@@ -110,8 +110,8 @@ extern struct mntent *HRFS_entry;
 	 *********************/
 int Get_Next_HR_Store (void);
 void  Init_HR_Store (void);
-int header_hrstore (struct variable *,oid *, int *, int, int *, WriteMethod **);
-int header_hrstoreEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrstore (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+int header_hrstoreEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 int linux_mem (int, int);
 
@@ -139,9 +139,9 @@ void init_hr_storeage (void)
 int
 header_hrstore(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
 #define HRSTORE_NAME_LENGTH	9
@@ -154,12 +154,12 @@ header_hrstore(struct variable *vp,
       DEBUGMSGTL(("host/hr_storage", "var_hrstore: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSTORE_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -170,9 +170,9 @@ header_hrstore(struct variable *vp,
 int
 header_hrstoreEntry(struct variable *vp,
 		    oid *name,
-		    int *length,
+		    size_t *length,
 		    int exact,
-		    int *var_len,
+		    size_t *var_len,
 		    WriteMethod **write_method)
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
@@ -200,7 +200,7 @@ header_hrstoreEntry(struct variable *vp,
           sprint_objid (c_oid, newname, *length);
           DEBUGMSGTL(("host/hr_storage", "%s\n", c_oid));
         }
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = storage_idx;
 	    /* Save storage status information */
@@ -251,12 +251,12 @@ static const char *hrs_descr[] = {
 
 
 
-u_char	*
+const u_char *
 var_hrstore(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     int store_idx=0;
@@ -359,7 +359,7 @@ var_hrstore(struct variable *vp,
 	    else {
 	        store_idx = store_idx-HRS_TYPE_FS_MAX;
 	        *var_len = strlen( hrs_descr[store_idx] );
-	        return (u_char *)hrs_descr[store_idx];
+	        return (const u_char *)hrs_descr[store_idx];
 	    }
 	case HRSTORE_UNITS:
 	    if ( store_idx < HRS_TYPE_FS_MAX )

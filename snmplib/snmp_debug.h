@@ -1,6 +1,10 @@
 #ifndef SNMP_DEBUG_H
 #define SNMP_DEBUG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* snmp_debug.h:
 
    - prototypes for snmp debugging routines.
@@ -19,7 +23,7 @@ void debugmsgtoken(const char *token, const char *format, ...);
 void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
-void debugmsg_oid(const char *token, oid *theoid, int len);
+void debugmsg_oid(const char *token, oid *theoid, size_t len);
 
 /* Use these macros instead of the functions above to allow them to be
    re-defined at compile time to NOP for speed optimization.
@@ -120,9 +124,13 @@ void DEBUGP (const char *, ...);
 #else
 void DEBUGP (va_alist);
 #endif
-void DEBUGPOID(oid *, int);
+void DEBUGPOID(oid *, size_t);
 void snmp_set_do_debugging (int);
 int snmp_get_do_debugging (void);
 int debug_is_token_registered(const char *token);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMP_DEBUG_H */

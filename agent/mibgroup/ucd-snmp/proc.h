@@ -10,7 +10,6 @@ void init_proc(void);
 
 extern FindVarMethod var_extensible_proc;
 extern WriteMethod fixProcError;
-struct myproc *get_proc_instance (struct myproc*, int);
 int sh_count_procs (char *);
 int get_ps_output (struct extensible *);
 

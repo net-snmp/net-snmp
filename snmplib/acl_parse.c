@@ -68,7 +68,7 @@ read_acl_database(char *filename)
     int blank;
     int linenumber = 0;
     oid targetParty[MAX_OID_LEN], subjectParty[MAX_OID_LEN], resources[MAX_OID_LEN];
-    int targetPartyLen, subjectPartyLen, resourcesLen;
+    size_t targetPartyLen, subjectPartyLen, resourcesLen;
     int priveleges;
     struct aclEntry *ap;
     struct partyEntry *pp;

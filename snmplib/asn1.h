@@ -1,5 +1,10 @@
 #ifndef ASN1_H
 #define ASN1_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Definitions for Abstract Syntax Notation One, ASN.1
  * As defined in ISO/IS 8824 and ISO/IS 8825
@@ -42,22 +47,22 @@ typedef u_char	oid;
 #define MAX_NAME_LEN	    MAX_OID_LEN   /* obsolete. use MAX_OID_LEN */
 #endif
 
-#define ASN_BOOLEAN	    (0x01)
-#define ASN_INTEGER	    (0x02)
-#define ASN_BIT_STR	    (0x03)
-#define ASN_OCTET_STR	    (0x04)
-#define ASN_NULL	    (0x05)
-#define ASN_OBJECT_ID	    (0x06)
-#define ASN_SEQUENCE	    (0x10)
-#define ASN_SET		    (0x11)
+#define ASN_BOOLEAN	    ((u_char)0x01)
+#define ASN_INTEGER	    ((u_char)0x02)
+#define ASN_BIT_STR	    ((u_char)0x03)
+#define ASN_OCTET_STR	    ((u_char)0x04)
+#define ASN_NULL	    ((u_char)0x05)
+#define ASN_OBJECT_ID	    ((u_char)0x06)
+#define ASN_SEQUENCE	    ((u_char)0x10)
+#define ASN_SET		    ((u_char)0x11)
 
-#define ASN_UNIVERSAL	    (0x00)
-#define ASN_APPLICATION     (0x40)
-#define ASN_CONTEXT	    (0x80)
-#define ASN_PRIVATE	    (0xC0)
+#define ASN_UNIVERSAL	    ((u_char)0x00)
+#define ASN_APPLICATION     ((u_char)0x40)
+#define ASN_CONTEXT	    ((u_char)0x80)
+#define ASN_PRIVATE	    ((u_char)0xC0)
 
-#define ASN_PRIMITIVE	    (0x00)
-#define ASN_CONSTRUCTOR	    (0x20)
+#define ASN_PRIMITIVE	    ((u_char)0x00)
+#define ASN_CONSTRUCTOR	    ((u_char)0x20)
 
 #define ASN_LONG_LEN	    (0x80)
 #define ASN_EXTENSION_ID    (0x1F)
@@ -91,9 +96,9 @@ typedef struct counter64 unsigned64;
 #define ASN_OPAQUE_TAG1 (ASN_CONTEXT | ASN_EXTENSION_ID)
 /* base value for the second octet of the tag - the
    second octet was the value for the tag */
-#define ASN_OPAQUE_TAG2 (0x30) 
+#define ASN_OPAQUE_TAG2 ((u_char)0x30) 
 
-#define ASN_OPAQUE_TAG2U (0x2f) /* second octet of tag for union */
+#define ASN_OPAQUE_TAG2U ((u_char)0x2f) /* second octet of tag for union */
 
 /* All the ASN.1 types for SNMP "should have been" defined in this file,
    but they were not. (They are defined in snmp_impl.h)  Thus, the tag for
@@ -133,35 +138,39 @@ typedef struct counter64 unsigned64;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-u_char	*asn_parse_int (u_char *, int *, u_char *, long *, int);
-u_char	*asn_build_int (u_char *, int *, u_char, long *, int);
-u_char	*asn_parse_unsigned_int (u_char *, int *, u_char *, u_long *, int);
-u_char	*asn_build_unsigned_int (u_char *, int *, u_char, u_long *, int);
-u_char	*asn_parse_string (u_char *, int *, u_char *, u_char *, int *);
-u_char	*asn_build_string (u_char *, int *, u_char, const u_char *, int);
-u_char	*asn_parse_header (u_char *, int *, u_char *);
-u_char	*asn_build_header (u_char *, int *, u_char, int);
-u_char	*asn_build_sequence (u_char *, int *, u_char, int);
+u_char	*asn_parse_int (u_char *, size_t *, u_char *, long *, size_t);
+u_char	*asn_build_int (u_char *, size_t *, u_char, long *, size_t);
+u_char	*asn_parse_unsigned_int (u_char *, size_t *, u_char *, u_long *, size_t);
+u_char	*asn_build_unsigned_int (u_char *, size_t *, u_char, u_long *, size_t);
+u_char	*asn_parse_string (u_char *, size_t *, u_char *, u_char *, size_t *);
+u_char	*asn_build_string (u_char *, size_t *, u_char, const u_char *, size_t);
+u_char	*asn_parse_header (u_char *, size_t *, u_char *);
+u_char	*asn_build_header (u_char *, size_t *, u_char, size_t);
+u_char	*asn_build_sequence (u_char *, size_t *, u_char, size_t);
 u_char	*asn_parse_length (u_char *, u_long *);
-u_char	*asn_build_length (u_char *, int *, int);
-u_char	*asn_parse_objid (u_char *, int *, u_char *, oid *, int *);
-u_char	*asn_build_objid (u_char *, int *, u_char, oid *, int);
-u_char	*asn_parse_null (u_char *, int *, u_char *);
-u_char	*asn_build_null (u_char *, int *, u_char);
-u_char	*asn_parse_bitstring (u_char *, int *, u_char *, u_char *, int *);
-u_char	*asn_build_bitstring (u_char *, int *, u_char, u_char *, int);
-u_char	*asn_parse_unsigned_int64 (u_char *, int *, u_char *,
-                                       struct counter64 *, int);
-u_char	*asn_build_unsigned_int64 (u_char *, int *, u_char,
-                                       struct counter64 *, int);
-u_char	*asn_parse_signed_int64 (u_char *, int *, u_char *,
-                                       struct counter64 *, int);
-u_char	*asn_build_signed_int64 (u_char *, int *, u_char,
-                                       struct counter64 *, int);
-u_char	*asn_build_float (u_char *, int *, u_char, float *,
-                              int);
-u_char	*asn_parse_float (u_char *, int *, u_char *, float *, int);
-u_char	*asn_build_double (u_char *, int *, u_char, double *,
-                               int);
-u_char	*asn_parse_double (u_char *, int *, u_char *, double *, int);
+u_char	*asn_build_length (u_char *, size_t *, size_t);
+u_char	*asn_parse_objid (u_char *, size_t *, u_char *, oid *, size_t *);
+u_char	*asn_build_objid (u_char *, size_t *, u_char, oid *, size_t);
+u_char	*asn_parse_null (u_char *, size_t *, u_char *);
+u_char	*asn_build_null (u_char *, size_t *, u_char);
+u_char	*asn_parse_bitstring (u_char *, size_t *, u_char *, u_char *, size_t *);
+u_char	*asn_build_bitstring (u_char *, size_t *, u_char, u_char *, size_t);
+u_char	*asn_parse_unsigned_int64 (u_char *, size_t *, u_char *,
+                                       struct counter64 *, size_t);
+u_char	*asn_build_unsigned_int64 (u_char *, size_t *, u_char,
+                                       struct counter64 *, size_t);
+u_char	*asn_parse_signed_int64 (u_char *, size_t *, u_char *,
+                                       struct counter64 *, size_t);
+u_char	*asn_build_signed_int64 (u_char *, size_t *, u_char,
+                                       struct counter64 *, size_t);
+u_char	*asn_build_float (u_char *, size_t *, u_char, float *,
+                              size_t);
+u_char	*asn_parse_float (u_char *, size_t *, u_char *, float *, size_t);
+u_char	*asn_build_double (u_char *, size_t *, u_char, double *,
+                               size_t);
+u_char	*asn_parse_double (u_char *, size_t *, u_char *, double *, size_t);
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* ASN1_H */

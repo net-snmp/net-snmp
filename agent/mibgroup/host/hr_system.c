@@ -38,7 +38,6 @@ struct utmp *getutent (void);
 static int get_load_dev (void);
 static int count_users (void);
 extern int count_processes (void);
-extern int header_hrsys (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 
 	/*********************
@@ -69,9 +68,9 @@ void init_hr_system(void)
 int
 header_hrsys(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
 #define HRSYS_NAME_LENGTH	9
@@ -84,12 +83,12 @@ header_hrsys(struct variable *vp,
       DEBUGMSGTL(("host/hr_system", "var_hrsys: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSYS_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -104,12 +103,12 @@ header_hrsys(struct variable *vp,
 	 *
 	 *********************/
 
-u_char	*
+const u_char *
 var_hrsys(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method)
 {
     static char string[100];

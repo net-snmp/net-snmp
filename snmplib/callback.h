@@ -18,6 +18,12 @@
 typedef int (SNMPCallback)(int majorID, int minorID, void *serverarg,
                            void *clientarg);
 
+int
+snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
+                       void *arg);
+int
+snmp_call_callbacks(int major, int minor, void *caller_arg);
+
 struct snmp_gen_callback {
    SNMPCallback         *sc_callback;
    void                 *sc_client_arg;

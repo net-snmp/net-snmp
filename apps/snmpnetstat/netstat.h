@@ -6,7 +6,7 @@ extern struct snmp_session *Session;
 char *routename (struct in_addr);
 char *netname (struct in_addr, u_long);
 const char *plural (int);
-struct variable_list *getvarbyname (struct snmp_session *, oid *, int);
+struct variable_list *getvarbyname (struct snmp_session *, oid *, size_t);
 
 void intpr (int);
 void intpro (int);

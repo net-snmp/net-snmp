@@ -5,9 +5,13 @@
 #ifndef SNMPV3_H
 #define SNMPV3_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_ENGINEID_LENGTH 128
 
-int     setup_engineID(u_char **eidp, char *text);
+int     setup_engineID(u_char **eidp, const char *text);
 void    engineID_conf(char *word, char *cptr);
 void    engineBoots_conf(char *, char *);
 void    snmpv3_authtype_conf(char *word, char *cptr);
@@ -15,20 +19,25 @@ void    snmpv3_privtype_conf(char *word, char *cptr);
 void    init_snmpv3(const char *);
 int	init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                                 void *clientarg);
+void    shutdown_snmpv3(const char *type);
 int     snmpv3_store(int majorID, int minorID, void *serverarg,
                      void *clientarg);
-int     snmpv3_local_snmpEngineBoots(void);
-int     snmpv3_clone_engineID(u_char **, int* , u_char*, int);
-int     snmpv3_get_engineID(char *buf, int buflen);
-u_char *snmpv3_generate_engineID(int *);
-int     snmpv3_local_snmpEngineTime(void);
+u_long  snmpv3_local_snmpEngineBoots(void);
+int     snmpv3_clone_engineID(u_char **, size_t* , u_char*, size_t);
+int     snmpv3_get_engineID(u_char *buf, size_t buflen);
+u_char *snmpv3_generate_engineID(size_t *);
+u_long  snmpv3_local_snmpEngineTime(void);
 char   *get_default_context(void);
 char   *get_default_secName(void);
 int     get_default_secLevel(void);
-oid    *get_default_authtype(int *);
-oid    *get_default_privtype(int *);
+oid    *get_default_authtype(size_t *);
+oid    *get_default_privtype(size_t *);
 char   *get_default_authpass(void);
 char   *get_default_privpass(void);
 void    snmpv3_set_engineBootsAndTime(int boots, int ttime); 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMPV3_H */

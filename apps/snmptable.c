@@ -97,9 +97,9 @@ static int show_index = 0;
 static char *field_separator = NULL;
 static char *table_name;
 static oid name[MAX_OID_LEN];
-static int name_length;
+static size_t name_length;
 static oid root[MAX_OID_LEN];
-static int rootlen;
+static size_t rootlen;
 static int localdebug;
 static struct snmp_session session;
 

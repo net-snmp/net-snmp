@@ -90,8 +90,8 @@ struct mntent *HRFS_entry;
 extern void  Init_HR_FileSys (void);
 extern int   Get_Next_HR_FileSys (void);
 char *cook_device (char *);
-static u_char * when_dumped ( char* filesys, int level, int* length );
-int header_hrfilesys (struct variable *,oid *, int *, int, int *, WriteMethod **);
+static u_char * when_dumped ( char* filesys, int level, size_t* length );
+int header_hrfilesys (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 void init_hr_filesys(void)
 {
@@ -113,9 +113,9 @@ void init_hr_filesys(void)
 int
 header_hrfilesys(struct variable *vp,
 		 oid *name,
-		 int *length,
+		 size_t *length,
 		 int exact,
-		 int *var_len,
+		 size_t *var_len,
 		 WriteMethod **write_method)
 {
 #define HRFSYS_ENTRY_NAME_LENGTH	11
@@ -129,7 +129,7 @@ header_hrfilesys(struct variable *vp,
       DEBUGMSGTL(("host/hr_filesys", "var_hrfilesys: %s %d\n", c_oid, exact));
     }
     
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" file system entry */
 
     Init_HR_FileSys();
@@ -138,7 +138,7 @@ header_hrfilesys(struct variable *vp,
         if ( fsys_idx == -1 )
 	    break;
 	newname[HRFSYS_ENTRY_NAME_LENGTH] = fsys_idx;
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = fsys_idx;
             break;
@@ -157,7 +157,7 @@ header_hrfilesys(struct variable *vp,
         return(MATCH_FAILED);
     }
 
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -180,12 +180,12 @@ int fsys_type_len = sizeof(fsys_type_id)/sizeof(fsys_type_id[0]);
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrfilesys(struct variable *vp,
 	      oid *name,
-	      int *length,
+	      size_t *length,
 	      int exact,
-	      int *var_len,
+	      size_t *var_len,
 	      WriteMethod **write_method)
 {
     int  fsys_idx;
@@ -384,7 +384,7 @@ Get_Next_HR_FileSys (void)
     HRFS_entry = fsstats+HRFS_index;
     return HRFS_index++;
 #else
-    char **cpp;
+    const char **cpp;
 		/*
 		 * XXX - According to RFC 1514, hrFSIndex must
 		 *   "remain constant at least from one re-initialization
@@ -445,7 +445,7 @@ End_HR_FileSys (void)
 static u_char *
 when_dumped(char *filesys, 
 	    int level, 
-	    int *length)
+	    size_t *length)
 {
     time_t dumpdate = 0, tmp;
     FILE *dump_fp;

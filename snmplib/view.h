@@ -1,5 +1,9 @@
 #ifndef VIEW_H
 #define VIEW_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
           viewIndex        INTEGER,                     -- first INDEX
           viewSubtree      OBJECT IDENTIFIER,           -- second INDEX
@@ -30,11 +34,11 @@
 struct viewEntry {
     int		viewIndex;
     char	viewName[64];
-    int		viewNameLen;
+    size_t	viewNameLen;
     oid		viewSubtree[MAX_OID_LEN];
-    int		viewSubtreeLen;
+    size_t	viewSubtreeLen;
     u_char	viewMask[32];
-    int		viewMaskLen;
+    size_t	viewMaskLen;
     int		viewType;
     int		viewStorageType;
     int		viewStatus;
@@ -47,7 +51,7 @@ struct viewEntry {
 
 int read_view_database (char *);
 
-void view_destroyEntry (int, oid *, int);
+void view_destroyEntry (int, oid *, size_t);
 
 struct viewEntry *
 view_getEntry (int, oid*, int);
@@ -78,11 +82,15 @@ view_scanNext (void);
  */
 
 struct viewEntry *
-view_createEntry (int, oid *, int);
+view_createEntry (int, oid *, size_t);
 /*
  * Creates a viewEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* VIEW_H */

@@ -49,7 +49,7 @@ void  Save_HR_Partition (int, int);
 
 void  Init_HR_Partition (void);
 int   Get_Next_HR_Partition (void);
-int header_hrpartition (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrpartition (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 /*
   header_hrpartition(...
@@ -66,9 +66,9 @@ int header_hrpartition (struct variable *,oid *, int *, int, int *, WriteMethod 
 int
 header_hrpartition(struct variable *vp,
 		   oid *name,
-		   int *length,
+		   size_t *length,
 		   int exact,
-		   int *var_len,
+		   size_t *var_len,
 		   WriteMethod **write_method)
 {
 #define HRPART_DISK_NAME_LENGTH		11
@@ -102,7 +102,7 @@ header_hrpartition(struct variable *vp,
 		 *     (i.e. *length is too short to be a full instance)
 		 */
 
-    if (( snmp_oid_compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
+    if (( snmp_oid_compare( vp->name, vp->namelen, name, vp->namelen ) == 0 ) &&
 	( *length > HRPART_DISK_NAME_LENGTH )) {
         LowDiskIndex = (name[HRPART_DISK_NAME_LENGTH] & ((1<<HRDEV_TYPE_SHIFT)-1));
 
@@ -119,7 +119,7 @@ header_hrpartition(struct variable *vp,
 	    break;
 	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index;
 	newname[HRPART_ENTRY_NAME_LENGTH] = part_idx;
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 2);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 2);
         if (exact && (result == 0)) {
 	    Save_HR_Partition( HRD_index, part_idx );
 	    LowDiskIndex = HRD_index;
@@ -172,12 +172,12 @@ header_hrpartition(struct variable *vp,
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrpartition(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     int  part_idx;

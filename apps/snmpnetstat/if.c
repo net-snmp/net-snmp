@@ -111,7 +111,7 @@ void
 intpr(int interval)
 {
 	oid varname[MAX_OID_LEN], *instance, *ifentry;
-	int varname_len;
+	size_t varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
 	struct variable_list *var;
@@ -308,7 +308,7 @@ void
 intpro(int interval)
 {
 	oid varname[MAX_OID_LEN], *instance, *ifentry;
-	int varname_len;
+	size_t varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
 	struct variable_list *var;
@@ -581,7 +581,7 @@ sidewaysintpr(unsigned int interval)
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
 	struct variable_list *var;
 	oid varname[MAX_OID_LEN], *instance, *ifentry;
-	int varname_len;
+	size_t varname_len;
 	int ifnum, cfg_nnets;
 
 	lastif = iftot;

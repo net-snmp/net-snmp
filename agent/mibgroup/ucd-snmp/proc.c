@@ -45,7 +45,7 @@
 #include "mib_module_config.h"
 #include "../../../snmplib/system.h"
 
-struct myproc *get_proc_instance (struct myproc *,int);
+static struct myproc *get_proc_instance (struct myproc *, oid);
 struct myproc *procwatch = NULL;
 static struct extensible fixproc;
 int numprocs=0;
@@ -98,7 +98,7 @@ void proc_free_config(void) {
 }
 
 /* find a give entry in the linked list associated with a proc name */
-struct myproc *get_proc_by_name(char *name) {
+static struct myproc *get_proc_by_name(char *name) {
   struct myproc *ptmp;
 
   if (name == NULL)
@@ -175,11 +175,11 @@ void proc_parse_config(char *token, char* cptr)
 
 /* The routine that handles everything */
 
-unsigned char *var_extensible_proc(struct variable *vp,
+const u_char *var_extensible_proc(struct variable *vp,
 				   oid *name,
-				   int *length,
+				   size_t *length,
 				   int exact,
-				   int *var_len,
+				   size_t *var_len,
 				   WriteMethod **write_method)
 {
 
@@ -247,7 +247,7 @@ unsigned char *var_extensible_proc(struct variable *vp,
       case ERRORFIXCMD:
         if (proc->fixcmd) {
           *var_len = strlen(proc->fixcmd);
-          return proc->fixcmd;
+          return (u_char *)proc->fixcmd;
         }
         errmsg[0] = 0;
         *var_len = 0;
@@ -262,10 +262,10 @@ int
 fixProcError(int action,
 	     u_char *var_val,
 	     u_char var_val_type,
-	     int var_val_len,
+	     size_t var_val_len,
 	     u_char *statP,
 	     oid *name,
-	     int name_len)
+	     size_t name_len)
 {
   
   struct myproc *proc;
@@ -288,8 +288,8 @@ fixProcError(int action,
   return SNMP_ERR_WRONGTYPE;
 }
 
-struct myproc *get_proc_instance(struct myproc *proc,
-				 int inst)
+static struct myproc *get_proc_instance(struct myproc *proc,
+				 oid inst)
 {
   int i;
   

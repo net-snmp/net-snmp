@@ -5,6 +5,10 @@
 #ifndef IN_PARTY_H
 #define IN_PARTY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /*						FIXtoss?
     partyIdentity        Party,
@@ -60,12 +64,12 @@
 
 struct partyEntry {
     oid		partyIdentity[MAX_OID_LEN];
-    int		partyIdentityLen;
+    size_t	partyIdentityLen;
     int		partyIndex;
     char	partyName[64];	/* friendly name */
     int		partyTDomain;
     u_char	partyTAddress[16];
-    int		partyTAddressLen;
+    size_t	partyTAddressLen;
     int		partyMaxMessageSize;
     int		partyLocal;
     int		partyAuthProtocol;
@@ -73,15 +77,15 @@ struct partyEntry {
     u_long	partyLastTimeStamp;	/* not in MIB */
     long	partyAuthNonce;
     u_char	partyAuthPrivate[16];
-    int		partyAuthPrivateLen;
+    size_t	partyAuthPrivateLen;
     u_char	partyAuthPublic[32];
-    int		partyAuthPublicLen;
+    size_t	partyAuthPublicLen;
     u_long	partyAuthLifetime;
     int		partyPrivProtocol;
     u_char	partyPrivPrivate[16];
-    int		partyPrivPrivateLen;
+    size_t	partyPrivPrivateLen;
     u_char	partyPrivPublic[32];
-    int		partyPrivPublicLen;
+    size_t	partyPrivPublicLen;
     int		partyStorageType;
     int		partyStatus;
     
@@ -93,7 +97,7 @@ struct partyEntry {
 };
 
 struct partyEntry *
-party_getEntry (oid *partyID, int partyIDLen);
+party_getEntry (oid *partyID, size_t partyIDLen);
 /*
  * Returns a pointer to the partyEntry with the
  * same identity as partyID.
@@ -121,13 +125,17 @@ party_scanNext (void);
  */
 
 struct partyEntry *
-party_createEntry (oid *partyID, int partyIDLen);
+party_createEntry (oid *partyID, size_t partyIDLen);
 /*
  * Creates a partyEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-void party_destroyEntry (oid *, int);
+void party_destroyEntry (oid *, size_t);
 int read_party_database (char *);
+#ifdef __cplusplus
+}
+#endif
+
 #endif  /* IN_PARTY_H */

@@ -118,8 +118,8 @@ snmp_pdu_create(int command)
     pdu->errstat		 = SNMP_DEFAULT_ERRSTAT;
     pdu->errindex		 = SNMP_DEFAULT_ERRINDEX;
     pdu->address.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
-    pdu->securityNameLen	 = -1;
-    pdu->contextNameLen		 = -1;
+    pdu->securityNameLen	 = 0;
+    pdu->contextNameLen		 = 0;
     pdu->reqid                   = snmp_get_next_reqid();
     pdu->msgid                   = snmp_get_next_msgid();
     }
@@ -134,9 +134,9 @@ snmp_pdu_create(int command)
  */
 struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu, 
 					oid *name, 
-					int name_length)
+					size_t name_length)
 {
-    return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
+    return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
 }  /* end snmp_add_null_var() */
 
 
@@ -386,9 +386,9 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
 
 int
 snmp_set_var_objid (struct variable_list *vp,
-                    const oid *objid, int name_length)
+                    const oid *objid, size_t name_length)
 {
-    int len = sizeof(oid) * name_length;
+    size_t len = sizeof(oid) * name_length;
 
     /* use built-in storage for smaller values */
     if (len <= sizeof(vp->name_loc)) {
@@ -411,7 +411,7 @@ snmp_set_var_objid (struct variable_list *vp,
 
 int
 snmp_set_var_value(struct variable_list *newvar,
-                    char *val_str, int val_len)
+                    char *val_str, size_t val_len)
 {
     if (newvar->val.string &&
         newvar->val.string != newvar->buf)
@@ -630,9 +630,9 @@ snmp_errstring(int errstat)
  */
 int
 ms_party_init(	in_addr_t	 destaddr,
-		oid		*src,		int	*srclen,
-		oid		*dst,		int	*dstlen,
-		oid		*context,	int	*contextlen)
+		oid		*src,		size_t	*srclen,
+		oid		*dst,		size_t	*dstlen,
+		oid		*context,	size_t	*contextlen)
 {
 #define PARTYCOMPLETE_MASK	65535
 #define PARTYCOMPLETE_MASK	65535

@@ -43,7 +43,7 @@ static int NextIndex = 1;
 
 struct contextEntry *
 context_getEntry(oid *contextID,
-		 int contextIDLen)
+		 size_t contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -91,7 +91,7 @@ context_scanNext (void)
 
 struct contextEntry *
 context_createEntry(oid *contextID,
-		    int contextIDLen)
+		    size_t contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -112,7 +112,7 @@ context_createEntry(oid *contextID,
 
 void
 context_destroyEntry(oid *contextID,
-		     int contextIDLen)
+		     size_t contextIDLen)
 {
     struct contextEntry *cp, *lastcp = NULL;
 

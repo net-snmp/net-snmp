@@ -26,6 +26,10 @@ SOFTWARE.
 #ifndef SNMP_CLIENT_H
 #define SNMP_CLIENT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 struct snmp_pdu;
 struct snmp_session;
@@ -42,7 +46,10 @@ struct synch_state {
     struct snmp_pdu *pdu;
 };
 
-struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, int);
+int snmp_set_var_value(struct variable_list *, char *, size_t);
+int snmp_set_var_objid (struct variable_list *vp,
+                    const oid *objid, size_t name_length);
+struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, size_t);
 struct snmp_pdu	*snmp_pdu_create (int);
 struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
 struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
@@ -51,20 +58,13 @@ void snmp_synch_reset (struct snmp_session *);
 void snmp_synch_setup (struct snmp_session *);
 int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
 
-int ms_party_init (in_addr_t, oid *, int *, oid *, int *, oid *, int *);
+int ms_party_init (in_addr_t, oid *, size_t *, oid *, size_t *, oid *, size_t *);
 
-struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, int);
-struct snmp_pdu	*snmp_pdu_create (int);
-struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
-struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
-int snmp_set_var_objid (struct variable_list *, const oid *, int);
-int snmp_set_var_value (struct variable_list *, char *, int);
-void snmp_synch_reset (struct snmp_session *);
-void snmp_synch_setup (struct snmp_session *);
-int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
-int ms_party_init (in_addr_t, oid *, int *, oid *, int *, oid *, int *);
 /* single session API - see snmp_api.h for full details */
 int snmp_sess_synch_response (void *, struct snmp_pdu *, struct snmp_pdu **);
  
-#endif /* SNMP_CLIENT_H */
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* SNMP_CLIENT_H */

@@ -44,7 +44,7 @@
  */
 typedef struct _smux_peer_auth {
 	oid sa_oid[MAX_OID_LEN];        /* name of peer         	*/
-	int sa_oid_len;                 /* length of peer name  	*/
+	size_t sa_oid_len;              /* length of peer name  	*/
 	char sa_passwd[SMUXMAXSTRLEN];  /* configured passwd    	*/
 	int sa_active_fd;		/* the peer using this auth 	*/
 } smux_peer_auth;
@@ -54,7 +54,7 @@ typedef struct _smux_peer_auth {
  */
 typedef struct _smux_reg {
 	oid sr_name[MAX_OID_LEN];       /* name of subtree              */
-	int sr_name_len;                /* length of subtree name       */
+	size_t sr_name_len;             /* length of subtree name       */
 	int sr_priority;                /* priority of registration     */
 	int sr_fd;                      /* descriptor of owner          */
 	struct _smux_reg *sr_next;      /* next one                     */
@@ -62,7 +62,7 @@ typedef struct _smux_reg {
 
 extern int init_smux (void);
 extern int smux_accept (int);
-extern u_char *smux_snmp_process (int, oid *, int *, int *, u_char *, int);
+extern u_char *smux_snmp_process (int, oid *, size_t *, size_t *, u_char *, int);
 extern int smux_process (int);
 extern void smux_parse_peer_auth (char *, char *);
 extern void smux_free_peer_auth (void);

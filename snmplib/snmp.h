@@ -1,5 +1,9 @@
 #ifndef SNMP_H
 #define SNMP_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * Definitions for the Simple Network Management Protocol (RFC 1067).
  *
@@ -259,8 +263,8 @@ SOFTWARE.
 #define SMI_OPAQUE ASN_OPAQUE
 #define SMI_COUNTER64   ASN_COUNTER64
 
-int mib_TxtToOid (char *, oid **, int *);
-int mib_OidToTxt (oid *, int , char *, int );
+int mib_TxtToOid (char *, oid **, size_t *);
+int mib_OidToTxt (oid *, size_t , char *, int );
 
 struct snmp_pdu;
 char *snmp_pdu_type (struct snmp_pdu *);
@@ -269,14 +273,18 @@ struct snmp_session;
 u_char * cmu_snmp_parse (struct snmp_session *session,
     struct snmp_pdu *pdu,
     u_char *data,
-    int length);
+    size_t length);
 
 #endif /* CMU_COMPATIBLE */
 
 char *uptime_string (u_long, char *);
-void xdump (const u_char *, int, const char *);
-u_char *snmp_parse_var_op (u_char *, oid *, int *, u_char *, int *,
-                               u_char **, int *);
-u_char *snmp_build_var_op (u_char *, oid *, int *, u_char, int, u_char *,
-                               int *);
+void xdump (const u_char *, size_t, const char *);
+u_char *snmp_parse_var_op (u_char *, oid *, size_t *, u_char *, size_t *,
+                               u_char **, size_t *);
+u_char *snmp_build_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,
+                               size_t *);
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* SNMP_H */

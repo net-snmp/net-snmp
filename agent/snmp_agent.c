@@ -80,22 +80,22 @@ static int snmp_vars_inc;
 static struct agent_snmp_session *agent_session_list = NULL;
 
 
-static void dump_var(oid *, int, int, void *, int);
-static int goodValue(u_char, int, u_char, int);
-static void setVariable(u_char *, u_char, int, u_char *, int);
+static void dump_var(oid *, size_t, int, void *, size_t);
+static int goodValue(u_char, size_t, u_char, size_t);
+static void setVariable(u_char *, u_char, size_t, u_char *, size_t);
 
 static void dump_var (
     oid *var_name,
-    int var_name_len,
+    size_t var_name_len,
     int statType,
     void *statP,
-    int statLen)
+    size_t statLen)
 {
     char buf [SPRINT_MAX_LEN];
     struct variable_list temp_var;
 
     temp_var.type = statType;
-    temp_var.val.string = statP;
+    temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
     sprint_variable (buf, var_name, var_name_len, &temp_var);
     fprintf (stdout, "    >> %s\n", buf);
@@ -352,10 +352,10 @@ handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
     u_char  statType;
-    register u_char *statP;
-    int	    statLen;
+    const u_char *statP;
+    size_t  statLen;
     u_short acl;
-    int	    (*write_method) (int, u_char *, u_char, int, u_char *, oid *, int);
+    WriteMethod *write_method;
     int	    noSuchObject;
     int count, rw, exact;
     
@@ -380,7 +380,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     
 statp_loop:
 	statP = getStatPtr(  varbind_ptr->name,
-			   &(varbind_ptr->name_length),
+			   &varbind_ptr->name_length,
 			   &statType, &statLen, &acl,
 			   exact, &write_method, asp->pdu, &noSuchObject);
 			   
@@ -426,7 +426,7 @@ statp_loop:
             /* dump verbose info */
 	    if (verbose && statP)
 	        dump_var(varbind_ptr->name, varbind_ptr->name_length,
-				statType, statP, statLen);
+				statType, (void *)statP, statLen);
 
 		/*  FINALLY we can act on SET requests ....*/
 	    if ( rw == WRITE ) {
@@ -434,7 +434,7 @@ statp_loop:
 		    statType = (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
-                                               varbind_ptr->val_len, statP,
+                                               varbind_ptr->val_len, (u_char *)statP,
                                                varbind_ptr->name,
                                                varbind_ptr->name_length);
                     if (statType != SNMP_ERR_NOERROR) {
@@ -457,7 +457,7 @@ statp_loop:
                     /* actually do the set if necessary */
                     if (asp->mode == COMMIT)
                         setVariable(varbind_ptr->val.string, varbind_ptr->type,
-                                    varbind_ptr->val_len, statP, statLen);
+                                    varbind_ptr->val_len, (u_char *)statP, statLen);
                 }
 	    }
 		/* ... or save the results from assorted GETs */
@@ -480,9 +480,9 @@ statp_loop:
 
 static int
 goodValue(u_char inType, 
-	  int inLen,
+	  size_t inLen,
 	  u_char actualType,
-	  int actualLen)
+	  size_t actualLen)
 {
     if (inLen > actualLen)
 	return FALSE;
@@ -492,11 +492,11 @@ goodValue(u_char inType,
 static void
 setVariable(u_char *var_val,
 	    u_char var_val_type,
-	    int var_val_len,
+	    size_t var_val_len,
 	    u_char *statP,
-	    int statLen)
+	    size_t statLen)
 {
-    int	    buffersize = 1000;
+    size_t buffersize = 1000;
 
     switch(var_val_type){
 	case ASN_INTEGER:

@@ -1,6 +1,10 @@
 #ifndef _LIBSNMP_H_
 #define _LIBSNMP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Definitions for the Simple Network Management Protocol (RFC 1067).
  *
@@ -175,5 +179,9 @@
 #define SOCK_CLEANUP winsock_cleanup()
 
 #endif /* !UCD_SNMP_LIBRARY */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _LIBSNMP_H_ */

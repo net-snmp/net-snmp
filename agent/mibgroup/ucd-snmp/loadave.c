@@ -229,11 +229,11 @@ int try_getloadavg(double *r_ave, size_t s_ave)
   return 0;
 }
   
-unsigned char *var_extensible_loadave(struct variable *vp,
+const u_char *var_extensible_loadave(struct variable *vp,
 				      oid *name,
-				      int *length,
+				      size_t *length,
 				      int exact,
-				      int *var_len,
+				      size_t *var_len,
 				      WriteMethod **write_method)
 {
 

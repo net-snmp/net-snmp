@@ -317,7 +317,7 @@ MDupdate(MDptr MDp,
 
 /* MDchecksum(data, len, MD5): do a checksum on an arbirtrary amount of data */
 void
-MDchecksum(u_char *data, int len, u_char *mac, int maclen)
+MDchecksum(u_char *data, size_t len, u_char *mac, size_t maclen)
 {
   MDstruct md;
   MDstruct *MD = &md;
@@ -338,8 +338,8 @@ MDchecksum(u_char *data, int len, u_char *mac, int maclen)
 /* MDsign(data, len, MD5): do a checksum on an arbirtrary amount
    of data, and prepended with a secret in the standard fashion */
 int
-MDsign(u_char *data, int len, u_char *mac, int maclen,
-       u_char *secret, int secretlen)
+MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
+       u_char *secret, size_t secretlen)
 {
 #define HASHKEYLEN 64
 
@@ -348,7 +348,7 @@ MDsign(u_char *data, int len, u_char *mac, int maclen,
   u_char   K2[HASHKEYLEN];
   u_char   extendedAuthKey[HASHKEYLEN];
   u_char   buf[HASHKEYLEN];
-  int      i;
+  size_t   i;
   u_char  *cp;
 
   memset(K1,0,HASHKEYLEN);
@@ -399,7 +399,7 @@ MDsign(u_char *data, int len, u_char *mac, int maclen,
 }
 
 void
-MDget(MDstruct *MD, u_char *buf, int buflen)
+MDget(MDstruct *MD, u_char *buf, size_t buflen)
 {
   int i, j;
   

@@ -142,7 +142,7 @@ snmp_parse_args(int argc,
   char *Apsz = NULL;
   char *Xpsz = NULL;
   u_char buf[BUF_SIZE];
-  int bsize;
+  size_t bsize;
 #ifdef USE_V2PARTY_PROTOCOL
   static oid src[MAX_OID_LEN];
   static oid dst[MAX_OID_LEN];
@@ -537,7 +537,7 @@ snmp_parse_args(int argc,
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      Apsz, strlen(Apsz),
+                      (u_char *)Apsz, strlen(Apsz),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
           fprintf(stderr,"Error generating Ku from authentication pass phrase. \n");
@@ -549,7 +549,7 @@ snmp_parse_args(int argc,
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      Xpsz, strlen(Xpsz),
+                      (u_char *)Xpsz, strlen(Xpsz),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
           fprintf(stderr,"Error generating Ku from privacy pass phrase. \n");
@@ -724,7 +724,7 @@ snmp_parse_args(int argc,
 oid
 *snmp_parse_oid(char *argv,
 		oid *root,
-		int *rootlen)
+		size_t *rootlen)
 {
   if (random_access) {
     if (get_node(argv,root,rootlen)) {

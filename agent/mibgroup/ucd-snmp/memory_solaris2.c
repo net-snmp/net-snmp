@@ -76,12 +76,12 @@ void init_memory_solaris2(void)
   }
 }
 
-unsigned char *var_extensible_mem(
+const u_char *var_extensible_mem(
     struct variable *vp,
     oid        *name,
-    int        *length,
+    size_t     *length,
     int        exact,
-    int        *var_len,
+    size_t     *var_len,
     WriteMethod **write_method)
 {
   static long long_ret;
@@ -161,7 +161,8 @@ long getTotalSwap(void)
 {
   long total_mem;
 
-  int num, i, n;
+  size_t num;
+  int i, n;
   swaptbl_t      *s;
   char *strtab;
 
@@ -189,7 +190,8 @@ long getFreeSwap(void)
 {
   long free_mem = 0;
 
-  int num, i, n;
+  size_t num;
+  int i, n;
   swaptbl_t      *s;
   char *strtab;
 
@@ -215,7 +217,8 @@ long getTotalFree(void)
 {
   long free_mem = 0;
 
-  int num, i, n;
+  size_t num;
+  int i, n;
   swaptbl_t      *s;
   char *strtab;
 

@@ -1,5 +1,9 @@
 #ifndef IN_CONTEXT_H
 #define IN_CONTEXT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
     contextIdentity         Context,
     contextIndex            INTEGER,
@@ -31,18 +35,18 @@
 
 struct contextEntry {
     oid		contextIdentity[MAX_OID_LEN];
-    int		contextIdentityLen;
+    size_t	contextIdentityLen;
     int		contextIndex;
     char	contextName[64];	/* friendly name */
     int		contextLocal;
     int		contextViewIndex;
     u_char	contextLocalEntity[64];
-    int		contextLocalEntityLen;
+    size_t	contextLocalEntityLen;
     int		contextLocalTime;
     int		contextDstPartyIndex;
     int		contextSrcPartyIndex;
     oid		contextProxyContext[MAX_OID_LEN];
-    int		contextProxyContextLen;
+    size_t	contextProxyContextLen;
     int		contextStorageType;
     int		contextStatus;
     
@@ -53,10 +57,10 @@ struct contextEntry {
     struct timeval tv;
 };
 
-void context_destroyEntry (oid *,int);
+void context_destroyEntry (oid *, size_t);
 
 struct contextEntry *
-context_getEntry (oid *contextID, int contextIDLen);
+context_getEntry (oid *contextID, size_t contextIDLen);
 /*
  * Returns a pointer to the contextEntry with the
  * same identity as contextID.
@@ -84,7 +88,7 @@ context_scanNext (void);
  */
 
 struct contextEntry *
-context_createEntry (oid *contextID, int contextIDLen);
+context_createEntry (oid *contextID, size_t contextIDLen);
 /*
  * Creates a contextEntry with the given index
  * and returns a pointer to it.
@@ -92,5 +96,9 @@ context_createEntry (oid *contextID, int contextIDLen);
  */
 
 int read_context_database (char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

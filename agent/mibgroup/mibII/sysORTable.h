@@ -10,7 +10,7 @@ config_require(util_funcs)
 struct sysORTable {
    char *OR_descr;
    oid  *OR_oid;
-   int  OR_oidlen;
+   size_t  OR_oidlen;
    struct timeval OR_uptime;
    struct sysORTable *next;
 };
@@ -18,7 +18,7 @@ struct sysORTable {
 extern void     init_sysORTable (void);
 extern FindVarMethod var_sysORTable;
 extern FindVarMethod var_sysORLastChange;
-extern void     register_sysORTable (oid *, int, const char *);
+extern void     register_sysORTable (oid *, size_t, const char *);
 
 #define	SYSORTABLEINDEX		        1
 #define	SYSORTABLEID		        2

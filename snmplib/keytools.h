@@ -5,6 +5,10 @@
 #ifndef _KEYTOOLS_H
 #define _KEYTOOLS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #define USM_LENGTH_EXPANDED_PASSPHRASE	(1024 * 1024)	/* 1Meg. */
 
@@ -82,6 +86,10 @@ int	decode_keychange (	oid	*hashtype,	u_int  hashtype_len,
 {						\
 	return SNMPERR_KT_NOT_AVAILABLE;	\
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _KEYTOOLS_H */
 

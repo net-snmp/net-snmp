@@ -5,6 +5,10 @@
 #ifndef _LCD_TIME_H
 #define _LCD_TIME_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #define LCD_TIME_SYNC_OPT 0
 
@@ -107,6 +111,8 @@ int	 hash_engineID (u_char *engineID, u_int engineID_len);
 void	 dump_etimelist_entry (Enginetime e, int count);
 void	 dump_etimelist (void);
 
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* _LCD_TIME_H */
-
-

@@ -52,7 +52,7 @@ static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
 #define CONTEXTCOMPLETE_MASK		0x03FF	/* all collumns */
 
 struct contextEntry *
-context_rowCreate(oid *contextID, int contextIDLen)
+context_rowCreate(oid *contextID, size_t contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -72,7 +72,7 @@ context_rowCreate(oid *contextID, int contextIDLen)
 }
 
 void
-context_rowDelete(oid *contextID, int contextIDLen)
+context_rowDelete(oid *contextID, size_t contextIDLen)
 {
     context_destroyEntry(contextID, contextIDLen);
 }
@@ -88,10 +88,10 @@ int
 write_context(int action,
 	      u_char *var_val,
 	      u_char var_val_type,
-	      int var_val_len,
+	      size_t var_val_len,
 	      u_char *statP,
 	      oid *name,
-	      int length)
+	      size_t length)
 {
 #if 0
     struct contextEntry *cp, *rp;
@@ -517,16 +517,16 @@ write_context(int action,
     return SNMP_ERR_NOERROR;
 }
 
-u_char *
+const u_char *
 var_context(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN];
-    int newnamelen, lownamelen=0;
+    size_t newnamelen, lownamelen=0;
     struct contextEntry *cp, *lowcp = NULL;
     u_long mask;
 /*

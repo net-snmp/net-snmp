@@ -82,10 +82,10 @@ SOFTWARE.
 
 u_char *
 asn_parse_int(u_char *data,
-	      int *datalength,
+	      size_t *datalength,
 	      u_char *type,
 	      long *intp,
-	      int intsize)
+	      size_t intsize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -141,10 +141,10 @@ asn_parse_int(u_char *data,
  */
 u_char *
 asn_parse_unsigned_int(u_char *data,
-		       int *datalength,
+		       size_t *datalength,
 		       u_char *type,
 		       u_long *intp,
-		       int intsize)
+		       size_t intsize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -195,16 +195,16 @@ asn_parse_unsigned_int(u_char *data,
   u_char * asn_build_int(
       u_char     *data         IN - pointer to start of output buffer
       int        *datalength   IN/OUT - number of valid bytes left in buffer
-      u_char      type         IN  - asn type of object
+      int         type         IN  - asn type of object
       long       *intp         IN - pointer to start of long integer
       int         intsize      IN - size of input buffer
  */
 u_char *
 asn_build_int(u_char *data,
-	      int *datalength,
+	      size_t *datalength,
 	      u_char type,
 	      long *intp,
-	      int intsize)
+	      size_t intsize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -264,10 +264,10 @@ asn_build_int(u_char *data,
  */
 u_char *
 asn_build_unsigned_int(u_char *data,
-		       int *datalength,
+		       size_t *datalength,
 		       u_char type,
 		       u_long *intp,
-		       int intsize)
+		       size_t intsize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -345,13 +345,13 @@ asn_build_unsigned_int(u_char *data,
  */
 u_char *
 asn_parse_string(u_char *data,
-		 int *datalength,
+		 size_t *datalength,
 		 u_char *type,
 		 u_char *string,
-		 int    *strlength)
+		 size_t *strlength)
 {
-    register u_char *bufp = data;
-    u_long	    asn_length;
+    u_char *bufp = data;
+    u_long  asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -365,7 +365,7 @@ asn_parse_string(u_char *data,
 	ERROR_MSG("I don't support such long strings");
 	return NULL;
     }
-    memmove(string, bufp, (int)asn_length);
+    memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
     return bufp + asn_length;
@@ -391,10 +391,10 @@ asn_parse_string(u_char *data,
  */
 u_char *
 asn_build_string(u_char *data,
-		 int *datalength,
+		 size_t *datalength,
 		 u_char	type,
 		 const u_char *string,
-		 int strlength)
+		 size_t strlength)
 {
 /*
  * ASN.1 octet string ::= primstring | cmpdstring
@@ -436,7 +436,7 @@ asn_build_string(u_char *data,
  */
 u_char *
 asn_parse_header(u_char	*data,
-		 int *datalength,
+		 size_t *datalength,
 		 u_char	*type)
 {
     register u_char *bufp = data;
@@ -511,15 +511,15 @@ asn_parse_header(u_char	*data,
 
   u_char * asn_build_header(
       u_char     *data         IN - pointer to start of object
-      int        *datalength   IN/OUT - number of valid bytes left in buffer
+      size_t     *datalength   IN/OUT - number of valid bytes left in buffer
       u_char      type         IN - asn type of object
-      int         length       IN - length of object
+      size_t      length       IN - length of object
  */
 u_char *
 asn_build_header (u_char *data,
-		  int *datalength,
+		  size_t *datalength,
 		  u_char type,
-		  int length)
+		  size_t length)
 {
     if (*datalength < 1)
 	return NULL;
@@ -550,9 +550,9 @@ asn_build_header (u_char *data,
  */
 u_char *
 asn_build_sequence(u_char *data,
-		  int *datalength,
+		  size_t *datalength,
 		  u_char type,
-		  int length)
+		  size_t length)
 {
     *datalength -= 4;
     if (*datalength < 0){
@@ -595,7 +595,7 @@ asn_parse_length(u_char  *data,
 	    return NULL;
 	}
 	*length = 0;  /* protect against short lengths */
-	memmove(length, data + 1, (int)lengthbyte);
+	memmove(length, data + 1, lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(int)) - lengthbyte));
 	return data + lengthbyte + 1;
@@ -614,8 +614,8 @@ asn_parse_length(u_char  *data,
  */
 u_char *
 asn_build_length(u_char *data,
-		 int *datalength,
-		 int length)
+		 size_t *datalength,
+		 size_t length)
 {
     u_char    *start_data = data;
 
@@ -668,10 +668,10 @@ asn_build_length(u_char *data,
  */
 u_char *
 asn_parse_objid(u_char *data,
-		int *datalength,
+		size_t *datalength,
 		u_char *type,	
 		oid *objid,
-		int *objidlength)
+		size_t *objidlength)
 {
 /*
  * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -760,16 +760,16 @@ asn_parse_objid(u_char *data,
   u_char * asn_build_objid(
       u_char     *data         IN - pointer to start of object
       int        *datalength   IN/OUT - number of valid bytes left in buffer
-      u_char      type         IN - asn type of object
+      int        type         IN - asn type of object
       oid        *objid        IN - pointer to start of input buffer
       int         objidlength  IN - number of sub-id's in objid
  */
 u_char *
 asn_build_objid(u_char *data,
-		int *datalength,
+		size_t *datalength,
 		u_char type,
 		oid *objid,
-		int objidlength)
+		size_t objidlength)
 {
 /*
  * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -777,7 +777,7 @@ asn_build_objid(u_char *data,
  * leadingbyte ::= 1 7bitvalue
  * lastbyte ::= 0 7bitvalue
  */
-    int asnlength;
+    size_t asnlength;
     register oid *op = objid;
     u_char objid_size[MAX_OID_LEN];
     register u_long objid_val;
@@ -886,7 +886,7 @@ asn_build_objid(u_char *data,
  */
 u_char *
 asn_parse_null(u_char *data,
-	       int *datalength,
+	       size_t *datalength,
 	       u_char *type)
 {
 /*
@@ -925,7 +925,7 @@ asn_parse_null(u_char *data,
  */
 u_char *
 asn_build_null(u_char *data,
-	       int *datalength,
+	       size_t *datalength,
 	       u_char type)
 {
 /*
@@ -948,17 +948,17 @@ asn_build_null(u_char *data,
 
   u_char * asn_parse_bitstring(
       u_char     *data         IN - pointer to start of object
-      int        *datalength   IN/OUT - number of valid bytes left in buffer
+      size_t     *datalength   IN/OUT - number of valid bytes left in buffer
       u_char     *type         OUT - asn type of object
       u_char     *string       IN/OUT - pointer to start of output buffer
-      int        *strlength    IN/OUT - size of output buffer
+      size_t     *strlength    IN/OUT - size of output buffer
  */
 u_char *
 asn_parse_bitstring(u_char *data,
-		    int *datalength,
+		    size_t *datalength,
 		    u_char *type,
 		    u_char *string,
-		    int *strlength)
+		    size_t *strlength)
 {
 /*
  * bitstring ::= 0x03 asnlength unused {byte}*
@@ -986,7 +986,7 @@ asn_parse_bitstring(u_char *data,
 	ERROR_MSG("Invalid bitstring");
 	return NULL;
     }
-    memmove(string, bufp, (int)asn_length);
+    memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
     return bufp + asn_length;
@@ -1013,10 +1013,10 @@ asn_parse_bitstring(u_char *data,
  */
 u_char *
 asn_build_bitstring(u_char *data,
-		    int *datalength,
+		    size_t *datalength,
 		    u_char type,
 		    u_char *string,
-		    int strlength)
+		    size_t strlength)
 {
 /*
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -1056,10 +1056,10 @@ asn_build_bitstring(u_char *data,
  */
 u_char *
 asn_parse_unsigned_int64(u_char *data,
-			 int *datalength,
+			 size_t *datalength,
 			 u_char *type, 
 			 struct counter64 *cp,
-			 int countersize)
+			 size_t countersize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1134,17 +1134,17 @@ asn_parse_unsigned_int64(u_char *data,
 
   u_char * asn_build_unsigned_int64(
       u_char     *data         IN - pointer to start of output buffer
-      int        *datalength   IN/OUT - number of valid bytes left in buffer
+      size_t     *datalength   IN/OUT - number of valid bytes left in buffer
       u_char      type         IN  - asn type of object
       struct counter64 *cp     IN - pointer to counter struct
-      int         countersize  IN - size of input buffer
+      size_t      countersize  IN - size of input buffer
  */
 u_char *
 asn_build_unsigned_int64(u_char *data,
-			 int *datalength,
+			 size_t *datalength,
 			 u_char type,
 			 struct counter64 *cp,
-			 int countersize)
+			 size_t countersize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1153,7 +1153,7 @@ asn_build_unsigned_int64(u_char *data,
     register u_long low, high;
     register u_long mask, mask2;
     int add_null_byte = 0;
-    int intsize;
+    size_t intsize;
 
     if (countersize != sizeof (struct counter64))
 	return NULL;
@@ -1254,10 +1254,10 @@ asn_build_unsigned_int64(u_char *data,
 
 u_char *
 asn_parse_signed_int64(u_char *data,
-		       int *datalength,
+		       size_t *datalength,
 		       u_char *type,
 		       struct counter64 *cp,
-		       int countersize)
+		       size_t countersize)
 {
   register u_char *bufp = data;
   u_long	    asn_length;
@@ -1329,10 +1329,10 @@ asn_parse_signed_int64(u_char *data,
  */
 u_char *
 asn_build_signed_int64(u_char *data,
-		       int *datalength,
+		       size_t *datalength,
 		       u_char type,
 		       struct counter64 *cp,
-		       int countersize)
+		       size_t countersize)
 {
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1341,7 +1341,7 @@ asn_build_signed_int64(u_char *data,
     struct counter64 c64;
     register u_int mask, mask2;
     u_long low, high;
-    int intsize;
+    size_t intsize;
 
     if (countersize != sizeof (struct counter64))
 	return NULL;
@@ -1408,10 +1408,10 @@ asn_build_signed_int64(u_char *data,
  */
 u_char *
 asn_parse_float(u_char *data,
-		int *datalength,
+		size_t *datalength,
 		u_char *type,
 		float *floatp,
-		int floatsize)
+		size_t floatsize)
 {
     register u_char *bufp = data;
     u_long	    asn_length;
@@ -1488,10 +1488,10 @@ asn_parse_float(u_char *data,
  */
 u_char *
 asn_build_float(u_char *data,
-		int *datalength,
+		size_t *datalength,
 		u_char type,
 		float *floatp,
-		int floatsize)
+		size_t floatsize)
 {
     union {
         float  floatVal;
@@ -1539,10 +1539,10 @@ asn_build_float(u_char *data,
  */
 u_char *
 asn_parse_double(u_char *data,
-		 int *datalength,
+		 size_t *datalength,
 		 u_char *type,
 		 double *doublep,
-		 int doublesize)
+		 size_t doublesize)
 {
     register u_char *bufp = data;
     u_long	    asn_length;
@@ -1614,10 +1614,10 @@ asn_parse_double(u_char *data,
  */
 u_char *
 asn_build_double(u_char *data,
-		 int *datalength,
+		 size_t *datalength,
 		 u_char type,
 		 double* doublep,
-		 int doublesize)
+		 size_t doublesize)
 {
     long  tmp;
     union {

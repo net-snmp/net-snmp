@@ -72,7 +72,7 @@ static oid dESPrivProt[] = {1, 3, 6, 1, 6, 3, 3, 1, 1, 3};
 #define PARTYCOMPLETE_MASK		0xFFFF	/* all collumns */
 
 struct partyEntry *
-party_rowCreate(oid *partyID, int partyIDLen)
+party_rowCreate(oid *partyID, size_t partyIDLen)
 {
     struct partyEntry *pp;
 
@@ -92,7 +92,7 @@ party_rowCreate(oid *partyID, int partyIDLen)
 }
 
 void
-party_rowDelete(oid *partyID, int partyIDLen)
+party_rowDelete(oid *partyID, size_t partyIDLen)
 {
     party_destroyEntry(partyID, partyIDLen);
 }
@@ -108,17 +108,18 @@ int
 write_party(int action,
 	    u_char *var_val,
 	    u_char var_val_type,
-	    int var_val_len,
+	    size_t var_val_len,
 	    u_char *statP,
 	    oid *name,
-	    int length)
+	    size_t length)
 {
     struct partyEntry *pp, *rp = NULL;
-    int var, indexlen, len;
+    int var;
+    size_t indexlen, len;
     oid *indexoid;
     long val;
     oid buf[MAX_OID_LEN];
-    int bigsize = 1000, size;
+    size_t bigsize = 1000, size;
     u_long myaddr;
     
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
@@ -534,16 +535,16 @@ write_party(int action,
     return SNMP_ERR_NOERROR;
 }
 
-u_char *
+const u_char *
 var_party(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN];
-    int newnamelen, lownamelen=0;
+    size_t newnamelen, lownamelen=0;
     struct partyEntry *pp, *lowpp = NULL;
     u_long mask;
     struct timeval now;

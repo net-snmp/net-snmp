@@ -25,7 +25,7 @@
 
 extern void  Init_HR_Proc (void);
 extern int   Get_Next_HR_Proc (void);
-int header_hrproc (struct variable *,oid *, int *, int, int *,  WriteMethod **);
+int header_hrproc (struct variable *,oid *, size_t *, int, size_t *,  WriteMethod **);
 
 	/*********************
 	 *
@@ -58,9 +58,9 @@ void init_hr_proc(void)
 int
 header_hrproc(struct variable *vp,
 		  oid *name,
-		  int *length,
+		  size_t *length,
 		  int exact,
-		  int *var_len,
+		  size_t *var_len,
 		  WriteMethod **write_method)
 {
 #define HRPROC_ENTRY_NAME_LENGTH	11
@@ -74,7 +74,7 @@ header_hrproc(struct variable *vp,
       DEBUGMSGTL(("host/hr_proc", "var_hrproc: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" proc entry */
 
     Init_HR_Proc();
@@ -83,7 +83,7 @@ header_hrproc(struct variable *vp,
         if ( proc_idx == -1 )
 	    break;
 	newname[HRPROC_ENTRY_NAME_LENGTH] = proc_idx;
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = proc_idx;
 	    /* Save processor status information */
@@ -104,7 +104,7 @@ header_hrproc(struct variable *vp,
         return(MATCH_FAILED);
     }
 
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -124,12 +124,12 @@ header_hrproc(struct variable *vp,
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrproc(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
     int  proc_idx;

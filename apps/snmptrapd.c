@@ -406,7 +406,7 @@ int snmp_input(int op,
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		    oid trapOid[MAX_OID_LEN];
-		    int trapOidLen = pdu->enterprise_length;
+		    size_t trapOidLen = pdu->enterprise_length;
 		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
 		    trapOid[trapOidLen++] = pdu->specific_type;
@@ -449,7 +449,7 @@ int snmp_input(int op,
 	    	}
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		    oid trapOid[MAX_OID_LEN];
-		    int trapOidLen = pdu->enterprise_length;
+		    size_t trapOidLen = pdu->enterprise_length;
 		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
 		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
 		    trapOid[trapOidLen++] = pdu->specific_type;
@@ -868,8 +868,7 @@ init_syslog(void)
  * trap deamon is running detatched from the console.
  *
  */
-void update_config(a) 
-     int a;
+void update_config(int a) 
 {
 #if 0  
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */

@@ -7,6 +7,10 @@
 #ifndef VACM_H
 #define VACM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SECURITYMODEL	1
 #define SECURITYNAME	2
 #define SECURITYGROUP	3
@@ -70,9 +74,9 @@ struct vacm_accessEntry {
 struct vacm_viewEntry {
     char	viewName[32];
     oid		viewSubtree[MAX_OID_LEN];
-    int		viewSubtreeLen;
+    size_t	viewSubtreeLen;
     u_char	viewMask[32];
-    int		viewMaskLen;
+    size_t	viewMaskLen;
     int		viewType;
     int		viewStorageType;
     int		viewStatus;
@@ -83,11 +87,11 @@ struct vacm_viewEntry {
     struct vacm_viewEntry *next;
 };
 
-void vacm_destroyViewEntry (char *, oid *, int);
+void vacm_destroyViewEntry (const char *, oid *, size_t);
 void vacm_destroyAllViewEntries (void);
 
 struct vacm_viewEntry *
-vacm_getViewEntry (char *, oid*, int);
+vacm_getViewEntry (const char *, oid *, size_t);
 /*
  * Returns a pointer to the viewEntry with the
  * same viewName and viewSubtree
@@ -115,31 +119,35 @@ vacm_scanViewNext (void);
  */
 
 struct vacm_viewEntry *
-vacm_createViewEntry (char *, oid *, int);
+vacm_createViewEntry (const char *, oid *, size_t);
 /*
  * Creates a viewEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-void vacm_destroyGroupEntry (int, char *);
+void vacm_destroyGroupEntry (int, const char *);
 void vacm_destroyAllGroupEntries (void);
-struct vacm_groupEntry * vacm_createGroupEntry (int, char *);
-struct vacm_groupEntry *vacm_getGroupEntry (int, char *);
+struct vacm_groupEntry *vacm_createGroupEntry (int, const char *);
+struct vacm_groupEntry *vacm_getGroupEntry (int, const char *);
 void vacm_scanGroupInit (void);
 struct vacm_groupEntry *vacm_scanGroupNext (void);
 
-void vacm_destroyAccessEntry (char *, char *, int, int);
+void vacm_destroyAccessEntry (const char *, const char *, int, int);
 void vacm_destroyAllAccessEntries (void);
-struct vacm_accessEntry * vacm_createAccessEntry (char *, char *, int, int);
+struct vacm_accessEntry *vacm_createAccessEntry (const char *, const char *, int, int);
 struct vacm_accessEntry *vacm_getAccessEntry (const char *, const char *, int, int);
 void vacm_scanAccessInit (void);
 struct vacm_accessEntry *vacm_scanAccessNext (void);
 
-void vacm_destroySecurityEntry (char *);
-void vacm_destroyAllSecurityEntries (void);
-struct vacm_securityEntry * vacm_createSecurityEntry (char *);
-struct vacm_securityEntry *vacm_getSecurityEntry (char *);
+void vacm_destroySecurityEntry (const char *);
+struct vacm_securityEntry *vacm_createSecurityEntry (const char *);
+struct vacm_securityEntry *vacm_getSecurityEntry (const char *);
 void vacm_scanSecurityInit (void);
 struct vacm_securityEntry *vacm_scanSecurityEntry (void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* VACM_H */

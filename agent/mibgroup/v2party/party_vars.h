@@ -7,8 +7,8 @@
 
 extern FindVarMethod var_party;
 extern WriteMethod write_party;
-struct partyEntry *party_rowCreate (oid *, int);
-void party_rowDelete (oid *, int);
+struct partyEntry *party_rowCreate (oid *, size_t);
+void party_rowDelete (oid *, size_t);
 
 #include "party.h"
 

@@ -96,9 +96,9 @@ int main(int argc, char  *argv[])
     struct variable_list *vars;
     int  arg;
     oid  name[MAX_OID_LEN];
-    int  name_length;
+    size_t  name_length;
     oid  root[MAX_OID_LEN];
-    int  rootlen;
+    size_t  rootlen;
     int  count;
     int  running;
     int  status;

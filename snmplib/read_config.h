@@ -5,6 +5,10 @@
 #ifndef READ_CONFIG_H
 #define READ_CONFIG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define STRINGMAX 1024
 
 #define NORMAL_CONFIG 0
@@ -55,13 +59,17 @@ struct config_line *register_premib_handler (const char *, const char *,
                                              const char *);
 void unregister_config_handler (const char *, const char *);
 void read_config_print_usage(const char *lead);
-char *read_config_save_octet_string(char *saveto, u_char *str, int len);
-char *read_config_read_octet_string(char *readfrom, u_char **str, int *len);
-char *read_config_read_objid(char *readfrom, oid **objid, int *len);
-char *read_config_save_objid(char *saveto, oid *objid, int len);
-char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len);
-char *read_config_store_data(int type, char *storeto, void *dataptr, int *len);
+char *read_config_save_octet_string(char *saveto, u_char *str, size_t len);
+char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len);
+char *read_config_read_objid(char *readfrom, oid **objid, size_t *len);
+char *read_config_save_objid(char *saveto, oid *objid, size_t len);
+char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len);
+char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len);
 void  read_config_store(const char *type, const char *line);
 void  snmp_clean_persistent(const char *type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* READ_CONFIG_H */

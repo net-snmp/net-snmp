@@ -73,7 +73,8 @@ void snmpTargetParamTable_addToList(
      struct targetParamTable_struct **listPtr)
 {
   static struct targetParamTable_struct *curr_struct, *prev_struct;
-  int    i, newOIDLen = 0, currOIDLen = 0;
+  int    i;
+  size_t newOIDLen = 0, currOIDLen = 0;
   oid    newOID[128], currOID[128];
   
   /* if the list is empty, add the new entry to the top */
@@ -151,13 +152,14 @@ void snmpTargetParamTable_remFromList(
 struct targetParamTable_struct *
 search_snmpTargetParamsTable(
      oid    *baseName,
-     int    baseNameLen,
+     size_t baseNameLen,
      oid    *name,
-     int    *length,
+     size_t *length,
      int    exact)
 {
    static struct targetParamTable_struct *temp_struct;
-   int    i, myOIDLen = 0;
+   int    i;
+   size_t myOIDLen = 0;
    oid    newNum[128];
 
    /* lookup entry in p / * Get Current MIB ID */
@@ -214,7 +216,7 @@ int snmpTargetParams_addParamName(
      struct targetParamTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no param name in config string\n"));
     return(0);
@@ -280,7 +282,7 @@ int snmpTargetParams_addSecName(
      struct targetParamTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no security name in config string\n"));
     return(0);
@@ -467,13 +469,13 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
 /* MIB table access routines */
 
 
-unsigned char *
+const u_char *
 var_snmpTargetParamsEntry(
     struct  variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
   /* variables we may use later */
@@ -485,7 +487,7 @@ var_snmpTargetParamsEntry(
   *var_len = sizeof(long_ret); /* assume an integer and change later if not */
   
   /* look for OID in current table */
-  if ( (temp_struct = search_snmpTargetParamsTable(vp->name, (int)vp->namelen, 
+  if ( (temp_struct = search_snmpTargetParamsTable(vp->name, vp->namelen, 
 				      name, length, exact)) == 0 ) {
     if (vp->magic == SNMPTARGETPARAMSROWSTATUS)  {
       *write_method = write_snmpTargetParamsRowStatus;
@@ -552,13 +554,14 @@ write_snmpTargetParamsMPModel(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -613,13 +616,14 @@ write_snmpTargetParamsSecurityModel(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -676,13 +680,14 @@ write_snmpTargetParamsSecurityName(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static unsigned char           string[1500];
-  int                            size=1500, bigsize=1000;
+  size_t                         size=1500;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -742,13 +747,14 @@ write_snmpTargetParamsSecurityLevel(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
  
   /* check incoming variable */
@@ -805,13 +811,14 @@ write_snmpTargetParamsStorageType(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -863,7 +870,7 @@ write_snmpTargetParamsStorageType(
    It passes back 0 if unsuccessfull.*/
 int snmpTargetParams_createNewRow(
      oid  *name,
-     int  name_len)
+     size_t name_len)
 {
   int    pNameLen, i;
   struct targetParamTable_struct *temp_struct;
@@ -896,15 +903,16 @@ write_snmpTargetParamsRowStatus(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   enum commit_action_enum        {NOTHING, DESTROY, CREATE, CHANGE};
   enum commit_action_enum        onCommitDo = NOTHING; 
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct; /*also treated as boolean for row lookup*/
 
   if (var_val_type != ASN_INTEGER) {

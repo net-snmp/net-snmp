@@ -58,8 +58,8 @@
 	 *
 	 *********************/
 
-int header_hrswinst (struct variable *,oid *, int *, int, int *, WriteMethod **);
-int header_hrswInstEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrswinst (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+int header_hrswInstEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 const  char *HRSW_directory = NULL;
 
@@ -68,7 +68,7 @@ extern struct timeval starttime;
 #ifdef HAVE_LIBRPM
 static rpmdb	rpm_db = NULL;
 #else
-extern char  HRSW_name[];
+static char HRSW_name[100];
 #endif
 
 	/*********************
@@ -128,9 +128,9 @@ void init_hr_swinst(void)
 int
 header_hrswinst(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
 #define HRSWINST_NAME_LENGTH	9
@@ -143,12 +143,12 @@ header_hrswinst(struct variable *vp,
       DEBUGMSGTL(("host/hr_swinst", "var_hrswinst: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSWINST_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -159,9 +159,9 @@ header_hrswinst(struct variable *vp,
 int
 header_hrswInstEntry(struct variable *vp,
 		     oid *name,
-		     int *length,
+		     size_t *length,
 		     int exact,
-		     int *var_len,
+		     size_t *var_len,
 		 WriteMethod **write_method)
 {
 #define HRSWINST_ENTRY_NAME_LENGTH	11
@@ -175,7 +175,7 @@ header_hrswInstEntry(struct variable *vp,
       DEBUGMSGTL(("host/hr_swinst", "var_hrswInstEntry: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" installed software entry */
 
     Init_HR_SWInst();
@@ -189,7 +189,7 @@ header_hrswInstEntry(struct variable *vp,
           sprint_objid (c_oid, newname, *length);
           DEBUGMSGTL(("host/hr_swinst", "%s\n", c_oid));
         }
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = swinst_idx;
 	    Save_HR_SW_info();
@@ -211,7 +211,7 @@ header_hrswInstEntry(struct variable *vp,
         return(MATCH_FAILED);
     }
 
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -230,12 +230,12 @@ header_hrswInstEntry(struct variable *vp,
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrswinst(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     int sw_idx=0;
@@ -369,7 +369,6 @@ static int HRSW_index;
 #ifndef HAVE_LIBRPM
 static DIR *dp = NULL;
 static struct dirent *de_p;
-static char HRSW_name[100];
 #endif
 
 

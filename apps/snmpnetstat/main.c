@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     struct partyEntry *pp;
     struct contextEntry *cxp;
     oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
+    size_t srclen = 0, dstlen = 0, contextlen = 0;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
     in_addr_t destAddr;

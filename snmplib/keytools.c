@@ -80,7 +80,7 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
         u_int            i, pindex = 0;
         int		 transform;
 
-	char		 buf[USM_LENGTH_KU_HASHBLOCK],
+	u_char		 buf[USM_LENGTH_KU_HASHBLOCK],
 			*bufp;
 
 #ifdef HAVE_LIBKMT
@@ -227,9 +227,9 @@ generate_kul(	oid	*hashtype,	u_int  hashtype_len,
 {
 	int		 rval    = SNMPERR_SUCCESS;
 	u_int		 nbytes  = 0;
-        int              properlength;
+        size_t           properlength;
 
-	char		 buf[SNMP_MAXBUF];
+	u_char		 buf[SNMP_MAXBUF];
 	void		*context = NULL;
 #ifdef SNMP_TESTING_CODE
         int		 i;
@@ -337,7 +337,7 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
-	int		 properlength;
+	size_t		 properlength;
         u_int            nbytes  = 0;
 
         u_char          *tmpbuf = NULL;
@@ -473,12 +473,12 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
-	int		 properlength = 0;
+	size_t		 properlength = 0;
 	u_int		 nbytes  = 0;
 
 	u_int8_t	*bufp,
 			 tmp_buf[SNMP_MAXBUF];
-        int              tmp_buf_len = SNMP_MAXBUF;
+        size_t           tmp_buf_len = SNMP_MAXBUF;
 	void		*context = NULL;
         u_char          *tmpbuf = NULL;
 

@@ -21,9 +21,9 @@ struct eventEntry {
 	struct eventEntry *next;
 	int index;				/* 1..65535 */
 	oid id[MAX_OID_LEN];
-	int idLen;
+	size_t idLen;
 	char description[MAX_DESCRIPTION_LEN];		/* 0..127 */
-	int descriptionLen;
+	size_t descriptionLen;
 	int numEvents;
 	u_long lastTimeSent;	/* timeticks */
 	u_long minInterval;
@@ -37,11 +37,11 @@ struct eventNotifyEntry {
     struct eventNotifyEntry *next;
     int index;
     oid srcParty[MAX_OID_LEN];
-    int srcPartyLen;
+    size_t srcPartyLen;
     oid dstParty[MAX_OID_LEN];
-    int dstPartyLen;
+    size_t dstPartyLen;
     oid context[MAX_OID_LEN];
-    int contextLen;
+    size_t contextLen;
     int interval;
     int retransmissions;
     int lifetime;

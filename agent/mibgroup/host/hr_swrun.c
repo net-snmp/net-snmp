@@ -65,8 +65,8 @@
 void  Init_HR_SWRun (void);
 int   Get_Next_HR_SWRun (void);
 void  End_HR_SWRun (void);
-int header_hrswrun (struct variable *,oid *, int *, int, int *, WriteMethod **);
-int header_hrswrunEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrswrun (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
+int header_hrswrunEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 #ifndef linux
 static int LowProcIndex;
@@ -110,9 +110,9 @@ void init_hr_swrun(void)
 int
 header_hrswrun(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
 #define HRSWRUN_NAME_LENGTH	9
@@ -125,12 +125,12 @@ header_hrswrun(struct variable *vp,
       DEBUGMSGTL(("host/hr_swrun", "var_hrswrun: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSWRUN_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -141,9 +141,9 @@ header_hrswrun(struct variable *vp,
 int
 header_hrswrunEntry(struct variable *vp,
 		    oid *name,
-		    int *length,
+		    size_t *length,
 		    int exact,
-		    int *var_len,
+		    size_t *var_len,
 		    WriteMethod **write_method)
 {
 #define HRSWRUN_ENTRY_NAME_LENGTH	11
@@ -157,7 +157,7 @@ header_hrswrunEntry(struct variable *vp,
       DEBUGMSGTL(("host/hr_swrun", "var_hrswrunEntry: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 
 		/*
 	 	 *  Find the "next" running process
@@ -176,7 +176,7 @@ header_hrswrunEntry(struct variable *vp,
           sprint_objid (c_oid, newname, *length);
           DEBUGMSG(("host/hr_swrun", "%s", c_oid));
         }
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
 #ifndef linux
@@ -204,7 +204,7 @@ DEBUGMSG(("host/hr_swrun", "\n"));
     }
 
     newname[HRSWRUN_ENTRY_NAME_LENGTH] = LowPid;
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -221,12 +221,12 @@ DEBUGMSG(("host/hr_swrun", "\n"));
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrswrun(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     int pid=0;
@@ -567,7 +567,7 @@ static int nproc;
 void
 Init_HR_SWRun (void)
 {
-    int bytes;
+    size_t bytes;
     static time_t iwhen = 0;
     time_t now;
 

@@ -7,6 +7,10 @@
 #ifndef SNMPUSM_H
 #define SNMPUSM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define WILDCARDSTRING "*"
 
 /*
@@ -41,18 +45,18 @@
  * Structures.
  */
 struct usmStateReference {
-	u_char		*usr_name;
-	u_int		 usr_name_length;
+	char		*usr_name;
+	size_t		 usr_name_length;
 	u_char		*usr_engine_id;
-	u_int		 usr_engine_id_length;
+	size_t		 usr_engine_id_length;
 	oid		*usr_auth_protocol;
-	u_int		 usr_auth_protocol_length;
+	size_t		 usr_auth_protocol_length;
 	u_char		*usr_auth_key;
-	u_int		 usr_auth_key_length;
+	size_t		 usr_auth_key_length;
 	oid		*usr_priv_protocol;
-	u_int		 usr_priv_protocol_length;
+	size_t		 usr_priv_protocol_length;
 	u_char		*usr_priv_key;
-	u_int		 usr_priv_key_length;
+	size_t		 usr_priv_key_length;
 	u_int		 usr_sec_level;
 };
 
@@ -64,22 +68,22 @@ struct usmStateReference {
 struct usmUser;
 struct usmUser {
    u_char         *engineID;
-   int            engineIDLen;
-   u_char         *name;
-   u_char         *secName;
+   size_t          engineIDLen;
+   char           *name;
+   char           *secName;
    oid            *cloneFrom;
-   int            cloneFromLen;
+   size_t          cloneFromLen;
    oid            *authProtocol;
-   int            authProtocolLen;
+   size_t          authProtocolLen;
    u_char         *authKey;
-   int            authKeyLen;
+   size_t          authKeyLen;
    oid            *privProtocol;
-   int            privProtocolLen;
+   size_t          privProtocolLen;
    u_char         *privKey;
-   int            privKeyLen;
+   size_t          privKeyLen;
    u_char         *userPublicString;
-   int            userStatus;
-   int            userStorageType;
+   int             userStatus;
+   int             userStorageType;
    struct usmUser *next;
    struct usmUser *prev;
 };
@@ -98,71 +102,71 @@ void	usm_free_usmStateReference (void *old);
 
 int	usm_set_usmStateReference_name (
 		struct usmStateReference	*ref,
-		u_char				*name,
-		u_int				 name_len);
+		char				*name,
+		size_t				 name_len);
 
 int	usm_set_usmStateReference_engine_id (
 		struct usmStateReference	*ref,
 		u_char				*engine_id,
-		u_int				 engine_id_len);
+		size_t				 engine_id_len);
 
 int	usm_set_usmStateReference_auth_protocol (
 		struct usmStateReference *ref,
 		oid *auth_protocol,
-		u_int auth_protocol_len);
+		size_t auth_protocol_len);
 
 int	usm_set_usmStateReference_auth_key (
 		struct usmStateReference *ref,
 		u_char *auth_key,
-		u_int auth_key_len);
+		size_t auth_key_len);
 
 int	usm_set_usmStateReference_priv_protocol (
 		struct usmStateReference *ref,
 		oid *priv_protocol,
-		u_int priv_protocol_len);
+		size_t priv_protocol_len);
 
 int	usm_set_usmStateReference_priv_key (
 		struct usmStateReference *ref,
 		u_char *priv_key,
-		u_int priv_key_len);
+		size_t priv_key_len);
 
 int	usm_set_usmStateReference_sec_level (
 		struct usmStateReference *ref,
-		u_int sec_level);
+		int sec_level);
 
 #ifdef SNMP_TESTING_CODE
 void	emergency_print (u_char *field, u_int length);
 #endif
 
-int	asn_predict_int_length (int type, long number, int len);
+int	asn_predict_int_length (int type, long number, size_t len);
 
-int	asn_predict_length (int type, u_char *ptr, int u_char_len);
+int	asn_predict_length (int type, u_char *ptr, size_t u_char_len);
 
 int	usm_set_salt (
 		u_char		*iv,
-		int		*iv_length,
+		size_t		*iv_length,
 		u_char		*priv_salt,
-		int		 priv_salt_length,
+		size_t		 priv_salt_length,
 		u_char		*msgSalt );
 
 int	usm_parse_security_parameters (
 		u_char  *secParams,
-		u_int    remaining,
+		size_t   remaining,
 		u_char  *secEngineID,
-		int     *secEngineIDLen,
+		size_t  *secEngineIDLen,
 		u_int   *boots_uint,
 		u_int   *time_uint,
-		u_char  *secName,
-		int     *secNameLen,
+		char    *secName,
+		size_t  *secNameLen,
 		u_char  *signature,
-		u_int   *signature_length,
+		size_t  *signature_length,
 		u_char  *salt,
-		u_int   *salt_length,
+		size_t  *salt_length,
 		u_char **data_ptr);
 
 int	usm_check_and_update_timeliness (
 		u_char *secEngineID,
-		int     secEngineIDLen,
+		size_t  secEngineIDLen,
 		u_int   boots_uint,
 		u_int   time_uint,
 		int    *error);
@@ -170,18 +174,18 @@ int	usm_check_and_update_timeliness (
 void usm_set_reportErrorOnUnknownID (int value);
 void usm_free_usmStateReference (void *old);
 
-int usm_generate_out_msg (int, u_char *, int, int, int, u_char *,int,
-			      u_char *, int, int, u_char *, int, void *,
-			      u_char *, int *, u_char **, int *);
+int usm_generate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
+			      char *,  size_t, int, u_char *, size_t, void *,
+			      u_char *, size_t *, u_char **, size_t *);
 
-int usm_process_in_msg (int, int, u_char *, int, int, u_char *, int,
-			    u_char *, int *, u_char *, int *, u_char **, int *,
-			    int *, void **);
+int usm_process_in_msg (int, size_t, u_char *, int, int, u_char *, size_t,
+			    u_char *, size_t *, char *, size_t *, u_char **, size_t *,
+			    size_t *, void **);
 
 int             usm_check_secLevel(int level, struct usmUser *user);
 struct usmUser *usm_get_userList(void);
-struct usmUser *usm_get_user(char *engineID, int engineIDLen, char *name);
-struct usmUser *usm_get_user_from_list(char *engineID, int engineIDLen,
+struct usmUser *usm_get_user(u_char *engineID, size_t engineIDLen, char *name);
+struct usmUser *usm_get_user_from_list(u_char *engineID, size_t engineIDLen,
                                        char *name, struct usmUser *userList,
                                        int use_default);
 struct usmUser *usm_add_user(struct usmUser *user);
@@ -190,13 +194,13 @@ struct usmUser *usm_add_user_to_list(struct usmUser *user,
 struct usmUser *usm_free_user(struct usmUser *user);
 struct usmUser *usm_create_user(void);
 struct usmUser *usm_create_initial_user(const char *name,
-                                     oid *authProtocol, int authProtocolLen,
-                                     oid *privProtocol, int privProtocolLen);
+                                     oid *authProtocol, size_t authProtocolLen,
+                                     oid *privProtocol, size_t privProtocolLen);
 struct usmUser *usm_cloneFrom_user(struct usmUser *from, struct usmUser *to);
 struct usmUser *usm_remove_user(struct usmUser *user);
 struct usmUser *usm_remove_user_from_list(struct usmUser *user,
                                           struct usmUser **userList);
-char           *get_objid(char *line, oid **optr, int *len);
+char           *get_objid(char *line, oid **optr, size_t *len);
 void            usm_save_users(const char *token, const char *type);
 void            usm_save_users_from_list(struct usmUser *user, const char *token,
                                         const char *type);
@@ -210,5 +214,9 @@ void            usm_set_user_password(struct usmUser *user, char *token,
 void		init_usm(void);
 int		init_usm_post_config(int majorid, int minorid, void *serverarg,
                                      void *clientarg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMPUSM_H */

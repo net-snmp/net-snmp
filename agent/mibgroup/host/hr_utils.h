@@ -3,5 +3,5 @@
  *
  */
 
-u_char * date_n_time (time_t * , int * );
+u_char * date_n_time (time_t * , size_t * );
 time_t ctime_to_timet (char* );

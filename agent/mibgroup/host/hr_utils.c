@@ -37,9 +37,7 @@
 
 
 u_char *
-date_n_time ( when, length )
-    time_t *when;
-    int  *length;
+date_n_time ( time_t *when, size_t  *length)
 {
     struct tm	*tm_p;
     static u_char string[11];

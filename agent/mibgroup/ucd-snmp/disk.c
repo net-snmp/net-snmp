@@ -294,11 +294,11 @@ void disk_parse_config(char *token, char *cptr)
   
 */
 
-unsigned char *var_extensible_disk(struct variable *vp,
+const u_char *var_extensible_disk(struct variable *vp,
 				   oid *name,
-				   int *length,
+				   size_t *length,
 				   int exact,
-				   int *var_len,
+				   size_t *var_len,
 				   WriteMethod **write_method)
 {
 
