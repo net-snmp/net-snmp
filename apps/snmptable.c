@@ -106,7 +106,7 @@ void get_field_names (void);
 void get_table_entries( struct snmp_session *ss );
 void print_table (void);
 
-static void optProc(int opt)
+static void optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
     case 'w':
