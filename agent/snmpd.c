@@ -93,6 +93,8 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
+#include "snmp_vars.h"
+#include "agent_read_config.h"
 
 #ifdef USING_V2PARTY_ALARM_MODULE
 #include "mibgroup/v2party/alarm.h"
@@ -708,7 +710,7 @@ static int
 receive(int sdlist[], 
 	int sdlen)
 {
-    int numfds, index;
+    int numfds, iindex;
     fd_set fdset;
     struct timeval  timeout, *tvp = &timeout;
     struct timeval  sched, *svp = &sched, now, *nvp = &now;
@@ -730,10 +732,10 @@ receive(int sdlist[],
 
 	numfds = 0;
 	FD_ZERO(&fdset);
-	for(index = 0; index < sdlen; index++){
-	    if (sdlist[index] + 1 > numfds)
-		numfds = sdlist[index] + 1;
-	    FD_SET(sdlist[index], &fdset);
+	for(iindex = 0; iindex < sdlen; iindex++){
+	    if (sdlist[iindex] + 1 > numfds)
+		numfds = sdlist[iindex] + 1;
+	    FD_SET(sdlist[iindex], &fdset);
 	}
         block = 0;
         snmp_select_info(&numfds, &fdset, tvp, &block);
@@ -741,10 +743,10 @@ receive(int sdlist[],
             tvp = NULL; /* block without timeout */
 	count = select(numfds, &fdset, 0, 0, tvp);
 	if (count > 0){
-	    for(index = 0; index < sdlen; index++){
-		if(FD_ISSET(sdlist[index], &fdset)){
-		    sd_handlers[index](sdlist[index]);
-		    FD_CLR(sdlist[index], &fdset);
+	    for(iindex = 0; iindex < sdlen; iindex++){
+		if(FD_ISSET(sdlist[iindex], &fdset)){
+		    sd_handlers[iindex](sdlist[iindex]);
+		    FD_CLR(sdlist[iindex], &fdset);
 		}
 	    }
 	    snmp_read(&fdset);
@@ -780,7 +782,6 @@ receive(int sdlist[],
 	        svp->tv_sec++;
             }
 	    if (log_addresses && lastAddrAge++ > 600){
-		int count;
 		
 		lastAddrAge = 0;
 		for(count = 0; count < ADDRCACHE; count++){
