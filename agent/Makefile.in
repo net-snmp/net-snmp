@@ -17,9 +17,9 @@ SPCC		= @CC@ $(CPPFLAGS)
 
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o
 
-AGENTOBJS=kernel.o auto_nlist.o snmpd.o
+AGENTOBJS=snmpd.o auto_nlist.o
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
-	agent_trap.o
+	agent_trap.o kernel.o
 
 INSTALLHEADERS=agent_read_config.h agent_registry.h agent_trap.h auto_nlist.h \
 	ds_agent.h snmp_agent.h snmp_vars.h var_struct.h mibgroup/util_funcs.h \
