@@ -1,6 +1,8 @@
 #ifndef _AGENTX_SUBAGENT_H
 #define _AGENTX_SUBAGENT_H
 
+config_belongs_in(agent_module)
+
 config_require(agentx/protocol)
 config_require(agentx/client)
 config_require(agentx/agentx_config)
