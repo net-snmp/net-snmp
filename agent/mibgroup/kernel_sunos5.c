@@ -623,7 +623,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, size_t entry
     }
     if (strbuf.len >= sizeof(struct T_error_ack)
 	&& tea->PRIM_type == T_ERROR_ACK) {
-      ret = -(tea->TLI_error == TSYSERR) ? tea->UNIX_error : EPROTO;/* Protocol error */
+      ret = -((tea->TLI_error == TSYSERR)?tea->UNIX_error:EPROTO); /* Protocol error */
       break;
     }
     if (rc != MOREDATA
