@@ -91,7 +91,8 @@ inline void netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                               netsnmp_table_row *origrow,
                                               netsnmp_table_row *newrow);
 netsnmp_table_row *netsnmp_table_data_set_clone_row(netsnmp_table_row *row);
-    
+void netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
+                                      char *registration_name);
     
 #ifdef __cplusplus
 };
