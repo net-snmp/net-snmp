@@ -409,21 +409,21 @@ Save_HR_Disk_Specific (void)
 	    HRD_savedIntf_type = HRD_info.intf_type; 
 	    HRD_savedDev_type  = HRD_info.dev_type;
 	    HRD_savedFlags     = HRD_info.flags;
-	    HRD_savedCapacity  = HRD_cap.lba;
+	    HRD_savedCapacity  = HRD_cap.lba / 2;
 #endif
 #ifdef DKIOCINFO
 	    HRD_savedCtrl_type = HRD_info.dki_ctype;
 	    HRD_savedFlags     = HRD_info.dki_flags;
 	    HRD_savedCapacity  = HRD_cap.dkg_ncyl*
 				 HRD_cap.dkg_nhead*
-				 HRD_cap.dkg_nsect; /* ??? */
+				 HRD_cap.dkg_nsect / 2; /* ??? */
 #endif
 #ifdef HAVE_LINUX_HDREG_H
 	    HRD_savedCapacity  = HRD_info.lba_capacity / 2 ;
 	    HRD_savedFlags     = HRD_info.config;
 #endif
 #ifdef DIOCGDINFO
-	    HRD_savedCapacity  = HRD_info.d_secperunit;
+	    HRD_savedCapacity  = HRD_info.d_secperunit / 2;
 #endif
 }
 
