@@ -181,7 +181,7 @@ udpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case UDPLOCALPORT:
-                port = ntohs(entry->UDPTABLE_LOCALPORT);
+                port = ntohs((u_short)entry->UDPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -256,7 +256,7 @@ udpTable_next_entry( void **loop_context,
      */
     snmp_set_var_value(index, (u_char *)&udp_head[i].UDPTABLE_LOCALADDRESS,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
-    port = ntohs(udp_head[i].UDPTABLE_LOCALPORT);
+    port = ntohs((u_short)udp_head[i].UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
     /*

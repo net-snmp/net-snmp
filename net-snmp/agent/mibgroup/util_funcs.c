@@ -638,7 +638,7 @@ header_simple_table(struct variable *vp, oid * name, size_t * length,
             newname[*length - 1] = name[*length - 1];
         }
     }
-    if ((max >= 0 && (newname[*length - 1] > max)) ||
+    if ((max >= 0 && ((int)newname[*length - 1] > max)) ||
                ( 0 == newname[*length - 1] )) {
         if (var_len)
             *var_len = 0;

@@ -470,7 +470,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         continue;
 
 	    }
-	    snmp_set_var_typed_value(request->requestvb, type,
+	    snmp_set_var_typed_value(request->requestvb, (u_char)type,
 			             (u_char *)&ret_value, sizeof(ret_value));
 	}
         break;

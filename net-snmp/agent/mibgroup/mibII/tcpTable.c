@@ -218,7 +218,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNLOCALPORT:
-                port = ntohs(entry->TCPTABLE_LOCALPORT);
+                port = ntohs((u_short)entry->TCPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -234,7 +234,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNREMOTEPORT:
-                port = ntohs(entry->TCPTABLE_REMOTEPORT);
+                port = ntohs((u_short)entry->TCPTABLE_REMOTEPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -317,7 +317,7 @@ tcpTable_next_entry( void **loop_context,
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_LOCALADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
 
-    port = ntohs(tcp_head[i].TCPTABLE_LOCALPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -325,7 +325,7 @@ tcpTable_next_entry( void **loop_context,
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_REMOTEADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
 
-    port = ntohs(tcp_head[i].TCPTABLE_REMOTEPORT);
+    port = ntohs((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
