@@ -9,6 +9,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - new configure option to remove specific code pieces (mib reading, ...)
       ./configure --help for a list of code areas that can be excluded.
     - new snmpd.conf tokens:  includeAllDisks
+    - snmptrapd's new -t switch can be used to disable syslog.
+      (useful for a no-output snmptrapd with only traphandle support)
+    - the UCD-DISKIO-MIB will now work on linux.
 
  Fixes:
     - More patches to properly demonize snmpd (close std*, double fork, ...).
