@@ -3322,10 +3322,10 @@ while test "x$new_module_list" != "x"; do
         module_list_code="$module_list_code $i"
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
 	if grep init_$mnm $srcdir/$mibdir/$i.c > /dev/null; then
-	    echo "  init_$mnm();" >> $mibdir/mib_module_inits.h
+	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/mib_module_inits.h
 	fi
 	if grep shutdown_`basename $i` $srcdir/$mibdir/$i.c > /dev/null; then
-	    echo "  shutdown_`basename $i`();" >> $mibdir/mib_module_shutdown.h
+	    echo "  if (should_init(\"`basename $i`\")) shutdown_`basename $i`();" >> $mibdir/mib_module_shutdown.h
 	fi
       fi
       if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
