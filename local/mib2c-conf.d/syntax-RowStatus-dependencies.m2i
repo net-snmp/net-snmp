@@ -22,12 +22,13 @@
         if (MFD_SUCCESS != rc)
             return rc;
         
+@if $m2c_table_row_creation == 1@
         /*
          * row creation requirements
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             if (ROWSTATUS_CREATEANDGO ==  ${m2c_data_item}$node) {
-                if (rowreq_ctx->column_set_flags != $context.uc_REQUIRED_ROWS) {
+                if (rowreq_ctx->column_set_flags != $context.uc_REQUIRED_COLS) {
                     DEBUGMSGTL(("${context}",
                                 "required columns missing\n"));
                     return MFD_CANNOT_CREATE_NOW;
@@ -35,6 +36,7 @@
             }
         } /* row creation */
         else {
+@end@
             /*
              * row change requirements
              */
@@ -52,11 +54,17 @@
                     return MFD_NOT_VALID_NOW;
                 }
             } /* row destroy */
+@if $m2c_table_row_creation == 1@
         } /* row change */
+@end@
     }
     else {
         /*
+@if $m2c_table_row_creation == 1@
          * must have row status to create a row
+@else@
+         * row creation snot supported
+@end@
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
             DEBUGMSGTL(("$context",
