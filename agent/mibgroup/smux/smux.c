@@ -271,7 +271,7 @@ var_smux(struct variable *vp,
 	*write_method = var_smux_write; 
 	/* search the active registration list */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
-		if (!compare_tree(vp->name, vp->namelen, rptr->sr_name,
+		if (0 >= snmp_oidtree_compare(vp->name, vp->namelen, rptr->sr_name,
 		    rptr->sr_name_len))
 			break;
 	}

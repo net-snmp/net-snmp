@@ -5235,6 +5235,17 @@ snmp_oid_compare(const oid *in_name1,
     return 0;
 }
 
+int
+snmp_oidtree_compare(const oid *in_name1,
+                 size_t len1,
+                 const oid *in_name2,
+                 size_t len2)
+{
+   int len = ((len1 < len2) ? len1 : len2);
+
+   return(snmp_oid_compare(in_name1, len, in_name2, len));
+}
+
 /*
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.

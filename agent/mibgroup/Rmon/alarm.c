@@ -22,6 +22,10 @@
    for the ucd-snmp snmpd agent.
  *
  * $Log$
+ * Revision 1.4  2002/02/05 17:54:16  hardaker
+ * Patch from Harrie Hazewinkel to move the oidtree_compare function to
+ * the main library.
+ *
  * Revision 1.3  2002/01/29 04:54:50  hardaker
  * Major file moving and editing of include directives.
  *   - essentially adds up to:
@@ -147,7 +151,7 @@ fetch_var_val (oid *name, size_t namelen, u_long* new_value)
   s_var_ptr = tree_ptr->variables;
   for (iii = 0; iii < tree_ptr->variables_len; iii++) {
     if (s_var_ptr->namelen) {
-      if (! compare_tree (name + tree_ptr->namelen,
+      if (0 >= snmp_oidtree_compare(name + tree_ptr->namelen,
                           namelen - tree_ptr->namelen,
                           s_var_ptr->name,
                           s_var_ptr->namelen)) {
