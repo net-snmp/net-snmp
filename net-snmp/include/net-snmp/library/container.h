@@ -14,6 +14,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/factory.h>
+#include <net-snmp/library/snmp_logging.h>
 
 #ifdef  __cplusplus
 extern "C" {
