@@ -125,9 +125,6 @@
 	 *
 	 *********************/
 
-#ifdef freebsd4
-static unsigned int hz;
-#endif
 
 	/*********************
 	 *
