@@ -1678,6 +1678,7 @@ AC_OUTPUT([
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
+ testing/TESTCONF.sh:testing/TESTCONF.sh.in
 ], echo timestamp > stamp-h)
 
 dnl Local Variables:

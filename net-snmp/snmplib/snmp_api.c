@@ -111,6 +111,7 @@ SOFTWARE.
 #include "snmp_logging.h"
 #include "default_store.h"
 #include "mt_support.h"
+#include "snmp-tc.h"
 
 static void _init_snmp (void);
 
@@ -1357,6 +1358,9 @@ create_user_from_session(struct snmp_session *session)
         return SNMPERR_GENERR;
       }
     }
+
+    user->userStatus = RS_ACTIVE;
+    user->userStorageType = ST_READONLY;
 
     /* add the user into the database */
     usm_add_user(user);
@@ -4183,6 +4187,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         break;
 
       case ASN_OBJECT_ID:
+      case ASN_PRIV_IMPLIED_OBJECT_ID:
       case ASN_PRIV_INCL_RANGE:
       case ASN_PRIV_EXCL_RANGE:
         if (largeval) {
@@ -4194,6 +4199,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         memmove(vars->val.objid, value, vars->val_len);
         break;
 
+      case ASN_PRIV_IMPLIED_OCTET_STR:
       case ASN_OCTET_STR:
       case ASN_OPAQUE:
       case ASN_NSAP:

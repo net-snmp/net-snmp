@@ -32,14 +32,25 @@ header_complex_generate_varoid(struct variable_list *var) {
         var->name[0] = *(var->val.integer);
         break;
 
-      case ASN_OPAQUE:
-      case ASN_OCTET_STR:
-        var->name_length = var->val_len+1;
-        var->name = (oid *) malloc(sizeof(oid) * (var->val_len + 1));
+      case ASN_PRIV_IMPLIED_OCTET_STR:
+        var->name_length = var->val_len;
+        var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
         if (var->name == NULL)
             return SNMPERR_GENERR;
+
+        for(i = 0; i <= var->val_len; i++)
+          var->name[i] = (oid) var->val.string[i];
+        break;
+
+      case ASN_OPAQUE:
+      case ASN_OCTET_STR:
+        var->name_length = var->val_len + 1;
+        var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+        if (var->name == NULL)
+            return SNMPERR_GENERR;
+
         var->name[0] = (oid) var->val_len;
-        for(i=0; i < var->val_len; i++)
+        for(i = 0; i <= var->val_len; i++)
           var->name[i+1] = (oid) var->val.string[i];
         break;
       
@@ -90,11 +101,16 @@ int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
 
       case ASN_OPAQUE:
       case ASN_OCTET_STR:
-        itmp = (long) *oidIndex++;
-        oidLen--;
-        if (itmp > oidLen)
-          return SNMPERR_GENERR;
-          
+      case ASN_PRIV_IMPLIED_OCTET_STR:
+        if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
+            itmp = oidLen;
+        } else {
+            itmp = (long) *oidIndex++;
+            oidLen--;
+            if (itmp > oidLen)
+                return SNMPERR_GENERR;
+        }
+
         if (itmp == 0)
           break;        /* zero length strings shouldn't malloc */
         
