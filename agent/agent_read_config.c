@@ -94,7 +94,8 @@ RETSIGTYPE update_config(int a)
   if (optconfigfile != NULL) {
     read_config_with_type (optconfigfile, "snmpd");
   }
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                      NULL);
   signal(SIGHUP,update_config);
 }
 

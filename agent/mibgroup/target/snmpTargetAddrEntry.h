@@ -51,9 +51,10 @@ struct targetAddrTable_struct {
 
 /* function definitions */
 
-extern void          init_snmpTargetAddrEntry(void);
-extern void          shutdown_snmpTargetAddrEntry(void);
-extern FindVarMethod var_snmpTargetAddrEntry;
+void          init_snmpTargetAddrEntry(void);
+int           store_snmpTargetAddrEntry(int majorID, int minorID,
+                                        void *serverarg, void *clientarg);
+FindVarMethod var_snmpTargetAddrEntry;
 
 void snmpd_parse_config_targetAddr( char *, char *);
 

@@ -14,6 +14,7 @@
 #include "mibincl.h"
 #include "snmpTargetParamsEntry.h"
 #include "read_config.h"
+#include "callback.h"
 
 #define snmpTargetParamsOIDLen 11  /*This is base+column, 
 				     i.e. everything but index*/
@@ -202,6 +203,10 @@ init_snmpTargetParamsEntry(void)
 {
   aPTable = 0;
   snmpd_register_config_handler("targetParams", snmpd_parse_config_targetParams,0,"");
+
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         store_snmpTargetParamsEntry, NULL);
 }  /*  init_snmpTargetParmsEntry  */
 
 
@@ -425,11 +430,12 @@ void snmpd_parse_config_targetParams(
 /* shutdown routines */
 
 
-/* shutdown_snmpTargetParamsEntry handles the shutdown proccess 
+/* store_snmpTargetParamsEntry handles the presistent storage proccess 
    for this MIB table. It writes out all the non-volatile rows 
    to permanent storage on a shutdown  */
-void 
-shutdown_snmpTargetParamsEntry(void)
+int 
+store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
+                            void *clientarg)
 {
   struct targetParamTable_struct *curr_struct;
   char line[1024];
@@ -454,8 +460,8 @@ shutdown_snmpTargetParamsEntry(void)
       curr_struct = curr_struct->next;
     }
   }
-
-}  /*  shutdown_snmpTargetParmsEntry  */
+  return SNMPERR_SUCCESS;
+}  /*  store_snmpTargetParmsEntry  */
 
 
 /* MIB table access routines */

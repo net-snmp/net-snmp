@@ -27,6 +27,7 @@
 #include "util_funcs.h"
 #include "keytools.h"
 #include "tools.h"
+#include "callback.h"
 
 #include "usmUser.h"
 #include "transform_oids.h"
@@ -36,19 +37,25 @@
 
 static unsigned int usmUserSpinLock=0;
 
+int
+store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+  /* save the user base */
+  usm_save_users("usmUser", "snmpd");
+  return SNMPERR_SUCCESS;
+}
+
 void
 init_usmUser(void)
 {
   snmpd_register_config_handler("usmUser",
                                 usm_parse_config_usmUser, NULL,
                                 "internal use only");
-}
 
-void
-shutdown_usmUser(void)
-{
-  /* save the user base */
-  usm_save_users("usmUser", "snmpd");
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         store_usmUser, NULL);
+  
 }
 
 /*******************************************************************-o-******
