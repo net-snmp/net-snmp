@@ -134,7 +134,7 @@ nsop_append(oid1, string)
         if (oid1->len + name_len > MAX_OID_LEN) {
             /* XXX: illegal */
         }
-        for(i = 0; i < name_len; i++) {
+        for(i = 0; i < (int)name_len; i++) {
             oid1->name[i+oid1->len] = name[i];
         }
         oid1->len += name_len;
@@ -151,7 +151,7 @@ nsop_append_oid(oid1, oid2)
         if (oid1->len + oid2->len > MAX_OID_LEN) {
             /* XXX: illegal */
         }
-        for(i = 0; i < oid2->len; i++) {
+        for(i = 0; i < (int)oid2->len; i++) {
             oid1->name[i+oid1->len] = oid2->name[i];
         }
         oid1->len += oid2->len;

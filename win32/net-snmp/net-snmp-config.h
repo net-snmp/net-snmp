@@ -846,11 +846,13 @@ extern "C" {
 #endif
 #endif
 
+#if notused /* dont step on other defns of bcopy,bzero, and bcmp */
 #ifndef HAVE_BCOPY
 #ifdef HAVE_MEMCPY
 # define bcopy(s, d, n) memcpy ((d), (s), (n))
 # define bzero(p,n) memset((p),(0),(n))
 # define bcmp memcmp
+#endif
 #endif
 #endif
 
@@ -936,7 +938,7 @@ extern "C" {
 
 #define HAVE_GETPID 1
 
-int strcasecmp(const char *s1, const char *s2);
+/* int strcasecmp(const char *s1, const char *s2); */
 #define vsnprintf _vsnprintf
 #define snprintf  _snprintf
 
