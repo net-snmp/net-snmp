@@ -371,7 +371,10 @@ agentx_master_handler(
         }
         
         /* mark the request as delayed */
-        request->delegated = 1;
+        if (pdu->command != AGENTX_MSG_CLEANUPSET)
+            request->delegated = 1;
+        else
+            request->delegated = 0;
 
         /* next... */
         request = request->next;
