@@ -729,9 +729,8 @@ init_snmp_enums(void)
 {
     se_add_pair_to_slist("asntypes", strdup("integer"), ASN_INTEGER);
     se_add_pair_to_slist("asntypes", strdup("counter"), ASN_COUNTER);
-    se_add_pair_to_slist("asntypes", strdup("gauge"), ASN_GAUGE);
+    se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_GAUGE);
     se_add_pair_to_slist("asntypes", strdup("timeticks"), ASN_TIMETICKS);
-    se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_UINTEGER);
     se_add_pair_to_slist("asntypes", strdup("counter64"), ASN_COUNTER64);
     se_add_pair_to_slist("asntypes", strdup("octet_str"), ASN_OCTET_STR);
     se_add_pair_to_slist("asntypes", strdup("ipaddress"), ASN_IPADDRESS);
@@ -739,7 +738,6 @@ init_snmp_enums(void)
     se_add_pair_to_slist("asntypes", strdup("nsap"), ASN_NSAP);
     se_add_pair_to_slist("asntypes", strdup("object_id"), ASN_OBJECT_ID);
     se_add_pair_to_slist("asntypes", strdup("null"), ASN_NULL);
-    se_add_pair_to_slist("asntypes", strdup("bit_str"), ASN_BIT_STR);
 #ifdef OPAQUE_SPECIAL_TYPES
     se_add_pair_to_slist("asntypes", strdup("opaque_counter64"),
                          ASN_OPAQUE_COUNTER64);
