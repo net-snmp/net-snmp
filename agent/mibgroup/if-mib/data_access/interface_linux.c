@@ -31,6 +31,12 @@ netsnmp_arch_interface_init(void)
      */
 }
 
+oid
+netsnmp_arch_interface_index_find(const char *name)
+{
+    return netsnmp_access_interface_ioctl_ifindex_get(name);
+}
+
 
 /*
  *
@@ -76,6 +82,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     static char     scan_expected;
     int             scan_count, fd;
     netsnmp_interface_entry *entry = NULL;
+    struct ifreq ifrq;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
                 load_flags));
@@ -157,11 +164,12 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         DEBUGMSGTL(("9:access:ifcontainer", "processing '%s'\n", ifstart));
 
         /*
+         * get index via ioctl.
          * If we've met this interface before, use the same index.
          * Otherwise find an unused index value and use that.
          */
         *stats++ = 0; /* null terminate name */
-        entry = netsnmp_access_interface_entry_create(ifstart);
+        entry = netsnmp_access_interface_entry_create(ifstart, 0);
         if(NULL == entry) {
             netsnmp_access_interface_container_free(container,
                                                     NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);

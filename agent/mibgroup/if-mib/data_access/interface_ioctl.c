@@ -33,18 +33,18 @@
  * @retval -2 : couldn't create socket
  * @retval -3 : ioctl call failed
  */
-int
-_ioctl_get(int fd, int which, struct ifreq *ifrq,
-           netsnmp_interface_entry *ifentry)
+static int
+_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
 {
     int ourfd = -1, rc = 0;
 
-    DEBUGMSGTL(("verbose:access:interface:ioctl", "ioctl %d\n", which));
+    DEBUGMSGTL(("verbose:access:interface:ioctl",
+                "ioctl %d for %s\n", which, name));
 
     /*
      * sanity checks
      */
-    if((NULL == ifentry) || (NULL == ifentry->name)) {
+    if(NULL == name) {
         snmp_log(LOG_ERR, "invalid ifentry\n");
         return -1;
     }
@@ -60,7 +60,7 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq,
         }
     }
 
-    strncpy(ifrq->ifr_name, ifentry->name, sizeof(ifrq->ifr_name));
+    strncpy(ifrq->ifr_name, name, sizeof(ifrq->ifr_name));
     ifrq->ifr_name[ sizeof(ifrq->ifr_name)-1 ] = 0;
     rc = ioctl(fd, which, ifrq);
     if (rc < 0) {
@@ -117,7 +117,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
          */
         memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
         ifentry->paddr_len = IFHWADDRLEN;
-        rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry);
+        rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry->name);
         if (rc < 0) {
             memset(ifentry->paddr, (0), IFHWADDRLEN);
             rc = -3; /* msg already logged */
@@ -228,7 +228,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
 
     DEBUGMSGTL(("access:interface:ioctl", "flags_get\n"));
 
-    rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry);
+    rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
         return rc; /* msg already logged */
@@ -348,7 +348,7 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 
     DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
 
-    rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry);
+    rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->mtu = 0;
         return rc; /* msg already logged */
@@ -358,5 +358,31 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
     }
 
     return rc;
+}
+#endif /* SIOCGIFMTU */
+
+#ifdef SIOCGIFINDEX
+/**
+ * interface entry ifIndex ioctl wrapper
+ *
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param ifentry : ifentry to update
+ *
+ * @retval  0 : not found
+ * @retval !0 : ifIndex
+ */
+oid
+netsnmp_access_interface_ioctl_ifindex_get(const char *name)
+{
+    struct ifreq    ifrq;
+    int rc = 0;
+
+    DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
+
+    rc = _ioctl_get(-1, SIOCGIFINDEX, &ifrq, name);
+    if (rc < 0)
+        return 0;
+
+    return ifrq.ifr_ifindex;
 }
 #endif /* SIOCGIFMTU */

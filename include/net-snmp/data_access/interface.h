@@ -177,7 +177,7 @@ void netsnmp_access_interface_container_free(netsnmp_container *container,
  * create/free an ifentry
  */
 netsnmp_interface_entry *
-netsnmp_access_interface_entry_create(const char *name);
+netsnmp_access_interface_entry_create(const char *name, oid if_index);
 
 void netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry);
 
@@ -213,6 +213,7 @@ void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 
 netsnmp_conf_if_list *
 netsnmp_access_interface_entry_overrides_get(const char * name);
+
 
 /**---------------------------------------------------------------------*/
 

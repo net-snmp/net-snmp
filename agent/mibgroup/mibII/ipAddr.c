@@ -114,6 +114,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "ip.h"
 #include "interfaces.h"
@@ -569,12 +570,7 @@ Address_Scan_Next(Index, Retifnet)
         if (Index)
 	{
 	    ifr->ifr_addr = ifnet_store.if_addr;
-	    if (ioctl(fd, SIOCGIFINDEX, ifr) < 0)
-	    {
-	        *Index = -1;
-	    }
-	    else
-        	*Index = ifr->ifr_ifindex;
+            *Index = netsnmp_access_interface_index_find(ifr->ifr_name);
 	}
 	
 	ifr++;
