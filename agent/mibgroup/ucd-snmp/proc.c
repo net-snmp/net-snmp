@@ -414,7 +414,7 @@ sh_count_procs(char *procname)
     int fd,len,plen=strlen(procname),total = 0;
 
     if ((dir = opendir("/proc")) == NULL) return -1;
-    while (ent = readdir(dir)) {
+    while (NULL != (ent = readdir(dir))) {
       if(!(ent->d_name[0] >= '0' && ent->d_name[0] <= '9')) continue;
       /* read /proc/XX/cmdline */
       sprintf(cmdline,"/proc/%s/cmdline",ent->d_name);

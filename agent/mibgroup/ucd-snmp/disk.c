@@ -261,7 +261,7 @@ disk_parse_config(const char *token, char *cptr)
 #if HAVE_SETMNTENT
         mntfp = setmntent(ETC_MNTTAB, "r");
         disks[numdisks].device[0] = 0;
-        while (mntent && (mntent = getmntent(mntfp)))
+        while (NULL != (mntent = getmntent(mntfp)))
             if (strcmp(disks[numdisks].path, mntent->mnt_dir) == 0) {
                 copy_nword(mntent->mnt_fsname, disks[numdisks].device,
                            sizeof(disks[numdisks].device));
