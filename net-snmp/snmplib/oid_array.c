@@ -401,7 +401,7 @@ netsnmp_Get_oid_data_subset(oid_array a, void *key, int *len)
       ++end;
     }
 
-    *len = end - start;
+    *len = end - start + 1;
     subset = malloc( (*len) * t->data_size );
     memcpy( subset, TABLE_INDEX(t, start), t->data_size * (*len));
 
