@@ -823,7 +823,7 @@ int main(int argc, char *argv[])
 		for ( fd = (STDERR_FILENO + 1); fd < fdnum; fd++ )
 			close(fd);
 		/* move to safe, known dir */
-		(void) chdir("/");
+		(void) chdir(PERSISTENT_DIRECTORY);
 		break;
 
 	default:
