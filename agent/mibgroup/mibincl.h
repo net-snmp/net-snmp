@@ -21,6 +21,9 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+/* XX already included by sources including this file.
+   XX commented here because on some systems (older AIX)
+   XX the headers are not #ifndef protected.
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
@@ -31,6 +34,7 @@
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
+ XX */
 
 #include "../../snmplib/asn1.h"
 #include "../../snmplib/snmp_api.h"
