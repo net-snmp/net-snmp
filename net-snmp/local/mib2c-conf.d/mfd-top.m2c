@@ -100,7 +100,7 @@ typedef struct ${context}_rowreq_ctx_s {
 
     /** this must be first for container compare to work */
     netsnmp_index        oid_idx;
-    oid                  oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
+    oid                  oid_tmp[MAX_OID_LEN]; /* TODO: shrink this? */
     
     ${context}_mib_index        tbl_idx;
     
