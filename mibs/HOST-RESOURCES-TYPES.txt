@@ -5,7 +5,7 @@ IMPORTS
     hrMIBAdminInfo, hrStorage, hrDevice     FROM HOST-RESOURCES-MIB;
 
 hostResourcesTypesModule MODULE-IDENTITY
-    LAST-UPDATED "9910202200Z"    -- 20 October, 1999
+    LAST-UPDATED "200003060000Z"    -- 6 March, 2000
     ORGANIZATION "IETF Host Resources MIB Working Group"
     CONTACT-INFO
         "Steve Waldbusser
@@ -17,19 +17,20 @@ hostResourcesTypesModule MODULE-IDENTITY
         Fax:   650-318-1633
         Email: waldbusser@ins.com
 
-        In addition, the Host Resources MIB mailing list is dedicated to
-        discussion of this MIB. To join the mailing list, send a request
-        message to hostmib-request@andrew.cmu.edu. The mailing list
-        address is hostmib@andrew.cmu.edu."
+        In addition, the Host Resources MIB mailing list is dedicated
+        to discussion of this MIB. To join the mailing list, send a
+        request message to hostmib-request@andrew.cmu.edu. The mailing
+        list address is hostmib@andrew.cmu.edu."
     DESCRIPTION
         "This MIB module registers type definitions for
         storage types, device types, and file system types.
+
         After the initial revision, this module will be
         maintained by IANA."
-    REVISION "9910202200Z"    -- 20 October, 1999
+    REVISION "200003060000Z"    -- 6 March 2000
     DESCRIPTION
         "The original version of this module, published as RFC
-        XXXX."
+        2790."
     ::= { hrMIBAdminInfo 4 }
 
 -- Registrations for some storage types, for use with hrStorageType
