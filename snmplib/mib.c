@@ -2173,14 +2173,7 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
 		     (const u_char*)"No more variables left in this MIB View (It is past the end of the MIB tree)");
   } else {
-    u_char *tbuf = NULL;
-    size_t tbuf_len = 0, tout_len = 0;
-    int tbuf_overflow = 1;
-
-    subtree = _get_realloc_symbol(objid, objidlen, subtree,
-				  &tbuf, &tbuf_len, &tout_len, 0,
-				  &tbuf_overflow, NULL, NULL);
-
+    subtree = get_tree(objid, objidlen, subtree);
     if (subtree && subtree->printomat) {
       return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
 				   variable, subtree->enums,
