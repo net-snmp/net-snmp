@@ -1858,7 +1858,10 @@ snmpv3_parse(
     return SNMPERR_ASN_PARSE_ERR;
   }
   msg_flags = *tmp_buf;
-  pdu->reportableFlag = msg_flags & SNMP_MSG_FLAG_RPRT_BIT;
+  if (msg_flags & SNMP_MSG_FLAG_RPRT_BIT)
+    pdu->flags |= SNMP_MSG_FLAG_RPRT_BIT;
+  else
+    pdu->flags &= (~SNMP_MSG_FLAG_RPRT_BIT);
 
   /* msgSecurityModel */
   data = asn_parse_int(data, length, &type, &msg_sec_model,
@@ -2194,7 +2197,8 @@ snmp_parse(struct snmp_session *session,
 	case USM_ERR_NOT_IN_TIME_WINDOW:
 	case USM_ERR_DECRYPTION_ERROR:
           if (SNMP_CMD_CONFIRMED(pdu->command) ||
-	      (pdu->command == 0 && pdu->reportableFlag)) {
+	      (pdu->command == 0 && 
+              (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT ))) {
 	    snmpv3_make_report(pdu, result);
 	    snmp_send(session, pdu);
 	  }
