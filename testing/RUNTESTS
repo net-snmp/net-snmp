@@ -158,26 +158,29 @@ export SNMP_PATH
 export SNMP_UPDIR
 export SNMP_VERBOSE
 
+WHICH=which
+$WHICH $0 > /dev/null 2>&1
+if [ $? -ne 0 ] ; then
+    WHICH=type
+fi
+
+for needed in snmpd snmpget snmpgetnext; do
+    $WHICH $needed
+    if [ $? -ne 0  ] ; then 
+        echo "No $needed found. Exiting"
+        exit 1
+    fi
+done
+
 #
 # Distinguished expectations.
 #
 if [ $SNMP_VERBOSE -gt 0 ]; then
-  WHICH=which
-  $WHICH $0 > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    WHICH=type
-  fi
     echo ${SNMP_UPDIR}/testing
     echo path is $PATH
     echo top of build is $SNMP_UPDIR
     echo source testing is $SNMP_BASEDIR
-    $WHICH snmpget
-    $WHICH snmpgetnext
     $WHICH snmpusm
-    $WHICH snmpd
-    if [ $? -ne 0  ] ; then 
-        exit 0
-    fi
 fi
 
 #
