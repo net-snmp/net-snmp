@@ -8,7 +8,7 @@ This is what I had to do to get it to work for me. Your mileage may vary.
         - run 'gcc_select' to see what version you are using, and
           'gcc_select -l' to list available versions. I've had success with
           3.3, selected by running (as root) 'gcc_select 3.3'. (Note: this was
-          on Pather, 10.3.2)
+          on Panther, 10.3.2)
 
      - net-snmp as installed by Apple contains bad flags in net-snmp-config.
 
