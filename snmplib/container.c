@@ -286,21 +286,21 @@ int
 netsnmp_compare_netsnmp_index(const void *lhs, const void *rhs)
 {
     int rc;
-#ifndef NDEBUG
+    netsnmp_assert((NULL != lhs) && (NULL != rhs));
     DEBUGIF("compare:index") {
         DEBUGMSGT(("compare:index", "compare "));
-        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
+        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
                      ((const netsnmp_index *) lhs)->len));
         DEBUGMSG(("compare:index", " to "));
-        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
+        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
                      ((const netsnmp_index *) rhs)->len));
         DEBUGMSG(("compare:index", "\n"));
     }
-#endif
     rc = snmp_oid_compare(((const netsnmp_index *) lhs)->oids,
                           ((const netsnmp_index *) lhs)->len,
                           ((const netsnmp_index *) rhs)->oids,
                           ((const netsnmp_index *) rhs)->len);
+    DEBUGMSGT(("compare:index", "result was %d\n", rc));
     return rc;
 }
 
@@ -308,22 +308,22 @@ int
 netsnmp_ncompare_netsnmp_index(const void *lhs, const void *rhs)
 {
     int rc;
-#ifndef NDEBUG
+    netsnmp_assert((NULL != lhs) && (NULL != rhs));
     DEBUGIF("compare:index") {
         DEBUGMSGT(("compare:index", "compare "));
-        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
+        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
                      ((const netsnmp_index *) lhs)->len));
         DEBUGMSG(("compare:index", " to "));
-        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
+        DEBUGMSGSUBOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
                      ((const netsnmp_index *) rhs)->len));
         DEBUGMSG(("compare:index", "\n"));
     }
-#endif
     rc = snmp_oid_ncompare(((const netsnmp_index *) lhs)->oids,
                            ((const netsnmp_index *) lhs)->len,
                            ((const netsnmp_index *) rhs)->oids,
                            ((const netsnmp_index *) rhs)->len,
                            ((const netsnmp_index *) rhs)->len);
+    DEBUGMSGT(("compare:index", "result was %d\n", rc));
     return rc;
 }
 
