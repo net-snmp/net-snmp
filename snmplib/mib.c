@@ -1042,6 +1042,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
     ds_register_premib(ASN_BOOLEAN, "snmp","printNumericOids",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
+    ds_register_premib(ASN_BOOLEAN, "snmp","dontBreakdownOids",
+                       DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
@@ -1676,7 +1678,9 @@ _get_symbol(oid *objid,
     /* subtree not found */
 
     while (in_dices &&
-           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
+           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS) &&
+           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS) &&
+           !quick_print) {
 	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
