@@ -54,11 +54,14 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
-    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET))
-        agentx_sockets =
-            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
-    else
+
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+			      NETSNMP_DS_AGENT_X_SOCKET)) {
+	agentx_sockets = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+					       NETSNMP_DS_AGENT_X_SOCKET);
+    } else {
         agentx_sockets = strdup(AGENTX_SOCKET);
+    }
 
     cp1 = agentx_sockets;
     while (1) {
@@ -68,11 +71,13 @@ real_init_master(void)
          *
          */
         cp2 = strchr(cp1, ',');
-        if (cp2)
+        if (cp2 != NULL) {
             *cp2 = '\0';
-        sess.peername = strdup(cp1);
-        if (cp2)
+	}
+        sess.peername = cp1;
+        if (cp2 != NULL) {
             cp1 = cp2+1;
+	}
     
         if (sess.peername[0] == '/') {
             /*
