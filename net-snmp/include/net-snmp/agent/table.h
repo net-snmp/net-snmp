@@ -9,7 +9,7 @@ extern "C" {
 /* The table helper is designed to simplify the task of writing a
  * table handler for the net-snmp agent.  You should create a normal
  * handler and register it using the register_table() function instead
- * of the register_handler() function.
+ * of the netsnmp_register_handler() function.
  */
 
 /*
@@ -54,35 +54,35 @@ typedef struct _table_registration_info {
 
 } table_registration_info;
 
-typedef struct _table_request_info {
+typedef struct _table_netsnmp_request_info {
    unsigned int colnum;            /* 0 if OID not long enough */
    unsigned int number_indexes;    /* 0 if failure to parse any */
    struct variable_list *indexes; /* contents freed by helper upon exit */
   oid index_oid[MAX_OID_LEN];
   size_t index_oid_len;
   table_registration_info *reg_info;
-} table_request_info;
+} table_netsnmp_request_info;
 
-mib_handler *get_table_handler(table_registration_info *tabreq);
-int register_table(handler_registration *reginfo,
+netsnmp_mib_handler *get_table_handler(table_registration_info *tabreq);
+int register_table(netsnmp_handler_registration *reginfo,
                    table_registration_info *tabreq);
-int table_build_oid(handler_registration *reginfo,
-                    request_info *reqinfo,
-                    table_request_info *table_info);
-int table_build_oid_from_index(handler_registration *reginfo,
-                               request_info *reqinfo,
-                               table_request_info *table_info);
-int table_build_result(handler_registration *reginfo,
-                       request_info *reqinfo,
-                       table_request_info *table_info, u_char type,
+int table_build_oid(netsnmp_handler_registration *reginfo,
+                    netsnmp_request_info *reqinfo,
+                    table_netsnmp_request_info *table_info);
+int table_build_oid_from_index(netsnmp_handler_registration *reginfo,
+                               netsnmp_request_info *reqinfo,
+                               table_netsnmp_request_info *table_info);
+int table_build_result(netsnmp_handler_registration *reginfo,
+                       netsnmp_request_info *reqinfo,
+                       table_netsnmp_request_info *table_info, u_char type,
                        u_char *result, size_t result_len);
-int update_variable_list_from_index( table_request_info * );
-int update_indexes_from_variable_list( table_request_info *tri );
-table_registration_info *find_table_registration_info(handler_registration *reginfo);
+int update_variable_list_from_index( table_netsnmp_request_info * );
+int update_indexes_from_variable_list( table_netsnmp_request_info *tri );
+table_registration_info *find_table_registration_info(netsnmp_handler_registration *reginfo);
     
 unsigned int closest_column(unsigned int current, column_info *valid_columns);
 
-NodeHandler table_helper_handler;
+Netsnmp_Node_Handler table_helper_handler;
 
 #define table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
@@ -93,19 +93,19 @@ void table_helper_add_indexes(va_alist);
 #endif
 
 int
-check_getnext_reply(request_info *request, oid *prefix,
+check_getnext_reply(netsnmp_request_info *request, oid *prefix,
                     size_t prefix_len,
                     struct variable_list *newvar,
                     struct variable_list **outvar);
 
-table_request_info *extract_table_info(request_info *);
+table_netsnmp_request_info *extract_table_info(netsnmp_request_info *);
 
 
-#define ROWSTATUS_DECLARE long *rs = NULL; request_info *rsi = NULL
+#define ROWSTATUS_DECLARE long *rs = NULL; netsnmp_request_info *rsi = NULL
 #define ROWSTATUS_VALIDATE( v, r ) do { \
     if( ( *(v)->val.integer > SNMP_ROW_DESTROY ) || \
         ( *(v)->val.integer < 0) ) { \
-        set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
+        netsnmp_set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
         return; \
     } \
     rs = (v)->val.integer; \
@@ -114,23 +114,23 @@ table_request_info *extract_table_info(request_info *);
 #define ROWSTATUS_CHECK( orv, osv, ri ) do { \
     if( (orv) == SNMP_ROW_NONEXISTENT ) { \
         if( ! rs ) { \
-            set_mode_request_error(MODE_SET_BEGIN, ri, SNMP_ERR_NOSUCHNAME );\
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, ri, SNMP_ERR_NOSUCHNAME );\
         } \
     } \
     else if( rs ) { \
         int rc = check_rowstatus_transition( orv, *rs, \
                                              st ? *st : (osv) ); \
         if(rc != SNMP_ERR_NOERROR) \
-            set_mode_request_error(MODE_SET_BEGIN, rsi, rc ); \
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, rsi, rc ); \
     } \
 } while(0)
 
 
-#define STORAGETYPE_DECLARE long *st = NULL; request_info *sti = NULL
+#define STORAGETYPE_DECLARE long *st = NULL; netsnmp_request_info *sti = NULL
 #define STORAGETYPE_VALIDATE( v, r ) do { \
     if ((*(v)->val.integer > SNMP_STORAGE_READONLY) || \
         (*(v)->val.integer < 0) ) { \
-        set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
+        netsnmp_set_mode_request_error(MODE_SET_BEGIN, r, SNMP_ERR_BADVALUE ); \
         return; \
     } \
     st = (v)->val.integer; sti = r; \
@@ -139,7 +139,7 @@ table_request_info *extract_table_info(request_info *);
     if( st ) { \
         int rc = check_storage_transition( osv, *st ); \
         if(rc != SNMP_ERR_NOERROR) \
-            set_mode_request_error(MODE_SET_BEGIN, sti, rc ); \
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, sti, rc ); \
     } \
 } while(0)
 

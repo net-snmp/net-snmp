@@ -31,9 +31,9 @@ int register_old_api(const char *moduleName,
                      const char *context,
                      int timeout,
                      int flags);
-NodeHandler old_api_helper;
+Netsnmp_Node_Handler old_api_helper;
 
 /* really shouldn't be used */
-struct agent_snmp_session  *get_current_agent_session(void);
+netsnmp_agent_session  *get_current_agent_session(void);
 
 #endif /* OLD_API_H */

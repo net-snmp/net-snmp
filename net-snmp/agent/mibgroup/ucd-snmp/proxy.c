@@ -60,7 +60,7 @@ proxy_parse_config(const char *token, char *line) {
     char args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
     int argn, arg;
     char *cp;
-    handler_registration *reg;
+    netsnmp_handler_registration *reg;
     
     context_string = NULL;
     
@@ -142,7 +142,7 @@ proxy_parse_config(const char *token, char *line) {
     /* replace current link with us */
     *listpp = newp;
 
-    reg = create_handler_registration("proxy",
+    reg = netsnmp_create_handler_registration("proxy",
                                       proxy_handler,
                                       newp->name,
                                       newp->name_len,
@@ -151,7 +151,7 @@ proxy_parse_config(const char *token, char *line) {
     if (context_string)
         reg->contextName = strdup(context_string);
     
-    register_handler(reg);
+    netsnmp_register_handler(reg);
 }
 
 void
@@ -180,16 +180,16 @@ init_proxy(void) {
 
 int
 proxy_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     struct snmp_pdu *pdu;
     struct simple_proxy *sp;
     oid *ourname;
     size_t ourlength;
-    request_info              *request = requests;
+    netsnmp_request_info              *request = requests;
     
     DEBUGMSGTL(("proxy", "proxy handler starting, mode = %d\n",
                 reqinfo->mode));
@@ -213,7 +213,7 @@ proxy_handler(
     sp = (struct simple_proxy *) handler->myvoid;
 
     if (!pdu || !sp) {
-        set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
         return SNMP_ERR_NOERROR;
     }
       
@@ -247,7 +247,7 @@ proxy_handler(
     /* send the request out */
     DEBUGMSGTL(("proxy","sending pdu\n"));
     snmp_async_send(sp->sess, pdu, proxy_got_response,
-                    create_delegated_cache(handler, reginfo, reqinfo, requests,
+                    netsnmp_create_delegated_cache(handler, reginfo, reqinfo, requests,
                                            (void *) sp));
     return SNMP_ERR_NOERROR;
 }
@@ -256,15 +256,15 @@ int
 proxy_got_response(int operation, struct snmp_session *sess, int reqid,
                    struct snmp_pdu *pdu, void *cb_data) 
 {
-    delegated_cache *cache = (delegated_cache *) cb_data;
-    request_info              *requests, *request;
+    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) cb_data;
+    netsnmp_request_info              *requests, *request;
     struct variable_list *vars, *var;
     
     struct simple_proxy *sp;
     oid myname[MAX_OID_LEN];
     size_t myname_len = MAX_OID_LEN;
 
-    cache = handler_check_cache(cache);
+    cache = netsnmp_handler_check_cache(cache);
     requests = cache->requests;
 
     
@@ -317,11 +317,11 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
                     myname_len = sp->name_len + var->name_length - sp->base_len;
                     if (myname_len > MAX_OID_LEN) {
                         snmp_log(LOG_WARNING,"proxy OID return length too long.\n");
-                        set_request_error(cache->reqinfo, requests,
+                        netsnmp_set_request_error(cache->reqinfo, requests,
                                           SNMP_ERR_GENERR);
                         if (pdu)
                             snmp_free_pdu(pdu);
-                        free_delegated_cache(cache);
+                        netsnmp_free_delegated_cache(cache);
                         return 1;
                     }
 
@@ -344,7 +344,7 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
                 snmp_free_pdu(pdu);
             snmp_log(LOG_ERR,
                      "response to proxy request illegal.  We're screwed.\n");
-            set_request_error(cache->reqinfo, requests, SNMP_ERR_GENERR);
+            netsnmp_set_request_error(cache->reqinfo, requests, SNMP_ERR_GENERR);
         }
 
         /* free the response */
@@ -354,6 +354,6 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
         DEBUGMSGTL(("proxy", "no response received: op = %d\n", operation));
     }
 
-    free_delegated_cache(cache);
+    netsnmp_free_delegated_cache(cache);
     return 1;
 }

@@ -1,5 +1,5 @@
 /* testhandler.h */
 
 void init_vacm_context(void);
-NodeHandler vacm_context_handler;
+Netsnmp_Node_Handler vacm_context_handler;
 

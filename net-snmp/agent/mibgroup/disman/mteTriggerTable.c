@@ -689,7 +689,7 @@ parse_mteTriggerTable(const char *token, char *line) {
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityModel, &tmpint);
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityLevel, &tmpint);
       line = read_config_read_data(ASN_OBJECT_ID, line, &tmpoid, &tmpint);
-      if (!snmp_tdomain_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
+      if (!netnetsnmp_tdomain_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
 				&StorageTmp->pdu_tDomainLen)) {
 	config_perror("unsupported transport domain for mteTriggerEntry");
 	return;
@@ -2026,7 +2026,7 @@ write_mteTriggerEntryStatus(int      action,
               StorageTmp->mteTriggerEntryStatus == RS_ACTIVE &&
               !StorageTmp->have_copied_auth_info) {
               
-              struct agent_snmp_session *asp = get_current_agent_session();
+              netsnmp_agent_session *asp = get_current_agent_session();
               struct snmp_pdu *pdu = NULL;
               
               if (!asp) {

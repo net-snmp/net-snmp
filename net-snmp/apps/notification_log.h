@@ -6,12 +6,12 @@
  * function declarations 
  */
 void init_notification_log(void);
-NodeHandler     nlmLogTable_handler;
-NodeHandler     nlmLogVariableTable_handler;
+Netsnmp_Node_Handler     nlmLogTable_handler;
+Netsnmp_Node_Handler     nlmLogVariableTable_handler;
 
 void
 log_notification(struct hostent *host, struct snmp_pdu *pdu,
-                 snmp_transport *transport);
+                 netsnmp_transport *transport);
 
 
 /*

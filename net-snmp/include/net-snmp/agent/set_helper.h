@@ -1,4 +1,4 @@
-typedef struct set_info_s {
+typedef struct netsnmp_set_info_s {
    int   action;
    void *stateRef;
 
@@ -8,5 +8,5 @@ typedef struct set_info_s {
 #define AUTO_FREE_STATEREF 0x01 /* calls free(stateRef) */
 #define AUTO_FREE_OLDDATA  0x02 /* calls free(*oldData) */
 #define AUTO_UNDO          0x04 /* ... */
-} set_info;
+} netsnmp_set_info;
 

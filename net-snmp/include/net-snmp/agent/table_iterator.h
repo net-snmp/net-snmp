@@ -36,13 +36,13 @@ typedef struct iterator_info_s {
      
 #define TABLE_ITERATOR_NAME "table_iterator"
 
-mib_handler *get_table_iterator_handler(iterator_info *iinfo);
-int register_table_iterator(handler_registration *reginfo,
+netsnmp_mib_handler *get_table_iterator_handler(iterator_info *iinfo);
+int register_table_iterator(netsnmp_handler_registration *reginfo,
                             iterator_info *iinfo);
 
-void *extract_iterator_context(request_info *);
+void *extract_iterator_context(netsnmp_request_info *);
 
-NodeHandler table_iterator_helper_handler;
+Netsnmp_Node_Handler table_iterator_helper_handler;
 
 #ifdef __cplusplus
 };

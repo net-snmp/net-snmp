@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
     struct variable_list *vars, *vp;
-    snmp_transport *transport = NULL;
+    netsnmp_transport *transport = NULL;
     int	ret;
     int	    status, count;
     char	input[128];

@@ -113,17 +113,17 @@ table_data_get_from_oid(table_data *table,
 }
 
 /** Creates a table_data handler and returns it */
-mib_handler *
+netsnmp_mib_handler *
 get_table_data_handler(table_data *table)
 {
-    mib_handler *ret = NULL;
+    netsnmp_mib_handler *ret = NULL;
   
     if (!table) {
         snmp_log(LOG_INFO, "get_table_data_handler(NULL) called\n");
         return NULL;
     }
   
-    ret = create_handler(TABLE_DATA_NAME, table_data_helper_handler);
+    ret = netsnmp_create_handler(TABLE_DATA_NAME, table_data_helper_handler);
     if (ret) {
         ret->myvoid = (void *) table;
     }
@@ -133,20 +133,20 @@ get_table_data_handler(table_data *table)
 /** registers a handler as a data table.
  *  If table_info != NULL, it registers it as a normal table too. */
 int
-register_table_data(handler_registration *reginfo,
+register_table_data(netsnmp_handler_registration *reginfo,
                     table_data *table,
                     table_registration_info *table_info) {
-    inject_handler(reginfo, get_table_data_handler(table));
+    netsnmp_inject_handler(reginfo, get_table_data_handler(table));
     return register_table(reginfo, table_info);
 }
 
 /** registers a handler as a read-only data table
  *  If table_info != NULL, it registers it as a normal table too. */
 int
-register_read_only_table_data(handler_registration *reginfo,
+register_read_only_table_data(netsnmp_handler_registration *reginfo,
                               table_data *table,
                               table_registration_info *table_info) {
-    inject_handler(reginfo, get_read_only_handler());
+    netsnmp_inject_handler(reginfo, get_read_only_handler());
     return register_table_data(reginfo, table, table_info);
 }
 
@@ -158,16 +158,16 @@ register_read_only_table_data(handler_registration *reginfo,
  */
 int
 table_data_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     table_data *table = (table_data *) handler->myvoid;
-    request_info *request;
+    netsnmp_request_info *request;
     int valid_request = 0;
     table_row *row;
-    table_request_info *table_info;
+    table_netsnmp_request_info *table_info;
     table_registration_info *table_reg_info =
         find_table_registration_info(reginfo);
     int result, regresult;
@@ -247,7 +247,7 @@ table_data_helper_handler(
                 }
                 if (row) {
                     valid_request = 1;
-                    request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
                 } else { /* no decent result found.  Give up. It's beyond us. */
                         request->processed = 1;
                 }
@@ -260,7 +260,7 @@ table_data_helper_handler(
                 if (request->requestvb->name_length <
                     (reginfo->rootoid_len + 3)) {  /* table.entry.column... */
                     /* request too short */
-                    set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+                    netsnmp_set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
                     break;
                 } else if (NULL ==
                            (row =
@@ -271,11 +271,11 @@ table_data_helper_handler(
                                                     reginfo->rootoid_len -
                                                     2))) {
                     /* no such row */
-                    set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+                    netsnmp_set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
                     break;
                 } else {
                     valid_request = 1;
-                    request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -289,7 +289,7 @@ table_data_helper_handler(
                                              request->requestvb->name_length -
                                              reginfo->rootoid_len -
                                              2))) {
-                    request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -304,7 +304,7 @@ table_data_helper_handler(
     }
 
     if (valid_request)
-        return call_next_handler(handler, reginfo, reqinfo, requests);
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     else
         return SNMP_ERR_NOERROR;
 }
@@ -328,23 +328,23 @@ create_table_data_row(void)
 }
 
 /** extracts the row being accessed passed from the table_data helper */
-table_row *extract_table_row(request_info *request) 
+table_row *extract_table_row(netsnmp_request_info *request) 
 {
-    return (table_row *) request_get_list_data(request, TABLE_DATA_NAME);
+    return (table_row *) netsnmp_request_get_list_data(request, TABLE_DATA_NAME);
 }
 
 /** extracts the data from the row being accessed passed from the
  * table_data helper */
-void *extract_table_row_data(request_info *request) 
+void *extract_table_row_data(netsnmp_request_info *request) 
 {
     return (extract_table_row(request))->data;
 }
 
 /** builds a result given a row, a varbind to set and the data */
 int
-table_data_build_result(handler_registration *reginfo,
-                        agent_request_info   *reqinfo,
-                        request_info *request,
+table_data_build_result(netsnmp_handler_registration *reginfo,
+                        netsnmp_agent_request_info   *reqinfo,
+                        netsnmp_request_info *request,
                         table_row *row,
                         int column,
                         u_char type,

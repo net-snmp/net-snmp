@@ -15,14 +15,14 @@
 
 extern const oid ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
 
-snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
+netsnmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
 						 int local);
-int		snmp_unix_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_unix_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength);
-int		snmp_unix_send	(snmp_transport *t, void *buf, int size,
+int		snmp_unix_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength);
-int		snmp_unix_close	(snmp_transport *t);
-int		snmp_unix_accept	(snmp_transport *t);
+int		snmp_unix_close	(netsnmp_transport *t);
+int		snmp_unix_accept	(netsnmp_transport *t);
 
 /*  "Constructor" for transport domain object.  */
 

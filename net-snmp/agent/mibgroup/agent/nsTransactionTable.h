@@ -9,7 +9,7 @@
  */
 void            init_nsTransactionTable(void);
 void            initialize_table_nsTransactionTable(void);
-NodeHandler     nsTransactionTable_handler;
+Netsnmp_Node_Handler     nsTransactionTable_handler;
 FirstDataPoint  nsTransactionTable_get_first_data_point;
 NextDataPoint   nsTransactionTable_get_next_data_point;
 

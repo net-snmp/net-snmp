@@ -38,17 +38,17 @@ create_table_data_set(const char *table_name)
 }
 
 /** Given a table_data_set definition, create a handler for it */
-mib_handler *
+netsnmp_mib_handler *
 get_table_data_set_handler(table_data_set *data_set)
 {
-    mib_handler *ret = NULL;
+    netsnmp_mib_handler *ret = NULL;
 
     if (!data_set) {
         snmp_log(LOG_INFO, "get_table_data_set_handler(NULL) called\n");
         return NULL;
     }
     
-    ret = create_handler(TABLE_DATA_SET_NAME, table_data_set_helper_handler);
+    ret = netsnmp_create_handler(TABLE_DATA_SET_NAME, table_data_set_helper_handler);
     if (ret) {
         ret->myvoid = (void *) data_set;
     }
@@ -57,12 +57,12 @@ get_table_data_set_handler(table_data_set *data_set)
 
 
 /** register a given data_set at a given oid (specified in the
-    handler_registration pointer).  The
+    netsnmp_handler_registration pointer).  The
     reginfo->handler->access_method *may* be null if the call doesn't
     ever want to be called for SNMP operations.
 */
 int
-register_table_data_set(handler_registration *reginfo, table_data_set *data_set,
+register_table_data_set(netsnmp_handler_registration *reginfo, table_data_set *data_set,
                         table_registration_info *table_info)
 {
     if (NULL == table_info) {
@@ -92,7 +92,7 @@ register_table_data_set(handler_registration *reginfo, table_data_set *data_set,
             table_info->max_column = maxcol;
     }
 
-    inject_handler(reginfo, get_table_data_set_handler(data_set));
+    netsnmp_inject_handler(reginfo, get_table_data_set_handler(data_set));
     return register_table_data(reginfo, data_set->table, table_info);
 }
 
@@ -111,10 +111,10 @@ table_data_set_find_column(table_data_set_storage *start, unsigned int column)
  * extracts a table_data_set pointer from a given request
  */
 inline table_data_set *
-extract_table_data_set(request_info *request)
+extract_table_data_set(netsnmp_request_info *request)
 {
     return (table_data_set *)
-        request_get_list_data(request, TABLE_DATA_SET_NAME);
+        netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
 }
 
 /**
@@ -220,16 +220,16 @@ table_set_add_default_row(table_data_set *table_set, unsigned int column,
 
 int
 table_data_set_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     table_data_set_storage *data = NULL;
     table_row *row;
-    table_request_info *table_info;
+    table_netsnmp_request_info *table_info;
     data_set_cache *cache;
-    request_info *request;
+    netsnmp_request_info *request;
 
     DEBUGMSGTL(("table_data_set", "handler starting"));
     for(request = requests; request; request = request->next) {
@@ -246,7 +246,7 @@ table_data_set_helper_handler(
             if (MODE_IS_SET(reqinfo->mode)) {
                 /* ack */
                 /* XXXWWW creation */
-                set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_NOSUCHNAME);
             }
             continue;
         }
@@ -303,10 +303,10 @@ table_data_set_helper_handler(
                 if (data) {
                     /* modify existing */
                     if (!data->writable) {
-                        set_request_error(reqinfo, request,
+                        netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_NOTWRITABLE);
                     } else if (request->requestvb->type != data->type) {
-                        set_request_error(reqinfo, request,
+                        netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_WRONGTYPE);
                     }
                 } else {
@@ -319,12 +319,12 @@ table_data_set_helper_handler(
                     /* cache old data for later undo */
                     cache = SNMP_MALLOC_TYPEDEF(data_set_cache);
                     if (!cache) {
-                        set_request_error(reqinfo, request,
+                        netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_RESOURCEUNAVAILABLE);
                     } else {
                         cache->data = data->data.voidp;
                         cache->data_len = data->data_len;
-                        request_add_list_data(request, create_data_list(TABLE_DATA_SET_NAME, cache, free));
+                        netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_SET_NAME, cache, free));
                     }
                 } else {
                     /* XXXWWW */
@@ -345,7 +345,7 @@ table_data_set_helper_handler(
                 SNMP_FREE(data->data.voidp);
                 
                 cache = (data_set_cache *)
-                    request_get_list_data(request, TABLE_DATA_SET_NAME);
+                    netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
                 data->data.voidp = cache->data;
                 data->data_len = cache->data_len;
                 /* the cache itself is automatically freed by the
@@ -354,7 +354,7 @@ table_data_set_helper_handler(
 
             case MODE_SET_COMMIT:
                 cache = (data_set_cache *)
-                    request_get_list_data(request, TABLE_DATA_SET_NAME);
+                    netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
                 SNMP_FREE(cache->data);
                 break;
 
@@ -365,7 +365,7 @@ table_data_set_helper_handler(
     }
 
     if (handler->next && handler->next->access_method)
-        call_next_handler(handler, reginfo, reqinfo, requests);
+        netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     return SNMP_ERR_NOERROR;
 }
     
@@ -455,7 +455,7 @@ config_parse_table_set(const char *token, char *line)
 
     /* register the table */
     register_table_data_set(
-        create_handler_registration(line, NULL, table_name, table_name_length,
+        netsnmp_create_handler_registration(line, NULL, table_name, table_name_length,
                                     HANDLER_CAN_RWRITE),
         table_set, NULL);
 

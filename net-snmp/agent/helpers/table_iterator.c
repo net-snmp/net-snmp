@@ -33,11 +33,11 @@
 #undef NOT_SERIALIZED
 #define TABLE_ITERATOR_LAST_CONTEXT "ti_last_c"
 
-/** returns a mib_handler object for the table_iterator helper */
-mib_handler *
+/** returns a netsnmp_mib_handler object for the table_iterator helper */
+netsnmp_mib_handler *
 get_table_iterator_handler(iterator_info *iinfo) {
-    mib_handler *me=
-        create_handler(TABLE_ITERATOR_NAME, table_iterator_helper_handler);
+    netsnmp_mib_handler *me=
+        netsnmp_create_handler(TABLE_ITERATOR_NAME, table_iterator_helper_handler);
 
     if (!me || !iinfo)
         return NULL;
@@ -49,29 +49,29 @@ get_table_iterator_handler(iterator_info *iinfo) {
     
 /** registers a table after attaching it to a table_iterator helper */
 int
-register_table_iterator(handler_registration *reginfo,
+register_table_iterator(netsnmp_handler_registration *reginfo,
                         iterator_info *iinfo) {
-    inject_handler(reginfo, get_table_iterator_handler(iinfo));
+    netsnmp_inject_handler(reginfo, get_table_iterator_handler(iinfo));
 #ifndef NOT_SERIALIZED
-    inject_handler(reginfo, get_serialize_handler());
+    netsnmp_inject_handler(reginfo, get_serialize_handler());
 #endif
     return register_table(reginfo, iinfo->table_reginfo);
 }
 
 /** extracts the table_iterator specific data from a request */
 inline void *
-extract_iterator_context(request_info *request) 
+extract_iterator_context(netsnmp_request_info *request) 
 {
-    return request_get_list_data(request, TABLE_ITERATOR_NAME);
+    return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
 /** implements the table_iterator helper */
 int
 table_iterator_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
   
     table_registration_info   *tbl_info;
     oid coloid[MAX_OID_LEN];
@@ -107,7 +107,7 @@ table_iterator_helper_handler(
         struct variable_list *results = NULL;
         struct variable_list *index_search = NULL; /* WWW: move up? */
         struct variable_list *free_this_index_search = NULL;
-        table_request_info *table_info =
+        table_netsnmp_request_info *table_info =
             extract_table_info(requests);
         void *callback_loop_context = NULL;
         void *callback_data_context = NULL;
@@ -310,13 +310,13 @@ table_iterator_helper_handler(
             /* let set requsets use previously constructed data */
             snmp_free_var(results);
             if (callback_data_keep)
-                request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
-            request_add_list_data(requests, create_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
+                netsnmp_request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
+            netsnmp_request_add_list_data(requests, create_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
         }
         
         DEBUGMSGTL(("table_iterator", "doing mode: %s\n",
                     se_find_label_in_slist("agent_mode", oldmode)));
-        ret = call_next_handler(handler, reginfo, reqinfo, requests);
+        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         if (oldmode == MODE_GETNEXT ||
             oldmode == MODE_GETBULK) { /* XXX */
             if (requests->requestvb->type == ASN_NULL) {
@@ -328,9 +328,9 @@ table_iterator_helper_handler(
         }
 
         callback_data_context =
-            request_get_list_data(requests, TABLE_ITERATOR_NAME);
+            netsnmp_request_get_list_data(requests, TABLE_ITERATOR_NAME);
         callback_loop_context =
-            request_get_list_data(requests, TABLE_ITERATOR_LAST_CONTEXT);
+            netsnmp_request_get_list_data(requests, TABLE_ITERATOR_LAST_CONTEXT);
 
         if (reqinfo->mode == MODE_GET ||
             reqinfo->mode == MODE_GETNEXT ||
