@@ -149,7 +149,7 @@ nsb-build()
    nsb_rc=$?
    if [ $nsb_rc -eq 0 ]; then
       nsb-prompt "press enter to view errors"
-      $NSB_VIEW nsb-out-nerrs.$DATE
+      $NSB_VIEW nsb-out-errs.$DATE
    else
       nsb-prompt "No errors found, press enter to install"
       ## full build with install. usr subdir will be available to package
