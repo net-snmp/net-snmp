@@ -85,9 +85,9 @@ dnl
 
 AC_CACHE_CHECK(for location of sytem kernel,ac_cv_KERNEL_LOC,
 [ac_cv_KERNEL_LOC="unknown"
-for i in /vmunix /hp-ux /stand/vmunix /kernel/unix /dev/ksyms /kernel/genunix /netbsd /unix /kernel /bsd
+for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd
   do
-  if test -f $i; then
+  if test -f $i -o -c $i; then
     ac_cv_KERNEL_LOC="$i"
     break;
   fi
