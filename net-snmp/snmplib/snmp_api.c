@@ -981,6 +981,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	}
 	if (slp->session->securityEngineIDLen == 0) {
 	  DEBUGMSGTL(("snmp_api","unable to determine remote engine ID\n"));
+	  snmp_sess_close(slp);
 	  return NULL;
 	}
 	if (snmp_get_do_debugging()) {
