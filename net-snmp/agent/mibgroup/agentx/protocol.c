@@ -82,7 +82,7 @@ agentx_build_short(u_char *bufp, int value, int network_byte_order)
 	memmove( bufp, &value, 2);
     }
     else {
-#if BYTE_ORDER == LITTEL_ENDIAN
+#if BYTE_ORDER == LITTLE_ENDIAN
 	memmove( bufp, &value, 2);
 #else
 	*bufp = (u_char)value & 0xff;	value >>=8;	bufp++;
