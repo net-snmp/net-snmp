@@ -7,7 +7,7 @@ info	a SNMPv3 read-write user
 info	arguments:  user [noauth|auth|priv] [restriction_oid]
 question 1 The SNMPv3 user that should have read-write access
 question 2 The minimum security level required for that user [noauth|auth|priv, default = auth]
-validanswer 2 ^(noauth|auth|priv|)$
+validanswer 2 (noauth|auth|priv|)
 question 3 The OID that this community should be restricted to [if appropriate]
 
 token	rouser
@@ -20,11 +20,11 @@ token	rocommunity
 info	a SNMPv1/SNMPv2c read-only access community name
 info	arguments:  community [default|hostname|network/bits] [oid]
 question 1 The community name to add read-only access for
-question 2 The hostname or network address to accept this community name from [if appropriate]
-question 3 The OID that this community should be restricted to [if appropriate]
+question 2 The hostname or network address to accept this community name from [RETURN for all]
+question 3 The OID that this community should be restricted to [RETURN for no-restriction]
 
 token	rwcommunity
 info	a SNMPv1/SNMPv2c read-write access community name
 info	arguments:  community [default|hostname|network/bits] [oid]
 steal rocommunity
-question 1 Enter the community name to read-write add access for
+question 1 Enter the community name to add read-write access for
