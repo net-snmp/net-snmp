@@ -34,7 +34,7 @@ init_testhandler(void) {
     netsnmp_handler_registration *my_test;
     netsnmp_table_registration_info *table_info;
     u_long ind1;
-    table_data *table;
+    netsnmp_table_data *table;
     netsnmp_table_data_set *table_set;
     netsnmp_table_row *row;
     
@@ -343,7 +343,6 @@ my_test_instance_handler(
 
     switch(reqinfo->mode) {
         case MODE_GET:
-            accesses++;
             snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
                                      (u_char *) &accesses,
                                      sizeof(accesses));

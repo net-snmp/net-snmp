@@ -145,7 +145,9 @@ struct subtree *find_first_subtree(const char *context_name);
 subtree_context_cache *get_top_context_cache(void);
 
 /* internal API.  Don't use this.  Use netsnmp_register_handler instead */
-int netsnmp_register_mib(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int, netsnmp_handler_registration *);
+struct netsnmp_handler_registration_s;
+    
+int netsnmp_register_mib(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int, struct netsnmp_handler_registration_s *, int);
 
 #ifdef __cplusplus
 };
