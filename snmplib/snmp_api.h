@@ -694,31 +694,33 @@ void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 #define  STAT_SNMPINBADCOMMUNITYNAMES        12
 #define  STAT_SNMPINBADCOMMUNITYUSES         13
 #define  STAT_SNMPINASNPARSEERRS             14
-#define  STAT_SNMPINTOOBIGS                  15
-#define  STAT_SNMPINNOSUCHNAMES              16
-#define  STAT_SNMPINBADVALUES                17
-#define  STAT_SNMPINREADONLYS                18
-#define  STAT_SNMPINGENERRS                  19
-#define  STAT_SNMPINTOTALREQVARS             20
-#define  STAT_SNMPINTOTALSETVARS             21
-#define  STAT_SNMPINGETREQUESTS              22
-#define  STAT_SNMPINGETNEXTS                 23
-#define  STAT_SNMPINSETREQUESTS              24
-#define  STAT_SNMPINGETRESPONSES             25
-#define  STAT_SNMPINTRAPS                    26
-#define  STAT_SNMPOUTTOOBIGS                 27
-#define  STAT_SNMPOUTNOSUCHNAMES             28
-#define  STAT_SNMPOUTBADVALUES               29
-#define  STAT_SNMPOUTGENERRS                 30
-#define  STAT_SNMPOUTGETREQUESTS             31
-#define  STAT_SNMPOUTGETNEXTS                32
-#define  STAT_SNMPOUTSETREQUESTS             33
-#define  STAT_SNMPOUTGETRESPONSES            34
-#define  STAT_SNMPOUTTRAPS                   35
+#define  STAT_SNMPINBADTYPES		     15
+#define  STAT_SNMPINTOOBIGS                  16
+#define  STAT_SNMPINNOSUCHNAMES              17
+#define  STAT_SNMPINBADVALUES                18
+#define  STAT_SNMPINREADONLYS                19
+#define  STAT_SNMPINGENERRS                  20
+#define  STAT_SNMPINTOTALREQVARS             21
+#define  STAT_SNMPINTOTALSETVARS             22
+#define  STAT_SNMPINGETREQUESTS              23
+#define  STAT_SNMPINGETNEXTS                 24
+#define  STAT_SNMPINSETREQUESTS              25
+#define  STAT_SNMPINGETRESPONSES             26
+#define  STAT_SNMPINTRAPS                    27
+#define  STAT_SNMPOUTTOOBIGS                 28
+#define  STAT_SNMPOUTNOSUCHNAMES             29
+#define  STAT_SNMPOUTBADVALUES               30
+#define  STAT_SNMPOUTREADONLYS		     31
+#define  STAT_SNMPOUTGENERRS                 32
+#define  STAT_SNMPOUTGETREQUESTS             33
+#define  STAT_SNMPOUTGETNEXTS                34
+#define  STAT_SNMPOUTSETREQUESTS             35
+#define  STAT_SNMPOUTGETRESPONSES            36
+#define  STAT_SNMPOUTTRAPS                   37
 #define  STAT_SNMP_STATS_START               STAT_SNMPINPKTS
 #define  STAT_SNMP_STATS_END                 STAT_SNMPOUTTRAPS
 
-#define  MAX_STATS                           35
+#define  MAX_STATS                           38
 
 #ifdef __cplusplus
 }
