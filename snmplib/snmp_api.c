@@ -2024,7 +2024,8 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
 #ifdef USE_REVERSE_ASNENCODING
 static int
 snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
-				       size_t *offset, struct snmp_pdu *pdu)
+				       size_t *offset, struct snmp_pdu *pdu,
+				       size_t body_len)
 {
   size_t start_offset = *offset;
   int rc = 0;
@@ -2051,7 +2052,7 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 
   rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-				   *offset - start_offset);
+				   *offset - start_offset + body_len);
 
   return rc;
 }  /* end snmpv3_scopedPDU_header_realloc_rbuild() */
@@ -2067,6 +2068,7 @@ snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 {
   u_char *scoped_pdu, *hdrbuf = NULL, *hdr = NULL;
   size_t hdrbuf_len = SNMP_MAX_MSG_V3_HDRS, hdr_offset = 0, spdu_offset = 0;
+  size_t body_end_offset = *offset, body_len = 0;
   struct snmp_secmod_def *sptr = NULL;
   int rc = 0;
 
@@ -2087,9 +2089,11 @@ snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
       return -1;
     }
   }
+  body_len = *offset - body_end_offset;
 
   DEBUGDUMPSECTION("send", "ScopedPdu");
-  rc = snmpv3_scopedPDU_header_realloc_rbuild(pkt, pkt_len, offset, pdu);
+  rc = snmpv3_scopedPDU_header_realloc_rbuild(pkt, pkt_len, offset,
+					      pdu, body_len);
   if (rc == 0) {
     return -1;
   }
