@@ -152,6 +152,7 @@ extern "C" {
 
        /*
         * find all entries in the container which match the partial key
+        * returns allocated memory. user must free it when done.
         */
        netsnmp_container_set            *get_subset;
 
@@ -237,6 +238,9 @@ extern "C" {
 #define CONTAINER_FIRST(x)          (x)->find_next(x,NULL)
 #define CONTAINER_FIND(x,k)         (x)->find(x,k)
 #define CONTAINER_NEXT(x,k)         (x)->find_next(x,k)
+/*
+ * GET_SUBSET returns allocated memory. user must free it when done.
+ */
 #define CONTAINER_GET_SUBSET(x,k)   (x)->get_subset(x,k)
 #define CONTAINER_SIZE(x)           (x)->get_size(x)
 #define CONTAINER_ITERATOR(x)       (x)->get_iterator(x)
