@@ -12,6 +12,8 @@
  * $node is subid $node.subid of $node.parent.
  * It's status is $node.status, and it's access level is $node.access.
  * OID: $node.objectID
+ * Description:
+$node.description
  *
 @if $m2c_node_detail == 1@
  * node          -- name                 $node
