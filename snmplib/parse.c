@@ -4634,7 +4634,7 @@ merge_parse_objectid(struct node *np,
 		     char *name)
 {
     struct node *nnp;
-   //printf("merge defval --> %s\n",np->defaultValue);
+   /* printf("merge defval --> %s\n",np->defaultValue); */
     nnp = parse_objectid(fp, name);
     if (nnp) {
         
