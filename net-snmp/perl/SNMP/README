@@ -86,8 +86,10 @@ make install
 
 Win32:
 
-(Note: only builds on NT as far as I know. requires VC++ 5.0-6.0, be
-       sure to run vcvars32.bat first)
+This package only builds on NT as far as I know. Thes directions are fo VC++ 5.0-6.0 (I will be interested to here of success with cygwin).
+
+
+First  run vcvars32.bat
 
 for ActiveState Perl  (tested with AS Perl5.005_03 (515))
 
@@ -96,6 +98,9 @@ nmake
 nmake test
 nmake install
 
+OpenSSL note: see the ucd-snmp/README.win32 to compile libsnmp with
+              libeay32 abd see that libeay.lib is in usr\lib
+
 for the older perl5.004_02 distribution by gsarathy
 
 perl Makefile.PL
@@ -103,17 +108,13 @@ nmake
 nmake test
 nmake install
 
-Win32 Testing Note: 
 
-'nmake test' requires that an agent(snmpd) and trap receiver
-(snmptrapd) are running. Before running 'nmake test' start these
-servers using the config file provided (t/snmpd.conf) and indicate the
-host and port in t/snmpd.cmd by editting the following lines
-appropriately:
+Win32 Testing Note:
 
-HOST => 
-AGENT_PORT => 
-TRAP_PORT =>
+'nmake test' requires that an agent(snmpd) and trap receiver (snmptrapd)
+are running. Before running 'nmake test' start these servers using the
+config file provided (t/snmpd.conf). You will be asked for the test host
+and port numbers by Makefile.PL
 
 Operational Description:
 

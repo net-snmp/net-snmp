@@ -166,6 +166,7 @@ Copy win32\config.h to usr\include\ucd-snmp\ucd-snmp-config.h
 
 if using OpenSSL
 Copy libeay32.dll to usr\bin
+Copy libeay32.lib to usr\lib
 
 Installing is complete.  You may want to create a compressed
 archive of the \usr hierarchy.
