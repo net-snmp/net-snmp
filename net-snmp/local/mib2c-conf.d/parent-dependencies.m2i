@@ -31,6 +31,8 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
     
+    DEBUGMSGTL(("internal:${context}:${context}_check_dependencies","called\n"));
+
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
