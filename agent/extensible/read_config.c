@@ -13,7 +13,7 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
-#if HAVE_GETMNTENT
+#if HAVE_SYS_GETMNTENT_H
 #include <sys/mnttab.h>
 #endif
 #include <math.h>
@@ -53,8 +53,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   struct stat stat1, stat2;
 #if HAVE_FSTAB_H
   struct fstab *fstab;
-#endif
-#if HAVE_GETMNTENT
+#elif HAVE_GETMNTENT
   struct mnttab mnttab;
   FILE *mntfp;
 #endif
