@@ -103,7 +103,7 @@ struct agent_snmp_session {
 
    /* new API pointers */
    agent_request_info *reqinfo;
-   tree_cache **treecache;
+   tree_cache *treecache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
 };
