@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl 
+#!/usr/local/bin/perl5
 
 #defaults
 $hostname=`hostname`;
@@ -47,12 +47,11 @@ foreach $host ( @ARGV ) {
 	open(OUT,"$snmppath/snmpwalk -v 1 $host public $mibcheck$miberrflag|");
 	while (<OUT>) {
 	    ($mibloc) = /\.([0-9]+) /;
-	    if (($succ = &check_mib($_,1)) != 0 && 
-		($hostname =~ /tyfon/) && grep(/$mibx/,@fixitlist) &&
+	    if (($succ = &check_mib($_,1)) != 0 && grep(/$mibx/,@fixitlist) &&
 		$fixit >= 0) {
 		printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
-		system("snmpset $host $mibcheck$mibfix.$mibloc integer 1 > /dev/null 2>&1");
-		system("snmpset $host $mibclearcache integer 1 > /dev/null 2>&1");
+		system("snmpset -v 1 $host public $mibcheck$mibfix.$mibloc integer 1 > /dev/null 2>&1");
+		system("snmpset -v 1 $host public $mibclearcache integer 1 > /dev/null 2>&1");
 		printf("Sleeping\b\b\b\b\b\b\b\b");
 		sleep(2);
 		printf("Checking\b\b\b\b\b\b\b\b");
