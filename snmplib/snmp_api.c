@@ -2276,7 +2276,7 @@ snmpv3_header_build(netsnmp_session * session, netsnmp_pdu *pdu,
 
 #ifdef USE_REVERSE_ASNENCODING
 
-static int
+int
 snmpv3_header_realloc_rbuild(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, netsnmp_session * session,
                              netsnmp_pdu *pdu)
@@ -3752,12 +3752,6 @@ snmpv3_parse(netsnmp_pdu *pdu,
         if (mallocbuf) {
             SNMP_FREE(mallocbuf);
         }
-        if (pdu->securityStateRef != NULL) {
-            if (sptr && sptr->pdu_free_state_ref) {
-                sptr->pdu_free_state_ref(pdu->securityStateRef);
-                pdu->securityStateRef = NULL;
-            }
-        }
         return ret_val;
     }
 
@@ -3772,12 +3766,6 @@ snmpv3_parse(netsnmp_pdu *pdu,
         DEBUGINDENTADD(-4);
         if (mallocbuf) {
             SNMP_FREE(mallocbuf);
-        }
-        if (pdu->securityStateRef != NULL) {
-            if (sptr && sptr->pdu_free_state_ref) {
-                sptr->pdu_free_state_ref(pdu->securityStateRef);
-                pdu->securityStateRef = NULL;
-            }
         }
         return SNMPERR_ASN_PARSE_ERR;
     }
@@ -3803,12 +3791,6 @@ snmpv3_parse(netsnmp_pdu *pdu,
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         if (mallocbuf) {
             SNMP_FREE(mallocbuf);
-        }
-        if (pdu->securityStateRef != NULL) {
-            if (sptr && sptr->pdu_free_state_ref) {
-                sptr->pdu_free_state_ref(pdu->securityStateRef);
-                pdu->securityStateRef = NULL;
-            }
         }
         return SNMPERR_ASN_PARSE_ERR;
     }
@@ -4101,17 +4083,25 @@ _snmp_parse(void *sessp,
                     snmp_api_errstring(result)));
 
         if (result) {
+            struct snmp_secmod_def *secmod =
+                find_sec_mod(pdu->securityModel);
             if (!sessp) {
                 session->s_snmp_errno = result;
             } else {
                 /*
                  * Call the security model to special handle any errors
                  */
-                struct snmp_secmod_def *secmod =
-                    find_sec_mod(session->securityModel);
 
                 if (secmod && secmod->handle_report) {
-                    (secmod->handle_report)(sessp, session, result, pdu);
+                    struct session_list *slp = (struct session_list *) sessp;
+                    (*secmod->handle_report)(sessp, slp->transport, session,
+                                             result, pdu);
+                }
+            }
+            if (pdu->securityStateRef != NULL) {
+                if (secmod && secmod->pdu_free_state_ref) {
+                    secmod->pdu_free_state_ref(pdu->securityStateRef);
+                    pdu->securityStateRef = NULL;
                 }
             }
         }
