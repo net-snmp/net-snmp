@@ -2701,6 +2701,8 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
              * ignore these.  They're illegal to set by the
              * client APIs for these modes 
              */
+            snmp_log(LOG_ERR, "Illegal error_value %d for mode %d ignored\n",
+                     error_value, mode);
             return error_value;
 
         default:
@@ -2717,6 +2719,8 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
             /*
              * WWW: full translation map? 
              */
+            snmp_log(LOG_ERR, "Illegal error_value %d translated to %d\n",
+                     error_value, SNMP_ERR_GENERR);
             request->status = SNMP_ERR_GENERR;
         } else {
             /*
