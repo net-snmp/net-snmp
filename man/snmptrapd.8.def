@@ -99,6 +99,9 @@ hostnames.
 .BI -o " FILE"
 Log formatted incoming traps to 
 .IR FILE .
+Upon receipt of a SIGHUP, the daemon will close and re-open
+the log file.  This feature is useful when rotating the log file with
+other utilities such as logrotate.
 .TP
 .B -P
 Print formatted incoming traps to stderr.
