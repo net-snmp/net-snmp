@@ -30,8 +30,6 @@ static void _access_interface_entry_set_index(netsnmp_interface_entry *entry,
                                               const char *name);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _free_interface_config(void);
-static void _update_32bit(struct counter64 *prev_val, struct counter64 *new_val,
-                          struct counter64 *old_prev_val);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -398,22 +396,38 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
         }
     }
     else {
-        _update_32bit(&prev_vals->stats.ibytes,
-                      &new_vals->stats.ibytes, &prev_vals->old_stats->ibytes);
-        _update_32bit(&prev_vals->stats.iucast,
-                      &new_vals->stats.iucast, &prev_vals->old_stats->iucast);
-        _update_32bit(&prev_vals->stats.imcast,
-                      &new_vals->stats.imcast, &prev_vals->old_stats->imcast);
-        _update_32bit(&prev_vals->stats.ibcast,
-                      &new_vals->stats.ibcast, &prev_vals->old_stats->ibcast);
-        _update_32bit(&prev_vals->stats.obytes,
-                      &new_vals->stats.obytes, &prev_vals->old_stats->obytes);
-        _update_32bit(&prev_vals->stats.oucast,
-                      &new_vals->stats.oucast, &prev_vals->old_stats->oucast);
-        _update_32bit(&prev_vals->stats.omcast,
-                      &new_vals->stats.omcast, &prev_vals->old_stats->omcast);
-        _update_32bit(&prev_vals->stats.obcast,
-                      &new_vals->stats.obcast, &prev_vals->old_stats->obcast);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.ibytes,
+                                       &new_vals->stats.ibytes,
+                                       &prev_vals->old_stats->ibytes,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
+                                       &new_vals->stats.iucast,
+                                       &prev_vals->old_stats->iucast,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.imcast,
+                                       &new_vals->stats.imcast,
+                                       &prev_vals->old_stats->imcast,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.ibcast,
+                                       &new_vals->stats.ibcast,
+                                       &prev_vals->old_stats->ibcast,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.obytes,
+                                       &new_vals->stats.obytes,
+                                       &prev_vals->old_stats->obytes,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.oucast,
+                                       &new_vals->stats.oucast,
+                                       &prev_vals->old_stats->oucast,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.omcast,
+                                       &new_vals->stats.omcast,
+                                       &prev_vals->old_stats->omcast,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.obcast,
+                                       &new_vals->stats.obcast,
+                                       &prev_vals->old_stats->obcast,
+                                       &need_wrap_check);
     }
     
     /*
@@ -621,50 +635,4 @@ _free_interface_config(void)
         if_ptr = if_next;
     }
     conf_list = NULL;
-}
-
-static void
-_update_32bit(struct counter64 *prev_val, struct counter64 *new_val,
-              struct counter64 *old_prev_val)
-{
-    int rc;
-
-    /*
-     * counters are 32bit or unknown (which we'll treat as 32bit).
-     * update the prev values with the difference between the
-     * new stats and the prev old_stats:
-     *    prev->stats += (new->stats - prev->old_stats)
-     */
-    rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
-    if (rc < 0)
-        snmp_log(LOG_ERR,"c64 32 bit check failed\n");
-    else {
-        /*
-         * update previous values
-         */
-        (void) u64UpdateCounter(prev_val, new_val, old_prev_val);
-
-        /*
-         * if wrap check was 32 bit, undo adjust, now that prev is updated
-         */
-        if (32 == rc) {
-            /*
-             * check wrap incremented high, so reset it. (Because
-             * new is going to be copied to old later on.)
-             */
-            netsnmp_assert(1 == new_val->high);
-            new_val->high = 0;
-        }
-        else if (64 == rc) {
-            /*
-             * if we really have 64 bit counters, the summing we've been
-             * doing for prev values should be equal to the new values.
-             */
-            if ((prev_val->low != new_val->low) ||
-                (prev_val->high != new_val->high))
-                snmp_log(LOG_ERR, "looks like a 64bit wrap, but prev!=new\n");
-            else
-                need_wrap_check = 0;
-        }
-    }
 }
