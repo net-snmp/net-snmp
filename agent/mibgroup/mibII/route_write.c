@@ -235,10 +235,10 @@ write_rte(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      length)
+   size_t   length)
 {
     struct rtent *rp;
     int var;

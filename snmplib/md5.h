@@ -9,6 +9,10 @@
 #ifndef MD5_H
 #define MD5_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /* MDstruct is the data structure for a message digest computation.
 */
@@ -46,13 +50,17 @@ extern void MDupdate (MDptr, unsigned char *, unsigned int);
 */
 extern void MDprint (MDptr);
 
-void MDchecksum(u_char *data, int len, u_char *mac, int maclen);
-int  MDsign(u_char *data, int len, u_char *mac, int maclen,
-            u_char *secret, int secretlen);
-void MDget(MDstruct *MD, u_char *buf, int buflen);
+void MDchecksum(u_char *data, size_t len, u_char *mac, size_t maclen);
+int  MDsign(u_char *data, size_t len, u_char *mac, size_t maclen,
+            u_char *secret, size_t secretlen);
+void MDget(MDstruct *MD, u_char *buf, size_t buflen);
 
 /* 
 ** End of md5.h
 ****************************(cut)*****************************************/
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* MD5_H */
 

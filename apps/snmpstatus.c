@@ -78,23 +78,23 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
-int	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
+size_t	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
 oid	objid_sysUpTime[] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
-int	length_sysUpTime = sizeof(objid_sysUpTime)/sizeof(oid);
+size_t	length_sysUpTime = sizeof(objid_sysUpTime)/sizeof(oid);
 oid	objid_ifOperStatus[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 8};
-int	length_ifOperStatus = sizeof(objid_ifOperStatus)/sizeof(oid);
+size_t	length_ifOperStatus = sizeof(objid_ifOperStatus)/sizeof(oid);
 oid	objid_ifInUCastPkts[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 11};
-int	length_ifInUCastPkts = sizeof(objid_ifInUCastPkts)/sizeof(oid);
+size_t	length_ifInUCastPkts = sizeof(objid_ifInUCastPkts)/sizeof(oid);
 oid	objid_ifInNUCastPkts[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 12};
-int	length_ifInNUCastPkts = sizeof(objid_ifInNUCastPkts)/sizeof(oid);
+size_t	length_ifInNUCastPkts = sizeof(objid_ifInNUCastPkts)/sizeof(oid);
 oid	objid_ifOutUCastPkts[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 17};
-int	length_ifOutUCastPkts = sizeof(objid_ifOutUCastPkts)/sizeof(oid);
+size_t	length_ifOutUCastPkts = sizeof(objid_ifOutUCastPkts)/sizeof(oid);
 oid	objid_ifOutNUCastPkts[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 18};
-int	length_ifOutNUCastPkts = sizeof(objid_ifOutNUCastPkts)/sizeof(oid);
+size_t	length_ifOutNUCastPkts = sizeof(objid_ifOutNUCastPkts)/sizeof(oid);
 oid	objid_ipInReceives[] = {1, 3, 6, 1, 2, 1, 4, 3, 0};
-int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
+size_t	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
-int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
+size_t	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
 
 void usage(void)

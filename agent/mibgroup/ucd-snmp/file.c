@@ -78,11 +78,11 @@ void updateFile(int iindex)
 
 /* OID functions */
 
-u_char *var_file_table(struct variable *vp,
+const u_char *var_file_table(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
   static long long_ret;

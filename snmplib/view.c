@@ -78,7 +78,7 @@ view_scanNext(void)
 struct viewEntry *
 view_createEntry(int viewIndex, 
 		 oid *viewSubtree,
-		 int viewSubtreeLen)
+		 size_t viewSubtreeLen)
 {
     struct viewEntry *vp;
 
@@ -99,7 +99,7 @@ view_createEntry(int viewIndex,
 void
 view_destroyEntry(int viewIndex,
 		  oid *viewSubtree,		  
-		  int viewSubtreeLen)
+		  size_t viewSubtreeLen)
 {
     struct viewEntry *vp, *lastvp = NULL;
 

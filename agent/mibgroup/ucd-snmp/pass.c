@@ -66,7 +66,7 @@ int asc2bin(char *p)
     return n;
 }
 
-int bin2asc(char *p, int n)
+int bin2asc(char *p, size_t n)
 {
     int i, flag = 0;
     char buffer[BUFMAX];
@@ -172,11 +172,11 @@ void pass_free_config (void)
   numpassthrus = 0;
 }
 
-unsigned char *var_extensible_pass(struct variable *vp,
+const u_char *var_extensible_pass(struct variable *vp,
 				   oid *name,
-				   int *length,
+				   size_t *length,
 				   int exact,
-				   int *var_len,
+				   size_t *var_len,
 				   WriteMethod **write_method)
 {
 
@@ -306,19 +306,19 @@ int
 setPass(int action,
 	u_char *var_val,
 	u_char var_val_type,
-	int var_val_len,
+	size_t var_val_len,
 	u_char *statP,
 	oid *name,
-	int name_len)
+	size_t name_len)
 {
   int i, j, rtest, last;
   struct extensible *passthru;
 
-  static char buf[BUFMAX], buf2[BUFMAX];
-  static long tmp;
-  static unsigned long utmp;
-  static int itmp;
-  static oid objid[MAX_OID_LEN];
+  char buf[BUFMAX], buf2[BUFMAX];
+  long tmp;
+  unsigned long utmp;
+  size_t itmp;
+  oid objid[MAX_OID_LEN];
   
   for(i=1; i<= numpassthrus; i++) {
     passthru = get_exten_instance(passthrus,i);

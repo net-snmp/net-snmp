@@ -204,12 +204,12 @@ extern const struct in_addr * get_in_address (const void *, int, int);
   var_len       OUT     - length of variable or 0 if function returned
   write_method  out     - pointer to function to set variable, otherwise 0
 */
-u_char *
+const u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
-		 int *length,
+		 size_t *length,
 		 int exact,
-		 int *var_len,
+		 size_t *var_len,
 		 WriteMethod **write_method)
 {
   /*
@@ -480,12 +480,12 @@ klgetsa(struct sockaddr_in *dst)
 }
 #endif
 
-u_char *
+const u_char *
 var_ipRouteEntry(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     /*
@@ -698,12 +698,12 @@ IP_Cmp_Route(void *addr, void *ep)
     return (1);		/* Not found */
 }
 
-u_char *
+const u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
-		 int *length,
+		 size_t *length,
 		 int exact,
-		 int *var_len,
+		 size_t *var_len,
 		 WriteMethod **write_method)
 {
   /*
@@ -722,11 +722,11 @@ var_ipRouteEntry(struct variable *vp,
 
   /* fill in object part of name for current (less sizeof instance part) */
   
-  memcpy( (char *)current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
+  memcpy( (char *)current,(char *)vp->name, vp->namelen * sizeof(oid));
   if (*length == IP_ROUTENAME_LENGTH) /* Assume that the input name is the lowest */
     memcpy( (char *)lowest,(char *)name, IP_ROUTENAME_LENGTH * sizeof(oid));
   else
-    name[IP_ROUTEADDR_OFF] = -1; /* Grhhh: to prevent accidental comparison :-( */
+    name[IP_ROUTEADDR_OFF] = (oid)-1; /* Grhhh: to prevent accidental comparison :-( */
   for (Nextentry.ipRouteDest = (u_long)-2, req_type = GET_FIRST;
        ;
        Nextentry = entry, req_type = GET_NEXT) {
@@ -1249,8 +1249,8 @@ static int qsort_compare(RTENTRY **r1,
 #else
 	register u_long dst1 = ntohl(*(unsigned long *)&(*r1)->rt_dst.sa_data);
 	register u_long dst2 = ntohl(*(unsigned long *)&(*r2)->rt_dst.sa_data);
-#endif!
-#endif
+#endif /* defined(linux) */
+#endif /* NEED_KLGETSA */
 
 	/*
 	 *	Do the comparison
@@ -1434,12 +1434,12 @@ suck_krt(int force)
 	return 0;
 }
 
-u_char *
+const u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
-		 int *length,
+		 size_t *length,
 		 int exact,
-		 int *var_len,
+		 size_t *var_len,
 		 WriteMethod **write_method)
 {
 	/*

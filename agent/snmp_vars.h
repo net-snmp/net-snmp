@@ -35,17 +35,17 @@ struct variable;
 typedef int (WriteMethod)(int action,
         u_char  *var_val,
         u_char   var_val_type,
-        int      var_val_len,
+        size_t   var_val_len,
         u_char  *statP,
         oid     *name,
-        int      length);
+        size_t   length);
 
 /* Function pointer called by the master agent for mib information retrieval */
-typedef u_char *(FindVarMethod)(struct variable *vp,
+typedef const u_char *(FindVarMethod)(struct variable *vp,
         oid     *name,
-        int     *length,
+        size_t  *length,
         int      exact,
-        int     *var_len,
+        size_t  *var_len,
         WriteMethod   **write_method);
 
 struct nlist;
@@ -70,15 +70,15 @@ struct variable {
 
 int subtree_old_size (void);
 void sort_tree (void);
-struct subtree *find_subtree (oid *, int, struct subtree *);
-struct subtree *find_subtree_next (oid *, int, struct subtree *);
-void register_mib (const char *, struct variable *, int , int , oid *, int);
-void unregister_mib (oid *, int);
-struct subtree *unregister_mib_tree (oid *, int, struct subtree *);
+struct subtree *find_subtree (oid *, size_t, struct subtree *);
+struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
+void register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
+void unregister_mib (oid *, size_t);
+struct subtree *unregister_mib_tree (oid *, size_t, struct subtree *);
 struct subtree *free_subtree (struct subtree *);
 void init_agent(void);
-int compare_tree (oid *, int, oid *, int);
-int in_a_view(oid *, int *, struct snmp_pdu *, int);
+int compare_tree (oid *, size_t, oid *, size_t);
+int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 

@@ -343,7 +343,7 @@ void vacm_parse_view (char *token,
     int inclexcl;
     struct vacm_viewEntry *vp;
     oid suboid[MAX_OID_LEN];
-    int suboid_len = 0;
+    size_t suboid_len = 0;
     u_char viewMask[sizeof (vp->viewMask)];
     int i;
 
@@ -427,7 +427,7 @@ void vacm_free_view (void)
  */
 int vacm_in_view (struct snmp_pdu *pdu,
 		  oid *name,
-		  int namelen)
+		  size_t namelen)
 {
     struct vacm_securityEntry *sp = securityFirst;
     struct vacm_accessEntry *ap;
@@ -455,7 +455,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	    if ((pdu->address.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
 		    == sp->sourceIp.sin_addr.s_addr
                 && strlen(sp->community) == pdu->community_len
-		&& !strncmp(sp->community, pdu->community, pdu->community_len))
+		&& !strncmp(sp->community, (char *)pdu->community, pdu->community_len))
 		break;
 	    sp = sp->next;
 	}
@@ -512,11 +512,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
 }  /* end vacm_in_view() */
 
 
-u_char *var_vacm_sec2group(struct variable *vp,
+const u_char *var_vacm_sec2group(struct variable *vp,
 			   oid *name,
-			   int *length,
+			   size_t *length,
 			   int exact,
-			   int *var_len,
+			   size_t *var_len,
 			   WriteMethod **write_method)
 {
     struct vacm_groupEntry *gp;
@@ -592,11 +592,11 @@ u_char *var_vacm_sec2group(struct variable *vp,
     return NULL;
 }
 
-u_char *var_vacm_access(struct variable *vp,
+const u_char *var_vacm_access(struct variable *vp,
 			oid *name,
-			int *length,
+			size_t *length,
 			int exact,
-			int *var_len,
+			size_t *var_len,
 			WriteMethod **write_method)
 {
     struct vacm_accessEntry *gp;
@@ -735,17 +735,17 @@ u_char *var_vacm_access(struct variable *vp,
     return NULL;
 }
 
-u_char *var_vacm_view(struct variable *vp,
+const u_char *var_vacm_view(struct variable *vp,
 		      oid *name,
-		      int *length,
+		      size_t *length,
 		      int exact,
-		      int *var_len,
+		      size_t *var_len,
 		      WriteMethod **write_method)
 {
     struct vacm_viewEntry *gp;
     char viewName[32];
     oid subtree[MAX_OID_LEN];
-    int subtreeLen = 0;
+    size_t subtreeLen = 0;
     oid *op, *op1;
     int len;
     char *cp;

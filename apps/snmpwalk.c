@@ -92,14 +92,14 @@ int main(int argc, char *argv[])
     struct snmp_session  session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    int   arg;
-    oid   name[MAX_OID_LEN];
-    int   name_length;
-    oid   root[MAX_OID_LEN];
-    int   rootlen;
-    int   count;
-    int   running;
-    int   status;
+    int    arg;
+    oid    name[MAX_OID_LEN];
+    size_t name_length;
+    oid    root[MAX_OID_LEN];
+    size_t rootlen;
+    int    count;
+    int    running;
+    int    status;
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
 #endif

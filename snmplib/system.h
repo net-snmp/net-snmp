@@ -1,6 +1,9 @@
- 
 #ifndef SNMP_SYSTEM_H
 #define SNMP_SYSTEM_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***********************************************************
         Copyright 1993 by Carnegie Mellon University
@@ -103,5 +106,9 @@ int setenv (const char *, const char *, int);
 #endif
  
 int calculate_time_diff(struct timeval *, struct timeval *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMP_SYSTEM_H */

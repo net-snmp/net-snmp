@@ -9,11 +9,11 @@ void init_extensible(void);
 
 config_require(util_funcs)
   
-struct extensible *get_exten_instance (struct extensible *, int);
+struct extensible *get_exten_instance (struct extensible *, size_t);
 extern FindVarMethod var_extensible_shell;
 extern WriteMethod fixExecError;
 extern FindVarMethod var_extensible_relocatable;
-struct subtree *find_extensible (struct subtree *, oid *, int, int);
+struct subtree *find_extensible (struct subtree *, oid *, size_t, int);
 
 /* config file parsing routines */
 void extensible_free_config (void);

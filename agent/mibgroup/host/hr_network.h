@@ -8,7 +8,7 @@
 extern void	init_hr_network (void);
 extern FindVarMethod var_hrnet;
 
-config_require(mibII/interfaces);
+config_require(mibII/interfaces)
 
 #define	HRNET_IFINDEX		1
 

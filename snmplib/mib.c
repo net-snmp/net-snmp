@@ -75,10 +75,10 @@ SOFTWARE.
 #include "snmp_debug.h"
 
 static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
-static int parse_subtree (struct tree *, const char *, oid *, int *);
+static int parse_subtree (struct tree *, const char *, oid *, size_t *);
 static char *uptimeString (u_long, char *);
-static void sprint_hexstring (char *, u_char *, int);
-static void sprint_asciistring (char *, u_char *, int);
+static void sprint_hexstring (char *, u_char *, size_t);
+static void sprint_asciistring (char *, u_char *, size_t);
 static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_opaque (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_object_identifier (char *, struct variable_list *, struct enum_list *, const char *, const char *);
@@ -206,7 +206,7 @@ uptimeString(u_long timeticks,
 
 void sprint_hexstring(char *buf,
                       u_char *cp,
-                      int len)
+                      size_t len)
 {
 
     for(; len >= 16; len -= 16){
@@ -226,7 +226,7 @@ void sprint_hexstring(char *buf,
 
 static void sprint_asciistring(char *buf,
 			       u_char  *cp,
-			       int	    len)
+			       size_t	    len)
 {
     int	x;
 
@@ -1189,7 +1189,7 @@ set_function(struct tree *subtree)
 
 int read_objid(const char *input,
 	       oid *output,
-	       int *out_len)   /* number of subid's in "output" */
+	       size_t *out_len)   /* number of subid's in "output" */
 {
     struct tree *root = tree_head;
     oid *op = output;
@@ -1226,7 +1226,7 @@ static int
 parse_subtree(struct tree *subtree,
 	      const char *input,
 	      oid *output,
-	      int *out_len)   /* number of subid's */
+	      size_t *out_len)   /* number of subid's */
 {
     char buf[SPRINT_MAX_LEN], *to = buf;
     u_long subid = 0;
@@ -1308,7 +1308,7 @@ found:
 char *
 sprint_objid(char *buf,
 	     oid *objid,
-	     int objidlen)	/* number of subidentifiers */
+	     size_t objidlen)	/* number of subidentifiers */
 {
     char    tempbuf[SPRINT_MAX_LEN], *cp;
     struct tree    *subtree = tree_head;
@@ -1332,7 +1332,7 @@ sprint_objid(char *buf,
 	if (suffix_only == 2 && cp > tempbuf) {
 	    char modbuf[256];
 	    char *mod = module_name(subtree->modid, modbuf);
-	    int len = strlen(mod);
+	    size_t len = strlen(mod);
 	    if (len >= cp-tempbuf) {
 		memmove(tempbuf+len+1, cp, strlen(cp)+1);
 		cp = tempbuf+len+1;
@@ -1344,7 +1344,8 @@ sprint_objid(char *buf,
     }
     else if (!full_objid) {
 	PrefixListPtr pp = &mib_prefixes[0];
-	int ii, ilen, tlen;
+	int ii;
+	size_t ilen, tlen;
 	const char *testcp;
 	cp = tempbuf; tlen = strlen(tempbuf);
 	ii = 0;
@@ -1364,7 +1365,7 @@ sprint_objid(char *buf,
 
 void
 print_objid(oid *objid,
-	    int objidlen)	/* number of subidentifiers */
+	    size_t objidlen)	/* number of subidentifiers */
 {
   fprint_objid(stdout, objid, objidlen);
 }
@@ -1372,7 +1373,7 @@ print_objid(oid *objid,
 void
 fprint_objid(FILE *f,
 	     oid *objid,
-	     int objidlen)	/* number of subidentifiers */
+	     size_t objidlen)	/* number of subidentifiers */
 {
     char    buf[SPRINT_MAX_LEN];
 
@@ -1383,7 +1384,7 @@ fprint_objid(FILE *f,
 void
 sprint_variable(char *buf,
 		oid *objid,
-		int objidlen,
+		size_t objidlen,
 		struct variable_list *variable)
 {
     char    tempbuf[SPRINT_MAX_LEN];
@@ -1417,7 +1418,7 @@ sprint_variable(char *buf,
 
 void
 print_variable(oid *objid,
-	       int objidlen,
+	       size_t objidlen,
 	       struct variable_list *variable)
 {
     fprint_variable(stdout, objid, objidlen, variable);
@@ -1426,7 +1427,7 @@ print_variable(oid *objid,
 void
 fprint_variable(FILE *f,
 		oid *objid,
-		int objidlen,
+		size_t objidlen,
 		struct variable_list *variable)
 {
     char    buf[SPRINT_MAX_LEN];
@@ -1438,7 +1439,7 @@ fprint_variable(FILE *f,
 void
 sprint_value(char *buf,
 	     oid *objid,
-	     int objidlen,
+	     size_t objidlen,
 	     struct variable_list *variable)
 {
     char    tempbuf[SPRINT_MAX_LEN];
@@ -1462,7 +1463,7 @@ sprint_value(char *buf,
 
 void
 print_value(oid *objid,
-	    int objidlen,
+	    size_t objidlen,
 	    struct variable_list *variable)
 {
     fprint_value(stdout, objid, objidlen, variable);
@@ -1471,7 +1472,7 @@ print_value(oid *objid,
 void
 fprint_value(FILE *f,
 	     oid *objid,
-	     int objidlen,
+	     size_t objidlen,
 	     struct variable_list *variable)
 {
     char    tempbuf[SPRINT_MAX_LEN];
@@ -1482,7 +1483,7 @@ fprint_value(FILE *f,
 
 struct tree *
 get_symbol(oid *objid,
-	   int objidlen,
+	   size_t objidlen,
 	   struct tree *subtree,
 	   char *buf)
 {
@@ -1527,7 +1528,7 @@ found:
  */
 struct tree *
 get_tree(oid *objid,
-	 int objidlen,
+	 size_t objidlen,
 	 struct tree *subtree)
 {
     struct tree    *return_tree = NULL;
@@ -1550,7 +1551,7 @@ found:
 
 void
 print_description(oid *objid,
-		  int objidlen)   /* number of subidentifiers */
+		  size_t objidlen)   /* number of subidentifiers */
 {
     fprint_description(stdout, objid, objidlen);
 }
@@ -1558,7 +1559,7 @@ print_description(oid *objid,
 void
 fprint_description(FILE *f,
 		   oid *objid,
-		   int objidlen)   /* number of subidentifiers */
+		   size_t objidlen)   /* number of subidentifiers */
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
 	print_tree_node(f, tp);
@@ -1649,7 +1650,7 @@ int
 get_module_node(const char *name,
 		const char *module,
 		oid *objid,
-		int *objidlen)
+		size_t *objidlen)
 {
     int modid, subid, numids;
     struct tree *tp, *tp2;
@@ -1737,7 +1738,7 @@ get_module_node(const char *name,
 int
 get_node(const char *name,
 	 oid *objid,
-	 int *objidlen)
+	 size_t *objidlen)
 {
     char *cp;
 
@@ -1750,8 +1751,8 @@ get_node(const char *name,
 		 *  requested name is of the form
 		 *	"module:subidentifier"
 		 */
-	module = (char *)malloc(cp-name+1);
-	memcpy(module,name,cp-name);
+	module = (char *)malloc((size_t)(cp-name+1));
+	memcpy(module,name,(size_t)(cp-name));
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */
 

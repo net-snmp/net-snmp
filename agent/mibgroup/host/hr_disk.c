@@ -74,7 +74,7 @@ int   Is_It_Writeable (void);
 int   What_Type_Disk (void);
 int   Is_It_Removeable (void);
 const char *describe_disk (int);
-int header_hrdisk (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrdisk (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 void Add_HR_Disk_entry (const char *, char, char, char, char, char);
 
 int HRD_type_index;
@@ -167,9 +167,9 @@ void init_hr_disk(void)
 int
 header_hrdisk(struct variable *vp,
 	      oid *name,
-	      int *length,
+	      size_t *length,
 	      int exact,
-	      int *var_len,
+	      size_t *var_len,
 	      WriteMethod **write_method)
 {
 #define HRDISK_ENTRY_NAME_LENGTH	11
@@ -235,12 +235,12 @@ header_hrdisk(struct variable *vp,
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrdisk(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
     int  disk_idx;

@@ -117,7 +117,7 @@ usage (void)
 
 /* setup_oid appends to the oid the index for the engineid/user */
 void
-setup_oid(oid *it, int *len, u_char *id, int idlen, u_char *user)
+setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
 {
   int i;
   char buf[1024];
@@ -133,9 +133,7 @@ setup_oid(oid *it, int *len, u_char *id, int idlen, u_char *user)
 }
 
 int
-main(argc, argv)
-    int   argc;
-    char  *argv[];
+main(int argc, char *argv[])
 {
     struct snmp_session   session, *ss;
     struct snmp_pdu      *pdu, *response;
@@ -154,8 +152,8 @@ main(argc, argv)
     char                 *values[128];
     oid                   name[MAX_OID_LEN];
 #endif
-    int                   name_length = USM_OID_LEN;
-    int                   name_length2 = USM_OID_LEN;
+    size_t                name_length = USM_OID_LEN;
+    size_t                name_length2 = USM_OID_LEN;
     int                   status;
     int                   rval;
     int                   doauthkey       = 0,
@@ -172,9 +170,9 @@ main(argc, argv)
                           newkul_len      = SNMP_MAXBUF_SMALL,
                           keychange_len   = SNMP_MAXBUF_SMALL;
 
-    u_char               *newpass         = NULL,
-                         *oldpass         = NULL,
-                          oldKu[SNMP_MAXBUF_SMALL],
+    char                 *newpass         = NULL,
+                         *oldpass         = NULL;
+    u_char                oldKu[SNMP_MAXBUF_SMALL],
                           newKu[SNMP_MAXBUF_SMALL],
                           oldkul[SNMP_MAXBUF_SMALL],
                           newkul[SNMP_MAXBUF_SMALL],
@@ -273,7 +271,7 @@ main(argc, argv)
       /* the old Ku is in the session, but we need the new one */
       rval = generate_Ku(session.securityAuthProto,
                          session.securityAuthProtoLen,
-                         newpass, strlen(newpass),
+                         (u_char *)newpass, strlen(newpass),
                          newKu, &newKu_len);
 
       if (rval != SNMPERR_SUCCESS) {
@@ -284,7 +282,7 @@ main(argc, argv)
       /* the old Ku is in the session, but we need the new one */
       rval = generate_Ku(session.securityAuthProto,
                          session.securityAuthProtoLen,
-                         oldpass, strlen(oldpass),
+                         (u_char *)oldpass, strlen(oldpass),
                          oldKu, &oldKu_len);
     
       if (rval != SNMPERR_SUCCESS) {

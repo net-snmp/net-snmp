@@ -47,9 +47,9 @@ void init_registry(void)
 static struct subtree *
 header_registry(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
 #define REGISTRY_NAME_LENGTH	10
@@ -89,12 +89,12 @@ header_registry(struct variable *vp,
 	 *
 	 *********************/
 
-u_char	*
+const u_char *
 var_registry(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
   struct subtree *tp;

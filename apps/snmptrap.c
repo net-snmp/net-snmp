@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
     oid name[MAX_OID_LEN];
-    int name_length;
+    size_t name_length;
     int	arg;
     int status, inform = 0;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;

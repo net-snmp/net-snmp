@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     int	arg, count;
     char *current_name = NULL;
     oid name[MAX_OID_LEN];
-    int name_length;
+    size_t name_length;
     int tosymbolic = 0;
     int description = 0;
     int random_access = 0;

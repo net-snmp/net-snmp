@@ -63,12 +63,12 @@ init_sysORTable(void) {
 	 *
 	 *********************/
 
-u_char	*
+const u_char *
 var_sysORTable(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
   struct timeval diff;
@@ -125,7 +125,7 @@ var_sysORTable(struct variable *vp,
 
 
 void register_sysORTable(oid *oidin,
-			 int oidlen,
+			 size_t oidlen,
 			 const char *descr)
 {
   char c_oid[SPRINT_MAX_LEN];

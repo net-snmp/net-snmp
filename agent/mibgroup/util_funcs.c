@@ -144,7 +144,7 @@ int get_exec_output(struct extensible *ex)
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef EXCACHETIME
   char cache[MAXCACHESIZE];
-  long cachebytes;
+  size_t cachebytes;
   long curtime;
   static char lastcmd[STRMAX];
   int cfd;
@@ -352,10 +352,10 @@ int get_exec_pipes(char *cmd,
 int clear_cache(int action,
 		u_char *var_val,
 		u_char var_val_type,
-		int var_val_len,
+		size_t var_val_len,
 		u_char *statP,
 		oid *name,
-		int name_len)
+		size_t name_len)
 {
   
   long tmp=0;
@@ -392,10 +392,10 @@ int
 restart_hook(int action,
 	     u_char *var_val,
 	     u_char var_val_type,
-	     int var_val_len,
+	     size_t var_val_len,
 	     u_char *statP,
 	     oid *name,
-	     int name_len)
+	     size_t name_len)
 {
   
   long tmp=0;
@@ -414,7 +414,7 @@ restart_hook(int action,
 
 void
 print_mib_oid(oid name[],
-	      int len)
+	      size_t len)
 {
   int i;
   printf("Mib:  ");
@@ -426,7 +426,7 @@ print_mib_oid(oid name[],
 void
 sprint_mib_oid(char *buf,
 	       oid name[],
-	       int len)
+	       size_t len)
 {
   int i;
   for(i=0; i < len; i++) {
@@ -463,8 +463,8 @@ sprint_mib_oid(char *buf,
  * 'name' and 'length' are undefined upon failure.
  *
  */
-int header_simple_table(struct variable *vp, oid *name, int *length,
-                        int exact, int *var_len,
+int header_simple_table(struct variable *vp, oid *name, size_t *length,
+                        int exact, size_t *var_len,
                         WriteMethod **write_method, int max)
 {
   int	i,
@@ -555,9 +555,9 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
 int
 header_generic(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN];
@@ -571,7 +571,7 @@ header_generic(struct variable *vp,
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[vp->namelen] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     DEBUGMSGTL(("util_funcs", "  result: %d\n", result));
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
@@ -584,8 +584,8 @@ header_generic(struct variable *vp,
 }
 
 /* checkmib(): provided for backwards compatibility, do not use: */
-int checkmib(struct variable *vp, oid *name, int *length,
-             int exact, int *var_len,
+int checkmib(struct variable *vp, oid *name, size_t *length,
+             int exact, size_t *var_len,
              WriteMethod **write_method, int max) {
   /* checkmib used to be header_simple_table, with reveresed boolean
      return output.  header_simple_table() was created to match
@@ -636,7 +636,7 @@ int parse_miboid(const char *buf,
     while(isdigit(*buf++));
     if (*buf == '.') buf++;
   }
-  oidout[i] = -1;
+  /* oidout[i] = -1; hmmm */
   return i;
 }
 

@@ -166,9 +166,9 @@ void init_udp(void)
 static int
 header_udp(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
 #define UDP_NAME_LENGTH	8
@@ -205,12 +205,12 @@ header_udp(struct variable *vp,
 #ifndef MIB_UDPCOUNTER_SYMBOL
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
-u_char *
+const u_char *
 var_udp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
 #ifdef linux
@@ -299,12 +299,12 @@ var_udp(struct variable *vp,
 #else /* HAVE_SYS_TCPIPSTATS_H */
 
 
-u_char *
+const u_char *
 var_udp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     static struct kna tcpipstats;
@@ -341,12 +341,12 @@ var_udp(struct variable *vp,
 
 #else /* hpux */
 
-u_char *
+const u_char *
 var_udp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     static struct udpstat udpstat;
@@ -391,12 +391,12 @@ var_udp(struct variable *vp,
 
 
 
-u_char *
+const u_char *
 var_udpEntry(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     int i;
@@ -461,12 +461,12 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 
 #else /* solaris2 - udp */
 
-u_char *
+const u_char *
 var_udp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     mib2_udp_t udpstat;
@@ -505,12 +505,12 @@ var_udp(struct variable *vp,
     return (ret);
 }
 
-u_char *
+const u_char *
 var_udpEntry(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     return NULL;
@@ -635,7 +635,7 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	next = udp_inpcb.inp_next;
 	*RetInPcb = udp_inpcb;
 	udp_prev = next;
-#endif linux
+#endif /* linux */
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */

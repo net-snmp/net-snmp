@@ -381,7 +381,7 @@ eventNewRow(int iindex)
 static struct eventNotifyEntry *
 eventNotifyNewRow(int iindex,
 		  oid *context,
-		  int contextLen)
+		  size_t contextLen)
 {
     struct eventNotifyEntry *event;
     int i = 0;
@@ -440,7 +440,7 @@ eventNotifyNewRow(int iindex,
 static struct eventNotifyEntry *
 eventNotifyGetRow(int iindex,
 		  oid *context,
-		  int contextLen)
+		  size_t contextLen)
 {
     struct eventNotifyEntry *event;
     
@@ -833,19 +833,19 @@ static int
 write_eventtab(int action,
 	       u_char *var_val,
 	       u_char var_val_type,
-	       int var_val_len,
+	       size_t var_val_len,
 	       u_char *statP,
 	       oid *name,
-	       int name_len)
+	       size_t name_len)
 {
     register int iindex;
     register int variable;
     register struct eventEntry *event;
-    int size;
+    size_t size;
     long int_value;
     u_char string_value[MAX_OWNER_STR_LEN];
     oid id_value[MAX_OID_LEN];
-    int buffersize = 1000;
+    size_t buffersize = 1000;
     
     /* .1.3.6.1.6.3.2.1.2.2.1.6.1  */
 
@@ -1043,18 +1043,18 @@ static int
 write_eventnotifytab( int action,
 		      u_char *var_val,
 		      u_char var_val_type,
-		      int var_val_len,
+		      size_t var_val_len,
 		      u_char *statP,
 		      oid *name,
-		      int name_len)
+		      size_t name_len)
 {
     register int iindex;
     register int variable;
     register struct eventNotifyEntry *event;
     long int_value;
-    int buffersize = 1000;
+    size_t buffersize = 1000;
     oid *context;
-    int contextLen;
+    size_t contextLen;
     
     /* .1.3.6.1.6.3.2.1.2.5.1.4.int.len.context */
 
@@ -1211,18 +1211,18 @@ write_eventnotifytab( int action,
     return SNMP_ERR_NOERROR;
 }
 
-Export u_char *
+const u_char *
 var_eventnextindex(struct variable *vp,
 		   oid *name,
-		   int *length,
+		   size_t *length,
 		   int exact,
-		   int *var_len,
+		   size_t *var_len,
 		   WriteMethod **write_method)
 {
     int result;
 
     *write_method = NULL;
-    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1241,12 +1241,12 @@ var_eventnextindex(struct variable *vp,
 }
     
 /* respond to requests for variables in the event table */
-Export u_char *
+const u_char *
 var_eventtab(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN];
@@ -1308,18 +1308,18 @@ var_eventtab(struct variable *vp,
 }
 
 /* respond to queries for eventNotifyMinInterval and eventNotifyMaxRetransmissions */
-Export u_char *
+const u_char *
 var_eventnotifyvars(struct variable *vp,
 		    oid *name,
-		    int *length,
+		    size_t *length,
 		    int exact,
-		    int *var_len,
+		    size_t *var_len,
 		    WriteMethod **write_method)
 {
     int result;
 
     *write_method = 0;
-    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1342,12 +1342,12 @@ var_eventnotifyvars(struct variable *vp,
 }
 
 /* respond to requests for variables in the event table */
-Export u_char *
+const u_char *
 var_eventnotifytab(struct variable *vp,
 		   oid *name,
-		   int *length,
+		   size_t *length,
 		   int exact,
-		   int *var_len,
+		   size_t *var_len,
 		   WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN];
@@ -1379,7 +1379,7 @@ var_eventnotifytab(struct variable *vp,
 	return NULL;
     }
     
-    memcpy(name, newname, (int)(14 + event->contextLen) * sizeof(oid));
+    memcpy(name, newname, (14 + event->contextLen) * sizeof(oid));
     *length = 14 + event->contextLen;
     *var_len = sizeof(long);
     

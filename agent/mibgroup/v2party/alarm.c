@@ -77,23 +77,23 @@ static long alarmNextIndex = 1;
 
 static int
 rmonGetValue(oid *srcParty, 
-	     int srcPartyLen, 
+	     size_t srcPartyLen, 
 	     oid *dstParty, 
-	     int dstPartyLen,
+	     size_t dstPartyLen,
 	     oid *context, 
-	     int contextLen, 
+	     size_t contextLen, 
 	     oid *variable, 
-	     int variableLen, 
+	     size_t variableLen, 
 	     long *value, 
 	     struct alarmEntry *alarm)
 {
     oid bigVar[MAX_OID_LEN];
-    int bigVarLen;
+    size_t bigVarLen;
     u_char type;
-    int len;
+    size_t len;
     u_short acl;
     WriteMethod *write_method;
-    u_char *var;
+    const u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
     struct partyEntry *srcp, *dstp;
@@ -719,19 +719,19 @@ static int
 write_alarmtab(int action,
 	       u_char *var_val,
 	       u_char var_val_type,
-	       int var_val_len,
+	       size_t var_val_len,
 	       u_char *statP,
 	       oid *name,
-	       int name_len)
+	       size_t name_len)
 {
     register int iindex;
     register int variable;
     register struct alarmEntry *alarm;
-    int size;
+    size_t size;
     long int_value;
     oid oid_value[MAX_OID_LEN];
-    int buffersize = 1000;
-    int contextlen;
+    size_t buffersize = 1000;
+    size_t contextlen;
     oid *context;
     
     /* .1.3.6.1.6.3.2.1.1.2.1.X.cxlen.context.index */
@@ -1060,18 +1060,18 @@ write_alarmtab(int action,
     return SNMP_ERR_NOERROR;
 }
 
-Export u_char *
+const u_char *
 var_alarmnextindex(struct variable *vp,
 		   oid *name,
-		   int *length,
+		   size_t *length,
 		   int exact,
-		   int *var_len,
+		   size_t *var_len,
 		   WriteMethod **write_method)
 {
     int result;
 
     *write_method = NULL;
-    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1090,12 +1090,12 @@ var_alarmnextindex(struct variable *vp,
 }
     
 /* respond to requests for variables in the alarm table */
-Export u_char *
+const u_char *
 var_alarmtab(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN];

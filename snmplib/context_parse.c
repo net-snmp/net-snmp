@@ -77,10 +77,11 @@ read_context_database(char *filename)
     int linenumber = 0, chars = 0;
     int state = IDENTITY_STATE;
     oid contextid[MAX_OID_LEN];
-    int contextidlen;
-    int view = 0, entityLen = 0, icltime = 0;
+    size_t contextidlen;
+    int view = 0, icltime = 0;
+    size_t entityLen = 0, proxyIdLen;
     u_char entity[64];
-    int dstParty, srcParty, proxyIdLen;
+    int dstParty, srcParty;
     oid proxyId[MAX_OID_LEN];
     char name[64];	/* friendly name */
     struct contextEntry *cxp, *rp;

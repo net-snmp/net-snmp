@@ -198,9 +198,9 @@ void init_tcp(void)
 static int
 header_tcp(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
 #define TCP_NAME_LENGTH	8
@@ -213,12 +213,12 @@ header_tcp(struct variable *vp,
       DEBUGMSGTL(("mibII/tcp", "var_tcp: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[TCP_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -236,12 +236,12 @@ header_tcp(struct variable *vp,
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
-u_char *
+const u_char *
 var_tcp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     static struct kna tcpipstats;
@@ -352,7 +352,7 @@ var_tcp(struct variable *vp,
 	    case TCPOUTRSTS:
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
 		return (u_char *) &long_return;
-#endif linux
+#endif /* linux */
 	    default:
 		ERROR_MSG("");
 	}
@@ -361,12 +361,12 @@ var_tcp(struct variable *vp,
 
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
-u_char *
+const u_char *
 var_tcp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     static struct tcpstat tcpstat;
@@ -511,12 +511,12 @@ var_tcp(struct variable *vp,
 
 #endif /* not HAVE_SYS_TCPIPSTATS_H */
 
-u_char *
+const u_char *
 var_tcpEntry(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     int i;
@@ -534,7 +534,7 @@ var_tcpEntry(struct variable *vp,
 #endif
 #endif
     
-	memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+	memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* find "next" connection */
 Again:
 LowState = -1;	    /* Don't have one yet */
@@ -581,7 +581,7 @@ LowState = -1;	    /* Don't have one yet */
 	    }
 	}
 	if (LowState < 0) return(NULL);
-	memcpy( (char *)name,(char *)lowest, ((int)vp->namelen + 10) * sizeof(oid));
+	memcpy( (char *)name,(char *)lowest, (vp->namelen + 10) * sizeof(oid));
 	*length = vp->namelen + 10;
 	*write_method = 0;
 	*var_len = sizeof(long);
@@ -621,12 +621,12 @@ TCP_Cmp(void *addr, void *ep)
     return (1);
 }
 
-u_char *
+const u_char *
 var_tcp(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
   mib2_tcp_t tcpstat;
@@ -690,12 +690,12 @@ var_tcp(struct variable *vp,
 }
 
 
-u_char *
+const u_char *
 var_tcpEntry(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
   oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
@@ -711,7 +711,7 @@ var_tcpEntry(struct variable *vp,
     int			Found = 0;
     
     memset (&Lowentry, 0, sizeof (Lowentry));
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     if (*length == TCP_CONN_LENGTH) /* Assume that the input name is the lowest */
       memcpy( (char *)lowest,(char *)name, TCP_CONN_LENGTH * sizeof(oid));
     for (Nextentry.tcpConnLocalAddress = (u_long)-1, req_type = GET_FIRST;
@@ -750,7 +750,7 @@ var_tcpEntry(struct variable *vp,
     if (Found == 0)
       return(NULL);
     memcpy((char *)name, (char *)lowest,
-	  ((int)vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF) * sizeof(oid));
+	  (vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF) * sizeof(oid));
     *length = vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF;
     *write_method = 0;
     *var_len = sizeof(long);

@@ -468,7 +468,7 @@ rt_stats(void)
 struct variable_list *
 getvarbyname(struct snmp_session *sp,
 	     oid *name,
-	     int len)
+	     size_t len)
 {
     struct snmp_pdu *request, *response;
     struct variable_list *var = NULL, *vp;

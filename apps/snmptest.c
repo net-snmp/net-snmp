@@ -380,12 +380,12 @@ input_variable(struct variable_list *vp)
 		break;
 	    case ASN_OCTET_STR:
 		if (ch == 'd'){
-		    vp->val_len = ascii_to_binary((u_char *)buf, value);
+		    vp->val_len = ascii_to_binary(buf, value);
 		} else if (ch == 's'){
 		    strcpy((char*)value, buf);
 		    vp->val_len = strlen(buf);
 		} else if (ch == 'x'){
-		    vp->val_len = hex_to_binary((u_char *)buf, value);
+		    vp->val_len = hex_to_binary(buf, value);
 		}
 		vp->val.string = (u_char *)malloc(vp->val_len);
 		memmove(vp->val.string, value, vp->val_len);

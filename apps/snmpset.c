@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     char types[128];
     char *values[128];
     oid name[MAX_OID_LEN];
-    int name_length;
+    size_t name_length;
     int status;
 
     /* get the common command line arguments */

@@ -181,7 +181,7 @@ void extensible_parse_config(char *token, char* cptr)
     while (isdigit(*cptr) || *cptr == '.') cptr++;
   }
   else {
-    (*pptmp)->miboid[0] = -1;
+    (*pptmp)->miboid[0] = 0;
     (*pptmp)->miblen = 0;
   }
   /* name */
@@ -235,7 +235,7 @@ void extensible_free_config (void)
 
 
 struct extensible *get_exten_instance(struct extensible *exten,
-				      int inst)
+				      size_t inst)
 {
   int i;
   
@@ -294,11 +294,11 @@ void execfix_parse_config(char *token, char* cptr) {
   strcpy(execp->fixcmd, cptr);
 }
 
-unsigned char *var_extensible_shell(struct variable *vp,
+const u_char *var_extensible_shell(struct variable *vp,
 				    oid *name,
-				    int *length,
+				    size_t *length,
 				    int exact,
-				    int *var_len,
+				    size_t *var_len,
 				    WriteMethod **write_method)
 {
 
@@ -351,10 +351,10 @@ int
 fixExecError(int action,
 	     u_char *var_val,
 	     u_char var_val_type,
-	     int var_val_len,
+	     size_t var_val_len,
 	     u_char *statP,
 	     oid *name,
-	     int name_len)
+	     size_t name_len)
 {
   
   struct extensible *exten;
@@ -394,15 +394,16 @@ struct variable2 extensible_relocatable_variables[] = {
   {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
 };
 
-unsigned char *var_extensible_relocatable(struct variable *vp,
+const u_char *var_extensible_relocatable(struct variable *vp,
 					  oid *name,
-					  int *length,
+					  size_t *length,
 					  int exact,
-					  int *var_len,
+					  size_t *var_len,
 					  WriteMethod **write_method)
 {
 
-  int i, fd;
+  int fd;
+  size_t i;
   FILE *file;
   struct extensible *exten = 0;
   static long long_ret;
@@ -494,10 +495,11 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
 
 struct subtree *find_extensible(struct subtree	*tp,
 				oid tname[],
-				int tnamelen,
+				size_t tnamelen,
 				int exact)
 {
-  int i,tmp;
+  size_t tmp;
+  size_t i;
   struct extensible *exten = 0;
   struct variable myvp;
   oid name[MAX_OID_LEN];

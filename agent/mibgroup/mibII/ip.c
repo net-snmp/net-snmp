@@ -212,9 +212,9 @@ void init_ip(void)
 static int
 header_ip(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
@@ -253,12 +253,12 @@ header_ip(struct variable *vp,
 #ifndef linux
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
-u_char *
+const u_char *
 var_ip(struct variable *vp,
        oid *name,
-       int *length,
+       size_t *length,
        int exact,
-       int *var_len,
+       size_t *var_len,
        WriteMethod **write_method)
 {
     static struct ipstat ipstat;
@@ -415,12 +415,12 @@ var_ip(struct variable *vp,
 
 #else /* HAVE_SYS_TCPIPSTATS_H */
 
-u_char *
+const u_char *
 var_ip(struct variable *vp,
        oid *name,
-       int *length,
+       size_t *length,
        int exact,
-       int *var_len,
+       size_t *var_len,
        WriteMethod **write_method)
 {
     static struct kna tcpipstats;
@@ -549,12 +549,12 @@ var_ip(struct variable *vp,
 
 #else /* linux */    
 
-u_char *
+const u_char *
 var_ip(struct variable *vp,
        oid *name,
-       int *length,
+       size_t *length,
        int exact,
-       int *var_len,
+       size_t *var_len,
        WriteMethod **write_method)
 {
     static struct ip_mib ipstat;
@@ -615,12 +615,12 @@ static int Address_Scan_Next (short *, struct in_ifaddr *);
   
 */
 
-u_char *
+const u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     /*
@@ -798,12 +798,12 @@ struct in_ifaddr *Retin_ifaddr;
 
 #else /* solaris2 */
 
-u_char *
+const u_char *
 var_ip(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     mib2_ip_t ipstat;
@@ -894,12 +894,12 @@ IP_Cmp(void *addr, void *ep)
     return (1);
 }
 
-u_char *
+const u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     /*
@@ -1040,9 +1040,9 @@ void init_ip(void)
 static int
 header_ip(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method)
 {
 #define IP_NAME_LENGTH	8
@@ -1067,12 +1067,12 @@ header_ip(struct variable *vp,
     return(MATCH_SUCCEEDED);
 }
 
-u_char *
+const u_char *
 var_ip(struct variable *vp,
        oid *name,
-       int *length,
+       size_t *length,
        int exact,
-       int *var_len,
+       size_t *var_len,
        WriteMethod **write_method)
 {
 	struct ipstat ipstat;
@@ -1317,12 +1317,12 @@ loop:
 	goto loop;
 }
 
-u_char *
+const u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
 	/*

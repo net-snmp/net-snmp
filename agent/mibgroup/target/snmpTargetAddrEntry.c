@@ -84,7 +84,8 @@ void snmpTargetAddrTable_addToList(
      struct targetAddrTable_struct **listPtr)
 {
   static struct targetAddrTable_struct *curr_struct, *prev_struct;
-  int    i, newOIDLen = 0, currOIDLen = 0;
+  int    i;
+  size_t newOIDLen = 0, currOIDLen = 0;
   oid    newOID[128], currOID[128];
   
   /* if the list is empty, add the new entry to the top */
@@ -162,13 +163,14 @@ void snmpTargetAddrTable_remFromList(
 struct targetAddrTable_struct *
 search_snmpTargetAddrTable(
      oid    *baseName,
-     int    baseNameLen,
+     size_t  baseNameLen,
      oid    *name,
-     int    *length,
+     size_t *length,
      int    exact)
 {
    static struct targetAddrTable_struct *temp_struct;
-   int    i, myOIDLen = 0;
+   int    i;
+   size_t myOIDLen = 0;
    oid    newNum[128];
 
    /* lookup entry in addrTable linked list, Get Current MIB ID */
@@ -225,7 +227,7 @@ int snmpTargetAddr_addName(
      struct targetAddrTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no name in config string\n"));
     return(0);
@@ -249,7 +251,7 @@ int snmpTargetAddr_addTDomain(
      struct targetAddrTable_struct *entry,
      char   *cptr)
 {
-  int len=128;
+  size_t len=128;
   
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no tDomain in config string\n"));
@@ -276,7 +278,7 @@ int snmpTargetAddr_addTAddress(
      struct targetAddrTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no tAddress in config string\n"));
     return(0);
@@ -347,7 +349,7 @@ int snmpTargetAddr_addTagList(
      struct targetAddrTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no tag list in config string\n"));
     return(0);
@@ -372,7 +374,7 @@ int snmpTargetAddr_addParams(
      struct targetAddrTable_struct *entry,
      char   *cptr)
 {
-  int    len;
+  size_t len;
   if (cptr == 0) {
     DEBUGMSGTL(("snmpTargetAddrEntry","ERROR snmpTargetAddrEntry: no params in config string\n"));
     return(0);
@@ -563,19 +565,19 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
 /*MIB table access routines */
 
 
-unsigned char *
+const u_char *
 var_snmpTargetAddrEntry(
     struct variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
 
   /* variables we may use later */
   static long                    long_ret;
-  static unsigned char           string[1500];
+  static char                    string[1500];
   static oid                     objid[128];
   struct targetAddrTable_struct *temp_struct;
   int                            i=0;
@@ -584,7 +586,7 @@ var_snmpTargetAddrEntry(
   *var_len = sizeof(long_ret); /* assume an integer and change later if not */
 
   /* look for OID in current table */
-  if ( (temp_struct = search_snmpTargetAddrTable(vp->name, (int)vp->namelen, 
+  if ( (temp_struct = search_snmpTargetAddrTable(vp->name, vp->namelen, 
 				      name, length, exact)) == 0 ) {
     /* for creation of new rows */
     if (vp->magic == SNMPTARGETADDRROWSTATUS)  {
@@ -662,12 +664,13 @@ write_snmpTargetAddrTDomain(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
-  int                            objSize=128, bigsize=1000, i;
+  size_t                         bigsize=1000, objSize=128;
+  int                            i;
   struct targetAddrTable_struct *temp_struct;
   static oid                     objid[128];
 
@@ -722,13 +725,13 @@ write_snmpTargetAddrTAddress(
    int action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static unsigned char           string[1500];
-  int                            size=1500, bigsize=1000;
+  size_t                         size=1500, bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -782,14 +785,15 @@ write_snmpTargetAddrTimeout(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -833,14 +837,15 @@ write_snmpTargetAddrRetryCount(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -884,14 +889,14 @@ write_snmpTargetAddrTagList(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static unsigned char           string[1500];
-  int                            size=1500, bigsize=1000;
+  size_t                         size=1500, bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -936,13 +941,13 @@ write_snmpTargetAddrParams(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static unsigned char           string[1500];
-  int                            size=1500, bigsize=1000;
+  size_t                         size=1500, bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -992,13 +997,14 @@ write_snmpTargetAddrStorageType(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -1051,10 +1057,11 @@ write_snmpTargetAddrStorageType(
    adds it to the linked list. 'name' should be the full OID of the new index. 
    It passes back 0 if unsuccessfull.*/
 int snmpTargetAddr_createNewRow(
-     oid  *name,
-     int  name_len)
+     oid   *name,
+     size_t name_len)
 {
-  int    newNameLen, i;
+  size_t newNameLen;
+  int i;
   struct targetAddrTable_struct *temp_struct;
 
   /* setup a new snmpTargetAddrTable structure and add it to the list */
@@ -1085,15 +1092,16 @@ write_snmpTargetAddrRowStatus(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   enum commit_action_enum        {NOTHING, DESTROY, CREATE, CHANGE};
   enum commit_action_enum        onCommitDo = NOTHING; 
   static long                    long_ret;
-  int                            size, bigsize=1000;
+  size_t                         size;
+  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {

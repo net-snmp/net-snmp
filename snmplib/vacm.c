@@ -53,9 +53,9 @@ static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 
 struct vacm_viewEntry *
-vacm_getViewEntry(char *viewName,
+vacm_getViewEntry(const char *viewName,
 		  oid *viewSubtree,
-		  int viewSubtreeLen)
+		  size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
     char view[32];
@@ -112,9 +112,9 @@ vacm_scanViewNext (void)
 }
 
 struct vacm_viewEntry *
-vacm_createViewEntry(char *viewName,
+vacm_createViewEntry(const char *viewName,
 		     oid *viewSubtree,
-		     int viewSubtreeLen)
+		     size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lp, *op = NULL;
     int cmp;
@@ -146,9 +146,9 @@ next:
 }
 
 void
-vacm_destroyViewEntry(char *viewName,
+vacm_destroyViewEntry(const char *viewName,
 		      oid *viewSubtree,
-		      int viewSubtreeLen)
+		      size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lastvp = NULL;
 
@@ -189,7 +189,7 @@ void vacm_destroyAllViewEntries (void)
 
 struct vacm_groupEntry *
 vacm_getGroupEntry(int securityModel,
-		   char *securityName)
+		   const char *securityName)
 {
     struct vacm_groupEntry *vp;
     char secname[32];
@@ -221,7 +221,7 @@ vacm_scanGroupNext (void)
 
 struct vacm_groupEntry *
 vacm_createGroupEntry(int securityModel,
-		      char *securityName)
+		      const char *securityName)
 {
     struct vacm_groupEntry *gp, *lg, *og;
     int cmp;
@@ -252,7 +252,7 @@ vacm_createGroupEntry(int securityModel,
 
 void
 vacm_destroyGroupEntry(int securityModel,
-		       char *securityName)
+		       const char *securityName)
 {
     struct vacm_groupEntry *vp, *lastvp = NULL;
 
@@ -326,8 +326,8 @@ vacm_scanAccessNext (void)
 }
 
 struct vacm_accessEntry *
-vacm_createAccessEntry(char *groupName, 
-		       char *contextPrefix,
+vacm_createAccessEntry(const char *groupName, 
+		       const char *contextPrefix,
 		       int securityModel, 
 		       int securityLevel)
 {
@@ -368,8 +368,8 @@ next:
 }
 
 void
-vacm_destroyAccessEntry(char *groupName, 
-			char *contextPrefix,
+vacm_destroyAccessEntry(const char *groupName, 
+			const char *contextPrefix,
 			int securityModel,
 			int securityLevel)
 {

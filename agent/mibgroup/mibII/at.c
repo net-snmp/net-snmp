@@ -136,9 +136,9 @@ void init_at(void)
 u_char *
 var_atEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     /*
@@ -294,12 +294,12 @@ AT_Cmp(void *addr, void *ep)
   return ret;
 }
 
-u_char *
+const u_char *
 var_atEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     /*
