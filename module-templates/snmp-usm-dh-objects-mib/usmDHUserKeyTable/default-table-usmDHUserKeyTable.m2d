@@ -32,13 +32,13 @@
 ##
 ##
 ##
-@eval $m2c_data_context = "struct usmUser *"@
+@eval $m2c_data_context = "struct usmUser"@
 ##
 ########################################################################
 ##
 ##
 ##
-## @eval $m2c_data_allocate = 0@
+@eval $m2c_data_allocate = 1@
 ##
 ########################################################################
 ##
