@@ -328,6 +328,9 @@
 /* Define if you have the setmntent function.  */
 #undef HAVE_SETMNTENT
 
+/* Define if you have the setsid function.  */
+#undef HAVE_SETSID
+
 /* Define if you have the setuid function.  */
 #undef HAVE_SETUID
 
