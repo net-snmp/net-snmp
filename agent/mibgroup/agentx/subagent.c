@@ -169,7 +169,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     struct agent_snmp_session  *asp;
     struct agent_set_info      *asi;
     int status, allDone, i;
-    struct variable_list *var_ptr, *var_ptr2;
+    struct variable_list *var_ptr, *var_ptr2, *v = NULL, *ov = NULL, *w = NULL;
 
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
       int period = ds_get_int(DS_APPLICATION_ID,DS_AGENT_AGENTX_PING_INTERVAL);
@@ -193,7 +193,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	snmp_alarm_register(period, SA_REPEAT, agentx_reopen_session, NULL);
       }
       return 0;
-    }else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    } else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       DEBUGMSGTL(("agentx/subagent", "unexpected callback op %d\n",operation));
       return 1;
     }
@@ -270,8 +270,42 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
     case AGENTX_MSG_GETNEXT:
         DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
-	asp->exact   = FALSE;
-	status = handle_next_pass( asp );
+	asp->exact = FALSE;
+	ov = snmp_clone_varbind(asp->start);
+	status = handle_next_pass(asp);
+	
+	/*  Check results are in scope requested by the master agent.  This
+	    assumes that varbinds aren't re-ordered.  */
+
+	for (v = ov, w = asp->start;
+	     v != NULL && w != NULL;
+	     v = v->next_variable, w = w->next_variable) {
+	  if (v->type == ASN_PRIV_EXCL_RANGE) {
+	    /*  The master agent requested scoping for this variable.  */
+	    int rc = snmp_oid_compare(w->name, w->name_length,
+				      v->val.objid, v->val_len/sizeof(oid));
+	    DEBUGMSGTL(("agentx/subagent", "result "));
+	    DEBUGMSGOID(("agentx/subagent", w->name, w->name_length));
+	    DEBUGMSG(("agentx/subagent", " scope to "));
+	    DEBUGMSGOID(("agentx/subagent",
+			 v->val.objid, v->val_len/sizeof(oid)));
+	    DEBUGMSG(("agentx/subagent", " result %d\n", rc));
+	    if (rc >= 0) {
+	      /*  The varbind is out of scope.  From RFC2741, p. 66: "If the
+		  subagent cannot locate an appropriate variable, v.name is
+		  set to the starting OID, and the VarBind is set to
+		  `endOfMibView'".  */
+	      snmp_set_var_objid(w, v->name, v->name_length);
+	      snmp_set_var_typed_value(w, SNMP_ENDOFMIBVIEW, 0, 0);
+	      DEBUGMSGTL(("agentx/subagent",
+			  "scope violation -- return endOfMibView\n"));
+	    }
+	  }
+	}
+
+	if (ov != NULL) {
+	  snmp_free_varbind(ov);
+	}
 	break;
 
     case AGENTX_MSG_TESTSET:

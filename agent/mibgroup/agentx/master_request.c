@@ -238,13 +238,13 @@ handle_agentx_response(int op,
     } else {
 	/*  Otherwise, process successful requests.  */
 	DEBUGMSGTL(("agentx/master","handle_agentx_response() beginning\n"));
-
+	
 	for (i = 0, vbp = pdu->variables;
 	     (vbp != NULL) && (i < ax_vlist->num_vars);
 	     i++, vbp = vbp->next_variable) {
 
-	    DEBUGMSGTL(("agentx/master","handle_agentx_response: process: "));
-	    DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
+	    DEBUGMSGTL(("agentx/master", "handle_agentx_response: process: "));
+	    DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
 	    DEBUGMSG(("agentx/master","\n"));
 	    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
 		sprint_variable(buf, vbp->name, vbp->name_length, vbp);
@@ -259,12 +259,16 @@ handle_agentx_response(int op,
 	      DEBUGMSGTL(("agentx/master",
 			  "noSuchInstance doing getNext on FQI\n"));
 
-	      /*  This is *almost* like the case below, but we don't need to
-		  step on to the next variable here because of the way inexact
-		  queries get stepped over FQIs for us.  */
-	      
-	      asp->index = ax_vlist->variables[i]->index;
-	      asp->status = handle_one_var(asp, ax_vlist->variables[i]);
+	      retry_sub = find_subtree_next(vbp->name,vbp->name_length,NULL);
+
+	      if (retry_sub) {
+		(void)snmp_set_var_objid(ax_vlist->variables[i], 
+				      retry_sub->start, retry_sub->start_len);
+		asp->index = ax_vlist->variables[i]->index;
+		asp->status = handle_one_var(asp, ax_vlist->variables[i]);
+	      } else {
+		ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
+	      }
 	    } else if (!asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
 	       in_a_view(vbp->name, &vbp->name_length, asp->pdu, vbp->type))) {
 
@@ -339,8 +343,7 @@ handle_agentx_response(int op,
 		if ( asp->status != SNMP_ERR_NOERROR ) {
 			asp->mode   = FINISHED_FAILURE;
 			asp->status = SNMP_ERR_UNDOFAILED;
-		}
-		else {
+		} else {
 			asp->status = oldstatus;
 		}
 		break;
@@ -502,17 +505,19 @@ get_agentx_request(struct agent_snmp_session *asp,
     pdu->transid     = asp->pdu->transid;
     pdu->sessid      = ax_session->sessid;
     pdu->flags      |= UCD_MSG_FLAG_EXPECT_RESPONSE;
-    switch (asp->pdu->command ) {
+
+    switch (asp->pdu->command) {
 	case SNMP_MSG_GET:
                 DEBUGMSGTL(("agentx/master","-> get\n"));
 		pdu->command = AGENTX_MSG_GET;
 		break;
 	case SNMP_MSG_GETNEXT:
 	case SNMP_MSG_GETBULK:
-                DEBUGMSGTL(("agentx/master","-> getnext/bulk\n"));
 		if (sub->flags & FULLY_QUALIFIED_INSTANCE) {
+		    DEBUGMSGTL(("agentx/master","-> getnext/bulk [FQI -> get]\n"));
 		    pdu->command = AGENTX_MSG_GET;
 		} else {
+		    DEBUGMSGTL(("agentx/master","-> getnext/bulk\n"));
 		    pdu->command = AGENTX_MSG_GETNEXT;
 		}
 		break;

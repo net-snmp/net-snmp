@@ -377,12 +377,9 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
 
     case ASN_OBJECT_ID:
     case ASN_PRIV_EXCL_RANGE:
-	bufp = agentx_build_oid(bufp, out_length, 0, vp->val.objid,
-				vp->val_len/4, network_byte_order);
-	break;
     case ASN_PRIV_INCL_RANGE:
 	bufp = agentx_build_oid(bufp, out_length, 1, vp->val.objid,
-				vp->val_len/4, network_byte_order);
+				vp->val_len/sizeof(oid), network_byte_order);
 	break;
 
     case ASN_COUNTER64:
@@ -648,7 +645,7 @@ _agentx_build(struct snmp_session        *session,
 	    	if ( bufp == NULL )
 	    	    return -1;
 		bufp = agentx_build_oid( bufp, out_length, 0,
-	    		vp->val.objid, vp->val_len/4,
+	    		vp->val.objid, vp->val_len/sizeof(oid),
 			pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
 	    	if ( bufp == NULL )
 	    	    return -1;
