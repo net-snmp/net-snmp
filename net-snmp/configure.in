@@ -982,6 +982,18 @@ AC_CHECK_LIB(rpm, rpmdbOpen,[
   CFLAGS="$CFLAGS -I/usr/include/rpm"
 ],,-lz)
 
+dnl
+dnl now check for rpm using the appropriate db library
+dnl
+if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
+  unset ac_cv_lib_rpm_rpmdbOpen
+  AC_CHECK_LIB(rpm, rpmdbOpen,[
+    AC_DEFINE(HAVE_LIBRPM)
+    LIBS="-lrpm -lpopt $LIBS"
+    CFLAGS="$CFLAGS -I/usr/include/rpm"
+  ],,-lpopt -lz)
+fi
+
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
@@ -1002,7 +1014,7 @@ AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslo
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_mib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h sys/disklabel.h machine/types.h sys/socketvar.h)
 dnl Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/in_pcb.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h)
 dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h sys/pool.h)
 dnl BSDi2 headers
@@ -1025,6 +1037,18 @@ dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)
 dnl KAME
 AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
+
+dnl OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
+AC_MSG_CHECKING([for netinet/in_pcb.h])
+AC_CACHE_VAL(cv_have_netinet_in_pcb_h,
+[ AC_TRY_CPP( [
+#include <netinet/in.h>
+#include <netinet/in_pcb.h>
+], cv_have_netinet_in_pcb_h=yes, cv_have_netinet_in_pcb_h=no)])
+AC_MSG_RESULT($cv_have_netinet_in_pcb_h)
+if test $cv_have_netinet_in_pcb_h = yes; then
+  AC_DEFINE(HAVE_NETINET_IN_PCB_H)
+fi
 
 dnl OpenSSL
 AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h)
@@ -1261,7 +1285,7 @@ AC_TRY_COMPILE([
 #endif
 
   struct rtentry rt; 
-  rt.rt_nodes[0].rn_b = 1;
+  rt.rt_nodes[0].rn_flags = 1;
   rt.rt_dst;
   ], ac_cv_RTENTRY_TYPE="BSD-4.4")
 

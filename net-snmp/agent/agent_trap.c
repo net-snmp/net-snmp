@@ -466,13 +466,13 @@ void send_enterprise_trap_vars (int trap,
 		break;
 
 	case SNMP_TRAP_ENTERPRISESPECIFIC:
-		memcpy( &temp_oid,
+		memcpy( temp_oid,
 				    (char *)enterprise,
 				    (enterprise_length)*sizeof(oid));
 		temp_oid[ enterprise_length   ] = 0;
 		temp_oid[ enterprise_length+1 ] = specific;
 		snmp_set_var_value( &snmptrap_var,
-				    (u_char *)&temp_oid,
+				    (u_char *)temp_oid,
 				    (enterprise_length+2)*sizeof(oid));
 		snmptrap_var.next_variable  = vars;
 		last_var = NULL;	/* Don't need version info */

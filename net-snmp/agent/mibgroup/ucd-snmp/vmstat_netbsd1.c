@@ -18,6 +18,7 @@
 #include <sys/ioctl.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
+#include <sys/sched.h>
 
 #include <vm/vm_param.h>
 #include <uvm/uvm_extern.h>

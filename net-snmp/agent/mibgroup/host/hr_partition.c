@@ -14,6 +14,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
 
 #include "host_res.h"
 #include "hr_partition.h"
@@ -282,8 +283,10 @@ Get_Next_HR_Partition (void)
 	fd=open( string, O_RDONLY  );
 	if (fd != -1 ) {
             close(fd);
-            return( HRP_index );
+            return HRP_index;
 	}
+	else if (errno == EBUSY)
+	    return HRP_index;
 	HRP_index++;
     }
 

@@ -15,7 +15,6 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
-#include <sys/socket.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -25,6 +24,9 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 
 #if HAVE_NETINET_IN_H

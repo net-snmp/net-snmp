@@ -16,6 +16,7 @@
 #else
 #include <strings.h>
 #endif
+#include <sys/types.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -187,7 +188,7 @@ void init_system_mib(void)
 #endif /* HAVE_GETHOSTNAME */
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("mibII/system", system_variables, variable2, \
+  REGISTER_MIB("mibII/system", system_variables, variable2,
                system_variables_oid);
 
   if ( ++system_module_count == 3 )

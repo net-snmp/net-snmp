@@ -167,7 +167,7 @@ void init_errormib(void)
   oid extensible_error_variables_oid[] = { EXTENSIBLEMIB,ERRORMIBNUM };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/errormib", extensible_error_variables, \
+  REGISTER_MIB("ucd-snmp/errormib", extensible_error_variables,
                variable2, extensible_error_variables_oid);
 }
 

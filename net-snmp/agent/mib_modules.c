@@ -13,6 +13,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
