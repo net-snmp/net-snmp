@@ -12,7 +12,7 @@
     /* copy temporary value to passed parameter */
 @    if $m2c_node_needlength == 1@
     (* ${node}_ptr_ptr) = $m2c_node_lh;
-     (*${node}_len) = $m2c_node_lhs;
+     (*${node}_len_ptr) = $m2c_node_lhs;
 @    else@
     (* ${node}_ptr) = $m2c_node_lh;
 @    end@
