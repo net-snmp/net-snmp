@@ -120,6 +120,10 @@ void init_vmstat(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+    {CPURAWUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWNICE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
+    {CPURAWSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
 /* Future use: */
 /*
     {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -176,12 +180,15 @@ void getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 enum vmstat_index { swapin = 0,    swapout, 
 		    iosent,        ioreceive, 
 		    sysinterrupts, syscontext,
-		    cpuuser,       cpusystem, cpuidle };
+		    cpuuser,       cpusystem, cpuidle,
+                    cpurawuser,    cpurawnice,
+                    cpurawsystem,  cpurawidle };
 
 unsigned vmstat (int iindex) 
 {
   unsigned long cpu_use[2], cpu_nic[2], cpu_sys[2], cpu_idl[2];
   double duse,dsys,didl,ddiv,divo2;
+  double druse,drnic,drsys,dridl;
   unsigned int pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
   unsigned int inter[2],ticks[2],ctxt[2];
   unsigned int hz;
@@ -195,6 +202,10 @@ unsigned vmstat (int iindex)
   ddiv= (duse+dsys+didl);
   hz=sysconf(_SC_CLK_TCK); /* get ticks/s from system */
   divo2= ddiv/2;
+  druse= *(cpu_use);
+  drnic= *(cpu_nic);
+  drsys= *(cpu_sys);
+  dridl= (*(cpu_idl));
 
   if (iindex == swapin) {
     return (*(pswpin)*4*hz+divo2)/ddiv;
@@ -214,6 +225,14 @@ unsigned vmstat (int iindex)
     return (100*dsys/ddiv);
   } else if (iindex == cpuidle) {
     return (100*didl/ddiv);
+  } else if (iindex == cpurawuser) {
+    return druse;
+  } else if (iindex == cpurawnice) {
+    return drnic;
+  } else if (iindex == cpurawsystem) {
+    return drsys;
+  } else if (iindex == cpurawidle) {
+    return dridl;
   } else {
     return -1;
   }
@@ -288,6 +307,26 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
     case CPUIDLE:
 #ifdef linux
       long_ret = vmstat(cpuidle);
+#endif
+      return((u_char *) (&long_ret));
+    case CPURAWUSER:
+#ifdef linux
+      long_ret = vmstat(cpurawuser);
+#endif
+      return((u_char *) (&long_ret));
+    case CPURAWNICE:
+#ifdef linux
+      long_ret = vmstat(cpurawnice);
+#endif
+      return((u_char *) (&long_ret));
+    case CPURAWSYSTEM:
+#ifdef linux
+      long_ret = vmstat(cpurawsystem);
+#endif
+      return((u_char *) (&long_ret));
+    case CPURAWIDLE:
+#ifdef linux
+      long_ret = vmstat(cpurawidle);
 #endif
       return((u_char *) (&long_ret));
 /* reserved for future use */
