@@ -304,8 +304,8 @@ meminfo(void)
         for (j = 0; j < MAX_COL && *p; j++) {   /* scanf column-by-column */
             l = sscanf(p, "%lu%n", &m, &k);
             m /= 1024;
-            if (4294967295 > m) {
-                *(row[i] + j) = 4294967295;
+            if (0x7fffffff < m) {
+                *(row[i] + j) = 0x7fffffff;
             } else {
                 *(row[i] + j) = (unsigned) m;
             }
