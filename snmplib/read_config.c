@@ -604,18 +604,19 @@ void read_config_print_usage(const char *lead)
     snmp_log(LOG_INFO, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
             ctmp->fileHeader);
     for(ltmp = ctmp->start; ltmp != NULL; ltmp = ltmp->next) {
-        if (ltmp->help != NULL) {
-            DEBUGIF("read_config") {
-                if (ltmp->config_time == PREMIB_CONFIG)
-                    DEBUGMSG(("read_config", "*"));
-                else
-                    DEBUGMSG(("read_config", " "));
-                if (ltmp->help)
-                    snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead,
-                             ltmp->config_token, ltmp->help);
-                else
-                    snmp_log(LOG_INFO, "%s%s%-15s [NO HELP]\n", lead, lead,
-                             ltmp->config_token);
+        DEBUGIF("read_config_usage") {
+            if (ltmp->config_time == PREMIB_CONFIG)
+                DEBUGMSG(("read_config_usage", "*"));
+            else
+                DEBUGMSG(("read_config_usage", " "));
+        }
+        if (ltmp->help) {
+            snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead,
+                     ltmp->config_token, ltmp->help);
+        } else {
+            DEBUGIF("read_config_usage") {
+                snmp_log(LOG_INFO, "%s%s%-15s [NO HELP]\n", lead, lead,
+                         ltmp->config_token);
             }
         }
     }
