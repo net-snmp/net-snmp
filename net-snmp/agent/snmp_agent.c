@@ -571,12 +571,12 @@ int	netsnmp_register_agent_nsap	(netsnmp_transport *t)
   }
 }
 
-void	denetsnmp_register_agent_nsap	(int handle)
+void	netsnmp_deregister_agent_nsap	(int handle)
 {
   agent_nsap *a = NULL, **prevNext = &agent_nsap_list;
   int main_session_deregistered = 0;
 
-  DEBUGMSGTL(("denetsnmp_register_agent_nsap", "handle %d\n", handle));
+  DEBUGMSGTL(("netsnmp_deregister_agent_nsap", "handle %d\n", handle));
 
   for (a = agent_nsap_list; a != NULL && a->handle < handle; a = a->next) {
     prevNext = &(a->next);
