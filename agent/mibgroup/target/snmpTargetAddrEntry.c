@@ -242,6 +242,7 @@ oid snmpTargetAddrEntry_variables_oid[] = { 1,3,6,1,6,3,12,1,2,1 };
 
 void init_snmpTargetAddrEntry(void) {
   aAddrTable = 0;
+  DEBUGMSGTL(("snmpTargetAddrEntry","init\n"));
   REGISTER_MIB("target/snmpTargetAddrEntry", snmpTargetAddrEntry_variables,
 			variable2, snmpTargetAddrEntry_variables_oid);
 
@@ -704,7 +705,7 @@ write_snmpTargetAddrTDomain(
   size_t                         bigsize=1000, objSize=128;
   int                            i;
   struct targetAddrTable_struct *temp_struct;
-  static oid                     objid[128];
+  static oid                    objid[MAX_OID_LEN];
 
   if (var_val_type != ASN_OBJECT_ID) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain not ASN_OBJECT_ID\n"));
@@ -716,7 +717,8 @@ write_snmpTargetAddrTDomain(
   }
 
   /* spec check, ??? */
-  asn_parse_objid(var_val, &bigsize, &var_val_type, objid, &objSize);
+  objSize = var_val_len/sizeof(oid);
+  memcpy(objid, var_val, var_val_len);
   
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTDOMAINCOLUMN;
   if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
@@ -776,7 +778,8 @@ write_snmpTargetAddrTAddress(
   }
 
   /* spec check, ??? */
-  asn_parse_string(var_val, &bigsize, &var_val_type, string, &size);
+  size = var_val_len;
+  memcpy(string, var_val, var_val_len);
   
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTADDRESSCOLUMN;
   if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
@@ -836,8 +839,7 @@ write_snmpTargetAddrTimeout(
       DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   
   /* spec check range, no spec check */
   
@@ -888,8 +890,7 @@ write_snmpTargetAddrRetryCount(
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRetryCount: bad length\n"));
     return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   
   /* spec check range, no spec check */
   
@@ -941,7 +942,8 @@ write_snmpTargetAddrTagList(
   }
   
   /* spec check, ??? */
-  asn_parse_string(var_val, &bigsize, &var_val_type, string, &size);
+  size = var_val_len;
+  memcpy(string, var_val, var_val_len);
   
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTAGLISTCOLUMN;
   if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
@@ -992,7 +994,8 @@ write_snmpTargetAddrParams(
   }
 
   /* spec check, ??? */
-  asn_parse_string(var_val, &bigsize, &var_val_type, string, &size);
+  size = var_val_len;
+  memcpy(string, var_val, var_val_len);
   
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRPARAMSCOLUMN;
   if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
@@ -1048,8 +1051,7 @@ write_snmpTargetAddrStorageType(
       return SNMP_ERR_WRONGLENGTH;
   }
 
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   
   if ( (long_ret != SNMP_STORAGE_OTHER) && (long_ret != SNMP_STORAGE_VOLATILE) &&
        (long_ret != SNMP_STORAGE_NONVOLATILE) )  {
@@ -1144,8 +1146,7 @@ write_snmpTargetAddrRowStatus(
       DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
 
   /* search for struct in linked list */
   snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRROWSTATUSCOLUMN;
