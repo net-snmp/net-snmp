@@ -180,8 +180,8 @@ retry:
         } else {
           fprintf(stderr, "Error in packet.\nReason: %s\n",
                   snmp_errstring(response->errstat));
-          if (response->errstat == SNMP_ERR_NOSUCHNAME){
-            fprintf(stderr, "This name doesn't exist: ");
+          if (response->errindex != 0){
+            fprintf(stderr, "Failed object: ");
           for(count = 1, vars = response->variables;
                 vars && count != response->errindex;
                 vars = vars->next_variable, count++)

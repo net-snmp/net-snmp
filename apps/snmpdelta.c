@@ -642,8 +642,8 @@ int main(int argc, char *argv[])
 	  }
 	  end = last_end;
 	  continue;
-	} else if (response->errstat == SNMP_ERR_NOSUCHNAME){
-	  fprintf(stderr, "This object doesn't exist on %s: ", gateway);
+	} else if (response->errindex != 0){
+	  fprintf(stderr, "Failed object: ");
 	  for(count = 1, vars = response->variables;
 	      vars && count != response->errindex;
 	      vars = vars->next_variable, count++)

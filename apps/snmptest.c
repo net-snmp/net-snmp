@@ -234,13 +234,13 @@ int main(int argc, char *argv[])
 		    } else {
 			printf("Error in packet.\nReason: %s\n",
 				snmp_errstring(response->errstat));
-			if (response->errstat == SNMP_ERR_NOSUCHNAME){
+			if (response->errindex != 0){
 			    for(count = 1, vars = response->variables;
 				vars && count != response->errindex;
 				vars = vars->next_variable, count++)
 				;
 			    if (vars){
-				printf("This name doesn't exist: ");
+				printf("Failed object: ");
 				print_objid(vars->name, vars->name_length);
 			    }
 			    printf("\n");
