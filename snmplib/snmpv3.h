@@ -15,7 +15,8 @@ void    snmpv3_privtype_conf(char *word, char *cptr);
 void    init_snmpv3(const char *);
 int	init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                                 void *clientarg);
-void    shutdown_snmpv3(const char *type);
+int     snmpv3_store(int majorID, int minorID, void *serverarg,
+                     void *clientarg);
 int     snmpv3_local_snmpEngineBoots(void);
 int     snmpv3_clone_engineID(u_char **, int* , u_char*, int);
 int     snmpv3_get_engineID(char *buf, int buflen);

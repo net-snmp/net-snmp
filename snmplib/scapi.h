@@ -31,7 +31,8 @@
 int sc_get_properlength(oid *hashtype, u_int hashtype_len);
 
 int	sc_init (void);
-int	sc_shutdown (void);
+int	sc_shutdown (int majorID, int minorID, void *serverarg,
+                     void *clientarg);
 
 int	sc_random (	u_char *buf, u_int *buflen);
 

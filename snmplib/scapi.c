@@ -132,6 +132,11 @@ sc_init(void)
 #endif
 #endif
 
+#if		!defined(USE_INTERNAL_MD5) 
+	snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                               sc_shutdown, NULL);
+#endif		/* !USE_INTERNAL_MD5 */
+
 	return rval;
 
 }  /* end sc_init() */
@@ -151,8 +156,7 @@ sc_init(void)
  * bits stored in the KMT cache.
  */
 int
-sc_shutdown(void)
-{
+sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
 	int		rval = SNMPERR_SUCCESS;
 
 #ifdef HAVE_LIBKMT

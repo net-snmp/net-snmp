@@ -18,6 +18,7 @@
 #include "mibincl.h"
 #include "snmpTargetAddrEntry.h"
 #include "read_config.h"
+#include "callback.h"
 
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
 				  i.e. everything but index*/
@@ -212,6 +213,11 @@ void init_snmpTargetAddrEntry(void) {
   aAddrTable = 0;
   snmpd_register_config_handler("targetAddr", snmpd_parse_config_targetAddr,
 				0, "");
+
+  /* we need to be called back later */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                         store_snmpTargetAddrEntry, NULL);
+
 }  /* init_snmpTargetAddrEntry */
 
 
@@ -515,11 +521,12 @@ void snmpd_parse_config_targetAddr(char *token, char *char_ptr)
 /* Shutdown routines */
 
 
-/* shutdown_snmpTargetAddrEntry handles the shutdown proccess 
+/* store_snmpTargetAddrEntry handles the persistent storage proccess 
    for this MIB table. It writes out all the non-volatile rows 
    to permanent storage on a shutdown  */
-void 
-shutdown_snmpTargetAddrEntry(void)
+int 
+store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
+                          void *clientarg)
 {
   struct targetAddrTable_struct *curr_struct;
   char line[1024];
@@ -548,8 +555,9 @@ shutdown_snmpTargetAddrEntry(void)
       curr_struct = curr_struct->next;
     }
   }
+  return SNMPERR_SUCCESS;
 
-}  /*  shutdown_snmpTargetAddrEntry  */
+}  /*  store_snmpTargetAddrEntry  */
 
 
 /*MIB table access routines */
