@@ -151,9 +151,7 @@ init_master_agent(int dest_port,
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                   int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
 {
-    struct snmp_session
-                        sess,
-                       *session=&sess;
+    struct snmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return;
@@ -162,27 +160,23 @@ init_master_agent(int dest_port,
     /* set up a fake session for incoming requests that opens a port
      * that we listen to. */
 
-    snmp_sess_init(session);
+    snmp_sess_init( &sess );
     
-    session->version = SNMP_DEFAULT_VERSION;
-    session->peername = SNMP_DEFAULT_PEERNAME;
-    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+    sess.version = SNMP_DEFAULT_VERSION;
+    sess.peername = SNMP_DEFAULT_PEERNAME;
+    sess.community_len = SNMP_DEFAULT_COMMUNITY_LEN;
      
-    session->local_port = dest_port;
-    session->callback = handle_snmp_packet;
-    session->authenticator = NULL;
-    session = snmp_open( session );
+    sess.local_port = dest_port;
+    sess.callback = handle_snmp_packet;
+    sess.authenticator = NULL;
+    session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0 );
 
     if ( session == NULL ) {
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("init_master_agent", &sess);
-	/*return;*/
 	exit(1);
     }
-
-    if (pre_parse)
-      set_pre_parse( session, pre_parse );
-    if (post_parse)
-      set_post_parse( session, post_parse );
+   /* Ok, what to do with session pointer ??? */
 }
 
 struct agent_snmp_session  *
