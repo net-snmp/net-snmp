@@ -2,6 +2,8 @@
 #!/usr/bin/perl -w
 
 #
+# $Id$
+#
 # Description: 
 #
 # This program, given an OID reference as an argument, creates some
@@ -256,6 +258,10 @@ sub process_vars {
 #   @foreach $VAR column@
 #     repeat iterate over code until @end@ setting $VAR to all known
 #     columns within a given table.  Obviously this must be called
+#     within a foreach-table clause.
+#   @foreach $VAR nonindex@
+#     repeat iterate over code until @end@ setting $VAR to all known
+#     non-index columns within a given table.  Obviously this must be called
 #     within a foreach-table clause.
 #   @foreach $VAR index@
 #     repeat iterate over code until @end@ setting $VAR to all known
@@ -680,6 +686,21 @@ sub setup_data {
 	my $tablename = $mib->{label};
 	my $entry = $mib->{children};
 	my $columns = $entry->[0]{children};
+        my $augments = $entry->[0]{'augments'};
+        if ($augments) {
+           my $mib = $SNMP::MIB{$augments} || 
+		die "can't find info about augmented table $augments in table $tablename\n";
+           $mib = $mib->{parent} || 
+		die "can't find info about augmented table $augments in table $tablename\n";
+	   my $entry = $mib->{children};
+	   foreach my $index (@{$entry->[0]{'indexes'}}) {
+	       my $node = $SNMP::MIB{$index} || 
+		   die "can't find info about index $index in table $tablename\n";
+	       push @{$tables{$tablename}{'index'}}, $index;
+               $indexes = "$indexes $index"
+	   }
+           my $columns = $entry->[0]{children};
+        }
 	foreach my $index (@{$entry->[0]{'indexes'}}) {
 	    my $node = $SNMP::MIB{$index} || 
 		die "can't find info about index $index in table $tablename\n";
