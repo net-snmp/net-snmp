@@ -118,6 +118,9 @@ int exec_command(ex)
   }
   fclose(file);
   close(fd);
+#ifndef CACHETIME
+  while(wait3(&ex->result,WNOHANG,0) > 0);
+#endif
   return(ex->result);
 }
 
