@@ -965,6 +965,77 @@ find_tree_node(const char *name,
     return(NULL);
 }
 
+/* computes a value which represents how close name1 is to name2.
+ * high scores mean a worse match.
+ * (yes, the algorithm sucks!)
+ */
+#define MAX_BAD 0xffffff
+
+u_int
+compute_match(const char *search_base, const char *key) {
+    /* first find the longest matching substring (ick) */
+    char *first = NULL, *result = NULL, *entry;
+    const char *position;
+    char *newkey = strdup(key);
+    
+    entry = strtok( newkey, "*" );
+    position = search_base;
+    while ( entry ) {
+        result = strstr(position, entry);
+
+        if (result == NULL) {
+            free(newkey);
+            return MAX_BAD;
+        }
+
+        if (first == NULL)
+            first = result;
+        
+        position = result + strlen(entry);
+        entry = strtok( NULL, "*" );
+    }
+    free(newkey);
+    if (!result)
+        return MAX_BAD;
+    return(first-search_base);
+}
+
+
+struct tree *
+find_best_tree_node(const char *name, struct tree *tree_top, u_int *match)
+{
+    
+    struct tree *tp, *best_so_far = NULL, *retptr;
+    int count, *int_p;
+    u_int old_match=MAX_BAD, new_match;
+
+    if (!name || !*name)
+	return(NULL);
+
+    if (!tree_top)
+        tree_top = get_tree_head();
+
+    for ( tp = tree_top ; tp ; tp=tp->next_peer ) {
+        new_match = compute_match(tp->label, name);
+        if (new_match < old_match) {
+            best_so_far = tp;
+            old_match = new_match;
+        }
+        if (tp->child_list) {
+            retptr = find_best_tree_node(name, tp->child_list, &new_match);
+            if (new_match < old_match) {
+                best_so_far = retptr;
+                old_match = new_match;
+            }
+        }
+    }
+
+    if (match)
+        *match = old_match;
+    return(best_so_far);
+}
+
+
 static void
 merge_anon_children(struct tree *tp1,
 		    struct tree *tp2)
