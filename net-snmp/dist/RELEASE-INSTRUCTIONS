@@ -85,6 +85,8 @@ RELEASING:
      You'll have to then check these and commit them (possibly adding
      any new ones that have been modified since then).
 
+     Don't forget to update Makefile.in for any new manual pages.
+
   3) Update Makefile dependencies:
 
         a) First, run configure using an appropriate module set.
@@ -210,30 +212,44 @@ RELEASING:
 ***************************************************************************
 CREATING BINARY DISTRIBUTIONS
 
-0) Make SURE when building binary packages that you run configure using
-   --disable-privacy.  This removes encryption support, which can not be
-   present in binaries due to U.S. export restrictions (last I checked.
-   It's possible this has actually changed, but I haven't wanted to go
-   re-read that mess of documents).
+  0) Make SURE when building binary packages that you run configure using
+     --disable-privacy.  This removes encryption support, which can not be
+     present in binaries due to U.S. export restrictions (last I checked.
+     It's possible this has actually changed, but I haven't wanted to go
+     re-read that mess of documents).
 
-1) always build releases from a tarball, not from CVS.
+  1) always build releases from a tarball, not from CVS.
 
-2) Add mib modules that are common.  Basically, add:
+  2) Add mib modules that are common.  Basically, add:
 
-     host                      -- where supported.
-     disman/event-mib
-     smux
+       host                      -- where supported.
+       disman/event-mib
+       smux
 
-3) use --with-defaults --with-syscontact="Unknown" --with-syslocation="Unknown"
+  3) use --with-defaults --with-syscontact="Unknown" --with-syslocation="Unknown"
 
-4) when running make install, do it like:
+  4) when running make install, do it like:
 
-     make install prefix=/some/path/to/home/ARCH/usr/local exec_prefix=/some/path/to/home/ARCH/usr/local
-  
-5) Tar it up:
+       make install prefix=/some/path/to/home/ARCH/usr/local exec_prefix=/some/path/to/home/ARCH/usr/local
+    
+  5) Tar it up:
 
-     cd /some/path/to/home/ARCH
-     tar czf net-snmp-5.0.3-ARCH.tar.gz usr/local
+       cd /some/path/to/home/ARCH
+       tar czf net-snmp-5.0.3-ARCH.tar.gz usr/local
 
-6) upload and release, like you did for the source code but with a
-   different package name for binaries (5.0.3 binaries).
+  6) upload and release, like you did for the source code but with a
+     different package name for binaries (5.0.3 binaries).
+
+***************************************************************************
+CLEANING UP
+
+  1) remove any official patches that apply to old releases?
+     (we need to set a policy about whether to do this)
+
+***************************************************************************
+UPDATING WEB PAGE DOCUMENTS
+
+  1) NEWS at the top of the webpage is auto-extracted from the NEWS
+     submissions on SF.  Don't worry about it.
+
+  2) TBD
