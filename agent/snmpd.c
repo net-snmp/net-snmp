@@ -209,6 +209,14 @@ static int create_v1_trap_session (sink, com)
     return 0;
 }
 
+static void free_v1_trap_session (sp)
+    struct trap_sink *sp;
+{
+    snmp_close(sp->sesp);
+    if (sp->ses.community) free(sp->ses.community);
+    free (sp);
+}
+
 static int create_v2_trap_session (sink, com)
     char *sink, *com;
 {
@@ -301,34 +309,10 @@ static void send_v1_trap (ss, trap, specific)
 #endif
 }
 
-oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
-oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
-
 static void send_v2_trap (ss, trap, specific, type)
     struct snmp_session *ss;
     int trap, specific, type;
 {
-  struct snmp_pdu *mypdu;
-  
-  struct trap_sink *sink = v2sinks;
-
-  if ((snmp_enableauthentraps == 1) && sink != NULL) {
-    while (sink) {
-      mypdu = snmp_clone_pdu(pdu);
-      if (snmp_send(sink->sesp, mypdu) == 0) {
-        snmp_perror ("snmpd: send_trap_pdu");
-      }
-#ifdef USING_MIBII_SNMP_MIB_MODULE       
-      snmp_outtraps++;
-#endif
-      sink = sink->next;
-    }
-  }
-}
-
-void
-send_trap_pdu(pdu)
-  struct snmp_pdu *pdu;
     struct snmp_pdu *pdu;
     struct variable_list *var;
     struct timeval now, diff;
@@ -388,6 +372,28 @@ send_trap_pdu(pdu)
 #ifdef USING_MIBII_SNMP_MIB_MODULE       
     snmp_outtraps++;
 #endif
+}
+
+void
+send_trap_pdu(pdu)
+    struct snmp_pdu *pdu;
+{
+  struct snmp_pdu *mypdu;
+  
+  struct trap_sink *sink = v2sinks;
+
+  if ((snmp_enableauthentraps == 1) && sink != NULL) {
+    while (sink) {
+      mypdu = snmp_clone_pdu(pdu);
+      if (snmp_send(sink->sesp, mypdu) == 0) {
+        snmp_perror ("snmpd: send_trap_pdu");
+      }
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
+      snmp_outtraps++;
+#endif
+      sink = sink->next;
+    }
+  }
 }
 
 void send_easy_trap (trap, specific)
