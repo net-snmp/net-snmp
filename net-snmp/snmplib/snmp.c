@@ -77,7 +77,7 @@ xdump(const u_char *cp,
     int col, count;
     char *buffer;
 
-    buffer=(char *)malloc(strlen(prefix)+77);
+    buffer=(char *)malloc(strlen(prefix)+80);
     if (!buffer) {
       snmp_log(LOG_NOTICE, "xdump: malloc failed. packet-dump skipped\n");
       return;
