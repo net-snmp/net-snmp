@@ -9,11 +9,11 @@ BEGIN {
 use Test;
 BEGIN { $n = 17; plan tests => $n }
 use SNMP;
+use vars qw($agent_port $comm $agent_host);
 require "t/startagent.pl";
 $SNMP::debugging = 0;
 $SNMP::verbose = 0;
 $SNMP::dump_packet = 0;
-use vars qw($agent_port $comm $agent_host);
 
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
 my $oid = '.1.3.6.1.2.1.1.1';
@@ -21,12 +21,6 @@ my $junk_name = 'fooDescr';
 my $junk_host = 'no.host.here';
 my $name = "gmarzot\@nortelnetworks.com";
 my $s1;
-
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-    unlink "t/snmpd.pid";
-}
 
 # create list of varbinds for GETS, val field can be null or omitted
 $vars = new SNMP::VarList (
