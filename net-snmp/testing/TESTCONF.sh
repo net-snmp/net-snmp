@@ -76,20 +76,21 @@ SNMP_SNMPTRAPD_LOG_FILE="$SNMP_TMPDIR/snmptrapd.log"
 SNMP_SNMPTRAPD_PID_FILE="$SNMP_TMPDIR/snmptrapd.pid"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
-SNMP_SNMPD_PORT="-p 8765"
-SNMP_SNMPTRAPD_PORT="-p 8764"
 SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
 export SNMP_PERSISTENT_FILE
 
-## Setup flags iff not done
+## Setup default flags and ports iff not done
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
 fi
-echo $SNMP_FLAGS | egrep "\-p" > /dev/null
-if [ $? != 0 ]; then
-    SNMP_FLAGS="$SNMP_FLAGS $SNMP_SNMPD_PORT"
+if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
+    SNMP_SNMPD_PORT="8765"
 fi
-export SNMP_FLAGS
+
+if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
+    SNMP_SNMPTRAPD_PORT="8764"
+fi
+export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't
