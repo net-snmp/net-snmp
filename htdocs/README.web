@@ -80,3 +80,20 @@ Updating Development / API
  -find docs/html/. -name '*.html' | local/add-header-footer.pl --section=development --body --tidy
  -cp docs/html/*.html to web site /dev/agent
 
+
+Web site folder descriptions
+============================
+
+ party:         Pictures from Net-SNMP meeting.  Linked from -- in Net-SNMP logo
+
+ presentations: PowerPoint presentations etc
+
+ temp:          Temp folder for testing etc
+
+ unsupported:   ?
+
+ 
+
+
+
+
