@@ -79,7 +79,7 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 
 #endif                          /* freebsd */
 
-#if defined(freebsd5)
+#if HAVE_DEVSTAT_GETDEVS
   #define GETDEVS(x) devstat_getdevs(NULL, (x))
 #else
   #define GETDEVS(x) getdevs((x))
