@@ -61,13 +61,19 @@ auto_nlist_value(const char *string)
     strcpy(it->symbol,string);
     /* allocate an extra byte for inclusion of a preceding '_' later */
     it->nl[0].n_name = (char *) malloc(strlen(string)+2);
+#ifdef aix4
+    strcpy(it->nl[0].n_name,string);
+#else
     sprintf(it->nl[0].n_name,"_%s",string);
+#endif
     it->nl[1].n_name = 0;
     init_nlist(it->nl);
+#ifndef aix4
     if (it->nl[0].n_type == 0) {
       strcpy(it->nl[0].n_name,string);
       init_nlist(it->nl);
     }
+#endif
     if (it->nl[0].n_type == 0) {
       snmp_log(LOG_ERR, "nlist err: neither %s nor _%s found.\n", string, string);
       return( -1 );
@@ -103,7 +109,6 @@ auto_nlist(const char *string,
  
 static void
 init_nlist(struct nlist nl[])
- 
 {
 #ifdef CAN_USE_NLIST
   int ret;
@@ -121,12 +126,25 @@ init_nlist(struct nlist nl[])
       exit(1);
   }
   kvm_close(kernel);
+#else /* ! HAVE_KVM_OPENFILES */
+#ifdef aix4
+  if ( knlist(nl,1,sizeof(struct nlist)) == -1) {
+    DEBUGMSGTL(("auto_nlist", "knlist failed on symbol:  %s\n", nl[0].n_name));
+    if ( errno == EFAULT ) {
+        nl[0].n_type = 0;
+        nl[0].n_value = 0;
+    } else {
+        snmp_log_perror("knlist");
+        exit(1);
+    }
+  }
 #else
   if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
     snmp_log_perror("nlist");
     exit(1);
   }
-#endif
+#endif /*aix4*/
+#endif /* ! HAVE_KVM_OPENFILES */
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
 #ifdef aix4
       if (nl[ret].n_type == 0 && nl[ret].n_value != 0)
@@ -139,7 +157,7 @@ init_nlist(struct nlist nl[])
                       (unsigned int)nl[ret].n_value));
       }
   }
-#endif
+#endif /* CAN_USE_NLIST */
 }
 
 int KNLookup(struct nlist nl[],
