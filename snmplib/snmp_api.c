@@ -1198,7 +1198,7 @@ create_user_from_session(struct snmp_session *session)
   if (user == NULL) {
     DEBUGMSGTL(("snmp_api","Building user %s...\n",session->securityName));
     /* user doesn't exist so we create and add it */
-    user = (struct usmUser *) SNMP_MALLOC(sizeof(struct usmUser));
+    user = (struct usmUser *) calloc(1,sizeof(struct usmUser));
     if (user == NULL)
       return SNMPERR_GENERR;
 
@@ -1401,7 +1401,7 @@ snmpv3_build_probe_pdu (struct snmp_pdu **pdu)
   /* create the empty user */
   user = usm_get_user(NULL, 0, (*pdu)->securityName);
   if (user == NULL) {
-    user = (struct usmUser *) SNMP_MALLOC(sizeof(struct usmUser));
+    user = (struct usmUser *) calloc(1,sizeof(struct usmUser));
     user->name = strdup((*pdu)->securityName);
     user->secName = strdup((*pdu)->securityName);
     user->authProtocolLen = sizeof(usmNoAuthProtocol)/sizeof(oid);
@@ -2268,11 +2268,11 @@ snmpv3_parse(
 
   /* securtityParameters OCTET STRING begins after msgGlobalData */
   sec_params			= data;
-  pdu->contextEngineID		= SNMP_MALLOC(SNMP_MAX_ENG_SIZE);
+  pdu->contextEngineID		= calloc(1,SNMP_MAX_ENG_SIZE);
   pdu->contextEngineIDLen	= SNMP_MAX_ENG_SIZE;
-  pdu->securityEngineID         = SNMP_MALLOC(SNMP_MAX_ENG_SIZE);
+  pdu->securityEngineID         = calloc(1,SNMP_MAX_ENG_SIZE);
   pdu->securityEngineIDLen	= SNMP_MAX_ENG_SIZE;
-  pdu->securityName		= (char *)SNMP_MALLOC(SNMP_MAX_SEC_NAME_SIZE);
+  pdu->securityName		= (char *)calloc(1,SNMP_MAX_SEC_NAME_SIZE);
   pdu->securityNameLen		= SNMP_MAX_SEC_NAME_SIZE;
 
   memset(pdu_buf, 0, pdu_buf_len);

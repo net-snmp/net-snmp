@@ -342,19 +342,9 @@ static int tossObjectIdentifier (FILE *);
 static int  name_hash (const char *);
 static void init_node_hash (struct node *);
 static void print_error (const char *, const char *, int);
-#ifndef xmalloc
-static void *xmalloc (size_t);
-#endif
-#ifndef xstrdup
-static char *xstrdup (const char *);
-#endif
 static void free_tree (struct tree *);
 static void free_partial_tree (struct tree *);
 static void free_node (struct node *);
-#ifdef TEST
-static void xmalloc_stats (FILE *);
-static void print_nodes (FILE *, struct node *);
-#endif
 static void build_translation_table (void);
 static void init_tree_roots (void);
 static void merge_anon_children (struct tree *, struct tree *);
@@ -581,72 +571,11 @@ print_error(const char *string,
         snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
 }
 
-static long xmalloc_calls = 0;
-static long xmalloc_bytes = 0;
-static long xmalloc_errors = 0;
-
-#ifndef xmalloc
-static void *
-xmalloc(size_t num)
-{
-    void *p;
-    /* this is to fix (what seems to be) a problem with the IBM RT C
-library malloc */
-#if 0
-    if (num < 16)
-        num = 16;
-#endif
-    p = malloc(num);
-    if (!p) {
-        print_error("Out of memory", NULL, CONTINUE);
-	xmalloc_errors++;
-        return (NULL);
-    }
-    xmalloc_calls++;
-    xmalloc_bytes += num;
-    return p;
-}
-#endif
-
-#ifndef xstrdup
-static char *xstrdup (const char *s)
-{
-    char *ss = (char *) xmalloc (strlen (s)+1);
-    if (ss == NULL)
-	return (NULL);
-    return strcpy (ss, s);
-}
-#endif
-
-#ifndef xcalloc
-/* like calloc, but uses our very own memory allocator. */
-static void *xcalloc (size_t cnt,
-		      size_t siz)
-{
-    size_t sizeit = cnt * siz;
-    void *ss = xmalloc (sizeit);
-    if (ss == NULL)
-      return (NULL);
-
-    memset(ss, 0, sizeit);
-    return ss;
-}
-#endif
-
-#ifdef TEST
-static void xmalloc_stats(FILE *fp)
-{
-#ifndef xmalloc
-    fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
-#endif
-}
-#endif
-
 static struct node *
 alloc_node(int modid)
 {
     struct node *np;
-    np = (struct node *) xcalloc(1, sizeof(struct node));
+    np = (struct node *) calloc(1, sizeof(struct node));
     if (np) {
         np->tc_index = -1;
         np->modid = modid;
@@ -706,6 +635,7 @@ static void
 print_nodes(FILE *fp,
 	    struct node *root)
 {
+extern void xmalloc_stats (FILE *);
     struct enum_list *ep;
     struct index_list *ip;
     struct range_list *rp;
@@ -875,9 +805,9 @@ init_tree_roots()
         base_modid = which_module("RFC1213-MIB");
 
     /* build root node */
-    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
+    tp = (struct tree *) calloc(1, sizeof(struct tree));
     if (tp == NULL) return;
-    tp->label = xstrdup("joint-iso-ccitt");
+    tp->label = strdup("joint-iso-ccitt");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -888,14 +818,14 @@ init_tree_roots()
     tp->next = tbuckets[hash];
     tbuckets[hash] = tp;
     lasttp = tp;
-    root_imports[0].label = xstrdup( tp->label );
+    root_imports[0].label = strdup( tp->label );
     root_imports[0].modid = base_modid;
 
     /* build root node */
-    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
+    tp = (struct tree *) calloc(1, sizeof(struct tree));
     if (tp == NULL) return;
     tp->next_peer = lasttp;
-    tp->label = xstrdup("ccitt");
+    tp->label = strdup("ccitt");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -906,14 +836,14 @@ init_tree_roots()
     tp->next = tbuckets[hash];
     tbuckets[hash] = tp;
     lasttp = tp;
-    root_imports[1].label = xstrdup( tp->label );
+    root_imports[1].label = strdup( tp->label );
     root_imports[1].modid = base_modid;
 
     /* build root node */
-    tp = (struct tree *) xcalloc(1, sizeof(struct tree));
+    tp = (struct tree *) calloc(1, sizeof(struct tree));
     if (tp == NULL) return;
     tp->next_peer = lasttp;
-    tp->label = xstrdup("iso");
+    tp->label = strdup("iso");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
@@ -924,7 +854,7 @@ init_tree_roots()
     tp->next = tbuckets[hash];
     tbuckets[hash] = tp;
     lasttp = tp;
-    root_imports[2].label = xstrdup( tp->label );
+    root_imports[2].label = strdup( tp->label );
     root_imports[2].modid = base_modid;
 
     tree_head = tp;
@@ -1178,7 +1108,7 @@ do_subtree(struct tree *root,
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
-                int_p = (int *) xmalloc((tp->number_modules+1) * sizeof(int));
+                int_p = (int *) malloc((tp->number_modules+1) * sizeof(int));
                 if (int_p == NULL) return;
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -1204,7 +1134,7 @@ do_subtree(struct tree *root,
 			root->label, np->subid, tp->label, np->label, File);
 	}
 
-        tp = (struct tree *) xcalloc(1, sizeof(struct tree));
+        tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL) return;
         tp->parent = root;
         tp->modid = np->modid;
@@ -1381,7 +1311,7 @@ getoid(FILE *fp,
         }
         if (type == LABEL){
             /* this entry has a label */
-            id->label = xstrdup(token);
+            id->label = strdup(token);
             type = get_token(fp, token, MAXTOKEN);
             if (type == LEFTPAREN){
                 type = get_token(fp, token, MAXTOKEN);
@@ -1455,7 +1385,7 @@ parse_objectid(FILE *fp,
     if ( !op->label )
       for ( tp = tree_head ; tp ; tp=tp->next_peer )
         if ( (int)tp->subid == op->subid ) {
-            op->label = xstrdup(tp->label);
+            op->label = strdup(tp->label);
             break;
         }
 
@@ -1467,7 +1397,7 @@ parse_objectid(FILE *fp,
         np = alloc_node(op->modid);
         if (np == NULL) return(NULL);
         np->subid = op->subid;
-        np->label = xstrdup(name);
+        np->label = strdup(name);
         if (op->label) free(op->label);
         return np;
     }
@@ -1485,18 +1415,18 @@ parse_objectid(FILE *fp,
             if (np == NULL) return(NULL);
             if (root == NULL) root = np;
 
-            np->parent = xstrdup (op->label);
+            np->parent = strdup (op->label);
             if (count == (length - 2)) {
                 /* The name for this node is the label for this entry */
-                np->label = xstrdup (name);
+                np->label = strdup (name);
             }
             else {
                 if (!nop->label) {
-                    nop->label = (char *) xmalloc(20 + ANON_LEN);
+                    nop->label = (char *) malloc(20 + ANON_LEN);
                     if (nop->label == NULL) return(NULL);
                     sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
-                np->label = xstrdup (nop->label);
+                np->label = strdup (nop->label);
             }
             if (nop->subid != -1)
                 np->subid = nop->subid;
@@ -1545,7 +1475,7 @@ get_tc(const char *descriptor,
 	}
 	if (hint) {
 	    if (*hint) free(*hint);
-	    *hint = (tcp->hint ? xstrdup(tcp->hint) : NULL);
+	    *hint = (tcp->hint ? strdup(tcp->hint) : NULL);
 	}
 	return tcp->type;
       }
@@ -1626,10 +1556,10 @@ parse_enumlist(FILE *fp, struct enum_list **retp)
             break;
         if (type == LABEL){
             /* this is an enumerated label */
-            *epp = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
+            *epp = (struct enum_list *) calloc(1, sizeof(struct enum_list));
             if (*epp == NULL) return(NULL);
             /* a reasonable approximation for the length */
-            (*epp)->label = xstrdup(token);
+            (*epp)->label = strdup(token);
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
@@ -1685,7 +1615,7 @@ static struct range_list *parse_ranges(FILE *fp, struct range_list **retp)
 	    high = atol(nexttoken);
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	}
-	*rpp = (struct range_list *)xcalloc (1, sizeof(struct range_list));
+	*rpp = (struct range_list *)calloc (1, sizeof(struct range_list));
 	(*rpp)->low = low;
 	(*rpp)->high = high;
 	rpp = &(*rpp)->next;
@@ -1750,7 +1680,7 @@ parse_asntype(FILE *fp,
                 if (type == DISPLAYHINT) {
                     type = get_token(fp, token, MAXTOKEN);
                     if (type != QUOTESTRING) print_error("DISPLAY-HINT must be string", token, type);
-                    else hint = xstrdup (token);
+                    else hint = strdup (token);
                 }
                 else
 		    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
@@ -1782,7 +1712,7 @@ parse_asntype(FILE *fp,
         }
         tcp = &tclist[i];
         tcp->modid = current_module;
-        tcp->descriptor = xstrdup(name);
+        tcp->descriptor = strdup(name);
         tcp->hint = hint;
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
@@ -1909,7 +1839,7 @@ parse_objecttype(FILE *fp,
             free_node(np);
             return NULL;
         }
-	np->units = xstrdup (quoted_string_buffer);
+	np->units = strdup (quoted_string_buffer);
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
     }
     if (nexttype != ACCESS){
@@ -1953,7 +1883,7 @@ parse_objecttype(FILE *fp,
               return NULL;
           }
           if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-              np->description = xstrdup (quoted_string_buffer);
+              np->description = strdup (quoted_string_buffer);
           }
           break;
 
@@ -2029,7 +1959,7 @@ parse_objectgroup(FILE *fp,
               return NULL;
           }
           if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-              np->description = xstrdup (quoted_string_buffer);
+              np->description = strdup (quoted_string_buffer);
           }
           break;
 
@@ -2077,7 +2007,7 @@ parse_notificationDefinition(FILE *fp,
               return NULL;
           }
           if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-              np->description = xstrdup (quoted_string_buffer);
+              np->description = strdup (quoted_string_buffer);
           }
           break;
 
@@ -2116,7 +2046,7 @@ parse_trapDefinition(FILE *fp,
                     return NULL;
                 }
                 if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-                    np->description = xstrdup (quoted_string_buffer);
+                    np->description = strdup (quoted_string_buffer);
                 }
                 break;
             case ENTERPRISE:
@@ -2128,12 +2058,12 @@ parse_trapDefinition(FILE *fp,
                         free_node(np);
                         return NULL;
                     }
-                    np->parent = xstrdup(token);
+                    np->parent = strdup(token);
                     /* Get right bracket */
                     type = get_token(fp, token, MAXTOKEN);
                 }
                 else if (type == LABEL)
-                    np->parent = xstrdup(token);
+                    np->parent = strdup(token);
                 break;
             default:
                 /* NOTHING */
@@ -2143,7 +2073,7 @@ parse_trapDefinition(FILE *fp,
     }
     type = get_token(fp, token, MAXTOKEN);
 
-    np->label = xstrdup(name);
+    np->label = strdup(name);
 
     if (type != NUMBER) {
         print_error("Expected a Number", token, type);
@@ -2157,14 +2087,14 @@ parse_trapDefinition(FILE *fp,
         return(NULL);
     }
     np->next->parent = np->parent;
-    np->parent = (char *)xmalloc(strlen(np->parent)+2);
+    np->parent = (char *)malloc(strlen(np->parent)+2);
     if (np->parent == NULL) {
         free_node(np->next); free_node(np);
         return(NULL);
     }
     strcpy(np->parent, np->next->parent);
     strcat(np->parent, "#");
-    np->next->label = xstrdup(np->parent);
+    np->next->label = strdup(np->parent);
     return np;
 }
 
@@ -2308,7 +2238,7 @@ parse_imports(FILE *fp)
 		} while (type != SEMI && type != ENDOFFILE);
 		return;
 	    }
-	    import_list[import_count++].label = xstrdup(token);
+	    import_list[import_count++].label = strdup(token);
 	}
 	else if ( type == FROM ) {
 	    type = get_token(fp, token, MAXTOKEN);
@@ -2361,7 +2291,7 @@ parse_imports(FILE *fp)
 		free((char*)mp->imports);
 	    }
             mp->imports = (struct module_import *)
-              xcalloc(import_count, sizeof(struct module_import));
+              calloc(import_count, sizeof(struct module_import));
             if (mp->imports == NULL) return;
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
@@ -2447,13 +2377,13 @@ add_module_replacement(const char *old_module,
     struct module_compatability *mcp;
 
     mcp =  (struct module_compatability *)
-      xcalloc(1, sizeof( struct module_compatability));
+      calloc(1, sizeof( struct module_compatability));
     if (mcp == NULL) return;
 
-    mcp->old_module = xstrdup( old_module );
-    mcp->new_module = xstrdup( new_module_name );
+    mcp->old_module = strdup( old_module );
+    mcp->new_module = strdup( new_module_name );
 	if (tag)
-    mcp->tag	    = xstrdup( tag );
+    mcp->tag	    = strdup( tag );
     mcp->tag_len = len;
 
     mcp->next    = module_map_head;
@@ -2640,17 +2570,17 @@ new_module (const char *name,
 
 			/* Use the new one in preference */
 		free(mp->file);
-                mp->file = xstrdup(file);
+                mp->file = strdup(file);
             }
 	    return;
 	}
 
 	/* Add this module to the list */
     DEBUGMSGTL(("parse-mibs", "  Module %d %s is in %s\n", max_module, name, file));
-    mp = (struct module *) xcalloc(1, sizeof(struct module));
+    mp = (struct module *) calloc(1, sizeof(struct module));
     if (mp == NULL) return;
-    mp->name = xstrdup(name);
-    mp->file = xstrdup(file);
+    mp->name = strdup(name);
+    mp->file = strdup(file);
     mp->imports = NULL;
     mp->no_imports = -1;	/* Not yet loaded */
     mp->modid = max_module;
@@ -3229,9 +3159,9 @@ getIndexes(FILE *fp, struct index_list **retp) {
   type = get_token(fp, token, MAXTOKEN);
   while (type != RIGHTBRACKET && type != ENDOFFILE) {
     if ((type == LABEL) || (type & SYNTAX_MASK)) {
-      *mypp = (struct index_list *) xcalloc(1, sizeof(struct index_list));
+      *mypp = (struct index_list *) calloc(1, sizeof(struct index_list));
       if (*mypp) {
-        (*mypp)->ilabel = xstrdup(token);
+        (*mypp)->ilabel = strdup(token);
         mypp = &(*mypp)->next;
       }
     }
@@ -3297,9 +3227,9 @@ copy_enums (struct enum_list *sp)
   struct enum_list *xp = NULL, **spp = &xp;
 
   while (sp) {
-    *spp = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
+    *spp = (struct enum_list *) calloc(1, sizeof(struct enum_list));
     if (!*spp) break;
-    (*spp)->label = xstrdup(sp->label);
+    (*spp)->label = strdup(sp->label);
     (*spp)->value = sp->value;
     spp = &(*spp)->next;
     sp = sp->next;
@@ -3313,7 +3243,7 @@ copy_ranges (struct range_list *sp)
   struct range_list *xp = NULL, **spp = &xp;
 
   while (sp) {
-    *spp = (struct range_list *) xcalloc(1, sizeof(struct range_list));
+    *spp = (struct range_list *) calloc(1, sizeof(struct range_list));
     if (!*spp) break;
     (*spp)->low = sp->low;
     (*spp)->high = sp->high;
@@ -3329,9 +3259,9 @@ copy_indexes (struct index_list *sp)
   struct index_list *xp = NULL, **spp = &xp;
 
   while (sp) {
-    *spp = (struct index_list *) xcalloc(1, sizeof(struct index_list));
+    *spp = (struct index_list *) calloc(1, sizeof(struct index_list));
     if (!*spp) break;
-    (*spp)->ilabel = xstrdup(sp->ilabel);
+    (*spp)->ilabel = strdup(sp->ilabel);
     spp = &(*spp)->next;
     sp = sp->next;
   }
@@ -3471,7 +3401,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 
     for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
     if (count) {
-      leaves = (struct leave *)xcalloc(count, sizeof(struct leave));
+      leaves = (struct leave *)calloc(count, sizeof(struct leave));
       for (ntp = tp->child_list, count = 0; ntp; ntp = ntp->next_peer) {
 	for (i = 0, lp = leaves; i < count; i++, lp++)
 	  if (lp->id >= ntp->subid) break;
