@@ -99,8 +99,10 @@ SOFTWARE.
 #if USE_LIBWRAP
 #include <tcpd.h>
 
+/* fix 706903 - these are defined in agent/snmp_agent.c *-
 int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
+ */
 #endif
 
 /*
