@@ -77,7 +77,7 @@ ucdavis MODULE-IDENTITY
 --   systemStats      OBJECT IDENTIFIER ::= { ucdavis  11 }
 --   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis  14 } - UCD-DEMO-MIB
 --   fileTable        OBJECT IDENTIFIER ::= { ucdavis  15 }
---   logmatch         OBJECT IDENTIFIER ::= { ucdavis  15 }
+--   logMatch         OBJECT IDENTIFIER ::= { ucdavis  16 }
 --   version          OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs         OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable OBJECT IDENTIFIER ::= { ucdavis 102 }
