@@ -63,6 +63,18 @@ init_usmUser(void)
                  usmUser_variables_oid);
 }
 
+void
+init_register_usmUser_context(const char *contextName) {
+    register_mib_context("snmpv3/usmUser",
+                         (struct variable *) usmUser_variables,
+                         sizeof(struct variable4),
+                         sizeof(usmUser_variables)/sizeof(struct variable4),
+                         usmUser_variables_oid,
+                         sizeof(usmUser_variables_oid)/sizeof(oid),
+                         DEFAULT_MIB_PRIORITY, 0, 0, NULL,
+                         contextName, -1, 0);
+}
+
 /*******************************************************************-o-******
  * usm_generate_OID
  *

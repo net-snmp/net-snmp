@@ -41,6 +41,7 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
      */
      extern void     init_usmUser(void);
      extern FindVarMethod var_usmUser;
+     void init_register_usmUser_context(const char *contextName);
 
      void            shutdown_usmUser(void);
      int             store_usmUser(int majorID, int minorID,
