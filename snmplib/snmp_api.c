@@ -677,7 +677,7 @@ _sess_copy( struct snmp_session *in_session)
         session->securityAuthProtoLen = i;
     }
 
-    session->community = ucp;	/* replace pointer with pointer to new data */
+/*XXX ??    session->community = ucp;	pointer with pointer to new data */
 
     if (session->securityPrivProtoLen > 0) {
       op = (oid*)malloc((unsigned)session->securityPrivProtoLen *
