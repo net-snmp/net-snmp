@@ -67,8 +67,13 @@ To print multiple pieces to a single line in one call, use:
 
 #define DEBUGMSG(x)    debugmsg x;
 #define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
+#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 #define DEBUGTRACE     DEBUGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
                                  __FILE__,__LINE__));
+#else
+#define DEBUGTRACE     DEBUGMSGT(("trace"," %s, %d\n", __FILE__,__LINE__));
+#endif
+
 #define DEBUGMSGL(x)   DEBUGTRACE; debugmsg x;
 #define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
 #define DEBUGL(x)      DEBUGTRACE; debugmsg x;
