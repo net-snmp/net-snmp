@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ `hostname` = "clover" -a "$1" = "-" ]; then
+  LIST=`/usr/support/bin/findhosts +arch hppa`
+  for i in $LIST
+    do
+    echo "${i}$2:  \c"
+    /usr/local/bin/rsh $i /afs/.ece.ucdavis.edu/common/scripts/wesrestart "x" "$2"
+  done
+else
+  /usr/afsws/bin/fs checkv > /dev/null 2>&1
+  echo "checkv\c"
+  PID=`ps -e | grep snmpd | awk '{printf($1)}'`
+  if [ "$2" = "-hup" ]; then
+    kill -HUP $PID
+    echo " hupped"
+  else
+    kill $PID
+    echo " killed `ps -e | grep snmpd | wc -l`\c"
+    /etc/ece-snmpd > /usr/adm/ece-snmpd.log 2>&1 &
+    sleep 1
+    echo " restarted" `ps -e | grep snmpd | wc -l`
+  fi
+fi
