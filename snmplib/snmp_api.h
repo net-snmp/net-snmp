@@ -611,6 +611,7 @@ int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
 int snmp_pdu_dparse(struct snmp_pdu *pdu, u_char *data, size_t *length, int);
 u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, size_t *length);
 u_char* snmpv3_scopedPDU_dparse(struct snmp_pdu *pdu, u_char *cp, size_t *length, int);
+void snmp_store(const char *type);
 void snmp_shutdown(const char *type);
 struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
 struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
