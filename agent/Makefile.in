@@ -25,8 +25,11 @@ INCLUDESUBDIRHEADERS=agent_read_config.h \
 	var_struct.h \
 	agent_handler.h \
 	net-snmp-agent-includes.h \
-	agent_callbacks.h \
-	mib_module_config.h
+	agent_callbacks.h
+
+INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
+			mibgroup/mib_module_includes.h
+INSTALLBUILTSUBDIR=agent
 
 # XXX: need to install these  They're really UCD specific, however.
 BROKEINSTALL= \
