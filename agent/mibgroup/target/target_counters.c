@@ -12,9 +12,8 @@
 #include "target_counters.h"
 #include <net-snmp/agent/instance.h>
 
-static oid      unavailable_context_oid[] =
-    { 1, 3, 6, 1, 6, 3, 12, 1, 4, 0 };
-static oid      unknown_context_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1, 5, 0 };
+static oid   unavailable_context_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1, 4 };
+static oid   unknown_context_oid[]     = { 1, 3, 6, 1, 6, 3, 12, 1, 5 };
 
 void
 init_target_counters(void)
@@ -25,23 +24,23 @@ init_target_counters(void)
      * unknown contexts
      */
 
-    netsnmp_register_read_only_instance(netsnmp_create_handler_registration
-                                        ("myInstance",
+    netsnmp_register_scalar(
+        netsnmp_create_handler_registration("snmpUnknownContexts",
                                          get_unknown_context_count,
                                          unknown_context_oid,
-                                         sizeof(unknown_context_oid) /
-                                         sizeof(oid), HANDLER_CAN_RONLY));
+                                         OID_LENGTH(unknown_context_oid),
+                                         HANDLER_CAN_RONLY));
 
     /*
-     * unavailable available
+     * unavailable contexts
      */
 
-    netsnmp_register_read_only_instance(netsnmp_create_handler_registration
-                                        ("myInstance",
+    netsnmp_register_scalar(
+        netsnmp_create_handler_registration("snmpUnavailableContexts",
                                          get_unavailable_context_count,
                                          unavailable_context_oid,
-                                         sizeof(unavailable_context_oid) /
-                                         sizeof(oid), HANDLER_CAN_RONLY));
+                                         OID_LENGTH(unavailable_context_oid),
+                                         HANDLER_CAN_RONLY));
 
 }
 
