@@ -37,8 +37,9 @@ perl/ASN/ASN.pm ASN.pm
 perl/OID/OID.pm OID.pm
 perl/SNMP/SNMP.pm SNMP.pm
 perl/agent/agent.pm Agent.pm
-perl/agent/default_store/default_store.pm Agent-Default_Store
-perl/default_store/default_store.pm Default_store
+perl/agent/default_store/default_store.pm Agent-Default_Store.pm
+perl/default_store/default_store.pm Default_store.pm
+perl/TrapReceiver/TrapReceiver.pm TrapReceiver.pm
 );
 
 # Folder separator
