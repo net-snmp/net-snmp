@@ -1,4 +1,4 @@
-.TH "todo" 3 "21 Feb 2003" "net-snmp" \" -*- nroff -*-
+.TH "todo" 3 "28 Apr 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,6 +8,12 @@ todo \- Todo List
 .PP
 .IP "Global \fBnetsnmp_table_get_or_create_row_stash\fP(netsnmp_agent_request_info *reqinfo, const u_char *storage_name) " 1c
  This function will likely change to add free pointer functions.
+.PP
+.IP "Global \fBnetsnmp_read_data_callback\fP(const char *token, char *line) " 1c
+ make netsnmp_read_data_callback deal with a free routine
+.PP
+.IP "Global \fBnetsnmp_save_all_data_callback\fP(int major, int minor, void *serverarg, void *clientarg) " 1c
+ netsnmp_register_save_list should handle the same token name being saved from different types?
 .PP
 .IP "Global \fBnetsnmp_register_auto_data_table\fP(netsnmp_table_data_set *table_set, char *registration_name) " 1c
  create a properly free'ing registeration pointer for the datalist, and get the datalist freed at shutdown.  
