@@ -21,6 +21,7 @@ TABLE OF CONTENTS
    How do I find out about new releases?
    How can I find out what other people are doing?
    How do I submit a patch or bug report?
+   Can I reuse the code in my commercial application?
    What's the difference between SNMPv1, SNMPv2 and SNMPv3?
    What are all these different SNMPv2's anyway?
    Which versions of SNMP are supported in this package?
@@ -403,6 +404,14 @@ How do I submit a patch or bug report?
   unsupported package.  It's Open Source, so if you need something
   fixing badly enough,  fundamentally it's up to you to do the work.
 
+Can I reuse the code in my commercial application?
+-------------------------------------------------
+
+The details of the COPYRIGHTs on the package can be found in the
+COPYING file.  You should have your lawyer read this file if you wish
+to use the code in your commercial application.  We will not summarize
+here what is in the file, as we're not lawyers and are unqualified to
+do so.
 
 
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
