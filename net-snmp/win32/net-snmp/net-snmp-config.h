@@ -920,6 +920,11 @@ int strcasecmp(const char *s1, const char *s2);
 
 #endif
 
+/* do nothing for chown on Windows. */
+#if defined(WIN32) && !defined(chown)
+#define chown(x,y,z) 
+#endif
+
 typedef unsigned short mode_t;
 
 #define AGENT_DIRECTORY_MODE 0700
