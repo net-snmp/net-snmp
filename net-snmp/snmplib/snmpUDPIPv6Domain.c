@@ -1090,6 +1090,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 com2Sec6ListLast = com2Sec6List = e;
             }
 
+#if HAVE_GETADDRINFO
+
         } else {
             /*
              * Nope, Must be a hostname.  
@@ -1138,6 +1140,9 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             }
             if (res != NULL)
                 freeaddrinfo(res);
+
+#endif /* HAVE_GETADDRINFO */
+
         }
         /*
          * free(strnetwork); 
