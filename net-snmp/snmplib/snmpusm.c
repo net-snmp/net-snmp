@@ -94,6 +94,11 @@ usm_check_secLevel_vs_protocols(int level,
  */
 #define MAKE_ENTRY( type, item, len, field, field_len )			\
 {									\
+        if (len == 0 || item == NULL) {					\
+		ref->field = NULL;					\
+		ref->field_len = 0;					\
+		return 0;						\
+	}					 			\
 	if (ref == NULL)						\
 		return -1;						\
 	if (ref->field != NULL)	{					\
