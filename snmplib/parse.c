@@ -1,9 +1,6 @@
 /*
  * parse.c
  *
- * Update: 1998-07-17 <jhy@gsu.edu>
- * Added print_subtree_oid_report* and related functions and variables.
- *
  * Update: 1998-09-22 <mslifcak@iss.net>
  * Clear nbuckets in init_node_hash.
  * New method xcalloc returns zeroed data structures.
@@ -328,11 +325,6 @@ static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
 static int current_module = 0;
 static int     max_module = 0;
 
-static int print_subtree_oid_report_labeledoid = 0;
-static int print_subtree_oid_report_oid = 0;
-static int print_subtree_oid_report_symbolic = 0;
-static int print_subtree_oid_report_suffix = 0;
-
 static void do_subtree (struct tree *, struct node **);
 static void do_linkup (struct module *, struct node *);
 static void dump_module_list (void);
@@ -381,9 +373,6 @@ static void read_import_replacements (const char *, struct module_import *);
 
 static void  new_module  (const char *, const char *);
 
-static void print_parent_labeledoid (FILE *, struct tree *);
-static void print_parent_oid (FILE *, struct tree *);
-static void print_parent_label (FILE *, struct tree *);
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 static struct index_list *getIndexes(FILE *fp);
 static void free_indexes(struct index_list *idxs);
@@ -3184,177 +3173,6 @@ find_module(int mid)
   return NULL;
 }
 
-static void
-print_parent_labeledoid(FILE *f,
-			struct tree *tp)
-{
-    if(tp)
-    {
-        if(tp->parent)
-        {
-            print_parent_labeledoid(f, tp->parent);
-        }
-        fprintf(f, ".%s(%lu)", tp->label, tp->subid);
-    }
-}
-
-static void
-print_parent_oid(FILE *f,
-		 struct tree *tp)
-{
-    if(tp)
-    {
-        if(tp->parent)
-        {
-            print_parent_oid(f, tp->parent);
-        }
-        fprintf(f, ".%lu", tp->subid);
-    }
-}
-
-static void
-print_parent_label(FILE *f,
-		   struct tree *tp)
-{
-    if(tp)
-    {
-        if(tp->parent)
-        {
-            print_parent_label(f, tp->parent);
-        }
-        fprintf(f, ".%s", tp->label);
-    }
-}
-
-/*
- * print_subtree_oid_report():
- *
- * This function generates variations on the original print_subtree() report.
- * Traverse the tree depth first, from least to greatest sub-identifier.
- * Warning: this function recurses.
- */
-
-void
-print_subtree_oid_report(FILE *f,
-                         struct tree *tree,
-                         int count)
-{
-    struct tree *tp;
-
-    count++;
-
-    /* sanity check */
-    if(!tree)
-    {
-        return;
-    }
-
-    /* initialize: no peers included in the report. */
-    for(tp = tree->child_list; tp; tp = tp->next_peer)
-    {
-        tp->reported = 0;
-    }
-
-    /*
-     * find the not reported peer with the lowest sub-identifier.
-     * if no more, break the loop and cleanup.
-     * set "reported" flag, and create report for this peer.
-     * recurse using the children of this peer, if any.
-     */
-    while (1)
-    {
-        register struct tree *ntp;
-
-        tp = 0;
-        for (ntp = tree->child_list; ntp; ntp = ntp->next_peer)
-        {
-            if (ntp->reported) continue;
-
-            if (!tp || (tp->subid > ntp->subid))
-                tp = ntp;
-        }
-        if (!tp) break;
-
-        tp->reported = 1;
-
-        if(print_subtree_oid_report_labeledoid)
-        {
-            print_parent_labeledoid(f, tp);
-            fprintf(f, "\n");
-        }
-        if(print_subtree_oid_report_oid)
-        {
-            print_parent_oid(f, tp);
-            fprintf(f, "\n");
-        }
-        if(print_subtree_oid_report_symbolic)
-        {
-            print_parent_label(f, tp);
-            fprintf(f, "\n");
-        }
-        if(print_subtree_oid_report_suffix)
-        {
-            int i;
-            for(i = 0; i < count; i++)
-                fprintf(f, "  ");
-            fprintf(f, "%s(%ld) type=%d", tp->label, tp->subid, tp->type);
-            if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
-            if (tp->hint) fprintf(f, " hint=%s", tp->hint);
-            if (tp->units) fprintf(f, " units=%s", tp->units);
-
-            fprintf(f, "\n");
-        }
-        print_subtree_oid_report(f, tp, count);
-    }
-}
-
-void
-print_subtree_oid_report_enable_labeledoid (void)
-{
-    print_subtree_oid_report_labeledoid = 1;
-}
-
-void
-print_subtree_oid_report_enable_oid (void)
-{
-    print_subtree_oid_report_oid = 1;
-}
-
-void
-print_subtree_oid_report_enable_symbolic (void)
-{
-    print_subtree_oid_report_symbolic = 1;
-}
-
-void
-print_subtree_oid_report_enable_suffix (void)
-{
-    print_subtree_oid_report_suffix = 1;
-}
-
-void
-print_subtree_oid_report_disable_labeledoid (void)
-{
-    print_subtree_oid_report_labeledoid = 0;
-}
-
-void
-print_subtree_oid_report_disable_oid (void)
-{
-    print_subtree_oid_report_oid = 0;
-}
-
-void
-print_subtree_oid_report_disable_symbolic (void)
-{
-    print_subtree_oid_report_symbolic = 0;
-}
-
-void
-print_subtree_oid_report_disable_suffix (void)
-{
-    print_subtree_oid_report_suffix = 0;
-}
 
 static char leave_indent[256];
 static int leave_was_simple;
