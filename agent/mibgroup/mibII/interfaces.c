@@ -6,6 +6,12 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
+
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
@@ -16,10 +22,6 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
