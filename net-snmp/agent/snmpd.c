@@ -673,7 +673,7 @@ receive(void)
         /*
          * If the time 'now' is greater than the 'sched'uled time, then:
          *
-         *    Check alarm and event timers if v2p is configured.
+         *    Check alarm and event timers.
          *    Reset the 'sched'uled time to current time + one TIMETICK.
          *    Age the cache network addresses (from whom messges have
          *        been received).
@@ -700,6 +700,10 @@ receive(void)
                 }
             }
         }  /* endif -- now>sched */
+
+        /* run requested alarms */
+        run_alarms();
+        
     }  /* endwhile */
 
     snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
