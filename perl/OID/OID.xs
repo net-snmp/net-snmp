@@ -46,7 +46,6 @@ MODULE = NetSNMP::OID		PACKAGE = NetSNMP::OID		PREFIX=nso_
 netsnmp_oid *
 nso_newptr(char *initstring)
     CODE:
-        fprintf(stderr, "here: %s\n", initstring);
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
@@ -111,4 +110,65 @@ nsop_to_array(oid1)
             PUSHs(sv_2mortal(newSVnv(oid1->name[i])));
         }
 
+void
+nsop_append(oid1, string)
+    netsnmp_oid *oid1;
+    char *string;
+    PREINIT:
+    oid name[128];
+    size_t name_len = 128;
+    int i;
+    CODE: 
+    {
+        if (!snmp_parse_oid(string, (oid *) name, &name_len)) {
+            /* XXX */
+        }
+        if (oid1->len + name_len > 128) {
+            /* XXX: illegal */
+        }
+        for(i = 0; i < name_len; i++) {
+            oid1->name[i+oid1->len] = name[i];
+        }
+        oid1->len += name_len;
+    }
+
+void
+nsop_append_oid(oid1, oid2)
+    netsnmp_oid *oid1;
+    netsnmp_oid *oid2;
+    PREINIT:
+    int i;
+    CODE: 
+    {
+        if (oid1->len + oid2->len > 128) {
+            /* XXX: illegal */
+        }
+        for(i = 0; i < oid2->len; i++) {
+            oid1->name[i+oid1->len] = oid2->name[i];
+        }
+        oid1->len += oid2->len;
+    }
+
+int
+nsop_length(oid1)
+    netsnmp_oid *oid1;
+    CODE: 
+    {
+        RETVAL = oid1->len;
+    }
+    OUTPUT:
+    RETVAL
+    
+netsnmp_oid *
+nsop_clone(oid1)
+    netsnmp_oid *oid1;
+    PREINIT:
+    netsnmp_oid *oid2;
+    CODE:
+    {
+        oid2 = nso_newarrayptr(oid1->name, oid1->len);
+        RETVAL = oid2;
+    }
+OUTPUT:
+    RETVAL
         

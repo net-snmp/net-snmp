@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 23 };
+BEGIN { plan tests => 35 };
 use NetSNMP::OID;
 ok(1); # If we made it this far, we're ok.
 
@@ -65,3 +65,37 @@ ok(new NetSNMP::OID('sysORTable') > new NetSNMP::OID('system'));
 
 my @a = $oid->to_array();
 ok($a[0] == 1 && $a[1] == 3 && $a[2] == 6 && $a[3] == 1 && $#a == 3);
+
+$oid->append(".1.2.3");
+ok("$oid" eq "directory.2.3");
+
+$oidmore = $oid + ".8.9.10";
+ok($oidmore == new NetSNMP::OID("directory.2.3.8.9.10"));
+ok("$oid" eq "directory.2.3");
+ok(ref($oidmore) eq "NetSNMP::OID");
+
+# += should work
+$oidmore += ".11";
+ok($oidmore == new NetSNMP::OID("directory.2.3.8.9.10.11"));
+
+$oidstr = $oidmore + "\"wes\"";
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.3.119.101.115"));
+
+$oidstr = $oidmore + "\'wes\'";
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.119.101.115"));
+
+# just make sure you can do it twice (ie, not modify the original)
+$oidstr = $oidmore + "\'wes\'";
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.119.101.115"));
+
+$oidstr = $oidmore + "internet";
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.1.3.6.1"));
+
+$oidstr = $oidmore + "999";
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.999"));
+
+$oidstr = $oidmore + (new NetSNMP::OID(".1.3.6.1"));
+ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.1.3.6.1"));
+
+ok($oidstr->length() == 15);
+
