@@ -1,6 +1,13 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.6*
+
+ Fixes:
+    - prevent denial of service attack from authenticated users
+      (really this time).
+    - misc other fixes
+
 *5.0.5*
 
  New:

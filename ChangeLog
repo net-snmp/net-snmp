@@ -1,5 +1,123 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.5 -> V5.0.6
+
+2002-10-05 14:29  hardaker
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+   agent/mibgroup/Makefile.depend, apps/Makefile.depend,
+   apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend
+:
+
+   make depend
+   
+2002-10-05 14:09  hardaker
+
+   * Makefile.top:
+
+   update for 5.0.6
+   
+2002-10-05 14:08  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   remove illegal flag from nsb-config
+   
+2002-10-05 13:41  rstory
+
+   * agent/snmp_agent.c:
+
+   efence is your friend: don't allocate 0 bytes
+   
+2002-10-05 12:58  rstory
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   efence is your friend: don't reference ptr after is has been free'd.
+   
+2002-10-04 07:17  hardaker
+
+   * agent/snmp_agent.c:
+
+   fix secondary effect of bug 613983 and really fix it this time.
+   
+2002-10-02 10:56  hardaker
+
+   * agent/mibgroup/tunnel/: tunnel.c (V4-2-patches.2), tunnel.c
+:
+
+   Patch from Frank Strauss to fix some coding errors
+   
+2002-10-01 07:39  rstory
+
+   * agent/snmp_vars.c:
+
+   offical patch 617049: initialize container list earlier (in init_agent)
+   
+2002-10-01 07:35  rstory
+
+   * agent/snmp_vars.c:
+
+   remove ^M characters (damn windows editors)
+   
+2002-09-30 15:17  rstory
+
+   * FAQ, README, sedscript.in, perl/SNMP/SNMP.pm
+, snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.5 )
+   
+2002-09-30 15:16  rstory
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   add info on md5sums and gpg signing
+   
+2002-09-30 15:15  rstory
+
+   * dist/cvsup:
+
+   fix chmod to do what I wanted, not what I told it
+   
+2002-09-30 15:14  rstory
+
+   * ChangeLog, Makefile.top, NEWS:
+
+   update for 5.0.5
+   
+2002-09-30 14:27  rstory
+
+   * ChangeLog:
+
+   merge pre changes into 5.0.4 comments
+   
+2002-09-30 14:25  rstory
+
+   * NEWS:
+
+   update for 5.0.4
+   
+2002-09-30 14:23  hardaker
+
+   * NEWS:
+
+   NEWS updates for 5.0.4
+   
+2002-09-30 14:03  rstory
+
+   * README:
+
+   update my email address
+   
+2002-09-30 14:03  rstory
+
+   * ChangeLog:
+
+   update for release 5.0.4
+
+
+-------------------------------------------------------------------------------
+
 Changes: V5.0.3 -> V5.0.5
 
 2002-09-30 16:08  rstory
