@@ -583,8 +583,8 @@ main(argc, argv)
     printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
-    init_snmp();
     init_mib();
+    init_snmp();
     init_snmp2p( dest_port );
     
     printf("Opening port(s): "); 
