@@ -646,6 +646,8 @@ void getbulk_table_entries( struct snmp_session *ss )
 	      }
 	    }
 	    indices[row] = strdup(name_p);
+	    i = strlen(name_p);
+	    if (i > index_width) index_width = i;
 	  }
 	  dp = data+row*fields;
 	  sprint_value(string_buf, vars->name, vars->name_length, vars);
