@@ -6297,7 +6297,7 @@ snmp_add_var(netsnmp_pdu *pdu,
              oid * name, size_t name_length, char type, const char *value)
 {
     const char     *cp;
-    char           *ecp;
+    char           *ecp, *vp;
     int             result = SNMPERR_SUCCESS;
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
@@ -6485,7 +6485,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 's':
     case 'x':
     case 'd':
-        if (check && tp->type != TYPE_OCTETSTR) {
+        if (check && tp->type != TYPE_OCTETSTR && tp->type != TYPE_BITSTRING) {
             value = "OCTET STRING";
             result = SNMPERR_VALUE;
             goto type_error;
@@ -6549,13 +6549,9 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 
-        for (cp = value; *cp != '\0';) {
+	vp = strdup(value);
+	for (cp = strtok(vp, " ,\t"); cp; cp = strtok(NULL, " ,\t")) {
             int             ix, bit;
-
-            for (; (*cp == ' ' || *cp == '\t' || *cp == ','); cp++);
-            if (*cp == '\0') {
-                break;
-            }
 
             ltmp = strtoul(cp, &ecp, 0);
             if (*ecp != 0) {
@@ -6570,6 +6566,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                     result = SNMPERR_BAD_NAME;
                     snmp_set_detail(cp);
                     free(buf);
+		    free(vp);
                     goto out;
                 }
             }
@@ -6584,11 +6581,9 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
             bit = 0x80 >> ltmp % 8;
             buf[ix] |= bit;
-
-            for (;
-                 !(*cp == ' ' || *cp == '\t' || *cp == ',' || *cp == '\0');
-                 cp++);
+	    
         }
+	free(vp);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf, tint);
         break;
