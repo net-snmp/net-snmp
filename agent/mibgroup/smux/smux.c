@@ -1477,7 +1477,7 @@ smux_peer_cleanup(int sd)
 		if (Auths[i]->sa_active_fd == sd) {
 		  	char oid_name[128];
 			Auths[i]->sa_active_fd = -1;
-			snprint_objid(oid_name, sizeof(oid_print), Auths[i]->sa_oid, Auths[i]->sa_oid_len);
+			snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid, Auths[i]->sa_oid_len);
 			snmp_log(LOG_INFO, "peer disconnected: %s\n", oid_name);
 		}
 	}
