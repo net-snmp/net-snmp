@@ -338,7 +338,9 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                 row = table->first_row;
                 table_info->colnum = table_reg_info->min_column;
             } else if (regresult == 0 && request->requestvb->name_length ==
-                       reginfo->rootoid_len + 1) {
+                       reginfo->rootoid_len + 1 &&
+                       /* entry node must be 1, but any column is ok */
+                       request->requestvb->name[reginfo->rootoid_len] == 1) {
                 /*
                  * exactly to the entry 
                  */
