@@ -1472,13 +1472,20 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   within another application.
     See the file 'README.agentx' for details.
 
-  Note that support for the SMUX and AgentX extension mechanisms are
-  not configured in by default.  You will need to run configure with
-  the option
+  Note that support for SMUX is not configured in by default.  You will
+  need to run configure with the option
 
-		--with-mib-modules=agentx,smux
+		--with-mib-modules=smux
 
-  (or whichever of these you wish to support).
+  Starting from release 4.2.1, AgentX support is now included by default,
+  but needs to be explicitly activated in the master agent.  Do this by
+  adding the line
+
+		master agentx
+
+  to the snmpd.conf file before starting the agent.  Note that AgentX
+  support is still experimental, and should not be used on production
+  systems.  See README.agentx for details.
 
 
 
