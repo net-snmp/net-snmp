@@ -189,9 +189,9 @@ int             Facility = LOG_DAEMON;
 #define AGENT_RUNNING 1
 #define AGENT_STOPPED 0
 int             agent_status = AGENT_STOPPED;
-LPTSTR          g_szAppName = _T("Net-SNMP Agent");     /* Application Name */
+LPTSTR          app_name = _T("Net-SNMP Agent");     /* Application Name */
 #else
-char           *g_szAppName = "snmpd";
+char           *app_name = "snmpd";
 #endif
 
 extern char   **argvrestartp;
@@ -424,7 +424,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
     }
 
     if (syslog_log_s) {
-	snmp_enable_syslog_ident(g_szAppName, Facility);
+	snmp_enable_syslog_ident(app_name, Facility);
     }
 }
 
@@ -512,7 +512,7 @@ main(int argc, char *argv[])
             argv[i] = option_compatability;            
     }
 
-    snmp_log_syslogname(g_szAppName);
+    snmp_log_syslogname(app_name);
 
     /*
      * Now process options normally.  
@@ -1284,7 +1284,7 @@ _tmain(int argc, TCHAR * argv[])
     /*
      * Define Service Name and Description, which appears in windows SCM 
      */
-    LPCTSTR         lpszServiceName = g_szAppName;      /* Service Registry Name */
+    LPCTSTR         lpszServiceName = app_name;      /* Service Registry Name */
     LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Agent");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
 #ifdef IFDESCR
