@@ -446,6 +446,8 @@ as .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecur
 but the use of the
 .B -IR
 flag allows you to shorten that to just vacmSecurityModel.0."wes".
+(Though this OID really needs to be quoted - 'vacmSecurityModel.0."wes"' - to
+prevent the shell from swallowing the double quotes).
 .IP
 Additionally, see the
 .B RANDOM ACCESS MIBS
