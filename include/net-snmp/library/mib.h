@@ -180,6 +180,15 @@ SOFTWARE.
                                                       const oid * objid,
                                                       size_t objidlen);
 
+    void
+                    netsnmp_sprint_realloc_objid(u_char ** buf,
+                                                 size_t * buf_len,
+                                                 size_t * out_len,
+                                                 int allow_realloc,
+                                                 int *buf_overflow,
+                                                 const oid * objid,
+                                                 size_t objidlen);
+
     void            print_value(const oid * objid, size_t objidlen,
                                 const netsnmp_variable_list * variable);
 
