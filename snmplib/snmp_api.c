@@ -269,6 +269,8 @@ static const char * usmSecLevelName[] =
 struct session_list	*Sessions	 = NULL; /* MT_LIB_SESSION */
 static long		 Reqid		 = 0;    /* MT_LIB_REQUESTID */
 static long		 Msgid		 = 0;    /* MT_LIB_MESSAGEID */
+static long		 Sessid		 = 0;    /* MT_LIB_SESSIONID */
+static long		 Transid	 = 0;    /* MT_LIB_TRANSID */
 int              snmp_errno  = 0;
 /*END MTCRITICAL_RESOURCE*/
 
@@ -331,6 +333,30 @@ snmp_get_next_msgid (void)
     if (!retVal) retVal = 2;
     Msgid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
+    return retVal;
+}
+
+long
+snmp_get_next_sessid (void)
+{ 
+    long retVal;
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
+    retVal = 1 + Sessid; /*MTCRITICAL_RESOURCE*/
+    if (!retVal) retVal = 2;
+    Sessid = retVal;
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
+    return retVal;
+}
+
+long
+snmp_get_next_transid (void)
+{
+    long retVal;
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_TRANSID);
+    retVal = 1 + Transid; /*MTCRITICAL_RESOURCE*/
+    if (!retVal) retVal = 2;
+    Transid = retVal;
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_TRANSID);
     return retVal;
 }
 
@@ -836,6 +862,7 @@ _sess_copy( struct snmp_session *in_session)
 	session->retries = DEFAULT_RETRIES;
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
+    session->sessid = snmp_get_next_sessid();
 
     return( slp );
 }

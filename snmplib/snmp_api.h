@@ -84,6 +84,7 @@ struct snmp_pdu {
     long    reqid;	/* Request id - note: not incremented on retries */
     long    msgid;      /* Message id for V3 messages 
                          * note: incremented for each retry */
+    long    transid;    /* Unique ID for incoming transactions */
     long    sessid;     /* Session id for AgentX messages */
     long    errstat;	/* Error status (non_repeaters in GetBulk) */
     long    errindex;	/* Error index (max_repetitions in GetBulk) */
@@ -529,6 +530,8 @@ void snmp_timeout (void);
 
 long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
+long snmp_get_next_sessid(void);
+long snmp_get_next_transid(void);
 void snmp_set_dump_packet (int);
 int snmp_get_dump_packet (void);
 void snmp_set_quick_print (int);
