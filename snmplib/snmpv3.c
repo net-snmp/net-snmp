@@ -235,7 +235,7 @@ setup_engineID(u_char **eidp, const char *text)
    */
   if (text) {
     bufp[4] = 4;
-    strcpy((char *)bufp+5,text);
+    memcpy((char *)bufp+5, text, strlen(text));
 
   } else {
     bufp[4] = 1;
