@@ -4074,8 +4074,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       default:
 	result = SNMPERR_VAR_TYPE;
-	sprintf(buf, "%c", type);
-	snmp_set_detail(buf);
+	sprintf((char *)buf, "%c", type);
+	snmp_set_detail((const char *)buf);
         break;
     }
 
