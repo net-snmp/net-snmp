@@ -15,7 +15,7 @@ CC		= @CC@ $(CPPFLAGS)
 all: $(TARG)
 
 test:
-	$(srcdir)/RUNTESTS -a -D `pwd`/..
+	$(srcdir)/RUNTESTS -a -D `pwd`/.. $(TESTOPTS)
 
 etest:    etimetest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ etimetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
