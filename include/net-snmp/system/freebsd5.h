@@ -24,6 +24,3 @@
 #undef HAVE_STATVFS
 #undef HAVE_SYS_STATVFS_H
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
-/* force ucd-snmp/disk.c to ignore statvfs objects */
-#undef STRUCT_STATFS_HAS_F_FAVAIL
-
