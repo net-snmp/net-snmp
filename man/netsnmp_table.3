@@ -1,4 +1,4 @@
-.TH "table: Helps you implement a table." 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "table: Helps you implement a table." 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -85,7 +85,7 @@ table: Helps you implement a table. \- This handler helps you implement a table 
 .ti -1c
 .RI "int \fBnetsnmp_table_build_oid_from_index\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_request_info\fP *reqinfo, \fBnetsnmp_table_request_info\fP *table_info)"
 .br
-.RI "\fIBuilds an oid from index information. \fP"
+.RI "\fIgiven a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_update_variable_list_from_index\fP (\fBnetsnmp_table_request_info\fP *tri)"
 .br
@@ -108,7 +108,7 @@ To do this, the table handler needs to know up front how your table is structure
 .PP 
 .SS "int netsnmp_check_getnext_reply (\fBnetsnmp_request_info\fP * request, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * newvar, \fBnetsnmp_variable_list\fP ** outvar)"
 .PP
-checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value. returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. Definition at line 864 of file table.c.
+checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value. returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. Definition at line 872 of file table.c.
 .PP
 References variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb, snmp_oid_compare(), snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
@@ -179,7 +179,7 @@ creates a table handler given the netsnmp_table_registration_info object, insert
 References netsnmp_create_handler(), netsnmp_get_table_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and netsnmp_register_handler().
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
-given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. .Entry
+given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. Index values are extracted from the table_info varbinds. .Entry
 .PP
 .column Definition at line 772 of file table.c.
 .PP
@@ -188,7 +188,7 @@ References build_oid(), netsnmp_table_request_info_s::colnum, netsnmp_table_requ
 Referenced by netsnmp_table_build_result().
 .SS "int netsnmp_table_build_oid_from_index (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
-Builds an oid from index information. Definition at line 806 of file table.c.
+given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. Index values are extracted from the table_info index oid. Definition at line 809 of file table.c.
 .PP
 References netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_handler_registration, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_FREE.
 .SS "int netsnmp_table_build_result (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info, u_char type, u_char * result, size_t result_len)"
@@ -198,12 +198,12 @@ Builds the result to be returned to the agent given the table information. Use t
 References variable_list::name, variable_list::name_loc, netsnmp_handler_registration, netsnmp_table_build_oid(), netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value().
 .SS "int netsnmp_update_indexes_from_variable_list (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
-builds an oid given a set of indexes. Definition at line 846 of file table.c.
+builds an oid given a set of indexes. Definition at line 854 of file table.c.
 .PP
 References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, and netsnmp_table_request_info_s::indexes.
 .SS "int netsnmp_update_variable_list_from_index (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
-parses an OID into table indexses Definition at line 835 of file table.c.
+parses an OID into table indexses Definition at line 838 of file table.c.
 .PP
 References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, and netsnmp_table_request_info_s::indexes.
 .SS "int table_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"

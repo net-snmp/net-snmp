@@ -1,4 +1,4 @@
-.TH "old_api: Calls mib module code written in the old style of code." 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "old_api: Calls mib module code written in the old style of code." 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -39,7 +39,7 @@ References netsnmp_create_handler().
 Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
 .SS "int netsnmp_old_api_helper (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
-implements the old_api handler Definition at line 228 of file old_api.c.
+implements the old_api handler Definition at line 229 of file old_api.c.
 .PP
 References netsnmp_agent_request_info_s::asp, netsnmp_handler_registration_s::handlerName, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_create_data_list(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_oid_equals(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_MALLOC_TYPEDEF, snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"

@@ -98,7 +98,7 @@ else
       echo $NSC_SRCDIR
       ;;
     #################################################### linking
-    --lib-dir)
+    --libdir|--lib-dir)
       echo $NSC_LIBDIR
       ;;
     --ldflags|--ld*)
@@ -445,7 +445,7 @@ EOF
         echo "Ack.  Can't create $tmpfile."
 	exit 1
       fi
-      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS -L$NSC_EXEC_PREFIX/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp $NSC_AGENTLIBS $ldflags"
+      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then

@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "24 Nov 2004" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "24 Jan 2005" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -212,7 +212,7 @@ send_enterprise_trap_vars
 \fBsend_v2trap\fP 
 .RE
 .PP
-Definition at line 878 of file agent_trap.c.
+Definition at line 877 of file agent_trap.c.
 .PP
 Referenced by handle_snmp_packet().
 .SS "void send_v2trap (\fBnetsnmp_variable_list\fP * vars)"
@@ -244,7 +244,7 @@ send_enterprise_trap_vars
 .in +1c
 \fBnotification.c\fP.
 .PP
-Definition at line 907 of file agent_trap.c.
+Definition at line 906 of file agent_trap.c.
 .SS "void snmpd_free_trapsinks (void)"
 .PP
 This function allows you to make a distinction between generic traps from different classes of equipment. For example, you may want to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a different manner to a generic system SNMP_TRAP_LINKDOWN trap.
@@ -289,7 +289,7 @@ void
 \fBsend_v2trap\fP 
 .RE
 .PP
-Definition at line 342 of file agent_trap.c.
+Definition at line 341 of file agent_trap.c.
 .SH "Variable Documentation"
 .PP 
 .SS "oid snmptrapenterprise_oid[]"

@@ -1,7 +1,7 @@
 .TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
+snmpd.conf - configuration file for the Net-SNMP SNMP agent
 .SH DESCRIPTION
 .B snmpd.conf
 is the configuration file which defines how the Net-SNMP SNMP agent
@@ -47,7 +47,7 @@ This is a DISPLAY-STRING describing any error triggering the errorFlag above.
 If this entry is set to the integer value of 1 AND the errorFlag
 defined above is indeed a 1, a program or script will get executed
 with the table entry name from above as the argument.  The program to
-be executed is configured in the config.h file at compile time.
+be executed is configured in the net-snmp-config.h file at compile time.
 .SS Directives
 .IP "proc NAME"
 .IP "proc NAME MAX"
@@ -70,7 +70,7 @@ This registers a command that knows how to fix errors with the given
 process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "exec NAME PROG ARGS"
 .IP "exec MIBNUM NAME PROG ARGS"
 .IP
@@ -112,7 +112,7 @@ This registers a command that knows how to fix errors with the given
 exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
 given NAMEd entry is set to the integer value of 1, this command will
 be called.  It defaults to a compiled value set using the EXECFIXCMD
-definition in the config.h file.
+definition in the net-snmp-config.h file.
 .IP "disk PATH"
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 .IP

@@ -251,11 +251,11 @@ create_trap_session(char *sink, u_short sinkport,
         session.community_len = strlen(com);
     }
     /*
-     * for traps (not informs), there is no response. thus we don't
-     * need to listen to any address for a response, and should
-     * set the clientaddress to localhost, to reduce open ports.
+     * if the sink is localhost, bind to localhost, to reduce open ports.
      */
-    if (pdutype != SNMP_MSG_INFORM)
+    if ((NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_CLIENT_ADDR)) && 
+        ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
         session.localname = "localhost";
     sesp = snmp_open(&session);
     free(peername);
@@ -336,7 +336,6 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
  *
  *  @see send_easy_trap
  *  @see send_v2trap
-
  */
 void
 snmpd_free_trapsinks(void)

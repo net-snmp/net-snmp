@@ -71,7 +71,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 
     if (!row->index_oid) {
         snmp_log(LOG_ERR,
-                 "illegal data attempted to be added to table %s\n",
+                 "illegal data attempted to be added to table %s (no index)\n",
                  table->name);
         return SNMPERR_GENERR;
     }
@@ -116,7 +116,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
          * exact match.  Duplicate entries illegal 
          */
         snmp_log(LOG_WARNING,
-                 "duplicate table data attempted to be entered\n");
+                 "duplicate table data attempted to be entered. row exists\n");
         return SNMPERR_GENERR;
     }
 
