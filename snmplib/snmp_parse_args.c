@@ -195,10 +195,10 @@ extern int      snmpv3_options(char *optarg, netsnmp_session * session,
  * of a community string.
  */
 int
-snmp_do_parse_args(int argc,
-                   char *const *argv,
-                   netsnmp_session * session, const char *localOpts,
-                   void (*proc) (int, char *const *, int), int proxy)
+snmp_parse_args(int argc,
+                char **argv,
+                netsnmp_session * session, const char *localOpts,
+                void (*proc) (int, char *const *, int))
 {
     static char	   *sensitive[4] = { NULL, NULL, NULL, NULL };
     int             arg, sp = 0, zero_sensitive = 1, testcase = 0;
@@ -740,9 +740,10 @@ snmp_do_parse_args(int argc,
             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					 NETSNMP_DS_LIB_COMMUNITY);
 	    if (Cpsz == NULL) {
-                if (proxy) {
+                if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                           NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY)){
                     DEBUGMSGTL(("snmp_parse_args",
-                                "proxy, community string not present\n"));
+                                "ignoring that the community string is not present\n"));
                     session->community = NULL;
                     session->community_len = 0;
                 } else {
@@ -759,31 +760,3 @@ snmp_do_parse_args(int argc,
 
     return optind;
 }
-
-
-/*
- * Functionality contained in snmp_do_parse_args, this function, by passing
- * proxy value of 0, works as before.
- */
-int
-snmp_parse_args(int argc, char **argv, netsnmp_session *session, 
-		const char *localOpts, void (*proc)(int, char *const *, int))
-{
-    /* Pass last parm, proxy, as 0.  If no community string, signal error. */
-    return (snmp_do_parse_args(argc, argv, session, localOpts, proc, 0));
-}
-
-/*
- * Function called in proxy.c to support the parsing of arguments where no
- * community string is specified.
- */
-int
-snmp_proxy_parse_args(int argc,
-                      char *const *argv,
-                      netsnmp_session * session, const char *localOpts,
-                      void (*proc) (int, char *const *, int))
-{
-    /* Pass last parm, proxy, as 1.  If no community string, no error. */
-    return (snmp_do_parse_args(argc, argv, session, localOpts, proc, 1));
-}
-
