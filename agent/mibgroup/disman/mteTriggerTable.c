@@ -493,6 +493,8 @@ parse_simple_monitor(const char *token, char *line)
          */
         return;
     }
+    if (StorageNew->mteTriggerValueID)
+        free(StorageNew->mteTriggerValueID);
     StorageNew->mteTriggerValueID = snmp_duplicate_objid(obuf, obufLen);
     StorageNew->mteTriggerValueIDLen = obufLen;
 
