@@ -465,7 +465,7 @@ getswap(int rettype)
      * -- Wes 
      */
     strcpy(ex.command, "/etc/swapinfo -h");
-    if ((fd = get_exec_output(&ex))) {
+    if ((fd = get_exec_output(&ex)) != -1) {
         file = fdopen(fd, "r");
         for (i = 1;
              i <= 2 && fgets(ex.output, sizeof(ex.output), file) != NULL;
@@ -677,7 +677,7 @@ var_extensible_mem(struct variable *vp,
     case ERRORMSG:
         long_ret = getswap(SWAPGETLEFT);
         if ((long_ret > minimumswap) ? 0 : 1)
-            sprintf(errmsg, "Running out of swap space (%d)",
+            sprintf(errmsg, "Running out of swap space (%ld)",
                     getswap(SWAPGETLEFT));
         else
             errmsg[0] = 0;
