@@ -4059,7 +4059,7 @@ add_mibdir(const char *dirname)
 #endif
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
-#ifndef WIN32
+#if !(defined(WIN32) || defined(cygwin))
     sprintf(token, "%s/%s", dirname, ".index");
     if (stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {

@@ -3,9 +3,9 @@
 #
 
 top_builddir	= .
-TARG		=	bin/snmpget bin/snmpgetnext bin/snmpset 	\
-			bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk \
-			bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
+TARG		=	bin/snmpget$(EXEEXT) bin/snmpgetnext$(EXEEXT) bin/snmpset$(EXEEXT) 	\
+			bin/snmptranslate$(EXEEXT) bin/snmpwalk$(EXEEXT) bin/snmpbulkwalk$(EXEEXT) \
+			bin/snmptest$(EXEEXT) bin/snmptrapd$(EXEEXT) bin/snmpnetstat$(EXEEXT) bin/snmpd$(EXEEXT)
 
 SUBDIRS		= snmplib agent apps local ov man
 INSTALLDIRS	= snmplib agent apps local man mibs
@@ -63,7 +63,7 @@ installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir) $(includedir)
 	@-$(SHELL) $(srcdir)/mkinstalldirs $(persistentdir)
 
-apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd: makeall
+apps/snmpget$(EXEEXT) apps/snmpgetnext$(EXEEXT) apps/snmpset$(EXEEXT) apps/snmptranslate$(EXEEXT) apps/snmpwalk$(EXEEXT) apps/snmpbulkwalk$(EXEEXT) apps/snmptest$(EXEEXT) apps/snmptrapd$(EXEEXT) apps/snmpnetstat/snmpnetstat$(EXEEXT) agent/snmpd$(EXEEXT): makeall
 
 
 depend:
