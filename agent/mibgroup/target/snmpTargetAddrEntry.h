@@ -68,36 +68,4 @@ WriteMethod write_snmpTargetAddrStorageType;
 WriteMethod write_snmpTargetAddrRowStatus;
 
 
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the snmpTargetAddrEntry mib */
-
-struct variable2 snmpTargetAddrEntry_variables[] = {
-  { SNMPTARGETADDRTDOMAIN,     ASN_OBJECT_ID , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTDOMAINCOLUMN } },
-  { SNMPTARGETADDRTADDRESS,    ASN_OCTET_STR , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTADDRESSCOLUMN } },
-  { SNMPTARGETADDRTIMEOUT,     ASN_INTEGER   , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRTIMEOUTCOLUMN } },
-  { SNMPTARGETADDRRETRYCOUNT,  ASN_INTEGER   , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRRETRYCOUNTCOLUMN } },
-  { SNMPTARGETADDRTAGLIST,     ASN_OCTET_STR , RWRITE, 
-    var_snmpTargetAddrEntry, 1, {SNMPTARGETADDRTAGLISTCOLUMN } },
-  { SNMPTARGETADDRPARAMS,      ASN_OCTET_STR , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRPARAMSCOLUMN } },
-  { SNMPTARGETADDRSTORAGETYPE, ASN_INTEGER   , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRSTORAGETYPECOLUMN } },
-  { SNMPTARGETADDRROWSTATUS,   ASN_INTEGER   , RWRITE, 
-    var_snmpTargetAddrEntry, 1, { SNMPTARGETADDRROWSTATUSCOLUMN } },
-
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.12.1.2.1, 10, snmpTargetAddrEntry_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_SNMPTARGETADDRENTRY_H */

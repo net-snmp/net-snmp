@@ -204,10 +204,37 @@ int snmpTargetParams_rowStatusCheck(
 
 /* initialization routines */
 
+
+/* this variable defines function callbacks and type return information 
+   for the snmpTargetAddrEntry mib */
+
+struct variable2 snmpTargetParamsEntry_variables[] = {
+  { SNMPTARGETPARAMSMPMODEL,       ASN_INTEGER,   RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSMPMODELCOLUMN } },
+  { SNMPTARGETPARAMSSECURITYMODEL, ASN_INTEGER,   RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYMODELCOLUMN } },
+  { SNMPTARGETPARAMSSECURITYNAME,  ASN_OCTET_STR, RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYNAMECOLUMN } },
+  { SNMPTARGETPARAMSSECURITYLEVEL, ASN_INTEGER,   RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSECURITYLEVELCOLUMN } },
+  { SNMPTARGETPARAMSSTORAGETYPE,   ASN_INTEGER,   RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSSTORAGETYPECOLUMN } },
+  { SNMPTARGETPARAMSROWSTATUS,     ASN_INTEGER,   RWRITE, 
+    var_snmpTargetParamsEntry, 1, { SNMPTARGETPARAMSROWSTATUSCOLUMN } }
+};
+
+/* now load this mib into the agents mib table */
+oid snmpTargetParamsEntry_variables_oid[] = { 1,3,6,1,6,3,12,1,3,1 };
+
+
 void 
 init_snmpTargetParamsEntry(void)
 {
   aPTable = 0;
+
+  REGISTER_MIB("target/snmpTargetParamsEntry", snmpTargetParamsEntry_variables,
+			variable2, snmpTargetParamsEntry_variables_oid);
+
   snmpd_register_config_handler("targetParams", snmpd_parse_config_targetParams,0,"");
 
   /* we need to be called back later */

@@ -34,8 +34,24 @@ void ucdDemo_parse_userpass(char *word, char *line) {
   strcpy(demopass, line);
 }
 
+/* this variable defines function callbacks and type return information 
+   for the ucdDemoPublic mib */
+
+struct variable2 ucdDemoPublic_variables[] = {
+  { UCDDEMORESETKEYS    , ASN_INTEGER   , RWRITE, var_ucdDemoPublic, 1, { 1 } },
+  { UCDDEMOPUBLICSTRING , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 2 } },
+  { UCDDEMOUSERLIST     , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 3 } },
+  { UCDDEMOPASSPHRASE   , ASN_OCTET_STR , RWRITE, var_ucdDemoPublic, 1, { 4 } },
+
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid ucdDemoPublic_variables_oid[] = { 1,3,6,1,4,1,2021,14,1,1 };
 
 void init_ucdDemoPublic(void) {
+  REGISTER_MIB( "examples/ucdDemoPublic", ucdDemoPublic_variables,
+		variable2, ucdDemoPublic_variables_oid);
   snmpd_register_config_handler("demoUser",
                                 ucdDemo_parse_user, NULL, "USER");
   snmpd_register_config_handler("demoPass",

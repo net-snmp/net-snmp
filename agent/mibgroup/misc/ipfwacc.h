@@ -44,51 +44,8 @@ config_add_mib(IPFWACC-MIB)
 
 /* function definitions */
 
-  /* extern void	init_ipfwacc __P(void);*/
+extern void	init_ipfwacc (void);
+extern FindVarMethod var_ipfwacc;
 
-extern unsigned char	*var_ipfwacc __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int)) ));
-
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the ipfwaccounting mib */
-
-struct variable2 ipfwacc_variables[] = {
-    { IPFWACCINDEX,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCINDEX}},
-    { IPFWACCSRCADDR,  ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCSRCADDR}},
-    { IPFWACCSRCNM,  ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCSRCNM}},
-    { IPFWACCDSTADDR,  ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCDSTADDR}},
-    { IPFWACCDSTNM,  ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCDSTNM}},
-    { IPFWACCVIANAME,  ASN_OCTET_STR, RONLY, var_ipfwacc, 1, {IPFWACCVIANAME}},
-    { IPFWACCVIAADDR,  ASN_IPADDRESS, RONLY, var_ipfwacc, 1, {IPFWACCVIAADDR}},
-    { IPFWACCPROTO,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPROTO}},
-    { IPFWACCBIDIR,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCBIDIR}},
-    { IPFWACCDIR,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCDIR}},
-    { IPFWACCBYTES,  ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCBYTES}},
-    { IPFWACCPACKETS,  ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCPACKETS}},
-    { IPFWACCNSRCPRTS,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCNSRCPRTS}},
-    { IPFWACCNDSTPRTS,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCNDSTPRTS}},
-    { IPFWACCSRCISRNG,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCSRCISRNG}},
-    { IPFWACCDSTISRNG,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCDSTISRNG}},
-    { IPFWACCPORT1,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT1}},
-    { IPFWACCPORT2,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT2}},
-    { IPFWACCPORT3,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT3}},
-    { IPFWACCPORT4,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT4}},
-    { IPFWACCPORT5,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT5}},
-    { IPFWACCPORT6,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT6}},
-    { IPFWACCPORT7,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT7}},
-    { IPFWACCPORT8,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT8}},
-    { IPFWACCPORT9,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT9}},
-    { IPFWACCPORT10,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT10}}
-};
-
-/* now load this mib into the agents mib table */
-
-config_load_mib(1.3.6.1.4.1.2021.13.1, 9 , ipfwacc_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_IPFWACC_H */
 
