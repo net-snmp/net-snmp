@@ -239,6 +239,7 @@ static char *api_errors[-SNMPERR_MAX+1] = {
 };
 
 struct timeval Now;
+static int default_s_port = 161;
 struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
@@ -363,8 +364,9 @@ snmp_open(session)
     if (Reqid == 0)
 	init_snmp();
 
-    if (! servp)
-      servp = getservbyname("snmp", "udp");
+    servp = getservbyname("snmp", "udp");
+    if (servp)
+      default_s_port = servp->s_port;
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
@@ -508,8 +510,8 @@ snmp_open(session)
 	}
 	isp->addr.sin_family = AF_INET;
 	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    if (servp != NULL){
-		isp->addr.sin_port = servp->s_port;
+	    if (default_s_port){
+		isp->addr.sin_port = default_s_port;
 	    } else {
 		isp->addr.sin_port = htons(SNMP_PORT);
 	    }
