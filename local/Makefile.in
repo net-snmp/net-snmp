@@ -17,26 +17,44 @@ clean:
 
 snmpcheck.made: snmpcheck
 	touch snmpcheck.made
+	@if test ! -f snmpcheck; then\
+	  cp ${srcdir}/snmpcheck .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' snmpcheck
 
 tkmib.made: tkmib
 	touch tkmib.made
+	@if test ! -f tkmib; then\
+	  cp ${srcdir}/tkmib .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' tkmib
 
 mib2c.made: mib2c
 	touch mib2c.made
+	@if test ! -f mib2c; then\
+	  cp ${srcdir}/mib2c .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' mib2c
 
 ipf-mod.pl.made: ipf-mod.pl
 	touch ipf-mod.pl.made
+	@if test ! -f ipf-mod.pl; then\
+	  cp ${srcdir}/ipf-mod.pl .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' ipf-mod.pl
 
 fixproc.made: fixproc
 	touch fixproc.made
+	@if test ! -f fixproc; then\
+	  cp ${srcdir}/fixproc .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' fixproc
 
 rsnmp.made: fixproc
 	touch rsnmp.made
+	@if test ! -f rsnmp; then\
+	  cp ${srcdir}/rsnmp .; \
+	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' rsnmp
 
 install:
