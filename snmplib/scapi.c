@@ -48,6 +48,7 @@
 #include "scapi.h"
 #include "snmp_impl.h"
 #include "system.h"
+#include "mib.h"
 
 #include "transform_oids.h"
 
@@ -524,15 +525,34 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 
 #ifdef SNMP_TESTING_CODE
 {
-        char buf[SNMP_MAXBUF];
+        size_t buf_len = 128, out_len = 0;
+        u_char *buf = (u_char *)malloc(buf_len);
 
-	sprint_hexstring(buf, iv, ivlen);
-        DEBUGMSGTL(("scapi", "encrypt: IV: %s/ ", buf));
-	sprint_hexstring(buf, key, keylen);
-        DEBUGMSG(("scapi","%s\n", buf));
-
-	sprint_hexstring(buf, plaintext, 16);
-        DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	if (buf != NULL) {
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 iv, ivlen)) {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s/", buf));
+	    } else {
+		DEBUGMSGTL(("scapi", "encrypt: IV: %s [TRUNCATED]/", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 key, keylen)) {
+		DEBUGMSG(("scapi","%s\n", buf));
+	    } else {
+		DEBUGMSG(("scapi","%s [TRUNCATED]\n", buf));
+	    }
+	    out_len = 0;
+	    if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
+					 plaintext, 16)) {
+		DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
+	    } else {
+		DEBUGMSGTL(("scapi","encrypt: string: %s [TRUNCATED]\n", buf));
+	    }
+	    free(buf);
+	} else {
+	    DEBUGMSGTL(("scapi", "encrypt: malloc fail for debug output\n"));
+	}
 }
 #endif /* SNMP_TESTING_CODE */
 
