@@ -451,6 +451,10 @@ void vacm_parse_simple(char *token, char *confline) {
   const char *rw = "none";
   char *cp;
   static int num = 0;
+  char com2sec[] = "com2sec";
+  char group[] = "group";
+  char view[] = "view";
+  char access[] = "access";
 
   cp = copy_word(confline, community);
   if (cp && *cp) {
@@ -470,24 +474,24 @@ void vacm_parse_simple(char *token, char *confline) {
   /* com2sec mapping */
   /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
   sprintf(line,"anonymousSecName%03d %s %s", num, addressname, community);
-  vacm_parse_security("com2sec",line);
+  vacm_parse_security(com2sec,line);
 
   /* sec->group mapping */
   /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
   sprintf(line,"anonymousGroupName%03d any anonymousSecName%03d", num, num);
-  vacm_parse_group("group",line);
+  vacm_parse_group(group,line);
 
   /* view definition */
   /* view    anonymousViewNUM       included OID */
   sprintf(viewname,"anonymousView%03d",num);
   sprintf(line,"%s included %s", viewname, theoid);
-  vacm_parse_view("view",line);
+  vacm_parse_view(view,line);
 
   /* map everything together */
   /* access  anonymousGroupNameNUM  "" any noauth 0 anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
   sprintf(line, "anonymousGroupName%03d  \"\" any noauth 0 %s %s %s", num,
           viewname, rw, rw);
-  vacm_parse_access("access",line);
+  vacm_parse_access(access,line);
   num++;
 }
 
@@ -652,7 +656,9 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	groupSubtreeLen = *length - 13;
 	cp = secname;
 	while (groupSubtreeLen-- > 0) {
-	    *cp++ = *groupSubtree++;
+            if (*groupSubtree > 255)
+              return 0; /* illegal value */
+	    *cp++ = (char) *groupSubtree++;
 	}
 	*cp = 0;
 
@@ -664,7 +670,9 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	groupSubtreeLen = *length - 12;
 	cp = secname;
 	while (groupSubtreeLen-- > 0) {
-	    *cp++ = *groupSubtree++;
+            if (*groupSubtree > 255)
+              return 0; /* illegal value */
+	    *cp++ = (char) *groupSubtree++;
 	}
 	*cp = 0;
 	vacm_scanGroupInit();
@@ -735,13 +743,17 @@ u_char *var_vacm_access(struct variable *vp,
 	len = *op++;
 	cp = groupName;
 	while (len-- > 0) {
-	    *cp++ = *op++;
+            if (*op > 255)
+              return 0; /* illegal value */
+	    *cp++ = (char) *op++;
 	}
 	*cp = 0;
 	len = *op++;
 	cp = contextPrefix;
 	while (len-- > 0) {
-	    *cp++ = *op++;
+            if (*op > 255)
+              return 0; /* illegal value */
+	    *cp++ = (char) *op++;
 	}
 	*cp = 0;
 	secmodel = *op++;
@@ -763,7 +775,9 @@ u_char *var_vacm_access(struct variable *vp,
 	    len = *op;
 	    cp = groupName;
 	    while (len-- >= 0) {
-		*cp++ = *op++;
+                if (*op > 255)
+                  return 0; /* illegal value */
+		*cp++ = (char) *op++;
 	    }
 	    *cp = 0;
 	}
@@ -773,7 +787,9 @@ u_char *var_vacm_access(struct variable *vp,
 	    len = *op;
 	    cp = contextPrefix;
 	    while (len-- >= 0) {
-		*cp++ = *op++;
+                if (*op > 255)
+                  return 0; /* illegal value */
+		*cp++ = (char) *op++;
 	    }
 	    *cp = 0;
 	}
@@ -877,7 +893,9 @@ u_char *var_vacm_view(struct variable *vp,
 	len = *op++;
 	cp = viewName;
 	while (len-- > 0) {
-	    *cp++ = *op++;
+            if (*op > 255)
+              return 0; /* illegal value */
+	    *cp++ = (char) *op++;
 	}
 	*cp = 0;
 	len = *length - (op - name);
@@ -901,7 +919,9 @@ u_char *var_vacm_view(struct variable *vp,
 	    len = *op;
 	    cp = viewName;
 	    while (len-- >= 0) {
-		*cp++ = *op++;
+                if (*op > 255)
+                  return 0; /* illegal value */
+		*cp++ = (char) *op++;
 	    }
 	    *cp = 0;
 	}

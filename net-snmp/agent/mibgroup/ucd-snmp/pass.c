@@ -54,7 +54,7 @@ int asc2bin(char *p)
     int n = 0;
 
     for (;;) {
-        c = strtol(q, &r, 16);
+        c = (char) strtol(q, &r, 16);
         if (r == q) break;
         *p++ = c;
         q = r;
