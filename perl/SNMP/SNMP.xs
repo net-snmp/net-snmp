@@ -5128,6 +5128,10 @@ snmp_mib_node_FETCH(tp_ref, key)
                  sv_setsv(ST(0), *nn_hrefp);
                  break;
 	      case 'r': /* ranges */
+                 if (strncmp("reference", key, strlen(key)) == 0) {
+                   sv_setpv(ST(0),tp->reference);
+                   break;
+                 }
                  if (strncmp("ranges", key, strlen(key))) break;
                  ranges_av = newAV();
                  for(rp=tp->ranges; rp ; rp = rp->next) {
