@@ -46,6 +46,9 @@ SOFTWARE.
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#if HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/file.h>
 #include <nlist.h>
 
