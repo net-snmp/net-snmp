@@ -437,10 +437,7 @@ Save_HR_SW_info (void)
 void
 End_HR_SWInst (void)
 {
-#ifdef HAVE_LIBRPM
-    rpmdbClose(rpm_db);		/* or only on finishing ? */
-    rpm_db = NULL;
-#else
+#ifndef HAVE_LIBRPM
    if ( dp != NULL )
 	closedir( dp );
    dp = NULL;
