@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET.H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if HAVE_WINSOCK_H
