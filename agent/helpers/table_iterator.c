@@ -572,6 +572,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         continue;
                     if (!ti_info->results) {
                         if (table_info->colnum == tbl_info->max_column) {
+                            coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
+                            snmp_set_var_objid(request->requestvb,
+                                               coloid, reginfo->rootoid_len+2);
                             requests->processed = 1;
                             break;
                         } else {
@@ -652,6 +655,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     if (oldmode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
             if (request->requestvb->type == ASN_NULL ||
+                request->requestvb->type == SNMP_NOSUCHOBJECT ||
                 request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
