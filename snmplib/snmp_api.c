@@ -781,15 +781,14 @@ _sess_copy( struct snmp_session *in_session)
       session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
 
     if (in_session->securityAuthProtoLen > 0) {
-      session->securityAuthProto = 
-	(oid*)malloc(in_session->securityAuthProtoLen * sizeof(oid));
+      session->securityAuthProto =
+        snmp_duplicate_objid(in_session->securityAuthProto,
+                             in_session->securityAuthProtoLen);
       if (session->securityAuthProto == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(session->securityAuthProto, in_session->securityAuthProto,
-	      in_session->securityAuthProtoLen * sizeof(oid));
     } else if (get_default_authtype(&i) != NULL) {
         session->securityAuthProto =
           snmp_duplicate_objid(get_default_authtype(NULL), i);
@@ -797,15 +796,14 @@ _sess_copy( struct snmp_session *in_session)
     }
 
     if (in_session->securityPrivProtoLen > 0) {
-      session->securityPrivProto = 
-	(oid*)malloc((unsigned)in_session->securityPrivProtoLen * sizeof(oid));
+      session->securityPrivProto =
+        snmp_duplicate_objid(in_session->securityPrivProto,
+                             in_session->securityPrivProtoLen);
       if (session->securityPrivProto == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(session->securityPrivProto, in_session->securityPrivProto,
-	      in_session->securityPrivProtoLen * sizeof(oid));
     } else if (get_default_privtype(&i) != NULL) {
         session->securityPrivProto =
           snmp_duplicate_objid(get_default_privtype(NULL), i);
@@ -813,41 +811,38 @@ _sess_copy( struct snmp_session *in_session)
     }
 
     if (in_session->securityEngineIDLen > 0) {
-      ucp = (u_char*)malloc((unsigned)in_session->securityEngineIDLen *
-			   sizeof(u_char));
+      ucp = (u_char*)malloc(in_session->securityEngineIDLen);
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, in_session->securityEngineID,
-	      in_session->securityEngineIDLen * sizeof(u_char));
+	      in_session->securityEngineIDLen);
       session->securityEngineID = ucp;
 
     }
 
     if (in_session->contextEngineIDLen > 0) {
-      ucp = (u_char*)malloc((unsigned)in_session->contextEngineIDLen *
-			   sizeof(u_char));
+      ucp = (u_char*)malloc(in_session->contextEngineIDLen);
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, in_session->contextEngineID,
-	      in_session->contextEngineIDLen * sizeof(u_char));
+	      in_session->contextEngineIDLen);
       session->contextEngineID = ucp;
     } else if (in_session->securityEngineIDLen > 0) {
       /* default contextEngineID to securityEngineIDLen if defined */
-      ucp = (u_char*)malloc((unsigned)in_session->securityEngineIDLen *
-			   sizeof(u_char));
+      ucp = (u_char*)malloc(in_session->securityEngineIDLen);
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, in_session->securityEngineID,
-	      in_session->securityEngineIDLen * sizeof(u_char));
+	      in_session->securityEngineIDLen);
       session->contextEngineID = ucp;
       session->contextEngineIDLen = in_session->securityEngineIDLen;
     }
@@ -1184,7 +1179,11 @@ _sess_open(struct snmp_session *in_session)
       if (session->securityEngineIDLen == 0 &&
           (session->securityEngineIDLen & SNMP_FLAGS_DONT_PROBE) !=
           SNMP_FLAGS_DONT_PROBE) {
-	snmpv3_build_probe_pdu(&pdu);
+	if (snmpv3_build_probe_pdu(&pdu) != 0) {
+	  DEBUGMSGTL(("snmp_api","unable to create probe PDU\n"));
+	  snmp_sess_close(slp);
+	  return 0;
+	}
 	DEBUGMSGTL(("snmp_api","probing for engineID...\n"));
 	status = snmp_sess_synch_response(slp, pdu, &response);
 
@@ -1327,7 +1326,11 @@ create_user_from_session(struct snmp_session *session)
 
     /* copy in the authentication Key, and convert to the localized version */
     if (session->securityAuthKey != NULL && session->securityAuthKeyLen != 0) {
-      user->authKey = (u_char *)malloc (USM_LENGTH_KU_HASHBLOCK);
+      user->authKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
+      if (user->authKey == NULL) {
+        usm_free_user(user);
+        return SNMPERR_GENERR;
+      }
       user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
       if (generate_kul( user->authProtocol, user->authProtocolLen,
                         session->securityEngineID, session->securityEngineIDLen,
@@ -1340,7 +1343,11 @@ create_user_from_session(struct snmp_session *session)
 
     /* copy in the privacy Key, and convert to the localized version */
     if (session->securityPrivKey != NULL && session->securityPrivKeyLen != 0) {
-      user->privKey = (u_char *)malloc (USM_LENGTH_KU_HASHBLOCK);
+      user->privKey = (u_char *)calloc(1,USM_LENGTH_KU_HASHBLOCK);
+      if (user->privKey == NULL) {
+        usm_free_user(user);
+        return SNMPERR_GENERR;
+      }
       user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
       if (generate_kul( user->authProtocol, user->authProtocolLen,
                         session->securityEngineID, session->securityEngineIDLen,
@@ -1475,6 +1482,7 @@ snmpv3_build_probe_pdu (struct snmp_pdu **pdu)
   /* create the pdu */
   if (!pdu) return -1;
   *pdu = snmp_pdu_create(SNMP_MSG_GET);
+  if (!(*pdu) ) return -1;
   (*pdu)->version = SNMP_VERSION_3;
   (*pdu)->securityName = strdup("");
   (*pdu)->securityNameLen = strlen((*pdu)->securityName);
@@ -1485,6 +1493,11 @@ snmpv3_build_probe_pdu (struct snmp_pdu **pdu)
   user = usm_get_user(NULL, 0, (*pdu)->securityName);
   if (user == NULL) {
     user = (struct usmUser *) calloc(1,sizeof(struct usmUser));
+    if (user == NULL) {
+        snmp_free_pdu(*pdu);
+        *pdu = (struct snmp_pdu *)NULL;
+        return -1;
+    }
     user->name = strdup((*pdu)->securityName);
     user->secName = strdup((*pdu)->securityName);
     user->authProtocolLen = sizeof(usmNoAuthProtocol)/sizeof(oid);
@@ -1971,6 +1984,10 @@ _snmp_build(struct snmp_session *session,
 	    pdu->reqid = 1;	/* give a bogus non-error reqid for traps */
 	    if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH){
 	        pdu->enterprise = (oid *)malloc(sizeof(DEFAULT_ENTERPRISE));
+	        if (pdu->enterprise == NULL) {
+	            session->s_snmp_errno = SNMPERR_MALLOC;
+	            return -1;
+	        }
 	        memmove(pdu->enterprise, DEFAULT_ENTERPRISE,
 		    sizeof(DEFAULT_ENTERPRISE));
 	        pdu->enterprise_length = sizeof(DEFAULT_ENTERPRISE)/sizeof(oid);
@@ -2005,6 +2022,10 @@ _snmp_build(struct snmp_session *session,
 		return -1;
 	    }
 	    pdu->community = (u_char *)malloc(session->community_len);
+	    if (pdu->community == NULL) {
+	        session->s_snmp_errno = SNMPERR_MALLOC;
+	        return -1;
+	    }
 	    memmove(pdu->community, session->community,
                         session->community_len);
 	    pdu->community_len = session->community_len;
@@ -2023,6 +2044,10 @@ _snmp_build(struct snmp_session *session,
 	    else {
 	    SNMP_FREE(pdu->community);
 	    pdu->community = (u_char *)malloc(session->community_len);
+	    if (pdu->community == NULL) {
+	        session->s_snmp_errno = SNMPERR_MALLOC;
+	        return -1;
+	    }
 	    memmove(pdu->community, session->community,
                         session->community_len);
 	    }
@@ -2420,6 +2445,12 @@ snmpv3_parse(
   pdu->securityName		= (char *)calloc(1,SNMP_MAX_SEC_NAME_SIZE);
   pdu->securityNameLen		= SNMP_MAX_SEC_NAME_SIZE;
 
+  if ((pdu->securityName == NULL) ||
+      (pdu->securityEngineID == NULL) ||
+      (pdu->contextEngineID == NULL))
+  {
+      return SNMPERR_MALLOC;
+  }
   memset(pdu_buf, 0, pdu_buf_len);
   cp = pdu_buf;
 
@@ -2685,6 +2716,10 @@ _snmp_parse(void * sessp,
 	if (community_length) {
 	    pdu->community_len = community_length;
 	    pdu->community = (u_char *)malloc(community_length);
+	    if (pdu->community == NULL) {
+	        session->s_snmp_errno = SNMPERR_MALLOC;
+	        return -1;
+	    }
 	    memmove(pdu->community, community, community_length);
 	}
 	if (session->authenticator){
@@ -2810,6 +2845,9 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     if (data == NULL)
       return -1;
     pdu->enterprise = (oid *)malloc(pdu->enterprise_length * sizeof(oid));
+    if (pdu->enterprise == NULL) {
+        return -1;
+    }
     memmove(pdu->enterprise, objid, pdu->enterprise_length * sizeof(oid));
 
     /* agent-addr */
@@ -2973,8 +3011,11 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         if (vp->val_len < sizeof(vp->buf)){
           vp->val.string = (u_char *)vp->buf;
         } else {
-          vp->val.string = (u_char *)malloc((unsigned)vp->val_len);
+          vp->val.string = (u_char *)malloc(vp->val_len);
         }
+  	if (vp->val.string == NULL) {
+	  return -1;
+	}
         asn_parse_string(var_val, &len, &vp->type, vp->val.string,
                          &vp->val_len);
         break;
@@ -2982,7 +3023,10 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         vp->val_len = MAX_OID_LEN;
         asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
         vp->val_len *= sizeof(oid);
-        vp->val.objid = (oid *)malloc((unsigned)vp->val_len);
+        vp->val.objid = (oid *)malloc(vp->val_len);
+  	if (vp->val.objid == NULL) {
+	  return -1;
+	}
         memmove(vp->val.objid, objid, vp->val_len);
         break;
       case SNMP_NOSUCHOBJECT:
@@ -2992,6 +3036,9 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         break;
       case ASN_BIT_STR:
         vp->val.bitstring = (u_char *)malloc(vp->val_len);
+  	if (vp->val.bitstring == NULL) {
+	  return -1;
+	}
         asn_parse_bitstring(var_val, &len, &vp->type,
                             vp->val.bitstring, &vp->val_len);
         break;
@@ -3069,6 +3116,10 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
   } else {
     pdu->contextName	 = strdup("");
     pdu->contextNameLen	 = 0;
+  }
+  if (pdu->contextName == NULL) {
+    ERROR_MSG("error copying contextName from scopedPdu");
+    return NULL;
   }
 
   /* Get the PDU type */
@@ -3506,6 +3557,11 @@ _sess_read(void *sessp,
         isp->packet_size = (PACKET_LENGTH < length)?length:PACKET_LENGTH;
         isp->packet = (u_char *) malloc(isp->packet_size);
       }
+      if (isp->packet == NULL) {
+	/* TODO FIX: recover ?? */
+        isp->packet_size = 0;
+        return -1;
+      }
 
       /* do we have enough space? */
       if (isp->packet_size < (isp->packet_len + length)) {
@@ -3588,8 +3644,11 @@ _sess_read(void *sessp,
         return -1;
     }
 
-    pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-    memset (pdu, 0, sizeof(*pdu));
+    pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
+    if ( pdu == NULL ) {
+        return -1;
+    }
+
     pdu->address = from;
 
     if ( isp->hook_parse )
@@ -3651,11 +3710,21 @@ _sess_read(void *sessp,
             /* handle engineID discovery - */
             if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
               sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+	        if (sp->securityEngineID == NULL) {
+		/* TODO FIX: recover after message callback *?
+	            return -1;
+		*/
+	        }
               memcpy(sp->securityEngineID, pdu->securityEngineID,
                      pdu->securityEngineIDLen);
               sp->securityEngineIDLen = pdu->securityEngineIDLen;
               if (!sp->contextEngineIDLen) {
                 sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
+	        if (sp->contextEngineID == NULL) {
+		/* TODO FIX: recover after message callback *?
+	            return -1;
+		*/
+	        }
                 memcpy(sp->contextEngineID, pdu->securityEngineID,
                        pdu->securityEngineIDLen);
                 sp->contextEngineIDLen = pdu->securityEngineIDLen;
@@ -4120,6 +4189,9 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         if (largeval) {
             vars->val.objid = (oid *)malloc(vars->val_len);
         }
+        if (vars->val.objid == NULL) {
+            return NULL;
+        }
         memmove(vars->val.objid, value, vars->val_len);
         break;
 
@@ -4128,6 +4200,9 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       case ASN_NSAP:
         if (largeval) {
             vars->val.string = (u_char *)malloc(vars->val_len);
+        }
+        if (vars->val.string == NULL) {
+            return NULL;
         }
         memmove(vars->val.string, value, vars->val_len);
         break;
