@@ -11,7 +11,7 @@
  *
  *
  * Note: These arrays are sorted lazily. Thus, some methods
- * have a sort parameter in case you don't care is the array
+ * have a sort parameter in case you don't care if the array
  * has been sorted since it was last changed.
  *
  *
@@ -82,25 +82,25 @@ extern          "C" {
     int             netsnmp_array_compare(const void *lhs, const void *rhs);
 
     /*
-     * initialise an oid array which will contain data.
+     * initialize an oid array which will contain data.
      *
      * data_size  should be the size of each item
      */
-    oid_array       netsnmp_Initialise_oid_array(int data_size);
+    oid_array       netsnmp_initialize_oid_array(int data_size);
 
     /*
      * add an entry to an array.
      *
      * returns 0 on success, -1 on failure
      */
-    int             netsnmp_Add_oid_data(oid_array a, void *);
+    int             netsnmp_add_oid_data(oid_array a, void *);
 
     /*
      * replace an entry to an array.
      *
      * returns 0 on success, -1 on failure
      */
-    int             netsnmp_Replace_oid_data(oid_array a, void *key);
+    int             netsnmp_replace_oid_data(oid_array a, void *key);
 
     /*
      * find the entry in the array with the same index
@@ -109,7 +109,7 @@ extern          "C" {
      * change an index, remove the entry, change the index,
      * and the re-add the entry.
      */
-    void           *netsnmp_Get_oid_data(oid_array a, void *, int exact);
+    void           *netsnmp_get_oid_data(oid_array a, void *, int exact);
 
     /*
      * find entries in the array with the same index prefix
@@ -119,13 +119,13 @@ extern          "C" {
      * Note: caller is responsible for calling free() on the
      * pointer returned by this function.
      */
-    void          **netsnmp_Get_oid_data_subset(oid_array a, void *key, int * len);
+    void          **netsnmp_get_oid_data_subset(oid_array a, void *key, int * len);
 
     /*
      * find the number of entries in the array
      *
      */
-    int            netsnmp_Get_oid_data_count(oid_array a);
+    int            netsnmp_get_oid_data_count(oid_array a);
 
     /*
      * remove an entry
@@ -133,7 +133,7 @@ extern          "C" {
      * if save is not null, the entry will be copied to the address
      * save points at.
      */
-    int             netsnmp_Remove_oid_data(oid_array a, void *key, void *save);
+    int             netsnmp_remove_oid_data(oid_array a, void *key, void *save);
 
     /*
      * release memory used by a table.
@@ -142,7 +142,7 @@ extern          "C" {
      * memory, you are responsible for releasing that
      * memory before calling this function!
      */
-    void            netsnmp_Release_oid_array(oid_array a);
+    void            netsnmp_release_oid_array(oid_array a);
 
     /*
      * call a function for each entry (useful for cleanup).
@@ -153,7 +153,7 @@ extern          "C" {
      * If sort = 1, entries will be in sorted order. Otherwise
      * the order is not defined.
      */
-    void            netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each *,
+    void            netsnmp_for_each_oid_data(oid_array a, Netsnmp_For_Each *,
                                       void *context, int sort);
 
     /*
@@ -168,7 +168,7 @@ extern          "C" {
      * the table will be sorted. If sort is not set, the order is
      * not defined.
      */
-    void           *netsnmp_Retrieve_oid_array(oid_array a, int *size, int sort);
+    void           *netsnmp_retrieve_oid_array(oid_array a, int *size, int sort);
 
 #ifdef __cplusplus
 }
