@@ -87,6 +87,7 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 -- OID values assigned in the ucdExperimental branch:
 --   ucdIpFwAccMIB    OBJECT IDENTIFIER ::= { ucdExperimental  1 } - UCD-IPFWACC-MIB
 --   ucdIpFilter      OBJECT IDENTIFIER ::= { ucdExperimental  2 } - UCD-IPFILTER-MIB
+--   wavelan          OBJECT IDENTIFIER ::= { ucdExperimental  3 } - WL-MIB
 --   ucdDlmodMIB      OBJECT IDENTIFIER ::= { ucdExperimental 14 } - UCD-DLMOD-MIB
 --   ucdDiskIOMIB     OBJECT IDENTIFIER ::= { ucdExperimental 15 } - UCD-DISKIO-MIB
 
