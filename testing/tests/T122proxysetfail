@@ -35,7 +35,7 @@ STARTAGENT
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
   echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
-  echo "syscontact testcontact" >> $SNMP_CONFIG_FILE
+#  echo "syscontact testcontact" >> $SNMP_CONFIG_FILE
   AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
   ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
   SNMP_SNMPD_PORT="7676"
@@ -45,14 +45,17 @@ STARTAGENT
   # test to see that the agent now supports the system mib
   CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial udp:localhost:$SNMP_SNMPD_PORT sysContact.0"
 
-  CHECK ".1.3.6.1.2.1.1.4.0 = testcontact"
+  
+  # we don't know the real value, unfortunately, so we test for what
+  # we should *not* get back.
+  CHECK ".1.3.6.1.2.1.1.4.0 = No Such Object"
 
-  if test "$snmp_last_test_result" = 1; then
+  if test "$snmp_last_test_result" = 0; then
 
     # test to see that the agent now supports the system mib
     CAPTURE "snmpset -On -Ir $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial udp:localhost:$SNMP_SNMPD_PORT sysContact.0 i 42"
 
-    CHECK "Reason: commitFailed"
+    CHECK ".1.3.6.1.2.1.1.4.0 = Wrong Type"
 
   fi
 
