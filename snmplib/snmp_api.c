@@ -4186,6 +4186,7 @@ size_t snmp_socket_length( int family)
 #endif
 #endif
 
+#ifndef aix3
 #ifdef AF_LINK
     case AF_LINK:
 #ifdef _MAX_SA_LEN
@@ -4195,12 +4196,12 @@ size_t snmp_socket_length( int family)
 #endif
       break;
 #endif /* AF_LINK */
+#endif
 
     case AF_INET:
       length = sizeof (struct sockaddr_in);
       break;
     default:
-/* XXX: next was not in agent/mibgroup/mibII/var_route.c!! */
       length = sizeof (struct sockaddr);
       break;
     }
