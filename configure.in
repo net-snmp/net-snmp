@@ -214,6 +214,30 @@ else
   AC_DEFINE(RTENTRY,struct rtentry)
 fi
 
+dnl check for 4.3's rtentry->rt_next
+if test "x$ac_cv_RTENTRY_TYPE" = "xBSD-4.3"; then
+AC_CACHE_CHECK(for struct rtentry has a rt_next node, 
+	ac_cv_struct_rtentry_rt_next,
+[
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+],[
+struct rtentry rt; 
+rt.rt_next;
+], ac_cv_struct_rtentry_rt_next=yes,  ac_cv_struct_rtentry_rt_next=no )
+])
+
+if test "x$ac_cv_struct_rtentry_rt_next" = "xyes"; then
+  AC_DEFINE(RTENTRY_RT_NEXT)
+fi
+
+fi
 
 dnl Check ps args
 AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,

@@ -55,6 +55,9 @@
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
 
+/* Does the rtentry structure have a rt_next node */
+#undef RTENTRY_RT_NEXT
+
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
