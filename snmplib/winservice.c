@@ -107,11 +107,11 @@ VOID RegisterService(LPCTSTR lpszServiceName,
 							     SERVICE_AUTO_START,
 							     SERVICE_ERROR_NORMAL,
 							     szServiceCommand,
-							     NULL,    // load-order group
-							     NULL,    // group member tag
-							     NULL,    // dependencies
-							     NULL,    // account
-							     NULL);   // password
+							     NULL,    /* load-order group */
+							     NULL,    /* group member tag */
+							     NULL,    /* dependencies */
+							     NULL,    /* account */
+							     NULL);   /* password */
 
         if(hService == NULL)
         {
