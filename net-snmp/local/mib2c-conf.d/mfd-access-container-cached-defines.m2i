@@ -211,11 +211,14 @@ $example_end
         /*
          * allocate an row context and set the index(es)
          */
-@if $m2c_data_allocate == 1@
-        rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
-@else@
-        rowreq_ctx = ${context}_allocate_rowreq_ctx();
-@end@
+@   eval $m2c_tmp = ""@
+@   if ($m2c_data_allocate == 1) || ($m2c_data_init == 1)@
+@      eval $m2c_tmp = "NULL"@
+@      if ($m2c_data_allocate == 1) && ($m2c_data_init == 1)@
+@         eval $m2c_tmp = "$m2c_tmp, NULL"@
+@      @end@
+@   end@
+        rowreq_ctx = ${context}_allocate_rowreq_ctx($m2c_tmp);
         if(MFD_SUCCESS != ${context}_indexes_set(rowreq_ctx
 @   foreach $node index@
 @      include m2c_setup_node.m2i@

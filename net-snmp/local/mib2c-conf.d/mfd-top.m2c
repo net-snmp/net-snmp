@@ -297,10 +297,13 @@ initialize_table_$context(void)
 /**
  * extra context initialization
  *
- * @retval MFD_SUCCESS : no errors
- * @retval!MFD_SUCCESS : error (context allocate will fail)
+ * @param rowreq_ctx    : row request context
+ * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
+ *
+ * @retval MFD_SUCCESS  : no errors
+ * @retval MFD_ERROR    : error (context allocate will fail)
  */
-int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx)
+    int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx, void *user_init_ctx)
 {
     /*
      * TODO:
