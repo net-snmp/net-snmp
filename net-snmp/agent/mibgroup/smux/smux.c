@@ -58,6 +58,7 @@
 
 #include "../../../snmplib/system.h"
 #include "asn1.h"
+#include "mib.h"
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -92,7 +93,7 @@ static u_char debug_can[] = {
 
 
 u_char *smux_snmp_process __P((int, oid *, int *, int *));
-int init_smux();
+int init_smux __P((void));
 
 static u_char *smux_open_process __P((u_char *, int *));
 static u_char *smux_rreq_process __P((int, u_char *, int *));
@@ -101,6 +102,7 @@ static u_char *smux_close_process __P((int, u_char *, int *));
 static u_char *smux_parse __P((u_char *, oid *, int *, int *));
 static u_char *smux_parse_var __P((u_char *, int *, oid *, int *, int *));
 static int smux_build __P((u_char, u_long, oid *, int *, u_char *, int *));
+static void print_fdbits __P((fd_set *));
 
 int 
 init_smux __P((void))
@@ -446,7 +448,6 @@ smux_snmp_process(exact, objid, len, return_len)
 	u_char  result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
 	u_char type;
-	int i;
         char c_oid[MAX_NAME_LEN];
 	
 	/* 
@@ -598,7 +599,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	memcpy( objid,var_name, var_name_len * sizeof(oid));
 
         if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, objid, oidlen);
+          sprint_objid (c_oid, objid, *oidlen);
           DEBUGP("[smux_parse_var] returning oid : %s\n", c_oid);
         }
 	/* XXX */

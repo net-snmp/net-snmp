@@ -1,3 +1,5 @@
+#ifndef PARSE_H
+#define PARSE_H
 /***********************************************************
         Copyright 1989 by Carnegie Mellon University
 
@@ -139,6 +141,19 @@ struct module_compatability {
 #define MIB_STATUS_DEPRECATED  39
 #define MIB_STATUS_CURRENT     57
 
+#ifdef CMU_COMPATIBLE
+#define ACCESS_READONLY		MIB_ACCESS_READONLY
+#define ACCESS_READWRITE	MIB_ACCESS_READWRITE
+#define ACCESS_WRITEONLY	MIB_ACCESS_WRITEONLY
+#define ACCESS_NOACCESS		MIB_ACCESS_NOACCESS
+#define ACCESS_NOTIFY		MIB_ACCESS_NOTIFY
+#define ACCESS_CRAETE		MIB_ACCESS_CREATE
+#define STATUS_MANDATORY	MIB_STATUS_MANDATORY
+#define STATUS_OPTIONAL		MIB_STATUS_OPTIONAL
+#define STATUS_OBSOLETE		MIB_STATUS_OBSOLETE
+#define STATUS_DEPRECATED	MIB_STATUS_DEPRECATED
+#define STATUS_CURRENT		MIB_STATUS_CURRENT
+#endif	/* CMU_COMPATIBLE */
 
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
@@ -158,5 +173,7 @@ char *get_tc_descriptor __P((int));
  /* backwards compatability */
 struct tree *find_node __P((char *, struct tree*));
 struct module *find_module __P((int));
+void adopt_orphans __P((void));
 void snmp_set_mib_warnings __P((int));
 void snmp_set_save_descriptions __P((int));
+#endif /* PARSE_H */

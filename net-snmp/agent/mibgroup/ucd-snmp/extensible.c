@@ -106,7 +106,6 @@ extern int numextens;                    /* ditto */
 extern int numrelocs;                    /* ditto */
 extern struct extensible *passthrus;    /* In pass.c */
 extern int numpassthrus;                 /* ditto */
-extern char version_descr[];
 extern char sysName[];
 extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
@@ -288,7 +287,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   static struct extensible ex;
   FILE *file;
 
-  if ((exten = get_exten_instance(extens,name[8]))) {
+  if ((exten = get_exten_instance(extens,name[10]))) {
     if (var_val_type != ASN_INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;

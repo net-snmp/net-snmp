@@ -167,6 +167,7 @@ snmptranslate.o: ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 snmptranslate.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmptranslate.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmptranslate.o: ./../snmplib/parse.h ./../snmplib/mib.h ./../snmplib/snmp.h
+snmptranslate.o: ../snmplib/system.h ../version.h
 snmptrap.o: ../config.h ../mib_module_config.h 
 snmptrap.o:   ../s/linux.h
 snmptrap.o: ../s/sysv.h ../s/generic.h ../m/generic.h 

@@ -245,7 +245,7 @@ struct timeval Now;
 struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
-static int snmp_dump_packet = 0;
+int snmp_dump_packet = 0;
 
 static void free_request_list __P((struct request_list *));
 void shift_array __P((u_char *, int, int));
@@ -366,9 +366,9 @@ snmp_open(session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
-    u_char *cp;
+    u_char *cp, *comp;
     oid *op;
-    int sd;
+    int sd, comlen;
     in_addr_t addr;
     struct sockaddr_in	me;
     struct hostent *hp;
@@ -383,15 +383,28 @@ snmp_open(session)
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
+    if (slp == NULL) { 
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     slp->internal = isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
+    if (isp == NULL) { 
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     memset(isp, 0, sizeof(struct snmp_internal_session));
     slp->internal->sd = -1; /* mark it not set */
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
+    if (slp->session == NULL) { 
+      free(isp);
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     memmove(slp->session, session, sizeof(struct snmp_session));
     session = slp->session;
-    /* now link it in. */
-    slp->next = Sessions;
-    Sessions = slp;
+
     /*
      * session now points to the new structure that still contains pointers to
      * data allocated elsewhere.  Some of this data is copied to space malloc'd
@@ -400,23 +413,40 @@ snmp_open(session)
 
     if (session->peername != NULL){
 	cp = (u_char *)malloc((unsigned)strlen(session->peername) + 1);
+        if (cp == NULL) { 
+          free(slp->session);
+          free(isp);
+          free(slp);
+          snmp_errno = SNMPERR_GENERR;
+          return(NULL);
+        }
 	strcpy((char *)cp, session->peername);
 	session->peername = (char *)cp;
     }
 
     /* Fill in defaults if necessary */
-    if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
-	cp = (u_char *)malloc((unsigned)session->community_len);
-	memmove(cp, session->community, session->community_len);
-    } else {
-	session->community_len = strlen(DEFAULT_COMMUNITY);
-	cp = (u_char *)malloc((unsigned)session->community_len);
-	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
+    comp = session->community;
+    comlen = session->community_len;
+    if (comlen == SNMP_DEFAULT_COMMUNITY_LEN) {
+	comp = DEFAULT_COMMUNITY;
+	comlen = strlen(comp);
     }
+    cp = (u_char *)malloc(comlen);
+    if (cp == NULL) { 
+      free(session->peername);
+      free(slp->session);
+      free(isp);
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
+    memcpy(cp, comp, comlen);
     session->community = cp;	/* replace pointer with pointer to new data */
+    session->community_len = comlen;
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->srcParty, session->srcPartyLen * sizeof(oid));
 	session->srcParty = op;
     } else {
@@ -425,6 +455,7 @@ snmp_open(session)
 
     if (session->dstPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->dstParty, session->dstPartyLen * sizeof(oid));
 	session->dstParty = op;
     } else {
@@ -433,6 +464,7 @@ snmp_open(session)
 
     if (session->contextLen > 0){
 	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->context, session->contextLen * sizeof(oid));
 	session->context = op;
     } else {
@@ -443,7 +475,10 @@ snmp_open(session)
 	session->retries = DEFAULT_RETRIES;
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
-    isp->requests = isp->requestsEnd = NULL;
+
+    /* now link it in. */
+    slp->next = Sessions;
+    Sessions = slp;
 
     /* Set up connections */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -456,6 +491,18 @@ snmp_open(session)
 	}
 	return 0;
     }
+
+#ifdef SO_BSDCOMPAT
+    /* Patch for Linux.  Without this, UDP packets that fail get an ICMP
+     * response.  Linux turns the failed ICMP response into an error message
+     * and return value, unlike all other OS's.
+     */
+    {
+	int one=1;
+	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
+    }
+#endif /* SO_BSDCOMPAT */
+
     isp->sd = sd;
     if (session->peername != SNMP_DEFAULT_PEERNAME){
 	if ((addr = inet_addr(session->peername)) != -1){
@@ -488,6 +535,7 @@ snmp_open(session)
 	isp->addr.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
     }
 
+    memset(&me, '\0', sizeof(me));
     me.sin_family = AF_INET;
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(session->local_port);
@@ -836,6 +884,7 @@ snmp_parse(session, pdu, data, length)
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
+    char err[128];
 
     /* get the message tag */
     len = length;
@@ -924,20 +973,26 @@ snmp_parse(session, pdu, data, length)
         /* request id */
 	data = asn_parse_int(data, &length, &type, &pdu->reqid,
 			     sizeof(pdu->reqid));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
 	    return -1;
+	}
 
         /* error status (getbulk non-repeaters) */
 	data = asn_parse_int(data, &length, &type, &pdu->errstat,
 			     sizeof(pdu->errstat));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
 	    return -1;
+	}
 
         /* error index (getbulk max-repetitions) */
 	data = asn_parse_int(data, &length, &type, &pdu->errindex,
 			     sizeof(pdu->errindex));
-	if (data == NULL)
+	if (data == NULL) {
+	    ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
 	    return -1;
+	}
     } else {
         /* an SNMPv1 trap PDU */
 
@@ -1182,6 +1237,8 @@ snmp_async_send(session, pdu, callback, cb_data)
 	    return 0;
         }
         pdu->version = session->version;
+    } else if (session->version == SNMP_DEFAULT_VERSION) {
+	/* It's OK */
     } else if (pdu->version != session->version) {
         snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
@@ -1206,8 +1263,8 @@ snmp_async_send(session, pdu, callback, cb_data)
     } else if (pdu->command == SNMP_MSG_INFORM ||
                pdu->command == SNMP_MSG_TRAP2) {
         /* not supported in SNMPv1 and SNMPsec */
-	if ((session->version == SNMP_VERSION_1) ||
-                (session->version == SNMP_VERSION_sec)) {
+	if (pdu->version == SNMP_VERSION_1 ||
+                pdu->version == SNMP_VERSION_sec) {
 	    snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
@@ -1222,8 +1279,8 @@ snmp_async_send(session, pdu, callback, cb_data)
             expect_response = 0;
     } else if (pdu->command == SNMP_MSG_GETBULK) {
         /* not supported in SNMPv1 and SNMPsec */
-	if ((session->version == SNMP_VERSION_1) ||
-                (session->version == SNMP_VERSION_sec)) {
+	if (pdu->version == SNMP_VERSION_1 ||
+                pdu->version == SNMP_VERSION_sec) {
 	    snmp_errno = SNMPERR_V1_IN_V2;
 	    return 0;
 	}
@@ -1236,8 +1293,8 @@ snmp_async_send(session, pdu, callback, cb_data)
 	}
 	    
     } else if (pdu->command == SNMP_MSG_TRAP) {
-        if ((session->version != SNMP_VERSION_1) &&
-            (session->version != SNMP_VERSION_sec)) {
+        if (pdu->version != SNMP_VERSION_1 &&
+            pdu->version != SNMP_VERSION_sec) {
           snmp_errno = SNMPERR_V2_IN_V1;
           return 0;
         }
@@ -1278,7 +1335,7 @@ snmp_async_send(session, pdu, callback, cb_data)
      */
 
     /* setup administrative fields based on version */
-    switch (session->version) {
+    switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
 	if (pdu->community_len == 0){
@@ -1359,6 +1416,12 @@ snmp_async_send(session, pdu, callback, cb_data)
 
 	/* set up to expect a response */
 	rp = (struct request_list *)malloc(sizeof(struct request_list));
+	if (rp == NULL) {
+	    snmp_errno = SNMPERR_GENERR;
+	    return 0;
+	}
+	memset(rp, 0, sizeof(struct request_list));
+	/* XX isp needs lock iff multiple threads can handle this session */
 	if (isp->requestsEnd){
 	    rp->next_request = isp->requestsEnd->next_request;
 	    isp->requestsEnd->next_request = rp;
@@ -1502,7 +1565,7 @@ snmp_read(fdset)
 	    memset (pdu, 0, sizeof(*pdu));
 	    pdu->address = from;
 	    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
-		fprintf(stderr, "Unrecognizable or unauthentic packet received\n");
+		fprintf(stderr, "Unrecognizable or unauthentic packet received (%s)\n", snmp_detail);
 		snmp_free_internal_pdu(pdu);
 		return;
 	    }
@@ -1512,7 +1575,7 @@ snmp_read(fdset)
 		    if (rp->request_id == pdu->reqid){
 			if (rp->callback) callback = rp->callback;
 			if (rp->cb_data) magic = rp->cb_data;
-		        if (callback(RECEIVED_MESSAGE, sp, pdu->reqid,
+		        if (callback == NULL || callback(RECEIVED_MESSAGE, sp, pdu->reqid,
 					 pdu, magic) == 1){
 			    /* successful, so delete request */
 			    if (isp->requests == rp){
@@ -1690,7 +1753,8 @@ snmp_timeout __P((void))
 		    callback = (rp->callback ? rp->callback : sp->callback);
 		    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
 		    /* No more chances, delete this entry */
-		    callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
+		    if (callback)
+			callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
 		    if (orp == NULL){
 			isp->requests = rp->next_request;
 			if (isp->requestsEnd == rp)
@@ -1711,7 +1775,8 @@ snmp_timeout __P((void))
 		    /* retransmit this pdu */
 		    rp->retries++;
 		    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
-			fprintf(stderr, "Error re-building packet\n");
+			fprintf(stderr, "Error re-building packet (%s)\n",
+				snmp_detail);
 			/* this should never happen */
 			abort();
 		    }
@@ -1721,12 +1786,16 @@ snmp_timeout __P((void))
 			xdump(packet, length, "");
 			printf("\n");
 		    }
+
 		    if (sendto(isp->sd, (char *)packet, length, 0,
 			       (struct sockaddr *)&rp->pdu->address,
 			       sizeof(rp->pdu->address)) < 0){
 			snmp_set_detail(strerror(errno));
 		    }
-		    tv = now;
+
+/* XX time does not stand still for build/send processing */
+		    gettimeofday(&tv, (struct timezone *)0);
+
 		    rp->time = tv;
 		    tv.tv_usec += rp->timeout;
 		    tv.tv_sec += tv.tv_usec / 1000000L;

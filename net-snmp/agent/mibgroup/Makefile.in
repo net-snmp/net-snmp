@@ -1,6 +1,6 @@
 
-CPPFLAGS=@CPPFLAGS@ -I. -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
-	-I$(srcdir)/.. -I..
+CPPFLAGS=@CPPFLAGS@ -I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
+	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I..
 CC = @CC@
 
 # Need a special .c -> .o definition here to make sure we place the
@@ -142,9 +142,9 @@ mibII/interfaces.o:
 mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o:  
+mibII/interfaces.o:  
+mibII/interfaces.o:  
 mibII/interfaces.o: 
-mibII/interfaces.o:  
-mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o: ./../kernel.h mibincl.h 
@@ -466,6 +466,7 @@ ucd-snmp/pass.o:
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o: 
+ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  

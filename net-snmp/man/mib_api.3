@@ -7,6 +7,12 @@ read_objid, read_module_node,
 print_mib,
 print_variable, print_value, print_objid, print_description
 .SH SYNOPSIS
+.B "#include <stdio.h>
+.br
+.B "#include <sys/types.h>
+.br
+.B "#include <ucd-snmp/asn1.h>
+.br
 .B #include <ucd-snmp/mib.h>
 .br
 .B #include <ucd-snmp/parse.h>
@@ -141,15 +147,9 @@ directories initialised by
 .I add_mibdir
 (or the default setup), though any imported modules do.
 .br
-By default, the following list of files will be loaded (if present):
-.I mib.txt
-in the current directory,
-.I /usr/local/lib/snmp/mib.txt
-and
-.I /etc/mib.txt
-though these can be overridden by setting the environmental variable
-.I MIBFILE
-to a (colon-separated) list of files.
+The environmental variable
+.I MIBFILES
+can be set to a (colon-separated) list of files containing mibs to load.
 
 .I read_objid
 takes a string containing a textual version of an object identifier
@@ -157,7 +157,10 @@ takes a string containing a textual version of an object identifier
 the corresponding list of sub-identifiers.  This is returned in the
 .I output
 parameter, with the number of sub-identifiers returned via
-.I out_len
+.IR out_len .
+When called, out_len must hold the maximum length of the
+.I output
+array.
 This fuction returns a value of 0 if it succeeds in parsing the string
 and 1 otherwise.
 
