@@ -5,28 +5,10 @@
 #ifndef _MIBGROUP_TCP_H
 #define _MIBGROUP_TCP_H
 
-#ifdef linux
 
-struct tcp_mib
-{
- 	unsigned long	tcpRtoAlgorithm;
- 	unsigned long	tcpRtoMin;
- 	unsigned long	tcpRtoMax;
- 	unsigned long	tcpMaxConn;
- 	unsigned long	tcpActiveOpens;
- 	unsigned long	tcpPassiveOpens;
- 	unsigned long	tcpAttemptFails;
- 	unsigned long	tcpEstabResets;
- 	unsigned long	tcpCurrEstab;
- 	unsigned long	tcpInSegs;
- 	unsigned long	tcpOutSegs;
- 	unsigned long	tcpRetransSegs;
-};
-
-#endif
-
-config_arch_require(solaris2, kernel_sunos5)
 config_require(mibII/tcpTable util_funcs)
+config_arch_require(solaris2, kernel_sunos5)
+config_arch_require(linux, mibII/kernel_linux)
 
 extern void	init_tcp (void);
 extern FindVarMethod var_tcp;

@@ -6,38 +6,7 @@
 #define _MIBGROUP_ICMP_H
 
 config_arch_require(solaris2, kernel_sunos5)
-
-#ifdef linux
-struct icmp_mib
-{
- 	unsigned long	icmpInMsgs;
- 	unsigned long	icmpInErrors;
-  	unsigned long	icmpInDestUnreachs;
- 	unsigned long	icmpInTimeExcds;
- 	unsigned long	icmpInParmProbs;
- 	unsigned long	icmpInSrcQuenchs;
- 	unsigned long	icmpInRedirects;
- 	unsigned long	icmpInEchos;
- 	unsigned long	icmpInEchoReps;
- 	unsigned long	icmpInTimestamps;
- 	unsigned long	icmpInTimestampReps;
- 	unsigned long	icmpInAddrMasks;
- 	unsigned long	icmpInAddrMaskReps;
- 	unsigned long	icmpOutMsgs;
- 	unsigned long	icmpOutErrors;
- 	unsigned long	icmpOutDestUnreachs;
- 	unsigned long	icmpOutTimeExcds;
- 	unsigned long	icmpOutParmProbs;
- 	unsigned long	icmpOutSrcQuenchs;
- 	unsigned long	icmpOutRedirects;
- 	unsigned long	icmpOutEchos;
- 	unsigned long	icmpOutEchoReps;
- 	unsigned long	icmpOutTimestamps;
- 	unsigned long	icmpOutTimestampReps;
- 	unsigned long	icmpOutAddrMasks;
- 	unsigned long	icmpOutAddrMaskReps;
-};
-#endif
+config_arch_require(linux, mibII/kernel_linux)
 
 extern void	init_icmp (void);
 extern FindVarMethod var_icmp;

@@ -80,10 +80,14 @@
 #else
 #include "kernel.h"
 #endif
+#ifdef linux
+#include "kernel_linux.h"
+#endif
 
 #include "system.h"
 #include "asn1.h"
 #include "snmp_debug.h"
+#include "tools.h"
 
 #include "auto_nlist.h"
 
@@ -103,6 +107,14 @@
 #include <sys/sysctl.h>
 #endif
 
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT	5
+#endif
+#ifndef UDP_STATS_CACHE_TIMEOUT
+#define UDP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
+#endif
+marker_t udp_stats_cache_marker = NULL;
+
 	/*********************
 	 *
 	 *  Kernel & interface information,
@@ -110,9 +122,6 @@
 	 *
 	 *********************/
 
-#ifdef linux
-int linux_read_udp_stat (struct udp_mib *);
-#endif
 
 	/*********************
 	 *
@@ -277,72 +286,61 @@ var_udp(struct variable *vp,
 long
 read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 {
-   long ret_value;
-   int i;
+    long ret_value = -1;
+    int i;
 #if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
-   static int sname[4] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
-   size_t len = sizeof( *udpstat );
+    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
+    size_t len = sizeof( *udpstat );
 #endif
 #ifdef solaris2
-   mib2_ip_t ipstat;
+    static mib2_ip_t ipstat;
 #endif
 
+    if (  udp_stats_cache_marker &&
+	(!atime_ready( udp_stats_cache_marker, UDP_STATS_CACHE_TIMEOUT*1000 )))
+#ifdef solaris2
+	return ( magic == UDPNOPORTS ? ipstat.udpNoPorts : 0 );
+#else
+	return 0;
+#endif
+
+    if (udp_stats_cache_marker )
+	atime_setMarker( udp_stats_cache_marker );
+    else
+	udp_stats_cache_marker = atime_newMarker();
 
 #ifdef linux
-   return linux_read_udp_stat(udpstat);
+    ret_value = linux_read_udp_stat(udpstat);
 #endif
 
 #ifdef solaris2
     if ( magic == UDPNOPORTS ) {
 	if (getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL) < 0 )
-	    return -1;
+	    ret_value = -1;
 	else
-	    return ipstat.udpNoPorts;
+	    ret_value = ipstat.udpNoPorts;
     }
     else
-	return getMibstat(MIB_UDP, udpstat, sizeof(mib2_udp_t), GET_FIRST, &Get_everything, NULL);
+	ret_value = getMibstat(MIB_UDP, udpstat, sizeof(mib2_udp_t),
+					GET_FIRST, &Get_everything, NULL);
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
-    return sysmp (MP_SAGET, MPSA_TCPIPSTATS, udpstat, sizeof *udpstat);
+    ret_value = sysmp (MP_SAGET, MPSA_TCPIPSTATS, udpstat, sizeof *udpstat);
 #endif
 
 #if defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)
-    return sysctl(sname, 4, udpstat, &len, 0, 0);
+    ret_value = sysctl(sname, 4, udpstat, &len, 0, 0);
 #endif
 
 #ifdef UDPSTAT_SYMBOL
     if (auto_nlist(UDPSTAT_SYMBOL, (char *)udpstat, sizeof (*udpstat)))
-	return 0;
+	ret_value = 0;
 #endif
 
-    return -1;
-
-}
-
-
-#ifdef linux
-
-int
-linux_read_udp_stat (struct udp_mib *udpstat)
-{
-  FILE *in = fopen ("/proc/net/snmp", "r");
-  char line [1024];
-
-  memset ((char *) udpstat,(0), sizeof (*udpstat));
-
-  if (! in)
-    return -1;
-
-  while (line == fgets (line, sizeof(line), in))
-    {
-      if (4 == sscanf (line, "Udp: %lu %lu %lu %lu\n",
-			&udpstat->udpInDatagrams, &udpstat->udpNoPorts,
-			&udpstat->udpInErrors, &udpstat->udpOutDatagrams))
-	break;
+    if ( ret_value == -1 ) {
+	free( udp_stats_cache_marker );
+	udp_stats_cache_marker = NULL;
     }
-  fclose (in);
-  return 0;
+    return ret_value;
 }
-
-#endif /* linux */
