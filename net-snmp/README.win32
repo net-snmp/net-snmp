@@ -160,11 +160,11 @@ unfortunately none of the developers have this version around anymore.
 Building with earlier compiler versions has not been attempted.  Success
 stories are welcomed.
 
-A manually generated config.h file has been provided for use with the
-win32 build since the basic win32 environment does not support autoconf.
+A manually generated net-snmp-config.h file has been provided for use with
+the win32 build since the basic win32 environment does not support autoconf.
 Note: the compiled in MIB path is \usr\mibs which may be changed by
-editing win32/config.h.  Note that the install instructions below
-should be adjusted when changes are made to paths.
+editing win32/net-snmp/net-snmp-config.h.  Note that the install
+instructions below should be adjusted when changes are made to paths.
 
 To build the libraries and applications, open the workspace file
 "win32\win32.dsw" from VC++.
@@ -217,21 +217,38 @@ application. If you get an error message along the lines of
 'debugging information not available in file vc60.pdb, make sure the
 library debug option is set to 'C7 compatible'.
 
+Building
+--------
+
 To build the Release versions:
-Click Build->Batch Build. Uncheck all Debug and libsnmp versions.
-Make sure libsnmp_dll Release and all other Release versions
-are checked.  Rebuild All.  If the library DLL link fails, add
-missing function names to libsnmp_dll/libsnmp.def.
+-Click Build->Set Active Configuration and select 'libsnmp - Win32 
+ Release' or 'libsnmp_dll - Win32 Release'
+-Click Build->Build libsnmp.lib / libsnmp.dll
+-If the library DLL link fails, add missing function names to
+  libsnmp_dll/libsnmp.def.
+-Click Build->Batch Build. Uncheck all Debug, libsnmp and libsnmp_dll
+ versions.  Make sure all other Release versions are checked.  Rebuild All. 
 
 To build the Debug versions:
-Click Build->Batch Build. Uncheck all Release and libsnmp_dll versions.
-Make sure libsnmp Debug and all other Debug versions
-are checked. Rebuild All.
+-Click Build->Set Active Configuration and select 'libsnmp - Win32 
+ Debug' or 'libsnmp_dll - Win32 Debug'
+-Click Build->Build snmp_d.lib / snmp_d.dll
+-If the library DLL link fails, add missing function names to
+ libsnmp_dll/libsnmp.def.
+-Click Build->Batch Build. Uncheck all Release, libsnmp and libsnmp_dll
+ versions.  Make sure all other Debug versions are checked.  Rebuild All. 
 
 To build both Debug and Release versions:
-Click Build->Batch Build.  Check all versions.  Uncheck
-"libsnmp Release" and "libsnmp_dll Debug" versions only.
-Then click Rebuild All.
+-Click Build->Set Active Configuration and select 'libsnmp - Win32 
+ Release' or 'libsnmp_dll - Win32 Release'
+-Click Build->Build libsnmp.lib / libsnmp.dll
+-Click Build->Set Active Configuration and select 'libsnmp - Win32 
+ Debug' or 'libsnmp_dll - Win32 Debug'
+-Click Build->Build snmp_d.lib / snmp_d.dll
+-If the library DLL link fails, add missing function names to
+ libsnmp_dll/libsnmp.def.
+-Click Build->Batch Build. Uncheck all libsnmp and libsnmp_dll versions.
+ Check all others.  Rebuild All. 
 
 
 ***************************************************************************
@@ -490,4 +507,5 @@ the Win32 platform ports.  If you have, and your name is not here,
 please accept our apologies, and tell us so we can add your name.
 
 David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
-Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu and Nikolai Devereaux.
+Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu, Nikolai Devereaux
+and Alex Burger.
