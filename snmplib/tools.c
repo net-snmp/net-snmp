@@ -6,6 +6,9 @@
 
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -258,7 +261,7 @@ dump_chunk(const char *debugtoken, const char *title, const u_char *buf, int siz
 
 	while (size > 0)
 	{
-		if (size > printunit) {
+		if (size > (int)printunit) {
 			strncpy(chunk, sp, printunit);	
 			chunk[printunit] = '\0';
 			DEBUGMSGTL((debugtoken, "\t%s\n", chunk));

@@ -404,8 +404,8 @@ MDget(MDstruct *MD, u_char *buf, size_t buflen)
   int i, j;
   
   /* copy the checksum to the outgoing data (all of it that is requested). */
-  for(i=0; i < 4 && i*4 < buflen; i++)
-    for(j=0; j < 4 && i*4+j < buflen; j++)
+  for(i=0; i < 4 && i*4 < (int)buflen; i++)
+    for(j=0; j < 4 && i*4+j < (int)buflen; j++)
       buf[i*4+j] = (MD->buffer[i] >> j*8) & 0xff;
 }
 

@@ -8,6 +8,9 @@
 #include <config.h>
 
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -348,7 +351,7 @@ hash_engineID(u_char *engineID, u_int engineID_len)
                        buf, &buf_len);
 	QUITFUN(rval, hash_engineID_quit);
         
-	for ( bufp = buf; (bufp-buf) < buf_len; bufp += 4 ) {
+	for ( bufp = buf; (bufp-buf) < (int)buf_len; bufp += 4 ) {
 		additive += (u_int) *bufp;
 	}
 

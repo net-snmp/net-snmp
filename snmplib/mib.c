@@ -230,7 +230,7 @@ static void sprint_asciistring(char *buf,
 {
     int	x;
 
-    for(x = 0; x < len; x++){
+    for(x = 0; x < (int)len; x++){
 	if (isprint(*cp)){
 	    *buf++ = *cp++;
 	} else {
@@ -341,7 +341,7 @@ sprint_octet_string(char *buf,
     }
 
     hex = 0;
-    for(cp = var->val.string, x = 0; x < var->val_len; x++, cp++){
+    for(cp = var->val.string, x = 0; x < (int)var->val_len; x++, cp++){
 	if (!(isprint(*cp) || isspace(*cp)))
 	    hex = 1;
     }
@@ -760,7 +760,7 @@ sprint_bitstring(char *buf,
 	*buf = '\0';
     } else {
 	cp = var->val.bitstring + 1;
-	for(len = 0; len < var->val_len - 1; len++){
+	for(len = 0; len < (int)var->val_len - 1; len++){
 	    for(bit = 0; bit < 8; bit++){
 		if (*cp & (0x80 >> bit)){
 		    enum_string = NULL;
@@ -1337,7 +1337,7 @@ sprint_objid(char *buf,
 	    char modbuf[256];
 	    char *mod = module_name(subtree->modid, modbuf);
 	    size_t len = strlen(mod);
-	    if (len >= cp-tempbuf) {
+	    if ((int)len >= cp-tempbuf) {
 		memmove(tempbuf+len+1, cp, strlen(cp)+1);
 		cp = tempbuf+len+1;
 	    }
@@ -1688,7 +1688,7 @@ get_module_node(const char *name,
 	    if (tp2 == NULL)
 		break;
 	}
-	if (numids > *objidlen)
+	if (numids > (int)*objidlen)
 	    return 0;
 	*objidlen = numids;
 	memmove(objid, op, numids * sizeof(oid));
@@ -1871,12 +1871,12 @@ char *uptime_string(u_long timeticks, char *buf)
 
 #ifdef CMU_COMPATIBLE
 
-int mib_TxtToOid(char *Buf, oid **OidP, int *LenP)
+int mib_TxtToOid(char *Buf, oid **OidP, size_t *LenP)
 {
     return read_objid(Buf, *OidP, LenP);
 }
 
-int mib_OidToTxt(oid *O, int OidLen, char *Buf, int BufLen)
+int mib_OidToTxt(oid *O, size_t OidLen, char *Buf, size_t BufLen)
 {
     sprint_objid(Buf, O, OidLen);
     return 1;
