@@ -166,9 +166,7 @@ var_ipAddrEntry(struct variable *vp,
     oid			    current[14], *op;
     u_char		    *cp;
     int			    lowinterface=0;
-#ifndef freebsd2
     short                   interface;
-#endif
 #ifdef hpux11
     static mib_ipAdEnt      in_ifaddr, lowin_ifaddr;
 #else
