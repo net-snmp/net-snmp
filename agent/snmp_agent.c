@@ -58,7 +58,7 @@ SOFTWARE.
 #include "mibgroup/snmp_mib.h"
 #include "snmpd.h"
 #include "mibgroup/util_funcs.h"
-#include "mibgroup/read_config.h"
+#include "read_config.h"
 
 static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
 static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));

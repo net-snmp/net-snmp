@@ -11,6 +11,7 @@
 #endif
 
 #include "common_header.h"
+#include "read_config.h"
 #include "mib_module_includes.h"
 #include "../snmp_agent.h"
 #include "../snmpd.h"
@@ -32,7 +33,7 @@ char dontReadConfigFiles;
 char *optconfigfile;
 
 struct config_line config_handlers[] = {
-#include "mib_module_dot_conf.h"
+#include "mibgroup/mib_module_dot_conf.h"
   {"community", snmp_agent_parse_config, NULL},
   {"authtrapenable", snmpd_parse_config_authtrap, NULL},
   {"trapsink", snmpd_parse_config_trapsink, NULL},
@@ -197,3 +198,108 @@ int pass_compare(a, b)
 void config_perror(char *string) {
   fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
 }
+
+/* skip all white spaces and return 1 if found something either end of
+   line or a comment character */
+char *skip_white(ptr)
+  char *ptr;
+{
+
+  if (ptr == NULL) return (NULL);
+  while (*ptr != 0 && isspace(*ptr)) ptr++;
+  if (*ptr == 0 || *ptr == '#') return (NULL);
+  return (ptr);
+}
+
+char *skip_not_white(ptr)
+  char *ptr;
+{
+  
+  if (ptr == NULL) return (NULL);
+  while (*ptr != 0 && !isspace(*ptr)) ptr++;
+  if (*ptr == 0 || *ptr == '#') return (NULL);
+  return (ptr);
+}
+
+void copy_word(from, to)
+     char *from, *to;
+{
+  while (*from != 0 && !isspace(*from)) *(to++) = *(from++);
+  *to = 0;
+}
+
+
+int tree_compare(a, b)
+  const void *a, *b;
+{
+  struct subtree *ap, *bp;
+  ap = (struct subtree *) a;
+  bp = (struct subtree *) b;
+
+  return compare(ap->name,ap->namelen,bp->name,bp->namelen);
+}
+
+void setup_tree __P((void))
+{
+  extern struct subtree *subtrees,subtrees_old[];
+  extern struct variable2 extensible_relocatable_variables[];
+  extern struct variable2 extensible_passthru_variables[];
+  struct subtree *sb;
+  int i, old_treesz;
+  static struct subtree mysubtree[1];
+  struct extensible *exten;
+#if USING_EXTENSIBLE_MIB_MODULE
+  extern int numrelocs, numpassthrus;
+  extern struct extensible relocs, passthrus;
+#endif
+    
+  /* Malloc new space at the end of the mib tree for the new
+     extensible mibs and add them in. */
+
+  old_treesz = subtree_old_size();
+
+  subtrees = (struct subtree *) malloc ((old_treesz
+#if USING_EXTENSIBLE_MIB_MODULE
+                                         + numrelocs + numpassthrus
+#endif
+    )*sizeof(struct subtree));
+  memmove(subtrees, subtrees_old, old_treesz *sizeof(struct subtree));
+  sb = subtrees;
+  sb += old_treesz;
+
+#if USING_EXTENSIBLE_MIB_MODULE
+  /* add in relocatable mibs */
+  for(i=1;i<=numrelocs;i++, sb++) {
+    exten = get_exten_instance(relocs,i);
+    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
+    mysubtree[0].namelen = exten->miblen;
+    mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
+    mysubtree[0].variables_len = 6;
+    mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
+    memcpy(sb,mysubtree,sizeof(struct subtree));
+  }
+
+  /* add in pass thrus */
+  for(i=1;i<=numpassthrus;i++, sb++) {
+    exten = get_exten_instance(passthrus,i);
+    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
+    mysubtree[0].namelen = exten->miblen;
+    mysubtree[0].variables = (struct variable *)extensible_passthru_variables;
+    mysubtree[0].variables_len = 1;
+    mysubtree[0].variables_width = sizeof(*extensible_passthru_variables);
+    memcpy(sb,mysubtree,sizeof(struct subtree));
+  }
+#endif
+  
+  /* Here we sort the mib tree so it can insert new extensible mibs
+     and also double check that our mibs were in the proper order in
+     the first place */
+
+  qsort(subtrees,old_treesz
+#if USING_EXTENSIBLE_MIB_MODULE
+        + numrelocs + numpassthrus
+#endif
+        , sizeof(struct subtree),tree_compare);
+
+}
+

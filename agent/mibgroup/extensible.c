@@ -206,68 +206,6 @@ struct extensible *get_exten_instance(exten,inst)
   return(exten);
 }
 
-int tree_compare(a, b)
-  const void *a, *b;
-{
-  struct subtree *ap, *bp;
-  ap = (struct subtree *) a;
-  bp = (struct subtree *) b;
-
-  return compare(ap->name,ap->namelen,bp->name,bp->namelen);
-}
-
-void setup_tree __P((void))
-{
-  extern struct subtree *subtrees,subtrees_old[];
-  extern struct variable2 extensible_relocatable_variables[];
-  extern struct variable2 extensible_passthru_variables[];
-  struct subtree *sb;
-  int i, old_treesz;
-  static struct subtree mysubtree[1];
-  struct extensible *exten;
-  
-  /* Malloc new space at the end of the mib tree for the new
-     extensible mibs and add them in. */
-
-  old_treesz = subtree_old_size();
-
-  subtrees = (struct subtree *) malloc ((numrelocs + old_treesz + numpassthrus)
-                                        *sizeof(struct subtree));
-  memmove(subtrees, subtrees_old, old_treesz *sizeof(struct subtree));
-  sb = subtrees;
-  sb += old_treesz;
-
-  /* add in relocatable mibs */
-  for(i=1;i<=numrelocs;i++, sb++) {
-    exten = get_exten_instance(relocs,i);
-    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
-    mysubtree[0].namelen = exten->miblen;
-    mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
-    mysubtree[0].variables_len = 6;
-    mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
-    memcpy(sb,mysubtree,sizeof(struct subtree));
-  }
-
-  /* add in pass thrus */
-  for(i=1;i<=numpassthrus;i++, sb++) {
-    exten = get_exten_instance(passthrus,i);
-    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
-    mysubtree[0].namelen = exten->miblen;
-    mysubtree[0].variables = (struct variable *)extensible_passthru_variables;
-    mysubtree[0].variables_len = 1;
-    mysubtree[0].variables_width = sizeof(*extensible_passthru_variables);
-    memcpy(sb,mysubtree,sizeof(struct subtree));
-  }
-
-  /* Here we sort the mib tree so it can insert new extensible mibs
-     and also double check that our mibs were in the proper order in
-     the first place */
-
-  qsort(subtrees,numrelocs + old_treesz + numpassthrus,
-        sizeof(struct subtree),tree_compare);
-
-}
-
 #define MAXMSGLINES 1000
 
 struct extensible *extens=NULL;  /* In exec.c */
