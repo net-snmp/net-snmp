@@ -808,6 +808,9 @@ AC_SUBST(NON_GNU_VPATH)
 AC_CANONICAL_TARGET
 changequote(, )
 PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
+if test "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+	CFLAGS="$CFLAGS -Dmingw32"
+fi
 CFLAGS="$CFLAGS -D$PARTIALTARGETOS"
 changequote([, ])
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
@@ -1119,14 +1122,14 @@ other_objs_list=""
 other_lobjs_list=""
 
 # Win32 service code
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   other_src_list="$other_src_list winservice.c"
   other_objs_list="$other_objs_list winservice.o"
   other_lobjs_list="$other_lobjs_list winservice.lo"
 fi
   
 # Win32 pipes
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   other_src_list="$other_src_list winpipe.c"
   other_objs_list="$other_objs_list winpipe.o"
   other_lobjs_list="$other_lobjs_list winpipe.lo"
@@ -1154,7 +1157,7 @@ new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
 #
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
   transport_default_list="UDP TCP Callback"
-elif test "x$PARTIALTARGETOS" = "xmingw32"; then 
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
   transport_default_list="UDP TCP Callback"
 else
   transport_default_list="UDP TCP Unix Callback"
@@ -1197,7 +1200,7 @@ for i in $new_transport_list; do
       if test "x$PARTIALTARGETOS" = "xcygwin"; then
         echo
         AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
-      elif test "x$PARTIALTARGETOS" = "xmingw32"; then
+      elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
         echo
         AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
       fi
@@ -1224,7 +1227,7 @@ transport_obj_list=`echo " $transport_src_list " | sed 's/\.c/\.o/g'`
 transport_lobj_list=`echo " $transport_src_list " | sed 's/\.c/\.lo/g'`
 
 ## win32 platforms require inet_ntop etc.
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
   if echo "$transport_def_list" | grep "IPV6" >/dev/null; then
     transport_obj_list="$transport_obj_list inet_ntop.o inet_pton.o"
     transport_lobj_list="$transport_lobj_list inet_ntop.lo inet_pton.lo"
@@ -1723,12 +1726,12 @@ AC_MSG_CHECKING([default mib files to read])
 if test "x$DEFAULT_MIBS" = "x"; then
   DEFAULT_MIBS="$default_mibs"
 fi
-if test "x$PARTIALTARGETOS" = "xmingw32"; then
-  # migw32 uses ';' as the environment variable seperator char
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+  # mingw32 uses ';' as the environment variable separator char
   DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
 elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-  # cygwin uses ';' as the environment variable seperator char
+  # cygwin uses ';' as the environment variable separator char
   DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
 fi
@@ -2313,7 +2316,7 @@ elif test "`($PSPROG ax 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; 
   ac_cv_ps_flags="ax"
 elif test "x$PARTIALTARGETOS" = "xcygwin"; then
   ac_cv_ps_flags="-e"
-elif test "x$PARTIALTARGETOS" = "xmingw32"; then 
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
   ac_cv_ps_flags="-e"
 else
   AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
