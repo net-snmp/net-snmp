@@ -143,7 +143,7 @@
 ########################################################################
 ##
 ########################################################################
-@  if $m2c_node_skip_mapping == 0@
+@  if $m2c_node_skip_mapping != 1@
 @    if $m2c_node_needlength == 1@
 @      eval $m2c_XX="$m2c_decl **mib_$m2c_node_param_ref_name,"@
 @      eval $m2c_XX="$m2c_XX size_t *mib_$m2c_node_param_ref_lname,"@
