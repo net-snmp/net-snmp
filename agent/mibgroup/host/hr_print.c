@@ -187,9 +187,11 @@ Init_HR_Print (void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
     int i;
-#if HAVE_CGETNEXT
+#if HAVE_LPSTAT
+    FILE *p;
+#elif HAVE_CGETNEXT
     const char *caps[] = {"/etc/printcap", NULL};
-#elif HAVE_LPSTAT || HAVE_PRINTCAP
+#elif HAVE_PRINTCAP
     FILE *p;
 #endif
 
@@ -209,7 +211,7 @@ Init_HR_Print (void)
 	    sscanf(buf, "%*s %*s %[^:]", ptr);
 #elif HAVE_CGETNEXT
     {
-	char *buf, *ptr;
+	char *buf = NULL, *ptr;
 	while (cgetnext(&buf, caps)) {
 	    if ((ptr = strchr(buf, ':'))) *ptr = 0;
 	    if ((ptr = strchr(buf, '|'))) *ptr = 0;
@@ -235,7 +237,8 @@ Init_HR_Print (void)
 	    }
 	    HRP_name[HRP_names++] = strdup(ptr);
 #if HAVE_CGETNEXT
-	    free(buf);
+	    if (buf)
+		free(buf);
 #endif
 	}
 #if HAVE_LPSTAT

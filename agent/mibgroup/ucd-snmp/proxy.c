@@ -148,7 +148,8 @@ u_char *var_simple_proxy(struct variable *vp,
 			 WriteMethod **write_method)
 {
 
-    static char nullstr_ret[] = "";
+    static u_char *ret_str = NULL;
+    static int ret_str_len = 0;
     static oid  objid[MAX_OID_LEN];
     struct simple_proxy *sp;
     u_char *ret = NULL;
@@ -263,14 +264,16 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
 
                     /* copy the value */
-                    if ((var->type == ASN_OCTET_STR || var->type == ASN_BIT_STR)
-                        && var->val.integer == 0) {
-                        ret = nullstr_ret;
-                    } else {
-                        memdup(&ret, (void *) var->val.integer, var->val_len);
+		    if (!ret_str || ret_str_len < var->val_len) {
+			ret_str_len = var->val_len;
+			if (!ret_str_len) ret_str_len = 1;
+			if (ret_str) free(ret_str);
+			ret_str = (u_char *)malloc(ret_str_len);
                     }
+		    memcpy(ret_str, var->val.string, var->val_len);
                     *var_len = var->val_len;
                     vp->type = var->type;
+		    ret = ret_str;
 
                     DEBUGIF("proxy_var") {
                         char buf[SPRINT_MAX_LEN];

@@ -729,6 +729,13 @@ receive(void)
 	}
 #endif	/* USING_SMUX_MODULE */
 
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i]--;
+		external_signal_handler[i](i);
+	    }
+	}
+
 	for (i = 0; i < external_readfdlen; i++) {
 	    FD_SET(external_readfd[i], &readfds);
 	    if (external_readfd[i] >= numfds)
@@ -743,13 +750,6 @@ receive(void)
 	    FD_SET(external_exceptfd[i], &exceptfds);
 	    if (external_exceptfd[i] >= numfds)
 		numfds = external_exceptfd[i] + 1;
-	}
-
-	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i]--;
-		external_signal_handler[i](i);
-	    }
 	}
 	
 	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
