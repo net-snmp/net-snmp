@@ -1,4 +1,4 @@
-.TH "multiplexer: splits mode requests into calls to different handlers." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "multiplexer: splits mode requests into calls to different handlers." 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,7 +14,7 @@ More...
 .ti -1c
 .RI "int \fBnetsnmp_multiplexer_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
-.RI "\fIimplements the multiplexer helper\fP"
+.RI "\fIimplements the multiplexer helper.\fP"
 .in -1c
 .SH "DETAILED DESCRIPTION"
 .PP 
@@ -40,14 +40,8 @@ SET requests call the set_method, or if not present return a SNMP_ERR_NOTWRITABL
 returns a multiplixer handler given a \fBnetsnmp_mib_handler_methods\fP structure of subhandlers.
 .PP
 Definition at line 36 of file multiplexer.c.
-.PP
-References netsnmp_create_handler(), and netsnmp_multiplexer_helper_handler().
 .SS "int netsnmp_multiplexer_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
-implements the multiplexer helper
+implements the multiplexer helper.
 .PP
 Definition at line 57 of file multiplexer.c.
-.PP
-References netsnmp_call_handler().
-.PP
-Referenced by netsnmp_get_multiplexer_handler().
