@@ -46,7 +46,7 @@ int ${context}_indexes_set(${context}_rowreq_ctx *rowreq_ctx$gtis_tmp);
 int
 ${context}_indexes_set_tbl_idx(${context}_mib_index *tbl_idx$gtis_tmp)
 {
-    DEBUGMSGTL(("verbose:${context}_indexes_set_tbl_idx","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_indexes_set_tbl_idx","called\n"));
 
 @foreach $node index@
 @   include m2c_setup_node.m2i@
@@ -87,6 +87,8 @@ ${context}_indexes_set_tbl_idx(${context}_mib_index *tbl_idx$gtis_tmp)
 int
 ${context}_indexes_set(${context}_rowreq_ctx *rowreq_ctx$gtis_tmp)
 {
+    DEBUGMSGTL(("verbose:${context}:${context}_indexes_set","called\n"));
+
     if(MFD_SUCCESS != ${context}_indexes_set_tbl_idx(&rowreq_ctx->tbl_idx
 @foreach $node index@
 @   include m2c_setup_node.m2i@

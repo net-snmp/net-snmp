@@ -329,7 +329,7 @@ int
 ${context}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                     ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${context}_loop_get_first","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_loop_get_first","called\n"));
 
     netsnmp_assert(rowreq_ctx_ref);
     netsnmp_assert(loop_ctx_ref);
@@ -471,7 +471,7 @@ int
 ${context}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                         ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${context}_loop_get_next","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_loop_get_next","called\n"));
 
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
@@ -600,7 +600,7 @@ ${context}_loop_save_position($mfd_aue_param_decl,
                        ${context}_ref_loop_ctx *save_loop_ctx_ref,
                        int reuse)
 {
-    DEBUGMSGTL(("verbose:${context}_loop_save_position","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_loop_save_position","called\n"));
 
     netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
 
@@ -703,7 +703,7 @@ int
 ${context}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref,
                            ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${context}_loop_get_data","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_loop_get_data","called\n"));
 
     netsnmp_assert((NULL != loop_ctx_ref) && (NULL != loop_ctx_ref->loop_ctx));
     netsnmp_assert(NULL != rowreq_ctx_ref);
@@ -758,7 +758,7 @@ ${context}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx
 int
 ${context}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
 {
-    DEBUGMSGTL(("verbose:${context}_loop_cleanup_context","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_loop_cleanup_context","called\n"));
     
     netsnmp_assert(loop_ctx_ref);
     

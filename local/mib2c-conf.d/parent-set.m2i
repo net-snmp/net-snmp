@@ -148,7 +148,7 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
 {
     int rc = MFD_SUCCESS;
 
-    DEBUGMSGTL(("verbose:${context}_validate_index","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_validate_index","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -222,7 +222,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
 
-    DEBUGMSGTL(("verbose:${context}_undo_setup","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_undo_setup","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -253,7 +253,7 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
 
-    DEBUGMSGTL(("verbose:${context}_undo_cleanup","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_undo_cleanup","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -292,7 +292,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     int rc = MFD_SUCCESS;
     int             save_flags;
 
-    DEBUGMSGTL(("verbose:${context}_commit","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_commit","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -358,7 +358,7 @@ ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
 
-    DEBUGMSGTL(("verbose:${context}_undo_commit","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_undo_commit","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
@@ -391,7 +391,7 @@ ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc;
 
-    DEBUGMSGTL(("verbose:${context}_irreversible_commit","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_irreversible_commit","called\n"));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );

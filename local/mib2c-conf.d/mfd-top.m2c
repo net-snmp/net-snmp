@@ -334,7 +334,7 @@ void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
 int
 ${context}_pre_request(${context}_registration_ptr user_context)
 {
-    DEBUGMSGTL(("verbose:${context}_pre_request","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_pre_request","called\n"));
 
     /*
      * TODO:
@@ -354,7 +354,7 @@ ${context}_pre_request(${context}_registration_ptr user_context)
 int
 ${context}_post_request(${context}_registration_ptr user_context)
 {
-    DEBUGMSGTL(("verbose:${context}_post_request","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_post_request","called\n"));
 
     /*
      * TODO:

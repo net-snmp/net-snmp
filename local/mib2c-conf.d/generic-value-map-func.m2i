@@ -40,7 +40,7 @@ ${node}_map($m2c_node_map_param)
     netsnmp_assert(NULL != mib_$m2c_node_param_ref_name);
 @end@
     
-    DEBUGMSGTL(("verbose:${node}_map","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${node}_map","called\n"));
     
     /*
      * TODO:
