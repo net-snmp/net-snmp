@@ -82,7 +82,7 @@
 #include <net-snmp/library/transform_oids.h>
 
 static u_long   engineBoots = 1;
-static unsigned int engineIDType = ENGINEID_TYPE_UCD_RND;
+static unsigned int engineIDType = ENGINEID_TYPE_NETSNMP_RND;
 static unsigned char *engineID = NULL;
 static size_t   engineIDLength = 0;
 static unsigned char *engineIDNic = NULL;
@@ -490,7 +490,8 @@ int
 setup_engineID(u_char ** eidp, const char *text)
 {
     int             enterpriseid = htonl(ENTERPRISE_OID),
-        ucdavisid = htonl(UCDAVIS_OID), localsetup = (eidp) ? 0 : 1;
+        netsnmpoid = htonl(NETSNMP_OID),
+        localsetup = (eidp) ? 0 : 1;
 
     /*
      * Use local engineID if *eidp == NULL.  
@@ -572,7 +573,7 @@ setup_engineID(u_char ** eidp, const char *text)
     case ENGINEID_TYPE_IPV6:   /* IPv6 */
         len += 16;              /* + 16 byte IPV6 address */
         break;
-    case ENGINEID_TYPE_UCD_RND:        /* UCD specific encoding */
+    case ENGINEID_TYPE_NETSNMP_RND:        /* Net-SNMP specific encoding */
         if (engineID)           /* already setup, keep current value */
             return engineIDLength;
         if (oldEngineID) {
@@ -598,11 +599,11 @@ setup_engineID(u_char ** eidp, const char *text)
         snmp_log_perror("setup_engineID malloc");
         return -1;
     }
-    if (localEngineIDType == ENGINEID_TYPE_UCD_RND)
+    if (localEngineIDType == ENGINEID_TYPE_NETSNMP_RND)
         /*
          * we must use the net-snmp enterprise id here, regardless 
          */
-        memcpy(bufp, &ucdavisid, sizeof(ucdavisid));    /* XXX Must be 4 bytes! */
+        memcpy(bufp, &netsnmpoid, sizeof(netsnmpoid));    /* XXX Must be 4 bytes! */
     else
         memcpy(bufp, &enterpriseid, sizeof(enterpriseid));      /* XXX Must be 4 bytes! */
 
@@ -610,10 +611,12 @@ setup_engineID(u_char ** eidp, const char *text)
 
 
     /*
-     * Store the given text  -OR-   the first found IP address.
+     * Store the given text  -OR-   the first found IP address
+     *  -OR-  the MAC address  -OR-  random elements
+     * (the latter being the recommended default)
      */
     switch (localEngineIDType) {
-    case ENGINEID_TYPE_UCD_RND:
+    case ENGINEID_TYPE_NETSNMP_RND:
         if (oldEngineID) {
             /*
              * keep our previous notion of the engineID 
@@ -631,7 +634,7 @@ setup_engineID(u_char ** eidp, const char *text)
              * that may not have a correct clock setting and random number
              * seed at startup, but few OSes should have that problem.
              */
-            bufp[4] = ENGINEID_TYPE_UCD_RND;
+            bufp[4] = ENGINEID_TYPE_NETSNMP_RND;
             tmpint = random();
             memcpy(bufp + 5, &tmpint, sizeof(tmpint));
             tmptime = time(NULL);
