@@ -1035,7 +1035,7 @@ fileMax	OBJECT-TYPE
 		DESCRIPTION	"Limit of filesize (kb)"
 	::= { fileEntry 4 }
 
-fileMax		OBJECT-TYPE
+fileErrorFlag	OBJECT-TYPE
 		SYNTAX		INTEGER
 		MAX-ACCESS	read-only
 		STATUS		current
