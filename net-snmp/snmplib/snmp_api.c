@@ -2435,14 +2435,22 @@ snmpv3_parse(
   DEBUGINDENTLESS();
 
   if (ret_val != SNMPERR_SUCCESS) {
-    snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len); /* DO ignore return code */
-    DEBUGINDENTLESS();
+    DEBUGDUMPSECTION("recv", "ScopedPDU");
+    /* parse as much as possible */
+    if (cp)
+        cp = snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
+    if (cp) {
+        DEBUGDUMPSECTION("recv", "PDU");
+        snmp_pdu_parse(pdu, cp, &pdu_buf_len);
+        DEBUGINDENTADD(-8);
+    } else
+        DEBUGINDENTADD(-4);
     return ret_val;
   }
   
   /* parse plaintext ScopedPDU sequence */
   *length = pdu_buf_len;
-  DEBUGDUMPSECTION("recv", "ScopedPdu");
+  DEBUGDUMPSECTION("recv", "ScopedPDU");
   data = snmpv3_scopedPDU_parse(pdu, cp, length);
   if (data == NULL) {
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
