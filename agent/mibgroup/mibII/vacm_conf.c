@@ -660,15 +660,15 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *       check_subtree
  *      
  * Returns:
- *	0	On success.
- *	1	Missing security name.
- *	2	Missing group
- *	3	Missing access
- *	4	Missing view
- *	5	Not in view
- *      6       No Such Context
- *      7       When testing an entire subtree, UNKNOWN (ie, the entire
- *              subtree has both allowed and disallowed portions)
+ * VACM_SUCCESS(0)	   On success.
+ * VACM_NOSECNAME(1)	   Missing security name.
+ * VACM_NOGROUP(2)	   Missing group
+ * VACM_NOACCESS(3)	   Missing access
+ * VACM_NOVIEW(4)	   Missing view
+ * VACM_NOTINVIEW(5)	   Not in view
+ * VACM_NOSUCHCONTEXT(6)   No Such Context
+ * VACM_SUBTREE_UNKNOWN(7) When testing an entire subtree, UNKNOWN (ie, the entire
+ *                         subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
  *	<securityName> <groupName> <viewName> <viewType>
@@ -804,14 +804,14 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 #endif
         DEBUGMSGTL(("mibII/vacm_vars",
                     "vacm_in_view: No security name found\n"));
-        return 1;
+        return VACM_NOSECNAME;
     }
 
     if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN) {
         DEBUGMSGTL(("mibII/vacm_vars",
                     "vacm_in_view: bad ctxt length %d\n",
                     pdu->contextNameLen));
-        return 6;
+        return VACM_NOSUCHCONTEXT;
     }
     /*
      * NULL termination of the pdu field is ugly here.  Do in PDU parsing? 
@@ -824,12 +824,12 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     contextNameIndex[pdu->contextNameLen] = '\0';
     if (!netsnmp_subtree_find_first(contextNameIndex)) {
         /*
-         * rfc2575 section 3.2, step 1
+         * rfc 3415 section 3.2, step 1
          * no such context here; return no such context error 
          */
         DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: no such ctxt \"%s\"\n",
                     contextNameIndex));
-        return 6;
+        return VACM_NOSUCHCONTEXT;
     }
 
     DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: sn=%s", sn));
@@ -837,7 +837,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     gp = vacm_getGroupEntry(pdu->securityModel, sn);
     if (gp == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
-        return 2;
+        return VACM_NOGROUP;
     }
     DEBUGMSG(("mibII/vacm_vars", ", gn=%s", gp->groupName));
 
@@ -845,12 +845,12 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
                              pdu->securityModel, pdu->securityLevel);
     if (ap == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
-        return 3;
+        return VACM_NOACCESS;
     }
 
     if (name == 0) {            /* only check the setup of the vacm for the request */
         DEBUGMSG(("mibII/vacm_vars", ", Done checking setup\n"));
-        return 0;
+        return VACM_SUCCESS;
     }
 
     switch (pdu->command) {
@@ -883,7 +883,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 
     if (vp == NULL) {
         DEBUGMSG(("mibII/vacm_vars", "\n"));
-        return 4;
+        return VACM_NOVIEW;
     }
     DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
 
@@ -894,10 +894,10 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYUSES);
         }
 #endif
-        return 5;
+        return VACM_NOTINVIEW;
     }
 
-    return 0;
+    return VACM_SUCCESS;
 
 }                               /* end vacm_in_view() */
 
