@@ -6,6 +6,13 @@ DISCLAIMER
 
   I suggest v2 authentication only for mibs with vital information...  
 
+  The Author, the Univeristy of California, the University of
+  California at Davis, and the Electrical Engineering department at
+  the University of California at Davis assume no responsibility for
+  damage or loss of system performance as a direct or indirect result
+  of the use of this software.  This software is provided "as is"
+  without express or implied warranty.
+
 INTRO
 
   This package contains a port and modified code of the CMU 2.1.2.1
