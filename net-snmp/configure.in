@@ -219,6 +219,9 @@ AC_ARG_ENABLE(internal-md5,
 [  --enable-internal-md5           Use the internal MD5 support.],
 AC_DEFINE(USE_INTERNAL_MD5))
 
+AC_ARG_ENABLE(agentx-dom-sock-only,
+[  --enable-agentx-dom-sock-only         Disable UDP/TCP transports for agentx.],
+AC_DEFINE(AGENTX_DOM_SOCK_ONLY))
 
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
