@@ -68,9 +68,7 @@ libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(RANLIB) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 clean:
-	rm -f ${LMIBOBJS} ${LAGENTOBJS} ${LLIBAGENTOBJS} ${MIBOBJS} \
-		${LIBAGENTOBJS} ${AGENTOBJS} \
-		${TARG} ${LIBTARG} ${CLEANTARG}
+	rm -f core *.o *.lo *.exe ${TARG} ${LIBTARG} ${CLEANTARG}
 	rm -rf .libs
 	cd mibgroup; $(MAKE) clean
 
