@@ -102,16 +102,16 @@ ac_help="$ac_help
   --with-persistent-directory=\"directory\"
                                   Default directory for persistent data storage."
 ac_help="$ac_help
+  --with-copy-persistent-files=\"no\" Don't copy persistent files
+                                       (or use \"yes\" to copy them).
+                                       (Default: yes)"
+ac_help="$ac_help
   --with-default-snmp-version=\"3\" Default version of SNMP to use.
                                   (Default: 3)
                                   Legal values: 1, 2 (for SNMPv2c) or 3."
 ac_help="$ac_help
   --with-sys-contact=\"who@where\"  Default system contact.
                                     (Default: LOGIN@DOMAINNAME)"
-ac_help="$ac_help
-  --with-copy-persistent-files=\"no\" Don't copy persistent files
-                                       (or use \"yes\" to copy them).
-                                       (Default: yes)"
 ac_help="$ac_help
   --with-sys-location=\"location\"  Default system location.
                                     (Default: Unknown)"
@@ -1246,6 +1246,13 @@ if test "${with_persistent_directory+set}" = set; then
 fi
 
 
+# Check whether --with-copy_persistent_files or --without-copy_persistent_files was given.
+if test "${with_copy_persistent_files+set}" = set; then
+  withval="$with_copy_persistent_files"
+  ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files"
+fi
+
+
 # Check whether --with-default-snmp-version or --without-default-snmp-version was given.
 if test "${with_default_snmp_version+set}" = set; then
   withval="$with_default_snmp_version"
@@ -1263,13 +1270,6 @@ fi
 if test "${with_sys_contact+set}" = set; then
   withval="$with_sys_contact"
   ac_cv_user_prompt_SYS_CONTACT="$with_sys_contact"
-fi
-
-
-# Check whether --with-copy_persistent_files or --without-copy_persistent_files was given.
-if test "${with_copy_persistent_files+set}" = set; then
-  withval="$with_copy_persistent_files"
-  ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files"
 fi
 
 
