@@ -2,6 +2,11 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.0.9*
+
+ SECURITY:
+    - An existing user/community could get access to data in MIB
+      objects that were explicitly excluded from their view.
+
  Fixes:
     - Perl build environment should better under Windows
 
