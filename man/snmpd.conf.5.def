@@ -735,11 +735,6 @@ the examples below).  NAME is merely an arbitrary name of your
 choosing for administrative purposes only.  OPTIONS include the
 following possibilities:
 .RS
-.IP "-t"
-Use a threshold monitor instead of a boolean monitor.  This means that
-expression should be a low and high value.  If the given OID passes
-beyond the high value, a rising alarm will triggered.  A falling alarm
-will then be triggered after it falls below the low value.
 .IP "-r FREQUENCY"
 Monitors the given expression every FREQUENCY seconds.  The default is
 600 (10 minutes). 
@@ -787,14 +782,6 @@ look like:
 .IP
 This shows my xemacs process using 28Mb of resident memory.  Which,
 considering it's xemacs, is not that surprising.
-.IP
-Threshold example:
-.RS
-.nf
-.IP
-monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
-.fi
-.RE
 .IP "defaultMonitors yes"
 By default, the agent and the DISMAN-EVENT-MIB support do nothing
 until configured.  Typically people wish to watch a bunch of tables
