@@ -11,12 +11,17 @@
 @include generic-get-decl.m2i@
 @include generic-ctx-get.m2i@
     /*
-     * TODO: value mapping
+     * TODO:
+     * value mapping
+     *
      * If the values for your data type don't exactly match the
      * possible values defined by the mib, you should map them here.
      */
 $example_start
-    /** TODO: update INTERNAL_* macros defined in the header */
+    /*
+     * TODO:
+     * update INTERNAL_* macros defined in the header
+     */
     switch ($m2c_node_lh) {
 
         /* `active', which indicates that the conceptual row is
