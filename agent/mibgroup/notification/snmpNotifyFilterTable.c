@@ -535,17 +535,6 @@ write_snmpNotifyFilterRowStatus(int      action,
             if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
               return SNMP_ERR_INCONSISTENTVALUE;
     
-
-            /* destroying a non-existent row is actually legal */
-            if (set_value == RS_DESTROY) {
-              return SNMP_ERR_NOERROR;
-            }
-
-
-            /* illegal creation values */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
-              return SNMP_ERR_INCONSISTENTVALUE;
-            }
           } else {
             /* row exists.  Check for a valid state change */
             if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
