@@ -34,6 +34,12 @@
    correct. */
 #undef MIB_COMMENT_IS_EOL_TERMINATED
 
+/* debugging stuff */
+#undef SNMP_NO_DEBUGGING           /* if defined, we optimize the code
+                                      to exclude all debugging calls. */
+#define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
+                                      ignore the -D flag passed to the cmds */
+
 @TOP@
 
 /* define the system type include file here */
@@ -85,9 +91,6 @@
 
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
-
-/* debugging stuff */
-#define DODEBUG 0
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS

@@ -64,7 +64,7 @@ To print multiple pieces to a single line in one call, use:
    as debugging output.
 */
 
-
+#ifndef SNMP_NO_DEBUGGING  /* make sure we're wanted */
 #define DEBUGMSG(x)    debugmsg x;
 #define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
@@ -78,6 +78,18 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
 #define DEBUGL(x)      DEBUGTRACE; debugmsg x;
 #define DEBUGMSGOID(x)    debugmsg_oid x;
+
+#else /* SNMP_NO_DEBUGGING := enable streamlining of the code */
+
+#define DEBUGMSG(x)
+#define DEBUGMSGT(x)
+#define DEBUGTRACE
+#define DEBUGMSGL(x)
+#define DEBUGMSGTL(x)
+#define DEBUGL(x)
+#define DEBUGMSGOID(x)
+
+#endif
 
 #define MAX_DEBUG_TOKENS 256
 #define MAX_DEBUG_TOKEN_LEN 128
