@@ -223,4 +223,9 @@ auto_nlist_print_tree(int indent,
   }
 }
 #endif
-#endif /* CAN_USE_NLIST */
+#else /* !CAN_USE_NLIST */
+int
+auto_nlist_noop(void) {
+    return 0;
+}
+#endif /* !CAN_USE_NLIST */
