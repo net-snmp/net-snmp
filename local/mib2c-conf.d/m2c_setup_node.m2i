@@ -72,22 +72,29 @@
 @  else@ #ranges
 @    eval $m2c_node_maxlen = 65535@
 @  end@ #ranges
-########################################################################
+##/*####################################################################
 ## set up extra params, based on if we need length
 ########################################################################
-@  eval $m2c_node_var_ref = "($m2c_decl **)&var->val.string"@
+## VAR_VAL     : variable value.
+## VAR_VAL_PTR : pointer to variable value.
+## VAR_REF     : variable reference. (pointer to pointer to variable value)
+##*/
 @  eval $m2c_node_var_val_ptr = "($m2c_decl *)var->val.string"@
-@  eval $m2c_node_get_parm = "${node}_ptr"@
+@  eval $m2c_node_param_name = "${node}_ptr"@
+##
 @  if $m2c_node_needlength == 1@
-@    eval $m2c_node_get_parm = "${m2c_node_get_parm}_ptr"@
-@    eval $m2c_node_get_parms = "$m2c_decl **${node}_ptr_ptr, size_t * ${node}_len_ptr"@
-@    eval $m2c_node_set_parms = "$m2c_decl *${node}_ptr, size_t ${node}_len"@
-@    eval $m2c_node_var_ref = "$m2c_node_var_ref, &var->val_len"@
+@    eval $m2c_node_param_name = "${m2c_node_param_name}_ptr"@
+@    eval $m2c_node_param_ref = "$m2c_decl **${node}_ptr_ptr, size_t * ${node}_len_ptr"@
+@    eval $m2c_node_param_val = "$m2c_decl *${node}_ptr, size_t ${node}_len"@
+##
+@    eval $m2c_node_var_ref = "($m2c_decl **)&var->val.string, &var->val_len"@
 @    eval $m2c_node_var_val = "$m2c_node_var_val_ptr, var->val_len"@
 @  else@
+@    eval $m2c_node_var_ref = "($m2c_decl *)var->val.string"@
 @    eval $m2c_node_var_val = "*($m2c_node_var_val_ptr)"@
-@    eval $m2c_node_get_parms = "$m2c_decl * ${node}_ptr"@
-@    eval $m2c_node_set_parms = "$m2c_decl $node"@
+##
+@    eval $m2c_node_param_ref = "$m2c_decl * ${node}_ptr"@
+@    eval $m2c_node_param_val = "$m2c_decl $node"@
 @  end@
 ########################################################################
 ## include user overrides
