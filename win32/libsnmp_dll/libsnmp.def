@@ -1,6 +1,5 @@
 ;       @(#)snmp.def    1.0 10/26/97 (gmarzot@baynetworks.com)
 ;       Single session API mods by M. Slifcak, Internet Security Systems, Inc.
-;
 
 DESCRIPTION     'UCD SNMP Library'
 ;CODE            SHARED READ EXECUTE
@@ -344,12 +343,15 @@ EXPORTS
 	snmp_parse_args
 	snmp_parse_args_descriptions
 	snmp_parse_args_usage
+;	netsnmp_callback_open
 	netsnmp_udp_agent_config_tokens_register
 	netsnmp_udp_parse_security
 	netsnmp_udp_getSecName
 	find_sec_mod
 	strlcpy
 	getopt
+	optarg                  DATA
+	optind                  DATA
 	usmNoAuthProtocol
 	usmHMACMD5AuthProtocol
 	usmHMACSHA1AuthProtocol
@@ -361,6 +363,7 @@ EXPORTS
 	snprint_variable
 	snmp_synch_reset
 	snmp_log_options
+;	netsnmp_clear_callback_list
 	netsnmp_clear_tdomain_list
 	clear_sec_mod
 	clear_snmp_enum
@@ -371,6 +374,9 @@ EXPORTS
 	netsnmp_ds_shutdown
 	netsnmp_sprint_realloc_objid_tree
 	module_name
+	Mib                     DATA
+	tree_head               DATA
+	snmp_errno              DATA
 	netsnmp_daemonize
 	snmp_log_options_usage
 	netsnmp_container_free_list
@@ -379,8 +385,4 @@ EXPORTS
 	netsnmp_get_list_node
 	netsnmp_remove_loghandler
 	netsnmp_register_loghandler
-;
-; when SNMP_TRANSPORT_CALLBACK_DOMAIN is enabled
-;	netsnmp_callback_open
-;	netsnmp_clear_callback_list
-;
+
