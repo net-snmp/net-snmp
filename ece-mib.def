@@ -23,10 +23,17 @@ local          OBJECT IDENTIFIER ::= { private 10 }
 -- load           OBJECT IDENTIFIER ::= { local LOADAVEMIBNUM }
 -- version        OBJECT IDENTIFIER ::= { local VERSIONMIBNUM }
 
--- This is the returned value of the agent type.
+-- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
 
 ucdSnmpAgent      OBJECT IDENTIFIER ::= { local AGENTID }
+hpux              OBJECT IDENTIFIER ::= { ucdSnmpAgent HPUXID }
+sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent SUNOS4ID }
+solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent SOLARISID }
+osf3              OBJECT IDENTIFIER ::= { ucdSnmpAgent OSF3ID }
+ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent ULTRIXID }
+unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent UNKNOWNID }
+
 
 Processes OBJECT-TYPE
 	SYNTAX processes
