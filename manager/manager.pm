@@ -4,7 +4,7 @@ package ucdsnmp::manager;
 
 use strict ();
 use Apache::Constants qw(:common);
-use CGI qw(:standard);
+use CGI qw(:standard delete_all);
 use SNMP ();
 use DBI ();
 use lib ("/afs/dcas.ucdavis.edu/pkg/common/perl_modules");
@@ -319,9 +319,12 @@ if (defined(my $newhost = param('newhost'))) {
 #===========================================================================
 # display setup configuration for a group
 #===========================================================================
-if (defined(param('setupgroup')) && 
-    isadmin($dbh, $remuser, $group)) {
-    setupgroup($dbh, $group);
+if (defined(param('setupgroup'))) {
+    if (isadmin($dbh, $remuser, $group)) {
+	setupgroup($dbh, $group);
+    } else {
+	print "<h2>You're not able to perform setup operations for group $group\n";
+    }
     return Exit($dbh, $group);
 }
 
@@ -331,7 +334,7 @@ if (defined(param('setupgroup')) &&
 if (defined(param('setupgroupsubmit')) && 
     isadmin($dbh, $remuser, $group)) {
     setupgroupsubmit($dbh, $group);
-#    delete_all();
+    delete_all();
     param(-name => 'group', -value => $group);
     print "<a href=\"" . self_url() . "\">Entries submitted</a>";
     return Exit($dbh, $group);
@@ -351,7 +354,7 @@ if (defined(param('userprefs'))) {
 if (defined(param('setupuserprefssubmit')) && 
     isadmin($dbh, $remuser, $group)) {
     setupusersubmit($dbh, $group);
-#    delete_all();
+    delete_all();
     param(-name => 'group', -value => $group);
     print "<a href=\"" . self_url() . "\">Entries submitted</a>";
     return Exit($dbh, $group);
@@ -385,6 +388,11 @@ if (!defined($host)) {
     print "<h2>Hosts in the group \"$group\":</h2>\n";
     if (!isexpert($user)) {
 	print "<ul>\n";
+	if (isadmin($dbh, $remuser, $group)) {
+	    my $q = self_url();
+	    $q =~ s/\?.*//;
+            print "<li>Make sure you <a href=\"" . addtoken($q,"group=$group&setupgroup=1") . "\">set up the host</a> for the SNMP tables you want to monitor.\n";
+        }
 	print "<li>Click on a hostname to operate on or view the information tables associated with that group.\n";
 	print "<li>Click on a red status light below to list the problems found in with a particular host.\n";
 	print "</ul>\n";
@@ -505,22 +513,43 @@ sub addtoken {
 }
 
 #
-# summarizeerrors(CLAUSE):
+# summarizeerrors(DB-HANDLE, CLAUSE):
 #   summarize the list of errors in a given CLAUSE
 #
 sub summarizeerrors {
     my $dbh = shift;
     my $clause = shift;
-    print "<table $ucdsnmp::manager::tableparms><tr><td><b>Host</b></td><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+    $clause = "where" if ($clause eq "");
+    my $clause2 = $clause;
+    $clause2 =~ s/ host / hosterrors.host /;
+
+    # Major errors
+    displaytable($dbh, 'hosterrors, hostgroups',  # , hostgroups
+		 '-select', "hosterrors.host as host, errormsg",
+		 '-notitle', 1,
+		 '-title', "Fatal Errors",
+		 '-clauses', "$clause2 and hosterrors.host = hostgroups.host",
+		 '-beginhook', sub {
+		     if ($#_ < 2) {
+			 #doing header;
+			 print "<td></td>";
+		     } else {
+			 print "<td><img src=\"$ucdsnmp::manager::redimage\"></td>\n";
+		     }});
+
+    my $tabletop = "<br><table $ucdsnmp::manager::tableparms><tr><td><b>Host</b></td><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+    my $donetop = 0;
     my $cursor = 
 	getcursor($dbh, "SELECT * FROM hosttables $clause");
 
     while (my $row = $cursor->fetchrow_hashref ) {
+
 	my $exprs = getcursor($dbh, "SELECT * FROM errorexpressions where (tablename = '$row->{tablename}')");
 	
 	while (my  $expr = $exprs->fetchrow_hashref ) {
 	    my $errors = getcursor($dbh, "select * from $row->{tablename} where $expr->{expression} and host = '$row->{host}'");
 	    while (my  $error = $errors->fetchrow_hashref ) {
+		print $tabletop if ($donetop++ == 0);
 		print "<tr><td>$row->{host}</td><td>$row->{tablename}</td><td>$expr->{returnfield}: $error->{$expr->{returnfield}}</td></tr>";
 	    }
 	}
@@ -552,6 +581,7 @@ sub getcursor {
 sub mykeysort {
     my $mb = $SNMP::MIB{SNMP::translateObj($b)};
     my $ma = $SNMP::MIB{SNMP::translateObj($a)};
+
     return $ucdsnmp::manager::myorder{$a} <=> $ucdsnmp::manager::myorder{$b} if ((defined($ucdsnmp::manager::myorder{$a}) || !defined($ma->{'subID'})) && (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'})));
     return 1 if (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'}));
     return -1 if (defined($ucdsnmp::manager::myorder{$a}) || !defined($ma->{'subID'}));
@@ -825,6 +855,22 @@ sub displayconfigarray {
     print "</table>";
 }
 
+sub adddefaulttables {
+    my ($dbh, $names) = @_;
+    my $row;
+    # add in known expression tables.
+    my $handle = getcursor($dbh, "SELECT * FROM errorexpressions");
+
+    expr: 
+    while($row = $handle->fetchrow_hashref) {
+	foreach $i (@$names) {
+	    if ($i->[0] eq $row->{tablename}) {
+		next expr;
+	    }
+	}
+	push @$names, [$row->{tablename}];
+    }
+}
 
 #
 # display the setup information page for a given group.
@@ -834,6 +880,7 @@ sub setupgroup {
     my $group = shift;
     
     my ($hosts, $names) = gethostandgroups($dbh, $group);
+    adddefaulttables($dbh, $names);
 
     print "<form method=\"post\" action=\"" . self_url() . "\">\n";
     print "<input type=hidden text=\"setupgroupsubmit\" value=\"y\">";
@@ -881,6 +928,8 @@ sub setupgroupsubmit {
     my $group = shift;
     
     my ($hosts, $names) = gethostandgroups($dbh, $group);
+    adddefaulttables($dbh, $names);
+
     foreach my $i (@$hosts) {
 	$dbh->do("delete from hosttables where host = '${$i}[0]' and groupname = '$group'");
     }
@@ -889,6 +938,7 @@ sub setupgroupsubmit {
     foreach my $i (@$hosts) {
 	foreach my $j (@$names) {
 	    if (param("${$i}[0]" . "${$j}[0]")) {
+		print "test: ","${$i}[0] : ${$j}[0]<br>\n";
 		$rep->execute("${$i}[0]", "${$j}[0]") || print "$! $DBI::errstr<br>\n";
             }
 	}
@@ -930,7 +980,7 @@ sub Exit {
     print "<a href=\"$tq?userprefs=1?group=$group\">[options]</a>\n";
     if (defined($group)) {
 	print "<a href=\"$tq?group=$group\">[group: $group]</a>\n";
-	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize $group]</a>\n";
+	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize errors]</a>\n";
     }
     $dbh->disconnect() if (defined($dbh));
     return OK();
