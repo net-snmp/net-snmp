@@ -56,6 +56,6 @@ extern          "C" {
     Netsnmp_Node_Handler netsnmp_cache_helper_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 #endif /* NETSNMP_CACHE_HANDLER_H */

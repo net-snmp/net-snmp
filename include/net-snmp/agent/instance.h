@@ -86,7 +86,7 @@ Netsnmp_Node_Handler netsnmp_instance_int_handler;
 Netsnmp_Node_Handler netsnmp_instance_counter32_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_INSTANCE_H */

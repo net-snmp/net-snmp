@@ -221,7 +221,7 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
                                                     const char *);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* AGENT_HANDLER_H */

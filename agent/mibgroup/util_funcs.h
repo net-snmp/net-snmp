@@ -48,7 +48,7 @@ int             Add_Entry(mib_table_t, void *);
 void           *Retrieve_Table_Data(mib_table_t, int *);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _MIBGROUP_UTIL_FUNCS_H */

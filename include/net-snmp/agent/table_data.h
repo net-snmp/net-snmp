@@ -103,7 +103,7 @@ extern          "C" {
     int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_DATA_HANDLER_H_ */

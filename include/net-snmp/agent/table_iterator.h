@@ -131,7 +131,7 @@ extern          "C" {
     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_ITERATOR_HANDLER_H_ */

@@ -180,7 +180,7 @@ extern          "C" {
                                                 storage_name);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_HANDLER_H_ */

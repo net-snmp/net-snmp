@@ -131,7 +131,7 @@ typedef long ssize_t;
     } * netsnmp_ref_size_t;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* NET_SNMP_TYPES_H */
