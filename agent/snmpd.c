@@ -486,7 +486,7 @@ send_v1_trap (ss, trap, specific)
     pdu->specific_type = specific;
     pdu->time = diff.tv_sec * 100 + diff.tv_usec / 10000;
     if (snmp_send (ss, pdu) == 0) {
-        fprintf (stderr, "snmpd: send_trap: %s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror ("snmpd: send_trap");
     }
 #ifdef USING_SNMP_MODULE       
     snmp_outtraps++;

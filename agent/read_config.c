@@ -15,6 +15,10 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+
 #include "m2m.h"
 #include "mibincl.h"
 
@@ -274,6 +278,7 @@ void setup_tree __P((void))
 
   old_treesz = subtree_old_size();
 
+#undef malloc
   subtrees = (struct subtree *) malloc ((old_treesz
 #if USING_EXTENSIBLE_MODULE
                                          + numrelocs
