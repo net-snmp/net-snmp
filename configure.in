@@ -2,11 +2,15 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(agent/mibgroup/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
-AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging information.],AC_DEFINE(DODEBUG))
-AC_ARG_WITH(defaults,[  --with-defaults         Use defaults for prompted values.],defaults="yes",defaults="no")
-AC_ARG_WITH(root-access,[  --without-root-access   The agent does not exit if it can not open /dev/kmem.])
-AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"      Compile with additional mib modules.])
-AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"  Compile without these mib modules.])
+AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
+AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
+AC_ARG_WITH(root-access,[  --without-root-access           Agent won't require root access.])
+AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system contact.],ac_cv_user_prompt_SYS_CONTACT="$with_sys_contact")
+AC_ARG_WITH(sys_location,[  --with-sys-location=\"location\"  Default system location.],ac_cv_user_prompt_SYS_LOC="$with_sys_location")
+AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file location.],ac_cv_user_prompt_LOGFILE="$with_logfile")
+AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce (SNMPV1).],ac_cv_user_prompt_GLOBALSECURITY="$with_security")
+AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"       Compile with additional mib modules.])
+AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without these mib modules.])
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
 if test "x$with_root_access" = "xno"; then
@@ -536,6 +540,7 @@ if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(CAN_USE_SYSCTL)
 fi
 
+if test "x$ac_cv_user_prompt_GLOBALSECURITY" = "x" -o "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
 if test "x$defaults" = "xno"; then
@@ -562,6 +567,9 @@ else
   ac_cv_have_warned="no"
 fi
 ])
+else
+  ac_cv_have_warned="yes"
+fi
 
 ME=`$WHOAMI`
 if test -f /etc/resolv.conf; then
