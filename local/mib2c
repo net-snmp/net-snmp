@@ -283,11 +283,14 @@ sub oidlength {
 #   $var.type          -- node's ASN_XXX type (Net-SNMP specific #define)
 #   $var.decl          -- C data type (char, u_long, ...)
 #
-#   $var.readable      -- 1 if it's readable, 0 if not
-#   $var.settable      -- 1 if it's writable, 0 if not
+#   $var.readable      -- 1 if an object is readable, 0 if not
+#   $var.settable      -- 1 if an object is writable, 0 if not
+#   $var.creatable     -- 1 if a column object can be created as part of a new row, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.accessible    -- 1 if accessible, 0 if not
-#   $var.hasdefval     -- 1 if a DEFVAL was defined, 0 if not
+#   $var.rowstatus     -- 1 if an object is a RowStatus object, 0 if not
+#     'settable', 'creatable' and 'rowstatus' can also be used with table variables
+#     to indicate whether it contains writable, creatable or RowStatus column objects
 #
 #   $var.hasdefval     -- returns 1 if var has a DEFVAL clause
 #   $var.defval        -- node's DEFVAL
@@ -306,6 +309,11 @@ sub process_vars {
 
     # mib substitutions ($var.type -> $mibnode->{'type'})
    if ( $it =~ /\$(\w+)\.(\w+)/ ) {
+    if ($SNMP::MIB{$vars{$1}}{'label'} =~ /Table$/) {
+      $it =~ s/\$(\w+)\.(settable)/(table_is_writable($SNMP::MIB{$vars{$1}}{label}))/eg;
+      $it =~ s/\$(\w+)\.(creatable)/(table_has_create($SNMP::MIB{$vars{$1}}{label}))/eg;
+      $it =~ s/\$(\w+)\.(rowstatus)/(table_has_rowstatus($SNMP::MIB{$vars{$1}}{label}))/eg;
+    }
     $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
     $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg;
     $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg;
@@ -315,6 +323,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g;
     $it =~ s/\$(\w+)\.(module)/$SNMP::MIB{$vars{$1}}{moduleID}/g;
     $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|WriteOnly)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(creatable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(Create)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(readable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(Read|Create)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(accessible)/(($SNMP::MIB{$vars{$1}}{access} !~ \/(NoAccess)\/)?1:0)/eg;
@@ -333,6 +342,7 @@ sub process_vars {
     # check for enums
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
+    $it =~ s/\$(\w+)\.(rowstatus)/(($SNMP::MIB{$vars{$1}}{syntax} =~ \/(RowStatus)\/)?1:0)/eg;
     if ( $it =~ /\$(\w+)\.(\w+)/ ) {
       warn "Possible unknown variable attribute \$$1.$2 at $currentfile:$currentline\n";
     }
@@ -1121,6 +1131,19 @@ sub table_has_create {
     my $result = 0;
     foreach $column (@{$tables{$table}{'column'}}) {
       if($SNMP::MIB{$column}{access} =~ /(Create)/) {
+        $result = 1;
+        last;
+      }
+    }
+    return $result;
+}
+
+sub table_has_rowstatus {
+    my $table = shift;
+    my $column;
+    my $result = 0;
+    foreach $column (@{$tables{$table}{'column'}}) {
+      if($SNMP::MIB{$column}{syntax} =~ /(RowStatus)/) {
         $result = 1;
         last;
       }
