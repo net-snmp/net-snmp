@@ -17,9 +17,12 @@ extern "C" {
 /* default list of mibs to load */
 #define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
+
+#define INSTALL_BASE "c:/Program Files/Net-SNMP"
+
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-#define DEFAULT_MIBDIRS "/USR/MIBS"
+#define DEFAULT_MIBDIRS INSTALL_BASE ## "/mibs"
 
 /* default mib files to load, specified by path. */
 #undef DEFAULT_MIBFILES
@@ -58,7 +61,7 @@ extern "C" {
 /* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
    persisant information to this directory in the form of configuration
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY "/USR/SNMP/PERSIST"
+#define PERSISTENT_DIRECTORY INSTALL_BASE ## "/persist"
 
 /* PERSISTENT_MASK: the umask permissions to set up persistent files with */
 /* Win32 has no umask ...  #define PERSISTENT_MASK 077 */
@@ -87,10 +90,10 @@ extern "C" {
 
 /* SNMPLIBDIR contains important files */
 
-#define SNMPLIBPATH "/USR/LIB"
-#define SNMPSHAREPATH "/USR/SHARE/SNMP"
-#define SNMPCONFPATH "/USR"
-#define SNMPDLMODPATH "/USR/LIB/DLMOD"
+#define SNMPDLMODPATH INSTALL_BASE ## "/lib/dlmod"
+#define SNMPLIBPATH INSTALL_BASE ## "/lib"
+#define SNMPSHAREPATH INSTALL_BASE ## "/share"
+#define SNMPCONFPATH INSTALL_BASE ## "/conf"
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
