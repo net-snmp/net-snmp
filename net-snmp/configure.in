@@ -418,7 +418,7 @@ Miscellaneous:
     defaults="yes",defaults="no")
 
 AC_ARG_ENABLE(ucd-snmp-compatibility,
-[--ucd-snmp-compatibility        Install ucd-snmp look-alike headers and libs.],
+[--enable-ucd-snmp-compatibility  Install ucd-snmp look-alike headers and libs.],
     ucd_compat=yes)
 dnl
 dnl setup install targets
