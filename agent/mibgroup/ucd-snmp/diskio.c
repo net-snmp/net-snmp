@@ -22,6 +22,9 @@
 /* include our .h file */
 #include "diskio.h"
 
+/* parse config file */
+#include "agent_read_config.h"
+
 #define CACHE_TIMEOUT 10
 static time_t cache_time=0;
 
@@ -43,7 +46,16 @@ static int cache_disknr=-1;
 #include <sys/diskstats.h>
 #endif /* bsdi */
 
-	/*********************
+#if defined (freebsd4)
+#include <sys/dkstat.h>
+#include <devstat.h>
+#endif /* freebsd */
+
+static char type[20];
+void diskio_parse_config(const char*, char *);
+FILE *file;
+
+         /*********************
 	 *
 	 *  Initialisation & common implementation functions
 	 *
@@ -78,7 +90,7 @@ void init_diskio(void)
 
   /* Define the OID pointer to the top of the mib tree that we're
    registering underneath. */
-  oid diskio_variables_oid[] = { 1,3,6,1,4,1,2021,13,15,1,1 };
+  oid diskio_variables_oid[] = { 1,3,6,1,4,1,2021,13,15,1,1};
 
   /* register ourselves with the agent to handle our mib tree
 
@@ -92,12 +104,21 @@ void init_diskio(void)
   */
   REGISTER_MIB("diskio", diskio_variables, variable2, diskio_variables_oid);
 
+  /* Added to parse snmpd.conf - abby*/
+      snmpd_register_config_handler("diskio", diskio_parse_config,
+				    NULL,
+				    "diskio [device-type]");
+
 #ifdef solaris2
   kc=kstat_open();
 
   if (kc==NULL) 
     snmp_log(LOG_ERR, "diskio: Couln't open kstat\n");
 #endif
+}
+
+void diskio_parse_config(const char *token, char *cptr){
+   copy_nword(cptr,type,sizeof(type));
 }
 
 #ifdef solaris2
@@ -132,7 +153,7 @@ int get_disk(int disknr) {
 
 u_char	*
 var_diskio(struct variable *vp,
-	    oid *name,
+	   oid *name,
 	    size_t *length,
 	    int exact,
 	    size_t *var_len,
@@ -288,3 +309,85 @@ var_diskio(struct variable * vp,
   return NULL;
 }
 #endif /* bsdi */
+
+#if defined(freebsd4)
+static int ndisk;
+static struct statinfo *stat;
+FILE *file;
+
+static int
+getstats(void)
+{
+  time_t now;
+
+  now = time(NULL);
+  if (cache_time + CACHE_TIMEOUT > now) {
+    return 1;
+  }
+  stat=NULL;
+  if (stat==NULL){free(stat);}
+  stat=(struct statinfo*)malloc(sizeof(struct statinfo));
+  stat->dinfo=(struct devinfo*)malloc(sizeof(struct devinfo));
+  bzero(stat->dinfo, sizeof(struct devinfo));
+
+  if ((getdevs(stat))==-1){
+	fprintf (stderr,"Can't get devices:%s\n", devstat_errbuf);
+  	return 1;
+  }
+  ndisk=stat->dinfo->numdevs;
+  return 0;
+}
+
+u_char *
+var_diskio(struct variable * vp,
+	   oid * name,
+	   size_t * length,
+	   int exact,
+	   size_t * var_len,
+	   WriteMethod ** write_method)
+{
+  static long long_ret;
+  unsigned int indx;
+
+  if (getstats() == 1){
+    return NULL;
+  } 
+
+
+ if (header_simple_table(vp, name, length, exact, var_len, write_method, ndisk))
+    {
+	return NULL;
+    }
+
+  indx = (unsigned int) (name[*length - 1] - 1);
+
+  if (indx >= ndisk)
+    return NULL;
+
+  switch (vp->magic) {
+    case DISKIO_INDEX:
+      long_ret = (long) indx+1;;
+      return (u_char *) &long_ret;
+    case DISKIO_DEVICE:
+      *var_len = strlen(stat->dinfo->devices[indx].device_name);
+      return (u_char *) stat->dinfo->devices[indx].device_name;
+    case DISKIO_NREAD:
+      long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
+      return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+      long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
+      return (u_char *) & long_ret;
+    case DISKIO_READS:
+      long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
+      return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+      long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+      return (u_char *) & long_ret;
+
+    default:
+      ERROR_MSG("diskio.c: don't know how to handle this request.");
+  }
+  return NULL;
+}
+#endif /* freebsd4 */
+
