@@ -28,6 +28,8 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
+INSTALLLIBS     = libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
+
 SUBDIRS		= snmpnetstat
 
 #
@@ -45,7 +47,9 @@ CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 		  @CPPFLAGS@ -I$(srcdir)/../agent -I../agent/helpers \
 		  -I$(srcdir)/../agent/mibgroup
 OSUFFIX		= lo
-TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) notification_log.$(OSUFFIX)
+TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX)
+LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o  notification_log.o
+LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo notification_log.lo
 OBJS  = *.o
 LOBJS = *.lo
 
@@ -83,8 +87,8 @@ snmptable$(EXEEXT):    snmptable.$(OSUFFIX) $(USELIBS)
 snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) 
-	$(LINK) -o $@ $(TRAPD_OBJECTS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS} @WRAPLIBS@
+snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) $(INSTALLLIBS)
+	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS} @WRAPLIBS@
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
@@ -110,6 +114,10 @@ encode_keychange$(EXEEXT):    encode_keychange.$(OSUFFIX) $(USELIBS)
 
 snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
+	$(LIB_LD_CMD) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION) ${LLIBTRAPD_OBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
 
 snmpinforminstall:
 	rm -f $(bindir)/snmpinform$(EXEEXT)
