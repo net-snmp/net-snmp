@@ -1,6 +1,7 @@
-DBD_AnyData.patch
 INSTALL
+README
 MANIFEST
 Makefile.PL
 Format.pm
 Storage.pm
+DBD_AnyData.patch
