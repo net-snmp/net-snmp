@@ -235,6 +235,9 @@
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
 
+/* Define if you have the knlist function.  */
+#undef HAVE_KNLIST
+
 /* Define if you have the kvm_getprocs function.  */
 #undef HAVE_KVM_GETPROCS
 
