@@ -158,10 +158,7 @@ snmp_parse_args(int argc,
 #endif
 
   /* initialize session to default values */
-  memset(session, 0, sizeof(struct snmp_session));
-  session->remote_port = SNMP_DEFAULT_REMPORT;
-  session->timeout = SNMP_DEFAULT_TIMEOUT;
-  session->retries = SNMP_DEFAULT_RETRIES;
+  snmp_sess_init( session );
   session->authenticator = NULL;
   session->peername = NULL;
 
