@@ -91,22 +91,22 @@ void
 file_parse_config(const char *token, char *cptr)
 {
     char space;
+    char *cp;
 	
     if (fileCount < MAXFILE) {
         fileTable[fileCount].max = -1;
 
-        sscanf(cptr, "%255s%c%d",
-               fileTable[fileCount].name, &space, &fileTable[fileCount].max);
-	/*
-	 * Log an error then return if the string scanned in was larger then
-	 * it should have been.
-	 */
-	if (space != ' ') {
-		snmp_log(LOG_ERR, "file_parse_config: file name scanned " \
-		    "in from line %s is too large.  fileCount = %d\n", cptr,
-		    fileCount);
-		return;
+        cp = copy_nword(cptr, fileTable[fileCount].name, FILE_NAME_MAX);
+
+	if (strlen(fileTable[fileCount].name) >= FILE_NAME_MAX - 1) {
+            config_perror("file name too long");
+            return;
 	}
+
+        if (cp)
+            fileTable[fileCount].max = strtoul(cp, NULL, 10);
+        else
+            fileTable[fileCount].max = -1;
 
         fileCount++;
     }
