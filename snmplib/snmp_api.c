@@ -299,7 +299,6 @@ static int  snmp_detail_f  = 0;
 /*
  * Prototypes.
  */
-void register_default_handlers(void);
 int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
 static int snmp_parse (void *, struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
 static void * snmp_sess_pointer (struct snmp_session *);
@@ -563,9 +562,6 @@ _init_snmp (void)
     ds_set_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE,
                    DEFAULT_ASNENCODING_DIRECTION);
 #endif
-    register_mib_handlers();
-    register_default_handlers();
-    read_premib_configs();
 }
 
 /*
@@ -590,17 +586,17 @@ snmp_sess_init(struct snmp_session *session)
 
 void
 register_default_handlers(void) {
-  ds_register_premib(ASN_BOOLEAN, "snmp","dumpPacket",
+  ds_register_config(ASN_BOOLEAN, "snmp","dumpPacket",
                      DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
-  ds_register_premib(ASN_BOOLEAN, "snmp","reverseEncodeBER",
+  ds_register_config(ASN_BOOLEAN, "snmp","reverseEncodeBER",
                      DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE);
-  ds_register_premib(ASN_INTEGER, "snmp","defaultPort",
+  ds_register_config(ASN_INTEGER, "snmp","defaultPort",
                      DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
-  ds_register_premib(ASN_OCTET_STR, "snmp","defCommunity",
+  ds_register_config(ASN_OCTET_STR, "snmp","defCommunity",
 		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
   ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
                      DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
-  ds_register_premib(ASN_BOOLEAN, "snmp","noRangeCheck",
+  ds_register_config(ASN_BOOLEAN, "snmp","noRangeCheck",
 		     DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE );
 }
 
@@ -640,9 +636,12 @@ init_snmp(const char *type)
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
+  register_mib_handlers();
+  register_default_handlers();
   init_snmpv3(type);
   init_snmp_alarm();
 
+  read_premib_configs();
   init_mib();
 
   read_configs();

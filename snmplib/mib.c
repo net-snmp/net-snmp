@@ -1066,12 +1066,9 @@ snmp_out_toggle_options(char *options)
         case 'S':
 	    snmp_set_suffix_only(2);
 	    break;
-	case 'p':
-	    snmp_set_suffix_only(0);
-	    break;
-	case 'T':
-	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
-	    break;
+	     case 'T':
+	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+	     break;
         default:
 	    return options-1;
 	}
@@ -1091,7 +1088,6 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    f: Print full oids on output.\n", lead);
   fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
-  fprintf(outf, "%s    p: Print oids with std prefixes deleted (default).\n", lead);
   fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
   fprintf(outf, "%s    v: Print Print values only (not OID = value).\n", lead);
   fprintf(outf, "%s    T: Print human-readable text along with hex strings.\n", lead);
