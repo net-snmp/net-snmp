@@ -80,7 +80,7 @@ struct sockaddr_in smux_sa;
 struct counter64 smux_counter64;
 oid             smux_objid[MAX_OID_LEN];
 u_char          smux_str[SMUXMAXSTRLEN];
-int             smux_listen_sd;
+int             smux_listen_sd = -1;
 
 static struct timeval smux_rcv_timeout;
 static u_long   smux_reqid;
