@@ -129,14 +129,6 @@ typedef struct counter64 unsigned64;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-#ifndef __P
-#ifdef __STDC__
-#define __P(p) p
-#else
-#define __P(p) ()
-#endif
-#endif
-
 u_char	*asn_parse_int __P((u_char *, int *, u_char *, long *, int));
 u_char	*asn_build_int __P((u_char *, int *, u_char, long *, int));
 u_char	*asn_parse_unsigned_int __P((u_char *, int *, u_char *, u_long *, int));
