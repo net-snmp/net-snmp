@@ -90,8 +90,15 @@ typedef long    fd_mask;
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp.h"
-
+#include "mib.h"
 #include "m2m.h"
+
+#ifdef USING_V2PARTY_ALARM_MODULE
+#include "mibgroup/v2party/alarm.h"
+#endif
+#ifdef USING_V2PARTY_EVENT_MODULE
+#include "mibgroup/v2party/event.h"
+#endif
 
 #if USING_MIBII_SNMP_MIB_MODULE
 #include "mibgroup/mibII/snmp_mib.h"
@@ -153,7 +160,6 @@ char *sprintf_stamp __P((time_t *));
 int create_v1_trap_session __P((char *, char *));
 static void free_v1_trap_session __P((struct trap_sink *sp));
 void send_v1_trap __P((struct snmp_session *, int, int));
-char *reverse_bytes __P((char *, int));
 void usage __P((char *));
 int main __P((int, char **));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
