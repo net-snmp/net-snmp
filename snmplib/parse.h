@@ -56,6 +56,14 @@ struct range_list {
 };
 
 /*
+ * A linked list of indexes
+ */
+struct index_list {
+    struct index_list *next;
+    char *ilabel;
+};
+
+/*
  * A linked list of nodes.
  */
 struct node {
@@ -70,6 +78,7 @@ struct node {
     int status;
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     struct range_list *ranges;
+    struct index_list *indexes;
     char *hint;
     char *units;
     char *description;    	/* description (a quoted string) */
@@ -94,6 +103,7 @@ struct tree {
     int status;			/* This nodes status */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     struct range_list *ranges;
+    struct index_list *indexes;
     char *hint;
     char *units;
     void (*printer) (char *, struct variable_list *, struct enum_list *,

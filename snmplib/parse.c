@@ -389,6 +389,8 @@ static void print_parent_labeledoid (FILE *, struct tree *);
 static void print_parent_oid (FILE *, struct tree *);
 static void print_parent_label (FILE *, struct tree *);
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
+static struct index_list *getIndexes(FILE *fp);
+static void free_indexes(struct index_list *idxs);
 
 void snmp_set_mib_errors(int err)
 {
@@ -660,7 +662,12 @@ free_tree(struct tree *Tree)
             free((char*)trp);
         }
     }
+    if (Tree->indexes)
+    {
+      free_indexes(Tree->indexes);
+    }
 
+    
     if (Tree->description)
         free(Tree->description);
     if (Tree->label)
@@ -689,6 +696,8 @@ free_node(struct node *np)
     }
     if (np->description)
         free(np->description);
+    if (np->indexes)
+        free_indexes(np->indexes);
     if (np->label)
         free(np->label);
     if (np->parent)
@@ -703,6 +712,7 @@ print_nodes(FILE *fp,
 	    struct node *root)
 {
     struct enum_list *ep;
+    struct index_list *ip;
     struct range_list *rp;
     struct node *np;
 
@@ -721,6 +731,12 @@ print_nodes(FILE *fp,
             fprintf(fp, "  Ranges: \n");
             for(rp = np->ranges; rp; rp = rp->next){
                 fprintf(fp, "    %d..%d\n", rp->low, rp->high);
+            }
+        }
+        if (np->indexes){
+            fprintf(fp, "  Indexes: \n");
+            for(ip = np->indexes; ip; ip = ip->next){
+                fprintf(fp, "    %s\n", ip->ilabel);
             }
         }
         if (np->hint)
@@ -1131,6 +1147,7 @@ do_subtree(struct tree *root,
          */
         tp->label = np->label;  np->label = NULL;
         tp->enums = np->enums;  np->enums = NULL;
+        tp->indexes = np->indexes;  np->indexes = NULL;
         tp->ranges = np->ranges;  np->ranges = NULL;
         tp->hint = np->hint;  np->hint = NULL;
         tp->units = np->units;  np->units = NULL;
@@ -1168,6 +1185,7 @@ do_subtree(struct tree *root,
                 anon_tp->tc_index = tp->tc_index;
                 anon_tp->type = tp->type;
                 anon_tp->enums = tp->enums;  tp->enums=NULL;
+                anon_tp->indexes = tp->indexes;  tp->indexes=NULL;
                 anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
                 anon_tp->hint = tp->hint;  tp->hint=NULL;
                 anon_tp->description = tp->description;  tp->description=NULL;
@@ -1865,6 +1883,14 @@ parse_objecttype(FILE *fp,
           }
           break;
         case INDEX:
+          np->indexes = getIndexes(fp);
+          if (np->indexes == NULL) {
+            print_error("Bad Index List",token,type);
+            free_node(np);
+            return NULL;
+          }
+          break;
+          
         case DEFVAL:
         case AUGMENTS:
         case NUM_ENTRIES:
@@ -3009,6 +3035,56 @@ parseQuoteString(FILE *fp,
     }
 
     return 0;
+}
+
+/*
+ * struct index_list *
+ * getIndexes(FILE *fp):
+ *   This routine parses a string like  { blah blah blah } and returns a
+ *   list of the strings enclosed within it.
+ *    
+ */
+static struct index_list *
+getIndexes(FILE *fp) {
+  int type;
+  char token[MAXTOKEN];
+
+  struct index_list *mylist = NULL;
+  struct index_list **mypp = &mylist;
+  
+  
+  type = get_token(fp, token, MAXTOKEN);
+
+  if (type != LEFTBRACKET) {
+    free(mylist);
+    return NULL;
+  }
+
+  type = get_token(fp, token, MAXTOKEN);
+  while (type != RIGHTBRACKET && type != ENDOFFILE) {
+    if (type == LABEL) {
+      *mypp = (struct index_list *) xmalloc(sizeof(struct index_list));
+      if (*mypp == NULL)
+        return NULL;
+      (*mypp)->ilabel = xstrdup(token);
+      (*mypp)->next = NULL;
+      mypp = &(*mypp)->next;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+  }
+
+  return mylist;
+}
+
+static void
+free_indexes(struct index_list *idxs) {
+  struct index_list *idxp;
+  
+  while(idxs) {
+    idxp = idxs->next;
+    free(idxs);
+    idxs = idxp;
+  }
 }
 
 /*
