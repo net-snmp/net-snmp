@@ -41,6 +41,7 @@ SOFTWARE.
 
 extern int  errno;
 int	snmp_dump_packet = 0;
+extern int save_mib_descriptions;
 
 main(argc, argv)
     int	    argc;
@@ -55,7 +56,6 @@ main(argc, argv)
     int description = 0;
     int random_access = 0;
     
-    init_mib();
     /*
      * usage: snmptranslate name
      */
@@ -67,6 +67,7 @@ main(argc, argv)
 		break;	     
 	      case 'd':
 		description = 1;
+		save_mib_descriptions = 1;
 		break;
 	      case 'r':
 		random_access = 1;
@@ -84,6 +85,7 @@ main(argc, argv)
 	printf("usage: snmptranslate [-n] [-d] [-r] objectID\n");
 	exit(1);
     }
+    init_mib();
     name_length = MAX_NAME_LEN;
     if (random_access){
 	if (!get_node(current_name, name, &name_length)){
