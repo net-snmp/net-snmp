@@ -2450,7 +2450,7 @@ netsnmp_get_mib_directory(void)
         DEBUGMSGTL(("get_mib_directory", "no mib directories set\n"));
 
         /** Check if the environment variable is set */
-        dir = getenv("MIBDIRS");
+        dir = netsnmp_getenv("MIBDIRS");
         if (dir == NULL) {
             DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
             /** Not set use hard coded path */
@@ -2489,7 +2489,7 @@ netsnmp_get_mib_directory(void)
 void
 netsnmp_fixup_mib_directory(void)
 {
-    char *homepath = getenv("HOME");
+    char *homepath = netsnmp_getenv("HOME");
     char *mibpath = netsnmp_get_mib_directory();
     char *oldmibpath = NULL;
     char *ptr_home;
@@ -2562,7 +2562,7 @@ init_mib(void)
     }
     SNMP_FREE(env_var);
 
-    env_var = getenv("MIBFILES");
+    env_var = netsnmp_getenv("MIBFILES");
     if (env_var != NULL) {
         if (*env_var == '+')
             entry = strtok_r(env_var+1, ENV_SEPARATOR, &st);
@@ -2580,7 +2580,7 @@ init_mib(void)
      * Read in any modules or mibs requested 
      */
 
-    env_var = getenv("MIBS");
+    env_var = netsnmp_getenv("MIBS");
     if (env_var == NULL) {
         if (confmibs != NULL)
             env_var = strdup(confmibs);
@@ -2619,7 +2619,7 @@ init_mib(void)
     adopt_orphans();
     SNMP_FREE(env_var);
 
-    env_var = getenv("MIBFILES");
+    env_var = netsnmp_getenv("MIBFILES");
     if (env_var != NULL) {
         if (*env_var == '+') {
 #ifdef DEFAULT_MIBFILES
@@ -2657,7 +2657,7 @@ init_mib(void)
         SNMP_FREE(env_var);
     }
 
-    prefix = getenv("PREFIX");
+    prefix = netsnmp_getenv("PREFIX");
 
     if (!prefix)
         prefix = Standard_Prefix;
