@@ -421,17 +421,19 @@ main(int argc, char *argv[])
         }
 
         command = CMD_CREATE;
-        setup_oid(usmUserStatus, &name_length,
-                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
-        longvar = RS_CREATEANDGO;
-        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
-                              ASN_INTEGER, (u_char *) & longvar,
-                              sizeof(longvar));
 
         if (++arg < argc) {
             /*
-             * clone the new user from another user as well 
+             * clone the new user from an existing user
+             *   (and make them active immediately)
              */
+            setup_oid(usmUserStatus, &name_length,
+                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+            longvar = RS_CREATEANDGO;
+            snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                                  ASN_INTEGER, (u_char *) & longvar,
+                                  sizeof(longvar));
+
             setup_oid(usmUserCloneFrom, &name_length,
                       ss->contextEngineID, ss->contextEngineIDLen,
                       argv[arg - 1]);
@@ -442,6 +444,17 @@ main(int argc, char *argv[])
                                   ASN_OBJECT_ID,
                                   (u_char *) usmUserSecurityName,
                                   sizeof(oid) * name_length2);
+        } else {
+            /*
+             * create a new (unauthenticated) user from scratch
+             * The Net-SNMP agent won't allow such a user to be made active.
+             */
+            setup_oid(usmUserStatus, &name_length,
+                      ss->contextEngineID, ss->contextEngineIDLen, argv[arg-1]);
+            longvar = RS_CREATEANDWAIT;
+            snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                                  ASN_INTEGER, (u_char *) & longvar,
+                                  sizeof(longvar));
         }
 
     } else if (strcmp(argv[arg], CMD_CLONEFROM_NAME) == 0) {
@@ -460,7 +473,7 @@ main(int argc, char *argv[])
         command = CMD_CLONEFROM;
         setup_oid(usmUserStatus, &name_length,
                   ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
-        longvar = RS_CREATEANDGO;
+        longvar = RS_ACTIVE;
         snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                               ASN_INTEGER, (u_char *) & longvar,
                               sizeof(longvar));
