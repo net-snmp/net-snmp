@@ -678,20 +678,6 @@ main(int argc, char *argv[])
     }
 #endif
 
-#if HAVE_GETPID
-    if (pid_file != NULL) {
-      if ((PID = fopen(pid_file, "w")) == NULL) {
-        snmp_log_perror("fopen");
-        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
-          exit(1);
-      }
-      else {
-        fprintf(PID, "%d\n", (int)getpid());
-        fclose(PID);
-      }
-    }
-#endif
-
     /*  Honor selection of standard error output.  */
     if (!stderr_log) {
       snmp_disable_stderrlog();
@@ -734,6 +720,20 @@ main(int argc, char *argv[])
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0, 0);
         
+#if HAVE_GETPID
+    if (pid_file != NULL) {
+      if ((PID = fopen(pid_file, "w")) == NULL) {
+        snmp_log_perror("fopen");
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+          exit(1);
+      }
+      else {
+        fprintf(PID, "%d\n", (int)getpid());
+        fclose(PID);
+      }
+    }
+#endif
+
 #if HAVE_UNISTD_H
 #ifdef HAVE_SETGID
 	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
