@@ -6,7 +6,7 @@ LIBS=	../lib/libsnmp.a
 CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG
 CC =cc
 DIRS=wes
-WESOBJS=wes/misc.o wes/read_config.o wes/wes.o
+WESOBJS=wes/misc.o wes/read_config.o wes/wes.o wes/hpmibs.o
 all: 
 	cd wes; gmake all ; cd ..
 	make $(TARG)
