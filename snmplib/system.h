@@ -72,7 +72,7 @@ void winsock_cleanup (void);
 in_addr_t get_myaddr (void);
 long get_uptime (void);
 
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 void DEBUGP (const char *, ...);
 #else
 void DEBUGP (va_alist);
