@@ -90,7 +90,7 @@ if (test_version(1,5,0,0)) {
 }
 SNMP::initMib();
 $SNMP::verbose = 1;
-my $tmpbd = 3;
+my $tmpbd = 1;
 
 $top = MainWindow->new();
 $top->title("tkmib");
@@ -98,7 +98,7 @@ $top->title("tkmib");
 #Menus
 $MenuFrame = $top->Frame(-relief => "raised",-borderwidth => 2);
 $MenuFrame->pack(-fill => "x",-expand => 1);
-$FileMenuBut = $MenuFrame->Menubutton(-text => "File",
+$FileMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => "File",
 				      -menuitems =>
       [
 #       [Button => "Save Output", -command => [\&saveOutput]],
@@ -106,7 +106,7 @@ $FileMenuBut = $MenuFrame->Menubutton(-text => "File",
        ]);
 $FileMenuBut->pack(-side => 'left');
 
-$MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
+$MibMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => "Mib",
 				      -menuitems =>
       [[Button => "Find a mib node", 
 	-command => sub { my $var;
@@ -122,7 +122,7 @@ $MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
        ]);
 $MibMenuBut->pack(-side => 'left');
 
-$OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
+$OptMenuBut = $MenuFrame->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -text => "Options",
 				     -menuitems =>
       [[Cascade => "~Display"],
        [Cascade => "Use SNMP Version", -menuitems =>
@@ -208,11 +208,11 @@ $hlist=$top->Scrolled(qw(HList -itemtype imagetext -browsecmd main::showInfo
 $hlist->pack(-side => 'top', -expand => 1, -fill => 'both');
 my $sFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $sFrame->pack(-side => 'top', -fill => 'x');
-$sFrame->Label(-text => 'OID: ', -relief => 'raised', -borderwidth => $tmpbd)
+$sFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => 'OID: ', -relief => 'raised', -borderwidth => $tmpbd)
     ->pack(-side => 'left');
 $mibOID = $sFrame->Entry(-textvariable => \$OID, -relief => 'flat');
 $mibOID->pack(-side => 'left');
-$mibTextOID = $sFrame->Label(-text => '');
+$mibTextOID = $sFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => '');
 $mibTextOID->pack(-side => 'right');
 
 $dispFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
@@ -224,7 +224,7 @@ for($i=0;$i<= $#displayInfo;$i++) {
     
 $descrFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $descrFrame->pack(-side => 'top', -fill =>'x');
-$descrFrame->Label(-text => 'Description:', -anchor => 'w')->pack(-side => 'top',
+$descrFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => 'Description:', -anchor => 'w')->pack(-side => 'top',
 								-fill => 'x');
 $descr = $descrFrame->Scrolled(qw(Text -width 80 -height 4));
 $descr->pack(-side => 'top', -fill => 'x');
@@ -233,14 +233,14 @@ $bFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $bFrame->pack(-side => 'top', -fill => 'x');
 $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
-$bFrame->Button(-text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
-$tablebutton = $bFrame->Button(-text => 'table', -command => \&snmptable);
+$bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
+$tablebutton = $bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'table', -command => \&snmptable);
 $tablebutton->pack(-side => 'right');
-$bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
-$bFrame->Button(-text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
-$bFrame->Button(-text => 'get', -command => \&snmpget)->pack(-side => 'right');
-$bFrame->Button(-text => 'set', -command => [\&snmpsetbegin, 'OID'])->pack(-side => 'right');
-$stopBut = $bFrame->Button(-text => 'stop', -command => sub { stop(1) },
+$bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
+$bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
+$bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'get', -command => \&snmpget)->pack(-side => 'right');
+$bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'set', -command => [\&snmpsetbegin, 'OID'])->pack(-side => 'right');
+$stopBut = $bFrame->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'stop', -command => sub { stop(1) },
 			   -state => 'disabled');
 $stopBut->pack(-side => 'right');
 $oFrame = $top->Frame(-borderwidth => $tmpbd, -relief => 'raised');
@@ -250,10 +250,10 @@ $output->pack(-side => 'top', -fill => 'both', -expand => 1);
 
 $tmpFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $tmpFrame->pack(-side => 'top', -fill => 'x');
-$tmpFrame->Label(-text => "Status:  ", -anchor => 'w')
+$tmpFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => "Status:  ", -anchor => 'w')
 #		 -relief => 'raised', -borderwidth => $tmpbd)
     ->pack(-side => 'left');
-$status = $tmpFrame->Label(-anchor => 'w');
+$status = $tmpFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -anchor => 'w');
 $status->pack(-side => 'left', -fill => 'x');
 
 # initialize the browser
@@ -378,9 +378,9 @@ sub snmpsetbegin {
     my $vars = new SNMP::VarList;
     $varswin->pack(-side => 'top');
     my $buttons = $setwin->Frame(-relief => "raised")->pack(-side => 'top', -fill => "x",-expand => 1);
-    $buttons->Button(-text => 'Add a varbind', -command => [\&snmpsetbegin_addvar, $vars, $varswin, 'OID'])->pack(-side => 'left', -fill => "x",-expand => 1);
-    $buttons->Button(-text => 'perform set', -command => [\&snmpsetbegin_ok, $vars, $setwin, $varswin])->pack(-side => 'left');
-    $buttons->Button(-text => 'Cancel', -command => [sub { my $widget = shift; $varswin = shift; if ($setmain == $varswin) { $setmain = undef; } $widget->destroy();}, $setwin, $varswin])->pack(-side => 'right');
+    $buttons->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'Add a varbind', -command => [\&snmpsetbegin_addvar, $vars, $varswin, 'OID'])->pack(-side => 'left', -fill => "x",-expand => 1);
+    $buttons->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'perform set', -command => [\&snmpsetbegin_ok, $vars, $setwin, $varswin])->pack(-side => 'left');
+    $buttons->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'Cancel', -command => [sub { my $widget = shift; $varswin = shift; if ($setmain == $varswin) { $setmain = undef; } $widget->destroy();}, $setwin, $varswin])->pack(-side => 'right');
     if ($startoid ne "") {
 	snmpsetbegin_addvar($vars, $varswin, $startoid, $startval);
     }
@@ -397,7 +397,7 @@ sub make_enum_button {
     foreach my $i (@_) {
 	push @objs,[Radiobutton => $i, -variable => $var];
     }
-    return $win->Menubutton(-textvariable => $var,
+    return $win->Menubutton(-pady => $tmpbd, -padx => $tmpbd, -textvariable => $var,
 			    -relief => raised,
 			    -menuitems => \@objs);
 }
@@ -532,7 +532,7 @@ sub snmptable {
 	for(my $k=0;$k <= $#tags;$k++) {
 	    my $mib = $SNMP::MIB{"$tboids{$index[$i]}{$tags[$k]}"};
 	    if ($mib->{'access'} =~ /(Write|Create)/) {
-		$output->put($i+2,$k+2,$output->Button(-text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
+		$output->put($i+2,$k+2,$output->Button(-pady => $tmpbd, -padx => $tmpbd, -text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
 	    } else {
 		$output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
 	    }
@@ -757,13 +757,13 @@ sub optionalWidget {
 
 sub createRow {
     my $i = shift;
-    $dispFrame->Label(-text => $displayInfo[$i], 
+    $dispFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => $displayInfo[$i], 
 		     -anchor => 'w', -borderwidth => $tmpbd)
-	->grid(-column => ($i%2)*2, -row => int($i/2), -sticky => 'w');
+	->grid(-ipady => $tmpbd, -ipadx => $tmpbd, -column => ($i%2)*2, -row => int($i/2), -sticky => 'w');
     $dpyInfo[$i] = "" if (!defined($dpyInfo[$i]));
     my $ent = $dispFrame->Entry(-textvariable => \$dpyInfo[$i], -width => 40, 
 		      -relief => 'flat', -borderwidth => $tmpbd);
-    $ent->grid(-column => ($i%2)*2 + 1, -row => int($i/2), -sticky => 'w');
+    $ent->grid(-ipady => $tmpbd, -ipadx => $tmpbd, -column => ($i%2)*2 + 1, -row => int($i/2), -sticky => 'w');
 }
 
 sub toggleWidgetShown {
@@ -793,16 +793,16 @@ sub loadNewMibFile {
 sub loadNewMibModule {
     my $tmptop = MainWindow->new();
     my $var = "";
-    $tmptop->Label(-text => "Enter a SNMP MIB module name")
+    $tmptop->Label(-pady => $tmpbd, -padx => $tmpbd, -text => "Enter a SNMP MIB module name")
 	->pack(-side => 'top');
     my $e = $tmptop->Entry(-textvariable => \$var);
     $e->pack(-side => 'top');
     $e->bind('<Return>',[\&loadIt,\$var,$tmptop]);
     my $f = $tmptop->Frame();
     $f->pack(-side => 'top');
-    $f->Button(-text => 'Ok', -command => [\&loadIt,"",\$var,$tmptop])
+    $f->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'Ok', -command => [\&loadIt,"",\$var,$tmptop])
 	->pack(-side => 'left');
-    $f->Button(-text => 'Cancel', -command => [sub { my $wid = shift;
+    $f->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'Cancel', -command => [sub { my $wid = shift;
 						     $wid->destroy(); },
 					       $tmptop])
 	->pack(-side => 'left');
@@ -843,12 +843,13 @@ sub entryBox {
     $top->title($title);
     my $f = $top->Frame();
     $f->pack(-side => 'top');
-    $f->Label(-text => $text)->pack(-side => 'left');
+    $f->Label(-pady => $tmpbd, -padx => $tmpbd,
+	      -text => $text)->pack(-side => 'left');
     my $e = $f->Entry(-textvariable => \$newvar);
     $e->pack(-side => 'left');
     $f = $top->Frame();
     $f->pack(-side => 'bottom');
-    my $b = $f->Button(-text => 'Ok', 
+    my $b = $f->Button(-pady => $tmpbd, -padx => $tmpbd, -text => 'Ok', 
 		       -command => [sub { my $w = shift;
 					  my $v1 = shift;
 					  my $v2 = shift;
@@ -861,7 +862,8 @@ sub entryBox {
 				    \$newvar, $callback]);
     $b->pack(-side => 'left');
     $e->bind('<Return>',[$b,'invoke']);
-    $b = $f->Button(-text => 'Cancel', -command => [sub { my $w = shift;
+    $b = $f->Button(-pady => $tmpbd, -padx => $tmpbd, 
+		    -text => 'Cancel', -command => [sub { my $w = shift;
 							  $w->destroy();}, $top
 						    ]);
     $b->pack(-side => 'right');
@@ -885,7 +887,8 @@ sub test_version {
     my ($gt, $major, $minor, $sub) = @_;
     $SNMP::VERSION =~ /(\d)\.(\d).(\d)/;
     if ($gt) {
-	if ($1 > $major || ($1 == $major && $2 > $minor) || ($1 == $major && $2 == $minor && $3 >= $sub)) {
+	if ($1 > $major || ($1 == $major && $2 > $minor) || 
+	    ($1 == $major && $2 == $minor && $3 >= $sub)) {
 	    return 1;
 	}
     } else {
@@ -897,10 +900,14 @@ sub test_version {
 }
 
 sub save_options {
+    my $umask = umask();
+    umask 0077; # make sure its not readable by the world by default.
     if (!open(O,">$opts{C}")) {
 	warn "can't save to $opts{C}\n";
+	umask $umask;
 	return;
     }
+    umask $umask;
     print "saving to $opts{C}\n";
     foreach $i (keys(%session_opts)) {
 	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
