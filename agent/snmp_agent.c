@@ -1141,11 +1141,17 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         netsnmp_processing_set = NULL;
     }
 
-    /*
-     * some stuff needs to be saved in special subagent cases 
-     */
     if (asp->pdu) {
+        /*
+         * If we've got an error status, then this needs to be
+         *  passed back up to the higher levels....
+         */
+        if ( status != 0  && asp->status == 0 )
+            asp->status = status;
 
+        /*
+         * some stuff needs to be saved in special subagent cases 
+         */
         switch (asp->pdu->command) {
             case SNMP_MSG_INTERNAL_SET_BEGIN:
             case SNMP_MSG_INTERNAL_SET_RESERVE1:
