@@ -372,7 +372,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 	If you don't understand any of the above sentences: pick SNMPV1.
 
-What type of security to use],SNMPV2AUTH)
+What type of security to use],SNMPV1)
 
 AC_OUTPUT(Makefile snmplib/Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile man/Makefile ov/Makefile, echo timestamp > stamp-h)
 

@@ -3855,14 +3855,14 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 	If you don't understand any of the above sentences: pick SNMPV1.
 
-What type of security to use (SNMPV2AUTH): $ac_c"
+What type of security to use (SNMPV1): $ac_c"
 read tmpinput
-if test "$tmpinput" = "" -a "SNMPV2AUTH" != ""; then
-  tmpinput="SNMPV2AUTH"
+if test "$tmpinput" = "" -a "SNMPV1" != ""; then
+  tmpinput="SNMPV1"
 fi
 eval GLOBALSECURITY=\"$tmpinput\"
 else
-tmpinput="SNMPV2AUTH"
+tmpinput="SNMPV1"
 eval GLOBALSECURITY=\"$tmpinput\"
 fi
 
