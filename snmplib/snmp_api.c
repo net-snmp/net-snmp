@@ -694,7 +694,7 @@ init_snmp(const char *type)
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
-  register_netsnmp_mib_handlers();
+  register_mib_handlers();
   register_default_handlers();
   init_snmpv3(type);
   init_snmp_alarm();

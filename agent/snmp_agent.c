@@ -759,7 +759,7 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (asp->pdu)
 	snmp_free_pdu(asp->pdu);
     if (asp->reqinfo)
-        free_netsnmp_agent_request_info(asp->reqinfo);
+        netsnmp_free_agent_request_info(asp->reqinfo);
     if (asp->treecache) {
         free(asp->treecache);
     }
@@ -2132,7 +2132,7 @@ netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 }
 
 inline void
-free_netsnmp_agent_request_info(netsnmp_agent_request_info *ari)
+netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {
         if (ari->agent_data)

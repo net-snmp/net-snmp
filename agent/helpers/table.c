@@ -98,7 +98,7 @@ netsnmp_extract_table_info(netsnmp_request_info * request)
 /** extracts the registered netsnmp_table_registration_info object from a
  *  netsnmp_handler_registration object */
 netsnmp_table_registration_info *
-netsnmp_find_netsnmp_table_registration_info(netsnmp_handler_registration * reginfo)
+netsnmp_find_table_registration_info(netsnmp_handler_registration * reginfo)
 {
     return (netsnmp_table_registration_info *)
         netsnmp_find_handler_data_by_name(reginfo, TABLE_HANDLER_NAME);

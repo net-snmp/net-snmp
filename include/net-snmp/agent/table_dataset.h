@@ -72,12 +72,12 @@ void netsnmp_table_set_multi_add_default_row(va_alist);
 int netsnmp_set_row_column(netsnmp_table_row *, unsigned int, int, const char *, size_t);
 netsnmp_table_data_set_storage *netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *,
                                                    unsigned int);
-int netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *, netsnmp_table_data_set *,
+int netsnmp_register_table_data_set(netsnmp_handler_registration *, netsnmp_table_data_set *,
                             netsnmp_table_registration_info *);
-netsnmp_mib_handler *get_netsnmp_table_data_set_handler(netsnmp_table_data_set *);
+netsnmp_mib_handler *netsnmp_get_table_data_set_handler(netsnmp_table_data_set *);
 netsnmp_table_data_set *netsnmp_create_table_data_set(const char *);
 int netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column, int writable);
-inline netsnmp_table_data_set *extract_netsnmp_table_data_set(netsnmp_request_info *request);
+inline netsnmp_table_data_set *netsnmp_extract_table_data_set(netsnmp_request_info *request);
 void netsnmp_config_parse_table_set(const char *token, char *line);
 void netsnmp_config_parse_add_row(const char *token, char *line);
 inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type);
