@@ -14,7 +14,7 @@
 #include <dmalloc.h>
 #endif
 
-#include "null.h"
+#include <net-snmp/agent/null.h>
 
 int register_null(oid *loc, size_t loc_len) {
     handler_registration *reginfo;

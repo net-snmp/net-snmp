@@ -108,10 +108,10 @@
 #include "agent_callbacks.h"
 #include "default_store.h"
 #include "ds_agent.h"
-#include "helpers/table.h"
-#include "helpers/table_iterator.h"
-#include "helpers/table_data.h"
-#include "helpers/table_dataset.h"
+#include "net-snmp/agent/table.h"
+#include "net-snmp/agent/table_iterator.h"
+#include "net-snmp/agent/table_data.h"
+#include "net-snmp/agent/table_dataset.h"
 #include "mib_module_includes.h"
 
 char dontReadConfigFiles;

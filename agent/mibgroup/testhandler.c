@@ -12,10 +12,10 @@
 
 #include "snmp_api.h"
 #include "snmp_client.h"
-#include "helpers/table.h"
-#include "helpers/instance.h"
-#include "helpers/table_data.h"
-#include "helpers/table_dataset.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/instance.h>
+#include <net-snmp/agent/table_data.h>
+#include <net-snmp/agent/table_dataset.h>
 
 static oid my_test_oid[4] = {1,2,3,4};
 static oid my_table_oid[4] = {1,2,3,5};

@@ -12,8 +12,8 @@
 
 #include "snmp_api.h"
 #include "snmp_client.h"
-#include "helpers/table.h"
-#include "helpers/table_iterator.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
 
 static oid vacm_context_oid[] = {1,3,6,1,6,3,16,1,1};
 

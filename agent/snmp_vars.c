@@ -137,7 +137,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "callback.h"
 #include "snmp_alarm.h"
 #include "snmpd.h"
-#include "helpers/all_helpers.h"
+#include "net-snmp/agent/all_helpers.h"
 #include "mib_module_includes.h"
 
 #ifndef  MIN

@@ -164,8 +164,8 @@ typedef long    fd_mask;
 
 #include "version.h"
 
-#include <helpers/table.h>
-#include <helpers/table_iterator.h>
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
 #include "mib_module_includes.h"
 
 /*

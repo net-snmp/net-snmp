@@ -4,8 +4,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include "mibincl.h"
-#include <helpers/table.h>
-#include <helpers/table_iterator.h>
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
 #include "nsTransactionTable.h"
 
 /** Initialize the nsTransactionTable table by defining it's contents
