@@ -80,6 +80,7 @@ snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
 int
 snmp_call_callbacks(int major, int minor, void *caller_arg) {
   struct snmp_gen_callback *scp;
+  unsigned int count = 0;
 
   if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
@@ -96,10 +97,12 @@ snmp_call_callbacks(int major, int minor, void *caller_arg) {
 
     /* call them */
     (*(scp->sc_callback))(major, minor, caller_arg, scp->sc_client_arg);
+    count++;
   }
   
-  DEBUGMSGTL(("callback","END calling callbacks for maj=%d min=%d\n",
-              major, minor));
+  DEBUGMSGTL(("callback",
+              "END calling callbacks for maj=%d min=%d (%d called)\n",
+              major, minor, count));
 
   return SNMPERR_SUCCESS;
 }
