@@ -286,7 +286,7 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
     if (rc != 0) {
       DEBUGMSGTL(("snmp_unix_transport",
 		  "couldn't connect to \"%s\", errno %d (%s)\n",
-		  sup->server.sun_path, errno, strerror(errno)));
+		  addr->sun_path, errno, strerror(errno)));
       snmp_unix_close(t);
       snmp_transport_free(t);
       return NULL;
