@@ -192,31 +192,90 @@ init_master_agent(int dest_port,
                   int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
 {
     struct snmp_session sess, *session;
+    char *cptr, *cptr2;
+    char buf[SPRINT_MAX_LEN];
+    int flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
 
-    DEBUGMSGTL(("snmpd","installing master agent on port %d\n", dest_port));
+    /* has something been specified before? */
+    cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+                      
+    /* set the specification string up */
+    if (cptr && dest_port)
+        /* append to the older specification string */
+        sprintf(buf,"%d,%s", dest_port, cptr);
+    else if (cptr)
+        sprintf(buf,"%s",cptr);
+    else
+        sprintf(buf,"%d",dest_port);
 
-    snmp_sess_init( &sess );
+    DEBUGMSGTL(("snmpd_ports","final port spec: %s\n", buf));
+    cptr = strtok(buf, ",");
+    while(cptr) {
+        /* XXX: surely, this creates memory leaks */
+        /* specification format: [transport:]port[@interface/address],... */
+        DEBUGMSGTL(("snmpd_open","installing master agent on port %s\n", cptr));
+
+        /* transport type */
+        if ((cptr2 = strchr(cptr, ':'))) {
+            if (strncasecmp(cptr,"tcp",3) == 0)
+                flags |= SNMP_FLAGS_STREAM_SOCKET;
+            else if (strncasecmp(cptr,"udp",3) == 0)
+                flags ^= SNMP_FLAGS_STREAM_SOCKET; /* fix */
+            else {
+                snmp_log(LOG_ERR, "illegal port transport %s\n", buf);
+                return 1;
+            }
+            cptr = cptr2+1;
+        }
+
+        /* null? */
+        if (!cptr || !(*cptr)) {
+            snmp_log(LOG_ERR, "improper port specification\n");
+            return 1;
+        }
+
+        dest_port = strtol(cptr, &cptr2, 0);
+
+        if (dest_port <= 0 || (*cptr2 && *cptr2 != '@')) {
+            /* XXX: add getservbyname lookups */
+            snmp_log(LOG_ERR, "improper port specification %s\n", cptr);
+            return 1;
+        }
+
+        memset(&sess, 0, sizeof(sess));
+        snmp_sess_init( &sess );
     
-    sess.version = SNMP_DEFAULT_VERSION;
-    sess.peername = SNMP_DEFAULT_PEERNAME;
-    sess.community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+        sess.version = SNMP_DEFAULT_VERSION;
+        /* XXX: add interface binding (ie, eth0) */
+        if (cptr2 && *cptr2 == '@' && *(cptr2+1))
+            sess.peername = strdup(cptr2+1);
+        else
+            sess.peername = SNMP_DEFAULT_PEERNAME;
+        
+        sess.community_len = SNMP_DEFAULT_COMMUNITY_LEN;
      
-    sess.local_port = dest_port;
-    sess.callback = handle_snmp_packet;
-    sess.authenticator = NULL;
-    sess.flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
-    session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0, 0 );
+        sess.local_port = dest_port;
+        sess.callback = handle_snmp_packet;
+        sess.authenticator = NULL;
+        sess.flags = flags;
+        session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0, 0 );
 
-    if ( session == NULL ) {
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
-	snmp_sess_perror("init_master_agent", &sess);
-		return 1;
+        if ( session == NULL ) {
+            /* diagnose snmp_open errors with the input struct
+               snmp_session pointer */
+            snmp_sess_perror("init_master_agent", &sess);
+            return 1;
+        }
+        if (!main_session)
+            main_session = session;
+
+        /* next */
+        cptr = strtok(NULL, ",");
     }
-    main_session = session;
-	return 0;
+    return 0;
 }
 
 struct agent_snmp_session  *
