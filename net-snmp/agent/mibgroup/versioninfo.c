@@ -15,7 +15,7 @@
 #include "versioninfo.h"
 #include "util_funcs.h"
 
-char *VersionInfo="3.1.4.pre4";
+char *VersionInfo="3.1.4.pre5";
 
 unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
