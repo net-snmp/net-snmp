@@ -220,9 +220,9 @@ _KEYTOOLS_NOT_AVAILABLE
  */
 int
 generate_kul(const oid * hashtype, u_int hashtype_len,
-                      u_char * engineID, size_t engineID_len,
-                      u_char * Ku, size_t ku_len,
-                      u_char * Kul, size_t * kul_len)
+             u_char * engineID, size_t engineID_len,
+             u_char * Ku, size_t ku_len,
+             u_char * Kul, size_t * kul_len)
 #if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -326,9 +326,9 @@ _KEYTOOLS_NOT_AVAILABLE
  */
 int
 encode_keychange(const oid * hashtype, u_int hashtype_len,
-                          u_char * oldkey, size_t oldkey_len,
-                          u_char * newkey, size_t newkey_len,
-                          u_char * kcstring, size_t * kcstring_len)
+                 u_char * oldkey, size_t oldkey_len,
+                 u_char * newkey, size_t newkey_len,
+                 u_char * kcstring, size_t * kcstring_len)
 #if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -451,9 +451,9 @@ _KEYTOOLS_NOT_AVAILABLE
  */
 int
 decode_keychange(const oid * hashtype, u_int hashtype_len,
-                          u_char * oldkey, size_t oldkey_len,
-                          u_char * kcstring, size_t kcstring_len,
-                          u_char * newkey, size_t * newkey_len)
+                 u_char * oldkey, size_t oldkey_len,
+                 u_char * kcstring, size_t kcstring_len,
+                 u_char * newkey, size_t * newkey_len)
 #if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
     int             rval = SNMPERR_SUCCESS;
