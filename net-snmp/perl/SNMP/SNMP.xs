@@ -206,7 +206,7 @@ static int _debug_level = 0;
 #define	DBPRT(severity, otherargs)					\
 	do {								\
 	    if (_debug_level && severity <= _debug_level) {		\
-		(void)PerlIO_printf(PerlIO_stderr(), otherargs);		\
+		(void)PerlIO_printf otherargs;		\
 	    }								\
 	} while (/*CONSTCOND*/0)
 
@@ -1528,7 +1528,7 @@ _context_add(walk_context *context)
 
     /* Store the context pointer in the array and return 0 (success). */
     _valid_contexts->valid[i] = context;
-    DBPRT(3,( "Add context 0x%p to valid context list\n", context));
+    DBPRT(3,(DBOUT "Add context 0x%p to valid context list\n", context));
     return 0;
 }
 
@@ -1545,7 +1545,7 @@ _context_del(walk_context *context)
 
     for (i = 0; i < _valid_contexts->sz_valid; i++) {
 	if (_valid_contexts->valid[i] == context) {
-	    DBPRT(3,( "Remove context 0x%p from valid context list\n", context));
+	    DBPRT(3,(DBOUT "Remove context 0x%p from valid context list\n", context));
 	    _valid_contexts->valid[i] = NULL;	/* Remove it from the list.  */
 	    return 0;				/* Return successful status. */
 	}
@@ -1655,7 +1655,7 @@ _bulkwalk_async_cb(int		op,
    ** (and the context was destroyed).  If so, just return.
    */
    if (!_context_okay(context)) {
-      DBPRT(2,( "Ignoring PDU for dead context 0x%p...\n", context));
+      DBPRT(2,(DBOUT "Ignoring PDU for dead context 0x%p...\n", context));
       return 1;
    }
 
@@ -1664,7 +1664,7 @@ _bulkwalk_async_cb(int		op,
    */
    if (reqid != context->exp_reqid) {
        DBPRT(2,
-             ("Got reqid 0x%08X, expected reqid 0x%08X.  Ignoring...\n", reqid,
+             (DBOUT "Got reqid 0x%08X, expected reqid 0x%08X.  Ignoring...\n", reqid,
               context->exp_reqid));
       return 1;
    }
@@ -1677,7 +1677,7 @@ _bulkwalk_async_cb(int		op,
    switch (op) {
       case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
       {
-	 DBPRT(1,( "Received message for reqid 0x%08X ...\n", reqid));
+	 DBPRT(1,(DBOUT "Received message for reqid 0x%08X ...\n", reqid));
 
 	 switch (pdu->command)
 	 {
@@ -1699,7 +1699,7 @@ _bulkwalk_async_cb(int		op,
 	    }
 	    default:
 	    {
-	       DBPRT(1,( "unexpected pdu->command %d\n", pdu->command));
+	       DBPRT(1,(DBOUT "unexpected pdu->command %d\n", pdu->command));
 	       done = 1;   /* "This can't happen!", so bail out when it does. */
 	       break;
 	    }
@@ -1710,7 +1710,7 @@ _bulkwalk_async_cb(int		op,
 
       case NETSNMP_CALLBACK_OP_TIMED_OUT:
       {
-	 DBPRT(1,( "\n*** Timeout for reqid 0x%08X\n\n", reqid));
+	 DBPRT(1,(DBOUT "\n*** Timeout for reqid 0x%08X\n\n", reqid));
 
          sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_TIMEOUT));
          sv_setiv(*err_num_svp, SNMPERR_TIMEOUT);
@@ -1724,7 +1724,7 @@ _bulkwalk_async_cb(int		op,
 
       default:
       {
-	 DBPRT(1,( "unexpected callback op %d\n", op));
+	 DBPRT(1,(DBOUT "unexpected callback op %d\n", op));
          sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_GENERR));
          sv_setiv(*err_num_svp, SNMPERR_GENERR);
 	 npushed = _bulkwalk_finish(context, 0 /* NOT OKAY */);
@@ -1742,12 +1742,12 @@ _bulkwalk_async_cb(int		op,
    ** passed in by the user oh-so-long-ago.
    */
    if (!done) {
-      DBPRT(1,( "bulkwalk not complete -- send next pdu from callback\n"));
+      DBPRT(1,(DBOUT "bulkwalk not complete -- send next pdu from callback\n"));
 
       if (_bulkwalk_send_pdu(context) != NULL)
 	 return 1;
 
-      DBPRT(1,( "send_pdu() failed!\n"));
+      DBPRT(1,(DBOUT "send_pdu() failed!\n"));
       /* Fall through and return what we have so far. */
    }
 
@@ -1835,7 +1835,7 @@ _bulkwalk_send_pdu(walk_context *context)
    if (SvTRUE(context->perl_cb)) {
       reqid = snmp_async_send(ss, pdu, _bulkwalk_async_cb, (void *)context);
 
-      DBPRT(2,( "bulkwalk_send_pdu(): snmp_async_send => 0x%08X\n", reqid));
+      DBPRT(2,(DBOUT "bulkwalk_send_pdu(): snmp_async_send => 0x%08X\n", reqid));
 
       if (reqid == 0) {
 	 sv_setpv(*err_str_svp, (char*)snmp_api_errstring(ss->s_snmp_errno));
@@ -1867,7 +1867,7 @@ _bulkwalk_send_pdu(walk_context *context)
    ** values in the error string and number SV's.
    */
    if (status != STAT_SUCCESS) {
-      DBPRT(1,( "__send_sync_pdu() -> %d\n",(int)status));
+      DBPRT(1,(DBOUT "__send_sync_pdu() -> %d\n",(int)status));
       goto err;
    }
 
@@ -1929,7 +1929,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
    old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
    if (context->getlabel_f & USE_NUMERIC_OIDS) {
-      DBPRT(2,( "Using numeric oid's\n"));
+      DBPRT(2,(DBOUT "Using numeric oid's\n"));
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
       netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
       netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, NETSNMP_OID_OUTPUT_NUMERIC);
@@ -1961,7 +1961,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       ** this is probably worth the win, but for debugging it's not.
       */
       if (context->req_remain == 0) {
-	 DBPRT(2,( "No outstanding requests remain.  Terminating processing.\n"));
+	 DBPRT(2,(DBOUT "No outstanding requests remain.  Terminating processing.\n"));
 	 while (vars) {
 	    pix ++;
 	    vars = vars->next_variable;
@@ -2036,7 +2036,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	  (vars->type == SNMP_NOSUCHOBJECT) ||
 	  (vars->type == SNMP_NOSUCHINSTANCE))
       {
-	 DBPRT(2,( "error type %d\n", (int)vars->type));
+	 DBPRT(2,(DBOUT "error type %d\n", (int)vars->type));
 
 	 /* ENDOFMIBVIEW should be okay for a repeater - just walked off the
 	 ** end of the tree.  Mark the request as complete, and go on to the
@@ -2114,7 +2114,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** variable and move on to the next expected variable.
 	 */
 	 if (expect->complete) {
-	    DBPRT(2,( "      this branch is complete - ignoring.\n"));
+	    DBPRT(2,(DBOUT "      this branch is complete - ignoring.\n"));
 	    continue;
 	 }
 
@@ -2125,7 +2125,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 if ((vars->name_length < expect->req_len) ||
 	     (memcmp(vars->name, expect->req_oid, expect->req_len*sizeof(oid))))
 	 {
-	    DBPRT(2,( "      walked off branch - marking subtree as complete.\n"));
+	    DBPRT(2,(DBOUT "      walked off branch - marking subtree as complete.\n"));
 	    expect->complete = 1;
 	    context->req_remain --;
 	    continue;
@@ -2175,7 +2175,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
           iid = label + strlen(label);
       }
 
-      DBPRT(2,( "       save var %s.%s = ", label, iid));
+      DBPRT(2,(DBOUT "       save var %s.%s = ", label, iid));
 
       av_store(varbind, VARBIND_TAG_F, newSVpv(label, strlen(label)));
       av_store(varbind, VARBIND_IID_F, newSVpv(iid, strlen(iid)));
@@ -2188,7 +2188,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       av_store(varbind, VARBIND_VAL_F, newSVpv((char*)str_buf, len));
 
       str_buf[len] = '\0';
-      DBPRT(3,( "'%s' (%s)\n", str_buf, type_str));
+      DBPRT(3,(DBOUT "'%s' (%s)\n", str_buf, type_str));
 
 #if 0
     /* huh? */
@@ -2312,7 +2312,7 @@ _bulkwalk_finish(walk_context *context, int okay)
 		 (int)av_len(bt_entry->vars) > 0 ? "s" : ""));
 
 	  if (async && ary == NULL) {
-	     DBPRT(2,( "    [dropped due to newAV() failure]\n"));
+	     DBPRT(2,(DBOUT "    [dropped due to newAV() failure]\n"));
 	     continue;
 	  }
 
@@ -2365,9 +2365,9 @@ _bulkwalk_finish(walk_context *context, int okay)
    ** variables found.  Remove the context from the valid context list.
    */
    _context_del(context);
-   DBPRT(2,( "Free() context->req_oids\n"));
+   DBPRT(2,(DBOUT "Free() context->req_oids\n"));
    Safefree(context->req_oids);
-   DBPRT(2,( "Free() context 0x%p\n", context));
+   DBPRT(2,(DBOUT "Free() context 0x%p\n", context));
    Safefree(context);
    return npushed;
 }
@@ -3776,7 +3776,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   context->perl_cb  = newSVsv(perl_callback);
 	   context->sess_ref = newSVsv(sess_ref);
 
-	   DBPRT(3,("bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
+	   DBPRT(3,(DBOUT "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
 						    sess_ref, sess_ptr_sv, ss));
 
            context->getlabel_f  = NO_FLAGS;	/* long/numeric name flags */
@@ -3827,12 +3827,12 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   ** some error.  Create the initial packet to send out, which
 	   ** includes the non-repeaters.
 	   */
-	   DBPRT(1,( "Building request table:\n"));
+	   DBPRT(1,(DBOUT "Building request table:\n"));
 	   for (varlist_ind = 0; varlist_ind < varlist_len; varlist_ind++) {
 	      /* Get a handle on this entry in the request table. */
 	      bt_entry = &context->req_oids[context->nreq_oids];
 
-	      DBPRT(1,( "  request %d: ", (int)varlist_ind));
+	      DBPRT(1,(DBOUT "  request %d: ", (int)varlist_ind));
 
 	      /* Get the request varbind from the varlist, parse it out to
 	      ** tag and index, and copy it to the req_oid[] array slots.
@@ -3886,7 +3886,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	      } else {
 		 bt_entry->norepeat = 1;
-		 DBPRT(1,( "(nonrepeater) "));
+		 DBPRT(1,(DBOUT "(nonrepeater) "));
 	      }
 
 	      /* Initialize the array in which to hold the Varbinds to be
@@ -3899,7 +3899,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 		 goto err;
 	      }
 
-	      DBPRT(1,( "%s\n", snprint_objid(_debugx, sizeof(_debugx), oid_arr, oid_arr_len)));
+	      DBPRT(1,(DBOUT "%s\n", snprint_objid(_debugx, sizeof(_debugx), oid_arr, oid_arr_len)));
 
 	      context->nreq_oids ++;
 	   }
@@ -3908,7 +3908,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   ** finish processing early if we're done with all requests.
 	   */
 	   context->req_remain = context->nreq_oids;
-	   DBPRT(1,( "Total %d variable requests added\n", context->nreq_oids));
+	   DBPRT(1,(DBOUT "Total %d variable requests added\n", context->nreq_oids));
 
 	   /* If no good variable requests were found, return an error. */
 	   if (context->nreq_oids == 0) {
@@ -3936,17 +3936,17 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   ** callback will be invoked as soon as the walk completes.
 	   */
 	   if (SvTRUE(perl_callback)) {
-	      DBPRT(1,( "Starting asynchronous bulkwalk...\n"));
+	      DBPRT(1,(DBOUT "Starting asynchronous bulkwalk...\n"));
 
 	      pdu = _bulkwalk_send_pdu(context);
 
 	      if (pdu == NULL) {
-		 DBPRT(1,( "Initial asynchronous send failed...\n"));
+		 DBPRT(1,(DBOUT "Initial asynchronous send failed...\n"));
 		 XSRETURN_UNDEF;
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
-	      DBPRT(1,( "Okay, request id is %d\n", (int)pdu));
+	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (int)pdu));
 /*	      XSRETURN_IV((int)pdu); */
 	      XPUSHs(sv_2mortal(newSViv((int)pdu)));
 	      XSRETURN(1);
@@ -3957,7 +3957,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   ** bulkwalk_finish() function will push the return values onto
 	   ** the Perl call stack, and we return.
 	   */
-	   DBPRT(1,( "Starting synchronous bulkwalk...\n"));
+	   DBPRT(1,(DBOUT "Starting synchronous bulkwalk...\n"));
 
 	   while (!(okay = _bulkwalk_done(context))) {
 
@@ -3969,7 +3969,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	      /* If the request failed, consider the walk done. */
 	      if (pdu == NULL) {
-		 DBPRT(1,( "bulkwalk_send_pdu() failed!\n"));
+		 DBPRT(1,(DBOUT "bulkwalk_send_pdu() failed!\n"));
 		 break;
 	      }
 
@@ -3978,7 +3978,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      ** in the response.
 	      */
 	      if ((i = _bulkwalk_recv_pdu(context, pdu)) <= 0) {
-		 DBPRT(2,( "bulkwalk_recv_pdu() returned %d (error/empty)\n", i));
+		 DBPRT(2,(DBOUT "bulkwalk_recv_pdu() returned %d (error/empty)\n", i));
 		 break;
 	      }
 
@@ -3999,7 +3999,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	       okay ? "okay" : "error"));
 	   npushed = _bulkwalk_finish(context, okay);
 
-	   DBPRT(2,( "Returning %d values on the stack.\n", npushed));
+	   DBPRT(2,(DBOUT "Returning %d values on the stack.\n", npushed));
 	   XSRETURN(npushed);
 
 	/* Handle error cases and clean up after ourselves. */
