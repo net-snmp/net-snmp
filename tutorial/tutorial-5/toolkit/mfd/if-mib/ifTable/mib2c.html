@@ -9,15 +9,64 @@
     <h1>Running mib2c: Generating the template code</h1>
     <p>
       The first step is to generate the code. Create a new directory somewhere
-      for the code. Througout this tutorial, I'll assume that you have a
-      directory <var>if-mib</var> with two sub-directories (<var>ifTable</var>
-      and <var>ifXTable</var>.
+      for the code, and run mib2c.
     </p>
     <p>
-    <table><tr><td width=20></td><td><code>$</code></td><td bgcolor=CCCCCC>
-            <code>
-              <font color=blue>mib2c -c mib2c.mfd.conf ifTable</font>
-            </code></td></tr>
+    <table><tr><td width=20></td><td><code>&nbsp</code></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>mib2c -c mib2c.mfd.conf ifTable</font>
+writing to ifTable.h
+| +-> Processing table ifTable
+writing to -
+writing to default-table-ifTable.m2d
+writing to ifTable.c
+writing to ifTable_data_get.h
+writing to ifTable_data_get.c
+| |   +-> Processing nonindex ifDescr
+| |   +-> Processing nonindex ifType
+| |   +-> Processing nonindex ifMtu
+| |   +-> Processing nonindex ifSpeed
+| |   +-> Processing nonindex ifPhysAddress
+| |   +-> Processing nonindex ifAdminStatus
+| |   +-> Processing nonindex ifOperStatus
+| |   +-> Processing nonindex ifLastChange
+| |   +-> Processing nonindex ifInOctets
+| |   +-> Processing nonindex ifInUcastPkts
+| |   +-> Processing nonindex ifInNUcastPkts
+| |   +-> Processing nonindex ifInDiscards
+| |   +-> Processing nonindex ifInErrors
+| |   +-> Processing nonindex ifInUnknownProtos
+| |   +-> Processing nonindex ifOutOctets
+| |   +-> Processing nonindex ifOutUcastPkts
+| |   +-> Processing nonindex ifOutNUcastPkts
+| |   +-> Processing nonindex ifOutDiscards
+| |   +-> Processing nonindex ifOutErrors
+| |   +-> Processing nonindex ifOutQLen
+| |   +-> Processing nonindex ifSpecific
+writing to ifTable_data_set.h
+writing to ifTable_data_set.c
+| |   +-> Processing nonindex ifAdminStatus
+writing to ifTable_oids.h
+writing to ifTable_enums.h
+writing to ifTable_interface.h
+writing to ifTable_interface.c
+writing to ifTable_data_access.h
+writing to ifTable_data_access.c
+writing to ifTable-README-FIRST.txt
+writing to ifTable-README-ifTable.txt
+writing to ifTable_doxygen.conf
+running indent on ifTable_data_get.c
+running indent on ifTable_data_get.h
+running indent on ifTable_interface.c
+running indent on ifTable_interface.h
+running indent on ifTable_enums.h
+running indent on ifTable_oids.h
+running indent on ifTable_data_access.c
+running indent on ifTable_data_set.c
+running indent on ifTable_data_access.h
+running indent on ifTable.c
+running indent on ifTable.h
+running indent on ifTable_data_set.h
+</td></tr>
     </table>
     <p>
       When mib2c finishes, you should have several files. Here is a
@@ -68,7 +117,7 @@
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Apr 22 22:40:08 EDT 2004
+Last modified: Mon Jun 21 18:36:14 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
