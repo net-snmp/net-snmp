@@ -813,21 +813,23 @@ linux_mem(int mem_type, int size_or_used)
 {
     FILE           *fp;
     char            buf[100];
-    int             size = -1, used = -1;
+    int             size = -1, free = -1;
 
     if ((fp = fopen("/proc/meminfo", "r")) == NULL)
         return -1;
 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
-        if ((!strncmp(buf, "Mem:", 4) && mem_type == HRS_TYPE_MEM) ||
-            (!strncmp(buf, "Swap:", 5) && mem_type == HRS_TYPE_SWAP)) {
-            sscanf(buf, "%*s %d %d", &size, &used);
-            break;
-        }
+       if ((!strncmp(buf, "MemTotal:", 9) && mem_type == HRS_TYPE_MEM) ||
+            (!strncmp(buf, "SwapTotal:", 10) && mem_type == HRS_TYPE_SWAP))
+            sscanf(buf, "%*s %d", &size);
+
+       if ((!strncmp(buf, "MemFree:", 8) && mem_type == HRS_TYPE_MEM) ||
+            (!strncmp(buf, "SwapFree:", 9) && mem_type == HRS_TYPE_SWAP))
+            sscanf(buf, "%*s %d", &free);
     }
 
     fclose(fp);
-    return (size_or_used == HRSTORE_SIZE ? size : used) / 1024;
+    return (size_or_used == HRSTORE_SIZE ? size : (size - free));
 
 }
 #endif
