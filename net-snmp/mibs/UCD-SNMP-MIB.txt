@@ -37,7 +37,7 @@ IMPORTS
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "200101170000Z"
+    LAST-UPDATED "200209050000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	"This mib is no longer being maintained by the University of
@@ -52,6 +52,9 @@ ucdavis MODULE-IDENTITY
 
          email:    net-snmp-coders@lists.sourceforge.net
         "
+    DESCRIPTION
+	"Deprecate the non-raw objects."
+    REVISION	 "200209050000Z"
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
     REVISION	 "200101170000Z"
@@ -940,57 +943,64 @@ ssSwapOut OBJECT-TYPE
 ssIOSent OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"Blocks sent to a block device (blocks/s)."
+	"Blocks sent to a block device (blocks/s). Deprecated, replaced by
+	the ssIORawSent object"
     ::= { systemStats 5 }
 
 ssIOReceive OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"Blocks received from a block device (blocks/s)."
+	"Blocks received from a block device (blocks/s). Deprecated, replaced by
+	the ssIORawReceived object"
     ::= { systemStats 6 }
 
 ssSysInterrupts OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"The number of interrupts per second, including the clock."
+	"The number of interrupts per second, including the clock.
+	Deprecated, replaced by ssRawInterrupts"
     ::= { systemStats 7 }
 
 ssSysContext OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"The number of context switches per second."
+	"The number of context switches per second.
+	Deprecated, replaced by ssRawContext"
     ::= { systemStats 8 }
 
 ssCpuUser OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"percentages of user CPU time."
+	"percentages of user CPU time. Deprecated, replaced by the ssCpuRawUser
+	object"
     ::= { systemStats 9 }
 
 ssCpuSystem OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"percentages of system CPU time."
+	"percentages of system CPU time. Deprecated, replaced by of the
+	ssCpuRawSystem object"
     ::= { systemStats 10 }
 
 ssCpuIdle OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-only
-    STATUS	current
+    STATUS	deprecated
     DESCRIPTION
-	"percentages of idle CPU time."
+	"percentages of idle CPU time. Deprecated, replaced by of the
+	ssCpuRawIdle object"
     ::= { systemStats 11 }
 
 -- The agent only implements those of the following counters that the
