@@ -53,17 +53,17 @@ nsExtendEntry     OBJECT-TYPE
     ::= { nsExtendTable 1 }
 
 NsExtendEntry ::= SEQUENCE {
-    nsExtendToken       OCTET STRING,
-    nsExtendCommand     OCTET STRING,
-    nsExtendArgs        OCTET STRING,
-    nsExtendInput       OCTET STRING,
+    nsExtendToken       DisplayString,
+    nsExtendCommand     DisplayString,
+    nsExtendArgs        DisplayString,
+    nsExtendInput       DisplayString,
     nsExtendCacheTime   INTEGER,
     nsExtendExecType    INTEGER,
     nsExtendRunType     INTEGER,
 
     nsExtendOutputLen   INTEGER,
-    nsExtendOutput1Line OCTET STRING,
-    nsExtendOutputFull  OCTET STRING,
+    nsExtendOutput1Line DisplayString,
+    nsExtendOutputFull  DisplayString,
     nsExtendOutNumLines INTEGER,
     nsExtendResult      INTEGER,
 
@@ -252,15 +252,15 @@ nsExtendOutputEntry     OBJECT-TYPE
     DESCRIPTION
       "A conceptual row within the line-based output table."
     INDEX       { nsExtendToken, nsExtendLineIndex }
-    ::= { nsExtendTable 1 }
+    ::= { nsExtendOutputTable 1 }
 
 NsExtendOutputEntry ::= SEQUENCE {
     nsExtendLineIndex INTEGER,
-    nsExtendOutLine   OCTET STRING
+    nsExtendOutLine   DisplayString
 }
 
 nsExtendLineIndex OBJECT-TYPE
-    SYNTAX      INTEGER
+    SYNTAX      INTEGER(1..1024)
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
