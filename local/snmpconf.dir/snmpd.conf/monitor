@@ -13,9 +13,9 @@ info #
 info The results are reported in the prTable section of the UCD-SNMP-MIB tree
 info Special Case:  When the min and max numbers are both 0, it assumes
 info you want a max of infinity and a min of 1.
-question 1 The name of the process you want to check on
-question 2 The maximum number that should be running [default = 0]
-question 3 The minimum number that should be running [default = 0]
+question 1 Name of the process you want to check on
+question 2 Maximum number of processes named '$1' that should be running [default = 0]
+question 3 Minimum number of processes named '$1' that should be running [default = 0]
 
 token disk
 info Check for disk space usage of a partition.
@@ -31,7 +31,7 @@ info #        symbol.  Default value = 100000.
 info #
 info The results are reported in the dskTable section of the UCD-SNMP-MIB tree
 question 1 Enter the mount point for the disk partion to be checked on
-question 2 Enter the minimum amount of space that should be available
+question 2 Enter the minimum amount of space that should be available on $1
 
 token load
 info Check for unreasonable load average values.
@@ -49,5 +49,18 @@ question 1 Enter the maximum allowable value for the 1 minute load average
 question 2 Enter the maximum allowable value for the 5 minute load average
 question 3 Enter the maximum allowable value for the 15 minute load average
 validanswer 1 ^[\d\.]+$
-validanswer 2 ^[\d\.]+$
-validanswer 3 ^[\d\.]+$
+validanswer 2 ^([\d\.]+|)$
+validanswer 3 ^([\d\.]+|)$
+
+token file
+info Check on the size of a file.
+info Display a files size statistics.
+info If it grows to be too large, report an error about it.
+info
+info # file /path/to/file [maxsize]
+info #
+info #   if maxsize is not specified, assume only size reporting is needed.
+info #
+info The results are reported in the fileTable section of the UCD-SNMP-MIB tree
+question 1 Enter the path to the file you wish to monitor
+question 2 Enter the maximum size allowable for $1
