@@ -488,7 +488,7 @@ send_v1_trap (ss, trap, specific)
     if (snmp_send (ss, pdu) == 0) {
         fprintf (stderr, "snmpd: send_trap: %s\n", snmp_api_errstring(snmp_errno));
     }
-#ifdef USING_SNMP_MIB_MODULE       
+#ifdef USING_SNMP_MODULE       
     snmp_outtraps++;
 #endif
 }
@@ -722,7 +722,7 @@ main(argc, argv)
           continue;	/* don't listen for non-local parties */
 #else
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || memcmp(reverse_bytes(&myaddr,sizeof(myaddr)),
+	    || memcmp(reverse_bytes((char *) &myaddr,sizeof(myaddr)),
                     pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
 #endif
@@ -884,7 +884,7 @@ snmp_read_packet(sd)
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");
-#ifdef USING_SNMP_MIB_MODULE       
+#ifdef USING_SNMP_MODULE       
     snmp_inpkts++;
 #endif
     if (snmp_dump_packet){
@@ -925,7 +925,7 @@ snmp_read_packet(sd)
 	    printf("\n");
             fflush(stdout);
 	}
-#ifdef USING_SNMP_MIB_MODULE       
+#ifdef USING_SNMP_MODULE       
 	snmp_outpkts++;
 #endif
 	if (sendto(sd, (char *)outpacket, out_length, 0,

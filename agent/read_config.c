@@ -231,14 +231,20 @@ void setup_tree __P((void))
   extern struct subtree *subtrees,subtrees_old[];
   struct subtree *sb;
   int old_treesz;
-#if USING_EXTENSIBLE_MODULE
+#if defined(USING_EXTENSIBLE_MODULE) || defined(USING_PASS_MODULE)
   int i;
   static struct subtree mysubtree[1];
   struct extensible *exten;
-  extern int numrelocs, numpassthrus;
-  extern struct extensible *relocs, *passthrus;
+#ifdef USING_EXTENSIBLE_MODULE
+  extern int numrelocs;
+  extern struct extensible *relocs;
   extern struct variable2 extensible_relocatable_variables[];
+#endif
+#ifdef USING_PASS_MODULE
+  extern int numpassthrus;
+  extern struct extensible *passthrus;
   extern struct variable2 extensible_passthru_variables[];
+#endif
 #endif
     
   /* Malloc new space at the end of the mib tree for the new
@@ -247,15 +253,18 @@ void setup_tree __P((void))
   old_treesz = subtree_old_size();
 
   subtrees = (struct subtree *) malloc ((old_treesz
-#if USING_EXTENSIBLE_MIB_MODULE
-                                         + numrelocs + numpassthrus
+#if USING_EXTENSIBLE_MODULE
+                                         + numrelocs
+#endif
+#if USING_PASS_MODULE
+                                         + numpassthrus
 #endif
     )*sizeof(struct subtree));
   memmove(subtrees, subtrees_old, old_treesz *sizeof(struct subtree));
   sb = subtrees;
   sb += old_treesz;
 
-#if USING_EXTENSIBLE_MIB_MODULE
+#if USING_EXTENSIBLE_MODULE
   /* add in relocatable mibs */
   for(i=1;i<=numrelocs;i++, sb++) {
     exten = get_exten_instance(relocs,i);
@@ -266,7 +275,8 @@ void setup_tree __P((void))
     mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
     memcpy(sb,mysubtree,sizeof(struct subtree));
   }
-
+#endif
+#ifdef USING_PASS_MODULE
   /* add in pass thrus */
   for(i=1;i<=numpassthrus;i++, sb++) {
     exten = get_exten_instance(passthrus,i);
@@ -284,8 +294,11 @@ void setup_tree __P((void))
      the first place */
 
   qsort(subtrees,old_treesz
-#if USING_EXTENSIBLE_MIB_MODULE
-        + numrelocs + numpassthrus
+#if USING_EXTENSIBLE_MODULE
+        + numrelocs 
+#endif
+#ifdef USING_PASS_MODULE
+        + numpassthrus
 #endif
         , sizeof(struct subtree),tree_compare);
 
