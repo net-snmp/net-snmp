@@ -1725,6 +1725,7 @@ check_getnext_results(netsnmp_agent_session  *asp) {
                 DEBUGMSGTL(("check_getnext_results",
                         "request response %d out of range\n", request->index));
                 request->inclusive = 1;
+                /* XXX: should set this to the original OID? */
                 snmp_set_var_objid(request->requestvb,
                                    request->range_end, request->range_end_len);
                 snmp_set_var_typed_value(request->requestvb, ASN_NULL,
