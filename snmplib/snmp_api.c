@@ -76,6 +76,9 @@ SOFTWARE.
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#if HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
 #include <errno.h>
 #ifdef STDC_HEADERS
 #include <stdarg.h>
