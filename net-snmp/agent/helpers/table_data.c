@@ -71,10 +71,12 @@ netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row)
     for(nextrow = table->first_row, prevrow = NULL;
         nextrow != NULL;
         prevrow = nextrow, nextrow = nextrow->next) {
-        if (snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
+        if (nextrow->index_oid &&
+            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
                              row->index_oid, row->index_oid_len) > 0)
             break;
-        if (snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
+        if (nextrow->index_oid &&
+            snmp_oid_compare(nextrow->index_oid, nextrow->index_oid_len,
                              row->index_oid, row->index_oid_len) == 0) {
             /* exact match.  Duplicate entries illegal */
             snmp_log(LOG_WARNING,
@@ -190,7 +192,8 @@ netsnmp_table_data_get_from_oid(table_data *table,
                         oid *searchfor, size_t searchfor_len) {
     netsnmp_table_row *row;
     for(row = table->first_row; row != NULL; row = row->next) {
-        if (snmp_oid_compare(searchfor, searchfor_len,
+        if (row->index_oid &&
+            snmp_oid_compare(searchfor, searchfor_len,
                              row->index_oid, row->index_oid_len) == 0)
             return row;
     }
