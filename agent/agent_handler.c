@@ -323,11 +323,16 @@ netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
                               netsnmp_mib_handler *handler,
                               const char *before_what)
 {
+    netsnmp_mib_handler *handler2 = handler;
+
     if (handler == NULL || reginfo == NULL) {
         snmp_log(LOG_ERR, "netsnmp_inject_handler() called illegally\n");
         netsnmp_assert(reginfo != NULL);
         netsnmp_assert(handler != NULL);
         return SNMP_ERR_GENERR;
+    }
+    while (handler2->next) {
+        handler2 = handler2->next;  /* Find the end of a handler sub-chain */
     }
     if (reginfo->handler == NULL) {
         DEBUGMSGTL(("handler:inject", "injecting %s\n", handler->handler_name));
@@ -352,16 +357,16 @@ netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
         if (prevh) {
             /* after prevh and before nexth */
             prevh->next = handler;
-            handler->next = nexth;
+            handler2->next = nexth;
             handler->prev = prevh;
-            nexth->prev = handler;
+            nexth->prev = handler2;
             return SNMPERR_SUCCESS;
         }
         /* else we're first, which is what we do next anyway so fall through */
     }
-    handler->next = reginfo->handler;
+    handler2->next = reginfo->handler;
     if (reginfo->handler)
-        reginfo->handler->prev = handler;
+        reginfo->handler->prev = handler2;
     reginfo->handler = handler;
     return SNMPERR_SUCCESS;
 }
