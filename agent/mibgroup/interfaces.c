@@ -112,6 +112,9 @@
 #ifdef HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
+#ifdef CAN_USE_SYSCTL
+#include <sys/sysctl.h>
+#endif
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
@@ -1365,7 +1368,7 @@ struct ifnet *Retifnet;
 
 #else
 
-#if defined(netbsd1) || defined(freebsd3) || defined(openbsd2)
+#if defined(netbsd1) || defined(openbsd2)
 #define ia_next ia_list.tqe_next
 #define if_next if_list.tqe_next
 #endif
@@ -1406,14 +1409,7 @@ struct in_ifaddr *Retin_ifaddr;
 		 *  Try to find an address for this interface
 		 */
 
-#ifdef freebsd3
-		TAILQ_HEAD(, in_ifaddr) iah;
-
-		auto_nlist(IFADDR_SYMBOL, (char *)&iah, sizeof(iah));
-		ia = iah.tqh_first;
-#else
 		auto_nlist(IFADDR_SYMBOL, (char *)&ia, sizeof(ia));
-#endif
 		while (ia) {
 		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
 		    if (in_ifaddr.ia_ifp == ifnetaddr) break;
@@ -1703,4 +1699,405 @@ int Len;
 
 #endif /* solaris2 */
 
-#endif /* not USE_SYSCTL_IFLIST */
+#else /* HAVE_NET_IF_MIB_H */
+
+/*
+ * This code attempts to do the right thing for FreeBSD.  Note that
+ * the statistics could be gathered through use of of the
+ * net.route.0.link.iflist.0 sysctl (which we already use to get the
+ * hardware address of the interfaces), rather than using the ifmib
+ * code, but eventually I will implement dot3Stats and we will have to
+ * use the ifmib interface.  ifmib is also a much more natural way of
+ * mapping the SNMP MIB onto sysctl(3).
+ */
+
+#include <net/if.h>
+#include <net/if_dl.h>
+#include <net/if_mib.h>
+#include <net/route.h>
+
+int header_interfaces __P((struct variable *, oid *, int *, int, int *,
+			   int (**write) __P((int, u_char *, u_char, int,
+					      u_char *, oid *, int)) ));
+int header_ifEntry __P((struct variable *, oid *, int *, int, int *,
+			int (**write) __P((int, u_char *, u_char, int, 
+					   u_char *, oid *, int)) ));
+u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, 
+			  int *, 
+			  int (**write) __P((int, u_char *, u_char, int, 
+					     u_char *, oid *, int)) ));
+
+#define MATCH_FAILED	-1
+#define MATCH_SUCCEEDED	0
+
+static	char *physaddrbuf;
+static	int nphysaddrs;
+struct	sockaddr_dl **physaddrs;
+
+void	init_interfaces()
+{
+	int naddrs, ilen, bit;
+	static int mib[6] 
+		= { CTL_NET, PF_ROUTE, 0, AF_LINK, NET_RT_IFLIST, 0 };
+	char *cp;
+	size_t len;
+	struct rt_msghdr *rtm;
+	struct if_msghdr *ifm;
+	struct ifa_msghdr *ifam;
+	struct sockaddr *sa;
+
+	naddrs = 0;
+	if (physaddrs)
+		free(physaddrs);
+	if (physaddrbuf)
+		free(physaddrbuf);
+	physaddrbuf = 0;
+	physaddrs = 0;
+	nphysaddrs = 0;
+	len = 0;
+	if (sysctl(mib, 6, 0, &len, 0, 0) < 0)
+		return;
+
+	cp = physaddrbuf = malloc(len);
+	if (physaddrbuf == 0)
+		return;
+	if (sysctl(mib, 6, physaddrbuf, &len, 0, 0) < 0) {
+		free(physaddrbuf);
+		physaddrbuf = 0;
+		return;
+	}
+
+loop:
+	ilen = len;
+	cp = physaddrbuf;
+	while (ilen > 0) {
+		rtm = (struct rt_msghdr *)cp;
+		if (rtm->rtm_version != RTM_VERSION 
+		    || rtm->rtm_type != RTM_IFINFO) {
+			free(physaddrs);
+			physaddrs = 0;
+			free(physaddrbuf);
+			physaddrbuf = 0;
+		}
+		ifm = (struct if_msghdr *)rtm;
+		ilen -= ifm->ifm_msglen;
+		cp += ifm->ifm_msglen;
+		rtm = (struct rt_msghdr *)cp;
+		while (ilen > 0 && rtm->rtm_type == RTM_NEWADDR) {
+			int is_alias = 0;
+			ifam = (struct ifa_msghdr *)rtm;
+			ilen -= sizeof(*ifam);
+			cp += sizeof(*ifam);
+			sa = (struct sockaddr *)cp;
+#define ROUND(x) (((x) + sizeof(long) - 1) & ~sizeof(long))
+			for (bit = 1; bit && ilen > 0; bit <<= 1) {
+				if (!(ifam->ifam_addrs & bit))
+					continue;
+				ilen -= ROUND(sa->sa_len);
+				cp += ROUND(sa->sa_len);
+
+				if (bit == RTA_IFA) {
+					if (physaddrs)
+#define satosdl(sa) ((struct sockaddr_dl *)(sa))
+						physaddrs[naddrs++] 
+							= satosdl(sa);
+					else
+						naddrs++;
+				}
+				sa = (struct sockaddr *)cp;
+			}
+			rtm = (struct rt_msghdr *)cp;
+		}
+	}
+	if (physaddrs) {
+		nphysaddrs = naddrs;
+		return;
+	}
+	physaddrs = malloc(naddrs * sizeof(*physaddrs));
+	if (physaddrs == 0)
+		return;
+	naddrs = 0;
+	goto loop;
+	
+}
+
+static int
+get_phys_address(int index, char **ap, int *len)
+{
+	int i;
+	int once = 1;
+
+	do {
+		for (i = 0; i < nphysaddrs; i++) {
+			if (physaddrs[i]->sdl_index == index)
+				break;
+		}
+		if (i < nphysaddrs)
+			break;
+		init_interfaces();
+	} while (once--);
+
+	if (i < nphysaddrs) {
+		*ap = LLADDR(physaddrs[i]);
+		*len = physaddrs[i]->sdl_alen;
+		return 0;
+	}
+	return -1;
+}
+
+int
+header_interfaces(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+#define INTERFACES_NAME_LENGTH	8
+    oid newname[MAX_NAME_LEN];
+    int result;
+#ifdef DODEBUG
+    char c_oid[1024];
+
+    sprint_objid (c_oid, name, *length);
+    printf ("var_interfaces: %s %d\n", c_oid, exact);
+#endif
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    newname[INTERFACES_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+        return MATCH_FAILED;
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+    return MATCH_SUCCEEDED;
+}
+
+static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
+			    IFMIB_SYSTEM, IFMIB_IFCOUNT };
+
+int
+header_ifEntry(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;    /* IN - pointer to variable entry that points here */
+    oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+#define IFENTRY_NAME_LENGTH	10
+    oid newname[MAX_NAME_LEN];
+    register int	interface;
+    int result, count;
+    static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
+				IFMIB_SYSTEM, IFMIB_IFCOUNT };
+    size_t len;
+#ifdef DODEBUG
+    char c_oid[1024];
+
+    sprint_objid (c_oid, name, *length);
+    printf ("var_ifEntry: %s %d\n", c_oid, exact);
+#endif
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    /* find "next" interface */
+    len = sizeof count;
+    if (sysctl(count_oid, 5, &count, &len, (void *)0, (size_t)0) < 0)
+	    return MATCH_FAILED;
+
+    for(interface = 1; interface <= count; interface++){
+	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
+	result = compare(name, *length, newname, (int)vp->namelen + 1);
+	if ((exact && (result == 0)) || (!exact && (result < 0)))
+	    break;
+    }
+    if (interface > count) {
+#ifdef DODEBUG
+	printf ("... index out of range\n");
+#endif
+        return MATCH_FAILED;
+    }
+
+
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("... get I/F stats %s\n", c_oid);
+#endif
+
+    return interface;
+}
+
+u_char	*
+var_interfaces(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    oid     *name;
+    int     *length;
+    int     exact;
+    int     *var_len;
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *,
+				  oid *, int));
+{
+    size_t len;
+    int count;
+
+    if (header_interfaces(vp, name, length, exact, var_len, write_method)
+	== MATCH_FAILED)
+	    return NULL;
+
+    switch (vp->magic){
+    case IFNUMBER:
+	    len = sizeof count;
+	    if (sysctl(count_oid, 5, &count, &len, 0, 0) < 0)
+		    return NULL;
+	    long_return = count;
+	    return (u_char *)&long_return;
+    default:
+	    ERROR_MSG("");
+    }
+    return NULL;
+}
+
+u_char *
+var_ifEntry(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    register oid	*name;
+    register int	*length;
+    int			exact;
+    int			*var_len;
+    int			(**write_method) __P((int, u_char *, u_char, int,
+					      u_char *, oid *, int));
+{
+	int interface;
+	static int sname[6] = { CTL_NET, PF_LINK, NETLINK_GENERIC,
+			       IFMIB_IFDATA, 0, IFDATA_GENERAL };
+	static struct ifmibdata ifmd;
+	size_t len;
+	char *cp;
+
+	interface = header_ifEntry(vp, name, length, exact, var_len,
+				   write_method);
+	if (interface == MATCH_FAILED)
+		return NULL;
+
+	sname[4] = interface;
+	len = sizeof ifmd;
+	if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
+		return NULL;
+	
+	switch (vp->magic) {
+	case IFINDEX:
+		long_return = interface;
+		return (u_char *) &long_return;
+	case IFDESCR:
+#define USE_NAME_AS_DESCRIPTION
+#ifdef USE_NAME_AS_DESCRIPTION
+		cp = ifmd.ifmd_name;
+#else  /* USE_NAME_AS_DESCRIPTION */
+		cp = Lookup_Device_Annotation(Name, "snmp-descr");
+		if (!cp)
+			cp = Lookup_Device_Annotation(Name, 0);
+		if (!cp) cp = Name;
+#endif /* USE_NAME_AS_DESCRIPTION */
+		*var_len = strlen(cp);
+		return (u_char *)cp;
+	case IFTYPE:
+#if 0
+		cp = Lookup_Device_Annotation(Name, "snmp-type");
+		if (cp) long_return = atoi(cp);
+		else
+#endif
+		long_return = ifmd.ifmd_data.ifi_type;
+		return (u_char *) &long_return;
+	case IFMTU:
+		long_return = (long) ifmd.ifmd_data.ifi_mtu;
+		return (u_char *) &long_return;
+	case IFSPEED:
+		long_return = ifmd.ifmd_data.ifi_baudrate;
+		return (u_char *) &long_return;
+	case IFPHYSADDRESS:
+	{
+		char *cp;
+		if (get_phys_address(interface, &cp, var_len))
+			return NULL;
+		else
+			return cp;
+	}
+	case IFADMINSTATUS:
+		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
+		return (u_char *) &long_return;
+	case IFOPERSTATUS:
+		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
+		return (u_char *) &long_return;
+	case IFLASTCHANGE:
+		if ((ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 ) &&
+		    (ifmd.ifmd_data.ifi_lastchange.tv_usec == 0)) {
+			long_return = 0;
+		} else {
+			struct timeval now;
+
+			gettimeofday(&now, (struct timezone *)0);
+			long_return = (u_long)
+				((now.tv_sec 
+				  - ifmd.ifmd_data.ifi_lastchange.tv_sec) * 100
+				 + ((now.tv_usec
+				     - ifmd.ifmd_data.ifi_lastchange.tv_usec)
+				    / 10000));
+		}
+		return (u_char *) &long_return;
+	case IFINOCTETS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_ibytes;
+		return (u_char *) &long_return;
+	case IFINUCASTPKTS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_ipackets;
+		long_return -= (u_long) ifmd.ifmd_data.ifi_imcasts;
+		return (u_char *) &long_return;
+	case IFINNUCASTPKTS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_imcasts;
+		return (u_char *) &long_return;
+	case IFINDISCARDS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_iqdrops;
+		return (u_char *) &long_return;
+	case IFINERRORS:
+		long_return = ifmd.ifmd_data.ifi_ierrors;
+		return (u_char *) &long_return;
+	case IFINUNKNOWNPROTOS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_noproto;
+		return (u_char *) &long_return;
+	case IFOUTOCTETS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_obytes;
+		return (u_char *) &long_return;
+	case IFOUTUCASTPKTS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_opackets;
+		long_return -= (u_long) ifmd.ifmd_data.ifi_omcasts;
+		return (u_char *) &long_return;
+	case IFOUTNUCASTPKTS:
+		long_return = (u_long)  ifmd.ifmd_data.ifi_omcasts;
+		return (u_char *) &long_return;
+	case IFOUTDISCARDS:
+		long_return = ifmd.ifmd_snd_drops;
+		return (u_char *) &long_return;
+	case IFOUTERRORS:
+		long_return = ifmd.ifmd_data.ifi_oerrors;
+		return (u_char *) &long_return;
+	case IFOUTQLEN:
+		long_return = ifmd.ifmd_snd_len;
+		return (u_char *) &long_return;
+	case IFSPECIFIC:
+		*var_len = nullOidLen;
+		return (u_char *) nullOid;
+	default:
+		ERROR_MSG("");
+	}
+	return NULL;
+}
+
+#endif /* HAVE_NET_IF_MIB_H */

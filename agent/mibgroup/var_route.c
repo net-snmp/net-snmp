@@ -36,6 +36,8 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 
+#if !defined(CAN_USE_SYSCTL)
+
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>
 #include <sys/types.h>
@@ -1318,3 +1320,319 @@ RTENTRY **r1, **r2;
 #endif /* not USE_SYSCTL_ROUTE_DUMP */
 
 #endif /* solaris2 */
+
+#else /* CAN_USE_SYSCTL */
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <syslog.h>
+#include <time.h>
+
+#include <sys/types.h>
+#include <sys/queue.h>
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+
+#include <net/if_dl.h>
+#include <net/route.h>
+#include <netinet/in.h>
+
+#define CACHE_TIME (120)	    /* Seconds */
+
+#include "asn1.h"
+#include "snmp_impl.h"
+#include "snmp_api.h"
+#include "mib.h"
+#include "snmp.h"
+#include "../snmp_vars.h"
+#include "ip.h"
+#include "../kernel.h"
+#include "interfaces.h"
+#include "util_funcs.h"
+
+static TAILQ_HEAD(, snmprt) rthead;
+static char *rtbuf;
+static size_t rtbuflen;
+static time_t lasttime;
+
+struct snmprt {
+	TAILQ_ENTRY(snmprt) link;
+	struct rt_msghdr *hdr;
+	struct in_addr dest;
+	struct in_addr gateway;
+	struct in_addr netmask;
+	int index;
+	struct in_addr ifa;
+};
+
+static void
+rtmsg(struct rt_msghdr *rtm)
+{
+	struct snmprt *rt;
+	struct sockaddr *sa;
+	int bit, gotdest, gotmask;
+
+	rt = malloc(sizeof *rt);
+	if (rt == 0)
+		return;
+	rt->hdr = rtm;
+	rt->ifa.s_addr = 0;
+	rt->dest = rt->gateway = rt->netmask = rt->ifa;
+	rt->index = rtm->rtm_index;
+
+	gotdest = gotmask = 0;
+	sa = (struct sockaddr *)(rtm + 1);
+	for (bit = 1; ((char *)sa < (char *)rtm + rtm->rtm_msglen) && bit;
+	     bit <<= 1) {
+		if ((rtm->rtm_addrs & bit) == 0)
+			continue;
+		switch (bit) {
+		case RTA_DST:
+#define satosin(sa) ((struct sockaddr_in *)(sa))
+			rt->dest = satosin(sa)->sin_addr;
+			gotdest = 1;
+			break;
+		case RTA_GATEWAY:
+			if (sa->sa_family == AF_INET)
+				rt->gateway = satosin(sa)->sin_addr;
+			break;
+		case RTA_NETMASK:
+			if (sa->sa_len
+			    >= offsetof(struct sockaddr_in, sin_addr))
+				rt->netmask = satosin(sa)->sin_addr;
+			gotmask = 1;
+			break;
+		case RTA_IFA:
+			if (sa->sa_family == AF_INET)
+				rt->ifa = satosin(sa)->sin_addr;
+			break;
+		}
+/* from rtsock.c */
+#define ROUNDUP(a) \
+        ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))
+		sa = (struct sockaddr *)((char *)sa + ROUNDUP(sa->sa_len));
+	}
+	if (!gotdest) {
+		/* XXX can't happen if code above is correct */
+		fprintf(stderr, "route no dest?\n");
+		free(rt);
+	} else {
+		/* If no mask provided, it was a host route. */
+		if (!gotmask)
+			rt->netmask.s_addr = ~0;
+		TAILQ_INSERT_TAIL(&rthead, rt, link);
+	}
+}
+
+static int
+suck_krt(int force)
+{
+	time_t now;
+	struct snmprt *rt, *next;
+	size_t len;
+	static int name[6] = { CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0 };
+	char *cp;
+	struct rt_msghdr *rtm;
+
+	time(&now);
+	if (now < (lasttime + CACHE_TIME) && !force)
+		return 0;
+	lasttime = now;
+
+	for (rt = rthead.tqh_first; rt; rt = next) {
+		next = rt->link.tqe_next;
+		free(rt);
+	}
+	TAILQ_INIT(&rthead);
+
+	if (sysctl(name, 6, 0, &len, 0, 0) < 0) {
+		syslog(LOG_WARNING, "sysctl net-route-dump: %m");
+		return -1;
+	}
+
+	if (len > rtbuflen) {
+		char *newbuf;
+		newbuf = realloc(rtbuf, len);
+		if (newbuf == 0)
+			return -1;
+		rtbuf = newbuf;
+		rtbuflen = len;
+	}
+
+	if (sysctl(name, 6, rtbuf, &len, 0, 0) < 0) {
+		syslog(LOG_WARNING, "sysctl net-route-dump: %m");
+		return -1;
+	}
+
+	cp = rtbuf;
+	while (cp < rtbuf + len) {
+		rtm = (struct rt_msghdr *)cp;
+		/*
+		 * NB:
+		 * You might want to exclude routes with RTF_WASCLONED
+		 * set.  This keeps the cloned host routes (and thus also
+		 * ARP entries) out of the routing table.  Thus, it also
+		 * presents management stations with an incomplete view.
+		 * I believe that it should be possible for a management
+		 * station to examine (and perhaps delete) such routes.
+		 */
+		if (rtm->rtm_version == RTM_VERSION 
+		    && rtm->rtm_type == RTM_GET)
+			rtmsg(rtm);
+		cp += rtm->rtm_msglen;
+	}
+	return 0;
+}
+
+u_char *
+var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
+	struct variable *vp; /* IN - pointer to variable entry that points here */
+	oid *name;	/* IN/OUT - input name requested, output name found */
+	int *length;    /* IN/OUT - length of input and output strings */
+	int exact;    	/* IN - TRUE if an exact match was requested. */
+	int *var_len; /* OUT - length of variable or 0 if function returned. */
+	int (**write_method) __P((int, u_char *, u_char, int, u_char *, 
+				  oid *, int));
+{
+	/*
+	 * object identifier is of form:
+	 * 1.3.6.1.2.1.4.21.1.1.A.B.C.D,  where A.B.C.D is IP address.
+	 * IPADDR starts at offset 10.
+	 */
+	int Save_Valid, result;
+	u_char *cp;
+	oid *op;
+	struct snmprt *rt;
+	static struct snmprt *savert;
+	static int saveNameLen, saveExact;
+	static oid saveName[14], Current[14];
+
+	/*
+	 *	OPTIMIZATION:
+	 *
+	 *	If the name was the same as the last name, with the possible
+	 *	exception of the [9]th token, then don't read the routing table
+	 *
+	 */
+
+	if ((saveNameLen == *length) && (saveExact == exact)) {
+		int temp = name[9];
+		name[9] = 0;
+		Save_Valid = !compare(name, *length, saveName, saveNameLen);
+		name[9] = temp;
+	} else {
+		Save_Valid = 0;
+	}
+
+	if (Save_Valid) {
+		register int temp = name[9]; /* Fix up 'lowest' found entry */
+		bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+		name[9] = temp;
+		*length = 14;
+		rt = savert;
+	} else {
+		/* fill in object part of name for current
+		   (less sizeof instance part) */
+
+		bcopy((char *)vp->name, (char *)Current, 
+		      (int)(vp->namelen) * sizeof(oid));
+
+		suck_krt(0);
+
+		op = Current + 10;
+		for (rt = rthead.tqh_first; rt; rt = rt->link.tqe_next) {
+			memcpy(op, &rt->dest, 4);
+
+			result = compare(name, *length, Current, 14);
+			if ((exact && (result == 0))
+			    || (!exact && (result < 0)))
+				break;
+		}
+		if (rt == 0)
+			return 0;
+
+		/*
+		 *  Save in the 'cache'
+		 */
+		bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
+		saveName[9] = 0;
+		saveNameLen = *length;
+		saveExact = exact;
+		savert = rt;
+
+		/*
+		 *  Return the name
+		 */
+		bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+		*length = 14;
+	}
+
+	*write_method = write_rte;
+	*var_len = sizeof long_return;
+
+	switch (vp->magic) {
+	case IPROUTEDEST:
+		long_return = rt->dest.s_addr;
+		return (u_char *)&long_return;
+
+	case IPROUTEIFINDEX:
+		long_return = rt->index;
+		return (u_char *)&long_return;
+
+	case IPROUTEMETRIC1:
+		long_return = (rt->hdr->rtm_flags & RTF_GATEWAY) ? 1 : 0;
+		return (u_char *)&long_return;
+	case IPROUTEMETRIC2:
+		long_return = rt->hdr->rtm_rmx.rmx_rtt;
+		return (u_char *)&long_return;
+	case IPROUTEMETRIC3:
+		long_return = rt->hdr->rtm_rmx.rmx_rttvar;
+		return (u_char *)&long_return;
+	case IPROUTEMETRIC4:
+		long_return = rt->hdr->rtm_rmx.rmx_ssthresh;
+		return (u_char *)&long_return;
+	case IPROUTEMETRIC5:
+		long_return = rt->hdr->rtm_rmx.rmx_mtu;
+		return (u_char *)&long_return;
+
+	case IPROUTENEXTHOP:
+		if (rt->gateway.s_addr == 0 && rt->ifa.s_addr == 0)
+			long_return = 0;
+		else if (rt->gateway.s_addr == 0)
+			long_return = rt->ifa.s_addr;
+		else
+			long_return = rt->gateway.s_addr;
+		return (u_char *)&long_return;
+
+	case IPROUTETYPE:
+		long_return = (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3;
+		return (u_char *)&long_return;
+
+	case IPROUTEPROTO:
+		long_return = (rt->hdr->rtm_flags & RTF_DYNAMIC) ? 4 : 2;
+		return (u_char *)&long_return;
+
+	case IPROUTEAGE:
+		long_return = 0;
+		return (u_char *)&long_return;
+
+	case IPROUTEMASK:
+		long_return = rt->netmask.s_addr;
+		return (u_char *)&long_return;
+
+	case IPROUTEINFO:
+		*var_len = nullOidLen;
+		return (u_char *)nullOid;
+	default:
+		ERROR_MSG("");
+	}
+	return NULL;
+}
+
+void
+init_var_route(void)
+{
+	;
+}
+
+#endif /* CAN_USE_SYSCTL */
