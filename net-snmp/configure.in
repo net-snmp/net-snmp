@@ -2629,6 +2629,8 @@ command line usage has changed as well.).
 the default version for the command tools (snmpget, ...) to use.  This
 can always be overridden at runtime using the -v flag to the tools, or
 by using the \"defVersion\" token in your snmp.conf file.
+   Providing the --with-default-snmp-version=\"x\" parameter to ./configure
+will avoid this prompt.
 
 Default version of SNMP to use],3,unquoted)
 
@@ -2645,6 +2647,8 @@ AC_PROMPT_USER(SYS_CONTACT,[
 running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
+  Providing the --with-sys-contact=\"contact\" parameter to ./configure
+will avoid this prompt.
 
 System Contact Information],$ME@$LOC,quoted)
 
@@ -2655,6 +2659,8 @@ AC_PROMPT_USER(SYS_LOC,[
 	Describes the location of the system.  This information is
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
+  Providing the --with-sys-location=\"location\" parameter to ./configure
+will avoid this prompt.
 
 System Location],Unknown,quoted)
 
@@ -2672,6 +2678,8 @@ AC_PROMPT_USER(LOGFILE,[
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
+  Providing the --with-logfile=\"path\" parameter to ./configure
+will avoid this prompt.
 
 Location to write logfile],$defaultlog,quoted)
 
@@ -2695,6 +2703,8 @@ copy your files over to the new location (once only).  If you pick
 some other path than the default, you'll have to copy them yourself.
 There is nothing wrong with picking the old path ($ucddefaultstore) if
 you'd rather.
+  Providing the --with-persistent-directory=\"path\" parameter to
+./configure will avoid this prompt.
 
 Location to write persistent information],$defaultstore,quoted)
 
@@ -2715,6 +2725,8 @@ into your new net-snmp persistent file path?  This will functionally
 save all your ucd-snmp data and let it be used within the net-snmp
 tools.  This will only be done once when you run make install.  If you
 wish to do this, enter "yes" at the prompt.
+  Providing the --with-copy-persistent-files=\"no\" (or \"yes\")
+parameters to ./configure will avoid this prompt.
 
 Copy ucd-snmp data into the net-snmp data directory],"yes")
 ])
