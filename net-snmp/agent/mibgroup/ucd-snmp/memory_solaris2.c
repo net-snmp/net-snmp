@@ -71,9 +71,11 @@ void init_memory_solaris2(void)
   snmpd_register_config_handler("swap", memory_parse_config,
                                 memory_free_config,"min-avail");
 
-  kstat_fd = kstat_open();
   if (kstat_fd == 0) {
-    snmp_log(LOG_ERR, "kstat_open(): failed\n");
+    kstat_fd = kstat_open();
+    if (kstat_fd == 0) {
+      snmp_log(LOG_ERR, "kstat_open(): failed\n");
+    }
   }
 }
 
