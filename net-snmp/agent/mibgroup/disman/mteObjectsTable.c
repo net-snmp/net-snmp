@@ -77,9 +77,7 @@ void init_mteObjectsTable(void) {
 
   /* register our config handler(s) to deal with registrations */
   snmpd_register_config_handler("mteObjectsTable", parse_mteObjectsTable, NULL,
-                                "HELP STRING");
-
-
+                                NULL);
 
 
   /* we need to be called back later to store our data */
@@ -196,26 +194,23 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg, void *clientarg
       hcindex = hcindex->next) {
     StorageTmp = (struct mteObjectsTable_data *) hcindex->data;
 
-
-/*   XXX:  if (StorageTmp->mteObjectsTableStorageType == ST_NONVOLATILE) { */
-
-
+    if (StorageTmp->storagetype != ST_READONLY) {
         memset(line,0,sizeof(line));
         strcat(line, "mteObjectsTable ");
         cptr = line + strlen(line);
 
 
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteOwner, &StorageTmp->mteOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteObjectsName, &StorageTmp->mteObjectsNameLen);
-    cptr = read_config_store_data(ASN_UNSIGNED, cptr, &StorageTmp->mteObjectsIndex, &tmpint);
-    cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteObjectsID, &StorageTmp->mteObjectsIDLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteObjectsIDWildcard, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteObjectsEntryStatus, &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteOwner, &StorageTmp->mteOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteObjectsName, &StorageTmp->mteObjectsNameLen);
+        cptr = read_config_store_data(ASN_UNSIGNED, cptr, &StorageTmp->mteObjectsIndex, &tmpint);
+        cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteObjectsID, &StorageTmp->mteObjectsIDLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteObjectsIDWildcard, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteObjectsEntryStatus, &tmpint);
 
 
 
-    snmpd_store_config(line);
-/*   } */
+        snmpd_store_config(line);
+    }
   }
   DEBUGMSGTL(("mteObjectsTable", "done.\n"));
   return SNMPERR_SUCCESS;
@@ -633,6 +628,8 @@ mte_add_objects(struct variable_list *vars, struct mteTriggerTable_data *item,
                 oid *suffix, size_t suffix_len) {
     struct header_complex_index *hcptr = mteObjectsTableStorage;
 
+    DEBUGMSGTL(("mteObjectsTable", "Searching for objects to add for owner=%s / name=%s\n", owner, name));
+
     if (vars == NULL || item == NULL || owner == NULL || name == NULL ||
         hcptr == NULL)
         return;
@@ -644,10 +641,10 @@ mte_add_objects(struct variable_list *vars, struct mteTriggerTable_data *item,
 
     /* get to start of objects list */
     while(hcptr &&
-          strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteOwner,
-                 owner) != 0 &&
-          strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteObjectsName,
-                 name) != 0)
+          (strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteOwner,
+                  owner) != 0 ||
+           strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteObjectsName,
+                  name) != 0))
         hcptr = hcptr->next;
 
     /* add all objects */
@@ -683,17 +680,80 @@ mte_add_objects(struct variable_list *vars, struct mteTriggerTable_data *item,
         response = mte_get_response(item, pdu);
 
         if (response) {
-            vars->next_variable = response->variables;
-            vars = vars->next_variable;
-            response->variables = NULL;
+            if (vars) {
+                vars->next_variable = response->variables;
+                vars = vars->next_variable;
+                DEBUGMSGTL(("mteObjectsTable", "Adding:  "));
+                DEBUGMSGOID(("mteObjectsTable", response->variables->name,
+                             response->variables->name_length));
+                DEBUGMSG(("mteObjectsTable", "\n"));
+            } else {
+                vars = response->variables;
+            }
+            /* erase response notion of the values we stole from it */
+            response->variables = NULL;            
             snmp_free_pdu(response);
         }
 
         /* move along */
         hcptr = hcptr->next;
     }
+    DEBUGMSGTL(("mteObjectsTable", "Done adding objects\n"));
 }
 
-    
-    
-        
+int
+mte_add_object_to_table(const char *owner, const char *objname,
+                        oid *oidname, size_t oidname_len, int iswild) {
+    struct header_complex_index *hcptr = mteObjectsTableStorage, *lastnode;
+    static struct mteObjectsTable_data *StorageNew;
+
+    /* malloc initial struct */
+    StorageNew = SNMP_MALLOC_STRUCT(mteObjectsTable_data);
+    memdup((u_char **) &(StorageNew->mteOwner), 
+           owner, strlen(owner)+1);
+    StorageNew->mteOwnerLen = strlen(owner);
+
+    memdup((u_char **) &(StorageNew->mteObjectsName), 
+           objname, strlen(objname)+1);
+    StorageNew->mteObjectsNameLen = strlen(objname);
+
+    /* find the next number */
+    /* get to start of objects list */
+    while(hcptr &&
+          (strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteOwner,
+                  owner) != 0 ||
+           strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteObjectsName,
+                  objname) != 0))
+        hcptr = hcptr->next;
+
+    if (hcptr) {
+        /* an object existed.  Find the first one past and increment
+           the previous number */
+        lastnode = hcptr;
+        while(hcptr &&
+              strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteOwner,
+                     owner) == 0 &&
+              strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteObjectsName,
+                     objname) == 0) {
+            lastnode = hcptr;
+            hcptr = hcptr->next;
+        }
+        StorageNew->mteObjectsIndex =
+            ((struct mteObjectsTable_data *) lastnode->data)->mteObjectsIndex + 1;
+    } else {
+        StorageNew->mteObjectsIndex = 1;
+    }
+
+    /* XXX: fill in default row values here into StorageNew */
+    StorageNew->mteObjectsID = snmp_duplicate_objid(oidname, oidname_len);
+    StorageNew->mteObjectsIDLen = oidname_len;
+
+    if (iswild)
+        StorageNew->mteObjectsIDWildcard = MTEOBJECTSIDWILDCARD_TRUE;
+    else
+        StorageNew->mteObjectsIDWildcard = MTEOBJECTSIDWILDCARD_FALSE;
+
+    StorageNew->mteObjectsEntryStatus = RS_ACTIVE;
+    StorageNew->storagetype = ST_READONLY;
+    return mteObjectsTable_add(StorageNew);
+}

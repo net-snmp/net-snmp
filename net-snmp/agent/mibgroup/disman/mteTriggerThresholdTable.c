@@ -231,7 +231,6 @@ write_mteTriggerThresholdStartup(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerThresholdTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -249,6 +248,8 @@ write_mteTriggerThresholdStartup(int      action,
               fprintf(stderr, "write to mteTriggerThresholdStartup not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -299,7 +300,6 @@ write_mteTriggerThresholdRising(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerThresholdTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -317,6 +317,8 @@ write_mteTriggerThresholdRising(int      action,
               fprintf(stderr, "write to mteTriggerThresholdRising not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -367,7 +369,6 @@ write_mteTriggerThresholdFalling(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerThresholdTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -385,6 +386,8 @@ write_mteTriggerThresholdFalling(int      action,
               fprintf(stderr, "write to mteTriggerThresholdFalling not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -435,7 +438,6 @@ write_mteTriggerThresholdDeltaRising(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerThresholdTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -453,6 +455,8 @@ write_mteTriggerThresholdDeltaRising(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaRising not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -503,7 +507,6 @@ write_mteTriggerThresholdDeltaFalling(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerThresholdTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -521,6 +524,8 @@ write_mteTriggerThresholdDeltaFalling(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaFalling not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -589,6 +594,8 @@ write_mteTriggerThresholdObjectsOwner(int      action,
               fprintf(stderr, "write to mteTriggerThresholdObjectsOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -661,6 +668,8 @@ write_mteTriggerThresholdObjects(int      action,
               fprintf(stderr, "write to mteTriggerThresholdObjects not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -733,6 +742,8 @@ write_mteTriggerThresholdRisingEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerThresholdRisingEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -805,6 +816,8 @@ write_mteTriggerThresholdRisingEvent(int      action,
               fprintf(stderr, "write to mteTriggerThresholdRisingEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -877,6 +890,8 @@ write_mteTriggerThresholdFallingEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerThresholdFallingEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -949,6 +964,8 @@ write_mteTriggerThresholdFallingEvent(int      action,
               fprintf(stderr, "write to mteTriggerThresholdFallingEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1021,6 +1038,8 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaRisingEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1093,6 +1112,8 @@ write_mteTriggerThresholdDeltaRisingEvent(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaRisingEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1165,6 +1186,8 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaFallingEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1237,6 +1260,8 @@ write_mteTriggerThresholdDeltaFallingEvent(int      action,
               fprintf(stderr, "write to mteTriggerThresholdDeltaFallingEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
