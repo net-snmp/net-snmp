@@ -2502,7 +2502,7 @@ static int eat_syntax(FILE *fp, char *token, int maxtoken)
 static int compliance_lookup(const char *name, int modid)
 {
     if (modid == -1) {
-	struct objgroup *op = malloc(sizeof(struct objgroup));
+	struct objgroup *op = (struct objgroup *)malloc(sizeof(struct objgroup));
 	op->next = objgroups;
 	op->name = strdup(name);
 	op->line = Line;

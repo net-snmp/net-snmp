@@ -236,7 +236,7 @@ snmp_vlog (int priority, const char *format, va_list ap)
     return(0);
   }
 
-  dynamic=malloc(length+1);
+  dynamic = (char *)malloc(length+1);
   if (dynamic==NULL) {
     snmp_log_string(LOG_ERR, "Could not allocate memory for log-message\n");
     snmp_log_string(priority, buffer);

@@ -198,11 +198,11 @@ vacm_parse_config_access(const char *token, char *line)
   aptr->securityModel=access.securityModel;  
   aptr->securityLevel=access.securityLevel;  
   aptr->contextMatch=access.contextMatch;
-  readView=(u_char *)aptr->readView;
+  readView=(char *)aptr->readView;
   line = read_config_read_octet_string(line,(u_char **)&readView,&len);  
-  writeView=(u_char *)aptr->writeView;
+  writeView=(char *)aptr->writeView;
   line = read_config_read_octet_string(line,(u_char **)&writeView,&len);     
-  notifyView=(u_char *)aptr->notifyView;
+  notifyView=(char *)aptr->notifyView;
   line = read_config_read_octet_string(line,(u_char **)&notifyView,&len);     
 }
 
@@ -249,7 +249,7 @@ vacm_parse_config_group(const char *token, char *line)
 	
   gptr->status=group.status;
   gptr->storageType=group.storageType;    
-  groupName=(u_char *)gptr->groupName;
+  groupName=(char *)gptr->groupName;
   line = read_config_read_octet_string(line, (u_char **)&groupName,&len);  
 }
 
