@@ -85,7 +85,7 @@ The default is -v 1
 specifies MIB parsing options. See MIB PARSING OPTIONS below.
 .IP "-O nebqfsS"
 specifies output printing options. See OUTPUT OPTIONS below.
-.IP "-I Rbf"
+.IP "-I Rb"
 specifies input parsing options. See INPUT OPTIONS below.
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
@@ -281,31 +281,6 @@ the one that matches the closest to the beginning of the node name and
 the highest in the tree.  A current side effect of this option is that 
 you can't specify indexes or multiple nodes, since the '.' is treated
 as part of the regular expression.
-.IP -If
-If -If is specified, some applications (E.G., snmpget, snmpgetnext,
-snmpwalk, etc) will try to fix errors returned by the agent that you
-were talking to and resend the request.  The only time this is really
-useful is if you specified a OID that didn't exist in your request and
-you're using SNMPv1 which requires "all or nothing" kinds of
-requests. Example (system.sysUptime is an incomplete OID request for
-agents as it needs the .0 index appended to it):
-.nf
-snmpget -v 1 localhost public system.sysUpTime system.sysContact.0
-Error in packet
-Reason: (noSuchName) There is no such variable name in this MIB.
-This name doesn't exist: system.sysUpTime
-
-snmpget -If -v 1 localhost public system.sysUpTime system.sysContact.0
-Error in packet
-Reason: (noSuchName) There is no such variable name in this MIB.
-This name doesn't exist: system.sysUpTime
-
-system.sysContact.0 = root@localhost
-.fi
-.IP
-With the -If specified, as much information as possible for the
-request was retrieved (requiring multiple requests to be sent to the
-agent on your behalf).
 .SH "RANDOM ACCESS MIBS"
 Normally, an object identifier such as system.sysDescr.0 will be
 lookup in a single "wellknown" place, built into the SNMP library (or
