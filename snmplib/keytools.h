@@ -37,14 +37,14 @@ extern "C" {
 extern int (*kmt_hash) (
 	const int	  mode,		void  	 **context,
 	const u_int8_t	 *data,		const int  data_len,     
-	u_int8_t	**digest,	int	  *digest_len);
+	u_int8_t	**digest,	size_t	  *digest_len);
 
 
 #ifdef HAVE_LIBKMT
 extern int (*kmt_s_md5) (
 		const int	  mode,		void  	 **context,
 		const u_int8_t	 *data,		const int  data_len,     
-		u_int8_t	**digest,	int	  *digest_len);
+		u_int8_t	**digest,	size_t	  *digest_len);
 extern int (*kmt_s_sha1) (
 		const int	  mode,		void  	 **context,
 		const u_int8_t	 *data,		const int  data_len,     
@@ -52,7 +52,7 @@ extern int (*kmt_s_sha1) (
 extern int (*kmt_s_ripemd) (
 		const int	  mode,		void  	 **context,
 		const u_int8_t	 *data,		const int  data_len,     
-		u_int8_t	**digest,	int	  *digest_len);
+		u_int8_t	**digest,	size_t	  *digest_len);
 
 #endif
 
