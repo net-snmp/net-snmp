@@ -426,7 +426,7 @@
 /* Define if you have the <pkglocs.h> header file.  */
 #undef HAVE_PKGLOCS_H
 
-/* Define if you have the <pthread.h> header file. */
+/* Define if you have the <pthread.h> header file.  */
 #undef HAVE_PTHREAD_H
 
 /* Define if you have the <sgtty.h> header file.  */
