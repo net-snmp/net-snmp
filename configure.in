@@ -614,11 +614,11 @@ AC_MSG_CACHE_ADD(Net-SNMP Version:           $VERSION)
 # super type checking
 # WWWXXX
 AC_MSG_CHECKING([for developer gcc flags])
-# if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-#   DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
-# else
-#   DEVFLAGS=""
-# fi
+if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
+  DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
+else
+  DEVFLAGS=""
+fi
 AC_MSG_RESULT($DEVFLAGS)
 AC_SUBST(DEVFLAGS)
 
