@@ -165,7 +165,7 @@ struct variable2 extensible_disk_variables[] = {
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid disk_variables_oid[] = { EXTENSIBLEMIB,DISKMIBNUM,1 };
+oid disk_variables_oid[] = { UCDAVIS_MIB,DISKMIBNUM,1 };
 
 void init_disk(void)
 {

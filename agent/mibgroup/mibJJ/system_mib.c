@@ -62,6 +62,8 @@ char version_descr[ SYS_STRING_LEN ] = VERS_DESC;
 char sysContact[    SYS_STRING_LEN ] = SYS_CONTACT;
 char sysName[       SYS_STRING_LEN ] = SYS_NAME;
 char sysLocation[   SYS_STRING_LEN ] = SYS_LOC;
+oid version_sysoid[]                 = { SYSTEM_MIB };
+int version_sysoid_len               = OID_LENGTH( version_sysoid );
 
 char oldversion_descr[ SYS_STRING_LEN ];
 char oldsysContact[    SYS_STRING_LEN ];
@@ -70,10 +72,6 @@ char oldsysLocation[   SYS_STRING_LEN ];
 
 int sysServices=72;
 int sysServicesConfiged=0;
-
-extern oid version_id[];
-extern int version_id_len;
-
 
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
@@ -235,8 +233,8 @@ var_system(struct variable *vp,
             *write_method = writeSystem;
             return (u_char *)version_descr;
         case VERSIONID:
-            *var_len = version_id_len*sizeof(version_id[0]);
-            return (u_char *)version_id;
+            *var_len = OID_LENGTH(version_sysoid)*sizeof(version_sysoid[0]);
+            return (u_char *)version_sysoid;
         case UPTIME:
             gettimeofday(&now, NULL);
 	    long_return = timeval_uptime( &now );

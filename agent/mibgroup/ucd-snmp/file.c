@@ -56,7 +56,7 @@ void init_file(void)
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid file_variables_oid[] = { EXTENSIBLEMIB,15,1 };
+  oid file_variables_oid[] = { UCDAVIS_MIB,15,1 };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/file", file_table, variable2, file_variables_oid);

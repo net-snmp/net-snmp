@@ -56,6 +56,7 @@
 #include "host_res.h"
 #include "hr_swinst.h"
 #include "tools.h"
+#include "snmp-tc.h"
 
 #define HRSWINST_MONOTONICALLY_INCREASING
 

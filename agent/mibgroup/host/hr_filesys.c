@@ -6,6 +6,7 @@
 #include <config.h>
 #include "host_res.h"
 #include "hr_filesys.h"
+#include "snmp-tc.h"
 
 #if HAVE_MNTENT_H
 #include <mntent.h>
