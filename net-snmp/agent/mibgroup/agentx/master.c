@@ -87,7 +87,9 @@ void real_init_master(void)
             snmp_sess_perror("Error: Couldn't open a master agentx socket to listen on", &sess);
 	    exit(1);
         } else {
-            snmp_log(LOG_WARNING, "Warning: Couldn't open a agentx master socket to listen on");
+            netsnmp_sess_log_error(LOG_WARNING,
+                                   "Warning: Couldn't open a agentx master socket to listen on",
+                                   &sess);
         }
     }
 
