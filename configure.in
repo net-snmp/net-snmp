@@ -1149,7 +1149,7 @@ changequote([, ])
 AC_MSG_RESULT([$new_module_list.])
 AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
 
-MODULECPP="$CPP -I${srcdir}/agent/mibgroup"
+MODULECPP="$CPP -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 AC_MSG_CHECKING([for and configuring mib modules pieces to use])
 changequote(, )
 while test "x$new_module_list" != "x"; do
