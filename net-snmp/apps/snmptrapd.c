@@ -292,7 +292,7 @@ void send_handler_data(FILE *file, struct hostent *host,
 		      &tmpvar);
   }
   /* do the variables in the pdu */
-  for(vars = pdu->variables; vars; vars = vars->next_variable) {
+  for (vars = pdu->variables; vars; vars = vars->next_variable) {
       fprint_variable(file, vars->name, vars->name_length, vars);
   }
   if (pdu->command == SNMP_MSG_TRAP) {
@@ -436,10 +436,12 @@ int snmp_input(int op,
 	}
 
 	if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)){
+	  memset(rbuf, 0, o_len);
+	  o_len = 0;
 	  rbuf[o_len++] = ',';
 	  rbuf[o_len++] = ' ';
 
-	  for(vars = pdu->variables; vars; vars = vars->next_variable) {
+	  for (vars = pdu->variables; vars; vars = vars->next_variable) {
 	    trunc = !sprint_realloc_variable(&rbuf, &r_len, &o_len, 1,
 					  vars->name, vars->name_length, vars);
 	    if (!trunc) {
@@ -506,7 +508,7 @@ int snmp_input(int op,
 	}
       } else if (pdu->command == SNMP_MSG_TRAP2 ||
 		 pdu->command == SNMP_MSG_INFORM) {
-	if(!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
+	if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
 	  /*  Right, apparently a name lookup is wanted.  This is only
 	      reasonable for the UDP and TCP transport domains (we
 	      don't want to try to be too clever here).  */
@@ -541,6 +543,8 @@ int snmp_input(int op,
 	}
 	  
 	if (Syslog) {
+	  memset(rbuf, 0, o_len);
+	  o_len = 0;
 	  for (vars = pdu->variables; vars; vars = vars->next_variable) {
 	    trunc = !sprint_realloc_variable(&rbuf, &r_len, &o_len, 1, 
 					  vars->name, vars->name_length, vars);
@@ -597,10 +601,10 @@ int snmp_input(int op,
 	  event_input(pdu->variables);
 	}
 
-	for(vars = pdu->variables; (vars != NULL) &&
-	      snmp_oid_compare(vars->name, vars->name_length,
+	for (vars = pdu->variables; (vars != NULL) &&
+	       snmp_oid_compare(vars->name, vars->name_length,
 			       snmptrapoid2, sizeof(snmptrapoid2)/sizeof(oid));
-	    vars = vars->next_variable);
+	     vars = vars->next_variable);
 
 	if (vars && vars->type == ASN_OBJECT_ID) {
 	  Command = snmptrapd_get_traphandler(vars->val.objid,
