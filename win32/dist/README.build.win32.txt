@@ -187,7 +187,10 @@ Note:  A temporary location of /tmp/net-snmp is used.
     cd man
     make install prefix=/tmp/net-snmp
 
-7.  cd (source dir)/win32/dist/scripts
+7.  Go to the scripts folder and make sure all the scripts are executable:
+
+    cd (source dir)/win32/dist/scripts
+    chmod +x *
 
 8.  Edit these files and make sure the paths are correct in the OPTIONS 
     section.  Also ensure the list of README files and Perl modules 
@@ -195,7 +198,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
     mandir2html
     readme2html
-    poddir2html
+    readme2html
 
     Note:  mandir2html will process ALL man pages in c:\temp\net-snmp while
            readme2html and poddir2html will only process files listed in the
@@ -205,9 +208,9 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 9.  Run each script to generate the .html files:
 
-    perl mandir2html
-    perl readme2html
-    perl poddir2html
+    ./mandir2html
+    ./readme2html
+    ./poddir2html
 
     Note:  There will be many warnings from tidy which can be ignored.
 
@@ -234,7 +237,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 12. Convert EXAMPLE.conf.win32 to html:
 
     cd (source dir)/win32/dist/scripts
-    perl txt2html ../../EXAMPLE.conf.win32 | tidy > /tmp/net-snmp/html/EXAMPLE.conf.win32.html
+    ./txt2html ../../EXAMPLE.conf.win32 | tidy > /tmp/net-snmp/html/EXAMPLE.conf.win32.html
     
 
 Build Net-SNMP.chm
@@ -322,12 +325,15 @@ Requirements
     copy win32\dist\installer\SetEnVar.nsi c:\usr\
     copy win32\dist\installer\net-snmp.nsi c:\usr\
     copy win32\dist\installer\Add2Path.nsi c:\usr\
-    copy win32\dist\installer\unregisterservice.bat c:\usr\
-    copy win32\dist\installer\registerservice.bat c:\usr\
+    copy win32\dist\installer\net-snmp-header1.bmp c:\usr\
 
-3.  Create an empty snmp.conf file in:
+3.  Create the following empty files:
 
-    notepad c:\usr\etc\snmp\snmp.conf
+    cd c:\usr
+    echo . > c:\usr\registeragent.bat c:\usr\
+    echo . > c:\usr\unregisteragent.bat c:\usr\
+    echo . > c:\usr\bin\snmpconf.bat c:\usr\
+    echo . > c:\usr\etc\snmp\snmp.conf
 
 4.  Launch the 'Nullsoft Install System (NSIS 2.0)'
 
@@ -337,7 +343,7 @@ Requirements
 
 7.  Select c:\usr\net-snmp.nsi
 
-8.  You should now have a c:\usr\Net-SNMP-x.x.x-1.exe binary installer 
+8.  You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
     package
 
 9.  Test the package
