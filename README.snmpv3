@@ -7,45 +7,49 @@ if you have OpenSSL installed.
 
 CREATING THE FIRST USER:
 
-  First off, you need to add snmpd.conf VACM entries to allow you to
-  use the SNMPv3 users you are going to create.  So, in your
-  /usr/local/share/snmp/snmpd.conf file (you may have to create it)
-  put the following line:
+  First, you need to run snmpd to create a new user.  To do this, you
+  want it to create the user and then immediately quit.  So, run it as
+  follows (this only works in net-snmp 5.0 and up, by the way):
 
-    rwuser myuser
-
-  Then, you need to actually create your new user and specify their
-  authentication type and pass phrase.  You can do this by putting the
-  following line in your /var/ucd-snmp/snmpd.conf file (you may have
-  to create it):
-
-    createUser myuser MD5 my_password DES
+    snmpd --createUser="myuser MD5 my_password DES" --quit
 
   WARNING: SNMPv3 pass phrases must be at least 8 characters long!
 
-  Now, you have a user "myuser" which can write to everything using
-  MD5 authentication and DES encryption if the above 2 lines are in
-  place.  You can optionally add a second pass phrase after the DES
-  keyword if you want it to be different from the authentication
-  pass phrase.
+  The above line creates the user "myuser" with a password of
+  "my_password" (and uses MD5 and DES for protection).  You can
+  optionally add a second pass phrase after the DES keyword if you
+  want the encryption password to be different from the authentication
+  pass phrase.  (Note that encryption support isn't enabled in the
+  binary releases downloadable from the net-snmp web site.)
+
+  First off, you need to add snmpd.conf VACM entries to allow you to
+  use the SNMPv3 users you are going to create.  to do this run the
+  following command:
+
+    snmpconf -G access_control
+
+  and answer it's questions.  Make sure you answer it's questions
+  about adding access rights for the v3 user you created above.
+  Basically, snmpconf will end up creating a configuration file you'll
+  have to install (and it'll tell you where to install it).  If you
+  can't get snmpconf working, just put a line like "rwuser myuser" in
+  your /usr/local/share/snmp/snmpd.conf file (you may have to create
+  it).  That's all snmpconf will do for you anyway.
 
   Start the agent and test your setup:
     /usr/local/sbin/snmpd
-       [...wait a few seconds...]
-    snmpget -v 3 -u myuser -l authNoPriv -a MD5 -A my_password localhost sysUpTime.0
+       [...wait a few seconds...  It will run in the background and
+        return you to your shell immediately.]
 
-  SECURITY CONSIDERATIONS: By placing the "createUser" line in
-  /var/ucd-snmp/snmpd.conf instead of
-  /usr/local/share/snmp/snmpd.conf, the password will be automatically
-  erased when the agent starts up.  This way, only the derived secret
-  key will remembered.  Even better is that actually only the
-  localized secret key will be remembered and if the machine is broken
-  into it'll be impossible to use this localized key to get access to
-  any of your other hosts.
+    snmpget -v 3 -u myuser -l authNoPriv -a MD5 -A my_password localhost sysUpTime.0
+       [ this should return information about how long your agent has been up]
+  
+    snmpget -v 3 -u myuser -l authPriv -a MD5 -A my_password localhost sysUpTime.0
+       [ this should return similar information, but encrypts the transmission ]
 
 CREATING A SECOND USER:
 
-  Start the agent (if you haven't yet).
+  Start the agent (if you didn't do so above).
 
   Now, lets create a second user using the first user (just for fun)
   for both authentication purposes and as a template (or "cloning
@@ -67,7 +71,8 @@ CREATING A SECOND USER:
 
     rwuser wes
 
-  Or, optional use the "rouser" token to only grant them read-only access.
+  Or, optional use the "rouser" token instead of the "rwuser" token to
+  only grant them read-only access.
 
   Now, test your new user:
 
@@ -75,21 +80,14 @@ CREATING A SECOND USER:
 
 FURTHER STUDIES:
 
-  The information about the newly created users is stored in
-  /var/ucd-snmp/snmpd.conf, in the form of configuration lines, when the
-  agent is shut down so that it is usable in next run in the future.
-
-  Also since that the passkeys stored in /var/ucd-snmp/snmpd.conf are
-  locked to a given engineID, which by default is based off of your
-  IPv4 address.  This means that:
-
-  1) You can't copy/rdist the /var/ucd-snmp/snmpd.conf around.
-  2) If you change the IP address of your machine your entire user
-     database needs to be re-created.  wheeee.
+  The converted passwords are stored in /var/net-snmp/snmpd.conf and
+  are locked to a given engineID, which is different from machine to
+  machine.  This means that you can't copy/rdist the
+  /var/net-snmp/snmpd.conf around.
 
 Tired of all those command line options?
 ----------------------------------------
-put something like this in your ~/.snmp/snmp.conf file (make it
+put something like this in your $HOME/.snmp/snmp.conf file (make it
 readable only by you!!!):
 
   defSecurityName wes
@@ -99,7 +97,7 @@ readable only by you!!!):
   defAuthPassphrase new_passphrase
   defVersion 3
 
-And this is in place the above example line boils down to:
+And this is in place the last of the above example lines boils down to:
 
   snmpget localhost sysUpTime.0
 
