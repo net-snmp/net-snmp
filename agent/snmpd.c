@@ -1014,6 +1014,7 @@ main(int argc, char *argv[])
     SNMP_FREE(argvrestartname);
     SNMP_FREE(argvrestart);
     SNMP_FREE(argvrestartp);
+    SOCK_CLEANUP;
     return 0;
 }                               /* End main() -- snmpd */
 
