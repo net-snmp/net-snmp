@@ -255,7 +255,9 @@ table_iterator_helper_handler(
 #else
             if (callback_loop_context && iinfo->free_loop_context_at_end)
                 (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
-                
+	    if (free_this_index_search != NULL) {
+	      snmp_free_varbind(free_this_index_search);
+	    }
             return SNMP_ERR_NOERROR;
 #endif
         }
