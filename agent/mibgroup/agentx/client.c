@@ -310,3 +310,29 @@ agentx_remove_agentcaps( struct snmp_session *ss,
     snmp_free_pdu(response);
     return 1;
 }
+
+int
+agentx_send_ping( struct snmp_session *ss )
+{
+    struct snmp_pdu *pdu, *response;
+
+    if (! IS_AGENTX_VERSION( ss->version ))
+	return 0;
+
+    pdu = snmp_pdu_create(AGENTX_MSG_PING);
+    if ( pdu == NULL )
+	return 0;
+    pdu->time = 0;
+    pdu->sessid = ss->sessid;
+
+    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
+	return 0;
+
+    if ( response->errstat != SNMP_ERR_NOERROR ) {
+	snmp_free_pdu(response);
+	return 0;
+    }
+
+    snmp_free_pdu(response);
+    return 1;
+}

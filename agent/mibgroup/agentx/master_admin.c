@@ -207,6 +207,18 @@ remove_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
+agentx_ping_response(struct snmp_session *session, struct snmp_pdu *pdu)
+{
+    struct snmp_session *sp;
+
+    sp = find_agentx_session( session, pdu->sessid );
+    if ( sp == NULL )
+        return AGENTX_ERR_NOT_OPEN;
+    else
+        return AGENTX_ERR_NOERROR;
+}
+
+int
 handle_master_agentx_packet(int operation,
 			    struct snmp_session *session,
 			    int reqid,
@@ -246,6 +258,10 @@ handle_master_agentx_packet(int operation,
 
 	case AGENTX_MSG_REMOVE_AGENT_CAPS:
 		asp->status = remove_agent_caps_list( session, pdu );
+		break;
+
+	case AGENTX_MSG_PING:
+		asp->status = agentx_ping_response( session, pdu );
 		break;
 
 	/* TODO: Other admin packets */
