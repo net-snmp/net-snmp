@@ -42,9 +42,6 @@
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
 
-/* ... or define this if you're using openssl support */
-#undef USE_OPENSSL
-
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
 
@@ -254,6 +251,9 @@
 
 /* vfsstat.f_files */
 #undef STRUCT_STATVFS_HAS_F_FILES
+
+/* des_ks_struct.weak_key */
+#undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
 
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
@@ -497,6 +497,11 @@
 #endif
 #endif
 
+/* If you have openssl 0.9.7 or above, you likely have AES support. */
+#undef USE_OPENSSL
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
+#define HAVE_AES 1
+#endif
 
 /* define random functions */
 
