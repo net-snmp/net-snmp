@@ -15,6 +15,7 @@
 #endif
 
 #include "asn1.h"
+#include "snmpd.h"
 #include "snmp_debug.h"
 #include "default_store.h"
 #include "ds_agent.h"
@@ -57,8 +58,8 @@ void agentx_parse_master(const char *token, char *cptr)
 
 void agentx_parse_agentx_socket(const char *token, char *cptr)
 {
-    DEBUGMSGTL(("snmpd_agentx_connection","port spec: %s\n", cptr));
-    ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, strdup(cptr));
+    DEBUGMSGTL(("agentx/config", "port spec: %s\n", cptr));
+    ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, cptr);
 }
 
 void init_agentx_config(void)
