@@ -169,6 +169,16 @@ long getTotalSwap(void)
 {
   long total_mem;
 
+#ifdef SC_AINFO
+  struct anoninfo anon;
+
+  if (swapctl(SC_AINFO, &anon) == -1) {
+	total_mem = 0;
+	return;
+  }
+  total_mem = anon.ani_max;
+#else
+
   size_t num;
   int i, n;
   swaptbl_t      *s;
@@ -194,6 +204,7 @@ long getTotalSwap(void)
       }
       free (s);
   }
+#endif
 
   return (total_mem);
 }
@@ -204,6 +215,16 @@ long getTotalSwap(void)
 static long getFreeSwap(void)
 {
   long free_mem = -1;
+
+#ifdef SC_AINFO
+  struct anoninfo anon;
+
+  if (swapctl(SC_AINFO, &anon) == -1) {
+	free_mem = -1;
+	return;
+  }
+  free_mem = (anon.ani_max - anon.ani_resv);
+#else
 
   size_t num;
   int i, n;
@@ -229,6 +250,7 @@ static long getFreeSwap(void)
       }
       free (s);
   }
+#endif
 
   return (free_mem);
 }
