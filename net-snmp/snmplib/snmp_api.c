@@ -4762,6 +4762,18 @@ snmp_free_pdu(netsnmp_pdu *pdu)
     if (!pdu)
         return;
 
+    /*
+     * If the command field is empty, that probably indicates
+     *   that this PDU structure has already been freed.
+     *   Log a warning and return (rather than freeing things again)
+     *
+     * Note that this does not pick up dual-frees where the
+     *   memory is set to random junk, which is probably more serious.
+     */
+    if (pdu->command == 0) {
+        snmp_log(LOG_WARNING, "snmp_free_pdu probably called twice\n");
+        return;
+    }
     if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
         sptr->pdu_free != NULL) {
         (*sptr->pdu_free) (pdu);
@@ -4774,6 +4786,7 @@ snmp_free_pdu(netsnmp_pdu *pdu)
     SNMP_FREE(pdu->contextName);
     SNMP_FREE(pdu->securityName);
     SNMP_FREE(pdu->transport_data);
+    memset(pdu, 0, sizeof(netsnmp_pdu));
     free((char *) pdu);
 }
 
