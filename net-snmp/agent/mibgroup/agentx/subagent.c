@@ -588,8 +588,12 @@ subagent_pre_init( void )
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
 	return 0;
 
-    if (subagent_open_master_session() != 0)
+    if (subagent_open_master_session() != 0) {
+	if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL) > 0) {
+	    agentx_reopen_session(0, NULL);
+	}
         return -1;
+    }
 
 
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
