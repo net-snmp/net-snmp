@@ -1,0 +1,11 @@
+CC = cc -g
+
+OBJS = misc.o read_config.o wes.o hpmibs.o
+SRCS:=$(subst .o,.c,$(OBJS))
+
+all: $(OBJS)
+
+wes.o: wes.h wes.c struct.h
+hpmibs.o: wes.h hpmibs.c
+readconfig.o: readconfig.c struct.h
+misc.o: misc.c struct.h
