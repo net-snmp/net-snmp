@@ -194,15 +194,13 @@ void sprint_asciistring(char *buf,
 
     for(x = 0; x < (int)len; x++){
 	if (isprint(*cp)){
+	    if (*cp == '\\' || *cp == '"')
+		*buf++ = '\\';
 	    *buf++ = *cp++;
 	} else {
 	    *buf++ = '.';
 	    cp++;
 	}
-#if 0
-	if ((x % 48) == 47)
-	    *buf++ = '\n';
-#endif
     }
     *buf = '\0';
 }
