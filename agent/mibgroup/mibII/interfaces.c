@@ -1461,8 +1461,9 @@ Interface_Scan_Init (void)
                 snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
         }
 
-        *stats++ = 0;
+        *stats   = 0;
         strcpy(ifname_buf, ifstart);
+        *stats++ = ':';
         while (*stats == ' ') stats++;
 
         if ((scan_line_to_use == scan_line_2_2 &&
