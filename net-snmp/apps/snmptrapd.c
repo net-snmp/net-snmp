@@ -301,6 +301,8 @@ void do_external(char *cmd,
   static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
   static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
   static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
+  oid enttrapoid[MAX_OID_LEN];
+  int enttraplen = pdu->enterprise_length;
   int fd[2];
   int pid, result;
   FILE *file;
@@ -338,9 +340,18 @@ void do_external(char *cmd,
         sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
         fprintf(file,"%s\n",varbuf);
         tmpvar.type = ASN_OBJECT_ID;
-        trapoids[9] = pdu->trap_type+1;
-        tmpvar.val.objid = trapoids;
-        tmpvar.val_len = 10*sizeof(oid);
+	if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+	  memcpy(enttrapoid, pdu->enterprise, sizeof(oid)*enttraplen);
+	  if (enttrapoid[enttraplen-1] != 0) enttrapoid[enttraplen++] = 0;
+	  enttrapoid[enttraplen++] = pdu->specific_type;
+	  tmpvar.val.objid = enttrapoid;
+	  tmpvar.val_len = enttraplen*sizeof(oid);
+	}
+	else {
+	  trapoids[9] = pdu->trap_type+1;
+	  tmpvar.val.objid = trapoids;
+	  tmpvar.val_len = 10*sizeof(oid);
+	}
         sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
         fprintf(file,"%s\n",varbuf);
       }
@@ -393,8 +404,15 @@ int snmp_input(int op,
                   
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
+	    oid trapOid[MAX_OID_LEN];
+	    int trapOidLen = pdu->enterprise_length;
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				  sizeof (pduIp->sin_addr), AF_INET);
+	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+		memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
+		if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
+		trapOid[trapOidLen++] = pdu->specific_type;
+	    }
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
@@ -405,11 +423,6 @@ int snmp_input(int op,
                        inet_ntoa(pduIp->sin_addr),
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[MAX_OID_LEN];
-		    size_t trapOidLen = pdu->enterprise_length;
-		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
-		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
-		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
 		    cp = strrchr(oid_buf, '.');
 		    if (cp) cp++;
@@ -434,44 +447,43 @@ int snmp_input(int op,
 	    	varbuf[varbufidx]='\0';
 
 	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
-			sprint_variable(varbuf+varbufidx, vars->name,
-                                        vars->name_length, vars);
-			/* Update the length of the string with the
-                           new variable */
-			varbufidx += strlen(varbuf+varbufidx);
-			/* And add a trailing , ... */
-	        	varbuf[varbufidx++]=',';
-	        	varbuf[varbufidx++]=' ';
-	        	varbuf[varbufidx]='\0';
+		    sprint_variable(varbuf+varbufidx, vars->name,
+				    vars->name_length, vars);
+		    /* Update the length of the string with the
+		       new variable */
+		    varbufidx += strlen(varbuf+varbufidx);
+		    /* And add a trailing , ... */
+		    varbuf[varbufidx++]=',';
+		    varbuf[varbufidx++]=' ';
+		    varbuf[varbufidx]='\0';
 	    	}
 	    	if ( varbufidx ) {
 			varbufidx -= 2; varbuf[varbufidx]='\0';
 	    	}
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[MAX_OID_LEN];
-		    size_t trapOidLen = pdu->enterprise_length;
-		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
-		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
-		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
 		    cp = strrchr(oid_buf, '.');
 		    if (cp) cp++;
 		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
-		       inet_ntoa(pduIp->sin_addr),
-		       trap_description(pdu->trap_type), cp,
-		       uptime_string(pdu->time, buf), varbuf);
+                           inet_ntoa(pduIp->sin_addr),
+                           trap_description(pdu->trap_type), cp,
+                           uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
-		       inet_ntoa(pduIp->sin_addr),
-		       trap_description(pdu->trap_type), pdu->specific_type,
-		       uptime_string(pdu->time, buf), varbuf);
+                           inet_ntoa(pduIp->sin_addr),
+                           trap_description(pdu->trap_type), pdu->specific_type,
+                           uptime_string(pdu->time, buf), varbuf);
 		}
 	    }
-            trapoids[9] = pdu->trap_type+1;
-            Command = snmptrapd_get_traphandler(trapoids, 10);
+	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC)
+		Command = snmptrapd_get_traphandler(trapOid, trapOidLen);
+	    else {
+		trapoids[9] = pdu->trap_type+1;
+		Command = snmptrapd_get_traphandler(trapoids, 10);
+	    }
             if (Command)
-              do_external(Command, host, pdu);
+		do_external(Command, host, pdu);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
@@ -499,10 +511,10 @@ int snmp_input(int op,
                          sizeof(snmptrapoid2)/sizeof(oid));
                 vars = vars->next_variable);
             if (vars && vars->type == ASN_OBJECT_ID) {
-              Command = snmptrapd_get_traphandler(vars->val.objid,
-                                                  vars->val_len/sizeof(oid));
-              if (Command)
-                do_external(Command, host, pdu);
+		Command = snmptrapd_get_traphandler(vars->val.objid,
+						    vars->val_len/sizeof(oid));
+		if (Command)
+		    do_external(Command, host, pdu);
             }
 	    if (pdu->command == SNMP_MSG_INFORM){
 		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_RESPONSE))){

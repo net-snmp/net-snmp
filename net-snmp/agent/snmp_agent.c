@@ -66,6 +66,7 @@ SOFTWARE.
 #include "var_struct.h"
 #include "read_config.h"
 #include "snmp_logging.h"
+#include "snmp_debug.h"
 #include "mib_module_config.h"
 #if USING_MIBII_VACM_VARS_MODULE
 #include "mibgroup/mibII/vacm_vars.h"

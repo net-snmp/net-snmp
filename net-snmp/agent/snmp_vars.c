@@ -87,6 +87,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars.h"
 #include "agent_read_config.h"
 #include "mib_module_config.h"
+#include "agent_registry.h"
 #if USING_MIBII_VACM_VARS_MODULE
 #include "mibgroup/mibII/vacm_vars.h"
 #endif
@@ -387,7 +388,7 @@ getStatPtr(
       if ( snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) >= 0 )
           break;
     }
-    if ( tp != NULL && prev != NULL &
+    if ( tp != NULL && prev != NULL &&
        snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) > 0 )
               tp = prev;
 /*

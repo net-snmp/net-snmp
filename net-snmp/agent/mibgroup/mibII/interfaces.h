@@ -71,8 +71,10 @@ struct ifnet {
 		int	ifq_len;
 		int	ifq_drops;
 	} if_snd;			/* output queue */
+	int	if_ibytes;		/* octets received on interface */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
+	int	if_obytes;		/* octets sent on interface */
 	int	if_opackets;		/* packets sent on interface */
 	int	if_oerrors;		/* output errors on interface */
 	int	if_collisions;		/* collisions on csma interfaces */
