@@ -143,6 +143,14 @@ netsnmp_table_iterator_helper_handler(
            these */
         
         index_search = snmp_clone_varbind(table_info->indexes);
+        if (!index_search) {
+            /* hmmm....  invalid table? */
+            snmp_log(LOG_WARNING,
+                     "invalid index list or failed malloc for table %s\n",
+                     reginfo->handlerName);
+            return SNMP_ERR_NOERROR;
+        }
+        
         free_this_index_search = index_search;
 
         /* below our minimum column? */
