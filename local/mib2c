@@ -130,7 +130,7 @@ $varlen = $varLengths[$varlen];
 #
 #============================================
 open(DOTH,">$outputName.h");
-print DOTH (eval "\"$variableTypes{'code-dot-c-init'}{'code'}\"") . "\n";;
+print DOTH (eval "\"$variableTypes{'code-dot-h'}{'code'}\"") . "\n";;
 close(DOTH);
 
 
@@ -272,7 +272,7 @@ sub read_config() {
     my $fh = new FileHandle;
     if ( $fh->open("<$configfile") ) {
 	while(<$fh>) {
-	    next if /^\s*#/;
+	    next if (/^\s*\#/ || /^\s*$/);
 	    if (/type:\s*(.*)/) {
 		if (defined($type) && defined($lasttoken) && 
 		    defined ($variableTypes{$type}{$lasttoken})) {
