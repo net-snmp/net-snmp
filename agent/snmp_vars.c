@@ -67,7 +67,26 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_XTI_H
 #include <xti.h>
 #endif
+#if HAVE_SYS_VM_H
 #include <sys/vm.h>
+#else
+#if HAVE_VM_VM_H
+#include <vm/vm.h>
+#else
+#if HAVE_SYS_VMPARAM_H
+#include <sys/vmparam.h>
+#endif
+#if HAVE_SYS_VMMAC_H
+#include <sys/vmmac.h>
+#endif
+#if HAVE_SYS_VMMETER_H
+#include <sys/vmmeter.h>
+#endif
+#if HAVE_SYS_VMSYSTM_H
+#include <sys/vmsystm.h>
+#endif
+#endif
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -564,11 +583,13 @@ struct variable2 udp_variables[] = {
 #ifndef hpux
 #ifndef sparc
 #ifndef __alpha
+#ifndef netbsd1
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
     {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
+#endif
 #endif
 #endif
 #endif
@@ -2759,6 +2780,11 @@ int     (**write_method)(); /* OUT - pointer to function to set variable, otherw
 
 #endif /* solaris2 - tcp */
 
+#ifdef netbsd1
+#define inp_next inp_queue.cqe_next
+#define inp_prev inp_queue.cqe_prev
+#endif
+
 /*
  *	Print INTERNET connections
  */
@@ -2841,6 +2867,7 @@ static int arptab_size, arptab_current;
 static struct arptab *at=0;
 static ARP_Scan_Init()
 {
+#ifndef netbsd1
 	extern char *malloc();
 
 	if (!at) {
@@ -2850,12 +2877,14 @@ static ARP_Scan_Init()
 
 	KNLookup( N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
 	arptab_current = 0;
+#endif
 }
 
 static int ARP_Scan_Next(IPAddr, PhysAddr)
 u_long *IPAddr;
 char *PhysAddr;
 {
+#ifndef netbsd1
 	register struct arptab *atab;
 
 	while (arptab_current < arptab_size) {
@@ -2870,6 +2899,7 @@ char *PhysAddr;
 #endif
 	return(1);
 	}
+#endif
 	return(0);	    /* "EOF" */
 }
 
@@ -2942,6 +2972,11 @@ struct ifnet *Retifnet;
 
 #else
 
+#ifdef netbsd1
+#define ia_next ia_list.tqe_next
+#define if_next if_list.tqe_next
+#endif
+
 int Interface_Scan_Next(Index, Name, Retifnet, Retin_ifaddr)
 int *Index;
 char *Name;
@@ -2976,7 +3011,9 @@ struct in_ifaddr *Retin_ifaddr;
 		    ia = in_ifaddr.ia_next;
 		}
 
+#ifndef netbsd1
 		ifnet.if_addrlist = (struct ifaddr *)ia;     /* WRONG DATA TYPE; ONLY A FLAG */
+#endif
 /*		ifnet.if_addrlist = (struct ifaddr *)&ia->ia_ifa;   */  /* WRONG DATA TYPE; ONLY A FLAG */
 
 		if (Index)
