@@ -177,6 +177,8 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
 }
 
 /**
+ *
+ * @retval -1 : malloc error
  */
 static int
 _get_interface_count(int sd, struct ifconf * ifc)
@@ -196,7 +198,7 @@ _get_interface_count(int sd, struct ifconf * ifc)
         if (NULL == ifc->ifc_buf) {
             snmp_log(LOG_ERR, "could not allocate memory for %d interfaces\n",
                      i);
-            break;
+            return -1;
         }
         ifc->ifc_len = i * sizeof(struct ifreq);
 
