@@ -42,9 +42,9 @@ AC_DEFUN(AC_CHECK_STRUCT_FOR,[
 
 ac_safe_struct=`echo "$2" | sed 'y%./+-%__p_%'`
 ac_safe_member=`echo "$3" | sed 'y%./+-%__p_%'`
-ac_safe_all="ac_cv_struct_$ac_safe_struct_has_$ac_safe_member"
+ac_safe_all="ac_cv_struct_${ac_safe_struct}_has_${ac_safe_member}"
 changequote(, )dnl
-  ac_uc_define=STRUCT_`echo "$ac_safe_struct_HAS_$ac_safe_member" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+  ac_uc_define=STRUCT_`echo "${ac_safe_struct}_HAS_${ac_safe_member}" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
 changequote([, ])dnl
 
 AC_MSG_CHECKING([for $2.$3])
@@ -62,10 +62,10 @@ $1
 ],[
 struct $2 testit; 
 testit.$3 $defineit;
-], eval "$ac_safe_all=yes", eval "$ac_safe_all=no" )
+], eval "${ac_safe_all}=yes", eval "${ac_safe_all}=no" )
 ])
 
-if eval "test \"x$`echo $ac_safe_all`\" = \"xyes\""; then
+if eval "test \"x$`echo ${ac_safe_all}`\" = \"xyes\""; then
   AC_MSG_RESULT(yes)
   AC_DEFINE_UNQUOTED($ac_uc_define)
 else
