@@ -132,6 +132,17 @@ Release_oid_array(oid_array a)
     free(a);
 }
 
+int
+Get_oid_data_count(oid_array a)
+{
+    oid_array_table *t = (oid_array_table *) a;
+
+    /*
+     * return count
+     */
+    return t ? t->count : 0;
+}
+
 void           *
 Get_oid_data(oid_array a, void *key, int exact)
 {
@@ -301,4 +312,92 @@ Retrieve_oid_array(oid_array t, int *max_idx, int sort)
 
     *max_idx = table->count;
     return table->data;
+}
+
+/**********************************************************************
+ *
+ * Special case support for subsets
+ *
+ */
+static int
+array_ncompare(const void *lhs, const void *rhs)
+{
+  return snmp_oid_ncompare((*(const oid_array_header **) lhs)->idx,
+                           (*(const oid_array_header **) lhs)->idx_len,
+                           (*(const oid_array_header **) rhs)->idx,
+                           (*(const oid_array_header **) rhs)->idx_len,
+                           (*(const oid_array_header **) rhs)->idx_len);
+}
+
+static int
+binary_search_for_start(oid_array_header * val, oid_array_table * t)
+{
+    int             len = t->count;
+    int             half;
+    int             middle;
+    int             result = 0;
+    int             first = 0;
+
+    if (!len)
+        return -1;
+
+    if (t->dirty)
+        Sort_Array(t);
+
+    while (len > 0) {
+        half = len >> 1;
+        middle = first;
+        middle += half;
+        if ((result = array_ncompare(TABLE_INDEX(t, middle), &val)) < 0) {
+            first = middle;
+            ++first;
+            len = len - half - 1;
+        } else
+            len = half;
+    }
+
+    if( (first >= t->count) ||
+        array_ncompare(TABLE_INDEX(t, first), &val) != 0 )  
+      return -1;
+
+    return first;
+}
+
+void           **
+Get_oid_data_subset(oid_array a, void *key, int *len)
+{
+    oid_array_table *t = (oid_array_table *) a;
+    void            **subset;
+    int             start, end, i;
+
+    /*
+     * if there is no data, return NULL;
+     */
+    if (!t->count || !key)
+        return 0;
+
+    /*
+     * if the table is dirty, sort it.
+     */
+    if (t->dirty)
+        Sort_Array(t);
+
+    /*
+     * find matching items
+     */
+    start = end = binary_search_for_start(key, t);
+    if(start == -1)
+      return 0;
+    
+    for( i = start + 1; i < t->count; ++i ) {
+      if( 0 != array_ncompare(TABLE_INDEX(t, i), &key) )
+        break;
+      ++end;
+    }
+
+    *len = end - start;
+    subset = malloc( (*len) * t->data_size );
+    memcpy( subset, TABLE_INDEX(t, start), t->data_size * (*len));
+
+    return subset;
 }
