@@ -2642,7 +2642,7 @@ asn_realloc_rbuild_float(u_char **pkt, size_t *pkt_len,
   /*  Correct for endian differences and copy value.  */
   fu.floatVal = *floatp;
   fu.intVal = htonl(fu.intVal);	
-  *offset += floatsize + 3;
+  *offset += floatsize;
   memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), floatsize);
 
   /*  Put the special tag and length (3 bytes).  */
@@ -2696,7 +2696,7 @@ asn_realloc_rbuild_double(u_char **pkt, size_t *pkt_len,
   tmp = htonl(fu.intVal[0]);
   fu.intVal[0] = htonl(fu.intVal[1]);	
   fu.intVal[1] = tmp;
-  *offset += doublesize + 3;
+  *offset += doublesize;
   memcpy(*pkt + *pkt_len - *offset, &(fu.c[0]), doublesize);
 
   /*  Put the special tag and length (3 bytes).  */
