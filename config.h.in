@@ -203,6 +203,9 @@
 /* Define if you have the <inet/mib2.h> header file.  */
 #undef HAVE_INET_MIB2_H
 
+/* Define if you have the <kstat.h> header file.  */
+#undef HAVE_KSTAT_H
+
 /* Define if you have the <kvm.h> header file.  */
 #undef HAVE_KVM_H
 
@@ -415,6 +418,9 @@
 
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
+
+/* sysctl works to get boottime, etc... */
+#undef CAN_USE_SYSCTL
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
