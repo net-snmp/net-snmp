@@ -100,8 +100,7 @@ extern          "C" {
         /*
          * inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        /** 128 - 5(other indexes) - oid length(11) = 112 */
-        char            inetCidrRouteDest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
+        char inetCidrRouteDest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteDest_len;
 
         /*
@@ -112,7 +111,6 @@ extern          "C" {
         /*
          * inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h
          */
-        /** 128 - 5(other indexes) - oid length(11) = 112 */
         oid             inetCidrRoutePolicy[NETSNMP_POLICY_OID_MAX_LEN];
         size_t          inetCidrRoutePolicy_len;
 
@@ -124,8 +122,7 @@ extern          "C" {
         /*
          * inetCidrRouteNextHop(6)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        /** 128 - 5(other indexes) - oid length(11) = 112 */
-        char            inetCidrRouteNextHop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
+        char inetCidrRouteNextHop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteNextHop_len;
 
 
@@ -175,7 +172,7 @@ extern          "C" {
         /*
          * TODO:131:o: |   |-> Add useful data to inetCidrRouteTable rowreq context.
          */
-       u_char inetCidrRouteStatus;
+        u_char          inetCidrRouteStatus;
 
         /*
          * storage for future expansion
@@ -192,10 +189,10 @@ extern          "C" {
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         inetCidrRouteTable_pre_request(inetCidrRouteTable_registration_ptr
                                        user_context);
-    int            
+    int
         inetCidrRouteTable_post_request(inetCidrRouteTable_registration_ptr
                                         user_context);
 
@@ -238,8 +235,7 @@ extern          "C" {
      */
 
     int             inetCidrRouteIfIndex_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteIfIndex_val_ptr);
     int             inetCidrRouteType_get(inetCidrRouteTable_rowreq_ctx *
                                           rowreq_ctx,
@@ -253,30 +249,25 @@ extern          "C" {
                                          rowreq_ctx,
                                          u_long *
                                          inetCidrRouteAge_val_ptr);
-    int            
+    int
         inetCidrRouteNextHopAS_get(inetCidrRouteTable_rowreq_ctx *
                                    rowreq_ctx,
                                    u_long *
                                    inetCidrRouteNextHopAS_val_ptr);
     int             inetCidrRouteMetric1_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteMetric1_val_ptr);
     int             inetCidrRouteMetric2_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteMetric2_val_ptr);
     int             inetCidrRouteMetric3_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteMetric3_val_ptr);
     int             inetCidrRouteMetric4_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteMetric4_val_ptr);
     int             inetCidrRouteMetric5_get(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              *inetCidrRouteMetric5_val_ptr);
     int             inetCidrRouteStatus_get(inetCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx,
@@ -284,14 +275,13 @@ extern          "C" {
                                             inetCidrRouteStatus_val_ptr);
 
 
-    int            
+    int
         inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index
                                                * tbl_idx,
                                                u_long
                                                inetCidrRouteDestType_val,
                                                char
-                                               *inetCidrRouteDest_val_ptr,
-                                               size_t
+                                               *inetCidrRouteDest_val_ptr, size_t
                                                inetCidrRouteDest_val_ptr_len,
                                                u_long
                                                inetCidrRoutePfxLen_val,
@@ -302,10 +292,9 @@ extern          "C" {
                                                u_long
                                                inetCidrRouteNextHopType_val,
                                                char
-                                               *inetCidrRouteNextHop_val_ptr,
-                                               size_t
+                                               *inetCidrRouteNextHop_val_ptr, size_t
                                                inetCidrRouteNextHop_val_ptr_len);
-    int            
+    int
         inetCidrRouteTable_indexes_set(inetCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        u_long inetCidrRouteDestType_val,
@@ -352,42 +341,41 @@ extern          "C" {
     int             inetCidrRouteNextHop_check_index(inetCidrRouteTable_rowreq_ctx * rowreq_ctx);       /* internal */
 
 
-    int            
+    int
         inetCidrRouteTable_validate_index
         (inetCidrRouteTable_registration_ptr inetCidrRouteTable_reg,
          inetCidrRouteTable_rowreq_ctx * rowreq_ctx);
-    int            
+    int
         inetCidrRouteTable_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
-    int            
+    int
         inetCidrRouteTable_undo_cleanup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
-    int            
+    int
         inetCidrRouteTable_undo_commit(inetCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx);
 
 
-    int            
+    int
         inetCidrRouteIfIndex_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteIfIndex_val);
-    int            
+    int
         inetCidrRouteIfIndex_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteIfIndex_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteIfIndex_val);
     int             inetCidrRouteIfIndex_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteType_check_value(inetCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx,
                                       u_long inetCidrRouteType_val);
-    int            
+    int
         inetCidrRouteType_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx);
     int             inetCidrRouteType_set(inetCidrRouteTable_rowreq_ctx *
@@ -396,11 +384,11 @@ extern          "C" {
     int             inetCidrRouteType_undo(inetCidrRouteTable_rowreq_ctx *
                                            rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteProto_check_value(inetCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        u_long inetCidrRouteProto_val);
-    int            
+    int
         inetCidrRouteProto_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             inetCidrRouteProto_set(inetCidrRouteTable_rowreq_ctx *
@@ -409,11 +397,11 @@ extern          "C" {
     int             inetCidrRouteProto_undo(inetCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteAge_check_value(inetCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx,
                                      u_long inetCidrRouteAge_val);
-    int            
+    int
         inetCidrRouteAge_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                     rowreq_ctx);
     int             inetCidrRouteAge_set(inetCidrRouteTable_rowreq_ctx *
@@ -422,97 +410,92 @@ extern          "C" {
     int             inetCidrRouteAge_undo(inetCidrRouteTable_rowreq_ctx *
                                           rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteNextHopAS_check_value(inetCidrRouteTable_rowreq_ctx *
                                            rowreq_ctx,
                                            u_long
                                            inetCidrRouteNextHopAS_val);
-    int            
+    int
         inetCidrRouteNextHopAS_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                           rowreq_ctx);
-    int            
+    int
         inetCidrRouteNextHopAS_set(inetCidrRouteTable_rowreq_ctx *
                                    rowreq_ctx,
                                    u_long inetCidrRouteNextHopAS_val);
-    int            
+    int
         inetCidrRouteNextHopAS_undo(inetCidrRouteTable_rowreq_ctx *
                                     rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteMetric1_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteMetric1_val);
-    int            
+    int
         inetCidrRouteMetric1_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteMetric1_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteMetric1_val);
     int             inetCidrRouteMetric1_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteMetric2_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteMetric2_val);
-    int            
+    int
         inetCidrRouteMetric2_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteMetric2_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteMetric2_val);
     int             inetCidrRouteMetric2_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteMetric3_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteMetric3_val);
-    int            
+    int
         inetCidrRouteMetric3_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteMetric3_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteMetric3_val);
     int             inetCidrRouteMetric3_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteMetric4_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteMetric4_val);
-    int            
+    int
         inetCidrRouteMetric4_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteMetric4_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteMetric4_val);
     int             inetCidrRouteMetric4_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteMetric5_check_value(inetCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long inetCidrRouteMetric5_val);
-    int            
+    int
         inetCidrRouteMetric5_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             inetCidrRouteMetric5_set(inetCidrRouteTable_rowreq_ctx
-                                             * rowreq_ctx,
-                                             long
+                                             * rowreq_ctx, long
                                              inetCidrRouteMetric5_val);
     int             inetCidrRouteMetric5_undo(inetCidrRouteTable_rowreq_ctx
                                               * rowreq_ctx);
 
-    int            
+    int
         inetCidrRouteStatus_check_value(inetCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx,
                                         u_long inetCidrRouteStatus_val);
-    int            
+    int
         inetCidrRouteStatus_undo_setup(inetCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx);
     int             inetCidrRouteStatus_set(inetCidrRouteTable_rowreq_ctx *
@@ -523,7 +506,7 @@ extern          "C" {
                                              * rowreq_ctx);
 
 
-    int            
+    int
         inetCidrRouteTable_check_dependencies(inetCidrRouteTable_rowreq_ctx
                                               * ctx);
 
