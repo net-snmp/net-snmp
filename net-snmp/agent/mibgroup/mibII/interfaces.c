@@ -370,7 +370,7 @@ Interface_Scan_By_Index (int iindex,
 	      {
 		a = get_address (ifp+1, ifp->ifm_addrs, RTA_IFP);
                 if (a == NULL)
-                  return NULL;
+                  return 0;
 		strncpy (if_name,
 			 ((const struct sockaddr_in *) a)->sin_zero,
 			 ((const u_char *) a)[5]);
@@ -400,14 +400,14 @@ Interface_Scan_By_Index (int iindex,
 				     ifap->ifam_addrs &= ~RTA_NETMASK,
 				     RTA_IFA);
                 if (ia == NULL)
-                  return NULL;
+                  return 0;
                 
 		sifa->sifa_addr = *ia;
 		ia = get_in_address ((char *) (ifap+1)+8,
 				     ifap->ifam_addrs &= ~RTA_NETMASK,
 				     RTA_BRD);
                 if (ia == NULL)
-                  return NULL;
+                  return 0;
 
 		sifa->sifa_broadcast = *ia;
 		++have_addr;
@@ -529,7 +529,12 @@ var_ifEntry(struct variable *vp,
     long_return = (long) if_msg.ifm_data.ifi_mtu;
     return (u_char *) &long_return;
   case IFSPEED:
+#if STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE 
+    long_return = (u_long) if_msg.ifm_data.ifi_baudrate.ifs_value <<
+                           if_msg.ifm_data.ifi_baudrate.ifs_log2;
+#else
     long_return = (u_long) if_msg.ifm_data.ifi_baudrate;
+#endif
     return (u_char *) &long_return;
   case IFPHYSADDRESS:
     /* XXX */
