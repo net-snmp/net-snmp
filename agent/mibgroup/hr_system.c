@@ -165,7 +165,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

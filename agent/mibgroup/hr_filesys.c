@@ -225,7 +225,7 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	case HRFSYS_PARTDUMP:
 	    return when_dumped( HRFS_entry->mnt_fsname, PART_DUMP, var_len );
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

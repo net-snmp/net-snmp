@@ -295,7 +295,7 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) string;
 #endif
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
