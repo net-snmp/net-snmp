@@ -27,63 +27,113 @@ while ($#ARGV > -1 && $ARGV[0] =~ /^-/) {
 # run a whole ton of setup stuff
 
 if ($delete) {
-    $dbh->do("drop database if exists $dbname");
+    DO("drop database if exists $dbname");
 }
 
 # here we go
 
-$dbh->do("create database $dbname");
-$dbh->do("use $dbname");
-$dbh->do("create table hosts (id integer auto_increment primary key, 
-                        name varchar(16), 
-                        community varchar(32))");
-$dbh->do("create table hosterrors (id integer auto_increment primary key, 
-                       host varchar(16),
-                       errormsg varchar(128))");
-$dbh->do("create table hosttables (id integer auto_increment primary key, 
-                       host varchar(16), tablename varchar(64),
-		       groupname varchar(32),
-                       keephistory integer(2))");
-$dbh->do("create table usergroups (id integer auto_increment primary key, 
-                       user varchar(16),
-                       groupname varchar(32),
-		       isadmin enum('N','Y') default 'N')");
-$dbh->do("create table userprefs (id integer auto_increment primary key, 
-                            user varchar(16),
-                            groupname varchar(32),
-                            tablename varchar(64),
-                            columnname varchar(64),
-                            displayit enum('N','Y') default 'Y')");
-$dbh->do("create table hostgroups (id integer auto_increment primary key, 
-                             host varchar(16), 
-                             groupname varchar(32))");
+DO("create database $dbname");
+DO("use $dbname");
 
-$dbh->do("create table oncall (id integer auto_increment primary key, 
-                               user varchar(16),
-                               groupname varchar(32),
-                               email varchar(64),
-                               days  varchar(64),
-                               hours varchar(64))");
+# tables dumped with
+#
+# mysqldump -d ... snmp TABLE | perl -n -e 'while(<>) { last if (/CREATE/);} print "DO(\"$_"; while (<>) { last if (/\);/); print; } print ")\");\n";'
 
-$dbh->do("create table errorexpressions (id integer auto_increment primary key, 
-                                   tablename varchar(64), 
-                                   expression varchar(255),
-                                   returnfield varchar(64))");
+DO("CREATE TABLE hosterrors (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  host varchar(64),
+  errormsg varchar(128),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE hosttables (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  host varchar(64),
+  tablename varchar(64),
+  groupname varchar(32),
+  keephistory int(2),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE usergroups (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  user varchar(16),
+  groupname varchar(32),
+  isadmin enum('N','Y') DEFAULT 'N',
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE userprefs (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  user varchar(16),
+  groupname varchar(32),
+  tablename varchar(64),
+  columnname varchar(64),
+  displayit enum('N','Y') DEFAULT 'Y',
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE hostgroups (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  host varchar(64),
+  groupname varchar(32),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE oncall (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  user varchar(16),
+  groupname varchar(32),
+  email varchar(64),
+  days varchar(64),
+  hours varchar(64),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE errorexpressions (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  tablename varchar(64),
+  expression varchar(255),
+  returnfield varchar(64),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE authgroup (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  lookup varchar(64),
+  varcol varchar(128),
+  valcol varchar(128),
+  PRIMARY KEY (id)
+)");
+
+DO("CREATE TABLE authhost (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  lookup varchar(64),
+  varcol varchar(128),
+  valcol varchar(128),
+  PRIMARY KEY (id)
+)");
 
 # insert the standard ucd-snmp expressions 
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('prEntry', 'prErrorFlag > 0', 'prErrMessage')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('extEntry', 'extResult > 0', 'extOutput')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('dskEntry', 'dskErrorFlag > 0', 'dskErrMessage')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('laEntry', 'laErrorFlag > 0', 'laErrMessage')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('fileEntry', 'fileErrorFlag > 0', 'fileErrMessage')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('snmperrs', 'snmperrErrorFlag > 0', 'snmperrErrMessage')");
-$dbh->do("insert into errorexpressions(tablename, expression, returnfield)
+DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('memory', 'memSwapError > 0', 'memSwapErrMessage')");
 
 $dbh->disconnect();
+
+sub DO {
+    my $cmd = shift;
+    print $cmd,"\n" if ($verbose);
+    $dbh->do($cmd) if ($doit);
+}
