@@ -27,6 +27,7 @@
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "tools.h"
 #include "read_config.h"
 #include "default_store.h"
@@ -142,7 +143,7 @@ ds_handle_config(const char *token, char *line) {
   int itmp;
 
   DEBUGMSGTL(("ds_handle_config", "handling %s\n", token));
-  for(drsp = ds_configs; drsp != NULL && strcmp(token, drsp->token) != 0;
+  for(drsp = ds_configs; drsp != NULL && strcasecmp(token, drsp->token) != 0;
       drsp = drsp->next);
   if (drsp != NULL) {
     DEBUGMSGTL(("ds_handle_config",
@@ -175,11 +176,11 @@ ds_handle_config(const char *token, char *line) {
         break;
 
       default:
-        DEBUGMSGTL(("ds_handle_config", "*** unknown type %d\n", drsp->type));
+        snmp_log(LOG_CRIT,"ds_handle_config *** unknown type %d\n", drsp->type);
         break;
     }
   } else {
-    DEBUGMSGTL(("ds_handle_config", "*** no registration for %s\n", token));
+    snmp_log(LOG_CRIT, "ds_handle_config *** no registration for %s\n", token);
   }
 }
 
