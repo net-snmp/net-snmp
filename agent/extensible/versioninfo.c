@@ -2,13 +2,13 @@
 
 #include "mibdefs.h"
 #include "mibincl.h"
-#include "wes.h"
+#include "../../config.h"
 
 static char *VersionInfo="Ext2-7-3";
 
 int clear_cache();
 
-unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;

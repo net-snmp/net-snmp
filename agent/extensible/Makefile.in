@@ -1,7 +1,7 @@
 
 CC = cc -g
 
-OBJS = misc.o read_config.o wes.o hpmibs.o proc.o exec.o versioninfo.o 
+OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
 SRCS:=$(subst .o,.c,$(OBJS))
 
 all: TAGS $(OBJS)
@@ -9,13 +9,13 @@ all: TAGS $(OBJS)
 TAGS: $(SRCS)
 	etags *.c *.h
 
-wes.o: wes.h wes.c struct.h mibdefs.h mibincl.h
-hpmibs.o: wes.h struct.h hpmibs.c mibdefs.h mibincl.h
-read_config.o: read_config.c struct.h wes.h
-misc.o: misc.c struct.h wes.h
-versioninfo.o: mibdefs.h mibincl.h wes.h struct.h versioninfo.c
-proc.o: wes.h struct.h mibdefs.h mibincl.h proc.c
-exec.o: wes.h struct.h mibdefs.h mibincl.h exec.c
+extensible.o: ../../config.h extensible.c struct.h mibdefs.h mibincl.h
+hpmibs.o: ../../config.h struct.h hpmibs.c mibdefs.h mibincl.h
+read_config.o: read_config.c struct.h ../../config.h
+misc.o: misc.c struct.h ../../config.h
+versioninfo.o: mibdefs.h mibincl.h ../../config.h struct.h versioninfo.c
+proc.o: ../../config.h struct.h mibdefs.h mibincl.h proc.c
+exec.o: ../../config.h struct.h mibdefs.h mibincl.h exec.c
 
 tmp.make:
 	if [ -d CVS ]; then \

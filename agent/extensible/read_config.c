@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <fstab.h>
 #include <math.h>
-#include "wes.h"
+#include "../../config.h"
 
 #define ofile stderr
 #define debug 0
