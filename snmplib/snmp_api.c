@@ -1500,6 +1500,9 @@ snmp_sess_close(void *sessp)
     }
 
     sesp = slp->session; slp->session = 0;
+    if (sesp != NULL  && sesp->subsession != NULL) {
+      DEBUGMSGTL(("snmp_sess_close", "closing an AgentX session?\n"));
+    }
     if (sesp) {
         SNMP_FREE(sesp->peername);
         SNMP_FREE(sesp->community);
@@ -4327,7 +4330,8 @@ _sess_read(void *sessp,
 	 should be per session ! */
 
       if (callback == NULL || 
-	  callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu, magic) == 1) {
+	  callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+		   sp, pdu->reqid, pdu, magic) == 1) {
 	if (pdu->command == SNMP_MSG_REPORT) {
 	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW) {
 	    /* trigger immediate retry on recoverable Reports 
@@ -4386,7 +4390,8 @@ _sess_read(void *sessp,
   } else {
     if (sp->callback) {
       /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
-      sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,sp->callback_magic);
+      sp->callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+		   sp, pdu->reqid, pdu,sp->callback_magic);
       /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
     }	
   }
@@ -4767,7 +4772,8 @@ snmp_sess_timeout(void *sessp)
             }
     	    /* No more chances, delete this entry */
     	    if (callback) {
-		callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
+		callback(SNMP_CALLBACK_OP_TIMED_OUT,
+			 sp, rp->pdu->reqid, rp->pdu, magic);
 	    }
     	    if (isp->requests == rp){
     		isp->requests = rp->next_request;
