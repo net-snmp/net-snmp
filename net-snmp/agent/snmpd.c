@@ -879,7 +879,7 @@ snmp_input(int op,
 {
     struct get_req_state *state = (struct get_req_state *)magic;
     
-    if (op == RECEIVED_MESSAGE) {
+    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == SNMP_MSG_GET) {
 	    if (state->type == EVENT_GET_REQ) {
 		/* this is just the ack to our inform pdu */
@@ -887,7 +887,7 @@ snmp_input(int op,
 	    }
 	}
     }
-    else if (op == TIMED_OUT) {
+    else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
 	if (state->type == ALARM_GET_REQ) {
 		/* Need a mechanism to replace obsolete SNMPv2p alarm */
 	}
