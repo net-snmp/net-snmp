@@ -139,6 +139,7 @@ struct ifnet {
 	int	if_ibytes;		/* octets received on interface */
 	int	if_ipackets;		/* packets received on interface */
 	int	if_ierrors;		/* input errors on interface */
+        int     if_iqdrops;             /* input queue overruns */
 	int	if_obytes;		/* octets sent on interface */
 	int	if_opackets;		/* packets sent on interface */
 	int	if_oerrors;		/* output errors on interface */
