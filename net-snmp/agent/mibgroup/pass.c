@@ -4,12 +4,10 @@
 #include <stdlib.h>
 #endif
 #include <stdio.h>
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#endif
+#else
+#include <strings.h>
 #endif
 #if HAVE_UNISTD_H
 #include <unistd.h>

@@ -13,15 +13,14 @@ struct ifnet;
 
 int Interface_Index_By_Name __P((char *, int));
 void Interface_Scan_Init __P((void));
-#if defined(sunV3) || defined(linux)
-int Interface_Scan_Next __P((short *, char *, struct ifnet *));
-#else
-int Interface_Scan_Next __P((short *, char *, struct ifnet *, struct in_ifaddr *));
+#if defined(linux) || defined(sunV3)
+struct in_ifaddr { int dummy; };
 #endif
+int Interface_Scan_Next __P((short *, char *, struct ifnet *, struct in_ifaddr *));
 
-extern void	init_interfaces __P((void));
-extern u_char	*var_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+void	init_interfaces __P((void));
+u_char	*var_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #define IFNUMBER        0
 #define IFINDEX         1

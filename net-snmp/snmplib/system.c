@@ -160,8 +160,8 @@ opendir(char *filename)
     p->start = (char*)malloc(idx * sizeof(char));
     /* New(1304, p->start, idx, char);*/
     if(p->start == NULL) {
-		fprintf(stderr,"opendir: malloc failed!\n");
-		exit(1);
+	fprintf(stderr,"opendir: malloc failed!\n");
+	exit(1);
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -381,7 +381,7 @@ long get_uptime __P((void))
 #ifndef CAN_USE_SYSCTL
     int kmem;
     static struct nlist nl[] = {
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux)
 	    { "_boottime" },
 #else
 	    { "boottime" },
@@ -500,7 +500,7 @@ void
 snmp_set_do_debugging(val)
   int val;
 {
-  dodebug=val;
+  dodebug = val;
 }
 
 int
@@ -508,5 +508,3 @@ snmp_get_do_debugging __P((void))
 {
   return dodebug;
 }
-
-

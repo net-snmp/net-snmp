@@ -11,6 +11,7 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 
 #if STDC_HEADERS
@@ -56,6 +57,8 @@
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
+#else
+#include "kernel.h"
 #endif
 #include "../../snmplib/system.h"
 
@@ -309,6 +312,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	default:
 	    ERROR_MSG("");
     }
+    return NULL;
 }
 
 #else /* HAVE_SYS_TCPIPSTATS_H */
@@ -483,6 +487,10 @@ var_ip(vp, name, length, exact, var_len, write_method)
 #endif /* linux */
 
 
+#ifdef freebsd2
+static void Address_Scan_Init __P((void));
+static int Address_Scan_Next __P((short *, struct in_ifaddr *));
+#endif
 
 u_char *
 var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
@@ -503,9 +511,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     u_char		    *cp;
     int			    lowinterface=0;
     short                   interface;
-#if !(defined(linux) || defined(sunV3))
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
-#endif
     static struct ifnet ifnet, lowin_ifnet;
 
     /* fill in object part of name for current (less sizeof instance part) */
@@ -515,27 +521,26 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 #ifndef freebsd2
     Interface_Scan_Init();
 #else
-      Address_Scan_Init();
+    Address_Scan_Init();
 #endif
     for (;;) {
 
+#ifndef freebsd2
+	if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
+	    break;
+#ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
+	if ( ifnet.if_addrlist == 0 )
+	    continue;                   /* No address found for interface */
+#endif
+#else
+	if (Address_Scan_Next(&interface, &in_ifaddr) == 0)
+	    break;
+#endif /* freebsd2 */
 #if defined(linux) || defined(sunV3)
-	if (Interface_Scan_Next(&interface, NULL, &ifnet) == 0) break;
 	cp = (u_char *)&(((struct sockaddr_in *) &(ifnet.if_addr))->sin_addr.s_addr);
 #else
-#ifndef freebsd2
-	if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0) break;
-#else
-      if (Address_Scan_Next(&interface, &in_ifaddr) == 0) break;
-#endif
 	cp = (u_char *)&(((struct sockaddr_in *) &(in_ifaddr.ia_addr))->sin_addr.s_addr);
-
 #endif
-
-#ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
-      if ( ifnet.if_addrlist == 0 )
-          continue;                   /* No address found for interface */
-#endif /* linux/freebsd2 */
 
 	op = current + 10;
 	*op++ = *cp++;
@@ -611,6 +616,58 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     }
     return NULL;
 }
+
+#ifdef freebsd2
+static struct in_ifaddr *in_ifaddraddr;
+
+static void
+Address_Scan_Init __P((void))
+{
+    auto_nlist(IFADDR_SYMBOL, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
+}
+
+/* NB: Index is the number of the corresponding interface, not of the address */
+static int Address_Scan_Next(Index, Retin_ifaddr)
+short *Index;
+struct in_ifaddr *Retin_ifaddr;
+{
+      struct in_ifaddr in_ifaddr;
+      struct ifnet ifnet,*ifnetaddr;  /* NOTA: same name as another one */
+      short index=1;
+
+      while (in_ifaddraddr) {
+          /*
+           *      Get the "in_ifaddr" structure
+           */
+          klookup((unsigned long)in_ifaddraddr, (char *)&in_ifaddr, sizeof in_ifaddr);
+          in_ifaddraddr = in_ifaddr.ia_next;
+
+          if (Retin_ifaddr)
+              *Retin_ifaddr = in_ifaddr;
+
+	  /*
+	   * Now, more difficult, find the index of the interface to which
+	   * this address belongs
+	   */
+
+	  auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
+	  while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
+	      klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
+	      ifnetaddr = ifnet.if_next;
+	      index++;
+	  }
+
+	  /* XXX - might not find it? */
+
+	  if (Index)
+                  *Index = index;
+
+          return(1);  /* DONE */
+      }
+      return(0);          /* EOF */
+}
+
+#endif /* freebsd2 */
 
 #else /* solaris2 */
 

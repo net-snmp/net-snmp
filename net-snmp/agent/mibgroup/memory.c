@@ -22,7 +22,6 @@
 #if HAVE_SYS_CONF_H
 #include <sys/conf.h>
 #endif
-#include <sys/param.h>
 #if HAVE_SYS_SWAP_H
 #include <sys/swap.h>
 #endif

@@ -88,12 +88,9 @@
 #include <netinet/mib_kern.h>
 #endif /* hpux */
 
-#ifdef HAVE_SYS_SYSCTL_H
+#if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
-#endif
-
-#ifdef HAVE_SYS_SYSCTL_H
-# ifdef CTL_NET
+# if defined(CTL_NET) && !defined(freebsd2)
 #  ifdef PF_ROUTE
 #   ifdef NET_RT_IFLIST
 #    define USE_SYSCTL_IFLIST
@@ -120,9 +117,10 @@
 #include "util_funcs.h"
 #include "auto_nlist.h"
 
-void Interface_Scan_Init __P((void));
-
 static int Interface_Scan_Get_Count __P((void));
+
+static int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+static int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 
 #ifdef USE_SYSCTL_IFLIST
 
@@ -138,14 +136,14 @@ init_interfaces __P((void))
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_ifEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -191,7 +189,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define INTERFACES_NAME_LENGTH	8
   oid newname[MAX_NAME_LEN];
@@ -239,9 +237,6 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
   return NULL;
 }
 
-extern const struct sockaddr * get_address (const void *, int, int);
-extern const struct in_addr * get_in_address (const void *, int, int);
-
 struct small_ifaddr
 {
   struct in_addr	sifa_addr;
@@ -249,9 +244,14 @@ struct small_ifaddr
   struct in_addr	sifa_broadcast;
 };
 
+extern const struct sockaddr * get_address (const void *, int, int);
+extern const struct in_addr * get_in_address (const void *, int, int);
+static int Interface_Scan_By_Index __P((int, struct if_msghdr *, char *, struct small_ifaddr *));
+static int Interface_Get_Ether_By_Index __P((int, u_char *));
+
 static int
 Interface_Scan_By_Index (index, if_msg, if_name, sifa)
-     unsigned index;
+     int index;
      struct if_msghdr *if_msg;
      char *if_name;
      struct small_ifaddr *sifa;
@@ -260,17 +260,18 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
   struct if_msghdr *ifp;
   int have_ifinfo = 0, have_addr = 0;
 
+  memset (sifa, 0, sizeof (*sifa));
   for (cp = if_list;
        cp < if_list_end;
        cp += ifp->ifm_msglen)
     {
       ifp = (struct if_msghdr *)cp;
+      DEBUGP("ifm_type = %d, ifm_index = %d\n", ifp->ifm_type, ifp->ifm_index);
 
       switch (ifp->ifm_type)
 	{
 	case RTM_IFINFO:
 	  {
-	    u_char *p = cp + sizeof (struct if_msghdr);
 	    const struct sockaddr *a;
 
 	    if (ifp->ifm_index == index)
@@ -321,6 +322,8 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
     {
       return 0;
     }
+  else if (have_ifinfo && !(if_msg->ifm_flags & IFF_UP))
+      return 0;
   else
     {
       return -1;
@@ -409,7 +412,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     return NULL;
 
   if (Interface_Scan_By_Index(interface, &if_msg, if_name, &sifa) != 0)
-    return 0;
+    return NULL;
 
   switch (vp->magic) {
   case IFINDEX:
@@ -428,7 +431,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
   case IFSPEED:
     long_return = (u_long) if_msg.ifm_data.ifi_baudrate;
     return (u_char *) &long_return;
-    /* ifPhysAddress */
+  case IFPHYSADDRESS:
+    /* XXX */
+    return NULL;
   case IFADMINSTATUS:
     long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
     return (u_char *) &long_return;
@@ -499,16 +504,12 @@ struct in_ifaddr *Retin_ifaddr;
 
 #ifndef HAVE_NET_IF_MIB_H
 
-int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+static int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+static int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 
 #ifndef solaris2
-#if defined(sunV3) || defined(linux)
-static int Interface_Scan_By_Index __P((int, char *, struct ifnet *));
-#else
 static int Interface_Scan_By_Index __P((int, char *, struct ifnet *, struct in_ifaddr *));
-#endif
 static int Interface_Get_Ether_By_Index __P((int, u_char *));
 #endif
 
@@ -521,8 +522,6 @@ static int Interface_Get_Ether_By_Index __P((int, u_char *));
 
 void	init_interfaces( )
 {
-  auto_nlist( IFNET_SYMBOL,0,0 );
-  auto_nlist( IFADDR_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	-1
@@ -540,7 +539,7 @@ conf_if_list *if_list;
 struct ifnet *ifnetaddr_list;
 #endif /* linux */
 
-int
+static int
 header_interfaces(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -574,7 +573,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
 
 
-int
+static int
 header_ifEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -653,7 +652,6 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
 }
 
 
-
 #ifndef solaris2
 #ifndef hpux
 
@@ -668,52 +666,32 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 {
     static struct ifnet ifnet;
     register int interface;
-#if !(defined(linux) || defined(sunV3))
     static struct in_ifaddr in_ifaddr;
-#endif /* sunV3 */
     static char Name[16];
     register char *cp;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
-          struct timeval now;
+    struct timeval now;
 #endif
 
     interface = header_ifEntry(vp, name, length, exact, var_len, write_method);
     if ( interface == MATCH_FAILED )
 	return NULL;
 
-#if defined(linux) || defined(sunV3)
-    Interface_Scan_By_Index(interface, Name, &ifnet);   
-#else 
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
-#endif
-
 
     switch (vp->magic){
 	case IFINDEX:
 	    long_return = interface;
 	    return (u_char *) &long_return;
 	case IFDESCR:
-#define USE_NAME_AS_DESCRIPTION
-#ifdef USE_NAME_AS_DESCRIPTION
 	    cp = Name;
-#else  /* USE_NAME_AS_DESCRIPTION */
-	    cp = Lookup_Device_Annotation(Name, "snmp-descr");
-	    if (!cp)
-		cp = Lookup_Device_Annotation(Name, 0);
-	    if (!cp) cp = Name;
-#endif USE_NAME_AS_DESCRIPTION
 	    *var_len = strlen(cp);
 	    return (u_char *)cp;
 	case IFTYPE:
-#if 0
-	    cp = Lookup_Device_Annotation(Name, "snmp-type");
-	    if (cp) long_return = atoi(cp);
-	    else
-#endif
 #if STRUCT_IFNET_HAS_IF_TYPE
-		long_return = ifnet.if_type;
+	    long_return = ifnet.if_type;
 #else
-		long_return = 1;	/* OTHER */
+	    long_return = 1;	/* OTHER */
 #endif
 	    return (u_char *) &long_return;
 	case IFMTU: {
@@ -721,11 +699,6 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	}
 	case IFSPEED:
-#if 0
-	    cp = Lookup_Device_Annotation(Name, "snmp-speed");
-	    if (cp) long_return = atoi(cp);
-	    else
-#endif
 #if STRUCT_IFNET_HAS_IF_BAUDRATE
 	    long_return = ifnet.if_baudrate;
 #else
@@ -746,23 +719,13 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
-#if 0
-	    if (Lookup_Device_Annotation(Name, "ethernet-device")) {
-		Interface_Get_Ether_By_Index(interface, return_buf);
-		*var_len = 6;
-		return(u_char *) return_buf;
-	    } else {
-		long_return = 0;
-		return (u_char *) long_return;
-	    }
-#endif
-		Interface_Get_Ether_By_Index(interface, return_buf);
-		*var_len = 6;
-	        if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
-		    (return_buf[2] == 0) && (return_buf[3] == 0) &&
-		    (return_buf[4] == 0) && (return_buf[5] == 0))
-		    *var_len = 0;
-		return(u_char *) return_buf;
+	    Interface_Get_Ether_By_Index(interface, return_buf);
+	    *var_len = 6;
+	    if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
+		(return_buf[2] == 0) && (return_buf[3] == 0) &&
+		(return_buf[4] == 0) && (return_buf[5] == 0))
+		*var_len = 0;
+	    return(u_char *) return_buf;
 	case IFADMINSTATUS:
 	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
@@ -1148,9 +1111,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 
-#if !(defined(linux) || defined(sunV3))
 static struct in_ifaddr savein_ifaddr;
-#endif
 static struct ifnet *ifnetaddr, saveifnet, *saveifnetaddr;
 static int saveIndex=0;
 static char saveName[16];
@@ -1319,10 +1280,11 @@ Interface_Scan_Init __P((void))
 **  4.2 BSD doesn't have ifaddr
 **  
 */
-int Interface_Scan_Next(Index, Name, Retifnet)
+int Interface_Scan_Next(Index, Name, Retifnet, dummy)
 short *Index;
 char *Name;
 struct ifnet *Retifnet;
+struct in_ifaddr *dummy;
 {
 	struct ifnet ifnet;
 	register char *cp;
@@ -1403,7 +1365,7 @@ struct in_ifaddr *Retin_ifaddr;
 	    klookup((unsigned long)ifnet.if_name, (char *)saveName, sizeof saveName);
 
 	    saveName[sizeof (saveName)-1] = '\0';
-	    cp = index(saveName, '\0');
+	    cp = strchr(saveName, '\0');
 	    string_append_int (cp, ifnet.if_unit);
 #endif
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
@@ -1446,28 +1408,6 @@ struct in_ifaddr *Retin_ifaddr;
 
 #endif sunV3
 
-
-
-
-#if defined(linux) || defined(sunV3)
-
-static int Interface_Scan_By_Index(Index, Name, Retifnet)
-int Index;
-char *Name;
-struct ifnet *Retifnet;
-{
-        short i;
-
-        Interface_Scan_Init();
-        while (Interface_Scan_Next(&i, Name, Retifnet)) {
-          if (i == Index) break;
-        }
-        if (i != Index) return(-1);     /* Error, doesn't exist */
-	return(0);	/* DONE */
-}
-
-#else
-
 static int Interface_Scan_By_Index(Index, Name, Retifnet, Retin_ifaddr)
 int Index;
 char *Name;
@@ -1484,8 +1424,6 @@ struct in_ifaddr *Retin_ifaddr;
 	return(0);	/* DONE */
 }
 
-#endif
-
 
 static int Interface_Count=0;
 
@@ -1494,11 +1432,7 @@ static int Interface_Scan_Get_Count __P((void))
 
 	if (!Interface_Count) {
 	    Interface_Scan_Init();
-#if defined(linux) || defined(sunV3)
-	    while (Interface_Scan_Next(NULL, NULL, NULL) != 0) {
-#else
 	    while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
-#endif
 		Interface_Count++;
 	    }
 	}
@@ -1524,8 +1458,8 @@ u_char *EtherAddr;
 #endif
 #endif
 
-        memset(&arpcom.ac_enaddr,(0), sizeof(arpcom.ac_enaddr));
-        memset(EtherAddr,(0), sizeof(arpcom.ac_enaddr));
+        memset(&arpcom.ac_enaddr, 0, sizeof(arpcom.ac_enaddr));
+        memset(EtherAddr, 0, sizeof(arpcom.ac_enaddr));
 
 	if (saveIndex != Index) {	/* Optimization! */
 
@@ -1599,57 +1533,6 @@ u_char *EtherAddr;
 	return(0);	/* DONE */
 }
 
-#ifdef freebsd2
-static struct in_ifaddr *in_ifaddraddr;
-
-Address_Scan_Init __P((void))
-{
-    auto_nlist(IFADDR_SYMBOL, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
-}
-
-/* NB: Index is the number of the corresponding interface, not of the address */
-int Address_Scan_Next(Index, Retin_ifaddr)
-short *Index;
-struct in_ifaddr *Retin_ifaddr;
-{
-      struct in_ifaddr in_ifaddr;
-      struct ifnet ifnet,*ifnetaddr;  /* NOTA: same name as another one */
-      short index=1;
-
-      while (in_ifaddraddr) {
-          /*
-           *      Get the "in_ifaddr" structure
-           */
-          klookup((unsigned long)in_ifaddraddr, (char *)&in_ifaddr, sizeof in_ifaddr);
-          in_ifaddraddr = in_ifaddr.ia_next;
-
-          if (Retin_ifaddr)
-              *Retin_ifaddr = in_ifaddr;
-
-              /*
-               * Now, more difficult, find the index of the interface to which
-               * this address belongs
-               */
-
-              auto_nlist(IFNET_SYMBOL, (char *)&ifnetaddr, sizeof(ifnetaddr));
-              while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
-                      klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
-                      ifnetaddr = ifnet.if_next;
-                      index++;
-              }
-
-              /* XXX - might not find it? */
-
-              if (Index)
-                  *Index = index;
-
-          return(1);  /* DONE */
-      }
-      return(0);          /* EOF */
-}
-
-#endif
-
 #else /* solaris2 */
 
 static int Interface_Scan_Get_Count __P((void))
@@ -1718,10 +1601,10 @@ int Len;
 #include <net/if_mib.h>
 #include <net/route.h>
 
-int header_interfaces __P((struct variable *, oid *, int *, int, int *,
+static int header_interfaces __P((struct variable *, oid *, int *, int, int *,
 			   int (**write) __P((int, u_char *, u_char, int,
 					      u_char *, oid *, int)) ));
-int header_ifEntry __P((struct variable *, oid *, int *, int, int *,
+static int header_ifEntry __P((struct variable *, oid *, int *, int, int *,
 			int (**write) __P((int, u_char *, u_char, int, 
 					   u_char *, oid *, int)) ));
 u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, 
@@ -1847,7 +1730,7 @@ get_phys_address(int index, char **ap, int *len)
 	return -1;
 }
 
-int
+static int
 header_interfaces(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -1882,7 +1765,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
 			    IFMIB_SYSTEM, IFMIB_IFCOUNT };
 
-int
+static int
 header_ifEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -2000,23 +1883,10 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 		long_return = interface;
 		return (u_char *) &long_return;
 	case IFDESCR:
-#define USE_NAME_AS_DESCRIPTION
-#ifdef USE_NAME_AS_DESCRIPTION
 		cp = ifmd.ifmd_name;
-#else  /* USE_NAME_AS_DESCRIPTION */
-		cp = Lookup_Device_Annotation(Name, "snmp-descr");
-		if (!cp)
-			cp = Lookup_Device_Annotation(Name, 0);
-		if (!cp) cp = Name;
-#endif /* USE_NAME_AS_DESCRIPTION */
 		*var_len = strlen(cp);
 		return (u_char *)cp;
 	case IFTYPE:
-#if 0
-		cp = Lookup_Device_Annotation(Name, "snmp-type");
-		if (cp) long_return = atoi(cp);
-		else
-#endif
 		long_return = ifmd.ifmd_data.ifi_type;
 		return (u_char *) &long_return;
 	case IFMTU:

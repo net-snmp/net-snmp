@@ -13,6 +13,9 @@
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_SYS_VMMETER_H
 #if !(defined(bsdi2) || defined(netbsd1))
 #include <sys/vmmeter.h>
@@ -21,7 +24,6 @@
 #if HAVE_SYS_CONF_H
 #include <sys/conf.h>
 #endif
-#include <sys/param.h>
 #if HAVE_SYS_SWAP_H
 #include <sys/swap.h>
 #endif
@@ -66,9 +68,6 @@
 #include <sys/vfs.h>
 #endif
 #if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
 #endif
@@ -102,7 +101,6 @@ double maxload[3];
 
 void	init_loadave( )
 {
-  auto_nlist( LOADAVE_SYMBOL,0,0 );
 }
 
 void loadave_parse_config(word,cptr)

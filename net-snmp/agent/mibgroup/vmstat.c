@@ -22,7 +22,6 @@
 #if HAVE_SYS_CONF_H
 #include <sys/conf.h>
 #endif
-#include <sys/param.h>
 #if HAVE_SYS_FS_H
 #include <sys/fs.h>
 #else

@@ -39,25 +39,25 @@
 # endif
 #endif
 
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#else /* HAVE_STRINGS_H */
+#if HAVE_STRING_H
+# include <string.h>
+#else /* HAVE_STRINGS_Hs */
 # include <string.h>
 #endif /* HAVE_STRINGS_H */
 
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H */
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 # include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>

@@ -17,14 +17,21 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <sys/socket.h>
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#if HAVE_NETINET_IN_PCB_H
+#include <netinet/in_pcb.h>
+#endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
 
 #include "m2m.h"
 #include "mibincl.h"
-
-/* #include "common_header.h" */
 
 #include "mibgroup/struct.h"
 #include "read_config.h"
@@ -135,7 +142,7 @@ int a;
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
-      sprintf(defaultPath,"%s:%s\n",SNMPSHAREPATH,SNMPLIBPATH);
+      sprintf(defaultPath,"%s:%s",SNMPSHAREPATH,SNMPLIBPATH);
       envconfpath = defaultPath;
     }
     

@@ -2,14 +2,27 @@
 #include <config.h>
 
 #ifdef CAN_USE_NLIST
+
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <fcntl.h>
+#include <netinet/in.h>
 #ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
-#include <stdio.h>
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+
 #include "auto_nlist.h"
 #include "autonlist.h"
+#include "kernel.h"
+#include "../snmplib/system.h"
 
 struct autonlist *nlists = 0;
+static void init_nlist __P((struct nlist *));
 
 int
 auto_nlist_value(string)
@@ -43,15 +56,15 @@ auto_nlist_value(string)
     strcpy(it->symbol,string);
     /* allocate an extra byte for inclusion of a preceding '_' later */
     it->nl[0].n_name = (char *) malloc(strlen(string)+2);
-    strcpy(it->nl[0].n_name,string);
+    sprintf(it->nl[0].n_name,"_%s",string);
     it->nl[1].n_name = 0;
     init_nlist(it->nl);
     if (it->nl[0].n_type == 0) {
-      sprintf(it->nl[0].n_name,"_%s",string);
+      strcpy(it->nl[0].n_name,string);
       init_nlist(it->nl);
     }
     if (it->nl[0].n_type == 0) {
-      DEBUGP("nlist err:  neither %s nor _%s found.\n", string, string);
+      fprintf(stderr, "nlist err: neither %s nor _%s found.\n", string, string);
       return( -1 );
     } else {
       DEBUGP("nlist:  found symbol %s at %x.\n", it->symbol, it->nl[0].n_value);
@@ -84,6 +97,61 @@ auto_nlist(string, var, size)
   }
   return 0;
 }
+ 
+static void
+init_nlist(nl)
+  struct nlist nl[];
+{
+#ifdef CAN_USE_NLIST
+  int ret;
+#if HAVE_KVM_OPENFILES
+  kvm_t *kernel;
+  char kvm_errbuf[4096];
+
+  if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
+      fprintf(stderr, "kvm_openfiles: %s\n", kvm_errbuf);
+      exit(1);
+  }
+  if ((ret = kvm_nlist(kernel, nl)) == -1) {
+      perror("kvm_nlist");
+      exit(1);
+  }
+  kvm_close(kernel);
+#else
+  if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
+    perror("nlist");
+    exit(1);
+  }
+#endif
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+      if (nl[ret].n_type == 0) {
+	  DEBUGP("nlist err:  %s not found\n",nl[ret].n_name);
+      } else {
+	  DEBUGP("nlist: %s 0x%X\n", nl[ret].n_name,
+		  (unsigned int)nl[ret].n_value);
+      }
+  }
+#endif
+}
+
+int KNLookup(nl, nl_which, buf, s)
+    struct nlist nl[];
+    int nl_which;
+    char *buf;
+    int s;
+{   struct nlist *nlp = &nl[nl_which];
+
+    if (nlp->n_value == 0) {
+        fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
+	nlp->n_value = -1;	/* only one error message ... */
+	return 0;
+    }
+    if (nlp->n_value == -1)
+        return 0;
+
+    return klookup(nlp->n_value, buf, s);
+}
+
 #ifdef TESTING
 void
 auto_nlist_print_tree(indent, ptr)

@@ -32,10 +32,10 @@ SOFTWARE.
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
