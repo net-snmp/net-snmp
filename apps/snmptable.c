@@ -101,7 +101,7 @@ static oid name[MAX_NAME_LEN];
 static int name_length;
 static oid root[MAX_NAME_LEN];
 static int rootlen;
-static int debug;
+static int localdebug;
 static struct snmp_session session;
 
 void get_field_names __P((void));
@@ -181,7 +181,7 @@ main(argc, argv)
       fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
       exit(1);
     }
-    debug = snmp_get_dump_packet();
+    localdebug = snmp_get_dump_packet();
   } else {
     fprintf(stderr,"Missing table name\n");
     usage();
@@ -268,7 +268,7 @@ void get_field_names __P((void))
     root[rootlen] = fields;
     sprint_objid(string_buf, root, rootlen+1);
     name_p = strrchr(string_buf, '.');
-    if (debug) printf("%s %c\n", string_buf, name_p[1]);
+    if (localdebug) printf("%s %c\n", string_buf, name_p[1]);
     if ('0' <= name_p[1] && name_p[1] <= '9')
       break;
     if (fields == 1) column = (struct column *)malloc(sizeof (*column));
@@ -350,7 +350,7 @@ void get_table_entries __P((void))
 	  if (vars->name_length <= rootlen ||
 	      memcmp(name, vars->name, (rootlen+1) * sizeof(oid)) != 0) {
 	    /* not part of this subtree */
-	    if (debug) {
+	    if (localdebug) {
 	      printf("End of table: ");
 	      print_variable(vars->name, vars->name_length, vars);
 	    }
@@ -361,7 +361,7 @@ void get_table_entries __P((void))
 	  memcpy(name, vars->name, name_length*sizeof(oid));
 	  sprint_objid(string_buf, vars->name, vars->name_length); 
 	  name_p = strrchr(string_buf, '.');
-	  if (debug) printf("Index: %s\n", name_p+1);
+	  if (localdebug) printf("Index: %s\n", name_p+1);
 	}
 	entries++;
 	if (entries >= allocated) {
@@ -392,14 +392,14 @@ void get_table_entries __P((void))
 	for (vars = response->variables; vars; vars = vars->next_variable) {
 	  col++;
 	  i = name[rootlen] = vars->name[rootlen];
-	  if (debug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
+	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
 	  if (vars->name_length != name_length ||
 	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0) {
 	    /* not part of this subtree */
-	    if (debug) printf("%s => ignored\n", string_buf);
+	    if (localdebug) printf("%s => ignored\n", string_buf);
 	    continue;
 	  }
-	  if (debug) printf("%s => taken\n", string_buf);
+	  if (localdebug) printf("%s => taken\n", string_buf);
 	  sprint_value(string_buf, vars->name, vars->name_length, vars);
 	  dp[i-1] = strdup(string_buf);
 	  i = strlen(string_buf);
