@@ -86,7 +86,12 @@ int
 snmp_udp_recv(netsnmp_transport *t, void *buf, int size,
               void **opaque, int *olength)
 {
-    int             rc = -1, fromlen = sizeof(struct sockaddr);
+    int             rc = -1;
+#ifdef HAVE_SOCKLEN_T
+    socklen_t       fromlen = sizeof(struct sockaddr);
+#else
+    socklen_t       fromlen = sizeof(struct sockaddr);
+#endif
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
