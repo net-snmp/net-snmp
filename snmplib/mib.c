@@ -2365,7 +2365,7 @@ init_mib(void)
      * Initialise the MIB directory/ies 
      */
     netsnmp_fixup_mib_directory();
-    env_var = netsnmp_get_mib_directory();
+    env_var = strdup(netsnmp_get_mib_directory());
 
     DEBUGMSGTL(("init_mib",
                 "Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",
