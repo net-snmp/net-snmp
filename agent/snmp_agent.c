@@ -91,7 +91,7 @@ static void dump_var (
     void *statP,
     int statLen)
 {
-    char buf [2560];
+    char buf [SPRINT_MAX_LEN];
     struct variable_list temp_var;
 
     temp_var.type = statType;

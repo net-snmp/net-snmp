@@ -686,7 +686,7 @@ u_char *var_vacm_view(struct variable *vp,
 {
     struct vacm_viewEntry *gp;
     char viewName[32];
-    oid subtree[32];
+    oid subtree[MAX_OID_LEN];
     int subtreeLen = 0;
     oid *op, *op1;
     int len;

@@ -91,7 +91,7 @@ read_party_database(char *filename)
     int state = IDENTITY_STATE;
     in_addr_t addr;
     u_short port;
-    oid partyid[64];
+    oid partyid[MAX_OID_LEN];
     int partyidlen;
     int priv = 0, auth = 0;
 #if 0
@@ -111,7 +111,7 @@ read_party_database(char *filename)
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return -1;
-    while (fgets(buf, 256, fp)){
+    while (fgets(buf, sizeof(buf), fp)){
 	linenumber++;
 	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
@@ -136,7 +136,7 @@ read_party_database(char *filename)
 		fclose(fp);
 		return -1;
 	    }
-	    partyidlen = 64;
+	    partyidlen = MAX_OID_LEN;
 	    if (!read_objid(buf1, partyid, &partyidlen)) {
 		error_exit("Bad object identifier", linenumber, filename);
 		fclose(fp);

@@ -251,8 +251,7 @@ var_usmUser(
   *var_len = sizeof(long_ret); /* assume an integer and change later if not */
 
   if (vp->magic != USMUSERSPINLOCK) {
-#define MAX_NEWNAME_LEN 128
-    oid newname[MAX_NEWNAME_LEN];
+    oid newname[MAX_OID_LEN];
     len = (*length < vp->namelen) ? *length : vp->namelen;
     rtest = snmp_oid_compare(name, len, vp->name, len);
     if (rtest > 0 ||
@@ -262,7 +261,7 @@ var_usmUser(
 	*var_len = 0;
       return 0;
     }
-    memset((char *) newname,(0),MAX_NEWNAME_LEN*sizeof(oid));
+    memset(newname, 0, sizeof(newname));
     if (((int) *length) <= (int) vp->namelen || rtest == -1) {
       /* oid is not within our range yet */
       /* need to fail if not exact */

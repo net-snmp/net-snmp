@@ -72,9 +72,9 @@ struct packet_info {
     int		community_len;
 
     /* snmp security based authentication */
-    oid	        srcParty[64];
-    oid		dstParty[64];
-    oid		context[64];
+    oid	        srcParty[MAX_OID_LEN];
+    oid		dstParty[MAX_OID_LEN];
+    oid		context[MAX_OID_LEN];
     int		srcPartyLength;
     int		dstPartyLength;
     int		contextLength;

@@ -230,7 +230,7 @@ var_hrswrun(struct variable *vp,
 	    WriteMethod **write_method)
 {
     int pid=0;
-    static char string[100];
+    static char string[256];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
 #elif defined(solaris2)
@@ -301,7 +301,7 @@ var_hrswrun(struct variable *vp,
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/status", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, 100, fp );	/* Name: process name */
+	    fgets( buf, sizeof(buf), fp );	/* Name: process name */
 	    cp = buf;
 	    while ( *cp != ':' )
 		++cp;
@@ -335,7 +335,7 @@ var_hrswrun(struct variable *vp,
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/cmdline", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, 100, fp );	/* argv[0] '\0' argv[1] '\0' .... */
+	    fgets( buf, sizeof(buf), fp );	/* argv[0] '\0' argv[1] '\0' .... */
 	    strcpy( string, buf );
             fclose(fp);
 #else
@@ -367,8 +367,8 @@ var_hrswrun(struct variable *vp,
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/cmdline", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    memset( buf, 0, 100 );
-	    fgets( buf, 100, fp );   /* argv[0] '\0' argv[1] '\0' .... */
+	    memset( buf, 0, sizeof(buf) );
+	    fgets( buf, sizeof(buf), fp );   /* argv[0] '\0' argv[1] '\0' .... */
 
 		/* Skip over argv[0] */
 	    cp = buf;
@@ -457,7 +457,7 @@ var_hrswrun(struct variable *vp,
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, 250, fp );
+	    fgets( buf, sizeof(buf), fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
 		while ( *cp != ' ')
@@ -501,7 +501,7 @@ var_hrswrun(struct variable *vp,
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, 250, fp );
+	    fgets( buf, sizeof(buf), fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 13 ; ++i ) {	/* skip 13 fields */
 		while ( *cp != ' ')
@@ -535,7 +535,7 @@ var_hrswrun(struct variable *vp,
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, 250, fp );
+	    fgets( buf, sizeof(buf), fp );
 	    cp = buf;
 	    for ( i = 0 ; i < 23 ; ++i ) {	/* skip 23 fields */
 		while ( *cp != ' ')
