@@ -53,7 +53,6 @@ static int numEntries=0;
 /* define the structure we're going to ask the agent to register our
    information at */
 struct variable2 sysORTable_variables[] = {
-    { SYSORTABLEINDEX,   ASN_INTEGER,       RONLY, var_sysORTable, 1, {1}},
     { SYSORTABLEID,      ASN_OBJECT_ID,     RONLY, var_sysORTable, 1, {2}},
     { SYSORTABLEDESCR,   ASN_OCTET_STR,     RONLY, var_sysORTable, 1, {3}},
     { SYSORTABLEUPTIME,  ASN_TIMETICKS,     RONLY, var_sysORTable, 1, {4}}
@@ -115,10 +114,6 @@ var_sysORTable(struct variable *vp,
   DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- match: %d\n",i));
   
   switch (vp->magic){
-    case SYSORTABLEINDEX:
-      long_return = i;
-      return (u_char *)&long_return;
-
     case SYSORTABLEID:
       *var_len = ptr->OR_oidlen*sizeof(ptr->OR_oid[0]);
       return (u_char *) ptr->OR_oid;
