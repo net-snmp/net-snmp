@@ -143,3 +143,78 @@ snmp_set_mib_parse_label(int save)
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_MIB_PARSE_LABEL, save);
 }
+
+int
+ds_set_boolean		(int storeid, int which, int value)
+{
+  return netsnmp_ds_set_boolean(storeid, which, value);
+}
+
+int
+ds_get_boolean		(int storeid, int which)
+{
+  return netsnmp_ds_get_boolean(storeid, which);
+}
+
+int
+ds_toggle_boolean	(int storeid, int which)
+{
+  return netsnmp_ds_toggle_boolean(storeid, which);
+}
+
+int
+ds_set_int		(int storeid, int which, int value)
+{
+  return netsnmp_ds_set_int(storeid, which, value);
+}
+
+int
+ds_get_int		(int storeid, int which)
+{
+  return netsnmp_ds_get_int(storeid, which);
+}
+
+
+int
+ds_set_string		(int storeid, int which, const char *value)
+{
+  return netsnmp_ds_set_string(storeid, which, value);
+}
+
+char *
+ds_get_string		(int storeid, int which)
+{
+  return netsnmp_ds_get_string(storeid, which);
+}
+
+int
+ds_set_void		(int storeid, int which, void *value)
+{
+  return netsnmp_ds_set_void(storeid, which, value);
+}
+
+void *
+ds_get_void		(int storeid, int which)
+{
+  return netsnmp_ds_get_void(storeid, which);
+}
+
+int
+ds_register_config	(u_char type, const char *ftype,
+			 const char *token, int storeid, int which)
+{
+  return netsnmp_ds_register_config(type, ftype, token, storeid, which);
+}
+
+int
+ds_register_premib	(u_char type, const char *ftype,
+			 const char *token, int storeid, int which)
+{
+  return netsnmp_ds_register_premib(type, ftype, token, storeid, which);
+}
+
+void
+ds_shutdown		(void)
+{
+  netsnmp_ds_shutdown();
+}
