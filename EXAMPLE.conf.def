@@ -135,7 +135,7 @@ proc ntalkd 4
 #  Make sure at least one sendmail, but less than or equal to 10 are running.
 proc sendmail 10 1
 
-#  A snmpwalk of the process mib tree would look something like this:
+#  A snmpwalk of the prTable would look something like this:
 # 
 # % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.PROCMIBNUM
 # enterprises.ucdavis.procTable.prEntry.prIndex.1 = 1
