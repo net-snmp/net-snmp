@@ -43,9 +43,35 @@ netSnmpExampleInteger OBJECT-TYPE
 	"This is a simple object which merely houses a writable
 	 integer.  It's only purposes is to hold the value of a single
 	 integer.  Writing to it will simply change the value for
-	 subsequent GET/GETNEXT/GETBULK retrievals."
+	 subsequent GET/GETNEXT/GETBULK retrievals.
+
+	 This example object is implemented in the
+	 agent/mibgroup/examples/scalar_int.c file."
     DEFVAL { 42 }
     ::= { netSnmpExampleScalars 1 }
+
+netSnmpExampleSleeper OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"This is a simple object which is a basic integer.  It's value
+	 indicates the number of seconds that the agent will take in
+	 responding to requests of this object.  This is implemented
+	 in a way which will allow the agent to keep responding to
+	 other requests while access to this object is blocked.  It is
+	 writable, and changing it's value will change the amount of
+	 time the agent will effectively wait for before returning a
+	 response when this object is manipulated.  Note that SET
+	 requests through this object will take longer, since the
+	 delay is applied to each internal transaction phase, which
+	 could result in delays of up to 4 times the value of this
+	 object.
+
+	 This example object is implemented in the
+	 agent/mibgroup/examples/delayed_instance.c file."
+    DEFVAL { 1 }
+    ::= { netSnmpExampleScalars 2 }
 
 
 --
@@ -60,7 +86,10 @@ netSnmpIETFWGTable OBJECT-TYPE
 	"This table merely contains a set of data which is otherwise
 	 useless for true network management.  It is a table which
 	 describes properies about a IETF Working Group, such as the
-	 names of the two working group chairs."
+	 names of the two working group chairs.
+
+	 This example table is implemented in the
+	 agent/mibgroup/examples/data_set.c file."
     ::= { netSnmpExampleTables 1 }
 
 netSnmpIETFWGEntry OBJECT-TYPE
