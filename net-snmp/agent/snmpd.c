@@ -91,6 +91,7 @@ typedef long    fd_mask;
 #include "system.h"
 #include "read_config.h"
 #include "snmp.h"
+#include "agentx.h"
 #include "mib.h"
 #include "m2m.h"
 #include "snmp_vars.h"
@@ -139,6 +140,7 @@ int allow_severity	 = LOG_INFO;
 int deny_severity	 = LOG_WARNING;
 #endif  /* USE_LIBWRAP */
 
+int   agent_role;
 
 #define TIMETICK         500000L
 #define ONE_SEC         1000000L
@@ -554,6 +556,67 @@ SnmpTrapNodeDown(void)
     /* XXX  2 - Node Down #define it as NODE_DOWN_TRAP */
 }
 
+void
+init_master_agent(int dest_port)
+{
+    struct snmp_session
+                        sess,
+                       *session=&sess;
+
+    /* initialize v2party support */
+    init_snmp2p(dest_port);
+
+    /* set up a fake session for incoming requests that opens a port
+     * that we listen to. */
+    
+    memset(session, 0, sizeof(struct snmp_session));
+    session->version = SNMP_DEFAULT_VERSION;
+    session->peername = SNMP_DEFAULT_PEERNAME;
+    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+    session->retries = SNMP_DEFAULT_RETRIES;
+    session->timeout = SNMP_DEFAULT_TIMEOUT;
+     
+    session->srcPartyLen = 0;
+    session->dstPartyLen = 0;
+    session->contextLen = 0;
+     
+    session->local_port = dest_port;
+    session->callback = handle_snmp_packet;
+    session->authenticator = NULL;
+    session = snmp_open( session );
+    set_pre_parse( session, snmp_check_packet );
+    set_post_parse( session, snmp_check_parse );
+}
+
+struct snmp_session *agentx_session;
+void
+init_sub_agent(int dest_port)
+{
+    struct snmp_session
+                        sess,
+                       *session=&sess;
+
+    memset(session, 0, sizeof(struct snmp_session));
+    session->version = AGENTX_VERSION_1;
+    session->peername = AGENTX_SOCKET;
+    session->retries = SNMP_DEFAULT_RETRIES;
+    session->timeout = SNMP_DEFAULT_TIMEOUT;
+    session->flags  |= SNMP_FLAGS_STREAM_SOCKET;
+     
+    session->local_port = 0;	/* client */
+    session->callback = handle_agentx_packet;
+    session->authenticator = NULL;
+    agentx_session = snmp_open( session );
+    set_parse( agentx_session, agentx_parse );
+    set_build( agentx_session, agentx_build );
+
+    if ( agentx_open_session( agentx_session ) < 0 ) {
+	snmp_close( agentx_session );
+	free( agentx_session );
+	exit(1);
+    }
+}
+
 /*******************************************************************-o-******
  * main
  *
@@ -582,9 +645,6 @@ main(int argc, char *argv[])
         char           *pid_file = NULL;
         FILE           *PID;
         int             dont_zero_log = 0;
-        struct snmp_session
-                        sess,
-                       *session=&sess;
 
 	logfile[0]		= 0;
 	optconfigfile		= NULL;
@@ -712,6 +772,10 @@ main(int argc, char *argv[])
 	argvrestart = (char *) malloc(ret);
 	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
 	strcpy(argvrestartname, argv[0]);
+	if ( strstr(argvrestartname, "agentxd") != NULL)
+	    agent_role = SUB_AGENT;
+	else
+	    agent_role = MASTER_AGENT;
 	for (cptr = argvrestart, i = 0; i < argc; i++) {
 		strcpy(cptr, argv[i]);
 		*(argvptr++) = cptr;
@@ -754,6 +818,11 @@ main(int argc, char *argv[])
       fclose(PID);
     }
 
+    if ( agent_role == MASTER_AGENT )
+	init_master_agent( dest_port );
+    else
+	init_sub_agent( dest_port );
+
     usm_set_reportErrorOnUnknownID(1);
     init_agent();		/* register our .conf handlers */
     init_snmpv3("snmpd");	/* register the v3 handlers */
@@ -786,32 +855,6 @@ main(int argc, char *argv[])
     read_premib_configs();   /* read pre-mib-reading .conf handlers */
     init_mib();              /* initialize the mib structures */
     update_config(0);        /* read in config files and register HUP */
-
-    printf("Opening port(s): ");
-
-    /* initialize v2party support */
-    init_snmp2p(dest_port);
-
-    /* set up a fake session for incoming requests that opens a port
-     * that we listen to. */
-    
-    memset(session, 0, sizeof(struct snmp_session));
-    session->version = SNMP_DEFAULT_VERSION;
-    session->peername = SNMP_DEFAULT_PEERNAME;
-    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
-    session->retries = SNMP_DEFAULT_RETRIES;
-    session->timeout = SNMP_DEFAULT_TIMEOUT;
-     
-    session->srcPartyLen = 0;
-    session->dstPartyLen = 0;
-    session->contextLen = 0;
-     
-    session->local_port = dest_port;
-    session->callback = handle_snmp_packet;
-    session->authenticator = NULL;
-    session = snmp_open( session );
-    set_pre_parse( session, snmp_check_packet );
-    set_post_parse( session, snmp_check_parse );
 
     /* get current time (ie, the time the agent started) */
     gettimeofday(&starttime, NULL);

@@ -29,6 +29,8 @@
 #include "sysORTable.h"
 #include "../struct.h"
 #include "../util_funcs.h"
+#include "../../snmpd.h"
+#include "agentx.h"
 
 extern struct timeval starttime;
 
@@ -147,6 +149,9 @@ void register_sysORTable(oid *oidin,
   gettimeofday(&((*ptr)->OR_uptime), NULL);
   (*ptr)->next = NULL;
   numEntries++;
+
+  if ( agent_role == SUB_AGENT )
+     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
 }
 
 
@@ -177,4 +182,7 @@ void unregister_sysORTable(oid *oidin,
     prev = *ptr;
     ptr = &((*ptr)->next);
   }
+
+  if ( agent_role == SUB_AGENT )
+     agentx_remove_agentcaps( agentx_session, oidin, oidlen);
 }
