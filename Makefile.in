@@ -1,5 +1,5 @@
 #
-# Makefile.in (at the root of ucd-snmp)
+# Makefile.in (at the root of net-snmp)
 #
 
 top_builddir	= .
@@ -25,6 +25,14 @@ INSTALLBINSCRIPTS=net-snmp-config
 INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 
 #
+# other install rules.
+#
+OTHERINSTALL=copypersistentfiles
+COPY_PERSISTENT_FILES=@COPY_PERSISTENT_FILES@
+PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
+UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
+
+#
 # perl specific
 #
 PERLMODULES=SNMP ASN default_store agent
@@ -47,6 +55,15 @@ docs: doxygen.conf
 net-snmp-config-x:
 	chmod a+x net-snmp-config
 
+#
+# extra install rules
+#
+
+copypersistentfiles:
+	@if test "$(COPY_PERSISTENT_FILES)" = "yes" -a -d $(UCDPERSISTENT_DIRECTORY) -a ! -d $(PERSISTENT_DIRECTORY) ; then \
+		cp -pr $(UCDPERSISTENT_DIRECTORY) $(PERSISTENT_DIRECTORY) ; \
+		echo "copying $(UCDPERSISTENT_DIRECTORY) to $(PERSISTENT_DIRECTORY)" ; \
+	fi
 #
 # test targets
 #

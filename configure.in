@@ -199,6 +199,12 @@ AC_ARG_WITH(persistent-directory,
 [  --with-persistent-directory=\"directory\"
                                   Default directory for persistent data storage.],ac_cv_user_prompt_PERSISTENT_DIRECTORY="$with_persistent_directory")
 
+AC_ARG_WITH(copy_persistent_files,
+[  --with-copy-persistent-files=\"no\" Don't copy persistent files
+                                       (or use \"yes\" to copy them).
+                                       (Default: yes)],
+    ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files")
+
 AC_ARG_WITH(default-snmp-version,
 [  --with-default-snmp-version=\"3\" Default version of SNMP to use.
                                   (Default: 3)
@@ -2400,8 +2406,10 @@ Location to write logfile],$defaultlog,quoted)
 
 if test -d /var; then
   defaultstore="/var/net-snmp"
+  ucddefaultstore="/var/ucd-snmp"
 else
   defaultstore="/etc/net-snmp"
+  ucddefaultstore="/etc/ucd-snmp"
 fi
   
 AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
@@ -2409,12 +2417,41 @@ AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
 *** snmpd persistent storage location:
 
 	Enter a directory for the SNMP library to store persistent
-data in the form of a configuration file.
+data in the form of a configuration file.  This default location is
+different than the old default location (which was for ucd-snmp).  If
+you stay with the new path, I'll ask you in a second if you wish to
+copy your files over to the new location (once only).  If you pick
+some other path than the default, you'll have to copy them yourself.
+There is nothing wrong with picking the old path ($ucddefaultstore) if
+you'd rather.
 
 Location to write persistent information],$defaultstore,quoted)
 
 PERSISTENT_DIRECTORY=$ac_cv_user_prompt_PERSISTENT_DIRECTORY
 AC_SUBST(PERSISTENT_DIRECTORY)
+UCDPERSISTENT_DIRECTORY=$ucddefaultstore
+AC_SUBST(UCDPERSISTENT_DIRECTORY)
+
+if test $PERSISTENT_DIRECTORY = "$defaultstore" -a -d "$ucddefaultstore" -a ! -d "$defaultstore" ; then
+AC_CACHE_CHECK(If we should copy the old persistent directory, ac_cv_user_prompt_COPY_PERSISTENT_FILES,
+[
+AC_PROMPT_USER_NO_DEFINE(ac_cv_user_prompt_COPY_PERSISTENT_FILES,[
+
+*** Copying old ucd-snmp persistent files to net-snmp persistent directory:
+
+	Would you like to copy the older ucd-snmp persistent files
+into your new net-snmp persistent file path?  This will functionally
+save all your ucd-snmp data and let it be used within the net-snmp
+tools.  This will only be done once when you run make install.  If you
+wish to do this, enter "yes" at the prompt.
+
+Copy ucd-snmp data into the net-snmp data directory],"yes")
+])
+else
+ac_cv_user_prompt_COPY_PERSISTENT_FILES="no"
+fi
+COPY_PERSISTENT_FILES="$ac_cv_user_prompt_COPY_PERSISTENT_FILES"
+AC_SUBST(COPY_PERSISTENT_FILES)
 
 AC_SUBST(DLLIBS)
 
