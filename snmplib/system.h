@@ -50,7 +50,7 @@ typedef struct _dir_struc
 	struct direct dirstr;	/* Directory structure to return */
 } DIR;
 
-DIR *opendir (char *filename);
+DIR *opendir (const char *filename);
 struct direct *readdir (DIR *dirp);
 int closedir (DIR *dirp);
 

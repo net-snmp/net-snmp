@@ -136,7 +136,7 @@ SOFTWARE.
  * return the pointer to the current file name.
  */
 DIR *
-opendir(char *filename)
+opendir(const char *filename)
 {
     DIR            *p;
     long            len;

@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
   if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
 
-  exit (0);
+  return 0;
 }
 
 void print_table (void)

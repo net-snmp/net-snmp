@@ -17,10 +17,8 @@ CFG=snmpstatus - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "snmpstatus - Win32 Release" (based on\
- "Win32 (x86) Console Application")
-!MESSAGE "snmpstatus - Win32 Debug" (based on\
- "Win32 (x86) Console Application")
+!MESSAGE "snmpstatus - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "snmpstatus - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project

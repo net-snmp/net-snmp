@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
 #endif
 
     SOCK_CLEANUP;
-    exit(0);
+    return 0;
 }
 
 const char *
