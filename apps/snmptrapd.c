@@ -835,7 +835,7 @@ main(int argc, char *argv[])
 	    break;
 
         case 'c':
-	    if (optarg == NULL) {
+	    if (optarg != NULL) {
 		ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
 	    } else {
 		usage();
