@@ -49,7 +49,7 @@ typedef struct netsnmp_table_data_set_storage_s {
 } netsnmp_table_data_set_storage;
 
 typedef struct netsnmp_table_data_set_s {
-   table_data *table;
+   netsnmp_table_data *table;
    netsnmp_table_data_set_storage *default_row;
    int allow_creation; /* set to 1 to allow creation of new rows */
    int rowstatus_column;

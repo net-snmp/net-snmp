@@ -16,7 +16,7 @@ extern "C" {
 #define TABLE_DATA_NAME "table_data"
 
 typedef struct netsnmp_table_row_s {
-   netsnmp_variable_list *indexes; /* warning: not stored permanently */
+   netsnmp_variable_list *indexes; /* stored permanently if store_indexes = 1 */
    oid *index_oid;
    size_t index_oid_len;
    void *data;                    /* the data to store */
@@ -24,38 +24,39 @@ typedef struct netsnmp_table_row_s {
    struct netsnmp_table_row_s *next, *prev; /* if used in a list */
 } netsnmp_table_row;
 
-typedef struct table_data_s {
+typedef struct netsnmp_table_data_s {
    netsnmp_variable_list *indexes_template; /* containing only types */
    char *name;                    /* if !NULL, it's registered globally */
    int flags;                     /* not currently used */
+   int store_indexes;
    netsnmp_table_row *first_row;
-} table_data;
+} netsnmp_table_data;
 
-netsnmp_mib_handler *netsnmp_get_table_data_handler(table_data *table);
+netsnmp_mib_handler *netsnmp_get_table_data_handler(netsnmp_table_data *table);
 void netsnmp_table_data_generate_index_oid(netsnmp_table_row *row);
-int netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row);
-netsnmp_table_row *netsnmp_table_data_remove_row(table_data *table,
+int netsnmp_table_data_add_row(netsnmp_table_data *table, netsnmp_table_row *row);
+netsnmp_table_row *netsnmp_table_data_remove_row(netsnmp_table_data *table,
                                                  netsnmp_table_row *row);
 void *netsnmp_table_data_delete_row(netsnmp_table_row *row);
-void *netsnmp_table_data_remove_and_delete_row(table_data *table, netsnmp_table_row *row);
+void *netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table, netsnmp_table_row *row);
   
-netsnmp_table_row *netsnmp_table_data_get(table_data *table, netsnmp_variable_list *indexes);
+netsnmp_table_row *netsnmp_table_data_get(netsnmp_table_data *table, netsnmp_variable_list *indexes);
     
-netsnmp_table_row *netsnmp_table_data_get_from_oid(table_data *table,
+netsnmp_table_row *netsnmp_table_data_get_from_oid(netsnmp_table_data *table,
                                     oid *searchfor, size_t searchfor_len);
 
-int netsnmp_register_table_data(netsnmp_handler_registration *reginfo, table_data *table,
+int netsnmp_register_table_data(netsnmp_handler_registration *reginfo, netsnmp_table_data *table,
                         netsnmp_table_registration_info *table_info);
 int netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
-                                  table_data *table,
+                                  netsnmp_table_data *table,
                                   netsnmp_table_registration_info *table_info);
 
 netsnmp_table_row *netsnmp_extract_netsnmp_table_row(netsnmp_request_info *);
 void *netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *);
-table_data *netsnmp_create_table_data(const char *name);
+netsnmp_table_data *netsnmp_create_table_data(const char *name);
 netsnmp_table_row *netsnmp_create_table_data_row(void);
 netsnmp_table_row *netsnmp_table_data_clone_row(netsnmp_table_row *row);
-inline void netsnmp_table_data_replace_row(table_data *table,
+inline void netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                            netsnmp_table_row *origrow,
                                            netsnmp_table_row *newrow);
 
