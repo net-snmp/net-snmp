@@ -61,23 +61,8 @@
 
 extern int Suffix;
 DLL_IMPORT extern struct tree *Mib;
-#include "ucd-snmp/ucd-snmp-config.h"
-#include "ucd-snmp/asn1.h"
-#include "ucd-snmp/snmp_api.h"
-#include "ucd-snmp/snmp_client.h"
-#include "ucd-snmp/snmp_impl.h"
-#include "ucd-snmp/snmp.h"
-#undef CMU_COMPATIBLE
-#include "ucd-snmp/parse.h"
-#include "ucd-snmp/mib.h"
-#include "ucd-snmp/scapi.h"
-#include "ucd-snmp/keytools.h"
-#include "ucd-snmp/snmpv3.h"
-#include "ucd-snmp/transform_oids.h"
-#include "ucd-snmp/default_store.h"
-#include "ucd-snmp/int64.h"
-#include "ucd-snmp/system.h"
-#include "ucd-snmp/callback.h"
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 
 #include "perlsnmp.h"
 
@@ -1187,7 +1172,7 @@ void *cb_data;
   varlist_ref = &sv_undef;	/* Prevent unintialized use below. */
 
   switch (op) {
-  case RECEIVED_MESSAGE:
+  case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
     traplist_ref = NULL;
     switch (pdu->command) {
     case SNMP_MSG_INFORM:
@@ -1201,7 +1186,6 @@ void *cb_data;
         reply_pdu->command = SNMP_MSG_RESPONSE;
         reply_pdu->reqid = pdu->reqid;
         reply_pdu->errstat = reply_pdu->errindex = 0;
-        reply_pdu->address = pdu->address;
         snmp_send(ss, reply_pdu);
       } else {
         warn("Couldn't clone PDU for inform response");
@@ -1215,8 +1199,11 @@ void *cb_data;
       av_push(traplist, newSViv(pdu->command));
 #endif
       av_push(traplist, newSViv(pdu->reqid));
+#if 0
+    /* broke with v5 code.  Need Joh'ns help. */
       cp = inet_ntoa(SIN_ADDR(pdu->address));
       av_push(traplist, newSVpv(cp, strlen(cp)));
+#endif
       av_push(traplist, newSVpv((char*) pdu->community, pdu->community_len));
       /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
@@ -1279,7 +1266,7 @@ void *cb_data;
     } /* switch pdu->command */
     break;
 
-  case TIMED_OUT:
+  case SNMP_CALLBACK_OP_TIMED_OUT:
     varlist_ref = &sv_undef;
     break;
   default:;
@@ -1584,7 +1571,7 @@ _bulkwalk_async_cb(int		op,
    err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
 
    switch (op) {
-      case RECEIVED_MESSAGE:
+      case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
       {
 	 DBPRT(1,( "Received message for reqid 0x%08X ...\n", reqid));
 
@@ -1617,7 +1604,7 @@ _bulkwalk_async_cb(int		op,
 	 break;
       }
 
-      case TIMED_OUT:
+      case SNMP_CALLBACK_OP_TIMED_OUT:
       {
 	 DBPRT(1,( "\n*** Timeout for reqid 0x%08X\n\n", reqid));
 
@@ -2085,9 +2072,12 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       str_buf[len] = '\0';
       DBPRT(3,( "'%s' (%s)\n", str_buf, type_str));
 
+#if 0
+    /* huh? */
       /* If necessary, store a timestamp as the semi-documented 5th element. */
       if (sv_timestamp)
 	  av_store(varbind, VARBIND_TIME_F, SvREFCNT_inc(sv_timestamp));
+#endif
 
       /* Push ref to the varbind onto the list of vars for OID. */
       rv = newRV_noinc((SV *)varbind);
@@ -2289,9 +2279,9 @@ int arg;
     errno = 0;
     switch (*name) {
     case 'R':
-	if (strEQ(name, "RECEIVED_MESSAGE"))
-#ifdef RECEIVED_MESSAGE
-	    return RECEIVED_MESSAGE;
+	if (strEQ(name, "SNMP_CALLBACK_OP_RECEIVED_MESSAGE"))
+#ifdef SNMP_CALLBACK_OP_RECEIVED_MESSAGE
+	    return SNMP_CALLBACK_OP_RECEIVED_MESSAGE;
 #else
 	    goto not_there;
 #endif
@@ -2401,9 +2391,9 @@ int arg;
 #endif
 	break;
     case 'T':
-	if (strEQ(name, "TIMED_OUT"))
-#ifdef TIMED_OUT
-	    return TIMED_OUT;
+	if (strEQ(name, "SNMP_CALLBACK_OP_TIMED_OUT"))
+#ifdef SNMP_CALLBACK_OP_TIMED_OUT
+	    return SNMP_CALLBACK_OP_TIMED_OUT;
 #else
 	    goto not_there;
 #endif
@@ -2518,6 +2508,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 	   SnmpSession session = {0};
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+           char *  tmpc = NULL;
 
 	   if (version == 3) {
 		session.version = SNMP_VERSION_3;
@@ -2538,20 +2529,24 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
            session.securityName = sec_name;
            session.securityLevel = sec_level;
            /* session.securityEngineID = sec_eng_id_buf;*/
-           session.securityEngineID = malloc(ENG_ID_BUF_SIZE);
            session.securityEngineIDLen =
-              hex_to_binary(sec_eng_id, session.securityEngineID);
+              hex_to_binary2(sec_eng_id, strlen(sec_eng_id),
+                             (char **) &session.securityEngineID);
            /* session.contextEngineID = context_eng_id_buf; */
-	   session.contextEngineID = malloc(ENG_ID_BUF_SIZE);
            session.contextEngineIDLen =
-              hex_to_binary(context_eng_id, session.contextEngineID);
+              hex_to_binary2(sec_eng_id, strlen(sec_eng_id),
+                             (char **) &session.contextEngineID);
            session.engineBoots = eng_boots;
            session.engineTime = eng_time;
            if (!strcmp(auth_proto, "MD5")) {
-              session.securityAuthProto = usmHMACMD5AuthProtocol;
+               session.securityAuthProto = 
+                  snmp_duplicate_objid(usmHMACMD5AuthProtocol,
+                                          USM_AUTH_PROTO_MD5_LEN);
               session.securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
            } else if (!strcmp(auth_proto, "SHA")) {
-              session.securityAuthProto = usmHMACSHA1AuthProtocol;
+               session.securityAuthProto = 
+                   snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
+                                        USM_AUTH_PROTO_SHA_LEN);
               session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
            } else {
               if (verbose)
@@ -2571,7 +2566,9 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
               }
            }
            if (!strcmp(priv_proto, "DES")) {
-              session.securityPrivProto = usmDESPrivProtocol;
+              session.securityPrivProto =
+                  snmp_duplicate_objid(usmDESPrivProtocol,
+                                       USM_PRIV_PROTO_DES_LEN);
               session.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
            } else {
               if (verbose)
@@ -3914,6 +3911,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
                   goto err;
 	      }
+#if 0
+    /* broke in v5.  Not needed ? */
               if (agent && strlen(agent)) {
                  SIN_ADDR(pdu->address).s_addr = __parse_address(agent);
                  if (SIN_ADDR(pdu->address).s_addr == -1 && verbose) {
@@ -3923,6 +3922,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
               } else {
                  SIN_ADDR(pdu->address).s_addr = get_myaddr();
               }
+#endif
               pdu->trap_type = generic;
               pdu->specific_type = specific;
               pdu->time = uptime;

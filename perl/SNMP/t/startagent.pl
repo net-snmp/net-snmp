@@ -69,14 +69,14 @@ if (open(CMD, "<t/snmptest.cmd")) {
 if ($^O !~ /win32/i) {
   if ($snmpd_cmd) {
     if (-r $snmpd_cmd and -x $snmpd_cmd) {
-      system "$snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -p $agent_port -P t/snmpd.pid > /dev/null 2>&1";
+      system "$snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -P t/snmpd.pid $agent_port > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmpd\n");
     }
   }
   if ($snmptrapd_cmd) {
     if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
-      system "$snmptrapd_cmd -p $trap_port -u t/snmptrapd.pid -c t/snmptest.conf -C > /dev/null 2>&1";
+      system "$snmptrapd_cmd -u t/snmptrapd.pid -c t/snmptest.conf -C $trap_port > /dev/null 2>&1";
     } else {
       warn("Couldn't run snmptrapd\n");
     }
