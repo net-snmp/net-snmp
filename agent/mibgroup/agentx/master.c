@@ -2,10 +2,7 @@
  *  AgentX master agent
  */
 
-/* XXXWWW merge todo: incl/excl range changes in differences between
-   1.21 and 1.27 */
-
-#include "config.h"
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #include <sys/types.h>

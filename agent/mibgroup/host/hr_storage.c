@@ -3,7 +3,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #if HAVE_UNISTD_H

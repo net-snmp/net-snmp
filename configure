@@ -16603,7 +16603,7 @@ trap 'rm -fr `echo "
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
  net-snmp-config:net-snmp-config.in
- config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+ include/net-snmp/net-snmp-config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -16837,7 +16837,7 @@ ac_eD='%g'
 if test "${CONFIG_HEADERS+set}" != set; then
 EOF
 cat >> $CONFIG_STATUS <<EOF
-  CONFIG_HEADERS="config.h"
+  CONFIG_HEADERS="include/net-snmp/net-snmp-config.h"
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 fi

@@ -1,4 +1,4 @@
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_LIMITS_H
 #include <limits.h>

@@ -3,7 +3,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1

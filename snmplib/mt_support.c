@@ -8,7 +8,7 @@
  *                        use array of resource locking structures.
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <errno.h>
 #include "mt_support.h"
 

@@ -2,7 +2,7 @@
  *   AgentX utility routines
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #include <errno.h>

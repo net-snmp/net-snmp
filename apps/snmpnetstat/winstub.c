@@ -2,7 +2,7 @@
 /* uses local files only */
 /* currently searches the protocols only */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if (defined(WIN32) || defined(cygwin) || defined(aix4))
 

@@ -34,7 +34,7 @@
 #include <sys/sysinfo.h>
 
 /* UCD-SNMP config details */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 /* Includes needed for all modules */
 #include "mibdefs.h"

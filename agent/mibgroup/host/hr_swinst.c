@@ -3,7 +3,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>

@@ -12,7 +12,7 @@
  * FIX	Short test description/table of contents.	SUCCESSes: FIX
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
 #include <stdio.h>

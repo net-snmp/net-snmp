@@ -20,6 +20,11 @@
 
 /*
  * $Log$
+ * Revision 1.2  2002/01/04 20:50:31  hardaker
+ * beginnings of ucd-snmp -> net-snmp structural changes.
+ *   - config.h -> include/net-snmp/net-snmp-config.h
+ *     - this, of course, changes just about every file in the repository.
+ *
  * Revision 1.1  2001/05/09 19:36:13  slif
  * Include Alex Rozin's Rmon.
  *
@@ -32,7 +37,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include "mibincl.h" 
 #include "util_funcs.h"
 

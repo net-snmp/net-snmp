@@ -3,7 +3,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_disk.h"
 #if HAVE_STRING_H

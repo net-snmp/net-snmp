@@ -3,7 +3,7 @@
 
 
 /* This should always be included first before anything else */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
 #if HAVE_WINSOCK_H

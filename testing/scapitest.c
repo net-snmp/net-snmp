@@ -24,7 +24,7 @@
 static char *rcsid = "$Id$";	/* */
 
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
 #ifdef HAVE_NETINET_IN_H

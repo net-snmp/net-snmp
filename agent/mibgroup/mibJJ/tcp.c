@@ -4,7 +4,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include "mibincl.h"
 #include "util_funcs.h"
 

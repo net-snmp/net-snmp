@@ -25,7 +25,7 @@ SOFTWARE.
 /*
  * System dependent routines go here
  */
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>

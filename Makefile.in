@@ -11,28 +11,26 @@ SUBDIRS		= snmplib agent apps local ov man
 INSTALLDIRS	= snmplib agent apps local man mibs
 TESTDIRS	= testing
 
-CPP		= @CPP@ 						\
-			-I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
-			-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		\
-			$(EXTRACPPFLAGS)
+CPP		= @CPP@ 					        \
+		-Iinclude -I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
+		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
+		$(EXTRACPPFLAGS)
 
-
-CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
-
-INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
+INSTALLUCDHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
+INSTALLHEADERS=include/net-snmp/net-snmp-config.h $(srcdir)/version.h mib_module_config.h
 INSTALLSCRIPTS=net-snmp-config
 
-all:	sedscript EXAMPLE.conf ucd-snmp-config.h subdirs
+all:	sedscript EXAMPLE.conf include/ucd-snmp/ucd-snmp-config.h subdirs
 
 test:   all
 	( cd testing; $(MAKE) test )
 
-sedscript: sedscript.in config.h $(srcdir)/agent/mibgroup/mibdefs.h
+sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
 
 
-ucd-snmp-config.h: config.h
-	@egrep -v "IN_UCD_SNMP_SOURCE|SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module_config" config.h > ucd-snmp-config.h
+include/ucd-snmp/ucd-snmp-config.h: include/net-snmp/net-snmp-config.h
+	@egrep -v "IN_UCD_SNMP_SOURCE|SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module_config" include/net-snmp/net-snmp-config.h > include/ucd-snmp/ucd-snmp-config.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do	\
@@ -48,7 +46,7 @@ testdirs:
 	done
 
 
-distall: ${srcdir}/configure ${srcdir}/config.h 
+distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
 
 docs: doxygen.conf
 	doxygen doxygen.conf
@@ -58,6 +56,7 @@ install:    all installdirs
         ( cd $$i ; $(MAKE) install ) ;	\
 	done
 	@$(INSTALL) $(INSTALLHEADERS) $(includedir)
+	@$(INSTALL) $(INSTALLUCDHEADERS) $(ucdincludedir)
 	@$(INSTALL) $(INSTALLSCRIPTS) $(bindir)
 	@for i in $(INSTALLHEADERS) ; do \
 		echo "install:  installed $$i in $(includedir)";\
@@ -105,9 +104,9 @@ makefileclean:
 		local/Makefile testing/Makefile
 
 configclean: makefileclean
-	rm -f config.cache config.status config.log config.h
+	rm -f config.cache config.status config.log include/net-snmp/net-snmp-config.h
 	rm -f mibs/.index
-	rm -f mib_module_config.h ucd-snmp-config.h 	\
+	rm -f mib_module_config.h include/ucd-snmp/ucd-snmp-config.h 	\
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
@@ -121,20 +120,20 @@ $(srcdir)/configure: configure.in aclocal.m4
 	sh -c exit 2
 
 
-# autoheader might not change config.h.in, so touch a stamp file.
+# autoheader might not change include/net-snmp/net-snmp-config.h.in, so touch a stamp file.
 #
-$(srcdir)/config.h.in: stamp-h.in
-$(srcdir)/stamp-h.in: configure.in acconfig.h
+$(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
+$(srcdir)/stamp-h.in: configure.in include/net-snmp/acconfig.h
 	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
-config.h: stamp-h
-stamp-h: config.h.in config.status
+include/net-snmp/net-snmp-config.h: stamp-h
+stamp-h: include/net-snmp/net-snmp-config.h.in config.status
 	CONFIG_FILES= ./config.status
 	echo timestamp > stamp-h
 
 touchit:
-	touch configure config.h.in
+	touch configure include/net-snmp/net-snmp-config.h.in
 	touch config.status
 	touch stamp-h stamp-h.in
 

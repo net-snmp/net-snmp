@@ -1,6 +1,6 @@
 /* snmpMPDStats.c: tallies errors for SNMPv3 message processing. */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>

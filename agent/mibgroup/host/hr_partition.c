@@ -4,7 +4,7 @@
  *
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 #include <fcntl.h>
 #if HAVE_STRING_H
 #include <string.h>

@@ -34,7 +34,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * (simon@switch.ch) 1997
  */
 
-#include <config.h>
+#include <net-snmp/net-snmp-config.h>
 
 #if !defined(CAN_USE_SYSCTL)
 

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(include/net-snmp/net-snmp-config.h)
 
 dnl
 dnl save the configure arguments
