@@ -472,6 +472,9 @@ handle_master_agentx_packet(int operation,
         asp = init_agent_snmp_session(session, pdu);
     }
 
+    DEBUGMSGTL(("agentx/master", "handle pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
+                pdu->reqid,pdu->transid, pdu->sessid));
+    
     switch (pdu->command) {
     case AGENTX_MSG_OPEN:
         asp->pdu->sessid = open_agentx_session(session, pdu);
@@ -545,7 +548,9 @@ handle_master_agentx_packet(int operation,
     asp->pdu->time = calculate_time_diff(&now, &starttime);
     asp->pdu->command = AGENTX_MSG_RESPONSE;
     asp->pdu->errstat = asp->status;
-    DEBUGMSGTL(("agentx/master", "send response, stat %d\n", asp->status));
+    DEBUGMSGTL(("agentx/master", "send response, stat %d (req=0x%x,trans="
+                "0x%x,sess=0x%x)\n",
+                asp->status, pdu->reqid,pdu->transid, pdu->sessid));
     if (!snmp_send(asp->session, asp->pdu)) {
         char           *eb = NULL;
         int             pe, pse;

@@ -224,7 +224,8 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      * ok, we have a pdu from the net. Modify as needed 
      */
 
-    DEBUGMSGTL(("agentx/subagent", "handling agentx request....\n"));
+    DEBUGMSGTL(("agentx/subagent", "handling agentx request (req=0x%x,trans="
+                "0x%x,sess=0x%x)\n", pdu->reqid,pdu->transid, pdu->sessid));
     pdu->version = AGENTX_VERSION_1;
     pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
 
@@ -445,8 +446,9 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     }
 
     DEBUGMSGTL(("agentx/subagent",
-                "handling agentx subagent set response (mode=%d)....\n",
-                pdu->command));
+                "handling agentx subagent set response (mode=%d,req=0x%x,"
+                "trans=0x%x,sess=0x%x)\n",
+                pdu->command, pdu->reqid,pdu->transid, pdu->sessid));
     pdu = snmp_clone_pdu(pdu);
 
     asi = (struct agent_netsnmp_set_info *) magic;

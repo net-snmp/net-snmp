@@ -193,6 +193,9 @@ agentx_got_response(int operation,
         return 0;
     }
 
+    DEBUGMSGTL(("agentx/master", "got response errstat=%d, (req=0x%x,trans="
+                "0x%x,sess=0x%x)\n",
+                pdu->errstat,pdu->reqid,pdu->transid, pdu->sessid));
 
     if (pdu->errstat != AGENTX_ERR_NOERROR) {
         /*
@@ -218,6 +221,7 @@ agentx_got_response(int operation,
             DEBUGMSGTL(("agentx/master", "end error branch\n"));
             return 1;
         } else {
+            DEBUGMSGTL(("agentx/master", "errindex=%d\n", pdu->errindex));
             ret = 0;
             for (request = requests, i = 1; request;
                  request = request->next, i++) {
@@ -462,7 +466,8 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     /*
      * send the requests out 
      */
-    DEBUGMSGTL(("agentx", "sending pdu\n"));
+    DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
+                pdu->reqid,pdu->transid, pdu->sessid));
     snmp_async_send(ax_session, pdu, agentx_got_response,
                     netsnmp_create_delegated_cache(handler, reginfo,
                                                    reqinfo, requests,
