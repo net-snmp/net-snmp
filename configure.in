@@ -99,7 +99,7 @@ dnl
 AC_MSG_CHECKING(for system include file)
 changequote(, )
 filebase=$target_os
-while test "x$filebase" != "x$last" -a ! -f s/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/s/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -122,7 +122,7 @@ dnl second part, the CPU type.
 AC_MSG_CHECKING(for machine-type include file)
 changequote(, )
 filebase=$target_cpu
-while test "x$filebase" != "x$last" -a ! -f m/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/m/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -405,8 +405,15 @@ while test "x$new_module_list" != "x"; do
       module_list_h="$module_list_h mibgroup/$i.h"
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
-	if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
-	    echo "  init_$i();" >> $mibdir/mib_module_inits.h
+        mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
+	if grep init_$mnm $srcdir/$mibdir/$i.c > /dev/null; then
+	    echo "  init_$mnm();" >> $mibdir/mib_module_inits.h
+	fi
+      fi
+      if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
+	mnd=`echo $i | sed 's/\/[^/]*$//;'`
+	if test ! -d ./$mibdir/$mnd; then
+	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
       fi
       grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3),"'$i'"},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
@@ -421,8 +428,6 @@ while test "x$new_module_list" != "x"; do
   new_module_list="$new_list_two"
   new_list_two=""
 done
-
-
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
@@ -433,6 +438,11 @@ AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
 AC_SUBST(trap_list_o)
 
+AC_MSG_RESULT(.)
+AC_MSG_CHECKING(if directories neeed to be created)
+for i in $module_directories; do
+  $srcdir/mkinstalldirs $i
+done
 AC_MSG_RESULT(.)
 
 AC_MSG_CHECKING(default mib files to read)
