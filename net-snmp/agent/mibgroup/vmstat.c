@@ -191,7 +191,6 @@ unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_met
 {
 
   oid newname[30];
-  int result;
   static long long_ret;
   static char errmsg[300];
 #ifndef linux

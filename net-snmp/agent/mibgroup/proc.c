@@ -11,6 +11,9 @@
 #endif
 #include <math.h>
 #include <ctype.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"
@@ -23,6 +26,8 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "mib_module_config.h"
+#include "../../snmplib/snmp_api.h"
+#include "../../snmplib/system.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch = NULL;
@@ -73,7 +78,7 @@ void proc_parse_config(word,cptr)
       (*procp)->max = 0;
       (*procp)->min = 0;
     }
-  DEBUGP (stderr,"Read:  %s (%d) (%d)\n",
+  DEBUGP ("Read:  %s (%d) (%d)\n",
            (*procp)->name, (*procp)->max, (*procp)->min);
 }
 

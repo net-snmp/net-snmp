@@ -14,6 +14,7 @@
 #include "mibincl.h"
 #include "snmp_api.h"
 #include "registry.h"
+#include "../../snmplib/system.h"
 
 
 /*  
@@ -91,7 +92,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     if (mine != NULL) {
-      bcopy((char *)mine->name, (char *)(name+vp->namelen),
+      memcpy((char *)(name+vp->namelen), (char *)mine->name,
             ((int)mine->namelen) * sizeof(oid));
       *length = vp->namelen + mine->namelen;
     }

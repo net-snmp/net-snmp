@@ -9,6 +9,9 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -21,6 +24,9 @@
 #endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -60,6 +66,14 @@
 #endif
 #if HAVE_IOCTLS_H
 #include <ioctls.h>
+#endif
+#if STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 
 #ifdef solaris2
@@ -108,7 +122,7 @@
 
 void Interface_Scan_Init();
 
-static int Interface_Scan_Get_Count();
+static int Interface_Scan_Get_Count __P((void));
 
 #ifdef USE_SYSCTL_IFLIST
 
@@ -1247,9 +1261,9 @@ Interface_Scan_Init()
 	
 	strcpy (ifrq.ifr_name, ifname);
 	if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
-	  bzero (nnew->if_hwaddr, 6);
+	  memset (nnew->if_hwaddr,(0), 6);
 	else
-	  bcopy (ifrq.ifr_hwaddr.sa_data, nnew->if_hwaddr, 6);
+	  memcpy (nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, 6);
 	    
 	strcpy (ifrq.ifr_name, ifname);
 	nnew->if_metric = ioctl (fd, SIOCGIFMETRIC, &ifrq) < 0
@@ -1516,8 +1530,8 @@ u_char *EtherAddr;
 #endif
 #endif
 
-        bzero(arpcom.ac_enaddr, sizeof(arpcom.ac_enaddr));
-        bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
+        memset(arpcom.ac_enaddr,(0), sizeof(arpcom.ac_enaddr));
+        memset(EtherAddr,(0), sizeof(arpcom.ac_enaddr));
 
 	if (saveIndex != Index) {	/* Optimization! */
 

@@ -8,6 +8,18 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <ctype.h>
+#if STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#endif
 
 #include "host_res.h"
 #include "hr_utils.h"

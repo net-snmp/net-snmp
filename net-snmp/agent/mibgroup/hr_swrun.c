@@ -6,10 +6,15 @@
 
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "host_res.h"
 #include "hr_swrun.h"
 #include "auto_nlist.h"
 
+#include <ctype.h>
 #if HAVE_SYS_PSTAT_H
 #include <sys/pstat.h>
 #endif
@@ -47,7 +52,9 @@
        void  Init_HR_SWRun();
        int   Get_Next_HR_SWRun();
        void  End_HR_SWRun();
+#ifndef linux
 static int LowProcIndex;
+#endif
 
 #ifndef linux
 #ifndef hpux10
@@ -191,7 +198,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method)();
 {
-    int pid;
+    int pid=0;
     static char string[100];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
@@ -289,7 +296,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 #ifdef linux
 	    sprintf( string, "/proc/%d/cmdline", pid );
 	    fp = fopen( string, "r");
-	    bzero( buf, 100 );
+	    memset( buf,(0), 100 );
 	    fgets( buf, 100, fp );   /* argv[0] '\0' argv[1] '\0' .... */
 
 		/* Skip over argv[0] */
@@ -576,7 +583,10 @@ End_HR_SWRun()
 
 int count_processes ()
 {
-    int i, total=0;
+#ifndef linux
+    int i;
+#endif
+    int total=0;
 
     Init_HR_SWRun();
 #ifdef hpux10

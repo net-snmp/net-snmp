@@ -53,7 +53,7 @@
 #endif
 
 #ifndef FD_COPY
-#define FD_COPY(f, t)   bcopy(f, t, sizeof(*(f)))
+#define FD_COPY(f, t)   memcpy(t, f, sizeof(*(f)))
 #endif
 
 #include "asn1.h"
@@ -127,7 +127,7 @@ init_smux __P((void))
 	smux_port =  htons((u_short) SMUXPORT);
 
 	/* Get ready to listen on the SMUX port*/
-	bzero (&lo_socket, sizeof (lo_socket));
+	memset (&lo_socket,(0), sizeof (lo_socket));
 	lo_socket.sin_family = AF_INET;
 	lo_socket.sin_port = smux_port;
 
@@ -634,7 +634,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 		 * XXX - skip tag and length. We already know this is an ip 
 		 * address
 		 */
-		bcopy(var_val+2, (u_char *)&(smux_sa.sin_addr.s_addr), 
+		memcpy((u_char *)&(smux_sa.sin_addr.s_addr), var_val+2,
 		      *varlength);
 		return (u_char *)&(smux_sa.sin_addr.s_addr);
 		break;

@@ -205,9 +205,11 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method)();
 {
-    int sw_idx;
+    int sw_idx=0;
     static char string[100];
+#ifdef	INSTALLED_SW_IN_SYSTEM
     struct stat stat_buf;
+#endif
 #ifdef HAVE_LIBRPM
     Header rpm_head;
 #endif

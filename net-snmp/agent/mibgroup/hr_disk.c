@@ -9,6 +9,9 @@
 #include "hr_disk.h"
 
 #include <fcntl.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_KVM_H
 #include <kvm.h>
 #endif
@@ -25,6 +28,9 @@
 # if HAVE_NDIR_H
 #  include <ndir.h>
 # endif
+#endif
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
 #endif
 
 #if HAVE_SYS_DISKIO_H	/* HP-UX only ? */

@@ -113,7 +113,8 @@
 #else
 #define setPerrorstatus(x) perror(x)
 #endif
-#include "snmp_api.h"
+#include "../../snmplib/snmp_api.h"
+#include "../../snmplib/system.h"
 
 int numdisks;
 struct diskpart disks[MAXDISKS];

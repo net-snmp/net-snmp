@@ -19,7 +19,8 @@
 #include "versioninfo.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "snmp_api.h"
+#include "../../snmplib/snmp_api.h"
+#include "../../snmplib/system.h"
 
 #include "version.h"
 
