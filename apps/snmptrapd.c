@@ -679,6 +679,7 @@ int main(int argc, char *argv[])
     /* Initialize the world. Create initial user */
     usm_set_reportErrorOnUnknownID(1);
     init_snmpv3("snmptrapd");	/* register the v3 handlers */
+    init_snmp_alarm();
 
     register_mib_handlers();/* snmplib .conf handlers */
     read_premib_configs();	/* read pre-mib-reading .conf handlers */
