@@ -736,13 +736,13 @@ usm_parse_create_usmUser(const char *token, char *line)
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
 #ifdef HAVE_AES
-    } else if (strncmp(cp, "AES128", 3) == 0) {
+    } else if (strncmp(cp, "AES128", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES128PrivProtocol,
                sizeof(usmAES128PrivProtocol));
-    } else if (strncmp(cp, "AES192", 3) == 0) {
+    } else if (strncmp(cp, "AES192", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES192PrivProtocol,
                sizeof(usmAES192PrivProtocol));
-    } else if (strncmp(cp, "AES256", 3) == 0) {
+    } else if (strncmp(cp, "AES256", 6) == 0) {
         memcpy(newuser->privProtocol, usmAES256PrivProtocol,
                sizeof(usmAES256PrivProtocol));
 #endif
