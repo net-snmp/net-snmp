@@ -60,7 +60,6 @@ int register_mib(const char *, struct variable *, size_t, size_t, oid *, size_t)
 int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *, size_t, int);
 int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *);
 int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int);
-/* int register_mib_context2(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int, netsnmp_handler_registration *); */
 int register_mib_netsnmp_table_row(const char *, struct variable *, size_t, size_t, oid *, size_t, int, int, netsnmp_session *, const char *, int, int);
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
@@ -144,6 +143,9 @@ typedef struct subtree_context_cache_s {
 
 struct subtree *find_first_subtree(const char *context_name);
 subtree_context_cache *get_top_context_cache(void);
+
+/* internal API.  Don't use this.  Use netsnmp_register_handler instead */
+int netsnmp_register_mib(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int, netsnmp_handler_registration *);
 
 #ifdef __cplusplus
 };
