@@ -49,10 +49,11 @@
 #include "agent_read_config.h"
 #include "mib_module_includes.h"
 #include "mib_module_config.h"
-#include "../snmp_agent.h"
-#include "../snmpd.h"
+#include "callback.h"
+#include "snmp_agent.h"
+#include "snmpd.h"
 #include "../snmplib/system.h"
-#include "../snmplib/snmp_debug.h"
+#include "snmp_debug.h"
 
 char dontReadConfigFiles;
 char *optconfigfile;
@@ -93,6 +94,7 @@ RETSIGTYPE update_config(int a)
   if (optconfigfile != NULL) {
     read_config_with_type (optconfigfile, "snmpd");
   }
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
   signal(SIGHUP,update_config);
 }
 

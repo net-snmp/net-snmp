@@ -96,6 +96,7 @@ typedef long    fd_mask;
 #include "snmp_vars.h"
 #include "agent_read_config.h"
 #include "snmpv3.h"
+#include "callback.h"
 #ifdef USING_SNMPV3_USMUSER_MODULE 
 #include "mibgroup/snmpv3/usmUser.h"
 #endif
@@ -784,8 +785,6 @@ main(int argc, char *argv[])
     read_premib_configs();   /* read pre-mib-reading .conf handlers */
     init_mib();              /* initialize the mib structures */
     update_config(0);        /* read in config files and register HUP */
-    init_usm_post_config();
-    init_snmpv3_post_config();
 
     printf("Opening port(s): ");
 

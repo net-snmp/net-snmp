@@ -100,6 +100,7 @@ SOFTWARE.
 #include "tools.h"
 #include "keytools.h"
 #include "lcd_time.h"
+#include "callback.h"
 
 static void init_snmp_session (void);
 #include "transform_oids.h"
@@ -478,9 +479,8 @@ init_snmp(const char *type)
   init_mib();
 
   read_configs();
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
 
-  init_usm_post_config();
-  init_snmpv3_post_config();
   init_snmp_session();
 
 }  /* end init_snmp() */

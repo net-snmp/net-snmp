@@ -14,6 +14,8 @@
 #include "all_system.h"
 #include "all_general_local.h" /* */
 
+#include "callback.h"
+
 #include "transform_oids.h"
 
 static u_int    dummy_etime, dummy_eboot;	/* For ISENGINEKNOWN(). */
@@ -1904,7 +1906,11 @@ usm_process_in_msg (msgProcModel, maxMsgSize, secParams, secModel, secLevel,
 
 }  /* end usm_process_in_msg() */
 
-
+void
+init_usm(void) {
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                         init_usm_post_config, NULL);
+}
 
 /* 
  * initializations for the USM.
@@ -1913,9 +1919,9 @@ usm_process_in_msg (msgProcModel, maxMsgSize, secParams, secModel, secLevel,
  *
  * Set "arbitrary" portion of salt to a random number.
  */
-void
-init_usm_post_config(void)
-{
+int
+init_usm_post_config(int majorid, int minorid, void *serverarg,
+                     void *clientarg) {
   u_int	salt_integer_len = sizeof(salt_integer);
 
   initialUser = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
