@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         ipCidrRouteTable_init_data(ipCidrRouteTable_registration_ptr
                                    ipCidrRouteTable_reg);
 

@@ -157,7 +157,7 @@ extern          "C" {
         /*
          * TODO:131:o: |   |-> Add useful data to ipCidrRouteTable rowreq context.
          */
-       u_char     ipCidrRouteStatus;
+        u_char          ipCidrRouteStatus;
 
         /*
          * storage for future expansion
@@ -174,10 +174,10 @@ extern          "C" {
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         ipCidrRouteTable_pre_request(ipCidrRouteTable_registration_ptr
                                      user_context);
-    int            
+    int
         ipCidrRouteTable_post_request(ipCidrRouteTable_registration_ptr
                                       user_context);
 
@@ -220,8 +220,7 @@ extern          "C" {
      */
 
     int             ipCidrRouteIfIndex_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteIfIndex_val_ptr);
     int             ipCidrRouteType_get(ipCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx,
@@ -239,28 +238,22 @@ extern          "C" {
                                         size_t
                                         *ipCidrRouteInfo_val_ptr_len_ptr);
     int             ipCidrRouteNextHopAS_get(ipCidrRouteTable_rowreq_ctx *
-                                             rowreq_ctx,
-                                             long
+                                             rowreq_ctx, long
                                              *ipCidrRouteNextHopAS_val_ptr);
     int             ipCidrRouteMetric1_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteMetric1_val_ptr);
     int             ipCidrRouteMetric2_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteMetric2_val_ptr);
     int             ipCidrRouteMetric3_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteMetric3_val_ptr);
     int             ipCidrRouteMetric4_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteMetric4_val_ptr);
     int             ipCidrRouteMetric5_get(ipCidrRouteTable_rowreq_ctx *
-                                           rowreq_ctx,
-                                           long
+                                           rowreq_ctx, long
                                            *ipCidrRouteMetric5_val_ptr);
     int             ipCidrRouteStatus_get(ipCidrRouteTable_rowreq_ctx *
                                           rowreq_ctx,
@@ -268,7 +261,7 @@ extern          "C" {
                                           ipCidrRouteStatus_val_ptr);
 
 
-    int            
+    int
         ipCidrRouteTable_indexes_set_tbl_idx(ipCidrRouteTable_mib_index *
                                              tbl_idx,
                                              u_long ipCidrRouteDest_val,
@@ -276,7 +269,7 @@ extern          "C" {
                                              long ipCidrRouteTos_val,
                                              u_long
                                              ipCidrRouteNextHop_val);
-    int            
+    int
         ipCidrRouteTable_indexes_set(ipCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx,
                                      u_long ipCidrRouteDest_val,
@@ -313,28 +306,28 @@ extern          "C" {
     int             ipCidrRouteNextHop_check_index(ipCidrRouteTable_rowreq_ctx * rowreq_ctx);   /* internal */
 
 
-    int            
+    int
         ipCidrRouteTable_validate_index(ipCidrRouteTable_registration_ptr
                                         ipCidrRouteTable_reg,
                                         ipCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             ipCidrRouteTable_undo_setup(ipCidrRouteTable_rowreq_ctx
                                                 * rowreq_ctx);
-    int            
+    int
         ipCidrRouteTable_undo_cleanup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteTable_commit(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
-    int            
+    int
         ipCidrRouteTable_undo_commit(ipCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx);
 
 
-    int            
+    int
         ipCidrRouteIfIndex_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteIfIndex_val);
-    int            
+    int
         ipCidrRouteIfIndex_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteIfIndex_set(ipCidrRouteTable_rowreq_ctx *
@@ -355,7 +348,7 @@ extern          "C" {
     int             ipCidrRouteType_undo(ipCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteProto_check_value(ipCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx,
                                      u_long ipCidrRouteProto_val);
@@ -394,25 +387,24 @@ extern          "C" {
     int             ipCidrRouteInfo_undo(ipCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteNextHopAS_check_value(ipCidrRouteTable_rowreq_ctx *
                                          rowreq_ctx,
                                          long ipCidrRouteNextHopAS_val);
-    int            
+    int
         ipCidrRouteNextHopAS_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                         rowreq_ctx);
     int             ipCidrRouteNextHopAS_set(ipCidrRouteTable_rowreq_ctx *
-                                             rowreq_ctx,
-                                             long
+                                             rowreq_ctx, long
                                              ipCidrRouteNextHopAS_val);
     int             ipCidrRouteNextHopAS_undo(ipCidrRouteTable_rowreq_ctx *
                                               rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteMetric1_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteMetric1_val);
-    int            
+    int
         ipCidrRouteMetric1_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteMetric1_set(ipCidrRouteTable_rowreq_ctx *
@@ -421,11 +413,11 @@ extern          "C" {
     int             ipCidrRouteMetric1_undo(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteMetric2_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteMetric2_val);
-    int            
+    int
         ipCidrRouteMetric2_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteMetric2_set(ipCidrRouteTable_rowreq_ctx *
@@ -434,11 +426,11 @@ extern          "C" {
     int             ipCidrRouteMetric2_undo(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteMetric3_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteMetric3_val);
-    int            
+    int
         ipCidrRouteMetric3_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteMetric3_set(ipCidrRouteTable_rowreq_ctx *
@@ -447,11 +439,11 @@ extern          "C" {
     int             ipCidrRouteMetric3_undo(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteMetric4_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteMetric4_val);
-    int            
+    int
         ipCidrRouteMetric4_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteMetric4_set(ipCidrRouteTable_rowreq_ctx *
@@ -460,11 +452,11 @@ extern          "C" {
     int             ipCidrRouteMetric4_undo(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteMetric5_check_value(ipCidrRouteTable_rowreq_ctx *
                                        rowreq_ctx,
                                        long ipCidrRouteMetric5_val);
-    int            
+    int
         ipCidrRouteMetric5_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx);
     int             ipCidrRouteMetric5_set(ipCidrRouteTable_rowreq_ctx *
@@ -473,11 +465,11 @@ extern          "C" {
     int             ipCidrRouteMetric5_undo(ipCidrRouteTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipCidrRouteStatus_check_value(ipCidrRouteTable_rowreq_ctx *
                                       rowreq_ctx,
                                       u_long ipCidrRouteStatus_val);
-    int            
+    int
         ipCidrRouteStatus_undo_setup(ipCidrRouteTable_rowreq_ctx *
                                      rowreq_ctx);
     int             ipCidrRouteStatus_set(ipCidrRouteTable_rowreq_ctx *
@@ -487,7 +479,7 @@ extern          "C" {
                                            rowreq_ctx);
 
 
-    int            
+    int
         ipCidrRouteTable_check_dependencies(ipCidrRouteTable_rowreq_ctx *
                                             ctx);
 

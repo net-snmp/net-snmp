@@ -338,7 +338,7 @@ ipCidrRouteIfIndex_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteIfIndex data.
-     * set (* ipCidrRouteIfIndex_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteIfIndex_val_ptr ) from rowreq_ctx->data
      */
     (*ipCidrRouteIfIndex_val_ptr) = rowreq_ctx->data->if_index;
 
@@ -404,9 +404,9 @@ ipCidrRouteType_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteType data.
-     * set (* ipCidrRouteType_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteType_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteType_val_ptr ) = rowreq_ctx->data->rt_type;
+    (*ipCidrRouteType_val_ptr) = rowreq_ctx->data->rt_type;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteType_get */
@@ -461,9 +461,9 @@ ipCidrRouteProto_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteProto data.
-     * set (* ipCidrRouteProto_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteProto_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteProto_val_ptr ) = rowreq_ctx->data->rt_proto;
+    (*ipCidrRouteProto_val_ptr) = rowreq_ctx->data->rt_proto;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteProto_get */
@@ -519,7 +519,7 @@ ipCidrRouteAge_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteAge data.
-     * set (* ipCidrRouteAge_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteAge_val_ptr ) from rowreq_ctx->data
      */
     return MFD_SKIP;            /* TODO:235:M: |-> Remove SKIP once you've set ipCidrRouteAge data */
 
@@ -598,16 +598,16 @@ ipCidrRouteInfo_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteInfo data.
-     * set (* ipCidrRouteInfo_val_ptr_ptr ) and (* ipCidrRouteInfo_val_ptr_len_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteInfo_val_ptr_ptr ) and (* ipCidrRouteInfo_val_ptr_len_ptr ) from rowreq_ctx->data
      */
-    if((*ipCidrRouteInfo_val_ptr_len_ptr) < nullOidLen) {
+    if ((*ipCidrRouteInfo_val_ptr_len_ptr) < nullOidLen) {
         (*ipCidrRouteInfo_val_ptr_ptr) = malloc(nullOidLen);
-        if(NULL == (*ipCidrRouteInfo_val_ptr_ptr))
+        if (NULL == (*ipCidrRouteInfo_val_ptr_ptr))
             return MFD_ERROR;
     }
     (*ipCidrRouteInfo_val_ptr_len_ptr) = nullOidLen;
     memcpy((*ipCidrRouteInfo_val_ptr_ptr), nullOid, nullOidLen);
-    
+
     return MFD_SUCCESS;
 }                               /* ipCidrRouteInfo_get */
 
@@ -662,9 +662,9 @@ ipCidrRouteNextHopAS_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteNextHopAS data.
-     * set (* ipCidrRouteNextHopAS_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteNextHopAS_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteNextHopAS_val_ptr ) = rowreq_ctx->data->rt_nexthop_as;
+    (*ipCidrRouteNextHopAS_val_ptr) = rowreq_ctx->data->rt_nexthop_as;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteNextHopAS_get */
@@ -720,9 +720,9 @@ ipCidrRouteMetric1_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteMetric1 data.
-     * set (* ipCidrRouteMetric1_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteMetric1_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteMetric1_val_ptr) = rowreq_ctx->data->rt_metric1;
+    (*ipCidrRouteMetric1_val_ptr) = rowreq_ctx->data->rt_metric1;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteMetric1_get */
@@ -778,9 +778,9 @@ ipCidrRouteMetric2_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteMetric2 data.
-     * set (* ipCidrRouteMetric2_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteMetric2_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteMetric2_val_ptr) = rowreq_ctx->data->rt_metric2;
+    (*ipCidrRouteMetric2_val_ptr) = rowreq_ctx->data->rt_metric2;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteMetric2_get */
@@ -836,9 +836,9 @@ ipCidrRouteMetric3_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteMetric3 data.
-     * set (* ipCidrRouteMetric3_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteMetric3_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteMetric3_val_ptr) = rowreq_ctx->data->rt_metric3;
+    (*ipCidrRouteMetric3_val_ptr) = rowreq_ctx->data->rt_metric3;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteMetric3_get */
@@ -894,9 +894,9 @@ ipCidrRouteMetric4_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteMetric4 data.
-     * set (* ipCidrRouteMetric4_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteMetric4_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteMetric4_val_ptr) = rowreq_ctx->data->rt_metric4;
+    (*ipCidrRouteMetric4_val_ptr) = rowreq_ctx->data->rt_metric4;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteMetric4_get */
@@ -954,9 +954,9 @@ ipCidrRouteMetric5_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipCidrRouteMetric5 data.
-     * set (* ipCidrRouteMetric5_val_ptr ) from rowreq_ctx->data->
+     * set (* ipCidrRouteMetric5_val_ptr ) from rowreq_ctx->data
      */
-    (* ipCidrRouteMetric5_val_ptr) = rowreq_ctx->data->rt_metric5;
+    (*ipCidrRouteMetric5_val_ptr) = rowreq_ctx->data->rt_metric5;
 
     return MFD_SUCCESS;
 }                               /* ipCidrRouteMetric5_get */
@@ -1853,7 +1853,7 @@ ipCidrRouteIfIndex_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteIfIndex value.
-     * set ipCidrRouteIfIndex value in rowreq_ctx->data->
+     * set ipCidrRouteIfIndex value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2033,7 +2033,7 @@ ipCidrRouteType_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteType value.
-     * set ipCidrRouteType value in rowreq_ctx->data->
+     * set ipCidrRouteType value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2216,7 +2216,7 @@ ipCidrRouteInfo_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteInfo value.
-     * set ipCidrRouteInfo value in rowreq_ctx->data->
+     * set ipCidrRouteInfo value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2386,7 +2386,7 @@ ipCidrRouteNextHopAS_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteNextHopAS value.
-     * set ipCidrRouteNextHopAS value in rowreq_ctx->data->
+     * set ipCidrRouteNextHopAS value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2557,7 +2557,7 @@ ipCidrRouteMetric1_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteMetric1 value.
-     * set ipCidrRouteMetric1 value in rowreq_ctx->data->
+     * set ipCidrRouteMetric1 value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2734,7 +2734,7 @@ ipCidrRouteMetric2_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteMetric2 value.
-     * set ipCidrRouteMetric2 value in rowreq_ctx->data->
+     * set ipCidrRouteMetric2 value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -2911,7 +2911,7 @@ ipCidrRouteMetric3_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteMetric3 value.
-     * set ipCidrRouteMetric3 value in rowreq_ctx->data->
+     * set ipCidrRouteMetric3 value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -3088,7 +3088,7 @@ ipCidrRouteMetric4_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteMetric4 value.
-     * set ipCidrRouteMetric4 value in rowreq_ctx->data->
+     * set ipCidrRouteMetric4 value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -3267,7 +3267,7 @@ ipCidrRouteMetric5_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteMetric5 value.
-     * set ipCidrRouteMetric5 value in rowreq_ctx->data->
+     * set ipCidrRouteMetric5 value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -3436,7 +3436,7 @@ ipCidrRouteStatus_set(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipCidrRouteStatus value.
-     * set ipCidrRouteStatus value in rowreq_ctx->data->
+     * set ipCidrRouteStatus value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
