@@ -307,8 +307,8 @@ void init_system_mib(void)
                system_variables_oid);
 
   if ( ++system_module_count == 3 )
-	REGISTER_SYSOR_ENTRY( system_module_oid,
-		"The MIB module for SNMPv2 entities");
+	REGISTER_SYSOR_ENTRY( system_module_oid, \
+                              "The MIB module for SNMPv2 entities");
   
   sysContactSet = sysLocationSet = sysNameSet = 0;
 
@@ -352,8 +352,6 @@ var_system(struct variable *vp,
 	   WriteMethod **write_method)
 {
 
-    struct timeval now;
-
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
@@ -366,8 +364,7 @@ var_system(struct variable *vp,
             *var_len = version_sysoid_len*sizeof(version_sysoid[0]);
             return (u_char *)version_sysoid;
         case UPTIME:
-            gettimeofday(&now, NULL);
-	    long_return = timeval_uptime( &now );
+            long_return = get_agent_uptime();
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);

@@ -15,6 +15,8 @@
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_agent.h"
+#include "agent_handler.h"
 #include "mib.h"
 #include "snmp_vars.h"
 #include "var_struct.h"

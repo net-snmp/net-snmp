@@ -54,6 +54,7 @@
 #include "snmp.h"
 #include "snmp_debug.h"
 #include "snmp_vars.h"
+#include "agent_handler.h"
 #include "var_struct.h"
 #include "agent_registry.h"
 #include "agent_index.h"

@@ -8,6 +8,7 @@
 #include "vacm.h"
 
 config_require(util_funcs)
+config_require(mibII/vacm_context)
 config_add_mib(SNMP-VIEW-BASED-ACM-MIB) 
 config_add_mib(SNMP-COMMUNITY-MIB)
 

@@ -106,6 +106,9 @@
 /* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
 #undef HAVE_SYS_WAIT_H
 
+/* Define as __inline if that's what the C compiler calls it.  */
+#undef inline
+
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
 
@@ -1176,14 +1179,6 @@
 /*  This is defined if support for the IPX transport domain is
     available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
-
-/*  This is defined if support for the UDP over IPv6 transport domain is
-    available.  */
-#undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-
-/*  This is defined if support for the TCP over IPv6 transport domain is
-    available.  */
-#undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM
