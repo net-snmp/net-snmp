@@ -3,13 +3,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -83,7 +83,7 @@ struct tree {
 };
 
 /*
- * Information held about each MIB module 
+ * Information held about each MIB module
  */
 struct module_import {
     char *label;                /* The descriptor being imported */
@@ -108,7 +108,7 @@ struct module_compatability {
     struct module_compatability *next;	/* linked list */
 };
 
-    
+
 /* non-aggregate types for tree end nodes */
 #define TYPE_OTHER          0
 #define TYPE_OBJID          1
@@ -149,3 +149,5 @@ int  add_mibdir __P((char *));
 void add_module_replacement __P(( char *, char *, char *, int));
 void print_subtree __P((FILE *, struct tree *, int));
 void print_ascii_dump_tree __P((FILE *, struct tree *, int));
+ /* backwards compatability */
+struct tree *find_node __P((char *, struct tree*));

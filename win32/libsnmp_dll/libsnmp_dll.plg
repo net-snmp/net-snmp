@@ -1,17 +1,17 @@
 --------------------Configuration: libsnmp_dll - Win32 Debug--------------------
-Begining build with project "H:\Archive\ucd-snmp-3.3pre3-new\win32\libsnmp_dll\libsnmp_dll.dsp", at root.
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\libsnmp_dll\libsnmp_dll.dsp", at root.
 Active configuration is Win32 (x86) Dynamic-Link Library (based on Win32 (x86) Dynamic-Link Library)
 
 Project's tools are:
-			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp_dll.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp_dll.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
 			"OLE Type Library Maker" with flags "/nologo /D "_DEBUG" /mktyplib203 /o NUL /win32 "
 			"Win32 Resource Compiler" with flags "/l 0x409 /d "_DEBUG" "
-			"Browser Database Maker" with flags "/nologo /o"Debug/libsnmp_dll.bsc" "
-			"COFF Linker for 80x86" with flags "wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /def:".\libsnmp.def" /out:"../lib/libsnmp.dll" /implib:"Debug/libsnmp.lib" "
+			"Browser Database Maker" with flags "/nologo /o"..\lib/libsnmp_dll.bsc" "
+			"COFF Linker for 80x86" with flags "wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" "
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "D:\TEMP\RSP58.tmp" with contents <wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /def:".\libsnmp.def" /out:"../lib/libsnmp.dll" /implib:"Debug/libsnmp.lib" 
+Creating temp file "C:\WINDOWS\TEMP\RSP60C4.TMP" with contents <wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" 
 ".\Debug\acl.obj"
 ".\Debug\acl_parse.obj"
 ".\Debug\asn1.obj"
@@ -29,9 +29,9 @@ Creating temp file "D:\TEMP\RSP58.tmp" with contents <wsock32.lib kernel32.lib u
 ".\Debug\snmp_client.obj"
 ".\Debug\system.obj"
 ".\Debug\view.obj">
-Creating command line "link.exe @D:\TEMP\RSP58.tmp" 
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSP60C4.TMP" 
 Linking...
-   Creating library Debug/libsnmp.lib and object Debug/libsnmp.exp
+   Creating library ..\lib/libsnmp.lib and object ..\lib/libsnmp.exp
 
 
 

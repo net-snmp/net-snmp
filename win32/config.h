@@ -7,7 +7,7 @@
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* default list of mibs to load */
-#define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
+#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB"
 
 /* default location to look for mibs to load */
 #define DEFAULT_MIBDIRS "\\USR\\MIBS"
@@ -446,6 +446,9 @@
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
+/* define if sys/cdefs.h doesn't define the __P() macro */
+#undef SYS_CDEFS_DEFINES___P
+
 /* ifnet structure tests */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
 #undef STRUCT_IFNET_HAS_IF_TYPE
@@ -659,6 +662,12 @@
 #define DEBUGP1(x,y)
 #endif
 
+/* Define if you have the strdup function.  */
+#define HAVE_STRDUP 1
+
+/* Define if you have the strerror function.  */
+#define HAVE_STRERROR 1
+
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
@@ -737,10 +746,26 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1))
+#ifndef SYS_CDEFS_DEFINES___P
+#ifndef __P
 #ifdef __STDC__
 #define __P(params) params
 #else
 #define __P(params) ()
 #endif /* __STDC__ */
 #endif /* __P */
+#else /* SYS_CDEFS_DEFINES___P */
+#ifndef __P
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#endif /* HAVE_SYS_CDEFS_H */
+#endif /* __P */
+#endif /* SYS_CDEFS_DEFINES___P */
+
+#ifdef WIN32
+#define ENV_SEPARATOR ";"
+#define ENV_SEPARATOR_CHAR ';'
+#else
+#define ENV_SEPARATOR ":"
+#define ENV_SEPARATOR_CHAR ':'
+#endif
