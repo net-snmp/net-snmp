@@ -128,19 +128,19 @@ init_vacm_vars(void)
     snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
                                   "name type subtree [mask]");
     snmpd_register_config_handler("rwcommunity", vacm_parse_simple, NULL,
-                                  "community [default|hostname|network/bits] [oid]");
+                                  "community [default|hostname|network/bits [oid]]");
     snmpd_register_config_handler("rocommunity", vacm_parse_simple, NULL,
-                                  "community [default|hostname|network/bits] [oid]");
+                                  "community [default|hostname|network/bits [oid]]");
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
     snmpd_register_config_handler("rwcommunity6", vacm_parse_simple, NULL,
-                                  "community [default|hostname|network/bits] [oid]");
+                                  "community [default|hostname|network/bits [oid]]");
     snmpd_register_config_handler("rocommunity6", vacm_parse_simple, NULL,
-                                  "community [default|hostname|network/bits] [oid]");
+                                  "community [default|hostname|network/bits [oid]]");
 #endif
     snmpd_register_config_handler("rwuser", vacm_parse_simple, NULL,
-                                  "user [noauth|auth|priv] [oid]");
+                                  "user [noauth|auth|priv [oid]]");
     snmpd_register_config_handler("rouser", vacm_parse_simple, NULL,
-                                  "user [noauth|auth|priv] [oid]");
+                                  "user [noauth|auth|priv [oid]]");
     snmpd_register_config_handler("vacmView", vacm_parse_config_view, NULL,
                                   NULL);
     snmpd_register_config_handler("vacmGroup", vacm_parse_config_group,

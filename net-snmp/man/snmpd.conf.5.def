@@ -206,8 +206,8 @@ IPv6 support has been enabled, the \fIrocommunity6\fR and
 \fIrwcommunity6\fR tokens will also be available.  This section
 defines how to configure the snmpd program to accept various types and
 levels of access.
-.IP "rouser USER [noauth|auth|priv] [OID]"
-.IP "rwuser USER [noauth|auth|priv] [OID]"
+.IP "rouser USER [noauth|auth|priv [OID]]"
+.IP "rwuser USER [noauth|auth|priv [OID]]"
 Creates a SNMPv3 USM user in the VACM access configuration tables.  It
 is more efficient (and powerful) to use the combined \fIgroup\fR,
 \fIaccess\fR, and \fIview\fR directives instead, but these wrapper
@@ -217,8 +217,8 @@ The minimum level of authentication and privacy the user must use is
 specified by the first token (which defaults to "auth").  The OID
 parameter restricts access for that user to everything below the given
 OID.
-.IP "rocommunity COMMUNITY [SOURCE] [OID]"
-.IP "rwcommunity COMMUNITY [SOURCE] [OID]"
+.IP "rocommunity COMMUNITY [SOURCE [OID]]"
+.IP "rwcommunity COMMUNITY [SOURCE [OID]]"
 These create read-only and read-write communities that can be used to
 access the agent.  They are a quick wrapper around the more complex
 and powerful \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR
@@ -231,8 +231,8 @@ directives.
 The format of the SOURCE is token is described in the \fIcom2sec\fR
 directive section below.  The OID token restricts access for that
 community to everything below that given OID.
-.IP "rocommunity6 COMMUNITY [SOURCE] [OID]"
-.IP "rwcommunity6 COMMUNITY [SOURCE] [OID]"
+.IP "rocommunity6 COMMUNITY [SOURCE [OID]]"
+.IP "rwcommunity6 COMMUNITY [SOURCE [OID]]"
 They are the alternative directives to the \fIrocommunity\fR,
 \fIrwcommunity\fR for the transport domain UDPIPv6. They are only
 valid in specifing \fIUDPIPv6\fR as transport domain.
