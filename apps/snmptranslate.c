@@ -283,14 +283,11 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
     } else if (find_best) {
-        u_int result;
-        struct tree *tp = find_best_tree_node(current_name, 0, &result);
-        if (!tp) {
-            printf("Unable to find a matching object identifier for \"%s\"\n",
+        if (0 == get_wild_node(current_name, name, &name_length)) {
+            fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
                    current_name);
             exit(1);
         }
-        get_node(tp->label, name, &name_length);
     } else {
 	if (!read_objid(current_name, name, &name_length)){
 	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
