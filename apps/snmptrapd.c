@@ -932,6 +932,7 @@ main(int argc, char *argv[])
      * initialize local modules 
      */
     if (agentx_subagent) {
+        extern void init_register_usmUser_context(const char *);
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 	void  init_subagent(void);
         init_subagent();
