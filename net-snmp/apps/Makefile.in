@@ -108,7 +108,7 @@ installdirs:
 
 
 dependlocal: 
-	makedepend $(CPPFLAGS) $(srcdir)/*.c
+	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
 
 depend: dependlocal
 	for i in $(SUBDIRS) ; do \
@@ -119,7 +119,7 @@ nosysdepend:
 	for i in $(SUBDIRS) ; do \
         ( cd $$i ; $(MAKE) nosysdepend ) ; \
 	done
-	makedepend $(CPPFLAGS) *.c
+	makedepend $(CPPFLAGS) -o.lo *.c
 	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend

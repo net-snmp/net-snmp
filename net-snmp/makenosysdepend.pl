@@ -8,7 +8,7 @@ if (/^\# DO NOT DELETE THIS LINE/) {
 
 if ($doit == 1) {
     s#/usr/(include|lib|local)/[^\s]+##g;
-    print if (! /^\w+\.o:\s*$/);
+    print if (! /^\w+\.lo:\s*$/);
 } else {
     print;
 }
