@@ -243,7 +243,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
           }
           else if (!strncmp(word,"community",9)) {
             i = atoi(cptr);
-            if (i < NUM_COMMUNITIES) {
+            if (i > 0 && i <= NUM_COMMUNITIES) {
               cptr = skip_not_white(cptr);
               cptr = skip_white(cptr);
               if (cptr != NULL) {
