@@ -1,4 +1,4 @@
-.TH "multiplexer: splits mode requests into calls to different handlers." 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "multiplexer: splits mode requests into calls to different handlers." 3 "19 Feb 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,9 +8,9 @@ More...
 
 .in +1c
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_multiplexer_handler\fP (netsnmp_mib_handler_methods *req)"
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_multiplexer_handler\fP (\fBnetsnmp_mib_handler_methods\fP *req)"
 .br
-.RI "\fIreturns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers.\fP"
+.RI "\fIreturns a multiplixer handler given a \fBnetsnmp_mib_handler_methods\fP structure of subhandlers.\fP"
 .ti -1c
 .RI "int \fBnetsnmp_multiplexer_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
@@ -35,9 +35,9 @@ SET requests call the set_method, or if not present return a SNMP_ERR_NOTWRITABL
 .PP
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "netsnmp_mib_handler* netsnmp_get_multiplexer_handler (netsnmp_mib_handler_methods * req)"
+.SS "netsnmp_mib_handler* netsnmp_get_multiplexer_handler (\fBnetsnmp_mib_handler_methods\fP * req)"
 .PP
-returns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers.
+returns a multiplixer handler given a \fBnetsnmp_mib_handler_methods\fP structure of subhandlers.
 .PP
 Definition at line 36 of file multiplexer.c.
 .SS "int netsnmp_multiplexer_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
