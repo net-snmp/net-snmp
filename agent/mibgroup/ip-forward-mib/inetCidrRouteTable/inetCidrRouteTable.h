@@ -100,7 +100,8 @@ extern          "C" {
         /*
          * inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        char inetCidrRouteDest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
+        char           
+            inetCidrRouteDest[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteDest_len;
 
         /*
@@ -122,7 +123,8 @@ extern          "C" {
         /*
          * inetCidrRouteNextHop(6)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        char inetCidrRouteNextHop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
+        char           
+            inetCidrRouteNextHop[NETSNMP_ACCESS_ROUTE_ADDR_BUF_SIZE];
         size_t          inetCidrRouteNextHop_len;
 
 

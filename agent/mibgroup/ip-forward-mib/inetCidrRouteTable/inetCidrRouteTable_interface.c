@@ -584,7 +584,6 @@ inetCidrRouteTable_allocate_rowreq_ctx(inetCidrRouteTable_data * data)
                  "inetCidrRouteTable_rowreq_ctx.\n");
     } else {
         if (NULL != data) {
-            rowreq_ctx->rowreq_flags |= MFD_ROW_DATA_FROM_USER;
             rowreq_ctx->data = data;
         } else if (NULL ==
                    (rowreq_ctx->data =
@@ -621,8 +620,7 @@ inetCidrRouteTable_release_rowreq_ctx(inetCidrRouteTable_rowreq_ctx *
     netsnmp_assert(NULL != rowreq_ctx);
 
 
-    if ((rowreq_ctx->data) &&
-        !(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER))
+    if (rowreq_ctx->data)
         inetCidrRouteTable_release_data(rowreq_ctx->data);
 
     if (rowreq_ctx->undo)
@@ -1226,7 +1224,7 @@ _inetCidrRouteTable_check_column(inetCidrRouteTable_rowreq_ctx *
         }
         break;
 
-    default:  /** We shouldn't get here */
+    default:   /** We shouldn't get here */
         rc = SNMP_ERR_GENERR;
         snmp_log(LOG_ERR,
                  "unknown column %d in _inetCidrRouteTable_check_column\n",

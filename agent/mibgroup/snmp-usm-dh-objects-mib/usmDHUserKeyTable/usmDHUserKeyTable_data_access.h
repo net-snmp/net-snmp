@@ -55,20 +55,6 @@ extern          "C" {
     void            usmDHUserKeyTable_cache_free(netsnmp_container *
                                                  container);
 
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    /*
-     *********************************************************************
-     * Since we have no idea how you really access your data, we'll go with
-     * a worst case example: a flat text file.
-     */
-#define MAX_LINE_SIZE 256
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
     int             usmDHUserKeyTable_row_prep(usmDHUserKeyTable_rowreq_ctx
                                                * rowreq_ctx);
 
