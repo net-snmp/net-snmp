@@ -6,8 +6,8 @@
 !define PRODUCT_MIN_VERSION "2"
 !define PRODUCT_REVISION "0"
 !define PRODUCT_EXE_VERSION "1"
-!define PRODUCT_WEB_SITE "http://www.net-snmp.com"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
+!define PRODUCT_WEB_SITE "http://www.net-snmp.org"
+!define PRODUCT_DIR_REGKEY "Software\Net-SNMP"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "Net-SNMP:StartMenuDir"
@@ -64,9 +64,12 @@ OutFile "..\\net-snmp-${PRODUCT_MAJ_VERSION}.\
                   -${PRODUCT_EXE_VERSION}\
                   .win32.exe"
 InstallDir "C:\usr"
-InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
+InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" "InstallDir"
 ShowInstDetails show
 ShowUnInstDetails show
+
+; Variables for writing config files
+Var conf_file
 
 Section "Base Components" SEC01
   SetOutPath "$INSTDIR"
@@ -202,7 +205,7 @@ Section "Base Components" SEC01
   File "share\snmp\snmpconf-data\snmp-data\output"
   File "share\snmp\snmpconf-data\snmp-data\snmpconf-config"
   SetOutPath "$INSTDIR\etc\snmp"
-  File "etc\snmp\snmp.conf"
+  ; File "etc\snmp\snmp.conf"
   SetOutPath "$INSTDIR\include\net-snmp"
   File "include\net-snmp\net-snmp-config.h"
   SetOutPath "$INSTDIR\include\net-snmp\agent"
@@ -299,7 +302,8 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\bin\encode_keychange.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "InstallDir" $INSTDIR
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "Version" ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\encode_keychange.exe"
@@ -326,6 +330,7 @@ SectionEnd
 
 Function CreateSnmpConf
   SetOutPath "$INSTDIR\etc\snmp"
+  StrCpy $conf_file "snmp.conf"
   
   ; Slash it
   Push $INSTDIR
@@ -333,9 +338,16 @@ Function CreateSnmpConf
   Push "/"
   Call StrRep
   Pop $R0 
-  
+
+  IfSilent overwrite_conf
+  IfFileExists "$conf_file" 0 overwrite_conf
+    MessageBox MB_YESNO|MB_ICONQUESTION "File $conf_file exists.  Overwrite?" IDYES overwrite_conf
+    StrCpy $conf_file "$conf_file.new"
+    MessageBox MB_OK "File saved as $conf_file"
+  overwrite_conf:  
+
   ClearErrors
-  FileOpen $0 "snmp.conf" "w"
+  FileOpen $0 "$conf_file" "w"
   IfErrors cleanup
   FileWrite $0 "mibdirs $R0/share/snmp/mibs$\r$\n"
   FileWrite $0 "persistentDir $R0/snmp/persist$\r$\n"
@@ -787,3 +799,5 @@ Section Uninstall
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   SetAutoClose true
 SectionEnd
+
+
