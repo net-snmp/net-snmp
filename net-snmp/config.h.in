@@ -341,6 +341,15 @@
 /* Define if you have the <netinet/in_pcb.h> header file.  */
 #undef HAVE_NETINET_IN_PCB_H
 
+/* Define if you have the <netinet/in_systm.h> header file.  */
+#undef HAVE_NETINET_IN_SYSTM_H
+
+/* Define if you have the <netinet/tcp.h> header file.  */
+#undef HAVE_NETINET_TCP_H
+
+/* Define if you have the <netinet/udp.h> header file.  */
+#undef HAVE_NETINET_UDP_H
+
 /* Define if you have the <netinet/in_var.h> header file.  */
 #undef HAVE_NETINET_IN_VAR_H
 
