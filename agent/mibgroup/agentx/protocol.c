@@ -78,8 +78,11 @@ agentx_realloc_build_int(u_char **buf, size_t *buf_len, size_t *out_len,
 			 int allow_realloc,
 			 unsigned int value, int network_order)
 {
-  unsigned int ivalue = value, i = 0;
+  unsigned int ivalue = value;
   size_t ilen = *out_len;
+#ifdef WORDS_BIGENDIAN
+  unsigned int i = 0;
+#endif
 
   while ((*out_len + 4) >= *buf_len) {
     if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -141,8 +144,11 @@ agentx_realloc_build_short(u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc,
 			   unsigned short value, int network_order)
 {
-  unsigned short ivalue = value, i = 0;
+  unsigned short ivalue = value;
   size_t ilen = *out_len;
+#ifdef WORDS_BIGENDIAN
+  unsigned short i = 0;
+#endif
 
   while ((*out_len + 2) >= *buf_len) {
     if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
