@@ -770,8 +770,6 @@ usage(void)
     fprintf(stderr,
             "  -H\t\t\tdisplay configuration file directives understood\n");
     fprintf(stderr,
-            "  -l d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
-    fprintf(stderr,
             "  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n");
     fprintf(stderr,
             "  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n");
@@ -780,6 +778,8 @@ usage(void)
     fprintf(stderr, "  -o FILE\t\toutput to FILE\n");
     fprintf(stderr, "  -P\t\t\tprint to standard error\n");
     fprintf(stderr, "  -s\t\t\tlog to syslog\n");
+    fprintf(stderr,
+            "  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
 #if HAVE_GETPID
     fprintf(stderr, "  -u FILE\t\tstore process id in FILE\n");
 #endif
@@ -895,7 +895,7 @@ main(int argc, char *argv[])
     int             dofork = 1;
     char           *cp, *listen_ports = NULL;
     char           *trap1_fmt_str_remember = NULL;
-    int             agentx_subagent = 1;
+    int             agentx_subagent = 1, depmsg = 0;
 #if HAVE_GETPID
     FILE           *PID;
     char           *pid_file = NULL;
@@ -1012,6 +1012,10 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'l':
+	    fprintf(stderr,
+		    "Warning: -l option is deprecated; use -S instead\n");
+	    depmsg = 1;
+	case 'S':
             if (optarg != NULL) {
                 switch (*optarg) {
                 case 'd':
@@ -1047,8 +1051,7 @@ main(int argc, char *argv[])
                     Facility = LOG_LOCAL7;
                     break;
                 default:
-                    fprintf(stderr, "invalid syslog facility: -l %c\n",
-                            *optarg);
+                    fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
                     usage();
                     exit(1);
                 }
@@ -1274,8 +1277,10 @@ main(int argc, char *argv[])
 
     if (Syslog) {
         snmp_enable_syslog_ident("snmptrapd", Facility);
-        snmp_log(LOG_INFO, "Starting snmptrapd %s\n",
-                 netsnmp_get_version());
+        snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
+	if (depmsg) {
+	    snmp_log(LOG_WARNING, "-l option is deprecated; use -S instead\n");
+	}
     }
     if (Print) {
         struct tm      *tm;
