@@ -58,10 +58,17 @@ PERFORMANCE OF THIS SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_WINSOCK_H
+# include <winsock.h>
+#endif
 #if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
+# include <sys/socket.h>
+#endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_SYS_SOCKETVAR_H
+# include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -79,9 +86,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
@@ -345,7 +349,7 @@ search_subtree_vars(struct subtree *tp,
 			 */
 		    if ( access && snmp_oid_compare(name, *namelen,
 						    tp->end, tp->end_len) > 0) {
-			memcpy(name, tp->end, tp->end_len);
+			memcpy(name, tp->end, tp->end_len * sizeof(oid));
 			access = 0;
 		    }
 #if MIB_CLIENTS_ARE_EVIL
@@ -402,6 +406,7 @@ search_subtree_vars(struct subtree *tp,
 	    if (access != NULL || (exact && *write_method != NULL)) {
 	        *type = cvp->type;
 		*acl = cvp->acl;
+		*noSuchObject = FALSE;
 		return access;
 	    }
 	    return NULL;

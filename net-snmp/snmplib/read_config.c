@@ -227,9 +227,9 @@ unregister_config_handler(const char *type_param,
   while ((*ltmp)->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
     ltmp = &((*ltmp)->next);
   }
-  if (*ltmp == NULL) {
-    free((*ltmp)->config_token);
-    SNMP_FREE((*ltmp)->help);
+  if ((*ltmp)->next != NULL) {
+    free((*ltmp)->next->config_token);
+    SNMP_FREE((*ltmp)->next->help);
     ltmp2 = (*ltmp)->next->next;
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
@@ -476,7 +476,80 @@ read_premib_configs (void)
                       NULL);
 }
 
+/*******************************************************************-o-******
+ * set_configuration_directory
+ *
+ * Parameters:
+ *      char *dir - value of the directory
+ * Sets the configuration directory. Multiple directories can be
+ * specified, but need to be seperated by 'ENV_SEPARATOR_CHAR'.
+ */
+void set_configuration_directory(const char *dir)
+{
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR, strdup(dir));
+}
 
+/*******************************************************************-o-******
+ * get_configuration_directory
+ *
+ * Parameters: -
+ * Retrieve the configuration directory or directories.
+ * (For backwards compatibility that is:
+ *       SNMPCONFPATH, SNMPSHAREPATH, SNMPLIBPATH, HOME/.snmp
+ * First check whether the value is set.
+ * If not set give it the default value.
+ * Return the value.
+ * We always retrieve it new, since we have to do it anyway if it is just set.
+ */
+const char *get_configuration_directory()
+{
+char defaultPath[SPRINT_MAX_LEN];
+char *homepath;
+
+    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR)) {
+        homepath=getenv("HOME");
+        sprintf(defaultPath,"%s%c%s%c%s%s%s%s",
+              SNMPCONFPATH, ENV_SEPARATOR_CHAR,
+              SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
+              ((homepath == NULL) ? "" : ENV_SEPARATOR),
+              ((homepath == NULL) ? "" : homepath),
+              ((homepath == NULL) ? "" : "/.snmp"));
+        set_configuration_directory(defaultPath);
+    }
+    return(ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR));
+}
+
+/*******************************************************************-o-******
+ * set_persistent_directory
+ *
+ * Parameters:
+ *      char *dir - value of the directory
+ * Sets the configuration directory. 
+ * No multiple directories may be specified.
+ * (However, this is not checked)
+ */
+void set_persistent_directory(const char *dir)
+{
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR, strdup(dir));
+}
+
+/*******************************************************************-o-******
+ * get_persistent_directory
+ *
+ * Parameters: -
+ * Function will retrieve the persisten directory value.
+ * First check whether the value is set.
+ * If not set give it the default value.
+ * Return the value. 
+ * We always retrieve it new, since we have to do it anyway if it is just set.
+ */
+const char *get_persistent_directory()
+{
+    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR)) {
+        set_persistent_directory(PERSISTENT_DIRECTORY);
+    }
+    return(ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR));
+}
 
 
 /*******************************************************************-o-******
@@ -513,7 +586,8 @@ read_config_files (int when)
 {
   int i, j;
   char configfile[300];
-  char *envconfpath, *homepath;
+  char *envconfpath;
+  const char *confpath, *perspath;
   char *cptr1, *cptr2;
   char defaultPath[SPRINT_MAX_LEN];
 
@@ -526,6 +600,9 @@ read_config_files (int when)
   if (when == PREMIB_CONFIG)
     free_config();
 
+  confpath = get_configuration_directory();
+  perspath = get_persistent_directory();
+
   /* read all config file types */
   for(;ctmp != NULL; ctmp = ctmp->next) {
 
@@ -533,14 +610,10 @@ read_config_files (int when)
 
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
-      homepath=getenv("HOME");
-      sprintf(defaultPath,"%s%c%s%c%s%s%s%s%c%s",
-	      SNMPCONFPATH, ENV_SEPARATOR_CHAR,
-              SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
-              ((homepath == NULL) ? "" : ENV_SEPARATOR),
-              ((homepath == NULL) ? "" : homepath),
-              ((homepath == NULL) ? "" : "/.snmp"),
-              ENV_SEPARATOR_CHAR, PERSISTENT_DIRECTORY);
+      sprintf(defaultPath,"%s%s%s",
+              ((confpath == NULL) ? "" : confpath),
+              ((perspath == NULL) ? "" : ENV_SEPARATOR),
+              ((perspath == NULL) ? "" : perspath));
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
@@ -561,8 +634,8 @@ read_config_files (int when)
        * then we read all the configuration files we can, starting with
        * the oldest first.
        */
-      if (strncmp(cptr2, PERSISTENT_DIRECTORY,
-                  strlen(PERSISTENT_DIRECTORY)) == 0 ||
+      if (strncmp(cptr2, perspath,
+                  strlen(perspath)) == 0 ||
           (getenv("SNMP_PERSISTENT_FILE") != NULL &&
            strncmp(cptr2, getenv("SNMP_PERSISTENT_FILE"),
                    strlen(getenv("SNMP_PERSISTENT_FILE"))) == 0)) {
@@ -656,7 +729,7 @@ read_config_store(const char *type, const char *line)
      2. configured <PERSISTENT_DIRECTORY>/<type>.conf
   */
   if ((filep = getenv("SNMP_PERSISTENT_FILE")) == NULL) {
-    sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+    sprintf(file,"%s/%s.conf",get_persistent_directory(),type);
     filep = file;
   }
   
@@ -668,7 +741,7 @@ read_config_store(const char *type, const char *line)
                file);
   }
   if ((fout = fopen(filep, "a")) != NULL) {
-    fprintf(fout,line);
+    fprintf(fout, "%s", line);
     if (line[strlen(line)] != '\n')
       fprintf(fout,"\n");
     DEBUGMSGTL(("read_config","storing: %s\n",line));
@@ -719,10 +792,10 @@ snmp_save_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_save_persistent","saving %s files...\n", type));
-  sprintf(file,"%s/%s.conf", PERSISTENT_DIRECTORY, type);
+  sprintf(file,"%s/%s.conf", get_persistent_directory(), type);
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(fileold,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      sprintf(fileold,"%s/%s.%d.conf", get_persistent_directory(), type, j);
       if (stat(fileold, &statbuf) != 0) {
         DEBUGMSGTL(("snmp_save_persistent"," saving old config file: %s -> %s.\n", file, fileold));
         if (rename(file, fileold)) {
@@ -764,10 +837,10 @@ snmp_clean_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_clean_persistent","cleaning %s files...\n", type));
-  sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+  sprintf(file,"%s/%s.conf",get_persistent_directory(),type);
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(file,"%s/%s.%d.conf", PERSISTENT_DIRECTORY, type, j);
+      sprintf(file,"%s/%s.%d.conf", get_persistent_directory(), type, j);
       if (stat(file, &statbuf) == 0) {
         DEBUGMSGTL(("snmp_clean_persistent"," removing old config file: %s\n", file));
         unlink(file);

@@ -20,6 +20,12 @@
 #include <stdlib.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_utils.h"
 #if TIME_WITH_SYS_TIME
@@ -70,11 +76,14 @@ date_n_time ( time_t *when, size_t  *length)
     string[7] =  0;
     *length = 8;
 
+#ifndef cygwin
 	/*
 	 * Timezone offset
 	 */
 #ifndef SYSV
+#ifndef aix4
 #define timezone tm_p->tm_gmtoff
+#endif
 #endif
     if ( timezone > 0 )
 	string[8] = '-';
@@ -83,6 +92,7 @@ date_n_time ( time_t *when, size_t  *length)
     string[9] = abs(timezone)/3600;
     string[10] = (abs(timezone) - string[9]*3600)/60;
     *length = 11;
+#endif
 
 #ifdef SYSV
 	/*
@@ -104,8 +114,7 @@ date_n_time ( time_t *when, size_t  *length)
 }
 
 
-time_t ctime_to_timet( string )
-    char *string;
+time_t ctime_to_timet( char* string )
 {
     struct tm tm;
 

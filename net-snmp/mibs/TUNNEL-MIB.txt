@@ -92,6 +92,7 @@ tunnelIfEncapsMethod OBJECT-TYPE
                    l2f(7),     -- L2F encapsulation
                    udp(8),     -- UDP encapsulation
                    atmp(9)     -- ATMP encapsulation
+
                }
     MAX-ACCESS read-only
     STATUS     current
@@ -283,6 +284,7 @@ tunnelConfigStatus OBJECT-TYPE
             become active as soon as the agent assigns the interface
             index, regardless of whether the interface is operationally
             up.
+
             Deleting a row in this table will likewise delete the
             corresponding row in the ifTable and in the tunnelIfTable."
     ::= { tunnelConfigEntry 6 }
@@ -331,4 +333,5 @@ tunnelMIBBasicGroup OBJECT-GROUP
             "A collection of objects to support basic management of IP
             Tunnels."
     ::= { tunnelMIBGroups 1 }
+
 END

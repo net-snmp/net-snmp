@@ -8,15 +8,23 @@
 config_require(util_funcs)
 config_arch_require(solaris2, kernel_sunos5)
 
+#ifdef hpux11
+#include <sys/mib.h>
+#else
 struct in_ifaddr;
 struct ifnet;
+#endif
 
 int Interface_Index_By_Name (char *, int);
 void Interface_Scan_Init (void);
 #if defined(linux) || defined(sunV3)
 struct in_ifaddr { int dummy; };
 #endif
+#if defined(hpux11)
+int Interface_Scan_Next (short *, char *, nmapi_phystat *);
+#else
 int Interface_Scan_Next (short *, char *, struct ifnet *, struct in_ifaddr *);
+#endif
 
 void	init_interfaces (void);
 extern FindVarMethod var_interfaces;

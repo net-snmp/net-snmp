@@ -37,7 +37,7 @@ extern "C" {
 #define MT_LIB_MAXIMUM     6  /* must be one greater than the last one */
 
 
-#ifdef _REENTRANT
+#ifdef NS_REENTRANT
 
 #if HAVE_PTHREAD_H
 
@@ -63,14 +63,14 @@ int snmp_res_lock(int groupID, int resourceID);
 int snmp_res_unlock(int groupID, int resourceID);
 int snmp_res_destroy_mutex(int groupID, int resourceID);
 
-#else  /* !_REENTRANT */
+#else  /* !NS_REENTRANT */
 
 #define snmp_res_init() do {} while (0)
 #define snmp_res_lock(x,y) do {} while (0)
 #define snmp_res_unlock(x,y) do {} while (0)
 #define snmp_res_destroy_mutex(x,y) do {} while (0)
 
-#endif /* !_REENTRANT */
+#endif /* !NS_REENTRANT */
 
 #ifdef __cplusplus
 }

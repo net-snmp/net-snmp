@@ -20,6 +20,12 @@
 #include <netdb.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "asn1.h"
 #include "mib.h"
 #include "snmp_api.h"

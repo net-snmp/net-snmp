@@ -2,6 +2,15 @@ title Agent Operating Mode
 description  This section defines how the agent will operate when it
 description  is running.
 
+token master
+info  Should the agent operate as a master agent or not.
+info  Currently, the only supported master agent type for this token
+info  is "agentx".
+info  #
+info  arguments: (on|yes|agentx|all|off|no)
+question 1 Should the agent run as a AgentX master agent?
+validanswer 1 ^(on|yes|agentx|all|off|no)$
+
 token agentuser
 info  The system user that the agent runs as.
 info  arguments: name|#uid
