@@ -18,7 +18,7 @@
 #endif
 
 /** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
- *  @ingroup handler
+ *  @ingroup table
  *
  *  This helper helps you implement a table where all the indexes are
  *  expected to be stored within the agent itself and not in some
