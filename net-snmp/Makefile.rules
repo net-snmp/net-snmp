@@ -12,6 +12,8 @@ STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS) $(INS
 
 standardall: subdirs $(STANDARDTARGETS)
 
+objs: ${OBJS} ${LOBJS}
+
 subdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
@@ -433,5 +435,5 @@ distdependdirs:
 .PHONY: clean cleansubdirs lint \
 	install installprogs installheaders installlibs \
 	installbin installsbin installsubdirs \
-	all subdirs standardall \
+	all subdirs standardall objs \
 	depend nosysdepend distdepend dependdirs nosysdependdirs distdependdirs
