@@ -9923,7 +9923,7 @@ fi
 
 echo $ac_n "checking for socklen_t""... $ac_c" 1>&6
 echo "configure:9926: checking for socklen_t" >&5
-if eval "test \"`echo '$''{'ac_cv_type_socklen_t'+set}'`\" = set"; then
+if eval "test \"`echo '$''{'ac_cv_type_$1'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
@@ -9934,9 +9934,12 @@ else
 #include <stdlib.h>
 #include <stddef.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 EOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "(^|[^a-zA-Z_0-9])socklen_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+  egrep "socklen_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
   rm -rf conftest*
   ac_cv_type_socklen_t=yes
 else
@@ -9946,17 +9949,14 @@ fi
 rm -f conftest*
 
 fi
+
 echo "$ac_t""$ac_cv_type_socklen_t" 1>&6
 if test $ac_cv_type_socklen_t = no; then
   cat >> confdefs.h <<\EOF
-#define socklen_t cat >> confdefs.h <<\EOF
-#define HAVE_SOCKLEN_T 1
-EOF
-
+#define socklen_t u_int
 EOF
 
 fi
-
 
 echo $ac_n "checking for in_addr_t""... $ac_c" 1>&6
 echo "configure:9963: checking for in_addr_t" >&5
