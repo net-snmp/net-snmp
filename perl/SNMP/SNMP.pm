@@ -591,88 +591,97 @@ sub get {
 
 sub gettable {
 
-	#
-	# getTable
-	# --------
-	#
-	# Get OIDs starting at $table_oid, and continue down the tree
-	# until we get to an OID which does not start with $table_oid,
-	# i.e. we have reached the end of this table.
-	#
+    #
+    # getTable
+    # --------
+    #
+    # Get OIDs starting at $table_oid, and continue down the tree
+    # until we get to an OID which does not start with $table_oid,
+    # i.e. we have reached the end of this table.
+    #
 
-	my $this = shift;
-	my $root_oid = shift;
+    my ($this, $root_oid, $options) = @_;
+    my ($textnode, $stopconds);
 
+    # translate the OID into numeric form if its not
+    if ($root_oid !~ /^[\.0-9]+$/) {
+	$textnode = $root_oid;
+	$root_oid = SNMP::translateObj($root_oid);
+    } else {
+	$textnode = SNMP::translateObj($root_oid);
+    }
 
-	# Check if the root OID is a VarList
+    # bail if we don't have a valid oid.
+    return if (!$root_oid);
 
-	if(ref($root_oid) =~ /SNMP::VarList/) {
-
-		$table_root_oid = $root_oid;
-
-	} elsif(ref($root_oid) =~ /SNMP::Varbind/) {
-
-		$table_root_oid = [$root_oid];
-
-	} elsif(ref($root_oid) =~ /ARRAY/) {
-
-		$table_root_oid = [$root_oid];
-		$table_root_oid = $root_oid if ref($$root_oid[0]) =~ /ARRAY/;
-
+    # get the list of columns we should look at.
+    if (!$options->{'columns'}) {
+	if ($textnode) {
+	    my $children = $SNMP::MIB{$textnode}{'children'}[0]{'children'};
+	    foreach my $c (@$children) {
+		push @{$options->{'columns'}},
+		  $root_oid . ".1." . $c->{'subID'};
+	    }
 	} else {
+	    print STDERR "XXX: TODO: allow for gettable calls when the mib isn't loaded";
+	    return;
+	}
+    }
 
-		my($tag, $iid) = ($root_oid =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-		$table_root_oid = [[$tag, $iid]];
+    my %result_hash;
 
-	};
+    # create the initial walking info.
+    my $varbinds;
+	
+    foreach my $c (@{$options->{'columns'}}) {
+	push @$varbinds, [$c];
+	push @$stopconds, $c;
+    }
+    my $vbl = $varbinds;
+	
+    my $res = $this->getnext($vbl);
+    while ($#$vbl > -1 && !$this->{ErrorNum}) {
+	print STDERR "ack: gettable1\n" && return
+	  if ($#$vbl != $#$stopconds);
 
+	$varbinds = [];
+	my $newstopconds;
 
-	# Translate the supplied OID in to numeric format for parsing
+	for (my $i = 0; $i <= $#$vbl; $i++) {
+	    my $row_oid = SNMP::translateObj($vbl->[$i][0]);
+	    my $row_text = $vbl->[$i][0];
+	    my $row_index = $vbl->[$i][1];
+	    my $row_value = $vbl->[$i][2];
+	    my $row_type = $vbl->[$i][3];
 
-	$table_root_oid = SNMP::translateObj(@{@{$table_root_oid}[0]}[0]);
+	    if ($row_oid =~ /^$stopconds->[$i]/) {
 
-
-	my %result_hash;
-	my $end_of_table = 0;
-
-
-	my $table_varbind = new SNMP::Varbind([$table_root_oid]);
-
-	my $res;
-	while(defined($this->getnext($table_varbind)) && !$this->{ErrorNum}) {
-
-		my $row_oid = SNMP::translateObj(@{$table_varbind}[0]);
-		my $row_text = @{$table_varbind}[0];
-		my $row_index = @{$table_varbind}[1];
-		my $row_value = @{$table_varbind}[2];
-		my $row_type = @{$table_varbind}[3];
-
-		if($row_oid =~ m/($table_root_oid)/) {
-
-  		        if ($row_type eq "OBJECTID") {
+		if ($row_type eq "OBJECTID") {
 
 				# If the value returned is an OID, translate this
 				# back in to a textual OID
 
-				$row_value = SNMP::translateObj($row_value);
+		    $row_value = SNMP::translateObj($row_value);
 
-			};
+		}
 
+		# Place the results in a hash
 
-			# Place the results in a hash
+		$result_hash{$row_index}{$row_text} = $row_value;
 
-			$result_hash{$row_index}->{$row_text} = $row_value;
-
-		} else {
-
-			last;
-
-		};
-
-	};
-
-	return(\%result_hash);
-
+		# continue past this next time
+		push @$newstopconds, $stopconds->[$i];
+		push @$varbinds,$vbl->[$i];
+	    }
+	}
+	if ($#$newstopconds == -1) {
+	    last;
+	}
+	$vbl = $varbinds;
+	$stopconds = $newstopconds;
+	$res = $this->getnext($vbl);
+    }
+    return(\%result_hash);
 }
 
 sub fget {
