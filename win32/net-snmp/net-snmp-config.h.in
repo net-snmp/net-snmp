@@ -945,11 +945,11 @@ extern "C" {
 
 /*  This is defined if support for the UDP/IPv6 transport domain is
     available.  */
-#undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#define SNMP_TRANSPORT_UDPIPV6_DOMAIN 1
 
 /*  This is defined if support for the TCP/IPv6 transport domain is
     available.  */
-#undef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+#define SNMP_TRANSPORT_TCPIPV6_DOMAIN 1
 
 /* define this if the USM security module is available */
 #define SNMP_SECMOD_USM 1
