@@ -87,6 +87,8 @@ SOFTWARE.
 #include "system.h"
 #include "int64.h"
 
+static void init_snmp_session __P((void));
+
 #define PACKET_LENGTH	8000
 
 #ifndef BSD4_3
@@ -380,8 +382,9 @@ snmp_sess_error(sessp, p_errno, p_snmp_errno, p_str)
 
 
 /*
- * Gets initial request ID for all transactions.
+ * Gets initial request ID for all transactions,
  * and finds which port SNMP over UDP uses.
+ * SNMP over AppleTalk or IPX is not currently supported.
  */
 static void
 init_snmp_session __P((void))
@@ -406,13 +409,18 @@ init_snmp_session __P((void))
 #endif
 }
 
+/*
+ * Initializes the session structure.
+ * May perform one time minimal library initialization.
+ * No MIB file processing is done via this call.
+ */
 void
 snmp_sess_init(session)
     struct snmp_session * session;
 {
 extern int init_mib_internals();
 
-    init_snmp();
+    init_snmp_session();
     init_mib_internals();
 
     /* initialize session to default values */
@@ -481,11 +489,7 @@ snmp_sess_open(in_session)
     struct hostent *hp;
 
     if (Reqid == 0)
-      init_snmp();
-
-
-    if (! servp)
-      servp = getservbyname("snmp", "udp");
+      init_snmp_session();
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
