@@ -130,7 +130,7 @@
      static int
      fetch_var_val(oid * name, size_t namelen, u_long * new_value)
 {
-    struct subtree *tree_ptr;
+    netsnmp_subtree *tree_ptr;
     size_t          var_len;
     WriteMethod    *write_method;
     struct variable called_var;
@@ -139,12 +139,12 @@
     register u_char *access;
 
 
-    tree_ptr = find_subtree(name, namelen, NULL, "");
+    tree_ptr = netsnmp_subtree_find(name, namelen, NULL, "");
     if (!tree_ptr) {
         return SNMP_ERR_NOSUCHNAME;
     }
 
-    memcpy(called_var.name, tree_ptr->name,
+    memcpy(called_var.name, tree_ptr->name_a,
            tree_ptr->namelen * sizeof(oid));
     s_var_ptr = tree_ptr->variables;
     for (iii = 0; iii < tree_ptr->variables_len; iii++) {
@@ -166,9 +166,9 @@
                     (*(s_var_ptr->findVar)) (&called_var, name, &namelen,
                                              1, &var_len, &write_method);
                 if (access
-                    && snmp_oid_compare(name, namelen, tree_ptr->end,
+                    && snmp_oid_compare(name, namelen, tree_ptr->end_a,
                                         tree_ptr->end_len) > 0) {
-                    memcpy(name, tree_ptr->end, tree_ptr->end_len);
+                    memcpy(name, tree_ptr->end_a, tree_ptr->end_len);
                     access = 0;
                     ag_trace("access := 0");
                 }
