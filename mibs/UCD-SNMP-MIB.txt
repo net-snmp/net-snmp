@@ -48,6 +48,7 @@ ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
 --   extTable       OBJECT IDENTIFIER ::= { ucdavis 8 }
 --   diskTable      OBJECT IDENTIFIER ::= { ucdavis 9 }
 --   loadTable      OBJECT IDENTIFIER ::= { ucdavis 10 }
+--   systemStats    OBJECT IDENTIFIER ::= { ucdavis 11 }
 --   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -776,5 +777,114 @@ mrModuleName OBJECT-TYPE
     DESCRIPTION
 	"The module name that registered this OID."
     ::= { mrEntry  2 }
+
+systemStats ::= { ucdavis 11 }
+
+ssIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for each observed systemStat (1)."
+	::= { systemStats 1 }
+
+ssErrorName OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The list of systemStats names (vmstat) we're Counting."
+	::= { systemStats 2 }
+
+ssSwapIn OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Amount of memory swapped in from disk (kB/s)."
+	::= { systemStats 3 }
+
+ssSwapOut OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Amount of memory swapped to disk (kB/s)."
+	::= { systemStats 4 }
+
+ssIOSent OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Blocks sent to a block device (blocks/s)."
+	::= { systemStats 5 }
+
+ssIOReceive OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Blocks received from a block device (blocks/s)."
+	::= { systemStats 6 }
+
+ssSysInterrupts OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of interrupts per second, including the clock."
+	::= { systemStats 7 }
+
+ssSysContext OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of context switches per second."
+	::= { systemStats 8 }
+
+ssCpuUser OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of user CPU time."
+	::= { systemStats 9 }
+
+ssCpuSystem OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of system CPU time."
+	::= { systemStats 10 }
+
+ssCpuIdle OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"percentages of idle CPU time."
+	::= { systemStats 11 }
+
+-- possibly used in the future:
+--
+-- ssErrorFlag OBJECT-TYPE
+--         SYNTAX INTEGER
+--         ACCESS read-only
+--         STATUS mandatory
+--         DESCRIPTION
+--                 "Error flag."
+--         ::= { systemStats 100 }
+-- 
+-- ssErrMessage OBJECT-TYPE
+--      SYNTAX  DisplayString
+--      ACCESS  read-only
+--      STATUS  mandatory
+--      DESCRIPTION  
+--           "Error message describing the errorflag condition"
+--      ::= { systemStats 101 } 
+
 
 END
