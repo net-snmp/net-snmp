@@ -782,10 +782,12 @@ init_syslog __P((void))
     syslog(LOG_INFO, "Starting snmptrapd");
 }
 
-#ifdef hpux9
-int
-getdtablesize()
+#ifndef HAVE_GETDTABLESIZE
+#include <sys/resource.h>
+int getdtablesize()
 {
-        return(sysconf(_SC_OPEN_MAX));
+  struct rlimit rl;
+  getrlimit(RLIMIT_NOFILE, &rl);
+  return( rl.rlim_cur );
 }
 #endif
