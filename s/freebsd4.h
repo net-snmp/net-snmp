@@ -4,3 +4,10 @@
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"
+
+#undef PROC_SYMBOL
+#define PROC_SYMBOL "allproc"
+
+#undef NPROC_SYMBOL
+#define NPROC_SYMBOL "nprocs"
+
