@@ -35,7 +35,7 @@ snmpcmd
 .br
 [-m mibs] [-M mibdirs]
 .br
-[-d] [-D[TOKEN,TOKEN,...]]
+[-d] [-D <TOKEN[,TOKEN,...]> ]
 .br
 [-r retries] [-t timeout] [-p port] [-T UDP|TCP]
 .br
@@ -91,15 +91,19 @@ specifies output printing options. See OUTPUT OPTIONS below.
 specifies input parsing options. See INPUT OPTIONS below.
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
-The special name ALL is used to specify all modules in all directories.
 This overrides the environment variable MIBS.
+.br
+The special keyword "all" is used to specify all modules in all directories
+when searching for MIB files.
+Every file whose name does not begin with "."
+will be parsed as if it were a MIB file.
 .IP "-M mibdirs"
 specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
 .IP "-d"
 request the application to dump all SNMP packets sent and received
-.IP "-D[TOKEN,TOKEN,...]"
-request debugging output.  The optional comma separated TOKENs list
+.IP "-D <TOKEN[,TOKEN,...]> "
+request debugging output.  The comma separated TOKENs list
 specifies what type of debugging information you which to view.  Only
 debugging information about those TOKEN types will be shown to you.
 Only the beginning of the token needs to match.  In other words,
@@ -111,7 +115,7 @@ as well as
 .I mibII/system.
 .IP
 The special keyword "all" will display all debugging
-output. Specifying no TOKENs is the same as specifying "all".
+output.
 .IP
 The special keyword "trace" will display source code tracing output.
 .IP "-r retries"
