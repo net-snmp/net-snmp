@@ -192,8 +192,10 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
                  */
                 entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS;
                 entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
+#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
                 entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES;
                 entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS;
+#endif
             }
         } else {
             scan_count = sscanf(stats, scan_line_to_use,
@@ -226,17 +228,20 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 
 
         entry->stats.ibytes.low = rec_oct & 0xffffffff;
-        entry->stats.ibytes.high = rec_oct >> 32;
         entry->stats.iucast.low = rec_pkt & 0xffffffff;
-        entry->stats.iucast.high = rec_pkt >> 32;
-        entry->stats.ierrors = rec_err;
-        entry->stats.idiscards = rec_drop;
         entry->stats.imcast.low = rec_mcast & 0xffffffff;
         entry->stats.obytes.low = snd_oct & 0xffffffff;
-        entry->stats.obytes.high = snd_oct >> 32;
         entry->stats.oucast.low = snd_pkt & 0xffffffff;
+#ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
+        entry->stats.ibytes.high = rec_oct >> 32;
+        entry->stats.iucast.high = rec_pkt >> 32;
+        entry->stats.imcast.high = rec_mcast >> 32;
+        entry->stats.obytes.high = snd_oct >> 32;
         entry->stats.oucast.high = snd_pkt >> 32;
-        entry->stats.oerrors = snd_err;
+#endif
+        entry->stats.ierrors   = rec_err;
+        entry->stats.idiscards = rec_drop;
+        entry->stats.oerrors   = snd_err;
         entry->stats.odiscards = snd_drop;
         entry->stats.collisions = coll;
 
