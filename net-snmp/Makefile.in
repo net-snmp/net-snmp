@@ -133,7 +133,7 @@ perlmakefiles:
 	@if test ! -f perl/Makefile; then \
 	  (dir=`pwd`; \
 	   cd perl ; \
-	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config") $(PERLARGS) ; \
+	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" $(PERLARGS) ) ; \
         fi
 
 perlinstall:
