@@ -8,7 +8,11 @@
 ########################################################################
 ##
 ## mfd function params
-@eval $mfd_base_params="netsnmp_mfd_registration *mfdr, netsnmp_request_info *requests"@
+@eval $mfd_base_params="mfd_pdu_context *pdu_ctx, netsnmp_request_info *requests"@
+##
+@ifconf ${name}.m2d@
+@   include ${name}.m2d@
+@end@
 ########################################################################
 @open ${name}.h@
 /*
@@ -16,6 +20,8 @@
  *       version $Revision$ of $RCSfile$ 
  */
 @include generic-header-top.m2i@
+
+#include <net-snmp/library/asn1.h>
 
 /* other required module components */
 config_require(${name}_interface);
@@ -50,10 +56,11 @@ void init_$name(void);
      * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code) */
 @        eval $m2c_context_reg = "void *"@
 @    end@
-typedef $m2c_context_reg ${context}_reg_data;
+typedef $m2c_context_reg ${context}_registration_ptr;
 
 @    include generic-data-context.m2i@
 
+@   if $m2c_table_settable@
 /* *********************************************************************
  * undo context
  * We're just going to use the same data structure for our
@@ -62,6 +69,7 @@ typedef $m2c_context_reg ${context}_reg_data;
  */
 typedef ${context}_data ${context}_undo_data;
 
+@    end@
 @    include generic-table-indexes.m2i@
 
 /* *********************************************************************
@@ -70,18 +78,32 @@ typedef ${context}_data ${context}_undo_data;
  * ${context}_ctx pointer.
  */
 typedef struct ${context}_ctx_s {
+
+    /** this must be first for container compare to work */
     netsnmp_index        oid_idx;
     oid                  oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
-    ${context}_idx       tbl_idx;
     
-    ${context}_data      data;
-    ${context}_undo_data undo;
+    ${context}_idx              tbl_idx;
+    
+    ${context}_data             data;
+@   if $m2c_table_settable@
+    ${context}_undo_data        undo;
+@   end@
+
+    ${context}_registration_ptr ${context}_reg;
+
+    int                         request_mode;
 
     /*
      * TODO: add any other useful data
      *       (e.g. flags for when a column has been set)
      */
     
+    /*
+     * storage for future expansion
+     */
+    netsnmp_data_list             *${context}_data_list;
+
 } ${context}_ctx;
 
 typedef struct ${table}_ref_ctx_s {
@@ -91,26 +113,38 @@ typedef struct ${table}_ref_ctx_s {
 /* *********************************************************************
  * function prototypes
  */
-netsnmp_container *${table}_container_init(netsnmp_mfd_registration *reg);
+## {
+    int ${context}_pre_request(${context}_registration_ptr reg,
+                        netsnmp_data_list *data_list, u_long id);
+    int ${context}_post_request(${context}_registration_ptr reg,
+                        netsnmp_data_list *data_list, u_long id);
 
-@    include mfd-access-${m2c_table_access}-header.m2i@
-
+@   if $m2c_data_init == 1@
+    int ${context}_init_ctx(${context}_ctx *ctx);
+    void ${context}_cleanup_ctx(${context}_ctx *ctx);
+@   end@
 @    if $m2c_data_context ne "generated"@
-    ${table}_ctx * _${table}_allocate_ctx(netsnmp_mfd_registration *reg);
 @        if $m2c_data_allocate == 1@
     ${context}_data *${context}_allocate_data(void);
 @        end@
 
 @   end@
-@   if $m2c_table_writable@
+@   if $m2c_table_settable@
 @      if $m2c_table_dependencies == 1@
-    int ${table}_check_dependencies(netsnmp_mfd_registration *reg, ${table}_ctx * ctx);
+    int ${table}_check_dependencies(${table}_ctx * ctx); 
+@      end@ 
+    int ${context}_commit(${table}_ctx * ctx);
+@      if $m2c_irreversible_commit == 1@
+    int ${context}_irreversible_commit(${table}_ctx * ctx);
 @      end@
-    int ${context}_reversible_commit($mfd_base_params, ${table}_ctx * ctx);
-    int ${context}_final_commit($mfd_base_params, ${table}_ctx * ctx);
 @   end@ # writable
 
 @end@ # for each
+
+#include "${name}_interface.h"
+#include "${name}_data_access.h"
+#include "${name}_data_get.h"
+#include "${name}_data_set.h"
 
 @include generic-header-bottom.m2i@
 ######################################################################
@@ -123,12 +157,11 @@ netsnmp_container *${table}_container_init(netsnmp_mfd_registration *reg);
  */
 @include generic-source-includes.m2i@
 
-#include "ppk_interface.h"
+#include "${name}_interface.h"
 
 @foreach $table table@
 @    include m2c_setup_table.m2i@
-int ${context}_pre_request(netsnmp_mfd_registration *reg, u_long id);
-int ${context}_post_request(netsnmp_mfd_registration *reg, u_long id);
+void initialize_table_$table(void);
 @end@
 
 /**
@@ -158,84 +191,82 @@ init_$name(void)
 void
 initialize_table_$table(void)
 {
-    netsnmp_mfd_registration mfdr;
+    ${context}_registration_ptr * user_context;
+    u_long flags;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    /* *************************************************
-     * create the table registration information structures
-     */
-    mfdr = SNMP_MALLOC_TYPEDEF(netsnmp_mfd_registration);
-    if (!mfdr) {
-        snmp_log(LOG_ERR, "mfd registration malloc failed in "
-                          "initialize_table_$table");
-        return; /** Serious error. */
-    }
-
     /*
-     * If you want to keep a pointer to table specific data,
-     * allocate it here and assign it to mfdr->mfd_user_ctx
+     * if you'd like to pass in a pointer to some data for this
+     * table, allocate or set it up here.
      */
-    /** mfdr->mfd_user_ctx = SNMP_MALLOC_TYPEDEF(my_structure_type); */
-
-    /*
-     * OPTIONAL pre/post request handlers
-     */
-    mfdr.pre_request = (Netsnmp_MFD_Organize_Op*)${table}_pre_request;
-    mfdr.post_request = (Netsnmp_MFD_Organize_Op*)${table}_post_request;
-
-    /*
-     * REQUIRED for get request handling
-     */
-    mfdr.get_values = (Netsnmp_MFD_Request_Op*)${table}_get_values;
+    user_context = NULL;
     
-@   if $m2c_table_writable@
     /*
-     * REQUIRED for set request handling
+     * No support for any flags yet, but in the future you would
+     * set any flags here.
      */
-    mfdr.object_syntax_checks = (Netsnmp_MFD_Request_Op*)${table}_check_objects;
-    mfdr.undo_setup = (Netsnmp_MFD_Request_Op*)${table}_undo_setup;
-    mfdr.set_values = (Netsnmp_MFD_Request_Op*)${table}_set_values;
-    mfdr.undo_sets = (Netsnmp_MFD_Request_Op*)${table}_undo_values;
-    mfdr.undoable_commit = (Netsnmp_MFD_Request_Op*)${table}_reversible_commit;
-    mfdr.final_commit = (Netsnmp_MFD_Request_Op*)${table}_final_commit;
+    flags = 0;
     
-@      if $m2c_table_dependencies == 1@
-    /*
-     * REQUIRED for tables with dependencies
-     */
-    mfdr.consistency_checks = (Netsnmp_MFD_Request_Op*)${table}_check_dependencies;
-
-@      end@
-@   end@ # writable
     /*
      * call interface initialization code
      */
-    _${table}_initialize_table(&mfdr);
+    _${table}_initialize_interface(user_context, flags);
 }
 
+@   if $m2c_data_init == 1@
+/**
+ * extra context initialization
+ *
+ * @return MFD_SUCCESS : no errors
+ *        !MFD_SUCCESS : error (context allocate will fail)
+ */
+int ${context}_ctx_init(${context}_ctx *ctx)
+{
+    /*
+     * TODO: extra initialization
+     */
+
+    return MFD_SUCCESS;
+}
+
+/**
+ * extra context cleanup
+ *
+ */
+void ${context}_ctx_cleanup(${context}_ctx *ctx)
+{
+    /*
+     * TODO: extra cleanup
+     */
+}
+
+@   end@
 /**
  * pre-request callback
  *
  * This is a useful place to make sure you have access to your
  * data source, and perhaps to cache it.
  *
- * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param mfd_reg Pointer to the netsnmp_mfd_registration for the handler.
  * @param id The request id from the incoming pdu. Hopefully unique,
  *           but no guarantees.
  *
- * @return SNMP_ERR_NOERROR on success.
- *         SNMP_ERR_RESOURCEUNAVAILABLE if you can not get your data.
- *         SNMP_ERR_GENERR for any other error
+ * @return MFD_SUCCESS              : success.
+ *         MFD_RESOURCE_UNAVAILABLE : if you can not get your data.
+ *         MFD_ERROR                : other error
  */
 int
-${context}_pre_request(netsnmp_mfd_registration *reg, u_long id)
+${context}_pre_request( ${context}_registration_ptr reg,
+                        netsnmp_data_list *data_list, u_long id)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
      * TODO: pre-request setup
      */
+
+    return MFD_SUCCESS;
 }
 
 /**
@@ -244,21 +275,24 @@ ${context}_pre_request(netsnmp_mfd_registration *reg, u_long id)
  * This is a useful place to clean up after a request. If you
  * cached data, you could clean up here.
  *
- * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param mfd_refr Pointer to the netsnmp_mfd_registration for the handler.
  * @param id The request id from the incoming pdu. Hopefully unique,
  *           but no guarantees.
  *
- * @return SNMP_ERR_NOERROR on success.
- *         SNMP_ERR_GENERR for any other error (ignored)
+ * @return MFD_SUCCESS : success.
+ *         MFD_ERROR   : other error (ignored)
  */
 int
-${context}_post_request(netsnmp_mfd_registration *reg, u_long id)
+${context}_post_request(${context}_registration_ptr reg,
+                        netsnmp_data_list *data_list, u_long id)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
      * TODO: post-request cleanup
      */
+
+    return MFD_SUCCESS;
 }
 
 
@@ -273,10 +307,15 @@ ${context}_post_request(netsnmp_mfd_registration *reg, u_long id)
 @run mfd-data-access.m2c@
 @run mfd-data-get.m2c@
 @run mfd-data-set.m2c@
-@run mfd-makefile.m2m@
 @run mfd-readme.m2c@
-@run subagent.m2c@
-##@run mib2c.column_enums.conf@
+@ifconf ${name}_Makefile@
+@else@
+@   run mfd-makefile.m2m@
+@end@
+@ifconf ${name}_subagent.c@
+@else@
+@   run subagent.m2c@
+@end@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
