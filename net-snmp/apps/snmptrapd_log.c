@@ -93,6 +93,8 @@ SOFTWARE.
 #include "snmp.h"
 #include "tools.h"
 
+#include "snmptrapd_log.h"
+
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -312,11 +314,11 @@ static void str_append (char * dest,
     }
 }
 
-void output_temp_bfr (char * bfr,
-		      unsigned long * tail,
-		      unsigned long len,
-		      char * temp_bfr,
-		      options_type * options)
+static void output_temp_bfr (char * bfr,
+			     unsigned long * tail,
+			     unsigned long len,
+			     char * temp_bfr,
+			     options_type * options)
 
      /*
       * Function:
@@ -375,11 +377,11 @@ void output_temp_bfr (char * bfr,
   return;
 }
 
-void handle_time_fmt (char * bfr,
-		      unsigned long * tail,
-		      unsigned long len,
-		      options_type * options,
-		      struct snmp_pdu * pdu)
+static void handle_time_fmt (char * bfr,
+			     unsigned long * tail,
+			     unsigned long len,
+			     options_type * options,
+			     struct snmp_pdu * pdu)
 
      /*
       * Function:
@@ -478,11 +480,11 @@ void handle_time_fmt (char * bfr,
   return;
 }
 
-void handle_ip_fmt (char * bfr,
-		    unsigned long * tail,
-		    unsigned long len,
-		    options_type * options,
-		    struct snmp_pdu * pdu)
+static void handle_ip_fmt (char * bfr,
+			   unsigned long * tail,
+			   unsigned long len,
+			   options_type * options,
+			   struct snmp_pdu * pdu)
 
      /*
       * Function:
@@ -540,11 +542,11 @@ void handle_ip_fmt (char * bfr,
   return;
 }
 
-void handle_ent_fmt (char * bfr,
-		     unsigned long * tail,
-		     unsigned long len,
-		     options_type * options,
-		     struct snmp_pdu * pdu)
+static void handle_ent_fmt (char * bfr,
+			    unsigned long * tail,
+			    unsigned long len,
+			    options_type * options,
+			    struct snmp_pdu * pdu)
 
      /*
       * Function:
@@ -581,11 +583,11 @@ void handle_ent_fmt (char * bfr,
   return;
 }
 
-void handle_trap_fmt (char * bfr,
-		      unsigned long * tail,
-		      unsigned long len,
-		      options_type * options,
-		      struct snmp_pdu * pdu)
+static void handle_trap_fmt (char * bfr,
+			     unsigned long * tail,
+			     unsigned long len,
+			     options_type * options,
+			     struct snmp_pdu * pdu)
 
      /*
       * Function:
@@ -684,11 +686,11 @@ void handle_trap_fmt (char * bfr,
 #undef LCL_SAFE_LEN
 }
 
-void dispatch_format_cmd (char * bfr,
-			  unsigned long * tail,
-			  unsigned long len,
-			  options_type * options,
-			  struct snmp_pdu * pdu)
+static void dispatch_format_cmd (char * bfr,
+				 unsigned long * tail,
+				 unsigned long len,
+				 options_type * options,
+				 struct snmp_pdu * pdu)
 
      /*
       * Function:
@@ -726,10 +728,10 @@ void dispatch_format_cmd (char * bfr,
 }
 
 
-void handle_backslash (char * bfr,
-		       unsigned long * tail,
-		       unsigned long len,
-		       char fmt_cmd)
+static void handle_backslash (char * bfr,
+			      unsigned long * tail,
+			      unsigned long len,
+			      char fmt_cmd)
 
      /*
       * Function:
@@ -938,7 +940,7 @@ unsigned long format_plain_trap (char * bfr,
 
 unsigned long format_trap (char * bfr,
 			   unsigned long len,
-			   char * format_str,
+			   const char * format_str,
 			   struct snmp_pdu * pdu)
 
      /*
@@ -1096,5 +1098,3 @@ unsigned long format_trap (char * bfr,
 
   return tail;
 }
-
-

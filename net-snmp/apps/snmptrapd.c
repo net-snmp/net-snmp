@@ -98,6 +98,7 @@ SOFTWARE.
 #include "system.h"
 #include "version.h"
 #include "snmptrapd_handlers.h"
+#include "snmptrapd_log.h"
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
@@ -182,15 +183,6 @@ struct timeval Now;
 void init_syslog(void);
 
 void update_config (void);
-
-extern unsigned long format_plain_trap (char * bfr,
-					unsigned long len,
-					struct snmp_pdu * pdu);
-
-extern unsigned long format_trap (char * bfr,
-				  unsigned long len,
-				  char * format_str,
-				  struct snmp_pdu * pdu);
 
 #ifdef WIN32
 void openlog(const char *app, int options, int fac) {

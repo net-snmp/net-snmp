@@ -195,8 +195,9 @@ void sprint_hexstring(char *buf,
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
 	cp += 8;
-	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X\n", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
+	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
+	if (len > 16) { *buf++ = '\n'; *buf = 0; }
 	cp += 8;
     }
     for(; len > 0; len--){
@@ -207,7 +208,7 @@ void sprint_hexstring(char *buf,
 }
 
 void sprint_asciistring(char *buf,
-			       u_char  *cp,
+			       const u_char  *cp,
 			       size_t	    len)
 {
     int	x;
