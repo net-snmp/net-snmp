@@ -3538,7 +3538,7 @@ build_oid_noalloc(oid * in, size_t in_len, size_t * out_len,
     for (var = indexes; var != NULL; var = var->next_variable) {
         if (build_oid_segment(var) != SNMPERR_SUCCESS)
             return SNMPERR_GENERR;
-        if (var->name_length + *out_len < in_len) {
+        if (var->name_length + *out_len <= in_len) {
             memcpy(&(in[*out_len]), var->name,
                    sizeof(oid) * var->name_length);
             *out_len += var->name_length;
