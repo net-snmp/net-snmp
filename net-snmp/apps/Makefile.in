@@ -2,34 +2,18 @@
 # Makefile for snmpget, snmpwalk, snmpbulkwalk, snmptest, snmptranslate,
 # snmptrapd, snmptable, snmpset, snmpgetnext
 #
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-sbindir = @sbindir@
-libdir = @libdir@
-datadir = @datadir@
-snmplibdir = $(datadir)/snmp
-
-INSTALL = @INSTALL@
 
 TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmpset snmpgetnext snmptrap snmpstatus snmpdelta snmptable
 SBINTARG= snmptrapd
 SUBDIRS=  snmpnetstat
-USELIBS=  ../snmplib/libsnmp.a
-LIBS=	  $(USELIBS) @LIBS@
 TRAPSPECIAL=@trap_list_o@
 
-CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
-LDFLAGS=@LDFLAGS@
+USELIBS= ../snmplib/libsnmp.$(LIB_EXTENSION)
+LIBS=	 -L../snmplib $(LD_RUNTIME_ARG) -lsnmp @LIBS@
 
 PARSEOBJS=snmp_parse_args.o
 
+CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
 CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG) $(SBINTARG) subdirs

@@ -3,6 +3,7 @@ AC_INIT(agent/mibgroup/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
+AC_ARG_WITH(shared-libraries,[  --with-shared-libraies    Compile and install shared libraries.],with_shared="yes",with_shared="no")
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
 AC_ARG_WITH(root-access,[  --without-root-access           Agent won't require root access.])
 AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system contact.
@@ -131,6 +132,76 @@ if test "x$DEFAULT_MIBDIRS" = "x"; then
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPLIBPATH/mibs")
 fi
 
+dnl
+dnl Figure out appropriate shared libraries extensions if necessary.
+dnl
+
+if test "x$with_shared" = "xyes"; then
+
+    dnl defaults
+
+    if test "x$GCC" = "xyes"; then
+      CFLAGS_SHLIB="-fpic -shared"
+    else
+      CFLAGS_SHLIB="-Kpic"
+    fi
+    LIB_EXTENSION="so"
+    LD_ARGS=
+    LD_RUNTIME_ARG=
+
+    dnl over-rides
+    case $target_os in
+
+    linux*)
+	;;
+
+    hpux*)
+	LIB_EXTENSION="sl"
+        if test "x$GCC" = "xno"; then
+	    CFLAGS_SHLIB="+z"
+	fi
+	LD_RUNTIME_ARG="-Wl,+b,$libdir"
+	;;
+
+    osf*)
+	LD_RUNTIME_ARG="-rpath $libdir"
+	;;
+	
+    aix*)
+	LIB_EXTENSION="a"
+	;;
+
+    sysv4*)
+	LIB_EXTENSION="a"
+	LD_ARGS="-dy"
+	LD_RUNTIME_ARG="-R$libdir"
+	;;
+    
+    sunos*)
+	LIB_EXTENSION="a"
+	LD_ARGS="-dy"
+	;;
+    
+    solaris*)
+	LD_RUNTIME_ARG="-R$libdir"
+	LD_ARGS="-dy"
+	;;
+    
+    *)
+	AC_MSG_ERROR([
+	  *** shared libraries aren't supported for architecture $target_os
+	])
+	;;
+
+    esac
+else
+    LIB_EXTENSION="a"
+    LD_ARGS=
+fi
+
+AC_SUBST(LIB_EXTENSION)
+AC_SUBST(CFLAGS_SHLIB)
+AC_SUBST(LD_RUNTIME_ARG)
 
 dnl
 dnl Do hairy agent module processing.
@@ -887,7 +958,18 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 What type of security to use],SNMPV1)
 
-AC_OUTPUT(Makefile snmplib/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/mibgroup/Makefile local/Makefile man/Makefile ov/Makefile mibs/Makefile, echo timestamp > stamp-h)
+AC_OUTPUT([
+ Makefile:Makefile.top:Makefile.in
+ snmplib/Makefile:Makefile.top:snmplib/Makefile.in 
+ agent/Makefile:Makefile.top:agent/Makefile.in
+ apps/Makefile:Makefile.top:apps/Makefile.in
+ apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in
+ agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in
+ local/Makefile:Makefile.top:local/Makefile.in
+ man/Makefile:Makefile.top:man/Makefile.in
+ ov/Makefile:Makefile.top:ov/Makefile.in
+ mibs/Makefile:Makefile.top:mibs/Makefile.in
+], echo timestamp > stamp-h)
 
 dnl Local Variables:
 dnl mode: sh
