@@ -52,7 +52,7 @@ all: standardall
 
 mibsinstall: installdirs
 	@for i in $(MIBS) ; do \
-		$(INSTALL) $(srcdir)/$$i $(mibdir) ; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(mibdir) ; \
 		echo "install: installed $$i in $(mibdir)" ; \
 	done
 
