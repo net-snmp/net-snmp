@@ -358,7 +358,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
     struct agent_snmp_session  *asp;
-    int status, allDone, i;
+    int status, allDone, i, error_index = 0;
     struct variable_list *var_ptr, *var_ptr2;
 
     if ( magic == NULL ) {
@@ -526,8 +526,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+            if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = FREE;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = RESERVE2;
 
@@ -538,8 +540,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == RESERVE2 ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+	    if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = FREE;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = ACTION;
 
@@ -550,8 +554,10 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == ACTION ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
+	    if ( status != SNMP_ERR_NOERROR ){
 	        asp->mode = UNDO;
+                error_index = asp->index;
+            }
 	    else
 	        asp->mode = COMMIT;
 
@@ -565,6 +571,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    if ( status != SNMP_ERR_NOERROR ) {
 		status    = SNMP_ERR_COMMITFAILED;
 	        asp->mode = FINISHED_FAILURE;
+                error_index = asp->index;
 	    }
 	    else
 	        asp->mode = FINISHED_SUCCESS;
@@ -574,18 +581,18 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	}
 
 	if ( asp->mode == UNDO ) {
-	    if (handle_next_pass( asp ) != SNMP_ERR_NOERROR )
+            if (handle_next_pass( asp ) != SNMP_ERR_NOERROR ) {
 		status = SNMP_ERR_UNDOFAILED;
+                error_index = 0;
+            }
 
 	    asp->mode = FINISHED_FAILURE;
-	    break;
 	}
 
 	if ( asp->mode == FREE ) {
 	    (void) handle_next_pass( asp );
-	    break;
 	}
-
+        asp->index = error_index;
 	break;
 
     case SNMP_MSG_RESPONSE:
