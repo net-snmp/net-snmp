@@ -1,5 +1,10 @@
 #include <config.h>
 
+#ifdef solaris2
+#define _KMEMUSER	/* Needed by <sys/user.h> */
+#include <sys/types.h>   /* helps define struct rlimit */
+#endif
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
