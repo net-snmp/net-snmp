@@ -20,6 +20,7 @@ Microsoft Visual C++ - Workspace - Building
 Microsoft Visual C++ - Workspace - Building the Perl SNMP modules
 Microsoft Visual C++ - Workspace - Installing
 Microsoft Visual C++ - Building with OpenSSL
+Microsoft Visual C++ - Building with IPv6
 Microsoft Visual C++ - Building your own applications with snmplib
 Microsoft Visual C++ - Extending the Agent
 GCC on Windows
@@ -718,6 +719,37 @@ Project changes
    g.  Add to the 'Additional Dependencies' section:
 
          libeay32.lib 
+
+ 3. Continue with the section 'Microsoft Visual C++ - Building"
+
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Building with IPv6
+*
+***************************************************************************
+
+The default build configuration only supports SNMP over IPv4-based transports.
+However, Windows XP and Windows 2000 include an IPv6-capable stack, which
+can be used to provide SNMP over IPv6.   This requires the following
+changes to the Net-SNMP win32 Visual C++ configuration:
+
+Project changes
+===============
+
+ 1. Edit the win32\net-snmp\net-snmp-config.h header file.  Change
+    the two SNMP_TRANSPORT_xxxIPV6_DOMAIN lines to read:
+
+	#define SNMP_TRANSPORT_UDPIPV6_DOMAIN 1
+	#define SNMP_TRANSPORT_TCPIPV6_DOMAIN 1
+
+ 2. Open Visual Studio, and add the following four additional files
+    to the win32 and/or win32sdk projects:
+
+        snmplib\snmpUDPIPv6Domain.c
+        snmplib\snmpTCPIPv6Domain.c
+        snmplib\inet_ntop.c
+        snmplib\inet_pton.c
 
  3. Continue with the section 'Microsoft Visual C++ - Building"
 
