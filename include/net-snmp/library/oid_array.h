@@ -27,7 +27,7 @@
  * struct variable_list *var = NULL;
  * int idx1;
  *
- * my_table = Initialise_oid_array( sizeof(my_row*) );
+ * my_table = netsnmp_Initialise_oid_array( sizeof(my_row*) );
  *
  * 
  * my_row* new_row = (my_row*)calloc(sizeof(my_row));
@@ -40,7 +40,7 @@
  *                           "skiddo", strln("skiddo"));
  * build_oid( &my_row->index.idx, &my_row->index.idx_len,
  *            NULL, 0, var);
- * Add_oid_data( my_table, new_row );
+ * netsnmp_Add_oid_data( my_table, new_row );
  *
  * ------------------------------------------------------------
  */
@@ -62,45 +62,45 @@ extern          "C" {
      * the first two elements of your data structure better be a
      * pointer to the index oid and the length of the index!)
      */
-    typedef struct oid_array_header_s {
+    typedef struct netsnmp_oid_array_header_s {
         oid            *idx;
         int             idx_len;
-    } oid_array_header;
+    } netsnmp_oid_array_header;
 
-    typedef struct oid_array_header_wrapper_s {
+    typedef struct netsnmp_oid_array_header_wrapper_s {
         oid            *idx;
         int             idx_len;
         void           *data;
-    } oid_array_header_wrapper;
+    } netsnmp_oid_array_header_wrapper;
 
-    typedef void    (ForEach) (oid_array_header *, void *context);
+    typedef void    (Netsnmp_For_Each) (netsnmp_oid_array_header *, void *context);
 
     /*
      * compare two entries. Nothing fancy, just a wrapper around
      * snmp_oid_compare.
      */
-    int             array_compare(const void *lhs, const void *rhs);
+    int             netsnmp_array_compare(const void *lhs, const void *rhs);
 
     /*
      * initialise an oid array which will contain data.
      *
      * data_size  should be the size of each item
      */
-    oid_array       Initialise_oid_array(int data_size);
+    oid_array       netsnmp_Initialise_oid_array(int data_size);
 
     /*
      * add an entry to an array.
      *
      * returns 0 on success, -1 on failure
      */
-    int             Add_oid_data(oid_array a, void *);
+    int             netsnmp_Add_oid_data(oid_array a, void *);
 
     /*
      * replace an entry to an array.
      *
      * returns 0 on success, -1 on failure
      */
-    int             Replace_oid_data(oid_array a, void *key);
+    int             netsnmp_Replace_oid_data(oid_array a, void *key);
 
     /*
      * find the entry in the array with the same index
@@ -109,7 +109,7 @@ extern          "C" {
      * change an index, remove the entry, change the index,
      * and the re-add the entry.
      */
-    void           *Get_oid_data(oid_array a, void *, int exact);
+    void           *netsnmp_Get_oid_data(oid_array a, void *, int exact);
 
     /*
      * find entries in the array with the same index prefix
@@ -119,13 +119,13 @@ extern          "C" {
      * Note: caller is responsible for calling free() on the
      * pointer returned by this function.
      */
-    void          **Get_oid_data_subset(oid_array a, void *key, int * len);
+    void          **netsnmp_Get_oid_data_subset(oid_array a, void *key, int * len);
 
     /*
      * find the number of entries in the array
      *
      */
-    int            Get_oid_data_count(oid_array a);
+    int            netsnmp_Get_oid_data_count(oid_array a);
 
     /*
      * remove an entry
@@ -133,7 +133,7 @@ extern          "C" {
      * if save is not null, the entry will be copied to the address
      * save points at.
      */
-    int             Remove_oid_data(oid_array a, void *key, void *save);
+    int             netsnmp_Remove_oid_data(oid_array a, void *key, void *save);
 
     /*
      * release memory used by a table.
@@ -142,18 +142,18 @@ extern          "C" {
      * memory, you are responsible for releasing that
      * memory before calling this function!
      */
-    void            Release_oid_array(oid_array a);
+    void            netsnmp_Release_oid_array(oid_array a);
 
     /*
      * call a function for each entry (useful for cleanup).
      *
-     * The ForEach function will be called with a pointer
+     * The Netsnmp_For_Each function will be called with a pointer
      * to an entry and the context pointer.
      *
      * If sort = 1, entries will be in sorted order. Otherwise
      * the order is not defined.
      */
-    void            For_each_oid_data(oid_array a, ForEach *,
+    void            netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each *,
                                       void *context, int sort);
 
     /*
@@ -168,7 +168,7 @@ extern          "C" {
      * the table will be sorted. If sort is not set, the order is
      * not defined.
      */
-    void           *Retrieve_oid_array(oid_array a, int *size, int sort);
+    void           *netsnmp_Retrieve_oid_array(oid_array a, int *size, int sort);
 
 #ifdef __cplusplus
 }

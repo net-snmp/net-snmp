@@ -17,7 +17,7 @@
 #include <dmalloc.h>
 #endif
 
-static data_list *auto_tables;
+static netsnmp_data_list *auto_tables;
 
 typedef struct data_set_tables_s {
    table_data_set *table_set;
@@ -114,7 +114,7 @@ inline table_data_set *
 extract_table_data_set(netsnmp_request_info *request)
 {
     return (table_data_set *)
-        netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
+        netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_SET_NAME);
 }
 
 /**
@@ -324,7 +324,7 @@ table_data_set_helper_handler(
                     } else {
                         cache->data = data->data.voidp;
                         cache->data_len = data->data_len;
-                        netsnmp_request_add_list_data(request, create_data_list(TABLE_DATA_SET_NAME, cache, free));
+                        netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_SET_NAME, cache, free));
                     }
                 } else {
                     /* XXXWWW */
@@ -345,16 +345,16 @@ table_data_set_helper_handler(
                 SNMP_FREE(data->data.voidp);
                 
                 cache = (data_set_cache *)
-                    netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
+                    netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_SET_NAME);
                 data->data.voidp = cache->data;
                 data->data_len = cache->data_len;
                 /* the cache itself is automatically freed by the
-                   data_list routines */
+                   netsnmp_data_list routines */
                 break;
 
             case MODE_SET_COMMIT:
                 cache = (data_set_cache *)
-                    netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
+                    netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_SET_NAME);
                 SNMP_FREE(cache->data);
                 break;
 
@@ -461,7 +461,7 @@ config_parse_table_set(const char *token, char *line)
 
     tables = SNMP_MALLOC_TYPEDEF(data_set_tables);
     tables->table_set = table_set;
-    add_list_data(&auto_tables, create_data_list(line, tables, NULL));
+    netsnmp_add_list_data(&auto_tables, netsnmp_create_netsnmp_data_list(line, tables, NULL));
 }
 
 void
@@ -478,7 +478,7 @@ config_parse_add_row(const char *token, char *line)
     
     line = copy_nword(line, tname, SNMP_MAXBUF_MEDIUM);
 
-    tables = (data_set_tables *) get_list_data(auto_tables, tname);
+    tables = (data_set_tables *) netsnmp_get_list_data(auto_tables, tname);
     if (!tables) {
         config_pwarn("Unknown table trying to add a row");
         return;

@@ -142,7 +142,7 @@ typedef struct agent_set_cache_s {
    int treecache_num;
 
    netsnmp_request_info         *requests;
-   data_list            *agent_data;
+   netsnmp_data_list            *agent_data;
 
    /* list */
    struct agent_set_cache_s *next;
@@ -696,7 +696,7 @@ init_master_agent(void)
 		  "init_master_agent; pseudo-transport \"none\" requested\n"));
       return 0;
     } 
-    transport = netnetsnmp_tdomain_transport(cptr, 1, "udp");
+    transport = netsnmp_tdomain_transport(cptr, 1, "udp");
 
     if (transport == NULL) {
       snmp_log(LOG_ERR, "Error opening specified endpoint \"%s\"\n", cptr);
@@ -2089,21 +2089,21 @@ netsnmp_get_agent_uptime( void ) {
 
 
 inline void
-netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari, data_list *node) 
+netsnmp_agent_netsnmp_add_list_data(netsnmp_agent_request_info *ari, netsnmp_data_list *node) 
 {
   if (ari) {
     if (ari->agent_data)
-      add_list_data(&ari->agent_data, node);
+      netsnmp_add_list_data(&ari->agent_data, node);
     else
       ari->agent_data = node;
   }
 }
 
 inline void *
-netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari, const char *name)
+netsnmp_agent_netsnmp_get_list_data(netsnmp_agent_request_info *ari, const char *name)
 {
   if (ari)
-    return get_list_data(ari->agent_data,name);
+    return netsnmp_get_list_data(ari->agent_data,name);
   return NULL;
 }
 
@@ -2111,14 +2111,14 @@ inline void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
   if (ari)
-    free_list_data(ari->agent_data);
+    netsnmp_free_list_data(ari->agent_data);
 }
 
 inline void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari) 
 {
   if (ari)
-    free_all_list_data(ari->agent_data);
+    netsnmp_free_all_list_data(ari->agent_data);
 }
 
 inline void
@@ -2126,7 +2126,7 @@ free_netsnmp_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {
         if (ari->agent_data)
-            free_all_list_data(ari->agent_data);
+            netsnmp_free_all_list_data(ari->agent_data);
         free(ari);
     }
 }

@@ -92,7 +92,7 @@ inline table_netsnmp_request_info *
 extract_table_info(netsnmp_request_info * request)
 {
     return (table_netsnmp_request_info *)
-        netsnmp_request_get_list_data(request, TABLE_HANDLER_NAME);
+        netsnmp_request_netsnmp_get_list_data(request, TABLE_HANDLER_NAME);
 }
 
 /** extracts the registered table_registration_info object from a
@@ -147,7 +147,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
      * at a time... those handlers should not save data by their handler_name
      * in the netsnmp_agent_request_info. 
      */
-    if (netsnmp_agent_get_list_data(reqinfo,handler->next->handler_name)) {
+    if (netsnmp_agent_netsnmp_get_list_data(reqinfo,handler->next->handler_name)) {
         if (MODE_IS_SET(reqinfo->mode)) {
             return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         } else {
@@ -255,8 +255,8 @@ table_helper_handler(netsnmp_mib_handler * handler,
         tbl_req_info->reg_info = tbl_info;
         tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
         tbl_req_info->number_indexes = 0;       /* none yet */
-        netsnmp_request_add_list_data(request,
-                              create_data_list(TABLE_HANDLER_NAME,
+        netsnmp_request_netsnmp_add_list_data(request,
+                              netsnmp_create_netsnmp_data_list(TABLE_HANDLER_NAME,
                                                (void *) tbl_req_info,
                                                table_data_free_func));
 
