@@ -864,6 +864,10 @@ merge_anon_children( tp1, tp2 )
                     child1 = child1->next_peer;
                     previous->next_peer = tp2->child_list;
                     tp2->child_list = previous;
+                    for ( previous = tp2->child_list ;
+                          previous->next_peer ;
+                          previous = previous->next_peer )
+                                previous->parent = tp2;
                     break;
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
@@ -888,6 +892,10 @@ merge_anon_children( tp1, tp2 )
                     }
                     else
                         child2->child_list = child1->child_list;
+                    for ( previous = child1->child_list ;
+                          previous->next_peer ;
+                          previous = previous->next_peer )
+                                  previous->parent = tp2;
                     child1->child_list = NULL;
 
                     previous = child1;		/* Finished with 'child1' */
@@ -902,6 +910,7 @@ merge_anon_children( tp1, tp2 )
 		 */
         if ( child1 ) {
             previous = child1;
+            child1->parent = tp2;
             child1 = child1->next_peer;
             previous->next_peer = tp2->child_list;
             tp2->child_list = previous;
