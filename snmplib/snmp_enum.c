@@ -229,6 +229,41 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
     return ret;
 }
 
+void
+se_clear_list(struct snmp_enum_list **list)
+{
+    struct snmp_enum_list *this_entry, *next_entry;
+
+    if (!list)
+        return;
+
+    this_entry = *list;
+    while (this_entry) {
+        next_entry = this_entry->next;
+        free(this_entry->label);
+        free(this_entry);
+        this_entry = next_entry;
+    }
+    *list = NULL;
+    return;
+}
+
+void
+se_clear_slist(const char *listname)
+{
+    struct snmp_enum_list *list = se_find_slist(listname);
+    se_clear_list(&list);
+}
+
+void
+se_clear_all_lists(void)
+{
+    struct snmp_enum_list_str *sptr = NULL;
+
+    for (sptr = sliststorage; sptr != NULL; sptr = sptr->next)
+        se_clear_list(&(sptr->list));
+}
+
 #ifdef TESTING
 main()
 {
