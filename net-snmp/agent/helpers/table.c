@@ -579,6 +579,11 @@ netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
     if (!reginfo || !reqinfo || !table_info)
         return SNMPERR_GENERR;
 
+    /*
+     * xxx-rks: inefficent. we do a copy here, then build_oid does it
+     *          again. either come up with a new utility routine, or
+     *          do some hijinks here to eliminate extra copy.
+     */
     memcpy(tmpoid, reginfo->rootoid, reginfo->rootoid_len * sizeof(oid));
     tmpoid[reginfo->rootoid_len] = 1;   /** .Entry */
     tmpoid[reginfo->rootoid_len + 1] = table_info->colnum; /** .column */
@@ -614,6 +619,8 @@ netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
     memcpy(&tmpoid[len], table_info->index_oid,
            table_info->index_oid_len * sizeof(oid));
     len += table_info->index_oid_len;
+    if (var->name && var->name != var->name_loc)
+        SNMP_FREE(var->name);
     snmp_clone_mem((void **) &var->name, tmpoid, len * sizeof(oid));
     var->name_length = len;
 
@@ -835,4 +842,48 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
                                                              free));
     }
     return stashp;
+}
+
+netsnmp_index *
+netsnmp_table_index_find_next_row(netsnmp_container *c,
+                                  netsnmp_table_request_info *tblreq)
+{
+    netsnmp_index *row = NULL;
+
+    if (!c || !tblreq || !tblreq->reg_info) {
+        snmp_log(LOG_ERR,"netsnmp_table_index_find_next_row param error\n");
+        return NULL;
+    }
+
+    /*
+     * below our minimum column?
+     */
+    if (tblreq->colnum < tblreq->reg_info->min_column) {
+        tblreq->colnum = tblreq->reg_info->min_column;
+        row = CONTAINER_FIRST(c);
+    } else {
+        netsnmp_index index;
+        index.oids = tblreq->index_oid;
+        index.len = tblreq->index_oid_len;
+
+        row = CONTAINER_NEXT(c, &index);
+
+        /*
+         * we don't have a row, but we might be at the end of a
+         * column, so try the next column.
+         */
+        if (!row) {
+            ++tblreq->colnum;
+            if (tblreq->reg_info->valid_columns) {
+                tblreq->colnum = netsnmp_closest_column
+                    (tblreq->colnum,tblreq->reg_info->valid_columns);
+            } else if (tblreq->colnum > tblreq->reg_info->max_column)
+                tblreq->colnum = 0;
+
+            if (tblreq->colnum != 0)
+                row = CONTAINER_FIRST(c);
+        }
+    }
+
+    return row;
 }
