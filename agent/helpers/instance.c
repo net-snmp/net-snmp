@@ -18,8 +18,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup instance instance: process scalars and other instances easily.
- *  @ingroup handler
+/** @defgroup instance instance: process individual MIB instances easily.
+ *  @ingroup leaf
  *  @{
  */
 netsnmp_mib_handler *

@@ -25,7 +25,7 @@
  *  with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all
  *  modes.
  * 
- *  @ingroup handler
+ *  @ingroup utilities
  *  @{
  */
 

@@ -16,7 +16,7 @@
 #endif
 
 /** @defgroup serialize serialize: Calls sub handlers one request at a time.
- *  @ingroup handler
+ *  @ingroup utilities
  *  This functionally passes in one request at a time
  *  into lower handlers rather than a whole bunch of requests at once.
  *  This is useful for handlers that don't want to iterate through the

@@ -20,7 +20,7 @@ long                 caching_enabled       = 1;
 long                 cache_default_timeout = 5;		/* in seconds */
 
 /** @defgroup cache_handler cache_handler: Maintains a cache of data for use by lower level handlers.
- *  @ingroup handler
+ *  @ingroup utilities
  *  This helper checks to see whether the data has been loaded "recently"
  *  (according to the timeout for that particular cache) and calls the
  *  registered "load_cache" routine if necessary.
