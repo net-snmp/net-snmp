@@ -325,6 +325,48 @@ void snmpd_free_trapsinks (void)
 	 *
 	 *******************/
 
+void convert_v2_to_v1( struct variable_list *vars, struct snmp_pdu *template )
+{
+    struct variable_list *v, *trap_v=NULL, *ent_v=NULL;
+    oid  trap_prefix[] = { SNMPV2_TRAPS_PREFIX };
+    int len;
+
+    for ( v = vars ; v ; v = v->next_variable ) {
+	if ( snmp_oid_compare( v->name, v->name_length, 
+    			       snmptrap_oid, OID_LENGTH(snmptrap_oid)) == 0 )
+		trap_v = v;
+	if ( snmp_oid_compare( v->name, v->name_length, 
+    			       snmptrapenterprise_oid,
+			       OID_LENGTH(snmptrapenterprise_oid)) == 0 )
+		ent_v = v;
+    }
+
+    if ( !trap_v )
+	return;		/* Can't find v2 snmpTrapOID varbind */
+
+		/*
+		 * Is this a 'standard' trap?
+		 *  Or at least, does it have the correct prefix?
+		 */
+    if ( snmp_oid_compare( trap_v->val.objid, OID_LENGTH(trap_prefix), 
+    			   trap_prefix,       OID_LENGTH(trap_prefix)) == 0 ) {
+	template->trap_type     = trap_v->val.objid[OID_LENGTH(trap_prefix)]-1;
+	template->specific_type = 0;
+    }
+    else {
+	len = trap_v->val_len /sizeof( oid );
+	template->trap_type     = 6;	/* enterprise specific */
+	template->specific_type = trap_v->val.objid[len-1];
+    }
+
+		/*
+		 *  TODO:
+		 *    Extract the appropriate enterprise value from 'ent_v'
+		 *    Remove uptime/trapOID varbinds from 'vars' list
+		 */
+    
+}
+
 void send_enterprise_trap_vars (int trap, 
 		     int specific,
 		     oid *enterprise, int enterprise_length,
@@ -417,6 +459,7 @@ void send_enterprise_trap_vars (int trap,
 			snmptrap_var.next_variable = vars;
 		}
 		last_var = NULL;	/* Don't need enterprise info */
+		convert_v2_to_v1( vars, template_pdu );
 		break;
 
 			/* "Standard" SNMPv1 traps */
