@@ -70,6 +70,8 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
+@BOTTOM@
+
 /* ifnet structure tests */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
 #undef STRUCT_IFNET_HAS_IF_TYPE
@@ -90,8 +92,6 @@
 
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
-
-@BOTTOM@
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the

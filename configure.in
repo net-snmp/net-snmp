@@ -164,11 +164,11 @@ AC_HEADER_TIME
 
 dnl Check ps args
 AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
-[if test "`($PSPROG -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
+[if test "`($PSPROG -e 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+elif test "`($PSPROG -el 2>&1) | egrep ' ps *$' | awk '{print $NF}''`" = "ps" ; then
   ac_cv_ps_flags="-el"
-elif test "`($PSPROG -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+elif test "`($PSPROG -acx 2>&1) | egrep ' ps *$' | awk '{print $NF}''`" = "ps" ; then
   ac_cv_ps_flags="-acx"
 else
   AC_MSG_WARN(Unable to determine valid ps flags...  defaulting...)

@@ -2228,11 +2228,11 @@ echo "configure:2228: checking for correct flags to ps" >&5
 if eval "test \"`echo '$''{'ac_cv_ps_flags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  if test "`($PSPROG -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
+  if test "`($PSPROG -e 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+elif test "`($PSPROG -el 2>&1) | egrep ' ps *$' | awk '{print $NF}''`" = "ps" ; then
   ac_cv_ps_flags="-el"
-elif test "`($PSPROG -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+elif test "`($PSPROG -acx 2>&1) | egrep ' ps *$' | awk '{print $NF}''`" = "ps" ; then
   ac_cv_ps_flags="-acx"
 else
   echo "configure: warning: Unable to determine valid ps flags...  defaulting..." 1>&2
