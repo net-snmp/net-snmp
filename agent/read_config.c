@@ -182,8 +182,14 @@ int a;
 void config_perror(string)
   char *string;
 {
-  fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
+  config_pwarn(string);
   config_errors++;
+}
+
+void config_pwarn(string)
+  char *string;
+{
+  fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
 }
 
 /* skip all white spaces and return 1 if found something either end of
