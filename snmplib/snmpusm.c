@@ -1428,7 +1428,7 @@ usm_rgenerate_out_msg (
       theTotalLength = *wholeMsgLen;
 #endif
       *offset = 0;
-      rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+      rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       ciphertext, ciphertextlen);
 #ifdef SNMP_TESTING_CODE
@@ -1451,7 +1451,7 @@ usm_rgenerate_out_msg (
 
     DEBUGDUMPHEADER("send", "msgPrivacyParameters");
     /*  msgPrivacyParameters (warning: assumes DES salt).  */
-    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       iv, salt_length);
     DEBUGINDENTLESS();
@@ -1469,7 +1469,7 @@ usm_rgenerate_out_msg (
       msgAuthParmLen = USM_MD5_AND_SHA_AUTH_LEN;
     }
 
-    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       authParams, msgAuthParmLen);
     DEBUGINDENTLESS();
@@ -1487,7 +1487,7 @@ usm_rgenerate_out_msg (
     
     /*  msgUserName.  */
     DEBUGDUMPHEADER("send", "msgUserName");
-    rc = asn_realloc_rbuild_string (wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_string (wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       (u_char *)theName, theNameLength);
     DEBUGINDENTLESS();
@@ -1499,7 +1499,7 @@ usm_rgenerate_out_msg (
 
     /*  msgAuthoritativeEngineTime.  */
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineTime");
-    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &time_long, sizeof(long));
     DEBUGINDENTLESS();
@@ -1511,7 +1511,7 @@ usm_rgenerate_out_msg (
 
     /*  msgAuthoritativeEngineBoots.  */
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineBoots");
-    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &boots_long, sizeof(long));
     DEBUGINDENTLESS();
@@ -1522,7 +1522,7 @@ usm_rgenerate_out_msg (
     }
 
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineID");
-    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       theEngineID, theEngineIDLength);
     DEBUGINDENTLESS();
@@ -1533,7 +1533,7 @@ usm_rgenerate_out_msg (
     }
 
     /*  USM msgSecurityParameters sequence header  */
-    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset, 1,
 				     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				     *offset - sp_offset);
     if (rc == 0) {
@@ -1543,7 +1543,7 @@ usm_rgenerate_out_msg (
     }
 
     /*  msgSecurityParameters OCTET STRING wrapper.  */
-    rc = asn_realloc_rbuild_header(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_header(wholeMsg, wholeMsgLen, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       *offset - sp_offset);
 
@@ -1566,7 +1566,7 @@ usm_rgenerate_out_msg (
     memcpy(*wholeMsg + *wholeMsgLen - *offset, globalData, globalDataLen);
 
     /*  Total packet sequence.  */
-    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset,
+    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset, 1,
 				     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				     *offset);
     if (rc == 0) {
