@@ -32,6 +32,7 @@ sub InitMakeParams {
 	chomp($Params{'LIBS'});
 	$Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	chomp($Params{'CCFLAGS'});
+	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
 	if ($opts->{'insource'} eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ -L../../agent/helpers/.libs -L../../agent/helpers/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
