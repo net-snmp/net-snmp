@@ -109,7 +109,7 @@ extern          "C" {
 
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
-/*        netsnmp_pdu    *pdu;    /* pdu contains authinfo, eg */
+/*        netsnmp_pdu    *pdu;    */ /* pdu contains authinfo, eg */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
         /*
          * can be used to pass information on a per-pdu basis from a
