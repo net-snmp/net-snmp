@@ -424,8 +424,6 @@ int snmp_input(int op,
     struct sockaddr_in *pduIp   = (struct sockaddr_in *)&(pdu->address);
     char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
     struct snmp_pdu *reply;
-    struct tm *tm;
-    time_t timer;
     struct hostent *host;
     int varbufidx;
     char varbuf[SPRINT_MAX_LEN];
