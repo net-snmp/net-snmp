@@ -8,7 +8,10 @@
 @end@
 ########################################################################
 ## }
-@if $m2c_node_skip_mapping == 0@
+@if $m2c_node_skip_mapping == 1@
+    /** no mapping */
+@   include generic-ctx-get.m2i@
+@else@ // mapping
     /*
      * TODO:
      * value mapping
@@ -19,9 +22,7 @@
      * Otherwise, just do a direct copy.
 @   end@
      */
-@end@ // skip mapping
-@if $m2c_node_needlength == 1@
-@   if $m2c_node_skip_mapping != 1@
+@   if $m2c_node_needlength == 1@
     /*
      * it is hard to autogenerate code for mapping types that are not simple
      * integers, so here is an idea of what you might need to do. It may
@@ -36,23 +37,16 @@
      *    return MFD_ERROR;
      * }
      */
-@   end@ // skip mapping
-@   include generic-ctx-get.m2i@
+@      include generic-ctx-get.m2i@
 ##
-@elsif ($node.enums == 1) && ("$node.perltype" eq "INTEGER")@
+@   elsif ($node.enums == 1) && ("$node.perltype" eq "INTEGER")@
 ##
-@   if $m2c_node_skip_mapping == 0@
     if(MFD_SUCCESS !=
        ${node}_map(&${m2c_ctx_lh}, ${m2c_ctx_rh} )) {
         return MFD_ERROR;
     }
-@   else@
-@      include generic-ctx-get.m2i@
-@   end@ // skip mapping
-@else@ // ! len, ! enums
-       /** no mapping?? */
-@   include generic-ctx-get.m2i@
-@end@ // 
+@   end@ // enums
+@end@ // mapping
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
