@@ -1,3 +1,45 @@
+Changes since V3.0.1
+
+hardaker 26 Jul 95 16:31:41
+    - Added a new #define: EXIT_ON_BAD_KLREAD to config.h
+      If defined, and an error occurs while reading the kernel contents,
+      the agent will exit.  This was the default.  I wanted it to
+      continue.
+    
+    - Port to dec-alpha/OSF 3.1
+      - alpha's long is 8 bytes, not 4.
+      - should be (mostly) 64 bit clean now.
+      - cleaned up a LOT of bugs CMU code in the process.
+
+hardaker 28 Jul 95 14:23:41
+    Yet more problems fixed in the alpha port.
+      -- more int -> long checking.
+
+hardaker 31 Jul 95 16:27:47
+    - snmpcheck changes:
+      - terminal (ascii) based supported fixed.
+        - Detects presence of a DISPLAY variable.
+        - Now requires the Term::Readkey package.
+        - asks users weather to fix problems
+      - raises and deiconifies when new problems are found
+      - sets the background color of new problems to pinkish
+      - new preference:  ping host?
+      - global key bindings:
+          ctrl-q = quit; ctrl-h = hide; ctrl-s = seen all
+
+hardaker  1 Sep 95 11:57:52
+    - Fixed alpha's kernel lookups:
+      * CMU code was passing ints into lseek (needs long).
+
+hardaker 18 Sep 95 16:09:25
+    Minor mods to README file.
+
+hardaker 18 Sep 95 16:13:49
+    Minor bug:
+      (sh_count_procs) check if returned file descriptor > 0 before continuing
+
+-------------------------------------------------------------------------------
+
 Changes since V3.0
 
 hardaker 16 Jun 95 10:13:53
