@@ -78,7 +78,6 @@ SOFTWARE.
 static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static int parse_subtree (struct tree *, const char *, oid *, size_t *);
 static char *uptimeString (u_long, char *);
-static void sprint_hexstring (char *, u_char *, size_t);
 static void sprint_asciistring (char *, u_char *, size_t);
 static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_opaque (char *, struct variable_list *, struct enum_list *, const char *, const char *);
@@ -206,7 +205,7 @@ uptimeString(u_long timeticks,
 
 
 void sprint_hexstring(char *buf,
-                      u_char *cp,
+                      const u_char *cp,
                       size_t len)
 {
 

@@ -59,6 +59,7 @@
 #include "lcd_time.h"
 #include "snmp_debug.h"
 #include "callback.h"
+#include "default_store.h"
 
 #include "transform_oids.h"
 
@@ -72,75 +73,10 @@ static struct timeval	 snmpv3starttime;
 /* 
  * Set up default snmpv3 parameter value storage.
  */
-static char	*defaultSecName		= NULL;
-static char	*defaultContext		= NULL;
-static char	*defaultPassphrase	= NULL;
-static char	*defaultAuthPassphrase	= NULL;
-static char	*defaultPrivPassphrase	= NULL;
 static oid	*defaultAuthType	= NULL;
 static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
-int		defaultSecurityLevel	= 0;
-
-
-/*******************************************************************-o-******
- * snmpv3_secName_conf
- *
- * Parameters:
- *	*word
- *	*cptr
- *
- * Line syntax:
- *	defSecurityName <name>
- */
-void
-snmpv3_secName_conf(char *word, char *cptr)
-{
-  if (defaultSecName)
-    free(defaultSecName);
-  defaultSecName = strdup(cptr);
-  DEBUGMSGTL(("snmpv3","default security name set to: %s\n",defaultSecName));
-}
-
-char *
-get_default_secName(void)
-{
-  return defaultSecName;
-}
-
-
-void
-snmpv3_passphrase_conf(char *word, char *cptr)
-{
-  char **pass;
-  if (strcmp(word, "defAuthPassphrase"))
-    pass = &defaultAuthPassphrase;
-  else if (strcmp(word, "defPrivPassphrase"))
-    pass = &defaultPrivPassphrase;
-  else
-    pass = &defaultPassphrase;
-  if (*pass)
-    free(*pass);
-  *pass = strdup(cptr);
-  DEBUGMSGTL(("snmpv3","set %s\n",word));
-}
-
-char *
-get_default_authpass(void)
-{
-  if (defaultAuthPassphrase)
-    return defaultAuthPassphrase;
-  return defaultPassphrase;
-}
-
-char *
-get_default_privpass(void)
-{
-  if (defaultPrivPassphrase)
-    return defaultPrivPassphrase;
-  return defaultPassphrase;
-}
 
 void
 snmpv3_authtype_conf(char *word, char *cptr)
@@ -182,34 +118,6 @@ get_default_privtype(size_t *len)
   return defaultPrivType;
 }
 
-
-
-/*******************************************************************-o-******
- * snmpv3_context_conf
- *
- * Parameters:
- *	*word
- *	*cptr
- *	
- * Line syntax:
- *	defContext <context>
- */
-void
-snmpv3_context_conf(char *word, char *cptr)
-{
-  if (defaultContext)
-    free(defaultContext);
-  defaultContext = strdup(cptr);
-  DEBUGMSGTL(("snmpv3","default context set to: %s\n",defaultContext));
-}
-
-char *
-get_default_context(void)
-{
-  return defaultContext;
-}
-
-
 /*******************************************************************-o-******
  * snmpv3_secLevel_conf
  *
@@ -226,22 +134,17 @@ snmpv3_secLevel_conf(char *word, char *cptr)
   char buf[1024];
   
   if (strcmp(cptr,"noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0)
-    defaultSecurityLevel = SNMP_SEC_LEVEL_NOAUTH;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
   else if (strcmp(cptr,"authNoPriv") == 0 || strcmp(cptr, "2") == 0)
-    defaultSecurityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
   else if (strcmp(cptr,"authPriv") == 0 || strcmp(cptr, "3") == 0)
-    defaultSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
   else {
     sprintf(buf,"unknown security level: cptr");
     config_perror(buf);
   }
-  DEBUGMSGTL(("snmpv3","default secLevel set to: %s = %d\n", cptr, defaultSecurityLevel));
-}
-
-int
-get_default_secLevel(void)
-{
-  return defaultSecurityLevel;
+  DEBUGMSGTL(("snmpv3","default secLevel set to: %s = %d\n", cptr,
+              ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL)));
 }
 
 /*******************************************************************-o-******
@@ -444,20 +347,23 @@ init_snmpv3(const char *type) {
   register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL,
                           "len hexEngineId");
   register_config_handler(type,"engineBoots", engineBoots_conf, NULL, "num");
-  register_config_handler("snmp","defSecurityName", snmpv3_secName_conf, NULL,
-                          "name");
-  register_config_handler("snmp","defContext", snmpv3_context_conf, NULL,
-                          "string");
+
+  /* default store config entries */
+  ds_register_config(ASN_OCTET_STR, "snmp", "defSecurityName", DS_LIBRARY_ID,
+                     DS_LIB_SECNAME);
+  ds_register_config(ASN_OCTET_STR, "snmp", "defContext", DS_LIBRARY_ID,
+                     DS_LIB_CONTEXT);
+  ds_register_config(ASN_OCTET_STR, "snmp", "defPassphrase", DS_LIBRARY_ID,
+                     DS_LIB_PASSPHRASE);
+  ds_register_config(ASN_OCTET_STR, "snmp", "defAuthPassphrase", DS_LIBRARY_ID,
+                     DS_LIB_AUTHPASSPHRASE);
+  ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase", DS_LIBRARY_ID,
+                     DS_LIB_PRIVPASSPHRASE);
+
   register_config_handler("snmp","defAuthType", snmpv3_authtype_conf, NULL,
                           "MD5|SHA");
   register_config_handler("snmp","defPrivType", snmpv3_privtype_conf, NULL,
                           "DES (currently the only possible value)");
-  register_config_handler("snmp","defPassphrase", snmpv3_passphrase_conf, NULL,
-                          "passphrase");
-  register_config_handler("snmp","defAuthPassphrase",
-                          snmpv3_passphrase_conf, NULL, "passphrase");
-  register_config_handler("snmp","defPrivPassphrase",
-                          snmpv3_passphrase_conf, NULL, "passphrase");
   register_config_handler("snmp","defSecurityLevel", snmpv3_secLevel_conf,
                           NULL, "noAuthNoPriv|authNoPriv|authPriv");
   register_config_handler(type,"userSetAuthPass", usm_set_password, NULL,

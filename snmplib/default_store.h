@@ -14,9 +14,19 @@
 #define DS_LIB_SAVE_MIB_DESCRS  1
 #define DS_LIB_MIB_COMMENT_TERM 2
 #define DS_LIB_MIB_PARSE_LABEL  3
+#define DS_LIB_DUMP_PACKET      4
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
+#define DS_LIB_SECLEVEL      1
+
+/* library strings */
+#define DS_LIB_SECNAME         0
+#define DS_LIB_CONTEXT         1
+#define DS_LIB_PASSPHRASE      2
+#define DS_LIB_AUTHPASSPHRASE  3
+#define DS_LIB_PRIVPASSPHRASE  4
+
 
 struct ds_read_config {
    u_char type;

@@ -53,6 +53,25 @@ ds_set_boolean(int storeid, int which, int value) {
 }
 
 int
+ds_toggle_boolean(int storeid, int which) {
+
+  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+      storeid < 0 || which < 0)
+    return SNMPERR_GENERR;
+    
+  if (ds_booleans[storeid][which/8] == 0)
+    ds_booleans[storeid][which/8] |= (1 << (which%8));
+  else
+    ds_booleans[storeid][which/8] &= (0xff7f >> (7-(which%8)));
+
+  DEBUGMSGTL(("ds_toggle_boolean","Setting %d:%d = %d/%s\n", storeid, which,
+              ds_booleans[storeid][which/8],
+              ((ds_booleans[storeid][which/8])?"True":"False")));
+
+  return SNMPERR_SUCCESS;
+}
+
+int
 ds_get_boolean(int storeid, int which) {
   if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
