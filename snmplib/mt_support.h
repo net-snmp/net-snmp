@@ -49,7 +49,7 @@ typedef pthread_mutex_t mutex_type;
     #define MT_MUTEX_INIT_DEFAULT 0
 #endif
 
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(cygwin)
 
 #include <windows.h>
 typedef CRITICAL_SECTION  mutex_type;
