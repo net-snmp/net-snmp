@@ -697,8 +697,7 @@ static void free_trap2_fmt(void)
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [OPTIONS] [ADDRESSES]\n");
-//"[-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"Usage: snmptrapd [OPTIONS] [LISTENING ADDRESSES]\n");
     fprintf(stderr, "\n\tNET-SNMP Version:  %s\n", netsnmp_get_version());
     fprintf(stderr, "\tWeb:      http://www.net-snmp.org/\n");
     fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
