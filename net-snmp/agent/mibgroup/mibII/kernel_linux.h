@@ -27,6 +27,7 @@ struct ip_mib
  	unsigned long	ipFragOKs;
  	unsigned long	ipFragFails;
  	unsigned long	ipFragCreates;
+ 	unsigned long	ipRoutingDiscards;
 };
 
 struct icmp_mib

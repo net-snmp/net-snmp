@@ -85,6 +85,7 @@ linux_read_mibII_stats ( void )
 				&cached_ip_mib.ipFragOKs,
 				&cached_ip_mib.ipFragFails,
 				&cached_ip_mib.ipFragCreates);
+	    cached_ip_mib.ipRoutingDiscards = 0;	/* XXX */
 	}
 	else if (!strncmp( line, ICMP_STATS_LINE, ICMP_STATS_PREFIX_LEN )) {
 	    sscanf ( line, ICMP_STATS_LINE,

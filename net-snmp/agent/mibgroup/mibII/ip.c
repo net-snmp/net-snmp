@@ -277,6 +277,7 @@ var_ip(struct variable *vp,
 	case IPFRAGOKS:		return (u_char *) &ipstat.ipFragOKs;
 	case IPFRAGFAILS:	return (u_char *) &ipstat.ipFragFails;
 	case IPFRAGCREATES:	return (u_char *) &ipstat.ipFragCreates;
+	case IPROUTEDISCARDS:	return (u_char *) &ipstat.ipRoutingDiscards;
 #endif
 
 
