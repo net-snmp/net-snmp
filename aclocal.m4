@@ -3,7 +3,7 @@ AC_DEFUN(AC_PROMPT_USER_NO_DEFINE,
 dnl changequote(<<, >>) dnl
 dnl <<
 [
-echo "$2 ($3): \c"
+echo $ac_n "$2 ($3): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a "$3" != ""; then
   tmpinput="$3"
@@ -22,7 +22,7 @@ AC_CACHE_VAL(ac_cv_user_prompt_$1,
 echo ""
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
 eval ac_cv_user_prompt_$1=\$$1
-echo "setting $MSG_CHECK to...  \c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c"
 ) dnl
 if test "$ac_cv_user_prompt_$1" != "none"; then
   if test "$4" != ""; then
