@@ -25,6 +25,8 @@ int netsnmp_register_watched_scalar(   netsnmp_handler_registration *reginfo,
                                        netsnmp_watcher_info         *winfo);
 int netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
                                        marker_t timestamp);
+int netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
+                                      int *spinlock);    
 
 #define WATCHER_HANDLER_NAME "watcher"
 
