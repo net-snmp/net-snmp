@@ -13,6 +13,9 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
+#if HAVE_MNTENT_H
+#include <mntent.h>
+#endif
 #if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
@@ -20,9 +23,6 @@
 #include <snmp.h>
 #include <asn1.h>
 #include <snmp_impl.h>
-
-#define ofile stderr
-#define debug 0
 
 char *skip_white();
 char *skip_not_white();
@@ -51,16 +51,16 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   char *cptr, *tcptr;
   int linecount=0,i;
   struct stat stat1, stat2;
-#if HAVE_FSTAB_H
-  struct fstab *fstab;
-#elif HAVE_GETMNTENT
+#if HAVE_GETMNTENT
   struct mnttab mnttab;
   FILE *mntfp;
+#elif HAVE_FSTAB_H
+  struct fstab *fstab;
 #endif
   struct extensible **pptmp;
   
   if ((ifile = fopen(filename,"r")) == NULL) {
-    fprintf(ofile, "couldn't open %s for reading\n",filename);
+    fprintf(stderr, "couldn't open %s for reading\n",filename);
     return(1);
   }
 
@@ -163,15 +163,8 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 disk[*numdisks].minimumspace = DEFDISKMINIMUMSPACE;
               }
               /* find the device associated with the directory */
-#if HAVE_FSTAB_H
-              stat(disk[*numdisks].path,&stat1);
-              setfsent();
-              if (fstab = getfsfile(disk[*numdisks].path)) {
-                copy_word(fstab->fs_spec,disk[*numdisks].device);
-                *numdisks += 1;
-              }
-#elif HAVE_GETMNTENT
-	      mntfp = fopen ("/etc/mnttab", "r");
+#if HAVE_GETMNTENT
+	      mntfp = fopen (ETC_MNTTAB, "r");
 
 	      while ((i = getmntent (mntfp, &mnttab)) == 0)
 		if (strcmp (disk[*numdisks].path, mnttab.mnt_mountp) == 0)
@@ -185,6 +178,13 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 		copy_word (mnttab.mnt_special, disk[*numdisks].device);
 		*numdisks += 1;
 	      }
+#elif HAVE_FSTAB_H
+              stat(disk[*numdisks].path,&stat1);
+              setfsent();
+              if (fstab = getfsfile(disk[*numdisks].path)) {
+                copy_word(fstab->fs_spec,disk[*numdisks].device);
+                *numdisks += 1;
+              }
 #endif
               else {
                 fprintf(stderr,"Error:  couldn't find device for disk %s\n",
@@ -192,10 +192,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 disk[*numdisks].minimumspace = -1;
                 disk[*numdisks].path[0] = 0;
               }
-#if HAVE_FSTAB_H
-              endfsent();
-#elif HAVE_GETMNTENT
+#if HAVE_GETMNTENT
 	      fclose (mntfp);
+#elif HAVE_FSTAB_H
+              endfsent();
 #endif
             }
 #else
@@ -224,8 +224,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 (*procp)->max = 0;
                 (*procp)->min = 0;
               }
-            if (debug) fprintf (ofile,"Read:  %s (%d) (%d)\n",
-                                (*procp)->name, (*procp)->max, (*procp)->min);
+#if DODEBUG
+            fprintf (stderr,"Read:  %s (%d) (%d)\n",
+                     (*procp)->name, (*procp)->max, (*procp)->min);
+#endif
             procp = &((*procp)->next);
           }
           else if (!strncmp(word,"swap",4)) {

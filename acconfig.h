@@ -49,6 +49,9 @@
 /* location of UNIX kernel */
 #define KERNEL_LOC "/vmunix"
 
+/* location of mount table list */
+#define ETC_MNTTAB "/etc/mnttab"
+
 /* location of swap device (ok if not found) */
 #undef DMEM_LOC
 
