@@ -3229,7 +3229,7 @@ snmp_sess_select_info(void *sessp,
 		      int *block)
 {
     struct session_list *slptest = (struct session_list *)sessp;
-    struct session_list *slp;
+    struct session_list *slp, *next, *prev=NULL;
     struct snmp_internal_session *isp;
     struct request_list *rp;
     struct timeval now, earliest;
@@ -3242,9 +3242,18 @@ snmp_sess_select_info(void *sessp,
      * If a single session is specified, do just for that session.
      */
     if (slptest) slp = slptest; else slp = Sessions;
-    for(; slp; slp = slp->next){
-	active++;
+    for(; slp; slp = next){
 	isp = slp->internal;
+	if (isp->sd == -1) {
+		/* This session was marked for deletion */
+	    if ( prev == NULL )
+		Sessions = slp->next;
+	    else
+		prev->next = slp->next;
+	    next = slp->next;
+	    snmp_sess_close( slp );
+	    continue;
+	}
 	if ((isp->sd + 1) > *numfds)
 	    *numfds = (isp->sd + 1);
 	FD_SET(isp->sd, fdset);
@@ -3257,7 +3266,10 @@ snmp_sess_select_info(void *sessp,
 		    earliest = rp->expire;
 	    }
 	}
+	active++;
 	if (slp == slptest) break;
+	prev = slp;
+	next = slp->next;
     }
     if (requests == 0) { /* if none are active, skip arithmetic */
        *block = 1; /* can block - timeout value is undefined if no requests*/
