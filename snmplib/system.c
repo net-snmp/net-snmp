@@ -70,7 +70,7 @@ SOFTWARE.
 #define IFF_LOOPBACK 0
 #endif
 #define LOOPBACK    0x7f000001
-u_int get_myaddr __P((void))
+in_addr_t get_myaddr __P((void))
 {
     int sd;
     struct ifconf ifc;
@@ -98,7 +98,7 @@ u_int get_myaddr __P((void))
           && (ifreq.ifr_flags & IFF_RUNNING)
           && !(ifreq.ifr_flags & IFF_LOOPBACK)
           && in_addr->sin_addr.s_addr != LOOPBACK){
-#ifdef freebsd2
+#ifdef SYS_IOCTL_H_HAS_SIOCGIFADDR
 	    if (ioctl(sd, SIOCGIFADDR, (char *)&ifreq) < 0)
 		continue;
 	    in_addr = (struct sockaddr_in *)&(ifreq.ifr_addr);

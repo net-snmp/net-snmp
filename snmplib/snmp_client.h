@@ -47,4 +47,4 @@ struct snmp_pdu *snmp_clone_pdu __P((struct snmp_pdu *));
 char *snmp_errstring __P((int));
 void snmp_synch_setup __P((struct snmp_session *));
 int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
-int ms_party_init __P((u_long, oid *, int *, oid *, int *, oid *, int *));
+int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));

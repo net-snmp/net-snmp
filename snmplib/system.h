@@ -22,5 +22,5 @@ SOFTWARE.
 /*
  * Definitions for the system dependent library file
  */
-u_int get_myaddr __P((void));
+in_addr_t get_myaddr __P((void));
 long get_uptime __P((void));
