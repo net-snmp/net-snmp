@@ -229,7 +229,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Timeout",                             /* SNMPERR_TIMEOUT */
     "Failure in recvfrom",                 /* SNMPERR_BAD_RECVFROM */
     "Unable to determine contextEngineID", /* SNMPERR_BAD_ENG_ID */
-    "Unable to determine securityName",    /* SNMPERR_BAD_SEC_NAME */
+    "No securityName specified",           /* SNMPERR_BAD_SEC_NAME */
     "Unable to determine securityLevel",   /* SNMPERR_BAD_SEC_LEVEL  */
     "ASN.1 parse error in message",        /* SNMPERR_ASN_PARSE_ERR */
     "Unknown security model in message",   /* SNMPERR_UNKNOWN_SEC_MODEL */
@@ -237,7 +237,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Unknown engine ID",                   /* SNMPERR_UNKNOWN_ENG_ID */
     "Unknown user name",                   /* SNMPERR_UNKNOWN_USER_NAME */
     "Unsupported security level",          /* SNMPERR_UNSUPPORTED_SEC_LEVEL */
-    "Authentication failure",              /* SNMPERR_AUTHENTICATION_FAILURE */
+    "Authentication failure (incorrect password, community or key)",              /* SNMPERR_AUTHENTICATION_FAILURE */
     "Not in time window",                  /* SNMPERR_NOT_IN_TIME_WINDOW */
     "Decryption error",                    /* SNMPERR_DECRYPTION_ERR */
     "SCAPI general failure",		   /* SNMPERR_SC_GENERAL_FAILURE */
@@ -245,10 +245,10 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Key tools not available",		   /* SNMPERR_KT_NOT_AVAILABLE */
     "Unknown Report message",	           /* SNMPERR_UNKNOWN_REPORT */
     "USM generic error",	           /* SNMPERR_USM_GENERICERROR */
-    "USM unknown security name",           /* SNMPERR_USM_UNKNOWNSECURITYNAME */
-    "USM unsupported security level",      /* SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL */
+    "USM unknown security name (no such user exists)",           /* SNMPERR_USM_UNKNOWNSECURITYNAME */
+    "USM unsupported security level (this user has not been configured for that level of security)",      /* SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL */
     "USM encryption error",	           /* SNMPERR_USM_ENCRYPTIONERROR */
-    "USM authentication failure",          /* SNMPERR_USM_AUTHENTICATIONFAILURE */
+    "USM authentication failure (incorrect password or key)",          /* SNMPERR_USM_AUTHENTICATIONFAILURE */
     "USM parse error",		           /* SNMPERR_USM_PARSEERROR */
     "USM unknown engineID",	           /* SNMPERR_USM_UNKNOWNENGINEID */
     "USM not in time window",	           /* SNMPERR_USM_NOTINTIMEWINDOW */
@@ -961,7 +961,7 @@ _sess_copy( struct snmp_session *in_session)
                       (u_char*)cp, strlen(cp),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
-        snmp_set_detail("Error generating Ku from authentication pass phrase.");
+        snmp_set_detail("Error generating a key (Ku) from the supplied authentication pass phrase.");
 	snmp_sess_close(slp);
         return NULL;
       }
@@ -976,7 +976,7 @@ _sess_copy( struct snmp_session *in_session)
                       (u_char *)cp, strlen(cp),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
-        snmp_set_detail("Error generating Ku from privacy pass phrase.");
+        snmp_set_detail("Error generating a key (Ku) from the supplied privacy pass phrase.");
 	snmp_sess_close(slp);
         return NULL;
       }
