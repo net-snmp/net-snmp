@@ -432,7 +432,6 @@ void vacm_parse_view (const char *token,
     u_char viewMask[sizeof (vp->viewMask)];
     int i;
 
-    init_mib();
     name = strtok (param, " \t\n");
     if (!name) {
 	config_perror("missing NAME parameter");
