@@ -34,7 +34,7 @@ MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
 	netsnmp_read_only.3 netsnmp_serialize.3 netsnmp_table.3 \
 	netsnmp_table_array.3 netsnmp_table_data.3 netsnmp_table_dataset.3 \
 	netsnmp_table_iterator.3 netsnmp_todo.3 netsnmp_scalar.3 \
-	netsnmp_watcher.3
+	netsnmp_watcher.3 netsnmp_mode_end_call.3
 MAN3G = default_store.3 mib_api.3 read_config.3 snmp_agent_api.3 snmp_alarm.3 \
 	snmp_api.3 snmp_sess_api.3 snmp_trap_api.3
 MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5
