@@ -93,7 +93,7 @@ char *cook_device (char *);
 static u_char * when_dumped ( char* filesys, int level, int* length );
 int header_hrfilesys (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
-void	init_hr_filesys( )
+void init_hr_filesys(void)
 {
 	/* No initialisation needed */
 }

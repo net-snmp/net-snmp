@@ -60,14 +60,8 @@
 #define SIOCDELRT SIOCDELMULTI
 #endif
 
-int  addRoute(dstip, gwip, iff, flags)
-u_long  dstip;
-u_long  gwip;
-u_long  iff;
-u_short  flags;
+int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-
-
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
@@ -106,11 +100,7 @@ u_short  flags;
 
 
 
-int  delRoute(dstip, gwip, iff, flags)
-u_long  dstip;
-u_long  gwip;
-u_long  iff;
-u_short  flags;
+int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
 
 
@@ -157,14 +147,7 @@ u_short  flags;
 #endif
 
 
-
-
-
-
-
 #define  MAX_CACHE   8
-
-
 
 struct rtent {
 
@@ -190,17 +173,9 @@ struct rtent {
     u_long    xx_proto;
 };
 
-
-
-
-
-
 struct  rtent  rtcache[MAX_CACHE];
 
-
-
-struct rtent *findCacheRTE(dst)
-u_long dst;
+struct rtent *findCacheRTE(u_long dst)
 {
     int i;
 
@@ -213,9 +188,7 @@ u_long dst;
     return 0;
 }
 
-
-
-struct rtent  *newCacheRTE()
+struct rtent  *newCacheRTE(void)
 {
 
     int i;
@@ -231,10 +204,7 @@ struct rtent  *newCacheRTE()
 
 }
 
-
-
-int delCacheRTE(dst)
-u_long dst;
+int delCacheRTE(u_long dst)
 {
     struct  rtent  *rt;
 
@@ -248,25 +218,11 @@ u_long dst;
 }
 
 
-
-
-
-struct  rtent  *cacheKernelRTE(dst)
-u_long dst;
+struct  rtent  *cacheKernelRTE(u_long dst)
 {
-
     return 0;  /* for now */
-
-
     /* ...... */
-
-    
 }
-
-
-
-
-
 
 /*
  * If statP is non-NULL, the referenced object is at that location.
@@ -275,14 +231,14 @@ u_long dst;
  */
 
 int
-write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      length;
+write_rte(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      length)
 {
     struct rtent *rp;
     int var;
@@ -507,10 +463,6 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 
     }
 
-
     return SNMP_ERR_NOERROR;
 }
-
-
-
 

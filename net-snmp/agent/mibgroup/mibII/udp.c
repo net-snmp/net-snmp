@@ -137,7 +137,7 @@ struct variable8 udp_variables[] = {
    registering underneath */
 oid udp_variables_oid[] = { 1,3,6,1,2,1,7 };
 
-void init_udp()
+void init_udp(void)
 {
 
   /* register ourselves with the agent to handle our mib tree */

@@ -45,20 +45,16 @@ struct targetParamTable_struct {
 
 extern void          init_snmpTargetParamsEntry(void);
 extern void          shutdown_snmpTargetParamsEntry(void);
-extern unsigned char *var_snmpTargetParamsEntry
-(struct variable *, oid *, 
- int *, int, int *, int (**write) 
- (int, unsigned char *, unsigned char, 
-  int, unsigned char *, oid *, int));
+extern FindVarMethod var_snmpTargetParamsEntry;
 
 void snmpd_parse_config_targetParams(   char *, char *);
 
-int write_snmpTargetParamsMPModel(      int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetParamsSecurityModel(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetParamsSecurityName( int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetParamsSecurityLevel(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetParamsStorageType(  int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetParamsRowStatus(    int, u_char *,u_char, int, u_char *,oid*, int);
+WriteMethod write_snmpTargetParamsMPModel;
+WriteMethod write_snmpTargetParamsSecurityModel;
+WriteMethod write_snmpTargetParamsSecurityName;
+WriteMethod write_snmpTargetParamsSecurityLevel;
+WriteMethod write_snmpTargetParamsStorageType;
+WriteMethod write_snmpTargetParamsRowStatus;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

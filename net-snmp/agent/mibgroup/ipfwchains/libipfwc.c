@@ -19,7 +19,7 @@ static void *ipfwc_fn = NULL;
 
 static int init = 0;
 
-static int ipfwc_init()
+static int ipfwc_init(void)
 {
 	ipfwc_fn = ipfwc_init;
 	init = 1;

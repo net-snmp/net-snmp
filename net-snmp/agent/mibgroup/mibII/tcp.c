@@ -169,9 +169,8 @@ struct variable13 tcp_variables[] = {
    registering underneath */
 oid tcp_variables_oid[] = { 1,3,6,1,2,1,6 };
 
-void	init_tcp( )
+void init_tcp(void)
 {
-
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/tcp", tcp_variables, variable13, tcp_variables_oid);
 

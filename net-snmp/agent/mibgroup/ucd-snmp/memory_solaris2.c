@@ -76,20 +76,13 @@ void init_memory_solaris2(void)
   }
 }
 
-unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid        *name;
-/* IN/OUT - input name requested, output name found */
-    register int        *length;
-/* IN/OUT - length of input and output oid's */
-    int                 exact;
-/* IN - TRUE if an exact match was requested. */
-    int                 *var_len;
-/* OUT - length of variable or 0 if function returned. */
-    WriteMethod        **write_method;
-
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_mem(
+    struct variable *vp,
+    oid        *name,
+    int        *length,
+    int        exact,
+    int        *var_len,
+    WriteMethod **write_method)
 {
   static long long_ret;
 
