@@ -10,12 +10,14 @@
 @  eval $m2c_node_get_comments = ""@
 @  eval $m2c_node_set_comments = ""@
 @  eval $m2c_node_skip_get = 0@
+##//how should a function handle a pointer to a buffer that is to small?
+@  eval $m2c_node_realloc = 0@ // 0=fail, 1=realloc, 2=malloc
 ########################################################################
 ## fix some declarations
 ########################################################################
 @  if $node.enums == 1@
 ##
-## validate some assumtions
+## validate some assumptions
 ##
 @    if ("$node.perltype" ne "INTEGER") && ("$node.perltype" ne "BITS")@
 @       print "$node had enums, but isn't INTEGER or BITS! ($node.perltype)\n"@
@@ -81,26 +83,40 @@
 @    eval $m2c_node_var_name="var->"@
 @  end@
 @  eval $m2c_node_var_val_ptr = "($m2c_decl *)${m2c_node_var_name}val.string"@
-@  eval $m2c_node_param_name = "${node}_ptr"@
-##
 @  if $m2c_node_needlength == 1@
-@    eval $m2c_node_param_name = "${m2c_node_param_name}_ptr"@
-@    eval $m2c_node_param_ref = "$m2c_decl **${node}_ptr_ptr, size_t * ${node}_len_ptr"@
-@    eval $m2c_node_param_val = "$m2c_decl *${node}_ptr, size_t ${node}_len"@
-##
-@    eval $m2c_node_var_ref = "($m2c_decl **)&${m2c_node_var_name}val.string, &${m2c_node_var_name}val_len"@
+@    eval $m2c_XX = "($m2c_decl **)&${m2c_node_var_name}val.string,"@
+@    eval $m2c_node_var_ref = "$m2c_XX &${m2c_node_var_name}val_len"@
 @    eval $m2c_node_var_val = "$m2c_node_var_val_ptr, ${m2c_node_var_name}val_len"@
 @  else@
 @    eval $m2c_node_var_ref = "($m2c_decl *)${m2c_node_var_name}val.string"@
 @    eval $m2c_node_var_val = "*($m2c_node_var_val_ptr)"@
-##
-@    eval $m2c_node_param_ref = "$m2c_decl * ${node}_ptr"@
-@    eval $m2c_node_param_val = "$m2c_decl $node"@
 @  end@
+##
+##
+@  eval $m2c_node_param_val_name = "${node}"@
+@  eval $m2c_node_param_val_lname = "${m2c_node_param_val_name}_len"@
+@  eval $m2c_node_param_ref_name = "${m2c_node_param_val_name}_ptr"@
+@  if $m2c_node_needlength == 1@
+@    eval $m2c_node_param_val_name = "${m2c_node_param_val_name}_ptr"@
+@    eval $m2c_node_param_val_lname = "${m2c_node_param_val_name}_len"@
+@    eval $m2c_node_param_ref_name = "${m2c_node_param_ref_name}_ptr"@
+@    eval $m2c_node_param_ref_lname = "${m2c_node_param_val_lname}_ptr"@
+@    eval $m2c_XX = "$m2c_decl **$m2c_node_param_ref_name,"@
+@    eval $m2c_node_param_ref = "$m2c_XX size_t *$m2c_node_param_ref_lname"@
+@    eval $m2c_XX = "$m2c_decl *$m2c_node_param_val_name,"@
+@    eval $m2c_node_param_val = "$m2c_XX  size_t $m2c_node_param_val_lname"@
+@  else@
+@    eval $m2c_node_param_ref = "$m2c_decl * $m2c_node_param_ref_name"@
+@    eval $m2c_node_param_val = "$m2c_decl $m2c_node_param_val_name"@
+##
+@  end@
+##
+@eval $m2c_ctx_lh_sfx=""@
+@eval $m2c_ctx_rh_sfx=""@
 ########################################################################
 ## include user overrides
 ########################################################################
-@  include -ifexists user-${node}.m2d@
+@  include -ifexists default-node-${node}.m2d@
 ########################################################################
 ##
 ########################################################################
@@ -114,6 +130,25 @@
 @      eval $m2c_node_lh = "(* ${node}_ptr)"@
 @    end@
 @    eval $m2c_node_lhs = "(* ${node}_len_ptr)"@
+@  end@
+@  eval $m2c_ctx_lh="$m2c_node_lh"@
+@  eval $m2c_ctx_lhs="${m2c_node_lh}_len"@
+@  eval $m2c_ctx_rh="${m2c_data_item}${node}"@
+@  eval $m2c_ctx_rhs="${m2c_data_item}${node}_len"@
+########################################################################
+##
+########################################################################
+@  if $m2c_node_skip_mapping == 0@
+@    if $m2c_node_needlength == 1@
+@      eval $m2c_XX="$m2c_decl **mib_$m2c_node_param_ref_name,"@
+@      eval $m2c_XX="$m2c_XX size_t *mib_$m2c_node_param_ref_lname,"@
+@      eval $m2c_XX="$m2c_XX $m2c_decl *raw_$m2c_node_param_val_name,"@
+@      eval $m2c_XX="$m2c_XX size_t raw_$m2c_node_param_val_lname,"@
+@      eval $m2c_node_map_param="$m2c_XX int allow_realloc"@
+@    else@
+@      eval $m2c_XX="$m2c_decl *mib_$m2c_node_param_ref_name,"@
+@      eval $m2c_node_map_param="$m2c_XX $m2c_decl raw_$m2c_node_param_val_name"@
+@    end@
 @  end@
 ########################################################################
 ##
