@@ -2648,8 +2648,10 @@ AC_OUTPUT([
  man/Makefile:Makefile.top:man/Makefile.in:Makefile.rules
  mibs/Makefile:Makefile.top:mibs/Makefile.in:Makefile.rules
  net-snmp-config:net-snmp-config.in
-], echo timestamp > stamp-h)
-AC_OUTPUT_COMMANDS(chmod 755 net-snmp-config)
+], [
+ echo timestamp > stamp-h
+ chmod 755 net-snmp-config
+])
 
 AC_MSG_CACHE_DISPLAY()
 
