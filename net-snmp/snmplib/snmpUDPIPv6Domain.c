@@ -33,6 +33,7 @@
 #include "snmp.h"
 #include "vacm.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "default_store.h"
 #include "read_config.h"
 #include "snmp_transport.h"
@@ -49,6 +50,7 @@ char	       *snmp_udp6_fmtaddr	(snmp_transport *t,
 {
   struct sockaddr_in6 *to = NULL;
 
+  DEBUGMSGTL(("snmp_udp6_fmtaddr", "t = %p, data = %p, len = %d\n", t, data, len));
   if (data != NULL && len == sizeof(struct sockaddr_in6)) {
     to = (struct sockaddr_in6 *)data;
   } else if (t != NULL && t->data != NULL) {
@@ -57,10 +59,11 @@ char	       *snmp_udp6_fmtaddr	(snmp_transport *t,
   if (to == NULL) {
     return strdup("UDP/IPv6: unknown");
   } else {
+    char addr[INET6_ADDRSTRLEN];
     char tmp[INET6_ADDRSTRLEN + 8];
     
-    sprintf(tmp, "%s/%d", inet_ntop(AF_INET6, (void *)&(to->sin6_addr),
-				 tmp, INET6_ADDRSTRLEN), ntohs(to->sin6_port));
+    sprintf(tmp, "[%s]:%hd", inet_ntop(AF_INET6, (void *)&(to->sin6_addr),
+				 addr, INET6_ADDRSTRLEN), ntohs(to->sin6_port));
     return strdup(tmp);
   }
 }
@@ -126,7 +129,7 @@ int		snmp_udp6_send	(snmp_transport *t, void *buf, int size,
     DEBUGMSGTL(("snmp_udp6_send", "%d bytes from %p to %s on fd %d\n",
 		size, buf, string, t->sock));
     free(string);
-    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr_in6));
     return rc;
   } else {
     return -1;
@@ -138,6 +141,7 @@ int		snmp_udp6_send	(snmp_transport *t, void *buf, int size,
 int		snmp_udp6_close	(snmp_transport *t)
 {
   int rc = 0;
+  DEBUGMSGTL(("snmp_udp6_close", "close fd %d\n", t->sock));
   if (t->sock >= 0) {
 #ifndef HAVE_CLOSESOCKET
     rc = close(t->sock);
@@ -164,7 +168,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
   int rc = 0, udpbuf = (1 << 17);
   char *string = NULL;
 
-  if (addr == NULL || addr->sin_family != AF_INET6) {
+  if (addr == NULL || addr->sin6_family != AF_INET6) {
     return NULL;
   }
 
@@ -179,10 +183,10 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 
   memset(t, 0, sizeof(snmp_transport));
 
-  t->domain = snmpUDPDomain;
-  t->domain_length = sizeof(snmpUDPDomain)/sizeof(snmpUDPDomain[0]);
+  t->domain = ucdSnmpUDPIPv6Domain;
+  t->domain_length = sizeof(ucdSnmpUDPIPv6Domain)/sizeof(ucdSnmpUDPIPv6Domain[0]);
 
-  t->sock = socket(PF_INET, SOCK_DGRAM, 0);
+  t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
   if (t->sock < 0) {
     snmp_transport_free(t);
     return NULL;
@@ -205,14 +209,14 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
 
 #ifdef  SO_SNDBUF
   if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, &udpbuf, sizeof(int)) != 0) {
-    DEBUGMSGTL(("snmp_udp", "couldn't set SO_SNDBUF to %d bytes: %s\n",
+    DEBUGMSGTL(("snmp_udp6", "couldn't set SO_SNDBUF to %d bytes: %s\n",
 		udpbuf, strerror(errno)));
   }
 #endif/*SO_SNDBUF*/
 
 #ifdef  SO_RCVBUF
   if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, &udpbuf, sizeof(int)) != 0) {
-    DEBUGMSGTL(("snmp_udp", "couldn't set SO_RCVBUF to %d bytes: %s\n",
+    DEBUGMSGTL(("snmp_udp6", "couldn't set SO_RCVBUF to %d bytes: %s\n",
 		udpbuf, strerror(errno)));
   }
 #endif/*SO_RCVBUF*/
@@ -224,7 +228,7 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {
-      snmp_udp_close(t);
+      snmp_udp6_close(t);
       snmp_transport_free(t);
       return NULL;
     }
@@ -234,13 +238,13 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     /*  This is a client session.  Save the address in the transport-specific
 	data pointer for later use by snmp_udp_send.  */
 
-    t->data = malloc(sizeof(struct sockaddr_in));
+    t->data = malloc(sizeof(struct sockaddr_in6));
     if (t->data == NULL) {
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(t->data, addr, sizeof(struct sockaddr_in));
-    t->data_length = sizeof(struct sockaddr_in);
+    memcpy(t->data, addr, sizeof(struct sockaddr_in6));
+    t->data_length = sizeof(struct sockaddr_in6);
   }
 
   /*  16-bit length field, 8 byte UDP header, 40 byte IPv6 header.  */
@@ -262,6 +266,7 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
 						 int remote_port)
 {
   char *cp = NULL, *peername = NULL;
+  char debug_addr[INET6_ADDRSTRLEN];
 
   if (addr == NULL) {
     return 0;
@@ -312,41 +317,72 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
       DEBUGMSGTL(("snmp_sockaddr_in6", "IPv6 address\n"));
     } else {
       /*  Well, it must be a hostname then.  */
-#ifdef  HAVE_GETHOSTBYNAME
+#if HAVE_GETADDRINFO
+      struct addrinfo *addrs;
+      struct addrinfo hint;
+      int err;
+
+      memset(&hint, 0, sizeof hint);
+      hint.ai_flags = 0;
+      hint.ai_family = PF_INET6;
+      hint.ai_socktype = SOCK_DGRAM;
+      hint.ai_protocol = 0;
+
+      err = getaddrinfo(peername, NULL, &hint, &addrs);
+      if (err != 0) {
+	snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", peername, gai_strerror(err));
+	free(peername);
+	return 0;
+      }
+      DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+      memcpy(&addr->sin6_addr, &((struct sockaddr_in6 *)addrs->ai_addr)->sin6_addr, sizeof(struct in6_addr));
+#elif HAVE_GETIPNODEBYNAME
+      int err;
+      struct hostent *hp = getipnodebyname(peername, AF_INET6, 0, &err);
+      if (hp == NULL) {
+	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (couldn't resolve = %d)\n", err));
+	free(peername);
+	return 0;
+      }
+      DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+      memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
+#elif HAVE_GETHOSTBYNAME
       struct hostent *hp = gethostbyname(peername);
       if (hp == NULL) {
-	DEBUGMSGTL(("snmp_sockaddr_in", "hostname (couldn't resolve)\n"));
+	DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (couldn't resolve)\n"));
 	free(peername);
 	return 0;
       } else {
-	if (hp->h_addrtype != AF_INET) {
-	  DEBUGMSGTL(("snmp_sockaddr_in", "hostname (not AF_INET!)\n"));
+	if (hp->h_addrtype != AF_INET6) {
+	  DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (not AF_INET6!)\n"));
 	  free(peername);
 	  return 0;
 	} else {
-	  DEBUGMSGTL(("snmp_sockaddr_in", "hostname (resolved okay)\n"));
-	  memcpy(&(addr->sin_addr), hp->h_addr, hp->h_length);
+	  DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (resolved okay)\n"));
+	  memcpy(&(addr->sin6_addr), hp->h_addr, hp->h_length);
 	}
       }
 #else /*HAVE_GETHOSTBYNAME*/
-      DEBUGMSGTL(("snmp_sockaddr_in", "hostname (no gethostbyname)\n"));
+      DEBUGMSGTL(("snmp_sockaddr_in6", "hostname (no gethostbyname)\n"));
       free(peername);
       return 0;
 #endif/*HAVE_GETHOSTBYNAME*/
     }
   } else {
-    DEBUGMSGTL(("snmp_sockaddr_in", "NULL peername"));
+    DEBUGMSGTL(("snmp_sockaddr_in6", "NULL peername"));
     return 0;
   }
-  DEBUGMSGTL(("snmp_sockaddr_in", "return { AF_INET, %s:%hu }\n",
-	      inet_ntoa(addr->sin_addr), ntohs(addr->sin_port)));
+  DEBUGMSGTL(("snmp_sockaddr_in6", "return { AF_INET6, [%s]:%hu }\n",
+	      inet_ntop(AF_INET6, &addr->sin6_addr, debug_addr,
+		        sizeof(debug_addr)),
+	      ntohs(addr->sin6_port)));
   free(peername);
   return 1;
 }
 
 
 
-snmp_transport	*snmp_udp6_create	       (const char *string, int local)
+snmp_transport	*snmp_udp6_create_tstring       (const char *string, int local)
 {
   struct sockaddr_in6 addr;
 
@@ -362,7 +398,7 @@ void		snmp_udp6_ctor			(void)
 {
   udp6Domain.name        = ucdSnmpUDPIPv6Domain;
   udp6Domain.name_length = sizeof(ucdSnmpUDPIPv6Domain)/sizeof(oid);
-  udp6Domain.f_create 	 = snmp_udp6_create;
+  udp6Domain.f_create_from_tstring = snmp_udp6_create_tstring;
   udp6Domain.prefix	 = calloc(5, sizeof(char *));
   udp6Domain.prefix[0] 	 = "udp6";
   udp6Domain.prefix[1] 	 = "ipv6";

@@ -211,6 +211,9 @@
 /* Define if you have the fork function.  */
 #undef HAVE_FORK
 
+/* Define if you have the getaddrinfo function.  */
+#undef HAVE_GETADDRINFO
+
 /* Define if you have the getdtablesize function.  */
 #undef HAVE_GETDTABLESIZE
 
@@ -222,6 +225,9 @@
 
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
+
+/* Define if you have the getipnodebyname function.  */
+#undef HAVE_GETIPNODEBYNAME
 
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
@@ -1179,6 +1185,10 @@
 /*  This is defined if support for the IPX transport domain is
     available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
+
+/*  This is defined if support for the UDPIPv6 transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_UDPIPV6_DOMAIN
 
 /* define this if the USM security module is available */
 #undef SNMP_SECMOD_USM
