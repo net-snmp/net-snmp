@@ -131,9 +131,5 @@ time_t ctime_to_timet( string )
 
 	tm.tm_sec -= timezone;
 	
-#if !(defined(linux) || defined(solaris2))	/* CHECK THIS!! */
-    return( mktime( tm ));
-#else
     return( mktime( &tm ));
-#endif
 }

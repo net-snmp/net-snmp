@@ -12,6 +12,12 @@
 #if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
+#if HAVE_SYS_MNTENT_H
+#include <sys/mntent.h>
+#endif
+#if HAVE_SYS_MNTTAB_H
+#include <sys/mnttab.h>
+#endif
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
@@ -31,7 +37,12 @@
 	 *
 	 *********************/
 
+#ifdef solaris2
+struct mnttab  HRFS_entry_struct;
+struct mnttab *HRFS_entry = &HRFS_entry_struct;
+#else
 struct mntent *HRFS_entry;
+#endif
 
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
@@ -138,6 +149,7 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 {
     int  fsys_idx;
     static char string[100];
+    char *mnt_type;
 
     fsys_idx = header_hrfilesys(vp, name, length, exact, var_len, write_method);
     if ( fsys_idx == MATCH_FAILED )
@@ -149,12 +161,21 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	    long_return = fsys_idx;
 	    return (u_char *)&long_return;
 	case HRFSYS_MOUNT:
+#ifdef solaris2
+	    sprintf(string, HRFS_entry->mnt_mountp);
+#else
 	    sprintf(string, HRFS_entry->mnt_dir);
+#endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRFSYS_RMOUNT:
+#ifdef solaris2
+	    if (!strcmp( HRFS_entry->mnt_fstype, MNTTYPE_NFS))
+	        sprintf(string, HRFS_entry->mnt_special);
+#else
 	    if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_NFS))
 	        sprintf(string, HRFS_entry->mnt_fsname);
+#endif
 	    else
 		string[0] = '\0';
 	    *var_len = strlen(string);
@@ -165,26 +186,39 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 			 * Not sufficient to identity the file
 			 *   type precisely, but it's a start.
 			 */
-	    if ( HRFS_entry->mnt_type == NULL )
+#ifdef solaris2
+	    mnt_type = HRFS_entry->mnt_fstype;
+#else
+	    mnt_type = HRFS_entry->mnt_type;
+#endif
+	    if ( mnt_type == NULL )
 			fsys_type_id[fsys_type_len-1] = 2;	/* unknown */
 #ifdef MNTTYPE_HFS
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_HFS))
+	    else if (!strcmp( mnt_type, MNTTYPE_HFS))
 #ifdef BerkelyFS
 			fsys_type_id[fsys_type_len-1] = 3;
 #else /* SysV */
 			fsys_type_id[fsys_type_len-1] = 4;
 #endif
 #endif
+#ifdef MNTTYPE_UFS
+	    else if (!strcmp( mnt_type, MNTTYPE_UFS))
+			fsys_type_id[fsys_type_len-1] = 4;	/* or 3? XXX */
+#endif
 #ifdef MNTTYPE_SYSV
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_SYSV))
+	    else if (!strcmp( mnt_type, MNTTYPE_SYSV))
 			fsys_type_id[fsys_type_len-1] = 4;
 #endif
+#ifdef MNTTYPE_PC
+	    else if (!strcmp( mnt_type, MNTTYPE_PC))
+			fsys_type_id[fsys_type_len-1] = 5;
+#endif
 #ifdef MNTTYPE_MSDOS
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_MSDOS))
+	    else if (!strcmp( mnt_type, MNTTYPE_MSDOS))
 			fsys_type_id[fsys_type_len-1] = 5;
 #endif
 #ifdef MNTTYPE_CDFS
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_CDFS))
+	    else if (!strcmp( mnt_type, MNTTYPE_CDFS))
 #ifdef RockRidge
 			fsys_type_id[fsys_type_len-1] = 13;
 #else /* ISO 9660 */
@@ -192,11 +226,15 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 #endif
 #endif
 #ifdef MNTTYPE_ISO9660
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_ISO9660))
+	    else if (!strcmp( mnt_type, MNTTYPE_ISO9660))
 			fsys_type_id[fsys_type_len-1] = 12;
 #endif
 #ifdef MNTTYPE_NFS
-	    else if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_NFS))
+	    else if (!strcmp( mnt_type, MNTTYPE_NFS))
+			fsys_type_id[fsys_type_len-1] = 14;
+#endif
+#ifdef MNTTYPE_NFS3
+	    else if (!strcmp( mnt_type, MNTTYPE_NFS3))
 			fsys_type_id[fsys_type_len-1] = 14;
 #endif
 	    else
@@ -221,9 +259,17 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	    long_return = fsys_idx;		/* Use the same indices */
 	    return (u_char *)&long_return;
 	case HRFSYS_FULLDUMP:
+#ifdef solaris2
+	    return when_dumped( HRFS_entry->mnt_special, FULL_DUMP, var_len );
+#else
 	    return when_dumped( HRFS_entry->mnt_fsname, FULL_DUMP, var_len );
+#endif
 	case HRFSYS_PARTDUMP:
+#ifdef solaris2
+	    return when_dumped( HRFS_entry->mnt_special, PART_DUMP, var_len );
+#else
 	    return when_dumped( HRFS_entry->mnt_fsname, PART_DUMP, var_len );
+#endif
 	default:
 	    ERROR_MSG("");
     }
@@ -278,13 +324,16 @@ Get_Next_HR_FileSys()
     if ( fp == NULL )
 	return -1;
 
+#ifdef solaris2
+    getmntent( fp, HRFS_entry);
+#else
     HRFS_entry = getmntent( fp );
+#endif
 
     if ( HRFS_entry == NULL )
 	return -1;
     
-#define IGNORE_IGNORES
-#ifdef IGNORE_IGNORES
+#ifdef MNTTYPE_IGNORES
     if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_IGNORE))
 	return Get_Next_HR_FileSys();
 #endif
@@ -385,7 +434,12 @@ Get_FSIndex( dev )
     Init_HR_FileSys();
 
     while ((index=Get_Next_HR_FileSys()) != -1 )
-	if ( !strcmp(HRFS_entry->mnt_fsname, dev)) {
+#ifdef solaris2
+	if (!strcmp( HRFS_entry->mnt_special, dev))
+#else
+	if (!strcmp( HRFS_entry->mnt_fsname, dev))
+#endif
+	{
 	    End_HR_FileSys();
 	    return index;
 	}
@@ -396,22 +450,35 @@ Get_FSIndex( dev )
 
 		/*
 		 *  This is used by hrPartitionSize
-		 *    due to the assumtion that each
+		 *    due to the assumption that each
 		 *    disk is a signle partition
 		 */
 int
 Get_FSSize( dev )
     char *dev;
 {
+#ifdef solaris2
+    struct statvfs statfs_buf;
+#else
     struct statfs statfs_buf;
+#endif
 
     Init_HR_FileSys();
 
     while (Get_Next_HR_FileSys() != -1 )
-	if ( !strcmp(HRFS_entry->mnt_fsname, dev)) {
+#ifdef solaris2
+	if (!strcmp( HRFS_entry->mnt_special, dev))
+#else
+	if (!strcmp( HRFS_entry->mnt_fsname, dev))
+#endif
+	{
 	    End_HR_FileSys();
 
+#ifdef solaris2
+	    if (statvfs( HRFS_entry->mnt_mountp, &statfs_buf) != -1 )
+#else
 	    if (statfs( HRFS_entry->mnt_dir, &statfs_buf) != -1 )
+#endif
 	        return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
 	    else
 		return -1;
