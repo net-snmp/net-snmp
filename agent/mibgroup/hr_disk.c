@@ -367,9 +367,8 @@ Get_Next_HR_Disk()
 	    	    if ( HRD_type_index == 0 )
 			result = ioctl( fd, HDIO_GET_IDENTITY, &HRD_info );
 		    else
-#else
-		        result = 0;
 #endif
+		        result = 0;
 		    close(fd);
 		    if ( result != -1 ) {
 		        return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) +
