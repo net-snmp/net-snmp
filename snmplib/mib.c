@@ -95,6 +95,8 @@ static void sprint_badtype __P((char *, struct variable_list *, struct enum_list
 static char *get_description __P((oid *, int));
 
 static int quick_print = 0;
+static int full_objid = 0;
+static int suffix_only = 0;
 
 void snmp_set_quick_print(val)
     int val;
@@ -105,6 +107,28 @@ void snmp_set_quick_print(val)
 int snmp_get_quick_print __P((void))
 {
     return quick_print;
+}
+
+void snmp_set_full_objid(val)
+    int val;
+{
+    full_objid = val;
+}
+
+int snmp_get_full_objid __P((void))
+{
+    return full_objid;
+}
+
+void snmp_set_suffix_only(val)
+    int val;
+{
+    suffix_only = val;
+}
+
+int snmp_get_suffix_only __P((void))
+{
+    return suffix_only;
 }
 
 static char *
@@ -609,7 +633,7 @@ sprint_bitstring(buf, var, enums, hint, units)
     u_char *cp;
     char *enum_string;
 
-    if (var->type != ASN_BIT_STR){
+    if (var->type != ASN_BIT_STR && var->type != ASN_OCTET_STR){
 	sprintf(buf, "Wrong Type (should be BIT STRING): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -781,7 +805,6 @@ struct tree *Mib;             /* Backwards compatibility */
 
 char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
-int Suffix;
 
 extern void    init_mib_internals __P((void));	/* from parse.c */
 extern int     which_module __P((char *));	/* from parse.c */
@@ -875,15 +898,13 @@ init_mib __P((void))
 
     if (!prefix)
         prefix = Standard_Prefix;
-    if (prefix[strlen(prefix) - 1] != '.')
-        strcat(prefix, ".");  /* add a trailing dot in case user didn't */ 
-    prefix++;    /* get past leading dot. */
+    if (prefix[0] == '.') prefix++;    /* get past leading dot. */
     strcpy(Prefix, prefix);
+    if (Prefix[strlen(Prefix) - 1] != '.')
+        strcat(Prefix, ".");  /* add a trailing dot in case user didn't */ 
 
     if (getenv("SUFFIX"))
-	Suffix = TRUE;
-    else
-	Suffix = FALSE;
+	suffix_only = TRUE;
 
     Mib = tree_head;          /* Backwards compatibility */
 }
@@ -1082,8 +1103,8 @@ sprint_objid(buf, objid, objidlen)
 
     *tempbuf = '.';	/* this is a fully qualified name */
     get_symbol(objid, objidlen, subtree, tempbuf + 1);
-    if (Suffix){
-	for(cp =tempbuf; *cp; cp++)
+    if (suffix_only){
+	for(cp = tempbuf; *cp; cp++)
 	    ;
 	while(cp >= tempbuf){
 	    if (isalpha(*cp))
@@ -1096,38 +1117,29 @@ sprint_objid(buf, objid, objidlen)
 	    cp--;
 	}
 	cp++;
-	if (cp < tempbuf)
-	    cp = tempbuf;
-
-    } else {
-	cp = tempbuf;
-	if (((int) (strlen(tempbuf)) > ((int) strlen((char *)RFC1213_MIB_text)))
-	    && !memcmp(tempbuf, (char *)RFC1213_MIB_text,
-		     strlen((char *)RFC1213_MIB_text))){
-	    cp += sizeof(RFC1213_MIB_text);
-	}
-	if (((int) (strlen(tempbuf))) >
-                   ((int)strlen((char *)EXPERIMENTAL_MIB_text))
-	    && !memcmp(tempbuf, (char *) EXPERIMENTAL_MIB_text,
-		     strlen((char *)EXPERIMENTAL_MIB_text))){
-            cp += sizeof(EXPERIMENTAL_MIB_text);
-	}
-	if (((int)(strlen(tempbuf))) > ((int)strlen((char *)PRIVATE_MIB_text))
-	    && !memcmp(tempbuf, (char *) PRIVATE_MIB_text,
-		     strlen((char *)PRIVATE_MIB_text))){
-            cp += sizeof(PRIVATE_MIB_text);
-	}
-	if (((int)(strlen(tempbuf)) > ((int)strlen((char *)PARTY_MIB_text)))
-	    && !memcmp(tempbuf, (char *) PARTY_MIB_text,
-		     strlen((char *)PARTY_MIB_text))){
-            cp += sizeof(PARTY_MIB_text);
-	}
-	if (((int)(strlen(tempbuf)) > ((int)strlen((char *)SECRETS_MIB_text)))
-	    && !memcmp(tempbuf, (char *) SECRETS_MIB_text,
-		     strlen((char *)SECRETS_MIB_text))){
-            cp += sizeof(SECRETS_MIB_text);
-	}
     }
+    else if (!full_objid) {
+	cp = tempbuf;
+	if (strlen(tempbuf) > strlen(RFC1213_MIB_text)
+	    && !memcmp(tempbuf, RFC1213_MIB_text, strlen(RFC1213_MIB_text)))
+	    cp += sizeof(RFC1213_MIB_text);
+	if (strlen(tempbuf) > strlen(EXPERIMENTAL_MIB_text)
+	    && !memcmp(tempbuf, EXPERIMENTAL_MIB_text, strlen(EXPERIMENTAL_MIB_text)))
+            cp += sizeof(EXPERIMENTAL_MIB_text);
+	if (strlen(tempbuf) > strlen(PRIVATE_MIB_text)
+	    && !memcmp(tempbuf, PRIVATE_MIB_text, strlen(PRIVATE_MIB_text)))
+            cp += sizeof(PRIVATE_MIB_text);
+	if (strlen(tempbuf) > strlen(PARTY_MIB_text)
+	    && !memcmp(tempbuf, PARTY_MIB_text, strlen(PARTY_MIB_text)))
+            cp += sizeof(PARTY_MIB_text);
+	if (strlen(tempbuf) > strlen(SECRETS_MIB_text)
+	    && !memcmp(tempbuf, SECRETS_MIB_text, strlen(SECRETS_MIB_text)))
+            cp += sizeof(SECRETS_MIB_text);
+	if (strlen(tempbuf) > strlen(Prefix)
+	    && !memcmp(tempbuf, Prefix, strlen(Prefix)))
+            cp += strlen(Prefix) + 1;
+    }
+    else cp = tempbuf;
     strcpy(buf, cp);
     return buf;
 }
@@ -1385,12 +1397,7 @@ print_description(objid, objidlen)
     oid     *objid;
     int     objidlen;   /* number of subidentifiers */
 {
-    char *desc = get_description(objid, objidlen);
-
-    if (desc && desc[0] != '\0')
-        printf("Description: \"%s\"\n", desc);
-    else
-        printf("No description\n");
+    fprint_description(stdout, objid, objidlen);
 }
 
 void
@@ -1399,10 +1406,50 @@ fprint_description(f, objid, objidlen)
     oid     *objid;
     int     objidlen;   /* number of subidentifiers */
 {
-    char *desc = get_description(objid, objidlen);
-
-    if (desc && desc[0] != '\0')
-        fprintf(f, "Description: \"%s\"\n", desc);
+    struct tree *tp = get_tree(objid, objidlen, tree_head);
+    char *cp;
+    if (tp) {
+	switch (tp->type) {
+	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
+	case TYPE_OCTETSTR:	cp = "OCTET STRING"; break;
+	case TYPE_INTEGER:	cp = "INTEGER"; break;
+	case TYPE_NETADDR:	cp = "NetworkAddress"; break;
+	case TYPE_IPADDR:	cp = "IpAddress"; break;
+	case TYPE_COUNTER:	cp = "Counter"; break;
+	case TYPE_GAUGE:	cp = "Gauge"; break;
+	case TYPE_TIMETICKS:	cp = "TimeTicks"; break;
+	case TYPE_OPAQUE:	cp = "Opaque"; break;
+	case TYPE_NULL:		cp = "NULL"; break;
+	case TYPE_COUNTER64:	cp = "Counter64"; break;
+	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
+	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
+	case TYPE_UINTEGER:	cp = "UInteger32"; break;
+	default:		cp = NULL;
+	}
+	if (cp) fprintf(f, "SYNTAX\t%s\n", cp);
+	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
+	if (tp->units) fprintf(f, "UNITS\t\"%s\"\n", tp->units);
+	switch (tp->access) {
+	case ACCESS_READONLY:	cp = "read-only"; break;
+	case ACCESS_READWRITE:	cp = "read-write"; break;
+	case ACCESS_WRITEONLY:	cp = "write-only"; break;
+	case ACCESS_NOACCESS:	cp = "not-accessible"; break;
+	case ACCESS_NOTIFY:	cp = "accessible-for-notify"; break;
+	case ACCESS_CREATE:	cp = "read-create"; break;
+	default:		cp = NULL;
+	}
+	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
+	switch (tp->status) {
+	case STATUS_MANDATORY:	cp = "mandatory"; break;
+	case STATUS_OPTIONAL:	cp = "optional"; break;
+	case STATUS_OBSOLETE:	cp = "obsolete"; break;
+	case STATUS_DEPRECATED: cp = "deprecated"; break;
+	case STATUS_CURRENT:	cp = "current"; break;
+	default:		cp = NULL;
+	}
+	if (cp) fprintf(f, "STATUS\t%s\n", cp);
+	if (tp->description) fprintf(f, "DESCRIPTION\t\"%s\"\n", tp->description);
+    }
     else
         fprintf(f, "No description\n");
 }

@@ -160,11 +160,20 @@ vacm_destroyViewEntry(viewName, viewSubtree, viewSubtreeLen)
 	lastvp->next = vp->next;
     }
     if (vp->reserved)
-	free((char *)vp->reserved);
+	free(vp->reserved);
     free(vp);
     return;
 }
 
+void vacm_destroyAllViewEntries __P((void))
+{
+    struct vacm_viewEntry *vp;
+    while ((vp = viewList)) {
+	viewList = vp->next;
+	if (vp->reserved) free(vp->reserved);
+	free(vp);
+    }
+}
 
 struct vacm_groupEntry *
 vacm_getGroupEntry(securityModel, securityName)
@@ -254,11 +263,20 @@ vacm_destroyGroupEntry(securityModel, securityName)
 	lastvp->next = vp->next;
     }
     if (vp->reserved)
-	free((char *)vp->reserved);
+	free(vp->reserved);
     free(vp);
     return;
 }
 
+void vacm_destroyAllGroupEntries __P((void))
+{
+    struct vacm_groupEntry *gp;
+    while ((gp = groupList)) {
+	groupList = gp->next;
+	if (gp->reserved) free(gp->reserved);
+	free(gp);
+    }
+}
 
 struct vacm_accessEntry *
 vacm_getAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
@@ -365,7 +383,17 @@ vacm_destroyAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
 	lastvp->next = vp->next;
     }
     if (vp->reserved)
-	free((char *)vp->reserved);
+	free(vp->reserved);
     free(vp);
     return;
+}
+
+void vacm_destroyAllAccessEntries __P((void))
+{
+    struct vacm_accessEntry *ap;
+    while ((ap = accessList)) {
+	accessList = ap->next;
+	if (ap->reserved) free(ap->reserved);
+	free(ap);
+    }
 }
