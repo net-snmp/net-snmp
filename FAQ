@@ -82,6 +82,7 @@ What is it?
 	* tools to request or set information from SNMP agents
 	* tools to generate and handle SNMP traps
 	* a version of the unix 'netstat' command using SNMP
+        * a graphical Perl/Tk/SNMP based mib browser
 
     This package is originally based on the Carnegie Mellon University
     SNMP implementation (version 2.1.2.1), but has developed significantly
@@ -117,13 +118,8 @@ What documentation is available?
 Are there binaries available?
 ----------------------------
 
-  - Nope, sorry.
-
-	The distribution ought to compile cleanly and run
-	on a range of systems (see the next answer).
-	See the file INSTALL for more details.
-
-
+  - There are binaries for some systems available in the binaries
+    directory on the ftp site.
 
 What operating systems does it run on?
 -------------------------------------
@@ -141,12 +137,11 @@ What operating systems does it run on?
 	* Linux 2.1, 2.0, 1.3 on all? systems
         * AIX 4.1.5, 3.2.5 on all? systems
         * OpenBSD ? on all? systems
-        * Irix 5.1
+        * Irix 5.1, 6.2
 
   The applications (though not necessarily the agent) run on the
   following systems:
 
-        * Irix 6.2
         * Windows95
         * Windows NT
 
