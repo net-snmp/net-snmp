@@ -2,9 +2,13 @@ This directory holds the implementation of individual MIB groups.
 Currently, this contains the eight MIB-2 groups, plus a basic template
 for new MIB groups (wombat.c and wombat.h)
 
+Additionally, you may wish to check out the 'mib2c' perl script in the 
+SRCDIR/local directory that can convert a written mib into C template
+files for use with this package as mib modules.
+
 Each group consists of two files:
 
-  wombat.h:	interface information
+  examples/wombat.h:	interface information
 
 	- declaration of the initialisation function 'init_wombat'
 		(optional)
@@ -39,7 +43,7 @@ Each group consists of two files:
 
 
 
-  wombat.c:	implementation code
+  examples/wombat.c:	implementation code
 		(can be non-existant if only the .h file is needed)
 
 	- a list of kernel information needed to report
