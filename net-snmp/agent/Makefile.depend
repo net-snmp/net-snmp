@@ -68,7 +68,7 @@
 ./agent_index.lo: mibgroup/notification.h mibgroup/agentx.h
 ./agent_index.lo: mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./agent_index.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./agent_index.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./agent_index.lo: mibgroup/agent/nsTransactionTable.h 
 ./agent_index.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./agent_index.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_index.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -91,14 +91,14 @@
 ./agent_index.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_index.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
 ./agent_index.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_index.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./agent_index.lo: mibgroup/policy/policyGroupContentsTable.h
-./agent_index.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./agent_index.lo: mibgroup/policy/conditionsInRuleTable.h
-./agent_index.lo: mibgroup/policy/conditionTable.h
-./agent_index.lo: mibgroup/policy/filtersInConditionTable.h
-./agent_index.lo: mibgroup/policy/filterTable.h
-./agent_index.lo: mibgroup/policy/saStaticActionTable.h
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
+./agent_index.lo: 
 ./agent_index.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
 ./agent_index.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
 ./agent_index.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
@@ -112,7 +112,7 @@
 ./agent_index.lo: mibgroup/target.h mibgroup/agentx/protocol.h
 ./agent_index.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
 ./agent_index.lo: mibgroup/agentx/agentx_config.h
-./agent_index.lo: mibgroup/policy/policy_iterator.h
+./agent_index.lo: 
 ./agent_index.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_index.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_index.lo: mibgroup/target/target.h mibgroup/target/target_counters.h
@@ -160,7 +160,7 @@
 ./agent_read_config.lo: mibgroup/notification.h mibgroup/agentx.h
 ./agent_read_config.lo: mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./agent_read_config.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./agent_read_config.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./agent_read_config.lo: mibgroup/agent/nsTransactionTable.h 
 ./agent_read_config.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./agent_read_config.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_read_config.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -186,14 +186,14 @@
 ./agent_read_config.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_read_config.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
 ./agent_read_config.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_read_config.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./agent_read_config.lo: mibgroup/policy/policyGroupContentsTable.h
-./agent_read_config.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./agent_read_config.lo: mibgroup/policy/conditionsInRuleTable.h
-./agent_read_config.lo: mibgroup/policy/conditionTable.h
-./agent_read_config.lo: mibgroup/policy/filtersInConditionTable.h
-./agent_read_config.lo: mibgroup/policy/filterTable.h
-./agent_read_config.lo: mibgroup/policy/saStaticActionTable.h
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
+./agent_read_config.lo: 
 ./agent_read_config.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
 ./agent_read_config.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
 ./agent_read_config.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
@@ -211,7 +211,7 @@
 ./agent_read_config.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
 ./agent_read_config.lo: mibgroup/agentx/master_admin.h
 ./agent_read_config.lo: mibgroup/agentx/agentx_config.h
-./agent_read_config.lo: mibgroup/policy/policy_iterator.h
+./agent_read_config.lo: 
 ./agent_read_config.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_read_config.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_read_config.lo: mibgroup/target/target.h
@@ -259,7 +259,7 @@
 ./agent_registry.lo: mibgroup/notification.h mibgroup/agentx.h
 ./agent_registry.lo: mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./agent_registry.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./agent_registry.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./agent_registry.lo: mibgroup/agent/nsTransactionTable.h 
 ./agent_registry.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./agent_registry.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_registry.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -285,14 +285,14 @@
 ./agent_registry.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./agent_registry.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
 ./agent_registry.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_registry.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./agent_registry.lo: mibgroup/policy/policyGroupContentsTable.h
-./agent_registry.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./agent_registry.lo: mibgroup/policy/conditionsInRuleTable.h
-./agent_registry.lo: mibgroup/policy/conditionTable.h
-./agent_registry.lo: mibgroup/policy/filtersInConditionTable.h
-./agent_registry.lo: mibgroup/policy/filterTable.h
-./agent_registry.lo: mibgroup/policy/saStaticActionTable.h
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
+./agent_registry.lo: 
 ./agent_registry.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
 ./agent_registry.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
 ./agent_registry.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
@@ -306,7 +306,7 @@
 ./agent_registry.lo: mibgroup/target.h mibgroup/agentx/protocol.h
 ./agent_registry.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
 ./agent_registry.lo: mibgroup/agentx/agentx_config.h
-./agent_registry.lo: mibgroup/policy/policy_iterator.h
+./agent_registry.lo: 
 ./agent_registry.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./agent_registry.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./agent_registry.lo: mibgroup/target/target.h
@@ -374,7 +374,7 @@
 ./mib_modules.lo: mibgroup/notification.h mibgroup/agentx.h
 ./mib_modules.lo: mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./mib_modules.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./mib_modules.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./mib_modules.lo: mibgroup/agent/nsTransactionTable.h 
 ./mib_modules.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./mib_modules.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./mib_modules.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -397,14 +397,14 @@
 ./mib_modules.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./mib_modules.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
 ./mib_modules.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./mib_modules.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./mib_modules.lo: mibgroup/policy/policyGroupContentsTable.h
-./mib_modules.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./mib_modules.lo: mibgroup/policy/conditionsInRuleTable.h
-./mib_modules.lo: mibgroup/policy/conditionTable.h
-./mib_modules.lo: mibgroup/policy/filtersInConditionTable.h
-./mib_modules.lo: mibgroup/policy/filterTable.h
-./mib_modules.lo: mibgroup/policy/saStaticActionTable.h
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
+./mib_modules.lo: 
 ./mib_modules.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
 ./mib_modules.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
 ./mib_modules.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
@@ -418,7 +418,7 @@
 ./mib_modules.lo: mibgroup/target.h mibgroup/agentx/protocol.h
 ./mib_modules.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
 ./mib_modules.lo: mibgroup/agentx/agentx_config.h
-./mib_modules.lo: mibgroup/policy/policy_iterator.h
+./mib_modules.lo: 
 ./mib_modules.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./mib_modules.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./mib_modules.lo: mibgroup/target/target.h mibgroup/target/target_counters.h
@@ -492,7 +492,7 @@
 ./snmpd.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./snmpd.lo: mibgroup/agentx.h mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./snmpd.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./snmpd.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./snmpd.lo: mibgroup/agent/nsTransactionTable.h 
 ./snmpd.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./snmpd.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./snmpd.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -513,14 +513,14 @@
 ./snmpd.lo: mibgroup/notification/snmpNotifyFilterTable.h
 ./snmpd.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./snmpd.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
-./snmpd.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./snmpd.lo: mibgroup/policy/policyGroupContentsTable.h
-./snmpd.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./snmpd.lo: mibgroup/policy/conditionsInRuleTable.h
-./snmpd.lo: mibgroup/policy/conditionTable.h
-./snmpd.lo: mibgroup/policy/filtersInConditionTable.h
-./snmpd.lo: mibgroup/policy/filterTable.h
-./snmpd.lo: mibgroup/policy/saStaticActionTable.h mibgroup/host/hr_system.h
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo: 
+./snmpd.lo:  mibgroup/host/hr_system.h
 ./snmpd.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_device.h
 ./snmpd.lo: mibgroup/host/hr_other.h mibgroup/host/hr_proc.h
 ./snmpd.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
@@ -533,7 +533,7 @@
 ./snmpd.lo: mibgroup/header_complex.h mibgroup/target.h
 ./snmpd.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
 ./snmpd.lo: mibgroup/agentx/master_admin.h mibgroup/agentx/agentx_config.h
-./snmpd.lo: mibgroup/policy/policy_iterator.h
+./snmpd.lo: 
 ./snmpd.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./snmpd.lo: mibgroup/target/snmpTargetParamsEntry.h mibgroup/target/target.h
 ./snmpd.lo: mibgroup/target/target_counters.h
@@ -640,7 +640,7 @@
 ./snmp_vars.lo: mibgroup/notification.h mibgroup/agentx.h
 ./snmp_vars.lo: mibgroup/agent_mibs.h mibgroup/testhandler.h
 ./snmp_vars.lo: mibgroup/testdelayed.h mibgroup/examples/example.h
-./snmp_vars.lo: mibgroup/agent/nsTransactionTable.h mibgroup/policy.h
+./snmp_vars.lo: mibgroup/agent/nsTransactionTable.h 
 ./snmp_vars.lo: mibgroup/host.h mibgroup/mibII/system_mib.h
 ./snmp_vars.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./snmp_vars.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -663,14 +663,14 @@
 ./snmp_vars.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
 ./snmp_vars.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
 ./snmp_vars.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./snmp_vars.lo: mibgroup/policy/policyEndpointToGroupTable.h
-./snmp_vars.lo: mibgroup/policy/policyGroupContentsTable.h
-./snmp_vars.lo: mibgroup/policy/policyRuleDefinitionTable.h
-./snmp_vars.lo: mibgroup/policy/conditionsInRuleTable.h
-./snmp_vars.lo: mibgroup/policy/conditionTable.h
-./snmp_vars.lo: mibgroup/policy/filtersInConditionTable.h
-./snmp_vars.lo: mibgroup/policy/filterTable.h
-./snmp_vars.lo: mibgroup/policy/saStaticActionTable.h
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
+./snmp_vars.lo: 
 ./snmp_vars.lo: mibgroup/host/hr_system.h mibgroup/host/hr_storage.h
 ./snmp_vars.lo: mibgroup/host/hr_device.h mibgroup/host/hr_other.h
 ./snmp_vars.lo: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
@@ -684,7 +684,7 @@
 ./snmp_vars.lo: mibgroup/target.h mibgroup/agentx/protocol.h
 ./snmp_vars.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
 ./snmp_vars.lo: mibgroup/agentx/agentx_config.h
-./snmp_vars.lo: mibgroup/policy/policy_iterator.h
+./snmp_vars.lo: 
 ./snmp_vars.lo: mibgroup/target/snmpTargetAddrEntry.h
 ./snmp_vars.lo: mibgroup/target/snmpTargetParamsEntry.h
 ./snmp_vars.lo: mibgroup/target/target.h mibgroup/target/target_counters.h
