@@ -124,6 +124,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #ifdef SNMP_TRANSPORT_UDP_DOMAIN
 #include "snmpUDPDomain.h"
 #endif
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#include "snmpCallbackDomain.h"
+#endif
 
 #include "mibgroup/struct.h"
 #include "read_config.h"
@@ -257,8 +260,10 @@ init_agent (const char *app)
 
   /* initialize agentx subagent if necessary. */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
+  if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
     r = subagent_pre_init();
+    init_subagent();
+  }
 #endif
 
   /*  Register configuration tokens from transport modules.  */
@@ -493,6 +498,7 @@ getStatPtr(
 	    next node.  This arises in AgentX row registrations (only).  */
 	DEBUGMSGTL(("snmp_vars", "fully-qualified instance && !exact\n"));
 	tp = find_subtree_next(name, *namelen, tp, ""); /* WWW: delete this function */
+	                                                /*  JBPN: why?  */
     }
     
     while (search_return == NULL && tp != NULL) {
