@@ -277,7 +277,7 @@ tarclean:
 	fi
 
 commentcheck:
-	grep -n // `find $(srcdir) -name \*.\[ch\]` | grep -v http | grep -v /win32/
+	grep -n // `find $(srcdir) -name \*.\[ch\]` | grep -v tp:// | grep -v /win32/
 
 dist: version tag tar
 
