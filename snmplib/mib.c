@@ -1102,7 +1102,7 @@ register_mib_handlers (void)
     ds_register_config(ASN_BOOLEAN, "snmp","dontBreakdownOids",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
     ds_register_config(ASN_BOOLEAN, "snmp","escapeQuotes",
-                       DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
+                       DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
     ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
     ds_register_premib(ASN_BOOLEAN, "snmp","numericTimeticks",
