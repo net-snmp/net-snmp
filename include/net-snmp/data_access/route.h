@@ -52,14 +52,14 @@ typedef struct netsnmp_route_s {
 
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
    /** rt_info != inet_policy, because that would have made sense */
-   u_int8_t  rt_info_len;    /* 0-128 oids */
+   uint8_t   rt_info_len;    /* 0-128 oids */
    oid      *rt_info;        /* NULL should be interpreted as { 0, 0 } */
 
-   u_int32_t rt_mask;        /* ipv4 only */
-   u_int32_t rt_tos;         /* Integer32 (0..2147483647) */
+   uint32_t  rt_mask;        /* ipv4 only */
+   uint32_t  rt_tos;         /* Integer32 (0..2147483647) */
 #endif
 
-   u_int32_t rt_age;         /* seconds (ip == inet) */
+   uint32_t  rt_age;         /* seconds (ip == inet) */
    int32_t   rt_nexthop_as;  /* ip(int32) == inet(InetAutonomousSystemNumber) */
 
    int32_t   rt_metric1;

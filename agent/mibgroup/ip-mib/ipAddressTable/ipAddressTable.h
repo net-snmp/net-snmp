@@ -131,8 +131,8 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
        /*
         * not available from net-snmp ipaddress data_access
         */
-       u_int32_t ipAddressCreated;      /* sysUpTime */
-       u_int32_t ipAddressLastChanged;  /* sysUpTime */
+       uint32_t  ipAddressCreated;      /* sysUpTime */
+       uint32_t  ipAddressLastChanged;  /* sysUpTime */
        int       ipAddressRowStatus;
        int       ipAddressStorageType;
 
