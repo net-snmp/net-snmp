@@ -1114,9 +1114,9 @@ else
 fi
 
 #
-# Add platform specific source files.
+# Add platform-specific source files.
 #
-AC_MSG_CHECKING([for platform specific source])
+AC_MSG_CHECKING([for platform-specific source])
 other_src_list=""
 other_objs_list=""
 other_lobjs_list=""
@@ -1138,6 +1138,8 @@ fi
 AC_SUBST(other_src_list)
 AC_SUBST(other_objs_list)
 AC_SUBST(other_lobjs_list)
+
+AC_MSG_RESULT([$other_src_list $other_objs_list $other_lobjs_list])
   
 #
 # Do transport module processing.
@@ -1832,6 +1834,12 @@ AC_CHECK_LIB(elf, nlist)
 AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
 	AC_CHECK_LIB(nsl, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
 	LIBS="${LIBS} -lnsl"))
+
+# SCO Unixware 7.1.4 finds gethostbyname() in -lsocket
+AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
+	AC_CHECK_LIB(socket, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
+	LIBS="${LIBS} -lsocket"))
+
 AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
 	LIBS="${LIBS} -lsocket"))
@@ -2352,7 +2360,6 @@ AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol str
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
 AC_CHECK_FUNCS(sigaction)
-AC_CHECK_FUNCS(snprintf strtoul)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
 if test "x$with_rpm" != "xno" && \
