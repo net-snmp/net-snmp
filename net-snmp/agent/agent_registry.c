@@ -169,6 +169,9 @@ netsnmp_subtree_find_first(const char *context_name)
 netsnmp_subtree *
 add_subtree(netsnmp_subtree *new_tree, const char *context_name)
 {
+    oid ccitt[1]           = { 0 };
+    oid iso[1]             = { 1 };
+    oid joint_ccitt_iso[1] = { 2 };
     subtree_context_cache *ptr = SNMP_MALLOC_TYPEDEF(subtree_context_cache);
     if (!context_name) {
         context_name = "";
@@ -184,6 +187,15 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
     context_subtrees = ptr;
+
+    /* register null handlers at the top or else getnext breaks */
+    netsnmp_register_null_context(snmp_duplicate_objid(ccitt, 1), 1,
+                                  context_name);
+    netsnmp_register_null_context(snmp_duplicate_objid(iso, 1), 1,
+                                  context_name);
+    netsnmp_register_null_context(snmp_duplicate_objid(joint_ccitt_iso, 1), 1,
+                                  context_name);
+    
     return ptr->first_subtree;
 }
 
@@ -651,6 +663,7 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.range_ubound = range_ubound;
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
+        reg_parms.contextName = context;
 
         /*
          * Should this really be called if the registration hasn't actually 
@@ -950,6 +963,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
     reg_parms.range_subid = range_subid;
     reg_parms.range_ubound = range_ubound;
     reg_parms.flags = 0x00;     /*  this is okay I think  */
+    reg_parms.contextName = context;
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
