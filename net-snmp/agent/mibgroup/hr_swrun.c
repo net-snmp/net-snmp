@@ -76,7 +76,7 @@ static int LowProcIndex;
 static int current_proc_entry;
 #endif
 
-void	init_hrswrun( )
+void	init_hr_swrun( )
 {
 #ifndef linux
     init_nlist( hrswrun_nl );

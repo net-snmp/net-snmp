@@ -31,7 +31,7 @@ int   Get_Next_HR_Print();
 	 *********************/
 
 
-void	init_hrprint( )
+void	init_hr_print( )
 {
     init_device[ HRDEV_PRINTER ] = &Init_HR_Print;	
     next_device[ HRDEV_PRINTER ] = &Get_Next_HR_Print;
