@@ -43,7 +43,7 @@ in the format specified in
 .IR variables(5) .
 For example:
 .PP
-snmptest -c public zeus
+snmptest -c public -v 1 zeus
 .br
 .BR Variable: " system.sysDescr.0"
 .br
@@ -54,7 +54,7 @@ well as the information:
 .PP
 requestid 0x5992478A errstat 0x0 errindex 0x0
 .br
-system.sysDescr.0 = "Unix 4.3BSD"
+system.sysDescr.0 = STRING: "Unix 4.3BSD"
 .PP
 Upon startup, the program defaults to sending a GET request packet.
 This can be changed to a GETNEXT request or a SET request by typing

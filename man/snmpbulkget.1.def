@@ -65,13 +65,13 @@ will retrieve the variable system.sysDescr.0 (which is the
 lexicographically next object to system) and the first 5 objects in
 the ifTable:
 .PP
-sysDescr.0 = "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"
+sysDescr.0 = STRING: "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"
 .br
-ifIndex.1 = 1
+ifIndex.1 = INTEGER: 1
 .br
-ifIndex.2 = 2
+ifIndex.2 = INTEGER: 2
 .br
-ifDescr.1 = "lo0"
+ifDescr.1 = STRING: "lo0"
 .br
 et cetera.
 .SH NOTE

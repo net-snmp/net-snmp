@@ -318,7 +318,7 @@ flag.  The following examples should demonstrate this.
 .PP
 The default output looks as follows:
 .br
-snmpget -c public localhost system.sysUpTime.0
+snmpget -c public -v 1 localhost system.sysUpTime.0
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63        
 .TP
@@ -360,13 +360,13 @@ Prints the OID numerically:
 .B -Oe
 Removes the symbolic labels from enumerations:
 .br
-snmpget -c public localhost ip.ipForwarding.0
+snmpget -c public -v 1 localhost ip.ipForwarding.0
 .br
-ip.ipForwarding.0 = forwarding(1)
+ip.ipForwarding.0 = INTEGER: forwarding(1)
 .br
-snmpget -c public -Oe localhost ip.ipForwarding.0
+snmpget -c public -v 1 -Oe localhost ip.ipForwarding.0
 .br
-ip.ipForwarding.0 = 1
+ip.ipForwarding.0 = INTEGER: 1
 .TP
 .B -Ob
 When OIDs contain a index to a table,
@@ -392,11 +392,11 @@ you will know that decimal OIDs are not the preferred notation. Compare:
 .br
 snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
 .br
-IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = 2
+IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2
 .br
 snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable
 .br
-IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
+IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2
 .TP
 .B -OT
 If hexadecimal code is printed, this will also print any printable
@@ -405,9 +405,9 @@ characters after the hexadecimal codes.
 .B -Ov
 Output only the variable value, not the OID:
 .br
-snmpget -c public -Ov localhost ip.ipForwarding.0
+snmpget -c public -v 1 -Ov localhost ip.ipForwarding.0
 .br
-forwarding(1)
+INTEGER: forwarding(1)
 .TP
 .B -Ot
 Output timeticks values as raw numbers:
