@@ -149,6 +149,13 @@ extern          "C" {
                                                      char
                                                      *registration_name);
 
+#if HAVE_STDARG_H
+    void           
+        netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset, ...);
+#else
+    void            netsnmp_table_helper_add_indexes(va_alist);
+#endif
+
 #ifdef __cplusplus
 };
 #endif

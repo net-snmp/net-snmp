@@ -543,7 +543,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     /*
                      * Can only operate on new rows.
                      */
-                    if (data) {
+                    if (data && data->data.voidp) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         continue;
@@ -571,8 +571,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * modify row and set new value 
              */
             SNMP_FREE(data->data.string);
-            memdup(&data->data.string, request->requestvb->val.string,
-                   request->requestvb->val_len);
+            data->data.string =
+                netsnmp_strdup_and_null(request->requestvb->val.string,
+                                        request->requestvb->val_len);
             if (!data->data.string) {
                 netsnmp_set_request_error(reqinfo, requests,
                                           SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -979,6 +980,36 @@ netsnmp_table_set_multi_add_default_row(va_dcl
         data_len = va_arg(debugargs, size_t);
         netsnmp_table_set_add_default_row(tset, column, type, writable,
                                           data, data_len);
+    }
+
+    va_end(debugargs);
+}
+
+/** adds multiple indexes to a table_dataset helper object.
+ *  To end the list, use a 0 after the list of ASN index types. */
+void
+#if HAVE_STDARG_H
+netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,
+                              ...)
+#else
+netsnmp_table_set_add_indexes(va_alist)
+     va_dcl
+#endif
+{
+    va_list         debugargs;
+    int             type;
+
+#if HAVE_STDARG_H
+    va_start(debugargs, tset);
+#else
+    netsnmp_table_data_set *tset;
+
+    va_start(debugargs);
+    tset = va_arg(debugargs, netsnmp_table_data_set *);
+#endif
+
+    while ((type = va_arg(debugargs, int)) != 0) {
+        netsnmp_table_dataset_add_index(tset, type);
     }
 
     va_end(debugargs);
