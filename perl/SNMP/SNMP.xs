@@ -7,13 +7,13 @@
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 */
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
 #define WIN32SCK_IS_STDSCK
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -873,7 +873,6 @@ int    best_guess;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
    const char *cp = NULL;
-   char ch;
    char *module = NULL;
 
    char str_buf[STR_BUF_SIZE];
@@ -1046,7 +1045,6 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     netsnmp_variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
     int ret = SUCCESS;
-    struct tree *tp;
 
     if (pdu->variables == NULL){
 	pdu->variables = vars =
@@ -2164,7 +2162,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** assume that we've walked past the end of the subtree.  Set this
 	 ** subtree to be completed, and go on to the next variable.
 	 */
-	 if ((vars->name_length < expect->req_len) ||
+	 if (((int)vars->name_length < expect->req_len) ||
 	     (memcmp(vars->name, expect->req_oid, expect->req_len*sizeof(oid))))
 	 {
 	    DBPRT(2,(DBOUT "      walked off branch - marking subtree as complete.\n"));
@@ -4519,7 +4517,6 @@ snmp_get_type(tag, best_guess)
 	   struct tree *tp  = NULL;
 	   static char type_str[MAX_TYPE_NAME_LEN];
            char *ret = NULL;
-           int best_guess;
 
            if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL, best_guess);
            if (tp) __get_type_str(tp->type, ret = type_str);
