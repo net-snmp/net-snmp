@@ -89,7 +89,7 @@ netsnmp_mfd_register_table(netsnmp_mfd_registration *mfdr, const char *name,
     netsnmp_handler_registration *reginfo;
     u_long mfd_modes = 0;
         
-    DEBUGMSGT(("mfd",">%s\n","register_table"));
+    DEBUGMSGT(("mfd",">%s\n","netsnmp_mfd_register_table"));
 
     if (!mfdr) {
         snmp_log(LOG_ERR, "table_mfd registration with no callbacks\n" );
@@ -242,11 +242,6 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
             rc = _mfd_data_find(handler, reginfo, requests, &tmp_pdu_ctx);
         else
             rc = _mfd_data_lookup(handler, reginfo, requests, &tmp_pdu_ctx);
-        /*
-         * for row creation, the data lookup won't find the mfd_data, but
-         * won't return an error. For this case, check that there is a
-         * row_creation callback..
-         */
         if((NULL == tmp_pdu_ctx.mfd_data) && (SNMP_ERR_NOERROR == rc)) {
             /*
              * no data only ok for a set
@@ -293,7 +288,7 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_BSTEP_ROW_CREATE:
-        netsnmp_assert(NULL != pdu_ctx);
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
         if( (NULL == pdu_ctx->mfd_data) && mfdr->row_creation ) {
             (*mfdr->row_creation)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
@@ -395,7 +390,7 @@ _mfd_data_lookup(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *tblreq_info;
     netsnmp_index index;
     
-    DEBUGMSGT(("mfd",">%s\n","data_lookup"));
+    DEBUGMSGT(("mfd",">%s\n","_mfd_data_lookup"));
 
     /** mull test in previous function */
     netsnmp_assert(handler && handler->myvoid);
@@ -426,7 +421,7 @@ _mfd_data_find(netsnmp_mib_handler *handler,
     netsnmp_mfd_registration *mfdr;
     netsnmp_table_request_info *tblreq_info;
     
-    DEBUGMSGT(("mfd",">%s\n","data_find"));
+    DEBUGMSGT(("mfd",">%s\n","_mfd_data_find"));
 
     /** mull test in previous function */
     netsnmp_assert(handler && handler->myvoid);
