@@ -314,8 +314,9 @@ parse_storage_config(const char *token, char *cptr)
 {
     char *val;
     int ival;
+    char *st;
 
-    val = strtok(cptr, " \t");
+    val = strtok_r(cptr, " \t", &st);
     if (!val) {
         config_perror("Missing FLAG parameter in storageUseNFS");
         return;

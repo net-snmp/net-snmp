@@ -347,6 +347,7 @@ netsnmp_ds_handle_config(const char *token, char *line)
     char            buf[SNMP_MAXBUF];
     char           *value, *endptr;
     int             itmp;
+    char           *st;
 
     DEBUGMSGTL(("netsnmp_ds_handle_config", "handling %s\n", token));
 
@@ -362,7 +363,7 @@ netsnmp_ds_handle_config(const char *token, char *line)
 
         switch (drsp->type) {
         case ASN_BOOLEAN:
-            value = strtok(line, " \t\n");
+            value = strtok_r(line, " \t\n", &st);
             if (strcasecmp(value, "yes") == 0 || 
 		strcasecmp(value, "true") == 0) {
                 itmp = 1;
@@ -380,7 +381,7 @@ netsnmp_ds_handle_config(const char *token, char *line)
             break;
 
         case ASN_INTEGER:
-            value = strtok(line, " \t\n");
+            value = strtok_r(line, " \t\n", &st);
             itmp = strtol(value, &endptr, 10);
             if (*endptr != 0) {
                 config_perror("Bad integer value");
