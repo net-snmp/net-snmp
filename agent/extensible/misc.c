@@ -3,7 +3,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "wes.h"
+#include <errno.h>
+#include "../../config.h"
 #include "mibincl.h"
 
 char *find_field();
@@ -81,6 +82,7 @@ int sh_count_procs(procname)
   fclose(file);
   close(fd);
 #ifndef EXCACHETIME
+  printf("waitpid:  %d\n",ex.pid);
   if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
     perror("waitpid():");
   }
@@ -154,6 +156,7 @@ int get_exec_output(ex)
   static char lastcmd[STRMAX];
   int cfd;
   int lastresult;
+  int readcount;
 #endif
 
 #ifdef EXCACHETIME
@@ -213,8 +216,19 @@ int get_exec_output(ex)
           perror("open");
           return(NULL);
         }
-        while ((cachebytes = read(fd[0],(void *) cache, MAXCACHESIZE)) > 0)
-          write(cfd,(void *) cache, cachebytes);
+        fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
+        for (readcount = 0; readcount <= MAXREADCOUNT &&
+                         (cachebytes = read(fd[0],(void *) cache,MAXCACHESIZE));
+                       readcount++) {
+          if (cachebytes > 0)
+            write(cfd,(void *) cache, cachebytes);
+          else if (cachebytes == -1 && errno != EAGAIN) {
+            perror("read");
+            break;
+          }
+          else
+            sleep (1);
+        }
         close(cfd);
         close(fd[0]);
         /* wait for the child to finish */
