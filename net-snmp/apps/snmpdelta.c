@@ -82,14 +82,14 @@
 
 #define MAX_ARGS 256
     
-char *SumFile = "Sum";
+char *SumFile = (char*)"Sum";
 char *Argv[MAX_ARGS];
 int Argc;
 
 /* Information about the handled variables */
 struct varInfo {
   char *name;
-  oid *oid;
+  oid *info_oid;
   int oidlen;
   char descriptor[64];
   u_int value;
@@ -167,7 +167,7 @@ void sprint_descriptor(char *buffer,
 {
   char buf[256], *cp;
 
-  sprint_objid(buf, vip->oid, vip->oidlen);
+  sprint_objid(buf, vip->info_oid, vip->oidlen);
   for(cp = buf; *cp; cp++)
     ;
   while(cp >= buf){
@@ -395,8 +395,8 @@ int main(int argc, char *argv[])
     vip = varinfo + count;
     if (vip->name){
       vip->oidlen = MAX_NAME_LEN;
-      vip->oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
-      if (snmp_parse_oid(vip->name, vip->oid, &vip->oidlen) == NULL) {
+      vip->info_oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
+      if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) == NULL) {
 	fprintf(stderr, "Invalid object identifier: %s\n", vip->name);
 	SOCK_CLEANUP;
 	exit(1);
@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
     for(; count < current_name
 	  && count < begin + varbindsPerPacket - deltat; count++){
       if (varinfo[count].oidlen)
-	snmp_add_null_var(pdu, varinfo[count].oid, varinfo[count].oidlen);
+	snmp_add_null_var(pdu, varinfo[count].info_oid, varinfo[count].oidlen);
     }
     last_end = end;
     end = count;

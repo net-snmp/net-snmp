@@ -177,7 +177,7 @@ retry:
         for(vars = response->variables; vars; vars = vars->next_variable){
           if (vars->name_length == length_sysDescr &&
               !memcmp(objid_sysDescr, vars->name, sizeof(objid_sysDescr))){
-            sysdescr = malloc(vars->val_len+1);
+            sysdescr = (char*)malloc(vars->val_len+1);
             memcpy(sysdescr, vars->val.string, vars->val_len);
             sysdescr[vars->val_len] = '\0';
           }
