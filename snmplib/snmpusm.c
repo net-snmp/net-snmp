@@ -127,11 +127,7 @@ struct usmStateReference *
 usm_malloc_usmStateReference(void)
 {
 	struct usmStateReference *retval = (struct usmStateReference *)
-		malloc (sizeof(struct usmStateReference));
-
-	if (retval == NULL) return NULL;
-
-	memset (retval, 0, sizeof(struct usmStateReference));
+		malloc_zero (sizeof(struct usmStateReference));
 
 	return retval;
 }  /* end usm_malloc_usmStateReference() */
@@ -142,10 +138,12 @@ usm_free_usmStateReference (void *old)
 {
 	struct usmStateReference *old_ref = (struct usmStateReference *)old;
 
-	if (old_ref->usr_name)		free(old_ref->usr_name);
-	if (old_ref->usr_engine_id)	free(old_ref->usr_engine_id);
-	if (old_ref->usr_auth_protocol)	free(old_ref->usr_auth_protocol);
-	if (old_ref->usr_priv_protocol)	free(old_ref->usr_priv_protocol);
+    if (old_ref) {
+
+	SNMP_FREE(old_ref->usr_name);
+	SNMP_FREE(old_ref->usr_engine_id);
+	SNMP_FREE(old_ref->usr_auth_protocol);
+	SNMP_FREE(old_ref->usr_priv_protocol);
 
 	if (old_ref->usr_auth_key) {
 		SNMP_ZERO(old_ref->usr_auth_key, old_ref->usr_auth_key_length);
@@ -158,6 +156,8 @@ usm_free_usmStateReference (void *old)
 
 	SNMP_ZERO(old_ref, sizeof(*old_ref));
 	SNMP_FREE(old_ref);
+
+   }
 
 }  /* end usm_free_usmStateReference() */
 
@@ -804,8 +804,7 @@ usm_generate_out_msg (
                      			secLevel != SNMP_SEC_LEVEL_NOAUTH)
 		{
 			DEBUGMSGTL(("usm","Unknown User\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_UNKNOWN_SECURITY_NAME;
 		}
 
@@ -852,7 +851,7 @@ usm_generate_out_msg (
 		theAuthProtocol, theAuthProtocolLength) == 1)
 	{
 		DEBUGMSGTL(("usm","Unsupported Security Level\n"));
-		if (secStateRef) usm_free_usmStateReference (secStateRef);
+		usm_free_usmStateReference (secStateRef);
 		return USM_ERR_UNSUPPORTED_SECURITY_LEVEL;
 	}
 
@@ -884,7 +883,7 @@ usm_generate_out_msg (
 		&otstlen, &seq_len, &msgSecParmLen) == -1)
 	{
 		DEBUGMSGTL(("usm","Failed calculating offsets.\n"));
-		if (secStateRef) usm_free_usmStateReference (secStateRef);
+		usm_free_usmStateReference (secStateRef);
 		return USM_ERR_GENERIC_ERROR;
 	}
 
@@ -907,7 +906,7 @@ usm_generate_out_msg (
 	if (theTotalLength > *wholeMsgLen)
 	{
 		DEBUGMSGTL(("usm","Message won't fit in buffer.\n"));
-		if (secStateRef) usm_free_usmStateReference (secStateRef);
+		usm_free_usmStateReference (secStateRef);
 		return USM_ERR_GENERIC_ERROR;
 	}
 
@@ -935,8 +934,7 @@ usm_generate_out_msg (
 						== -1 )
 		{
 			DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_GENERIC_ERROR;
 		}
 
@@ -949,8 +947,7 @@ usm_generate_out_msg (
 							!= SNMP_ERR_NOERROR )
 		{
 			DEBUGMSGTL(("usm","DES-CBC error.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_ENCRYPTION_ERROR;
 		}
 
@@ -981,8 +978,7 @@ usm_generate_out_msg (
 				|| (salt_length != msgPrivParmLen) )
 		{
 			DEBUGMSGTL(("usm","DES-CBC length error.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_ENCRYPTION_ERROR;
 		}
 
@@ -1113,8 +1109,7 @@ usm_generate_out_msg (
 		if (temp_sig == NULL)
 		{
 			DEBUGMSGTL(("usm","Out of memory.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_GENERIC_ERROR;
 		}
 
@@ -1130,8 +1125,7 @@ usm_generate_out_msg (
 			SNMP_ZERO(temp_sig, temp_sig_len);
 			SNMP_FREE(temp_sig);
 			DEBUGMSGTL(("usm","Signing failed.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_AUTHENTICATION_FAILURE;
 		}
 
@@ -1140,8 +1134,7 @@ usm_generate_out_msg (
 			SNMP_ZERO(temp_sig, temp_sig_len);
 			SNMP_FREE(temp_sig);
 			DEBUGMSGTL(("usm","Signing lengths failed.\n"));
-			if (secStateRef)
-				usm_free_usmStateReference (secStateRef);
+			usm_free_usmStateReference (secStateRef);
 			return USM_ERR_AUTHENTICATION_FAILURE;
 		}
 
@@ -1153,11 +1146,7 @@ usm_generate_out_msg (
 	}  /* endif -- create keyed hash */
 
 
-
-	if (secStateRef != NULL)
-	{
-		usm_free_usmStateReference (secStateRef);
-	}
+	usm_free_usmStateReference (secStateRef);
 
 	DEBUGMSGTL(("usm","USM processing completed.\n"));
 	
@@ -1963,9 +1952,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                         USM_LENGTH_OID_TRANSFORM,
                                         usmDESPrivProtocol,
                                         USM_LENGTH_OID_TRANSFORM);
-  if (initialUser->engineID)
-    free(initialUser->engineID);
-  initialUser->engineID = NULL;
+  SNMP_FREE(initialUser->engineID);
   initialUser->engineIDLen = 0;
 
   if ( sc_random((u_char *) &salt_integer, &salt_integer_len) != SNMPERR_SUCCESS )
@@ -1979,9 +1966,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                                         USM_LENGTH_OID_TRANSFORM,
                                         usmDESPrivProtocol,
                                         USM_LENGTH_OID_TRANSFORM);
-  if (noNameUser->engineID)
-    free(noNameUser->engineID);
-  noNameUser->engineID = NULL;
+  SNMP_FREE(noNameUser->engineID);
   noNameUser->engineIDLen = 0;
 
   return SNMPERR_SUCCESS;
@@ -2259,19 +2244,19 @@ usm_remove_user_from_list(struct usmUser *user,
 struct usmUser *
 usm_free_user(struct usmUser *user)
 {
-  if (user->engineID != NULL)		free(user->engineID);
-  if (user->name != NULL)		free(user->name);
-  if (user->secName != NULL)		free(user->secName);
-  if (user->cloneFrom != NULL)		free(user->cloneFrom);
-  if (user->userPublicString != NULL)	free(user->userPublicString);
+  SNMP_FREE(user->engineID);
+  SNMP_FREE(user->name);
+  SNMP_FREE(user->secName);
+  SNMP_FREE(user->cloneFrom);
+  SNMP_FREE(user->userPublicString);
+  SNMP_FREE(user->authProtocol);
+  SNMP_FREE(user->privProtocol);
 
-  if (user->authProtocol != NULL)	free(user->authProtocol);
   if (user->authKey != NULL) {
     SNMP_ZERO(user->authKey, user->authKeyLen);
     SNMP_FREE(user->authKey);
   }
 
-  if (user->privProtocol != NULL)	free(user->privProtocol);
   if (user->privKey != NULL) {
     SNMP_ZERO(user->privKey, user->privKeyLen);
     SNMP_FREE(user->privKey);
@@ -2306,8 +2291,7 @@ struct usmUser *
 usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
 {
   /* copy the authProtocol oid row pointer */
-  if (to->authProtocol != NULL)
-    free(to->authProtocol);
+  SNMP_FREE(to->authProtocol);
 
   if ((to->authProtocol =
        snmp_duplicate_objid(from->authProtocol,from->authProtocolLen)) != NULL)
@@ -2317,8 +2301,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
 
 
   /* copy the authKey */
-  if (to->authKey)
-    free(to->authKey);
+  SNMP_FREE(to->authKey);
 
   if (from->authKeyLen > 0 &&
       (to->authKey = (u_char *) malloc(sizeof(char) * from->authKeyLen))
@@ -2332,8 +2315,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
 
 
   /* copy the privProtocol oid row pointer */
-  if (to->privProtocol != NULL)
-    free(to->privProtocol);
+  SNMP_FREE(to->privProtocol);
 
   if ((to->privProtocol =
        snmp_duplicate_objid(from->privProtocol,from->privProtocolLen)) != NULL)
@@ -2342,8 +2324,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
     to->privProtocolLen = 0;
 
   /* copy the privKey */
-  if (to->privKey)
-    free(to->privKey);
+  SNMP_FREE(to->privKey);
 
   if (from->privKeyLen > 0 &&
       (to->privKey = (u_char *) malloc(sizeof(char) * from->privKeyLen))
@@ -2367,10 +2348,9 @@ usm_create_user(void)
   struct usmUser *newUser;
 
   /* create the new user */
-  newUser = (struct usmUser *) malloc(sizeof(struct usmUser));
+  newUser = (struct usmUser *) malloc_zero(sizeof(struct usmUser));
   if (newUser == NULL)
     return NULL;
-  memset(newUser, 0, sizeof(struct usmUser));
 
   /* fill the auth/priv protocols */
   if ((newUser->authProtocol =
@@ -2422,16 +2402,14 @@ usm_create_initial_user(const char *name, oid *authProtocol, size_t authProtocol
   newUser->cloneFrom[1] = 0;
   newUser->cloneFromLen = 2;
 
-  if (newUser->privProtocol)
-    free(newUser->privProtocol);
+  SNMP_FREE(newUser->privProtocol);
   if ((newUser->privProtocol = (oid *) malloc(privProtocolLen*sizeof(oid)))
       == NULL)
     return usm_free_user(newUser);
   newUser->privProtocolLen = privProtocolLen;
   memcpy(newUser->privProtocol, privProtocol, privProtocolLen*sizeof(oid));
 
-  if (newUser->authProtocol)
-    free(newUser->authProtocol);
+  SNMP_FREE(newUser->authProtocol);
   if ((newUser->authProtocol = (oid *) malloc(authProtocolLen*sizeof(oid)))
       == NULL)
     return usm_free_user(newUser);
@@ -2523,23 +2501,21 @@ usm_read_user(char *line)
                                        &len);
   line = read_config_read_octet_string(line, (u_char **)&user->secName,
                                        &len);
-  if (user->cloneFrom) {
-    free(user->cloneFrom);
-    user->cloneFromLen = 0;
-  }
+  SNMP_FREE(user->cloneFrom);
+  user->cloneFromLen = 0;
+
   line = read_config_read_objid(line, &user->cloneFrom, &user->cloneFromLen);
-  if (user->authProtocol) {
-    SNMP_FREE(user->authProtocol);
-    user->authProtocolLen = 0;
-  }
+
+  SNMP_FREE(user->authProtocol);
+  user->authProtocolLen = 0;
+
   line = read_config_read_objid(line, &user->authProtocol,
                                 &user->authProtocolLen);
   line = read_config_read_octet_string(line, &user->authKey,
                                        &user->authKeyLen);
-  if (user->privProtocol) {
-    SNMP_FREE(user->privProtocol);
-    user->privProtocolLen = 0;
-  }
+  SNMP_FREE(user->privProtocol);
+  user->privProtocolLen = 0;
+
   line = read_config_read_objid(line, &user->privProtocol,
                                 &user->privProtocolLen);
   line = read_config_read_octet_string(line, &user->privKey,
@@ -2707,7 +2683,7 @@ usm_set_user_password(struct usmUser *user, char *token, char *line)
     }
   
     /* (destroy and) free the old key */
-    memset(userKey, 0, SNMP_MAXBUF_SMALL);
+    memset(userKey, 0, sizeof(userKey));
 
   } else {
     /* the key is given, copy it in */
