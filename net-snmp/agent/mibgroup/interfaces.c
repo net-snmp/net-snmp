@@ -1067,13 +1067,19 @@ int Index;
 u_char *EtherAddr;
 {
 	short i;
-#ifndef linux
+#if !(defined(linux) || defined(netbsd1) || defined(bsdi2))
 	struct arpcom arpcom;
-#else
+#else /* is linux or netbsd1 */
 	struct arpcom {
 	  char ac_enaddr[6];
 	} arpcom;
+        struct sockaddr_dl sadl;
+      struct ifaddr ifaddr;
+      u_long ifaddraddr;
 #endif
+
+        bzero(arpcom.ac_enaddr, sizeof(arpcom.ac_enaddr));
+        bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
 
 	if (saveIndex != Index) {	/* Optimization! */
 
@@ -1092,7 +1098,6 @@ u_char *EtherAddr;
 #ifdef freebsd2
 	    if (saveifnet.if_type != IFT_ETHER)
 	    {
-		bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
 		return(0);	/* Not an ethernet if */
 	    }
 #endif
@@ -1101,8 +1106,32 @@ u_char *EtherAddr;
 	 *  contains the ethernet address.
 	 */
 #ifndef linux
-	klookup((unsigned long)saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
-#else
+#if !(defined(netbsd1) || defined(bsdi2))
+      klookup((unsigned long)saveifnetaddr, (char *)&arpcom, sizeof arpcom);
+#else  /* netbsd1 or bsdi2 */
+
+#ifdef netbsd1
+#define if_addrlist if_addrlist.tqh_first
+#define ifa_next    ifa_list.tqe_next
+#endif
+
+        ifaddraddr = (unsigned long)saveifnet.if_addrlist;
+        while (ifaddraddr) {
+          klookup(ifaddraddr, (char *)&ifaddr, sizeof ifaddr);
+          klookup((unsigned long)ifaddr.ifa_addr, (char *)&sadl, sizeof sadl);
+          if (sadl.sdl_family == AF_LINK &&
+              (saveifnet.if_type == IFT_ETHER ||
+               saveifnet.if_type == IFT_ISO88025 ||
+               saveifnet.if_type == IFT_FDDI)) {
+            memcpy(arpcom.ac_enaddr, sadl.sdl_data + sadl.sdl_nlen,
+                   sizeof(arpcom.ac_enaddr));
+          break;
+          }
+          ifaddraddr = (unsigned long)ifaddr.ifa_next;
+        }
+#endif /* netbsd1 or bsdi2 */
+
+#else /* linux */
 	memcpy(arpcom.ac_enaddr, saveifnetaddr->if_hwaddr, 6);
 #endif
 	if (strncmp("lo", saveName, 2) == 0) {
