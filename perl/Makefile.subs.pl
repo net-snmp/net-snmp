@@ -60,3 +60,17 @@ sub NetSNMPGetOpts {
     \%ret;
 }
 
+sub find_files {
+    my($f,$d) = @_;
+    my ($dir,$found,$file);
+    for $dir (@$d){
+	$found = 0;
+	for $file (@$f) {
+	    $found++ if -f "$dir/$file";
+	}
+	if ($found == @$f) {
+	    return $dir;
+	}
+    }
+}
+
