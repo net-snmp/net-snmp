@@ -70,30 +70,29 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp_api.h"
-#include "parse.h"
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
+#include "parse.h"
 #include "int64.h"
 #include "system.h"
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "default_store.h"
 
-static int parse_subtree (struct tree *, const char *, oid *, size_t *);
-static char *uptimeString (u_long, char *);
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
-
+static char *uptimeString (u_long, char *);
 struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
   
 static void print_tree_node (FILE *, struct tree *, int);
 
 /* helper functions for get_module_node */
-int node_to_oid(struct tree *, oid *, size_t *);
+static int node_to_oid(struct tree *, oid *, size_t *);
 static int _add_strings_to_oid(struct tree *, char *,
              oid *, size_t *, size_t);
 
 extern struct tree *tree_head;
+static struct tree *tree_top;
 
 struct tree *Mib;             /* Backwards compatibility */
 
@@ -130,9 +129,10 @@ uptimeString(u_long timeticks,
     int	centisecs, seconds, minutes, hours, days;
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-        sprintf(buf,"%ld",timeticks);
-        return buf;
+	sprintf(buf,"%ld",timeticks);
+	return buf;
     }
+    
 
     centisecs = timeticks % 100;
     timeticks /= 100;
@@ -187,8 +187,8 @@ void sprint_hexstring(char *buf,
 }
 
 void sprint_asciistring(char *buf,
-			       const u_char  *cp,
-			       size_t	    len)
+		        const u_char  *cp,
+		        size_t	    len)
 {
     int	x;
 
@@ -985,17 +985,20 @@ snmp_out_toggle_options(char *options)
         case 'b':
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
             break;
-        case 'E':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
-            break;
+	case 'E':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
+	    break;
 	case 'q':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
         case 'f':
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 	    break;
-        case 't':
-            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+	case 't':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+	    break;
+	case 'v':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
 	    break;
         case 's':
 	    snmp_set_suffix_only(1);
@@ -1015,12 +1018,14 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%sOUTOPTS values:\n", lead);
   fprintf(outf, "%s    n: Print oids numerically.\n", lead);
   fprintf(outf, "%s    e: Print enums numerically.\n", lead);
+  fprintf(outf, "%s    E: Escape quotes in string indices.\n", lead);
   fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
   fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
   fprintf(outf, "%s    f: Print full oids on output.\n", lead);
   fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
   fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
+  fprintf(outf, "%s    v: Print Print values only (not OID = value).\n", lead);
 }
 
 char *
@@ -1075,18 +1080,18 @@ register_mib_handlers (void)
     ds_register_premib(ASN_BOOLEAN, "snmp","mibReplaceWithLatest",
                        DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
 
-    ds_register_config(ASN_BOOLEAN, "snmp","printNumericEnums",
+    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericEnums",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
-    ds_register_config(ASN_BOOLEAN, "snmp","printNumericOids",
+    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericOids",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
-    ds_register_config(ASN_BOOLEAN, "snmp","dontBreakdownOids",
+    ds_register_premib(ASN_BOOLEAN, "snmp","escapeQuotes",
+		       DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
+    ds_register_premib(ASN_BOOLEAN, "snmp","dontBreakdownOids",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
-    ds_register_config(ASN_BOOLEAN, "snmp","escapeQuotes",
-                       DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
-    ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
+    ds_register_premib(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
     ds_register_premib(ASN_BOOLEAN, "snmp","numericTimeticks",
-                       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+		       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
     ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     
@@ -1247,6 +1252,9 @@ init_mib (void)
 	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
     Mib = tree_head;          /* Backwards compatibility */
+    tree_top = (struct tree *)malloc(sizeof(struct tree));
+    memset(tree_top, 0, sizeof(struct tree));
+    tree_top->child_list = tree_head;
 }
 
 void
@@ -1327,24 +1335,33 @@ int read_objid(const char *input,
 	       oid *output,
 	       size_t *out_len)   /* number of subid's in "output" */
 {
-    struct tree *root = tree_head;
+    struct tree *root = tree_top;
     char buf[SPRINT_MAX_LEN];
-    int ret;
+    int ret, max_out_len;
+    char *name, ch;
+    const char *cp;
 
-    if (strchr(input, ':')) {
+    cp = input;
+    while ((ch = *cp))
+	if (('0' <= ch && ch <= '9')
+            || ('a' <= ch && ch <= 'z')
+	    || ('A' <= ch && ch <= 'Z')
+	    || ch == '-')
+	    cp++;
+	else
+	    break;
+    if (ch == ':')
 	return get_node(input, output, out_len);
-    }
 
     if (*input == '.')
 	input++;
     else {
     /* get past leading '.', append '.' to Prefix. */
 	if (*Prefix == '.')
-	    strcpy(buf, Prefix);
-	else if (*Prefix != 0 ) {
+	    strcpy(buf, Prefix+1);
+	else
             strcpy(buf, Prefix);
-	    strcat(buf, ".");
-	}
+	strcat(buf, ".");
 	strcat(buf, input);
 	input = buf;
     }
@@ -1352,160 +1369,23 @@ int read_objid(const char *input,
     if (root == NULL){
 	SET_SNMP_ERROR(SNMPERR_NOMIB);
 	*out_len = 0;
-	return(0);
+	return 0;
     }
-    if ((ret = parse_subtree(root, input, output, out_len)) <= 0)
+    name = strdup(input);
+    max_out_len = *out_len;
+    *out_len = 0;
+    if ((ret = _add_strings_to_oid(root, name, output, out_len, max_out_len)) <= 0)
     {
-	int errc = (ret ? ret : SNMPERR_UNKNOWN_OBJID);
-	SET_SNMP_ERROR(errc);
-	return (0);
+	if (ret == 0) ret = SNMPERR_UNKNOWN_OBJID;
+	SET_SNMP_ERROR(ret);
+	free(name);
+	return 0;
     }
-    *out_len = ret;
+    free(name);
 
-    return (1);
+    return 1;
 }
 
-
-/*
- * RECURSIVE helper methods for read_objid
- * Returns:
- * < 0  the SNMPERR_ errorcode
- * = 0  input string is empty.
- * > 0  the number of sub-identifiers found in the input string.
- */ 
-static int
-parse_subtree(struct tree *subtree,
-	      const char *input,
-	      oid *output,
-	      size_t *out_len)   /* number of subid's */
-{
-    char buf[SPRINT_MAX_LEN], *to = buf, *cp;
-    u_long subid = 0;
-    struct tree *tp;
-    int ret, len;
-
-    /*
-     * No empty strings.  Can happen if there is a trailing '.' or two '.'s
-     * in a row, i.e. "..".
-     */
-    if ((*input == '\0') ||
-	(*input == '.'))
-	return (0);
-
-    if (*input == '"' || *input == '\'') {
-      /*
-       * This is a string that should be converted into an OID
-       *  Note:  assumes variable length index is required, and prepends
-       *         the string length.
-       */
-      if ((cp = strchr(input+1, *input)) == NULL) {
-        /* error.  Should be a matching quote somewhere. */
-        return (0);
-      }
-      
-      /* is there room enough for the string in question plus its length */
-      len = cp-input-1;
-      if ((int)*out_len <= len){
-	return (SNMPERR_LONG_OID);
-      }
-
-      /* copy everything in */
-      if (*input++ == '"') {
-        /* add the length for " quoted objects */
-        *output++ = len++;
-      }
-
-      *out_len -= len;
-      while (input < cp) {
-        *output++ = *input++;
-      }
-
-      /* Now, we assume that nothing beyond this exists in the parse
-         tree, which should always be true (or else we have a really wacked
-         mib designer somewhere. */
-      input = cp + 1; /* past  the quote */
-
-      if (*input != '.')
-	return (len);
-
-      ret = parse_subtree(NULL, ++input, output, out_len);
-      if (ret <= 0)
-	return (ret);
-      return ret+len;
-
-    } else if (isdigit(*input)) {
-	/*
-	 * Read the number, then try to find it in the subtree.
-	 */
-	while (isdigit(*input)) {
-	    *to++ = *input;
-	    subid *= 10;
-	    subid += *input++ - '0';
-	}
-	if (*input != '.' && *input != 0) {
-	    while (*input != 0 && *input != '.') *to++ = *input++;
-	    *to = 0;
-	    snmp_set_detail(buf);
-	    return SNMPERR_BAD_SUBID;
-	}
-	*to = '\0';
-
-	for (tp = subtree; tp; tp = tp->next_peer) {
-	    if (tp->subid == subid)
-		goto found;
-	}
-    }
-    else {
-	/*
-	 * Read the name into a buffer.
-	 */
-	while ((*input != '\0') &&
-	       (*input != '.')) {
-	    *to++ = *input++;
-	}
-	*to = '\0';
-
-	/*
-	 * Find the name in the subtree;
-	 */
-	for (tp = subtree; tp; tp = tp->next_peer) {
-	    if (strcasecmp(tp->label, buf) == 0) {
-		subid = tp->subid;
-		goto found;
-	    }
-	}
-
-	/*
-	 * If we didn't find the entry, punt...
-	 */
-	if (tp == NULL) {
-	    snmp_set_detail(buf);
-	    return (SNMPERR_BAD_SUBID);
-	}
-    }
-
-found:
-    if(subid > (u_long)MAX_SUBID){
-	snmp_set_detail(buf);
-	return (SNMPERR_MAX_SUBID);
-    }
-
-    if ((int)*out_len <= 0){
-	return (SNMPERR_LONG_OID);
-    }
-
-    (*out_len)--;
-    *output++ = subid;
-
-    if (*input != '.')
-	return (1);
-
-    ret = parse_subtree(tp ? tp->child_list : NULL,
-                             ++input, output, out_len);
-    if (ret <= 0)
-	return (ret);
-    return ret+1;
-}
 
 static struct tree *
 _sprint_objid(char *buf,
@@ -1606,12 +1486,14 @@ sprint_variable(char *buf,
     struct tree    *subtree;
 
     subtree = _sprint_objid(buf, objid, objidlen);
-    buf += strlen(buf);
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	strcat(buf, " ");
-    else
-	strcat(buf, " = ");
-    buf += strlen(buf);
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
+	buf += strlen(buf);
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
+	    strcat(buf, " ");
+	else
+	    strcat(buf, " = ");
+	buf += strlen(buf);
+    }
 
     if (variable->type == SNMP_NOSUCHOBJECT)
 	strcpy(buf, "No Such Object available on this agent");
@@ -1722,17 +1604,17 @@ dump_oid_to_string(oid *objid,
             tst = (oid)'.';
           
         if (alen == 0) {
-            if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-                *cp++ = '\\';
-            *cp++ = quotechar;
-        }
+	    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+		*cp++ = '\\';
+	    *cp++ = quotechar;
+	}
         *cp++ = (char)tst;
         alen++;
     }
     if (alen) {
-        if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-            *cp++ = '\\';
-        *cp++ = quotechar;
+	if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+	    *cp++ = '\\';
+	*cp++ = quotechar;
     }
     *cp = '\0';
     buf = cp;
@@ -1787,30 +1669,42 @@ _get_symbol(oid *objid,
 	    if (in_dices->isimplied) {
                 numids = objidlen;
                 buf = dump_oid_to_string(objid, numids, buf, '\'');
+	    } else if (tp->ranges && !tp->ranges->next
+	      	       && tp->ranges->low == tp->ranges->high) {
+		/* a fixed-length object string */
+	        numids = tp->ranges->low;
+		buf = dump_oid_to_string(objid, numids, buf, '\'');
             } else {
                 numids = (size_t)*objid+1;
                 if (numids > objidlen)
                     goto finish_it;
 		if (numids == 1) {
-                    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-                        *buf++ = '\\';
+		    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+			*buf++ = '\\';
 		    *buf++ = '"';
-                    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-                        *buf++ = '\\';
-                    *buf++ = '"';
+		    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+			*buf++ = '\\';
+		    *buf++ = '"';
 		}
 		else
 		    buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
             }
-            objid += (numids);
-            objidlen -= (numids);
+            objid += numids;
+            objidlen -= numids;
 	    *buf++ = '.';
 	    *buf = '\0';
 	    break;
 	case TYPE_INTEGER:
-	    sprintf(buf, "%lu.", *objid++);
+	    if (tp->enums) {
+		struct enum_list *ep = tp->enums;
+		while (ep && ep->value != *objid) ep = ep->next;
+		if (ep) sprintf(buf, "%s.", ep->label);
+		else sprintf(buf, "%lu.", *objid);
+	    }
+	    else sprintf(buf, "%lu.", *objid);
 	    while(*buf)
 		buf++;
+	    objid++;
 	    objidlen--;
 	    break;
 	case TYPE_OBJID:
@@ -1828,14 +1722,44 @@ _get_symbol(oid *objid,
 	    *buf++ = '.';
 	    *buf = '\0';
 	    break;
+	case TYPE_IPADDR:
+	    if (objidlen < 4)
+	        goto finish_it;
+	    sprintf(buf, "%lu.%lu.%lu.%lu.",
+	    	    objid[0], objid[1], objid[2], objid[3]);
+	    objid += 4;
+	    objidlen -= 4;
+	    while (*buf) buf++;
+	    break;
+	case TYPE_NETADDR:
+	    {   oid ntype;
+	     	ntype = *objid++; objidlen--;
+		sprintf(buf, "%lu.", ntype);
+		buf += strlen(buf);
+		switch (ntype) {
+		case 1:
+		    if (objidlen < 4)
+			goto finish_it;
+		    sprintf(buf, "%lu.%lu.%lu.%lu.",
+			    objid[0], objid[1], objid[2], objid[3]);
+		    objid += 4;
+		    objidlen -= 4;
+		    break;
+		default:
+		    goto finish_it;
+		}
+	    }
+	    while (*buf) buf++;
+	    break;
+	case TYPE_NSAPADDRESS:
 	default:
 	    goto finish_it;
+	    break;
 	}
         in_dices = in_dices->next;
     }
 
 finish_it:
-
     while(objidlen-- > 0){	/* output rest of name, uninterpreted */
 	sprintf(buf, "%lu.", *objid++);
 	while(*buf)
@@ -1913,8 +1837,21 @@ fprint_description(FILE *f,
     struct tree *subtree = tree_head;
     int pos, len;
     char buf[128];
+    const char *cp;
 
-    fprintf(f, "%s OBJECT-TYPE\n", tp->label);
+    if (tp->type <= TYPE_SIMPLE_LAST)
+        cp = "OBJECT-TYPE";
+    else
+	switch (tp->type) {
+	case TYPE_TRAPTYPE:	cp = "TRAP-TYPE"; break;
+	case TYPE_NOTIFTYPE:	cp = "NOTIFICATION-TYPE"; break;
+	case TYPE_OBJGROUP:	cp = "OBJECT-GROUP"; break;
+	case TYPE_AGENTCAP:	cp = "AGENT-CAPABILITIES"; break;
+	case TYPE_MODID:	cp = "MODULE-IDENTITY"; break;
+	case TYPE_MODCOMP:	cp = "MODULE-COMPLIANCE"; break;
+	default:		sprintf(buf, "type_%d", tp->type); cp = buf;
+	}
+    fprintf(f, "%s %s\n", tp->label, cp);
     print_tree_node(f, tp, width);
     fprintf(f, "::= {");
     pos = 5;
@@ -1942,7 +1879,7 @@ fprint_description(FILE *f,
     fprintf(f, " %lu }\n", *objid);
 }
 
-static void
+void
 print_tree_node(FILE *f,
 		struct tree *tp, int width)
 {
@@ -1979,8 +1916,7 @@ print_tree_node(FILE *f,
 	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
 	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
 	case TYPE_UINTEGER:	cp = "UInteger32"; break;
-	case 0:			cp = NULL; break;
-	default:		sprintf(str,"type_%d", tp->type); cp = str;
+	default:		cp = NULL; break;
 	}
 #if SNMP_TESTING_CODE
 	if (!cp && (tp->ranges || tp->enums)) { /* ranges without type ? */
@@ -2055,12 +1991,14 @@ print_tree_node(FILE *f,
 	}
 #endif /* SNMP_TESTING_CODE */
 	if (cp) fprintf(f, "  STATUS\t%s\n", cp);
+	if (tp->augments)
+	    fprintf(f, "  AUGMENTS\t{ %s }\n", tp->augments);
 	if (tp->indexes) {
             struct index_list *ip = tp->indexes;
             int first=1;
             fprintf(f, "  INDEX\t\t");
-            fprintf(f," { ");
-	    pos = 16+3;
+            fprintf(f,"{ ");
+	    pos = 16+2;
 	    while (ip) {
 		if (first) first = 0;
 		else fprintf(f, ", ");
@@ -2068,12 +2006,34 @@ print_tree_node(FILE *f,
 			ip->ilabel);
 		len = strlen(str);
 		if (pos+len+2 > width) {
-		    fprintf(f, "\n\t\t   ");
-		    pos = 16+3;
+		    fprintf(f, "\n\t\t  ");
+		    pos = 16+2;
 		}
 		fprintf(f, "%s", str);
 		pos += len+2;
 		ip = ip->next;
+	    }
+	    fprintf(f," }\n");
+	}
+	if (tp->varbinds) {
+            struct varbind_list *vp = tp->varbinds;
+            int first=1;
+            fprintf(f, "  %s\t", tp->type == TYPE_TRAPTYPE ?
+	      			   "VARIABLES" : "OBJECTS");
+            fprintf(f,"{ ");
+	    pos = 16+2;
+	    while (vp) {
+		if (first) first = 0;
+		else fprintf(f, ", ");
+		sprintf(str, "%s", vp->vblabel);
+		len = strlen(str);
+		if (pos+len+2 > width) {
+		    fprintf(f, "\n\t\t  ");
+		    pos = 16+2;
+		}
+		fprintf(f, "%s", str);
+		pos += len+2;
+		vp = vp->next;
 	    }
 	    fprintf(f," }\n");
 	}
@@ -2143,7 +2103,7 @@ get_module_node(const char *fname,
  * and the buffer contents are indeterminate.
  * The buffer length can be used to create a larger buffer.
  */
-int
+static int
 node_to_oid(struct tree *tp, oid *objid, size_t *objidlen)
 {
     int numids, lenids;
@@ -2173,82 +2133,214 @@ node_to_oid(struct tree *tp, oid *objid, size_t *objidlen)
     return (numids);
 }
 
+
 static int
 _add_strings_to_oid(struct tree *tp, char *cp,
              oid *objid, size_t *objidlen,
              size_t maxlen)
 {
-    int subid;
+    oid subid;
+    int len_index = 1000000;
     struct tree *tp2 = NULL;
-    char *cp2 = NULL;
-    char doingquote = 0;
+    struct index_list *in_dices = NULL;
+    char *fcp, *ecp, *cp2 = NULL;
+    char doingquote;
+    int len = -1, pos = -1;
 
-	while ( cp != NULL ) {
-	    cp2 = strchr( cp, '.' );	/* Isolate the next entry */
-	    if ( cp2 != NULL ) {
-		*cp2 = '\0';
-		cp2++;
-	    }
+    while (cp && tp && tp->child_list) {
+	fcp = cp;
+	tp2 = tp->child_list;
+	/* Isolate the next entry */
+	cp2 = strchr( cp, '.' );
+	if (cp2) *cp2++ = '\0';
 
-            if ( *cp == '"' || *cp == '\'') { /* Is it the beggining
-                                                 of a quoted string */
-              doingquote = *cp++;
-              /* insert length if requested */
-              if (doingquote == '"') {
-                if (*objidlen >= maxlen)
-                    return 0;
-                objid[ *objidlen ] = (strchr(cp,doingquote) - cp);
-                (*objidlen)++;
-              }
-
-              while(*cp != doingquote) {
-                if (*objidlen >= maxlen)
-                    return 0;
-                objid[ *objidlen ] = *cp++;
-                (*objidlen)++;
-              }
-
-              tp = NULL; /* must be pure numeric from here, right? */
-              cp = cp2;
-              continue;
-            }
-
-                                        /* Is it numeric ? */
-            if ( isdigit( *cp ) )
-		subid=(strtol(cp,0,0));
-	    else
-		subid = -1;
-
-					/* Search for the appropriate child */
-	    if ( tp != NULL )
-	        tp2 = tp->child_list;
-	    while ( tp2 != NULL ) {
-		if (( (int)tp2->subid == subid ) ||
-		    ( !strcasecmp( tp2->label, cp ))) {
-                        if (*objidlen >= maxlen)
-                            return 0;
-			objid[ *objidlen ] = tp2->subid;
-			(*objidlen)++;
-			tp = tp2;
-			break;
-		}
-		tp2 = tp2->next_peer;
-	    }
-	    if ( tp2 == NULL ) {
-		if ( subid == -1 ) {
-		    return 0;
-		}
-				/* pure numeric from now on */
-                if (*objidlen >= maxlen)
-                    return 0;
-		objid[ *objidlen ] = subid;
-		(*objidlen)++;
-		tp = NULL;
-	    }
-	    cp = cp2;
+	/* Search for the appropriate child */
+	if ( isdigit( *cp ) ) {
+	    subid = strtol(cp, &ecp, 0);
+	    if (*ecp) goto bad_id;
+	    while (tp2 && tp2->subid != subid) tp2 = tp2->next_peer;
 	}
+	else {
+	    while (tp2 && strcmp(tp2->label, fcp)) tp2 = tp2->next_peer;
+	    if (!tp2) goto bad_id;
+	    subid = tp2->subid;
+	}
+	if (*objidlen >= maxlen) goto bad_id;
+	objid[ *objidlen ] = subid;
+	(*objidlen)++;
 
-	return 1;
+	if (!tp2) break;
+	tp = tp2;
+	cp = cp2;
+    }
+
+    if (tp && !tp->child_list) {
+	if ((tp2 = tp->parent)) {
+	    if (tp2->indexes) in_dices = tp2->indexes;
+	    else if (tp2->augments) {
+		tp2 = find_tree_node(tp2->augments, -1);
+		if (tp2) in_dices = tp2->indexes;
+	    }
+	}
+	tp = NULL;
+    }
+
+    while (cp && in_dices) {
+	fcp = cp;
+
+	tp = find_tree_node(in_dices->ilabel, -1);
+	if (!tp) break;
+	switch (tp->type) {
+	case TYPE_INTEGER:
+	    /* Isolate the next entry */
+	    cp2 = strchr( cp, '.' );
+	    if (cp2) *cp2++ = '\0';
+	    if (isdigit(*cp)) {
+	    	subid = strtoul(cp, &ecp, 0);
+		if (*ecp) goto bad_id;
+	    }
+	    else {
+		if (tp->enums) {
+		    struct enum_list *ep = tp->enums;
+		    while (ep && strcmp(ep->label, cp)) ep = ep->next;
+		    if (!ep) goto bad_id;
+		    subid = ep->value;
+		}
+		else goto bad_id;
+	    }
+	    if (tp->ranges) {
+		struct range_list *rp = tp->ranges;
+		int ok = 0;
+		while (!ok && rp)
+		    if (rp->low <= subid && subid <= rp->high) ok = 1;
+		    else rp = rp->next;
+		if (!ok) goto bad_id;
+	    }
+	    if (*objidlen >= maxlen) goto bad_id;
+	    objid[*objidlen] = subid;
+	    (*objidlen)++;
+	    break;
+	case TYPE_IPADDR:
+	    if (*objidlen + 4 > maxlen) goto bad_id;
+	    for (subid = 0; cp && subid < 4; subid++) {
+		fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
+		objid[*objidlen] = strtoul(cp, &ecp, 0);
+		if (*ecp) goto bad_id;
+		(*objidlen)++;
+		cp = cp2;
+	    }
+	    break;
+        case TYPE_OCTETSTR:
+	    if (tp->ranges && !tp->ranges->next
+	    	&& tp->ranges->low == tp->ranges->high)
+		len = tp->ranges->low;
+	    else
+		len = -1;
+	    pos = 0;
+	    if (*cp == '"' || *cp == '\'') {
+		doingquote = *cp++;
+		/* insert length if requested */
+		if (!in_dices->isimplied && len == -1) {
+		    if (*objidlen >= maxlen) goto bad_id;
+		    len_index = *objidlen;
+		    (*objidlen)++;
+		}
+
+		while(*cp && *cp != doingquote) {
+		    if (*objidlen >= maxlen) goto bad_id;
+		    objid[ *objidlen ] = *cp++;
+		    (*objidlen)++;
+		    pos++;
+		}
+		if (!*cp) goto bad_id;
+		cp2 = cp+1;
+		if (!*cp2 && *cp2 != '.') goto bad_id;
+		*cp2++ = 0;
+		if (len == -1) {
+		    struct range_list *rp = tp->ranges;
+		    int ok = 0;
+		    while (rp && !ok)
+		    	if (rp->low <= pos && pos <= rp->high) ok = 1;
+			else rp = rp->next;
+		    if (!ok) goto bad_id;
+		    if (!in_dices->isimplied) objid[len_index] = pos;
+		}
+		else if (pos != len) goto bad_id;
+	    }
+	    else {
+	    	if (!in_dices->isimplied && len == -1) {
+		    fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
+		    len = strtoul(cp, &ecp, 0);
+		    if (*ecp) goto bad_id;
+		    if (*objidlen + len + 1 >= maxlen) goto bad_id;
+		    objid[*objidlen] = len;
+		    (*objidlen)++;
+		    cp = cp2;
+		}
+		while (len && cp) {
+		    fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
+		    objid[*objidlen] = strtoul(cp, &ecp, 0);
+		    if (*ecp) goto bad_id;
+		    (*objidlen)++;
+		    len--;
+		    cp = cp2;
+		}
+	    }
+	    break;
+	case TYPE_OBJID:
+	    break;
+	}
+	cp = cp2;
+	in_dices = in_dices->next;
+    }
+
+    while (cp) {
+	fcp = cp;
+	switch (*cp) {
+	case '0': case '1': case '2': case '3': case '4':
+	case '5': case '6': case '7': case '8': case '9':
+	    cp2 = strchr(cp, '.');
+	    if (cp2) *cp2++ = 0;
+	    subid = strtol(cp, &ecp, 0);
+	    if (*ecp) goto bad_id;
+	    if (*objidlen >= maxlen) goto bad_id;
+	    objid[ *objidlen ] = subid;
+	    (*objidlen)++;
+	    break;
+	case '"': case '\'':
+	    doingquote = *cp++;
+	    /* insert length if requested */
+	    if (doingquote == '"') {
+		if (*objidlen >= maxlen) goto bad_id;
+		objid[ *objidlen ] = len = strchr(cp,doingquote) - cp;
+		(*objidlen)++;
+	    }
+
+	    while(*cp && *cp != doingquote) {
+		if (*objidlen >= maxlen) goto bad_id;
+		objid[ *objidlen ] = *cp++;
+		(*objidlen)++;
+	    }
+	    if (!cp) goto bad_id;
+	    cp2 = cp+1;
+	    break;
+	default:
+	    goto bad_id;
+	}
+	cp = cp2;
+    }
+    return 1;
+
+bad_id:
+    {   char buf[256];
+	if (in_dices) sprintf(buf, "Index: %s, %s, %d %d",
+				in_dices->ilabel, fcp, pos, len);
+	else if (tp) sprintf(buf, "Node: %s, %s", tp->label, fcp);
+	else sprintf(buf, "%s", fcp);
+
+	snmp_set_detail(buf);
+    }
+    return 0;
 }
 
 
@@ -2271,11 +2363,24 @@ get_node(const char *name,
 	 oid *objid,
 	 size_t *objidlen)
 {
-    char *cp;
+    const char *cp;
+    char ch;
     int res;
 
-    if (( cp=strchr(name, ':')) == NULL )
-	res = get_module_node( name, "ANY", objid, objidlen );
+    cp = name;
+    while ((ch = *cp))
+	if (('0' <= ch && ch <= '9')
+	    || ('a' <= ch && ch <= 'z')
+	    || ('A' <= ch && ch <= 'Z')
+	    || ch == '-')
+	    cp++;
+	else
+	    break;
+    if (ch != ':')
+	if (*name == '.')
+	    res = get_module_node( name+1, "ANY", objid, objidlen );
+	else
+	    res = get_module_node( name, "ANY", objid, objidlen );
     else {
 	char *module;
 		/*
