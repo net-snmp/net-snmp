@@ -9,4 +9,7 @@
 /* strings */
 #define DS_AGENT_PROGNAME 0        /* argv[0] */
 
+/* integers */
+#define DS_AGENT_FLAGS    0       /* session.flags */
+
 #endif

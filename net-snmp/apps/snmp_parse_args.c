@@ -96,7 +96,11 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
+  fprintf(outf, "  -q[FLAGS]\tquick print options:\n");
+  fprintf(outf, "  \t\t  FLAGS values:\n");
+  fprintf(outf, "  \t\t    noFlags:\told style quick printing\n");
+  fprintf(outf, "  \t\t    o:\t\tprint oids numerically\n");
+  fprintf(outf, "  \t\t    e:\t\tprint enums numerically\n");
   fprintf(outf, "  -f\t\tprint full object identifiers on output.\n");
   fprintf(outf, "  -s\t\tprint only last element of object identifiers.\n");
   fprintf(outf, "  -S\t\tmodule id plus last element of object identifiers.\n");
@@ -105,10 +109,12 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
+  fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
+  fprintf(outf, "\t\t\t(UDP or TCP).\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf,
-          "  -T <B> <T>\tset the destination engine boots/time for v3 requests.\n");
+          "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
@@ -149,8 +155,28 @@ snmp_parse_args(int argc,
         break;
 
       case 'q':
-        snmp_set_quick_print(1);
-        break;
+          if (argv[arg][2] == 0)
+              snmp_set_quick_print(1);
+          else {
+              cp = &argv[arg][2];
+              while(*cp) {
+                  switch(*cp++) {
+                      case 'o':
+                          ds_set_boolean(DS_LIBRARY_ID,
+                                         DS_LIB_PRINT_NUMERIC_OIDS, 1);
+                          break;
+                      case 'e':
+                          ds_set_boolean(DS_LIBRARY_ID,
+                                         DS_LIB_PRINT_NUMERIC_ENUM, 1);
+                          break;
+                      default:
+                          fprintf(stderr,"unknown option after -q flag\n");
+                          usage();
+                          exit(1);
+                  }
+              }
+          }
+          break;
 
       case 'D':
         debug_register_tokens(&argv[arg][2]);
@@ -217,6 +243,27 @@ snmp_parse_args(int argc,
         }
         break;
 
+      case 'T':
+          if (argv[arg][2] != '\0') 
+              cp = &argv[arg][2];
+          else if (++arg>argc) {
+              fprintf(stderr,"Need UDP or TCP after -T flag.\n");
+              usage();
+              exit(1);
+          } else {
+              cp = argv[arg];
+          }
+          if (strcasecmp(cp,"TCP") == 0) {
+              session->flags |= SNMP_FLAGS_STREAM_SOCKET;
+          } else if (strcasecmp(cp,"UDP") == 0) {
+              /* default, do nothing */
+          } else {
+              fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", cp);
+              usage();
+              exit(1);
+          }
+          break;
+
       case 'r':
         if (isdigit(argv[arg][2]))
           session->retries = atoi(&(argv[arg][2]));
@@ -229,20 +276,20 @@ snmp_parse_args(int argc,
         }
         break;
 
-      case 'T':
+      case 'Z':
         if (isdigit(argv[arg][2]))
           session->engineBoots = (u_long)(atol(&(argv[arg][2])));
         else if ((++arg<argc) && isdigit(argv[arg][0]))
           session->engineBoots = (u_long)(atol(argv[arg]));
         else {
-          fprintf(stderr,"Need engine boots value after -T flag.\n");
+          fprintf(stderr,"Need engine boots value after -Z flag.\n");
           usage();
           exit(1);
         }
         if ((++arg<argc) && isdigit(argv[arg][0]))
           session->engineTime = (u_long)(atol(argv[arg]));
         else {
-          fprintf(stderr,"Need engine time value after -T flag.\n");
+          fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
           exit(1);
         }
