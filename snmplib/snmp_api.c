@@ -1129,14 +1129,12 @@ snmp_send(session, pdu)
 	    return 0;
 	}
 	    
-    } else {
-	if (session->version == SNMP_VERSION_2_HISTORIC){
-          /* only supported in SNMPv1 and SNMPsec */
-          if ((session->version != SNMP_VERSION_1) &&
-              (session->version != SNMP_VERSION_sec)) {
-	    snmp_errno = SNMPERR_V1_IN_V2;
-	    return 0;
-	}
+    } else if (pdu->command == TRP_REQ_MSG) {
+        if ((session->version != SNMP_VERSION_1) &&
+            (session->version != SNMP_VERSION_sec)) {
+          snmp_errno = SNMPERR_V2_IN_V1;
+          return 0;
+        }
         /* initialize defaulted Trap PDU fields */
 	pdu->reqid = 1;	/* give a bogus non-error reqid for traps */
 	if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH){
