@@ -3580,7 +3580,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         break;
       default:
         snmp_log(LOG_ERR,"bad type returned (%x)\n", vp->type);
-        badtype = 1;
+        badtype = -1;
         break;
     }
     DEBUGINDENTADD(-4); 
