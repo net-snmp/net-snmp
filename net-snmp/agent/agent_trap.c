@@ -47,6 +47,9 @@
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_parse_args.h"
+#include "agent_trap.h"
+#include "callback.h"
+#include "agent_callbacks.h"
 
 struct trap_sink {
     struct snmp_session	*sesp;
@@ -361,8 +364,8 @@ void send_enterprise_trap_vars (int trap,
     for ( sink = sinks ; sink ; sink=sink->next ) {
 	if ( sink->version == SNMP_VERSION_1 && trap == -1 )
 		continue;	/* Skip v1 sinks for v2 only traps */
-	template_pdu->version = sink->version;
 	template_pdu->command = sink->pdutype;
+
 	if ( sink->version != SNMP_VERSION_1 ) {
 	    template_pdu->variables = v2_vars;
 	    if ( last_var )
@@ -371,26 +374,65 @@ void send_enterprise_trap_vars (int trap,
 	else
 	    template_pdu->variables = vars;
 
-	pdu = snmp_clone_pdu( template_pdu );
-	pdu->sessid = sink->sesp->sessid;	/* AgentX only ? */
-	if ( snmp_send( sink->sesp, pdu) == 0 ) {
-            snmp_sess_perror ("snmpd: send_trap", sink->sesp);
-	    snmp_free_pdu( pdu );
-	}
-	else {
-	    snmp_increment_statistic(STAT_SNMPOUTTRAPS);
-	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	}
-		
+        send_trap_to_sess(sink->sesp, template_pdu);
+
 	if ( sink->version != SNMP_VERSION_1 && last_var )
 	    last_var->next_variable = NULL;
     }
+
+    /* send stuff to registered callbacks */
+    /* v2 traps/informs */
+    template_pdu->variables = v2_vars;
+    if ( last_var )
+        last_var->next_variable = &enterprise_var;
+
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP2,
+                        template_pdu);
+    
+    if ( last_var )
+        last_var->next_variable = NULL;
+
+    /* v1 traps */
+    template_pdu->command = SNMP_MSG_TRAP;
+    template_pdu->variables = vars;
+    
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_SEND_TRAP1,
+                        template_pdu);
 
 	/* Ensure we don't free anything we shouldn't */
     if ( last_var )
 	last_var->next_variable = NULL;
     template_pdu->variables = NULL;
     snmp_free_pdu( template_pdu );
+}
+
+/* send_trap_to_sess: sends a trap to a session but assumes that the
+   pdu is constructed correctly for the session type. */
+void send_trap_to_sess(struct snmp_session *sess,
+                       struct snmp_pdu *template_pdu) {
+    struct snmp_pdu *pdu;
+
+    if (!sess || !template_pdu)
+        return;
+
+    DEBUGMSGTL(("send_trap_to_sess","sending trap type=%d, version=%d\n",
+                template_pdu->command, sess->version));
+    
+    if (sess->version == SNMP_VERSION_1 &&
+        (template_pdu->command == SNMP_MSG_TRAP2 ||
+         template_pdu->command == SNMP_MSG_INFORM))
+        return;	/* Skip v1 sinks for v2 only traps */
+    template_pdu->version = sess->version;
+    pdu = snmp_clone_pdu( template_pdu );
+    pdu->sessid = sess->sessid;	/* AgentX only ? */
+    if ( snmp_send( sess, pdu) == 0 ) {
+        snmp_sess_perror ("snmpd: send_trap", sess);
+        snmp_free_pdu( pdu );
+    }
+    else {
+        snmp_increment_statistic(STAT_SNMPOUTTRAPS);
+        snmp_increment_statistic(STAT_SNMPOUTPKTS);
+    }
 }
 
 void send_trap_vars (int trap, 
