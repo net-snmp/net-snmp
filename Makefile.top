@@ -25,7 +25,6 @@ mibdir = $(snmplibdir)/mibs
 INSTALL = @INSTALL@
 SED = @SED@
 RANLIB=@RANLIB@
-LD_SHLIB_CMD=@LD_SHLIB_CMD@
 
 # Compiler arguments
 CFLAGS = @CFLAGS@
