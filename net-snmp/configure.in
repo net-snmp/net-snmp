@@ -136,7 +136,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h)
+AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h)
 dnl Linux (lame) doesn't have these
@@ -270,6 +270,25 @@ if test "x$ac_cv_struct_rtentry_rt_next" = "xyes"; then
   AC_DEFINE(RTENTRY_RT_NEXT)
 fi
 
+fi
+
+dnl Check tcpstat for
+AC_CACHE_CHECK(if struct tcpstat has a tcps_rcvmemdrop node, 
+	ac_cv_struct_tcpstat_tcps_rcvmemdrop,
+[
+AC_TRY_COMPILE([
+#ifdef HAVE_NETINET_TCP_VAR_H
+#include<netinet/tcp_var.h>
+#endif
+],[
+struct tcpstat tcpstat;
+tcpstat.tcps_rcvmemdrop = 0;
+], ac_cv_struct_tcpstat_tcps_rcvmemdrop=yes,
+ac_cv_struct_tcpstat_tcps_rcvmemdrop=no)
+])
+
+if test "x$ac_cv_struct_tcpstat_tcps_rcvmemdrop" = "xyes"; then
+  AC_DEFINE(HAVE_TCPSTAT_TCPS_RCVMEMDROP)
 fi
 
 dnl Check ifnet entries using macro defined in aclocal.m4.
