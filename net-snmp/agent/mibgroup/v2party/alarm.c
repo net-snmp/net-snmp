@@ -94,7 +94,6 @@ rmonGetValue(oid *srcParty,
     u_short acl;
     WriteMethod *write_method;
     u_char *var;
-    struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
     struct partyEntry *srcp, *dstp;
     struct contextEntry *cxp;
@@ -168,25 +167,24 @@ rmonGetValue(oid *srcParty,
 		    cxp->contextIndex))
 	return 4;
     
-    memcpy(pi->srcParty, srcParty, srcPartyLen * sizeof(oid));
-    pi->srcPartyLength = srcPartyLen;
-    memcpy(pi->dstParty, dstParty, dstPartyLen * sizeof(oid));
-    pi->dstPartyLength = dstPartyLen;
-    memcpy(pi->context, context, contextLen * sizeof(oid));
-    pi->contextLength = contextLen;
-    pi->srcp = srcp;
-    pi->dstp = dstp;
-    pi->cxp = cxp;
+    memcpy(pdu->srcParty, srcParty, srcPartyLen * sizeof(oid));
+    pdu->srcPartyLen = srcPartyLen;
+    memcpy(pdu->dstParty, dstParty, dstPartyLen * sizeof(oid));
+    pdu->dstPartyLen = dstPartyLen;
+    memcpy(pdu->context, context, contextLen * sizeof(oid));
+    pdu->contextLen = contextLen;
+    pdu->srcp = srcp;
+    pdu->dstp = dstp;
+    pdu->cxp = cxp;
     
-    pi->version = SNMP_VERSION_2p;
-    pi->pdutype = SNMP_MSG_GET;
-    /* rest of pi is not needed */
+    pdu->version = SNMP_VERSION_2p;
+    pdu->command = SNMP_MSG_GET;
+    /* rest of pdu is not needed */
     
     memcpy(bigVar, variable, variableLen * sizeof(oid));
     bigVarLen = variableLen;
     
-// XXX function expects pdu !!
-    var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &write_method, pi,
+    var = getStatPtr(bigVar, &bigVarLen, &type, &len, &acl, 1, &write_method, pdu,
 		     &noSuchObject);
     if (var == NULL) {
 	return 6;
