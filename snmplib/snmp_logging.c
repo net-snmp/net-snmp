@@ -375,7 +375,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             logh->pri_max = pri_max;
             logh->token   = strdup(snmp_log_syslogname(0));
             logh->magic   = (void *)facility;
-	    snmp_enable_syslog(); /* XXX */
+	    snmp_enable_syslog_ident(snmp_log_syslogname(0), facility);
 	}
         break;
 
