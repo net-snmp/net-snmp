@@ -1,5 +1,5 @@
 /*
- * UCD-SNMP demo
+ * NET-SNMP demo
  *
  * This program demonstrates different ways to query a list of hosts
  * for a list of variables.
@@ -11,15 +11,15 @@
  * Niels Baggesen (Niels.Baggesen@uni-c.dk), 1999.
  */
 
-#include <ucd-snmp/ucd-snmp-config.h>
-#include <ucd-snmp/ucd-snmp-includes.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 
 /*
  * a list of hosts to query
  */
 struct host {
-  char *name;
-  char *community;
+  const char *name;
+  const char *community;
 } hosts[] = {
   { "test1",		"public" },
   { "test2",		"public" },
@@ -32,7 +32,7 @@ struct host {
  * a list of variables to query for
  */
 struct oid {
-  char *Name;
+  const char *Name;
   oid Oid[MAX_OID_LEN];
   int OidLen;
 } oids[] = {
@@ -77,13 +77,13 @@ int print_result (int status, struct snmp_session *sp, struct snmp_pdu *pdu)
   gettimeofday(&now, &tz);
   tm = localtime(&now.tv_sec);
   fprintf(stdout, "%.2d:%.2d:%.2d.%.6d ", tm->tm_hour, tm->tm_min, tm->tm_sec,
-	now.tv_usec);
+          now.tv_usec);
   switch (status) {
   case STAT_SUCCESS:
     vp = pdu->variables;
     if (pdu->errstat == SNMP_ERR_NOERROR) {
       while (vp) {
-        sprint_variable(buf, vp->name, vp->name_length, vp);
+        snprint_variable(buf, sizeof(buf), vp->name, vp->name_length, vp);
         fprintf(stdout, "%s: %s\n", sp->peername, buf);
 	vp = vp->next_variable;
       }
@@ -91,7 +91,7 @@ int print_result (int status, struct snmp_session *sp, struct snmp_pdu *pdu)
     else {
       for (ix = 1; vp && ix != pdu->errindex; vp = vp->next_variable, ix++)
         ;
-      if (vp) sprint_objid(buf, vp->name, vp->name_length);
+      if (vp) snprint_objid(buf, sizeof(buf), vp->name, vp->name_length);
       else strcpy(buf, "(none)");
       fprintf(stdout, "%s: %s: %s\n",
       	sp->peername, buf, snmp_errstring(pdu->errstat));
@@ -122,10 +122,9 @@ void synchronous (void)
 
     snmp_sess_init(&ss);			/* initialize session */
     ss.version = SNMP_VERSION_2c;
-    ss.peername = hp->name;
-    ss.community = hp->community;
+    ss.peername = strdup(hp->name);
+    ss.community = strdup(hp->community);
     ss.community_len = strlen(ss.community);
-    snmp_synch_setup(&ss);
     if (!(sp = snmp_open(&ss))) {
       snmp_perror("snmp_open");
       continue;
@@ -164,7 +163,7 @@ int asynch_response(int operation, struct snmp_session *sp, int reqid,
   struct session *host = (struct session *)magic;
   struct snmp_pdu *req;
 
-  if (operation == RECEIVED_MESSAGE) {
+  if (operation == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
     if (print_result(STAT_SUCCESS, host->sess, pdu)) {
       host->current_oid++;			/* send next GET (if any) */
       if (host->current_oid->Name) {
@@ -201,8 +200,8 @@ void asynchronous(void)
     struct snmp_session sess;
     snmp_sess_init(&sess);			/* initialize session */
     sess.version = SNMP_VERSION_2c;
-    sess.peername = hp->name;
-    sess.community = hp->community;
+    sess.peername = strdup(hp->name);
+    sess.community = strdup(hp->community);
     sess.community_len = strlen(sess.community);
     sess.callback = asynch_response;		/* default callback */
     sess.callback_magic = hs;
