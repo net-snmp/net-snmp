@@ -12,6 +12,8 @@ typedef struct override_data_s {
    size_t value_len;
 } override_data;
 
+/** @todo: (optionally) save values persistently when configured for
+ *  read-write */
 int
 override_handler(
     netsnmp_mib_handler               *handler,
@@ -81,8 +83,8 @@ netsnmp_parse_override(const char *token, char *line)
     }
     cp = copy_nword(cp, buf, sizeof(buf)-1);
 
-    if (!cp) {
-        config_perror("no variable type specified");
+    if (!cp && strcmp(buf,"null") != 0) {
+        config_perror("no variable value specified");
         return;
     }
 
@@ -92,7 +94,10 @@ netsnmp_parse_override(const char *token, char *line)
         return;
     }
     
-    copy_nword(cp, buf, sizeof(buf)-1);
+    if (cp)
+        copy_nword(cp, buf, sizeof(buf)-1);
+    else
+        buf[0] = 0;
 
     thedata = SNMP_MALLOC_TYPEDEF(override_data);
     thedata->type = type;
@@ -107,6 +112,7 @@ netsnmp_parse_override(const char *token, char *line)
             *((long *) thedata->value) = strtol(buf, NULL, 0);
             break;
 
+        case ASN_COUNTER:
         case ASN_UNSIGNED:
             MALLOC_OR_DIE(sizeof(u_long));
             *((u_long *) thedata->value) = strtoul(buf, NULL, 0);
@@ -131,6 +137,7 @@ netsnmp_parse_override(const char *token, char *line)
             break;
 
         case ASN_NULL:
+            thedata->value_len = 0;
             break;
 
         default:
