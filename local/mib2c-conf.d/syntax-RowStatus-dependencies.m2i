@@ -11,7 +11,7 @@
     /*
      * check RowStatus dependencies
      */
-    if (rowreq_ctx->column_set_flags & FLAG_$node.uc) {
+    if (rowreq_ctx->column_set_flags & COLUMN_$node.uc_FLAG) {
         /*
          * check for valid RowStatus transition (old, new)
          * (Note: move transition check to $node_check_value
@@ -49,7 +49,7 @@
              * can be destroyed.
              */
             if (ROWSTATUS_DESTROY == ${m2c_data_item}$node) {
-                if (rowreq_ctx->column_set_flags & ~FLAG_$node.uc) {
+                if (rowreq_ctx->column_set_flags & ~COLUMN_$node.uc_FLAG) {
                     DEBUGMSGTL(("$context",
                                 "destroy must be only varbind for row\n"));
                     return MFD_NOT_VALID_NOW;
