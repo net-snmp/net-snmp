@@ -11,3 +11,6 @@
 #define ARPTAB_SYMBOL "arptab_nb"
 #undef ARPTAB_SIZE_SYMBOL
 #define ARPTAB_SIZE_SYMBOL "arphd"
+
+/* ARP_Scan_Next needs a 4th ifIndex argument */
+#define ARP_SCAN_FOUR_ARGUMENTS

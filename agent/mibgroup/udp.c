@@ -576,34 +576,17 @@ struct inpcb *RetInPcb;
 	register struct inpcb *next;
 
 #ifndef linux
-#if defined(freebsd2)
-	if ((udp_inpcb.inp_list.le_next == NULL) ||
-	    (udp_inpcb.inp_list.le_next ==
+	if ((udp_inpcb.INP_NEXT_SYMBOL == NULL) ||
+	    (udp_inpcb.INP_NEXT_SYMBOL ==
              (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
-#else
-#if defined(netbsd1)
-	if ((udp_inpcb.inp_queue.cqe_next == NULL) ||
-	    (udp_inpcb.inp_queue.cqe_next == (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
-#else
-	if (udp_inpcb.inp_next == (struct inpcb *) auto_nlist_value(UDB_SYMBOL)) {
-#endif
-#endif
 	    return(0);	    /* "EOF" */
 	}
 
-#ifdef netbsd1
-	next = udp_inpcb.inp_queue.cqe_next;
-#else
-#ifdef freebsd2
-	next = udp_inpcb.inp_list.le_next;
-#else
-        next = udp_inpcb.inp_next;
-#endif
-#endif
+        next = udp_inpcb.INP_NEXT_SYMBOL;
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
 #if !(defined(netbsd1) || defined(freebsd2) || defined(linux))
-	if (udp_inpcb.inp_prev != udp_prev)	   /* ??? */
+	if (udp_inpcb.INP_PREV_SYMBOL != udp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
 #endif
 	*RetInPcb = udp_inpcb;
