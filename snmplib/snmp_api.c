@@ -1165,33 +1165,28 @@ snmp_read(fdset)
 			if (sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid,
 					 pdu, sp->callback_magic) == 1){
 			    /* successful, so delete request */
-			    orp = rp;
-			    if (isp->requests == orp){
+/* Begin Modif PVA GTMH 10/12/96 */
+			    if (isp->requests == rp){
 				/* first in list */
-				isp->requests = orp->next_request;
-				if (isp->requestsEnd == orp)
+				isp->requests = rp->next_request;
+				if (isp->requestsEnd == rp)
 				    isp->requestsEnd = NULL;
 			    } else {
-				for(rp = isp->requests; rp;
-				    rp = rp->next_request){
-				    if (rp->next_request == orp){
-					if (isp->requestsEnd == orp)
-					    isp->requestsEnd = rp;
-					/* check logic ^^^: is this the
-					   new "end"? XXX */
-					/* link around it */
-					rp->next_request = orp->next_request;
-					break;
-				    }
-				}
+				orp->next_request = rp->next_request;
+				if (isp->requestsEnd == rp)
+				    isp->requestsEnd = orp;
 			    }
-			    snmp_free_pdu(orp->pdu);
-			    free((char *)orp);
+			    snmp_free_pdu(rp->pdu);
+			    free((char *)rp);
+/* End Modif PVA GTMH 10/12/96 */
 			    /* there shouldn't be any more requests with the
 			       same reqid */
 			    break;
 			}
 		    }
+/* Begin Modif PVA GTMH 10/12/96 */
+		    orp = rp;
+/* End Modif PVA GTMH 10/12/96 */
 		}
 	    } else if (pdu->command == GET_REQ_MSG
 		       || pdu->command == GETNEXT_REQ_MSG
@@ -1348,8 +1343,9 @@ snmp_timeout(){
 		    } else {
 			orp->next_request = rp->next_request;
 			if (isp->requestsEnd == rp)
-			    isp->requestsEnd = rp->next_request;
-			/* check logic ^^^: is this the new "end"? XXX */
+/* Begin Modif PVA GTMH 10/12/96 */
+			    isp->requestsEnd = orp;
+/* End Modif PVA GTMH 10/12/96 */
 		    }
 		    snmp_free_pdu(rp->pdu);
 		    freeme = rp;

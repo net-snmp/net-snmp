@@ -35,6 +35,9 @@ struct synch_state {
 
 extern struct synch_state snmp_synch_state;
 
+/* Modif PVA GTmH 21/05/96 return pointer to added variable */
+struct variable_list* snmp_add_null_var();
+/* End Modif PVA GTmH 21/05/96 return pointer to added variable */
 struct snmp_pdu	*snmp_pdu_create();
 struct snmp_pdu *snmp_fix_pdu();
 struct snmp_pdu *snmp_clone_pdu();
