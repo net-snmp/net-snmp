@@ -260,6 +260,8 @@ EXPORTS
 	snmp_store
 	atime_diff
 	atime_newMarker
+	atime_setMarker
+	atime_ready
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
