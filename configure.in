@@ -87,7 +87,9 @@ else
 fi
 ])
 
-AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
+if test "x$ac_cv_DMEM_LOC" != "xnone"; then
+  AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
+fi
 
 dnl Checks for libraries.
 dnl Replace `main' with a function in -lX11:
