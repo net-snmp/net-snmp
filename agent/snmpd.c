@@ -436,6 +436,7 @@ main(argc, argv)
 	}
 	sdlist[sdlen] = sd;
 	portlist[sdlen] = dest_port;
+        fcntl(sd,F_SETFD,1);           /* close on exec */
 	if (++sdlen == 32){
 	    printf("No more sockets... ignoring rest of file\n");
 	    break;
