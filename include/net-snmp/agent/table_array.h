@@ -51,12 +51,14 @@ typedef struct array_group_s {
 
     int                status;
 
+    void               *myvoid;
 } array_group;
 
 typedef int (UserOidCompare)(void *lhs, void *rhs);
 typedef int (UserGetProcessor)(request_info *, oid_array_header *,
                                table_request_info *);
 typedef oid_array_header * (UserRowMethod)(oid_array_header *);
+typedef int (UserRowAction)(oid_array_header *, oid_array_header *, array_group *);
 typedef void (UserGroupMethod)( array_group * );
 
 /*
@@ -67,6 +69,10 @@ typedef struct table_array_callbacks_s {
      * XXX-rks: UserOidCompare         *compare;
      */
     UserGetProcessor       *get_value;
+
+    UserRowAction          *can_activate;
+    UserRowAction          *can_deactivate;
+    UserRowAction          *can_delete;
 
     UserRowMethod          *create_row;
     UserRowMethod          *duplicate_row;
