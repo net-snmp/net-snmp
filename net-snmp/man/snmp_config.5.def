@@ -57,7 +57,7 @@ dumpPacket true
 .PP
 into the snmp.conf file.  But, this would turn it on for all of the
 applications.  So, instead, you can put the same line in the
-snmpd.conf file so that it only applies to the snmpd demon.  However,
+snmpd.conf file so that it only applies to the snmpd daemon.  However,
 you need to tell the parser to expect this line.  You do this by
 putting a special type specification token inside a [] set.  In other
 words, inside your snmpd.conf file you could put the above snmp.conf
