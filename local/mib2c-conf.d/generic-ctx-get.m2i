@@ -41,10 +41,17 @@
 @end@
  */
 @if $m2c_node_needlength == 1@
+    /*
+     * make sure there is enough space for data
+     */
     if ((NULL == $m2c_ctx_lh) || ($m2c_ctx_lhs < $m2c_ctx_rhs)) {
 @   if $m2c_node_realloc == 0@
+        snmp_log(LOG_ERR,"not enough space for value\n");
         return MFD_ERROR;
 @   else@
+        /*
+         * allocate space for data
+         */
 @      if $m2c_node_realloc == 1@
         $m2c_ctx_lh = realloc($m2c_ctx_lh, $m2c_ctx_rhs * sizeof(${m2c_ctx_lh}[0]));
 @      else@
