@@ -1338,9 +1338,11 @@ while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
     #---------------------
-    # make sure module wasn't explicity excluded
+    # make sure module wasn't explicity excluded, or already added
     #
     if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
+      :
+    elif echo " $module_list " | grep " $i " > /dev/null; then
       :
     else
       #---------------------
@@ -1348,9 +1350,26 @@ while test "x$new_module_list" != "x"; do
       #
       if test -f $srcdir/$mibdir/$i.h; then
         #---------------------
-        # clear new_list (list of new modules added for $y by config_* macros)
+        # check if $i has any conflicts
         #
-        new_list=""
+	new_list="`$MODULECPP $srcdir/$mibdir/$i.h | grep config_exclude | sed 's/.*config_exclude(\(.*\)).*/\1/'`"
+	if test "x$new_list" != "x"; then
+	  for j in $new_list
+	    do
+	    if echo " $new_mib_module_list " | grep " $j " > /dev/null; then
+	      changequote([, ])
+	      AC_MSG_WARN([mib module "$i" excludes module "$j" but you told me to compile with it])
+              changequote(, )
+	    elif echo " $new_list_two " | grep " $j " > /dev/null; then
+	      changequote([, ])
+	      AC_MSG_WARN([mib module "$i" excludes module "$j" but another module requires it])
+              changequote(, )
+	    else
+	      new_with_out_mib_modules="$j $new_with_out_mib_modules"
+#              echo $ECHO_N " ***$j$ECHO_C"
+	    fi
+	  done
+	fi
         #---------------------
         # check if $i has any architecture specific requirements
         #
@@ -1371,7 +1390,7 @@ while test "x$new_module_list" != "x"; do
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
 	    do
-	    if test ! -f $srcdir/$mibdir/$j.h; then
+	    if test ! -f $srcdir/$mibdir/$j.h -a ! -f $srcdir/$mibdir/$j.c; then
 	      changequote([, ])
 	      AC_MSG_ERROR([mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir])
               changequote(, )
@@ -1405,18 +1424,34 @@ while test "x$new_module_list" != "x"; do
 		fi
 	    done
 	fi # new mibs
-      else # no $i.h
+        #-------------------
+        # add $i to module list, add header to mib_module_includes
+        #
+        module_list="$module_list $i"
+        echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
+        module_list_h="$module_list_h mibgroup/$i.h"
+        #-------------------
+        # check for unsupported config_load_mib
+        #
+        if $MODULECPP $srcdir/$mibdir/$i.h | grep config_load_mib > /dev/null 2>&1; then
+          changequote([, ])
+      	  AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
+          changequote(, )
+        fi # grep config_load_mib
+        #-------------------
+        # check for config_parse_dot_conf
+        #
+        $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+      elif test -f $srcdir/$mibdir/$i.c; then
+	      new_list_two="$new_list_two $j"
+      else # no $i.h or $I.c
         changequote([, ])
 	AC_MSG_ERROR([module files $i.h or $i.c could not be found in $srcdir/$mibdir])
         changequote(, )
       fi # no $i.h
       #-------------------
-      # add $i to module list, add header to mib_module_includes, and
       # check for init/shutdown routines to
       #
-      module_list="$module_list $i"
-      echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
-      module_list_h="$module_list_h mibgroup/$i.h"
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
@@ -1437,18 +1472,6 @@ while test "x$new_module_list" != "x"; do
 	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
       fi # module directory test
-      #-------------------
-      # check for unsupported config_load_mib
-      #
-      if $MODULECPP $srcdir/$mibdir/$i.h | grep config_load_mib > /dev/null 2>&1; then
-        changequote([, ])
-      	AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
-        changequote(, )
-      fi # grep config_load_mib
-      #-------------------
-      # check for config_parse_dot_conf
-      #
-      $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
       #-------------------
       # define USING_*_MODULE
       #
