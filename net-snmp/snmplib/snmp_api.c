@@ -708,6 +708,8 @@ register_default_handlers(void)
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "16bitIDs",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "clientaddr",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CLIENT_ADDR);
 }
 
 void

@@ -97,6 +97,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_MIBDIRS           11
 #define NETSNMP_DS_LIB_OIDSUFFIX         12
 #define NETSNMP_DS_LIB_OIDPREFIX         13
+#define NETSNMP_DS_LIB_CLIENT_ADDR       14
 
     /*
      * end storage definitions 

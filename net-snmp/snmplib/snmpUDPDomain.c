@@ -190,6 +190,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
     netsnmp_transport *t = NULL;
     int             rc = 0, udpbuf = (1 << 17);
     char           *string = NULL;
+    char           *client_socket = NULL;
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
@@ -300,7 +301,21 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         t->data_length = 0;
     } else {
         /*
-         * This is a client session.  Save the address in the
+         * This is a client session.  If we've been given a
+         * client address to send from, then bind to that.
+         * Otherwise the send will use "something sensible".
+         */
+        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_CLIENT_ADDR);
+        if (client_socket) {
+            struct sockaddr_in client_addr;
+            netsnmp_sockaddr_in( &client_addr, client_socket, 0);
+            client_addr.sin_port = 0;
+            bind(t->sock, (struct sockaddr *)&client_addr,
+                  sizeof(struct sockaddr));
+        }
+        /*
+         * Save the (remote) address in the
          * transport-specific data pointer for later use by netsnmp_udp_send.
          */
 
