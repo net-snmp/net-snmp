@@ -49,24 +49,13 @@ get_debug_handler(void) {
 void
 debug_print_requests(request_info              *requests) 
 {
-    size_t buf_len = 256;
-    size_t out_len = 0;
-    u_char *buf = malloc(buf_len);
-    request_info              *request;
+    request_info *request;
     
-    if (buf == NULL) {
-	DEBUGMSGTL(("helper:debug",
-		    "malloc() failure in debug_print_requests()\n"));
-	return;
-    }
-
     for (request = requests; request; request = request->next) {
-        out_len = 0;
-        sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
-                                request->requestvb->name,
-                                request->requestvb->name_length,
-                                request->requestvb);
-        DEBUGMSGTL(("helper:debug", "      #%2d: %s\n", request->index, buf));
+        DEBUGMSGTL(("helper:debug", "      #%2d: ", request->index));
+	DEBUGMSGVAR(("helper:debug", request->requestvb));
+	DEBUGMSG(("helper:debug", "\n"));
+
         if (request->processed)
             DEBUGMSGTL(("helper:debug", "        [processed]\n"));
         if (request->processed)
@@ -83,7 +72,6 @@ debug_print_requests(request_info              *requests)
             DEBUGMSG(("helper:debug", "]\n"));
         }
     }
-    free(buf);
 }
 
 

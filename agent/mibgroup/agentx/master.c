@@ -212,20 +212,9 @@ agentx_got_response(int operation,
             DEBUGMSGOID(("agentx/master", var->name, var->name_length));
             DEBUGMSG(("agentx/master", "\n"));
             if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
-		u_char *buf = NULL;
-		size_t buf_len = 0, out_len = 0;
-		if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
-					  var->name, var->name_length, var)) {
-		    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
-		} else {
-		    if (buf != NULL) {
-			DEBUGMSGTL(("snmp_agent", "    >> %s [TRUNCATED]\n",
-				    buf));
-		    }
-		}
-		if (buf != NULL) {
-		    free(buf);
-		}
+		DEBUGMSGTL(("snmp_agent", "    >> "));
+		DEBUGMSGVAR(("snmp_agent", var));
+		DEBUGMSG(("snmp_agent", "\n"));
             }
 
             /* update the oid in the original request */
