@@ -37,18 +37,20 @@ sub InitMakeParams {
 
     my $inc_path1 = "${prefix}${sep}include";
     my $inc_path2 = "${sep}usr${sep}include";
+    my $inc_path3 = "..${sep}..${sep}include";
     my $lib_path1 = "${prefix}${sep}lib";
     my $lib_path2 = "${sep}usr${sep}lib";
+    my $lib_path3 = "..${sep}..${sep}snmplib${sep}.libs";
 
     my @IncludeFiles = qw[net-snmp/net-snmp-config.h
 			  net-snmp/net-snmp-includes.h];
 
-    my @IncludeDirs = ($inc_path2, $inc_path1);
+    my @IncludeDirs = ($inc_path3, $inc_path2, $inc_path1);
 
     my $IncludeDir = find_files(\@IncludeFiles,\@IncludeDirs) ||
 	prompt("Where are the net-snmp include files?","$inc_path1");
 
-    my @LibDirs = ($lib_path1, $lib_path2);
+    my @LibDirs = ($lib_path1, $lib_path2, $lib_path3);
 
     my $LibDir = find_files(["$snmp_lib"],\@LibDirs) ||
 	prompt("Where is the net-snmp library installed?","$lib_path2");
