@@ -36,8 +36,10 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifndef STREAM_NEEDS_KERNEL_ISLANDS
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
+#endif
 #endif
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
@@ -77,6 +79,11 @@
 #endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
+#endif
+#ifdef STREAM_NEEDS_KERNEL_ISLANDS
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
