@@ -73,6 +73,16 @@ SOFTWARE.
 #include <tcpd.h>
 #endif
 
+#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
+# define NETSNMP_TMP_NDEBUG
+# define NDEBUG
+#endif
+#include <assert.h>
+#if defined(NETSNMP_TMP_NDEBUG)
+# undef NDEBUG
+# undef NETSNMP_TMP_NDEBUG
+#endif
+
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -115,7 +125,9 @@ typedef struct _agent_nsap {
 
 static agent_nsap *agent_nsap_list = NULL;
 static netsnmp_agent_session *agent_session_list = NULL;
+static netsnmp_agent_session *netsnmp_processing_set = NULL;
 netsnmp_agent_session *agent_delegated_list = NULL;
+netsnmp_agent_session *netsnmp_agent_queued_list = NULL;
 
 
 int             netsnmp_agent_check_packet(netsnmp_session *,
@@ -125,11 +137,17 @@ int             netsnmp_agent_check_parse(netsnmp_session *, netsnmp_pdu *,
                                           int);
 void            delete_subnetsnmp_tree_cache(netsnmp_agent_session *asp);
 int             handle_pdu(netsnmp_agent_session *asp);
+int             netsnmp_handle_request(netsnmp_agent_session *asp,
+                                       int status);
 int             netsnmp_wrap_up_request(netsnmp_agent_session *asp,
                                         int status);
 int             check_delayed_request(netsnmp_agent_session *asp);
 int             handle_getnext_loop(netsnmp_agent_session *asp);
 int             handle_set_loop(netsnmp_agent_session *asp);
+
+int             netsnmp_check_queued_chain_for(netsnmp_agent_session *asp);
+int             netsnmp_add_queued(netsnmp_agent_session *asp);
+
 
 static int      current_globalid = 0;
 
@@ -964,10 +982,56 @@ netsnmp_check_for_delegated_and_add(netsnmp_agent_session *asp)
              */
             asp->next = agent_delegated_list;
             agent_delegated_list = asp;
+            DEBUGMSGTL(("snmp_agent", "delegate session == %08p\n", asp));
         }
         return 1;
     }
     return 0;
+}
+
+int
+netsnmp_check_queued_chain_for(netsnmp_agent_session *asp)
+{
+    netsnmp_agent_session *asptmp;
+    for (asptmp = netsnmp_agent_queued_list; asptmp; asptmp = asptmp->next) {
+        if (asptmp == asp)
+            return 1;
+    }
+    return 0;
+}
+
+int
+netsnmp_add_queued(netsnmp_agent_session *asp)
+{
+    netsnmp_agent_session *asp_tmp;
+
+    /*
+     * first item?
+     */
+    if (NULL == netsnmp_agent_queued_list) {
+        netsnmp_agent_queued_list = asp;
+        return 1;
+    }
+
+
+    /*
+     * add to end of queued request chain 
+     */
+    asp_tmp = netsnmp_agent_queued_list;
+    for (; asp_tmp; asp_tmp = asp_tmp->next) {
+        /*
+         * already in queue?
+         */
+        if (asp_tmp == asp)
+            break;
+
+        /*
+         * end of queue?
+         */
+        if (NULL == asp_tmp->next)
+            asp_tmp->next = asp;
+    }
+    return 1;
 }
 
 
@@ -976,6 +1040,16 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 {
     netsnmp_variable_list *var_ptr;
     int             i, n = 0, r = 0;
+
+    /*
+     * if this request was a set, clear the global now that we are
+     * done.
+     */
+    if (asp == netsnmp_processing_set) {
+        DEBUGMSGTL(("snmp_agent", "SET request complete, asp = %08p\n",
+                    asp));
+        netsnmp_processing_set = NULL;
+    }
 
     /*
      * some stuff needs to be saved in special subagent cases 
@@ -1165,7 +1239,7 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
 {
     netsnmp_agent_session *a, **prevNext = &agent_session_list;
 
-    DEBUGMSGTL(("snmp_agent", "REMOVE %08p\n", asp));
+    DEBUGMSGTL(("snmp_agent", "REMOVE session == %08p\n", asp));
 
     for (a = agent_session_list; a != NULL; a = *prevNext) {
         if (a == asp) {
@@ -1214,8 +1288,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
                    netsnmp_pdu *pdu, void *magic)
 {
     netsnmp_agent_session *asp;
-    int             status, access_ret;
-    netsnmp_variable_list *var_ptr;
+    int             status, access_ret, rc;
 
     /*
      * We only support receiving here.  
@@ -1288,46 +1361,14 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         }
     }
 
-    /*
-     * process the request 
-     */
-    status = handle_pdu(asp);
-
-    /*
-     * print the results in approrpiate debugging mode 
-     */
-    DEBUGIF("results") {
-        DEBUGMSGTL(("results", "request results (status = %d):\n",
-                    status));
-        for (var_ptr = asp->pdu->variables; var_ptr;
-             var_ptr = var_ptr->next_variable) {
-            DEBUGMSGTL(("results", "\t"));
-            DEBUGMSGVAR(("results", var_ptr));
-            DEBUGMSG(("results", "\n"));
-        }
-    }
-
-    /*
-     * check for uncompleted requests 
-     */
-    if (netsnmp_check_for_delegated_and_add(asp)) {
-        /*
-         * add to delegated request chain 
-         */
-        asp->status = status;
-    } else {
-        /*
-         * if we don't have anything outstanding (delegated), wrap up 
-         */
-        return netsnmp_wrap_up_request(asp, status);
-    }
+    rc = netsnmp_handle_request(asp, status);
 
     /*
      * done 
      */
     DEBUGMSGTL(("snmp_agent", "end of handle_snmp_packet, asp = %08p\n",
                 asp));
-    return 1;
+    return rc;
 }
 
 netsnmp_request_info *
@@ -1899,13 +1940,17 @@ handle_var_requests(netsnmp_agent_session *asp)
 
 /*
  * loop through our sessions known delegated sessions and check to see
- * if they've completed yet 
+ * if they've completed yet. If there are no more delegated sessions,
+ * check for and process any queued requests
  */
 void
 netsnmp_check_outstanding_agent_requests(void)
 {
     netsnmp_agent_session *asp, *prev_asp = NULL, *next_asp = NULL;
 
+    /*
+     * deal with delegated requests
+     */
     for (asp = agent_delegated_list; asp; prev_asp = asp, asp = next_asp) {
         next_asp = asp->next;   /* save in case we clean up asp */
         if (!netsnmp_check_for_delegated(asp)) {
@@ -1923,6 +1968,54 @@ netsnmp_check_outstanding_agent_requests(void)
              */
             check_delayed_request(asp);
         }
+    }
+
+    /*
+     * if we are processing a set and there are more delegated
+     * requests, keep waiting before getting to queued requests.
+     */
+    if (netsnmp_processing_set && (NULL != agent_delegated_list))
+        return;
+
+    while (netsnmp_agent_queued_list) {
+
+        /*
+         * if we are processing a set, the first item better be
+         * the set being (or waiting to be) processed.
+         */
+        assert((!netsnmp_processing_set) ||
+               (netsnmp_processing_set == netsnmp_agent_queued_list));
+
+        /*
+         * if the top request is a set, don't pop it
+         * off if there are delegated requests
+         */
+        if ((netsnmp_agent_queued_list->pdu->command == SNMP_MSG_SET) &&
+            (agent_delegated_list)) {
+
+            assert(netsnmp_processing_set == NULL);
+
+            netsnmp_processing_set = netsnmp_agent_queued_list;
+            DEBUGMSGTL(("snmp_agent", "SET request remains queued while "
+                        "delegated requests finish, asp = %08p\n", asp));
+            break;
+        }
+
+        /*
+         * pop the first request and process it
+         */
+        asp = netsnmp_agent_queued_list;
+        netsnmp_agent_queued_list = asp->next;
+        DEBUGMSGTL(("snmp_agent",
+                    "processing queued request, asp = %08p\n", asp));
+
+        netsnmp_handle_request(asp, asp->status);
+
+        /*
+         * if we hit a set, stop
+         */
+        if (NULL != netsnmp_processing_set)
+            break;
     }
 }
 
@@ -1956,6 +2049,9 @@ int
 check_delayed_request(netsnmp_agent_session *asp)
 {
     int             status = SNMP_ERR_NOERROR;
+
+    DEBUGMSGTL(("snmp_agent", "processing delegated request, asp = %08p\n",
+                asp));
 
     switch (asp->mode) {
     case SNMP_MSG_GETBULK:
@@ -2279,6 +2375,87 @@ handle_set_loop(netsnmp_agent_session *asp)
             return asp->status;
     }
     return asp->status;
+}
+
+int
+netsnmp_handle_request(netsnmp_agent_session *asp, int status)
+{
+    /*
+     * if this isn't a delegated request trying to finish,
+     * processing of a set request should not start until all
+     * delegated requests have completed, and no other new requests
+     * should be processed until the set request completes.
+     */
+    if ((0 == netsnmp_check_delegated_chain_for(asp)) &&
+        (asp != netsnmp_processing_set)) {
+        /*
+         * if we are processing a set and this is not a delegated
+         * request, queue the request
+         */
+        if (netsnmp_processing_set) {
+            netsnmp_add_queued(asp);
+            DEBUGMSGTL(("snmp_agent",
+                        "request queued while processing set, "
+                        "asp = %08p\n", asp));
+            return 1;
+        }
+
+        /*
+         * check for set request
+         */
+        if (asp->pdu->command == SNMP_MSG_SET) {
+            netsnmp_processing_set = asp;
+
+            /*
+             * if there are delegated requests, we must wait for them
+             * to finishd.
+             */
+            if (agent_delegated_list) {
+                DEBUGMSGTL(("snmp_agent", "SET request queued while "
+                            "delegated requests finish, asp = %08p\n",
+                            asp));
+                netsnmp_add_queued(asp);
+                return 1;
+            }
+        }
+    }
+
+    /*
+     * process the request 
+     */
+    status = handle_pdu(asp);
+
+    /*
+     * print the results in appropriate debugging mode 
+     */
+    DEBUGIF("results") {
+        netsnmp_variable_list *var_ptr;
+        DEBUGMSGTL(("results", "request results (status = %d):\n",
+                    status));
+        for (var_ptr = asp->pdu->variables; var_ptr;
+             var_ptr = var_ptr->next_variable) {
+            DEBUGMSGTL(("results", "\t"));
+            DEBUGMSGVAR(("results", var_ptr));
+            DEBUGMSG(("results", "\n"));
+        }
+    }
+
+    /*
+     * check for uncompleted requests 
+     */
+    if (netsnmp_check_for_delegated_and_add(asp)) {
+        /*
+         * add to delegated request chain 
+         */
+        asp->status = status;
+    } else {
+        /*
+         * if we don't have anything outstanding (delegated), wrap up
+         */
+        return netsnmp_wrap_up_request(asp, status);
+    }
+
+    return 1;
 }
 
 int
