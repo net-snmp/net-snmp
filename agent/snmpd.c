@@ -103,7 +103,7 @@ typedef long    fd_mask;
 #include "acl.h"
 #include "mib.h"
 #if USING_MIBII_SNMP_MIB_MODULE
-#include "mibgroup/snmp_mib.h"
+#include "mibgroup/mibII/snmp_mib.h"
 #endif
 #include "snmp_client.h"
 #include "snmpd.h"
