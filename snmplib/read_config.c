@@ -1001,7 +1001,6 @@ read_config_files(int when)
         free_config();
 
     confpath = get_configuration_directory();
-    perspath = get_persistent_directory();
 
     /*
      * read all config file types 
@@ -1009,6 +1008,12 @@ read_config_files(int when)
     for (; ctmp != NULL; ctmp = ctmp->next) {
 
         ltmp = ctmp->start;
+
+        /*
+         * persistent path can change via conf file, so make sure
+         * we have a valid pointer.
+         */
+        perspath = get_persistent_directory();
 
         /*
          * read the config files 
