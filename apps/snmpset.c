@@ -488,7 +488,7 @@ ascii_to_binary(cp, bufp)
     u_char *bp = bufp;
 
     for(; *cp != '\0'; cp++){
-	if (isspace(*cp))
+	if (isspace(*cp) || *cp == '.')
 	    continue;
 	if (!isdigit(*cp)){
 	    fprintf(stderr, "Input error\n");
