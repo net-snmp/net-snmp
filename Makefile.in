@@ -102,7 +102,6 @@ configclean:
 	rm -f mib_module_config.h			\
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
-		agent/mibgroup/mib_module_loads.h 	\
 		agent/mibgroup/mib_module_dot_conf.h
 	rm -f *.core
 
