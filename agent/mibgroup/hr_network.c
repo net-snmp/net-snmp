@@ -171,12 +171,15 @@ static int		HRN_savedErrors;;
 void
 Init_HR_Network()
 {
+#ifndef solaris2
    Interface_Scan_Init();
+#endif
 }
 
 int
 Get_Next_HR_Network()
 {
+#ifndef solaris2
 #if defined(linux) || defined(sunV3)
     if (Interface_Scan_Next( &HRN_index, HRN_name, &HRN_ifnet))
 #else
@@ -184,6 +187,7 @@ Get_Next_HR_Network()
 #endif
         return ( HRDEV_NETWORK << HRDEV_TYPE_SHIFT ) + HRN_index;
     else
+#endif
         return -1;
 }
 
