@@ -216,8 +216,7 @@ AC_ARG_WITH(out_mib_modules,
   Optional modules for C coders to look at and/or include as extension examples:
   
     examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
-    examples/example:       example C code extension.
-    examples/wombat:        template file similar to example.])
+    examples/example:       example C code extension.])
 
 dnl
 dnl otherwise prompted information
@@ -464,9 +463,21 @@ if test "x$with_shared" = "xyes"; then
 	;;
 
     netbsd*|openbsd*)
-	SHLIB_LD_CMD="ld -Bshareable -o"
-	CC_RUNTIME_ARG="-R$libdir"
-	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -m $(libdir)'
+	AC_MSG_CHECKING(if this is ELF system)
+	AC_EGREP_CPP(yes, [dnl
+#ifdef __ELF__
+yes
+#endif], [dnl
+		AC_MSG_RESULT([yes])
+		SHLIB_LD_CMD="ld -Bshareable -o"
+		CC_RUNTIME_ARG="-R$libdir"
+		SHLIB_LDCONFIG_CMD=
+	], [dnl
+		AC_MSG_RESULT([no])
+		SHLIB_LD_CMD="ld -Bshareable -o"
+		CC_RUNTIME_ARG="-R$libdir"
+		SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -m $(libdir)'
+	])
 	;;
 
     hpux*)
