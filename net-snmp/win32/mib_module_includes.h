@@ -152,3 +152,11 @@
 #include "mibgroup/agentx/agentx_config.h"
 #endif
 
+#ifdef USING_EXAMPLES_EXAMPLE_MODULE
+#include "mibgroup/examples/example.h"
+#endif
+
+#ifdef USING_EXAMPLES_UCDDEMOPUBLIC_MODULE
+#include "mibgroup/examples/ucdDemoPublic.h"
+#endif
+
