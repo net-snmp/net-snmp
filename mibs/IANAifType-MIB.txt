@@ -121,7 +121,7 @@ IANAifType ::= TEXTUAL-CONVENTION
 	         qllc(68),          
 		 fastEtherFX(69),   
 	         channel(70),       
-	         IEEE802.11(71),    
+	         IEEE802-11(71),    
 	         ibm370parChan(72), 
 	         ESCON(73),	         
 	         DLSw(74),          
