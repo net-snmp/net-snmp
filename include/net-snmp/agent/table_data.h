@@ -94,6 +94,7 @@ extern          "C" {
                                         netsnmp_table_row *row, int column,
                                         u_char type, u_char * result_data,
                                         size_t result_data_len);
+    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 
 #define netsnmp_table_data_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)

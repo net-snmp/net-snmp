@@ -695,6 +695,18 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     return newrow;
 }
 
+int
+netsnmp_table_data_num_rows(netsnmp_table_data *table)
+{
+    int i=0;
+    netsnmp_table_row *row;
+    if (!table)
+        return 0;
+    for (row = table->first_row; row; row = row->next) {
+        i++;
+    }
+    return i;
+}
 /*
  * @} 
  */
