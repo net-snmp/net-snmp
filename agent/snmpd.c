@@ -125,7 +125,7 @@ extern void init_snmp __P((void));
 int receive __P((int *, int));
 int snmp_read_packet __P((int));
 char *sprintf_stamp __P((time_t *));
-int agent_party_init __P((u_long, u_short, char *));
+int agent_party_init __P((u_int, u_short, char *));
 struct snmp_session *create_v1_trap_session __P((struct snmp_session*, char *, char *));
 void send_v1_trap __P((struct snmp_session *, int));
 char *reverse_bytes __P((char *, int));
@@ -161,11 +161,11 @@ char *sprintf_stamp (now)
  */
 int
 agent_party_init(myaddr, dest_port, view)
-    u_long myaddr;
+    u_int myaddr;
     u_short dest_port;
     char *view;
 {
-    u_long addr;
+    u_int addr;
     u_short port;
     oid partyid1[64];
     int partyidlen1;
@@ -532,7 +532,7 @@ main(argc, argv)
     int port_flag = 0, ret;
     u_short dest_port = 161;
     struct partyEntry *pp;
-    u_long myaddr;
+    u_int myaddr;
     int dont_fork=0;
     char logfile[300], miscfile[300];
     char *cptr, **argvptr;
@@ -686,7 +686,7 @@ main(argc, argv)
           continue;	/* don't listen for non-local parties */
 #else
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || memcmp(reverse_bytes(&myaddr,sizeof(long)),
+	    || memcmp(reverse_bytes(&myaddr,sizeof(myaddr)),
                     pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
 #endif

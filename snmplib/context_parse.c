@@ -73,7 +73,7 @@ read_context_database(filename)
     oid proxyId[64];
     char name[64];	/* friendly name */
     struct contextEntry *cxp, *rp;
-    u_long myaddr;
+    u_int myaddr;
     int diff;
 
     fp = fopen(filename, "r");

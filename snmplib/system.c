@@ -70,7 +70,7 @@ SOFTWARE.
 #define IFF_LOOPBACK 0
 #endif
 #define LOOPBACK    0x7f000001
-u_long get_myaddr __P((void))
+u_int get_myaddr __P((void))
 {
     int sd;
     struct ifconf ifc;
