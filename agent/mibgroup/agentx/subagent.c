@@ -183,10 +183,7 @@ int
 handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
-    struct agent_snmp_session  *asp = NULL;
     struct agent_set_info      *asi;
-    int status, allDone, i;
-    struct variable_list *var_ptr, *var_ptr2, *v = NULL, *ov = NULL, *w = NULL;
     int (*mycallback)(int operation, struct snmp_session *session, int reqid,
                       struct snmp_pdu *pdu, void *magic);
     void *retmagic;
