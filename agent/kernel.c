@@ -45,13 +45,20 @@ init_kmem(const char *file)
     char err[4096];
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
     if (kd == NULL) {
- snmp_log(LOG_NOTICE, "init_kmem: kvm_openfiles failed: %s\n", err);
+	snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
+#ifndef NO_ROOT_ACCESS
+	exit(1);
+#endif
     }
 #else
     kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
-    if (!kd)
-      snmp_log(LOG_NOTICE, "init_kmem: kvm_open failed with errno %d\n", errno);
+    if (!kd) {
+	snmp_log(LOG_CRIT, "init_kmem: kvm_open failed with errno %d\n", errno);
+#ifndef NO_ROOT_ACCESS
+	exit(1);
 #endif
+    }
+#endif	/* HAVE_KVM_OPENFILES */
 }
 
 
@@ -99,7 +106,7 @@ init_kmem(const char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    log_perror("init_kmem open file");
+    log_perror(file);
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -107,7 +114,7 @@ init_kmem(const char *file)
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    log_perror("init_kmem open /dev/mem");
+    log_perror("/dev/mem");
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
@@ -116,7 +123,7 @@ init_kmem(const char *file)
 #ifdef DMEM_LOC
   swap = open(DMEM_LOC,O_RDONLY);
   if (swap < 0){
-    log_perror("init_kmem DMEM_LOC");
+    log_perror(DMEM_LOC);
 #ifndef NO_ROOT_ACCESS
     exit(1);
 #endif
