@@ -2,6 +2,7 @@
 # Makefile.in (at the root of ucd-snmp)
 #
 
+top_builddir	= .
 TARG		=	bin/snmpget bin/snmpgetnext bin/snmpset 	\
 			bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk \
 			bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
