@@ -936,7 +936,6 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
 
     /*
      * If we haven't already opened the file, then do so.
