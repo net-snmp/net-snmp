@@ -227,28 +227,34 @@ int
 unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
-    oid ubound = 0;
-
-    if (pdu->range_subid != 0) {
-	ubound = pdu->variables->val.objid[pdu->range_subid-1];
-    }
+    int rc = 0;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL) {
         return AGENTX_ERR_NOT_OPEN;
     }
 
-    switch (unregister_mib_context(pdu->variables->name,
-    		       pdu->variables->name_length,
-		       pdu->priority, pdu->range_subid, ubound,
-		       (char *)pdu->community)) {
-	case MIB_UNREGISTERED_OK:
-				return AGENTX_ERR_NOERROR;
-	case MIB_NO_SUCH_REGISTRATION:
-				return AGENTX_ERR_UNKNOWN_REGISTRATION;
-	case MIB_UNREGISTRATION_FAILED:
-	default:
-				return AGENTX_ERR_REQUEST_DENIED;
+    if (pdu->range_subid != 0) {
+	oid ubound = pdu->variables->val.objid[pdu->range_subid-1];
+	rc = unregister_mib_table_row(pdu->variables->name,
+				      pdu->variables->name_length,
+				      pdu->priority, pdu->range_subid, ubound,
+				      (char *)pdu->community);
+    } else {
+	rc = unregister_mib_context(pdu->variables->name,
+				    pdu->variables->name_length,
+				    pdu->priority, 0, 0,
+				    (char *)pdu->community);
+    }
+
+    switch (rc) {
+    case MIB_UNREGISTERED_OK:
+	return AGENTX_ERR_NOERROR;
+    case MIB_NO_SUCH_REGISTRATION:
+	return AGENTX_ERR_UNKNOWN_REGISTRATION;
+    case MIB_UNREGISTRATION_FAILED:
+    default:
+	return AGENTX_ERR_REQUEST_DENIED;
     }
 }
 
