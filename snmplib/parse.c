@@ -3776,6 +3776,25 @@ adopt_orphans(void)
 		    if (tp) {
 			do_subtree(tp, &np);
 			adopted = 1;
+                        /*
+                         * if do_subtree adopted the entire bucket, stop
+                         */
+                        if(NULL == nbuckets[i])
+                            break;
+
+                        /*
+                         * do_subtree may modify nbuckets, and if np
+                         * was adopted, np->next probably isn't an orphan
+                         * anymore. if np is still in the bucket (do_subtree
+                         * didn't adopt it) keep on plugging. otherwise
+                         * start over, at the top of the bucket.
+                         */
+                        for(onp = nbuckets[i]; onp; onp = onp->next)
+                            if(onp == np)
+                                break;
+                        if(NULL == onp) { /* not in the list */
+                            np = nbuckets[i]; /* start over */
+                        }
 		    }
 		}
             }
