@@ -18,6 +18,10 @@ extern const oid snmpTCPDomain[8];  /*  = { 1, 3, 6, 1, 3, 91, 1, 1 };  */
 snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 						 int local);
 
+/*  "Constructor" for transport domain object.  */
+
+void		snmp_tcp_ctor		(void);
+
 #endif/*SNMP_TRANSPORT_TCP_DOMAIN*/
 
 #endif/*_SNMPTCPDOMAIN_H*/

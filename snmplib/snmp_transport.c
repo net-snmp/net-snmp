@@ -13,6 +13,7 @@
 #endif
 
 #include "snmp_transport.h"
+#include "snmpUDPDomain.h"
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 #include "snmpTCPDomain.h"
 #endif
@@ -26,6 +27,14 @@
 #include "snmpAAL5PVCDomain.h"
 #endif
 #include "snmp_api.h"
+#include "snmp_debug.h"
+#include "snmp_logging.h"
+
+
+/*  Our list of supported transport domains.  */
+
+static snmp_tdomain *domain_list = NULL;
+
 
 
 /*  The standard SNMP domains.  */
@@ -36,6 +45,9 @@ const oid snmpCONSDomain[]	= { 1, 3, 6, 1, 6, 1, 3 };
 const oid snmpDDPDomain[]	= { 1, 3, 6, 1, 6, 1, 4 };
 const oid snmpIPXDomain[]	= { 1, 3, 6, 1, 6, 1, 5 };
 
+
+
+static void		snmp_tdomain_dump	(void);
 
 
 /*  Make a deep copy of an snmp_transport.  */
@@ -127,63 +139,197 @@ void		     	snmp_transport_free	(snmp_transport *t)
 
 
 
-int		       snmp_transport_support	(const oid *in_oid,
+int		       snmp_tdomain_support	(const oid *in_oid,
 						 size_t in_len,
-						 oid **out_oid,
+						 const oid **out_oid,
 						 size_t *out_len)
 {
-  if (snmp_oid_compare(snmpUDPDomain,
-		       sizeof(snmpUDPDomain)/sizeof(snmpUDPDomain[0]),
-		       in_oid, in_len) == 0) {
-    if (out_oid != NULL && out_len != NULL) {
-      *out_oid = (oid *)snmpUDPDomain;
-      *out_len = sizeof(snmpUDPDomain)/sizeof(snmpUDPDomain[0]);
+  snmp_tdomain *d = NULL;
+  
+  for (d = domain_list; d != NULL; d = d->next) {
+    if (snmp_oid_compare(in_oid, in_len, d->name, d->name_length) == 0) {
+      if (out_oid != NULL && out_len != NULL) {
+	*out_oid = d->name;
+	*out_len = d->name_length;
+      }
+      return 1;
     }
-    return 1;
   }
+  return 0;
+}
+
+
+
+int		       snmp_transport_support	(const oid *in_oid,
+						 size_t in_len,
+						 const oid **out_oid,
+						 size_t *out_len)
+{
+  return snmp_tdomain_support(in_oid, in_len, out_oid, out_len);
+}
+
+
+
+void			snmp_tdomain_init	(void)
+{
+  DEBUGMSGTL(("tdomain", "snmp_tdomain_init() called\n"));
+  snmp_udp_ctor();
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-  if (snmp_oid_compare(snmpTCPDomain,
-		       sizeof(snmpTCPDomain)/sizeof(snmpTCPDomain[0]),
-		       in_oid, in_len) == 0) {
-    if (out_oid != NULL && out_len != NULL) {
-      *out_oid = (oid *)snmpTCPDomain;
-      *out_len = sizeof(snmpTCPDomain)/sizeof(snmpTCPDomain[0]);
-    }
-    return 1;
-  }
+  snmp_tcp_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-  if (snmp_oid_compare(snmpIPXDomain,
-		       sizeof(snmpIPXDomain)/sizeof(snmpIPXDomain[0]),
-		       in_oid, in_len) == 0) {
-    if (out_oid != NULL && out_len != NULL) {
-      *out_oid = (oid *)snmpIPXDomain;
-      *out_len = sizeof(snmpIPXDomain)/sizeof(snmpIPXDomain[0]);
-    }
-    return 1;
-  }   
+  snmp_ipx_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-  if (snmp_oid_compare(ucdSnmpUnixDomain,
-		       sizeof(ucdSnmpUnixDomain)/sizeof(ucdSnmpUnixDomain[0]),
-		       in_oid, in_len) == 0) {
-    if (out_oid != NULL && out_len != NULL) {
-      *out_oid = (oid *)ucdSnmpUnixDomain;
-      *out_len = sizeof(ucdSnmpUnixDomain)/sizeof(ucdSnmpUnixDomain[0]);
-    }
-    return 1;
-  }   
+  snmp_unix_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-  if (snmp_oid_compare(ucdSnmpAal5PvcDomain,
-		 sizeof(ucdSnmpAal5PvcDomain)/sizeof(ucdSnmpAal5PvcDomain[0]),
-		       in_oid, in_len) == 0) {
-    if (out_oid != NULL && out_len != NULL) {
-      *out_oid = (oid *)ucdSnmpAal5PvcDomain;
-      *out_len = sizeof(ucdSnmpAal5PvcDomain)/sizeof(ucdSnmpAal5PvcDomain[0]);
-    }
-    return 1;
-  }   
+  snmp_aal5pvc_ctor();
 #endif
-  return 0;
+  snmp_tdomain_dump();
+}
+
+
+static void		snmp_tdomain_dump	(void)
+{
+  snmp_tdomain *d;
+  int i = 0;
+
+  DEBUGMSGTL(("tdomain", "domain_list -> "));
+  for (d = domain_list; d != NULL; d = d->next) {
+    DEBUGMSG(("tdomain", "{ "));
+    DEBUGMSGOID(("tdomain", d->name, d->name_length));
+    DEBUGMSG(("tdomain", ", \""));
+    for (i = 0; d->prefix[i] != NULL; i++) {
+      DEBUGMSG(("tdomain", "%s%s", d->prefix[i], (d->prefix[i+1])?"/":""));
+    }
+    DEBUGMSG(("tdomain", "\" } -> "));
+  }
+  DEBUGMSG(("tdomain", "[NIL]\n"));
+}
+
+
+
+int			snmp_tdomain_register	(snmp_tdomain *n)
+{
+  snmp_tdomain **prevNext = &domain_list, *d;
+
+  if (n != NULL) {
+    for (d = domain_list; d != NULL; d = d->next) {
+      if (snmp_oid_compare(n->name, n->name_length,
+			   d->name, d->name_length) == 0) {
+	/*  Already registered.  */
+	return 0;
+      }
+      prevNext = &(d->next);
+    }
+    n->next = NULL;
+    *prevNext = n;
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
+
+int			snmp_tdomain_unregister	(snmp_tdomain *n)
+{
+  snmp_tdomain **prevNext = &domain_list, *d;
+
+  if (n != NULL) {
+    for (d = domain_list; d != NULL; d = d->next) {
+      if (snmp_oid_compare(n->name, n->name_length,
+			   d->name, d->name_length) == 0) {
+	*prevNext = n->next;
+	return 1;
+      }
+      prevNext = &(d->next);
+    }
+    return 0;
+  } else {
+    return 0;
+  }
+}
+
+
+
+snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
+						 const char *default_domain)
+{
+  snmp_tdomain *d;
+  snmp_transport *t = NULL;
+  const char *spec, *addr;
+  char *cp, *mystring;
+  int i;
+
+  if (string == NULL) {
+    return NULL;
+  }
+
+  if ((mystring = strdup(string)) == NULL) {
+    DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", string));
+    return NULL;
+  }
+
+  if ((cp = strchr(mystring, ':')) == NULL) {
+    /*  There doesn't appear to be a transport specifier.  */
+    DEBUGMSGTL(("tdomain", "no specifier in \"%s\"\n", mystring));
+    if (*mystring == '/') {
+      spec = "unix";
+      addr = mystring;
+    } else {
+      if (default_domain) {
+	spec = default_domain;
+      } else {
+	spec = "udp";
+      }
+      addr = mystring;
+    }
+  } else {
+    *cp = '\0';
+    spec = mystring;
+    addr = cp + 1;
+  }
+  DEBUGMSGTL(("tdomain", "specifier \"%s\" address \"%s\"\n",	spec, addr));
+
+  for (d = domain_list; d != NULL; d = d->next) {
+    for (i = 0; d->prefix[i] != NULL; i++) {
+      if (strcasecmp(d->prefix[i], spec) == 0) {
+	DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n", spec));
+	t = d->f_create(addr, local);
+	free(mystring);
+	return t;
+      }
+    }
+  }
+
+  /*  Okay no match so far.  Consider the possibility that we have something
+      like hostname.domain.com:port which will have confused the parser above.
+      Try and match again with the appropriate default domain.  */
+
+  if (default_domain) {
+    spec = default_domain;
+  } else {
+    spec = "udp";
+  }
+  *cp = ':';
+  addr = mystring;
+  DEBUGMSGTL(("tdomain", "try again with specifier \"%s\" address \"%s\"\n",
+	      spec, addr));
+  
+  for (d = domain_list; d != NULL; d = d->next) {
+    for (i = 0; d->prefix[i] != NULL; i++) {
+      if (strcmp(d->prefix[i], spec) == 0) {
+	DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n", spec));
+	t = d->f_create(addr, local);
+	free(mystring);
+	return t;
+      }
+    }
+  }
+
+  snmp_log(LOG_ERR, "No support for requested transport domain \"%s\"", spec);
+  free(mystring);
+  return NULL;
 }

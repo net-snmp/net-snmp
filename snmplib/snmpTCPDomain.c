@@ -29,6 +29,7 @@
 #include "asn1.h"
 #include "snmp_debug.h"
 #include "snmp_transport.h"
+#include "snmpUDPDomain.h"
 #include "snmpTCPDomain.h"
 
 
@@ -38,7 +39,7 @@
 
 
 const oid snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
-
+static snmp_tdomain tcpDomain;
 
 
 /*  Return a string representing the address in data, or else the "far end"
@@ -302,4 +303,30 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
   t->f_fmtaddr   = snmp_tcp_fmtaddr;
 
   return t;
+}
+
+
+
+snmp_transport	*snmp_tcp_create		(const char *string, int local)
+{
+  struct sockaddr_in addr;
+
+  if (snmp_sockaddr_in(&addr, string, 0)) {
+    return snmp_tcp_transport(&addr, local);
+  } else {
+    return NULL;
+  }
+}
+
+
+
+void		snmp_tcp_ctor			(void)
+{
+  tcpDomain.name        = snmpTCPDomain;
+  tcpDomain.name_length = sizeof(snmpTCPDomain)/sizeof(oid);
+  tcpDomain.f_create	= snmp_tcp_create;
+  tcpDomain.prefix      = calloc(2, sizeof(char *));
+  tcpDomain.prefix[0]   = "tcp";
+
+  snmp_tdomain_register(&tcpDomain);
 }
