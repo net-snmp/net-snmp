@@ -49,9 +49,19 @@ Optional features to pass to configure for ucd-snmp:
   --with-defaults                 Use defaults for prompted values.
   --without-root-access           Agent won't require root access.
   --with-sys-contact="who@where"  Default system contact.
+                                    (Default: LOGIN@DOMAINNAME)
   --with-sys-location="location"  Default system location.
+                                    (Default: Unknown)
   --with-logfile="location"       Default log file location.
-  --with-security="TYPE"          Default security type to enforce (SNMPV1).
+  --with-security="TYPE"          Default security type to enforce
+                                    (Default: SNMPV1).
+  --with-mibs="item1:item2:"      Default mib IDs to load.
+                                    (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
+                                              SNMPv2-CONF:UCD-SNMP-MIB)
+  --with-mibdirs="dir1:dir2:"     Default directories for mibs.
+                                    (Default: PREFIX/lib/snmp/mibs)
+  --with-mibfiles="file1:file2"   Default mib files to load.
+                                    (Default:  none.  uses ID's above instead.)
   --with-mib-modules="list"       Compile with additional mib modules.
   --with-out-mib-modules="list"   Compile without these mib modules.
 
@@ -59,7 +69,7 @@ Optional mib modules to include:
 
   snmp_ospf snmp_rip2 snmp_bgp:   smux modules to talk with gated.
 
-Useful modules for C coders to look at:
+Optional modules for C coders to look at and/or include as extension examples:
 
   example:                        example C code extension.
   wombat:                         template file similar to example.
