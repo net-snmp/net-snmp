@@ -299,9 +299,12 @@ int main(int argc, char *argv[])
     }
 
     SOCK_STARTUP;
+
+    /* open an SNMP session */
     Session = snmp_open(&session);
     if (Session == NULL){
-        snmp_perror("snmpnetstat");
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+        snmp_sess_perror("snmpnetstat", &session);
         SOCK_CLEANUP;
 	exit(1);
     }

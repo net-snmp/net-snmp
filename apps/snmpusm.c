@@ -193,6 +193,7 @@ main(int argc, char *argv[])
     /*   Note:  this wil obtain the engineID needed below */
     ss = snmp_open(&session);
     if (ss == NULL){
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
       snmp_sess_perror("snmpusm", &session);
       exit(1);
     }
