@@ -532,18 +532,20 @@ main(int argc, char *argv[])
 
         /* which is slightly different for encryption if lengths are
            different */
-        rval = encode_keychange(session.securityAuthProto,
+	if (doprivkey) {
+	  rval = encode_keychange(session.securityAuthProto,
                                 session.securityAuthProtoLen,
                                 oldkulpriv, oldkulpriv_len,
                                 newkulpriv, newkulpriv_len,
                                 keychangepriv, &keychangepriv_len);
 
-        if (rval != SNMPERR_SUCCESS) {
+	  if (rval != SNMPERR_SUCCESS) {
             snmp_perror(argv[0]);
             fprintf(stderr, "encoding the keychange failed\n");
             usage();
             exit(1);
-        }
+	  }
+	}
 
         /*
          * add the keychange string to the outgoing packet 
@@ -556,14 +558,10 @@ main(int argc, char *argv[])
                                   ASN_OCTET_STR, keychange, keychange_len);
         }
         if (doprivkey) {
-            printf("priv lengths: %d %d %d\n",
-                   oldkulpriv_len,
-                   newkulpriv_len,
-                   keychangepriv_len);
             setup_oid(privKeyChange, &name_length2,
                       ss->contextEngineID, ss->contextEngineIDLen,
                       session.securityName);
-            snmp_pdu_add_variable(pdu, privKeyChange, name_length,
+            snmp_pdu_add_variable(pdu, privKeyChange, name_length2,
                                   ASN_OCTET_STR,
                                   keychangepriv, keychangepriv_len);
         }
