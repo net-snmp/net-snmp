@@ -241,7 +241,7 @@ init_snmpTargetParamsEntry(void)
   REGISTER_MIB("target/snmpTargetParamsEntry", snmpTargetParamsEntry_variables,
 			variable2, snmpTargetParamsEntry_variables_oid);
 
-  snmpd_register_config_handler("targetParams", snmpd_parse_config_targetParams,0,"");
+  snmpd_register_config_handler("targetParams", snmpd_parse_config_targetParams,0,NULL);
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
