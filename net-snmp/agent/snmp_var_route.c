@@ -66,7 +66,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2)
+#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #define rt_dst rt_nodes->rn_key
 #endif
 #else
@@ -139,7 +139,7 @@ static struct nlist nl[] = {
 	{ "_rthost" },
 	{ "_rtnet" },
 	{ "_rthashsize" },
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	{ "_rt_tables" },
 #else
 	{ "_rt_table" },
@@ -152,7 +152,7 @@ extern write_rte();
 
 #ifndef solaris2
 
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 static union {
     struct  sockaddr_in sin;
     u_short data[128];
@@ -187,7 +187,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     static oid saveName[14], Current[14];
     u_char *cp;
     oid *op;
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
     struct sockaddr_in *sa;
 #endif
 
@@ -229,7 +229,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
         Route_Scan_Reload();
 #endif
 	for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -267,7 +267,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
     switch(vp->magic){
 	case IPROUTEDEST:
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -289,7 +289,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #endif
@@ -523,7 +523,7 @@ struct radix_node *pt;
       }
     }
       
-#ifdef freebsd2
+#if defined(freebsd2) || defined(bsdi2)
     if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
         && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO))
       {
@@ -542,7 +542,7 @@ struct radix_node *pt;
          */
         bcopy((char *) &rt, (char *)rthead[rtsize], sizeof(RTENTRY));
         rtsize++;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(bsdi2)
       }
 #endif
 
@@ -593,7 +593,7 @@ static Route_Scan_Reload()
 #ifdef RTENTRY_4_4 
 /* rtentry is a BSD 4.4 compat */
 
-#ifndef AF_UNSPEC
+#if (!defined(AF_UNSPEC)) || defined(bsdi2)
 #define AF_UNSPEC AF_INET 
 #endif
 
@@ -778,7 +778,7 @@ static Route_Scan_Reload()
 static int qsort_compare(r1,r2)
 RTENTRY **r1, **r2;
 {
-#ifdef freebsd2
+#if defined(freebsd2) || defined(bsdi2)
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
 	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);
 #else
