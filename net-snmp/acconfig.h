@@ -57,6 +57,9 @@
 
 #define PSCMD "/bin/ps"
 
+/* Where is the uname command */
+#define UNAMEPROG "/bin/uname"
+
 /* debugging stuff */
 #undef DODEBUG
 
