@@ -48,13 +48,15 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_NET_ROUTE_H
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #include <netinet/ip.h>
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
