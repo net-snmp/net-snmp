@@ -25,7 +25,7 @@ ipFwAcc OBJECT-TYPE
 	DESCRIPTION
 		"The accounting rules of the IP firewall"
 	INDEX { ipFwAccIndex }
-	::= { ucdavis 13 }
+	::= { ucdExperimental 1 }
 
 IpFwAcc ::= SEQUENCE {
 	ipFwAccIndex		INTEGER,
