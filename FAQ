@@ -37,7 +37,7 @@ TABLE OF CONTENTS
    Why can't I see values in the UCDavis 'extensible' tree?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    I've done that, and I still can't see the values. Why not?
-   The agent is complaining about 'snmp.conf'.  Where is this?
+   The agent is complaining about 'snmpd.conf'.  Where is this?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
@@ -426,7 +426,7 @@ somewhere within the MIB tree.  Try running the command
 'snmptranslate -x zzz' which will inform you of any duplicates.
 
 
-The agent is complaining about 'snmp.conf'.  Where is this?
+The agent is complaining about 'snmpd.conf'.  Where is this?
 ----------------------------------------------------------
 
   It doesn't exist in the distribution as shipped.  You need to
