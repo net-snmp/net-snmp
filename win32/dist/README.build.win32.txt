@@ -337,6 +337,8 @@ Requirements
 
     echo . > c:\usr\registeragent.bat
     echo . > c:\usr\unregisteragent.bat
+    echo . > c:\usr\registertrapd.bat
+    echo . > c:\usr\unregistertrapd.bat
     echo . > c:\usr\etc\snmp\snmp.conf
 
 4.  Edit the following variables in c:\usr\net-snmp.nsi:

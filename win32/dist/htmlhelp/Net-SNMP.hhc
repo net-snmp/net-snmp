@@ -96,6 +96,18 @@
 				<param name="Name" value="README.solaris">
 				<param name="Local" value="readme-README.solaris.html">
 				</OBJECT>
+        		<LI> <OBJECT type="text/sitemap">
+        			<param name="Name" value="README.aix">
+        			<param name="Local" value="readme-README.aix.html">
+        			</OBJECT>
+        		<LI> <OBJECT type="text/sitemap">
+        			<param name="Name" value="README.osX">
+        			<param name="Local" value="readme-README.osX.html">
+        			</OBJECT>
+        		<LI> <OBJECT type="text/sitemap">
+        			<param name="Name" value="README.Panasonic_AM3X">
+        			<param name="Local" value="readme-README.Panasonic_AM3X.txt.html">
+        			</OBJECT>
 		</UL>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
@@ -244,10 +256,6 @@
 			<param name="Local" value="man3-netsnmp_debug.3.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="netsnmp_deprecated">
-			<param name="Local" value="man3-netsnmp_deprecated.3.html">
-			</OBJECT>
-		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="netsnmp_example_scalar_int">
 			<param name="Local" value="man3-netsnmp_example_scalar_int.3.html">
 			</OBJECT>
@@ -330,10 +338,6 @@
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="netsnmp_table_iterator">
 			<param name="Local" value="man3-netsnmp_table_iterator.3.html">
-			</OBJECT>
-		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="netsnmp_todo">
-			<param name="Local" value="man3-netsnmp_todo.3.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="netsnmp_utilities">
@@ -577,16 +581,16 @@
 			<param name="Local" value="perl-ASN.pm.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Agent-Default_Store">
-			<param name="Local" value="perl-Agent-Default_Store.html">
+			<param name="Name" value="Agent-Default_Store.pm">
+			<param name="Local" value="perl-Agent-Default_Store.pm.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Agent.pm">
 			<param name="Local" value="perl-Agent.pm.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Default_store">
-			<param name="Local" value="perl-Default_store.html">
+			<param name="Name" value="Default_store.pm">
+			<param name="Local" value="perl-Default_store.pm.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="OID.pm">

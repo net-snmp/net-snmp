@@ -28,7 +28,7 @@ Cygwin - Building
 MinGW - Building
 MinGW - Building with OpenSSL
 Configuring Net-SNMP
-How to Register the Net-SNMP Agent as a Windows service
+How to Register the Net-SNMP Agent and Trap Daemon as Windows services
 Notes on SET support for WIN32 ports
 Acknowledgements
 
@@ -1026,61 +1026,141 @@ You can now run snmpconf using the standard command line such as:
 
   snmpconf -i
 
+
 ***************************************************************************
 *
-* How to Register the Net-SNMP Agent as a Windows service
+* How to Register the Net-SNMP Agent and Trap Daemon as Windows services
 *
 ***************************************************************************
 
- 1. If the Net-SNMP Agent is already registered, the existing program
-    must first be unregistered.  If you don't know the program's location,
-    either search for it with Windows Explorer, or invoke REGEDIT and
-    search the key using "Net-SNMP". Once it is found, Cd to the
-    program's directory, then type:
-	.\snmpd -unregister
+The Agent (snmpd.exe) and trap daemon (snmptrapd.exe) can be run as a service
+under Windows operating systems that have the Service Control Manager (SCM)
+(Services Control Panel).  This includes Windows NT, 2000, XP and 2003.  
+Windows 9x/Me do not have the SCM.
 
- 2. View win32\net-snmp\net-snmp-config.h to know these directories:
+To allow snmpd.exe or snmptrapd.exe to run as a service, the programs need
+to be registered with the SCM.  This is done by running the program once with
+the -register command line switch from a command prompt.
 
-    MIB directory (DEFAULT_MIBDIRS),
-    "config" directory (SNMPCONFPATH), and
-    "engine" directory PERSISTENT_DIRECTORY).
+The synopsis for registering snmpd as a Windows service is:
 
-    These values take precedence when comprehending the on-line documentation.
+  snmpd -register [OPTIONS] [LISTENING ADDRESSES]
 
-    For help remembering which configuration settings can be made, or
-    into which file a particular setting belongs, print then read the manual:
-    	.\snmpd -H > snmp.settings.txt
+The synopsis for registering snmptrapd as a Windows service is:
 
- 3. Make sure Net-SNMP is properly installed.  Refer to the "Microsoft Visual 
-    C++ - Installing" section.
+  snmptrapd -register [OPTIONS] [LISTENING ADDRESSES]
 
-    The configuration files snmpd.conf, and possibly snmp.conf, must
-    be properly formed and copied to the "config" directory.  See the
-    "Configuring Net-SNMP" section for details.
+After registration, the services 'Net-SNMP Agent' and 'Net-SNMP Trap Handler'
+will be available in the SCM.  The services can be started and stopped using 
+the SCM (Services Control Panel) or from the command prompt using:
 
- 4. Go to the "install" directory.
+ net start "Net-SNMP Agent"
+ net start "Net-SNMP Trap Handler"
 
-    Invoke ".\snmpd -f -Le" , with no other command line parameters.
+and
 
- 5. Test that the agent runs correctly from local and from remote
-    command generators.  Snmpwalk, snmpbulkwalk, and snmpget
-    are good for testing "snmpd".  When tests are completed,
-    stop the "snmpd" program.
+ net stop "Net-SNMP Agent"
+ net stop "Net-SNMP Trap Handler"
 
- 6. Repeat steps 3, 4 and 5, until "snmpd" works as you intend.
+If any command line options are specified after the -register option, they 
+will be included when the service starts.  For example, to register the
+snmptrapd daemon and enable logging of traps to c:\usr\log\snmptrapd.log, 
+enter the following command line:
 
-    Once the agent is working, Cd to the "install" directory, and type:
-	.\snmpd -register
+ snmptrapd -register -Lf c:/usr/log/snmptrapd.log
 
- 7. Start the service:   net start "Net-SNMP Agent"
+Note:  Use Unix style slashes (/) for all paths.
 
- 8. Run the tests you ran in step 5.  You should get similar results
-    as you did when you ran those tests.  If you did not, start over
-    from step 1.
+For a complete list of command line options, consult the man pages, or use 
+the -h switch:
 
- 9. Save your work, and reboot the system.  After the system restarts,
-    and you've logged in, run the tests you ran in steps 5 and 8.
-    The results should still compare favorably.
+ snmpd -h
+ snmptrapd -h
+
+Notes: -H will display all available snmpd.conf, snmptrapd.conf and snmp.conf
+       configuration file options, not the command line options.
+
+       Like all Net-SNMP applications, snmpd and snmptrapd will read the 
+       system environment variables SNMPCONFPATH, SNMPSHAREPATH etc even when
+       run as a service.  Due to a limitation in the Windows SCM, if any system
+       environment variables are changed, the system will need to be rebooted 
+       to allow the services to access the changed environment variables (see 
+       Microsoft knowledge base article 821761).  Therefore, if the location 
+       of the various configuration files is different than what was selected 
+       during compilation, a reboot will be required after setting the environment
+       variables, otherwise the services may fail to start.
+
+       If Net-SNMP was installed from a .exe binary release and was installed 
+       in a non default directory, a reboot will be required to allow the
+       services to access the SNMPCONFPATH and SNMPSHAREPATH variables.  
+       If the system is not rebooted, the services may fail to start and they 
+       will not be able to locate any configuration or MIB files.
+     
+
+Unregistering the services
+--------------------------
+
+To un-register the services, use the command line switch -unregister.  For
+example:
+
+ snmpd -unregister
+
+ snmptrapd -unregister
+
+Note:  Be sure to have all Service Control Panel windows closed when 
+       unregistering, otherwise a reboot may be required to complete
+       the removal.
+
+
+Modifying the services
+----------------------
+
+To change the parameters that the SCM passes to snmpd or snmptrapd, the 
+service must be unregistered, and then re-registered with the new options.
+
+For example, to change the parameters that SCM passes to snmpd, open a 
+command prompt window, CD to the directory where the snmpd program is located
+(unless it is already in your PATH), identify the full set of parameters you 
+desire, then type these two commands:
+
+ snmpd -unregister
+ snmpd -register [OPTIONS] [LISTENING ADDRESSES]
+
+Note:  Be sure to have all Service Control Panel windows closed when 
+       unregistering, otherwise a reboot may be required to complete
+       the removal.
+
+
+Registry Information
+--------------------
+
+Warning:  Improper use of the registry editor can damage to your operating
+          system and should only be used by experienced users.
+
+The following registry keys are used by snmpd and snmptrapd:
+
+HKLM\SYSTEM\CurrentControlSet\Services\Net-SNMP Agent
+HKLM\SYSTEM\CurrentControlSet\Services\Net-SNMP Trap Handler
+       
+Each command line option specified when regsitering the service will be added 
+to the Parameters registry subkey for the service as a ParamX REG_SZ value 
+where X starts at 1 and increments for each additional command line option.  
+For example, '-Lf c:/usr/log/snmptrapd.log' would be:
+
+ HKLM\SYSTEM\CurrentControlSet\Services\
+   Net-SNMP Trap Handler\Parameters\Param1 -Lf
+
+ HKLM\SYSTEM\CurrentControlSet\Services\
+   Net-SNMP Trap Handler\Parameters\Param2 c:/usr/log/snmptrapd.log
+
+To add additional command line switches or modify the existing ones, it is
+recommended to unregister and re-register the services with the new command 
+line options.  It is also possible to directly add or modify the ParamX values
+in the registry.
+
+Note:  The Parameters key is only created when there is at least one command
+       line option specified when registering the service so it may need to be
+       manually added if modifying using the registry editor.
 
 
 ***************************************************************************
