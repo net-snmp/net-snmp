@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -73,6 +83,17 @@
 /** creates a netsnmp_mib_handler structure given a name and a access method.
  *  The returned handler should then be @link netsnmp_register_handler()
  *  registered.@endlink
+ *
+ *  @param name is the handler name and is copied then assigned to
+ *              netsnmp_mib_handler->handler_name
+ *
+ *  @param handler_access_method is a function pointer used as the access
+ *	   method for this handler registration instance for whatever required
+ *         needs.
+ *
+ *  @return a pointer to a populated netsnmp_mib_handler struct to be
+ *          registered
+ *
  *  @see netsnmp_create_handler_registration()
  *  @see netsnmp_register_handler()
  */
@@ -92,6 +113,38 @@ netsnmp_create_handler(const char *name,
  *  be set to the default value of only HANDLER_CAN_DEFAULT, which is
  *  by default read-only GET and GETNEXT requests.
  *  @note This ends up calling netsnmp_create_handler(name, handler_access_method)
+ *  @param name is the handler name and is copied then assigned to
+ *              netsnmp_handler_registration->handlerName.
+ *
+ *  @param handler_access_method is a function pointer used as the access
+ *	method for this handler registration instance for whatever required
+ *	needs.
+ *
+ *  @param reg_oid is the registration location oid.
+ *
+ *  @param reg_oid_len is the length of reg_oid, can use the macro,
+ *         OID_LENGTH
+ *
+ *  @param modes is used to configure read/write access.  If modes == 0, 
+ *	then modes will automatically be set to the default 
+ *	value of only HANDLER_CAN_DEFAULT, which is by default read-only GET 
+ *	and GETNEXT requests.  The other two mode options are read only, 
+ *	HANDLER_CAN_RONLY, and read/write, HANDLER_CAN_RWRITE.
+ *
+ *		- HANDLER_CAN_GETANDGETNEXT
+ *		- HANDLER_CAN_SET
+ *		- HANDLER_CAN_GETBULK      
+ *
+ *		- HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)
+ *		- HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | 
+ *			HANDLER_CAN_SET)
+ *		- HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY
+ *
+ *  @return Returns a pointer to a netsnmp_handler_registration struct.
+ *          NULL is returned only when memory could not be allocated for the 
+ *          netsnmp_handler_registration struct.
+ *
+ *
  *  @see netsnmp_create_handler()
  *  @see netsnmp_register_handler()
  */
@@ -568,7 +621,16 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,
     }
 }
 
-/** add data to a request that can be extracted later by submodules */
+/** add data to a request that can be extracted later by submodules
+ *
+ * @param requset the netsnmp request info structure
+ *
+ * @param node this is the data to be added to the linked list
+ *             request->parent_data
+ *
+ * @return void
+ *
+ */
 NETSNMP_INLINE void
 netsnmp_request_add_list_data(netsnmp_request_info *request,
                               netsnmp_data_list *node)
@@ -581,7 +643,17 @@ netsnmp_request_add_list_data(netsnmp_request_info *request,
     }
 }
 
-/** extract data from a request that was added previously by a parent module */
+/** extract data from a request that was added previously by a parent module
+ *
+ * @param request the netsnmp request info function
+ *
+ * @param name used to compare against the request->parent_data->name value,
+ *             if a match is found request->parent_data->data is returned
+ *
+ * @return a void pointer(request->parent_data->data), otherwise NULL is
+ *         returned if request is NULL or request->parent_data is NULL or
+ *         request->parent_data object is not found.
+ */
 NETSNMP_INLINE void    *
 netsnmp_request_get_list_data(netsnmp_request_info *request,
                               const char *name)

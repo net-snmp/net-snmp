@@ -64,6 +64,20 @@ static void     table_data_free_func(void *data);
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
  *  store it's information into the request->parent_data structure.
+ *
+ *  The table helper handler pulls out the column number and indexes from 
+ *  the request oid so that you don't have to do the complex work of
+ *  parsing within your own code.
+ *
+ *  @param tabreq is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ *  @return Returns a pointer to a netsnmp_mib_handler struct which contains
+ *	the handler's name and the access method
+ *
  */
 netsnmp_mib_handler *
 netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
@@ -96,10 +110,14 @@ netsnmp_register_table(netsnmp_handler_registration *reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
-/** extracts the processed table information from a given request.
- *  call this from subhandlers on a request to extract the processed
+/** Extracts the processed table information from a given request.
+ *  Call this from subhandlers on a request to extract the processed
  *  netsnmp_request_info information.  The resulting information includes the
  *  index values and the column number.
+ *
+ * @param request populated netsnmp request structure
+ *
+ * @return populated netsnmp_table_request_info structure
  */
 NETSNMP_INLINE netsnmp_table_request_info *
 netsnmp_extract_table_info(netsnmp_request_info *request)
@@ -787,6 +805,25 @@ netsnmp_closest_column(unsigned int current,
     return closest;
 }
 
+/**
+ * This function can be used to setup the table's definition within
+ * your module's initialize function, it takes a variable index parameter list
+ * for example: the table_info structure is followed by two integer index types
+ * netsnmp_table_helper_add_indexes(
+ *                  table_info,   
+ *	            ASN_INTEGER,  
+ *		    ASN_INTEGER,  
+ *		    0);
+ *
+ * @param tinfo is a pointer to a netsnmp_table_registration_info struct.
+ *	The table handler needs to know up front how your table is structured.
+ *	A netsnmp_table_registeration_info structure that is 
+ *	passed to the table handler should contain the asn index types for the 
+ *	table as well as the minimum and maximum column that should be used.
+ *
+ * @return void
+ *
+ */
 void
 #if HAVE_STDARG_H
 netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,

@@ -1,7 +1,14 @@
 /*
  * snmp_vars.c - return a pointer to the named variable.
+ */
+/**
+ * @addtogroup library
  *
- *
+ * @{
+ */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
  */
 /***********************************************************
 	Copyright 1988, 1989, 1990 by Carnegie Mellon University
@@ -30,6 +37,12 @@ PERFORMANCE OF THIS SOFTWARE.
  * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
  * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
  * (jbray@origin-at.co.uk) 1997
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
  */
 
 /*
@@ -203,8 +216,17 @@ struct timeval  starttime;
 netsnmp_session *callback_master_sess;
 int             callback_master_num;
 
-/*
- * init_agent() returns non-zero on error 
+/**
+ * Initialize the agent.  Calls into init_agent_read_config to set tha app's
+ * configuration file in the appropriate default storage space,
+ *  NETSNMP_DS_LIB_APPTYPE.  Need to call init_agent before calling init_snmp.
+ *
+ * @param app the configuration file to be read in, gets stored in default
+ *        storage
+ *
+ * @return Returns non-zero on failure and zero on success.
+ *
+ * @see init_snmp
  */
 int
 init_agent(const char *app)

@@ -1,5 +1,19 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /*
- * default_store.h: storage space for defaults 
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
+ * @file default_store.h: storage space for defaults
+ *
+ * @addtogroup default_store
+ *
+ * @{
  */
 #ifndef DEFAULT_STORE_H
 #define DEFAULT_STORE_H
@@ -14,9 +28,9 @@ extern          "C" {
     /*
      * begin storage definitions 
      */
-    /*
-     * These definitions correspond with the "storid" argument to the API 
-     */
+/**
+ * @def NETSNMP_DS_LIBRARY_ID These definitions correspond with the "storid" argument to the API 
+ */
 #define NETSNMP_DS_LIBRARY_ID     0
 #define NETSNMP_DS_APPLICATION_ID 1
 #define NETSNMP_DS_TOKEN_ID       2
@@ -122,3 +136,4 @@ extern          "C" {
 }
 #endif
 #endif                          /* DEFAULT_STORE_H */
+/** @} */

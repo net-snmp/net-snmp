@@ -7,6 +7,10 @@
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 
@@ -311,6 +315,18 @@ getNextSessID()
     return ++SessionID;
 }
 
+/**
+ * This function checks for packets arriving on the SNMP port and
+ * processes them(snmp_read) if some are found, using the select(). If block
+ * is non zero, the function call blocks until a packet arrives
+ *
+ * @param block used to control blocking in the select() function, 1 = block
+ *        forever, and 0 = don't block
+ *
+ * @return  Returns a positive integer if packets were processed, and -1 if an
+ * error was found.
+ *
+ */
 int
 agent_check_and_process(int block)
 {
@@ -2815,6 +2831,57 @@ handle_pdu(netsnmp_agent_session *asp)
     return status;
 }
 
+/**
+ * This function calls into netsnmp_set_mode_request_error,  sets 
+ * error_value given a reqinfo->mode value.  It's used to send specific
+ * errors back to the agent to process accordingly.
+ * 
+ * If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE,
+ * or SNMP_ENDOFMIBVIEW the following is applicable:
+ * Sets the error_value to request->requestvb->type if 
+ * reqinfo->mode value is set to MODE_GET.  If the reqinfo->mode 
+ * value is set to MODE_GETNEXT or MODE_GETBULK the code calls 
+ * snmp_log logging an error message.
+ *
+ * Otherwise, the request->status value is checked, if it's < 0
+ * snmp_log is called with an error message and SNMP_ERR_GENERR is 
+ * assigned to request->status. If the request->status value is >= 0 the
+ * error_value is set to request->status.
+ *
+ * @param reqinfo  is a pointer to the netsnmp_agent_request_info struct.  It
+ *	contains the reqinfo->mode which is required to set error_value or
+ *	log error messages.
+ *
+ * @param request is a pointer to the netsnmp_request_info struct.  The 
+ *	error_value is set to request->requestvb->type
+ *
+ * @param error_value is the exception value you want to set, below are
+ *        possible values.
+ *      - SNMP_NOSUCHOBJECT
+ *      - SNMP_NOSUCHINSTANCE
+ *      - SNMP_ENDOFMIBVIEW
+ *      - SNMP_ERR_NOERROR
+ *      - SNMP_ERR_TOOBIG
+ *      - SNMP_ERR_NOSUCHNAME
+ *      - SNMP_ERR_BADVALUE
+ *      - SNMP_ERR_READONLY
+ *      - SNMP_ERR_GENERR
+ *      - SNMP_ERR_NOACCESS
+ *      - SNMP_ERR_WRONGTYPE
+ *      - SNMP_ERR_WRONGLENGTH
+ *      - SNMP_ERR_WRONGENCODING
+ *      - SNMP_ERR_WRONGVALUE
+ *      - SNMP_ERR_NOCREATION
+ *      - SNMP_ERR_INCONSISTENTVALUE
+ *      - SNMP_ERR_RESOURCEUNAVAILABLE
+ *      - SNMP_ERR_COMMITFAILED
+ *      - SNMP_ERR_UNDOFAILED
+ *      - SNMP_ERR_AUTHORIZATIONERROR
+ *      - SNMP_ERR_NOTWRITABLE
+ *      - SNMP_ERR_INCONSISTENTNAME
+ *
+ * @return Returns error_value under all conditions.
+ */
 int
 netsnmp_set_request_error(netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *request, int error_value)
@@ -2987,3 +3054,4 @@ netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
         free(ari);
     }
 }
+/** @} */

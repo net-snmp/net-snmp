@@ -1,6 +1,20 @@
 /*
- * agent_trap.c: define trap generation routines for mib modules, etc,
- * to use 
+ * agent_trap.c
+ */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup agent_trap Trap generation routines for mib modules to use
+ *  @ingroup agent
+ *
+ * @{
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -317,6 +331,46 @@ convert_v2_to_v1(netsnmp_variable_list * vars, netsnmp_pdu *template_pdu)
 
 }
 
+/**
+ * This function allows you to make a distinction between generic 
+ * traps from different classes of equipment. For example, you may want 
+ * to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a 
+ * different manner to a generic system SNMP_TRAP_LINKDOWN trap.
+ *   
+ *
+ *  @param trap is the generic trap type.  The trap types are:
+ *		- SNMP_TRAP_COLDSTART:
+ *			cold start
+ *		- SNMP_TRAP_WARMSTART:
+ *			warm start
+ *		- SNMP_TRAP_LINKDOWN:
+ *			link down
+ *		- SNMP_TRAP_LINKUP:
+ *			link up
+ *		- SNMP_TRAP_AUTHFAIL:
+ *			authentication failure
+ *		- SNMP_TRAP_EGPNEIGHBORLOSS:
+ *			egp neighbor loss
+ *		- SNMP_TRAP_ENTERPRISESPECIFIC:
+ *			enterprise specific
+ *			
+ *  @param specific is the specific trap value.
+ *
+ *  @param enterprise is an enterprise oid in which you want to send specifc 
+ *	traps from. 
+ *
+ *  @param enterprise_length is the length of the enterprise oid, use macro,
+ *	OID_LENGTH, to compute length.
+ *
+ *  @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ *  @return void
+ *
+ *  @see send_easy_trap
+ *  @see send_v2trap
+
+ */
 void
 send_enterprise_trap_vars(int trap,
                           int specific,
@@ -583,11 +637,57 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
                                   OID_LENGTH(trap_version_id), vars);
 }
 
+/**
+ * Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of  
+ * configured trap destinations (or "sinks"), using the provided 
+ * values for the generic trap type and specific trap value.
+ *
+ * This function eventually calls send_enterprise_trap_vars.  If the
+ * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
+ * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * oid and length respectively.  If the trap type is set to 
+ * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
+ * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * respectively.
+ *
+ * @param trap is the generic trap type.
+ *
+ * @param specific is the specific trap value.
+ *
+ * @return void
+ *
+ * @see send_enterprise_trap_vars
+ * @see send_v2trap
+ */
+       	
 void
 send_easy_trap(int trap, int specific)
 {
     send_trap_vars(trap, specific, NULL);
 }
+
+/**
+ * Uses the supplied list of variable bindings to form an SNMPv2 trap, 
+ * which is sent to SNMPv2-capable sinks  on  the  configured  list.  
+ * An equivalent INFORM is sent to the configured list of inform sinks.  
+ * Sinks that can only handle SNMPv1 traps are skipped.
+ *
+ * This function eventually calls send_enterprise_trap_vars.  If the
+ * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
+ * and enterprise_length paramater is set to the pre defined SYSTEM_MIB 
+ * oid and length respectively.  If the trap type is set to 
+ * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
+ * parameters are set to the pre-defined NOTIFICATION_MIB oid and length 
+ * respectively.
+ *
+ * @param vars is used to supply list of variable bindings to form an SNMPv2 
+ *	trap.
+ *
+ * @return void
+ *
+ * @see send_easy_trap
+ * @see send_enterprise_trap_vars
+ */
 
 void
 send_v2trap(netsnmp_variable_list * vars)
@@ -838,3 +938,4 @@ snmpd_free_trapcommunity(void)
         snmp_trapcommunity = NULL;
     }
 }
+/** @} */

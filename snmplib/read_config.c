@@ -1,7 +1,69 @@
 /*
  * read_config.c
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
+/** @defgroup read_config parsing various configuration files at run time
+ *  @ingroup library
+ *
+ * The read_config related functions are a fairly extensible  system  of
+ * parsing various configuration files at the run time.
+ *
+ * The idea is that the calling application is able to register
+ * handlers for certain tokens specified in certain types
+ * of files.  The read_configs function can then be  called
+ * to  look  for all the files that it has registrations for,
+ * find the first word on each line, and pass  the  remainder
+ * to the appropriately registered handler.
+ *
+ * For persistent configuration storage you will need to use the
+ * read_config_read_data, read_config_store, and read_config_store_data
+ * APIs in conjunction with first registering a
+ * callback so when the agent shutsdown for whatever reason data is written
+ * to your configuration files.  The following explains in more detail the
+ * sequence to make this happen.
+ *
+ * This is the callback registration API, you need to call this API with
+ * the appropriate parameters in order to configure persistent storage needs.
+ *
+ *        int snmp_register_callback(int major, int minor,
+ *                                   SNMPCallback *new_callback,
+ *                                   void *arg);
+ *
+ * You will need to set major to SNMP_CALLBACK_LIBRARY, minor to
+ * SNMP_CALLBACK_STORE_DATA. arg is whatever you want.
+ *
+ * Your callback function's prototype is:
+ * int     (SNMPCallback) (int majorID, int minorID, void *serverarg,
+ *                        void *clientarg);
+ *
+ * The majorID, minorID and clientarg are what you passed in the callback
+ * registration above.  When the callback is called you have to essentially
+ * transfer all your state from memory to disk. You do this by generating
+ * configuration lines into a buffer.  The lines are of the form token
+ * followed by token parameters.
+ * 
+ * Finally storing is done using read_config_store(type, buffer);
+ * type is the application name this can be obtained from:
+ *
+ * netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE);
+ *
+ * Now, reading back the data: This is done by registering a config handler
+ * for your token using the register_config_handler function. Your
+ * handler will be invoked and you can parse in the data using the
+ * read_config_read APIs.
+ *
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -100,17 +162,35 @@ register_app_prenetsnmp_mib_handler(const char *token,
             (NULL, token, parser, releaser, help));
 }
 
-/*******************************************************************-o-******
- * register_config_handler
+/**
+ * register_config_handler registers handlers for certain tokens specified in
+ * certain types of files.
  *
- * Parameters:
- *	*type
- *	*token
- *	*parser
- *	*releaser
+ * Allows a module writer use/register multiple configuration files based off
+ * of the type parameter.  A module writer may want to set up multiple
+ * configuration files to separate out related tasks/variables or just for
+ * management of where to put tokens as the module or modules get more complex
+ * in regard to handling token registrations.
+ *
+ * @param type     the configuration file used, e.g., if snmp.conf is the file
+ *                 where the token is located use "snmp" here.
+ *                 If NULL the configuration file used will be snmpd.conf.
+ *
+ * @param token    the token being parsed from the file.  Must be non-NULL.
+ *
+ * @param parser   the handler function pointer that use  the specified
+ *                 token and the rest of the line to do whatever is required
+ *                 Should be non-NULL in order to make use of this API.
+ *
+ * @param releaser if non-NULL, the function specified is called if
+ *                 and when the configuration files are re-read.  This function
+ *                 should free any resources allocated by the token handler
+ *                 function.
+ *
+ * @param help     if non-NULL, used to display help information on the expected 
+ *	           arguments after the token.
  *      
- * Returns:
- *	Pointer to a new config line entry  -OR-  NULL on error.
+ * @return Pointer to a new config line entry or NULL on error.
  */
 struct config_line *
 register_config_handler(const char *type_param,
@@ -186,6 +266,19 @@ register_app_config_handler(const char *token,
     return (register_config_handler(NULL, token, parser, releaser, help));
 }
 
+
+
+/**
+ * uregister_config_handler un-registers handlers given a specific type_param
+ * and token.
+ *
+ * @param type_param the configuration file used where the token is located.
+ *                   Used to lookup the config file entry
+ * 
+ * @param token      the token that is being unregistered
+ *
+ * @return void
+ */
 void
 unregister_config_handler(const char *type_param, const char *token)
 {
@@ -962,22 +1055,19 @@ read_config_print_usage(const char *lead)
     }
 }
 
-/*******************************************************************-o-******
- * read_config_store
- *
- * Parameters:
- *	*type
- *	*line
- *      
- * 
- * Append line to a file named either ENV(SNMP_PERSISTENT_FILE) or
+/**
+ * read_config_store intended for use by applications to store permenant
+ * configuration information generated by sets or persistent counters.
+ * Appends line to a file named either ENV(SNMP_PERSISTENT_FILE) or
  *   "<PERSISTENT_DIRECTORY>/<type>.conf".
- * Add a trailing newline to the stored file if necessary.
+ * Adds a trailing newline to the stored file if necessary.
  *
- * Intended for use by applications to store permenant configuration 
- * information generated by sets or persistent counters.
- *
- */
+ * @param type is the application name
+ * @param line is the configuration line written to the application name's
+ * configuration file
+ *      
+ * @return void
+  */
 void
 read_config_store(const char *type, const char *line)
 {
@@ -1479,16 +1569,30 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
     return readfrom;
 }
 
-/*
- * read_config_read_data():
- * reads data of a given type from a token(s) on a configuration line.
+/**
+ * read_config_read_data reads data of a given type from a token(s) on a
+ * configuration line.  The supported types are:
+ *
+ *    - ASN_INTEGER
+ *    - ASN_TIMETICKS
+ *    - ASN_UNSIGNED
+ *    - ASN_OCTET_STR
+ *    - ASN_BIT_STR
+ *    - ASN_OBJECT_ID
+ *
+ * @param type the asn data type to be read in.
+ *
+ * @param readform the configuration line data to be read.
+ *
+ * @param dataptr an allocated pointer expected to match the type being read
+ *        (int *, u_int *, char **, oid **)
+ *
+ * @param len is the length of an asn oid or octet/bit string, not required
+ *            for the asn integer, unsigned integer, and timeticks types
+ *
+ * @return the next token in the configuration line.  NULL if none left or
+ * if an unknown type.
  * 
- * Returns: character pointer to the next token in the configuration line.
- * NULL if none left.
- * NULL if an unknown type.
- * 
- * dataptr is expected to match a pointer type being read
- * (int *, u_int *, char **, oid **)
  */
 char           *
 read_config_read_data(int type, char *readfrom, void *dataptr,
@@ -1590,12 +1694,32 @@ read_config_read_memory(int type, char *readfrom,
     return NULL;
 }
 
-/*
- * read_config_store_data():
- * stores data of a given type to a configuration line.
- * 
- * Returns: character pointer to the end of the line.
- * NULL if an unknown type.
+/**
+ * read_config_store_data stores data of a given type to a configuration line
+ * into the storeto buffer.
+ * Calls read_config_store_data_prefix with the prefix parameter set to a char
+ * space.  The supported types are:
+ *
+ *    - ASN_INTEGER
+ *    - ASN_TIMETICKS
+ *    - ASN_UNSIGNED
+ *    - ASN_OCTET_STR
+ *    - ASN_BIT_STR
+ *    - ASN_OBJECT_ID
+ *
+ * @param type    the asn data type to be stored
+ *
+ * @param storeto a pre-allocated char buffer which will contain the data
+ *                to be stored
+ *
+ * @param dataptr contains the value to be stored, the supported pointers:
+ *                (int *, u_int *, char **, oid **)
+ *
+ * @param len     is the length of the pre-allocated storeto buffer, not
+ *                required for the asn integer, unsigned integer, and
+ *                timeticks types.
+ *
+ * @return character pointer to the end of the line. NULL if an unknown type.
  */
 char           *
 read_config_store_data(int type, char *storeto, void *dataptr, size_t * len)
@@ -1603,13 +1727,6 @@ read_config_store_data(int type, char *storeto, void *dataptr, size_t * len)
     return read_config_store_data_prefix(' ', type, storeto, dataptr, *len);
 }
 
-/*
- * read_config_store_data_prefix():
- * stores data of a given type to a configuration line.
- * 
- * Returns: character pointer to the end of the line.
- * NULL if an unknown type.
- */
 char           *
 read_config_store_data_prefix(char prefix, int type, char *storeto,
                               void *dataptr, size_t len)
@@ -1650,3 +1767,4 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
         }
     return NULL;
 }
+/** @} */

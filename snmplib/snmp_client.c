@@ -2,6 +2,10 @@
  * snmp_client.c - a toolkit of common functions for an SNMP client.
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -23,7 +27,18 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
+/** @defgroup snmp_client various PDU processing routines
+ *  @ingroup library
+ * 
+ *  @{
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -635,6 +650,21 @@ snmp_set_var_objid(netsnmp_variable_list * vp,
     return 0;
 }
 
+/**
+ * snmp_set_var_typed_value is used to set data into the netsnmp_variable_list
+ * structure.  Used to return data to the snmp request via the
+ * netsnmp_request_info structure's requestvb pointer.
+ *
+ * @param newvar   the structure gets populated with the given data, type,
+ *                 val_str, and val_len.
+ * @param type     is the asn data type to be copied
+ * @param val_str  is a buffer containing the value to be copied into the
+ *                 newvar structure. 
+ * @param val_len  the length of val_str
+ * 
+ * @return returns 0 on success and 1 on a malloc error
+ */
+
 int
 snmp_set_var_typed_value(netsnmp_variable_list * newvar, u_char type,
                          const u_char * val_str, size_t val_len)
@@ -919,3 +949,4 @@ snmp_errstring(int errstat)
         return "Unknown Error";
     }
 }
+/** @} */
