@@ -693,3 +693,45 @@ string_append_int (char *s,
     strcpy(s, textVal);
     return;
 }
+
+
+	/*
+	 * Time-related utility functions
+	 */
+
+extern struct timeval starttime;
+
+		/* Return the value of 'sysUpTime' at the given marker */
+int
+marker_uptime( marker_t pm )
+{
+    int res;
+    marker_t start = (marker_t)&starttime;
+
+    res = atime_diff( start, pm );
+    return res/10;      /* atime_diff works in msec, not csec */
+}
+
+		/* Return the number of timeTicks since the given marker */
+int
+marker_tticks( marker_t pm )
+{
+    int res;
+    marker_t now = atime_newMarker;
+
+    res = atime_diff( pm, now );
+    free( now );
+    return res/10;      /* atime_diff works in msec, not csec */
+}
+
+			/* struct timeval equivalents of these */
+int timeval_uptime( struct timeval *tv )
+{
+    return marker_uptime((marker_t)tv);
+}
+
+int timeval_tticks( struct timeval *tv )
+{
+    return marker_tticks((marker_t)tv);
+}
+
