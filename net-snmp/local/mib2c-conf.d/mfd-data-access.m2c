@@ -38,7 +38,8 @@
 @      include m2c_setup_node.m2i@
 @      eval $m2c_tmp="$m2c_tmp, $m2c_node_param_val"@
 @    end@ // for each index
-@    include generic-table-indexes-set.m2i@
+
+    int ${table}_init_data(${context}_registration_ptr ${context}_reg);
 
 @    include mfd-access-${m2c_table_access}-defines.m2i@
 @end@
@@ -58,6 +59,8 @@
  * $$hack:$
  */
 @include generic-source-includes.m2i@
+
+#include "${name}_data_access.h"
 
 /** @defgroup data_access data_access: Routines to access data
  *
@@ -84,7 +87,7 @@
  * @retval MFD_ERROR   : unrecoverable error.
  */
 int
-${table}_init_data($mfd_aue_param_decl)
+${table}_init_data(${context}_registration_ptr ${context}_reg)
 {
     DEBUGTRACE;
 
@@ -107,7 +110,6 @@ $example_end
 @end@ #ifconf
 }
 
-@    include generic-table-indexes-set.m2i@
 @    include mfd-access-${m2c_table_access}-defines.m2i@
 @    if $m2c_data_transient != 0@ #
 /**
