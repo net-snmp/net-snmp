@@ -20,6 +20,7 @@
 #endif
 #include <sys/types.h>
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/oid_array.h>
 #include <net-snmp/library/snmp_api.h>
 
