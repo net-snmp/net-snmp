@@ -125,8 +125,6 @@ snmp_count_callbacks(int major, int minor) {
 
 int
 snmp_callback_available(int major, int minor) {
-    int count = 0;
-
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }

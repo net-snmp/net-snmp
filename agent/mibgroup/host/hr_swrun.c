@@ -216,15 +216,15 @@ header_hrswrunEntry(struct variable *vp,
         if ( pid == -1 )
 	    break;
 	newname[HRSWRUN_ENTRY_NAME_LENGTH] = pid;
-    DEBUGMSGOID(("host/hr_swrun", newname, *length));
-    DEBUGMSG(("host/hr_swrun","\n"));
+	DEBUGMSGOID(("host/hr_swrun", newname, *length));
+	DEBUGMSG(("host/hr_swrun","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
 #ifndef linux
 	    LowProcIndex = current_proc_entry-1;
 #endif
-DEBUGMSGTL(("host/hr_swrun", " saved\n"));
+	    DEBUGMSGTL(("host/hr_swrun", " saved\n"));
 	    /* Save process status information */
             break;
 	}
@@ -235,9 +235,9 @@ DEBUGMSGTL(("host/hr_swrun", " saved\n"));
 	    LowProcIndex = current_proc_entry-1;
 #endif
 	    /* Save process status information */
-DEBUGMSG(("host/hr_swrun", " saved"));
+	    DEBUGMSG(("host/hr_swrun", " saved"));
 	}
-DEBUGMSG(("host/hr_swrun", "\n"));
+	DEBUGMSG(("host/hr_swrun", "\n"));
     }
 
     if ( LowPid == -1 ) {
@@ -284,11 +284,11 @@ var_hrswrun(struct variable *vp,
     char procfn[sizeof "/proc/00000/psinfo"];
 #else
     static struct proc *proc_buf;
+    char *cp1;
 #endif	/* _SLASH_PROC_METHOD_ */
     static time_t when = 0;
     time_t now;
     static int oldpid = -1;
-    char *cp1;
 #endif
 #if HAVE_KVM_GETPROCS
     char **argv;
@@ -859,7 +859,7 @@ End_HR_SWRun (void)
 
 int count_processes (void)
 {
-#ifndef linux
+#if !(defined(linux) || defined(hpux10) || defined(solaris2) || HAVE_KVM_GETPROCS)
     int i;
 #endif
     int total=0;
