@@ -23,7 +23,7 @@ kill -HUP `cat $SNMP_SNMPD_PID_FILE`
 sleep 1
 
 # And see if it has the new value.
-CAPTURE "snmpget $SNMP_FLAGS -v 1 localhost testcommunity system.sysLocation.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -v 1 localhost testcommunity system.sysLocation.0"
 
 STOPAGENT
 
