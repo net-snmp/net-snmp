@@ -48,6 +48,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
+#if HAVE_MACHINE_PARAM_H
+#include <machine/param.h>
+#endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
@@ -57,7 +60,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
-#ifdef osf3
+#if defined(osf3) || defined(netbsd1)
 #define rt_dst rt_nodes->rn_key
 #endif
 #else
