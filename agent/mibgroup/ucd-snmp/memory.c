@@ -102,6 +102,9 @@
 #  include <time.h>
 # endif
 #endif
+#ifdef hpux11
+#include <sys/pstat.h>
+#endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
@@ -128,12 +131,24 @@ void init_memory(void)
 #ifdef PHYSMEM_SYMBOL
  auto_nlist(PHYSMEM_SYMBOL,0,0);
 #endif
+#ifdef TOTAL_MEMORY_SYMBOL
  auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+#endif
+#ifdef MBSTAT_SYMBOL
  auto_nlist(MBSTAT_SYMBOL,0,0);
+#endif
+#ifdef SWDEVT_SYMBOL
  auto_nlist(SWDEVT_SYMBOL,0,0);
+#endif
+#ifdef FSWDEVT_SYMBOL
  auto_nlist(FSWDEVT_SYMBOL,0,0);
+#endif
+#ifdef NSWAPFS_SYMBOL
  auto_nlist(NSWAPFS_SYMBOL,0,0);
+#endif
+#ifdef NSWAPDEV_SYMBOL
  auto_nlist(NSWAPDEV_SYMBOL,0,0);
+#endif
 
 #ifndef bsdi2
   if (auto_nlist(NSWAPDEV_SYMBOL,(char *) &nswapdev, sizeof(nswapdev)) == 0)
@@ -284,18 +299,17 @@ int getswap(int rettype)
 {
   int spaceleft=0, spacetotal=0;
 
-#ifdef linux
+#if defined(linux)
 	spaceleft = memswap(meminfo_free);
 	spacetotal = memswap(meminfo_total);
-#else
-#ifdef bsdi2
+#elif defined(bsdi2)
   struct swapstats swapst;
   size_t size = sizeof(swapst);
   static int mib[] = { CTL_VM, VM_SWAPSTATS };
   if (sysctl(mib, 2, &swapst, &size, NULL, 0) < 0) return (0);
   spaceleft = swapst.swap_free / 2;
   spacetotal = swapst.swap_total / 2;	
-#else
+#else	/* !linux && !bsdi2 */
   struct swdevt swdevt[100];
   struct fswdevt fswdevt[100];
   FILE *file;
@@ -380,8 +394,8 @@ int getswap(int rettype)
   } else {
     return(0);
   }
-#endif
-#endif
+#endif	/* !linux && !bsdi2 */
+
   switch
     (rettype) {
     case SWAPGETLEFT:
@@ -401,12 +415,9 @@ unsigned char *var_extensible_mem(struct variable *vp,
 				  WriteMethod **write_method)
 {
 
-#ifndef linux
-  int result;
-#endif
   static long long_ret;
   static char errmsg[300];
-#ifndef linux
+#if !defined(linux) && (defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM))
   struct vmtotal total;
 #endif
 
@@ -414,20 +425,22 @@ unsigned char *var_extensible_mem(struct variable *vp,
 
   if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);
+
 #ifndef linux
-#ifdef bsdi2
-    /* sum memory statistics */
-    {
-	size_t size = sizeof(total);
-	static int mib[] = { CTL_VM, VM_TOTAL };
-	if (sysctl(mib, 2, &total, &size, NULL, 0) < 0) return (0);
-    }
-#else
-  if (auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&total, sizeof(total)) == 0) {
-    return(0);
+#if defined(USE_SYSCTL_VM)
+  /* sum memory statistics */
+  {
+    size_t size = sizeof(total);
+    static int mib[] = { CTL_VM, VM_TOTAL };
+    if (sysctl(mib, 2, &total, &size, NULL, 0) < 0)
+      return NULL;
   }
+#elif defined(TOTAL_MEMORY_SYMBOL)
+  if (auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&total, sizeof(total)) == 0)
+    return NULL;
 #endif
-#endif
+#endif	/* !linux */
+
   switch (vp->magic) {
     case MIBINDEX:
       long_ret = 0;
@@ -446,77 +459,101 @@ unsigned char *var_extensible_mem(struct variable *vp,
       long_ret = minimumswap;
       return((u_char *) (&long_ret));
     case MEMTOTALREAL:
-#ifdef linux
-	long_ret = memory(meminfo_total);
-#else
-#ifdef bsdi2
-      {	
+#if defined(USE_SYSCTL)
+      {
 	size_t size = sizeof(long_ret);
 	static int mib[] = { CTL_HW, HW_PHYSMEM };
-	if (sysctl(mib, 2, &long_ret, &size, NULL, 0) < 0) 
-	  long_ret = 0; else long_ret = long_ret / 1024;
-      }	
+	if (sysctl(mib, 2, &long_ret, &size, NULL, 0) < 0)
+	  return NULL;
+	long_ret = long_ret / 1024;
+      }
+#elif defined(hpux11)
+      {
+	struct pst_static pst_buf;
+	if (pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0) < 0)
+	  return NULL;
+	long_ret = pst_buf.physical_memory * (pst_buf.page_size / 1024);
+      }
+#elif defined(linux)
+	long_ret = memory(meminfo_total);
+#elif defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
+	long_ret = sysconf(_SC_PHYS_PAGES) * (sysconf(_SC_PAGESIZE) / 1024);
+#elif defined(PHYSMEM_SYMBOL)
+      {
+	int result;
+	if (auto_nlist(PHYSMEM_SYMBOL, (char *)&result, sizeof(result)) == 0)
+	  return NULL;
+	long_ret = result * 1000;	/* ??? */
+      }
 #else
-      /* long_ret = pagetok((int) total.t_rm); */
-#ifdef PHYSMEM_SYMBOL
-      if(auto_nlist(PHYSMEM_SYMBOL,(char *) &result,sizeof(result)) == 0)
-        return NULL;
-#else
-      return NULL;
-#endif
-      long_ret = result*1000;
-#endif
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMAVAILREAL:
 #ifdef linux
-	long_ret = memory(meminfo_free);
-#else
+      long_ret = memory(meminfo_free);
+#elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
       long_ret = pagetok((int) total.t_arm);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
 #ifndef linux
     case MEMTOTALSWAPTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_vmtxt);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMUSEDSWAPTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_avmtxt);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_rmtxt);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMUSEDREALTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_armtxt);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
-#endif
+#endif	/* linux */
     case MEMTOTALFREE:
 #ifdef linux
-	long_ret = memory(meminfo_free) + memswap(meminfo_free);
+      long_ret = memory(meminfo_free) + memswap(meminfo_free);
 #else
       long_ret = pagetok(total.t_free);
 #endif
       return((u_char *) (&long_ret));
     case MEMCACHED:
 #ifdef linux
-	long_ret = memory(meminfo_cached);
+      long_ret = memory(meminfo_cached);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMBUFFER:
 #ifdef linux
-	long_ret = memory(meminfo_buffers);
+      long_ret = memory(meminfo_buffers);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMSHARED:
 #ifdef linux
-	long_ret = memory(meminfo_shared);
+      long_ret = memory(meminfo_shared);
+#else
+      return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case ERRORFLAG:
@@ -534,4 +571,3 @@ unsigned char *var_extensible_mem(struct variable *vp,
   }
   return NULL;
 }
-
