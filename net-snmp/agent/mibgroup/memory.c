@@ -79,6 +79,8 @@
 #include "mibincl.h"
 #include "mibdefs.h"
 
+#include "memory.h"
+
 int minimumswap;
 static int pageshift;           /* log base 2 of the pagesize */
 
@@ -132,7 +134,6 @@ void init_memory()
     pagesize >>= 1;
   }
   pageshift -= 10;
-#endif
 }
 
 #define SWAPGETLEFT 0
