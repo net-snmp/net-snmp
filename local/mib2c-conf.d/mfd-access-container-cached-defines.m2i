@@ -219,6 +219,10 @@ $example_end
 @      @end@
 @   end@
         rowreq_ctx = ${context}_allocate_rowreq_ctx($m2c_tmp);
+        if (NULL == rowreq_ctx) {
+            snmp_log(LOG_ERR, "memory allocation failed\n");
+            return MFD_RESOURCE_UNAVAILABLE;
+        }
         if(MFD_SUCCESS != ${context}_indexes_set(rowreq_ctx
 @   foreach $node index@
 @      include m2c_setup_node.m2i@
