@@ -1,4 +1,4 @@
-      Frequently Asked Questions (FAQ) for the UCD/Net SNMP package
+      Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
 		        net-snmp Version: 5.1.pre3
@@ -28,8 +28,6 @@ TABLE OF CONTENTS
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
    Where can I find more information about network management?
    Is ucd-snmp thread safe?
- COMPILING
-   On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
  APPLICATIONS
    How do I add a MIB?
    How do I add a MIB to the tools?
@@ -92,6 +90,7 @@ TABLE OF CONTENTS
    How can I run AgentX with a different socket address?
    How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
+   Where are these traps sent to?
    How can I send a particular trap to selected destinations?
    Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
    When I run the agent it runs and then quits without staying around. Why?
@@ -119,26 +118,33 @@ TABLE OF CONTENTS
    The agent is complaining about 'snmpd.conf'.  Where is this?
    The system uptime (sysUpTime) returned is wrong!
    How can I reduce the memory footprint?
- CODING
+ COMPILING
    How do I compile with 'cc' instead of 'gcc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
-   How do I write C code to integrate with the agent?
-   How does the agent fetch the value of a variable from the system?
-   I've created a new module with 'mib2c' but it doesn't work.  Why not?
-   Where should I put the files produced by 'mib2c'?
-   Mib2c only handles a single table in my MIB. How can I fix this?
-   Mib2c complains about a missing "mib reference" - what does this mean?
-   Mib2c complains about not having a "valid OID" - what does this mean?
-   Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
-   Mib2c talks about "configuration files". Why has this stopped working?
-   How can I get the agent to generate a trap (or inform)?
-   What if I'm using an AgentX sub-agent instead?
+   On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf". Why?
    I'm getting an error "autoheader: not found" - what's wrong?
    What about a failed dependency on 'libcrypto'?  Where can I get that?
    Why is the project workspace empty under Visual C++?
+ CODING
+   How do I write C code to integrate with the agent?
+   How does the agent fetch the value of a variable from the system?
+   Mib2c complains about a missing "mib reference" - what does this mean?
+   Mib2c complains about not having a "valid OID" - what does this mean?
+   Why doesn't Mib2c like the MIB file I'm giving it?
+   Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
+   Mib2c complains about "configuration files". What's this for?
+   Which mib2c configuration file should I use?
+   How can I have Mib2c generate code for both scalars and tables?
+   Are there any examples, or documentation?
+   I've created a new module with 'mib2c' but it doesn't work.  Why not?
+   Where should I put the files produced by 'mib2c'?
+   Mib2c only handles a single table in my MIB. How can I fix this?
+   How can I get the agent to generate a trap (or inform)?
+   What if I'm using an AgentX sub-agent instead?
+ MISC
    Why are packets requesting the same information larger with UC-Davis SNMP?
    What ASN.1 parser is used?
-   What is the Official Slogan of the ucd-snmp-coders list?
+   What is the Official Slogan of the net-snmp-coders list?
 
 
 GENERAL
@@ -561,25 +567,7 @@ Is ucd-snmp thread safe?
 
   The applications and the agent have not been designed for threaded use.
 
-COMPILING
-=========
 
-On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
-----------------------------------------------------------
-
-  RedHat 8.0 and up doesn't come with libelf installed (properly) by
-  default.  In order to build Net-SNMP you'll need the elfutils-devel
-  rpm installed, which you currently don't have.
-
-  Alternatively, this could quickly fix the problem without requiring
-  the -devel rpm installed (as this is one of the things the -devel rpm
-  does when you install it):
-
-    cd /usr/lib ; ln -s libelf.so.1 libelf.so
-
-  Note that this will only affect you if you are trying to compile in
-  the host resources mib support, as it'll try to use the rpm libraries
-  which will in turn require that libelf.a or libelf.so be present.
 
 APPLICATIONS
 ============
@@ -705,28 +693,42 @@ Requests always seem to timeout, and don't give me anything back.  Why?
 
   There are a number of possible causes of this.
 
-  The most likely is a problem with access control - the agent is not
-  configured to allow you to access these variables.  This is commonly
-  seen with community-based requests (i.e. SNMPv1 and SNMPv2).  While
-  you might expect this to return an error, the specification of the
-  protocol actually defines this as not returning any response at all.
-  The tools will retry the request a number of times, and then report
-  a timeout error.
+  The most likely are the agent access control settings (who is allowed
+  access by the agent itself), or firewall/packet filtering settings
+  (who is allowed access by the underlying operating system).
+
+  A fuller list of possible causes (with indications of how to check
+  for each) is as follows:
+  
+	- is the machine you are querying up and running?
+		(Does it respond to 'ping' or similar requests?)
+	- is there an SNMP agent running on it?
+		(Run 'ps -ef | grep snmp' or 'netstat -an | grep 161')
+	- are the requests arriving, or being blocked (e.g. by a firewall)?
+		(Restart the agent using 'snmpd -f -L -d'
+		 and see if it shows the incoming packet dumps)
+	- is the agent simply taking a long time to respond?
+		(The 'snmpd -f -L -d' command should show a series of
+ 		 incoming PDUs, followed eventually by the outgoing PDUs.
+		 Try the request again with a long timeout value,
+		 e.g. 'snmpcmd -t 120 ....')
+	- does the agent's control settings allow this request?
+		(The 'snmpd -f -L -d' command will show a series of
+ 		 incoming PDUs with *no* corresponding outgoing PDUs)
+
+  Note that if the agent is not configured to allow access for a
+  particular community, then the SNMP specification declares that no
+  error response should be sent at all.  The Net-SNMP tools will retry
+  the request a number of times, before reporting a timeout error.
+
+    If the agent is configured to allow partial access for a given
+  community, then requests that fall outside this authorised access
+  *will* result in an error response.
+    (SNMP agents can be very fussy over who they talk to!)
 
     See the entries on access control in the AGENT section for how to
-  configure the UCD agent to allow suitable access.  For other vendors'
-  agents, you will need to consult the relevant documentation.
-
-    Other possibilities to check:
-	- is the machine you are querying up and running?
-		(does it respond to 'ping' or similar requests?)
-	- is there an SNMP agent running on it?
-	- is the agent simply taking a long time to respond?
-		(try again with a long timeout value - e.g. '-t 120')
-	- are there firewall or TCP wrapper settings that block this request?
-		(see the entry 'Why am I getting "Connection refused"?')
-
-  But the most likely cause is definitely access control settings.
+  configure the Net-SNMP agent to allow suitable access.  For other
+  vendors' agents, you will need to consult the relevant documentation.
 
 
 
@@ -750,7 +752,7 @@ I can see the system group, but nothing else.  Why?
   the access control won't allow you access to it.
 
   See the entries on access control in the AGENT section for how to
-  configure the UCD agent, or consult the agent's own documentation.
+  configure the Net-SNMP agent, or consult the agent's own documentation.
 
 
 
@@ -807,7 +809,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
   Note that snmptranslate still requires "random-access" to be specified
   explicitly - all other command tools now use this mode by defaults.
 
-  All versions of the UCD tools accept the syntax
+  All versions of the UCD and Net-SNMP tools accept the syntax
 
 	snmpget -v1 -c public myhost RFC1213-MIB:sysUpTime.0
 
@@ -861,7 +863,7 @@ Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
 
   If the object X happens to be the last entry supported by the agent, it
   doesn't have another object to provide, so returns an "end of MIB"
-  indication.  The UCD tools report this with the message above.
+  indication.  The Net-SNMP tools report this with the message above.
 
   But in either case, the actual information provided will be the same.
 
@@ -1168,13 +1170,16 @@ How big can an SNMP request (or reply) be?
     As a rule of thumb, sending 400 integer-valued varbinds seems to
   work OK, while 300 string-valued varbinds triggers an overrun.
 
+    The Net-SNMP releases handle packet buffers rather differently,
+  and are not subject to the same fixed restrictions.
+
 
 
 How can I monitor my systems (disk, memory, etc)?
 ------------------------------------------------
 
-    In general, the UCD suite consists of relatively low-level tools,
-  and there is nothing included that is designed for high-level,
+    In general, the Net-SNMP suite consists of relatively low-level
+  tools, and there is nothing included that is designed for high-level,
   long-term monitoring of trends in network traffic, disk or memory
   usage, etc.
 
@@ -1224,8 +1229,8 @@ OK, what should I put in snmp.conf?
   to a particular user, and should go in a personal snmp.conf file
   (typically $HOME/.snmp/snmp.conf).
 
-    Note that the UCD package does not come with an example snmp.conf file.
-  See 'snmpget -H' and/or the snmp.conf(5) man page for more details.
+    Note that the Net-SNMP package does not come with an example snmp.conf
+  file.  See 'snmpget -H' and/or the snmp.conf(5) man page for more details.
 
     You can also use the "snmpconf" command to help you generate your
   snmp.conf configuration file (just run it and answer its questions).
@@ -1280,12 +1285,12 @@ But compiling this fails! Why?
 -----------------------------
 
   The perl module tends to delve quite deeply into the internals of the
-  main UCD snmp library, and so is quite sensitive to changes within the
+  main Net-SNMP library, and so is quite sensitive to changes within the
   library.  It's important to use the correct version of the module, that
   corresponds to the version of the library you have installed.  If you're
-  working with the main UCD distribution, the appropriate version of the
-  perl module is shipped as part of this, but you *must* have
-  run "make install" on the main UCD distribution *first*.
+  working with the main Net-SNMP distribution, the appropriate version of
+  the perl module is shipped as part of this, but you *must* have
+  run "make install" on the main Net-SNMP distribution *first*.
 
   If you're working with a ready-installed version of the library, make
   sure you obtain a compatible version of the perl module.
@@ -1402,8 +1407,8 @@ Where can I find a MIB compiler?
   That depends what you mean by a "MIB compiler".  There are at least two
   types of tool that are commonly referred to by this name.
 
-  The first is a tool to check MIB files for validity.  The functionality
-  of this is mostly integrated within the MIB parser (part of the UCD library)
+  The first is a tool to check MIB files for validity.  This functionality
+  is mostly integrated within the MIB parser (part of the Net-SNMP library)
   and hence included in all the applications.  The tool 'snmptranslate' is
   probably the most appropriate for this purpose.
     Note that the parser is fairly forgiving (see 'What ASN.1 parser is used'
@@ -1411,7 +1416,7 @@ Where can I find a MIB compiler?
 
     The second type of tool is one to turn a MIB specification into C code,
   specifically one designed to aid agent implementation.  The command 'mib2c'
-  is an example of such a tool for the UCD agent.  
+  is an example of such a tool for the Net-SNMP agent.  
   See the CODING section for more information.
 
 
@@ -1430,9 +1435,9 @@ the first two characters of the filename.  What's happening?
 Why aren't my mib files being read in?
 -------------------------------------
 
-    The UCD library only loads a subset of MIB files by default.  This
-  list is set at when the suite is first configured and compiled, and
-  basically corresponds to the list of modules that the agent supports.
+    The Net-SNMP library only loads a subset of MIB files by default.
+  This list is set at when the suite is first configured and compiled,
+  and basically corresponds to the list of modules that the agent supports.
   (This is a simplification, but is a reasonable first approximation).
 
     You can override this by using the command-line option '-m', the
@@ -1546,7 +1551,7 @@ The parser doesn't handle comments properly. Why not?
 How do I replace MIB values with new ones?
 -----------------------------------------
 
-  The UCD parser generally takes the first definition it sees for each
+  The Net-SNMP parser generally takes the first definition it sees for each
   object in the MIB hierarchy.   Even if you specify your file to be read
   first, if the IMPORTS clauses reference a MIB with competing objects,
   those objects will be parsed first.
@@ -1719,8 +1724,8 @@ How do I add functionality?
   This is known as "pass-through" support.
 
   Thirdly, it may be possible to link another agent (which already
-  supports the desired MIB), as a "subagent" of the UCD master (or
-  vice versa).  The possibilities here are SMUX, AgentX or proxied
+  supports the desired MIB), as a "subagent" of the Net-SNMP master
+  (or vice versa).  The possibilities here are SMUX, AgentX or proxied
   SNMP (see the next question but one).
 
   Finally, the agent itself can be extended to support additional MIB
@@ -1781,18 +1786,18 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   mechanisms need to be set up.
 
     SMUX uses a similar packet format, but the subagent "registers" with
-  the master agent, providing a suitable password.  The UCD agent includes
-  the possibility of acting as a SMUX master agent, but the suite does not
-  include a subagent API.   Note that the SMUX protocol has essentially
-  been superceded by AgentX, but is still provided in order to support
-  existing SMUX subagents.
+  the master agent, providing a suitable password.  The Net-SNMP (and UCD)
+  agent includes the possibility of acting as a SMUX master agent, but the
+  suite does not include a subagent API.   Note that the SMUX protocol has
+  essentially been superceded by AgentX, but is still provided in order to
+  support existing SMUX subagents.
     See the file 'agent/mibgroup/README.smux' for details.
 
     AgentX uses a more compact (and simpler) packet format, with a richer
   range of administrative commands, and provides a more flexible and reliable
-  extension mechanism.  The UCD agent can be used in both master and subagent
-  roles, and the agent library can also be used to embed an AgentX subagent
-  within another application.
+  extension mechanism.  The Net-SNMP agent can be used in both master and
+  subagent roles, and the agent library can also be used to embed an AgentX
+  subagent within another application.
     See the file 'README.agentx' for details.
 
   Note that support for SMUX is not configured in by default.  You will
@@ -1961,20 +1966,30 @@ How can I combine two copies of the 'mib2' tree from separate subagents?
 What traps are sent by the agent?
 --------------------------------
 
-  The agent sends a 'coldStart(0)' trap when it first starts up, and a
-  UCD-specific trap 'ucdShutdown' when it stops.  It can also be configured
-  to send an 'authenticationFailure(4)' trap when it receives an SNMPv1
-  request using an unknown community name.  It does not currently generate
-  either 'coldStart(0)' or 'warmStart(1)' traps on being re-configured,
-  though this would be fairly simple to add.  (The main difficulty would
-  be determining whether the configuration had changed or not).
+  The agent sends a 'coldStart(0)' trap when it first starts up, and an
+  enterprise-specific trap 'nsNotifyShutdown' (or 'ucdShutdown') when it
+  stops.  It can also be configured to send an 'authenticationFailure(4)'
+  trap when it receives an SNMPv1 request using an unknown community name.
+  The Net-SNMP agent generates an enterprise-specific trap 'nsNotifyRestart'
+  (rather than the standard 'coldStart(0)' or 'warmStart(1)' traps) on
+  receiving a HUP signal - typically after being re-configured.
 
-    The agent does not send 'linkUp' or 'linkDown' traps.  Nor does it
-  generate traps when one of the monitored characteristics (disk usage,
-  running processes, etc) enters or leaves an error state.  Generating such
-  traps would be simple enough, but the difficulty is in recognising when
-  they should be generated.  See the question on generating traps in the
-  CODING section for more discussion of this.
+    The agent does not send 'linkUp' or 'linkDown' traps by default.  The
+  Net-SNMP agent can be configured to do this using the 'monitor' config
+  directive.  See the 'snmpd.conf(5)' man page (under DISMAN-EVENT-MIB)
+  for details (including the need for an 'agentSecName' setting).
+
+    Similarly, it does not generate traps by default when one of the
+  monitored characteristics (disk usage, running processes, etc) enters or
+  leaves an error state.  This can be configured using the 'defaultMonitors'
+  config directive (also documented under DISMAN-EVENT-MIB).  Note that
+  these facilities are only available with the v5 Net-SNMP agent, and are
+  not supported by the v4 UCD agent.
+
+
+
+Where are these traps sent to?
+-----------------------------
 
     With all these alerts, the agent also needs to be configured with
   (one or more) destinations to send them to, specifying the type of
@@ -1982,7 +1997,23 @@ What traps are sent by the agent?
   use.  This uses the snmpd.conf directives 'trapsink', 'trap2sink' and
   'informsink' for the destination type, and 'trapcommunity' for the
   community name.  SNMPv3 destinations can be configured using the directive
-  'trapsess'.   See the snmpd.conf man page for details.
+  'trapsess'.   See the 'snmpd.conf(5)' man page for details.
+
+    Note that these directives control the type of notification that is
+  generated.  This is completely separate from the style of API used to
+  request that the notification should be sent.  If a module invokes the
+  v1-style API 'send_easy_trap', this will still send SNMPv2 notifications
+  to destinations configured using 'trap2sink' or 'informsink' (and vice
+  versa).
+
+    A configuration block such as
+
+        trapsink   localhost
+        trap2sink  localhost
+        informsink localhost
+
+  will result in *three* notifications being sent for each call to
+  'send_easy_trap' (or 'send_v2trap').  See 'snmp_trap_api(3)' for details.
 
     Note that all notifications will be sent to all destinations.  The
   agent does not (currently) support notification filtering.
@@ -1992,12 +2023,12 @@ What traps are sent by the agent?
 How can I send a particular trap to selected destinations?
 ----------------------------------------------------------
 
-    With the 4.2.x agent, this isn't possible (or at least not
+    With the v4 UCD agent, this isn't possible (or at least not
   easily).  When you request the agent to generate a trap (using
-  either 'send_v2trap' or 'send_easy_trap'), this will be send
-  to all the known destinations.
+  either 'send_v2trap' or 'send_easy_trap'), this will be sent
+  to *all* the known destinations.
 
-    The 5.0 agent introduces preliminary support for the
+    The v5 Net-SNMP agent introduced preliminary support for the
   snmpNotifyFilterTable which is designed to allow this sort of
   selective trap direction, though this is not currently active.
   (The tables are present, but the information is not consulted)
@@ -2024,6 +2055,7 @@ Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
 
     Essentially, the API call to use depends on what you asking for,
   which is not necessarily what the recipients will actually get!
+  See 'snmp_trap_api(3)' for a fuller explanation.
 
 
 
@@ -2041,7 +2073,7 @@ When I run the agent it runs and then quits without staying around. Why?
   To prevent this behaviour (such as when attempting to debug the
   agent), you can start it with the '-f' flag.  This suppresses the
   fork, and the agent will run as a 'normal' command.  It's also often
-  useful to use the '-L' flag, to log messages to stdout.
+  useful to use the '-L' (or '-Le') flag, to log messages to stdout.
 
   On the other hand, if 'ps' shows that the agent is not running, then
   this is an error, and probably show that something went wrong in
@@ -2113,7 +2145,7 @@ How can I listen on just one particular interface?
 
     Normally, the agent will bind to the specified port on all interfaces
   on the system, and accept request received from any of them.  With
-  version 4.2, the '-p' option can now be used to listen on individual
+  version 4.2, the '-p' option can be used to listen on individual
   interfaces.  For example,
 	
 			snmpd -p 161@127.0.0.1
@@ -2128,9 +2160,9 @@ How can I listen on just one particular interface?
 
 		snmpd -p 161@127.0.0.1 -p 6161@10.0.0.1
 
-  The 5.0 agent has a similar facility, but does not use the '-p' command
-  line option flag.  Instead, the ports and/or interfaces to listen on are
-  simply listed on the command line, following any other options.  Also,
+  The v5 Net-SNMP agent has a similar facility, but does not use the '-p'
+  command line option flag.  Instead, the ports and/or interfaces to listen
+  on are simply listed on the command line, following any other options.  Also,
   the syntax of port and interface is slightly different (interface:port).
     So the three examples above would be
 
@@ -2160,15 +2192,21 @@ How do I configure access control?
   (Obviously you should change these names to match your requirements -
   which is a particularly good idea in the case of 'rwcommunity'!)
 
-    These can also be restricted to particular subtrees, and/or request
-  sources.  Similarly, the configure directives 'rouser' and 'rwuser'
-  can be used to allow the specified SNMPv3-authenticated users access
-  to all or part of the MIB tree.  See 'snmpd.conf(5)'.
+  Note that it is *not* necessary (and not advisible) to specify the
+  same community name for both rocommunity and rwcommunity directives.
+  The rwcommunity setting automatically includes rocommunity access,
+  and having both lines (with the same community name) may result in
+  apparently inconsistent behaviour.  Only use both settings when
+  specifying *different* community names.
+    The same holds true for rouser and rwuser.
 
-    These are effectively wrappers round the core access control
-  mechanisms.  This uses four directives 'com2sec', 'group', 'view'
-  and 'access',  and provides a more efficient and flexible control
-  over who can access what portions of the tree.
+  All four of these settings can can also be restricted to particular
+  subtrees, and/or request sources.  See 'snmpd.conf(5)' for details.
+
+  These directives are effectively wrappers round the core access control
+  mechanism, which uses the four directives 'com2sec', 'group', 'view'
+  and 'access' to provide a more efficient and flexible control
+  over who can access which portions of the tree.
 
     See the next question for the gory details, and the entry after
   that for setting up SNMPv3 users.
@@ -2201,12 +2239,14 @@ I don't understand the new access control stuff - what does it mean?
   where the entries in braces need to be defined elsewhere (I'm coming
   to that - be patient!), and the rest can be left as shown here.
 
-	[ If you really want to know, the 'sec.model' field can be used
-	  to have an access line that's only relevant to particular
-	  versions of SNMP (such v1 or v2c) rather than "any" version,
-	  and the 'sec.level' field can be used to ensure that the
-	  request is authenticated or encrypted.
-	    You'll have to ask Niels about the other two!]
+	[ If you really want to know, the 'sec.model' field can 
+	  be used to have an access line that's only relevant to
+	  particular versions of SNMP (such v1 or v2c) rather than
+	  "any" version, and the 'sec.level' field to ensure that
+	  the request must be authenticated or encrypted.
+	    The context and prefix fields can be used to distinguish
+	  between parallel versions of the same overall OID tree
+	]
 
 
   The "view" keyword is used to define particular bits of the MIB tree,
@@ -2331,7 +2371,7 @@ My new agent is ignoring the old snmpd.conf file. Why?
 
     The most likely explanation is that the new version of the agent is
   looking in a different location than the previous one.  This is commonly
-  experienced when replacing a ready-installed version (e.g. from a Linux
+  experienced when replacing a ready-installed version (e.g. from a vendor
   distribution), with the current release installed from the source.
 
     The default location for this file with the basic distribution is
@@ -2340,10 +2380,10 @@ My new agent is ignoring the old snmpd.conf file. Why?
   or /etc/snmp/snmpd.conf.  Try moving the old config file to the new
   location, and restart the agent.
 
-    With release 5.0, the name of the package is changing from "ucd-snmp"
-  to "net-snmp", and this change is reflected in the name of the persistent
-  /var directory.  So a 5.0 agent will not look in /var/ucd-snmp/snmpd.conf
-  for settings from a previous (UCD) agent.
+    With release 5.0, the name of the package changed from "ucd-snmp"
+  to "net-snmp", and this change was reflected in the name of the persistent
+  /var directory.  So a v5 Net-SNMP agent will not look in
+  /var/ucd-snmp/snmpd.conf for settings from a v4 UCD agent.
 
 
 
@@ -2366,8 +2406,10 @@ Why am I getting "Connection refused"?
   anyone to try and query your agent (though the agent's own access control
   mechanisms can still be used to restrict what - if anything - they can see).
 
-  Note that personal firewalls (such as Linux' ipchains mechanism) may have
-  a similar effect (though typically this won't be logged).
+  Note that personal firewalls (such as Linux' ipchains or iptables mechanism)
+  may have a similar effect (though typically this won't be logged).
+  See the earlier entry
+    Requests always seem to timeout, and don't give me anything back.  Why?
 
 
  
@@ -2421,6 +2463,8 @@ Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
   Note that these subtrees only report the current usage when
   explicitly queried.  They do *not* generate traps when the
   usage strays outside the configured bounds.
+  See the earlier FAQ entry
+    What traps are sent by the agent?
 
 
 
@@ -2612,8 +2656,8 @@ How can I reduce the memory footprint?
 
 
 
-CODING
-======
+COMPILING
+=========
 
 How do I compile with 'cc' instead of 'gcc'?
 -------------------------------------------
@@ -2645,6 +2689,72 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
 +         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
 
 
+
+On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
+----------------------------------------------------------
+
+  RedHat 8.0 and up doesn't come with libelf installed (properly) by
+  default.  In order to build Net-SNMP you'll need the elfutils-devel
+  rpm installed, which you currently don't have.
+
+  Alternatively, this could quickly fix the problem without requiring
+  the -devel rpm installed (as this is one of the things the -devel rpm
+  does when you install it):
+
+    cd /usr/lib ; ln -s libelf.so.1 libelf.so
+
+  Note that this will only affect you if you are trying to compile in
+  the host resources mib support, as it'll try to use the rpm libraries
+  which will in turn require that libelf.a or libelf.so be present.
+
+
+
+I'm getting an error "autoheader: not found" - what's wrong?
+-----------------------------------------------------------
+
+    This usually appears when compiling the current development source
+  version, obtained via CVS.  Unfortunately, the timestamps on some of
+  the configure files are such that make assumes (mistakenly) that the
+  configure script needs to be re-generated.
+    A similar problem may arise relating to 'autoconf'.
+
+    In both cases, this can be corrected by running the command
+  "make -k touchit" before attempting to make the main package.
+
+
+
+What about a failed dependency on 'libcrypto'?  Where can I get that?
+--------------------------------------------------------------------
+
+    This is typically encountered when installing a Linux RPM of
+  the ucd-snmp package.  This library is part of the 'openssl'
+  suite, so simply install that RPM first, or download the source
+  from ftp://ftp.openssl.org and compile and install that.
+
+    When compiling {UCD,Net}-SNMP from source, the configure script
+  should detect that this library is not present, and use alternative
+  arrangements for MD5-based authentication.
+
+    If encryption (or SHA1-based authentication) is required, then
+  this typically requires compiling from source.  Under Linux, both
+  the 'openssl' and 'openssl-devel' RPMs should be installed, and the
+  'config.cache' file removed before running "configure --with-openssl"
+  and re-compiling.
+
+
+
+Why is the project workspace empty under Visual C++?
+---------------------------------------------------
+
+    This is probably due to the different ways that Unix and Windows
+  handle text file line termination.  Older versions of WinZip don't
+  handle this properly, and Visual C++ gets confused (poor dear!).
+  The latest version of WinZip is reported to unpack this correctly.
+
+
+
+CODING
+======
 
 How do I write C code to integrate with the agent?
 -------------------------------------------------
@@ -2679,6 +2789,179 @@ How does the agent fetch the value of a variable from the system?
   (it would be hard to think of a less clean interface!), via ioctl()
   calls or similar system routines and these mechanisms are usually used
   in preference.
+
+
+
+Mib2c complains about a missing "mib reference" - what does this mean?
+---------------------------------------------------------------------
+
+    This basically means that it hasn't loaded the MIB file containing
+  the definition of the MIB subtree you're trying to implement.  This
+  might be because it hasn't been installed, the name is wrong, or
+  (most likely), because it isn't in the default list.  See the MIBS
+  section for more details.
+
+
+
+Mib2c complains about not having a "valid OID" - what does this mean?
+---------------------------------------------------------------------
+
+    This probably means that you gave it the name of a MIB file (or
+  module), rather than the name of an object defined in that file.
+  Mib2c expects the name of a 'root' object, and will generate a
+  template for the sub-tree starting from there.
+
+    If you've got a file 'MY-MIB.txt', defining the MIB module
+  'MY-MIB' which contains a subtree based on the object 'myMib',
+  then you should invoke mib2c as
+            "mib2c .... myMib"
+  rather than
+            "mib2c .... MY-MIB.txt"
+  or        "mib2c .... MY-MIB"
+
+    Note that you'll probably also have to add your MIB to the list of
+  MIBs that are loaded automatically, in order for mib2c to recognise
+  the name of this object.  So the command would typically be
+            "MIBS=+MY-MIB mib2c .... myMib"
+  or        "MIBS=ALL     mib2c .... myMib"
+
+
+
+Why doesn't Mib2c like the MIB file I'm giving it?
+-------------------------------------------------
+
+    This is the same problem as above.  Mib2c takes the name of a MIB
+  object, not the name of a file (or a MIB module).  Try using the
+  name of the MODULE-IDENTITY definition.
+
+
+
+Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
+---------------------------------------------------------------------
+
+    This is the same problem as above -  giving mib2c the name of
+  the file containing the MIB, rather than an object within it.
+  Earlier versions of mib2c didn't detect this situation, and
+  rather than report an error, it merrily constructed a template
+  for a default starting point of the mib-2 node.
+
+  More recent versions issue the error mentioned above, instead.
+
+
+
+Mib2c complains about "configuration files". What's this for?
+------------------------------------------------------------
+
+    You've probably upgraded to the v5 net-snmp release (from the
+  v4 ucd-snmp release).  This introduced a new approach to agent
+  module development, including a number of different "helpers".
+  The mib2c tool comes with configurations to generate code for
+  many of these, but you'll need to select which is most convenient
+  for your particular case.
+
+
+
+Which mib2c configuration file should I use?
+-------------------------------------------
+
+    If the MIB contains scalar objects, then use the config file
+  'mib2c.scalar.conf'.   This will generate template handlers for
+  these scalar objects (ignoring internal structural definitions,
+  table objects and notifications).
+
+    If the MIB contains tables, then there are number of possible
+  choices.  There are at least four configuration files that will
+  generate template handlers for table objects (ignoring internal
+  internal structural definitions, scalar objects and notifications).
+  Which to use depends on the characteristics of the table being
+  modelled (in particular where the data is held), and preferences
+  as to the style of code structure.
+
+    The config file 'mib2c.create-dataset.conf' assumes that the
+  data is held internally within the agent, and generates a single
+  handler routine for each table.  Most of the processing is handled
+  internally within the agent, so this handler routine is really
+  only needed if particular column objects require special processing.
+  
+    The config file 'mib2c.iterate.conf' is aimed at tables which
+  model data held external to the agent (not necessarily ordered
+  according to the MIB indexing requirements).  It generates a pair
+  of "iteration" routines, which can be used to step through the
+  table, to select the appropriate row for any given request.
+  This row is then passed to the (single) table handler routine,
+  which handles the rest of the processing for all of the column
+  objects (for both GET and SET requests).
+
+    There is also a similar 'mib2c.iterate_access.conf' which
+  builds on this, but generates a series of individual routines
+  for handling GET or SET requests for each column object.
+
+    The config file 'mib2c.array-user.conf' is again primarily
+  aimed at data held within the agent (although it can also be used
+  with external data).  In contrast to the single handler routine of
+  the first two approaches, this generates a series of separate
+  template routines to handle different aspects of processing the
+  request.  As with the 'mib2c.create-dataset.conf' approach, much
+  of the processing is handled internally.  Many of the generated
+  routines can be deleted if the relevant objects need no special
+  processing.
+ 
+    The most recent 'mfd' (or 'MIBs For Dummies') configuration takes
+  this idea of small (often optional) 'stub' routines even further.
+  This generates a collection of separate *files*, each of which
+  implements a particular aspect of the table processing.  The idea
+  here is to have lots of "baby steps", rather than have all the
+  processing dealt with in one place.
+
+    There are also some other 'mib2c' configuration files, for more
+  specialised requirements (e.g. generating notifications, "watched"
+  scalar objects, or code that is compatible with the v4 UCD agent
+  API), but these are the main choices for most requirements.
+
+
+
+How can I have Mib2c generate code for both scalars and tables?
+--------------------------------------------------------------
+
+    The v5 Net-SNMP mib2c tool uses separate configuration files to
+  generate code for scalar objects, and for tables.  This means that
+  it's not possible to automatically generate a single code file
+  that supports both scalars and tables.
+
+    Instead, it's necessary to generate the two code files separately,
+  and then combine the two files manually.  The handler routines from
+  one file can simply be included in the other with no changes needed.
+  The corresponding registration of these handlers can then be copied
+  from the first initialisation routine into the second.
+
+
+
+Are there any examples, or documentation?
+-------------------------------------------
+
+    Most of the MIB modules shipped with the Net-SNMP agent still
+  use the v4 "traditional" MIB module API, but a few use one of the
+  newer v5 helper-based handlers.
+
+    The dataset handler is used in the two DISMAN-EVENT-MIB modules
+  (disman/mteEventTable and disman/mteEventNotificationTable), as
+  well as the 'snmptrapd' implementation of logging incoming traps
+  (apps/notification_log)
+
+    The basic iterator handler is used in a number of modules, such
+  as the latest TCP and UDP table implementations (mibII/tcpTable &
+  mibII/udpTable), VACM context handling (mibII/vacm_context) and
+  various tables relating to agent internals (agent/*).  These show
+  a number of different approaches to using the iterator helper, so
+  it's worth comparing them.
+
+    The two examples/netSnmpHostsTable* modules provide a contrast
+  between the iterator and iterator_access helpers.
+
+    The Net-SNMP agent does not currently include any MIB modules
+  using the array-user container-based helper.  The best examples
+  of this are to be found in the net-policy project.
+  See http://net-policy.sourceforge.net/
 
 
 
@@ -2740,112 +3023,43 @@ Mib2c only handles a single table in my MIB. How can I fix this?
 
 
 
-Mib2c complains about a missing "mib reference" - what does this mean?
----------------------------------------------------------------------
-
-    This basically means that it hasn't loaded the MIB file containing
-  the definition of the MIB subtree you're trying to implement.  This
-  might be because it hasn't been installed, the name is wrong, or
-  (most likely), because it isn't in the default list.  See the MIBS
-  section for more details.
-
-
-
-Mib2c complains about not having a "valid OID" - what does this mean?
----------------------------------------------------------------------
-
-    This probably means that you gave it the name of a MIB file (or
-  module), rather than the name of an object defined in that file.
-  Mib2c expects the name of a 'root' object, and will generate a
-  template for the sub-tree starting from there.
-
-    If you've got a file 'MY-MIB.txt', defining the MIB module
-  'MY-MIB' which contains a subtree based on the object 'myMib',
-  then you should invoke mib2c as
-            "mib2c .... myMib"
-  rather than
-            "mib2c .... MY-MIB.txt"
-  or        "mib2c .... MY-MIB"
-
-    Note that you'll probably also have to add your MIB to the list of
-  MIBs that are loaded automatically, in order for mib2c to recognise
-  the name of this object.  So the command would typically be
-            "MIBS=+MY-MIB mib2c .... myMib"
-  or        "MIBS=ALL     mib2c .... myMib"
-
-
-
-Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
----------------------------------------------------------------------
-
-    This is the same problem as above -  giving mib2c the name of
-  the file containing the MIB, rather than an object within it.
-  Earlier versions of mib2c didn't detect this situation, and
-  rather than report an error, it merrily constructed a template
-  for a default starting point of the mib-2 node.
-
-  More recent versions issue the error mentioned above, instead.
-
-
-
-Mib2c talks about "configuration files". Why has this stopped working?
----------------------------------------------------------------------
-
-    You've probably upgraded to the v5 net-snmp release (from the
-  v4 ucd-snmp release).  This introduced a new approach to agent
-  module development, including a number of different "helpers".
-  The mib2c tool comes with configurations to generate code for
-  many of these, but you'll need to select which is most convenient
-  for your particular case.
-
-
-
 How can I get the agent to generate a trap (or inform)?
 ------------------------------------------------------
 
-    Actually generating a trap is reasonably simple - just call one
-  of the utility routines 'send_easy_trap()' or 'send_v2trap' with
-  the relevant information (trap values, or varbind list respectively).
-  See the 'snmp_trap_api(3)' man page for details.  But note that
-  these interfaces are only available within the agent (or subagents).
-  They are not available to stand-alone applications.  See the code
-  for 'snmptrap' for the approach to use in this case.
+    Generating a trap is reasonably simple - just call one of the
+  trap API routines 'send_easy_trap()' or 'send_v2trap' with the
+  relevant information (generic and specific trap values, or a
+  varbind list respectively).  See the 'snmp_trap_api(3)' man page
+  for details.
 
-    Determining _when_ to generate the trap is often harder.
-  If the trap is generated in response to some action within the
-  agent, (e.g. as the result of a SET), then this isn't too much
-  of a problem.
+    The 'mib2c.notify.conf' configuration file can be used to
+  construct a suitable template routine for generating a trap,
+  including building the variable list from the MIB trap
+  definition.  These variables can then be given suitable values,
+  before invoking the 'send_v2trap' call to actually send the trap.
+
+    Note that these APIs are only available within the agent (or
+  subagents), and are not available to stand-alone applications.
+  The code for 'snmptrap' shows an approach to use in such a case.
+
+    Determining _when_ to generate the trap (either directly or
+  via the mib2c-generated routine) is often harder.  If the trap
+  is generated in response to some action within the agent, (e.g.
+  as the result of a SET), then this isn't too much of a problem.
 
     But if the trap is intended to report on a change of status
   (e.g. a network interface going up or down, or a disk filling up),
   then actually detecting this is non-trivial.   It's necessary to
   poll the value(s) on a regular basis, save the results and compare
   them with the new values the next time round.
-    This can be done using the routines documented in 'snmp_alarm(3)',
-  though unfortunately we don't have any examples of how to do this.
-  Eventually, the intention is to implement the Event MIB (from the
-  Distributed Management working group), which will provide this
-  functionality in a flexible, standardised manner.
 
-    In the meantime, the simplest approach is probably to set up
-  an external program, to poll the agent for the desired values,
-  and generate a trap when values change.  E.g:
-
-		old_value=`snmpget myObject.0`
-		while true
-		do
-		    sleep 60
-		    new_value=`snmpget myObject.0`
-		    if [ $old_value != $new_value ]
-		    then
-			snmptrap .... myObject.0 i $new_value
-		    fi
-		    old_value=$new_value
-		done
-
-   (Obviously, this is not complete, but should give you the
-   general idea).
-
+    With the v4 UCD agent, this would have to be done manually,
+  using the routines documented in 'snmp_alarm(3)'.  The v5 Net-SNMP
+  agent has implemented the Distributed Management Event MIB, which
+  provides this functionality in a flexible, standardised manner.
+  See the 'snmpd.conf(5)' man page (under DISMAN-EVENT-MIB) for
+  details (including the need for an 'agentSecName' setting).
+  
 
 
 What if I'm using an AgentX sub-agent instead?
@@ -2866,49 +3080,8 @@ What if I'm using an AgentX sub-agent instead?
 
 
 
-I'm getting an error "autoheader: not found" - what's wrong?
------------------------------------------------------------
-
-    This usually appears when compiling the current development source
-  version, obtained via CVS.  Unfortunately, the timestamps on some of
-  the configure files are such that make assumes (mistakenly) that the
-  configure script needs to be re-generated.
-    A similar problem may arise relating to 'autoconf'.
-
-    In both cases, this can be corrected by running the command
-  "make -k touchit" before attempting to make the main package.
-
-
-
-What about a failed dependency on 'libcrypto'?  Where can I get that?
---------------------------------------------------------------------
-
-    This is typically encountered when installing a Linux RPM of
-  the ucd-snmp package.  This library is part of the 'openssl'
-  suite, so simply install that RPM first, or download the source
-  from ftp://ftp.openssl.org and compile and install that.
-
-    When compiling {UCD,Net}-SNMP from source, the configure script
-  should detect that this library is not present, and use alternative
-  arrangements for MD5-based authentication.
-
-    If encryption (or SHA1-based authentication) is required, then
-  this typically requires compiling from source.  Under Linux, both
-  the 'openssl' and 'openssl-devel' RPMs should be installed, and the
-  'config.cache' file removed before running "configure --with-openssl"
-  and re-compiling.
-
-
-
-Why is the project workspace empty under Visual C++?
----------------------------------------------------
-
-    This is probably due to the different ways that Unix and Windows
-  handle text file line termination.  Older versions of WinZip don't
-  handle this properly, and Visual C++ gets confused (poor dear!).
-  The latest version of WinZip is reported to unpack this correctly.
-
-
+MISC
+======
 
 Why are packets requesting the same information larger with UC-Davis SNMP?
 -------------------------------------------------------------------------
@@ -2925,7 +3098,8 @@ Why are packets requesting the same information larger with UC-Davis SNMP?
   using the long form of length encoding.  Some agents use the short form
   of length encoding only, and do not understand the long form.
 
-    Get version 4.2 or higher to use the shorter encoding lengths.
+    This should not be a problem with UCD v4.2 or higher, or the Net-SNMP
+  releases.
 
 
 
@@ -2940,15 +3114,15 @@ What ASN.1 parser is used?
   and the parser is usually bundled into the library 'libsnmp.a'
 
     Note that the parser attempts to be fairly forgiving of some common
-  errors and incompatibilities in MIB files.  The UCD tools accepting a
-  MIB file without complaint does not imply that the MIB is strictly
+  errors and incompatibilities in MIB files.  The Net-SNMP tools accepting
+  a MIB file without complaint does *not* imply that the MIB is strictly
   correct.
     Certain MIBs may need some amendments to allow them to be read
   correctly by the parser.  Contact the coders' list for advice.
 
 
 
-What is the Official Slogan of the ucd-snmp-coders list?
+What is the Official Slogan of the net-snmp-coders list?
 -------------------------------------------------------
 
   "The current implementation is non-obvious and may need to be improved."
