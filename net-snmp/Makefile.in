@@ -8,7 +8,7 @@ SUBDIRS		= snmplib agent apps local man mibs
 TESTDIRS	= testing
 
 CPP		= @CPP@ 					        \
-		-Iinclude -I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
+		-Iinclude -I$(srcdir)/include -I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
