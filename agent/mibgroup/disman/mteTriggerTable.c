@@ -690,8 +690,8 @@ parse_mteTriggerTable(const char *token, char *line) {
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityModel, &tmpint);
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityLevel, &tmpint);
       line = read_config_read_data(ASN_OBJECT_ID, line, &tmpoid, &tmpint);
-      if (!snmp_transport_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
-				 &StorageTmp->pdu_tDomainLen)) {
+      if (!snmp_tdomain_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
+				&StorageTmp->pdu_tDomainLen)) {
 	config_perror("unsupported transport domain for mteTriggerEntry");
 	return;
       }

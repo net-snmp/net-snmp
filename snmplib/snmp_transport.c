@@ -161,16 +161,6 @@ int		       snmp_tdomain_support	(const oid *in_oid,
 
 
 
-int		       snmp_transport_support	(const oid *in_oid,
-						 size_t in_len,
-						 const oid **out_oid,
-						 size_t *out_len)
-{
-  return snmp_tdomain_support(in_oid, in_len, out_oid, out_len);
-}
-
-
-
 void			snmp_tdomain_init	(void)
 {
   DEBUGMSGTL(("tdomain", "snmp_tdomain_init() called\n"));
