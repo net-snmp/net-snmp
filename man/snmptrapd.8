@@ -24,7 +24,7 @@
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ]
+snmptrapd [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ] [-D]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -51,6 +51,9 @@ must be run as root so that UDP port 162 can be opened.
 Adding a "-d" to the argument list will cause the application to dump input and output packets.
 .PP
 Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
+.PP
+Adding a "-D" to the argument list will cause debugging output to be
+turned on..
 .PP
 .SH "SEE ALSO"
 syslog(8), variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
