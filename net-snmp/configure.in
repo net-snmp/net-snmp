@@ -28,6 +28,12 @@ AC_ARG_ENABLE(shared,
 [  --enable-shared                 Compile, use, and install shared libraries.],
     with_shared="yes",with_shared="no")
 
+AC_ARG_ENABLE(ipv6,
+[  --enable-ipv6                   Generate IPv6 ready version.],
+    [if test "x$enable_ipv6" = "xyes"; then
+      AC_DEFINE(INET6)
+    fi])
+
 AC_ARG_ENABLE(debugging,
 [  --enable-debugging              Outputs extra debugging information at all
                                   times.  Normally, you should not enable this,
@@ -343,7 +349,7 @@ AC_PATH_PROG(CCPATH,$CC)
 dnl watch out for /usr/ucb/cc on solaris, it doesn't work with this package.
 case $target_os in
     bsdi*)
-	if test "x$CCPATH" = "x/usr/ucb/cc"; then
+	if test "x$CCPATH" = "x/usr/ucb/cc" -o "x$CCPATH" = "x/usr/bin/cc"; then
 	    AC_MSG_ERROR([
 
 *** The BSDI /usr/ucb/cc compiler does not work with this package.  
@@ -489,7 +495,7 @@ if test "x$with_shared" = "xyes"; then
 	SHLIB_LD_CMD="ld -G -o"
 	CC_RUNTIME_ARG="-R$libdir"
 	;;
-    
+
     freebsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
 	SHLIB_VERSION=.3.5
@@ -506,6 +512,102 @@ else
     SHLIB_EXTENSION="a"
     SHLIB_LD_CMD="ar cr"
     SHLIB_LDCONFIG_CMD=":"
+fi
+
+dnl guess IPv6 stack type.
+if test "x$enable_ipv6" = "xyes"; then
+	v6type=unknown
+	v6lib=none
+	v6trylibc=no
+
+	AC_MSG_CHECKING([ipv6 stack type])
+	for i in v6d toshiba kame inria zeta linux; do
+		case $i in
+		v6d)
+			AC_EGREP_CPP(yes, [dnl
+#include </usr/local/v6/include/sys/types.h>
+#ifdef __V6D__
+yes
+#endif],
+				[v6type=$i; v6lib=v6;
+				v6libdir=/usr/local/v6/lib;
+				CFLAGS="-I/usr/local/v6/include $CFLAGS"])
+			;;
+		toshiba)
+			AC_EGREP_CPP(yes, [dnl
+#include <sys/param.h>
+#ifdef _TOSHIBA_INET6
+yes
+#endif],
+				[v6type=$i; v6lib=inet6;
+				v6libdir=/usr/local/v6/lib;
+				CFLAGS="-DINET6 $CFLAGS"])
+			;;
+		kame)
+			AC_EGREP_CPP(yes, [dnl
+#include <netinet/in.h>
+#ifdef __KAME__
+yes
+#endif],
+				[v6type=$i; v6lib=inet6;
+				v6libdir=/usr/local/v6/lib;
+				v6trylibc=yes;
+				CFLAGS="-DINET6 $CFLAGS"])
+			;;
+		inria)
+			AC_EGREP_CPP(yes, [dnl
+#include <netinet/in.h>
+#ifdef IPV6_INRIA_VERSION
+yes
+#endif],
+				[v6type=$i;
+				v6lib=dummy;
+				v6libdir=/none;
+				v6trylibc=yes;
+				CFLAGS="-DINET6 $CFLAGS"])
+			;;
+		zeta)
+			AC_EGREP_CPP(yes, [dnl
+#include <sys/param.h>
+#ifdef _ZETA_MINAMI_INET6
+A
+yes
+#endif],
+				[v6type=$i; v6lib=inet6;
+				v6libdir=/usr/local/v6/lib;
+				CFLAGS="-DINET6 $CFLAGS"])
+			;;
+		linux)
+			if test -d /usr/inet6; then
+				v6type=$i
+				v6lib=inet6
+				v6libdir=/usr/inet6/lib
+				CFLAGS="-DINET6 $CFLAGS"
+			fi
+			;;
+		esac
+		if test "$v6type" != "unknown"; then
+			break
+		fi
+	done
+
+	if test "$v6lib" != "none"; then
+		if test -d $v6libdir -a -f $v6libdir/lib$v6lib.a; then
+			LIBS="-L$v6libdir -l$v6lib $LIBS"
+			enable_ipv6="yes"
+			AC_MSG_RESULT(["$v6type, $enable_ipv6, using lib$v6lib"])
+		elif test "$v6trylibc" = "yes"; then
+			enable_ipv6="yes"
+			AC_MSG_RESULT(["$v6type, $enable_ipv6, using libc"])
+		else
+			echo
+			echo "Fatal: no IPv6 library lib$v6lib.a found."
+			exit 1
+		fi
+	else
+		enable_ipv6="no"
+		AC_MSG_RESULT(["$v6type, $enable_ipv6"])
+	fi
 fi
 
 dnl
@@ -551,6 +653,10 @@ mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
 new_module_list="mibII ucd_snmp snmpv3mibs $with_mib_modules"
+
+if test "x$enable_ipv6" = "xyes"; then
+	new_module_list="$new_module_list mibII/ipv6"
+fi
 
 dnl Create include file list for snmp_vars.h to use.
 if test ! -d agent; then
@@ -842,6 +948,8 @@ dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
 dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)
+dnl KAME
+AC_CHECK_HEADERS(netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
 
 dnl OpenSSL
 AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h)
@@ -937,6 +1045,7 @@ AC_CHECK_FUNCS(getfsstat kvm_getprocs)
 AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
 AC_CHECK_FUNCS(tcgetattr)
+AC_CHECK_FUNCS(if_nameindex if_freenameindex)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,

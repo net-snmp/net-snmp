@@ -472,3 +472,5 @@
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
 #endif
+
+#undef INET6

@@ -10,6 +10,7 @@ config_arch_require(solaris2, kernel_sunos5)
 
 void init_var_route (void);
 #ifdef RTENTRY_4_4
+struct radix_node;
 void load_rtentries (struct radix_node *);
 #endif
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
