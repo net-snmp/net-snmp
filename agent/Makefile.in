@@ -61,6 +61,7 @@ makefileindepend: nosysdepend
 	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
 
 snmp_vars.o: @module_list_h@
+read_config.o: @module_list_h@
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
