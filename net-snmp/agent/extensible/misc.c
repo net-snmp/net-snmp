@@ -66,8 +66,9 @@ int sh_count_procs(procname)
 #else
   union wait status;
 #endif
+  struct extensible ex;
   
-  fd = get_ps_output();
+  fd = get_ps_output(&ex);
   file = fdopen(fd,"r");
   while(fgets(line,STRMAX,file) != NULL)
     {
@@ -78,6 +79,12 @@ int sh_count_procs(procname)
     }
   fclose(file);
   close(fd);
+#ifndef CACHETIME
+  if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
+    perror("waitpid():");
+  }
+  ex.pid = 0;
+#endif
   return(ret);
 }
 
@@ -261,14 +268,14 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
-int get_ps_output()
+int get_ps_output(ex)
+  struct extensible *ex;
 {
   int fd;
   FILE *ret;
-  struct extensible ex;
 
-  strcpy(ex.command,PSCMD);
-  fd = get_exec_output(&ex);
+  strcpy(ex->command,PSCMD);
+  fd = get_exec_output(ex);
   return(fd);
 } 
 
