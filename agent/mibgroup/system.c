@@ -84,7 +84,7 @@ void init_system()
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
 
-  gettimeofday(&starttime, 0);
+  gettimeofday(&starttime, NULL);
   starttime.tv_sec--;
   starttime.tv_usec += 1000000L;
 
@@ -156,17 +156,17 @@ var_system(vp, name, length, exact, var_len, write_method)
             *var_len = sizeof(version_id);
             return (u_char *)version_id;
         case UPTIME:
-              gettimeofday(&now, 0);
-              now.tv_sec--;
-              now.tv_usec += 1000000L;
-              diff.tv_sec = now.tv_sec - starttime.tv_sec;
-              diff.tv_usec = now.tv_usec - starttime.tv_usec;
-              if (diff.tv_usec > 1000000L){
+            gettimeofday(&now, NULL);
+            now.tv_sec--;
+            now.tv_usec += 1000000L;
+            diff.tv_sec = now.tv_sec - starttime.tv_sec;
+            diff.tv_usec = now.tv_usec - starttime.tv_usec;
+            if (diff.tv_usec > 1000000L){
                 diff.tv_usec -= 1000000L;
                 diff.tv_sec++;
-              }
-              long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-              return ((u_char *) &long_return);
+            }
+            long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+            return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
             *write_method = writeSystem;
