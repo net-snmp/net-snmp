@@ -16,6 +16,7 @@ extern          "C" {
 #define ENGINEID_TYPE_MACADDR 3
 #define ENGINEID_TYPE_TEXT    4
 #define ENGINEID_TYPE_UCD_RND 128
+#define ENGINEID_TYPE_NETSNMP_RND 256
 
 #define	DEFAULT_NIC "eth0"
 
