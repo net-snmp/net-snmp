@@ -488,6 +488,9 @@ char *snmp_in_toggle_options(char *);
 void snmp_in_toggle_options_usage(const char *, FILE *);
 int mib_to_asn_type(int mib_type);
 
+
+int netsnmp_str2oid( const char * S, oid * O, int L );
+
 #ifdef __cplusplus
 }
 #endif
