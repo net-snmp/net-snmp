@@ -692,8 +692,12 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+#ifdef XXX_BROKEN /* parse_args doesn't clone memory like it should */
     do { free(argv[--argn]); } while (argn > 0);
+#endif
 
+    if (session.remote_port == SNMP_DEFAULT_REMPORT)
+        session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open (&session);
 
     if (!ss) {
