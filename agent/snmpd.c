@@ -46,7 +46,11 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -60,6 +64,8 @@ SOFTWARE.
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
@@ -76,7 +82,9 @@ SOFTWARE.
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #include <signal.h>
 
 #ifndef FD_SET
@@ -290,9 +298,10 @@ main(int argc, char *argv[])
 	int             dont_fork = 0;
 	char            logfile[SNMP_MAXBUF_SMALL];
 	char           *cptr, **argvptr;
-	struct usmUser *user, *userListPtr;
 	char           *pid_file = NULL;
+#if HAVE_GETPID
 	FILE           *PID;
+#endif
 	int             dont_zero_log = 0;
 	int             stderr_log=0, syslog_log=0;
 	int             uid=0, gid=0;
@@ -500,10 +509,13 @@ main(int argc, char *argv[])
      * Initialize the world.  Detach from the shell.
      * Create initial user.
      */
+#if HAVE_FORK
     if (!dont_fork && fork() != 0) {
       exit(0);
     }
+#endif
 
+#if HAVE_GETPID
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
         snmp_log_perror("fopen");
@@ -512,7 +524,9 @@ main(int argc, char *argv[])
       fprintf(PID, "%d\n", (int)getpid());
       fclose(PID);
     }
+#endif
 
+    SOCK_STARTUP;
     init_agent();		/* do what we need to do first. */
     init_mib_modules();
     

@@ -17,18 +17,11 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #if HAVE_DMALLOC_H
@@ -75,12 +68,12 @@ int bin2asc(char *p, size_t n)
     int i, flag = 0;
     char buffer[BUFMAX];
 
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
         buffer[i] = p[i];
         if (!isprint(p[i])) flag = 1;
     }
     if (flag == 0) return n;
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
         sprintf(p, "%02x ", (unsigned char)(buffer[i] & 0xff));
         p += 3;
     }
@@ -143,13 +136,7 @@ void pass_parse_config(char *token, char* cptr)
         i++, ptmp = ptmp->next)
       etmp[i] = ptmp;
     qsort(etmp, numpassthrus, sizeof(struct extensible *),
-#ifdef __STDC__
-         (int (*)(const void *, const void *)) pass_compare
-#else
-	  pass_compare
-#endif
-          
-      );
+	  pass_compare);
     passthrus = (struct extensible *) etmp[0];
     ptmp = (struct extensible *) etmp[0];
     
@@ -383,7 +370,7 @@ setPass(int action,
           memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
           buf2[var_val_len] = 0;
-          if (bin2asc(buf2, itmp) == itmp)
+          if ((int)bin2asc(buf2, itmp) == (int)itmp)
               sprintf(buf,"string %s",buf2);
           else
               sprintf(buf,"octet %s",buf2);
@@ -413,7 +400,7 @@ setPass(int action,
   return SNMP_ERR_NOSUCHNAME;
 }
 
-int pass_compare(void *a, void *b)
+int pass_compare(const void *a, const void *b)
 {
   struct extensible **ap, **bp;
   ap = (struct extensible **) a;

@@ -4,6 +4,9 @@
 
 #include <config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -34,7 +37,11 @@
 # define WIFEXITED(stat_val) (((stat_val) & 255) == 0)
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -57,7 +64,16 @@
 #include <strings.h>
 #endif
 #include <ctype.h>
-
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_BASETSD_H
+#include <basetsd.h>
+#define ssize_t SSIZE_T
+#endif
+#if HAVE_RAISE
+#define alarm raise
+#endif
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
@@ -88,6 +104,7 @@ Exit(int var)
 
 int shell_command(struct extensible *ex)
 {
+#if HAVE_SYSTEM
   char shellline[STRMAX];
   FILE *shellout;
   
@@ -102,6 +119,10 @@ int shell_command(struct extensible *ex)
     fclose(shellout);
   }
   unlink("/tmp/shoutput");
+#else
+  ex->output[0] = 0;
+  ex->result = 0;
+#endif
   return(ex->result);
 }
 
@@ -109,6 +130,7 @@ int shell_command(struct extensible *ex)
 
 int exec_command(struct extensible *ex)
 {
+#if HAVE_EXECV
   int fd;
   FILE *file;
   
@@ -119,7 +141,9 @@ int exec_command(struct extensible *ex)
     }
     fclose(file);
     wait_on_exec(ex);
-  } else {
+  } else
+#endif
+  {
     ex->output[0] = 0;
     ex->result = 0;
   }
@@ -140,6 +164,7 @@ void wait_on_exec(struct extensible *ex)
 
 int get_exec_output(struct extensible *ex)
 {
+#if HAVE_EXECV
   int fd[2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef EXCACHETIME
@@ -257,7 +282,7 @@ int get_exec_output(struct extensible *ex)
         ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
         lastresult = ex->result;
-#else
+#else /* !EXCACHETIME */
         return(fd[0]);
 #endif
       }
@@ -272,6 +297,10 @@ int get_exec_output(struct extensible *ex)
   }
   return(cfd);
 #endif
+
+#else /* !HAVE_EXECV */
+  return 0;
+#endif
 }
 
 int get_exec_pipes(char *cmd,
@@ -280,6 +309,7 @@ int get_exec_pipes(char *cmd,
 		   int *pid)
 
 {
+#if HAVE_EXECV
   int fd[2][2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
   /* Setup our pipes */
@@ -347,6 +377,8 @@ int get_exec_pipes(char *cmd,
       *fdOut = fd[0][1];
       return(1); /* We are returning 0 for error... */
     }
+#endif /* !HAVE_EXECV */
+  return 0;
 }
 
 int clear_cache(int action,
@@ -384,8 +416,10 @@ RETSIGTYPE restart_doit(int a)
     close(i);
 
   /* do the exec */
+#if HAVE_EXECV
   execv(argvrestartname,argvrestartp);
   setPerrorstatus("execv");
+#endif
 }
 
 int
@@ -406,7 +440,9 @@ restart_hook(int action,
   }
   tmp = *((long *) var_val);
   if (tmp == 1 && action == COMMIT) {
+#ifdef SIGALRM
     signal(SIGALRM,restart_doit);
+#endif
     alarm(RESTARTSLEEP);
   } 
   return SNMP_ERR_NOERROR;
@@ -433,7 +469,7 @@ sprint_mib_oid(char *buf,
 	       size_t len)
 {
   int i;
-  for(i=0; i < len; i++) {
+  for(i=0; i < (int)len; i++) {
     sprintf(buf,".%d",(int) name[i]);
     while (*buf != 0)
       buf++;
@@ -487,8 +523,8 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     }
   }
   if (rtest > 0 ||
-      (rtest == 0 && !exact && (int) vp->namelen+1 < (int) *length) ||
-    (exact == 1 && (rtest || *length != vp->namelen+1))) {
+      (rtest == 0 && !exact && (int)(vp->namelen+1) < (int) *length) ||
+    (exact == 1 && (rtest || (int)*length != (int)(vp->namelen+1)))) {
     if (var_len)
 	*var_len = 0;
     return MATCH_FAILED;
@@ -509,7 +545,7 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     else
       newname[*length-1] = name[*length-1];
   }  
-  if (max >= 0 && newname[*length-1] > max) {
+  if (max >= 0 && ((int)newname[*length-1] > max)) {
     if(var_len)
       *var_len = 0;
     return MATCH_FAILED;

@@ -41,12 +41,27 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <fcntl.h>
 
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -54,7 +69,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -94,7 +111,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "transform_oids.h"
 #include "callback.h"
 #include "snmpd.h"
-#include "mibgroup/mib_module_includes.h"
+#include "mib_module_includes.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
@@ -393,7 +410,7 @@ getStatPtr(
     struct snmp_pdu *pdu,   /* IN - relevant auth info re PDU */
     int		*noSuchObject)
 {
-    struct subtree	*tp, *prev;
+    struct subtree	*tp;
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
     u_char              result_type;

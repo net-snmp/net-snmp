@@ -31,7 +31,12 @@
 #include <dmalloc.h>
 #endif
 
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "mibincl.h"
 #include "read_config.h"
@@ -42,7 +47,7 @@
 #include "agent_registry.h"
 #include "agent_callbacks.h"
 #include "vacm_vars.h"
-#include "../../mib_module_config.h"
+#include "mib_module_config.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

@@ -15,6 +15,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
@@ -34,12 +37,12 @@
 
 #include "mibgroup/struct.h"
 #include "mib_modules.h"
-#include "mibgroup/mib_module_includes.h"
+#include "mib_module_includes.h"
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "mibgroup/agentx/subagent.h"
 #endif
 
 void
 init_mib_modules(void) {
-  #include "mibgroup/mib_module_inits.h"
+  #include "mib_module_inits.h"
 }
