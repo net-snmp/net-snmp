@@ -80,7 +80,7 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "default_store.h"
 #include "system.h"
-#include "apps/snmp_parse_args.h"
+#include "snmp_parse_args.h"
 #include "parse.h"
 
 struct column {
@@ -126,6 +126,7 @@ but again, -C should be forgotten.
 
 #endif
 
+void usage(void);
 
 void get_field_names (char *);
 void get_table_entries( struct snmp_session *ss );
@@ -211,7 +212,10 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  snmp_parse_args(argc, argv, &session, "w:C:bi", optProc);
+  if ((snmp_parse_args(argc, argv, &session, "w:C:bi", optProc)) < 0) { 
+      usage();
+      exit(1);
+  }
 
   /* get the initial object and subtree */
   /* specified on the command line */

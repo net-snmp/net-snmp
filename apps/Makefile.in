@@ -19,8 +19,6 @@ LOCAL_LIBS	= -L../snmplib
 #LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 LIBS		= $(USELIBS) @LIBS@
 
-PARSEOBJS	= snmp_parse_args.o
-
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib @CPPFLAGS@
 OSUFFIX		= lo
 
@@ -33,58 +31,58 @@ subdirs:
         ( cd $$i ; $(MAKE) ) ; \
 	done
 
-snmpwalk:    snmpwalk.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpwalk.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpwalk:    snmpwalk.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpbulkwalk:    snmpbulkwalk.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpbulkwalk.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpbulkwalk:    snmpbulkwalk.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpbulkwalk.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpbulkget:    snmpbulkget.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpbulkget.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpbulkget:    snmpbulkget.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpbulkget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptranslate:    snmptranslate.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptranslate.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpstatus:    snmpstatus.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpstatus.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpstatus:    snmpstatus.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpstatus.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpget:    snmpget.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpget.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpget:    snmpget.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpget.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpdelta:    snmpdelta.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpdelta.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpdelta:    snmpdelta.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpdelta.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptable:    snmptable.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmptable.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptable:    snmptable.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmptable.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptest:    snmptest.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmptest.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptest:    snmptest.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd:    snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptrap:    snmptrap.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 	rm -f snmpinform
 	$(LN_S) snmptrap snmpinform
 
-snmpset:    snmpset.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpset.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpset:    snmpset.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpset.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpusm:    snmpusm.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpusm.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpusm:    snmpusm.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpusm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpvacm:    snmpvacm.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpvacm.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpvacm:    snmpvacm.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpgetnext:    snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpgetnext:    snmpgetnext.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpgetnext.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-encode_keychange:    encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+encode_keychange:    encode_keychange.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ encode_keychange.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmpdf:    snmpdf.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
-	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmpdf:    snmpdf.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 
 clean:

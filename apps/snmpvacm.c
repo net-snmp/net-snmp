@@ -253,12 +253,15 @@ main(int argc, char *argv[])
     int                   command         = 0;
     long                  longvar;
     int 				  secModel,secLevel,contextMatch,val,i = 0; 
-	char 				  *mask,*groupName,*prefix;	
-	u_char 				  viewMask[VACMSTRINGLEN];
+    char 				  *mask,*groupName,*prefix;	
+    u_char 				  viewMask[VACMSTRINGLEN];
 	
                        
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
+    if ((arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) < 0) { 
+        usage();
+        exit(1);
+    }
 
     
     SOCK_STARTUP;
