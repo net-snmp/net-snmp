@@ -213,6 +213,9 @@ NetSNMP::OID - Perl extension for manipulating OIDs
   $len = $oid3->length();
   # -> 7
 
+  # retrieving indexes from an oid:
+  $arrayref = $tableoid->get_indexes()
+
 =head1 DESCRIPTION
 
 The NetSNMP::OID module is a simple wrapper around a C-based net-snmp
