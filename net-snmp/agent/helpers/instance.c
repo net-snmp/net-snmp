@@ -149,7 +149,7 @@ netsnmp_register_long_instance(const char *name,
 }
 
 int
-register_read_only_int_instance(const char *name,
+netsnmp_register_read_only_int_instance(const char *name,
                                 oid * reg_oid, size_t reg_oid_len,
                                 int *it, Netsnmp_Node_Handler * subhandler)
 {
@@ -159,6 +159,19 @@ register_read_only_int_instance(const char *name,
                     HANDLER_CAN_RONLY, netsnmp_instance_int_handler,
                     subhandler);
     return netsnmp_register_read_only_instance(myreg);
+}
+
+  /*
+   * Compatibility with earlier (inconsistently named) routine
+   */
+int
+register_read_only_int_instance(const char *name,
+                                oid * reg_oid, size_t reg_oid_len,
+                                int *it, Netsnmp_Node_Handler * subhandler)
+{
+  return netsnmp_register_read_only_int_instance(name,
+                                reg_oid, reg_oid_len,
+                                it, subhandler);
 }
 
 int
