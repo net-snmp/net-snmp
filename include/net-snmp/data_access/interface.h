@@ -6,16 +6,9 @@
 #ifndef NETSNMP_ACCESS_INTERFACE_H
 #define NETSNMP_ACCESS_INTERFACE_H
 
-#ifndef NETSNMP_CPP_WRAP_START
 # ifdef __cplusplus
-#  define NETSNMP_CPP_WRAP_START extern          "C" {
-#  define NETSNMP_CPP_WRAP_END                   };
-# else
-#  define NETSNMP_CPP_WRAP_START
-#  define NETSNMP_CPP_WRAP_END
-# endif
+extern          "C" {
 #endif
-NETSNMP_CPP_WRAP_START  /* no semi-colon */
 
 /*
  * define flags to indicate the availability of certain data
@@ -201,6 +194,8 @@ oid netsnmp_access_interface_index_find(const char *name);
 
 /**---------------------------------------------------------------------*/
 
-NETSNMP_CPP_WRAP_END
+# ifdef __cplusplus
+};
+#endif
 
 #endif /* NETSNMP_ACCESS_INTERFACE_H */

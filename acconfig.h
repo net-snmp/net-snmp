@@ -693,13 +693,4 @@
 /* define if agentx transport is to use domain sockets only */
 #undef AGENTX_DOM_SOCK_ONLY
 
-#ifdef __cplusplus
-#define NETSNMP_CPP_WRAP_START extern          "C" {
-#define NETSNMP_CPP_WRAP_END                   };
-#else
-#define NETSNMP_CPP_WRAP_START
-#define NETSNMP_CPP_WRAP_END
-#endif
-
-
 #endif /* NET_SNMP_CONFIG_H */
