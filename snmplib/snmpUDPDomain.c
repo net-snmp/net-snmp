@@ -518,6 +518,7 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
 {
   com2SecEntry *c;
   struct sockaddr_in *from = (struct sockaddr_in *)opaque;
+  char *ztcommunity = NULL;
 
   /*  Special case if there are NO entries (as opposed to no MATCHING
       entries).  */
@@ -542,14 +543,20 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
     return 1;
   }
 
+  ztcommunity = malloc(community_len + 1);
+  if (ztcommunity != NULL) {
+    memcpy(ztcommunity, community, community_len);
+    ztcommunity[community_len] = '\0';
+  }
+
   DEBUGMSGTL(("snmp_udp_getSecName", "resolve <\"%s\", 0x%08x>\n",
-	      community, from->sin_addr.s_addr));
+	      ztcommunity?ztcommunity:"<malloc error>",from->sin_addr.s_addr));
 
   for (c = com2SecList; c != NULL; c = c->next) {
     DEBUGMSGTL(("snmp_udp_getSecName", "compare <\"%s\", 0x%08x/0x%08x>",
 		c->community, c->network, c->mask));
     if ((community_len == strlen(c->community)) &&
-	(strncmp(community, c->community, community_len) == 0) &&
+	(memcmp(community, c->community, community_len) == 0) &&
 	((from->sin_addr.s_addr & c->mask) == c->network)) {
       DEBUGMSG(("snmp_udp_getSecName", "... SUCCESS\n"));
       if (secName != NULL) {
@@ -558,6 +565,9 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
       break;
     }
     DEBUGMSG(("snmp_udp_getSecName", "... nope\n"));
+  }
+  if (ztcommunity != NULL) {
+    free(ztcommunity);
   }
   return 1;
 }
