@@ -4198,8 +4198,13 @@ _sess_read(void *sessp,
       ret = isp->hook_parse(sp, pdu, packetptr, length);
     else
       ret = snmp_parse(sessp, sp, pdu, packetptr, length);
+    if (ret != SNMP_ERR_NOERROR) {
+      DEBUGMSGTL(("sess_read", "parse fail\n"));
+    }
+
     if ( isp->hook_post ) {
       if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
+        DEBUGMSGTL(("sess_read", "post-parse fail\n"));
         snmp_free_pdu(pdu);
         return -1;
       }
@@ -4389,23 +4394,30 @@ snmp_sess_select_info(void *sessp,
      * If a single session is specified, do just for that session.
      */
     if (sessp) slp = slptest; else slp = Sessions;
+    DEBUGMSGTL(("sess_select","for %s session%s: ",
+               sessp?"single":"all", sessp?"":"s" ));
+
     for(; slp; slp = next){
 	next = slp->next;
 
 	isp = slp->internal;
         if (!isp) {
-          DEBUGMSGTL(("sess_select","select fail: closing...\n"));
+          DEBUGMSG(("sess_select","skip "));
           continue;  /* close in progress - skip this one */
         }
 
 	if (isp->sd == -1) {
 		/* This session was marked for deletion */
+            DEBUGMSG(("sess_select","delete\n"));
 	    if (sessp == NULL)
 		snmp_close(slp->session);
 	    else
 		snmp_sess_close( slp );
+            DEBUGMSGTL(("sess_select","for %s session%s: ",
+                       sessp?"single":"all", sessp?"":"s" ));
 	    continue;
 	}
+        DEBUGMSG(("sess_select","%d ", isp->sd));
 	if ((isp->sd + 1) > *numfds)
 	    *numfds = (isp->sd + 1);
 	FD_SET(isp->sd, fdset);
@@ -4428,6 +4440,7 @@ snmp_sess_select_info(void *sessp,
 	active++;
 	if (sessp) break;	/* single session processing */
     }
+    DEBUGMSG(("sess_select","\n"));
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)) {
       next_alarm = get_next_alarm_delay_time();
