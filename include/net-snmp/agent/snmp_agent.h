@@ -51,7 +51,7 @@ extern          "C" {
 
         struct netsnmp_request_info_s *next;
         struct netsnmp_request_info_s *prev;
-        struct subtree *subtree;
+        struct netsnmp_subtree_s      *subtree;
     } netsnmp_request_info;
 
     typedef struct netsnmp_set_info_s {
@@ -69,7 +69,7 @@ extern          "C" {
     } netsnmp_set_info;
 
     typedef struct netsnmp_tree_cache_s {
-        struct subtree *subtree;
+        struct netsnmp_subtree_s *subtree;
         netsnmp_request_info *requests_begin;
         netsnmp_request_info *requests_end;
     } netsnmp_tree_cache;
