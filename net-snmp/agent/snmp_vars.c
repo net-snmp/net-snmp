@@ -226,8 +226,6 @@ init_agent (void)
 
   setup_tree();
 
-#include "mibgroup/mib_module_inits.h"
-
   init_agent_read_config();
 
 #ifdef TESTING

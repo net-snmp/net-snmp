@@ -3,17 +3,18 @@
 #
 
 TARG		= snmpd
-LIBTARG		= libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+LIBTARG		= libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) \
+	libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LOCAL_LIBS	= -L../snmplib -L.
-LIBS		= $(CC_RUNTIME_ARG) -lagent -lsnmp @WRAPLIBS@ @LIBS@
+LIBS		= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
 CC		= @CC@ $(CPPFLAGS)
 
-MIBOBJS		= @mibgroup_list_o@
+MIBOBJS		= @mibgroup_list_o@ mib_modules.o
 
 PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
 
@@ -44,13 +45,17 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd:	${AGENTOBJS} $(USELIBS) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+snmpd:	${AGENTOBJS} $(USELIBS) $(LIBTARG)
 	${CC} -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${LIBS}  
 
 
-libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS} ${MIBOBJS} 
-	$(SHLIB_LD_CMD) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS} ${MIBOBJS} 
-	$(RANLIB) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS}
+	$(SHLIB_LD_CMD) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS}
+	$(RANLIB) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+
+libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${MIBOBJS} 
+	$(SHLIB_LD_CMD) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${MIBOBJS} 
+	$(RANLIB) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 clean:
 	rm -f *.o ${TARG} ${LIBTARG}
