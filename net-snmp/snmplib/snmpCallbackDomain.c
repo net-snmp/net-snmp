@@ -141,10 +141,10 @@ callback_pop_queue(int num)
  * address if data is NULL.  
  */
 
-char           *
-snmp_callback_fmtaddr(netsnmp_transport *t, void *data, int len)
+char *
+netsnmp_callback_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    char            buf[SPRINT_MAX_LEN];
+    char buf[SPRINT_MAX_LEN];
     netsnmp_callback_info *mystuff;
 
     if (!t)
@@ -169,16 +169,21 @@ snmp_callback_fmtaddr(netsnmp_transport *t, void *data, int len)
  */
 
 int
-snmp_callback_recv(netsnmp_transport *t, void *buf, int size,
-                   void **opaque, int *olength)
+netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
+		      void **opaque, int *olength)
 {
-    int             rc;
-    char            newbuf[1];
+    int rc = -1;
+    char newbuf[1];
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
 
     DEBUGMSGTL(("transport_callback", "hook_recv enter\n"));
 
-    rc = read(mystuff->pipefds[0], newbuf, 1);
+    while (rc < 0) {
+	rc = read(mystuff->pipefds[0], newbuf, 1);
+	if (rc < 0 && errno != EINTR) {
+	    break;
+	}
+    }
 
     if (mystuff->linkedto) {
         /*
@@ -200,10 +205,10 @@ snmp_callback_recv(netsnmp_transport *t, void *buf, int size,
 
 
 int
-snmp_callback_send(netsnmp_transport *t, void *buf, int size,
-                   void **opaque, int *olength)
+netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
+		      void **opaque, int *olength)
 {
-    int             from;
+    int from, rc = -1;
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
     netsnmp_callback_pass *cp;
 
@@ -249,8 +254,13 @@ snmp_callback_send(netsnmp_transport *t, void *buf, int size,
         if (!other_side)
             return -1;
 
-        write(((netsnmp_callback_info *) other_side->data)->pipefds[1],
-              " ", 1);
+	while (rc < 0) {
+	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
+		       " ", 1);
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
         callback_push_queue(mystuff->linkedto, cp);
         /*
          * we don't need the transport data any more 
@@ -274,8 +284,13 @@ snmp_callback_send(netsnmp_transport *t, void *buf, int size,
         other_side = find_transport_from_callback_num(from);
         if (!other_side)
             return -1;
-        write(((netsnmp_callback_info *) other_side->data)->pipefds[1],
-              " ", 1);
+	while (rc < 0) {
+	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
+		       " ", 1);
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
         callback_push_queue(from, cp);
     }
 
@@ -286,7 +301,7 @@ snmp_callback_send(netsnmp_transport *t, void *buf, int size,
 
 
 int
-snmp_callback_close(netsnmp_transport *t)
+netsnmp_callback_close(netsnmp_transport *t)
 {
     int             rc;
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
@@ -304,7 +319,7 @@ snmp_callback_close(netsnmp_transport *t)
 
 
 int
-snmp_callback_accept(netsnmp_transport *t)
+netsnmp_callback_accept(netsnmp_transport *t)
 {
     DEBUGMSGTL(("transport_callback", "hook_accept enter\n"));
     DEBUGMSGTL(("transport_callback", "hook_accept exit\n"));
@@ -358,11 +373,11 @@ netsnmp_callback_transport(int to)
         return NULL;
     }
 
-    t->f_recv = snmp_callback_recv;
-    t->f_send = snmp_callback_send;
-    t->f_close = snmp_callback_close;
-    t->f_accept = snmp_callback_accept;
-    t->f_fmtaddr = snmp_callback_fmtaddr;
+    t->f_recv    = netsnmp_callback_recv;
+    t->f_send    = netsnmp_callback_send;
+    t->f_close   = netsnmp_callback_close;
+    t->f_accept  = netsnmp_callback_accept;
+    t->f_fmtaddr = netsnmp_callback_fmtaddr;
 
     netsnmp_transport_add_to_list(&trlist, t);
 

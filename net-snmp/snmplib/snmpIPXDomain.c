@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <errno.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -37,8 +38,8 @@ static netsnmp_tdomain ipxDomain;
  * address if data is NULL.  
  */
 
-char           *
-snmp_ipx_fmtaddr(netsnmp_transport *t, void *data, int len)
+static char *
+netsnmp_ipx_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     struct sockaddr_ipx *to = NULL;
 
@@ -50,7 +51,7 @@ snmp_ipx_fmtaddr(netsnmp_transport *t, void *data, int len)
     if (to == NULL) {
         return strdup("IPX: unknown");
     } else {
-        char            tmp[64];
+        char tmp[64];
         sprintf(tmp, "IPX: %08X:%02X%02X%02X%02X%02X%02X/%hu",
                 ntohl(to->sipx_network), to->sipx_node[0],
                 to->sipx_node[1], to->sipx_node[2], to->sipx_node[3],
@@ -67,15 +68,15 @@ snmp_ipx_fmtaddr(netsnmp_transport *t, void *data, int len)
  * remember where a PDU came from, so that you can send a reply there...  
  */
 
-int
-snmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
-              void **opaque, int *olength)
+static int
+netsnmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
+		 void **opaque, int *olength)
 {
-    int             rc = -1, fromlen = sizeof(struct sockaddr);
+    int rc = -1, fromlen = sizeof(struct sockaddr);
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
-        from = (struct sockaddr *) malloc(sizeof(struct sockaddr_ipx));
+        from = (struct sockaddr *)malloc(sizeof(struct sockaddr_ipx));
         if (from == NULL) {
             *opaque = NULL;
             *olength = 0;
@@ -84,17 +85,21 @@ snmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
             memset(from, 0, fromlen);
         }
 
-        rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+	while (rc < 0) {
+	  rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+	  if (rc < 0 && errno != EINTR) {
+	    break;
+	  }
+	}
 
         if (rc >= 0) {
-            char           *string = snmp_ipx_fmtaddr(NULL, from, fromlen);
-            DEBUGMSGTL(("snmp_ipx_recv",
-                        "recvfrom fd %d got %d bytes (from %s)\n", t->sock,
-                        rc, string));
+            char *string = netsnmp_ipx_fmtaddr(NULL, from, fromlen);
+            DEBUGMSGTL(("netsnmp_ipx","recvfrom fd %d got %d bytes(from %s)\n",
+			t->sock, rc, string));
             free(string);
         } else {
-            DEBUGMSGTL(("snmp_ipx_recv", "recvfrom fd %d FAILED (rc %d)\n",
-                        t->sock, rc));
+            DEBUGMSGTL(("netsnmp_ipx", "recvfrom fd %d err %d (\"%s\")\n",
+                        t->sock, errno, strerror(errno)));
         }
         *opaque = (void *) from;
         *olength = sizeof(struct sockaddr_ipx);
@@ -104,15 +109,15 @@ snmp_ipx_recv(netsnmp_transport *t, void *buf, int size,
 
 
 
-int
-snmp_ipx_send(netsnmp_transport *t, void *buf, int size,
-              void **opaque, int *olength)
+static int
+netsnmp_ipx_send(netsnmp_transport *t, void *buf, int size,
+		 void **opaque, int *olength)
 {
-    int             rc = 0;
+    int rc = -1;
     struct sockaddr *to = NULL;
 
     if (opaque != NULL && *opaque != NULL &&
-        *olength == sizeof(struct sockaddr_ipx)) {
+	*olength == sizeof(struct sockaddr_ipx)) {
         to = (struct sockaddr *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
                t->data_length == sizeof(struct sockaddr_ipx)) {
@@ -120,26 +125,27 @@ snmp_ipx_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (to != NULL && t != NULL && t->sock >= 0) {
-        char           *string = NULL;
-        string =
-            snmp_ipx_fmtaddr(NULL, (void *) to,
-                             sizeof(struct sockaddr_ipx));
-        DEBUGMSGTL(("snmp_ipx_send", "%d bytes from %p to %s on fd %d\n",
+        char *string = netsnmp_ipx_fmtaddr(NULL, (void *)to,
+					sizeof(struct sockaddr_ipx));
+        DEBUGMSGTL(("netsnmp_ipx", "send %d bytes from %p to %s on fd %d\n",
                     size, buf, string, t->sock));
         free(string);
-        rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-        return rc;
-    } else {
-        return -1;
+	while (rc < 0) {
+	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
     }
+    return rc;
 }
 
 
 
-int
-snmp_ipx_close(netsnmp_transport *t)
+static int
+netsnmp_ipx_close(netsnmp_transport *t)
 {
-    int             rc = 0;
+    int rc = -1;
     if (t->sock >= 0) {
 #ifndef HAVE_CLOSESOCKET
         rc = close(t->sock);
@@ -147,10 +153,8 @@ snmp_ipx_close(netsnmp_transport *t)
         rc = closesocket(t->sock);
 #endif
         t->sock = -1;
-        return rc;
-    } else {
-        return -1;
     }
+    return rc;
 }
 
 
@@ -177,9 +181,9 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         return NULL;
     }
 
-    string =
-        snmp_ipx_fmtaddr(NULL, (void *) addr, sizeof(struct sockaddr_ipx));
-    DEBUGMSGTL(("snmp_ipx", "open %s %s\n", local ? "local" : "remote",
+    string = netsnmp_ipx_fmtaddr(NULL, (void *)addr, 
+				 sizeof(struct sockaddr_ipx));
+    DEBUGMSGTL(("netsnmp_ipx", "open %s %s\n", local ? "local" : "remote",
                 string));
     free(string);
 
@@ -206,15 +210,15 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         t->local_length = 12;
 
         /*
-         * This session is inteneded as a server, so we must bind on to the given
-         * address (which may include a particular network and/or node address,
-         * but definitely includes a port number).  
+         * This session is inteneded as a server, so we must bind on to the
+         * given address (which may include a particular network and/or node
+         * address, but definitely includes a port number).
          */
 
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr));
         if (rc != 0) {
-            snmp_ipx_close(t);
+            netsnmp_ipx_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -232,8 +236,8 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
         t->remote_length = 12;
 
         /*
-         * This is a client session.  Save the address in the transport-specific
-         * data pointer for later use by snmp_ipx_send.  
+         * This is a client session.  Save the address in the
+         * transport-specific data pointer for later use by snmp_ipx_send.
          */
 
         t->data = malloc(sizeof(struct sockaddr_ipx));
@@ -251,11 +255,11 @@ netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local)
      */
 
     t->msgMaxSize = 576 - 30;
-    t->f_recv = snmp_ipx_recv;
-    t->f_send = snmp_ipx_send;
-    t->f_close = snmp_ipx_close;
-    t->f_accept = NULL;
-    t->f_fmtaddr = snmp_ipx_fmtaddr;
+    t->f_recv     = netsnmp_ipx_recv;
+    t->f_send     = netsnmp_ipx_send;
+    t->f_close    = netsnmp_ipx_close;
+    t->f_accept   = NULL;
+    t->f_fmtaddr  = netsnmp_ipx_fmtaddr;
 
     return t;
 }
@@ -374,7 +378,7 @@ netsnmp_sockaddr_ipx(struct sockaddr_ipx *addr, const char *peername)
 
 
 netsnmp_transport *
-snmp_ipx_create_tstring(const char *string, int local)
+netsnmp_ipx_create_tstring(const char *string, int local)
 {
     struct sockaddr_ipx addr;
 
@@ -388,7 +392,7 @@ snmp_ipx_create_tstring(const char *string, int local)
 
 
 netsnmp_transport *
-snmp_ipx_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_ipx_create_ostring(const u_char * o, size_t o_len, int local)
 {
     struct sockaddr_ipx addr;
 
@@ -412,8 +416,8 @@ netsnmp_ipx_ctor(void)
     ipxDomain.prefix = calloc(2, sizeof(char *));
     ipxDomain.prefix[0] = "ipx";
 
-    ipxDomain.f_create_from_tstring = snmp_ipx_create_tstring;
-    ipxDomain.f_create_from_ostring = snmp_ipx_create_ostring;
+    ipxDomain.f_create_from_tstring = netsnmp_ipx_create_tstring;
+    ipxDomain.f_create_from_ostring = netsnmp_ipx_create_ostring;
 
     netsnmp_tdomain_register(&ipxDomain);
 }
