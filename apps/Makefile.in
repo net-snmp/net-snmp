@@ -41,9 +41,9 @@ USETRAPLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/l
 LOCAL_LIBS	= -L../snmplib -L../agent -L../agent/helpers
 LIBS		= $(USELIBS) @LIBS@
 TRAPDWITHAGENT  = $(USETRAPLIBS) @AGENTLIBS@
-TRAPDWITHOUTAGENT = 
+TRAPDWITHOUTAGENT = $(LIBS)
 # this will be set by configure to one of the above 2 lines
-TRAPLIBS	= @TRAPLIBS@
+TRAPLIBS	= @TRAPLIBS@ @WRAPLIBS@
 
 CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
@@ -91,8 +91,8 @@ snmptable$(EXEEXT):    snmptable.$(OSUFFIX) $(USELIBS)
 snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) $(INSTALLLIBS)
-	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS} @WRAPLIBS@
+snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(TRAPLIBS) $(INSTALLLIBS)
+	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
