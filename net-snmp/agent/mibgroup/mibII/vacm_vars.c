@@ -125,6 +125,10 @@ init_vacm_vars (void)
                                 NULL,"community [default|hostname|network/bits] [oid]");
   snmpd_register_config_handler("rocommunity", vacm_parse_simple,
                                 NULL,"community [default|hostname|network/bits] [oid]");
+  snmpd_register_config_handler("rwuser", vacm_parse_simple,
+                                NULL,"user [default|hostname|network/bits] [oid]");
+  snmpd_register_config_handler("rouser", vacm_parse_simple,
+                                NULL,"user [default|hostname|network/bits] [oid]");
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
@@ -455,6 +459,7 @@ void vacm_parse_simple(const char *token, char *confline) {
   char group[] = "group";
   char view[] = "view";
   char access[] = "access";
+  char secname[SPRINT_MAX_LEN];
 
   cp = copy_word(confline, community);
   if (cp && *cp) {
@@ -468,17 +473,22 @@ void vacm_parse_simple(const char *token, char *confline) {
     strcpy(theoid, ".1");
   }
 
-  if (strcmp(token,"rwcommunity") == 0)
+  if (strcmp(token,"rwcommunity") == 0 || strcmp(token,"rwuser") == 0)
     rw = viewname;
 
-  /* com2sec mapping */
-  /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
-  sprintf(line,"anonymousSecName%03d %s %s", num, addressname, community);
-  vacm_parse_security(com2sec,line);
+  if (strcmp(token,"rwcommunity") == 0 || strcmp(token,"rocommunity") == 0) {
+    /* com2sec mapping */
+    /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
+    sprintf(secname, "anonymousSecName%03d", num);
+    sprintf(line,"%s %s %s", secname, addressname, community);
+    vacm_parse_security(com2sec,line);
+  } else {
+    strcpy(secname, community);
+  }
 
   /* sec->group mapping */
   /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-  sprintf(line,"anonymousGroupName%03d any anonymousSecName%03d", num, num);
+  sprintf(line,"anonymousGroupName%03d any %s", num, secname);
   vacm_parse_group(group,line);
 
   /* view definition */
