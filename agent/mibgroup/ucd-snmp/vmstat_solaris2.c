@@ -2,6 +2,7 @@
  *  vmstat_solaris2.c
  *  UCD SNMP module for sysStatus section of UCD-SNMP-MIB for SunOS/Solaris
  *  Jochen Kmietsch <jochen.kmietsch@gmx.de>
+ *  with fixes from Michael Slifcak <mslifcak@iss.net>
  *  Uses some ideas from xosview and top
  *  Some comments paraphrased from the SUN man pages 
  *  Version 0.1 initial release (Dec 1999)
@@ -16,6 +17,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <time.h>
+#include <string.h>
      
 /* UCD-SNMP config details */
 #include <config.h>
@@ -29,6 +31,8 @@
 
 /* Header file for this module */
 #include "vmstat_solaris2.h"
+
+/* Utility functions for UCD-SNMP */
 #include "util_funcs.h"
 
 /* Includes end here */
@@ -40,10 +44,10 @@
 /* Provides access to the kernel statistics library by */
 /* initializing a kstat control structure and returning a pointer */
 /* to this structure.  This pointer must be used as the kc argument in */
-/* following function calls from libkstat */
-/* Pointer to structure to be opened with kstat_open in main procedure */
-/* We share this one with kernel_sunos5, where it's defined, and memory_solaris2 */
-extern kstat_ctl_t *kstat_fd;  /* defined in kernel_sunos5.c */
+/* following function calls from libkstat (here kc is called kstat_fd). */
+/* Pointer to structure to be opened with kstat_open in main procedure. */
+/* We share this one with memory_solaris2 and kernel_sunos5, where it's defined. */
+extern kstat_ctl_t *kstat_fd;
 
 /* Holds number of CPUs this computer has. */
 static ulong num_cpu;
@@ -69,7 +73,7 @@ static float (*cpu_perc)[CPU_STATES+1];
 /* Functions start here */
 
 /* countCPU: Returns number of CPUs, utility routine */
-ulong countCPU(kstat_ctl_t *kctl)
+ulong countCPU(kstat_ctl_t *kstat_fd)
 {
   /* From kstat.h: */
   /* A "Named Kstat", see "man kstat" (Named Statistics) for description of structure */
@@ -77,7 +81,7 @@ ulong countCPU(kstat_ctl_t *kctl)
   kstat_t *ksp_count;
   
   /* Look for a kstat by name */
-  ksp_count = kstat_lookup(kctl, "unix", 0, "system_misc"); 
+  ksp_count = kstat_lookup(kstat_fd, "unix", 0, "system_misc"); 
   
   if (ksp_count == NULL)
     {
@@ -86,7 +90,7 @@ ulong countCPU(kstat_ctl_t *kctl)
     }
   
   /* Allocates the memory needed for kstat_data_lookup */
-  kstat_read(kctl, ksp_count, NULL);
+  kstat_read(kstat_fd, ksp_count, NULL);
   
   /* kstat_data_lookup looks in the kstat specified by arg 1 for the */
   /* string specified by arg 2.  Works only for named kstats. */
@@ -95,7 +99,8 @@ ulong countCPU(kstat_ctl_t *kctl)
   if (n_cpus == NULL)
     {
       snmp_log(LOG_ERR, "vmstat_solari2: No data in countCPU n_cpus.\n");
-      return(-1);
+      /* Reasonable default */
+      return(1);
     }
   
   /* Returns the value of the named kstat, an ulong in this case */
@@ -137,17 +142,21 @@ void init_vmstat_solaris2(void)
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/vmstat", extensible_vmstat_variables, variable2, \
                vmstat_variables_oid);
-
-  if (kstat_fd == 0) {
-    kstat_fd = kstat_open();
-    if (kstat_fd == 0) {
-      snmp_log(LOG_ERR, "kstat_open(): failed\n");
+  
+  /* First check whether shared kstat contol is NULL, if so, try to open our own. */
+  if (kstat_fd == NULL)
+    {
+      kstat_fd = kstat_open();
     }
-  }
+  /* Then check whether either shared kstat was found or we succeeded in opening our own. */
+  if (kstat_fd == NULL)
+    {
+      snmp_log(LOG_ERR, "vmstat_solaris2 (init): kstat_open() failed and no shared kstat control found.\n");
+    }
   
   /* Get number of CPUs, needed for dimensions of arrays that hold CPU data */
   if (kstat_fd != NULL)
-  num_cpu = countCPU(kstat_fd);
+    num_cpu = countCPU(kstat_fd);
   
   /* For getMisc, calloc here at start of module since size is dependend on number of CPUs */
   swapin = (ulong *) calloc(num_cpu, sizeof(swapin));
