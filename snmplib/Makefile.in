@@ -31,7 +31,7 @@ INSTALLHEADERS=\
 	snmp_impl.h \
 	system.h \
 	ucd-snmp-includes.h \
-	view.h \
+	view.h
 
 CFLAGS=@CFLAGS@ @SHLIB_CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir) -I$(srcdir)/..
