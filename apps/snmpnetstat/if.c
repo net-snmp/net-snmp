@@ -440,7 +440,7 @@ loop:
 	sigsetmask(oldmask);
 #endif
 /* reset signal as many OSs require this, and the rest shouldn't be hurt */
-#ifndef HAVE_SIGSET
+#ifdef HAVE_SIGSET
 	(void)sigset(SIGALRM, catchalarm);
 #else
 	(void)signal(SIGALRM, catchalarm);
