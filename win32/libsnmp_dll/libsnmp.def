@@ -360,6 +360,7 @@ EXPORTS
 	usmHMACSHA1AuthProtocol
 	usmNoPrivProtocol
 	usmDESPrivProtocol
+	usmAESPrivProtocol
 	snprint_bitstring
 	snprint_value
 	snprint_objid
