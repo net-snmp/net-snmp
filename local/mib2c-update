@@ -112,7 +112,7 @@ do_diff()
     # p     Show which C function each change is in.
     # d     smaller changes
     #    --exclude='*Makefile' --unidirectional-new-file
-    diff -cp -C 5 --show-c-function \
+    diff -u -p -b -w --show-c-function \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
         --exclude="*.deps" \
