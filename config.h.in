@@ -98,6 +98,9 @@
 
 #define PSCMD "/bin/ps"
 
+/* debugging stuff */
+#undef DODEBUG
+
 /* This ID is returned after the AGENTID above.  IE, the resulting
    value returned by a query to sysObjectID is
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
@@ -107,6 +110,11 @@
                              before restarting the agent.  This is
                              necessary to finish the snmpset reply
                              before restarting. */
+
+#ifdef DODEBUG
+#define DEBUGP(x) fprintf(stderr,x);
+#define DEBUGP1(x,y) fprintf(stderr,x,y);
+#endif
 
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
@@ -354,9 +362,7 @@ sure to end it in -1.*/
 
 #define LASTFIELD -1      /* internal define */
 
-/* debugging stuff */
-
-#define DODEBUG
+/* debugging macros */
 
 #ifdef DODEBUG
 #define DEBUGP(x) fprintf(stderr,x);
