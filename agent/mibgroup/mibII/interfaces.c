@@ -546,12 +546,10 @@ Interface_Scan_By_Index (int iindex,
 	  DEBUGMSGTL(("mibII/interfaces", "routing socket: unknown message type %d\n", ifp->ifm_type));
 	}
     }
-  if (have_ifinfo && have_addr)
+  if (have_ifinfo)
     {
       return 0;
     }
-  else if (have_ifinfo && !(if_msg->ifm_flags & IFF_UP))
-      return 0;
   else
     {
       return -1;
@@ -1454,6 +1452,11 @@ Interface_Scan_Init (void)
 
         while (*ifstart == ' ') ifstart++;
 
+        if ( strstr(line,"No statistics available") == 0)
+            continue; /* legal line in the /proc file, but there is
+                         nothing we can do about the missing
+                         information */
+        
         if ( (stats = strrchr(ifstart, ':')) == NULL ) {
                 snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
                 continue;
@@ -1473,9 +1476,8 @@ Interface_Scan_Init (void)
             (scan_line_to_use == scan_line_2_0 &&
             sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt,
 &snd_err, &coll) != 5)) {
-          if ( (scan_line_to_use == scan_line_2_2) &&
-                !strstr(line,"No statistics available") )
-                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
+          if ( strstr(line,"No statistics available") == 0)
+              snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
           continue;
         }
 	
