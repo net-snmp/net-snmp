@@ -89,7 +89,7 @@ if [ $TYPE = "down" -o $TYPE = "up" ]; then
 
   # Check to see if it is a unix host
     
-  grep $HOST $HOSTLISTFILE > /dev/null 2>&1
+  egrep "^$HOST$" $HOSTLISTFILE > /dev/null 2>&1
   
   if [ $? = 1 ]; then
     exit 0
