@@ -316,7 +316,7 @@ extensible_free_config(void)
             tname[etmp2->miblen] = i;
             unregister_mib(tname, etmp2->miblen+1);
         }
-        for (i=100; i<103; i++) {
+        for (i=100; i<=103; i++) {
             tname[etmp2->miblen] = i;
             unregister_mib(tname, etmp2->miblen+1);
         }
