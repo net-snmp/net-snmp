@@ -589,7 +589,6 @@ void getbulk_table_entries( struct snmp_session *ss )
   char  *name_p = NULL;
   char  **dp;
   int end_of_table = 0;
-  int have_current_index;
 
   while (running) {
     /* create PDU for GETNEXT request and add object name to request */
@@ -653,7 +652,7 @@ void getbulk_table_entries( struct snmp_session *ss )
 	  for (cp = string_buf; *cp; cp++)
 	    if (*cp == '\n') *cp = ' ';
 	  for (col = 0; col < fields; col++)
-	    if (column[col].subid == vars->name[rootlen]) break;
+	    if (column[col].subid == (int)vars->name[rootlen]) break;
 	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
 	  if (i > column[col].width) column[col].width = i;
