@@ -342,7 +342,7 @@ vacm_parse_view(const char *token, char *param)
         config_perror("missing SUBTREE parameter");
         return;
     }
-    mask = strtok(NULL, " \t\n");
+    mask = strtok(NULL, "\0");
 
     if (strcmp(type, "included") == 0)
         inclexcl = SNMP_VIEW_INCLUDED;
@@ -363,7 +363,7 @@ vacm_parse_view(const char *token, char *param)
     if (mask) {
         int             val;
         i = 0;
-        for (mask = strtok(mask, ".:"); mask; mask = strtok(NULL, ".:")) {
+        for (mask = strtok(mask, " .:"); mask; mask = strtok(NULL, " .:")) {
             if (i >= sizeof(viewMask)) {
                 config_perror("MASK too long");
                 return;
