@@ -128,7 +128,7 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 
-#if defined(freebsd3) || defined(freebsd4)
+#ifdef freebsd3
 #    define USE_SYSCTL_IFLIST
 #else
 # if defined(CTL_NET) && !defined(freebsd2)
