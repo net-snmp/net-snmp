@@ -82,9 +82,10 @@ kernel.o: ./../snmplib/snmp_impl.h
 snmp_agent.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 snmp_agent.o:  ./../snmplib/asn1.h
 snmp_agent.o: ./../snmplib/snmp_impl.h 
-snmp_agent.o:  ./../snmplib/snmp.h ./../snmplib/acl.h
-snmp_agent.o: ./../snmplib/party.h ./../snmplib/context.h ./../snmplib/mib.h
-snmp_agent.o: mibgroup/snmp_mib.h snmpd.h
+snmp_agent.o:  ./../snmplib/snmp_api.h
+snmp_agent.o: ./../snmplib/snmp.h ./../snmplib/acl.h ./../snmplib/party.h
+snmp_agent.o: ./../snmplib/context.h ./../snmplib/mib.h mibgroup/snmp_mib.h
+snmp_agent.o: snmpd.h
 snmp_vars.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
 snmp_vars.o: common_header.h  
 snmp_vars.o:  ./../snmplib/asn1.h
