@@ -17,6 +17,7 @@
 #include <net-snmp/agent/read_only.h>
 #include <net-snmp/agent/bulk_to_next.h>
 #include <net-snmp/agent/table_dataset.h>
+#include <net-snmp/agent/table_dataset2.h>
 #include <net-snmp/agent/stash_cache.h>
 
 #else
@@ -38,6 +39,7 @@ netsnmp_init_helpers(void)
     netsnmp_init_read_only_helper();
     netsnmp_init_bulk_to_next_helper();
     netsnmp_init_table_dataset();
+    netsnmp_init_table_dataset2();
     netsnmp_init_stash_cache_helper();
 }
 
