@@ -428,9 +428,9 @@ int             storage_type_len =
 
 static const char *hrs_descr[] = {
     NULL,
+    "Memory Buffers",           /* HRS_TYPE_MBUF */
     "Real Memory",              /* HRS_TYPE_MEM */
-    "Swap Space",               /* HRS_TYPE_SWAP */
-    "Memory Buffers"            /* HRS_TYPE_MBUF */
+    "Swap Space"                /* HRS_TYPE_SWAP */
 };
 
 
@@ -474,7 +474,7 @@ var_hrstore(struct variable *vp,
         if (store_idx == MATCH_FAILED)
             return NULL;
 
-        if (store_idx < HRS_TYPE_FS_MAX) {
+        if (store_idx > HRS_TYPE_FIXED_MAX) {
             if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0)
                 return NULL;
         }
@@ -529,7 +529,7 @@ var_hrstore(struct variable *vp,
         long_return = store_idx;
         return (u_char *) & long_return;
     case HRSTORE_TYPE:
-        if (store_idx < HRS_TYPE_FS_MAX)
+        if (store_idx > HRS_TYPE_FIXED_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
             else
@@ -552,18 +552,18 @@ var_hrstore(struct variable *vp,
         *var_len = sizeof(storage_type_id);
         return (u_char *) storage_type_id;
     case HRSTORE_DESCR:
-        if (store_idx < HRS_TYPE_FS_MAX) {
+        if (store_idx > HRS_TYPE_FIXED_MAX) {
             strncpy(string, HRFS_entry->HRFS_mount, sizeof(string)-1);
             string[ sizeof(string)-1 ] = 0;
             *var_len = strlen(string);
             return (u_char *) string;
         } else {
-            store_idx = store_idx - HRS_TYPE_FS_MAX;
+            /* store_idx = store_idx - 1; */
             *var_len = strlen(hrs_descr[store_idx]);
             return (u_char *) hrs_descr[store_idx];
         }
     case HRSTORE_UNITS:
-        if (store_idx < HRS_TYPE_FS_MAX)
+        if (store_idx > HRS_TYPE_FIXED_MAX)
 #if STRUCT_STATVFS_HAS_F_FRSIZE
             long_return = stat_buf.f_frsize;
 #else
@@ -597,7 +597,7 @@ var_hrstore(struct variable *vp,
             }
         return (u_char *) & long_return;
     case HRSTORE_SIZE:
-        if (store_idx < HRS_TYPE_FS_MAX)
+        if (store_idx > HRS_TYPE_FIXED_MAX)
             long_return = stat_buf.f_blocks;
         else
             switch (store_idx) {
@@ -664,7 +664,7 @@ var_hrstore(struct variable *vp,
             }
         return (u_char *) & long_return;
     case HRSTORE_USED:
-        if (store_idx < HRS_TYPE_FS_MAX)
+        if (store_idx > HRS_TYPE_FIXED_MAX)
             long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
         else
             switch (store_idx) {
@@ -722,7 +722,7 @@ var_hrstore(struct variable *vp,
             }
         return (u_char *) & long_return;
     case HRSTORE_FAILS:
-        if (store_idx < HRS_TYPE_FS_MAX)
+        if (store_idx > HRS_TYPE_FIXED_MAX)
             long_return = 0;
         else
             switch (store_idx) {
@@ -766,41 +766,42 @@ static int      HRS_index;
 void
 Init_HR_Store(void)
 {
-    HRS_index = -1;
+#if !defined(solaris2) && !defined(hpux10) && !defined(hpux11)
+    HRS_index = 0;
+#else
+    HRS_index = HRS_TYPE_MBUF;
+#endif
+
     Init_HR_FileSys();
-    FS_storage = 1;             /* Start with file-based storage */
+    FS_storage = 0;             /* Start with file-based storage */
 }
 
 int
 Get_Next_HR_Store(void)
 {
     /*
-     * File-based storage 
+     * Fixed-style 'other' storage types
      */
     long_return = -1;
-    if (FS_storage == 1) {
-        HRS_index = Get_Next_HR_FileSys();
-
-        if (HRS_index >= 0)
+    if (FS_storage == 0) {
+        ++HRS_index;
+        if (HRS_index <= HRS_TYPE_FIXED_MAX)
             return HRS_index;
-        FS_storage = 0;         /* End of filesystems */
-        HRS_index = HRS_TYPE_FS_MAX;
+        else {
+            FS_storage = 1;
+            HRS_index = 0;
+        }
     }
 
     /*
-     * 'Other' storage types 
+     * File-based storage 
      */
-    ++HRS_index;
-#if !defined(solaris2) && !defined(hpux10) && !defined(hpux11)
-    if (HRS_index < HRS_TYPE_MAX)
-        return HRS_index;
-    else
-#else
-    if (HRS_index < HRS_TYPE_MBUF)
-        return HRS_index;
-    else
-#endif
-        return -1;
+    HRS_index = Get_Next_HR_FileSys();
+
+    if (HRS_index >= 0)
+        return HRS_index + HRS_TYPE_FIXED_MAX;
+
+    return -1;
 }
 
 #ifdef linux
