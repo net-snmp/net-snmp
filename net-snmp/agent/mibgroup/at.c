@@ -58,7 +58,7 @@
 #include "../../snmplib/system.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
-# if defined(RTF_LLINFO)
+# if defined(RTF_LLINFO) && !defined(irix6)
 #  define CAN_USE_SYSCTL 1
 # endif
 #endif
