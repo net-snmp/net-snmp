@@ -225,7 +225,7 @@ snmpUnixDomain.lo: snmp_transport.h snmpUnixDomain.h
 snmpAAL5PVCDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpAAL5PVCDomain.lo: asn1.h snmp.h snmp_debug.h default_store.h 
 snmpAAL5PVCDomain.lo: snmp_transport.h snmpAAL5PVCDomain.h
-snmpCallbackDomain.lo: ./config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpCallbackDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpCallbackDomain.lo: asn1.h snmp.h snmp_debug.h default_store.h snmp_impl.h
 snmpCallbackDomain.lo: snmp_api.h snmp_client.h tools.h snmp_transport.h
 snmpCallbackDomain.lo: snmpCallbackDomain.h
