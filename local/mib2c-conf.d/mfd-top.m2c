@@ -155,7 +155,8 @@ typedef struct ${context}_ref_rowreq_ctx_s {
         int rc);
 
 @   if $m2c_data_init == 1@
-    int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx);
+    int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx,
+                                   void *user_init_ctx);
     void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx);
 
 @   end@
