@@ -457,6 +457,7 @@ typedef struct _com2SecUnixEntry {
     char            sockpath[sizeof(struct sockaddr_un)];
     unsigned long   pathlen;
     char            secName[VACMSTRINGLEN];
+    char            contextName[VACMSTRINGLEN];
     struct _com2SecUnixEntry *next;
 } com2SecUnixEntry;
 
@@ -465,8 +466,9 @@ com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
 
 int
 netsnmp_unix_getSecName(void *opaque, int olength,
-                       const char *community,
-                       size_t community_len, char **secName)
+                        const char *community,
+                        size_t community_len,
+                        char **secName, char **contextName)
 {
     com2SecUnixEntry   *c;
     struct sockaddr_un *to = (struct sockaddr_un *) opaque;
@@ -524,6 +526,7 @@ netsnmp_unix_getSecName(void *opaque, int olength,
             DEBUGMSG(("netsnmp_unix_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
                 *secName = c->secName;
+                *contextName = c->contextName;
             }
             break;
         }
@@ -539,11 +542,20 @@ void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
     char           secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
+    char           contextName[VACMSTRINGLEN + 1];
     char           sockpath[sizeof(struct sockaddr_un) + 1];
     com2SecUnixEntry   *e = NULL;
 
 
-	param = copy_nword(param, secName, VACMSTRINGLEN);
+    param = copy_nword(param, secName, VACMSTRINGLEN);
+    if (strcmp(secName, "-Cn") == 0) {
+        if (!secName) {
+            config_perror("missing CONTEXT_NAME parameter");
+            return;
+        }
+        param = copy_nword( param, contextName, sizeof(contextName));
+        param = copy_nword( param, secName, sizeof(secName));
+    }
     if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
         return;
@@ -590,6 +602,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
                 "<\"%s\"> => \"%s\"\n", community, secName));
 
     strcpy(e->secName, secName);
+    strcpy(e->contextName, contextName);
     strcpy(e->community, community);
     strcpy(e->sockpath, sockpath);
 	e->pathlen = strlen(sockpath);
@@ -622,7 +635,7 @@ netsnmp_unix_agent_config_tokens_register(void)
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2secunix", netsnmp_unix_parse_security,
                                 netsnmp_unix_com2SecList_free,
-                                "name sockpath community");
+                                "[-Cn CONTEXT] secName sockpath community");
 #endif /* support for community based SNMP */
 }
 
