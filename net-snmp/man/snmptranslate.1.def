@@ -30,7 +30,7 @@
 .TH SNMPTRANSLATE 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmptranslate - translate SNMP OID values into more useful information
+snmptranslate - translate MIB OID names between numeric and textual forms
 .SH SYNOPSIS
 .B snmptranslate
 [OPTIONS] OID [OID]...

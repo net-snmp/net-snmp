@@ -22,7 +22,7 @@
 .TH SNMPGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpget - communicates with a network entity using SNMP GET Requests.
+snmpget - communicates with a network entity using SNMP GET requests
 .SH SYNOPSIS
 .B snmpget
 [COMMON OPTIONS] [-Cf] OID [OID]...

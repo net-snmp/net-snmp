@@ -22,7 +22,7 @@
 .TH SNMPBULKWALK 1 "17 Jun 1998" "" "Net-SNMP"
 .UC 4
 .SH NAME
-snmpbulkwalk - communicates with a network entity using SNMP BULK Requests.
+snmpbulkwalk - retrieve a subtree of management values using SNMP GETBULK requests
 .SH SYNOPSIS
 .B snmpbulkwalk
 [APPLICATION OPTIONS] [COMMON OPTIONS] [OID]
