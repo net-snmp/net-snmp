@@ -1952,6 +1952,7 @@ var_ifv6Entry(register struct variable * vp,
                 close(s);
                 break;
             }
+            close(s);
             switch (vp->magic) {
             case IPV6IFADMSTATUS:
                 flag = IFF_RUNNING;
