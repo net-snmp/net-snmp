@@ -127,7 +127,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * particularily easy bug to track down so this saves debugging time at
  * the expense of a few memcpy's.
  */
-#define MIB_CLIENTS_ARE_EVIL
+#define MIB_CLIENTS_ARE_EVIL 1
  
 extern struct subtree *subtrees;
 int subtree_size;
@@ -264,7 +264,7 @@ search_subtree_vars(struct subtree *tp,
     int			result;
     oid 		*suffix;
     size_t		suffixlen;
-#ifdef MIB_CLIENTS_ARE_EVIL
+#if MIB_CLIENTS_ARE_EVIL
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
 #endif
@@ -307,7 +307,7 @@ search_subtree_vars(struct subtree *tp,
 		    cvp->acl = vp->acl;
 		    cvp->findVar = vp->findVar;
                     *write_method = NULL;
-#ifdef MIB_CLIENTS_ARE_EVIL
+#if MIB_CLIENTS_ARE_EVIL
                     memcpy(save, name, *namelen*sizeof(oid));
                     savelen = *namelen;
 #endif
@@ -317,16 +317,18 @@ search_subtree_vars(struct subtree *tp,
 						  len, write_method);
 	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
 				(access==NULL) ? "(null)" : "something" ));
-#ifdef MIB_CLIENTS_ARE_EVIL
+#if MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
-		      if (memcmp(name, save, savelen) != 0) {
-			char buf1[256], buf2[256];
+		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0)
+		      {
+			char buf1[SPRINT_MAX_LEN];
+			snmp_set_suffix_only(2); /* XX short form for debug */
 			sprint_objid(buf1, save, savelen);
-			sprint_objid(buf2, name, *namelen);
-			fprintf(stderr,"evil_client: %s => %s\n", buf1, buf2);
+			sprint_objid(c_oid, name, *namelen);
+			DEBUGMSGTL(("snmp_vars","evil_client: %s => %s\n", buf1, c_oid));
+                        memcpy(name, save, savelen*sizeof(oid));
+                        *namelen = savelen;
 		      }
-                      memcpy(name, save, savelen*sizeof(oid));
-                      *namelen = savelen;
                     }
 #endif
 		    if (*write_method)
