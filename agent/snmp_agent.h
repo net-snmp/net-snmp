@@ -17,6 +17,7 @@ struct agent_snmp_session {
     struct snmp_pdu      *pdu;
     int		rw;
     int		exact;
+    int		status;
     
     struct request_list *outstanding_requests;
     struct agent_snmp_session *next;
