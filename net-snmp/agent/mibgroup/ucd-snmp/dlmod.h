@@ -8,6 +8,8 @@
 
 /* TODO #include "mibdefs.h" */
 
+config_add_mib(UCD-DLMOD-MIB)
+
 #ifndef SNMPDLMODPATH
 #define SNMPDLMODPATH "/usr/local/lib/snmp/dlmod"
 #endif
