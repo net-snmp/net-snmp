@@ -884,7 +884,7 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
                 snmp_log(LOG_DEBUG, "  TRAP message\n");
                 break;
             case SNMP_MSG_GETBULK:
-                snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
+                snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%ld, max_rep=%ld\n",
                          pdu->errstat, pdu->errindex);
                 break;
             case SNMP_MSG_INFORM:
