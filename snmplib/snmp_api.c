@@ -5407,10 +5407,12 @@ struct snmp_pdu *snmp_2clone_pdu(struct snmp_pdu *from_pdu, struct snmp_pdu *to_
 oid *
 snmp_duplicate_objid(oid *objToCopy, size_t objToCopyLen)
 {
-  oid *returnOid;
-  returnOid = (oid *) malloc(objToCopyLen*sizeof(oid));
-  if (returnOid) {
-    memmove(returnOid, objToCopy, objToCopyLen*sizeof(oid));
+  oid *returnOid = NULL;
+  if (objToCopy != NULL && objToCopyLen != 0) {
+    returnOid = (oid *) malloc(objToCopyLen*sizeof(oid));
+    if (returnOid) {
+      memmove(returnOid, objToCopy, objToCopyLen*sizeof(oid));
+    }
   }
   return returnOid;
 }
