@@ -201,6 +201,7 @@ extern char    *argvrestartname;
 #define NUM_SOCKETS	32
 
 #ifdef USING_SMUX_MODULE
+#include <mibgroup/smux/smux.h>
 static int      sdlist[NUM_SOCKETS], sdlen = 0;
 #endif                          /* USING_SMUX_MODULE */
 
