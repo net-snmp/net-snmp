@@ -1,3 +1,10 @@
+The discussion about coding style on the net-snmp-coders mailing list
+can be found at the following web address:
+  http://www.geocrawler.com/mail/thread.php3?subject=design+proposal+-+coding+style&list=6845
+
+----------------------------------------------------------------------
+Indentation: 
+
 We've adopted the following indent style:
 
    indent -orig -nbc -bap
@@ -30,6 +37,21 @@ Briefly, here's a description of the style:
 		Four character basic and continuation line indent
 		Continuation paramters lined up with opening parenthesis
 
-The discussion about coding style on the net-snmp-coders mailing list
-can be found at the following web address:
-  http://www.geocrawler.com/mail/thread.php3?subject=design+proposal+-+coding+style&list=6845
+----------------------------------------------------------------------
+Function names and Variable names:
+
+should_be_like_this and notLikeThis
+
+----------------------------------------------------------------------
+Structures:
+
+We have decided to typedef all structures into names using the
+following convention:
+
+typedef struct netsnmp_wombat_s {
+  int something_cool;
+} netsnmp_wombat;
+
+The important things to note here are that the struct name ends in a
+"_s", the typedef name doesn't end in "_t", and the typedef is not to a
+pointer and everything begins with "netsnmp_".
