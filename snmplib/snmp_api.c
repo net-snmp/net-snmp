@@ -320,6 +320,36 @@ const char *strerror(int err)
 }
 #endif
 
+#define DEBUGPRINTPDUTYPE(token, type) \
+    switch(type) { \
+      case SNMP_MSG_GET: \
+        DEBUGDUMPSECTION(token, "PDU-GET"); \
+        break; \
+      case SNMP_MSG_GETNEXT: \
+        DEBUGDUMPSECTION(token, "PDU-GETNEXT"); \
+        break; \
+      case SNMP_MSG_RESPONSE: \
+        DEBUGDUMPSECTION(token, "PDU-RESPONSE"); \
+        break; \
+      case SNMP_MSG_SET: \
+        DEBUGDUMPSECTION(token, "PDU-SET"); \
+        break; \
+      case SNMP_MSG_GETBULK: \
+        DEBUGDUMPSECTION(token, "PDU-GETBULK"); \
+        break; \
+      case SNMP_MSG_INFORM: \
+        DEBUGDUMPSECTION(token, "PDU-INFORM"); \
+        break; \
+      case SNMP_MSG_TRAP2: \
+        DEBUGDUMPSECTION(token, "PDU-TRAP2"); \
+        break; \
+      case SNMP_MSG_REPORT: \
+        DEBUGDUMPSECTION(token, "PDU-REPORT"); \
+        break; \
+      default: \
+        DEBUGDUMPSECTION(token, "PDU-UNKNOWN"); \
+        break; \
+    }
 
 long
 snmp_get_next_reqid (void)
@@ -1960,7 +1990,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     /* 
      * build a scopedPDU structure into the packet
      */
-    DEBUGDUMPSECTION("send", "PDU");
+    DEBUGPRINTPDUTYPE("send", pdu->command);
     if (pdu_data) {
         if (pdu_data_len > header_buf_len)
             return -1;
@@ -2043,7 +2073,7 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 
     /* build the PDU structure onto the end of spdu_buf 
      */
-    DEBUGDUMPSECTION("send", "PDU");
+    DEBUGPRINTPDUTYPE("send", ((pdu_data) ? *pdu_data : 0x00));
     if (pdu_data) {
       memcpy(cp, pdu_data, pdu_data_len);
       cp += pdu_data_len;
@@ -2247,7 +2277,7 @@ _snmp_build(struct snmp_session *session,
         DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
 #ifdef USE_REVERSE_ASNENCODING
         if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
-            DEBUGDUMPSECTION("send", "PDU");
+            DEBUGPRINTPDUTYPE("send", pdu->command);
             cp = snmp_pdu_rbuild(pdu, packet, out_length);
             if (cp == NULL)
                 return -1;
@@ -2342,7 +2372,7 @@ _snmp_build(struct snmp_session *session,
     }
 
     h1 = cp;
-    DEBUGDUMPSECTION("send", "PDU");
+    DEBUGPRINTPDUTYPE("send", pdu->command);
     cp = snmp_pdu_build(pdu, cp, out_length);
     DEBUGINDENTADD(-4); /* return from entire v1/v2c message */
     if (cp == NULL)
@@ -2886,7 +2916,7 @@ snmpv3_parse(
     if (cp)
         cp = snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
     if (cp) {
-        DEBUGDUMPSECTION("recv", "PDU");
+        DEBUGPRINTPDUTYPE("recv", *cp);
         snmp_pdu_parse(pdu, cp, &pdu_buf_len);
         DEBUGINDENTADD(-8);
     } else
@@ -2911,7 +2941,7 @@ snmpv3_parse(
     *after_header	 = data;
   }
 
-  DEBUGDUMPSECTION("recv", "PDU");
+  DEBUGPRINTPDUTYPE("recv", *data);
   ret = snmp_pdu_parse(pdu, data, length);
   DEBUGINDENTADD(-8); 
 
