@@ -29,6 +29,7 @@ SOFTWARE.
     /*
      * Definitions for the system dependent library file
      */
+#ifndef MSVC_PERL
 #ifdef WIN32
 
     /*
@@ -77,6 +78,7 @@ SOFTWARE.
 #define SOCK_CLEANUP
 
 #endif                          /* WIN32 */
+#endif				/* MSVC_PERL */
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */
 
