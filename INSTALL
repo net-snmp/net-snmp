@@ -121,25 +121,34 @@ README's for various platforms such as README.solaris.
 
 Installing the Perl/SNMP Module
 ===============================
-   The Perl/SNMP Module is now bundled with the net-snmp package and is
-located in the net-snmp/perl directory. This module is an interface
-to the net-snmp SNMP client side management API. The Perl package
-provides a high level abstract interface to these functions for rapid
-application development. Following are the steps required to build and
-install this perl module.
+   The Perl/SNMP Module is now bundled with the net-snmp package
+(which includes other Net-SNMP specific modules as well), all of which
+are located in the net-snmp/perl directory. The Perl package provides
+a high level abstract interface to the functionality found in the
+Net-SNMP libraries and demon applications.
 
-   1.) Be sure to read the net-snmp/perl/SNMP/README
+   It is recommended you install the perl modules as you build the
+   Net-SNMP package.  The configure script can be run as follows to
+   automatically find perl and use it to install the perl modules:
 
-   2.) Be sure that net-snmp has been sucessfully tested and installed -
-       the headers and libraries will be required to build, the
-       applications and mibs will be required to test the perl module
+      ./configure --with-perl-modules
 
-   3.) cd to net-snmp/perl and run
+   If you wish to use the embedded perl support available in the
+   Net-SNMP agent (and starting in Net-SNMP 5.2, the trap receiver),
+   then use the following option instead:
+
+      ./configure --enable-embedded-perl --enable-shared
+
+
+   If you wish to build the perl modules by hand, *install Net-SNMP
+   first* and then change directories to the perl subdirectory and:
+
+   Run:
+            cd perl
             perl Makefile.PL
             make
             make test
             make install (as root)
-
 
 
 Compilers and Options
