@@ -6,6 +6,7 @@ NET-SNMP-EXAMPLES-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     MODULE-IDENTITY, OBJECT-TYPE, Integer32 FROM SNMPv2-SMI
+    SnmpAdminString                         FROM SNMP-FRAMEWORK-MIB
     netSnmp                                 FROM NET-SNMP-MIB;
 
 netSnmpExamples MODULE-IDENTITY
