@@ -673,7 +673,7 @@ static void unlink_tree(struct tree *tp)
     struct tree *otp = NULL, *ntp = tp->parent;
 
   if (!ntp) { /* this tree has no parent */
-      snmp_log(LOG_INFO, "Tree node %s has no parent\n", tp->label);
+      DEBUGMSGTL(("unlink_tree", "Tree node %s has no parent\n", tp->label));
   }
   else {
     ntp = ntp->child_list;
