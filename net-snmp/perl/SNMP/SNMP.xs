@@ -113,7 +113,7 @@ DLL_IMPORT extern struct tree *Mib;
 #define SYS_UPTIME_OID_LEN 9
 #define SNMP_TRAP_OID_LEN 11
 #define NO_RETRY_NOSUCH 0
-static oid sysUpTime[SYS_UPTIME_OID_LEN] = {1,3,6,1,2,1,1,3,0};
+static oid sysUpTime[SYS_UPTIME_OID_LEN] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
 static oid snmpTrapOID[SNMP_TRAP_OID_LEN] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
 /* these should be part of transform_oids.h ? */
@@ -818,8 +818,11 @@ UINT:
         break;
 
       case TYPE_OCTETSTR:
+	vars->type = ASN_OCTET_STR;
+	goto OCT;
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
+OCT:
         vars->val.string = (u_char *)malloc(len);
         vars->val_len = len;
         bcopy(val,(char *)vars->val.string, vars->val_len);
