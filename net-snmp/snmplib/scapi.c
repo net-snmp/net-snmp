@@ -129,6 +129,23 @@ sc_get_properlength(const oid * hashtype, u_int hashtype_len)
     return SNMPERR_GENERR;
 }
 
+int
+sc_get_proper_priv_length(const oid * privtype, u_int privtype_len)
+{
+    int properlength = 0;
+#ifndef DISABLE_DES
+    if (ISTRANSFORM(privtype, DESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+    }
+#endif
+#ifdef HAVE_AES
+    if (ISTRANSFORM(privtype, AESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+    }
+#endif
+    return properlength;
+}
+
 
 /*******************************************************************-o-******
  * sc_init
@@ -599,7 +616,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 #if defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
-    u_int           properlength, properlength_iv;
+    u_int           properlength = 0, properlength_iv = 0;
     u_char          pad_block[128];      /* bigger than anything I need */
     u_char          my_iv[128];  /* ditto */
     int             pad, plast, pad_size = 0;
@@ -883,7 +900,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #endif
     DES_cblock      key_struct;
 #endif
-    u_int           properlength, properlength_iv;
+    u_int           properlength = 0, properlength_iv = 0;
     int             have_transform;
 #ifdef HAVE_AES
     int new_ivlen = 0;

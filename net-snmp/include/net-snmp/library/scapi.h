@@ -32,6 +32,8 @@ extern          "C" {
      */
     int             sc_get_properlength(const oid * hashtype,
                                         u_int hashtype_len);
+    int             sc_get_proper_priv_length(const oid * privtype,
+                                              u_int privtype_len);
 
     int             sc_init(void);
     int             sc_shutdown(int majorID, int minorID, void *serverarg,
