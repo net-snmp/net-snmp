@@ -933,14 +933,14 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
 
     if (pdu->variables == NULL){
 	pdu->variables = vars =
-           (struct variable_list *)malloc(sizeof(struct variable_list));
+           (struct variable_list *)calloc(1,sizeof(struct variable_list));
     } else {
 	for(vars = pdu->variables;
             vars->next_variable;
             vars = vars->next_variable)
 	    /*EXIT*/;
 	vars->next_variable =
-           (struct variable_list *)malloc(sizeof(struct variable_list));
+           (struct variable_list *)calloc(1,sizeof(struct variable_list));
 	vars = vars->next_variable;
     }
 
@@ -996,6 +996,7 @@ OCT:
 	vars->val_len = MAX_OID_LEN;
         /* if (read_objid(val, oidbuf, &(vars->val_len))) { */
 	tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL,0);
+
         if (vars->val_len) {
         	vars->val_len *= sizeof(oid);
 		vars->val.objid = (oid *)malloc(vars->val_len);
@@ -3936,7 +3937,6 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 
                  } /* if var_ref is ok */
               } /* for all the vars */
-
 
               if (snmp_send(ss, pdu) == 0) {
 	         snmp_free_pdu(pdu);

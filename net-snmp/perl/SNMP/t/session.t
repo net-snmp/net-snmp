@@ -7,9 +7,9 @@ BEGIN {
     }
 }
 use Test;
-BEGIN { plan tests => 4}
+BEGIN { plan tests => 5}
 use SNMP;
-use vars qw($agent_port $comm $agent_host);
+use vars qw($agent_port $comm $agent_host $bad_auth_pass $auth_pass $sec_name $bad_sec_name $bad_version $bad_priv_pass $priv_pass);
 require "t/startagent.pl";
 
 $SNMP::debugging = 0;
@@ -59,13 +59,13 @@ my $s5 = new SNMP::Session (Version=>$bad_version);
 ok(!defined($s5));
 #print("\n");
 ########################  6  ########################################
-#Test for authorization
+#Test for v3 session creation success
 my $s6 = new SNMP::Session (Version => 3, RemotePort => $agent_port,
 			    SecLevel => 'authPriv', 
-			    SecName => $bad_sec_name, 
-			    PrivPass => $bad_priv_pass, 
-			    AuthPass => $bad_auth_pass);
-ok(!defined($s6));
+			    SecName => $sec_name, 
+			    PrivPass => $priv_pass, 
+			    AuthPass => $auth_pass);
+ok(defined($s6));
 #print STDERR "Error string2 = $s6->{ErrorStr}:$s6->{ErrorInd}\n";
 #print("\n");
 #####################  7  ############################################
