@@ -36,8 +36,6 @@ int snmp_res_init_mutex(mutex_type * mutex)
     int rc = 0;
 #if HAVE_PTHREAD_H
     rc = pthread_mutex_init(mutex, MT_MUTEX_INIT_DEFAULT);
-#elif HAVE_SYNCH_H
-    rc = mutex_init(mutex,USYNC_THREAD,NULL);
 #elif defined(WIN32)
     InitializeCriticalSection(mutex);
 #endif
@@ -70,8 +68,6 @@ int snmp_res_destroy_mutex(int groupID, int resourceID)
 
 #if HAVE_PTHREAD_H
     rc = pthread_mutex_destroy(mutex);
-#elif HAVE_SYNCH_H
-    rc = mutex_destroy(mutex);
 #elif defined(WIN32)
     DeleteCriticalSection(mutex);
 #endif
@@ -87,8 +83,6 @@ int snmp_res_lock(int groupID, int resourceID)
 
 #if HAVE_PTHREAD_H
     rc = pthread_mutex_lock(mutex);
-#elif HAVE_SYNCH_H
-    rc = mutex_lock(mutex);
 #elif defined(WIN32)
     EnterCriticalSection(mutex);
 #endif
@@ -104,8 +98,6 @@ int snmp_res_unlock(int groupID, int resourceID)
 
 #if HAVE_PTHREAD_H
     rc = pthread_mutex_unlock(mutex);
-#elif HAVE_SYNCH_H
-    rc = mutex_unlock(mutex);
 #elif defined(WIN32)
     LeaveCriticalSection(mutex);
 #endif

@@ -47,12 +47,6 @@ typedef pthread_mutex_t mutex_type;
     #define MT_MUTEX_INIT_DEFAULT 0
 #endif
 
-#elif HAVE_SYNCH_H
-
-#include <thread.h>
-#include <synch.h>
-typedef mutex_t mutex_type;
-
 #elif defined(WIN32)
 
 #include <windows.h>
