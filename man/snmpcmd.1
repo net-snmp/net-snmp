@@ -1,4 +1,4 @@
-.\*/***********************************************************
+.\"/***********************************************************
 .\" 	Copyright 1988, 1989 by Carnegie Mellon University
 .\" 
 .\"                       All Rights Reserved
@@ -141,7 +141,7 @@ This will initialize the local notion of the agents boots/time with an
 authenticated value stored in the LCD. (will be discovered if not supplied)
 .IP "-n contextname"
 sets the destination contextName used for SNMP v3 messages. Default 
-contextName is and empty string ""
+contextName is the empty string ""
 .IP "-l seclevel"
 sets the securityLevel used for SNMP v3 messages 
 (noAuthNoPriv|authNoPriv|authPriv). Appropriate pass phrase(s) must provided
@@ -322,12 +322,8 @@ Agent configuration file. See snmpd.conf(5)
 Application configuration files. See snmp.conf(5)
 .SH "SEE ALSO"
 snmpget(1), snmpgetnext(1), snmpset(1),
-.br
-snmpbulkwalk(1), snmpwalk(1),
-.br
+snmpbulkget(1), snmpbulkwalk(1), snmpwalk(1),
 snmptable(1), snmpdelta(1), snmptrap(1), snmpinform(1),
-.br
 snmpusm(1), snmpstatus(1), snmptest(1),
-.br
 snmp.conf(5).
 
