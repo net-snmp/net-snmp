@@ -5334,10 +5334,49 @@ uptime_string(u_long timeticks, char *buf)
     return buf;
 }
 
+/**
+ * Given a string, parses an oid out of it (if possible).
+ * It will try to parse it based on predetermined configuration if
+ * present or by every method possible otherwise.
+ * If a suffix has been registered using NETSNMP_DS_LIB_OIDSUFFIX, it
+ * will be appended to the input string before processing.
+ *
+ * @param argv    The OID to string parse
+ * @param root    An OID array where the results are stored.
+ * @param rootlen The max length of the array going in and the data
+ *                length coming out.
+ *
+ * @return        The root oid pointer if successful, or NULL otherwise.
+ */
+ 
 oid            *
 snmp_parse_oid(const char *argv, oid * root, size_t * rootlen)
 {
     size_t          savlen = *rootlen;
+    static size_t   tmpbuf_len = 0;
+    static char    *tmpbuf;
+    const char     *suffix, *prefix;
+
+    suffix = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_OIDSUFFIX);
+    prefix = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_OIDPREFIX);
+    if ((suffix && suffix[0]) || (prefix && prefix[0])) {
+        if (!suffix)
+            suffix = "";
+        if (!prefix)
+            prefix = "";
+        if ((strlen(suffix) + strlen(prefix) + strlen(argv) + 2) > tmpbuf_len) {
+            tmpbuf_len = strlen(suffix) + strlen(argv) + strlen(prefix) + 2;
+            tmpbuf = realloc(tmpbuf, tmpbuf_len);
+        }
+        snprintf(tmpbuf, tmpbuf_len, "%s%s%s%s", prefix, argv,
+                 ((suffix[0] == '.') ? "" : "."),
+                 suffix);
+        argv = tmpbuf;
+        DEBUGMSGTL(("snmp_parse_oid","Parsing: %s\n",argv));
+    }
+
 #ifndef DISABLE_MIB_LOADING
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_RANDOM_ACCESS)
         || strchr(argv, ':')) {
