@@ -279,6 +279,8 @@ var_ipAddrEntry(struct variable *vp,
 	    long_return = lowin_ifaddr.BcastAddr;
 #elif defined(linux) || defined(sunV3)
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->sin_addr.s_addr) & 1;
+#elif defined(netbsd1)
+	    long_return = ((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr & 1;
 #else
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr) & 1;
 #endif
