@@ -1787,6 +1787,15 @@ usm_parse_security_parameters (
 		return -1;
 	}
 
+	if (*secNameLen > 32) {
+		/*
+		 * This is a USM-specific limitation over and above the above
+		 * limitation (which will probably default to the length of an
+		 * SnmpAdminString, i.e. 255).  See RFC 2574, sec. 2.4.  
+		 */
+		return -1;
+	}
+
 	secName[*secNameLen] = '\0';
 
 	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR))
