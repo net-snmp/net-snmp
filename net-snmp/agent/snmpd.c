@@ -109,13 +109,6 @@ typedef long    fd_mask;
 #include "mibgroup/snmpv3/usmUser.h"
 #endif
 
-#ifdef USING_V2PARTY_ALARM_MODULE
-#include "mibgroup/v2party/alarm.h"
-#endif
-#ifdef USING_V2PARTY_EVENT_MODULE
-#include "mibgroup/v2party/event.h"
-#endif
-
 #include "snmp_client.h"
 #include "snmpd.h"
 #include "var_struct.h"
@@ -991,12 +984,6 @@ receive(void)
 
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
-#ifdef USING_V2PARTY_ALARM_MODULE
-	    alarmTimer(nvp);
-#endif
-#ifdef USING_V2PARTY_EVENT_MODULE
-	    eventTimer(nvp);
-#endif
             svp->tv_usec = nvp->tv_usec + TIMETICK;
             svp->tv_sec = nvp->tv_sec;
     
@@ -1148,16 +1135,11 @@ snmp_input(int op,
 		/* this is just the ack to our inform pdu */
 		return 1;
 	    }
-#ifdef USING_V2PARTY_ALARM_MODULE
-	    return alarmGetResponse(pdu, state, op, session);
-#endif
 	}
     }
     else if (op == TIMED_OUT) {
 	if (state->type == ALARM_GET_REQ) {
-#ifdef USING_V2PARTY_ALARM_MODULE
-	    return alarmGetResponse(pdu, state, op, session);
-#endif
+		/* Need a mechanism to replace obsolete SNMPv2p alarm */
 	}
     }
     return 1;

@@ -134,8 +134,7 @@ int print_errors = 0;
 void usage(void)
 {
     fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-P proto] [-I interface] [interval]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname noAuth [-ainrs] [-P proto] [-I interface] [interval]       or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname srcParty dstParty context [-ainrs] [-P proto] [-I interface] [interval]\n");
+    fprintf(stderr, "Usage: snmpnetstat [-q] [-D] hostname noAuth [-ainrs] [-P proto] [-I interface] [interval]\n");
 }
 
 int main(int argc, char *argv[])
@@ -153,14 +152,6 @@ int main(int argc, char *argv[])
     size_t srclen = 0, dstlen = 0, contextlen = 0;
     int trivialSNMPv2 = FALSE;
     int arg;
-#ifdef USE_V2PARTY_PROTOCOL
-    char ctmp[128];
-    struct partyEntry *pp;
-    struct contextEntry *cxp;
-    oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
-    struct hostent *hp;
-    in_addr_t destAddr;
-#endif
 
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
@@ -169,8 +160,7 @@ int main(int argc, char *argv[])
     init_mib();
     /*
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
-     * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...      or:
-     * Usage: snmpnetstat [-v 2 ] [-q] hostname srcParty dstParty context ...
+     * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -294,9 +284,7 @@ int main(int argc, char *argv[])
     }
     
     if (!hostname ||
-	((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) && !community)
-	|| (version == SNMP_VERSION_2p && (!srclen || !dstlen || !contextlen)
-	    && !trivialSNMPv2)){
+	((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) && !community)) {
 	usage();
 	exit(1);
     }

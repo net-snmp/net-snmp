@@ -25,9 +25,6 @@
 
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
-#define SNMPV2                  1, 3, 6, 1, 6
-#define PARTYMIB        SNMPV2, 3, 3
-#define SNMPV2M2M       SNMPV2, 3, 3
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
@@ -359,10 +356,6 @@ free_subtree(struct subtree *st)
    cvp          IN - relevant auth info re mib module
 */
 
-#ifdef USING_V2PARTY_VIEW_VARS_MODULE
-extern int in_view (oid *, int, int);
-#endif
-
 int
 in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
           size_t	  *namelen,   /* IN -number of sub-ids in name*/
@@ -381,12 +374,6 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   case SNMP_VERSION_3:
 #ifdef USING_MIBII_VACM_VARS_MODULE
     return vacm_in_view(pdu, name, *namelen);
-#else
-    return 1;
-#endif
-  case SNMP_VERSION_2p:
-#ifdef USING_V2PARTY_VIEW_VARS_MODULE
-    return in_view(name, *namelen, 0 /* XXX: pi->cxp->contextViewIndex */);
 #else
     return 1;
 #endif

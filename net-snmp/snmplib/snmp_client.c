@@ -263,7 +263,6 @@ locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
 
     /* reset copied pointers if copy fails */
     newpdu->variables = 0; newpdu->enterprise = 0; newpdu->community = 0;
-    newpdu->srcParty  = 0; newpdu->dstParty   = 0; newpdu->context   = 0;
     newpdu->securityEngineID = 0; newpdu->securityName = 0;
     newpdu->contextEngineID  = 0; newpdu->contextName  = 0;
 
@@ -280,12 +279,6 @@ locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
                                     pdu->contextNameLen)
      ||  snmp_clone_mem((void **)&newpdu->securityName, pdu->securityName,
                                     pdu->securityNameLen)
-     ||  snmp_clone_mem((void **)&newpdu->srcParty, pdu->srcParty,
-                                    sizeof(oid)*pdu->srcPartyLen)
-     ||  snmp_clone_mem((void **)&newpdu->dstParty, pdu->dstParty,
-                                    sizeof(oid)*pdu->dstPartyLen)
-     ||  snmp_clone_mem((void **)&newpdu->context, pdu->context,
-                                    sizeof(oid)*pdu->contextLen)
        )
     {
         snmp_free_pdu(newpdu); return 0;
