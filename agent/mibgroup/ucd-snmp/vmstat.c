@@ -1,5 +1,8 @@
 #include <config.h>
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
