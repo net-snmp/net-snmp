@@ -62,6 +62,7 @@ if($ENV{MIB2C_DIR}) {
 }
 push @def_search_dirs, "/usr/local/share/snmp/";
 push @def_search_dirs, "/usr/local/share/snmp/mib2c-data";
+push @def_search_dirs, "./mib2c-conf.d";
 
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
@@ -309,7 +310,7 @@ sub process_vars {
 
     # mib substitutions ($var.type -> $mibnode->{'type'})
    if ( $it =~ /\$(\w+)\.(\w+)/ ) {
-    if ($SNMP::MIB{$vars{$1}}{'label'} =~ /Table$/) {
+    if ($SNMP::MIB{$vars{$1}} && $SNMP::MIB{$vars{$1}}{'label'} =~ /Table$/) {
       $it =~ s/\$(\w+)\.(settable)/(table_is_writable($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(creatable)/(table_has_create($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(rowstatus)/(table_has_rowstatus($SNMP::MIB{$vars{$1}}{label}))/eg;
