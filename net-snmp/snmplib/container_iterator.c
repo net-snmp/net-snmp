@@ -494,7 +494,7 @@ netsnmp_container_iterator_get(void *iterator_user_ctx,
     ii->user_ctx = iterator_user_ctx;
 
     return (netsnmp_container*)ii;
-};
+}
 
 void
 netsnmp_container_iterator_set_data_cb(netsnmp_container *c,
