@@ -475,7 +475,11 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
             /*
              * allocate new context
              */
-            rowreq_ctx = ${table}_allocate_rowreq_ctx();
+@if $m2c_data_allocate == 1@
+            rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
+@else@
+            rowreq_ctx = ${context}_allocate_rowreq_ctx();
+@end@
             if (NULL == rowreq_ctx)
                 return MFD_ERROR; /* msg already logged */
 
@@ -756,7 +760,6 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
 NETSNMP_STATIC_INLINE int
 _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 {
-    netsnmp_table_request_info * tri;
     int                          rc;
 
     DEBUGTRACE;
