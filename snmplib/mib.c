@@ -499,7 +499,13 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                 }
                 switch (code) {
                 case 'x':
-                    sprintf(intbuf, "%lx", value);
+                    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                               NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT)
+                                       && value < 16) {
+                        sprintf(intbuf, "0%lx", value);
+                    } else {
+                        sprintf(intbuf, "%lx", value);
+                    }
                     if (!snmp_strcat
                         (buf, buf_len, out_len, allow_realloc,
                          (u_char *) intbuf)) {
@@ -2123,6 +2129,10 @@ snmp_out_toggle_options(char *options)
 {
     while (*options) {
         switch (*options++) {
+        case '0':
+            netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID,
+                                      NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT);
+            break;
         case 'a':
             netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT,
                                                       NETSNMP_STRING_OUTPUT_ASCII);
@@ -2192,6 +2202,7 @@ snmp_out_toggle_options(char *options)
 void
 snmp_out_toggle_options_usage(const char *lead, FILE * outf)
 {
+    fprintf(outf, "%s0:  print leading 0 for single-digit hex characters\n", lead);
     fprintf(outf, "%sa:  print all strings in ascii format\n", lead);
     fprintf(outf, "%sb:  do not break OID indexes down\n", lead);
     fprintf(outf, "%se:  print enums numerically\n", lead);
