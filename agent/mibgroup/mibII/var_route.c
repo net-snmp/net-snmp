@@ -525,7 +525,7 @@ var_ipRouteEntry(struct variable *vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
       saveNameLen = 0;
 #endif
     if (rtsize <= 1)
