@@ -3432,7 +3432,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 
     for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
     if (count) {
-      leaves = calloc(count, sizeof(struct leave));
+      leaves = (leave *)xcalloc(count, sizeof(struct leave));
       for (ntp = tp->child_list, count = 0; ntp; ntp = ntp->next_peer) {
 	for (i = 0, lp = leaves; i < count; i++, lp++)
 	  if (lp->id >= ntp->subid) break;

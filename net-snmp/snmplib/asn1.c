@@ -469,7 +469,7 @@ asn_parse_string(u_char *data,
     *datalength -= (int)asn_length + (bufp - data);
 
     DEBUGIF("dump_recv") {
-      char *buf = malloc(asn_length);
+      char *buf = (char *)malloc(asn_length);
       sprint_asciistring(buf, string, asn_length);
       DEBUGMSG(("dump_recv", "  ASN String:\t%s\n", buf));
     }
