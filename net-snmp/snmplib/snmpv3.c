@@ -126,7 +126,16 @@ void
 snmpv3_privtype_conf(const char *word, char *cptr)
 {
     if (strcasecmp(cptr, "DES") == 0)
-        defaultPrivType = SNMP_DEFAULT_PRIV_PROTO;
+        defaultPrivType = usmDESPrivProtocol;
+#if HAVE_AES
+    /* XXX AES: assumes oid length == des oid length */
+    else if (strcasecmp(cptr, "AES128") == 0)
+        defaultPrivType = usmAES128PrivProtocol;
+    else if (strcasecmp(cptr, "AES192") == 0)
+        defaultPrivType = usmAES192PrivProtocol;
+    else if (strcasecmp(cptr, "AES256") == 0)
+        defaultPrivType = usmAES256PrivProtocol;
+#endif
     else
         config_perror("Unknown privacy type");
     defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
@@ -320,6 +329,17 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         if (!strcasecmp(optarg, "DES")) {
             session->securityPrivProto = usmDESPrivProtocol;
             session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+#ifdef HAVE_AES
+        } else if (!strcasecmp(optarg, "AES128")) {
+            session->securityPrivProto = usmAES128PrivProtocol;
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
+        } else if (!strcasecmp(optarg, "AES192")) {
+            session->securityPrivProto = usmAES192PrivProtocol;
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES192_LEN;
+        } else if (!strcasecmp(optarg, "AES256")) {
+            session->securityPrivProto = usmAES256PrivProtocol;
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES256_LEN;
+#endif
         } else {
             fprintf(stderr,
                     "Invalid privacy protocol specified after -3x flag: %s\n",
@@ -714,6 +734,17 @@ usm_parse_create_usmUser(const char *token, char *line)
     if (strncmp(cp, "DES", 3) == 0) {
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
+#ifdef HAVE_AES
+    } else if (strncmp(cp, "AES128", 3) == 0) {
+        memcpy(newuser->privProtocol, usmAES128PrivProtocol,
+               sizeof(usmAES128PrivProtocol));
+    } else if (strncmp(cp, "AES192", 3) == 0) {
+        memcpy(newuser->privProtocol, usmAES192PrivProtocol,
+               sizeof(usmAES192PrivProtocol));
+    } else if (strncmp(cp, "AES256", 3) == 0) {
+        memcpy(newuser->privProtocol, usmAES256PrivProtocol,
+               sizeof(usmAES256PrivProtocol));
+#endif
     } else {
         config_perror("Unknown privacy protocol");
         usm_free_user(newuser);
@@ -1010,7 +1041,11 @@ init_snmpv3(const char *type)
                             NULL, "MD5|SHA");
     register_config_handler("snmp", "defPrivType", snmpv3_privtype_conf,
                             NULL,
-                            "DES (currently the only possible value)");
+#ifdef HAVE_AES
+                            "DES (AES support not available)");
+#else
+                            "DES|AES128|AES192|AES256");
+#endif
     register_config_handler("snmp", "defSecurityLevel",
                             snmpv3_secLevel_conf, NULL,
                             "noAuthNoPriv|authNoPriv|authPriv");

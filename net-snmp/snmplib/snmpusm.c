@@ -71,6 +71,9 @@ oid             usmHMACSHA1AuthProtocol[10] =
     { 1, 3, 6, 1, 6, 3, 10, 1, 1, 3 };
 oid             usmNoPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 1 };
 oid             usmDESPrivProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 2, 2 };
+oid             usmAES128PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,128 };
+oid             usmAES192PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,192 };
+oid             usmAES256PrivProtocol[10] = { 1, 3, 6, 1, 4, 1, 8072, 876,876,256 };
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -78,6 +81,9 @@ static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
  * Globals.
  */
 static u_int    salt_integer;
+#ifdef HAVE_AES
+static u_int    salt_integer64_1, salt_integer64_2;
+#endif
         /*
          * 1/2 of seed for the salt.   Cf. RFC2274, Sect 8.1.1.1.
          */
@@ -583,7 +589,7 @@ usm_set_salt(u_char * iv,
              size_t * iv_length,
              u_char * priv_salt, size_t priv_salt_length, u_char * msgSalt)
 {
-    size_t          propersize_salt = BYTESIZE(USM_MAX_SALT_LENGTH);
+    size_t          propersize_salt = BYTESIZE(USM_DES_SALT_LENGTH);
     int             net_boots;
     int             net_salt_int;
     /*
@@ -625,6 +631,66 @@ usm_set_salt(u_char * iv,
 
 }                               /* end usm_set_salt() */
 
+#ifdef HAVE_AES
+/*******************************************************************-o-******
+ * usm_set_aes_iv
+ *
+ * Parameters:
+ *	*iv		  (O)   Buffer to contain IV.
+ *	*iv_length	  (O)   Length of iv.
+ *      net_boots         (I)   the network byte order of the authEng boots val
+ *      net_time         (I)   the network byte order of the authEng time val
+ *      *salt             (O)   A buffer for the outgoing salt (= 8 bytes of iv)
+ *      
+ * Returns:
+ *	0	On success,
+ *	-1	Otherwise.
+ *
+ *	Determine the initialization vector for AES encryption.
+ *	(draft-blumenthal-aes-usm-03.txt, 3.1.2.2)
+ *
+ *	iv is defined as the concatenation of engineBoots, engineTime
+  	and a 64 bit salt-integer.
+ *	The 64 bit salt integer is incremented.
+ *	The resulting salt is copied into the salt buffer.
+ *	The IV result is returned individually for further use.
+ */
+int
+usm_set_aes_iv(u_char * iv,
+               size_t * iv_length,
+               u_int net_boots,
+               u_int net_time,
+               u_char * salt)
+{
+    /*
+     * net_* should be encoded in network byte order.
+     */
+    int             net_salt_int1, net_salt_int2;
+#define PROPER_AES_IV_SIZE 64
+
+    /*
+     * Sanity check.
+     */
+    if (!iv || !iv_length) {
+        return -1;
+    }
+
+    net_salt_int1 = htonl(salt_integer64_1);
+    net_salt_int2 = htonl(salt_integer64_2);
+
+    if ((salt_integer64_2 += 1) == 0)
+        salt_integer64_2 += 1;
+    
+    /* XXX: warning: hard coded proper lengths */
+    memcpy(iv, &net_boots, 4);
+    memcpy(iv+4, &net_time, 4);
+    memcpy(iv+8, &net_salt_int1, 4);
+    memcpy(iv+12, &net_salt_int2, 4);
+
+    memcpy(salt, iv+8, 8); /* only copy the needed portion */
+    return 0;
+}                               /* end usm_set_salt() */
+#endif /* HAVE_AES */
 
 int
 usm_secmod_generate_out_msg(struct snmp_secmod_outgoing_params *parms)
@@ -931,6 +997,20 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
         /*
          * XXX  Hardwired to seek into a 1DES private key!
          */
+#ifdef HAVE_AES
+        if (ISTRANSFORM(thePrivProtocol, AES128Priv) &&
+            ISTRANSFORM(thePrivProtocol, AES192Priv) &&
+            ISTRANSFORM(thePrivProtocol, AES256Priv)) {
+            if (!thePrivKey ||
+                usm_set_aes_iv(salt, &salt_length,
+                               htonl(boots_uint), htonl(time_uint),
+                               &ptr[privParamsOffset]) == -1) {
+                DEBUGMSGTL(("usm", "Can't set AES iv.\n"));
+                usm_free_usmStateReference(secStateRef);
+                return SNMPERR_USM_GENERICERROR;
+            }
+        } else if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+#endif
         if (!thePrivKey ||
             (usm_set_salt(salt, &salt_length,
                           thePrivKey + 8, thePrivKeyLength - 8,
@@ -940,6 +1020,9 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
             usm_free_usmStateReference(secStateRef);
             return SNMPERR_USM_GENERICERROR;
         }
+#ifdef HAVE_AES
+        }
+#endif
 
         if (sc_encrypt(thePrivProtocol, thePrivProtocolLength,
                        thePrivKey, thePrivKeyLength,
@@ -1252,7 +1335,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     u_int           thePrivProtocolLength = 0;
     int             theSecLevel = 0;    /* No defined const for bad
                                          * value (other then err). */
-    size_t          salt_length = 0;
+    size_t          salt_length = 0, save_salt_length = 0, save_salt_offset = 0;
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
     u_char          authParams[USM_MAX_AUTHSIZE];
     u_char          iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -1395,16 +1478,39 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         /*
          * XXX Hardwired to seek into a 1DES private key!  
          */
-        salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
-        if (!thePrivKey || (usm_set_salt(salt, &salt_length,
-                                         thePrivKey + 8,
-                                         thePrivKeyLength - 8,
-                                         iv) == -1)) {
-            DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
-            usm_free_usmStateReference(secStateRef);
-            free(ciphertext);
-            return SNMPERR_USM_GENERICERROR;
+#ifdef HAVE_AES
+        if (ISTRANSFORM(thePrivProtocol, AES128Priv) ||
+            ISTRANSFORM(thePrivProtocol, AES192Priv) ||
+            ISTRANSFORM(thePrivProtocol, AES256Priv)) {
+            salt_length = BYTESIZE(USM_AES_SALT_LENGTH);
+            save_salt_length = BYTESIZE(USM_AES_SALT_LENGTH)/2;
+            save_salt_offset = 0;
+            if (!thePrivKey ||
+                usm_set_aes_iv(salt, &salt_length,
+                               htonl(boots_uint), htonl(time_uint),
+                               iv) == -1) {
+                DEBUGMSGTL(("usm", "Can't set AES iv.\n"));
+                usm_free_usmStateReference(secStateRef);
+                free(ciphertext);
+                return SNMPERR_USM_GENERICERROR;
+            }
+        } else if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
+#endif
+            salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
+            save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
+            save_salt_offset = 0;
+            if (!thePrivKey || (usm_set_salt(salt, &salt_length,
+                                             thePrivKey + 8,
+                                             thePrivKeyLength - 8,
+                                             iv) == -1)) {
+                DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
+                usm_free_usmStateReference(secStateRef);
+                free(ciphertext);
+                return SNMPERR_USM_GENERICERROR;
+            }
+#ifdef HAVE_AES
         }
+#endif
 #ifdef SNMP_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "This data was encrypted:",
@@ -1465,8 +1571,9 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
      */
     rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset, 1,
                                    (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE
-                                             | ASN_OCTET_STR), iv,
-                                   salt_length);
+                                             | ASN_OCTET_STR),
+                                   iv,
+                                   save_salt_length);
     DEBUGINDENTLESS();
     if (rc == 0) {
         DEBUGMSGTL(("usm", "building privParams failed.\n"));
@@ -2152,8 +2259,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 {                               /* IN     - v3 Message flags.              */
     size_t          remaining = wholeMsgLen - (u_int)
         ((u_long) * secParams - (u_long) * wholeMsg);
-    u_int           boots_uint;
-    u_int           time_uint;
+    u_int           boots_uint, net_boots;
+    u_int           time_uint, net_time;
     u_char          signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
     size_t          signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
     u_char          salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
@@ -2418,37 +2525,52 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             return SNMPERR_USM_PARSEERROR;
         }
 
-        /*
-         * From RFC2574:
-         * 
-         * "Before decryption, the encrypted data length is verified.
-         * If the length of the OCTET STRING to be decrypted is not
-         * an integral multiple of 8 octets, the decryption process
-         * is halted and an appropriate exception noted."  
-         */
+        if (ISTRANSFORM(user->privProtocol, DESPriv)) {
+            /*
+             * From RFC2574:
+             * 
+             * "Before decryption, the encrypted data length is verified.
+             * If the length of the OCTET STRING to be decrypted is not
+             * an integral multiple of 8 octets, the decryption process
+             * is halted and an appropriate exception noted."  
+             */
 
-        if (remaining % 8 != 0) {
-            DEBUGMSGTL(("usm",
-                        "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %d)\n",
-                        remaining, remaining % 8));
-            if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
-                0) {
-                DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+            if (remaining % 8 != 0) {
+                DEBUGMSGTL(("usm",
+                            "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %d)\n",
+                            remaining, remaining % 8));
+                if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
+                    0) {
+                    DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+                }
+                usm_free_usmStateReference(*secStateRef);
+                *secStateRef = NULL;
+                return SNMPERR_USM_DECRYPTIONERROR;
             }
-            usm_free_usmStateReference(*secStateRef);
-            *secStateRef = NULL;
-            return SNMPERR_USM_DECRYPTIONERROR;
+
+            end_of_overhead = value_ptr;
+
+            /*
+             * XOR the salt with the last (iv_length) bytes
+             * of the priv_key to obtain the IV.
+             */
+            iv_length = BYTESIZE(USM_DES_SALT_LENGTH);
+            for (i = 0; i < (int) iv_length; i++)
+                iv[i] = salt[i] ^ user->privKey[iv_length + i];
         }
-
-        end_of_overhead = value_ptr;
-
-        /*
-         * XOR the salt with the last (iv_length) bytes
-         * of the priv_key to obtain the IV.
-         */
-        for (i = 0; i < (int) iv_length; i++)
-            iv[i] = salt[i] ^ user->privKey[iv_length + i];
-
+#ifdef HAVE_AES
+        else if (ISTRANSFORM(user->privProtocol, AES128Priv) ||
+                 ISTRANSFORM(user->privProtocol, AES192Priv) ||
+                 ISTRANSFORM(user->privProtocol, AES256Priv)) {
+            iv_length = BYTESIZE(USM_AES_SALT_LENGTH);
+            net_boots = ntohl(boots_uint);
+            net_time = ntohl(time_uint);
+            memcpy(iv, &net_boots, 4);
+            memcpy(iv+4, &net_time, 4);
+            memcpy(iv+8, salt, salt_length);
+        }
+#endif
+        
         if (sc_decrypt(user->privProtocol, user->privProtocolLen,
                        user->privKey, user->privKeyLen,
                        iv, iv_length,
@@ -2472,7 +2594,6 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         }
 #endif
     }
-
     /*
      * sPDU is plaintext.
      */
@@ -2544,9 +2665,23 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
         salt_integer = (u_int) time(NULL);
-        salt_integer_len = sizeof(salt_integer);
     }
 
+#ifdef HAVE_AES
+    salt_integer_len = sizeof (salt_integer64_1);
+    if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
+        SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
+        salt_integer64_1 = (u_int) time(NULL);
+    }
+    salt_integer_len = sizeof (salt_integer64_1);
+    if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
+        SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
+        salt_integer64_2 = (u_int) time(NULL);
+    }
+#endif
+    
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
                                          USM_LENGTH_OID_TRANSFORM,
                                          usmDESPrivProtocol,

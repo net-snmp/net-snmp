@@ -103,7 +103,11 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -l LEVEL\t\tset security level (noAuthNoPriv|authNoPriv|authPriv)\n");
     fprintf(outf, "  -n CONTEXT\t\tset context name (e.g. bridge1)\n");
     fprintf(outf, "  -u USER-NAME\t\tset security name (e.g. bert)\n");
+#ifdef HAVE_AES
+    fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES|AES)\n");
+#else
     fprintf(outf, "  -x PROTOCOL\t\tset privacy protocol (DES)\n");
+#endif
     fprintf(outf, "  -X PASSPHRASE\t\tset privacy protocol pass phrase\n");
     fprintf(outf,
             "  -Z BOOTS,TIME\t\tset destination engine boots/time\n");
@@ -449,6 +453,17 @@ snmp_parse_args(int argc,
             if (!strcasecmp(optarg, "DES")) {
                 session->securityPrivProto = usmDESPrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+#ifdef HAVE_AES
+            } else if (!strcasecmp(optarg, "AES128")) {
+                session->securityPrivProto = usmAES128PrivProtocol;
+                session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
+            } else if (!strcasecmp(optarg, "AES192")) {
+                session->securityPrivProto = usmAES192PrivProtocol;
+                session->securityPrivProtoLen = USM_PRIV_PROTO_AES192_LEN;
+            } else if (!strcasecmp(optarg, "AES256")) {
+                session->securityPrivProto = usmAES256PrivProtocol;
+                session->securityPrivProtoLen = USM_PRIV_PROTO_AES256_LEN;
+#endif
             } else {
                 fprintf(stderr,
                         "Invalid privacy protocol specified after -x flag: %s\n",
