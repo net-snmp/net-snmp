@@ -236,8 +236,10 @@ real_init_smux(void)
 
     smux_socket = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_SMUX_SOCKET);
+#ifndef GLOBAL_SMUX
     if (!smux_socket)
         smux_socket = "127.0.0.1";   /* By default, listen on localhost only */
+#endif
     netsnmp_sockaddr_in( &lo_socket, smux_socket, SMUXPORT );
 
     if ((smux_listen_sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
