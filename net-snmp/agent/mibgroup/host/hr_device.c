@@ -110,7 +110,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
 		 *     (i.e. *length is too short to be a full instance)
 		 */
 
-    if (( compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
+    if (( snmp_oid_compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
 	( *length > HRDEV_ENTRY_NAME_LENGTH ))
         current_type = (name[HRDEV_ENTRY_NAME_LENGTH]>>HRDEV_TYPE_SHIFT);
     else
@@ -129,7 +129,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
           sprint_objid (c_oid, newname, *length);
           DEBUGP("%s\n", c_oid);
         }
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    if ( save_device[current_type] != NULL )
 		(*save_device[current_type])();

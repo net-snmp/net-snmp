@@ -584,8 +584,8 @@ var_party(vp, name, length, exact, var_len, write_method)
 	memcpy((newname + 12),
 	      pp->partyIdentity, pp->partyIdentityLen * sizeof(oid));
 	newnamelen = 12 + pp->partyIdentityLen;
-	if ((compare(newname, newnamelen, name, *length) > 0) &&
-	    (!lowpp || compare(newname, newnamelen,
+	if ((snmp_oid_compare(newname, newnamelen, name, *length) > 0) &&
+	    (!lowpp || snmp_oid_compare(newname, newnamelen,
 			       lowname, lownamelen) < 0)){
 	    /*
 	     * if new one is greater than input and closer to input than

@@ -2093,7 +2093,7 @@ snmp_get_do_debugging __P((void))
 }
 
 int
-compare(name1, len1, name2, len2)
+snmp_oid_compare(name1, len1, name2, len2)
     register oid	    *name1, *name2;
     register int	    len1, len2;
 {

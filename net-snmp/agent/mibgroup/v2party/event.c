@@ -1272,7 +1272,7 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
     int result;
 
     *write_method = NULL;
-    result = compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1322,7 +1322,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
 	    continue;
 	}
 	newname[12] = (oid)event->index;
-	result = compare(name, *length, newname, 13);
+	result = snmp_oid_compare(name, *length, newname, 13);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }
@@ -1379,7 +1379,7 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
     int result;
 
     *write_method = 0;
-    result = compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1436,7 +1436,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
 	newname[12] = (oid)event->index;
 	newname[13] = (oid)event->contextLen;
 	memcpy(newname+14, event->context, event->contextLen * sizeof(oid));
-	result = compare(name, *length, newname, 14 + event->contextLen);
+	result = snmp_oid_compare(name, *length, newname, 14 + event->contextLen);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }

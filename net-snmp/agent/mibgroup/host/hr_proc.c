@@ -74,7 +74,7 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
         if ( proc_idx == -1 )
 	    break;
 	newname[HRPROC_ENTRY_NAME_LENGTH] = proc_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = proc_idx;
 	    /* Save processor status information */

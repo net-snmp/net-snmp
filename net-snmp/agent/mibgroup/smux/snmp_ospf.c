@@ -97,7 +97,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	 */
 
 	/* Reject GET and GETNEXT for anything above ospfifconf range */
-	result = compare(name, *length, max_ospf_mib, 
+	result = snmp_oid_compare(name, *length, max_ospf_mib, 
 		         sizeof(max_ospf_mib)/sizeof(u_int));
 
 	if (result >= 0) {
@@ -106,7 +106,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	}
 
 	/* for GETs we need to be in the ospf range so reject anything below */
-	result = compare(name, *length, min_ospf_mib, 
+	result = snmp_oid_compare(name, *length, min_ospf_mib, 
 			 sizeof(min_ospf_mib)/sizeof(u_int));
 	if (exact && (result < 0)) {
                 DEBUGP("Exact but doesn't match length %d, size %d\n",

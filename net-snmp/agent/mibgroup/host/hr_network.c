@@ -83,7 +83,7 @@ header_hrnet(vp, name, length, exact, var_len, write_method)
         if ( net_idx == -1 )
 	    break;
 	newname[HRNET_ENTRY_NAME_LENGTH] = net_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = net_idx;
             break;

@@ -569,8 +569,8 @@ var_context(vp, name, length, exact, var_len, write_method)
 	memcpy((newname + 12),
 	      cp->contextIdentity, cp->contextIdentityLen * sizeof(oid));
 	newnamelen = 12 + cp->contextIdentityLen;
-	if ((compare(newname, newnamelen, name, *length) > 0) &&
-	    (!lowcp || compare(newname, newnamelen,
+	if ((snmp_oid_compare(newname, newnamelen, name, *length) > 0) &&
+	    (!lowcp || snmp_oid_compare(newname, newnamelen,
 			       lowname, lownamelen) < 0)){
 	    /*
 	     * if new one is greater than input and closer to input than

@@ -1091,7 +1091,7 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
     int result;
 
     *write_method = NULL;
-    result = compare(name, *length, vp->name, (int)vp->namelen);
+    result = snmp_oid_compare(name, *length, vp->name, (int)vp->namelen);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
@@ -1144,7 +1144,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
 	memcpy(newname + 13,
 	      alarm->contextID, alarm->contextLength * sizeof(oid));
 	newname[13 + alarm->contextLength] = (oid)alarm->index;
-	result = compare(name, *length,
+	result = snmp_oid_compare(name, *length,
 			 newname, 14 + alarm->contextLength);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;

@@ -76,7 +76,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
         if ( print_idx == -1 )
 	    break;
 	newname[HRPRINT_ENTRY_NAME_LENGTH] = print_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = print_idx;
 	    /* Save printer status information */

@@ -95,7 +95,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 		 *     (i.e. *length is too short to be a full instance)
 		 */
 
-    if (( compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
+    if (( snmp_oid_compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
 	( *length > HRPART_DISK_NAME_LENGTH )) {
         LowDiskIndex = (name[HRPART_DISK_NAME_LENGTH] & ((1<<HRDEV_TYPE_SHIFT)-1));
 
@@ -112,7 +112,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 	    break;
 	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index;
 	newname[HRPART_ENTRY_NAME_LENGTH] = part_idx;
-        result = compare(name, *length, newname, (int)vp->namelen + 2);
+        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 2);
         if (exact && (result == 0)) {
 	    Save_HR_Partition( HRD_index, part_idx );
 	    LowDiskIndex = HRD_index;

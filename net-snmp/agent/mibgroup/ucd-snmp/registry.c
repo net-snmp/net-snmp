@@ -48,7 +48,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_registry: %s\n", c_oid);
     }
     if (*length < REGISTRY_NAME_LENGTH ||
-        compare(name, *length, vp->name, vp->namelen) < 1)
+        snmp_oid_compare(name, *length, vp->name, vp->namelen) < 1)
       mine = subtrees;
     else
       mine = find_subtree_next(&(name[REGISTRY_NAME_LENGTH]),
