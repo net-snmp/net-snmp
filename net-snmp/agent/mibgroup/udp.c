@@ -201,7 +201,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 
     switch (vp->magic){
 	case UDPINDATAGRAMS:
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
 	    long_return = udpstat.udps_ipackets;
 #else
 #if defined(linux)
@@ -212,7 +212,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case UDPNOPORTS:
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
 	    long_return = udpstat.udps_noport;
 #else
 #if defined(linux)
@@ -223,7 +223,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case UDPOUTDATAGRAMS:
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
 	    long_return = udpstat.udps_opackets;
 #else
 #if defined(linux)
@@ -495,7 +495,7 @@ static void UDP_Scan_Init()
 {
 #ifndef linux
     auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
-#if !(defined(freebsd2) || defined(netbsd1))
+#if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
     udp_prev = (struct inpcb *) auto_nlist_value(UDB_SYMBOL);
 #endif
 #else /* linux */
@@ -581,12 +581,12 @@ struct inpcb *RetInPcb;
         next = udp_inpcb.INP_NEXT_SYMBOL;
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
-#if !(defined(netbsd1) || defined(freebsd2) || defined(linux))
+#if !(defined(netbsd1) || defined(freebsd2) || defined(linux) || defined(openbsd2))
 	if (udp_inpcb.INP_PREV_SYMBOL != udp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
 #endif
 	*RetInPcb = udp_inpcb;
-#if !(defined(netbsd1) || defined(freebsd2))
+#if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))
 	udp_prev = next;
 #endif
 #else /* linux */
