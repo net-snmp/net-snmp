@@ -398,6 +398,7 @@ AC_ARG_WITH(out_mib_modules,
   
     mibII                  support for the mib-II tree.
     snmpv3mibs             support for the snmpv3 mib modules.
+    host                   host resources mib support.
     ucd_snmp               UCD-SNMP-MIB specific extensions.
     agent_mibs             NET-SNMP-AGENT-MIB extensions
     agentx                 (see below)
@@ -406,8 +407,6 @@ AC_ARG_WITH(out_mib_modules,
     utilities              general agent configuration utilities.
 
   Optional mib modules that can be built into the agent include:
-    host                   host resources mib support.
-                             (beta level code for linux, hpux, solaris, bsdi)
     disman/event-mib       support for the DISMAN-EVENT-MIB (beta)
                              (supports self monitoring and notification 
                               delivery when error conditions are found)
@@ -1161,8 +1160,8 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx agent_mibs utilities $new_with_mib_modules"
-default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
+new_module_list="mibII ucd_snmp host snmpv3mibs notification target agent_mibs agentx agent_mibs utilities $new_with_mib_modules"
+default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 
 if test "x$mini_agent" = "xyes"; then
 new_with_out_mib_modules="mibII $new_with_out_mib_modules"

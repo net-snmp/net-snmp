@@ -1165,6 +1165,7 @@ Configuring the agent:
 
     mibII                  support for the mib-II tree.
     snmpv3mibs             support for the snmpv3 mib modules.
+    host                   host resources mib support.
     ucd_snmp               UCD-SNMP-MIB specific extensions.
     agent_mibs             NET-SNMP-AGENT-MIB extensions
     agentx                 (see below)
@@ -1173,8 +1174,6 @@ Configuring the agent:
     utilities              general agent configuration utilities.
 
   Optional mib modules that can be built into the agent include:
-    host                   host resources mib support.
-                             (beta level code for linux, hpux, solaris, bsdi)
     disman/event-mib       support for the DISMAN-EVENT-MIB (beta)
                              (supports self monitoring and notification
                               delivery when error conditions are found)
@@ -5137,7 +5136,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5140 "configure"' > conftest.$ac_ext
+  echo '#line 5139 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5680,7 +5679,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5683: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5682: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7550,7 +7549,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7553 "configure"
+#line 7552 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7648,7 +7647,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7651 "configure"
+#line 7650 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9765,8 +9764,8 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx agent_mibs utilities $new_with_mib_modules"
-default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
+new_module_list="mibII ucd_snmp host snmpv3mibs notification target agent_mibs agentx agent_mibs utilities $new_with_mib_modules"
+default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 
 if test "x$mini_agent" = "xyes"; then
 new_with_out_mib_modules="mibII $new_with_out_mib_modules"
