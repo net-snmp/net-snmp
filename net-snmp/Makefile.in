@@ -22,6 +22,9 @@ INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
 
 all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
+test:   all
+	( cd testing; make test )
+
 sedscript: sedscript.in config.h $(srcdir)/agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
 
