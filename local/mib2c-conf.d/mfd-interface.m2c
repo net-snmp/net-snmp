@@ -457,7 +457,7 @@ _mfd_${context}_pre_request(netsnmp_mib_handler *handler,
          */
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_undo_cleanup\n", rc));
-        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+        netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
     
     return SNMP_ERR_NOERROR;
@@ -473,6 +473,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_agent_request_info *agtreq_info,
                              netsnmp_request_info *requests)
 {
+    ${context}_rowreq_ctx *rowreq_ctx;
     int rc = ${context}_post_request(${context}_if_ctx.user_ctx);
     if (MFD_SUCCESS != rc) {
         /*
@@ -481,6 +482,13 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_undo_cleanup\n", rc));
     }
+    
+    /*
+     * if it was set, clear row created flag.
+     */
+    rowreq_ctx = netsnmp_container_table_extract_context(requests);
+    if ((NULL != rowreq_ctx) && (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED))
+        rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
 
     return SNMP_ERR_NOERROR;
 }
@@ -529,7 +537,11 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
         oid_idx.oids = tblreq_info->index_oid;
         oid_idx.len = tblreq_info->index_oid_len;
         rc = ${context}_index_from_oid(&oid_idx, &mib_idx);
-        if(MFD_SUCCESS == rc) {
+        if(MFD_SUCCESS != rc) {
+            DEBUGMSGT(("$context", "error parsing index\n"));
+            netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
+        }
+        else {
             /*
              * allocate new context
              */
@@ -553,10 +565,11 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
             if(MFD_SUCCESS != rc) {
                 netsnmp_assert((rc == SNMP_ERR_NOCREATION) ||
                                (rc == SNMP_ERR_INCONSISTENTNAME));
-                netsnmp_request_set_error_all(requests, rc);
+                netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
                 ${context}_release_rowreq_ctx(rowreq_ctx);
             }
             else {
+                rowreq_ctx->rowreq_flags |= MFD_ROW_CREATED;
                 netsnmp_request_add_list_data(requests, netsnmp_create_data_list
                                               (TABLE_CONTAINER_NAME, rowreq_ctx,
                                                NULL)); /* xxx-rks: free routine? */
@@ -692,7 +705,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
             rc = SNMP_ERR_GENERR;
         }
         if(rc)
-            netsnmp_request_set_error(requests, rc);
+            netsnmp_request_set_error(requests, SNMP_VALIDATE_ERR(rc));
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
@@ -809,7 +822,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
 
         rc = _${context}_check_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
-            netsnmp_request_set_error(requests, rc);
+            netsnmp_request_set_error(requests, SNMP_VALIDATE_ERR(rc));
             break;
         }
 
@@ -893,7 +906,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
     if(rc){
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_check_dependencies\n", rc));
-        netsnmp_request_set_error_all(requests, rc);
+        netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
 
     return SNMP_ERR_NOERROR;
@@ -987,7 +1000,7 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
     if (MFD_SUCCESS != rc)  {
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_undo_setup\n", rc));
-        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+        netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
 
     return SNMP_ERR_NOERROR;
@@ -1029,15 +1042,16 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
     /*
      * release undo context, if needed
      */
-     if(rowreq_ctx->undo) 
+    if(rowreq_ctx->undo) {
          ${context}_release_data(rowreq_ctx->undo);
+         rowreq_ctx->undo = NULL;
+    }
 
 @end@
-
     /*
      * clear set flags
      */
-    rowreq_ctx->set_flags = 0;
+    rowreq_ctx->column_set_flags = 0;
 
     return SNMP_ERR_NOERROR;
 }
@@ -1070,14 +1084,14 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
     case COLUMN_$node.uc:
 @         if $m2c_node_needlength == 0@
         if(var->val_len != sizeof($m2c_decl)) {
-            rc = MFD_ERROR;
+            rc = SNMP_ERR_WRONGLENGTH;
             snmp_log(LOG_ERR,
                      "varbind size of %d does not match expected size %d\n",
                      var->val_len, sizeof($m2c_decl));
             break;
         }
 @         end@
-        rowreq_ctx->set_flags |= FLAG_$node.uc;
+        rowreq_ctx->column_set_flags |= FLAG_$node.uc;
         rc = ${node}_set(rowreq_ctx, $m2c_node_var_val );
         break;
  @      end@ # settable
@@ -1106,7 +1120,7 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
     
-    rowreq_ctx->set_flags = 0;
+    rowreq_ctx->column_set_flags = 0;
     for(;requests; requests = requests->next) {
         /*
          * set column data
@@ -1120,7 +1134,7 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
         if(MFD_SUCCESS != rc)  {
             DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                         "${context}_set_column\n", rc));
-            netsnmp_set_request_error(agtreq_info, requests, rc);
+            netsnmp_set_request_error(agtreq_info, requests, SNMP_VALIDATE_ERR(rc));
         }
     } /* for results */
 
@@ -1152,7 +1166,7 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_commit\n", rc));
-        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+        netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
 
     return SNMP_ERR_NOERROR;
