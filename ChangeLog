@@ -1,3 +1,33 @@
+-------------------------------------------------------------------------------
+
+Changes: V3.5.1 -> V3.5.2
+
+hardaker  8 Sep 98 09:26:13
+    - (NEWS): update.
+
+hardaker  8 Sep 98 09:33:25
+    - (ChangeLog): update for 3.5.1.
+
+hardaker  8 Sep 98 09:35:55
+    version tag ( 3.5.1 )
+
+hardaker  9 Sep 98 09:45:24
+    - (Makefile.in): Put an @ sign in front of the last echo line.
+
+hardaker  9 Sep 98 09:46:35
+    - (memory.c, memory.h, memory_freebsd2.c, memory_freebsd2.h):
+      - Change all instances of USED -> AVAIL since thats really what
+        we're reporting.
+
+hardaker  9 Sep 98 09:50:22
+    - (memory.c, memory.h, memory_freebsd2.c, memory_freebsd2.h):
+      - correct work I stupidly made when tired.
+
+hardaker  9 Sep 98 11:00:44
+    - (NEWS): update for 3.5.2.
+
+-------------------------------------------------------------------------------
+	
 Changes: V3.5 -> V3.5.1
 
 hardaker 22 Jun 98 09:16:32
