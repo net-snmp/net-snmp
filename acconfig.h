@@ -6,9 +6,14 @@
 #define CONFIGFILE "/etc/ece-snmpd.conf"          /* default config file */
 #define CONFIGFILETWO "/etc/ece-snmpd.local.conf" /* optional second file */
 
-#define SNMPV1      0xAAAA       /* don't change these values! */
-#define SNMPV2ANY   0x2
-#define SNMPV2AUTH  0x4
+/* to hack in forced V2 security, I had to reserve the left byte of
+   the ACL Mib word for V2.  Do NOT define more than 5 V1 communities
+   else they will roll into these definitions (see snmp_vars.c:340) */
+   
+/* don't change these values! */
+#define SNMPV1      0xAAAA       /* readable by anyone */
+#define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
+#define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* If GLOBALSECURITY is defined, it sets the default SNMP access type
    for the extensible mibs to the setting type described. */
@@ -16,14 +21,20 @@
 #define GLOBALSECURITY SNMPV2AUTH    /* only authenticated snmpv2 requests
                                         permited */
 
-#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1 accessable
-                                              because HP Openview does not
-                                              support V2 */
+
+/* the ErrorFlag is V1 accessable because HP Openview does not support
+V2.  You can make this list of pairs as long as you want, just make
+sure to end it in -1.*/
+
+#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1
+
 /* additional note:  if SECURITYEXCEPTIONS is defined, you must use an
                      ANSI compiler (gcc) for agent/extensible/extensible.c */
 
 
 /* Mib-2 tree Info */
+
+/* These are the system information variables. */
 
 #if defined(hpux)
 #define VERS_DESC   "HP-UX 9.0.5"
@@ -43,6 +54,10 @@
 #define LOGFILE "/usr/adm/ece-snmpd.log"
 
 /* mib pointer to the top of the extensible tree */
+/* point this to the location in the tree your company/organization
+   has been allocated.  If you don't have an official one (like me),
+   just make one up that doesn't overlap with other mibs you are using
+   on the system */
 
 #define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
 #define EXTENSIBLENUM 6            /* count the above numbers */
@@ -61,7 +76,8 @@
 
 #define ERRORMIBNUM 101     /* Reports errors the agent runs into
                                (typically its "can't fork, no mem" problems) */
-#define ERRORTIMELENGTH 600 /* how long to wait for error querys */
+#define ERRORTIMELENGTH 600 /* how long to wait for error querys
+                               before reseting the error trap.*/
 
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
@@ -82,15 +98,18 @@
 
 #define EXECFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
 
-/* Should exec output Cashing be used, and if so,
-   After how many seconds should the cache re-newed?
-   Note:  Don't define CASHETIME to disable cashing completely */
+/* Should exec output Cashing be used (speeds up things greatly), and
+   if so, After how many seconds should the cache re-newed?  Note:
+   Don't define CASHETIME to disable cashing completely */
 
 #define EXCACHETIME 30
 #define CACHEFILE "/tmp/.snmp-exec-cache"
 #define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 
 #define MAXDISKS 10                      /* can't scan more than this number */
+
+/* misc defaults */
+
 #define DEFDISKMINIMUMSPACE 100000       /* default of 100 meg minimum
                                             if the minimum size is not
                                             specified in the config file */
