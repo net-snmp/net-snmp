@@ -41,8 +41,8 @@ be executed is configured in the config.h file at compile time.
 .IP
 Checks to see if the NAME'd processes are running on the agent's
 machine.  An error flag (1) and a description message are then passed
-to the EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORMSG mib tables (respectively) if the
+to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG mib columns (respectively) if the
 NAME'd program is not found in the process table as reported by PSCMD.
 .IP
 If MAX and MIN are not specified, MAX is assumed to be 
@@ -52,7 +52,7 @@ and MIN is assumed to be 1.
 If MAX is specified but MIN is not specified, MIN is assumed to be 0.
 .IP "procfix NAME PROG ARGS"
 This registers a command that knows how to fix errors with the given
-process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFIX for a given
+process NAME.  When EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFIX for a given
 NAMEd program is set to the integer value of 1, this command will be
 called.  It defaults to a compiled value set using the PROCFIXCMD
 definition in the config.h file.
@@ -62,8 +62,8 @@ definition in the config.h file.
 If MIBNUM is not specified, the agent executes the named PROG with
 arguments of ARGS and returns the exit status and the first line of
 the STDOUT output of the PROG program to queries of the
-EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORMSG mib tables (respectively).  All
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORMSG mib columns (respectively).  All
 STDOUT output beyond the first line is silently truncated.
 .IP
 If MIBNUM is specified, it acts as above but returns the exit status
@@ -86,7 +86,7 @@ EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
 .RE
 .IP "execfix NAME PROG ARGS"
 This registers a command that knows how to fix errors with the given
-exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFIX for a
+exec or sh NAME.  When EXTENSIBLEDOTMIB.SHELLMIBNUM.1.ERRORFIX for a
 given NAMEd entry is set to the integer value of 1, this command will
 be called.  It defaults to a compiled value set using the EXECFIXCMD
 definition in the config.h file.
@@ -97,17 +97,17 @@ Checks the named disks mounted at PATH for available disk space.  If
 the disk space is less than MINSPACE (kB) if specified or less than
 MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
 if not specified, the associated entry in the
-EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORFLAG mib table will be set to (1) and
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORFLAG mib table will be set to (1) and
 a descriptive error message will be returned to queries of
-EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORMSG.
+EXTENSIBLEDOTMIB.DISKMIBNUM.1.ERRORMSG.
 .IP "load MAX1"
 .IP "load MAX1 MAX5"
 .IP "load MAX1 MAX5 MAX15"
 .IP
 Checks the load average of the machine and returns an error flag (1),
 and an text-string error message
-to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORFLAG and
-EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG (respectively) when the
+to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORFLAG and
+EXTENSIBLEDOTMIB.LOADAVEMIBNUM.1.ERRORMSG (respectively) when the
 1-minute, 5-minute, or 15-minute averages exceed the associated
 maximum values.  If any of the MAX1, MAX5, or MAX15 values are
 unspecified, they default to a value of DEFMAXLOADAVE.
@@ -118,8 +118,8 @@ and only monitors the size without reporting errors about it.
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
-EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORFLAG flag and the
+EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
 .SH AGENTX SUB-AGENTS
 To enable AgentX support in the snmp master agent, put the following
 line in your snmpd.conf file:
