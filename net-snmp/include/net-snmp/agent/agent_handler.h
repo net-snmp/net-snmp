@@ -72,6 +72,7 @@ typedef struct netsnmp_mib_handler_s {
 #define HANDLER_CAN_GETBULK           0x04
 #define HANDLER_CAN_NOT_CREATE        0x08         /* auto set if ! CAN_SET */
 #define HANDLER_CAN_BABY_STEP         0x10
+#define HANDLER_CAN_STASH             0x20
 
 
 #define HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)
