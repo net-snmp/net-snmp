@@ -942,10 +942,10 @@ fi
 
 
 cat >> confdefs.h <<EOF
-#define CONFIGURE_OPTIONS "$ac_configure_args"
+#define CONFIGURE_OPTIONS "\"$ac_configure_args\""
 EOF
 
-CONFIGURE_OPTIONS="$ac_configure_args"
+CONFIGURE_OPTIONS="\"$ac_configure_args\""
 
 
 # Check whether --with-cc or --without-cc was given.
