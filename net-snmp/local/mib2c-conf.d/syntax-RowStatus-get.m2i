@@ -17,12 +17,12 @@
      */
 $example_start
     /** TODO: update INTERNAL_* macros defined in the header */
-    switch (temp_dAssignmentsRowStatus) {
+    switch ($m2c_node_lh) {
 
         /* `active', which indicates that the conceptual row is
               available for use by the managed device */
-    case INTERNAL_DASSIGNMENTSROWSTATUS_ACTIVE:
-        temp_dAssignmentsRowStatus = ROWSTATUS_ACTIVE;
+    case INTERNAL_$node.uc_ACTIVE:
+        $m2c_node_lh = ROWSTATUS_ACTIVE;
         break;
 
         /* `notInService', which indicates that the conceptual
@@ -31,8 +31,8 @@ $example_start
                  no implication regarding the internal consistency of
                  the row, availability of resources, or consistency with
                  the current state of the managed device */
-    case INTERNAL_DASSIGNMENTSROWSTATUS_NOTINSERVICE:
-        temp_dAssignmentsRowStatus = ROWSTATUS_NOTINSERVICE;
+    case INTERNAL_$node.uc_NOTINSERVICE:
+        $m2c_node_lh = ROWSTATUS_NOTINSERVICE;
         break;
 
         /* `notReady', which indicates that the conceptual row
@@ -40,14 +40,14 @@ $example_start
                  necessary in order to be available for use by the
                  managed device (i.e., one or more required columns in
                  the conceptual row have not been instanciated) */
-    case INTERNAL_DASSIGNMENTSROWSTATUS_NOTREADY:
-        temp_dAssignmentsRowStatus = ROWSTATUS_NOTREADY;
+    case INTERNAL_$node.uc_NOTREADY:
+        $m2c_node_lh = ROWSTATUS_NOTREADY;
         break;
 
     default:
         snmp_log(LOG_ERR,
                  "couldn't map value %d for dAssignmentsRowStatus\n",
-                 temp_dAssignmentsRowStatus);
+                 $m2c_node_lh);
         return SNMP_ERR_GENERR;
     }
 $example_end
