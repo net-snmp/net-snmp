@@ -696,6 +696,90 @@ find_tree_node( name, modid )
     return(NULL);
 }
 
+static void
+merge_anon_children( tp1, tp2 )
+    struct tree *tp1, *tp2;
+		/* NB: tp1 is the 'anonymous' node */
+{
+    struct tree *child1, *child2, *previous;
+
+    for ( child1 = tp1->child_list ; child1 ; ) {
+
+        for ( child2 = tp2->child_list, previous = NULL ;
+              child2 ; previous = child2, child2 = child2->next_peer ) {
+
+            if ( child1->subid == child2->subid ) {
+			/*
+			 * Found 'matching' children,
+			 *  so merge them
+			 */
+		if ( !strncmp( child1->label, ANON, ANON_LEN)) {
+                    merge_anon_children( child1, child2 );
+
+                    previous = child1;		/* Finished with 'child1' */
+                    child1 = child1->next_peer;
+                    free_node( previous );
+                    break;
+                }
+
+		else if ( !strncmp( child2->label, ANON, ANON_LEN)) {
+                    merge_anon_children( child2, child1 );
+
+                    if ( previous )
+                         previous->next_peer = child2->next_peer;
+                    else
+                         tp2->child_list = child2->next_peer;
+                    free_node(child2);
+
+                    previous = child1;		/* Move 'child1' to 'tp2' */
+                    child1 = child1->next_peer;
+                    previous->next_peer = tp2->child_list;
+                    tp2->child_list = previous;
+                    break;
+                }
+		else if ( strcmp( child1->label, child2->label) != 0 ) {
+	            if (mib_warnings)
+		        fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
+			        tp2->label, child1->subid,
+                                child1->label, child2->label);
+                    continue;
+                }
+                else {
+				/*
+				 * Two copies of the same node.
+				 * 'child2' adopts the children of 'child1'
+				 */
+
+                    if ( child2->child_list ) {
+                        for ( previous = child2->child_list ;
+                              previous->next_peer ;
+                              previous = previous->next_peer )
+                                  ;	/* Find the end of the list */
+                        previous->next_peer = child1->child_list;
+                    }
+                    else
+                        child2->child_list = child1->child_list;
+                    child1->child_list = NULL;
+
+                    previous = child1;		/* Finished with 'child1' */
+                    child1 = child1->next_peer;
+                    free_node( previous );
+                    break;
+                }
+            }
+        }
+		/*
+		 * If no match, move 'child1' to 'tp2' child_list
+		 */
+        if ( child1 ) {
+            previous = child1;
+            child1 = child1->next_peer;
+            previous->next_peer = tp2->child_list;
+            tp2->child_list = previous;
+        }
+    }
+}
+
 
 /*
  * Find all the children of root in the list of nodes.  Link them into the
@@ -706,7 +790,7 @@ do_subtree(root, nodes)
     struct tree *root;
     struct node **nodes;
 {
-    register struct tree *tp;
+    register struct tree *tp, *anon_tp=NULL;
     register struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int hash;
@@ -748,6 +832,10 @@ do_subtree(root, nodes)
 		do_subtree(tp, nodes);
 		continue;
             }
+            if (!strncmp( np->label, ANON, ANON_LEN) ||
+                !strncmp( tp->label, ANON, ANON_LEN)) {
+                anon_tp = tp;	/* Need to merge these two trees later */
+            }
 	    if (mib_warnings)
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			root->label, np->subid, tp->label, np->label);
@@ -778,6 +866,46 @@ do_subtree(root, nodes)
 /*      if (tp->type == TYPE_OTHER) */
             do_subtree(tp, nodes);      /* recurse on this child if it isn't
                                            an end node */
+        if ( anon_tp ) {
+            if (!strncmp( tp->label, ANON, ANON_LEN)) {
+			/*
+			 * The new node is anonymous,
+			 *  so merge it with the existing one.
+			 */
+                merge_anon_children( tp, anon_tp );
+            }
+            else if (!strncmp( anon_tp->label, ANON, ANON_LEN)) {
+			/*
+			 * The old node was anonymous,
+			 *  so merge it with the existing one,
+			 *  and fill in the full information.
+			 */
+                merge_anon_children( anon_tp, tp );
+                anon_tp->label = tp->label;  tp->label=NULL;
+                anon_tp->child_list = tp->child_list;  tp->child_list=NULL;
+                anon_tp->modid = tp->modid;
+                anon_tp->tc_index = tp->tc_index;
+                anon_tp->type = tp->type;
+                anon_tp->enums = tp->enums;  tp->enums=NULL;
+                anon_tp->hint = tp->hint;  tp->hint=NULL;
+                anon_tp->description = tp->description;  tp->description=NULL;
+                set_function(anon_tp);
+            }
+            else {
+                /* Uh?  One of these two should have been anonymous! */
+	        if (mib_warnings)
+		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s\n",
+			tp->label, anon_tp->label);
+            }
+		/*
+		 * The new node is no longer needed
+		 *  so unlink and discard it.
+		 */
+            root->child_list = tp->next_peer;
+            tbuckets[hash] = tp->next;
+            free_node( tp );
+            anon_tp = NULL;
+        }
     }
     /* free all nodes that were copied into tree */
     oldnp = NULL;
@@ -884,7 +1012,7 @@ parse_objectid(fp, name)
                 np->parent = Strdup (op->label);
                 if (!nop->label) {
 		    nop->label = Malloc(20);
-		    sprintf(nop->label, "anonymous#%d", anonymous++);
+ 		    sprintf(nop->label, "%s%d", ANON, anonymous++);
                 }
                 np->label = Strdup (nop->label);
                 np->modid = nop->modid;
