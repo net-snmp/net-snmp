@@ -45,10 +45,10 @@ clean:
 	cd extensible; make clean
 
 install:  installdirs
-	$(INSTALL) $(TARG) $(etcdir)
+	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) 
 
 installdirs:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(etcdir) $(snmplibdir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(etcdir) $(snmplibdir) 
 
 depend: 
 	cd extensible; $(MAKE) depend; cd ..

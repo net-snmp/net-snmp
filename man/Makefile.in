@@ -25,10 +25,10 @@ all:
 	echo "nothing to make"
 
 install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN8)
-	for i in $(MAN1) ; do $(INSTALL) $$i $(man1dir) ; done
-	for i in $(MAN3) ; do $(INSTALL) $$i $(man3dir) ; done
-	for i in $(MAN5) ; do $(INSTALL) $$i $(man5dir) ; done
-	for i in $(MAN8) ; do $(INSTALL) $$i $(man8dir) ; done
+	@for i in $(MAN1) ; do $(INSTALL) $$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
+	@for i in $(MAN3) ; do $(INSTALL) $$i $(man3dir) ; echo "install:  installed $$i in $(man3dir)" ; done
+	@for i in $(MAN5) ; do $(INSTALL) $$i $(man5dir) ; echo "install:  installed $$i in $(man5dir)" ; done
+	@for i in $(MAN8) ; do $(INSTALL) $$i $(man8dir) ; echo "install:  installed $$i in $(man8dir)" ; done
 	
 installdirs:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
