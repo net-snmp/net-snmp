@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -24,12 +24,56 @@
 ########################################################################
 ##
 ########################################################################
-@    if $m2c_data_allocate eq "yes" && $m2c_data_context ne "generated"@
+##@    if $m2c_data_allocate eq "yes" && $m2c_data_context ne "generated"@
 @        include parent-set.m2i@
-@    end@
-@    if $m2c_table_dependencies == 1@
-@        include parent-dependencies.m2i@
-@    end@
+##@    end@
+########################################################################
+##
+########################################################################
+@    foreach $node index@
+@        include m2c_setup_node.m2i@
+@        print | |   +-> Processing index $node@
+@        include details-node.m2i@
+/**
+ * check validity of ${node} index portion
+ *
+ * NOTE: this is not the place to do any checks for the sanity
+ *       of multiple indexes. Those types of checks should be done in the
+ *       ${context}_validate_index() function.
+ *
+ * The following checks have already been done for you:
+ *    The syntax is $node.type
+ @if $node.enums == 1@
+ *    The value is one of $m2c_evals
+ @elsif $node.ranges == 1@
+ @    if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
+ @        eval $m2c_tmp_ns = "value"@
+ @    else@
+ @        eval $m2c_tmp_ns = "length"@
+ @    end@
+ *    The $m2c_tmp_ns is in (one of) the range set(s): $m2c_evals
+ @end@
+ *
+ * @return 0 if the incoming value is legal, a SNMP error code otherwise.
+ */
+int
+${node}_check_index( ${context}_ctx *ctx, $m2c_node_set_parms)
+{
+    netsnmp_assert(NULL != ctx);
+@if $m2c_node_needlength == 1@
+    netsnmp_assert(NULL != ${node}_ptr);
+@end@
+
+    /*
+     * TODO: check that index value is legal
+     *
+     */
+
+    /* if everything looks ok, return SNMP_ERR_NOERROR */
+      return SNMP_ERR_NOERROR;
+}
+
+@    end@ # foreach column
 ########################################################################
 ##
 ########################################################################
@@ -38,10 +82,14 @@
 @        if $node.settable == 0@
 @            break@ # skip to next column
 @        end@
-@        print Processing       nonindex $node@
+@        print | |   +-> Processing nonindex $node@
 @        include details-node.m2i@
 @        include node-set.m2i@
 @    end@ # foreach column
+########################################################################
+@    if $m2c_table_dependencies == 1@
+@        include parent-dependencies.m2i@
+@    end@
 ########################################################################
 @end@ # foreach table
 ##
