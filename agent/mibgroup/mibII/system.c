@@ -7,7 +7,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "mibincl.h"
+#include "../mibincl.h"
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -27,10 +27,10 @@
 #endif
 
 #include "system.h"
-#include "struct.h"
-#include "util_funcs.h"
+#include "../struct.h"
+#include "../util_funcs.h"
 #include "read_config.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 
 	/*********************
@@ -174,7 +174,7 @@ header_system(vp, name, length, exact, var_len, write_method)
 	 *
 	 *********************/
 
-#ifdef USING_SYSORTABLE_MODULE
+#ifdef USING_MIBII_SYSORTABLE_MODULE
 extern struct timeval sysOR_lastchange;
 #endif
 
@@ -229,7 +229,7 @@ var_system(vp, name, length, exact, var_len, write_method)
             long_return = 72;
             return (u_char *)&long_return;
 
-#ifdef USING_SYSORTABLE_MODULE
+#ifdef USING_MIBII_SYSORTABLE_MODULE
         case SYSORLASTCHANGE:
               diff.tv_sec = sysOR_lastchange.tv_sec - 1 - starttime.tv_sec;
               diff.tv_usec =

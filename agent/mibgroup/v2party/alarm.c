@@ -64,7 +64,7 @@ SOFTWARE.
 #include "snmp_vars_m2m.h"
 #include "event.h"
 #include "alarm.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 #include "snmpd.h"
 
 static struct alarmEntry *alarmTab = NULL;

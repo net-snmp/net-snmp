@@ -24,11 +24,11 @@
 #include <strings.h>
 #endif
 
-#include "mibincl.h"
-#include "../../snmplib/system.h"
+#include "../mibincl.h"
+#include "../../../snmplib/system.h"
 #include "sysORTable.h"
-#include "struct.h"
-#include "util_funcs.h"
+#include "../struct.h"
+#include "../util_funcs.h"
 
 extern struct timeval starttime;
 

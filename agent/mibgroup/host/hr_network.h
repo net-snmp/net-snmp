@@ -8,7 +8,7 @@
 extern void	init_hr_network __P((void));
 extern u_char	*var_hrnet  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));;
 
-config_require(interfaces);
+config_require(mibII/interfaces);
 
 #define	HRNET_IFINDEX		1
 

@@ -70,7 +70,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
 #include "mib_module_config.h"
-#include "mibgroup/vacm_vars.h"
+#if USING_MIBII_VACM_VARS_MODULE
+#include "mibgroup/mibII/vacm_vars.h"
+#endif
 
 #include "snmpd.h"
 #include "party.h"
@@ -204,7 +206,7 @@ init_snmp __P((void))
 #define PARTYMIB 	SNMPV2, 3, 3
 
 /* various OIDs that are needed throughout the agent */
-#ifdef USING_ALARM_MODULE
+#ifdef USING_V2PARTY_ALARM_MODULE
 Export oid alarmVariableOid[] = {SNMPV2ALARMENTRY, ALARMTABVARIABLE};
 Export int alarmVariableOidLen = sizeof(alarmVariableOid) / sizeof(oid);
 Export oid alarmSampleTypeOid[] = {SNMPV2ALARMENTRY, ALARMTABSAMPLETYPE};
@@ -221,7 +223,7 @@ Export oid nullOid[] = {0,0};
 Export int nullOidLen = sizeof(nullOid)/sizeof(oid);
 Export oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
 Export int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
-#ifdef USING_EVENT_MODULE
+#ifdef USING_V2PARTY_EVENT_MODULE
 Export oid eventIdOid[] = {SNMPV2EVENTENTRY, EVENTTABID};
 Export int eventIdOidLen = sizeof(eventIdOid)/sizeof(oid);
 Export oid trapRisingAlarmOid[] = {SNMPV2ALARMEVENTS, 1};
@@ -239,7 +241,7 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
 
-#ifdef USING_VIEW_VARS_MODULE
+#ifdef USING_MIBII_VIEW_VARS_MODULE
 extern int in_view __P((oid *, int, int));
 #endif
 
@@ -412,7 +414,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 			*acl = cvp->acl;
 		    if (access &&
                         (
-#ifdef USING_VIEW_VARS_MODULE
+#ifdef USING_MIBII_VIEW_VARS_MODULE
                          (pi->version == SNMP_VERSION_2p &&
                           !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
 #endif

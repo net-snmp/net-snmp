@@ -58,8 +58,8 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "../../snmplib/system.h"
-#ifdef USING_ERRORMIB_MODULE
-#include "errormib.h"
+#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
+#include "ucd-snmp/errormib.h"
 #else
 #define setPerrorstatus(x) perror(x)
 #endif

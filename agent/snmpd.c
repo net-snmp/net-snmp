@@ -92,15 +92,19 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "m2m.h"
 #include "party.h"
-#ifdef USING_ALARM_MODULE
-#include "mibgroup/alarm.h"
+#ifdef USING_V2PARTY_ALARM_MODULE
+#include "mibgroup/v2party/alarm.h"
 #endif
-#include "event.h"
+#if USING_V2PARTY_EVENT_MODULE
+#include "v2party/event.h"
+#endif
 #include "view.h"
 #include "context.h"
 #include "acl.h"
 #include "mib.h"
+#if USING_MIBII_SNMP_MODULE
 #include "mibgroup/snmp_mib.h"
+#endif
 #include "snmp_client.h"
 #include "snmpd.h"
 #include "var_struct.h"
@@ -523,7 +527,7 @@ send_v1_trap (ss, trap, specific)
     if (snmp_send (ss, pdu) == 0) {
         snmp_perror ("snmpd: send_trap");
     }
-#ifdef USING_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MODULE       
     snmp_outtraps++;
 #endif
 }
@@ -897,10 +901,10 @@ receive(sdlist, sdlen)
         gettimeofday(nvp, (struct timezone *) NULL);
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
-#ifdef USING_ALARM_MODULE
+#ifdef USING_V2PARTY_ALARM_MODULE
 	    alarmTimer(nvp);
 #endif
-#ifdef USING_EVENT_MODULE
+#ifdef USING_V2PARTY_EVENT_MODULE
 	    eventTimer(nvp);
 #endif
 	    if (nvp->tv_usec < 500000L){
@@ -956,7 +960,7 @@ snmp_read_packet(sd)
 	}
 #endif
 
-#ifdef USING_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MODULE       
     snmp_inpkts++;
 #endif
     if (snmp_dump_packet){
@@ -997,7 +1001,7 @@ snmp_read_packet(sd)
 	    printf("\n");
             fflush(stdout);
 	}
-#ifdef USING_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MODULE       
 	snmp_outpkts++;
 #endif
 	if (sendto(sd, (char *)outpacket, out_length, 0,
@@ -1027,14 +1031,14 @@ snmp_input(op, session, reqid, pdu, magic)
 		/* this is just the ack to our inform pdu */
 		return 1;
 	    }
-#ifdef USING_ALARM_MODULE
+#ifdef USING_V2PARTY_ALARM_MODULE
 	    return alarmGetResponse(pdu, state, op, session);
 #endif
 	}
     }
     else if (op == TIMED_OUT) {
 	if (state->type == ALARM_GET_REQ) {
-#ifdef USING_ALARM_MODULE
+#ifdef USING_V2PARTY_ALARM_MODULE
 	    return alarmGetResponse(pdu, state, op, session);
 #endif
 	}

@@ -10,7 +10,7 @@
 #include "hr_system.h"
 #include "hr_utils.h"
 #include "auto_nlist.h"
-#include "../../snmplib/system.h"
+#include "../../../snmplib/system.h"
 
 #ifdef HAVE_SYS_PROC_H
 #include <sys/param.h>
@@ -141,7 +141,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 	    long_return = count_users();
 	    return (u_char *)&long_return;
 	case HRSYS_PROCS:
-#if USING_HR_SWRUN_MODULE
+#if USING_HOST_HR_SWRUN_MODULE
 	    long_return = count_processes();
 #else
 	    long_return = 0;
