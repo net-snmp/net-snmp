@@ -7,6 +7,40 @@
 #include "wombat.h"
 
 
+/*  
+ *  header_wombat routines are called to implement the final part of
+ *  the oid search.  The parent snmpd routines search the subtree
+ *  structure, composed of the various entries in the wombat.h file,
+ *  to identify the routine likely responsible for the given oid.  vp
+ *  points to the subtree element that contained pointers to the
+ *  var_wombat routine, and name points to the actual request.  The
+ *  var_wombat routine is called with this info, and it calls
+ *  header_wombat to either verify that the request is valid (in the
+ *  case of a Get [exact == 1]), or turn the request into a valid
+ *  request, if possible (in the case of Get Next [exact == 0]).  When
+ *  a valid request is found or generated, a pointer to the routine
+ *  responsible for handling Set requests is filled in, in case that's
+ *  what's really caused our invocation.
+ *
+ *  The subtree structure only identifies Types.  In the case of Get,
+ *  if the oid is a scalar, we just check to see if the length is
+ *  right and the instance identifier is 0.  If the oid is a table, we
+ *  validate the index.  This routine could be modified to deal with
+ *  a single routine handling a sequence or other data structures, but
+ *  you're probably reinventing the wheel if you do (the subtree
+ *  structure should be used to reduce those cases down to a scalar or
+ *  a table).
+ *
+ *  In the case of Get Next, we have to deal with the fact that the
+ *  incoming request is probably not going to match anything --- it
+ *  can be too short or too long, or the index of a table might not
+ *  match anything actually in the table.
+ *
+ *  If the incoming request is too short, convert it to the first valid
+ *  oid.  If it's too long, match as far as possible, and then convert
+ *  it to the next valid oid.
+ */
+
 	/*********************
 	 *
 	 *  Kernel & interface information,
