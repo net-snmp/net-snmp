@@ -40,7 +40,7 @@ ucdavis MODULE-IDENTITY
     LAST-UPDATED "9912090000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
-        "The ucd-snmp-coders mailing list is the best place 
+	 "The ucd-snmp-coders mailing list is the best place
 	 to write for public questions about the ucd-snmp
 	 project: ucd-snmp-coders@ece.ucdavis.edu
 
@@ -58,39 +58,37 @@ ucdavis MODULE-IDENTITY
 	"SMIv2 version converted from older MIB definitions."
     ::= { enterprises 2021 }
 
--- numerical definitions:
--- ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
-ucdInternal       OBJECT IDENTIFIER ::= { ucdavis 12 }
-ucdExperimental   OBJECT IDENTIFIER ::= { ucdavis 13 }
-
--- Local tables:
---   prTable        OBJECT IDENTIFIER ::= { ucdavis 2 }
---   memory         OBJECT IDENTIFIER ::= { ucdavis 4 }
---   extTable       OBJECT IDENTIFIER ::= { ucdavis 8 }
---   diskTable      OBJECT IDENTIFIER ::= { ucdavis 9 }
---   loadTable      OBJECT IDENTIFIER ::= { ucdavis 10 }
---   systemStats    OBJECT IDENTIFIER ::= { ucdavis 11 }
---   ipFwAcc        OBJECT IDENTIFIER ::= { ucdExperimental 1 } 
---                  (defined in IPFWACC-MIB.txt)
---   ucdDemoMIB     OBJECT IDENTIFIER ::= { ucdavis 14 }
---   fileTable      OBJECT IDENTIFIER ::= { ucdavis 15 }
---   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
---   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
---   mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
+-- Current UCD core mib table entries:
+--   prTable          OBJECT IDENTIFIER ::= { ucdavis   2 }
+--   memory           OBJECT IDENTIFIER ::= { ucdavis   4 }
+--   extTable         OBJECT IDENTIFIER ::= { ucdavis   8 }
+--   diskTable        OBJECT IDENTIFIER ::= { ucdavis   9 }
+--   loadTable        OBJECT IDENTIFIER ::= { ucdavis  10 }
+--   systemStats      OBJECT IDENTIFIER ::= { ucdavis  11 }
+--   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis  14 } - UCD-DEMO-MIB
+--   fileTable        OBJECT IDENTIFIER ::= { ucdavis  15 }
+--   version          OBJECT IDENTIFIER ::= { ucdavis 100 }
+--   snmperrs         OBJECT IDENTIFIER ::= { ucdavis 101 }
+--   mibRegistryTable OBJECT IDENTIFIER ::= { ucdavis 102 }
 
 -- Older mib table entries that were changed to new locations above:
---   processes      OBJECT IDENTIFIER ::= { ucdavis 1 }
---   exec           OBJECT IDENTIFIER ::= { ucdavis 3 }
---   disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
---   load           OBJECT IDENTIFIER ::= { ucdavis 7 }
+--   processes        OBJECT IDENTIFIER ::= { ucdavis   1 }
+--   exec             OBJECT IDENTIFIER ::= { ucdavis   3 }
+--   disk             OBJECT IDENTIFIER ::= { ucdavis   6 }
+--   load             OBJECT IDENTIFIER ::= { ucdavis   7 }
 
 -- Never implemented and removed from the mib:
---   lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
+--   lockd            OBJECT IDENTIFIER ::= { ucdavis   5 }
 
--- Reserved
---   ucdInternal      OBJECT IDENTIFIER ::= { ucdavis 12 }
---   ucdExperimental  OBJECT IDENTIFIER ::= { ucdavis 13 }
---   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis 14 }
+-- Branches for registering other UCD MIB modules:
+ucdInternal           OBJECT IDENTIFIER ::= { ucdavis 12 }
+ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
+
+-- OID values assigned in the ucdExperimental branch:
+--   ucdIpFwAccMIB    OBJECT IDENTIFIER ::= { ucdExperimental  1 } - UCD-IPFWACC-MIB
+--   ucdIpFilter      OBJECT IDENTIFIER ::= { ucdExperimental  2 } - UCD-IPFILTER-MIB
+--   ucdDlmodMIB      OBJECT IDENTIFIER ::= { ucdExperimental 14 } - UCD-DLMOD-MIB
+--   ucdDiskIOMIB     OBJECT IDENTIFIER ::= { ucdExperimental 15 } - UCD-DISKIO-MIB
 
 
 -- These are the returned values of the agent type.
