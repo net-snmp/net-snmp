@@ -14,7 +14,7 @@ sub compare($$);
 use overload
     '<=>' => \&compare,
     '""' => \&quote_oid,
-    '+' => \&add
+    '+' => \&add,
 ;
    
 
@@ -92,7 +92,7 @@ our $VERSION = '0.01';
 sub new {
     my $type = shift;
     my $arg = shift;
-    SNMP::init_snmp();
+    SNMP::init_snmp("perl");
     my $ptr = NetSNMP::OID::newptr($arg);
     return newwithptr($type, $ptr);
 }
@@ -101,7 +101,7 @@ sub newwithptr {
     my $type = shift;
     my $self = {};
     my $ptr = shift;
-    SNMP::init_snmp();
+    SNMP::init_snmp("perl");
     $self->{'oidptr'} = $ptr;
     bless($self, $type);
     return $self;
@@ -180,14 +180,34 @@ NetSNMP::OID - Perl extension for manipulating OIDs
 
   my @numarray = $oid->to_array();
 
+  # appending oids
+  $oid = new NetSNMP::OID('.1.3');
+  $oid += ".6.1";
+  # -> .1.3.6.1
+
+  # appending index strings
+
+  $oid2 = $oid + "\"wes\"";
+  # -> .1.3.6.1.3.119.101.115
+
+  $oid3 = $oid + "\'wes\'";
+  # -> .1.3.6.1.119.101.115
+
+  $len = $oid3->length();
+  # -> 7
+
 =head1 DESCRIPTION
 
 The NetSNMP::OID module is a simple wrapper around a C-based net-snmp
 oid (which is an array of unsigned integers).  The OID is internally
 stored as a C array of integers for speed purposes when doing
-comparisons, etc.  The standard logical expression operators (<, >,
-==, ...) are overloaded such that lexographical comparisons may be
-done with them.
+comparisons, etc.
+
+The standard logical expression operators (<, >, ==, ...) are
+overloaded such that lexographical comparisons may be done with them.
+
+The + operator is overloaded to allow you to append stuff on to the
+end of a OID, like index segments of a table, for example.
 
 =head2 EXPORT
 
