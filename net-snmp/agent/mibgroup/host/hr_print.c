@@ -264,7 +264,7 @@ Init_HR_Print(void)
 #endif
         }
 #if HAVE_LPSTAT
-        pclose(p);
+        fclose(p);
         close(fd);
 #elif HAVE_CGETNEXT
         cgetclose();
