@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /debug /machine:I386 /def:".\libsnmp.def" /out:"../bin/netsnmp_d.dll"
+# ADD LINK32 advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /incremental:no /debug /machine:I386 /def:".\libsnmp.def" /out:"../bin/netsnmp_d.dll"
 
 !ENDIF 
 
