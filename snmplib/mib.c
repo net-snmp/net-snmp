@@ -1701,8 +1701,9 @@ sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     }
-    sprintf((char *) (*buf + *out_len), "%d.%d.%d.%d", ip[0], ip[1], ip[2],
-            ip[3]);
+    if (ip)
+        sprintf((char *) (*buf + *out_len), "%d.%d.%d.%d",
+                                            ip[0], ip[1], ip[2], ip[3]);
     *out_len += strlen((char *) (*buf + *out_len));
     return 1;
 }
