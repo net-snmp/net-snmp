@@ -105,7 +105,7 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
 static
     int
 _asn_parse_length_check(const char *str,
-                        u_char * bufp, u_char * data,
+                        const u_char * bufp, const u_char * data,
                         u_long plen, size_t dlen)
 {
     char            ebuf[128];
@@ -135,7 +135,7 @@ _asn_parse_length_check(const char *str,
  */
 static
     int
-_asn_build_header_check(const char *str, u_char * data,
+_asn_build_header_check(const char *str, const u_char * data,
                         size_t datalen, size_t typedlen)
 {
     char            ebuf[128];
@@ -160,8 +160,8 @@ _asn_build_header_check(const char *str, u_char * data,
 static
     int
 _asn_realloc_build_header_check(const char *str,
-                                u_char ** pkt, size_t * pkt_len,
-                                size_t typedlen)
+                                u_char ** pkt,
+                                const size_t * pkt_len, size_t typedlen)
 {
     char            ebuf[128];
 
@@ -378,7 +378,7 @@ asn_parse_unsigned_int(u_char * data,
  */
 u_char         *
 asn_build_int(u_char * data,
-              size_t * datalength, u_char type, long *intp, size_t intsize)
+           size_t * datalength, u_char type, const long *intp, size_t intsize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -449,7 +449,7 @@ asn_build_int(u_char * data,
 u_char         *
 asn_build_unsigned_int(u_char * data,
                        size_t * datalength,
-                       u_char type, u_long * intp, size_t intsize)
+                       u_char type, const u_long * intp, size_t intsize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1037,6 +1037,8 @@ asn_parse_objid(u_char * data,
         /*
          * ?? note, this test will never be true, since the largest value
          * of subidentifier is the value of MAX_SUBID! 
+	 *
+	 * Yes: PC-LINT says the same thing
          */
         if (subidentifier > (u_long) MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
@@ -1390,7 +1392,7 @@ asn_parse_bitstring(u_char * data,
 u_char         *
 asn_build_bitstring(u_char * data,
                     size_t * datalength,
-                    u_char type, u_char * string, size_t strlength)
+                    u_char type, const u_char * string, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -1507,7 +1509,7 @@ asn_parse_unsigned_int64(u_char * data,
     DEBUGIF("dumpv_recv") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_recv", "Counter64: ", i64buf));
+        DEBUGMSG(("dumpv_recv", "Counter64: %s", i64buf));
     }
 
     return bufp;
@@ -1535,7 +1537,7 @@ u_char         *
 asn_build_unsigned_int64(u_char * data,
                          size_t * datalength,
                          u_char type,
-                         struct counter64 * cp, size_t countersize)
+                         const struct counter64 * cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1767,7 +1769,7 @@ u_char         *
 asn_build_signed_int64(u_char * data,
                        size_t * datalength,
                        u_char type,
-                       struct counter64 * cp, size_t countersize)
+                       const struct counter64 * cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -1945,7 +1947,7 @@ asn_parse_float(u_char * data,
 u_char         *
 asn_build_float(u_char * data,
                 size_t * datalength,
-                u_char type, float *floatp, size_t floatsize)
+                u_char type, const float *floatp, size_t floatsize)
 {
     union {
         float           floatVal;
@@ -2087,7 +2089,7 @@ asn_parse_double(u_char * data,
 u_char         *
 asn_build_double(u_char * data,
                  size_t * datalength,
-                 u_char type, double *doublep, size_t doublesize)
+                 u_char type, const double *doublep, size_t doublesize)
 {
     long            tmp;
     union {
@@ -2262,7 +2264,7 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
 int
 asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
                        size_t * offset, int r,
-                       u_char type, long *intp, size_t intsize)
+                       u_char type, const long *intp, size_t intsize)
 {
     static const char *errpre = "build int";
     register long   integer = *intp;
@@ -2379,7 +2381,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
 int
 asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
                                 size_t * offset, int r,
-                                u_char type, u_long * intp, size_t intsize)
+                            u_char type, const u_long * intp, size_t intsize)
 {
     static const char *errpre = "build uint";
     register u_long integer = *intp;
@@ -2578,7 +2580,7 @@ int
 asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, int r,
                              u_char type,
-                             u_char * string, size_t strlength)
+                             const u_char * string, size_t strlength)
 {
     /*
      * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
@@ -2641,7 +2643,7 @@ int
 asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
                                   size_t * offset, int r,
                                   u_char type,
-                                  struct counter64 *cp, size_t countersize)
+                               const struct counter64 *cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -2804,7 +2806,7 @@ int
 asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
                                 size_t * offset, int r,
                                 u_char type,
-                                struct counter64 *cp, size_t countersize)
+                                const struct counter64 *cp, size_t countersize)
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
@@ -2919,7 +2921,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
 int
 asn_realloc_rbuild_float(u_char ** pkt, size_t * pkt_len,
                          size_t * offset, int r,
-                         u_char type, float *floatp, size_t floatsize)
+                         u_char type, const float *floatp, size_t floatsize)
 {
     size_t          start_offset = *offset;
     union {
@@ -2978,7 +2980,7 @@ asn_realloc_rbuild_float(u_char ** pkt, size_t * pkt_len,
 int
 asn_realloc_rbuild_double(u_char ** pkt, size_t * pkt_len,
                           size_t * offset, int r,
-                          u_char type, double *doublep, size_t doublesize)
+                          u_char type, const double *doublep, size_t doublesize)
 {
     size_t          start_offset = *offset;
     long            tmp;
