@@ -313,13 +313,20 @@ void read_config(const char *filename,
   
   if ((ifile = fopen(filename, "r")) == NULL) {
 #ifdef ENOENT
-    if (errno != ENOENT) {
+    if (errno == ENOENT) {
+      DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    } else
+#endif /* ENOENT */
+#ifdef EACCES
+    if (errno == EACCES) {
+      DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    } else
+#endif /* EACCES */
+#if defined(ENOENT) || defined(EACCES)
+    {
       snmp_log_perror(filename);
     }
-    else {
-      DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
-    }
-#else /* ENOENT */
+#else /* defined(ENOENT) || defined(EACCES) */
     snmp_log_perror(filename);
 #endif /* ENOENT */
     return;
