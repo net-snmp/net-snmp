@@ -85,7 +85,7 @@
 
 
 
-/* This is used, this the TUNNEL-MIB aguments ifTable. */
+/* This is used, because the TUNNEL-MIB augments ifTable. */
 extern unsigned char *var_ifEntry(struct variable *,
 				  oid *, size_t *,
 				  int, size_t *,
@@ -155,8 +155,6 @@ struct variable4 tunnel_variables[] = {
 };
 
 
-
-char *configfilename;
 
 extern int register_sysORTable(oid *, size_t, const char *);
 extern int unregister_sysORTable(oid *, size_t);
@@ -711,17 +709,6 @@ static int writeTOS(int action, unsigned char *var_val,
 
 
 
-#if 0
-static int writeStatus(int action, unsigned char *var_val,
-		       unsigned char var_val_type, size_t var_val_len,
-		       unsigned char *statP, oid *name, size_t name_len)
-{
-    return SNMP_ERR_NOTWRITABLE;
-}
-#endif
-
-
-
 unsigned char *var_tunnelIfEntry(struct variable *vp,
 				 oid *name, size_t *length,
 				 int exact, size_t *var_len,
@@ -895,9 +882,6 @@ unsigned char *var_tunnelConfigEntry(struct variable *vp,
 	ret_int = 1; /* active */
 	*var_len = sizeof(ret_int);
 	vp->type = ASN_INTEGER;
-#if 0
-	*write_method = writeStatus;
-#endif
 	return (u_char *) &ret_int;
     default:
 	return 0;
