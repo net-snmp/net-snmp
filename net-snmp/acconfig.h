@@ -256,6 +256,12 @@
 #endif
 #endif
 
+#ifndef HAVE_MEMMOVE
+#ifdef HAVE_MEMCPY
+# define memmove memcpy
+#endif
+#endif
+
 #ifndef HAVE_BCOPY
 #ifdef HAVE_MEMCPY
 # define bcopy(s, d, n) memcpy ((d), (s), (n))
