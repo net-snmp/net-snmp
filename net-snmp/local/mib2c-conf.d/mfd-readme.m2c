@@ -392,7 +392,7 @@ File: ${name}_data_get.c
 
 @    foreach $node index@
 @        include m2c_setup_node.m2i@
-@        if ($m2c_skip_mapping == 0)@
+@        if ($m2c_skip_mapping != 1)@
   Map native data to MIB format
   -----------------------------
   TODO : convert data from it's native format to the format required by the MIB
@@ -407,7 +407,7 @@ File: ${name}_data_get.c
 @    end@ // foreach index
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-@        if ($m2c_skip_mapping == 0)@
+@        if ($m2c_skip_mapping != 1)@
   Map native data to MIB format
   -----------------------------
   TODO : convert data from it's native format to the format required by the MIB

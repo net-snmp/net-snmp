@@ -5,7 +5,7 @@
 @if "$m2c_node_name" ne "$node"@
 ## if $node.accessible != 1, might be inaccessible index node
 @  eval $m2c_node_name = $node@
-@  eval $m2c_node_skip_mapping = 1@
+@  eval $m2c_node_skip_mapping = $m2c_table_skip_mapping@
 @  eval $m2c_node_needlength = $node.needlength@
 @  eval $m2c_node_get_comments = ""@
 @  eval $m2c_node_set_comments = ""@
@@ -17,7 +17,9 @@
 ########################################################################
 @  if $node.enums == 1@
 ##
-@    eval $m2c_node_skip_mapping = 0@
+@    if $m2c_node_skip_mapping == -1@
+@       eval $m2c_node_skip_mapping = 0@
+@    end@
 ##
 ## validate some assumptions
 ##

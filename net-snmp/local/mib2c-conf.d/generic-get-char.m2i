@@ -9,7 +9,9 @@
 ########################################################################
 ##
 ##   enums first
-@eval $m2c_node_skip_mapping = 1@
+@if $m2c_node_skip_mapping == -1@
+@   eval $m2c_node_skip_mapping = 1@
+@end@
 @if ($node.enums == 1) && ("$node.perltype" eq "BITS")@
 $example_start
     /*
