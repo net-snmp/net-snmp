@@ -1909,6 +1909,7 @@ fprint_description(FILE *f,
 		break;
 	    }
 	}
+	if (subtree == 0) break;
 	objid++; objidlen--; subtree = subtree->child_list;
 	if (subtree == 0) break;
     }
