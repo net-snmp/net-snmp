@@ -630,12 +630,12 @@ inetprint(struct in_addr *in, u_short port, const char *proto)
     char            line[80], *cp;
     int             width;
 
-    sprintf(line, "%.*s.", 22, inetname(*in));
+    sprintf(line, "%.*s.", 18, inetname(*in));
     cp = (char *) strchr(line, '\0');
     if (!nflag && port)
         sp = getservbyport(htons(port), proto);
     if (sp || port == 0)
-        sprintf(cp, "%.8s", sp ? sp->s_name : "*");
+        sprintf(cp, "%.12s", sp ? sp->s_name : "*");
     else
         sprintf(cp, "%d", port);
     width = 28;
