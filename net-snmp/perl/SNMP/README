@@ -1,6 +1,5 @@
 	      The Perl5 'SNMP' Extension Module v5.0
 		      for the Net-SNMP Library
-	       G.S. Marzot (gmarzot@nortelnetworks.com)
 
 Contents:
    Introduction:
@@ -63,9 +62,8 @@ Contact:
 	the following forums may be helpful:
 
 	comp.lang.perl.modules
-	net-snmp-coders@lists.sourceforge.net mail list
-	(see http://sourceforge.net/projects/net-snmp to subscribe)
-        gmarzot@nortelnetworks.com (last resort)
+	net-snmp-users@lists.sourceforge.net mail list
+	(see http://www.net-snmp.org/lists/users/ to subscribe)
 
 Supported Platforms:
 	Linux 1.2.x, 2.x
@@ -93,11 +91,13 @@ INSTALL docs.
 
 (Note: To ensure that any previous Net-SNMP, ucd-snmp or cmu snmp
 installation's library or headers are not used by mistake, use the
--NET-SNMP-PATH directive to explicitly set the default path)
+-NET-SNMP-CONFIG directive to explicitly set the path to the
+net-snmp-config command that knows about the net-snmp installation you
+want to use.)
 
 Unix:
 
-perl Makefile.PL [-NET-SNMP-PATH=/usr/local]
+perl Makefile.PL [-NET-SNMP-CONFIG="sh ../../net-snmp-config"] [-NET-SNMP-IN-SOURCE=true]
 make
 make test
 make install
@@ -576,7 +576,7 @@ Sometimes compiling the Net-SNMP library with
 'position-independent-code' enabled is required (HPUX specifically).
 
 If you cannot resolve the problem you can post to
-comp.lang.perl.modules or email net-snmp-coders@lists.sourceforge.net.
+comp.lang.perl.modules or email net-snmp-users@lists.sourceforge.net.
 
 please give sufficient information to analyze the problem (OS type,
 versions for OS/Perl/net-SNMP/compiler, complete error output, etc.)
@@ -767,3 +767,8 @@ Copyright:
      Copyright (c) 1995-2000 G. S. Marzot. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
+
+     Copyright (c) 2001-2002 Networks Associates Technology, Inc.  All
+     Rights Reserved.  This program is free software; you can
+     redistribute it and/or modify it under the same terms as Perl
+     itself.
