@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/utilities.h>
 
