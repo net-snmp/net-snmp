@@ -594,7 +594,7 @@ register_mib_table_row(const char *moduleName,
      */
     memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
     if (vr->namelen > 0) {
-      memcpy(&subtree->name[var_subid - 1], vr->name, 
+      memcpy(&subtree->name[var_subid - vr->namelen], vr->name, 
 	     vr->namelen*sizeof(oid));
     } else {
       subtree->name[var_subid - 1] += x;
@@ -603,7 +603,7 @@ register_mib_table_row(const char *moduleName,
 
     memcpy(subtree->start, mibloc, mibloclen*sizeof(oid));
     if (vr->namelen > 0) {
-      memcpy(&subtree->start[var_subid - 1], vr->name, 
+      memcpy(&subtree->start[var_subid - vr->namelen], vr->name, 
 	     vr->namelen*sizeof(oid));
     } else {
       subtree->start[var_subid - 1] += x;
@@ -612,7 +612,7 @@ register_mib_table_row(const char *moduleName,
 
     memcpy(subtree->end, mibloc, mibloclen*sizeof(oid));
     if (vr->namelen > 0) {
-      memcpy(&subtree->end[var_subid - 1], vr->name, 
+      memcpy(&subtree->end[var_subid - vr->namelen], vr->name, 
 	     vr->namelen*sizeof(oid));
     } else {
       subtree->end[var_subid - 1] += x;
