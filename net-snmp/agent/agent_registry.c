@@ -465,6 +465,20 @@ struct subtree *find_subtree(oid *name,
   return NULL;
 }
 
+struct snmp_session *get_session_for_oid( oid *name, size_t len)
+{
+   struct subtree *myptr;
+
+   myptr = find_subtree_previous(name, len, subtrees);
+   while ( myptr && myptr->variables == NULL )
+        myptr = myptr->next;
+
+   if ( myptr == NULL )
+        return NULL;
+   else
+        return myptr->session;
+}
+
 
 
 static struct subtree root_subtrees[] = {
