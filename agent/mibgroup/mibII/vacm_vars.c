@@ -133,6 +133,9 @@ init_vacm_vars (void)
   /* register ourselves to handle access control */
   snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_ACM_CHECK,
                          vacm_in_view_callback, NULL);
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                         SNMPD_CALLBACK_ACM_CHECK_INITIAL,
+                         vacm_in_view_callback, NULL);
 }
 
 static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
@@ -679,6 +682,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
     ap = vacm_getAccessEntry(gp->groupName, "", pdu->securityModel,
                              pdu->securityLevel);
     if (ap == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 3; }
+
+    if (name == 0) { /* only check the setup of the vacm for the request */
+        DEBUGMSG(("mibII/vacm_vars", ", Done checking setup\n"));
+        return 0;
+    }
 
     switch (pdu->command) {
       case SNMP_MSG_GET:

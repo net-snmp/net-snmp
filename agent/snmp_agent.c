@@ -274,6 +274,21 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     if (asp->outstanding_requests != NULL)
 	return 1;
 
+    if ((status = check_access(pdu)) != 0) {
+        /* access control setup is incorrect */
+        if (asp->pdu->version != SNMP_VERSION_1) {
+            asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
+            asp->pdu->command = SNMP_MSG_RESPONSE;
+            snmp_increment_statistic(STAT_SNMPOUTPKTS);
+            snmp_send( asp->session, asp->pdu );
+            return 1;
+        } else {
+            /* drop the request */
+            free( asp );
+            return 0;
+        }
+    }
+
     switch (pdu->command) {
     case SNMP_MSG_GET:
 	if ( asp->mode != RESERVE1 )
