@@ -93,9 +93,8 @@ typedef struct ${context}_rowreq_ctx_s {
     ${context}_undo_data        undo;
 @   end@
 
+    /** implementor's context pointer provided during registration */
     ${context}_registration_ptr ${context}_reg;
-
-    int                         request_mode;
 
     /*
      * TODO:
