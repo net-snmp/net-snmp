@@ -536,7 +536,7 @@ AC_CHECK_HEADERS(sys/statfs.h)
 dnl Dynix
 AC_CHECK_HEADERS(net/route.h)
 dnl for HostRes (HP-UX at least)
-AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h)
+AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
 dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
 

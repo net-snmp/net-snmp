@@ -319,6 +319,9 @@
 /* Define if you have the <osreldate.h> header file.  */
 #undef HAVE_OSRELDATE_H
 
+/* Define if you have the <pkglocs.h> header file.  */
+#undef HAVE_PKGLOCS_H
+
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
 
