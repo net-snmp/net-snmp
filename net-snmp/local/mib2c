@@ -186,7 +186,6 @@ sub loadMib {
 	$mib->{'access'} =~ /ReadOnly|ReadWrite|WriteOnly|Create/) {
 	$count = $count + 1;
 	$subid = $mib->{'objectID'};
-	$type = $mib->{'type'};
 	$subid =~ s/$fulloid\.//;
 	$subid =~ s/\./,/g;
 	if (!defined($variables{$mib->{'type'}})) {
