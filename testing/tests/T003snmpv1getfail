@@ -21,6 +21,6 @@ CAPTURE "snmpget $SNMP_FLAGS -v 1 localhost notavalidcommunity system.sysUpTime.
 
 STOPAGENT
 
-CHECK "noSuchName"
+CHECK "Timeout"
 
 FINISHED
