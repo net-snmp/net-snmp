@@ -133,7 +133,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   register int interface;
   struct extensible *exten;
   long long_ret;
-  char errmsg[STRMAX];
+  static char errmsg[STRMAX];
   struct variable myvp;
   oid tname[30];
 

@@ -128,7 +128,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
                 *numdisks += 1;
               }
               else {
-                fprintf(stderr,"Error:  couldn't find device for disk %s",
+                fprintf(stderr,"Error:  couldn't find device for disk %s\n",
                         disk[*numdisks].path);
                 disk[*numdisks].minimumspace = -1;
                 disk[*numdisks].path[0] = NULL;

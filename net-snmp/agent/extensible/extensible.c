@@ -226,7 +226,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
   register int interface;
   struct myproc *proc;
   long long_ret;
-  char errmsg[300];
+  static char errmsg[300];
 
   struct vmtotal total;
 
@@ -321,7 +321,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   register int interface;
   struct myproc *proc;
   long long_ret;
-  char errmsg[300];
+  static char errmsg[300];
 
   int file;
   union {
@@ -471,7 +471,7 @@ unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write
   register int interface;
   struct myproc *proc;
   long long_ret;
-  char errmsg[300];
+  static char errmsg[300];
 
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
@@ -517,7 +517,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
   register int interface;
   struct extensible *exten;
   long long_ret;
-  char errmsg[300];
+  static char errmsg[300];
 #ifdef ultrix
   fix favenrun[3];
 #endif
@@ -584,17 +584,16 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 static time_t errorstatustime=0;
 static char errorstring[STRMAX];
 
-extern char *sys_errlist[];
-
 setPerrorstatus(to)
   char *to;
 {
   char buf[STRMAX];
   extern char *sys_errlist[];
+  extern int errno;
   
+  sprintf(buf,"%s:  %s",to,sys_errlist[errno]);
   perror(to);
-  sprintf(buf,"%s: %s",to,sys_errlist[errno]);
-  seterrorstatus(to);
+  seterrorstatus(buf);
 }
 
 seterrorstatus(to)
@@ -621,7 +620,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 
   oid newname[30];
   long long_ret;
-  char errmsg[300];
+  static char errmsg[300];
 
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
