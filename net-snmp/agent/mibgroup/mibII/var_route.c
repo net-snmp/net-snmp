@@ -1628,6 +1628,48 @@ init_var_route(void)
  */
 #include <sys/un.h>
 
+/* returns the length of a socket structure */
+
+size_t snmp_socket_length( int family)
+{
+  size_t length;
+
+  switch (family) {
+#ifndef cygwin
+#ifndef WIN32
+#ifdef AF_UNIX
+  case AF_UNIX:
+      length = sizeof (struct sockaddr_un);
+      break;
+#endif /* AF_UNIX */
+#endif
+#endif
+
+#ifndef aix3
+#ifdef AF_LINK
+  case AF_LINK:
+#ifdef _MAX_SA_LEN
+      length = _MAX_SA_LEN;
+#elif SOCK_MAXADDRLEN
+      length = SOCK_MAXADDRLEN;
+#else
+      length = sizeof (struct sockaddr_dl);
+#endif
+      break;
+#endif /* AF_LINK */
+#endif
+
+  case AF_INET:
+      length = sizeof (struct sockaddr_in);
+      break;
+  default:
+      length = sizeof (struct sockaddr);
+      break;
+  }
+
+  return length;
+}
+
 const struct sockaddr *
 get_address (const void * _ap, int addresses, int wanted)
 {
