@@ -1,5 +1,9 @@
 /* config.h:  a general config file */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
 #define IN_UCD_SNMP_SOURCE 1
 
@@ -834,4 +838,8 @@ typedef unsigned short mode_t;
 /* reverse encoding BER packets is both faster and more efficient in space. */
 #define USE_REVERSE_ASNENCODING       1
 #define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
+
+#ifdef __cplusplus
+}
+#endif
 
