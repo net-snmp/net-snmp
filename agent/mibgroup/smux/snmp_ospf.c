@@ -190,7 +190,7 @@ var_ospf(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid requested Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_ospf", name, *length));
-    DEBUGMSG(("smux/snmp_ospf"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_ospf","\n"));
         
 	/* 
 	 * Pass on the request to Gated.
@@ -242,7 +242,7 @@ var_ospf(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid obtained Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_ospf", name, *length));
-    DEBUGMSG(("smux/snmp_ospf"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_ospf","\n"));
 
 	vp->type = smux_type;
 

@@ -16,7 +16,7 @@ int num=0;
 static char demoUsers[MAXUSERS][MYMAX+1];
 static char demopass[MYMAX+1];
 
-void ucdDemo_parse_user(char *word, char *line) {
+void ucdDemo_parse_user(const char *word, char *line) {
   if (num == MAXUSERS)
     return;
 
@@ -27,7 +27,7 @@ void ucdDemo_parse_user(char *word, char *line) {
 }
 
 
-void ucdDemo_parse_userpass(char *word, char *line) {
+void ucdDemo_parse_userpass(const char *word, char *line) {
   if (strlen(line) > MYMAX)
     return;
   

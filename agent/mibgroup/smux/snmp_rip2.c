@@ -105,7 +105,7 @@ var_rip2(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_rip2", "[var_rip2] var len %d, oid requested Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_rip2", name, *length));
-    DEBUGMSG(("smux/snmp_rip2"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_rip2","\n"));
         
 	/* 
 	 * Pass on the request to Gated.
@@ -157,7 +157,7 @@ var_rip2(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_rip2", "[var_rip2] var len %d, oid obtained Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_rip2", name, *length));
-    DEBUGMSG(("smux/snmp_rip2"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_rip2","\n"));
 
 	vp->type = smux_type;
 

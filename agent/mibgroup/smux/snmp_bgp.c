@@ -108,7 +108,7 @@ var_bgp(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_bgp", "[var_bgp] var len %d, oid requested Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_bgp", name, *length));
-    DEBUGMSG(("smux/snmp_bgp"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_bgp","\n"));
 
 	/* 
 	 * Pass on the request to Gated.
@@ -160,7 +160,7 @@ var_bgp(struct variable *vp,
     DEBUGMSGTL(("smux/snmp_bgp", "[var_bgp] var len %d, oid obtained Len %d-",
 	*var_len, *length));
     DEBUGMSGOID(("smux/snmp_bgp", name, *length));
-    DEBUGMSG(("smux/snmp_bgp"," %d\n", exact));
+    DEBUGMSG(("smux/snmp_bgp","\n"));
 
 	vp->type = smux_type;
 
