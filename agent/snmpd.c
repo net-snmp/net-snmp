@@ -46,6 +46,8 @@ SOFTWARE.
 #include "context.h"
 #include "acl.h"
 
+#include "../config.h"
+
 extern int  errno;
 int	snmp_dump_packet = 0;
 int log_addresses = 0;
@@ -358,7 +360,7 @@ main(argc, argv)
     struct partyEntry *pp;
     u_long myaddr;
     int on=1;
-
+    int dont_fork=0;
 
     /*
      * usage: snmpd
@@ -379,6 +381,9 @@ main(argc, argv)
 		case 'a':
 		    log_addresses++;
 		    break;
+		case 'f':
+		    dont_fork=1;
+		    break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
 		    break;
@@ -386,6 +391,15 @@ main(argc, argv)
 	    continue;
 	}
     }
+#ifdef LOGFILE
+    close(1);
+    open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
+    close(2);
+    dup(1);
+    close(0);
+#endif
+    if (!dont_fork && fork() != 0)   /* detach from shell */
+      exit(0);
     init_snmp();
     init_mib();
     if (read_party_database("/etc/party.conf") > 0){
@@ -469,6 +483,7 @@ main(argc, argv)
 	}	
     }
     printf("\n");
+    fflush(stdout);
     bzero((char *)addrCache, sizeof(addrCache));
     receive(sdlist, sdlen);
     return 0;
