@@ -12885,7 +12885,7 @@ fi
 # Install the various perl modules
 #
 
-if "x$embed_perl" = "xyes" -a "x$install_perl" = "xno" ; then
+if test "x$embed_perl" = "xyes" -a "x$install_perl" = "xno" ; then
   install_perl="yes"
 fi
 if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
