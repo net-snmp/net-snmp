@@ -1,0 +1,60 @@
+NET-SNMP-EXAMPLES-MIB DEFINITIONS ::= BEGIN
+
+--
+-- Example MIB objects for agent module example implementations
+--
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32 FROM SNMPv2-SMI
+    netSnmp                                 FROM NET-SNMP-MIB;
+
+netSnmpExamples MODULE-IDENTITY
+    LAST-UPDATED "200202060000Z"
+    ORGANIZATION "www.net-snmp.org"
+    CONTACT-INFO    
+	 "postal:   Wes Hardaker
+                    P.O. Box 382
+                    Davis CA  95617
+
+          email:    net-snmp-coders@lists.sourceforge.net"
+    DESCRIPTION
+	"Example MIB objects for agent module example implementations"
+    REVISION     "200202060000Z"
+    DESCRIPTION
+	"First draft"
+    ::= { netSnmp 2 }
+
+--
+-- top level structure
+--
+netSnmpExampleScalars       OBJECT IDENTIFIER ::= { netSnmpExamples 1 }
+netSnmpExampleTables        OBJECT IDENTIFIER ::= { netSnmpExamples 2 }
+netSnmpExampleNotifications OBJECT IDENTIFIER ::= { netSnmpExamples 3 }
+
+--
+-- Example scalars
+--
+
+netSnmpExampleInteger OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"This is a simple object which merely houses a writable
+	 integer.  It's only purposes is to hold the value of a single
+	 integer.  Writing to it will simply change the value for
+	 subsequent GET/GETNEXT/GETBULK retrievals."
+    DEFVAL { 42 }
+    ::= { netSnmpExampleScalars 1 }
+
+
+--
+--  Example Tables
+--
+
+--
+--  Example Notifications
+--
+
+
+END
