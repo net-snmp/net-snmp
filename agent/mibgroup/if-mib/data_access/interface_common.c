@@ -26,8 +26,7 @@ static int _access_interface_entry_compare_name(const void *lhs,
                                                 const void *rhs);
 static void _access_interface_entry_release(netsnmp_interface_entry * entry,
                                             void *unused);
-static void _access_interface_entry_set_index(netsnmp_interface_entry *entry,
-                                              const char *name);
+static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _free_interface_config(void);
 
@@ -45,6 +44,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 extern int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus);
+extern int netsnmp_arch_interface_index_find(const char*name);
+
 
 
 /**---------------------------------------------------------------------*/
@@ -223,11 +224,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
 oid
 netsnmp_access_interface_index_find(const char *name)
 {
-    oid index = se_find_value_in_slist("interfaces", name);
-    if (index == SE_DNE)
-        return 0;
-
-    return index;
+    return netsnmp_arch_interface_index_find(name);
 }
 
 /**
@@ -242,7 +239,7 @@ netsnmp_access_interface_name_find(oid index)
 /**
  */
 netsnmp_interface_entry *
-netsnmp_access_interface_entry_create(const char *name)
+netsnmp_access_interface_entry_create(const char *name, oid if_index)
 {
     netsnmp_interface_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
@@ -255,15 +252,20 @@ netsnmp_access_interface_entry_create(const char *name)
     if(NULL != name)
         entry->name = strdup(name);
 
-    _access_interface_entry_set_index(entry, name);
+    /*
+     * get if index, and save name for reverse lookup
+     */
+    if (0 == if_index)
+        entry->index = netsnmp_arch_interface_index_find(name);
+    else
+        entry->index = if_index;
+    _access_interface_entry_save_name(name, entry->index);
 
     /*
      * until we can get actual description, leave descr NULL.
      * The end user can decide what to do with it.
      */
     /* entry->descr = strdup("unknown"); */
-
-    /* xxx-rks: alias? supposed to be persistent */
 
     /*
      * make some assumptions
@@ -360,21 +362,21 @@ _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 /**
  */
 static void
-_access_interface_entry_set_index(netsnmp_interface_entry *entry, const char *name)
+_access_interface_entry_save_name(const char *name, oid index)
 {
-    if(NULL != name) {
-        entry->index = netsnmp_access_interface_index_find(name);
-        if (entry->index == 0) {
-            entry->index = se_find_free_value_in_slist("interfaces");
-            if (entry->index == SE_DNE)
-                entry->index = 1;       /* Completely new list! */
-            se_add_pair_to_slist("interfaces", strdup(name), entry->index);
-            DEBUGMSGTL(("access:interface:ifIndex", "new ifIndex %d for %s\n",
-                        entry->index, name));
-        }
+    oid tmp;
+
+    if(NULL == name)
+        return;
+
+    tmp = se_find_value_in_slist("interfaces", name);
+    if (tmp == SE_DNE) {
+        se_add_pair_to_slist("interfaces", strdup(name), index);
+        DEBUGMSGTL(("access:interface:ifIndex", "saved ifIndex %d for %s\n",
+                    index, name));
     }
     else
-        entry->index = 0;
+        netsnmp_assert(index == tmp);
 }
 
 /**

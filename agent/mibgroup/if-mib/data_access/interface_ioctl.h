@@ -31,6 +31,9 @@ int
 netsnmp_access_interface_ioctl_mtu_get(int fd,
                                        netsnmp_interface_entry *ifentry);
 
+oid
+netsnmp_access_interface_ioctl_ifindex_get(const char *name);
+
 /**---------------------------------------------------------------------*/
 
 # ifdef __cplusplus
