@@ -130,6 +130,7 @@ int Syslog = 0;
 int Event = 0;
 int dropauth = 0;
 int running = 1;
+int reconfig = 0;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -558,6 +559,14 @@ RETSIGTYPE term_handler(int sig)
     running = 0;
 }
 
+#ifdef SIGHUP
+RETSIGTYPE hup_handler(int sig)
+{
+    reconfig = 1;
+    signal(SIGHUP, hup_handler);
+}
+#endif
+
 
 int main(int argc, char *argv[])
 {
@@ -806,11 +815,27 @@ int main(int argc, char *argv[])
 
     signal(SIGTERM, term_handler);
 #ifdef SIGHUP
-    signal(SIGHUP, term_handler);
+    signal(SIGHUP, hup_handler);
 #endif
     signal(SIGINT, term_handler);
 
     while (running) {
+	if (reconfig) {
+	    if (Print) {
+		struct tm *tm;
+		time_t timer;
+		time (&timer);
+		tm = localtime (&timer);
+		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Reconfigured.\n",
+		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+		       tm->tm_hour, tm->tm_min, tm->tm_sec,
+		       VersionInfo);
+	    }
+	    if (Syslog)
+		syslog(LOG_INFO, "Snmptrapd reconfigured");
+	    update_config(0);
+	    reconfig = 0;
+	}
 	numfds = 0;
 	FD_ZERO(&fdset);
 	block = 0;
@@ -830,7 +855,6 @@ int main(int argc, char *argv[])
 		break;
 	    case -1:
 	        snmp_log_perror("select");
-		running = 0;
 		break;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);
@@ -848,6 +872,9 @@ int main(int argc, char *argv[])
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
 	       VersionInfo);
     }
+    if (Syslog)
+	syslog(LOG_INFO, "Stopping snmptrapd");
+
     snmp_close(ss);
     SOCK_CLEANUP;
     return 0;
@@ -861,7 +888,7 @@ init_syslog(void)
      * the console if syslog doesn't work.
      */
     openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
-    syslog(LOG_INFO, "Starting snmptrapd");
+    syslog(LOG_INFO, "Starting snmptrapd %s", VersionInfo);
 }
 
 
@@ -894,10 +921,6 @@ void update_config(int a)
 #endif
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
-
-#ifdef SIGHUP
-  signal(SIGHUP, update_config);
-#endif
 }
 
 
