@@ -903,6 +903,8 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->status = SNMP_ERR_NOERROR;
     asp->index = 0;
     asp->oldmode = 0;
+    asp->treecache_num = -1;
+    asp->treecache_len = 0;
     asp->vbcount = count_varbinds(asp->pdu->variables);
     asp->requests =
         (netsnmp_request_info *) calloc(asp->vbcount,
