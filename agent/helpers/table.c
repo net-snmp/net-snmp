@@ -561,7 +561,6 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
 {
     int             status;
     netsnmp_request_info *request;
-    status = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     oid             coloid[MAX_OID_LEN];
     netsnmp_table_request_info *table_info;
 
