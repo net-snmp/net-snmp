@@ -1,0 +1,742 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD : ifTable data access</title>
+  </head>
+
+  <body>
+    <h1>MFD : ifTable data access</h1>
+    <p>
+      Now that we have the basic code generated, the next step is to
+      implement the data access functions. In the Linux 2.4 kernel, interface
+      statistics are available by reading the file /proc/net/dev. The format
+      looks like this:
+    </p>
+    <table><tr><td></td><td bgcolor=CCCCCC><pre>
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo:45312667  382442    0    0    0     0          0         0 45312667  382442    0    0    0     0       0          0
+  eth0:2116574495 13308144    0    0    0     0          0         0 816012310 7565504    0    0    0 3604480       0          0
+            </pre></td></tr></table>
+    <p>
+      As is often the case with external data, the interfaces data we get
+      from the kernel is not sorted by the index specified by the MIB. The
+      kernel reports data by interface names ('eth0', 'lo', etc), and the
+      ifTable is ordered by the somewhat arbitrary ifIndex.
+    </p><p>
+      To keep this tutorial simple, we aren't going to implment
+      every column in the ifTable. In particular, the ifAdminStatus,
+      ifOperStatus and ifLastChange columns are not available from
+      the kernel. This also lets us ignore set support for the time being.
+      We'll cover dealing with those two situations when we get
+      to the ifXTable section. Backporting the changes to the ifTable
+      is left as an exercise to the reader.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Data access methods</h2>
+    <p>
+      The default data access method used by MFD is the
+      <var>unsorted-external</var> method. Since our data store (the
+      text file) is external, and the text file is not ordered by the
+      MIB's index (ifIndex), this matches our needs.
+    </p><p>
+      The unsorted external data access code works by calling a few simple
+      functions to get the index value for each row. Once the agent determines
+      which row is needed to process an incoming request, another function
+      is called to retrieve the data for that row.
+    </p><p>
+      A simplified version of the pseudo-code looks like this:
+    </p>
+    <table><tr><td></td><td bgcolor=CCCCCC><pre>
+ ifTable_loop_get_first(loop,data)
+ while( no_error ) {
+    if( best_match(data, key)
+       ifTable_loop_save_position(loop,pos);
+    ifTable_loop_get_next(loop,data)
+ }
+ ifTable_loop_get_data(pos,data)
+ ifTable_loop_cleanup_context(loop)
+            </pre></td></tr></table>
+    <p>
+      The unsorted-external method is not without it's disadvantages.
+      The biggest disadvantage is that it is very inefficient. To
+      process a single request, the agent must iterate over every
+      row, looking for the best match. This might not matter for a
+      simple table like the ifTable, which usually only contains a few
+      rows, but for the TCP connection table of a busy server,
+      performance can suffer.  We'll cover one possible solution
+      (caching), when we get to the ifXTable.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Defining our loop context</h2>
+    <p>
+      Before we start writing the code to read the file, we need
+      to define our loop context. The structure definition is in
+      <var>ifTable_data_access.h</var>.
+      The loop context has one basic purpose: to all us to keep track of where
+      we are while we are iterating over our data. Since we are reading our
+      data from a file, we can simply use a <var>FILE</var> pointer.
+    </p>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+typedef struct ifTable_loop_context_s {
+   /*
+    * temporary context used during iteration
+    */
+   ifTable_rowreq_ctx *rowreq_ctx;
+} ifTable_loop_context;
+            </pre></td>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>          
+typedef struct ifTable_loop_context_s {
+   /*
+    * temporary context used during iteration
+    */
+   ifTable_rowreq_ctx *rowreq_ctx;
+<font color=blue>
+   /*
+    * this example code is based on a data source that is a
+    * text file to be read and parsed.
+    */
+    FILE *filep;</font>
+} ifTable_loop_context;
+              </pre></td></tr>
+    </table>
+    <!-- ========================================================= -->
+    <h2>Initialization</h2>
+    <p>
+      When the agent starts up and initializes, the
+      <var>ifTable_loop_init_data</var>
+      function will be called to allow us to do any initilization for our
+      data access functions. Since the format of the /proc/net/dev file
+      changed between the Linux 2.2 and 2.4 kernels, we'll open it here
+      and take a peek inside to figure out which we're dealing with.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre><font color=blue>
+static const char     *scan_line_2_2 =
+    "%llu %llu %llu %llu %*llu %*llu %*llu %*llu %llu %llu %llu %llu %*llu %llu";
+static const char     *scan_line_2_0 =
+    "%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
+static const char     *scan_line_to_use = NULL;
+static char     scan_expected;
+</font>
+int
+ifTable_init_data(ifTable_registration_ptr ifTable_reg)
+{<font color=blue>
+    FILE           *devin;
+    char            line[256];
+</font>
+    DEBUGMSGTL(("verbose:ifTable_init_data","called"));
+
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    if (!(devin = fopen("/proc/net/dev", "r"))) {
+        snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/dev\n");
+        return MFD_ERROR;
+    }
+    /*
+     * Read the first two lines of the file, containing the header
+     * This indicates which version of the kernel we're working with,
+     * and hence which statistics are actually available.
+     */
+    fgets(line, sizeof(line), devin); /* ignore first line */
+    fgets(line, sizeof(line), devin);
+    if (strstr(line, "compressed")) {
+        scan_line_to_use = scan_line_2_2;
+        scan_expected = 9;
+        DEBUGMSGTL(("ifTable", "using linux 2.2 kernel /proc/net/dev\n"));
+     } else {
+         scan_line_to_use = scan_line_2_0;
+         scan_expected = 5;
+         DEBUGMSGTL(("ifTable",
+                     "using linux 2.0 kernel /proc/net/dev\n"));
+    }
+    fclose(devin);</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+    </p>
+    <!-- ========================================================= -->
+    <h2>The Loop</h2>
+
+    <h3>ifTable_loop_get_first</h3>
+    <p>
+      Each time the agent prepares to iterate over the <var>datastore</var>,
+      the <var>ifTable_loop_get_first</var> function is called
+      to allocate and initilize a loop context and return the index for
+      the first data item. This is where we'll open the proc file.
+    </p>
+    <p>
+      The <var>get_first</var> function, as the name implies, returns the index
+      for the first item in the <var>datastore</var>. Note that the primary
+      idea behind the <var>unsorted-external</var> access method is that
+      the <var>datastore</var> does not need to be in any particular order. The
+      agent will iterate over all the items in the <var>datastore</var> and
+      use the index returned in the <var>row request context</var> to find
+      the correct item.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_loop_get_first(ifTable_registration_ptr ifTable_reg,
+                       ifTable_ref_loop_ctx * loop_ctx_ref,
+                       ifTable_ref_rowreq_ctx * rowreq_ctx_ref)
+{
+    DEBUGMSGTL(("verbose:ifTable_loop_get_first","called"));
+
+    netsnmp_assert(rowreq_ctx_ref);
+    netsnmp_assert(loop_ctx_ref);
+
+    /*
+     * allocate memory for new structure
+     */
+    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(ifTable_loop_context);
+    if (NULL == loop_ctx_ref->loop_ctx)
+        return MFD_ERROR;
+
+    /*
+     * allocate a temporary context to use during iteration
+     */
+    loop_ctx_ref->loop_ctx->rowreq_ctx = ifTable_allocate_rowreq_ctx();
+    if (NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
+        SNMP_FREE(loop_ctx_ref->loop_ctx);
+        return MFD_RESOURCE_UNAVAILABLE;
+    }
+
+    /*
+     * TODO:
+     * set up loop context
+     */
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    /*
+     * open our data file.
+     */
+    loop_ctx_ref->loop_ctx->filep = fopen("/proc/net/dev", "r");
+    if(NULL ==  loop_ctx_ref->loop_ctx->filep) {
+        return MFD_RESOURCE_UNAVAILABLE;
+    }
+    /*
+     * ignore header lines
+     */
+    fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+          loop_ctx_ref->loop_ctx->filep);
+    fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+          loop_ctx_ref->loop_ctx->filep);</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    /*
+     * in this example, after opening the file, get next does the same thing
+     * as get first, we let's just call get next...
+     */
+    return ifTable_loop_get_next(ifTable_reg, loop_ctx_ref,
+                                 rowreq_ctx_ref);</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+    <h3>ifTable_loop_get_next</h3>
+    In <var>get_next</var> we need to:
+    <ul><li>advance to the next item in the data store
+      <li>make sure we haven't reached the end of the <var>datastore</var>
+      <li>make sure the <var>row request context</var> we return is the one
+        in our <var>loop context</var>.
+      <li>update the index in the <var>table_context</var>
+    </ul><p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_loop_get_next(ifTable_registration_ptr ifTable_reg,
+                  ifTable_ref_loop_ctx * loop_ctx_ref, ifTable_ref_rowreq_ctx * rowreq_ctx_ref)
+{<font color=blue>
+    u_char         *ifstart;
+    u_int           index = 0;
+</font>
+    DEBUGMSGTL(("verbose:ifTable_loop_get_next","called"));
+
+    netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
+    netsnmp_assert(rowreq_ctx_ref);
+
+    /*
+     * we just need the index for now. Reuse the one in the loop context's
+     * temporary row request context. (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+     */
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    /*
+     * The rest of the file provides the statistics for an interface.
+     * Read in each line in turn, isolate the interface name
+     *   and retrieve (or create) the corresponding data structure.
+     */
+    while (NULL != (ifstart = fgets(loop_ctx_ref->loop_ctx->line,
+                                    sizeof(loop_ctx_ref->loop_ctx->line),
+                                    loop_ctx_ref->loop_ctx->filep))) {
+        char           *stats;
+
+        /*
+         * remove any newline, and skip leading spaces
+         */
+        if (loop_ctx_ref->loop_ctx->line[strlen(loop_ctx_ref->loop_ctx->line) - 1] == '\n')
+            loop_ctx_ref->loop_ctx->line[strlen(loop_ctx_ref->loop_ctx->line) - 1] = '\0';
+
+        while (*ifstart && *ifstart == ' ')
+            ifstart++;
+
+        if ((!*ifstart) || ((stats = strrchr(ifstart, ':')) == NULL)) {
+            snmp_log(LOG_ERR,
+                     "interface data format error 1, line ==|%s|\n",
+                     loop_ctx_ref->loop_ctx->line);
+            continue;
+        }
+
+        DEBUGMSGTL(("ifTable", "found '%s'\n", ifstart));
+
+        /*
+         * If we've met this interface before, use the same index.
+         * Otherwise find an unused index value and use that.
+         */
+        *stats++ = 0; /* null terminate name */
+        index = se_find_value_in_slist("interfaces",
+                                       loop_ctx_ref->loop_ctx->line);
+        if (index == SE_DNE) {
+            index = se_find_free_value_in_slist("interfaces");
+            if (index == SE_DNE)
+                index = 1;       /* Completely new list! */
+            se_add_pair_to_slist("interfaces",
+                                 strdup(loop_ctx_ref->loop_ctx->line), index);
+            DEBUGMSGTL(("ifTable:ifIndex", "new ifIndex %d for %s\n",
+                        index, loop_ctx_ref->loop_ctx->line));
+        }
+        break;
+    }
+
+    /*
+     * check for end of data
+     */
+    if ((NULL == ifstart) || (0 == index))
+        return MFD_END_OF_DATA;
+
+    /*
+     * TODO:
+     * set local vars for index from loop_ctx_ref->loop_ctx
+     */
+    rowreq_ctx_ref->rowreq_ctx->tbl_idx.ifIndex = index;
+</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+    </table>
+    <!-- ========================================================= -->
+    <h2>Saving the current position</h2>
+    <p>
+      While the agent is iterating over the <var>datastore</var>, it keeps
+      track of the best candidate it has found. Whenever the current item is
+      the best candidate so far, the <var>ifTable_loop_save_position</var>
+      function is called to duplicate the current <var>loop context</var>.
+    </p><p>
+      Whenever possilbe, to reduce the number of memory allocations, the agent
+      will call this  function with <var>reuse</var> set to 1, indicating
+      that you may reuse the <var>loop context</var> referred to by
+      <var>save_loop_ctx_ref</var>, which may point to a previously saved
+      context.
+    <p>
+      Since we have already set the table index for the current item in the
+      <var>row request context</var> we allocated for the
+      <var>loop context</var>,
+      we can take it for the saved context.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_loop_save_position(ifTable_registration_ptr ifTable_reg,
+                       ifTable_ref_loop_ctx * loop_ctx_ref,
+                       ifTable_ref_loop_ctx * save_loop_ctx_ref,
+                       int reuse)
+{
+    DEBUGMSGTL(("verbose:ifTable_loop_save_position","called"));
+
+    netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
+
+    /*
+     * TODO:
+     * 1) allocate new loop context, unless you can reuse a previous pointer.
+     * 2) save information for the position of loop_ctx_ref in save_loop_ctx_ref.
+     */
+    if((0 == reuse) || (NULL == save_loop_ctx_ref->loop_ctx))
+        save_loop_ctx_ref->loop_ctx =
+            SNMP_MALLOC_TYPEDEF(ifTable_loop_context);
+    if(NULL == save_loop_ctx_ref->loop_ctx) {
+        snmp_log(LOG_ERR, "could not allocate memory\n");
+        return MFD_ERROR;
+    }
+
+    /*
+     * if you can reuse a previously saved contex, just swap
+     * it out with the loop iterator
+     */
+    if(reuse && save_loop_ctx_ref->loop_ctx->rowreq_ctx) {
+        ifTable_rowreq_ctx * tmp_rowreq_ctx =
+            save_loop_ctx_ref->loop_ctx->rowreq_ctx;
+        save_loop_ctx_ref->loop_ctx->rowreq_ctx =
+            loop_ctx_ref->loop_ctx->rowreq_ctx;
+        loop_ctx_ref->loop_ctx->rowreq_ctx = tmp_rowreq_ctx;
+    } else {
+        /*
+         * take the current pointer
+         */
+        save_loop_ctx_ref->loop_ctx->rowreq_ctx =
+            loop_ctx_ref->loop_ctx->rowreq_ctx;
+        
+        /*
+         * allocate a new context to replace the one you just took.
+         */
+        loop_ctx_ref->loop_ctx->rowreq_ctx =
+            ifTable_allocate_rowreq_ctx();
+        if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
+            SNMP_FREE(loop_ctx_ref->loop_ctx);
+            return MFD_ERROR;
+        }
+    }
+ 
+    /*
+     * TRANSIENT data: copy all the data.
+     */
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    /*
+     * we just need line for parsing later
+     */
+    memcpy(save_loop_ctx_ref->loop_ctx->line, loop_ctx_ref->loop_ctx->line,
+           sizeof(loop_ctx_ref->loop_ctx->line));</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Returning the data context</h2>
+    <p>
+      When the agent finds the item it is looking for, it will call the
+      <var>get_data</var> function to update the <var>data context</var> for
+      the item associated with the specified <var>loop context</var>. Here
+      we'll take the <var>row request context</var> from the
+      <var>loop context</var> again, and then call the Net-SNMP interface
+      function to populate the  <var>data context</var>.
+    </p><p>
+      Not all the data needed for the ifTable can be found in the proc
+      file. Some of it is avaialbe via the <var>ioctl</var> system
+      call. We only use ioctl to get the PhysAddress in this example.
+      Enterprising students could check out the existing ifTable
+      implementation (agent/mibgroup/mibII/interfaces.c) and extract
+      additional ioctl calls for a more complete implementation.
+    </p><p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_loop_get_data(ifTable_registration_ptr ifTable_reg,
+                  ifTable_ref_loop_ctx * loop_ctx_ref, ifTable_ref_rowreq_ctx * rowreq_ctx_ref)
+{<font color=blue>
+    struct ifreq    ifrq;
+    int             scan_count, fd;
+    char           *pos;
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+</font>
+    DEBUGMSGTL(("verbose:ifTable_loop_get_data","called"));
+    
+    netsnmp_assert((NULL != loop_ctx_ref)
+                   && (NULL != loop_ctx_ref->loop_ctx));
+    netsnmp_assert(NULL != rowreq_ctx_ref);
+    netsnmp_assert(NULL != rowreq_ctx_ref->rowreq_ctx);
+
+    /*
+     * take temporary row request context from loop context
+     */
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+    loop_ctx_ref->loop_ctx->rowreq_ctx = NULL;
+
+    /*
+     * TODO:
+     * copy data to the data context (rowreq_ctx_ref->rowreq_ctx->data.)
+     */<font color=blue>
+    pos =
+        &loop_ctx_ref->loop_ctx->line[strlen(loop_ctx_ref->loop_ctx->line)+1];
+    rec_pkt = rec_oct = rec_err = rec_drop = 0;
+    snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
+    if (scan_line_to_use == scan_line_2_2) {
+        scan_count = sscanf(pos, scan_line_to_use,
+                            &rec_oct, &rec_pkt, &rec_err, &rec_drop,
+                            &snd_oct, &snd_pkt, &snd_err, &snd_drop,
+                            &coll);
+    } else {
+        scan_count = sscanf(pos, scan_line_to_use,
+                                &rec_pkt, &rec_err,
+                                &snd_pkt, &snd_err, &coll);
+    }
+    if(scan_count != scan_expected) {
+        snmp_log(LOG_ERR,
+                 "error scanning interface data (expected %d, got %d)\n",
+                 scan_expected, scan_count);
+        return MFD_ERROR;
+    }
+    if (scan_line_to_use != scan_line_2_2) {
+        rec_oct = rec_pkt * 308;
+        snd_oct = snd_pkt * 308;
+    }
+
+    /*
+     * create socket for ioctls
+     */
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        goto error;
+    }
+</font>
+    /*
+     * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
+     */<font color=blue>
+    /** no code to get description yet */
+    rowreq_ctx_ref->rowreq_ctx->data.ifDescr[0] = 0;
+    rowreq_ctx_ref->rowreq_ctx->data.ifDescr_len = 0;
+</font>
+    /*
+     * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/H
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    if ((NULL == rowreq_ctx_ref->rowreq_ctx->data.ifPhysAddress)
+        || (sizeof(rowreq_ctx_ref->rowreq_ctx->data.ifPhysAddress) < 6)) {
+        goto error;
+    }
+    rowreq_ctx_ref->rowreq_ctx->data.ifPhysAddress_len = 6;
+    pos = loop_ctx_ref->loop_ctx->line;
+    while(*pos == ' ')
+        ++pos;
+    strncpy(ifrq.ifr_name, pos, sizeof(ifrq.ifr_name));
+    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+    if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
+        memset(rowreq_ctx_ref->rowreq_ctx->data.ifPhysAddress, (0), 6);
+    else {
+        memcpy(rowreq_ctx_ref->rowreq_ctx->data.ifPhysAddress,
+               ifrq.ifr_hwaddr.sa_data, 6);
+    }</font>
+    /*
+     * ifType(3)/IANAifType/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+     */
+    /*
+     * TODO:
+     * value mapping
+     */<font color=blue>
+    if (MFD_SUCCESS !=
+        ifType_map(&rowreq_ctx_ref->rowreq_ctx->data.ifType,
+                   ifrq.ifr_hwaddr.sa_family)) {
+        goto error;
+    }
+</font>
+    /*
+     * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifInOctets = rec_oct;
+</font>
+    /*
+     * ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifInUcastPkts = rec_pkt;
+</font>
+    /*
+     * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifInDiscards = snd_drop;
+</font>
+    /*
+     * ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifInErrors = rec_err;
+</font>
+    /*
+     * ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifOutOctets = snd_oct;
+</font>
+    /*
+     * ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifOutUcastPkts = snd_pkt;
+</font>
+    /*
+     * ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifOutDiscards = snd_drop;
+</font>
+    /*
+     * ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+     */
+    /** no mapping */
+    /*
+     * TODO:
+     * update, replace or delete, if needed.
+     */<font color=blue>
+    rowreq_ctx_ref->rowreq_ctx->data.ifOutErrors = snd_err;
+
+     close(fd);
+</font>
+    return MFD_SUCCESS;
+<font color=blue>
+  error:
+    if (fd>=0)
+        close(fd);
+
+    return MFD_ERROR;
+</font>
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Cleaning up after the loop</h2>
+    <p>
+      Once the agent is finished looping over the <var>datastore</var>, it
+      will call the <var>cleanup_context</var> so that you can release any
+      allocated memory. If the <var>row request context</var> wasn't taken
+      by another function, we need to free it here.
+    </p><p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_loop_cleanup_context(ifTable_registration_ptr ifTable_reg,
+                          ifTable_ref_loop_ctx * loop_ctx_ref)
+{
+    DEBUGMSGTL(("verbose:ifTable_loop_cleanup_context","called"));
+
+    netsnmp_assert(NULL != loop_ctx_ref->loop_ctx);
+
+    /*
+     * release the row request context, if it wasn't taken
+     */
+    if(NULL != loop_ctx_ref->loop_ctx->rowreq_ctx)
+        ifTable_release_context(loop_ctx_ref->loop_ctx->rowreq_ctx);
+
+    /*
+     * TODO:
+     * release resources
+     */
+    /***************************************************/
+    /***             START EXAMPLE CODE              ***/
+    /***---------------------------------------------***/<font color=blue>
+    if(loop_ctx_ref->loop_ctx->filep)
+        fclose(loop_ctx_ref->loop_ctx->filep);
+</font>
+    /***---------------------------------------------***/
+    /***              END  EXAMPLE CODE              ***/
+    /***************************************************/
+
+    /*
+     * free loop context
+     */
+    free(loop_ctx_ref->loop_ctx);
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Row preparation</h2>
+    <p>
+      The row preparation function <var>ifTable_row_prep</var> is common
+      to all data access methods, and serves a similar purpose as the
+      get_data function of the unsorted-external data access method:
+      a change to manipulate the row context after the row has been
+      found, but before any get or set processing is done. We've already
+      done the processing we need to do, so we'll just leave this
+      function as is.
+    </p>
+      <!-- ========================================================= -->
+    <p></p>
+    <font size=+1>
+      <a href="data_get.html">Next: Get data</a> |
+      <a href="structures.html">Back: Structures</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Thu Apr 22 22:29:31 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
