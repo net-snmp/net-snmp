@@ -4,7 +4,6 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -13,10 +12,18 @@
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 #if HAVE_SYS_SYSCTL_H
 #ifdef _I_DEFINED_KERNEL
@@ -33,7 +40,12 @@
 #if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -49,7 +61,9 @@
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
@@ -59,7 +73,9 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -70,6 +86,7 @@
 #include "kernel.h"
 #endif
 
+#include "mibincl.h"
 #include "system.h"
 #include "auto_nlist.h"
 
@@ -82,6 +99,10 @@
 #include "interfaces.h"
 #include "sysORTable.h"
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 	/*********************
 	 *
@@ -102,7 +123,7 @@
 	 *
 	 *********************/
 
-
+#ifndef WIN32
 
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
@@ -641,3 +662,112 @@ var_ipAddrEntry(struct variable *vp,
 }
 
 #endif /* CAN_USE_SYSCTL && IPCTL_STATS */
+
+#else /* WIN32 */
+#include <iphlpapi.h>
+u_char *
+var_ipAddrEntry(struct variable *vp,
+		oid *name,
+		size_t *length,
+		int exact,
+		size_t *var_len,
+		WriteMethod **write_method)
+{
+	/*
+	 * object identifier is of form:
+	 * 1.3.6.1.2.1.4.20.1.?.A.B.C.D,  where A.B.C.D is IP address.
+	 * IPADDR starts at offset 10.
+	 */
+	oid lowest[14];
+	oid current[14], *op;
+	u_char *cp;
+	int lowinterface = -1;
+	int i;
+  PMIB_IPADDRTABLE pIpAddrTable = NULL;
+    DWORD status = NO_ERROR;
+    DWORD statusRetry = NO_ERROR;
+    DWORD dwActualSize = 0;
+
+	/* fill in object part of name for current (less sizeof instance part) */
+	memcpy(current, vp->name, (int)vp->namelen * sizeof(oid));
+
+	/*
+	 * Get interface table from kernel.
+	 */
+	 status = GetIpAddrTable(pIpAddrTable, &dwActualSize, TRUE);
+   if (status == ERROR_INSUFFICIENT_BUFFER)
+   {
+     pIpAddrTable = (PMIB_IPADDRTABLE) malloc(dwActualSize);
+     if(pIpAddrTable != NULL){       
+       statusRetry = GetIpAddrTable(pIpAddrTable, &dwActualSize, TRUE);
+     }
+   }
+
+	if(statusRetry == NO_ERROR || status == NO_ERROR)
+    {
+      
+        for (i = 0; i < (int)pIpAddrTable->dwNumEntries; ++i)
+        {
+		op = &current[10];
+		cp = (u_char *)&pIpAddrTable->table[i].dwAddr;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		if (exact) {
+			if (snmp_oid_compare(current, 14, name, *length) == 0) {
+				memcpy(lowest, current, 14 * sizeof(oid));
+				lowinterface = i;
+				break;	/* no need to search further */
+			}
+		} else {
+			if (snmp_oid_compare(current, 14, name, *length) > 0) {
+
+				lowinterface = i;
+				memcpy(lowest, current, 14 * sizeof(oid));
+        break; /* Since the table is sorted, no need to search further  */
+			}
+		}
+	}
+  }
+
+  if (lowinterface < 0){
+    free(pIpAddrTable);
+		return NULL;
+  }
+	i = lowinterface;
+	memcpy(name, lowest, 14 * sizeof(oid));
+	*length = 14;
+	*write_method = 0;
+	*var_len = sizeof(long_return);
+	switch (vp->magic) {
+	case IPADADDR:
+		long_return = pIpAddrTable->table[i].dwAddr;
+		return (u_char *)&long_return;
+
+	case IPADIFINDEX:
+		long_return = pIpAddrTable->table[i].dwIndex;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	case IPADNETMASK:
+		long_return = pIpAddrTable->table[i].dwMask;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	case IPADBCASTADDR:
+		long_return = pIpAddrTable->table[i].dwBCastAddr;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;	   
+
+	case IPADREASMMAX:
+		long_return = pIpAddrTable->table[i].dwReasmSize;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	default:
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
+	}
+	return NULL;
+}
+#endif /* WIN32 */

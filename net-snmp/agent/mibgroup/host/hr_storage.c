@@ -25,6 +25,9 @@
 #endif
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
+#if (!defined(KERNEL) || defined(MACH_USER_API)) && defined(HAVE_SYS_VMMETER_H) /*OS X does not #include <sys/vmmeter.h> if (defined(KERNEL) && !defined(MACH_USER_API))*/
+#include <sys/vmmeter.h>
+#endif
 #else
 #if HAVE_VM_VM_H
 #include <vm/vm.h>
@@ -372,7 +375,9 @@ var_hrstore(struct variable *vp,
     struct pool mbpool, mclpool;
     int i;
 #endif
+#ifdef MBSTAT_SYMBOL
     struct mbstat  mbstat;
+#endif
 #endif	/* solaris2 */
 #endif	/* linux */
     static char string[100];
@@ -520,8 +525,10 @@ var_hrstore(struct variable *vp,
 			long_return = 0;
 			for (i = 0; i < sizeof(mbstat.m_mtypes)/sizeof(mbstat.m_mtypes[0]); i++)
 			    long_return += mbstat.m_mtypes[i];
-#else
+#elif defined(MBSTAT_SYMBOL)
 			long_return = mbstat.m_mbufs;
+#else
+			return NULL;
 #endif
 			break;
 #else	/* linux */
@@ -557,8 +564,10 @@ var_hrstore(struct variable *vp,
 #if HAVE_SYS_POOL_H
 			long_return = (mbpool.pr_nget - mbpool.pr_nput)*mbpool.pr_size
 				+ (mclpool.pr_nget - mclpool.pr_nput)*mclpool.pr_size;
-#else
+#elif defined(MBSTAT_SYMBOL)
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
+#else
+			return NULL;
 #endif
 			break;
 #else	/* linux */
@@ -588,7 +597,7 @@ var_hrstore(struct variable *vp,
 #endif
 			long_return = 0;
 			break;
-#if !defined(linux) && !defined(solaris2)
+#if !defined(linux) && !defined(solaris2) && defined(MBSTAT_SYMBOL)
 		case HRS_TYPE_MBUF:
 			long_return = mbstat.m_drops;
 			break;

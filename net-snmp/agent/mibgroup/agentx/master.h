@@ -7,8 +7,8 @@ config_require(agentx/master_admin)
 config_require(agentx/master_request)
 config_require(mibII/sysORTable)
 
-int get_agentx_transID( int, snmp_ipaddr *);
 void init_master(void);
+void real_init_master(void);
 
 #endif /* _AGENTX_MASTER_H */
 

@@ -37,11 +37,11 @@ CREATING THE FIRST USER:
   SECURITY CONSIDERATIONS: By placing the "createUser" line in
   /var/ucd-snmp/snmpd.conf instead of
   /usr/local/share/snmp/snmpd.conf, the password will be automatically
-  erased from the file the next time the agent shuts down.  This way,
-  only the derived secret key will remembered.  Even better is that
-  actually only the localized secret key will be remembered and if the
-  machine is broken into it'll be impossible to use this localized key
-  to get access to any of your other hosts.
+  erased when the agent starts up.  This way, only the derived secret
+  key will remembered.  Even better is that actually only the
+  localized secret key will be remembered and if the machine is broken
+  into it'll be impossible to use this localized key to get access to
+  any of your other hosts.
 
 CREATING A SECOND USER:
 

@@ -182,7 +182,9 @@ static void optProc(int argc, char *const *argv, int opt)
           }
        }
        break;
+#ifndef DEPRECATED_CLI_OPTIONS
     case 'w':
+      fprintf(stderr, "Warning: -w option is deprecated - use -Cw\n");
       max_width = atoi(optarg);
       if (max_width == 0) {
 	fprintf(stderr, "Bad -w option: %s\n", optarg);
@@ -190,11 +192,14 @@ static void optProc(int argc, char *const *argv, int opt)
       }
       break;
     case 'b':
+      fprintf(stderr, "Warning: -b option is deprecated - use -Cb\n");
       brief = 1;
       break;
     case 'i':
+      fprintf(stderr, "Warning: -i option is deprecated - use -Ci\n");
       show_index = 1;
       break;
+#endif
     }
 }
 
@@ -223,7 +228,11 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
+#ifndef DEPRECATED_CLI_OPTIONS
   switch (snmp_parse_args(argc, argv, &session, "w:C:bi", optProc)) {
+#else
+  switch (snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+#endif
   case  -2:
     exit(0);
   case -1:

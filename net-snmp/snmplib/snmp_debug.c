@@ -44,6 +44,10 @@ static int debugindent=0;
 #define INDENTMAX 80
 static char debugindentchars[] = "                                                                                ";
 
+/* Prototype definitions */
+void debug_config_register_tokens(const char *configtoken, char *tokens);
+void debug_config_turn_on_debugging(const char *configtoken, char *line);
+
 char *
 debug_indent(void) {
   return debugindentchars;
@@ -199,6 +203,12 @@ void
 debugmsg_hex(const char *token, u_char *thedata, size_t len) {
   char buf[SPRINT_MAX_LEN];
   
+  if (len > SPRINT_MAX_LEN/5) {
+      /* hex is long, so print only a certain amount (1/5th of size to
+         be safer than is needed) */
+      len = SPRINT_MAX_LEN/5;
+      debugmsg(token, "[truncated hex:]");
+  }
   sprint_hexstring(buf, thedata, len);
   debugmsg(token, buf);
 }

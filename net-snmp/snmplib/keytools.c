@@ -412,7 +412,7 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
             kcstring += properlength;
             nbytes    = 0;
             while ((int)(nbytes++) < properlength) {
-            	*kcstring++ = *kcstring ^ *newkey++;
+            	*kcstring++ ^= *newkey++;
             }
         }
 
@@ -527,7 +527,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
             bufp   = kcstring+properlength;
             nbytes = 0;
             while ((int)(nbytes++) < properlength) {
-                    *newkey++ = *newkey ^ *bufp++;
+                    *newkey++ ^= *bufp++;
             }
         }
 
