@@ -333,6 +333,14 @@ var_udp(struct variable *vp,
     case UDPINERRORS:
         return (u_char *) & udpstat.dwInErrors;
 #endif                          /* WIN32 */
+#ifdef hpux11
+    case UDPINDATAGRAMS:
+    case UDPNOPORTS:
+    case UDPOUTDATAGRAMS:
+    case UDPINERRORS:
+      long_return = (long) udpstat;
+        return (u_char *) & long_return;
+#endif        /* hpux11 */
 
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));

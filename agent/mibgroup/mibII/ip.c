@@ -544,6 +544,31 @@ var_ip(struct variable *vp,
     case IPROUTEDISCARDS:
         return (u_char *) & ipstat.dwRoutingDiscards;
 #endif                          /* WIN32 */
+#ifdef hpux11
+    case IPFORWARDING:
+    case IPDEFAULTTTL:
+    case IPINRECEIVES:
+    case IPINHDRERRORS:
+    case IPINADDRERRORS:
+    case IPFORWDATAGRAMS:
+    case IPINUNKNOWNPROTOS:
+    case IPINDISCARDS:
+    case IPINDELIVERS:
+    case IPOUTREQUESTS:
+    case IPOUTDISCARDS:
+    case IPOUTNOROUTES:
+    case IPREASMTIMEOUT:
+    case IPREASMREQDS:
+    case IPREASMOKS:
+    case IPREASMFAILS:
+    case IPFRAGOKS:
+    case IPFRAGFAILS:
+    case IPFRAGCREATES:
+    case IPROUTEDISCARDS:
+        long_return = (long) ipstat;
+        return (u_char *) & long_return;
+#endif        /* hpux11 */
+
 
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));

@@ -443,6 +443,25 @@ var_tcp(struct variable *vp,
     case TCPOUTRSTS:
         return (u_char *) & tcpstat.dwOutRsts;
 #endif
+#ifdef hpux11
+    case TCPRTOALGORITHM:
+    case TCPRTOMIN:
+    case TCPRTOMAX:
+    case TCPMAXCONN:
+    case TCPACTIVEOPENS:
+    case TCPPASSIVEOPENS:
+    case TCPATTEMPTFAILS:
+    case TCPESTABRESETS:
+    case TCPCURRESTAB:
+    case TCPINSEGS:
+    case TCPOUTSEGS:
+    case TCPRETRANSSEGS:
+    case TCPINERRS:
+    case TCPOUTRSTS:
+        long_return = (long) tcpstat;
+        return (u_char *) & long_return;
+#endif        /* hpux11 */
+
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
     }
