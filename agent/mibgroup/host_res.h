@@ -10,11 +10,11 @@
 
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "mib.h"
 #include "var_struct.h"
 #include "snmp_vars.h"
-#include "snmp_api.h"
 #include "../../snmplib/system.h"
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
