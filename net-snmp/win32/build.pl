@@ -7,7 +7,7 @@
 my $openssl = "disabled";
 my $b_ipv6 = "disabled";
 my $sdk = "disabled";
-my $default_install_base = "c:/Program Files/Net-SNMP";
+my $default_install_base = "c:/usr";
 my $install_base = $default_install_base;
 my $install = "enabled";
 my $perl = "disabled";
