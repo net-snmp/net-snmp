@@ -304,9 +304,9 @@ routename(in)
 		first = 0;
 		if (gethostname(domain, MAXHOSTNAMELEN) == 0 &&
 #ifdef SVR4
-		    (cp = strchr(domain, '.')))
+		    (cp = (char *) strchr(domain, '.')))
 #else
-		    (cp = index(domain, '.')))
+		    (cp = (char *) index(domain, '.')))
 #endif
 			(void) strcpy(domain, cp + 1);
 		else
@@ -318,9 +318,9 @@ routename(in)
 			AF_INET);
 		if (hp) {
 #ifdef SVR4
-			if ((cp = strchr(hp->h_name, '.')) &&
+			if ((cp = (char *) strchr(hp->h_name, '.')) &&
 #else
-			if ((cp = index(hp->h_name, '.')) &&
+			if ((cp = (char *) index(hp->h_name, '.')) &&
 #endif
 			    !strcmp(cp + 1, domain))
 				*cp = 0;
