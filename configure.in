@@ -28,6 +28,10 @@ AC_ARG_ENABLE(shared,
 [  --enable-shared                 Compile, use, and install shared libraries.],
     with_shared="yes",with_shared="no")
 
+AC_ARG_ENABLE(mini_agent,
+[  --enable-mini-agent             Build a minimal agent.],
+    mini_agent="yes",mini_agent="no")
+
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
     [if test "x$enable_ipv6" = "xyes"; then
@@ -716,6 +720,14 @@ module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 new_module_list="mibII ucd_snmp snmpv3mibs $new_with_mib_modules"
+default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
+
+if test "x$mini_agent" = "xyes"; then
+new_with_out_mib_modules="mibII $new_without_mib_modules"
+new_module_list="snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable examples/ucdDemoPublic mibII/vacm_vars $new_with_mib_modules"
+default_mibs=SNMPv2-MIB:RFC1213-MIB
+fi
+
 
 if test "x$enable_ipv6" = "xyes"; then
 	new_module_list="$new_module_list mibII/ipv6"
@@ -736,7 +748,6 @@ done
 test_modules="$new_module_list"
 new_module_list=""
 module_list_h=""
-default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
 
 for i in $test_modules
  do
