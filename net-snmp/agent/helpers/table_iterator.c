@@ -3,13 +3,65 @@
  */
 /** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
- *  Functionally, it is a specialized version of the more
- *  generic table helper but easies the burden of GETNEXT processing by
- *  manually looping through all the data indexes retrieved through
- *  function calls which should be supplied by the module that wishes
- *  help.  The module the table_iterator helps should, afterwards,
- *  never be called for the case of "MODE_GETNEXT" and only for the GET
- *  and SET related modes instead.
+    Functionally, it is a specialized version of the more
+    generic table helper but easies the burden of GETNEXT processing by
+    manually looping through all the data indexes retrieved through
+    function calls which should be supplied by the module that wishes
+    help.  The module the table_iterator helps should, afterwards,
+    never be called for the case of "MODE_GETNEXT" and only for the GET
+    and SET related modes instead.
+ 
+    The fundamental notion between the table iterator is that it
+    allows your code to iterate over each "row" within your data
+    storage mechanism, without requiring that it be sorted in a
+    SNMP-index-compliant manner.  Through the get_first_data_point and
+    get_next_data_point hooks, the table_iterator helper will
+    repeatedly call your hooks to find the "proper" row of data that
+    needs processing.  The following concepts are important:
+
+      - A loop context is a pointer which indicates where in the
+        current processing of a set of rows you currently are.  The
+        most simple example would be a pointer to an integer which
+        simply counts rows from 1 to X.  More commonly, it might be a
+        pointer to a linked list node, or someother internal or
+        external reference to a data set (file seek value, array
+        pointer, ...).  If allocated during iteration, either the
+        free_loop_context_at_end (preferably) or the free_loop_context
+        pointers should be set.
+
+      - A data context is something that your handler code can use
+        later in order to retrieve the rest of the data for the needed
+        row.  The important difference between a loop context and a
+        data context is that multiple data contexts can be kept by the
+        table_iterator helper, where as only one loop context will
+        ever be held by the table_iterator helper.  If allocated
+        during iteration the free_data_context pointer should be set
+        to an appropriate function.
+ 
+    The table iterator operates in a series of steps that call your
+    code hooks from your netsnmp_iterator_info registration pointer.
+ 
+      - the get_first_data_point hook is called at the beginning of
+        processing.  It should set the variable list to a list of
+        indexes for the given table.  It should also set the
+        loop_context and maybe a data_context which you will get a
+        pointer back to when it needs to call your code to retrieve
+        actual data later.  The list of indexes should be returned
+        after being update.
+
+      - the get_next_data_point hook is then called repeatedly and is
+        passed the loop context and the data context for it to update.
+        The indexes, loop context and data context should all be
+        updated if more data is available, otherwise they should be
+        left alone and a NULL should be returned.  Ideally, it should
+        update the loop context without the need to reallocate it.  If
+        reallocation is necessary for every iterative step, then the
+        free_loop_context function pointer should be set.  If not,
+        then the free_loop_context_at_end pointer should be set, which
+        is more efficient since a malloc/free will only be performed
+        once for every iteration.
+ *
+ *  @{
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -512,3 +564,5 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 #endif
     return SNMP_ERR_NOERROR;
 }
+
+/** @} */
