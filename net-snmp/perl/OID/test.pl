@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 35 };
+BEGIN { plan tests => 36 };
 use NetSNMP::OID;
 ok(1); # If we made it this far, we're ok.
 
@@ -22,12 +22,12 @@ ok(ref($oid->{oidptr}) eq "netsnmp_oidPtr");
 
 my $tostring = "$oid";
 #print STDERR "$tostring\n";
-ok($tostring eq "internet");
+ok($tostring eq "SNMPv2-SMI::internet");
 
 my $oid2 = new NetSNMP::OID(".1.3.6.1.2");
 $tostring = "$oid2";
 #print STDERR "$tostring\n";
-ok($tostring eq "mgmt");
+ok($tostring eq "SNMPv2-SMI::mgmt");
 
 my $oid3 = new NetSNMP::OID(".1.3.6.1");
 
@@ -67,11 +67,11 @@ my @a = $oid->to_array();
 ok($a[0] == 1 && $a[1] == 3 && $a[2] == 6 && $a[3] == 1 && $#a == 3);
 
 $oid->append(".1.2.3");
-ok("$oid" eq "directory.2.3");
+ok("$oid" eq "SNMPv2-SMI::directory.2.3");
 
 $oidmore = $oid + ".8.9.10";
 ok($oidmore == new NetSNMP::OID("directory.2.3.8.9.10"));
-ok("$oid" eq "directory.2.3");
+ok("$oid" eq "SNMPv2-SMI::directory.2.3");
 ok(ref($oidmore) eq "NetSNMP::OID");
 
 # += should work
