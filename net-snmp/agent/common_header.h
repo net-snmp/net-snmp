@@ -82,6 +82,9 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <net/if.h>
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif

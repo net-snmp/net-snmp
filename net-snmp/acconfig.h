@@ -157,7 +157,7 @@
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
-#if defined(hpux9) || defined(bsdi2) || defined(linux)
+#if defined(hpux9) || defined(bsdi2) || defined(linux) || defined(freebsd2)
 #define USEMEMMIB
 #endif
 
@@ -198,7 +198,7 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
-#define FREEBSD2ID 8
+#define FREEBSDID 8
 #define IRIXID 9
 #define UNKNOWNID 255
 
@@ -223,8 +223,8 @@
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
 #endif
-#ifdef freebsd2
-#define OSTYPE FREEBSD2ID
+#if defined(freebsd2) || defined(freebsd3)
+#define OSTYPE FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
 #define OSTYPE IRIXID
