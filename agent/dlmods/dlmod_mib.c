@@ -245,7 +245,7 @@ var_dlmodEntry(struct variable *vp,
 					 * if not */
 
 	dlm =  header_dlmodEntry(vp, name, length, exact, var_len, write_method);
-	if (!dlm)
+	if (dlm == MATCH_FAILED)
 		return 0;
 
 	/* this is where we do the value assignments for the mib results. */
