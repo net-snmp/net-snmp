@@ -281,7 +281,7 @@ The following configure options creates a working set of programs:
 
 ./configure --with-mib-modules="host agentx smux examples/example" \
  	--with-out-mib-modules=host/hr_network \
-	--with-libs="-lregex -liphlpapi"
+	--with-libs="-liphlpapi"
 
 This has been tested for Windows 98 and Windows NT 4.0.  In order for
 the process part of the host resources MIB to work under NT you will need
@@ -290,6 +290,12 @@ of www.microsoft.com. The DLL is included with Windows 2000 and XP,
 and is also part of the VC++ distribution.  The IPHLPAPI library is
 part of the "Microsoft Platform SDK", which is also available from
 www.microsoft.com.  See above for details.
+
+Earlier releases of Cygwin may need to use the configure flag
+        --with-libs="-lregex -libphlpapi"
+but this regular expression support has since been incorporated
+into the main Cygwin package, and it is no longer necessary to
+include it separately.
 
 
 ***************************************************************************
