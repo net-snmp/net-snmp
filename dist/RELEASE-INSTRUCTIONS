@@ -6,6 +6,7 @@ the CMU code to make the agent "extensible", and hence the beginning
 tag name.
    -- Wes 2002-08
 
+***************************************************************************
 **** IMPORTANT NOTES:
   - Don't *ever* release a second tar ball under the same name as the
     first.  It's much much much better to release another version
@@ -23,7 +24,8 @@ tag name.
     "Ext-VERSION-NUMBERS-HERE" tag apart and runs things based on the
     information.  It probably needs to be rewritten.  Probably in perl.
 
-Testing:
+***************************************************************************
+TESTING:
 
   0) run "cvs update" to catch everyones commits.  (I've forgotten this
      step before.)
@@ -55,7 +57,8 @@ Testing:
   4) ideally, run make in the tutorial directories to make sure they
      compile properly after running "make install".
 
-Releasing:
+***************************************************************************
+RELEASING:
 
   0) run "cvs update" to catch everyones commits.  I've forgotten this
      before.
@@ -71,6 +74,16 @@ Releasing:
      This will basically run a "grep" on all the sources for //.  It
      ignores things with "http:" in it as well as "/win32/".  Make
      sure there are no // comments in the main code body.
+
+  2c) "make docs"
+
+     Make the doxygen extracted manual pages.
+
+  2d) "make mancp"
+
+     Copies the doxygen extracted manual pages to the man directory.
+     You'll have to then check these and commit them (possibly adding
+     any new ones that have been modified since then).
 
   3) Update Makefile dependencies:
 
@@ -108,6 +121,9 @@ Releasing:
      don't have outstanding important changes.
 
   5) Update the ChangeLog file
+
+     [if you did this before above, do it again if you made any
+     changes to the CVS tree since creating the last revision]
 
        cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
        perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
@@ -167,7 +183,7 @@ Releasing:
      d) Create a release like "5.0.3 sources"
      e) Click on the "Edit this release" button to add files to it.
      f) Do something similar to release binary files under "5.0.3
-        binaries", for example.
+        binaries", for example.  [see below for creating them]
 
      WARNING:  The "Quick release file" mechanism, which is generally
      cool and saves steps *only* works if the release doesn't exist
@@ -176,3 +192,48 @@ Releasing:
      the hard way).  You can do the first one using the Quick release
      mechanism, but the second has to be done using the "edit this
      release" button.
+
+  10) Make a home-page news announcement.  Go to the net-snmp project
+      page and click "news" and then "submit news".  It shouldn't need
+      approval if you're a core developer (and you're logged in).
+
+  11) Wait a week and if everything is ok, then submit a note to
+      net-snmp-announce@lists.sf.net with a global announcement.  I
+      wait a week to ensure there are no major problems before making
+      a huge announcement.  I often make a immediate announcement to
+      the users list to get some initial feedback.  If there are
+      problems and another release is coming shortly, don't announce
+      to the mailing list and announce the next one instead.  In the
+      announcement include the NEWS snippet since the last release.
+      
+
+***************************************************************************
+CREATING BINARY DISTRIBUTIONS
+
+0) Make SURE when building binary packages that you run configure using
+   --disable-privacy.  This removes encryption support, which can not be
+   present in binaries due to U.S. export restrictions (last I checked.
+   It's possible this has actually changed, but I haven't wanted to go
+   re-read that mess of documents).
+
+1) always build releases from a tarball, not from CVS.
+
+2) Add mib modules that are common.  Basically, add:
+
+     host                      -- where supported.
+     disman/event-mib
+     smux
+
+3) use --with-defaults --with-syscontact="Unknown" --with-syslocation="Unknown"
+
+4) when running make install, do it like:
+
+     make install prefix=/some/path/to/home/ARCH/usr/local exec_prefix=/some/path/to/home/ARCH/usr/local
+  
+5) Tar it up:
+
+     cd /some/path/to/home/ARCH
+     tar czf net-snmp-5.0.3-ARCH.tar.gz usr/local
+
+6) upload and release, like you did for the source code but with a
+   different package name for binaries (5.0.3 binaries).
