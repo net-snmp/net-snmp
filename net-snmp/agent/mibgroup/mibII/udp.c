@@ -290,7 +290,6 @@ long
 read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 {
     long ret_value = -1;
-    int i;
 #if (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS))
     static int sname[4] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
     size_t len = sizeof( *udpstat );

@@ -126,10 +126,7 @@ handle_agentx_response( int operation,
     struct snmp_session *ax_session;
     struct request_list *req;
     int i, type, index;
-    struct ax_variable_list *retry_vlist;
-    struct variable_list    *vb_retry, *vbp2;
     struct subtree          *retry_sub;
-    int j;
     char buf[SPRINT_MAX_LEN];
 
     remove_outstanding_request( asp, pdu->reqid );

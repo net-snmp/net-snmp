@@ -1396,7 +1396,7 @@ asn_parse_unsigned_int64(u_char *data,
     DEBUGIF("dumpv_recv") {
       char i64buf[I64CHARSZ+1];
       printU64(i64buf, cp);
-      DEBUGMSG(("dumpv_recv", i64buf));
+      DEBUGMSG(("dumpv_recv", "Counter64: ", i64buf));
     }
 
     return bufp;
@@ -1606,7 +1606,7 @@ asn_parse_signed_int64(u_char *data,
   DEBUGIF("dumpv_recv") {
     char i64buf[I64CHARSZ+1];
     printI64(i64buf, cp);
-    DEBUGMSG(("dumpv_recv", i64buf));
+    DEBUGMSG(("dumpv_recv", "Integer64: %s", i64buf));
   }
 
   return bufp;
@@ -2074,7 +2074,6 @@ asn_rbuild_int (u_char *data,
 {
     static const char *errpre = "build int";
     register long integer;
-    register u_long mask;
     u_char *initdatap = data;
     int testvalue = (*intp < 0) ? -1 : 0;
     
@@ -2152,7 +2151,6 @@ asn_rbuild_unsigned_int (u_char *data,
 {
     static const char *errpre = "build uint";
     register u_long integer;
-    register u_long mask;
     u_char *initdatap = data;
     
     if (intsize != sizeof (long)){
@@ -2211,9 +2209,6 @@ asn_rbuild_sequence (u_char *data,
                      u_char type,
                      size_t length)
 {
-    static const char *errpre = "build seq";
-    char ebuf[128];
-
     return asn_rbuild_header(data, datalength, type, length);
 }
 
@@ -2269,15 +2264,10 @@ asn_rbuild_objid (u_char *data,
  * leadingbyte ::= 1 7bitvalue
  * lastbyte ::= 0 7bitvalue
  */
-    size_t asnlength;
     register oid *op = objid;
-    u_char objid_size[MAX_OID_LEN];
-    register u_long objid_val;
-    u_long first_objid_val;
     register int i, tmpint;
     u_char *initdatap = data;
-    char ebuf[128];
-    static const char *errpre = "build objid";
+    const char *errpre = "build objid";
 
     /* check if there are at least 2 sub-identifiers */
     if (objidlength == 0) {
@@ -2355,8 +2345,6 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
  */
 
     register u_long low, high;
-    register u_long mask, mask2;
-    int add_null_byte = 0;
     size_t intsize;
     u_char *initdatap = data;
     int count;
@@ -2462,8 +2450,6 @@ u_char	*asn_rbuild_signed_int64 (u_char *data,
  */
 
     register u_long low, high;
-    register u_long mask, mask2;
-    int add_null_byte = 0;
     size_t intsize;
     u_char *initdatap = data;
     int count;

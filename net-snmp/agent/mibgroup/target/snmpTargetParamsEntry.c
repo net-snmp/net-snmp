@@ -603,7 +603,6 @@ write_snmpTargetParamsMPModel(
 {
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -665,7 +664,6 @@ write_snmpTargetParamsSecurityModel(
 {
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -729,7 +727,6 @@ write_snmpTargetParamsSecurityName(
 {
   static unsigned char           string[1500];
   size_t                         size=1500;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   /* check incoming variable */
@@ -797,7 +794,6 @@ write_snmpTargetParamsSecurityLevel(
 {
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
  
   /* check incoming variable */
@@ -861,7 +857,6 @@ write_snmpTargetParamsStorageType(
 {
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -955,7 +950,6 @@ write_snmpTargetParamsRowStatus(
   enum commit_action_enum        onCommitDo = NOTHING; 
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetParamTable_struct *temp_struct; /*also treated as boolean for row lookup*/
 
   if (var_val_type != ASN_INTEGER) {

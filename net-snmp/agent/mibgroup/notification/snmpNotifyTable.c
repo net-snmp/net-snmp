@@ -168,7 +168,6 @@ void
 parse_snmpNotifyTable(const char *token, char *line) {
   size_t tmpint;
   struct snmpNotifyTable_data *StorageTmp = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-  struct variable_list *vars = NULL;
 
 
     DEBUGMSGTL(("snmpNotifyTable", "parsing config...  "));
@@ -380,13 +379,14 @@ write_snmpNotifyTag(int      action,
              SNMP_FREE(StorageTmp->snmpNotifyTag);
              StorageTmp->snmpNotifyTag = tmpvar;
              StorageTmp->snmpNotifyTagLen = tmplen;
+	     tmpvar = NULL;
           break;
 
 
         case COMMIT:
              /* Things are working well, so it's now safe to make the change
              permanently.  Make sure that anything done here can't fail! */
-     SNMP_FREE(tmpvar);
+	     SNMP_FREE(tmpvar);
           break;
   }
   return SNMP_ERR_NOERROR;
@@ -405,7 +405,6 @@ write_snmpNotifyType(int      action,
 {
   static int tmpvar;
   struct snmpNotifyTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -473,7 +472,6 @@ write_snmpNotifyStorageType(int      action,
 {
   static int tmpvar;
   struct snmpNotifyTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -549,7 +547,6 @@ write_snmpNotifyRowStatus(int      action,
   int set_value;
   static struct variable_list *vars, *vp;
   struct header_complex_index *hciptr;
-  char who[MAX_OID_LEN], flagName[MAX_OID_LEN];
 
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyRowStatus entering action=%d...  \n", action));
@@ -588,12 +585,6 @@ write_snmpNotifyRowStatus(int      action,
             /* destroying a non-existent row is actually legal */
             if (set_value == RS_DESTROY) {
               return SNMP_ERR_NOERROR;
-            }
-
-
-            /* illegal creation values */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
-              return SNMP_ERR_INCONSISTENTVALUE;
             }
           } else {
             /* row exists.  Check for a valid state change */
@@ -713,7 +704,7 @@ write_snmpNotifyRowStatus(int      action,
              /* Things are working well, so it's now safe to make the change
              permanently.  Make sure that anything done here can't fail! */
           if (StorageDel != NULL) {
-            StorageDel == 0;
+            StorageDel = NULL;
             /* XXX: free it, its dead */
           }
           if (StorageTmp && StorageTmp->snmpNotifyRowStatus == RS_CREATEANDGO) {
@@ -726,7 +717,3 @@ write_snmpNotifyRowStatus(int      action,
   }
   return SNMP_ERR_NOERROR;
 }
-
-
-
-

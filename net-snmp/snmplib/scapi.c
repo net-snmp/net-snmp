@@ -213,7 +213,6 @@ sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
   u_char	 buf[SNMP_MAXBUF_SMALL];
 #if  defined(USE_OPENSSL)
   int		 buf_len = sizeof(buf);
-  u_char	*bufp = buf;
 #endif
   
   DEBUGTRACE;
@@ -495,8 +494,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 #if defined(USE_OPENSSL) 
 {
 	int		rval	= SNMPERR_SUCCESS;
-	u_int		transform,
-			properlength,
+	u_int		properlength,
 			properlength_iv;
 	u_char		pad_block[32];  /* bigger than anything I need */
 	u_char          my_iv[32];      /* ditto */
@@ -647,7 +645,6 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 {
 
 	int rval = SNMPERR_SUCCESS;
-	int i, j; 
 	u_char *my_iv[32];
 	des_key_schedule key_sch;
 	des_cblock  key_struct;

@@ -144,7 +144,6 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
     char buf[SNMP_MAXBUF_SMALL];
     oid udpdomain[] = { 1,3,6,1,6,1,1 };
     int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
-    in_addr_t addr;
 #ifdef HAVE_GETHOSTBYNAME
     struct hostent *hp;
 #endif

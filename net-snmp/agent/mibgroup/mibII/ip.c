@@ -413,8 +413,12 @@ long
 read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 {
    long ret_value;
+#if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
    int i;
+#endif
+#if !(defined (linux) || defined(solaris2))
    static int ttl, forward;
+#endif
 
 #if ((defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)) ||	\
      (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)))
