@@ -58,9 +58,13 @@ void
 add_to_init_list(const char *module_list) {
     struct module_init_list *newitem, **list;
     char *cp;
-    char *buf;
 
-    cp = buf = strdup(module_list);
+    if (module_list == NULL) {
+      return;
+    } else {
+      cp = (char *)module_list;
+    }
+
     if (*cp == '-' || *cp == '!') {
         cp++;
         list = &noinitlist;
