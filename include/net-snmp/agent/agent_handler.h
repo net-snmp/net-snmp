@@ -26,7 +26,8 @@ struct netsnmp_handler_registration_s;
 
 /*
  * per mib handler flags.
- * NOTE: The last 4 bits are reserved for the handler's own use.
+ * NOTE: Lower bits are reserved for the agent handler's use.
+ *       The high 4 bits (31-28) are reserved for use by the handler.
  */
 #define MIB_HANDLER_AUTO_NEXT                   0x00000001
 #define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x00000002
@@ -51,7 +52,7 @@ typedef struct netsnmp_mib_handler_s {
         int             flags;
 
         /** if you add more members, you probably also want to update */
-        /** _clone_handler in snmp_agent.c. */
+        /** _clone_handler in agent_handler.c. */
 	
         int             (*access_method) (struct netsnmp_mib_handler_s *,
                                           struct
