@@ -15,5 +15,6 @@ void snmpd_register_config_handler __P((char *,
                                         void (*parser)(char *, char *),
                                         void (*releaser) (void)));
 void snmpd_unregister_config_handler __P((char *));
+void snmpd_store_config __P((char *));
 
 #endif /* _MIBGROUP_READ_CONFIG_H */

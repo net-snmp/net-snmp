@@ -396,12 +396,39 @@ char *prog;
   exit(1);
 }
 
+static int agentBoots=0;
+
+void
+agentBoots_conf(word, cptr)
+  char *word;
+  char *cptr;
+{
+  agentBoots = atoi(cptr)+1;
+  DEBUGP("agentBoots: %d\n",agentBoots);
+}
+
+RETSIGTYPE
+SnmpdShutDown(a)
+  int a;
+{
+  char line[512];
+  /* We've received a sigTERM.  Shutdown by calling mib-module
+     functions and sending out a shutdown trap. */
+  fprintf(stderr, "Received TERM or STOP signal...  shutting down...\n");
+#include "mib_module_shutdown.h"
+  sprintf(line, "agentBoots %d", agentBoots);
+  snmpd_store_config(line);
+  DEBUGP("sending shutdown trap\n");
+  SnmpTrapNodeDown(a);
+  DEBUGP("Bye...\n");
+  exit(1);
+}
+
 RETSIGTYPE
 SnmpTrapNodeDown(a)
   int a;
 {
   send_easy_trap (2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
-  exit(1);
 }
 
 #define NUM_SOCKETS     32
@@ -532,8 +559,16 @@ main(argc, argv)
     printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
-    init_snmp();
-    init_mib();
+    init_agent();            /* register our .conf handlers */
+    register_mib_handlers(); /* snmplib .conf handlers */
+    read_premib_configs();   /* read pre-mib-reading .conf handlers */
+    init_mib();              /* initialize the mib structures */
+    update_config(0);        /* read in config files and register HUP */
+#ifdef PERSISTENTFILE
+    /* read in the persistent information cache */
+    read_config_with_type(PERSISTENTFILE, "snmpd");
+    unlink(PERSISTENTFILE);  /* nuke it now that we've read it */
+#endif
     init_snmp2p( dest_port );
     
     printf("Opening port(s): "); 
@@ -551,8 +586,8 @@ main(argc, argv)
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0);
-    signal(SIGTERM, SnmpTrapNodeDown);
-    signal(SIGSTOP, SnmpTrapNodeDown);
+    signal(SIGTERM, SnmpdShutDown);
+    signal(SIGSTOP, SnmpdShutDown);
 
     memset(addrCache, 0, sizeof(addrCache));
     receive(sdlist, sdlen);
