@@ -1,4 +1,88 @@
-Changes since V3.0.1
+Changes since V3.0.2.1
+
+hardaker 29 Sep 95 13:43:49
+    - ported to GNU's autoconfig2.4
+      - to install, you must now run ./configure first to generate the
+        Makefiles and config.h
+      - almost all of the code is now dynamically checked for problems
+        rather than being dependant on architecture names.
+    - system name now dynamically determined at run time (from uname -n)
+    - created a 'make depend' call (finally).
+    - (agent/snmp_vars.h) changed SYSNAME define to SYSTEMNAME define to
+      avoid a conflict with a solaris header file.
+    - protecting better against include header files twice.
+    - Most of port to Solaris 2.4 finished.  The kernel reads still need work.
+
+hardaker 29 Sep 95 13:46:43
+    - (NEWS) updated the news file.
+
+hardaker  3 Oct 95 09:24:00
+    (acconfig.h) Minor bug:  recursive comments not correct for compilers (AIX)
+
+hardaker  3 Oct 95 09:43:54
+    (versioninfo.c) Added 3-0-3-A1 tag
+
+hardaker  4 Oct 95 16:53:39
+    version tag of versioninfo.c
+
+hardaker  5 Oct 95 15:23:05
+    - More Solaris porting.
+      - Most mibII entries now work.
+         - Haven't checked returned information for accuracy
+      - sysUpTime still fails.
+      - cc and gcc both compile everything now.
+
+hardaker  5 Oct 95 15:48:23
+    version tag of versioninfo.c
+
+hardaker  6 Oct 95 11:37:00
+    - (README) Moved INSTALLATION instructions to INSTALL
+               Changed listing of supported architectures
+               Updated AVAILABILITY section
+
+hardaker  6 Oct 95 16:28:48
+    version tag of versioninfo.c
+
+hardaker  6 Oct 95 16:32:04
+    - (snmpd.c) Added two new flags:
+      -h for help
+      -v for version information
+
+hardaker  6 Oct 95 16:32:43
+    - (parse.c, snmp.c) added config.h to the list of includes.
+
+hardaker  6 Oct 95 16:40:38
+    - (snmpd.c) Usage of --help and --version should work now...  GNU standard.
+
+hardaker  6 Oct 95 16:41:18
+    - (NEWS/-TODO) -h/--help, -v/--version command line options
+
+hardaker 11 Oct 95 17:33:26
+    - The configure script now prompts for important values to be put in
+      config.h.  Some things need to use $(prefix) instead however.
+    - (Makefile.in, agent/Makefile.in, apps/Makefile.in)
+      + linking to ../snmplib/libsnmp.a instead of ../lib/libsnmp.a to
+        remove install requirement.
+      +  put ../lib/libsnmp.a in application
+
+hardaker 13 Oct 95 15:45:28
+    - (snmpd.c) Added -p port to --help output
+    - (config) Setup to use --prefix to look for config files.
+
+hardaker 16 Oct 95 13:01:39
+    - (Makefiles) Fairly decent 'make install' now possible.  Installs
+      into the directory specified by --prefix for the ./configure script.
+    - (extensible.c) config file re-location: now uses the SNMPLIBPATH
+      defined loosely as $(prefix)/lib/snmp/.
+
+hardaker 16 Oct 95 15:02:01
+    - (Makefiles) make install echos what its doing in a more clear fashion
+    - (INSTALL) added better instructions to the INSTALL file.
+    - (README) minor wording changes
+
+-------------------------------------------------------------------------------
+
+Changes since V3.0.2
 
 hardaker 21 Sep 95 09:27:18
     (snmplib/md5.c) Forgot to include sys/types.h for u_long definition.
@@ -103,7 +187,7 @@ hardaker 10 Jul 95 11:27:00
       -l LOGFILE       Outputs stderr/out to LOGFILE (overrides config.h def)
       -L               Do NOT write to a log file (overrides config.h)
 
-hardaker 10 Jul 95 12:29:32
+hardaker 10 Jul 95 12:29:32
     - More perror()s converted to set the snmp error status flag on the agent.
     - error status flag is now prioritized.  perrors get the highest so
       other errors won't override them if they happen at a later time.
@@ -201,4 +285,5 @@ hardaker 14 Jun 95 13:43:38
     - Added more documentation to the README file.
     - Created a mailing list to handle announcements
       (ucd-snmp-announce@ece.ucdavis.edu)
+
 
