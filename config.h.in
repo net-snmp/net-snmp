@@ -386,6 +386,9 @@
 /* Define if you have the <ufs/fs.h> header file.  */
 #undef HAVE_UFS_FS_H
 
+/* Define if you have the <ufs/ufs/dinode.h> header file.  */
+#undef HAVE_UFS_UFS_DINODE_H
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
