@@ -701,6 +701,12 @@ sub gettable {
 	push @$varbinds, [$c];
 	push @$stopconds, $c;
     }
+
+    if ($#$varbinds == -1) {
+	print STDERR "ack: gettable failed to find any columns to look for.\n";
+	return;
+    }
+
     $vbl = $varbinds;
 	
     my $repeatcount;
@@ -708,6 +714,8 @@ sub gettable {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
+    } elsif ($#$varbinds == -1) {
+	$repeatcount = 1;
     } else {
 	# experimentally determined maybe guess at a best repeat value
 	# 1000 bytes max (safe), 30 bytes average for encoding of the
