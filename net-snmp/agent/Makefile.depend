@@ -170,7 +170,7 @@
 ./agent_index.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_index.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
 ./agent_index.lo: mibgroup/utilities.h mibgroup/host.h
-./agent_index.lo: mibgroup/nstAgentModuleObject.h mibgroup/examples.h
+./agent_index.lo: mibgroup/examples.h
 ./agent_index.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ./agent_index.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
 ./agent_index.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
@@ -312,7 +312,7 @@
 ./agent_read_config.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_read_config.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
 ./agent_read_config.lo: mibgroup/utilities.h mibgroup/host.h
-./agent_read_config.lo: mibgroup/nstAgentModuleObject.h mibgroup/examples.h
+./agent_read_config.lo: mibgroup/examples.h
 ./agent_read_config.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ./agent_read_config.lo: mibgroup/smux.h mibgroup/Rmon.h
 ./agent_read_config.lo: mibgroup/disman/event-mib.h
@@ -467,7 +467,7 @@
 ./agent_registry.lo: mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./agent_registry.lo: mibgroup/target.h mibgroup/agent_mibs.h
 ./agent_registry.lo: mibgroup/agentx.h mibgroup/utilities.h mibgroup/host.h
-./agent_registry.lo: mibgroup/nstAgentModuleObject.h mibgroup/examples.h
+./agent_registry.lo: mibgroup/examples.h
 ./agent_registry.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ./agent_registry.lo: mibgroup/smux.h mibgroup/Rmon.h
 ./agent_registry.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
@@ -683,7 +683,7 @@
 ./mib_modules.lo: mibgroup/notification.h mibgroup/target.h
 ./mib_modules.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
 ./mib_modules.lo: mibgroup/utilities.h mibgroup/host.h
-./mib_modules.lo: mibgroup/nstAgentModuleObject.h mibgroup/examples.h
+./mib_modules.lo: mibgroup/examples.h
 ./mib_modules.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ./mib_modules.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
 ./mib_modules.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
@@ -989,7 +989,7 @@
 ./snmpd.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./snmpd.lo: mibgroup/target.h mibgroup/agent_mibs.h mibgroup/agentx.h
 ./snmpd.lo: mibgroup/utilities.h mibgroup/host.h
-./snmpd.lo: mibgroup/nstAgentModuleObject.h mibgroup/examples.h
+./snmpd.lo: mibgroup/examples.h
 ./snmpd.lo: mibgroup/examples/example.h mibgroup/testhandler.h
 ./snmpd.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
 ./snmpd.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
@@ -1204,7 +1204,7 @@
 ./snmp_vars.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./snmp_vars.lo: mibgroup/notification.h mibgroup/target.h
 ./snmp_vars.lo: mibgroup/agent_mibs.h mibgroup/agentx.h mibgroup/utilities.h
-./snmp_vars.lo: mibgroup/host.h mibgroup/nstAgentModuleObject.h
+./snmp_vars.lo: mibgroup/host.h
 ./snmp_vars.lo: mibgroup/examples.h mibgroup/examples/example.h
 ./snmp_vars.lo: mibgroup/testhandler.h mibgroup/smux.h mibgroup/Rmon.h
 ./snmp_vars.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
