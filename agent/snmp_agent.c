@@ -1989,6 +1989,11 @@ netsnmp_check_outstanding_agent_requests(void)
                 agent_delegated_list = asp->next;
 
             /*
+             * check request status
+             */
+            netsnmp_check_all_requests_status(asp, 0);
+            
+            /*
              * continue processing or finish up 
              */
             check_delayed_request(asp);
