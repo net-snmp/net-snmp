@@ -110,6 +110,7 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp_api.h"
+#include "tools.h"
 #include "system.h"
 #include "snmp_logging.h"
 
@@ -155,10 +156,10 @@ opendir(const char *filename)
     }
 
     /* get the file system characteristics */
-/*  if(GetFullPathName(filename, MAX_PATH, root, &dummy)) {
+/*  if(GetFullPathName(filename, SNMP_MAXPATH, root, &dummy)) {
  *	if(dummy = strchr(root, '\\'))
  *	    *++dummy = '\0';
- *	if(GetVolumeInformation(root, volname, MAX_PATH, &serial,
+ *	if(GetVolumeInformation(root, volname, SNMP_MAXPATH, &serial,
  *				&maxname, &flags, 0, 0)) {
  *	    downcase = !(flags & FS_CASE_IS_PRESERVED);
  *	}
@@ -664,11 +665,7 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast) {
     struct stat     sbuf;
     char *ourcopy = strdup(pathname);
     char *entry;
-#ifdef WIN32
-    char buf[MAX_PATH];
-#else
-    char buf[MAXPATHLEN];
-#endif
+    char buf[SNMP_MAXPATH];
 
     entry = strtok( ourcopy, "/" );
 
