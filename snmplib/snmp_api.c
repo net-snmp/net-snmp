@@ -1678,7 +1678,11 @@ snmpv3_build(struct snmp_session	*session,
                   usmSecLevelName[pdu->securityLevel]));
 
   DEBUGDUMPSECTION("send", "SNMPv3 Message");
+#ifdef USE_REVERSE_ASNENCODING
+  ret = snmpv3_packet_rbuild(pdu, packet, out_length, NULL, 0);
+#else
   ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
+#endif
   DEBUGINDENTLESS();
   if (-1 != ret) {
       session->s_snmp_errno = ret;
@@ -1787,7 +1791,73 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
 
 }  /* end snmpv3_header_build() */
 
+#ifdef USE_REVERSE_ASNENCODING
+static u_char *
+snmpv3_header_rbuild(struct snmp_pdu *pdu, u_char *packet,
+                     size_t *out_length, size_t length, u_char **msg_hdr_e)
+{
+    u_char 			*cp = packet;
+    u_char			 msg_flags;
+    long			 max_size;
+    long			 sec_model;
 
+    /* msgSecurityModel */
+    sec_model = SNMP_SEC_MODEL_USM;
+    DEBUGDUMPHEADER("send", "msgSecurityModel");
+    cp = asn_rbuild_int(cp, out_length,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+		       &sec_model, sizeof(sec_model));
+    DEBUGINDENTLESS();
+    if (cp == NULL) return NULL;
+
+
+    /* msgFlags */
+    snmpv3_calc_msg_flags(pdu->securityLevel, pdu->command, &msg_flags);
+    DEBUGDUMPHEADER("send", "msgFlags");
+    cp = asn_rbuild_string(cp, out_length,
+			  (u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
+			  &msg_flags, sizeof(msg_flags));
+    DEBUGINDENTLESS();
+    if (cp == NULL) return NULL;
+
+
+    /* msgMaxSize */
+    max_size = SNMP_MAX_MSG_SIZE;
+    DEBUGDUMPHEADER("send", "msgMaxSize");
+    cp = asn_rbuild_int(cp, out_length,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+		       &max_size, sizeof(max_size));
+    DEBUGINDENTLESS();
+    if (cp == NULL) return NULL;
+
+
+    /* msgID */
+    DEBUGDUMPHEADER("send", "msgID");
+    cp = asn_rbuild_int(cp, out_length,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+		       &pdu->msgid, sizeof(pdu->msgid));
+    DEBUGINDENTLESS();
+    if (cp == NULL) return NULL;
+
+
+    /* Global data sequence */
+    cp = asn_rbuild_sequence(cp, out_length,
+			    (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                            packet - cp);
+    if (cp == NULL) return NULL;
+
+
+    /* store the version field - msgVersion */
+    DEBUGDUMPHEADER("send", "SNMP Version Number");
+    cp = asn_rbuild_int(cp, out_length,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+		       (long *) &pdu->version, sizeof(pdu->version));
+    DEBUGINDENTLESS();
+    if (cp == NULL) return NULL;
+
+    return cp;
+}  /* end snmpv3_header_build() */
+#endif /* USE_REVERSE_ASNENCODING */
 
 static u_char *
 snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
@@ -1826,6 +1896,110 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
 
 }  /* end snmpv3_scopedPDU_header_build() */
 
+
+#ifdef USE_REVERSE_ASNENCODING
+static u_char *
+snmpv3_scopedPDU_header_rbuild(struct snmp_pdu *pdu,
+                               u_char *packet, size_t *out_length,
+                               size_t pdu_len)
+
+{
+  u_char *startp = packet, *pb = packet;
+
+  /* contextName */
+  DEBUGDUMPHEADER("send", "contextName");
+  pb = asn_rbuild_string(pb, out_length,
+                        (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
+                        (u_char *)pdu->contextName, pdu->contextNameLen);
+  DEBUGINDENTLESS();
+  if (pb == NULL) return NULL;
+
+
+  /* contextEngineID */
+  DEBUGDUMPHEADER("send", "contextEngineID");
+  pb = asn_rbuild_string(pb, out_length,
+                        (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
+                        pdu->contextEngineID, pdu->contextEngineIDLen);
+  DEBUGINDENTLESS();
+  if (pb == NULL) return NULL;
+
+  pb = asn_rbuild_sequence(pb, out_length,
+                          (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                          (startp - pb + pdu_len));
+
+  return pb;
+
+}  /* end snmpv3_scopedPDU_header_build() */
+#endif /* USE_REVERSE_ASNENCODING */
+
+#ifdef USE_REVERSE_ASNENCODING
+/* returns 0 if success, -1 if fail, not 0 if USM build failure */
+int
+snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
+                     u_char *pdu_data, size_t pdu_data_len)
+{
+    u_char	*global_data,		*sec_params;
+    size_t	 global_data_len,	 sec_params_len;
+    u_char	 header_buf[*out_length];
+    size_t	 header_buf_len = *out_length, spdu_len;
+    u_char	*cp = packet;
+    int      result;
+    size_t      tmp_len = *out_length;
+
+    global_data = packet;
+
+    /* 
+     * build a scopedPDU structure into the packet
+     */
+    DEBUGDUMPSECTION("send", "PDU");
+    if (pdu_data) {
+        if (pdu_data_len > header_buf_len)
+            return -1;
+        memcpy(cp - pdu_data_len, pdu_data, pdu_data_len);
+        cp -= pdu_data_len;
+        tmp_len -= pdu_data_len;
+    } else {
+        cp = snmp_pdu_rbuild(pdu, cp, &tmp_len);
+        if (cp == NULL) return -1;
+    }
+    
+    DEBUGDUMPSECTION("send", "ScopedPdu");
+    cp = snmpv3_scopedPDU_header_rbuild(pdu, cp, &tmp_len,
+                                        *out_length - tmp_len);
+    if (cp == NULL) return -1;
+
+    /* 
+     * build the headers for the packet, returned addr = start of secParams
+     */
+    global_data = snmpv3_header_rbuild(pdu, header_buf + SNMP_MAX_MSG_SIZE,
+                                       &header_buf_len, 0, NULL);
+    if (global_data == NULL) return -1;
+
+    DEBUGINDENTADD(-4); /* return from Scoped PDU */
+
+    /* 
+     * call the security module to possibly encrypt and authenticate the
+     * message - the entire message to transmitted on the wire is returned
+     */
+    DEBUGDUMPSECTION("send", "USM msgSecurityParameters");
+    result =
+     	usm_rgenerate_out_msg(
+			SNMP_VERSION_3,		
+			global_data+1, sizeof(header_buf) - header_buf_len,
+                        SNMP_MAX_MSG_SIZE,	
+			SNMP_SEC_MODEL_USM,
+                        pdu->securityEngineID,	pdu->securityEngineIDLen,
+                        pdu->securityName,	pdu->securityNameLen,
+                        pdu->securityLevel,	
+			cp, packet-cp,
+			pdu->securityStateRef,
+                        packet, out_length);
+    DEBUGINDENTLESS();
+
+    return result;
+
+}  /* end snmpv3_packet_build() */
+#endif /* USE_REVERSE_ASNENCODING */
 
 /* returns 0 if success, -1 if fail, not 0 if USM build failure */
 int
@@ -1914,11 +2088,12 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
  * Returns the length of the completed packet in out_length.  If any errors
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
+
 static int
 _snmp_build(struct snmp_session *session,
-	   struct snmp_pdu *pdu,
-	   u_char *packet,
-	   size_t *out_length)
+             struct snmp_pdu *pdu,
+             u_char *packet,
+             size_t *out_length)
 {
     u_char *h0, *h0e = 0, *h1;
     u_char  *cp;
@@ -1928,8 +2103,10 @@ _snmp_build(struct snmp_session *session,
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
-    if (pdu->version == SNMP_VERSION_3)
-      return snmpv3_build(session, pdu, packet, out_length);
+    if (pdu->version == SNMP_VERSION_3) {
+        return snmpv3_build(session, pdu, packet, out_length);
+    }
+    
 
     switch (pdu->command) {
 	case SNMP_MSG_RESPONSE:
@@ -2059,6 +2236,49 @@ _snmp_build(struct snmp_session *session,
 #endif /* !NO_ZEROLENGTH_COMMUNITY */
 
         DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
+#ifdef USE_REVERSE_ASNENCODING
+        DEBUGDUMPSECTION("send", "PDU");
+        cp = snmp_pdu_rbuild(pdu, packet, out_length);
+        if (cp == NULL)
+            return -1;
+
+        DEBUGDUMPHEADER("send", "Community String");
+        cp = asn_rbuild_string(cp, out_length,
+                               (u_char)
+                               (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+                               pdu->community, pdu->community_len);
+        DEBUGINDENTLESS();
+        if (cp == NULL)
+            return -1;
+
+        
+        /* store the version field */
+        DEBUGDUMPHEADER("send", "SNMP Version Number");
+
+        version = pdu->version;
+        cp = asn_rbuild_int(cp, out_length,
+                            (u_char)
+                            (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                            (long *) &version, sizeof(version));
+        DEBUGINDENTLESS();
+        if (cp == NULL)
+            return -1;
+
+        /* build the final sequence */
+        if (pdu->version == SNMP_VERSION_1)
+            DEBUGDUMPSECTION("send", "SNMPv1 Message");
+        else
+            DEBUGDUMPSECTION("send", "SNMPv2c Message");
+        cp = asn_rbuild_sequence(cp, out_length,
+                                 (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                                 packet - cp);
+
+        if (cp == NULL)
+            return -1;
+
+        return 0;
+
+#else /* !USE_REVERSE_ASNENCODING */
         /* Save current location and build SEQUENCE tag and length
            placeholder for SNMP message sequence
           (actual length will be inserted later) */
@@ -2094,6 +2314,7 @@ _snmp_build(struct snmp_session *session,
         if (cp == NULL)
             return -1;
         break;
+#endif /* USE_REVERSE_ASNENCODING */
 
     case SNMP_VERSION_2p:
     case SNMP_VERSION_sec:
@@ -2131,7 +2352,6 @@ _snmp_build(struct snmp_session *session,
     *out_length = cp - packet;
     return 0;
 }
-
 int
 snmp_build(struct snmp_session *pss,
 	   struct snmp_pdu *pdu,
@@ -2280,6 +2500,137 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
   return cp;
 }
 
+#ifdef USE_REVERSE_ASNENCODING
+/* on error, returns NULL (likely an encoding problem). */
+u_char *
+snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
+{
+  struct variable_list *vp, *curvp;
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
+  size_t length;
+  u_char *startcp = cp;
+
+  /* Store variable-bindings */
+  DEBUGDUMPSECTION("send", "VarBindList");
+  curvp = NULL;
+  while (curvp != pdu->variables) {
+      for(vp = pdu->variables; vp && curvp != vp->next_variable;
+          vp = vp->next_variable);
+      
+      DEBUGDUMPSECTION("send", "VarBind");
+      cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
+                              vp->val_len, (u_char *)vp->val.string,
+                              out_length);
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+      curvp = vp;
+  }
+  DEBUGINDENTLESS();
+
+  /* Save current location and build SEQUENCE tag and length placeholder
+       for variable-bindings sequence
+       (actual length will be inserted later) */
+  cp = asn_rbuild_sequence(cp, out_length,
+                           (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                           startcp - cp);
+
+  /* store fields in the PDU preceeding the variable-bindings sequence */
+  if (pdu->command != SNMP_MSG_TRAP){
+      /* PDU is not an SNMPv1 trap */
+
+      /* error index (getbulk max-repetitions) */
+      DEBUGDUMPHEADER("send", "error index");
+      cp = asn_rbuild_int(cp, out_length,
+                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                          &pdu->errindex, sizeof(pdu->errindex));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+      /* error status (getbulk non-repeaters) */
+      DEBUGDUMPHEADER("send", "error status");
+      cp = asn_rbuild_int(cp, out_length,
+                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                          &pdu->errstat, sizeof(pdu->errstat));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+
+      /* request id */
+      DEBUGDUMPHEADER("send", "request_id");
+      cp = asn_rbuild_int(cp, out_length,
+                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                          &pdu->reqid, sizeof(pdu->reqid));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+  } else {
+    /* an SNMPv1 trap PDU */
+
+      /* timestamp  */
+      DEBUGDUMPHEADER("send", "timestamp");
+      cp = asn_rbuild_unsigned_int(cp, out_length,
+                                  (u_char)(ASN_TIMETICKS | ASN_PRIMITIVE),
+                                  &pdu->time, sizeof(pdu->time));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+      /* specific trap */
+      DEBUGDUMPHEADER("send", "specific trap number");
+      cp = asn_rbuild_int(cp, out_length,
+                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                         (long *)&pdu->specific_type,
+                         sizeof(pdu->specific_type));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+      /* generic trap */
+      DEBUGDUMPHEADER("send", "generic trap number");
+      cp = asn_rbuild_int(cp, out_length,
+                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                         (long *)&pdu->trap_type, sizeof(pdu->trap_type));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+
+      /* agent-addr */
+      DEBUGDUMPHEADER("send", "agent Address");
+      cp = asn_rbuild_string(cp, out_length,
+                            (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
+                            (u_char *)&pduIp->sin_addr.s_addr,
+                            sizeof(pduIp->sin_addr.s_addr));
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+
+      /* enterprise */
+      DEBUGDUMPHEADER("send", "enterprise OBJID");
+      cp = asn_rbuild_objid(cp, out_length,
+                           (u_char)
+                           (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
+                           (oid *)pdu->enterprise, pdu->enterprise_length);
+      DEBUGINDENTLESS();
+      if (cp == NULL)
+          return NULL;
+
+
+  }
+
+  /* build the PDU sequence */
+  cp = asn_rbuild_sequence(cp, out_length,
+                           pdu->command,
+                           startcp - cp);
+
+  return cp;
+}
+#endif /* USE_REVERSE_ASNENCODING */
 
 /*
  * Parses the packet received to determine version, either directly
@@ -3196,7 +3547,8 @@ _sess_async_send(void *sessp,
     struct session_list *slp = (struct session_list *)sessp;
     struct snmp_session *session;
     struct snmp_internal_session *isp;
-    u_char  packet[PACKET_LENGTH];
+    u_char  realpacket[PACKET_LENGTH];
+    u_char  *packet = realpacket;
     size_t length = PACKET_LENGTH;
     struct sockaddr_in *isp_addr;
     struct sockaddr_in *pduIp;
@@ -3277,8 +3629,15 @@ _sess_async_send(void *sessp,
     /* build the message to send */
     if (isp->hook_build)
 	result = isp->hook_build(session, pdu, packet, &length);
-    else
+    else {
+#ifdef USE_REVERSE_ASNENCODING
+	result = snmp_build(session, pdu, packet+length-1, &length);
+        packet = packet + length;
+        length = PACKET_LENGTH - length;
+#else
 	result = snmp_build(session, pdu, packet, &length);
+#endif
+    }
     if (result < 0){
 	return 0;
     }
@@ -3970,7 +4329,8 @@ static int
 snmp_resend_request(struct session_list *slp, struct request_list *rp, 
 		    int incr_retries)
 {
-  u_char  packet[PACKET_LENGTH];
+  u_char  realpacket[PACKET_LENGTH];
+  u_char  *packet = realpacket;
   size_t length = PACKET_LENGTH;
   struct timeval tv;
   struct snmp_session *sp;
@@ -3992,8 +4352,15 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   /* retransmit this pdu */
   if ( isp->hook_build )
 	result = isp->hook_build(sp, rp->pdu, packet, &length);
-  else
+  else {
+#ifdef USE_REVERSE_ASNENCODING
+	result = snmp_build(sp, rp->pdu, packet+length-1, &length);
+        packet = packet + length;
+        length = PACKET_LENGTH - length;
+#else
 	result = snmp_build(sp, rp->pdu, packet, &length);
+#endif
+  }
   if (result < 0){
     /* this should never happen */
     return -1;
