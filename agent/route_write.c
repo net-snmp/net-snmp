@@ -44,7 +44,7 @@
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 
-#ifdef osf3
+#if defined(osf3) || defined(netbsd1)
 #define rt_dst rt_nodes->rn_key
 #endif
 
@@ -134,7 +134,7 @@ u_short  flags;
 }
 
 
-#ifdef osf3
+#if defined(osf3) || defined(netbsd1)
 #undef rt_dst
 #endif
 
