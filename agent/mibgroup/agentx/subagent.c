@@ -655,14 +655,16 @@ subagent_open_master_session(void)
          * Diagnose snmp_open errors with the input
          * netsnmp_session pointer.  
          */
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-            netsnmp_sess_log_error(LOG_WARNING,
-                                   "Error: Failed to connect to the agentx master agent",
-                                   &sess);
-        } else {
-            snmp_sess_perror
-                ("Error: Failed to connect to the agentx master agent",
-                 &sess);
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                netsnmp_sess_log_error(LOG_WARNING,
+                                       "Error: Failed to connect to the agentx master agent",
+                                       &sess);
+            } else {
+                snmp_sess_perror
+                    ("Error: Failed to connect to the agentx master agent",
+                     &sess);
+            }
         }
         return -1;
     }

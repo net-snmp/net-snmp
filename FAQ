@@ -1064,13 +1064,12 @@ Why does snmptrapd complain about AgentX?
 
     If there is no AgentX master agent available, this registration
   fails, generating the warning about "failed to connect to the agentx
-  master".  This failure does not affect the main operation of the
-  trap handler.  It simply means that the nsmLog information won't be
-  available for query via SNMP.
+  master".  This warning only appears between version 5.0 and 5.0.4
+  (in 5.0.4 and after the warning was silenced).  This failure does
+  not affect the main operation of the trap handler.  It simply means
+  that the nsmLog information won't be available for query via SNMP.
 
-    Basically, this is a warning that can safely be ignored.  In the
-  future, we hope to suppress this message, and allow the connection
-  to fail silently.
+    Basically, this is a warning that can safely be ignored.
 
 
 
