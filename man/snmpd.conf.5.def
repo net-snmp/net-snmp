@@ -139,8 +139,7 @@ EXTENSIBLEDOTMIB.ERRORMIBNUM.1.ERRORMSG text-string description.
 To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
-Note that this support is still experimental, and should not be used
-on production systems.  See README.agentx for details.
+See README.agentx for further details.
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
