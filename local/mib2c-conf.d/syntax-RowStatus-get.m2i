@@ -10,6 +10,7 @@
 ##
 @include generic-get-decl.m2i@
 @include generic-ctx-get.m2i@
+@if $m2c_node_skip_mapping != 1@
     /*
      * TODO:
      * value mapping
@@ -59,6 +60,7 @@ $example_start
     }
 $example_end
 
+@end@
 @include generic-get-decl-bot.m2i@            
 ##
 ########################################################################
