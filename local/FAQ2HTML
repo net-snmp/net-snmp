@@ -20,6 +20,11 @@ while(<>) {
 while(<>) {
     last if (/^\s*$/);
     chomp();
+    if (/^     */) {
+	# continuation of the question.
+	print O "<a href=\"#$x\">$_</a>\n";
+	next;
+    }
     $_ =~ s/^ *//;
     $x = $_;
     $x =~ s/^ *//g;
@@ -39,10 +44,8 @@ while(<>) {
     chomp($y);
     if (defined($xlate{$y})) {
 	print O "<a name=\"$xlate{$y}\">\n";
-	print O "<h3>$y</h3>\n";
-    } else {
-	print O $_;
     }
+    print O $_;
 }
 
 $dt = localtime(time());
