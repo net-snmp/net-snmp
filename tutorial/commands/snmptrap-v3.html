@@ -2,10 +2,10 @@
 <html>
   <head>
     <title>blah<head>
-<title>UCD-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</title>
+<title>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</title>
 </head>
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-<h1>UCD-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</h1>
+<h1>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</h1>
 
 <p>
 <h2>Prerequisite reading:</h2>
@@ -77,7 +77,7 @@ database.  You do this as follows:
 <p>
 <ol>
 <li> Stop any currently running snmptrapd
-<li> edit /var/ucd-snmp/snmptrapd.conf to insert the following line:
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
 <pre>
   createUser myuser MD5 mypassword DES myotherpassword
 </pre>
@@ -111,12 +111,12 @@ users in your remote user database with a bit more care and need to
 create one for every engineID you wish to send traps from.  This means
 that if you want to have 100 snmp agents send snmpv3 traps to your
 trap receiver, you need 100 createUser directives in your
-/var/ucd-snmp/snmptrapd.conf file.
+/var/net-snmp/snmptrapd.conf file.
 <p>
 So, try the following:
 <ol>
 <li> Stop any currently running snmptrapd
-<li> edit /var/ucd-snmp/snmptrapd.conf to insert the following line:
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
 <pre>
   createUser -e 0x0102030405 myuser MD5 mypassword DES myotherpassword
 </pre>

@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- snmptable</title>
+    <title>Net-SNMP Tutorial -- snmptable</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <h1>UCD-SNMP Tutorial -- snmptable</h1>
+    <h1>Net-SNMP Tutorial -- snmptable</h1>
     <p>
       The <b>snmptable</b> command nicely displays a SNMP table for
       you in an easy to read column based fashion.  Consider the
@@ -16,7 +16,7 @@
       you (though sometimes it can be a bit wide, like in this example):
 <pre>
 <ul>
-% <b>snmptable ucd-snmp.ucdavis.edu demopublic sysORTable</b>
+% <b>snmptable -v 1 -c demopublic test.net-snmp.org sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID                                                                     sysORDescr  sysORUpTime
@@ -28,7 +28,7 @@ SNMP table: system.sysORTable
 </pre>
 But you can adjust the width of the table
 <pre>
-% <b>snmptable -w 80 ucd-snmp.ucadvis.edu demopublic sysORTable</b>
+% <b>snmptable -w 80 net-snmp.ucadvis.edu demopublic sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID

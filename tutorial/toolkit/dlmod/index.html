@@ -1,18 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Dynamic Module Creation for the ucd-snmp agent</title>
+    <title>Dynamic Module Creation for the net-snmp agent</title>
   </head>
 
   <body bgcolor="#ffffff">
-    <h1>Dynamic Module Creation for the ucd-snmp agent</h1>
+    <h1>Dynamic Module Creation for the net-snmp agent</h1>
     <p>
       Now, lets take the ustScalarSet mib module we created in the <a
       href="../mib_module">previous example</a> and make it work as a
       dynamicly loadable shared object.
 
     <p><b>Note:</b> For this to work, you must have compiled the
-      ucd-snmp package with dynamicly loadable module support turned
+      net-snmp package with dynamicly loadable module support turned
       on, as well as built it with --enable-shared turned on .  It's
       on by default, if your system supports it, in version 4.2 and
       higher.  You can check your agent but looking at the output of
@@ -41,7 +41,7 @@
 	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
 	used to build the projects</td>
 	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	href="../mib_module/Net-SNMP-TUTORIAL-MIB.txt">Net-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
 	code for</td>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="../mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td>
@@ -78,10 +78,10 @@ href="../mib_module/ustScalarSet.c">ustScalarSet.c</a> file.
 	</ul><p>
       <li> In another window, test to make sure that the agent doesn't 
       currently support the ustScalarSet (if you get different results 
-      running this command you need to recompile the ucd-snmp agent
+      running this command you need to recompile the net-snmp agent
       without the ustScalarSet mib module compiled in directly):
 	<p><ul>
-	  <li> % <b>snmpget  localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	  <li> % <b>snmpget  localhost Net-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 	<p><pre>
 ustSSSimpleString.0 = No Such Object available on this agent
 	    </pre>	</ul><p>
@@ -136,7 +136,7 @@ SNMP table: dlmodTable
 	</ul>
       <li> If everything above was done correctly, then the following
 	command should work and will access the shared object's data:
-	<p><ul><li> % <b>snmpget  localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	<p><ul><li> % <b>snmpget  localhost Net-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 <p><pre>
 ustSSSimpleString.0 = "Hello World"
 </pre><p>

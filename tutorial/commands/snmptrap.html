@@ -1,8 +1,8 @@
 <head>
-<title>UCD-SNMP Tutorial -- Trap handling</title>
+<title>Net-SNMP Tutorial -- Trap handling</title>
 </head>
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-<h1>UCD-SNMP Tutorial -- traps</h1>
+<h1>Net-SNMP Tutorial -- traps</h1>
 <p>
 Traps can be used by network entities to signal abnormal conditions to
 management stations.
@@ -20,7 +20,7 @@ The SNMPv1 trap is defined in the MIB file using the TRAP-TYPE macro,
 as in the following example
 <pre><ul>
 TRAP-TEST-MIB DEFINITIONS ::= BEGIN
-	IMPORTS ucdExperimental FROM UCD-SNMP-MIB;
+	IMPORTS ucdExperimental FROM Net-SNMP-MIB;
 
 demotraps OBJECT IDENTIFIER ::= { ucdExperimental 990 }
 
@@ -50,7 +50,7 @@ The format of the SNMPv2 notification is somewhat different. The definition in
 the MIB file looks as follows
 <pre><ul>
 NOTIFICATION-TEST-MIB DEFINITIONS ::= BEGIN
-        IMPORTS ucdavis FROM UCD-SNMP-MIB;
+        IMPORTS ucdavis FROM Net-SNMP-MIB;
 
 demonotifs OBJECT IDENTIFIER ::= { ucdavis 991 }
 
@@ -160,7 +160,7 @@ trap: demo-notif localhost 127.0.0.1 SNMPv2-MIB::sysUpTime.0 = 1:19:02:06.33, SN
 <h2>Generating traps from the agent</h2>
 The agent is able to generate a few traps by itself.
 When starting up, it will generate a SNMPv2-MIB::coldStart trap,
-and when shutting down a UCD-SNMP-MIB::ucdShutDown.
+and when shutting down a Net-SNMP-MIB::ucdShutDown.
 <p>
 These traps are sent to managers specified in the <i>snmpd.conf</i>file,
 using the <i>trapsink</i> or <i>trap2sink</i> directive (SNMPv1 and SNMPv2
@@ -182,6 +182,6 @@ $ <b>snmpset -c public agent SNMPv2-MIB::snmpEnableAuthenTraps s enable</b>
 </ul></pre>
 <p>
 <strong> Note:</strong>
-the current 4.0 version of UCD-SNMP does not generate authentication
+the current 4.0 version of Net-SNMP does not generate authentication
 failure traps. This will hopefully be corrected before the next release.
 </body>

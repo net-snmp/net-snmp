@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- Demo Application</title>
+    <title>Net-SNMP Tutorial -- Demo Application</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <h1>UCD-SNMP Tutorial -- Demo Application</h1>
+    <h1>Net-SNMP Tutorial -- Demo Application</h1>
     <p>
       Here we discuss how to write a simple application.  It's only
       purpose is to retrieve the value of a variable from a remote
@@ -25,12 +25,12 @@
       </center>
     <p>
       First, we must include some header files.  After you've
-      installed the ucd-snmp toolkit, some easy to use header files
+      installed the net-snmp toolkit, some easy to use header files
       have been installed that handle most situations you'll run
       into.  We start our <i>snmpdemoapp.c</i> file with these:
 <pre>
-#include &lt;ucd-snmp/ucd-snmp-config.h&gt;
-#include &lt;ucd-snmp/ucd-snmp-includes.h&gt;
+#include &lt;net-snmp/net-snmp-config.h&gt;
+#include &lt;net-snmp/net-snmp-includes.h&gt;
 #include <string.h>
 </pre>
     <p>
@@ -45,7 +45,7 @@
 #define DEMO_USE_SNMP_VERSION_3
 
 #ifdef DEMO_USE_SNMP_VERSION_3
-#include "ucd-snmp/transform_oids.h"
+#include "net-snmp/transform_oids.h"
 const char *our_v3_passphrase = "The UCD Demo Password";
 #endif
 </pre>
@@ -98,7 +98,7 @@ main() {
       Next, we'll inialize a session that describes who we want to
       talk to, what version of SNMP we want to use, how to
       authenticate to it, etc.  A full definition of this session
-      can be found in the ucd-snmp/snmp_api.h header file.
+      can be found in the net-snmp/snmp_api.h header file.
     <p>
       We've picked SNMPv3 by default above, which is a bit more complex to
       understand so make sure you've read 
@@ -108,7 +108,7 @@ main() {
      * Initialize a "session" that defines who we're going to talk to
      */
     snmp_sess_init( &session );                   /* set up defaults */
-    session.peername = "ucd-snmp.ucdavis.edu";
+    session.peername = "test.net-snmp.org";
 
     /* set up the authentication parameters for talking to the server */
 
@@ -320,8 +320,8 @@ cc -o snmpdemoapp snmpdemoapp.o -lsnmp
       And then, run it, which produces the results we were expecting:
     <pre>
 % <b>./snmpdemoapp</b>
-system.sysDescr.0 = HP-UX ucd-snmp B.10.20 A 9000/715
-value #1 is a string: HP-UX ucd-snmp B.10.20 A 9000/715
+system.sysDescr.0 = HP-UX net-snmp B.10.20 A 9000/715
+value #1 is a string: HP-UX net-snmp B.10.20 A 9000/715
     </pre>
     <p>
       Homework:
