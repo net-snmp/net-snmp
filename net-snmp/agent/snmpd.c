@@ -305,7 +305,6 @@ main(int argc, char *argv[])
 	int             dont_zero_log = 0;
 	int             stderr_log=0, syslog_log=0;
 	int             uid=0, gid=0;
-        struct module_init_list *initlist;
 
 	logfile[0]		= 0;
 
