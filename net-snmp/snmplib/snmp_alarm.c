@@ -86,30 +86,22 @@ sa_update_entry(struct snmp_alarm *alrm) {
 
 void
 snmp_alarm_unregister(unsigned int clientreg) {
-  struct snmp_alarm *sa_ptr, *alrm=NULL;
+  struct snmp_alarm *sa_ptr, **prevNext = &thealarms;
 
-  if (thealarms == NULL)
-    return;
-
-  if (clientreg == thealarms->clientreg) {
-    alrm = thealarms;
-    thealarms = alrm->next;
-  }
-  else {
-    for(sa_ptr = thealarms;
-        sa_ptr != NULL && sa_ptr->next->clientreg != clientreg;
-        sa_ptr = sa_ptr->next);
-    if (sa_ptr) {
-      if (sa_ptr->next) {
-        alrm = sa_ptr->next;
-        sa_ptr->next = sa_ptr->next->next;
-      }
-    }
+  for (sa_ptr = thealarms;
+       sa_ptr != NULL && sa_ptr->clientreg != clientreg;
+       sa_ptr = sa_ptr->next) {
+    prevNext = &(sa_ptr->next);
   }
 
-  /* Note:  do not free the clientarg, its the clients responsibility */
-  if (alrm)
-    free(alrm);
+  if (sa_ptr != NULL) {
+    *prevNext = sa_ptr->next;
+    DEBUGMSGTL(("snmp_alarm_unregister","alarm %d\n",sa_ptr->clientreg));
+    /* Note:  do not free the clientarg, its the clients responsibility */
+    free(sa_ptr);
+  } else {
+    DEBUGMSGTL(("snmp_alarm_unregister","alarm %d doesn't exist\n",clientreg));
+  }
 }
   
 
@@ -230,6 +222,7 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
   (*sa_pptr)->clientarg = clientarg;
   (*sa_pptr)->thecallback = thecallback;
   (*sa_pptr)->clientreg = regnum++;
+  (*sa_pptr)->next = NULL;
   sa_update_entry(*sa_pptr);
 
   DEBUGMSGTL(("snmp_alarm_register","registered alarm %d, secends=%d, flags=%d\n",
