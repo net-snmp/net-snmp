@@ -1108,11 +1108,26 @@ init_snmpv3(const char *type)
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defContext", 
 			       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CONTEXT);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPassphrase",
-			     NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PASSPHRASE);
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_PASSPHRASE);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defAuthPassphrase",
-			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_AUTHPASSPHRASE);
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_AUTHPASSPHRASE);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase",
-			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRIVPASSPHRASE);
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_PRIVPASSPHRASE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defAuthMasterKey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_AUTHMASTERKEY);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPrivMasterKey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_PRIVMASTERKEY);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defAuthLocalizedKey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_AUTHLOCALIZEDKEY);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPrivLocalizedKey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_PRIVLOCALIZEDKEY);
     register_config_handler("snmp", "defVersion", version_conf, NULL,
                             "1|2c|3");
 
