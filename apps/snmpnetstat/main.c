@@ -106,7 +106,7 @@ main(argc, argv)
 	int argc;
 	char *argv[];
 {
-    char *cp, *name;
+    char *name;
     char *hostname = NULL;
     register struct protoent *p;
     register struct protox *tp;	/* for printing cblocks & stats */
@@ -181,15 +181,10 @@ main(argc, argv)
                         break;
 
                 case 'P':
-                        argv++;
-                        argc--;
-                        if (argc == 0){
-                                usage();
-				exit(1);
-			}
-                        if ((tp = name2protox(*argv)) == NULLPROTOX) {
+                        arg++;
+                        if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
                                 fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
-                                        *argv);
+                                        argv [arg]);
                                 exit(10);
                         }
                         pflag++;
@@ -197,15 +192,11 @@ main(argc, argv)
 
                 case 'I':
                         iflag++;
-                        if (*(interface = cp + 1) == 0) {
-                                if ((interface = argv[1]) == 0)
+                        if (*(interface = argv[arg] + 2) == 0) {
+                                arg++;
+                                if ((interface = argv[arg]) == 0)
                                         break;
-                                argv++;
-                                argc--;
                         }
-                        for (cp = interface; *cp; cp++)
-                                ;
-                        cp--;
                         break;
 
 	      default:

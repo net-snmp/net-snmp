@@ -302,16 +302,24 @@ int snmp_input(op, session, reqid, pdu, magic)
     struct variable_list *vars;
     char buf[64];
     struct snmp_pdu *reply;
+    struct tm *tm;
+    time_t timer;
 
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == TRP_REQ_MSG){
 	    if (Print){
-		printf("%s: %s Trap (%d) Uptime: %s\n",
+		time (&timer);
+		tm = localtime (&timer);
+		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s: %s Trap (%d) Uptime: %s\n",
+		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+		       tm->tm_hour, tm->tm_min, tm->tm_sec,
 		       inet_ntoa(pdu->agent_addr.sin_addr),
 		       trap_description(pdu->trap_type), pdu->specific_type,
 		       uptime_string(pdu->time, buf));
-		for(vars = pdu->variables; vars; vars = vars->next_variable)
+		for(vars = pdu->variables; vars; vars = vars->next_variable) {
+		    printf ("                    ");
 		    print_variable(vars->name, vars->name_length, vars);
+		}
 	    }
 	    if (Syslog){
 		syslog(LOG_WARNING, "%s: %s Trap (%d) Uptime: %s\n",
@@ -403,13 +411,14 @@ main(argc, argv)
     u_long myaddr;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen, dstlen, contextlen;
-    int local_port = 0, port_flag;
+    int local_port = 0, port_flag = 0;
     char *config_file = NULL;
     struct config_module *dp;
     int sd;
     struct sockaddr_in me;
     char ctmp[300];
 
+    setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     init_syslog();
     init_mib();
     /*
@@ -421,7 +430,7 @@ main(argc, argv)
 	        case 'c':
 		    /* config file name */
 		    if (++arg >= argc) {
-			printf("-c: no config file name\n");
+			fprintf(stderr,"-c: no config file name\n");
 			break;
 		    }
 		    config_file = argv[arg];
@@ -450,13 +459,13 @@ main(argc, argv)
                     if (version < 1 || version > 2){
                         fprintf(stderr, "Invalid version\n");
 
-                        printf("Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+                        fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
                         exit(1);
                     }
                     break;
 		default:
-		    printf("invalid option: -%c\n", argv[arg][1]);
-		    printf("Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
+		    fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
 		    break;
 	    }
 	    continue;
@@ -513,8 +522,8 @@ main(argc, argv)
 	session.local_port = SNMP_TRAP_PORT;
     ss = snmp_open(&session);
     if (ss == NULL){
-	printf("Couldn't open snmp\n");
-	exit(-1);
+	fprintf(stderr,"Couldn't open snmp\n");
+	exit(1);
     }
 
     while(1){

@@ -1513,6 +1513,10 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 static int
 IF_cmp(void *addr, void *ep)
 {
+#ifdef DODEBUG
+    printf ("... IF_cmp %d %d\n", 
+    ((mib2_ifEntry_t *)ep)->ifIndex, ((mib2_ifEntry_t *)addr)->ifIndex);
+#endif
     if (((mib2_ifEntry_t *)ep)->ifIndex == ((mib2_ifEntry_t *)addr)->ifIndex)
 	return (0);
     else
@@ -1540,7 +1544,14 @@ variable, otherwise 0 */
     int                 result, count;
     register char       *cp;
     mib2_ifEntry_t      ifstat;
+#ifdef DODEBUG
+    char c_oid[1024];
+#endif
  
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_ifEntry: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
@@ -1549,15 +1560,27 @@ variable, otherwise 0 */
         if ((exact && (result == 0)) || (!exact && (result < 0)))
             break;
     }
-    if (interface > count)
+    if (interface > count) {
+#ifdef DODEBUG
+	printf ("... index out of range\n");
+#endif
         return NULL;
+    }
     bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);
+#ifdef DODEBUG
+    sprint_objid (c_oid, newname, *length);
+    printf ("... getMibstat %s\n", c_oid);
+#endif
     if (getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
-                   GET_EXACT, &IF_cmp, &interface) != 0)
+                   GET_EXACT, &IF_cmp, &interface) != 0) {
+#ifdef DODEBUG
+      printf ("... no mib stats\n");
+#endif
       return NULL;
+    }
     switch (vp->magic){
     case IFINDEX:
       long_return = ifstat.ifIndex;
@@ -1758,9 +1781,16 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
+#ifdef DODEBUG
+    char	c_oid[1024];
+#endif
 
     /* fill in object part of name for current (less sizeof instance part) */
 
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_atEntry: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
@@ -1800,6 +1830,9 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	    }
 	}
     }
+#ifdef DODEBUG
+    printf ("... Found = %d\n", Found);
+#endif
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));
@@ -2069,7 +2102,14 @@ var_ip(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
+#ifdef DODEBUG
+    char c_oid[1024];
+#endif
 
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_ip: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
@@ -2185,9 +2225,16 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     mib2_ipAddrEntry_t	    entry, Lowentry;
     int			    Found = 0;
     req_e		    req_type;
+#ifdef DODEBUG
+    char		    c_oid[1024];
+#endif
     
     /* fill in object part of name for current (less sizeof instance part) */
 
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_ipAddrEntry: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
@@ -2220,6 +2267,9 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	}
       }
     }
+#ifdef DODEBUG
+    printf ("... Found = %d\n", Found);
+#endif
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, IP_ADDRNAME_LENGTH * sizeof(oid));
@@ -2367,7 +2417,14 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
+#ifdef DODEBUG
+    char c_oid[1024];
+#endif
 
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_icmp: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[ICMP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
@@ -2533,7 +2590,14 @@ var_udp(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
+#ifdef DODEBUG
+    char c_oid[1024];
+#endif
 
+#ifdef DODEBUG
+    sprint_objid (c_oid, name, *length);
+    printf ("var_udp: %s %d\n", c_oid, exact);
+#endif
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[UDP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
@@ -2756,7 +2820,14 @@ int     (**write_method)(); /* OUT - pointer to function to set variable, otherw
   int State, LowState;
   int result;
   u_char *ret = (u_char *)&long_return;	/* Successful completion */
+#ifdef DODEBUG
+  char c_oid[1024];
+#endif
 
+#ifdef DODEBUG
+  sprint_objid (c_oid, name, *length);
+  printf ("var_tcp: %s %d\n", c_oid, exact);
+#endif
   if (vp->magic < TCPCONNSTATE) {
     bcopy((char *)vp->name, (char *)newname,
 	  (int)vp->namelen * sizeof(oid));

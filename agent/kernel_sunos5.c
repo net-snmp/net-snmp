@@ -63,7 +63,7 @@
 static
 mibcache Mibcache[MIBCACHE_SIZE] = {
 {MIB_SYSTEM,		0,					(void *)-1, 0, 0, 0, 0},
-{MIB_INTERFACES,	10*sizeof(mib2_ifEntry_t),		(void *)-1, 0, 1000, 0, 0},
+{MIB_INTERFACES,	10*sizeof(mib2_ifEntry_t),		(void *)-1, 0, 10, 0, 0},
 {MIB_AT,		0,					(void *)-1, 0, 0, 0, 0},
 {MIB_IP,		sizeof(mib2_ip_t),			(void *)-1, 0, 20, 0, 0},
 {MIB_IP_ADDR,		20*sizeof(mib2_ipAddrEntry_t),		(void *)-1, 0, 20, 0, 0},
@@ -191,6 +191,12 @@ getKstat(char *statname, char *varname, void *value)
 
   /* Now, look for the name of our stat in the headers buf */
   for (i = 0; i < ks->ks_ndata; i++) {
+#ifdef DODEBUG
+    printf ("module: %s instance: %d name: %s class: %s type: %d flags: %x\n",
+	    kstat_data[i].ks_module, kstat_data[i].ks_instance, 
+	    kstat_data[i].ks_name, kstat_data[i].ks_class,
+	    kstat_data[i].ks_type, kstat_data[i].ks_flags);
+#endif
     if (strcmp(statname, kstat_data[i].ks_name) == 0) {
       strcpy(module_name, kstat_data[i].ks_module);
       instance = kstat_data[i].ks_instance;
@@ -217,28 +223,52 @@ getKstat(char *statname, char *varname, void *value)
     goto Return;		/* Invalid stat type */
   }
   for (i = 0, d = KSTAT_NAMED_PTR(ks); i < ks->ks_ndata; i++, d++) {
+#ifdef DODEBUG
+    printf ("variable: %s %d\n", d->name, d->data_type);
+#endif
     if (strcmp(d->name, varname) == 0) {
       switch (d->data_type) {
       case KSTAT_DATA_CHAR:
 	*(char *)v = (int)d->value.c;
+#ifdef DODEBUG
+	printf ("value: %d\n", (int)d->value.c);
+#endif
 	break;
       case KSTAT_DATA_LONG:
 	*(long *)v = d->value.l;
+#ifdef DODEBUG
+	printf ("value: %ld\n", d->value.l);
+#endif
 	break;
       case KSTAT_DATA_ULONG:
 	*(ulong_t *)v = d->value.ul;
+#ifdef DODEBUG
+	printf ("value: %lu\n", d->value.ul);
+#endif
 	break;
       case KSTAT_DATA_LONGLONG:
 	*(longlong_t *)v = d->value.ll;
+#ifdef DODEBUG
+	printf ("value: %ld\n", (long)d->value.ll);
+#endif
 	break;
       case KSTAT_DATA_ULONGLONG:
 	*(u_longlong_t *)v = d->value.ull;
+#ifdef DODEBUG
+	printf ("value: %lu\n", (unsigned long)d->value.ul);
+#endif
 	break;
       case KSTAT_DATA_FLOAT:
 	*(float *)v = d->value.f;
+#ifdef DODEBUG
+	printf ("value: %f\n", d->value.f);
+#endif
 	break;
       case KSTAT_DATA_DOUBLE:
 	*(double *)v = d->value.d;
+#ifdef DODEBUG
+	printf ("value: %f\n", d->value.d);
+#endif
 	break;
       default:
 	ret = -3;
@@ -276,6 +306,9 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
      * We assume that Mibcache is initialized in mibgroup_e enum order
      * so we don't check the validity of index here.
      */
+#ifdef DODEBUG
+    printf ("getMibstat (%d, *, %d, %d, *, *)\n", grid, entrysize, req_type);
+#endif
     cachep = &Mibcache[grid];
     mibgr = Mibmap[grid].group;
     mibtb = Mibmap[grid].table;
@@ -286,8 +319,11 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 	cachep->cache_addr = resp; /* So use caller supplied address instead of cache */
 	cachep->cache_size = entrysize;
     }
-    cache_valid =
-	(((time((time_t *)NULL) - cachep->cache_time) > cachep->cache_ttl)? 0 : 1);
+    cache_valid = (time(NULL) - cachep->cache_time) > cachep->cache_ttl ? 0 : 1;
+#ifdef DODEBUG
+    printf ("... cache_valid %d time %ld ttl %d now %ld\n",
+            cache_valid, cachep->cache_time, cachep->cache_ttl, time (NULL));
+#endif
     if (cache_valid) {
 	/* Entry is valid, let's try to find a match */
 	result = getentry(req_type, cachep->cache_addr, cachep->cache_length,
@@ -308,7 +344,7 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 	    rc = getmib(mibgr, mibtb, cachep->cache_addr, cachep->cache_size, entrysize,
 			req_type, &ep, &length, comp, arg);
 	if (rc >= 0) {		/* Cache has been filled up */
-	    cachep->cache_time = time((time_t *)NULL);
+	    cachep->cache_time = time(NULL);
 	    cachep->cache_length = length;
 	    if (rc == 1)	/* Found but there are more unread data */
 		cachep->cache_flags |= CACHE_MOREDATA;
@@ -316,6 +352,9 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 		cachep->cache_flags &= ~CACHE_MOREDATA;
 	}
     }
+#ifdef DODEBUG
+    printf ("... result %d rc %d\n", result, rc);
+#endif
     if (result == FOUND || rc == 0 || rc == 1) {
 	/* Entry has been found, deliver it */
 	if (resp != (void *)NULL) 
@@ -374,7 +413,7 @@ init_mibcache_element(mibcache *cp)
 	return;
     if (cp->cache_size)
 	    cp->cache_addr = malloc(cp->cache_size);
-    cp->cache_time = time((time_t)NULL) - 100*cp->cache_ttl; /* In the past */
+    cp->cache_time = time(NULL) - 100*cp->cache_ttl; /* In the past */
 }
 
 /* Get MIB-II statistics from the Solaris kernel.
@@ -545,7 +584,7 @@ static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
       mib2_ifEntry_t *resp, int *length, int (*comp)(void *, void *), void *arg)
 {
-    int 		i, ret, index = 1;
+    int 		i, ret, idx = 1;
     int 		sd;
     char 		buf[1024];
     struct ifconf 	ifconf;
@@ -566,13 +605,19 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
  Again:
     for (i = 0, ifp = (mib2_ifEntry_t *)ifbuf, ifrp = ifconf.ifc_req;
 	 ((char *)ifrp < ((char *)ifconf.ifc_buf + ifconf.ifc_len)) && (i < nentries);
-	 i++, ifp++, ifrp++, index++) {
+	 i++, ifp++, ifrp++, idx++) {
+#ifdef DODEBUG
+	printf ("...... getif %s\n", ifrp->ifr_name);
+#endif
 	if (ioctl(sd, SIOCGIFFLAGS, ifrp) < 0) {
 	    ret = -1;
+#ifdef DODEBUG
+	    printf ("...... SIOCGIFFLAGS failed\n");
+#endif
 	    goto Return;
 	}
 	(void)memset(ifp, 0, sizeof(mib2_ifEntry_t));
-	ifp->ifIndex = index;
+	ifp->ifIndex = idx;
 	ifp->ifDescr.o_length = strlen(ifrp->ifr_name);
 	(void)strcpy(ifp->ifDescr.o_bytes, ifrp->ifr_name);
 	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_RUNNING) ? 1 : 2;
@@ -580,42 +625,37 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifLastChange = 0;		/* Who knows ...  */
 	if (ioctl(sd, SIOCGIFMTU, ifrp) < 0) {
 	    ret = -1;
+#ifdef DODEBUG
+	    printf ("...... SIOCGIFMTU failed\n");
+#endif
 	    goto Return;
 	}
 	ifp->ifMtu = ifrp->ifr_metric;
 	ifp->ifSpeed = 10000000; 	/* Best guess */
-	if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
-          /* Virtual interfaces (dev:X) don't have individual statistics, */
-          /* at least on Solaris 2.5 as of 5/1/96.  -ddickey */
-          if (!strchr(ifrp->ifr_name, ':')) {
-            ret = -1;
-            goto Return;
-          }
-	}
-	ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
-	if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutUcastPkts) < 0) {
-          if (!strchr(ifrp->ifr_name, ':')) {
-	    ret = -1;
-	    goto Return;
-          }
-	}
-	ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
-	if (strcmp(ifrp->ifr_name, "lo0") == 0) { /* No other stat for lo0 */
-	    ifp->ifType = 24;		/* Loopback */
-	    continue;
-	}
-	ifp->ifType = (ifp->ifMtu == 1500)? 6 : 1; /* Best guess */
-	if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
-          if (!strchr(ifrp->ifr_name, ':')) {
-	    ret = -1;
-	    goto Return;
-          }
-	}
-	if (getKstat(ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
-          if (!strchr(ifrp->ifr_name, ':')) {
-	    ret = -1;
-	    goto Return;
-          }
+	if (!strchr (ifrp->ifr_name, ':')) {
+	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
+		ret = -1;
+		goto Return;
+	    }
+	    ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
+	    if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutUcastPkts) < 0) {
+		ret = -1;
+		goto Return;
+	    }
+	    ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
+	    if (strcmp(ifrp->ifr_name, "lo0") == 0) { /* No other stat for lo0 */
+		ifp->ifType = 24;		/* Loopback */
+		continue;
+	    }
+	    ifp->ifType = (ifp->ifMtu == 1500)? 6 : 1; /* Best guess */
+	    if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
+		ret = -1;
+		goto Return;
+	    }
+	    if (getKstat(ifrp->ifr_name, "oerrors", &ifp->ifOutErrors) < 0) {
+		ret = -1;
+		goto Return;
+	    }
 	}
 	/*
 	 * An attempt to determine the physical address of the interface.
@@ -749,7 +789,7 @@ IF_cmp(void *addr, void *ep)
 void
 main (int argc, char **argv)
 {
-  int rc = 0, i, index;
+  int rc = 0, i, idx;
   mib2_ipAddrEntry_t	ipbuf, *ipp = &ipbuf;
   mib2_ipNetToMediaEntry_t entry, *ep = &entry;
   mib2_ifEntry_t	ifstat;
@@ -773,8 +813,8 @@ main (int argc, char **argv)
     break;
   };
   while ((rc = getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
-			  req_type, &IF_cmp, &index)) == 0) {
-      index = ifstat.ifIndex;
+			  req_type, &IF_cmp, &idx)) == 0) {
+      idx = ifstat.ifIndex;
       fprintf(stdout, "Ifname = %s\n", ifstat.ifDescr.o_bytes);
       req_type = GET_NEXT;
   }

@@ -378,7 +378,7 @@ build_tree(nodes)
     strcpy(tp->label, "joint-iso-ccitt");
     tp->subid = 2;
     tp->type = 0;
-    tp->description = 0;
+    tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
     do_subtree(tp, &nodes);
     lasttp = tp;
@@ -392,7 +392,7 @@ build_tree(nodes)
     strcpy(tp->label, "ccitt");
     tp->subid = 0;
     tp->type = 0;
-    tp->description = 0;
+    tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
     do_subtree(tp, &nodes);
     lasttp = tp;
@@ -406,7 +406,7 @@ build_tree(nodes)
     strcpy(tp->label, "iso");
     tp->subid = 1;
     tp->type = 0;
-    tp->description = 0;
+    tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
     do_subtree(tp, &nodes);
 
@@ -1082,7 +1082,7 @@ parse_objecttype(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, quoted_string_buffer);
+          type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
           if (type != QUOTESTRING) {
               print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
@@ -1091,12 +1091,14 @@ parse_objecttype(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
+#ifdef USE_DESCRIPTION
 	  np->description = quoted_string_buffer;
 	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+#endif
           break;
 
 	case REFERENCE:
-	  type = get_token(fp, quoted_string_buffer);
+	  type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
 	  if (type != QUOTESTRING) {
 	      print_error("Bad DESCRIPTION", quoted_string_buffer, type);
 	      free_node(np);
@@ -1180,7 +1182,7 @@ parse_objectgroup(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, quoted_string_buffer);
+          type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
           if (type != QUOTESTRING) {
               print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
@@ -1189,8 +1191,10 @@ parse_objectgroup(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
+#ifdef USE_DESCRIPTION
 	  np->description = quoted_string_buffer;
 	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+#endif
           break;
 
         default:
@@ -1251,7 +1255,7 @@ parse_notificationDefinition(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, quoted_string_buffer);
+          type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
           if (type != QUOTESTRING) {
               print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
@@ -1260,8 +1264,10 @@ parse_notificationDefinition(fp, name)
 #ifdef TEST
 printf("Description== \"%.50s\"\n", quoted_string_buffer);
 #endif
+#ifdef USE_DESCRIPTION
 	  np->description = quoted_string_buffer;
 	  quoted_string_buffer = (char *)malloc(MAXQUOTESTR);
+#endif
           break;
 
         default:
