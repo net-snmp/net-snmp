@@ -28,6 +28,13 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
+@    foreach $node index@
+@        include m2c_setup_node.m2i@
+@        if $m2c_node_skip_mapping == 0@
+    int ${node}_map($m2c_node_map_param);
+@        end@ # // skip mapping
+@    end@ # index
+
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
     int ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref );
@@ -58,13 +65,26 @@
 ##
 ##   do nodes
 ##
+@    foreach $node index@
+@        include m2c_setup_node.m2i@
+@        include details-node.m2i@
+@        if $m2c_node_skip_mapping == 1@
+@           next@
+@        end@
+@        print | |   +-> Processing index $node@
+@        include generic-value-map-func.m2i@
+@    end@ # foreach column
+
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
 @        include details-node.m2i@
 @        if $node.noaccess == 1@
-@            break@ # skip to next column
+@            next@ # skip to next column
 @        end@
 @        print | |   +-> Processing nonindex $node@
+@        if $m2c_node_skip_mapping == 0@
+@           include generic-value-map-func.m2i@
+@        end@
 @        include node-get.m2i@
 @    end@ # foreach column
 @end@ # foreach table

@@ -118,8 +118,8 @@ ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
-@   eval $m2c_ctx_lh = "$m2c_undo_item"@
-@   eval $m2c_ctx_rh = "$m2c_data_item"@
+@   eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
+@   eval $m2c_ctx_rh = "${m2c_data_item}${node}"@
 @   include generic-ctx-copy.m2i@
 @end@
 
@@ -192,8 +192,8 @@ ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx)
     /** syntax-$node.syntax-undo.m2i not found */
     netsnmp_assert(NULL != rowreq_ctx);
 
-@   eval $m2c_ctx_rh = "$m2c_undo_item"@
-@   eval $m2c_ctx_lh = "$m2c_data_item"@
+@   eval $m2c_ctx_rh = "${m2c_undo_item}${node}"@
+@   eval $m2c_ctx_lh = "${m2c_data_item}${node}"@
 @   include generic-ctx-copy.m2i@
 @end@ # no syntax include
     
