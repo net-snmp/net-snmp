@@ -1673,6 +1673,13 @@ usm_process_in_msg (
 	}
 
 
+	if (secLevel != SNMP_SEC_LEVEL_AUTHPRIV) {
+            /* pull these out now so reports can use them */
+            *scopedPdu = data_ptr;
+            *scopedPduLen = wholeMsgLen - (data_ptr - wholeMsg);
+            end_of_overhead = data_ptr;
+        }
+
 	if (secStateRef)
 	{
 		/* Cache the name, engine ID, and security level,
