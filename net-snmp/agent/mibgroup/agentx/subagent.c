@@ -583,7 +583,13 @@ subagent_open_master_session(void)
     if (main_session == NULL) {
 	/*  Diagnose snmp_open errors with the input
 	    netsnmp_session pointer.  */
-	snmp_sess_perror("subagent_pre_init", &sess);
+	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+            snmp_sess_perror("Warning: Failed to connect to the agentx master agent",
+                             &sess);
+        } else {
+            snmp_sess_perror("Error: Failed to connect to the agentx master agent",
+                             &sess);
+        }
 	return -1;
     }
 
