@@ -1048,3 +1048,46 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     free(ourcopy);
     return SNMPERR_SUCCESS;
 }
+
+/*
+ * This function was created to differentiate actions
+ * that are appropriate for Linux 2.4 kernels, but not later kernels.
+ *
+ * This function can be used to test kernels on any platform that supports uname().
+ *
+ * If not running a platform that supports uname(), return -1.
+ *
+ * If ospname matches, and the release matches up through the prefix,
+ *  return 0.
+ * If the release is ordered higher, return 1.
+ * Be aware that "ordered higher" is not a guarantee of correctness.
+ */
+int
+netsnmp_os_prematch(const char *ospmname,
+                    const char *ospmrelprefix)
+{
+#if HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+static int printOSonce = 1;
+  struct utsname utsbuf;
+  if ( 0 != uname(&utsbuf))
+    return -1;
+
+  if (printOSonce) {
+    printOSonce = 0;
+    /* show the four elements that the kernel can be sure of */
+  DEBUGMSGT(("daemonize","sysname '%s',\nrelease '%s',\nversion '%s',\nmachine '%s'\n",
+      utsbuf.sysname, utsbuf.release, utsbuf.version, utsbuf.machine));
+  }
+  if (0 != strcasecmp(utsbuf.sysname, ospmname)) return -1;
+
+  /* Required to match only the leading characters */
+  return strncasecmp(utsbuf.release, ospmrelprefix, strlen(ospmrelprefix));
+
+#else
+
+  return -1;
+
+#endif /* HAVE_SYS_UTSNAME_H */
+}
+
