@@ -15,7 +15,8 @@ INSTALL = @INSTALL@
 
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
-all:	${srcdir}/configure ${srcdir}/config.h makeall mib.txt
+all:	makeall mib.txt
+distall: ${srcdir}/configure ${srcdir}/config.h 
 
 install:    apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd
 	$(INSTALL) apps/snmpget $(bindir)/snmpget
