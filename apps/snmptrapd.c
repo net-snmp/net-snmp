@@ -1118,7 +1118,7 @@ main(int argc, char *argv[])
 #endif
     while (running) {
         if (reconfig) {
-            if (Print) {
+            if (Print || Log) {
                 struct tm      *tm;
                 time_t          timer;
                 time(&timer);
@@ -1179,7 +1179,7 @@ main(int argc, char *argv[])
 	run_alarms();
     }
 
-    if (Print) {
+    if (Print || Log) {
         struct tm      *tm;
         time_t          timer;
         time(&timer);
