@@ -12,6 +12,7 @@
 #define ERRORNAME 2
 #define ERRORFLAG 100
 #define ERRORMSG 101
+#define ERRORFIX 102
 
 /* process mib names def numbers */
 

@@ -9,6 +9,16 @@
 #define PSCMD "/bin/ps -axc"
 #endif
 
+/* Exec command to fix PROC problems */
+/* %s will be replaced by the process name in error */
+
+#define PROCFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
+
+/* Exec command to fix EXEC problems */
+/* %s will be replaced by the process name in error */
+
+#define EXECFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
+
 /* Should process output Cashing be used, and if so,
    After how many seconds should the cache re-newed?
    Note:  Don't define CASHETIME to disable cashing completely */
