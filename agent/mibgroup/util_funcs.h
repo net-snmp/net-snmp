@@ -5,6 +5,16 @@
 #define _MIBGROUP_UTIL_FUNCS_H
 
 #include "struct.h"
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 void Exit __P((int));
 int shell_command __P((struct extensible *));
@@ -21,5 +31,6 @@ char *find_field __P((char *, int));
 int parse_miboid __P((char *, oid *));
 void string_append_int __P((char *, int));
 void wait_on_exec __P((struct extensible *));
+int calculate_time_diff __P((struct timeval, struct timeval));
 
 #endif /* _MIBGROUP_UTIL_FUNCS_H */
