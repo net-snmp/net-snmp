@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -8,71 +8,102 @@
 @end@
 ########################################################################
 ##
-/*
- * ${node}_check_value
+##----------------------------------------------------------------------
+/**
+ * Check that the proposed new value is potentially valid.
  *
- * return 0 if the incoming value is legal, an SNMP error code otherwise.
+@if $mfd_code_verbose == 1@
+ * Note that this check is only to determine if the new value
+ * is *potentially* valid. This is the first check of many, and
+ * is one of simplest ones.
+ *
+ * The following checks have already been done for you:
+ *    The syntax is $node.type
+@if $node.enums == 1@
+ *    The value is one of $m2c_evals
+@elsif $node.ranges == 1@
+@    if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
+@        eval $m2c_tmp_ns = "value"@
+@    else@
+@        eval $m2c_tmp_ns = "length"@
+@    end@
+ *    The $m2c_tmp_ns is in (one of) the range set(s): $m2c_evals
+@end@
+ *
+ * This is the place to check for requirements that are not
+ * expressed in the mib syntax (for example, a requirement that
+ * is detailed in the description for an object).
+ *
+@    if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
+ * For example, an object with the syntax INTEGER(0..500) will
+ * have already been checked for a value between 0 and 500. But
+ * if the decsription also specifies that the value must be an
+ * even number, you would enforce that requirement here.
+@    else@
+ * For example, and object with the syntax DisplayString(0..40)
+ * will have already been checked for a length between 0 and 40.
+ * But if the description also specified that the value must
+ * be all uppercase letters, you would enforce that requirement here.
+@    end@
+ *
+ * check that the requested change between the undo value and the
+ * new value is legal (ie, the transistion from one value to another
+ * is legal
+ *      
+ * If there a no other checks you need to do, simply return 0.
+ * 
+ * NOTE: this is not the place to do any checks for values
+ *       which depend on some other value in the mib. Those
+ *       types of checks should be done in the
+ *       ${context}_check_dependencies() function.
+ *
+@end@
+ * @param ${context}_ctx
+ *        Pointer to the users context. You should know how to
+ *        manipulate the value from this object.
+ * @param ${node}
+ *        A $node.decl containing the new value.
+@    if $m2c_node_needlength == 1@
+ * @param ${node}_len
+ *        The size (in bytes) of the data pointed to by ${node}_ptr.
+@    end@
+ *
+ * @return 0 if the incoming value is legal, 1 if it is not.
  */
 int
 ${node}_check_value( ${context}_ctx *ctx, $m2c_node_set_parms)
 {
-    netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != ctx->reg);
-    netsnmp_assert(NULL != ctx->data);
-    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
+    /** should never get a NULL pointer */
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
 
     /*
-     * TODO: check that new value is legal
-     *
-     * The following checks have already been done for you:
-     *    The syntax is $node.syntax
-@if $node.enums == 1@
-     *    The value is one of $m2c_evals
-@elsif $node.ranges == 1@
-     *    The value is in one of the range set(s): $m2c_evals
-@end@
-     *
-     * NOTE: this is not the place to do any checks for values
-     *       which depend on some other value in the mib. Those
-     *       types of checks should be done in the
-     *       ${node}_check_dependencies() function.
+     * TODO: check that new value is legal, and/or if the
+     * new value 
      */
 
-    /*
-     * TODO: check that the requested change between the undo value and the
-     * new value is legal (ie, the transistion from one value to another
-     * is legal
-     */
-      
-    /* if everything looks ok, return SNMP_ERR_NOERROR */
-      return SNMP_ERR_NOERROR;
+    /* if everything looks ok, return 0 */
+    return SNMPERR_SUCCESS;
 }
 
+##----------------------------------------------------------------------
 /*
- * ${node}_set
+ * Set the new value.
  *
- * Purpose:
- *
- * Param: ${context}_reg
- *        Pointer supplied by user during registration.
- * Param: ${context}_ctx
- *        Pointer to the users context. You should know how to
- *        manipulate the value from this object.
 @if $m2c_node_set_comments ne ""@
 $m2c_node_set_comments
-@else@
- * Param: ${node}
- *        Pointer to storage for a $node.decl variable
-@    if $m2c_node_needlength == 1@
- * Param: ${node}_len
- *        Pointer to a size_t. The size (in bytes) of the data pointed to by
- *        If you need more memory, allocate it using malloc(), update the
- *        the $node pointer.
-@    end@
+*
 @end@
+ * @param ${context}_ctx
+ *        Pointer to the users context. You should know how to
+ *        manipulate the value from this object.
+ * @param ${node}
+ *        A $node.decl containing the new value.
+@    if $m2c_node_needlength == 1@
+ * @param ${node}_len
+ *        The size (in bytes) of the data pointed to by ${node}_ptr.
+@    end@
  */
 int
 ${node}_set( ${context}_ctx *ctx, $m2c_node_set_parms )
@@ -80,10 +111,8 @@ ${node}_set( ${context}_ctx *ctx, $m2c_node_set_parms )
 @ifconf syntax-$node.syntax-set.m2i@
 @    include syntax-$node.syntax-set.m2i@
 @else@
+    /** should never get a NULL pointer */
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != ctx->reg);
-    netsnmp_assert(NULL != ctx->data);
-    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
@@ -96,43 +125,33 @@ ${node}_set( ${context}_ctx *ctx, $m2c_node_set_parms )
 @        include generic-ctx-set.m2i@
 @    end@ # ! enums & bits
 @end@ # no syntax include
-    return SNMP_ERR_NOERROR;
+    return SNMPERR_SUCCESS;
 }
 
+##----------------------------------------------------------------------
 /*
- * ${node}_undo
+ * undo the previous set.
  *
- * Purpose:
- *
- * Param: ${context}_reg
- *        Pointer supplied by user during registration.
- * Param: ${context}_ctx
- *        Pointer to the users context. You should know how to
- *        manipulate the value from this object.
 @if $m2c_node_undo_comments ne ""@
 $m2c_node_undo_comments
-@else@
- * Param: ${node}
- *        Pointer to storage for a $node.decl variable
-@    if $m2c_node_needlength == 1@
- * Param: ${node}_len
- *        Pointer to a size_t. The size (in bytes) of the data pointed to by
- *        If you need more memory, allocate it using malloc(), update the
- *        the $node pointer.
-@    end@
+*
+@end@
+ * @param ${context}_ctx
+ *        Pointer to the users context. You should know how to
+ *        manipulate the value from this object.
+@if $m2c_node_needlength == 1@
+ * @param ${node}_len
+ *        The size (in bytes) of the data pointed to by ${node}_ptr.
 @end@
  */
 int
-${node}_undo( ${context}_ctx *ctx, $m2c_node_set_parms )
+${node}_undo( ${context}_ctx *ctx )
 {
 @ifconf syntax-$node.syntax-undo.m2i@
 @    include syntax-$node.syntax-undo.m2i@
 @else@
     /** syntax-$node.syntax-undo.m2i not found */
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != ctx->reg);
-    netsnmp_assert(NULL != ctx->data);
-    netsnmp_assert(NULL != ctx->undo);
 @if $m2c_node_needlength == 1@
     netsnmp_assert(NULL != ${node}_ptr);
 @end@
