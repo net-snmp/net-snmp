@@ -83,6 +83,12 @@ hardaker 11 Mar 96 15:40:17
 
     - (README): more clean up and added reference to the ucd-snmp mailing list.
 
+hardaker 11 Mar 96 15:57:20
+
+    - (snmplib/snmp_api.c): fixed a timeout bug caused by architectures
+      with an unsigned timeval.tv_sec value.
+      - Thanks goes to Giovanni S. Marzot <gmarzot@baynetworks.com> for
+	the patch!
 
 -------------------------------------------------------------------------------
 
