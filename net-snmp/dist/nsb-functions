@@ -10,6 +10,7 @@
 NSB_QUIET=0
 NSB_PROMPT=1
 NSB_CLEAN=1
+NSB_CONFIG_ALL=0
 NSB_SKIP_CONFIG=0
 NSB_SKIP_BUILD=0
 NSB_SKIP_TEST=0
@@ -49,18 +50,39 @@ nsb-prompt()
 #
 nsb-get-config()
 {
-   if [ $# -ne 2 ]; then
-      echo "usage: $0 release src_dir dest_dir"
+   if [ $# -lt 1 ]; then
+      echo "usage: nsb-get-config src_dir"
       exit
    fi
    ngc_src=$1
-   ngc_inst=$2
    echo $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
    $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
+}
+
+nsb-config-all()
+{
+   if [ $# -lt 1 ]; then
+      echo "usage: nsb-config-with src_dir"
+      exit
+   fi
+   ngc_src=$1
+   shift 1
+   echo $ngc_src/configure  --with-sys-location=Unknown \
+      --with-sys-contact='System Administrator' \
+      '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+      '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+       --enable-embedded-perl --enable-shared
+
+   $ngc_src/configure  --with-sys-location=Unknown \
+      --with-sys-contact='System Administrator' \
+      '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
+      '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+       --enable-embedded-perl --enable-shared
+
 }
 
 nsb-sysname()
@@ -134,15 +156,18 @@ nsb-make()
 
 nsb-build()
 {
-   if [ $# -ne 4 ]; then
-      echo "usage: $0 release src_dir build_directory dest_dir"
+   if [ $# -lt 5 ]; then
+      echo "usage: $0 release src_dir build_directory dest_dir config_all_flag"
       exit
    fi
 
+   nsb_config_all=0
    release=$1
    src_dir=$2
    build_dir=$3
    dest_dir=$4
+   nsb_config_all=$5
+   shift 5
 
    if [ ! -d $src_dir ]; then
       echo "$src_dir does not exist!"
@@ -176,7 +201,11 @@ nsb-build()
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
       nsb-info "Configuring... (log is nsb-config.$DATE)"
-      nsb-get-config $src_dir $dest_dir | tee nsb-config.$DATE
+      if [ $nsb_config_all -eq 0 ]; then
+          nsb-get-config $src_dir | tee nsb-config.$DATE
+      else
+          nsb-config-all $src_dir | tee nsb-config.$DATE
+      fi
       nsb-prompt "press enter to continue"
    fi
 
