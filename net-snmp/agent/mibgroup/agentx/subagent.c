@@ -578,8 +578,8 @@ subagent_open_master_session(void)
     sess.remote_port = AGENTX_PORT;	/* default port */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
-    main_session = snmp_open_ex(&sess, 0, agentx_parse, 0, agentx_build,
-                                 agentx_check_packet);
+    main_session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
+				agentx_realloc_build, agentx_check_packet);
 
     if (main_session == NULL) {
 	/*  Diagnose snmp_open errors with the input

@@ -127,16 +127,16 @@ void real_init_master(void)
     sess.local_port = AGENTX_PORT;         /* Indicate server & set default port */
     sess.remote_port = 0;
     sess.callback = handle_master_agentx_packet;
-    session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                            agentx_check_packet );
+    session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
+			   agentx_realloc_build, agentx_check_packet);
 
     if ( session == NULL && sess.s_errno == EADDRINUSE ) {
 		/*
 		 * Could be a left-over socket (now deleted)
 		 * Try again
 		 */
-        session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                            agentx_check_packet );
+        session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
+			       agentx_realloc_build, agentx_check_packet);
     }
 
     if ( session == NULL ) {
