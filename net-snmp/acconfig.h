@@ -446,6 +446,9 @@
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
 
+/* have socklen_t */
+#undef HAVE_SOCKLEN_T
+
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
