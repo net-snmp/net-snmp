@@ -11,7 +11,7 @@ included here.
 
 The remainder of this guide has the following sections :
 
-Status as of 21-Apr-2004 for Win32 platforms
+Status as of 28-May-2004 for Win32 platforms
 Interactions with Other Vendor's Products
 Installing Platform SDK
 Microsoft Visual C++ - Overview
@@ -35,7 +35,7 @@ Acknowledgements
 
 ***************************************************************************
 *
-* Status as of 21-Apr-2004 for Win32 platforms
+* Status as of 28-May-2004 for Win32 platforms
 *
 ***************************************************************************
 
@@ -54,7 +54,7 @@ Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.
   -  Extending the agent to support enterprise-specific MIBs works.
   -  Running the agent on a non-standard UDP or TCP port works.
   -  Snmpd can be registered as a Windows NT/2000 service.
-  -  Snmptrapd cannot be registered as a Windows service.
+  -  Snmptrapd can be registered as a Windows NT/2000 service.
 
 The next subsection relates to items that are built using Visual Studio
 
@@ -88,6 +88,9 @@ The next subsection relates to items that are built using Visual Studio
 
   -  Running the Net-SNMP Agent or trap receiver on Windows 95 or Win3.1
      is not supported.
+
+  -  Running the Net-SNMP Agent or trap receiver as a service on Windows 95
+     or Windows 98 is not supported.
 
   -  The Net-SNMP agent and trap receiver will fail to start if either 
      cannot bind to their connect port (161 for agent, 162 for trap receiver).
@@ -192,7 +195,7 @@ This is so the Debug and Release versions of an application can be built and
 tested separately.
 
 Both VC++ 6.0 and 7.1 have been tested.  Building with earlier Microsoft
-compiler versions has been dropped and is no longer supported.
+compiler versions is no longer supported.
 
 Note:  Compiling Net-SNMP using MSVC 2003 .NET (MSVC 7.1) will add a 
        dependency of MSVCR71.DLL for NETSNMP.DLL and all applications.
@@ -620,7 +623,7 @@ components to an install directory named in the INSTALL_BASE variable.
     your system path.
 
 7.  Test the installation.  For a simple test to see if Net-SNMP is working, 
-    try:
+    open a _new_ command prompt window, and type:
 
     snmptranslate -IR -Td linkDown
 
@@ -953,9 +956,9 @@ builds under MinGW with MSyS is available at:
 	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6" \
 
 
-5.  Run make to compile the package. 
+5.  Type "make" to compile the package. 
 
-6.  Run make install to install the package.
+6.  Type "make install" to install the package.
 
 
 ***************************************************************************
