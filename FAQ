@@ -46,6 +46,7 @@ TABLE OF CONTENTS
    I've done that, and I still can't see the values. Why not?
    I've done that, and I'm *still* not getting anything back. Why not?
    I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
+   Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
    I'm not receiving any traps with 'snmptrapd'?
    I'm sending traps using 'snmptrap', but they're not being received?
    The agent is complaining about 'snmpd.conf'.  Where is this?
@@ -61,6 +62,7 @@ TABLE OF CONTENTS
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
    My Linux system can't find the include file "nlist.h" when compiling
    I cannot set any variables in the MIB.
+   Variables seem to disappear when I try to set them.  Why?
    Sometimes I seem to get the wrong answers.  Why?
    The system uptime (sysUpTime) returned is wrong!
    The Host Resources information is wrong (and/or doesn't even compile)!
@@ -777,6 +779,29 @@ I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
 
 
 
+Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
+--------------------------------------------------------------------------
+
+  This depends on which MIB modules are supported by the agent you are querying.
+
+  A tree is walked by repeatedly asking for "the next entry" until all the
+  values under that tree have been retrieved.  However, the agent has no idea
+  that this is what's happening - all it sees is a request for "the next entry
+  after X".
+
+  If the variable X happens to be the last entry in a tree, the agent will
+  provide the next variable supported (as requested) even though this will
+  be in a different subtree.  It's up to the querying tool to recognise that
+  this last result lies outside the area of interest, and simply discard it.
+
+  If the variable X happens to be the last entry supported, then the agent
+  doesn't have another variable to provide, so returns a suitable error.
+  The UCD tools report this with the message above.
+
+  But in either case, the actual information provided will be the same.
+
+
+
 I'm not receiving any traps with 'snmptrapd'?
 I'm sending traps using 'snmptrap', but they're not being received?
 ------------------------------------------------------------------
@@ -944,6 +969,44 @@ I cannot set any variables in the MIB.
   Note that the (first) community string "public" can *not* be used
   to set variables.
   
+
+
+Variables seem to disappear when I try to set them.  Why?
+--------------------------------------------------------
+
+  This is actually the same as the previous question - it just isn't
+  particularly obvious.  A typical example of this effect would be
+
+	$ snmpget localhost public system.sysLocation.0
+	system.sysLocation.0 = somewhere nearby
+
+	$ snmpset localhost public system.sysLocation.0 s "right here"
+	Error in packet.
+	Reason: (noSuchName) There is no such variable name in this MIB.
+	This name doesn't exist: system.sysLocation.0
+
+  This is due to the limitations of the available SNMPv1 error codes,
+  which are forced to cover a number of different possibilities.
+  What 'noSuchName' actually means is
+
+	"You can't do that to this variable"
+
+  That could be because the variable doesn't exist, it does exist but
+  you don't have access to it (but someone else may do), or it exists
+  but you can't perform that particular operation (i.e. changing it).
+
+  The error codes in SNMPv2 (various flavours) are rather more flexible
+  and informative:
+
+	$ snmpset -v 2c localhost public system.sysLocation.0 s "right here"
+        Error in packet.
+        Reason: notWritable
+
+  Note that this actually means "not writeable in this particular case",
+  rather than "not writeable under any circumstances".  It may well be
+  that a different invocation (such as using the community string "private")
+  might be successful.
+
 
 
 Sometimes I seem to get the wrong answers.  Why?
