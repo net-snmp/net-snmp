@@ -45,6 +45,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -55,6 +58,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/mbuf.h>
 #endif
 #include <net/if.h>
+#if HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
 #define KERNEL		/* to get routehash and RTHASHSIZ */
 #include <net/route.h>
 #undef	KERNEL
@@ -70,7 +76,19 @@ PERFORMANCE OF THIS SOFTWARE.
 #ifndef NULL
 #define NULL 0
 #endif
+#if HAVE_KVM_OPENFILES
+#include <fcntl.h>
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+#endif
 
+#if STDC_HEADERS
+#include <strings.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
@@ -89,6 +107,15 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
+#endif
+
+#if __STDC__
+extern int compare(oid *name1, int len1, oid *name2, int len2);
+extern int klookup(unsigned long off, char *target, int siz);
+
+void Interface_Scan_Init(void);
+int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
+			struct in_ifaddr *Retin_ifaddr);
 #endif
 
 static	    Route_Scan_Reload();
@@ -112,27 +139,32 @@ static struct nlist nl[] = {
 	{ "_rthost" },
 	{ "_rtnet" },
 	{ "_rthashsize" },
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	{ "_rt_tables" },
 #else
 	{ "_rt_table" },
 #endif
 #endif
-	0,
+	{ 0 },
 };
 
 extern write_rte();
 
 #ifndef solaris2
 
-#ifdef freebsd2
-struct sockaddr_in klgetsatmp;
+#if defined(freebsd2) || defined(netbsd1)
+static union {
+    struct  sockaddr_in sin;
+    u_short data[128];
+} klgetsatmp;
 
 struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
-    klookup(dst, &klgetsatmp, sizeof klgetsatmp);
-    return(&ksgetsatmp);    
+    klookup((u_long)dst, (char *)&klgetsatmp.sin, sizeof klgetsatmp.sin);
+    if (klgetsatmp.sin.sin_len > sizeof (klgetsatmp.sin))
+	klookup((u_long)dst, (char *)&klgetsatmp.sin, klgetsatmp.sin.sin_len);
+   return(&klgetsatmp.sin);
 }
 #endif
 
@@ -155,7 +187,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     static oid saveName[14], Current[14];
     u_char *cp;
     oid *op;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
     struct sockaddr_in *sa;
 #endif
 
@@ -197,7 +229,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
         Route_Scan_Reload();
 #endif
 	for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    cp = (u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -235,7 +267,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
     switch(vp->magic){
 	case IPROUTEDEST:
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
@@ -257,7 +289,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #endif
@@ -412,11 +444,26 @@ int		(**write_method)(); /* OUT - pointer to function to set variable, otherwise
 
 init_routes(){
   int ret;
+#if HAVE_KVM_OPENFILES
+  kvm_t *kernel;
+  char kvm_errbuf[4096];
+
+  if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
+      ERROR("kvm_openfiles");
+      exit(1);
+  }
+  if ((ret = kvm_nlist(kernel, nl)) == -1) {
+      ERROR("kvm_nlist");
+      exit(1);
+  }
+  kvm_close(kernel);
+#else
   if (nlist(KERNEL_LOC,nl) == -1) {
     perror("nlist");
     ERROR("nlist");
     exit(1);
   }
+#endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
       DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name)
@@ -436,9 +483,11 @@ struct radix_node *pt;
   RTENTRY rt;
   struct ifnet ifnet;
   char name[16], temp[16];
+#if !STRUCT_IFNET_HAS_IF_XNAME
   register char *cp;
+#endif
   
-  if (!klookup(pt , (char *) &node , sizeof (struct radix_node))) {
+  if (!klookup((unsigned long)pt , (char *) &node , sizeof (struct radix_node))) {
     DEBUGP("Fail\n");
     return;
   }
@@ -453,15 +502,20 @@ struct radix_node *pt;
       return;
     }
     /* get the route */
-    klookup(pt, (char *) &rt, sizeof (RTENTRY));
+    klookup((unsigned long)pt, (char *) &rt, sizeof (RTENTRY));
       
     if (rt.rt_ifp != 0) {
-      klookup( rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
+      klookup((unsigned long)rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
+#if STRUCT_IFNET_HAS_IF_XNAME
+      klookup((unsigned long)ifnet.if_xname, name, 16);
+      name[15] = '\0';
+#else
       klookup( ifnet.if_name, name, 16);
       name[15] = '\0';
       cp = (char *) index(name, '\0');
       *cp++ = ifnet.if_unit + '0';
       *cp = '\0';
+#endif
       Interface_Scan_Init();
       rt.rt_unit = 0;
       while (Interface_Scan_Next((short *) &(rt.rt_unit), temp, 0, 0) != 0) {
@@ -500,19 +554,20 @@ struct radix_node *pt;
 
 static Route_Scan_Reload()
 {
+#if defined(RTENTRY_4_4)
+  struct radix_node_head head, *rt_table[AF_MAX+1];
+#else
   RTENTRY **routehash, mb;
   register RTENTRY *m;
   RTENTRY *rt;
-#if defined(RTENTRY_4_4)
-  struct radix_node_head head, *rt_table[AF_MAX+1];
-#endif
   struct ifnet ifnet;
   int i, table;
   register char *cp;
   char name[16], temp[16];
+  int hashsize;
+#endif
   static int Time_Of_Last_Reload=0;
   struct timeval now;
-  int hashsize;
 
   gettimeofday(&now, (struct timezone *)0);
   if (Time_Of_Last_Reload+CACHE_TIME > now.tv_sec)
@@ -544,7 +599,7 @@ static Route_Scan_Reload()
 
   KNLookup(N_RTTABLES, (char *) rt_table, sizeof(rt_table));
   if (rt_table[AF_UNSPEC]) {
-    if (klookup(rt_table[AF_UNSPEC], (char *) &head, sizeof(head))) {
+    if (klookup((unsigned long)rt_table[AF_UNSPEC], (char *) &head, sizeof(head))) {
       load_rtentries(head.rnh_treetop);
     }
     else {

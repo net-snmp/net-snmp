@@ -69,6 +69,16 @@
 /* debugging stuff */
 #undef DODEBUG
 
+/* ifnet structure tests */
+#undef STRUCT_IFNET_HAS_IF_BAUDRATE
+#undef STRUCT_IFNET_HAS_IF_TYPE
+#undef STRUCT_IFNET_HAS_IF_IMCASTS
+#undef STRUCT_IFNET_HAS_IF_IQDROPS
+#undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+#undef STRUCT_IFNET_HAS_IF_NOPROTO
+#undef STRUCT_IFNET_HAS_IF_OMCASTS
+#undef STRUCT_IFNET_HAS_IF_XNAME
+
 @BOTTOM@
 
 /* If defined, the snmplib library will store contents of the

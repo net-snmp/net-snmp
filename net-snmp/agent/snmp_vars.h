@@ -164,6 +164,8 @@ extern u_char return_buf[];
 #define TCPCONNLOCALPORT    15
 #define TCPCONNREMADDRESS   16
 #define TCPCONNREMPORT	    17
+#define TCPINERRS           18
+#define TCPOUTRSTS          19
 
 #define UDPINDATAGRAMS	    0
 #define UDPNOPORTS	    1

@@ -49,6 +49,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_NET_IF_TYPES_H
 #include <net/if_types.h>
 #endif
@@ -94,6 +97,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -123,6 +129,12 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/protosw.h>
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
+#endif
+#if HAVE_KVM_OPENFILES
+#include <fcntl.h>
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
 #endif
 
 #ifndef NULL
@@ -162,6 +174,17 @@ PERFORMANCE OF THIS SOFTWARE.
 
 extern  int swap, mem;
 extern char *Lookup_Device_Annotation();
+#if __STDC__
+extern init_kmem(char *file);
+extern init_routes(void);
+extern init_extensible(void);
+extern int klookup(unsigned long off, char *target, int siz);
+
+void Interface_Scan_Init(void);
+int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
+			struct in_ifaddr *Retin_ifaddr);
+int compare_tree(oid *name1, int len1, oid *name2, int len2);
+#endif
 
 static int TCP_Count_Connections();
 static void TCP_Scan_Init();
@@ -210,7 +233,11 @@ static struct nlist nl[] = {
 	{ "_icmpstat" },
 	{ "_ifnet" },
 	{ "_tcpstat" },
+#ifdef netbsd1
+	{ "_tcbtable" },
+#else
 	{ "_tcb" },
+#endif
 	{ "_arptab_size" }, 
 	{ "_arptab" },      
 	{ "_in_ifaddr" },
@@ -319,14 +346,34 @@ u_char		return_buf[256]; /* nee 64 */
 init_snmp()
 {
   int ret;
+#if HAVE_KVM_OPENFILES
+  kvm_t *kernel;
+  char kvm_errbuf[4096];
+
+  if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
+      ERROR("kvm_openfiles");
+      exit(1);
+  }
+  if ((ret = kvm_nlist(kernel, nl)) == -1) {
+      ERROR("kvm_nlist");
+      exit(1);
+  }
+  kvm_close(kernel);
+#else
   if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
     ERROR("nlist");
     exit(1);
   }
+#endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
-    if (nl[ret].n_type == 0) {
-      DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name)
-    }
+      if (nl[ret].n_type == 0) {
+#ifdef DODEBUG
+	  DEBUGP1("nlist err:  %s not found\n",nl[ret].n_name);
+      } else {
+	  fprintf(stderr, "nlist: %s 0x%X\n", nl[ret].n_name,
+		  (unsigned int)nl[ret].n_value);
+#endif
+      }
   }
   init_kmem("/dev/kmem"); 
   init_routes();
@@ -574,7 +621,9 @@ struct variable13 tcp_variables[] = {
     {TCPCONNLOCALADDRESS, IPADDRESS, RONLY, var_tcp, 3, {13, 1, 2}},
     {TCPCONNLOCALPORT, INTEGER, RONLY, var_tcp, 3, {13, 1, 3}},
     {TCPCONNREMADDRESS, IPADDRESS, RONLY, var_tcp, 3, {13, 1, 4}},
-    {TCPCONNREMPORT, INTEGER, RONLY, var_tcp, 3, {13, 1, 5}}
+    {TCPCONNREMPORT, INTEGER, RONLY, var_tcp, 3, {13, 1, 5}},
+    {TCPINERRS, COUNTER, RONLY, var_tcp, 1, {14}},
+    {TCPOUTRSTS, COUNTER, RONLY, var_tcp, 1, {15}}
 };
 
 struct variable2 udp_variables[] = {
@@ -879,7 +928,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int			suffixlen;
     int 		found = FALSE;
     oid			save[MAX_NAME_LEN];
-    int			savelen;
+    int			savelen = 0;
     extern int numrelocs, numpassthrus;
 
     if (!exact){
@@ -1392,6 +1441,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif sunV3
     static char Name[16];
     register char *cp;
+#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+          struct timeval now;
+#endif
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -1437,7 +1489,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_TYPE
 		long_return = ifnet.if_type;
 #else
 		long_return = 1;	/* OTHER */
@@ -1453,10 +1505,19 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_BAUDRATE
 	    long_return = ifnet.if_baudrate;
 #else
 	    long_return = (u_long)  1;	/* OTHER */
+#endif
+#if STRUCT_IFNET_HAS_IF_TYPE
+	    if((long_return == 0) || (long_return == 1)) {
+		if(ifnet.if_type == IFT_ETHER) long_return=10000000;
+		if(ifnet.if_type == IFT_P10) long_return=10000000;
+		if(ifnet.if_type == IFT_P80) long_return=80000000;
+		if(ifnet.if_type == IFT_ISDNBASIC) long_return=64000; /* EDSS1 only */
+		if(ifnet.if_type == IFT_ISDNPRIMARY) long_return=64000*30;
+	    }
 #endif
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
@@ -1484,9 +1545,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
-#ifdef freebsd2
-          struct timeval now;
-
+#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
           if ((ifnet.if_lastchange.tv_sec == 0 ) &&
               (ifnet.if_lastchange.tv_usec == 0))
             long_return = 0;
@@ -1507,14 +1566,14 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = (u_long)  ifnet.if_ipackets;
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_IMCASTS
 	    long_return = (u_long)  ifnet.if_imcasts;
 #else
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_IQDROPS
 	    long_return = (u_long)  ifnet.if_iqdrops;
 #else
 	    long_return = (u_long)  0; /* XXX */
@@ -1523,7 +1582,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	case IFINERRORS:
 	    return (u_char *) &ifnet.if_ierrors;
 	case IFINUNKNOWNPROTOS:
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_NOPROTO
 	    long_return = (u_long)  ifnet.if_noproto;
 #else
 	    long_return = (u_long)  0; /* XXX */
@@ -1536,7 +1595,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = (u_long)  ifnet.if_opackets;
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
-#ifdef freebsd2
+#if STRUCT_IFNET_HAS_IF_OMCASTS
 	    long_return = (u_long)  ifnet.if_omcasts;
 #else
 	    long_return = (u_long)  0; /* XXX */
@@ -1726,7 +1785,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
     u_long		    Addr, LowAddr;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
     u_short		    ifIndex, lowIfIndex;
 #endif
 
@@ -1736,7 +1795,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     LowAddr = -1;      /* Don't have one yet */
     ARP_Scan_Init();
     for (;;) {
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	if (ARP_Scan_Next(&Addr, PhysAddr, &ifIndex) == 0)
 	    break;
 	current[10] = ifIndex;
@@ -1758,7 +1817,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    if (compare(current, 16, name, *length) == 0){
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -1773,7 +1832,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		 */
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -1789,7 +1848,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     switch(vp->magic){
 	case ATIFINDEX:
 	    *var_len = sizeof long_return;
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    long_return = lowIfIndex;
 #else
 	    long_return = 1; /* XXX */
@@ -2077,9 +2136,11 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     u_char		    *cp;
     int			    lowinterface=0;
     short                   interface;
-    static struct ifnet ifnet, lowin_ifnet;
+    static struct ifnet ifnet;
 #ifndef sunV3
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
+#else
+    static struct ifnet lowin_ifnet;
 #endif sunV3
 
     /* fill in object part of name for current (less sizeof instance part) */
@@ -2640,17 +2701,17 @@ var_udp(vp, name, length, exact, var_len, write_method)
 
     switch (vp->magic){
 	case UDPINDATAGRAMS:
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_ipackets;
 	    return (u_char *) &long_return;
 #endif
 	case UDPNOPORTS:
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_noport;
 	    return (u_char *) &long_return;
 #endif
 	case UDPOUTDATAGRAMS:
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	    long_return = udpstat.udps_opackets;
 #else
 	    long_return = 0;
@@ -2749,7 +2810,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 
     if (nl[N_TCPSTAT].n_value == 0) return(NULL);
 
-    if (vp->magic < TCPCONNSTATE) {
+    if ((vp->magic < TCPCONNSTATE) || (vp->magic >= TCPINERRS)) {
 
 	bcopy((char *)vp->name, (char *)newname,
 	      (int)vp->namelen * sizeof(oid));
@@ -2778,35 +2839,34 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &long_return;
 	    case TCPRTOMAX:
 		long_return = TCPTV_REXMTMAX / PR_SLOWHZ * 1000;
-
 		return (u_char *) &long_return;
 	    case TCPMAXCONN:
 		long_return = -1;
 		return (u_char *) &long_return;
 	    case TCPACTIVEOPENS:
-
 		return (u_char *) &tcpstat.tcps_connattempt;
-
 	    case TCPPASSIVEOPENS:
-
 		return (u_char *) &tcpstat.tcps_accepts;
-
 	    case TCPATTEMPTFAILS:
 		return (u_char *) &tcpstat.tcps_conndrops;
-
 	    case TCPESTABRESETS:
 		return (u_char *) &tcpstat.tcps_drops;
-
 	    case TCPCURRESTAB:
 		long_return = TCP_Count_Connections();
 		return (u_char *) &long_return;
 	    case TCPINSEGS:
 		return (u_char *) &tcpstat.tcps_rcvtotal;
-
 	    case TCPOUTSEGS:
 		return (u_char *) &tcpstat.tcps_sndtotal;
 	    case TCPRETRANSSEGS:
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
+	    case TCPINERRS:
+		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff +
+		    tcpstat.tcps_rcvmemdrop + tcpstat.tcps_rcvshort;
+		return (u_char *) &long_return;
+	    case TCPOUTRSTS:
+		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
+		return (u_char *) &long_return;
 	    default:
 		ERROR("");
 	}
@@ -3087,38 +3147,43 @@ Again:	/*
 
 	KNLookup( N_TCB, (char *)&cb, sizeof(struct inpcb));
 	inpcb = cb;
-#ifndef freebsd2
+#if !(defined(freebsd2) || defined(netbsd1))
 	prev = (struct inpcb *) nl[N_TCB].n_value;
 #endif
 	/*
 	 *	Scan the control blocks
 	 */
-#ifdef freebsd2
-	while (inpcb.inp_next != NULL) {
+#if defined(freebsd2) || defined(netbsd1)
+	while ((inpcb.inp_next != NULL) && (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value)) {
 #else
 	while (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value) {
 #endif
 		next = inpcb.inp_next;
 
-		klookup(next, (char *)&inpcb, sizeof (inpcb));
-#ifndef freebsd2
+		if((klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb)) == 0)) {
+		    perror("TCP_Count_Connections - inpcb");
+		}
+#if !(defined(freebsd2) || defined(netbsd1))
 		if (inpcb.inp_prev != prev) {	    /* ??? */
 			sleep(1);
 			goto Again;
 		}
 #endif
 		if (inet_lnaof(inpcb.inp_laddr) == INADDR_ANY) {
-#ifndef freebsd2
+#if !(defined(freebsd2) || defined(netbsd1))
 			prev = next;
 #endif
 			continue;
 		}
-		klookup(inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
+		if(klookup((unsigned long)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb)) == 0) {
+		    perror("TCP_Count_Connections - tcpcb");
+		    break;
+		}
 
 		if ((tcpcb.t_state == TCPS_ESTABLISHED) ||
 		    (tcpcb.t_state == TCPS_CLOSE_WAIT))
 		    Established++;
-#ifndef freebsd2
+#if !(defined(freebsd2) || defined(netbsd1))
 		prev = next;
 #endif
 	}
@@ -3130,7 +3195,7 @@ static struct inpcb inpcb, *prev;
 static void TCP_Scan_Init()
 {
     KNLookup( N_TCB, (char *)&inpcb, sizeof(inpcb));
-#ifndef freebsd2
+#if !(defined(freebsd2) || defined(netbsd1))
     prev = (struct inpcb *) nl[N_TCB].n_value;
 #endif
 }
@@ -3142,8 +3207,9 @@ struct inpcb *RetInPcb;
 	register struct inpcb *next;
 	struct tcpcb tcpcb;
 
-#ifdef freebsd2
-	if (inpcb.inp_next == NULL) {
+#if defined(freebsd2) || defined(netbsd1)
+	if ((inpcb.inp_next == NULL) ||
+	    (inpcb.inp_next == (struct inpcb *) nl[N_TCB].n_value)) {
 #else
 	if (inpcb.inp_next == (struct inpcb *) nl[N_TCB].n_value) {
 #endif
@@ -3152,21 +3218,21 @@ struct inpcb *RetInPcb;
 
 	next = inpcb.inp_next;
 
-	klookup(next, (char *)&inpcb, sizeof (inpcb));
-#ifndef freebsd2
+	klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb));
+#if !(defined(netbsd1) || defined(freebsd2))
 	if (inpcb.inp_prev != prev)	   /* ??? */
           return(-1); /* "FAILURE" */
 #endif
 	klookup ( (int)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 	*State = tcpcb.t_state;
 	*RetInPcb = inpcb;
-#ifndef freebsd2
+#if !(defined(netbsd1) || defined(freebsd2))
 	prev = next;
 #endif
 	return(1);	/* "OK" */
 }
 
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 static char *lim, *rtnext;
 static char *at = 0;
 #else
@@ -3186,7 +3252,7 @@ static void ARP_Scan_Init()
 	KNLookup( N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
 	arptab_current = 0;
 #else
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	int mib[6];
 	size_t needed;
 
@@ -3211,7 +3277,7 @@ static void ARP_Scan_Init()
 #endif
 }
 
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 static int ARP_Scan_Next(IPAddr, PhysAddr, ifIndex)
 u_short *ifIndex;
 #else
@@ -3236,7 +3302,7 @@ char *PhysAddr;
 	return(1);
 	}
 #endif
-#ifdef freebsd2
+#if defined(freebsd2) || defined(netbsd1)
 	struct rt_msghdr *rtm;
 	struct sockaddr_inarp *sin;
 	struct sockaddr_dl *sdl;
@@ -3267,6 +3333,7 @@ static struct ifnet *ifnetaddr, saveifnet, *saveifnetaddr;
 static int saveIndex=0;
 static char saveName[16];
 
+void
 Interface_Scan_Init()
 {
     KNLookup (N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
@@ -3341,20 +3408,27 @@ struct in_ifaddr *Retin_ifaddr;
 {
 	struct ifnet ifnet;
 	struct in_ifaddr *ia, in_ifaddr;
+#if !STRUCT_IFNET_HAS_IF_XNAME
 	register char *cp;
+#endif
 	extern char *index();
 
 	while (ifnetaddr) {
 	    /*
 	     *	    Get the "ifnet" structure and extract the device name
 	     */
-	    klookup(ifnetaddr, (char *)&ifnet, sizeof ifnet);
-	    klookup(ifnet.if_name, (char *)saveName, 16);
+	    klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
+#if STRUCT_IFNET_HAS_IF_XNAME
+	    klookup((unsigned long)ifnet.if_xname, (char *)saveName, 16);
+	    saveName[15] = '\0';
+#else
+	    klookup((unsigned long)ifnet.if_name, (char *)saveName, 16);
 
 	    saveName[15] = '\0';
 	    cp = index(saveName, '\0');
 	    *cp++ = ifnet.if_unit + '0';
 	    *cp = '\0';
+#endif
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 		/*
 		 *  Try to find an address for this interface
@@ -3362,7 +3436,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 		KNLookup(N_IN_IFADDR, (char *)&ia, sizeof(ia));
 		while (ia) {
-		    klookup(ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
+		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
 		    if (in_ifaddr.ia_ifp == ifnetaddr) break;
 		    ia = in_ifaddr.ia_next;
 		}
@@ -3503,7 +3577,7 @@ u_char *EtherAddr;
 	 *  the arpcom structure is an extended ifnet structure which
 	 *  contains the ethernet address.
 	 */
-	klookup(saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
+	klookup((unsigned long)saveifnetaddr, (char *)&arpcom, sizeof (struct arpcom));
 	if (strncmp("lo", saveName, 2) == 0) {
 	    /*
 	     *  Loopback doesn't have a HW addr, so return 00:00:00:00:00:00
@@ -3511,7 +3585,7 @@ u_char *EtherAddr;
 	    bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
 
 	} else {
-#if defined(sunV3) || defined(sparc) || defined(freebsd2)
+#if defined(sunV3) || defined(sparc) || defined(freebsd2) || defined(netbsd1)
 	    bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #endif
 #ifdef mips

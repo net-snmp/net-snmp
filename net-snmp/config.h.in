@@ -107,6 +107,16 @@
 /* debugging stuff */
 #undef DODEBUG
 
+/* ifnet structure tests */
+#undef STRUCT_IFNET_HAS_IF_BAUDRATE
+#undef STRUCT_IFNET_HAS_IF_TYPE
+#undef STRUCT_IFNET_HAS_IF_IMCASTS
+#undef STRUCT_IFNET_HAS_IF_IQDROPS
+#undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+#undef STRUCT_IFNET_HAS_IF_NOPROTO
+#undef STRUCT_IFNET_HAS_IF_OMCASTS
+#undef STRUCT_IFNET_HAS_IF_XNAME
+
 /* This ID is returned after the AGENTID above.  IE, the resulting
    value returned by a query to sysObjectID is
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
@@ -142,6 +152,9 @@
 
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
+
+/* Define if you have the kvm_openfiles function.  */
+#undef HAVE_KVM_OPENFILES
 
 /* Define if you have the lrand48 function.  */
 #undef HAVE_LRAND48
@@ -182,6 +195,9 @@
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
+/* Define if you have the <arpa/inet.h> header file.  */
+#undef HAVE_ARPA_INET_H
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
@@ -193,6 +209,9 @@
 
 /* Define if you have the <inet/mib2.h> header file.  */
 #undef HAVE_INET_MIB2_H
+
+/* Define if you have the <kvm.h> header file.  */
+#undef HAVE_KVM_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
