@@ -306,9 +306,6 @@ init_agent(const char *app)
     netsnmp_init_helpers();
     init_traps();
     netsnmp_container_init_list();
-#ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
-    netsnmp_access_interface_init();
-#endif
 
     /*
      * initialize agentx subagent if necessary. 
