@@ -77,6 +77,10 @@ SOFTWARE.
 #include <varargs.h>
 #endif
 
+#if HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_api.h"
@@ -450,7 +454,7 @@ init_snmp __P((void)) {
   done_init = 1;
 
 /* set our current locale properly to initialize isprint() type functions */
-#ifdef HAVE_SETLOCAL
+#ifdef HAVE_SETLOCALE
   setlocale(LC_CTYPE, "");
 #endif
 

@@ -63,10 +63,6 @@ SOFTWARE.
 #include <winsock.h>
 #endif
 
-#if HAVE_LOCAL_H
-#include <locale.h>
-#endif
-
 #include "asn1.h"
 #include "snmp_api.h"
 #include "mib.h"
