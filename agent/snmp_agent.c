@@ -768,6 +768,72 @@ free_agent_snmp_session(struct agent_snmp_session *asp)
     free(asp);
 }
 
+void
+dump_sess_list(void)
+{
+    struct agent_snmp_session *a;
+    
+    DEBUGMSGTL(("snmp_agent", "DUMP agent_sess_list -> "));
+    for (a = agent_session_list; a != NULL; a = a->next) {
+	DEBUGMSG(("snmp_agent", "%08p[session %08p] -> ", a, a->session));
+    }
+    DEBUGMSG(("snmp_agent", "[NIL]\n"));
+}
+
+void
+remove_and_free_agent_snmp_session(struct agent_snmp_session *asp)
+{
+    struct agent_snmp_session *a, **prevNext = &agent_session_list;
+
+    DEBUGMSGTL(("snmp_agent", "REMOVE %08p\n", asp));
+
+    for (a = agent_session_list; a != NULL; a = *prevNext) {
+	if (a == asp) {
+	    *prevNext = a->next;
+	    a->next = NULL;
+	    free_agent_snmp_session(a);
+	    asp = NULL;
+	    break;
+	} else {
+	    prevNext = &(a->next);
+	}
+    }
+
+    if (a == NULL && asp != NULL) {
+	/*  We coulnd't find it on the list, so free it anyway.  */
+	free_agent_snmp_session(asp);
+    }
+}
+
+void
+free_agent_snmp_session_by_session(struct snmp_session *sess,
+				   void (*free_request)(struct request_list *))
+{
+    struct agent_snmp_session *a, *next, **prevNext = &agent_session_list;
+
+    DEBUGMSGTL(("snmp_agent", "REMOVE session == %08p\n", sess));
+
+    for (a = agent_session_list; a != NULL; a = next) {
+	if (a->session == sess) {
+	    *prevNext = a->next;
+	    next = a->next;
+	    if (a->outstanding_requests != NULL && free_request) {
+		struct request_list *r = a->outstanding_requests, *s = NULL;
+
+		DEBUGMSGTL(("snmp_agent", "  has outstanding requests\n"));
+		for (; r != NULL; r = s) {
+		    s = r->next_request;
+		    free_request(r);
+		}
+	    }
+	    free_agent_snmp_session(a);
+	} else {
+	    prevNext = &(a->next);
+	    next = a->next;
+	}
+    }
+}
+
 int
 count_varbinds( struct snmp_pdu *pdu )
 {
@@ -782,28 +848,29 @@ count_varbinds( struct snmp_pdu *pdu )
 }
 
 int
-handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
+handle_snmp_packet(int op, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
     struct agent_snmp_session  *asp;
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2;
 
-    if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       return 1;
     }
 
     if ( magic == NULL ) {
 	asp = init_agent_snmp_session( session, pdu );
 	status = SNMP_ERR_NOERROR;
-    }
-    else {
+    } else {
 	asp = (struct agent_snmp_session *)magic;
         status =   asp->status;
     }
 
-    if (asp->outstanding_requests != NULL)
+    if (asp->outstanding_requests != NULL) {
+      	DEBUGMSGTL(("snmp_handle_packet", "asp->requests != NULL\n"));
 	return 1;
+    }
 
     if ( check_access(pdu) != 0) {
         /* access control setup is incorrect */
@@ -815,11 +882,11 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
             if (! snmp_send( asp->session, asp->pdu ))
 	        snmp_free_pdu(asp->pdu);
 	    asp->pdu = NULL;
-	    free_agent_snmp_session(asp);
+	    remove_and_free_agent_snmp_session(asp);
             return 1;
         } else {
             /* drop the request */
-            free_agent_snmp_session( asp );
+            remove_and_free_agent_snmp_session( asp );
             return 0;
         }
     }
@@ -1022,25 +1089,42 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     case SNMP_MSG_RESPONSE:
         snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
-	free_agent_snmp_session( asp );
+	remove_and_free_agent_snmp_session( asp );
 	return 0;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         snmp_increment_statistic(STAT_SNMPINTRAPS);
-	free_agent_snmp_session( asp );
+	remove_and_free_agent_snmp_session( asp );
 	return 0;
     default:
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-	free_agent_snmp_session( asp );
+	remove_and_free_agent_snmp_session( asp );
 	return 0;
     }
 
     if ( asp->outstanding_requests != NULL ) {
+	struct agent_snmp_session *a = agent_session_list;
 	asp->status = status;
-	asp->next = agent_session_list;
-	agent_session_list = asp;
-    }
-    else {
+	
+	/*  Careful not to add duplicates.  */
+
+	for (; a != NULL; a = a->next) {
+	    if (a == asp) {
+		break;
+	    }
+	}
+	if (a == NULL) {
+	    asp->next = agent_session_list;
+	    agent_session_list = asp;
+	    DEBUGMSGTL(("snmp_agent", "ADDED %08p agent_sess_list -> ", asp));
+	    for (a = agent_session_list; a != NULL; a = a->next) {
+		DEBUGMSG(("snmp_agent", "%08p -> ", a));
+	    }
+	    DEBUGMSG(("snmp_agent", "[NIL]\n"));
+	} else {
+	    DEBUGMSGTL(("snmp_agent", "DID NOT ADD %08p (duplicate)\n", asp));
+	}
+    } else {
 		/*
 		 * May need to "dumb down" a SET error status for a
 		 *  v1 query.  See RFC2576 - section 4.3
@@ -1092,13 +1176,13 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    }
 	    }
 	}
+
 	if (( status == SNMP_ERR_NOERROR ) && ( asp->pdu )) {
 	    snmp_increment_statistic_by(
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
 	    	count_varbinds( asp->pdu ));
-	}
-	else {
+	} else {
 		/*
 		 * Use a copy of the original request
 		 *   to report failures.
@@ -1107,19 +1191,21 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    asp->pdu = asp->orig_pdu;
 	    asp->orig_pdu = NULL;
 	}
+
 	if ( asp->pdu ) {
 	    asp->pdu->command  = SNMP_MSG_RESPONSE;
 	    asp->pdu->errstat  = status;
 	    asp->pdu->errindex = asp->index;
-	    if (! snmp_send( asp->session, asp->pdu ))
+	    if (!snmp_send(asp->session, asp->pdu)) {
 	        snmp_free_pdu(asp->pdu);
+	    }
 	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
 	    snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
 	    asp->pdu = NULL;
-	    free_agent_snmp_session( asp );
+	    remove_and_free_agent_snmp_session(asp);
 	}
     }
-
+    DEBUGMSGTL(("snmp_agent", "end of handle_snmp_packet, asp = %08p\n", asp));
     return 1;
 }
 

@@ -51,7 +51,11 @@ int handle_one_var( struct agent_snmp_session *, struct variable_list *varbind_p
 void snmp_agent_parse_config (char *, char *);
 struct agent_snmp_session  *init_agent_snmp_session( struct snmp_session *, struct snmp_pdu *);
 void free_agent_snmp_session( struct agent_snmp_session * );
+void remove_and_free_agent_snmp_session(struct agent_snmp_session *asp);
+void free_agent_snmp_session_by_session(struct snmp_session *sess,
+				  void (*free_request)(struct request_list *));
 int getNextSessID(void);
+void dump_sess_list(void);
 int init_master_agent(void);
 int agent_check_and_process(int block);
 struct agent_snmp_session  *get_current_agent_session(void);
