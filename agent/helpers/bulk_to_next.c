@@ -31,6 +31,26 @@ get_bulk_to_next_handler(void) {
     return create_handler("bulk_to_next", bulk_to_next_helper);
 }
 
+void
+bulk_to_next_fix_requests(request_info              *requests) 
+{
+    request_info              *request;
+    /* update the varbinds for the next request series */
+    for(request = requests; request; request = request->next) {
+        if (request->repeat > 0 && 
+            request->requestvb->type != ASN_NULL &&
+            request->requestvb->type != ASN_PRIV_RETRY) {
+            request->repeat--;
+            snmp_set_var_objid(request->requestvb->next_variable,
+                               request->requestvb->name,
+                               request->requestvb->name_length);
+            request->requestvb =
+                request->requestvb->next_variable;
+            request->requestvb->type = ASN_PRIV_RETRY;
+        }
+    }
+}
+
 /** @internal Implements the bulk_to_next handler */
 int
 bulk_to_next_helper(
@@ -50,19 +70,7 @@ bulk_to_next_helper(
             reqinfo->mode = MODE_GETBULK;
 
             /* update the varbinds for the next request series */
-            for(request = requests; request; request = request->next) {
-                if (request->repeat > 0 && 
-		    request->requestvb->type != ASN_NULL &&
-                    request->requestvb->type != ASN_PRIV_RETRY) {
-                    request->repeat--;
-                    snmp_set_var_objid(request->requestvb->next_variable,
-                                       request->requestvb->name,
-                                       request->requestvb->name_length);
-                    request->requestvb =
-                        request->requestvb->next_variable;
-                    request->requestvb->type = ASN_PRIV_RETRY;
-                }
-            }
+            bulk_to_next_fix_requests(requests);
             return ret;
             
         default:
