@@ -45,8 +45,8 @@ sub InitMakeParams {
 	if ($opts->{'insource'} eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
-	} else {
-	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
+#	} else {
+#	    $Params{'PREREQ_PM'} = { 'NetSNMP::default_store' => 0.01 };
 	}
 	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
 	if (!$ENV{'NETSNMP_PREFIX'}) {

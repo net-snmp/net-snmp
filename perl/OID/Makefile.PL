@@ -34,8 +34,8 @@ sub InitMakeParams {
 	if ($opts->{'insource'} eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
-	} else {
-	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
+#	} else {
+#	    $Params{'PREREQ_PM'} = {'SNMP' => '5.0'};
 	}
 	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
