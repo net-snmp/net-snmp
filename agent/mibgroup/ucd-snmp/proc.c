@@ -94,7 +94,7 @@ void init_proc(void)
   oid proc_variables_oid[] = { EXTENSIBLEMIB,PROCMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2,
                proc_variables_oid);
 
   snmpd_register_config_handler("proc", proc_parse_config, proc_free_config,

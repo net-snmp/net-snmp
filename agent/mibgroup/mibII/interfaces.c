@@ -161,6 +161,8 @@
 #include "auto_nlist.h"
 #include "sysORTable.h"
 
+extern struct timeval starttime;
+
 static int Interface_Scan_Get_Count (void);
 
 struct variable4 interfaces_variables[] = {
@@ -587,7 +589,18 @@ var_ifEntry(struct variable *vp,
   case IFOUTERRORS:
     long_return = (u_long) if_msg.ifm_data.ifi_oerrors;
     return (u_char *) &long_return;
-    /* ifOutQLen */
+  case IFLASTCHANGE:
+    if (if_msg.ifm_data.ifi_lastchange.tv_sec == 0 &&
+	if_msg.ifm_data.ifi_lastchange.tv_usec == 0)
+      long_return = 0;
+    else if (if_msg.ifm_data.ifi_lastchange.tv_sec < starttime.tv_sec)
+      long_return = 0;
+    else {
+      long_return = (u_long)
+	((if_msg.ifm_data.ifi_lastchange.tv_sec - starttime.tv_sec) * 100
+	 + (if_msg.ifm_data.ifi_lastchange.tv_usec - starttime.tv_usec) / 10000);
+    }
+    return (u_char *) &long_return;
   default:
     return 0;
   }
@@ -738,14 +751,15 @@ var_ifEntry(struct variable *vp,
  * a packet was last input or output.  In the 2.1.5 and later releases,
  * this is fixed, thus the 199607 comparison.
  */
-          if ((ifnet.if_lastchange.tv_sec == 0 ) &&
-              (ifnet.if_lastchange.tv_usec == 0))
+          if (ifnet.if_lastchange.tv_sec == 0 &&
+              ifnet.if_lastchange.tv_usec == 0)
             long_return = 0;
+	  else if (ifnet.if_lastchange.tv_sec < starttime.tv_sec)
+	    long_return = 0;
           else {
-            gettimeofday(&now, (struct timezone *)0);
             long_return = (u_long)
-              ((now.tv_sec - ifnet.if_lastchange.tv_sec) * 100
-               + (now.tv_usec - ifnet.if_lastchange.tv_usec) / 10000);
+              ((ifnet.if_lastchange.tv_sec - starttime.tv_sec) * 100
+               + (ifnet.if_lastchange.tv_usec - starttime.tv_usec) / 10000);
           }
 #else
 #if NO_DUMMY_VALUES
@@ -1863,19 +1877,15 @@ var_ifEntry(struct variable *vp,
 		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFLASTCHANGE:
-		if ((ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 ) &&
-		    (ifmd.ifmd_data.ifi_lastchange.tv_usec == 0)) {
+		if (ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 &&
+		    ifmd.ifmd_data.ifi_lastchange.tv_usec == 0) {
 			long_return = 0;
+		else if (ifmd.ifmd_data.ifi_lastchange.tv_sec < starttime.tv_sec)
+		    long_return = 0;
 		} else {
-			struct timeval now;
-
-			gettimeofday(&now, (struct timezone *)0);
-			long_return = (u_long)
-				((now.tv_sec 
-				  - ifmd.ifmd_data.ifi_lastchange.tv_sec) * 100
-				 + ((now.tv_usec
-				     - ifmd.ifmd_data.ifi_lastchange.tv_usec)
-				    / 10000));
+		    long_return = (u_long)
+			((ifmd.ifmd_data.ifi_lastchange.tv_sec - starttime.tv_sec) * 100
+			 + ((ifmd.ifmd_data.ifi_lastchange.tv_usec - starttime.tv_usec) / 10000));
 		}
 		return (u_char *) &long_return;
 	case IFINOCTETS:

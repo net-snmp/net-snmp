@@ -31,7 +31,7 @@ void init_usmStats (void) {
   register_sysORTable(reg,10,"The management information definitions for the SNMP User-based Security Model.");
 #endif
 
-  REGISTER_MIB("snmpv3/usmStats", usmStats_variables, variable2, \
+  REGISTER_MIB("snmpv3/usmStats", usmStats_variables, variable2,
 				 usmStats_variables_oid );
 }
 

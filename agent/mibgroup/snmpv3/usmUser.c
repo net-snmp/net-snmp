@@ -67,7 +67,7 @@ init_usmUser(void)
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                          usm_store_users, NULL);
   
-  REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4, \
+  REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4,
 				 usmUser_variables_oid);
 }
 

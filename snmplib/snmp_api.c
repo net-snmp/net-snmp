@@ -2208,7 +2208,7 @@ _snmp_build(struct snmp_session *session,
 #ifdef NO_ZEROLENGTH_COMMUNITY
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
-		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+		session->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
 		return -1;
 	    }
 	    pdu->community = (u_char *)malloc(session->community_len);

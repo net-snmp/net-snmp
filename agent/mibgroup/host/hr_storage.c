@@ -6,6 +6,9 @@
 #include <config.h>
 #include <sys/types.h>
 #include <sys/param.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -50,8 +53,12 @@
 #endif /* vm/vm.h */
 #endif /* sys/vm.h */
 #if HAVE_SYS_POOL_H
+#if defined(MBPOOL_SYMBOL) && defined(MCLPOOL_SYMBOL)
 #define __POOL_EXPOSE
 #include <sys/pool.h>
+#else
+#undef HAVE_SYS_POOL_H
+#endif
 #endif
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
@@ -97,7 +104,8 @@
 #include <strings.h>
 #endif
 
-#include "../../../snmplib/system.h"
+#include "system.h"
+#include "snmp_logging.h"
 
 #define HRSTORE_MONOTONICALLY_INCREASING
 
@@ -115,6 +123,13 @@ extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
 
+#elif defined(HAVE_STATVFS)
+
+extern struct mntent *HRFS_entry;
+extern int fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	mnt_dir
+
 #elif defined(HAVE_GETFSSTAT)
 
 extern struct statfs *HRFS_entry;
@@ -130,9 +145,7 @@ extern struct mntent *HRFS_entry;
 
 #endif
 
-#ifndef linux
 static int physmem, pagesize;
-#endif
 
 	/*********************
 	 *
@@ -179,23 +192,36 @@ void init_hr_storage (void)
     mib[0] = CTL_HW;
     mib[1] = HW_PHYSMEM;
     len = sizeof(physmem);
-    if (sysctl(mib, 2, &physmem, &len, NULL, 0) == -1) perror("sysctl: physmem");
+    if (sysctl(mib, 2, &physmem, &len, NULL, 0) == -1)
+    	snmp_log_perror("sysctl: physmem");
     mib[1] = HW_PAGESIZE;
     len = sizeof(pagesize);
-    if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1) perror("sysctl: pagesize");
+    if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1)
+    	snmp_log_perror("sysctl: pagesize");
     physmem /= pagesize;
 #else	/* USE_SYSCTL */
-    auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
-#ifdef PGSHIFT
+#ifdef HAVE_GETPAGESIZE
+    pagesize = getpagesize();
+#elif defined(_SC_PAGESIZE)
+    pagesize = sysconf(_SC_PAGESIZE);
+#elif defined(PGSHIFT)
     pagesize = 1 << PGSHIFT;
 #elif defined(PAGE_SHIFT)
     pagesize = 1 << PAGE_SHIFT;
 #elif defined(PAGE_SIZE)
     pagesize = PAGE_SIZE;
+#elif defined(linux)
+    { struct stat kc_buf;
+      stat("/proc/kcore", &kc_buf);
+      pagesize = kc_buf.st_size/1024;	/* 4K too large ? */
+    }
 #else
-#  ifndef linux
     pagesize = PAGESIZE;
-#  endif
+#endif
+#ifdef _SC_PHYS_PAGES
+    physmem = sysconf(_SC_PHYS_PAGES);
+#else
+    auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
 #endif
 #endif	/* USE_SYSCTL */
 #ifdef TOTAL_MEMORY_SYMBOL
@@ -348,8 +374,6 @@ var_hrstore(struct variable *vp,
 #endif
     struct mbstat  mbstat;
 #endif	/* solaris2 */
-#else	/* linux */
-    struct stat  kc_buf;
 #endif	/* linux */
     static char string[100];
     struct HRFS_statfs stat_buf;
@@ -400,12 +424,7 @@ var_hrstore(struct variable *vp,
 
     switch (vp->magic){
 	case HRSTORE_MEMSIZE:
-#ifndef linux
 	    long_return = physmem * (pagesize / 1024);
-#else
-	    stat("/proc/kcore", &kc_buf);
-	    long_return = kc_buf.st_size/1024;	/* 4K too large ? */
-#endif
 	    return (u_char *)&long_return;
 
 	case HRSTORE_INDEX:
@@ -443,7 +462,11 @@ var_hrstore(struct variable *vp,
 	    }
 	case HRSTORE_UNITS:
 	    if ( store_idx < HRS_TYPE_FS_MAX )
+#if STRUCT_STATVFS_HAS_F_FRSIZE
+		long_return = stat_buf.f_frsize;
+#else
 		long_return = stat_buf.f_bsize;
+#endif
 	    else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:

@@ -170,7 +170,7 @@ oid disk_variables_oid[] = { EXTENSIBLEMIB,DISKMIBNUM,1 };
 void init_disk(void)
 {
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/disk", extensible_disk_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/disk", extensible_disk_variables, variable2,
                disk_variables_oid);
 
   snmpd_register_config_handler("disk", disk_parse_config, disk_free_config,

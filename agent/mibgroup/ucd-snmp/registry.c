@@ -42,7 +42,7 @@ void init_registry(void)
   oid registry_variables_oid[] = { 1,3,6,1,4,1,2021,102,1 };
 
     /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("ucd-snmp/registry", registry_variables, variable2, \
+  REGISTER_MIB("ucd-snmp/registry", registry_variables, variable2,
                registry_variables_oid);
 
 }
