@@ -4,6 +4,7 @@
 #
 export CVS_RSH=ssh
 TAG=
+WO=0
 
 if [ $# -eq 0 ]; then
 	DIR=.
@@ -48,7 +49,19 @@ else
 	COMMAND="cvs -q -z3 -d $ROOT co $TAG -d $DIR $REP"
 fi
 
+if [ ! -w $DIR/CVS ]; then
+	WO=1
+	echo "Making $DIR writable"
+	chmod -R u+w $DIR/* $DIR/.*
+fi
+
 echo "Updating directory $DIR with $TAG $REP..."
 echo "$COMMAND"
 
 $COMMAND
+
+if [ $WO -eq 1 ]; then
+	echo "Making $DIR read-only"
+	chmod -R a+w $DIR/* $DIR/.*
+fi
+
