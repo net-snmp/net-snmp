@@ -165,7 +165,7 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
     }
 
     tad = SNMP_MALLOC_TYPEDEF(container_table_data);
-    handler = netsnmp_create_handler(TABLE_CONTAINER_NAME,
+    handler = netsnmp_create_handler("table_container",
                                      _container_table_handler);
     if((NULL == tad) || (NULL == handler)) {
         if(tad) free(tad); /* SNMP_FREE wasted on locals */
@@ -405,17 +405,19 @@ _data_lookup(netsnmp_handler_registration *reginfo,
     } /** GET/SET */
     
     /*
-     * save the data in the request
+     * save the data and table in the request.
      */
-    if (NULL != row)
+    if (SNMP_ENDOFMIBVIEW != request->status) {
+        if (NULL != row)
+            netsnmp_request_add_list_data(request,
+                                          netsnmp_create_data_list
+                                          (TABLE_CONTAINER_ROW,
+                                           row, NULL));
         netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list
-                                      (TABLE_CONTAINER_ROW,
-                                       row, NULL));
-    netsnmp_request_add_list_data(request,
-                                      netsnmp_create_data_list
-                                      (TABLE_CONTAINER_TABLE,
+                                      (TABLE_CONTAINER_CONTAINER,
                                        tad->table, NULL));
+    }
 }
 
 /**********************************************************************
@@ -519,15 +521,15 @@ _container_table_handler(netsnmp_mib_handler *handler,
 
 /** retrieve the container used by the table_container helper */
 netsnmp_container*
-netsnmp_container_table_extract(netsnmp_request_info *request)
+netsnmp_container_table_container_extract(netsnmp_request_info *request)
 {
     return (netsnmp_container *)
-         netsnmp_request_get_list_data(request, TABLE_CONTAINER_TABLE);
+         netsnmp_request_get_list_data(request, TABLE_CONTAINER_CONTAINER);
 }
 
 /** inserts a newly created table_container entry into a request list */
 void
-netsnmp_container_table_insert_row(netsnmp_request_info *request,
+netsnmp_container_table_row_insert(netsnmp_request_info *request,
                                    netsnmp_index        *row)
 {
     netsnmp_request_info       *req;
@@ -593,13 +595,13 @@ netsnmp_container_table_insert_row(netsnmp_request_info *request,
 #ifndef NETSNMP_USE_INLINE
 /** find the context data used by the table_container helper */
 void *
-netsnmp_container_table_extract_context(netsnmp_request_info *request)
+netsnmp_container_table_row_extract(netsnmp_request_info *request)
 {
     /*
      * NOTE: this function must match in table_container.c and table_container.h.
      *       if you change one, change them both!
      */
-    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
+    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
 }
 #endif /* inline */
 
