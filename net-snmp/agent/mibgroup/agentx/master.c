@@ -218,10 +218,12 @@ agentx_got_response(int operation,
             }
 
             /* update the oid in the original request */
-            snmp_set_var_typed_value(request->requestvb, var->type,
-                                     var->val.string, var->val_len);
-            snmp_set_var_objid(request->requestvb, var->name,
-                               var->name_length);
+            if (var->type != SNMP_ENDOFMIBVIEW) {
+                snmp_set_var_typed_value(request->requestvb, var->type,
+                                         var->val.string, var->val_len);
+                snmp_set_var_objid(request->requestvb, var->name,
+                                   var->name_length);
+            }
             request->delegated = REQUEST_IS_NOT_DELEGATED;
 	}
 
@@ -232,6 +234,9 @@ agentx_got_response(int operation,
                      "response to agentx request illegal.  We're screwed.\n");
             set_request_error(cache->reqinfo, requests, SNMP_ERR_GENERR);
         }
+
+        if (cache->reqinfo->mode == MODE_GETBULK)
+            bulk_to_next_fix_requests(requests);
     } else {
         /* mark set requests as handled */
         for(request = requests; request; request = request->next) {
@@ -281,7 +286,7 @@ agentx_master_handler(
             break;
 
         case MODE_GETBULK: /* WWWXXX */
-            pdu = snmp_pdu_create(AGENTX_MSG_GETBULK);
+            pdu = snmp_pdu_create(AGENTX_MSG_GETNEXT);
             break;
             
         case MODE_SET_RESERVE1:
