@@ -7,7 +7,7 @@
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 */
-
+#define WIN32SCK_IS_STDSCK
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -41,15 +41,6 @@
 #ifndef G_VOID
 #define G_VOID G_DISCARD
 #endif
-/*
-#ifndef in_addr_t
-#define in_addr_t u_long
-#endif
-
-#ifdef HAS_MEMCPY
-#define bcopy(s,d,l) memcpy((d),(s),(l))
-#endif
-*/
 
 #ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
