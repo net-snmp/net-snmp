@@ -55,9 +55,8 @@ struct traphandle *traphandlers=0;
 /*   traphandle OID EXEC           */
 
 char *
-snmptrapd_get_traphandler(name, namelen)
-  oid *name;
-  int namelen;
+snmptrapd_get_traphandler(oid *name,
+			  int namelen)
 {
   struct traphandle **ttmp;
   DEBUGMSGTL(("snmptrapd:traphandler", "looking for trap handler for "));
@@ -75,9 +74,7 @@ snmptrapd_get_traphandler(name, namelen)
 }
 
 void
-snmptrapd_traphandle(word, line)
-  char *word;
-  char *line;
+snmptrapd_traphandle(char *word, char *line)
 {
   struct traphandle **ttmp;
   char buf[STRINGMAX];
