@@ -1,0 +1,253 @@
+                          -- IPFWCHAINS-MIB
+              -- gedefinieerd door Didier Dhaenens
+		-- Versie 3 : 25/02/99
+
+IPFWCHAINS-MIB 
+ 
+DEFINITIONS ::= BEGIN
+
+IMPORTS
+      enterprises, INTEGER
+     	  FROM RFC1155-SMI
+      OBJECT-TYPE      
+	  FROM RFC-1212
+      DisplayString
+	  FROM RFC1213-MIB
+      ucdavis, ucdExperimental 
+	  FROM UCD-SNMP-MIB;
+
+
+ipfwChainTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF IpfwChain
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Table with the chains of the firewall"
+	::= { ucdExperimental 65 }
+
+ipfwChain OBJECT-TYPE 
+	SYNTAX IpfwChain
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		" ipfwchains row "
+	INDEX
+		{ chainindex }
+	::= { ipfwChainTable 1 } 		
+
+IpfwChain ::= SEQUENCE {
+		
+	chainindex	INTEGER,
+        chainlabel	DisplayString,
+	policy		DisplayString,
+	refcnt		INTEGER,
+	pkts		DisplayString,
+	bytes		DisplayString,
+	}
+
+chainindex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" index in tabel "
+	::= { ipfwChain 1 }
+
+chainlabel OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" Name of the chain "
+	::= { ipfwChain 2 }
+
+policy OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" Default policy of chain "
+	::= { ipfwChain 3 }
+
+refcnt OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" Number of references to this chain "
+	::= { ipfwChain 4 }
+
+pkts OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" Number of packets that matched default rule "
+	::= { ipfwChain 5 }
+
+bytes OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		" Number of bytes that matched default rule "
+	::= { ipfwChain 6 }
+
+ipfwRuleTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF IpfwRule
+        ACCESS not-accessible
+        STATUS mandatory
+        DESCRIPTION
+                "Table with the rules from the firewall"
+        ::= { ucdExperimental 66 }       
+
+ipfwRule OBJECT-TYPE
+        SYNTAX IpfwRule
+        ACCESS not-accessible
+        STATUS mandatory
+        DESCRIPTION
+                " Row from the ipfwRuleTable "
+        INDEX
+                { ruleindex }
+        ::= { ipfwRuleTable 1 }
+
+IpfwRule ::= SEQUENCE {
+
+        ruleindex 	INTEGER,
+        chain		DisplayString,
+        pkts            DisplayString,
+        bytes           DisplayString,
+	target		DisplayString,
+	prot		DisplayString,
+	source		DisplayString,
+	destination	DisplayString,
+	ports		DisplayString,
+	opt		DisplayString,
+	ifname		DisplayString,
+	tosa		DisplayString,
+	tosx		DisplayString,
+	mark		DisplayString,
+	outsize		DisplayString,
+        }      
+
+ruleindex OBJECT-TYPE
+        SYNTAX INTEGER
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Rulenumber "
+        ::= { ipfwRule 1 }
+
+chain   OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Name of the chain "
+        ::= { ipfwRule 2 }
+
+pkts 	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Number of packets that matched this rule "
+        ::= { ipfwRule 3 }
+
+bytes 	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Number of bytes that matched this rule "
+        ::= { ipfwRule 4 }   
+
+target	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Target of this rule "
+        ::= { ipfwRule 5 }
+
+prot  	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Protocol of this rule "
+        ::= { ipfwRule 6 }   
+
+source  OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Source of this rule "
+        ::= { ipfwRule 7 }
+
+destination  OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Destination of this rule "
+        ::= { ipfwRule 8 }      
+
+ports  	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Portrange source -> Portrange destination "
+        ::= { ipfwRule 9 }   
+
+opt	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Options of this rule "
+        ::= { ipfwRule 10 }
+
+ifname  OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Interface to which this rule applies "
+        ::= { ipfwRule 11 }      
+
+tosa  	OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " TOS-field will be Anded with this value "
+        ::= { ipfwRule 12 }
+
+tosx    OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " TOS-field will be Xored with this value "
+        ::= { ipfwRule 13 }      
+
+mark    OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Packet will be marked with this value "
+        ::= { ipfwRule 14 }   
+
+outsize OBJECT-TYPE
+        SYNTAX DisplayString
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+                " Maximum size of outgoing packet "
+        ::= { ipfwRule 15 }   
+
+END
