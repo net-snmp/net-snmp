@@ -332,10 +332,12 @@ static void send_v1_trap (struct snmp_session *ss,
 {
     struct snmp_pdu *pdu;
     struct timeval now;
+    struct sockaddr_in *pduIp;
 
     gettimeofday(&now, NULL);
 
     pdu = snmp_pdu_create (SNMP_MSG_TRAP);
+    pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
 
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
 	pdu->enterprise		 = objid_enterprisetrap;
@@ -345,8 +347,7 @@ static void send_v1_trap (struct snmp_session *ss,
 	pdu->enterprise		 = version_id;
 	pdu->enterprise_length	 = version_id_len;
     }
-    pdu->agent_addr.sin_addr.s_addr
-				 = get_myaddr();
+    pduIp->sin_addr.s_addr	  = get_myaddr();
     pdu->trap_type		 = trap;
     pdu->specific_type		 = specific;
     pdu->time		 	 = calculate_time_diff(&now, &starttime);
@@ -975,13 +976,15 @@ int
 snmp_check_packet(struct snmp_session *session,
   snmp_ipaddr from)
 {
+    struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
+
 #ifdef USE_LIBWRAP
     char *addr_string;
     /*
      * Log the message and/or dump the message.
      * Optionally cache the network address of the sender.
      */
-    addr_string = inet_ntoa(from.sin_addr);
+    addr_string = inet_ntoa(fromIp->sin_addr);
 
     if(!addr_string) {
       addr_string = STRING_UNKNOWN;
@@ -1001,16 +1004,16 @@ snmp_check_packet(struct snmp_session *session,
 	
 	for(count = 0; count < ADDRCACHE; count++){
 	    if (addrCache[count].status > UNUSED /* used or old */
-		&& from.sin_addr.s_addr == addrCache[count].addr)
+		&& fromIp->sin_addr.s_addr == addrCache[count].addr)
 		break;
 	}
 
 	if (count >= ADDRCACHE || verbose){
 	    printf("%s Received SNMP packet(s) from %s\n",
-		   sprintf_stamp(NULL), inet_ntoa(from.sin_addr));
+		   sprintf_stamp(NULL), inet_ntoa(fromIp->sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
-		    addrCache[count].addr = from.sin_addr.s_addr;
+		    addrCache[count].addr = fromIp->sin_addr.s_addr;
 		    addrCache[count].status = USED;
 		    break;
 		}

@@ -103,6 +103,7 @@ rmonGetValue(oid *srcParty,
     struct variable_list *varList;
     u_long addr;
     struct get_req_state *state;
+    struct sockaddr_in *pduIp;
     extern int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
     
     /* whether it's local or non-local, I have to know about the
@@ -141,9 +142,10 @@ rmonGetValue(oid *srcParty,
 	}
 	
 	pdu = snmp_pdu_create(SNMP_MSG_GET);
-	memcpy(&pdu->address.sin_addr.s_addr, dstp->partyTAddress, 4);
-	memcpy(&pdu->address.sin_port, dstp->partyTAddress + 4, 2);
-	pdu->address.sin_family = AF_INET;
+	pduIp = (struct sockaddr_in *)&(pdu->address);
+	memcpy(&pduIp->sin_addr.s_addr, dstp->partyTAddress, 4);
+	memcpy(&pduIp->sin_port, dstp->partyTAddress + 4, 2);
+	pduIp->sin_family = AF_INET;
 	varList = (struct variable_list *)malloc(sizeof(struct variable_list));
 	
 	varList->name = (oid *)malloc(variableLen * sizeof(oid));
