@@ -1,4 +1,4 @@
-/*
+/* -*- C -*-
      SNMP.xs -- Perl 5 interface to the UCD SNMP toolkit
 
      written by G. S. Marzot (gmarzot@nortelnetworks.com)
@@ -2533,6 +2533,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
            session.securityNameLen = strlen(sec_name);
            session.securityName = sec_name;
            session.securityLevel = sec_level;
+           session.securityModel = USM_SEC_MODEL_NUMBER;
            /* session.securityEngineID = sec_eng_id_buf;*/
            session.securityEngineIDLen =
               hex_to_binary2(sec_eng_id, strlen(sec_eng_id),
