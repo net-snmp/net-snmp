@@ -2060,14 +2060,20 @@ handle_mibdirs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibdir) {
-        ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
-        if (!ctmp) {
-            DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
-            return;
+        if ((*line == '+') || (*line == '-')) {
+            ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
+            if (!ctmp) {
+                DEBUGMSGTL(("read_config:initmib",
+                            "mibdir conf malloc failed"));
+                return;
+            }
+            if(*line++ == '+')
+                sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
+            else
+                sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
+        } else {
+            ctmp = strdup(line);
         }
-        if (*line == '+')
-            line++;
-        sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
         SNMP_FREE(confmibdir);
         confmibdir = ctmp;
     } else {
@@ -2315,7 +2321,7 @@ register_mib_handlers(void)
 #ifndef DISABLE_MIB_LOADING
     register_prenetsnmp_mib_handler("snmp", "mibdirs",
                                     handle_mibdirs_conf, NULL,
-                                    "[mib-dirs|+mib-dirs]");
+                                    "[mib-dirs|+mib-dirs|-mib-dirs]");
     register_prenetsnmp_mib_handler("snmp", "mibs",
                                     handle_mibs_conf, NULL,
                                     "[mib-tokens|+mib-tokens]");
@@ -2448,7 +2454,7 @@ netsnmp_get_mib_directory(void)
                 DEBUGMSGTL(("get_mib_directory", "no mib directories set by config\n"));
                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
             }
-            else if (*confmibdir == '+') {
+            else if ((*confmibdir == '+') || (*confmibdir == '+')) {
                 DEBUGMSGTL(("get_mib_directory", "mib directories set by config (but added)\n"));
                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
                 netsnmp_set_mib_directory(confmibdir);
