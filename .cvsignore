@@ -1,3 +1,4 @@
+*.made
 .index
 .software.db.sh
 ChangeLog.add
@@ -12,12 +13,12 @@ config.out
 config.status
 ece-mib.txt
 lib
+libtool
 make.out
 mib.txt
 mib_module_config.h
+net-snmp-config
 sedscript
 targets
 ucd-snmp-config.h
 ucd-snmp.txt
-*.made
-libtool
