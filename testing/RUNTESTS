@@ -116,6 +116,7 @@ unset SNMP_TMPDIR
 export SNMP_TMPDIR
 
 PATH=${SNMP_TESTDIR}:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
+export PATH
 
 #
 # Switch to the testing directory, for ease of the client test packages.
