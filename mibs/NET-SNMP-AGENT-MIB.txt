@@ -65,11 +65,11 @@ nsTransactionEntry OBJECT-TYPE
 
 NsTransactionEntry ::= SEQUENCE {
   nsTransactionID   INTEGER,
-  nsTransactionMode INTEGER
+  nsTransactionMode Integer32
 }
 
 nsTransactionID OBJECT-TYPE
-    SYNTAX      INTEGER
+    SYNTAX      INTEGER (0..4294967295)
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
