@@ -123,10 +123,23 @@ sa_find_next(void) {
   return sa_ret;
 }
 
+struct snmp_alarm *
+sa_find_specific(unsigned int clientreg)
+{
+  struct snmp_alarm *sa_ptr;
+  for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_ptr->next) {
+    if (sa_ptr->clientreg == clientreg) {
+      return sa_ptr;
+    }
+  }
+  return NULL;
+}
+
 void
 run_alarms(void) {
   int done=0;
   struct snmp_alarm *sa_ptr;
+  unsigned int clientreg;
 
   /* loop through everything we have repeatedly looking for the next
      thing to call until all events are finally in the future again */
@@ -136,13 +149,17 @@ run_alarms(void) {
     if (sa_ptr == NULL)
       return;
     if (sa_ptr->nextcall <= time(NULL)) {
-      DEBUGMSGTL(("snmp_alarm_run_alarms","  running alarm %d\n",
-                  sa_ptr->clientreg));
+      clientreg = sa_ptr->clientreg;
+      DEBUGMSGTL(("snmp_alarm_run_alarms","  running alarm %d\n", clientreg));
       (*(sa_ptr->thecallback))(sa_ptr->clientreg, sa_ptr->clientarg);
       DEBUGMSGTL(("snmp_alarm_run_alarms","     ... done\n"));
-      sa_ptr->lastcall = time(NULL);
-      sa_ptr->nextcall = 0;
-      sa_update_entry(sa_ptr);
+      if ((sa_ptr = sa_find_specific(clientreg)) != NULL) {
+	sa_ptr->lastcall = time(NULL);
+	sa_ptr->nextcall = 0;
+	sa_update_entry(sa_ptr);
+      } else {
+	DEBUGMSGTL(("snmp_alarm_run_alarms", "alarm deleted by callback?\n"));
+      }
     } else {
       done = 1;
     }
