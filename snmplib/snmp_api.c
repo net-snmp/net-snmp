@@ -5203,262 +5203,304 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     char type,
 	     const char *value)
 {
-    int result = 0;
-    char *ecp;
-    int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
-    u_char buf[SPRINT_MAX_LEN], *bufptr = buf;
-    size_t tint;
-    long ltmp;
-    struct tree *tp;
-    struct enum_list *ep;
-    struct range_list *rp;
+  const char *cp;
+  char *ecp;
+  int result = SNMPERR_SUCCESS;
+  int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+  u_char *buf = NULL;
+  const char *buf_ptr = NULL;
+  size_t buf_len = 0, value_len = 0, tint;
+  long ltmp;
+  struct tree *tp;
+  struct enum_list *ep;
+  struct range_list *rp;
 #ifdef OPAQUE_SPECIAL_TYPES
-    double dtmp;
-    float ftmp;
-    struct counter64 c64tmp;
+  double dtmp;
+  float ftmp;
+  struct counter64 c64tmp;
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-    tp = get_tree(name, name_length, get_tree_head());
-    if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) check = 0;
+  tp = get_tree(name, name_length, get_tree_head());
+  if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
+    check = 0;
+  }
 
-    switch(type){
-      case 'i':
-        if (check && tp->type != TYPE_INTEGER && tp->type != TYPE_INTEGER32) {
-	    value = "INTEGER";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
+  switch(type) {
+  case 'i':
+    if (check && tp->type != TYPE_INTEGER && tp->type != TYPE_INTEGER32) {
+      value = "INTEGER";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    if (!*value) goto fail;
+    ltmp = strtol(value, &ecp, 10);
+    if (*ecp) {
+      ep = tp ? tp->enums : NULL;
+      while (ep) {
+	if (strcmp(value, ep->label) == 0) {
+	  ltmp = ep->value;
+	  break;
 	}
-	if (!*value) goto fail;
-        ltmp = strtol(value, &ecp, 10);
-	if (*ecp) {
-	    ep = tp ? tp->enums : NULL;
-	    while (ep) {
-		if (strcmp(value, ep->label) == 0) {
-		    ltmp = ep->value;
-		    break;
-		}
-		ep = ep->next;
-	    }
-	    if (!ep) {
-		result = SNMPERR_BAD_NAME;
-		snmp_set_detail(value);
-		break;
-	    }
-	}
-
-	if (check && tp->ranges) {
-	    rp = tp->ranges;
-	    while (rp) {
-		if (rp->low <= ltmp && ltmp <= rp->high) break;
-		rp = rp->next;
-	    }
-	    if (!rp) {
-		result = SNMPERR_RANGE;
-		snmp_set_detail(value);
-		break;
-	    }
-	}
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
-                              (u_char *) &ltmp, sizeof(ltmp));
-        break;
-
-      case 'u':
-        if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
-	    value = "Unsigned32";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        ltmp = strtoul(value, &ecp, 10);
-	if (*value && !*ecp)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
-				  (u_char *) &ltmp, sizeof(ltmp));
-	else goto fail;
-        break;
-
-      case '3':
-        if (check && tp->type != TYPE_UINTEGER) {
-	    value = "UInteger32";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        ltmp = strtoul(value, &ecp, 10);
-	if (*value && !*ecp)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
-				  (u_char *) &ltmp, sizeof(ltmp));
-	else goto fail;
-        break;
-
-      case 'c':
-        if (check && tp->type != TYPE_COUNTER) {
-	    value = "Counter32";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        ltmp = strtoul(value, &ecp, 10);
-	if (*value && !*ecp)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
-				  (u_char *) &ltmp, sizeof(ltmp));
-	else goto fail;
-        break;
-
-      case 't':
-        if (check && tp->type != TYPE_TIMETICKS) {
-	    value = "Timeticks";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        ltmp = strtoul(value, &ecp, 10);
-	if (*value && !*ecp)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
-				  (u_char *) &ltmp, sizeof(long));
-	else goto fail;
-        break;
-
-      case 'a':
-        if (check && tp->type != TYPE_IPADDR) {
-	    value = "IpAddress";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        ltmp = inet_addr(value);
-        if (ltmp != (long)-1 || !strcmp(value,"255.255.255.255"))
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
-				  (u_char *) &ltmp, sizeof(long));
-	else goto fail;
-        break;
-
-      case 'o':
-        if (check && tp->type != TYPE_OBJID) {
-	    value = "OBJECT IDENTIFIER";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        tint = sizeof(buf) / sizeof(oid);
-        if (snmp_parse_oid(value, (oid *)buf, &tint))
-            snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
-                              sizeof(oid)*tint);
-	else result = snmp_errno;
-        break;
-
-      case 's':
-      case 'x':
-      case 'd':
-        if (check && tp->type != TYPE_OCTETSTR) {
-	    value = "OCTET STRING";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-        if (type == 'd'){
-          ltmp = ascii_to_binary(value, buf);
-        } else if (type == 's') {
-	  /*  Don't copy buffer here -- completely pointless.  */
-	  bufptr = (u_char *)value;
-          ltmp = strlen(value);
-        } else if (type == 'x'){
-          ltmp = hex_to_binary(value, buf);
-        }
-        if (ltmp < 0) {
-          result = SNMPERR_VALUE;
-          snmp_set_detail(value);
-          break;
-        }
-	if (check && tp->ranges) {
-	    rp = tp->ranges;
-	    while (rp) {
-		if (rp->low <= ltmp && ltmp <= rp->high) break;
-		rp = rp->next;
-	    }
-	    if (!rp) {
-		result = SNMPERR_RANGE;
-		snmp_set_detail("Bad string length");
-		break;
-	    }
-	}
-        snmp_pdu_add_variable(pdu, name, name_length,
-			      ASN_OCTET_STR, bufptr, ltmp);
-        break;
-
-      case 'n':
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
-        break;
-
-      case 'b':
-        if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
-	    value = "BITS";
-	    result = SNMPERR_VALUE;
-	    goto type_error;
-	}
-	tint = 0;
-	memset(buf, 0, sizeof buf);
-	{ char *lvalue = strdup(value), *cp;
-          for (ep = tp ? tp->enums : NULL; ep; ep = ep->next)
-            if (ep->value / 8 >= (int)tint) tint = ep->value / 8 + 1;
-	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
-	    int ix, bit;
-	    ltmp = strtoul(cp, &ecp, 0);
-	    if (*ecp != 0) {
-	      ep = tp ? tp->enums : NULL;
-	      while (ep)
-		if (strcmp(ep->label, cp)) ep = ep->next;
-		else break;
-	      if (ep) ltmp = ep->value;
-	      else {
-		result = SNMPERR_BAD_NAME;
-		snmp_set_detail(cp);
-		free(lvalue);
-		goto out;
-	      }
-	    }
-	    ix = ltmp / 8;
-	    if (ix >= (int)tint) tint = ix+1;
-	    bit = 0x80 >> ltmp % 8;
-	    buf[ix] |= bit;
-	  }
-	  free(lvalue);
-	}
-	snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
-	  		      buf, tint);
+	ep = ep->next;
+      }
+      if (!ep) {
+	result = SNMPERR_BAD_NAME;
+	snmp_set_detail(value);
 	break;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-      case 'U':
-        if (read64(&c64tmp, value))
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
-				  (u_char *) &c64tmp, sizeof(c64tmp));
-	else goto fail;
-        break;
-
-      case 'I':
-        if (read64(&c64tmp, value))
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64,
-				  (u_char *) &c64tmp, sizeof(c64tmp));
-	else goto fail;
-        break;
-
-      case 'F':
-	if (sscanf(value, "%f", &ftmp) == 1)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
-				  (u_char *) &ftmp, sizeof(ftmp));
-	else goto fail;
-        break;
-
-      case 'D':
-	if (sscanf(value, "%lf", &dtmp) == 1)
-	    snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE,
-				  (u_char *) &dtmp, sizeof(dtmp));
-	else goto fail;
-        break;
-#endif /* OPAQUE_SPECIAL_TYPES */
-
-      default:
-	result = SNMPERR_VAR_TYPE;
-	sprintf((char *)buf, "%c", type);
-	snmp_set_detail((char *)buf);
-        break;
+      }
     }
 
-    SET_SNMP_ERROR(result);
-    return result;
+    if (check && tp->ranges) {
+      rp = tp->ranges;
+      while (rp) {
+	if (rp->low <= ltmp && ltmp <= rp->high) break;
+	rp = rp->next;
+      }
+      if (!rp) {
+	result = SNMPERR_RANGE;
+	snmp_set_detail(value);
+	break;
+      }
+    }
+    snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
+			  (u_char *) &ltmp, sizeof(ltmp));
+    break;
+
+  case 'u':
+    if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
+      value = "Unsigned32";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    ltmp = strtoul(value, &ecp, 10);
+    if (*value && !*ecp)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
+			    (u_char *) &ltmp, sizeof(ltmp));
+    else goto fail;
+    break;
+
+  case '3':
+    if (check && tp->type != TYPE_UINTEGER) {
+      value = "UInteger32";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    ltmp = strtoul(value, &ecp, 10);
+    if (*value && !*ecp)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
+			    (u_char *) &ltmp, sizeof(ltmp));
+    else goto fail;
+    break;
+
+  case 'c':
+    if (check && tp->type != TYPE_COUNTER) {
+      value = "Counter32";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    ltmp = strtoul(value, &ecp, 10);
+    if (*value && !*ecp)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
+			    (u_char *) &ltmp, sizeof(ltmp));
+    else goto fail;
+    break;
+
+  case 't':
+    if (check && tp->type != TYPE_TIMETICKS) {
+      value = "Timeticks";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    ltmp = strtoul(value, &ecp, 10);
+    if (*value && !*ecp)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
+			    (u_char *) &ltmp, sizeof(long));
+    else goto fail;
+    break;
+
+  case 'a':
+    if (check && tp->type != TYPE_IPADDR) {
+      value = "IpAddress";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    ltmp = inet_addr(value);
+    if (ltmp != (long)-1 || !strcmp(value,"255.255.255.255"))
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
+			    (u_char *) &ltmp, sizeof(long));
+    else goto fail;
+    break;
+
+  case 'o':
+    if (check && tp->type != TYPE_OBJID) {
+      value = "OBJECT IDENTIFIER";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    if ((buf = malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
+      result = SNMPERR_MALLOC;
+    } else {
+      tint = MAX_OID_LEN;
+      if (snmp_parse_oid(value, (oid *)buf, &tint)) {
+	snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
+			      buf, sizeof(oid)*tint);
+      } else {
+	result = snmp_errno;
+      }
+    }
+    break;
+
+  case 's':
+  case 'x':
+  case 'd':
+    if (check && tp->type != TYPE_OCTETSTR) {
+      value = "OCTET STRING";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    if (type == 'd') {
+      if (!snmp_decimal_to_binary(&buf, &buf_len, &value_len, 1, value)) {
+	result = SNMPERR_VALUE;
+	snmp_set_detail(value);
+	break;
+      }
+      buf_ptr = buf;
+    } else if (type == 'x') {
+      if (!snmp_hex_to_binary(&buf, &buf_len, &value_len, 1, value)) {
+	result = SNMPERR_VALUE;
+	snmp_set_detail(value);
+	break;
+      }
+      buf_ptr = buf;
+    } else if (type == 's') {
+      buf_ptr   = value;
+      value_len = strlen(value);
+    }
+    if (check && tp->ranges) {
+      rp = tp->ranges;
+      while (rp) {
+	if (rp->low <= value_len && value_len <= rp->high) {
+	  break;
+	}
+	rp = rp->next;
+      }
+      if (!rp) {
+	result = SNMPERR_RANGE;
+	snmp_set_detail("Bad string length");
+	break;
+      }
+    }
+    snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
+			  buf_ptr, value_len);
+    break;
+
+  case 'n':
+    snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
+    break;
+
+  case 'b':
+    if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
+      value = "BITS";
+      result = SNMPERR_VALUE;
+      goto type_error;
+    }
+    tint = 0;
+    if ((buf = (u_char *)malloc(256)) == NULL) {
+      result = SNMPERR_MALLOC;
+      break;
+    } else {
+      buf_len = 256;
+      memset(buf, 0, buf_len);
+    }
+
+    for (ep = tp ? tp->enums : NULL; ep; ep = ep->next) {
+      if (ep->value / 8 >= (int)tint) {
+	tint = ep->value / 8 + 1;
+      }
+    }
+
+    for (cp = value; *cp != '\0';) {
+      int ix, bit;
+
+      for (; (*cp == ' ' || *cp == '\t' || *cp == ','); cp++);
+      if (*cp == '\0') {
+	break;
+      }
+
+      ltmp = strtoul(cp, &ecp, 0);
+      if (*ecp != 0) {
+	for (ep = tp?tp->enums:NULL; ep != NULL; ep = ep->next) {
+	  if (strncmp(ep->label, cp, strlen(ep->label)) == 0) {
+	    break;
+	  }
+	}
+	if (ep != NULL) {
+	  ltmp = ep->value;
+	} else {
+	  result = SNMPERR_BAD_NAME;
+	  snmp_set_detail(cp);
+	  free(buf);
+	  goto out;
+	}
+      }
+      
+      ix = ltmp / 8;
+      if (ix >= (int)tint) {
+	tint = ix + 1;
+      }
+      if (ix >= buf_len && !snmp_realloc(&buf, &buf_len)) {
+	result = SNMPERR_MALLOC;
+	break;
+      }
+      bit = 0x80 >> ltmp % 8;
+      buf[ix] |= bit;
+
+      for (; !(*cp == ' ' || *cp == '\t' || *cp == ',' || *cp == '\0'); cp++);
+    }
+    snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
+			  buf, tint);
+    break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  case 'U':
+    if (read64(&c64tmp, value))
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
+			    (u_char *) &c64tmp, sizeof(c64tmp));
+    else goto fail;
+    break;
+
+  case 'I':
+    if (read64(&c64tmp, value))
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64,
+			    (u_char *) &c64tmp, sizeof(c64tmp));
+    else goto fail;
+    break;
+
+  case 'F':
+    if (sscanf(value, "%f", &ftmp) == 1)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
+			    (u_char *) &ftmp, sizeof(ftmp));
+    else goto fail;
+    break;
+
+  case 'D':
+    if (sscanf(value, "%lf", &dtmp) == 1)
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE,
+			    (u_char *) &dtmp, sizeof(dtmp));
+    else goto fail;
+    break;
+#endif /* OPAQUE_SPECIAL_TYPES */
+
+  default:
+    result = SNMPERR_VAR_TYPE;
+    sprintf((char *)buf, "%c", type);
+    snmp_set_detail((char *)buf);
+    break;
+  }
+
+  SNMP_FREE(buf);
+  SET_SNMP_ERROR(result);
+  return result;
 
 type_error:
     {   char error_msg[256];
