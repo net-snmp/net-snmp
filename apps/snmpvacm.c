@@ -201,7 +201,7 @@ view_oid(oid *it, size_t *len, const char *viewName,char *viewSubtree)
   for(i=0; i < c_oid_length; i++)
     it[itIndex++] = c_oid[i];
 
- // sprint_objid(c_oid, it, *len);
+ /* sprint_objid(c_oid, it, *len); */
 }
 
 static void optProc(int argc, char *const *argv, int opt)
