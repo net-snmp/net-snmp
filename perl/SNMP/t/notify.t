@@ -11,7 +11,7 @@ BEGIN { $n = 10; plan tests => $n }
 use SNMP;
 use vars qw($agent_port $comm $comm2 $trap_port $agent_host $sec_name);
 require 't/startagent.pl';
-$SNMP::debugging = 2;
+$SNMP::debugging = 0;
 
 my $res;
 my $enterprise = '.1.3.6.1.2.1.1.1.0';

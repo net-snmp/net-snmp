@@ -1347,7 +1347,7 @@ _context_add(walk_context *context)
     for (i = 0; i < _valid_contexts->sz_valid; i++)
 	if (_valid_contexts->valid[i] == NULL)
 	    break;
-    
+
     /* Did we walk off the end of the list?  Need to grow the list.  Double
     ** it for now.
     */
@@ -1356,7 +1356,7 @@ _context_add(walk_context *context)
 
 	Renew(_valid_contexts->valid, new_sz, walk_context *);
 	assert(_valid_contexts->valid != NULL);
-	
+
 	DBPRT(3, "Resized valid_context array 0x%p from %d to %d slots\n",
 		    _valid_contexts->valid, _valid_contexts->sz_valid, new_sz);
 
@@ -1383,7 +1383,7 @@ _context_del(walk_context *context)
 
     if (_valid_contexts == NULL)	/* Make sure it was initialized. */
 	return 1;
-	
+
     for (i = 0; i < _valid_contexts->sz_valid; i++) {
 	if (_valid_contexts->valid[i] == context) {
 	    DBPRT(3, "Remove context 0x%p from valid context list\n", context);
@@ -1404,7 +1404,7 @@ _context_okay(walk_context *context)
 
     if (_valid_contexts == NULL)	/* Make sure it was initialized. */
 	return 0;
-	
+
     if (context == NULL)		/* Asked about a NULL context? Fail. */
 	return 0;
 
@@ -1429,30 +1429,30 @@ _bulkwalk_done(walk_context *context)
    /* Don't consider walk done until at least one packet has been exchanged. */
    if (context->pkts_exch == 0)
       return 0;
- 
+
    /* Fix up any requests that have completed.  If the complete flag is set,
-   ** or it is a non-repeater OID, set the ignore flag so that it will not 
-   ** be considered further.  Assume we are done with the walk, and note 
+   ** or it is a non-repeater OID, set the ignore flag so that it will not
+   ** be considered further.  Assume we are done with the walk, and note
    ** otherwise if we aren't.  Return 1 if all requests are complete, or 0
    ** if there's more to do.
-   */ 
+   */
    for (i = 0; i < context->nreq_oids; i ++) {
       bt_entry = &context->req_oids[i];
- 
+
       if (bt_entry->complete || bt_entry->norepeat) {
 
- 	/* This request is complete.  Remove it from list of 
+ 	/* This request is complete.  Remove it from list of
  	** walks still in progress.
  	*/
- 	DBPRT(1, "Ignoring %s request oid %s\n", 
+ 	DBPRT(1, "Ignoring %s request oid %s\n",
  	      bt_entry->norepeat? "nonrepeater" : "completed",
  	      sprint_objid(_debugx, bt_entry->req_oid,
  				    bt_entry->req_len));
- 
+
  	/* Ignore this OID in any further packets. */
  	bt_entry->ignore = 1;
       }
- 
+
       /* If any OID is not being ignored, the walk is not done.  Must loop
       ** through all requests to do the fixup -- no early return possible.
       */
@@ -1478,15 +1478,15 @@ _bulkwalk_async_cb(int		op,
    int	npushed;
    SV **err_str_svp;
    SV **err_num_svp;
-   
+
    /* Handle callback request for asynchronous bulkwalk.  If the bulkwalk has
-   ** not completed, and has not timed out, send the next request packet in 
+   ** not completed, and has not timed out, send the next request packet in
    ** the walk.
    **
    ** Return 0 to indicate success (caller ignores return value).
    */
 
-   DBPRT(2, "bulkwalk_async_cb(op %d, reqid 0x%08X, context 0x%p)\n", 
+   DBPRT(2, "bulkwalk_async_cb(op %d, reqid 0x%08X, context 0x%p)\n",
 							op, reqid, context_ptr);
 
    context = (walk_context *)context_ptr;
@@ -1593,7 +1593,7 @@ _bulkwalk_async_cb(int		op,
 
    /* Call the perl callback with the return values and we're done. */
    npushed = _bulkwalk_finish(context, 1 /* OKAY */);
-   
+
    return 1;
 }
 
@@ -1663,7 +1663,7 @@ _bulkwalk_send_pdu(walk_context *context)
 
    context->pkts_exch ++;
 
-   DBPRT(1, "Sending %ssynchronous request %d...\n", 
+   DBPRT(1, "Sending %ssynchronous request %d...\n",
 		     SvTRUE(context->perl_cb) ? "a" : "", context->pkts_exch);
 
    /* We handle the asynchronous and synchronous requests differently here.
@@ -1762,7 +1762,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       sv_timestamp = newSViv((IV)time(NULL));
 
    /* Set up for numeric OID's, if necessary.  Save the old values
-   ** so that they can be restored when we finish -- these are 
+   ** so that they can be restored when we finish -- these are
    ** library-wide globals, and have to be set/restored for each
    ** session.
    */
@@ -1774,8 +1774,8 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
    }
 
-   /* Parse through the list of variables returned, adding each return to 
-   ** the appropriate array (as a VarBind).  Also keep track of which 
+   /* Parse through the list of variables returned, adding each return to
+   ** the appropriate array (as a VarBind).  Also keep track of which
    ** repeated OID we're expecting to see, and check if that tree walk has
    ** been completed (i.e. we've walked past the root of our request).  If
    ** so, mark the request complete so that we don't send it again in any
@@ -1795,7 +1795,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
    {
 
       /* If no outstanding requests remain, we're done.  This works, but it
-      ** causes the reported total variable count to be wrong (since the 
+      ** causes the reported total variable count to be wrong (since the
       ** remaining vars on the last packet are not counted).  In practice
       ** this is probably worth the win, but for debugging it's not.
       */
@@ -1811,7 +1811,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       /* Determine which OID we expect to see next.  We assert that the OID's
       ** must be returned in the expected order.  The first nreq_oids returns
       ** should match the req_oids array, after that, we must cycle through
-      ** the repeaters in order.  Non-repeaters are not included in later 
+      ** the repeaters in order.  Non-repeaters are not included in later
       ** packets, so cannot have the "ignore" flag set.
       */
 
@@ -1822,22 +1822,22 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	 assert(expect->norepeat);
 
       } else {
-	 /* Must be a repeater.  Look for the first one that is not being 
+	 /* Must be a repeater.  Look for the first one that is not being
 	 ** ignored.  Make sure we don't loop around to where we started.
 	 ** If we get here but everything is being ignored, there's a problem.
 	 **
 	 ** Note that we *do* accept completed but not ignored OID's -- these
-	 ** are OID's for trees that have been completed sometime in this 
+	 ** are OID's for trees that have been completed sometime in this
 	 ** response, but must be looked at to maintain ordering.
 	 */
 
 	 if (pix == 0) {
-	    /* Special case code for no non-repeater case.  This 
+	    /* Special case code for no non-repeater case.  This
 	    ** is necessary because expect normally points to the
 	    ** last non-repeater upon entry to this code (so the
 	    ** '++expect' below increments it into the repeaters
 	    ** section of the req_oids[] array).
-	    ** If there are no non-repeaters, the expect pointer 
+	    ** If there are no non-repeaters, the expect pointer
 	    ** is never initialized.  This addresses this problem.
 	    */
 	    expect = context->reqbase;
@@ -1864,11 +1864,11 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	 }
       }
 
-      DBPRT(2, "Var %03d request %s\n", pix, sprint_objid(_debugx, 
+      DBPRT(2, "Var %03d request %s\n", pix, sprint_objid(_debugx,
 					     expect->req_oid, expect->req_len));
 
       /* Did we receive an error condition for this variable?
-      ** If it's a repeated variable, mark it as complete and 
+      ** If it's a repeated variable, mark it as complete and
       ** fall through to the block below.
       */
       if ((vars->type == SNMP_ENDOFMIBVIEW) ||
@@ -1881,7 +1881,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	 ** end of the tree.  Mark the request as complete, and go on to the
 	 ** next one.
 	 */
-	 if ((context->oid_saved >= context->non_reps) && 
+	 if ((context->oid_saved >= context->non_reps) &&
 	     (vars->type == SNMP_ENDOFMIBVIEW))
 	 {
 	    expect->complete = 1;
@@ -1909,7 +1909,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       */
       if ((context->pkts_exch > 1) && (pix < context->repeaters)) {
 	 if (__oid_cmp(vars->name, vars->name_length,
-				   context->reqbase[pix].last_oid, 
+				   context->reqbase[pix].last_oid,
 				   context->reqbase[pix].last_len) == 0)
 	 {
 	    DBPRT(2, "Ignoring repeat oid: %s\n",
@@ -1921,7 +1921,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
       context->oid_total ++;	/* Count each variable received. */
 
-      /* If this is a non-repeater, handle it.  Otherwise, if it is a 
+      /* If this is a non-repeater, handle it.  Otherwise, if it is a
       ** repeater, has the walk wandered off of the requested tree?  If so,
       ** this request is complete, so mark it as such.  Ignore any other
       ** variables in a completed request.  In order to maintain the correct
@@ -1931,13 +1931,13 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       */
       if (context->oid_saved < context->non_reps) {
 	 DBPRT(2, "   expected var %s (nonrepeater %d/%d)\n",
-		     sprint_objid(_debugx, context->req_oids[pix].req_oid, 
+		     sprint_objid(_debugx, context->req_oids[pix].req_oid,
 					   context->req_oids[pix].req_len),
 		     pix, context->non_reps);
 	 DBPRT(2, "   received var %s\n",
 		     sprint_objid(_debugx, vars->name, vars->name_length));
 
-	 /* This non-repeater has now been seen, so mark the sub-tree as 
+	 /* This non-repeater has now been seen, so mark the sub-tree as
 	 ** completed.  Note that this may not be the same oid as requested,
 	 ** since non-repeaters act like GETNEXT requests, not GET's. <sigh>
 	 */
@@ -1949,7 +1949,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	 DBPRT(2, "   received oid %s\n",
 	       sprint_objid(_debugx, vars->name, vars->name_length));
 
-	 /* Are we already done with this tree?  If so, just ignore this 
+	 /* Are we already done with this tree?  If so, just ignore this
 	 ** variable and move on to the next expected variable.
 	 */
 	 if (expect->complete) {
@@ -1970,7 +1970,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	    continue;
 	 }
 
-	 /* Still interested in the tree -- we need to keep track of the 
+	 /* Still interested in the tree -- we need to keep track of the
 	 ** last-seen value in case we need to send an additional request
 	 ** packet.
 	 */
@@ -1980,7 +1980,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
       }
 
-      /* Create a new Varbind and populate it with the parsed information 
+      /* Create a new Varbind and populate it with the parsed information
       ** returned by the agent.  This Varbind is then pushed onto the arrays
       ** maintained for each request OID in the context.  These varbinds are
       ** collected into a return array by bulkwalk_finish().
@@ -2100,11 +2100,11 @@ _bulkwalk_finish(walk_context *context, int okay)
 
    DBPRT(1, "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total);
-   
+
    if (okay) {
-       DBPRT(1, "%s %d varbind refs %s\n", 
-				async ? "pass ref to array of" : "return", 
-				context->nreq_oids, 
+       DBPRT(1, "%s %d varbind refs %s\n",
+				async ? "pass ref to array of" : "return",
+				context->nreq_oids,
 				async ? "to callback" : "on stack to caller");
 
        /* Create the array to hold the responses for the asynchronous callback,
@@ -2192,7 +2192,7 @@ _bulkwalk_finish(walk_context *context, int okay)
    */
    _context_del(context);
    DBPRT(2, "Free() context->req_oids\n");
-   Safefree(context->req_oids); 
+   Safefree(context->req_oids);
    DBPRT(2, "Free() context 0x%p\n", context);
    Safefree(context);
    return npushed;
@@ -3108,10 +3108,10 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 						    DS_LIB_PRINT_NUMERIC_OIDS);
 	      old_printfull = ds_get_boolean(DS_LIBRARY_ID,
 						    DS_LIB_PRINT_FULL_OID);
-      
+
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_NUMERIC_OIDS;
-      
+
 	         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 1);
 		 ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
 	      }
@@ -3302,7 +3302,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 						  DS_LIB_PRINT_FULL_OID);
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_NUMERIC_OIDS;
-  
+
 	         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 1);
 	         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
 	      }
@@ -3450,8 +3450,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
 	      context->sprintval_f = USE_SPRINT_VALUE;
 
-	   /* Set up an array of bulktbl's to hold the original list of 
-	   ** requested OID's.  This is used to populate the PDU's with 
+	   /* Set up an array of bulktbl's to hold the original list of
+	   ** requested OID's.  This is used to populate the PDU's with
 	   ** oid values, to contain/sort the return values, and (through
 	   ** last_oid/last_len) to determine when the bulkwalk for each
 	   ** variable has completed.
@@ -3514,9 +3514,9 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      ** the initial value.  We build packets using last_oid (see
 	      ** below), so initialize last_oid to the initial request.
 	      */
-	      Copy((void *)oid_arr, (void *)bt_entry->req_oid, 
+	      Copy((void *)oid_arr, (void *)bt_entry->req_oid,
 							oid_arr_len, oid);
-	      Copy((void *)oid_arr, (void *)bt_entry->last_oid, 
+	      Copy((void *)oid_arr, (void *)bt_entry->last_oid,
 							oid_arr_len, oid);
 
 	      bt_entry->req_len  = oid_arr_len;
@@ -3573,7 +3573,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   _context_add(context);
 
 	   /* For asynchronous bulkwalk requests, all we have to do at this
-	   ** point is enqueue the asynchronous GETBULK request with our 
+	   ** point is enqueue the asynchronous GETBULK request with our
 	   ** bulkwalk-specific callback and return.  Remember that the
 	   ** bulkwalk_send_pdu() function returns the reqid cast to an
 	   ** snmp_pdu pointer, or NULL on failure.  Return undef if the
@@ -3593,7 +3593,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 		 DBPRT(1, "Initial asynchronous send failed...\n");
 		 XSRETURN_UNDEF;
 	      }
-	      
+
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
 	      DBPRT(1, "Okay, request id is %d\n", (int)pdu);
 /*	      XSRETURN_IV((int)pdu); */
@@ -3611,7 +3611,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   while (!(okay = _bulkwalk_done(context))) {
 
 	      /* Send a request for the next batch of variables. */
-	      DBPRT(1, "Building %s GETBULK bulkwalk PDU (%d)...\n", 
+	      DBPRT(1, "Building %s GETBULK bulkwalk PDU (%d)...\n",
 					context->pkts_exch ? "next" : "first",
 					context->pkts_exch);
 	      pdu = _bulkwalk_send_pdu(context);
@@ -3644,7 +3644,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      continue;
 	   }
 
-	   DBPRT(1, "Bulkwalk done... calling bulkwalk_finish(%s)...\n", 
+	   DBPRT(1, "Bulkwalk done... calling bulkwalk_finish(%s)...\n",
 	       okay ? "okay" : "error");
 	   npushed = _bulkwalk_finish(context, okay);
 
@@ -4099,13 +4099,12 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
                  }
 		 goto done;
               }
-fprintf(stderr, "inform before: status = %d, response = %lx\n", status, response);
 
 	      status = __send_sync_pdu(ss, pdu, &response,
 				       NO_RETRY_NOSUCH,
                                        *err_str_svp, *err_num_svp,
                                        *err_ind_svp);
-fprintf(stderr, "inform: status = %d, response = %lx\n", status, response);
+
               if (response) snmp_free_pdu(response);
 
               if (status) {
@@ -4315,9 +4314,9 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
         int block;
 	SV *cb;
 
- 
+
  	mainloop_finish = 0;
- 
+
 	itvp = &interval;
 	itvp->tv_sec = timeout_sec;
 	itvp->tv_usec = timeout_usec;
@@ -4376,7 +4375,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
               default:;
            }
 
-	   /* A call to snmp_mainloop_finish() in the callback sets the 
+	   /* A call to snmp_mainloop_finish() in the callback sets the
 	   ** mainloop_finish flag.  Exit the loop after the callback returns.
 	   */
 	   if (mainloop_finish)
@@ -4559,7 +4558,7 @@ snmp_mib_node_FETCH(tp_ref, key)
                           break;
                       } /* end if */
                   } /* end if */
-	          /* we must be looking at description */	
+	          /* we must be looking at description */
                  sv_setpv(ST(0),tp->description);
                  break;
               case 'i': /* indexes */
