@@ -65,9 +65,22 @@ struct netsnmp_udpEntry_s {
 #ifdef linux
 #define INP_NEXT_SYMBOL		inp_next
 #endif
+
+#ifdef freebsd4
+typedef struct netsnmp_inpcb_s netsnmp_inpcb;
+struct netsnmp_inpcb_s {
+    struct inpcb    pcb;
+    int             state;
+    netsnmp_inpcb  *inp_next;
+};
+#define	UDPTABLE_ENTRY_TYPE	netsnmp_inpcb 
+#define	UDPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
+#define	UDPTABLE_LOCALPORT	pcb.inp_lport
+#else
 #define	UDPTABLE_ENTRY_TYPE	struct inpcb 
 #define	UDPTABLE_LOCALADDRESS	inp_laddr.s_addr 
 #define	UDPTABLE_LOCALPORT	inp_lport
+#endif
 #define	UDPTABLE_IS_LINKED_LIST
 
 #endif                          /* WIN32 */
@@ -583,7 +596,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     int      sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
     char     *udpcb_buf = NULL;
     struct xinpgen *xig = NULL;
-    struct inpcb   *nnew;
+    UDPTABLE_ENTRY_TYPE  *nnew;
 
     udpTable_free(NULL, NULL);
 
@@ -607,12 +620,17 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
 
     while (xig && (xig->xig_len > sizeof(struct xinpgen))) {
-        nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
+        nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
+#ifdef freebsd4
+        memcpy(nnew, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
+	nnew->inp_next = udp_head;
+#else
         memcpy(nnew, ((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
-
 	nnew->next = udp_head;		/* XXX - ?? Check 'next' pointer */
+#endif
+
 	udp_head   = nnew;
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
     }
