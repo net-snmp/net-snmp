@@ -211,6 +211,29 @@ sure to end it in -1.*/
 #define DEBUGP1(x,y)
 #endif
 
+#ifndef HAVE_STRCHR
+# define strchr index
+# define strrchr rindex
+#endif
+
+#ifndef HAVE_INDEX
+# define index strchr
+# define rindex strrchr
+#endif
+
+#ifndef HAVE_MEMCPY
+# define memcpy(d, s, n) bcopy ((s), (d), (n))
+# define memmove(d, s, n) bcopy ((s), (d), (n))
+# define memcmp bcmp
+#endif
+
+#ifndef HAVE_BCOPY
+# define bcopy(s, d, n) memcpy ((d), (s), (n))
+# define bzero(p,n) memset((p),(0),(n))
+# define bcmp memcmp
+#endif
+
+
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
 #endif

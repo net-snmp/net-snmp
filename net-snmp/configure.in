@@ -31,11 +31,6 @@ dnl system check
 AC_CANONICAL_SYSTEM
 CFLAGS="$CFLAGS -D`echo $target_os | sed 's/\..*//'`"
 
-dnl Solaris specialties
-case "$target_os" in
-  solaris2*) CPPFLAGS="$CPPFLAGS -I/usr/ucbinclude -I/usr/include" ; LDFLAGS="-L/usr/ucblib -R/usr/ucblib $LDFLAGS" ;;
-esac
-
 dnl Set SNMPLIBPATH
 if test "x$prefix" = "xNONE"; then
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
@@ -92,44 +87,12 @@ if test "x$ac_cv_DMEM_LOC" != "xnone"; then
 fi
 
 dnl Checks for libraries.
-dnl Replace `main' with a function in -lX11:
-dnl AC_CHECK_LIB(X11, main)
-dnl Replace `main' with a function in -lXau:
-dnl AC_CHECK_LIB(Xau, main)
-dnl Replace `main' with a function in -lXaw:
-dnl AC_CHECK_LIB(Xaw, main)
-dnl Replace `main' with a function in -lXext:
-dnl AC_CHECK_LIB(Xext, main)
-dnl Replace `main' with a function in -lXmu:
-dnl AC_CHECK_LIB(Xmu, main)
-dnl Replace `main' with a function in -lXt:
-dnl AC_CHECK_LIB(Xt, main)
-dnl Replace `main' with a function in -ldes:
 dnl AC_CHECK_LIB(des, main)
-dnl Replace `main' with a function in -lelf:
-AC_CHECK_LIB(elf, main)
-dnl Replace `main' with a function in -lm:
+AC_CHECK_LIB(elf, nlist)
 AC_CHECK_LIB(m, asin)
-dnl Replace `main' with a function in -lnsl:
 AC_CHECK_LIB(nsl, gethostbyname)
-dnl Replace `main' with a function in -loldX:
-dnl AC_CHECK_LIB(oldX, main)
-dnl Replace `main' with a function in -lsnmp:
-dnl AC_CHECK_LIB(snmp, main)
-dnl Replace `main' with a function in -lsocket:
 AC_CHECK_LIB(socket, getservbyname)
-dnl Replace `main' with a function in -lsocket:
-AC_CHECK_LIB(ucb, bzero)
-
-dnl more solaris specialities
-dnl if libucb does not define bzero and I am solaris, add -DSVR4 to CFLAGS
-case "$target_os" in
-  solaris2*) 
-  if test "X$HAVE_LIBUCB" = "X"; then
-    CFLAGS="$CFLAGS -DSVR4"
-  fi ;;
-esac
-
+dnl AC_CHECK_LIB(ucb, bzero)
 
 dnl Replace `main' with a function in -ltcl:
 dnl AC_CHECK_LIB(tcl, main)
@@ -144,12 +107,39 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h)
+AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
+
+dnl Check ps args
+AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
+[if test "`($PSPROG -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
+  ac_cv_ps_flags="-e"
+elif test "`($PSPROG -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+  ac_cv_ps_flags="-el"
+elif test "`($PSPROG -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
+  ac_cv_ps_flags="-acx"
+else
+  AC_MSG_WARN(Unable to determine valid ps flags...  defaulting...)
+  ac_cv_ps_flags="-acx"
+fi
+])
+
+AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
+
+dnl Checks for byte order
+AC_C_BIGENDIAN
+
+dnl Checks for library functions.
+AC_FUNC_ALLOCA
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
+AC_CHECK_FUNCS(strchr memcpy index bcopy)
 
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
@@ -238,32 +228,6 @@ if test "x$ac_cv_struct_rtentry_rt_next" = "xyes"; then
 fi
 
 fi
-
-dnl Check ps args
-AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
-[if test "`($PSPROG -e 2>&1) | egrep ' ps$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
-  ac_cv_ps_flags="-el"
-elif test "`($PSPROG -acx 2>&1) | egrep ' ps$' | awk '{print $NF}''`" = "ps" ; then
-  ac_cv_ps_flags="-acx"
-else
-  AC_MSG_WARN(Unable to determine valid ps flags...  defaulting...)
-  ac_cv_ps_flags="-acx"
-fi
-])
-
-AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
-
-dnl Checks for byte order
-AC_C_BIGENDIAN
-
-dnl Checks for library functions.
-AC_FUNC_ALLOCA
-AC_PROG_GCC_TRADITIONAL
-AC_FUNC_MEMCMP
-AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [

@@ -1,10 +1,12 @@
 #include <config.h>
 
 #include <stdio.h>
-#ifdef SVR4
-#include <string.h>
-#else
+#if HAVE_STRINGS_H
 #include <strings.h>
+#else
+#if STDC_HEADERS
+#include <string.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>

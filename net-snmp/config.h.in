@@ -122,17 +122,29 @@
 #define DEBUGP1(x,y)
 #endif
 
+/* Define if you have the bcopy function.  */
+#undef HAVE_BCOPY
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define if you have the index function.  */
+#undef HAVE_INDEX
+
+/* Define if you have the memcpy function.  */
+#undef HAVE_MEMCPY
+
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
 /* Define if you have the socket function.  */
 #undef HAVE_SOCKET
+
+/* Define if you have the strchr function.  */
+#undef HAVE_STRCHR
 
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
@@ -169,6 +181,9 @@
 
 /* Define if you have the <netinet/tcpip.h> header file.  */
 #undef HAVE_NETINET_TCPIP_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
@@ -253,9 +268,6 @@
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
-
-/* Define if you have the ucb library (-lucb).  */
-#undef HAVE_LIBUCB
 
 
 /* the ErrorFlag is V1 accessable because HP Openview does not support
@@ -399,6 +411,29 @@ sure to end it in -1.*/
 #define DEBUGP(x)
 #define DEBUGP1(x,y)
 #endif
+
+#ifndef HAVE_STRCHR
+# define strchr index
+# define strrchr rindex
+#endif
+
+#ifndef HAVE_INDEX
+# define index strchr
+# define rindex strrchr
+#endif
+
+#ifndef HAVE_MEMCPY
+# define memcpy(d, s, n) bcopy ((s), (d), (n))
+# define memmove(d, s, n) bcopy ((s), (d), (n))
+# define memcmp bcmp
+#endif
+
+#ifndef HAVE_BCOPY
+# define bcopy(s, d, n) memcpy ((d), (s), (n))
+# define bzero(p,n) memset((p),(0),(n))
+# define bcmp memcmp
+#endif
+
 
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
