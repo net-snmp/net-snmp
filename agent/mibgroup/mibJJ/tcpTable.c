@@ -22,6 +22,9 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
@@ -499,7 +502,11 @@ int load_tcp_list( mib_table_t t )
     int sname[] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_PCBLIST };
     char *tcpcb_buf = NULL;
     struct xinpgen *xig = NULL;
-    struct xinpcb pcb;
+#ifdef freebsd4
+    struct inpcb pcb;
+#else
+    struct xinpcb pcb;	/* XXX For which platforms is this correct? ERD */
+#endif
     int state;
 
     xig = NULL;
@@ -541,6 +548,8 @@ int load_tcp_list( mib_table_t t )
 	pcb.TCP_STATE_FIELD = TRANSLATE_STATE( state );
 	if (( state == TCPS_ESTABLISHED) || (state == TCPS_CLOSE_WAIT))
 		tcp_established_connections++;
+	pcb.inp_lport = htons(pcb.inp_lport);
+	pcb.inp_fport = htons(pcb.inp_fport);
 
 	if (Add_Entry( t, (void*)&pcb ) < 0 )
 	    break;

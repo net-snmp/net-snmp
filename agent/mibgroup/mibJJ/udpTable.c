@@ -400,6 +400,7 @@ int load_udp_list( mib_table_t t )
     int sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
     char *udpcb_buf = NULL;
     struct xinpgen *xig = NULL;
+    struct xinpcb *xpcb;
 
     xig = NULL;
 
@@ -434,9 +435,11 @@ int load_udp_list( mib_table_t t )
 	if (xig->xig_len <= sizeof(struct xinpgen))
 	    break;
 
+	xpcb = (struct xinpcb *)xig;
+	xpcb->xi_inp.inp_lport = htons(xpcb->xi_inp.inp_lport);
+
 	if (Add_Entry( t, (void*)&((struct xinpcb *)xig)->xi_inp ) < 0 )
 	    break;
-	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
     }
 
     return 0;
