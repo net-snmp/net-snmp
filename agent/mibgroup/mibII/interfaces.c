@@ -1393,8 +1393,10 @@ Interface_Scan_Init (void)
 	      nnew->if_type = 35; break;
 	  case ARPHRD_LOCALTLK:
 	      nnew->if_type = 42; break;
+#ifdef ARPHRD_HIPPI
 	  case ARPHRD_HIPPI:
 	      nnew->if_type = 47; break;
+#endif
           /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
 	  }
 #endif
