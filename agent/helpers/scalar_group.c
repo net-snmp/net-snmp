@@ -161,10 +161,11 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
 	 *   set things up to retry again.
          */
         if (requests->requestvb->type == ASN_NULL ||
+            requests->requestvb->type == SNMP_NOSUCHOBJECT ||
             requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
             snmp_set_var_objid(requests->requestvb,
                                reginfo->rootoid, reginfo->rootoid_len);
-            requests->requestvb->name[reginfo->rootoid_len] = ++subid;
+            requests->requestvb->name[reginfo->rootoid_len-1] = ++subid;
             requests->requestvb->type = ASN_PRIV_RETRY;
         }
         reginfo->rootoid_len--;
