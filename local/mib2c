@@ -266,7 +266,11 @@ sub process {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
 	    my $scalar;
-	    foreach $scalar (keys %scalars) {
+	    my @thekeys = keys(%scalars);
+	    if ($#thekeys == -1) {
+	      skippart();
+	    } else {
+	      foreach $scalar (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
 		$vars{$var} = $scalar;
@@ -275,12 +279,17 @@ sub process {
 		process();
 		$vars{$var} = $oldvar;
 		$currentscalar = $oldscalar;
+	      }
 	    }
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
 	    my $table;
-	    foreach $table (keys %tables) {
+	    my @thekeys = keys(%tables);
+	    if ($#thekeys == -1) {
+	      skippart();
+	    } else {
+	      foreach $table (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
 		$vars{$var} = $table;
@@ -289,13 +298,17 @@ sub process {
 		process();
 		$vars{$var} = $oldvar;
 		$currenttable = $oldtable;
+	      }
 	    }
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index)\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index)\s*\@/) {
 	    my ($var, $type) = ($1, $2);
 	    my $startpos = $fh->tell();
 	    my $column;
-	    foreach $column (@{$tables{$currenttable}{$type}}) {
-#		print "looping on $var for $type -> $column\n";
+	    if ($#{$tables{$currenttable}{$type}} == -1) {
+	      skippart();
+	    } else {
+	      foreach $column (@{$tables{$currenttable}{$type}}) {
+		#		print "looping on $var for $type -> $column\n";
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
 		$vars{$var} = $column;
@@ -304,8 +317,9 @@ sub process {
 		process();
 		$vars{$var} = $oldvar;
 		$currentcolumn = $oldcolumn;
+	      }
 	    }
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+(enums*)\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
 	    my $enum;
