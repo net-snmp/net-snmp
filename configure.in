@@ -42,6 +42,9 @@ elif test -f /hp-ux; then
 elif test -f /kernel/unix; then
   AC_DEFINE(KERNEL_LOC,"/kernel/unix")
   KERNEL_LOC="/kernel/unix"
+elif test -f /kernel/genunix; then
+  AC_DEFINE(KERNEL_LOC,"/kernel/genunix")
+  KERNEL_LOC="/kernel/genunix"
 elif test -f /unix; then
   AC_DEFINE(KERNEL_LOC,"/unix")
   KERNEL_LOC="/unix"
