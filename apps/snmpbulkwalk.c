@@ -77,7 +77,7 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-void main __P((int, char **));
+int main __P((int, char **));
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
@@ -90,7 +90,7 @@ usage __P((void))
   snmp_parse_args_descriptions(stderr);
 }
 
-void
+int
 main(argc, argv)
     int   argc;
     char  *argv[];
