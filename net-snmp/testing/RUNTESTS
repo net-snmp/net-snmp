@@ -25,7 +25,7 @@ usage() {
     cat << BLIK
 
 Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s] [-XM]
-       [-T TESTNUMS] [-D bindir] [-S seconds] [-P <udp|tcp|udp6|tcp6|unix>]"
+       [-T TESTNUMS] [-D bindir] [-S seconds] [-P <udp|tcp|udp6|tcp6|unix>]
 
   -a        run all tests.
   -T NUMS   run particular tests (command separated list of numbers)
