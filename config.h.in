@@ -131,6 +131,9 @@
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
+/* Define if you have the getloadavg function.  */
+#undef HAVE_GETLOADAVG
+
 /* Define if you have the getmntent function.  */
 #undef HAVE_GETMNTENT
 
@@ -200,17 +203,29 @@
 /* Define if you have the <machine/pte.h> header file.  */
 #undef HAVE_MACHINE_PTE_H
 
+/* Define if you have the <malloc.h> header file.  */
+#undef HAVE_MALLOC_H
+
 /* Define if you have the <mtab.h> header file.  */
 #undef HAVE_MTAB_H
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
+/* Define if you have the <net/if_dl.h> header file.  */
+#undef HAVE_NET_IF_DL_H
+
+/* Define if you have the <net/if_types.h> header file.  */
+#undef HAVE_NET_IF_TYPES_H
+
 /* Define if you have the <netinet/in.h> header file.  */
 #undef HAVE_NETINET_IN_H
 
 /* Define if you have the <netinet/tcpip.h> header file.  */
 #undef HAVE_NETINET_TCPIP_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
 
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
@@ -242,6 +257,9 @@
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
@@ -250,6 +268,9 @@
 
 /* Define if you have the <sys/swap.h> header file.  */
 #undef HAVE_SYS_SWAP_H
+
+/* Define if you have the <sys/sysctl.h> header file.  */
+#undef HAVE_SYS_SYSCTL_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
@@ -377,6 +398,7 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
+#define NETBSD1ID 8
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -399,6 +421,9 @@
 #endif
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
+#endif
+#ifdef freebsd2
+#define OSTYPE FREEBSD2ID
 #endif
 /* unknown */
 #ifndef OSTYPE
