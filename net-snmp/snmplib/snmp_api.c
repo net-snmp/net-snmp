@@ -2649,14 +2649,14 @@ _snmp_parse(void * sessp,
         DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
-        DEBUGDUMPSETUP("recv", data, 0);
-        DEBUGMSG(("dumpv_recv", "SNMPv%d message\n", (1+pdu->version)));
+        if (pdu->version == SNMP_VERSION_1)
+            DEBUGDUMPSECTION("recv", "SNMPv1 message\n");
+        else
+            DEBUGDUMPSECTION("recv", "SNMPv2c message\n");
 
-        DEBUGINDENTMORE();
 	data = snmp_comstr_parse(data, &length,
                                  community, &community_length,
 			         &pdu->version);
-        DEBUGINDENTLESS();
 	if (data == NULL)
 	    return -1;
 
@@ -2689,7 +2689,10 @@ _snmp_parse(void * sessp,
 		return -1;
 	    }
 	}
+        
+        DEBUGDUMPSECTION("recv","PDU");
 	result = snmp_pdu_parse(pdu, data, &length);
+        DEBUGINDENTADD(-6); 
         break;
 
     case SNMP_VERSION_3:
@@ -2988,9 +2991,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
         badtype = 1;
         break;
     }
-    DEBUGINDENTLESS();
+    DEBUGINDENTADD(-4); 
   }
-  DEBUGINDENTLESS();
   return badtype;
 }
 
