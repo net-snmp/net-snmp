@@ -43,16 +43,11 @@ extern          "C" {
 #define FLAG_MAX_IPADDRESSTABLE 5
 
     /*
-     * required rows for row creation
-     * TODO: update, if necessary. default is writable cols w/out defaults.
+     * TODO:405:r: Review IPADDRESSTABLE_REQUIRED_COLS macro.
+     * OR together all the required rows for row creation.
+     * default is writable cols w/out defaults.
      */
-#define IPADDRESSTABLE_REQUIRED_COLS (FLAG_IPADDRESSTYPE | FLAG_IPADDRESSSTATUS | FLAG_IPADDRESSSTORAGETYPE)
-
-    /*
-     * required rows on creation
-     */
-#define IPADDRESS_REQUIRED_COLS (FLAG_IPADDRESSIFINDEX | \
-                                 FLAG_IPADDRESSROWSTATUS)
+#define IPADDRESSTABLE_REQUIRED_COLS (FLAG_IPADDRESSIFINDEX | FLAG_IPADDRESSROWSTATUS)
 
     /*
      * NOTES on enums
@@ -73,7 +68,6 @@ extern          "C" {
  *
  *************************************************************************
  *************************************************************************/
-
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -96,16 +90,13 @@ extern          "C" {
 #endif                          /* INETADDRESSTYPE_ENUMS */
 
     /*
-     * TODO:
-     * value mapping (see notes at top of file)
+     * TODO:140:o: Define interal representation of ipAddressAddrType enums.
+     * (used for value mapping; see notes at top of file)
      *
      * simplistic map of address length to type
      */
 #define INTERNAL_IPADDRESSADDRTYPE_IPV4  4
 #define INTERNAL_IPADDRESSADDRTYPE_IPV6  16
-
-
-
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -123,15 +114,6 @@ extern          "C" {
 
 
 #endif                          /* IPADDRESSTYPE_ENUMS */
-
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPADDRESSTYPE_UNICAST  1
-#define INTERNAL_IPADDRESSTYPE_ANYCAST  2
-#define INTERNAL_IPADDRESSTYPE_BROADCAST  3
-
 
 
 /*************************************************************
@@ -152,16 +134,6 @@ extern          "C" {
 
 
 #endif                          /* IPADDRESSORIGINTC_ENUMS */
-
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPADDRESSORIGIN_OTHER  1
-#define INTERNAL_IPADDRESSORIGIN_MANUAL  2
-#define INTERNAL_IPADDRESSORIGIN_DHCP  4
-#define INTERNAL_IPADDRESSORIGIN_LINKLAYER  5
-#define INTERNAL_IPADDRESSORIGIN_RANDOM  6
 
 
 /*************************************************************
@@ -185,19 +157,6 @@ extern          "C" {
 
 #endif                          /* IPADDRESSSTATUSTC_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPADDRESSSTATUS_PREFERRED  1
-#define INTERNAL_IPADDRESSSTATUS_INVALID  3
-#define INTERNAL_IPADDRESSSTATUS_INACCESSIBLE  4
-#define INTERNAL_IPADDRESSSTATUS_UNKNOWN  5
-#define INTERNAL_IPADDRESSSTATUS_TENTATIVE  6
-#define INTERNAL_IPADDRESSSTATUS_DUPLICATE  7
-
-
-
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -219,17 +178,6 @@ extern          "C" {
 
 #endif                          /* ROWSTATUS_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPADDRESSROWSTATUS_ACTIVE  1
-#define INTERNAL_IPADDRESSROWSTATUS_NOTINSERVICE  2
-#define INTERNAL_IPADDRESSROWSTATUS_NOTREADY  3
-#define INTERNAL_IPADDRESSROWSTATUS_CREATEANDGO  4
-#define INTERNAL_IPADDRESSROWSTATUS_CREATEANDWAIT  5
-#define INTERNAL_IPADDRESSROWSTATUS_DESTROY  6
-
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -250,15 +198,6 @@ extern          "C" {
 
 #endif                          /* STORAGETYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IPADDRESSSTORAGETYPE_OTHER  1
-#define INTERNAL_IPADDRESSSTORAGETYPE_VOLATILE  2
-#define INTERNAL_IPADDRESSSTORAGETYPE_NONVOLATILE  3
-#define INTERNAL_IPADDRESSSTORAGETYPE_PERMANENT  4
-#define INTERNAL_IPADDRESSSTORAGETYPE_READONLY  5
 
 
 

@@ -43,7 +43,7 @@ extern          "C" {
 #define IFTABLE_MAX_COL		COLUMN_IFSPECIFIC
 
     /*
-     * change flags for writable columns 
+     * change flags for writable columns
      */
 #define FLAG_IFADMINSTATUS       (0x1 << 0)
 
@@ -308,11 +308,6 @@ extern          "C" {
 
 #endif                          /* IANAIFTYPE_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IFTYPE_OTHER  1
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -330,6 +325,7 @@ extern          "C" {
 
 
 #endif                          /* IFADMINSTATUS_ENUMS */
+
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -352,22 +348,10 @@ extern          "C" {
 
 #endif                          /* IFOPERSTATUS_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (see notes at top of file)
-     */
-#define INTERNAL_IFOPERSTATUS_UP  1
-#define INTERNAL_IFOPERSTATUS_DOWN  2
-#define INTERNAL_IFOPERSTATUS_TESTING  3
-#define INTERNAL_IFOPERSTATUS_UNKNOWN  4
-#define INTERNAL_IFOPERSTATUS_DORMANT  5
-#define INTERNAL_IFOPERSTATUS_NOTPRESENT  6
-#define INTERNAL_IFOPERSTATUS_LOWERLAYERDOWN  7
 
 
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* IFTABLE_OIDS_H */
