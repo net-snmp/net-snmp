@@ -1630,8 +1630,9 @@ usm_process_in_msg (
 	DEBUGMSGTL(("usm","USM processing begun...\n"));
 
 
-	if (secStateRef)		/* FIX -- huh?  destroy it? */
+	if (secStateRef)
 	{
+		usm_free_usmStateReference(*secStateRef);
 		*secStateRef = usm_malloc_usmStateReference();
 		if (*secStateRef == NULL)
 		{
