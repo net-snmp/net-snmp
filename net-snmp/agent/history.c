@@ -1,3 +1,4 @@
+#include <config.h>
 #include <sys/types.h>
 #include "asn1.h"
 #define NULL 0

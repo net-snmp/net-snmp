@@ -114,6 +114,17 @@ SOFTWARE.
 
 static void init_snmp_session (void);
 #include "transform_oids.h"
+#ifndef timercmp
+#define	timercmp(tvp, uvp, cmp) \
+	/* CSTYLED */ \
+	((tvp)->tv_sec cmp (uvp)->tv_sec || \
+	((tvp)->tv_sec == (uvp)->tv_sec && \
+	/* CSTYLED */ \
+	(tvp)->tv_usec cmp (uvp)->tv_usec))
+#endif
+#ifndef timerclear
+#define	timerclear(tvp)		(tvp)->tv_sec = (tvp)->tv_usec = 0
+#endif
 
 /*
  * Globals.
@@ -426,7 +437,10 @@ snmp_sess_perror(const char *prog_string, struct snmp_session *ss) {
 static void
 init_snmp_session (void)
 {
+#ifdef  HAVE_GETSERVBYNAME
     struct servent *servp;
+#endif
+    
     struct timeval tv;
 
     if (Reqid) return;
@@ -446,9 +460,13 @@ init_snmp_session (void)
 #endif
 
     default_s_port = htons(SNMP_PORT);
+#ifdef HAVE_GETSERVBYNAME   
     servp = getservbyname("snmp", "udp");
     if (servp)
       default_s_port = servp->s_port;
+#else /* HAVE_GETSERVBYNAME */
+    default_s_port = htons(SNMP_PORT);
+#endif /* HAVE_GETSERVBYNAME */
 }
 
 /*
@@ -860,7 +878,9 @@ _sess_open(struct snmp_session *in_session)
     int sd;
     in_addr_t addr;
     struct sockaddr_in *isp_addr, *meIp;
+#ifdef HAVE_GETHOSTBYNAME
     struct hostent *hp;
+#endif
     struct snmp_pdu *pdu, *response;
     int status;
     size_t i, addr_size;
@@ -878,10 +898,18 @@ _sess_open(struct snmp_session *in_session)
 
     if ( isp->addr.sa_family == AF_UNSPEC ) {
         if ( session->peername && session->peername[0] == '/' ) {
+#ifdef AF_UNIX
             isp->addr.sa_family = AF_UNIX;
             if ( session->local_port == 0 ) {	/* 'remote' implies client */
                 strcpy( isp->addr.sa_data, session->peername);
             }
+#else /* AF_UNIX */
+            fprintf(stderr,"%s:%d: _sess_open invalid session name %s- unix sockets not supported  \n",
+                    __FILE__,__LINE__,
+                    session->peername);
+            return(NULL);
+#endif /* AF_UNIX */
+            
         } else {
             isp->addr.sa_family = AF_INET;
             isp_addr = (struct sockaddr_in *)&(isp->addr);
@@ -889,6 +917,7 @@ _sess_open(struct snmp_session *in_session)
                 if ((int)(addr = inet_addr(session->peername)) != -1){
                     memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
                 } else {
+#ifdef HAVE_GETHOSTBYNAME
                     hp = gethostbyname(session->peername);
                     if (hp == NULL){
                         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -899,6 +928,14 @@ _sess_open(struct snmp_session *in_session)
                     } else {
                         memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
                     }
+
+#else /* HAVE_GETHOSTBYNAME */
+                    fprintf(stderr,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
+                            __FILE__,__LINE__,
+                            session->peername);
+                    return(0);
+#endif /* HAVE_GETHOSTBYNAME */
+
                 }
                 if (session->remote_port == SNMP_DEFAULT_REMPORT){
                     isp_addr->sin_port = default_s_port;
@@ -918,6 +955,7 @@ _sess_open(struct snmp_session *in_session)
         meIp->sin_addr.s_addr = INADDR_ANY;
         meIp->sin_port = htons(session->local_port);
     }
+#ifdef AF_UNIX
     else if ( isp->me.sa_family == AF_UNIX ) {
         if ( session->local_port != 0 ) {	/* 'local' implies server */
             strcpy( isp->me.sa_data, session->peername);
@@ -933,10 +971,9 @@ _sess_open(struct snmp_session *in_session)
             strcat( isp->me.sa_data, "XXXXXX" );
             mktemp( isp->me.sa_data );
 #endif
-
         }
     }
-
+#endif /* AF_UNIX */
     addr_size = snmp_socket_length(isp->me.sa_family);
 
     /* Set up connections */
@@ -969,7 +1006,9 @@ _sess_open(struct snmp_session *in_session)
 
 #ifndef SERVER_REQUIRES_CLIENT_SOCKET
     if (!(( session->flags & SNMP_FLAGS_STREAM_SOCKET ) &&
+#ifdef AF_UNIX
         ( isp->me.sa_family == AF_UNIX ) &&
+#endif /* AF_UNIX */
         ( session->local_port == 0 ))) {
 
 		/* Client Unix-domain stream sockets don't need to 'bind' */
@@ -1208,8 +1247,10 @@ snmp_sess_close(void *sessp)
 #else
 	    closesocket(isp->sd);
 #endif
+#ifdef AF_UNIX
             if ( isp->me.sa_family == AF_UNIX )
                 unlink( isp->me.sa_data );
+#endif /* AF_UNIX */
 	}
 
 	/* Free each element in the input request list.  */
@@ -3212,9 +3253,11 @@ _sess_read(void *sessp,
         isp->sd = -1;	/* Mark session for deletion */
 
 		/* Don't unlink the server listening socket prematurely */
+#ifdef AF_UNIX
         if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
                   isp->me.sa_family = AF_UNSPEC;
+#endif /*AF_UNIX */
         return -1;
     }
 
