@@ -39,7 +39,6 @@
 #include "ipCidrRouteTable.h"
 
 
-#include <net-snmp/agent/table_mfd.h>
 #include <net-snmp/library/container.h>
 
 #include "ipCidrRouteTable_interface.h"
