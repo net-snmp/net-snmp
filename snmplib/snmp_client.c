@@ -215,14 +215,24 @@ snmp_fix_pdu(pdu, command)
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
     if (pdu->enterprise){
-	newpdu->enterprise =
-          (oid *)malloc(pdu->enterprise_length * sizeof(oid));
-	memmove(newpdu->enterprise, pdu->enterprise,
-                pdu->enterprise_length * sizeof(oid));
+	newpdu->enterprise = (oid *)malloc(sizeof(oid)*pdu->enterprise_length);
+	memmove(newpdu->enterprise, pdu->enterprise, sizeof(oid)*pdu->enterprise_length);
     }
     if (pdu->community){
 	newpdu->community = (u_char *)malloc(pdu->community_len);
 	memmove(newpdu->community, pdu->community, pdu->community_len);
+    }
+   if (pdu->srcParty){
+	newpdu->srcParty = (oid *)malloc(sizeof(oid)*pdu->srcPartyLen);
+	memmove(newpdu->srcParty, pdu->srcParty, sizeof(oid)*pdu->srcPartyLen);
+    }
+    if (pdu->dstParty){
+	newpdu->dstParty = (oid *)malloc(sizeof(oid)*pdu->dstPartyLen);
+	memmove(newpdu->dstParty, pdu->dstParty, sizeof(oid)*pdu->dstPartyLen);
+    }
+    if (pdu->context){
+	newpdu->context = (oid *)malloc(sizeof(oid)*pdu->contextLen);
+	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
     }
     var = pdu->variables;
     index = 1;
@@ -320,24 +330,24 @@ snmp_clone_pdu(pdu)
 	}
     }
     if (pdu->enterprise){
-	newpdu->enterprise = (oid *)malloc(pdu->enterprise_length);
-	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
+	newpdu->enterprise = (oid *)malloc(sizeof(oid)*pdu->enterprise_length);
+	memmove(newpdu->enterprise, pdu->enterprise, sizeof(oid)*pdu->enterprise_length);
     }
     if (pdu->community){
 	newpdu->community = (u_char *)malloc(pdu->community_len);
 	memmove(newpdu->community, pdu->community, pdu->community_len);
     }
     if (pdu->srcParty){
-	newpdu->srcParty = (oid *)malloc(pdu->srcPartyLen);
-	memmove(newpdu->srcParty, pdu->srcParty, pdu->srcPartyLen);
+	newpdu->srcParty = (oid *)malloc(sizeof(oid)*pdu->srcPartyLen);
+	memmove(newpdu->srcParty, pdu->srcParty, sizeof(oid)*pdu->srcPartyLen);
     }
     if (pdu->dstParty){
-	newpdu->dstParty = (oid *)malloc(pdu->dstPartyLen);
-	memmove(newpdu->dstParty, pdu->dstParty, pdu->dstPartyLen);
+	newpdu->dstParty = (oid *)malloc(sizeof(oid)*pdu->dstPartyLen);
+	memmove(newpdu->dstParty, pdu->dstParty, sizeof(oid)*pdu->dstPartyLen);
     }
     if (pdu->context){
-	newpdu->context = (oid *)malloc(pdu->contextLen);
-	memmove(newpdu->context, pdu->context, pdu->contextLen);
+	newpdu->context = (oid *)malloc(sizeof(oid)*pdu->contextLen);
+	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
     }
     return newpdu;
 }
