@@ -88,27 +88,27 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 Creating the Perl package
 -------------------------
 
-1.  cd (source dir)\perl
+1.  cd (source dir)
+    cd perl
 
 2.  nmake ppd
 
 3.  Open an MSYS shell (unless you have tar.exe and gzip.exe)
 
-4.  cd (source dir)\perl
+4.  cd (source dir)
+    cd perl
 
-5.  tar cvf Net-SNMP.tar blib
+5.  tar cvf Net-SNMP.tar blib; gzip --best Net-SNMP.tar
 
-6.  gzip --best Net-SNMP.tar
+6.  Open a Windows command prompt (CMD) and cd (source dir)\perl
 
-7.  Open a Windows command prompt (CMD) and cd (source dir)\perl
+7.  ren Bundle-NetSNMP.ppd Net-SNMP.ppd
 
-8.  ren Bundle-NetSNMP.ppd Net-SNMP.ppd
-
-9.  Modify Net-SNMP.ppd to look like the following.  Change the 
+8.  Modify Net-SNMP.ppd to look like the following.  Change the 
     VERSION="x,x,x,x" line to the correct values.  Do NOT change 
     * lines in the original file.
 
-<SOFTPKG NAME="Net-SNMP" VERSION="5,1,1,0">
+<SOFTPKG NAME="Net-SNMP" VERSION="5,2,0,0">
     <TITLE>Net-SNMP</TITLE>
     <ABSTRACT>Object Oriented Interface to Net-SNMP</ABSTRACT>
     <AUTHOR></AUTHOR>
@@ -119,14 +119,14 @@ Creating the Perl package
     </IMPLEMENTATION>
 </SOFTPKG>
 
-10. Create base directories:
+9.  Create base directories:
 
     md "c:\usr\docs"
     md "c:\usr\perl"
     md "c:\usr\perl\x86"
     md "c:\usr\temp"
 
-11. Copy files:
+10. Copy files:
 
     cd (source dir)
     copy COPYING "c:\usr\docs"
@@ -136,7 +136,7 @@ Creating the Perl package
     copy perl\Net-SNMP.ppd "c:\usr\Perl"
     copy perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
 
-12. Update the BUILD INFORMATION section of c:\usr\README.txt
+11. Update the BUILD INFORMATION section of c:\usr\README.txt
 
 
 Compiling HTMLHelp file
@@ -184,19 +184,16 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 5.  Build Net-SNMP man pages: 
 
-    ./configure
-    make sedscript
-    cd man;make;cd ..
+    ./configure; make sedscript; cd man;make; cd ..
 
 6.  Install only the man files to /temp/net-snmp:
 
-    cd man
-    make install prefix=/tmp/net-snmp
+    cd man; make install prefix=/tmp/net-snmp; cd ..
 
 7.  Go to the scripts folder and make sure all the scripts are executable:
 
-    cd (source dir)/win32/dist/scripts
-    chmod +x *
+    cd (source dir)
+    cd win32/dist/scripts; chmod +x *
 
 8.  Edit these files and make sure the paths are correct in the OPTIONS 
     section.  Also ensure the list of README files and Perl modules 
@@ -214,9 +211,7 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 9.  Run each script to generate the .html files:
 
-    ./mandir2html
-    ./readme2html
-    ./poddir2html
+    ./mandir2html; ./readme2html; ./poddir2html
 
     Note:  There will be many warnings from tidy which can be ignored.
 
@@ -230,7 +225,6 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 12. Convert EXAMPLE.conf.win32 to html:
 
-    cd (source dir)/win32/dist/scripts
     ./txt2html ../../EXAMPLE.conf.win32 | tidy > /tmp/net-snmp/html/EXAMPLE.conf.win32.html
     
 
