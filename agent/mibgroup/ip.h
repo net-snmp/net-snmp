@@ -7,6 +7,7 @@
 #define _MIBGROUP_IP_H
 
 config_require(interfaces at var_route route_write)
+config_arch_require(solaris2, kernel_sunos5)
 
 #include "var_route.h"
 #include "route_write.h"
