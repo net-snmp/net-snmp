@@ -15,6 +15,9 @@
 #include <unistd.h>
 #endif
 #include <ctype.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"

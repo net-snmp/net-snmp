@@ -6,6 +6,9 @@
 #include <config.h>
 
 #include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #include "asn1.h"
 #include "snmp.h"
@@ -15,9 +18,6 @@
 #include "snmp_vars.h"
 #include "snmp_api.h"
 
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
