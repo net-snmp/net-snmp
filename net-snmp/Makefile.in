@@ -61,14 +61,14 @@ configclean:
 	rm -f config.cache config.status config.log
 	rm -f snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile
 
-${srcdir}/configure: configure.in aclocal.m4
+configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf
 	echo "Please run configure now."
 	sh -c exit 2
 
 # autoheader might not change config.h.in, so touch a stamp file.
-${srcdir}/config.h.in: ${srcdir}/stamp-h.in
-${srcdir}/stamp-h.in: configure.in acconfig.h
+config.h.in: ${srcdir}/stamp-h.in
+stamp-h.in: configure.in acconfig.h
 	cd ${srcdir} && autoheader
 	echo timestamp > ${srcdir}/stamp-h.in
 
@@ -78,10 +78,10 @@ stamp-h: config.h.in config.status
 	echo timestamp > ${srcdir}/stamp-h
 
 Makefile: Makefile.in config.status
-	./config.status
+	$(SHELL) ./config.status
 
 config.status: configure
-	./config.status --recheck
+	$(srcdir)/config.status --no-create
 
 mib.txt: ece-mib.def mibII.txt sedscript
 	cat ece-mib.def | $(SED) -f sedscript | cat mibII.txt - > mib.txt
