@@ -110,6 +110,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "agent_registry.h"
 #include "transform_oids.h"
 #include "callback.h"
+#include "snmp_alarm.h"
 #include "snmpd.h"
 #include "mib_module_includes.h"
 
