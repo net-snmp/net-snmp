@@ -2894,7 +2894,7 @@ usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
     if (name == NULL)
         name = noName;
     for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
-        if (!strcmp(ptr->name, name) &&
+        if (ptr->name && !strcmp(ptr->name, name) &&
             ptr->engineIDLen == engineIDLen &&
             ((ptr->engineID == NULL && engineID == NULL) ||
              (ptr->engineID != NULL && engineID != NULL &&
@@ -2941,6 +2941,8 @@ usm_add_user_to_list(struct usmUser *user, struct usmUser *puserList)
      * loop through puserList till we find the proper, sorted place to
      * insert the new user 
      */
+    /* XXX - how to handle a NULL user->name ?? */
+    /* XXX - similarly for a NULL nptr->name ?? */
     for (nptr = puserList, pptr = NULL; nptr != NULL;
          pptr = nptr, nptr = nptr->next) {
         if (nptr->engineIDLen > user->engineIDLen)
@@ -3526,7 +3528,7 @@ usm_set_password(const char *token, char *line)
          */
         cp = skip_token(cp);
         for (user = userList; user != NULL; user = user->next) {
-            if (strcmp(user->secName, nameBuf) == 0) {
+            if (user->secName && strcmp(user->secName, nameBuf) == 0) {
                 usm_set_user_password(user, token, cp);
             }
         }
@@ -3566,7 +3568,9 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
     /*
      * Retrieve the "old" key and set the key type.
      */
-    if (strcmp(token, "userSetAuthPass") == 0) {
+    if (!token) {
+        return;
+    } else if (strcmp(token, "userSetAuthPass") == 0) {
         key = &user->authKey;
         keyLen = &user->authKeyLen;
         type = 0;
@@ -3609,6 +3613,10 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
         /*
          * convert the password into a key 
          */
+        if (cp == NULL) {
+            config_perror("missing user password");
+            return;
+        }
         ret = generate_Ku(user->authProtocol, user->authProtocolLen,
                           (u_char *) cp, strlen(cp), userKey, &userKeyLen);
 
