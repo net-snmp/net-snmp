@@ -315,11 +315,50 @@ netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
-/** Extract the cache information for a given request */
+NETSNMP_STATIC_INLINE char *
+_build_cache_name(const char *name)
+{
+    char *dup = malloc(strlen(name) + strlen(CACHE_NAME) + 2);
+    if (NULL == dup)
+        return NULL;
+    sprintf(dup, "%s:%s", CACHE_NAME, name);
+    return dup;
+}
+
+/** Insert the cache information for a given request (PDU) */
+void
+netsnmp_cache_reqinfo_insert(netsnmp_cache* cache,
+                             netsnmp_agent_request_info * reqinfo,
+                             const char *name)
+{
+    char *cache_name = _build_cache_name(name);
+    if (NULL == netsnmp_agent_get_list_data(reqinfo, cache_name)) {
+        DEBUGMSGTL(("verbose:helper:cache_handler", " adding '%s' to %p\n",
+                    cache_name, reqinfo));
+        netsnmp_agent_add_list_data(reqinfo,
+                                    netsnmp_create_data_list(cache_name,
+                                                             cache, NULL));
+    }
+    SNMP_FREE(cache_name);
+}
+
+/** Extract the cache information for a given request (PDU) */
+netsnmp_cache  *
+netsnmp_cache_extract_from_reqinfo(netsnmp_agent_request_info * reqinfo,
+                                   const char *name)
+{
+    netsnmp_cache  *result;
+    char *cache_name = _build_cache_name(name);
+    result = netsnmp_agent_get_list_data(reqinfo, cache_name);
+    SNMP_FREE(cache_name);
+    return result;
+}
+
+/** Extract the cache information for a given request (PDU) */
 netsnmp_cache  *
 netsnmp_extract_cache_info(netsnmp_agent_request_info * reqinfo)
 {
-    return netsnmp_agent_get_list_data(reqinfo, CACHE_NAME);
+    return netsnmp_cache_extract_from_reqinfo(reqinfo, CACHE_NAME);
 }
 
 
@@ -357,9 +396,10 @@ netsnmp_cache_check_and_reload(netsnmp_cache * cache)
 
 /** Is the cache valid for a given request? */
 int
-netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo)
+netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo, 
+                       const char* name)
 {
-    netsnmp_cache  *cache = netsnmp_extract_cache_info(reqinfo);
+    netsnmp_cache  *cache = netsnmp_cache_extract_from_reqinfo(reqinfo, name);
     return (cache && cache->valid);
 }
 
@@ -369,7 +409,7 @@ netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo)
 int
 netsnmp_is_cache_valid(netsnmp_agent_request_info * reqinfo)
 {
-    return netsnmp_cache_is_valid(reqinfo);
+    return netsnmp_cache_is_valid(reqinfo, CACHE_NAME);
 }
 
 /** Implements the cache handler */
@@ -381,8 +421,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
 {
     netsnmp_cache  *cache = NULL;
 
-    DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ",
-                reqinfo->mode));
+    DEBUGMSGTL(("helper:cache_handler", "Got request (%d) for %s: ",
+                reqinfo->mode, reginfo->handlerName));
     DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid,
                  reginfo->rootoid_len));
 
@@ -411,23 +451,22 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          * a previous (delegated) request is still using the cache.
          * maybe use a reference counter?
          */
-        if( cache->valid )
+        if (netsnmp_cache_is_valid(reqinfo, reginfo->handlerName))
             return SNMP_ERR_NOERROR;
 
         /*
          * call the load hook, and update the cache timestamp.
+         * If it's not already there, add to reqinfo
          */
         netsnmp_cache_check_and_reload(cache);
-        netsnmp_agent_add_list_data(reqinfo,
-                                    netsnmp_create_data_list(CACHE_NAME,
-                                                             cache, NULL));
+        netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
         break;
 
     case MODE_SET_RESERVE2:
     case MODE_SET_FREE:
     case MODE_SET_ACTION:
     case MODE_SET_UNDO:
-        netsnmp_assert( cache->valid );
+        netsnmp_assert(netsnmp_cache_is_valid(reqinfo, reginfo->handlerName));
         break;
 
         /*

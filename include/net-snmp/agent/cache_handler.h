@@ -47,10 +47,18 @@ extern          "C" {
     };
 
 
+    void netsnmp_cache_reqinfo_insert(netsnmp_cache* cache,
+                                      netsnmp_agent_request_info * reqinfo,
+                                      const char *name);
+    netsnmp_cache  *
+       netsnmp_cache_extract_from_reqinfo(netsnmp_agent_request_info * reqinfo,
+                                          const char *name);
     netsnmp_cache* netsnmp_extract_cache_info(netsnmp_agent_request_info *);
+
     int            netsnmp_cache_check_and_reload(netsnmp_cache * cache);
     int            netsnmp_cache_check_expired(netsnmp_cache *cache);
-    int            netsnmp_cache_is_valid(    netsnmp_agent_request_info *);
+    int            netsnmp_cache_is_valid(    netsnmp_agent_request_info *,
+                                              const char *name);
     /** for backwards compat */
     int            netsnmp_is_cache_valid(    netsnmp_agent_request_info *);
     netsnmp_mib_handler *netsnmp_get_cache_handler(int, NetsnmpCacheLoad *,
