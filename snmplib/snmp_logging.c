@@ -90,7 +90,9 @@ vlog_syslog (int priority, const char *format, va_list ap)
 {
   if (do_syslogging) {
 #ifndef WIN32
-    syslog(priority, format, ap);
+    char xbuf[256];
+    vsnprintf(xbuf, sizeof(xbuf), format, ap);
+    syslog(priority, xbuf);
 #endif
   }
 }
