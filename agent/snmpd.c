@@ -313,7 +313,7 @@ main(int argc, char *argv[])
 
 #ifdef NO_ROOT_ACCESS
         /* default to no */
-        ds_set_boolean(DS_APPLICATION_ID, DS_NO_ROOT_ACCESS, 1)
+        ds_set_boolean(DS_APPLICATION_ID, DS_NO_ROOT_ACCESS, 1);
 #endif
 
 	/*
