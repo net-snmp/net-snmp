@@ -155,7 +155,7 @@ snmp_synch_input(int op,
 	return 0;
 
     state->waiting = 0;
-    if (op == RECEIVED_MESSAGE) {
+    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       if (pdu->command == SNMP_MSG_REPORT) {
 	rpt_type = snmpv3_get_report_type(pdu);
 	if (SNMPV3_IGNORE_UNAUTH_REPORTS || 
@@ -171,7 +171,7 @@ snmp_synch_input(int op,
 	state->status = STAT_SUCCESS;
 	session->s_snmp_errno = SNMPERR_SUCCESS;
       }
-    } else if (op == TIMED_OUT){
+    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT){
 	state->pdu		 = NULL;
 	state->status		 = STAT_TIMEOUT;
 	session->s_snmp_errno	 = SNMPERR_TIMEOUT;
