@@ -12,7 +12,6 @@
 
 /* process mib names def numbers */
 
-#define PROCMIBNUM 1
 #define PROCINDEX 1
 #define PROCNAMES 2
 #define PROCMIN   3
@@ -21,7 +20,6 @@
 #define PROCERROR 6
 #define PROCERRORMSG 7
 
-#define SHELLMIBNUM 3
 #define SHELLINDEX 1
 #define SHELLNAMES 2
 #define SHELLCOMMAND 3
@@ -35,7 +33,6 @@
 #define LOCKDNFSFILE "/.nfslockdtest/nfs/subdir/test"
 #define LOCKDREALFILE "/.nfslockdtest/real/subdir/test"
 
-#define MEMMIBNUM 4
 #define MEMSWAPINDEX 1
 #define MEMERRNAME 2 /* always returns "swap", for other mib
                         compatibility purposes */
@@ -54,7 +51,6 @@
 
 /* disk watching mib.  Returns are in kbytes */
 
-#define DISKMIBNUM 6
 #define DISKINDEX 1
 #define DISKPATH 2
 #define DISKDEVICE 3
@@ -65,12 +61,10 @@
 #define DISKPERCENT 8
 
 /* load average mib */
-#define LOADAVEMIBNUM 7
 #define LOADAVE 3
 #define LOADMAXVAL 4
 
 /* Version info mib */
-#define VERSIONMIBNUM 100
 #define VERTAG 2
 #define VERDATE 3
 #define VERCDATE 4
