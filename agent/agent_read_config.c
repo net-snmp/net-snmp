@@ -98,6 +98,24 @@
 char dontReadConfigFiles;
 char *optconfigfile;
 
+void snmpd_set_agent_address(const char *token, char *cptr)
+{
+    char buf[SPRINT_MAX_LEN];
+    char *ptr;
+
+    /* has something been specified before? */
+    ptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+
+    if (ptr)
+	/* append to the older specification string */
+	sprintf(buf,"%s,%s", ptr, cptr);
+    else
+	strcpy(buf,cptr);
+
+    DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
+    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+
+}
 void init_agent_read_config (const char *app)
 {
   if ( app != NULL )
@@ -125,6 +143,10 @@ void init_agent_read_config (const char *app)
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
                           "community-string");
+  register_app_config_handler("agentaddress",
+                          snmpd_set_agent_address, NULL,
+                          "SNMP bind address");
+
 #include "mib_module_dot_conf.h"
 #ifdef TESTING
   print_config_handlers();
