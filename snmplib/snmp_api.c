@@ -4341,6 +4341,8 @@ size_t snmp_socket_length( int family)
     case AF_LINK:
 #ifdef _MAX_SA_LEN
       length = _MAX_SA_LEN;
+#elif SOCK_MAXADDRLEN
+      length = SOCK_MAXADDRLEN;
 #else
       length = sizeof (struct sockaddr_dl);
 #endif
