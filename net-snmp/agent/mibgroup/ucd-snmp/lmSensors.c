@@ -758,7 +758,6 @@ _sensor_load(clock_t t)
     int typ;
     int temp;
     int other;
-    int er_code;
     const char *fantypes[]={"CPU","PWR","AFB"};
     kstat_ctl_t *kc;
     kstat_t *kp;
@@ -767,6 +766,7 @@ _sensor_load(clock_t t)
     envctrl_encl_t *enc_info;
 
 #ifdef HAVE_PICL_H
+    int er_code;
     picl_errno_t     error_code;
     picl_nodehdl_t  rooth,plath;
     char sname[PICL_PROPNAMELEN_MAX] = "SYSTEM";
