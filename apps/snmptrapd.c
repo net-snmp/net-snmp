@@ -110,6 +110,8 @@ SOFTWARE.
 #include "snmp_alarm.h"
 #include "default_store.h"
 
+#define DS_APP_NUMERIC_IP  1
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif
@@ -434,6 +436,9 @@ int snmp_input(int op,
 	    oid trapOid[MAX_OID_LEN];
 	    int trapOidLen = pdu->enterprise_length;
 	    struct sockaddr_in *agentIp = (struct sockaddr_in *)&pdu->agent_addr;
+		if( ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP) )
+			host = NULL;
+		else
 	    host = gethostbyaddr ((char *)&agentIp->sin_addr,
 				  sizeof (agentIp->sin_addr), AF_INET);
 	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
@@ -450,6 +455,9 @@ int snmp_input(int op,
                        host ? host->h_name : inet_ntoa(agentIp->sin_addr),
                        inet_ntoa(agentIp->sin_addr));
 		if (agentIp->sin_addr.s_addr != pduIp->sin_addr.s_addr) {
+			if( ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP) )
+				host = NULL;
+			else
 		    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 					  sizeof (pduIp->sin_addr), AF_INET);
 		    printf("(via %s [%s]) ",
@@ -522,6 +530,9 @@ int snmp_input(int op,
 		do_external(Command, host, pdu);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
+		if( ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP) )
+			host = NULL;
+		else
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
@@ -556,6 +567,9 @@ int snmp_input(int op,
 	    	if ( varbufidx ) {
 		    varbufidx -= 2; varbuf[varbufidx]='\0';
 	    	}
+		if( ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP) )
+			host = NULL;
+		else
 		host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				      sizeof (pduIp->sin_addr), AF_INET);
 		syslog(LOG_WARNING, "%s [%s]: Trap %s",
@@ -598,7 +612,7 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
     fprintf(stderr, "\
   -h        Print this help message and exit\n\
@@ -614,9 +628,10 @@ void usage(void)
   -f        Stay in foreground (don't fork)\n\
   -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
   -d        Dump input/output packets\n\
+  -n        Use numeric IP addresses instead of host names (no DNS)
   -a        Ignore Authentication Failture traps.\n\
-  -c CONFFILE Read CONFFILE as a configuration file.\n\
-  -C        Don't read the default configuration files.\n\
+  -c CONFFILE Read CONFFILE as a configuration file.
+  -C        Don't read the default configuration files.
   -m <MIBS>     Use MIBS list instead of the default mib list.\n\
   -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
   -O <OUTOPTS>  Toggle various options controlling output display\n");
@@ -675,7 +690,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:Hu:c:C")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:C")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -771,6 +786,10 @@ int main(int argc, char *argv[])
 
         case 'C':
             ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
+            break;
+
+        case 'n':
+            ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
             break;
 
 	default:
