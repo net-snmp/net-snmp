@@ -119,12 +119,14 @@ int             deny_severity = LOG_WARNING;
 
 #define SNMP_ADDRCACHE_SIZE 10
 
+enum { SNMP_ADDRCACHE_UNUSED = 0,
+       SNMP_ADDRCACHE_USED = 1,
+       SNMP_ADDRCACHE_OLD = 2
+};
+
 struct addrCache {
     char           *addr;
-    enum { SNMP_ADDRCACHE_UNUSED = 0,
-        SNMP_ADDRCACHE_USED = 1,
-        SNMP_ADDRCACHE_OLD = 2
-    } status;
+    int             status;
 };
 
 static struct addrCache addrCache[SNMP_ADDRCACHE_SIZE];
