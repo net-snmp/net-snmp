@@ -1415,10 +1415,7 @@ print_variable(oid *objid,
 	       int objidlen,
 	       struct variable_list *variable)
 {
-    char    buf[SPRINT_MAX_LEN];
-
-    sprint_variable(buf, objid, objidlen, variable);
-    printf("%s\n", buf);
+    fprint_variable(stdout, objid, objidlen, variable);
 }
 
 void
@@ -1427,7 +1424,10 @@ fprint_variable(FILE *f,
 		int objidlen,
 		struct variable_list *variable)
 {
-  fprint_variable(stdout, objid, objidlen, variable);
+    char    buf[SPRINT_MAX_LEN];
+
+    sprint_variable(buf, objid, objidlen, variable);
+    fprintf(f, "%s\n", buf);
 }
 
 void
@@ -1620,9 +1620,9 @@ get_module_node(char *name,
 		oid *objid,
 		int *objidlen)
 {
-    int modid, subid;
+    int modid, subid, numids;
     struct tree *tp, *tp2;
-    oid newname[64], *op;
+    oid newname[MAX_OID_LEN], *op;
     char *cp, *cp2;
 
     if ( !strcmp(module, "ANY") )
@@ -1645,16 +1645,17 @@ get_module_node(char *name,
 		/* Build up the object ID, working backwards,
 		   starting from the end of the buffer. */
 	tp2 = tp;
-	for(op = newname + 63; op >= newname; op--){
+	for(op = newname + (MAX_OID_LEN - 1), numids = 1;
+		 op >= newname; op--, numids++){
 	    *op = tp2->subid;
 	    tp2 = tp2->parent;
 	    if (tp2 == NULL)
 		break;
 	}
-	if (newname + 64 - op > *objidlen)
+	if (numids > *objidlen)
 	    return 0;
-	*objidlen = newname + 64 - op;
-	memmove(objid, op, (newname + 64 - op) * sizeof(oid));
+	*objidlen = numids;
+	memmove(objid, op, numids * sizeof(oid));
 
 		/* If the name requested was more than one element,
 		   tag on the rest of the components */
@@ -1718,7 +1719,7 @@ get_node(char *name,
 		 *  requested name is of the form
 		 *	"module:subidentifier"
 		 */
-	module = (char*)malloc(cp-name+1);
+	module = malloc(cp-name+1);
 	memcpy(module,name,cp-name);
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */
@@ -1734,8 +1735,8 @@ get_node(char *name,
 
 main(int argc, char* argv[])
 {
-    oid objid[64];
-    int objidlen = sizeof (objid);
+    oid objid[MAX_OID_LEN];
+    int objidlen = MAX_OID_LEN;
     int count;
     struct variable_list variable;
 
@@ -1746,7 +1747,7 @@ main(int argc, char* argv[])
     variable.val.integer = 3;
     variable.val_len = 4;
     for (argc--; argc; argc--, argv++) {
-	objidlen = sizeof (objid);
+	objidlen = MAX_OID_LEN;
 	printf("read_objid(%s) = %d\n",
 	       argv[1], read_objid(argv[1], objid, &objidlen));
 	for(count = 0; count < objidlen; count++)
