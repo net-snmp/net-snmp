@@ -23,6 +23,5 @@ char *find_field (char *, int);
 int parse_miboid (char *, oid *);
 void string_append_int (char *, int);
 void wait_on_exec (struct extensible *);
-int calculate_time_diff (struct timeval, struct timeval);
 
 #endif /* _MIBGROUP_UTIL_FUNCS_H */

@@ -1,3 +1,7 @@
+/*
+ * util_funcs.c
+ */
+
 #include <config.h>
 
 #include <stdio.h>
@@ -213,6 +217,7 @@ int get_exec_output(struct extensible *ex)
         }
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
+	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus("open");
           cachetime = 0;
@@ -354,13 +359,12 @@ int clear_cache(int action,
 {
   
   long tmp=0;
-  int tmplen=1000;
 
   if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
-  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  tmp = *((long *) var_val);
   if (tmp == 1 && action == COMMIT) {
 #ifdef EXCACHETIME
     cachetime = 0;                      /* reset the cache next read */
@@ -395,13 +399,12 @@ restart_hook(int action,
 {
   
   long tmp=0;
-  int tmplen=1000;
 
   if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
-  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  tmp = *((long *) var_val);
   if (tmp == 1 && action == COMMIT) {
     signal(SIGALRM,restart_doit);
     alarm(RESTARTSLEEP);
@@ -433,12 +436,43 @@ sprint_mib_oid(char *buf,
   }
 }
 
+/*******************************************************************-o-******
+ * header_simple_table
+ *
+ * Parameters:
+ *	  *vp		 Variable data.
+ *	  *name		 Fully instantiated OID name.
+ *	  *length	 Length of name.
+ *	   exact	 TRUE if an exact match is desired.
+ *	  *var_len	 Hook for size of returned data type.
+ *	(**write_method) Hook for write method (UNUSED).
+ *	   max
+ *      
+ * Returns:
+ *	0	If name matches vp->name (accounting for 'exact') and is
+ *			not greater in length than 'max'.
+ *	1	Otherwise.
+ *
+ *
+ * Compare 'name' to vp->name for the best match or an exact match (if
+ *	requested).  Also check that 'name' is not longer than 'max' if
+ *	max is greater-than/equal 0.
+ * Store a successful match in 'name', and increment the OID instance if
+ *	the match was not exact.  
+ *
+ * 'name' and 'length' are undefined upon failure.
+ *
+ */
 int header_simple_table(struct variable *vp, oid *name, int *length,
                         int exact, int *var_len,
                         WriteMethod **write_method, int max)
 {
-  int i, rtest;
-#define MAX_NEWNAME_LEN 100
+#define MAX_NEWNAME_LEN	256
+  int	i,
+	rtest;	/* Set to:	-1	If name < vp->name,
+	 	 *		1	If name > vp->name,
+		 *		0	Otherwise.
+		 */
   oid newname[MAX_NEWNAME_LEN];
 
   for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
@@ -456,9 +490,12 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
 	*var_len = 0;
     return MATCH_FAILED;
   }
+
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
-         vp->namelen,*length,name[*length-1]); */
+         vp->namelen,*length,name[*length-1]); */	/* XXX */
+
   memset((char *) newname,(0),MAX_NEWNAME_LEN*sizeof(oid));
+
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
@@ -477,6 +514,7 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
       *var_len = 0;
     return MATCH_FAILED;
   }
+
   memmove(name, newname, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
@@ -497,6 +535,24 @@ int header_simple_table(struct variable *vp, oid *name, int *length,
   
 */
 
+/*******************************************************************-o-******
+ * generic_header
+ *
+ * Parameters:
+ *	  *vp	   (I)     Pointer to variable entry that points here.
+ *	  *name	   (I/O)   Input name requested, output name found.
+ *	  *length  (I/O)   Length of input and output oid's.
+ *	   exact   (I)     TRUE if an exact match was requested.
+ *	  *var_len (O)     Length of variable or 0 if function returned.
+ *	(**write_method)   Hook to name a write method (UNUSED).
+ *      
+ * Returns:
+ *	MATCH_SUCCEEDED	If vp->name matches name (accounting for exact bit).
+ *	MATCH_FAILED	Otherwise,
+ *
+ *
+ * Check whether variable (vp) matches name.
+ */
 int
 header_generic(struct variable *vp,
 	       oid *name,
@@ -599,21 +655,4 @@ string_append_int (char *s,
     sprintf (textVal, "%d", val);
     strcpy(s, textVal);
     return;
-}
-
-int
-calculate_time_diff(struct timeval t1,
-		    struct timeval t2)
-{
-  struct timeval tmp, diff;
-  memcpy(&tmp, &t1, sizeof(struct timeval));
-  tmp.tv_sec--;
-  tmp.tv_usec += 1000000L;
-  diff.tv_sec = tmp.tv_sec - t2.tv_sec;
-  diff.tv_usec = tmp.tv_usec - t2.tv_usec;
-  if (diff.tv_usec > 1000000L){
-    diff.tv_usec -= 1000000L;
-    diff.tv_sec++;
-  }
-  return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
 }

@@ -1,3 +1,7 @@
+/*
+ * read_config.c
+ */
+
 #include <config.h>
 
 #include <stdio.h>
@@ -31,6 +35,9 @@
 #  include <time.h>
 # endif
 #endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -52,7 +59,6 @@
 #else
 #include <varargs.h>
 #endif
-
 
 #include "asn1.h"
 #include "mib.h"
@@ -82,6 +88,18 @@ register_premib_handler(char *type,
   return (ltmp);
 }
 
+/*******************************************************************-o-******
+ * register_config_handler
+ *
+ * Parameters:
+ *	*type
+ *	*token
+ *	*parser
+ *	*releaser
+ *      
+ * Returns:
+ *	Pointer to a new config line entry  -OR-  NULL on error.
+ */
 struct config_line *
 register_config_handler(char *type,
 			char *token,
@@ -92,46 +110,64 @@ register_config_handler(char *type,
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
 
-  /* find type in current list */
-  while (*ctmp != NULL && strcmp((*ctmp)->fileHeader,type)) {
+  /* 
+   * Find type in current list  -OR-  create a new file type.
+   */
+  while (*ctmp != NULL && strcmp((*ctmp)->fileHeader, type)) {
     ctmp = &((*ctmp)->next);
   }
 
   if (*ctmp == NULL) {
-    /* Not found, create a new one. */
-    *ctmp = (struct config_files *) malloc(sizeof(struct config_files));
-    (*ctmp)->next = NULL;
-    (*ctmp)->start = NULL;
-    (*ctmp)->fileHeader = strdup(type);
+    *ctmp = (struct config_files *)
+      malloc(sizeof(struct config_files));
+    if ( !*ctmp ) {
+      return NULL;
+    }
+
+    (*ctmp)->next		 = NULL;
+    (*ctmp)->start		 = NULL;
+    (*ctmp)->fileHeader	 = strdup(type);
   }
 
+  /* 
+   * Find parser type in current list  -OR-  create a new
+   * line parser entry.
+   */
   ltmp = &((*ctmp)->start);
 
-  while (*ltmp != NULL && strcmp((*ltmp)->config_token,token)) {
+  while (*ltmp != NULL && strcmp((*ltmp)->config_token, token)) {
     ltmp = &((*ltmp)->next);
   }
 
   if (*ltmp == NULL) {
-    /* Not found, create a new one. */
-    *ltmp = (struct config_line *) malloc(sizeof(struct config_line));
-    (*ltmp)->next = NULL;
-    (*ltmp)->config_time = NORMAL_CONFIG;
-    (*ltmp)->parse_line = 0;
-    (*ltmp)->free_func = 0;
-    (*ltmp)->config_token = strdup(token);
+    *ltmp = (struct config_line *)
+      malloc(sizeof(struct config_line));
+    if ( !*ltmp ) {
+      return NULL;
+    }
+
+    (*ltmp)->next		 = NULL;
+    (*ltmp)->config_time	 = NORMAL_CONFIG;
+    (*ltmp)->parse_line	 = 0;
+    (*ltmp)->free_func	 = 0;
+    (*ltmp)->config_token	 = strdup(token);
     if (help != NULL)
       (*ltmp)->help = strdup(help);
     else
       (*ltmp)->help = strdup("");
+
   }
 
-  /* Found the handler for this token.  Add/Replace the functions with */
-  /* the newly registered ones: */
-
+  /* 
+   * Add/Replace the parse/free functions for the given line type
+   * in the given file type.
+   */
   (*ltmp)->parse_line = parser;
-  (*ltmp)->free_func = releaser;
+  (*ltmp)->free_func  = releaser;
+
   return (*ltmp);
-}
+
+}  /* end register_config_handler() */
 
 void
 unregister_config_handler(char *type, 
@@ -204,6 +240,25 @@ void read_config_with_type(char *filename,
            type, filename));
 }
 
+/*******************************************************************-o-******
+ * read_config
+ *
+ * Parameters:
+ *	*filename
+ *	*line_handler
+ *	 when
+ *
+ * Read <filename> and process each line in accordance with the list of
+ * <line_handler> functions.
+ *
+ *
+ * For each line in <filename>, search the list of <line_handler>'s 
+ * for an entry that matches the first token on the line.  This comparison is
+ * case insensitive.
+ *
+ * For each match, check that <when> is the designated time for the
+ * <line_handler> function to be executed before processing the line.
+ */
 void read_config(char *filename,
 		 struct config_line *line_handler,
 		 int when)
@@ -236,9 +291,9 @@ void read_config(char *filename,
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{
-          copy_word(cptr,token);
-          cptr = skip_not_white(cptr);
-          cptr = skip_white(cptr);
+          DEBUGMSGTL(("read_config",
+                      "%s:%d Parsing: %s\n", filename, linecount, line));
+          cptr = copy_word(cptr,token);
           if (cptr == NULL) {
             sprintf(tmpbuf,"Blank line following %s token.", token);
             config_perror(tmpbuf);
@@ -261,7 +316,10 @@ void read_config(char *filename,
     }
   fclose(ifile);
   return;
-}
+
+}  /* end read_config() */
+
+
 
 void
 free_config (void)
@@ -287,6 +345,38 @@ read_premib_configs (void)
   read_config_files(PREMIB_CONFIG);
 }
 
+
+
+
+/*******************************************************************-o-******
+ * read_config_files
+ *
+ * Parameters:
+ *	when	== PREMIB_CONFIG, NORMAL_CONFIG  -or-  EITHER_CONFIG
+ *
+ *
+ * Traverse the list of config file types, performing the following actions
+ * for each --
+ *
+ * First, build a search path for config files.  If the contents of 
+ * environment variable SNMPCONFPATH are NULL, then use the following
+ * path list (where the last entry exists only if HOME is non-null):
+ *
+ *	SNMPSHAREPATH:SNMPLIBPATH:${HOME}/.snmp
+ *
+ * Then, In each of these directories, read config files by the name of:
+ *
+ *	<dir>/<fileHeader>.conf		-AND-
+ *	<dir>/<fileHeader>.local.conf
+ *
+ * where <fileHeader> is taken from the config file type structure.
+ *
+ *
+ * PREMIB_CONFIG causes free_config() to be invoked prior to any other action.
+ *
+ *
+ * EXITs if any 'config_errors' are logged while parsing config file lines.
+ */
 void
 read_config_files (int when)
 {
@@ -310,10 +400,11 @@ read_config_files (int when)
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
       homepath=getenv("HOME");
-      sprintf(defaultPath,"%s:%s%s%s%s",SNMPSHAREPATH,SNMPLIBPATH,
+      sprintf(defaultPath,"%s:%s%s%s%s:%s",SNMPSHAREPATH,SNMPLIBPATH,
               ((homepath == NULL) ? "" : ":"),
               ((homepath == NULL) ? "" : homepath),
-              ((homepath == NULL) ? "" : "/.snmp"));
+              ((homepath == NULL) ? "" : "/.snmp"),
+              PERSISTENT_DIRECTORY);
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
@@ -336,7 +427,7 @@ read_config_files (int when)
   }
   
   if (config_errors) {
-    fprintf(stderr, "snmpd: errors in config file - abort.\n");
+    fprintf(stderr, "ucd-snmp: errors in config file - abort.\n");
     exit(1);
   }
 }
@@ -359,6 +450,90 @@ void read_config_print_usage(char *lead)
   }
 }
 
+/*******************************************************************-o-******
+ * read_config_store
+ *
+ * Parameters:
+ *	*type
+ *	*line
+ *      
+ * 
+ * Append line to a file named either ENV(SNMP_PERSISTENT_FILE) or
+ *   "<PERSISTENT_DIRECTORY>/<type>.persistent.conf".
+ * Add a trailing newline to the stored file if necessary.
+ *
+ * Intended for use by applications to store permenant configuration 
+ * information generated by sets or persistent counters.
+ *
+ */
+void
+read_config_store(char *type, char *line)
+{
+#ifdef PERSISTENT_DIRECTORY
+  char file[512], *filep;
+  FILE *OUT;
+
+  /* store configuration directives in the following order of preference:
+     1. ENV variable SNMP_PERSISTENT_FILE
+     2. configured <PERSISTENT_DIRECTORY>/<type>.conf
+  */
+  if ((filep = getenv("SNMP_PERSISTENT_FILE")) == NULL) {
+    sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+    filep = file;
+  }
+  
+  if ((OUT = fopen(filep, "a")) != NULL) {
+    fprintf(OUT,line);
+    if (line[strlen(line)] != '\n')
+      fprintf(OUT,"\n");
+    DEBUGP("storing: %s\n",line);
+    fclose(OUT);
+    /* XXX Sync the disk? */
+  } else {
+    snmp_perror(type);
+  }
+#endif
+}  /* end read_config_store() */
+
+
+
+
+/*******************************************************************-o-******
+ * snmp_clean_persistent
+ *
+ * Parameters:
+ *	*type
+ *      
+ *
+ * Unlink a file called "<PERSISTENT_DIRECTORY>/<type>.conf".
+ *
+ * Should be called just before all persistent information is supposed to be
+ * written to clean out the existing persistent cache.
+ *
+ * XXX  Worth overwriting with random bytes first?  This would
+ *	ensure that the data is destroyed, even a buffer containing the
+ *	data persists in memory or swap.  Only important if secrets
+ *	will be stored here.
+ */
+void
+snmp_clean_persistent(char *type)
+{
+  char file[512], fileold[512];
+  struct stat statbuf;
+
+  sprintf(file,"%s/%s.conf",PERSISTENT_DIRECTORY,type);
+  if (stat(file, &statbuf) == 0) {
+    sprintf(fileold,"%s/%s.conf.old",PERSISTENT_DIRECTORY,type);
+    if (rename(file, fileold)) {
+      unlink(file);/* failed, try nuking it */
+    }
+  }
+}
+
+
+
+/* config_perror: prints a warning string associated with a file and
+   line number of a .conf file and increments the error count. */
 void config_perror(char *string)
 {
   config_pwarn(string);
@@ -405,8 +580,8 @@ char *skip_token(char *ptr)
    is one token, \"the red rose\" is three tokens)
    a '\' character will allow a quote character to be treated
    as a regular character 
-   It returns a pointer to the white space at the end of the token
-   or to 0 if there is no white space at the end.*/
+   It returns a pointer to first non-white space after the end of the token
+   being copied or to 0 if we reach the end.*/
 
 char *copy_word(char *from, char *to)
 {
@@ -434,10 +609,7 @@ char *copy_word(char *from, char *to)
     }
   }
   *to = 0;
-  while(from && isspace(*from)) {
-    from++;
-  }
-  
+  from = skip_white(from);
   return(from);
 }  /* copy_word */
 

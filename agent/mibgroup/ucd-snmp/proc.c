@@ -270,14 +270,13 @@ fixProcError(int action,
   
   struct myproc *proc;
   long tmp=0;
-  int tmplen=1000;
 
   if ((proc = get_proc_instance(procwatch,name[10]))) {
     if (var_val_type != ASN_INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
-    asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+    tmp = *((long *) var_val);
     if (tmp == 1 && action == COMMIT) {
       if (proc->fixcmd[0]) {
         strcpy(fixproc.command, proc->fixcmd);

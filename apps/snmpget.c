@@ -77,7 +77,6 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-
 int failures=0;
 
 void
@@ -112,7 +111,10 @@ int main(int argc, char *argv[])
     
     SOCK_STARTUP;
 
-    /* open an SNMP session */
+
+    /* 
+     * Open an SNMP session.
+     */
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
@@ -121,7 +123,10 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    /* create PDU for GET request and add object names to request */
+
+    /* 
+     * Create PDU for GET request and add object names to request.
+     */
     pdu = snmp_pdu_create(SNMP_MSG_GET);
     for(count = 0; count < current_name; count++){
       name_length = MAX_OID_LEN;
@@ -136,44 +141,60 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    /* do the request */
+
+    /* 
+     * Perform the request.
+     *
+     * If the Get Request fails, note the OID that caused the error,
+     * "fix" the PDU (removing the error-prone OID) and retry.
+     */
 retry:
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS){
       if (response->errstat == SNMP_ERR_NOERROR){
         for(vars = response->variables; vars; vars = vars->next_variable)
           print_variable(vars->name, vars->name_length, vars);
+
       } else {
         fprintf(stderr, "Error in packet\nReason: %s\n",
                 snmp_errstring(response->errstat));
+
         if (response->errstat == SNMP_ERR_NOSUCHNAME){
           fprintf(stderr, "This name doesn't exist: ");
           for(count = 1, vars = response->variables; 
                 vars && count != response->errindex;
                 vars = vars->next_variable, count++)
-            ;
+            /*EMPTY*/ ;
           if (vars)
             fprint_objid(stderr, vars->name, vars->name_length);
           fprintf(stderr, "\n");
         }
+
         if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
           goto retry;
-      }
+
+      }  /* endif -- SNMP_ERR_NOERROR */
+
     } else if (status == STAT_TIMEOUT){
 	fprintf(stderr,"Timeout: No Response from %s.\n", session.peername);
 	snmp_close(ss);
 	SOCK_CLEANUP;
 	exit(1);
+
     } else {    /* status == STAT_ERROR */
       snmp_perror("snmpget");
       snmp_close(ss);
       SOCK_CLEANUP;
       exit(1);
-    }
+
+    }  /* endif -- STAT_SUCCESS */
+
 
     if (response)
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
     exit (0);
-}
+
+}  /* end main() */
+

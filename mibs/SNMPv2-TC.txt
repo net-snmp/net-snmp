@@ -214,16 +214,16 @@ RowStatus ::= TEXTUAL-CONVENTION
                  consider the following state diagram:
 
                                               STATE
-                   +--------------+-----------+-------------+-------------
-                   |      A       |     B     |      C      |      D
-                   |              |status col.|status column|
-                   |status column |    is     |      is     |status column
-         ACTION    |does not exist|  notReady | notInService|  is active
+                       +--------------+-----------+-------------+-------------
+                       |      A       |     B     |      C      |      D
+                       |              |status col.|status column|
+                       |status column |    is     |      is     |status column
+         ACTION        |does not exist|  notReady | notInService|  is active
          --------------+--------------+-----------+-------------+-------------
          set status    |noError    ->D|inconsist- |inconsistent-|inconsistent-
          column to     |       or     |   entValue|        Value|        Value
          createAndGo   |inconsistent- |           |             |
-                   |         Value|           |             |
+                       |         Value|           |             |
          --------------+--------------+-----------+-------------+-------------
          set status    |noError  see 1|inconsist- |inconsistent-|inconsistent-
          column to     |       or     |   entValue|        Value|        Value
@@ -232,16 +232,16 @@ RowStatus ::= TEXTUAL-CONVENTION
          set status    |inconsistent- |inconsist- |noError      |noError
          column to     |         Value|   entValue|             |
          active        |              |           |             |
-                   |              |     or    |             |
-                   |              |           |             |
-                   |              |see 2   ->D|          ->D|          ->D
+                       |              |     or    |             |
+                       |              |           |             |
+                       |              |see 2   ->D|          ->D|          ->D
          --------------+--------------+-----------+-------------+-------------
          set status    |inconsistent- |inconsist- |noError      |noError   ->C
          column to     |         Value|   entValue|             |
          notInService  |              |           |             |
-                   |              |     or    |             |      or
-                   |              |           |             |
-                   |              |see 3   ->C|          ->C|wrongValue
+                       |              |     or    |             |      or
+                       |              |           |             |
+                       |              |see 3   ->C|          ->C|wrongValue
          --------------+--------------+-----------+-------------+-------------
          set status    |noError       |noError    |noError      |noError
          column to     |              |           |             |

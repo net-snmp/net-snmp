@@ -74,6 +74,7 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <signal.h>
 #include <errno.h>
 
 #include "asn1.h"
@@ -90,6 +91,10 @@ SOFTWARE.
 #include "snmptrapd_handlers.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmpusm.h"
+#include "tools.h"
+#include "lcd_time.h"
+#include "transform_oids.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -154,6 +159,9 @@ int Facility = LOG_LOCAL0;
 struct timeval Now;
 
 void init_syslog(void);
+
+void update_config (int a);
+
 
 char *
 trap_description(int trap)
@@ -543,7 +551,8 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
-    struct snmp_session session, *ss;
+    struct snmp_session sess, *session = &sess, *ss;
+    struct usmUser *user, *userListPtr;
     int	arg;
     int count, numfds, block;
     fd_set fdset;
@@ -650,7 +659,7 @@ int main(int argc, char *argv[])
 		    }
 		    break;
                 case 'H':
-                    init_snmp();
+                    init_snmp("snmptrapd");
                     fprintf(stderr, "Configuration directives understood:\n");
                     read_config_print_usage("  ");
                     exit(0);
@@ -668,13 +677,50 @@ int main(int argc, char *argv[])
 	}
     }
 
-    init_mib();
-    read_configs();
     if (!Print) Syslog = 1;
-
     myaddr = get_myaddr();
     srclen = dstlen = contextlen = MAX_OID_LEN;
     ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
+
+    /* Initialize the world. Create initial user */
+    usm_set_reportErrorOnUnknownID(1);
+    init_snmpv3("snmptrapd");	/* register the v3 handlers */
+
+    register_mib_handlers();/* snmplib .conf handlers */
+    read_premib_configs();	/* read pre-mib-reading .conf handlers */
+
+    /* create the initial and template users */
+    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+        
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
+    init_snmp("snmp");
+    read_configs();
+
+    init_usm_post_config();
+    init_snmpv3_post_config();
+
+#ifdef USE_V2PARTY_PROTOCOL
 
     sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
     if (read_party_database(ctmp) != 0){
@@ -689,6 +735,10 @@ int main(int argc, char *argv[])
 	fprintf(stderr,
 		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);
     }
+
+#endif
+
+
 
     /* fork the process to the background if we are not printing to stdout */
     if (!Print && dofork) {
@@ -739,18 +789,26 @@ int main(int argc, char *argv[])
     }
 
 
-    memset(&session, 0, sizeof(struct snmp_session));
-    session.peername = NULL;
-    session.version = SNMP_DEFAULT_VERSION;
-    session.srcPartyLen = 0;
-    session.dstPartyLen = 0;
-    session.retries = SNMP_DEFAULT_RETRIES;
-    session.timeout = SNMP_DEFAULT_TIMEOUT;
-    session.authenticator = NULL;
-    session.callback = snmp_input;
-    session.callback_magic = NULL;
-    session.local_port = local_port;
-    ss = snmp_open(&session);
+    memset(session, 0, sizeof(struct snmp_session));
+    session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
+    session->version = SNMP_DEFAULT_VERSION;
+
+    session->srcPartyLen = 0;
+    session->dstPartyLen = 0;
+    session->contextLen = 0; 
+
+    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+
+    session->retries = SNMP_DEFAULT_RETRIES;
+    session->timeout = SNMP_DEFAULT_TIMEOUT;
+     
+    session->local_port = local_port;
+
+    session->callback = snmp_input; 
+    session->callback_magic = NULL; 
+    session->authenticator = NULL;
+
+    session = snmp_open( session );
     if (ss == NULL){
         snmp_perror("snmptrapd");
         if (Syslog) {
@@ -797,6 +855,40 @@ init_syslog(void)
     openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
     syslog(LOG_INFO, "Starting snmptrapd");
 }
+
+
+/*
+ * Read the configuration files. Implemented as a signal handler so that
+ * receipt of SIGHUP will cause configuration to be re-read when the
+ * trap deamon is running detatched from the console.
+ *
+ */
+void update_config(a) 
+     int a;
+{
+#if 0  
+  if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
+#endif
+
+    read_configs();
+
+#if 0
+  }
+#endif
+  
+  /* read all optional config files */
+  /* last is -c from command line */
+  /* always read this one even if -C is present (ie both -c and -C) */
+
+#if 0
+  if (optconfigfile != NULL) {
+    read_config_with_type (optconfigfile, "snmptrapd");
+  } 
+#endif
+
+  signal(SIGHUP, update_config);
+}
+
 
 #ifndef HAVE_GETDTABLESIZE
 #include <sys/resource.h>
