@@ -379,6 +379,37 @@ sub _tie {
     tie($_[0],$_[1],$_[2],$_[3]);
 }
 
+sub split_vars {
+    # This sub holds the regex that is used throughout this module  
+    #  to parse the base part of an OID from the IID.
+    #  eg: portName.9.30 -> ['portName','9.30'] 
+    my $vars = shift;
+
+    # The regex was changed to this simple form by patch 722075 for some reason.
+    # Testing shows now (2/05) that it is not needed, and that the long expression 
+    # works fine.  AB
+    # my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
+    
+    # These following two are the same.  Broken down for easier maintenance
+    # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+    my ($tag, $iid) =
+        ($vars =~ /^(               # Capture $1
+                    # 1. either this 5.5.5.5
+                     (?:\.\d+)+     # for grouping, won't increment $1
+                    |
+                    # 2. or asdf-asdf-asdf-asdf
+                     (?:            # grouping again
+                        \w+         # needs some letters followed by
+                        (?:\-*\w+)+ #  zero or more dashes, one or more letters
+                     )
+                    )
+                    \.?             # optionally match a dot
+                    (.*)            # whatever is left in the string is our iid ($2)
+                   $/x
+    );
+    return [$tag,$iid];
+}
+
 package SNMP::Session;
 
 sub new {
@@ -567,10 +598,11 @@ sub set {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);     
+     #$varbind_list_ref = [[$tag, $iid, $val]];
+     my $split_vars = SNMP::split_vars($vars);
      my $val = shift;
-     $varbind_list_ref = [[$tag, $iid, $val]];
+     push @$split_vars,$val;
+     $varbind_list_ref = [$split_vars];
    }
    my $cb = shift;
 
@@ -590,9 +622,7 @@ sub get {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -793,9 +823,7 @@ sub fget {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -825,9 +853,7 @@ sub getnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -850,9 +876,7 @@ sub fgetnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
@@ -884,9 +908,7 @@ sub getbulk {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
-     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
-     $varbind_list_ref = [[$tag, $iid]];
+     $varbind_list_ref = [SNMP::split_vars($vars)];
    }
 
    my $cb = shift;
