@@ -809,19 +809,20 @@ snmp_shutdown(const char *type)
 
 
 /*
- * Sets up the session with the snmp_session information provided
- * by the user.  Then opens and binds the necessary UDP port.
- * A handle to the created session is returned (this is different than
- * the pointer passed to snmp_open()).  On any error, NULL is returned
- * and snmp_errno is set to the appropriate error code.
+ * Sets up the session with the snmp_session information provided by the user.
+ * Then opens and binds the necessary low-level transport.  A handle to the
+ * created session is returned (this is NOT the same as the pointer passed to
+ * snmp_open()).  On any error, NULL is returned and snmp_errno is set to the
+ * appropriate error code.
  */
 netsnmp_session *
-snmp_open(netsnmp_session * session)
+snmp_open(netsnmp_session *session)
 {
     struct session_list *slp;
     slp = (struct session_list *) snmp_sess_open(session);
-    if (!slp)
+    if (!slp) {
         return NULL;
+    }
 
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     slp->next = Sessions;
@@ -835,25 +836,25 @@ snmp_open(netsnmp_session * session)
  * extended open 
  */
 netsnmp_session *
-snmp_open_ex(netsnmp_session * session,
-             int (*fpre_parse) (netsnmp_session *, netsnmp_transport *,
+snmp_open_ex(netsnmp_session *session,
+             int (*fpre_parse)	(netsnmp_session *, netsnmp_transport *,
                                 void *, int),
-             int (*fparse) (netsnmp_session *, netsnmp_pdu *, u_char *,
-                            size_t), int (*fpost_parse) (netsnmp_session *,
-                                                         netsnmp_pdu *,
-                                                         int),
-             int (*fbuild) (netsnmp_session *, netsnmp_pdu *, u_char *,
-                            size_t *), int (*frbuild) (netsnmp_session *,
-                                                       netsnmp_pdu *,
-                                                       u_char **, size_t *,
-                                                       size_t *),
-             int (*fcheck) (u_char *, size_t)
-    )
+             int (*fparse)	(netsnmp_session *, netsnmp_pdu *, u_char *,
+				 size_t),
+	     int (*fpost_parse)	(netsnmp_session *, netsnmp_pdu *, int),
+
+             int (*fbuild)	(netsnmp_session *, netsnmp_pdu *, u_char *,
+				 size_t *),
+	     int (*frbuild)	(netsnmp_session *, netsnmp_pdu *,
+				 u_char **, size_t *, size_t *),
+             int (*fcheck)	(u_char *, size_t)
+	     )
 {
     struct session_list *slp;
     slp = (struct session_list *) snmp_sess_open(session);
-    if (!slp)
+    if (!slp) {
         return NULL;
+    }
     slp->internal->hook_pre = fpre_parse;
     slp->internal->hook_parse = fparse;
     slp->internal->hook_post = fpost_parse;
@@ -4787,286 +4788,286 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                      void *opaque, int olength,
                      u_char * packetptr, int length)
 {
-    struct session_list *slp = (struct session_list *) sessp;
-    netsnmp_pdu    *pdu;
-    netsnmp_request_list *rp, *orp = NULL;
-    struct snmp_secmod_def *sptr;
-    int             ret = 0, handled = 0;
+  struct session_list *slp = (struct session_list *) sessp;
+  netsnmp_pdu    *pdu;
+  netsnmp_request_list *rp, *orp = NULL;
+  struct snmp_secmod_def *sptr;
+  int             ret = 0, handled = 0;
 
-    DEBUGMSGTL(("sess_process_packet",
-                "session %p fd %d pkt %p length %d\n", sessp,
-                transport->sock, packetptr, length));
+  DEBUGMSGTL(("sess_process_packet",
+	      "session %p fd %d pkt %p length %d\n", sessp,
+	      transport->sock, packetptr, length));
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-			       NETSNMP_DS_LIB_DUMP_PACKET)) {
-        if (transport->f_fmtaddr != NULL) {
-            char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
-            if (addrtxt != NULL) {
-                snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n",
-                         length, addrtxt);
-                free(addrtxt);
-            } else {
-                snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n",
-                         length);
-            }
-        }
-        xdump(packetptr, length, "");
+  if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			     NETSNMP_DS_LIB_DUMP_PACKET)) {
+    if (transport->f_fmtaddr != NULL) {
+      char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
+      if (addrtxt != NULL) {
+	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n",
+		 length, addrtxt);
+	free(addrtxt);
+      } else {
+	snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n",
+		 length);
+      }
     }
+    xdump(packetptr, length, "");
+  }
 
-    /*
-     * Do transport-level filtering (e.g. IP-address based allow/deny).  
-     */
+  /*
+   * Do transport-level filtering (e.g. IP-address based allow/deny).  
+   */
 
-    if (isp->hook_pre) {
-        if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
-            DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
-	    if (opaque != NULL) {
-	      free(opaque);
-	    }
-            return -1;
-        }
+  if (isp->hook_pre) {
+    if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
+      DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
+      if (opaque != NULL) {
+	free(opaque);
+      }
+      return -1;
     }
+  }
 
-    if (isp->hook_create_pdu) {
-        pdu = isp->hook_create_pdu(transport, opaque, olength);
-    } else {
-        pdu = snmp_create_sess_pdu(transport, opaque, olength);
+  if (isp->hook_create_pdu) {
+    pdu = isp->hook_create_pdu(transport, opaque, olength);
+  } else {
+    pdu = snmp_create_sess_pdu(transport, opaque, olength);
+  }
+  if (pdu == NULL) {
+    snmp_log(LOG_ERR, "pdu failed to be created\n");
+    if (opaque != NULL) {
+      free(opaque);
     }
-    if (pdu == NULL) {
-        snmp_log(LOG_ERR, "pdu failed to be created\n");
-	if (opaque != NULL) {
-	  free(opaque);
-	}
-        return -1;
+    return -1;
+  }
+
+  if (isp->hook_parse) {
+    ret = isp->hook_parse(sp, pdu, packetptr, length);
+  } else {
+    ret = snmp_parse(sessp, sp, pdu, packetptr, length);
+  }
+
+  if (ret != SNMP_ERR_NOERROR) {
+    DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
+  }
+
+  if (isp->hook_post) {
+    if (isp->hook_post(sp, pdu, ret) == 0) {
+      DEBUGMSGTL(("sess_process_packet", "post-parse fail\n"));
+      ret = SNMPERR_ASN_PARSE_ERR;
     }
+  }
 
-    if (isp->hook_parse) {
-        ret = isp->hook_parse(sp, pdu, packetptr, length);
-    } else {
-        ret = snmp_parse(sessp, sp, pdu, packetptr, length);
-    }
-
-    if (ret != SNMP_ERR_NOERROR) {
-        DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
-    }
-
-    if (isp->hook_post) {
-        if (isp->hook_post(sp, pdu, ret) == 0) {
-            DEBUGMSGTL(("sess_process_packet", "post-parse fail\n"));
-            ret = SNMPERR_ASN_PARSE_ERR;
-        }
-    }
-
-    if (ret != SNMP_ERR_NOERROR) {
-        /*
-         * Call USM to free any securityStateRef supplied with the message.  
-         */
-        if (pdu->securityStateRef != NULL) {
-            sptr = find_sec_mod(pdu->securityModel);
-            if (sptr != NULL) {
-                if (sptr->pdu_free_state_ref != NULL) {
-                    (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-                } else {
-                    snmp_log(LOG_ERR,
-                             "Security Model %d can't free state references\n",
-                             pdu->securityModel);
-                }
-            } else {
-                snmp_log(LOG_ERR,
-                         "Can't find security model to free ptr: %d\n",
-                         pdu->securityModel);
-            }
-            pdu->securityStateRef = NULL;
-        }
-        snmp_free_pdu(pdu);
-        return -1;
-    }
-
-    if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
-        /*
-         * Call USM to free any securityStateRef supplied with the message.  
-         */
-        if (pdu->securityStateRef) {
-            sptr = find_sec_mod(pdu->securityModel);
-            if (sptr) {
-                if (sptr->pdu_free_state_ref) {
-                    (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-                } else {
-                    snmp_log(LOG_ERR,
-                             "Security Model %d can't free state references\n",
-                             pdu->securityModel);
-                }
-            } else {
-                snmp_log(LOG_ERR,
-                         "Can't find security model to free ptr: %d\n",
-                         pdu->securityModel);
-            }
-            pdu->securityStateRef = NULL;
-        }
-
-        for (rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
-            snmp_callback   callback;
-            void           *magic;
-
-            if (pdu->version == SNMP_VERSION_3) {
-                /*
-                 * msgId must match for v3 messages.  
-                 */
-                if (rp->message_id != pdu->msgid) {
-                    continue;
-                }
-
-                /*
-                 * Check that message fields match original, if not, no further
-                 * processing.  
-                 */
-                if (!snmpv3_verify_msg(rp, pdu)) {
-                    break;
-                }
-            } else {
-                if (rp->request_id != pdu->reqid) {
-                    continue;
-                }
-            }
-
-            if (rp->callback) {
-                callback = rp->callback;
-                magic = rp->cb_data;
-            } else {
-                callback = sp->callback;
-                magic = sp->callback_magic;
-            }
-            handled = 1;
-
-            /*
-             * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock
-             * should be per session ! 
-             */
-
-            if (callback == NULL
-                || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
-                            pdu->reqid, pdu, magic) == 1) {
-                if (pdu->command == SNMP_MSG_REPORT) {
-                    if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
-                        snmpv3_get_report_type(pdu) ==
-                        SNMPERR_NOT_IN_TIME_WINDOW) {
-                        /*
-                         * trigger immediate retry on recoverable Reports 
-                         * * (notInTimeWindow), incr_retries == TRUE to prevent
-                         * * inifinite resend                      
-                         */
-                        if (rp->retries <= sp->retries) {
-                            snmp_resend_request(slp, rp, TRUE);
-                            break;
-                        }
-                    } else {
-                        if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
-                            break;
-                        }
-                    }
-
-                    /*
-                     * Handle engineID discovery.  
-                     */
-                    if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
-                        sp->securityEngineID =
-                            (u_char *) malloc(pdu->securityEngineIDLen);
-                        if (sp->securityEngineID == NULL) {
-                            /*
-                             * TODO FIX: recover after message callback *?
-                             * return -1;
-                             */
-                        }
-                        memcpy(sp->securityEngineID, pdu->securityEngineID,
-                               pdu->securityEngineIDLen);
-                        sp->securityEngineIDLen = pdu->securityEngineIDLen;
-                        if (!sp->contextEngineIDLen) {
-                            sp->contextEngineID =
-                                (u_char *) malloc(pdu->
-                                                  securityEngineIDLen);
-                            if (sp->contextEngineID == NULL) {
-                                /*
-                                 * TODO FIX: recover after message callback *?
-                                 * return -1;
-                                 */
-                            }
-                            memcpy(sp->contextEngineID,
-                                   pdu->securityEngineID,
-                                   pdu->securityEngineIDLen);
-                            sp->contextEngineIDLen =
-                                pdu->securityEngineIDLen;
-                        }
-                    }
-                }
-
-                /*
-                 * Successful, so delete request.  
-                 */
-                if (isp->requests == rp) {
-                    isp->requests = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = NULL;
-                    }
-                } else {
-                    orp->next_request = rp->next_request;
-                    if (isp->requestsEnd == rp) {
-                        isp->requestsEnd = orp;
-                    }
-                }
-                snmp_free_pdu(rp->pdu);
-                free((char *) rp);
-                /*
-                 * There shouldn't be any more requests with the same reqid.  
-                 */
-                break;
-            }
-            /*
-             * MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! 
-             */
-        }
-    } else {
-        if (sp->callback) {
-            /*
-             * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); 
-             */
-            handled = 1;
-            sp->callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE,
-                         sp, pdu->reqid, pdu, sp->callback_magic);
-            /*
-             * MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); 
-             */
-        }
-    }
-
+  if (ret != SNMP_ERR_NOERROR) {
     /*
      * Call USM to free any securityStateRef supplied with the message.  
      */
-    if (pdu != NULL && pdu->securityStateRef &&
-	pdu->command == SNMP_MSG_TRAP2) {
-        sptr = find_sec_mod(pdu->securityModel);
-        if (sptr) {
-            if (sptr->pdu_free_state_ref) {
-                (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
-            } else {
-                snmp_log(LOG_ERR,
-                         "Security Model %d can't free state references\n",
-                         pdu->securityModel);
-            }
-        } else {
-            snmp_log(LOG_ERR,
-                     "Can't find security model to free ptr: %d\n",
-                     pdu->securityModel);
-        }
-        pdu->securityStateRef = NULL;
+    if (pdu->securityStateRef != NULL) {
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr != NULL) {
+	if (sptr->pdu_free_state_ref != NULL) {
+	  (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
+	} else {
+	  snmp_log(LOG_ERR,
+		   "Security Model %d can't free state references\n",
+		   pdu->securityModel);
+	}
+      } else {
+	snmp_log(LOG_ERR,
+		 "Can't find security model to free ptr: %d\n",
+		 pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
     }
-
-    if (!handled) {
-        snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
-        DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
-    }
-
     snmp_free_pdu(pdu);
-    return 0;
+    return -1;
+  }
+
+  if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
+    /*
+     * Call USM to free any securityStateRef supplied with the message.  
+     */
+    if (pdu->securityStateRef) {
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr) {
+	if (sptr->pdu_free_state_ref) {
+	  (*sptr->pdu_free_state_ref) (pdu->securityStateRef);
+	} else {
+	  snmp_log(LOG_ERR,
+		   "Security Model %d can't free state references\n",
+		   pdu->securityModel);
+	}
+      } else {
+	snmp_log(LOG_ERR,
+		 "Can't find security model to free ptr: %d\n",
+		 pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
+    }
+
+    for (rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
+      snmp_callback   callback;
+      void           *magic;
+
+      if (pdu->version == SNMP_VERSION_3) {
+	/*
+	 * msgId must match for v3 messages.  
+	 */
+	if (rp->message_id != pdu->msgid) {
+	  continue;
+	}
+
+	/*
+	 * Check that message fields match original, if not, no further
+	 * processing.  
+	 */
+	if (!snmpv3_verify_msg(rp, pdu)) {
+	  break;
+	}
+      } else {
+	if (rp->request_id != pdu->reqid) {
+	  continue;
+	}
+      }
+
+      if (rp->callback) {
+	callback = rp->callback;
+	magic = rp->cb_data;
+      } else {
+	callback = sp->callback;
+	magic = sp->callback_magic;
+      }
+      handled = 1;
+
+      /*
+       * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock
+       * should be per session ! 
+       */
+
+      if (callback == NULL
+	  || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
+		      pdu->reqid, pdu, magic) == 1) {
+	if (pdu->command == SNMP_MSG_REPORT) {
+	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
+	      snmpv3_get_report_type(pdu) ==
+	      SNMPERR_NOT_IN_TIME_WINDOW) {
+	    /*
+	     * trigger immediate retry on recoverable Reports 
+	     * * (notInTimeWindow), incr_retries == TRUE to prevent
+	     * * inifinite resend                      
+	     */
+	    if (rp->retries <= sp->retries) {
+	      snmp_resend_request(slp, rp, TRUE);
+	      break;
+	    }
+	  } else {
+	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
+	      break;
+	    }
+	  }
+
+	  /*
+	   * Handle engineID discovery.  
+	   */
+	  if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
+	    sp->securityEngineID =
+	      (u_char *) malloc(pdu->securityEngineIDLen);
+	    if (sp->securityEngineID == NULL) {
+	      /*
+	       * TODO FIX: recover after message callback *?
+	       * return -1;
+	       */
+	    }
+	    memcpy(sp->securityEngineID, pdu->securityEngineID,
+		   pdu->securityEngineIDLen);
+	    sp->securityEngineIDLen = pdu->securityEngineIDLen;
+	    if (!sp->contextEngineIDLen) {
+	      sp->contextEngineID =
+		(u_char *) malloc(pdu->
+				  securityEngineIDLen);
+	      if (sp->contextEngineID == NULL) {
+		/*
+		 * TODO FIX: recover after message callback *?
+		 * return -1;
+		 */
+	      }
+	      memcpy(sp->contextEngineID,
+		     pdu->securityEngineID,
+		     pdu->securityEngineIDLen);
+	      sp->contextEngineIDLen =
+		pdu->securityEngineIDLen;
+	    }
+	  }
+	}
+
+	/*
+	 * Successful, so delete request.  
+	 */
+	if (isp->requests == rp) {
+	  isp->requests = rp->next_request;
+	  if (isp->requestsEnd == rp) {
+	    isp->requestsEnd = NULL;
+	  }
+	} else {
+	  orp->next_request = rp->next_request;
+	  if (isp->requestsEnd == rp) {
+	    isp->requestsEnd = orp;
+	  }
+	}
+	snmp_free_pdu(rp->pdu);
+	free((char *) rp);
+	/*
+	 * There shouldn't be any more requests with the same reqid.  
+	 */
+	break;
+      }
+      /*
+       * MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! 
+       */
+    }
+  } else {
+    if (sp->callback) {
+      /*
+       * MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); 
+       */
+      handled = 1;
+      sp->callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+		   sp, pdu->reqid, pdu, sp->callback_magic);
+      /*
+       * MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); 
+       */
+    }
+  }
+
+  /*
+   * Call USM to free any securityStateRef supplied with the message.  
+   */
+  if (pdu != NULL && pdu->securityStateRef &&
+      pdu->command == SNMP_MSG_TRAP2) {
+    sptr = find_sec_mod(pdu->securityModel);
+    if (sptr) {
+      if (sptr->pdu_free_state_ref) {
+	(*sptr->pdu_free_state_ref) (pdu->securityStateRef);
+      } else {
+	snmp_log(LOG_ERR,
+		 "Security Model %d can't free state references\n",
+		 pdu->securityModel);
+      }
+    } else {
+      snmp_log(LOG_ERR,
+	       "Can't find security model to free ptr: %d\n",
+	       pdu->securityModel);
+    }
+    pdu->securityStateRef = NULL;
+  }
+
+  if (!handled) {
+    snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
+    DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
+  }
+
+  snmp_free_pdu(pdu);
+  return 0;
 }
 
 /*
