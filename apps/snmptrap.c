@@ -183,7 +183,8 @@ main(int argc, char *argv[])
 
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, SNMP_TRAP_PORT);
+    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT, 
+		       SNMP_TRAP_PORT);
 
     if (session.version == SNMP_VERSION_3 && !inform) {
         /*

@@ -40,16 +40,16 @@ real_init_master(void)
 {
     netsnmp_session sess, *session;
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
 
     DEBUGMSGTL(("agentx/master", "initializing...\n"));
     snmp_sess_init(&sess);
     sess.version = AGENTX_VERSION_1;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
-    if (ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET))
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET))
         sess.peername =
-            ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET);
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
     else
         sess.peername = AGENTX_SOCKET;
 
@@ -87,7 +87,7 @@ real_init_master(void)
         /*
          * diagnose snmp_open errors with the input netsnmp_session pointer 
          */
-        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
             snmp_sess_perror
                 ("Error: Couldn't open a master agentx socket to listen on",
                  &sess);
@@ -255,7 +255,7 @@ agentx_got_response(int operation,
                         "  handle_agentx_response: processing: "));
             DEBUGMSGOID(("agentx/master", var->name, var->name_length));
             DEBUGMSG(("agentx/master", "\n"));
-            if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_VERBOSE)) {
                 DEBUGMSGTL(("snmp_agent", "    >> "));
                 DEBUGMSGVAR(("snmp_agent", var));
                 DEBUGMSG(("snmp_agent", "\n"));

@@ -193,7 +193,7 @@ init_smux(void)
     struct sockaddr_in lo_socket;
     int             one = 1;
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
         smux_listen_sd = -1;
         return;
     }

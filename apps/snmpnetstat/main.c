@@ -277,7 +277,7 @@ main(int argc, char *argv[])
 
     init_snmp("snmpapp");
     if (version == SNMP_DEFAULT_VERSION) {
-        version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+        version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION);
     }
     if (hostname == NULL && optind < argc) {
         hostname = argv[optind++];
@@ -313,7 +313,7 @@ main(int argc, char *argv[])
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) {
         if (!community
             && !(community =
-                 ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY))) {
+                 netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY))) {
             fprintf(stderr, "Missing community name.\n");
             exit(1);
         }

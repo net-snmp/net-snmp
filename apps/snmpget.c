@@ -75,7 +75,7 @@ SOFTWARE.
 
 int             failures = 0;
 
-#define DS_APP_DONT_FIX_PDUS 0
+#define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
 static void
 optProc(int argc, char *const *argv, int opt)
@@ -85,7 +85,8 @@ optProc(int argc, char *const *argv, int opt)
         while (*optarg) {
             switch (*optarg++) {
             case 'f':
-                ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+					  NETSNMP_DS_APP_DONT_FIX_PDUS);
                 break;
             default:
                 fprintf(stderr, "Unknown flag passed to -C: %c\n",
@@ -210,8 +211,9 @@ main(int argc, char *argv[])
                      vars && count != response->errindex;
                      vars = vars->next_variable, count++)
                     /*EMPTY*/;
-                if (vars)
+                if (vars) {
                     fprint_objid(stderr, vars->name, vars->name_length);
+		}
                 fprintf(stderr, "\n");
             }
             exitval = 2;
@@ -219,12 +221,14 @@ main(int argc, char *argv[])
             /*
              * retry if the errored variable was successfully removed 
              */
-            if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+					NETSNMP_DS_APP_DONT_FIX_PDUS)) {
                 pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
                 snmp_free_pdu(response);
                 response = NULL;
-                if (pdu != NULL)
+                if (pdu != NULL) {
                     goto retry;
+		}
             }
         }                       /* endif -- SNMP_ERR_NOERROR */
 

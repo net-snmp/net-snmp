@@ -72,9 +72,9 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-includes.h>
 
-#define DS_WALK_INCLUDE_REQUESTED		1
-#define DS_WALK_PRINT_STATISTICS		2
-#define DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
+#define NETSNMP_DS_WALK_INCLUDE_REQUESTED		1
+#define NETSNMP_DS_WALK_PRINT_STATISTICS		2
+#define NETSNMP_DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 
 oid             objid_mib[] = { 1, 3, 6, 1, 2, 1 };
 int             numprinted = 0;
@@ -132,13 +132,13 @@ optProc(int argc, char *const *argv, int opt)
         while (*optarg) {
             switch (*optarg++) {
             case 'c':
-                ds_toggle_boolean(DS_APPLICATION_ID,
-                                  DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
+				     NETSNMP_DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
                 break;
 
             case 'i':
-                ds_toggle_boolean(DS_APPLICATION_ID,
-                                  DS_WALK_INCLUDE_REQUESTED);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
+					  NETSNMP_DS_WALK_INCLUDE_REQUESTED);
                 break;
 
             case 'n':
@@ -164,8 +164,8 @@ optProc(int argc, char *const *argv, int opt)
                 break;
 
             case 'p':
-                ds_toggle_boolean(DS_APPLICATION_ID,
-                                  DS_WALK_PRINT_STATISTICS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
+					  NETSNMP_DS_WALK_PRINT_STATISTICS);
                 break;
 
             default:
@@ -195,13 +195,15 @@ main(int argc, char *argv[])
     int             check;
     int             exitval = 0;
 
-    ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
-                       DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
-    ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
-                       DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
-    ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
-                       DS_APPLICATION_ID,
-                       DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
+			       NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_WALK_INCLUDE_REQUESTED);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
+			       NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_WALK_PRINT_STATISTICS);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
+			       NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 
     /*
      * get the common command line arguments 
@@ -259,10 +261,10 @@ main(int argc, char *argv[])
 
     running = 1;
 
-    check =
-        !ds_get_boolean(DS_APPLICATION_ID,
-                        DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
+    check = !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+				    NETSNMP_DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_WALK_INCLUDE_REQUESTED)) {
         snmp_get_and_print(ss, root, rootlen);
     }
 
@@ -379,7 +381,8 @@ main(int argc, char *argv[])
     }
     snmp_close(ss);
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_WALK_PRINT_STATISTICS)) {
         printf("Variables found: %d\n", numprinted);
     }
 
