@@ -600,6 +600,7 @@ snmp_sess_init(struct snmp_session *session)
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_DEFAULT_VERSION;
     session->securityModel = SNMP_DEFAULT_SECMODEL;
+    session->rcvMsgMaxSize = SNMP_MAX_MSG_SIZE;
 }
 
 
@@ -1203,6 +1204,8 @@ _sess_open(struct snmp_session *in_session)
       return 0;
     }
 
+    session->rcvMsgMaxSize = slp->transport->msgMaxSize;
+
     if (!snmpv3_engineID_probe(slp, in_session)) {
       snmp_sess_close(slp);
       return 0;
@@ -1279,6 +1282,8 @@ int (*fcheck) (u_char *, size_t))
   slp->internal->hook_post    = fpost_parse;
   slp->internal->hook_build   = fbuild;
   slp->internal->check_packet = fcheck;
+
+  slp->session->rcvMsgMaxSize = transport->msgMaxSize;
 
   if (slp->session->version == SNMP_VERSION_3) {
     DEBUGMSGTL(("snmp_sess_add", "adding v3 session -- engineID probe now\n"));
@@ -1676,8 +1681,6 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
 static int
 snmpv3_build(u_char **pkt, size_t *pkt_len, size_t *offset,
 	     struct snmp_session *session, struct snmp_pdu *pdu)
-     //             u_char	        	*packet,
-     //             size_t			*out_length)
 {
   int ret;
 
@@ -1812,8 +1815,9 @@ snmpv3_build(u_char **pkt, size_t *pkt_len, size_t *offset,
 
 
 static u_char *
-snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
-                    size_t *out_length, size_t length, u_char **msg_hdr_e)
+snmpv3_header_build(struct snmp_session *session, struct snmp_pdu *pdu,
+		    u_char *packet, size_t *out_length,
+		    size_t length, u_char **msg_hdr_e)
 
 {
     u_char			*global_hdr, *global_hdr_e;
@@ -1861,7 +1865,7 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
     if (cp == NULL) return NULL;
 
     							/* msgMaxSize */
-    max_size = SNMP_MAX_MSG_SIZE;
+    max_size = session->rcvMsgMaxSize;
     DEBUGDUMPHEADER("send", "msgMaxSize");
     cp = asn_build_int(cp, out_length,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
@@ -1911,7 +1915,7 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
 
 static int
 snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
-			     struct snmp_pdu *pdu)
+			   struct snmp_session *session, struct snmp_pdu *pdu)
 {
   size_t start_offset = *offset;
   u_char msg_flags;
@@ -1941,7 +1945,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   }
 
   /*  msgMaxSize.  */
-  max_size = SNMP_MAX_MSG_SIZE;
+  max_size = session->rcvMsgMaxSize;
   DEBUGDUMPHEADER("send", "msgMaxSize");
   rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
@@ -2023,7 +2027,6 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 				       size_t *offset, struct snmp_pdu *pdu)
 {
   size_t start_offset = *offset;
-  //  u_char *startp = packet, *pb = packet;
   int rc = 0;
 
   /*  contextName.  */
@@ -2097,7 +2100,8 @@ snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
     return -1;
   }
 
-  rc = snmpv3_header_realloc_rbuild(&hdrbuf, &hdrbuf_len, &hdr_offset, pdu);
+  rc = snmpv3_header_realloc_rbuild(&hdrbuf, &hdrbuf_len, &hdr_offset,
+				    session, pdu);
   if (rc == 0) {
     free(hdrbuf);
     return -1;
@@ -2171,7 +2175,8 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
     /* 
      * build the headers for the packet, returned addr = start of secParams
      */
-    sec_params = snmpv3_header_build(pdu, global_data, out_length, 0, NULL);
+    sec_params = snmpv3_header_build(session, pdu, global_data,
+				     out_length, 0, NULL);
     if (sec_params == NULL) return -1;
     global_data_len = sec_params - global_data;
     sec_params_len = *out_length; /* length left in packet buf for sec_params */
@@ -2257,8 +2262,8 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
 
 /*
  * Takes a session and a pdu and serializes the ASN PDU into the area
- * pointed to by packet.  out_length is the size of the data area available.
- * Returns the length of the completed packet in out_length.  If any errors
+ * pointed to by *pkt.  *pkt_len is the size of the data area available.
+ * Returns the length of the completed packet in *offset.  If any errors
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
 
@@ -2368,8 +2373,8 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
 #ifdef NO_ZEROLENGTH_COMMUNITY
-	if (pdu->community_len == 0){
-	    if (session->community_len == 0){
+	if (pdu->community_len == 0) {
+	    if (session->community_len == 0) {
 		session->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
 		return -1;
 	    }
@@ -2378,35 +2383,35 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
 	        session->s_snmp_errno = SNMPERR_MALLOC;
 	        return -1;
 	    }
-	    memmove(pdu->community, session->community,
-                        session->community_len);
+	    memmove(pdu->community,
+		    session->community, session->community_len);
 	    pdu->community_len = session->community_len;
 	}
 #else /* !NO_ZEROLENGTH_COMMUNITY */
 	if (pdu->community_len == 0 && pdu->command != SNMP_MSG_RESPONSE) {
 	    /* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
-		SNMP_FREE(pdu->community); pdu->community = 0;
-	    }
-	    else if (pdu->community_len == session->community_len) {
-		memmove(pdu->community, session->community,
-			    session->community_len);
-	    }
-	    else {
+		SNMP_FREE(pdu->community);
+		pdu->community = NULL;
+	    } else if (pdu->community_len == session->community_len) {
+		memmove(pdu->community,
+			session->community, session->community_len);
+	    } else {
 		SNMP_FREE(pdu->community);
 		pdu->community = (u_char *)malloc(session->community_len);
 		if (pdu->community == NULL) {
 		    session->s_snmp_errno = SNMPERR_MALLOC;
 		    return -1;
 		}
-		memmove(pdu->community, session->community,
-                        session->community_len);
+		memmove(pdu->community,
+			session->community, session->community_len);
 	    }
 	    pdu->community_len = session->community_len;
 	}
 #endif /* !NO_ZEROLENGTH_COMMUNITY */
 
-        DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
+        DEBUGMSGTL(("snmp_send", "Building SNMPv%d message...\n",
+		    (1 + pdu->version)));
 #ifdef USE_REVERSE_ASNENCODING
         if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
             DEBUGPRINTPDUTYPE("send", pdu->command);
@@ -2460,23 +2465,24 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
             cp = asn_build_sequence(*pkt, pkt_len,
                                     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
                                     0);
-            if (cp == NULL)
+            if (cp == NULL) {
                 return -1;
+	    }
             h0e = cp;
 
-            if (pdu->version == SNMP_VERSION_1)
+            if (pdu->version == SNMP_VERSION_1) {
                 DEBUGDUMPSECTION("send", "SNMPv1 Message");
-            else
+            } else {
                 DEBUGDUMPSECTION("send", "SNMPv2c Message");
+	    }
         
             /* store the version field */
             DEBUGDUMPHEADER("send", "SNMP Version Number");
 
             version = pdu->version;
             cp = asn_build_int(*pkt, pkt_len,
-                               (u_char)
-                               (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                               (long *) &version, sizeof(version));
+                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 (long *)&version, sizeof(version));
             DEBUGINDENTLESS();
             if (cp == NULL)
                 return -1;
@@ -2484,9 +2490,8 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
             /* store the community string */
             DEBUGDUMPHEADER("send", "Community String");
             cp = asn_build_string(*pkt, pkt_len,
-                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
-                                            ASN_OCTET_STR),
-                                  pdu->community, pdu->community_len);
+                       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+                       pdu->community, pdu->community_len);
             DEBUGINDENTLESS();
             if (cp == NULL)
                 return -1;
@@ -2903,24 +2908,22 @@ snmpv3_parse(
   msg_len  = *length;
 
 
-  /* message is an ASN.1 SEQUENCE
-   */
+  /*  message is an ASN.1 SEQUENCE  */
   DEBUGDUMPSECTION("recv", "SNMPv3 Message");
   data = asn_parse_sequence(data, length, &type,
                         (ASN_SEQUENCE | ASN_CONSTRUCTOR), "message");
-  if (data == NULL){
+  if (data == NULL) {
     /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTLESS();
     return SNMPERR_ASN_PARSE_ERR;
   }
 
-  /* parse msgVersion
-   */
+  /*  parse msgVersion  */
   DEBUGDUMPHEADER("recv", "SNMP Version Number");
   data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
   DEBUGINDENTLESS();
-  if (data == NULL){
+  if (data == NULL) {
     ERROR_MSG("bad parse of version");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTLESS();
@@ -2928,14 +2931,13 @@ snmpv3_parse(
   }
   pdu->version = ver;
 
-  /* parse msgGlobalData sequence
-   */
+  /*  parse msgGlobalData sequence  */
   cp	  = data;
   asn_len = *length;
   DEBUGDUMPSECTION("recv", "msgGlobalData");
   data = asn_parse_sequence(data, &asn_len, &type,
                         (ASN_SEQUENCE | ASN_CONSTRUCTOR), "msgGlobalData");
-  if (data == NULL){
+  if (data == NULL) {
     /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
@@ -2964,6 +2966,27 @@ snmpv3_parse(
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
     return SNMPERR_ASN_PARSE_ERR;
+  }
+
+  /*  Check the msgMaxSize we received is a legal value.  If not, then clamp
+      it in the appropriate direction and carry on anyway (also logging the
+      error).  I'm not sure this is the correct behaviour, but it seems
+      reasonable to me.  Note we store the msgMaxSize on a per-session basis
+      which also seems reasonable; it could vary from PDU to PDU but that
+      would be strange (also since we deal with a PDU at a time, it wouldn't
+      make any difference to our responses, if any).  */
+
+  if (msg_max_size < 484) {
+    snmp_log(LOG_ERR, "rx bad msgMaxSize (%lu < 484); using 484.\n",
+	     msg_max_size);
+    sess->sndMsgMaxSize = 484;
+  } else if (msg_max_size > 0x7fffffff) {
+    snmp_log(LOG_ERR, "rx bad msgMaxSize (%lu > 2^31 - 1); using 2^31 - 1.\n",
+	     msg_max_size);
+    sess->sndMsgMaxSize = 0x7fffffff;
+  } else {
+    DEBUGMSGTL(("snmpv3_parse", "msgMaxSize %lu received\n", msg_max_size));
+    sess->sndMsgMaxSize = msg_max_size;
   }
 
   /* msgFlags */
@@ -3003,7 +3026,7 @@ snmpv3_parse(
   }
   pdu->securityModel = msg_sec_model;
 
-  if (msg_flags & SNMP_MSG_FLAG_PRIV_BIT && 
+  if (msg_flags & SNMP_MSG_FLAG_PRIV_BIT &&
       !(msg_flags & SNMP_MSG_FLAG_AUTH_BIT)) {
     ERROR_MSG("invalid message, illegal msgFlags");
     snmp_increment_statistic(STAT_SNMPINVALIDMSGS);
@@ -3076,16 +3099,20 @@ snmpv3_parse(
   if (ret_val != SNMPERR_SUCCESS) {
     DEBUGDUMPSECTION("recv", "ScopedPDU");
     /* parse as much as possible */
-    if (cp)
+    if (cp) {
         cp = snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
+    }
     if (cp) {
         DEBUGPRINTPDUTYPE("recv", *cp);
         snmp_pdu_parse(pdu, cp, &pdu_buf_len);
         DEBUGINDENTADD(-8);
-    } else
+    } else {
         DEBUGINDENTADD(-4);
-    if (mallocbuf)
+    }
+
+    if (mallocbuf) {
         free(mallocbuf);
+    }
     return ret_val;
   }
   
@@ -3101,19 +3128,19 @@ snmpv3_parse(
     return SNMPERR_ASN_PARSE_ERR;
   }
 
-  /* parse the PDU.
-   */
+  /*  parse the PDU.  */
   if (after_header != NULL) {
-    tmp_buf_len		 = *length;
-    *after_header	 = data;
+    *after_header = data;
+    tmp_buf_len   = *length;
   }
 
   DEBUGPRINTPDUTYPE("recv", *data);
   ret = snmp_pdu_parse(pdu, data, length);
   DEBUGINDENTADD(-8); 
 
-  if (after_header != NULL)
+  if (after_header != NULL) {
     *length = tmp_buf_len;
+  }
 
   if (ret != SNMPERR_SUCCESS) {
     ERROR_MSG("error parsing PDU");
@@ -3216,17 +3243,16 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
       pdu->securityStateRef = NULL;
   }
 
-  if (error != SNMPERR_USM_NOTINTIMEWINDOW) 
-    pdu->securityLevel          = SNMP_SEC_LEVEL_NOAUTH;
-  else
-    pdu->securityLevel          = SNMP_SEC_LEVEL_AUTHNOPRIV;
+  if (error == SNMPERR_USM_NOTINTIMEWINDOW) {
+    pdu->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+  } else {
+    pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+  }
 
-  /* find the appropriate error counter
-   */
+  /*  find the appropriate error counter  */
   ltmp = snmp_get_statistic(stat_ind);
 
-  /* return the appropriate error counter
-   */
+  /*  return the appropriate error counter  */
   snmp_pdu_add_variable(pdu, err_var, err_var_len,
                         ASN_COUNTER, (u_char *) &ltmp, sizeof(ltmp));
 
@@ -3245,7 +3271,7 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
   if (pdu == NULL || pdu->variables == NULL) return rpt_type;
   vp = pdu->variables;
   if (vp->name_length == REPORT_STATS_LEN+2) {
-    if (memcmp(snmpMPDStats,vp->name,REPORT_STATS_LEN*sizeof(oid)) == 0) {
+    if (memcmp(snmpMPDStats, vp->name, REPORT_STATS_LEN*sizeof(oid)) == 0) {
       switch (vp->name[REPORT_STATS_LEN]) {
       case REPORT_snmpUnknownSecurityModels_NUM:
 	rpt_type = SNMPERR_UNKNOWN_SEC_MODEL;
@@ -3254,7 +3280,7 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
 	rpt_type = SNMPERR_INVALID_MSG;
 	break;
       }
-    } else if (memcmp(usmStats,vp->name,REPORT_STATS_LEN*sizeof(oid)) == 0) {
+    } else if (memcmp(usmStats, vp->name, REPORT_STATS_LEN*sizeof(oid)) == 0) {
       switch (vp->name[REPORT_STATS_LEN]) {
       case REPORT_usmStatsUnsupportedSecLevels_NUM:
 	rpt_type = SNMPERR_UNSUPPORTED_SEC_LEVEL;
@@ -3315,7 +3341,8 @@ _snmp_parse(void * sessp,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
-        DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
+        DEBUGMSGTL(("snmp_api", "Parsing SNMPv%d message...\n",
+		    (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
         if (pdu->version == SNMP_VERSION_1) {
@@ -3330,8 +3357,7 @@ _snmp_parse(void * sessp,
 	    return -1;
 
         if (pdu->version != session->version &&
-	    session->version != SNMP_DEFAULT_VERSION)
-	{
+	    session->version != SNMP_DEFAULT_VERSION) {
             session->s_snmp_errno = SNMPERR_BAD_VERSION;
             return -1;
 	}
@@ -3352,12 +3378,10 @@ _snmp_parse(void * sessp,
 	    }
 	    memmove(pdu->community, community, community_length);
 	}
-	if (session->authenticator){
+	if (session->authenticator) {
 	    data = session->authenticator(data, &length,
-					  community,
-                                          community_length);
-	    if (data == NULL)
-	    {
+					  community, community_length);
+	    if (data == NULL) {
 		session->s_snmp_errno = SNMPERR_AUTHENTICATION_FAILURE;
 		return -1;
 	    }
@@ -3380,33 +3404,34 @@ _snmp_parse(void * sessp,
 	  session->s_snmp_errno = result;
 	} else {
 
-	/* handle reportable errors */
-	switch (result) {
-	case SNMPERR_USM_UNKNOWNENGINEID:
-	case SNMPERR_USM_UNKNOWNSECURITYNAME:
-	case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
-	case SNMPERR_USM_AUTHENTICATIONFAILURE:
-	case SNMPERR_USM_NOTINTIMEWINDOW:
-	case SNMPERR_USM_DECRYPTIONERROR:
-          if (SNMP_CMD_CONFIRMED(pdu->command) ||
-	      (pdu->command == 0 && 
-              (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT ))) {
-	    struct snmp_pdu *pdu2;
-	    int flags = pdu->flags;
-	    pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
-	    pdu2 = snmp_clone_pdu(pdu);
-	    pdu->flags = pdu2->flags = flags;
-	    snmpv3_make_report(pdu2, result);
-	    if (0 == snmp_sess_send(sessp, pdu2)) {
+	  /* handle reportable errors */
+	  switch (result) {
+	  case SNMPERR_USM_UNKNOWNENGINEID:
+	  case SNMPERR_USM_UNKNOWNSECURITYNAME:
+	  case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
+	  case SNMPERR_USM_AUTHENTICATIONFAILURE:
+	  case SNMPERR_USM_NOTINTIMEWINDOW:
+	  case SNMPERR_USM_DECRYPTIONERROR:
+
+	    if (SNMP_CMD_CONFIRMED(pdu->command) ||
+		(pdu->command == 0 && (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT))) {
+	      struct snmp_pdu *pdu2;
+	      int flags = pdu->flags;
+
+	      pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
+	      pdu2 = snmp_clone_pdu(pdu);
+	      pdu->flags = pdu2->flags = flags;
+	      snmpv3_make_report(pdu2, result);
+	      if (0 == snmp_sess_send(sessp, pdu2)) {
 	        snmp_free_pdu(pdu2);
 	        /* TODO: indicate error */
+	      }
 	    }
+	    break;
+	  default:
+	    session->s_snmp_errno = result;
+	    break;
 	  }
-	  break;
-	default:
-	  session->s_snmp_errno = result;
-	  break;
-	}
 	}
       }
       break;
@@ -3438,11 +3463,12 @@ snmp_parse(void *sessp,
 {
     int rc;
 
-    rc = _snmp_parse(sessp,pss,pdu,data,length);
+    rc = _snmp_parse(sessp, pss, pdu, data, length);
     if (rc) {
-        if ( !pss->s_snmp_errno)
-            pss->s_snmp_errno = SNMPERR_BAD_PARSE;
-        SET_SNMP_ERROR(pss->s_snmp_errno);
+      if (!pss->s_snmp_errno) {
+	pss->s_snmp_errno = SNMPERR_BAD_PARSE;
+      }
+      SET_SNMP_ERROR(pss->s_snmp_errno);
     }
 
     return rc;
@@ -3925,6 +3951,30 @@ _sess_async_send(void *sessp,
     return 0;
   }
 
+  /*  Make sure we don't send something that is bigger than the msgMaxSize
+      specified in the received PDU.  */
+
+  if (session->sndMsgMaxSize != 0 && length > session->sndMsgMaxSize) {
+    DEBUGMSGTL(("sess_async_send",
+		"length of packet (%lu) exceeds session maximum (%lu)\n",
+		length, session->sndMsgMaxSize));
+    session->s_snmp_errno = SNMPERR_TOO_LONG;
+    free(pktbuf);
+    return 0;
+  }
+
+  /*  Check that the underlying transport is capable of sending a packet as
+      large as length.  */
+
+  if (transport->msgMaxSize != 0 && length > transport->msgMaxSize) {
+    DEBUGMSGTL(("sess_async_send",
+		"length of packet (%lu) exceeds transport maximum (%lu)\n",
+		length, transport->msgMaxSize));
+    session->s_snmp_errno = SNMPERR_TOO_LONG;
+    free(pktbuf);
+    return 0;
+  }
+
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
     if (transport->f_fmtaddr != NULL) {
       char *dest_txt = transport->f_fmtaddr(transport, pdu->transport_data,
@@ -3940,9 +3990,6 @@ _sess_async_send(void *sessp,
   }
 
   /*  Send the message.  */
-
-  /*  XXX: We should check here that the underlying transport is capable of
-      sending a packet as large as length.  */
 
   result = transport->f_send(transport, packet, length,
 			     &(pdu->transport_data),
@@ -4022,7 +4069,7 @@ snmp_sess_async_send(void *sessp,
 	snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
 	return(0);
     }
-    rc = _sess_async_send(sessp,pdu,callback,cb_data);
+    rc = _sess_async_send(sessp, pdu, callback, cb_data);
     if (rc == 0) {
         struct session_list *psl;
         struct snmp_session *pss;
@@ -4593,8 +4640,7 @@ _sess_read(void *sessp, fd_set *fdset)
 
 /* returns 0 if success, -1 if fail */
 int
-snmp_sess_read(void *sessp,
-	       fd_set *fdset)
+snmp_sess_read(void *sessp, fd_set *fdset)
 {
     struct session_list *psl;
     struct snmp_session *pss;
@@ -4799,7 +4845,7 @@ snmp_timeout (void)
 {
     struct session_list *slp;
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for(slp = Sessions; slp; slp = slp->next){
+    for(slp = Sessions; slp; slp = slp->next) {
 	snmp_sess_timeout((void *)slp);
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
@@ -4935,20 +4981,22 @@ snmp_sess_timeout(void *sessp)
     /*
      * For each request outstanding, check to see if it has expired.
      */
-    for(rp = isp->requests; rp; rp = rp->next_request){
-        if (freeme != NULL){
-    	/* frees rp's after the for loop goes on to the next_request */
-    	free((char *)freeme);
-    	freeme = NULL;
+    for(rp = isp->requests; rp; rp = rp->next_request) {
+        if (freeme != NULL) {
+	  /* frees rp's after the for loop goes on to the next_request */
+	  free((char *)freeme);
+	  freeme = NULL;
         }
-        if ((timercmp(&rp->expire, &now, <))){
-        if ((sptr = find_sec_mod(rp->pdu->securityModel)) != NULL &&
-            sptr->pdu_timeout != NULL) {
+
+        if ((timercmp(&rp->expire, &now, <))) {
+	  if ((sptr = find_sec_mod(rp->pdu->securityModel)) != NULL &&
+	      sptr->pdu_timeout != NULL) {
             /* call security model if it needs to know about this */
             (*sptr->pdu_timeout)(rp->pdu);
-        }
-    	/* this timer has expired */
-    	if (rp->retries >= sp->retries){
+	  }
+
+	  /* this timer has expired */
+	  if (rp->retries >= sp->retries) {
             if (rp->callback) {
               callback = rp->callback;
               magic = rp->cb_data;
@@ -4956,30 +5004,36 @@ snmp_sess_timeout(void *sessp)
               callback = sp->callback;
               magic = sp->callback_magic;
             }
+
     	    /* No more chances, delete this entry */
     	    if (callback) {
-		callback(SNMP_CALLBACK_OP_TIMED_OUT,
-			 sp, rp->pdu->reqid, rp->pdu, magic);
+		callback(SNMP_CALLBACK_OP_TIMED_OUT, sp,
+			 rp->pdu->reqid, rp->pdu, magic);
 	    }
-    	    if (isp->requests == rp){
+    	    if (isp->requests == rp) {
     		isp->requests = rp->next_request;
-    		if (isp->requestsEnd == rp)
+    		if (isp->requestsEnd == rp) {
     		    isp->requestsEnd = NULL;
+		}
     	    } else {
     		orp->next_request = rp->next_request;
-    		if (isp->requestsEnd == rp)
+    		if (isp->requestsEnd == rp) {
     		    isp->requestsEnd = orp;
+		}
     	    }
     	    snmp_free_pdu(rp->pdu);	/* FIX  rp is already free'd! */
     	    freeme = rp;
     	    continue;	/* don't update orp below */
-    	} else {
-	  if (snmp_resend_request(slp, rp, TRUE)) break;
-    	}
+	  } else {
+	    if (snmp_resend_request(slp, rp, TRUE)) {
+	      break;
+	    }
+	  }
         }
         orp = rp;
     }
-    if (freeme != NULL){
+
+    if (freeme != NULL) {
         free((char *)freeme);
         freeme = NULL;
     }
@@ -5157,69 +5211,17 @@ snmp_varlist_add_variable(struct variable_list **varlist,
     }
     
     /* put only qualified variable onto varlist */
-    if (*varlist == NULL){
+    if (*varlist == NULL) {
       *varlist = vars;
     } else {
-      for(vtmp = *varlist;
-            vtmp->next_variable;
-            vtmp = vtmp->next_variable)
-        ;
+      for(vtmp = *varlist; vtmp->next_variable; vtmp = vtmp->next_variable);
 
       vtmp->next_variable = vars;
     }
 
-	return vars;
+    return vars;
 }
 
-/*
- * Parses dotted notation object identifier
- * into unsigned character array.
- * Returns: SNMPERR_RANGE if any sub-identifier > 255.
- * Returns: SNMPERR_VALUE if input string is not octet string.
- * Returns: non-negative number of sub-identifiers parsed,
- */
-int
-ascii_to_binary(const char *cp,
-		u_char *bufp)
-{
-    int  subidentifier;
-    u_char *bp = bufp;
-
-    for(; *cp != '\0'; cp++){
-      if (isspace((int)*cp) || *cp == '.')
-        continue;
-      if (!isdigit((int)*cp)){
-        return SNMPERR_VALUE;
-      }
-      subidentifier = atoi(cp);
-      if (subidentifier > 255){
-        return SNMPERR_RANGE;
-      }
-      *bp++ = (u_char)subidentifier;
-      while(isdigit((int)*cp))
-        cp++;
-      cp--;
-    }
-    return bp - bufp;
-}
-
-int
-hex_to_binary(const char *str,
-	      u_char *bufp)
-{
-  int len, itmp;
-  if (!bufp) return -1;
-  if (*str && *str == '0' && (*(str+1) == 'x' || *(str+1) == 'X')) str += 2;
-  for (len = 0; *str; str++) {
-    if (isspace((int)*str)) continue;
-    if (!isxdigit((int)*str)) return -1;
-    len++;
-    if (sscanf(str++, "%2x", &itmp) == 0) return -1;
-    *bufp++ = itmp;
-    if (!*str) return -1; /* odd number of chars is an error */
-  }
-  return len;
-}
 
 
 /*
