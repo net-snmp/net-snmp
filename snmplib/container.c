@@ -157,7 +157,11 @@ netsnmp_container_add_index(netsnmp_container *primary,
     primary->next = new_index;
 }
 
+#ifdef DONT_INLINE_CONTAINER_MACROS /* default is to inline */
+
 /*------------------------------------------------------------------
+ * These functions should EXACTLY match the inline version in
+ * container.h. If you chance one, change them both.
  */
 int CONTAINER_INSERT(netsnmp_container *x, const void *k)
 {
@@ -177,6 +181,10 @@ int CONTAINER_INSERT(netsnmp_container *x, const void *k)
     return rc;
 }
 
+/*------------------------------------------------------------------
+ * These functions should EXACTLY match the inline version in
+ * container.h. If you chance one, change them both.
+ */
 int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
 {
     if (NULL != x->next) {
@@ -194,6 +202,10 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
     return x->remove(x,k);
 }
 
+/*------------------------------------------------------------------
+ * These functions should EXACTLY match the inline version in
+ * container.h. If you chance one, change them both.
+ */
 int CONTAINER_FREE(netsnmp_container *x)
 {
 
@@ -211,7 +223,7 @@ int CONTAINER_FREE(netsnmp_container *x)
     }
     return x->free(x);
 }
-
+#endif
 
 
 /*------------------------------------------------------------------
