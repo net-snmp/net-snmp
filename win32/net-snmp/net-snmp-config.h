@@ -839,7 +839,12 @@ extern "C" {
 
 /*  Pluggable transports.  */
 
-#define SNMP_TRANSPORT_CALLBACK_DOMAIN 1
+    /*
+     * the pipe call creates fds that select chokes on, so
+     * disable callbacks on WIN32 until a fix can be found
+     */
+#define SNMP_TRANSPORT_CALLBACK_DOMAIN 0
+
 #define SNMP_TRANSPORT_UDP_DOMAIN 1
 #define SNMP_TRANSPORT_TCP_DOMAIN 1
 #undef SNMP_TRANSPORT_UNIX_DOMAIN
