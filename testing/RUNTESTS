@@ -288,8 +288,16 @@ if [ "x$test_nums" = "xall" -o "x$test_nums" = "x" ] ; then
 else
     num="$test_nums"
 fi
+cntr=0
 for testfile in $do_tests; do
-    dothisone="yes";
+    dothisone="yes"
+    id_x=0
+    for itest in $inp; do
+        if [ "$cntr" = "$id_x" ] ; then
+            num="$itest"
+        fi
+    id_x=`expr $id_x + 1`
+    done
     if [ "x$interactive" = "xyes" ]; then
 
         if [ $SH_DEBUG = 1 ] ; then
@@ -299,8 +307,8 @@ for testfile in $do_tests; do
 	fi
 
 	ECHO "  Run test #$num (y/n) [y]? "
-	read inp
-	if [ "x$inp" = "xn" ]; then
+	read inp2
+	if [ "x$inp2" = "xn" ]; then
 	    dothisone=no
 	fi
     fi
@@ -318,6 +326,7 @@ for testfile in $do_tests; do
 	fi
     fi
     num=`expr $num + 1`
+    cntr=`expr $cntr + 1`
 done
 
 echo Summary: $success_count / `expr $failed_count + $success_count` succeeded.
