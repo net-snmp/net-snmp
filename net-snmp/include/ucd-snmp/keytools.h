@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/keytools.h>
+#include <net-snmp/library/keytools.h>
 
 #else
 

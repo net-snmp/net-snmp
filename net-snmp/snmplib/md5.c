@@ -58,7 +58,7 @@
 #endif
 
 #include <net-snmp/utilities.h>
-#include <net-snmp/md5.h>
+#include <net-snmp/library/md5.h>
 
 /* Compile-time declarations of MD5 ``magic constants''.
 */

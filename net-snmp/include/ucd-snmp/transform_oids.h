@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/transform_oids.h>
+#include <net-snmp/library/transform_oids.h>
 
 #else
 

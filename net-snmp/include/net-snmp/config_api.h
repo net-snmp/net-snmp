@@ -18,14 +18,14 @@
      *  But for the time being, this header file is a placeholder,
      *  to allow application writers to adopt the new header file names.
      */
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
-#include <net-snmp/read_config.h>
-#include <net-snmp/default_store.h>
+#include <net-snmp/library/read_config.h>
+#include <net-snmp/library/default_store.h>
 
 #include <stdio.h>	/* for FILE definition */
-#include <net-snmp/snmp_parse_args.h>
-#include <net-snmp/snmp_enum.h>
-#include <net-snmp/vacm.h>
+#include <net-snmp/library/snmp_parse_args.h>
+#include <net-snmp/library/snmp_enum.h>
+#include <net-snmp/library/vacm.h>
 
 #endif /* NET_SNMP_CONFIG_API_H */

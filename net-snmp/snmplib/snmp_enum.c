@@ -9,7 +9,7 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/snmp_enum.h>
+#include <net-snmp/library/snmp_enum.h>
 
 struct snmp_enum_list_str {
    char *name;

@@ -18,12 +18,12 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
-#include <net-snmp/mib.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/oid_array.h>
-#include <net-snmp/oid_stash.h>
-#include <net-snmp/ucd_compat.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/parse.h>
+#include <net-snmp/library/oid_array.h>
+#include <net-snmp/library/oid_stash.h>
+#include <net-snmp/library/ucd_compat.h>
 
 #endif /* NET_SNMP_MIB_API_H */

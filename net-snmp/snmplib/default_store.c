@@ -30,7 +30,7 @@
 #include <net-snmp/default_store.h>	/* for "internal" definitions */
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
 struct ds_read_config *ds_configs = NULL;
 

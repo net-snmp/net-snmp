@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/mibincl.h>
+#include <net-snmp/library/mibincl.h>
 
 #else
 

@@ -1,4 +1,4 @@
-#include <net-snmp/version.h>
+#include <net-snmp/library/version.h>
 
 const char *NetSnmpVersionInfo="5.0.pre1";
 

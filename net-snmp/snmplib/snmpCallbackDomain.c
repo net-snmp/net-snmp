@@ -28,11 +28,11 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUnixDomain.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmpCallbackDomain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUnixDomain.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/snmpCallbackDomain.h>
 
 #ifndef SNMP_STREAM_QUEUE_LEN
 #define SNMP_STREAM_QUEUE_LEN  5

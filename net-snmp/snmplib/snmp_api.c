@@ -102,30 +102,30 @@ SOFTWARE.
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>	/* for xdump & {build,parse}_var_op */
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/int64.h>
-#include <net-snmp/snmpv3.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp.h>	/* for xdump & {build,parse}_var_op */
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/parse.h>
+#include <net-snmp/library/mib.h>
+#include <net-snmp/library/int64.h>
+#include <net-snmp/library/snmpv3.h>
+#include <net-snmp/library/callback.h>
+#include <net-snmp/library/snmp_secmod.h>
 #ifdef SNMP_SECMOD_USM
-#include <net-snmp/snmpusm.h>
+#include <net-snmp/library/snmpusm.h>
 #endif
 #ifdef SNMP_SECMOD_KSM
-#include <net-snmp/snmpksm.h>
+#include <net-snmp/library/snmpksm.h>
 #endif
-#include <net-snmp/keytools.h>
-#include <net-snmp/lcd_time.h>
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/snmp_transport.h>
+#include <net-snmp/library/keytools.h>
+#include <net-snmp/library/lcd_time.h>
+#include <net-snmp/library/snmp_alarm.h>
+#include <net-snmp/library/snmp_transport.h>
 
 static void _init_snmp (void);
 
-#include <net-snmp/transform_oids.h>
+#include <net-snmp/library/transform_oids.h>
 #ifndef timercmp
 #define	timercmp(tvp, uvp, cmp) \
 	/* CSTYLED */ \

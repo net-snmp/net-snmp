@@ -114,7 +114,7 @@ SOFTWARE.
 #include <net-snmp/utilities.h>
 #include <net-snmp/system.h>		/* for "internal" definitions */
 
-#include <net-snmp/snmp_api.h>
+#include <net-snmp/library/snmp_api.h>
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0

@@ -18,8 +18,8 @@
      *  to allow application writers to adopt the new header file names.
      */
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/snmp_client.h>
+#include <net-snmp/library/asn1.h>
 
 #endif /* NET_SNMP_PDU_API_H */

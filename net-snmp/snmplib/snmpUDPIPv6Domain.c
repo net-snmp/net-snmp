@@ -33,8 +33,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
 
 const oid ucdSnmpUDPIPv6Domain[9] = { UCDAVIS_MIB, 251, 4 };
 static snmp_tdomain udp6Domain;

@@ -30,7 +30,7 @@ typedef u_char	oid;
      */
 
 #include <net-snmp/definitions.h>
-#include <net-snmp/snmp_api.h>
-/* #include <net-snmp/libsnmp.h> */
+#include <net-snmp/library/snmp_api.h>
+/* #include <net-snmp/library/libsnmp.h> */
 
 #endif /* NET_SNMP_TYPES_H */
