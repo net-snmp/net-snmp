@@ -44,6 +44,9 @@
 #define	LOG_DAEMON	(3<<3)	/* System daemons */
 #endif
 
+/* got socklen_t? */
+#define HAVE_SOCKLEN_T 1
+
 /* This was taken from the win32 config file. */
 #define EADDRINUSE		WSAEADDRINUSE
 

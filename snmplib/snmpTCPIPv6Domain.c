@@ -1,5 +1,21 @@
 #include <net-snmp/net-snmp-config.h>
+
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
+
+/*
+ * hack-o-matic for Cygwin to use winsock2
+*/
+#if defined(cygwin)
+#undef HAVE_UNISTD_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_NET_IF_H
+#undef HAVE_NETDB_H
+#undef HAVE_SYS_PARAM_H
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_IN_ADDR_T
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -20,12 +36,15 @@
 #include <sys/socket.h>
 #endif
 
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
     /*
      * Windows IPv6 support is part of WinSock2 only
      */
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+extern const char *inet_ntop(int, const void*, char*, size_t);
+
 #endif
 
 #if HAVE_NETINET_IN_H
