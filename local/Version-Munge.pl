@@ -2,11 +2,32 @@
 
 use Getopt::Std;
 
+sub usage {
+    print "
+$0 [-v VERSION] -R -C -M -h
+
+  -M           Modify the files with a new version (-v required)
+  -v VERSION   Use VERSION as the version string
+  -C           Commit changes to the files
+  -R           Reverse files (rm and cvs update)
+  -f FILE      Just do a particular file
+  -t TYPE      Just do a particular type of file
+
+  -V           verbose
+";
+    exit 1;
+}
+
 getopts("v:T:RCMDhnf:t:V",\%opts) || usage;
 
-die "no version (-v or -T) specified" if (!$opts{'v'} && $opts{'M'} && !$opts{'T'});
-die "nothing to do (need -R -C -D or -M)" if (!$opts{'R'} && !$opts{'M'} && 
-					      !$opts{'C'} && !$opts{'D'});
+if (!$opts{'v'} && $opts{'M'} && !$opts{'T'}) {
+  warn "no version (-v or -T) specified";
+  usage;
+}
+if (!$opts{'R'} && !$opts{'M'} && !$opts{'C'} && !$opts{'D'}) {
+  warn "nothing to do (need -R -C -D or -M)\n";
+  usage;
+}
 
 my @exprs = (
 	     # c files with a equal sign and a specific variable
@@ -81,20 +102,4 @@ for ($i = 0; $i <= $#exprs; $i++) {
 	    system("cvs commit -m \"- ($f): version tag ( $VERSION )\" $f");
 	}
     }
-}
-
-sub usage {
-    print "
-$0 [-v VERSION] -R -C -M -h
-
-  -M           Modify the files with a new version (-v required)
-  -v VERSION   Use VERSION as the version string
-  -C           Commit changes to the files
-  -R           Reverse files (rm and cvs update)
-  -f FILE      Just do a particular file
-  -t TYPE      Just do a particular type of file
-
-  -V           verbose
-";
-    exit 1;
 }
