@@ -9,7 +9,7 @@ TARG		= snmpget snmpgetnext snmpset snmpusm			\
 			snmpwalk snmpbulkwalk snmptable			\
 			snmptrap snmpbulkget				\
 			snmptranslate snmpstatus snmpdelta snmptest	\
-			encode_keychange
+			encode_keychange snmpdf
 
 SBINTARG	= snmptrapd
 SUBDIRS		= snmpnetstat
@@ -79,6 +79,9 @@ snmpgetnext:    snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 
 encode_keychange:    encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 	${LIBTOOL} ${CC} -o $@ encode_keychange.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmpdf:    snmpdf.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	${LIBTOOL} ${CC} -o $@ snmpdf.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 
 clean:
