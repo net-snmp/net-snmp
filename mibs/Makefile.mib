@@ -76,7 +76,7 @@ DISMAN-SCHEDULE-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2591
 
 DISMAN-SCRIPT-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2592
+	./mibfetch $(RFCHOST) $(RFCDIR) 3165
 
 IF-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2863
