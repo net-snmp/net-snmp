@@ -9,6 +9,32 @@
 ########################################################################
 @include mfd-access-unsorted-external-setup.m2i@
 ##
+static int
+${table}_read_and_update_index( $mfd_aue_param_decl,
+                                ${table}_ref_loop *loop_ref,
+                                ${table}_ref_ctx *ctx_ref);
+
+/**
+ * unsorted-external overview
+ *
+ * The unsorted external data access code works by calling a few simple
+ * functions to get the index value for each row. Once the agent determines
+ * which row is needed to process an incoming request, another function
+ * is called to retrieve the data for that row.
+ *
+ * A simplified version of the pseudo-code looks like this:
+ *
+ *    ${table}_init_loop_ctx(loop)
+ *    ${table}_get_first(loop,data)
+ *    while( no_error ) {
+ *       if( best_match(data, key)
+ *          ${table}_save_position(loop,pos);
+ *       ${table}_get_next(loop,data)
+ *    }
+ *    ${table}_get_data(pos,data)
+ *    ${table}_cleanup_loop_ctx(loop)
+ */
+
 /**
  * initialization for ${context} data access
  *
@@ -21,7 +47,7 @@
  *         MFD_ERROR   : unrecoverable error.
  */
 int
-    ${table}_init_data($mfd_aue_param_decl)
+${table}_init_data($mfd_aue_param_decl)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
@@ -43,14 +69,334 @@ $example_end
     return MFD_SUCCESS;
 }
 
+/***********************************************************************
+ *
+ * ITERATION
+ *
+ ***********************************************************************/
+
+/**
+ * initialize the iterator loop context for a new iteration loop.
+ *
+ * Summary
+ * -------
+ *  This function will be called before the start of a new itertion over
+ *  the data. The loop context that is initialized here will be passed to
+ *  ${table}_get_first and ${table}_get_next.
+ *
+ *  Set the loop context variable ref->itr_ctx so that the iteration
+ *  functions (get_first and get_next) can locate the apropriate data
+ *  context.
+ *
+ * More Details
+ * ------------
+ * @param $mfd_aue_param_cmt
+ * @param ref  Pointer to your loop reference.
+ *
+ * @return MFD_SUCCESS     : success.
+ *         MFD_END_OF_DATA : an empty data set.
+ *         MFD_ERROR       : other error.
+ */
+int
+${table}_init_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    /*
+     * allocate memory for new structure
+     */
+    ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+    if(NULL == ref->itr_ctx)
+        return MFD_ERROR;
+
+    /*
+     * TODO: set loop context
+     */
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * allocate a context to use
+     */
+    ref->itr_ctx->ctx = ${context}_allocate_ctx();
+    if(NULL == ref->itr_ctx->ctx) {
+        SNMP_FREE(ref->itr_ctx);
+        return MFD_ERROR; /* xxx-rks: resource unavailable? */
+    }
+
+    /*
+     * open our data file.
+     */
+    ref->itr_ctx->filep = fopen("/etc/dummy.conf", "r");
+    if(NULL ==  ref->itr_ctx->filep) {
+        return MFD_ERROR; /* xxx-rks: resource unavailable? */
+    }
+
+$example_end
+@end@
+
+    return MFD_SUCCESS;
+}
+
+/**
+ * get the first data index
+ *
+ * Summary
+ * -------
+ *  This function is called to return set the index(es) for the first
+ *  ${table}_data in the data set.
+
+ *  Note that during the loop, the only important thing is the indexes.
+ *  If access to your data is cheap/fast (e.g. you have a pointer to a
+ *  structure in memory), it would make sense to update the data here.
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
+ *  then you should limit yourslef to setting the indexes. Extracting the
+ *  can be put off until the desired row is found See the notes on
+ *  ${table}_get_data().
+ *
+ *  This function should update the table index (ctx_ref->ctx->tbl_idx)
+ *  values for the raw data (ctx_ref->ctx->data).
+ *
+ * More Details
+ * ------------
+ *  If there is currently no data available, return MFD_END_OF_DATA.
+ *  Otherwise, you should set ctx_ref->ctx and it's indexes.
+ *
+ *  ctx_ref->ctx will be NULL. You should allocate a new context
+ *  for this loop. [Alternatively, you could allocate one in
+ *  ${table}_init_loop_ctx, save it in your
+ *  ${table}_ref_loop, and use it here.]
+ *
+ *  Once you have your context pointer, you should set the index (or indexes)
+ *  in ctx_ref->ctx->tbl_idx to the appropriate value for this row. [If you
+ *  use your loop_ref cleverly, you might be able to put this work in
+ *  ${table}_get_next, and simply call that function.]
+ *
+ * @param $mfd_aue_param_cmt
+ * @param ref  Pointer to your loop reference.
+ * @param ref  Pointer to a context reference.
+ *
+ * @return MFD_SUCCESS     : success.
+ *         MFD_END_OF_DATA : no data available
+ *         MFD_ERROR       : error.
+ */
+int
+${table}_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+                    ${table}_ref_ctx *ctx_ref)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * check for end of data
+     */
+    if(NULL == loop_ref->itr_ctx->filep)
+        return MFD_END_OF_DATA;
+
+/*
+ * do actual read of data in update_index, since get and get_next do
+ * the same thing...
+ */
+    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+$example_end
+@else@
+    return MFD_SUCCESS;
+@end@ # example
+}
+
+/**
+ * get the next data index
+ *
+ * Summary
+ * -------
+ *  This function returns the next data item in the data set. The same
+ *  caveat applies here as did above. The indexes are the important parts
+ *  during loop processing.
+ *
+ * More Details
+ * ------------
+ * ctx_ref->ctx will have been set in ${table}_get_first.
+ *
+ * If there is currently no data available, return MFD_END_OF_DATA.
+ * Otherwise, you should set the indexes in ctx_ref->ctx->tbl_idx.
+ *
+ * You should set the index (or indexes) in ctx_ref->ctx->tbl_idx to the
+ * appropriate value for this row.
+ *
+ * @param $mfd_aue_param_cmt
+ * @param ref  Pointer to your loop reference.
+ * @param ref  Pointer to a context reference.
+ *
+ * @return MFD_SUCCESS     : success.
+ *         MFD_END_OF_DATA : no more data available
+ *         MFD_ERROR       : error.
+ */
+int
+${table}_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+                        ${table}_ref_ctx *ctx_ref)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(ctx_ref && ctx_ref->ctx);
+    
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * check for end of data
+     */
+    if(NULL == loop_ref->itr_ctx->filep)
+        return MFD_END_OF_DATA;
+
+/*
+ * do actual read of data in update_index, since get and get_next do
+ * the same thing...
+ */
+    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+$example_end
+@else@
+    return MFD_SUCCESS;
+@end@ # example
+}
+
+/**
+ * duplicate the current loop reference
+ *
+ * Summary
+ *  -------
+ *  During loop iteration, the iterator keeps track of the row that
+ *  is the current best match. This function is called when the
+ *  current row is a better match than any previous row.
+ *
+ *  You should save any information you need to be able to locate this row
+ *  again from the current loop context to a new loop context.
+ *
+ *  At the end of the loop, when the best match has been found, the saved
+ *  loop context will be used to get the data for the row by calling
+ *  ${table}_get_data().
+@if $m2c_data_transient != 0@ # persistent
+ *
+ *  Since your data is transient, you need to make a copy of it before
+ *  the iterator moves on to the next row.
+@end@
+ *
+ * More Details
+ * ------------
+@if $m2c_data_transient != 0@ # persistent
+@   if $m2c_data_transient == 1@ # short term
+ *  Since your data is semi-TRANSIENT data, you could just keep a pointer
+ *  to the data in the loop reference. The data should then be copied in
+ *  ${table}_get_data().
+@   else@ # $m2c_data_transient == 2@ # copy immediately
+ *  One idea would be to copy it space allocated in the loop reference
+ *  structure. Another would be to simply have a pointer in the loop
+ *  reference structure, and allocate memory here.
+ *
+@   end@
+ * @param $mfd_aue_param_cmt
+ * @param loop_ref  Reference to current loop context.
+ * @param loop_save Reference to a loop context for saving the current position
+ *                  If reuse is not set or loop_save->itr_ctx is NULL, allocate
+ *                  a new one. If reuse is set, you may reuse  the existing
+ *                  itr_ctx.
+ * @param reuse     Indicates if an existing loop_save->itr_ctx may be reused.
+ *
+ * @return MFD_SUCCESS : success.
+ *         MFD_ERROR   : error.
+ */
+int
+${table}_save_position($mfd_aue_param_decl,
+                       ${table}_ref_loop *loop_ref,
+                       ${table}_ref_loop *loop_save,
+                       int reuse)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+@if $m2c_include_examples == 1@
+$example_start
+
+    /*
+     * allocate new loop context, unless you can reuse a previous pointer
+     */
+    if((0 == reuse) || (NULL == loop_save->itr_ctx))
+        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+    if(NULL == loop_save->itr_ctx) {
+        snmp_log(LOG_ERR, "could not allocate memory\n");
+        return MFD_ERROR;
+    }
+
+    /*
+     * if you can reuse a previously saved contex, just swap
+     * it out with the loop iterator
+     */
+    if(reuse && loop_save->itr_ctx->ctx) {
+        ifXTable_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
+        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
+        loop_ref->itr_ctx->ctx = tmp_ctx;
+    }
+    else {
+        /*
+         * take the current pointer
+         */
+        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
+        
+        /*
+         * allocate a new context to replace the one you took.
+         * shouldn't need the locked flag or the filep pointer.
+         * (well, you *could* use it to do things a little differently;
+         * like if you know you had the file locked and wanted to save
+         * the current offset for writing back new values... but we are
+         * trying to keep this example simple.)
+         */
+        loop_ref->itr_ctx->ctx = ${context}_allocate_ctx();
+        if(NULL == loop_ref->itr_ctx->ctx) {
+            SNMP_FREE(loop_ref->itr_ctx);
+            return MFD_ERROR; /* xxx-rks: resource unavailable? */
+        }
+    }
+
+ 
+@if $m2c_data_transient == 0@ # persistent
+    /** non-TRANSIENT data: no need to copy */
+@elsif $m2c_data_transient == 1@ # short term
+    /** semi-TRANSIENT data: will copy data when index found */
+    /** have to save line to do that */
+    memcpy(loop_save->itr_ctx->line, loop_ref->itr_ctx->line,
+           sizeof(loop_ref->itr_ctx->line));
+@elsif $m2c_data_transient == 2@ # copy immediately
+    /*
+     * TRANSIENT data: you are using a buffer in the loop ctx,
+     * So you need to copy the data.
+     */
+    /*
+     * for this example, it would be cheap to just save line.
+     * but we'll assume worst case, and just go ahead and setup
+     * the individual data items...
+     */
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+    /** TODO: set ctx_ref->${m2c_data_item}$node
+     **       from loop_ref->line */
+@   end@
+@end@
+$example_end
+@end@ # example
+    
+    return MFD_SUCCESS;
+}
+
 @if $m2c_data_transient != 0@ # 
 /**
  * set ${table}_data from a data context
  *
- * Once the loop iteration has completed and the best match has been
- * found, this function will be called to copy the data to a newly
- * created context.
+ * Summary
+ * -------
+ *  At the end of the loop, when the best match has been found, the saved
+ *  loop context will be used to get the data for the row by calling
+ *  ${table}_get_data().
  *
+ * More Details
+ * ------------
  * @param $mfd_aue_param_cmt
  * @param loop_ref pointer to your loop reference.
  * @param ctx_ref pointer to a context reference.
@@ -63,6 +409,7 @@ ${table}_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
 
     netsnmp_assert((NULL != loop_ref) && (NULL != loop_ref->itr_ctx));
     netsnmp_assert(NULL != ctx_ref);
+    netsnmp_assert(NULL != ctx_ref->ctx);
     
 @if $m2c_include_examples == 1@
 $example_start
@@ -75,11 +422,7 @@ $example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /** TODO: set ctx_ref->${m2c_data_item}$node
-@      if $m2c_data_transient == 1@ # short term
-     **       from loop_ref->line */
-@      else@
-     **       from orig_${m2c_data_item}$node */
-@      end@
+     **       from your loop context. */
 @   end@
 $example_end
 @end@
@@ -89,14 +432,64 @@ $example_end
 
 @end@
 
+/**
+ * clean up a loop reference
+ *
+ * Summary
+ * -------
+ *  This function will be called once the loop iteration has completed
+ *  to release any memory allocated for loop reference.
+ *
+ * More Details
+ * ------------
+ * @param $mfd_aue_param_cmt
+ * @param ref  Pointer to your loop reference.
+ *
+ * @return MFD_SUCCESS : success.
+ *         MFD_ERROR   : error.
+ */
+int
+${table}_cleanup_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    
+@if $m2c_include_examples == 1@
+$example_start
+    if(!ref->itr_ctx)
+        return MFD_ERROR;
+
+if(ref->itr_ctx->ctx)
+    ${context}_release_ctx(ref->itr_ctx->ctx);
+ 
+    /*
+     * close file
+     */
+    if(ref->itr_ctx->filep)
+        fclose(ref->itr_ctx->filep);
+    
+    /*
+     * free loop context
+     */
+    free(ref->itr_ctx);
+$example_end
+@end@
+    
+    return MFD_SUCCESS;
+}
+
+########################################################################
 @if $m2c_include_examples == 1@
 $example_start
 /**
  * Update the index for the current iterator position.
  *
+ * Summary
+ * -------
  * This example routine updates the index for the current row. It is
  * called by the get_first and get_next functions.
  *
+ * More Details
+ * ------------
  * @return MFD_SUCCESS     : success
  *         MFD_END_OF_DATA : no data is available
  *         MFD_ERROR       : error.
@@ -150,328 +543,6 @@ ${table}_read_and_update_index( $mfd_aue_param_decl,
 $example_end
 @end@
 
-/***********************************************************************
- *
- * ITERATION
- *
- ***********************************************************************/
-
-/**
- * initialize the iterator loop context for a new iteration loop.
- *
- * This function will be called before the start of a new itertion over
- * the data.
- *
- * Set the loop_context variable ref->itr_ctx to the first data point
- * structure of your choice (from which you can find the next one).  This
- * could be anything from the first node in a linked list, to an integer
- * pointer containing the beginning of an array variable.
- *
- * @param $mfd_aue_param_cmt
- * @param ref  Pointer to your loop reference.
- *
- * @return MFD_SUCCESS     : success.
- *         MFD_END_OF_DATA : an empty data set.
- *         MFD_ERROR       : other error.
- */
-int
-${table}_init_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    /*
-     * allocate memory for new structure
-     */
-    ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
-    if(NULL == ref->itr_ctx)
-        return MFD_ERROR;
-
-    /*
-     * TODO: set loop context
-     */
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * allocate a context to use
-     */
-    ref->itr_ctx->ctx = ${context}_allocate_ctx();
-    if(NULL == ref->itr_ctx->ctx) {
-        SNMP_FREE(ref->itr_ctx);
-        return MFD_ERROR; /* xxx-rks: resource unavailable? */
-    }
-
-    /*
-     * open our data file.
-     */
-    ref->itr_ctx->filep = fopen("/etc/dummy.conf", "r");
-    if(NULL ==  ref->itr_ctx->filep) {
-        return MFD_ERROR; /* xxx-rks: resource unavailable? */
-    }
-
-$example_end
-@end@
-
-    return MFD_SUCCESS;
-}
-
-/**
- * clean up a loop reference
- *
- * This function will be called to release a loop reference once
- * the iteration has completed.
- *
- * @param $mfd_aue_param_cmt
- * @param ref  Pointer to your loop reference.
- *
- * @return MFD_SUCCESS : success.
- *         MFD_ERROR   : error.
- */
-int
-${table}_cleanup_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-    
-@if $m2c_include_examples == 1@
-$example_start
-    if(!ref->itr_ctx)
-        return MFD_ERROR;
-
-if(ref->itr_ctx->ctx)
-    ${context}_release_ctx(ref->itr_ctx->ctx);
- 
-    /*
-     * close file
-     */
-    if(ref->itr_ctx->filep)
-        fclose(ref->itr_ctx->filep);
-    
-    /*
-     * free loop context
-     */
-    free(ref->itr_ctx);
-$example_end
-@end@
-    
-    return MFD_SUCCESS;
-}
-
-/**
- * duplicate the current loop reference
- *
- * During loop iteration, the iterator keeps track of the row that
- * is the current best match. This function is called when the
- * current row is a better match than any previous row.
- * You should update the table index for the current row, along with
- * any other pertinent data in your loop reference structure.
- *
-@if $m2c_data_transient != 0@ # persistent
- * Since your data is transient, we need to make a copy of it before
- * the iterator moves on to the next row.
- *
-@   if $m2c_data_transient == 1@ # short term
-* Since your data is semi-TRANSIENT data, you could just keep a pointer
-* to the data in the loop reference. The data should then be copied in
-* ${table}_get_data().
-@   else@ # $m2c_data_transient == 2@ # copy immediately
-* Since your data is TRANSIENT data, you should make a copy of it here.
-* One idea would be to copy it space allocated in the loop reference
-* structure. Another would be to simply have a pointer in the loop
-* reference structure, and allocate memory here.
-@   end@
- *
-@end@
- * @param $mfd_aue_param_cmt
- * @param loop_ref  Reference to current loop context.
- * @param loop_save Reference to a loop context for saving the current position
- *                  If reuse is not set or loop_save->itr_ctx is NULL, allocate
- *                  a new one. If reuse is set, you may reuse  the existing
- *                  itr_ctx.
- * @param reuse     Indicates if an existing loop_save->itr_ctx may be reused.
- *
- * @return MFD_SUCCESS : success.
- *         MFD_ERROR   : error.
- */
-int
-${table}_save_position($mfd_aue_param_decl,
-                       ${table}_ref_loop *loop_ref,
-                       ${table}_ref_loop *loop_save,
-                       int reuse)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-@if $m2c_include_examples == 1@
-$example_start
-
-    /*
-     * allocate new loop context, unless we can reuse a previous pointer
-     */
-    if((0 == reuse) || (NULL == loop_save->itr_ctx))
-        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
-    if(NULL == loop_save->itr_ctx) {
-        snmp_log(LOG_ERR, "could not allocate memory\n");
-        return MFD_ERROR;
-    }
-
-    /*
-     * if we can reuse a previously saved contex, just swap
-     * it out with the loop iterator
-     */
-    if(reuse && loop_save->itr_ctx->ctx) {
-        ifXTable_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
-        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
-        loop_ref->itr_ctx->ctx = tmp_ctx;
-    }
-    else {
-        /*
-         * take the current pointer
-         */
-        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
-        
-        /*
-         * allocate a new context to replace the one we took.
-         * shouldn't need the locked flag or the filep pointer.
-         * (well, we *could* use it to do things a little differently;
-         * like if we know we had the file locked and wanted to save
-         * the current offset for writing back new values... but we are
-         * trying to keep this example simple.)
-         */
-        loop_ref->itr_ctx->ctx = ${context}_allocate_ctx();
-        if(NULL == loop_ref->itr_ctx->ctx) {
-            SNMP_FREE(loop_ref->itr_ctx);
-            return MFD_ERROR; /* xxx-rks: resource unavailable? */
-        }
-    }
-
- 
-@if $m2c_data_transient == 0@ # persistent
-    /** non-TRANSIENT data: no need to copy */
-@elsif $m2c_data_transient == 1@ # short term
-    /** semi-TRANSIENT data: will copy data when index found */
-    /** have to save line to do that */
-    memcpy(loop_save->itr_ctx->line, loop_ref->itr_ctx->line,
-           sizeof(loop_ref->itr_ctx->line));
-@elsif $m2c_data_transient == 2@ # copy immediately
-    /*
-     * TRANSIENT data: we are using a buffer in the loop ctx,
-     * So we need to copy the data.
-     */
-    /*
-     * for this example, it would be cheap to just save line.
-     * but we'll assume worst case, and just go ahead and setup
-     * the individual data items...
-     */
-@   foreach $node nonindex@
-@      include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->${m2c_data_item}$node
-     **       from loop_ref->line */
-@   end@
-@end@
-$example_end
-@end@ # example
-    
-    return MFD_SUCCESS;
-}
-
-/**
- * get the first data index
- *
- * Use the loop_ref set up in ${table}_init_loop_ctx
- * to set the indexes for the first object.
- *
- * If there is currently no data available, return MFD_END_OF_DATA.
- * Otherwise, you should set ctx_ref->ctx and it's indexes.
- *
- * ctx_ref->ctx will be NULL. You should allocate a new context
- * for this loop. [Alternatively, you could allocate one in
- * ${table}_init_loop_ctx, save it in your
- * ${table}_ref_loop, and use it here.]
- *
- * Once you have your context pointer, you should set the index (or indexes)
- * in ctx_ref->ctx->tbl_idx to the appropriate value for this row. [If you
- * use your loop_ref cleverly, you might be able to put this work in
- * ${table}_get_next, and simply call that function.]
- *
- * @param $mfd_aue_param_cmt
- * @param ref  Pointer to your loop reference.
- * @param ref  Pointer to a context reference.
- *
- * @return MFD_SUCCESS     : success.
- *         MFD_END_OF_DATA : no data available
- *         MFD_ERROR       : error.
- */
-int
-${table}_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                    ${table}_ref_ctx *ctx_ref)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * check for end of data
-     */
-    if(NULL == loop_ref->itr_ctx->filep)
-        return MFD_END_OF_DATA;
-
-/*
- * do actual read of data in update_index, since get and get_next do
- * the same thing...
- */
-    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
-$example_end
-@else@
-    return MFD_SUCCESS;
-@end@ # example
-}
-
-/**
- * get the next data index
- *
- * Use the loop_ref set up in ${table}_init_loop_ctx
- * to set the indexes for the next object.
- *
- * If there is currently no data available, return MFD_END_OF_DATA.
- * Otherwise, you should set the indexes in ctx_ref->ctx->tbl_idx.
- *
- * ctx_ref->ctx will have been set in ${table}_get_first.
- *
- * ou should set the index (or indexes) in ctx_ref->ctx->tbl_idx to the
- * appropriate value for this row.
- *
- * @param $mfd_aue_param_cmt
- * @param ref  Pointer to your loop reference.
- * @param ref  Pointer to a context reference.
- *
- * @return MFD_SUCCESS     : success.
- *         MFD_END_OF_DATA : no more data available
- *         MFD_ERROR       : error.
- */
-int
-${table}_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
-                        ${table}_ref_ctx *ctx_ref)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * check for end of data
-     */
-    if(NULL == loop_ref->itr_ctx->filep)
-        return MFD_END_OF_DATA;
-
-/*
- * do actual read of data in update_index, since get and get_next do
- * the same thing...
- */
-    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
-$example_end
-@else@
-    return MFD_SUCCESS;
-@end@ # example
-}
-
-##
 ########################################################################
 @if $m2c_mark_boundary == 1@
 /** END code generated by $RCSfile$ $Revision$ */
