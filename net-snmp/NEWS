@@ -40,8 +40,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
           refreshing of caches and cache pre-loading.
       - experimental implementation of DisMan Remote Operations MIB groups
         (remote nslookup, ping, traceroute and expressions via SNMP)
-      - v1/v2c communities can be mapped to SNMPv3 contexts now,
-        allowing better support for v1/2->v3 proxies and other context uses.
       - The proxy supports a new -Cc flag which passes the community
         name through to the other side rather than hard-coding it.
       - The config_require() and other modules can now be placed
@@ -87,7 +85,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     perl:
       - An improved SNMP::gettable() method.  Uses GETBULK if possible and
         better GETNEXT requests if not, decodes indexes from OIDs,
-        requests multiple variables at once, ...
+        requests multiple variables at once, ...  ("perldoc SNMP" for details)
       - A NetSNMP::OID::get_indexes() function to extract index values
         from an OID.
 
@@ -97,7 +95,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
            ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
            ipAddressTable, ipSystemStatsTable, ipNetToPhysicalTable.
        - Enable these talbles by specifying --enable-mfd-rewrites to configure.
-       - Most of these tables has IPv6 support as well.
+       - Most of these tables have IPv6 support as well.
      - ifIndex no longer changes when interfaces are added/removed, and all
          tables/object wiil now use the same ifIndex for the same interface.
 
