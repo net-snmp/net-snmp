@@ -22,6 +22,57 @@
 @   include details-table.m2i@
 ########################################################################
 ##
+@    if $m2c_data_allocate == 1 && $m2c_data_context eq "generated"@
+@        include generic-data-allocate.m2i@
+@    end@
+########################################################################
+/*
+ * allocate resources for a ${table}_ctx
+ */
+${table}_ctx *
+${table}_allocate_ctx(netsnmp_mfd_registration *reg)
+{
+    ${table}_ctx *ctx = SNMP_MALLOC_TYPEDEF(${table}_ctx);
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    if(NULL == ctx) {
+        snmp_log(LOG_ERR,"Couldn't allocate memory for a "
+                 "${table}_ctx.\n");
+    }
+@if $m2c_data_allocate == 1@
+    else if (NULL == (ctx->data = ${table}_allocate_data())) {
+        SNMP_FREE(ctx);
+    }
+    else if (NULL == (ctx->undo = ${table}_allocate_data())) {
+        free(ctx->data); /* SNMP_FREE would be overkill */
+        SNMP_FREE(ctx);
+    }
+@end@
+    
+    return ctx;
+}
+
+/*
+ * release resources for a ${table}_ctx
+ */
+void
+${table}_release_ctx(netsnmp_mfd_registration *reg, ${table}_ctx *ctx)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+@if $m2c_data_allocate == 1@
+    if(ctx->data)
+        ${table}_release_data(ctx->data);
+ 
+     if(ctx->data) 
+         ${table}_release_data(ctx->undo);
+@end@ 
+    SNMP_FREE(ctx);
+}
+
+########################################################################
+##
 int
 ${table}_get_values(netsnmp_mfd_registration *mfdr,
                     netsnmp_request_group *rg)
