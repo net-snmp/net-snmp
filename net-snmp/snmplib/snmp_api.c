@@ -5298,7 +5298,7 @@ _sess_read(void *sessp, fd_set * fdset)
 		if (sp->callback != NULL) {
 		  DEBUGMSGTL(("sess_read",
 			      "perform callback with op=DISCONNECT\n"));
-		  (void)sp->callback(SNMP_CALLBACK_OP_DISCONNECT,
+		  (void)sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT,
 				     sp, 0, NULL, sp->callback_magic);
 		}
 		DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
