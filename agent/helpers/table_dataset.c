@@ -650,7 +650,8 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_SET_ACTION:
 
             /*
-             * install the new row.  Do this only *once* per row 
+             * Install the new row into the stored table.
+	     * Do this only *once* per row ....
              */
             if (newrowstash->state != STATE_ACTION) {
                 newrowstash->state = STATE_ACTION;
@@ -660,6 +661,16 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     netsnmp_table_dataset_replace_row(datatable,
                                                       row, newrow);
                 }
+            }
+            /*
+             * ... but every (relevant) varbind in the request will
+	     * need to know about this new row, so update the
+	     * per-request row information regardless
+             */
+            if (newrowstash->created) {
+		netsnmp_request_add_list_data(request,
+			netsnmp_create_data_list(TABLE_DATA_NAME,
+						 newrow, NULL));
             }
             break;
 
