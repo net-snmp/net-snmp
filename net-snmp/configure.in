@@ -1217,7 +1217,14 @@ done
 
 #
 # Do hairy agent module processing.
+#   (unless agent was disabled)
 #
+if test "x$enable_agent" = "xno"; then
+
+   default_mibs=SNMPv2-MIB:RFC1213-MIB
+
+else # agent not disabled
+
 AC_MSG_CHECKING([for and configuring mib modules to use])
 changequote(, )
 
@@ -1263,6 +1270,7 @@ test_modules="$new_module_list"
 new_module_list=""
 module_list_h=""
 
+# remove modules that were explicity excluded
 for i in $test_modules
  do
   if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
@@ -1279,14 +1287,30 @@ AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
 MODULECPP="$CPP -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 AC_MSG_CHECKING([for and configuring mib modules pieces to use])
 changequote(, )
+
+#---------------------
+# loop over module list
+#
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
+    #---------------------
+    # make sure module wasn't explicity excluded
+    #
     if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
       :
     else
+      #---------------------
+      # process modules header, checking for config_ pseudo-macros
+      #
       if test -f $srcdir/$mibdir/$i.h; then
+        #---------------------
+        # clear new_list (list of new modules added for $y by config_* macros)
+        #
         new_list=""
+        #---------------------
+        # check if $i has any architecture specific requirements
+        #
         new_list_arch=`grep config_arch_require $srcdir/$mibdir/$i.h | sed 's/.*config_arch_require(\(.*\), *\(.*\)).*/\1-xarchx-\2/'`
 	if test "x$new_list_arch" != "x"; then
           for j in $new_list_arch
@@ -1297,6 +1321,9 @@ while test "x$new_module_list" != "x"; do
 	    fi
 	  done
 	fi
+        #---------------------
+        # check if $i has any other required modules
+        #
 	new_list="$new_list `$MODULECPP $srcdir/$mibdir/$i.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
@@ -1316,6 +1343,9 @@ while test "x$new_module_list" != "x"; do
 	    fi
 	  done
 	fi
+        #---------------------
+        # check if $i has any mibs to add
+        #
 	new_mibs=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_add_mib | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
@@ -1331,12 +1361,16 @@ while test "x$new_module_list" != "x"; do
 		    fi
 		fi
 	    done
-	fi
-      else
+	fi # new mibs
+      else # no $i.h
         changequote([, ])
 	AC_MSG_ERROR([module files $i.h or $i.c could not be found in $srcdir/$mibdir])
         changequote(, )
-      fi
+      fi # no $i.h
+      #-------------------
+      # add $i to module list, add header to mib_module_includes, and
+      # check for init/shutdown routines to
+      #
       module_list="$module_list $i"
       echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
       module_list_h="$module_list_h mibgroup/$i.h"
@@ -1350,35 +1384,51 @@ while test "x$new_module_list" != "x"; do
 	if grep shutdown_`basename $i` $srcdir/$mibdir/$i.c > /dev/null; then
 	    echo "  if (should_init(\"`basename $i`\")) shutdown_`basename $i`();" >> $mibdir/mib_module_shutdown.h
 	fi
-      fi
+      fi # test -f $srcdir/$mibdir/$i.c
+      #-------------------
+      # check for output directory (for building outside of source tree
+      #
       if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
 	mnd=`echo $i | sed 's/\/[^/]*$//;'`
 	if test ! -d ./$mibdir/$mnd; then
 	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
-      fi
+      fi # module directory test
+      #-------------------
+      # check for unsupported config_load_mib
+      #
       if $MODULECPP $srcdir/$mibdir/$i.h | grep config_load_mib > /dev/null 2>&1; then
         changequote([, ])
       	AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
         changequote(, )
-      fi
+      fi # grep config_load_mib
+      #-------------------
+      # check for config_parse_dot_conf
+      #
       $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+      #-------------------
+      # define USING_*_MODULE
+      #
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/mib_module_config.h
       echo " " >> include/net-snmp/agent/mib_module_config.h
+      #-------------------
       changequote([, ])
       echo $ECHO_N " $i$ECHO_C"
       changequote(, )
-    fi
-  done
+    fi #
+  done # for i in $new_module_list
+  #-------------------
+  # if $i added new modules vis config_*, check those modules for requirements too
+  #
   new_module_list="$new_list_two"
   new_list_two=""
-done
-if test "x$PARTIALTARGETOS" = "xmingw32"; then
-  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
-  default_mibs=`echo "$default_mibs" | sed 's/:/;/g'`
-fi
+done # while test "x$new_module_list" != "x"; do
+
+#-------------------
+# build module lists for Makefiles
+#
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_lo=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
@@ -1398,15 +1448,24 @@ AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
 
+fi # agent not disabled
+
 AC_MSG_CHECKING([if directories need to be created])
 for i in $module_directories; do
   $srcdir/mkinstalldirs $i
 done
 AC_MSG_RESULT(.)
 
+#-------------------
+# Define default mibs
+#
 AC_MSG_CHECKING([default mib files to read])
 if test "x$DEFAULT_MIBS" = "x"; then
   DEFAULT_MIBS="$default_mibs"
+fi
+if test "x$PARTIALTARGETOS" = "xmingw32"; then
+  # migw32 uses ';' as the environment variable seperator char
+  DEFAULT_MIBS=`echo "$DEFAULT_MIBS" | sed 's/:/;/g'`
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$DEFAULT_MIBS")
 AC_MSG_RESULT($DEFAULT_MIBS)
