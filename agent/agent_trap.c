@@ -218,7 +218,7 @@ void send_enterprise_trap_vars (int trap,
 {
     struct variable_list uptime_var, snmptrap_var, enterprise_var;
     struct variable_list *v2_vars, *last_var=NULL;
-    struct snmp_pdu	*template_pdu, *pdu;
+    struct snmp_pdu	*template_pdu;
     struct timeval	 now;
     long uptime;
     struct sockaddr_in *pduIp;

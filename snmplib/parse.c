@@ -2478,7 +2478,6 @@ parse_compliance(FILE *fp,
     }
     while (type == MODULE) {
 	int modid = -1;
-	struct tree *tp;
 	char modname[MAXTOKEN];
 	type = get_token(fp, token, MAXTOKEN);
 	if (type == LABEL && strcmp(token, module_name(current_module, modname))) {
@@ -2916,9 +2915,7 @@ parse_imports(FILE *fp)
     char modbuf[256];
 #define MAX_IMPORTS	256
     struct module_import import_list[MAX_IMPORTS];
-    int this_module, old_current_module;
-    const char *old_File;
-    int old_line;
+    int this_module;
     struct module *mp;
 
     int import_count=0;		/* Total number of imported descriptors */
