@@ -103,6 +103,13 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
+#ifdef osf4
+/* these are undefed to remove a stupid warning on osf compilers
+   because they get redefined with a slightly differnt notation of the
+   same value.  -- Wes */
+#undef TCP_NODELAY
+#undef TCP_MAXSEG
+#endif
 #include <netinet/tcp.h>
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
