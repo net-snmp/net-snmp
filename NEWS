@@ -31,9 +31,12 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - A new perl module "AnyData::SNMP" is available that implements a
       perl DBI interface to map SQL commands to SNMP.  Included is a
       "snmpsh" shell where SQL commands can be typed, aliases created,
-      etc.
+      etc.  See the perl/AnyData_SNMP/INSTALL file for details.
     - Much of the code is getting documented with "doxygen" style
       documentation.  Run "make docs" if you have doxygen installed.
+    - A "net-snmp-config" script will get installed which can report
+      how the various tools were built (which libraries they were
+      linked against, etc).
 
 *4.2.3*
  New:

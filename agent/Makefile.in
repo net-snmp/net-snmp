@@ -14,9 +14,9 @@ HELPERLIB	= helpers/libhelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 #LOCAL_LIBS	= -L../snmplib -L.
 LOCAL_LIBS	= 
 #LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
-LIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
-#AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ $(LIBS) @DLLIBS@
-AGENT_LIBS	= $(LIBTARG) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
+LIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
+#OUR_AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ $(LIBS) @DLLIBS@
+OUR_AGENT_LIBS	= $(LIBTARG) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
@@ -67,7 +67,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(HELPERLIB) $(LIBTARG)
-	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}
+	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 
 libucdagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
