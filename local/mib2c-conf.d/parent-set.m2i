@@ -116,7 +116,7 @@ $example_end
 int
 ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 {
-    int rc;
+    int rc = MFD_SUCCESS;
 
     DEBUGTRACE;
 
@@ -124,7 +124,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert( NULL != rowreq_ctx );
 
 
-    return MFD_SUCCESS;
+    return rc;
 }
 
 @end@ // ne generated
@@ -144,7 +144,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 int
 ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
-    int rc;
+    int rc = MFD_SUCCESS;
 
     DEBUGTRACE;
 
@@ -158,7 +158,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 ##$example_start
 ##$example_end
 
-    return MFD_SUCCESS;
+    return rc;
 }
 
 
