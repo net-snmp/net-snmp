@@ -262,6 +262,7 @@ extensible_unregister(int major, int minor,
                       void *serverarg, void *clientarg)
 {
     extensible_free_config();
+    return 0;
 }
 
 void
