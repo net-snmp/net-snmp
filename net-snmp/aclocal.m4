@@ -26,7 +26,7 @@ AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
 [echo ""
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
 eval ac_cv_user_prompt_$1=\$$1
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c" 1>&AC_FD_MSG
 ])
 if test "$ac_cv_user_prompt_$1" != "none"; then
   if test "$4" != ""; then

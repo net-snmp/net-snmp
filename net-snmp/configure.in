@@ -254,12 +254,12 @@ fi
 dnl overflow problems with hpux's sh
 dnl taken from Perl's Configure script 
 
-echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c"
+echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c" 1>&AC_FD_MSG
 if test -f /hp-ux -a -f /bin/ksh; then
   if (PATH=.; alias -x) >/dev/null 2>&1; then
-    echo "no"
+    echo "no"	1>&AC_FD_MSG
   else
-    echo "yes"
+    echo "yes"	1>&AC_FD_MSG
     if test "x$1" = "x"; then
       exec /bin/ksh $0
     else
@@ -267,7 +267,7 @@ if test -f /hp-ux -a -f /bin/ksh; then
     fi
   fi
 else
-  echo "no"
+  echo "no"	1>&AC_FD_MSG
 fi
 
 dnl libtool stuff for shared/static libraries.
@@ -746,7 +746,7 @@ while test "x$new_module_list" != "x"; do
       echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
       echo " " >> mib_module_config.h
-      echo $ac_n " $i$ac_c"
+      echo $ac_n " $i$ac_c" 1>&AC_FD_MSG
     fi
   done
   new_module_list="$new_list_two"
