@@ -293,7 +293,7 @@ main(int argc, char *argv[])
                          newKu, &newKu_len);
 
       if (rval != SNMPERR_SUCCESS) {
-        snmp_perror("snmpgetnext");
+        snmp_perror(argv[0]);
         fprintf(stderr, "generating the old Ku failed\n");
         exit(1);
       }
@@ -305,6 +305,7 @@ main(int argc, char *argv[])
                          oldKu, &oldKu_len);
     
       if (rval != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
         fprintf(stderr, "generating the new Ku failed\n");
         exit(1);
       }
@@ -316,6 +317,7 @@ main(int argc, char *argv[])
                           oldKu, oldKu_len, oldkul, &oldkul_len);
 
       if (rval != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
         fprintf(stderr, "generating the old Kul failed\n");
         exit(1);
       }
@@ -327,6 +329,7 @@ main(int argc, char *argv[])
                           newkul, &newkul_len);
 
       if (rval != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
         fprintf(stderr, "generating the new Kul failed\n");
         exit(1);
       }
@@ -339,6 +342,7 @@ main(int argc, char *argv[])
                               keychange, &keychange_len);
 
       if (rval != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
         fprintf(stderr, "encoding the keychange failed\n");
         usage();
         exit(1);
