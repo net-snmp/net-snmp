@@ -154,6 +154,7 @@ char *module_name __P((int));
 void print_subtree __P((FILE *, struct tree *, int));
 void print_ascii_dump_tree __P((FILE *, struct tree *, int));
 struct tree *find_tree_node __P((char *, int));
+char *get_tc_descriptor __P((int));
  /* backwards compatability */
 struct tree *find_node __P((char *, struct tree*));
 struct module *find_module __P((int));

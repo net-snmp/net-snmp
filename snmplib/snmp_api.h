@@ -82,6 +82,8 @@ struct snmp_session {
     int	    contextLen;
 };
 
+typedef int (*snmp_callback) __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+
 /*
  * Set fields in session and pdu to the following to get a default or unconfigured value.
  */
@@ -192,6 +194,24 @@ int snmp_close __P((struct snmp_session *));
  */
 int snmp_send __P((struct snmp_session *, struct snmp_pdu *));
 
+/*
+ * int snmp_async_send(session, pdu, callback, cb_data)
+ *     struct snmp_session *session;
+ *     struct snmp_pdu	*pdu;
+ *     snmp_callback callback;
+ *     void   *cb_data;
+ * 
+ * Sends the input pdu on the session after calling snmp_build to create
+ * a serialized packet.  If necessary, set some of the pdu data from the
+ * session defaults.  Add a request corresponding to this pdu to the list
+ * of outstanding requests on this session and store callback and data, 
+ * then send the pdu.
+ * Returns the request id of the generated packet if applicable, otherwise 1.
+ * On any error, 0 is returned.
+ * The pdu is freed by snmp_send() unless a failure occured.
+ */
+int snmp_async_send __P((struct snmp_session *, struct snmp_pdu *, 
+                         snmp_callback, void *));
 
 /*
  * void snmp_read(fdset)

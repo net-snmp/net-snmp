@@ -1281,6 +1281,18 @@ get_tc_index(descriptor, modid)
     return -1;
 }
 
+/* translate integer tc_index to string identifier from tclist
+ *
+ * Returns pointer to string in table (should not be modified) or NULL
+ */
+char *
+get_tc_decriptor(tc_index)
+int tc_index;
+{
+  if (tc_index < 0 || tc_index >= MAXTC) return NULL;
+  return (tclist[tc_index].descriptor);
+}
+
 
 /*
  * Parses an enumeration list of the form:
