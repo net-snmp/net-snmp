@@ -96,9 +96,7 @@ void DEBUGP (va_alist);
 #ifndef HAVE_STRDUP
 char *strdup (const char *);
 #endif
-#ifndef HAVE_SETENV
-int setenv (const char *, const char *, int);
-#endif
+int snmp_setenv(const char *, const char *, int);
  
 int calculate_time_diff(struct timeval *, struct timeval *);
 

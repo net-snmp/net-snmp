@@ -627,11 +627,11 @@ strdup(const char *src)
 }
 #endif	/* HAVE_STRDUP */
 
-#ifndef HAVE_SETENV
-int setenv(const char *name,
-	   const char *value,
-	   int overwrite)
+int snmp_setenv(const char *name,
+		const char *value,
+		int overwrite)
 {
+#ifndef HAVE_SETENV
     char *cp;
     int ret;
 
@@ -643,11 +643,13 @@ int setenv(const char *name,
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
 #ifdef WIN32
-	free(cp);
-#endif
+    free(cp);
+#endif /* WIN32 */
     return ret;
-}
+#else /* HAVE_SETENV */
+    return setenv(name, value, overwrite);
 #endif /* HAVE_SETENV */
+}
 
 int
 calculate_time_diff(struct timeval *now, struct timeval *then)

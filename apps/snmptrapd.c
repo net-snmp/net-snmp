@@ -798,10 +798,10 @@ int main(int argc, char *argv[])
             local_port = atoi(optarg);
             break;
 	case 'm':
-	    setenv("MIBS", optarg, 1);
+	    snmp_setenv("MIBS", optarg, 1);
 	    break;
 	case 'M':
-	    setenv("MIBDIRS", optarg, 1);
+	    snmp_setenv("MIBDIRS", optarg, 1);
 	    break;
         case 'T':
             if (strcasecmp(optarg,"TCP") == 0) {

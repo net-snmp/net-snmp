@@ -195,10 +195,10 @@ int main(int argc, char *argv[])
 #endif /* DEPRECATED_CLI_OPTIONS */
 
         case 'm':
-            setenv("MIBS", optarg, 1);
+            snmp_setenv("MIBS", optarg, 1);
             break;
         case 'M':
-            setenv("MIBDIRS", optarg, 1);
+            snmp_setenv("MIBDIRS", optarg, 1);
             break;
 #ifdef DEPRECATED_CLI_OPTIONS
 	case 'w':

@@ -180,11 +180,11 @@ snmp_parse_args(int argc,
         return(-2);
 
       case 'm':
-        setenv("MIBS", optarg, 1);
+        snmp_setenv("MIBS", optarg, 1);
         break;
 
       case 'M':
-        setenv("MIBDIRS", optarg, 1);
+        snmp_setenv("MIBDIRS", optarg, 1);
         break;
 
 #ifndef DEPRECATED_CLI_OPTIONS
