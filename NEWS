@@ -49,7 +49,6 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         interface to map SQL commands to SNMP.  Included is a "snmpsh"
         shell where SQL commands can be typed, aliases created, etc.
         See the perl/AnyData_SNMP/INSTALL file for details.
-
     - Beginning (alpha level quality) support for embedding perl
       subroutines directly within the net-snmp agent.
     - Much of the code is getting documented with "doxygen" style
