@@ -208,52 +208,59 @@ static int receive(void);
 
 static void usage(char *prog)
 {
-	printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE] [-r]",prog);
-#if HAVE_UNISTD_H
-	printf(" [-u uid] [-g gid]");
-#endif
+        printf("\nUsage:  %s [OPTIONS] [ADDRESSES]", prog);
 	printf("\n");
 	printf("\n\tVersion:  %s\n",VersionInfo);
 	printf("\tWeb:      http://www.net-snmp.org/\n");
 	printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
-	printf("\n-h\t\tThis usage message.\n");
-	printf("-H\t\tDisplay configuration file directives understood.\n");
-	printf("-v\t\tVersion information.\n");
-	printf("-f\t\tDon't fork from the shell.\n");
-	printf("-a\t\tLog addresses.\n");
-	printf("-d\t\tDump sent and received UDP SNMP packets\n");
-	printf("-V\t\tVerbose display\n");
-	printf("-P PIDFILE\tUse PIDFILE to store process id\n");
-	printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
-	printf("-D\t\tTurn on debugging output\n");
-	printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
-#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
-	printf("-x SOCKADDR\tBind AgentX port to this address\n");
+	printf("\n  -a\t\t\tlog addresses\n");
+ 	printf("  -A\t\t\tappend to the logfile rather than truncating it\n");
+	printf("  -c FILE\t\tread FILE as a configuration file\n");
+	printf("  -C\t\t\tdo not read the default configuration files\n");
+	printf("  -d\t\t\tdump sent and received SNMP packets\n");
+	printf("  -D\t\t\tturn on debugging output\n");
+	printf("  -f\t\t\tdo not fork from the shell\n");
+#if HAVE_UNISTD_H
+	printf("  -g GID\t\tchange to this numeric gid after opening\n\t\t\t  transport endpoints\n");
+#endif
+	printf("  -h, --help\t\tdisplay this usage message\n");
+	printf("  -H\t\t\tdisplay configuration file directives understood\n");
+	printf("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
+	printf("\t\t\t  (run snmpd with -Dinit_mib for a list)\n");
+	printf("  -l FILE\t\tprint warnings/messages to FILE\n");
+#ifdef LOGFILE
+	printf("\t\t\t  (by default FILE=%s)\n", LOGFILE);
+#else
+	printf("\t\t\t  (by default FILE=none)\n");
+#endif
+	printf("  -L\t\t\tprint warnings/messages to stdout/err\n");
+	printf("  -P FILE\t\tstore process id in FILE\n");
+	printf("  -q\t\t\tprint information in a more parsable format\n");
+	printf("  -r\t\t\tdo not exit if files only accessible to root\n\t\t\t  cannot be opened\n");
+	printf("  -s\t\t\tlog warnings/messages to syslog\n");
+#if HAVE_UNISTD_H
+	printf("  -u UID\t\tchange to this uid (numeric or textual) after\n\t\t\t  opening transport endpoints\n");
+#endif
+	printf("  -v, --version\t\tdisplay version information\n");
+	printf("  -V\t\t\tverbose display\n");
+#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
+	printf("  -x ADDRESS\t\tuse ADDRESS as AgentX address\n");
 #endif
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-	printf("-X\t\tRun as an AGENTX subagent rather than an SNMP master agent.\n");
-#endif
-	printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
-	printf("-C\t\tDon't read the default configuration files.\n");
-	printf("-L\t\tPrint warnings/messages to stdout/err\n");
-	printf("-s\t\tLog warnings/messages to syslog\n");
-	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
-	printf("-r\t\tDon't exit if root only accessible files can't be opened\n");
-	printf("-I [-]INITLIST\tList of mib modules to initialize (or not).\n");
-	printf("\t\t (run snmpd with -Dinit_mib for a list)\n");
-	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
-#ifdef LOGFILE
-	printf("\t\t(By default LOGFILE=%s)\n", LOGFILE);
-#else
-	printf("\t\t(By default LOGFILE=none)\n");
+	printf("  -X\t\t\trun as an AgentX subagent rather than as an\n\t\t\t  SNMP master agent\n");
 #endif
 
-#if HAVE_UNISTD_H
-	printf("-g \t\tChange to this gid after opening port\n");
-	printf("-u \t\tChange to this uid after opening port\n");
-#endif
 	printf("\n");
 	exit(1);
+}
+
+static void
+version(void)
+{
+    printf("\nUCD-snmp version:  %s\n",VersionInfo);
+    printf("Web:               http://www.net-snmp.org/\n");
+    printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
+    exit(0);
 }
 
 	RETSIGTYPE
@@ -304,300 +311,296 @@ SnmpTrapNodeDown(void)
  *
  * Also successfully EXITs with zero for some options.
  */
-	int
+int
 main(int argc, char *argv[])
 {
-	int             arg, i;
-	int             ret;
-	int             dont_fork = 0;
-	char            logfile[PATH_MAX + 1] = { 0 };
-	char           *cptr, **argvptr;
-	char           *pid_file = NULL;
-        char            buf[SPRINT_MAX_LEN];
+    char options[128] = "aAc:CdD::fhHI:l:LP:qrsV";
+    int  arg, i, ret;
+    int  dont_fork = 0;
+    int  dont_zero_log = 0;
+    int  stderr_log=0, syslog_log=0;
+    int  uid=0, gid=0;
+    int  agent_mode=-1;
+    char logfile[PATH_MAX + 1] = { 0 };
+    char *cptr, **argvptr;
+    char *pid_file = NULL;
 #if HAVE_GETPID
-	FILE           *PID;
+    FILE *PID;
 #endif
-	int             dont_zero_log = 0;
-	int             stderr_log=0, syslog_log=0;
-	int             uid=0, gid=0;
-        int             agent_mode=-1;
 
 #ifdef LOGFILE
-	strncpy(logfile, LOGFILE, PATH_MAX);
+    strncpy(logfile, LOGFILE, PATH_MAX);
 #endif
 
 #ifdef NO_ROOT_ACCESS
-        /* default to no */
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
+    /*  Default to no.  */
+    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
 #endif
-			/* Default to NOT running an AgentX master */
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 0);
+    /*  Default to NOT running an AgentX master.  */
+    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 0);
 
-	/*
-	 * usage: snmpd
-	 */
-	for (arg = 1; arg < argc; arg++)
-          {
-            if (argv[arg][0] == '-') {
-              switch (argv[arg][1]) {
-
-                case 'c':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG,
-                                 argv[arg]);
-                  break;
-
-                case 'C':
-                    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
-                    break;
-
-		case 'd':
-                    snmp_set_dump_packet(++snmp_dump_packet);
-		    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE, 1);
-		    break;
-
-		case 'q':
-		    snmp_set_quick_print(1);
-		    break;
-
-                case 'T':
-                    if (argv[arg][2] != '\0') 
-                        cptr = &argv[arg][2];
-                    else if (++arg>argc) {
-                        fprintf(stderr,"%s: Need UDP or TCP after -T flag.\n", argv[0]);
-                        usage(argv[0]);
-                        exit(1);
-                    } else {
-                        cptr = argv[arg];
-                    }
-                    if (strcasecmp(cptr,"TCP") == 0) {
-                        ds_set_int(DS_APPLICATION_ID, DS_AGENT_FLAGS,
-                                   ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS)
-                                   | SNMP_FLAGS_STREAM_SOCKET);
-                    } else if (strcasecmp(cptr,"UDP") == 0) {
-                        /* default, do nothing */
-                    } else {
-                        fprintf(stderr,
-                                "%s: Unknown transport \"%s\" after -T flag.\n",
-                                argv[0], cptr);
-                        usage(argv[0]);
-                        exit(1);
-                    }
-                    break;
-
-		case 'D':
-                    debug_register_tokens(&argv[arg][2]);
-		    snmp_set_do_debugging(1);
-		    break;
-
-                case 'p':
-                  if (++arg == argc)
-                    usage(argv[0]);
-
-                  /* has something been specified before? */
-                  cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
-                      
-                  /* set the specification string up */
-                  if (cptr) {
-                      /*  Append to the older specification string.  */
-		    sprintf(buf,"%s,%s", cptr, argv[arg]);
-                  } else {
-		    strcpy(buf,argv[arg]);
-		  }
-
-                  DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
-                  break;
-
-#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
-                case 'x':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, argv[arg]);
-		  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 1 );
-                  break;
+    /*  Add some options if they are available.  */
+#if HAVE_UNISTD_H
+    strcat(options, "g:u:");
+#endif
+#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
+    strcat(options, "x:");
+#endif
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+    strcat(options, "X");
 #endif
 
-                case 'X':
-#if defined(USING_AGENTX_SUBAGENT_MODULE)
-                  agent_mode = SUB_AGENT;
-#else
-                  fprintf(stderr,"%s: Illegal argument -X: AgentX support not compiled in.\n", argv[0]);
-                  usage(argv[0]);
-                  exit(1);
+    /*  Initial scan for "--help" and "--version".  */
+    
+    for (i = 0; i < argc; i++) {
+	if (strcmp(argv[i], "--help") == 0) {
+	    usage(argv[0]);
+	} else if (strcmp(argv[i], "--version") == 0) {
+	    version();
+	}
+    }
+
+    /*  Now process options normally.  */
+    
+    while ((arg = getopt(argc, argv, options)) != EOF) {
+	switch (arg) {
+	case 'a':
+	    log_addresses++;
+	    break;
+
+	case 'A':
+	    dont_zero_log = 1;
+	    break;
+
+	case 'c':
+	    if (optarg != NULL) {
+		ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
+	    } else {
+		usage(argv[0]);
+	    }		
+	    break;
+
+	case 'C':
+	    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
+	    break;
+
+	case 'd':
+	    snmp_set_dump_packet(++snmp_dump_packet);
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE, 1);
+	    break;
+
+	case 'D':
+	    debug_register_tokens(optarg);
+	    snmp_set_do_debugging(1);
+	    break;
+
+	case 'f':
+	    dont_fork = 1;
+	    break;
+
+#if HAVE_UNISTD_H
+	case 'g':
+	    if (optarg != NULL) {
+		ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID,
+			   atoi(optarg));
+	    } else {
+		usage(argv[0]);
+	    }
+	    break;
 #endif
-                  break;
+		
+	case 'h':
+	    usage(argv[0]);
+	    break;
 
-		case 'r':
-                    ds_toggle_boolean(DS_APPLICATION_ID,
-                                      DS_AGENT_NO_ROOT_ACCESS);
-		    break;
+	case 'H':
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
+	    init_agent("snmpd");   /* register our .conf handlers */
+	    init_mib_modules();
+	    init_snmp("snmpd");
+	    fprintf(stderr, "Configuration directives understood:\n");
+	    read_config_print_usage("  ");
+	    exit(0);
 
-                case 'P':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  pid_file = argv[arg];
-		  break;
+	case 'I':
+	    if (optarg != NULL) {
+		add_to_init_list(optarg);
+	    } else {
+		usage(argv[0]);
+	    }
+	    break;
 
-                case 'a':
-		  log_addresses++;
-                  break;
-
-                case 'V':
-                  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE, 1);
-                  break;
-
-                case 'f':
-                  dont_fork = 1;
-                  break;
-
-                case 'l':
-                  if (++arg == argc) {
-                    usage(argv[0]);
-		  }
-		  if (strlen(argv[arg]) > PATH_MAX) {
+	case 'l':
+	    if (optarg != NULL) {
+		if (strlen(optarg) > PATH_MAX) {
 		    fprintf(stderr,
 			    "%s: logfile path too long (limit %d chars)\n",
 			    argv[0], PATH_MAX);
 		    exit(1);
-		  }
-                  strncpy(logfile, argv[arg], PATH_MAX);
-                  break;
+		}
+		strncpy(logfile, optarg, PATH_MAX);
+	    } else {
+		usage(argv[0]);
+	    }
+	    break;
+		
+	case 'L':
+	    stderr_log=1;
+	    break;
 
-                case 'L':
-		    stderr_log=1;
-                    break;
+	case 'P':
+	    if (optarg != NULL) {
+		pid_file = optarg;
+	    } else {
+		usage(argv[0]);
+	    }		
+	    break;
 
-		case 's':
-		    syslog_log=1;
-		    break;
+	case 'q':
+	    snmp_set_quick_print(1);
+	    break;
 
-                case 'A':
-                    dont_zero_log = 1;
-                    break;
+	case 'r':
+	    ds_toggle_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS);
+	    break;
 
-                case 'I':
-                  if (++arg == argc) usage(argv[0]);
-                  add_to_init_list(argv[arg]);
-                  break;
+	case 's':
+	    syslog_log=1;
+	    break;
 
 #if HAVE_UNISTD_H
-                case 'u':
-                  if (++arg == argc) usage(argv[0]);
-		  { char *ecp;
-		    int uid;
-		    uid = strtoul(argv[arg], &ecp, 10);
-		    if (*ecp) {
+	case 'u':
+	    if (optarg != NULL) {
+		char *ecp;
+		int uid;
+
+		uid = strtoul(optarg, &ecp, 10);
+		if (*ecp) {
 #if HAVE_GETPWNAM && HAVE_PWD_H
-		      struct passwd *info;
-		      info = getpwnam(argv[arg]);
-		      if (info) uid = info->pw_uid;
-		      else {
+		    struct passwd *info;
+		    info = getpwnam(argv[arg]);
+		    if (info) {
+			uid = info->pw_uid;
+		    } else {
 #endif
-			fprintf(stderr, "Bad user id: %s\n", argv[arg]);
+			fprintf(stderr, "Bad user id: %s\n", optarg);
 			exit(1);
 #if HAVE_GETPWNAM && HAVE_PWD_H
-		      }
-#endif
 		    }
-		  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+#endif
 		}
-                  break;
-                case 'g':
-                  if (++arg == argc) usage(argv[0]);
-                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(argv[arg]));
-                  break;
-#endif
-                case 'h':
-                  usage(argv[0]);
-                  break;
-                case 'H':
-                  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
-                  init_agent("snmpd");   /* register our .conf handlers */
-                  init_mib_modules();
-                  init_snmp("snmpd");
-                  fprintf(stderr, "Configuration directives understood:\n");
-                  read_config_print_usage("  ");
-                  exit(0);
-                case 'v':
-                  printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                  printf("Web:               http://www.net-snmp.org/\n");
-                  printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
-                  exit (0);
-                case '-':
-                  switch(argv[arg][2]){
-                    case 'v': 
-                      printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Web:               http://www.net-snmp.org/\n");
-                      printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
-                      exit (0);
-                    case 'h':
-                      usage(argv[0]);
-                      exit(0);
-                  }
-
-                default:
-                  fprintf(stderr, "%s: Invalid option: %s\n", argv[0], argv[arg]);
-                  usage(argv[0]);
-                  break;
-              }
-              continue;
-            }
-	    else {
-	      fprintf(stderr, "%s: Bad argument: %s\n", argv[0], argv[arg]);
-	      exit(1);
+		ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+	    } else {
+		usage(argv[0]);
 	    }
-	}  /* end-for */
-
-	/* honor selection of standard error output */
-	if (!stderr_log)
-		snmp_disable_stderrlog();
-
-	/* 
-	 * Initialize a argv set to the current for restarting the agent.
-	 */
-	argvrestartp = (char **) malloc((argc + 2) * sizeof(char *));
-	argvptr = argvrestartp;
-	for (i = 0, ret = 1; i < argc; i++) {
-		ret += strlen(argv[i]) + 1;
-	}
-	argvrestart = (char *) malloc(ret);
-	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
-	strcpy(argvrestartname, argv[0]);
-        if (agent_mode == -1) {
-            if ( strstr(argvrestartname, "agentxd") != NULL )
-                ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, SUB_AGENT);
-            else
-                ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
-        } else {
-            ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, agent_mode);
-        }
-        
-	for (cptr = argvrestart, i = 0; i < argc; i++) {
-		strcpy(cptr, argv[i]);
-		*(argvptr++) = cptr;
-		cptr += strlen(argv[i]) + 1;
-	}
-	*cptr = 0;
-	*argvptr = NULL;
-
-	/* 
-	 * Open the logfile if necessary.
-	 */
-
-	/* Should open logfile and/or syslog based on arguments */
-	if (logfile[0])
-		snmp_enable_filelog(logfile, dont_zero_log);
-	if (syslog_log)
-		snmp_enable_syslog(); 
-#ifdef BUFSIZ
-	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+	    break;
 #endif
-    /* 
-     * Initialize the world.  Detach from the shell.
-     * Create initial user.
-     */
+
+	case 'v':
+	    version();
+
+	case 'V':
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE, 1);
+	    break;
+
+#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
+	case 'x':
+	    if (optarg != NULL) {
+		ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, optarg);
+	    } else {
+		usage(argv[0]);
+	    }
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, 1 );
+	    break;
+#endif
+
+	case 'X':
+#if defined(USING_AGENTX_SUBAGENT_MODULE)
+	    agent_mode = SUB_AGENT;
+#else
+	    fprintf(stderr, "%s: Illegal argument -X: AgentX support not compiled in.\n", argv[0]);
+	    usage(argv[0]);
+	    exit(1);
+#endif
+	    break;
+
+	default:
+	    fprintf(stderr, "%s: Invalid option: -%c\n", argv[0], arg);
+	    usage(argv[0]);
+	    break;
+	}
+    }
+
+    if (optind < argc) {
+	/*  There are optional transport addresses on the command line.  */
+	DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
+	for (i = optind; i < argc; i++) {
+	    char *c, *astring;
+	    if ((c = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS))) {
+		astring = malloc(strlen(c) + 2 + strlen(argv[i]));
+		if (astring == NULL) {
+		    fprintf(stderr, "malloc failure processing argv[%d]\n",
+			    i);
+		    exit(1);
+		}
+		sprintf(astring, "%s,%s", c, argv[i]);
+		ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, astring);
+		free(astring);
+	    } else {
+		ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, argv[i]);
+	    }
+	}
+	DEBUGMSGTL(("snmpd/main", "port spec: %s\n",
+		    ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS)));
+    }
+
+    /*  Honor selection of standard error output.  */
+    if (!stderr_log) {
+	snmp_disable_stderrlog();
+    }
+    
+    /*  Initialize a argv set to the current for restarting the agent.	*/
+    argvrestartp = (char **)malloc((argc + 2) * sizeof(char *));
+    argvptr = argvrestartp;
+    for (i = 0, ret = 1; i < argc; i++) {
+	ret += strlen(argv[i]) + 1;
+    }
+    argvrestart = (char *) malloc(ret);
+    argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
+    strcpy(argvrestartname, argv[0]);
+    if (agent_mode == -1) {
+	if (strstr(argvrestartname, "agentxd") != NULL) {
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, SUB_AGENT);
+	} else {
+	    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
+	}
+    } else {
+	ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, agent_mode);
+    }
+        
+    for (cptr = argvrestart, i = 0; i < argc; i++) {
+	strcpy(cptr, argv[i]);
+	*(argvptr++) = cptr;
+	cptr += strlen(argv[i]) + 1;
+    }
+    *cptr = 0;
+    *argvptr = NULL;
+
+    /*  Open the logfile if necessary.  */
+
+    /*  Should open logfile and/or syslog based on arguments.  */
+    if (logfile[0]) {
+	snmp_enable_filelog(logfile, dont_zero_log);
+    }
+
+    if (syslog_log) {
+	snmp_enable_syslog(); 
+    }
+
+#ifdef BUFSIZ
+    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+#endif
+    /*  Initialize the world.  Detach from the shell.  Create initial user.  */
 #if HAVE_FORK
     if (!dont_fork && fork() != 0) {
       exit(0);
@@ -606,34 +609,28 @@ main(int argc, char *argv[])
 
 #if HAVE_GETPID
     if (pid_file != NULL) {
-      if ((PID = fopen(pid_file, "w")) == NULL) {
-        snmp_log_perror("fopen");
-        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
-          exit(1);
-      }
-      else {
-        fprintf(PID, "%d\n", (int)getpid());
-        fclose(PID);
-      }
+	if ((PID = fopen(pid_file, "w")) == NULL) {
+	    snmp_log_perror("fopen");
+	    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+		exit(1);
+	    }
+	} else {
+	    fprintf(PID, "%d\n", (int)getpid());
+	    fclose(PID);
+	}
     }
 #endif
-
-    /*  Honor selection of standard error output.  */
-    if (!stderr_log) {
-      snmp_disable_stderrlog();
-    }
 
     SOCK_STARTUP;
     init_agent("snmpd");		/* do what we need to do first. */
     init_mib_modules();
     
-
     /* start library */
     init_snmp("snmpd");
 
     if ((ret = init_master_agent()) != 0) {
-      /*  Some error opening one of the specified agent transports.  */
-      Exit(1); /*  Exit logs exit val for us  */
+	/*  Some error opening one of the specified agent transports.  */
+	Exit(1); /*  Exit logs exit val for us  */
     }
 
 #ifdef SIGTERM
@@ -652,54 +649,54 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);	/* 'Inline' failure of wayward readers */
 #endif
 
-    /* store persistent data immediately in case we crash later */
+    /*  Store persistent data immediately in case we crash later.  */
     snmp_store("snmpd");
 
-    /* send coldstart trap via snmptrap(1) if possible */
+    /*  Send coldstart trap if possible.  */
     send_easy_trap (0, 0);
         
 #if HAVE_UNISTD_H
 #ifdef HAVE_SETGID
-	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
-		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
-		if (setgid(gid)==-1
+    if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
+	DEBUGMSGTL(("snmpd/main", "Changing gid to %d.\n", gid));
+	if (setgid(gid)==-1
 #ifdef HAVE_SETGROUPS
-		 || setgroups(1, &gid)==-1
+	    || setgroups(1, &gid)==-1
 #endif
-		) {
-			snmp_log_perror("setgid failed");
-			if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
-			    exit(1);
-		}
+	    ) {
+	    snmp_log_perror("setgid failed");
+	    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+		exit(1);
+	    }
 	}
+    }
 #endif
 #ifdef HAVE_SETUID
-	if ((uid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_USERID)) != 0) {
-		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
-		if(setuid(uid)==-1) {
-			snmp_log_perror("setuid failed");
-			if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
-			    exit(1);
-		}
+    if ((uid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_USERID)) != 0) {
+	DEBUGMSGTL(("snmpd/main", "Changing uid to %d.\n", uid));
+	if(setuid(uid)==-1) {
+	    snmp_log_perror("setuid failed");
+	    if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+		exit(1);
+	    }
 	}
+    }
 #endif
 #endif
 
-	/* we're up, log our version number */
-	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
-	snmp_addrcache_initialise();
-	/* 
-	 * Forever monitor the dest_port for incoming PDUs.
-	 */
-	DEBUGMSGTL(("snmpd", "We're up.  Starting to process data.\n"));
-	receive();
+    /*  We're up, log our version number.  */
+    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
+    snmp_addrcache_initialise();
+
+    /*  Forever monitor the dest_port for incoming PDUs.  */
+    DEBUGMSGTL(("snmpd/main", "We're up.  Starting to process data.\n"));
+    receive();
 #include "mib_module_shutdown.h"
-	DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
-	SnmpTrapNodeDown();
-	DEBUGMSGTL(("snmpd", "Bye...\n"));
-	snmp_shutdown("snmpd");
-	return 0;
-
+    DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
+    SnmpTrapNodeDown();
+    DEBUGMSGTL(("snmpd/main", "Bye...\n"));
+    snmp_shutdown("snmpd");
+    return 0;
 }  /* End main() -- snmpd */
 
 /*******************************************************************-o-******
@@ -715,7 +712,7 @@ main(int argc, char *argv[])
  * Invoke the established message handlers for incoming messages on a per
  * port basis.  Handle timeouts.
  */
-	static int
+static int
 receive(void)
 {
     int numfds;
