@@ -642,7 +642,6 @@ int
 handle_next_pass(struct agent_snmp_session  *asp)
 {
     int status;
-    struct snmp_pdu *pdu = asp->pdu;
     struct request_list *req_p, *next_req;
 
 

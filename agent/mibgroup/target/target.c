@@ -20,7 +20,7 @@
 struct snmp_session *
 get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                     void *filterArg) {
-    struct snmp_session *ret = NULL, thissess, *ss;
+    struct snmp_session *ret = NULL, thissess;
     struct targetAddrTable_struct *targaddrs;
     char buf[SPRINT_MAX_LEN], smbuf[64];
     char tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;

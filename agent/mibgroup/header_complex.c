@@ -313,7 +313,6 @@ header_complex_add_data(struct header_complex_index **thedata,
   struct header_complex_index *hciptrn, *hciptrp, *ourself;
   oid newoid[MAX_OID_LEN];
   size_t newoid_len;
-  struct variable_list *vp, *vp2;
 
   if (thedata == NULL || var == NULL || data == NULL)
     return NULL;

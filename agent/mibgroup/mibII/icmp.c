@@ -197,7 +197,9 @@ var_icmp(struct variable *vp,
 {
     static ICMP_STAT_STRUCTURE	icmpstat;
     static long ret_value;
+#ifdef USES_TRADITIONAL_ICMPSTAT
     int i;
+#endif
 
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -311,7 +313,6 @@ long
 read_icmp_stat( ICMP_STAT_STRUCTURE *icmpstat, int magic )
 {
    long ret_value = -1;
-   int i;
 #if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_ICMP, ICMPCTL_STATS };
    size_t len = sizeof( *icmpstat );

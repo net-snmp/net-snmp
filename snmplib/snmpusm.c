@@ -1205,21 +1205,11 @@ usm_rgenerate_out_msg (
 
      size_t *wholeMsgLen)          /* IN/OUT - Len available, len returned. */
 {
-    size_t otstlen;
-    size_t seq_len;
     size_t msgAuthParmLen = 0;
-    size_t msgPrivParmLen;
-    size_t msgSecParmLen;
-    size_t authParamsOffset;
-    size_t privParamsOffset;
-    size_t datalen;
-    size_t dataOffset;
+#ifdef SNMP_TESTING_CODE
     size_t theTotalLength;
+#endif
 
-    u_char         *ptr;
-    size_t          ptr_len;
-    size_t          remaining;
-    size_t          offSet;
     u_int           boots_uint;
     u_int           time_uint;
     long            boots_long;
@@ -1251,7 +1241,6 @@ usm_rgenerate_out_msg (
     u_char  salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
     u_char  authParams[USM_MAX_AUTHSIZE];
     u_char *authParamsPtr;
-    u_char  authParamsLen = 0;
     u_char *startcp;
     u_char *endp = wholeMsg;
     u_char iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
