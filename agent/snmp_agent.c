@@ -1476,6 +1476,39 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                  varbind_ptr->name_length));
     DEBUGMSG(("snmp_agent", ", %8p)\n", tp));
 
+    if (tp &&
+        asp->pdu->command == SNMP_MSG_GETNEXT ||
+        asp->pdu->command == SNMP_MSG_GETBULK) {
+        int result;
+        int prefix_len;
+
+        prefix_len = netsnmp_oid_find_prefix(tp->start_a,
+                                             tp->start_len,
+                                             tp->end_a, tp->end_len);
+        result =
+            netsnmp_acm_check_subtree(asp->pdu, tp->start_a, prefix_len);
+
+        while (result == VACM_NOTINVIEW) {
+            /* the entire subtree is not in view. Skip it. */
+            /** @todo make this be more intelligent about ranges.
+                Right now we merely take the highest level
+                commonality of a registration range and use that.
+                At times we might be able to be smarter about
+                checking the range itself as opposed to the node
+                above where the range exists, but I doubt this will
+                come up all that frequently. */
+            tp = tp->next;
+            if (tp) {
+                prefix_len = netsnmp_oid_find_prefix(tp->start_a,
+                                                     tp->start_len,
+                                                     tp->end_a,
+                                                     tp->end_len);
+                result =
+                    netsnmp_acm_check_subtree(asp->pdu,
+                                              tp->start_a, prefix_len);
+            }
+        }
+    }
     if (tp == NULL) {
         /*
          * no appropriate registration found 
@@ -1579,7 +1612,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                 if (asp->treecache == NULL)
                     return NULL;
                 memset(&(asp->treecache[cacheid]), 0x00,
-                       sizeof(netsnmp_tree_cache) * (CACHE_GROW_SIZE - 1));
+                       sizeof(netsnmp_tree_cache) * (CACHE_GROW_SIZE));
             }
             asp->treecache[cacheid].subtree = tp;
             asp->treecache[cacheid].requests_begin = request;
@@ -1857,8 +1890,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
         if (asp->requests[i].requestvb->type == ASN_NULL) {
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
-                                              asp->requests[i].subtree->
-                                              next)) {
+                                              asp->requests[i].subtree->next)) {
                 if (old_treecache != NULL) {
                     free(old_treecache);
                 }
