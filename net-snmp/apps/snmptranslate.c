@@ -273,6 +273,12 @@ main(int argc, char *argv[])
         if (print == 1) {
             struct tree    *tp;
             tp = get_tree(name, name_length, get_tree_head());
+            if (tp == NULL) {
+                snmp_log(LOG_ERR,
+                        "Unable to find a matching object identifier for \"%s\"\n",
+                        current_name);
+                exit(1);
+            }
             print_mib_tree(stdout, tp, width);
         } else {
             print_objid(name, name_length);
