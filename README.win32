@@ -8,21 +8,82 @@ This guide describes building with Microsoft Visual C++ and
 with the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
-
 The remainder of this guide has the following sections :
 
+Status as of 30-Jan-2004 for Win32 platforms
 Visual C++ Overview
-Status as of 10-Nov-2003 for Win32 platforms
-Status as of 18-Sep-2002 for Win32 platforms
-Status as of  5-Nov-2001 for Win32 platforms
 Installing Platform SDK
 Building with MS VC++
 Building with OpenSSL with MS VC++
 Installing from MS VC++ build
 Extending the Agent with MS VC++
+How to Register Net-SNMP Agent as a Windows service
 Building with Cygwin
 Notes on SET support for WIN32 ports
 Acknowledgements
+
+
+***************************************************************************
+*
+* Status as of 30-Jan-2004 for Win32 platforms
+*
+***************************************************************************
+
+All applications build with MS VC++, gcc under Cygwin, and gcc under MinGW.
+
+  -  All of the applications work
+     (snmpwalk, snmpget, snmpset, snmptrap, etc...)
+  -  The system, snmp, ip, tcp, udp, icmp mibgroups function
+         (when agent is built using the snmpdsdk project).
+  -  The Net-SNMP agent runs as an AgentX master agent or as subagent
+         when the callback transport patch is compiled.
+  -  smux is working
+  -  The target, notification, disman/mte groups compile but are not tested
+         
+  -  Extending the agent to support enterprise-specific MIBs works
+  -  Running the agent on a non-standard UDP or TCP port works
+  -  Snmpd can be registered as a Windows NT/2000 service
+         (the procedure is included later in this document).
+  -  Snmptrapd cannot register as a Windows service.
+
+
+The next subsection relates to items that are built using Visual Studio
+
+  -  all Visual Studio project (.dsp) files are cleaned, and 
+     a) generate code to use Multi-Threaded DLL (/MD) "C" run-time library.
+     b) provide the same preprocesor defines (WIN32,_CONSOLE,_MBCS)
+     c) remove unnecessary references to GDI, ODBC, and "C" libraries.
+     d) Debug versions build source browsing and debugging information.
+     e) provide consistent include search paths
+
+  -  Building netsnmp.dll is not supported, as the DLL does not
+	prevent corruption of dynamically changing shared data.
+
+  -  All Debug and Release targets linked with libsnmp project targets
+        build without errors, and are fully functional.
+
+
+***************************************************************************
+*
+* Interactions with Other Vendor's Products
+*
+***************************************************************************
+
+  -  Running the Net-SNMP Agent or trap receiver on Windows 95 or Win3.1
+         is not supported.
+
+  -  The Net-SNMP agent and trap receiver will fail to start
+	if either cannot bind to their connect port
+	 (161 for agent, 162 for trap receiver).
+
+  -  Running the Net-SNMP agent instead of the MS supplied one "works"
+         (at the loss of most of the functionality).
+
+  -  The Net-SNMP agent does not use the MS SNMP.dll,
+         therefore it cannot run as an extensible part of the MS agent.
+
+  -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
+         a program that is available from Microsoft or ACE#COMM.
 
 
 ***************************************************************************
@@ -36,105 +97,19 @@ more or less the same set of projects.  The former is for developers who
 have not installed the Platform SDK from Microsoft's MSDN SDK Update site.
 The latter is for those who have.   This only affects building the agent.
 
-There are two core development libraries ('libsnmp' and 'libsnmp_dll'),
+There is one core development library ('libsnmp'),
 together with a number of utility projects for the individual executable
 commands ('snmpget', 'snmpwalk', etc...).  All of these projects require
-the .lib created by ONE of the libsnmp projects, but neither libsnmp project
-is a dependency of the utility projects.  This is done intentionally so
-that you can choose which version of the applications you want to compile.
-For dynamically linked applications (significantly smaller build size), first
-compile the libsnmp_dll project and THEN compile any of the utility projects.
-Keep in mind that the dll created by the 'libsnmp_dll' project must be located
-in the current working directory
+the .lib created by the libsnmp project.
 
-The agent requires (one of) these core libraries, plus the other three
+The agent requires the core library plus the other three
 library projects ('libagent', libhelpers' and either 'netsnmpmibs' or
 'netsnmpmibssdk' depending on which workspace is being used) together
-with the main agent project (either 'snmpd' or 'snmpdsdk').  However, there
-may be some problems with using the dynamic core library ('libsnmp_dll') with
-the agent.  It's probably safer to use the static library for this project,
-and add all the relevant projects as dependencies in the workspace.
+with the main agent project (either 'snmpd' or 'snmpdsdk').
 
 The final application project is the trap handler 'snmptrapd'.  This also
-requires two of the agent libraries ('libagent' and 'libhelpers') as well
-as the core development library ('libsnmp' or 'libsnmp_dll') and the
-'snmptrapd' project itself.
-
-
-***************************************************************************
-*
-* Status as of 10-Nov-2003 for Win32 platforms
-*
-***************************************************************************
-
-  -  libsnmp now creates netsnmp.lib instead of libsnmp.lib, and 
-     libsnmp_dll creates netsnmp.lib and netsnmp.dll instead of
-     libsnmp.lib and libsnmp.dll.
-  -  The debug versions follow the same naming standards, except they
-     end with a _d (such as netsnmp_d.lib and netsnmp_d.dll)
-     internal callbacks have been disabled until a fix can be found.
-  -  The callback transport still hasn't been fixes, so AgentX still
-     doesn't work for win32.
-  -  The problem with the libsnmp_dll project also remains, so build
-     the regular libsnmp instead.
-  -  The applications now seem to work with both libsnmp and libsnmp_dll,
-     but snmpd and snmptrapd may not work with libsnmp_dll.
-  -  The problems listed below for 'Status as of 18-Sep-2002' still exist
-
- 
-***************************************************************************
-*
-* Status as of 18-Sep-2002 for Win32 platforms
-*
-***************************************************************************
-
-  -  new project files created for those wishing to use the platform sdk
-     for more functionality. The default workspace, win32.dsw, does not
-     require the platform sdk. Uses who have installed the platform sdk
-     can use win32sdk.dsw for additional functionality.
-  -  For some as-yet unknown reason, the file descriptors created for the
-     internal callback transport are causing problems with select(), so
-     internal callbacks have been disabled until a fix can be found.
-     This almost certainly means that AgentX will no longer work for win32.
-  -  There appears to be a problem with the libsnmp_dll project, so build
-     the regular libsnmp instead. This, of course, means that the
-     applications will be a bit bigger, but at least they run.
-
-WIN32 savy developers are strongly encouraged to lend a hand in helping
-to fix these problems, as none of the core developers are very enthusiastic
-about working on windows. We'll probably get around to fixing things
-eventually, but if you can help, let us know.
-
-
-***************************************************************************
-*
-* Status as of 5-Nov-2001 for Win32 platforms
-*
-***************************************************************************
-
-  -  the client applications work
-  -  the core framework of the agent works
-  -  the system, snmp, ip, tcp, udp, icmp mibgroups work
-          (assuming one installs the option Platform SDK)
-  -  the target, agentx, smux, notification groups compile
-  -  extending the agent to support enterprise-specific MIBs works
-  -  running the agent on a non-standard port works
-  -  running the UCD agent instead of the MS supplied one "works"
-          (at the loss of most of the functionality)
-  -  running the UCD agent as a "subagent" of the MS one does not work
-          (i.e. using the SNMP.dll interface)
-  -  running the UCD agent as a subagent of an AgentX master "works"
-          (bearing in mind this support is alpha-code)
-
-All applications build with both MS VC++ and Cygwin.
-
-Note: The agent cannot be built as an extensible SNMP agent that
-will work with Microsoft's agent.
-
-Neither snmpd nor snmptrapd register as NT services.
-
-Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
-a program that is available from Microsoft or ACE#COMM.
+requires the agent libraries ('libagent', 'libhelpers' and 'netsnmpmibs')
+as well as the core development library.
 
 
 ***************************************************************************
@@ -162,10 +137,7 @@ as follows:
     -  Once this package has installed, from the Start Menu run
 	"Register PSDK directories with Visual Studio"
 
-
-To buld the agent, make sure you use the win32sdk.dsw workspace.
-
-The full agent should now compile successfully.
+See the Building section below in order to build the agent.
 
 
 ***************************************************************************
@@ -175,13 +147,10 @@ The full agent should now compile successfully.
 ***************************************************************************
 
 The win32 directory contains two Microsoft VC++ workspaces and project
-files to build both static and DLL versions of the library and the
-applications. Both VC++ 6.0 and 7.0 have been tested.  Until recently it
-was known to build with VC++ 5.0 too. Unfortunately none of the developers
-have this version around anymore.
+files to build static versions of the applications.
 
-Building with earlier compiler versions has not been attempted.  Success
-stories are welcomed.
+Both VC++ 6.0 and 7.0 have been tested.  Building with earlier Microsoft
+compiler versions has been dropped and is no longer supported.
 
 A manually generated net-snmp-config.h file has been provided for use with
 the win32 build since the basic win32 environment does not support autoconf.
@@ -199,11 +168,8 @@ To build the libraries and applications, open the workspace file
 
 Note there is a Debug version and Release version for each subproject.
 
-The applications seem to work with both libnetsnmp and libnetsnmp_dll, but 
-snmpd and snmptrapd may not work with libnetsnmp_dll.
-
 The projects are arranged so that ALL of the usable products,
-the .lib, .dll, and .exe files, are written to the win32\bin
+the .exe files, are written to the win32\bin
 directory.  The win32\lib directory is used only to build the
 the files in the win32\bin directory.  Once building is completed,
 there is no further use for the files in the win32\lib directory.
@@ -213,25 +179,40 @@ of the applications.  This is so the Debug and Release versions
 of an application can be built and tested separately.
 
 
-Runtime libraries
------------------
+Project Settings
+----------------
 
-Note that the library must be built using the same options as the
-application which it will be linked with. In particular, the run-time
-libraries must match (Project settings, C/C++ tab, 'Code Generation'
-category).
-
-For example, linking in an snmplib built to use the Multithreaded DLL
+Linking in an snmplib built to use the Multithreaded DLL
 runtime library to an application configured for the Debug
 Multithreaded DLL runtime library results in a link error along the
 lines of 'defaultlib "MSVCRT" conflicts with use of other libs'.   If
 you receive a similar message, check that the projects settings
 between library and application match up.
 
+To successfully build your existing project with Net-SNMP libraries,
+change the project settings FOR YOUR APPLICATION ONLY as follows:
+
+   1. In the Link section, Select "Additional Libraries".
+        Add netsnmp.lib for Release version.
+        Add netsnmp_d.lib for Debug version.
+
+   2. Remove all references to these libraries:
+        libsnmp*.lib msvcrt*.lib libc*.lib oldnames.lib
+
+   3. In the C++ section, Select "Code Generation".
+        For Release, select /MD or "MultiThreaded DLL".
+        For Debug, select /MDd or "Debug MultiThreaded DLL".
+
+   4. Make sure "Ignore all default libraries" is NOT SET.
+
+   5. Make sure "_MBCS" is included in your pre-processor defines.
+
+
+
 Debug Information
 -----------------
 
-Note that VC++ 6.0 has new options for for debugging information -
+Note that VC++ 6.0 has options for debugging information -
 the 'Program Database'.  This option is set in the Project settings,
 C/C++ tab, 'General' category, and is turned on by default during the
 conversion of the project files. This option is not for use with a
@@ -239,43 +220,33 @@ library, as it embeds debug information into the library that
 references an external file that will not be available to the linking
 application. If you get an error message along the lines of
 'debugging information not available in file vc60.pdb, make sure the
-library debug option is set to 'C7 compatible'.
+library debug option is set to 'Program Database' or "/Zi".
+
 
 Building
 --------
 
-To build the Release versions:
--Click Build->Set Active Configuration and select 'libsnmp - Win32 
- Release' or 'libsnmp_dll - Win32 Release'
--Click Build->Build netsnmp.lib / netsnmp.dll
--If the library DLL link fails, add missing function names to
-  libsnmp_dll/libsnmp.def.
--Click Build->Batch Build. Uncheck all Debug, libsnmp and libsnmp_dll
- versions.  Make sure all other Release versions are checked.  Rebuild All. 
+Because snmptrapd builds only using win32.dsw, and since the library
+projects are exactly the same from the workspaces' point of view,
+start by building from the win32.dsw workspace.
 
-To build the Debug versions:
--Click Build->Set Active Configuration and select 'libsnmp - Win32 
- Debug' or 'libsnmp_dll - Win32 Debug'
--Click Build->Build netsnmp_d.lib / netsnmp_d.dll
--If the library DLL link fails, add missing function names to
- libsnmp_dll/libsnmp.def.
--Click Build->Batch Build. Uncheck all Release, libsnmp and libsnmp_dll
- versions.  Make sure all other Debug versions are checked.  Rebuild All. 
+1. Open win32.dsw.  Click "Build->Batch Build..."  
+2. Set Release and/or Debug in 'Project configurations' to suit.
+3. Click "ReBuild All".
+4. When building is done, View the Output window, clip and
+   save to a text file if there is some information to share.
+5. Click "File->Close Workspace".
 
-To build both Debug and Release versions:
--Click Build->Set Active Configuration and select 'libsnmp - Win32 
- Release' or 'libsnmp_dll - Win32 Release'
--Click Build->Build netsnmp.lib / libsnmp.dll
--Click Build->Set Active Configuration and select 'libsnmp - Win32 
- Debug' or 'libsnmp_dll - Win32 Debug'
--Click Build->Build netsnmp_d.lib / netsnmp_d.dll
--If the library DLL link fails, add missing function names to
- libsnmp_dll/libsnmp.def.
--Click Build->Batch Build. Uncheck all libsnmp and libsnmp_dll versions.
- Check all others.  Rebuild All. 
 
-Note: Build both using the same library (libsnmp OR libsnmp_dll).  
-      Do not attempt to mix them.
+Skip the next five steps if you did not install the Platform SDK.
+
+6. Open win32sdk.dsw.  Click "Build->Batch Build..."
+7. Set Release and/or Debug in 'Project configurations' to suit.
+8. Set netsnmpmibssdk, snmpdsdk, then Click "Build".
+9. When building is done, View the Output window, clip and
+   save to a text file if there is some information to share.
+10.Click "File->Close Workspace".
+
 
 ***************************************************************************
 *
@@ -295,7 +266,7 @@ from:
 
 http://www.kernel.org/pub/software/devel/nasm
 
-You will also need to change the win32/config.h file from
+You will also need to change the win32/net-snmp/net-snmp-config.h file from
 
 ---
 /* define if you are using the internal MD5 code */
@@ -310,14 +281,12 @@ to
 #define USE_OPENSSL 1
 ---
 
-now you will need to edit the VC++ Project settings for the libraries
-and applications. Change the Settings->Link->'Object/Library Modules' to
-include
+Now edit the VC++ Project settings for the applications only.
+Click Project->Settings.  Highlight only the names of the application projects.
+Add the next line to the 'Object/Library Modules' list for Debug and Release
+versions
 
 libeay32.lib
-
-when installing be sure to place libeay32.dll on your search path (e.g.,
-usr\bin)
 
 
 ***************************************************************************
@@ -325,6 +294,12 @@ usr\bin)
 * Installing from MS VC++ build
 *
 ***************************************************************************
+
+There is a basic installation, which installs the programs and MIB files only.
+The development installation includes library files and header files for
+other sources to compile against the Net-SNMP library, but the programs
+do not require library files nor include header files to function correctly.
+
 
 Create these subdirectories on the root directory of the
 volume you wish to hold the UC-Davis SNMP applications :
@@ -345,7 +320,13 @@ definition for mode_t (if there is one).
 
 if using OpenSSL
 Copy libeay32.dll to usr\bin
+If using OpenSSL for development
 Copy libeay32.lib to usr\lib
+
+If you do not want to install the debug versions, type :
+del \usr\bin\*_d.exe
+del \usr\bin\*_d.dll
+
 
 Installing is complete.  You may want to create a compressed
 archive of the \usr hierarchy.
@@ -379,11 +360,61 @@ and 'snmpd' project. And things should work just fine.
 
 ***************************************************************************
 *
+* How to Register Net-SNMP Agent as a Windows service
+*
+***************************************************************************
+
+ 1. If the Net-SNMP Agent is already registered, the existing program
+    must first be unregistered.  If you don't know the program's location,
+    either search for it with Windows Explorer, or invoke REGEDIT and
+    search the key using "Net-SNMP". Once it is found, Cd to the
+    program's directory, then type:
+	.\snmpd -unregister
+
+ 2. View win32\net-snmp\net-snmp-config.h to know these directories:
+        MIB directory (DEFAULT_MIBDIRS),
+    "config" directory (SNMPCONFPATH), and
+    "engine" directory PERSISTENT_DIRECTORY).
+    These values take precedence when comprehending the on-line documentation.
+    For help remembering which configuration settings can be made, or
+    into which file a particular setting belongs, print then read the manual:
+    	.\snmpd -H > snmp.settings.txt
+
+ 3. Copy "snmpd" to the "install" directory.
+    The configuration files snmpd.conf, and possibly snmp.conf, must
+    be properly formed and copied to the "config" directory.
+
+ 4. Go to the "install" directory.
+    Invoke ".\snmpd -f -Le" , with no other command line parameters.
+
+ 5. Test that the agent runs correctly from local and from remote
+    command generators.  Snmpwalk, snmpbulkwalk, and snmpget
+    are good for testing "snmpd".  When tests are completed,
+    stop the "snmpd" program.
+
+ 6. Repeat steps 3, 4 and 5, until "snmpd" works as you intend.
+    Once the agent is working, Cd to the "install" directory, and type:
+	.\snmpd -register
+
+ 7. Start the service:   net start "Net-SNMP Agent"
+
+ 8. Run the tests you ran in step 5.  You should get similar results
+    as you did when you ran those tests.  If you did not, start over
+    from step 1.
+
+ 9. Save your work, and reboot the system.  After the system restarts,
+    and you've logged in, run the tests you ran in steps 5 and 8.
+    The results should still compare favorably.
+
+
+
+***************************************************************************
+*
 * Building with Cygwin
 *
 ***************************************************************************
 
-An alternate way to build UCD SNMP for win32 is to use Cygnus's cygwin32
+An alternate way to build Net-SNMP for win32 is to use Cygnus's cygwin32
 environment.  Information on the Cygnus cygwin32 environment is available
 on the web at: http://sources.redhat.com/cygwin/.
 
@@ -403,19 +434,10 @@ part of the "Microsoft Platform SDK", which is also available from
 www.microsoft.com.  See above for details.
 
 Earlier releases of Cygwin may need to use the configure flag
-        --with-libs="-lregex -libphlpapi"
+	--with-libs="-lregex -libphlpapi"
 but this regular expression support has since been incorporated
 into the main Cygwin package, and it is no longer necessary to
 include it separately.
-
-
-***************************************************************************
-*
-* Extending the Agent with Cygwin
-*
-***************************************************************************
-
-[To Be Provided]
 
 
 ***************************************************************************
@@ -428,10 +450,6 @@ Requirements:
 
   Windows NT/2000 or later: Requires Windows NT 4.0 SP4 or later. 
   Windows 95/98/Me: Requires Windows 98 or later. 
-  Library: Use IPHLPAPI.LIB 
-
-Note: IPHLPAPI.LIB is part of the "Microsoft Platform SDK", which may be
-      freely downloaded from www.microsoft.com.  See above for details.
 
 Windows support for SET on following groups:
 
@@ -545,5 +563,6 @@ the Win32 platform ports.  If you have, and your name is not here,
 please accept our apologies, and tell us so we can add your name.
 
 David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
-Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu, Nikolai Devereaux
-and Alex Burger.
+Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu, Nikolai Devereaux,
+Alex Burger, Bernhard Penz, and Andy Smith.
+
