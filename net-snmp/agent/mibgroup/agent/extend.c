@@ -199,9 +199,9 @@ int
 extend_load_cache(netsnmp_cache *cache, void *magic)
 {
     int  out_len = 1024*100;
-    char out_buf[ out_len ];
+    char out_buf[ 1024*100 ];
     int  cmd_len = 255*2 + 2;	/* 2 * DisplayStrings */
-    char cmd_buf[ cmd_len ];
+    char cmd_buf[ 255*2 + 2 ];
     int  ret;
     char *cp;
     char *line_buf[ 1024 ];
@@ -376,7 +376,6 @@ extend_parse_config(const char *token, char *cptr)
     size_t oid_len;
     extend_registration_block *eptr;
     int  flags;
-    int  i;
 
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     if ( *exec_name == '.' ) {
@@ -1158,7 +1157,7 @@ _extend_find_entry( netsnmp_request_info       *request,
             oid_buf[ oid_len++ ] = COLUMN_EXTOUT2_OUTLINE;
                                          /* string token index */
             oid_buf[ oid_len++ ] = strlen(eptr->token);
-            for ( i=0; i<strlen(eptr->token); i++ )
+            for ( i=0; i < (int)strlen(eptr->token); i++ )
                 oid_buf[ oid_len+i ] = eptr->token[i];
             oid_len += strlen( eptr->token );
                                          /* plus line number */

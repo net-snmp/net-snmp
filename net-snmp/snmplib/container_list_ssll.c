@@ -123,7 +123,7 @@ _ssll_insert(netsnmp_container *c, const void *data)
     new_node = SNMP_MALLOC_TYPEDEF(sl_node);
     if(NULL == new_node)
         return -1;
-    new_node->data = data;
+    new_node->data = (void *)data;
     ++sl->count;
 
     /*

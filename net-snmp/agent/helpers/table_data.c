@@ -607,7 +607,7 @@ netsnmp_extract_table_row(netsnmp_request_info *request)
 netsnmp_table_data *
 netsnmp_extract_table(netsnmp_request_info *request)
 {
-    return (netsnmp_table_row *) netsnmp_request_get_list_data(request,
+    return (netsnmp_table_data *) netsnmp_request_get_list_data(request,
                                                                TABLE_DATA_TABLE);
 }
 
