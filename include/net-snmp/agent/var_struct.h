@@ -41,6 +41,7 @@ struct subtree {
     oid     range_ubound;
     netsnmp_handler_registration *reginfo;       /* new API */
     int                 cacheid;
+    int                 global_cacheid;
 };
 
 /*
