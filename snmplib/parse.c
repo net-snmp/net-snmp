@@ -517,7 +517,7 @@ char *snmp_mib_toggle_options(char *options) {
     while(*options) {
       switch(*options) {
         case 'u':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL));
+          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL);
           break;
 
         case 'c':
@@ -664,6 +664,8 @@ alloc_node(int modid)
     if (np) {
         np->tc_index = -1;
         np->modid = modid;
+	np->filename = strdup(File);
+	np->lineno = mibLine;
     }
     return np;
 }
@@ -756,6 +758,7 @@ free_node(struct node *np)
     if (np->defaultValue) free(np->defaultValue);
     if (np->parent) free(np->parent);
     if (np->augments) free(np->augments);
+    if (np->filename) free(np->filename);
     free((char*)np);
 }
 
@@ -1563,6 +1566,10 @@ static void do_linkup(struct module *mp,
 			 (onp->label ? onp->label : "<no label>"),
 			 (onp->parent ? onp->parent : "<no parent>"),
 			 onp->subid);
+		snmp_log(LOG_WARNING,
+			 "Undefined identifier: %s near line %d of %s\n",
+			 (onp->parent ? onp->parent : "<no parent>"),
+			 onp->lineno, onp->filename);
 		np = onp;
 		onp = onp->next;
 	    }

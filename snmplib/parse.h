@@ -90,6 +90,8 @@ struct node {
     char *hint;
     char *units;
     char *description;    	/* description (a quoted string) */
+    char *filename;
+    int lineno;
     char *defaultValue;
 };
 
