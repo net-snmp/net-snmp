@@ -322,3 +322,4 @@ int snmp_get_suffix_only __P((void));
 int snmp_get_errno __P((void));
 void snmp_set_do_debugging __P((int));
 int snmp_get_do_debugging __P((void));
+void snmp_pdu_add_variable __P((struct snmp_pdu *, oid *, int, u_char, u_char *, int));
