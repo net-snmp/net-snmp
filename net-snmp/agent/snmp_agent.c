@@ -194,7 +194,7 @@ init_master_agent(int dest_port,
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
 
-    DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
+    DEBUGMSGTL(("snmpd","installing master agent on port %d\n", dest_port));
 
     snmp_sess_init( &sess );
     
