@@ -88,7 +88,7 @@ struct partyEntry {
 };
 
 struct partyEntry *
-party_getEntry __P((oid *partyID, int partyIDLen));
+party_getEntry (oid *partyID, int partyIDLen);
 /*
  * Returns a pointer to the partyEntry with the
  * same identity as partyID.
@@ -96,7 +96,7 @@ party_getEntry __P((oid *partyID, int partyIDLen));
  */
 
 void
-party_scanInit __P((void));
+party_scanInit (void);
 /*
  * Initialized the scan routines so that they will begin at the
  * beginning of the list of partyEntries.
@@ -105,7 +105,7 @@ party_scanInit __P((void));
 
 
 struct partyEntry *
-party_scanNext __P((void));
+party_scanNext (void);
 /*
  * Returns a pointer to the next partyEntry.
  * These entries are returned in no particular order,
@@ -116,13 +116,13 @@ party_scanNext __P((void));
  */
 
 struct partyEntry *
-party_createEntry __P((oid *partyID, int partyIDLen));
+party_createEntry (oid *partyID, int partyIDLen);
 /*
  * Creates a partyEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-void party_destroyEntry __P((oid *, int));
-int read_party_database __P((char *));
+void party_destroyEntry (oid *, int);
+int read_party_database (char *);
 #endif

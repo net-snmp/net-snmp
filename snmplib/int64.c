@@ -33,11 +33,9 @@
 *
 */
 void
-divBy10(u64, pu64Q, puR)
-  U64 u64;
-  U64 *pu64Q;
-  unsigned int *puR;
-  
+divBy10(U64 u64,
+	U64 *pu64Q,
+	unsigned int *puR)  
 {
     unsigned long ulT;
     unsigned long ulQ;
@@ -84,9 +82,8 @@ divBy10(u64, pu64Q, puR)
 *
 */
 void
-multBy10(u64, pu64P)
-  U64 u64;
-  U64 *pu64P;
+multBy10(U64 u64,
+	 U64 *pu64P)
 {
     unsigned long ulT;
     unsigned long ulP;
@@ -129,9 +126,8 @@ multBy10(u64, pu64P)
 *
 */
 void
-incrByU16(pu64, u16)
-  U64 *pu64;
-  unsigned int u16;
+incrByU16(U64 *pu64,
+	  unsigned int u16)
 {
     unsigned long ulT1;
     unsigned long ulT2;
@@ -165,9 +161,8 @@ incrByU16(pu64, u16)
 } /* incrByV16 */
 
 void
-incrByU32(pu64, u32)
-  U64 *pu64;
-  unsigned int u32;
+incrByU32(U64 *pu64,
+	  unsigned int u32)
 {
   unsigned int tmp;
   tmp = pu64->low;
@@ -183,8 +178,7 @@ incrByU32(pu64, u32)
 *
 */
 void
-zeroU64(pu64)
-  U64 *pu64;
+zeroU64(U64 *pu64)
 {
 
     pu64->low = 0;
@@ -199,8 +193,7 @@ zeroU64(pu64)
 *
 */
 int
-isZeroU64(pu64)
-  U64 *pu64;
+isZeroU64(U64 *pu64)
 {
 
     if ((pu64->low == 0) && (pu64->high == 0))
@@ -211,9 +204,8 @@ isZeroU64(pu64)
 } /* isZeroU64 */
 
 void
-printU64(buf, pu64)
-  char * buf; /* char [I64CHARSZ+1]; */
-  U64 *pu64;
+printU64(char * buf, /* char [I64CHARSZ+1]; */
+	 U64 *pu64)
 {
   U64 u64a;
   U64 u64b;
@@ -237,9 +229,8 @@ printU64(buf, pu64)
 }
 
 void
-printI64(buf, pu64)
-  char * buf; /* char [I64CHARSZ+1]; */
-  U64 *pu64;
+printI64(char * buf, /* char [I64CHARSZ+1]; */
+	 U64 *pu64)
 {
   U64 u64a;
   U64 u64b;
@@ -276,9 +267,8 @@ printI64(buf, pu64)
 }
 
 void
-read64(i64, string)
-  U64 *i64;
-  char *string;
+read64(U64 *i64,
+       char *string)
 {
   U64 i64p;
   unsigned int u;

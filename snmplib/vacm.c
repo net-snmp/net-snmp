@@ -53,10 +53,9 @@ static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
 
 struct vacm_viewEntry *
-vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
-    char *viewName;
-    oid *viewSubtree;
-    int viewSubtreeLen;
+vacm_getViewEntry(char *viewName,
+		  oid *viewSubtree,
+		  int viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
     char view[32];
@@ -99,13 +98,13 @@ vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
 }
 
 void
-vacm_scanViewInit __P((void))
+vacm_scanViewInit (void)
 {
     viewScanPtr = viewList;
 }
 
 struct vacm_viewEntry *
-vacm_scanViewNext __P((void))
+vacm_scanViewNext (void)
 {
     struct vacm_viewEntry *returnval = viewScanPtr;
     if (viewScanPtr) viewScanPtr = viewScanPtr->next;
@@ -113,10 +112,9 @@ vacm_scanViewNext __P((void))
 }
 
 struct vacm_viewEntry *
-vacm_createViewEntry(viewName, viewSubtree, viewSubtreeLen)
-    char *viewName;
-    oid *viewSubtree;
-    int viewSubtreeLen;
+vacm_createViewEntry(char *viewName,
+		     oid *viewSubtree,
+		     int viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lp, *op = NULL;
     int cmp;
@@ -148,10 +146,9 @@ next:
 }
 
 void
-vacm_destroyViewEntry(viewName, viewSubtree, viewSubtreeLen)
-    char *viewName;
-    oid *viewSubtree;
-    int viewSubtreeLen;
+vacm_destroyViewEntry(char *viewName,
+		      oid *viewSubtree,
+		      int viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lastvp = NULL;
 
@@ -180,7 +177,7 @@ vacm_destroyViewEntry(viewName, viewSubtree, viewSubtreeLen)
     return;
 }
 
-void vacm_destroyAllViewEntries __P((void))
+void vacm_destroyAllViewEntries (void)
 {
     struct vacm_viewEntry *vp;
     while ((vp = viewList)) {
@@ -191,9 +188,8 @@ void vacm_destroyAllViewEntries __P((void))
 }
 
 struct vacm_groupEntry *
-vacm_getGroupEntry(securityModel, securityName)
-    int securityModel;
-    char *securityName;
+vacm_getGroupEntry(int securityModel,
+		   char *securityName)
 {
     struct vacm_groupEntry *vp;
     char secname[32];
@@ -210,13 +206,13 @@ vacm_getGroupEntry(securityModel, securityName)
 }
 
 void
-vacm_scanGroupInit __P((void))
+vacm_scanGroupInit (void)
 {
     groupScanPtr = groupList;
 }
 
 struct vacm_groupEntry *
-vacm_scanGroupNext __P((void))
+vacm_scanGroupNext (void)
 {
     struct vacm_groupEntry *returnval = groupScanPtr;
     if (groupScanPtr) groupScanPtr = groupScanPtr->next;
@@ -224,9 +220,8 @@ vacm_scanGroupNext __P((void))
 }
 
 struct vacm_groupEntry *
-vacm_createGroupEntry(securityModel, securityName)
-    int securityModel;
-    char *securityName;
+vacm_createGroupEntry(int securityModel,
+		      char *securityName)
 {
     struct vacm_groupEntry *gp, *lg, *og;
     int cmp;
@@ -256,9 +251,8 @@ vacm_createGroupEntry(securityModel, securityName)
 }
 
 void
-vacm_destroyGroupEntry(securityModel, securityName)
-    int securityModel;
-    char *securityName;
+vacm_destroyGroupEntry(int securityModel,
+		       char *securityName)
 {
     struct vacm_groupEntry *vp, *lastvp = NULL;
 
@@ -283,7 +277,7 @@ vacm_destroyGroupEntry(securityModel, securityName)
     return;
 }
 
-void vacm_destroyAllGroupEntries __P((void))
+void vacm_destroyAllGroupEntries (void)
 {
     struct vacm_groupEntry *gp;
     while ((gp = groupList)) {
@@ -294,9 +288,10 @@ void vacm_destroyAllGroupEntries __P((void))
 }
 
 struct vacm_accessEntry *
-vacm_getAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
-    char *groupName, *contextPrefix;
-    int securityModel, securityLevel;
+vacm_getAccessEntry(char *groupName, 
+		    char *contextPrefix,
+		    int securityModel, 
+		    int securityLevel)
 {
     struct vacm_accessEntry *vp;
     char group[32];
@@ -317,13 +312,13 @@ vacm_getAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
 }
 
 void
-vacm_scanAccessInit __P((void))
+vacm_scanAccessInit (void)
 {
     accessScanPtr = accessList;
 }
 
 struct vacm_accessEntry *
-vacm_scanAccessNext __P((void))
+vacm_scanAccessNext (void)
 {
     struct vacm_accessEntry *returnval = accessScanPtr;
     if (accessScanPtr) accessScanPtr = accessScanPtr->next;
@@ -331,9 +326,10 @@ vacm_scanAccessNext __P((void))
 }
 
 struct vacm_accessEntry *
-vacm_createAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
-    char *groupName, *contextPrefix;
-    int securityModel, securityLevel;
+vacm_createAccessEntry(char *groupName, 
+		       char *contextPrefix,
+		       int securityModel, 
+		       int securityLevel)
 {
     struct vacm_accessEntry *vp, *lp, *op = NULL;
     int cmp;
@@ -372,9 +368,10 @@ next:
 }
 
 void
-vacm_destroyAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
-    char *groupName, *contextPrefix;
-    int securityModel, securityLevel;
+vacm_destroyAccessEntry(char *groupName, 
+			char *contextPrefix,
+			int securityModel,
+			int securityLevel)
 {
     struct vacm_accessEntry *vp, *lastvp = NULL;
 
@@ -403,7 +400,7 @@ vacm_destroyAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
     return;
 }
 
-void vacm_destroyAllAccessEntries __P((void))
+void vacm_destroyAllAccessEntries (void)
 {
     struct vacm_accessEntry *ap;
     while ((ap = accessList)) {

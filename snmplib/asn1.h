@@ -129,35 +129,35 @@ typedef struct counter64 unsigned64;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-u_char	*asn_parse_int __P((u_char *, int *, u_char *, long *, int));
-u_char	*asn_build_int __P((u_char *, int *, u_char, long *, int));
-u_char	*asn_parse_unsigned_int __P((u_char *, int *, u_char *, u_long *, int));
-u_char	*asn_build_unsigned_int __P((u_char *, int *, u_char, u_long *, int));
-u_char	*asn_parse_string __P((u_char *, int *, u_char *, u_char *, int *));
-u_char	*asn_build_string __P((u_char *, int *, u_char, u_char *, int));
-u_char	*asn_parse_header __P((u_char *, int *, u_char *));
-u_char	*asn_build_header __P((u_char *, int *, u_char, int));
-u_char	*asn_build_sequence __P((u_char *, int *, u_char, int));
-u_char	*asn_parse_length __P((u_char *, u_long *));
-u_char	*asn_build_length __P((u_char *, int *, int));
-u_char	*asn_parse_objid __P((u_char *, int *, u_char *, oid *, int *));
-u_char	*asn_build_objid __P((u_char *, int *, u_char, oid *, int));
-u_char	*asn_parse_null __P((u_char *, int *, u_char *));
-u_char	*asn_build_null __P((u_char *, int *, u_char));
-u_char	*asn_parse_bitstring __P((u_char *, int *, u_char *, u_char *, int *));
-u_char	*asn_build_bitstring __P((u_char *, int *, u_char, u_char *, int));
-u_char	*asn_parse_unsigned_int64 __P((u_char *, int *, u_char *,
-                                       struct counter64 *, int));
-u_char	*asn_build_unsigned_int64 __P((u_char *, int *, u_char,
-                                       struct counter64 *, int));
-u_char	*asn_parse_signed_int64 __P((u_char *, int *, u_char *,
-                                       struct counter64 *, int));
-u_char	*asn_build_signed_int64 __P((u_char *, int *, u_char,
-                                       struct counter64 *, int));
-u_char	*asn_build_float __P((u_char *, int *, u_char, float *,
-                              int));
-u_char	*asn_parse_float __P((u_char *, int *, u_char *, float *, int));
-u_char	*asn_build_double __P((u_char *, int *, u_char, double *,
-                               int));
-u_char	*asn_parse_double __P((u_char *, int *, u_char *, double *, int));
+u_char	*asn_parse_int (u_char *, int *, u_char *, long *, int);
+u_char	*asn_build_int (u_char *, int *, u_char, long *, int);
+u_char	*asn_parse_unsigned_int (u_char *, int *, u_char *, u_long *, int);
+u_char	*asn_build_unsigned_int (u_char *, int *, u_char, u_long *, int);
+u_char	*asn_parse_string (u_char *, int *, u_char *, u_char *, int *);
+u_char	*asn_build_string (u_char *, int *, u_char, u_char *, int);
+u_char	*asn_parse_header (u_char *, int *, u_char *);
+u_char	*asn_build_header (u_char *, int *, u_char, int);
+u_char	*asn_build_sequence (u_char *, int *, u_char, int);
+u_char	*asn_parse_length (u_char *, u_long *);
+u_char	*asn_build_length (u_char *, int *, int);
+u_char	*asn_parse_objid (u_char *, int *, u_char *, oid *, int *);
+u_char	*asn_build_objid (u_char *, int *, u_char, oid *, int);
+u_char	*asn_parse_null (u_char *, int *, u_char *);
+u_char	*asn_build_null (u_char *, int *, u_char);
+u_char	*asn_parse_bitstring (u_char *, int *, u_char *, u_char *, int *);
+u_char	*asn_build_bitstring (u_char *, int *, u_char, u_char *, int);
+u_char	*asn_parse_unsigned_int64 (u_char *, int *, u_char *,
+                                       struct counter64 *, int);
+u_char	*asn_build_unsigned_int64 (u_char *, int *, u_char,
+                                       struct counter64 *, int);
+u_char	*asn_parse_signed_int64 (u_char *, int *, u_char *,
+                                       struct counter64 *, int);
+u_char	*asn_build_signed_int64 (u_char *, int *, u_char,
+                                       struct counter64 *, int);
+u_char	*asn_build_float (u_char *, int *, u_char, float *,
+                              int);
+u_char	*asn_parse_float (u_char *, int *, u_char *, float *, int);
+u_char	*asn_build_double (u_char *, int *, u_char, double *,
+                               int);
+u_char	*asn_parse_double (u_char *, int *, u_char *, double *, int);
 #endif /* ASN1_H */

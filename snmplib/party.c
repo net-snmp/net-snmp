@@ -38,9 +38,8 @@ static int cachePtr;
 static int NextIndex = 1;
 
 struct partyEntry *
-party_getEntry(partyID, partyIDLen)
-    oid *partyID;
-    int partyIDLen;
+party_getEntry(oid *partyID,
+	       int partyIDLen)
 {
     struct partyEntry *pp;
 
@@ -69,13 +68,13 @@ party_getEntry(partyID, partyIDLen)
 }
 
 void
-party_scanInit()
+party_scanInit(void)
 {
   ScanPtr = List;
 }
 
 struct partyEntry *
-party_scanNext()
+party_scanNext(void)
 {
     struct partyEntry *returnval;
 
@@ -86,9 +85,8 @@ party_scanNext()
 }
 
 struct partyEntry *
-party_createEntry(partyID, partyIDLen)
-    oid *partyID;
-    int partyIDLen;
+party_createEntry(oid *partyID,
+		  int partyIDLen)
 {
     struct partyEntry *pp;
 
@@ -108,9 +106,8 @@ party_createEntry(partyID, partyIDLen)
 }
 
 void
-party_destroyEntry(partyID, partyIDLen)
-    oid *partyID;
-    int partyIDLen;
+party_destroyEntry(oid *partyID,
+		   int partyIDLen)
 {
     struct partyEntry *pp, *lastpp = NULL;
 

@@ -73,34 +73,34 @@ SOFTWARE.
 #include "system.h"
 #include "read_config.h"
 
-static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static int parse_subtree __P((struct tree *, char *, oid *, int *));
-static char *uptimeString __P((u_long, char *));
-static void sprint_hexstring __P((char *, u_char *, int));
-static void sprint_asciistring __P((char *, u_char *, int));
-static void sprint_octet_string __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_opaque __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_object_identifier __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_timeticks __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_hinted_integer __P((char *, long, char *, char *));
-static void sprint_integer __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_uinteger __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_gauge __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_counter __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_networkaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_ipaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_null __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_bitstring __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_nsapaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_counter64 __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_by_type (char *, struct variable_list *, struct enum_list *, char *, char *);
+static int parse_subtree (struct tree *, char *, oid *, int *);
+static char *uptimeString (u_long, char *);
+static void sprint_hexstring (char *, u_char *, int);
+static void sprint_asciistring (char *, u_char *, int);
+static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_opaque (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_object_identifier (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_timeticks (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_hinted_integer (char *, long, char *, char *);
+static void sprint_integer (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_uinteger (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_gauge (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_counter (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_networkaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_ipaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_null (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_bitstring (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_counter64 (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_unknowntype (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_badtype (char *, struct variable_list *, struct enum_list *, char *, char *);
   
 #ifdef OPAQUE_SPECIAL_TYPES
-static void sprint_float __P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_float (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_double (char *, struct variable_list *, struct enum_list *, char *, char *);
 #endif
-void print_tree_node __P((FILE *f, struct tree *tp));
+void print_tree_node (FILE *f, struct tree *tp);
 
 extern struct tree *tree_head;
 
@@ -124,11 +124,13 @@ typedef struct _PrefixList {
  */
 PrefixList mib_prefixes[] = {
 	{ &Standard_Prefix[0] }, /* placeholder for Prefix data */
-	{ ".iso.org.dod.internet.mgmt.mib-2" },
-	{ ".iso.org.dod.internet.experimental" },
-	{ ".iso.org.dod.internet.private" },
-	{ ".iso.org.dod.internet.snmpParties" },
-	{ ".iso.org.dod.internet.snmpSecrets" },
+	{ (char*)".iso.org.dod.internet.mgmt.mib-2" },
+	{ (char*)".iso.org.dod.internet.experimental" },
+	{ (char*)".iso.org.dod.internet.private" },
+	{ (char*)".iso.org.dod.internet.experimental" },
+	{ (char*)".iso.org.dod.internet.snmpParties" },
+	{ (char*)".iso.org.dod.internet.experimental" },
+	{ (char*)".iso.org.dod.internet.snmpSecrets" },
 	{ NULL, 0 }  /* end of list */
 };
 
@@ -136,43 +138,39 @@ static int quick_print = 0;
 static int full_objid = 0;
 static int suffix_only = 0;
 
-void snmp_set_quick_print(val)
-    int val;
+void snmp_set_quick_print(int val)
 {
     quick_print = val;
 }
 
-int snmp_get_quick_print __P((void))
+int snmp_get_quick_print (void)
 {
     return quick_print;
 }
 
-void snmp_set_full_objid(val)
-    int val;
+void snmp_set_full_objid(int val)
 {
     full_objid = val;
 }
 
-int snmp_get_full_objid __P((void))
+int snmp_get_full_objid (void)
 {
     return full_objid;
 }
 
-void snmp_set_suffix_only(val)
-    int val;
+void snmp_set_suffix_only(int val)
 {
     suffix_only = val;
 }
 
-int snmp_get_suffix_only __P((void))
+int snmp_get_suffix_only (void)
 {
     return suffix_only;
 }
 
 static char *
-uptimeString(timeticks, buf)
-    register u_long timeticks;
-    char *buf;
+uptimeString(u_long timeticks, 
+	     char *buf)
 {
     int	centisecs, seconds, minutes, hours, days;
 
@@ -205,10 +203,9 @@ uptimeString(timeticks, buf)
     return buf;
 }
 
-static void sprint_hexstring(buf, cp, len)
-    char *buf;
-    u_char  *cp;
-    int	    len;
+static void sprint_hexstring(char *buf,
+			     u_char  *cp,
+			     int	    len)
 {
 
     for(; len >= 16; len -= 16){
@@ -226,10 +223,9 @@ static void sprint_hexstring(buf, cp, len)
     *buf = '\0';
 }
 
-static void sprint_asciistring(buf, cp, len)
-    char *buf;
-    u_char  *cp;
-    int	    len;
+static void sprint_asciistring(char *buf,
+			       u_char  *cp,
+			       int	    len)
 {
     int	x;
 
@@ -261,13 +257,13 @@ static void sprint_asciistring(buf, cp, len)
   > 4     "this is a test"
 
   */
+
 static void
-sprint_octet_string(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_octet_string(char *buf,
+		    struct variable_list *var,
+		    struct enum_list *enums,
+		    char *hint,
+		    char *units)
 {
     int hex, x;
     u_char *cp;
@@ -380,12 +376,11 @@ sprint_octet_string(buf, var, enums, hint, units)
 #ifdef OPAQUE_SPECIAL_TYPES
 
 static void
-sprint_float(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_float(char *buf,
+	     struct variable_list *var,
+	     struct enum_list *enums,
+	     char *hint,
+	     char *units)
 {
   if (var->type != ASN_OPAQUE_FLOAT) {
 	sprintf(buf, "Wrong Type (should be Float): ");
@@ -403,12 +398,11 @@ sprint_float(buf, var, enums, hint, units)
 }
 
 static void
-sprint_double(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_double(char *buf,
+	      struct variable_list *var,
+	      struct enum_list *enums,
+	      char *hint,
+	      char *units)
 {
   if (var->type != ASN_OPAQUE_DOUBLE) {
 	sprintf(buf, "Wrong Type (should be Double): ");
@@ -428,12 +422,11 @@ sprint_double(buf, var, enums, hint, units)
 #endif /* OPAQUE_SPECIAL_TYPES */
 
 static void
-sprint_opaque(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_opaque(char *buf,
+	      struct variable_list *var,
+	      struct enum_list *enums,
+	      char *hint,
+	      char *units)
 {
 
     if (var->type != ASN_OPAQUE
@@ -481,12 +474,11 @@ sprint_opaque(buf, var, enums, hint, units)
 }
 
 static void
-sprint_object_identifier(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_object_identifier(char *buf,
+			 struct variable_list *var,
+			 struct enum_list *enums,
+			 char *hint,
+			 char *units)
 {
     if (var->type != ASN_OBJECT_ID){
 	sprintf(buf, "Wrong Type (should be OBJECT IDENTIFIER): ");
@@ -504,12 +496,11 @@ sprint_object_identifier(buf, var, enums, hint, units)
 }
 
 static void
-sprint_timeticks(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_timeticks(char *buf,
+		 struct variable_list *var,
+		 struct enum_list *enums,
+		 char *hint,
+		 char *units)
 {
     char timebuf[32];
 
@@ -529,11 +520,10 @@ sprint_timeticks(buf, var, enums, hint, units)
 }
 
 static void
-sprint_hinted_integer (buf, val, hint, units)
-    char *buf;
-    long val;
-    char *hint;
-    char *units;
+sprint_hinted_integer (char *buf,
+		       long val,
+		       char *hint,
+		       char *units)
 {
     char code;
     int shift, len;
@@ -574,12 +564,11 @@ sprint_hinted_integer (buf, val, hint, units)
 }
 
 static void
-sprint_integer(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_integer(char *buf,
+	       struct variable_list *var,
+	       struct enum_list *enums,
+	       char *hint,
+	       char *units)
 {
     char    *enum_string = NULL;
 
@@ -607,12 +596,11 @@ sprint_integer(buf, var, enums, hint, units)
 }
 
 static void
-sprint_uinteger(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_uinteger(char *buf,
+		struct variable_list *var,
+		struct enum_list *enums,
+		char *hint,
+		char *units)
 {
     char    *enum_string = NULL;
 
@@ -638,12 +626,11 @@ sprint_uinteger(buf, var, enums, hint, units)
 }
 
 static void
-sprint_gauge(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_gauge(char *buf,
+	     struct variable_list *var,
+	     struct enum_list *enums,
+	     char *hint,
+	     char *units)
 {
     if (var->type != ASN_GAUGE){
 	sprintf(buf, "Wrong Type (should be Gauge): ");
@@ -660,12 +647,11 @@ sprint_gauge(buf, var, enums, hint, units)
 }
 
 static void
-sprint_counter(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_counter(char *buf,
+	       struct variable_list *var,
+	       struct enum_list *enums,
+	       char *hint,
+	       char *units)
 {
     if (var->type != ASN_COUNTER){
 	sprintf(buf, "Wrong Type (should be Counter): ");
@@ -679,12 +665,11 @@ sprint_counter(buf, var, enums, hint, units)
 }
 
 static void
-sprint_networkaddress(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_networkaddress(char *buf,
+		      struct variable_list *var,
+		      struct enum_list *enums,
+		      char *hint,
+		      char *units)
 {
     int x, len;
     u_char *cp;
@@ -704,12 +689,11 @@ sprint_networkaddress(buf, var, enums, hint, units)
 }
 
 static void
-sprint_ipaddress(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_ipaddress(char *buf,
+		 struct variable_list *var,
+		 struct enum_list *enums,
+		 char *hint,
+		 char *units)
 {
     u_char *ip;
 
@@ -727,12 +711,11 @@ sprint_ipaddress(buf, var, enums, hint, units)
 }
 
 static void
-sprint_null(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_null(char *buf,
+	    struct variable_list *var,
+	    struct enum_list *enums,
+	    char *hint,
+	    char *units)
 {
     if (var->type != ASN_NULL){
 	sprintf(buf, "Wrong Type (should be NULL): ");
@@ -799,12 +782,11 @@ sprint_bitstring(buf, var, enums, hint, units)
 }
 
 static void
-sprint_nsapaddress(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_nsapaddress(char *buf,
+		   struct variable_list *var,
+		   struct enum_list *enums,
+		   char *hint,
+		   char *units)
 {
     if (var->type != ASN_NSAP){
 	sprintf(buf, "Wrong Type (should be NsapAddress): ");
@@ -820,12 +802,11 @@ sprint_nsapaddress(buf, var, enums, hint, units)
 }
 
 static void
-sprint_counter64(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_counter64(char *buf,
+		 struct variable_list *var,
+		 struct enum_list *enums,
+		 char *hint,
+		 char *units)
 {
     char a64buf[I64CHARSZ+1];
 
@@ -883,35 +864,32 @@ sprint_counter64(buf, var, enums, hint, units)
 }
 
 static void
-sprint_unknowntype(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_unknowntype(char *buf,
+		   struct variable_list *var,
+		   struct enum_list *enums,
+		   char *hint,
+		   char *units)
 {
 /*    sprintf(buf, "Variable has bad type"); */
     sprint_by_type(buf, var, NULL, NULL, NULL);
 }
 
 static void
-sprint_badtype(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_badtype(char *buf,
+	       struct variable_list *var,
+	       struct enum_list *enums,
+	       char *hint,
+	       char *units)
 {
     sprintf(buf, "Variable has bad type");
 }
 
 static void
-sprint_by_type(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_by_type(char *buf,
+	       struct variable_list *var,
+	       struct enum_list *enums,
+	       char *hint,
+	       char *units)
 {
     switch (var->type){
 	case ASN_INTEGER:
@@ -968,7 +946,7 @@ sprint_by_type(buf, var, enums, hint, units)
 }
 
 
-struct tree *get_tree_head __P((void))
+struct tree *get_tree_head(void)
 {
    return(tree_head);
 }
@@ -977,9 +955,8 @@ static char *confmibdir=NULL;
 static char *confmibs=NULL;
 
 void
-handle_mibdirs_conf(word, line)
-  char *word;
-  char *line;
+handle_mibdirs_conf(char *word,
+		    char *line)
 {
   if (confmibdir)
     free(confmibdir);
@@ -988,9 +965,8 @@ handle_mibdirs_conf(word, line)
 }
 
 void
-handle_mibs_conf(word, line)
-  char *word;
-  char *line;
+handle_mibs_conf(char *word,
+		 char *line)
 {
   if (confmibs)
     free(confmibs);
@@ -999,86 +975,86 @@ handle_mibs_conf(word, line)
 }
 
 void
-handle_mibfile_conf(word, line)
-  char *word;
-  char *line;
+handle_mibfile_conf(char *word,
+		    char *line)
 {
   DEBUGMSGTL(("read_config:initmib", "reading mibfile: %s\n", line));
   read_mib(line);
 }
 
 void
-register_mib_handlers __P((void)) {
-  register_premib_handler("snmp","mibdirs",
-	  (void (*)(char *,char *))handle_mibdirs_conf,NULL,
-                          "[mib-dirs|+mib-dirs]");
-  register_premib_handler("snmp","mibs",
-	  (void (*)(char *,char *))handle_mibs_conf,NULL,
-                          "[mib-tokens|+mib-tokens]");
-  register_config_handler("snmp","mibfile",
-	  (void (*)(char *,char *))handle_mibfile_conf,NULL,
-                          "mibfile-to-read");
+register_mib_handlers (void) 
+{
+    register_premib_handler("snmp","mibdirs",
+			    (void (*)(char *,char *))handle_mibdirs_conf,NULL,
+			    "[mib-dirs|+mib-dirs]");
+    register_premib_handler("snmp","mibs",
+			    (void (*)(char *,char *))handle_mibs_conf,NULL,
+			    "[mib-tokens|+mib-tokens]");
+    register_config_handler("snmp","mibfile",
+			    (void (*)(char *,char *))handle_mibfile_conf,NULL,
+			    "mibfile-to-read");
 }
 
 void
-init_mib __P((void))
+init_mib (void)
 {
     char *prefix;
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
-
+    
     if (Mib) return;
-
-	/* Initialise the MIB directory/ies */
+    
+    /* Initialise the MIB directory/ies */
 
     /* we can't use the environment variable directly, because strtok
        will modify it. */
-
+    
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
-      if (confmibdir != NULL)
-        env_var = strdup(confmibdir);
-      else
-        env_var = strdup(DEFAULT_MIBDIRS);
+	if (confmibdir != NULL)
+	    env_var = strdup(confmibdir);
+	else
+	    env_var = strdup(DEFAULT_MIBDIRS);
     } else {
-      env_var = strdup(env_var);
+	env_var = strdup(env_var);
     }
     if (*env_var == '+') {
-      entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
-      sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
-      free(env_var);
-      env_var = entry;
+	entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
+	sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+	free(env_var);
+	env_var = entry;
     }
-
+    
     DEBUGMSGTL(("init_mib","Looking in %s for mibs...\n",env_var));
-
+    
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
     }
     free(env_var);
-
+    
     init_mib_internals();
 
-	/* Read in any modules or mibs requested */
-
+    /* Read in any modules or mibs requested */
+    
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
-      if (confmibs != NULL)
+	if (confmibs != NULL)
         env_var = strdup(confmibs);
-      else
-        env_var = strdup(DEFAULT_MIBS);
+	else
+	    env_var = strdup(DEFAULT_MIBS);
     } else {
-      env_var = strdup(env_var);
+	env_var = strdup(env_var);
     }
     if (*env_var == '+') {
-      entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
-      sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
-      free(env_var);
-      env_var = entry;
+	entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
+	sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+	free(env_var);
+	env_var = entry;
     }
-
+    
     DEBUGMSGTL(("init_mib","Looking for mibs... %s\n",env_var));
     if (strcmp (env_var, "ALL") == 0) {
 	read_all_mibs();
@@ -1091,39 +1067,39 @@ init_mib __P((void))
 	adopt_orphans();
     }
     free(env_var);
-
+    
     env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
 #ifdef DEFAULT_MIBFILES
-      if (*env_var == '+') {
+	if (*env_var == '+') {
         entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
         sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
                 env_var+1);
         env_var = entry;
-      } else {
-        env_var = strdup(DEFAULT_MIBFILES);
-      }
+	} else {
+	    env_var = strdup(DEFAULT_MIBFILES);
+	}
 #endif
     } else {
-      env_var = strdup(env_var);
+	env_var = strdup(env_var);
     }
     
     if ( env_var != 0 ) {
-      entry = strtok( env_var, ENV_SEPARATOR );
-      while ( entry ) {
-        read_mib(entry);
-        entry = strtok( NULL, ENV_SEPARATOR);
-      }
+	entry = strtok( env_var, ENV_SEPARATOR );
+	while ( entry ) {
+	    read_mib(entry);
+	    entry = strtok( NULL, ENV_SEPARATOR);
+	}
     }
-
+    
     prefix = getenv("PREFIX");
-
+    
     if (!prefix)
         prefix = Standard_Prefix;
 
     Prefix = malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
-
+    
     /* remove trailing dot */
     env_var = &Prefix[strlen(Prefix) - 1];
     if (*env_var == '.') *env_var = '\0';
@@ -1142,15 +1118,13 @@ init_mib __P((void))
 }
 
 void
-print_mib (fp)
-    FILE *fp;
+print_mib (FILE *fp)
 {
     print_subtree (fp, tree_head, 0);
 }
 
 void
-print_ascii_dump (fp)
-    FILE *fp;
+print_ascii_dump (FILE *fp)
 {
   fprintf(fp, "dump DEFINITIONS ::= BEGIN\n");
   print_ascii_dump_tree (fp, tree_head, 0);
@@ -1158,13 +1132,12 @@ print_ascii_dump (fp)
 }
 
 void
-set_function(subtree)
-    struct tree *subtree;
+set_function(struct tree *subtree)
 {
-	switch(subtree->type){
-	    case TYPE_OBJID:
-		subtree->printer = sprint_object_identifier;
-		break;
+    switch(subtree->type){
+	case TYPE_OBJID:
+	    subtree->printer = sprint_object_identifier;
+	    break;
 	    case TYPE_OCTETSTR:
 		subtree->printer = sprint_octet_string;
 		break;
@@ -1211,10 +1184,9 @@ set_function(subtree)
 	}
 }
 
-int read_objid(input, output, out_len)
-    char *input;
-    oid *output;
-    int	*out_len;   /* number of subid's in "output" */
+int read_objid(char *input,
+	       oid *output,
+	       int *out_len)   /* number of subid's in "output" */
 {
     struct tree *root = tree_head;
     oid *op = output;
@@ -1248,11 +1220,10 @@ int read_objid(input, output, out_len)
 
 
 static int
-parse_subtree(subtree, input, output, out_len)
-    struct tree *subtree;
-    char *input;
-    oid	*output;
-    int	*out_len;   /* number of subid's */
+parse_subtree(struct tree *subtree,
+	      char *input,
+	      oid *output,
+	      int *out_len)   /* number of subid's */
 {
     char buf[128], *to = buf;
     u_long subid = 0;
@@ -1330,10 +1301,9 @@ found:
 }
 
 char *
-sprint_objid(buf, objid, objidlen)
-    char *buf;
-    oid	    *objid;
-    int	    objidlen;	/* number of subidentifiers */
+sprint_objid(char *buf,
+	     oid *objid,
+	     int objidlen)	/* number of subidentifiers */
 {
     char    tempbuf[2048], *cp;
     struct tree    *subtree = tree_head;
@@ -1388,9 +1358,8 @@ sprint_objid(buf, objid, objidlen)
 }
 
 void
-print_objid(objid, objidlen)
-    oid	    *objid;
-    int	    objidlen;	/* number of subidentifiers */
+print_objid(oid *objid,
+	    int objidlen)	/* number of subidentifiers */
 {
     char    buf[256];
 
@@ -1399,10 +1368,9 @@ print_objid(objid, objidlen)
 }
 
 void
-fprint_objid(f, objid, objidlen)
-    FILE    *f;
-    oid	    *objid;
-    int	    objidlen;	/* number of subidentifiers */
+fprint_objid(FILE *f,
+	     oid *objid,
+	     int objidlen)	/* number of subidentifiers */
 {
     char    buf[256];
 
@@ -1411,11 +1379,10 @@ fprint_objid(f, objid, objidlen)
 }
 
 void
-sprint_variable(buf, objid, objidlen, variable)
-    char *buf;
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+sprint_variable(char *buf,
+		oid *objid,
+		int objidlen,
+		struct variable_list *variable)
 {
     char    tempbuf[2048];
     struct tree    *subtree = tree_head;
@@ -1447,10 +1414,9 @@ sprint_variable(buf, objid, objidlen, variable)
 }
 
 void
-print_variable(objid, objidlen, variable)
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+print_variable(oid *objid,
+	       int objidlen,
+	       struct variable_list *variable)
 {
     char    buf[2048];
 
@@ -1459,11 +1425,10 @@ print_variable(objid, objidlen, variable)
 }
 
 void
-fprint_variable(f, objid, objidlen, variable)
-    FILE    *f;
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+fprint_variable(FILE *f,
+		oid *objid,
+		int objidlen,
+		struct variable_list *variable)
 {
     char    buf[2048];
 
@@ -1472,11 +1437,10 @@ fprint_variable(f, objid, objidlen, variable)
 }
 
 void
-sprint_value(buf, objid, objidlen, variable)
-    char *buf;
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+sprint_value(char *buf,
+	     oid *objid,
+	     int objidlen,
+	     struct variable_list *variable)
 {
     char    tempbuf[2048];
     struct tree    *subtree = tree_head;
@@ -1498,10 +1462,9 @@ sprint_value(buf, objid, objidlen, variable)
 }
 
 void
-print_value(objid, objidlen, variable)
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+print_value(oid *objid,
+	    int objidlen,
+	    struct variable_list *variable)
 {
     char    tempbuf[2048];
 
@@ -1510,11 +1473,10 @@ print_value(objid, objidlen, variable)
 }
 
 void
-fprint_value(f, objid, objidlen, variable)
-    FILE    *f;
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
+fprint_value(FILE *f,
+	     oid *objid,
+	     int objidlen,
+	     struct variable_list *variable)
 {
     char    tempbuf[2048];
 
@@ -1523,11 +1485,10 @@ fprint_value(f, objid, objidlen, variable)
 }
 
 struct tree *
-get_symbol(objid, objidlen, subtree, buf)
-    oid	    *objid;
-    int	    objidlen;
-    struct tree    *subtree;
-    char    *buf;
+get_symbol(oid *objid,
+	   int objidlen,
+	   struct tree *subtree,
+	   char *buf)
 {
     struct tree    *return_tree = NULL;
 
@@ -1569,10 +1530,9 @@ found:
  * Clone of get_symbol that doesn't take a buffer argument
  */
 struct tree *
-get_tree(objid, objidlen, subtree)
-    oid     *objid;
-    int     objidlen;
-    struct tree    *subtree;
+get_tree(oid *objid,
+	 int objidlen,
+	 struct tree *subtree)
 {
     struct tree    *return_tree = NULL;
 
@@ -1593,27 +1553,24 @@ found:
 }
 
 void
-print_description(objid, objidlen)
-    oid     *objid;
-    int     objidlen;   /* number of subidentifiers */
+print_description(oid *objid,
+		  int objidlen)   /* number of subidentifiers */
 {
     fprint_description(stdout, objid, objidlen);
 }
 
 void
-fprint_description(f, objid, objidlen)
-    FILE    *f;
-    oid     *objid;
-    int     objidlen;   /* number of subidentifiers */
+fprint_description(FILE *f,
+		   oid *objid,
+		   int objidlen)   /* number of subidentifiers */
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
 	print_tree_node(f, tp);
 }
 
 void
-print_tree_node(f, tp)
-    FILE    *f;
-    struct tree *tp;
+print_tree_node(FILE *f,
+		struct tree *tp)
 {
     char *cp;
     char str[32];
@@ -1667,11 +1624,10 @@ print_tree_node(f, tp)
 }
 
 int
-get_module_node(name, module, objid, objidlen)
-    char *name;
-    char *module;
-    oid *objid;
-    int *objidlen;
+get_module_node(char *name,
+		char *module,
+		oid *objid,
+		int *objidlen)
 {
     int modid, subid;
     struct tree *tp, *tp2;
@@ -1756,10 +1712,9 @@ get_module_node(name, module, objid, objidlen)
 
 
 int
-get_node(name, objid, objidlen)
-    char *name;
-    oid *objid;
-    int *objidlen;
+get_node(char *name,
+	 oid *objid,
+	 int *objidlen)
 {
     char *cp;
 
@@ -1786,9 +1741,7 @@ get_node(name, objid, objidlen)
 
 #ifdef testing
 
-main(argc, argv)
-     int argc;
-     char *argv[];
+main(int argc, char* argv[])
 {
     oid objid[64];
     int objidlen = sizeof (objid);
@@ -1815,56 +1768,55 @@ main(argc, argv)
 #endif /* testing */
 
 void
-print_oid_report (fp)
-    FILE *fp;
+print_oid_report (FILE *fp)
 {
     print_subtree_oid_report (fp, tree_head, 0);
 }
 
 void
-print_oid_report_enable_labeledoid __P((void))
+print_oid_report_enable_labeledoid (void)
 {
     print_subtree_oid_report_enable_labeledoid ();
 }
 
 void
-print_oid_report_enable_oid __P((void))
+print_oid_report_enable_oid (void)
 {
     print_subtree_oid_report_enable_oid ();
 }
 
 void
-print_oid_report_enable_suffix __P((void))
+print_oid_report_enable_suffix (void)
 {
     print_subtree_oid_report_enable_suffix ();
 }
 
 void
-print_oid_report_enable_symbolic __P((void))
+print_oid_report_enable_symbolic (void)
 {
     print_subtree_oid_report_enable_symbolic ();
 }
 
 void
-print_oid_report_disable_labeledoid __P((void))
+print_oid_report_disable_labeledoid (void)
 {
     print_subtree_oid_report_disable_labeledoid ();
 }
 
 void
-print_oid_report_disable_oid __P((void))
+print_oid_report_disable_oid (void)
 {
      print_subtree_oid_report_disable_oid ();
 }
 
 void
-print_oid_report_disable_suffix __P((void))
+print_oid_report_disable_suffix (void)
 {
     print_subtree_oid_report_disable_suffix ();
 }
 
 void
-print_oid_report_disable_symbolic __P((void))
+print_oid_report_disable_symbolic (void)
 {
      print_subtree_oid_report_disable_symbolic ();
 }

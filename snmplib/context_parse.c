@@ -57,12 +57,9 @@
 #define VIEW_STATE	2
 #define PROXY_STATE  	3
 
-static void error_exit __P((char *, int, char *));
-
-static void error_exit(str, linenumber, filename)
-    char *str;
-    int linenumber;
-    char *filename;
+static void error_exit(char *str,
+		       int linenumber,
+		       char *filename)
 {
   char tmpbuf[1024];
   snmp_errno = SNMPERR_BAD_CONTEXT;
@@ -71,8 +68,7 @@ static void error_exit(str, linenumber, filename)
 }
 
 int
-read_context_database(filename)
-    char *filename;
+read_context_database(char *filename)
 {
     FILE *fp;
     char buf[256], buf1[256], buf2[256], buf3[256];

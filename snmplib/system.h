@@ -47,14 +47,14 @@ typedef struct _dir_struc
 	struct direct dirstr;	// Directory structure to return
 } DIR;
 
-DIR *opendir __P((char *filename));
-struct direct *readdir __P((DIR *dirp));
-int closedir __P((DIR *dirp));
+DIR *opendir (char *filename);
+struct direct *readdir (DIR *dirp);
+int closedir (DIR *dirp);
 
-int gettimeofday __P((struct timeval *, struct timezone *tz));
+int gettimeofday (struct timeval *, struct timezone *tz);
 
-char * winsock_startup __P((void));
-void winsock_cleanup __P((void));
+char * winsock_startup (void);
+void winsock_cleanup (void);
 
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
@@ -63,20 +63,20 @@ void winsock_cleanup __P((void));
 #define SOCK_CLEANUP
 #endif
 
-in_addr_t get_myaddr __P((void));
-long get_uptime __P((void));
+in_addr_t get_myaddr (void);
+long get_uptime (void);
 
 #ifdef STDC_HEADERS
-void DEBUGP __P((const char *, ...));
+void DEBUGP (const char *, ...);
 #else
-void DEBUGP __P((va_alist));
+void DEBUGP (va_alist);
 #endif
 
 #ifndef HAVE_STRDUP
-char *strdup __P((char *));
+char *strdup (char *);
 #endif
 #ifndef HAVE_SETENV
-int setenv __P((char *, char *, int));
+int setenv (char *, char *, int);
 #endif
  
 #endif /* SNMP_SYSTEM_H */

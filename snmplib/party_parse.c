@@ -67,13 +67,12 @@
 static oid noProxy[] = {1, 3, 6, 1, 2, 1, 20, 1, 3, 1};
 #endif
 
-static void error_exit __P((char *, int, char *));
-int update_clock __P((char *, int, u_long));
+static void error_exit (char *, int, char *);
+int update_clock (char *, int, u_long);
 
-static void error_exit(str, linenumber, filename)
-    char *str;
-    int linenumber;
-    char *filename;
+static void error_exit(char *str,
+		       int linenumber,
+		       char *filename)
 {
   char tmpbuf[1024];
   snmp_errno = SNMPERR_BAD_PARTY;
@@ -82,8 +81,7 @@ static void error_exit(str, linenumber, filename)
 }
 
 int
-read_party_database(filename)
-    char *filename;
+read_party_database(char *filename)
 {
     FILE *fp;
     char buf[256], buf1[256], buf2[256], buf3[256];
@@ -476,10 +474,9 @@ noProxy         noAuth       noPriv
   */
 
 int
-update_clock(file, pos, clock)
-    char *file;
-    int pos;
-    u_long clock;
+update_clock(char *file,
+	     int pos,
+	     u_long clock)
 {
     int fd;
     char buf[9];

@@ -36,8 +36,9 @@
 static struct aclEntry *List = NULL, *ScanPtr = NULL;
 
 struct aclEntry *
-acl_getEntry(target, subject, resources)
-    int target, subject, resources;
+acl_getEntry(int target, 
+	     int subject, 
+	     int resources)
 {
     struct aclEntry *ap;
 
@@ -51,13 +52,13 @@ acl_getEntry(target, subject, resources)
 }
 
 void
-acl_scanInit __P((void))
+acl_scanInit (void)
 {
   ScanPtr = List;
 }
 
 struct aclEntry *
-acl_scanNext __P((void))
+acl_scanNext (void)
 {
     struct aclEntry *returnval;
 
@@ -68,8 +69,9 @@ acl_scanNext __P((void))
 }
 
 struct aclEntry *
-acl_createEntry(target, subject, resources)
-    int target, subject, resources;
+acl_createEntry(int target,
+		int subject, 
+		int resources)
 {
     struct aclEntry *ap;
 
@@ -88,8 +90,9 @@ acl_createEntry(target, subject, resources)
 }
 
 void
-acl_destroyEntry(target, subject, resources)
-    int target, subject, resources;
+acl_destroyEntry(int target,
+		 int subject, 
+		 int resources)
 {
     struct aclEntry *ap, *lastap = NULL;
 

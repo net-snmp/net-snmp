@@ -20,7 +20,7 @@ typedef struct {
 ** Input: MD -- an MDptr
 ** Initialize the MDstruct prepatory to doing a message digest computation.
 */
-extern void MDbegin __P((MDptr));
+extern void MDbegin (MDptr);
 
 /* MDupdate(MD,X,count)
 ** Input: MD -- an MDptr
@@ -34,7 +34,7 @@ extern void MDbegin __P((MDptr));
 ** every MD computation should end with one call to MDupdate with a
 ** count less than 512.  Zero is OK for a count.
 */
-extern void MDupdate __P((MDptr, unsigned char *, unsigned int));
+extern void MDupdate (MDptr, unsigned char *, unsigned int);
 
 /* MDprint(MD)
 ** Input: MD -- an MDptr
@@ -42,7 +42,7 @@ extern void MDupdate __P((MDptr, unsigned char *, unsigned int));
 ** Order is from low-order byte of buffer[0] to high-order byte of buffer[3].
 ** Each byte is printed with high-order hexadecimal digit first.
 */
-extern void MDprint __P((MDptr));
+extern void MDprint (MDptr);
 
 /* 
 ** End of md5.h
