@@ -75,20 +75,23 @@ AC_ARG_WITH(efence,
 [  --with-efence                   Look for and use libefence (malloc).],
       use_efence="$withval")
 
+tryopenssl=defaultyes
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
-    tryopenssl=$withval
     if test "x$withval" = "xyes"; then
-      AC_ADD_SEARCH_PATH(/usr/local/ssl)
       tryopenssl=yes
     elif test "x$withval" = "xno"; then
-      with_openssl="no"
       tryopenssl=no
     elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
       tryopenssl=yes
     fi,
 )
+if test "x$tryopenssl" = "xdefaultyes"; then
+      AC_ADD_SEARCH_PATH(/usr/local/ssl)
+      tryopenssl=yes
+fi
+
 
 AC_ARG_ENABLE(privacy,
 [  --disable-privacy               Don't compile in support for privacy.])
@@ -1008,7 +1011,7 @@ AC_CHECK_LIB(kvm, kvm_read)
 dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 dnl Check for security related functions
-if test "x$with_openssl" != "xno"; then
+if test "x$tryopenssl" != "xno"; then
     AC_CHECK_LIB(crypto, EVP_md5)
 fi
 
