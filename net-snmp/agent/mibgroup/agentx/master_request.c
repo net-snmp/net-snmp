@@ -181,7 +181,7 @@ handle_agentx_response( int operation,
 		pdu->errindex = 0;
 		if (asp->pdu->command != SNMP_MSG_SET)
 		    asp->mode = RESERVE2;
-		break;
+		return 0;
 
 
 	case RECEIVED_MESSAGE:
