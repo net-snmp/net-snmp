@@ -13,6 +13,9 @@
 #include <sys/param.h>
 #endif
 #if HAVE_UNISTD_H
+#ifdef irix6
+#define _STANDALONE
+#endif
 #include <unistd.h>
 #endif
 #if HAVE_SYS_SOCKET_H
