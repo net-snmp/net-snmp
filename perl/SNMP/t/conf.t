@@ -23,15 +23,15 @@ use SNMP;
 use NetSNMP::default_store(':all');
 
 # should be 0, as it's un-initialized
-$myint = ds_get_int(DS_LIBRARY_ID, 
-		    DS_LIB_NUMERIC_TIMETICKS);
+$myint = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+			    NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
 
 ok($myint == 0);
 
 SNMP::init_snmp("conftest");
 
-$myint = ds_get_boolean(DS_LIBRARY_ID,
-		       DS_LIB_NUMERIC_TIMETICKS);
+$myint = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+				NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
 
 # ok, should be 1 as it's initalized by the snmp.conf config file.
 ok($myint == 1);
