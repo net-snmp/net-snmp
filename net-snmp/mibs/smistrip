@@ -60,7 +60,7 @@ do_strip () {
 	next
     }
 
-    /^[ \t]*(::=|DESCRIPTION|SYNTAX|(MAX-|MIN-|)ACCESS|STATUS|REFERENCE|INDEX|AUGMENTS|DEFVAL|")/ {
+    /^[ \t]*(::=|DESCRIPTION|SYNTAX|(MAX-|MIN-|)ACCESS|STATUS|REFERENCE|INDEX|AUGMENTS|DEFVAL|UNITS|DISPLAY|")/ {
 	if (collect)
 	    if (line[n-1] == "") n--
     }
