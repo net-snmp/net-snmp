@@ -221,7 +221,7 @@ Init_HR_Print (void)
 #elif HAVE_CGETNEXT
     {
 	char *buf = NULL, *ptr;
-	while (cgetnext(&buf, caps)) {
+	while (cgetnext(&buf, caps) > 0) {
 	    if ((ptr = strchr(buf, ':'))) *ptr = 0;
 	    if ((ptr = strchr(buf, '|'))) *ptr = 0;
 	    ptr = buf;
