@@ -123,7 +123,7 @@ main(argc, argv)
     if (arg < argc) {
       /* specified on the command line */
       rootlen = MAX_NAME_LEN;
-      if (!read_objid(argv[arg], root, &rootlen)){
+      if (snmp_parse_oid(argv[arg], root, &rootlen) == NULL) {
         fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
         exit(1);
       }

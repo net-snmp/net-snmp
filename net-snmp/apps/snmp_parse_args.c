@@ -60,6 +60,8 @@
 #include "version.h"
 #include "system.h"
 
+int random_access = 0;
+
 void usage __P((void));
 
 void
@@ -86,7 +88,6 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf,
           "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
 }
-
 
 int
 snmp_parse_args(argc, argv, session)
@@ -121,6 +122,10 @@ snmp_parse_args(argc, argv, session)
     switch(argv[arg][1]){
       case 'd':
         snmp_set_dump_packet(1);
+        break;
+
+      case 'R':
+        random_access = 1;
         break;
 
       case 'q':
@@ -385,3 +390,22 @@ snmp_parse_args(argc, argv, session)
   }
   return arg;
 }
+
+oid
+*snmp_parse_oid(argv,root,rootlen) 
+  char *argv;
+  oid *root;
+  int *rootlen;
+{
+  if (random_access) {
+    if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else {
+    if (read_objid(argv,root,rootlen)) {
+      return root;
+    }
+  }
+  return NULL;
+}
+

@@ -323,7 +323,7 @@ main(argc, argv)
 	}
 	else {
 	    name_length = MAX_NAME_LEN;
-	    if (!read_objid (argv[arg], name, &name_length)) {
+	    if (!snmp_parse_oid(argv[arg], name, &name_length)) {
 		fprintf (stderr, "Invalid enterprise id: %s\n", argv[arg]);
 		usage ();
 		exit (1);
@@ -399,7 +399,7 @@ main(argc, argv)
 	arg += 3;
 	if (arg > argc) break;
 	name_length = MAX_NAME_LEN;
-	if (!read_objid (argv [arg-3], name, &name_length)) {
+	if (!snmp_parse_oid(argv [arg-3], name, &name_length)) {
 	    fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
 	    exit(1);
 	}
