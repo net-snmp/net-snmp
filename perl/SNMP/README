@@ -32,7 +32,7 @@ Availability:
 
 The most recent release of the Perl5 SNMP module can be found bundled
 with the latest Net-SNMP distibution available from:
-http://sourceforge.net/projects/net-snmp 
+http://sourceforge.net/projects/net-snmp
 
 (Note: The perl SNMP distribution obtained this way has the highest
 chance of being up to date and compatible with the Net-SNMP version
@@ -378,7 +378,7 @@ SNMP package variables and functions:
  $SNMP::auto_init_mib - default '1', set to 0 to disable automatic reading
                         of the MIB upon session creation. set to non-zero
                         to call initMib at session creation which will result
-                        in MIB loading according to Net-SNMP env. variables 
+                        in MIB loading according to Net-SNMP env. variables
 			(see man mib_api)
 
  $SNMP::verbose       - default '0', controls warning/info output of
@@ -408,8 +408,8 @@ SNMP package variables and functions:
                         $SNMP::use_long_names to non-zero is highly recommended.
 
  $SNMP::timestamp_vars - default '0', set to non-zero to add an additional
-			time(2)-style timestamp element to each returned 
-			Varbind (as array element 4).  Do not modify a 
+			time(2)-style timestamp element to each returned
+			Varbind (as array element 4).  Do not modify a
 			timestamp value -- it is shared between all variables
 			that were received at the same time.
 
@@ -454,7 +454,8 @@ SNMP package variables and functions:
         units         - returns UNITS
         hint          - returns HINT
         enums         - returns hash ref {tag => num, ...}
-        ranges        - returns array ref [[low1, high1], [low2, high2], ...]
+        ranges        - returns array ref of hash ref [{low=>num, high=>num}]
+        defaultValue  - returns default value
         description   - returns DESCRIPTION ($SNMP::save_descriptions must
                         be set prior to MIB initialization/parsing)
 
@@ -530,7 +531,7 @@ SNMP package variables and functions:
                      interrupted. If <timeout
 
  &SNMP::finish()
-		   - This function, when called from an SNMP::MainLoop() 
+		   - This function, when called from an SNMP::MainLoop()
 		     callback function, will cause the current SNMP::MainLoop
 		     to return after the callback is completed. finish() can
 		     be used to terminate an otherwise-infinite MainLoop. A
