@@ -479,16 +479,7 @@ ipAddressType_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ipAddressType_val_ptr ) from rowreq_ctx->data->
      */
-    return MFD_SKIP;            /* TODO: remove this once you've set data */
-    /*
-     * TODO:
-     * value mapping
-     */
-    if (MFD_SUCCESS !=
-        ipAddressType_map(&(*ipAddressType_val_ptr),
-                          rowreq_ctx->data->ia_type)) {
-        return MFD_ERROR;
-    }
+    (*ipAddressType_val_ptr) = rowreq_ctx->data->ia_type;
 
     return MFD_SUCCESS;
 }
@@ -734,11 +725,7 @@ ipAddressCreated_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ipAddressCreated_val_ptr ) from rowreq_ctx->data->
      */
-    return MFD_SKIP;            /* TODO: remove this once you've set data */
-    /*
-     * TODO:
-     * value mapping
-     */
+    (* ipAddressCreated_val_ptr ) = rowreq_ctx->ipAddressCreated;
 
     return MFD_SUCCESS;
 }
@@ -790,11 +777,7 @@ ipAddressLastChanged_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ipAddressLastChanged_val_ptr ) from rowreq_ctx->data->
      */
-    return MFD_SKIP;            /* TODO: remove this once you've set data */
-    /*
-     * TODO:
-     * value mapping
-     */
+    (* ipAddressLastChanged_val_ptr ) = rowreq_ctx->ipAddressLastChanged;
 
     return MFD_SUCCESS;
 }
@@ -854,8 +837,7 @@ ipAddressRowStatus_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * update, replace or delete, if needed.
      */
-#warning ipAddressRowStatus get
-    (*ipAddressRowStatus_val_ptr) = ROWSTATUS_ACTIVE;
+    (*ipAddressRowStatus_val_ptr) = rowreq_ctx->ipAddressRowStatus;
 
     return MFD_SUCCESS;
 }
@@ -908,8 +890,7 @@ ipAddressStorageType_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ipAddressStorageType_val_ptr ) from rowreq_ctx->data->
      */
-    return MFD_SKIP;            /* TODO: remove this once you've set data */
-#warning ipAddressStorageType
+    (* ipAddressStorageType_val_ptr ) = rowreq_ctx->ipAddressStorageType;
 
     return MFD_SUCCESS;
 }
@@ -1540,7 +1521,7 @@ ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * set ipAddressIfIndex value in rowreq_ctx->data->
      */
 
-    return MFD_SUCCESS;
+    return MFD_NOT_WRITABLE;
 }
 
 /**
@@ -1713,6 +1694,7 @@ ipAddressType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    return MFD_NOT_WRITABLE;
     /*
      * TODO:
      * reverse value mapping
@@ -1929,6 +1911,7 @@ ipAddressStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    return MFD_NOT_WRITABLE;
     /*
      * TODO:
      * reverse value mapping
@@ -2164,6 +2147,7 @@ ipAddressRowStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    return MFD_NOT_WRITABLE;
     /*
      * TODO:
      * reverse value mapping
@@ -2391,6 +2375,7 @@ ipAddressStorageType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    return MFD_NOT_WRITABLE;
     /*
      * TODO:
      * reverse value mapping

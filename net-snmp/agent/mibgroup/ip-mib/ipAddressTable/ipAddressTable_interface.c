@@ -545,6 +545,9 @@ _mfd_ipAddressTable_object_lookup(netsnmp_mib_handler *handler,
      */
 
     if (NULL == rowreq_ctx) {
+#ifndef NETSNMP_IPADDRESSTABLE_CREATE_SUPPORT
+        netsnmp_request_set_error(requests, SNMP_ERR_NOCREATION);
+#else
         int             rc = MFD_SUCCESS;
         netsnmp_table_request_info *tblreq_info;
         netsnmp_index   oid_idx;
@@ -585,6 +588,7 @@ _mfd_ipAddressTable_object_lookup(netsnmp_mib_handler *handler,
                 netsnmp_request_add_list_data(requests, netsnmp_create_data_list(TABLE_CONTAINER_NAME, rowreq_ctx, NULL));      /* xxx-rks: free routine? */
             }
         }
+#endif
     } else {
         ipAddressTable_row_prep(rowreq_ctx);
     }
