@@ -363,6 +363,9 @@
 #endif
 #endif
 
+/* define if you have librpm and libdb */
+#undef HAVE_LIBRPM
+
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 

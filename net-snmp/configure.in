@@ -503,7 +503,10 @@ AC_CHECK_LIB(m, asin)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, getservbyname)
 dnl AC_CHECK_LIB(ucb, bzero)
-AC_CHECK_LIB(rpm, rpmdbOpen)
+AC_CHECK_LIB(rpm, rpmdbOpen,[
+  AC_DEFINE(HAVE_LIBRPM)
+  LIBS="$LIBS -lrpm -ldb"
+],,-ldb)
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
