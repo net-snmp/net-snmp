@@ -98,7 +98,7 @@ read_party_database(char *filename)
     int proxy;
 #endif
     int lifetime = 0, maxmessagesize = 0;
-    u_long clock;
+    u_long ulclock;
     u_char privPrivate[32], authPrivate[32], privPublic[64], authPublic[64];
     u_char *ucp;
     u_long byte;
@@ -244,7 +244,7 @@ read_party_database(char *filename)
 		    return -1;
 		}
 	    }
-	    if (sscanf(buf1, "%lx", &clock) != 1) {
+	    if (sscanf(buf1, "%lx", &ulclock) != 1) {
 		error_exit("Bad clock value", linenumber, filename);
 		fclose(fp);
 		return -1;
@@ -405,7 +405,7 @@ read_party_database(char *filename)
 	    }
 #endif
 	    pp->partyAuthProtocol = rp->partyAuthProtocol = auth;
-	    pp->partyAuthClock = rp->partyAuthClock = clock;
+	    pp->partyAuthClock = rp->partyAuthClock = ulclock;
 	    pp->tv.tv_sec = pp->partyAuthClock;
 	    if ((pp->partyAuthPublicLen = authPublicLength) != 0){
 		memmove(pp->partyAuthPublic, (char *)authPublic,
@@ -476,12 +476,12 @@ noProxy         noAuth       noPriv
 int
 update_clock(char *file,
 	     int pos,
-	     u_long clock)
+	     u_long ulclock)
 {
     int fd;
     char buf[9];
 
-    sprintf(buf, "%08lX", clock);
+    sprintf(buf, "%08lX", ulclock);
     fd = open(file, O_WRONLY);
     if (lseek(fd, pos, SEEK_SET) != pos){
 	fprintf(stderr, "Couldn't update file\n");

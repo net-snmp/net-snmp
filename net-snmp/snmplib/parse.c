@@ -588,7 +588,7 @@ static void *xcalloc (size_t cnt,
 		      size_t siz)
 {
     size_t sizeit = cnt * siz;
-    void *ss = (char *) xmalloc (sizeit);
+    void *ss = xmalloc (sizeit);
     if (ss == NULL)
       return (NULL);
 
@@ -1546,7 +1546,7 @@ parse_asntype(FILE *fp,
 
     type = get_token(fp, token, MAXTOKEN);
     if (type == SEQUENCE){
-        int level = 0;
+        level = 0;
         while((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE){
             if (type == LEFTBRACKET){
                 level++;
@@ -2224,7 +2224,7 @@ module_name (int modid,
  */
 void
 add_module_replacement(char *old_module,
-		       char *new_module,
+		       char *new_module_name,
 		       char *tag,
 		       int len)
 {
@@ -2235,7 +2235,7 @@ add_module_replacement(char *old_module,
     if (mcp == NULL) return;
 
     mcp->old_module = xstrdup( old_module );
-    mcp->new_module = xstrdup( new_module );
+    mcp->new_module = xstrdup( new_module_name );
 	if (tag)
     mcp->tag	    = xstrdup( tag );
     mcp->tag_len = len;
@@ -2259,7 +2259,7 @@ read_module_replacements(char *name)
 }
 
 static void
-read_import_replacements(char *module_name,
+read_import_replacements(char *new_module_name,
 			 char *node_identifier)
 {
     struct module_compatability *mcp;
@@ -2268,7 +2268,7 @@ read_import_replacements(char *module_name,
 	 * Look for matches first
 	 */
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !label_compare( mcp->old_module, module_name )) {
+      if ( !label_compare( mcp->old_module, new_module_name )) {
 
 	if (	/* exact match */
 	  	  ( mcp->tag_len==0 &&
@@ -2289,9 +2289,9 @@ read_import_replacements(char *module_name,
     }
 
 	/*
-	 * If no exact match, load everything releant
+	 * If no exact match, load everything relevant
 	 */
-    read_module_replacements( module_name );
+    read_module_replacements( new_module_name );
 }
 
 

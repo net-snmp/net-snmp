@@ -107,7 +107,7 @@ static void md5Digest (u_char *, int, u_char *) ;
 u_char *
 snmp_comstr_parse(u_char *data,
 		  int *length,
-		  u_char *sid,
+		  u_char *psid,
 		  int *slen,
 		  int *version)
 {
@@ -134,12 +134,12 @@ snmp_comstr_parse(u_char *data,
     }
 
     /* second field is the community string for SNMPv1 & SNMPv2c */
-    data = asn_parse_string(data, length, &type, sid, slen);
+    data = asn_parse_string(data, length, &type, psid, slen);
     if (data == NULL){
         ERROR_MSG("bad parse of community");
         return NULL;
     }
-    sid[*slen] = '\0';
+    psid[*slen] = '\0';
     return (u_char *)data;
 }
 
@@ -398,7 +398,7 @@ snmp_party_parse(u_char *data,
 u_char *
 snmp_comstr_build(u_char *data,
 		  int *length,
-		  u_char *sid,
+		  u_char *psid,
 		  int *slen,
 		  int *version,
 		  int messagelen)
@@ -434,7 +434,7 @@ snmp_comstr_build(u_char *data,
     /* store the community string */
     data = asn_build_string(data, length,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-            sid, *slen);
+            psid, *slen);
     if (data == NULL){
         ERROR_MSG("buildstring");
         return NULL;
