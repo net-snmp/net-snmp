@@ -1,11 +1,10 @@
 V3.1
   Gnu Auto-conf
     Makefiles
-      install
       sed script for man/mib/other
         mib file creation
     AC_FUNC_MEMCMP
-  Solaris port
+  Solaris port (finish working out bugs...)
   Manual pages/Documentation
 
 V3.2
