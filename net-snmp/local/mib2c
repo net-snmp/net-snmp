@@ -195,6 +195,7 @@ print DOTC "
 
 /* minimal include directives */
 #include \"mibincl.h\"
+#include \"util_funcs.h\"
 #include \"$outputName.h\"
 
 /* 
@@ -245,13 +246,12 @@ void init_$outputName(void) {
  *   and mibII directories.
  */
 unsigned char *
-var_$outputName(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    WriteMethod **write_method);
+var_$outputName(struct variable *vp, 
+                oid     *name, 
+                int     *length, 
+                int     exact, 
+                int     *var_len, 
+                WriteMethod **write_method)
 {
 
 $varInits
@@ -287,13 +287,12 @@ foreach $vtable (@table_list) {
  *   The workings of this are basically the same as for var_$outputName above.
  */
 unsigned char *
-var_$vtable(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    WriteMethod **write_method);
+var_$vtable(struct variable *vp,
+    	    oid     *name,
+    	    int     *length,
+    	    int     exact,
+    	    int     *var_len,
+    	    WriteMethod **write_method)
 {
 
 $varInits
@@ -437,14 +436,13 @@ sub createWriteFunction {
     my $type = shift;
 
     $writeFuncs .= "int
-write_$name(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_$name(int      action,
+   	    u_char   *var_val,
+   	    u_char   var_val_type,
+   	    int      var_val_len,
+   	    u_char   *statP,
+   	    oid      *name,
+   	    int      name_len)
 {
   $variableTypes{$type}{writeInit}
   int size, bigsize=SNMP_MAX_LEN;
