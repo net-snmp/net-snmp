@@ -239,6 +239,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
                       netsnmp_request_info *requests)
 {
     Netsnmp_Node_Handler *nh;
+    netsnmp_request_info *request;
     int             status;
 
     if (reginfo == NULL || reqinfo == NULL || requests == NULL) {
@@ -280,6 +281,10 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
     }
     DEBUGMSGTL(("handler:calling", "calling main handler %s\n",
                 reginfo->handler->handler_name));
+
+    for (request = requests ; request; request = request->next) {
+        request->processed = 0;
+    }
 
     nh = reginfo->handler->access_method;
     if (!nh) {
