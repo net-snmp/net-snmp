@@ -33,7 +33,7 @@
 ./encode_keychange.lo: ../include/net-snmp/snmp_parse_args.h
 ./encode_keychange.lo: ../include/net-snmp/snmp_enum.h
 ./encode_keychange.lo: ../include/net-snmp/vacm.h
-./encode_keychange.lo: ../include/net-snmp/logging_api.h
+./encode_keychange.lo: ../include/net-snmp/output_api.h
 ./encode_keychange.lo: ../include/net-snmp/snmp_debug.h
 ./encode_keychange.lo: ../include/net-snmp/snmp_logging.h
 ./encode_keychange.lo: ../include/net-snmp/utilities.h
@@ -88,7 +88,7 @@
 ./notification_log.lo: ../include/net-snmp/snmp_parse_args.h
 ./notification_log.lo: ../include/net-snmp/snmp_enum.h
 ./notification_log.lo: ../include/net-snmp/vacm.h
-./notification_log.lo: ../include/net-snmp/logging_api.h
+./notification_log.lo: ../include/net-snmp/output_api.h
 ./notification_log.lo: ../include/net-snmp/snmp_debug.h
 ./notification_log.lo: ../include/net-snmp/snmp_logging.h
 ./notification_log.lo: ../include/net-snmp/utilities.h
@@ -154,7 +154,7 @@
 ./snmpbulkget.lo: ../include/net-snmp/default_store.h
 ./snmpbulkget.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpbulkget.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpbulkget.lo: ../include/net-snmp/logging_api.h
+./snmpbulkget.lo: ../include/net-snmp/output_api.h
 ./snmpbulkget.lo: ../include/net-snmp/snmp_debug.h
 ./snmpbulkget.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpbulkget.lo:  ../include/net-snmp/utilities.h
@@ -199,7 +199,7 @@
 ./snmpbulkwalk.lo: ../include/net-snmp/default_store.h
 ./snmpbulkwalk.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpbulkwalk.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpbulkwalk.lo: ../include/net-snmp/logging_api.h
+./snmpbulkwalk.lo: ../include/net-snmp/output_api.h
 ./snmpbulkwalk.lo: ../include/net-snmp/snmp_debug.h
 ./snmpbulkwalk.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpbulkwalk.lo:  ../include/net-snmp/utilities.h
@@ -246,7 +246,7 @@
 ./snmpdelta.lo: ../include/net-snmp/default_store.h
 ./snmpdelta.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpdelta.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpdelta.lo: ../include/net-snmp/logging_api.h
+./snmpdelta.lo: ../include/net-snmp/output_api.h
 ./snmpdelta.lo: ../include/net-snmp/snmp_debug.h
 ./snmpdelta.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpdelta.lo:  ../include/net-snmp/utilities.h
@@ -286,7 +286,7 @@
 ./snmpdf.lo: ../include/net-snmp/default_store.h
 ./snmpdf.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpdf.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpdf.lo: ../include/net-snmp/logging_api.h
+./snmpdf.lo: ../include/net-snmp/output_api.h
 ./snmpdf.lo: ../include/net-snmp/snmp_debug.h
 ./snmpdf.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpdf.lo:  ../include/net-snmp/utilities.h
@@ -327,7 +327,7 @@
 ./snmpget.lo: ../include/net-snmp/default_store.h
 ./snmpget.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpget.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpget.lo: ../include/net-snmp/logging_api.h
+./snmpget.lo: ../include/net-snmp/output_api.h
 ./snmpget.lo: ../include/net-snmp/snmp_debug.h
 ./snmpget.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpget.lo:  ../include/net-snmp/utilities.h
@@ -369,7 +369,7 @@
 ./snmpgetnext.lo: ../include/net-snmp/default_store.h
 ./snmpgetnext.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpgetnext.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpgetnext.lo: ../include/net-snmp/logging_api.h
+./snmpgetnext.lo: ../include/net-snmp/output_api.h
 ./snmpgetnext.lo: ../include/net-snmp/snmp_debug.h
 ./snmpgetnext.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpgetnext.lo:  ../include/net-snmp/utilities.h
@@ -411,7 +411,7 @@
 ./snmpset.lo: ../include/net-snmp/default_store.h
 ./snmpset.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpset.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpset.lo: ../include/net-snmp/logging_api.h
+./snmpset.lo: ../include/net-snmp/output_api.h
 ./snmpset.lo: ../include/net-snmp/snmp_debug.h
 ./snmpset.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpset.lo:  ../include/net-snmp/utilities.h
@@ -455,7 +455,7 @@
 ./snmpstatus.lo: ../include/net-snmp/default_store.h
 ./snmpstatus.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpstatus.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpstatus.lo: ../include/net-snmp/logging_api.h
+./snmpstatus.lo: ../include/net-snmp/output_api.h
 ./snmpstatus.lo: ../include/net-snmp/snmp_debug.h
 ./snmpstatus.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpstatus.lo:  ../include/net-snmp/utilities.h
@@ -498,7 +498,7 @@
 ./snmptable.lo: ../include/net-snmp/default_store.h
 ./snmptable.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptable.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmptable.lo: ../include/net-snmp/logging_api.h
+./snmptable.lo: ../include/net-snmp/output_api.h
 ./snmptable.lo: ../include/net-snmp/snmp_debug.h
 ./snmptable.lo: ../include/net-snmp/snmp_logging.h 
 ./snmptable.lo:  ../include/net-snmp/utilities.h
@@ -541,7 +541,7 @@
 ./snmptest.lo: ../include/net-snmp/default_store.h
 ./snmptest.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptest.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmptest.lo: ../include/net-snmp/logging_api.h
+./snmptest.lo: ../include/net-snmp/output_api.h
 ./snmptest.lo: ../include/net-snmp/snmp_debug.h
 ./snmptest.lo: ../include/net-snmp/snmp_logging.h 
 ./snmptest.lo:  ../include/net-snmp/utilities.h
@@ -571,7 +571,7 @@
 ./snmptranslate.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptranslate.lo: ../include/net-snmp/snmp_enum.h
 ./snmptranslate.lo: ../include/net-snmp/vacm.h
-./snmptranslate.lo: ../include/net-snmp/logging_api.h
+./snmptranslate.lo: ../include/net-snmp/output_api.h
 ./snmptranslate.lo: ../include/net-snmp/snmp_client.h
 ./snmptranslate.lo: ../include/net-snmp/snmp_debug.h
 ./snmptranslate.lo: ../include/net-snmp/snmp_logging.h 
@@ -604,7 +604,7 @@
 ./snmptrap.lo: ../include/net-snmp/default_store.h
 ./snmptrap.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptrap.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmptrap.lo: ../include/net-snmp/logging_api.h
+./snmptrap.lo: ../include/net-snmp/output_api.h
 ./snmptrap.lo: ../include/net-snmp/snmp_debug.h
 ./snmptrap.lo: ../include/net-snmp/snmp_logging.h 
 ./snmptrap.lo:  ../include/net-snmp/utilities.h
@@ -647,7 +647,7 @@
 ./snmptrapd.lo: ../include/net-snmp/default_store.h
 ./snmptrapd.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptrapd.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmptrapd.lo: ../include/net-snmp/logging_api.h
+./snmptrapd.lo: ../include/net-snmp/output_api.h
 ./snmptrapd.lo: ../include/net-snmp/snmp_debug.h
 ./snmptrapd.lo: ../include/net-snmp/snmp_logging.h 
 ./snmptrapd.lo:  ../include/net-snmp/utilities.h
@@ -682,7 +682,7 @@
 ./snmptrapd_handlers.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/snmp_enum.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/vacm.h
-./snmptrapd_handlers.lo: ../include/net-snmp/logging_api.h
+./snmptrapd_handlers.lo: ../include/net-snmp/output_api.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/snmp_client.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/snmp_debug.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/snmp_logging.h
@@ -735,7 +735,7 @@
 ./snmptrapd_log.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmptrapd_log.lo: ../include/net-snmp/snmp_enum.h
 ./snmptrapd_log.lo: ../include/net-snmp/vacm.h
-./snmptrapd_log.lo: ../include/net-snmp/logging_api.h
+./snmptrapd_log.lo: ../include/net-snmp/output_api.h
 ./snmptrapd_log.lo: ../include/net-snmp/snmp_debug.h
 ./snmptrapd_log.lo: ../include/net-snmp/snmp_logging.h 
 ./snmptrapd_log.lo:  ../include/net-snmp/utilities.h
@@ -781,7 +781,7 @@
 ./snmpusm.lo: ../include/net-snmp/default_store.h
 ./snmpusm.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpusm.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpusm.lo: ../include/net-snmp/logging_api.h
+./snmpusm.lo: ../include/net-snmp/output_api.h
 ./snmpusm.lo: ../include/net-snmp/snmp_debug.h
 ./snmpusm.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpusm.lo:  ../include/net-snmp/utilities.h
@@ -824,7 +824,7 @@
 ./snmpvacm.lo: ../include/net-snmp/default_store.h
 ./snmpvacm.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpvacm.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpvacm.lo: ../include/net-snmp/logging_api.h
+./snmpvacm.lo: ../include/net-snmp/output_api.h
 ./snmpvacm.lo: ../include/net-snmp/snmp_debug.h
 ./snmpvacm.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpvacm.lo:  ../include/net-snmp/utilities.h
@@ -867,7 +867,7 @@
 ./snmpwalk.lo: ../include/net-snmp/default_store.h
 ./snmpwalk.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmpwalk.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmpwalk.lo: ../include/net-snmp/logging_api.h
+./snmpwalk.lo: ../include/net-snmp/output_api.h
 ./snmpwalk.lo: ../include/net-snmp/snmp_debug.h
 ./snmpwalk.lo: ../include/net-snmp/snmp_logging.h 
 ./snmpwalk.lo:  ../include/net-snmp/utilities.h
