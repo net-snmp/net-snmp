@@ -11,7 +11,9 @@
 #endif
 #include <ctype.h>
 #include <signal.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif

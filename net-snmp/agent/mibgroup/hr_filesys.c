@@ -345,8 +345,12 @@ Get_Next_HR_FileSys()
 #endif
 
 #ifdef linux
-    if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_PROC) ||
-        !strcmp( HRFS_entry->mnt_type, MNTTYPE_SWAP))
+    if (!strcmp( HRFS_entry->mnt_type, MNTTYPE_SWAP)
+#ifdef MNTTYPE_PROC
+        || !strcmp( HRFS_entry->mnt_type, MNTTYPE_PROC))
+#else
+      )
+#endif
 	return Get_Next_HR_FileSys();
 #endif
 

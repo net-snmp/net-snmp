@@ -10,7 +10,9 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
