@@ -681,6 +681,11 @@ whardake 26 May 97 10:52:12
 whardake 26 May 97 10:56:19
     - (snmpcheck.def): new variables to set walk/get/set command line usage.
 
+whardake 26 May 97 11:38:41
+    - (parse.c): Patch from niels Baggesen to:
+      - close mibfiles for MIBS=ALL.
+      - Allow SYNTAX DisplayString (SIZE(1..255)) inside OBJECT-TYPE.
+	
 -------------------------------------------------------------------------------
 
 Changes: V3.1.2.1 -> V3.1.3
