@@ -179,6 +179,8 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
       if (session->securityModel != SNMP_DEFAULT_SECMODEL) {
 	snmp_alarm_unregister(session->securityModel);
       }
+      snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			  SNMPD_CALLBACK_INDEX_STOP, (void *)session);
       agentx_unregister_callbacks(session);
       main_session = NULL;
       if (period != 0) {
@@ -464,7 +466,7 @@ subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *cli
 void
 agentx_register_callbacks(struct snmp_session *s)
 {
-  DEBUGMSGTL(("agentx/subagent", "registering callbacks for session %p\n"));
+  DEBUGMSGTL(("agentx/subagent", "registering callbacks for session %p\n", s));
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
 			 SNMP_CALLBACK_POST_READ_CONFIG,
 			 subagent_register_ping_alarm, s);
@@ -495,7 +497,8 @@ agentx_register_callbacks(struct snmp_session *s)
 void
 agentx_unregister_callbacks(struct snmp_session *ss)
 {
-  DEBUGMSGTL(("agentx/subagent", "unregistering callbacks for session %p\n"));
+  DEBUGMSGTL(("agentx/subagent", "unregistering callbacks for session %p\n",
+	      ss));
   snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
 			   SNMP_CALLBACK_POST_READ_CONFIG,
 			   subagent_register_ping_alarm, ss, 1);
@@ -565,6 +568,9 @@ subagent_open_master_session(void) {
     }
 
     agentx_register_callbacks(main_session);
+
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			SNMPD_CALLBACK_INDEX_START, (void *)main_session);
 
     DEBUGMSGTL(("agentx/subagent","opening session...  DONE (%p)\n",
                 main_session));
@@ -676,12 +682,11 @@ void
 agentx_check_session(unsigned int clientreg, void *clientarg) {
     struct snmp_session *ss = (struct snmp_session *) clientarg;
     if (!ss) {
-        if (clientreg)
-            snmp_alarm_unregister (clientreg);
+        if (clientreg) 
+            snmp_alarm_unregister(clientreg);
         return;
     }
-    DEBUGMSGTL(("agentx/subagent","checking status of our session (%x)\n",
-                ss));
+    DEBUGMSGTL(("agentx/subagent", "checking status of session %p\n", ss));
     
     if (!agentx_send_ping(ss)) {
         snmp_log(LOG_WARNING, "AgentX master agent failed to respond to ping.  Attempting to re-register.\n");
@@ -690,12 +695,13 @@ agentx_check_session(unsigned int clientreg, void *clientarg) {
         agentx_unregister_callbacks(ss);
         agentx_close_session(ss, AGENTX_CLOSE_TIMEOUT);
         snmp_alarm_unregister(clientreg); /* delete ping alarm timer */
-	snmp_close( main_session );
-        
+	snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			    SNMPD_CALLBACK_INDEX_STOP, (void *)ss);
+	snmp_close(main_session);
         main_session = NULL;
         agentx_reopen_session(0, NULL);
     } else {
-        DEBUGMSGTL(("agentx/subagent","status ok, master responded to ping\n"));
+        DEBUGMSGTL(("agentx/subagent", "session %p responded to ping\n", ss));
     }
 }
 
