@@ -3,12 +3,23 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.0*
  New:
-    - SNMPv3 supported!!!
+    - SNMPv3 protocol support!!!
+    - historic v2party support removed.
+    - complete re-write of the agent.
+    - The extensible AgentX protocol is in alpha-test mode.
+      (to use, compile with the mib-module "agentxx" or
+      "agentx/master" or "agentx/client").
+    - syslog support for the agent (and everything else for that matter).
     - Per-process/per-exec-script based fix scripts implemented.
       (see snmpd.conf(5) for details)
+    - many more config file options supported.
+      (run any command with -H)
+    - other things we've forgotten.
 
- API Change:
+ API Changes:
     - A small change to the write functions in mib modules.
+      (data passed in has already be BER-decoded and is a pointer to a 
+      variable of the correct type).
 
 *3.6.2*
  Fixes:
