@@ -344,6 +344,13 @@ snmp_parse_args(int argc,
             }
             break;
 
+        case 'L':
+            if (snmp_log_options(optarg, argc, argv) <
+                0) {
+                return (-1);
+            }
+            break;
+
 #define SNMPV3_CMD_OPTIONS
 #ifdef  SNMPV3_CMD_OPTIONS
         case 'Z':
