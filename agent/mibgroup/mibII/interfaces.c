@@ -720,7 +720,7 @@ var_interfaces(struct variable *vp,
 #ifndef hpux
 
 u_char *
-var_ifEntry(vstruct variable *vp,
+var_ifEntry(struct variable *vp,
 	    oid *name,
 	    int *length,
 	    int exact,
@@ -1345,7 +1345,7 @@ Interface_Scan_Init (void)
 **  4.2 BSD doesn't have ifaddr
 **  
 */
-int Interface_Scan_Next(short *Index
+int Interface_Scan_Next(short *Index,
 			char *Name,
 			struct ifnet *Retifnet,
 			struct in_ifaddr *dummy)
