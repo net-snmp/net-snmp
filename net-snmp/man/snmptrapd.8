@@ -24,14 +24,14 @@
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [ -p ] [ -s ] [ -P port ] [ -v version ] [ -d ] [ -e ]
+snmptrapd [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
 sent to the SNMP-TRAP port (162) on the local machine.
 .PP
 If the
-.B -p
+.B -P
 option is given,
 .I snmptrapd
 will print it's messages to the standard output.  Otherwise it will use
