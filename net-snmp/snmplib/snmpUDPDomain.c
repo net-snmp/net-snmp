@@ -221,6 +221,17 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
                    sizeof(one));
     }
 #endif                          /*SO_BSDCOMPAT */
+#ifdef  SO_REUSEADDR
+    /*
+     * Allow the same port to be specified multiple times without failing.
+     *    (useful for a listener)
+     */
+    {
+        int             one = 1;
+        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *) &one,
+                   sizeof(one));
+    }
+#endif                          /*SO_REUSEADDR */
 
     /*
      * Try to set the send and receive buffers to a reasonably large value, so
