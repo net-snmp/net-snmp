@@ -628,7 +628,9 @@ handle_var_list(struct agent_snmp_session  *asp)
 statp_loop:
 	if ( asp->rw == WRITE && varbind_ptr->data != NULL ) {
 		/*
-		 * Restore results from an earlier 'getStatPtr' call
+		 * SET handling is "multi-pass", so restore
+		 *  results from an earlier 'getStatPtr' call
+		 *  to avoid repeating this processing.
 		 */
 	    saved = (struct saved_var_data *) varbind_ptr->data;
 	    write_method = saved->write_method;
@@ -637,12 +639,35 @@ statp_loop:
 	    statLen      = saved->statLen;
 	    acl          = saved->acl;
 	}
-	else
-	    statP = getStatPtr(  varbind_ptr->name,
+	else {
+		/*
+		 *  For exact requests (i.e. GET/SET),
+		 *   check whether this object is accessible
+		 *   before actually doing any work
+		 */
+	    if ( asp->exact )
+		view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
+				   asp->pdu, varbind_ptr->type);
+	    else
+		view = 0;	/* Assume accessible */
+	    
+	    if ( view == 0 )
+	        statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
 			   &statType, &statLen, &acl,
 			   asp->exact, &write_method, asp->pdu, &noSuchObject);
+	    else {
+		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+		statP        = NULL;
+		write_method = NULL;
+	    }
+	}
 			   
+		/*
+		 * For a valid SET request, having no existing value
+		 *  is (possibly) acceptable (and implies creation).
+		 * In all other situations, this indicates failure.
+		 */
 	if (statP == NULL && (asp->rw != WRITE || write_method == NULL)) {
 	    	varbind_ptr->val.integer   = NULL;
 	    	varbind_ptr->val_len = 0;
@@ -670,31 +695,33 @@ statp_loop:
 		else
 		    varbind_ptr->type = statType;
 	}
-                /* Delegated variables should be added to the
-                   relevant outgoing request */
+                /*
+		 * Delegated variables should be added to the
+                 *  relevant outgoing request
+		 */
         else if ( IS_DELEGATED(statType)) {
                 add_method = (AddVarMethod*)statP;
                 statType = (*add_method)( asp, varbind_ptr );
         }
-		/* GETNEXT/GETBULK should just skip inaccessible entries */
-	else if ((view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
-				   asp->pdu, varbind_ptr->type))
-			 && !asp->exact) {
+		/*
+		 * GETNEXT/GETBULK should just skip inaccessible entries
+		 */
+	else if (!asp->exact &&
+		 (view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
+				   asp->pdu, varbind_ptr->type))) {
+
 		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 		goto statp_loop;
 	}
-		/* Other access problems are permanent */
-	else if (( asp->rw == WRITE && !(acl & 2)) || view) {
-	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
-		if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE))
-                  DEBUGMSGTL(("snmp_agent", "    >> noSuchName (read-only)\n"));
-		ERROR_MSG("read-only");
+		/*
+		 * Other access problems are permanent
+		 *   (i.e. writing to non-writeable objects)
+		 */
+	else if ( asp->rw == WRITE && !((acl & 2) && write_method)) {
+	    if (asp->pdu->version == SNMP_VERSION_1 ) {
 		statType = SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {
-		if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE))
-                  DEBUGMSGTL(("snmp_agent", "    >> notWritable\n"));
-		ERROR_MSG("Not Writable");
 		statType = SNMP_ERR_NOTWRITABLE;
 	    }
 	    asp->pdu->errstat = statType;
@@ -702,16 +729,25 @@ statp_loop:
 	    send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 	    return statType;
         }
+		
 	else {
-            /* dump verbose info */
+		/*
+		 *  Things appear to have worked (so far)
+		 *  Dump the current value of this object
+		 */
 	    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) && statP)
 	        dump_var(varbind_ptr->name, varbind_ptr->name_length,
 				statType, statP, statLen);
 
-		/*  FINALLY we can act on SET requests ....*/
+		/*
+		 *  FINALLY we can act on SET requests ....
+		 */
 	    if ( asp->rw == WRITE ) {
-	        if ( write_method != NULL ) {
 		    if ( varbind_ptr->data == NULL ) {
+				/*
+				 * Save the results from 'getStatPtr'
+				 *  to avoid repeating this call
+				 */
 			saved = (struct saved_var_data *)malloc(sizeof(struct saved_var_data));
 			if ( saved == NULL ) {
 			    statType = SNMP_ERR_GENERR;
@@ -726,6 +762,9 @@ statp_loop:
 	    		saved->acl          = acl;
 			varbind_ptr->data = (void *)saved;
 		    }
+				/*
+				 * Call the object's write method
+				 */
 		    statType = (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
@@ -738,28 +777,13 @@ write_error:
                       asp->pdu->errindex = count;
                       return statType;
                     }
-		}
-		else {
-                    if (!goodValue(varbind_ptr->type, varbind_ptr->val_len,
-                                    statType, statLen)){
-                        if (asp->pdu->version == SNMP_VERSION_1)
-                            statType = SNMP_ERR_BADVALUE;
-                        else
-                            statType = SNMP_ERR_WRONGTYPE; /* poor approximation */
-			asp->pdu->errstat = statType;
-			asp->pdu->errindex = count;
-			return statType;
-                    }
-                    /* actually do the set if necessary */
-                    if (asp->mode == COMMIT)
-                        setVariable(varbind_ptr->val.string, varbind_ptr->type,
-                                    varbind_ptr->val_len, statP, statLen);
-                }
 	    }
-		/* ... or save the results from assorted GETs */
+		/*
+		 * ... or save the results from assorted GET requests
+		 */
 	    else {
-		     snmp_set_var_value(varbind_ptr, statP, statLen);
-		     varbind_ptr->type = statType;
+		snmp_set_var_value(varbind_ptr, statP, statLen);
+		varbind_ptr->type = statType;
 	    }
 	}
 	
@@ -773,50 +797,3 @@ write_error:
 
 
 
-static int
-goodValue(u_char inType, 
-	  size_t inLen,
-	  u_char actualType,
-	  size_t actualLen)
-{
-    if (inLen > actualLen)
-	return FALSE;
-    return (inType == actualType);
-}
-
-static void
-setVariable(u_char *var_val,
-	    u_char var_val_type,
-	    size_t var_val_len,
-	    u_char *statP,
-	    size_t statLen)
-{
-    size_t buffersize = 1000;
-
-    switch(var_val_type){
-	case ASN_INTEGER:
-	    asn_parse_int(var_val, &buffersize, &var_val_type, (long *)statP, statLen);
-	    break;
-	case ASN_COUNTER:
-	case ASN_GAUGE:
-	case ASN_TIMETICKS:
-	    asn_parse_unsigned_int(var_val, &buffersize, &var_val_type, (u_long *)statP, statLen);
-	    break;
-	case ASN_COUNTER64:
-	    asn_parse_unsigned_int64(var_val, &buffersize, &var_val_type,
-				     (struct counter64 *)statP, statLen);
-	    break;
-	case ASN_OCTET_STR:
-	case ASN_IPADDRESS:
-	case ASN_OPAQUE:
-	case ASN_NSAP:
-	    asn_parse_string(var_val, &buffersize, &var_val_type, statP, &statLen);
-	    break;
-	case ASN_OBJECT_ID:
-	    asn_parse_objid(var_val, &buffersize, &var_val_type, (oid *)statP, &statLen);
-	    break;
-	case ASN_BIT_STR:
-	    asn_parse_bitstring(var_val, &buffersize, &var_val_type, statP, &statLen);
-	    break;
-    }
-}
