@@ -1,7 +1,10 @@
 #ifndef MIB_H
 #define MIB_H
 /*
- * Definitions for the variables as defined in the MIB
+ * mib.h - Definitions for the variables as defined in the MIB
+ *
+ * Update: 1998-07-17 <jhy@gsu.edu>
+ * Added prototypes for print_oid_report* functions.
  */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
@@ -278,4 +281,13 @@ struct tree *get_symbol __P((oid *, int, struct tree *, char *));
 struct tree *get_tree __P((oid *, int, struct tree *));
 struct tree *get_tree_head __P((void));
 void  set_function __P((struct tree *));
+void print_oid_report __P((FILE *));
+void print_oid_report_enable_labeledoid __P((void));
+void print_oid_report_enable_oid __P((void));
+void print_oid_report_enable_suffix __P((void));
+void print_oid_report_enable_symbolic __P((void));
+void print_oid_report_disable_labeledoid __P((void));
+void print_oid_report_disable_oid __P((void));
+void print_oid_report_disable_suffix __P((void));
+void print_oid_report_disable_symbolic __P((void));
 #endif /* MIB_H */
