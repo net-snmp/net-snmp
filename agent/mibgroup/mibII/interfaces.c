@@ -1409,6 +1409,7 @@ int Interface_Scan_Next(short *Index,
 {
 	struct ifnet ifnet;
 	struct in_ifaddr *ia, in_ifaddr;
+	short has_ipaddr=0;
 #if !STRUCT_IFNET_HAS_IF_XNAME
 	register char *cp;
 #endif
@@ -1440,7 +1441,10 @@ int Interface_Scan_Next(short *Index,
 		auto_nlist(IFADDR_SYMBOL, (char *)&ia, sizeof(ia));
 		while (ia) {
 		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
-		    if (in_ifaddr.ia_ifp == ifnetaddr) break;
+		    if (in_ifaddr.ia_ifp == ifnetaddr) {
+                        has_ipaddr = 1; /* this IF has IP-address */
+                        break;
+                    }
 		    ia = in_ifaddr.ia_next;
 		}
 
@@ -1454,6 +1458,9 @@ int Interface_Scan_Next(short *Index,
 		if (Retifnet)
 		    *Retifnet = ifnet;
 		if (Retin_ifaddr)
+		    *Retin_ifaddr = in_ifaddr;
+		if (Retin_ifaddr && has_ipaddr) /* assign the in_ifaddr only
+                                                   if the IF has IP-address */
 		    *Retin_ifaddr = in_ifaddr;
 		if (Name)
 		    strcpy(Name, saveName);
