@@ -231,7 +231,7 @@ installsubdirs:
 #
 # cleaning targets
 #
-clean: cleansubdirs
+clean: cleansubdirs $(OTHERCLEANTODOS)
 	rm -f core ${OBJS} ${LOBJS} $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
 	rm -rf .libs
 
