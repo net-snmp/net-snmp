@@ -56,7 +56,7 @@ depend:
 
 nosysdepend:
 	makedepend $(CPPFLAGS) *.c
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/(include|lib)/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 makefileindepend: nosysdepend
 	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
@@ -66,7 +66,6 @@ makefileindepend: nosysdepend
 if.o: ../../config.h ../../mib_module_config.h 
 if.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 if.o: ../../m/i386.h  
-if.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 if.o:   main.h
 if.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 if.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_api.h
@@ -74,14 +73,12 @@ if.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h netstat.h
 inet.o: ../../config.h ../../mib_module_config.h 
 inet.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 inet.o: ../../m/i386.h  
-inet.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 inet.o: main.h ./../../snmplib/asn1.h ./../../snmplib/snmp_impl.h
 inet.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_client.h
 inet.o: ./../../snmplib/mib.h ./../../snmplib/snmp.h netstat.h
 main.o: ../../config.h ../../mib_module_config.h 
 main.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 main.o: ../../m/i386.h  
-main.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 main.o:  ./../../snmplib/asn1.h ./../../snmplib/mib.h
 main.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 main.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
@@ -91,7 +88,6 @@ main.o: netstat.h
 route.o: ../../config.h ../../mib_module_config.h 
 route.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 route.o: ../../m/i386.h  
-route.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 route.o: main.h ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_api.h
 route.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h netstat.h

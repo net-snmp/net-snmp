@@ -54,7 +54,7 @@ depend: dependlocal
 nosysdepend:
 	cd mibgroup; $(MAKE) nosysdepend; cd ..
 	makedepend $(CPPFLAGS) *.c
-	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/(include|lib)/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
 
 makefileindepend: nosysdepend
 	cd mibgroup; $(MAKE) makefileindepend; cd ..
@@ -70,7 +70,6 @@ kernel.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 read_config.o: ../config.h ../mib_module_config.h 
 read_config.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
 read_config.o: ../m/i386.h  
-read_config.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 read_config.o:   m2m.h
 read_config.o: ./mibgroup/mibincl.h  
 read_config.o:  ./../snmplib/asn1.h
@@ -99,7 +98,6 @@ read_config.o: mibgroup/route_write.h ./snmp_agent.h ./snmpd.h
 read_config.o: mibgroup/mib_module_dot_conf.h
 snmp_agent.o: ../config.h ../mib_module_config.h 
 snmp_agent.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_agent.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmp_agent.o: ./../snmplib/asn1.h ./../snmplib/snmp_impl.h
 snmp_agent.o:  ./../snmplib/snmp_api.h
 snmp_agent.o: ./../snmplib/snmp.h ./../snmplib/acl.h ./../snmplib/party.h
@@ -108,7 +106,6 @@ snmp_agent.o: snmpd.h mibgroup/struct.h mibgroup/util_funcs.h snmp_agent.h
 snmp_agent.o: read_config.h
 snmp_vars.o: ../config.h ../mib_module_config.h 
 snmp_vars.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_vars.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmp_vars.o:  ./mibgroup/mibincl.h ./../snmplib/asn1.h
 snmp_vars.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./var_struct.h
 snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h snmp_vars_m2m.h
@@ -135,7 +132,6 @@ snmp_vars.o: mibgroup/route_write.h read_config.h snmpd.h
 snmp_vars.o: mibgroup/mib_module_inits.h mibgroup/mib_module_loads.h
 snmpd.o: ../config.h ../mib_module_config.h 
 snmpd.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmpd.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 snmpd.o: ./../snmplib/asn1.h ./../snmplib/snmp_impl.h ./../snmplib/system.h
 snmpd.o: ./../snmplib/snmp_api.h ./../snmplib/snmp.h m2m.h
 snmpd.o: ./../snmplib/party.h mibgroup/alarm.h ./mibgroup/event.h
@@ -145,5 +141,4 @@ snmpd.o: snmpd.h read_config.h mibgroup/struct.h mibgroup/util_funcs.h
 snmpd.o: ../version.h
 view_parse.o: ../config.h ../mib_module_config.h 
 view_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-view_parse.o: /usr/lib/gcc-lib/i486-linux/2.7.2.2/include/stddef.h
 view_parse.o: ./../snmplib/asn1.h ./../snmplib/mib.h ./../snmplib/view.h
