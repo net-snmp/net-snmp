@@ -160,10 +160,6 @@ int main(int argc, char *argv[])
     int trivialSNMPv2 = FALSE;
     int arg;
 
-#ifdef _DEBUG_MALLOC_INC
-    unsigned long histid1, histid2, orig_size, current_size;
-#endif
-
     init_mib();
     /*
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
@@ -316,10 +312,6 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-#ifdef _DEBUG_MALLOC_INC
-    orig_size = malloc_inuse(&histid1);
-#endif
-    
     /*
      * Keep file descriptors open to avoid overhead
      * of open/close on each call to get* routines.
@@ -368,11 +360,6 @@ int main(int argc, char *argv[])
     endhostent();
 
     snmp_close(Session);
-
-#ifdef _DEBUG_MALLOC_INC
-    current_size = malloc_inuse(&histid2);
-    if (current_size != orig_size) malloc_list(2, histid1, histid2);
-#endif
 
     SOCK_CLEANUP;
     return 0;

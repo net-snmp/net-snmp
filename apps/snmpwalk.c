@@ -118,9 +118,6 @@ int main(int argc, char *argv[])
       memmove(root, objid_mib, sizeof(objid_mib));
       rootlen = sizeof(objid_mib) / sizeof(oid);
     }
-#ifdef _DEBUG_MALLOC_INC
-    orig_size = malloc_inuse(&histid1);
-#endif
 
     SOCK_STARTUP;
 
@@ -198,11 +195,6 @@ int main(int argc, char *argv[])
         snmp_free_pdu(response);
     }
     snmp_close(ss);
-
-#ifdef _DEBUG_MALLOC_INC
-    current_size = malloc_inuse(&histid2);
-    if (current_size != orig_size) malloc_list(2, histid1, histid2);
-#endif
 
     SOCK_CLEANUP;
     return 0;
