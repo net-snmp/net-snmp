@@ -198,6 +198,11 @@ snmp_parse_args(argc, argv, session)
           psz = &(argv[arg][2]);
         else
           psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need version value after -v flag. \n");
+          usage();
+          exit(1);
+        }
         if (!strcmp(psz,"1")) {
           session->version = SNMP_VERSION_1;
         } else if (!strcasecmp(psz,"2c")) {
