@@ -331,20 +331,6 @@ snmp_api_errstring(snmp_errnumber)
 }
 
 /*
-  init_snmp: call appropriately the functions to do config file
-  loading and mib module parsing in the correct order.
-*/
-
-void
-init_snmp __P((void)) {
-  register_mib_handlers();
-  read_premib_configs();
-  init_mib();
-  read_configs();
-  init_snmp_session();
-}
-
-/*
  * snmp_error - return error data
  * Inputs :  address of errno, address of snmp_errno, address of string
  * Caller must free the string returned after use.
@@ -436,6 +422,20 @@ extern int init_mib_internals();
     session->timeout = SNMP_DEFAULT_TIMEOUT;
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_VERSION_1;
+}
+
+/*
+  init_snmp: call appropriately the functions to do config file
+  loading and mib module parsing in the correct order.
+*/
+
+void
+init_snmp __P((void)) {
+  register_mib_handlers();
+  read_premib_configs();
+  init_mib();
+  read_configs();
+  init_snmp_session();
 }
 
 /*
