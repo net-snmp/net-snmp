@@ -79,20 +79,6 @@ void winsock_cleanup (void);
 in_addr_t get_myaddr (void);
 long get_uptime (void);
 
-#if HAVE_STDARG_H
-void DEBUGP (const char *, ...);
-#else
-void DEBUGP (va_alist);
-#endif
-
-#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define DEBUGPL(x)	\
-	    DEBUGP("%s():%s,%d: ",__FUNCTION__,__FILE__,__LINE__); DEBUGP x ;
-#else
-#define DEBUGPL(x)	\
-	    DEBUGP("():%s,%d: ",__FILE__,__LINE__); DEBUGP x ;
-#endif
-
 #ifndef HAVE_STRDUP
 char *strdup (const char *);
 #endif

@@ -217,16 +217,8 @@ To print multiple pieces to a single line in one call, use:
 void debug_register_tokens(char *tokens);
 int debug_is_token_registered(const char *token);
 void snmp_debug_init(void);
-
-/* provided for backwards compatability.  Don't use these functions. */
-#if HAVE_STDARG_H
-void DEBUGP (const char *, ...);
-#else
-void DEBUGP (va_alist);
-#endif
-void DEBUGPOID(oid *, size_t);
-void snmp_set_do_debugging (int);
-int snmp_get_do_debugging (void);
+void snmp_set_do_debugging(int);
+int snmp_get_do_debugging(void);
 int debug_is_token_registered(const char *token);
 
 #ifdef __cplusplus
