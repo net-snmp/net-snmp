@@ -141,6 +141,7 @@ snmpdelta.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpdelta.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmpdelta.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
 snmpdelta.o: ./../snmplib/int64.h snmp_parse_args.h
+snmpdelta.o: ./../snmplib/snmp_logging.h 
 snmpget.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmpget.o: ../s/generic.h ../m/generic.h 
 snmpget.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
@@ -197,10 +198,11 @@ snmptrapd.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmptrapd.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h
 snmptrapd.o: ./../snmplib/snmp.h ./../snmplib/system.h ../version.h
 snmptrapd.o: snmptrapd_handlers.h ./../snmplib/read_config.h
-snmptrapd.o: ./../snmplib/snmp_debug.h ./../snmplib/snmpusm.h
-snmptrapd.o: ./../snmplib/tools.h ./../snmplib/lcd_time.h
-snmptrapd.o: ./../snmplib/transform_oids.h ./../snmplib/snmpv3.h
-snmptrapd.o: ./../snmplib/callback.h ./../snmplib/snmp_alarm.h
+snmptrapd.o: ./../snmplib/snmp_debug.h ./../snmplib/snmp_logging.h
+snmptrapd.o: ./../snmplib/snmpusm.h ./../snmplib/tools.h
+snmptrapd.o: ./../snmplib/lcd_time.h ./../snmplib/transform_oids.h
+snmptrapd.o: ./../snmplib/snmpv3.h ./../snmplib/callback.h
+snmptrapd.o: ./../snmplib/snmp_alarm.h
 snmptrapd_handlers.o: ../config.h ../mib_module_config.h ../s/linux.h
 snmptrapd_handlers.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 snmptrapd_handlers.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
