@@ -33,23 +33,6 @@ if (! (-d $ENV{MSVCDir})) {
   exit;
 }
 
-# Set to not search for non-existent ".dep" files
-$ENV{NO_EXTERNAL_DEPS}="1";
-
-# Set PATH environment variable so Perl make tests can locate the DLL
-$ENV{MIBDIRS}="$current_pwd\\bin;$ENV{MIBDIRS}";
-
-# Set MIBDIRS environment variable so Perl make tests can locate the mibs
-my $temp_mibdir = "$current_pwd/../mibs";
-$temp_mibdir =~ s/\\/\//g;
-$ENV{MIBDIRS}=$temp_mibdir;
-
-# Set SNMPCONFPATH environment variable so Perl conf.t test can locate
-# the configuration files.
-# See the note about environment variables in the Win32 section of 
-# perl/SNMP/README for details on why this is needed. 
-$ENV{SNMPCONFPATH}=t;$ENV{SNMPCONFPATH};
-
 while (1) {
   print "\n\nNet-SNMP build and install options\n";
   print "==================================\n\n";
@@ -159,6 +142,25 @@ $configOpts = "$configOpts $cTmp";
 $cTmp = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
 $configOpts = "$configOpts $cTmp";
 
+# Set environment variables
+
+# Set to not search for non-existent ".dep" files
+$ENV{NO_EXTERNAL_DEPS}="1";
+
+# Set PATH environment variable so Perl make tests can locate the DLL
+$ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
+
+# Set MIBDIRS environment variable so Perl make tests can locate the mibs
+my $temp_mibdir = "$current_pwd/../mibs";
+$temp_mibdir =~ s/\\/\//g;
+$ENV{MIBDIRS}=$temp_mibdir;
+
+# Set SNMPCONFPATH environment variable so Perl conf.t test can locate
+# the configuration files.
+# See the note about environment variables in the Win32 section of 
+# perl/SNMP/README for details on why this is needed. 
+$ENV{SNMPCONFPATH}=t;$ENV{SNMPCONFPATH};
+
 print "\nBuilding...\n";
 
 if ($logging eq "enabled") {
@@ -198,11 +200,8 @@ if ($logging eq "enabled") {
     system("nmake /nologo perl > perlmake.out 2>&1") == 0 || die "Build error (see perlmake.out)";
 
     print "Testing Perl modules...\n";
-    $path_old = $ENV{PATH};
-    $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
     system("nmake /nologo perl_test > perltest.out 2>&1"); # Don't die if all the tests don't pass..
-    $ENV{PATH} = $path_old;
-  
+    
     if ($perl_install eq "enabled") {
       print "Installing Perl modules...\n";
       system("nmake /nologo perl_install > perlinstall.out 2>&1") == 0 || die "Build error (see perlinstall.out)";
