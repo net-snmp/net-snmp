@@ -171,6 +171,10 @@ static oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 #define DEFAULT_ENTERPRISE  default_enterprise
 #define DEFAULT_TIME	    0
 
+/* don't set higher than 0x7fffffff, and I doubt it should be that high
+ * = 4 gig snmp messages max */
+#define MAXIMUM_PACKET_SIZE 0x7fffffff
+
 /*
  * Internal information about the state of the snmp session.
  */
@@ -4723,9 +4727,9 @@ _sess_read(void *sessp, fd_set *fdset)
       isp->packet_len -= pdulen;
     }
 
-    if (isp->packet_len < 0) {
+    if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
       /*  Obviously this should never happen!  */
-      snmp_log(LOG_ERR, "-ve packet_len %d, dropping connection %d\n",
+      snmp_log(LOG_ERR, "too large packet_len = %d, dropping connection %d\n",
 	       isp->packet_len, transport->sock);
       transport->f_close(transport);
       return -1;
