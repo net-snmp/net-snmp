@@ -844,17 +844,20 @@ init_mib __P((void))
     env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
       env_var = getenv("MIBFILE");  /* backwards compatibility */
+#ifdef DEFAULT_MIBFILES
       if ( env_var == NULL ) {
         strcpy(path, DEFAULT_MIBFILES);
 	env_var = path;
       }
+#endif
     }
-    entry = strtok( env_var, ":" );
-    while ( entry ) {
+    if ( env_var == NULL ) {
+      entry = strtok( env_var, ":" );
+      while ( entry ) {
         read_mib(entry);
         entry = strtok( NULL, ":");
+      }
     }
-
 
     prefix = getenv("PREFIX");
     if (!prefix)

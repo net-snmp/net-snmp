@@ -5,15 +5,17 @@ AC_CONFIG_HEADER(config.h)
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
 AC_ARG_WITH(root-access,[  --without-root-access           Agent won't require root access.])
-AC_ARG_WITH(default_mibs,[  --with-default-mibs=\"item1:item2:\"  Default mibs to load.],DEFAULT_MIBS="$with_default_mibs",DEFAULT_MIBS="RFC1213-MIB:UCD-SNMP-MIB")
 AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system contact.],ac_cv_user_prompt_SYS_CONTACT="$with_sys_contact")
 AC_ARG_WITH(sys_location,[  --with-sys-location=\"location\"  Default system location.],ac_cv_user_prompt_SYS_LOC="$with_sys_location")
 AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file location.],ac_cv_user_prompt_LOGFILE="$with_logfile")
 AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce (SNMPV1).],ac_cv_user_prompt_GLOBALSECURITY="$with_security")
+AC_ARG_WITH(mibs,[  --with-mibs=\"item1:item2:\"      Default mib IDs to load.], AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$with_mibs"))
+AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories for mibs.],[DEFAULT_MIBDIRS="$with_mibdirs"
+  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")
+])
+AC_ARG_WITH(mibfiles,[  --with-mibfiles=\"file1:file2\"   Default mib files to load.],AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"       Compile with additional mib modules.])
 AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without these mib modules.])
-
-AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$DEFAULT_MIBS")
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
 if test "x$with_root_access" = "xno"; then
@@ -87,11 +89,17 @@ AC_MSG_RESULT($EXTRACPPFLAGS)
 
 dnl Set SNMPLIBPATH and SNMPPATH
 if test "x$prefix" = "xNONE"; then
+SNMPLIBPATH="$ac_default_prefix/lib/snmp"
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
 AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
 else
+SNMPLIBPATH="$prefix/lib/snmp"
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
 AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
+fi
+
+if test "x$DEFAULT_MIBDIRS" = "x"; then
+  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPLIBPATH/mibs")
 fi
 
 

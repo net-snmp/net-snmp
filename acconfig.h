@@ -7,7 +7,15 @@
 
 /* default list of mibs to load */
 
-#undef DEFAULT_MIBS
+#define DEFAULT_MIBS "SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:SNMPv2-CONF:UCD-SNMP-MIB"
+
+/* default location to look for mibs to load */
+
+#undef DEFAULT_MIBDIRS
+
+/* default location to look for mibs to load */
+
+#undef DEFAULT_MIBFILES
 
 @TOP@
 
