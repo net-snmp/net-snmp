@@ -4208,3 +4208,16 @@ size_t snmp_socket_length( int family)
 
     return length;
 }
+
+/*
+ * For compatibility with applications built using
+ * previous versions only.
+ */
+
+/* use <struct snmp_session *)->s_snmp_errno instead */
+int  snmp_get_errno   (void)  { return SNMPERR_SUCCESS; }
+
+/* synch_reset and synch_setup are no longer used. */
+void snmp_synch_reset (struct snmp_session * notused) {}
+void snmp_synch_setup (struct snmp_session * notused) {}
+
