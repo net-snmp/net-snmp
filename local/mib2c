@@ -238,7 +238,7 @@ sub skippart {
 
 sub process {
     while(<$fh>) {
-	if (/^\#\#/) {
+	if (/^\s*\#\#/) {
 	    # noop, it's a comment
 	} elsif (/\@open\s+([^\@]+)\@/) {
 	    my $spec = process_vars($1);
@@ -272,10 +272,14 @@ sub process {
 	    }
 	} elsif (/\@eval\s+\$(\w+)\s*=\s*([^\@]*)/) {
 	    my ($v, $e) = ($1, $2);
+#	    print STDERR "eval: $e\n";
 	    my $e = process_vars($e);
 	    $vars{$v} = eval($e);
+#	    warn "$@" if (!defined($vars{$v}));
 	} elsif (/\@perleval\s*(.*)\@/) {
-	    eval($1);
+	    print STDERR "perleval: $1\n";
+	    my $res = eval($1);
+	    warn "$@" if ($res);
 	} elsif (/\@skip\@/) {
 	    skippart();
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) {
