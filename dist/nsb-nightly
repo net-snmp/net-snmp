@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# $Id$
+# Author: Robert Story <rstory@freesnmp.com>
+#
+########################################################################
+########################################################################
+
+usage()
+{
+   echo "Usage: $0  [-x] [-s SRCD] [-b BUILDD] [-i INSTALLD] VERSION"
+   echo ""
+   echo " VERSION    : relase number (eg 5.0.3)"
+   echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
+   echo " -b BUILDD  : build directory [$HOME/build/]"
+   echo "              NOTE-platform will be appended to build directory"
+   echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
+   echo ""
+   echo " -x : configure extra features for pre-release testing"
+   exit 1
+}
+
+#set -x
+
+#
+# find nsb-platform based on te path to this script
+#
+EXE_PATH=${0%nsb-nightly}
+EXE_PATH=${EXE_PATH%/}
+if [ -f $EXE_PATH/nsb-functions ];then
+   source $EXE_PATH/nsb-functions
+elif [ -f $HOME/bin/nsb-functions ]; then
+   source $HOME/bin/nsb-functions
+elif [ -f nsb-functions ];then
+   source nsb-functions
+else
+   echo "Cannot find nsb-functions in $EXE_PATH, $HOME/bin or $PWD"
+   exit 1
+fi
+
+
+########################################################################
+########################################################################
+
+# -c -d
+PARMS="-p -r"
+
+while getopts b:i:s:x opt
+do
+    case "$opt" in
+      b)  PARMS="-b $OPTARG $PARMS";;
+      i)  PARMS="-i $OPTARG $PARMS";;
+      s)  PARMS="-s $OPTARG $PARMS";;
+      x)  PARMS="-x $PARMS";;
+      \?)# unknown flag
+        usage;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if [ $# -ne 1 ]; then
+   echo "expecting 1 argument, got $# ($@)"
+   usage
+fi
+
+VERSION=$1
+
+
+########################################################################
+########################################################################
+echo "Start: `date`"
+echo "Running nsb-package $PARMS $VERSION"
+$EXE_PATH/nsb-package $PARMS $VERSION > /dev/null
+RC=$?
+echo "Finish: `date`"
+echo -n "Result: "
+case $RC in
+    0) echo "Success!";;
+    *) echo "Error!";;
+esac
