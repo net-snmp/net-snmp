@@ -6,6 +6,9 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -64,6 +67,7 @@
 #include "../../snmplib/system.h"
 
 #include "mibincl.h"
+#include "snmp_api.h"
 #include <nlist.h>
 
 #ifdef hpux
