@@ -359,7 +359,6 @@ var_system(struct variable *vp,
     switch (vp->magic){
         case VERSION_DESCR:
             *var_len = strlen(version_descr);
-            *write_method = writeSystem;
             return (u_char *)version_descr;
         case VERSIONID:
             *var_len = version_sysoid_len*sizeof(version_sysoid[0]);
@@ -415,10 +414,6 @@ writeSystem(int action,
     int count, *setvar = NULL;
 
     switch((char)name[7]){
-      case VERSION_DESCR:
-        buf    = version_descr;
-        oldbuf = oldversion_descr;
-        break;
       case SYSCONTACT:
         buf    = sysContact;
         oldbuf = oldsysContact;
@@ -444,7 +439,7 @@ writeSystem(int action,
                 snmp_log(LOG_ERR, "not string\n");
 		return SNMP_ERR_WRONGTYPE;
 	    }
-	    if (var_val_len > sizeof(version_descr)-1){
+	    if (var_val_len > sizeof(sysLocation)-1){
                 snmp_log(LOG_ERR, "bad length\n");
 		return SNMP_ERR_WRONGLENGTH;
 	    }
