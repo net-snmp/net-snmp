@@ -1,7 +1,224 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.0.7pre1 -> V5.0.7pre2
+Changes: V5.0.6 -> V5.0.7
 
+2003-01-11 01:15  rstory
+
+   * .cvsignore:
+
+   ignore configure-summary
+   
+2003-01-11 01:14  rstory
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend
+, agent/mibgroup/Makefile.depend, apps/Makefile.depend
+, apps/snmpnetstat/Makefile.depend,
+   snmplib/Makefile.depend:
+
+   make depend
+   
+2003-01-11 01:08  rstory
+
+   * .cvsignore:
+
+   ignore variations of changelog.add
+   
+2003-01-10 20:09  hardaker
+
+   * snmplib/: mib.c, snmp_api.c:
+
+   doxygen output tags to put the recently defined functions into groups.
+   
+2003-01-10 20:09  hardaker
+
+   * man/: Makefile.in, netsnmp_agent.3,
+   netsnmp_bulk_to_next.3, netsnmp_debug.3,
+   netsnmp_handler.3, netsnmp_instance.3,
+   netsnmp_library.3, netsnmp_mib_utilities.3,
+   netsnmp_mode_end_call.3, netsnmp_multiplexer.3,
+   netsnmp_old_api.3, netsnmp_read_only.3,
+   netsnmp_scalar.3, netsnmp_serialize.3, netsnmp_table.3
+, netsnmp_table_array.3, netsnmp_table_data.3,
+   netsnmp_table_dataset.3, netsnmp_table_iterator.3,
+   netsnmp_todo.3, netsnmp_watcher.3:
+
+   doxygen updates
+   
+2003-01-10 17:38  hardaker
+
+   * configure, configure.in:
+
+   opps
+   
+2003-01-10 17:29  hardaker
+
+   * configure, configure.in:
+
+   remove double checking output
+   
+2003-01-10 14:33  hardaker
+
+   * testing/tests/T0160snmpv2cbulkget:
+
+   fix positional arguments
+   
+2003-01-10 09:04  dts12
+
+   * FAQ:
+
+   Reference Bruce Shaw's discussion of the perl compilation problems
+   (see README.solaris)
+   
+2003-01-10 08:31  dts12
+
+   * FAQ:
+
+   Mention AgentX under windows, and beef up the perl stuff a bit.
+   Add a missing entry in the contents list.
+   (This may prove too late for 5.0.8, but at least it'll be ready for next time!)
+   
+2003-01-09 18:41  hardaker
+
+   * man/Makefile.in:
+
+   make doc update.
+   
+2003-01-09 18:38  hardaker
+
+   * man/: netsnmp_agent.3, netsnmp_bulk_to_next.3,
+   netsnmp_debug.3, netsnmp_handler.3, netsnmp_instance.3
+, netsnmp_mode_end_call.3, netsnmp_multiplexer.3,
+   netsnmp_old_api.3, netsnmp_read_only.3,
+   netsnmp_scalar.3, netsnmp_serialize.3, netsnmp_table.3
+, netsnmp_table_array.3, netsnmp_table_data.3,
+   netsnmp_table_dataset.3, netsnmp_table_iterator.3,
+   netsnmp_todo.3, netsnmp_watcher.3:
+
+   make doc update.
+   
+2003-01-09 18:37  hardaker
+
+   * agent/helpers/Makefile.in, agent/helpers/mode_end_call.c
+, include/net-snmp/agent/all_helpers.h,
+   include/net-snmp/agent/mode_end_call.h:
+
+   end-of-mode helper to call more handlers after processing the main
+   line.  Functionally allows parallel handler trees and callbacks after
+   a particular mode is completed (useful for things registered under a
+   serialize handler when you don't know when the mode is over).
+      (not used anywhere in production code yet.).
+   
+2003-01-09 11:55  dts12
+
+   * FAQ:
+
+   Mention the perl shared/static library problem,
+   the unresponsive agent problem (and fix), and
+   disclaim all knowledge of David Town's Net::SNMP module,
+   
+2003-01-09 10:27  hardaker
+
+   * testing/tests/: T0160snmpv2cbulkget, T0220snmpv3bulkget
+:
+
+   GetBulk testing supplied by Xiaofeng Ling
+   
+2003-01-09 10:26  hardaker
+
+   * testing/RUNTESTS:
+
+   Add -x flag for calling subtests with "sh -x".
+   Fix number counting for interactive output.
+   
+2003-01-07 18:49  hardaker
+
+   * COPYING (V4-2-patches.8), COPYING:
+
+   year update
+   
+2003-01-07 13:18  hardaker
+
+   * FAQ (V4-2-patches.58), FAQ:
+
+   irc server name change
+   
+2003-01-07 11:01  hardaker
+
+   * snmplib/mib.c:
+
+   bug #663628 and patch: fix ip address index parsing from OIDs
+   
+2003-01-07 04:53  dts12
+
+   * agent/helpers/table_iterator.c:
+
+   Remove redundant code to free 'callback_data_keep' data.
+   This branch would never be invoked, and is in the wrong
+   place anyway.  Patch supplied by Jay Parlar
+   
+2003-01-06 11:16  nba
+
+   * Makefile.in:
+
+   Install Solaris 9 header
+   
+2003-01-05 18:14  nba
+
+   * win32/win32.opt:
+
+   Make it compile with VC++
+   
+2003-01-05 17:28  nba
+
+   * win32/: encode_keychange/encode_keychange.dsp, win32.opt
+, libsnmp_dll/libsnmp.def:
+
+   Make it compile with VC++
+   
+2003-01-05 15:45  nba
+
+   * mibs/: Makefile.mib, SNMP-FRAMEWORK-MIB.txt,
+   SNMP-MPD-MIB.txt, SNMP-NOTIFICATION-MIB.txt,
+   SNMP-PROXY-MIB.txt, SNMP-TARGET-MIB.txt,
+   SNMP-USER-BASED-SM-MIB.txt, SNMP-VIEW-BASED-ACM-MIB.txt
+, SNMPv2-MIB.txt, SNMPv2-TM.txt, rfclist:
+
+   Update to current RFC versions
+   
+2003-01-03 15:50  rstory
+
+   * configure, configure.in:
+
+   don't call AC_DISABLE_SHARED, as sets the default to disabled (it's very
+   presence in configure.in generates a configure with shared disabled, even
+   if it was in an if block; for developer default, set enable_shared directly
+   unless it was previously set; test that enable_shared=yes for embedded-perl
+   
+2003-01-03 08:02  dts12
+
+   * FAQ (V4-2-patches.57), FAQ:
+
+   Mention the Stratus VOS port. (Thanks to Brandon Hall)
+   
+2003-01-02 18:00  rstory
+
+   * include/net-snmp/library/container.h:
+
+   parens around x in macro in case x is multiple C tokens
+   
+2002-12-22 12:32  rstory
+
+   * sedscript.in, snmplib/snmp_version.c, FAQ,
+   README, perl/SNMP/SNMP.pm:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.7.pre2 )
+   
+2002-12-22 12:31  rstory
+
+   * ChangeLog, NEWS:
+
+   update for 5.0.7.pre2
+   
 2002-12-22 12:20  rstory
 
    * agent/Makefile.depend, agent/helpers/Makefile.depend
