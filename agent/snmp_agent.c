@@ -1088,7 +1088,7 @@ handle_next_pass(struct agent_snmp_session  *asp)
 				/*
 				 * Send failed - call callback to handle this
 				 */
-			(void)req_p->callback( SEND_FAILED,
+			(void)req_p->callback( SNMP_CALLBACK_OP_SEND_FAILED,
 					 req_p->session,
 					 req_p->pdu->reqid,
 					 req_p->pdu,
