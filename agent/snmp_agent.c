@@ -166,10 +166,13 @@ save_set_cache( struct agent_snmp_session  *asp)
     ptr->treecache_len = asp->treecache_len;
     ptr->treecache_num = asp->treecache_num;
     ptr->agent_data    = asp->reqinfo->agent_data;
+    ptr->requests      = asp->requests;
 
     /* make the agent forget about what we've saved */
     asp->treecache = NULL;
     asp->reqinfo->agent_data = NULL;
+    asp->pdu->variables = NULL;
+    asp->requests = NULL;
     
     ptr->next = Sets;
     Sets = ptr;
@@ -193,6 +196,7 @@ get_set_cache( struct agent_snmp_session *asp )
             asp->treecache           = ptr->treecache;
             asp->treecache_len       = ptr->treecache_len;
             asp->treecache_num       = ptr->treecache_num;
+            asp->requests            = ptr->requests;
             if (!asp->reqinfo) {
                 asp->reqinfo = SNMP_MALLOC_TYPEDEF(agent_request_info);
                 if (asp->reqinfo) {
@@ -1821,7 +1825,8 @@ handle_set(struct agent_snmp_session  *asp) {
     }
     
     if (asp->mode != FINISHED_SUCCESS && asp->mode != FINISHED_FAILURE) {
-        DEBUGMSGTL(("agent_set", "doing set mode = %d\n", asp->mode));
+        DEBUGMSGTL(("agent_set", "doing set mode = %d (%s)\n", asp->mode,
+                    se_find_label_in_slist("agent_mode", asp->mode)));
         status = handle_var_requests(asp);
         DEBUGMSGTL(("agent_set", "did set mode = %d, status = %d\n",
                     asp->mode, status));
