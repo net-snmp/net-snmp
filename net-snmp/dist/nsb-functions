@@ -1,3 +1,16 @@
+#----------------------------------------------------------------------
+# $Id$
+# Author: Robert Story <rstory@freesnmp.com>
+
+#----------------------------------------------------------------------
+#
+# Utility vars
+#
+NSB_QUIET=0
+NSB_CLEAN=1
+NSB_SKIP_CONFIG=0
+NSB_VIEW=cat
+DATE=`date +%y%m%d_%k%M`
 
 #----------------------------------------------------------------------
 #
@@ -14,14 +27,17 @@ nsb-info()
 nsb-prompt()
 {
    echo $@
-   read nsb-prompt-dummy
+   read nsb_prompt_dummy
 }
 
 #----------------------------------------------------------------------
 #
 nsb-get-config()
 {
-   echo "configure --prefix=usr/local --disable-privacy --with-defaults --with-sys-contact=\"root\" --with-mib-modules=\"host disman/event-mib\""
+#   echo src/configure --prefix=usr/local --with-sys-location=\"Location\" --with-sys-contact=\"System Administrator\" --disable-privacy --with-defaults --with-mib-modules=\"host disman/event-mib\"
+   src/configure --prefix=usr/local --with-sys-location=Location \
+      --with-sys-contact='System Administrator' --disable-privacy \
+      --with-defaults --with-mib-modules='host disman/event-mib'
 }
 
 nsb-sysname()
@@ -32,16 +48,16 @@ nsb-sysname()
 nsb-zip()
 {
    if [ $# -ne 3 ]; then
-      echo "usage: $0 release build-directory dest-dir"
+      echo "usage: $0 release build_directory dest_dir"
       exit
    fi
 
    release=$1
-   build-dir=$2
-   dest-dir=$3
+   build_dir=$2
+   dest_dir=$3
 
    platform=`nsb-sysname`
-   build=$build-dir/$platform
+   build=$build_dir/$platform
 
    if [ ! -d $build ]; then
       echo "$build directory does not exist!"
@@ -55,15 +71,15 @@ nsb-zip()
 
    cd $build
 
-   rm -f $dest-dir/$release-$platform.tar
-   nsb-info "tar cf $dest-dir/$release-$platform.tar usr"
-   tar cf $dest-dir/$release-$platform.tar usr
+   rm -f $dest_dir/$release-$platform.tar
+   nsb-info "tar cf $dest_dir/$release-$platform.tar usr"
+   tar cf $dest_dir/$release-$platform.tar usr
 
-   nsb-info "gzip --best $dest-dir/$release-$platform.tar"
-   gzip --best $dest-dir/$release-$platform.tar
+   nsb-info "gzip --best $dest_dir/$release-$platform.tar"
+   gzip --best $dest_dir/$release-$platform.tar
 
    if [ $NSB_QUIET -ne 1 ]; then
-      ls -lt $dest-dir
+      ls -lt $dest_dir
    fi
 }
 
@@ -71,25 +87,25 @@ nsb-build()
 {
 
    if [ $# -ne 3 ]; then
-      echo "usage: $0 release src-dir build-directory dest-dir"
+      echo "usage: $0 release src_dir build_directory dest_dir"
       exit
    fi
 
    release=$1
-   src-dir=$2
-   build-dir=$3
-   dest-dir=$4
+   src_dir=$2
+   build_dir=$3
+#   dest_dir=$4
 
-   if [ ! -d $src-dir/$release ]; then
-      echo "$src-dir/$release does not exist!"
+   if [ ! -d $src_dir ]; then
+      echo "$src_dir does not exist!"
       exit
    fi
 
    platform=`nsb-sysname`
-   build=$build-dir/$platform
+   build=$build_dir/$platform
 
    if [ ! -d $build ]; then
-      mkdir $HOME/build/$platform
+      mkdir $build
       if [ ! -d $build ]; then
          echo "$build directory does not exist!"
          exit;
@@ -100,17 +116,38 @@ nsb-build()
    cd $build
 
    if [ ! -h $build/src  ]; then
-      ln -s $HOME/src/$release src
+      ln -s $src_dir src
    fi
 
-   nsb-info "Configuring..."
-   `nsb-config`
-   nsb-prompt "press enter to continue"
+   if [ $NSB_CLEAN -eq 1 ]; then
+      nsb-info "Cleaning up..."
+      rm -fR nsb-out-* 2>&1 > /dev/null
+      if [ -f Makefile ]; then
+         make distclean
+      fi
+   fi
 
-   nsb-info "Building..."
-   date > make.out
-   make 2>&1 | tee -a make.out
-   nsb-prompt "press enter to continue and check for errors"
+   if [ $NSB_SKIP_CONFIG -ne 1 ]; then
+      nsb-info "Configuring... (log is nsb-out-config.$DATE)"
+      nsb-get-config | tee nsb-out-config.$DATE
+      nsb-prompt "press enter to continue"
+   fi
 
-   grep -v "^/bin/sh" make.out | less"
+   OUTPUT=nsb-out-make.$DATE
+   nsb-info "Building... (log is $OUTPUT)"
+   make 2>&1 test | tee $OUTPUT
+
+   nsb-info "Checking for errors..."
+   egrep "Error|FAIL|warning|No rule|exists" $OUTPUT > nsb-out-allerrs.$DATE
+   egrep -v "^/usr" nsb-out-allerrs.$DATE > nsb-out-nerrs.$DATE
+   egrep -v "warn" nsb-out-nerrs.$DATE > nsb-out-errs.$DATE
+   nsb_rc=$?
+   if [ $nsb_rc -eq 0 ]; then
+      nsb-prompt "press enter to view errors"
+      $NSB_VIEW nsb-out-nerrs.$DATE
+   else
+      nsb-prompt "No errors found, press enter to install"
+      ## full build with install. usr subdir will be available to package
+      make install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local | tee -a $OUTPUT
+   fi
 }
