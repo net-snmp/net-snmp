@@ -40,73 +40,127 @@ register_read_only_instance(handler_registration *reginfo) {
     return register_serialize(reginfo);
 }
 
+static
+handler_registration *
+get_reg(const char *name,
+        const char *ourname,
+        oid *reg_oid, size_t reg_oid_len,
+        void *it,
+        int modes,
+        NodeHandler *scalarh,
+        NodeHandler *subhandler) 
+{
+    handler_registration *myreg;
+    mib_handler *myhandler;
+    
+    if (subhandler) {
+        myreg =
+            create_handler_registration(name,
+                                        subhandler,
+                                        reg_oid, reg_oid_len,
+                                        modes);
+        myhandler = create_handler(ourname, scalarh);
+        myhandler->myvoid = (void *) it;
+        inject_handler(myreg, myhandler);
+    } else {
+        myreg =
+            create_handler_registration(name,
+                                        scalarh,
+                                        reg_oid, reg_oid_len,
+                                        modes);
+        myreg->handler->myvoid = (void *) it;
+    }
+    return myreg;
+}
+
 int
 register_read_only_ulong_instance(const char *name,
                                   oid *reg_oid, size_t reg_oid_len,
-                                  u_long *it) 
+                                  u_long *it,
+                                  NodeHandler *subhandler) 
 {
-    handler_registration *myreg =
-        create_handler_registration(name,
-                                    instance_ulong_handler,
-                                    reg_oid, reg_oid_len,
-                                    HANDLER_CAN_RONLY);
-    myreg->handler->myvoid = (void *) it;
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, instance_ulong_handler, subhandler);
     return register_read_only_instance(myreg);
 }
 
 int
 register_ulong_instance(const char *name,
                         oid *reg_oid, size_t reg_oid_len,
-                        u_long *it) 
+                        u_long *it,
+                        NodeHandler *subhandler) 
 {
-    handler_registration *myreg =
-        create_handler_registration(name,
-                                    instance_ulong_handler,
-                                    reg_oid, reg_oid_len,
-                                    HANDLER_CAN_RWRITE);
-    myreg->handler->myvoid = (void *) it;
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, instance_ulong_handler, subhandler);
     return register_instance(myreg);
 }
 
 int
 register_read_only_counter32_instance(const char *name,
                                       oid *reg_oid, size_t reg_oid_len,
-                                      u_long *it) 
+                                      u_long *it,
+                                      NodeHandler *subhandler) 
 {
-    handler_registration *myreg =
-        create_handler_registration(name,
-                                    instance_counter32_handler,
-                                    reg_oid, reg_oid_len,
-                                    HANDLER_CAN_RONLY);
-    myreg->handler->myvoid = (void *) it;
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, instance_counter32_handler, subhandler);
     return register_read_only_instance(myreg);
 }
 
 int
 register_read_only_long_instance(const char *name,
                                  oid *reg_oid, size_t reg_oid_len,
-                                 long *it) 
+                                 long *it,
+                                 NodeHandler *subhandler) 
 {
-    handler_registration *myreg =
-        create_handler_registration(name,
-                                    instance_long_handler,
-                                    reg_oid, reg_oid_len,
-                                    HANDLER_CAN_RONLY);
-    myreg->handler->myvoid = (void *) it;
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, instance_long_handler, subhandler);
     return register_read_only_instance(myreg);
 }
 
 int
 register_long_instance(const char *name,
                        oid *reg_oid, size_t reg_oid_len,
-                       long *it) 
+                       long *it,
+                       NodeHandler *subhandler) 
 {
-    handler_registration *myreg =
-        create_handler_registration(name,
-                                    instance_long_handler,
-                                    reg_oid, reg_oid_len,
-                                    HANDLER_CAN_RWRITE);
-    myreg->handler->myvoid = (void *) it;
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, instance_long_handler, subhandler);
+    return register_instance(myreg);
+}
+
+int
+register_read_only_int_instance(const char *name,
+                                oid *reg_oid, size_t reg_oid_len,
+                                int *it,
+                                NodeHandler *subhandler) 
+{
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RONLY, instance_int_handler, subhandler);
+    return register_read_only_instance(myreg);
+}
+
+int
+register_int_instance(const char *name,
+                      oid *reg_oid, size_t reg_oid_len,
+                      int *it,
+                      NodeHandler *subhandler) 
+{
+    handler_registration *myreg;
+
+    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
+                    HANDLER_CAN_RWRITE, instance_int_handler, subhandler);
     return register_instance(myreg);
 }
 
@@ -180,7 +234,8 @@ instance_counter32_handler(
 
     u_long *it = (u_long *) handler->myvoid;
     
-    DEBUGMSGTL(("instance_ulong_handler", "Got request:  %d\n", reqinfo->mode));
+    DEBUGMSGTL(("instance_counter32_handler",
+                "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
         /* data requests */
@@ -209,7 +264,7 @@ instance_long_handler(
     long *it = (u_long *) handler->myvoid;
     long *it_save;
     
-    DEBUGMSGTL(("instance_ulong_handler", "Got request:  %d\n", reqinfo->mode));
+    DEBUGMSGTL(("instance_long_handler", "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
         /* data requests */
@@ -221,7 +276,7 @@ instance_long_handler(
 
         /* SET requests.  Should only get here if registered RWRITE */
         case MODE_SET_RESERVE1:
-            if (requests->requestvb->type != ASN_UNSIGNED)
+            if (requests->requestvb->type != ASN_INTEGER)
                 set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
             break;
 
@@ -249,6 +304,67 @@ instance_long_handler(
         case MODE_SET_UNDO:
             *it =
                 *((u_long *) request_get_list_data(requests,
+                                                   INSTANCE_HANDLER_NAME));
+            break;
+
+        case MODE_SET_COMMIT:
+        case MODE_SET_FREE:
+                /* nothing to do */
+            break;
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+int
+instance_int_handler(
+    mib_handler               *handler,
+    handler_registration      *reginfo,
+    agent_request_info        *reqinfo,
+    request_info              *requests) {
+
+    int *it = (u_int *) handler->myvoid;
+    int *it_save;
+    
+    DEBUGMSGTL(("instance_int_handler", "Got request:  %d\n", reqinfo->mode));
+
+    switch(reqinfo->mode) {
+        /* data requests */
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                     (u_char *) it,
+                                     sizeof(*it));
+            break;
+
+        /* SET requests.  Should only get here if registered RWRITE */
+        case MODE_SET_RESERVE1:
+            if (requests->requestvb->type != ASN_INTEGER)
+                set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
+            break;
+
+        case MODE_SET_RESERVE2:
+            /* store old info for undo later */
+            memdup((u_char **) &it_save,
+                   (u_char *) it, sizeof(u_long));
+            if (it_save == NULL) {
+                set_request_error(reqinfo, requests,
+                                  SNMP_ERR_RESOURCEUNAVAILABLE);
+                return SNMP_ERR_NOERROR;
+            }
+            request_add_list_data(requests,
+                                  create_data_list(INSTANCE_HANDLER_NAME,
+                                                   it_save, free));
+            break;
+
+        case MODE_SET_ACTION:
+            /* update current */
+            DEBUGMSGTL(("testhandler","updated int %d -> %l\n", *it,
+                        *(requests->requestvb->val.integer)));
+            *it = (int) *(requests->requestvb->val.integer);
+            break;
+            
+        case MODE_SET_UNDO:
+            *it =
+                *((u_int *) request_get_list_data(requests,
                                                    INSTANCE_HANDLER_NAME));
             break;
 
