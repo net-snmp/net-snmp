@@ -15,14 +15,15 @@
 #include <dmalloc.h>
 #endif
 
-netsnmp_cache       *cache_head = NULL;
-long                 caching_enabled       = 1;
-long                 cache_default_timeout = 5;		/* in seconds */
-int                  cache_outstanding_valid = 0;
+netsnmp_cache  *cache_head = NULL;
+long            caching_enabled = 1;
+long            cache_default_timeout = 5;      /* in seconds */
+int             cache_outstanding_valid = 0;
 
-#define CACHE_RELEASE_FREQUENCY	60	/* Check for expired caches every 60s */
+#define CACHE_RELEASE_FREQUENCY 60      /* Check for expired caches every 60s */
 
-void release_cached_resources( unsigned int regNo, void *clientargs );
+void            release_cached_resources(unsigned int regNo,
+                                         void *clientargs);
 
 /** @defgroup cache_handler cache_handler: Maintains a cache of data for use by lower level handlers.
  *  @ingroup utilities
@@ -36,37 +37,37 @@ void release_cached_resources( unsigned int regNo, void *clientargs );
 /** returns a cache handler that can be injected into a given handler chain.  
  */
 netsnmp_mib_handler *
-netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad *load_hook,
-                                       NetsnmpCacheFree *free_hook,
-                                       oid *rootoid, int rootoid_len)
+netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
+                          NetsnmpCacheFree * free_hook,
+                          oid * rootoid, int rootoid_len)
 {
-    netsnmp_mib_handler *ret   = NULL;
-    netsnmp_cache       *cache = NULL;
+    netsnmp_mib_handler *ret = NULL;
+    netsnmp_cache  *cache = NULL;
 
     ret = netsnmp_create_handler("cache_handler",
-                                  netsnmp_cache_helper_handler);
+                                 netsnmp_cache_helper_handler);
     if (ret) {
         cache = SNMP_MALLOC_TYPEDEF(netsnmp_cache);
         if (cache) {
-            cache->timeout     = timeout;
-            cache->load_cache  = load_hook;
-            cache->free_cache  = free_hook;
-            cache->enabled     = 1;
+            cache->timeout = timeout;
+            cache->load_cache = load_hook;
+            cache->free_cache = free_hook;
+            cache->enabled = 1;
 
             /*
-	     * Add the registered OID information, and tack
-	     * this onto the list for cache SNMP management
-	     *
-	     * Note that this list is not ordered.
-	     *    table_iterator rules again!
-	     */
-            cache->rootoid     = snmp_duplicate_objid(rootoid, rootoid_len);
+             * Add the registered OID information, and tack
+             * this onto the list for cache SNMP management
+             *
+             * Note that this list is not ordered.
+             *    table_iterator rules again!
+             */
+            cache->rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
             cache->rootoid_len = rootoid_len;
-	    cache->next = cache_head;
-	    if (cache_head)
-	        cache_head->prev = cache;
-	    cache_head = cache;
-	}
+            cache->next = cache_head;
+            if (cache_head)
+                cache_head->prev = cache;
+            cache_head = cache;
+        }
         ret->myvoid = (void *) cache;
     }
     return ret;
@@ -75,13 +76,14 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad *load_hook,
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a cache handler at the same time for you. */
 int
-netsnmp_register_cache_handler(netsnmp_handler_registration *reginfo,
-                               int timeout, NetsnmpCacheLoad *load_hook,
-                                            NetsnmpCacheFree *free_hook)
+netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
+                               int timeout, NetsnmpCacheLoad * load_hook,
+                               NetsnmpCacheFree * free_hook)
 {
     netsnmp_mib_handler *handler = NULL;
     handler = netsnmp_get_cache_handler(timeout, load_hook, free_hook,
-		    		reginfo->rootoid, reginfo->rootoid_len);
+                                        reginfo->rootoid,
+                                        reginfo->rootoid_len);
 
     netsnmp_inject_handler(reginfo, handler);
     return netsnmp_register_handler(reginfo);
@@ -89,14 +91,14 @@ netsnmp_register_cache_handler(netsnmp_handler_registration *reginfo,
 
 /** Extract the cache information for a given request */
 netsnmp_cache  *
-netsnmp_extract_cache_info(netsnmp_agent_request_info *reqinfo)
+netsnmp_extract_cache_info(netsnmp_agent_request_info * reqinfo)
 {
     return netsnmp_agent_get_list_data(reqinfo, CACHE_NAME);
 }
 
 /** Is the cache valid for a given request? */
 int
-netsnmp_is_cache_valid(netsnmp_agent_request_info *reqinfo)
+netsnmp_is_cache_valid(netsnmp_agent_request_info * reqinfo)
 {
     netsnmp_cache  *cache = netsnmp_extract_cache_info(reqinfo);
     return (cache && cache->valid);
@@ -104,38 +106,40 @@ netsnmp_is_cache_valid(netsnmp_agent_request_info *reqinfo)
 
 /** Implements the cache handler */
 int
-netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
-                                 netsnmp_handler_registration *reginfo,
-                                 netsnmp_agent_request_info *reqinfo,
-                                 netsnmp_request_info *requests)
+netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
+                             netsnmp_handler_registration * reginfo,
+                             netsnmp_agent_request_info * reqinfo,
+                             netsnmp_request_info * requests)
 {
-  netsnmp_cache       *cache = NULL;
-  long cache_timeout;
-  int  ret;
+    netsnmp_cache  *cache = NULL;
+    long            cache_timeout;
+    int             ret;
 
-  DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ", reqinfo->mode));
-  DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
+    DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ",
+                reqinfo->mode));
+    DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid,
+                 reginfo->rootoid_len));
 
-  cache = (netsnmp_cache *)handler->myvoid;
-  if (!caching_enabled || !cache || !cache->enabled) {
-      DEBUGMSGTL(("helper:cache_handler", "caching disabled, "
-                  "cache not found or cache is disabled"));
-      goto done;
-  }
+    cache = (netsnmp_cache *) handler->myvoid;
+    if (!caching_enabled || !cache || !cache->enabled) {
+        DEBUGMSGTL(("helper:cache_handler", "caching disabled, "
+                    "cache not found or cache is disabled"));
+        goto done;
+    }
 
-  switch (reqinfo->mode) {
+    switch (reqinfo->mode) {
 
-  case MODE_GET:
-  case MODE_GETNEXT:
-  case MODE_GETBULK:
-    /*
-     * call the load hook, and update the cache timestamp.
-     */
+    case MODE_GET:
+    case MODE_GETNEXT:
+    case MODE_GETBULK:
+        /*
+         * call the load hook, and update the cache timestamp.
+         */
         cache_timeout = cache->timeout;
         if (cache_timeout == 0)
             cache_timeout = cache_default_timeout;
         if (!cache->valid || !cache->timestamp ||
-             atime_ready(cache->timestamp, 1000*cache_timeout)) {
+            atime_ready(cache->timestamp, 1000 * cache_timeout)) {
             /*
              * If we've got a valid cache, then release it before reloading
              */
@@ -145,8 +149,9 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
             }
             ret = cache->load_cache(cache, cache->magic);
             if (ret < 0) {
-                DEBUGMSG(("helper:cache_handler", " load failed (%d)\n", ret));
-                goto done;	/* XXX - or return ? */
+                DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
+                          ret));
+                goto done;      /* XXX - or return ? */
             }
             cache->valid = 1;
 
@@ -160,44 +165,45 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
                 cache_outstanding_valid = 1;
             }
             if (cache->timestamp)
-       	        atime_setMarker(cache->timestamp);
-	    else
+                atime_setMarker(cache->timestamp);
+            else
                 cache->timestamp = atime_newMarker();
-            DEBUGMSG(("helper:cache_handler", " loaded (%d)\n", cache_timeout));
+            DEBUGMSG(("helper:cache_handler", " loaded (%d)\n",
+                      cache_timeout));
         } else {
-            DEBUGMSG(("helper:cache_handler", " cached (%d)\n", cache_timeout));
+            DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
+                      cache_timeout));
         }
         netsnmp_agent_add_list_data(reqinfo,
                                     netsnmp_create_data_list(CACHE_NAME,
                                                              cache, NULL));
         break;
 
-  /*
-   * A (successful) SET request wouldn't typically trigger a reload of
-   *  the cache, but might well invalidate the current contents.
-   * Only do this on the last pass through.
-   */
-  case MODE_SET_RESERVE1:
-  case MODE_SET_RESERVE2:
-  case MODE_SET_FREE:
-  case MODE_SET_ACTION:
-  case MODE_SET_UNDO:
-    break;
-  case MODE_SET_COMMIT:
-    if (cache->valid /* && some flag ? */) {
-        cache->free_cache(cache, cache->magic);
-        cache->valid = 0;
+        /*
+         * A (successful) SET request wouldn't typically trigger a reload of
+         *  the cache, but might well invalidate the current contents.
+         * Only do this on the last pass through.
+         */
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_FREE:
+    case MODE_SET_ACTION:
+    case MODE_SET_UNDO:
+        break;
+    case MODE_SET_COMMIT:
+        if (cache->valid /* && some flag ? */ ) {
+            cache->free_cache(cache, cache->magic);
+            cache->valid = 0;
+        }
+        break;
+
+    default:
+        snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n",
+                 reqinfo->mode);
     }
-    break;
 
-  default:
-    snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n", 
-                           reqinfo->mode);
-  }
-
-done:
-  return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                   requests);
+  done:
+    return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
 }
 
 
@@ -205,13 +211,14 @@ done:
 /** run regularly to automatically release cached resources.
  */
 void
-release_cached_resources( unsigned int regNo, void *clientargs ) {
-    netsnmp_cache *cache = NULL;
-    long cache_timeout;
+release_cached_resources(unsigned int regNo, void *clientargs)
+{
+    netsnmp_cache  *cache = NULL;
+    long            cache_timeout;
 
     cache_outstanding_valid = 0;
     DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
-    for (cache=cache_head; cache; cache=cache->next) {
+    for (cache = cache_head; cache; cache = cache->next) {
         if (cache->valid) {
             /*
              * Check to see if this cache has timed out.
@@ -223,7 +230,7 @@ release_cached_resources( unsigned int regNo, void *clientargs ) {
             if (cache_timeout == 0)
                 cache_timeout = cache_default_timeout;
             if (!cache->timestamp ||
-                 atime_ready(cache->timestamp, 1000*cache_timeout)) {
+                atime_ready(cache->timestamp, 1000 * cache_timeout)) {
                 cache->free_cache(cache, cache->magic);
                 cache->valid = 0;
             } else {
