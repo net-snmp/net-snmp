@@ -32,6 +32,11 @@ extern oid netsnmpCLNSDomain[];	/*	= { 1, 3, 6, 1, 6, 1, 2 };  */
 extern oid netsnmpCONSDomain[];	/* 	= { 1, 3, 6, 1, 6, 1, 3 };  */
 extern oid netsnmpDDPDomain[];	/* 	= { 1, 3, 6, 1, 6, 1, 4 };  */
 extern oid netsnmpIPXDomain[];	/*	= { 1, 3, 6, 1, 6, 1, 5 };  */
+extern size_t netsnmpUDPDomain_len;	/* 	= { 1, 3, 6, 1, 6, 1, 1 };  */
+extern size_t netsnmpCLNSDomain_len;	/*	= { 1, 3, 6, 1, 6, 1, 2 };  */
+extern size_t netsnmpCONSDomain_len;	/* 	= { 1, 3, 6, 1, 6, 1, 3 };  */
+extern size_t netsnmpDDPDomain_len;	/* 	= { 1, 3, 6, 1, 6, 1, 4 };  */
+extern size_t netsnmpIPXDomain_len;	/*	= { 1, 3, 6, 1, 6, 1, 5 };  */
 
 
 
