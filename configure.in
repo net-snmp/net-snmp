@@ -888,6 +888,8 @@ elif test "`($PSPROG -acx 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" 
   ac_cv_ps_flags="-acx"
 elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | egrep ' ps *$' | awk '{print $NF}'`" = "ps" ; then
   ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
+elif test "`($PSPROG ax 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+  ac_cv_ps_flags="ax"
 else
   AC_MSG_WARN(Unable to determine valid ps flags...  defaulting...)
   ac_cv_ps_flags="-acx"
