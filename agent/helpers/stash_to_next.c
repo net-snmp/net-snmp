@@ -64,13 +64,20 @@ netsnmp_stash_to_next_helper(netsnmp_mib_handler *handler,
      * Don't do anything for any modes except GET_STASH. Just return,
      * and the agent will call the next handler (AUTO_NEXT).
      *
-     * For GET_STASH, we munge the mode to GET_NEXT, and call the
+     * If the handler chain already supports GET_STASH, we don't
+     * need to do anything here either.  Once again, we just return
+     * and the agent will call the next handler (AUTO_NEXT).
+     *
+     * Otherwise, we munge the mode to GET_NEXT, and call the
      * next handler ourselves, repeatedly until we've retrieved the
      * full contents of the table or subtree.
      *   Then restore the mode and return to the calling handler 
      * (setting AUTO_NEXT_OVERRRIDE so the agent knows what we did).
      */
     if (MODE_GET_STASH == reqinfo->mode) {
+        if ( reginfo->modes & HANDLER_CAN_STASH ) {
+            return ret;
+        }
         cinfo  = netsnmp_extract_stash_cache( reqinfo );
         reqtmp = SNMP_MALLOC_TYPEDEF(netsnmp_request_info);
         vb = reqtmp->requestvb = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
