@@ -24,7 +24,6 @@
 # endif
 #endif
 #if HAVE_SYS_TIMES_H
-/* lumentis: replaced gettimeofday() with times() */
 #include <sys/times.h>
 #endif
 #if HAVE_STRING_H
