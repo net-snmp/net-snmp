@@ -69,9 +69,11 @@ struct counter64 smux_counter64;
 oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
 
+#ifdef USING_SD_HANDLERS
 extern int sdlist[];
 extern int sdlen;
 extern int (*sd_handlers[])(int);
+#endif
 
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
@@ -205,10 +207,12 @@ init_smux(void)
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
+#ifdef USING_SD_HANDLERS
 	sdlist[sdlen] = smux_sd;
 	sd_handlers[sdlen++] = smux_accept;
 
 	fprintf(stderr, "sdlen in smux_init: %d\n", sdlen);
+#endif
 	fprintf(stderr, "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
 		 lo_socket.sin_port);
 
@@ -390,10 +394,12 @@ smux_accept(int sd)
 #endif
 
 		npeers++;
+#ifdef USING_SD_HANDLERS
 		sdlist[sdlen] = fd;
 		sd_handlers[sdlen++] = smux_process;
 
 		DEBUGMSGTL (("smux","[smux_accept] fd %d, sdlen %d\n", fd, sdlen));
+#endif
 	}
 
 	return SMUXOK;
@@ -1212,6 +1218,7 @@ smux_peer_cleanup(int sd)
 			free(rptr);
 		}
 	}
+#ifdef USING_SD_HANDLERS
 	/* XXX stop paying attention to his socket */
 	for (i = 0; i < sdlen; i++) {
 		if (sdlist[i] == sd) {
@@ -1222,6 +1229,7 @@ smux_peer_cleanup(int sd)
 		}
 	}
 	sdlen--;
+#endif
 
 	/* decrement the peer count */
 	npeers--;

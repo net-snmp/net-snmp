@@ -221,8 +221,7 @@ int snmp_check_packet(struct snmp_session*, snmp_ipaddr);
 int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
 
 static char *
-sprintf_stamp (now)
-    time_t *now;
+sprintf_stamp (time_t *now)
 {
     time_t Now;
     struct tm *tm;
@@ -969,9 +968,8 @@ receive(void)
  *
  */
 int
-snmp_check_packet( session, from )
-  struct snmp_session *session;
-  snmp_ipaddr from;
+snmp_check_packet(struct snmp_session *session,
+  snmp_ipaddr from)
 {
 #ifdef USE_LIBWRAP
     char *addr_string;
@@ -1023,10 +1021,9 @@ snmp_check_packet( session, from )
 
 
 int
-snmp_check_parse( session, pdu, result )
-    struct snmp_session *session;
-    struct snmp_pdu     *pdu;
-    int    result;
+snmp_check_parse( struct snmp_session *session,
+    struct snmp_pdu     *pdu,
+    int    result)
 {
     if ( result == 0 ) {
         if ( verbose) {
@@ -1120,9 +1117,7 @@ void snmpd_parse_config_trapsink(char *token,
 
 
 void
-snmpd_parse_config_trap2sink(word, cptr)
-    char *word;
-    char *cptr;
+snmpd_parse_config_trap2sink(char *word, char *cptr)
 {
     char tmpbuf[1024];
   
@@ -1133,9 +1128,7 @@ snmpd_parse_config_trap2sink(word, cptr)
 }
 
 void
-snmpd_parse_config_trapcommunity(word,cptr)
-    char *word;
-    char *cptr;
+snmpd_parse_config_trapcommunity(char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
     snmp_trapcommunity = malloc (strlen(cptr));

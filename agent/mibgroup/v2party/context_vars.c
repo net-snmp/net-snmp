@@ -95,8 +95,8 @@ write_context(int action,
 {
 #if 0
     struct contextEntry *cp, *rp;
-    int var, indexlen, len;
-    oid *index;
+    int var, oid_len, len;
+    oid *poid;
     long val;
     oid buf[32];
     int bigsize = 1000, size;
@@ -107,16 +107,16 @@ write_context(int action,
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
 	return SNMP_ERR_NOCREATION;  
     var = name[11];
-    indexlen = name[12];
-    index = name + 13;
-    if (length != 13 + indexlen)
+    oid_len = name[12];
+    poid = name + 13;
+    if (length != 13 + oid_len)
 	return SNMP_ERR_NOCREATION;
 
-    cp = context_getEntry(index, indexlen);
+    cp = context_getEntry(poid, oid_len);
     if (cp)
 	rp = cp->reserved;
     if (action == RESERVE1 && !cp){
-	if ((cp = context_rowCreate(index, indexlen)) == NULL)
+	if ((cp = context_rowCreate(poid, oid_len)) == NULL)
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
 	rp = cp->reserved;
 	/* create default vals here in reserve area
@@ -171,7 +171,7 @@ write_context(int action,
 	}
     } else if (action == FREE){
 	if (cp && cp->contextStatus == SNMP_ROW_NONEXISTENT){
-	    context_rowDelete(index, indexlen);
+	    context_rowDelete(poid, oid_len);
 	    cp = rp = NULL;
 	}
 	if (cp)	/* satisfy postcondition for bitMask */

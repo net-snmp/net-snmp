@@ -179,7 +179,7 @@ int usm_process_in_msg (int, int, u_char *, int, int, u_char *, int,
 			    int *, void **);
 
 int             usm_check_secLevel(int level, struct usmUser *user);
-struct usmUser *usm_get_userList();
+struct usmUser *usm_get_userList(void);
 struct usmUser *usm_get_user(char *engineID, int engineIDLen, char *name);
 struct usmUser *usm_get_user_from_list(char *engineID, int engineIDLen,
                                        char *name, struct usmUser *userList,
@@ -189,7 +189,9 @@ struct usmUser *usm_add_user_to_list(struct usmUser *user,
                                      struct usmUser *userList);
 struct usmUser *usm_free_user(struct usmUser *user);
 struct usmUser *usm_create_user(void);
-struct usmUser *usm_create_initial_user();
+struct usmUser *usm_create_initial_user(char *name,
+                                     oid *authProtocol, int authProtocolLen,
+                                     oid *privProtocol, int privProtocolLen);
 struct usmUser *usm_cloneFrom_user(struct usmUser *from, struct usmUser *to);
 struct usmUser *usm_remove_user(struct usmUser *user);
 struct usmUser *usm_remove_user_from_list(struct usmUser *user,

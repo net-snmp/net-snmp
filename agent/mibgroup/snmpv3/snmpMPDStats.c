@@ -26,13 +26,13 @@ void init_snmpMPDStats(void) {
 }
 
 unsigned char *
-var_snmpMPDStats(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    WriteMethod **write_method;
+var_snmpMPDStats(
+    struct variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
 
   /* variables we may use later */

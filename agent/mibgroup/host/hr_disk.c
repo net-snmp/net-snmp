@@ -336,7 +336,7 @@ Get_Next_HR_Disk (void)
 {
     char string[100];
     int fd, result;
-    int index;
+    int iindex;
     int max_disks;
     time_t now;
 
@@ -347,7 +347,7 @@ Get_Next_HR_Disk (void)
 		    disk_device_id[      HRD_type_index ] +1;
 
 	while ( HRD_index < max_disks ) {
-	    index = (HRD_type_index << HRDISK_TYPE_SHIFT) + HRD_index;
+	    iindex = (HRD_type_index << HRDISK_TYPE_SHIFT) + HRD_index;
 
 			/*
 			 * Check to see whether this device
@@ -356,8 +356,8 @@ Get_Next_HR_Disk (void)
 			 * This has a *major* impact on run
 			 *   times (by a factor of 10!)
 			 */
-	    if (( HRD_history[ index ] != 0 ) &&
-		(( now - HRD_history[ index ]) < 60 ))
+	    if (( HRD_history[ iindex ] != 0 ) &&
+		(( now - HRD_history[ iindex ]) < 60 ))
 	    {
 			HRD_index++;
 			continue;
@@ -376,11 +376,11 @@ Get_Next_HR_Disk (void)
 		result = Query_Disk( fd );
 		close(fd);
 		if ( result != -1 ) {
-		    HRD_history[ index ] = 0;
-		    return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) + index );
+		    HRD_history[ iindex ] = 0;
+		    return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) + iindex );
 		}
 	    }
-	    HRD_history[ index ] = now;
+	    HRD_history[ iindex ] = now;
 	    HRD_index++;
 	}
 	HRD_type_index++;

@@ -19,7 +19,7 @@ config_add_mib(SNMP-MPD-MIB)
 /* function definitions */
 
 void           init_snmpMPDStats(void);
-unsigned char *var_snmpMPDStats(struct variable *, oid *, int *, int, int *, WriteMethod **write_method);
+extern FindVarMethod  var_snmpMPDStats;
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 
    file in tha agent subdirectory of the source tree */

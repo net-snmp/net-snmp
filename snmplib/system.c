@@ -162,7 +162,7 @@ opendir(char *filename)
     /* Create the search pattern */
     strcpy(scanname, filename);
 
-    if(index("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
+    if(strchr("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
 	strcat(scanname, "/*");
     else
 	strcat(scanname, "*");

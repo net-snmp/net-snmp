@@ -377,13 +377,16 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   case SNMP_VERSION_2c:
   case SNMP_VERSION_3:
 #ifdef USING_MIBII_VACM_VARS_MODULE
-    return vacm_in_view(pi, name, *namelen);
+    return vacm_in_view(pdu, name, *namelen);
 #else
     return 1;
 #endif
   case SNMP_VERSION_2p:
 #ifdef USING_V2PARTY_VIEW_VARS_MODULE
+#ifdef notused
+XX find the context used by pdu
     return in_view(name, *namelen, pi->cxp->contextViewIndex);
+#endif
 #else
     return 1;
 #endif

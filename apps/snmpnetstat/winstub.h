@@ -2,7 +2,7 @@
 #ifndef _WINSTUB_H_
 #define _WINSTUB_H_
 
-#if (defined(WIN32) || defined(cygwin32))
+#if (defined(WIN32) || defined(cygwin))
 
 /* database access functions for host, services, protocols, networks */
 
@@ -31,7 +31,7 @@ u_long inet_netof(struct in_addr in);
 /* Return the host number from an internet address */
 u_long inet_lnaof(struct in_addr in);
 
-#endif /* WIN32 or cygwin32 */
+#endif /* WIN32 or cygwin */
 
 #endif /*_WINSTUB_H_ */
 

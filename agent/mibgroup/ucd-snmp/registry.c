@@ -97,19 +97,19 @@ var_registry(struct variable *vp,
 	     int *var_len,
 	     WriteMethod **write_method)
 {
-  struct subtree *index;
-    if ((index =
+  struct subtree *tp;
+    if ((tp =
          header_registry(vp, name, length, exact, var_len, write_method))
         == NULL )
       return NULL;
 
     switch (vp->magic){
 	case REGISTRYINDEX:
-            *var_len = sizeof(oid)*(index->namelen);
-            return (u_char *) index->name;
+            *var_len = sizeof(oid)*(tp->namelen);
+            return (u_char *) tp->name;
         case REGISTRYNAME:
-            *var_len = strlen(index->label);
-            return (u_char *) index->label;
+            *var_len = strlen(tp->label);
+            return (u_char *) tp->label;
         default:
             ERROR_MSG("");
     }
