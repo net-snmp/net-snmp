@@ -361,6 +361,12 @@ main(argc, argv)
     u_long myaddr;
     int on=1;
     int dont_fork=0;
+    char logfile[300];
+
+    logfile[0] = NULL;
+#ifdef LOGFILE
+    strcpy(logfile,LOGFILE);
+#endif
 
     /*
      * usage: snmpd
@@ -384,6 +390,12 @@ main(argc, argv)
 		case 'f':
 		    dont_fork=1;
 		    break;
+                case 'l':
+                    strcpy(logfile,argv[++arg]);
+                    break;
+                case 'L':
+                    logfile[0] = NULL;
+                    break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
 		    break;
@@ -391,13 +403,13 @@ main(argc, argv)
 	    continue;
 	}
     }
-#ifdef LOGFILE
-    close(1);
-    open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
-    close(2);
-    dup(1);
-    close(0);
-#endif
+    if (logfile[0]) {
+      close(1);
+      open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
+      close(2);
+      dup(1);
+      close(0);
+    }
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
     init_snmp();
