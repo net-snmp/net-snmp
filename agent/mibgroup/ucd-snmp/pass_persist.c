@@ -156,9 +156,8 @@ u_char *var_extensible_pass_persist(struct variable *vp,
 					   size_t *var_len,
 					   WriteMethod **write_method)
 {
-
   oid newname[MAX_OID_LEN];
-  int i, j, rtest=0, newlen, last;
+  int i, rtest, newlen;
   static long long_ret;
   static char buf[STRMAX], buf2[STRMAX];
   static oid  objid[MAX_OID_LEN];
@@ -171,17 +170,8 @@ u_char *var_extensible_pass_persist(struct variable *vp,
   long_ret = *length;
   for(i=1; i<= numpersistpassthrus; i++) {
     persistpassthru = get_exten_instance(persistpassthrus,i);
-    last = persistpassthru->miblen;
-    if (persistpassthru->miblen > *length)
-      last = *length;
-    for(j=0,rtest=0; j < last && !rtest; j++) {
-      if (name[j] != persistpassthru->miboid[j]) {
-        if (name[j] < persistpassthru->miboid[j])
-          rtest = -1;
-        else
-          rtest = 1;
-      }
-    }
+    rtest = snmp_oid_compare(name, *length,
+                persistpassthru->miboid, persistpassthru->miblen);
     if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
       /* setup args */
       if (persistpassthru->miblen >= *length || rtest < 0)
@@ -308,31 +298,21 @@ setPassPersist(int action,
 	       oid *name,
 	       size_t name_len)
 {
-  int i, j, rtest, tmplen=1000, last;
+  int i, rtest;
   struct extensible *persistpassthru;
 
   static char buf[STRMAX], buf2[STRMAX];
-  static long tmp;
-  static unsigned long utmp;
-  static int itmp;
-  static oid objid[MAX_OID_LEN];
+  long tmp;
+  unsigned long utmp;
+  int itmp;
 
   /* Make sure that our basic pipe structure is malloced */
   init_persist_pipes();
 
   for(i=1; i<= numpersistpassthrus; i++) {
     persistpassthru = get_exten_instance(persistpassthrus,i);
-    last = persistpassthru->miblen;
-    if (persistpassthru->miblen > name_len)
-      last = name_len;
-    for(j=0,rtest=0; j < last && !rtest; j++) {
-      if (name[j] != persistpassthru->miboid[j]) {
-        if (name[j] < persistpassthru->miboid[j])
-          rtest = -1;
-        else
-          rtest = 1;
-      }
-    }
+    rtest = snmp_oid_compare(name, name_len,
+                persistpassthru->miboid, persistpassthru->miblen);
     if (rtest <= 0) {
       if (action != COMMIT)
         return SNMP_ERR_NOERROR;
@@ -375,15 +355,13 @@ setPassPersist(int action,
         case ASN_OCTET_STR:
 	  itmp = sizeof(buf2);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, var_val_len) == (int)itmp)
+          if (bin2asc(buf2, var_val_len) == (int)var_val_len)
               sprintf(buf,"string %s",buf2);
           else
               sprintf(buf,"octet %s",buf2);
           break;
         case ASN_OBJECT_ID:
-          itmp = var_val_len/sizeof(oid);
-          memcpy(objid, var_val, var_val_len);
-          sprint_mib_oid(buf2, objid, itmp);
+          sprint_mib_oid(buf2, (oid *)var_val, var_val_len);
           sprintf(buf,"objectid \"%s\"",buf2);
           break;
       }
