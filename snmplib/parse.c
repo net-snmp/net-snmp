@@ -905,7 +905,7 @@ compute_match(const char *search_base, const char *key) {
     regex_t parsetree;
     regmatch_t pmatch;
 
-    rc=regcomp(&parsetree, key, REG_ICASE);
+    rc=regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
     if (rc == 0)
         rc=regexec(&parsetree, search_base, 1, &pmatch, 0);
     regfree(&parsetree);
