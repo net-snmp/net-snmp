@@ -240,6 +240,10 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
 #	include <tchar.h>
 #	include <windows.h>
 
+/*
+ * MinGW defines WIN32, but has working dirent stuff.
+ */
+#ifndef HAVE_DIRENT_H 
 
 /*
  * The idea here is to read all the directory names into a string table
@@ -411,6 +415,7 @@ closedir(DIR * dirp)
     free(dirp);
     return 1;
 }
+#endif /* HAVE_DIRENT_H */
 
 #ifndef HAVE_GETTIMEOFDAY
 
