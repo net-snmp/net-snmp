@@ -25,6 +25,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#include<stdio.h>
+
 
 #if (defined vax) || (defined (mips))
 /*
@@ -122,7 +124,7 @@ struct trapVar {
 };
 
 #ifdef DEBUG
-#define ERROR(string)	printf("%s(%d): %s\n",__FILE__, __LINE__, string);
+#define ERROR(string)	printf("%s(%d): %s\n",__FILE__, __LINE__, string);fflush(stdout);
 #else
 #define ERROR(string)
 #endif

@@ -38,23 +38,30 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/user.h>
 #include <sys/proc.h>
 #include <sys/types.h>
+#ifdef mips
+#include <sys/dmap.h>
 #include <machine/pte.h>
+#include <xti.h>
+#endif
 #include <sys/vm.h>
 #include <netinet/in.h>
 #include <syslog.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <net/route.h>
+#include <netinet/ip.h>
 #include <netinet/in_pcb.h>
 #include <netinet/if_ether.h>
 #include <netinet/in_systm.h>
 #ifndef sunV3
 #include <netinet/in_var.h>
 #endif
-#include <netinet/ip.h>
 #include <netinet/ip_var.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_timer.h>
+#ifdef __alpha
+#include <netinet/tcpip.h>
+#endif
 #include <netinet/tcp_var.h>
 #include <netinet/tcp_fsm.h>
 #include <netinet/udp.h>
@@ -91,6 +98,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "acl.h"
 #include "view.h"
 
+#include "../config.h"
+
 #ifdef vax11c
 #define ioctl socket_ioctl
 #define perror socket_perror
@@ -99,56 +108,96 @@ PERFORMANCE OF THIS SOFTWARE.
 extern  int swap, mem;
 extern char *Lookup_Device_Annotation();
 
+static int TCP_Count_Connections();
+static TCP_Scan_Init();
+static int TCP_Scan_Next();
+static ARP_Scan_Init();
+static int ARP_Scan_Next();
+static int Interface_Scan_Get_Count();
+static int Interface_Scan_By_Index();
+static int Interface_Get_Ether_By_Index();
+
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 
-static struct nlist nl[] = {
-
 #define N_IPSTAT	0
-	{ "_ipstat"},
 #define N_IPFORWARDING	1
-	{ "_ipforwarding" },
 #define N_TCP_TTL	2
-	{ "_tcp_ttl"},
 #define N_UDPSTAT	3
-	{ "_udpstat" },
 #define N_IN_INTERFACES 4
-	{ "_in_interfaces" },
 #define N_ICMPSTAT	5
-	{ "_icmpstat" },
 #define N_IFNET		6
-	{ "_ifnet" },
 #define N_TCPSTAT	7
-	{ "_tcpstat" },
 #define N_TCB		8
-	{ "_tcb" },
 #define N_ARPTAB_SIZE	9
-	{ "_arptab_size" },
 #define N_ARPTAB        10
-	{ "_arptab" },
 #define N_IN_IFADDR     11
-	{ "_in_ifaddr" },
 #define N_BOOTTIME	12
-	{ "_boottime" },
 #define N_PROC		13
-	{ "_proc" },
 #define N_NPROC		14
-	{ "_nproc" },
 #define N_DMMIN		15
-	{ "_dmmin" },
 #define N_DMMAX		16
-	{ "_dmmax" },
 #define N_NSWAP		17
-	{ "_nswap" },
 #define N_USRPTMAP	18
- 	{ "_Usrptmap" },
 #define N_USRPT		19
+
+static struct nlist nl[] = {
+#ifndef hpux
+	{ "_ipstat"},
+#ifdef sun
+	{ "_ip_forwarding" },
+#else
+	{ "_ipforwarding" },
+#endif
+	{ "_tcp_ttl"},
+	{ "_udpstat" },
+	{ "_in_interfaces" },
+	{ "_icmpstat" },
+	{ "_ifnet" },
+	{ "_tcpstat" },
+	{ "_tcb" },
+	{ "_arptab_size" }, 
+	{ "_arptab" },      
+	{ "_in_ifaddr" },
+	{ "_boottime" },
+	{ "_proc" },
+	{ "_nproc" },
+	{ "_dmmin" },
+	{ "_dmmax" },
+	{ "_nswap" },
+#ifdef __alpha
+        { "_user_pt_map"},
+#else
+        { "_Usrptmap" },
+#endif
 	{ "_usrpt" },
+#else
+	{ "ipstat"},  
+	{ "ipforwarding" },
+	{ "tcpDefaultTTL"},
+	{ "udpstat" },
+	{ "in_interfaces" },
+	{ "icmpstat" },
+	{ "ifnet" },
+	{ "tcpstat" },
+	{ "tcb" },
+	{ "arptab_nb" }, 
+	{ "arphd" },      
+	{ "in_ifaddr" },
+	{ "boottime" },
+	{ "proc" },
+	{ "nproc" },
+	{ "dmmin" },
+	{ "dmmax" },
+	{ "nswap" },
+        { "mpid" },
+        { "hz"},
+#endif
 #ifdef ibm032
 #define N_USERSIZE	20
 	{ "_userSIZE" },
 #endif
-	0,
+	{ 0 },
 };
 
 /*
@@ -203,16 +252,30 @@ static struct nlist nl[] = {
 
 long		long_return;
 #ifndef ibm032
-u_char		return_buf[CLSIZE*NBPG];  
+u_char		return_buf[258];  
 #else
 u_char		return_buf[256]; /* nee 64 */
 #endif
  
 init_snmp()
 {
-	nlist("/vmunix",nl);
-	init_kmem("/dev/kmem");
-	init_routes();
+  int ret;
+#ifdef hpux
+  if ((ret = nlist("/hp-ux",nl)) == -1) {
+    ERROR("nlist");
+    exit(1);
+  }
+#else
+  nlist("/vmunix",nl);
+#endif
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+    if (nl[ret].n_type == 0) {
+      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+    }
+  }
+  init_kmem("/dev/kmem"); 
+  init_routes();
+  init_extensible();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -289,63 +352,7 @@ Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
 
 
-/*
- * The subtree structure contains a subtree prefix which applies to
- * all variables in the associated variable list.
- * No subtree may be a subtree of another subtree in this list.  i.e.:
- * 1.2
- * 1.2.0
- */
-struct subtree {
-    oid			name[16];	/* objid prefix of subtree */
-    u_char 		namelen;	/* number of subid's in name above */
-    struct variable	*variables;   /* pointer to variables array */
-    int			variables_len;	/* number of entries in above array */
-    int			variables_width; /* sizeof each variable entry */
-};
-
-/*
- * This is a new variable structure that doesn't have as much memory
- * tied up in the object identifier.  It's elements have also been re-arranged
- * so that the name field can be variable length.  Any number of these
- * structures can be created with lengths tailor made to a particular
- * application.  The first 5 elements of the structure must remain constant.
- */
-struct variable2 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[2];       /* object identifier of variable */
-};
-
-struct variable4 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[4];       /* object identifier of variable */
-};
-
-struct variable7 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[7];       /* object identifier of variable */
-};
-
-struct variable13 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[13];       /* object identifier of variable */
-};
+#include "var_struct.h"
 
 /*
  * ##############################################################
@@ -400,7 +407,7 @@ struct variable4 interface_variables[] = {
 
 struct variable2 system_variables[] = {
     {VERSION_DESCR, STRING, RWRITE, var_system, 1, {1}},
-    {VERSION_ID, OBJID, RONLY, var_system, 1, {2}},
+    {VERSIONID, OBJID, RONLY, var_system, 1, {2}},
     {UPTIME, TIMETICKS, RONLY, var_system, 1, {3}},
     {SYSCONTACT, STRING, RWRITE, var_system, 1, {4}},
     {SYSNAME, STRING, RWRITE, var_system, 1, {5}},
@@ -522,12 +529,16 @@ struct variable2 udp_variables[] = {
     {UDPOUTDATAGRAMS, COUNTER, RONLY, var_udp, 1, {4}}
 };
 
+#ifndef hpux
 #ifndef sparc
+#ifndef __alpha
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
-    {PROCESSID, INTEGER, RONLY, var_proces, 1, {2}},
+    {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
+#endif
+#endif
 #endif
 
 /*
@@ -569,10 +580,11 @@ struct variable2 context_variables[] = {
     {CONTEXTSTATUS, INTEGER, RWRITE, var_context, 1, {11}}
 };
 
+
 /* No access for community SNMP, RW possible for Secure SNMP */
-#define PRIVRW   0x0003  
+#define PRIVRW   (SNMPV2ANY | 0x5000)
 /* No access for community SNMP, RO possible for Secure SNMP */
-#define PRIVRO   0x0002
+#define PRIVRO   (SNMPV2ANY)
 
 struct variable2 acl_variables[] = {
     {ACLPRIVELEGES, INTEGER, PRIVRW, var_acl, 1, {4}},
@@ -657,7 +669,11 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
-struct subtree subtrees[] = {
+#include "extensible/mibdefs.h"
+#include "extensible/snmp_vars.h"
+struct subtree *subtrees;   /* this is now malloced in
+                                      extensible/extensible.c */
+struct subtree subtrees_old[] = {
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -683,6 +699,54 @@ struct subtree subtrees[] = {
     {{HOSTTIMETAB}, 10, (struct variable *)hosttimetab_variables,
 	 sizeof(hosttimetab_variables) / sizeof(*hosttimetab_variables),
 	 sizeof(*hosttimetab_variables)},
+#endif
+#ifdef hpux
+  {{1,3,6,1,4,1,11,2,13,1,2,1},12,(struct variable *)extensible_hptrap_variables,
+   sizeof(extensible_hptrap_variables)/sizeof(*extensible_hptrap_variables),
+   sizeof(*extensible_hptrap_variables)},
+  {{1,3,6,1,4,1,11,2,13,2},10,(struct variable *)extensible_hp_variables,
+   sizeof(extensible_hp_variables)/sizeof(*extensible_hp_variables),
+   sizeof(*extensible_hp_variables)},
+#endif
+#ifdef PROCMIBNUM
+  {{EXTENSIBLEMIB, PROCMIBNUM}, EXTENSIBLENUM+1,
+   (struct variable *)extensible_proc_variables,
+   sizeof(extensible_proc_variables)/sizeof(*extensible_proc_variables),
+   sizeof(*extensible_proc_variables)},
+#endif
+#ifdef SHELLMIBNUM
+  {{EXTENSIBLEMIB, SHELLMIBNUM}, EXTENSIBLENUM+1,
+   (struct variable *)extensible_extensible_variables,
+   sizeof(extensible_extensible_variables)/sizeof(*extensible_extensible_variables),
+   sizeof(*extensible_extensible_variables)},
+#endif
+#ifdef hpux
+  {{EXTENSIBLEMIB, MEMMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_mem_variables,
+   sizeof(extensible_mem_variables)/sizeof(*extensible_mem_variables),
+   sizeof(*extensible_mem_variables)},
+#endif
+  {{EXTENSIBLEMIB, LOCKDMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_lockd_variables,
+   sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
+   sizeof(*extensible_lockd_variables)},
+#ifdef DISKMIBNUM
+  {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
+   sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
+   sizeof(*extensible_disk_variables)},
+#endif
+#ifdef LOADAVEMIBNUM
+  {{EXTENSIBLEMIB, LOADAVEMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_loadave_variables,
+   sizeof(extensible_loadave_variables)/sizeof(*extensible_loadave_variables),
+   sizeof(*extensible_loadave_variables)},
+#endif
+#ifdef VERSIONMIBNUM
+  {{EXTENSIBLEMIB, VERSIONMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_version_variables,
+   sizeof(extensible_version_variables)/sizeof(*extensible_version_variables),
+   sizeof(*extensible_version_variables)},
+#endif
+#ifdef ERRORMIBNUM
+  {{EXTENSIBLEMIB, ERRORMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_error_variables,
+   sizeof(extensible_error_variables)/sizeof(*extensible_error_variables),
+   sizeof(*extensible_error_variables)},
 #endif
     {{SNMPV2ALARMNEXTINDEX}, 10, (struct variable *)alarmnextindex_variables,
 	 sizeof(alarmnextindex_variables) / sizeof(*alarmnextindex_variables),
@@ -723,6 +787,11 @@ struct subtree subtrees[] = {
 };
 
 extern int in_view();
+
+int subtree_old_size() {
+  return (sizeof(subtrees_old)/ sizeof(struct subtree));
+}
+
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
@@ -758,14 +827,14 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int 		found = FALSE;
     oid			save[MAX_NAME_LEN];
     int			savelen;
+    extern numrelocs;
 
     if (!exact){
 	bcopy(name, save, *namelen * sizeof(oid));
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (y = 0, tp = subtrees; y < sizeof(subtrees)/sizeof(struct subtree);
-	 tp++, y++){
+    for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treerresult == 0
 	   if next  and treeresult <= 0 */
@@ -804,10 +873,17 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 						  len, write_method);
 		    if (write_method)
 			*acl = vp->acl;
-		    if (access && (pi->version == SNMP_VERSION_2)
-			&& !in_view(name, *namelen,
-				    pi->cxp->contextViewIndex)){
-			access = NULL;
+		    if (access &&
+                        (((pi->version == SNMP_VERSION_2) &&
+                         !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+                         ((pi->version == SNMP_VERSION_1) &&
+                          (((cvp->acl & 0xAFFF) == SNMPV2ANY) ||
+                            (cvp->acl & 0xAFFF) == SNMPV2AUTH)) ||
+                          ((pi->version == SNMP_VERSION_2) &&
+                          ((cvp->acl & 0xAFFF) == SNMPV2AUTH) &&
+                          (pi->srcp->partyAuthProtocol == NOAUTH ||
+                           pi->dstp->partyAuthProtocol == NOAUTH)))) {
+                      access = NULL;
 			*write_method = NULL;
 			/*
 			  if (in_view(vp->name, vp->namelen,
@@ -839,7 +915,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		break;
 	}
     }
-    if (y == sizeof(subtrees)/sizeof(struct subtree)){
+    if (y == (subtree_old_size() + numrelocs)) {
 	if (!access && !exact){
 	    bcopy(save, name, savelen * sizeof(oid));
 	    *namelen = savelen;
@@ -932,13 +1008,16 @@ compare_tree(name1, len1, name2, len2)
 
 
 
-char version_descr[128] = "Unix 4.3BSD";
-char sysContact[128] = "Unknown";
-char sysName[128] = "Unknown";
-char sysLocation[128] = "Unknown";
+char version_descr[128] = VERS_DESC;
+char sysContact[128] = SYS_CONTACT;
+char sysName[128] = SYS_NAME;
+char sysLocation[128] = SYS_LOC;
 
-
+#ifdef hpux
+oid version_id[] = {1, 3, 6, 1, 4, 1, 11, 2, 3, 2, 5};
+#else
 oid version_id[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
+#endif
 
 u_long
 sysUpTime(){
@@ -1012,8 +1091,9 @@ var_hosttimetab(vp, name, length, exact, var_len, write_method)
 
         switch (vp->magic) {
                 case HOSTTIMETABADDRESS:
-                        *var_len = sizeof(struct ether_addr);
-                        return (u_char *) "RMONRULES";
+/*                  *var_len = sizeof(struct ether_addr); */
+                  *var_len = 6*sizeof(u_char);
+                  return (u_char *) "RMONRULES";
                 case HOSTTIMETABCREATIONORDER:
 			long_return = creationOrder;
 			return (u_char *) &long_return;
@@ -1060,11 +1140,11 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    *var_len = strlen(version_descr);
 	    *write_method = writeVersion;
 	    return (u_char *)version_descr;
-	case VERSION_ID:
+	case VERSIONID:
 	    *var_len = sizeof(version_id);
 	    return (u_char *)version_id;
 	case UPTIME:
-	    (u_long)long_return = sysUpTime();
+	    long_return = (u_long)  sysUpTime();
 	    return (u_char *)&long_return;
 	case IFNUMBER:
 	    long_return = Interface_Scan_Get_Count();
@@ -1303,7 +1383,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
-	    (u_long)long_return = 1;	/* OTHER */
+	    long_return = (u_long)  1;	/* OTHER */
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 #if 0
@@ -1329,30 +1409,30 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = 0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINOCTETS:
-	    (u_long)long_return = ifnet.if_ipackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINUCASTPKTS:
-	    (u_long)long_return = ifnet.if_ipackets;
+	    long_return = (u_long)  ifnet.if_ipackets;
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINERRORS:
 	    return (u_char *) &ifnet.if_ierrors;
 	case IFINUNKNOWNPROTOS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTOCTETS:
-	    (u_long)long_return = ifnet.if_opackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
-	    (u_long)long_return = ifnet.if_opackets;
+	    long_return = (u_long)  ifnet.if_opackets;
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
 	    return (u_char *) &ifnet.if_snd.ifq_drops;
@@ -1463,7 +1543,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 {
     static struct ipstat ipstat;
     oid newname[MAX_NAME_LEN];
-    int result;
+    int result, i;
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[8] = 0;
@@ -2356,8 +2436,7 @@ u_char *EtherAddr;
 struct proc procbuf[PROCBLOC];
 
 
-u_char *
-var_process(vp, name, length, exact, var_len, write_method)
+u_char *var_process(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
     register oid	*name;	    /* IN/OUT - input name requested, output name found */
     register int	*length;    /* IN/OUT - length of input and output oid's */
@@ -2539,7 +2618,11 @@ union {
     /*
      *  We don't deal with Zombies and the like...
      */
+#ifdef mips
+    if (proc->p_stat == SZOMB || proc->p_type){
+#else
     if (proc->p_stat == SZOMB || proc->p_flag & (SSYS | SWEXIT)){
+#endif
 	strcpy((char *)buf, "");
 	return strlen(buf);
     }
@@ -2557,11 +2640,16 @@ union {
     /*
      *  Is our target proc in core??
      */
+#ifdef mips
+    if ((proc->p_sched) == 0){
+	lseek(swap, (long)(proc->p_cdmap->dm_ptdaddr), 0);
+#else
     if ((proc->p_flag & SLOAD) == 0){
+	lseek(swap, (long)dtob(proc->p_swaddr), 0);
+#endif
       /*
        *  Not in core -- poke (peek, actually [hopefully]) around swap for u. struct 
        */
-	lseek(swap, (long)dtob(proc->p_swaddr), 0);
 
 	if (read(swap, (char *)user.upages, size) != size) {
 	        ERROR("");
@@ -2695,15 +2783,25 @@ union {
     }
 #endif sunV3
 
+#ifdef mips
+    if ((proc->p_sched) == 0 || argaddr == 0){
+#else
     if ((proc->p_flag & SLOAD) == 0 || argaddr == 0){
-#if !defined(ibm032) || !defined(BSD4_3)
+#endif
+#if defined(mips)
+        vstodb(0, CLSIZE, proc->p_smap, &db, 1);
+#elif !defined(ibm032) || !defined(BSD4_3)
 	vstodb(0, CLSIZE, &u.u_smap, &db, 1);
 #else
-	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
+     	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
 #endif
 
+#ifdef mips
 	lseek(swap, (long)dtob(db.db_base), 0);
- 	if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
+#else
+	lseek(swap, (long)dtob(db.db_base), 0);
+#endif
+        if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
 	  ERROR("");
 	}
     } else {
@@ -2807,7 +2905,11 @@ vstodb(vsbase, vssize, dmp, dbp, rev)
 	blk = dmmin;
 	vsbase = ctod(vsbase);
 	vssize = ctod(vssize);
+#ifdef mips
+	if (vsbase < 0 || vsbase + vssize > dmp->dm_cnt) {
+#else
 	if (vsbase < 0 || vsbase + vssize > dmp->dm_size) {
+#endif
 	    ERROR("vstodb\n");
 	    return(0);
 	}

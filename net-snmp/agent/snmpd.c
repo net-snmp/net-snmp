@@ -46,6 +46,8 @@ SOFTWARE.
 #include "context.h"
 #include "acl.h"
 
+#include "../config.h"
+
 extern int  errno;
 int	snmp_dump_packet = 0;
 int log_addresses = 0;
@@ -334,18 +336,42 @@ agent_party_init(myaddr, view)
     return 0; /* SUCCESS */
 }
 
+char *reverse_bytes(buf,num)
+  char *buf;
+  int num;
+{
+  static char outbuf[100];
+  int i;
+  
+  for(i=num-1;i>=0;i--)
+    outbuf[i] = *buf++;
+  return(outbuf);
+}
+
+char **argvrestartp;
+char *argvrestart;
+char *argvrestartname;
+
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
-    int	arg;
+    int	arg,i;
     int sd, sdlist[32], portlist[32], sdlen = 0, index;
     struct sockaddr_in	me;
     int port_flag = 0, ret;
     u_short dest_port = 0;
     struct partyEntry *pp;
     u_long myaddr;
+    int on=1;
+    int dont_fork=0;
+    char logfile[300];
+    char *cptr, **argvptr;
 
+    logfile[0] = NULL;
+#ifdef LOGFILE
+    strcpy(logfile,LOGFILE);
+#endif
 
     /*
      * usage: snmpd
@@ -366,6 +392,15 @@ main(argc, argv)
 		case 'a':
 		    log_addresses++;
 		    break;
+		case 'f':
+		    dont_fork=1;
+		    break;
+                case 'l':
+                    strcpy(logfile,argv[++arg]);
+                    break;
+                case 'L':
+                    logfile[0] = NULL;
+                    break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
 		    break;
@@ -373,6 +408,33 @@ main(argc, argv)
 	    continue;
 	}
     }
+    /* initialize a argv set to the current for restarting the agent */
+    argvrestartp = (char **) malloc((argc+2) * sizeof (char *));
+    argvptr = argvrestartp;
+    for(i=0, ret = 1; i < argc; i++) {
+      ret += strlen(argv[i])+1;
+    }
+    argvrestart = (char *) malloc((ret));
+    argvrestartname = (char *) malloc(strlen(argv[0]));
+    strcpy(argvrestartname,argv[0]);
+    for(cptr = argvrestart,i = 0; i < argc; i++) {
+      strcpy(cptr,argv[i]);
+      *(argvptr++) = cptr;
+      cptr += strlen(argv[i]) + 1;
+    }
+    *cptr = NULL;
+    *argvptr = NULL;
+
+    /* open the logfile if necessary */
+    if (logfile[0]) {
+      close(1);
+      open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
+      close(2);
+      dup(1);
+      close(0);
+    }
+    if (!dont_fork && fork() != 0)   /* detach from shell */
+      exit(0);
     init_snmp();
     init_mib();
     if (read_party_database("/etc/party.conf") > 0){
@@ -406,22 +468,33 @@ main(argc, argv)
 	}
     }
 
-    printf("Opening port(s): ");
+    printf("Opening port(s): "); 
     fflush(stdout);
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
+#if defined(ultrix) || defined(__alpha)         /* little endian systems */
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
+	    || bcmp(reverse_bytes((char *)&myaddr,sizeof(long)),
+                    pp->partyTAddress, 4))
+          continue;	/* don't listen for non-local parties */
+#else
+        if ((pp->partyTDomain != DOMAINSNMPUDP)
 	    || bcmp((char *)&myaddr, pp->partyTAddress, 4))
-	    continue;	/* don't listen for non-local parties */
+          continue;	/* don't listen for non-local parties */
+#endif
 	
 	dest_port = 0;
+#if defined(ultrix) || defined(__alpha)        /* little endian systems */
+	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
+#else
 	bcopy(pp->partyTAddress + 4, &dest_port, 2);
+#endif
 	for(index = 0; index < sdlen; index++)
 	    if (dest_port == portlist[index])
 		break;
 	if (index < sdlen)  /* found a hit before the end of the list */
 	    continue;
-	printf("%u ", dest_port);
+	printf("%u ", dest_port); 
 	fflush(stdout);
 	/* Set up connections */
 	sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -432,19 +505,22 @@ main(argc, argv)
 	me.sin_family = AF_INET;
 	me.sin_addr.s_addr = INADDR_ANY;
 	/* already in network byte order (I think) */
-	me.sin_port = dest_port;
+	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
+          fprintf(stderr,"bind/%d",me.sin_port);
 	    perror("bind");
 	    return 2;
 	}
 	sdlist[sdlen] = sd;
 	portlist[sdlen] = dest_port;
+        fcntl(sd,F_SETFD,1);           /* close on exec */
 	if (++sdlen == 32){
 	    printf("No more sockets... ignoring rest of file\n");
 	    break;
 	}	
     }
     printf("\n");
+    fflush(stdout);
     bzero((char *)addrCache, sizeof(addrCache));
     receive(sdlist, sdlen);
     return 0;
@@ -462,7 +538,11 @@ receive(sdlist, sdlen)
 int counter = 0;
 
 
+#ifdef hpux
+    gettimeofday(nvp, (struct timezone *) NULL);
+#else
     gettimeofday(nvp);
+#endif
     if (nvp->tv_usec < 500000L){
 	svp->tv_usec = nvp->tv_usec + 500000L;
 	svp->tv_sec = nvp->tv_sec;
@@ -490,7 +570,7 @@ int counter = 0;
         snmp_select_info(&numfds, &fdset, tvp, &block);
         if (block == 1)
             tvp = NULL; /* block without timeout */
-	count = select(numfds, &fdset, 0, 0, tvp);
+	count = select(numfds, (int *) &fdset, 0, 0, tvp);
 	if (count > 0){
 	    for(index = 0; index < sdlen; index++){
 		if(FD_ISSET(sdlist[index], &fdset)){
@@ -514,7 +594,11 @@ int counter = 0;
 		printf("select returned %d\n", count);
 		return -1;
 	}
-	gettimeofday(nvp);
+#ifdef hpux
+        gettimeofday(nvp, (struct timezone *) NULL);
+#else
+        gettimeofday(nvp);
+#endif
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
 	    alarmTimer(nvp);

@@ -5,6 +5,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
 #include "asn1.h"
 #include "snmp_impl.h"
 
@@ -12,33 +14,39 @@
 #define NULL 0
 #endif
 
-
 static int kmem;
 int swap, mem;
 
 init_kmem(file)
     char *file;
 {
-    kmem = open(file, 0);
-    if (kmem < 0){
-	fprintf(stderr, "cannot open ");
-	perror(file);
-	exit(1);
-    }
-
-    mem = open("/dev/mem",0);    
-    if (mem < 0){
-	fprintf(stderr, "cannot open ");
-	perror(file);
-	exit(1);
-    }
-    swap = open("/dev/drum",0);
-    if (swap < 0){
-	fprintf(stderr, "cannot open ");
-	perror(file);
-	exit(1);
-    }
-
+  kmem = open(file, O_RDONLY);
+  if (kmem < 0){
+    fprintf(stderr, "cannot open ");
+    perror(file);
+    exit(1);
+  }
+  fcntl(kmem,F_SETFD,1);
+  mem = open("/dev/mem",O_RDONLY);    
+  if (mem < 0){
+    fprintf(stderr, "cannot open ");
+    perror("/dev/mem");
+    exit(1);
+  }
+  fcntl(mem,F_SETFD,1);
+#ifndef __alpha
+#ifdef hpux
+  swap = open("/dev/dmem",O_RDONLY);
+#else
+  swap = open("/dev/drum",0);
+#endif
+  if (swap < 0){
+    fprintf(stderr, "cannot open ");
+    perror("/dev/drum");
+    exit(1);
+  }
+  fcntl(swap,F_SETFD,1);
+#endif
 }
 
 
@@ -84,10 +92,12 @@ klookup(off, target, siz)
      int     siz;
 {
 
-  klseek(off);      
+  klseek(off);
   if (siz != klread(target, siz)) {
     ERROR("klread\n");
+#ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
+#endif
     return(NULL);
   }
 
