@@ -144,6 +144,7 @@ you can use the `configure' options `--x-includes=DIR' and
 Optional features for ucd-snmp:
   --enable-debugging      Outputs extra debugging information.
   --with-defaults         Use defaults for prompted values.
+  --without-root-access   The agent does not exit if it can not open /dev/kmem.
 
 Specifying the System Type
 ==========================

@@ -4,6 +4,12 @@ AC_CONFIG_HEADER(config.h)
 
 AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_WITH(defaults,[  --with-defaults         Use defaults for prompted values.],defaults="yes",defaults="no")
+AC_ARG_WITH(root-access,[  --without-root-access   The agent does not exit if it can not open /dev/kmem.])
+
+dnl Only define if specifically chosen as --without (ie, default to true). 
+if test "x$with_root_access" = "xno"; then
+  AC_DEFINE(NO_ROOT_ACCESS)
+fi
 
 dnl Checks for programs.
 AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
