@@ -1,33 +1,44 @@
 NOTE NOTE NOTE: this module depends on a modified version of the
 DBD::AnyData module.  The DBD_AnyData.patch file should be applied to version
-0.5 of the DBD::AnyData module.  This patch won't be needed in the future
-when that modules supports the needed features of the patch.  This is
-planned for the future of the DBD::AnyData model, but will probably be done
-in a different way.  In other words, *don't* apply this patch to 0.6
-or higher of the DBD::AnyData model but instead convince the author of this
-module to update to the newer DBD::AnyData API instead.  You'll probably
-never have to do this.
+0.5 of the DBD::AnyData module.  This patch won't be needed in the future when
+that modules supports the needed features of the patch.  This is
+planned for the future of the DBD::AnyData model, but will probably be
+done in a different way.  In other words, *don't* apply this patch to
+0.6 or higher of the DBD::AnyData model but instead convince the
+author of this module to update to the newer DBD::AnyData API instead.
+You'll probably never have to do this.
 
-You also need the SQL-Statement module of version 0.2001 or higher.
+Jeff's unpatched AnyData packages can be found at:
+  http://www.vpservices.com/jeff/programs/AnyData/
 
 Install steps:
-  [download, and install the AnyData, and DBI modules from:
-     http://www.vpservices.com/jeff/programs/AnyData/]
-  [download, and install the SQL-Statement modules from:
-     http://www.vpservices.com/jeff/programs/AnyData/]
-  [download, patch, and install the 0.05 DBD::AnyData modules:
-     http://www.vpservices.com/jeff/programs/AnyData/
-     cd DBD-AnyData-0.05
-     patch < DBD_AnyData.patch]
-  perl Makefile.PL
-  make
-  make install
+  1) download, and install the modified AnyData perl modules from:
+     http://www.net-snmp.org/AnyData-wes/AnyData-0.05.tar.gz
+     http://www.net-snmp.org/AnyData-wes/DBD-AnyData-0.05.wes.tar.gz
+     http://www.net-snmp.org/AnyData-wes/SQL-Statement-0.2001.wes.tar.gz
+
+  2) Extract each of the above tar balls and in the resulting directories
+     run:
+    perl Makefile.PL
+    make
+    make install
+
+  3) Then in this directory, run:
+    perl Makefile.PL
+    make
+    make install
 
 To use it:
-  API documentation:
-    perldoc AnyData::Storage::SNMP;
   SQL like Shell script:
     snmpsh [snmpcmd arguments] HOST [SQL COMMAND]
+
+  Example commands to type at the prompt:
+    select * from ifTable
+    select * from ifTable where ifDescr = 'eth0'
+    alias ifconfig select ifDescr, ifAdminStatus where ifDescr = '\1'
+    ifconfig eth0
+
+
 
 
 
