@@ -212,6 +212,9 @@ SOFTWARE.
 #define SNMP_OID_SNMPV2			SNMP_OID_INTERNET, 6
 #define SNMP_OID_SNMPMODULES		SNMP_OID_SNMPV2, 3
 
+/* lengths as defined by TCs */
+#define SNMPADMINLENGTH 255
+
 
 #ifdef CMU_COMPATIBLE
 /* PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
