@@ -17696,6 +17696,45 @@ _ACEOF
 
 fi
 
+# Older versions of MinGW do not define ssize_t in sys/types
+echo "$as_me:$LINENO: checking for ssize_t" >&5
+echo $ECHO_N "checking for ssize_t... $ECHO_C" >&6
+if eval "test \"\${ac_cv_type_$1+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "ssize_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+  ac_cv_type_ssize_t=yes
+else
+  ac_cv_type_ssize_t=no
+fi
+rm -f conftest*
+
+fi
+
+
+echo "$as_me:$LINENO: result: $ac_cv_type_ssize_t" >&5
+echo "${ECHO_T}$ac_cv_type_ssize_t" >&6
+if test $ac_cv_type_ssize_t = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_SSIZE_T 1
+_ACEOF
+
+fi
+
 # Check ps args
 echo "$as_me:$LINENO: checking for correct flags to ps" >&5
 echo $ECHO_N "checking for correct flags to ps... $ECHO_C" >&6

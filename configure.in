@@ -1859,6 +1859,21 @@ if test $ac_cv_type_in_addr_t = yes; then
   AC_DEFINE(HAVE_IN_ADDR_T)
 fi
 
+# Older versions of MinGW do not define ssize_t in sys/types
+AC_MSG_CHECKING([for ssize_t])
+AC_CACHE_VAL(ac_cv_type_$1,
+[AC_EGREP_CPP([ssize_t@<:@^a-zA-Z_0-9@:>@],
+[#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif], [ac_cv_type_ssize_t=yes], [ac_cv_type_ssize_t=no])])
+
+AC_MSG_RESULT([$ac_cv_type_ssize_t])
+if test $ac_cv_type_ssize_t = yes; then
+  AC_DEFINE(HAVE_SSIZE_T)
+fi
+
 # Check ps args
 AC_CACHE_CHECK([for correct flags to ps], ac_cv_ps_flags,
 [if test "`($PSPROG -e 2>&1) | egrep ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
