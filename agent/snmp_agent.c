@@ -459,6 +459,10 @@ int snmp_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
 	snmp_log(LOG_DEBUG, "  TRAP2 message\n"); break;
       case SNMP_MSG_REPORT:
 	snmp_log(LOG_DEBUG, "  REPORT message\n"); break;
+      default:
+	snmp_log(LOG_DEBUG, "  UNKNOWN message, type=%02X\n", pdu->command);
+	snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+	return 0;
       }
 	     
       for (var_ptr = pdu->variables; var_ptr != NULL;
@@ -987,9 +991,20 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
     int status, access_ret;
     struct variable_list *var_ptr;
 
-    /* we only support receiving here */
+    /*  We only support receiving here.  */
     if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
-      return 1;
+	return 1;
+    }
+    
+    /*  RESPONSE messages won't get this far, but TRAP-like messages
+	might.  */
+    if (pdu->command == SNMP_MSG_TRAP || pdu->command == SNMP_MSG_INFORM ||
+	pdu->command == SNMP_MSG_TRAP2) {
+	DEBUGMSGTL(("snmp_agent", "received trap-like PDU (%02x)\n",
+		    pdu->command));
+	pdu->command = SNMP_MSG_TRAP2;
+	snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
+	return 1;
     }
 
     if ( magic == NULL ) {
