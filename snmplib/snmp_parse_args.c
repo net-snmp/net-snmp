@@ -72,6 +72,7 @@
 #include "snmp_debug.h"
 #include "snmpv3.h"
 #include "default_store.h"
+#include "tools.h"
 
 int random_access = 0;
 
@@ -143,8 +144,6 @@ snmp_parse_args(int argc,
   char *Apsz = NULL;
   char *Xpsz = NULL;
   char *Cpsz = NULL;
-  u_char buf[BUF_SIZE];
-  int bsize;
   int tmp_port;
   char Opts[BUF_SIZE];
 
@@ -323,25 +322,39 @@ snmp_parse_args(int argc,
         }
         break;
 
-      case 'e':
-	if ((bsize = hex_to_binary(optarg,buf)) <= 0) {
-          fprintf(stderr,"Bad engine ID value after -e flag. \n");
+      case 'e': {
+	size_t ebuf_len = 32, eout_len = 0;
+	u_char *ebuf = (u_char *)malloc(ebuf_len);
+	
+	if (ebuf == NULL) {
+	  fprintf(stderr, "malloc failure processing -e flag.\n");
+	  return(-1);
+	}
+	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
+          fprintf(stderr, "Bad engine ID value after -e flag.\n");
           return(-1);
 	}
-	session->securityEngineID = (u_char *)malloc(bsize);
-	memcpy(session->securityEngineID, buf, bsize);
-	session->securityEngineIDLen = bsize;
+	session->securityEngineID = ebuf;
+	session->securityEngineIDLen = eout_len;
         break;
+      }
 
-      case 'E':
-	if ((bsize = hex_to_binary(optarg,buf)) <= 0) {
-          fprintf(stderr,"Bad engine ID value after -E flag. \n");
+      case 'E': {
+	size_t ebuf_len = 32, eout_len = 0;
+	u_char *ebuf = (u_char *)malloc(ebuf_len);
+	
+	if (ebuf == NULL) {
+	  fprintf(stderr, "malloc failure processing -E flag.\n");
+	  return(-1);
+	}
+	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
+          fprintf(stderr, "Bad engine ID value after -E flag.\n");
           return(-1);
 	}
-	session->contextEngineID = (u_char *)malloc(bsize);
-	memcpy(session->contextEngineID, buf, bsize);
-	session->contextEngineIDLen = bsize;
+	session->contextEngineID = ebuf;
+	session->contextEngineIDLen = eout_len;
         break;
+      }
 
       case 'n':
 	session->contextName = optarg;
