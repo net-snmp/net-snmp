@@ -83,9 +83,12 @@ void real_init_master(void)
 
     if ( session == NULL ) {
       /* diagnose snmp_open errors with the input netsnmp_session pointer */
-	snmp_sess_perror("real_init_master", &sess);
-	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+            snmp_sess_perror("Error: Couldn't open a master agentx socket to listen on", &sess);
 	    exit(1);
+        } else {
+            snmp_log(LOG_WARNING, "Warning: Couldn't open a agentx master socket to listen on");
+        }
     }
 
     DEBUGMSGTL(("agentx/master","initializing...   DONE\n"));
