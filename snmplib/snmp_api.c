@@ -1193,7 +1193,7 @@ _sess_open(struct snmp_session *in_session)
      */
     {
 	int one=1;
-	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
+	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, (void*)&one, sizeof(one));
     }
 #endif /* SO_BSDCOMPAT */
 #ifdef SO_REUSEADDR
@@ -1203,7 +1203,7 @@ _sess_open(struct snmp_session *in_session)
      */
     {
 	int one=1;
-	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*)&one, sizeof(one));
     }
 #endif /* SO_REUSEADDR */
 

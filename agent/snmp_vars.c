@@ -372,7 +372,7 @@ search_subtree_vars(struct subtree *tp,
                         in_a_view(name, namelen, pdu, cvp->type)) {
 			if ( access && !exact
 #ifdef USING_AGENTX_MASTER_MODULE
-                             && (access!=agentx_add_request)
+                             && ((AddVarMethod*)access!=agentx_add_request)
 #endif
                             ) {
 				/*
