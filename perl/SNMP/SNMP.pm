@@ -103,6 +103,8 @@ $dump_packet = 0; # non-zero to globally enable libsnmp dump_packet output.
                   # is also enabled when $debugging >= 2
 $save_descriptions = 0; #tied scalar to control saving descriptions during
                # mib parsing - must be set prior to mib loading
+$best_guess = 0;  # determine whether or not to enable best-guess regular
+                  # expression object name translation
 
 sub setMib {
 # loads mib from file name provided
@@ -172,10 +174,12 @@ sub translateObj {
    return undef if not defined $obj;
    my $res;
    if ($obj =~ /^\.?(\d+\.)*\d+$/) {
-      $res = SNMP::_translate_obj($obj,1,$long_names,$SNMP::auto_init_mib);
-   } elsif ($obj =~ /(\.\d+)*$/) {
-      $res = SNMP::_translate_obj($`,0,$long_names,$SNMP::auto_init_mib);
+      $res = SNMP::_translate_obj($obj,1,$long_names,$SNMP::auto_init_mib,0);
+   } elsif ($obj =~ /(\.\d+)*$/ && $SNMP::best_guess == 0) {
+      $res = SNMP::_translate_obj($`,0,$long_names,$SNMP::auto_init_mib,0);
       $res .= $& if defined $res and defined $&;
+   } elsif ($SNMP::best_guess) {
+      $res = SNMP::_translate_obj($obj,0,$long_names,$SNMP::auto_init_mib,$SNMP::best_guess);
    }
 
    return($res);
@@ -885,6 +889,7 @@ my %node_elements =
      parent => 0,   # parent node
      children => 0, # array reference of children nodes
      indexes => 0,  # returns array of column labels
+     varbinds => 0, # returns array of trap/notification varbinds
      nextNode => 0, # next lexico node (BUG! does not return in lexico order)
      type => 0,     # returns simple type (see getType for values)
      access => 0,   # returns ACCESS (ReadOnly, ReadWrite, WriteOnly,
@@ -896,7 +901,7 @@ my %node_elements =
      units => 0,    # returns UNITS
      hint => 0,     # returns HINT
      enums => 0,    # returns hash ref {tag => num, ...}
-     ranges => 0,    # returns array ref [[low1,high1], [low2,high2], ...]
+     ranges => 0,    # returns hash ref {low => num, high => num}
      description => 0, # returns DESCRIPTION ($SNMP::save_descriptions must
                     # be set prior to MIB initialization/parsing
     );

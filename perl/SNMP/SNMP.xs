@@ -21,6 +21,8 @@
 #endif
 #include <netdb.h>
 #include <stdlib.h>
+/* XXX This is a problem if regex.h is not on the system. */
+#include <regex.h>
 
 #ifndef __P
 #define __P(x) x
@@ -130,7 +132,7 @@ static int __oid_cmp _((oid *, int, oid *, int));
 static int __tp_sprint_num_objid _((char*,SnmpMibNode *));
 static SnmpMibNode * __get_next_mib_node _((SnmpMibNode *));
 static struct tree * __oid2tp _((oid*, int, struct tree *, int*));
-static struct tree * __tag2oid _((char *, char *, oid  *, int  *, int *));
+static struct tree * __tag2oid _((char *, char *, oid  *, int  *, int *, int));
 static int __concat_oid_str _((oid *, int *, char *));
 static int __add_var_val_str _((struct snmp_pdu *, oid *, int, char *,
                                  int, int));
@@ -141,6 +143,8 @@ static int __snmp_xs_cb __P((int, struct snmp_session *, int,
 static SV* __push_cb_args _((SV * sv, SV * esv));
 static int __call_callback _((SV * sv, int flags));
 static char* __av_elem_pv _((AV * av, I32 key, char *dflt));
+static u_int compute_match _((const char *, const char *));
+struct tree * find_best_tree_node _((const char *, struct tree *, u_int *));
 
 #define NON_LEAF_NAME 0x04
 #define USE_LONG_NAMES 0x02
@@ -278,6 +282,8 @@ char* typestr;
 	if (!strncasecmp(typestr,"UINTEGER",3))
 	    return(TYPE_UINTEGER); /* historic - should not show up */
                                    /* but it does?                  */
+	if (!strncasecmp(typestr, "NOTIF", 3))
+		return(TYPE_NOTIF);
         return(TYPE_UNKNOWN);
 }
 
@@ -531,6 +537,9 @@ char * str;
                 strcpy(str, "UINTEGER"); /* historic - should not show up */
                                           /* but it does?                  */
                 break;
+	case TYPE_NOTIF:
+		strcpy(str, "NOTIF");
+		break;
 	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
 	case TYPE_BITSTRING:
 	case TYPE_NSAPADDRESS:
@@ -628,22 +637,104 @@ int oidb_arr_len;
    return(oida_arr_len > oidb_arr_len ? 1 : -1);
 }
 
+#define MAX_BAD 0xffffff
+
+static u_int
+compute_match(search_base, key)
+const char *search_base;
+const char *key;
+{
+   int rc;
+   regex_t parsetree;
+   regmatch_t pmatch;
+
+   rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
+   if (rc == 0)
+      rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
+   regfree(&parsetree);
+   if (rc == 0) {
+      return pmatch.rm_so;
+   }
+
+   return MAX_BAD;
+}
+
+struct tree *
+find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
+{
+   struct tree *tp, *best_so_far = NULL, *retptr;
+   u_int old_match = MAX_BAD, new_match = MAX_BAD;
+
+   if (!pattrn || !*pattrn)
+      return(NULL);
+
+   if (!tree_top)
+      tree_top = get_tree_head();
+
+   for (tp = tree_top; tp; tp = tp->next_peer) {
+      if (!tp->reported)
+         new_match = compute_match(tp->label, pattrn);
+      tp->reported = 1;
+
+      if (new_match < old_match) {
+         best_so_far = tp;
+	 old_match = new_match;
+      }
+      if (new_match == 0)
+	 break;
+      if (tp->child_list) {
+	 retptr = find_best_tree_node(pattrn, tp->child_list, &new_match);
+
+	 if (new_match < old_match) {
+	    best_so_far = retptr;
+	    old_match = new_match;
+	 }
+	 if (new_match == 0)
+	    break;
+      }
+   }
+
+   if (match)
+      *match = old_match;
+   return(best_so_far);
+}
+
+
 static struct tree *
-__tag2oid(tag, iid, oid_arr, oid_arr_len, type)
+__tag2oid(tag, iid, oid_arr, oid_arr_len, type, best_guess)
 char * tag;
 char * iid;
 oid  * oid_arr;
 int  * oid_arr_len;
 int  * type;
+int    best_guess;
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
+   extern struct tree *tree_head;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
 
    if (type) *type = TYPE_UNKNOWN;
    if (oid_arr_len) *oid_arr_len = 0;
    if (!tag) goto done;
+
+   if (best_guess) {
+      tp = rtp = find_best_tree_node(tag, tree_head, NULL);
+      if (tp) {
+	 if (type) *type = tp->type;
+	 if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
+	 for (op = newname + MAX_OID_LEN - 1; op >= newname; op--) {
+            *op = tp->subid;
+	    tp = tp->parent;
+	    if (tp == NULL)
+	       break;
+	 }
+	 *oid_arr_len = newname + MAX_OID_LEN - op;
+	 bcopy(op, oid_arr, *oid_arr_len * sizeof(oid));
+      }
+      return(rtp);
+   }
 
    if (strchr(tag,'.')) { /* if multi part tag  */
       if (!__scan_num_objid(tag, newname, &newname_len)) { /* numeric tag */
@@ -822,7 +913,7 @@ OCT:
         vars->type = ASN_OBJECT_ID;
 	vars->val_len = MAX_OID_LEN;
         /* if (read_objid(val, oidbuf, &(vars->val_len))) { */
-	tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL);
+	tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL,0);
         if (vars->val_len) {
         	vars->val_len *= sizeof(oid);
 		vars->val.objid = (oid *)malloc(vars->val_len);
@@ -1640,7 +1731,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
                     tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F,NULL);
                     tp=__tag2oid(tag_pv,
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type);
+                                 oid_arr, &oid_arr_len, &type,0);
 
                     if (oid_arr_len==0) {
                        if (verbose)
@@ -1799,7 +1890,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F,NULL);
                     tp = __tag2oid(tag_pv,
                                    __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                   oid_arr, &oid_arr_len, NULL);
+                                   oid_arr, &oid_arr_len, NULL,0);
 
                     if (oid_arr_len) {
                        snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -1849,7 +1940,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type);
+                                 oid_arr, &oid_arr_len, &type,0);
 
                     for (vars = last_vars; vars; vars=vars->next_variable) {
 	            if (__oid_cmp(oid_arr, oid_arr_len, vars->name,
@@ -1951,7 +2042,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
                     tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                              oid_arr, &oid_arr_len, NULL);
+                              oid_arr, &oid_arr_len, NULL,0);
 
       		    if (oid_arr_len) {
   		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -2113,7 +2204,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
                     __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                              oid_arr, &oid_arr_len, NULL);
+                              oid_arr, &oid_arr_len, NULL,0);
 
 
                     if (oid_arr_len) {
@@ -2273,7 +2364,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F, NULL),
-                                 oid_arr, &oid_arr_len, &type);
+                                 oid_arr, &oid_arr_len, &type,0);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -2321,7 +2412,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
 	      pdu->enterprise = (oid *)malloc( MAX_OID_LEN * sizeof(oid));
               tp = __tag2oid(enterprise,NULL, pdu->enterprise,
-                             &pdu->enterprise_length, NULL);
+                             &pdu->enterprise_length, NULL,0);
   	      if (pdu->enterprise_length == 0) {
 		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
                   goto err;
@@ -2432,7 +2523,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type);
+                                 oid_arr, &oid_arr_len, &type,0);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -2573,7 +2664,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref)
 
                     tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
                                  __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type);
+                                 oid_arr, &oid_arr_len, &type,0);
 
                     if (oid_arr_len == 0) {
                        if (verbose)
@@ -2650,7 +2741,7 @@ snmp_get_type(tag)
 	   static char type_str[MAX_TYPE_NAME_LEN];
            char *ret = NULL;
 
-           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL);
+           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL,0);
            if (tp) __get_type_str(tp->type, ret = type_str);
 	   RETVAL = ret;
 	}
@@ -2681,7 +2772,7 @@ snmp_map_enum(tag, val, iflag)
 
            RETVAL = NULL;
 
-           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL);
+           if (tag && *tag) tp = __tag2oid(tag, NULL, NULL, NULL, NULL,0);
 
            if (tp) {
               if (iflag) {
@@ -2710,11 +2801,12 @@ snmp_map_enum(tag, val, iflag)
 #define SNMP_XLATE_MODE_TAG2OID 0
 
 char *
-snmp_translate_obj(var,mode,use_long,auto_init)
+snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
 	char *		var
 	int		mode
 	int		use_long
 	int		auto_init
+	int             best_guess
 	CODE:
 	{
 	   char str_buf[STR_BUF_SIZE];
@@ -2738,7 +2830,7 @@ snmp_translate_obj(var,mode,use_long,auto_init)
            str_buf[0] = '\0';
   	   switch (mode) {
               case SNMP_XLATE_MODE_TAG2OID:
-		if (!__tag2oid(var, NULL, oid_arr, &oid_arr_len, NULL)) {
+		if (!__tag2oid(var, NULL, oid_arr, &oid_arr_len, NULL, best_guess)) {
 		   if (verbose) warn("error:snmp_translate_obj:Unknown OID %s\n",var);
                 } else {
                    status = __sprint_num_objid(str_buf, oid_arr, oid_arr_len);
@@ -2957,7 +3049,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
         IV tp
 	CODE:
 	{
-           if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL);
+           if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
               sv_setref_iv(ST(0), class, tp);
@@ -2979,10 +3071,11 @@ snmp_mib_node_FETCH(tp_ref, key)
            struct index_list *ip;
            struct enum_list *ep;
            struct range_list *rp;
+	   struct varbind_list *vp;
            struct module *mp;
            SV *child_list_aref, *next_node_href, *mib_tied_href, **nn_hrefp;
-           HV *mib_hv, *enum_hv;
-           AV *index_av, *range_av, *ranges_av;
+           HV *mib_hv, *enum_hv, *range_hv;
+           AV *index_av, *varbind_av, *ranges_av;
            MAGIC *mg;
 
            if (SvROK(tp_ref)) tp = (SnmpMibNode*)SvIV((SV*)SvRV(tp_ref));
@@ -3046,6 +3139,14 @@ snmp_mib_node_FETCH(tp_ref, key)
                  } /* for child_list */
                  sv_setsv(ST(0), child_list_aref);
                  break;
+	      case 'v':
+	         if (strncmp("varbinds", key, strlen(key))) break;
+		 varbind_av = newAV();
+		 for (vp = tp->varbinds; vp; vp = vp->next) {
+	            av_push(varbind_av, newSVpv((vp->vblabel),strlen(vp->vblabel)));
+		 }
+		 sv_setsv(ST(0), newRV((SV*)varbind_av));
+		 break;
 	      case 'd': /* description */
                  if (strncmp("description", key, strlen(key))) break;
                  sv_setpv(ST(0),tp->description);
@@ -3140,11 +3241,11 @@ snmp_mib_node_FETCH(tp_ref, key)
 	      case 'r': /* ranges */
                  if (strncmp("ranges", key, strlen(key))) break;
                  ranges_av = newAV();
-                 for(rp=tp->ranges; rp != NULL; rp = rp->next) {
-                   range_av = newAV();
-                   av_store(range_av, 0, newSViv(rp->low));
-                   av_store(range_av, 1, newSViv(rp->high));
-                   av_push(ranges_av, newRV((SV*)range_av));
+                 for(rp=tp->ranges; rp ; rp = rp->next) {
+		   range_hv = newHV();
+                   hv_store(range_hv, "low", strlen("low"), newSViv(rp->low), 0);
+                   hv_store(range_hv, "high", strlen("high"), newSViv(rp->high), 0);
+		   av_push(ranges_av, newRV((SV*)range_hv));
                  }
                  sv_setsv(ST(0), newRV((SV*)ranges_av));
                  break;
