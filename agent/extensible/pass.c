@@ -212,7 +212,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         if (passthru->miblen >= name_len || rtest < 0)
           sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
         else 
-          sprint_mib_oid(buf, name, name_len
+          sprint_mib_oid(buf, name, name_len);
         sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
         switch(var_val_type) {
           case INTEGER:
