@@ -96,7 +96,7 @@ that user's passphrase ("setup_passphrase").
 .SS Change the user's passphrase
 .PP
 snmpusm -v 3 -u wes -n "" -l authNoPriv -a MD5 -A setup_passphrase
-localhost passwd -setup_passphrase new_passphrase
+localhost passwd setup_passphrase new_passphrase
 .IP
 After creating the user "wes" with the same passphrase as the
 "initial" user, we need to change his passphrase for him.  The above
