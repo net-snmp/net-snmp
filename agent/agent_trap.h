@@ -18,7 +18,7 @@ void send_trap_to_sess(struct snmp_session *sess,
                        struct snmp_pdu *template_pdu);
 
 int create_trap_session (char *, u_short, char *, int, int);
-int add_trap_session( struct snmp_session *, int, int);
+int add_trap_session( struct snmp_session *, int, int, int);
 int remove_trap_session( struct snmp_session * );
 
 #endif /* AGENT_TRAP_H */

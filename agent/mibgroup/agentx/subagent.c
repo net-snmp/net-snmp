@@ -307,7 +307,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     case AGENTX_MSG_RESPONSE:
         DEBUGMSGTL(("agentx/subagent","  -> response\n"));
 	free( asp );
-	return 0;
+	return 1;
 
     default:
         DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n", pdu->command ));
@@ -403,7 +403,7 @@ subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *cli
     DEBUGMSGTL(("agentx/subagent","No session to register\n"));
     return 0;
   }
-  if (add_trap_session( thesession, AGENTX_MSG_NOTIFY, AGENTX_VERSION_1) == 0){
+  if (add_trap_session( thesession, AGENTX_MSG_NOTIFY, 1, AGENTX_VERSION_1) == 0){
     DEBUGMSGTL(("agentx/subagent","Trap session registration failed\n"));
     return 0;
   }
