@@ -925,15 +925,15 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 						  len, write_method);
 		    if (write_method)
-			*acl = vp->acl;
+			*acl = cvp->acl;
 		    if (access &&
                         (((pi->version == SNMP_VERSION_2) &&
                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
                          ((pi->version == SNMP_VERSION_1) &&
-                          (((cvp->acl & 0xAFFF) == SNMPV2ANY) ||
-                            (cvp->acl & 0xAFFF) == SNMPV2AUTH)) ||
+                          (((cvp->acl & 0xAFFC) == SNMPV2ANY) ||
+                            (cvp->acl & 0xAFFC) == SNMPV2AUTH)) ||
                           ((pi->version == SNMP_VERSION_2) &&
-                          ((cvp->acl & 0xAFFF) == SNMPV2AUTH) &&
+                          ((cvp->acl & 0xAFFC) == SNMPV2AUTH) &&
                           (pi->srcp->partyAuthProtocol == NOAUTH ||
                            pi->dstp->partyAuthProtocol == NOAUTH)))) {
                       access = NULL;
