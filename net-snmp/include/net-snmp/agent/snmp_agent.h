@@ -28,7 +28,7 @@ extern int	log_addresses;
 extern int	lastAddrAge;
 
 typedef struct request_info_s {
-   struct variable_list *requestvb; /* will certainly change */
+   struct variable_list *requestvb;
 
    /* can be used to pass information on a per-request basis from a
       helper to the later handlers */
