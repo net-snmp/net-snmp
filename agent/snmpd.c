@@ -58,8 +58,12 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
@@ -795,8 +799,9 @@ main(int argc, char *argv[])
       enable_stderrlog();
     if (syslog_log)
       enable_syslog(); 
-
+#ifdef BUFSIZ
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+#endif
     /* 
      * Initialize the world.  Detach from the shell.
      * Create initial user.
@@ -860,8 +865,12 @@ main(int argc, char *argv[])
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0, 0);
+#ifdef SIGTERM
     signal(SIGTERM, SnmpdShutDown);
+#endif
+#ifdef SIGINT
     signal(SIGINT, SnmpdShutDown);
+#endif
         
 #if HAVE_UNISTD_H
     if (gid) {

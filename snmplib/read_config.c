@@ -279,12 +279,16 @@ void read_config(const char *filename,
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
+#ifdef ENOENT
     if (errno != ENOENT) {
       log_perror(filename);
     }
     else {
       DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
     }
+#else /* ENOENT */
+    log_perror(filename);
+#endif /* ENOENT */
     return;
   } else {
     DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));

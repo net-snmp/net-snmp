@@ -29,7 +29,9 @@
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif 
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
@@ -99,7 +101,9 @@ RETSIGTYPE update_config(int a)
   }
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
+#ifdef SIGHUP
   signal(SIGHUP,update_config);
+#endif
 }
 
 
