@@ -40,8 +40,8 @@ RSC=rc.exe
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -63,10 +63,10 @@ LIB32=link.exe -lib
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409
-# ADD RSC /l 0xffffffff
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -83,6 +83,10 @@ LIB32=link.exe -lib
 # Begin Group "mibII"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\setSerialNo.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
@@ -104,6 +108,42 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 # End Source File
 # End Group
+# Begin Group "disman"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteEventNotificationTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteEventTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteObjectsTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerBooleanTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerDeltaTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerExistenceTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerThresholdTable.c
+# End Source File
+# End Group
 # Begin Group "examples"
 
 # PROP Default_Filter ""
@@ -119,10 +159,6 @@ SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 # Begin Group "ucd-snmp"
 
 # PROP Default_Filter ""
-# Begin Source File
-
-SOURCE="..\..\agent\mibgroup\ucd-snmp\disk.c"
-# End Source File
 # Begin Source File
 
 SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
@@ -230,72 +266,39 @@ SOURCE=..\..\agent\mibgroup\agentx\agentx_config.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\client.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\protocol.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\subagent.c
-
-!IF  "$(CFG)" == "netsnmpmibs - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "netsnmpmibs - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "agent"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsCache.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsDebug.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsLogging.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agent\nsModuleTable.c
@@ -310,11 +313,11 @@ SOURCE=..\..\agent\mibgroup\agent\nsTransactionTable.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\header_complex.c
+SOURCE=..\..\agent\mibgroup\utilities\execute.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\utilities\execute.c
+SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
 
@@ -329,5 +332,9 @@ SOURCE=..\..\agent\mibgroup\utilities\override.c
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\smux\smux.c
+# End Source File
 # End Target
 # End Project

@@ -38,6 +38,9 @@
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
 
+/* define if you are using the codeS11 library ...*/
+#undef USE_PKCS
+
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
 
@@ -1122,6 +1125,9 @@
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
 #endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
+#endif
 /* unknown */
 #ifndef OSTYPE
 #define OSTYPE UNKNOWNID
@@ -1216,6 +1222,9 @@
 
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
+
+/* got ssize_t? */
+#undef HAVE_SSIZE_T
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX

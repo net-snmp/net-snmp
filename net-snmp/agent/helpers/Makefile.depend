@@ -11,7 +11,7 @@
 ./baby_steps.lo: ../../include/net-snmp/system/generic.h
 ./baby_steps.lo: ../../include/net-snmp/machine/generic.h
 ./baby_steps.lo: ../../include/net-snmp/net-snmp-includes.h
-./baby_steps.lo: ../../include/net-snmp/definitions.h
+./baby_steps.lo:  ../../include/net-snmp/definitions.h
 ./baby_steps.lo: ../../include/net-snmp/types.h
 ./baby_steps.lo: ../../include/net-snmp/library/snmp_api.h
 ./baby_steps.lo: ../../include/net-snmp/library/asn1.h
@@ -20,7 +20,6 @@
 ./baby_steps.lo: ../../include/net-snmp/library/snmp-tc.h
 ./baby_steps.lo: ../../include/net-snmp/utilities.h
 ./baby_steps.lo: ../../include/net-snmp/library/snmp_client.h
-./baby_steps.lo: ../../include/net-snmp/library/getopt.h
 ./baby_steps.lo: ../../include/net-snmp/library/system.h
 ./baby_steps.lo: ../../include/net-snmp/library/tools.h
 ./baby_steps.lo: ../../include/net-snmp/library/int64.h
@@ -117,7 +116,6 @@
 ./bulk_to_next.lo: ../../include/net-snmp/library/snmp-tc.h
 ./bulk_to_next.lo: ../../include/net-snmp/utilities.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/snmp_client.h
-./bulk_to_next.lo: ../../include/net-snmp/library/getopt.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/system.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/tools.h
 ./bulk_to_next.lo: ../../include/net-snmp/library/int64.h
@@ -214,7 +212,6 @@
 ./cache_handler.lo: ../../include/net-snmp/library/snmp-tc.h
 ./cache_handler.lo: ../../include/net-snmp/utilities.h
 ./cache_handler.lo: ../../include/net-snmp/library/snmp_client.h
-./cache_handler.lo: ../../include/net-snmp/library/getopt.h
 ./cache_handler.lo: ../../include/net-snmp/library/system.h
 ./cache_handler.lo: ../../include/net-snmp/library/tools.h
 ./cache_handler.lo: ../../include/net-snmp/library/int64.h
@@ -311,7 +308,6 @@
 ./debug_handler.lo: ../../include/net-snmp/library/snmp-tc.h
 ./debug_handler.lo: ../../include/net-snmp/utilities.h
 ./debug_handler.lo: ../../include/net-snmp/library/snmp_client.h
-./debug_handler.lo: ../../include/net-snmp/library/getopt.h
 ./debug_handler.lo: ../../include/net-snmp/library/system.h
 ./debug_handler.lo: ../../include/net-snmp/library/tools.h
 ./debug_handler.lo: ../../include/net-snmp/library/int64.h
@@ -399,7 +395,7 @@
 ./instance.lo: ../../include/net-snmp/system/generic.h
 ./instance.lo: ../../include/net-snmp/machine/generic.h 
 ./instance.lo: ../../include/net-snmp/net-snmp-includes.h
-./instance.lo: ../../include/net-snmp/definitions.h
+./instance.lo:  ../../include/net-snmp/definitions.h
 ./instance.lo: ../../include/net-snmp/types.h
 ./instance.lo: ../../include/net-snmp/library/snmp_api.h
 ./instance.lo: ../../include/net-snmp/library/asn1.h
@@ -408,8 +404,7 @@
 ./instance.lo: ../../include/net-snmp/library/snmp-tc.h
 ./instance.lo: ../../include/net-snmp/utilities.h
 ./instance.lo: ../../include/net-snmp/library/snmp_client.h
-./instance.lo: ../../include/net-snmp/library/getopt.h
-./instance.lo: ../../include/net-snmp/library/system.h
+./instance.lo:  ../../include/net-snmp/library/system.h
 ./instance.lo: ../../include/net-snmp/library/tools.h
 ./instance.lo: ../../include/net-snmp/library/int64.h
 ./instance.lo: ../../include/net-snmp/library/mt_support.h
@@ -505,7 +500,6 @@
 ./mode_end_call.lo: ../../include/net-snmp/library/snmp-tc.h
 ./mode_end_call.lo: ../../include/net-snmp/utilities.h
 ./mode_end_call.lo: ../../include/net-snmp/library/snmp_client.h
-./mode_end_call.lo: ../../include/net-snmp/library/getopt.h
 ./mode_end_call.lo: ../../include/net-snmp/library/system.h
 ./mode_end_call.lo: ../../include/net-snmp/library/tools.h
 ./mode_end_call.lo: ../../include/net-snmp/library/int64.h
@@ -602,7 +596,6 @@
 ./multiplexer.lo: ../../include/net-snmp/library/snmp-tc.h
 ./multiplexer.lo: ../../include/net-snmp/utilities.h
 ./multiplexer.lo: ../../include/net-snmp/library/snmp_client.h
-./multiplexer.lo: ../../include/net-snmp/library/getopt.h
 ./multiplexer.lo: ../../include/net-snmp/library/system.h
 ./multiplexer.lo: ../../include/net-snmp/library/tools.h
 ./multiplexer.lo: ../../include/net-snmp/library/int64.h
@@ -689,8 +682,8 @@
 ./null.lo: ../../include/net-snmp/system/sysv.h
 ./null.lo: ../../include/net-snmp/system/generic.h
 ./null.lo: ../../include/net-snmp/machine/generic.h 
-./null.lo: ../../include/net-snmp/net-snmp-includes.h 
-./null.lo: ../../include/net-snmp/definitions.h
+./null.lo:  ../../include/net-snmp/net-snmp-includes.h
+./null.lo:  ../../include/net-snmp/definitions.h
 ./null.lo: ../../include/net-snmp/types.h
 ./null.lo: ../../include/net-snmp/library/snmp_api.h
 ./null.lo: ../../include/net-snmp/library/asn1.h
@@ -698,8 +691,7 @@
 ./null.lo: ../../include/net-snmp/library/snmp.h
 ./null.lo: ../../include/net-snmp/library/snmp-tc.h
 ./null.lo: ../../include/net-snmp/utilities.h
-./null.lo: ../../include/net-snmp/library/snmp_client.h
-./null.lo: ../../include/net-snmp/library/getopt.h
+./null.lo: ../../include/net-snmp/library/snmp_client.h 
 ./null.lo: ../../include/net-snmp/library/system.h
 ./null.lo: ../../include/net-snmp/library/tools.h
 ./null.lo: ../../include/net-snmp/library/int64.h
@@ -786,7 +778,7 @@
 ./old_api.lo: ../../include/net-snmp/system/generic.h
 ./old_api.lo: ../../include/net-snmp/machine/generic.h 
 ./old_api.lo: ../../include/net-snmp/net-snmp-includes.h 
-./old_api.lo: ../../include/net-snmp/definitions.h
+./old_api.lo:  ../../include/net-snmp/definitions.h
 ./old_api.lo: ../../include/net-snmp/types.h
 ./old_api.lo: ../../include/net-snmp/library/snmp_api.h
 ./old_api.lo: ../../include/net-snmp/library/asn1.h
@@ -795,8 +787,7 @@
 ./old_api.lo: ../../include/net-snmp/library/snmp-tc.h
 ./old_api.lo: ../../include/net-snmp/utilities.h
 ./old_api.lo: ../../include/net-snmp/library/snmp_client.h
-./old_api.lo: ../../include/net-snmp/library/getopt.h
-./old_api.lo: ../../include/net-snmp/library/system.h
+./old_api.lo:  ../../include/net-snmp/library/system.h
 ./old_api.lo: ../../include/net-snmp/library/tools.h
 ./old_api.lo: ../../include/net-snmp/library/int64.h
 ./old_api.lo: ../../include/net-snmp/library/mt_support.h
@@ -884,7 +875,7 @@
 ./read_only.lo: ../../include/net-snmp/system/generic.h
 ./read_only.lo: ../../include/net-snmp/machine/generic.h
 ./read_only.lo: ../../include/net-snmp/net-snmp-includes.h
-./read_only.lo: ../../include/net-snmp/definitions.h
+./read_only.lo:  ../../include/net-snmp/definitions.h
 ./read_only.lo: ../../include/net-snmp/types.h
 ./read_only.lo: ../../include/net-snmp/library/snmp_api.h
 ./read_only.lo: ../../include/net-snmp/library/asn1.h
@@ -893,8 +884,7 @@
 ./read_only.lo: ../../include/net-snmp/library/snmp-tc.h
 ./read_only.lo: ../../include/net-snmp/utilities.h
 ./read_only.lo: ../../include/net-snmp/library/snmp_client.h
-./read_only.lo: ../../include/net-snmp/library/getopt.h
-./read_only.lo: ../../include/net-snmp/library/system.h
+./read_only.lo:  ../../include/net-snmp/library/system.h
 ./read_only.lo: ../../include/net-snmp/library/tools.h
 ./read_only.lo: ../../include/net-snmp/library/int64.h
 ./read_only.lo: ../../include/net-snmp/library/mt_support.h
@@ -981,7 +971,7 @@
 ./row_merge.lo: ../../include/net-snmp/system/generic.h
 ./row_merge.lo: ../../include/net-snmp/machine/generic.h
 ./row_merge.lo: ../../include/net-snmp/net-snmp-includes.h
-./row_merge.lo: ../../include/net-snmp/definitions.h
+./row_merge.lo:  ../../include/net-snmp/definitions.h
 ./row_merge.lo: ../../include/net-snmp/types.h
 ./row_merge.lo: ../../include/net-snmp/library/snmp_api.h
 ./row_merge.lo: ../../include/net-snmp/library/asn1.h
@@ -990,8 +980,7 @@
 ./row_merge.lo: ../../include/net-snmp/library/snmp-tc.h
 ./row_merge.lo: ../../include/net-snmp/utilities.h
 ./row_merge.lo: ../../include/net-snmp/library/snmp_client.h
-./row_merge.lo: ../../include/net-snmp/library/getopt.h
-./row_merge.lo: ../../include/net-snmp/library/system.h
+./row_merge.lo:  ../../include/net-snmp/library/system.h
 ./row_merge.lo: ../../include/net-snmp/library/tools.h
 ./row_merge.lo: ../../include/net-snmp/library/int64.h
 ./row_merge.lo: ../../include/net-snmp/library/mt_support.h
@@ -1078,7 +1067,7 @@
 ./scalar.lo: ../../include/net-snmp/system/generic.h
 ./scalar.lo: ../../include/net-snmp/machine/generic.h 
 ./scalar.lo:  ../../include/net-snmp/net-snmp-includes.h
-./scalar.lo: ../../include/net-snmp/definitions.h
+./scalar.lo:  ../../include/net-snmp/definitions.h
 ./scalar.lo: ../../include/net-snmp/types.h
 ./scalar.lo: ../../include/net-snmp/library/snmp_api.h
 ./scalar.lo: ../../include/net-snmp/library/asn1.h
@@ -1087,8 +1076,7 @@
 ./scalar.lo: ../../include/net-snmp/library/snmp-tc.h
 ./scalar.lo: ../../include/net-snmp/utilities.h
 ./scalar.lo: ../../include/net-snmp/library/snmp_client.h
-./scalar.lo: ../../include/net-snmp/library/getopt.h
-./scalar.lo: ../../include/net-snmp/library/system.h
+./scalar.lo:  ../../include/net-snmp/library/system.h
 ./scalar.lo: ../../include/net-snmp/library/tools.h
 ./scalar.lo: ../../include/net-snmp/library/int64.h
 ./scalar.lo: ../../include/net-snmp/library/mt_support.h
@@ -1184,7 +1172,6 @@
 ./scalar_group.lo: ../../include/net-snmp/library/snmp-tc.h
 ./scalar_group.lo: ../../include/net-snmp/utilities.h
 ./scalar_group.lo: ../../include/net-snmp/library/snmp_client.h
-./scalar_group.lo: ../../include/net-snmp/library/getopt.h
 ./scalar_group.lo: ../../include/net-snmp/library/system.h
 ./scalar_group.lo: ../../include/net-snmp/library/tools.h
 ./scalar_group.lo: ../../include/net-snmp/library/int64.h
@@ -1272,7 +1259,7 @@
 ./serialize.lo: ../../include/net-snmp/system/generic.h
 ./serialize.lo: ../../include/net-snmp/machine/generic.h
 ./serialize.lo: ../../include/net-snmp/net-snmp-includes.h
-./serialize.lo: ../../include/net-snmp/definitions.h
+./serialize.lo:  ../../include/net-snmp/definitions.h
 ./serialize.lo: ../../include/net-snmp/types.h
 ./serialize.lo: ../../include/net-snmp/library/snmp_api.h
 ./serialize.lo: ../../include/net-snmp/library/asn1.h
@@ -1281,8 +1268,7 @@
 ./serialize.lo: ../../include/net-snmp/library/snmp-tc.h
 ./serialize.lo: ../../include/net-snmp/utilities.h
 ./serialize.lo: ../../include/net-snmp/library/snmp_client.h
-./serialize.lo: ../../include/net-snmp/library/getopt.h
-./serialize.lo: ../../include/net-snmp/library/system.h
+./serialize.lo:  ../../include/net-snmp/library/system.h
 ./serialize.lo: ../../include/net-snmp/library/tools.h
 ./serialize.lo: ../../include/net-snmp/library/int64.h
 ./serialize.lo: ../../include/net-snmp/library/mt_support.h
@@ -1378,7 +1364,6 @@
 ./stash_cache.lo: ../../include/net-snmp/library/snmp-tc.h
 ./stash_cache.lo: ../../include/net-snmp/utilities.h
 ./stash_cache.lo: ../../include/net-snmp/library/snmp_client.h
-./stash_cache.lo: ../../include/net-snmp/library/getopt.h
 ./stash_cache.lo: ../../include/net-snmp/library/system.h
 ./stash_cache.lo: ../../include/net-snmp/library/tools.h
 ./stash_cache.lo: ../../include/net-snmp/library/int64.h
@@ -1476,7 +1461,6 @@
 ./table_array.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table_array.lo: ../../include/net-snmp/utilities.h
 ./table_array.lo: ../../include/net-snmp/library/snmp_client.h
-./table_array.lo: ../../include/net-snmp/library/getopt.h
 ./table_array.lo: ../../include/net-snmp/library/system.h
 ./table_array.lo: ../../include/net-snmp/library/tools.h
 ./table_array.lo: ../../include/net-snmp/library/int64.h
@@ -1563,8 +1547,8 @@
 ./table.lo: ../../include/net-snmp/system/sysv.h
 ./table.lo: ../../include/net-snmp/system/generic.h
 ./table.lo: ../../include/net-snmp/machine/generic.h 
-./table.lo: ../../include/net-snmp/net-snmp-includes.h 
-./table.lo: ../../include/net-snmp/definitions.h
+./table.lo:  ../../include/net-snmp/net-snmp-includes.h
+./table.lo:  ../../include/net-snmp/definitions.h
 ./table.lo: ../../include/net-snmp/types.h
 ./table.lo: ../../include/net-snmp/library/snmp_api.h
 ./table.lo: ../../include/net-snmp/library/asn1.h
@@ -1573,8 +1557,7 @@
 ./table.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table.lo: ../../include/net-snmp/utilities.h
 ./table.lo: ../../include/net-snmp/library/snmp_client.h
-./table.lo: ../../include/net-snmp/library/getopt.h
-./table.lo: ../../include/net-snmp/library/system.h
+./table.lo:  ../../include/net-snmp/library/system.h
 ./table.lo: ../../include/net-snmp/library/tools.h
 ./table.lo: ../../include/net-snmp/library/int64.h
 ./table.lo: ../../include/net-snmp/library/mt_support.h
@@ -1660,7 +1643,7 @@
 ./table_data.lo: ../../include/net-snmp/system/generic.h
 ./table_data.lo: ../../include/net-snmp/machine/generic.h
 ./table_data.lo: ../../include/net-snmp/net-snmp-includes.h
-./table_data.lo: ../../include/net-snmp/definitions.h
+./table_data.lo:  ../../include/net-snmp/definitions.h
 ./table_data.lo: ../../include/net-snmp/types.h
 ./table_data.lo: ../../include/net-snmp/library/snmp_api.h
 ./table_data.lo: ../../include/net-snmp/library/asn1.h
@@ -1669,7 +1652,6 @@
 ./table_data.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table_data.lo: ../../include/net-snmp/utilities.h
 ./table_data.lo: ../../include/net-snmp/library/snmp_client.h
-./table_data.lo: ../../include/net-snmp/library/getopt.h
 ./table_data.lo: ../../include/net-snmp/library/system.h
 ./table_data.lo: ../../include/net-snmp/library/tools.h
 ./table_data.lo: ../../include/net-snmp/library/int64.h
@@ -1766,7 +1748,6 @@
 ./table_dataset.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table_dataset.lo: ../../include/net-snmp/utilities.h
 ./table_dataset.lo: ../../include/net-snmp/library/snmp_client.h
-./table_dataset.lo: ../../include/net-snmp/library/getopt.h
 ./table_dataset.lo: ../../include/net-snmp/library/system.h
 ./table_dataset.lo: ../../include/net-snmp/library/tools.h
 ./table_dataset.lo: ../../include/net-snmp/library/int64.h
@@ -1863,7 +1844,6 @@
 ./table_iterator.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table_iterator.lo: ../../include/net-snmp/utilities.h
 ./table_iterator.lo: ../../include/net-snmp/library/snmp_client.h
-./table_iterator.lo: ../../include/net-snmp/library/getopt.h
 ./table_iterator.lo: ../../include/net-snmp/library/system.h
 ./table_iterator.lo: ../../include/net-snmp/library/tools.h
 ./table_iterator.lo: ../../include/net-snmp/library/int64.h
@@ -1952,7 +1932,7 @@
 ./table_mfd.lo: ../../include/net-snmp/system/generic.h
 ./table_mfd.lo: ../../include/net-snmp/machine/generic.h
 ./table_mfd.lo: ../../include/net-snmp/net-snmp-includes.h
-./table_mfd.lo: ../../include/net-snmp/definitions.h
+./table_mfd.lo:  ../../include/net-snmp/definitions.h
 ./table_mfd.lo: ../../include/net-snmp/types.h
 ./table_mfd.lo: ../../include/net-snmp/library/snmp_api.h
 ./table_mfd.lo: ../../include/net-snmp/library/asn1.h
@@ -1961,8 +1941,7 @@
 ./table_mfd.lo: ../../include/net-snmp/library/snmp-tc.h
 ./table_mfd.lo: ../../include/net-snmp/utilities.h
 ./table_mfd.lo: ../../include/net-snmp/library/snmp_client.h
-./table_mfd.lo: ../../include/net-snmp/library/getopt.h
-./table_mfd.lo: ../../include/net-snmp/library/system.h
+./table_mfd.lo:  ../../include/net-snmp/library/system.h
 ./table_mfd.lo: ../../include/net-snmp/library/tools.h
 ./table_mfd.lo: ../../include/net-snmp/library/int64.h
 ./table_mfd.lo: ../../include/net-snmp/library/mt_support.h
@@ -2049,7 +2028,7 @@
 ./watcher.lo: ../../include/net-snmp/system/generic.h
 ./watcher.lo: ../../include/net-snmp/machine/generic.h 
 ./watcher.lo: ../../include/net-snmp/net-snmp-includes.h 
-./watcher.lo: ../../include/net-snmp/definitions.h
+./watcher.lo:  ../../include/net-snmp/definitions.h
 ./watcher.lo: ../../include/net-snmp/types.h
 ./watcher.lo: ../../include/net-snmp/library/snmp_api.h
 ./watcher.lo: ../../include/net-snmp/library/asn1.h
@@ -2058,8 +2037,7 @@
 ./watcher.lo: ../../include/net-snmp/library/snmp-tc.h
 ./watcher.lo: ../../include/net-snmp/utilities.h
 ./watcher.lo: ../../include/net-snmp/library/snmp_client.h
-./watcher.lo: ../../include/net-snmp/library/getopt.h
-./watcher.lo: ../../include/net-snmp/library/system.h
+./watcher.lo:  ../../include/net-snmp/library/system.h
 ./watcher.lo: ../../include/net-snmp/library/tools.h
 ./watcher.lo: ../../include/net-snmp/library/int64.h
 ./watcher.lo: ../../include/net-snmp/library/mt_support.h

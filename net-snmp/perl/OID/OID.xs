@@ -9,11 +9,10 @@
 /* pulled from Dave's, yet-to-be-used, net-snmp library rewrite.
    autocompatibility for the future? */
 
-#define NETSNMP_NAMEBUF_LEN 128
 typedef struct netsnmp_oid_s {
     oid                 *name;
     unsigned int         len;
-    oid                  namebuf[ NETSNMP_NAMEBUF_LEN ];
+    oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
 static int
@@ -124,18 +123,18 @@ nsop_append(oid1, string)
     netsnmp_oid *oid1;
     char *string;
     PREINIT:
-    oid name[128];
-    size_t name_len = 128;
+    oid name[MAX_OID_LEN];
+    size_t name_len = MAX_OID_LEN;
     int i;
     CODE: 
     {
         if (!snmp_parse_oid(string, (oid *) name, &name_len)) {
             /* XXX */
         }
-        if (oid1->len + name_len > 128) {
+        if (oid1->len + name_len > MAX_OID_LEN) {
             /* XXX: illegal */
         }
-        for(i = 0; i < name_len; i++) {
+        for(i = 0; i < (int)name_len; i++) {
             oid1->name[i+oid1->len] = name[i];
         }
         oid1->len += name_len;
@@ -149,10 +148,10 @@ nsop_append_oid(oid1, oid2)
     int i;
     CODE: 
     {
-        if (oid1->len + oid2->len > 128) {
+        if (oid1->len + oid2->len > MAX_OID_LEN) {
             /* XXX: illegal */
         }
-        for(i = 0; i < oid2->len; i++) {
+        for(i = 0; i < (int)oid2->len; i++) {
             oid1->name[i+oid1->len] = oid2->name[i];
         }
         oid1->len += oid2->len;

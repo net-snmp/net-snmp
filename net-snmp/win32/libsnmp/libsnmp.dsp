@@ -40,10 +40,10 @@ RSC=rc.exe
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
-# ADD BASE RSC /l 0x406
-# ADD RSC /l 0x406
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -63,10 +63,10 @@ LIB32=link.exe -lib
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
-# ADD BASE RSC /l 0x406
-# ADD RSC /l 0xffffffff
+# ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -106,6 +106,10 @@ SOURCE=..\..\snmplib\container.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\container_binary_array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\container_iterator.c
 # End Source File
 # Begin Source File
 
@@ -259,6 +263,10 @@ SOURCE=..\..\snmplib\ucd_compat.c
 
 SOURCE=..\..\snmplib\vacm.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winpipe.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -338,10 +346,6 @@ SOURCE="..\..\include\net-snmp\library\scapi.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\snmp-tc.h"
-# End Source File
-# Begin Source File
-
-SOURCE="C:\Program Files\Microsoft SDK\include\Snmp.h"
 # End Source File
 # Begin Source File
 

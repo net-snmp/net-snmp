@@ -44,7 +44,7 @@ override_handler(netsnmp_mib_handler *handler,
         DEBUGMSGOID(("override", requests->requestvb->name,
                      requests->requestvb->name_length));
         DEBUGMSG(("override", "\n"));
-        snmp_set_var_typed_value(requests->requestvb, data->type,
+        snmp_set_var_typed_value(requests->requestvb, (u_char)data->type,
                                  (u_char *) data->value, data->value_len);
         break;
 

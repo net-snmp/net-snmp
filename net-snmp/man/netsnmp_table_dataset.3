@@ -1,4 +1,4 @@
-.TH "table_dataset: Helps you implement a table with automatted storage." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset: Helps you implement a table with automatted storage." 3 "17 Feb 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -12,11 +12,11 @@ More...
 .br
 .RI "\fICreate a netsnmp_table_data_set structure given a table_data definition.\fP"
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_table_data_set_handler\fP (netsnmp_table_data_set *data_set)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_table_data_set_handler\fP (netsnmp_table_data_set *data_set)"
 .br
 .RI "\fIGiven a netsnmp_table_data_set definition, create a handler for it.\fP"
 .ti -1c
-.RI "int \fBnetsnmp_register_table_data_set\fP (netsnmp_handler_registration *reginfo, netsnmp_table_data_set *data_set, netsnmp_table_registration_info *table_info)"
+.RI "int \fBnetsnmp_register_table_data_set\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_table_data_set *data_set, netsnmp_table_registration_info *table_info)"
 .br
 .RI "\fIregister a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).\fP"
 .ti -1c
@@ -52,7 +52,7 @@ More...
 .br
 .RI "\fIcreates a new row from an existing defined default set\fP"
 .ti -1c
-.RI "int \fBnetsnmp_table_data_set_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
+.RI "int \fBnetsnmp_table_data_set_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
 .RI "\fIimplements the table data helper.\fP"
 .ti -1c
@@ -134,13 +134,13 @@ extracts a netsnmp_table_data_set pointer from a given request
 Definition at line 172 of file table_dataset.c.
 .PP
 References netsnmp_extract_table_row_data(), and netsnmp_table_data_set_find_column().
-.SS "netsnmp_mib_handler* netsnmp_get_table_data_set_handler (netsnmp_table_data_set * data_set)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_table_data_set_handler (netsnmp_table_data_set * data_set)"
 .PP
 Given a netsnmp_table_data_set definition, create a handler for it.
 .PP
 Definition at line 86 of file table_dataset.c.
 .PP
-References netsnmp_create_handler(), and netsnmp_table_data_set_helper_handler().
+References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_table_data_set_helper_handler(), and snmp_log().
 .PP
 Referenced by netsnmp_register_table_data_set().
 .SS "int netsnmp_mark_row_column_writable (netsnmp_table_row * row, int column, int writable)"
@@ -153,7 +153,7 @@ marks a given column in a row as writable or not.
 .PP
 Definition at line 196 of file table_dataset.c.
 .PP
-References netsnmp_table_data_set_find_column(), and SNMP_MALLOC_TYPEDEF.
+References netsnmp_table_data_set_find_column(), snmp_log(), and SNMP_MALLOC_TYPEDEF.
 .PP
 Referenced by netsnmp_table_data_set_create_row_from_defaults().
 .SS "void netsnmp_register_auto_data_table (netsnmp_table_data_set * table_set, char * registration_name)"
@@ -173,7 +173,7 @@ If registration_name is NULL then the name used when the table was created will 
 Definition at line 738 of file table_dataset.c.
 .PP
 References netsnmp_add_list_data(), netsnmp_create_data_list(), and SNMP_MALLOC_TYPEDEF.
-.SS "int netsnmp_register_table_data_set (netsnmp_handler_registration * reginfo, netsnmp_table_data_set * data_set, netsnmp_table_registration_info * table_info)"
+.SS "int netsnmp_register_table_data_set (\fBnetsnmp_handler_registration\fP * reginfo, netsnmp_table_data_set * data_set, netsnmp_table_registration_info * table_info)"
 .PP
 register a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).
 .PP
@@ -185,7 +185,7 @@ The reginfo->handler->access_method *may* be null if the call doesn't ever want 
 .PP
 Definition at line 112 of file table_dataset.c.
 .PP
-References netsnmp_get_table_data_set_handler(), netsnmp_inject_handler(), netsnmp_register_table_data(), SNMP_MALLOC_TYPEDEF, SNMP_MAX, and SNMP_MIN.
+References netsnmp_table_registration_info_s::indexes, netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column, netsnmp_get_table_data_set_handler(), netsnmp_inject_handler(), netsnmp_register_table_data(), SNMP_MALLOC_TYPEDEF, SNMP_MAX, and SNMP_MIN.
 .SS "int netsnmp_set_row_column (netsnmp_table_row * row, unsigned int column, int type, const char * value, size_t value_len)"
 .PP
 sets a given column in a row with data given a type, value, and length.
@@ -198,7 +198,7 @@ Data is memdup'ed by the function.
 .PP
 Definition at line 232 of file table_dataset.c.
 .PP
-References memdup(), netsnmp_table_data_set_find_column(), SNMP_FREE, and SNMP_MALLOC_TYPEDEF.
+References memdup(), netsnmp_table_data_set_find_column(), SNMP_FREE, snmp_log(), and SNMP_MALLOC_TYPEDEF.
 .PP
 Referenced by netsnmp_table_data_set_create_row_from_defaults().
 .SS "netsnmp_table_row* netsnmp_table_data_set_clone_row (netsnmp_table_row * row)"
@@ -224,7 +224,7 @@ Finds a column within a given storage set, given the pointer to the start of the
 Definition at line 160 of file table_dataset.c.
 .PP
 Referenced by netsnmp_extract_table_data_set_column(), netsnmp_mark_row_column_writable(), netsnmp_set_row_column(), netsnmp_table_data_set_helper_handler(), and netsnmp_table_set_add_default_row().
-.SS "int netsnmp_table_data_set_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
+.SS "int netsnmp_table_data_set_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the table data helper.
 .PP
@@ -232,7 +232,7 @@ This is the routine that takes care of all SNMP requests coming into the table.
 .PP
 Definition at line 404 of file table_dataset.c.
 .PP
-References netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_extract_table_row(), netsnmp_oid_stash_add_data(), netsnmp_oid_stash_get_data(), netsnmp_request_add_list_data(), netsnmp_strdup_and_null(), netsnmp_table_data_build_result(), netsnmp_table_data_set_clone_row(), netsnmp_table_data_set_find_column(), netsnmp_table_dataset_add_row(), netsnmp_table_dataset_delete_row(), netsnmp_table_dataset_remove_and_delete_row(), netsnmp_table_dataset_replace_row(), SNMP_FREE, and SNMP_MALLOC_TYPEDEF.
+References netsnmp_mib_handler_s::access_method, netsnmp_table_request_info_s::colnum, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_extract_table_row(), netsnmp_oid_stash_add_data(), netsnmp_oid_stash_get_data(), netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_strdup_and_null(), netsnmp_table_data_build_result(), netsnmp_table_data_set_clone_row(), netsnmp_table_data_set_find_column(), netsnmp_table_dataset_add_row(), netsnmp_table_dataset_delete_row(), netsnmp_table_dataset_remove_and_delete_row(), netsnmp_table_dataset_replace_row(), netsnmp_mib_handler_s::next, netsnmp_request_info_s::next, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, SNMP_MALLOC_TYPEDEF, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
 Referenced by netsnmp_get_table_data_set_handler().
 .SS "NETSNMP_INLINE void netsnmp_table_dataset_add_index (netsnmp_table_data_set * table, u_char type)"

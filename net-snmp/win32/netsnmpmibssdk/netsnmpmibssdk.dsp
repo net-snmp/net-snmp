@@ -40,8 +40,8 @@ RSC=rc.exe
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\agent" /I "..\..\snmplib" /I "..\..\include" /I "..\..\agent\mibgroup" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "HAVE_WIN32_PLATFORM_SDK" /YX /FD /c
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /YX /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"../lib/netsnmpmibs.lib"
 
 !ELSEIF  "$(CFG)" == "netsnmpmibssdk - Win32 Debug"
 
@@ -63,16 +63,16 @@ LIB32=link.exe -lib
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "..\..\agent" /I "..\..\agent\mibgroup" /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "w:\sdutils\csol\inc" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /FR /YX /FD /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "HAVE_WIN32_PLATFORM_SDK" /YX /FD /c
 # ADD BASE RSC /l 0x409
-# ADD RSC /l 0xffffffff
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/netsnmpmibssdk_d.lib"
+# ADD LIB32 /nologo /out:"../lib/netsnmpmibs_d.lib"
 
 !ENDIF 
 
@@ -106,6 +106,42 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
+# End Source File
+# End Group
+# Begin Group "disman"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteEventNotificationTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteEventTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteObjectsTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerBooleanTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerDeltaTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerExistenceTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\mteTriggerThresholdTable.c
 # End Source File
 # End Group
 # Begin Group "examples"
@@ -209,6 +245,18 @@ SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\agent\nsCache.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsDebug.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\nsLogging.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\agent\nsModuleTable.c
 # End Source File
 # Begin Source File
@@ -281,10 +329,6 @@ SOURCE=..\..\agent\mibgroup\mibII\var_route.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE="..\..\agent\mibgroup\ucd-snmp\disk.c"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
 # End Source File
 # Begin Source File
@@ -335,6 +379,10 @@ SOURCE=..\..\agent\mib_modules.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\util_funcs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\smux\smux.c
 # End Source File
 # End Target
 # End Project

@@ -394,8 +394,8 @@ header_dlmodEntry(struct variable *vp,
     for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++) {
         dlm = dlmod_get_by_index(dlmod_index);
 
-        DEBUGMSGTL(("dlmod", "dlmodEntry dlm: %x dlmod_index: %d\n",
-                    (int) dlm, dlmod_index));
+        DEBUGMSGTL(("dlmod", "dlmodEntry dlm: %p dlmod_index: %d\n",
+                    dlm, dlmod_index));
 
         if (dlm) {
             newname[12] = dlmod_index;

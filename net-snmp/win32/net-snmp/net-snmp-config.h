@@ -17,13 +17,14 @@ extern "C" {
 /* default list of mibs to load */
 #define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
+
+#define INSTALL_BASE "c:/usr"
+
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-
-#define DEFAULT_MIBDIRS "/USR/MIBS"
+#define DEFAULT_MIBDIRS INSTALL_BASE ## "/mibs"
 
 /* default mib files to load, specified by path. */
-
 #undef DEFAULT_MIBFILES
 
 /* should we compile to use special opaque types: float, double,
@@ -44,28 +45,117 @@ extern "C" {
 /* add in recent CMU library extensions (not complete) */
 #define CMU_COMPATIBLE 1
 
-/* should "--" comments in mibs be a comment till the end of the line
-   or also until another "--", the latter being the technically
-   correct. */
-#undef MIB_COMMENT_IS_EOL_TERMINATED
+/* add in recent resource lock functions (not complete) */
+#undef _REENTRANT
 
 /* debugging stuff */
-#undef SNMP_NO_DEBUGGING           /* if defined, we optimize the code
-                                      to exclude all debugging calls. */
-#define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
-                                      ignore the -D flag passed to the cmds */
+/* if defined, we optimize the code to exclude all debugging calls. */
+#undef SNMP_NO_DEBUGGING
+/* ignore the -D flag and always print debugging information */
+#define SNMP_ALWAYS_DEBUG 0
 
-/* Define if using alloca.c.  */
-#undef C_ALLOCA
+/* reverse encoding BER packets is both faster and more efficient in space. */
+#define USE_REVERSE_ASNENCODING       1
+#define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
 
-/* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
-   This function is required for alloca.c support on those systems.  */
+/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
+   persisant information to this directory in the form of configuration
+   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
+#define PERSISTENT_DIRECTORY INSTALL_BASE ## "/snmp/persist"
+
+/* PERSISTENT_MASK: the umask permissions to set up persistent files with */
+/* Win32 has no umask ...  #define PERSISTENT_MASK 077 */
+
+/* AGENT_DIRECTORY_MODE: the mode the agents should use to create
+   directories with. Since the data stored here is probably sensitive, it
+   probably should be read-only by root/administrator. */
+#define AGENT_DIRECTORY_MODE 0700
+
+/* MAX_PERSISTENT_BACKUPS:
+ *   The maximum number of persistent backups the library will try to
+ *   read from the persistent cache directory.  If an application fails to
+ *   close down successfully more than this number of times, data will be lost.
+ */
+#define MAX_PERSISTENT_BACKUPS 10
+
+
+/* define if you are embedding perl in the main agent */
+#undef NETSNMP_EMBEDDED_PERL
+
+/* define the system type include file here */
+#undef SYSTEM_INCLUDE_FILE
+
+/* define the machine (cpu) type include file here */
+#undef MACHINE_INCLUDE_FILE
+
+/* SNMPLIBDIR contains important files */
+
+#define SNMPDLMODPATH INSTALL_BASE ## "/lib/dlmod"
+#define SNMPLIBPATH INSTALL_BASE ## "/lib"
+#define SNMPSHAREPATH INSTALL_BASE ## "/share/snmp"
+#define SNMPCONFPATH INSTALL_BASE
+
+/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
+   place.  (stdin is closed so that sh scripts won't wait for it) */
+#undef LOGFILE
+
+/* default system contact */
+#define SYS_CONTACT "unknown"
+
+/* system location */
+#define SYS_LOC "unknown"
+
+/* Use libwrap to handle allow/deny hosts? */
+#undef USE_LIBWRAP
+
+/* Use dmalloc to do malloc debugging? */
+#undef HAVE_DMALLOC_H
+
+/* location of UNIX kernel */
+#define KERNEL_LOC "unknown"
+
+/* location of mount table list */
+#define ETC_MNTTAB "unknown"
+
+/* location of swap device (ok if not found) */
+#undef DMEM_LOC
+
+#define PSCMD "/bin/ps"
+
+/* Where is the uname command */
+#define UNAMEPROG "/bin/uname"
+
+/* pattern for temporary file names */
+#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
+
+/* testing code sections. */
+/* #undef SNMP_TESTING_CODE */
+
+/* If you don't have root access don't exit upon kmem errors */
+#undef NO_ROOT_ACCESS
+
+/* If you don't want the agent to report on variables it doesn't have data for */
+/* #undef NO_DUMMY_VALUES */
+
+
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems.  This function is required for `alloca.c' support on those systems.
+   */
 #undef CRAY_STACKSEG_END
 
-/* Define if you have alloca, as a function or macro.  */
+/* Define to 1 if using `alloca.c'.  */
+#undef C_ALLOCA
+
+/* Define if mib loading and parsing code should not be included */
+#undef DISABLE_MIB_LOADING
+
+/* Define to 1 if you have the `AES_cfb128_encrypt' function. */
+#undef HAVE_AES_CFB128_ENCRYPT
+
+/* Define to 1 if you have `alloca', as a function or macro.  */
 #undef HAVE_ALLOCA
 
-/* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
 /* Define if you have the getmntent function.  */
@@ -109,47 +199,13 @@ extern "C" {
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
-/* Define if you have the <sys/time.h> header file.  */
-#undef HAVE_SYS_TIME_H
-
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
-#define SNMPDLMODPATH "/USR/LIB/DLMOD"
-#define SNMPLIBPATH "/USR/LIB"
-#define SNMPSHAREPATH "/USR/SHARE/SNMP"
-#define SNMPCONFPATH "/USR"
-
 /* SNMPPATH contains (more) important files */
 
 #undef SNMPPATH
-
-/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
-   place.  (stdin is closed so that sh scripts won't wait for it) */
-
-#undef LOGFILE
-
-/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
-   persisant information to this directory in the form of configuration
-   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
-#define PERSISTENT_DIRECTORY "/USR/SNMP/PERSIST"
-
-#define MAX_PERSISTENT_BACKUPS 10
-/* default system contact */
-#define SYS_CONTACT "unknown"
-
-/* system location */
-#define SYS_LOC "unknown"
-
-/* location of UNIX kernel */
-#define KERNEL_LOC "unknown"
-
-/* location of mount table list */
-#define ETC_MNTTAB "unknown"
-
-/* location of swap device (ok if not found) */
-#undef DMEM_LOC
 
 /* define rtentry to ortentry on SYSV machines (alphas) */
 #define RTENTRY rtentry;
@@ -159,20 +215,6 @@ extern "C" {
 
 /* Does the rtentry structure have a rt_next node */
 #undef RTENTRY_RT_NEXT
-
-#define PSCMD "/bin/ps"
-
-/* Where is the uname command */
-#define UNAMEPROG "/bin/uname"
-
-/* pattern for temporary file names */
-#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
-
-/* testing code sections. */
-/* #undef SNMP_TESTING_CODE */
-
-/* If you don't have root access don't exit upon kmem errors */
-#undef NO_ROOT_ACCESS
 
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
@@ -192,6 +234,9 @@ extern "C" {
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
 
+/* Define to 1 if you have the `setlocale' function. */
+#define HAVE_SETLOCALE 1
+
 /* Define if you have the strtoul function.  */
 #define HAVE_STRTOUL 1
 
@@ -205,14 +250,23 @@ extern "C" {
 /* Define if you have the kvm_openfiles function.  */
 #undef HAVE_KVM_OPENFILES
 
+/* Define to 1 if you have the <locale.h> header file. */
+#define HAVE_LOCALE_H 1
+
 /* Define if you have the lrand48 function.  */
 #undef HAVE_LRAND48
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#define HAVE_MALLOC_H 1
 
 /* Define if you have the memcpy function.  */
 #define HAVE_MEMCPY 1
 
 /* Define if you have the memmove function.  */
 #define HAVE_MEMMOVE 1
+
+/* Define to 1 if you have the <memory.h> header file. */
+#define HAVE_MEMORY_H 1
 
 /* Define if you have the rand function.  */
 #define HAVE_RAND 1
@@ -263,7 +317,7 @@ extern "C" {
 #define HAVE_STRTOL 1
 
 /* Define if you have the tcgetattr function.  */
-/* #define HAVE_TCGETATTR 1 */
+#undef HAVE_TCGETATTR
 
 /* Define if you have the uname function.  */
 #undef HAVE_UNAME
@@ -442,6 +496,12 @@ extern "C" {
 /* Define if you have the <sys/tcpipstats.h> header file.  */
 #undef HAVE_SYS_TCPIPSTATS_H
 
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#define HAVE_SYS_TYPES_H 1
+
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
 
@@ -569,12 +629,6 @@ extern "C" {
 /* count the above numbers */
 #define EXTENSIBLENUM 7
 
-/* the ErrorFlag is V1 accessable because HP Openview does not support
-   V2.  You can make this list of pairs as long as you want, just make
-   sure to end it in -1.*/
-
-#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1 */
-
 /* Mib-2 tree Info */
 /* These are the system information variables. */
 
@@ -586,41 +640,27 @@ extern "C" {
 
 /*   proc PROCESSNAME [MAX] [MIN] */
 #define PROCMIBNUM 2
-#define USEPROCMIB
 
 /*   exec/shell NAME COMMAND      */
 #define SHELLMIBNUM 8
-#define USESHELLMIB
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
-#if defined(hpux9) || defined(bsdi2)
-#define USEMEMMIB
-#endif
 
 /*   disk DISK MINSIZE            */
 #define DISKMIBNUM 9
-#if (HAVE_FSTAB_H || HAVE_SYS_STATVFS_H)
-#define USEDISKMIB
-#endif
 
 /*   load 1 5 15                  */
 #define LOADAVEMIBNUM 10
-#define USELOADAVEMIB
-
-/*   pass MIBOID command */
-#define USEPASSMIB
 
 /* which version are you using? This mibloc will tell you */
 #define VERSIONMIBNUM 100
-#define USEVERSIONMIB
 
 /* Reports errors the agent runs into */
 /* (typically its "can't fork, no mem" problems) */
 #define ERRORMIBNUM 101
-#define USEERRORMIB
 
-/* The sub id of EXENSIBLEMIB returned to queries of
+/* The sub id of EXTENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
 #define AGENTID 250
 
@@ -640,6 +680,8 @@ extern "C" {
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
+#define HPUX11ID 14
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -648,13 +690,16 @@ extern "C" {
 #ifdef hpux10
 #define OSTYPE HPUX10ID
 #endif
+#ifdef hpux11
+#define OSTYPE HPUX11ID
+#endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID
 #endif
 #ifdef solaris2
 #define OSTYPE SOLARISID
 #endif
-#if defined(osf3) || defined(osf4) || defined (osf5)
+#if defined(osf3) || defined(osf4) || defined(osf5)
 #define OSTYPE OSFID
 #endif
 #ifdef ultrix4
@@ -672,11 +717,14 @@ extern "C" {
 #ifdef linux
 #define OSTYPE LINUXID
 #endif
-#if defined(bsdi2) || defined(bsdi3)
+#if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
+#endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
 #endif
 /* unknown */
 #ifndef OSTYPE
@@ -741,19 +789,17 @@ extern "C" {
 
 #define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
-#define MAXREADCOUNT 20   /* max times to loop reading output from
-                             execs.  Because of sleep(1)s, this will also
-                             be time to wait (in seconds) for exec to finish */
+/* Because of sleep(1)s, this will also be time to wait (in seconds) for exec
+   to finish */
+#define MAXREADCOUNT 20   /* max times to loop reading output from execs. */
 
-#define SNMPBLOCK 1       /* Set to 1 if you want snmpgets to block and never
-                             timeout.  Original CMU code had this
-                             hardcoded into the code as = 1 */
+/* The original CMU code had this hardcoded as = 1 */
+#define SNMPBLOCK 1       /* Set if snmpgets should block and never timeout */
 
-#define RESTARTSLEEP 5    /* How long to wait after a snmpset to
-                             EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT
-                             before restarting the agent.  This is
-                             necessary to finish the snmpset reply
-                             before restarting. */
+/* How long to wait before restarting the agent after a snmpset to
+   EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT.  This is
+   necessary to finish the snmpset reply before restarting. */
+#define RESTARTSLEEP 5
 
 /* Number of community strings to store */
 #define NUM_COMMUNITIES	5
@@ -800,11 +846,13 @@ extern "C" {
 #endif
 #endif
 
+#if notused /* dont step on other defns of bcopy,bzero, and bcmp */
 #ifndef HAVE_BCOPY
 #ifdef HAVE_MEMCPY
 # define bcopy(s, d, n) memcpy ((d), (s), (n))
 # define bzero(p,n) memset((p),(0),(n))
 # define bcmp memcmp
+#endif
 #endif
 #endif
 
@@ -841,11 +889,6 @@ extern "C" {
 /*#include "agent/mibgroup/struct.h" */
 #endif
 
-#ifndef linux
-#ifndef solaris2
-#define bsdlike
-#endif
-#endif
 
 /*  Pluggable transports.  */
 
@@ -859,7 +902,7 @@ extern "C" {
      * the pipe call creates fds that select chokes on, so
      * disable callbacks on WIN32 until a fix can be found
      */
-#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
+#define SNMP_TRANSPORT_CALLBACK_DOMAIN 1
 
 /*  This is defined if support for the TCP/IP transport domain is
     available.  */
@@ -895,7 +938,7 @@ extern "C" {
 
 #define HAVE_GETPID 1
 
-int strcasecmp(const char *s1, const char *s2);
+/* int strcasecmp(const char *s1, const char *s2); */
 #define vsnprintf _vsnprintf
 #define snprintf  _snprintf
 
@@ -913,12 +956,6 @@ int strcasecmp(const char *s1, const char *s2);
 #endif
 
 typedef unsigned short mode_t;
-
-#define AGENT_DIRECTORY_MODE 0700
-
-/* reverse encoding BER packets is both faster and more efficient in space. */
-#define USE_REVERSE_ASNENCODING       1
-#define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
 
 /*
  * this must be before the system/machine includes, to allow them to

@@ -416,9 +416,9 @@ sh_count_procs(char *procname)
     char cmdline[512], *tmpc;
     struct dirent *ent;
 #ifdef USE_PROC_CMDLINE
-    int fd,len;
+    int fd;
 #endif
-    int plen=strlen(procname),total = 0;
+    int len,plen=strlen(procname),total = 0;
     FILE *status;
 
     if ((dir = opendir("/proc")) == NULL) return -1;
@@ -452,9 +452,14 @@ sh_count_procs(char *procname)
       tmpc = skip_token(cmdline);
       if (!tmpc)
           break;
+      for (len=0;; len++) {
+	if (tmpc[len] && isgraph(tmpc[len])) continue;
+	tmpc[len]='\0';
+	break;
+      }
       DEBUGMSGTL(("proc","Comparing wanted %s against %s\n",
                   procname, tmpc));
-      if(!strncmp(tmpc,procname,plen)) {
+      if(len==plen && !strncmp(tmpc,procname,plen)) {
           total++;
           DEBUGMSGTL(("proc", " Matched.  total count now=%d\n", total));
       }

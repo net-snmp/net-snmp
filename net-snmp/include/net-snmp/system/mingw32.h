@@ -7,6 +7,15 @@
 #undef HAVE_SOCKET
 #undef HAVE_SIGNAL
 
+/* Define if you have raise() instead of alarm() */
+#define HAVE_RAISE 1
+
+/* Define to 1 if you have the `execv' function. */
+#undef HAVE_EXECV
+
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
 /*
  * I'm sure there is a cleaner way to do this.
  * Probably should be in net_snmp_config.h and
@@ -18,16 +27,6 @@
 
 /* This was taken from the win32 config file. */
 #define EADDRINUSE		WSAEADDRINUSE
-
-/*
- * Not sure if the checking is required but cygwin
- * does it this way.
- */
-#if defined(__INT_MAX__) && __INT_MAX__ == 2147483647
-typedef int ssize_t;
-#else
-typedef long ssize_t;
-#endif
 
 /*
  * File io stuff. Odd that this is not defined by MinGW.
@@ -46,4 +45,4 @@ typedef long ssize_t;
 struct timezone {
 	int tz_minuteswest;
 	int tz_dsttime;
-}
+};

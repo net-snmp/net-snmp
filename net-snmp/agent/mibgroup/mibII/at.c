@@ -367,7 +367,8 @@ var_atEntry(struct variable * vp,
     oid             lowest[AT_MAX_NAME_LENGTH];
     oid             current[AT_MAX_NAME_LENGTH];
     if_ip_t         NextAddr;
-    mib2_ipNetToMediaEntry_t entry, Lowentry;
+    mib2_ipNetToMediaEntry_t entry;
+    static mib2_ipNetToMediaEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
     int             offset, olength;
@@ -442,13 +443,10 @@ var_atEntry(struct variable * vp,
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
-        (void) memcpy(return_buf, Lowentry.ipNetToMediaPhysAddress.o_bytes,
-                      *var_len);
-        return (u_char *) return_buf;
+        return Lowentry.ipNetToMediaPhysAddress.o_bytes;
     case IPMEDIANETADDRESS:
-        *var_len = sizeof long_return;
-        long_return = Lowentry.ipNetToMediaNetAddress;
-        return (u_char *) & long_return;
+        *var_len = sizeof(Lowentry.ipNetToMediaNetAddress);
+        return (u_char *) &Lowentry.ipNetToMediaNetAddress;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
         long_return = Lowentry.ipNetToMediaType;
