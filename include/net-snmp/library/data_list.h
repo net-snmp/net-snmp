@@ -36,20 +36,27 @@ extern          "C" {
        Netsnmp_Free_List_Data *data_list_free_ptr;
     } netsnmp_data_list_saveinfo;
 
-    inline netsnmp_data_list *netsnmp_create_data_list(const char *,
-                                                       void *,
-                                                       Netsnmp_Free_List_Data
-                                                       *);
-    void            netsnmp_add_list_data(netsnmp_data_list **head,
-                                          netsnmp_data_list *node);
+    NETSNMP_INLINE netsnmp_data_list * 
+      netsnmp_create_data_list(const char *, void *, Netsnmp_Free_List_Data* );
+    void            netsnmp_data_list_add_node(netsnmp_data_list **head,
+                                               netsnmp_data_list *node);
+    netsnmp_data_list *
+      netsnmp_data_list_add_data(netsnmp_data_list **head,
+                                 const char *name, void *data,
+                                 Netsnmp_Free_List_Data * beer);
     void           *netsnmp_get_list_data(netsnmp_data_list *head,
                                           const char *node);
     void            netsnmp_free_list_data(netsnmp_data_list *head);    /* single */
     void            netsnmp_free_all_list_data(netsnmp_data_list *head);        /* multiple */
     int             netsnmp_remove_list_node(netsnmp_data_list **realhead,
                                              const char *name);
-    inline netsnmp_data_list *netsnmp_get_list_node(netsnmp_data_list *head,
-                                          const char *name);
+    NETSNMP_INLINE netsnmp_data_list *
+    netsnmp_get_list_node(netsnmp_data_list *head,
+                          const char *name);
+
+    /** depreciated: use netsnmp_data_list_add_node() */
+    void            netsnmp_add_list_data(netsnmp_data_list **head,
+                                          netsnmp_data_list *node);
 
 
     void
