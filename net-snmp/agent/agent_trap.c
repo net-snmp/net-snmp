@@ -131,7 +131,7 @@ static void free_trap_session (struct trap_sink *sp)
     free (sp);
 }
 
-int add_trap_session( struct snmp_session *ss, int pdutype, int version )
+int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int version )
 {
     struct trap_sink *new_sink;
     
@@ -151,8 +151,6 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
     if (!ss)
         return (0);
 
-    if (ss->version != SNMP_VERSION_1) {
-        
         for(i=0; i < MAX_ENTRIES; i++) {
             sprintf(buf, "internal%d", i);
             if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
@@ -222,14 +220,14 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
         nptr->snmpNotifyNameLen = strlen(buf);
         nptr->snmpNotifyTag = strdup(buf);
         nptr->snmpNotifyTagLen = strlen(buf);
-        nptr->snmpNotifyType = (pdutype == SNMP_MSG_TRAP2) ?
+        nptr->snmpNotifyCommand = pdutype;
+        nptr->snmpNotifyType = confirm ?
             SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
         nptr->snmpNotifyStorageType = ST_READONLY;
         nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
         snmpNotifyTable_add(nptr);
-    } else {
-#endif
+#else /* ! USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE */
         new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
         if ( new_sink == NULL )
             return 0;
@@ -239,8 +237,6 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
         new_sink->version = version;
         new_sink->next    = sinks;
         sinks = new_sink;
-#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
-    }
 #endif
     return 1;
 }
@@ -280,7 +276,7 @@ int create_trap_session (char *sink, u_short sinkport,
     sesp = snmp_open (&session);
 
     if (sesp) {
-	return( add_trap_session( sesp, pdutype, version ));
+	return( add_trap_session( sesp, pdutype, (pdutype==SNMP_MSG_INFORM), version ));
     }
 
     /* diagnose snmp_open errors with the input struct snmp_session pointer */
@@ -737,9 +733,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     }
     
     if (ss->version == SNMP_VERSION_1) {
-	add_trap_session(ss, SNMP_MSG_TRAP, SNMP_VERSION_1);
+	add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
     } else {
-        add_trap_session( ss, traptype, ss->version);
+	add_trap_session( ss, traptype, (traptype==SNMP_MSG_INFORM), ss->version );
     }
 }
 
