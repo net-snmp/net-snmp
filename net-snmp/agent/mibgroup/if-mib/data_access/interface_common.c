@@ -232,7 +232,12 @@ netsnmp_access_interface_entry_create(const char *name)
 
     _access_interface_entry_set_index(entry, name);
 
-    entry->if_descr = strdup("unknown");
+    /*
+     * until we can get actual description, leave if_descr NULL.
+     * The end user can decide what to do with it.
+     */
+    // entry->if_descr = strdup("unknown");
+
     // xxx-rks: if_alias? supposed to be persistent
 
     /*
