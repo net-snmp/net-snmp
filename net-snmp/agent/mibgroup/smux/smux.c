@@ -179,6 +179,7 @@ smux_free_peer_auth(void)
 		free(Auths[i]);
 		Auths[i] = NULL;
 	}
+	nauths = 0;
 }
 
 void
