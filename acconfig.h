@@ -370,14 +370,14 @@
 #define ENTERPRISE_DOT_MIB_LENGTH	7
 
 /* The assigned enterprise number for sysObjectID. */
-#define SYSTEM_MIB		1,3,6,1,4,1,2021,AGENTID,OSTYPE
-#define SYSTEM_DOT_MIB		1.3.6.1.4.1.2021.AGENTID.OSTYPE
-#define SYSTEM_DOT_MIB_LENGTH	9
+#define SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,OSTYPE
+#define SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.OSTYPE
+#define SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
-#define NOTIFICATION_MIB		1,3,6,1,4,1,2021,251
-#define NOTIFICATION_DOT_MIB		1.3.6.1.4.1.2021.251
-#define NOTIFICATION_DOT_MIB_LENGTH	8
+#define NOTIFICATION_MIB		1,3,6,1,4,1,8072,4,0
+#define NOTIFICATION_DOT_MIB		1.3.6.1.4.1.8072.4.0
+#define NOTIFICATION_DOT_MIB_LENGTH	9
 
 /* this is the location of the ucdavis mib tree.  It shouldn't be
    changed, as the places it is used are expected to be constant
