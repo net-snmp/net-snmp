@@ -224,7 +224,8 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     if ( asp == NULL )
 	return NULL;
     asp->session = session;
-    asp->pdu     = snmp_clone_pdu(pdu);
+    asp->pdu      = snmp_clone_pdu(pdu);
+    asp->orig_pdu = snmp_clone_pdu(pdu);
     asp->rw      = READ;
     asp->exact   = TRUE;
     asp->outstanding_requests = NULL;
@@ -247,6 +248,8 @@ free_agent_snmp_session(struct agent_snmp_session *asp)
 {
     if (!asp)
 	return;
+    if (asp->orig_pdu)
+	snmp_free_pdu(asp->orig_pdu);
     if (asp->pdu)
 	snmp_free_pdu(asp->pdu);
 
@@ -556,7 +559,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 *   to report failures.
 		 */
 	    snmp_free_pdu( asp->pdu );
-	    asp->pdu = snmp_clone_pdu( pdu );
+	    asp->pdu = asp->orig_pdu;
+	    asp->orig_pdu = NULL;
 	}
 	asp->pdu->command  = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat  = status;
@@ -741,7 +745,7 @@ statp_loop:
 		 */
         else if ( IS_DELEGATED(statType)) {
                 add_method = (AddVarMethod*)statP;
-                statType = (*add_method)( asp, varbind_ptr );
+                return (*add_method)( asp, varbind_ptr );
         }
 		/*
 		 * GETNEXT/GETBULK should just skip inaccessible entries
