@@ -27,8 +27,10 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_logging.h"
+#include "default_store.h"
 
 #include "kernel.h"
+#include "ds_agent.h"
 
 #ifndef NULL
 #define NULL 0

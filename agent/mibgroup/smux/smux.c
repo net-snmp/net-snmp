@@ -7,6 +7,9 @@
 #include <sys/types.h>
 #include <ctype.h>
 
+#if HAVE_IO_H  /* win32 */
+#include <io.h>
+#endif
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -23,7 +26,11 @@
 #include <err.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -33,10 +40,16 @@
 # endif
 #endif
 #include <errno.h>
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
 
 #include <sys/stat.h>
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
@@ -280,7 +293,6 @@ var_smux_write(
 	size_t len, var_len, datalen, name_length;
 	long reqid, errsts, erridx;
 	u_char var_type, *dataptr;
-	long lval;
 
 	DEBUGMSGTL (("smux","[var_smux_write] entering var_smux_write\n"));
 
@@ -652,7 +664,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer:")); 
-          for (i=0; i<oid_name_len; i++) 
+          for (i=0; i < (int)oid_name_len; i++) 
             DEBUGMSG (("smux",".%d", oid_name[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -668,7 +680,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer descr:")); 
-          for (i=0; i<string_len; i++) 
+          for (i=0; i < (int)string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -684,7 +696,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer passwd:")); 
-          for (i=0; i<string_len; i++) 
+          for (i=0; i < (int)string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -693,7 +705,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	if(!smux_auth_peer(oid_name, oid_name_len, string, fd)) {
 		if(snmp_get_do_debugging()) {
 		    DEBUGMSGTL (("smux","[smux_open_process] peer authentication failed for oid\n"));
-		    for (i = 0; i < oid_name_len; i++) 
+		    for (i = 0; i < (int)oid_name_len; i++) 
 			DEBUGMSG (("smux","\t.%d", oid_name[i]));
 		    DEBUGMSG (("smux"," password %s\n", string));
 		}
@@ -851,7 +863,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		nrptr->sr_priority = priority;
 		nrptr->sr_name_len = oid_name_len;
 		nrptr->sr_fd = sd;
-		for(i = 0; i < oid_name_len; i++)
+		for(i = 0; i < (int)oid_name_len; i++)
 			nrptr->sr_name[i] = oid_name[i];
 
 		/* See if this tree matches or scopes any of the

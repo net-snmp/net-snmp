@@ -15,9 +15,25 @@
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <fcntl.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -32,7 +48,7 @@
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
-#include "mibgroup/mib_module_includes.h"
+#include "mib_module_includes.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"
@@ -314,7 +330,7 @@ register_mib_range(const char *moduleName,
 	 *   for the rest of the range
 	 */
   if (( res == MIB_REGISTERED_OK ) && ( range_subid != 0 )) {
-    for ( i = mibloc[range_subid-1] +1 ; i < range_ubound ; i++ ) {
+    for ( i = mibloc[range_subid-1] +1 ; i < (int)range_ubound ; i++ ) {
 	sub2 = (struct subtree *) malloc(sizeof(struct subtree));
 	if ( sub2 == NULL ) {
 	    unregister_mib_range( mibloc, mibloclen, priority,

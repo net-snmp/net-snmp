@@ -17,19 +17,36 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif HAVE_WINSOCK_H
+#include <winsock.h>
 #endif 
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
@@ -63,7 +80,7 @@
 #include "snmp_debug.h"
 #include "default_store.h"
 #include "ds_agent.h"
-#include "mibgroup/mib_module_includes.h"
+#include "mib_module_includes.h"
 
 char dontReadConfigFiles;
 char *optconfigfile;
@@ -89,7 +106,7 @@ void init_agent_read_config (void)
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
                           "community-string");
-#include "mibgroup/mib_module_dot_conf.h"
+#include "mib_module_dot_conf.h"
 #ifdef TESTING
   print_config_handlers();
 #endif

@@ -14,6 +14,9 @@
 #endif
 #include <stdlib.h>
 #include <ctype.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "mibincl.h"
 #include "snmpTargetAddrEntry.h"
@@ -96,14 +99,14 @@ void snmpTargetAddrTable_addToList(
   else {
     /* get the 'OID' value of the new entry */
     newOIDLen = strlen(newEntry->name);
-    for(i=0; i < newOIDLen ;i++) {
+    for(i=0; i < (int)newOIDLen ;i++) {
       newOID[i] = newEntry->name[i];
     }
 
     /* search through the list for an equal or greater OID value */
     while (curr_struct != 0) {
       currOIDLen = strlen(curr_struct->name);
-      for(i=0; i < currOIDLen ;i++) {
+      for(i=0; i < (int)currOIDLen ;i++) {
 	currOID[i] = curr_struct->name[i];
       }
 
@@ -177,7 +180,7 @@ search_snmpTargetAddrTable(
    memcpy(newNum, baseName, baseNameLen*sizeof(oid));
   
    for( temp_struct = aAddrTable; temp_struct != 0; temp_struct = temp_struct->next) {
-     for(i=0; i < strlen(temp_struct->name) ;i++) {
+     for(i=0; i < (int)strlen(temp_struct->name) ;i++) {
        newNum[baseNameLen+i] = temp_struct->name[i];
      }
      myOIDLen = baseNameLen+strlen(temp_struct->name);
@@ -735,7 +738,7 @@ write_snmpTargetAddrTDomain(
 
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
-    for (i=0;i<objSize;i++) 
+    for (i=0;i < (int)objSize; i++) 
       temp_struct->tDomain[i] = objid[i];
     temp_struct->tDomainLen = objSize;
 
@@ -1099,7 +1102,7 @@ int snmpTargetAddr_createNewRow(
     temp_struct       = snmpTargetAddrTable_create();
     temp_struct->name = (char *)malloc(sizeof(char)*(newNameLen + 1));
 
-    for (i = 0; i < newNameLen; i++) {
+    for (i = 0; i < (int)newNameLen; i++) {
       temp_struct->name[i] = (char)name[i+snmpTargetAddrOIDLen];
     }
 

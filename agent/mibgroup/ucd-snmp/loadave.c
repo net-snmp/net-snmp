@@ -98,7 +98,11 @@
 #include <string.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -106,6 +110,9 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "mibincl.h"
@@ -211,7 +218,9 @@ int try_getloadavg(double *r_ave, size_t s_ave)
   for(i=0;i<s_ave;i++)
     *(pave+i) = FIX_TO_DBL(favenrun[i]);
 #elif !defined(cygwin)
+#ifdef CAN_USE_NLIST
   if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
+#endif
     return (-1);
 #endif
 /*
@@ -276,7 +285,7 @@ u_char *var_extensible_loadave(struct variable *vp,
       return((u_char *) (&long_ret));
 #ifdef OPAQUE_SPECIAL_TYPES
     case LOADAVEFLOAT:
-      float_ret = avenrun[name[*length-1]-1];
+      float_ret = (float)avenrun[name[*length-1]-1];
       *var_len = sizeof(float_ret);
       return((u_char *) (&float_ret));
 #endif
