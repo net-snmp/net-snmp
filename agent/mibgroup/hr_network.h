@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRNET_H
 #define _MIBGROUP_HRNET_H
 
-extern void	init_hrnet();
+extern void	init_hr_network();
 extern u_char	*var_hrnet();
 
 config_require(interfaces);
