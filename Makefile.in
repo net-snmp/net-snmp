@@ -35,7 +35,8 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 #
 # perl specific
 #
-PERLMODULES=SNMP ASN default_store agent
+# yes, order matters here.  default_store must occur before anything else
+PERLMODULES=default_store SNMP ASN agent
 
 all:    sedscript EXAMPLE.conf standardall net-snmp-config-x @PERLTARGS@ 
 
