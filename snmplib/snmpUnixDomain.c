@@ -430,3 +430,146 @@ netsnmp_unix_ctor(void)
 
     netsnmp_tdomain_register(&unixDomain);
 }
+
+/* support for SNMPv1 and SNMPv2c on unix domain*/
+
+#define EXAMPLE_COMMUNITY "COMMUNITY"
+typedef struct _com2SecUnixEntry {
+    char            community[VACMSTRINGLEN];
+    unsigned long   network;
+    unsigned long   mask;
+    char            secName[VACMSTRINGLEN];
+    struct _com2SecUnixEntry *next;
+} com2SecUnixEntry;
+
+com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
+
+
+int
+netsnmp_unix_getSecName(void *opaque, int olength,
+                       const char *community,
+                       size_t community_len, char **secName)
+{
+    com2SecUnixEntry   *c;
+    char           *ztcommunity = NULL;
+
+    /*
+     * Special case if there are NO entries (as opposed to no MATCHING
+     * entries).  
+     */
+
+    if (com2SecUnixList == NULL) {
+        DEBUGMSGTL(("netsnmp_unix_getSecName", "no com2sec entries\n"));
+        if (secName != NULL) {
+            *secName = NULL;
+        }
+        return 0;
+    }
+
+
+    DEBUGIF("netsnmp_unix_getSecName") {
+	ztcommunity = (char *)malloc(community_len + 1);
+	if (ztcommunity != NULL) {
+	    memcpy(ztcommunity, community, community_len);
+	    ztcommunity[community_len] = '\0';
+	}
+
+	DEBUGMSGTL(("netsnmp_unix_getSecName", "resolve <\"%s\">\n",
+		    ztcommunity ? ztcommunity : "<malloc error>"
+		    ));
+    }
+
+    for (c = com2SecUnixList; c != NULL; c = c->next) {
+        DEBUGMSGTL(("netsnmp_unix_getSecName","compare <\"%s\", 0x%08x/0x%08x>",
+		    c->community, c->network, c->mask));
+        if ((community_len == strlen(c->community)) &&
+	    (memcmp(community, c->community, community_len) == 0) 
+		   ) {
+            DEBUGMSG(("netsnmp_unix_getSecName", "... SUCCESS\n"));
+            if (secName != NULL) {
+                *secName = c->secName;
+            }
+            break;
+        }
+        DEBUGMSG(("netsnmp_unix_getSecName", "... nope\n"));
+    }
+    if (ztcommunity != NULL) {
+        free(ztcommunity);
+    }
+    return 1;
+}
+
+void
+netsnmp_unix_parse_security(const char *token, char *param)
+{
+    char           *secName = NULL, *community = NULL;
+    char           *cp = NULL;
+    com2SecUnixEntry   *e = NULL;
+
+
+    secName = strtok(param, "\t\n ");
+    if (secName == NULL) {
+        config_perror("missing NAME parameter");
+        return;
+    } else if (strlen(secName) > (VACMSTRINGLEN - 1)) {
+        config_perror("security name too long");
+        return;
+    }
+
+    community = strtok(NULL, "\t\n ");
+    if (community == NULL) {
+        config_perror("missing COMMUNITY parameter\n");
+        return;
+    } else
+        if (strncmp
+            (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
+            == 0) {
+        config_perror("example config COMMUNITY not properly configured");
+        return;
+    } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
+        config_perror("community name too long");
+        return;
+    }
+
+    e = (com2SecUnixEntry *) malloc(sizeof(com2SecUnixEntry));
+    if (e == NULL) {
+        config_perror("memory error");
+        return;
+    }
+
+    DEBUGMSGTL(("netsnmp_unix_parse_security",
+                "<\"%s\"> => \"%s\"\n", community, secName));
+
+    strcpy(e->secName, secName);
+    strcpy(e->community, community);
+    e->next = NULL;
+
+    if (com2SecUnixListLast != NULL) {
+        com2SecUnixListLast->next = e;
+        com2SecUnixListLast = e;
+    } else {
+        com2SecUnixListLast = com2SecUnixList = e;
+    }
+}
+
+void
+netsnmp_unix_com2SecList_free(void)
+{
+    com2SecUnixEntry   *e = com2SecUnixList;
+    while (e != NULL) {
+        com2SecUnixEntry   *tmp = e;
+        e = e->next;
+        free(tmp);
+    }
+    com2SecUnixList = com2SecUnixListLast = NULL;
+}
+
+void
+netsnmp_unix_agent_config_tokens_register(void)
+{
+    register_app_config_handler("com2secunix", netsnmp_unix_parse_security,
+                                netsnmp_unix_com2SecList_free,
+                                "name community");
+}
+
+
