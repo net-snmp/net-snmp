@@ -195,8 +195,8 @@ uptimeString(u_long timeticks, char *buf)
  * Prints the character pointed to if in human-readable ASCII range,
  * otherwise prints a dot.
  *
- * @param buf buffer to print the character to
- * @param ch  character to print
+ * @param buf Buffer to print the character to.
+ * @param ch  Character to print.
  */
 static void
 sprint_char(char *buf, const u_char ch)
@@ -214,6 +214,7 @@ sprint_char(char *buf, const u_char ch)
  * Prints a hexadecimal string into a buffer.
  *
  * The characters pointed by *cp are encoded as hexadecimal string.
+ *
  * If allow_realloc is true the buffer will be (re)allocated to fit in the 
  * needed size. (Note: *buf may change due to this.)
  * 
@@ -315,6 +316,7 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
  * Prints an ascii string into a buffer.
  *
  * The characters pointed by *cp are encoded as an ascii string.
+ * 
  * If allow_realloc is true the buffer will be (re)allocated to fit in the 
  * needed size. (Note: *buf may change due to this.)
  * 
@@ -371,18 +373,20 @@ sprint_realloc_asciistring(u_char ** buf, size_t * buf_len,
  * Prints an octet string into a buffer.
  *
  * The variable var is encoded as octet string.
+ * 
  * If allow_realloc is true the buffer will be (re)allocated to fit in the 
  * needed size. (Note: *buf may change due to this.)
  * 
- * @param buf      address of the buffer to print to.
- * @param buf_len  address to an integer containing the size of buf.
- * @param out_len  incremented by the number of characters printed.
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
  * @param allow_realloc if not zero reallocate the buffer to fit the 
  *                      needed size.
- * @param var      the variable to encode.
- * @param enums    ???
- * @param hint     ??? 
- * @param units    ??? 
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
  * 
  * @return 1 on success, or 0 on failure (out of memory, or buffer to
  *         small when not allowed to realloc.)
@@ -628,6 +632,28 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
 #ifdef OPAQUE_SPECIAL_TYPES
 
+/**
+ * Prints a float into a buffer.
+ *
+ * The variable var is encoded as a floating point value.
+ * 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_float(u_char ** buf, size_t * buf_len,
                      size_t * out_len, int allow_realloc,
@@ -678,6 +704,29 @@ sprint_realloc_float(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
+
+/**
+ * Prints a double into a buffer.
+ *
+ * The variable var is encoded as a double precision floating point value.
+ * 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_double(u_char ** buf, size_t * buf_len,
                       size_t * out_len, int allow_realloc,
@@ -730,6 +779,29 @@ sprint_realloc_double(u_char ** buf, size_t * buf_len,
 
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 
+
+/**
+ * Prints a counter into a buffer.
+ *
+ * The variable var is encoded as a counter value.
+ * 
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
                          int allow_realloc,
@@ -823,6 +895,27 @@ sprint_realloc_counter64(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints an object identifier into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
                       size_t * out_len, int allow_realloc,
@@ -892,6 +985,27 @@ sprint_realloc_opaque(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
+
+/**
+ * Prints an object identifier into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_object_identifier(u_char ** buf, size_t * buf_len,
                                  size_t * out_len, int allow_realloc,
@@ -939,6 +1053,28 @@ sprint_realloc_object_identifier(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
+
+
+/**
+ * Prints a timetick variable into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
                          int allow_realloc,
@@ -991,6 +1127,27 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints an integer according to the hint into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
                               size_t * out_len, int allow_realloc,
@@ -1044,6 +1201,27 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
     return snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp);
 }
 
+
+/**
+ * Prints an integer into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
                        int allow_realloc,
@@ -1125,6 +1303,27 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints an unsigned integer into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
                         int allow_realloc,
@@ -1200,6 +1399,27 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints a gauge value into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
                      int allow_realloc,
@@ -1251,6 +1471,27 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints a counter value into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
                        int allow_realloc,
@@ -1292,6 +1533,27 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints a network address into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_networkaddress(u_char ** buf, size_t * buf_len,
                               size_t * out_len, int allow_realloc,
@@ -1336,6 +1598,27 @@ sprint_realloc_networkaddress(u_char ** buf, size_t * buf_len,
     return 1;
 }
 
+
+/**
+ * Prints an ip-address into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
                          int allow_realloc,
@@ -1373,6 +1656,27 @@ sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+
+/**
+ * Prints a null value into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_null(u_char ** buf, size_t * buf_len, size_t * out_len,
                     int allow_realloc,
@@ -1395,6 +1699,27 @@ sprint_realloc_null(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 }
 
+
+/**
+ * Prints a bit string into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                          int allow_realloc,
@@ -1511,6 +1836,27 @@ sprint_realloc_nsapaddress(u_char ** buf, size_t * buf_len,
                                     var->val.string, var->val_len);
 }
 
+
+/**
+ * Fallback routine for a bad type, prints "Variable has bad type" into a buffer.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_badtype(u_char ** buf, size_t * buf_len, size_t * out_len,
                        int allow_realloc,
@@ -1523,6 +1869,29 @@ sprint_realloc_badtype(u_char ** buf, size_t * buf_len, size_t * out_len,
     return snmp_strcat(buf, buf_len, out_len, allow_realloc, str);
 }
 
+
+
+/**
+ * Universal print routine, prints a variable into a buffer according to the variable 
+ * type.
+ *
+ * If allow_realloc is true the buffer will be (re)allocated to fit in the 
+ * needed size. (Note: *buf may change due to this.)
+ * 
+ * @param buf      Address of the buffer to print to.
+ * @param buf_len  Address to an integer containing the size of buf.
+ * @param out_len  Incremented by the number of characters printed.
+ * @param allow_realloc if not zero reallocate the buffer to fit the 
+ *                      needed size.
+ * @param var      The variable to encode.
+ * @param enums    The enumeration ff this variable is enumerated. may be NULL.
+ * @param hint     Contents of the DISPLAY-HINT clause of the MIB.
+ *                 See RFC 1903 Section 3.1 for details. may be NULL.
+ * @param units    Contents of the UNITS clause of the MIB. may be NULL.
+ * 
+ * @return 1 on success, or 0 on failure (out of memory, or buffer to
+ *         small when not allowed to realloc.)
+ */
 int
 sprint_realloc_by_type(u_char ** buf, size_t * buf_len, size_t * out_len,
                        int allow_realloc,
@@ -1597,6 +1966,11 @@ sprint_realloc_by_type(u_char ** buf, size_t * buf_len, size_t * out_len,
 }
 
 
+/**
+ * Retrieves the tree head.
+ *
+ * @return the tree head.
+ */
 struct tree    *
 get_tree_head(void)
 {
@@ -1760,7 +2134,7 @@ snmp_in_toggle_options(char *options)
 
 
 /**
- * Prints out a help usage for the in toggle options.
+ * Prints out a help usage for the in* toggle options.
  *
  * @param lead      The lead to print for every line.
  * @param outf      The file descriptor to write to.
@@ -1779,6 +2153,9 @@ snmp_in_toggle_options_usage(const char *lead, FILE * outf)
             lead);
 }
 
+/***
+ *
+ */ 
 void
 register_mib_handlers(void)
 {
@@ -1832,7 +2209,8 @@ register_mib_handlers(void)
 
 /**
  * Initialises the mib reader.
- * Reads in all mibs. 
+ *
+ * Reads in all settings from the environment.
  */
 void
 init_mib(void)
@@ -2064,7 +2442,7 @@ print_ascii_dump(FILE * fp)
  * Set's the printing function printomat in a subtree according
  * it's type
  *
- * @param subtree the subtree to set.
+ * @param subtree    The subtree to set.
  */
 void
 set_function(struct tree *subtree)
@@ -3364,8 +3742,10 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
     return NULL;
 }
 
-/*
- * Clone of get_symbol that doesn't take a buffer argument
+/**
+ * Clone of get_symbol that doesn't take a buffer argument.
+ *
+ * @see get_symbol
  */
 struct tree    *
 get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
@@ -3389,6 +3769,11 @@ get_tree(const oid * objid, size_t objidlen, struct tree *subtree)
         return subtree;
 }
 
+/**
+ * Prints on oid description on stdout.
+ *
+ * @see fprint_description
+ */
 void
 print_description(oid * objid, size_t objidlen, /* number of subidentifiers */
                   int width)
@@ -3396,8 +3781,17 @@ print_description(oid * objid, size_t objidlen, /* number of subidentifiers */
     fprint_description(stdout, objid, objidlen, width);
 }
 
+
+/**
+ * Prints on oid description into a file descriptor.
+ * 
+ * @param f         The file descriptor to print to.
+ * @param objid     The object identifier.
+ * @param objidlen  The object id length.
+ * @param width     Number of subidentifiers.
+ */
 void
-fprint_description(FILE * f, oid * objid, size_t objidlen,      /* number of subidentifiers */
+fprint_description(FILE * f, oid * objid, size_t objidlen,
                    int width)
 {
     struct tree    *tp = get_tree(objid, objidlen, tree_head);
@@ -3765,6 +4159,8 @@ get_module_node(const char *fname,
 
 
 /**
+ * @internal
+ *
  * Populates the object identifier from a node in the MIB hierarchy.
  * Builds up the object ID, working backwards,
  * starting from the end of the objid buffer.
@@ -4123,8 +4519,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 }
 
 
-/*
- * see comments on find_best_tree_node for usage after first time.
+/**
+ * @see comments on find_best_tree_node for usage after first time.
  */
 int
 get_wild_node(const char *name, oid * objid, size_t * objidlen)
@@ -4403,6 +4799,7 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
  *                     least 64 Bytes large.
  *       
  * @return The buffer
+ *
  * @see uptimeString
  */
 char           *
