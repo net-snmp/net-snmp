@@ -6,9 +6,6 @@
 extern "C" {
 #endif
 
-/* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
-#define IN_UCD_SNMP_SOURCE 1
-
 /* Default (SNMP) version number for the tools to use */
 #define DEFAULT_SNMP_VERSION 3
 
