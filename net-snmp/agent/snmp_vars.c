@@ -2199,6 +2199,9 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif
 
+      if ( ifnet.if_addrlist == 0 )
+          continue;                   /* No address found for interface */
+
 	op = current + 10;
 	*op++ = *cp++;
 	*op++ = *cp++;
@@ -2760,6 +2763,9 @@ var_udp(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	case UDPINERRORS:
 	    long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
+#ifdef HAVE_UDPSTAT_UDPS_DISCARD
+                      + udpstat.udps_discard;
+#endif
 			  udpstat.udps_badlen;
 	    return (u_char *) &long_return;
 	default:
@@ -2968,7 +2974,11 @@ LowState = -1;	    /* Don't have one yet */
 	*var_len = sizeof(long);
 	switch (vp->magic) {
 	    case TCPCONNSTATE: {
+#ifndef hpux
 		static int StateMap[]={1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11};
+#else
+              static int StateMap[]={1, 2, 3, -1, 4, 5, 8, 6, 10, 9, 7, 11};
+#endif
 		return (u_char *) &StateMap[LowState];
 	    }
 	    case TCPCONNLOCALADDRESS:
@@ -3623,7 +3633,7 @@ u_char *EtherAddr;
 #if defined(sunV3) || defined(sparc) || defined(freebsd2) || defined(netbsd1)
 	    bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #endif
-#ifdef mips
+#if defined(mips) || defined(hpux)
 	    bcopy((char *)  arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #endif
 
