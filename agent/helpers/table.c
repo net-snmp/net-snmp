@@ -633,8 +633,8 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
                             netsnmp_variable_list * newvar,
                             netsnmp_variable_list ** outvar)
 {
-    static oid      myname[MAX_OID_LEN];
-    static int      myname_len;
+    oid      myname[MAX_OID_LEN];
+    int      myname_len;
 
     build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                       prefix, prefix_len, newvar);
