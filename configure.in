@@ -491,9 +491,17 @@ AC_ARG_WITH(out_mib_module,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-mo
 AC_ARG_WITH(perl-modules,
 [
 Perl:
-  --with-perl-modules             Install the perl modules along with the rest
-                                  of the net-snmp toolkit.],
-    install_perl=yes)
+  --with-perl-modules[=ARGS]      Install the perl modules along with the rest
+                                  of the net-snmp toolkit.  If ARGS is
+                                  specified, they're passed to the
+                                  Makefile.PL script.],[
+    install_perl=yes
+    if test "$withval" = yes; then
+      PERLARGS=""
+    else
+      PERLARGS="$withval"
+    fi
+])
 
 AC_ARG_ENABLE(embedded-perl,
 [
@@ -1566,11 +1574,15 @@ fi
 # Install the various perl modules
 #
 
-if test "x$install_perl" = "xyes" -o "x$embed_perl" = "xyes"; then
+if "x$embed_perl" = "xyes" -a "x$install_perl" = "xno" ; then
+  install_perl="yes"
+fi
+if test "x$install_perl" != "x" -a "x$install_perl" != "xno"; then
     PERLTARGS="perlmodules"
     PERLINSTALLTARGS="perlinstall"
     AC_SUBST(PERLTARGS)
     AC_SUBST(PERLINSTALLTARGS)
+    AC_SUBST(PERLARGS)
     AC_MSG_CACHE_ADD(SNMP Perl modules:          enabled)
 else
     AC_MSG_CACHE_ADD(SNMP Perl modules:          disabled)
