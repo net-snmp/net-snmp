@@ -669,7 +669,13 @@ static void unlink_tbucket(struct tree *tp)
 
 static void unlink_tree(struct tree *tp)
 {
-    struct tree *otp = NULL, *ntp = tp->parent->child_list;
+    struct tree *otp = NULL, *ntp = tp->parent;
+
+  if (!ntp) { /* this tree has no parent */
+      snmp_log(LOG_INFO, "Tree node %s has no parent\n", tp->label);
+  }
+  else {
+    ntp = ntp->child_list;
 
     while (ntp && ntp != tp) {
 	otp = ntp; ntp = ntp->next_peer;
@@ -678,6 +684,7 @@ static void unlink_tree(struct tree *tp)
 	tp->label, tp->parent->label);
     else if (otp) otp->next_peer = ntp->next_peer;
     else tp->parent->child_list = tp->next_peer;
+  }
 
     if (tree_head == tp) tree_head = tp->next_peer;
 }
