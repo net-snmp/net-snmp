@@ -421,7 +421,7 @@ setPass(int action,
             else
                 sprint_mib_oid(buf, name, name_len);
             snprintf(passthru->command, sizeof(passthru->command),
-                     "%s -s %s", passthru->name, buf);
+                     "%s -s %s ", passthru->name, buf);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
             switch (var_val_type) {
             case ASN_INTEGER:
