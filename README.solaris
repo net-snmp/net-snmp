@@ -132,3 +132,11 @@ perl -V
 if everything looks all right, do the net-snmp ./configure (don't forget to make clean if necessary)
 
  -- Bruce Shaw <Bruce.Shaw@gov.ab.ca>
+
+------------------------------------------------------------
+
+The version of sed in /usr/ucb on Solaris 2.5.1 and 2.6 can't
+cope with the size of the subsitution strings used in config.status.
+
+Putting /usr/bin ahead of /usr/ucb in the search path fixes this.
+
