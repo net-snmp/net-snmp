@@ -595,8 +595,9 @@ get_agentx_request(struct agent_snmp_session *asp,
 	 *   adding it to the list for that particular agent
 	 */
 int
-agentx_add_request( struct agent_snmp_session *asp,
-		    struct variable_list *vbp)
+agentx_add_request(struct agent_snmp_session *asp,
+		   struct variable_list *vbp,
+		   u_char rangeType)
 {
     struct snmp_pdu     *pdu = asp->pdu;
     struct snmp_session *ax_session;
@@ -605,10 +606,11 @@ agentx_add_request( struct agent_snmp_session *asp,
     struct subtree      *sub;
     int			 sessid, order = 0;
 
-    if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1 )
+    if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1) {
 	return AGENTX_ERR_NOERROR;
+    }
 
-    ax_session = get_session_for_oid( vbp->name, vbp->name_length );
+    ax_session = get_session_for_oid(vbp->name, vbp->name_length);
 
     if (!ax_session) {
 	return SNMP_ERR_GENERR;
@@ -649,9 +651,13 @@ agentx_add_request( struct agent_snmp_session *asp,
 			      vbp->name, vbp->name_length, vbp->type,
 			      (u_char*)(vbp->val.string), vbp->val_len);
     } else {
+	DEBUGMSG(("agentx/master", "%s searchRange from ",
+		  (rangeType == ASN_PRIV_INCL_RANGE)?"INCLUSIVE":"EXCLUSIVE"));
+	DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
+	DEBUGMSG(("agentx/master", " to "));
 	DEBUGMSGOID(("agentx/master", sub->end, sub->end_len));
         snmp_pdu_add_variable(request->pdu,
-			      vbp->name, vbp->name_length, ASN_PRIV_INCL_RANGE,
+			      vbp->name, vbp->name_length, rangeType,
 			      (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
     DEBUGMSG(("agentx/master", "\n"));
@@ -661,4 +667,20 @@ agentx_add_request( struct agent_snmp_session *asp,
     }
 
     return AGENTX_ERR_NOERROR;
+}
+
+
+int
+agentx_add_inclusive(struct agent_snmp_session *asp, struct variable_list *vbp)
+{
+    DEBUGMSGTL(("agentx/master", "agentx_add_inclusive\n"));
+    return agentx_add_request(asp, vbp, ASN_PRIV_INCL_RANGE);
+}
+
+
+int
+agentx_add_exclusive(struct agent_snmp_session *asp, struct variable_list *vbp)
+{
+    DEBUGMSGTL(("agentx/master", "agentx_add_exclusive\n"));
+    return agentx_add_request(asp, vbp, ASN_PRIV_EXCL_RANGE);
 }
