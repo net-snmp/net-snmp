@@ -35,9 +35,9 @@ stop_server(int a) {
 }
 
 static void usage(void) {
-   printf("usage: $name [-D <tokens>] [-f] [-L] [-M] [-H]\n"
+   printf("usage: $name [-D<tokens>] [-f] [-L] [-M] [-H] [LISTENING ADDRESSES]\n"
           "\t-f      Do not fork() from the calling shell.\n"
-          "\t-D[TOKEN[,...]]\n"
+          "\t-DTOKEN[,TOKEN,...]\n"
           "\t\tTurn on debugging output for the given TOKEN(s).\n"
           "\t\tWithout any tokens specified, it defaults to printing\n"
           "\t\tall the tokens (which is equivalent to the keyword 'ALL').\n"
@@ -55,7 +55,6 @@ main (int argc, char **argv) {
   int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
   /* Defs for arg-handling code: handles setting of policy-related variables */
   int          ch;
-  int          help_opt;
   extern char *optarg;
   int dont_fork = 0, use_syslog = 0;
 
