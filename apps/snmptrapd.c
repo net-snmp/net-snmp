@@ -459,7 +459,7 @@ int snmp_input(int op,
 	            (void) format_plain_trap (out_bfr, SPRINT_MAX_LEN, pdu);
 	        else
 		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, trap1_fmt_str, pdu);
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
@@ -518,7 +518,7 @@ int snmp_input(int op,
                 else
                     (void) format_trap (out_bfr, SPRINT_MAX_LEN,
                                         trap2_fmt_str, pdu);
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog) {
 	    	varbufidx=0;
