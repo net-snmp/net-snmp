@@ -11,6 +11,20 @@ top_builddir=..
 # headers
 INSTALLHEADERS=\
 	net-snmp-includes.h \
+	config_api.h  \
+	mib_api.h     \
+	output_api.h  \
+	pdu_api.h     \
+	session_api.h \
+	snmpv3_api.h  \
+	varbind_api.h \
+	types.h       \
+	utilities.h   \
+	version.h     \
+	definitions.h
+
+INCLUDESUBDIR=library
+INCLUDESUBDIRHEADERS=\
 	asn1.h \
 	callback.h \
 	data_list.h \
@@ -37,7 +51,6 @@ INSTALLHEADERS=\
 	tools.h \
 	transform_oids.h \
 	snmp_transport.h \
-	version.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@
 
