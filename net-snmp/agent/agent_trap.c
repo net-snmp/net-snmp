@@ -372,7 +372,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
                              snmptrapenterprise_oid_len);
         if (var) {
             memdup((u_char**)&template_v1pdu->enterprise,
-                   var->val.objid, var->val_len);
+                   (const u_char*)var->val.objid, var->val_len);
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
         } else {
             template_v1pdu->enterprise        = NULL;
