@@ -482,6 +482,7 @@ sub showInfo {
     if ($tag =~ /^[.0-9]+$/) {
 	# strip off index in case there is one
 	$tag = SNMP::translateObj("$oid");
+	$tag = ".iso.org.dod.internet.private.$tag" if $tag =~ /^enterprises/;
     } else {
 	$full = SNMP::translateObj("$oid");
     }
