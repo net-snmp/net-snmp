@@ -846,3 +846,387 @@ struct ip_mib *ipstat;
   fclose (in);
 } /* end of linux_read_ip_stat */
 #endif /* linux */
+
+#else /* CAN_USE_SYSCTL && IPCTL_STATS */
+
+void init_ip(void)
+{
+	;
+}
+
+
+#define MATCH_FAILED	1
+#define MATCH_SUCCEEDED	0
+
+static int
+header_ip(vp, name, length, exact, var_len, write_method)
+	struct variable *vp;    /* IN - pointer to variable entry that points here */
+	oid     *name;	    /* IN/OUT - input name requested, output name found */
+    int     *length;	    /* IN/OUT - length of input and output oid's */
+    int     exact;	    /* IN - TRUE if an exact match was requested. */
+    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+#define IP_NAME_LENGTH	8
+    oid newname[MAX_NAME_LEN];
+    int result;
+#ifdef DODEBUG
+    char c_oid[MAX_NAME_LEN];
+
+    sprint_objid (c_oid, name, *length);
+    printf ("var_ip: %s %d\n", c_oid, exact);
+#endif
+
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    newname[IP_NAME_LENGTH] = 0;
+    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    if ((exact && (result != 0)) || (!exact && (result >= 0)))
+        return(MATCH_FAILED);
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+    return(MATCH_SUCCEEDED);
+}
+
+u_char *
+var_ip(vp, name, length, exact, var_len, write_method)
+	struct	variable *vp;
+	oid	*name;
+	int	*length;
+	int	 exact;
+	int	*var_len;
+	int   (**write_method) __P((int, u_char *, u_char, int, u_char *, 
+				    oid *, int));
+{
+	struct ipstat ipstat;
+	int i;
+	size_t len;
+	static int sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
+
+	if (header_ip(vp, name, length, exact, var_len, write_method)
+	    == MATCH_FAILED)
+		return NULL;
+
+	/*
+	 *	Get the IP statistics from the kernel...
+	 */
+	if (!(vp->magic == IPFORWARDING || vp->magic == IPDEFAULTTTL)) {
+		len = sizeof ipstat;
+		sname[3] = IPCTL_STATS;
+		if (sysctl(sname, 4, &ipstat, &len, 0, 0) < 0)
+			return NULL;
+	}
+
+	switch (vp->magic) {
+	case IPFORWARDING:
+		len = sizeof i;
+		sname[3] = IPCTL_FORWARDING;
+		if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
+			return NULL;
+		if (i) {
+			long_return = 1; /* GATEWAY */
+		} else {
+			long_return = 2; /* HOST    */
+		}
+		return (u_char *) &long_return;
+
+	case IPDEFAULTTTL:
+		len = sizeof i;
+		sname[3] = IPCTL_DEFTTL;
+		if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
+			return NULL;
+		long_return = i;
+		return (u_char *) &long_return;
+
+	case IPINRECEIVES:
+		long_return = ipstat.ips_total;
+		return (u_char *) &long_return;
+
+	case IPINHDRERRORS:
+		long_return = ipstat.ips_badsum + ipstat.ips_tooshort +
+			ipstat.ips_toosmall + ipstat.ips_badhlen +
+			ipstat.ips_badlen;
+		return (u_char *) &long_return;
+
+	case IPINADDRERRORS:
+		long_return = ipstat.ips_cantforward;
+		return (u_char *) &long_return;
+
+	case IPFORWDATAGRAMS:
+		long_return = ipstat.ips_forward;
+		return (u_char *) &long_return;
+
+	case IPINUNKNOWNPROTOS:
+		long_return = ipstat.ips_noproto;
+		return (u_char *) &long_return;
+
+	case IPINDISCARDS:
+		long_return = 0;
+		return (u_char *) &long_return;
+
+	case IPINDELIVERS:
+		long_return = ipstat.ips_delivered;
+		return (u_char *) &long_return;
+
+	case IPOUTREQUESTS:
+		long_return = ipstat.ips_localout;
+		return (u_char *) &long_return;
+
+	case IPOUTDISCARDS:
+		long_return = ipstat.ips_odropped;
+		return (u_char *) &long_return;
+
+	case IPOUTNOROUTES:
+		long_return = ipstat.ips_cantforward;
+		return (u_char *) &long_return;
+
+	case IPREASMTIMEOUT:
+		long_return = IPFRAGTTL;
+		return (u_char *) &long_return;
+
+	case IPREASMREQDS:
+		long_return = ipstat.ips_fragments;
+		return (u_char *) &long_return;
+
+	case IPREASMOKS:
+		long_return = ipstat.ips_reassembled;
+		return (u_char *) &long_return;
+
+	case IPREASMFAILS:
+		long_return = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
+		return (u_char *) &long_return;
+
+	case IPFRAGOKS:
+		long_return = ipstat.ips_fragmented;
+		return (u_char *) &long_return;
+
+	case IPFRAGFAILS:
+		long_return = ipstat.ips_cantfrag;
+		return (u_char *) &long_return;
+
+	case IPFRAGCREATES:
+		long_return = ipstat.ips_ofragments;
+		return (u_char *) &long_return;
+
+	case IPROUTEDISCARDS:
+		long_return = 0;
+		return (u_char *) &long_return;
+
+	default:
+		ERROR_MSG("");
+	}
+}
+
+/*
+ * Ideally, this would be combined with the code in interfaces.c.
+ * Even separate, it's still better than what went before.
+ */
+struct iflist {
+	int flags;
+	int index;
+	struct in_addr addr;
+	struct in_addr mask;
+	struct in_addr bcast;
+};
+static struct iflist *ifs;
+static int nifs;
+
+static void
+get_iflist(void)
+{
+	int naddrs, bit;
+	static int mib[6] 
+		= { CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0 };
+	char *cp, *ifbuf;
+	size_t len;
+	struct rt_msghdr *rtm;
+	struct if_msghdr *ifm;
+	struct ifa_msghdr *ifam;
+	struct sockaddr *sa;
+	int flags;
+
+	naddrs = 0;
+	if (ifs)
+		free(ifs);
+	ifs = 0;
+	nifs = 0;
+	len = 0;
+	if (sysctl(mib, 6, 0, &len, 0, 0) < 0)
+		return;
+
+	ifbuf = malloc(len);
+	if (ifbuf == 0)
+		return;
+	if (sysctl(mib, 6, ifbuf, &len, 0, 0) < 0) {
+		syslog(LOG_WARNING, "sysctl net-route-iflist: %m");
+		free(ifbuf);
+		return;
+	}
+
+loop:
+	cp = ifbuf;
+	while (cp < &ifbuf[len]) {
+		int gotaddr;
+
+		gotaddr = 0;
+		rtm = (struct rt_msghdr *)cp;
+		if (rtm->rtm_version != RTM_VERSION 
+		    || rtm->rtm_type != RTM_IFINFO) {
+			free(ifs);
+			ifs = 0;
+			nifs = 0;
+			free(ifbuf);
+			return;
+		}
+		ifm = (struct if_msghdr *)rtm;
+		flags = ifm->ifm_flags;
+		cp += ifm->ifm_msglen;
+		rtm = (struct rt_msghdr *)cp;
+		while (cp < &ifbuf[len] && rtm->rtm_type == RTM_NEWADDR) {
+			ifam = (struct ifa_msghdr *)rtm;
+			cp += sizeof(*ifam);
+/* from route.c */
+#define ROUND(a) \
+        ((a) > 0 ? (1 + (((a) - 1) | (sizeof(long) - 1))) : sizeof(long))
+			for (bit = 1; bit && cp < &ifbuf[len]; bit <<= 1) {
+				if (!(ifam->ifam_addrs & bit))
+					continue;
+				sa = (struct sockaddr *)cp;
+				cp += ROUND(sa->sa_len);
+				
+				/*
+				 * Netmasks are returned as bit
+				 * strings of type AF_UNSPEC.  The
+				 * others are pretty ok.
+				 */
+				if (bit == RTA_IFA) {
+#define satosin(sa) ((struct sockaddr_in *)(sa))
+					if (ifs) {
+						ifs[naddrs].addr 
+							=satosin(sa)->sin_addr;
+						ifs[naddrs].index
+							= ifam->ifam_index;
+						ifs[naddrs].flags = flags;
+					}
+					gotaddr = 1;
+				} else if (bit == RTA_NETMASK) {
+					if (ifs)
+						ifs[naddrs].mask 
+							=satosin(sa)->sin_addr;
+				} else if (bit == RTA_BRD) {
+					if (ifs)
+						ifs[naddrs].bcast 
+							=satosin(sa)->sin_addr;
+				}
+			}
+			if (gotaddr)
+				naddrs++;
+			cp = (char *)rtm + rtm->rtm_msglen;
+			rtm = (struct rt_msghdr *)cp;
+		}
+	}
+	if (ifs) {
+		nifs = naddrs;
+		free(ifbuf);
+		return;
+	}
+	ifs = malloc(naddrs * sizeof(*ifs));
+	if (ifs == 0) {
+		free(ifbuf);
+		return;
+	}
+	naddrs = 0;
+	goto loop;
+}
+
+u_char *
+var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
+	struct	variable *vp;    /* IN - pointer to variable entry that points here */
+	oid	*name;		/* IN/OUT - input name requested, output name found */
+	int	*length;	/* IN/OUT - length of input and output oid's */
+	int	 exact;		/* IN - TRUE if an exact match was requested. */
+	int	*var_len;	/* OUT - length of variable or 0 if function returned. */
+	int   (**write_method) __P((int, u_char *, u_char, int, u_char *, 
+				    oid *, int));
+{
+	/*
+	 * object identifier is of form:
+	 * 1.3.6.1.2.1.4.20.1.?.A.B.C.D,  where A.B.C.D is IP address.
+	 * IPADDR starts at offset 10.
+	 */
+	oid lowest[14];
+	oid current[14], *op;
+	u_char *cp;
+	int lowinterface = -1;
+	int i, interface;
+
+	/* fill in object part of name for current (less sizeof instance part) */
+	bcopy((char *)vp->name, (char *)current, 
+	      (int)vp->namelen * sizeof(oid));
+
+	/*
+	 * Get interface table from kernel.
+	 */
+	get_iflist();
+
+	for (i = 0; i < nifs; i++) {
+		memcpy(current + 10, &ifs[i].addr, 4);
+		if (exact) {
+			if (compare(current, 14, name, *length) == 0) {
+				memcpy(lowest, current, 14 * sizeof(oid));
+				lowinterface = i;
+				break;	/* no need to search further */
+			}
+		} else {
+			if ((compare(current, 14, name, *length) > 0) &&
+			    (lowinterface < 0 
+			     || (compare(current, 14, lowest, 14) < 0))) {
+				/*
+				 * if new one is greater than input
+				 * and closer to input than previous
+				 * lowest, save this one as the "next"
+				 * one.  
+				 */
+				lowinterface = i;
+				memcpy(lowest, current, 14 * sizeof(oid));
+			}
+		}
+	}
+
+	if (lowinterface < 0)
+		return NULL;
+	i = lowinterface;
+	memcpy(name, lowest, 14 * sizeof(oid));
+	*length = 14;
+	*write_method = 0;
+	*var_len = sizeof(long_return);
+	switch (vp->magic) {
+	case IPADADDR:
+		long_return = ifs[i].addr.s_addr;
+		return (u_char *)&long_return;
+
+	case IPADIFINDEX:
+		long_return = ifs[i].index;
+		return (u_char *)&long_return;
+
+	case IPADNETMASK:
+		long_return = ifs[i].mask.s_addr;
+		return (u_char *)&long_return;
+
+	case IPADBCASTADDR:
+		long_return = ntohl(ifs[i].bcast.s_addr) & 1;
+		return (u_char *)&long_return;	   
+
+	case IPADREASMMAX:
+		long_return = -1;
+		return (u_char *)&long_return;
+
+	default:
+		ERROR_MSG("");
+	}
+	return NULL;
+}
+
+#endif /* CAN_USE_SYSCTL && IPCTL_STATS */

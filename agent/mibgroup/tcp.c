@@ -104,7 +104,6 @@
 /* #include "../common_header.h" */
 #include "tcp.h"
 
-
 	/*********************
 	 *
 	 *  Kernel & interface information,
@@ -327,7 +326,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	/*
 	 *  Get the TCP statistics from the kernel...
 	 */
-
+#if !defined(CAN_USE_SYSCTL) || !defined(TCPCTL_STATS)
 #ifndef linux
 	auto_nlist(TCPSTAT_SYMBOL, (char *)&tcpstat, sizeof (tcpstat));
 #ifdef MIB_TCPCOUNTER_SYMBOL
@@ -337,7 +336,18 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 #else /* linux */
 	linux_read_tcp_stat (&tcpstat);
 #endif /* linux */
-	switch (vp->magic){
+#else /* can use sysctl and net.inet.tcp.stats exists */
+	{
+		int sname[] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_STATS };
+		size_t len;
+
+		len = sizeof tcpstat;
+		if (sysctl(sname, 4, &tcpstat, &len, 0, 0) < 0)
+			return NULL;
+	}
+#endif
+
+	switch (vp->magic) {
 	    case TCPRTOALGORITHM:
 #ifndef linux
 		long_return = 4;	/* Van Jacobsen's algorithm *//* XXX */
@@ -455,7 +465,7 @@ var_tcpEntry(vp, name, length, exact, var_len, write_method)
     if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
 #endif
 #endif
-
+    
 	memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* find "next" connection */
 Again:
