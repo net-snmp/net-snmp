@@ -64,11 +64,7 @@ typedef long	fd_mask;
 #define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
 #define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
 #define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
-#ifdef SVR4
-#define FD_ZERO(p)	memset((char *)(p), NULL, sizeof(*(p)))
-#else
-#define FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
-#endif
+#define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
 oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
@@ -246,18 +242,10 @@ snmp_open(session)
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
     slp->internal = isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
-#ifdef SVR4
-    memset((char *)isp, NULL, sizeof(struct snmp_internal_session));
-#else
-    bzero((char *)isp, sizeof(struct snmp_internal_session));
-#endif
+    memset(isp, 0, sizeof(struct snmp_internal_session));
     slp->internal->sd = -1; /* mark it not set */
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
-#ifdef SVR4
-    memmove((char *)slp->session, (char *)session, sizeof(struct snmp_session));
-#else
-    bcopy((char *)session, (char *)slp->session, sizeof(struct snmp_session));
-#endif
+    memmove(slp->session, session, sizeof(struct snmp_session));
     session = slp->session;
     /* now link it in. */
     slp->next = Sessions;
@@ -277,31 +265,17 @@ snmp_open(session)
     /* Fill in defaults if necessary */
     if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
 	cp = (u_char *)malloc((unsigned)session->community_len);
-#ifdef SVR4
-	memmove((char *)cp, (char *)session->community, session->community_len);
-#else
-	bcopy((char *)session->community, (char *)cp, session->community_len);
-#endif
+	memmove(cp, session->community, session->community_len);
     } else {
 	session->community_len = strlen(DEFAULT_COMMUNITY);
 	cp = (u_char *)malloc((unsigned)session->community_len);
-#ifdef SVR4
-	memmove((char *)cp, (char *)DEFAULT_COMMUNITY, session->community_len);
-#else
-	bcopy((char *)DEFAULT_COMMUNITY, (char *)cp, session->community_len);
-#endif
+	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
     }
     session->community = cp;	/* replace pointer with pointer to new data */
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
-#ifdef SVR4
-	memmove((char *)op, (char *)session->srcParty,
-	      session->srcPartyLen * sizeof(oid));
-#else
-	bcopy((char *)session->srcParty, (char *)op,
-	      session->srcPartyLen * sizeof(oid));
-#endif
+	memmove(op, session->srcParty, session->srcPartyLen * sizeof(oid));
 	session->srcParty = op;
     } else {
 	session->srcParty = 0;
@@ -309,13 +283,7 @@ snmp_open(session)
 
     if (session->dstPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
-#ifdef SVR4
-	memmove((char *)op, (char *)session->dstParty,
-	      session->dstPartyLen * sizeof(oid));
-#else
-	bcopy((char *)session->dstParty, (char *)op,
-	      session->dstPartyLen * sizeof(oid));
-#endif
+	memmove(op, session->dstParty, session->dstPartyLen * sizeof(oid));
 	session->dstParty = op;
     } else {
 	session->dstParty = 0;
@@ -323,13 +291,7 @@ snmp_open(session)
 
     if (session->contextLen > 0){
 	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
-#ifdef SVR4
-	memmove((char *)op, (char *)session->context,
-	      session->contextLen * sizeof(oid));
-#else
-	bcopy((char *)session->context, (char *)op,
-	      session->contextLen * sizeof(oid));
-#endif
+	memmove(op, session->context, session->contextLen * sizeof(oid));
 	session->context = op;
     } else {
 	session->context = 0;
@@ -356,13 +318,7 @@ snmp_open(session)
     isp->sd = sd;
     if (session->peername != SNMP_DEFAULT_PEERNAME){
 	if ((addr = inet_addr(session->peername)) != -1){
-#ifdef SVR4
-	    memmove((char *)&isp->addr.sin_addr, (char *)&addr,
-		  sizeof(isp->addr.sin_addr));
-#else
-	    bcopy((char *)&addr, (char *)&isp->addr.sin_addr,
-		  sizeof(isp->addr.sin_addr));
-#endif
+	    memmove(&isp->addr.sin_addr, &addr, sizeof(isp->addr.sin_addr));
 	} else {
 	    hp = gethostbyname(session->peername);
 	    if (hp == NULL){
@@ -375,13 +331,7 @@ snmp_open(session)
 		}
 		return 0;
 	    } else {
-#ifdef SVR4
-		memmove((char *)&isp->addr.sin_addr, (char *)hp->h_addr,
-		      hp->h_length);
-#else
-		bcopy((char *)hp->h_addr, (char *)&isp->addr.sin_addr,
-		      hp->h_length);
-#endif
+		memmove(&isp->addr.sin_addr, hp->h_addr, hp->h_length);
 	    }
 	}
 	isp->addr.sin_family = AF_INET;
@@ -693,11 +643,7 @@ snmp_parse(session, pdu, data, length)
 	    return -1;
 	pdu->community_len = community_length;
 	pdu->community = (u_char *)malloc(community_length);
-#ifdef SVR4
 	memmove(pdu->community, community, community_length);
-#else
-	bcopy(community, pdu->community, community_length);
-#endif
 	if (session->authenticator){
 	    data = session->authenticator(data, &length,
 					  community, community_length);
@@ -763,13 +709,7 @@ snmp_parse(session, pdu, data, length)
 	if (data == NULL)
 	    return -1;
 	pdu->enterprise = (oid *)malloc(pdu->enterprise_length * sizeof(oid));
-#ifdef SVR4
-	memmove((char *)pdu->enterprise, (char *)objid,
-	      pdu->enterprise_length * sizeof(oid));
-#else
-	bcopy((char *)objid, (char *)pdu->enterprise,
-	      pdu->enterprise_length * sizeof(oid));
-#endif
+	memmove(pdu->enterprise, objid, pdu->enterprise_length * sizeof(oid));
 
 	four = 4;
 	data = asn_parse_string(data, &length, &type,
@@ -877,11 +817,7 @@ snmp_parse(session, pdu, data, length)
 		asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
 		vp->val_len *= sizeof(oid);
 		vp->val.objid = (oid *)malloc((unsigned)vp->val_len);
-#ifdef SVR4
-		memmove((char *)vp->val.objid, (char *)objid, vp->val_len);
-#else
-		bcopy((char *)objid, (char *)vp->val.objid, vp->val_len);
-#endif
+		memmove(vp->val.objid, objid, vp->val_len);
 		break;
             case SNMP_NOSUCHOBJECT:
             case SNMP_NOSUCHINSTANCE:
@@ -971,13 +907,8 @@ snmp_send(session, pdu)
 	pdu->reqid = 1;	/* give a bogus non-error reqid for traps */
 	if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH){
 	    pdu->enterprise = (oid *)malloc(sizeof(DEFAULT_ENTERPRISE));
-#ifdef SVR4
-	    memmove((char *)pdu->enterprise, (char *)DEFAULT_ENTERPRISE,
-		  sizeof(DEFAULT_ENTERPRISE));
-#else
-	    bcopy((char *)DEFAULT_ENTERPRISE, (char *)pdu->enterprise,
-		  sizeof(DEFAULT_ENTERPRISE));
-#endif
+	    memmove(pdu->enterprise, DEFAULT_ENTERPRISE,
+		    sizeof(DEFAULT_ENTERPRISE));
 	    pdu->enterprise_length = sizeof(DEFAULT_ENTERPRISE)/sizeof(oid);
 	}
 	if (pdu->time == SNMP_DEFAULT_TIME)
@@ -985,13 +916,7 @@ snmp_send(session, pdu)
     }
     if (pdu->address.sin_addr.s_addr == SNMP_DEFAULT_ADDRESS){
 	if (isp->addr.sin_addr.s_addr != SNMP_DEFAULT_ADDRESS){
-#ifdef SVR4
-	    memmove((char *)&pdu->address, (char *)&isp->addr,
-		  sizeof(pdu->address));
-#else
-	    bcopy((char *)&isp->addr, (char *)&pdu->address,
-		  sizeof(pdu->address));
-#endif
+	    memmove(&pdu->address, &isp->addr, sizeof(pdu->address));
 	} else {
 	    fprintf(stderr, "No remote IP address specified\n");
 	    snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -1027,13 +952,8 @@ snmp_send(session, pdu)
 		return 0;
 	    }
 	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
-#ifdef SVR4
-	    memmove((char *)pdu->srcParty, (char *)session->srcParty,
-		  session->srcPartyLen * sizeof(oid));
-#else
-	    bcopy((char *)session->srcParty, (char *)pdu->srcParty,
-		  session->srcPartyLen * sizeof(oid));
-#endif
+	    memmove(pdu->srcParty, session->srcParty,
+		    session->srcPartyLen * sizeof(oid));
 	    pdu->srcPartyLen = session->srcPartyLen;
 	}
 	if (pdu->dstPartyLen == 0){
@@ -1043,13 +963,8 @@ snmp_send(session, pdu)
 		return 0;
 	    }
 	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
-#ifdef SVR4
-	    memmove((char *)pdu->dstParty, (char *)session->dstParty,
-		  session->dstPartyLen * sizeof(oid));
-#else
-	    bcopy((char *)session->dstParty, (char *)pdu->dstParty,
-		  session->dstPartyLen * sizeof(oid));
-#endif
+	    memmove(pdu->dstParty, session->dstParty,
+		    session->dstPartyLen * sizeof(oid));
 	    pdu->dstPartyLen = session->dstPartyLen;
 	}
 	if (pdu->contextLen == 0){
@@ -1059,13 +974,8 @@ snmp_send(session, pdu)
 		return 0;
 	    }
 	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
-#ifdef SVR4
-	    memmove((char *)pdu->context, (char *)session->context,
-		  session->contextLen * sizeof(oid));
-#else
-	    bcopy((char *)session->context, (char *)pdu->context,
-		  session->contextLen * sizeof(oid));
-#endif
+	    memmove(pdu->context, session->context,
+		    session->contextLen * sizeof(oid));
 	    pdu->contextLen = session->contextLen;
 	}
     } else if (pdu->version == SNMP_VERSION_1){
@@ -1076,13 +986,7 @@ snmp_send(session, pdu)
 		return 0;
 	    }
 	    pdu->community = (u_char *)malloc(session->community_len);
-#ifdef SVR4
-	    memmove((char *)pdu->community, (char *)session->community,
-		  session->community_len);
-#else
-	    bcopy((char *)session->community, (char *)pdu->community,
-		  session->community_len);
-#endif
+	    memmove(pdu->community, session->community, session->community_len);
 	    pdu->community_len = session->community_len;
 	}
     }
