@@ -30,7 +30,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
-#include "notification_log.h"
 
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
@@ -806,48 +805,6 @@ int   command_handler( netsnmp_pdu           *pdu,
 }
 
 
-/*
- *  "Notification" handler for implementing NOTIFICATION-MIB
- *  		(presumably)
- */
-int   notification_handler(netsnmp_pdu           *pdu,
-                           netsnmp_transport     *transport,
-                           netsnmp_trapd_handler *handler)
-{
-    struct hostent *host = NULL;
-
-    DEBUGMSGTL(( "snmptrapd", "notification_handler\n"));
-
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_APP_NUMERIC_IP)) {
-            /*
-             * Right, apparently a name lookup is wanted.  This is only
-             * reasonable for the UDP and TCP transport domains (we
-             * don't want to try to be too clever here).  
-             */
-            if (transport != NULL
-                && (transport->domain == netsnmpUDPDomain
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-                    || transport->domain == netsnmp_snmpTCPDomain
-#endif
-		)) {
-                /*
-                 * This is kind of bletcherous -- it breaks the opacity of
-                 * transport_data but never mind -- the alternative is a
-                 * lot of munging strings from f_fmtaddr.
-                 */
-                struct sockaddr_in *addr =
-                    (struct sockaddr_in *) pdu->transport_data;
-                if (addr != NULL && 
-		    pdu->transport_data_length == sizeof(struct sockaddr_in)) {
-                    host = gethostbyaddr((char *) &(addr->sin_addr),
-					     sizeof(struct in_addr), AF_INET);
-                }
-            }
-        }
-    log_notification(host, pdu, transport);
-    return NETSNMPTRAPD_HANDLER_OK;
-}
 
 
 /*

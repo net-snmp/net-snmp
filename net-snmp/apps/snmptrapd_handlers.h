@@ -25,7 +25,6 @@ struct netsnmp_trapd_handler_s {
 Netsnmp_Trap_Handler   syslog_handler;
 Netsnmp_Trap_Handler   print_handler;
 Netsnmp_Trap_Handler   command_handler;
-Netsnmp_Trap_Handler   notification_handler;
 Netsnmp_Trap_Handler   event_handler;
 Netsnmp_Trap_Handler   forward_handler;
 
