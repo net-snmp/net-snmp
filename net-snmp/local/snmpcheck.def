@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl5  -w
+#!/usr/local/bin/perl -w
 
 use strict 'refs';
 require Net::Ping;
@@ -27,6 +27,8 @@ $mibupdateconfig="$mibheadall.VERSIONMIBNUM.VERUPDATECONFIG";
 		 '.LOADAVEMIBNUM' => 1,
 		 '.ERRORMIBNUM' => 1);
 $errlog="/net/tyfon/1/OV/log/ece-log";
+$default_get_args = "-v 1 %s public";
+$default_set_args = "-v 1 %s private";
 $andlog=0;
 $snmppath="BINDIR";
 $eraseline="                                                                           \r";
@@ -154,7 +156,8 @@ sub snmp_get {
     my $self = shift;
     $self->{'Frame'}->toplevel->Busy() if ($::display);
     my $mib = shift;
-    $_ = `$::snmppath/snmpget $self->{'Host'} ecemgr eceagent ececontext $mib`;
+    my $args = sprint($::default_get_args, $self->{'Host'});
+    $_ = `$::snmppath/snmpget $args $mib`;
     my ($result) = /= (.*)$/;
     if (!defined($result) || $result =~ /No Response/) {
 	$self->{'HostId'}->hostdown;
@@ -171,7 +174,8 @@ sub snmp_set {
     my $self = shift;
     $self->{'Frame'}->toplevel->Busy() if ($::display);
     my $mib = shift;
-    $_ = `$::snmppath/snmpset $self->{'Host'} ecemgr eceagent ececontext $mib`;
+    my $args = sprint($::default_set_args, $self->{'Host'});
+    $_ = `$::snmppath/snmpset $args $mib`;
     my ($result) = /= (.*)$/;
     $result = "" if (!defined($result));
     $result =~ s/\"//g;
@@ -748,12 +752,18 @@ if ($display) {
     $agentMenuBut->configure(-menu => $agentMenu);
     $agentMenuBut->pack(-side => "left");
     $agentMenuBut->command(-label => "Re-read Configuration", 
-			   -command => [sub {if ($selected) { $top->Busy();$_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibupdateconfig i 1`; $top->Unbusy();}}]);
+			   -command => [sub {if ($selected) { $top->Busy(); 
+							      my $args = sprint($::default_get_args, $selected->{'Host'});
+$_ = `$::snmppath/snmpset $args $mibupdateconfig i 1`; $top->Unbusy();}}]);
     $agentMenuBut->command(-label => "Clear Exec Cache", 
-			   -command => [sub {if ($selected) { $top->Busy();$_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibclearcache i 1`; $top->Unbusy();}}]);
+			   -command => [sub {if ($selected) { $top->Busy();
+							      my $args = sprint($::default_get_args, $selected->{'Host'});
+$_ = `$::snmppath/snmpset $args $mibclearcache i 1`; $top->Unbusy();}}]);
     $agentMenuBut->separator();
     $agentMenuBut->command(-label => "Re-start Agent", 
-			   -command => [sub {if ($selected) { $top->Busy(); $_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibrestartagent i 1`; $top->Unbusy();} }]);
+			   -command => [sub {if ($selected) { $top->Busy(); 
+							      my $args = sprint($::default_get_args, $selected->{'Host'});
+$_ = `$::snmppath/snmpset $args $mibrestartagent i 1`; $top->Unbusy();} }]);
 
     # set up remote commands
 
@@ -1050,7 +1060,7 @@ sub remote_cmd {
 
 sub remote_load {
     if ($selected) {
-	remote_cmd_generic("$::snmppath/snmpwalk $selected->{'Host'} ecemgr eceagent ececontext .EXTENSIBLEDOTMIB.LOADAVEMIBNUM.LOADAVE",
+	remote_cmd_generic("$::snmppath/snmpwalk " . sprintf($::default_get_args,$selected->{'Host'}) . " .EXTENSIBLEDOTMIB.LOADAVEMIBNUM.LOADAVE",
 			   "$selected->{'Host'} -- LoadAve");
     } else {
 	setmsg("Error:  Nothing selected");
