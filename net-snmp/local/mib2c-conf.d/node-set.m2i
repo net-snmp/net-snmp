@@ -21,8 +21,9 @@
  *        The size (in bytes) of the data pointed to by $m2c_node_param_val_name
 @    end@
  *
- * @retval MFD_SUCCESS : incoming value is legal
- * @retval MFD_ERROR   : incoming value is NOT legal
+ * @retval MFD_SUCCESS        : incoming value is legal
+ * @retval MFD_NOT_VALID_NOW  : incoming value is not valid now
+ * @retval MFD_NOT_VALID_EVER : incoming value is never valid
  *
  * This is the place to check for requirements that are not
  * expressed in the mib syntax (for example, a requirement that
@@ -62,12 +63,20 @@
  * For example, an object with the syntax INTEGER(0..500) will
  * have already been checked for a value between 0 and 500. But
  * if the description also specifies that the value must be an
- * even number, you would enforce that requirement here.
+ * even number, you would enforce that requirement here. If and odd
+ * numer is set, return MFD_NOT_VALID_EVER. If the description also
+ * specified that changed must be made in single steps of 2, then a set
+ * to change the value 10 to an even value other than 8 or 12 should
+ * return MFD_NOT_VALID_NOW.
 @    else@
  * For example, and object with the syntax DisplayString(0..40)
  * will have already been checked for a length between 0 and 40.
  * But if the description also specified that the value must
- * be all uppercase letters, you would enforce that requirement here.
+ * be all uppercase letters, you would enforce that requirement here
+ * by returning MFD_NOT_VALID_EVER for a set containing lowercase
+ * letters. If the description also specified that the value can not
+ * change by more than one letter at a time, an attempt to change
+ * "ABBY" to "ANNIE" should return MFD_NOT_VALID_NOW.
 @    end@
  *
  */
