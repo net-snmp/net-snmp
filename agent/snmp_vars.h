@@ -50,3 +50,5 @@ int subtree_old_size __P((void));
 void register_mib __P((char *, struct variable *, int , int , oid *, int));
 int unregister_mib __P((oid *, int));
 void sort_tree __P((void));
+struct subtree *find_subtree __P((oid *, int, struct subtree *));
+struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
