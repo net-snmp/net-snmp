@@ -1243,11 +1243,12 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
 	}
 	if ((r = count - n) < 0) {
 	  r = 0;
+	  asp->bulkcache = NULL;
+	} else {
+	    asp->bulkcache =
+		(struct variable_list **)malloc(asp->pdu->errindex * r *
+						sizeof(struct varbind_list*));
 	}
-
-        asp->bulkcache =
-            (struct variable_list **)malloc(asp->pdu->errindex * r *
-					    sizeof(struct varbind_list*));
 	DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %d, R = %d\n",
 		    n, asp->pdu->errindex, r));
     }
