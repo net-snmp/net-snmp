@@ -13,7 +13,7 @@
 #include "snmp_transport.h"
 #include "asn1.h"
 
-const oid ucdSnmpUnixDomain[9];  /*  = { 1, 3, 6, 1, 4, 1, 2021, 251, 2 };  */
+extern const oid ucdSnmpUnixDomain[9];  /*  = { 1, 3, 6, 1, 4, 1, 2021, 251, 2 };  */
 
 snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
 						 int local);

@@ -1,6 +1,11 @@
 #include <config.h>
 
 #include <stdio.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <sys/types.h>
 
 #if HAVE_STDLIB_H
@@ -54,7 +59,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
   }
 
   if (t->local != NULL) {
-    n->local = malloc(t->local_length);
+    n->local = (u_char *)malloc(t->local_length);
     if (n->local == NULL) {
       snmp_transport_free(n);
       return NULL;
@@ -67,7 +72,7 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t)
   }
 
   if (t->remote != NULL) {
-    n->remote = malloc(t->remote_length);
+    n->remote = (u_char *)malloc(t->remote_length);
     if (n->remote == NULL) {
       snmp_transport_free(n);
       return NULL;

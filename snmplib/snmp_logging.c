@@ -70,6 +70,11 @@ static int do_log_callback=0;
 static int newline = 1;
 static FILE *logfile;
 
+#ifndef HAVE_VSNPRINTF
+		/* Need to use the UCD-provided one */
+int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
+#endif
+
 void
 init_snmp_logging(void) {
   ds_register_premib(ASN_BOOLEAN, "snmp", "logTimestamp", DS_LIBRARY_ID,

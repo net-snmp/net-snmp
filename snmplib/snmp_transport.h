@@ -19,11 +19,11 @@ extern "C" {
 
 /*  The standard SNMP domains.  */
 
-const oid snmpUDPDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 1 };  */
-const oid snmpCLNSDomain[7];	/*	= { 1, 3, 6, 1, 6, 1, 2 };  */
-const oid snmpCONSDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 3 };  */
-const oid snmpDDPDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 4 };  */
-const oid snmpIPXDomain[7];	/*	= { 1, 3, 6, 1, 6, 1, 5 };  */
+extern const oid snmpUDPDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 1 };  */
+extern const oid snmpCLNSDomain[7];	/*	= { 1, 3, 6, 1, 6, 1, 2 };  */
+extern const oid snmpCONSDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 3 };  */
+extern const oid snmpDDPDomain[7];	/* 	= { 1, 3, 6, 1, 6, 1, 4 };  */
+extern const oid snmpIPXDomain[7];	/*	= { 1, 3, 6, 1, 6, 1, 5 };  */
 
 
 
