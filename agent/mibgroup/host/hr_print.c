@@ -268,7 +268,7 @@ Get_Next_HR_Print (void)
 
 const char *describe_printer(int idx)
 {
-    printf("describe p: %d/%d %s\n", HRP_index, idx, HRP_name[HRP_index-1]);
+    DEBUGMSGTL(("snmpd", "describe p: %d/%d %s\n", HRP_index, idx, HRP_name[HRP_index-1]));
     return HRP_name[HRP_index-1];
 }
 
