@@ -400,7 +400,7 @@ if (!defined($host)) {
     displaytable($dbh, 'hostgroups', 
 		 '-notitle',0,
 		 '-clauses', "where (groupname = '$group')",
-		 '-select', 'distinct host, sysObjectId, sysDescr, versionTag',
+		 '-select', 'distinct host, sysObjectId, sysDescr, sysUpTime, versionTag',
 		 '-datalink', sub { my $q = self_url();
 				    my $key = shift;
 				    my $h = shift;
