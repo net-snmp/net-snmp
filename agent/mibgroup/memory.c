@@ -43,6 +43,9 @@
 #ifdef HAVE_UFS_UFS_INODE_H
 #include <ufs/ufs/inode.h>
 #endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #if HAVE_UFS_FFS_FS_H
 #include <ufs/ffs/fs.h>
 #endif
@@ -95,9 +98,6 @@
 # else
 #  include <time.h>
 # endif
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
 #endif
 
 #include "mibincl.h"
