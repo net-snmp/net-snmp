@@ -348,11 +348,10 @@ STARTPROG() {
     if [ "x$PORT_SPEC" != "x" ]; then
         COMMAND="$COMMAND $PORT_SPEC"
     fi
+    echo $COMMAND >> $SNMP_TMPDIR/invoked
     if [ "x$OSTYPE" = "xmsys" ]; then
-      echo $COMMAND \& >> $SNMP_TMPDIR/invoked
       $COMMAND > $LOG_FILE.stdout 2>&1 &
     else
-      echo $COMMAND >> $SNMP_TMPDIR/invoked
       $COMMAND > $LOG_FILE.stdout 2>&1
     fi
     DELAY
