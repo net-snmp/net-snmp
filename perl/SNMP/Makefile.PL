@@ -46,6 +46,8 @@ sub InitMakeParams {
 	  $LibDir = find_files(["$snmp_lib"],\@LibDirs);
 	  if ($LibDir ne '') {
 	    $noLibDir = 0;
+            # Put quotes around LibDir to allow spaces in paths
+            $LibDir = '"' . $LibDir . '"';
 	  }
 	  else
 	  {
@@ -95,20 +97,6 @@ sub InitMakeParams {
 
     return(%Params);
 
-}
-
-sub find_files {
-    my($f,$d) = @_;
-    my ($dir,$found,$file);
-    for $dir (@$d){
-	$found = 0;
-	for $file (@$f) {
-	    $found++ if -f "$dir/$file";
-	}
-	if ($found == @$f) {
-	    return $dir;
-	}
-    }
 }
 
 sub GetTestInfo {
@@ -268,5 +256,19 @@ sub NetSNMPGetOpts {
     $ret{'rootpath'} = $rootpath;
 
     \%ret;
+}
+
+sub find_files {
+    my($f,$d) = @_;
+    my ($dir,$found,$file);
+    for $dir (@$d){
+	$found = 0;
+	for $file (@$f) {
+	    $found++ if -f "$dir/$file";
+	}
+	if ($found == @$f) {
+	    return $dir;
+	}
+    }
 }
 
