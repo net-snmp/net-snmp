@@ -19,7 +19,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <sys/types.h>
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
