@@ -38,7 +38,8 @@ struct ds_read_config *ds_configs = NULL;
 
 int ds_integers[DS_MAX_IDS][DS_MAX_SUBIDS];
 char ds_booleans[DS_MAX_IDS][DS_MAX_SUBIDS/8];  /* bit vector storage. */
-char *ds_strings[DS_MAX_IDS][DS_MAX_SUBIDS];  /* bit vector storage. */
+char *ds_strings[DS_MAX_IDS][DS_MAX_SUBIDS];
+void *ds_voids[DS_MAX_IDS][DS_MAX_SUBIDS];
 
 int
 ds_set_boolean(int storeid, int which, int value) {
@@ -135,6 +136,30 @@ ds_get_string(int storeid, int which) {
     return NULL;
 
   return (ds_strings[storeid][which]);
+}
+
+int
+ds_set_void(int storeid, int which, void *value) {
+
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
+      storeid < 0 || which < 0)
+    return SNMPERR_GENERR;
+    
+  DEBUGMSGTL(("ds_set_void","Setting %d:%d = %x\n", storeid, which,
+              value));
+
+  ds_voids[storeid][which] = value;
+  
+  return SNMPERR_SUCCESS;
+}
+
+void *
+ds_get_void(int storeid, int which) {
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
+      storeid < 0 || which < 0)
+    return NULL;
+
+  return (ds_voids[storeid][which]);
 }
 
 void
