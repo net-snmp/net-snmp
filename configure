@@ -1909,7 +1909,7 @@ EOF
 fi
 
 SNMPCONFPATH=""
-tmpset="$datadir/snmp"
+tmpset="$sysconfdir/snmp"
 while test "x$tmpset" != "x$SNMPCONFPATH"; do
   SNMPCONFPATH="$tmpset"
   eval tmpset="$tmpset"
