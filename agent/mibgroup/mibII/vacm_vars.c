@@ -1,6 +1,12 @@
 /*
  * SNMPv3 View-based Access Control Model
  */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -1627,6 +1633,10 @@ write_vacmSecurityToGroupStatus(int action,
                 free(newName);
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && geptr->storageType == ST_PERMANENT) {
+                free(newName);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
