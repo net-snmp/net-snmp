@@ -16,4 +16,5 @@ Not sure how the above could be done using just 'nmake' from the DOS
 shell but it should be feasible.
 
 Also note: An alternate way to build UCD SNMP for win32 is to use
-Cygnus's cygwin32 environment.
+Cygnus's cygwin32 environment, available on the web at:
+http://sourceware.cygnus.com/cygwin/.
