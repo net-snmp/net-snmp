@@ -2,6 +2,8 @@
  * tools.c
  */
 
+#define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <ctype.h>
@@ -55,6 +57,48 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
+#ifdef WIN32
+/**
+ * This function is a wrapper for the strdup function.
+ */
+char * netsnmp_strdup( const char * ptr)
+{
+    return strdup(ptr);
+}
+/**
+ * This function is a wrapper for the calloc function.
+ */
+void * netsnmp_calloc(size_t nmemb, size_t size)
+{
+    return calloc(nmemb, size);
+}
+
+/**
+ * This function is a wrapper for the malloc function.
+ */
+void * netsnmp_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+/**
+ * This function is a wrapper for the realloc function.
+ */
+void * netsnmp_realloc( void * ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+/**
+ * This function is a wrapper for the free function.
+ * It calls free only if the calling parameter has a non-zero value.
+ */
+void netsnmp_free( void * ptr)
+{
+    if (ptr)
+        free(ptr);
+}
+#endif /* WIN32 */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
