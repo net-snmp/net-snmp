@@ -568,7 +568,7 @@ ARP_Scan_Init(void)
     int             i;
     char            line[128];
     int             za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
-    char            ifname[20];
+    char            ifname[21];
 
     arptab_current = 0;         /* Anytime this is called we need to reset 'current' */
 
