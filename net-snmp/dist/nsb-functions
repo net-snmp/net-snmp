@@ -308,7 +308,7 @@ nsb-build()
             $NSB_MAKE distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
-                nsb-abort "Error during makedistclean (rc=$nsb_build_rc)"
+                nsb-abort "Error during make distclean (rc=$nsb_build_rc)"
             fi
         fi
       fi
