@@ -2258,10 +2258,10 @@ snmp_out_toggle_options(char *options)
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
 	    break;
         case 's':
-	    snmp_set_suffix_only(1);
+	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 	    break;
         case 'S':
-	    snmp_set_suffix_only(2);
+	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 	    break;
 	case 'T':
 	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
@@ -4932,7 +4932,7 @@ snmp_parse_oid(const char *argv,
 		size_t *rootlen)
 {
   size_t savlen = *rootlen;
-  if (snmp_get_random_access() || strchr(argv, ':')) {
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS) || strchr(argv, ':')) {
     if (get_node(argv,root,rootlen)) {
       return root;
     }
@@ -5033,17 +5033,3 @@ netsnmp_str2oid( const char * S, oid * O, int L )
 }
 
 
-#ifdef CMU_COMPATIBLE
-
-int mib_TxtToOid(char *Buf, oid **OidP, size_t *LenP)
-{
-    return read_objid(Buf, *OidP, LenP);
-}
-
-int mib_OidToTxt(oid *O, size_t OidLen, char *Buf, size_t BufLen)
-{
-    _sprint_objid(Buf, O, OidLen);
-    return 1;
-}
-
-#endif /* CMU_COMPATIBLE */

@@ -238,63 +238,6 @@ SOFTWARE.
 #define SNMPADMINLENGTH 255
 
 
-#ifdef CMU_COMPATIBLE
-/* PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
-#define GET_REQ_MSG	    SNMP_MSG_GET
-#define GETNEXT_REQ_MSG	    SNMP_MSG_GETNEXT
-#define GET_RSP_MSG	    SNMP_MSG_RESPONSE
-#define SET_REQ_MSG	    SNMP_MSG_SET
-
-/* PDU types in SNMPv1 and SNMPsec */
-#define TRP_REQ_MSG	    SNMP_MSG_TRAP
-
-/* PDU types in SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
-#define BULK_REQ_MSG	    SNMP_MSG_GETBULK
-#define INFORM_REQ_MSG	    SNMP_MSG_INFORM
-#define TRP2_REQ_MSG	    SNMP_MSG_TRAP2
-
-/* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
-#define REPORT_RSP_MSG	    SNMP_MSG_REPORT
-
-/* since CMU V1.5 */
-
-#define SNMP_PDU_GET	    SNMP_MSG_GET
-#define SNMP_PDU_GETNEXT    SNMP_MSG_GETNEXT
-#define SNMP_PDU_RESPONSE   SNMP_MSG_RESPONSE
-#define SNMP_PDU_SET        SNMP_MSG_SET
-#define SNMP_PDU_GETBULK    SNMP_MSG_GETBULK
-#define SNMP_PDU_INFORM     SNMP_MSG_INFORM
-#define SNMP_PDU_V2TRAP     SNMP_MSG_TRAP2
-#define SNMP_PDU_REPORT     SNMP_MSG_REPORT
-
-#define SNMP_TRAP_AUTHENTICATIONFAILURE SNMP_TRAP_AUTHFAIL
-
-#define SMI_INTEGER     ASN_INTEGER
-#define SMI_STRING      ASN_OCTET_STR
-#define SMI_OBJID       ASN_OBJECT_ID
-#define SMI_NULLOBJ     ASN_NULL
-#define SMI_IPADDRESS   ASN_IPADDRESS
-#define SMI_COUNTER32	    ASN_COUNTER
-#define SMI_GAUGE32	    ASN_GAUGE
-#define SMI_UNSIGNED32 SMI_GAUGE32
-#define SMI_TIMETICKS   ASN_TIMETICKS
-#define SMI_OPAQUE ASN_OPAQUE
-#define SMI_COUNTER64   ASN_COUNTER64
-
-int mib_TxtToOid (char *, oid **, size_t *);
-int mib_OidToTxt (oid *, size_t , char *, size_t );
-
-struct snmp_pdu;
-char *snmp_pdu_type (struct snmp_pdu *);
-
-struct snmp_session;
-u_char * cmu_snmp_parse (struct snmp_session *session,
-    struct snmp_pdu *pdu,
-    u_char *data,
-    size_t length);
-
-#endif /* CMU_COMPATIBLE */
-
 char *uptime_string (u_long, char *);
 void xdump (const u_char *, size_t, const char *);
 u_char *snmp_parse_var_op (u_char *, oid *, size_t *, u_char *, size_t *,

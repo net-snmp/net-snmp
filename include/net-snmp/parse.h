@@ -197,20 +197,6 @@ struct module_compatability {
 #define MIB_STATUS_DEPRECATED  39
 #define MIB_STATUS_CURRENT     57
 
-#ifdef CMU_COMPATIBLE
-#define ACCESS_READONLY		MIB_ACCESS_READONLY
-#define ACCESS_READWRITE	MIB_ACCESS_READWRITE
-#define ACCESS_WRITEONLY	MIB_ACCESS_WRITEONLY
-#define ACCESS_NOACCESS		MIB_ACCESS_NOACCESS
-#define ACCESS_NOTIFY		MIB_ACCESS_NOTIFY
-#define ACCESS_CREATE		MIB_ACCESS_CREATE
-#define STATUS_MANDATORY	MIB_STATUS_MANDATORY
-#define STATUS_OPTIONAL		MIB_STATUS_OPTIONAL
-#define STATUS_OBSOLETE		MIB_STATUS_OBSOLETE
-#define STATUS_DEPRECATED	MIB_STATUS_DEPRECATED
-#define STATUS_CURRENT		MIB_STATUS_CURRENT
-#endif	/* CMU_COMPATIBLE */
-
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
 
@@ -233,11 +219,6 @@ struct tree *find_best_tree_node(const char *, struct tree *, u_int *);
 struct tree *find_node (const char *, struct tree*);
 struct module *find_module (int);
 void adopt_orphans (void);
-void snmp_set_mib_warnings (int);
-void snmp_set_mib_errors (int);
-void snmp_set_save_descriptions (int);
-void snmp_set_mib_comment_term (int);
-void snmp_set_mib_parse_label (int);
 char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf);
 void print_mib(FILE *);
