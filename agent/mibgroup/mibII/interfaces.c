@@ -2571,7 +2571,6 @@ var_ifEntry(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             ifIndex;
-    static char     Name[16];
     static MIB_IFROW ifRow;
 
     ifIndex =
@@ -2611,10 +2610,11 @@ var_ifEntry(struct variable * vp,
         *write_method = writeIfEntry;
         return (u_char *) & long_return;
     case IFOPERSTATUS:
-        long_return = ifRow.dwOperStatus;
+        long_return =
+           (MIB_IF_OPER_STATUS_OPERATIONAL == ifRow.dwOperStatus) ? 1 : 2;
         return (u_char *) & long_return;
     case IFLASTCHANGE:
-        long_return = ifRow.dwLastChange;
+        long_return = 0 /* XXX not a UNIX epochal time ifRow.dwLastChange */ ;
         return (u_char *) & long_return;
     case IFINOCTETS:
         long_return = ifRow.dwInOctets;
