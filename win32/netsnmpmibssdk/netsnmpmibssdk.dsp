@@ -173,6 +173,10 @@ SOURCE=..\..\agent\mibgroup\snmpv3\snmpMPDStats.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\snmpv3\usmConf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\snmpv3\usmStats.c
 # End Source File
 # Begin Source File
@@ -247,6 +251,10 @@ SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 # Begin Group "agent"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agent\extend.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agent\nsCache.c

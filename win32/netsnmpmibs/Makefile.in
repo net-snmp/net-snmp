@@ -36,6 +36,7 @@ CLEAN :
 	-@erase "$(INTDIR)\mteTriggerExistenceTable.obj"
 	-@erase "$(INTDIR)\mteTriggerTable.obj"
 	-@erase "$(INTDIR)\mteTriggerThresholdTable.obj"
+	-@erase "$(INTDIR)\extend.obj"
 	-@erase "$(INTDIR)\nsCache.obj"
 	-@erase "$(INTDIR)\nsDebug.obj"
 	-@erase "$(INTDIR)\nsLogging.obj"
@@ -63,6 +64,7 @@ CLEAN :
 	-@erase "$(INTDIR)\target.obj"
 	-@erase "$(INTDIR)\target_counters.obj"
 	-@erase "$(INTDIR)\ucdDemoPublic.obj"
+	-@erase "$(INTDIR)\usmConf.obj"
 	-@erase "$(INTDIR)\usmStats.obj"
 	-@erase "$(INTDIR)\usmUser.obj"
 	-@erase "$(INTDIR)\util_funcs.obj"
@@ -150,6 +152,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\versioninfo.obj" \
 	"$(INTDIR)\snmpEngine.obj" \
 	"$(INTDIR)\snmpMPDStats.obj" \
+	"$(INTDIR)\usmConf.obj" \
 	"$(INTDIR)\usmStats.obj" \
 	"$(INTDIR)\usmUser.obj" \
 	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
@@ -165,6 +168,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\master_admin.obj" \
 	"$(INTDIR)\protocol.obj" \
 	"$(INTDIR)\subagent.obj" \
+	"$(INTDIR)\extend.obj" \
 	"$(INTDIR)\nsCache.obj" \
 	"$(INTDIR)\nsDebug.obj" \
 	"$(INTDIR)\nsLogging.obj" \
@@ -209,6 +213,7 @@ CLEAN :
 	-@erase "$(INTDIR)\mteTriggerExistenceTable.obj"
 	-@erase "$(INTDIR)\mteTriggerTable.obj"
 	-@erase "$(INTDIR)\mteTriggerThresholdTable.obj"
+	-@erase "$(INTDIR)\extend.obj"
 	-@erase "$(INTDIR)\nsCache.obj"
 	-@erase "$(INTDIR)\nsDebug.obj"
 	-@erase "$(INTDIR)\nsLogging.obj"
@@ -236,6 +241,7 @@ CLEAN :
 	-@erase "$(INTDIR)\target.obj"
 	-@erase "$(INTDIR)\target_counters.obj"
 	-@erase "$(INTDIR)\ucdDemoPublic.obj"
+	-@erase "$(INTDIR)\usmConf.obj"
 	-@erase "$(INTDIR)\usmStats.obj"
 	-@erase "$(INTDIR)\usmUser.obj"
 	-@erase "$(INTDIR)\util_funcs.obj"
@@ -324,6 +330,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\versioninfo.obj" \
 	"$(INTDIR)\snmpEngine.obj" \
 	"$(INTDIR)\snmpMPDStats.obj" \
+	"$(INTDIR)\usmConf.obj" \
 	"$(INTDIR)\usmStats.obj" \
 	"$(INTDIR)\usmUser.obj" \
 	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
@@ -339,6 +346,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\master_admin.obj" \
 	"$(INTDIR)\protocol.obj" \
 	"$(INTDIR)\subagent.obj" \
+	"$(INTDIR)\extend.obj" \
 	"$(INTDIR)\nsCache.obj" \
 	"$(INTDIR)\nsDebug.obj" \
 	"$(INTDIR)\nsLogging.obj" \
@@ -543,6 +551,12 @@ SOURCE=..\..\agent\mibgroup\snmpv3\snmpMPDStats.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\agent\mibgroup\snmpv3\usmConf.c
+
+"$(INTDIR)\usmConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\agent\mibgroup\snmpv3\usmStats.c
 
 "$(INTDIR)\usmStats.obj" : $(SOURCE) "$(INTDIR)"
@@ -630,6 +644,12 @@ SOURCE=..\..\agent\mibgroup\agentx\protocol.c
 SOURCE=..\..\agent\mibgroup\agentx\subagent.c
 
 "$(INTDIR)\subagent.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\agent\extend.c
+
+"$(INTDIR)\extend.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

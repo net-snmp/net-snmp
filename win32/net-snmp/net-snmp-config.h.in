@@ -18,7 +18,7 @@
 
 /* default list of mibs to load */
 
-#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
+#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;HOST-RESOURCES-MIB;SNMPv2-MIB;RFC1213-MIB;NOTIFICATION-LOG-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;NET-SNMP-AGENT-MIB;DISMAN-EVENT-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
@@ -39,7 +39,6 @@
    privacy support. */
 #define SCAPI_AUTHPRIV 1
 
-/* XXX do not modify. change the USE_OPENSSL define instead */
 /* define if you are using the MD5 code ...*/
 /* #undef USE_INTERNAL_MD5 */
 
@@ -68,7 +67,7 @@
 #define PERSISTENT_DIRECTORY INSTALL_BASE ## "/snmp/persist"
 
 /* PERSISTENT_MASK: the umask permissions to set up persistent files with */
-/* XXX no win32 umask #define PERSISTENT_MASK 077 */
+/* #undef PERSISTENT_MASK -- no win32 umask */
 
 /* AGENT_DIRECTORY_MODE: the mode the agents should use to create
    directories with. Since the data stored here is probably sensitive, it
@@ -283,6 +282,24 @@
 
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 /* #undef HAVE_INET_MIB2_H */
+
+/* Define to 1 if the system has the type `int32_t'. */
+#define HAVE_INT32_T 1
+
+/* define if you have type uint32_t */
+#define HAVE_UINT32_T 1
+
+/* define if you have type u_int32_t */
+#undef HAVE_U_INT32_T
+
+/* define if you have type int64_t */
+#define HAVE_INT64_T 1
+
+/* define if you have type uint64_t */
+#define HAVE_UINT64_T 1
+
+/* define if you have type u_int64_t */
+#undef HAVE_U_INT64_T
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 /* #undef HAVE_INTTYPES_H */
@@ -506,21 +523,20 @@
 /* Define to 1 if you have the <nlist.h> header file. */
 /* #undef HAVE_NLIST_H */
 
-#if Not_Set_Later_In_This_file
-/* XXX do not modify. change the USE_OPENSSL define instead */
 /* Define to 1 if you have the <openssl/aes.h> header file. */
-#define HAVE_OPENSSL_AES_H 1
+/* #undef HAVE_OPENSSL_AES_H */
 
 /* Define to 1 if you have the <openssl/des.h> header file. */
-#define HAVE_OPENSSL_DES_H 1
+/* #undef HAVE_OPENSSL_DES_H */
+
+/* Define to 1 if you have the <openssl/dh.h> header file. */
+/* #undef HAVE_OPENSSL_DH_H */
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
-#define HAVE_OPENSSL_EVP_H 1
+/* #undef HAVE_OPENSSL_EVP_H */
 
 /* Define to 1 if you have the <openssl/hmac.h> header file. */
-#define HAVE_OPENSSL_HMAC_H 1
-
-#endif /* Not_Set_Later_In_This_file */
+/* #undef HAVE_OPENSSL_HMAC_H */
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 /* #undef HAVE_OSRELDATE_H */
@@ -565,7 +581,7 @@
 /* #undef HAVE_RPM_RPMIO_H */
 
 /* Define to 1 if you have the <search.h> header file. */
-/* #undef HAVE_SEARCH_H */
+#define HAVE_SEARCH_H 1
 
 /* Define to 1 if you have the <security/cryptoki.h> header file. */
 /* #undef HAVE_SECURITY_CRYPTOKI_H */
@@ -891,19 +907,31 @@
 /* #undef PACKAGE_BUGREPORT */
 
 /* Define to the full name of this package. */
-/* #undef PACKAGE_NAME */
+#define PACKAGE_NAME "Net-SNMP"
 
 /* Define to the full name and version of this package. */
 /* #undef PACKAGE_STRING */
 
 /* Define to the one symbol short name of this package. */
-/* #undef PACKAGE_TARNAME */
+#define PACKAGE_TARNAME "net-snmp"
 
 /* Define to the version of this package. */
 /* #undef PACKAGE_VERSION */
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
+
+/* The size of a `int', as computed by sizeof. */
+#define SIZEOF_INT 4
+
+/* The size of a `long', as computed by sizeof. */
+#define SIZEOF_LONG 4
+
+/* The size of a `long long', as computed by sizeof. */
+#define SIZEOF_LONG_LONG 8
+
+/* The size of a `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -946,6 +974,9 @@
 /* define if you have getdevs() */
 /* #undef HAVE_GETDEVS */
 
+/* define if you have devstat_getdevs() */
+/* #undef HAVE_DEVSTAT_GETDEVS */
+
 /* define if you have <netinet/in_pcb.h> */
 /* #undef HAVE_NETINET_IN_PCB_H */
 
@@ -960,7 +991,7 @@
 #define RTENTRY rtentry;
 
 /* Use BSD 4.4 routing table entries? */
-/* #undef RTENTRY_4_4 XXX */
+/* #undef RTENTRY_4_4 */
 
 /* Does struct sigaction have a sa_sigaction field? */
 /* #undef STRUCT_SIGACTION_HAS_SA_SIGACTION */
@@ -975,7 +1006,7 @@
 /* #undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR */
 
 /* rtentry structure tests */
-/* #undef RTENTRY_RT_NEXT XXX */
+/* #undef RTENTRY_RT_NEXT */
 /* #undef STRUCT_RTENTRY_HAS_RT_DST */
 /* #undef STRUCT_RTENTRY_HAS_RT_UNIT */
 /* #undef STRUCT_RTENTRY_HAS_RT_USE */
@@ -1148,7 +1179,7 @@
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
 #endif
-#ifdef freebsd2
+#if defined(__FreeBSD__)
 #define OSTYPE FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
@@ -1306,19 +1337,9 @@
 /* #undef USE_OPENSSL */
 
 #ifdef USE_OPENSSL
-/* Copied from above, for easier exclusion when not building with OpenSSL. */
 
-/* Define to 1 if you have the <openssl/aes.h> header file. */
-#define HAVE_OPENSSL_AES_H 1
-
-/* Define to 1 if you have the <openssl/des.h> header file. */
-#define HAVE_OPENSSL_DES_H 1
-
-/* Define to 1 if you have the <openssl/evp.h> header file. */
-#define HAVE_OPENSSL_EVP_H 1
-
-/* Define to 1 if you have the <openssl/hmac.h> header file. */
-#define HAVE_OPENSSL_HMAC_H 1
+/* Define to 1 if you have the <openssl/dh.h> header file. */
+#define HAVE_OPENSSL_DH_H 1
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
@@ -1419,7 +1440,7 @@
 /* define this if we're using the new MIT crypto API */
 /* #undef MIT_NEW_CRYPTO */
 
-/* define if you want to build with reentrant/threaded code */
+/* define if you want to build with reentrant/threaded code (incomplete)*/
 /* #undef NS_REENTRANT */
 
 /* on aix, if you have perfstat */
@@ -1431,6 +1452,7 @@
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
+#define config_belongs_in(x)
 
 #if defined (WIN32) || defined (mingw32) || defined (cygwin)
 #define ENV_SEPARATOR ";"
@@ -1498,6 +1520,8 @@
 typedef unsigned short mode_t;
 typedef unsigned __int32 uint32_t;
 typedef long int32_t;
+typedef unsigned __int64 uint64_t;
+typedef __int64 int64_t;
 
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
@@ -1600,6 +1624,39 @@ typedef long int32_t;
   #endif
 #endif
 
+/*
+ * Module configuration and control starts here.
+ *
+ * Some of the defines herein are used to control
+ * groups of modules.  The ones that have "CFG"
+ * are used especially to control the include files
+ * seen in {agent,mib}_module_includes.h, and the init entries
+ * which are invoked in {agent,mib}_module_inits.h.
+ *
+ * To disable a group, uncomment the associated define.
+ */
+ 
+/* CFG Define if compiling with the ucd_snmp module files.  */
+#define USING_UCD_SNMP_MODULE 1
+ 
+/* CFG Define if compiling with the agentx module files.  */
+#define USING_AGENTX_MODULE 1
+ 
+/* CFG Define if compiling with the host module files.  */
+/* #undef USING_HOST_MODULE */
+ 
+/* CFG Define if compiling with the Rmon module files.  */
+/* #undef USING_RMON_MODULE */
+
+/* CFG Define if compiling with the disman/event-mib module files.  */
+#define USING_DISMAN_EVENT_MIB_MODULE 1
+
+/* CFG Define if compiling with the smux module files.  */
+/* #undef USING_SMUX_MODULE */
+
+/*
+ * Module configuration and control ends here.
+ */
 
 #endif /* NET_SNMP_CONFIG_H */
 
