@@ -2,7 +2,7 @@
 #define _SNMP_TRANSPORT_H
 
 #include <sys/types.h>
-#include "asn1.h"
+#include <net-snmp/library/asn1.h>
 
 #ifdef __cplusplus
 extern "C" {

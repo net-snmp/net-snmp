@@ -50,7 +50,7 @@ char copyright[] =
 #else
 #include <strings.h>
 #endif
-#include <net-snmp/getopt.h>
+#include <net-snmp/utilities.h>
 
 #include <sys/types.h>
 #if HAVE_SYS_PARAM_H

@@ -5,7 +5,7 @@
 /* new version2 agent handler API structures */
 /***********************************************************************/
 
-#include "snmp_agent.h"
+#include <net-snmp/agent/snmp_agent.h>
 
 #ifdef __cplusplus
 extern "C" {

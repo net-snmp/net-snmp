@@ -82,7 +82,7 @@ int subtree_old_size (void);
 void sort_tree (void);
 
 #ifndef _AGENT_REGISTRY_H
-#include "agent_registry.h"
+#include <net-snmp/agent/agent_registry.h>
 #endif
 
 /* fail overloads non-negative integer value. it must be -1 ! */

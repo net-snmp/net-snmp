@@ -10,8 +10,8 @@
 #include <sys/un.h>
 #endif
 
-#include "snmp_transport.h"
-#include "asn1.h"
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/asn1.h>
 
 extern const oid ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
 

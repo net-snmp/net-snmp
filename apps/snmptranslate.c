@@ -51,7 +51,7 @@ SOFTWARE.
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#include <net-snmp/getopt.h>
+#include <net-snmp/utilities.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>

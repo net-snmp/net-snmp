@@ -69,7 +69,7 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include <net-snmp/getopt.h>
+#include <net-snmp/utilities.h>
 
 #include <net-snmp/net-snmp-includes.h>
 

@@ -1,8 +1,8 @@
 #ifndef _SNMPUDPIPV6DOMAIN_H
 #define _SNMPUDPIPV6DOMAIN_H
 
-#include "snmp_transport.h"
-#include "asn1.h"
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/asn1.h>
 
 const oid ucdSnmpUDPIPv6Domain[9];  /* = { UCDAVIS_MIB, 251, 4 }; */
 

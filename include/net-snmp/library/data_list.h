@@ -13,8 +13,8 @@
 extern "C" {
 #endif
 
-#include "snmp_impl.h"
-#include "tools.h"
+#include <net-snmp/library/snmp_impl.h>
+#include <net-snmp/library/tools.h>
 
 
 typedef void (Free_List_Data)(void *);
