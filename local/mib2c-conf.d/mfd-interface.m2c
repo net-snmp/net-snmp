@@ -386,8 +386,10 @@ ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
     if(rowreq_ctx->data)
         ${table}_release_data(rowreq_ctx->data);
  
+@   if $m2c_table_settable@
      if(rowreq_ctx->undo) 
          ${table}_release_data(rowreq_ctx->undo);
+@   end@
 @end@ 
 
     /*
