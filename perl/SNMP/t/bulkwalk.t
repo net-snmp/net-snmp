@@ -131,7 +131,7 @@ else {
 $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'] ); # NON-repeaters
 
 $expect = scalar @$vars;
-@list = $s1->bulkwalk(2, 1, $vars);
+@list = $s1->bulkwalk(2, 16, $vars);
 ok($s1->{ErrorNum} == 0);
 
 # Did we get back the list of references to returned values?
