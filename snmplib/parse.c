@@ -1245,7 +1245,10 @@ static void do_linkup(struct module *mp,
 		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		    snmp_log(LOG_WARNING,
                              "Unlinked OID in %s: %s ::= { %s %ld }\n",
-                             mp->name, onp->label, onp->parent, onp->subid);
+                             (mp->name ? mp->name : "<no module>"),
+                             (onp->label ? onp->label : "<no label>"),
+                             (onp->parent ? onp->parent : "<no parent>"),
+                             onp->subid);
 		np = onp;
 		onp = onp->next;
 	    }
