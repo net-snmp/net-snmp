@@ -1667,6 +1667,10 @@ snmp_out_toggle_options(char *options)
         case 'q':
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
             break;
+        case 'Q':
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICKE_PRINT, 1);
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
+            break;
         case 'f':
             ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
             ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 0);
@@ -1710,6 +1714,7 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sf:  print full OIDs on output\n", lead);
     fprintf(outf, "%sn:  print OIDs numerically\n", lead);
     fprintf(outf, "%sq:  quick print for easier parsing\n", lead);
+    fprintf(outf, "%sQ:  quick print with equal-signs\n", lead);        /* @@JDW */
     fprintf(outf, "%ss:  print only last symbolic element of OID\n", lead);
     fprintf(outf, "%sS:  print MIB module-id plus last element\n", lead);
     fprintf(outf, "%st:  print timeticks unparsed as numeric integers\n",
@@ -2383,21 +2388,28 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
     if (buf_overflow) {
         return 0;
     }
-
     if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
-            if (!snmp_strcat
-                (buf, buf_len, out_len, allow_realloc,
-                 (const u_char *) " ")) {
-                return 0;
-            }
-        } else {
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICKE_PRINT)) {
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
                  (const u_char *) " = ")) {
                 return 0;
             }
-        }
+        } else {
+            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+                if (!snmp_strcat
+                    (buf, buf_len, out_len, allow_realloc,
+                     (const u_char *) " ")) {
+                    return 0;
+                }
+            } else {
+                if (!snmp_strcat
+                    (buf, buf_len, out_len, allow_realloc,
+                     (const u_char *) " = ")) {
+                    return 0;
+                }
+            }                   /* end if-else DS_LIB_QUICK_PRINT */
+        }                       /* end if-else DS_LIB_QUICKE_PRINT */
     } else {
         *out_len = 0;
     }

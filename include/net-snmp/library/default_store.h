@@ -56,6 +56,7 @@ extern          "C" {
 #define DS_LIB_READ_UCD_STYLE_OID  25   /* require top-level OIDs to be prefixed with a dot */
 #define DS_LIB_HAVE_READ_PREMIB_CONFIG 26       /* have the pre-mib parsing config tokens been processed */
 #define DS_LIB_HAVE_READ_CONFIG    27   /* have the config tokens been processed */
+#define DS_LIB_QUICKE_PRINT        28   
 
     /*
      * library integers 
