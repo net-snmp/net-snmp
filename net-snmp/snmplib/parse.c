@@ -397,6 +397,7 @@ build_tree(nodes)
     tp->enums = NULL;
     strcpy(tp->label, "joint-iso-ccitt");
     tp->subid = 2;
+    tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
@@ -411,6 +412,7 @@ build_tree(nodes)
     tp->enums = NULL;
     strcpy(tp->label, "ccitt");
     tp->subid = 0;
+    tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
@@ -425,6 +427,7 @@ build_tree(nodes)
     tp->enums = NULL;
     strcpy(tp->label, "iso");
     tp->subid = 1;
+    tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
     /* XXX nodes isn't needed in do_subtree() ??? */
@@ -517,6 +520,7 @@ do_subtree(root, nodes)
 	tp->child_list = NULL;
 	strcpy(tp->label, np->label);
 	tp->subid = np->subid;
+      tp->tc_index = np->tc_index;
 	tp->type = translation_table[np->type];
 	tp->enums = np->enums;
 	np->enums = NULL;	/* so we don't free them later */
@@ -705,6 +709,7 @@ parse_objectid(fp, name)
 		    strcpy(np->label, nop->label);
 		if (nop->subid != -1)
 		    np->subid = nop->subid;
+              np->tc_index = -1;
 		np->type = 0;
 		np->enums = 0;
 		/* set up next entry */
@@ -777,6 +782,25 @@ get_tc(descriptor, ep)
 	}
     }
     return LABEL;
+}
+
+/* return index into tclist of given TC descriptor
+   return -1 if not found
+ */
+static int
+get_tc_index(descriptor)
+    char *descriptor;
+{
+    int i;
+
+    for(i = 0; i < MAXTC; i++){
+      if (tclist[i].type == 0)
+          break;
+      if (!strcmp(descriptor, tclist[i].descriptor)){
+          return i;
+      }
+    }
+    return -1;
 }
 
 /*
@@ -928,6 +952,7 @@ parse_objecttype(fp, name)
     }
     np = (struct node *)Malloc(sizeof(struct node));
     np->next = 0;
+    np->tc_index = -1;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
     type = get_token(fp, token,MAXTOKEN);
@@ -940,6 +965,7 @@ parse_objecttype(fp, name)
 	}
 #endif
 	type = tctype;
+        np->tc_index = get_tc_index(token); /* store TC for later reference */
     }
     np->type = type;
     nexttype = get_token(fp, nexttoken,MAXTOKEN);
@@ -1251,6 +1277,7 @@ parse_objectgroup(fp, name)
     register struct enum_list *ep;
 
     np = (struct node *)Malloc(sizeof(struct node));
+    np->tc_index = -1;
     np->type = 0;
     np->next = 0;
     np->enums = 0;
@@ -1324,6 +1351,7 @@ parse_notificationDefinition(fp, name)
     register struct enum_list *ep;
 
     np = (struct node *)Malloc(sizeof(struct node));
+    np->tc_index = -1;
     np->type = 0;
     np->next = 0;
     np->enums = 0;
@@ -1397,6 +1425,7 @@ parse_trapDefinition(fp, name)
     register struct enum_list *ep;
 
     np = (struct node *)Malloc(sizeof(struct node));
+    np->tc_index = -1;
     np->type = 0;
     np->next = 0;
     np->enums = 0;
@@ -1488,6 +1517,7 @@ parse_compliance(fp, name)
     register struct enum_list *ep;
 
     np = (struct node *)Malloc(sizeof(struct node));
+    np->tc_index = -1;
     np->type = 0;
     np->next = 0;
     np->enums = 0;
@@ -1541,6 +1571,7 @@ parse_moduleIdentity(fp, name)
     register struct enum_list *ep;
 
     np = (struct node *)Malloc(sizeof(struct node));
+    np->tc_index = -1;
     np->type = 0;
     np->next = 0;
     np->enums = 0;
@@ -1852,6 +1883,8 @@ skipget:
     for(np = root; np; np = np->next){
 	printf("%s ::= { %s %d } (%d)\n", np->label, np->parent, np->subid,
 		np->type);
+        if (np->tc_index >= 0)
+            printf("TC = %s\n",tclist[np->tc_index].descriptor);
 	if (np->enums){
 	    printf("Enums: \n");
 	    for(ep = np->enums; ep; ep = ep->next){
