@@ -1,12 +1,128 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.2.4 -> V4.2.5
+
+2002-05-06 16:13  hardaker
+
+	* configure, config.h.in, configure.in, snmplib/snmp_api.c
+
+	use size_t when socklen_t is not available (correctly done this time)
+	
+2002-05-06 15:49  hardaker
+
+	* configure, acconfig.h, config.h.in, configure.in
+
+	use size_t when socklen_t is not available
+	
+2002-05-06 15:46  hardaker
+
+	* snmplib/snmp_api.c 
+
+	use size_t when socklen_t is not available
+	
+2002-05-06 15:38  hardaker
+
+	* snmplib/snmp_api.c 
+
+	bug #551391: change size_t to socklen_t
+	
+2002-05-06 09:37  hardaker
+
+	* agent/mibgroup/smux/smux.c 
+
+	bug #547010: fix smux auth bug as reported and fixed by Stefan Radman
+	
+2002-05-02 02:18  jbpn
+
+	* agent/mibgroup/mibII/sysORTable.c 
+
+	  - don't reference some memory after free()ing it (in a very rare
+	    code path), noted by Urs Thuermann.
+	
+2002-05-01 09:39  jbpn
+
+	* agent/mibgroup/mibII/sysORTable.c 
+
+	  - fix bug #548571, whereby a kill -TERM can cause a segfault, noted
+	    by Urs Thuermann.
+	
+2002-05-01 07:45  hardaker
+
+	* mibs/UCD-SNMP-MIB.txt 
+
+	remove old (and conflicting with traps) transport domain OIDs
+	
+2002-05-01 03:42  jbpn
+
+	* NEWS 
+
+	  - add section for 4.2.5, mention PID bug fix
+	
+2002-04-30 10:59  hardaker
+
+	* README.snmpv3 
+
+	reorder sentences a bit to force putting VACM config before
+	changing passwords
+	
+2002-04-30 08:16  jbpn
+
+	* agent/snmpd.c 
+
+	  - fix bug #545775, reported by Dave Denson, whereby the PID of an
+	    already-running snmpd would be overwritten by starting a new snmpd
+	    (which would then exit, leaving the original snmpd running and the
+	    wrong PID in the file).  Solution is not to write the PID until we
+	    have successfully opened all our sockets.
+	
+2002-04-27 01:23  dts12
+
+	* aclocal.m4, configure 
+
+	Fudge to try and ensure 'dlopen' is detected correctly.
+	
+2002-04-26 04:11  dts12
+
+	* agent/mibgroup/ucd-snmp/memory.c 
+
+	Handle memory values > 32bit (latching at 2^32-1)
+	Patch #548663 from Rob Myers
+	
+2002-04-25 16:19  hardaker
+
+	* perl/SNMP/t/mib.t 
+
+	fix the last broken make test for perl
+	
+2002-04-25 16:15  hardaker
+
+	* snmplib/mib.c 
+
+	fix the get_symbol replacement initializing a variable.
+	 - this fixes all but one of the 4.2.4 perl problems.
+	
+2002-04-18 01:46  dts12
+
+	* FAQ 
+
+	Replace the dlmod WHERE with something more meaningful....
+	
+2002-04-16 08:20  dts12
+
+	* FAQ 
+
+	Add an entry about the 'libcrypto' dependency.
+	
+-------------------------------------------------------------------------------
+
 Changes: V4.2.3 -> V4.2.4
 	
 2002-04-04 15:24  hardaker
 
    * snmplib/: snmp_api.c, snmp_api.h:
 
-   patch from Petter Larsen to add a function for extracting the fd associated with a session
+	patch from Petter Larsen to add a function for extracting the fd
+	associated with a session
    
 2002-04-04 15:14  hardaker
 
