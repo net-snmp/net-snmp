@@ -5138,7 +5138,7 @@ snmp_add_var(struct snmp_pdu *pdu,
     int result = 0;
     char *ecp;
     int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
-    u_char buf[SPRINT_MAX_LEN];
+    u_char buf[SPRINT_MAX_LEN], *bufptr = buf;
     size_t tint;
     long ltmp;
     struct tree *tp;
@@ -5282,9 +5282,10 @@ snmp_add_var(struct snmp_pdu *pdu,
 	}
         if (type == 'd'){
           ltmp = ascii_to_binary(value, buf);
-        } else if (type == 's'){
-          strcpy((char*)buf, value);
-          ltmp = strlen((char*)buf);
+        } else if (type == 's') {
+	  /*  Don't copy buffer here -- completely pointless.  */
+	  bufptr = value;
+          ltmp = strlen((char*)value);
         } else if (type == 'x'){
           ltmp = hex_to_binary(value, buf);
         }
@@ -5305,7 +5306,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 		break;
 	    }
 	}
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, ltmp);
+        snmp_pdu_add_variable(pdu, name, name_length,
+			      ASN_OCTET_STR, bufptr, ltmp);
         break;
 
       case 'n':
