@@ -25,17 +25,17 @@
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
 .SH SYNOPSIS
 .B snmpcmd
-[OPTIONS] AGENT [COMMUNITY] PARAMETERS
+[OPTIONS] AGENT [PARAMETERS]
 .SH DESCRIPTION
 This manual page describes the common options for the SNMP commands:
 .BR snmpbulkget ", " snmpbulkwalk ", "  snmpdelta ", " snmpget ", "
 .BR snmpgetnext ", " snmpnetstat ", " snmpset ", " snmpstatus ", "
 .BR snmptable ", " snmptest ", " snmptrap ", " snmpusm ", " snmpwalk ".  "
 The command line applications use the SNMP protocol to communicate
-with an SNMP capable network entity, an agent.  Individual applications
-typically take additional parameters that are given after the agent
-specification and optional community.  These parameters are documented
-in the manual pages for each application.
+with an SNMP capable network entity, an agent.  Individual
+applications typically (but not necessarily) take additional
+parameters that are given after the agent specification.  These
+parameters are documented in the manual pages for each application.
 
 .SH OPTIONS
 .TP
@@ -48,7 +48,7 @@ Set the authentication pass phrase used for authenticated SNMPv3
 messages.
 .TP
 .BI -c " community"
-Set the community for SNMPv1/v2c transactions.
+Set the community string for SNMPv1/v2c transactions.
 .TP
 .B -d
 Dump (in hexadecimal) the sent and received SNMP packets.
@@ -150,17 +150,6 @@ specifies the remote SNMP entity with which to communicate.  The format
 of this parameter is defined in the
 .B AGENT SPECIFICATION
 section below.
-.PP
-For version 1 or version 2c,
-.I COMMUNITY
-specifies the community name for the transaction with the remote system.
-If a
-.I snmp.conf
-file specifies a
-.I defCommunity
-this is not a positional parameter. The 
-.BI -c " COMMUNITY"
-form is preferred in any case.
 .SH AGENT SPECIFICATION
 The
 .I AGENT
