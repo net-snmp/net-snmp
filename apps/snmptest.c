@@ -81,6 +81,7 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 #include "default_store.h"
 #include "snmp_transport.h"
+#include "tools.h"
 
 int command = SNMP_MSG_GET;
 
@@ -98,7 +99,6 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
-    struct sockaddr_in *respIp;
     struct variable_list *vars, *vp;
     snmp_transport *transport = NULL;
     int	ret;
@@ -410,26 +410,42 @@ getValue:
 		vp->val_len = sizeof(long);
 		break;
 	    case ASN_OCTET_STR:
-		if (ch == 'd'){
-		    val_len = ascii_to_binary(buf, value);
-		    if (vp->val_len < 0) {
+		if (ch == 'd') {
+		    size_t buf_len = 256;
+		    val_len = 0;
+		    if ((vp->val.string = (u_char *)malloc(buf_len)) == NULL) {
+			printf("malloc failure\n");
+			goto getValue;
+		    }
+		    if (!snmp_decimal_to_binary(&(vp->val.string), &buf_len,
+						&val_len, 1, buf)) {
 			printf("Bad value or no sub-identifier > 255\n");
 			goto getValue;
 		    }
 		    vp->val_len = val_len;
-		} else if (ch == 's'){
-		    strcpy((char*)value, buf);
-		    vp->val_len = strlen(buf);
-		} else if (ch == 'x'){
-		    val_len = hex_to_binary(buf, value);
-		    if (vp->val_len < 0) {
+		} else if (ch == 's') {
+		    /*  -1 to omit trailing newline  */
+		    vp->val.string = (u_char *)malloc(strlen(buf) - 1);
+		    if (vp->val.string == NULL) {
+			printf("malloc failure\n");
+			goto getValue;
+		    }
+		    memcpy(vp->val.string, buf, strlen(buf) - 1);
+		    vp->val_len = strlen(buf) - 1;
+		} else if (ch == 'x') {
+		    size_t buf_len = 256;
+		    val_len = 0;
+		    if ((vp->val.string = (u_char *)malloc(buf_len)) == NULL) {
+			printf("malloc failure\n");
+			goto getValue;
+		    }
+		    if (!snmp_hex_to_binary(&(vp->val.string), &buf_len,
+					    &val_len, 1, buf)) {
 			printf("Bad value (need pairs of hex digits)\n");
 			goto getValue;
 		    }
 		    vp->val_len = val_len;
 		}
-		vp->val.string = (u_char *)malloc(vp->val_len);
-		memmove(vp->val.string, value, vp->val_len);
 		break;
 	    case ASN_NULL:
 		vp->val_len = 0;
