@@ -123,6 +123,9 @@
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
 
+/* pattern for temporary file names */
+#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
+
 /* testing code sections. */
 #undef SNMP_TESTING_CODE 
 
@@ -843,7 +846,6 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
-#ifndef PACKAGE_NAME
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -858,7 +860,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-#endif
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
