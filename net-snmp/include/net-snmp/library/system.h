@@ -64,7 +64,6 @@ SOFTWARE.
         int             d_namlen;       /* Name length */
         char            d_name[257];    /* file name */
     } _DIRECT;
-#endif /* HAVE_DIRENT_H */
 
     /*
      * structure for dir operations 
@@ -80,6 +79,7 @@ SOFTWARE.
     DIR            *opendir(const char *filename);
     struct direct  *readdir(DIR * dirp);
     int             closedir(DIR * dirp);
+#endif /* HAVE_DIRENT_H */
 
 #ifndef HAVE_GETTIMEOFDAY
     int             gettimeofday(struct timeval *, struct timezone *tz);

@@ -1,6 +1,10 @@
 /*
  * system.c
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
         Copyright 1992 by Carnegie Mellon University
 
@@ -22,6 +26,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 /*
  * System dependent routines go here
  */
@@ -463,7 +473,7 @@ get_myaddr(void)
          */
         remote_in_addr.sin_family = AF_INET;
         remote_in_addr.sin_port = htons(IPPORT_ECHO);
-        remote_in_addr.sin_addr.s_addr = inet_addr("128.22.33.11");
+        remote_in_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
         result =
             connect(hSock, (LPSOCKADDR) & remote_in_addr,
                     sizeof(SOCKADDR));
@@ -527,7 +537,10 @@ winsock_startup(void)
     int             i;
     static char     errmsg[100];
 
-    VersionRequested = MAKEWORD(1, 1);
+	/* winsock 1: use MAKEWORD(1,1) */
+	/* winsock 2: use MAKEWORD(2,2) */
+
+    VersionRequested = MAKEWORD(2,2);
     i = WSAStartup(VersionRequested, &stWSAData);
     if (i != 0) {
         if (i == WSAVERNOTSUPPORTED)
@@ -752,8 +765,8 @@ get_uptime(void)
             if (kid != -1) {
                 named = kstat_data_lookup(ks, "lbolt");
                 if (named) {
-#ifdef KSTAT_DATA_INT32
-                    lbolt = named->value.ul;
+#ifdef KSTAT_DATA_UINT32
+                    lbolt = named->value.ui32;
 #else
                     lbolt = named->value.ul;
 #endif
@@ -953,17 +966,24 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
     char           *entry;
     char            buf[SNMP_MAXPATH];
 
+#if defined (WIN32) || defined (cygwin)
+    /* convert backslash to forward slash */
+    for (entry = ourcopy; *entry; entry++)
+        if (*entry == '\\')
+            *entry = '/';
+#endif
+
     entry = strtok(ourcopy, "/");
 
     buf[0] = '\0';
 
-#ifdef WIN32
+#if defined (WIN32) || defined (cygwin)
     /*
      * Check if first entry contains a drive-letter
-     *   e.g  "c:\path"
+     *   e.g  "c:/path"
      */
     if ((entry) && (':' == entry[1]) &&
-        (('\0' == entry[2]) || ('/' == entry[2]) || ('\\' == entry[1]))) {
+        (('\0' == entry[2]) || ('/' == entry[2]))) {
         strcat(buf, entry);
         entry = strtok(NULL, "/");
     }

@@ -28,24 +28,39 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
     
-    if ($Config{'osname'} eq 'MSWin32') {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
+
+      # Grab command line options first.  Only used if environment variables are not set
+      GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
+        "NET-SNMP-PATH=s"      => \$ret{'prefix'},          
+        "NET-SNMP-DEBUG=s"     => \$ret{'debug'});
+
       if ($ENV{'NET-SNMP-IN-SOURCE'})
       {
 	$ret{'insource'} = $ENV{'NET-SNMP-IN-SOURCE'};
+        undef ($ret{'prefix'});
       }
       elsif ($ENV{'NET-SNMP-PATH'})
       {
 	$ret{'prefix'} = $ENV{'NET-SNMP-PATH'};
       }
-      else
-      {
-	# don't have env vars, pull from command line and put there
-	GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
-	           "NET-SNMP-PATH=s"      => \$ret{'prefix'});
 
-	$ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
-	$ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
+      if ($ENV{'NET-SNMP-DEBUG'})
+      {
+	$ret{'debug'} = $ENV{'NET-SNMP-DEBUG'};
       }
+
+      # Update environment variables in case they are needed
+      $ENV{'NET-SNMP-IN-SOURCE'}    = $ret{'insource'};
+      $ENV{'NET-SNMP-PATH'}         = $ret{'prefix'};
+      $ENV{'NET-SNMP-DEBUG'}        = $ret{'debug'};        
+     
+      $basedir = `%COMSPEC% /c cd`;
+      chomp $basedir;
+      $basedir =~ /(.*?)\\perl.*/;
+      $basedir = $1;
+      print "Net-SNMP base directory: $basedir\n";
+
     }
     else
     {
@@ -59,7 +74,7 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if ($ret{'insource'} eq "true" && $ret{'nsconfig'} eq "") {
+	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
 	} elsif ($ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="net-snmp-config";
@@ -75,5 +90,19 @@ sub NetSNMPGetOpts {
     $ret{'rootpath'} = $rootpath;
 
     \%ret;
+}
+
+sub find_files {
+    my($f,$d) = @_;
+    my ($dir,$found,$file);
+    for $dir (@$d){
+	$found = 0;
+	for $file (@$f) {
+	    $found++ if -f "$dir/$file";
+	}
+	if ($found == @$f) {
+	    return $dir;
+	}
+    }
 }
 

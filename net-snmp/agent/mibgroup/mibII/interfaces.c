@@ -3,6 +3,17 @@
  *
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(IFNET_NEEDS_KERNEL_LATE)
@@ -196,7 +207,9 @@
 
 /* if you want caching enabled for speed retrival purposes, set this to 5?*/
 #define MINLOADFREQ 0                     /* min reload frequency in seconds */
+#ifdef linux
 static unsigned long LastLoad = 0;        /* ET in secs at last table load */
+#endif
 
 extern struct timeval starttime;
 
@@ -1369,6 +1382,9 @@ var_ifEntry(struct variable * vp,
     case IFOUTQLEN:
         long_return = (u_long) ifstat.ifOutQLen;
         return (u_char *) & long_return;
+    case IFSPECIFIC:
+	long_return = (u_long) ifstat.ifSpecific;
+	return (u_char *) & long_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n",
                     vp->magic));

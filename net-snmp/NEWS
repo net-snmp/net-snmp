@@ -1,6 +1,49 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.1.2*
+ New:
+   - Minor improvements to snmpdelta (error reporting)
+   - Minor improvements to snmpnetstat (IPv6 output)
+
+ Fixes:
+   - Misc 64bit processor fixes.
+   - Misc perl build and install fixes.
+
+ Ports:
+   - Linux 2.6 improvements
+   - Win32 Suport for TCP and UDP over IPv6 via Winsock version 2
+   - Win32 fixes in many places.
+   - Win32 service support for snmptrapd
+   - Win32 support for snmpconf
+
+*5.1.1*
+ New:
+   - test suite supports testing over other transports (tcp, udp6, unix, ...)
+     (see the -P switch to the testing/RUNTESTS script)
+   - Solaris supports the use of it's PKCS#11 library for supporting
+     cryptographic functions (OpenSSL isn't required if PKCS#11 is available)
+     (see configure's --with-pkcs flag)
+
+ Fixes:
+   - Improvements on 64 bit architectures.
+   - A few minor memory leaks fixed.
+   - An extremely large number of minor bug fixes.
+   - Many perl module specific bug fixes.
+   - snmpd will safely handle more signals.
+
+ Ports:
+   - Many many significant Windows improvements.
+     - AgentX support is working again under windows.
+     - SCM support is built into the agent to allow the agent to be
+       started as a windows service.
+     - MSDOS names are supported in path names.
+     - A win32 build script in win32/build.pl
+     - Support for the MinGW compiler
+     - (see the README.win32 file for details on new ports)
+     - Various helpful win32/*.bat files for installation, etc.
+   - Some linux 2.6 support improvements
+
 *5.1*
  New:
 
@@ -970,3 +1013,4 @@ UCD-SNMP NEWS:
 *3.0*
 
 	Initial (public) Release
+yyy

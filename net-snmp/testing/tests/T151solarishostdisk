@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER root partition on Solaris using HOST-RESOURCES
+HEADER initial load device on Solaris using HOST-RESOURCES
 
 if test `uname -s` != "SunOS" ; then
     # a bogus skip for !suns
@@ -20,12 +20,12 @@ SKIPIFNOT USING_HOST_MODULE
 
 STARTAGENT
 
-# ask for the description of the first CPU in the system
+# ask  the index of the initial device
 
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.25.2.3.1.3.4"
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.25.1.3.0"
 
 STOPAGENT
 
-CHECKORDIE "^.1.3.6.1.2.1.25.2.3.1.3.4 = STRING: /$"
+CHECKORDIE "^.1.3.6.1.2.1.25.1.3.0 = INTEGER:"
 
 FINISHED

@@ -295,7 +295,8 @@ void
 debugmsg_suboid(const char *token, const oid * theoid, size_t len)
 {
     u_char         *buf = NULL;
-    size_t          buf_len = 0, out_len = 0, buf_overflow = 0;
+    size_t          buf_len = 0, out_len = 0;
+    int             buf_overflow = 0;
 
     netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
                                  &buf_overflow, theoid, len);

@@ -38,6 +38,20 @@ SOFTWARE.
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+
+/*
+ * hack-o-matic for Cygwin to use winsock2
+*/
+#if defined(cygwin)
+#undef HAVE_UNISTD_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_SYS_PARAM_H
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_IN_ADDR_T
+#endif
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -61,9 +75,12 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include "winstub.h"
+
+extern const char *inet_ntop(int, const void*, char*, size_t);
 #else
 #include <sys/socket.h>
 #include <netdb.h>
@@ -73,6 +90,7 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include "netstat.h"
 
+void            inet6print(struct in6_addr *, u_short, const char *);
 static char    *inet6name(struct in6_addr *);
 
 struct stat_table {

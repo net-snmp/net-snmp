@@ -24,8 +24,10 @@ subdirs:
 	        done \
 	fi
 
+# installlibs handles local, ucd and subdir libs. need to do subdir libs
+# before bins, sinze those libs may be needed for successful linking
 install: installlocalheaders @installucdheaders@ \
-         installlocallibs    @installucdlibs@    \
+         installlibs \
          installlocalbin      installlocalsbin   \
          installsubdirs      $(OTHERINSTALL)
 

@@ -343,7 +343,7 @@ netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
     if (!tokenname || !root || !curoid || !dumpfn)
         return;
 
-    for (i = 0; i < root->children_size; i++) {
+    for (i = 0; i < (int)root->children_size; i++) {
         if (root->children[i]) {
             for (tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
                 curoid[curoid_len] = tmpp->value;

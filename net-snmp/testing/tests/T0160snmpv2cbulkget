@@ -13,7 +13,7 @@ HEADER SNMPv2 bulkget of system components
 
 STARTAGENT
 
-CAPTURE "snmpbulkget $SNMP_FLAGS -v2c -On -Cn1 -Cr2 -c testcommunity udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4 .1.3.6.1.2.1.1"
+CAPTURE "snmpbulkget $SNMP_FLAGS -v2c -On -Cn1 -Cr2 -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4 .1.3.6.1.2.1.1"
 
 STOPAGENT
 

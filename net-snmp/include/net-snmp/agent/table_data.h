@@ -100,6 +100,7 @@ extern          "C" {
 
 
     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
+    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 #ifdef __cplusplus
 };
