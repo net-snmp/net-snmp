@@ -11,12 +11,6 @@
 @if "x$mfd_readme_verbose" eq "x"@
 @   eval $mfd_readme_verbose = 1@
 @end@
-@if "x$m2c_data_transient" eq "x"@
-@   eval $m2c_data_transient = 2@ # TRANSIENT
-@end@
-@if "x$m2c_include_examples" eq "x"@
-@   eval $m2c_include_examples = 1@
-@end@
 ########################################################################
 ## enum constants upper or lower case? (NODE_NAME vs node_name)
 @if "x$m2c_const_lc" eq "x"@
