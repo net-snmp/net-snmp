@@ -203,6 +203,7 @@ foreach my $progName (@programs) {
 my @programs = qw 
 /libagent
 libhelpers
+libnetsnmptrapd
 /;
 
 if ($sdk == 1) {
