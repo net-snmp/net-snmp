@@ -2487,7 +2487,7 @@ usm_read_user(char *line)
   }
   line = read_config_read_objid(line, &user->cloneFrom, &user->cloneFromLen);
   if (user->authProtocol) {
-    free(user->authProtocol);
+    SNMP_FREE(user->authProtocol);
     user->authProtocolLen = 0;
   }
   line = read_config_read_objid(line, &user->authProtocol,
@@ -2495,7 +2495,7 @@ usm_read_user(char *line)
   line = read_config_read_octet_string(line, &user->authKey,
                                        &user->authKeyLen);
   if (user->privProtocol) {
-    free(user->privProtocol);
+    SNMP_FREE(user->privProtocol);
     user->privProtocolLen = 0;
   }
   line = read_config_read_objid(line, &user->privProtocol,
