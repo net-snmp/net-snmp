@@ -146,11 +146,10 @@ struct trapVar {
 };
 
 /* changed to ERROR_MSG to eliminate conflict with other includes */
-#define ERROR_MSG(string)	snmp_detail = string
+#define ERROR_MSG(string)	snmp_set_detail((string))
 
 /* from snmp.c */
 extern u_char	sid[];	/* size SID_MAX_LEN */
-extern char *snmp_detail;
 extern int snmp_errno;
 
 
