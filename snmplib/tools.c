@@ -112,6 +112,29 @@ snmp_realloc(u_char **buf, size_t *buf_len)
   }
 }
 
+int
+snmp_strcat(u_char **buf, size_t *buf_len, size_t *out_len,
+	    int allow_realloc, const u_char *s)
+{
+  if (buf == NULL || buf_len == NULL || out_len == NULL) {
+    return 0;
+  }
+
+  if (s == NULL) {
+    /*  Appending a NULL string always succeeds since it is a NOP.  */
+    return 1;
+  }
+
+  while ((*out_len + strlen(s) + 1) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  strcpy((*buf + *out_len), s);
+  *out_len += strlen((*buf + *out_len));
+  return 1;
+}
 
 /*******************************************************************-o-******
  * free_zero
@@ -302,7 +325,6 @@ snmp_decimal_to_binary	(u_char **buf, size_t *buf_len, size_t *out_len,
     return 0;
   }
 
-  *out_len = 0;
   while (*cp != '\0') {
     if (isspace((int)*cp) || *cp == '.') {
       cp++;
@@ -342,7 +364,6 @@ snmp_hex_to_binary	(u_char **buf, size_t *buf_len, size_t *out_len,
     cp += 2;
   }
 
-  *out_len = 0;
   while (*cp != '\0') {
     if (isspace((int)*cp)) {
       cp++;
