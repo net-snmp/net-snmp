@@ -132,6 +132,8 @@ ucdDomains		OBJECT IDENTIFIER ::= { ucdavis 251 }
 ucdSnmpTCPDomain	OBJECT IDENTIFIER ::= { ucdDomains 1 }
 ucdSnmpUnixDomain	OBJECT IDENTIFIER ::= { ucdDomains 2 }
 ucdSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { ucdDomains 3 }
+ucdSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 4 }
+ucdSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 5 }
 
 --
 -- Define the Float Textual Convention
