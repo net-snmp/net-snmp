@@ -126,7 +126,7 @@ int netsnmp_agent_check_packet(netsnmp_session*, struct netsnmp_transport_s *,
 int netsnmp_agent_check_parse(netsnmp_session*, netsnmp_pdu*, int);
 void delete_subnetsnmp_tree_cache(netsnmp_agent_session  *asp);
 int handle_pdu(netsnmp_agent_session  *asp);
-int wrap_up_request(netsnmp_agent_session *asp, int status);
+int netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status);
 int check_delayed_request(netsnmp_agent_session  *asp);
 int handle_getnext_loop(netsnmp_agent_session  *asp);
 int handle_set_loop(netsnmp_agent_session  *asp);
@@ -779,7 +779,7 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
 }
 
 int
-check_for_delegated(netsnmp_agent_session *asp) {
+netsnmp_check_for_delegated(netsnmp_agent_session *asp) {
     int i;
     netsnmp_request_info *request;
     
@@ -795,7 +795,7 @@ check_for_delegated(netsnmp_agent_session *asp) {
 
 
 int
-wrap_up_request(netsnmp_agent_session *asp, int status)
+netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
 {
     netsnmp_variable_list *var_ptr;
     int i, n = 0, r = 0;
@@ -1101,14 +1101,14 @@ handle_snmp_packet(int op, netsnmp_session *session, int reqid,
     }
 
     /* check for uncompleted requests */
-    if (check_for_delegated(asp)) {
+    if (netsnmp_check_for_delegated(asp)) {
         /* add to delegated request chain */
 	asp->status = status;
 	asp->next = agent_delegated_list;
 	agent_delegated_list = asp;
     } else {
         /* if we don't have anything outstanding (delegated), wrap up */
-        return wrap_up_request(asp, status);
+        return netsnmp_wrap_up_request(asp, status);
     }
 
     /* done */
@@ -1117,8 +1117,9 @@ handle_snmp_packet(int op, netsnmp_session *session, int reqid,
 }
 
 netsnmp_request_info *
-add_varbind_to_cache(netsnmp_agent_session  *asp, int vbcount,
-                     netsnmp_variable_list *varbind_ptr, struct subtree *tp)
+netsnmp_add_varbind_to_cache(netsnmp_agent_session  *asp, int vbcount,
+                             netsnmp_variable_list *varbind_ptr,
+                             struct subtree *tp)
 {
     netsnmp_request_info *request = NULL;
     int cacheid;
@@ -1261,7 +1262,7 @@ check_acm(netsnmp_agent_session  *asp, u_char type) {
 
 
 int
-create_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
+netsnmp_create_subtree_cache(netsnmp_agent_session  *asp) {
     struct subtree *tp;
     netsnmp_variable_list *varbind_ptr, *vbsave, *vbptr, **prevNext;
     int view;
@@ -1386,7 +1387,8 @@ create_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
                 /* XXXWWW: check VACM here to see if "tp" is even worthwhile */
         }
         if (view == VACM_SUCCESS) {
-            request = add_varbind_to_cache(asp, vbcount, varbind_ptr, tp);
+            request = netsnmp_add_varbind_to_cache(asp, vbcount, varbind_ptr,
+                                                   tp);
             if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
                 request->repeat = bulkrep;
             }
@@ -1402,7 +1404,7 @@ create_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
 
 /* this function is only applicable in getnext like contexts */
 int
-reassign_requests(netsnmp_agent_session  *asp)
+netsnmp_reassign_requests(netsnmp_agent_session  *asp)
 {
     /* assume all the requests have been filled or rejected by the
        subtrees, so reassign the rejected ones to the next subtree in
@@ -1420,9 +1422,9 @@ reassign_requests(netsnmp_agent_session  *asp)
 
     for(i = 0; i < asp->vbcount; i++) {
         if (asp->requests[i].requestvb->type == ASN_NULL) {
-            if (!add_varbind_to_cache(asp, asp->requests[i].index,
-				      asp->requests[i].requestvb,
-				      asp->requests[i].subtree->next)) {
+            if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
+                                              asp->requests[i].requestvb,
+                                              asp->requests[i].subtree->next)) {
 		if (old_treecache != NULL) {
 		    free(old_treecache);
 		}
@@ -1431,9 +1433,9 @@ reassign_requests(netsnmp_agent_session  *asp)
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /* re-add the same subtree */
             asp->requests[i].requestvb->type = ASN_NULL;
-            if (!add_varbind_to_cache(asp, asp->requests[i].index,
-                                      asp->requests[i].requestvb,
-                                      asp->requests[i].subtree)) {
+            if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
+                                              asp->requests[i].requestvb,
+                                              asp->requests[i].subtree)) {
 		if (old_treecache != NULL) {
 		    free(old_treecache);
 		}
@@ -1449,7 +1451,7 @@ reassign_requests(netsnmp_agent_session  *asp)
 }
 
 void
-delete_netsnmp_request_infos(netsnmp_request_info *reqlist) {
+netsnmp_delete_request_infos(netsnmp_request_info *reqlist) {
     while(reqlist) {
         netsnmp_free_request_data_sets(reqlist);
         reqlist = reqlist->next;
@@ -1457,21 +1459,23 @@ delete_netsnmp_request_infos(netsnmp_request_info *reqlist) {
 }
 
 void
-delete_subnetsnmp_tree_cache(netsnmp_agent_session  *asp) {
+netsnmp_delete_subtree_cache(netsnmp_agent_session  *asp) {
     while(asp->treecache_num >= 0) {
         /* don't delete subtrees */
-        delete_netsnmp_request_infos(asp->treecache[asp->treecache_num]
-                             .requests_begin);
+        netsnmp_delete_request_infos(asp->treecache[asp->treecache_num].requests_begin);
         asp->treecache_num--;
     }
 }
 
 int
-check_requests_status(netsnmp_agent_session  *asp, netsnmp_request_info *requests) {
+netsnmp_check_requests_status(netsnmp_agent_session  *asp,
+                              netsnmp_request_info *requests,
+                              int look_for_specific) {
     /* find any errors marked in the requests */
     while(requests) {
         if (requests->status != SNMP_ERR_NOERROR &&
-            (asp->index == 0 ||
+            (!look_for_specific || requests->status == look_for_specific) &&
+            (look_for_specific || asp->index == 0 ||
              requests->index < asp->index)) {
             asp->index = requests->index;
             asp->status = requests->status;
@@ -1482,10 +1486,12 @@ check_requests_status(netsnmp_agent_session  *asp, netsnmp_request_info *request
 }
 
 int
-check_all_requests_status(netsnmp_agent_session  *asp) {
+netsnmp_check_all_requests_status(netsnmp_agent_session  *asp,
+                                  int look_for_specific) {
     int i;
     for(i = 0; i <= asp->treecache_num; i++) {
-        check_requests_status(asp, asp->treecache[i].requests_begin);
+        netsnmp_check_requests_status(asp, asp->treecache[i].requests_begin,
+                                      look_for_specific);
     }
     return asp->status;
 }
@@ -1510,11 +1516,28 @@ handle_var_requests(netsnmp_agent_session  *asp) {
     for(i=0; i <= asp->treecache_num; i++) {
         reginfo = asp->treecache[i].subtree->reginfo;
         status = netsnmp_call_handlers(reginfo, asp->reqinfo,
-                               asp->treecache[i].requests_begin);
+                                       asp->treecache[i].requests_begin);
 
-        /* find any errors marked in the requests */
-        retstatus =
-            check_requests_status(asp, asp->treecache[i].requests_begin);
+        /* find any errors marked in the requests.  For later parts of
+         SET processing, only check for new errors specific to that
+         set processing directive (which must superceed the previous
+         errors).*/
+        switch (asp->mode) {
+            case MODE_SET_COMMIT:
+                retstatus =
+                    netsnmp_check_requests_status(asp, asp->treecache[i].requests_begin, SNMP_ERR_COMMITFAILED);
+                break;
+
+            case MODE_SET_UNDO:
+                retstatus =
+                    netsnmp_check_requests_status(asp, asp->treecache[i].requests_begin, SNMP_ERR_UNDOFAILED);
+                break;
+
+            default:
+                retstatus =
+                    netsnmp_check_requests_status(asp, asp->treecache[i].requests_begin, 0);
+                break;
+        }
 
         /* always take lowest varbind if possible */
         if (retstatus != SNMP_ERR_NOERROR)
@@ -1541,12 +1564,12 @@ handle_var_requests(netsnmp_agent_session  *asp) {
 /* loop through our sessions known delegated sessions and check to see
    if they've completed yet */ 
 void
-netsnmp_check_outstanding_agent_requests(int status) {
+netsnmp_check_outstanding_agent_requests(void) {
     netsnmp_agent_session *asp, *prev_asp = NULL, *next_asp = NULL;
 
     for(asp = agent_delegated_list; asp; prev_asp = asp, asp = next_asp) {
         next_asp = asp->next; /* save in case we clean up asp */
-        if (!check_for_delegated(asp)) {
+        if (!netsnmp_check_for_delegated(asp)) {
 
             /* we're done with this one, remove from queue */
             if (prev_asp != NULL)
@@ -1590,13 +1613,12 @@ int
 check_delayed_request(netsnmp_agent_session  *asp) {
     int status = SNMP_ERR_NOERROR;
     
-    check_all_requests_status(asp); /* update the asp->status */
-
     switch(asp->mode) {
         case SNMP_MSG_GETBULK:
         case SNMP_MSG_GETNEXT:
+            netsnmp_check_all_requests_status(asp, 0);
             handle_getnext_loop(asp);
-            if (check_for_delegated(asp) &&
+            if (netsnmp_check_for_delegated(asp) &&
                 netsnmp_check_transaction_id(asp->pdu->transid) != SNMPERR_SUCCESS) {
                 /* add to delegated request chain */
                 asp->next = agent_delegated_list;
@@ -1604,18 +1626,27 @@ check_delayed_request(netsnmp_agent_session  *asp) {
             }
             break;
 
+        case MODE_SET_COMMIT:
+            netsnmp_check_all_requests_status(asp,
+                                              SNMP_ERR_COMMITFAILED);
+            goto settop;
+            
+        case MODE_SET_UNDO:
+            netsnmp_check_all_requests_status(asp,
+                                              SNMP_ERR_UNDOFAILED);
+            goto settop;
+
         case MODE_SET_BEGIN:
         case MODE_SET_RESERVE1:
         case MODE_SET_RESERVE2:
         case MODE_SET_ACTION:
-        case MODE_SET_COMMIT:
         case MODE_SET_FREE:
-        case MODE_SET_UNDO:
+      settop:
             handle_set_loop(asp);
             if (asp->mode != FINISHED_SUCCESS &&
                 asp->mode != FINISHED_FAILURE) {
 
-                if (check_for_delegated(asp)) {
+                if (netsnmp_check_for_delegated(asp)) {
                     /* add to delegated request chain */
                     if (!asp->status)
                         asp->status = status;
@@ -1632,8 +1663,8 @@ check_delayed_request(netsnmp_agent_session  *asp) {
     }
     
     /* if we don't have anything outstanding (delegated), wrap up */
-    if (!check_for_delegated(asp))
-        return wrap_up_request(asp, status);
+    if (!netsnmp_check_for_delegated(asp))
+        return netsnmp_wrap_up_request(asp, status);
 
     return 1;
 }
@@ -1724,7 +1755,7 @@ handle_getnext_loop(netsnmp_agent_session  *asp) {
     while (1) {
 
         /* bail for now if anything is delegated. */
-        if (check_for_delegated(asp)) {
+        if (netsnmp_check_for_delegated(asp)) {
                 return SNMP_ERR_NOERROR;
         }
 
@@ -1752,7 +1783,7 @@ handle_getnext_loop(netsnmp_agent_session  *asp) {
 	    }
         }
 
-        reassign_requests(asp);
+        netsnmp_reassign_requests(asp);
         status = handle_var_requests(asp);
         if (status != SNMP_ERR_NOERROR) {
             return status; /* should never really happen */
@@ -1813,17 +1844,12 @@ handle_set(netsnmp_agent_session  *asp) {
             case MODE_SET_COMMIT:
                 if (asp->status != SNMP_ERR_NOERROR) {
                     asp->mode = FINISHED_FAILURE;
-                    asp->status = SNMP_ERR_COMMITFAILED;
                 } else {
                     asp->mode = FINISHED_SUCCESS;
 		}
                 break;
 
             case MODE_SET_UNDO:
-                if (asp->status != SNMP_ERR_NOERROR) {
-                    asp->status = SNMP_ERR_UNDOFAILED;
-                    asp->index = 0;
-                }
                 asp->mode = FINISHED_FAILURE;
                 break;
 
@@ -1839,14 +1865,9 @@ handle_set(netsnmp_agent_session  *asp) {
         status = handle_var_requests(asp);
         DEBUGMSGTL(("agent_set", "did set mode = %d, status = %d\n",
                     asp->mode, status));
-        if (status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR) {
-	    if (asp->mode == MODE_SET_COMMIT) {
-		asp->status = SNMP_ERR_COMMITFAILED;
-	    } else if (asp->mode == MODE_SET_UNDO) {
-		asp->status = SNMP_ERR_UNDOFAILED;
-	    } else {
-		asp->status = status;
-	    }
+        if ((status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR) ||
+            status == SNMP_ERR_COMMITFAILED || status == SNMP_ERR_UNDOFAILED ) {
+            asp->status = status;
 	}
     }
     return asp->status;
@@ -1857,7 +1878,7 @@ handle_set_loop(netsnmp_agent_session  *asp)
 {
     while(asp->mode != FINISHED_FAILURE && asp->mode != FINISHED_SUCCESS) {
         handle_set(asp);
-        if (check_for_delegated(asp))
+        if (netsnmp_check_for_delegated(asp))
             return SNMP_ERR_NOERROR;
         if (asp->pdu->flags & UCD_MSG_FLAG_ONE_PASS_ONLY)
             return asp->status;
@@ -1887,10 +1908,12 @@ handle_pdu(netsnmp_agent_session  *asp)
         case SNMP_MSG_GETBULK:
 	    for (v = asp->pdu->variables; v != NULL; v = v->next_variable) {
 		if (v->type == ASN_PRIV_INCL_RANGE) {
-		    /*  Leave the type for now (it gets set to ASN_NULL in
-			add_varbind_to_cache, called by create_subnetsnmp_tree_cache
-			below).  If we set it to ASN_NULL now, we wouldn't
-			be able to distinguish INCLUSIVE search ranges.  */
+		    /*  Leave the type for now (it gets set to
+			ASN_NULL in netsnmp_add_varbind_to_cache,
+			called by create_subnetsnmp_tree_cache below).
+			If we set it to ASN_NULL now, we wouldn't be
+			able to distinguish INCLUSIVE search
+			ranges.  */
 		    inclusives++;
 		} else {
 		    snmp_set_var_typed_value(v, ASN_NULL, NULL, 0);
@@ -1902,7 +1925,7 @@ handle_pdu(netsnmp_agent_session  *asp)
         case SNMP_MSG_INTERNAL_SET_RESERVE1:
         default:
             /* collect varbinds */
-            status = create_subnetsnmp_tree_cache(asp);
+            status = netsnmp_create_subtree_cache(asp);
             if (status != SNMP_ERR_NOERROR)
                 return status;
     }

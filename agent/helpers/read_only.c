@@ -65,7 +65,7 @@ netsnmp_read_only_helper(
  *  use.
  */
 void
-init_netsnmp_read_only_helper(void) 
+netsnmp_init_read_only_helper(void) 
 {
     netsnmp_register_handler_by_name("read_only", netsnmp_get_read_only_handler());
 }

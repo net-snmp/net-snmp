@@ -34,7 +34,7 @@ netsnmp_get_bulk_to_next_handler(void) {
 /** takes answered requests and decrements the repeat count and
  *  updates the requests to the next to-do varbind in the list */
 void
-bulk_to_next_fix_requests(netsnmp_request_info              *requests) 
+netsnmp_bulk_to_next_fix_requests(netsnmp_request_info              *requests) 
 {
     netsnmp_request_info              *request;
     /* update the varbinds for the next request series */
@@ -62,7 +62,6 @@ netsnmp_bulk_to_next_helper(
     netsnmp_request_info              *requests) {
 
     int ret;
-    netsnmp_request_info              *request;
 
     switch(reqinfo->mode) {
         
@@ -72,7 +71,7 @@ netsnmp_bulk_to_next_helper(
             reqinfo->mode = MODE_GETBULK;
 
             /* update the varbinds for the next request series */
-            bulk_to_next_fix_requests(requests);
+            netsnmp_bulk_to_next_fix_requests(requests);
             return ret;
             
         default:
@@ -86,7 +85,7 @@ netsnmp_bulk_to_next_helper(
  *  use.
  */
 void
-init_netsnmp_bulk_to_next_helper(void) 
+netsnmp_init_bulk_to_next_helper(void) 
 {
     netsnmp_register_handler_by_name("bulk_to_next", netsnmp_get_bulk_to_next_handler());
 }

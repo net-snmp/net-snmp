@@ -256,7 +256,7 @@ agentx_got_response(int operation,
         }
 
         if (cache->reqinfo->mode == MODE_GETBULK)
-            bulk_to_next_fix_requests(requests);
+            netsnmp_bulk_to_next_fix_requests(requests);
     } else {
         /* mark set requests as handled */
         for(request = requests; request; request = request->next) {
