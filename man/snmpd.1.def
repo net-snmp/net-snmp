@@ -210,15 +210,18 @@ the same error on other platforms.
 checks for the existence of and parses the following files:
 .TP 6
 .B DATADIR/snmp/snmp.conf
-Common configuration for the agent and applications. See snmp.conf(5)
+Common configuration for the agent and applications. See
+.I snmp.conf(5)
 for details.
 .TP
 .B DATADIR/snmp/snmpd.conf
 .TP
 .B DATADIR/snmp/snmpd.local.conf
-Agent-specific configuration.  See snmpd.conf(5) for details.  These
-files are optional and may be used to configure access control, trap
-generation, subagent protocols and much else besides.
+Agent-specific configuration.  See
+.I snmpd.conf(5)
+for details.  These files are optional and may be used to configure
+access control, trap generation, subagent protocols and much else
+besides.
 .IP
 In addition to these two configuration files in DATADIR/snmp, the
 agent will read any files with the names

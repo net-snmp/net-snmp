@@ -25,7 +25,9 @@ Finally, applications that store persistent data will also look in the
 .SH "CONFIGURATION FILE TYPES"
 Each application may use multiple configuration files, which will
 configure various different aspects of the application.  For instance, 
-the SNMP agent (snmpd) knows how to understand configuration
+the SNMP agent
+.RB ( snmpd )
+knows how to understand configuration
 directives in both the snmpd.conf and the snmp.conf files.  In fact,
 most applications understand how to read the contents of the snmp.conf 
 files.  Note, however, that configuration directives understood in one 
@@ -88,7 +90,8 @@ are treated as a comment and are not parsed.
 .PP
 Information about writing C code that makes use of this system in
 either the agent's mib modules or in applications can be found in the
-read_config(3) manual page.
+.I read_config(3)
+manual page.
 .SH "SEE ALSO"
 read_config(3).
 .\" Local Variables:
