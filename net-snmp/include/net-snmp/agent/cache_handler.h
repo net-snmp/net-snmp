@@ -53,6 +53,14 @@ extern          "C" {
 	netsnmp_cache *next, *prev;
         oid *rootoid;
         int  rootoid_len;
+
+        /*
+	 * Allow the load routine to link into the calling handler chain
+	 */
+        netsnmp_mib_handler          *handler;
+        netsnmp_handler_registration *reginfo;
+        netsnmp_agent_request_info   *reqinfo;
+        netsnmp_request_info         *requests;
     };
 
 

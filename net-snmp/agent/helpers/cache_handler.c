@@ -425,6 +425,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                 reqinfo->mode, reginfo->handlerName));
     DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid,
                  reginfo->rootoid_len));
+    DEBUGMSG(("helper:cache_handler", "\n"));
 
     netsnmp_assert(handler->flags & MIB_HANDLER_AUTO_NEXT);
 
@@ -436,6 +437,15 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                   "cache not found, disabled or had no load method\n"));
         return SNMP_ERR_NOERROR;
     }
+
+    /*
+     * Make the handler-chain parameters available to
+     * the cache_load hook routine.
+     */
+    cache->handler  = handler;
+    cache->reginfo  = reginfo;
+    cache->reqinfo  = reqinfo;
+    cache->requests = requests;
 
     switch (reqinfo->mode) {
 
@@ -472,6 +482,10 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         netsnmp_cache_check_and_reload(cache);
         netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
         cache->cache_hint = NULL;
+        cache->handler  = NULL;
+        cache->reginfo  = NULL;
+        cache->reqinfo  = NULL;
+        cache->requests = NULL;
         /** next handler called automatically - 'AUTO_NEXT' */
         }
         return SNMP_ERR_NOERROR;
