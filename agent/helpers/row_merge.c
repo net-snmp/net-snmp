@@ -49,9 +49,108 @@ netsnmp_register_row_merge(netsnmp_handler_registration *reginfo)
     return netsnmp_register_handler(reginfo);
 }
 
+static void
+_rm_status_free(void *mem)
+{
+    netsnmp_row_merge_status *rm_status = (netsnmp_row_merge_status*)mem;
+
+    if (NULL != rm_status->saved_requests)
+        free(rm_status->saved_requests);
+
+    if (NULL != rm_status->saved_status)
+        free(rm_status->saved_status);
+
+    free(mem);
+}
+
+
+/** retrieve row_merge_status
+ */
+netsnmp_row_merge_status *
+netsnmp_row_merge_status_get(netsnmp_handler_registration *reginfo,
+                             netsnmp_agent_request_info *reqinfo,
+                             int create_missing)
+{
+    netsnmp_row_merge_status *rm_status;
+    char buf[64];
+    int rc;
+
+    /*
+     * see if we've already been here
+     */
+    rc = snprintf(buf, sizeof(buf), "row_merge:%p", reginfo);
+    if ((-1 == rc) || (rc >= sizeof(buf))) {
+        snmp_log(LOG_ERR,"error creating key\n");
+        return NULL;
+    }
+    
+    rm_status = netsnmp_agent_get_list_data(reqinfo, buf);
+    if ((NULL == rm_status) && create_missing) {
+        void *data_list;
+        
+        rm_status = SNMP_MALLOC_TYPEDEF(netsnmp_row_merge_status);
+        if (NULL == rm_status) {
+            snmp_log(LOG_ERR,"error allocating memory\n");
+            return NULL;
+        }
+        data_list = netsnmp_create_data_list(buf, rm_status,
+                                             _rm_status_free);
+        if (NULL == data_list) {
+            free(rm_status);
+            return NULL;
+        }
+        netsnmp_agent_add_list_data(reqinfo, data_list);
+    }
+    
+    return rm_status;
+}
+
+/** Determine if this is the first row
+ *
+ * returns 1 if this is the first row for this pass of the handler.
+ */
+int
+netsnmp_row_merge_status_first(netsnmp_handler_registration *reginfo,
+                               netsnmp_agent_request_info *reqinfo)
+{
+    netsnmp_row_merge_status *rm_status;
+
+    /*
+     * find status
+     */
+    rm_status = netsnmp_row_merge_status_get(reginfo, reqinfo, 0);
+    if (NULL == rm_status)
+        return 0;
+
+    return (rm_status->count == 1) ? 1 : (rm_status->current == 1);
+}
+
+/** Determine if this is the last row
+ *
+ * returns 1 if this is the last row for this pass of the handler.
+ */
+int
+netsnmp_row_merge_status_last(netsnmp_handler_registration *reginfo,
+                              netsnmp_agent_request_info *reqinfo)
+{
+    netsnmp_row_merge_status *rm_status;
+
+    /*
+     * find status
+     */
+    rm_status = netsnmp_row_merge_status_get(reginfo, reqinfo, 0);
+    if (NULL == rm_status)
+        return 0;
+
+    return (rm_status->count == 1) ? 1 :
+        (rm_status->current == rm_status->rows);
+}
+
+
 #define ROW_MERGE_WAITING 0
 #define ROW_MERGE_ACTIVE  1
 #define ROW_MERGE_DONE    2
+#define ROW_MERGE_HEAD    3
 
 /** Implements the row_merge handler */
 int
@@ -62,41 +161,79 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_request_info *request, **saved_requests;
     char *saved_status;
-    int i, j, ret, tail, count = 0;
+    netsnmp_row_merge_status *rm_status;
+    int i, j, ret, tail, count, final_rc = SNMP_ERR_NOERROR;
 
     /*
-     * xxx-rks - for sets, should store this info in agent request info, so it
-     *           doesn't need to be done for every mode.
-     *
      * Use the prefix length as supplied during registration, rather
      *  than trying to second-guess what the MIB implementer wanted.
      */
     int SKIP_OID = (int)handler->myvoid;
 
-    DEBUGMSGTL(("helper:row_merge", "Got request (%d)\n", SKIP_OID));
+    DEBUGMSGTL(("helper:row_merge", "Got request (%d): ", SKIP_OID));
     DEBUGMSGOID(("helper:row_merge", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:row_merge", "\n"));
+
+    /*
+     * find or create status
+     */
+    rm_status = netsnmp_row_merge_status_get(reginfo, reqinfo, 1);
 
     /*
      * Count the requests, and set up an array to keep
      *  track of the original order.
      */
-    for (request = requests; request; request = request->next) 
-	count++;
+    for (count = 0, request = requests; request; request = request->next) 
+        count++;
 
     /*
      * Optimization: skip all this if there is just one request
      */
     if(count == 1) {
-        DEBUGMSGTL(("helper:row_merge", "  only one varbind\n"));
+        rm_status->count = count;
+        DEBUGMSGTL(("helper:row_merge", "  one varbind: "));
+        DEBUGMSGOID(("helper:row_merge", requests->requestvb->name,
+                     requests->requestvb->name_length));
+        DEBUGMSG(("helper:row_merge", "\n"));
         return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     }
 
     /*
-     * allocate memory for saved structure
+     * we really should only have to do this once, instead of ever pass.
+     * as a precaution, we'll do it every time, but put in some asserts
+     * to see if we have to. marked with "// SANITY".
+     * xxx-rks: remove "// SANITY" checks before release.
      */
-    saved_requests = (netsnmp_request_info**)calloc(count+1, sizeof(netsnmp_request_info*));
-    saved_status   =                  (char*)calloc(count,   sizeof(char));
+    /*
+     * if the count changed, re-do everything
+     */
+    if ((0 != rm_status->count) && (rm_status->count != count)) {
+        netsnmp_assert((NULL != rm_status->saved_requests) &&
+                       (NULL != rm_status->saved_status));
+        DEBUGMSGTL(("helper:row_merge", "count changed! do over...\n"));
+        /*
+         * if it got bigger, we need to reallocate memory
+         */
+        if (count > rm_status->count) {
+            free(rm_status->saved_requests);
+            free(rm_status->saved_status);
+        }
+        rm_status->count = 0;
+        rm_status->rows = 0;
+    }
+
+    if (0 == rm_status->count) {
+        /*
+         * allocate memory for saved structure
+         */
+        rm_status->saved_requests =
+            (netsnmp_request_info**)calloc(count+1,
+                                           sizeof(netsnmp_request_info*));
+        rm_status->saved_status = (char*)calloc(count,sizeof(char));
+    }
+
+    saved_status = rm_status->saved_status;
+    saved_requests = rm_status->saved_requests;
 
     /*
      * set up saved requests, and set any processed requests to done
@@ -110,8 +247,13 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
                          request->requestvb->name_length));
             DEBUGMSG(("helper:row_merge", "\n"));
         }
+        else
+            saved_status[i] = ROW_MERGE_WAITING;
+        if (0 != rm_status->count)
+            netsnmp_assert(saved_requests[i] == request); // xxx-rks SANITY
         saved_requests[i] = request;
     }
+    saved_requests[i] = NULL;
 
     /*
      * Note that saved_requests[count] is valid
@@ -126,66 +268,81 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      *   matching indexes, and link them into a new list.
      */
     for (i=0; i<count; i++) {
-	if (saved_status[i] != ROW_MERGE_WAITING) {
-	    /*
-	     * Already processed, so just re-link into the original list
-	     */
-	    saved_requests[i]->next = saved_requests[i+1];
+	if (saved_status[i] != ROW_MERGE_WAITING)
 	    continue;
-	}
 
-        DEBUGMSGTL(("helper:row_merge", "  oid[%d]: ", i));
-        DEBUGMSGOID(("helper:row_merge", saved_requests[i]->requestvb->name, saved_requests[i]->requestvb->name_length));
+        if (0 == rm_status->count)
+            rm_status->rows++;
+        DEBUGMSGTL(("helper:row_merge", " row %d oid[%d]: ", rm_status->rows, i));
+        DEBUGMSGOID(("helper:row_merge", saved_requests[i]->requestvb->name,
+                     saved_requests[i]->requestvb->name_length));
         DEBUGMSG(("helper:row_merge", "\n"));
 
 	saved_requests[i]->next = NULL;
-	saved_status[i] = ROW_MERGE_ACTIVE;
+	saved_status[i] = ROW_MERGE_HEAD;
 	tail = i;
         for (j=i+1; j<count; j++) {
-	    if (saved_status[j] != ROW_MERGE_WAITING) {
+	    if (saved_status[j] != ROW_MERGE_WAITING)
 	        continue;
-	    }
+
             DEBUGMSGTL(("helper:row_merge", "? oid[%d]: ", j));
-            DEBUGMSGOID(("helper:row_merge", saved_requests[j]->requestvb->name, saved_requests[j]->requestvb->name_length));
-            DEBUGMSG(("helper:row_merge", "\n"));
+            DEBUGMSGOID(("helper:row_merge",
+                         saved_requests[j]->requestvb->name,
+                         saved_requests[j]->requestvb->name_length));
             if (!snmp_oid_compare(
                     saved_requests[i]->requestvb->name+SKIP_OID,
                     saved_requests[i]->requestvb->name_length-SKIP_OID,
                     saved_requests[j]->requestvb->name+SKIP_OID,
                     saved_requests[j]->requestvb->name_length-SKIP_OID)) {
-                DEBUGMSGTL(("helper:row_merge", "merged\n"));
+                DEBUGMSG(("helper:row_merge", " match\n"));
                 saved_requests[tail]->next = saved_requests[j];
                 saved_requests[j]->next    = NULL;
 	        saved_status[j] = ROW_MERGE_ACTIVE;
 	        tail = j;
             }
+            else
+                DEBUGMSG(("helper:row_merge", " no match\n"));
         }
-
-        /*
-         * call the next handler with this list, and 
-         * restore the original next pointer 
-         */
-        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
-			                saved_requests[i]);
-	saved_requests[i]->next = saved_requests[i+1];
-
-        if (ret != SNMP_ERR_NOERROR) {
-	    /* 
-	     * Something went wrong.
-	     * Re-link the rest of the original list,
-	     *   clean up, and report back.
-	     */
-            for (j=0; j<count; j++)
-	        saved_requests[j]->next = saved_requests[j+1];
-	    free(saved_requests);
-	    free(saved_status);
-            return ret;
-	}
     }
 
-    free(saved_requests);
-    free(saved_status);
-    return SNMP_ERR_NOERROR;
+    /*
+     * not that we have a list for each row, call next handler...
+     */
+    if (0 == rm_status->count)
+        rm_status->count = count;
+    rm_status->current = 0;
+    for (i=0; i<count; i++) {
+	if (saved_status[i] != ROW_MERGE_HEAD)
+	    continue;
+
+        /*
+         * found the head of a new row,
+         * call the next handler with this list
+         */
+        rm_status->current++;
+        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
+			                saved_requests[i]);
+        /*
+         * hmm... I'm not sure about this break.. it could result
+         * in strange things if one mode doesn't call all requests,
+         * but following modes do..
+         */
+        if (ret != SNMP_ERR_NOERROR) {
+            // break;
+            snmp_log(LOG_WARNING, "bad rc from next handler in row_merge\n",
+                     ret);
+            if (SNMP_ERR_NOERROR == final_rc)
+                final_rc = ret;
+        }
+    }
+
+    /*
+     * restore original linked list
+     */
+    for (i=0; i<count; i++)
+	saved_requests[i]->next = saved_requests[i+1];
+
+    return final_rc;
 }
 
 /** 
