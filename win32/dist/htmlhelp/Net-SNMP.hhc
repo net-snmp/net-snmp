@@ -23,10 +23,6 @@
 			<param name="Local" value="Help Caveats.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Installation">
-			<param name="Local" value="Installation.html">
-			</OBJECT>
-		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="COPYING">
 			<param name="Local" value="readme-COPYING.html">
 			</OBJECT>

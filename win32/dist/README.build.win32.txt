@@ -112,7 +112,7 @@ Creating the Perl package
     </IMPLEMENTATION>
 </SOFTPKG>
 
-10. Update the BUILD INFORMATION section of README-FIRST.txt
+10. Update the BUILD INFORMATION section of win32\dist\README.txt
 
 11. Create base directories:
 
@@ -125,7 +125,6 @@ Creating the Perl package
 
     copy (source dir)\COPYING "c:\usr\docs"
     copy (source dir)\win32\dist\doc\README.txt "c:\usr"
-    copy (source dir)\win32\dist\doc\README-FIRST.txt "c:\usr\docs"
     copy (source dir)\win32\dist\scripts\net-snmp-perl-test.pl "c:\usr\bin"
 
     copy (source dir)\perl\Net-SNMP.ppd "c:\usr\Perl"
@@ -268,7 +267,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
 
     cd win32\bin (folder of *Windows* compiled Net-SNMP)
     snmptrapd -H 2> c:\temp\snmptrapd.options
-    snmpd -H 2> c:\temp\snmptrapd.options
+    snmpd -H 2> c:\temp\snmpd.options
 
     Update these files using an HTML editor (Mozilla etc):
 
@@ -295,11 +294,10 @@ Combining the binaries, HTMLHelp and README files
 
 1.  Copy the following files to c:\usr:
 
-    (source dir)\win32\dist\README
+    (source dir)\win32\dist\README.txt
 
 2.  Copy the following files to c:\usr\docs:
 
-    (source dir)\win32\dist\README-FIRST.txt
     (source dir)\COPYING
     c:\temp\Net-SNMP\Net-SNMP.chm
 
