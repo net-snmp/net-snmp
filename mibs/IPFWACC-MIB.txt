@@ -1,4 +1,4 @@
-IPFWADM-MIB DEFINITIONS ::= BEGIN
+IPFWACC-MIB DEFINITIONS ::= BEGIN
 
 -- This module defines MIB components for reading information from the
 -- accounting rules IP Firewall. This would typically let you read the rules
