@@ -116,8 +116,7 @@ FTP:
   - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-
-
+  - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
 
 What documentation is available?
 -------------------------------
