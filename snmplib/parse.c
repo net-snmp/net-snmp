@@ -2999,13 +2999,15 @@ add_mibdir(const char *dirname)
 {
     FILE *fp, *ip;
     DIR *dir, *dir2;
+    const char *oldFile = File;
     struct dirent *file;
     char token[MAXTOKEN];
     char tmpstr[300];
-    char tmpstr1[300];
     int count = 0;
+#ifndef WIN32
     struct stat dir_stat, idx_stat;
-    const char *oldFile = File;
+    char tmpstr1[300];
+#endif
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
 #ifndef WIN32
