@@ -60,7 +60,7 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef freebsd3
+#if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_PCB_H
@@ -921,8 +921,6 @@ void TCP_Scan_Init (void)
     auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
     tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
-#else
-    tcp_head = tcp_prev = (struct inpcb *)&((struct inpcbtable *)auto_nlist_value(TCP_SYMBOL))->inpt_queue.cqh_first;
 #endif
 #endif	/* PCB_TABLE */
 #else	/* linux */
