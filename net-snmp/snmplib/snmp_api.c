@@ -156,8 +156,7 @@ static void _init_snmp (void);
 /*
  * Globals.
  */
-#define PACKET_LENGTH	(8 * 1024)
-#define MAX_PACKET_LENGTH	(32768)
+#define MAX_PACKET_LENGTH	(0x7fffffff)
 #ifndef SNMP_STREAM_QUEUE_LEN
 #define SNMP_STREAM_QUEUE_LEN  5
 #endif
@@ -201,10 +200,9 @@ struct snmp_internal_session {
     int (*hook_build)(struct snmp_session *, struct snmp_pdu *,
 		      u_char *, size_t *);
     int (*check_packet) (u_char *, size_t);
+
     u_char *packet;
-    long packet_len, proper_len;
-    size_t packet_size;
-    char newpkt;
+    size_t packet_len, packet_size;
 };
 
 /*
@@ -286,13 +284,12 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Kerberos related error",	           /* SNMPERR_KRB5 */
 };
 
-static const char * secLevelName[] =
-	{
-		"BAD_SEC_LEVEL",
-		"noAuthNoPriv",
-		"authNoPriv",
-		"authPriv"
-	};
+static const char * secLevelName[] = {
+    "BAD_SEC_LEVEL",
+    "noAuthNoPriv",
+    "authNoPriv",
+    "authPriv"
+};
 
 /*
  * Multiple threads may changes these variables.
@@ -311,8 +308,6 @@ static long		 Transid	 = 0;    /* MT_LIB_TRANSID */
 int              snmp_errno  = 0;
 /*END MTCRITICAL_RESOURCE*/
 
-/*struct timeval Now;*/
-
 /*
  * global error detail storage
  */
@@ -322,7 +317,6 @@ static int  snmp_detail_f  = 0;
 /*
  * Prototypes.
  */
-//int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
 int snmp_build	(u_char **pkt, size_t *pkt_len, size_t *offset,
 		 struct snmp_session *pss, struct snmp_pdu *pdu);
 static int snmp_parse (void *, struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
@@ -533,7 +527,7 @@ snmp_sess_perror(const char *prog_string, struct snmp_session *ss) {
  * Invokes minimum required initialization for displaying MIB objects.
  * Gets initial request ID for all transactions,
  * and finds which port SNMP over UDP uses.
- * SNMP over AppleTalk or IPX is not currently supported.
+ * SNMP over AppleTalk is not currently supported.
  *
  * Warning: no debug messages here.
  */
@@ -3455,7 +3449,8 @@ snmp_parse(void *sessp,
 }
 
 int
-snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
+snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length)
+{
   u_char  type;
   u_char  msg_type;
   u_char  *var_val;
@@ -3559,7 +3554,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     return -1;
 
     /* get each varBind sequence */
-  while((int)*length > 0){
+  while((int)*length > 0) {
     struct variable_list *vptemp;
     vptemp = (struct variable_list *)malloc(sizeof(*vptemp));
     if (0 == vptemp) {
@@ -3587,8 +3582,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     if (snmp_set_var_objid(vp, objid, vp->name_length))
         return -1;
 
-    len = PACKET_LENGTH;
-    DEBUGDUMPHEADER("recv","Value");
+    len = MAX_PACKET_LENGTH;
+    DEBUGDUMPHEADER("recv", "Value");
     switch((short)vp->type){
     case ASN_INTEGER:
       vp->val.integer = (long *)vp->buf;
@@ -3654,8 +3649,8 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   	if (vp->val.string == NULL) {
 	  return -1;
 	}
-        asn_parse_string(var_val, &len, &vp->type, vp->val.string,
-                         &vp->val_len);
+	asn_parse_string(var_val ,&len, &vp->type, vp->val.string,
+			 &vp->val_len);
         break;
       case ASN_OBJECT_ID:
         vp->val_len = MAX_OID_LEN;
@@ -4342,8 +4337,8 @@ _sess_read(void *sessp, fd_set *fdset)
   struct snmp_session *sp = slp?slp->session:NULL;
   struct snmp_internal_session *isp = slp?slp->internal:NULL;
   snmp_transport *transport = slp?slp->transport:NULL;
-  u_char packet[PACKET_LENGTH], *packetptr = packet;
-  size_t length = 0, packetlen = 0;
+  size_t length = 0, pdulen = 0, rxbuf_len = 65536;
+  u_char *rxbuf = NULL;
   int olength = 0, rc = 0;
   void *opaque = NULL;
   
@@ -4352,13 +4347,13 @@ _sess_read(void *sessp, fd_set *fdset)
     return 0;
   }
 
-  if (!isp->newpkt && (!fdset || !(FD_ISSET(transport->sock, fdset)))) {
-    DEBUGMSGTL(("sess_read", "not reading %d (newpkt %d fdset %p set %d)\n",
-		transport->sock, isp->newpkt, fdset,
+  if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
+    DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
+		transport->sock, fdset,
 		fdset?FD_ISSET(transport->sock, fdset):-9));
     return 0;
   }
-    
+
   sp->s_snmp_errno = 0;
   sp->s_errno = 0;
 
@@ -4422,20 +4417,64 @@ _sess_read(void *sessp, fd_set *fdset)
     }
   }
 
-  length = transport->f_recv(transport, packet, PACKET_LENGTH,
-			     &opaque, &olength);
+  /*  Work out where to receive the data to.  */
+
+  if (transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
+    if (isp->packet == NULL) {
+      /*  We have no saved packet.  Allocate one.  */
+      if ((isp->packet = (u_char *)malloc(rxbuf_len)) == NULL) {
+	DEBUGMSGTL(("sess_read",
+		    "can't malloc %d bytes for rxbuf\n",rxbuf_len));
+	return 0;
+      } else {
+	rxbuf = isp->packet;
+	isp->packet_size = rxbuf_len;
+	isp->packet_len = 0;
+      }
+    } else {
+      /*  We have saved a partial packet from last time.  Extend that, if
+	  necessary, and receive new data after the old data.  */
+      u_char *newbuf;
+
+      if (isp->packet_size < isp->packet_len + rxbuf_len) {
+	newbuf = (u_char *)realloc(isp->packet, isp->packet_len + rxbuf_len);
+	if (newbuf == NULL) {
+	  DEBUGMSGTL(("sess_read","can't malloc %d more for rxbuf (%d tot)\n",
+		      rxbuf_len, isp->packet_len + rxbuf_len));
+	  return 0;
+	} else {
+	  isp->packet = newbuf;
+	  isp->packet_size = isp->packet_len + rxbuf_len;
+	  rxbuf = isp->packet + isp->packet_len;
+	}
+      } else {
+	rxbuf = isp->packet + isp->packet_len;
+	rxbuf_len = isp->packet_size - isp->packet_len;
+      }
+    }
+  } else {
+    if ((rxbuf = (u_char *)malloc(rxbuf_len)) == NULL) {
+      DEBUGMSGTL(("sess_read", "can't malloc %d bytes for rxbuf\n",rxbuf_len));
+      return 0;
+    }
+  }
+    
+  length = transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
 
   if (length == -1) {
     sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
     sp->s_errno = errno;
     snmp_set_detail(strerror(errno));
+    free(rxbuf);
+    if (opaque != NULL) {
+      free(opaque);
+    }
     return -1;
   }
 
   /*  Remote end closed connection.  */
 
-  if ((length == 0 && !isp->newpkt) &&
-      (transport->flags & SNMP_TRANSPORT_FLAG_STREAM)) {
+  if (length == 0 && transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
     /*  Alert the application if possible.  */
     if (sp->callback != NULL) {
       DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
@@ -4445,87 +4484,55 @@ _sess_read(void *sessp, fd_set *fdset)
     /*  Close socket and mark session for deletion.  */
     DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));    
     transport->f_close(transport);
+    free(rxbuf);
+    isp->packet = NULL;
+    if (opaque != NULL) {
+      free(opaque);
+    }
     return -1;
   }
-
+  
   if (transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
-    if (isp->newpkt == 1) {
-      /*  We have saved a *partial* packet from last time.  isp->packet_len
-	  tells you the total length of the buffer, which contains previously
-	  processed packets as well as our partial packet.  isp->proper_len is 
-	  the number of bytes of that buffer that we have processed already,
-	  so we move the data from past that point to the start of the buffer
-	  and update isp->packet_len and isp->proper_len.  */ 
-      DEBUGMSGTL(("sess_read","isp->newpkt set, packet_len %d proper_len %d\n",
-		  isp->packet_len, isp->proper_len));
-      isp->packet_len -= isp->proper_len;
-      memmove(isp->packet, isp->packet+isp->proper_len, isp->packet_len);
-      isp->newpkt = 0;
-      isp->proper_len = 0;
-    }
+    u_char *pptr = isp->packet;
 
-    /*  malloc() the save space if needed.  */
-    if (isp->packet == NULL) {
-      isp->packet_size = (PACKET_LENGTH < length)?length:PACKET_LENGTH;
-      isp->packet = (u_char *)malloc(isp->packet_size);
-    }
-    if (isp->packet == NULL) {
-      /* TODO FIX: recover ?? */
-      isp->packet_size = 0;
-      return -1;
-    }
-
-    /*  Do we have enough space?  */
-    if (isp->packet_size < (isp->packet_len + length)) {
-      if (isp->packet_size+length > MAX_PACKET_LENGTH) {
-	/*  Maximum length exceeded, drop connection.  */
-	snmp_log(LOG_ERR,"Maximum saved packet size exceeded.\n");
-	transport->f_close(transport);
-	return -1;
-      }
-      isp->packet_size = isp->packet_size*2;
-      if (isp->packet_size < (isp->packet_len + length)) {
-	/*  Shouldn't happen.  */
-	isp->packet_size = (isp->packet_len + length);
-      }
-      isp->packet = (u_char *)realloc(isp->packet, isp->packet_size);
-    }
-
-    /*  Add the new data to the end of our buffer.  */
-    memcpy(isp->packet+isp->packet_len, packet, length);
     isp->packet_len += length;
-    isp->newpkt = 1;
 
     while (isp->packet_len > 0) {
       /*  Get the total data length we're expecting (and need to wait for).  */
       if (isp->check_packet) {
-	packetlen = isp->check_packet(packetptr, isp->packet_len);
+	pdulen = isp->check_packet(pptr, isp->packet_len);
       } else {
-	packetlen = asn_check_packet(packetptr, isp->packet_len);
+	pdulen = asn_check_packet(pptr, isp->packet_len);
       }
       
-      DEBUGMSGTL(("sess_read","loop packet_len %d, proper_len %d, pktlen %d\n",
-		  isp->packet_len, isp->proper_len, packetlen));
+      DEBUGMSGTL(("sess_read", "  loop packet_len %d, PDU length %d\n",
+		  isp->packet_len, pdulen));
 
-      if (packetlen > MAX_PACKET_LENGTH) {
+      if (pdulen > MAX_PACKET_LENGTH) {
 	/*  Illegal length, drop the connection.  */
 	snmp_log(LOG_ERR, "Maximum packet size exceeded in a request.\n");
 	transport->f_close(transport);
+	if (opaque != NULL) {
+	  free(opaque);
+	}
 	return -1;
       }
 
-      if (packetlen == 0 || packetlen > isp->packet_len) {
+      if (pdulen > isp->packet_len) {
 	/*  We don't have a complete packet yet.  Return, and wait for more
 	    data to arrive.  */
-	DEBUGMSGTL(("sess_read", "short packet (needed %d got %d)\n",
-		    packetlen, isp->packet_len));
+	DEBUGMSGTL(("sess_read", "pkt not complete (need %d got %d so far)\n",
+		    pdulen, isp->packet_len));
+	if (opaque != NULL) {
+	  free(opaque);
+	}
 	return 0;
       }
 
       /*  We have *at least* one complete packet in the buffer now.  */
 
-      if ((rc = _sess_process_packet(sessp, sp,  isp, transport,
-				     opaque, olength, packetptr, packetlen))) {
+      if ((rc = _sess_process_packet(sessp, sp, isp, transport,
+				     opaque, olength, pptr, pdulen))) {
 	/*  Something went wrong while processing this packet -- set the
 	    errno.  */
 	if (sp->s_snmp_errno != 0) {
@@ -4533,22 +4540,52 @@ _sess_read(void *sessp, fd_set *fdset)
 	}
       }
 
-      packetptr += packetlen;
-      isp->proper_len += packetlen;
-      isp->packet_len -= packetlen;
+      pptr += pdulen;
+      isp->packet_len -= pdulen;
     }
 
-    /*  If we get here, then there is no partial packet left at the end of the 
-	buffer, so isp->newpkt = 0 and isp->proper_len = 0.  */
+    if (isp->packet_len < 0) {
+      /*  Obviously this should never happen!  */
+      snmp_log(LOG_ERR, "-ve packet_len %d, dropping connection %d\n",
+	       isp->packet_len, transport->sock);
+      transport->f_close(transport);
+      return -1;
+    } else if (isp->packet_len == 0) {
+      /*  This is good: it means the packet buffer contained an integral
+	  number of PDUs, so we don't have to save any data for next time.  We
+	  can free() the buffer now to keep the memory footprint down.  */
+      free(isp->packet);
+      isp->packet      = NULL;
+      isp->packet_size = 0;
+      isp->packet_len  = 0;
+      return rc;
+    }
 
-    DEBUGMSGTL(("sess_read","end packet_len %d, proper_len %d, pktlen %d\n",
-		isp->packet_len, isp->proper_len, packetlen));
-    isp->newpkt = 0;
-    isp->proper_len = 0;
+    /*  If we get here, then there is a partial packet of length
+	isp->packet_len bytes starting at pptr left over.  Move that to the
+	start of the buffer, and then realloc() the buffer down to size to
+	reduce the memory footprint.  */
+
+    memmove(isp->packet, pptr, isp->packet_len);
+    DEBUGMSGTL(("sess_read", "end: memmove(%p, %p, %d); realloc(%p, %d)\n",
+		isp->packet, pptr, isp->packet_len,
+		isp->packet, isp->packet_len));
+
+    if ((rxbuf = realloc(isp->packet, isp->packet_len)) == NULL) {
+      /*  I don't see why this should ever fail, but it's not a big deal.  */
+      DEBUGMSGTL(("sess_read", "realloc() failed\n"));
+    } else {
+      DEBUGMSGTL(("sess_read", "realloc() okay, old buffer %p, new %p\n",
+		  isp->packet, rxbuf));
+      isp->packet = rxbuf;
+      isp->packet_size = isp->packet_len;
+    }
     return rc;
   } else {
-    return _sess_process_packet(sessp, sp, isp, transport, opaque, olength,
-				packet, length);
+    rc = _sess_process_packet(sessp, sp, isp, transport, opaque, olength,
+			      rxbuf, length);
+    free(rxbuf);
+    return rc;
   }
 }
 
