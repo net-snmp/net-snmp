@@ -1227,7 +1227,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                     "compare <\"%s\", 0x%032/0x%032x>", c->community,
                     c->network, c->mask));
 
-        if ((community_len == strlen(c->community)) &&
+        if ((community_len == (int)strlen(c->community)) &&
             (memcmp(community, c->community, community_len) == 0) &&
             (masked_address_are_equal(from->sin6_family,
                                       (struct sockaddr_storage *) from,
