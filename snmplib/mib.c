@@ -950,17 +950,19 @@ init_mib __P((void))
 
 	/* Initialise the MIB directory/ies */
 
+    /* we can't use the environment variable directly, because strtok
+       will modify it. */
+
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
         strcpy(path, DEFAULT_MIBDIRS);
-	env_var = path;
     } else if ( *env_var == '+' ) {
-      strcpy(path, DEFAULT_MIBDIRS);
-      *env_var = ENV_SEPARATOR_CHAR;
-      strcat(path, env_var);
-      env_var = path ;
+      sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+    } else {
+      strcpy(path, env_var);
     }
-    entry = strtok( env_var, ENV_SEPARATOR );
+
+    entry = strtok( path, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
@@ -973,46 +975,42 @@ init_mib __P((void))
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
         strcpy(path, DEFAULT_MIBS);
-	env_var = path;
+    } else {
+      if ( *env_var == '+' ) {
+        sprintf(path, "%s%c%s",DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+      } else {
+        strcpy(path, env_var);
+      }
     }
-    if (strcmp (env_var, "ALL") == 0) {
+    if (strcmp (path, "ALL") == 0) {
 	read_all_mibs();
-    }
-    else {
-	if ( *env_var == '+' ) {
-	    strcpy(path, DEFAULT_MIBS);
-	    *env_var = ENV_SEPARATOR_CHAR;
-	    strcat(path, env_var);
-	    env_var = path ;
-	}
-	entry = strtok( env_var, ENV_SEPARATOR );
+    } else {
+	entry = strtok( path, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
     }
 
+    path[0] = 0;
     env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
       env_var = getenv("MIBFILE");  /* backwards compatibility */
-#ifdef DEFAULT_MIBFILES
       if ( env_var == NULL ) {
-        strcpy(path, DEFAULT_MIBFILES);
-	env_var = path;
-      }
-#endif
-    }
 #ifdef DEFAULT_MIBFILES
-    else if ( *env_var == '+') {
-      strcpy(path, DEFAULT_MIBFILES);
-      *env_var = ENV_SEPARATOR_CHAR;
-      strcat(path, env_var);
-      env_var = path ;
-    }
+        strcpy(path, DEFAULT_MIBFILES);
+      } else if ( *path == '+') {
+        sprintf(path, "%s%c%s",DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR, env_var);
 #endif
+      } else {
+        strcpy(path, env_var);
+      }
+    } else {
+      strcpy(path, env_var);
+    }
     
-    if ( env_var != NULL ) {
-      entry = strtok( env_var, ENV_SEPARATOR );
+    if ( path[0] != 0 ) {
+      entry = strtok( path, ENV_SEPARATOR );
       while ( entry ) {
         read_mib(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
