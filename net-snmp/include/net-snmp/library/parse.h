@@ -90,6 +90,7 @@ SOFTWARE.
         char           *hint;
         char           *units;
         char           *description;    /* description (a quoted string) */
+        char           *reference;    /* references (a quoted string) */
         char           *defaultValue;
 	char           *filename;
         int             lineno;
@@ -125,6 +126,7 @@ SOFTWARE.
                                       const char *);
         void            (*printer) (char *, const netsnmp_variable_list *, const struct enum_list *, const char *, const char *);   /* Value printing function */
         char           *description;    /* description (a quoted string) */
+        char           *reference;    /* references (a quoted string) */
         int             reported;       /* 1=report started in print_subtree... */
         char           *defaultValue;
     };
