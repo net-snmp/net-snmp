@@ -536,22 +536,38 @@ agentx_add_request( struct agent_snmp_session *asp,
     struct request_list *request;
     struct ax_variable_list *ax_vlist;
     struct subtree      *sub;
-    int			 sessid;
+    int			 sessid, order = 0;
 
     if (asp->pdu->command == SNMP_MSG_SET && asp->mode == RESERVE1 )
 	return AGENTX_ERR_NOERROR;
 
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
-    if ( !ax_session )
+
+    if (!ax_session) {
 	return SNMP_ERR_GENERR;
+    }
+
     sessid = ax_session->sessid;
-    if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
+    if (ax_session->flags & SNMP_FLAGS_SUBSESSION) {
+	order = ax_session->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
 	ax_session = ax_session->subsession;
-    request    = get_agentx_request( asp, ax_session, pdu->transid, vbp );
-    if ( !request )
+    }
+
+    request = get_agentx_request(asp, ax_session, pdu->transid, vbp);
+    
+    if (!request) {
 	return SNMP_ERR_GENERR;
+    }
+
     request->pdu->sessid = sessid;     /* Use the registered (sub)session's ID,
 					  not the main listening session ID */
+
+    /*  Honour the value of NETWORK_BYTE_ORDER given by the subagent
+	at session open time.  */
+
+    if (order) {
+      request->pdu->flags |= AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
+    }
 
     ax_vlist = (struct ax_variable_list *)request->cb_data;
     ax_vlist->variables[ax_vlist->num_vars] = vbp;

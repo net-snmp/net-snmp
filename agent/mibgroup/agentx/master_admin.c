@@ -117,11 +117,14 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     gettimeofday(&now, NULL);
     sp->engineTime = calculate_time_diff( &now, &starttime );
 
-    sp->subsession = session;			/* link back to head */
-    sp->flags     |= SNMP_FLAGS_SUBSESSION;
-    sp->next       = session->subsession;
+    sp->subsession  = session;			/* link back to head */
+    sp->flags      |= SNMP_FLAGS_SUBSESSION;
+    sp->flags      &= ~AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
+    sp->flags      |= (pdu->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER);
+    sp->next        = session->subsession;
     session->subsession = sp;
-    DEBUGMSGTL(("agentx/master","opened %08p = %d\n", sp, sp->sessid));
+    DEBUGMSGTL(("agentx/master","opened %08p = %d with flags = %02x\n",
+		sp, sp->sessid, sp->flags & AGENTX_MSG_FLAGS_MASK));
 
     return sp->sessid;
 }
