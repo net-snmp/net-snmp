@@ -705,18 +705,18 @@ ifTable_load(netsnmp_cache *cache, void *vmagic)
     FILE           *devin;
     char            line[256];
     const char     *scan_line_2_2 =
-        "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
+        "%llu %llu %llu %llu %*llu %*llu %*llu %*llu %llu %llu %llu %llu %*llu %llu";
     const char     *scan_line_2_0 =
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
     const char     *scan_line_to_use;
     int             scan_count;
-    unsigned long long   rec_pkt, rec_oct, rec_err, rec_drop;
-    unsigned long long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    unsigned long long int  rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long long int  snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_ifentry *entry;
 
     ifTable_free(cache, NULL);
 
-    if (!(devin = fopen("/tmp/net-dev", "r"))) {
+    if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("mibII/ifTable", "Failed to load Interface Table (linux1)\n"));
         snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/dev ...\n");
         return -1;
