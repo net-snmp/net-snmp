@@ -220,6 +220,7 @@ char *find_field(ptr,field)
     while (*ptr != NULL && isspace(*ptr) && init <= ptr) ptr--;
     while (*ptr != NULL && !isspace(*ptr) && init <= ptr) ptr--;
     if (isspace(*ptr)) ptr++;  /* past space */
+    if (ptr < init) ptr = init;
     if (!isspace(*ptr) && *ptr != NULL) return(ptr);
   } else {
     if ((ptr = skip_white(ptr)) == NULL) return(NULL);
