@@ -482,6 +482,7 @@ init_snmp(const char *type)
   snmp_init_statistics();
   register_mib_handlers();
   init_snmpv3(type);
+  init_snmp_alarm();
 
   read_premib_configs();
   init_mib();
