@@ -28,7 +28,7 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
-@    include access-${m2c_table_access}-header.m2i@
+@    include mfd-access-${m2c_table_access}-header.m2i@
 @end@
 
 @eval $m2c_save = "$name"@
@@ -48,7 +48,7 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
-@    include access-${m2c_table_access}-body.m2i@
+@    include mfd-access-${m2c_table_access}-body.m2i@
 @end@
 ##
 ########################################################################
