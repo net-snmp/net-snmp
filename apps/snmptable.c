@@ -134,24 +134,51 @@ void print_table (void);
 static void optProc(int argc, char *const *argv, int opt)
 {
     switch (opt) {
+      case 'C':
+		/* Handle new '-C' command-specific meta-options */
+	while (*optarg) {
+          switch (*optarg++) {
+          case 'w':
+	    if ( argv[optind] )
+               max_width = atoi(argv[optind]);
+            if (max_width == 0) {
+               fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
+               usage();
+            }
+	    optind++;
+            break;
+          case 'f':
+            field_separator = argv[optind];
+            if ( !field_separator ) {
+               fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+               usage();
+            }
+	    optind++;
+            break;
+          case 'h':
+            headers_only = 1;
+            break;
+          case 'H':
+            no_headers = 1;
+            break;
+          case 'C':
+            nonsequential = 0;
+            break;
+          case 'b':
+            brief = 1;
+            break;
+          case 'i':
+            show_index = 1;
+            break;
+          }
+       }
+       break;
     case 'w':
       max_width = atoi(optarg);
       if (max_width == 0) {
 	fprintf(stderr, "Bad -w option: %s\n", optarg);
 	usage();
       }
-      break;
-    case 'f':
-      field_separator = optarg;
-      break;
-    case 'h':
-      headers_only = 1;
-      break;
-    case 'H':
-      no_headers = 1;
-      break;
-    case 'C':
-      nonsequential = 0;
       break;
     case 'b':
       brief = 1;
@@ -168,10 +195,10 @@ void usage(void)
   snmp_parse_args_usage(stdout);
   fprintf(stdout," <objectID>\n\n");
   snmp_parse_args_descriptions(stdout);
-  fprintf(stdout,"  -w <W>\tprint table in parts of W characters width\n");
-  fprintf(stdout,"  -f <F>\tprint an F delimited table\n");
-  fprintf(stdout,"  -b\t\tbrief field names\n");
-  fprintf(stdout,"  -i\t\tprint index value\n");
+  fprintf(stdout,"  -Cw <W>\tprint table in parts of W characters width\n");
+  fprintf(stdout,"  -Cf <F>\tprint an F delimited table\n");
+  fprintf(stdout,"  -Cb\t\tbrief field names\n");
+  fprintf(stdout,"  -Ci\t\tprint index value\n");
   exit(1);
 }
 
@@ -184,7 +211,7 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  snmp_parse_args(argc, argv, &session, "w:f:ChHbi", optProc);
+  snmp_parse_args(argc, argv, &session, "w:C:bi", optProc);
 
   /* get the initial object and subtree */
   /* specified on the command line */
