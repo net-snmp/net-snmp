@@ -7,7 +7,7 @@
 
 #include <config.h>
 
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
@@ -21,6 +21,10 @@
 #endif
 #include <sys/param.h>
 #include <sys/types.h>
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(IFNET_NEEDS_KERNEL_LATE)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <sys/socket.h>
 
 #if TIME_WITH_SYS_TIME
