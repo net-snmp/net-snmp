@@ -2787,8 +2787,8 @@ char *uptime_string(u_long timeticks, char *buf)
     return buf;
 }
 
-oid
-*snmp_parse_oid(const char *argv,
+oid *
+snmp_parse_oid(const char *argv,
 		oid *root,
 		size_t *rootlen)
 {
