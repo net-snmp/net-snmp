@@ -257,8 +257,10 @@ snmp_fix_pdu(pdu, command)
     var = pdu->variables;
     index = 1;
     if (pdu->errindex == index){	/* skip first variable */
-	var = var->next_variable;
-	index++;
+      if (var == NULL)
+        return NULL;
+      var = var->next_variable;
+      index++;
     }
     if (var != NULL){
 	newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
