@@ -1,15 +1,18 @@
-.TH SNMPGET 1 "01 Dec 2000" "" "Net-SNMP"
+.TH SNMPGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpconf - creates and modifies snmp configuration files
 .SH SYNOPSIS
-snmpconf [options] [fileToCreate]
+.B snmpconf
+[OPTIONS] [fileToCreate]
 .IP "Start with:"
-snmpconf -g basic_setup
+.B snmpconf
+-g basic_setup
 .IP "Or even just:"
-snmpconf
+.B snmpconf
 .SH DESCRIPTION
-snmpconf is a simple perl script that walks you through setting up a
+.B snmpconf
+is a simple Perl script that walks you through setting up a
 configuration file step by step.  It should be fairly straight forward
 to use.  Merely run it and answer its questions.
 .PP
@@ -24,68 +27,105 @@ Finally, when the user quits the program any configuration files that
 have been edited by the user are saved to the local directory, fully
 commented.
 .PP
-A particularly useful option is the -g switch, which walks a user
-through a specific set of configuration questions.  Run
-.B "snmpconf -g basic_setup"
+A particularly useful option is the
+.B -g
+switch, which walks a user through a specific set of configuration
+questions.  Run:
+.RS
+.PP
+snmpconf -g basic_setup
+.RE
+.PP
 for an example.
 .SH "OPTIONS"
-.IP -f
+.TP 8
+.B -f
 Force overwriting existing files in the current directory without
 prompting the user if this is a desired thing to do.
-.IP -i
+.TP 
+.B -i
 When finished, install the files into the location where the global
 system commands expect to find them.
-.IP -p
+.TP
+.B -p
 When finished, install the files into the users home directory's .snmp
 subdirectory (where the applications will also search for
 configuration files).
-.IP "-I DIRECTORY"
-When finished, install the files into the directory DIRECTORY.
-.IP -a
+.TP
+.BI -I " DIRECTORY"
+When finished, install the files into the directory 
+.IR DIRECTORY .
+.TP
+.B -a
 Don't ask any questions.  Simply read in the various known
 configuration files and write them back out again.  This has the
 effect of "auto-commenting" the configuration files for you.  See
 the
-.I "neat tricks"
+.B NEAT TRICKS
 section below.
-.IP "-r all|none"
+.TP
+.BI -r all|none
 Read in either all or none of the found configuration files.  Normally
-snmpconf prompts you for which files you wish to read in.  Reading in
+.B snmpconf
+prompts you for which files you wish to read in.  Reading in
 these configuration files will merge these files with the results of
 the questions that it asks of you.
-.IP "-R file,..."
+.TP
+.BI -R " FILE,..."
 Read in a specific list of configuration files.
-.IP "-g groupname"
+.TP
+.BI -g " GROUPNAME"
 Groups of configuration entries can be created that can be used to
 walk a user through a series of questions to create an initial
 configuration file.  There are no menus to navigate, just a list of
-questions.  Run
-.B "snmpconf -g basic_setup"
+questions.  Run:
+.RS
+.RS
+.PP
+snmpconf -g basic_setup
+.RE
+.PP
 for a good example.
-.IP -G
-List all the known groups
-.IP "-c configdir"
-snmpconf uses a directory of configuration information to learn about
+.RE
+.TP
+.B -G
+List all the known groups.
+.TP
+.BI -c " CONFIGDIR"
+.B snmpconf
+uses a directory of configuration information to learn about
 the files and questions that it should be asking.  This option tells
-snmpconf to use a different location for configuring itself.
-.IP -q
+.B snmpconf
+to use a different location for configuring itself.
+.TP
+.B -q
 Run slightly more quietly.  Since this is an interactive program, I
 don't recommend this option since it only removes information from the
 output that is designed to help you.
-.IP -d
-Turn on *lots* of debugging output.
-.IP -D
-Add even more debugging output in the form of perl variable dumps.
+.TP
+.B -d
+Turn on 
+.B lots
+of debugging output.
+.TP
+.B -D
+Add 
+.B even more
+debugging output in the form of Perl variable dumps.
 .IP
 .SH "NEAT TRICKS"
 .IP "snmpconf -g basic_setup"
 Have I mentioned this command enough yet?  It's designed to walk
-someone through an initial setup for the snmpd demon.  Really, you
-should try it.
+someone through an initial setup for the
+.I snmpd(1)
+daemon.  Really, you should try it.
 .IP "snmpconf -R /usr/local/snmp/snmpd.conf -a -f snmpd.conf"
-Automatically reads in a snmpd.conf file (for example) and adds
+Automatically reads in an snmpd.conf file (for example) and adds
 comments to them describing what each token does.  Try it.  It's cool.
 .SH "NOTES"
-snmpconf is actually a very generic utility that could be easily
+.B snmpconf
+is actually a very generic utility that could be easily
 configured to help construct just about any kind of configuration
-file.  Its default configuration set of files are snmp based.
+file.  Its default configuration set of files are SNMP based.
+.SH SEE ALSO
+snmpd(1), snmp_config(5), snmp.conf(5), snmpd.conf(5)

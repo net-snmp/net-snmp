@@ -19,28 +19,34 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAP 1 "11 May 2000" "" "Net-SNMP"
+.TH SNMPTRAP 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptrap, snmpinform - sends an SNMP trap to a manager
 .SH SYNOPSIS
-snmptrap -v 1 [-Ci] [common arguments] enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
+.B snmptrap -v 1
+[COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID type value]...
 .PP
-snmptrap -v [2c|3] [-Ci] [common arguments] uptime trap-oid [objectID type value]...
+.B snmptrap -v [2c|3]
+[COMMON OPTIONS] [-Ci] uptime trap-oid [OID type value]...
 .PP
-snmpinform -v [2c|3] [common arguments] uptime trap-oid [objectID type value]...
+.B snmpinform -v [2c|3]
+[COMMON OPTIONS] uptime trap-oid [OID type value]...
 .SH DESCRIPTION
-Snmptrap is an SNMP application that uses the TRAP Request to send
-information to a network manager.  One or more fully qualified
-object identifiers can be given as arguments on the command line.  A type
-and a value must accompany each object
-identifier.  Each variable name is given in the format specified in
-.IR variables (5).
+.B snmptrap
+is an SNMP application that uses the SNMP TRAP operation to send
+information to a network manager.  One or more object identifiers
+(OIDs) can be given as arguments on the command line.  A type and a
+value must accompany each object identifier.  Each variable name is
+given in the format specified in 
+.IR variables(5) .
 .PP
 When invoked as
-.I snmpinform,
-or when -Ci is added to the command line flags of snmptrap, it sends
-an INFORM-PDU, expecting a response from the trap receiver,
+.B snmpinform,
+or when
+.B -Ci
+is added to the command line flags of snmptrap, it sends an
+INFORM-PDU, expecting a response from the trap receiver,
 retransmitting if required.  Otherwise it sends an TRAP-PDU or
 TRAP2-PDU.
 .PP
@@ -97,16 +103,18 @@ BITS
 .PD
 .RE
 .PP
-For example
+For example:
 .PP
-.I "snmptrap -v 1 manager public enterprises.spider test-hub 3 0 '' interfaces.iftable.ifentry.ifindex.1 i 1"
+snmptrap -v 1 manager public enterprises.spider test-hub 3 0 '' interfaces.iftable.ifentry.ifindex.1 i 1
 .PP
-will send a generic link-up trap to manager, for interface 1.
-.PP
-If the network entity has an error processing the request packet, an error
-packet will be returned and a message will be shown, helping to pinpoint in what
-way the request was malformed.  If there were other variables in the request,
-the request will be resent without the bad variable.
-.PP
+will send a generic linkUp trap to manager, for interface 1.
+.SH OPTIONS
+.B snmptrap
+takes the common options described in the
+.I snmpcmd(1) 
+manual page in
+addition to the 
+.B -Ci
+option described above.
 .SH SEE ALSO
 snmpcmd(1), variables(5).

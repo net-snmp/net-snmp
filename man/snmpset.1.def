@@ -19,23 +19,23 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPSET 1 "21 Jun 2001" "" "Net-SNMP"
+.TH SNMPSET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpset - communicates with a network entity using SNMP SET Requests.
 .SH SYNOPSIS
-snmpset [ common arguments ] objectID type value [objectID type value]...
+.B snmpset
+[COMMON OPTIONS] OID type value [OID type value]...
 .SH DESCRIPTION
-Snmpset is an SNMP application that uses the SET Request to set
-information on a network entity.  One or more fully qualified
-object identifiers must be given as arguments on the command line.  A type
-and a value to set must accompany each object
-identifier.  Each variable name is given in the format specified in
-.IR variables (5).
+.B snmpset
+is an SNMP application that uses the SNMP SET request to set
+information on a network entity.  One or more object identifiers
+(OIDs) must be given as arguments on the command line.  A type and a
+value to be set must accompany each object identifier.  Each variable
+name is given in the format specified in
+.IR variables(5) .
 .PP
-The
-.I type
-is a single character, one of:
+The type is a single character, one of:
 .RS
 .PD 0
 .TP 3
@@ -72,25 +72,26 @@ BITS
 .RE
 If you have the proper MIB file loaded, you can, in most cases, replace the
 type with an '=' sign. For an object of type OCTET STRING this will assume
-a string like the 's' type notation. For other type it will do "The
+a string like the 's' type notation. For other types it will do "The
 Right Thing".
 .PP
-For example
+For example:
 .PP
-.I "snmpset test-hub private system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 = 2"
-.I 
+snmpset test-hub private system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 = 2
 .PP
-will set the variables sysContact.0 and ipforwarding.0:
+will set the variables sysContact.0 and ipForwarding.0:
 .PP
-.I system.sysContact.0 =
-"dpz@noc.rutgers.edu"
+system.sysContact.0 = "dpz@noc.rutgers.edu"
 .br
-.I ip.ipForwarding.0 = not-forwarding(2)
+ip.ipForwarding.0 = not-forwarding(2)
 .PP
-If the network entity has an error processing the request packet, an error
-packet will be returned and a message will be shown, helping to pinpoint in what
-way the request was malformed.  If there were other variables in the request,
-the request will be resent without the bad variable.
-.PP
+If the network entity has an error processing the request packet, an
+error packet will be returned and a message will be shown, helping to
+pinpoint in what way the request was malformed.
+.SH OPTIONS
+.B snmpset
+takes the common options described in the
+.I snmpcmd(1)
+manual page.
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
