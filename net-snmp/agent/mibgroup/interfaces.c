@@ -1176,7 +1176,7 @@ struct in_ifaddr *Retin_ifaddr;
           /*
            *      Get the "in_ifaddr" structure
            */
-          klookup(in_ifaddraddr, (char *)&in_ifaddr, sizeof in_ifaddr);
+          klookup((unsigned long)in_ifaddraddr, (char *)&in_ifaddr, sizeof in_ifaddr);
           in_ifaddraddr = in_ifaddr.ia_next;
 
           if (Retin_ifaddr)
@@ -1189,7 +1189,7 @@ struct in_ifaddr *Retin_ifaddr;
 
               KNLookup (interfaces_nl, N_IFNET, (char *)&ifnetaddr, sizeof(ifnetaddr));
               while (ifnetaddr && ifnetaddr != in_ifaddr.ia_ifp) {
-                      klookup(ifnetaddr, (char *)&ifnet, sizeof ifnet);
+                      klookup((unsigned long)ifnetaddr, (char *)&ifnet, sizeof ifnet);
                       ifnetaddr = ifnet.if_next;
                       index++;
               }
