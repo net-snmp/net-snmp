@@ -497,7 +497,7 @@ read_premib_configs (void)
  */
 void set_configuration_directory(const char *dir)
 {
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR, strdup(dir));
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR, dir);
 }
 
 /*******************************************************************-o-******
@@ -542,7 +542,7 @@ char *homepath;
  */
 void set_persistent_directory(const char *dir)
 {
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR, strdup(dir));
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR, dir);
 }
 
 /*******************************************************************-o-******
