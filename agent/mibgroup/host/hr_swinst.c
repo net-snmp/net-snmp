@@ -181,7 +181,9 @@ init_hr_swinst(void)
 #if defined(HAVE_LIBRPM) || defined(_PATH_HRSW_directory)
     SWI_t          *swi = &_myswi;      /* XXX static for now */
 #endif
+#ifdef HAVE_LIBRPM
     struct stat     stat_buf;
+#endif
 
     /*
      * Read settings from config file,
