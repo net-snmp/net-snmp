@@ -212,5 +212,5 @@ nsb-build()
       fi
    fi
 
-   return nsb_build_rc
+   return $nsb_build_rc
 }
