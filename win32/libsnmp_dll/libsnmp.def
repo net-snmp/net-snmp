@@ -51,6 +51,7 @@ EXPORTS
 	read_mib
 	read_all_mibs
 	add_mibdir
+	snmp_get_token
 	snmp_set_suffix_only
 	snmp_set_full_objid
 	snmp_set_mib_warnings
