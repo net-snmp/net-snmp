@@ -2956,7 +2956,7 @@ snmpv3_parse(
   }
   sptr = find_sec_mod(msg_sec_model);
   if (!sptr) {
-    snmp_log(LOG_WARNING, "unknown security model: %d", msg_sec_model);
+    snmp_log(LOG_WARNING, "unknown security model: %d\n", msg_sec_model);
     snmp_increment_statistic(STAT_SNMPUNKNOWNSECURITYMODELS);
     DEBUGINDENTLESS();
     return SNMPERR_UNKNOWN_SEC_MODEL;

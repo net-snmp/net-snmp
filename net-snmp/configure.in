@@ -842,6 +842,22 @@ AC_SUBST(security_hdr_list)
 AC_MSG_RESULT($new_with_security)
 
 dnl
+dnl Handle the special case of KSM to see which crypto API we support
+dnl
+
+for sec in $new_with_security
+do
+  if test x$sec = xksm; then
+    AC_MSG_CHECKING(to see which crypto API we need to use)
+
+    AC_CHECK_FUNC(krb5_c_encrypt,[
+      AC_MSG_RESULT(new MIT crypto API)
+      AC_DEFINE(MIT_NEW_CRYPTO)],[
+      AC_MSG_RESULT(old MIT crypto API)])
+  fi
+done
+
+dnl
 dnl Do hairy agent module processing.
 dnl
 changequote(, )
