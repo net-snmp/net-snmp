@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdlib.h>
@@ -382,9 +392,10 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
                              netsnmp_request_info *requests)
 {
 
-    int            *it = (u_int *) handler->myvoid;
-    int            *it_save;
-
+    int *it = (int *) handler->myvoid;
+    int *it_save;
+    long tmp_it;
+    
     DEBUGMSGTL(("netsnmp_instance_int_handler", "Got request:  %d\n",
                 reqinfo->mode));
 
@@ -393,8 +404,12 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
          * data requests 
          */
     case MODE_GET:
+	/*
+	 * Use a long here, otherwise on 64 bit use of an int would fail
+	 */
+	tmp_it = *it;
         snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) it, sizeof(*it));
+                                 (u_char *) &tmp_it, sizeof(long));
         break;
 
         /*
