@@ -278,6 +278,11 @@ initialize_table_$table(void)
      * call interface initialization code
      */
     _${table}_initialize_interface(user_context, flags);
+
+    /*
+     * call data access initialization code
+     */
+    ${table}_init_data(user_context);
 }
 
 ########################################################################
@@ -360,7 +365,7 @@ ${context}_post_request(${context}_registration_ptr user_context)
 @   include mfd-data-get.m2c@
 @   include mfd-data-set.m2c@
 @else@
-@   eval $m2c_processing_type = '*'@
+@   eval $m2c_processing_type = '#'@
 @   run mfd-data-get.m2c@
 @   run mfd-data-set.m2c@
 @end@
