@@ -83,7 +83,7 @@ SOFTWARE.
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
 static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
-  
+
 static void print_tree_node (FILE *, struct tree *, int);
 
 /* helper functions for get_module_node */
@@ -123,7 +123,7 @@ PrefixList mib_prefixes[] = {
 };
 
 static char *
-uptimeString(u_long timeticks, 
+uptimeString(u_long timeticks,
 	     char *buf)
 {
     int	centisecs, seconds, minutes, hours, days;
@@ -132,7 +132,7 @@ uptimeString(u_long timeticks,
 	sprintf(buf,"%ld",timeticks);
 	return buf;
     }
-    
+
 
     centisecs = timeticks % 100;
     timeticks /= 100;
@@ -1069,7 +1069,7 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 }
 
 void
-register_mib_handlers (void) 
+register_mib_handlers (void)
 {
     register_premib_handler("snmp","mibdirs",
 			    handle_mibdirs_conf, NULL,
@@ -1083,7 +1083,7 @@ register_mib_handlers (void)
 
     /* register the snmp.conf configuration handlers for default
        parsing behaviour */
-    
+
     ds_register_premib(ASN_BOOLEAN, "snmp","showMibErrors",
                        DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
     ds_register_premib(ASN_BOOLEAN, "snmp","strictCommentTerm",
@@ -1120,14 +1120,14 @@ init_mib (void)
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
     char *new_mibdirs, *homepath, *cp_home;
-    
+
     if (Mib) return;
 
     /* Initialise the MIB directory/ies */
 
     /* we can't use the environment variable directly, because strtok
        will modify it. */
-    
+
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
 	if (confmibdir != NULL)
@@ -1159,20 +1159,20 @@ init_mib (void)
         env_var = new_mibdirs;
       }
     }
-    
+
     DEBUGMSGTL(("init_mib","Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",env_var));
-    
+
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
     }
     free(env_var);
-    
+
     init_mib_internals();
 
     /* Read in any modules or mibs requested */
-    
+
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
 	if (confmibs != NULL)
@@ -1188,7 +1188,7 @@ init_mib (void)
 	free(env_var);
 	env_var = entry;
     }
-    
+
     DEBUGMSGTL(("init_mib","Seen MIBS: Looking in '%s' for mib files ...\n",env_var));
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
@@ -1205,7 +1205,7 @@ init_mib (void)
     }
     adopt_orphans();
     free(env_var);
-    
+
     env_var = getenv("MIBFILES");
     if ( env_var != NULL ) {
 	if (*env_var == '+') {
@@ -1236,9 +1236,9 @@ init_mib (void)
 	}
 	free(env_var);
     }
-    
+
     prefix = getenv("PREFIX");
-    
+
     if (!prefix)
         prefix = Standard_Prefix;
 
@@ -1246,7 +1246,7 @@ init_mib (void)
     strcpy(Prefix, prefix);
 
     DEBUGMSGTL(("init_mib","Seen PREFIX: Looking in '%s' for prefix ...\n", Prefix));
-    
+
     /* remove trailing dot */
     env_var = &Prefix[strlen(Prefix) - 1];
     if (*env_var == '.') *env_var = '\0';
@@ -1634,7 +1634,7 @@ dump_oid_to_string(oid *objid,
         oid tst = objid[ii];
         if ((tst > 254) || (!isprint(tst)))
             tst = (oid)'.';
-          
+
         if (alen == 0) {
 	    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
 		*cp++ = '\\';
@@ -2725,7 +2725,7 @@ char *uptime_string(u_long timeticks, char *buf)
 	if (cp) *cp = '\0';
 #endif
     strcpy(buf, tbuf);
-    return buf; 
+    return buf;
 }
 
 #ifdef CMU_COMPATIBLE
