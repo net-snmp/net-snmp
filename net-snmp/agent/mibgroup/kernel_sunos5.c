@@ -14,7 +14,6 @@
  */
 #include <config.h>
 #ifdef solaris2
-#define _SYS_PROC_H
 /*-
  * Includes of standard ANSI C header files 
  */
@@ -31,7 +30,6 @@
 #include <fcntl.h>
 #include <stropts.h>
 #include <sys/types.h>
-#define _SYS_USER_H
 #include <kvm.h>
 #include <sys/fcntl.h>
 #include <kstat.h>
