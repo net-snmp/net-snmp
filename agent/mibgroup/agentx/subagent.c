@@ -641,7 +641,7 @@ subagent_open_master_session(void)
         sess.peername =
             netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
     } else {
-        sess.peername = AGENTX_SOCKET;
+        sess.peername = strdup(AGENTX_SOCKET);
     }
 
     sess.local_port = 0;        /* client */

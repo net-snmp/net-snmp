@@ -36,7 +36,7 @@ int             netsnmp_udp6_getSecName(void *opaque, int olength,
  * "Constructor" for transport domain object.  
  */
 
-void            snmp_udp6_ctor(void);
+void            netsnmp_udp6_ctor(void);
 
 #ifdef __cplusplus
 }
