@@ -137,7 +137,7 @@ agentx_open_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
     extern oid version_sysoid[];
-    extern oid version_sysoid_len;
+    extern int version_sysoid_len;
 
     DEBUGMSGTL(("agentx/subagent","opening session \n"));
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
