@@ -30,6 +30,8 @@
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "../../snmpd.h"
+#include "default_store.h"
+#include "ds_agent.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"
@@ -167,8 +169,8 @@ int register_sysORTable(oid *oidin,
   numEntries++;
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( agent_role == SUB_AGENT )
-     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
+     agentx_add_agentcaps( agentx_session, oidin, oidlen, (char *)descr);
 #endif
 
   return 0;
@@ -206,7 +208,7 @@ int unregister_sysORTable(oid *oidin,
   }
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( agent_role == SUB_AGENT )
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
      agentx_remove_agentcaps( agentx_session, oidin, oidlen);
 #endif
 

@@ -87,9 +87,7 @@ void init_agent_read_config (void)
 void update_config(void)
 {
   free_config();
-  if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
-    read_configs();
-  }
+  read_configs();
   
   /* read all optional config files */
   /* last is -c from command line */

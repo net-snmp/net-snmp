@@ -47,6 +47,7 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <errno.h>
 
 #include "asn1.h"
 #define SNMP_NEED_REQUEST_LIST
@@ -72,6 +73,8 @@ SOFTWARE.
 #include "mibgroup/mibII/vacm_vars.h"
 #endif
 
+#include "default_store.h"
+#include "ds_agent.h"
 #include "snmp_agent.h"
 
 static int snmp_vars_inc;
@@ -106,6 +109,86 @@ int getNextSessID()
     static int SessionID = 0;
 
     return ++SessionID;
+}
+
+int
+agent_check_and_process(int block) {
+  int numfds;
+  fd_set fdset;
+  struct timeval	timeout, *tvp = &timeout;
+  int count;
+  int fakeblock=0;
+  
+  tvp =  &timeout;
+  tvp->tv_sec = 0;
+  tvp->tv_usec = 1;
+
+  numfds = 0;
+  FD_ZERO(&fdset);
+  snmp_select_info(&numfds, &fdset, tvp, &fakeblock);
+  if (block == 1 && fakeblock == 1)
+    tvp = NULL; /* block without timeout */
+  count = select(numfds, &fdset, 0, 0, tvp);
+
+  if (count > 0){
+    /* packets found, process them */
+    snmp_read(&fdset);
+  } else switch(count){
+    case 0:
+      snmp_timeout();
+      break;
+    case -1:
+      if (errno == EINTR){
+        return -1;
+      } else {
+        snmp_log_perror("select");
+      }
+      return -1;
+    default:
+      snmp_log(LOG_ERR, "select returned %d\n", count);
+      return -1;
+  }  /* endif -- count>0 */
+  return count;
+}
+
+
+void
+init_master_agent(int dest_port, 
+                  int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
+                  int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
+{
+    struct snmp_session
+                        sess,
+                       *session=&sess;
+
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
+	return;
+
+    DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
+    /* set up a fake session for incoming requests that opens a port
+     * that we listen to. */
+
+    snmp_sess_init(session);
+    
+    session->version = SNMP_DEFAULT_VERSION;
+    session->peername = SNMP_DEFAULT_PEERNAME;
+    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+     
+    session->local_port = dest_port;
+    session->callback = handle_snmp_packet;
+    session->authenticator = NULL;
+    session = snmp_open( session );
+
+    if ( session == NULL ) {
+	snmp_sess_perror("init_master_agent", &sess);
+	/*return;*/
+	exit(1);
+    }
+
+    if (pre_parse)
+      set_pre_parse( session, pre_parse );
+    if (post_parse)
+      set_post_parse( session, post_parse );
 }
 
 struct agent_snmp_session  *
@@ -455,13 +538,14 @@ statp_loop:
 	      || !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                             asp->pdu, varbind_ptr->type)) {
 	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
-		if (verbose)
-                  snmp_log(LOG_INFO, "    >> noSuchName (read-only)\n");
+		if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE))
+                  DEBUGMSGTL(("snmp_agent", "    >> noSuchName (read-only)\n"));
 		ERROR_MSG("read-only");
 		statType = SNMP_ERR_NOSUCHNAME;
 	    }
 	    else {
-		if (verbose) snmp_log(LOG_INFO, "    >> notWritable\n");
+		if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE))
+                  DEBUGMSGTL(("snmp_agent", "    >> notWritable\n"));
 		ERROR_MSG("Not Writable");
 		statType = SNMP_ERR_NOTWRITABLE;
 	    }
@@ -471,7 +555,7 @@ statp_loop:
         }
 	else {
             /* dump verbose info */
-	    if (verbose && statP)
+	    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) && statP)
 	        dump_var(varbind_ptr->name, varbind_ptr->name_length,
 				statType, statP, statLen);
 
