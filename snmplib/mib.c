@@ -1059,9 +1059,10 @@ init_mib (void)
     const char *prefix;
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
+    char *new_mibdirs, *homepath, *cp_home, *cp_end_home;
     
     if (Mib) return;
-    
+
     /* Initialise the MIB directory/ies */
 
     /* we can't use the environment variable directly, because strtok
@@ -1081,6 +1082,22 @@ init_mib (void)
 	sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
 	free(env_var);
 	env_var = entry;
+    }
+
+    /* replace $HOME in the path with the users home directory */
+    homepath=getenv("HOME");
+
+    if (homepath) {
+      while(cp_home = strstr(env_var, "$HOME")) {
+        new_mibdirs = (char *) malloc(strlen(env_var) - strlen("$HOME") +
+                                      strlen(homepath));
+        *cp_home = 0; /* null out the spot where we stop copying */
+        sprintf(new_mibdirs, "%s%s%s", env_var, homepath,
+                cp_home + strlen("$HOME"));
+        /* swap in the new value and repeat */
+        free(env_var);
+        env_var = new_mibdirs;
+      }
     }
     
     DEBUGMSGTL(("init_mib","Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",env_var));
@@ -1497,6 +1514,32 @@ sprint_objid(char *buf,
     }
     else cp = tempbuf;
     strcpy(buf, cp);
+#ifndef TEXT_AFTER_EACH
+    /* insert at the end of sprint_objid */
+    /* if any subidentifier might be printable, dump it as printable. */
+    if (*buf)
+      { int ii, jj, kk;
+      char *scp;
+      cp = buf + (strlen(buf));
+      scp = cp; kk = 0;
+      for (ii= 0, jj = 0; ii < objidlen; ii++)
+	{
+          int tst = objid[ii];
+          if (tst > 0)
+	    if ((tst < 254) && isprint(tst)) {
+	      if (jj == 0) { *cp++ = ' '; *cp++ = '['; jj = 1; }
+	      *cp++ = (char)tst;
+	      kk++;
+	    } else if (jj > 0) {
+              *cp++ = '.';
+              kk++;
+            }
+	}
+      if (jj) { *cp++ = ']'; }
+      if (kk < 2) cp = scp;
+      *cp = '\0';
+      }
+#endif
     return buf;
 }
 

@@ -20,7 +20,7 @@ CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBIND
 
 INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
 
-all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
+all:	sedscript EXAMPLE.conf ucd-snmp-config.h subdirs
 
 test:   all
 	( cd testing; $(MAKE) test )
@@ -30,7 +30,7 @@ sedscript: sedscript.in config.h $(srcdir)/agent/mibgroup/mibdefs.h
 
 
 ucd-snmp-config.h: config.h
-	@egrep -v "SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module_config" config.h > ucd-snmp-config.h
+	@egrep -v "IN_UCD_SNMP_SOURCE|SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module_config" config.h > ucd-snmp-config.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do	\
