@@ -337,7 +337,7 @@ SnmpDaemonMain(int argc, TCHAR *argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char options[128] = "aAc:CdD::fhHI:l:LP:qrsV";
+    char options[128] = "aAc:CdD::fhHI:l:LP:qrsV-:";
     int  arg, i, ret;
     int  dont_fork = 0;
     int  dont_zero_log = 0;
@@ -373,20 +373,21 @@ main(int argc, char *argv[])
     strcat(options, "X");
 #endif
 
-    /*  Initial scan for "--help" and "--version".  */
-    
-    for (i = 0; i < argc; i++) {
-	if (strcmp(argv[i], "--help") == 0) {
-	    usage(argv[0]);
-	} else if (strcmp(argv[i], "--version") == 0) {
-	    version();
-	}
-    }
-
     /*  Now process options normally.  */
     
     while ((arg = getopt(argc, argv, options)) != EOF) {
 	switch (arg) {
+        case '-':
+          if (strcasecmp(optarg, "help") == 0) {
+              usage(argv[0]);
+          }
+          if (strcasecmp(optarg, "version") == 0) {
+              version();
+          }
+
+          handle_long_opt(optarg);
+          break;
+
 	case 'a':
 	    log_addresses++;
 	    break;

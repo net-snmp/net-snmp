@@ -743,7 +743,7 @@ snmptrapd_close_sessions(struct snmp_session *sess_list)
 int
 main(int argc, char *argv[])
 {
-    char options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:";
+    char options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
     struct snmp_session *sess_list = NULL, *ss = NULL;
     snmp_transport *transport = NULL;
     int	arg, i = 0;
@@ -790,22 +790,23 @@ main(int argc, char *argv[])
      strcat(options, "u:");
 #endif
 
-    /*  Initial scan for "--help" and "--version".  */
-    
-    for (i = 0; i < argc; i++) {
-	if (strcmp(argv[i], "--help") == 0) {
-	    usage();
-	    exit(0);
-	} else if (strcmp(argv[i], "--version") == 0) {
-	    version();
-	    exit(0);
-	}
-    }
-
     /*  Now process options normally.  */
 
     while ((arg = getopt(argc, argv, options)) != EOF) {
 	switch (arg) {
+        case '-':
+          if (strcasecmp(optarg, "help") == 0) {
+              usage();
+              exit(0);
+          }
+          if (strcasecmp(optarg, "version") == 0) {
+              version();
+              exit(0);
+          }
+
+          handle_long_opt(optarg);
+          break;
+
 	case 'a':
 	    dropauth = 1;
 	    break;

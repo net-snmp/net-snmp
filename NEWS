@@ -20,6 +20,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - The proxy code has been completely rewritten and now supports
       the use of SNMPv3 contexts to help select which proxied host you
       wish to talk to.
+    - All the tools take --configToken=value options now.  (see -H
+      output from any command for what configTokens it accepts)      
     - All the tools can speak over many different transport layers
       now, including UDP/TCP (ipv4 and ipv6), AAL5pvc, and IPX.  See
       ./configure --help for details on enabling them.
