@@ -28,8 +28,8 @@ struct filestat
 #define FILE_NAME       2
 #define FILE_SIZE       3
 #define FILE_MAX        4
-#define FILE_ERROR      5
-#define FILE_MSG        6
+#define FILE_ERROR      100
+#define FILE_MSG        101
 
 #ifdef IN_SNMP_VARS_C
 
@@ -39,11 +39,11 @@ struct variable2 file_table[] =
     {FILE_NAME,   ASN_OCTET_STR, RONLY, var_file_table, 1, {2}},
     {FILE_SIZE,   ASN_INTEGER,   RONLY, var_file_table, 1, {3}},
     {FILE_MAX,    ASN_INTEGER,   RONLY, var_file_table, 1, {4}},
-    {FILE_ERROR,  ASN_INTEGER,   RONLY, var_file_table, 1, {5}},
-    {FILE_MSG,    ASN_OCTET_STR, RONLY, var_file_table, 1, {6}}
+    {FILE_ERROR,  ASN_INTEGER,   RONLY, var_file_table, 1, {100}},
+    {FILE_MSG,    ASN_OCTET_STR, RONLY, var_file_table, 1, {101}}
 };
 
-config_load_mib(HUMLAN_ROOT.FILE_OID.1, HUMLAN_LEN+2, file_table);
+config_load_mib(EXTENSIBLEMIB.14.1, EXTENSIBLENUM+2, file_table);
 
 #endif
 #endif /* _MIBGROUP_FILE_H */
