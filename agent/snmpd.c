@@ -89,6 +89,9 @@ SOFTWARE.
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_PROCESS_H  /* Win32-getpid */
+#include <process.h>
+#endif
 
 #ifndef FD_SET
 typedef long    fd_mask;
