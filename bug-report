@@ -31,7 +31,7 @@ fi
 echo "You are about to compose a mail message to the"
 echo "ucd-snmp-coders@ece.ucdavis.edu.  Please write a detailed"
 echo "description of your problem.  At the end you will be given"
-echo "the opertunity to include optional text files, such as"
+echo "the opportunity to include optional text files, such as"
 echo "patches, make output, error files, etc..."
 echo ""
 echo "Note:  If at all possible, this should be run on the machine that"
@@ -51,11 +51,9 @@ then
 fi
 
 # attempt to figure out domain name.
-domain=`grep domain /etc/resolv.conf`;
-if [ $? ]; then
-  domain=`echo $domain | awk '{print $2}'`
-else
-  domain=""
+domain=`grep "^domain" /etc/resolv.conf | awk '{print $2}'`;
+if [ "$domain" = "" ]; then
+  domain=`grep "^search" /etc/resolv.conf | awk '{print $2}'`;
 fi
 
 email=`whoami`@`hostname`.$domain
@@ -70,11 +68,11 @@ fi
 #    Start to build the bug report
 #
 echo "UCD-SNMP version $VersionInfo bug report" >  $msg_file
-echo "-------------------------------------------------" >> $msg_file
+echo "--------------------------------------" >> $msg_file
 
 echo $n "Press return to edit bug report file $c"
 read pause
-${EDITOR:-vi} $msg_file
+${EDITOR:-vi} $msg_file || exit
 
 #
 #    Start to create the mail message
