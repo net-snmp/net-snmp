@@ -13,7 +13,7 @@ configuration files in the following 4 directories, in order:
 SYSCONFDIR/snmp,
 DATADIR/snmp, LIBDIR/snmp, and $HOME/.snmp.  In each of these
 directories, it looks for files with the extension of both
-.IR .conf " and " .local.conf
+.IR conf " and " local.conf
 (reading the second ones last).  In this manner, there are
 8 default places a configuration file can exist for any given
 configuration file type.
