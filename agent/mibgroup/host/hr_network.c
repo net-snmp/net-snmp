@@ -191,7 +191,9 @@ static nmapi_phystat HRN_ifnet;
 #define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c)
 #else                           /* hpux11 */
 static char     HRN_name[16];
+#ifndef WIN32
 static struct ifnet HRN_ifnet;
+#endif /* WIN32 */
 #define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
 #endif
 
@@ -216,9 +218,11 @@ int
 Get_Next_HR_Network(void)
 {
 #ifndef solaris2
+#ifndef WIN32
     if (M_Interface_Scan_Next(&HRN_index, HRN_name, &HRN_ifnet, NULL))
         return (HRDEV_NETWORK << HRDEV_TYPE_SHIFT) + HRN_index;
     else
+#endif /* WIN32 */
 #endif
         return -1;
 }
@@ -232,8 +236,10 @@ Save_HR_Network_Info(void)
     HRN_savedErrors = HRN_ifnet.if_entry.ifInErrors +
         HRN_ifnet.if_entry.ifOutErrors;
 #else                           /* hpux11 */
+#ifndef WIN32
     HRN_savedFlags = HRN_ifnet.if_flags;
     HRN_savedErrors = HRN_ifnet.if_ierrors + HRN_ifnet.if_oerrors;
+#endif /* WIN32 */
 #endif                          /* hpux11 */
 }
 
@@ -255,11 +261,16 @@ network_status(int idx)
 #ifdef hpux11
     if (HRN_savedFlags == LINK_UP)
 #else
+#ifndef WIN32
     if (HRN_savedFlags & IFF_UP)
+#endif /* WIN32 */
 #endif
+#ifndef WIN32
         return 2;               /* running */
     else
         return 5;               /* down */
+#endif /* WIN32 */
+
 }
 
 int
