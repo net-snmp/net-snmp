@@ -1566,6 +1566,7 @@ get_tc(const char *descriptor,
 	}
 	return tcp->type;
       }
+    else *tc_index = -1;
     return LABEL;
 }
 
