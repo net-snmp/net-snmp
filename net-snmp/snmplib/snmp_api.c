@@ -86,6 +86,7 @@ SOFTWARE.
 #include "context.h"
 #include "system.h"
 #include "int64.h"
+#include "read_config.h"
 
 static void init_snmp_session __P((void));
 
@@ -2286,10 +2287,12 @@ snmp_add_var(pdu, name, name_length, type, value)
 {
     char buf[2048];
     int tint;
+    long ltmp;
+#ifdef OPAQUE_SPECIAL_TYPES
     double dtmp;
     float ftmp;
-    long ltmp;
     struct counter64 c64tmp;
+#endif /* OPAQUE_SPECIAL_TYPES */
 
     switch(type){
       case 'i':
@@ -2359,7 +2362,7 @@ snmp_add_var(pdu, name, name_length, type, value)
         break;
       
       case 'F':
-        ftmp = atof(value);
+        ftmp = (float)atof(value);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
                               (u_char *) &ftmp, sizeof(ftmp));
         break;
