@@ -394,7 +394,7 @@ init_routes(){
 
 static int qsort_compare();
 
-#ifdef RTENTRY
+#if !defined(HAVE_SYS_MBUF_H) || defined(RTENTRY_4_4)
 
 #ifdef RTENTRY_4_4
 load_rtentries(pt)
