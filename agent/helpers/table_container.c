@@ -376,7 +376,7 @@ _data_lookup(netsnmp_handler_registration *reginfo,
              * ignore it, but it is not an error - getnext will move
              * on to another handler to process this request.
              */
-            request->processed = 1;
+            netsnmp_set_request_error(agtreq_info, request, SNMP_ENDOFMIBVIEW);
             DEBUGMSGTL(("table_container", "no row found\n"));
         }
     } /** GETNEXT/GETBULK */
