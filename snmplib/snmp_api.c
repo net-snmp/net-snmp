@@ -252,7 +252,7 @@ long Reqid = 0;
 /*END MTCRITICAL_RESOURCE*/
 
 /*struct timeval Now;*/
-static int default_s_port = 0;
+static unsigned short default_s_port = 0;	/* default SNMP service port */
 int snmp_errno = 0;
 char *snmp_detail = NULL;
 
@@ -396,10 +396,6 @@ init_snmp_session __P((void))
     if (Reqid) return;
     Reqid = 1;
 
-    servp = getservbyname("snmp", "udp");
-    if (servp)
-      default_s_port = servp->s_port;
-
     gettimeofday(&tv,(struct timezone *)0);
     /*Now = tv;*/
 
@@ -410,6 +406,11 @@ init_snmp_session __P((void))
     srandom(tv.tv_sec ^ tv.tv_usec);
     Reqid = random();
 #endif
+
+    default_s_port = htons(SNMP_PORT);
+    servp = getservbyname("snmp", "udp");
+    if (servp)
+      default_s_port = servp->s_port;
 }
 
 /*
@@ -650,11 +651,7 @@ snmp_sess_open(in_session)
 	}
 	isp->addr.sin_family = AF_INET;
 	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    if (default_s_port){
-		isp->addr.sin_port = default_s_port;
-	    } else {
-		isp->addr.sin_port = htons(SNMP_PORT);
-	    }
+	    isp->addr.sin_port = default_s_port;
 	} else {
 	    isp->addr.sin_port = htons(session->remote_port);
 	}
