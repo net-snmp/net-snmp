@@ -7,9 +7,13 @@ Field "SNMPAgent" {
 		"UCD HP-UX 10",
 		"UCD SunOS4",
 		"UCD Solaris",
-		"UCD OSF/3",
+		"UCD OSF",
 		"UCD Ultrix",
 		"UCD NetBSD",
+		"UCD FreeBSD",
+		"UCD IRIX",
+		"UCD Linux",
+		"UCD BSD/OS",
 		"UCD Unknown",
 		"UCDavis Agent";
 }
