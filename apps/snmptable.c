@@ -317,8 +317,10 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+#ifndef DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1)
         use_getbulk = 0;
+#endif
 
     do {
         entries = 0;

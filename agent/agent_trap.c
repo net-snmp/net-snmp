@@ -108,9 +108,12 @@ size_t          sysuptime_oid_len;
 
 #define SNMPV2_COMM_OBJS_PREFIX	SNMP_OID_SNMPMODULES,18,1
 oid             agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
-oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
 size_t          agentaddr_oid_len;
+oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
 size_t          community_oid_len;
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+char           *snmp_trapcommunity = NULL;
+#endif
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
@@ -118,7 +121,6 @@ size_t          community_oid_len;
 
 int             snmp_enableauthentraps = SNMP_AUTHENTICATED_TRAPS_DISABLED;
 int             snmp_enableauthentrapsset = 0;
-char           *snmp_trapcommunity = NULL;
 
 /*
  * Prototypes 
@@ -226,6 +228,7 @@ remove_trap_session(netsnmp_session * ss)
     return 0;
 }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 int
 create_trap_session(char *sink, u_short sinkport,
                     char *com, int version, int pdutype)
@@ -261,14 +264,18 @@ create_trap_session(char *sink, u_short sinkport,
     snmp_sess_perror("snmpd: create_trap_session", &session);
     return 0;
 }
+#endif /* support for community based SNMP */
 
+#ifndef DISABLE_SNMPV1
 static int
 create_v1_trap_session(char *sink, u_short sinkport, char *com)
 {
     return create_trap_session(sink, sinkport, com,
                                SNMP_VERSION_1, SNMP_MSG_TRAP);
 }
+#endif
 
+#ifndef DISABLE_SNMPV2C
 static int
 create_v2_trap_session(char *sink, u_short sinkport, char *com)
 {
@@ -282,7 +289,7 @@ create_v2_inform_session(char *sink, u_short sinkport, char *com)
     return create_trap_session(sink, sinkport, com,
                                SNMP_VERSION_2c, SNMP_MSG_INFORM);
 }
-
+#endif
 
 /**
  * This function allows you to make a distinction between generic 
@@ -749,12 +756,16 @@ netsnmp_send_traps(int trap, int specific,
      *   providing an appropriately formatted PDU in each case
      */
     for (sink = sinks; sink; sink = sink->next) {
+#ifndef DISABLE_SNMPV1
         if (sink->version == SNMP_VERSION_1) {
             send_trap_to_sess(sink->sesp, template_v1pdu);
         } else {
+#endif
             template_v2pdu->command = sink->pdutype;
             send_trap_to_sess(sink->sesp, template_v2pdu);
+#ifndef DISABLE_SNMPV1
         }
+#endif
     }
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_SEND_TRAP1, template_v1pdu);
@@ -795,9 +806,11 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     DEBUGMSGTL(("trap", "sending trap type=%d, version=%d\n",
                 template_pdu->command, sess->version));
 
+#ifndef DISABLE_SNMPV1
     if (sess->version == SNMP_VERSION_1 &&
         (template_pdu->command != SNMP_MSG_TRAP))
         return;                 /* Skip v1 sinks for v2 only traps */
+#endif
     template_pdu->version = sess->version;
     pdu = snmp_clone_pdu(template_pdu);
     pdu->sessid = sess->sessid; /* AgentX only ? */
@@ -951,6 +964,7 @@ snmpd_parse_config_authtrap(const char *token, char *cptr)
     }
 }
 
+#ifndef DISABLE_SNMPV1
 void
 snmpd_parse_config_trapsink(const char *token, char *cptr)
 {
@@ -980,8 +994,9 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
         config_perror(tmpbuf);
     }
 }
+#endif
 
-
+#ifndef DISABLE_SNMPV2C
 void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
@@ -1041,6 +1056,7 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
         config_perror(tmpbuf);
     }
 }
+#endif
 
 /*
  * this must be standardized somewhere, right? 
@@ -1104,14 +1120,19 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         return;
     }
 
+#ifndef DISABLE_SNMPV1
     if (ss->version == SNMP_VERSION_1) {
         add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
     } else {
+#endif
         add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM),
                          ss->version);
+#ifndef DISABLE_SNMPV1
     }
+#endif
 }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 void
 snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
@@ -1132,4 +1153,5 @@ snmpd_free_trapcommunity(void)
         snmp_trapcommunity = NULL;
     }
 }
+#endif
 /** @} */

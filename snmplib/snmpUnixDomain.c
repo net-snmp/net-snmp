@@ -448,6 +448,7 @@ netsnmp_unix_ctor(void)
     netsnmp_tdomain_register(&unixDomain);
 }
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 /* support for SNMPv1 and SNMPv2c on unix domain*/
 
 #define EXAMPLE_COMMUNITY "COMMUNITY"
@@ -613,13 +614,16 @@ netsnmp_unix_com2SecList_free(void)
     }
     com2SecUnixList = com2SecUnixListLast = NULL;
 }
+#endif /* support for community based SNMP */
 
 void
 netsnmp_unix_agent_config_tokens_register(void)
 {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2secunix", netsnmp_unix_parse_security,
                                 netsnmp_unix_com2SecList_free,
                                 "name sockpath community");
+#endif /* support for community based SNMP */
 }
 
 

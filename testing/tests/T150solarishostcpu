@@ -9,6 +9,8 @@ if test `uname -s` != "SunOS" ; then
     SKIPIFNOT XXXYYYZZZ
 fi
 
+SKIPIF DISABLE_SNMPV2C
+
 SKIPIFNOT USING_HOST_MODULE
 
 #

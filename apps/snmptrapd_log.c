@@ -1037,6 +1037,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1044,6 +1045,8 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
         break;
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1051,6 +1054,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
         break;
+#endif
     case SNMP_VERSION_3:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1061,6 +1065,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     switch (pdu->version) {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         if (!snmp_strcat
@@ -1085,6 +1090,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         *(*buf + *out_len) = '\0';
         break;
+#endif
     case SNMP_VERSION_3:
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,

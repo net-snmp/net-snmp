@@ -706,8 +706,10 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE);
     netsnmp_ds_register_config(ASN_INTEGER, "snmp", "defaultPort",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT);
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defCommunity",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY);
+#endif
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
                       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_TOKEN_WARNINGS);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noRangeCheck",
@@ -986,6 +988,7 @@ _sess_copy(netsnmp_session * in_session)
     /*
      * Fill in defaults if necessary 
      */
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     if (in_session->community_len != SNMP_DEFAULT_COMMUNITY_LEN) {
         ucp = (u_char *) malloc(in_session->community_len);
         if (ucp != NULL)
@@ -1015,6 +1018,7 @@ _sess_copy(netsnmp_session * in_session)
         return (NULL);
     }
     session->community = ucp;   /* replace pointer with pointer to new data */
+#endif
 
     if (session->securityLevel <= 0) {
         session->securityLevel =
@@ -2666,11 +2670,16 @@ static int
 _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             netsnmp_session * session, netsnmp_pdu *pdu)
 {
-    u_char         *h0, *h0e = 0, *h1;
-    u_char         *cp;
-    size_t          length, start_offset = *offset;
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
+    u_char         *h0e = 0;
+    size_t          start_offset = *offset;
     long            version;
     int             rc = 0;
+#endif /* support for community based SNMP */
+    
+    u_char         *h0, *h1;
+    u_char         *cp;
+    size_t          length;
 
     session->s_snmp_errno = 0;
     session->s_errno = 0;
@@ -2707,6 +2716,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
          * Fallthrough 
          */
     case SNMP_MSG_INFORM:
+#ifndef DISABLE_SNMPV1
         /*
          * not supported in SNMPv1 and SNMPsec 
          */
@@ -2714,6 +2724,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             session->s_snmp_errno = SNMPERR_V2_IN_V1;
             return -1;
         }
+#endif
         if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
             pdu->errstat = 0;
         if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
@@ -2724,10 +2735,12 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * not supported in SNMPv1 and SNMPsec 
          */
+#ifndef DISABLE_SNMPV1
         if (pdu->version == SNMP_VERSION_1) {
             session->s_snmp_errno = SNMPERR_V2_IN_V1;
             return -1;
         }
+#endif
         if (pdu->max_repetitions < 0) {
             session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
             return -1;
@@ -2742,10 +2755,12 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         /*
          * *only* supported in SNMPv1 and SNMPsec 
          */
+#ifndef DISABLE_SNMPV1
         if (pdu->version != SNMP_VERSION_1) {
             session->s_snmp_errno = SNMPERR_V1_IN_V2;
             return -1;
         }
+#endif
         /*
          * initialize defaulted Trap PDU fields 
          */
@@ -2790,8 +2805,13 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
      */
     h0 = *pkt;
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 #ifdef NO_ZEROLENGTH_COMMUNITY
         if (pdu->community_len == 0) {
             if (session->community_len == 0) {
@@ -2942,7 +2962,8 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 #ifdef USE_REVERSE_ASNENCODING
         }
 #endif                          /* USE_REVERSE_ASNENCODING */
-
+        break;
+#endif /* support for community based SNMP */
     case SNMP_VERSION_2p:
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -2963,12 +2984,18 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
      * insert the actual length of the message sequence 
      */
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         asn_build_sequence(*pkt, &length,
                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
                            cp - h0e);
         break;
+#endif /* support for community based SNMP */
 
     case SNMP_VERSION_2p:
     case SNMP_VERSION_sec:
@@ -3959,8 +3986,10 @@ _snmp_parse(void *sessp,
             netsnmp_session * session,
             netsnmp_pdu *pdu, u_char * data, size_t length)
 {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     u_char          community[COMMUNITY_MAX_LEN];
     size_t          community_length = COMMUNITY_MAX_LEN;
+#endif
     int             result = -1;
 
     session->s_snmp_errno = 0;
@@ -3980,8 +4009,13 @@ _snmp_parse(void *sessp,
     }
 
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
         DEBUGMSGTL(("snmp_api", "Parsing SNMPv%d message...\n",
                     (1 + pdu->version)));
 
@@ -4042,6 +4076,7 @@ _snmp_parse(void *sessp,
         }
         DEBUGINDENTADD(-6);
         break;
+#endif /* support for community based SNMP */
 
     case SNMP_VERSION_3:
         result = snmpv3_parse(pdu, data, &length, NULL, session);

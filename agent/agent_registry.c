@@ -1127,9 +1127,11 @@ in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
     /*
      * check for v1 and counter64s, since snmpv1 doesn't support it 
      */
+#ifndef DISABLE_SNMPV1
     if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64) {
         return VACM_NOTINVIEW;
     }
+#endif
 
     view_parms.pdu = pdu;
     view_parms.name = name;
@@ -1142,8 +1144,12 @@ in_a_view(oid *name, size_t *namelen, netsnmp_pdu *pdu, int type)
     view_parms.check_subtree = 0;
 
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
     case SNMP_VERSION_3:
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK, &view_parms);
@@ -1173,8 +1179,12 @@ check_access(netsnmp_pdu *pdu)
     }
 
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
     case SNMP_VERSION_3:
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK_INITIAL, &view_parms);
@@ -1206,8 +1216,12 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
     }
 
     switch (pdu->version) {
+#ifndef DISABLE_SNMPV1
     case SNMP_VERSION_1:
+#endif
+#ifndef DISABLE_SNMPV2C
     case SNMP_VERSION_2c:
+#endif
     case SNMP_VERSION_3:
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_ACM_CHECK_SUBTREE, &view_parms);

@@ -96,8 +96,12 @@ SOFTWARE.
     /*
      * versions based on version field 
      */
+#ifndef DISABLE_SNMPV1
 #define SNMP_VERSION_1	   0
+#endif
+#ifndef DISABLE_SNMPV2C
 #define SNMP_VERSION_2c    1
+#endif
 #define SNMP_VERSION_2u    2    /* not (will never be) supported by this code */
 #define SNMP_VERSION_3     3
 

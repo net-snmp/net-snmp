@@ -176,11 +176,13 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                 thissess.securityNameLen =
                                     strlen(thissess.securityName);
                                 thissess.securityLevel = param->secLevel;
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
                             } else {
                                 thissess.community =
                                     (u_char *) strdup(param->secName);
                                 thissess.community_len =
                                     strlen((char *) thissess.community);
+#endif
                             }
 
                             targaddrs->sess = snmp_add(&thissess, t,

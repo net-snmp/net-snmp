@@ -467,6 +467,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 
 
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token
  * functionality for compatibility.  
@@ -670,14 +671,16 @@ netsnmp_udp_com2SecList_free(void)
     }
     com2SecList = com2SecListLast = NULL;
 }
-
+#endif /* support for community based SNMP */
 
 void
 netsnmp_udp_agent_config_tokens_register(void)
 {
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2sec", netsnmp_udp_parse_security,
                                 netsnmp_udp_com2SecList_free,
                                 "name IPv4-network-address[/netmask] community");
+#endif /* support for community based SNMP */
 }
 
 
@@ -689,6 +692,7 @@ netsnmp_udp_agent_config_tokens_register(void)
  * parameters did not match any com2sec entry.  
  */
 
+#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
 int
 netsnmp_udp_getSecName(void *opaque, int olength,
                        const char *community,
@@ -757,7 +761,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     }
     return 1;
 }
-
+#endif /* support for community based SNMP */
 
 
 netsnmp_transport *
