@@ -10,55 +10,53 @@
 @ifconf $node.syntax.m2i@
 @   include $node.syntax.m2i@
 @else@
-/*
- * constants for enums for the MIB node $node
+##
+##   Generating enums
+##
+## Examples:
+##
+## enums  syntax    perltype  net-snmp type  cdecl  m2c_decl
+## -----  --------  --------  -------------  -----  -------
+##   1    SomeTC    BITS      ASN_OCTET_STR  char    u_long
+##   1    INTEGER   INTEGER   ASN_INTEGER    long    u_long
+##   1    RowStatus INTEGER   ASN_INTEGER    long    u_long
+##
+/*************************************************************
+ * constants for enums for the MIB node
+ * $node ($node.syntax / $node.type)
+ *
+ * since a Textual Convention may be referenced more than once in a
+ * MIB, protect againt redifinitions of the enum values.
  */
-@    if $node.syntax ne $node.perltype@
-@        eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@
-@    else@
-@        eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
-@    end@
-##@    if $m2c_const_lc == 0@
-##@        eval $m2c_de_pfx = uc($m2c_de_pfx)@
-##@    end@
-@    if ("$node.perltype" eq "INTEGER") && ($node.enums == 1)@
-##@    if $node.syntax ne $node.perltype@
+##
 #ifndef ${m2c_de_pfx}_ENUMS
 #define ${m2c_de_pfx}_ENUMS
-##@    end@
-@    foreach $e $v enum@
-@        eval $m2c_ename = "${m2c_de_pfx}_${e}"@
-@        if $m2c_const_lc == 0@
-@            eval $m2c_ename = uc($m2c_ename)@
-@        end@
-@        if "$node.perltype" eq "BITS"@
-$m2c_const_dcl $m2c_ename $m2c_const_del (1 << (31-$v)) $m2c_const_sfx
-@        else@
-$m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
-@        end@
-@    end@ # for each
-##@    if $node.syntax ne $node.perltype@
-#endif /* $node.syntax_ENUMS */
-@    end@
 
-@    if ($node.enums == 1) || ($node.syntax ne $node.perltype)@
-    /*
-     * TODO: value mapping
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them
-     * here. For example, a boolean flag (1/0) is usually represented
-     * as a TruthValue in a MIB, which maps to the values (1/2).
-     */
-@        if $node.enums@
-@            foreach $e $v enum@
-@                eval $m2c_ename = "${m2c_const_pfx}${node}_${e}"@
-@                if $m2c_const_lc == 0@
-@                    eval $m2c_ename = uc($m2c_ename);@
-@                end@
-$m2c_const_dcl INTERNAL_$m2c_ename $m2c_const_del $v $m2c_const_sfx
-@             end@
+@      foreach $e $v enum@
+@         include m2c_setup_enum.m2i@
+@         if "$node.perltype" eq "BITS"@
+$m2c_const_dcl $m2c_ename $m2c_const_del (1 << (31-$v)) $m2c_const_sfx
+@         else@
+$m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
 @         end@
-@    end@
+@      end@ # for each
+
+#endif /* ${m2c_de_pfx}_ENUMS */
+
+@      if ($node.enums == 1) && ("$node.perltype" ne "BITS")@
+    /*
+     * TODO: value mapping (set notes at top of file)
+     */
+@         foreach $e $v enum@
+##           # this enum should be unique per column, so always use 
+##           # node name (i.e. don't use m2c_setup_enum here)
+@            eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
+@            if $m2c_const_lc == 0@
+@               eval $m2c_iname = uc($m2c_iname)@
+@            end@
+$m2c_const_dcl INTERNAL_$m2c_iname $m2c_const_del $v $m2c_const_sfx
+@         end@
+@      end@
 @end@ # ! syntax include
 
 ########################################################################
