@@ -134,7 +134,7 @@ snmp_pdu_create(int command)
  * variables for this pdu.
  */
 netsnmp_variable_list *
-snmp_add_null_var(netsnmp_pdu *pdu, oid * name, size_t name_length)
+snmp_add_null_var(netsnmp_pdu *pdu, const oid * name, size_t name_length)
 {
     return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
 }
