@@ -17,6 +17,10 @@
  * Update: 1998-10-21 <mslifcak@iss.net>
  * Merge_parse_objectid associates information with last node in chain.
  */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /******************************************************************
         Copyright 1989, 1991, 1992 by Carnegie Mellon University
 
