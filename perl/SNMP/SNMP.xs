@@ -1243,8 +1243,8 @@ void *cb_data;
          sv_bless(varbind_ref, gv_stashpv("SNMP::Varbind",0));
          av_push(varlist, varbind_ref);
          *str_buf = '.';
-         tp = get_symbol(vars->name,vars->name_length,
-                         get_tree_head(),str_buf+1);
+         tp = get_tree(vars->name,vars->name_length,
+                       get_tree_head());
          if (__is_leaf(tp)) {
             type = tp->type;
          } else {
@@ -2055,7 +2055,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       }
 
       *str_buf = '.';
-      tp = get_symbol(vars->name,vars->name_length, get_tree_head(), str_buf+1);
+      tp = get_tree(vars->name,vars->name_length, get_tree_head());
 
       getlabel_flag = context->getlabel_f;
 
@@ -3253,8 +3253,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     varbind = (AV*) SvRV(*varbind_ref);
 
                     *str_buf = '.';
-                    tp = get_symbol(vars->name,vars->name_length,
-                                    get_tree_head(),str_buf+1);
+                    tp = get_tree(vars->name,vars->name_length,
+                                  get_tree_head());
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
@@ -3450,8 +3450,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 
                     varbind = (AV*) newAV();
                     *str_buf = '.';
-                    tp = get_symbol(vars->name,vars->name_length,
-                                    get_tree_head(),str_buf+1);
+                    tp = get_tree(vars->name,vars->name_length,
+                                    get_tree_head());
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
