@@ -27,7 +27,6 @@
      */ 
 extern LPTSTR   g_szAppName;
 
-
     /*
      * 
      * * Declare global variable
@@ -38,27 +37,22 @@ extern LPTSTR   g_szAppName;
      */ 
     BOOL g_fRunningAsService = FALSE;
 
-
     /*
      * Varibale to maintain Current Service status 
      */ 
 static SERVICE_STATUS ServiceStatus;
-
 
     /*
      * Service Handle 
      */ 
 static SERVICE_STATUS_HANDLE hServiceStatus = 0L;
 
-
     /*
      * Service Table Entry 
      */ 
     SERVICE_TABLE_ENTRY ServiceTableEntry[] = {
-    
-NULL, ServiceMain, /* Service Main function */ 
+    NULL, ServiceMain, /* Service Main function */ 
 NULL, NULL};
-
 
 
     /*
@@ -66,14 +60,11 @@ NULL, NULL};
      */ 
 static HANDLE   hServiceThread = NULL;  /* Thread Handle */
 
-
-
     /*
      * Holds calling partys Function Entry point, that should started 
      * * when entered to service mode
      */ 
 static          INT(*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
-
 
     /*
      * 
@@ -82,100 +73,57 @@ static          INT(*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
      */ 
 static          VOID(*StopFunction) () = 0L;
 
-
-
     /*
      * 
      * * To register as Windows Service with SCM(Service Control Manager)
      * * Input - Service Name, Serivce Display Name,Service Description and
      * * Service startup arguments
      */ 
-    
-VOID RegisterService(LPCTSTR lpszServiceName, 
-LPCTSTR lpszServiceDisplayName, 
-LPCTSTR lpszServiceDescription, 
-InputParams * StartUpArg) /* Startup argument to the service */
+    VOID RegisterService(LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName, LPCTSTR lpszServiceDescription, InputParams * StartUpArg) /* Startup argument to the service */
     
 {
-    
-TCHAR szServicePath[MAX_PATH];     /* To hold module File name */
-    
-TCHAR MsgErrorString[MAX_STR_SIZE];        /* Message or Error string */
-    
-TCHAR szServiceCommand[MAX_PATH + 9];      /* Command to execute */
-    
-
-SC_HANDLE hSCManager = NULL;
-    
-SC_HANDLE hService = NULL;
-    
-
-TCHAR szRegAppLogKey[] =
+    TCHAR szServicePath[MAX_PATH];     /* To hold module File name */
+    TCHAR MsgErrorString[MAX_STR_SIZE];        /* Message or Error string */
+    TCHAR szServiceCommand[MAX_PATH + 9];      /* Command to execute */
+    SC_HANDLE hSCManager = NULL;
+    SC_HANDLE hService = NULL;
+    TCHAR szRegAppLogKey[] =
         "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
-    
-TCHAR szRegKey[512];
-    
-HKEY hKey = NULL;          /* Key to registry entry */
-    
-HKEY hParamKey = NULL;     /* To store startup parameters */
-    
-DWORD dwData;              /* Type of logging supported */
-    
-
-DWORD i, j;               /* Loop variables */
-    
-
-GetModuleFileName(NULL, szServicePath, MAX_PATH);
-    
-__try 
- {
+    TCHAR szRegKey[512];
+    HKEY hKey = NULL;          /* Key to registry entry */
+    HKEY hParamKey = NULL;     /* To store startup parameters */
+    DWORD dwData;              /* Type of logging supported */
+    DWORD i, j;               /* Loop variables */
+    GetModuleFileName(NULL, szServicePath, MAX_PATH);
+    __try  {
         
             /*
              * Open Service Control Manager handle 
              */ 
             hSCManager =
-            OpenSCManager(NULL, 
-NULL, 
-SC_MANAGER_CREATE_SERVICE);
+            OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+        if (hSCManager == NULL)
+             {
+            DisplayError(_T("Can't open SCM"));
+            __leave;
+            }
         
-if (hSCManager == NULL)
-            
- {
-            
-DisplayError(_T("Can't open SCM"));
-            
-__leave;
-            
-}
-        
-
             /*
              * Generate the Command to be executed by SCM 
              */ 
             _stprintf(szServiceCommand, "%s %s", szServicePath,
                       _T("-service"));
         
-
             /*
              * Create the Desired service 
              */ 
-            hService = CreateService(hSCManager, 
-lpszServiceName, 
-lpszServiceDisplayName, 
-SERVICE_ALL_ACCESS, 
-SERVICE_WIN32_OWN_PROCESS, 
-SERVICE_AUTO_START, 
-SERVICE_ERROR_NORMAL, 
-szServiceCommand, 
-NULL,      /* load-order group */
+            hService = CreateService(hSCManager, lpszServiceName, lpszServiceDisplayName, SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS, SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, szServiceCommand, NULL,      /* load-order group */
                                      NULL,      /* group member tag */
                                      NULL,      /* dependencies */
                                      NULL,      /* account */
                                      NULL);     /* password */
-        
-if (hService == NULL)
-            
- {
+        if (hService == NULL)
+             {
             
                 /*
                  * Generate Error String 
@@ -183,14 +131,10 @@ if (hService == NULL)
                 _stprintf(MsgErrorString, "%s %s",
                           _T("Can't Create Service"),
                           lpszServiceDisplayName);
-            
-DisplayError(MsgErrorString);
-            
-__leave;
-            
-}
+            DisplayError(MsgErrorString);
+            __leave;
+            }
         
-
             /*
              * Create registry entires for EventLog 
              */ 
@@ -198,165 +142,111 @@ __leave;
              * Create registry Application event log key 
              */ 
             _tcscpy(szRegKey, szRegAppLogKey);
+        _tcscat(szRegKey, lpszServiceName);
         
-_tcscat(szRegKey, lpszServiceName);
-        
-
             /*
              * Create registry key 
              */ 
             if (RegCreateKey(HKEY_LOCAL_MACHINE, szRegKey, &hKey) !=
                 ERROR_SUCCESS)
-            
- {
-            
-_stprintf(MsgErrorString, "%s %s",
+             {
+            _stprintf(MsgErrorString, "%s %s",
                        _T("Unable to create registry entires"),
                        lpszServiceDisplayName);
-            
-DisplayError(MsgErrorString);
-            
-__leave;
-            
-}
+            DisplayError(MsgErrorString);
+            __leave;
+            }
         
-
             /*
              * Add Event ID message file name to the 'EventMessageFile' subkey 
              */ 
-            RegSetValueEx(hKey, 
-"EventMessageFile", 
-0, 
-REG_EXPAND_SZ, 
+            RegSetValueEx(hKey, "EventMessageFile", 0, REG_EXPAND_SZ, 
                           (CONST BYTE *) szServicePath,
-                          
-_tcslen(szServicePath) + sizeof(TCHAR));
+                          _tcslen(szServicePath) + sizeof(TCHAR));
         
-
             /*
              * Set the supported types flags. 
              */ 
             dwData =
             EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE |
             EVENTLOG_INFORMATION_TYPE;
+        RegSetValueEx(hKey, "TypesSupported", 0, REG_DWORD,
+                       (CONST BYTE *) & dwData, sizeof(DWORD));
         
-RegSetValueEx(hKey, 
-"TypesSupported", 
-0, 
-REG_DWORD,
-                       
-(CONST BYTE *) & dwData, 
-sizeof(DWORD));
-        
-
             /*
              * Close Registry key 
              */ 
             RegCloseKey(hKey);
         
-
             /*
              * Set Service Description String  and save startup parameters if present
              */ 
             if (lpszServiceDescription != NULL || StartUpArg->Argc > 2)
-            
- {
+             {
             
                 /*
                  * Create Registry Key path 
                  */ 
                 _tcscpy(szRegKey,
                         _T("SYSTEM\\CurrentControlSet\\Services\\"));
-            
-_tcscat(szRegKey, g_szAppName);
-            
-
-hKey = NULL;
+            _tcscat(szRegKey, g_szAppName);
+            hKey = NULL;
             
                 /*
                  * Open Registry key 
                  */ 
                 if (RegOpenKeyEx
-                    (HKEY_LOCAL_MACHINE, 
-szRegKey, 
-0, 
-KEY_WRITE,
+                    (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_WRITE,
                      /*
                       * Create and Set access 
                       */ 
                      &hKey) != ERROR_SUCCESS)
-                
- {
-                
-_stprintf(MsgErrorString, "%s %s",
+                 {
+                _stprintf(MsgErrorString, "%s %s",
                            _T("Unable to create registry entires"),
                            lpszServiceDisplayName);
-                
-DisplayError(MsgErrorString);
-                
-__leave;
-                
-}
+                DisplayError(MsgErrorString);
+                __leave;
+                }
             
-
                 /*
                  * Create description subkey and the set value 
                  */ 
                 if (lpszServiceDescription != NULL)
-                
- {
-                
-if (RegSetValueEx(hKey, 
-"Description", 
-0, 
-REG_SZ, 
+                 {
+                if (RegSetValueEx(hKey, "Description", 0, REG_SZ, 
                                    (CONST BYTE *) lpszServiceDescription,
-                                   
-_tcslen(lpszServiceDescription) +
+                                   _tcslen(lpszServiceDescription) +
                                    sizeof(TCHAR)) != ERROR_SUCCESS)
-                    
- {
-                    
-_stprintf(MsgErrorString, "%s %s",
+                     {
+                    _stprintf(MsgErrorString, "%s %s",
                                _T("Unable to create registry entires"),
                                lpszServiceDisplayName);
-                    
-DisplayError(MsgErrorString);
-                    
-__leave;
-                    
-};
-                
-}
+                    DisplayError(MsgErrorString);
+                    __leave;
+                    };
+                }
             
-
                 /*
                  * Save startup arguments if they are present 
                  */ 
                 if (StartUpArg->Argc > 2)
-                
- {
+                 {
                 
                     /*
                      * Create Subkey parameters 
                      */ 
                     if (RegCreateKeyEx
                         (hKey, "Parameters", 0, NULL,
-                         
-REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
+                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
                          &hParamKey, NULL) != ERROR_SUCCESS)
-                    
- {
-                    
-_stprintf(MsgErrorString, "%s %s",
+                     {
+                    _stprintf(MsgErrorString, "%s %s",
                                _T("Unable to create registry entires"),
                                lpszServiceDisplayName);
-                    
-DisplayError(MsgErrorString);
-                    
-__leave;
-                    
-}
+                    DisplayError(MsgErrorString);
+                    __leave;
+                    }
                 
                     /*
                      * Save parameters 
@@ -366,52 +256,34 @@ __leave;
                      * Loop through arguments 
                      */ 
                     for (i = 2, j = 1; i < StartUpArg->Argc; i++, j++)
-                    
- {
-                    
-_stprintf(szRegKey, "%s%d", _T("Param"), j);
+                     {
+                    _stprintf(szRegKey, "%s%d", _T("Param"), j);
                     
                         /*
                          * Create registry key 
                          */ 
                         if (RegSetValueEx
-                            (hParamKey, 
-szRegKey, 
-0, 
-REG_SZ,
-                             
-(CONST BYTE *) StartUpArg->Argv[i],
-                             
-_tcslen(StartUpArg->Argv[i]) +
+                            (hParamKey, szRegKey, 0, REG_SZ,
+                             (CONST BYTE *) StartUpArg->Argv[i],
+                             _tcslen(StartUpArg->Argv[i]) +
                              sizeof(TCHAR)) != ERROR_SUCCESS)
-                        
- {
-                        
-_stprintf(MsgErrorString, "%s %s",
+                         {
+                        _stprintf(MsgErrorString, "%s %s",
                                    _T("Unable to create registry entires"),
                                    lpszServiceDisplayName);
-                        
-DisplayError(MsgErrorString);
-                        
-__leave;
-                        
-};
-                    
-}
-                
-}
+                        DisplayError(MsgErrorString);
+                        __leave;
+                        };
+                    }
+                }
             
-
                 /*
                  * Everything is set, delete hKey 
                  */ 
                 RegCloseKey(hParamKey);
-            
-RegCloseKey(hKey);
-            
-}
+            RegCloseKey(hKey);
+            }
         
-
             /*
              * Ready to Log messages 
              */ 
@@ -422,41 +294,24 @@ RegCloseKey(hKey);
             _stprintf(MsgErrorString, "%s %s", lpszServiceName,
                       _T("- Successfully registered as Service"));
         
-
             /*
              * Log message to eventlog 
              */ 
             WriteToEventLog(EVENTLOG_INFORMATION_TYPE, MsgErrorString);
-        
-
-MessageBox(NULL, 
-MsgErrorString, 
-g_szAppName,
-                     
-MB_ICONINFORMATION);
-    
-}
-    
-__finally 
- {
-        
-if (hSCManager)
+        MessageBox(NULL, MsgErrorString, g_szAppName,
+                     MB_ICONINFORMATION);
+    }
+    __finally  {
+        if (hSCManager)
             CloseServiceHandle(hSCManager);
-        
-if (hService)
+        if (hService)
             CloseServiceHandle(hService);
-        
-if (hKey)
+        if (hKey)
             RegCloseKey(hKey);
-        
-if (hParamKey)
+        if (hParamKey)
             RegCloseKey(hParamKey);
-    
+    }
 }
-
-}
-
-
 
 
     /*
@@ -465,85 +320,47 @@ if (hParamKey)
      * * Input - ServiceName
      * *
      */ 
-    
-VOID UnregisterService(LPCSTR lpszServiceName) 
+    VOID UnregisterService(LPCSTR lpszServiceName) 
 {
-    
-TCHAR MsgErrorString[MAX_STR_SIZE];        /* Message or Error string */
-    
-
-SC_HANDLE hSCManager = NULL;      /* SCM handle */
-    
-SC_HANDLE hService = NULL; /* Service Handle */
-    
-
-SERVICE_STATUS sStatus;
-    
-TCHAR szRegAppLogKey[] =
+    TCHAR MsgErrorString[MAX_STR_SIZE];        /* Message or Error string */
+    SC_HANDLE hSCManager = NULL;      /* SCM handle */
+    SC_HANDLE hService = NULL; /* Service Handle */
+    SERVICE_STATUS sStatus;
+    TCHAR szRegAppLogKey[] =
         "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
-    
-TCHAR szRegKey[512];
-    
-HKEY hKey = NULL;          /* Key to registry entry */
-    
-
-__try 
- {
+    TCHAR szRegKey[512];
+    HKEY hKey = NULL;          /* Key to registry entry */
+    __try  {
         
             /*
              * Open Service Control Manager 
              */ 
             hSCManager =
-            OpenSCManager(NULL, 
-NULL, 
-SC_MANAGER_CREATE_SERVICE);
-        
-if (hSCManager == NULL)
-            
- {
+            OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+        if (hSCManager == NULL)
+             {
             
                 /*
                  * Error while opening SCM 
                  */ 
-                
-MessageBox(NULL, 
-_T("Can't open SCM"), 
-g_szAppName,
-                            
-MB_ICONHAND);
-            
-__leave;
-            
-}
+                MessageBox(NULL, _T("Can't open SCM"), g_szAppName,
+                            MB_ICONHAND);
+            __leave;
+            }
         
-
             /*
              * Open registered service 
              */ 
-            
-hService =
-            OpenService(hSCManager, 
-lpszServiceName, 
-SERVICE_ALL_ACCESS);
-        
-
-if (hService == NULL)
-            
- {
-            
-_stprintf(MsgErrorString, "%s %s", _T("Can't open service"),
+            hService =
+            OpenService(hSCManager, lpszServiceName, SERVICE_ALL_ACCESS);
+        if (hService == NULL)
+             {
+            _stprintf(MsgErrorString, "%s %s", _T("Can't open service"),
                        lpszServiceName);
-            
-MessageBox(NULL, 
-MsgErrorString, 
-g_szAppName, 
-MB_ICONHAND);
-            
-__leave;
-            
-}
+            MessageBox(NULL, MsgErrorString, g_szAppName, MB_ICONHAND);
+            __leave;
+            }
         
-
             /*
              * Query service status 
              */ 
@@ -551,100 +368,66 @@ __leave;
              * If running stop before deleting 
              */ 
             if (QueryServiceStatus(hService, &sStatus))
-            
- {
-            
-if (sStatus.dwCurrentState == SERVICE_RUNNING
-                 || 
-sStatus.dwCurrentState == SERVICE_PAUSED)
-                
- {
+             {
+            if (sStatus.dwCurrentState == SERVICE_RUNNING
+                 || sStatus.dwCurrentState == SERVICE_PAUSED)
+                 {
                 
                     /*
                      * Shutdown the service 
                      */ 
                     ControlService(hService, SERVICE_CONTROL_STOP,
                                    &sStatus);
-                
-}
-            
-};
+                }
+            };
         
-
             /*
              * Delete the service  
              */ 
             if (DeleteService(hService) == FALSE)
-            
- {
-            
-_stprintf(MsgErrorString, "%s %s", _T("Can't delete service"),
+             {
+            _stprintf(MsgErrorString, "%s %s", _T("Can't delete service"),
                        lpszServiceName);
-            
-MessageBox(NULL, 
-MsgErrorString, 
-g_szAppName, 
-MB_ICONHAND);
+            MessageBox(NULL, MsgErrorString, g_szAppName, MB_ICONHAND);
             
                 /*
                  * Log message to eventlog 
                  */ 
                 WriteToEventLog(EVENTLOG_INFORMATION_TYPE, MsgErrorString);
-            
-__leave;
-            
-}
+            __leave;
+            }
         
-
             /*
              * Service deleted successfully 
              */ 
             _stprintf(MsgErrorString, "%s %s", lpszServiceName,
                       _T("- Service deleted"));
         
-
             /*
              * Log message to eventlog 
              */ 
             WriteToEventLog(EVENTLOG_INFORMATION_TYPE, MsgErrorString);
         
-
             /*
              * Delete registry entires for EventLog 
              */ 
             _tcscpy(szRegKey, szRegAppLogKey);
-        
-_tcscat(szRegKey, lpszServiceName);
-        
-RegDeleteKey(HKEY_LOCAL_MACHINE, szRegKey);
-        
-
-MessageBox(NULL, 
-MsgErrorString, 
-g_szAppName,
-                     
-MB_ICONINFORMATION);
+        _tcscat(szRegKey, lpszServiceName);
+        RegDeleteKey(HKEY_LOCAL_MACHINE, szRegKey);
+        MessageBox(NULL, MsgErrorString, g_szAppName,
+                     MB_ICONINFORMATION);
+    }
     
-}
-    
-
         /*
          * Delete the handles 
          */ 
-        __finally 
- {
-        
-if (hService)
+        __finally  {
+        if (hService)
             CloseServiceHandle(hService);
-        
-if (hSCManager)
+        if (hSCManager)
             CloseServiceHandle(hSCManager);
-    
+    }
 }
-
-}
-
-
 
 
     /*
@@ -653,64 +436,31 @@ if (hSCManager)
      * * Input - Event Type, Message string
      * *
      */ 
-    
-VOID WriteToEventLog(WORD wType, LPCTSTR pszFormat,...) 
+    VOID WriteToEventLog(WORD wType, LPCTSTR pszFormat,...) 
 {
-    
-TCHAR szMessage[512];
-    
-LPTSTR LogStr[1];
-    
-va_list ArgList;
-    
-HANDLE hEventSource = NULL;
-    
-
-va_start(ArgList, pszFormat);
-    
-_vstprintf(szMessage, pszFormat, ArgList);
-    
-va_end(ArgList);
-    
-
-LogStr[0] = szMessage;
-    
-
-
-hEventSource = RegisterEventSource(NULL, g_szAppName);
-    
-if (hEventSource == NULL)
+    TCHAR szMessage[512];
+    LPTSTR LogStr[1];
+    va_list ArgList;
+    HANDLE hEventSource = NULL;
+    va_start(ArgList, pszFormat);
+    _vstprintf(szMessage, pszFormat, ArgList);
+    va_end(ArgList);
+    LogStr[0] = szMessage;
+    hEventSource = RegisterEventSource(NULL, g_szAppName);
+    if (hEventSource == NULL)
         return;
-    
-
-ReportEvent(hEventSource, 
-wType, 
-0, 
-DISPLAY_MSG, /* To Just output the text to event log */ 
-                  NULL, 
-1, 
-0, 
-LogStr, 
-NULL);
-    
-
-DeregisterEventSource(hEventSource);
-    
-
-if (!g_fRunningAsService)
-        
- {
+    ReportEvent(hEventSource, wType, 0, DISPLAY_MSG, /* To Just output the text to event log */ 
+                  NULL, 1, 0, LogStr, NULL);
+    DeregisterEventSource(hEventSource);
+    if (!g_fRunningAsService)
+         {
         
             /*
              * We are running in command mode, output the string 
              */ 
             _putts(szMessage);
-        
+        }
 }
-
-}
-
-
 
 
     /*
@@ -724,50 +474,32 @@ if (!g_fRunningAsService)
      * *     They should supplied as first arguments(other wise they will be ignored
      * * Return: Type indicating the option specified
      */ 
-    
-INT ParseCmdLineForServiceOption(int argc, TCHAR * argv[]) 
+    INT ParseCmdLineForServiceOption(int argc, TCHAR * argv[]) 
 {
-    
-int            nReturn = RUN_AS_CONSOLE;   /* Defualted to run as console */
-    
-
-if (argc >= 2)
-        
- {
+    int            nReturn = RUN_AS_CONSOLE;   /* Defualted to run as console */
+    if (argc >= 2)
+         {
         
             /*
              * second argument present 
              */ 
             if (lstrcmpi(_T("-register"), argv[1]) == 0)
-            
- {
-            
-nReturn = REGISTER_SERVICE;
-            
-}
+             {
+            nReturn = REGISTER_SERVICE;
+            }
         
         else if (lstrcmpi(_T("-unregister"), argv[1]) == 0)
-            
- {
-            
-nReturn = UN_REGISTER_SERVICE;
-            
-}
+             {
+            nReturn = UN_REGISTER_SERVICE;
+            }
         
         else if (lstrcmpi(_T("-service"), argv[1]) == 0)
-            
- {
-            
-nReturn = RUN_AS_SERVICE;
-            
+             {
+            nReturn = RUN_AS_SERVICE;
+            }
+        }
+    return nReturn;
 }
-        
-}
-    
-return nReturn;
-
-}
-
 
 
     /*
@@ -777,47 +509,26 @@ return nReturn;
      */ 
     VOID DisplayError(LPCTSTR pszTitle) 
 {
+    LPVOID pErrorMsg;
     
-LPVOID pErrorMsg;
-    
-
         /*
          * Build Error String 
          */ 
         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                      
-FORMAT_MESSAGE_FROM_SYSTEM, 
-NULL, 
-GetLastError(),
-                      
-MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                      
-(LPTSTR) & pErrorMsg, 
-0, 
-NULL);
-    
-if (g_fRunningAsService != FALSE)
-        
- {
-        
-WriteToEventLog(EVENTLOG_ERROR_TYPE, pErrorMsg);
-        
-}
+                      FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
+                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                      (LPTSTR) & pErrorMsg, 0, NULL);
+    if (g_fRunningAsService != FALSE)
+         {
+        WriteToEventLog(EVENTLOG_ERROR_TYPE, pErrorMsg);
+        }
     
     else
-        
- {
-        
-MessageBox(NULL, pErrorMsg, pszTitle, MB_ICONHAND);
-        
+         {
+        MessageBox(NULL, pErrorMsg, pszTitle, MB_ICONHAND);
+        }
+    LocalFree(pErrorMsg);
 }
-    
-
-LocalFree(pErrorMsg);
-
-}
-
-
 
 
     /*
@@ -827,77 +538,42 @@ LocalFree(pErrorMsg);
      * *  the global service status structure.
      */ 
 static          BOOL
-UpdateServiceStatus(DWORD dwStatus, 
-DWORD dwErrorCode,
-                    
-DWORD dwWaitHint) 
+UpdateServiceStatus(DWORD dwStatus, DWORD dwErrorCode,
+                    DWORD dwWaitHint) 
 {
-    
-BOOL fReturn = FALSE;
-    
-DWORD static   dwCheckpoint = 1;
-    
-DWORD dwControls =
+    BOOL fReturn = FALSE;
+    DWORD static   dwCheckpoint = 1;
+    DWORD dwControls =
         SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
-    
-
-if (g_fRunningAsService == FALSE)
+    if (g_fRunningAsService == FALSE)
         return FALSE;
-    
-
-ZeroMemory(&ServiceStatus, sizeof(ServiceStatus));
-    
-ServiceStatus.dwServiceType = SERVICE_WIN32;
-    
-ServiceStatus.dwCurrentState = dwStatus;
-    
-ServiceStatus.dwWaitHint = dwWaitHint;
-    
-
-if (dwErrorCode)
-        
- {
-        
-ServiceStatus.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-        
-ServiceStatus.dwServiceSpecificExitCode = dwErrorCode;
-        
-}
+    ZeroMemory(&ServiceStatus, sizeof(ServiceStatus));
+    ServiceStatus.dwServiceType = SERVICE_WIN32;
+    ServiceStatus.dwCurrentState = dwStatus;
+    ServiceStatus.dwWaitHint = dwWaitHint;
+    if (dwErrorCode)
+         {
+        ServiceStatus.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
+        ServiceStatus.dwServiceSpecificExitCode = dwErrorCode;
+        }
     
         /*
          * special cases that depend on the new state 
          */ 
         switch (dwStatus)
-        
- {
-    
-case SERVICE_START_PENDING:
-        
-dwControls = 0;
-        
-break;
-    
-
-case SERVICE_RUNNING:
-    
-case SERVICE_STOPPED:
-        
-dwCheckpoint = 0;
-        
-break;
-        
+         {
+    case SERVICE_START_PENDING:
+        dwControls = 0;
+        break;
+    case SERVICE_RUNNING:
+    case SERVICE_STOPPED:
+        dwCheckpoint = 0;
+        break;
+        }
+    ServiceStatus.dwCheckPoint = dwCheckpoint++;
+    ServiceStatus.dwControlsAccepted = dwControls;
+    return ReportCurrentServiceStatus();
 }
-    
-ServiceStatus.dwCheckPoint = dwCheckpoint++;
-    
-ServiceStatus.dwControlsAccepted = dwControls;
-    
-
-return ReportCurrentServiceStatus();
-
-}
-
-
 
 
     /*
@@ -907,12 +583,8 @@ return ReportCurrentServiceStatus();
 static          BOOL
 ReportCurrentServiceStatus() 
 {
-    
-return SetServiceStatus(hServiceStatus, &ServiceStatus);
-
+    return SetServiceStatus(hServiceStatus, &ServiceStatus);
 }
-
-
 
 
     /*
@@ -921,35 +593,22 @@ return SetServiceStatus(hServiceStatus, &ServiceStatus);
      */ 
     VOID WINAPI ServiceMain(DWORD argc, LPTSTR argv[]) 
 {
+    SECURITY_ATTRIBUTES SecurityAttributes;
+    DWORD dwThreadId;
     
-
-SECURITY_ATTRIBUTES SecurityAttributes;
-    
-DWORD dwThreadId;
-    
-
         /*
          * Input Arguments to function startup 
          */ 
         DWORD ArgCount = 0;
+    LPTSTR * ArgArray = NULL;
+    TCHAR szRegKey[512];
+    TCHAR szValue[128];
+    DWORD nSize;
+    HKEY hParamKey = NULL;     /* To read startup parameters */
+    DWORD TotalParams = 0;
+    DWORD i;
+    InputParams ThreadInputParams;
     
-LPTSTR * ArgArray = NULL;
-    
-TCHAR szRegKey[512];
-    
-TCHAR szValue[128];
-    
-DWORD nSize;
-    
-HKEY hParamKey = NULL;     /* To read startup parameters */
-    
-DWORD TotalParams = 0;
-    
-DWORD i;
-    
-InputParams ThreadInputParams;
-    
-
         /*
          * Build the Input parameters to pass to thread 
          */ 
@@ -959,7 +618,6 @@ InputParams ThreadInputParams;
          * * arguments user specified while starting contorl agent
          */ 
         
-
         /*
          * Read registry parameter 
          */ 
@@ -968,245 +626,157 @@ InputParams ThreadInputParams;
          */ 
         ArgCount = 1;
     
-
         /*
          * Create Registry Key path 
          */ 
         _stprintf(szRegKey, "%s%s\\%s",
                   _T("SYSTEM\\CurrentControlSet\\Services\\"), g_szAppName,
                   "Parameters");
-    
-if (RegOpenKeyEx
+    if (RegOpenKeyEx
          (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_ALL_ACCESS,
           &hParamKey) == ERROR_SUCCESS)
+         {
         
- {
-        
-
             /*
              * Read startup Configuration information 
              */ 
             /*
              * Find number of subkeys inside parameters 
              */ 
-            
-if (RegQueryInfoKey
+            if (RegQueryInfoKey
                  (hParamKey, NULL, NULL, 0, NULL, NULL, NULL, &TotalParams,
                   NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
-            
- {
-            
-if (TotalParams != 0)
+             {
+            if (TotalParams != 0)
+                 {
+                ArgCount += TotalParams;
                 
- {
-                
-ArgCount += TotalParams;
-                
-
                     /*
                      * Allocate memory to hold strings 
                      */ 
                     ArgArray =
                     (LPTSTR *) malloc(sizeof(LPTSTR) * ArgCount);
                 
-
                     /*
                      * Copy first argument 
                      */ 
                     ArgArray[0] = _tcsdup(argv[0]);
-                
-
-for (i = 1; i <= TotalParams; i++)
-                    
- {
+                for (i = 1; i <= TotalParams; i++)
+                     {
                     
                         /*
                          * Create Subkey value name 
                          */ 
                         _stprintf(szRegKey, "%s%d", "Param", i);
                     
-
                         /*
                          * Set size 
                          */ 
                         nSize = 128;
-                    
-RegQueryValueEx(hParamKey, szRegKey, 0, NULL,
+                    RegQueryValueEx(hParamKey, szRegKey, 0, NULL,
                                      (LPBYTE) & szValue, &nSize);
-                    
-ArgArray[i] = _tcsdup(szValue);
-                    
-}
-                
-}
-            
-}
-        
-RegCloseKey(hParamKey);
-        
-}
-    
-
-
-if (ArgCount == 1)
-        
- {
+                    ArgArray[i] = _tcsdup(szValue);
+                    }
+                }
+            }
+        RegCloseKey(hParamKey);
+        }
+    if (ArgCount == 1)
+         {
         
             /*
              * No statup agrs are given 
              */ 
             ThreadInputParams.Argc = argc;
-        
-ThreadInputParams.Argv = argv;
-        
-}
+        ThreadInputParams.Argv = argv;
+        }
     
     else
-        
- {
-        
-ThreadInputParams.Argc = ArgCount;
-        
-ThreadInputParams.Argv = ArgArray;
-        
-}
+         {
+        ThreadInputParams.Argc = ArgCount;
+        ThreadInputParams.Argv = ArgArray;
+        }
     
-
         /*
          * Register Serivce Control Handler 
          */ 
         hServiceStatus =
-        RegisterServiceCtrlHandler(g_szAppName, 
-ControlHandler);
+        RegisterServiceCtrlHandler(g_szAppName, ControlHandler);
+    if (hServiceStatus == 0)
+         {
+        WriteToEventLog(EVENTLOG_ERROR_TYPE,
+                         _T("RegisterServiceCtrlHandler failed"));
+        return;
+        }
     
-if (hServiceStatus == 0)
-        
- {
-        
-WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                         
-_T("RegisterServiceCtrlHandler failed"));
-        
-return;
-        
-}
-    
-
         /*
          * Update the service status to START_PENDING 
          */ 
-        UpdateServiceStatus(SERVICE_START_PENDING, 
-NO_ERROR,
-                            
-SCM_WAIT_INTERVAL);
+        UpdateServiceStatus(SERVICE_START_PENDING, NO_ERROR,
+                            SCM_WAIT_INTERVAL);
     
-
         /*
          * Spin of worker thread, which does majority of the work 
          */ 
+        __try  {
+        if (SetSimpleSecurityAttributes(&SecurityAttributes) == FALSE)
+             {
+            WriteToEventLog(EVENTLOG_ERROR_TYPE,
+                             _T("Couldn't init security attributes"));
+            __leave;
+            }
+        hServiceThread =
+            (void *) _beginthreadex(&SecurityAttributes, 0,
+                                    ThreadFunction,
+                                    (void *) &ThreadInputParams, 0,
+                                    &dwThreadId);
+        if (hServiceThread == NULL)
+             {
+            WriteToEventLog(EVENTLOG_ERROR_TYPE,
+                             _T("Couldn't start worker thread"));
+            __leave;
+            }
         
-__try 
- {
-        
-if (SetSimpleSecurityAttributes(&SecurityAttributes) == FALSE)
-            
- {
-            
-WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                             
-_T("Couldn't init security attributes"));
-            
-__leave;
-            
-}
-        
-hServiceThread =
-            (void *) _beginthreadex(&SecurityAttributes, 
-0,
-                                    
-ThreadFunction,
-                                    
-(void *) &ThreadInputParams, 
-0,
-                                    
-&dwThreadId);
-        
-if (hServiceThread == NULL)
-            
- {
-            
-WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                             
-_T("Couldn't start worker thread"));
-            
-__leave;
-            
-}
-        
-
             /*
              * Set Service Status to Running 
              */ 
-            UpdateServiceStatus(SERVICE_RUNNING, 
-NO_ERROR,
-                                
-SCM_WAIT_INTERVAL);
+            UpdateServiceStatus(SERVICE_RUNNING, NO_ERROR,
+                                SCM_WAIT_INTERVAL);
         
-
             /*
              * Wait for termination event and worker thread to
              * * spin down.
              */ 
-            
-WaitForSingleObject(hServiceThread, INFINITE);
-    
-}
-    
-__finally 
- {
+            WaitForSingleObject(hServiceThread, INFINITE);
+    }
+    __finally  {
         
             /*
              * Release resources 
              */ 
-            UpdateServiceStatus(SERVICE_STOPPED, 
-NO_ERROR,
-                                
-SCM_WAIT_INTERVAL);
+            UpdateServiceStatus(SERVICE_STOPPED, NO_ERROR,
+                                SCM_WAIT_INTERVAL);
+        if (hServiceThread)
+            CloseHandle(hServiceThread);
+        FreeSecurityAttributes(&SecurityAttributes);
         
-
-if (hServiceThread)
-            
-CloseHandle(hServiceThread);
-        
-FreeSecurityAttributes(&SecurityAttributes);
-        
-
             /*
              * Delete allocated argument list 
              */ 
             if (ArgCount > 1 && ArgArray != NULL)
-            
- {
+             {
             
                 /*
                  * Delete all strings 
                  */ 
                 for (i = 0; i < ArgCount; i++)
-                
- {
-                
-free(ArgArray[i]);
-                
+                 {
+                free(ArgArray[i]);
+                }
+            free(ArgArray);
+            }
+    }
 }
-            
-free(ArgArray);
-            
-}
-    
-}
-
-}
-
 
 
     /*
@@ -1215,58 +785,41 @@ free(ArgArray);
      * * The calling party should specify their entry point as input parameter
      * * Returns TRUE if the Service is started successfully
      */ 
-    
-BOOL RunAsService(INT(*ServiceFunction) (INT, LPTSTR *)) 
+    BOOL RunAsService(INT(*ServiceFunction) (INT, LPTSTR *)) 
 {
     
-
         /*
          * Set the ServiceEntryPoint 
          */ 
         ServiceEntryPoint = ServiceFunction;
     
-
         /*
          * By default, mark as Running as a service 
          */ 
         g_fRunningAsService = TRUE;
     
-
         /*
          * Initialize ServiceTableEntry table 
          */ 
         ServiceTableEntry[0].lpServiceName = g_szAppName;       /* Application Name */
     
-
         /*
          * Call SCM via StartServiceCtrlDispatcher to run as Service 
          * * If the function returns TRUE we are running as Service, 
          */ 
+        if (StartServiceCtrlDispatcher(ServiceTableEntry) == FALSE)
+         {
+        g_fRunningAsService = FALSE;
         
-if (StartServiceCtrlDispatcher(ServiceTableEntry) == FALSE)
-        
- {
-        
-g_fRunningAsService = FALSE;
-        
-
             /*
              * Some other error has occurred. 
              */ 
             WriteToEventLog(EVENTLOG_ERROR_TYPE,
-                            
-_T("Couldn't start service - %s"),
+                            _T("Couldn't start service - %s"),
                             g_szAppName);
-        
-
+        }
+    return g_fRunningAsService;
 }
-    
-
-return g_fRunningAsService;
-
-}
-
-
 
 
     /*
@@ -1278,39 +831,22 @@ return g_fRunningAsService;
      */ 
     VOID WINAPI ControlHandler(DWORD dwControl) 
 {
-    
-switch (dwControl)
-        
- {
-    
-case SERVICE_CONTROL_STOP:
-        
-ProcessServiceStop();  /* To stop the service */
-        
-break;
-    
-case SERVICE_CONTROL_INTERROGATE:
-        
-ProcessServiceInterrogate();   /* Report Current state of the Service */
-        
-break;
-    
-case SERVICE_CONTROL_PAUSE:
-        
-ProcessServicePause(); /* To puase service */
-        
-break;
-    
-case SERVICE_CONTROL_CONTINUE:
-        
-ProcessServiceContinue();      /* To continue Service */
-        
-break;
-        
+    switch (dwControl)
+         {
+    case SERVICE_CONTROL_STOP:
+        ProcessServiceStop();  /* To stop the service */
+        break;
+    case SERVICE_CONTROL_INTERROGATE:
+        ProcessServiceInterrogate();   /* Report Current state of the Service */
+        break;
+    case SERVICE_CONTROL_PAUSE:
+        ProcessServicePause(); /* To puase service */
+        break;
+    case SERVICE_CONTROL_CONTINUE:
+        ProcessServiceContinue();      /* To continue Service */
+        break;
+        }
 }
-
-}
-
 
 
     /*
@@ -1322,38 +858,26 @@ break;
      */ 
     VOID ProcessServiceStop(VOID) 
 {
+    UpdateServiceStatus(SERVICE_STOP_PENDING, NO_ERROR,
+                         SCM_WAIT_INTERVAL);
     
-UpdateServiceStatus(SERVICE_STOP_PENDING, 
-NO_ERROR,
-                         
-SCM_WAIT_INTERVAL);
-    
-
         /*
          * Invoke registered Stop funciton 
          */ 
         if (StopFunction != NULL)
-        
- {
-        
-(*StopFunction) ();
-        
-}
+         {
+        (*StopFunction) ();
+        }
     
     else
-        
- {
+         {
         
             /*
              * There is no registered stop function, so terminate the thread 
              */ 
             TerminateThread(hServiceThread, 0);
-        
+        }
 }
-
-}
-
-
 
 
     /*
@@ -1362,12 +886,8 @@ SCM_WAIT_INTERVAL);
      */ 
     VOID ProcessServiceInterrogate(VOID) 
 {
-    
-ReportCurrentServiceStatus();
-
+    ReportCurrentServiceStatus();
 }
-
-
 
 
     /*
@@ -1381,72 +901,45 @@ ReportCurrentServiceStatus();
      */ 
     BOOL SetSimpleSecurityAttributes(SECURITY_ATTRIBUTES * pSecurityAttr) 
 {
+    BOOL fReturn = FALSE;
+    SECURITY_DESCRIPTOR * pSecurityDesc = NULL;
     
-BOOL fReturn = FALSE;
-    
-SECURITY_DESCRIPTOR * pSecurityDesc = NULL;
-    
-
         /*
          * If an invalid address passed as a parameter, return
          * * FALSE right away. 
          */ 
-        
-if (!pSecurityAttr)
+        if (!pSecurityAttr)
         return FALSE;
-    
-
-pSecurityDesc =
+    pSecurityDesc =
         (SECURITY_DESCRIPTOR *) LocalAlloc(LPTR,
-                                           
-SECURITY_DESCRIPTOR_MIN_LENGTH);
-    
-if (!pSecurityDesc)
+                                           SECURITY_DESCRIPTOR_MIN_LENGTH);
+    if (!pSecurityDesc)
         return FALSE;
-    
-
-fReturn =
+    fReturn =
         InitializeSecurityDescriptor(pSecurityDesc,
-                                     
-SECURITY_DESCRIPTOR_REVISION);
-    
-if (fReturn != FALSE)
-        
- {
-        
-fReturn =
+                                     SECURITY_DESCRIPTOR_REVISION);
+    if (fReturn != FALSE)
+         {
+        fReturn =
             SetSecurityDescriptorDacl(pSecurityDesc, TRUE, NULL, FALSE);
-        
-}
-    
-
-if (fReturn != FALSE)
-        
- {
-        
-pSecurityAttr->nLength = sizeof(SECURITY_ATTRIBUTES);
-        
-pSecurityAttr->lpSecurityDescriptor = pSecurityDesc;
-        
-pSecurityAttr->bInheritHandle = TRUE;
-        
-}
+        }
+    if (fReturn != FALSE)
+         {
+        pSecurityAttr->nLength = sizeof(SECURITY_ATTRIBUTES);
+        pSecurityAttr->lpSecurityDescriptor = pSecurityDesc;
+        pSecurityAttr->bInheritHandle = TRUE;
+        }
     
     else
-        
- {
+         {
         
             /*
              * Couldn't initialize or set security descriptor. 
              */ 
             LocalFree(pSecurityDesc);
-        
+        }
+    return fReturn;
 }
-    
-return fReturn;
-
-}
-
 
 
     /*
@@ -1456,13 +949,9 @@ return fReturn;
      */ 
     VOID FreeSecurityAttributes(SECURITY_ATTRIBUTES * pSecurityAttr) 
 {
-    
-if (pSecurityAttr && pSecurityAttr->lpSecurityDescriptor)
-        
-LocalFree(pSecurityAttr->lpSecurityDescriptor);
-
+    if (pSecurityAttr && pSecurityAttr->lpSecurityDescriptor)
+        LocalFree(pSecurityAttr->lpSecurityDescriptor);
 }
-
 
 
     /*
@@ -1482,13 +971,9 @@ LocalFree(pSecurityAttr->lpSecurityDescriptor);
          * Declare pointer to InputParams 
          */ 
         InputParams * pInputArg;
-    
-pInputArg = (InputParams *) lpParam;
-    
-return (*ServiceEntryPoint) (pInputArg->Argc, pInputArg->Argv);
-
+    pInputArg = (InputParams *) lpParam;
+    return (*ServiceEntryPoint) (pInputArg->Argc, pInputArg->Argv);
 }
-
 
 
     /*
@@ -1497,15 +982,10 @@ return (*ServiceEntryPoint) (pInputArg->Argc, pInputArg->Argv);
      * * This function will be inovked when SCM sends
      * * STOP command
      */ 
-    
-VOID RegisterStopFunction(void (*StopFunc) ()) 
+    VOID RegisterStopFunction(void (*StopFunc) ()) 
 {
-    
-StopFunction = StopFunc;
-
+    StopFunction = StopFunc;
 } 
-
-
 
     /*
      * 
@@ -1515,39 +995,21 @@ StopFunction = StopFunc;
      */ 
     VOID ProcessServicePause(VOID) 
 {
-    
-
-if (ServiceStatus.dwCurrentState == SERVICE_RUNNING)
+    if (ServiceStatus.dwCurrentState == SERVICE_RUNNING)
+         {
+        UpdateServiceStatus(SERVICE_PAUSE_PENDING, NO_ERROR,
+                             SCM_WAIT_INTERVAL);
         
- {
-        
-UpdateServiceStatus(SERVICE_PAUSE_PENDING, 
-NO_ERROR,
-                             
-SCM_WAIT_INTERVAL);
-        
-
             /*
              * Invoke Thread pause on ThreadHandle 
              */ 
             if (SuspendThread(hServiceThread) != -1)
-            
- {
-            
-UpdateServiceStatus(SERVICE_PAUSED, 
-NO_ERROR,
-                                 
-SCM_WAIT_INTERVAL);
-            
+             {
+            UpdateServiceStatus(SERVICE_PAUSED, NO_ERROR,
+                                 SCM_WAIT_INTERVAL);
+            }
+        }
 }
-        
-
-}
-
-}
-
-
-
 
 
     /*
@@ -1557,36 +1019,20 @@ SCM_WAIT_INTERVAL);
      */ 
     VOID ProcessServiceContinue(VOID) 
 {
-    
-
-if (ServiceStatus.dwCurrentState == SERVICE_PAUSED)
+    if (ServiceStatus.dwCurrentState == SERVICE_PAUSED)
+         {
+        UpdateServiceStatus(SERVICE_CONTINUE_PENDING, NO_ERROR,
+                             SCM_WAIT_INTERVAL);
         
- {
-        
-UpdateServiceStatus(SERVICE_CONTINUE_PENDING, 
-NO_ERROR,
-                             
-SCM_WAIT_INTERVAL);
-        
-
-
             /*
              * Invoke Thread pause on ThreadHandle 
              */ 
             if (ResumeThread(hServiceThread) != -1)
-            
- {
-            
-UpdateServiceStatus(SERVICE_RUNNING, 
-NO_ERROR,
-                                 
-SCM_WAIT_INTERVAL);
-            
-}
-        
-
-}
-
+             {
+            UpdateServiceStatus(SERVICE_RUNNING, NO_ERROR,
+                                 SCM_WAIT_INTERVAL);
+            }
+        }
 }
 
 
