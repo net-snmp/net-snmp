@@ -40,6 +40,7 @@ kstat_named_t *kn, *kn2;
 static FindVarMethod var_extensible_mem;
 static long getFreeSwap(void);
 static long getTotalFree(void);
+static long getTotalSwap(void);
 
 void init_memory_solaris2(void)
 {
