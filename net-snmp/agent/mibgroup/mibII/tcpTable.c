@@ -94,7 +94,6 @@ struct netsnmp_inpcb_s {
 TCPTABLE_ENTRY_TYPE	*tcp_head  = NULL;
 int                      tcp_size  = 0;	/* Only used for table-based systems */
 int                      tcp_estab = 0;
-int tcpTable_valid = 0;
 
 
 	/*
@@ -277,9 +276,10 @@ tcpTable_first_entry(void **loop_context,
                      netsnmp_variable_list *index,
                      netsnmp_iterator_info *data)
 {
-    if (!tcpTable_valid)
-	tcpTable_load(NULL, NULL);
-
+    /*
+     * XXX - How can we tell if the cache is valid?
+     *       No access to 'reqinfo'
+     */
     if (tcp_size == 0)
         return NULL;
 
@@ -334,14 +334,13 @@ tcpTable_next_entry( void **loop_context,
 }
 
 void
-tcpTable_free(void)
+tcpTable_free(netsnmp_cache *cache, void *magic)
 {
     if (tcp_head)
         free(tcp_head);
     tcp_head  = NULL;
     tcp_size  = 0;
     tcp_estab = 0;
-    tcpTable_valid = 0;
 }
 #else
 #ifdef TCPTABLE_IS_LINKED_LIST
@@ -351,6 +350,10 @@ tcpTable_first_entry(void **loop_context,
                      netsnmp_variable_list *index,
                      netsnmp_iterator_info *data)
 {
+    /*
+     * XXX - How can we tell if the cache is valid?
+     *       No access to 'reqinfo'
+     */
     if (tcp_head == 0)
         return NULL;
 
@@ -412,7 +415,7 @@ tcpTable_next_entry( void **loop_context,
 }
 
 void
-tcpTable_free(netsnmp_cache *cache)
+tcpTable_free(netsnmp_cache *cache, void *magic)
 {
     TCPTABLE_ENTRY_TYPE *p;
     while (tcp_head) {
@@ -424,7 +427,6 @@ tcpTable_free(netsnmp_cache *cache)
     tcp_head  = NULL;
     tcp_size  = 0;
     tcp_estab = 0;
-    tcpTable_valid = 0;
 }
 #endif		/* TCPTABLE_IS_LINKED_LIST */
 #endif		/* TCPTABLE_IS_TABLE */
@@ -450,7 +452,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     unsigned int    ulen;
     int             ret;
 
-    tcpTable_free();
+    tcpTable_free(NULL, NULL);
 
     if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
         p.objid = ID_tcpConnNumEnt;
@@ -486,7 +488,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (tcp_size > 0) {
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (hpux11)\n"));
@@ -501,7 +502,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     FILE           *in;
     char            line[256];
 
-    tcpTable_free(cache);
+    tcpTable_free(cache, NULL);
 
     if (!(in = fopen("/proc/net/tcp", "r"))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (linux1)\n"));
@@ -546,7 +547,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     fclose(in);
 
     DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-    tcpTable_valid = 1;
     return 0;
 }
 #else                           /* linux */
@@ -569,7 +569,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     netsnmp_tcpConnEntry *nnew;
     netsnmp_tcpConnEntry *prev_entry = NULL;
 
-    tcpTable_free();
+    tcpTable_free(NULL, NULL);
 
     if (getMibstat(MIB_TCP_CONN, &entry, sizeof(mib2_tcpConnEntry_t),
                    GET_FIRST, &TCP_Cmp, &entry) != 0) {
@@ -601,7 +601,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (tcp_head) {
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (solaris)\n"));
@@ -646,7 +645,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
         tcp_size = pTcpTable->dwNumEntries;
         tcp_head = pTcpTable->table;
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (win32)\n"));
@@ -665,7 +663,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     netsnmp_inpcb  *nnew;
     int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 
-    tcpTable_free();
+    tcpTable_free(NULL, NULL);
 
     /*
      *  Read in the buffer containing the TCP table data
@@ -705,7 +703,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     free(tcpcb_buf);
     if (tcp_head) {
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (sysctl)\n"));
@@ -722,7 +719,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     netsnmp_inpcb  *nnew;
     int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 
-    tcpTable_free();
+    tcpTable_free(NULL, NULL);
 
     if (!auto_nlist(TCP_SYMBOL, (char *) &table, sizeof(table))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to read inpcbtable\n"));
@@ -755,7 +752,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (tcp_head) {
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (pcb_table)\n"));
@@ -777,7 +773,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     int      StateMap[] = { 1, 2, 3,     4, 5, 8, 6, 10, 9, 7, 11 };
 #endif
 
-    tcpTable_free();
+    tcpTable_free(NULL, NULL);
 
     if (!auto_nlist(TCP_SYMBOL, (char *) &tcp_inpcb, sizeof(tcp_inpcb))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to read tcp_symbol\n"));
@@ -810,7 +806,6 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (tcp_head) {
         DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table\n"));
-        tcpTable_valid = 1;
         return 0;
     }
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (tcp_symbol)\n"));
@@ -822,7 +817,6 @@ int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
     DEBUGMSGTL(("mibII/tcpTable", "Loading TCP Table not implemented\n"));
-    tcpTable_valid = 0;
     return -1;
 }
 #endif				/* UDB_SYMBOL */

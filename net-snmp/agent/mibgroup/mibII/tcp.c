@@ -168,7 +168,6 @@ init_tcp(void)
 #endif
 
 TCP_STAT_STRUCTURE tcpstat;
-int tcp_valid = 0;
 
 
 
@@ -198,7 +197,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
      * But just to be safe, check this and load it manually if necessary
      */
 #ifndef hpux11
-    if (!tcp_valid) {
+    if (!netsnmp_is_cache_valid(reqinfo)) {
         tcp_load( NULL, NULL );	/* XXX - check for failure */
     }
 #endif
@@ -582,10 +581,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = linux_read_tcp_stat(&tcpstat);
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (linux)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (linux)\n"));
     }
     return ret_value;
@@ -622,10 +619,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
                            GET_FIRST, &Get_everything, NULL);
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (solaris)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (solaris)\n"));
     }
     return ret_value;
@@ -640,10 +635,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = GetTcpStatistics(&tcpstat);
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (win32)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (win32)\n"));
     }
     return ret_value;
@@ -660,10 +653,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = sysctl(sname, 4, &tcpstat, &len, 0, 0);
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (sysctl)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (sysctl)\n"));
     }
     return ret_value;
@@ -678,10 +669,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, &tcpstat, sizeof(tcpstat));
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (tcpipstats)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (tcpipstats)\n"));
     }
     return ret_value;
@@ -697,10 +686,8 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
         ret_value = 0;
 
     if ( ret_value < 0 ) {
-        tcp_valid = 0;
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (tcpstat)\n"));
     } else {
-        tcp_valid = 1;
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (tcpstat)\n"));
     }
     return ret_value;
@@ -711,7 +698,6 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
 {
     long ret_value = -1;
 
-    tcp_valid = 0;
     DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (null)\n"));
     return ret_value;
 }
@@ -725,8 +711,7 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
 
 
 void
-tcp_free(netsnmp_cache *cache)
+tcp_free(netsnmp_cache *cache, void *magic)
 {
     memset(&tcpstat, 0, sizeof(tcpstat));
-    tcp_valid = 0;
 }

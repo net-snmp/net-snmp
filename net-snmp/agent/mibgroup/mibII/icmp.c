@@ -136,7 +136,6 @@ init_icmp(void)
 
 
 ICMP_STAT_STRUCTURE icmpstat;
-int icmp_valid = 0;
 
 
         /*********************
@@ -166,7 +165,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
      * But just to be safe, check this and load it manually if necessary
      */
 #ifndef hpux11
-    if (!icmp_valid) {
+    if (netsnmp_is_cache_valid(reqinfo)) {
         icmp_load( NULL, NULL );	/* XXX - check for failure */
     }
 #endif
@@ -629,10 +628,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = linux_read_icmp_stat(&icmpstat);
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (linux)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (linux)\n"));
     }
     return ret_value;
@@ -649,10 +646,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
                    &Get_everything, NULL);
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (solaris)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (solaris)\n"));
     }
     return ret_value;
@@ -667,10 +662,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = GetIcmpStatistics(&icmpstat);
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (win32)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (win32)\n"));
     }
     return ret_value;
@@ -688,10 +681,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = sysctl(sname, 4, &icmpstat, &len, 0, 0);
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (sysctl)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (sysctl)\n"));
     }
     return ret_value;
@@ -707,10 +698,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
         sysmp(MP_SAGET, MPSA_TCPIPSTATS, &icmpstat, sizeof icmpstat);
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (tcpipstats)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (tcpipstats)\n"));
     }
     return ret_value;
@@ -726,10 +715,8 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
         ret_value = 0;
 
     if ( ret_value < 0 ) {
-        icmp_valid = 0;
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (icmpstat)\n"));
     } else {
-        icmp_valid = 1;
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (icmpstat)\n"));
     }
     return ret_value;
@@ -740,7 +727,6 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
 {
     long            ret_value = -1;
 
-    icmp_valid = 0;
     DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (null)\n"));
     return ret_value;
 }
@@ -753,8 +739,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
 #endif		/* hpux11 */
 
 void
-icmp_free(netsnmp_cache *cache)
+icmp_free(netsnmp_cache *cache, void *magic)
 {
     memset(&icmpstat, 0, sizeof(icmpstat));
-    icmp_valid = 0;
 }
