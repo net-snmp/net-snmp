@@ -5691,7 +5691,6 @@ snmp_sess_select_info(void *sessp,
     struct session_list *slp, *next = NULL;
     netsnmp_request_list *rp;
     struct timeval  now, earliest, delta;
-    int             timer_set = 0;
     int             active = 0, requests = 0;
     int             next_alarm = 0;
 
@@ -5753,6 +5752,8 @@ snmp_sess_select_info(void *sessp,
                 if ((!timerisset(&earliest)
                      || (timercmp(&rp->expire, &earliest, <)))) {
                     earliest = rp->expire;
+                    DEBUGMSG(("verbose:sess_select","(to in %d.%d sec) ",
+                               earliest.tv_sec, earliest.tv_usec));
                 }
             }
         }
@@ -5769,12 +5770,15 @@ snmp_sess_select_info(void *sessp,
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
         next_alarm = get_next_alarm_delay_time(&delta);
+        DEBUGMSGT(("sess_select","next alarm %d.%d sec\n",
+                   delta.tv_sec, delta.tv_usec));
     }
     if (next_alarm == 0 && requests == 0) {
         /*
          * If none are active, skip arithmetic.  
          */
-        *block = 1;             /* can block - timeout value is undefined if no requests */
+        DEBUGMSGT(("sess_select","blocking:no session requests or alarms.\n"));
+        *block = 1; /* can block - timeout value is undefined if no requests */
         return active;
     }
 
@@ -5804,7 +5808,8 @@ snmp_sess_select_info(void *sessp,
         }
     }
 
-    if (timer_set || earliest.tv_sec < now.tv_sec) {
+    if (earliest.tv_sec < now.tv_sec) {
+        DEBUGMSGT(("verbose:sess_select","timer overdue\n"));
         earliest.tv_sec = 0;
         earliest.tv_usec = 0;
     } else if (earliest.tv_sec == now.tv_sec) {
@@ -5813,6 +5818,8 @@ snmp_sess_select_info(void *sessp,
         if (earliest.tv_usec < 0) {
             earliest.tv_usec = 100;
         }
+        DEBUGMSGT(("verbose:sess_select","timer due *real* soon. %d usec\n",
+                   earliest.tv_usec));
     } else {
         earliest.tv_sec = (earliest.tv_sec - now.tv_sec);
         earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
@@ -5820,12 +5827,17 @@ snmp_sess_select_info(void *sessp,
             earliest.tv_sec--;
             earliest.tv_usec = (1000000L + earliest.tv_usec);
         }
+        DEBUGMSGT(("verbose:sess_select","timer due in %d.%d sec\n",
+                   earliest.tv_sec, earliest.tv_usec));
     }
 
     /*
      * if it was blocking before or our delta time is less, reset timeout 
      */
     if ((*block || (timercmp(&earliest, timeout, <)))) {
+        DEBUGMSGT(("verbose:sess_select",
+                   "setting timer to %d.%d sec, clear block (was %d)\n",
+                   earliest.tv_sec, earliest.tv_usec, *block));
         *timeout = earliest;
         *block = 0;
     }
