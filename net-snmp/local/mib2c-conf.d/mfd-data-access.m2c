@@ -28,6 +28,16 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
+
+int ${context}_indexes_set(${context}_mib_index *mib_idx
+##@    eval $m2c_gtis_comma = 1@
+@    foreach $node index@
+                     ,
+@        include m2c_setup_node.m2i@
+                     $m2c_node_param_val
+@    end@ # for each index
+    );
+
 @    include mfd-access-${m2c_table_access}-header.m2i@
 @end@
 
@@ -48,6 +58,7 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
+@    include generic-table-indexes-set.m2i@
 @    include mfd-access-${m2c_table_access}-body.m2i@
 @end@
 ##
