@@ -67,7 +67,8 @@ $m2c_conf_comment_divider
 $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_comment
-$m2c_conf_comment @eval $@m2c_table_settable = table_is_writable($table)@
+    @eval $m2c_temp = table_is_writable($table)@
+$m2c_conf_comment @eval $@m2c_table_settable = $m2c_temp@
 $m2c_conf_comment
 $m2c_conf_comment_divider
 $m2c_conf_comment
@@ -79,7 +80,8 @@ $m2c_conf_comment_divider
 $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_comment
-$m2c_conf_comment @eval $@m2c_table_row_creation = table_has_create($table)@
+    @eval $m2c_temp = table_has_create($table)@
+$m2c_conf_comment @eval $@m2c_table_row_creation = $m2c_temp@
 $m2c_conf_comment
 $m2c_conf_comment_divider
 $m2c_conf_comment
