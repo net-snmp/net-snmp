@@ -95,7 +95,7 @@ output_files(\%filetypes, $term);
 print "The following files were created:\n";
 
 foreach my $i (keys(%didfile)) {
-    if ($i ne "1") {
+    if ($didfile{$i} ne "1") {
 	print "  $didfile{$i} ",
 	($i ne $didfile{$i})?"[ from $i specifications]":" ","\n";
 	if ($opts{'d'}) {
