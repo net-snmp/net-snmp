@@ -374,6 +374,11 @@ dnl
 AC_MSG_CHECKING(for system include file)
 changequote(, )
 filebase=$target_os
+dnl ignore binary format indication
+filebase=`echo $filebase | sed 's/elf//'`
+filebase=`echo $filebase | sed 's/aout//'`
+filebase=`echo $filebase | sed 's/ecoff//'`
+filebase=`echo $filebase | sed 's/coff//'`
 while test "x$filebase" != "x$last" -a ! -f $srcdir/s/$filebase.h
 do
     last=$filebase
