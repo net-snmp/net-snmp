@@ -3905,7 +3905,7 @@ unload_all_mibs()
         if (mcp == module_map)
             break;
         module_map_head = mcp->next;
-        free((char *) mcp->tag);
+        if (mcp->tag) free((char *) mcp->tag);
         free((char *) mcp->old_module);
         free((char *) mcp->new_module);
         free(mcp);
