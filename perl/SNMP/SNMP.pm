@@ -587,6 +587,101 @@ sub get {
    return(wantarray() ? @res : $res[0]);
 }
 
+
+
+sub gettable {
+
+	#
+	# getTable
+	# --------
+	#
+	# Get OIDs starting at $table_oid, and continue down the tree
+	# until we get to an OID which does not start with $table_oid,
+	# i.e. we have reached the end of this table.
+	#
+
+	my $this = shift;
+	my $root_oid = shift;
+
+
+	# Check if the root OID is a VarList
+
+	if(ref($root_oid) =~ /SNMP::VarList/) {
+
+		$table_root_oid = $root_oid;
+
+	} elsif(ref($root_oid) =~ /SNMP::Varbind/) {
+
+		$table_root_oid = [$root_oid];
+
+	} elsif(ref($root_oid) =~ /ARRAY/) {
+
+		$table_root_oid = [$root_oid];
+		$table_root_oid = $root_oid if ref($$root_oid[0]) =~ /ARRAY/;
+
+	} else {
+
+		my($tag, $iid) = ($root_oid =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+		$table_root_oid = [[$tag, $iid]];
+
+	};
+
+
+	# Translate the supplied OID in to numeric format for parsing
+
+	$table_root_oid = SNMP::translateObj(@{@{$table_root_oid}[0]}[0]);
+
+
+	my %result_hash;
+	my $end_of_table = 0;
+
+
+	my $table_varbind = new SNMP::Varbind([$table_root_oid]);
+
+	while($this->getnext($table_varbind) && !$this->{ErrorNum}) {
+
+		my $row_oid = SNMP::translateObj(@{$table_varbind}[0]);
+		my $row_text = @{$table_varbind}[0];
+		my $row_index = @{$table_varbind}[1];
+		my $row_value = @{$table_varbind}[2];
+		my $row_type = @{$table_varbind}[3];
+
+		if($row_oid =~ m/($table_root_oid)/) {
+
+			if(($row_type eq "OCTETSTR") && ($row_value =~ m/^\W/)) {
+
+				# If the value returned is an octet string and
+				# includes non-word or non-digit values, unpack
+				# them to produce cleartext
+
+				$row_value = unpack("H*", $row_value);
+
+			} elsif($row_type eq "OBJECTID") {
+
+				# If the value returned is an OID, translate this
+				# back in to a textual OID
+
+				$row_value = SNMP::translateObj($row_value);
+
+			};
+
+
+			# Place the results in a hash
+
+			$result_hash{$row_index}->{$row_text} = $row_value;
+
+		} else {
+
+			last;
+
+		};
+
+	};
+
+	return(%result_hash);
+
+}
+
 sub fget {
    my $this = shift;
    my $vars = shift;
