@@ -454,13 +454,13 @@ netsnmp_config_remember_in_list(char *line,
 void
 netsnmp_config_remember_free_list(struct read_config_memory **mem)
 {
-    struct read_config_memory **tmpmem;
+    struct read_config_memory *tmpmem;
     while (*mem) {
         SNMP_FREE((*mem)->line);
-        tmpmem = &((*mem)->next);
+        tmpmem = (*mem)->next;
         free(*mem);
         *mem = NULL;
-        mem = tmpmem;
+        mem = &tmpmem;
     }
 }
 
