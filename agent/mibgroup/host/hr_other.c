@@ -32,7 +32,16 @@ static int      done_coProc;
 void
 Init_HR_CoProc(void)
 {
+#ifdef solaris2
+    /* 
+     * Sun didn't sell many Windows Co-processor boards 
+     * somebody who has one will have to figure out how to discover it
+     * so assume there are none
+     */
+    done_coProc = 1;
+#else
     done_coProc = 0;
+#endif
 }
 
 int
