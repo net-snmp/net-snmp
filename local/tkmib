@@ -18,7 +18,7 @@ my $havetk = eval {require Tk;
 if (!$havesnmp) {
     print "
 ERROR:  You don't have the SNMP perl module installed.  Please obtain this by
-getting the latest source release of the ucd-snmp toolkit from
+getting the latest source release of the net-snmp toolkit from
 http://www.net-snmp.org/download/ .  The perl module is contained in
 the perl/SNMP directory.  See the INSTALL file there for
 instructions.

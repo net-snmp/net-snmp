@@ -8,8 +8,8 @@ print O "<body bgcolor=\"#ffffff\" background=\"ucd-snmp-bg3.gif\">
 <div align=center>
 <h1>Frequently Asked Questions (FAQ) for the UCD SNMP package</h1>
 FAQ Author: Dave Shield<br>
-ucd-snmp Project Author: Wes Hardaker<br>
-Email: <a href=\"mailto:ucd-snmp-coders\@ucd-snmp.ucdavis.edu\">ucd-snmp-coders\@ucd-snmp.ucdavis.edu</a><br>
+net-snmp Project Author: Wes Hardaker<br>
+Email: <a href=\"mailto:net-snmp-coders\@lists.sourceforge.net\">net-snmp-coders\@list.sourceforge.net</a><br>
 </div>
 <hr>
 <h2>Table of Contents</h2>\n";
