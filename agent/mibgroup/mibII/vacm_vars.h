@@ -18,6 +18,8 @@ void vacm_parse_group (char *, char *);
 void vacm_parse_access (char *, char *);
 void vacm_parse_view (char *, char *);
 
+SNMPCallback vacm_in_view_callback;
+
 int vacm_in_view (struct snmp_pdu *, oid *, size_t);
 
 extern FindVarMethod var_vacm_sec2group;

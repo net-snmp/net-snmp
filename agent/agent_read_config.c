@@ -50,7 +50,6 @@
 #include "mibgroup/struct.h"
 #include "read_config.h"
 #include "agent_read_config.h"
-#include "mib_module_includes.h"
 #include "mib_module_config.h"
 #include "callback.h"
 #include "snmp_agent.h"

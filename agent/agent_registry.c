@@ -24,15 +24,12 @@
 #include "mibincl.h"
 #include "default_store.h"
 #include "ds_agent.h"
+#include "callback.h"
+#include "agent_callbacks.h"
+#include "agent_registry.h"
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
-#include "mibgroup/mib_module_includes.h"
-
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-#include "agentx/subagent.h"
-#endif
-
 
 #define UCD_REG_FLAG_SPLIT_REGISTRATION 0x1
 
@@ -234,7 +231,8 @@ register_mib(const char *moduleName,
   struct subtree *subtree;
   char c_oid[SPRINT_MAX_LEN];
   int res;
-
+  struct register_parameters reg_parms;
+  
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
   if ( subtree == NULL )
     return -1;
@@ -253,10 +251,10 @@ register_mib(const char *moduleName,
   subtree->variables_width = varsize;
   res = load_subtree(subtree);
 
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
-    agentx_register( agentx_session, mibloc, mibloclen );
-#endif
+  reg_parms.name = mibloc;
+  reg_parms.namelen = mibloclen;
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
+                      &reg_parms);
 
   return res;
 }
@@ -318,16 +316,18 @@ unregister_mib(oid *name,
 {
   struct subtree *my_ptr;
   int res;
+  struct register_parameters reg_parms;
 
   my_ptr = find_subtree( name, len, subtrees );
   if ( my_ptr == NULL )
      return -1;
 
   res = unload_subtree(name, len, subtrees);
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
-    agentx_unregister( agentx_session, name, len );
-#endif
+
+  reg_parms.name = name;
+  reg_parms.namelen = len;
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
+                      &reg_parms);
 
   return res;
 }
@@ -361,6 +361,13 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
           struct snmp_pdu *pdu,       /* IN - relevant auth info re PDU */
           int	           type)      /* IN - variable type being checked */
 {
+
+  struct view_parameters view_parms;
+  view_parms.pdu = pdu;
+  view_parms.name = name;
+  view_parms.namelen = *namelen;
+  view_parms.errorcode = 1;
+
   if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
     return 1;		/* Enable bypassing of view-based access control */
 
@@ -371,11 +378,9 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   case SNMP_VERSION_1:
   case SNMP_VERSION_2c:
   case SNMP_VERSION_3:
-#ifdef USING_MIBII_VACM_VARS_MODULE
-    return vacm_in_view(pdu, name, *namelen);
-#else
-    return 1;
-#endif
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_ACM_CHECK,
+                        &view_parms);
+    return view_parms.errorcode;
   }
   return 0;
 }
