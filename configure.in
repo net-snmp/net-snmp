@@ -125,6 +125,7 @@ case $target_os in
   solaris*) new_module_list="$new_module_list kernel_sunos5" ; trap_list_o="../agent/mibgroup/kernel_sunos5.o" ;;
   hpux*) new_module_list="$new_module_list hpux memory" ;;
   bsdi*) new_module_list="$new_module_list memory" ;;
+  linux*) new_module_list="$new_module_list memory" ;;
 esac
 
 dnl Create include file list for snmp_vars.h to use.
