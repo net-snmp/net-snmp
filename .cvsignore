@@ -11,6 +11,7 @@ config.h
 config.log
 config.out
 config.status
+configure-summary
 docs
 ece-mib.txt
 lib
