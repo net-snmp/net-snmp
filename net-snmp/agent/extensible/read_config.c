@@ -220,7 +220,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               cptr = skip_not_white(cptr);
               cptr = skip_white(cptr);
               if (cptr != NULL) {
-                if (strlen(cptr) < COMMUNITY_MAX_LEN) {
+                if (((int) strlen(cptr)) < COMMUNITY_MAX_LEN) {
                   copy_word(cptr,communities[i-1]);
                 } else {
                   fprintf(stderr,"snmpd.conf:  comminity %s too long\n",cptr);
