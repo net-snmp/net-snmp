@@ -6047,7 +6047,7 @@ netsnmp_oid_is_subtree(const oid * in_name1,
     if (len1 > len2)
         return 1;
 
-    if (memcmp(in_name1, in_name2, len1))
+    if (memcmp(in_name1, in_name2, len1 * sizeof(oid)))
         return 1;
 
     return 0;
