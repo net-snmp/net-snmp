@@ -655,10 +655,10 @@ var_extensible_disk(struct variable *vp,
         (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
                (double) (vfs.f_blocks -
                          (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
-    multiplier = vfs.f_bsize / 1024;
+    multiplier = (float)vfs.f_bsize / (float)1024.0;
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
     if (vfs.f_frsize > 255)
-        multiplier = vfs.f_frsize / 1024;
+        multiplier = (float)vfs.f_frsize / (float)1024.0;
 #endif
     avail = (long)(vfs.f_bavail * multiplier);
     iserror = (disks[disknum].minimumspace >= 0 ?
@@ -743,7 +743,7 @@ var_extensible_disk(struct variable *vp,
     percent =
         availblks ==
         0 ? 100 : (int) ((double) used / (double) totalblks * 100.0 + 0.5);
-    multiplier = filesys.fs_fsize / 1024;
+    multiplier = (float)filesys.fs_fsize / (float)1024.0;
     iserror =
         (disks[disknum].minimumspace >= 0
             ? avail * multiplier < disks[disknum].minimumspace
