@@ -101,7 +101,7 @@ extern "C" {
 #define STDC_HEADERS 1
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#undef TIME_WITH_SYS_TIME
+#define TIME_WITH_SYS_TIME 1
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
