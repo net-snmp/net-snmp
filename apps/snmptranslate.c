@@ -70,6 +70,7 @@ void usage(void)
 {
   fprintf(stderr,
 	  "usage: snmptranslate [-V|-p|-a] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+  fprintf(stderr, "  -h\t\tPrint this help message.\n");
   fprintf(stderr,
           "  -V\t\tPrint snmptranslate version then exit.\n");
   fprintf(stderr,
@@ -85,17 +86,17 @@ void usage(void)
   fprintf(stderr,
           "  -t\t\tPrint MIB symbol table report in alternate format. (Same as -Tt)\n");
   fprintf(stderr,
-          "  -T <TOPTS>\tPrint one or more MIB symbol reports.\n");
+          "  -T <lost>\tPrint one or more MIB symbol reports.\n");
   fprintf(stderr,
-          "  Where <TOPTS> is one or more of the following:\n");
+          "  Where <lost> is one or more of the following:\n");
   fprintf(stderr,
-          "  \tl|L\tEnable or disable labeled OID report.\n");
+          "  \tl\tEnable labeled OID report.\n");
   fprintf(stderr,
-          "  \to|O\tEnable or disable OID report.\n");
+          "  \to\tEnable OID report.\n");
   fprintf(stderr,
-          "  \ts|S\tEnable or disable dotted symbolic report.\n");
+          "  \ts\tEnable dotted symbolic report.\n");
   fprintf(stderr,
-          "  \tt|T\tEnable or disable alternately formatted symbolic suffix report.\n");
+          "  \tt\tEnable alternately formatted symbolic suffix report.\n");
   fprintf(stderr,
           "  -w\t\tEnable warnings of MIB symbol conflicts. (Obsolete, use -Pw)\n");
   fprintf(stderr,
@@ -235,7 +236,7 @@ int main(int argc, char *argv[])
                 else if (++arg < argc)
                     tPtr = argv[arg];
                 else {
-                    fprintf(stderr, "Need <LOST> after -T flag.\n");
+                    fprintf(stderr, "Need <lost> after -T flag.\n");
                     usage(); 
                     exit(1);
                 }
@@ -246,29 +247,17 @@ int main(int argc, char *argv[])
                       case 'l':
                         print_oid_report_enable_labeledoid();
                         break;
-                      case 'L':
-                        print_oid_report_disable_labeledoid();
-                        break;
                       case 'o':
                         print_oid_report_enable_oid();
-                        break;
-                      case 'O':
-                        print_oid_report_disable_oid();
                         break;
                       case 's':
                         print_oid_report_enable_symbolic();
                         break;
-                      case 'S':
-                        print_oid_report_disable_symbolic();
-                        break;
                       case 't':
                         print_oid_report_enable_suffix();
                         break;
-                      case 'T':
-                        print_oid_report_disable_suffix();
-                        break;
                       default:
-                        fprintf(stderr,"Invalid <LOST> character: %c\n", *tPtr);
+                        fprintf(stderr,"Invalid <lost> character: %c\n", *tPtr);
                         usage();
                         exit(1);
                         break;
