@@ -2511,7 +2511,7 @@ init_mib (void)
     }
 
     if (getenv("SUFFIX"))
-	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
+	ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
     Mib = tree_head;          /* Backwards compatibility */
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
