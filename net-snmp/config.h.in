@@ -34,7 +34,7 @@
    privacy support. */
 #undef SCAPI_AUTHPRIV
 
-/* define if you are using the v2party MD5 code */
+/* define if you are using the MD5 code */
 #undef USE_INTERNAL_MD5
 
 /* comment the next line if you do not want SNMPv2 party-based auth. */
