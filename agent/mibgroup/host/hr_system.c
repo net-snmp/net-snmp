@@ -273,7 +273,7 @@ static int count_users(void)
 #if HAVE_UTMPX_H
 #define setutent setutxent
 #define getutent getutxent
-#define entutent entutxent
+#define endutent endutxent
      struct utmpx *utmp_p;
 #else
      struct utmp *utmp_p;
