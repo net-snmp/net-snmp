@@ -1787,6 +1787,7 @@ get_module_node(const char *fname,
     oid newname[MAX_OID_LEN], *op;
     char *cp, *cp2;
     char *name, *oname;
+    char doingquote = 0;
 
     if ( !strcmp(module, "ANY") )
         modid = -1;
@@ -1832,8 +1833,28 @@ get_module_node(const char *fname,
 		cp2++;
 	    }
 
-					/* Is it numeric ? */
-	    if ( isdigit( *cp ) )
+		  
+            if ( *cp == '"' || *cp == '\'') { /* Is it the beggining
+                                                 of a quoted string */
+              doingquote = *cp++;
+              /* insert length if requested */
+              if (doingquote == '"') {
+                objid[ *objidlen ] = (strchr(cp,doingquote) - cp);
+                (*objidlen)++;
+              }
+
+              while(*cp != doingquote) {
+                objid[ *objidlen ] = *cp++;
+                (*objidlen)++;
+              }
+
+              tp = NULL; /* must be pure numeric from here, right? */
+              cp = cp2;
+              continue;
+            }
+
+                                        /* Is it numeric ? */
+            if ( isdigit( *cp ) )
 		subid=(atoi(cp));
 	    else
 		subid = -1;
