@@ -1648,11 +1648,14 @@ static int Interface_Scan_By_Index(int Index,
 
 
 static int Interface_Count=0;
+static time_t scan_time = 0;
 
 static int Interface_Scan_Get_Count (void)
 {
-
-	if (!Interface_Count) {
+        time_t time_now = time(NULL);
+    
+	if (!Interface_Count || (time_now > scan_time + 60)) {
+            scan_time = time_now;
 	    Interface_Scan_Init();
 	    while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
 		Interface_Count++;
