@@ -245,7 +245,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
             if (reqinfo->mode != MODE_GETNEXT) {
                 table_helper_cleanup(reqinfo, request,
-                                     SNMP_ERR_NOSUCHNAME);
+                                     SNMP_NOSUCHOBJECT);
             }
             continue;
         }
@@ -291,7 +291,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, request,
-                                         SNMP_ERR_NOSUCHNAME);
+                                         SNMP_NOSUCHOBJECT);
                 }
                 continue;
             }
@@ -326,7 +326,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 tmp_name = tbl_req_info->index_oid;
             }
         } else if (reqinfo->mode != MODE_GETNEXT) {
-            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
             continue;
         } else {
             tbl_req_info->index_oid_len = 0;
@@ -361,7 +361,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, requests,
-                                         SNMP_ERR_NOSUCHNAME);
+                                         SNMP_NOSUCHOBJECT /* ??? */);
                     cleaned_up = 1;
                 }
                 tmp_len = 0;
