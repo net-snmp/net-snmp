@@ -1151,26 +1151,45 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     }
 
 
+#ifdef WORDS_BIGENDIAN
+# define endianoff 1
+#else
+# define endianoff 0
+#endif
     if (*length < 4 * n_subid) {
         DEBUGMSGTL(("agentx", "Incomplete Object ID"));
         return NULL;
     }
 
     if (prefix) {	 
-        if (sizeof(oid) == 8) {  	/* align OID values in 64 bit agent */  
-            int_ptr[0] = int_ptr[2] = int_ptr[4] = int_ptr[6] = int_ptr[8] = 0;
+        if (int_offset == 2) {  	/* align OID values in 64 bit agent */  
+	    memset(int_ptr, 0, 10*sizeof(int_ptr[0])); 
+	    int_ptr[0+endianoff] = 1;
+	    int_ptr[2+endianoff] = 3;
+	    int_ptr[4+endianoff] = 6;
+	    int_ptr[6+endianoff] = 1;
+	    int_ptr[8+endianoff] = prefix;
+        } else { /* assume int_offset == 1 */
+	    int_ptr[0] = 1;
+	    int_ptr[1] = 3;
+	    int_ptr[2] = 6;
+	    int_ptr[3] = 1;
+	    int_ptr[4] = prefix;
         }
-        int_ptr[int_offset - 1] = 1;
-        int_ptr[(int_offset * 2) - 1] = 3;
-        int_ptr[(int_offset * 3) - 1] = 6;
-        int_ptr[(int_offset * 4) - 1] = 1;
-        int_ptr[(int_offset * 5) - 1] = prefix;
         int_ptr = int_ptr + (int_offset * 5);
     }
 
     for (i = 0; i < (int) (int_offset * n_subid); i = i + int_offset) {
-        int_ptr[i] = 0;
-        int_ptr[i + (int_offset - 1)] = agentx_parse_int(buf_ptr, network_byte_order);
+	int x;
+
+	x = agentx_parse_int(buf_ptr, network_byte_order);
+	if (int_offset == 2) {
+            int_ptr[i+0] = 0;
+	    int_ptr[i+1] = 0;
+	    int_ptr[i+endianoff]=x;
+        } else {
+	    int_ptr[i] = x;
+        }
         buf_ptr += 4;
         *length -= 4;
     }
