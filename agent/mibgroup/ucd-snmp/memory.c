@@ -118,6 +118,12 @@
 int             minimumswap;
 #ifndef linux
 static int      pageshift;      /* log base 2 of the pagesize */
+#else
+static int      log_procerr = 1;
+void
+getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared, 
+       unsigned long *buffers, unsigned long *cached, unsigned long *swaptotal, 
+       unsigned long *swapfree);
 #endif
 
 #ifndef bsdi2
@@ -136,7 +142,17 @@ static FindVarMethod var_extensible_mem;
 void
 init_memory(void)
 {
-#ifndef linux
+#ifdef linux
+    unsigned long memtotal, memfree, memshared, buffers, cached, swaptotal,
+        swapfree;
+    /*
+     * call once, to log errors for missing vars, then turn off logging
+     * of those errors.
+     */
+    getmem(&memtotal, &memfree, &memshared, &buffers, &cached, &swaptotal,
+           &swapfree);
+    log_procerr = 0;
+#else
     int             pagesize;
 #ifdef PHYSMEM_SYMBOL
     auto_nlist(PHYSMEM_SYMBOL, 0, 0);
@@ -171,7 +187,7 @@ init_memory(void)
         0)
         return;
 #endif
-#endif
+#endif /* bsdi2 */
     pagesize = 1 << PGSHIFT;
     pageshift = 0;
     while (pagesize > 1) {
@@ -179,7 +195,7 @@ init_memory(void)
         pagesize >>= 1;
     }
     pageshift -= 10;
-#endif
+#endif /* linux */
     {
         struct variable2 extensible_mem_variables[] = {
             {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_mem, 1,
@@ -276,6 +292,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b) 
             sscanf(b, "MemTotal: %lu", memtotal);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No MemTotal line in /proc/meminfo\n");
             *memtotal = 0;
         }
@@ -283,6 +300,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b) 
             sscanf(b, "MemFree: %lu", memfree);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No MemFree line in /proc/meminfo\n");
             *memfree = 0;
         }
@@ -290,6 +308,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "MemShared: %lu", memshared);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
             *memshared = 0;
         }
@@ -297,6 +316,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "Buffers: %lu", buffers);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No Buffers line in /proc/meminfo\n");
             *buffers = 0;
         }
@@ -304,6 +324,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "Cached: %lu", cached);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No Cached line in /proc/meminfo\n");
             *cached = 0;
         }
@@ -311,6 +332,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "SwapTotal: %lu", swaptotal);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No SwapTotal line in /proc/meminfo\n");
             *swaptotal = 0;
         }
@@ -318,6 +340,7 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "SwapFree: %lu", swapfree);
         else {
+            if(log_procerr)
             snmp_log(LOG_ERR, "No SwapFree line in /proc/meminfo\n");
             *swapfree = 0;
         }
