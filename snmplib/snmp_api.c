@@ -269,7 +269,6 @@ static int  snmp_detail_f  = 0;
 /*
  * Prototypes.
  */
-void shift_array (u_char *, int, int);
 int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
 static int snmp_parse (struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
 static void * snmp_sess_pointer (struct snmp_session *);
@@ -1281,30 +1280,6 @@ snmp_close_sessions( void )
             return 0;
     return 1;
 }
-
-#ifdef notused	/* XXX */
-void
-shift_array(u_char *begin,
-	    int length,
-	    int shift_amount)
-{
-    u_char     *old, *newer;
-
-    if (shift_amount >= 0){
-        old = begin + length - 1;
-        newer = old + shift_amount;
-
-        while(length--)
-            *newer-- = *old--;
-    } else {
-        old = begin;
-        newer = begin + shift_amount;
-
-        while(length--)
-            *newer++ = *old++;
-    }
-}
-#endif
 
 static int
 snmpv3_build_probe_pdu (struct snmp_pdu **pdu)

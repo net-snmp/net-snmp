@@ -292,7 +292,7 @@ _SCAPI_NOT_CONFIGURED
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_SC_GENERAL_FAILURE	All errs, including KMT errors.
+ *	SNMPERR_GENERR			All errs, including KMT errors.
  *
  *
  * A hash of the first msglen bytes of message using a keyed hash defined
@@ -386,7 +386,10 @@ sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
 
         if ((int)*maclen > properlength)
           *maclen = properlength;
-        MDsign(message, msglen, MAC, *maclen, key, keylen);
+        if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
+            rval = SNMPERR_GENERR;
+            goto sc_generate_keyed_hash_quit;
+        }
 
 #endif /* ! HAVE_LIBKMT */
 
@@ -465,7 +468,9 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
 
 #else /* USE_INTERNAL_MD5 */
 
-  MDchecksum(buf, buf_len, MAC, *MAC_len);
+  if (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
+    return SNMPERR_GENERR;
+  }
   if (*MAC_len > 16)
     *MAC_len = 16;
   return SNMPERR_SUCCESS;
