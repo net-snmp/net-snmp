@@ -154,6 +154,7 @@
 extern struct mnttab *HRFS_entry;
 #define HRFS_mount	mnt_mountp
 #define HRFS_statfs	statvfs
+#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
 #elif defined(HAVE_STATVFS) && defined(__NetBSD__)
 
@@ -161,6 +162,7 @@ extern struct statvfs *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
 #elif defined(HAVE_STATVFS)
 
@@ -168,6 +170,7 @@ extern struct mntent *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	mnt_dir
+#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
 #elif defined(HAVE_GETFSSTAT)
 
@@ -175,12 +178,14 @@ extern struct statfs *HRFS_entry;
 extern int      fscount;
 #define HRFS_statfs	statfs
 #define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE STRUCT_STATFS_HAS_F_FRSIZE
 
 #else
 
 extern struct mntent *HRFS_entry;
 #define HRFS_mount	mnt_dir
 #define HRFS_statfs	statfs
+#define HRFS_HAS_FRSIZE STRUCT_STATFS_HAS_F_FRSIZE
 
 #endif
 
@@ -581,7 +586,7 @@ try_next:
         }
     case HRSTORE_UNITS:
         if (store_idx > HRS_TYPE_FIXED_MAX)
-#if STRUCT_STATVFS_HAS_F_FRSIZE
+#if HRFS_HAS_FRSIZE
             long_return = stat_buf.f_frsize;
 #else
             long_return = stat_buf.f_bsize;
