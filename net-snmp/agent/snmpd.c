@@ -784,9 +784,9 @@ snmp_check_packet(struct snmp_session *session,
       addr_string = STRING_UNKNOWN;
     }
     if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-      snmp_log(allow_severity, "Connection from %s", addr_string);
+      snmp_log(allow_severity, "Connection from %s\n", addr_string);
     } else {
-      snmp_log(deny_severity, "Connection from %s refused", addr_string);
+      snmp_log(deny_severity, "Connection from %s REFUSED\n", addr_string);
       return(0);
     }
 #endif	/* USE_LIBWRAP */
