@@ -79,7 +79,7 @@ exit 1
 	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared \
-	%{?_with_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"} \
+	%{?_with_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT%{_prefix} INSTALLDIRS=vendor"} \
 	%{?_with_embedded_perl: --enable-embedded-perl} \
 	--with-cflags="$RPM_OPT_FLAGS"
 
@@ -91,14 +91,15 @@ make
 # ----------------------------------------------------------------------
 rm -rf $RPM_BUILD_ROOT
 
-%makeinstall
+%makeinstall ucdincludedir=$RPM_BUILD_ROOT%{_prefix}/include/ucd-snmp \
+             includedir=$RPM_BUILD_ROOT%{_prefix}/include/net-snmp
 
 # Remove 'snmpinform' from the temporary directory because it is a
 # symbolic link, which cannot be handled by the rpm installation process.
 %__rm -f $RPM_BUILD_ROOT%{_prefix}/bin/snmpinform
 # install the init script
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-perl -i -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@usr@g' dist/snmpd-init.d
+perl -i -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@%{_prefix}@g' dist/snmpd-init.d
 install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
 %if %{include_perl}
