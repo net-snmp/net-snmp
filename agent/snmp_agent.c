@@ -28,6 +28,9 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -125,35 +128,41 @@ int
 agent_check_and_process(int block) {
   int numfds;
   fd_set fdset;
-  struct timeval	timeout, *tvp = &timeout;
+  struct timeval timeout = { LONG_MAX, 0 }, *tvp = &timeout;
   int count;
   int fakeblock=0;
   
-  tvp =  &timeout;
-
   numfds = 0;
   FD_ZERO(&fdset);
   snmp_select_info(&numfds, &fdset, tvp, &fakeblock);
-  if (block == 1)
-    tvp = NULL; /* block without timeout */
-  else if (block == 0) {
-      tvp->tv_sec = 0;
-      tvp->tv_usec = 0;
+  if (block != 0 && fakeblock != 0) {
+    /*  There are no alarms registered, and the caller asked for blocking, so
+	let select() block forever.  */
+
+    tvp = NULL;
+  } else if (block != 0 && fakeblock == 0) {
+    /*  The caller asked for blocking, but there is an alarm due sooner than
+	LONG_MAX seconds from now, so use the modified timeout returned by
+	snmp_select_info as the timeout for select().  */
+
+  } else if (block == 0) {
+    /*  The caller does not want us to block at all.  */
+
+    tvp->tv_sec  = 0;
+    tvp->tv_usec = 0;
   }
 
   count = select(numfds, &fdset, 0, 0, tvp);
 
-  if (count > 0){
+  if (count > 0) {
     /* packets found, process them */
     snmp_read(&fdset);
-  } else switch(count){
+  } else switch(count) {
     case 0:
       snmp_timeout();
       break;
     case -1:
-      if (errno == EINTR){
-        return -1;
-      } else {
+      if (errno != EINTR) {
         snmp_log_perror("select");
       }
       return -1;
@@ -162,7 +171,7 @@ agent_check_and_process(int block) {
       return -1;
   }  /* endif -- count>0 */
 
-  /* run requested alarms */
+  /*  Run requested alarms.  */
   run_alarms();
 
   return count;
@@ -808,8 +817,9 @@ statp_loop:
 		 * In all other situations, this indicates failure.
 		 */
 	if (statP == NULL && (asp->rw != WRITE || write_method == NULL)) {
-	    	varbind_ptr->val.integer   = NULL;
-	    	varbind_ptr->val_len = 0;
+	        /*  Careful -- if the varbind was lengthy, it will have
+		    allocated some memory.  */
+	        snmp_set_var_value(varbind_ptr, NULL, 0);
 		if ( asp->exact ) {
 	            if ( noSuchObject == TRUE ){
 		        statType = SNMP_NOSUCHOBJECT;
