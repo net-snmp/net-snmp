@@ -104,22 +104,20 @@ log_syslog (int priority, const char *format)
 
 
 void
-log_filelog (int priority, const char *format)
+log_filelog (int priority, const char *string)
 {
-  /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_filelogging) {
-    fprintf(logfile, format);
+    fputs(string, logfile);
     fflush(logfile);
   }
 }
 
 
 void
-log_stderrlog (int priority, const char *format)
+log_stderrlog (int priority, const char *string)
 {
-  /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_stderrlogging) {
-    fprintf(stderr, format);
+    fputs(string, stderr);
     fflush(stderr);
   }
 }
