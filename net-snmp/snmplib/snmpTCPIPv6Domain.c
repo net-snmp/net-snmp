@@ -154,11 +154,7 @@ snmp_tcp6_accept(netsnmp_transport *t)
 {
     struct sockaddr_in6 *farend = NULL;
     int             newsock = -1, sockflags = 0;
-#ifdef HAVE_SOCKLEN_T
     socklen_t       farendlen = sizeof(struct sockaddr_in6);
-#else   /* HAVE_SOCKLEN_T */
-    size_t          farendlen = sizeof(struct sockaddr_in6);
-#endif
     char           *string = NULL;
 
     farend = (struct sockaddr_in6 *) malloc(sizeof(struct sockaddr_in6));
