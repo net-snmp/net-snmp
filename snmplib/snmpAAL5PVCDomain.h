@@ -6,9 +6,6 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_UN_H
-#include <sys/un.h>
-#endif
 
 #include <atm.h>
 
