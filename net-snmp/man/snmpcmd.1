@@ -25,19 +25,21 @@
 snmpcmd - commmands to communicate with a network entity using SNMP Requests.
 .SH SYNOPSIS
 snmpcmd
-[-h|-V]
+[-h|-H|-V]
 .br
 [-v (1 | 2c | 3) ]
 .br
-[-R] [-f|-s|-S] [-O[o][e][b]]
+[-R] [-O <OIDOPTS> ]
 .br
-[-P [w] [W] [e] [c] [d] [u] [R] ]
+[-P <PARSEROPTS> ]
 .br
 [-m mibs] [-M mibdirs]
 .br
 [-d] [-D[TOKEN,TOKEN,...]]
 .br
 [-r retries] [-t timeout] [-p port] [-T UDP|TCP]
+.br
+[-c community]
 .br
 [-e engineid] [-Z boots time] [-n contextname]
 .br
@@ -70,6 +72,8 @@ that are specified after the
 and authentication controls specified here.
 .IP "-h"
 prints the applications help message
+.IP "-H"
+display the configuration file directives understood be the command
 .IP "-V"
 prints the applications version string
 .IP "-v 1 | 2c | 3"
@@ -80,39 +84,8 @@ The default is -v 1
 requests random access to the MIB symbol table. See RANDOM ACCESS MIB below.
 .IP "-P wWecduR"
 specifies MIB parsing options. See MIB PARSING OPTIONS below.
-.IP "-f"
-requests full object identifiers on output.
-.I system.sysDescr.0
-will be printed as
-.I .iso.org.dod.internet.mgmt.mib-2.system.sysDescr.0
-.IP "-s"
-request that object identifiers on output uses "suffix only", that is,
-only the last symbolic part is printed. For example,
-.I interfaces.iftable.ifentry.ifindex.1
-will just show up as
-.I ifindex.1
-.IP "-S"
-request object identifiers with suffix and MIB name.
-.I interfaces.iftable.ifentry.ifindex.1
-will show up as
-.I IF-MIB:ifindex.1
-.IP "-q"
-request a "quick print" output format, that also is easier to
-parse for programs.
-.IP "-O[o][e][b]"
-The following flags modify the printing behaviour of the output:
-.RS
-.IP "o"
-Print oids numerically rather than translating them into text strings.
-.IP "e"
-Print enums as numeric values only, without their labels.
-.IP "b"
-Don't break OIDs into pieces.  When OIDs contain a index to a table,
-they are broken into the displayable pieces and shown to you.  For
-example the oid vacmSecurityModel.0.3.119.101.115 is nicely broken
-down by default and the string hidden in the oid is shown to you as
-vacmSecurityModel.0."wes"
-.RE
+.IP "-O nebqfsS"
+specifies OID options. See OID OPTIONS below.
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
 The special name ALL is used to specify all modules in all directories.
@@ -213,31 +186,80 @@ As that specification has changed through time,
 and in recognition of the
 diversity in compliance expressed in MIB files, 
 additional options provide more flexibility in reading MIB files.
-.IP "-w"
+.IP "-Pw"
 Show some warning messages in resolving the MIB files.
 Can be also set with the configuration token "mibWarningLevel".
-.IP "-W"
+.IP "-PW"
 Show additional warning messages.
 Can be also set with the configuration token "mibWarningLevel".
-.IP "-e"
-Show MIB errors.
+.IP "-Pe"
+Don't show MIB errors.
 Can be also set with the configuration token "showMibErrors".
-.IP "-c"
+.IP "-Pc"
 Allow ASN.1 comment to extend to the end of the MIB source line.
 This overcomes some problems with manually maintained MIB files.
 Can be also set with the configuration token "strictCommentTerm".
-.IP "-d"
+.IP "-Pd"
 Collect the DESCRIPTION information into the parsed hierarchy.
 This increases the memory used by the size of each DESCRIPTION clause.
-.IP "-u"
+.IP "-Pu"
 Allow underline characters in symbols.
 Can be also set with the configuration token "mibAllowUnderline".
-.IP "-R"
+.IP "-PR"
 Replace MIB objects using the last read MIB file.
 WARNING: Setting this option may result in an incorrect hierarchy.
 Can be also set with the configuration token "mibReplaceWithLatest".
 .PP
+.SH "OID OPTIONS"
+The OID names can be presented in various ways, together with any
+values returned from the agent. The following will demonstrate
+how the options influence the printed values.
 .PP
+The default output looks as follows:
+.br
+snmpget -c public localhost system.sysUpTime.0
+.br
+system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63        
+.IP -Oq
+removes the equal sign and type information,
+.br
+system.sysUpTime.0 1:15:09:27.63
+.IP -Of
+gives you the complete OID
+.br
+\.iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.IP -Os
+deletes all by the last symbolic part of the OID
+.br
+sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.IP -OS
+is a variant of this, adding the name of the MIB that defined this
+object
+.br
+SNMPv2-MIB:sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.IP -On
+prints the OID numerically
+.br
+snmpget -On -c public localhost system.sysUpTime.0
+.br
+\.1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.IP -Oe
+removes the symbolic labels from enumerations:
+.br
+snmpget -c public localhost ip.ipForwarding.0
+.br
+ip.ipForwarding.0 = forwarding(1)
+.br
+snmpget -c public -Oe localhost ip.ipForwarding.0
+.br
+ip.ipForwarding.0 = 1
+.PP
+When OIDs contain a index to a table,
+they are broken into the displayable pieces and shown to you.  For
+example the oid vacmSecurityModel.0.3.119.101.115 is nicely broken
+down by default and the string hidden in the oid is shown to you as
+vacmSecurityModel.0."wes".
+The -Ob option diables this feature.
 .SH "ENVIRONMENT VARIABLES"
 .IP PREFIX
 The standard prefix for object identifiers. Defaults to .iso.org.dod.internet.mgmt.mib-2
