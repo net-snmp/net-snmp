@@ -625,6 +625,7 @@ sub process {
           }
 	} ####################################################################
         elsif (/\@\s*exit\@/) { #                                         EXIT
+            close_files;
 	    die "exiting at conf file ($currentfile:$currentline) request\n";
 	} elsif (/\@\s*debug\s+([^\@]+)\@/) { #                          DEBUG
           if ($1 eq "on") {
