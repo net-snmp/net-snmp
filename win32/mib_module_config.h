@@ -9,6 +9,9 @@
 /* Define if compiling with the smux module files.  */
 #define USING_SMUX_MODULE 1
  
+/* Define if compiling with the mibII/sysORTable module files.  */
+#define USING_MIBII_SYSORTABLE_MODULE 1
+
 /* Define if compiling with the mibII/system_mib module files.  */
 #define USING_MIBII_SYSTEM_MIB_MODULE 1
  

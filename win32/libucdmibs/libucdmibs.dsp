@@ -85,15 +85,29 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\sysORTable.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
+# End Source File
+# End Group
+# Begin Group "examples"
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\examples\example.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\examples\ucdDemoPublic.c
 # End Source File
 # End Group
 # Begin Group "ucd-snmp"
