@@ -451,7 +451,8 @@ snmp_open(session)
 {
     struct session_list *slp;
     slp = (struct session_list *)snmp_sess_open(session);
-    if (slp)
+    if (!slp) return NULL;
+
     { /*MTCRITICAL_RESOURCE*/
 	slp->next = Sessions;
 	Sessions = slp;
