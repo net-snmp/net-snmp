@@ -17,6 +17,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       (run any command with -H and see appropriate .conf manual pages)
     - The start of a "make test" suite.
     - many other things we've forgotten.
+    - code is ANSI C now, and requires a ANSI C compiler.
 
  API Changes:
     - A small change to the write functions in mib modules.
