@@ -316,7 +316,7 @@ typedef struct _conf_if_list {
     struct _conf_if_list *next;
 } conf_if_list;
 
-static conf_if_list *conf_list;
+static conf_if_list *conf_list = NULL;
 #ifdef linux
 static struct ifnet *ifnetaddr_list;
 #endif
@@ -502,7 +502,8 @@ Interface_Scan_By_Index(int iindex,
     struct if_msghdr *ifp;
     int             have_ifinfo = 0, have_addr = 0;
 
-    memset(sifa, 0, sizeof(*sifa));
+    if (NULL != sifa)
+        memset(sifa, 0, sizeof(*sifa));
     for (cp = if_list; cp < if_list_end; cp += ifp->ifm_msglen) {
         ifp = (struct if_msghdr *) cp;
         DEBUGMSGTL(("mibII/interfaces", "ifm_type = %d, ifm_index = %d\n",
@@ -530,7 +531,7 @@ Interface_Scan_By_Index(int iindex,
             {
                 struct ifa_msghdr *ifap = (struct ifa_msghdr *) cp;
 
-                if (ifap->ifam_index == iindex) {
+                if ((NULL != sifa) && (ifap->ifam_index == iindex)) {
                     const struct in_addr *ia;
 
                     /*
@@ -568,7 +569,7 @@ Interface_Scan_By_Index(int iindex,
                         ifp->ifm_type));
         }
     }
-    if (have_ifinfo && have_addr) {
+    if (have_ifinfo && (NULL == sifa) || (have_addr)) {
         return 0;
     } else if (have_ifinfo && !(if_msg->ifm_flags & IFF_UP))
         return 0;
@@ -640,7 +641,7 @@ var_ifEntry(struct variable *vp,
     int             interface;
     struct if_msghdr if_msg;
     static char     if_name[100];
-    struct small_ifaddr sifa;
+    conf_if_list   *if_ptr = conf_list;;
     char           *cp;
 
     interface =
@@ -648,8 +649,10 @@ var_ifEntry(struct variable *vp,
     if (interface == MATCH_FAILED)
         return NULL;
 
-    if (Interface_Scan_By_Index(interface, &if_msg, if_name, &sifa) != 0)
+    if (Interface_Scan_By_Index(interface, &if_msg, if_name, NULL) != 0)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -660,18 +663,25 @@ var_ifEntry(struct variable *vp,
         *var_len = strlen(if_name);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = (long) if_msg.ifm_data.ifi_type;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) if_msg.ifm_data.ifi_mtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else {
 #if STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE
         long_return = (u_long) if_msg.ifm_data.ifi_baudrate.ifs_value <<
             if_msg.ifm_data.ifi_baudrate.ifs_log2;
 #else
         long_return = (u_long) if_msg.ifm_data.ifi_baudrate;
 #endif
+        }
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
         /*
@@ -1044,7 +1054,7 @@ var_ifEntry(struct variable *vp,
     int             hp_fd;
     int             hp_len = sizeof(hp_ifEntry);
 #endif
-
+    conf_if_list   *if_ptr = conf_list;;
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -1075,6 +1085,8 @@ var_ifEntry(struct variable *vp,
         }
     }
 #endif
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -1092,6 +1104,9 @@ var_ifEntry(struct variable *vp,
         *var_len = strlen(cp);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else {
 #if defined(hpux11)
         long_return = ifnet.if_entry.ifType;
 #else
@@ -1100,6 +1115,7 @@ var_ifEntry(struct variable *vp,
         else
             long_return = 1;    /* OTHER */
 #endif
+        }
         return (u_char *) & long_return;
     case IFMTU:{
 #if defined(hpux11)
@@ -1110,6 +1126,9 @@ var_ifEntry(struct variable *vp,
             return (u_char *) & long_return;
         }
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else {
 #if defined(hpux11)
         long_return = ifnet.if_entry.ifSpeed;
 #else
@@ -1118,6 +1137,7 @@ var_ifEntry(struct variable *vp,
         else
             long_return = (u_long) 1;   /* OTHER */
 #endif
+        }
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
 #if defined(hpux11)
@@ -1298,7 +1318,7 @@ var_ifEntry(struct variable * vp,
 {
     int             interface;
     mib2_ifEntry_t  ifstat;
-
+    conf_if_list   *if_ptr = conf_list;
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -1310,6 +1330,9 @@ var_ifEntry(struct variable * vp,
         DEBUGMSGTL(("mibII/interfaces", "... no mib stats\n"));
         return NULL;
     }
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
+
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifstat.ifIndex;
@@ -1319,12 +1342,18 @@ var_ifEntry(struct variable * vp,
         (void) memcpy(return_buf, ifstat.ifDescr.o_bytes, *var_len);
         return (u_char *) return_buf;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = (u_long) ifstat.ifType;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (u_long) ifstat.ifMtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = (u_long) ifstat.ifSpeed;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
@@ -2489,6 +2518,7 @@ var_ifEntry(struct variable * vp,
     static struct ifmibdata ifmd;
     size_t          len;
     char           *cp;
+    conf_if_list   *if_ptr = conf_list;;
 
     interface = header_ifEntry(vp, name, length, exact, var_len,
                                write_method);
@@ -2499,6 +2529,8 @@ var_ifEntry(struct variable * vp,
     len = sizeof ifmd;
     if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
 
     switch (vp->magic) {
     case IFINDEX:
@@ -2509,12 +2541,18 @@ var_ifEntry(struct variable * vp,
         *var_len = strlen(cp);
         return (u_char *) cp;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = ifmd.ifmd_data.ifi_type;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) ifmd.ifmd_data.ifi_mtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = ifmd.ifmd_data.ifi_baudrate;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
@@ -2707,9 +2745,8 @@ var_ifEntry(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             ifIndex;
-    static char     Name[16];
-    conf_if_list   *if_ptr = conf_list;
     static MIB_IFROW ifRow;
+    conf_if_list   *if_ptr = conf_list;;
 
     ifIndex =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -2722,6 +2759,9 @@ var_ifEntry(struct variable * vp,
     ifRow.dwIndex = ifIndex;
     if (GetIfEntry(&ifRow) != NO_ERROR)
         return NULL;
+    while (if_ptr && strcmp(Name, if_ptr->name))
+        if_ptr = if_ptr->next;
+
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifIndex;
@@ -2730,12 +2770,18 @@ var_ifEntry(struct variable * vp,
         *var_len = ifRow.dwDescrLen;
         return (u_char *) ifRow.bDescr;
     case IFTYPE:
+        if (if_ptr)
+            long_return = if_ptr->type;
+        else
         long_return = ifRow.dwType;
         return (u_char *) & long_return;
     case IFMTU:
         long_return = (long) ifRow.dwMtu;
         return (u_char *) & long_return;
     case IFSPEED:
+        if (if_ptr)
+            long_return = if_ptr->speed;
+        else
         long_return = (long) ifRow.dwSpeed;
         return (u_char *) & long_return;
     case IFPHYSADDRESS:
