@@ -623,6 +623,7 @@ int flag;
       *(icp++) = '\0';
    }
    *last_label = (flag & USE_LONG_NAMES ? name : lcp);
+
    *iid = icp;
 
    return(SUCCESS);
@@ -1967,7 +1968,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
 
-                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, "0"),
+                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
                               __av_elem_pv(varbind, VARBIND_IID_F, NULL),
                               oid_arr, &oid_arr_len, NULL);
 
