@@ -442,7 +442,9 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GET:
     case MODE_GETNEXT:
     case MODE_GETBULK:
-    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE1: {
+        netsnmp_handler_args cache_hint;
+
         /*
          * only touch cache once per pdu request, to prevent a cache
          * reload while a module is using cached data.
@@ -454,13 +456,24 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         if (netsnmp_cache_is_valid(reqinfo, reginfo->handlerName))
             return SNMP_ERR_NOERROR;
 
+        if (cache->flags & NETSNMP_CACHE_HINT_HANDLER_ARGS) {
+            netsnmp_assert(NULL == cache->cache_hint);
+            cache_hint.handler = handler;
+            cache_hint.reginfo = reginfo;
+            cache_hint.reqinfo = reqinfo;
+            cache_hint.requests = requests;
+            cache->cache_hint = &cache_hint;
+        }
+
         /*
          * call the load hook, and update the cache timestamp.
          * If it's not already there, add to reqinfo
          */
         netsnmp_cache_check_and_reload(cache);
         netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
-        /* next handler called automatically - 'AUTO_NEXT' */
+        cache->cache_hint = NULL;
+        /** next handler called automatically - 'AUTO_NEXT' */
+        }
         return SNMP_ERR_NOERROR;
 
     case MODE_SET_RESERVE2:
@@ -468,7 +481,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_ACTION:
     case MODE_SET_UNDO:
         netsnmp_assert(netsnmp_cache_is_valid(reqinfo, reginfo->handlerName));
-        /* next handler called automatically - 'AUTO_NEXT' */
+        /** next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
 
         /*
@@ -482,7 +495,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             cache->free_cache(cache, cache->magic);
             cache->valid = 0;
         }
-        /* next handler called automatically - 'AUTO_NEXT' */
+        /** next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
 
     default:
