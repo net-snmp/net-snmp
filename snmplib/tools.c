@@ -56,21 +56,17 @@
 #include <net-snmp/library/scapi.h>
 
 
-/*
- * snmp_realloc:
- * 
- * Parameters:
- * 
- * buf  pointer to a buffer pointer
- * buf_len      pointer to current size of buffer in bytes
- * 
+/**
  * This function increase the size of the buffer pointed at by *buf, which is
  * initially of size *buf_len.  Contents are preserved **AT THE BOTTOM END OF
  * THE BUFFER**.  If memory can be (re-)allocated then it returns 1, else it
  * returns 0.
  * 
+ * @param buf  pointer to a buffer pointer
+ * @param buf_len      pointer to current size of buffer in bytes
+ * 
+ * 
  */
-
 int
 snmp_realloc(u_char ** buf, size_t * buf_len)
 {
@@ -136,12 +132,10 @@ snmp_strcat(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
-/*******************************************************************-o-******
- * free_zero
+/** zeros memory before freeing it.
  *
- * Parameters:
- *	*buf	Pointer at bytes to free.
- *	size	Number of bytes in buf.
+ *	@param *buf	Pointer at bytes to free.
+ *	@param size	Number of bytes in buf.
  */
 void
 free_zero(void *buf, size_t size)
@@ -153,19 +147,14 @@ free_zero(void *buf, size_t size)
 
 }                               /* end free_zero() */
 
-
-
-
-/*******************************************************************-o-******
- * malloc_random
- *
- * Parameters:
- *	size	Number of bytes to malloc() and fill with random bytes.
- *      
+/**
  * Returns pointer to allocaed & set buffer on success, size contains
- * number of random bytes filled.
+ * number of random bytes filled.  buf is NULL and *size set to KMT
+ * error value upon failure.
  *
- * buf is NULL and *size set to KMT error value upon failure.
+ *	@param size	Number of bytes to malloc() and fill with random bytes.
+ *
+ * @return a malloced buffer
  *
  */
 u_char         *
@@ -189,20 +178,15 @@ malloc_random(size_t * size)
 
 }                               /* end malloc_random() */
 
+/** Duplicates a memory block.
+ *  Copies a existing memory location from a pointer to another, newly
+    malloced, pointer.
 
-
-
-/*******************************************************************-o-******
- * memdup
- *
- * Parameters:
- *	to       Pointer to allocate and copy memory to.
- *      from     Pointer to copy memory from.
- *      size     Size of the data to be copied.
+ *	@param to       Pointer to allocate and copy memory to.
+ *      @param from     Pointer to copy memory from.
+ *      @param size     Size of the data to be copied.
  *      
- * Returns
- *	SNMPERR_SUCCESS	On success.
- *      SNMPERR_GENERR	On failure.
+ *	@return SNMPERR_SUCCESS	on success, SNMPERR_GENERR on failure.
  */
 int
 memdup(u_char ** to, const u_char * from, size_t size)
@@ -243,16 +227,13 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
     return ret;
 }
 
-/*******************************************************************-o-******
- * binary_to_hex
+/** converts binary to hexidecimal
  *
- * Parameters:
- *	*input		Binary data.
- *	len		Length of binary data.
- *	**output	NULL terminated string equivalent in hex.
+ *	@param *input		Binary data.
+ *	@param len		Length of binary data.
+ *	@param **output	NULL terminated string equivalent in hex.
  *      
- * Returns:
- *	olen	Length of output string not including NULL terminator.
+ * @return olen	Length of output string not including NULL terminator.
  *
  * FIX	Is there already one of these in the UCD SNMP codebase?
  *	The old one should be used, or this one should be moved to
@@ -281,18 +262,13 @@ binary_to_hex(const u_char * input, size_t len, char **output)
 
 
 
-/*******************************************************************-o-******
+/**
  * hex_to_binary2
- *
- * Parameters:
- *	*input		Printable data in base16.
- *	len		Length in bytes of data.
- *	**output	Binary data equivalent to input.
+ *	@param *input		Printable data in base16.
+ *	@param len		Length in bytes of data.
+ *	@param **output	Binary data equivalent to input.
  *      
- * Returns:
- *	SNMPERR_GENERR	Failure.
- *	<len>		Otherwise, Length of allocated string.
- *
+ * @return SNMPERR_GENERR on failure, otherwise length of allocated string.
  *
  * Input of an odd length is right aligned.
  *
@@ -690,7 +666,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 #endif                          /* SNMP_TESTING_CODE */
 
 
-/*
+/**
  * create a new time marker.
  * NOTE: Caller must free time marker when no longer needed.
  */
@@ -702,7 +678,7 @@ atime_newMarker(void)
     return pm;
 }
 
-/*
+/**
  * set a time marker.
  */
 void
@@ -715,7 +691,7 @@ atime_setMarker(marker_t pm)
 }
 
 
-/*
+/**
  * Returns the difference (in msec) between the two markers
  */
 long
@@ -732,7 +708,7 @@ atime_diff(marker_t first, marker_t second)
     return (diff.tv_sec * 1000 + diff.tv_usec / 1000);
 }
 
-/*
+/**
  * Returns the difference (in u_long msec) between the two markers
  */
 u_long
@@ -749,7 +725,7 @@ uatime_diff(marker_t first, marker_t second)
     return (((u_long) diff.tv_sec) * 1000 + diff.tv_usec / 1000);
 }
 
-/*
+/**
  * Returns the difference (in u_long 1/100th secs) between the two markers
  * (functionally this is what sysUpTime needs)
  */
@@ -769,7 +745,7 @@ uatime_hdiff(marker_t first, marker_t second)
     return res;
 }
 
-/*
+/**
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
@@ -791,7 +767,7 @@ atime_ready(marker_t pm, int deltaT)
     return 1;
 }
 
-/*
+/**
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
@@ -818,9 +794,9 @@ uatime_ready(marker_t pm, unsigned int deltaT)
          * Time-related utility functions
          */
 
-                /*
-                 * Return the number of timeTicks since the given marker 
-                 */
+/**
+ * Return the number of timeTicks since the given marker 
+ */
 int
 marker_tticks(marker_t pm)
 {
