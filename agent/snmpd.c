@@ -305,6 +305,7 @@ main(int argc, char *argv[])
 	int             dont_zero_log = 0;
 	int             stderr_log=0, syslog_log=0;
 	int             uid=0, gid=0;
+        struct module_init_list *initlist;
 
 	logfile[0]		= 0;
 
@@ -438,6 +439,12 @@ main(int argc, char *argv[])
                 case 'A':
                     dont_zero_log = 1;
                     break;
+
+                case 'I':
+                  if (++arg == argc) usage(argv[0]);
+                  add_to_init_list(argv[arg]);
+                  break;
+
 #if HAVE_UNISTD_H
                 case 'u':
                   if (++arg == argc) usage(argv[0]);
