@@ -15,14 +15,18 @@
 CC=gcc
 
 @if "$mfd_netsnmp_dir" ne ""@
+NETSNMPDIR=$mfd_netsnmp_dir
+NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
+@else@
+NETSNMPCONFIG=net-snmp-config
+@end@
+
+@if "$mfd_netsnmp_dir" ne ""@
 
 # Assuming we're linking against a Net-SNMP build tree (which may or
 # may not be the same as the source tree) and not an installed package.
 
 # Note: to do this we REQUIRE gnu-make.
-
-NETSNMPDIR=$mfd_netsnmp_dir
-NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
 
 NETSNMPBASECFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
 NETSNMPINCLUDES := $(shell $(NETSNMPCONFIG) --build-includes $(NETSNMPDIR))
@@ -38,9 +42,12 @@ LIBS=$(NETSNMPLIBDIRS) -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEX
 
 @else@
 
-NETSNMPCONFIG=net-snmp-config
+# uncomment this if you have GNU make
+#NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+#NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
 NETSNMPCFLAGS=`$(NETSNMPCONFIG) --base-cflags`
 NETSNMPLIBS=`$(NETSNMPCONFIG) --agent-libs`
+
 LIBS=$(NETSNMPLIBS)
 
 @end@
