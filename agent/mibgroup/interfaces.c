@@ -1092,7 +1092,7 @@ u_char *EtherAddr;
 
 	} else {
 
-#if defined(mips) || defined(hpux)
+#if defined(mips) || defined(hpux) || defined(osf4)
           bcopy((char *) arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #else
           bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
