@@ -27,6 +27,7 @@
 #include "mibdefs.h"
 #include "../../config.h"
 
+void update_config();
 
 extern struct myproc *procwatch;  /* moved to proc.c */
 extern int numprocs;                     /* ditto */
@@ -50,6 +51,9 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     int                 max;
 {
   int i, rtest;
+#ifdef SECURITYEXCEPTIONS
+  int exceptions[] = SECURITYEXCEPTIONS;
+#endif
 
   for(i=0,rtest=0; i < vp->namelen; i++) {
     if (name[i] != vp->name[i]) {
@@ -91,6 +95,14 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     *write_method = 0;
   if (var_len)
     *var_len = sizeof(long);   /* default */
+#ifdef GLOBALSECURITY
+  vp->acl = (vp->acl & 0x1) + GLOBALSECURITY;  /* RO/RW + SECURITY */
+#ifdef SECURITYEXCEPTIONS
+  for(i=0; exceptions[i] != -1; i += 2)
+    if (vp->magic == exceptions[i])
+      vp->acl = (vp->acl & 0x1) + exceptions[i+1];  /* RO/RW + SECURITY */
+#endif
+#endif
   return(1);
 }
 
@@ -622,7 +634,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 #endif
 
 
-int update_config()
+void update_config()
 {
   int i;
   free_config(&procwatch,&extens,&relocs);
