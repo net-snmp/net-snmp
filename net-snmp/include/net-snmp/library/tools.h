@@ -1,5 +1,8 @@
-/*
- * tools.h
+/**
+ * @file tools.h
+ * @defgroup util Memory Utility Routines
+ * @ingroup library
+ * @{
  */
 
 #ifndef _TOOLS_H
@@ -44,12 +47,18 @@ extern          "C" {
 
 
 
+/** @def SNMP_FREE(s)
+    Frees a pointer only if it is !NULL and sets its value to NULL */
 #define SNMP_FREE(s)		if (s) { free((void *)s); s=NULL; }
 
     /*
      * XXX Not optimal everywhere. 
      */
+/** @def SNMP_MALLOC_STRUCT(s)
+    Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. */
 #define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))
+/** @def SNMP_MALLOC_TYPEDEF(t)
+    Mallocs memory of sizeof(t), zeros it and returns a pointer to it. */
 #define SNMP_MALLOC_TYPEDEF(td)  (td *) calloc(1, sizeof(td))
 #define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
 
@@ -62,7 +71,12 @@ extern          "C" {
 #define VAL2HEX(s)	( (s) + (((s) >= 10) ? ('a'-10) : '0') )
 
 
+/** @def SNMP_MAX(a, b)
+    Computers the maximum of a and b. */
 #define SNMP_MAX(a,b) ((a) > (b) ? (a) : (b))
+
+/** @def SNMP_MIN(a, b)
+    Computers the minimum of a and b. */
 #define SNMP_MIN(a,b) ((a) > (b) ? (b) : (a))
 
 #ifndef FALSE
@@ -173,3 +187,4 @@ extern          "C" {
 }
 #endif
 #endif                          /* _TOOLS_H */
+/* @} */
