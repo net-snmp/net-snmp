@@ -4,6 +4,8 @@
 #ifndef _MIBGROUP_PASS_H
 #define _MIBGROUP_PASS_H
 
+void init_pass(void);
+
 config_require(ucd-snmp/extensible util_funcs)
 
 extern FindVarMethod var_extensible_pass;

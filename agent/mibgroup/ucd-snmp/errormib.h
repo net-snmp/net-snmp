@@ -4,6 +4,8 @@
 #ifndef _MIBGROUP_ERRORMIB_H
 #define _MIBGROUP_ERRORMIB_H
 
+void init_errormib(void);
+
 config_require(util_funcs)
 
 void setPerrorstatus (char *);

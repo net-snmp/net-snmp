@@ -10,7 +10,7 @@
 int getswap(int);
 unsigned char *var_extensible_mem(struct variable *, oid *, int *, int, int *, WriteMethod **write_method);
 
-extern void	init_memory(void);
+void init_memory_solaris2(void);
 
 /* config file parsing routines */
 void memory_parse_config(char *, char *);

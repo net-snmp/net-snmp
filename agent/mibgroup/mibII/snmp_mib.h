@@ -10,6 +10,8 @@ struct variable;
 extern FindVarMethod var_snmp;
 extern WriteMethod write_snmp;
 
+void init_snmp_mib(void);
+
 extern int snmp_inpkts;			/*  1 - current */
 extern int snmp_outpkts;		/*  2 - obsolete */
 extern int snmp_inbadversions;		/*  3 - current */

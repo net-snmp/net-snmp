@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_DISK_H
 #define _MIBGROUP_DISK_H
 
+void init_disk(void);
+
 config_require(util_funcs)
 
 extern FindVarMethod var_extensible_disk;
