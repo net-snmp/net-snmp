@@ -6,7 +6,9 @@
 #define _MIBGROUP_INTERFACES_H
 
 config_require(util_funcs)
-    config_arch_require(solaris2, kernel_sunos5)
+config_require(if-mib/data_access/interface)
+config_arch_require(solaris2, kernel_sunos5)
+
 #ifdef hpux11
 #include <sys/mib.h>
 #else
