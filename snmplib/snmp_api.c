@@ -4267,7 +4267,12 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
          * fallthrough 
          */
 
-    default:
+    case SNMP_MSG_GET:
+    case SNMP_MSG_GETNEXT:
+    case SNMP_MSG_GETBULK:
+    case SNMP_MSG_TRAP2:
+    case SNMP_MSG_INFORM:
+    case SNMP_MSG_SET:
         /*
          * PDU is not an SNMPv1 TRAP 
          */
@@ -4304,6 +4309,12 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         if (data == NULL) {
             return -1;
         }
+	break;
+
+    default:
+        snmp_log(LOG_ERR, "Bad PDU type received: 0x%.2x\n", pdu->command);
+        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+        return -1;
     }
 
     /*
