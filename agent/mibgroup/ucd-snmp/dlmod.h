@@ -33,8 +33,6 @@ struct dlmod *dlmod_get_by_index(int);
 void dlmod_init(void);
 void dlmod_deinit(void);
 
-extern int dlmod_next_index;
-
 extern void init_dlmod(void);
 extern void deinit_dlmod(void);
 
