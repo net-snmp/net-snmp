@@ -199,14 +199,17 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
             pptr->secModel = ss->securityModel;
             pptr->secLevel = ss->securityLevel;
             memdup((void *) &pptr->secName, (void *) ss->securityName,
-                   ss->securityNameLen);
+                   ss->securityNameLen+1);
+	    pptr->secName[ss->securityNameLen] = 0;
         } else {
             pptr->secModel = ss->version;
             pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
             pptr->secName = NULL;
-            if (ss->community && (ss->community_len > 0))
+            if (ss->community && (ss->community_len > 0)) {
                 memdup((void *) &pptr->secName, (void *) ss->community,
-                   ss->community_len);
+                   ss->community_len+1);
+		pptr->secName[ss->community_len] = 0;
+	    }
         }
         pptr->storageType = ST_READONLY;
         pptr->rowStatus = RS_ACTIVE;
