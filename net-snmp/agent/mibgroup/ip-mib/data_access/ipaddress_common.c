@@ -14,8 +14,8 @@
 /*
  * local static prototypes
  */
-//static int _access_ipaddress_entry_compare_name(const void *lhs,
-//                                                const void *rhs);
+static int _access_ipaddress_entry_compare_addr(const void *lhs,
+                                                const void *rhs);
 static void _access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry,
                                             void *unused);
 
@@ -49,21 +49,26 @@ netsnmp_access_ipaddress_container_init(u_int flags)
      * indexed by ifName.
      */
     container1 = netsnmp_container_find("access_ipaddress:table_container");
-    if (NULL == container1)
+    if (NULL == container1) {
+        snmp_log(LOG_ERR, "ipaddress primary container not found\n");
         return NULL;
+    }
+    container1->container_name = strdup("ia_index");
 
-#ifdef xxx-rks
-    if (flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_NAME) {
+    if (flags & NETSNMP_ACCESS_IPADDRESS_INIT_ADDL_IDX_BY_ADDR) {
         netsnmp_container *container2 =
-            netsnmp_container_find("access_ipaddress:table_container");
-        if (NULL == container2)
+            netsnmp_container_find("ipaddress_addr:access_ipaddress:table_container");
+        if (NULL == container2) {
+            snmp_log(LOG_ERR, "ipaddress secondary container not found\n");
+            CONTAINER_FREE(container1);
             return NULL;
-
-// xxx-rks        container2->compare = _access_ipaddress_entry_compare_name;
+        }
+        
+        container2->compare = _access_ipaddress_entry_compare_addr;
+        container2->container_name = strdup("ia_addr");
         
         netsnmp_container_add_index(container1, container2);
     }
-#endif
 
     return container1;
 }
@@ -80,7 +85,7 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container, u_int load
     DEBUGMSGTL(("access:ipaddress:container", "load\n"));
 
     if (NULL == container)
-        container = netsnmp_container_find("access:ipaddress:table_container");
+        container = netsnmp_access_ipaddress_container_init(load_flags);
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_ipaddress\n");
         return NULL;
@@ -152,6 +157,90 @@ netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry)
     free(entry);
 }
 
+/**
+ * update an old ipaddress_entry from a new one
+ *
+ * @note: only mib related items are compared. Internal objects
+ * such as oid_index, ns_ia_index and flags are not compared.
+ *
+ * @retval -1  : error
+ * @retval >=0 : number of fileds updated
+ */
+int
+netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
+                                      netsnmp_ipaddress_entry *rhs)
+{
+    int changed = 0;
+
+    /*
+     * do any memory allocations first, using temp vars, so a failure can
+     * return w/out chaning lhs entry. length is dealt with right afterwards.
+     */
+    if (lhs->ia_prefix_oid != rhs->ia_prefix_oid) {
+        oid *tmp_oid;
+
+        if (NULL != rhs->ia_prefix_oid) {
+            int tmp_len = rhs->ia_prefix_oid_len * sizeof(oid);
+            tmp_oid = malloc(tmp_len);
+            if (NULL == tmp_oid) {
+                snmp_log(LOG_ERR, "malloc failed\n");
+                return -1;
+            }
+            memcpy(tmp_oid,rhs->ia_prefix_oid, tmp_len);
+        }
+        else
+            tmp_oid = NULL;
+
+        if (NULL != lhs->ia_prefix_oid)
+            SNMP_FREE(lhs->ia_prefix_oid);
+        lhs->ia_prefix_oid = tmp_oid;
+
+        ++changed;
+    }
+    if (lhs->ia_prefix_oid_len != rhs->ia_prefix_oid_len) {
+        ++changed;
+        lhs->ia_prefix_oid_len = rhs->ia_prefix_oid_len;
+    }
+
+
+    if (lhs->if_index != rhs->if_index) {
+        ++changed;
+        lhs->if_index = rhs->if_index;
+    }
+
+    if (lhs->ia_flags != rhs->ia_flags) {
+        ++changed;
+        lhs->ia_flags = rhs->ia_flags;
+    }
+
+    if (lhs->ia_address_len != rhs->ia_address_len) {
+        changed += 2;
+        lhs->ia_address_len = rhs->ia_address_len;
+        memcpy(lhs->ia_address, rhs->ia_address, rhs->ia_address_len);
+    }
+    else if (memcmp(lhs->ia_address, rhs->ia_address, rhs->ia_address_len) != 0) {
+        ++changed;
+        memcpy(lhs->ia_address, rhs->ia_address, rhs->ia_address_len);
+    }
+
+    if (lhs->ia_type != rhs->ia_type) {
+        ++changed;
+        lhs->ia_type = rhs->ia_type;
+    }
+
+    if (lhs->ia_status != rhs->ia_status) {
+        ++changed;
+        lhs->ia_status = rhs->ia_status;
+    }
+
+    if (lhs->ia_origin != rhs->ia_origin) {
+        ++changed;
+        lhs->ia_origin = rhs->ia_origin;
+    }
+
+    return changed;
+}
+
 /**---------------------------------------------------------------------*/
 /*
  * Utility routines
@@ -163,4 +252,27 @@ void
 _access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry, void *context)
 {
     netsnmp_access_ipaddress_entry_free(entry);
+}
+
+static int _access_ipaddress_entry_compare_addr(const void *lhs,
+                                                const void *rhs)
+{
+    const netsnmp_ipaddress_entry *lh = (const netsnmp_ipaddress_entry *)lhs;
+    const netsnmp_ipaddress_entry *rh = (const netsnmp_ipaddress_entry *)rhs;
+
+    netsnmp_assert(NULL != lhs);
+    netsnmp_assert(NULL != rhs);
+
+    /*
+     * compare address length
+     */
+    if (lh->ia_address_len < rh->ia_address_len)
+        return -1;
+    else if (lh->ia_address_len > rh->ia_address_len)
+        return 1;
+
+    /*
+     * length equal, compare address
+     */
+    return memcmp(lh->ia_address, rh->ia_address, lh->ia_address_len);
 }
