@@ -75,7 +75,7 @@
 #endif
 
 #include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/read_config.h>
+#include <net-snmp/library/read_config.h>
 
 #define HRD_MONOTONICALLY_INCREASING
 
