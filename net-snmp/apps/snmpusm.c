@@ -287,8 +287,9 @@ main(int argc, char *argv[])
          * do we have a securityName?  If not, copy the default 
          */
         if (session.securityName == NULL) {
-            session.securityName =
-                strdup(ds_get_string(DS_LIBRARY_ID, DS_LIB_SECNAME));
+            session.securityName = 
+	      strdup(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_SECNAME));
         }
 
         /*

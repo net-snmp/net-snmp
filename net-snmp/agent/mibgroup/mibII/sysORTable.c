@@ -86,7 +86,7 @@ init_sysORTable(void)
      */
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT)
         (void) register_mib_priority("mibII/sysORTable",
                                      (struct variable *)
                                      sysORTable_variables,

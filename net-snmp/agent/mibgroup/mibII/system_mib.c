@@ -530,11 +530,11 @@ writeSystem(int action,
         if (setvar != NULL) {
             *setvar = 1;
         }
-        snmp_save_persistent(ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE));
+        snmp_save_persistent(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE));
         (void) snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                                    SNMP_CALLBACK_STORE_DATA, NULL);
-        snmp_clean_persistent(ds_get_string
-                              (DS_LIBRARY_ID, DS_LIB_APPTYPE));
+        snmp_clean_persistent(netsnmp_ds_get_string
+                              (NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE));
 
     case FREE:                 /* Free any resources allocated */
 

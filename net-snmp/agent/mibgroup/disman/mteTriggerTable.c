@@ -162,8 +162,8 @@ init_mteTriggerTable(void)
                                   "[options] monitor_expression [see \"man snmpd.conf\"]");
     snmpd_register_config_handler("defaultMonitors",
                                   parse_default_monitors, NULL, "yes|no");
-    ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
-                       DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
+                       NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 
     /*
      * we need to be called back later to store our data 
@@ -318,7 +318,7 @@ parse_default_monitors(const char *token, char *line)
 {
     char            buf[SPRINT_MAX_LEN];
     char           *mte_default_user =
-        ds_get_string(DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
+        netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_INTERNAL_SECNAME);
 
     if (strncmp(line, "yes", 3) == 0) {
 
@@ -452,7 +452,7 @@ parse_simple_monitor(const char *token, char *line)
 
     if (StorageNew->pdu_securityNameLen == 0) {
         char           *mte_default_user =
-            ds_get_string(DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_INTERNAL_SECNAME);
         if (mte_default_user) {
             StorageNew->pdu_securityName = strdup(mte_default_user);
             StorageNew->pdu_securityNameLen = strlen(mte_default_user);

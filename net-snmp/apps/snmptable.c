@@ -593,10 +593,10 @@ get_table_entries(netsnmp_session * ss)
                         }
                         i = vars->name_length - rootlen + 1;
                         if (localdebug || show_index) {
-                            if (ds_get_boolean
-                                (DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
+                            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					      NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                                 name_p = strchr(buf, '[');
-                            else {
+                            } else {
                                 switch (snmp_get_suffix_only()) {
                                 case 2:
                                     name_p = strrchr(buf, ':');
@@ -612,8 +612,9 @@ get_table_entries(netsnmp_session * ss)
                                 name_p = strchr(name_p, '.') + 1;
                             }
                         }
-                        if (localdebug)
+                        if (localdebug) {
                             printf("Index: %s\n", name_p);
+			}
                         if (show_index) {
                             indices[entries - 1] = strdup(name_p);
                             i = strlen(name_p);
@@ -749,10 +750,10 @@ getbulk_table_entries(netsnmp_session * ss)
                         printf("%s => taken\n",
                                buf ? (char *) buf : "[NIL]");
                     }
-                    if (ds_get_boolean
-                        (DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
+                    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					      NETSNMP_DS_LIB_EXTENDED_INDEX)) {
                         name_p = strchr(buf, '[');
-                    else {
+		    } else {
                         switch (snmp_get_suffix_only()) {
                         case 2:
                             name_p = strrchr(buf, ':');

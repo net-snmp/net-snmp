@@ -13,7 +13,7 @@ void
                 log_notification(struct hostent *host, netsnmp_pdu *pdu,
                                  netsnmp_transport *transport);
 
-#define DS_APP_DONT_LOG    9    /* must match notification_log. */
+#define NETSNMP_DS_APP_DONT_LOG    9    /* must match notification_log. */
 
 /*
  * column number definitions for table nlmLogTable 
