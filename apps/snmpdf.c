@@ -265,13 +265,13 @@ int main(int argc, char *argv[])
             descr[vlp2->val_len] = '\0';
 
             vlp2 = vlp2->next_variable;
-            units = *(vlp2->val.integer);
+            units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            hssize = *(vlp2->val.integer);
+            hssize = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            hsused = *(vlp2->val.integer);
+            hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             printf("%-18s %15lld %15lld %15lld %4lld%%\n", descr,
                    ((units)?(hssize*units/1024):hssize), hsused,
