@@ -78,6 +78,7 @@ void  read_config_store(const char *type, const char *line);
 void  read_app_config_store(const char *line);
 void  snmp_save_persistent(const char *type);
 void  snmp_clean_persistent(const char *type);
+struct config_line *read_config_get_handlers(const char *type);
 
 #ifdef __cplusplus
 }
