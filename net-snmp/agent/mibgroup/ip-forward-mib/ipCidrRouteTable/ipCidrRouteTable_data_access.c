@@ -136,13 +136,13 @@ ipCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
  *
  */
 static void
-_snarf_route_entry(netsnmp_route_entry *route_entry,
+_snarf_route_entry(netsnmp_route_entry * route_entry,
                    netsnmp_container * container)
 {
     ipCidrRouteTable_rowreq_ctx *rowreq_ctx;
-    
+
     DEBUGTRACE;
-    
+
     netsnmp_assert(NULL != route_entry);
     netsnmp_assert(NULL != container);
 
@@ -151,21 +151,19 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
      * the container
      */
     rowreq_ctx = ipCidrRouteTable_allocate_rowreq_ctx(route_entry);
-    if( (NULL != rowreq_ctx) &&
+    if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ipCidrRouteTable_indexes_set
-         (rowreq_ctx,*((u_long*)route_entry->rt_dest),
+         (rowreq_ctx, *((u_long *) route_entry->rt_dest),
           route_entry->rt_mask, route_entry->rt_tos,
-          *((u_long*)route_entry->rt_nexthop)))) {
+          *((u_long *) route_entry->rt_nexthop)))) {
         CONTAINER_INSERT(container, rowreq_ctx);
         rowreq_ctx->ipCidrRouteStatus = ROWSTATUS_ACTIVE;
-    }
-    else {
-        if(rowreq_ctx) {
+    } else {
+        if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "ipCidrRoute cache.\n");
             ipCidrRouteTable_release_rowreq_ctx(rowreq_ctx);
-        }
-        else
+        } else
             netsnmp_access_route_entry_free(route_entry);
     }
 }
@@ -204,7 +202,7 @@ int
 ipCidrRouteTable_cache_load(netsnmp_container * container)
 {
     ipCidrRouteTable_rowreq_ctx *rowreq_ctx;
-    netsnmp_container * route_container;
+    netsnmp_container *route_container;
 
     DEBUGMSGTL(("verbose:ipCidrRouteTable:ipCidrRouteTable_cache_load",
                 "called\n"));
@@ -220,22 +218,22 @@ ipCidrRouteTable_cache_load(netsnmp_container * container)
                                             NETSNMP_ACCESS_ROUTE_LOAD_IPV4_ONLY);
 
     if (NULL == route_container)
-        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
-    
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
     /*
      * we just got a fresh copy of route data. snarf data
      */
     CONTAINER_FOR_EACH(route_container,
-                       (netsnmp_container_obj_func*)_snarf_route_entry,
+                       (netsnmp_container_obj_func *) _snarf_route_entry,
                        container);
-    
+
     /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
      */
     netsnmp_access_route_container_free(route_container,
-                                        NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR );
-    
+                                        NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR);
+
     DEBUGMSGT(("verbose:ipCidrRouteTable:ipCidrRouteTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
 
@@ -252,8 +250,12 @@ ipCidrRouteTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+ *
  */
 void
 ipCidrRouteTable_cache_free(netsnmp_container * container)
