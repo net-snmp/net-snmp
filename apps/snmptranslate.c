@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
                 else if (++arg < argc)
                     tPtr = argv[arg];
                 else {
-                    fprintf(stderr, "Need <TOPTS> after -T flag.\n");
+                    fprintf(stderr, "Need <LOST> after -T flag.\n");
                     usage(); 
                     exit(1);
                 }
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
                         print_oid_report_disable_suffix();
                         break;
                       default:
-                        fprintf(stderr,"Invalid <TOPTS> character: %c\n", *tPtr);
+                        fprintf(stderr,"Invalid <LOST> character: %c\n", *tPtr);
                         usage();
                         exit(1);
                         break;
