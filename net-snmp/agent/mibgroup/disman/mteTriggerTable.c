@@ -2998,12 +2998,18 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
              */
             char           *errstr;
             snmp_error(mte_callback_sess, 0, 0, &errstr);
-            DEBUGMSGTL(("mteTriggerTable",
-                        "Error received: status=%d, sess_error=%s, pduerr=%d/%s, pdu version=%d\n",
-                        status, errstr,
-                        response->errstat,
-                        snmp_api_errstring(response->errstat),
-                        response->version));
+            if (response) {
+                DEBUGMSGTL(("mteTriggerTable",
+                            "Error received: status=%d, sess_error=%s, pduerr=%d/%s, pdu version=%d\n",
+                            status, errstr,
+                            response->errstat,
+                            snmp_api_errstring(response->errstat),
+                            response->version));
+            } else {
+                DEBUGMSGTL(("mteTriggerTable",
+                            "Error received: status=%d, sess_error=%s [no response pointer]\n",
+                            status, errstr));
+            }
             if (errstr)
                 free(errstr);
             return NULL;        /* XXX: proper failure, trap sent, etc */
