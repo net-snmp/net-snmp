@@ -5550,9 +5550,11 @@ uptime_string(u_long timeticks, char *buf)
 {
     uptimeString(timeticks, buf);
 #ifdef CMU_COMPATIBLE
+    {
     char *cp = strrchr(buf, '.');
     if (cp)
         *cp = '\0';
+    }
 #endif
     return buf;
 }
