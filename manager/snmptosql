@@ -63,7 +63,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	$comm =  ${$x->fetchrow_hashref}{'community'};
     }
     print STDERR "$host: $comm\n" if ($verbose);
-    my $sess = new SNMP::Session (  DestHost => $host, Community => $comm, Timeout => 5000000 );
+    my $sess = new SNMP::Session (  DestHost => $host, Community => $comm, Timeout => 30000000 );
 
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";
