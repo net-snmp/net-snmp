@@ -108,7 +108,7 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
-    int	arg, count;
+    int	arg;
     char *current_name = NULL, *cp;
     oid name[MAX_OID_LEN];
     size_t name_length;
