@@ -286,7 +286,6 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
     long val;
     u_long  dst;
     char    buf[8];
-    int     bufsz;
     u_short  flags;
     int      oldty;
 
@@ -344,8 +343,7 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 		    return SNMP_ERR_WRONGTYPE;
 		}
 
-		bufsz = 8;
-		asn_parse_string(var_val, &var_val_len, &var_val_type, buf, &bufsz);
+                memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
 		if (var_val_type != ASN_OCTET_STR) {
 		    printf("not octet2");
@@ -368,7 +366,7 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 		    return SNMP_ERR_WRONGTYPE;
 		}
 		
-		asn_parse_int(var_val, &var_val_len, &var_val_type, &val, sizeof(val));
+                val = *((long *) var_val);
 
 		if (val < -1) {
 		    printf("not right1");
@@ -397,7 +395,7 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 		  return SNMP_ERR_WRONGTYPE;
 		}
 		
-		asn_parse_int(var_val, &var_val_len, &var_val_type, &val, sizeof(val));
+                val = *((long *) var_val);
 
 		if (val <= 0) {
 		    printf("not right3");
@@ -420,8 +418,7 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 		  return SNMP_ERR_WRONGTYPE;
 		}
 
-		bufsz = 8;
-		asn_parse_string(var_val, &var_val_len, &var_val_type, buf, &bufsz);
+                memcpy(buf, var_val, (var_val_len > 8) ? 8 : var_val_len);
 
 		if (var_val_type != ASN_OCTET_STR) {
 		    printf("not right5");
@@ -451,7 +448,7 @@ write_rte(action, var_val, var_val_type, var_val_len, statP, name, length)
 		  return SNMP_ERR_WRONGTYPE;
 		}
 		
-		asn_parse_int(var_val, &var_val_len, &var_val_type, &val, sizeof(val));
+                val = *((long *) var_val);
 
 		if ((val < 2) || (val > 4)) { /* only accept invalid, direct, indirect */
 		    printf("not right6");

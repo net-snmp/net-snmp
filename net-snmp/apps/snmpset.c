@@ -108,7 +108,7 @@ main(argc, argv)
     char  *argv[];
 {
     struct snmp_session session, *ss;
-    struct snmp_pdu *pdu, *response;
+    struct snmp_pdu *pdu, *response = NULL;
     struct variable_list *vars;
     int arg;
     int count;

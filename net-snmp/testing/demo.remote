@@ -1,0 +1,794 @@
+#!/bin/sh
+#
+# demo.remote [-h][-cCnstT] [<host>]
+#
+#
+# REQUIRED FILES:	
+#	./demo2.functions
+#
+# XXX	One day unify remote demo with demo2?
+# XXX	Remove somewhat circular dependencies between this and demo2.functions.
+#
+# FIX	Tests that were marked as "non-remote" only are not updated to 
+#	use the current form of user definitions.
+#
+
+USAGE="Usage: `basename $0` [-h][-cCnstT] [<host>]"
+
+
+
+#------------------------------------ -o- 
+# Definitions:
+#	+ Log and configuration files and directories
+#	+ Local function parameters
+#	+ Demo parameters (some configurable by the user).
+#
+#
+# NOTE	MAKEUSEROID() defines variables named '${user}oid'.
+#	LOOKFOR() defines variable 'lookresults'.
+#
+
+export PATH=../apps:../agent:$PATH
+export SNMPCONFPATH=
+
+APPLOG=./demo.remote.applog
+LOGDIR=./OLDLOGS
+
+DEMOFUNCTIONS=./demo2.functions
+
+THEDATE=".`date '+%h%d_%H%M' | sed 's/\([a-z]\)0/\1/' | tr 'A-Z' 'a-z'`"
+
+XTERMARGS="-sb -s -fn 7x13 -rv -sl 1000"
+XTGEOSHAPE=80x32
+
+
+
+autodoit=1		# TRUE means run DOIT() without a preceeding pause.
+autoread=1		# Don't wait for <cr> from user between tests.
+autotest=1		# Run all tests without any pauses between.
+autoconfig=0            # Automatically configure the agent for all tests.
+
+createUsers=1           # Test user creation.
+runcommands=1           # FALSE means display actions without running anything.
+runcommands=1		# FALSE means display actions without running anything.
+dosleep=0		# TRUE means always sleep 1 second between tests.
+
+host=localhost
+
+DOTIMETESTS=		# FIX -- Solve this problem.
+
+
+#
+# Internal config for the remote demo.  Set variables that wield control
+# over local agent to zero or empty string.
+#
+ISREMOTEDEMO=true
+
+[ "$ISREMOTEDEMO" = true ] && {
+	autoconfig=0		
+	handleagent=0	
+	createUsers=0
+	startonly=
+	stoponly=
+
+	host=ucd-snmp.ucdavis.edu
+}
+
+
+
+
+#
+# Globals from ./demo2.functions.
+#
+TMPFILE=/tmp/snmp.demo.out
+
+testcounter=0
+succeeds=0
+boots=		
+time=	
+lookresults=			
+engineidstr=		
+keychange=	
+
+
+
+
+#------------------------------------ -o- 
+# Definitions for users, commands, and OIDs.
+#
+DEBUGFLAG=-D
+LOGGINGFLAG=-L
+PORTFLAG="-p 161"
+
+APPDIR=../apps/	
+
+
+#
+# User definitions.
+#
+uP="The UCD Demo Password"				# User Passphrase.
+
+NOAUTH="	-l noAuthNoPriv			  "
+
+AUTH_MD5="	-l authNoPriv	-a MD5 -A \"$uP\" "
+AUTH_SHA1="	-l authNoPriv	-a SHA -A \"$uP\" "
+AUTH_MD5_new="	-l authNoPriv	-a MD5 -A \"new_$uP\" "
+AUTH_SHA1_new="	-l authNoPriv	-a SHA -A \"new_$uP\" "
+
+PRIV_MD5DES="		$AUTH_MD5	-x DES -X \"$uP\" "
+PRIV_SHA1DES="		$AUTH_SHA1	-x DES -X \"$uP\" "
+PRIV_MD5DES_new="	$AUTH_MD5_new	-x DES -X \"$uP\" "
+PRIV_SHA1DES_new="	$AUTH_SHA1_new	-x DES -X \"$uP\" "
+
+    # AUTH_MD5="	-l authNoPriv	-a MD5 -A $uP "
+    # AUTH_SHA1="	-l authNoPriv	-a SHA -A $uP "
+    # AUTH_MD5_new="	-l authNoPriv	-a MD5 -A new_$uP "
+    # AUTH_SHA1_new="	-l authNoPriv	-a SHA -A new_$uP "
+    # 
+    # PRIV_MD5DES="		$AUTH_MD5	-x DES -X $uP "
+    # PRIV_SHA1DES="		$AUTH_SHA1	-x DES -X $uP "
+    # PRIV_MD5DES_new="	$AUTH_MD5_new	-x DES -X $uP "
+    # PRIV_SHA1DES_new="	$AUTH_SHA1_new	-x DES -X $uP "
+
+userNOAUTH=" -n na -u noAuthUser "
+userMD5="    -n na -u MD5User    "
+userSHA1="   -n na -u SHAUser    "
+userMD5DES=" -n na -u MD5DESUser "
+userSHA1DES=" -n na -u SHADESUser "
+
+
+noAuthArgs="$PORTFLAG -n default -v 3 $userNOAUTH $NOAUTH" 
+  AuthArgs="$PORTFLAG -n default -v 3 $userMD5	  $AUTH_MD5"
+
+ snmpset="${APPDIR}snmpset  $DEBUGFLAG -s -R  	$AuthArgs   	$host"
+snmpwalk="${APPDIR}snmpwalk $DEBUGFLAG -s -R 	$noAuthArgs	$host"
+ snmpget="${APPDIR}snmpget  $DEBUGFLAG -s -R 	$noAuthArgs 	$host"
+
+
+#
+# OIDs
+#
+usmUserSecurityName=`${APPDIR}snmptranslate $DEBUGFLAG -R usmUserSecurityName`
+             noAuth=`${APPDIR}snmptranslate $DEBUGFLAG -R usmNoAuthProtocol`
+             noPriv=`${APPDIR}snmptranslate $DEBUGFLAG -R usmNoPrivProtocol`
+
+          sysUpTime=system.sysUpTime.0
+
+
+
+
+#------------------------------------ -o- 
+#
+. $DEMOFUNCTIONS
+
+for u in noAuth MD5 SHA MD5DES SHADES; do
+	MAKEUSEROID ${u}User
+done
+
+
+
+
+#------------------------------------ -o- 
+# Parse.
+#
+for arg
+do
+  if test $arg = "-c"; then		autodoit=0
+  elif test $arg = "-C"; then		autoconfig=1
+  elif test $arg = "-n"; then		runcommands=0
+  elif test $arg = "-s"; then		dosleep=1		
+  elif test $arg = "-t"; then		autoread=0
+  elif test $arg = "-T"; then		autotest=0
+
+  elif test $arg = "-h"; then		
+    echo $USAGE
+
+cat <<BLORT
+    
+     -c:    Pause before running commands.
+     -C:    Automatically configure the agent for you.
+     -n:    Don't actually run any commands.
+     -s:    Sleep 1 second instead of pausing at requested spots.
+     -t:    Pause at section titles.
+     -T:    Pause at section titles.
+
+ <host>:    The host with the agent that the commands should talk to.
+
+BLORT
+
+    exit 0
+
+  else
+    host=$arg
+  fi
+
+done	# endfor -- arg
+
+
+
+#------------------------------------ -o- 
+#
+# Get setup:
+#	+ (Stop only agent option.)
+#	+ Configure the agent.
+#	+ Move aside old log files.
+#	+ (Start only agent option.)
+#	+ Start xterms for the log files.
+#
+
+#
+# Stop agent option.
+#
+[ -n "$stoponly" ] && {
+	STOPAGENT
+
+	echo
+	echo "Deleting agent configuration file..."
+	rm -rf $CONFIGDIR
+
+	echo
+	YESNO N "Okay to delete persistent storage in \"$PERSISTENTDIR\"?"
+	[ $? -eq 1 ] && {
+	    echo "Deleting..."
+	    rm -rf $PERSISTENTDIR/*
+	}
+
+	exit 0
+}
+
+
+#
+# Configure the agent.
+#
+[ "$autoconfig" = 1 ] &&  {
+    echo
+    echo "Setting up configuration file \"$CONFIGFILE\"..."
+
+    if test ! -d $CONFIGDIR; then
+	mkdir $CONFIGDIR
+    fi
+
+    rm -f $CONFIGFILE
+
+    if test -f $CONFIGFILE; then
+	echo "Could not remove old \"$CONFIGFILE\"!"
+	echo
+	echo "Exiting..."
+	exit 1
+    fi
+
+    cat > $CONFIGFILE << EOF
+`cat $AGENTCONFIG`
+EOF
+
+    SNMPCONFPATH=/tmp/snmp:/var/snmp
+    export SNMPCONFPATH
+
+
+    echo
+    YESNO Y "Okay to delete persistent storage in \"$PERSISTENTDIR\"?"
+    [ $? -eq 0 ] && {
+	echo "Deleting..."
+    	rm -rf $PERSISTENTDIR/*
+	true
+
+    } || {
+	echo "Files remaining in \"$PERSISTENTDIR\":"
+	ls -FC $PERSISTENTDIR
+	echo
+	echo "Exiting..."
+	exit 1
+    }
+
+}  # endif -- autoconfig=1
+
+
+
+#
+# Start agent option.
+#
+[ -n "$startonly" ] && {
+	STARTAGENT
+	exit 0
+}
+
+
+
+#
+# Move aside files from previous run.
+#
+echo
+YESNO Y "Do you wish to save the previously existing log file(s)?"
+
+[ $? -eq 0 ] && {
+	[ ! -e $LOGDIR ] && mkdir $LOGDIR
+
+	[ -e "$AGENTLOG" ] && {
+		cp $AGENTLOG ${LOGDIR}/${AGENTLOG}$THEDATE
+		cat /dev/null >$AGENTLOG
+	}
+	[ -e "$APPLOG" ] && {
+		cp $APPLOG   ${LOGDIR}/${APPLOG}$THEDATE
+		cat /dev/null >$APPLOG
+	}
+
+	gzip -r $LOGDIR 2>/dev/null &
+
+}
+
+
+#
+# Start xterms to trace logfiles.
+#
+echo
+YESNO Y "Do you wish to run individual xterms to trace the log files?"
+
+[ $? -eq 0 ] && {
+	touch $APPLOG $AGENTLOG
+
+	STARTXTERM "Application LOG"	"tail -f $APPLOG"
+	[ "$ISREMOTEDEMO" != true ] && {
+		STARTXTERM "Agent LOG"		"tail -f $AGENTLOG"
+	}
+}
+
+
+
+
+#------------------------------------ -o- 
+#
+# Begin demo tests.
+#
+
+echo
+GETRETORSLEEP
+
+TITLE	"Beginning Demonstration"	\
+	""				\
+	"Using host: $host"
+
+
+[ "$ISREMOTEDEMO" != true ] && {
+	STOPAGENT		# Be sure it is not running.
+	STARTAGENT
+}
+
+
+
+#------------------------------------ -o- 
+#
+# Message types
+#
+
+TITLE	 "Sending a SNMPv1 message."
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+		${APPDIR}snmpget -v 1 $PORTFLAG $host private system.sysUpTime.0
+
+
+TITLE	 "Sending a SNMP v2c message."
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+		${APPDIR}snmpget -v 2c $PORTFLAG $host private system.sysUpTime.0
+
+
+TITLE	 "Sending a SNMP v3 message -- noAuthNoPriv."
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+		${APPDIR}snmpget $noAuthArgs $host system.sysUpTime.0
+
+
+
+#------------------------------------ -o- 
+#
+# Persistent storage.
+#
+# FIX  This should be allowed in a non-public remote demo.
+#
+
+[ "$ISREMOTEDEMO" != true ] && {
+	TITLE "Demonstrate persistent storage of snmpEngineBoots."	  \ 
+	      "Note: You should see snmpEngineBoots.0 increment by one."
+
+	LOOKFOR "snmpEngineBoots.0" $snmpwalk snmpFrameworkMIB
+
+	boots=`echo $lookresults | tail -1 | awk '{print $NF}'`
+	boots=`expr $boots + 1`
+
+	STOPAGENT
+
+	STARTAGENT
+
+	echo
+	echo "boots: $boots ($lookresults)"
+	echo
+
+	OKORFAIL "snmpEngineBoots.0.=.$boots" $snmpwalk snmpFrameworkMIB
+}
+
+
+
+#------------------------------------ -o- 
+#
+# Agent configuration.
+#
+
+[ "$ISREMOTEDEMO" != true ] && {
+	TITLE "Demonstrate that users, user passphrases -OR- Ku," 	  \
+	      "and engineIDs can be configured in a configuration file."
+
+	#
+	# XXX	Put these elsewhere?  Another script?
+	#
+
+	DOIT "egrep userSet|engineID $HOME/.snmp/snmpd.conf /usr/local/share/snmp/snmpd.conf"
+
+
+	TITLE	"+++++++ NOT Demontrate that initial user data from USM RFC " \
+		"        can be specified."				      \
+		""							      \
+		"        (Its included in the agent automatically, you only " \
+		"         need to set the keys.)"
+
+	TITLE	"+++++++ NOT Demonstrating syntax for user creation at "  \
+		"        the agent.  Look in \"$CONFIGFILE\" to see how " \
+		"        this could be accopmlished."
+}
+
+
+
+#------------------------------------ -o- 
+#
+# Creating users.
+#
+# FIX  This should be allowed in a (non-public only?) remote demo.
+#
+
+[ "$ISREMOTEDEMO" != true ] && {
+	GETENGINEIDOID
+	MAKEUSEROID templateMD5
+	MAKEUSEROID templateSHA
+
+	[ "$createUsers" = 1 ] && {
+	    TITLE "Creating Users: dolphin shark shark2 stingray stingray2."
+
+	    TITLE "Creating user dolphin."
+	    CREATEUSER dolphin $templateMD5oid $noPriv $noAuth 
+
+	    TITLE "Creating user shark."
+	    CREATEUSER shark $templateMD5oid $noPriv
+
+	    TITLE "Creating user shark2."
+	    CREATEUSER shark2 $templateSHAoid $noPriv
+
+	    TITLE "Creating user stingray."
+	    CREATEUSER stingray $templateMD5oid
+
+	    TITLE "Creating user stingray2."
+	    CREATEUSER stingray2 $templateSHAoid
+	}
+}
+
+
+
+#------------------------------------ -o- 
+#
+# authPriv & encryption
+#
+
+TITLE "Send crypted packets."					\
+      "Demonstrate results are the same as noAuthNoPriv by "	\
+      "  parsing the agent debug output."
+
+[ "$ISREMOTEDEMO" != true ] && SETDEBUGGING 1
+
+
+TITLE	 "Perform a get with a user configured for authNoPriv (MD5)."
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userMD5 $NOAUTH $host $sysUpTime
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userMD5 $AUTH_MD5 $host $sysUpTime"
+
+
+TITLE	 "Perform a get with a user configured for authNoPriv (SHA1)."
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1 $NOAUTH $host $sysUpTime
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1 $AUTH_SHA1 $host $sysUpTime"
+
+
+TITLE	 "Perform a get with a user configured for authPriv (MD5-DES)."
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $NOAUTH $host $sysUpTime
+
+#
+# FIX -- Test this user with authNoPriv?
+#
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $PRIV_MD5DES $host $sysUpTime"
+
+
+TITLE	 "Perform a get with a user configured for authPriv (SHA1-DES)."
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1DES $NOAUTH $host $sysUpTime
+
+#
+# FIX -- Test this user with authNoPriv?
+#
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1DES $PRIV_SHA1DES $host $sysUpTime"
+
+
+[ "$ISREMOTEDEMO" != true ] && SETDEBUGGING 0
+
+
+
+#------------------------------------ -o- 
+#
+# Users can use lower levels of auth/priv requirements.
+#
+
+TITLE "Send AuthNoPriv messages with a user configured for AuthPriv."
+
+OKORFAIL "sysUpTime.*Timeticks"		\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $AUTH_MD5 $host $sysUpTime"
+
+
+
+#------------------------------------ -o- 
+#
+# Malformed packets (wrong key).
+#
+
+TITLE	"Send authenticated packets hashed with the wrong key"	\
+      	"and examine the result for proper information."	\
+      	"(We're using SHA authentication for a MD5 user to "	\
+      	"produce the error.)"
+
+OKORFAIL "Authentication.failure"	\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $AUTH_SHA1 $host $sysUpTime"
+
+
+TITLE	"Send malformed crypted packets and examine the result "	\
+	"for proper information."					\
+	"(We're using SHA authentication for a MD5 user to produce "	\
+	"the error.)"
+
+OKORFAIL "Authentication.failure"	\
+	eval "${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $PRIV_SHA1DES $host $sysUpTime"
+
+
+[ -n "$NOTYET" ] && {	# FIX	Modify these to use the UCD-DEMO-MIB
+			#	and to perform a reset of the keys after.
+
+#------------------------------------ -o- 
+#
+# Key Change: MD5.
+#
+# FIX -- Clean up description in presentation for this section and the next.
+#
+
+TITLE "Demonstrate KeyChange (MD5)."			\
+      "Change kul for a user at the remote node."
+
+keychange=`encode_keychange -t md5 -N "new_$uP" -O "$uP" -E 0x$engineidstr`
+
+TITLE	"Changing auth (MD5) and priv key for a user configured to use"	\
+	"both transforms."						\
+	"(Using $keychange.)"
+
+OKORFAIL "usmUserPrivKeyChange.$MD5DESUseroid.=.+Hex:" \
+	$snmpset usmUserPrivKeyChange.$MD5DESUseroid x $keychange
+
+OKORFAIL "usmUserAuthKeyChange.$MD5DESUseroid.=.+Hex:" \
+	$snmpset usmUserAuthKeyChange.$MD5DESUseroid x $keychange
+
+
+TITLE "Perform a get with authPriv user to demonstrate it fails."	\
+      "(Using old key.)"
+
+OKORFAIL "Authentication.failure" 	\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $PRIV_MD5DES $host $sysUpTime
+
+TITLE	"Perform a get with authPriv user to demonstrate it succeeds."	\
+	"(Using new key.)"
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userMD5DES $PRIV_MD5DESnew $host $sysUpTime
+
+
+
+#------------------------------------ -o- 
+#
+# Key Change: SHA
+# 
+
+TITLE "Demonstrate KeyChange (MD5)."	\
+      "Change kul for a user at the remote node."
+
+keychange=`encode_keychange -t sha1 -N "new_$uP" -O "$uP" -E 0x$engineidstr`
+
+
+TITLE	"Changing auth and priv key for user configured to use both"	\
+	"transforms."							\
+	"(Using $keychange.)"
+
+OKORFAIL "usmUserPrivKeyChange.$SHADESUseroid.=.+Hex:" \
+	$snmpset usmUserPrivKeyChange.$SHADESUseroid x $keychange
+
+OKORFAIL "usmUserAuthKeyChange.$SHADESUseroid.=.+Hex:" \
+	$snmpset usmUserAuthKeyChange.$SHADESUseroid x $keychange
+
+
+TITLE "Perform a get with authPriv user to demonstrate it fails."	\
+      "(Using old key.)"
+
+OKORFAIL "Authentication.failure"	\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1DES $PRIV_SHA1DES $host $sysUpTime
+
+
+TITLE	"Perform a get with authPriv user to demonstrate it succeeds."	\
+	"(Using new key.)"
+
+OKORFAIL "sysUpTime.*Timeticks" 	\
+	${APPDIR}snmpget $PORTFLAG -v 3 $userSHA1DES $PRIV_SHA1DES_new $host $sysUpTime
+
+#
+# FIX -- this is the original, shouldn't it fail?
+#
+# -n default -u stingray2 -l authNoPriv -a SHA -A "new_$uP" -x DES -X "$uP"
+#
+
+}  # endif -- NOTYET
+
+
+
+#------------------------------------ -o- 
+#
+# Cloning an account.
+#
+# FIX -- Should demonstrate this using (non-public only?) remote demo.
+#
+
+[ "$ISREMOTEDEMO" != true ] && {
+	TITLE	"Use an admin user to clone a new account that has "	\
+		"additional priveleges."
+
+	CREATEUSER whale $sharkoid
+
+	OKORFAIL "sysUpTime.*Timeticks"	\
+		${APPDIR}snmpget $PORTFLAG -n default -u whale -l authNoPriv -a MD5 -A "$defpass" -v 3 $host $sysUpTime
+}
+
+
+
+#------------------------------------ -o- 
+#
+# engineID & time discovery.
+#
+# FIX -- Devise a means to automatically count the messages.
+#	 Count may vary depending upon who implemented the remote agent.
+#
+
+[ "$DOTIMETESTS" = true ] && {
+	TITLE	"Demonstrate engineID and time discovery."		\
+		""							\
+		"snmpget with noAuthNoPriv to an agent that is not "	\
+		"pre-configured."					\
+		"Note: Trace the 4 message exchange."
+
+	OKORFAIL "sysUpTime.*Timeticks"		\
+		${APPDIR}snmpget -s -R $noAuthArgs -d $host $sysUpTime
+
+
+	TITLE	"snmpget with AuthNoPriv to an agent that is not "	\
+		"pre-configured."					\
+		"Note: Trace the 6 message exchange."
+
+	OKORFAIL "sysUpTime.*Timeticks"		\
+		${APPDIR}snmpget -s -T 0 1 -R $AuthArgs -d $host $sysUpTime
+}
+
+
+
+#------------------------------------ -o- 
+#
+# Proper time stamp handling.
+#
+# FIX -- Devise a means to automatically count the messages.
+#	 Count may vary depending upon who implemented the remote agent.
+#
+
+
+[ "$DOTIMETESTS" = true ] && {
+	TITLE	"Demonstrate proper judgement of time stamps."		 \
+		""							 \
+		"Set the agent 200 seconds ahead of the client."	 \
+		"Run snmpget, then demonstrate that the client updates " \
+		"its sense of time for the agent."
+
+	GETBOOTSANDTIME
+
+	DOIT $snmpset snmpEngineTime.0 i `expr $time + 300`	# 200 + 100
+
+	OKORFAIL "sysUpTime.*Timeticks" 	\
+		${APPDIR}snmpget -T $boots $time -s -R $AuthArgs $host $sysUpTime
+
+
+	TITLE "Set the client 200 seconds behind the agent." \
+	      "snmpget and trace the 4 message exchange."
+
+	GETBOOTSANDTIME # update us
+
+	OKORFAIL "sysUpTime.*Timeticks" 	\
+		${APPDIR}snmpget -T $boots `expr $time - 200 ` -s -R $AuthArgs $host $sysUpTime
+
+
+	TITLE "Set the agent 200 seconds behind the client."		   \
+	      "snmpget and trace/demonstrate lack of time synchronization" \
+	      "and failure of the get."
+
+	OKORFAIL "Timeout.*Response" 	\
+		${APPDIR}snmpget -T $boots `expr $time + 200 ` -s -R $AuthArgs $host $sysUpTime
+
+
+	#
+	# FIX -- Should be able to run this test in non-public remote demo.
+	#
+	[ "$ISREMOTEDEMO" != true ] && {
+		TITLE "Reboot the agent." \
+		      "snmpget and trace the 4 message exchange."
+
+		STOPAGENT
+
+		STARTAGENT
+
+		OKORFAIL "sysUpTime.*Timeticks"		\
+			${APPDIR}snmpget -d -e $engineidstr -s -R $AuthArgs $host $sysUpTime
+
+		# XXX  Got that right?  Toss the following?
+		#
+		# OKORFAIL "sysUpTime.*Timeticks" 			     \
+		#   snmpget -d -e $engineidstr -T $boots `expr $time + 200 ` \
+		# 		-s -R $AuthArgs $host $sysUpTime
+	}
+
+}  # endif -- DOTIMETESTS
+
+
+
+#------------------------------------ -o- 
+# Cleanup & Exit.
+#
+
+TITLE "Done with the demonstration."
+
+[ "$ISREMOTEDEMO" != true ] && {
+	echo
+	STOPAGENT
+}
+
+echo
+REPORT
+
+[ "$ISREMOTEDEMO" != true ] && {
+	echo
+	echo "Deleting agent configuration file..."
+	rm -rf $CONFIGDIR
+
+	echo
+	YESNO N "Okay to delete persistent storage in \"$PERSISTENTDIR\"?"
+	[ $? -eq 1 ] && {
+	    echo "Deleting..."
+	    rm -rf $PERSISTENTDIR/*
+	}
+}
+

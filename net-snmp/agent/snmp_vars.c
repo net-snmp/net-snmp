@@ -65,6 +65,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "mibincl.h"
+#include "snmpv3.h"
+#include "snmpusm.h"
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
 #include "../snmplib/system.h"
@@ -91,13 +93,11 @@ PERFORMANCE OF THIS SOFTWARE.
 static int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
-static u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+static u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct snmp_pdu *, int *));
 
 struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
 
-static u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
-
-static int in_a_view __P((oid *, int *, struct packet_info *, struct variable *));
+static u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct snmp_pdu *, int *));
 
 int subtree_size;
 int subtree_malloc_size;
@@ -164,16 +164,19 @@ void
 init_agent __P((void))
 {
 #ifdef CAN_USE_NLIST
-  init_kmem("/dev/kmem"); 
+	init_kmem("/dev/kmem");
 #endif
 
-  setup_tree();
+	setup_tree();
+
 #include "mibgroup/mib_module_inits.h"
-  init_agent_read_config();
+
+	init_agent_read_config();
+
 #ifdef TESTING
-  auto_nlist_print_tree(-2,0);
+	auto_nlist_print_tree(-2, 0);
 #endif
-}
+}  /* end init_agent() */
 
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -358,27 +361,27 @@ free_subtree(st)
 /* in_a_view: determines if a given packet_info is allowed to see a
    given name/namelen OID pointer */
 
-static int
-in_a_view(name, namelen, pi, cvp)
-  struct packet_info *pi;   /* IN - relevant auth info re PDU */
-  struct variable	*cvp; /* IN - relevant auth info re mib module */
-  oid		*name;	    /* IN - name of var, OUT - name matched */
-  int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+int
+in_a_view(name, namelen, pdu, type)
+  struct snmp_pdu *pdu;     /* IN - relevant auth info re PDU */
+  oid		  *name;    /* IN - name of var, OUT - name matched */
+  int		  *namelen; /* IN -number of sub-ids in name*/
+  int	           type;    /* IN - variable type being checked */
 {
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
-  if (pi->version == SNMP_VERSION_1 && cvp->type == ASN_COUNTER64)
+  if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64)
     return 0;
   return (
 #ifdef USING_V2PARTY_VIEW_VARS_MODULE
 #define GOT_A_VIEW_CHECK
     /* check against the older v2party view support */
-    (pi->version == SNMP_VERSION_2p &&
-     in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+    (pdu->version == SNMP_VERSION_2p &&
+     in_view(name, *namelen, 0 /* XXX: pi->cxp->contextViewIndex */)) ||
 #endif
 #ifdef USING_MIBII_VACM_VARS_MODULE
 #define GOT_A_VIEW_CHECK
     /* check against the snmpv3 VACM support */
-    (vacm_in_view(pi, name, *namelen)) ||
+    (vacm_in_view(pdu, name, *namelen)) ||
 #endif
 #ifndef GOT_A_VIEW_CHECK
     /* no support at all for views?  Ick!
@@ -406,8 +409,8 @@ in_a_view(name, namelen, pi, cvp)
 static  int 		found;
 
 static u_char *
-search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
-	   noSuchObject)
+search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pdu,
+                    noSuchObject)
     struct subtree *tp;
     oid		*name;	    /* IN - name of var, OUT - name matched */
     int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
@@ -416,7 +419,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
     u_short	*acl;	    /* OUT - access control list */
     int		exact;	    /* IN - TRUE if exact match wanted */
     int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
+    struct snmp_pdu *pdu; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {
     register struct variable *vp;
@@ -470,7 +473,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 			*acl = cvp->acl;
                     /* check for permission to view this part of the OID tree */
 		    if ((access != NULL || (*write_method != NULL && exact)) &&
-                        !in_a_view(name, namelen, pi, cvp)) {
+                        !in_a_view(name, namelen, pdu, cvp->type)) {
                         access = NULL;
 			*write_method = NULL;
 		    } else if (exact){
@@ -503,8 +506,8 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 }
 
 static u_char *
-search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
-	   noSuchObject)
+search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pdu,
+               noSuchObject)
     struct subtree *sub_tp;
     oid		*name;	    /* IN - name of var, OUT - name matched */
     int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
@@ -513,7 +516,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
     u_short	*acl;	    /* OUT - access control list */
     int		exact;	    /* IN - TRUE if exact match wanted */
     int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
+    struct snmp_pdu *pdu; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {
     struct subtree *tp;
@@ -541,7 +544,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 			/* No children, so use local info only */
     if ( tp == NULL )
 	return( search_subtree_vars( sub_tp, name, namelen,
-		type, len, acl, exact, write_method, pi, noSuchObject));
+		type, len, acl, exact, write_method, pdu, noSuchObject));
 
     while ( tp != NULL ) {
 	compare_len = MIN( tp->namelen, *namelen );
@@ -553,13 +556,15 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 			/* No relevant children, so as above */
     if ( tp == NULL )
 	return( search_subtree_vars( sub_tp, name, namelen,
-		type, len, acl, exact, write_method, pi, noSuchObject));
+                                     type, len, acl, exact, write_method,
+                                     pdu, noSuchObject));
 
 			/* No local info, so children or nothing */
     if ( sub_tp->variables == NULL ) {
 	while ( tp != NULL ) {
 	    child_return = search_subtree( tp, name, namelen,
-			type, len, acl, exact, write_method, pi, noSuchObject);
+                                           type, len, acl, exact,
+                                           write_method, pdu, noSuchObject);
 	    if ( child_return != NULL || (exact && write_method != NULL))
 		return child_return;
 	    else
@@ -587,7 +592,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	this_return = search_subtree_vars( sub_tp,
 		this_name, &this_namelen,
 		&this_type, &this_len, &this_acl, exact,
-		write_method, pi, &this_NoObj);
+		write_method, pdu, &this_NoObj);
 
 			/* This answer is the best we'll get, so use it */
 	if ( this_return != NULL &&
@@ -609,7 +614,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	    child_return = search_subtree( tp,
 		child_name, &child_namelen,
 		&child_type, &child_len, &child_acl, exact,
-		write_method, pi, &child_NoObj);
+		write_method, pdu, &child_NoObj);
 	    tp = tp->next;
 
 			/* Only one possibly relevant subtree */
@@ -670,7 +675,7 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 }
 
 u_char	*
-getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
+getStatPtr(name, namelen, type, len, acl, exact, write_method, pdu,
 	   noSuchObject)
     oid		*name;	    /* IN - name of var, OUT - name matched */
     int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
@@ -679,7 +684,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     u_short	*acl;	    /* OUT - access control list */
     int		exact;	    /* IN - TRUE if exact match wanted */
     int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
+    struct snmp_pdu *pdu; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {
     register struct subtree	*tp;
@@ -698,7 +703,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     *write_method = NULL;
     for (tp = subtrees; tp != NULL ; tp = tp->next ) {
 	search_return = search_subtree( tp, name, namelen, &result_type,
-		len, &result_acl, exact, write_method, pi, noSuchObject);
+                                        len, &result_acl, exact, write_method,
+                                        pdu, noSuchObject);
 	if ( search_return != NULL || (*write_method != NULL && exact))
 	    break;
     }

@@ -107,13 +107,12 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      name_len;
 {
   long tmp=0;
-  int tmplen=1000;
 
   if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
-  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  tmp = *((long *) var_val);
   if (tmp == 1 && action == COMMIT) {
     update_config(0);
   } 
@@ -131,13 +130,12 @@ debugging_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len
    int      name_len;
 {
   long tmp=0;
-  int tmplen=1000;
 
   if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
-  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  tmp = *((long *) var_val);
   if (action == COMMIT) {
     snmp_set_do_debugging(tmp);
   } 
