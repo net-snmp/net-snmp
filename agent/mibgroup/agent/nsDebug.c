@@ -27,26 +27,24 @@ oid nsDebugDumpPdu_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 3};
 
 /*
  * ... and for the token table.
- * And yes - I am mixing old and new APIs here!
  */
 
 #define  DBGTOKEN_PREFIX	2
 #define  DBGTOKEN_ENABLED	3
-oid nsDebugTokenTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 4, 1};
-struct variable2 nsDebugTokenTable_variables[] = {
-  { DBGTOKEN_PREFIX,  ASN_OCTET_STR, RWRITE, var_dbgtokens, 1, {2}},
-  { DBGTOKEN_ENABLED, ASN_INTEGER,   RWRITE, var_dbgtokens, 1, {3}}
-};
+#define  DBGTOKEN_STATUS	4
+oid nsDebugTokenTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 4};
 
 
 void
 init_nsDebug(void)
 {
-    DEBUGMSGTL(("nsDebugScalars", "Initializing\n"));
+    netsnmp_table_registration_info *table_info;
+    netsnmp_iterator_info           *iinfo;
 
     /*
      * Register the scalar objects...
      */
+    DEBUGMSGTL(("nsDebugScalars", "Initializing\n"));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration(
             "nsDebugEnabled", handle_nsDebugEnabled,
@@ -68,9 +66,39 @@ init_nsDebug(void)
 
     /*
      * ... and the table.
+     * We need to define the column structure and indexing....
      */
-    REGISTER_MIB("nsDebugTokenTable", nsDebugTokenTable_variables,
-                variable2, nsDebugTokenTable_oid);
+
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (!table_info) {
+        return;
+    }
+    netsnmp_table_helper_add_indexes(table_info, ASN_PRIV_IMPLIED_OCTET_STR, 0);
+    table_info->min_column = DBGTOKEN_STATUS;
+    table_info->max_column = DBGTOKEN_STATUS;
+
+
+    /*
+     * .... and the iteration information ....
+     */
+    iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+    if (!iinfo) {
+        return;
+    }
+    iinfo->get_first_data_point = get_first_debug_entry;
+    iinfo->get_next_data_point = get_next_debug_entry;
+    iinfo->table_reginfo        = table_info;
+
+
+    /*
+     * .... and register the table with the agent.
+     */
+    netsnmp_register_table_iterator(
+        netsnmp_create_handler_registration(
+            "tzDebugTable", handle_nsDebugTable,
+            nsDebugTokenTable_oid, OID_LENGTH(nsDebugTokenTable_oid),
+            HANDLER_CAN_RWRITE),
+        iinfo);
 }
 
 
@@ -233,237 +261,177 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
  *   Handle the tzIntTable as a fixed table of NUMBER_TZ_ENTRIES rows,
  *    with the timezone offset hardwired to be the same as the index.
  */
-unsigned char *
-var_dbgtokens(struct variable *vp,
-    	    oid     *name,
-    	    size_t  *length,
-    	    int     exact,
-    	    size_t  *var_len,
-    	    WriteMethod **write_method)
+
+netsnmp_variable_list *
+get_first_debug_entry(void **loop_context, void **data_context,
+                      netsnmp_variable_list *index,
+                      netsnmp_iterator_info *data)
 {
-  static long long_ret;
-  int index;
-  int ret;
+    int i;
 
-  DEBUGMSGTL(( "nsDebugTokens", "var_dbgtokens: "));
-  DEBUGMSGOID(("nsDebugTokens", vp->name, vp->namelen));
-  DEBUGMSG  (( "nsDebugTokens", " %d (%s)\n", vp->magic, (exact?"Get":"GetNext")));
+    for (i=0; i<debug_num_tokens; i++) {
+        if (dbg_tokens[i].token_name)
+            break;
+    }
+    if ( i==debug_num_tokens )
+        return NULL;
 
-  /* 
-   * The list of debug tokens is (almost) a 'simple' table,
-   *   with indexes running from 0 to debug_num_tokens-1
-   *   We'll just need to tweak the indexing to run from 1 later.
-   */
-  ret = header_simple_table(vp,name,length,exact,var_len,write_method,
-                          debug_num_tokens);
+    snmp_set_var_value(index, dbg_tokens[i].token_name,
+		       strlen(dbg_tokens[i].token_name));
+    *loop_context = (void*)i;
+    *data_context = (void*)&dbg_tokens[i];
+    return index;
+}
+
+netsnmp_variable_list *
+get_next_debug_entry(void **loop_context, void **data_context,
+                      netsnmp_variable_list *index,
+                      netsnmp_iterator_info *data)
+{
+    int i = (int)*loop_context;
+
+    for (i++; i<debug_num_tokens; i++) {
+        if (dbg_tokens[i].token_name)
+            break;
+    }
+    if ( i==debug_num_tokens )
+        return NULL;
+
+    snmp_set_var_value(index, dbg_tokens[i].token_name,
+		       strlen(dbg_tokens[i].token_name));
+    *loop_context = (void*)i;
+    *data_context = (void*)&dbg_tokens[i];
+    return index;
+}
 
 
-  /*
-   * Configure the write-handling routines, so we can create new rows.
-   * Note that must be done *after* calling 'header_simple_table'
-   *   since this routine resets the write_method hook to NULL.
-   */
-  switch(vp->magic) {
-    case DBGTOKEN_PREFIX:
-        *write_method = write_dbgPrefix;
+int
+handle_nsDebugTable(netsnmp_mib_handler *handler,
+                netsnmp_handler_registration *reginfo,
+                netsnmp_agent_request_info *reqinfo,
+                netsnmp_request_info *requests)
+{
+    long status;
+    netsnmp_request_info       *request    =NULL;
+    netsnmp_table_request_info *table_info    =NULL;
+    netsnmp_token_descr        *debug_entry=NULL;
+
+    switch (reqinfo->mode) {
+
+    case MODE_GET:
+        for (request=requests; request; request=request->next) {
+            debug_entry = (netsnmp_token_descr*)
+                           netsnmp_extract_iterator_context(request);
+	    status = (debug_entry->enabled ? RS_ACTIVE : RS_NOTINSERVICE);
+	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
+                                     (u_char*)&status, sizeof(status));
+	}
 	break;
-    case DBGTOKEN_ENABLED:
-        *write_method = write_dbgEnabled;
+
+
+    case MODE_SET_RESERVE1:
+	for (request = requests; request; request=request->next) {
+            if ( request->status != 0 ) {
+                return SNMP_ERR_NOERROR;	/* Already got an error */
+            }
+            if ( request->requestvb->type != ASN_INTEGER ) {
+                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_WRONGTYPE);
+                return SNMP_ERR_WRONGTYPE;
+            }
+
+            debug_entry = (netsnmp_token_descr*)
+                           netsnmp_extract_iterator_context(request);
+            switch (*request->requestvb->val.integer) {
+            case RS_ACTIVE:
+            case RS_NOTINSERVICE:
+                /*
+		 * These operations require an existing row
+		 */
+                if (!debug_entry) {
+		    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+		}
+		break;
+
+            case RS_CREATEANDWAIT:
+            case RS_CREATEANDGO:
+                /*
+		 * These operations assume the row doesn't already exist
+		 */
+                if (debug_entry) {
+		    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+		}
+		break;
+
+            case RS_DESTROY:
+                /*
+		 * This operation can work regardless
+		 */
+		break;
+
+            case RS_NOTREADY:
+            default:
+		netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_WRONGVALUE);
+                return SNMP_ERR_WRONGVALUE;
+	    }
+        }
         break;
-  }
-
-  if (ret == MATCH_FAILED )
-    return NULL;
 
 
-  /* 
-   * 'name' now holds the full OID of the instance being queried.
-   * The last subidentifier is the index value, which needs to be
-   * tweaked to be 0-based rather than 1-based.
-   */
-  index = name[(*length)-1];
-  index--;
+    case MODE_SET_COMMIT:
+	for (request = requests; request; request=request->next) {
+            if ( request->status != 0 ) {
+                return SNMP_ERR_NOERROR;	/* Already got an error */
+            }
 
-  /*
-   * If there are empty slots in the table, we need to skip them
-   */
-  if (!dbg_tokens[index].token_name) {
-      if (exact)
-          return NULL;   /* This entry doesn't exist */
+            switch (*request->requestvb->val.integer) {
+            case RS_ACTIVE:
+            case RS_NOTINSERVICE:
+                /*
+		 * Update the enabled field appropriately
+		 */
+                debug_entry = (netsnmp_token_descr*)
+                               netsnmp_extract_iterator_context(request);
+                debug_entry->enabled =
+                    (*request->requestvb->val.integer == RS_ACTIVE);
+		break;
 
-      while (++index < MAX_DEBUG_TOKENS) {
-          if (dbg_tokens[index].token_name) {
-              /* Found one that does, so update 'name' and continue */
-              name[(*length)-1] = index+1;
-              break;
-	  }
-      }
-      if (index == MAX_DEBUG_TOKENS)
-          return NULL;   /* Run out of possible slots */
-  }
+            case RS_CREATEANDWAIT:
+            case RS_CREATEANDGO:
+                /*
+		 * Create the entry, and set the enabled field appropriately
+		 */
+                table_info = netsnmp_extract_table_info(request);
+                debug_register_tokens(table_info->indexes->val.string);
+#ifdef UMMMMM
+                if (*request->requestvb->val.integer == RS_CREATEANDWAIT) {
+		    /* XXX - how to locate the entry ??  */
+		    debug_entry->enabled = 0;
+		}
+#endif
+		break;
 
+            case RS_DESTROY:
+                /*
+		 * XXX - there's no "remove" API  :-(
+		 */
+                debug_entry = (netsnmp_token_descr*)
+                               netsnmp_extract_iterator_context(request);
+                if (debug_entry) {
+		    debug_entry->enabled = 0;
+		    free(debug_entry->token_name);
+		    debug_entry->token_name = NULL;
+		}
+		break;
+	    }
+        }
+        break;
+    }
 
-  /* 
-   * this is where we do the value assignments for the mib results.
-   */
-  switch(vp->magic) {
-
-    case DBGTOKEN_PREFIX:
-        *write_method = write_dbgPrefix;
-        *var_len      = strlen(dbg_tokens[index].token_name);
-        return (unsigned char *) dbg_tokens[index].token_name;
-
-    case DBGTOKEN_ENABLED:
-        *write_method = write_dbgEnabled;
-        long_ret = (dbg_tokens[index].enabled ? 1 : 2);
-        return (unsigned char *) &long_ret;
-
-    default:
-      ERROR_MSG("");
-  }
-  return NULL;
+    return SNMP_ERR_NOERROR;
 }
 
-
-int
-write_dbgPrefix(int      action,
-            u_char   *var_val,
-            u_char   var_val_type,
-            size_t   var_val_len,
-            u_char   *statP,
-            oid      *name,
-            size_t   name_len)
-{
-  int index;
-
-  DEBUGMSGTL(( "nsDebugTokens", "write_dbgPrefix: "));
-  DEBUGMSGOID(("nsDebugTokens", name, name_len));
-  DEBUGMSG  (( "nsDebugTokens", " = %*s ", var_val_len, var_val));
-  DEBUGMSG  (( "nsDebugTokens", "pass %d - %s\n", action, (statP ? "update" : "create")));
-
-  /* 
-   * 'name' holds the full OID of the instance being set.
-   * The last subidentifier is the index value, which needs
-   * to be tweaked to be 0-based rather than 1-based.
-   */
-  index = name[name_len-1];
-  index--;
-
-  switch ( action ) {
-        case RESERVE1:
-             /*
-              * Check that the proposed new value is appropriate
-              *   (in terms of type, length and actual value).
-              */
-          if (index>MAX_DEBUG_TOKENS) {
-              snmp_log(LOG_ERR, "failed attempt to create a new row (%d)\n", index);
-              return SNMP_ERR_NOCREATION;	/* ??? */
-          }
-          if (var_val_type != ASN_OCTET_STR) {
-              snmp_log(LOG_ERR, "write to nsDebugTokenPrefix: bad type (%x)\n", var_val_type);
-              return SNMP_ERR_WRONGTYPE;
-          }
-          break;
-
-
-        case RESERVE2:
-        case FREE:
-        case ACTION:
-        case UNDO:
-             /*
-              * We're being lazy and doing everything in the COMMIT phase.
-              */
-          break;
-
-
-        case COMMIT:
-             /*
-              * Insert the new token, and pray that the strdup works!
-              */
-          if (dbg_tokens[index].token_name)
-              free(dbg_tokens[index].token_name);
-          dbg_tokens[index].token_name = strdup(var_val);
-	  if (index>=debug_num_tokens)
-              debug_num_tokens=index+1;
-          break;
-  }
-  return SNMP_ERR_NOERROR;
-}
-
-
-int
-write_dbgEnabled(int      action,
-            u_char   *var_val,
-            u_char   var_val_type,
-            size_t   var_val_len,
-            u_char   *statP,
-            oid      *name,
-            size_t   name_len)
-{
-  int   index;
-  long  long_ret;
-
-  DEBUGMSGTL(( "nsDebugTokens", "write_dbgEnabled: "));
-  DEBUGMSGOID(("nsDebugTokens", name, name_len));
-  DEBUGMSG  (( "nsDebugTokens", " = %*s ", var_val_len, var_val));
-  DEBUGMSG  (( "nsDebugTokens", "pass %d - %s\n", action, (statP ? "update" : "create")));
-
-  /* 
-   * 'name' holds the full OID of the instance being set.
-   * The last subidentifier is the index value, which needs
-   * to be tweaked to be 0-based rather than 1-based.
-   */
-  index = name[name_len-1];
-  index--;
-
-  switch ( action ) {
-        case RESERVE1:
-             /*
-              * Check that the proposed new value is appropriate
-              *   (in terms of type, length and actual value).
-              */
-          if (index>MAX_DEBUG_TOKENS) {
-              snmp_log(LOG_ERR, "failed attempt to create a new row (%d)\n", index);
-              return SNMP_ERR_NOCREATION;	/* ??? */
-          }
-          if (var_val_type != ASN_INTEGER) {
-              snmp_log(LOG_ERR, "write to nsDebugTokenEnabled: bad type (%x)\n", var_val_type);
-              return SNMP_ERR_WRONGTYPE;
-          }
-	  long_ret = *(long *)var_val;
-          if (long_ret < 1 ||
-              long_ret > 2) {
-              snmp_log(LOG_ERR, "write to nsDebugTokenEnabled: bad value (%d)\n", long_ret);
-              return SNMP_ERR_WRONGVALUE;
-          }
-          break;
-
-
-        case RESERVE2:
-        case FREE:
-        case ACTION:
-        case UNDO:
-             /*
-              * We're being lazy and doing everything in the COMMIT phase.
-              */
-          break;
-
-
-        case COMMIT:
-             /*
-              * Mark this entry as enabled.
-	      * TODO: Check that there is actually a valid token here.
-	      * (That means handling nsDebugTokenPrefix SET requests
-	      *  properly, i.e. in the ACTION pass, so we can rely on
-	      *  it having been processed by this point).
-              */
-	  long_ret = *(long *)var_val;
-	  if (long_ret == 2)
-	      long_ret = 0;  /* disabled */
-          dbg_tokens[index].enabled = long_ret;
-	  if (index>=debug_num_tokens)
-              debug_num_tokens=index+1;
-          break;
-  }
-  return SNMP_ERR_NOERROR;
-}

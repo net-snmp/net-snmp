@@ -233,7 +233,10 @@ debug_is_token_registered(const char *token)
             if (dbg_tokens[i].token_name &&
                 strncmp(dbg_tokens[i].token_name, token,
                         strlen(dbg_tokens[i].token_name)) == 0) {
-                return SNMPERR_SUCCESS;
+                if (dbg_tokens[i].enabled)
+                    return SNMPERR_SUCCESS;
+                else
+                    return SNMPERR_GENERR;
             }
         }
     }
