@@ -33,7 +33,7 @@ static char errmsg[300];
 /****************************
  * Kstat specific variables *
  ****************************/
-kstat_ctl_t *kc;
+extern kstat_ctl_t *kstat_fd;  /* defined in kernel_sunos5.c */
 kstat_t *ksp1, *ksp2;
 kstat_named_t *kn, *kn2;
 
@@ -71,8 +71,8 @@ void init_memory_solaris2(void)
   snmpd_register_config_handler("swap", memory_parse_config,
                                 memory_free_config,"min-avail");
 
-  kc = kstat_open();
-  if (kc == 0) {
+  kstat_fd = kstat_open();
+  if (kstat_fd == 0) {
     snmp_log(LOG_ERR, "kstat_open(): failed\n");
   }
 }
@@ -111,15 +111,15 @@ u_char *var_extensible_mem(
       long_ret = minimumswap;
       return((u_char *) (&long_ret));
     case MEMTOTALREAL:
-      ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
-      kstat_read(kc, ksp1, 0);
+      ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
+      kstat_read(kstat_fd, ksp1, 0);
       kn = kstat_data_lookup(ksp1, "physmem");
 
       long_ret =  kn->value.ul * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
     case MEMAVAILREAL:
-      ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
-      kstat_read(kc, ksp1, 0);
+      ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
+      kstat_read(kstat_fd, ksp1, 0);
       kn = kstat_data_lookup(ksp1, "freemem");
 
       long_ret =  kn->value.ul * (getpagesize() / 1024);
@@ -228,8 +228,8 @@ long getTotalFree(void)
 
   if (free_mem < 0) return (free_mem);
 
-  ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
-  kstat_read(kc, ksp1, 0);
+  ksp1 = kstat_lookup(kstat_fd, "unix", 0, "system_pages");
+  kstat_read(kstat_fd, ksp1, 0);
   kn = kstat_data_lookup(ksp1, "freemem");
 
   free_mem += kn->value.ul;
