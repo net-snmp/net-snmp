@@ -44,10 +44,6 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
   char arg1[3];
   FILE *file;
 
-  DEBUGP("passthru:  ");
-  print_mib_oid(name,*length);
-  DEBUGP1("\tlength:  %d\n",*length);
-  DEBUGP1("checking on %d\n",numpassthrus)
   long_ret = *length;
   for(i=1; i<= numpassthrus; i++) {
     passthru = get_exten_instance(passthrus,i);
@@ -62,9 +58,6 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           rtest = 1;
       }
     }
-    print_mib_oid(passthru->miboid,passthru->miblen);
-    DEBUGP1(" (%d)",passthru->miblen);
-    DEBUGP1(": %d\n",rtest);
     if ((exact && rtest == 0) || (!exact && rtest <= 0)) {
       /* setup args */
       if (passthru->miblen >= *length || rtest < 0)
@@ -85,10 +78,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           close(fd);
           return(NULL);
         }
-        DEBUGP1("pass:  %s\n",buf);
         newlen = parse_miboid(buf,newname);
-        print_mib_oid(newname,newlen);
-        DEBUGP1(" (%d)\n",newlen);
 
         /* its good, so copy onto name/length */
         bcopy((char *) newname, (char *)name, (int)newlen * sizeof (oid));
@@ -106,47 +96,38 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         }
         fclose(file);
         close(fd);
-        DEBUGP1("buf:  %s\n",buf);
-        DEBUGP1("buf2: %s\n",buf2);
         /* buf contains the return type, and buf2 contains the data */
         if (!strncasecmp(buf,"string",6)) {
-          DEBUGP("parsed as: string\n");
           buf2[strlen(buf2)-1] = NULL;  /* zap the linefeed */
           *var_len = strlen(buf2);
           vp->type = STRING;
           return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
-          DEBUGP("parsed as: int\n");
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
           vp->type = INTEGER;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"counter",7)) {
-          DEBUGP("parsed as: counter\n");
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
           vp->type = COUNTER;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"gauge",5)) {
-          DEBUGP("parsed as: gauge\n");
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
           vp->type = GAUGE;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"objectid",8)) {
-          DEBUGP("parsed as: objectid\n");
           newlen = parse_miboid(buf2,objid);
           *var_len = newlen*sizeof(oid);
           vp->type = OBJID;
           return((unsigned char *) objid);
         } else if (!strncasecmp(buf,"timetick",8)) {
-          DEBUGP("parsed as: timetick\n");
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
           vp->type = TIMETICKS;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"ipaddress",9)) {
-          DEBUGP("parsed as: ipaddress\n");
           newlen = parse_miboid(buf2,objid);
           if (newlen != 4) {
             fprintf(stderr,"invalid ipaddress returned:  %s\n",buf2);
@@ -164,7 +145,6 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
       return(NULL);
     }
   }
-  DEBUGP("failed to find anything\n");
   if (var_len)
     *var_len = NULL;
   *write_method = NULL;
@@ -204,9 +184,6 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
             rtest = 1;
         }
       }
-      print_mib_oid(passthru->miboid,passthru->miblen);
-      DEBUGP1(" (%d)",passthru->miblen);
-      DEBUGP1(": %d\n",rtest);
       if (rtest <= 0) {
         /* setup args */
         if (passthru->miblen >= name_len || rtest < 0)
