@@ -362,7 +362,7 @@ AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unis
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h)
 dnl Linux (lame) doesn't have these
-AC_CHECK_HEADERS(sys/conf.h netinet/in_var.h netinet/in_pcb.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/in_var.h netinet/in_pcb.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h)
 dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h)
 dnl BSDi2 headers
