@@ -638,6 +638,8 @@ event_save_log(CRTL_ENTRY_T * body, char *event_descr)
     }
 
     lptr->log_time = body->event_last_time_sent;
+    if (lptr->log_description)
+        AGFREE(lptr->log_description);
     lptr->log_description = AGSTRDUP(event_descr);
     lptr->data_index = ROWDATAAPI_get_total_number(&body->scrlr);
 
