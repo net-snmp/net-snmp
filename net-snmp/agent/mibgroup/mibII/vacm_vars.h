@@ -24,7 +24,7 @@ config_add_mib(SNMP-COMMUNITY-MIB)
      SNMPCallback    vacm_in_view_callback;
      SNMPCallback    vacm_warn_if_not_configured;
 
-     int             vacm_in_view(netsnmp_pdu *, oid *, size_t);
+     int             vacm_in_view(netsnmp_pdu *, oid *, size_t, int);
 
      extern FindVarMethod var_vacm_sec2group;
      extern FindVarMethod var_vacm_access;

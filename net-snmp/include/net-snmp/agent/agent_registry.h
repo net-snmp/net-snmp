@@ -26,9 +26,11 @@ struct view_parameters {
     netsnmp_pdu    *pdu;
     oid            *name;
     size_t          namelen;
+    int             test;
     int             errorcode;		/*  Do not change unless you're
 					    specifying an error, as it starts
 					    in a success state.  */
+    int             check_subtree;
 };
 
 struct register_parameters {
@@ -116,6 +118,7 @@ int             compare_tree		   (const oid *, size_t,
 int             in_a_view		   (oid *, size_t *, 
 					    netsnmp_pdu *, int);
 int             check_access		   (netsnmp_pdu *pdu);
+int             netsnmp_acm_check_subtree  (netsnmp_pdu *, oid *, size_t);
 void            register_mib_reattach	   (void);
 void            register_mib_detach	   (void);
 
