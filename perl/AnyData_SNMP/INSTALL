@@ -12,9 +12,9 @@ You'll probably never have to do this.
 
 Jeff Zucker's original (unpatched) AnyData perl modules can be found
 at http://www.vpservices.com/jeff/programs/AnyData/ .  However, do not
-use these as they won't work with the current software in this
-directory.  (Use the download sites in step 1 below instead.)  It is a
-good source for documentation about the AnyData modules.
+use the modules from this site as they won't work with the software in
+this directory.  (Use the download sites in step 1 below instead.)  It
+is a good source for documentation about the AnyData modules.
   
 
 Install steps:
