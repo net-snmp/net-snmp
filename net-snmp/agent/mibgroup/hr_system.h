@@ -5,9 +5,8 @@
 #ifndef _MIBGROUP_HRSYSTEM_H
 #define _MIBGROUP_HRSYSTEM_H
 
-extern void	init_hr_system();
-extern u_char	*var_hrsys();
-
+extern void	init_hr_system __P((void));
+extern u_char	*var_hrsys __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #define	HRSYS_UPTIME		1
 #define	HRSYS_DATE		2

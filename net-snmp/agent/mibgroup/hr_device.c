@@ -24,7 +24,7 @@
 int Get_Next_Device __P((void));
 
 PFV init_device[ HRDEV_TYPE_MAX ];
-PFI next_device[ HRDEV_TYPE_MAX ];
+PFIV next_device[ HRDEV_TYPE_MAX ];
 PFV save_device[ HRDEV_TYPE_MAX ];
 int dev_idx_inc[ HRDEV_TYPE_MAX ];
 
@@ -35,7 +35,8 @@ PFI device_errors[ HRDEV_TYPE_MAX ];
 
 int current_type;
 
-void Init_Device();
+void Init_Device __P((void));
+int header_hrdevice __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 	/*********************
 	 *
@@ -43,7 +44,7 @@ void Init_Device();
 	 *
 	 *********************/
 
-void	init_hr_device( )
+void	init_hr_device  __P((void))
 {
     int i;
 
@@ -80,7 +81,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRDEV_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -184,7 +185,7 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int dev_idx, type;
     oid *oid_p;
@@ -206,14 +207,14 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&device_type_id;
 	case HRDEV_DESCR:
 	    if ( device_descr[ type ] != NULL )
-        	strcpy(string, (*device_descr[type])(dev_idx) );
+        	strcpy(string, ((*device_descr[type])(dev_idx)) );
 	    else
 	        sprintf(string, "a black box of some sort");
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRDEV_ID:
 	    if ( device_prodid[ type ] != NULL )
-        	oid_p = (*device_prodid[type])(dev_idx, var_len);
+        	oid_p = ((*device_prodid[type])(dev_idx, var_len));
 	    else {
 	        oid_p = nullOid;
                 *var_len = nullOidLen;
@@ -221,7 +222,7 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) oid_p;
 	case HRDEV_STATUS:
 	    if ( device_status[ type ] != NULL )
-        	long_return = (*device_status[type])(dev_idx);
+        	long_return = ((*device_status[type])(dev_idx));
 	    else
 	        long_return = 2;	/* Assume running */
 	    return (u_char *)&long_return;
@@ -246,7 +247,7 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
 
 
 void
-Init_Device()
+Init_Device __P((void))
 {
 		/*
 		 *  Find the first non-NULL initialisation function
@@ -259,7 +260,7 @@ Init_Device()
 }
 
 int
-Get_Next_Device()
+Get_Next_Device __P((void))
 {
     int result = -1;
 

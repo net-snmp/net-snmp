@@ -18,8 +18,9 @@
 	 *
 	 *********************/
 
-extern void  Init_HR_Proc();
-extern int   Get_Next_HR_Proc();
+extern void  Init_HR_Proc __P((void));
+extern int   Get_Next_HR_Proc __P((void));
+int header_hrproc __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 	/*********************
 	 *
@@ -49,7 +50,7 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRPROC_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -119,7 +120,7 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int  proc_idx;
 #if defined(sun) || defined(__alpha)
@@ -187,13 +188,13 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 static int HRP_index;
 
 void
-Init_HR_Proc()
+Init_HR_Proc __P((void))
 {
    HRP_index = 1;
 }
 
 int
-Get_Next_HR_Proc()
+Get_Next_HR_Proc __P((void))
 {
 		/*
 		 * Silly question time:

@@ -42,7 +42,6 @@ int config_errors;
 
 static int is_parent __P((oid *, int, oid *));
 static struct subtree* insert_in_children_list __P((struct subtree *, struct subtree *));
-void load_subtree __P((struct subtree *));
 
 struct config_line config_handlers[] = {
 #include "mibgroup/mib_module_dot_conf.h"

@@ -80,6 +80,8 @@
 	 *
 	 *********************/
 
+#if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
+
 #ifdef linux
 static void linux_read_ip_stat __P((struct ip_mib *));
 #endif

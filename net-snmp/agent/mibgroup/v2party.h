@@ -6,3 +6,5 @@ config_require(context_vars)
 config_require(alarm)
 config_require(event)
 config_add_mib(SNMPv2-PARTY-MIB SNMPv2-M2M-MIB)
+
+void init_v2party __P((void));

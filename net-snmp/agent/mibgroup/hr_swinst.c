@@ -56,6 +56,9 @@
 	 *
 	 *********************/
 
+int header_hrswinst __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int header_hrswInstEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+
 #ifdef hpux	/* This *is* HP-UX specific, I think */
 #define	INSTALLED_SW_IN_SYSTEM
 #endif
@@ -74,9 +77,9 @@ static rpmdb	rpm_db;
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-extern void  Init_HR_SWInst();
-extern int   Get_Next_HR_SWInst();
-extern void  End_HR_SWInst();
+extern void  Init_HR_SWInst __P((void));
+extern int   Get_Next_HR_SWInst __P((void));
+extern void  End_HR_SWInst __P((void));
 
 
 void	init_hr_swinst( )
@@ -96,7 +99,7 @@ header_hrswinst(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRSWINST_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -128,7 +131,7 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRSWINST_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -203,7 +206,7 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int sw_idx=0;
     static char string[100];
@@ -314,7 +317,7 @@ static char HRSW_name[100];
 
 
 void
-Init_HR_SWInst()
+Init_HR_SWInst __P((void))
 {
    HRSW_index = 0;
 
@@ -331,7 +334,7 @@ Init_HR_SWInst()
 }
 
 int
-Get_Next_HR_SWInst()
+Get_Next_HR_SWInst __P((void))
 {
 #ifdef	INSTALLED_SW_IN_SYSTEM
    struct dirent *de_p;
@@ -362,7 +365,7 @@ Get_Next_HR_SWInst()
 }
 
 void
-End_HR_SWInst()
+End_HR_SWInst __P((void))
 {
 #ifdef	INSTALLED_SW_IN_SYSTEM
    if ( dp != NULL );

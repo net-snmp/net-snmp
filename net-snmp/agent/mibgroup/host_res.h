@@ -55,13 +55,14 @@
 #define	HRDEV_TYPE_MAX	22	/* one greater than largest device type */
 #define	HRDEV_TYPE_SHIFT  8
 
-typedef	void (*PFV)();
-typedef	int  (*PFI)();
-typedef	char* (*PFS)();
-typedef	oid* (*PFO)();
+typedef	void (*PFV) __P((void));
+typedef	int  (*PFI) __P((int));
+typedef	int  (*PFIV) __P((void));
+typedef	char* (*PFS) __P((int));
+typedef	oid* (*PFO) __P((int, int *));
 
 extern PFV init_device[];	/* Routines for stepping through devices */
-extern PFI next_device[];
+extern PFIV next_device[];
 extern PFV save_device[];
 extern int dev_idx_inc[];	/* Flag - are indices returned in strictly
 					increasing order */
