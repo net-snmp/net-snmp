@@ -438,7 +438,12 @@ loop:
 		sigpause(0);
 	}
 	sigsetmask(oldmask);
-        (void)signal(SIGALRM, catchalarm);
+#endif
+/* reset signal as many OSs require this, and the rest shouldn't be hurt */
+#ifndef HAVE_SIGSET
+	(void)sigset(SIGALRM, catchalarm);
+#else
+	(void)signal(SIGALRM, catchalarm);
 #endif
 	signalled = NO;
 	(void)alarm(interval);
