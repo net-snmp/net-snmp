@@ -466,6 +466,7 @@ static void ARP_Scan_Init (void)
 	else
 		at = NULL;
 	for (i = 0; i < arptab_size; i++) {
+		u_long tmp_a;
 		while (line == fgets (line, sizeof(line), in) &&
 			11 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x",
 			&za, &zb, &zc, &zd, &at[i].at_flags,
@@ -477,7 +478,11 @@ static void ARP_Scan_Init (void)
 		at [i].at_enaddr[3] = zh;
 		at [i].at_enaddr[4] = zi;
 		at [i].at_enaddr[5] = zj;
-		at [i].at_iaddr.s_addr = (zd << 24) | (zc << 16) | (zb << 8) | za;
+		tmp_a = ((u_long)za << 24) |
+			((u_long)zb << 16) |
+			((u_long)zc <<  8) |
+			((u_long)zd      ) ;
+		at [i].at_iaddr.s_addr = htonl(tmp_a);
 	}
 	fclose (in);
 #endif /* linux */
