@@ -320,6 +320,8 @@
 #endif
 #endif
 
+/* Watch out for compilers that don't handle void properly. */
+#undef void
 
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"

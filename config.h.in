@@ -17,6 +17,9 @@
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
 
+/* Define if the closedir function returns void instead of int.  */
+#undef CLOSEDIR_VOID
+
 /* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
    This function is required for alloca.c support on those systems.  */
 #undef CRAY_STACKSEG_END
@@ -56,6 +59,9 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
+
+/* Define if the closedir function returns void instead of int.  */
+#undef VOID_CLOSEDIR
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
@@ -637,6 +643,8 @@
 #endif
 #endif
 
+/* Watch out for compilers that don't handle void properly. */
+#undef void
 
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"

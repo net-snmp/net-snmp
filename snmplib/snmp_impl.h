@@ -27,15 +27,6 @@ SOFTWARE.
 
 #include<stdio.h>
 
-
-#if (defined vax) || (defined (mips))
-/*
- * This is a fairly bogus thing to do, but there seems to be no better way for
- * compilers that don't understand void pointers.
- */
-#define void char
-#endif
-
 /*
  * Error codes:
  */
