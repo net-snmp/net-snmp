@@ -95,6 +95,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "acl.h"
 #include "view.h"
 
+#include "../config.h"
+
 #ifdef vax11c
 #define ioctl socket_ioctl
 #define perror socket_perror
@@ -562,13 +564,9 @@ struct variable2 context_variables[] = {
 
 
 /* No access for community SNMP, RW possible for Secure SNMP */
-#define PRIVRW   0x0003  
+#define PRIVRW   (SNMPV2ANY | 0x5000)
 /* No access for community SNMP, RO possible for Secure SNMP */
-#define PRIVRO   0x0002
-
-/* Decline NoAuth requests */
-#define PRIVAUTHRW 0x0005
-#define PRIVAUTHRO 0x0004
+#define PRIVRO   (SNMPV2ANY)
 
 struct variable2 acl_variables[] = {
     {ACLPRIVELEGES, INTEGER, PRIVRW, var_acl, 1, {4}},
@@ -654,7 +652,6 @@ struct variable2 eventnotifytab_variables[] = {
 };
 
 #include "extensible/mibdefs.h"
-#include "../config.h"
 #include "extensible/snmp_vars.h"
 struct subtree *subtrees;   /* this is now malloced in
                                       extensible/extensible.c */
@@ -772,7 +769,6 @@ struct subtree subtrees_old[] = {
 };
 
 extern int in_view();
-extern struct subtree *find_extensible();
 
 int subtree_old_size() {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
@@ -863,10 +859,10 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
                         (((pi->version == SNMP_VERSION_2) &&
                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
                          ((pi->version == SNMP_VERSION_1) &&
-                          (((cvp->acl & 0xFFFE) == PRIVRO) ||
-                            (cvp->acl & 0xFFFE) == PRIVAUTHRO)) ||
+                          (((cvp->acl & 0xAFFF) == SNMPV2ANY) ||
+                            (cvp->acl & 0xAFFF) == SNMPV2AUTH)) ||
                           ((pi->version == SNMP_VERSION_2) &&
-                          ((cvp->acl & 0xFFFE) == PRIVAUTHRO) &&
+                          ((cvp->acl & 0xAFFF) == SNMPV2AUTH) &&
                           (pi->srcp->partyAuthProtocol == NOAUTH ||
                            pi->dstp->partyAuthProtocol == NOAUTH)))) {
                       access = NULL;
