@@ -1465,11 +1465,7 @@ u_char *EtherAddr;
 
 	    Interface_Scan_Init();
 
-#if defined(linux) || defined(sunV3)
-	    while (Interface_Scan_Next((short *)&i, NULL, NULL) != 0) {
-#else
 	    while (Interface_Scan_Next((short *)&i, NULL, NULL, NULL) != 0) {
-#endif
 		if (i == Index) break;
 	    }
 	    if (i != Index) return(-1);     /* Error, doesn't exist */
