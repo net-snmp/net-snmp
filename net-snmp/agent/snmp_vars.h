@@ -65,7 +65,7 @@ struct variable {
     u_short	    acl;	    /* access control list for variable */
     FindVarMethod *findVar;  /* function that finds variable */
     u_char	    namelen;	    /* length of above */
-    oid		    name[32];	    /* object identifier of variable */
+    oid		    name[MAX_OID_LEN];	    /* object identifier of variable */
 };
 
 int subtree_old_size (void);

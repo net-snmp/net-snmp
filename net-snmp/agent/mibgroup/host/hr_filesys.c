@@ -37,6 +37,14 @@
 #endif
 #endif
 
+#ifdef freebsd3
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+#define MOUNT_NFS "nfs"
+#endif
+#endif
+#endif /* freebsd3 */
+
 #define HRFS_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -56,7 +64,7 @@ struct mnttab *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_statfs	statvfs
 
 #elif defined(HAVE_GETFSSTAT)
-static struct statfs *fsstats;
+static struct statfs *fsstats = 0;
 static int fscount;
 struct statfs *HRFS_entry;
 #define HRFS_statfs	statfs
@@ -208,7 +216,7 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_RMOUNT:
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
-	    if (!strcmp( HRFS_entry->HRFS_type, MOUNT_NFS))
+	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
@@ -244,8 +252,12 @@ var_hrfilesys(struct variable *vp,
 	    case MOUNT_CD9660: fsys_type_id[fsys_type_len-1] = 12; break;
 	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
 	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
+#ifdef MOUNT_EXT2FS
 	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 1; break;
+#endif
+#ifdef MOUNT_TFS
 	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
+#endif
 	    }
 #else
 	    mnt_type = HRFS_entry->HRFS_type;
@@ -351,6 +363,9 @@ Init_HR_FileSys (void)
 {
 #if HAVE_GETFSSTAT
     fscount = getfsstat(NULL, 0, MNT_NOWAIT);
+    if (fsstats)
+      free((char *)fsstats);
+    fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
     HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
@@ -432,7 +447,8 @@ void
 End_HR_FileSys (void)
 {
 #ifdef HAVE_GETFSSTAT
-    free(fsstats);
+    if (fsstats)
+      free((char *)fsstats);
     fsstats = NULL;
 #else
     if ( fp != NULL )
@@ -474,7 +490,7 @@ when_dumped(char *filesys,
     if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
 	return date_n_time (NULL, length);
 
-    while ( fgets( line, 100, dump_fp ) != NULL ) {
+    while ( fgets( line, sizeof(line), dump_fp ) != NULL ) {
         cp2=strchr( line, ' ' );	/* Start by looking at the device name only */
 	if ( cp2!=NULL ) {
 	    *cp2 = '\0';

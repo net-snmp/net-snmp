@@ -149,11 +149,11 @@ unsigned char *var_extensible_pass(struct variable *vp,
 				   WriteMethod **write_method)
 {
 
-  oid newname[30];
+  oid newname[MAX_OID_LEN];
   int i, j, rtest=0, fd, newlen, last;
   static long long_ret;
-  static char buf[300], buf2[300];
-  static oid  objid[30];
+  static char buf[STRMAX], buf2[STRMAX];
+  static oid  objid[MAX_OID_LEN];
   struct extensible *passthru;
   FILE *file;
 
@@ -185,7 +185,7 @@ unsigned char *var_extensible_pass(struct variable *vp,
       /* valid call.  Exec and get output */
       if ((fd = get_exec_output(passthru))) {
         file = fdopen(fd,"r");
-        if (fgets(buf,STRMAX,file) == NULL) {
+        if (fgets(buf,sizeof(buf),file) == NULL) {
           *var_len = 0;
           fclose(file);
           close(fd);
@@ -201,8 +201,8 @@ unsigned char *var_extensible_pass(struct variable *vp,
         /* set up return pointer for setable stuff */
         *write_method = setPass;
 
-        if (newlen == 0 || fgets(buf,STRMAX,file) == NULL
-            || fgets(buf2,STRMAX,file) == NULL) {
+        if (newlen == 0 || fgets(buf,sizeof(buf),file) == NULL
+            || fgets(buf2,sizeof(buf2),file) == NULL) {
           *var_len = 0;
           fclose(file);
           close(fd);
@@ -279,11 +279,11 @@ setPass(int action,
   int i, j, rtest, tmplen=1000, last;
   struct extensible *passthru;
 
-  static char buf[300], buf2[300];
+  static char buf[STRMAX], buf2[STRMAX];
   static long tmp;
   static unsigned long utmp;
   static int itmp;
-  static oid objid[30];
+  static oid objid[MAX_OID_LEN];
   
   for(i=1; i<= numpassthrus; i++) {
     passthru = get_exten_instance(passthrus,i);

@@ -117,7 +117,7 @@ init_vacm_vars (void)
 #endif
 }
 
-static struct vacm_securityEntry *securityFirst, *securityLast;
+static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 
 void vacm_parse_security (char *token, 
 			  char *param)
@@ -129,8 +129,20 @@ void vacm_parse_security (char *token,
 
     memset (&se, 0 , sizeof se);
     name = strtok(param, "\t\n ");
+    if (!name) {
+	config_perror("missing NAME parameter");
+	return;
+    }
     source = strtok(NULL, "\t\n ");
+    if (!source) {
+	config_perror("missing SOURCE parameter");
+	return;
+    }
     community = strtok(NULL, "\t\n ");
+    if (!community) {
+	config_perror("missing COMMUNITY parameter");
+	return;
+    }
     cp = strchr(source, '/');
     if (cp == NULL) cp = "";
     else *cp++ = 0;
@@ -210,15 +222,15 @@ void vacm_parse_group (char *token,
     security = strtok (NULL, " \t\n");
 
     if (group == NULL || *group == 0) {
-	config_perror("missing group name");
+	config_perror("missing GROUP parameter");
 	return;
     }
     if (model == NULL || *model == 0) {
-	config_perror("missing model name");
+	config_perror("missing MODEL parameter");
 	return;
     }
     if (security == NULL || *security == 0) {
-	config_perror("missing security name");
+	config_perror("missing SECURITY parameter");
 	return;
     }
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
@@ -235,6 +247,7 @@ void vacm_parse_group (char *token,
     gp->storageType = SNMP_STORAGE_PERMANENT;
     gp->status = SNMP_ROW_ACTIVE;
     free (gp->reserved);
+    gp->reserved = NULL;
 }
 
 void vacm_free_group (void)
@@ -249,13 +262,45 @@ void vacm_parse_access (char *token, char *param)
     struct vacm_accessEntry *ap;
 
     name = strtok(param, " \t\n");
+    if (!name) {
+	config_perror("missing NAME parameter");
+	return;
+    }
     context = strtok(NULL, " \t\n");
+    if (!context) {
+	config_perror("missing CONTEXT parameter");
+	return;
+    }
     model = strtok(NULL, " \t\n");
+    if (!model) {
+	config_perror("missing MODEL parameter");
+	return;
+    }
     level = strtok(NULL, " \t\n");
+    if (!level) {
+	config_perror("missing LEVEL parameter");
+	return;
+    }
     prefix = strtok(NULL, " \t\n");
+    if (!prefix) {
+	config_perror("missing PREFIX parameter");
+	return;
+    }
     readView = strtok(NULL, " \t\n");
+    if (!readView) {
+	config_perror("missing readView parameter");
+	return;
+    }
     writeView = strtok(NULL, " \t\n");
+    if (!writeView) {
+	config_perror("missing writeView parameter");
+	return;
+    }
     notify = strtok(NULL, " \t\n");
+    if (!notify) {
+	config_perror("missing notifyView parameter");
+	return;
+    }
     if (strcmp(context, "\"\"") == 0) *context = 0;
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
     else if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
@@ -283,6 +328,7 @@ void vacm_parse_access (char *token, char *param)
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
     free (ap->reserved);
+    ap->reserved = NULL;
 }
 
 void vacm_free_access (void)
@@ -303,19 +349,31 @@ void vacm_parse_view (char *token,
 
     init_mib();
     name = strtok (param, " \t\n");
+    if (!name) {
+	config_perror("missing NAME parameter");
+	return;
+    }
     type = strtok (NULL, " \n\t");
+    if (!type) {
+	config_perror("missing TYPE parameter");
+	return;
+    }
     subtree = strtok(NULL, " \t\n");
+    if (!subtree) {
+	config_perror("missing SUBTREE parameter");
+	return;
+    }
     mask = strtok(NULL, " \t\n");
 
     if (strcmp(type, "included") == 0) inclexcl = SNMP_VIEW_INCLUDED;
     else if (strcmp(type, "excluded") == 0) inclexcl = SNMP_VIEW_EXCLUDED;
     else {
-	config_perror("included/excluded?");
+	config_perror("TYPE must be included/excluded?");
 	return;
     }
     suboid_len = MAX_OID_LEN;
     if (!read_objid(subtree, suboid, &suboid_len)) {
-	config_perror("bad object id");
+	config_perror("bad SUBTREE object id");
 	return;
     }
     if (mask) {
@@ -323,11 +381,11 @@ void vacm_parse_view (char *token,
 	i = 0;
 	for (mask = strtok(mask, "."); mask; mask = strtok(NULL, ":")) {
 	    if (i >= sizeof(viewMask)) {
-		config_perror("mask too long");
+		config_perror("MASK too long");
 		return;
 	    }
 	    if (sscanf(mask, "%x", &val) == 0) {
-		config_perror("invalid mask");
+		config_perror("invalid MASK");
 		return;
 	    }
 	    viewMask[i] = val;
@@ -344,6 +402,7 @@ void vacm_parse_view (char *token,
     vp->viewStorageType = SNMP_STORAGE_PERMANENT;
     vp->viewStatus = SNMP_ROW_ACTIVE;
     free (vp->reserved);
+    vp->reserved = NULL;
 }
 
 void vacm_free_view (void)
@@ -380,7 +439,7 @@ int vacm_in_view (struct packet_info *pi,
 	while (sp) {
 	    if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
 		    == sp->sourceIp.sin_addr.s_addr
-		&& strcmp(sp->community, pi->community) == 0)
+		&& strcmp(sp->community, (char *)pi->community) == 0)
 		break;
 	    sp = sp->next;
 	}
@@ -656,7 +715,7 @@ u_char *var_vacm_view(struct variable *vp,
 {
     struct vacm_viewEntry *gp;
     char viewName[32];
-    oid subtree[32];
+    oid subtree[MAX_OID_LEN];
     int subtreeLen = 0;
     oid *op, *op1;
     int len;

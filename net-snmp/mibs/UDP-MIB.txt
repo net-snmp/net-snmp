@@ -27,7 +27,7 @@ udpMIB MODULE-IDENTITY
          II."
     ::= { mib-2  50 }
 
-udp ::= { mib-2  7 }
+udp OBJECT IDENTIFIER ::= { mib-2  7 }
 
 udpInDatagrams OBJECT-TYPE
     SYNTAX     Counter32

@@ -139,6 +139,7 @@ extern "C" {
   int	getMibstat(mibgroup_e grid, void *resp, int entrysize,
 		   req_e req_type, int (*comp)(void *, void *), void *arg);
   int	Get_everything(void *, void *);
+  int	getKstatInt(char *classname, char *statname, char *varname, int *value);
 
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus

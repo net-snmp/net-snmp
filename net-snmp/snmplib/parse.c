@@ -98,19 +98,21 @@ struct subid_s {
     char *label;
 };
 
-#define MAXTC   256
+#define MAXTC   1024
 struct tc {     /* textual conventions */
     int type;
     int modid;
     char *descriptor;
     char *hint;
     struct enum_list *enums;
+    struct range_list *ranges;
 } tclist[MAXTC];
 
 int Line = 1;
-char *File;
+char *File = (char *)"(none)";
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
+static int mib_errors = 1;
 static int anonymous = 0;
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
 static int mib_comment_term = 1; /* 0=strict, 1=EOL terminated */
@@ -197,6 +199,7 @@ static int mib_parse_label = 0; /* 0=strict, 1=underscore OK in label */
 #define CONVENTION  70
 #define DISPLAYHINT 71
 #define FROM        72
+#define CAPABILITIES 73
 
 struct tok {
     char *name;                 /* token name */
@@ -275,6 +278,7 @@ struct tok tokens[] = {
     { (char*)"NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
     { (char*)"DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
     { (char*)"FROM", sizeof ("FROM")-1, FROM },
+    { (char*)"AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
     { NULL }
 };
 
@@ -300,6 +304,7 @@ struct module_compatability module_map[] = {
 	{ (char*)"RFC1271-MIB",	(char*)"RMON-MIB",	NULL,	0},
 	{ (char*)"RFC1286-MIB",	(char*)"SOURCE-ROUTING-MIB",	(char*)"dot1dSr", 7},
 	{ (char*)"RFC1286-MIB",	(char*)"BRIDGE-MIB",	NULL,	0},
+	{ (char*)"RFC1315-MIB",	(char*)"FRAME-RELAY-DTE-MIB",	NULL,	0},
 	{ (char*)"RFC1316-MIB",	(char*)"CHARACTER-MIB", NULL,	0},
 };
 #define MODULE_NOT_FOUND	0
@@ -349,13 +354,13 @@ static void print_error (char *, char *, int);
 #ifndef xmalloc
 static void *xmalloc (size_t);
 #endif
-static void xmalloc_stats (FILE *);
 #ifndef xstrdup
 static char *xstrdup (char *);
 #endif
 static void free_tree (struct tree *);
 static void free_node (struct node *);
 #ifdef TEST
+static void xmalloc_stats (FILE *);
 static void print_nodes (FILE *, struct node *);
 #endif
 static void build_translation_table (void);
@@ -364,7 +369,7 @@ static void init_tree_roots (void);
 static void merge_anon_children (struct tree *, struct tree *);
 static int getoid (FILE *, struct subid_s *, int);
 static struct node *parse_objectid (FILE *, char *);
-static int get_tc (char *, int, struct enum_list **, char **);
+static int get_tc (char *, int, struct enum_list **, struct range_list **, char **);
 static int get_tc_index (char *, int);
 static struct enum_list *parse_enumlist (FILE *);
 static struct node *parse_asntype (FILE *, char *, int *, char *);
@@ -379,7 +384,7 @@ static struct node *parse (FILE *, struct node *);
 
 static int read_module_internal (char *);
 static void read_module_replacements (char *);
-static void read_import_replacements (char *, char *);
+static void read_import_replacements (char *, struct module_import *);
 
 static void  new_module  (char *, char *);
 
@@ -387,6 +392,11 @@ static void print_parent_labeledoid (FILE *, struct tree *);
 static void print_parent_oid (FILE *, struct tree *);
 static void print_parent_label (FILE *, struct tree *);
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
+
+void snmp_set_mib_errors(int err)
+{
+    mib_errors = err;
+}
 
 void snmp_set_mib_warnings(int warn)
 {
@@ -413,9 +423,11 @@ void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
   fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
           lead, ((mib_parse_label)?"dis":""));
   fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
-          lead, ((mib_comment_term)?"dis":""));
+          lead, ((mib_comment_term)?"":"dis"));
   fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
           lead, ((save_mib_descriptions)?"don't ":""));
+  fprintf(outf, "%s    e: Disable mib errors of MIB symbols conflicts\n",
+          lead);
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
@@ -432,6 +444,10 @@ char *snmp_mib_toggle_options(char *options) {
 
         case 'c':
           mib_comment_term = !mib_comment_term;
+          break;
+           
+        case 'e':
+          mib_errors = !mib_errors;
           break;
            
         case 'w':
@@ -560,11 +576,7 @@ library malloc */
     if (!p) {
         print_error("Out of memory", NULL, CONTINUE);
 	xmalloc_errors++;
-#ifdef NO_EXCEPTION
-        exit (1);
-#else
         return (NULL);
-#endif
     }
     xmalloc_calls++;
     xmalloc_bytes += num;
@@ -582,6 +594,7 @@ static char *xstrdup (char *s)
 }
 #endif
 
+#ifndef xcalloc
 /* like calloc, but uses our very own memory allocator. */
 static void *xcalloc (size_t cnt,
 		      size_t siz)
@@ -594,13 +607,16 @@ static void *xcalloc (size_t cnt,
     memset(ss, 0, sizeit);
     return ss;
 }
+#endif
 
+#ifdef TEST
 static void xmalloc_stats(FILE *fp)
 {
 #ifndef xmalloc
     fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
 #endif
 }
+#endif
 
 static struct node *
 alloc_node(int modid)
@@ -634,6 +650,18 @@ free_tree(struct tree *Tree)
             if (tep->label)
                 free(tep->label);
             free((char*)tep);
+        }
+    }
+    if (Tree->ranges)
+    {
+        struct range_list *rp, *trp;
+
+        rp = Tree->ranges;
+        while(rp)
+        {
+            trp = rp;
+            rp = rp->next;
+            free((char*)trp);
         }
     }
 
@@ -679,6 +707,7 @@ print_nodes(FILE *fp,
 	    struct node *root)
 {
     struct enum_list *ep;
+    struct range_list *rp;
     struct node *np;
 
     for(np = root; np; np = np->next){
@@ -690,6 +719,12 @@ print_nodes(FILE *fp,
             fprintf(fp, "  Enums: \n");
             for(ep = np->enums; ep; ep = ep->next){
                 fprintf(fp, "    %s(%d)\n", ep->label, ep->value);
+            }
+        }
+        if (np->ranges){
+            fprintf(fp, "  Ranges: \n");
+            for(rp = np->ranges; rp; rp = rp->next){
+                fprintf(fp, "    %d..%d\n", rp->low, rp->high);
             }
         }
         if (np->hint)
@@ -943,7 +978,7 @@ merge_anon_children(struct tree *tp1,
                     child1->child_list = NULL;
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    free_tree( previous );
+                    /* free_tree( previous ); */
                     break;
                 }
 
@@ -954,7 +989,7 @@ merge_anon_children(struct tree *tp1,
                          previous->next_peer = child2->next_peer;
                     else
                          tp2->child_list = child2->next_peer;
-                    free_tree(child2);
+                    /* free_tree(child2); */
 
                     previous = child1;		/* Move 'child1' to 'tp2' */
                     child1 = child1->next_peer;
@@ -968,9 +1003,9 @@ merge_anon_children(struct tree *tp1,
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
 	            if (mib_warnings)
-		        fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
+		        fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
 			        tp2->label, child1->subid,
-                                child1->label, child2->label);
+                                child1->label, child2->label, File);
                     continue;
                 }
                 else {
@@ -996,7 +1031,7 @@ merge_anon_children(struct tree *tp1,
 
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    free_tree( previous );
+                    /* free_tree( previous ); */
                     break;
                 }
             }
@@ -1081,8 +1116,8 @@ do_subtree(struct tree *root,
                 anon_tp = tp;	/* Need to merge these two trees later */
             }
 	    else if (mib_warnings)
-		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
-			root->label, np->subid, tp->label, np->label);
+		fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
+			root->label, np->subid, tp->label, np->label, File);
 	}
         tp = (struct tree *) xcalloc(1, sizeof(struct tree));
         if (tp == NULL) return;
@@ -1100,6 +1135,7 @@ do_subtree(struct tree *root,
          */
         tp->label = np->label;  np->label = NULL;
         tp->enums = np->enums;  np->enums = NULL;
+        tp->ranges = np->ranges;  np->ranges = NULL;
         tp->hint = np->hint;  np->hint = NULL;
         tp->units = np->units;  np->units = NULL;
         tp->description = np->description;  np->description = NULL;
@@ -1136,6 +1172,7 @@ do_subtree(struct tree *root,
                 anon_tp->tc_index = tp->tc_index;
                 anon_tp->type = tp->type;
                 anon_tp->enums = tp->enums;  tp->enums=NULL;
+                anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
                 anon_tp->hint = tp->hint;  tp->hint=NULL;
                 anon_tp->description = tp->description;  tp->description=NULL;
                 set_function(anon_tp);
@@ -1143,8 +1180,8 @@ do_subtree(struct tree *root,
             else {
                 /* Uh?  One of these two should have been anonymous! */
 	        if (mib_warnings)
-		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s\n",
-			tp->label, anon_tp->label);
+		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s) in %s\n",
+			tp->label, anon_tp->label, File);
             }
 		/*
 		 * The new node is no longer needed
@@ -1196,8 +1233,9 @@ static void do_linkup(struct module *mp,
 	    continue;
 	tp = find_tree_node( mip->label, mip->modid );
 	if (!tp) {
-	    fprintf(stderr, "Did not find '%s' in module %s\n",
-		mip->label, module_name(mip->modid, modbuf));
+	    if (mip->modid != -1)
+		fprintf(stderr, "Did not find '%s' in module %s (%s)\n",
+			mip->label, module_name(mip->modid, modbuf), File);
 	    continue;
 	}
 	do_subtree( tp, &np );
@@ -1223,8 +1261,9 @@ static void do_linkup(struct module *mp,
 		onp = orphan_nodes = nbuckets[i];
 	    nbuckets[i] = NULL;
 	    while (onp) {
-		fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-			mp->name, onp->label, onp->parent, onp->subid);
+		if (mib_warnings)
+		    fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
+			    mp->name, onp->label, onp->parent, onp->subid);
 		np = onp;
 		onp = onp->next;
 	    }
@@ -1387,7 +1426,7 @@ parse_objectid(FILE *fp,
                 np->subid = nop->subid;
             else
                 print_error("Warning: This entry is pretty silly",
-                                np->label, CONTINUE);
+			    np->label, CONTINUE);
 
             /* set up next entry */
             if (oldnp) oldnp->next = np;
@@ -1408,6 +1447,7 @@ static int
 get_tc(char *descriptor,
        int modid,
        struct enum_list **ep,
+       struct range_list **rp,
        char **hint)
 {
     int i;
@@ -1418,6 +1458,7 @@ get_tc(char *descriptor,
       {
  	tcp = &tclist[i];
         *ep = tcp->enums;
+        *rp = tcp->ranges;
         *hint = tcp->hint;
         return tcp->type;
       }
@@ -1527,6 +1568,48 @@ parse_enumlist(FILE *fp)
     return ep;
 }
 
+static struct range_list *parse_ranges(FILE *fp)
+{   int low, high;
+    char nexttoken[MAXTOKEN];
+    int nexttype;
+    struct range_list *r, *rl = NULL;
+    int size = 0, taken = 1;
+
+    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+    if (nexttype == SIZE) {
+	size = 1;
+	taken = 0;
+	nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	if (nexttype != LEFTPAREN)
+	    print_error("Expected \"(\" after SIZE", nexttoken, nexttype);
+    }
+
+    do {
+	if (!taken) nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	else taken = 0;
+	high = low = atol(nexttoken);
+	nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	if (nexttype == RANGE) {
+	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	    high = atol(nexttoken);
+	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	}
+	r = (struct range_list *)malloc (sizeof(*r));
+	r->next = rl;
+	r->low = low;
+	r->high = high;
+	rl = r;
+    } while (nexttype == BAR);
+    if (size) {
+	if (nexttype != RIGHTPAREN)
+	    print_error ("Expected \")\" after SIZE", nexttoken, nexttype);
+	nexttype = get_token(fp, nexttoken, nexttype);
+    }
+    if (nexttype != RIGHTPAREN)
+	print_error ("Expected \")\"", nexttoken, nexttype);
+    return rl;
+}
+
 /*
  * Parses an asn type.  Structures are ignored by this parser.
  * Returns NULL on error.
@@ -1543,6 +1626,7 @@ parse_asntype(FILE *fp,
     char *hint = NULL;
     char *tmp_hint;
     struct enum_list *ep;
+    struct range_list *rp;
     struct tc *tcp;
     int level;
 
@@ -1585,7 +1669,7 @@ parse_asntype(FILE *fp,
 
         if (type == LABEL)
         {
-            type = get_tc(token, current_module, &ep, &tmp_hint);
+            type = get_tc(token, current_module, &ep, &rp, &tmp_hint);
         }
 
         /* textual convention */
@@ -1610,17 +1694,7 @@ parse_asntype(FILE *fp,
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN){
-            level = 1;
-            /* don't record any constraints for now */
-            while(level > 0){
-                *ntype = get_token(fp, ntoken, MAXTOKEN);
-                if (*ntype == LEFTPAREN)
-                    level++;
-                else if (*ntype == RIGHTPAREN)
-                    level--;
-                else if (*ntype == ENDOFFILE)
-                    break;
-            }
+	    tcp->ranges = parse_ranges(fp);
             *ntype = get_token(fp, ntoken, MAXTOKEN);
         } else if (*ntype == LEFTBRACKET) {
             /* if there is an enumeration list, parse it */
@@ -1656,7 +1730,7 @@ parse_objecttype(FILE *fp,
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
-        tctype = get_tc(token, current_module, &np->enums, &np->hint);
+        tctype = get_tc(token, current_module, &np->enums, &np->ranges, &np->hint);
         if (tctype == LABEL && mib_warnings > 1){
             print_error("Warning: No known translation for type", token, type);
         }
@@ -1681,16 +1755,7 @@ parse_objecttype(FILE *fp,
                 np->enums = parse_enumlist(fp);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
-		do {
-		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    if (nexttype == RANGE) {
-			nexttype = get_token(fp, nexttoken, MAXTOKEN);
-			nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    }
-		} while (nexttype == BAR);
-		if (nexttype != RIGHTPAREN)
-		    print_error ("Expected \")\"", nexttoken, nexttype);
+		np->ranges = parse_ranges(fp);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             }
             break;
@@ -1701,16 +1766,7 @@ parse_objecttype(FILE *fp,
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
                 /* ignore the "constrained integer" for now */
-		do {
-		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    if (nexttype == RANGE) {
-			nexttype = get_token(fp, nexttoken, MAXTOKEN);
-			nexttype = get_token(fp, nexttoken, MAXTOKEN);
-		    }
-		} while (nexttype == BAR);
-		if (nexttype != RIGHTPAREN)
-		    print_error ("Expected \")\"", nexttoken, nexttype);
+		np->ranges = parse_ranges(fp);
 		nexttype = get_token (fp, nexttoken, MAXTOKEN);
             }
             break;
@@ -1723,14 +1779,7 @@ parse_objecttype(FILE *fp,
                 if (nexttype == SIZE) {
                     nexttype = get_token(fp, nexttoken, MAXTOKEN);
                     if (nexttype == LEFTPAREN) {
-                        do {
-                            nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                            nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                            if (nexttype == RANGE) {
-                                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                                nexttype = get_token(fp, nexttoken, MAXTOKEN);
-                            }
-                        } while (nexttype == BAR);
+			np->ranges = parse_ranges(fp);
                         nexttype = get_token(fp, nexttoken, MAXTOKEN); /* ) */
                         if (nexttype == RIGHTPAREN)
                         {
@@ -2038,6 +2087,29 @@ parse_compliance(FILE *fp,
     return merge_parse_objectid(np, fp, name);
 }
 
+
+/*
+ * Parses a capabilities macro
+ * Returns 0 on error.
+ */
+static struct node *
+parse_capabilities(FILE *fp,
+		   char *name)
+{
+    register int type;
+    char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
+    register struct node *np;
+
+    np = alloc_node(current_module);
+    if (np == NULL) return(NULL);
+    type = get_token(fp, token, MAXTOKEN);
+    while (type != EQUALS && type != ENDOFFILE) {
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    }
+    return merge_parse_objectid(np, fp, name);
+}
+
 /*
  * Parses a module identity macro
  * Returns 0 on error.
@@ -2090,14 +2162,10 @@ parse_imports(FILE *fp)
 	if (type == LABEL ) {
 	    if (import_count == MAX_IMPORTS ) {
 		print_error("Too many imported symbols", token, type);
-#ifdef NO_EXCEPTION
-		exit(1);
-#else
 		do {
 		    type = get_token(fp, token, MAXTOKEN);
 		} while (type != SEMI && type != ENDOFFILE);
 		return;
-#endif
 	    }
 	    import_list[import_count++].label = xstrdup(token);
 	}
@@ -2124,7 +2192,7 @@ parse_imports(FILE *fp)
 		 */
 	    if  (read_module_internal(token) == MODULE_NOT_FOUND ) {
 		for ( ; old_i<import_count ; ++old_i ) {
-		    read_import_replacements( token, import_list[old_i].label);
+		    read_import_replacements( token, &import_list[old_i]);
 		}
 	    }
 
@@ -2159,11 +2227,7 @@ parse_imports(FILE *fp)
 	 * Shouldn't get this far
 	 */
     print_error("Cannot find module", module_name(current_module,modbuf), CONTINUE);
-#ifdef NO_EXCEPTION
-    exit(1);
-#else
     return;
-#endif
 }
 
 
@@ -2252,17 +2316,22 @@ read_module_replacements(char *name)
     struct module_compatability *mcp;
 
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !label_compare( mcp->old_module, name )) {
-	if (mib_warnings)
-	    fprintf (stderr, "Loading replacement module %s\n", mcp->new_module);
-	(void)read_module( mcp->new_module );
-      }
+	if ( !label_compare( mcp->old_module, name )) {
+	    if (mib_warnings)
+		fprintf (stderr, "Loading replacement module %s for %s (%s)\n",
+			mcp->new_module, name, File);
+	    (void)read_module( mcp->new_module );
+	    return;
+	}
     }
+    if (mib_errors) 
+	print_error("Cannot find module", name, CONTINUE);
+
 }
 
 static void
-read_import_replacements(char *new_module_name,
-			 char *node_identifier)
+read_import_replacements(char *old_module_name,
+			 struct module_import *identifier)
 {
     struct module_compatability *mcp;
 
@@ -2270,21 +2339,22 @@ read_import_replacements(char *new_module_name,
 	 * Look for matches first
 	 */
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !label_compare( mcp->old_module, new_module_name )) {
+      if ( !label_compare( mcp->old_module, old_module_name )) {
 
 	if (	/* exact match */
 	  	  ( mcp->tag_len==0 &&
 		    (mcp->tag == NULL ||
-                     !label_compare( mcp->tag, node_identifier ))) ||
+                     !label_compare( mcp->tag, identifier->label ))) ||
 		/* prefix match */
 	          ( mcp->tag_len!=0 &&
-		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
+		    !strncmp( mcp->tag, identifier->label, mcp->tag_len ))
 	   ) {
 
 	    if (mib_warnings)
-	        fprintf (stderr, "Loading replacement module %s (for %s)\n",
-			mcp->new_module, node_identifier);
+	        fprintf (stderr, "Importing %s from replacement module %s instead of %s (%s)\n",
+			identifier->label, mcp->new_module, old_module_name, File);
 	    (void)read_module( mcp->new_module );
+	    identifier->modid = which_module(mcp->new_module);
 	    return;	/* finished! */
         }
       }
@@ -2293,7 +2363,7 @@ read_import_replacements(char *new_module_name,
 	/*
 	 * If no exact match, load everything relevant
 	 */
-    read_module_replacements( new_module_name );
+    read_module_replacements( old_module_name );
 }
 
 
@@ -2333,8 +2403,8 @@ read_module_internal (char *name)
 	    return MODULE_LOADED_OK;
 	}
 
-    if (mib_warnings)
-      fprintf(stderr, "Module %s not found\n", name);
+    if (mib_warnings > 1)
+	fprintf(stderr, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
@@ -2408,8 +2478,9 @@ new_module (char *name,
 	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
 			/* Not the same file */
 	    if (label_compare(mp->file, file)) {
-                fprintf(stderr, "Warning: Module %s in both %s and %s\n",
-			name, mp->file, file);
+		if (mib_warnings)
+		    fprintf(stderr, "Warning: Module %s in both %s and %s\n",
+			    name, mp->file, file);
 
 			/* Use the new one in preference */
 		free(mp->file);
@@ -2454,7 +2525,7 @@ parse(FILE *fp,
     int state = BETWEEN_MIBS;
     struct node *np, *nnp;
 
-    DEBUGMSGTL(("parse-mibs", "Parsing file:  %s...\n", File));
+    DEBUGMSGTL(("parse-file", "Parsing file:  %s...\n", File));
 
     np = root;
     if (np != NULL) {
@@ -2485,7 +2556,9 @@ parse(FILE *fp,
 		np = root = NULL;
 	    }
             state = BETWEEN_MIBS;
+#ifdef TEST
             if (mib_warnings) xmalloc_stats (stderr);
+#endif
             continue;
         case IMPORTS:
             parse_imports( fp );
@@ -2569,10 +2642,17 @@ parse(FILE *fp,
                 return NULL;
             }
             break;
+        case CAPABILITIES:
+            nnp = parse_capabilities(fp, name);
+            if (nnp == NULL){
+                print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
+                return NULL;
+            }
+            break;
         case MODULEIDENTITY:
             nnp = parse_moduleIdentity(fp, name);
             if (nnp == NULL){
-                print_error("Bad parse of NODULE-IDENTITY", NULL, type);
+                print_error("Bad parse of MODULE-IDENTITY", NULL, type);
                 return NULL;
             }
             break;
@@ -2604,6 +2684,7 @@ parse(FILE *fp,
             while (np->next) np = np->next;
         }
     }
+    DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
     return root;
 }
 
@@ -2617,12 +2698,7 @@ static int ungotten_token = CONTINUE;
 static void unget_token (int token)
 {
     if (ungotten_token != CONTINUE) {
-#ifdef NO_EXCEPTION
-        fprintf (stderr, "Double unget\n");
-        exit (1);
-#else
         print_error("Double unget", "ungotten_token", CONTINUE);
-#endif
     }
     ungotten_token = token;
 }
@@ -3075,8 +3151,8 @@ print_parent_label(FILE *f,
 
 void
 print_subtree_oid_report(FILE *f,
-			 struct tree *tree,
-			 int count)
+                         struct tree *tree,
+                         int count)
 {
     struct tree *tp;
 
@@ -3195,6 +3271,114 @@ print_subtree_oid_report_disable_suffix (void)
     print_subtree_oid_report_suffix = 0;
 }
 
+static char leave_indent[256];
+static int leave_was_simple;
+
+static void print_mib_leaves(FILE *f, struct tree *tp)
+{ struct tree *ntp;
+  char *ip = leave_indent+strlen(leave_indent)-1;
+  char last = *ip;
+
+  *ip = '+';
+  if (tp->type == 0)
+    fprintf(f, "%s--%s(%ld)\n", leave_indent, tp->label, tp->subid);
+  else {
+    const char *acc, *typ;
+    int size = 0;
+    switch (tp->access) {
+    case MIB_ACCESS_NOACCESS:	acc = "----"; break;
+    case MIB_ACCESS_READONLY:	acc = "-R--"; break;
+    case MIB_ACCESS_WRITEONLY:	acc = "--W-"; break;
+    case MIB_ACCESS_READWRITE:	acc = "-RW-"; break;
+    case MIB_ACCESS_NOTIFY:	acc = "---N"; break;
+    case MIB_ACCESS_CREATE:	acc = "CR--"; break;
+    default:			acc = "    "; break;
+    }
+    switch (tp->type) {
+    case TYPE_OBJID:		typ = "ObjID    "; break;
+    case TYPE_OCTETSTR:		typ = "String   "; size = 1; break;
+    case TYPE_INTEGER:		typ = "Integer  "; break;
+    case TYPE_NETADDR:		typ = "NetAddr  "; break;
+    case TYPE_IPADDR:		typ = "IpAddr   "; break;
+    case TYPE_COUNTER:		typ = "Counter  "; break;
+    case TYPE_GAUGE:		typ = "Gauge    "; break;
+    case TYPE_TIMETICKS:	typ = "TimeTicks"; break;
+    case TYPE_OPAQUE:		typ = "Opaque   "; size = 1; break;
+    case TYPE_NULL:		typ = "Null     "; break;
+    case TYPE_COUNTER64:	typ = "Counter64"; break;
+    case TYPE_BITSTRING:	typ = "BitString"; break;
+    case TYPE_NSAPADDRESS:	typ = "NsapAddr "; break;
+    case TYPE_UINTEGER:		typ = "UInteger "; break;
+    default:			typ = "         "; break;
+    }
+    if (tp->enums)		typ = "EnumVal  ";
+    fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
+    *ip = last;
+    if (tp->enums) {
+      struct enum_list *ep = tp->enums;
+      fprintf(f, "%s        Values: ", leave_indent);
+      while (ep) {
+	if (ep != tp->enums) fprintf(f, ", ");
+	fprintf(f, "%s(%d)", ep->label, ep->value);
+	ep = ep->next;
+      }
+      fprintf(f, "\n");
+    }
+    if (tp->ranges) {
+      struct range_list *rp = tp->ranges;
+      if (size) fprintf(f, "%s        Size: ", leave_indent);
+      else fprintf(f, "%s        Range: ", leave_indent);
+      while (rp) {
+        if (rp != tp->ranges) fprintf(f, " | ");
+	if (rp->low == rp->high) fprintf(f, "%d", rp->low);
+	else fprintf(f, "%d..%d", rp->low, rp->high);
+	rp = rp->next;
+      }
+      fprintf(f, "\n");
+    }
+  }
+  *ip = last;
+  strcat(leave_indent, "  |");
+  leave_was_simple = tp->type != 0;
+
+  { int i, j, count = 0;
+    struct leave {
+      oid id;
+      struct tree *tp;
+    } *leaves, *lp;
+
+    for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
+    if (count) {
+      leaves = calloc(count, sizeof(struct leave));
+      for (ntp = tp->child_list, count = 0; ntp; ntp = ntp->next_peer) {
+	for (i = 0, lp = leaves; i < count; i++, lp++)
+	  if (lp->id >= ntp->subid) break;
+	for (j = count; j > i; j--) leaves[j] = leaves[j-1];
+	lp->id = ntp->subid;
+	lp->tp = ntp;
+	count++;
+      }
+      for (i = 1, lp = leaves; i <= count; i++, lp++) {
+	if (!leave_was_simple || lp->tp->type == 0)
+	  fprintf(f, "%s\n", leave_indent);
+	if (i == count) ip[3] = ' ';
+	print_mib_leaves(f, lp->tp);
+      }
+      free(leaves);
+      leave_was_simple = 0;
+    }
+  }
+  ip[1] = 0;
+}
+
+void print_mib_tree(FILE *f, struct tree *tp)
+{
+  leave_indent[0] = ' ';
+  leave_indent[1] = 0;
+  leave_was_simple = 1;
+  print_mib_leaves(f, tp);
+}
+
 /*
  * Merge the parsed object identifier with the existing node.
  * If there is a problem with the identifier, release the existing node.
@@ -3214,20 +3398,20 @@ merge_parse_objectid(struct node *np,
 	int ncount = 0;
 	nextp = headp = nnp;
 	while (nnp->next) {
-		nextp = nnp;
-		ncount++;
-		nnp = nnp->next;
+	    nextp = nnp;
+	    ncount++;
+	    nnp = nnp->next;
 	}
 
 	np->label = nnp->label;
 	np->subid = nnp->subid;
-    np->modid = nnp->modid;
+	np->modid = nnp->modid;
 	np->parent = nnp->parent;
 	free(nnp);
 
 	if (ncount) {
-		nextp->next = np;
-		np = headp;
+	    nextp->next = np;
+	    np = headp;
 	}
     }
     else {

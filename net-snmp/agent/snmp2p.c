@@ -93,16 +93,16 @@ agent_party_init(in_addr_t myaddr,
     in_addr_t addr;
     unsigned char *adp;
     u_short port;
-    oid partyid1[64];
+    oid partyid1[MAX_OID_LEN];
     int partyidlen1;
-    oid partyid2[64];
+    oid partyid2[MAX_OID_LEN];
     int partyidlen2;
-    oid contextid[64];
+    oid contextid[MAX_OID_LEN];
     int contextidlen;
     struct partyEntry *pp1, *pp2, *rp;
     struct contextEntry *cxp, *rxp;
     int viewIndex;
-    oid viewSubtree[64];
+    oid viewSubtree[MAX_OID_LEN];
     int viewSubtreeLen;
     struct viewEntry *vwp;
     struct aclEntry *ap;
@@ -143,7 +143,7 @@ agent_party_init(in_addr_t myaddr,
        create viewEntry(viewIndex, viewSubtree)
        context.viewIndex = viewIndex
      */
-    partyidlen1 = 64;
+    partyidlen1 = MAX_OID_LEN;
     if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1",
 		    partyid1, &partyidlen1)){
 	fprintf(stderr, "Bad object identifier: %s\n",
@@ -163,7 +163,7 @@ agent_party_init(in_addr_t myaddr,
     pp1 = party_createEntry(partyid1, partyidlen1);
     oneIndex = pp1->partyIndex;
 
-    partyidlen2 = 64;
+    partyidlen2 = MAX_OID_LEN;
     if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1",
 		    partyid2, &partyidlen2)){
 	fprintf(stderr, "Bad object identifier: %s\n",
@@ -184,7 +184,7 @@ agent_party_init(in_addr_t myaddr,
     pp2 = party_createEntry(partyid2, partyidlen2);
     twoIndex = pp2->partyIndex;
 
-    contextidlen = 64;
+    contextidlen = MAX_OID_LEN;
     if (!read_objid(".1.3.6.1.6.3.3.1.4.128.2.35.55.1",
 		    contextid, &contextidlen)){
 	fprintf(stderr, "Bad object identifier: %s\n",
@@ -206,7 +206,7 @@ agent_party_init(in_addr_t myaddr,
     }
 
     viewIndex = 1;
-    viewSubtreeLen = 64;
+    viewSubtreeLen = MAX_OID_LEN;
     if (!read_objid(view, viewSubtree, &viewSubtreeLen)){
 	fprintf(stderr, "Bad object identifier: %s\n", view);
 	party_destroyEntry(partyid1, partyidlen1);
@@ -305,7 +305,7 @@ agent_party_init(in_addr_t myaddr,
     vwp->viewBitMask = VIEWCOMPLETE_MASK;
     vwp->reserved->viewBitMask = vwp->viewBitMask;
 
-    viewSubtreeLen = 64;
+    viewSubtreeLen = MAX_OID_LEN;
     if (!read_objid(".2.6.6", viewSubtree, &viewSubtreeLen)){
 	fprintf(stderr, "Bad object identifier: .2.6.6\n");
 	return -1;

@@ -76,12 +76,12 @@ read_context_database(char *filename)
     int blank;
     int linenumber = 0, chars = 0;
     int state = IDENTITY_STATE;
-    oid contextid[64];
+    oid contextid[MAX_OID_LEN];
     int contextidlen;
     int view = 0, entityLen = 0, icltime = 0;
     u_char entity[64];
     int dstParty, srcParty, proxyIdLen;
-    oid proxyId[64];
+    oid proxyId[MAX_OID_LEN];
     char name[64];	/* friendly name */
     struct contextEntry *cxp, *rp;
     u_int myaddr;
@@ -90,7 +90,7 @@ read_context_database(char *filename)
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return -1;
-    while (fgets(buf, 256, fp)){
+    while (fgets(buf, sizeof(buf), fp)){
 	linenumber++;
 	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
@@ -115,7 +115,7 @@ read_context_database(char *filename)
 		fclose(fp);
 		return -1;
 	    }
-	    contextidlen = 64;
+	    contextidlen = MAX_OID_LEN;
 	    if (!read_objid(buf1, contextid, &contextidlen)) {
 		error_exit("Bad object identifier", linenumber, filename);
 		fclose(fp);
@@ -174,7 +174,7 @@ read_context_database(char *filename)
 		}
 	    srcParty = atoi(buf2);
 
-	    proxyIdLen = 64;
+	    proxyIdLen = MAX_OID_LEN;
 	    if (!read_objid(buf3, proxyId, &proxyIdLen)) {
 		error_exit("Bad object identifier", linenumber, filename);
 		fclose(fp);

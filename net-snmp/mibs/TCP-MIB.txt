@@ -27,7 +27,7 @@ tcpMIB MODULE-IDENTITY
          II."
     ::= { mib-2  49 }
 
-tcp ::= { mib-2  6 }
+tcp OBJECT IDENTIFIER ::= { mib-2  6 }
 
 tcpRtoAlgorithm OBJECT-TYPE
     SYNTAX     INTEGER {

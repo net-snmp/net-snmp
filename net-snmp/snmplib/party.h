@@ -54,7 +54,7 @@
 /* extern oid snmpv2MD5AuthProt[]; */
 
 struct partyEntry {
-    oid		partyIdentity[32];
+    oid		partyIdentity[MAX_OID_LEN];
     int		partyIdentityLen;
     int		partyIndex;
     char	partyName[64];	/* friendly name */

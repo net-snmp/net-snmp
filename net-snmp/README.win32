@@ -1,0 +1,23 @@
+The win32 directory contains a Microsoft VC++ (5.0,6.0) workspace and
+project files to build both static and DLL versions of the UCD SNMP
+library as well as most of the applications (snmpd and snmptrapd not
+included). 
+
+A manually generated config.h file has been provided for use with the
+win32 build since the basic win32 environment does not support autoconf.
+Note: the compiled in MIB path is \usr\mibs which may be changed by
+editting win32/config.h
+
+To build the libraries and applications, open the wokspace in VC++ and
+simply run 'Build' from the menu. The applications and DLL will be
+output to win32/bin and the lib files will be output to win32/lib.
+
+Not sure how the above could be done using just 'nmake' from the DOS
+shell but it should be feasible.
+
+Also note: An alternate way to build UCD SNMP for win32 is to use
+Cygnus's cygwin32 environment.  Make sure to get the 'full' version.
+The 'user' version does not contain the programs necessary to run
+the GNU configure mechanism, which is used to by UCD SNMP.  Information
+on the Cygnus cygwin32 environment is available on the web at :
+http://sourceware.cygnus.com/cygwin/.

@@ -4,7 +4,7 @@
 
 #include <config.h>
 
-#if (defined(WIN32) || defined(cygwin32))
+#if (defined(WIN32) || defined(cygwin))
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -125,7 +125,7 @@ getprotoent (void)
 	if (!p_fp) p_fp = fopen(p_fn, "r");
 
 	if (!p_fp) return 0;
-	while(fgets(&lbuf[0], sizeof(lbuf)-1, p_fp))
+	while(fgets(lbuf, sizeof(lbuf), p_fp))
 	{
 		linecnt++;
 		cp = lbuf;
@@ -190,5 +190,5 @@ inet_lnaof(struct in_addr in)
 
 #else
 static int module_dummy = 0;
-#endif /* WIN32 or cygwin32 */
+#endif /* WIN32 or cygwin */
 

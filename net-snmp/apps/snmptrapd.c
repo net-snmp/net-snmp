@@ -74,6 +74,7 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <signal.h>
 #include <errno.h>
 
 #include "asn1.h"
@@ -109,6 +110,8 @@ typedef long	fd_mask;
 int Print = 0;
 int Syslog = 0;
 int Event = 0;
+int dropauth = 0;
+int running = 1;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -317,6 +320,8 @@ void do_external(char *cmd,
   static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
   static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
   static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
+  oid enttrapoid[MAX_OID_LEN];
+  int enttraplen = pdu->enterprise_length;
   int fd[2];
   int pid, result;
   FILE *file;
@@ -354,9 +359,18 @@ void do_external(char *cmd,
         sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
         fprintf(file,"%s\n",varbuf);
         tmpvar.type = ASN_OBJECT_ID;
-        trapoids[9] = pdu->trap_type+1;
-        tmpvar.val.objid = trapoids;
-        tmpvar.val_len = 10*sizeof(oid);
+	if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+	  memcpy(enttrapoid, pdu->enterprise, sizeof(oid)*enttraplen);
+	  if (enttrapoid[enttraplen-1] != 0) enttrapoid[enttraplen++] = 0;
+	  enttrapoid[enttraplen++] = pdu->specific_type;
+	  tmpvar.val.objid = enttrapoid;
+	  tmpvar.val_len = enttraplen*sizeof(oid);
+	}
+	else {
+	  trapoids[9] = pdu->trap_type+1;
+	  tmpvar.val.objid = trapoids;
+	  tmpvar.val_len = 10*sizeof(oid);
+	}
         sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
         fprintf(file,"%s\n",varbuf);
       }
@@ -393,7 +407,7 @@ int snmp_input(int op,
 	       void *magic)
 {
     struct variable_list *vars;
-    char buf[64], oid_buf [SPRINT_MAX_LEN];
+    char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
     struct snmp_pdu *reply;
     struct tm *tm;
     time_t timer;
@@ -408,9 +422,16 @@ int snmp_input(int op,
                   
     if (op == RECEIVED_MESSAGE){
 	if (pdu->command == SNMP_MSG_TRAP){
+	    oid trapOid[MAX_OID_LEN];
+	    int trapOidLen = pdu->enterprise_length;
 	    host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
 				  sizeof (pdu->agent_addr.sin_addr), AF_INET);
-	    if (Print) {
+	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+		memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
+		if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
+		trapOid[trapOidLen++] = pdu->specific_type;
+	    }
+	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
                 printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
@@ -420,15 +441,12 @@ int snmp_input(int op,
                        inet_ntoa(pdu->agent_addr.sin_addr),
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[64];
-		    int trapOidLen = pdu->enterprise_length;
-		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
-		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
-		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
+		    cp = strrchr(oid_buf, '.');
+		    if (cp) cp++;
+		    else cp = oid_buf;
 		    printf("\t%s Trap (%s) Uptime: %s\n",
-			   trap_description(pdu->trap_type),
-			   strrchr(oid_buf, '.')+1,
+			   trap_description(pdu->trap_type), cp,
 			   uptime_string(pdu->time, buf));
 		}
 		else
@@ -441,48 +459,46 @@ int snmp_input(int op,
 		}
                 printf("\n");
 	    }
-	    if (Syslog) {
+	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
 	    	varbuf[varbufidx++]=','; varbuf[varbufidx++]=' ';
 	    	varbuf[varbufidx]='\0';
 
 	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
-			sprint_variable(varbuf+varbufidx, vars->name,
-                                        vars->name_length, vars);
-			/* Update the length of the string with the
-                           new variable */
-			varbufidx += strlen(varbuf+varbufidx);
-			/* And add a trailing , ... */
-	        	varbuf[varbufidx++]=',';
-	        	varbuf[varbufidx++]=' ';
-	        	varbuf[varbufidx]='\0';
+		    sprint_variable(varbuf+varbufidx, vars->name,
+				    vars->name_length, vars);
+		    /* Update the length of the string with the
+		       new variable */
+		    varbufidx += strlen(varbuf+varbufidx);
+		    /* And add a trailing , ... */
+		    varbuf[varbufidx++]=',';
+		    varbuf[varbufidx++]=' ';
+		    varbuf[varbufidx]='\0';
 	    	}
-	    	if ( varbufidx ) {
-			varbufidx -= 2; varbuf[varbufidx]='\0';
-	    	}
+		varbufidx -= 2; varbuf[varbufidx]='\0';
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    oid trapOid[64];
-		    int trapOidLen = pdu->enterprise_length;
-		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
-		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
-		    trapOid[trapOidLen++] = pdu->specific_type;
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
-
+		    cp = strrchr(oid_buf, '.');
+		    if (cp) cp++;
+		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
-		       inet_ntoa(pdu->agent_addr.sin_addr),
-		       trap_description(pdu->trap_type), strrchr(oid_buf, '.')+1,
-		       uptime_string(pdu->time, buf), varbuf);
-		} else {
+			   inet_ntoa(pdu->agent_addr.sin_addr),
+			   trap_description(pdu->trap_type), cp,
+			   uptime_string(pdu->time, buf), varbuf);
+		} else
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
-		       inet_ntoa(pdu->agent_addr.sin_addr),
-		       trap_description(pdu->trap_type), pdu->specific_type,
-		       uptime_string(pdu->time, buf), varbuf);
-		}
+			   inet_ntoa(pdu->agent_addr.sin_addr),
+			   trap_description(pdu->trap_type), pdu->specific_type,
+			   uptime_string(pdu->time, buf), varbuf);
 	    }
-            trapoids[9] = pdu->trap_type+1;
-            Command = snmptrapd_get_traphandler(trapoids, 10);
+	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC)
+		Command = snmptrapd_get_traphandler(trapOid, trapOidLen);
+	    else {
+		trapoids[9] = pdu->trap_type+1;
+		Command = snmptrapd_get_traphandler(trapoids, 10);
+	    }
             if (Command)
-              do_external(Command, host, pdu);
+		do_external(Command, host, pdu);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
 	    host = gethostbyaddr ((char *)&pdu->address.sin_addr,
@@ -510,10 +526,10 @@ int snmp_input(int op,
                          sizeof(snmptrapoid2)/sizeof(oid));
                 vars = vars->next_variable);
             if (vars && vars->type == ASN_OBJECT_ID) {
-              Command = snmptrapd_get_traphandler(vars->val.objid,
-                                                  vars->val_len/sizeof(oid));
-              if (Command)
-                do_external(Command, host, pdu);
+		Command = snmptrapd_get_traphandler(vars->val.objid,
+						    vars->val_len/sizeof(oid));
+		if (Command)
+		    do_external(Command, host, pdu);
             }
 	    if (pdu->command == SNMP_MSG_INFORM){
 		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_RESPONSE))){
@@ -537,7 +553,12 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-h] [-H]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-H] [-S] [-a]\n");
+}
+
+RETSIGTYPE term_handler(int sig)
+{
+    running = 0;
 }
 
 
@@ -560,7 +581,7 @@ int main(int argc, char *argv[])
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
-     * usage: snmptrapd [-v 1] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e]
+     * usage: snmptrapd [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e] [-S] [-a]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -617,6 +638,12 @@ int main(int argc, char *argv[])
 		case 's':
 		    Syslog++;
 		    break;
+		case 'S':
+		    snmp_set_suffix_only(2);
+		    break;
+		case 'a':
+		    dropauth = 1;
+		    break;
                 case 'f':
 		    dofork = 0;
 		    break;
@@ -668,8 +695,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-    init_mib();
-    read_configs();
+    init_snmp();
     if (!Print) Syslog = 1;
 
     myaddr = get_myaddr();
@@ -724,20 +750,19 @@ int main(int argc, char *argv[])
     }
 
     if (Syslog) {
-      /* open syslog */
-      init_syslog();
+	/* open syslog */
+	init_syslog();
     }
     if (Print) {
-      struct tm *tm;
-      time_t timer;
-      time (&timer);
-      tm = localtime (&timer);
-      printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s\n",
-             tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-             tm->tm_hour, tm->tm_min, tm->tm_sec,
-             VersionInfo);
+	struct tm *tm;
+	time_t timer;
+	time (&timer);
+	tm = localtime (&timer);
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
+	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	       tm->tm_hour, tm->tm_min, tm->tm_sec,
+	       VersionInfo);
     }
-
 
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = NULL;
@@ -759,7 +784,11 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-    while(1){
+    signal(SIGTERM, term_handler);
+    signal(SIGHUP, term_handler);
+    signal(SIGINT, term_handler);
+
+    while (running) {
 	numfds = 0;
 	FD_ZERO(&fdset);
 	block = 0;
@@ -779,12 +808,24 @@ int main(int argc, char *argv[])
 		break;
 	    case -1:
 	        perror("select");
-		return 1;
+		running = 0;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);
-		return 1;
+		running = 0;
 	}
     }
+
+    if (Print) {
+	struct tm *tm;
+	time_t timer;
+	time (&timer);
+	tm = localtime (&timer);
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Stopped.\n",
+	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	       tm->tm_hour, tm->tm_min, tm->tm_sec,
+	       VersionInfo);
+    }
+    return 0;
 }
 
 void

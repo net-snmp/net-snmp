@@ -56,6 +56,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <netinet/in_systm.h>
 #endif
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif

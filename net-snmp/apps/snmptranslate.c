@@ -68,7 +68,7 @@ SOFTWARE.
 void usage(void)
 {
   fprintf(stderr,
-	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+	  "usage: snmptranslate [-V|-p|-a] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
   fprintf(stderr,
           "  -V\t\tPrint snmptranslate version then exit.\n");
   fprintf(stderr,
@@ -96,9 +96,9 @@ void usage(void)
   fprintf(stderr,
           "  \tt|T\tEnable or disable alternately formatted symbolic suffix report.\n");
   fprintf(stderr,
-          "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
+          "  -w\t\tEnable warnings of MIB symbol conflicts. (Obsolete, use -Pw)\n");
   fprintf(stderr,
-          "  -W\t\tEnable detailed warnings of MIB symbol conflicts.\n");
+          "  -W\t\tEnable detailed warnings of MIB symbol conflicts. (Obsolete, use -PW)\n");
   fprintf(stderr,
           "  -R\t\tUse \"random access\" to access objectID.\n");
   fprintf(stderr,
@@ -113,6 +113,8 @@ void usage(void)
           "  -s\t\tDisplay last symbolic part of OID for objectID.\n");
   fprintf(stderr,
           "  -S\t\tDisplay MIB and last symbolic part of OID for objectID.\n");
+  fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
+  snmp_mib_toggle_options_usage("\t\t", stderr);
   exit(1);
 }
 
@@ -199,7 +201,26 @@ int main(int argc, char *argv[])
                 fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                 exit(0);
                 break;
-              case 't':
+	      case 'P':
+		{ char *cp;
+		  if (argv[arg][2] != 0)
+		    cp = &argv[arg][2];
+		  else if (++arg<argc)
+		    cp = &argv[arg][2];
+		  else {
+		    fprintf(stderr,"Need option arguments after -P flag.\n");
+		    usage();
+		    exit(1);
+		  }
+		  cp = snmp_mib_toggle_options(cp);
+		  if (cp != NULL) {
+		    fprintf(stderr,"Unknown parsing option passed to -P: %c.\n", *cp);
+		    usage();
+		    exit(1);
+		  }
+		}
+		break;
+	      case 't':
                 print = 3;
                 print_oid_report_enable_suffix();
                 break;
@@ -269,8 +290,8 @@ int main(int argc, char *argv[])
       exit(1);
     }
     
-    init_mib();
-    if (print == 1) print_mib (stdout);
+    init_snmp();
+    if (print == 1) print_mib_tree (stdout, get_tree_head());
     if (print == 2) print_ascii_dump (stdout);
     if (print == 3) print_oid_report (stdout);
     if (!current_name) exit (0);
@@ -287,6 +308,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
     }
+
     if (tosymbolic){
 	print_objid(name, name_length);
     } else {

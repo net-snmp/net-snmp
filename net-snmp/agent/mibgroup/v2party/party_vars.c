@@ -76,7 +76,7 @@ party_rowCreate(oid *partyID, int partyIDLen)
 {
     struct partyEntry *pp;
 
-    if (partyIDLen > 32)
+    if (partyIDLen > MAX_OID_LEN)
 	return NULL;
     pp = party_createEntry(partyID, partyIDLen);
     pp->partyBitMask = 0;
@@ -117,7 +117,7 @@ write_party(int action,
     int var, indexlen, len;
     oid *indexoid;
     long val;
-    oid buf[32];
+    oid buf[MAX_OID_LEN];
     int bigsize = 1000, size;
     u_long myaddr;
     

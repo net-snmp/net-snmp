@@ -181,7 +181,7 @@ void extensible_parse_config(char *token, char* cptr)
     while (isdigit(*cptr) || *cptr == '.') cptr++;
   }
   else {
-    (*pptmp)->miboid[0] = -1;
+    (*pptmp)->miboid[0] = 0;
     (*pptmp)->miblen = 0;
   }
   /* name */
@@ -408,7 +408,7 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
   static long long_ret;
   static char errmsg[STRMAX];
   struct variable myvp;
-  oid tname[30];
+  oid tname[MAX_OID_LEN];
 
   memcpy(&myvp,vp,sizeof(struct variable));
 
@@ -460,7 +460,7 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
         if ((fd = get_exec_output(exten))){
           file = fdopen(fd,"r");
           for (i=0;i != name[*length-1];i++) {
-            if (fgets(errmsg,STRMAX,file) == NULL) {
+            if (fgets(errmsg,sizeof(errmsg),file) == NULL) {
               *var_len = 0;
               fclose(file);
               close(fd);
@@ -500,7 +500,7 @@ struct subtree *find_extensible(struct subtree	*tp,
   int i,tmp;
   struct extensible *exten = 0;
   struct variable myvp;
-  oid name[30];
+  oid name[MAX_OID_LEN];
   static struct subtree mysubtree[2];
 
   for(i=1; i<= numrelocs; i++) {

@@ -41,6 +41,7 @@ EXPORTS
 	MDupdate
 	MDprint
 	print_mib
+	print_mib_tree
 	print_ascii_dump
 	read_objid
 	get_tree_head

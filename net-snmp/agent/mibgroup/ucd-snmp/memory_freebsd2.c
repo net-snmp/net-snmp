@@ -305,7 +305,7 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	return((u_char *) (&long_ret));
     case ERRORMSG:
 	if (swapFree < minimumswap)
-	    sprintf(errmsg,"Running out of swap space (%d)", swapFree);
+	    sprintf(errmsg,"Running out of swap space (%ld)", swapFree);
 	else
 	    errmsg[0] = 0;
 	*var_len = strlen(errmsg);
