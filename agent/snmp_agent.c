@@ -314,6 +314,8 @@ snmp_check_packet(struct snmp_session *session, snmp_transport *transport,
 	  }
 	  addrCache[i].addr   = addr_string;
 	  addrCache[i].status = SNMP_ADDRCACHE_USED;
+	  addr_string         = NULL;	/* Don't free this 'temporary' string
+					   since it's now part of the cache */
 	  break;
 	}
       }
