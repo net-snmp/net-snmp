@@ -64,6 +64,7 @@ SOFTWARE.
 #include "int64.h"
 #include "snmp_debug.h"
 #include "mib.h"
+#include "tools.h"
 
 #ifndef NULL
 #define NULL	0
@@ -1969,41 +1970,24 @@ asn_build_double(u_char *data,
 int
 asn_realloc(u_char **pkt, size_t *pkt_len)
 {
-  u_char *new_pkt = NULL;
-  size_t new_pkt_len;
+  u_char *old_pkt = NULL;
+  size_t old_pkt_len;
 
-  if (pkt == NULL) {
+  if (pkt != NULL) {
+    old_pkt     = *pkt;
+    old_pkt_len = *pkt_len;
+  } else {
     return 0;
   }
 
-  /*  The current re-allocation algorithm is to increase the buffer size by
-      whichever is the greater of 256 bytes or the current buffer size, up to
-      a maximum increase of 8192 bytes.  */
-
-  if (*pkt_len < 256) {
-    new_pkt_len = *pkt_len + 256;
-  } else if (*pkt_len < 8192) {
-    new_pkt_len = *pkt_len * 2;
-  } else {
-    new_pkt_len = *pkt_len + 8192;
-  }
-
-  DEBUGMSGTL(("asn_realloc", "pkt %08p, len %08x ", *pkt, *pkt_len));
-  if (*pkt == NULL) {
-    new_pkt = (u_char *)malloc(new_pkt_len);
-  } else {
-    new_pkt = (u_char *)realloc(*pkt, new_pkt_len);
-  }
-  if (new_pkt != NULL) {
+  DEBUGMSGTL(("asn_realloc", "old_pkt %08p, old_pkt_len %08x ",
+	      old_pkt, old_pkt_len));
+  if (snmp_realloc(pkt, pkt_len)) {
     DEBUGMSG(("asn_realloc", "new_pkt %08p, new_pkt_len %08x\n",
-	      new_pkt, new_pkt_len));
-    if (*pkt != NULL) {
-      DEBUGMSGTL(("asn_realloc", "memmove(%08p, %08p, %08x)\n",
-		  new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len));
-      memmove(new_pkt + (new_pkt_len - *pkt_len), new_pkt, *pkt_len);
-    }
-    *pkt = new_pkt;
-    *pkt_len = new_pkt_len;
+	      *pkt, *pkt_len));
+    DEBUGMSGTL(("asn_realloc", "memmove(%08p, %08p, %08x)\n",
+		*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
+    memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
     return 1;
   } else {
     DEBUGMSG(("asn_realloc", "CANNOT REALLOC()\n"));
