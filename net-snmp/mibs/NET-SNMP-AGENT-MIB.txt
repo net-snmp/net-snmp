@@ -17,17 +17,17 @@ netSnmpAgentMIB MODULE-IDENTITY
     LAST-UPDATED "200202090000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
-	 "postal:    Wes Hardaker
+	 "postal:   Wes Hardaker
                     P.O. Box 382
                     Davis CA  95617
 
-         email:     net-snmp-coders@lists.sourceforge.net"
+          email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
 	 "Defines control and monitoring structures for the Net-SNMP agent."
     REVISION     "200202090000Z"
     DESCRIPTION
 	"First revision."
-    ::= { netSnmpModuleIDs 2}
+    ::= { netSnmpModuleIDs 2 }
 
 
 nsVersion              OBJECT IDENTIFIER ::= {netSnmpObjects 1}
@@ -83,5 +83,82 @@ nsTransactionMode OBJECT-TYPE
     DESCRIPTION
 	"The mode number for the current operation being performed."
     ::= { nsTransactionEntry 2 }
+
+nsModuleTable OBJECT-TYPE
+    SYNTAX	SEQUENCE OF NsModuleEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"A table displaying all the oid's registered by mib modules in
+	 the agent.  Since the agent is modular in nature, this lists
+	 each module's OID it is responsible for and the name of the module"
+    ::= { netSnmpAgentMIB 2 }
+
+nsModuleEntry OBJECT-TYPE
+    SYNTAX	NsModuleEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+        "An entry containing a registered mib oid."
+    INDEX       { nsmContextName, nsmRegistrationPoint, 
+                  nsmRegistrationPriority }
+    ::= { nsModuleTable 1 }
+
+NsModuleEntry ::= SEQUENCE {
+    nsmContextName         OCTET STRING,
+    nsmRegistrationPoint   OBJECT IDENTIFIER,
+    nsmName	           DisplayString
+}
+
+nsmContextName OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"The context name the module is registered under."
+    ::= { nsModuleEntry 1 }
+
+nsmRegistrationPoint OBJECT-TYPE
+    SYNTAX	OBJECT IDENTIFIER
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"The registry OID of a mib module."
+    ::= { nsModuleEntry  2 }
+
+nsmRegistrationPriority OBJECT-TYPE
+    SYNTAX	INTEGER
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"The priority of the registered mib module."
+    ::= { nsModuleEntry  3 }
+
+nsModuleName OBJECT-TYPE
+    SYNTAX	DisplayString
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"The module name that registered this OID."
+    ::= { nsModuleEntry  4 }
+
+nsModuleModes OBJECT-TYPE
+    SYNTAX	BITS { getAndGetNext(0), set(1), getBulk(2) }
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"The modes that the particular lower level handler can cope
+  	 with directly."
+    ::= { nsModuleEntry  5 }
+
+nsModuleTimeout OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"The registered timeout.  This is only meaningful for handlers
+	 that expect to return results at a later date (subagents,
+	 etc)"
+    ::= { nsModuleEntry  6 }
 
 END
