@@ -45,11 +45,10 @@ alarm.o: ../../snmplib/system.h ./../snmpd.h
 at.o: ../../mib_module_config.h ../../config.h 
 at.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 at.o: ../../m/i386.h  
-at.o:  mibincl.h 
-at.o:   ../../snmplib/asn1.h
-at.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-at.o: ../var_struct.h ../../snmplib/snmp.h ../../snmplib/mib.h at.h
-at.o: interfaces.h ./../auto_nlist.h ../../snmplib/system.h
+at.o:   mibincl.h
+at.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
+at.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h ../../snmplib/mib.h
+at.o: at.h interfaces.h ./../auto_nlist.h ../../snmplib/system.h
 context_vars.o: ../../config.h ../../mib_module_config.h
 context_vars.o:  ../../s/linux.h ../../s/generic.h
 context_vars.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
@@ -227,10 +226,11 @@ hr_utils.o:  hr_utils.h
 icmp.o: ../../mib_module_config.h ../../config.h 
 icmp.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 icmp.o: ../../m/i386.h  
-icmp.o:  ../../snmplib/system.h mibincl.h
-icmp.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
-icmp.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-icmp.o: ../../snmplib/snmp.h ../../snmplib/mib.h ./../auto_nlist.h icmp.h
+icmp.o: ../../snmplib/system.h mibincl.h 
+icmp.o:   ../../snmplib/asn1.h
+icmp.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+icmp.o: ../var_struct.h ../../snmplib/snmp.h ../../snmplib/mib.h
+icmp.o: ./../auto_nlist.h icmp.h
 interfaces.o: ../../mib_module_config.h ../../config.h
 interfaces.o:  ../../s/linux.h ../../s/generic.h
 interfaces.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
@@ -244,6 +244,7 @@ interfaces.o: ./../auto_nlist.h
 ip.o: ../../mib_module_config.h ../../config.h 
 ip.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 ip.o: ../../m/i386.h  
+ip.o:   ./../kernel.h
 ip.o: ../../snmplib/system.h mibincl.h 
 ip.o:   ../../snmplib/asn1.h
 ip.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h ../snmp_vars.h
@@ -280,9 +281,10 @@ mibII.o: sysORTable.h
 party_vars.o: ../../config.h ../../mib_module_config.h
 party_vars.o:  ../../s/linux.h ../../s/generic.h
 party_vars.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
-party_vars.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
-party_vars.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-party_vars.o:  ./../snmp_vars.h
+party_vars.o:  ./../../snmplib/asn1.h
+party_vars.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
+party_vars.o: ./../../snmplib/snmp_impl.h 
+party_vars.o:   ./../snmp_vars.h
 party_vars.o: ../../snmplib/system.h ./../../snmplib/acl.h
 party_vars.o: ./../../snmplib/view.h party_vars.h ./../../snmplib/party.h
 pass.o: ../../config.h ../../mib_module_config.h 
@@ -350,12 +352,11 @@ snmp_rip2.o: ./../../snmplib/snmp_impl.h ./../snmp_vars.h smux.h
 sysORTable.o: ../../config.h ../../mib_module_config.h
 sysORTable.o:  ../../s/linux.h ../../s/generic.h
 sysORTable.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
-sysORTable.o:  mibincl.h 
-sysORTable.o:  ../../snmplib/asn1.h
-sysORTable.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-sysORTable.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-sysORTable.o: ../../snmplib/mib.h ../../snmplib/system.h sysORTable.h
-sysORTable.o: struct.h util_funcs.h
+sysORTable.o:   mibincl.h
+sysORTable.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+sysORTable.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+sysORTable.o: ../../snmplib/snmp.h ../../snmplib/mib.h ../../snmplib/system.h
+sysORTable.o: sysORTable.h struct.h util_funcs.h
 system.o: ../../config.h ../../mib_module_config.h 
 system.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 system.o: ../../m/i386.h  
@@ -368,7 +369,7 @@ system.o: ./../read_config.h ../../snmplib/system.h
 tcp.o: ../../config.h ../../mib_module_config.h 
 tcp.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 tcp.o: ../../m/i386.h  
-tcp.o:   mibincl.h
+tcp.o:   ./../kernel.h mibincl.h
 tcp.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 tcp.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 tcp.o: ../../snmplib/snmp.h ../../snmplib/mib.h ../../snmplib/system.h
@@ -376,6 +377,7 @@ tcp.o:   ./../auto_nlist.h tcp.h
 udp.o: ../../mib_module_config.h ../../config.h 
 udp.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 udp.o: ../../m/i386.h  
+udp.o:   ./../kernel.h
 udp.o: ../../snmplib/system.h mibincl.h 
 udp.o:   ../../snmplib/asn1.h
 udp.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h ../snmp_vars.h
@@ -384,12 +386,11 @@ udp.o: ./../auto_nlist.h udp.h
 util_funcs.o: ../../config.h ../../mib_module_config.h
 util_funcs.o:  ../../s/linux.h ../../s/generic.h
 util_funcs.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
-util_funcs.o:   mibincl.h
-util_funcs.o:  ../../snmplib/asn1.h
-util_funcs.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-util_funcs.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-util_funcs.o: ../../snmplib/mib.h struct.h util_funcs.h errormib.h mibdefs.h
-util_funcs.o: ./../read_config.h
+util_funcs.o:  mibincl.h 
+util_funcs.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+util_funcs.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+util_funcs.o: ../../snmplib/snmp.h ../../snmplib/mib.h struct.h util_funcs.h
+util_funcs.o: errormib.h mibdefs.h ./../read_config.h
 v2party.o: ../../config.h ../../mib_module_config.h 
 v2party.o: ../../s/linux.h ../../s/generic.h ../../m/i686.h ../../m/i586.h
 v2party.o: ../../m/i386.h  
@@ -401,13 +402,13 @@ v2party.o: sysORTable.h
 vacm_vars.o: ../../config.h ../../mib_module_config.h
 vacm_vars.o:  ../../s/linux.h ../../s/generic.h
 vacm_vars.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
-vacm_vars.o:   mibincl.h
-vacm_vars.o:  ../../snmplib/asn1.h
-vacm_vars.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-vacm_vars.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-vacm_vars.o: ../../snmplib/mib.h ./../read_config.h ../../snmplib/system.h
-vacm_vars.o: ./../../snmplib/vacm.h vacm_vars.h ../../mib_module_config.h
-vacm_vars.o:  sysORTable.h
+vacm_vars.o:  mibincl.h 
+vacm_vars.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+vacm_vars.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+vacm_vars.o: ../../snmplib/snmp.h ../../snmplib/mib.h ./../read_config.h
+vacm_vars.o: ../../snmplib/system.h ./../../snmplib/vacm.h vacm_vars.h
+vacm_vars.o: ../../mib_module_config.h 
+vacm_vars.o:   sysORTable.h
 var_route.o: ../../config.h ../../mib_module_config.h
 var_route.o:  ../../s/linux.h ../../s/generic.h
 var_route.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
@@ -415,7 +416,7 @@ var_route.o: ./../auto_nlist.h ./../../snmplib/asn1.h
 var_route.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
 var_route.o: ./../../snmplib/mib.h ./../../snmplib/snmp.h ../snmp_vars.h ip.h
 var_route.o: var_route.h route_write.h at.h ../kernel.h interfaces.h struct.h
-var_route.o: util_funcs.h
+var_route.o: util_funcs.h  
 versioninfo.o: ../../config.h ../../mib_module_config.h
 versioninfo.o:  ../../s/linux.h ../../s/generic.h
 versioninfo.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
@@ -448,4 +449,4 @@ wombat.o: ../../m/i686.h ../../m/i586.h ../../m/i386.h
 wombat.o:  ./../../snmplib/asn1.h
 wombat.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_impl.h
 wombat.o: ./../../snmplib/mib.h ./../var_struct.h ./../snmp_vars.h ./../m2m.h
-wombat.o: ./../snmp_vars_m2m.h ../snmp_vars.linux.h ../kernel.h wombat.h
+wombat.o: ./../snmp_vars_m2m.h ../snmp_vars.linux.h ./../kernel.h wombat.h
