@@ -24,11 +24,10 @@ netsnmpmibs_clean : netsnmpmibs_clean_
 
 !IF "$(LINKTYPE)" == "static"
 libsnmp : libsnmp_
-libsnmp_clean : libsnmp_clean_
 !ELSE
 libsnmp : libsnmp_dll_
-libsnmp_clean : libsnmp_dll_clean_
 !ENDIF
+libsnmp_clean : libsnmp_clean_ libsnmp_dll_clean_
 
 libs : libagent libhelpers libsnmp libnetsnmptrapd netsnmpmibs 
 libs_clean : libagent_clean libhelpers_clean libsnmp_clean libnetsnmptrapd_clean netsnmpmibs_clean
