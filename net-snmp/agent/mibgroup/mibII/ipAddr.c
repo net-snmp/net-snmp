@@ -500,6 +500,7 @@ Address_Scan_Init(void)
 	if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
 	{
 	    ifr=NULL;
+	    close(fd);
 	    return;
 	}
     }
