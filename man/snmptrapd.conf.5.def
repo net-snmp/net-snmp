@@ -49,7 +49,7 @@ SNMPv1 traps have been converted to the SNMPv2 trap PDU type by the
 method described in the SNMPv1/SNMPv2/SNMPv3 coexistence document (RFC2576).
 .br
 .IP Example:
-A traptoemail script has been included in the net-snmp package that
+A traptoemail script has been included in the Net-SNMP package that
 can be used as a trap handle directive:
 .br
 .RS
@@ -58,9 +58,11 @@ traphandle /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@som
 .RE
 .RE
 .IP "createUser username (MD5|SHA) authpassphrase [DES]"
-See the snmpd.conf manual page for a description of how to create
-SNMPv3 users.  It's roughly the same, but the file name changes to
-snmptrapd.conf from snmpd.conf. 
+See the 
+.I snmpd.conf(5)
+manual page for a description of how to create SNMPv3 users.  It's
+roughly the same, but the file name changes to snmptrapd.conf from
+snmpd.conf.
 .RE
 .IP "format1 format"
 The format used to print a SNMPv1 TRAP message. See
@@ -76,5 +78,5 @@ The daemon blocks on the executing traphandle commands.  (This should
 be fixed in the future with an appropriate signal catch and wait()
 combination).
 .SH "SEE ALSO"
-snmp_config(5), snmptrapd(8), syslog(8), variables(5), read_config(3).
+snmp_config(5), snmptrapd(8), syslog(8), variables(5), snmpd.conf(5), read_config(3).
 
