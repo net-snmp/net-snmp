@@ -1,8 +1,5 @@
 V3.1
   Gnu Auto-conf
-    Makefiles
-      sed script for man/mib/other
-        mib file creation
     AC_FUNC_MEMCMP
   Solaris port (finish working out bugs...)
   Manual pages/Documentation
@@ -10,6 +7,7 @@ V3.1
 V3.2
   Pass off extensibles
   snmpset'able variables
+  Should be able to set the fix script line in the .conf files per type.
   agent should send traps to a trap daemon.  
     (it might all ready, just needs configuration)
 
