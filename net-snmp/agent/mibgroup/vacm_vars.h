@@ -51,32 +51,32 @@ extern u_char *var_vacm_view __P((struct variable *, oid *, int *, int, int *, i
 #define PRIVRW	(SNMPV2ANY | 0x5000)
 
 struct variable2 vacm_sec2group[] = {
-    {SECURITYMODEL, INTEGER, PRIVRW, var_vacm_sec2group, 1, {1}},
-    {SECURITYNAME, STRING, PRIVRW, var_vacm_sec2group, 1, {2}},
-    {SECURITYGROUP, STRING, PRIVRW, var_vacm_sec2group, 1, {3}},
-    {SECURITYSTORAGE, INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
-    {SECURITYSTATUS, INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
+    {SECURITYMODEL, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {1}},
+    {SECURITYNAME, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {2}},
+    {SECURITYGROUP, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {3}},
+    {SECURITYSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
+    {SECURITYSTATUS, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
 };
 
 struct variable2 vacm_access[] = {
-    {ACCESSPREFIX, STRING, PRIVRW, var_vacm_access, 1, {1}},
-    {ACCESSMODEL, INTEGER, PRIVRW, var_vacm_access, 1, {2}},
-    {ACCESSLEVEL, INTEGER, PRIVRW, var_vacm_access, 1, {3}},
-    {ACCESSMATCH, INTEGER, PRIVRW, var_vacm_access, 1, {4}},
-    {ACCESSREAD, STRING, PRIVRW, var_vacm_access, 1, {5}},
-    {ACCESSWRITE, STRING, PRIVRW, var_vacm_access, 1, {6}},
-    {ACCESSNOTIFY, STRING, PRIVRW, var_vacm_access, 1, {7}},
-    {ACCESSSTORAGE, INTEGER, PRIVRW, var_vacm_access, 1, {8}},
-    {ACCESSSTATUS, INTEGER, PRIVRW, var_vacm_access, 1, {9}},
+    {ACCESSPREFIX, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {1}},
+    {ACCESSMODEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {2}},
+    {ACCESSLEVEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {3}},
+    {ACCESSMATCH, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {4}},
+    {ACCESSREAD, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {5}},
+    {ACCESSWRITE, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {6}},
+    {ACCESSNOTIFY, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {7}},
+    {ACCESSSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {8}},
+    {ACCESSSTATUS, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {9}},
 };
 
 struct variable2 vacm_view[] = {
-    {VIEWNAME, STRING, PRIVRW, var_vacm_view, 1, {1}},
-    {VIEWSUBTREE, OBJID, PRIVRW, var_vacm_view, 1, {2}},
-    {VIEWMASK, STRING, PRIVRW, var_vacm_view, 1, {3}},
-    {VIEWTYPE, INTEGER, PRIVRW, var_vacm_view, 1, {4}},
-    {VIEWSTORAGE, INTEGER, PRIVRW, var_vacm_view, 1, {5}},
-    {VIEWSTATUS, INTEGER, PRIVRW, var_vacm_view, 1, {6}},
+    {VIEWNAME, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {1}},
+    {VIEWSUBTREE, ASN_OBJECT_ID, PRIVRW, var_vacm_view, 1, {2}},
+    {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {3}},
+    {VIEWTYPE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {4}},
+    {VIEWSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {5}},
+    {VIEWSTATUS, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {6}},
 };
 
 config_load_mib(OID_VACMGROUPENTRY, 10, vacm_sec2group)

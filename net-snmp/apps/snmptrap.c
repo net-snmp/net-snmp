@@ -175,7 +175,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 
     switch((type = tolower (type))){
 	case 'i':
-	    vars->type = INTEGER;
+	    vars->type = ASN_INTEGER;
 	    vars->val.integer = (long *)malloc(sizeof(long));
 	    *(vars->val.integer) = atoi(value);
 	    vars->val_len = sizeof(long);
@@ -183,7 +183,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	case 's':
 	case 'x':
 	case 'd':
-	    vars->type = STRING;
+	    vars->type = ASN_OCTET_STR;
 	    if (type == 'd'){
 		vars->val_len = ascii_to_binary((u_char *)value, buf);
 	    } else if (type == 's'){
@@ -196,12 +196,12 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    memmove(vars->val.string, buf, vars->val_len);
 	    break;
 	case 'n':
-	    vars->type = NULLOBJ;
+	    vars->type = ASN_NULL;
 	    vars->val_len = 0;
 	    vars->val.string = NULL;
 	    break;
 	case 'o':
-	    vars->type = OBJID;
+	    vars->type = ASN_OBJECT_ID;
 	    vars->val_len = MAX_NAME_LEN;
 	    read_objid(value, (oid *)buf, &vars->val_len);
 	    vars->val_len *= sizeof(oid);
@@ -209,13 +209,13 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    memmove(vars->val.objid, buf, vars->val_len);
 	    break;
 	case 't':
-	    vars->type = TIMETICKS;
+	    vars->type = ASN_TIMETICKS;
 	    vars->val.integer = (long *)malloc(sizeof(long));
 	    *(vars->val.integer) = atoi(value);
 	    vars->val_len = sizeof(long);
 	    break;
 	case 'a':
-	    vars->type = IPADDRESS;
+	    vars->type = ASN_IPADDRESS;
 	    vars->val.integer = (long *)malloc(sizeof(long));
 	    *(vars->val.integer) = inet_addr(value);
 	    vars->val_len = sizeof(long);
@@ -318,7 +318,7 @@ main(argc, argv)
 #endif
 
     if (session.version == SNMP_VERSION_1) {
-	pdu = snmp_pdu_create(TRP_REQ_MSG);
+	pdu = snmp_pdu_create(SNMP_MSG_TRAP);
 	if (arg == argc) {
 	    fprintf(stderr, "No enterprise oid\n");
 	    usage();
@@ -379,7 +379,7 @@ main(argc, argv)
 	long sysuptime;
 	char csysuptime [20];
 
-	pdu = snmp_pdu_create(TRP2_REQ_MSG);
+	pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
 	if (arg == argc) {
 	    fprintf(stderr, "Missing up-time parameter\n");
 	    usage();

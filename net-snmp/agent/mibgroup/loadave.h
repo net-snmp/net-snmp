@@ -22,12 +22,12 @@ config_parse_dot_conf("load", loadave_parse_config, loadave_free_config);
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_loadave_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
-  {LOADAVE, STRING, RONLY, var_extensible_loadave, 1, {LOADAVE}},
-  {LOADMAXVAL, STRING, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
-    {ERRORFLAG, INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
+  {LOADAVE, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADAVE}},
+  {LOADMAXVAL, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
 };
 
 config_load_mib(EXTENSIBLEMIB.LOADAVEMIBNUM.1, EXTENSIBLENUM+2, extensible_loadave_variables)

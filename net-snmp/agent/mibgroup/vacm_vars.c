@@ -294,35 +294,49 @@ int vacm_in_view (pi, name, namelen)
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
     char *vn;
+    char *sn;
 
-    DEBUGP ("vacm_in_view: ver=%d, source=%.8x, community=%s\n", pi->version, pi->source.sin_addr.s_addr, pi->community);
+    if (pi->sec_model == SNMP_SEC_MODEL_SNMPv1 || pi->sec_model == SNMP_SEC_MODEL_SNMPv2c) {
+	DEBUGP ("vacm_in_view: ver=%d, source=%.8x, community=%s\n", pi->version, pi->source.sin_addr.s_addr, pi->community);
 
-    while (sp) {
-	if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
-		== sp->sourceIp.sin_addr.s_addr
-	    && strcmp(sp->community, pi->community) == 0)
-	    break;
-	sp = sp->next;
+	/* allow running without snmpd.conf */
+	if (sp == NULL) {
+	    DEBUGP("vacm_in_view: accepted with no com2sec entries\n");
+	    return 1;
+	}
+	while (sp) {
+	    if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
+		    == sp->sourceIp.sin_addr.s_addr
+		&& strcmp(sp->community, pi->community) == 0)
+		break;
+	    sp = sp->next;
+	}
+	if (sp == NULL) return 0;
+	sn = sp->securityName;
     }
-    if (sp == NULL) return 0;
-    DEBUGP ("vacm_in_view: securityName == %s\n", sp->securityName);
-    gp = vacm_getGroupEntry(pi->sec_model, sp->securityName);
+    else {
+	sn = NULL;
+    }
+
+    if (sn == NULL) return 0;
+    DEBUGP ("vacm_in_view: securityName == %s\n", sn);
+    gp = vacm_getGroupEntry(pi->sec_model, sn);
     if (gp == NULL) return 0;
     DEBUGP ("vacm_in_view: groupName == %s\n", gp->groupName);
     ap = vacm_getAccessEntry(gp->groupName, "", pi->sec_model, pi->sec_level);
     if (ap == NULL) return 0;
     switch (pi->pdutype) {
-    case GET_REQ_MSG:
-    case GETNEXT_REQ_MSG:
-    case BULK_REQ_MSG:
+    case SNMP_MSG_GET:
+    case SNMP_MSG_GETNEXT:
+    case SNMP_MSG_GETBULK:
 	vn = ap->readView;
 	break;
-    case SET_REQ_MSG:
+    case SNMP_MSG_SET:
 	vn = ap->writeView;
 	break;
-    case TRP_REQ_MSG:
-    case TRP2_REQ_MSG:
-    case INFORM_REQ_MSG:
+    case SNMP_MSG_TRAP:
+    case SNMP_MSG_TRAP2:
+    case SNMP_MSG_INFORM:
 	vn = ap->notifyView;
 	break;
     default:

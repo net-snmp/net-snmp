@@ -20,9 +20,9 @@ extern int write_acl __P((int, u_char *, u_char, int, u_char *, oid *, int));
 #define PRIVRO   (SNMPV2ANY)
 
 struct variable2 acl_variables[] = {
-    {ACLPRIVELEGES, INTEGER, PRIVRW, var_acl, 1, {4}},
-    {ACLSTORAGETYPE, INTEGER, PRIVRW, var_acl, 1, {5}},
-    {ACLSTATUS, INTEGER, PRIVRW, var_acl, 1, {6}}
+    {ACLPRIVELEGES, ASN_INTEGER, PRIVRW, var_acl, 1, {4}},
+    {ACLSTORAGETYPE, ASN_INTEGER, PRIVRW, var_acl, 1, {5}},
+    {ACLSTATUS, ASN_INTEGER, PRIVRW, var_acl, 1, {6}}
 };
 
 config_load_mib( ACLTABLE, 11, acl_variables)

@@ -15,8 +15,8 @@ extern u_char	*var_hrprint();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrprint_variables[] = {
-    { HRPRINT_STATUS,    INTEGER, RONLY, var_hrprint, 2, {1,1}},
-    { HRPRINT_ERROR,      STRING, RONLY, var_hrprint, 2, {1,2}}
+    { HRPRINT_STATUS,    ASN_INTEGER, RONLY, var_hrprint, 2, {1,1}},
+    { HRPRINT_ERROR,   ASN_OCTET_STR, RONLY, var_hrprint, 2, {1,2}}
 };
 config_load_mib( MIB.25.3.5, 9, hrprint_variables)
 

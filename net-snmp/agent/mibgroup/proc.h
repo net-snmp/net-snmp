@@ -26,14 +26,14 @@ config_parse_dot_conf("proc", proc_parse_config, proc_free_config);
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_proc_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
-    {PROCMIN, INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}}, 
-    {PROCMAX, INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
-    {PROCCOUNT, INTEGER, RONLY, var_extensible_proc, 1, {PROCCOUNT}},
-    {ERRORFLAG, INTEGER, RONLY, var_extensible_proc, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_extensible_proc, 1, {ERRORMSG}},
-  {ERRORFIX, INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
+    {PROCMIN, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}}, 
+    {PROCMAX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
+    {PROCCOUNT, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCCOUNT}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_proc, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORMSG}},
+  {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
 };
 
 config_load_mib(EXTENSIBLEMIB.PROCMIBNUM.1, EXTENSIBLENUM+2, extensible_proc_variables)

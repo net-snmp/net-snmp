@@ -15,8 +15,8 @@ extern u_char	*var_hrproc();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrproc_variables[] = {
-    { HRPROC_ID,          OBJID, RONLY, var_hrproc, 2, {1,1}},
-    { HRPROC_LOAD,      INTEGER, RONLY, var_hrproc, 2, {1,2}}
+    { HRPROC_ID,      ASN_OBJECT_ID, RONLY, var_hrproc, 2, {1,1}},
+    { HRPROC_LOAD,      ASN_INTEGER, RONLY, var_hrproc, 2, {1,2}}
 };
 config_load_mib( MIB.25.3.3, 9, hrproc_variables)
 

@@ -91,30 +91,30 @@ struct eventNotifyEntry {
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 eventnextindex_variables[] = {
-    {EVENTNEXTINDEX, INTEGER, RONLY, var_eventnextindex, 1, {0}}
+    {EVENTNEXTINDEX, ASN_INTEGER, RONLY, var_eventnextindex, 1, {0}}
 };
 
 struct variable2 eventtab_variables[] = {
-        {EVENTTABID, OBJID, RWRITE, var_eventtab, 1, {2 }},
-        {EVENTTABDESCRIPTION, STRING, RWRITE, var_eventtab, 1, {3 }},
-        {EVENTTABEVENTS, COUNTER, RONLY, var_eventtab, 1, {4 }},
-        {EVENTTABLASTTIMESENT, TIMETICKS, RONLY, var_eventtab, 1, {5 }},
-        {EVENTTABSTATUS, INTEGER, RWRITE, var_eventtab, 1, {6 }}
+        {EVENTTABID, ASN_OBJECT_ID, RWRITE, var_eventtab, 1, {2 }},
+        {EVENTTABDESCRIPTION, ASN_OCTET_STR, RWRITE, var_eventtab, 1, {3 }},
+        {EVENTTABEVENTS, ASN_COUNTER, RONLY, var_eventtab, 1, {4 }},
+        {EVENTTABLASTTIMESENT, ASN_TIMETICKS, RONLY, var_eventtab, 1, {5 }},
+        {EVENTTABSTATUS, ASN_INTEGER, RWRITE, var_eventtab, 1, {6 }}
 };
 
 struct variable2 eventmininterval_variables[] = {
-    {EVENTMININTERVAL, INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
+    {EVENTMININTERVAL, ASN_INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
 };
 
 struct variable2 eventmaxretrans_variables[] = {
-    {EVENTMAXRETRANS, INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
+    {EVENTMAXRETRANS, ASN_INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
 };
 
 struct variable2 eventnotifytab_variables[] = {
-        {EVENTNOTIFYTABINTERVAL, INTEGER, RWRITE, var_eventnotifytab, 1, {1 }},
-        {EVENTNOTIFYTABRETRANSMISSIONS, INTEGER, RWRITE, var_eventnotifytab, 1, {2 }},
-        {EVENTNOTIFYTABLIFETIME, INTEGER, RWRITE, var_eventnotifytab, 1, {3 }},
-        {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
+        {EVENTNOTIFYTABINTERVAL, ASN_INTEGER, RWRITE, var_eventnotifytab, 1, {1 }},
+        {EVENTNOTIFYTABRETRANSMISSIONS, ASN_INTEGER, RWRITE, var_eventnotifytab, 1, {2 }},
+        {EVENTNOTIFYTABLIFETIME, ASN_INTEGER, RWRITE, var_eventnotifytab, 1, {3 }},
+        {EVENTNOTIFYTABSTATUS, ASN_INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
 config_load_mib( SNMPV2EVENTNEXTINDEX, 10, eventnextindex_variables)

@@ -17,22 +17,22 @@ void party_rowDelete __P((oid *, int));
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 party_variables[] = {
-    {PARTYINDEX, INTEGER, RONLY, var_party, 1, {2}},
-    {PARTYTDOMAIN, OBJID, RWRITE, var_party, 1, {3}},
-    {PARTYTADDRESS, STRING, RWRITE, var_party, 1, {4}},
-    {PARTYMAXMESSAGESIZE, INTEGER, RWRITE, var_party, 1, {5}},
-    {PARTYLOCAL, INTEGER, RWRITE, var_party, 1, {6}},
-    {PARTYAUTHPROTOCOL, OBJID, RWRITE, var_party, 1, {7}},
-    {PARTYAUTHCLOCK, UINTEGER, RWRITE, var_party, 1, {8}},
-    {PARTYAUTHPRIVATE, STRING, RWRITE, var_party, 1, {9}},
-    {PARTYAUTHPUBLIC, STRING, RWRITE, var_party, 1, {10}},
-    {PARTYAUTHLIFETIME, INTEGER, RWRITE, var_party, 1, {11}},
-    {PARTYPRIVPROTOCOL, OBJID, RWRITE, var_party, 1, {12}},
-    {PARTYPRIVPRIVATE, STRING, RWRITE, var_party, 1, {13}},
-    {PARTYPRIVPUBLIC, STRING, RWRITE, var_party, 1, {14}},
-    {PARTYCLONEFROM, OBJID, RONLY, var_party, 1, {15}},
-    {PARTYSTORAGETYPE, INTEGER, RWRITE, var_party, 1, {16}},
-    {PARTYSTATUS, INTEGER, RWRITE, var_party, 1, {17}}
+    {PARTYINDEX, ASN_INTEGER, RONLY, var_party, 1, {2}},
+    {PARTYTDOMAIN, ASN_OBJECT_ID, RWRITE, var_party, 1, {3}},
+    {PARTYTADDRESS, ASN_OCTET_STR, RWRITE, var_party, 1, {4}},
+    {PARTYMAXMESSAGESIZE, ASN_INTEGER, RWRITE, var_party, 1, {5}},
+    {PARTYLOCAL, ASN_INTEGER, RWRITE, var_party, 1, {6}},
+    {PARTYAUTHPROTOCOL, ASN_OBJECT_ID, RWRITE, var_party, 1, {7}},
+    {PARTYAUTHCLOCK, ASN_UINTEGER, RWRITE, var_party, 1, {8}},
+    {PARTYAUTHPRIVATE, ASN_OCTET_STR, RWRITE, var_party, 1, {9}},
+    {PARTYAUTHPUBLIC, ASN_OCTET_STR, RWRITE, var_party, 1, {10}},
+    {PARTYAUTHLIFETIME, ASN_INTEGER, RWRITE, var_party, 1, {11}},
+    {PARTYPRIVPROTOCOL, ASN_OBJECT_ID, RWRITE, var_party, 1, {12}},
+    {PARTYPRIVPRIVATE, ASN_OCTET_STR, RWRITE, var_party, 1, {13}},
+    {PARTYPRIVPUBLIC, ASN_OCTET_STR, RWRITE, var_party, 1, {14}},
+    {PARTYCLONEFROM, ASN_OBJECT_ID, RONLY, var_party, 1, {15}},
+    {PARTYSTORAGETYPE, ASN_INTEGER, RWRITE, var_party, 1, {16}},
+    {PARTYSTATUS, ASN_INTEGER, RWRITE, var_party, 1, {17}}
 };
 
 config_load_mib( PARTYTABLE, 11, party_variables)

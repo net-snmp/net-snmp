@@ -33,7 +33,7 @@ int numpassthrus=0;
 /* the relocatable extensible commands variables */
 struct variable2 extensible_passthru_variables[] = {
   /* bogus entry.  Only some of it is actually used. */
-  {MIBINDEX, INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
+  {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
 
 void pass_parse_config(word,cptr)
@@ -201,32 +201,32 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         if (!strncasecmp(buf,"string",6)) {
           buf2[strlen(buf2)-1] = 0;  /* zap the linefeed */
           *var_len = strlen(buf2);
-          vp->type = STRING;
+          vp->type = ASN_OCTET_STR;
           return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
-          vp->type = INTEGER;
+          vp->type = ASN_INTEGER;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"counter",7)) {
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
-          vp->type = COUNTER;
+          vp->type = ASN_COUNTER;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"gauge",5)) {
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
-          vp->type = GAUGE;
+          vp->type = ASN_GAUGE;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"objectid",8)) {
           newlen = parse_miboid(buf2,objid);
           *var_len = newlen*sizeof(oid);
-          vp->type = OBJID;
+          vp->type = ASN_OBJECT_ID;
           return((unsigned char *) objid);
         } else if (!strncasecmp(buf,"timetick",8)) {
           *var_len = sizeof(long_ret);
           long_ret = atoi(buf2);
-          vp->type = TIMETICKS;
+          vp->type = ASN_TIMETICKS;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"ipaddress",9)) {
           newlen = parse_miboid(buf2,objid);
@@ -238,7 +238,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           long_ret = (objid[0] << (8*3)) + (objid[1] << (8*2)) +
             (objid[2] << 8) + objid[3];
           *var_len = sizeof(long_ret);
-          vp->type = IPADDRESS;
+          vp->type = ASN_IPADDRESS;
           return((unsigned char *) &long_ret);
         }
       }
@@ -294,28 +294,28 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         sprint_mib_oid(buf, name, name_len);
       sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
       switch(var_val_type) {
-        case INTEGER:
-        case COUNTER:
-        case GAUGE:
-        case TIMETICKS:
+        case ASN_INTEGER:
+        case ASN_COUNTER:
+        case ASN_GAUGE:
+        case ASN_TIMETICKS:
           asn_parse_int(var_val,&tmplen,&var_val_type, &tmp,
                         sizeof(tmp));
           switch (var_val_type) {
-            case INTEGER:
+            case ASN_INTEGER:
               sprintf(buf,"integer %d",(int) tmp);
               break;
-            case COUNTER:
+            case ASN_COUNTER:
               sprintf(buf,"counter %d",(int) tmp);
               break;
-            case GAUGE:
+            case ASN_GAUGE:
               sprintf(buf,"gauge %d",(int) tmp);
               break;
-            case TIMETICKS:
+            case ASN_TIMETICKS:
               sprintf(buf,"timeticks %d",(int) tmp);
               break;
           }
           break;
-        case IPADDRESS:
+        case ASN_IPADDRESS:
           asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
                                  sizeof(utmp));
           sprintf(buf,"ipaddress %d.%d.%d.%d",
@@ -324,13 +324,13 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
                   (int) ((utmp & 0xff00) >> (8)),
                   (int) ((utmp & 0xff)));
           break;
-        case STRING:
+        case ASN_OCTET_STR:
           itmp = sizeof(buf);
           memset(buf2,(0),itmp);
           asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
           sprintf(buf,"string %s",buf2);
           break;
-        case OBJID:
+        case ASN_OBJECT_ID:
           itmp = sizeof(objid);
           asn_parse_objid(var_val,&tmplen,&var_val_type,objid,&itmp);
           sprint_mib_oid(buf2, objid, itmp);

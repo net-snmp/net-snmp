@@ -140,6 +140,10 @@ int Syslog = 0;
 #ifndef LOG_LOCAL7
 #define LOG_LOCAL7	0
 #endif
+#ifndef LOG_DAEMON
+#define LOG_DAEMON	0
+#endif
+
 /* Include an extra Facility variable to allow command line adjustment of
    syslog destination */
 int Facility = LOG_LOCAL0;
@@ -325,7 +329,7 @@ int snmp_input(op, session, reqid, pdu, magic)
     struct hostent *host;
 
     if (op == RECEIVED_MESSAGE){
-	if (pdu->command == TRP_REQ_MSG){
+	if (pdu->command == SNMP_MSG_TRAP){
 	    if (Print){
 		time (&timer);
 		tm = localtime (&timer);
@@ -401,8 +405,8 @@ int snmp_input(op, session, reqid, pdu, magic)
 		       uptime_string(pdu->time, buf),varbuf);
 		}
 	    }
-	} else if (pdu->command == TRP2_REQ_MSG
-		   || pdu->command == INFORM_REQ_MSG){
+	} else if (pdu->command == SNMP_MSG_TRAP2
+		   || pdu->command == SNMP_MSG_INFORM){
 	    if (Print){
 		printf("-------------------------------  Notification  -------------------------------\n");
 		time (&timer);
@@ -421,8 +425,8 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    if (Event) {
 		event_input(pdu->variables);
 	    }
-	    if (pdu->command == INFORM_REQ_MSG){
-		if (!(reply = snmp_clone_pdu2(pdu, GET_RSP_MSG))){
+	    if (pdu->command == SNMP_MSG_INFORM){
+		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_GET))){
 		    fprintf(stderr, "Couldn't clone PDU for response\n");
 		    return 1;
 		}

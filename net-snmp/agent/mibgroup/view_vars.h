@@ -20,10 +20,10 @@ extern int write_view __P((int, u_char *, u_char, int, u_char *, oid *, int));
 #define PRIVRO   (SNMPV2ANY)
 
 struct variable2 view_variables[] = {
-    {VIEWMASK, STRING, PRIVRW, var_view, 1, {3}},
-    {VIEWTYPE, INTEGER, PRIVRW, var_view, 1, {4}},
-    {VIEWSTORAGETYPE, INTEGER, PRIVRW, var_view, 1, {5}},
-    {VIEWSTATUS, INTEGER, PRIVRW, var_view, 1, {6}}
+    {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_view, 1, {3}},
+    {VIEWTYPE, ASN_INTEGER, PRIVRW, var_view, 1, {4}},
+    {VIEWSTORAGETYPE, ASN_INTEGER, PRIVRW, var_view, 1, {5}},
+    {VIEWSTATUS, ASN_INTEGER, PRIVRW, var_view, 1, {6}}
 };
 
 config_load_mib( VIEWTABLE, 11, view_variables)

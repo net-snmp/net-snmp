@@ -152,7 +152,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	    }
 	}
 	
-	pdu = snmp_pdu_create(GET_REQ_MSG);
+	pdu = snmp_pdu_create(SNMP_MSG_GET);
 	memcpy(&pdu->address.sin_addr.s_addr, dstp->partyTAddress, 4);
 	memcpy(&pdu->address.sin_port, dstp->partyTAddress + 4, 2);
 	pdu->address.sin_family = AF_INET;
@@ -171,10 +171,10 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	return 1;	/* this means the request has been sent */
     }
     
-    if (!has_access(GET_REQ_MSG, srcp->partyIndex, dstp->partyIndex,
+    if (!has_access(SNMP_MSG_GET, srcp->partyIndex, dstp->partyIndex,
 		    cxp->contextIndex))
 	return 5;
-    if (!has_access(GET_RSP_MSG, dstp->partyIndex, srcp->partyIndex,
+    if (!has_access(SNMP_MSG_RESPONSE, dstp->partyIndex, srcp->partyIndex,
 		    cxp->contextIndex))
 	return 4;
     
@@ -189,7 +189,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     pi->cxp = cxp;
     
     pi->version = SNMP_VERSION_2p;
-    pi->pdutype = GET_REQ_MSG;
+    pi->pdutype = SNMP_MSG_GET;
     /* rest of pi is not needed */
     
     memcpy(bigVar, variable, variableLen * sizeof(oid));
@@ -201,9 +201,9 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	return 6;
     }
     
-    if ((type != INTEGER) && (type != COUNTER) &&
-	(type != TIMETICKS) && (type != GAUGE) &&
-	(type != COUNTER64)) {
+    if ((type != ASN_INTEGER) && (type != ASN_COUNTER) &&
+	(type != ASN_TIMETICKS) && (type != ASN_GAUGE) &&
+	(type != ASN_COUNTER64)) {
 	return 7;
     }
     
@@ -698,9 +698,9 @@ alarmGetResponse(pdu, state, op, session)
     if (pdu->errstat == SNMP_ERR_NOERROR) {
 	/* send the variable to an update routine */
 	vp = pdu->variables;
-	if (vp && ((vp->type == INTEGER) || (vp->type == COUNTER) ||
-		   (vp->type == TIMETICKS) || (vp->type == GAUGE) ||
-		   (vp->type == COUNTER64))) {
+	if (vp && ((vp->type == ASN_INTEGER) || (vp->type == ASN_COUNTER) ||
+		   (vp->type == ASN_TIMETICKS) || (vp->type == ASN_GAUGE) ||
+		   (vp->type == ASN_COUNTER64))) {
 	    if (alarm->sampleType == ALARM_DELTA_VALUE) {
 		alarmUpdateDelta(alarm, *vp->val.integer);
 	    }

@@ -15,7 +15,7 @@ snmpd.conf.5: snmpd.conf.5.def ../sedscript
 snmpd.1: snmpd.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.1.def > snmpd.1
 
-install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN8)
+install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN5G) $(MAN8)
 	@for i in $(MAN1) ; do $(INSTALL) $(srcdir)/$$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
 	@for i in $(MAN1G) ; do $(INSTALL) $$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
 	@for i in $(MAN3) ; do $(INSTALL) $(srcdir)/$$i $(man3dir) ; echo "install:  installed $$i in $(man3dir)" ; done

@@ -246,7 +246,7 @@ writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     u_char buf[sizeof(version_descr)], *cp;
     int count, size;
 
-    if (var_val_type != STRING){
+    if (var_val_type != ASN_OCTET_STR){
 	printf("not string\n");
 	return SNMP_ERR_WRONGTYPE;
     }
@@ -285,7 +285,7 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     u_char buf[sizeof(version_descr)], *cp;
     int count, size;
 
-    if (var_val_type != STRING){
+    if (var_val_type != ASN_OCTET_STR){
 	printf("not string\n");
 	return SNMP_ERR_WRONGTYPE;
     }

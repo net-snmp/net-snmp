@@ -199,7 +199,7 @@ protopr __P((void))
     oid *instance;
     int first, status;
 
-    request = snmp_pdu_create(GETNEXT_REQ_MSG);
+    request = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
     snmp_add_null_var(request, oid_tcpconntable, sizeof(oid_tcpconntable)/sizeof(oid));
 
@@ -215,7 +215,7 @@ protopr __P((void))
 		break;
 	}
 	
-	request = snmp_pdu_create(GETNEXT_REQ_MSG);
+	request = snmp_pdu_create(SNMP_MSG_GETNEXT);
 	snmp_add_null_var(request, vp->name, vp->name_length);
 
 	instance = vp->name + 10;

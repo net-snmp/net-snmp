@@ -108,7 +108,7 @@ struct packet_info {
 #define ASN_COUNTER64   (ASN_APPLICATION | 6)
 #define ASN_UINTEGER    (ASN_APPLICATION | 7)  /* historic - don't use */
 
-#define CMU_COMPATIBLE
+/* #define CMU_COMPATIBLE */
 #ifdef CMU_COMPATIBLE
 #define INTEGER	    ASN_INTEGER
 #define STRING	    ASN_OCTET_STR

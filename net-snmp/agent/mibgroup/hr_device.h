@@ -20,12 +20,12 @@ extern u_char	*var_hrdevice();
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrdevice_variables[] = {
-    { HRDEV_INDEX,     INTEGER, RONLY, var_hrdevice, 2, {1,1}},
-    { HRDEV_TYPE,        OBJID, RONLY, var_hrdevice, 2, {1,2}},
-    { HRDEV_DESCR,      STRING, RONLY, var_hrdevice, 2, {1,3}},
-    { HRDEV_ID,          OBJID, RONLY, var_hrdevice, 2, {1,4}},
-    { HRDEV_STATUS,    INTEGER, RONLY, var_hrdevice, 2, {1,5}},
-    { HRDEV_ERRORS,    COUNTER, RONLY, var_hrdevice, 2, {1,6}}
+    { HRDEV_INDEX,     ASN_INTEGER, RONLY, var_hrdevice, 2, {1,1}},
+    { HRDEV_TYPE,    ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1,2}},
+    { HRDEV_DESCR,   ASN_OCTET_STR, RONLY, var_hrdevice, 2, {1,3}},
+    { HRDEV_ID,      ASN_OBJECT_ID, RONLY, var_hrdevice, 2, {1,4}},
+    { HRDEV_STATUS,    ASN_INTEGER, RONLY, var_hrdevice, 2, {1,5}},
+    { HRDEV_ERRORS,    ASN_COUNTER, RONLY, var_hrdevice, 2, {1,6}}
 };
 config_load_mib( MIB.25.3.2, 9, hrdevice_variables)
 

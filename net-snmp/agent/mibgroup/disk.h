@@ -35,17 +35,17 @@ struct diskpart
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_disk_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
-  {DISKDEVICE, STRING, RONLY, var_extensible_disk, 1, {DISKDEVICE}},
-  {DISKMINIMUM, INTEGER, RONLY, var_extensible_disk, 1, {DISKMINIMUM}},
-  {DISKMINPERCENT, INTEGER, RONLY, var_extensible_disk, 1, {DISKMINPERCENT}},
-  {DISKTOTAL, INTEGER, RONLY, var_extensible_disk, 1, {DISKTOTAL}},
-  {DISKAVAIL, INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
-  {DISKUSED, INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},
-  {DISKPERCENT, INTEGER, RONLY, var_extensible_disk, 1, {DISKPERCENT}},
-  {ERRORFLAG, INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG }},
-  {ERRORMSG, STRING, RONLY, var_extensible_disk, 1, {ERRORMSG }}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORNAME}},
+  {DISKDEVICE, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {DISKDEVICE}},
+  {DISKMINIMUM, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKMINIMUM}},
+  {DISKMINPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKMINPERCENT}},
+  {DISKTOTAL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKTOTAL}},
+  {DISKAVAIL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
+  {DISKUSED, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},
+  {DISKPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKPERCENT}},
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG }},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORMSG }}
 };
 
 config_load_mib(EXTENSIBLEMIB.DISKMIBNUM.1, EXTENSIBLENUM+2, extensible_disk_variables)
