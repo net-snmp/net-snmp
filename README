@@ -130,24 +130,39 @@ MAILING LISTS
 
   The lists:
 
-    The following mailing lists have been created for your use:
+    A number of mailing lists have been created for support of the project:
+    The main ones are:
 
-      net-snmp-announce@lists.sourceforge.net  -- For announcements
+      net-snmp-announce@lists.sourceforge.net  -- For official announcements
       net-snmp-users@lists.sourceforge.net     -- For usage discussions
       net-snmp-coders@lists.sourceforge.net    -- For development discussions
-      net-snmp-cvs@lists.sourceforge.net       -- For cvs update announcements
 
-    To subscribe to these lists, please see:
-  
-      http://www.net-snmp.org/lists/
-
-    The lists you definitely want to subscribe to is the
-    net-snmp-announce@lists.sourceforge.net list and the
-    net-snmp-users@lists.sourceforge.net list.
+    The -coders list is intended for discussion on development of code
+    that will be shipped as part of the package.  The -users list is
+    for general discussion on configuring and using the package,
+    including issues with coding user-developed applications (clients,
+    managers, MIB modules, etc).
 
     Please do *NOT* send messages to both -users and -coders lists.
     This is completely unnecessary, and simply serves to further
-    overload (and annoy) the core development team.  Thank you.
+    overload (and annoy) the core development team.   If in doubt,
+    just use the -users list.
+
+
+    The other lists of possible interest are:
+
+      net-snmp-cvs@lists.sourceforge.net       -- For cvs update announcements
+      net-snmp-bugs@lists.sourceforge.net      -- For Bug database update announcements
+      net-snmp-patches@lists.sourceforge.net   -- For Patch database update announcements
+
+    Please do NOT post messages to these lists (or to the announce list above).
+    Bug reports and Patches should be submitted via the Source Forge tracker
+    system.  See the main project web pages for details.
+
+    To subscribe to any of these lists, please see:
+  
+      http://www.net-snmp.org/lists/
+
 
   Archives:
     The archives for these mailing lists can be found by following links at
