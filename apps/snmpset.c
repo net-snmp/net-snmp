@@ -88,11 +88,11 @@ void usage(void)
   fprintf(stderr," [<objectID> <type> <value> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr, 
-    "  type - one of i, u, t, a, o, s, x, d, n\n");
+    "  type - one of i, u, t, a, o, s, x, d, b, n\n");
   fprintf(stderr,
     "    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
   fprintf(stderr,
-    "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
+    "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING, b: BITS\n");
 #ifdef OPAQUE_SPECIAL_TYPES
   fprintf(stderr,
     "    U: unsigned int64, I: signed int64, F: float, D: double\n");

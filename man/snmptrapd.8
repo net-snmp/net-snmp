@@ -19,12 +19,12 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "15 Jun 2001"
+.TH SNMPTRAPD 8 "07 Aug 2001"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-n] [-O oidopts] [-C] [-c confFile] [-F FORMAT]
+snmptrapd [common options] [-P] [-o file] [-s] [-f] [-p port] [-e] [-l [d0-7]] [-a] [-C] [-c confFile] [-F FORMAT]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -39,10 +39,13 @@ The log messages are of the form:
 .I Snmptrapd
 must be run as root so that UDP port 162 can be opened.
 .SH COMMAND LINE ARGUMENTS
-.IP "-h"
-Print a usage summary and exit.
+In addition to the command arguments described under
+.IR snmpcmd (1)
+the following arguments are understood:
 .IP "-P"
 Print the logged messages to stdout.
+.IP "-o file"
+Print the logged messaged to the specified file.
 .IP "-p port"
 Specifies the port to run on, if the default 162 is not desired.
 .IP "-s"
@@ -65,8 +68,6 @@ Causes the application to dump input and output packets.
 Turn debugging output on.
 .IP "-f"
 Don't fork away from the caller when using syslog().
-.IP "-O oidopts"
-Set OID printing options (see snmpcmd(1))
 .IP "-C"
 Don't read the default set of configuration files.
 .IP "-c confFile"

@@ -94,6 +94,8 @@ void usage(void)
   fprintf(stderr,
           "  \t\tTRANSOPTS values:\n");
   fprintf(stderr,
+          "  \t\t    B: Print all matching objects for a regex search.\n");
+  fprintf(stderr,
           "  \t\t    d: Print full details of the given OID.\n");
   fprintf(stderr,
           "  \t\t    p: Print tree format symbol table.\n");
