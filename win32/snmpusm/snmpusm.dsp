@@ -17,8 +17,7 @@ CFG=snmpusm - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "snmpusm - Win32 Release" (based on\
- "Win32 (x86) Console Application")
+!MESSAGE "snmpusm - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "snmpusm - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
@@ -66,7 +65,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -82,10 +81,6 @@ LINK32=link.exe
 
 # Name "snmpusm - Win32 Release"
 # Name "snmpusm - Win32 Debug"
-# Begin Source File
-
-SOURCE=..\..\apps\snmp_parse_args.c
-# End Source File
 # Begin Source File
 
 SOURCE=..\..\apps\snmpusm.c

@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libsnmp_dll"="..\apps\libsnmp_dll\libsnmp_dll.dsp" - Package Owner=<4>
+Project: "libsnmp_dll"=".\libsnmp_dll\libsnmp_dll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmpbulkwalk"="..\apps\snmpbulkwalk\snmpbulkwalk.dsp" - Package Owner=<4>
+Project: "snmpbulkwalk"=".\snmpbulkwalk\snmpbulkwalk.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmpdelta"="..\apps\snmpdelta\snmpdelta.dsp" - Package Owner=<4>
+Project: "snmpdelta"=".\snmpdelta\snmpdelta.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -74,11 +74,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libsnmp
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "snmpgetnext"="..\apps\snmpgetnext\snmpgetnext.dsp" - Package Owner=<4>
+Project: "snmpgetnext"=".\snmpgetnext\snmpgetnext.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -98,6 +101,12 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libsnmp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -110,11 +119,17 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libsnmp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "snmpstatus"="..\apps\snmpstatus\snmpstatus.dsp" - Package Owner=<4>
+Project: "snmpstatus"=".\snmpstatus\snmpstatus.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -137,11 +152,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libsnmp
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "snmptest"="..\apps\snmptest\snmptest.dsp" - Package Owner=<4>
+Project: "snmptest"=".\snmptest\snmptest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -164,11 +182,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libsnmp
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "snmptrap"="..\apps\snmptrap\snmptrap.dsp" - Package Owner=<4>
+Project: "snmptrap"=".\snmptrap\snmptrap.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -176,6 +197,12 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libsnmp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp_dll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -192,7 +219,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmpusm"="..\apps\snmpusm\snmpusm.dsp" - Package Owner=<4>
+Project: "snmpusm"=".\snmpusm\snmpusm.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -204,7 +231,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmpwalk"="..\apps\snmpwalk\snmpwalk.dsp" - Package Owner=<4>
+Project: "snmpwalk"=".\snmpwalk\snmpwalk.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
