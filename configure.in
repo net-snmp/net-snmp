@@ -16,6 +16,18 @@ Compiler Options:
   --with-cc=CC                    use CC to compile (default=gcc).],
     [CC=$with_cc;export CC])
 
+AC_ARG_WITH(ar,
+[  --with-ar=AR                    use AR as the archiver.],
+    [AR=$with_ar; export AR])
+
+AC_ARG_WITH(endianness,
+[  --with-endianness=big|little    define endianness of target platform when
+                                  cross-compiling.],
+    [if test $with_endianness != "big" -a $with_endianness != "little" ; then
+       AC_MSG_ERROR([Endianness must be big or little, not \"$with_endianness\".]);
+     fi
+])
+
 AC_ARG_WITH(cflags,
 [  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],
     [CFLAGS=$with_cflags; export CFLAGS])
@@ -1161,7 +1173,18 @@ fi
 AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
 
 dnl Checks for byte order
-AC_C_BIGENDIAN
+if test $cross_compiling = yes; then
+  if test $with_endianness = "big"; then
+    AC_DEFINE(WORDS_BIGENDIAN)
+  elif test -z $with_endianness; then
+    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness]);
+  fi
+else
+  if test $with_endianness; then
+    AC_MSG_ERROR([Endianness has been specified, but you are not cross-compiling.])
+  fi
+  AC_C_BIGENDIAN
+fi
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
@@ -1686,8 +1709,11 @@ AC_CHECK_STRUCT_FOR([
 
 dnl attempt to figure out if sysctl is usable
 
-AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_CAN_USE_SYSCTL,
-[AC_TRY_RUN([
+if test $cross_compiling = yes; then
+  AC_MSG_WARN([Can't check sysctl, manually define CAN_USE_SYSCTL if platform support available])
+else
+  AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_CAN_USE_SYSCTL,
+  [AC_TRY_RUN([
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -1721,7 +1747,8 @@ main() {
   else
     exit(1);
 }
-], ac_cv_CAN_USE_SYSCTL=yes, ac_cv_CAN_USE_SYSCTL=no)])
+  ], ac_cv_CAN_USE_SYSCTL=yes, ac_cv_CAN_USE_SYSCTL=no, ac_cv_CAN_USE_SYSCTL=no)])
+fi
 
 if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(CAN_USE_SYSCTL)
