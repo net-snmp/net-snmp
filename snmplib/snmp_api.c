@@ -4733,7 +4733,7 @@ snmp_sess_select_info(void *sessp,
     slp = Sessions;
   }
 
-  DEBUGMSGTL(("sess_select", "for %s session%s\n", 
+  DEBUGMSGTL(("sess_select", "for %s session%s: ", 
 	      sessp?"single":"all", sessp?"":"s"));
 
   for(; slp; slp = next) {
@@ -4741,23 +4741,24 @@ snmp_sess_select_info(void *sessp,
 
     if (slp->transport == NULL) {
       /*  Close in progress -- skip this one.  */
-      DEBUGMSGTL(("sess_select","select fail: closing...\n"));
+      DEBUGMSG(("sess_select", "skip "));
       continue;
     }
 
     if (slp->transport->sock == -1) {
       /*  This session was marked for deletion.  */
-      DEBUGMSGTL(("sess_select", "deleting session...\n"));
+      DEBUGMSG(("sess_select", "delete\n"));
       if (sessp == NULL) {
 	snmp_close(slp->session);
       } else {
 	snmp_sess_close(slp);
       }
+      DEBUGMSGTL(("sess_select", "for %s session%s: ", 
+		  sessp?"single":"all", sessp?"":"s"));
       continue;
     }
 
-    DEBUGMSGTL(("sess_select", "including session with fd %d\n",
-		slp->transport->sock));
+    DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
     if ((slp->transport->sock + 1) > *numfds) {
       *numfds = (slp->transport->sock + 1);
     }
@@ -4780,6 +4781,7 @@ snmp_sess_select_info(void *sessp,
       break;
     }
   }
+  DEBUGMSG(("sess_select", "\n"));
 
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)) {
     next_alarm = get_next_alarm_delay_time(&delta);
