@@ -582,6 +582,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         break;
 
     case MODE_GETNEXT:
+    case MODE_GETBULK:
     case MODE_SET_RESERVE1:
 		/* XXX - Windows currently supports setting this */
     case MODE_SET_RESERVE2:
@@ -589,7 +590,12 @@ ip_handler(netsnmp_mib_handler          *handler,
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
     case MODE_SET_UNDO:
+        snmp_log(LOG_WARNING, "mibII/ip: Unsupported mode (%d)\n",
+                               reqinfo->mode);
+        break;
     default:
+        snmp_log(LOG_WARNING, "mibII/ip: Unrecognised mode (%d)\n",
+                               reqinfo->mode);
         break;
     }
 
