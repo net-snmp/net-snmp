@@ -9,9 +9,7 @@
 ########################################################################
 ##
 /*
- * TODO:
- * reverse value mapping
- *
+ * TODO:245:o: |-> Implement $node reverse mapping.
  * If the values for your data type don't exactly match the
  * possible values defined by the mib, you should map them here.
  */

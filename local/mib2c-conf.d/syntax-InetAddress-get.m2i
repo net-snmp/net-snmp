@@ -9,12 +9,12 @@
 ########################################################################
 ##
     /*
-     * TODO:
-     * get actual address type from ${context}_rowreq_ctx->data.
+     * TODO:231:o: |-> copy $node data.
+     * get actual address type from your context pointer.
      */
     int  addressType = -1;
 
-    return MFD_SKIP; /* TODO: remove this once you've set data */
+    return MFD_SKIP; /* TODO:235:M: |-> Remove SKIP once you've set $node data */
 
     switch (addressType) {
     case INETADDRESSTYPE_UNKNOWN:

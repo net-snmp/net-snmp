@@ -13,24 +13,10 @@
 @   include generic-ctx-get.m2i@
 @else@ // mapping
     /*
-     * TODO:
-     * value mapping
-@   if $mfd_code_verbose == 1@
+     * TODO:246:r: |-> Define $node mapping.
+     * Map values between raw/native values and MIB values
      *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     * Otherwise, just do a direct copy.
-@   end@
-     */
 @   if $m2c_node_needlength == 1@
-    /*
-     * it is hard to autogenerate code for mapping types that are not simple
-     * integers, so here is an idea of what you might need to do. It may
-     * need some tweaking to get right. 
-     */
-    /*
-     * NOTE: this code would replace the memcpy below.
-     *
      * if(MFD_SUCCESS !=
      *    ${node}_map(&$m2c_ctx_lh, &$m2c_ctx_lhs,
      *                $m2c_ctx_rh, $m2c_ctx_rhs, $m2c_node_realloc)) {
@@ -41,11 +27,16 @@
 ##
 @   elsif ($node.enums == 1) && ("$node.perltype" eq "INTEGER")@
 ##
+    * enums usually need mapping.
+    */
     if(MFD_SUCCESS !=
        ${node}_map(&${m2c_ctx_lh}, ${m2c_ctx_rh} )) {
         return MFD_ERROR;
     }
-@   end@ // enums
+@   else@ // enums
+     * Integer based value can usually just do a direct copy.
+     */
+@   end@ 
 @end@ // mapping
 ##
 ########################################################################
