@@ -120,7 +120,7 @@ EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
 .SH ACCESS CONTROL
 snmpd supports the View-Based Access Control Model (vacm)
-as defined in RFC 2175.
+as defined in RFC 2265.
 To this end, it recognizes the following keywords in the configuration
 file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR.
 .IP "com2sec NAME SOURCE COMMUNITY"
