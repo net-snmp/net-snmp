@@ -263,6 +263,7 @@ var_smux(struct variable *vp,
 	}
 }
 
+
 int 
 var_smux_write(
 	int action,
@@ -275,66 +276,212 @@ var_smux_write(
 {
 	smux_reg *rptr;
 	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[6], type;
-	size_t len;
 	int reterr;
+	size_t len, var_len, datalen, name_length;
 	long reqid, errsts, erridx;
+	u_char var_type, *dataptr;
+	long lval;
+
+	DEBUGMSGTL (("smux","[var_smux_write] entering var_smux_write\n"));
 
 	len = SMUXMAXPKTSIZE;
+	reterr = SNMP_ERR_NOERROR;
+	var_len = var_val_len;
+	var_type = var_val_type;
+	name_length = name_len;
 
 	/* XXX find the descriptor again */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
-		if(!compare_tree(name, name_len, rptr->sr_name,
+		if (!compare_tree(name, name_len, rptr->sr_name,
 		     rptr->sr_name_len))
 			break;
 	}
-	if (action == COMMIT) {
-		if ((smux_build((u_char)SMUX_SET, smux_reqid, name,
-		    &name_len, var_val_type, statP, var_val_len,
-		     buf, &len)) == 0) {
-			DEBUGMSGTL (("smux","[var_smux_write] smux build failed\n"));
-			return SNMP_ERR_GENERR;	/* ? */
+
+	switch (action) {
+	case RESERVE1:
+		DEBUGMSGTL (("smux","[var_smux_write] entering RESERVE1\n"));
+
+		/* length might be long */
+		var_len += (*(var_val + 1) & ASN_LONG_LEN) ?
+		    var_len + ((*(var_val + 1) & 0x7F) + 2) : 2;
+
+		switch (var_val_type) {
+		case ASN_INTEGER:
+			datalen = sizeof(long);
+			if ((ptr = asn_parse_int(var_val, &var_len,
+			    &var_type, &smux_long,
+			    datalen)) == NULL ) {
+				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_int failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			dataptr = (u_char *)&smux_long;
+			break;
+		case ASN_OCTET_STR:
+			if (((ptr = asn_parse_header(var_val, &var_len,
+			    &var_type)) == NULL) ||
+			    (var_type != (u_char)ASN_OCTET_STR)) {
+				DEBUGMSGTL (("smux", "[var_smux_write] asn_parse_header for octet string failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			datalen = var_len;
+			dataptr = ptr;
+			break;
+		case ASN_COUNTER:
+		case ASN_GAUGE:
+		case ASN_TIMETICKS:
+		case ASN_UINTEGER:
+			datalen = sizeof(u_long);
+			if ((ptr = asn_parse_unsigned_int(var_val,
+			    &var_len, &var_type, (u_long *)&smux_ulong,
+			    datalen)) == NULL) {
+				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			dataptr = (u_char *)&smux_ulong;
+		case ASN_COUNTER64:
+			datalen = sizeof(smux_counter64);
+			if ((ptr = asn_parse_unsigned_int64(var_val,
+			    &var_len, &var_type, &smux_counter64,
+			    datalen)) == NULL ) {
+				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			dataptr = (u_char *)&smux_counter64;
+			break;
+		case ASN_IPADDRESS:
+			if (((ptr = asn_parse_header(var_val, 
+			    &var_len, &var_type)) == NULL) ||
+			    (var_type != (u_char)ASN_IPADDRESS)) {
+				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			datalen = var_len;
+			memcpy((u_char *)&(smux_sa.sin_addr.s_addr),
+			    ptr, datalen);
+			dataptr = (u_char *)&(smux_sa.sin_addr.s_addr);
+			break;
+		case ASN_OPAQUE:
+		case ASN_NSAP:
+		case ASN_OBJECT_ID:
+			datalen = MAX_OID_LEN;
+			if ((ptr = asn_parse_objid(var_val, &var_len,
+			    &var_type, smux_objid,
+			    &datalen)) == NULL ) {
+				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
+				return SNMP_ERR_GENERR;
+			}
+			dataptr = (u_char *)smux_objid;
+			break;
+		case ASN_BIT_STR:
+			datalen = SMUXMAXSTRLEN;
+			ptr = asn_parse_bitstring(var_val,
+			    &var_len, &var_type,
+			    smux_str, &datalen);
+			dataptr = (u_char *)smux_str;
+			break;
+		case SNMP_NOSUCHOBJECT:
+    	        case SNMP_NOSUCHINSTANCE:
+		case SNMP_ENDOFMIBVIEW:
+		case ASN_NULL:
+		default:
+			DEBUGMSGTL (("smux","[var_smux_write] variable not supported\n"));
+			return SNMP_ERR_GENERR;
+			break;
 		}
-	}
-	if (send(rptr->sr_fd, (char *)buf, len, 0) < 0) {
-		DEBUGMSGTL (("smux","[var_smux_write] send failed\n"));
-		return SNMP_ERR_GENERR; /* ? */
-	}
-	if ((len = recv(rptr->sr_fd, (char *)buf, SMUXMAXPKTSIZE, 0)) <= 0) {
-		DEBUGMSGTL (("smux","[var_smux_write] recv failed or timed out\n"));
-		smux_peer_cleanup(rptr->sr_fd);
-		return SNMP_ERR_GENERR; /* ? */
-	}
-	ptr = buf;
-	ptr = asn_parse_int(ptr, &len, &type, &reqid, sizeof(reqid));
-	if ((ptr == NULL) || type != ASN_INTEGER) 
-		return SNMP_ERR_GENERR;
-	ptr = asn_parse_int(ptr, &len, &type, &errsts, sizeof(errsts));
-	if ((ptr == NULL) || type != ASN_INTEGER) 
-		return SNMP_ERR_GENERR;
-	ptr = asn_parse_int(ptr, &len, &type, &erridx, sizeof(erridx));
-	if ((ptr == NULL) || type != ASN_INTEGER) 
-		return SNMP_ERR_GENERR;
 
-	ptr = sout;
-	len = 6;
-	if ((ptr = asn_build_sequence(ptr, &len,
-	    (u_char)SMUX_SOUT, 2)) == NULL)
-		return SNMP_ERR_GENERR;
-	*(ptr++) = (u_char)1;
+		if ((smux_build((u_char)SMUX_SET, smux_reqid,
+		    name, &name_length, var_val_type, dataptr, 
+		    datalen, buf, &len)) != SMUXOK) {
+			DEBUGMSGTL (("smux","[var_smux_write] smux build failed\n"));
+			return SNMP_ERR_GENERR;
+		}
 
-	if((errsts == 0) && (erridx == 0)) {
-		*ptr = (u_char)0;
+
+		if (send(rptr->sr_fd, buf, len, 0) < 0) {
+			DEBUGMSGTL (("smux","[var_smux_write] send failed\n"));
+			return SNMP_ERR_GENERR;
+		}
+
+		if ((len = recv(rptr->sr_fd, buf,
+		    SMUXMAXPKTSIZE, 0)) <= 0) {
+			DEBUGMSGTL (("smux","[var_smux_write] recv failed or timed out\n"));
+			/* do we need to do a peer cleanup in this case?? */
+			smux_peer_cleanup(rptr->sr_fd);
+			return SNMP_ERR_GENERR;
+		}
+
+		ptr = buf;
+		ptr = asn_parse_header(ptr, &len, &type);
+		if ((ptr == NULL) || type != SNMP_MSG_RESPONSE) 
+			return SNMP_ERR_GENERR;
+
+		ptr = asn_parse_int(ptr, &len, &type, &reqid, sizeof(reqid));
+		if ((ptr == NULL) || type != ASN_INTEGER) 
+			return SNMP_ERR_GENERR;
+
+		ptr = asn_parse_int(ptr, &len, &type, &errsts, sizeof(errsts));
+		if ((ptr == NULL) || type != ASN_INTEGER) 
+			return SNMP_ERR_GENERR;
+
+		if (errsts) {
+			DEBUGMSGTL (("smux","[var_smux_write] errsts returned\n"));
+			return (errsts);
+		}
+
+		ptr = asn_parse_int(ptr, &len, &type, &erridx, sizeof(erridx));
+		if ((ptr == NULL) || type != ASN_INTEGER) 
+			return SNMP_ERR_GENERR;
+
 		reterr = SNMP_ERR_NOERROR;
-	} else {
-		*ptr = (u_char)1;
-		reterr = SNMP_ERR_COMMITFAILED;
-	}
-	if ((send(rptr->sr_fd, (char *)sout, 6, 0)) < 0) {
-		DEBUGMSGTL (("smux","[var_smux_write] send sout failed\n"));
-		return SNMP_ERR_GENERR;
+
+		break;	/* case Action == RESERVE1 */
+
+	case RESERVE2:
+		DEBUGMSGTL (("smux","[var_smux_write] entering RESERVE2\n"));
+		reterr = SNMP_ERR_NOERROR;
+		break;	/* case Action == RESERVE2 */
+	case FREE:
+		DEBUGMSGTL (("smux","[var_smux_write] entering FREE - sending RollBack \n"));
+		ptr = sout;
+		var_len = 6;
+		if ((ptr = asn_build_sequence(ptr, &var_len,
+		    (u_char)SMUX_SOUT, 2)) == NULL) {
+			DEBUGMSGTL (("smux","[var_smux_write] asn_build_sequence failure\n"));
+			return SNMP_ERR_GENERR;
+		}
+		*(ptr++) = (u_char)1;		/* length */
+		*ptr = (u_char)1;			/* rollback */
+		if ((send(rptr->sr_fd, sout, 6, 0)) < 0) {
+			DEBUGMSGTL (("smux","[var_smux_write] send rollback failed\n"));
+			reterr = SNMP_ERR_GENERR;
+		} else
+			reterr = SNMP_ERR_NOERROR;
+		break;	/* case Action == FREE */
+	case COMMIT:
+		DEBUGMSGTL (("smux","[var_smux_write] entering COMMIT - sending SOUT\n"));
+
+		ptr = sout;
+		var_len = 6;
+		if ((ptr = asn_build_sequence(ptr, &var_len,
+		    (u_char)SMUX_SOUT, 2)) == NULL) {
+			DEBUGMSGTL (("smux","[var_smux_write] asn_build_sequence failure\n"));
+			return SNMP_ERR_GENERR;
+		}
+		*(ptr++) = (u_char)1; 	/* length */
+		*ptr = (u_char)0;	/* commit */
+
+		if ((send(rptr->sr_fd, sout, 6, 0)) < 0) {
+			DEBUGMSGTL (("smux","[var_smux_write] send commit failed\n"));
+			reterr = SNMP_ERR_GENERR;
+		} else 
+			reterr = SNMP_ERR_NOERROR;
+		break;	/* case Action == COMMIT */
+	default:
+		break;
 	}
 	return reterr;
 }
+
 
 int
 smux_accept(int sd)
