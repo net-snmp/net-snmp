@@ -2339,8 +2339,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		}
 		if (!*cp) goto bad_id;
 		cp2 = cp+1;
-		if (!*cp2 && *cp2 != '.') goto bad_id;
-		*cp2++ = 0;
+		if (*cp2 && *cp2 != '.') goto bad_id;
+		if (*cp2 == '.') cp2++;
+		else cp2 = NULL;
 		if (len == -1) {
 		    struct range_list *rp = tp->ranges;
 		    int ok = 0;
@@ -2366,6 +2367,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		    fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
 		    objid[*objidlen] = strtoul(cp, &ecp, 0);
 		    if (*ecp) goto bad_id;
+		    if (objid[*objidlen] < 0 || objid[*objidlen] > 255)
+		        goto bad_id;
 		    (*objidlen)++;
 		    len--;
 		    cp = cp2;
@@ -2418,9 +2421,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 
 bad_id:
     {   char buf[256];
-	if (in_dices) sprintf(buf, "Index: %s, %s, %d %d",
-				in_dices->ilabel, fcp, pos, len);
-	else if (tp) sprintf(buf, "Node: %s -> %s", tp->label, fcp);
+	if (in_dices) sprintf(buf, "Index out of range: %s (%s)",
+				fcp, in_dices->ilabel);
+	else if (tp) sprintf(buf, "Node not found: %s -> %s", tp->label, fcp);
 	else sprintf(buf, "%s", fcp);
 
 	snmp_set_detail(buf);
