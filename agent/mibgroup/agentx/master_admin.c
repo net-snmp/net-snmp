@@ -357,7 +357,7 @@ handle_master_agentx_packet(int operation,
     if ( magic )
         asp = (struct agent_snmp_session *)magic;
     else
-    	asp = init_agent_snmp_session(session, snmp_clone_pdu(pdu) );
+    	asp = init_agent_snmp_session(session, pdu);
 
     switch (pdu->command) {
         case AGENTX_MSG_OPEN:
@@ -430,7 +430,8 @@ handle_master_agentx_packet(int operation,
         asp->pdu->command = AGENTX_MSG_RESPONSE;
 	asp->pdu->errstat = asp->status;
 	snmp_send( asp->session, asp->pdu );
-	free(asp);
+	asp->pdu = NULL;
+	free_agent_snmp_session(asp);
     }
 
     return 1;

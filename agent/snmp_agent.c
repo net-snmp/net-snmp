@@ -223,13 +223,8 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     asp = malloc( sizeof( struct agent_snmp_session ));
     if ( asp == NULL )
 	return NULL;
-    asp->start = pdu->variables;
-    asp->end   = pdu->variables;
-    if ( asp->end != NULL )
-	while ( asp->end->next_variable != NULL )
-	    asp->end = asp->end->next_variable;
     asp->session = session;
-    asp->pdu     = pdu;
+    asp->pdu     = snmp_clone_pdu(pdu);
     asp->rw      = READ;
     asp->exact   = TRUE;
     asp->outstanding_requests = NULL;
@@ -237,7 +232,24 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     asp->mode    = RESERVE1;
     asp->status  = SNMP_ERR_NOERROR;
 
+    asp->start = asp->pdu->variables;
+    asp->end   = asp->pdu->variables;
+    if ( asp->end != NULL )
+	while ( asp->end->next_variable != NULL )
+	    asp->end = asp->end->next_variable;
+
     return asp;
+}
+
+void
+free_agent_snmp_session(struct agent_snmp_session *asp)
+{
+    if (!asp)
+	return;
+    if (asp->pdu)
+	snmp_free_pdu(asp->pdu);
+
+    free(asp);
 }
 
 int
@@ -262,7 +274,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     struct variable_list *var_ptr, *var_ptr2;
 
     if ( magic == NULL ) {
-	asp = init_agent_snmp_session( session, snmp_clone_pdu(pdu) );
+	asp = init_agent_snmp_session( session, pdu );
 	status = SNMP_ERR_NOERROR;
     }
     else {
@@ -281,10 +293,12 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
             asp->pdu->command = SNMP_MSG_RESPONSE;
             snmp_increment_statistic(STAT_SNMPOUTPKTS);
             snmp_send( asp->session, asp->pdu );
+	    asp->pdu = NULL;
+	    free_agent_snmp_session(asp);
             return 1;
         } else {
             /* drop the request */
-            free( asp );
+            free_agent_snmp_session( asp );
             return 0;
         }
     }
@@ -461,16 +475,16 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     case SNMP_MSG_RESPONSE:
         snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 0;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         snmp_increment_statistic(STAT_SNMPINTRAPS);
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 0;
     default:
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 0;
     }
 
@@ -550,7 +564,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	snmp_send( asp->session, asp->pdu );
 	snmp_increment_statistic(STAT_SNMPOUTPKTS);
 	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
-	free( asp );
+	asp->pdu = NULL;
+	free_agent_snmp_session( asp );
     }
 
     return 1;
