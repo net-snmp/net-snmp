@@ -794,9 +794,10 @@ check_for_delegated(struct agent_snmp_session *asp) {
 
 
 int
-wrap_up_request(struct agent_snmp_session *asp, int status) {
+wrap_up_request(struct agent_snmp_session *asp, int status)
+{
     struct variable_list *var_ptr;
-    int i;
+    int i, n = 0, r = 0;
 
     /* some stuff needs to be saved in special subagent cases */
     switch(asp->pdu->command) {
@@ -814,18 +815,28 @@ wrap_up_request(struct agent_snmp_session *asp, int status) {
     /* if this is a GETBULK response we need to rearrange the varbinds */
     if (asp->pdu->command == SNMP_MSG_GETBULK) {
         int repeats = asp->pdu->errindex;
-        int repvarnum = asp->vbcount - asp->pdu->errstat;
         int j;
         
-        for(i = 0; i < repvarnum-1; i++) {
+	if (asp->pdu->errstat < asp->vbcount) {
+	  n = asp->pdu->errstat;
+	} else {
+	  n = asp->vbcount;
+	}
+	if ((r = asp->vbcount - n) < 0) {
+	  r = 0;
+	}
+
+        for(i = 0; i < r - 1; i++) {
             for(j = 0; j < repeats; j++) {
                 asp->bulkcache[i * repeats + j]->next_variable = 
                     asp->bulkcache[(i+1) * repeats + j];
             }
         }
-        for(j = 0; j < repeats-1; j++) {
-            asp->bulkcache[(repvarnum-1) * repeats + j]->next_variable = 
-                asp->bulkcache[j+1];
+	if (r > 0) {
+	    for(j = 0; j < repeats-1; j++) {
+		asp->bulkcache[(r-1) * repeats + j]->next_variable = 
+		    asp->bulkcache[j+1];
+	    }
         }
     }
     
@@ -1201,9 +1212,8 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
     struct variable_list *varbind_ptr, *vbsave, *vbptr, **prevNext;
     int view;
     int vbcount = 0;
-    int bulkskip = asp->pdu->errstat, bulkcount = 0, bulkrep = 0;
-    int i;
-    int n = 0, r = 0;
+    int bulkcount = 0, bulkrep = 0;
+    int i = 0, n = 0, r = 0;
     request_info *request;
 
     if (asp->treecache == NULL &&
@@ -1280,9 +1290,6 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
 		    /*  0 repeats requested for this varbind, so take it off
 			the list.  */
 		    vbptr = varbind_ptr;
-		    DEBUGMSGTL(("snmp_agent", "GETBULK 0 reps for "));
-		    DEBUGMSGOID(("snmp_agent", vbptr->name, vbptr->name_length));
-		    DEBUGMSGTL(("snmp_agent", "\n"));
 		    *prevNext = vbptr->next_variable;
 		    vbptr->next_variable = NULL;
 		    snmp_free_varbind(vbptr);
