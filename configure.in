@@ -553,7 +553,7 @@ if test "x$enable_ipv6" = "xyes"; then
 	v6trylibc=no
 
 	AC_MSG_CHECKING([ipv6 stack type])
-	for i in v6d toshiba kame inria zeta linux; do
+	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6; do
 		case $i in
 		v6d)
 			AC_EGREP_CPP(yes, [dnl
@@ -594,7 +594,7 @@ yes
 #endif],
 				[v6type=$i;
 				v6lib=dummy;
-				v6libdir=/none;
+				v6libdir=none;
 				v6trylibc=yes;
 				CFLAGS="-DINET6 $CFLAGS"])
 			;;
@@ -609,7 +609,19 @@ yes
 				v6libdir=/usr/local/v6/lib;
 				CFLAGS="-DINET6 $CFLAGS"])
 			;;
-		linux)
+		linux-glibc)
+			AC_EGREP_CPP(yes, [dnl
+#include <features.h>
+#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1) || (__GLIBC_ > 2))
+yes
+#endif],
+				[v6type=$i;
+				v6lib=dummy;
+				v6libdir=none;
+				v6trylibc=yes;
+				CFLAGS="-DINET6 $CFLAGS"])
+			;;
+		linux-inet6)
 			if test -d /usr/inet6; then
 				v6type=$i
 				v6lib=inet6
