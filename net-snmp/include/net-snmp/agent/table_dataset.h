@@ -150,6 +150,7 @@ extern          "C" {
                                                      *table_set,
                                                      char
                                                      *registration_name);
+    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 #if HAVE_STDARG_H
     void           
