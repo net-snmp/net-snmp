@@ -172,7 +172,8 @@ agentx_close_session( struct snmp_session *ss, int why )
 }
 
 int
-agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
+agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
+		 int priority, int range_subid, oid range_ubound)
 {
     struct snmp_pdu *pdu, *response;
 
@@ -186,9 +187,16 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
-    pdu->priority = DEFAULT_MIB_PRIORITY;
+    pdu->priority = priority;
     pdu->sessid = ss->sessid;
-    snmp_add_null_var( pdu, start, startlen);
+    pdu->range_subid = range_subid;
+    if ( range_subid ) {
+	snmp_pdu_add_variable( pdu, start, startlen,
+				ASN_OBJECT_ID, (char *)start, startlen);
+	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
+    }
+    else
+	snmp_add_null_var( pdu, start, startlen);
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS ) {
         DEBUGMSGTL(("agentx/subagent","registering failed!\n"));
@@ -208,7 +216,8 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
 }
 
 int
-agentx_unregister_priority( struct snmp_session *ss, oid start[], size_t startlen, int priority)
+agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
+		   int priority, int range_subid, oid range_ubound)
 {
     struct snmp_pdu *pdu, *response;
 
@@ -224,7 +233,14 @@ agentx_unregister_priority( struct snmp_session *ss, oid start[], size_t startle
     pdu->time = 0;
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
-    snmp_add_null_var( pdu, start, startlen);
+    pdu->range_subid = range_subid;
+    if ( range_subid ) {
+	snmp_pdu_add_variable( pdu, start, startlen,
+				ASN_OBJECT_ID, (char *)start, startlen);
+	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
+    }
+    else
+	snmp_add_null_var( pdu, start, startlen);
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
 	return 0;
@@ -237,12 +253,6 @@ agentx_unregister_priority( struct snmp_session *ss, oid start[], size_t startle
     snmp_free_pdu(response);
     DEBUGMSGTL(("agentx/subagent","unregistered\n"));
     return 1;
-}
-
-int
-agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
-{
-    agentx_unregister_priority( ss, start, startlen, DEFAULT_MIB_PRIORITY);
 }
 
 int

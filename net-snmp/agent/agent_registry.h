@@ -15,6 +15,8 @@ struct register_parameters {
    oid    *name;
    size_t  namelen;
    int     priority;
+   int     range_subid;
+   oid     range_ubound;
 };
 
 #define MIB_REGISTERED_OK		 0
@@ -28,8 +30,34 @@ struct register_parameters {
 #define DEFAULT_MIB_PRIORITY		127
 
 void setup_tree (void);
-int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, int, struct snmp_session *);
+struct subtree *find_subtree (oid *, size_t, struct subtree *);
+struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
+struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
+struct snmp_session *get_session_for_oid( oid *, size_t);
+
+int register_mib(const char *, struct variable *, size_t, size_t, oid *, size_t);
+int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *, size_t, int);
+int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *);
+
+int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
 void unregister_mibs_by_session (struct snmp_session *);
+
+struct subtree *free_subtree (struct subtree *);
+int compare_tree (oid *, size_t, oid *, size_t);
+int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
+
+/* REGISTER_MIB(): This macro simply loads register_mib with less pain:
+
+   descr:   A short description of the mib group being loaded.
+   var:     The variable structure to load.
+   vartype: The variable structure used to define it (variable2, variable4, ...)
+   theoid:  A *initialized* *exact length* oid pointer.
+            (sizeof(theoid) *must* return the number of elements!) 
+*/
+#define REGISTER_MIB(descr, var, vartype, theoid)                      \
+  (void)register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
+               sizeof(var)/sizeof(struct vartype),                     \
+               theoid, sizeof(theoid)/sizeof(oid));
 
 #endif /* AGENT_REGISTRY_H */

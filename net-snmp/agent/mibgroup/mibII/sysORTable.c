@@ -68,8 +68,7 @@ init_sysORTable(void) {
 		sizeof(struct variable2),
 		sizeof(sysORTable_variables)/sizeof(struct variable2),
 		sysORTable_variables_oid,
-		sizeof(sysORTable_variables_oid)/sizeof(oid),
-		1, NULL);
+		sizeof(sysORTable_variables_oid)/sizeof(oid), 1);
   else
 #endif
     REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);

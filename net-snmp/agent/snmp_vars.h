@@ -73,32 +73,13 @@ struct variable {
     oid		    name[MAX_OID_LEN];	    /* object identifier of variable */
 };
 
+void init_agent(void);
 int subtree_old_size (void);
 void sort_tree (void);
-struct subtree *find_subtree (oid *, size_t, struct subtree *);
-struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
-struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
-struct snmp_session *get_session_for_oid( oid *, size_t);
-int register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
-int unregister_mib (oid *, size_t);
-struct subtree *free_subtree (struct subtree *);
-void init_agent(void);
-int compare_tree (oid *, size_t, oid *, size_t);
-int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
 
-/* REGISTER_MIB(): This macro simply loads register_mib with less pain:
-
-   descr:   A short description of the mib group being loaded.
-   var:     The variable structure to load.
-   vartype: The variable structure used to define it (variable2, variable4, ...)
-   theoid:  A *initialized* *exact length* oid pointer.
-            (sizeof(theoid) *must* return the number of elements!) 
-*/
-#define REGISTER_MIB(descr, var, vartype, theoid)                      \
-  (void)register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
-               sizeof(var)/sizeof(struct vartype),                     \
-               theoid, sizeof(theoid)/sizeof(oid));
-
+#ifndef _AGENT_REGISTRY_H
+#include "agent_registry.h"
+#endif
 
 /* fail overloads non-negative integer value. it must be -1 ! */
 #define MATCH_FAILED	(-1)

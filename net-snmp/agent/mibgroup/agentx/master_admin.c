@@ -123,6 +123,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct subtree *sub;
     char buf[32];
+    oid ubound = 0;
     
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -132,11 +133,13 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     		 /*
 		* TODO: registration timeout
 		*	registration context
-		*	Range registration
 		*/ 
-    switch (register_mib(buf, (struct variable *)agentx_varlist,
+    if ( pdu->range_subid )
+	ubound = pdu->variables->val.objid[ pdu->range_subid-1 ];
+    switch (register_mib_range(buf, (struct variable *)agentx_varlist,
 			 sizeof(agentx_varlist[0]), 1,
-			 pdu->variables->name, pdu->variables->name_length)) {
+			 pdu->variables->name, pdu->variables->name_length,
+			 pdu->priority, pdu->range_subid, ubound, sp)) {
 
 	case MIB_REGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
@@ -152,17 +155,15 @@ int
 unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
+    oid ubound = 0;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    		 /*
-		* TODO: Range unregistration
-		*/ 
-    switch (unregister_mib_priority(pdu->variables->name,
+    switch (unregister_mib_range(pdu->variables->name,
     		       pdu->variables->name_length,
-		       pdu->priority)) {
+		       pdu->priority, pdu->range_subid, ubound, sp)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:

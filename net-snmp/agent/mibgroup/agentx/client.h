@@ -12,8 +12,8 @@ extern "C" {
 
 int agentx_open_session( struct snmp_session *);
 int agentx_close_session( struct snmp_session *, int);
-int agentx_register( struct snmp_session *, oid*, size_t);
-int agentx_unregister( struct snmp_session *, oid*, size_t);
+int agentx_register( struct snmp_session *, oid*, size_t, int, int, oid);
+int agentx_unregister( struct snmp_session *, oid*, size_t, int, int, oid);
 int agentx_add_agentcaps( struct snmp_session *, oid*, size_t, const char*);
 int agentx_remove_agentcaps( struct snmp_session *, oid*, size_t);
 
