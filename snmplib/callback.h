@@ -19,6 +19,7 @@ extern "C" {
 #define SNMP_CALLBACK_STORE_DATA	        1
 #define SNMP_CALLBACK_SHUTDOWN		        2
 #define SNMP_CALLBACK_POST_PREMIB_READ_CONFIG	3
+#define SNMP_CALLBACK_LOGGING			4
 
 typedef int (SNMPCallback)(int majorID, int minorID, void *serverarg,
                            void *clientarg);
