@@ -14,7 +14,7 @@ CFLAGS=-I/usr/local/include -g
 OBJS1=snmpdemoapp.o
 OBJS2=ustMain.o ustScalarSet.o
 OBJS3=asyncapp.o
-TARGETS=ustMain snmpdemoapp asyncdemo
+TARGETS=ustMain snmpdemoapp asyncapp
 
 # if ucd-snmp was compiled with openssl support
 CRYPTO=-L/usr/local/ssl/lib -lcrypto
@@ -23,6 +23,8 @@ CRYPTO=-L/usr/local/ssl/lib -lcrypto
 #SYSLIBS=-lsocket -lnsl -lkstat
 # for BSD
 #SYSLIBS=-lkvm
+# for Linux and many other OSes
+#SYSLIBS=-ldl
 
 # shared library flags (assumes gcc)
 DLFLAGS=-fPIC -shared
