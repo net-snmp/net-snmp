@@ -165,6 +165,68 @@ void loadave_free_config (void)
     maxload[i] = DEFMAXLOADAVE;
 }
 
+/*
+ * try to get load average
+ * Inputs: pointer to array of doubles, number of elements in array
+ * Returns: 0=array has values, -1=error occurred.
+ */
+int try_getloadavg(double *r_ave, size_t s_ave)
+{
+#ifdef HAVE_SYS_FIXPOINT_H
+  fix favenrun[3];
+#endif
+#if defined(ultrix) || defined(sun4) || defined(__alpha)
+#if defined(sun4) || defined(__alpha)
+  int i;
+  long favenrun[3];
+  if (s_ave > 3) /* bounds check */
+    return (-1); 
+#define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
+#endif
+#endif
+  double *pave = r_ave;
+
+#ifdef HAVE_GETLOADAVG
+  if (getloadavg(pave, s_ave) == -1)
+    return(-1);
+#elif defined(linux)
+  { FILE *in = fopen("/proc/loadavg", "r");
+    if (!in) {
+      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
+      return (-1);
+    }
+    fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
+    fclose(in);
+  }
+#elif defined(ultrix) || defined(sun4) || defined(__alpha)
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
+    return(-1);
+  for(i=0;i<s_ave;i++)
+    *(pave+i) = FIX_TO_DBL(favenrun[i]);
+#else
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
+    return (-1);
+#endif
+/*
+ * XXX
+ *   To calculate this, we need to compare
+ *   successive values of the kernel array
+ *   '_cp_times', and calculate the resulting
+ *   percentage changes.
+ *     This calculation needs to be performed
+ *   regularly - perhaps as a background process.
+ *
+ *   See the source to 'top' for full details.
+ *
+ * The linux SNMP HostRes implementation
+ *   uses 'avenrun[0]*100' as an approximation.
+ *   This is less than accurate, but has the
+ *   advantage of being simple to implement!
+ *
+ * I'm also assuming a single processor
+ */
+  return 0;
+}
   
 unsigned char *var_extensible_loadave(struct variable *vp,
 				      oid *name,
@@ -177,21 +239,7 @@ unsigned char *var_extensible_loadave(struct variable *vp,
   static long long_ret;
   static float float_ret;
   static char errmsg[300];
-#ifdef HAVE_SYS_FIXPOINT_H
-  fix favenrun[3];
-#endif
-#if defined(ultrix) || defined(sun) || defined(__alpha)
-#if defined(sun) || defined(__alpha)
-  long favenrun[3];
-#define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
-#endif
-  int i;
-#endif
   double avenrun[3];
-#if defined(solaris2)
-  unsigned long load_avg;
-#endif
-
   
   if (!checkmib(vp,name,length,exact,var_len,write_method,3))
     return(NULL);
@@ -206,39 +254,8 @@ unsigned char *var_extensible_loadave(struct variable *vp,
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
-#if defined(solaris2)
-  snprintf(errmsg,300,"avenrun_%dmin",((name[*length-1] == 1) ? 1 :
-				       ((name[*length-1] == 2) ? 5 : 15)));
-
-  /*
-   * Should include kernel_sunos5.h (definition of getKstat) somewhere.
-   * Return type of avenrun_*min is KSTAT_DATA_ULONG
-   */
-  if (getKstat("system_misc",errmsg,&load_avg) < 0) 
-    return (NULL);
-  /* Convert into float */
-  avenrun[name[*length-1]-1] = (double)load_avg/FSCALE;
-#elif HAVE_GETLOADAVG
-  if (getloadavg(avenrun, sizeof(avenrun) / sizeof(avenrun[0])) == -1)
+  if (try_getloadavg(&avenrun[0], sizeof(avenrun) / sizeof(avenrun[0])) == -1)
     return(0);
-#elif defined(linux)
-  { FILE *in = fopen("/proc/loadavg", "r");
-    if (!in) {
-      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
-      return NULL;
-    }
-    fscanf(in, "%lf %lf %lf", &avenrun[0], &avenrun[1], &avenrun[2]);
-    fclose(in);
-  }
-#elif defined(ultrix) || defined(sun) || defined(__alpha)
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
-    return(0);
-  for(i=0;i<3;i++)
-    avenrun[i] = FIX_TO_DBL(favenrun[i]);
-#else
-  if (auto_nlist(LOADAVE_SYMBOL,(char *) avenrun, sizeof(double)*3) == 0)
-    return NULL;
-#endif
   switch (vp->magic) {
     case LOADAVE:
       sprintf(errmsg,"%.2f",avenrun[name[*length-1]-1]);
