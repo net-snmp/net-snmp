@@ -16,6 +16,7 @@ TODO list for the ucd-snmp-coders:
     implemented.
   Make read_objid and sprint_objid agree on which shorthands they accept.
   snmpset should check against MIB size if possible?
+  Remove unsuppored mib nodes from output instead of returning '0's.
 
 ===================
 
