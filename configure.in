@@ -347,7 +347,11 @@ AC_C_CONST
 dnl get version number.
 AC_MSG_CHECKING(for ucd-snmp version number)
 VERSION=`cat $srcdir/version.h | sed 's/";//;s/.*"//;s/pre/0./;'`
+changequote(, )
+RELEASEVERSION=`echo $VERSION | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
+changequote([, ])
 AC_SUBST(VERSION)
+AC_SUBST(RELEASEVERSION)
 AC_MSG_RESULT($VERSION)
 
 dnl super type checking
@@ -1179,7 +1183,7 @@ if test $cross_compiling = yes; then
   if test $with_endianness = "big"; then
     AC_DEFINE(WORDS_BIGENDIAN)
   elif test -z $with_endianness; then
-    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness]);
+    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
   fi
 else
   if test $with_endianness; then
