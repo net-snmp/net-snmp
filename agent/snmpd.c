@@ -726,7 +726,8 @@ main(int argc, char *argv[])
 	 */
 	if (logfile[0]) {
 		close(1);
-		open(logfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		open(logfile, O_WRONLY | O_CREAT |
+                     ((dont_zero_log) ? O_APPEND : O_TRUNC), 0644);
 		close(2);
 		dup(1);
 		close(0);
