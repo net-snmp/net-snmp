@@ -230,17 +230,16 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   static struct extensible *exten = 0;
   static long long_ret;
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
+  if (!checkmib(vp,name,length,exact,var_len,write_method,numextens))
     return(NULL);
 
-  if ((exten = get_exten_instance(extens,newname[*length-1]))) {
+  if ((exten = get_exten_instance(extens,name[*length-1]))) {
     switch (vp->magic) {
       case MIBINDEX:
-        long_ret = newname[*length-1];
+        long_ret = name[*length-1];
         return((u_char *) (&long_ret));
       case ERRORNAME: /* name defined in config file */
         *var_len = strlen(exten->name);
@@ -337,7 +336,6 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   int i, fd;
   FILE *file;
   struct extensible *exten = 0;
@@ -356,8 +354,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
       myvp.namelen = exten->miblen;
       *length = vp->namelen;
       memcpy(tname,vp->name,vp->namelen*sizeof(oid));
-      if (checkmib(&myvp,tname,length,-1,var_len,write_method,newname,
-                   -1))
+      if (checkmib(&myvp,tname,length,-1,var_len,write_method, -1))
         break;
       else
         exten = NULL;
@@ -371,13 +368,13 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   }
 
   *length = long_ret;
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,
+  if (!checkmib(vp,name,length,exact,var_len,write_method,
                ((vp->magic == ERRORMSG) ? MAXMSGLINES : 1)))
     return(NULL);
   
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = newname[*length-1];
+      long_ret = name[*length-1];
       return((u_char *) (&long_ret));
     case ERRORNAME: /* name defined in config file */
       *var_len = strlen(exten->name);
@@ -437,7 +434,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   int i,tmp;
   struct extensible *exten = 0;
   struct variable myvp;
-  oid newname[30], name[30];
+  oid name[30];
   static struct subtree mysubtree[2];
 
   for(i=1; i<= numrelocs; i++) {
@@ -448,8 +445,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
       myvp.name[exten->miblen] = name[exten->miblen];
       myvp.namelen = exten->miblen+1;
       tmp = exten->miblen+1;
-      if (checkmib(&myvp,name,&tmp,-1,NULL,NULL,newname,
-                   numrelocs))
+      if (checkmib(&myvp,name,&tmp,-1,NULL,NULL, numrelocs))
         break;
     }
   }

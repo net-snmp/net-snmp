@@ -10,10 +10,11 @@
    return types and various defines and structures. */
 #include "mibincl.h"
 
+/* header_generic() comes from here */
+#include "util_funcs.h"
+
 /* include our .h file */
 #include "example.h"
-
-int header_example __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 	/*********************
 	 *
@@ -35,76 +36,6 @@ void	init_example( )
      actually don't need it, so its commented out. */
   /* auto_nlist( "example_symbol" ); */
 }
-
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
-
-/* This function is a generic function we use to determine if the
-   incoming request is within our defined mib table.  It is up to *us*
-   to determine if it is or not */
-
-int
-header_example(vp, name, length, exact, var_len, write_method)
-    /* vp:       IN - pointer to variable entry that we defined in example.h */
-    register struct variable *vp;
-
-    /* name:     IN/OUT - input oid requested, output oid found */
-    oid     *name;	    
-
-    /* length:   IN/OUT - length of input and output oid's */
-    int     *length;	    
-
-    /* exact:    IN - TRUE if an exact match was requested.
-                      (ie getnext if not true, get if true). */
-    int     exact;
-
-    /* var_len:  OUT - length of data returned or 0 if function returned. */
-    int     *var_len;
-
-    /* write_method: OUT - pointer to function to set this variable,
-                           otherwise 0 */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
-
-{
-
-/* The length of our mib oid.  It should match the length defined in
-   the .h file using config_load_mib(). */
-#define EXAMPLE_NAME_LENGTH	8
-
-    oid newname[MAX_NAME_LEN];
-    int result;
-
-    /* print out the fact that we got here */
-    char c_oid[MAX_NAME_LEN];
-
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_example: %s %d\n", c_oid, exact);
-      sprint_objid (c_oid, vp->name, vp->namelen);
-      DEBUGP ("\tvp->name: %s\n", c_oid);
-    }
-
-    /* copy our mib oid from the vp->name structure */
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-    newname[vp->namelen] = 0;
-
-    /* compare it against the incoming request */
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
-
-    /* return if its outside of our mib definition */
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return(MATCH_FAILED);
-
-    /* since it is inside our mib tree, copy it back onto the name
-       outing pointer. */
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen+1) * sizeof(oid));
-    *length = vp->namelen+1;
-
-    *write_method = 0;          /* default to read-only */
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return(MATCH_SUCCEEDED);
-}
-
 
 	/*********************
 	 *
@@ -129,7 +60,11 @@ var_example(vp, name, length, exact, var_len, write_method)
   static char string[300];
   static oid oid_ret[8];
   
-  if (header_example(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+  /* header_generic is a simple function for finding out if we're in
+     the right place.  This only works on scalar objects.  Use
+     checkmib for simple tables, and write your own for anything
+     else. */
+  if (header_generic(vp, name, length, exact, var_len, write_method))
     return NULL;
 
   /* We can now simply test on vp's magic number, defined in example.h */

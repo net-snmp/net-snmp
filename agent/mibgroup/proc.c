@@ -99,19 +99,18 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   struct myproc *proc;
   static long long_ret;
   static char errmsg[300];
 
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numprocs))
+  if (!checkmib(vp,name,length,exact,var_len,write_method,numprocs))
     return(NULL);
   
-  if ((proc = get_proc_instance(procwatch,newname[*length-1]))) {
+  if ((proc = get_proc_instance(procwatch,name[*length-1]))) {
     switch (vp->magic) {
       case MIBINDEX:
-        long_ret = newname[*length-1];
+        long_ret = name[*length-1];
         return((u_char *) (&long_ret));
       case ERRORNAME:   /* process name to check for */
         *var_len = strlen(proc->name);

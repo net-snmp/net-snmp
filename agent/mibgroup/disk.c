@@ -253,7 +253,6 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   int percent, iserror, disknum=0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
   double totalblks, free, used, avail, availblks;
@@ -281,9 +280,9 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 #endif
 #endif
   
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numdisks))
+  if (!checkmib(vp,name,length,exact,var_len,write_method,numdisks))
     return(NULL);
-  disknum = newname[*length - 1] - 1;
+  disknum = name[*length - 1] - 1;
   switch (vp->magic) {
     case MIBINDEX:
       long_ret = disknum;

@@ -314,7 +314,6 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
 #ifndef linux
   int result;
 #endif
@@ -326,7 +325,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 
   long_ret = 0;  /* set to 0 as default */
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+  if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);
 #ifndef linux
 #ifdef bsdi2
@@ -344,7 +343,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 #endif
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = 1;
+      long_ret = 0;
       return((u_char *) (&long_ret));
     case ERRORNAME:    /* dummy name */
       sprintf(errmsg,"swap");
