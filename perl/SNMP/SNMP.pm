@@ -80,6 +80,7 @@ tie $SNMP::dump_packet, SNMP::DUMP_PACKET;
 tie %SNMP::MIB, SNMP::MIB;
 tie $SNMP::save_descriptions, SNMP::MIB::SAVE_DESCR;
 tie $SNMP::replace_newer, SNMP::MIB::REPLACE_NEWER;
+tie $SNMP::mib_options, SNMP::MIB::MIB_OPTIONS;
 
 %SNMP::V3_SEC_LEVEL_MAP = (noAuthNoPriv => 1, authNoPriv => 2, authPriv =>3);
 
@@ -1266,6 +1267,16 @@ sub DELETE {
     SNMP::_set_replace_newer(0);
     ${$_[0]} = 0;
 }
+
+package SNMP::MIB::MIB_OPTIONS;
+
+sub TIESCALAR { my $class = shift; my $val; bless \$val, $class; }
+
+sub FETCH { ${$_[0]}; }
+
+sub STORE { SNMP::_mib_toggle_options($_[1]); ${$_[0]} = $_[1]; }
+
+sub DELETE { SNMP::_mib_toggle_options(0); ${$_[0]} = ''; }
 
 package SNMP;
 END{SNMP::_sock_cleanup() if defined &SNMP::_sock_cleanup;}
