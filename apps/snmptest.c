@@ -387,7 +387,7 @@ input_variable(vp)
 	return -1;
     }
     vp->name_length = MAX_NAME_LEN;
-    if (!read_objid(buf, name, &vp->name_length))
+    if (!snmp_parse_oid(buf, name, &vp->name_length))
 	return -1;
     vp->name = (oid *)malloc(vp->name_length * sizeof(oid));
     memmove(vp->name, name, vp->name_length * sizeof(oid));

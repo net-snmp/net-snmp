@@ -387,7 +387,7 @@ char **argv;
     if (vip->name){
       vip->oidlen = MAX_NAME_LEN;
       vip->oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
-      if (!read_objid(vip->name, vip->oid, &vip->oidlen)) {
+      if (snmp_parse_oid(vip->name, vip->oid, &vip->oidlen) == NULL) {
 	fprintf(stderr, "Invalid object identifier: %s\n", vip->name);
 	SOCK_CLEANUP;
 	exit(1);

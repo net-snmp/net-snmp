@@ -135,7 +135,7 @@ main (argc, argv)
 
     for(count = 0; count < current_name; count++){
       name_length = MAX_NAME_LEN;
-      if (!read_objid(names[count], name, &name_length)){
+      if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
         fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
         failures++;
       } else
