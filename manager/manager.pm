@@ -2,11 +2,13 @@
 
 package ucdsnmp::manager;
 
-use strict;
+use strict ();
 use Apache::Constants qw(:common);
 use CGI qw(:standard);
-use SNMP;
-use DBI;
+use SNMP ();
+use DBI ();
+use lib ("/afs/dcas.ucdavis.edu/pkg/common/perl_modules");
+use displaytable ();
 
 # globals
 $ucdsnmp::manager::hostname = 'localhost';          # Host that serves the mSQL Database
@@ -50,7 +52,28 @@ $remuser = "guest" if (!defined($remuser) || $remuser eq "");
 ( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
-$query = new CGI;
+#===========================================================================
+# stats Images, for inclusion on another page. (ie, slashdot user box)
+#===========================================================================
+if (my $group = param('groupstat')) {
+    $r->content_type("image/gif");
+    $r->send_http_header();
+    my $cur = getcursor($dbh, "select host from usergroups as ug, hostgroups as hg where ug.groupname = '$group' and hg.groupname = '$group' and user = '$remuser'");
+    while (my $row = $cur->fetchrow_hashref ) {
+	if (checkhost($dbh, $group, $row->{'host'})) {
+	    open(I,"/home/hardaker/src/snmp/manager/red.gif");
+	    while(read(I, $_, 4096)) { print; }
+	    close(I);
+	}
+    }
+    open(I,"/home/hardaker/src/snmp/manager/green.gif");
+    while(read(I, $_, 4096)) { print; }
+    close(I);
+    return Exit($dbh,  "");
+}
+
+$r->content_type("text/html");
+$r->send_http_header();
 
 #===========================================================================
 # Start HTML.
@@ -169,8 +192,8 @@ if (defined(param('setupgroup')) &&
 #===========================================================================
 if (defined(param('setupgroupsubmit')) && 
     isadmin($dbh, $remuser, $group)) {
-    setupgroupsubmit($dbh, $user, $group);
-    delete_all();
+    setupgroupsubmit($dbh, $group);
+#    delete_all();
     param(-name => 'group', -value => $group);
     print "<a href=\"" . self_url() . "\">Entries submitted</a>";
     return Exit($dbh, $group);
@@ -190,7 +213,7 @@ if (defined(param('userprefs'))) {
 if (defined(param('setupuserprefssubmit')) && 
     isadmin($dbh, $remuser, $group)) {
     setupusersubmit($dbh, $group);
-    delete_all();
+#    delete_all();
     param(-name => 'group', -value => $group);
     print "<a href=\"" . self_url() . "\">Entries submitted</a>";
     return Exit($dbh, $group);
@@ -252,10 +275,45 @@ if (!defined($host)) {
     return Exit($dbh, $group);
 }
 
+if (param('setuphost')) {
+    print "<form method=post><input type=hidden name=setuphost value=1><input type=hidden name=host value=\"$host\"><input type=hidden name=group value=\"$group\">\n";
+    displaytable($dbh, 'hosttables',
+    '-clauses',"where host = '$host' and groupname = '$group'",
+    '-select','groupname, host, tablename, keephistory',
+    '-selectorder', 1,
+    '-editable', ['groupname','host','tablename'],
+    '-CGI', $CGI::Q
+    );
+    print "<input type=submit value=\"submit changes\">\n";
+    print "</form>\n";
+    return Exit($dbh, $group);
+}
+
 #===========================================================================
 # display inforamation about a host
+#  optionally add new collection tables
 #===========================================================================
 showhost($dbh, $host, $group, $remuser);
+if (isadmin($dbh, $remuser, $group)) {
+    if (param('newtables')) {
+    	my $x = param('newtables');
+    	$x =~ s/,/ /g;
+    	if (/[^\w\s]/) {
+    	    print "<br>Illegal table names in addition list: $x<br>\n" 
+    	} else {
+	    my @x = split(/\s+/,$x);
+	    foreach my $i (@x) {
+		$dbh->do("insert into hosttables(host, groupname, tablename, keephistory) values('$host','$group','$i','0')");
+	    }
+    	    print "<br>adding: ",join(", ",@x),"<br>\n";
+    	}
+    } else {
+        print "<br>Add new Tables to collect for this host: <form><input type=hidden name=host value=\"$host\"><input type=hidden name=group value=\"$group\"><input name=\"newtables\" type=text><input type=submit value=\"add tables\"></form>\n";
+    }
+    my $q = self_url();
+    $q =~ s/\?.*//;
+    print "<a href=\"" . addtoken($q, "setuphost=1&host=$host&group=$group") . "\">setup host $host</a>\n";
+}
 return Exit($dbh, $group);
 
 #===========================================================================
@@ -449,92 +507,6 @@ sub printredgreen {
     print "<td><img src=$img></td>";
 }
 
-# displaytable(TABLENAME, CONFIG...):
-#
-#   genericly displays any sql table in existence.
-#
-sub displaytable {
-    my $dbh = shift;
-    my $tablename = shift;
-    my %config = @_;
-    my $clauses = $config{'-clauses'};
-    my $sort = $config{'-sort'};
-    my $dolink = $config{'-dolink'};
-    my $datalink = $config{'-datalink'};
-    my $beginhook = $config{'-beginhook'};
-    my $selectwhat = $config{'-select'};
-    my $printonly = $config{'-printonly'};
-    $selectwhat = "*" if (!defined($selectwhat));
-    my ($thetable, $data, $ref);
-
-    # get a list of data from the table we want to display
-    $thetable = getcursor($dbh, "SELECT $selectwhat FROM $tablename $clauses");
-
-    my $prefs = $dbh->prepare($config{'-dontdisplaycol'}) if ($config{'-dontdisplaycol'});
-
-    # table header
-    my $doheader = 1;
-    my @keys;
-    while( $data = $thetable->fetchrow_hashref ) {
-	if ($doheader) {
-	    if (defined($sort)) {
-		@keys = (sort $sort keys(%$data));
-	    } else {
-		@keys = (sort keys(%$data));
-	    }
-	    if (!defined($config{'-notitle'})) {
-		print "<br><b>";
-		print "<a href=\"$ref\">" if (defined($dolink) && 
-					      defined($ref = &$dolink($tablename)));
-		print "$tablename";
-		print "</a>" if (defined($ref));
-		print "</b>\n";
-	    }
-	    print "<br>\n";
-	    print "<table $ucdsnmp::manager::tableparms>\n<tr>";
-	    if (defined($beginhook)) {
-		&$beginhook($dbh, $tablename);
-	    }
-	    foreach my $l (@keys) {
-		if (!defined($prefs) || 
-		    $prefs->execute($tablename, $l) eq "0E0") {
-		    print "<td>";
-		    print "<a href=\"$ref\">" if (defined($dolink) && 
-						  defined($ref = &$dolink($l)));
-		    print "$l";
-		    print "</a>" if (defined($ref));
-		    print "</td>";
-		}
-	    }
-	    "</tr>\n";
-	    $doheader = 0;
-	}
-
-	print "<tr>";
-	if (defined($beginhook)) {
-	    &$beginhook($dbh, $tablename, $data);
-	}
-	foreach my $key (@keys) {
-	    if (!defined($prefs) || 
-		$prefs->execute($tablename, $key) eq "0E0") {
-		print "<td>";
-		print "<a href=\"$ref\">" if (defined($datalink) && 
-					      defined($ref = &$datalink($key, $data->{$key})));
-		if (defined($config{'-editable'})) {
-		    print "<input type=text name=\"$key.x.$data->{$key}\" value=\"$data->{$key}\">";
-		} else {
-		    print $data->{$key};
-		}
-		print "</a>" if (defined($ref));
-		print "</td>";
-	    }
-	}
-	print "</tr>\n";
-    }
-    print "</table>\n";
-}
-    
-
 #
 # display information about a given mib node as a table.
 #
@@ -697,11 +669,11 @@ sub gethostandgroups {
     my $group = shift;
     my ($tbnms);
 
-    my $names = getarrays('hosttables', 
+    my $names = getarrays($dbh, 'hosttables', 
 			  "-select", 'distinct tablename',
 			  "-clauses", "where groupname = '$group'");
 
-    my $hosts = getarrays('hostgroups', 
+    my $hosts = getarrays($dbh, 'hostgroups', 
 			  "-select", 'distinct host',
 			  "-clauses", "where groupname = '$group'");
     
@@ -712,7 +684,7 @@ sub setupgroupsubmit {
     my $dbh = shift;
     my $group = shift;
     
-    my ($hosts, $names) = gethostandgroups($group);
+    my ($hosts, $names) = gethostandgroups($dbh, $group);
     foreach my $i (@$hosts) {
 	$dbh->do("delete from hosttables where host = '${$i}[0]' and groupname = '$group'");
     }
@@ -721,7 +693,7 @@ sub setupgroupsubmit {
     foreach my $i (@$hosts) {
 	foreach my $j (@$names) {
 	    if (param("${$i}[0]" . "${$j}[0]")) {
-		$rep->execute("${$i}[0]", "${$j}[0]");
+		$rep->execute("${$i}[0]", "${$j}[0]") || print "$! $DBI::errstr<br>\n";
             }
 	}
     }
@@ -733,7 +705,7 @@ sub setupgroupsubmit {
 #
 sub setupusersubmit {
     my ($dbh, $remuser, $group) = @_;
-    my $tables = getarrays('hosttables', 
+    my $tables = getarrays($dbh, 'hosttables', 
 			   "-select", 'distinct tablename',
 			   "-clauses", "where groupname = '$group'");
     
@@ -775,7 +747,7 @@ sub Exit {
 #
 sub setupuserpreferences {
     my ($dbh, $user, $group) = @_;
-    my $tables = getarrays('hosttables', 
+    my $tables = getarrays($dbh, 'hosttables', 
 			   "-select", 'distinct tablename',
 			   "-clauses", "where groupname = '$group'");
 
