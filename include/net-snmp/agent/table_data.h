@@ -36,7 +36,8 @@ void netsnmp_table_data_generate_index_oid(netsnmp_table_row *row);
 int netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row);
 netsnmp_table_row *netsnmp_table_data_remove_row(table_data *table,
                                                  netsnmp_table_row *row);
-void *netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row);
+void *netsnmp_table_data_delete_row(netsnmp_table_row *row);
+void *netsnmp_table_data_remove_and_delete_row(table_data *table, netsnmp_table_row *row);
   
 netsnmp_table_row *netsnmp_table_data_get(table_data *table, netsnmp_variable_list *indexes);
     
