@@ -327,7 +327,7 @@ unsigned char *var_extensible_disk(struct variable *vp,
 #endif
 #endif
   
-  if (!checkmib(vp,name,length,exact,var_len,write_method,numdisks))
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,numdisks))
     return(NULL);
   disknum = name[*length - 1] - 1;
   switch (vp->magic) {

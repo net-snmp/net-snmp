@@ -90,7 +90,7 @@ u_char *var_file_table(struct variable *vp,
   int index;
   struct filestat *file;
 
-  if (!checkmib(vp, name, length, exact, var_len, write_method, fileCount))
+  if (header_simple_table(vp, name, length, exact, var_len, write_method, fileCount))
       return(NULL);
   
   index = name[*length-1]-1;
