@@ -403,7 +403,7 @@ fi
 
 
 # Name of the host.
-+ hostname on some systems (SVR3.2, Linux) returns a bogus exit status,
+# hostname on some systems (SVR3.2, Linux) returns a bogus exit status,
 # so uname gets run too.
 ac_hostname=`(hostname || uname -n) 2>/dev/null | sed 1q`
 
@@ -2485,7 +2485,7 @@ fi
 
 # perl requires shared libs
 if test "x$embed_perl" = "xyes"; then
- (  if test "x$enable_shared" != "xyes"; then
+    if test "x$enable_shared" != "xyes"; then
       { { echo "$as_me:$LINENO: error: --enable-embedded-perl requires --enable-shared" >&5
 echo "$as_me: error: --enable-embedded-perl requires --enable-shared" >&2;}
    { (exit 1); exit 1; }; }
@@ -4007,7 +4007,7 @@ $debug ||
 } ||
 {
    echo "$me: cannot create a temporary directory in $TMPDIR" >&2
-   { (exit 1); exit 1;(}
+   { (exit 1); exit 1; }
 }
   _max=0
   _count=0
