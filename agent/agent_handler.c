@@ -153,7 +153,47 @@ register_handler(handler_registration *reginfo) {
                          NULL,
                          reginfo->contextName,
                          reginfo->timeout,
-                         0, reginfo);
+                         0, reginfo, 1);
+}
+
+/** register a handler, as defined by the handler_registration pointer. */ 
+int
+register_handler_nocallback(handler_registration *reginfo)
+{
+    mib_handler *handler;
+    DEBUGIF("handler::register") {
+        DEBUGMSGTL(("handler::register", "Registering (with no callback) "));
+        for (handler = reginfo->handler; handler; handler = handler->next) {
+            DEBUGMSG(("handler::register","::%s", handler->handler_name));
+        }
+            
+        DEBUGMSG(("handler::register", " at "));
+        if (reginfo->rootoid && reginfo->range_subid) {
+            DEBUGMSGOIDRANGE(("handler::register", reginfo->rootoid,
+	     reginfo->rootoid_len, reginfo->range_subid, reginfo->range_ubound));
+	} else if (reginfo->rootoid) {
+            DEBUGMSGOID(("handler::register", reginfo->rootoid,
+                         reginfo->rootoid_len));
+        } else {
+            DEBUGMSG(("handler::register", "[null]"));
+        }
+        DEBUGMSG(("handler::register", "\n"));
+    }
+
+    /* don't let them register for absolutely nothing.  Probably a mistake */
+    if (0 == reginfo->modes) {
+        reginfo->modes = HANDLER_CAN_DEFAULT;
+    }
+
+    return register_mib_context2(reginfo->handler->handler_name,
+                         NULL, 0, 0,
+                         reginfo->rootoid, reginfo->rootoid_len,
+                         reginfo->priority,
+                         reginfo->range_subid, reginfo->range_ubound,
+                         NULL,
+                         reginfo->contextName,
+                         reginfo->timeout,
+                         0, reginfo, 0);
 }
 
 /** inject a new handler into the calling chain of the handlers
@@ -287,6 +327,128 @@ inline int call_next_handler(mib_handler          *current,
     return call_handler(current->next, reginfo, reqinfo, requests);
 }
 
+void
+snmp_handler_free(mib_handler *handler)
+{
+    if (handler != NULL) {
+	if (handler->next != NULL) {
+	    snmp_handler_free(handler->next);
+	    handler->next = NULL;
+	}
+	SNMP_FREE(handler->handler_name);
+	SNMP_FREE(handler->myvoid);
+	free(handler);
+    }
+}
+
+mib_handler *
+snmp_handler_dup(mib_handler *handler)
+{
+    mib_handler *h = NULL;
+
+    if (handler == NULL) {
+	return NULL;
+    }
+
+    h = (mib_handler *)calloc(1, sizeof(mib_handler));
+
+    if (h != NULL) {
+	h->myvoid = handler->myvoid;
+	h->access_method = handler->access_method;
+
+	if (handler->handler_name != NULL) {
+	    h->handler_name = strdup(handler->handler_name);
+	    if (h->handler_name == NULL) {
+		free(h);
+		return NULL;
+	    }
+	}
+
+	if (handler->next != NULL) {
+	    h->next = snmp_handler_dup(handler->next);
+	    if (h->next == NULL) {
+		if (h->handler_name) {
+		    free(h->handler_name);
+		}
+		free(h);
+		return NULL;
+	    }
+	    h->next->prev = h;
+	}
+	h->prev = NULL;
+	return h;
+    }
+    return NULL;
+}
+
+void
+snmp_handler_registration_free(handler_registration *reginfo)
+{
+    if (reginfo != NULL) {
+	snmp_handler_free(reginfo->handler);
+	SNMP_FREE(reginfo->handlerName);
+	SNMP_FREE(reginfo->contextName);
+	SNMP_FREE(reginfo->rootoid);    
+	free(reginfo);
+    }
+}
+
+handler_registration *
+snmp_handler_registration_dup(handler_registration *reginfo)
+{
+    handler_registration *r = NULL;
+
+    if (reginfo == NULL) {
+	return NULL;
+    }
+
+
+    r = (handler_registration *)calloc(1, sizeof(handler_registration));
+
+    if (r != NULL) {
+	r->modes       = reginfo->modes;
+	r->priority    = reginfo->priority;
+	r->range_subid = reginfo->range_subid;
+	r->timeout     = reginfo->timeout;
+	r->range_ubound= reginfo->range_ubound;
+	r->rootoid_len = reginfo->rootoid_len;
+
+	if (reginfo->handlerName != NULL) {
+	    r->handlerName = strdup(reginfo->handlerName);
+	    if (r->handlerName == NULL) {
+		snmp_handler_registration_free(r);
+		return NULL;
+	    }
+	}
+
+	if (reginfo->contextName != NULL) {
+	    r->contextName = strdup(reginfo->contextName);
+	    if (r->contextName == NULL) {
+		snmp_handler_registration_free(r);
+		return NULL;
+	    }
+	}
+
+	if (reginfo->rootoid != NULL) {
+	    memdup((u_char **)&(r->rootoid), (const u_char *)reginfo->rootoid,
+		   reginfo->rootoid_len * sizeof(oid));
+	    if (r->rootoid == NULL) {
+		snmp_handler_registration_free(r);
+		return NULL;
+	    }
+	}
+
+	r->handler = snmp_handler_dup(reginfo->handler);
+	if (r->handler == NULL) {
+	    snmp_handler_registration_free(r);
+	    return NULL;
+	}
+	return r;
+    }
+
+    return NULL;
+}
+
 /** creates a cache of information which can be saved for future
    reference.  Use handler_check_cache() later to make sure it's still
    valid before referencing it in the future. */
@@ -333,7 +495,7 @@ free_delegated_cache(delegated_cache *dcache)
     if (dcache)
         free(dcache);
     
-    return NULL;
+    return;
 }
 
 
