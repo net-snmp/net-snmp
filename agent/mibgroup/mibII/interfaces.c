@@ -954,7 +954,7 @@ var_ifEntry(struct variable *vp,
 {
     static struct ifnet ifnet;
     register int interface;
-    static struct in_ifaddr in_ifaddr;
+    static struct in_ifaddr in_ifaddrVar;
     static char Name[16];
     register char *cp;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
@@ -970,7 +970,7 @@ var_ifEntry(struct variable *vp,
     if ( interface == MATCH_FAILED )
 	return NULL;
 
-    Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
+    Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddrVar);
 
 	/*
 	 * Additional information about the interfaces is available under
