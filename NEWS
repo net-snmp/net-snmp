@@ -5,8 +5,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  New:
     - Command line argument parsing has been reworked for getopt() use.
       (currently backwards compatible; see the snmpcmd(1) manual page)
-    - Many new flags have been added for output flexibility.
-      (see the snmpcmd(1) manual page on the -O flag)
+    - Many new flags have been added for input/output flexibility.
+      (see the snmpcmd(1) manual page on the -O flag and -I flag)
     - A ucd-snmp usage tutorial has been placed on the main web page.
       (see http://ucd-snmp.ucdavis.edu/tutorial)
     - snmptable is much smarter and handles sparse tables better.
