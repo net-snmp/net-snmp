@@ -40,24 +40,20 @@ ucdavis MODULE-IDENTITY
     LAST-UPDATED "200101170000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
-	 "The ucd-snmp-coders mailing list is the best place
-	 to write for public questions about the ucd-snmp
-	 project: ucd-snmp-coders@ucd-snmp.ucdavis.edu
+	"This mib is no longer being maintained by the University of
+	 California and is now in life-support-mode and being
+	 maintained by the net-snmp project.  The best place to write
+	 for public questions about the net-snmp-coders mailing list
+	 at net-snmp-coders@lists.sourceforge.net.
 
-         Primary Author: Wes Hardaker
+         postal:   Wes Hardaker
+                   P.O. Box 382
+                   Davis CA  95617
 
-         postal:    IT-DCAS
-                    UCDavis
-                    Davis CA  95616
-         phone:     +1 530 754-7571
-         email:     wjhardaker@ucdavis.edu"
+         email:    net-snmp-coders@lists.sourceforge.net
+        "
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
-    REVISION	 "200201040000Z"
-    DESCRIPTION
-	"Introduced UCDLongDisplayString which is needed for allow
-	 for long configuration settings. Rewrote some definitions
-	 to make them more precise."
     REVISION	 "200101170000Z"
     DESCRIPTION
 	"Added raw CPU and IO counters."
@@ -75,6 +71,7 @@ ucdavis MODULE-IDENTITY
 --   systemStats      OBJECT IDENTIFIER ::= { ucdavis  11 }
 --   ucdDemoMIB       OBJECT IDENTIFIER ::= { ucdavis  14 } - UCD-DEMO-MIB
 --   fileTable        OBJECT IDENTIFIER ::= { ucdavis  15 }
+--   logmatch         OBJECT IDENTIFIER ::= { ucdavis  15 }
 --   version          OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs         OBJECT IDENTIFIER ::= { ucdavis 101 }
 --   mibRegistryTable OBJECT IDENTIFIER ::= { ucdavis 102 }
@@ -98,6 +95,7 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   wavelan          OBJECT IDENTIFIER ::= { ucdExperimental  3 } - WL-MIB
 --   ucdDlmodMIB      OBJECT IDENTIFIER ::= { ucdExperimental 14 } - UCD-DLMOD-MIB
 --   ucdDiskIOMIB     OBJECT IDENTIFIER ::= { ucdExperimental 15 } - UCD-DISKIO-MIB
+--   lmSensors        OBJECT IDENTIFIER ::= { ucdExperimental 16 } - LM-SENSORS-MIB
 
 
 -- These are the returned values of the agent type.
@@ -105,11 +103,11 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 
 ucdSnmpAgent      OBJECT IDENTIFIER ::= { ucdavis 250 }
 hpux9             OBJECT IDENTIFIER ::= { ucdSnmpAgent 1 }
-hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent 2 }
 solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent 3 }
 osf               OBJECT IDENTIFIER ::= { ucdSnmpAgent 4 }
 ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent 5 }
+hpux10            OBJECT IDENTIFIER ::= { ucdSnmpAgent 6 }
 netbsd1           OBJECT IDENTIFIER ::= { ucdSnmpAgent 7 }
 freebsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
 irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
@@ -121,39 +119,25 @@ hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
-UCDLongDisplayString ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "1023a"
-    STATUS	current
-    DESCRIPTION
-            "Represents textual information taken from the NVT ASCII
-            character set, as defined in pages 4, 10-11 of RFC 854.
+-- Object identifiers for the non-standard transports that UCD/Net-SNMP
+-- supports.  Note that snmpTCPDomain is the subject of Internet Draft
+-- draft-irtf-nmrg-snmp-tcp-04.txt, which defines the OID
+-- .iso.org.dod.internet.experimental.nmrg.nmrgSnmpDomains.snmpTCPDomain
+-- (.1.3.6.1.3.91.1.1) for the SNMP over TCP over IPv4 transport domain.
+-- This draft (or its successor) is available from the Network Management
+-- Research Group web page at http://www.ibr.cs.tu-bs.de/projects/nmrg/
+--
+-- The NMRG OID for snmpTCPDomain is currently used by the code, but in case
+-- this is thought to be a Bad Idea, we define a private transport domain here
+-- that we could use instead.  The Unix domain, AAL5 PVC domain and
+-- the IPv6 domains are also defined privately here (for now).
 
-            To summarize RFC 854, the NVT ASCII repertoire specifies:
-
-              - the use of character codes 0-127 (decimal)
-
-              - the graphics characters (32-126) are interpreted as
-                US ASCII
-
-              - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
-                meanings specified in RFC 854
-
-              - the other 25 codes have no standard interpretation
-
-              - the sequence 'CR LF' means newline
-
-              - the sequence 'CR NUL' means carriage-return
-
-              - an 'LF' not preceded by a 'CR' means moving to the
-                same column on the next line.
-
-              - the sequence 'CR x' for any x other than LF or NUL is
-                illegal.  (Note that this also means that a string may
-                end with either 'CR LF' or 'CR NUL', but not with CR.)
-
-            Any object defined using this syntax may not exceed 1023
-            characters in length."
-    SYNTAX OCTET STRING (SIZE (0..1023))
+ucdDomains		OBJECT IDENTIFIER ::= { ucdavis 251 }
+ucdSnmpTCPDomain	OBJECT IDENTIFIER ::= { ucdDomains 1 }
+ucdSnmpUnixDomain	OBJECT IDENTIFIER ::= { ucdDomains 2 }
+ucdSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { ucdDomains 3 }
+ucdSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 4 }
+ucdSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 5 }
 
 --
 -- Define the Float Textual Convention
@@ -268,12 +252,12 @@ prCount OBJECT-TYPE
     ::= { prEntry 5 }
 
 prErrorFlag OBJECT-TYPE
-    SYNTAX	INTEGER { ok(0), error(1) }
+    SYNTAX	Integer32
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
 	"A Error flag to indicate trouble with a process.  It
-	 goes to error(1) if there is an error, ok(0) if no error."
+	 goes to 1 if there is an error, 0 if no error."
     ::= { prEntry 100 }
 
 prErrMessage OBJECT-TYPE
@@ -822,7 +806,7 @@ versionIdent OBJECT-TYPE
     ::= { version 5 } 
 
 versionConfigureOptions OBJECT-TYPE
-    SYNTAX	UCDLongDisplayString
+    SYNTAX	DisplayString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION  
@@ -854,12 +838,12 @@ versionRestartAgent OBJECT-TYPE
     ::= { version 12 } 
 
 versionDoDebugging OBJECT-TYPE
-    SYNTAX	INTEGER { disabled(0), enabled(1) }
+    SYNTAX	Integer32
     MAX-ACCESS	read-write
     STATUS	current
     DESCRIPTION  
-	"Set to enabled(1) to turn debugging statements on in the 
-	 agent or to disabled(0) to turn them off."
+	"Set to 1 to turn debugging statements on in the agent or 0
+	 to turn it off."
     ::= { version 20 } 
 
 
@@ -1232,5 +1216,169 @@ fileErrorMsg OBJECT-TYPE
     DESCRIPTION
 	"Filesize error message"
     ::= { fileEntry 101 }
+
+logMatch OBJECT IDENTIFIER ::= { ucdavis 16 }
+
+logMatchMaxEntries OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"The maximum number of logmatch entries
+		this snmpd daemon can support."
+	::= { logMatch 1 }
+
+logMatchTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Table of monitored files."
+	::= { logMatch 2 }
+
+logMatchEntry OBJECT-TYPE
+	SYNTAX LogMatchEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Entry of file"
+	INDEX { logMatchIndex }
+	::= { logMatchTable 1 }
+
+LogMatchEntry ::=
+	SEQUENCE { 
+		logMatchIndex
+			Integer32,
+		logMatchName
+			DisplayString,
+		logMatchFilename
+			DisplayString,
+		logMatchRegEx
+			DisplayString,
+		logMatchGlobalCounter
+			Counter32,
+		logMatchGlobalCount
+			Integer32,
+		logMatchCurrentCounter
+			Counter32,
+		logMatchCurrentCount
+			Integer32,
+		logMatchCounter
+			Counter32,
+		logMatchCount
+			Integer32,
+		logMatchCycle
+			Integer32,
+		logMatchErrorFlag
+			TruthValue,
+		logMatchRegExCompilation
+			DisplayString
+	 }
+
+logMatchIndex OBJECT-TYPE
+	SYNTAX Integer32 (1..2147483647)
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Index of logmatch"
+	::= { logMatchEntry 1 }
+
+logMatchName OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"logmatch instance name"
+	::= { logMatchEntry 2 }
+
+logMatchFilename OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"filename to be logmatched"
+	::= { logMatchEntry 3 }
+
+logMatchRegEx OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"regular expression"
+	::= { logMatchEntry 4 }
+
+logMatchGlobalCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"global count of matches"
+	::= { logMatchEntry 5 }
+
+logMatchGlobalCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 6 }
+
+logMatchCurrentCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each logfile rotation."
+	::= { logMatchEntry 7 }
+
+logMatchCurrentCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 8 }
+
+logMatchCounter OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Regex match counter. This counter will
+		be reset with each read"
+	::= { logMatchEntry 9 }
+
+logMatchCount OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Description."
+	::= { logMatchEntry 10 }
+
+logMatchCycle OBJECT-TYPE
+	SYNTAX Integer32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"time between updates (if not queried) in seconds"
+	::= { logMatchEntry 11 }
+
+logMatchErrorFlag OBJECT-TYPE
+	SYNTAX TruthValue
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"errorflag: is this line configured correctly?"
+	::= { logMatchEntry 100 }
+
+logMatchRegExCompilation OBJECT-TYPE
+	SYNTAX DisplayString
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"message of regex precompilation"
+	::= { logMatchEntry 101 }
 
 END
