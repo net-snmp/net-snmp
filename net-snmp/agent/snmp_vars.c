@@ -139,9 +139,7 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 #define MIB_CLIENTS_ARE_EVIL 1
 
-extern struct subtree *subtrees;
-int             subtree_size;
-int             subtree_malloc_size;
+extern netsnmp_subtree *subtrees;
 
 /*
  *      Each variable name is placed in the variable table, without the
