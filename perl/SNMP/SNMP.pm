@@ -2065,7 +2065,7 @@ net-snmp-users@net-snmp-users@lists.sourceforge.net
 please give sufficient information to analyze the problem (OS type,
 versions for OS/Perl/UCD/compiler, complete error output, etc.)
 
-=head1 Acknowledments
+=head1 Acknowledgements
 
 Many thanks to all those who supplied patches, suggestions and
 feedback.
@@ -2107,4 +2107,5 @@ bugs, comments, questions to net-snmp-users@lists.sourceforge.net
      Rights Reserved.  This program is free software; you can
      redistribute it and/or modify it under the same terms as Perl
      itself.
+
 =cut
