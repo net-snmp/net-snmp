@@ -7,7 +7,7 @@
 extern          "C" {
 #endif
 
-#ifdef irix6
+#if defined(irix6) && defined(IRIX64)
 #define nlist nlist64
 #endif
 
