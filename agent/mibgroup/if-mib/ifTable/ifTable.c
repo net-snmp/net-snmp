@@ -1799,7 +1799,7 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     rowreq_ctx->undo->ifentry =
-        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->if_name);
+        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->name);
     if(NULL == rowreq_ctx->undo->ifentry)
         rc = MFD_ERROR;
     else

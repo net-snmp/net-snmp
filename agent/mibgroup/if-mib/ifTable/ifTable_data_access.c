@@ -235,7 +235,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
         DEBUGMSGTL(("ifTable:access","updating existing entry\n"));
         
         netsnmp_assert(strcmp(rowreq_ctx->data.ifName,
-                              ifentry->if_name) == 0);
+                              ifentry->name) == 0);
         
         /*
          * if the interface was missing, but came back, clear the
@@ -252,8 +252,8 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
         /*
          * Check for changes, then update
          */
-        if((! (ifentry->flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE)) &&
-           (rowreq_ctx->data.ifOperStatus != ifentry->if_oper_status))
+        if((! (ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE)) &&
+           (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
             oper_changed = 1;
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry, ifentry);
         
