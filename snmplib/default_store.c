@@ -64,7 +64,7 @@ ds_toggle_boolean(int storeid, int which) {
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
     
-  if (ds_booleans[storeid][which/8] == 0)
+  if ((ds_booleans[storeid][which/8] & (1 << (which % 8))) == 0)
     ds_booleans[storeid][which/8] |= (1 << (which%8));
   else
     ds_booleans[storeid][which/8] &= (0xff7f >> (7-(which%8)));
