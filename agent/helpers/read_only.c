@@ -21,7 +21,7 @@
  *  Inserting it into your handler chain will ensure you're never
  *  asked to perform a SET request so you can ignore those error
  *  conditions.
- *  @ingroup handler
+ *  @ingroup utilities
  *  @{
  */
 

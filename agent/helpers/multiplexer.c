@@ -12,7 +12,7 @@
 #endif
 
 /** @defgroup multiplexer multiplexer: splits mode requests into calls to different handlers.
- *  @ingroup handler
+ *  @ingroup utilities
  * The multiplexer helper lets you split the calling chain depending
  * on the calling mode (get vs getnext vs set).  Useful if you want
  * different routines to handle different aspects of SNMP requests,
