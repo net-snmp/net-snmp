@@ -587,7 +587,7 @@ snmp_build(session, pdu, packet, out_length)
     register u_char	*packet;
     int			*out_length;
 {
-    u_char *h0, *h0e, *h1, *h1e, *h2, *h2e;
+    u_char *h0, *h0e=NULL, *h1, *h1e, *h2, *h2e;
     register u_char  *cp;
     struct variable_list *vp;
     struct  packet_info pkt, *pi = &pkt;
