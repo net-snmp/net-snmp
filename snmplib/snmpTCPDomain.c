@@ -282,6 +282,10 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
     }
   }
 
+  /*  Message size is not limited by this transport (hence msgMaxSize
+      is equal to the maximum legal size of an SNMP message).  */
+
+  t->msgMaxSize  = 0x7fffffff;
   t->f_recv      = snmp_tcp_recv;
   t->f_send      = snmp_tcp_send;
   t->f_close     = snmp_tcp_close;

@@ -221,11 +221,14 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
   memcpy(t->data, addr, sizeof(struct sockaddr_atmpvc));
   t->data_length = sizeof(struct sockaddr_atmpvc);
 
-  t->f_recv    = snmp_aal5pvc_recv;
-  t->f_send    = snmp_aal5pvc_send;
-  t->f_close   = snmp_aal5pvc_close;
-  t->f_accept  = NULL;
-  t->f_fmtaddr = snmp_aal5pvc_fmtaddr;
+  /*  16-bit length field in the trailer, no headers.  */
+
+  t->msgMaxSize  = 0xffff;
+  t->f_recv      = snmp_aal5pvc_recv;
+  t->f_send      = snmp_aal5pvc_send;
+  t->f_close     = snmp_aal5pvc_close;
+  t->f_accept    = NULL;
+  t->f_fmtaddr   = snmp_aal5pvc_fmtaddr;
 
   return t;
 }

@@ -300,11 +300,15 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
     sup->local = 0;
   }
 
-  t->f_recv    = snmp_unix_recv;
-  t->f_send    = snmp_unix_send;
-  t->f_close   = snmp_unix_close;
-  t->f_accept  = snmp_unix_accept;
-  t->f_fmtaddr = snmp_unix_fmtaddr;
+  /*  Message size is not limited by this transport (hence msgMaxSize
+      is equal to the maximum legal size of an SNMP message).  */
+
+  t->msgMaxSize  = 0x7fffffff;
+  t->f_recv      = snmp_unix_recv;
+  t->f_send      = snmp_unix_send;
+  t->f_close     = snmp_unix_close;
+  t->f_accept    = snmp_unix_accept;
+  t->f_fmtaddr   = snmp_unix_fmtaddr;
 
   return t;
 }
