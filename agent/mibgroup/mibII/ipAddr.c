@@ -627,6 +627,7 @@ var_ipAddrEntry(struct variable * vp,
     static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
+    unsigned int    ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
