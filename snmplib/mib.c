@@ -2339,9 +2339,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		}
 		if (!*cp) goto bad_id;
 		cp2 = cp+1;
-		if (*cp2 && *cp2 != '.') goto bad_id;
-		if (*cp2 == '.') cp2++;
-		else cp2 = NULL;
+		if (!*cp2) cp2 = NULL;
+		else if (*cp2 != '.') goto bad_id;
+		else cp2++;
 		if (len == -1) {
 		    struct range_list *rp = tp->ranges;
 		    int ok = 0;
@@ -2400,7 +2400,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    /* insert length if requested */
 	    if (doingquote == '"') {
 		if (*objidlen >= maxlen) goto bad_id;
-		objid[ *objidlen ] = len = strchr(cp,doingquote) - cp;
+		objid[ *objidlen ] = len = strchr(cp, doingquote) - cp;
 		(*objidlen)++;
 	    }
 
@@ -2411,6 +2411,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    }
 	    if (!cp) goto bad_id;
 	    cp2 = cp+1;
+	    if (!*cp2) cp2 = NULL;
+	    else if (*cp2 == '.') cp2++;
+	    else goto bad_id;
 	    break;
 	default:
 	    goto bad_id;
