@@ -2,6 +2,7 @@
 config_require(ucd-snmp/proc)
 config_require(ucd-snmp/versioninfo)
 config_require(ucd-snmp/pass)
+config_require(ucd-snmp/pass-persist)
 config_require(ucd-snmp/disk)
 config_require(ucd-snmp/loadave)
 config_require(ucd-snmp/extensible)
