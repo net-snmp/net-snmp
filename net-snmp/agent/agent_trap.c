@@ -385,7 +385,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         len--;
         if (vblist->val.objid[len-1] == 0)
             len--;
-        memcpy(template_v1pdu->enterprise,
+        SNMP_FREE(template_v1pdu->enterprise);
+        memdup((u_char**)&template_v1pdu->enterprise,
                vblist->val.objid, len*sizeof(oid));
         template_v1pdu->enterprise_length = len;
     }
