@@ -100,12 +100,12 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
       newname[*length-1] = name[*length-1] + 1;
     else
       newname[*length-1] = name[*length-1];
-    if (max >= 0 && newname[*length-1] > max) {
-      if(var_len)
-        *var_len = NULL;
-      return NULL;
-    }
   }  
+  if (max >= 0 && newname[*length-1] > max) {
+    if(var_len)
+      *var_len = NULL;
+    return NULL;
+  }
   bcopy((char *)newname, (char *)name, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
