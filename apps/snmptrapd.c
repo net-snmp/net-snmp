@@ -539,7 +539,26 @@ int snmp_input(int op,
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-H] [-S] [-a]\n");
+    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-S] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr, "\
+  -h        Print this help message and exit\n\
+  -H        Read what can show up in config file\n\
+  -V        Print version and exit\n\
+  -q        Quick print mib display\n\
+  -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
+  -p <port> Local port to listen from\n\
+  -P        Print to standard output\n\
+  -e        Print Event # (rising/falling alarm], etc.\n\
+  -s        Log syslog\n\
+  -S        Print module id plus last element of object identifiers.\n\
+\n\
+  -f        Stay in foreground (don't fork)\n\
+  -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
+  -d        Dump input/output packets\n\
+  -a        Ignore Authentication Failture traps.\n\
+  -m <MIBS>     Use MIBS list instead of the default mib list.\n\
+  -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
+");
 }
 
 RETSIGTYPE term_handler(int sig)
