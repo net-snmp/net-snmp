@@ -7,7 +7,8 @@
 #
 
 # the standard items to build: libraries, bins, and sbins
-STANDARDTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
+STANDARDTARGETS     =$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
+STANDARDCLEANTARGETS=$(INSTALLLIBS)                    $(INSTALLSBINPROGS)
 
 standardall: subdirs $(STANDARDTARGETS)
 
@@ -98,7 +99,7 @@ installsubdirs:
 # cleaning targets
 #
 clean: cleansubdirs
-	rm -f core ${OBJS} ${LOBJS} $(STANDARDTARGETS) $(OTHERCLEANTARGETS)
+	rm -f core ${OBJS} ${LOBJS} $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
 	rm -rf .libs
 
 cleansubdirs:
