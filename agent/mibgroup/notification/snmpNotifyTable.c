@@ -28,6 +28,7 @@
 #include "target/snmpTargetAddrEntry.h"
 #include "target/target.h"
 #include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/agent/agent_trap.h>
 
 SNMPCallback store_snmpNotifyTable;
 
