@@ -42,8 +42,4 @@ int  Search_Table( mib_table_t, void*, int);
 int  Add_Entry( mib_table_t, void*);
 void *Retrieve_Table_Data( mib_table_t, int*);
 
-int marker_uptime( marker_t pm );
-int marker_tticks( marker_t pm );
-int timeval_uptime( struct timeval *tv );
-int timeval_tticks( struct timeval *tv );
 #endif /* _MIBGROUP_UTIL_FUNCS_H */

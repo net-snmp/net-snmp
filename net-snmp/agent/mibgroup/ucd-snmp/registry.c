@@ -68,11 +68,11 @@ header_registry(struct variable *vp,
 
     if (*length < REGISTRY_NAME_LENGTH ||
         snmp_oid_compare(name, *length, vp->name, vp->namelen) < 1)
-      mine = subtrees;
+      mine = find_first_subtree("");
     else
       mine = find_subtree_next(&(name[REGISTRY_NAME_LENGTH]),
                                *length-REGISTRY_NAME_LENGTH,
-                               subtrees);
+                               find_first_subtree(""), ""); /* WWW */
 
     if (mine != NULL) {
       memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
