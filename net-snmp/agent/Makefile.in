@@ -63,15 +63,16 @@ makefileindepend: nosysdepend
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 auto_nlist.o: ../config.h ../mib_module_config.h 
-auto_nlist.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+auto_nlist.o:   ../s/linux.h
+auto_nlist.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 history.o: ./../snmplib/asn1.h history.h
 kernel.o: ../config.h ../mib_module_config.h 
-kernel.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+kernel.o:   ../s/linux.h
+kernel.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 read_config.o: ../config.h ../mib_module_config.h 
-read_config.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
-read_config.o: ../m/i386.h 
-read_config.o:   m2m.h
-read_config.o: ./mibgroup/mibincl.h  
+read_config.o:   ../s/linux.h
+read_config.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+read_config.o:  m2m.h ./mibgroup/mibincl.h
 read_config.o:  ./../snmplib/asn1.h
 read_config.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h ./snmp_vars.h
 read_config.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h
@@ -94,23 +95,26 @@ read_config.o: mibgroup/hr_storage.h mibgroup/hr_device.h mibgroup/hr_other.h
 read_config.o: mibgroup/hr_proc.h mibgroup/hr_network.h mibgroup/hr_print.h
 read_config.o: mibgroup/hr_disk.h mibgroup/hr_partition.h
 read_config.o: mibgroup/hr_filesys.h mibgroup/hr_swrun.h mibgroup/hr_swinst.h
-read_config.o: mibgroup/hr_utils.h mibgroup/util_funcs.h mibgroup/var_route.h
-read_config.o: mibgroup/route_write.h ./snmp_agent.h ./snmpd.h
-read_config.o: mibgroup/mib_module_dot_conf.h
+read_config.o: mibgroup/hr_utils.h mibgroup/util_funcs.h mibgroup/struct.h
+read_config.o: mibgroup/var_route.h mibgroup/route_write.h ./snmp_agent.h
+read_config.o: ./snmpd.h ./../snmplib/system.h mibgroup/mib_module_dot_conf.h
 snmp_agent.o: ../config.h ../mib_module_config.h 
-snmp_agent.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmp_agent.o:   ../s/linux.h
+snmp_agent.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 snmp_agent.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmp_agent.o: ./../snmplib/snmp_impl.h 
-snmp_agent.o: ./../snmplib/snmp.h ./../snmplib/acl.h ./../snmplib/party.h
-snmp_agent.o: ./../snmplib/context.h ./../snmplib/mib.h mibgroup/snmp_mib.h
-snmp_agent.o: snmpd.h mibgroup/struct.h mibgroup/util_funcs.h snmp_agent.h
+snmp_agent.o:  ./../snmplib/snmp.h ./../snmplib/acl.h
+snmp_agent.o: ./../snmplib/party.h ./../snmplib/context.h ./../snmplib/mib.h
+snmp_agent.o: mibgroup/snmp_mib.h snmpd.h mibgroup/struct.h
+snmp_agent.o: mibgroup/util_funcs.h mibgroup/struct.h snmp_agent.h
 snmp_agent.o: var_struct.h read_config.h mibgroup/vacm_vars.h
 snmp_vars.o: ../config.h ../mib_module_config.h 
-snmp_vars.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
-snmp_vars.o:  ./mibgroup/mibincl.h ./../snmplib/asn1.h
-snmp_vars.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h ./snmp_vars.h
-snmp_vars.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h
-snmp_vars.o: snmp_vars_m2m.h ../snmplib/system.h kernel.h mibgroup/struct.h
+snmp_vars.o:   ../s/linux.h
+snmp_vars.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmp_vars.o: ./mibgroup/mibincl.h ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmp_vars.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./var_struct.h
+snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h snmp_vars_m2m.h
+snmp_vars.o: ../snmplib/system.h kernel.h mibgroup/struct.h
 snmp_vars.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/host.h
 snmp_vars.o: mibgroup/system.h mibgroup/sysORTable.h mibgroup/at.h
@@ -129,17 +133,20 @@ snmp_vars.o: mibgroup/hr_device.h mibgroup/hr_other.h mibgroup/hr_proc.h
 snmp_vars.o: mibgroup/hr_network.h mibgroup/hr_print.h mibgroup/hr_disk.h
 snmp_vars.o: mibgroup/hr_partition.h mibgroup/hr_filesys.h
 snmp_vars.o: mibgroup/hr_swrun.h mibgroup/hr_swinst.h mibgroup/hr_utils.h
-snmp_vars.o: mibgroup/util_funcs.h mibgroup/var_route.h
+snmp_vars.o: mibgroup/util_funcs.h mibgroup/struct.h mibgroup/var_route.h
 snmp_vars.o: mibgroup/route_write.h read_config.h snmpd.h
 snmp_vars.o: mibgroup/mib_module_inits.h mibgroup/mib_module_loads.h
 snmpd.o: ../config.h ../mib_module_config.h 
-snmpd.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpd.o:   ../s/linux.h
+snmpd.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 snmpd.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpd.o: ./../snmplib/system.h ./../snmplib/snmp.h m2m.h ./../snmplib/party.h
 snmpd.o: mibgroup/alarm.h ./mibgroup/event.h ./../snmplib/view.h
 snmpd.o: ./../snmplib/context.h ./../snmplib/acl.h ./../snmplib/mib.h
 snmpd.o: mibgroup/snmp_mib.h ./../snmplib/snmp_client.h snmpd.h var_struct.h
-snmpd.o: read_config.h mibgroup/struct.h mibgroup/util_funcs.h ../version.h
+snmpd.o: read_config.h mibgroup/struct.h mibgroup/util_funcs.h
+snmpd.o: mibgroup/struct.h ../version.h
 view_parse.o: ../config.h ../mib_module_config.h 
-view_parse.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+view_parse.o:   ../s/linux.h
+view_parse.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
 view_parse.o: ./../snmplib/asn1.h ./../snmplib/mib.h ./../snmplib/view.h
