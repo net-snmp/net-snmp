@@ -622,8 +622,12 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         row = g->existing_row = CONTAINER_FIND(tad->table, &index);
         if (!g->existing_row) {
             if (!tad->cb->create_row) {
-                netsnmp_set_request_error(agtreq_info, current,
-                                          SNMP_NOSUCHINSTANCE);
+                if(MODE_IS_SET(agtreq_info->mode))
+                    netsnmp_set_request_error(agtreq_info, current,
+                                              SNMP_ERR_NOTWRITABLE);
+                else
+                    netsnmp_set_request_error(agtreq_info, current,
+                                              SNMP_NOSUCHINSTANCE);
                 free(g);
                 free(i);
                 continue;
@@ -631,6 +635,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             /** use undo_info temporarily */
             row = g->existing_row = tad->cb->create_row(&index);
             if (!row) {
+                /* xxx-rks : parameter to create_row to allow
+                 * for better error reporting. */
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_GENERR);
                 free(g);
