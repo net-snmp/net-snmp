@@ -129,9 +129,7 @@ main(argc, argv)
   int   argc;
   char  *argv[];
 {
-  int   arg, argt;
-  extern int optind;
-  extern char *optarg;
+  int   arg;
 #ifdef _DEBUG_MALLOC_INC
   unsigned long histid1, histid2, orig_size, current_size;
 #endif
@@ -140,20 +138,20 @@ main(argc, argv)
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  arg = snmp_parse_args(argc, argv, &session)-1;
+  arg = snmp_parse_args(argc, argv, &session);
   snmp_set_suffix_only(0);
   
-  while ((argt = getopt(argc-arg, argv+arg, "w:f:hHbx")) != EOF) {
-    switch (argt) {
+  for(; (arg < argc) && (argv[arg][0] == '-') ; arg++){
+      switch(argv[arg][1]){
     case 'w':
-      max_width = atoi(optarg);
+      max_width = atoi(argv[++arg]);
       if (max_width == 0) {
-	fprintf(stderr, "Bad -w option: %s\n", optarg);
+	fprintf(stderr, "Bad -w option: %s\n", argv[++arg]);
 	usage();
       }
       break;
     case 'f':
-      field_separator = optarg;
+      field_separator = argv[++arg];
       break;
     case 'h':
       headers_only = 1;
@@ -171,14 +169,13 @@ main(argc, argv)
       usage();
     }
   }
-  optind += arg;
 
   /* get the initial object and subtree */
-  if (optind+1 == argc) {
-    /* specified on the command line */
+  /* specified on the command line */
+  if (arg+1 == argc) {
     rootlen = MAX_NAME_LEN;
-    if (!snmp_parse_oid(argv[optind], root, &rootlen)){
-      fprintf(stderr, "Invalid object identifier: %s\n", argv[optind]);
+    if (!snmp_parse_oid(argv[arg], root, &rootlen)){
+      fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
       exit(1);
     }
     debug = snmp_get_dump_packet();
