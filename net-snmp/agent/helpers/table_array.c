@@ -218,15 +218,16 @@ netsnmp_extract_array_context(netsnmp_request_info *request)
 /** this function is called to validate RowStatus transitions. */
 int
 netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
-                                     netsnmp_index *ctx_new,
-                                     netsnmp_index *ctx_old,
                                      netsnmp_request_group *ag,
-                                     int *rs_new, int *rs_old)
+                                     long *rs_new, long *rs_old)
 {
+    netsnmp_index *row_ctx = ag->existing_row;
+    netsnmp_index *undo_ctx = ag->undo_info;
+    
     /*
      * xxx-rks: revisit row delete scenario
      */
-    if (ctx_new) {
+    if (row_ctx) {
         /*
          * either a new row, or change to old row
          */
@@ -238,7 +239,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
              * is it ready to be active?
              */
             if ((NULL==cb->can_activate) ||
-                cb->can_activate(ctx_old, ctx_new, ag))
+                cb->can_activate(undo_ctx, row_ctx, ag))
                 *rs_new = RS_ACTIVE;
             else
                 return SNMP_ERR_INCONSISTENTVALUE;
@@ -246,7 +247,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
             /*
              * not going active
              */
-            if (ctx_old) {
+            if (undo_ctx) {
                 /*
                  * change
                  */
@@ -255,7 +256,7 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
                      * check pre-reqs for deactivation
                      */
                     if (cb->can_deactivate &&
-                        !cb->can_deactivate(ctx_old, ctx_new, ag)) {
+                        !cb->can_deactivate(undo_ctx, row_ctx, ag)) {
                         return SNMP_ERR_INCONSISTENTVALUE;
                     }
                 }
@@ -267,17 +268,22 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
 
             if (*rs_new != RS_DESTROY) {
                 if ((NULL==cb->can_activate) ||
-                    cb->can_activate(ctx_old, ctx_new, ag))
+                    cb->can_activate(undo_ctx, row_ctx, ag))
                     *rs_new = RS_NOTINSERVICE;
                 else
                     *rs_new = RS_NOTREADY;
+            } else {
+                if (cb->can_delete && !cb->can_delete(undo_ctx, row_ctx, ag)) {
+                    return SNMP_ERR_INCONSISTENTVALUE;
+                }
+                ag->row_deleted = 1;
             }
         }
     } else {
         /*
          * check pre-reqs for delete row
          */
-        if (cb->can_delete && !cb->can_delete(ctx_old, ctx_new, ag)) {
+        if (cb->can_delete && !cb->can_delete(undo_ctx, row_ctx, ag)) {
             return SNMP_ERR_INCONSISTENTVALUE;
         }
     }
@@ -343,7 +349,8 @@ static void
 release_netsnmp_request_groups(void *vp)
 {
     netsnmp_container *c = (netsnmp_container*)vp;
-    CONTAINER_FOR_EACH(c, release_netsnmp_request_group, NULL);
+    CONTAINER_FOR_EACH(c, (netsnmp_container_obj_func*)
+                       release_netsnmp_request_group, NULL);
     CONTAINER_FREE(c);
 }
 
@@ -595,10 +602,10 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
 
         /*
          * search for row. all changes are made to the original row,
-         * later, we'll make a copy in old_row before we start processing.
+         * later, we'll make a copy in undo_info before we start processing.
          */
-        row = g->new_row = CONTAINER_FIND(tad->table, &index);
-        if (!g->new_row) {
+        row = g->existing_row = CONTAINER_FIND(tad->table, &index);
+        if (!g->existing_row) {
             if (!tad->cb->create_row) {
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_NOSUCHNAME);
@@ -606,8 +613,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
                 free(i);
                 continue;
             }
-            /** use old_row temporarily */
-            row = g->old_row = tad->cb->create_row(&index);
+            /** use undo_info temporarily */
+            row = g->existing_row = tad->cb->create_row(&index);
             if (!row) {
                 netsnmp_set_request_error(agtreq_info, current,
                                           SNMP_ERR_GENERR);
@@ -615,6 +622,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
                 free(i);
                 continue;
             }
+            g->row_created = 1;
         }
 
         g->index.oids = row->oids;
@@ -629,30 +637,22 @@ static void
 process_set_group(netsnmp_index *o, void *c)
 {
     /* xxx-rks: should we continue processing after an error?? */
-    set_context    *context = (set_context *) c;
+    set_context           *context = (set_context *) c;
     netsnmp_request_group *ag = (netsnmp_request_group *) o;
+    int                    rc = SNMP_ERR_NOERROR;
 
     switch (context->agtreq_info->mode) {
 
     case MODE_SET_RESERVE1:/** -> SET_RESERVE2 || SET_FREE */
 
         /*
-         * if no row, copy new row from old_row
+         * if not a new row, save undo info
          */
-        if (!ag->new_row) {
-            ag->new_row = ag->old_row;
-            ag->old_row = NULL;
-        }
-        else {
-            /*
-             * save a copy of row in old_row (undo info)
-             */
-            ag->old_row = context->tad->cb->duplicate_row(ag->new_row);
-            if (!ag->old_row) {
-                netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                               ag->list->ri,
-                                               SNMP_ERR_RESOURCEUNAVAILABLE);
-                return;
+        if (ag->row_created == 0) {
+            ag->undo_info = context->tad->cb->duplicate_row(ag->existing_row);
+            if (NULL == ag->undo_info) {
+                rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+                break;
             }
         }
         
@@ -666,37 +666,41 @@ process_set_group(netsnmp_index *o, void *c)
         break;
 
     case MODE_SET_ACTION:/** -> SET_COMMIT || SET_UNDO */
-        /*
-         * if we have and old_row, this row existed before.
-         * if we have no old_row, this is a new row.
-         * if table has secondary index, update it
-         */
-        if (ag->old_row) {
-            /** if no row, it has been deleted */
-            if (!ag->new_row) {
-                /** remove deleted row */
-                CONTAINER_REMOVE(ag->table, ag->old_row);
-            }
-        } else {
-            /** insert new row */
-            /** xxx-rks: error handling? */
-            CONTAINER_INSERT(ag->table, ag->new_row);
-        }
-
         if (context->tad->cb->set_action)
             context->tad->cb->set_action(ag);
         break;
 
     case MODE_SET_COMMIT:/** FINAL CHANCE ON SUCCESS */
+        if (ag->row_created == 0) {
+            /*
+             * this is an existing row, has it been deleted?
+             */
+            if (ag->row_deleted == 1) {
+                DEBUGMSGT((TABLE_ARRAY_NAME, "action: deleting row\n"));
+                if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
+                    rc = SNMP_ERR_GENERR;
+                    break;
+                }
+            }
+        } else if (ag->row_deleted == 0) {
+            /*
+             * new row (that hasn't been deleted) should be inserted
+             */
+            DEBUGMSGT((TABLE_ARRAY_NAME, "action: inserting row\n"));
+            if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
+                rc = SNMP_ERR_GENERR;
+                break;
+            }
+        }
+
         if (context->tad->cb->set_commit)
             context->tad->cb->set_commit(ag);
 
-        /** no more use for old_row, so free it */
-        if (ag->old_row) {
-            context->tad->cb->delete_row(ag->old_row);
-            ag->old_row = NULL;
+        /** no more use for undo_info, so free it */
+        if (ag->undo_info) {
+            context->tad->cb->delete_row(ag->undo_info);
+            ag->undo_info = NULL;
         }
-
 
 #if 0
         /* XXX-rks: finish row cooperative notifications
@@ -704,8 +708,8 @@ process_set_group(netsnmp_index *o, void *c)
          * for row operations.
          */
         if (context->tad->notifications) {
-            if (ag->old_row) {
-                if (!ag->new_row)
+            if (ag->undo_info) {
+                if (!ag->existing_row)
                     netsnmp_monitor_notify(EVENT_ROW_DEL);
                 else
                     netsnmp_monitor_notify(EVENT_ROW_MOD);
@@ -720,60 +724,72 @@ process_set_group(netsnmp_index *o, void *c)
         if (context->tad->cb->set_free)
             context->tad->cb->set_free(ag);
 
-        /** no more use for old_row, so free it */
-        if (ag->old_row) {
-            context->tad->cb->delete_row(ag->old_row);
-            ag->old_row = NULL;
+        /** no more use for undo_info, so free it */
+        if (ag->undo_info) {
+            context->tad->cb->delete_row(ag->undo_info);
+            ag->undo_info = NULL;
         }
         break;
 
     case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE */
-        if (ag->old_row) {
+        if (ag->row_created == 0) {
             /*
-             * if we have old_row, this row existed before.
+             * this row existed before.
              */
-            if (!ag->new_row) {
+            if (ag->row_deleted == 1) {
                 /*
-                 * old_row but no new_row means a deleted row.
-                 * insert old_row
+                 * re-insert undo_info
                  */
-                CONTAINER_INSERT(ag->table, ag->old_row);
+                DEBUGMSGT((TABLE_ARRAY_NAME, "undo: re-inserting row\n"));
+                if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
+                    rc = SNMP_ERR_GENERR;
+                    break;
+                }
             }
-        } else {
+        } else if (ag->row_deleted == 0) {
             /*
-             * if we have no old_row, this was a new row.
+             * new row that wasn't deleted should be removed
              */
-            assert(ag->new_row != NULL);
-            CONTAINER_REMOVE(ag->table, ag->new_row);
+            DEBUGMSGT((TABLE_ARRAY_NAME, "undo: removing new row\n"));
+            if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
+                rc = SNMP_ERR_GENERR;
+                break;
+            }
         }
 
-        /** status already set - don't change it now */
+        /*
+         * status already set - don't change it now
+         */
         if (context->tad->cb->set_undo)
             context->tad->cb->set_undo(ag);
 
-        /** no more use for old_row, so free it */
-        if (ag->old_row) {
-            if (ag->new_row) {
-                /*
-                 * copy old_row to new_row (restore values)
-                 */
-                context->tad->cb->row_copy(ag->new_row, ag->old_row);
-            }
-            context->tad->cb->delete_row(ag->old_row);
-            ag->old_row = NULL;
+        /*
+         * no more use for undo_info, so free it
+         */
+        if (ag->row_created == 0) {
+            /*
+             * restore old values
+             */
+            context->tad->cb->row_copy(ag->existing_row, ag->undo_info);
+            context->tad->cb->delete_row(ag->undo_info);
+            ag->undo_info = NULL;
         }
         else {
-            context->tad->cb->delete_row(ag->new_row);
-            ag->new_row = NULL;
+            context->tad->cb->delete_row(ag->existing_row);
+            ag->existing_row = NULL;
         }
         break;
 
     default:
         snmp_log(LOG_ERR, "unknown mode processing SET for "
                  "netsnmp_table_array_helper_handler\n");
-        /**context->status = SNMP_ERR_GENERR*/ ;
+        rc = SNMP_ERR_GENERR;
         break;
     }
+    
+    if (rc)
+        netsnmp_set_mode_request_error(MODE_SET_BEGIN, ag->list->ri, rc);
+                                               
 }
 
 inline
