@@ -334,6 +334,7 @@ FINISHED() {
 	    COMMAND="kill -9 $pid"
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
+	    return_value=1
 	fi
     done
     if [ "x$return_value" != "x0" ]; then
