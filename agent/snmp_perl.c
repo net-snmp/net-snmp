@@ -41,10 +41,24 @@ maybe_source_perl_startup(void)
 
     DEBUGMSGTL(("perl", "initializing perl (%s)\n", embedargs[1]));
     my_perl = perl_alloc();
+    if (!my_perl)
+        goto bail_out;
+    
     perl_construct(my_perl);
-    perl_parse(my_perl, xs_init, 2, (char **) embedargs, NULL);
-    perl_run(my_perl);
+    if (perl_parse(my_perl, xs_init, 2, (char **) embedargs, NULL))
+        goto bail_out;
+    
+    if (perl_run(my_perl))
+        goto bail_out;
+    
     DEBUGMSGTL(("perl", "done initializing perl\n"));
+
+    return;
+    
+  bail_out:
+    snmp_log(LOG_ERR, "embedded perl support failed to initalize\n");
+    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL, 1);
+    return;
 }
 
 void
@@ -53,6 +67,8 @@ do_something_perlish(char *something)
     if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL))
         return;
     maybe_source_perl_startup();
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL))
+        return;
     DEBUGMSGTL(("perl", "calling perl\n"));
     eval_pv(something, TRUE);
     DEBUGMSGTL(("perl", "finished calling perl\n"));
