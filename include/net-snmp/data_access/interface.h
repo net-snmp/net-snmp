@@ -13,16 +13,17 @@ extern          "C" {
 /*
  * define flags to indicate the availability of certain data
  */
-#define NETSNMP_INTERFACE_FLAGS_ACTIVE			0x01
-#define NETSNMP_INTERFACE_FLAGS_HAS_BYTES		0x02
-#define NETSNMP_INTERFACE_FLAGS_HAS_DROPS		0x04
-#define NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS		0x08
-#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES		0x10
-#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS	0x20
-#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED		0x40
-#define NETSNMP_INTERFACE_FLAGS_DYNAMIC_SPEED		0x80
-#define NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE		0x100
-#define NETSNMP_INTERFACE_FLAGS_HAS_DISCONTINUITY	0x200
+#define NETSNMP_INTERFACE_FLAGS_ACTIVE			0x00000001
+#define NETSNMP_INTERFACE_FLAGS_HAS_BYTES		0x00000002
+#define NETSNMP_INTERFACE_FLAGS_HAS_DROPS		0x00000004
+#define NETSNMP_INTERFACE_FLAGS_HAS_MCAST_PKTS		0x00000008
+#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_BYTES		0x00000010
+#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_PACKETS	0x00000020
+#define NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED		0x00000040
+#define NETSNMP_INTERFACE_FLAGS_DYNAMIC_SPEED		0x00000080
+#define NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE		0x00000100
+#define NETSNMP_INTERFACE_FLAGS_HAS_DISCONTINUITY	0x00000200
+#define NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS      	0x00000400
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -109,11 +110,17 @@ typedef struct netsnmp_interface_entry_s {
     u_long  if_lastchange;
     time_t  if_discontinuity;
 
+   char  if_admin_status;
    char  if_oper_status;
 
    /** booleans (not TruthValues!) */
    char  if_promiscuous;
    char  if_connector_present;
+
+   /*-----------------------------------------------
+    * platform/arch/access specific data
+    */
+   unsigned int if_flags; /* iff NETSNMP_INTERFACE_FLAGS_HAS_FAMILY */
 
    /*
     * statistics
@@ -193,6 +200,9 @@ oid netsnmp_access_interface_index_find(const char *name);
  */
 int netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
                                         netsnmp_interface_entry * rhs);
+
+void netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *);
+void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 
 /**---------------------------------------------------------------------*/
 
