@@ -18,6 +18,8 @@
 #endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
+#  include <windows.h>
+#  include <errno.h>
 #  include <sys/timeb.h>
 # else
 #  include <sys/time.h>
@@ -156,6 +158,35 @@ extern struct mnttab *HRFS_entry;
 #define HRFS_statfs	statvfs
 #define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
+#elif defined(WIN32)
+/* fake block size */
+#define FAKED_BLOCK_SIZE 512
+
+/* linux-compatible values for fs type */
+#define MSDOS_SUPER_MAGIC     0x4d44
+#define NTFS_SUPER_MAGIC      0x5346544E
+
+/* Define the statfs structure for Windows. */
+struct win_statfs {
+   long    f_type;     /* type of filesystem */
+   long    f_bsize;    /* optimal transfer block size */
+   long    f_blocks;   /* total data blocks in file system */
+   long    f_bfree;    /* free blocks in fs */
+   long    f_bavail;   /* free blocks avail to non-superuser */
+   long    f_files;    /* total file nodes in file system */
+   long    f_ffree;    /* free file nodes in fs */
+   long    f_fsid;     /* file system id */
+   long    f_namelen;  /* maximum length of filenames */
+   long    f_spare[6]; /* spare for later */
+   char	   f_driveletter[6];
+};
+
+static int win_statfs (const char *path, struct win_statfs *buf);
+
+extern struct win_statfs *HRFS_entry;
+#define HRFS_statfs	win_statfs
+#define HRFS_mount	f_driveletter
+
 #elif defined(HAVE_STATVFS) && defined(__NetBSD__)
 
 extern struct statvfs *HRFS_entry;
@@ -188,7 +219,7 @@ extern struct mntent *HRFS_entry;
 #define HRFS_HAS_FRSIZE STRUCT_STATFS_HAS_F_FRSIZE
 
 #endif
-
+	
 static int      physmem, pagesize;
 static void parse_storage_config(const char *, char *);
 
@@ -263,6 +294,7 @@ init_hr_storage(void)
         pagesize = pst_buf.page_size;
     }
 #else                           /* !USE_SYSCTL && !hpux10 && !hpux11 */
+#ifndef WIN32
 #ifdef HAVE_GETPAGESIZE
     pagesize = getpagesize();
 #elif defined(_SC_PAGESIZE)
@@ -282,6 +314,9 @@ init_hr_storage(void)
     }
 #else
     pagesize = PAGESIZE;
+#endif
+#else /* WIN32 */
+	pagesize = 4096; /* Yes...Yes it does. */
 #endif
 #ifdef _SC_PHYS_PAGES
     physmem = sysconf(_SC_PHYS_PAGES);
@@ -892,3 +927,82 @@ sol_get_swapinfo(int *totalP, int *usedP)
     *usedP = ainfo.ani_resv;
 }
 #endif                          /* solaris2 */
+
+#ifdef WIN32
+char *win_realpath(const char *file_name, char *resolved_name)
+{
+	char szFile[_MAX_PATH + 1];
+	char *pszRet;
+ 	
+	pszRet = _fullpath(szFile, resolved_name, MAX_PATH);
+ 	
+	return pszRet;  
+}
+
+static int win_statfs (const char *path, struct win_statfs *buf)
+{
+    HINSTANCE h;
+    FARPROC f;
+    int retval = 0;
+    char tmp [MAX_PATH], resolved_path [MAX_PATH];
+    GetFullPathName(path, MAX_PATH, resolved_path, NULL);
+    /* TODO - Fix this! The realpath macro needs defined
+     * or rewritten into the function.
+     */
+    
+    win_realpath(path, resolved_path);
+    
+    if (!resolved_path)
+    	retval = - 1;
+    else {
+    	/* check whether GetDiskFreeSpaceExA is supported */
+        h = LoadLibraryA ("kernel32.dll");
+        if (h)
+			f = GetProcAddress (h, "GetDiskFreeSpaceExA");
+        else
+        	f = NULL;
+		
+        if (f) {
+			ULARGE_INTEGER bytes_free, bytes_total, bytes_free2;
+            if (!f (resolved_path, &bytes_free2, &bytes_total, &bytes_free)) {
+				errno = ENOENT;
+				retval = - 1;
+			} else {
+				buf -> f_bsize = FAKED_BLOCK_SIZE;
+				buf -> f_bfree = (bytes_free.QuadPart) / FAKED_BLOCK_SIZE;
+				buf -> f_files = buf -> f_blocks = (bytes_total.QuadPart) / FAKED_BLOCK_SIZE;
+				buf -> f_ffree = buf -> f_bavail = (bytes_free2.QuadPart) / FAKED_BLOCK_SIZE;
+			}
+		} else {
+			DWORD sectors_per_cluster, bytes_per_sector;
+			if (h) FreeLibrary (h);
+			if (!GetDiskFreeSpaceA (resolved_path, &sectors_per_cluster,
+					&bytes_per_sector, &buf -> f_bavail, &buf -> f_blocks)) {
+                errno = ENOENT;
+                retval = - 1;
+            } else {
+                buf -> f_bsize = sectors_per_cluster * bytes_per_sector;
+                buf -> f_files = buf -> f_blocks;
+                buf -> f_ffree = buf -> f_bavail;
+                buf -> f_bfree = buf -> f_bavail;
+            }
+		}
+		if (h) FreeLibrary (h);
+	}
+
+	/* get the FS volume information */
+	if (strspn (":", resolved_path) > 0) resolved_path [3] = '\0'; /* we want only the root */    
+	if (GetVolumeInformation (resolved_path, NULL, 0, &buf -> f_fsid, &buf -> f_namelen, 
+									NULL, tmp, MAX_PATH)) {
+		if (strcasecmp ("NTFS", tmp) == 0) {
+			buf -> f_type = NTFS_SUPER_MAGIC;
+		} else {
+			buf -> f_type = MSDOS_SUPER_MAGIC;
+		}
+	} else {
+		errno = ENOENT;
+		retval = - 1;
+	}
+	return retval;
+}
+#endif	/* WIN32 */
