@@ -35,15 +35,6 @@
 
 #undef LOGFILE
 
-/* to hack in forced V2 security, I had to reserve the left byte of
-   the ACL Mib word for V2.  Do NOT define more than 5 V1 communities
-   else they will roll into these definitions (see snmp_vars.c:340) 
-   If GLOBALSECURITY is defined, it sets the default SNMP access type
-   for the extensible mibs to the setting type described. */
-
-#define GLOBALSECURITY SNMPV2AUTH    /* only authenticated snmpv2 requests
-                                        permited */
-
 /* configuration files.  I rdist the first one and leave machine
    specific stuff in the second one */
 
@@ -156,12 +147,6 @@
 #define EXTENSIBLEDOTMIB 1.3.6.1.4.1.2021
 /* count the above numbers */
 #define EXTENSIBLENUM 7
-
-/* the ErrorFlag is V1 accessable because HP Openview does not support
-   V2.  You can make this list of pairs as long as you want, just make
-   sure to end it in -1.*/
-
-#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1 */
 
 /* Mib-2 tree Info */
 /* These are the system information variables. */
