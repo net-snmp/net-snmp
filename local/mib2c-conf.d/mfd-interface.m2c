@@ -56,9 +56,6 @@ void _${context}_initialize_interface(${context}_registration_ptr user_ctx,
 @   end@
     ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx($m2c_tmp);
 void ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
-@    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
-static ${context}_data *${context}_allocate_data(void);
-@   end@
 
 int ${context}_index_to_oid(netsnmp_index *oid_idx,
                             ${context}_mib_index *mib_idx);
@@ -138,7 +135,10 @@ NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowr
 @end@
 
 @   end@ # writable
+@   if ("$m2c_data_context" eq "generated") && (($m2c_undo_embed == 0)) || ($m2c_data_allocate == 1)@
+static ${context}_data *${context}_allocate_data(void);
 
+@   end@
 /**
  * @internal
  * Initialize the table $context 
@@ -217,7 +217,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
      * no wrappers yet
      */
     access_multiplexer->commit = _mfd_${context}_commit;
-    access_multiplexer->commit = _mfd_${context}_undo_commit;
+    access_multiplexer->undo_commit = _mfd_${context}_undo_commit;
 @   if $m2c_irreversible_commit == 1@
     access_multiplexer->irreversible_commit = _mfd_${context}_irreversible_commit;
 @   end@
@@ -328,7 +328,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
 
 ########################################################################
 ##
-@    if $m2c_data_allocate == 1 && $m2c_data_context eq "generated"@
+@    if (($m2c_data_allocate == 1) || ($m2c_undo_embed == 0)) && ("$m2c_data_context" eq "generated")@
 @        include generic-data-allocate.m2i@
 @    end@
 ########################################################################
@@ -408,6 +408,8 @@ ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
     if(rowreq_ctx->data)
         ${context}_release_data(rowreq_ctx->data);
  
+@end@ 
+@if $m2c_undo_embed == 0@
     if(rowreq_ctx->undo)
         ${context}_release_data(rowreq_ctx->undo);
  
@@ -730,9 +732,10 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
     if(SNMPERR_SUCCESS == rc) {
         rc = ${node}_check_value( rowreq_ctx, $m2c_node_var_val );
         if((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc) &&
-           (MFD_NOT_VALID_NOW != rc))
+           (MFD_NOT_VALID_NOW != rc)) {
             snmp_log(LOG_ERR, "bad rc %d from ${node}_check_value\n", rc);
             rc = SNMP_ERR_GENERR;
+        }
     }
         break;
 @   end@ # for each nonindex
@@ -860,7 +863,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
  * SET: Undo setup
  *
  *---------------------------------------------------------------------*/
-@if "$m2c_data_context" eq "generated"@
+@if ("$m2c_data_context" eq "generated") && ($m2c_data_init == 0)@
 /**
  * @internal
  * Setup up context with information needed to undo a set request.
@@ -925,12 +928,12 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
                   netsnmp_container_table_extract_context(requests);
     netsnmp_assert(NULL != rowreq_ctx);
 
-@if $m2c_data_allocate == 1@
+@if $m2c_undo_embed == 0@
     /*
-     * allocate context, if needed
+     * allocate undo context
      */
     rowreq_ctx->undo = ${context}_allocate_data();
-    if(NULL == rowreq_ctx->data) {
+    if(NULL == rowreq_ctx->undo) {
         /** msg already logged */
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
@@ -960,7 +963,7 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
      */
     rc = ${context}_undo_cleanup(rowreq_ctx);
 
-@if $m2c_data_allocate == 1@
+@if $m2c_undo_embed == 0@
     /*
      * release undo context, if needed
      */
