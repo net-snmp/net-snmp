@@ -292,6 +292,7 @@ STOPPROG() {
 
 	DELAY
 	$COMMAND > /dev/null 2>&1
+	DELAY
     fi
 }
 
