@@ -146,6 +146,9 @@ void init_at(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/at", at_variables, variable4, at_variables_oid);
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 #ifndef WIN32

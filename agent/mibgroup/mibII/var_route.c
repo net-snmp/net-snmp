@@ -462,6 +462,9 @@ static char*  route_symbols[] = {
 void
 init_var_route (void)
 {
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 static void Route_Scan_Reload (void)
