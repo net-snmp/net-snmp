@@ -51,8 +51,10 @@ usage() {
 }
 
 # defaults
+# Fix path starting from this script's base.
 SNMP_BASEDIR=`dirname $0` ; export SNMP_BASEDIR
-SNMP_UPDIR=`dirname $0`/..
+cd $SNMP_BASEDIR
+SNMP_UPDIR=..
 interactive=no
 
 while [ -n "$1" ]; do
@@ -101,12 +103,14 @@ while [ -n "$1" ]; do
 done
 
 
-# Fix path starting from this script's base.
-PATH=`pwd`:${SNMP_BASEDIR}:$PATH
+PATH=`pwd`:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
+export PATH
+SNMP_PATH=yes
 
 #
 # Source the testing configuration file
 #
+
 . TESTCONF.sh
 
 # Hack: the above created a directory, now we have to nuke it and
@@ -115,13 +119,10 @@ rmdir $SNMP_TMPDIR
 unset SNMP_TMPDIR
 export SNMP_TMPDIR
 
-PATH=${SNMP_TESTDIR}:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
-export PATH
-
 #
 # Switch to the testing directory, for ease of the client test packages.
 #
-cd $SNMP_TESTDIR
+cd ./tests
 
 #------------------------------------ -o- 
 # Globals.
