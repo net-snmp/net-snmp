@@ -57,6 +57,11 @@ nosysdepend:
 	cd apps; make nosysdepend
 	cd agent; make nosysdepend
 
+makefileindepend:
+	cd snmplib; make makefileindepend
+	cd apps; make makefileindepend
+	cd agent; make makefileindepend
+
 clean:
 	for i in $(SUBDIRS) ; do \
         ( cd $$i ; $(MAKE) clean ) ; \
