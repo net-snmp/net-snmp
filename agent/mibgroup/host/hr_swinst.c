@@ -43,6 +43,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_RPMGETPATH
+#include <rpm/rpmmacro.h>
+#endif
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -104,8 +108,12 @@ void init_hr_swinst(void)
 	HRSW_directory = "/var/db/pkg";
 #endif
 
-#ifdef HAVE_LIBRPM
+#if (defined(HAVE_LIBRPM) || defined(HAVE_RPMGETPATH))
+#ifdef HAVE_RPMGETPATH
+	rpmReadConfigFiles(NULL, NULL);
+#else
 	rpmReadConfigFiles( NULL, NULL, NULL, 0);
+#endif
 #endif
     }
 
@@ -272,8 +280,14 @@ var_hrswinst(struct variable *vp,
 	case HRSWINST_CHANGE:
 	case HRSWINST_UPDATE:
 	    string[0] = '\0';
-#ifdef HAVE_LIBRPM
+#if (defined(HAVE_LIBRPM) || defined(HAVE_RPMGETPATH))
+	    /* RPM versions pre 2.9 use rpmGetVar to get the database path
+	       RPM version 2.9 and higher use the rpmGetPath for the. */
+#ifdef HAVE_RPMGETPATH
+	    sprintf(string, "%s/packages.rpm", rpmGetPath("%{_dbpath}",NULL));
+#else
 	    sprintf(string, "%s/packages.rpm", rpmGetVar(RPMVAR_DBPATH));
+#endif
 #else
 	    if ( HRSW_directory )
 		strcpy( string, HRSW_directory);
