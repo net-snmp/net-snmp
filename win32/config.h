@@ -178,6 +178,12 @@
 /* Define if you have the setenv function.  */
 #undef HAVE_SETENV
 
+/* Define if you have the strtoul function.  */
+#define HAVE_STRTOUL 1
+
+/* Define if you have the vsnprintf function.  */
+#define HAVE_VSNPRINTF 1
+
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
 
@@ -797,6 +803,7 @@
 #define IN_UCD_SNMP_SOURCE 1
 
 int strcasecmp(const char *s1, const char *s2);
+#define vsnprintf _vsnprintf
 
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
@@ -811,3 +818,8 @@ int strcasecmp(const char *s1, const char *s2);
 typedef unsigned short mode_t;
 
 #define AGENT_DIRECTORY_MODE 0700
+
+/* reverse encoding BER packets is both faster and more efficient in space. */
+#define USE_REVERSE_ASNENCODING       1
+#define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
+
