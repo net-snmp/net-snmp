@@ -56,6 +56,12 @@ SOFTWARE.
 #include <in.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif

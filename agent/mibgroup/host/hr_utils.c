@@ -20,6 +20,12 @@
 #include <stdlib.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_utils.h"
 #if TIME_WITH_SYS_TIME

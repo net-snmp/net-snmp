@@ -4,6 +4,13 @@
  */
 
 #include <config.h>
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_disk.h"
 #if HAVE_STRING_H

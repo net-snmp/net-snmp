@@ -16,6 +16,12 @@
 #endif
 #include <errno.h>
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_partition.h"
 #include "hr_filesys.h"

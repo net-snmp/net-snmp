@@ -87,6 +87,27 @@
 #define SIOCDELRT SIOCDELMULTI
 #endif
 
+/*
+ *  didn't wanna take the time to fix these errors:
+ *
+ * "mibII/route_write.c", line 113: undefined struct/union member: rt_nodes
+ * "mibII/route_write.c", line 113: undefined struct/union member: rn_key
+ * "mibII/route_write.c", line 113: left operand of "->" must be pointer to struct/union
+ * "mibII/route_write.c", line 118: undefined struct/union member: rt_pad1
+ * "mibII/route_write.c", line 123: undefined symbol: SIOCADDRT
+ * "mibII/route_write.c", line 155: undefined struct/union member: rt_nodes
+ * "mibII/route_write.c", line 155: undefined struct/union member: rn_key
+ * "mibII/route_write.c", line 155: left operand of "->" must be pointer to struct/union
+ * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
+ * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
+ *
+ */
+#ifdef dynix
+int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
+{
+    return 0;
+}
+#else
 int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
     struct sockaddr_in     dst;
@@ -124,9 +145,31 @@ int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #endif
 
 }
+#endif
 
 
 
+/*
+ *  didn't wanna take the time to fix these errors:
+ *
+ * "mibII/route_write.c", line 113: undefined struct/union member: rt_nodes
+ * "mibII/route_write.c", line 113: undefined struct/union member: rn_key
+ * "mibII/route_write.c", line 113: left operand of "->" must be pointer to struct/union
+ * "mibII/route_write.c", line 118: undefined struct/union member: rt_pad1
+ * "mibII/route_write.c", line 123: undefined symbol: SIOCADDRT
+ * "mibII/route_write.c", line 155: undefined struct/union member: rt_nodes
+ * "mibII/route_write.c", line 155: undefined struct/union member: rn_key
+ * "mibII/route_write.c", line 155: left operand of "->" must be pointer to struct/union
+ * "mibII/route_write.c", line 160: undefined struct/union member: rt_pad1
+ * "mibII/route_write.c", line 166: undefined symbol: SIOCDELRT
+ *
+ */
+#ifdef dynix
+int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
+{
+    return 0;
+}
+#else
 int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
 
@@ -167,6 +210,8 @@ int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 #endif
 
 }
+#endif
+
 
 
 #ifndef STRUCT_RTENTRY_HAS_RT_DST

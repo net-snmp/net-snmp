@@ -25,6 +25,12 @@
 #include <dmalloc.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "auto_nlist.h"
 #include "autonlist.h"
 #include "kernel.h"
