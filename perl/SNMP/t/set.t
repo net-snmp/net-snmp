@@ -216,6 +216,6 @@ ok( $s1->{ErrorStr} =~ /^Unknown/ );
 
 ##############################################
 
-    snmptest_cleanup();
+snmptest_cleanup();
 
 
