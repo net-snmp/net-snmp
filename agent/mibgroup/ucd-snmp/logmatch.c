@@ -251,7 +251,7 @@ updateLogmatch(int iindex)
          * ------------------------------------ 
          */
 
-        if (perfile = fopen(perfilename, "r")) {
+        if ((perfile = fopen(perfilename, "r"))) {
 
 
             /*
@@ -275,8 +275,8 @@ updateLogmatch(int iindex)
                  * ------------------------------------ 
                  */
 
-                if (logmatchTable[iindex].logfile =
-                    fopen(logmatchTable[iindex].filename, "r")) {
+                if ((logmatchTable[iindex].logfile =
+                    fopen(logmatchTable[iindex].filename, "r"))) {
 
 
                     /*
@@ -336,8 +336,8 @@ updateLogmatch(int iindex)
             toobig = FALSE;
         }
 
-        if (logmatchTable[iindex].logfile =
-            fopen(logmatchTable[iindex].filename, "r")) {
+        if ((logmatchTable[iindex].logfile =
+            fopen(logmatchTable[iindex].filename, "r"))) {
 
             result =
                 fseek(logmatchTable[iindex].logfile,

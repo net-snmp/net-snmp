@@ -415,7 +415,10 @@ sh_count_procs(char *procname)
     DIR *dir;
     char cmdline[512], *tmpc;
     struct dirent *ent;
-    int fd,len,plen=strlen(procname),total = 0;
+#ifdef USE_PROC_CMDLINE
+    int fd,len;
+#endif
+    int plen=strlen(procname),total = 0;
     FILE *status;
 
     if ((dir = opendir("/proc")) == NULL) return -1;

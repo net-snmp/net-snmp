@@ -389,7 +389,6 @@ vacm_checkSubtree(const char *viewName,
     struct vacm_viewEntry *vp, *vpShorter = NULL, *vpLonger = NULL;
     char            view[VACMSTRINGLEN];
     int             found, glen;
-    int count=0;
 
     glen = (int) strlen(viewName);
     if (glen < 0 || glen >= VACM_MAX_STRING)
