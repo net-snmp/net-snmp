@@ -37,8 +37,10 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
 fi
 
 if [ "x$MIBDIRS" = "x" ]; then
+  if [ "x$SNMP_PREFER_NEAR_MIBS" = "x1" ]; then
     MIBDIRS=${SNMP_BASEDIR}/../mibs
     export MIBDIRS
+  fi
 fi
 
 # Set up the path to the programs we want to use.
