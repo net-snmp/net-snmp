@@ -37,6 +37,7 @@ $pinghost = 0;
 $loglevel = 1;
 $logwindowatstart = 0;
 $numloglevels = 5;
+$dontstart = 0;
 #
 #  Mib Package:  Each mib has a mib number attached and can check/fix itself;
 #
@@ -152,12 +153,12 @@ sub snmp_get {
     my $mib = shift;
     $_ = `$::snmppath/snmpget $self->{'Host'} ecemgr eceagent ececontext $mib`;
     my ($result) = /= (.*)$/;
-    $result =~ s/\"//g;
-    $result =~ s/ Hex:.*$//g;
     if ($result =~ /No Response/) {
 	$self->{'HostId'}->hostdown;
 	$result = "";
     }
+    $result =~ s/\"//g;
+    $result =~ s/ Hex:.*$//g;
     ::addToLog("snmpget:  $_",5);
     $self->{'Frame'}->toplevel->Unbusy() if ($::display);
     return $result;
@@ -598,6 +599,7 @@ if ($#ARGV != -1) {
 	/^-L/ && ($logwindowatstart = 1);
 	/^-h/ && &display_help(); 
 	/^-f/ && &setmibchecklist(@fixitlist); 
+	/^-d/ && ($dontstart = 1);
     }
 }
 
@@ -806,7 +808,9 @@ if ($display) {
     $status->configure(-text => "Idle");
     $selected = 0;
     # fill table with hosts
-  Tk::after(1000,[\&loadAllHosts,@ARGV]);
+    if (!$dontstart) {
+	loadAllHosts(@ARGV);
+    }
     MainLoop;
 }
 else {
@@ -1086,6 +1090,7 @@ X Options:
   -H\tstart in hidden mode.  (hides user interface)
   -V NUM\tsets the initial verbosity level of the command log (def: 1)
   -L\tShow the log window at startup
+  -d\tDon't start by checking anything.  Just bring up the interface.
 
 Ascii Options:
   -n\tDon't ever try and fix the problems found.  Just list.
