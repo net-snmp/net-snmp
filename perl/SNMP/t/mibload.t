@@ -65,4 +65,5 @@ $res = $SNMP::MIB{ipv6TcpConnState}{moduleID};
 ok($res =~ /^IPV6-TCP-MIB/);
 #################################################
 
+snmptest_cleanup();
 
