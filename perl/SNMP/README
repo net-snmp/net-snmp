@@ -409,6 +409,7 @@ SNMP package variables and functions:
         units         - returns UNITS
         hint          - returns HINT
         enums         - returns hash ref {tag => num, ...}
+        ranges        - returns array ref [[low1, high1], [low2, high2], ...]
         description   - returns DESCRIPTION ($SNMP::save_descriptions must
                         be set prior to MIB initialization/parsing)
 

@@ -2956,10 +2956,11 @@ snmp_mib_node_FETCH(tp_ref, key)
            SnmpMibNode *tp = NULL;
            struct index_list *ip;
            struct enum_list *ep;
+           struct range_list *rp;
            struct module *mp;
            SV *child_list_aref, *next_node_href, *mib_tied_href, **nn_hrefp;
            HV *mib_hv, *enum_hv;
-           AV *index_av;
+           AV *index_av, *range_av, *ranges_av;
            MAGIC *mg;
 
            if (SvROK(tp_ref)) tp = (SnmpMibNode*)SvIV((SV*)SvRV(tp_ref));
@@ -2967,14 +2968,163 @@ snmp_mib_node_FETCH(tp_ref, key)
 	   ST(0) = sv_newmortal();
            if (tp)
 	   switch (c) {
+	      case 'a': /* access */
+                 if (strncmp("access", key, strlen(key))) break;
+                 switch	(tp->access) {
+                   case MIB_ACCESS_READONLY:
+                     sv_setpv(ST(0),"ReadOnly");
+                     break;
+                   case MIB_ACCESS_READWRITE:
+                     sv_setpv(ST(0),"ReadWrite");
+                     break;
+                   case MIB_ACCESS_WRITEONLY:
+                     sv_setpv(ST(0),"WriteOnly");
+                     break;
+                   case MIB_ACCESS_NOACCESS:
+                     sv_setpv(ST(0),"NoAccess");
+                     break;
+                   case MIB_ACCESS_NOTIFY:
+                     sv_setpv(ST(0),"Notify");
+                     break;
+                   case MIB_ACCESS_CREATE:
+                     sv_setpv(ST(0),"Create");
+                     break;
+                   default:
+                     break;
+                 }
+                 break;
+  	      case 'c': /* children */
+                 if (strncmp("children", key, strlen(key))) break;
+                 child_list_aref = newRV((SV*)newAV());
+                 for (tp = tp->child_list; tp; tp = tp->next_peer) {
+                    mib_hv = perl_get_hv("SNMP::MIB", FALSE);
+                    if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
+                    if (mg) mib_tied_href = (SV*)mg->mg_obj;
+                    next_node_href = newRV((SV*)newHV());
+                    __tp_sprint_num_objid(str_buf, tp);
+                    nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
+                                        str_buf, strlen(str_buf), 1);
+                    if (!SvROK(*nn_hrefp)) {
+                       sv_setsv(*nn_hrefp, next_node_href);
+                       ENTER ;
+                       SAVETMPS ;
+                       PUSHMARK(sp) ;
+                       XPUSHs(SvRV(*nn_hrefp));
+                       XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
+                       XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
+                       XPUSHs(sv_2mortal(newSViv((IV)tp)));
+                       PUTBACK ;
+                       perl_call_pv("SNMP::_tie",G_VOID);
+                       /* pp_tie(ARGS); */
+                       SPAGAIN ;
+                       FREETMPS ;
+                       LEAVE ;
+                    } /* if SvROK */
+                    av_push((AV*)SvRV(child_list_aref), *nn_hrefp);
+                 } /* for child_list */
+                 sv_setsv(ST(0), child_list_aref);
+                 break;
+	      case 'd': /* description */
+                 if (strncmp("description", key, strlen(key))) break;
+                 sv_setpv(ST(0),tp->description);
+                 break;
+              case 'i': /* indexes */
+                 if (strncmp("indexes", key, strlen(key))) break;
+                 index_av = newAV();
+                 for(ip=tp->indexes; ip != NULL; ip = ip->next) {
+                    av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
+                 }
+                sv_setsv(ST(0), newRV((SV*)index_av));
+                break;
+	      case 'l': /* label */
+                 if (strncmp("label", key, strlen(key))) break;
+                 sv_setpv(ST(0),tp->label);
+                 break;
+	      case 'm': /* moduleID */
+                 if (strncmp("moduleID", key, strlen(key))) break;
+                 mp = find_module(tp->modid);
+                 if (mp) sv_setpv(ST(0), mp->name);
+                 break;
+	      case 'n': /* nextNode */
+                 if (strncmp("nextNode", key, strlen(key))) break;
+                 tp = __get_next_mib_node(tp);
+                 if (tp == NULL) {
+                    sv_setsv(ST(0), &sv_undef);
+                    break;
+                 }
+                 mib_hv = perl_get_hv("SNMP::MIB", FALSE);
+                 if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
+                 if (mg) mib_tied_href = (SV*)mg->mg_obj;
+                 __tp_sprint_num_objid(str_buf, tp);
+
+                 nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
+                                     str_buf, strlen(str_buf), 1);
+                 /* if (!SvROK(*nn_hrefp)) { */ /* bug in ucd - 2 .0.0 nodes */
+                 next_node_href = newRV((SV*)newHV());
+                 sv_setsv(*nn_hrefp, next_node_href);
+                 ENTER ;
+                 SAVETMPS ;
+                 PUSHMARK(sp) ;
+                 XPUSHs(SvRV(*nn_hrefp));
+                 XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
+                 XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
+                 XPUSHs(sv_2mortal(newSViv((IV)tp)));
+                 PUTBACK ;
+                 perl_call_pv("SNMP::_tie",G_VOID);
+                 /* pp_tie(ARGS); */
+                 SPAGAIN ;
+                 FREETMPS ;
+                 LEAVE ;
+                 /* } */
+                 sv_setsv(ST(0), *nn_hrefp);
+                 break;
 	      case 'o': /* objectID */
                  if (strncmp("objectID", key, strlen(key))) break;
                  __tp_sprint_num_objid(str_buf, tp);
                  sv_setpv(ST(0),str_buf);
                  break;
-	      case 'l': /* label */
-                 if (strncmp("label", key, strlen(key))) break;
-                 sv_setpv(ST(0),tp->label);
+	      case 'p': /* parent */
+                 if (strncmp("parent", key, strlen(key))) break;
+                 tp = tp->parent;
+                 if (tp == NULL) {
+                    sv_setsv(ST(0), &sv_undef);
+                    break;
+                 }
+                 mib_hv = perl_get_hv("SNMP::MIB", FALSE);
+                 if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
+                 if (mg) mib_tied_href = (SV*)mg->mg_obj;
+                 next_node_href = newRV((SV*)newHV());
+                 __tp_sprint_num_objid(str_buf, tp);
+                 nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
+                                     str_buf, strlen(str_buf), 1);
+                 if (!SvROK(*nn_hrefp)) {
+                 sv_setsv(*nn_hrefp, next_node_href);
+                 ENTER ;
+                 SAVETMPS ;
+                 PUSHMARK(sp) ;
+                 XPUSHs(SvRV(*nn_hrefp));
+                 XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
+                 XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
+                 XPUSHs(sv_2mortal(newSViv((IV)tp)));
+                 PUTBACK ;
+                 perl_call_pv("SNMP::_tie",G_VOID);
+                 /* pp_tie(ARGS); */
+                 SPAGAIN ;
+                 FREETMPS ;
+                 LEAVE ;
+                 }
+                 sv_setsv(ST(0), *nn_hrefp);
+                 break;
+	      case 'r': /* ranges */
+                 if (strncmp("ranges", key, strlen(key))) break;
+                 ranges_av = newAV();
+                 for(rp=tp->ranges; rp != NULL; rp = rp->next) {
+                   range_av = newAV();
+                   av_store(range_av, 0, newSViv(rp->low));
+                   av_store(range_av, 1, newSViv(rp->high));
+                   av_push(ranges_av, newRV((SV*)range_av));
+                 }
+                 sv_setsv(ST(0), newRV((SV*)ranges_av));
                  break;
 	      case 's': /* subID */
                  if (strncmp("subID", key, strlen(key))) {
@@ -3012,107 +3162,6 @@ snmp_mib_node_FETCH(tp_ref, key)
                    sv_setiv(ST(0),(I32)tp->subid);
                  }
                  break;
-	      case 'm': /* moduleID */
-                 if (strncmp("moduleID", key, strlen(key))) break;
-                 mp = find_module(tp->modid);
-                 if (mp) sv_setpv(ST(0), mp->name);
-                 break;
-	      case 'p': /* parent */
-                 if (strncmp("parent", key, strlen(key))) break;
-                 tp = tp->parent;
-                 if (tp == NULL) {
-                    sv_setsv(ST(0), &sv_undef);
-                    break;
-                 }
-                 mib_hv = perl_get_hv("SNMP::MIB", FALSE);
-                 if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
-                 if (mg) mib_tied_href = (SV*)mg->mg_obj;
-                 next_node_href = newRV((SV*)newHV());
-                 __tp_sprint_num_objid(str_buf, tp);
-                 nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
-                                     str_buf, strlen(str_buf), 1);
-                 if (!SvROK(*nn_hrefp)) {
-                 sv_setsv(*nn_hrefp, next_node_href);
-                 ENTER ;
-                 SAVETMPS ;
-                 PUSHMARK(sp) ;
-                 XPUSHs(SvRV(*nn_hrefp));
-                 XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
-                 XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
-                 XPUSHs(sv_2mortal(newSViv((IV)tp)));
-                 PUTBACK ;
-                 perl_call_pv("SNMP::_tie",G_VOID);
-                 /* pp_tie(ARGS); */
-                 SPAGAIN ;
-                 FREETMPS ;
-                 LEAVE ;
-                 }
-                 sv_setsv(ST(0), *nn_hrefp);
-                 break;
-  	      case 'c': /* children */
-                 if (strncmp("children", key, strlen(key))) break;
-                 child_list_aref = newRV((SV*)newAV());
-                 for (tp = tp->child_list; tp; tp = tp->next_peer) {
-                    mib_hv = perl_get_hv("SNMP::MIB", FALSE);
-                    if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
-                    if (mg) mib_tied_href = (SV*)mg->mg_obj;
-                    next_node_href = newRV((SV*)newHV());
-                    __tp_sprint_num_objid(str_buf, tp);
-                    nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
-                                        str_buf, strlen(str_buf), 1);
-                    if (!SvROK(*nn_hrefp)) {
-                       sv_setsv(*nn_hrefp, next_node_href);
-                       ENTER ;
-                       SAVETMPS ;
-                       PUSHMARK(sp) ;
-                       XPUSHs(SvRV(*nn_hrefp));
-                       XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
-                       XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
-                       XPUSHs(sv_2mortal(newSViv((IV)tp)));
-                       PUTBACK ;
-                       perl_call_pv("SNMP::_tie",G_VOID);
-                       /* pp_tie(ARGS); */
-                       SPAGAIN ;
-                       FREETMPS ;
-                       LEAVE ;
-                    } /* if SvROK */
-                    av_push((AV*)SvRV(child_list_aref), *nn_hrefp);
-                 } /* for child_list */
-                 sv_setsv(ST(0), child_list_aref);
-                 break;
-	      case 'n': /* nextNode */
-                 if (strncmp("nextNode", key, strlen(key))) break;
-                 tp = __get_next_mib_node(tp);
-                 if (tp == NULL) {
-                    sv_setsv(ST(0), &sv_undef);
-                    break;
-                 }
-                 mib_hv = perl_get_hv("SNMP::MIB", FALSE);
-                 if (SvMAGICAL(mib_hv)) mg = mg_find((SV*)mib_hv, 'P');
-                 if (mg) mib_tied_href = (SV*)mg->mg_obj;
-                 __tp_sprint_num_objid(str_buf, tp);
-
-                 nn_hrefp = hv_fetch((HV*)SvRV(mib_tied_href),
-                                     str_buf, strlen(str_buf), 1);
-                 /* if (!SvROK(*nn_hrefp)) { */ /* bug in ucd - 2 .0.0 nodes */
-                 next_node_href = newRV((SV*)newHV());
-                 sv_setsv(*nn_hrefp, next_node_href);
-                 ENTER ;
-                 SAVETMPS ;
-                 PUSHMARK(sp) ;
-                 XPUSHs(SvRV(*nn_hrefp));
-                 XPUSHs(sv_2mortal(newSVpv("SNMP::MIB::NODE",0)));
-                 XPUSHs(sv_2mortal(newSVpv(str_buf,0)));
-                 XPUSHs(sv_2mortal(newSViv((IV)tp)));
-                 PUTBACK ;
-                 perl_call_pv("SNMP::_tie",G_VOID);
-                 /* pp_tie(ARGS); */
-                 SPAGAIN ;
-                 FREETMPS ;
-                 LEAVE ;
-                 /* } */
-                 sv_setsv(ST(0), *nn_hrefp);
-                 break;
 	      case 't': /* type */
                  if (strncmp("type", key, strlen(key))) {
                     if (strncmp("textualConvention", key, strlen(key))) break;
@@ -3121,31 +3170,6 @@ snmp_mib_node_FETCH(tp_ref, key)
                  }
                  __get_type_str(tp->type, str_buf);
                  sv_setpv(ST(0), str_buf);
-                 break;
-	      case 'a': /* access */
-                 if (strncmp("access", key, strlen(key))) break;
-                 switch	(tp->access) {
-                   case MIB_ACCESS_READONLY:
-                     sv_setpv(ST(0),"ReadOnly");
-                     break;
-                   case MIB_ACCESS_READWRITE:
-                     sv_setpv(ST(0),"ReadWrite");
-                     break;
-                   case MIB_ACCESS_WRITEONLY:
-                     sv_setpv(ST(0),"WriteOnly");
-                     break;
-                   case MIB_ACCESS_NOACCESS:
-                     sv_setpv(ST(0),"NoAccess");
-                     break;
-                   case MIB_ACCESS_NOTIFY:
-                     sv_setpv(ST(0),"Notify");
-                     break;
-                   case MIB_ACCESS_CREATE:
-                     sv_setpv(ST(0),"Create");
-                     break;
-                   default:
-                     break;
-                 }
                  break;
 	      case 'u': /* units */
                  if (strncmp("units", key, strlen(key))) break;
@@ -3163,18 +3187,6 @@ snmp_mib_node_FETCH(tp_ref, key)
                                 newSViv(ep->value), 0);
                  }
                  sv_setsv(ST(0), newRV((SV*)enum_hv));
-                 break;
-              case 'i': /* indexes */
-                 if (strncmp("indexes", key, strlen(key))) break;
-                 index_av = newAV();
-                 for(ip=tp->indexes; ip != NULL; ip = ip->next) {
-                    av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
-                 }
-                sv_setsv(ST(0), newRV((SV*)index_av));
-                break;
-	      case 'd': /* description */
-                 if (strncmp("description", key, strlen(key))) break;
-                 sv_setpv(ST(0),tp->description);
                  break;
               default:
                  break;
