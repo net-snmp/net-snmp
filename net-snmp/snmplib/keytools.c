@@ -102,13 +102,10 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     }
 
     if (pplen < USM_LENGTH_P_MIN) {
-#ifdef SNMP_TESTING_CODE
-        snmp_log(LOG_WARNING,
-                 "Warning: passphrase chosen is below the length requiremnts of the USM.\n");
-#else
+        snmp_log(LOG_ERR, "Error: passphrase chosen is below the length "
+                 "requirements of the USM (min=%d).\n",USM_LENGTH_P_MIN);
         snmp_set_detail("The supplied password length is too short.");
         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
-#endif
     }
 
 
@@ -221,38 +218,8 @@ _KEYTOOLS_NOT_AVAILABLE
  * XXX	An engineID of any length is accepted, even if larger than
  *	what is spec'ed for the textual convention.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         generate_kul(const oid * hashtype, u_int hashtype_len,
+int
+generate_kul(const oid * hashtype, u_int hashtype_len,
                       u_char * engineID, size_t engineID_len,
                       u_char * Ku, size_t ku_len,
                       u_char * Kul, size_t * kul_len)
@@ -357,38 +324,8 @@ _KEYTOOLS_NOT_AVAILABLE
  * XXX FIX:     Does not handle varibable length keys.
  * XXX FIX:     Does not handle keys larger than the hash algorithm used.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         encode_keychange(const oid * hashtype, u_int hashtype_len,
+int
+encode_keychange(const oid * hashtype, u_int hashtype_len,
                           u_char * oldkey, size_t oldkey_len,
                           u_char * newkey, size_t newkey_len,
                           u_char * kcstring, size_t * kcstring_len)
@@ -512,38 +449,8 @@ _KEYTOOLS_NOT_AVAILABLE
 /*
  * XXX:  if the newkey is not long enough, it should be freed and remalloced 
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         decode_keychange(const oid * hashtype, u_int hashtype_len,
+int
+decode_keychange(const oid * hashtype, u_int hashtype_len,
                           u_char * oldkey, size_t oldkey_len,
                           u_char * kcstring, size_t kcstring_len,
                           u_char * newkey, size_t * newkey_len)
