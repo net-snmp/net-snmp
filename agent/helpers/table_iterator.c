@@ -143,6 +143,7 @@ netsnmp_table_iterator_helper_handler(
            these */
         
         index_search = snmp_clone_varbind(table_info->indexes);
+        DEBUGMSGTL(("index_search", "%x\n", index_search));
         free_this_index_search = index_search;
 
         /* below our minimum column? */
@@ -165,7 +166,6 @@ netsnmp_table_iterator_helper_handler(
                                                      &callback_data_context,
                                                      index_search,
                                                      iinfo);
-
         /* table.entry.column node */
         coloid[reginfo->rootoid_len+1] = table_info->colnum;
 
@@ -308,7 +308,7 @@ netsnmp_table_iterator_helper_handler(
             reqinfo->mode == MODE_SET_RESERVE1) {
             /* first (or only) pass stuff */
             /* let set requsets use previously constructed data */
-            snmp_free_var(results);
+            snmp_free_varbind(results);
             if (callback_data_keep)
                 netsnmp_request_netsnmp_add_list_data(requests, netsnmp_create_netsnmp_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
             netsnmp_request_netsnmp_add_list_data(requests, netsnmp_create_netsnmp_data_list(TABLE_ITERATOR_LAST_CONTEXT, callback_loop_context, NULL));
