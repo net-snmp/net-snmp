@@ -90,6 +90,7 @@ struct node {
     char *hint;
     char *units;
     char *description;    	/* description (a quoted string) */
+    char *defaultValue;
 };
 
 /*
@@ -120,6 +121,7 @@ struct tree {
                          const char *, const char *);	/* Value printing function */
     char *description;    	/* description (a quoted string) */
     int  reported;              /* 1=report started in print_subtree... */
+    char *defaultValue;
 };
 
 /*

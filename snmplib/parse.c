@@ -706,6 +706,7 @@ free_partial_tree(struct tree *tp, int keep_label)
     SNMP_FREE(tp->units);
     SNMP_FREE(tp->description);
     SNMP_FREE(tp->augments);
+    SNMP_FREE(tp->defaultValue);
 }
 
 /*
@@ -738,6 +739,7 @@ free_node(struct node *np)
     if (np->hint) free(np->hint);
     if (np->units) free(np->units);
     if (np->description) free(np->description);
+    if (np->defaultValue) free(np->defaultValue);
     if (np->parent) free(np->parent);
     if (np->augments) free(np->augments);
     free((char*)np);
@@ -790,6 +792,8 @@ extern void xmalloc_stats (FILE *);
             fprintf(fp, "  Hint: %s\n", np->hint);
         if (np->units)
             fprintf(fp, "  Units: %s\n", np->units);
+        if (np->defaultValue)
+            fprintf(fp, "  DefaultValue: %s\n",np->defaultValue);
     }
 }
 #endif
@@ -1359,7 +1363,9 @@ do_subtree(struct tree *root,
                 anon_tp->hint = tp->hint;
                 anon_tp->units = tp->units;
                 anon_tp->description = tp->description;
+		anon_tp->defaultValue = tp->defaultValue;
 		anon_tp->parent = tp->parent;
+                
                 set_function(anon_tp);
 
 		/* update parent pointer in moved children */
@@ -2052,6 +2058,7 @@ parse_objecttype(FILE *fp,
             if (nexttype == OF){
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
+            
             }
             break;
         case INTEGER:
@@ -2150,6 +2157,7 @@ parse_objecttype(FILE *fp,
       switch (type) {
         case DESCRIPTION:
           type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+          
           if (type != QUOTESTRING) {
               print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
@@ -2197,6 +2205,26 @@ parse_objecttype(FILE *fp,
 	  free_indexes(&np->indexes);
           break;
         case DEFVAL:
+            /* Mark's defVal section */
+            type = get_token(fp,quoted_string_buffer,MAXTOKEN);
+            if(type != LEFTBRACKET) {
+                print_error("Bad DEFAULTVALUE",quoted_string_buffer,type);
+                free_node(np);
+                return NULL;
+            }   
+            
+            type = get_token(fp,quoted_string_buffer,MAXTOKEN);         
+            np->defaultValue = strdup (quoted_string_buffer);
+           
+            type = get_token(fp,quoted_string_buffer,MAXTOKEN);
+            if (type != RIGHTBRACKET) {
+                print_error("Bad DEFAULTVALUE",quoted_string_buffer,type);
+                free_node(np);
+                return NULL;
+            }
+            
+            break;  
+        
         case NUM_ENTRIES:
           if (tossObjectIdentifier(fp) != OBJID) {
               print_error("Bad Object Identifier", token, type);
@@ -4573,9 +4601,10 @@ merge_parse_objectid(struct node *np,
 		     char *name)
 {
     struct node *nnp;
-
+   //printf("merge defval --> %s\n",np->defaultValue);
     nnp = parse_objectid(fp, name);
     if (nnp) {
+        
 	/* apply last OID sub-identifier data to the information */
 	/* already collected for this node. */
 	struct node *headp, *nextp;
@@ -4630,12 +4659,13 @@ tree_from_node(struct tree *tp, struct node *np)
     tp->hint = np->hint;  np->hint = NULL;
     tp->units = np->units;  np->units = NULL;
     tp->description = np->description;  np->description = NULL;
-
+    tp->defaultValue = np->defaultValue; np->defaultValue = NULL;
     tp->subid = np->subid;
     tp->tc_index = np->tc_index;
     tp->type = translation_table[np->type];
     tp->access = np->access;
     tp->status = np->status;
+     
     set_function(tp);
 }
 
