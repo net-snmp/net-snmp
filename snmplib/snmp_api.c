@@ -1319,6 +1319,8 @@ snmp_sess_close(void *sessp)
     if (isp) {
 	struct request_list *rp, *orp;
 
+        SNMP_FREE(isp->packet);
+
 	if (isp->sd != -1)
 	{
 #ifndef HAVE_CLOSESOCKET
@@ -3013,6 +3015,11 @@ _sess_async_send(void *sessp,
     long reqid;
 
     session = slp->session; isp = slp->internal;
+    if (!session || !isp) {
+      DEBUGMSGTL(("sess_read","send fail: closing...\n"));
+      return 0;
+    }
+
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
@@ -3251,12 +3258,17 @@ _sess_read(void *sessp,
     int addrlen;
     int fromlength;
 
-    if ((!slp->internal->newpkt && !(FD_ISSET(slp->internal->sd, fdset)))) {
+    sp = slp->session; isp = slp->internal;
+    if (!sp || !isp) {
+      DEBUGMSGTL(("sess_read","read fail: closing...\n"));
+      return 0;
+    }
+
+    if ((!isp->newpkt && !(FD_ISSET(isp->sd, fdset)))) {
       DEBUGMSGTL(("sess_read","not reading...\n"));
       return 0;
     }
     
-    sp = slp->session; isp = slp->internal;
     sp->s_snmp_errno = 0;
     sp->s_errno = 0;
 
@@ -3618,6 +3630,11 @@ snmp_sess_select_info(void *sessp,
     if (sessp) slp = slptest; else slp = Sessions;
     for(; slp; slp = next){
 	isp = slp->internal;
+        if (!isp) {
+          DEBUGMSGTL(("sess_select","select fail: closing...\n"));
+          continue;  /* close in progress - skip this one */
+        }
+
 	if (isp->sd == -1) {
 	    if (sessp == NULL) {
 		/* This session was marked for deletion */
@@ -3738,6 +3755,10 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   int result, addr_size;
 
   sp = slp->session; isp = slp->internal;
+  if (!sp || !isp) {
+      DEBUGMSGTL(("sess_read","resend fail: closing...\n"));
+      return 0;
+  }
 
   if (incr_retries) rp->retries++;
 
@@ -3793,6 +3814,10 @@ snmp_sess_timeout(void *sessp)
     void *magic;
 
     sp = slp->session; isp = slp->internal;
+    if (!sp || !isp) {
+      DEBUGMSGTL(("sess_read","timeout fail: closing...\n"));
+      return;
+    }
 
     gettimeofday(&now,(struct timezone *)0);
 
