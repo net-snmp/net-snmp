@@ -39,6 +39,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     char            line[256];
     netsnmp_route_entry *entry = NULL;
     char            name[16];
+    int             fd;
 
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv4\n"));
@@ -50,6 +51,16 @@ _load_ipv4(netsnmp_container* container, u_long *index )
      */
     if (!(in = fopen("/proc/net/route", "r"))) {
         snmp_log(LOG_ERR, "cannot open /proc/net/route\n");
+        return -2;
+    }
+
+    /*
+     * create socket for ioctls (see NOTE[1], below)
+     */
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        snmp_log(LOG_ERR, "could not create socket\n");
+        fclose(in);
         return -2;
     }
 
@@ -88,14 +99,17 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          */
         strncpy(name, rtent_name, sizeof(name));
         name[ sizeof(name)-1 ] = 0;
-        /*
-         * linux says ``lo'', but the interface is stored as ``lo0'': 
-         * rks: sez who? stored where? not on 2.4.20...
-         * if (!strcmp(name, "lo"))
-         *   strcat(name, "0");
-         */
 
-        entry->if_index = netsnmp_access_interface_index_find(name);
+        /*
+         * don't bother to try and get the ifindex for routes with
+         * no interface name.
+         * NOTE[1]: normally we'd use netsnmp_access_interface_index_find,
+         * but since that will open/close a socket, and we might
+         * have a lot of routes, call the ioctl routine directly.
+         */
+        if ('*' != name[0])
+            entry->if_index =
+                netsnmp_access_interface_ioctl_ifindex_get(fd,name);
 
         /*
          * arbitrary index
@@ -164,6 +178,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     }
 
     fclose(in);
+    close(fd);
     return 0;
 }
 
