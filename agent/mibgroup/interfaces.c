@@ -9,6 +9,10 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -21,10 +25,6 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
@@ -36,6 +36,9 @@
 #include <net/route.h>
 #endif
 #include <netinet/in_systm.h>
+#if HAVE_SYS_HASHING_H
+#include <sys/hashing.h>
+#endif
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
@@ -73,6 +76,20 @@
 #define OBJID                   ASN_OBJECT_ID
 #endif /* hpux */
 
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+
+#ifdef HAVE_SYS_SYSCTL_H
+# ifdef CTL_NET
+#  ifdef PF_ROUTE
+#   ifdef NET_RT_IFLIST
+#    define USE_SYSCTL_IFLIST
+#   endif
+#  endif
+# endif
+#endif
+
 /* #include "../common_header.h" */
 
 #include "../../snmplib/system.h"
@@ -88,16 +105,6 @@
 #include "util_funcs.h"
 #include "snmp_api.h"
 #include "auto_nlist.h"
-
-#ifdef HAVE_SYS_SYSCTL_H
-# ifdef CTL_NET
-#  ifdef PF_ROUTE
-#   ifdef NET_RT_IFLIST
-#    define USE_SYSCTL_IFLIST
-#   endif
-#  endif
-# endif
-#endif
 
 void Interface_Scan_Init();
 
@@ -293,8 +300,7 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
 	  }
 	  break;
 	default:
-	  DEBUGP (stderr, "routing socket: unknown message type %d\n",
-		   ifp->ifm_type);
+	  DEBUGP ("routing socket: unknown message type %d\n", ifp->ifm_type);
 	}
     }
   if (have_ifinfo && have_addr)

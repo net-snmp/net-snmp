@@ -6,15 +6,21 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
+#if HAVE_SYS_SYSMP_H
+#include <sys/sysmp.h>
+#endif
+#if HAVE_SYS_TCPIPSTATS_H
+#include <sys/tcpipstats.h>
 #endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
@@ -79,7 +85,7 @@ extern int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**
 
 void	init_icmp( )
 {
-#if !defined(HAVE_SYS_TCPIPSTATS_H)
+#ifdef ICMPSTAT_SYMBOL
     auto_nlist( ICMPSTAT_SYMBOL,0,0 );
 #endif
 }

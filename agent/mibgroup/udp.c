@@ -30,6 +30,12 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_SYS_SYSMP_H
+#include <sys/sysmp.h>
+#endif
+#if HAVE_SYS_TCPIPSTATS_H
+#include <sys/tcpipstats.h>
+#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -111,7 +117,9 @@ static void linux_read_udp_stat __P((struct udp_mib *));
 
 void	init_udp( )
 {
+#ifdef UDPSTAT_SYMBOL
   auto_nlist( UDPSTAT_SYMBOL,0,0 );
+#endif
   auto_nlist( UDB_SYMBOL,0,0 );
 }
 
