@@ -26,11 +26,11 @@ extern void deinit_dlmod (void);
 extern int dynamic_init_dlmod (void);
 extern int dynamic_deinit_dlmod (void);
 
-static unsigned char  *var_dlmod (struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
-static unsigned char  *var_dlmodEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
-static int write_dlmodName (int, u_char *, u_char, int, u_char *, oid *, int);
-static int write_dlmodPath (int, u_char *, u_char, int, u_char *, oid *, int);
-static int write_dlmodStatus (int, u_char *, u_char, int, u_char *, oid *, int);
+static FindVarMethod var_dlmod;
+static FindVarMethod var_dlmodEntry;
+static WriteMethod write_dlmodName;
+static WriteMethod write_dlmodPath;
+static WriteMethod write_dlmodStatus;
 
 
 /*
