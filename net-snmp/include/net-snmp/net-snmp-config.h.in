@@ -47,7 +47,7 @@
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
 #undef SNMP_NO_DEBUGGING
-/*ignore the -D flag and always print debugging information */
+/* ignore the -D flag and always print debugging information */
 #define SNMP_ALWAYS_DEBUG 0
 
 /* reverse encoding BER packets is both faster and more efficient in space. */
@@ -1399,7 +1399,9 @@
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
 #   define NETSNMP_USE_INLINE
 #else
+#   undef NETSNMP_INLINE
 #   define NETSNMP_INLINE 
+#   undef NETSNMP_STATIC_INLINE
 #   define NETSNMP_STATIC_INLINE static
 #endif
 
