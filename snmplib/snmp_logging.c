@@ -386,6 +386,22 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 	}
         break;
 
+    /*
+     * Don't log 
+     */
+    case 'N':
+        priority = decode_priority( optarg, &pri_max );
+        if (priority == -1)  return -1;
+        if (inc_optind)
+            optind++;
+        /* Fallthrough */
+    case 'n':
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_NONE, priority);
+        if (logh) {
+            logh->pri_max = pri_max;
+	}
+        break;
+
     default:
         fprintf(stderr, "Unknown logging option passed to -L: %c.\n", *cp);
         return -1;
@@ -400,11 +416,12 @@ snmp_log_options_usage(const char *lead, FILE * outf)
     const char *pri2_msg = " for levels 'p1' to 'p2'";
     fprintf(outf, "%se:           log to standard error\n", lead);
     fprintf(outf, "%so:           log to standard output\n", lead);
+    fprintf(outf, "%sn:           don't log at all\n", lead);
     fprintf(outf, "%sf file:      log to the specified file\n", lead);
     fprintf(outf, "%ss facility:  log to syslog (via the specified facility)\n", lead);
     fprintf(outf, "\n%s(variants)\n", lead);
-    fprintf(outf, "%s[EO] pri:    log to standard error/output%s\n", lead, pri1_msg);
-    fprintf(outf, "%s[EO] p1-p2:  log to standard error/output%s\n", lead, pri2_msg);
+    fprintf(outf, "%s[EON] pri:   log to standard error, output or /dev/null%s\n", lead, pri1_msg);
+    fprintf(outf, "%s[EON] p1-p2: log to standard error, output or /dev/null%s\n", lead, pri2_msg);
     fprintf(outf, "%s[FS] pri token:    log to file/syslog%s\n", lead, pri1_msg);
     fprintf(outf, "%s[FS] p1-p2 token:  log to file/syslog%s\n", lead, pri2_msg);
 }
@@ -804,6 +821,9 @@ netsnmp_register_loghandler( int type, int priority )
         break;
     case NETSNMP_LOGHANDLER_CALLBACK:
         logh->handler = log_handler_callback;
+        break;
+    case NETSNMP_LOGHANDLER_NONE:
+        logh->handler = log_handler_null;
         break;
     default:
         free(logh);

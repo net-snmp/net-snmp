@@ -77,6 +77,7 @@ extern          "C" {
 #define NETSNMP_LOGHANDLER_FILE		3
 #define NETSNMP_LOGHANDLER_SYSLOG	4
 #define NETSNMP_LOGHANDLER_CALLBACK	5
+#define NETSNMP_LOGHANDLER_NONE		6
 
     int snmp_log_options(char *optarg, int argc, char *const *argv);
     void snmp_log_options_usage(const char *lead, FILE *outf);
