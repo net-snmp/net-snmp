@@ -224,6 +224,7 @@ static char *api_errors[-SNMPERR_MAX+1] = {
     "Bad Party definition",
     "Session abort failure",
     "Unknown PDU type",
+    "Timeout",
 };
 
 struct timeval Now;
@@ -259,6 +260,11 @@ void snmp_set_dump_packet(val)
 int snmp_get_dump_packet __P((void))
 {
     return snmp_dump_packet;
+}
+
+int snmp_get_errno __P((void))
+{
+    return snmp_errno;
 }
 
 void

@@ -145,6 +145,8 @@ SOFTWARE.
 /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
 #define SNMP_ERR_INCONSISTENTNAME	(18)
 
+#define MAX_SNMP_ERR 18
+
 /* values of the generic-trap field in trap PDUs */
 #define SNMP_TRAP_COLDSTART		(0)
 #define SNMP_TRAP_WARMSTART		(1)

@@ -300,7 +300,7 @@ char *disk_device_strings[ ] =
 char *disk_device_strings[ ] =
     {
 	NULL
-    }
+    };
 #define NUMBER_DISK_TYPES	0
 #define MAX_DISKS_PER_TYPE	7
 #define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */

@@ -9,11 +9,12 @@
 
 #define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
 
-/* default location to look for mibs to load */
+/* default location to look for mibs to load using the above tokens
+   and/or those in the MIBS envrionment variable*/
 
 #undef DEFAULT_MIBDIRS
 
-/* default location to look for mibs to load */
+/* default mib files to load, specified by path. */
 
 #undef DEFAULT_MIBFILES
 

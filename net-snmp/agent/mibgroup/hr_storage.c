@@ -38,13 +38,19 @@
 #if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
+#if HAVE_SYS_MNTTAB_H
+#include <sys/mnttab.h>
+#endif
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
-#ifdef SYS_MBUF
+#ifdef HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
-#ifdef MACHINE_PARAM
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
 #include <sys/stat.h>
@@ -84,7 +90,11 @@ static struct nlist hrstore_nl[] = {
 #endif
 
 
+#ifdef solaris2
+extern struct mnttab *HRFS_entry;
+#else
 extern struct mntent *HRFS_entry;
+#endif
 
 	/*********************
 	 *
@@ -239,13 +249,19 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
     int store_idx;
 #ifndef linux
     int physmem;
+#ifndef solaris2
     struct vmtotal memory_totals;
     struct mbstat  mbstat;
+#endif
 #else
     struct stat  kc_buf;
 #endif
     static char string[100];
+#ifdef solaris2
+    struct statvfs stat_buf;
+#else
     struct statfs stat_buf;
+#endif
 
     if ( vp->magic == HRSTORE_MEMSIZE ) {
         if (header_hrstore(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -261,10 +277,14 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    return NULL;
 
 	if ( store_idx < HRS_TYPE_FS_MAX ) {
+#ifdef solaris2
+	    if ( statvfs( HRFS_entry->mnt_mountp, &stat_buf) < 0 )
+#else
 	    if ( statfs( HRFS_entry->mnt_dir, &stat_buf) < 0 )
+#endif
 		return NULL;
 	}
-#ifndef linux
+#if !defined(linux) && !defined(solaris2)
 	else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
@@ -284,7 +304,11 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
     switch (vp->magic){
 	case HRSTORE_MEMSIZE:
 #ifndef linux
+#ifdef PGSHIFT
 	    long_return = physmem << PGSHIFT;
+#else
+	    long_return = physmem * PAGESIZE;
+#endif
 #else
 	    stat("/proc/kcore", &kc_buf);
 	    long_return = kc_buf.st_size/1024;	/* 4K too large ? */
@@ -315,7 +339,11 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&storage_type_id;
 	case HRSTORE_DESCR:
 	    if (store_idx<HRS_TYPE_FS_MAX) {
+#ifdef solaris2
+	        strcpy(string, HRFS_entry->mnt_mountp);
+#else
 	        strcpy(string, HRFS_entry->mnt_dir);
+#endif
 	        *var_len = strlen(string);
 	        return (u_char *) string;
 	    }
@@ -352,7 +380,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    if ( store_idx < HRS_TYPE_FS_MAX )
 		long_return = stat_buf.f_blocks;
 	    else switch ( store_idx ) {
-#ifndef linux
+#if !defined(linux) && !defined(solaris2)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_rm;
 			break;
@@ -363,10 +391,12 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 			long_return = mbstat.m_mbufs;
 			break;
 #else	/* linux */
+#ifdef linux
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
 			long_return = linux_mem( store_idx, HRSTORE_SIZE);
 			break;
+#endif
 #endif
 		default:
 			long_return = 1024;
@@ -377,7 +407,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    if ( store_idx < HRS_TYPE_FS_MAX )
 		long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
 	    else switch ( store_idx ) {
-#ifndef linux
+#if !defined(linux) && !defined(solaris2)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_arm;
 			break;
@@ -388,10 +418,12 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
 			break;
 #else	/* linux */
+#ifdef linux
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
 			long_return = linux_mem( store_idx, HRSTORE_USED);
 			break;
+#endif
 #endif
 		default:
 			long_return = 1024;
@@ -406,7 +438,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 		case HRS_TYPE_SWAP:
 			long_return = 0;
 			break;
-#ifndef linux
+#if !defined(linux) && !defined(solaris2)
 		case HRS_TYPE_MBUF:
 			long_return = mbstat.m_drops;
 			break;
@@ -455,9 +487,11 @@ Get_Next_HR_Store()
 
 		/* 'Other' storage types */
     ++HRS_index;
+#ifndef solaris2
     if ( HRS_index < HRS_TYPE_MAX )
 	return HRS_index;
     else
+#endif
 	return -1;
 }
 
