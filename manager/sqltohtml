@@ -1,0 +1,187 @@
+#!/usr/local/bin/perl
+
+use SNMP;
+use DBI;
+use CGI;
+$SNMP::save_descriptions=1;
+init_mib;
+
+%myorder = qw(id 0 oidindex 1 host 2 updated 3);
+
+#===========================================================================
+#  Global defines
+#===========================================================================
+
+$hostname = 'localhost';          # Host that serves the mSQL Database
+$dbname = 'snmp';                 # mySQL Database name
+$user = 'root';
+#$verbose = 1;
+
+$remuser = $ENV{'REMOTE_USER'};
+$remuser = "guest" if (!defined($remuser) || $remuser eq "");
+
+#===========================================================================
+# Connect to the mSQL database with the appropriate driver
+( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
+    or die "\tConnect not ok: $DBI::errstr\n";
+
+# print header
+print "Content-type:  text/html\n\n<body bgcolor=\"#ffffff\"><h3>user: $remuser</h3>\n";
+
+$query = new CGI;
+
+if ($dispinfo = $query->param('displayinfo')) {
+    makemibtable($dispinfo);
+    $dbh->disconnect();
+    exit;
+}
+
+$host = $query->param('host');
+$group = $query->param('group');
+
+if (!defined($group)) {
+    @groups = getgroupsforuser($remuser);
+    if ($#groups > 0) {
+	showgeneric("group",@groups);
+	$dbh->disconnect();
+	exit;
+    } else {
+	$group = $groups[0];
+    }
+}
+
+if (!defined($host)) {
+    @hosts = gethostsforgroup($group);
+    showgeneric("host",gethostsforgroup($group));
+} else {
+    showhost($host);
+}
+$dbh->disconnect();
+
+
+# sort things by mib location, or hard coded order.
+sub mykeysort {
+    $mb = $SNMP::MIB{SNMP::translateObj($b)};
+    $ma = $SNMP::MIB{SNMP::translateObj($a)};
+    return $myorder{$a} <=> $myorder{$b} if (!defined($ma->{'subID'}) && !defined($mb->{'subID'}));
+    return 1 if (!defined($mb->{'subID'}));
+    return -1 if (!defined($ma->{'subID'}));
+
+    $ma->{'subID'} <=> $mb->{'subID'};
+}
+
+sub showhost {
+    my $host = shift;
+    # host header
+    print "<h3>host: $host</h3>\n";
+
+    # get a list of tables we want to display
+    $cmd = "SELECT * FROM hosttables where (host = '$host')";
+    print " $cmd\n" if ($verbose);
+    ( $tblh = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $tblh->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+
+    # table data
+    while (  $tablelist = $tblh->fetchrow_hashref ) {
+
+	# get a list of data from the table we want to display
+	$cmd = "SELECT * FROM $tablelist->{'tablename'} where (host = '$host')";
+	print " $cmd\n" if ($verbose);
+	( $thetable = $dbh->prepare( $cmd ) )
+	    or die "\nnot ok: $DBI::errstr\n";
+	( $thetable->execute )
+	    or print( "\tnot ok: $DBI::errstr\n" );
+
+	# table header
+	$doheader = 1;
+	my @keys;
+	while( $data = $thetable->fetchrow_hashref ) {
+	    if ($doheader) {
+		@keys = (sort mykeysort keys(%$data));
+		print "<br><b><a href=\"" . $query->url . "?displayinfo=$tablelist->{'tablename'}\">$tablelist->{'tablename'}</a></b><br>\n";
+		print "<table border=3>\n<tr><td>";
+		foreach $l (@keys) {
+		    print "<a href=\"" . $query->url . "?displayinfo=$l\">" if (!exists($myorder{$l}));
+		    print "$l";
+		    print "</a>" if (!exists($myorder{$l}));
+		    print "</td><td>";
+		}
+		"</td></tr>\n";
+		$doheader = 0;
+	    }
+	    print "<tr><td>";
+	    foreach $key (@keys) {
+		print $data->{$key},"</td><td>";
+	    }
+	    print "</td></tr>\n";
+	}
+	print "</table>\n";
+    }
+
+}
+
+sub makemibtable {
+    my $dispinfo = shift;
+    # display information about a data type in a table
+    my $mib = $SNMP::MIB{SNMP::translateObj($dispinfo)};
+    print "<table border=3><tr><td>\n";
+    foreach $i (qw(label type access status units hint moduleID description enums)) {
+#    foreach $i (keys(%$mib)) {
+	next if (!defined($$mib{$i}) || $$mib{$i} eq "");
+	next if (ref($$mib{$i}) eq "HASH" && $#{keys(%{$$mib{$i}})} == -1);
+	print "<tr><td>$i</td><td>";
+	if (ref($$mib{$i}) eq "HASH") {
+	    print "<table border=3><tr><td>\n";
+	    foreach $j (sort { $$mib{$i}{$a} <=> $$mib{$i}{$b} } keys(%{$$mib{$i}})) {
+		print "<tr><td>$$mib{$i}{$j}</td><td>$j</td></tr>";
+	    }
+	    print "</table>\n";
+	} else {
+	    print "$$mib{$i}";
+	}
+	print "</td></tr>\n";
+    }
+    print "</table>\n";
+}
+
+sub showgeneric {
+#    my $label = shift;
+    my ($label, @stuff) = @_;
+    print "<h3>Selecet a $label:</h3><ul>\n";
+    my $item;
+    foreach $item (@stuff) {
+	print "<li><a href=\"" . $query->self_url . "?$label=$item\">$item</a>\n";
+    }
+    print "</ul>\n";
+}
+
+sub getgroupsforuser {
+    my (@ret, $cursor, $row);
+    my $remuser = shift;
+    ( $cursor = $dbh->prepare( "SELECT * FROM usergroups where (user = '$remuser')"))
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $cursor->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+    while (  $row = $cursor->fetchrow_hashref ) {
+	push(@ret, $row->{'groupname'});
+    }
+    @ret;
+}
+
+sub gethostsforgroup {
+    my (@ret, $cursor, $row);
+    my $group = shift;
+    ( $cursor = $dbh->prepare( "SELECT * FROM hostgroups where (groupname = '$group')"))
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $cursor->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+    while (  $row = $cursor->fetchrow_hashref ) {
+	push(@ret, $row->{'host'});
+    }
+    @ret;
+}

@@ -1,0 +1,103 @@
+REQUIREMENTS
+
+  Get and install:
+  
+    the mysql (www.mysql.com) database
+    The following perl modules (www.cpan.org):
+      SNMP
+      DBI
+      Data-Dumper
+      Data-ShowTable
+      Msql-Mysql-modules
+
+  Setting up mysql:
+     ./configure
+     make
+     make install
+     scripts/mysql_install_db
+  
+     start it by running 'safe_mysqld'.
+     To run the sql commands listed in the following text, run 'mysql'.
+
+
+SETTING UP THE MYSQL DATABASES
+  Use mysql itself to set up the mysql database resquired:
+  
+    create database snmp;
+    use snmp;
+    create table hosts (id integer auto_increment primary key, 
+			host varchar(16), 
+			community varchar(32));
+    create table hosttables (id integer auto_increment primary key, 
+		       host varchar(16), tablename varchar(64), 
+		       keephistory integer(2));
+    create table usergroups (id integer auto_increment primary key, 
+		       user varchar(16),
+		       groupname varchar(32));
+    create table hostgroups (id integer auto_increment primary key, 
+                             host varchar(16), 
+                             groupname varchar(32));
+		       
+    
+  Which should produce the tables you need:
+  
+    mysql> show columns from hosts;
+    +-----------+-------------+------+-----+---------+----------------+
+    | Field     | Type        | Null | Key | Default | Extra          |
+    +-----------+-------------+------+-----+---------+----------------+
+    | id        | int(11)     |      | PRI | 0       | auto_increment |
+    | name      | varchar(16) | YES  |     | NULL    |                |
+    | community | varchar(32) | YES  |     | NULL    |                |
+    +-----------+-------------+------+-----+---------+----------------+
+    3 rows in set (0.03 sec)
+    
+    mysql> show columns from hosttables;
+    +-------------+-------------+------+-----+---------+----------------+
+    | Field       | Type        | Null | Key | Default | Extra          |
+    +-------------+-------------+------+-----+---------+----------------+
+    | id          | int(11)     |      | PRI | 0       | auto_increment |
+    | host        | varchar(16) | YES  |     | NULL    |                |
+    | tablename   | varchar(32) | YES  |     | NULL    |                |
+    | keephistory | int(2)      | YES  |     | NULL    |                |
+    +-------------+-------------+------+-----+---------+----------------+
+    4 rows in set (0.00 sec)
+
+
+  For each host you want to monitor, put an entry in the hosts table
+  using:
+  
+    insert into hosts(name, community) values(HOSTNAME, COMMUNITY);
+  
+  Then, for each thing you want to monitor on a given host:
+  
+    insert into hosttables(host, tablename) values(HOSTNAME, TABLENAME)
+
+  This can be automatted using the setupnewhost command, like:
+
+    setupnewhost -u root -p password host1 host2 ...
+
+  which will put the standard list of ucd-snmp specific mib tables in
+  the table for you.
+
+COLLECTING THE DATA
+
+  The command you need to run to collect data is snmptosql, which will 
+  use the information defined above to fill your data base with all
+  sorts of useful information that you've asked it to collect.
+  Something like:
+
+    snmptosql -u root -p password
+
+  should be put in cron to update a regular intervals.
+
+DISPLAYING THE RESULTS
+
+  Put the script snmptohtml somewhere in your cgi-bin directory, and
+  view it.  It should take care of everything else and display neat
+  pretty tables for you.
+
+  Idealy, it should be put behind a user/password database in your web
+  server (something that sets REMOTE_USER for in an environmental for
+  CGI scripts).  This will greatly enhance its operation so that
+  different users can be users of different groups of hosts, etc...
+  If this is not done, everyone will use the user name "guest".
