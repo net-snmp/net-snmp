@@ -9,57 +9,28 @@
 ########################################################################
 ##
 /*
- * ${context}_allocate_context
+ * ${context}_allocate_data
  *
- * Purpose: create new data context.
+ * Purpose: create new data data.
  *
  */
-int
-${context}_allocate_context( ${context}_reg *reg, 
-                             ${context}_ctx **ctx_ptr_ptr )
+${context}_data *
+${context}_allocate_data_context(  )
 {
-@if $m2c_get_use_temp == 1@
-@    eval $m2c_node_lh = "ctx_ptr"@
-    ${context}_ctx *ctx_ptr;
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx_ptr_ptr );
-
-    ctx_ptr = (*ctx_ptr_ptr);
-
-@else@
-@    eval $m2c_node_lh = "(* ctx_ptr_ptr)"@
-@end@
     /*
      * allocate memory for the context
      */
 $example_start
-    $m2c_node_lh = SNMP_MALLOC_STRUCT(${context}_ctx);
-    if(NULL == $m2c_node_lh) {
-        snmp_log(LOG_ERR,
-                 "unable to malloc memory for new row context for the "
-                 "${table} table.\n");
-        return SNMP_ERR_GENERR;
-    }
+    ${context}_data *rtn = SNMP_MALLOC_STRUCT(${context}_data);
+$example_end
 
-    $m2c_node_lh->data = SNMP_MALLOC_STRUCT(${context}_data);
-    if(NULL == $m2c_node_lh->data) {
+    if(NULL == rtn) {
         snmp_log(LOG_ERR,
                  "unable to malloc memory for new data context for the "
                  "${table} table.\n");
-        free(ctx_ptr);
-        return SNMP_ERR_GENERR;
     }
-$example_end
 
-@if $m2c_get_use_temp == 1@
-    /*
-     * set the pointer to the memory we allocated
-     */
-    (*ctx_ptr_ptr) = ctx_ptr;
-@end@
-
-    return SNMP_ERR_NOERROR;
+    return rtn;
 }
 
 /*
@@ -69,22 +40,13 @@ $example_end
  *
  */
 int
-${context}_create_context( ${context}_reg *reg, ${context}_idx *idx,
-                        ${context}_ctx **ctx_ptr_ptr )
+${context}_create_data_context( ${context}_ctx *ctx )
 {
     int rc;
-@if $m2c_get_use_temp == 1@
-@    eval $m2c_node_lh = "ctx_ptr"@
-    ${context}_ctx *ctx_ptr;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx_ptr_ptr );
+    netsnmp_assert( NULL != ctx );
 
-    ctx_ptr = (*ctx_ptr_ptr);
-
-@else@
-@    eval $m2c_node_lh = "(* ctx_ptr_ptr)"@
-@end@
     /*
      * TODO: Validate incoming index
      * Check that the values specified in the incoming index are valid
@@ -112,27 +74,13 @@ $example_start
 $example_end
 
     /*
-     * allocate memory for the context
+     * allocate memory for the data context
      */
-    rc = ${context}_allocate_context( reg, ctx_ptr_ptr );
-    if(SNMP_ERR_NOERROR != rc) {
+    ctx->data = ${context}_allocate_data();
+    if(NULL == ctx->data) {
         /** msg already logged */
-        return SNMP_ERR_GENERR;
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
-
-    /*
-     * Save index. If index has no owner, assume ownership
-     */
-    $m2c_node_lh->idx = idx;
-    if(NULL == idx->owner)
-        idx->owner = $m2c_node_lh;
-
-@if $m2c_get_use_temp == 1@
-    /*
-     * set the pointer to the memory we allocated
-     */
-    (*ctx_ptr_ptr) = ctx_ptr;
-@end@
 
     return SNMP_ERR_NOERROR;
 }
@@ -143,49 +91,34 @@ $example_end
  * Create an 
  */
 int
-${context}_create_undo(${context}_reg *reg, ${context}_ctx *ctx,
-                    ${context}_undo_ctx **undo_ctx_ptr_ptr )
+${context}_create_undo_context( ${context}_ctx *ctx )
 {
     int rc;
-@if $m2c_get_use_temp == 1@
-@    eval $m2c_node_ctx = "undo_ctx_ptr"@
-    ${context}_undo_ctx *undo_ctx_ptr;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != undo_ctx_ptr_ptr );
+    netsnmp_assert( NULL != ctx );
 
-@else@
-@    eval $m2c_node_ctx = "(* undo_ctx_ptr_ptr)"@
-@end@
     /*
      * allocate context
      */
-    rc = ${context}_allocate_context( reg, undo_ctx_ptr_ptr );
-    if(SNMP_ERR_NOERROR != rc) {
+$example_start
+    ctx->undo = ${context}_allocate_data();
+    if(NULL == ctx->data) {
         /** msg already logged */
-        return SNMP_ERR_GENERR;
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
-@if $m2c_get_use_temp == 1@
-    $m2c_node_ctx = (* undo_ctx_ptr_ptr);
-@end@
+$example_end
 
     /*
      * copy the data
      */
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-@        eval $m2c_ctx_lh = "$m2c_node_ctx"@
-@        eval $m2c_ctx_rh = "ctx"@
+@        eval $m2c_ctx_lh = "ctx->undo"@
+@        eval $m2c_ctx_rh = "ctx->data"@
 @        include generic-ctx-copy.m2i@
 @    end@ # foreach nonindex
-$example_end
-@if $m2c_get_use_temp == 1@
-    /*
-     * set the pointer to the memory we allocated
-     */
-    (*undo_ctx_ptr_ptr) = undo_ctx_ptr;
 
-@end@
     return SNMP_ERR_NOERROR;
 }
 
