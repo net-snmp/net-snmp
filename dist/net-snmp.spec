@@ -1,21 +1,23 @@
-# define to include perl support
+%{?with_embedded_perl:%define embed_perl 1}
+%{!?with_embedded_perl:%define embed_perl 0}
+%{?with_perl_modules:%define perl_modules 1}
+%{!?with_perl_modules:%define perl_modules 0}
+#
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: %version
-Release: %release
+Version: cvs-main
+Release: 1
 URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
 Group: System Environment/Daemons
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
-Patch0: net-snmp-5.0.9-with-perl.patch
-Patch1: net-snmp-5.0.9-use-numeric.patch
 Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
-%if %{with_perl}
+# require perl til use of it on line 91 is removed
 Requires: perl
-%endif
+
 %description
 
 Net-SNMP provides tools and libraries relating to the Simple Network
@@ -25,7 +27,7 @@ generate and handle SNMP traps, etc.  Using SNMP you can check the
 status of a network of computers, routers, switches, servers, ... to
 evaluate the state of your network.
 
-%if %{with_perl}
+%if %{embed_perl}
 This package includes embedded perl support within the agent
 %endif
 
@@ -39,7 +41,7 @@ Obsoletes: cmu-snmp-devel ucd-snmp-devel
 The net-snmp-devel package contains headers and libraries which are
 useful for building SNMP applications, agents, and sub-agents.
 
-%if %{with_perl}
+%if %{perl_modules}
 %package perlmods
 Group: System Environment/Libraries
 Summary: The perl modules provided with Net-SNMP
@@ -53,18 +55,17 @@ with embedded perl support within the agent.
 
 %prep
 %setup -q
-%if "%{version}" == "5.0.9"
-%patch0 -p0
-%endif
 
 %build
 %configure --with-defaults --with-sys-contact="Unknown" \
 	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared					\
-%if %{with_perl}
-	--enable-embedded-perl                          \
+%if %{perl_modules}
 	--with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"  \
+%endif
+%if %{embed_perl}
+	--enable-embedded-perl                          \
 %endif
 	--with-cflags="$RPM_OPT_FLAGS"
 
@@ -83,10 +84,10 @@ rm -rf $RPM_BUILD_ROOT
 %__rm -f $RPM_BUILD_ROOT%{_prefix}/bin/snmpinform
 # install the init script
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-perl -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@usr@g' dist/snmpd-init.d
+perl -i -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@usr@g' dist/snmpd-init.d
 install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
-%if %{with_perl}
+%if %{include_perl}
 # unneeded perl stuff
 find $RPM_BUILD_ROOT/usr/lib/perl5/ -name Bundle -type d | xargs rm -rf
 find $RPM_BUILD_ROOT/usr/lib/perl5/ -name perllocal.pod | xargs rm -f
@@ -155,7 +156,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/*.a
 %{_libdir}/*.la
 
-%if %{with_perl}
+%if %{include_perl}
 %files -f net-snmp-perl-files perlmods
 %defattr(-,root,root)
 %{_mandir}/man3/*::*
@@ -166,6 +167,11 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Sat Oct  4 2003 Robert Story <rstory@users.sourceforge.net>
+- fix to build without requiring arguments
+- separate embedded perl and perl modules options
+- fix fix for init.d script for non-/usr/local installation
+
 * Fri Sep 26 2003 Wes Hardaker <hardaker@users.sourceforge.net>
 - fix perl's UseNumeric
 - fix init.d script for non-/usr/local installation
