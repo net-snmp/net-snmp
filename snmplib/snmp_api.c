@@ -523,6 +523,7 @@ init_snmp(const char *type)
 
   snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
   init_callbacks();
+  init_snmp_logging();
   snmp_init_statistics();
   register_mib_handlers();
   register_default_handlers();
