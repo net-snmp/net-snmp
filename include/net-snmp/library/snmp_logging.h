@@ -87,6 +87,7 @@ extern          "C" {
     NetsnmpLogHandler log_handler_file;
     NetsnmpLogHandler log_handler_syslog;
     NetsnmpLogHandler log_handler_callback;
+    NetsnmpLogHandler log_handler_null;
 
     struct netsnmp_log_handler_s {
         int	enabled;
