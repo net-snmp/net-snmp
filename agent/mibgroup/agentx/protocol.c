@@ -1140,7 +1140,7 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
       /*  If the OID has been 'compacted', then tweak the packet's
 	  'range_subid' to reflect this.  */
       if (*(*buf + prefix_offset) != 0) {
-	*(*buf + prefix_offset) -= 5;
+	*(*buf + range_offset) -= 5;
 	DEBUGPRINTINDENT("dumpv_send");
 	DEBUGMSG(("dumpv_send", "  Range SubID tweaked:\t%d\n",
 		  *(*buf + prefix_offset)));
