@@ -380,8 +380,10 @@ free_request_data_set(request_info *request)
 inline void
 free_request_data_sets(request_info *request) 
 {
-  if (request)
-    free_all_list_data(request->parent_data);
+    if (request && request->parent_data) {
+        free_all_list_data(request->parent_data);
+        request->parent_data = NULL;
+    }
 }
 
 /** Returns a handler from a chain based on the name */
