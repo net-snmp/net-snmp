@@ -258,6 +258,11 @@ struct request_list {
 #define SNMP_DEFAULT_ENTERPRISE_LENGTH	0
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
+#define SNMP_DEFAULT_CONTEXT        ""
+#define SNMP_DEFAULT_AUTH_PROTO     usmHMACMD5AuthProtocol
+#define SNMP_DEFAULT_AUTH_PROTOLEN  USM_LENGTH_OID_TRANSFORM
+#define SNMP_DEFAULT_PRIV_PROTO     usmDESPrivProtocol
+#define SNMP_DEFAULT_PRIV_PROTOLEN  USM_LENGTH_OID_TRANSFORM
 
 extern const char *snmp_api_errstring (int);
 extern void snmp_perror (const char *);
