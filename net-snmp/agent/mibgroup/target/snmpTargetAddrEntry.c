@@ -341,7 +341,7 @@ int snmpTargetAddr_addTAddress(
 	  return(0);
       } */
     SNMP_FREE(entry->tAddress);
-    entry->tAddress = (char *)malloc(len);
+    entry->tAddress = (u_char *)malloc(len);
     entry->tAddressLen = len;
     memcpy(entry->tAddress, cptr, len);
   }
@@ -753,7 +753,7 @@ write_snmpTargetAddrTDomain(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -804,7 +804,7 @@ write_snmpTargetAddrTAddress(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
@@ -815,7 +815,7 @@ write_snmpTargetAddrTAddress(
   /* Finally, we're golden, check if we should save value */
   if (action == COMMIT)  {    
     SNMP_FREE(temp_struct->tAddress);
-    temp_struct->tAddress = (char *)malloc(var_val_len);
+    temp_struct->tAddress = (u_char *)malloc(var_val_len);
     temp_struct->tAddressLen = var_val_len;
     memcpy(temp_struct->tAddress, var_val, var_val_len);
     
@@ -866,7 +866,7 @@ write_snmpTargetAddrTimeout(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
 
   /* Finally, we're golden, should we save value? */
@@ -916,7 +916,7 @@ write_snmpTargetAddrRetryCount(
 
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRetryCount : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
 
   /* Finally, we're golden, should we save value? */
@@ -966,7 +966,7 @@ write_snmpTargetAddrTagList(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTagList : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   
   /* Finally, we're golden, check if we should save value */
@@ -1018,7 +1018,7 @@ write_snmpTargetAddrParams(
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
     DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrParams : row is read only\n"));
-    return SNMP_ERR_READONLY;
+    return SNMP_ERR_NOTWRITABLE;
   }
   
   /* Finally, we're golden, check if we should save value */
@@ -1180,7 +1180,7 @@ write_snmpTargetAddrRowStatus(
     /* check if it is changeable */
     if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
       DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus : row is read only\n"));
-      return SNMP_ERR_READONLY;
+      return SNMP_ERR_NOTWRITABLE;
     }    
     /* check if row is to be destroyed (note: it is ok to destroy notReady row!) */
     else if (long_ret == SNMP_ROW_DESTROY)  {

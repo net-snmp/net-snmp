@@ -61,7 +61,6 @@
 #include "tools.h"
 #include "keytools.h"
 #include "snmp-tc.h"
-#include "transform_oids.h"
 #include "snmpv3.h"
 #include "default_store.h"
 #include "getopt.h"
@@ -108,7 +107,7 @@ static oid  vacmGroupName[MAX_OID_LEN]			= {1,3,6,1,6,3,16,1,2,1,3},
 	    vacmAccessStatus[MAX_OID_LEN]	    	= {1,3,6,1,6,3,16,1,4,1,9},
 	    vacmViewTreeFamilyMask[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,3},
 	    vacmViewTreeFamilyType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,4},
-	    vacmViewTreeFamilyStorageType[MAX_OID_LEN]= {1,3,6,1,6,3,16,1,5,2,1,5},
+	    vacmViewTreeFamilyStorageType[MAX_OID_LEN]  = {1,3,6,1,6,3,16,1,5,2,1,5},
 	    vacmViewTreeFamilyStatus[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,5,2,1,6}
 ;
 
@@ -126,7 +125,7 @@ usage (void)
   fprintf(stderr, "  deleteAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
   fprintf(stderr, "  createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
   fprintf(stderr, "  deleteSec2Group  MODEL SECURITYNAME\n");
-  fprintf(stderr, "  createView  [-e] NAME SUBTREE MASK\n");
+  fprintf(stderr, "  createView  [-Ce] NAME SUBTREE MASK\n");
   fprintf(stderr, "  deleteView  NAME SUBTREE\n"); 
 }
 
@@ -214,8 +213,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }

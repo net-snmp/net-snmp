@@ -34,7 +34,11 @@ AC_ARG_WITH(cflags,
 
 AC_ARG_WITH(ldflags,
 [  --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.],
-    [LIBS=$with_ldflags; export LIBS])
+    [LDFLAGS=$with_ldflags; export LDFLAGS])
+
+AC_ARG_WITH(libs,
+[  --with-libs=LIBS                use LIBS as link time arguments to ld.],
+    [LIBS=$with_libs; export LIBS])
 
 AC_ARG_ENABLE(silent-libtool,
 [  --enable-silent-libtool         Pass --silent to libtool.],
@@ -101,15 +105,18 @@ AC_ARG_WITH(rsaref,
 )
 
 tryopenssl=defaultyes
+askedopenssl=no
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
     if test "x$withval" = "xyes"; then
       tryopenssl=yes
+      askedopenssl=yes
     elif test "x$withval" = "xno"; then
       tryopenssl=no
     elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
       tryopenssl=yes
+      askedopenssl=yes
     fi,
 )
 if test "x$tryopenssl" = "xdefaultyes"; then
@@ -131,7 +138,7 @@ AC_DEFINE(USE_INTERNAL_MD5))
 
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
-                                  SNMP normally can not handle
+                                  SNMP normally cannot handle
                                   floating numbers, nor large 64 bit
                                   integers well.  By default, the
                                   ucd-snmp package compiles in
@@ -222,6 +229,7 @@ AC_ARG_WITH(out_mib_modules,
     mibII:                 support for the mib-II tree.
     snmpv3:                support for the snmpv3 mib modules.
     ucd_snmp:              ucd-snmp specific extensions.
+    agentx:                (see below)
     notification:          mibs supporting specification of trap destinations.
 
   Optional mib modules that can be built into the agent include:
@@ -231,7 +239,6 @@ AC_ARG_WITH(out_mib_modules,
     misc/ipfwacc:          accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains: firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
-    ucd-snmp/dlmod:        Dynamically loadable MIB modules.
     ucd-snmp/diskio:       Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
     target:                Support for the SNMP WGs TARGET-MIB.
@@ -240,7 +247,7 @@ AC_ARG_WITH(out_mib_modules,
     tunnel:                Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
-    agentx/client:         allows the agent to run as either a snmp agent
+    agentx/subagent:       allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
     agentx/master:         makes the agent run as an agentX master agent
                            as well as a normal snmp agent.
@@ -266,17 +273,17 @@ Miscellaneous:
   --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
 fi
 
-dnl Define unless specifically suppressed (ie, option defaults to false). 
+dnl Define unless specifically suppressed (i.e., option defaults to false). 
 if test "x$with_dummy_values" != "xyes"; then
   AC_DEFINE(NO_DUMMY_VALUES)
 fi
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_opaque_special_types" != "xno"; then
   AC_DEFINE(OPAQUE_SPECIAL_TYPES)
 fi
@@ -374,6 +381,11 @@ dnl
 AC_MSG_CHECKING(for system include file)
 changequote(, )
 filebase=$target_os
+dnl ignore binary format indication
+filebase=`echo $filebase | sed 's/elf//'`
+filebase=`echo $filebase | sed 's/aout//'`
+filebase=`echo $filebase | sed 's/ecoff//'`
+filebase=`echo $filebase | sed 's/coff//'`
 while test "x$filebase" != "x$last" -a ! -f $srcdir/s/$filebase.h
 do
     last=$filebase
@@ -621,9 +633,7 @@ dnl Maybe add library extensions for thread mutex locking.
 dnl
 
 if test "x$with_res_locks" = "xyes"; then
-
-    cat >> confdefs.h <<\EOF
-#define _REENTRANT 1
+  AC_DEFINE(NS_REENTRANT)
 EOF
 
     case $target_os in
@@ -660,7 +670,7 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification $new_with_mib_modules"
+new_module_list="mibII ucd_snmp snmpv3mibs notification agentx $new_with_mib_modules"
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB
 
 if test "x$mini_agent" = "xyes"; then
@@ -761,7 +771,8 @@ while test "x$new_module_list" != "x"; do
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
-	if grep init_$mnm $srcdir/$mibdir/$i.c > /dev/null; then
+        temp_init=`grep init_$mnm $srcdir/$mibdir/$i.c | grep -v _init_$mnm`
+	if test "x$temp_init" != "x"; then
 	    echo "  if (should_init(\"$mnm\")) init_$mnm();" >> $mibdir/mib_module_inits.h
 	fi
 	if grep shutdown_`basename $i` $srcdir/$mibdir/$i.c > /dev/null; then
@@ -804,7 +815,7 @@ AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
 
-AC_MSG_CHECKING(if directories neeed to be created)
+AC_MSG_CHECKING(if directories need to be created)
 for i in $module_directories; do
   $srcdir/mkinstalldirs $i
 done
@@ -833,7 +844,7 @@ else
   dnl fall back
   CFLAG="-f"
 fi
-for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd
+for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd /mach_kernel
   do
   if test -f $i -o $CFLAG $i; then
     ac_cv_KERNEL_LOC="$i"
@@ -938,7 +949,7 @@ AC_ARG_WITH(libwrap,
   ],[hosts_access((void *)0)],
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(USE_LIBWRAP)
-	    test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 	    WRAPLIBS="$WRAPLIBS -lwrap",
 	    AC_MSG_RESULT(no)
 	    dnl Linux RedHat 6.1 won't link libwrap without libnsl
@@ -950,7 +961,7 @@ AC_ARG_WITH(libwrap,
   int deny_severity  = 0;
   ],[hosts_access((void *)0)],
 		AC_MSG_RESULT(yes)
-		test "$with_libwrap" != no && WRAPLIBS="-L$with_libwrap/lib"
+		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 		WRAPLIBS="$WRAPLIBS -lwrap", AC_MSG_RESULT(no)),
 	    CPPFLAGS=${_cppflags}),
 	CPPFLAGS=${_cppflags})
@@ -1053,7 +1064,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h netinet/ip.h net/if.h netdb.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h pwd.h grp.h)
+AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h netinet/ip.h netinet/ip_icmp.h net/if.h netdb.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h linux/tasks.h pwd.h grp.h utmpx.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_mib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h sys/disklabel.h machine/types.h sys/socketvar.h)
 dnl Linux
@@ -1074,6 +1085,10 @@ dnl Dynix
 AC_CHECK_HEADERS(net/route.h)
 dnl for HostRes (HP-UX at least)
 AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
+dnl for HostRes (Solaris 2.x at least)
+AC_CHECK_HEADERS(pkginfo.h,
+    AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
+    LIBS="${LIBS} -ladm"))
 dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
 dnl SCO
@@ -1114,8 +1129,8 @@ if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h
 dnl if OpenSSL is not found, default to using internal md5 support.
     AC_DEFINE(USE_INTERNAL_MD5)
     AC_MSG_RESULT(Internal MD5 Support)
-    if test "x$tryopenssl" = "xyes"; then
-	AC_MSG_WARN(Asked to use OpenSSL but I couldn't find it.)
+    if test "x$askedopenssl" = "xyes"; then
+	AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
     fi
 else
     if test "x$tryopenssl" = "xno"; then
@@ -1179,7 +1194,7 @@ if test $cross_compiling = yes; then
   if test $with_endianness = "big"; then
     AC_DEFINE(WORDS_BIGENDIAN)
   elif test -z $with_endianness; then
-    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness]);
+    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
   fi
 else
   if test $with_endianness; then
@@ -1219,7 +1234,7 @@ AC_CHECK_FUNCS(getpagesize)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_FUNCS(dlopen)
 AC_CHECK_FUNCS(mkstemp)
-AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid)
+AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
@@ -1784,14 +1799,14 @@ cat << EOF
 
 	 ************** Configuration Section **************
 
-	You are about to be prompted by a series of questions.  Answer
+	You are about to be prompted with a series of questions.  Answer
 them carefully, as they determine how the snmp agent and related
 applications are to function.
 
 	After the configure script finishes, you can browse the newly
 created config.h file for further - less important - parameters to
-modify.  Be careful if you re-run configure though since config.h will
-be over written.
+modify.  Be careful if you re-run configure though, since config.h will
+be overwritten.
 
 -Press return to continue-
 EOF
@@ -1820,8 +1835,8 @@ AC_PROMPT_USER(SYS_CONTACT,[
 
 	Describes who should be contacted about the host the agent is
 running on.  This information is available in the MIB-II tree.  This
-Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
-Configuration Files.
+can also be over-ridden using the \"syscontact\" syntax in the agent's
+configuration files.
 
 System Contact Information],$ME@$LOC,1)
 
@@ -1830,7 +1845,7 @@ AC_PROMPT_USER(SYS_LOC,[
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can also be over-ridden using the
+available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
 
 System Location],Unknown,1)

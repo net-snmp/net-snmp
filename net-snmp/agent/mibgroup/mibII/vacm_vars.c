@@ -652,7 +652,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (snmp_get_do_debugging()) {
             char *buf;
             if (pdu->community) {
-                buf = malloc(1+ pdu->community_len);
+                buf = (char *)malloc(1+ pdu->community_len);
                 memcpy(buf, pdu->community, pdu->community_len);
                 buf[pdu->community_len] = '\0';
             } else {
@@ -665,7 +665,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	}
 
 	/* allow running without snmpd.conf */
-	if (sp == NULL) {
+	if (sp == NULL && !vacm_is_configured()) {
 	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: accepted with no com2sec entries\n"));
 	    switch (pdu->command) {
 	    case SNMP_MSG_GET:
