@@ -17,14 +17,117 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 
+#include "ipaddress_ioctl.h"
+
 static int _get_interface_count(int sd, struct ifconf * ifc);
 static void _print_flags(short flags);
+
+#define LIST_TOKEN "ioctl_extras"
+
+/*
+ * get extra structure
+ *
+ * @returns the extras structure from the entry
+ */
+_ioctl_extras *
+netsnmp_ioctl_ipaddress_extras_get(netsnmp_ipaddress_entry *entry)
+{
+    if ((NULL == entry) || (NULL == entry->arch_data))
+        return NULL;
+
+    return netsnmp_get_list_data(entry->arch_data, LIST_TOKEN);
+}
+
+/**
+ * initialize ioctl extras
+ *
+ * @returns _ioctl_extras pointer, or NULL on error
+ */
+_ioctl_extras *
+netsnmp_ioctl_ipaddress_entry_init(netsnmp_ipaddress_entry *entry)
+{
+    netsnmp_data_list *node;
+    _ioctl_extras     *extras;
+
+    if (NULL == entry)
+        return NULL;
+
+    extras = SNMP_MALLOC_TYPEDEF(_ioctl_extras);
+    if (NULL == extras)
+        return NULL;
+
+    node = netsnmp_create_data_list(LIST_TOKEN, extras, free);
+    if (NULL == node) {
+        free(extras);
+        return NULL;
+    }
+
+    netsnmp_data_list_add_node( &entry->arch_data, node );
+    
+    return extras;
+}
+
+/**
+ * cleanup ioctl extras
+ */
+void
+netsnmp_ioctl_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry)
+{
+    if (NULL == entry) {
+        netsnmp_assert(NULL != entry);
+        return;
+    }
+
+    if (NULL == entry->arch_data) {
+        netsnmp_assert(NULL != entry->arch_data);
+        return;
+    }
+
+    netsnmp_remove_list_node(&entry->arch_data, LIST_TOKEN);
+}
+
+/**
+ * copy ioctl extras
+ *
+ * @retval  0: success
+ * @retval <0: error
+ */
+int
+netsnmp_ioctl_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
+                                   netsnmp_ipaddress_entry *rhs)
+{
+    _ioctl_extras *lhs_extras, *rhs_extras;
+    int            rc = SNMP_ERR_NOERROR;
+
+    if ((NULL == lhs) || (NULL == rhs)) {
+        netsnmp_assert((NULL != lhs) && (NULL != rhs));
+        return -1;
+    }
+
+    rhs_extras = netsnmp_ioctl_ipaddress_extras_get(rhs);
+    lhs_extras = netsnmp_ioctl_ipaddress_extras_get(lhs);
+    if (NULL == rhs_extras) {
+        if (NULL != lhs_extras)
+            netsnmp_ioctl_ipaddress_entry_cleanup(lhs);
+    }
+    else {
+        if (NULL == lhs_extras)
+            lhs_extras = netsnmp_ioctl_ipaddress_entry_init(lhs);
+        
+        if (NULL != lhs_extras)
+            memcpy(lhs_extras, rhs_extras, sizeof(_ioctl_extras));
+        else
+            rc = -1;
+    }
+
+    return rc;
+}
 
 /**
  * load ipv4 address via ioctl
  */
 int
-_netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
+_netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset)
 {
     int             i, sd, rc = 0, interfaces = 0;
@@ -32,6 +135,7 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
     netsnmp_ipaddress_entry *entry;
+    _ioctl_extras           *extras;
 
     if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         snmp_log(LOG_ERR, "could not create socket\n");
@@ -59,6 +163,12 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
             break;
         }
         entry->ns_ia_index = ++idx_offset;
+
+        /*
+         * save if name
+         */
+        extras = netsnmp_ioctl_ipaddress_extras_get(entry);
+        memcpy(extras->name, ifrp->ifr_name, sizeof(extras->name));
 
         /*
          * each time we make an ioctl, we need to specify the address, but
@@ -99,7 +209,6 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
         /*
          * get ifindex
          */
-#ifndef NETSNMP_USE_IOCTL_IFINDEX
         /*
          * there is an iotcl to get an ifindex, but I'm not sure that
          * it has the correct characteristics required to be the actual
@@ -108,24 +217,25 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
          * truncate any alias info.
          */
         {
+            /*
+             * I think that Linux and Solaris both use ':' in the
+             * interface name for aliases. When a new arch is added
+             * that uses some other indicator, a new function, maybe
+             * netsnmp_access_ipaddress_entry_name_alias_check(), will
+             * need to be written.
+             */
             char *ptr = strchr(ifrp->ifr_name, ':');
-            if (NULL != ptr)
+            if (NULL != ptr) {
+                entry->flags |= NETSNMP_ACCESS_IPADDRESS_ISALIAS;
                 *ptr = 0;
+            }
         }
         entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
-#else
-        /*
-         * get ifindex. not sure how if it is appropriate for use as
-         * the mib index.
-         */
-        if (ioctl(sd, SIOCGIFINDEX, ifrp) < 0) {
-            snmp_log(LOG_ERR,
-                     "error getting if_index for interface %d\n", i);
+        if (0 == entry->if_index) {
+            snmp_log(LOG_ERR,"no ifindex found for interface\n");
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
-        entry->if_index = ifrp->ifr_ifindex;
-#endif
 
         /*
          * get flags
@@ -135,8 +245,9 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
             snmp_log(LOG_ERR,
                      "error getting if_flags for interface %d\n", i);
             netsnmp_access_ipaddress_entry_free(entry);
+            continue;
         }
-        entry->ia_flags = ifrp->ifr_flags;
+        extras->flags = ifrp->ifr_flags;
 
         entry->ia_type = IPADDRESSTYPE_UNICAST; /* assume unicast? */
 
@@ -163,8 +274,8 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
                 DEBUGMSGT_NC(("access:ipaddress:container", " address %p\n",
                               *((void**)entry->ia_address)));
             DEBUGMSGT_NC(("access:ipaddress:container", "flags 0x%x\n",
-                          entry->ia_flags));
-            _print_flags(entry->ia_flags);
+                          extras->flags));
+            _print_flags(extras->flags);
 
         }
 
@@ -189,6 +300,78 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
     return idx_offset;
 }
 
+/**
+ * find unused alias number
+ */
+int
+_netsnmp_ioctl_ipaddress_next_alias(char *if_name)
+{
+    int             i, j, k, sd, interfaces = 0, len;
+    struct ifconf   ifc;
+    struct ifreq   *ifrp;
+    char                    *alias;
+    int                     *alias_list;
+
+    if (NULL == if_name)
+        return -1;
+    len = strlen(if_name);
+
+    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        snmp_log(LOG_ERR, "could not create socket\n");
+        return -1;
+    }
+
+    interfaces = _get_interface_count(sd, &ifc);
+    if(interfaces < 0) {
+        close(sd);
+        return -2;
+    }
+    netsnmp_assert(NULL != ifc.ifc_buf);
+    DEBUGMSGTL(("access:ipaddress:container", "processing %d interfaces\n", interfaces));
+
+    alias_list = malloc(interfaces * sizeof(int));
+    if (NULL == alias_list) {
+        close(sd);
+        return -2;
+    }
+
+    ifrp = ifc.ifc_req;
+    for(i=0,j=0; i < interfaces; ++i, ++ifrp) {
+
+        if (strncmp(ifrp->ifr_name, if_name, len) != 0)
+            continue;
+
+        DEBUGMSGTL(("access:ipaddress:container",
+                    " interface %d, %s\n", i, ifrp->ifr_name));
+
+        alias = strchr(ifrp->ifr_name, ':');
+        if (NULL == alias)
+            continue;
+
+        ++alias; /* skip ':' */
+        alias_list[j++] = atoi(alias);
+    }
+
+    /*
+     * clean up
+     */
+    free(ifc.ifc_buf);
+    close(sd);
+
+    /*
+     * return first unused alias
+     */
+    for(i=1; i<=interfaces; ++i) {
+        for(k=0;k<j;++k)
+            if (alias_list[k] == i)
+                break;
+        if (k == j)
+            return i;
+    }
+
+    return interfaces + 1;
+}
+
 
 /**
  *
@@ -198,13 +381,88 @@ _netsnmp_access_ipaddress_container_ioctl_load_v4(netsnmp_container *container,
  * @retval -3 : ioctl failed
  */
 int
-_netsnmp_access_ipaddress_ioctl_set_v4(const char *name, u_long addr)
+_netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
 {
     struct ifreq                   ifrq;
     struct sockaddr_in            *sin;
     int                            rc, fd = -1;
+    _ioctl_extras                 *extras;
 
-    if (NULL == name)
+    if (NULL == entry)
+        return -1;
+
+    netsnmp_assert(4 == entry->ia_address_len);
+
+    extras = netsnmp_ioctl_ipaddress_extras_get(entry);
+    if (NULL == extras)
+        return -1;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        snmp_log(LOG_ERR,"couldn't create socket\n");
+        return -2;
+    }
+    memset(&ifrq, 0, sizeof(ifrq));
+
+    if ('\0' == extras->name[0]) {
+        char *name = netsnmp_access_interface_name_find(entry->if_index);
+        int   alias_idx;
+
+        if (NULL == name) {
+            DEBUGMSGT(("access:ipaddress:set", "cant find name for index %d\n",
+                       entry->if_index));
+            close(fd);
+            return -1;
+        }
+
+        /*
+         * search for unused alias
+         */
+        alias_idx = _netsnmp_ioctl_ipaddress_next_alias(name);
+        snprintf(ifrq.ifr_name,sizeof(ifrq.ifr_name), "%s:%d",
+                 name, alias_idx);
+    }
+    else
+        strncpy(ifrq.ifr_name, extras->name, sizeof(ifrq.ifr_name));
+
+    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+
+    sin = (struct sockaddr_in*)&ifrq.ifr_addr;
+    sin->sin_family = AF_INET;
+    memcpy(&sin->sin_addr.s_addr, entry->ia_address,
+           entry->ia_address_len);
+
+    rc = ioctl(fd, SIOCSIFADDR, &ifrq);
+    close(fd);
+    if(rc < 0) {
+        snmp_log(LOG_ERR,"error setting address\n");
+        return -3;
+    }
+
+    return 0;
+}
+
+/**
+ *
+ * @retval  0 : no error
+ * @retval -1 : bad parameter
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl failed
+ */
+int
+_netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
+{
+    struct ifreq                   ifrq;
+    int                            rc, fd = -1;
+    _ioctl_extras                 *extras;
+
+    if (NULL == entry)
+        return -1;
+
+    netsnmp_assert(4 == entry->ia_address_len);
+
+    extras = netsnmp_ioctl_ipaddress_extras_get(entry);
+    if (NULL == extras)
         return -1;
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -215,17 +473,15 @@ _netsnmp_access_ipaddress_ioctl_set_v4(const char *name, u_long addr)
 
     memset(&ifrq, 0, sizeof(ifrq));
 
-    strncpy(ifrq.ifr_name, name, sizeof(ifrq.ifr_name));
+    strncpy(ifrq.ifr_name, extras->name, sizeof(ifrq.ifr_name));
     ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
 
-    sin = (struct sockaddr_in*)&ifrq.ifr_addr;
-    sin->sin_family = AF_INET;
-    sin->sin_addr.s_addr = addr;
+    ifrq.ifr_flags = 0;
 
-    rc = ioctl(fd, SIOCSIFADDR, &ifrq);
+    rc = ioctl(fd, SIOCSIFFLAGS, &ifrq);
+    close(fd);
     if(rc < 0) {
-        snmp_log(LOG_ERR,"error setting address\n");
-        close(fd);
+        snmp_log(LOG_ERR,"error deleting address\n");
         return -3;
     }
 

@@ -8,6 +8,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/ipaddress.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 
@@ -28,8 +29,16 @@ static void _access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry,
  * the header file.
  */
 extern int
-netsnmp_access_ipaddress_container_arch_load(netsnmp_container* container,
-                                             u_int load_flags);
+netsnmp_arch_ipaddress_container_load(netsnmp_container* container,
+                                      u_int load_flags);
+extern int
+netsnmp_arch_ipaddress_entry_init(netsnmp_ipaddress_entry *entry);
+extern int
+netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
+                                  netsnmp_ipaddress_entry *rhs);
+extern void
+netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry);
+
 
 
 /**---------------------------------------------------------------------*/
@@ -92,7 +101,7 @@ netsnmp_access_ipaddress_container_load(netsnmp_container* container, u_int load
         return NULL;
     }
 
-    rc =  netsnmp_access_ipaddress_container_arch_load(container, load_flags);
+    rc =  netsnmp_arch_ipaddress_container_load(container, load_flags);
     if (0 != rc) {
         netsnmp_access_ipaddress_container_free(container,
                                                 NETSNMP_ACCESS_IPADDRESS_FREE_NOFLAGS);
@@ -137,6 +146,7 @@ netsnmp_access_ipaddress_entry_create(void)
 {
     netsnmp_ipaddress_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_ipaddress_entry);
+    int rc = 0;
 
     entry->oid_index.len = 1;
     entry->oid_index.oids = &entry->ns_ia_index;
@@ -147,6 +157,12 @@ netsnmp_access_ipaddress_entry_create(void)
     entry->ia_type = IPADDRESSTYPE_UNICAST;
     entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
     entry->ia_storagetype = STORAGETYPE_VOLATILE;
+
+    rc = netsnmp_arch_ipaddress_entry_init(entry);
+    if (SNMP_ERR_NOERROR != rc) {
+        DEBUGMSGT(("access:ipaddress:create","error %d in arch init\n"));
+        netsnmp_access_ipaddress_entry_free(entry);
+    }
 
     return entry;
 }
@@ -162,7 +178,65 @@ netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry)
     if (NULL != entry->ia_prefix_oid)
         free(entry->ia_prefix_oid);
 
+    if (NULL != entry->arch_data)
+        netsnmp_arch_ipaddress_entry_cleanup(entry);
+
     free(entry);
+}
+
+/**
+ * update underlying data store (kernel) for entry
+ *
+ * @retval  0 : success
+ * @retval -1 : error
+ */
+int
+netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry)
+{
+    int rc = SNMP_ERR_NOERROR;
+
+    if (NULL == entry) {
+        netsnmp_assert(NULL != entry);
+        return -1;
+    }
+    
+    /*
+     * make sure interface and ifIndex match up
+     */
+    if (NULL == netsnmp_access_interface_name_find(entry->if_index)) {
+        DEBUGMSGT(("access:ipaddress:set", "cant find name for index %d\n",
+                  entry->if_index));
+        return -1;
+    }
+
+    /*
+     * don't support non-volatile yet
+     */
+    if (STORAGETYPE_VOLATILE != entry->ia_storagetype) {
+        DEBUGMSGT(("access:ipaddress:set",
+                   "non-volatile storagetypes unsupported\n"));
+        return -1;
+    }
+
+    /*
+     *
+     */
+    rc = -1;
+    if (entry->flags & NETSNMP_ACCESS_IPADDRESS_CREATE) {
+        rc = netsnmp_arch_ipaddress_create(entry);
+    }
+    else if (entry->flags & NETSNMP_ACCESS_IPADDRESS_CHANGE) {
+    }
+    else if (entry->flags & NETSNMP_ACCESS_IPADDRESS_DELETE) {
+        rc = netsnmp_arch_ipaddress_delete(entry);
+    }
+    else {
+        snmp_log(LOG_ERR,"netsnmp_access_ipaddress_entry_set with no mode\n");
+        netsnmp_assert("ipaddress_entry_set" == "unknown mode"); 
+        rc = -1;
+    }
+    
+    return rc;
 }
 
 /**
@@ -178,7 +252,7 @@ int
 netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
                                       netsnmp_ipaddress_entry *rhs)
 {
-    int changed = 0;
+    int rc, changed = 0;
 
     /*
      * do any memory allocations first, using temp vars, so a failure can
@@ -210,6 +284,14 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
         lhs->ia_prefix_oid_len = rhs->ia_prefix_oid_len;
     }
 
+    /*
+     * copy arch stuff. we don't care if it changed
+     */
+    rc = netsnmp_arch_ipaddress_entry_copy(lhs,rhs);
+    if (0 != rc) {
+        snmp_log(LOG_ERR,"arch ipaddress copy failed\n");
+        return -1;
+    }
 
     if (lhs->if_index != rhs->if_index) {
         ++changed;
@@ -219,11 +301,6 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
     if (lhs->ia_storagetype != rhs->ia_storagetype) {
         ++changed;
         lhs->ia_storagetype = rhs->ia_storagetype;
-    }
-
-    if (lhs->ia_flags != rhs->ia_flags) {
-        ++changed;
-        lhs->ia_flags = rhs->ia_flags;
     }
 
     if (lhs->ia_address_len != rhs->ia_address_len) {

@@ -43,14 +43,14 @@ typedef struct netsnmp_ipaddress_s {
 
    oid      *ia_prefix_oid; /* NULL == 0.0 */
 
-   int       ia_flags;      /* arch specific flags */
-
    u_char    ia_address_len;/* address len, 4 | 16 */
    u_char    ia_prefix_oid_len; /* 1-128 oids */
    u_char    ia_type;       /* 1-3 */
    u_char    ia_status;     /* IpAddressStatus (1-7) */
    u_char    ia_origin;     /* IpAddressOrigin (1-6) */
    u_char    ia_storagetype; /* IpAddressStorageType (1-5) */
+
+   netsnmp_data_list *arch_data;      /* arch specific data */
 
 } netsnmp_ipaddress_entry;
 
@@ -102,6 +102,12 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old,
  */
 /** not yet */
 
+/*
+ * create/change/delete
+ */
+int
+netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry);
+
 
 /*
  * ipaddress flags
@@ -110,8 +116,10 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old,
  *         ipAddressTable_constants.h
  */
 #define NETSNMP_ACCESS_IPADDRESS_CREATE     0x80000000
-#define NETSNMP_ACCESS_IPADDRESS_DESTROY    0x40000000
+#define NETSNMP_ACCESS_IPADDRESS_DELETE     0x40000000
 #define NETSNMP_ACCESS_IPADDRESS_CHANGE     0x20000000
+
+#define NETSNMP_ACCESS_IPADDRESS_ISALIAS    0x10000000
 
 /* 
  * mask for change flag bits
