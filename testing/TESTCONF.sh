@@ -123,6 +123,14 @@ fi
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
     SNMP_SNMPTRAPD_PORT=`expr $BASE_PORT - 1`
 fi
+
+if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
+       SNMP_TRANSPORT_SPEC="udp"
+fi
+if [ "x$SNMP_TEST_DEST" = "x" -a $SNMP_TRANSPORT_SPEC != "unix" ];then
+       SNMP_TEST_DEST="localhost:"
+fi
+
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
 # Make sure the agent doesn't parse any config file but what we give it.  

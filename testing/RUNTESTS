@@ -93,6 +93,19 @@ while [ -n "$1" ]; do
 	    shift
 	    SNMP_UPDIR="$1"
 	    ;;
+	-P)
+		shift
+		SNMP_TRANSPORT_SPEC="$1"
+		export SNMP_TRANSPORT_SPEC
+		if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ];then
+			SNMP_SNMPD_PORT="/var/tmp/unixsnmpd"
+			SNMP_SNMPTRAPD_PORT="/var/tmp/unixsnmptrapd"
+			SNMP_TEST_DEST=""
+			export SNMP_SNMPD_PORT
+			export SNMP_SNMPTRAPD_PORT
+			export SNMP_TEST_DEST
+		fi
+		;;
 	-T)
 	    shift
 	    test_nums=`echo $1 | sed 's/,/ /g'`
