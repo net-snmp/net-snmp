@@ -88,6 +88,8 @@ for CONFIGFILE.
 .IP 
 The following values are supported for CONFIGFILE:
 .IP 
+mib2c.mfd.conf
+.br
 mib2c.scalar.conf
 .br
 mib2c.int_watch.conf
@@ -114,6 +116,14 @@ scalars, use:
 	mib2c -c mib2c.int_watch.conf MIBNODE
 .IP 
 GENERATING CODE FOR TABLES:
+
+The recommended configuration file for tables is the MIBs for
+Dummies, or MFD, configuration file. It hides as much of the SNMP
+details as possible, generating small, easy to understand functions.
+It is also the most flexible and well documented configuration file.
+See the agent/mibgroup/if-mib/ifTable/ifTable*.c files for an example:
+
+        mib2c -c mib2c.mfd.conf MIBNODE
 
 If your table data is kept somewhere else (e.g. it's in the
 kernel and not in the memory of the agent itself) and you need to
