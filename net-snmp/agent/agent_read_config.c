@@ -56,10 +56,10 @@
 #include "snmpd.h"
 #include "../snmplib/system.h"
 #include "snmp_debug.h"
+#include "mibgroup/mib_module_includes.h"
 
 char dontReadConfigFiles;
 char *optconfigfile;
-
 
 void init_agent_read_config (void)
 {
