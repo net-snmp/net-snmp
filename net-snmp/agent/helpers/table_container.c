@@ -428,7 +428,6 @@ _container_table_handler(netsnmp_mib_handler *handler,
 {
     int             rc = SNMP_ERR_NOERROR;
     int             oldmode, need_processing = 0;
-    netsnmp_request_info *request;
     container_table_data *tad;
 
     /** sanity checks */
@@ -455,15 +454,16 @@ _container_table_handler(netsnmp_mib_handler *handler,
      */
     oldmode = agtreq_info->mode;
     if(MODE_IS_GET(oldmode) || (MODE_SET_RESERVE1 == oldmode)) {
+        netsnmp_request_info *curr_request;
         /*
          * Loop through each of the requests, and
          * try to find the appropriate row from the container.
          */
-        for (request = requests; request; request = request->next) {
+        for (curr_request = requests; curr_request; curr_request = curr_request->next) {
             /*
              * skip anything that doesn't need processing.
              */
-            if (requests->processed != 0) {
+            if (curr_request->processed != 0) {
                 DEBUGMSGTL(("table_container", "already processed\n"));
                 continue;
             }
@@ -471,9 +471,9 @@ _container_table_handler(netsnmp_mib_handler *handler,
             /*
              * find data for this request
              */
-            _data_lookup(reginfo, agtreq_info, requests, tad);
+            _data_lookup(reginfo, agtreq_info, curr_request, tad);
 
-            if(request->processed)
+            if(curr_request->processed)
                 continue;
 
             ++need_processing;
