@@ -3,8 +3,7 @@
 ## $Id$
 ########################################################################
 @if "$m2c_node_name" ne "$node"@
-@  if $node.accessible != 1@
-@    print "Why include setup node for inaccessible node?\n"@
+## if $node.accessible != 1, might be inaccessible index node
 @  end@
 @  eval $m2c_node_name = $node@
 @  eval $m2c_node_skip_mapping = 0@
@@ -38,7 +37,7 @@
 @    if "$node.perltype" eq "BITS"@
 @       eval $m2c_enum_mask="${m2c_de_pfx}_MASK"@
 @       if $m2c_const_lc == 0@
-@          eval $m2c_enum_mask = uc($m2c_enum_mask)@
+@          eval $m2c_enum_mask = "uc($m2c_enum_mask)"@
 @       end@
 @    end@
 ##
