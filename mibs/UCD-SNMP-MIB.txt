@@ -93,6 +93,7 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   wavelan          OBJECT IDENTIFIER ::= { ucdExperimental  3 } - WL-MIB
 --   ucdDlmodMIB      OBJECT IDENTIFIER ::= { ucdExperimental 14 } - UCD-DLMOD-MIB
 --   ucdDiskIOMIB     OBJECT IDENTIFIER ::= { ucdExperimental 15 } - UCD-DISKIO-MIB
+--   lmSensors        OBJECT IDENTIFIER ::= { ucdExperimental 16 } - LM-SENSORS-MIB
 
 
 -- These are the returned values of the agent type.
