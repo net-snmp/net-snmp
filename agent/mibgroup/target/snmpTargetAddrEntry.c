@@ -22,6 +22,8 @@
 #include "snmpTargetAddrEntry.h"
 #include "read_config.h"
 #include "callback.h"
+#include "snmp-tc.h"
+#include "util_funcs.h"
 
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
 				  i.e. everything but index*/
@@ -718,9 +720,13 @@ var_snmpTargetAddrEntry(
     return (unsigned char *) &long_ret;
 
   case SNMPTARGETADDRTAGLIST:
-    strcpy(string, temp_struct->tagList);
-    *var_len = strlen(string);
-    return (unsigned char *) string;
+    if (temp_struct->tagList != NULL) {
+	strcpy(string, temp_struct->tagList);
+	*var_len = strlen(string);
+	return (unsigned char *) string;
+    } else {
+	return NULL;
+    }
 
   case SNMPTARGETADDRPARAMS:
     if (temp_struct->params == 0) return(0);
@@ -753,54 +759,70 @@ write_snmpTargetAddrTDomain(
    oid      *name,
    size_t   name_len)
 {
-  size_t                         objSize=128;
-  int                            i;
-  struct targetAddrTable_struct *temp_struct;
-  static oid                    objid[MAX_OID_LEN];
-
-  if (var_val_type != ASN_OBJECT_ID) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain not ASN_OBJECT_ID\n"));
-    return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > 128) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain: bad length\n"));
-    return SNMP_ERR_WRONGLENGTH;
-  }
-
-  /* spec check, ??? */
-  objSize = var_val_len/sizeof(oid);
-  memcpy(objid, var_val, var_val_len);
+  struct targetAddrTable_struct *target = NULL;
+  static oid old_oid[MAX_OID_LEN];
+  static size_t old_oid_len;
   
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTDOMAINCOLUMN;
-  if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						 snmpTargetAddrOIDLen,
-						 name, &name_len, 1)) == 0) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain : BAD OID!\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  /* row exists, check if it is changeable */
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomain : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
-  /* check if row active */
-  if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTDomains : This change not allowed in active row.\n"));
-    return SNMP_ERR_INCONSISTENTVALUE;
-  }
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OBJECT_ID) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTDomain not ASN_OBJECT_ID\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if ((var_val_len > (MAX_OID_LEN * sizeof(oid))) ||
+	  (var_val_len % sizeof(oid) != 0)) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTDomain: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTDOMAINCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) == 0) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTDomain: BAD OID!\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",	
+		      "write to snmpTargetAddrTDomain: row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+	  if (target->rowStatus == SNMP_ROW_ACTIVE) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+	      "write to snmpTargetAddrTDomain: not allowed in active row.\n"));
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
 
-  /* Finally, we're golden, check if we should save value */
-  if (action == COMMIT)  {    
-    for (i=0;i < (int)objSize; i++) 
-      temp_struct->tDomain[i] = objid[i];
-    temp_struct->tDomainLen = objSize;
+	  /*  Finally, we're golden, save current value.  */
 
-    /* If row is new, check if its status can be updated */
-    if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
-	 (snmpTargetAddr_rowStatusCheck(temp_struct) != 0) )
-      temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+	  memcpy(old_oid, target->tDomain, target->tDomainLen * sizeof(oid));
+	  old_oid_len = target->tDomainLen;
+
+	  memcpy((u_char *)target->tDomain, var_val, var_val_len);
+	  target->tDomainLen = var_val_len / sizeof(oid);
+
+	  /*  If row is new, check if its status can be updated.  */
+	  if ((target->rowStatus == SNMP_ROW_NOTREADY) &&
+	      (snmpTargetAddr_rowStatusCheck(target) != 0)) {
+	      target->rowStatus = SNMP_ROW_NOTINSERVICE;
+	  }
+      }
+  } else if (action == FREE || action == UNDO) {
+      /*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTDOMAINCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) != NULL) {
+	  if (target->storageType != SNMP_STORAGE_READONLY &&
+	      target->rowStatus   != SNMP_ROW_ACTIVE) {
+	      memcpy((u_char *)target->tDomain, (u_char *)old_oid,
+		                                  (old_oid_len * sizeof(oid)));
+	      target->tDomainLen = old_oid_len;
+	  }
+      }
   }
-
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrTDomain */
 
@@ -815,43 +837,75 @@ write_snmpTargetAddrTAddress(
    oid      *name,
    size_t   name_len)
 {
-  struct targetAddrTable_struct *temp_struct;
+  struct targetAddrTable_struct *target = NULL;
+  static char *old_addr = NULL;
+  static size_t old_len = 0;
 
-  if (var_val_type != ASN_OCTET_STR) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress not ASN_OCTET_STR\n"));
-      return SNMP_ERR_WRONGTYPE;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTAddress not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      } else if (var_val_len < 1 || var_val_len > 255) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTADDRESSCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) == 0) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTAddress: BAD OID!\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",	
+		      "write to snmpTargetAddrTAddress: row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+	  if (target->rowStatus == SNMP_ROW_ACTIVE) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+	     "write to snmpTargetAddrTAddress: not allowed in active row.\n"));
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+
+	  old_addr = target->tAddress;
+	  old_len  = target->tAddressLen;
+	  target->tAddress = (u_char *)malloc(var_val_len);
+	  if (target->tAddress == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  memcpy(target->tAddress, var_val, var_val_len);
+	  target->tAddressLen = var_val_len;
+
+	  /*  If row is new, check if its status can be updated.  */
+	  if ((target->rowStatus == SNMP_ROW_NOTREADY) &&
+	      (snmpTargetAddr_rowStatusCheck(target) != 0)) {
+	      target->rowStatus = SNMP_ROW_NOTINSERVICE;
+	  }
+      }
+  } else if (action == COMMIT) {
+      SNMP_FREE(old_addr);
+      old_addr = NULL;
+  } else if (action == FREE || action == UNDO) {
+      /*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTADDRESSCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) != NULL) {
+	  if (target->storageType != SNMP_STORAGE_READONLY && 
+	      target->rowStatus   != SNMP_ROW_ACTIVE) {
+	      SNMP_FREE(target->tAddress);
+	      target->tAddress    = old_addr;
+	      target->tAddressLen = old_len;
+	      if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
+		  snmpTargetAddr_rowStatusCheck(target) == 0) {
+		  target->rowStatus = SNMP_ROW_NOTREADY;
+	      }
+	  }
+      }
   }
 
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTADDRESSCOLUMN;
-  if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						 snmpTargetAddrOIDLen,
-						 name, &name_len, 1)) == 0) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress : BAD OID!\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  /* row exists, check if it is changeable */
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
-  /* check if row active */
-  if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTAddress : This change not allowed in active row.\n"));
-    return SNMP_ERR_INCONSISTENTVALUE;
-  }
-  
-  /* Finally, we're golden, check if we should save value */
-  if (action == COMMIT)  {    
-    SNMP_FREE(temp_struct->tAddress);
-    temp_struct->tAddress = (u_char *)malloc(var_val_len);
-    temp_struct->tAddressLen = var_val_len;
-    memcpy(temp_struct->tAddress, var_val, var_val_len);
-    
-    /* If row is new, check if its status can be updated */
-    if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
-	 (snmpTargetAddr_rowStatusCheck(temp_struct) != 0) )
-      temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
-  }
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrTAddress */
 
@@ -916,45 +970,79 @@ write_snmpTargetAddrRetryCount(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static long                    long_ret;
-  size_t                         size;
-  struct targetAddrTable_struct *temp_struct;
+  static long long_ret;
+  struct targetAddrTable_struct *target;
 
-  if (var_val_type != ASN_INTEGER) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRetryCount not ASN_INTEGER\n"));
-    return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > (size = sizeof(long_ret))) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRetryCount: bad length\n"));
-    return SNMP_ERR_WRONGLENGTH;
-  }
-  long_ret = *((long *) var_val);
-  
-  /* spec check range, no spec check */
-  
-  /* Find row in linked list and check pertinent status... */
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRRETRYCOUNTCOLUMN;
-  if ((temp_struct = search_snmpTargetAddrTable
-       (snmpTargetAddrOID, snmpTargetAddrOIDLen, 
-	name, &name_len, 1)) == 0 ) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : BAD OID\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRetryCount : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
-
-  /* Finally, we're golden, should we save value? */
-  if (action == COMMIT)  {
-    temp_struct->retryCount = long_ret;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_INTEGER) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrRetryCount not ASN_INTEGER\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long)) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrRetryCount: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      long_ret = *((long *) var_val);
+      if (long_ret < 0 || long_ret > 255) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = 
+	                                        SNMPTARGETADDRRETRYCOUNTCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen, 
+					       name, &name_len, 1)) == NULL) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTimeout: BAD OID\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+		     "write to snmpTargetAddrRetryCount: row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+      }
+  } else if (action == COMMIT) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = 
+	                                        SNMPTARGETADDRRETRYCOUNTCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen, 
+					       name, &name_len, 1)) != NULL) {
+	  target->retryCount = long_ret;
+      }
   }
 
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrRetryCount */
 
+int
+snmpTagListValid(const char *tagList, const size_t tagListLen)
+{
+    size_t i = 0;
+    int inTag = 0;
+
+    static inline int is_delim(const char c) {
+	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+    }
+
+    for (i = 0; i < tagListLen; i++) {
+	if (is_delim(tagList[i]) && !inTag) {
+	    /*  Either a leading delimiter or two consecutive delimiters.  */
+	    return 0;
+	} else if (is_delim(tagList[i]) && inTag) {
+	    inTag = 0;
+	} else if (!is_delim(tagList[i]) && !inTag) {
+	    inTag = 1;
+	}
+    }
+    if (!inTag) {
+	/*  Trailing delimiter.  */
+	return 0;
+    }
+    return 1;
+}
 
 int
 write_snmpTargetAddrTagList(
@@ -966,43 +1054,58 @@ write_snmpTargetAddrTagList(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static unsigned char           string[1500];
-  size_t                         size=1500;
-  struct targetAddrTable_struct *temp_struct;
+  struct targetAddrTable_struct *target = NULL;
+  static char *old_tlist;
 
-  if (var_val_type != ASN_OCTET_STR) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTagList not ASN_OCTET_STR\n"));
-    return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > (size = sizeof(string))) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTagList: bad length\n"));
-    return SNMP_ERR_WRONGLENGTH;
-  }
-  
-  /* spec check, ??? */
-  size = var_val_len;
-  memcpy(string, var_val, var_val_len);
-  
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTAGLISTCOLUMN;
-  if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						 snmpTargetAddrOIDLen,
-						 name, &name_len, 1)) == 0) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTagList : BAD OID!\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  /* row exists, check if it is changeable */
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTagList : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
-  
-  /* Finally, we're golden, check if we should save value */
-  if (action == COMMIT)  {    
-    SNMP_FREE(temp_struct->tagList);
-    temp_struct->tagList = (char *)malloc(size + 1);
-    memcpy(temp_struct->tagList, string, size);
-    temp_struct->tagList[size] = '\0';
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTagList not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len > 255) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTagList: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (!snmpTagListValid(var_val, var_val_len)) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTAGLISTCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) == NULL) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrTagList: BAD OID!\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+			"write to snmpTargetAddrTagList: row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+	  old_tlist = target->tagList;
+	  target->tagList = (char *)malloc(var_val_len + 1);
+	  if (target->tagList == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  memcpy(target->tagList, var_val, var_val_len);
+	  target->tagList[var_val_len] = '\0';
+      }
+  } else if (action == COMMIT) {
+      SNMP_FREE(old_tlist);
+      old_tlist = NULL;
+  } else if (action == FREE || action == UNDO) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTAGLISTCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) != NULL) {
+	  if (target->storageType != SNMP_STORAGE_READONLY) {
+	      SNMP_FREE(target->tagList);
+	      target->tagList = old_tlist;
+	  }
+      }
   }
 
   return SNMP_ERR_NOERROR;
@@ -1019,52 +1122,74 @@ write_snmpTargetAddrParams(
    oid      *name,
    size_t   name_len)
 {
-  static unsigned char           string[1500];
-  size_t                         size=1500;
-  struct targetAddrTable_struct *temp_struct;
+  struct targetAddrTable_struct *target = NULL;
+  static char *old_params = NULL;
 
-  if (var_val_type != ASN_OCTET_STR) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrParams not ASN_OCTET_STR\n"));
-    return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > (size = sizeof(string))) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrParams: bad length\n"));
-    return SNMP_ERR_WRONGLENGTH;
-  }
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_OCTET_STR) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrParams not ASN_OCTET_STR\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      } else if (var_val_len < 1 || var_val_len > 32) {
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRPARAMSCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) == 0) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrParams: BAD OID!\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else {
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",	
+		      "write to snmpTargetAddrParams: row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+	  if (target->rowStatus == SNMP_ROW_ACTIVE) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+	     "write to snmpTargetAddrParams: not allowed in active row.\n"));
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
 
-  /* spec check, ??? */
-  size = var_val_len;
-  memcpy(string, var_val, var_val_len);
-  
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRPARAMSCOLUMN;
-  if ( (temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						 snmpTargetAddrOIDLen,
-						 name, &name_len, 1)) == 0) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrParams : BAD OID!\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  /* row exists, check if it is changeable */
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrParams : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
-  
-  /* Finally, we're golden, check if we should save value */
-  if (action == COMMIT)  {    
-    SNMP_FREE(temp_struct->params);
-    temp_struct->params = (char *)malloc(size + 1);
-    memcpy(temp_struct->params, string, size);
-    temp_struct->params[size] = '\0';
-    
-    /* If row is new, check if its status can be updated */
-    if ( (temp_struct->rowStatus == SNMP_ROW_NOTREADY) &&
-	 (snmpTargetAddr_rowStatusCheck(temp_struct) != 0) )
-      temp_struct->rowStatus = SNMP_ROW_NOTINSERVICE;
+	  old_params = target->params;
+	  target->params = (u_char *)malloc(var_val_len + 1);
+	  if (target->params == NULL) {
+	      return SNMP_ERR_RESOURCEUNAVAILABLE;
+	  }
+	  memcpy(target->params, var_val, var_val_len);
+	  target->params[var_val_len] = '\0';
+
+	  /*  If row is new, check if its status can be updated.  */
+	  if ((target->rowStatus == SNMP_ROW_NOTREADY) &&
+	      (snmpTargetAddr_rowStatusCheck(target) != 0)) {
+	      target->rowStatus = SNMP_ROW_NOTINSERVICE;
+	  }
+      }
+  } else if (action == COMMIT) {
+      SNMP_FREE(old_params);
+      old_params = NULL;
+  } else if (action == FREE || action == UNDO) {
+      /*  Try to undo the SET here (abnormal usage of FREE clause)  */
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRPARAMSCOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen,
+					       name, &name_len, 1)) != NULL) {
+	  if (target->storageType != SNMP_STORAGE_READONLY && 
+	      target->rowStatus   != SNMP_ROW_ACTIVE) {
+	      SNMP_FREE(target->params);
+	      target->params = old_params;
+	      if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
+		  snmpTargetAddr_rowStatusCheck(target) == 0) {
+		  target->rowStatus = SNMP_ROW_NOTREADY;
+	      }
+	  }
+      }
   }
 
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrParams */
-
 
 int
 write_snmpTargetAddrStorageType(
@@ -1076,47 +1201,55 @@ write_snmpTargetAddrStorageType(
    oid      *name,
    size_t   name_len)
 {
-  static long                    long_ret;
-  size_t                         size;
-  struct targetAddrTable_struct *temp_struct;
+  long long_ret = *((long *)var_val);
+  struct targetAddrTable_struct *target;
 
-  if (var_val_type != ASN_INTEGER) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrStorageType not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrStorageType: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-
-  long_ret = *((long *) var_val);
-  
-  if ( (long_ret != SNMP_STORAGE_OTHER) && (long_ret != SNMP_STORAGE_VOLATILE) &&
-       (long_ret != SNMP_STORAGE_NONVOLATILE) )  {
-    DEBUGMSGTL(("snmpTargetAddrEntry", "write to snmpTargetAddrStorageType : attempted storage type not a valid"));
-    DEBUGMSG(("snmpTargetAddrEntry", "  value of other(%d), volatile(%d), or nonvolatile(%d)\n", 
-	   SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, SNMP_STORAGE_NONVOLATILE));
-    return SNMP_ERR_INCONSISTENTVALUE;
-  }
-
-  /* Find the struct in the linked list and check status */
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRSTORAGETYPECOLUMN;
-  if ((temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						snmpTargetAddrOIDLen, 
-						name, &name_len, 1)) == 0 ) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrStorageType : BAD OID\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  if ( (temp_struct->storageType == SNMP_STORAGE_PERMANENT) || 
-       (temp_struct->storageType == SNMP_STORAGE_READONLY) )  {
-    DEBUGMSGTL(("snmpTargetAddrEntry", "write to snmpTargetAddrStorageType : row has unchangeable storage status: %d\n",
-	   temp_struct->storageType));
-    return SNMP_ERR_INCONSISTENTVALUE;
-  }
-
-  /* Finally, we're golden, check if we should save new value */
-  if (action == COMMIT) {      
-    temp_struct->storageType = long_ret;
+  if (action == RESERVE1) {
+      if (var_val_type != ASN_INTEGER) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrStorageType not ASN_INTEGER\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(long)) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrStorageType: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (long_ret != SNMP_STORAGE_OTHER && 
+	  long_ret != SNMP_STORAGE_VOLATILE &&
+	  long_ret != SNMP_STORAGE_NONVOLATILE) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry", "write to snmpTargetAddrStorageType: attempted storage type not a valid"));
+	  DEBUGMSG(("snmpTargetAddrEntry", " value of other(%d), volatile(%d), or nonvolatile(%d)\n", 
+		    SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, 
+		    SNMP_STORAGE_NONVOLATILE));
+	  return SNMP_ERR_WRONGVALUE;
+      }
+  } else if (action == RESERVE2) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = 
+	                                       SNMPTARGETADDRSTORAGETYPECOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen, 
+					       name, &name_len, 1)) == NULL) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrStorageType: BAD OID\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      } else { 
+	  if (target->storageType == SNMP_STORAGE_PERMANENT || 
+	      target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry",
+			  "write to snmpTargetAddrStorageType: row has unchangeable storage status: %d\n",
+			  target->storageType));
+	      return SNMP_ERR_WRONGVALUE;
+	  }
+      }
+  } else if (action == COMMIT) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = 
+	                                       SNMPTARGETADDRSTORAGETYPECOLUMN;
+      if ((target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen, 
+					       name, &name_len, 1)) != NULL) {
+	  target->storageType = long_ret;
+      }
   }
 
   return SNMP_ERR_NOERROR;
@@ -1172,20 +1305,127 @@ write_snmpTargetAddrRowStatus(
    oid      *name,
    size_t   name_len)
 {
-  enum commit_action_enum        {NOTHING, DESTROY, CREATE, CHANGE};
-  enum commit_action_enum        onCommitDo = NOTHING; 
-  static long                    long_ret;
-  size_t                         size;
-  struct targetAddrTable_struct *temp_struct;
+  static long value;
+  struct targetAddrTable_struct *target = NULL;
 
-  if (var_val_type != ASN_INTEGER) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
+  if (action == RESERVE1) {
+      value = *((long *)var_val);
+      if (var_val_type != ASN_INTEGER) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrRowStatus not ASN_INTEGER\n"));
+	  return SNMP_ERR_WRONGTYPE;
+      }
+      if (var_val_len != sizeof(int)) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry",
+		      "write to snmpTargetAddrRowStatus: bad length\n"));
+	  return SNMP_ERR_WRONGLENGTH;
+      }
+      if (value == RS_NOTREADY || value < 1 || value > 6) {
+	  return SNMP_ERR_WRONGVALUE;
+      }
+
+      /*  Check index value is reasonable.  */
+
+      if (name_len < snmpTargetAddrOIDLen + 1 ||
+	  name_len > snmpTargetAddrOIDLen + 32) {
+	  DEBUGMSGTL(("snmpTargetAddrEntry", "bad index length %d\n",
+		      name_len - snmpTargetAddrOIDLen));
+	  return SNMP_ERR_NOCREATION;
+      }
+
+      /*  Search for struct in linked list.  */
+
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] =SNMPTARGETADDRROWSTATUSCOLUMN;
+      target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					       snmpTargetAddrOIDLen, 
+					       name, &name_len, 1);
+
+      if (target != NULL) {
+	  if (value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) {
+	      value = RS_NOTREADY;
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+	  if (target->storageType == SNMP_STORAGE_READONLY) {
+	      DEBUGMSGTL(("snmpTargetAddrEntry", "row is read only\n"));
+	      return SNMP_ERR_NOTWRITABLE;
+	  }
+	  if (target->storageType == SNMP_STORAGE_PERMANENT) {
+	      if (value == RS_DESTROY) {
+		  DEBUGMSGTL(("snmpTargetAddrEntry",
+			      "unable to destroy permanent row\n"));
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  }
+      } else {
+	  if (value == RS_ACTIVE || value == RS_NOTINSERVICE) {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+	  if (value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) {
+	      if (snmpTargetAddr_createNewRow(name, name_len) == 0) {
+		  DEBUGMSGTL(("snmpTargetAddrEntry",
+			      "couldn't malloc() new row\n"));
+		  return SNMP_ERR_RESOURCEUNAVAILABLE;
+	      }
+	  }
+      }
+  } else if (action == ACTION) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] =SNMPTARGETADDRROWSTATUSCOLUMN;
+      target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					  snmpTargetAddrOIDLen, 
+					  name, &name_len, 1);
+
+      if (target != NULL) {
+	  if (value == RS_CREATEANDGO) {
+	      /*  Check whether all the required objects have been set.  */
+	      if (snmpTargetAddr_rowStatusCheck(target)) {
+		  target->rowStatus = RS_ACTIVE;
+	      } else {
+		  target->rowStatus = RS_NOTREADY;
+	      }
+	  } else if (value == RS_CREATEANDWAIT) {
+	      /*  Check whether all the required objects have been set.  */
+	      if (snmpTargetAddr_rowStatusCheck(target)) {
+		  target->rowStatus = RS_NOTINSERVICE;
+	      } else {
+		  target->rowStatus = RS_NOTREADY;
+	      }
+	  } else if (value == RS_ACTIVE) {
+	      if (target->rowStatus == RS_NOTINSERVICE) {
+		  target->rowStatus = RS_ACTIVE;
+	      } else if (target->rowStatus == RS_NOTREADY) {
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  } else if (value == RS_NOTINSERVICE) {
+	      if (target->rowStatus == RS_ACTIVE) {
+		  target->rowStatus = RS_NOTINSERVICE;
+	      } else if (target->rowStatus == RS_NOTREADY) {
+		  return SNMP_ERR_INCONSISTENTVALUE;
+	      }
+	  }
+      }
+  } else if (action == COMMIT) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] =SNMPTARGETADDRROWSTATUSCOLUMN;
+      target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					  snmpTargetAddrOIDLen, 
+					  name, &name_len, 1);
+      if (target != NULL) {
+	  if (value == RS_DESTROY) {
+	      snmpTargetAddrTable_remFromList(target, &aAddrTable);
+	  }
+      }
+  } else if (action == UNDO || action == FREE) {
+      snmpTargetAddrOID[snmpTargetAddrOIDLen-1] =SNMPTARGETADDRROWSTATUSCOLUMN;
+      target = search_snmpTargetAddrTable(snmpTargetAddrOID, 
+					  snmpTargetAddrOIDLen, 
+					  name, &name_len, 1);
+      if (value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) {
+	  if (target != NULL) {
+	      snmpTargetAddrTable_remFromList(target, &aAddrTable);
+	  }
+      }
   }
-  if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
+  return SNMP_ERR_NOERROR;
+#if 0
   long_ret = *((long *) var_val);
 
   /* search for struct in linked list */
@@ -1269,6 +1509,7 @@ write_snmpTargetAddrRowStatus(
   }
   
   return SNMP_ERR_NOERROR;
+#endif
 }  /* write_snmpTargetAddrRowStatus */
 
 
