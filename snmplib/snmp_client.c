@@ -158,6 +158,7 @@ snmp_synch_input(int op,
 	state->pdu = NULL;
 	state->status = STAT_ERROR;
 	session->s_snmp_errno = rpt_type;
+        snmp_errno = rpt_type;
       } else if (pdu->command == SNMP_MSG_RESPONSE) {
 	/* clone the pdu to return to snmp_synch_response */
 	state->pdu = snmp_clone_pdu(pdu);
@@ -168,6 +169,7 @@ snmp_synch_input(int op,
 	state->pdu		 = NULL;
 	state->status		 = STAT_TIMEOUT;
 	session->s_snmp_errno	 = SNMPERR_TIMEOUT;
+        snmp_errno = SNMPERR_TIMEOUT;
     }
 
     return 1;

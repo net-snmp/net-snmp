@@ -671,6 +671,7 @@ void   snmp_sess_timeout    (void *);
 int    snmp_sess_close      (void *);
 
 void   snmp_sess_error      (void *, int *, int *, char **);
+void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 
 /* end single session API */
 

@@ -322,7 +322,7 @@ void get_table_entries(void)
   /* open an SNMP session */
   ss = snmp_open(&session);
   if (ss == NULL){
-    snmp_perror("snmptable");
+    snmp_sess_perror("snmptable", ss);
     SOCK_CLEANUP;
     exit(1);
   }
@@ -425,7 +425,7 @@ void get_table_entries(void)
       fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
       running = 0;
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmptable");
+      snmp_sess_perror("snmptable", ss);
       running = 0;
     }
     if (response)
