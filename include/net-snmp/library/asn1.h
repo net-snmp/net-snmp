@@ -188,12 +188,12 @@ SOFTWARE.
     int             asn_check_packet(u_char *, size_t);
     u_char         *asn_parse_int(u_char *, size_t *, u_char *, long *,
                                   size_t);
-    u_char         *asn_build_int(u_char *, size_t *, u_char, long *,
+    u_char         *asn_build_int(u_char *, size_t *, u_char, const long *,
                                   size_t);
     u_char         *asn_parse_unsigned_int(u_char *, size_t *, u_char *,
                                            u_long *, size_t);
     u_char         *asn_build_unsigned_int(u_char *, size_t *, u_char,
-                                           u_long *, size_t);
+                                           const u_long *, size_t);
     u_char         *asn_parse_string(u_char *, size_t *, u_char *,
                                      u_char *, size_t *);
     u_char         *asn_build_string(u_char *, size_t *, u_char,
@@ -214,20 +214,20 @@ SOFTWARE.
     u_char         *asn_parse_bitstring(u_char *, size_t *, u_char *,
                                         u_char *, size_t *);
     u_char         *asn_build_bitstring(u_char *, size_t *, u_char,
-                                        u_char *, size_t);
+                                        const u_char *, size_t);
     u_char         *asn_parse_unsigned_int64(u_char *, size_t *, u_char *,
                                              struct counter64 *, size_t);
     u_char         *asn_build_unsigned_int64(u_char *, size_t *, u_char,
-                                             struct counter64 *, size_t);
+                                             const struct counter64 *, size_t);
     u_char         *asn_parse_signed_int64(u_char *, size_t *, u_char *,
                                            struct counter64 *, size_t);
     u_char         *asn_build_signed_int64(u_char *, size_t *, u_char,
-                                           struct counter64 *, size_t);
-    u_char         *asn_build_float(u_char *, size_t *, u_char, float *,
+                                           const struct counter64 *, size_t);
+    u_char         *asn_build_float(u_char *, size_t *, u_char, const float *,
                                     size_t);
     u_char         *asn_parse_float(u_char *, size_t *, u_char *, float *,
                                     size_t);
-    u_char         *asn_build_double(u_char *, size_t *, u_char, double *,
+    u_char         *asn_build_double(u_char *, size_t *, u_char, const double *,
                                      size_t);
     u_char         *asn_parse_double(u_char *, size_t *, u_char *,
                                      double *, size_t);
@@ -348,7 +348,7 @@ SOFTWARE.
     int             asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
                                            size_t * offset,
                                            int allow_realloc, u_char type,
-                                           long *data, size_t data_size);
+                                           const long *data, size_t data_size);
 
     int             asn_realloc_rbuild_string(u_char ** pkt,
                                               size_t * pkt_len,
@@ -363,7 +363,7 @@ SOFTWARE.
                                                     size_t * offset,
                                                     int allow_realloc,
                                                     u_char type,
-                                                    u_long * data,
+                                                    const u_long * data,
                                                     size_t data_size);
 
     int             asn_realloc_rbuild_header(u_char ** pkt,
@@ -404,7 +404,7 @@ SOFTWARE.
                                                  size_t * offset,
                                                  int allow_realloc,
                                                  u_char type,
-                                                 u_char * data,
+                                                 const u_char * data,
                                                  size_t data_size);
 
     int             asn_realloc_rbuild_unsigned_int64(u_char ** pkt,
@@ -413,28 +413,28 @@ SOFTWARE.
                                                       int allow_realloc,
                                                       u_char type,
                                                       struct counter64
-                                                      *data, size_t);
+                                                      const *data, size_t);
 
     int             asn_realloc_rbuild_signed_int64(u_char ** pkt,
                                                     size_t * pkt_len,
                                                     size_t * offset,
                                                     int allow_realloc,
                                                     u_char type,
-                                                    struct counter64 *data,
+                                                    const struct counter64 *data,
                                                     size_t);
 
     int             asn_realloc_rbuild_float(u_char ** pkt,
                                              size_t * pkt_len,
                                              size_t * offset,
                                              int allow_realloc,
-                                             u_char type, float *data,
+                                             u_char type, const float *data,
                                              size_t data_size);
 
     int             asn_realloc_rbuild_double(u_char ** pkt,
                                               size_t * pkt_len,
                                               size_t * offset,
                                               int allow_realloc,
-                                              u_char type, double *data,
+                                              u_char type, const double *data,
                                               size_t data_size);
 #endif
 

@@ -5,7 +5,7 @@
 #include <net-snmp/library/check_varbind.h>
 
 NETSNMP_INLINE int
-netsnmp_check_vb_type(netsnmp_variable_list *var, int type )
+netsnmp_check_vb_type(const netsnmp_variable_list *var, int type )
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -20,7 +20,7 @@ netsnmp_check_vb_type(netsnmp_variable_list *var, int type )
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_size(netsnmp_variable_list *var, size_t size )
+netsnmp_check_vb_size(const netsnmp_variable_list *var, size_t size )
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -35,7 +35,7 @@ netsnmp_check_vb_size(netsnmp_variable_list *var, size_t size )
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_size_range(netsnmp_variable_list *var,
+netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
                             size_t low, size_t high )
 {
     register int rc = SNMP_ERR_NOERROR;
@@ -51,7 +51,7 @@ netsnmp_check_vb_size_range(netsnmp_variable_list *var,
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_type_and_size(netsnmp_variable_list *var,
+netsnmp_check_vb_type_and_size(const netsnmp_variable_list *var,
                                int type, size_t size)
 {
     register int rc = SNMP_ERR_NOERROR;
@@ -68,7 +68,7 @@ netsnmp_check_vb_type_and_size(netsnmp_variable_list *var,
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_int_range(netsnmp_variable_list *var, int low, int high)
+netsnmp_check_vb_int_range(const netsnmp_variable_list *var, int low, int high)
 {
     register int rc = SNMP_ERR_NOERROR;
     
@@ -86,7 +86,7 @@ netsnmp_check_vb_int_range(netsnmp_variable_list *var, int low, int high)
 }
 
 int
-netsnmp_check_vb_truthvalue(netsnmp_variable_list *var)
+netsnmp_check_vb_truthvalue(const netsnmp_variable_list *var)
 {
     register int rc = SNMP_ERR_NOERROR;
     
@@ -100,7 +100,7 @@ netsnmp_check_vb_truthvalue(netsnmp_variable_list *var)
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_rowstatus_value(netsnmp_variable_list *var)
+netsnmp_check_vb_rowstatus_value(const netsnmp_variable_list *var)
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -115,7 +115,7 @@ netsnmp_check_vb_rowstatus_value(netsnmp_variable_list *var)
 }
 
 int
-netsnmp_check_vb_rowstatus(netsnmp_variable_list *var, int old_value)
+netsnmp_check_vb_rowstatus(const netsnmp_variable_list *var, int old_value)
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -129,7 +129,7 @@ netsnmp_check_vb_rowstatus(netsnmp_variable_list *var, int old_value)
 }
 
 int
-netsnmp_check_vb_storagetype(netsnmp_variable_list *var, int old_value)
+netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
 {
     int rc = SNMP_ERR_NOERROR;
 

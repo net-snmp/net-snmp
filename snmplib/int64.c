@@ -193,7 +193,7 @@ incrByU32(U64 * pu64, unsigned int u32)
  * pu64out = pu64one - pu64two 
  */
 void
-u64Subtract(U64 * pu64one, U64 * pu64two, U64 * pu64out)
+u64Subtract(const U64 * pu64one, const U64 * pu64two, U64 * pu64out)
 {
     if (pu64one->low < pu64two->low) {
         pu64out->low = 0xffffffff - pu64two->low + pu64one->low + 1;
@@ -226,7 +226,7 @@ zeroU64(U64 * pu64)
 *
 */
 int
-isZeroU64(U64 * pu64)
+isZeroU64(const U64 * pu64)
 {
 
     if ((pu64->low == 0) && (pu64->high == 0))
@@ -237,8 +237,8 @@ isZeroU64(U64 * pu64)
 }                               /* isZeroU64 */
 
 void
-                printU64(char *buf,     /* char [I64CHARSZ+1]; */
-                         U64 * pu64) {
+printU64(char *buf,     /* char [I64CHARSZ+1]; */
+                         const U64 * pu64) {
     U64             u64a;
     U64             u64b;
 
@@ -261,8 +261,8 @@ void
 }
 
 void
-                printI64(char *buf,     /* char [I64CHARSZ+1]; */
-                         U64 * pu64) {
+printI64(char *buf,     /* char [I64CHARSZ+1]; */
+                         const U64 * pu64) {
     U64             u64a;
     U64             u64b;
 
