@@ -30,9 +30,14 @@ mkdir $DIRS
 for f in $DIRS
 do
   case $f in
-  */*/*)
+  */*/*/*)
     echo Too deep nesting...
     exit 1
+    ;;
+  */*/*)
+    cd $f
+    for f in ../../../../../$f/* ; do [ -d $f ] || ln -s $f . ; done
+    cd ../../..
     ;;
   */*)
     cd $f
