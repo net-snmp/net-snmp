@@ -88,8 +88,8 @@ SOFTWARE.
 
 #include "default_store.h"
 #include "system.h"
-#include "ds_agent.h"
-#include "snmp_agent.h"
+#include <net-snmp/agent/ds_agent.h>
+#include <net-snmp/agent/snmp_agent.h>
 #include "snmp_alarm.h"
 #include "snmp_transport.h"
 #include "vacm.h"

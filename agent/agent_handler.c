@@ -8,9 +8,9 @@
 
 #include <mibincl.h>
 #include <data_list.h>
-#include <snmp_agent.h>
-#include <agent_handler.h>
-#include <agent_registry.h>
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/agent_registry.h>
 #include <data_list.h>
 #include <snmp_enum.h>
 #include <net-snmp/agent/bulk_to_next.h>

@@ -136,8 +136,8 @@
 #include "disk.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "agent_read_config.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/agent_read_config.h>
+#include <net-snmp/agent/auto_nlist.h>
 #if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else

@@ -62,7 +62,7 @@
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
-#include "snmp_vars.h"
+#include <net-snmp/agent/snmp_vars.h>
 #include "snmp_debug.h"
 #include "ip.h"
 #include "route_write.h"

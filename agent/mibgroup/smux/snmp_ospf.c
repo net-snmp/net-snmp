@@ -50,7 +50,7 @@
 #include "mib.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
-#include "snmp_vars.h"
+#include <net-snmp/agent/snmp_vars.h>
 #include "smux.h"
 #include "snmp_ospf.h"
 

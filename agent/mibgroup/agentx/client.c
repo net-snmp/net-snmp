@@ -53,12 +53,12 @@
 #include "default_store.h"
 #include "snmp.h"
 #include "snmp_debug.h"
-#include "snmp_vars.h"
-#include "agent_handler.h"
-#include "var_struct.h"
-#include "agent_registry.h"
-#include "agent_index.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/var_struct.h>
+#include <net-snmp/agent/agent_registry.h>
+#include <net-snmp/agent/agent_index.h>
+#include <net-snmp/agent/ds_agent.h>
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"

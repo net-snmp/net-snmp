@@ -110,7 +110,7 @@
 #include <dmalloc.h>
 #endif
 
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 #ifdef hpux
 #include <sys/mib.h>

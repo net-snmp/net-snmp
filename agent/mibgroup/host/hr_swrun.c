@@ -69,7 +69,7 @@
 #include "snmp_logging.h"
 #include "host_res.h"
 #include "hr_swrun.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "kernel.h"
 #if solaris2
 #include "kernel_sunos5.h"

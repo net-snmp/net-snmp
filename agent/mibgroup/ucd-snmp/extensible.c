@@ -116,8 +116,8 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "agent_read_config.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/agent_read_config.h>
+#include <net-snmp/agent/auto_nlist.h>
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */

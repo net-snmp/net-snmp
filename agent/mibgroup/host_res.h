@@ -15,11 +15,11 @@
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
-#include "snmp_agent.h"
-#include "agent_handler.h"
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
 #include "mib.h"
-#include "snmp_vars.h"
-#include "var_struct.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/var_struct.h>
 #include "../../snmplib/system.h"
 #include "snmp_debug.h"
 

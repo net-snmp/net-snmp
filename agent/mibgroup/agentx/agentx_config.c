@@ -18,11 +18,11 @@
 #include "snmpd.h"
 #include "snmp_debug.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "snmp_logging.h"
 #include "mib_module_config.h"
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "agentx/agentx_config.h"
 
 #ifdef USING_AGENTX_MASTER_MODULE

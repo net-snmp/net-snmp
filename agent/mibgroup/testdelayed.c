@@ -9,7 +9,7 @@
 
 #include "mibincl.h"
 #include "testdelayed.h"
-#include "snmp_agent.h"
+#include <net-snmp/agent/snmp_agent.h>
 #include "snmp_alarm.h"
 
 #include "snmp_api.h"

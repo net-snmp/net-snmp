@@ -15,8 +15,8 @@
 
 #include "host_res.h"
 #include "hr_proc.h"
-#include "auto_nlist.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/agent_read_config.h>
 #include "ucd-snmp/loadave.h"
 
 #define HRPROC_MONOTONICALLY_INCREASING

@@ -39,7 +39,7 @@
 #include "util_funcs.h"
 
 #include "vmstat.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 /* CPU percentage */
 #define CPU_PRC         100

@@ -39,13 +39,24 @@ LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
 AGENTOBJS=snmpd.o
 LAGENTOBJS=snmpd.lo
 
+INSTALLHEADERS=$(top_srcdir)/include/net-snmp/agent/agent_read_config.h \
+	$(top_srcdir)/include/net-snmp/agent/agent_registry.h \
+	$(top_srcdir)/include/net-snmp/agent/agent_index.h \
+	$(top_srcdir)/include/net-snmp/agent/agent_trap.h \
+	$(top_srcdir)/include/net-snmp/agent/auto_nlist.h \
+	$(top_srcdir)/include/net-snmp/agent/ds_agent.h \
+	$(top_srcdir)/include/net-snmp/agent/snmp_agent.h \
+	$(top_srcdir)/include/net-snmp/agent/snmp_vars.h \
+	$(top_srcdir)/include/net-snmp/agent/var_struct.h \
+	$(top_srcdir)/include/net-snmp/agent/agent_handler.h \
+	$(top_srcdir)/include/net-snmp/agent/ucd-snmp-agent-includes.h \
+	$(top_srcdir)/include/net-snmp/agent/agent_callbacks.h \
+	$(top_srcdir)/include/net-snmp/agent/mib_modules.h \
+	mibgroup/struct.h \
+	mibgroup/util_funcs.h \
+	mibgroup/mibincl.h \
+	mibgroup/header_complex.h
 
-
-INSTALLHEADERS=agent_read_config.h agent_registry.h agent_index.h agent_trap.h \
-	auto_nlist.h ds_agent.h snmp_agent.h snmp_vars.h var_struct.h \
-	mibgroup/util_funcs.h mibgroup/mibincl.h mibgroup/header_complex.h \
-	agent_handler.h ucd-snmp-agent-includes.h mibgroup/struct.h \
-	agent_handler.h agent_callbacks.h mib_modules.h
 INSTALLDIRS=helpers
 
 all: subdirs snmpd$(EXEEXT) libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
@@ -87,7 +98,7 @@ clean:
 
 
 install:  installdirs
-	@$(INSTALL) $(INSTALLHEADERS) $(includedir) 
+	@$(INSTALL) $(INSTALLHEADERS) $(includedir)/agent
 	@for i in $(INSTALLHEADERS) ; do echo "install:  installed $$i in $(includedir)" ; done
 	@$(INSTALL) $(LIBTARG) $(libdir)
 	@for i in $(LIBTARG) ; do $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
@@ -98,7 +109,7 @@ install:  installdirs
 	done
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir) $(libdir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir)/agent $(libdir)
 	@-$(SHELL) $(srcdir)/../mkinstalldirs $(persistentdir)
 
 

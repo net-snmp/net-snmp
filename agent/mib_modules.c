@@ -47,21 +47,21 @@
 #include "snmp.h"
 #include "mib.h"
 #include "m2m.h"
-#include "snmp_agent.h"
-#include "agent_handler.h"
-#include "snmp_vars.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/agent_read_config.h>
 #include "snmpv3.h"
 #include "callback.h"
 #include "snmp_alarm.h"
 #include "default_store.h"
 #include "snmp_debug.h"
 #include "tools.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "snmp_secmod.h"
 
 #include "mibgroup/struct.h"
-#include "mib_modules.h"
+#include <net-snmp/agent/mib_modules.h>
 #include "net-snmp/agent/table.h"
 #include "net-snmp/agent/table_iterator.h"
 #include "mib_module_includes.h"

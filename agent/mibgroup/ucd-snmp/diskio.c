@@ -23,7 +23,7 @@
 #include "diskio.h"
 
 /* parse config file */
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 
 #define CACHE_TIMEOUT 10
 static time_t cache_time=0;
