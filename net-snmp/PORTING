@@ -11,7 +11,7 @@ aspects of the project.
 Additionally, you should probably be developing against the latest
 snapshot of the source code, which can be obtained through the
 net-snmp cvs server.  Details can be found at
-http://sourceforge.net/cvs/?group_id=12694.
+http://www.net-snmp.org/cvs/.
 
 If you send patches to us, it would greatly help us if you sent them
 to us based on the current checked out copy from CVS.  To do this,
@@ -100,7 +100,7 @@ existance).  I'd be far less happy to get patches ignoring the above
 request.  If you simple can't abide by this, please send the patches
 anyway, but it'll just take me longer to get them applied.
 
-Submit the patch to http://sourceforge.net/patch/?group_id=12694.
+Submit the patch to http://www.net-snmp.org/patches/.
 Please include what version of the net-snmp package it was applied to
 and state the arcitectures you have tested it on.
 

@@ -95,12 +95,12 @@ if (keys(%knownfiles)) {
 	}
 	Print("reading: ", join(",",@files),"\n");
     } else {
-	my @files = display_menu(-head => "The following configuration files were found:\n",
-				 -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
-				 -multiple => 1,
-				 -question => 'Read in which',
-				 -defaultvalue => 'all',
-				 sort keys(%knownfiles));
+	@files = display_menu(-head => "The following configuration files were found:\n",
+			      -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
+			      -multiple => 1,
+			      -question => 'Read in which',
+			      -defaultvalue => 'all',
+			      sort keys(%knownfiles));
     }
     foreach my $i (@files) {
 	debug("reading $i\n");
@@ -286,7 +286,9 @@ sub do_section {
 	if ($line eq "list" || $line eq "l") {
 	    print "Lines defined for section \"$confsect->{title}[0]\" so far:\n";
 	    foreach my $i (keys(%{$confsect->{'thetokens'}})) {
-		print "  ",join("\n  ",@{$confsect->{$i}{'results'}}),"\n";
+		if ($#{$confsect->{$i}{'results'}} >= 0) {
+		    print "  ",join("\n  ",@{$confsect->{$i}{'results'}}),"\n";
+		}
 	    }
 	    next;
 	}
@@ -374,7 +376,10 @@ sub read_config_items {
     while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
 	if (-f "$itemdir/$file") {
-	    push @results, read_config_item("$itemdir/$file", $type);
+	    my $res = read_config_item("$itemdir/$file", $type);
+	    if (scalar(keys(%$res)) > 0) {
+		push @results, $res;
+	    }
 	}
     }
     closedir(ITEMS);

@@ -88,11 +88,11 @@ void usage(void)
   fprintf(stderr," [<objectID> <type> <value> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr, 
-    "  type - one of i, u, t, a, o, s, x, d, n\n");
+    "  type - one of i, u, t, a, o, s, x, d, b, n\n");
   fprintf(stderr,
     "    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
   fprintf(stderr,
-    "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
+    "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING, b: BITS\n");
 #ifdef OPAQUE_SPECIAL_TYPES
   fprintf(stderr,
     "    U: unsigned int64, I: signed int64, F: float, D: double\n");
@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
     int status;
     int exitval = 0;
 
+    putenv(strdup("POSIXLY_CORRECT=1"));
+
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
     case -2:
@@ -140,6 +142,7 @@ int main(int argc, char *argv[])
       names[current_name++] = argv[arg++];
       if (arg < argc) {
         switch(*argv[arg]){
+	case '=':
         case 'i':
         case 'u':
         case 't':

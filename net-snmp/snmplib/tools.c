@@ -56,6 +56,81 @@
 #include "scapi.h" 
 
 
+/*  snmp_realloc:
+
+    Parameters:
+
+      buf	pointer to a buffer pointer
+      buf_len	pointer to current size of buffer in bytes
+
+    This function increase the size of the buffer pointed at by *buf, which is
+    initially of size *buf_len.  Contents are preserved **AT THE BOTTOM END OF
+    THE BUFFER**.  If memory can be (re-)allocated then it returns 1, else it
+    returns 0.
+
+*/
+
+int
+snmp_realloc(u_char **buf, size_t *buf_len)
+{
+  u_char *new_buf = NULL;
+  size_t  new_buf_len = 0;
+
+  if (buf == NULL) {
+    return 0;
+  }
+
+  /*  The current re-allocation algorithm is to increase the buffer size by
+      whichever is the greater of 256 bytes or the current buffer size, up to
+      a maximum increase of 8192 bytes.  */
+
+  if (*buf_len <= 255) {
+    new_buf_len = *buf_len + 256;
+  } else if (*buf_len > 255 && *buf_len <= 8191) {
+    new_buf_len = *buf_len * 2;
+  } else if (*buf_len > 8191) {
+    new_buf_len = *buf_len + 8192;
+  }
+    
+  if (*buf == NULL) {
+    new_buf = (u_char *)malloc(new_buf_len);
+  } else {
+    new_buf = (u_char *)realloc(*buf, new_buf_len);
+  }
+
+  if (new_buf != NULL) {
+    *buf = new_buf;
+    *buf_len = new_buf_len;
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int
+snmp_strcat(u_char **buf, size_t *buf_len, size_t *out_len,
+	    int allow_realloc, const u_char *s)
+{
+  if (buf == NULL || buf_len == NULL || out_len == NULL) {
+    return 0;
+  }
+
+  if (s == NULL) {
+    /*  Appending a NULL string always succeeds since it is a NOP.  */
+    return 1;
+  }
+
+  while ((*out_len + strlen((const char*)s) + 1) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  strcpy((char*)(*buf + *out_len), (const char*)s);
+  *out_len += strlen((char*)(*buf + *out_len));
+  return 1;
+}
+
 /*******************************************************************-o-******
  * free_zero
  *
@@ -205,7 +280,7 @@ int
 hex_to_binary2(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len/2) + (len%2);
-	char	*s	= (char *)calloc (1,olen),
+	char	*s	= (char *)calloc (1,(olen)?olen:1),
 		*op	= s;
 	const u_char *ip	= input;
 
@@ -533,7 +608,7 @@ void atime_setMarker(marker_t pm)
 /*
  * Returns the difference (in msec) between the two markers
  */
-long atime_diff( marker_t first, marker_t second )
+u_long atime_diff( marker_t first, marker_t second )
 {
     struct timeval *tv1, *tv2, diff;
 
@@ -550,10 +625,10 @@ long atime_diff( marker_t first, marker_t second )
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
-int atime_ready( marker_t pm, int deltaT)
+u_long atime_ready( marker_t pm, u_long deltaT)
 {
   marker_t now;
-  long diff;
+  u_long diff;
   if (! pm) return 0;
 
   now = atime_newMarker();

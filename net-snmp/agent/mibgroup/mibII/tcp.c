@@ -5,10 +5,16 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
-#include "util_funcs.h"
 
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -27,7 +33,15 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -43,7 +57,9 @@
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -64,12 +80,7 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#if HAVE_STRING_H
-#include <string.h>
-#endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+#include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -94,7 +105,9 @@
 #undef TCP_NODELAY
 #undef TCP_MAXSEG
 #endif
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
 #if HAVE_NETINET_TCPIP_H
 #include <netinet/tcpip.h>
 #endif
@@ -115,13 +128,19 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+#include "util_funcs.h"
 #include "auto_nlist.h"
-#include "tools.h"
 
 #ifdef hpux
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* hpux */
+
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 #include "tcp.h"
 #include "tcpTable.h"
@@ -171,7 +190,11 @@ struct variable13 tcp_variables[] = {
     {TCPOUTSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {11} },
     {TCPRETRANSSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {12}},
 #endif
+#ifdef WIN32
+    {TCPCONNSTATE, ASN_INTEGER, RWRITE, var_tcpEntry, 3, {13, 1, 1}},
+#else
     {TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 1}},
+#endif
     {TCPCONNLOCALADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 2}},
     {TCPCONNLOCALPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 3}},
     {TCPCONNREMADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 4}},
@@ -219,6 +242,15 @@ void init_tcp(void)
 #ifdef solaris2
 #define TCP_STAT_STRUCTURE	mib2_tcp_t
 #define USES_SNMP_DESIGNED_TCPSTAT
+#endif
+
+#ifdef hpux11
+#define TCP_STAT_STRUCTURE	int
+#endif
+
+#ifdef WIN32
+#include <iphlpapi.h>
+#define TCP_STAT_STRUCTURE     MIB_TCPSTATS
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
@@ -282,10 +314,21 @@ var_tcp(struct variable *vp,
 	case TCPINERRS:
 #ifdef solaris2
 				return (u_char *) &ret_value;
+#elif defined(linux)
+				if (tcpstat.tcpInErrsValid)
+				    return (u_char *) &tcpstat.tcpInErrs;
+				return NULL;
 #else
 				return NULL;
 #endif
-	case TCPOUTRSTS:	return NULL;
+	case TCPOUTRSTS:
+#ifdef linux
+				if (tcpstat.tcpOutRstsValid)
+				    return (u_char *) &tcpstat.tcpOutRsts;
+				return NULL;
+#else
+				return NULL;
+#endif
 #endif
 
 #ifdef USES_TRADITIONAL_TCPSTAT
@@ -341,7 +384,22 @@ var_tcp(struct variable *vp,
 					    - tcpstat.tcps_closed;
 				return (u_char *) &long_return;
 #endif
-
+#ifdef WIN32
+       case TCPRTOALGORITHM:   return (u_char *) &tcpstat.dwRtoAlgorithm;
+       case TCPRTOMIN:         return (u_char *) &tcpstat.dwRtoMin;
+       case TCPRTOMAX:         return (u_char *) &tcpstat.dwRtoMax;
+       case TCPMAXCONN:        return (u_char *) &tcpstat.dwMaxConn;
+       case TCPACTIVEOPENS:    return (u_char *) &tcpstat.dwActiveOpens;
+       case TCPPASSIVEOPENS:   return (u_char *) &tcpstat.dwPassiveOpens;
+       case TCPATTEMPTFAILS:   return (u_char *) &tcpstat.dwAttemptFails;
+       case TCPESTABRESETS:    return (u_char *) &tcpstat.dwEstabResets;
+       case TCPCURRESTAB:      return (u_char *) &tcpstat.dwCurrEstab;
+       case TCPINSEGS:         return (u_char *) &tcpstat.dwInSegs;
+       case TCPOUTSEGS:        return (u_char *) &tcpstat.dwOutSegs;
+       case TCPRETRANSSEGS:    return (u_char *) &tcpstat.dwRetransSegs;
+       case TCPINERRS:   return (u_char *) &tcpstat.dwInErrs;
+       case TCPOUTRSTS:  return (u_char *) &tcpstat.dwOutRsts;
+#endif
 	default:
 		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
     }
@@ -370,6 +428,44 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 #ifdef solaris2
    static mib2_ip_t ipstat;
 #endif
+#ifdef hpux11
+    int fd;
+    struct nmparms p;
+    unsigned int ulen;
+    int ret;
+
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+	return (-1);	/* error */
+
+    switch (magic) {
+	case TCPRTOALGORITHM:	p.objid = ID_tcpRtoAlgorithm;		break;
+	case TCPRTOMIN:		p.objid = ID_tcpRtoMin;			break;
+	case TCPRTOMAX:		p.objid = ID_tcpRtoMax;			break;
+	case TCPMAXCONN:	p.objid = ID_tcpMaxConn;		break;
+	case TCPACTIVEOPENS:	p.objid = ID_tcpActiveOpens;		break;
+	case TCPPASSIVEOPENS:	p.objid = ID_tcpPassiveOpens;		break;
+	case TCPATTEMPTFAILS:	p.objid = ID_tcpAttemptFails;		break;
+	case TCPESTABRESETS:	p.objid = ID_tcpEstabResets;		break;
+	case TCPCURRESTAB:	p.objid = ID_tcpCurrEstab;		break;
+	case TCPINSEGS:		p.objid = ID_tcpInSegs;			break;
+	case TCPOUTSEGS:	p.objid = ID_tcpOutSegs;		break;
+	case TCPRETRANSSEGS:	p.objid = ID_tcpRetransSegs;		break;
+	case TCPINERRS:		p.objid = ID_tcpInErrs;			break;
+	case TCPOUTRSTS:	p.objid = ID_tcpOutRsts;		break;
+	default:
+	    *tcpstat = 0;
+	    close_mib(fd);
+	    return (0);
+    }
+
+    p.buffer = (void *)tcpstat;
+    ulen = sizeof(TCP_STAT_STRUCTURE);
+    p.len = &ulen;
+    ret_value = get_mib_info(fd, &p);
+    close_mib(fd);
+
+    return (ret_value);	/* 0: ok, < 0: error */
+#else	/* hpux11 */
 
     if (  tcp_stats_cache_marker &&
 	(!atime_ready( tcp_stats_cache_marker, TCP_STATS_CACHE_TIMEOUT*1000 )))
@@ -400,6 +496,10 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 					GET_FIRST, &Get_everything, NULL);
 #endif
 
+#ifdef WIN32
+    ret_value = GetTcpStatistics(tcpstat);
+#endif
+
 #ifdef HAVE_SYS_TCPIPSTATS_H
     ret_value = sysmp (MP_SAGET, MPSA_TCPIPSTATS, tcpstat, sizeof *tcpstat);
 #endif
@@ -418,4 +518,5 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 	tcp_stats_cache_marker = NULL;
     }
     return ret_value;
+#endif	/* hpux11 */
 }

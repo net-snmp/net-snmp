@@ -746,7 +746,7 @@ char *getpass( const char * prompt )
 	int ch, lim;
 
 	_cputs(prompt);
-	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf); )
+	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf)-1; )
 	{
 		ch = _getch();  /* look ma, no echo ! */
 		if (ch == '\r' || ch == '\n' || ch == '\b')

@@ -331,7 +331,41 @@ in_addr_t get_myaddr(void)
 
 long get_uptime (void)
 {
-    return (0); /* not implemented */
+  long             return_value = 0;
+  DWORD            buffersize   = (sizeof(PERF_DATA_BLOCK)+
+                                  sizeof(PERF_OBJECT_TYPE)),
+                   type         = REG_EXPAND_SZ;
+  PPERF_DATA_BLOCK perfdata     = NULL;
+
+  /* min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE */ 
+  perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
+
+
+  memset(perfdata,0,buffersize);
+
+  RegQueryValueEx( HKEY_PERFORMANCE_DATA,
+                   "Global",
+                   NULL,
+                   &type,
+                   (LPBYTE) perfdata,
+                   &buffersize );
+
+  /* we can not rely on the return value since there is always more so
+     we check the signature */
+
+  if (wcsncmp(perfdata->Signature,L"PERF",4)==0)
+  {
+     /* signature ok, and all we need is in the in the PERF_DATA_BLOCK */
+     return_value = (long)((perfdata->PerfTime100nSec.QuadPart / 
+                           (LONGLONG)100000));
+  }
+  else
+    return_value = GetTickCount()/10;
+
+  RegCloseKey(HKEY_PERFORMANCE_DATA);
+  free(perfdata);
+
+  return return_value;
 }
 
 char *
@@ -593,11 +627,11 @@ strdup(const char *src)
 }
 #endif	/* HAVE_STRDUP */
 
-#ifndef HAVE_SETENV
-int setenv(const char *name,
-	   const char *value,
-	   int overwrite)
+int snmp_setenv(const char *name,
+		const char *value,
+		int overwrite)
 {
+#ifndef HAVE_SETENV
     char *cp;
     int ret;
 
@@ -609,11 +643,13 @@ int setenv(const char *name,
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
 #ifdef WIN32
-	free(cp);
-#endif
+    free(cp);
+#endif /* WIN32 */
     return ret;
-}
+#else /* HAVE_SETENV */
+    return setenv(name, value, overwrite);
 #endif /* HAVE_SETENV */
+}
 
 int
 calculate_time_diff(struct timeval *now, struct timeval *then)

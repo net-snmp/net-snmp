@@ -82,6 +82,10 @@ struct tcp_mib
  	unsigned long	tcpInSegs;
  	unsigned long	tcpOutSegs;
  	unsigned long	tcpRetransSegs;
+	unsigned long	tcpInErrs;
+	unsigned long	tcpOutRsts;
+	short		tcpInErrsValid;
+	short		tcpOutRstsValid;
 };
 
 

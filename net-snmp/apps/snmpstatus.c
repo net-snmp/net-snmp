@@ -112,6 +112,9 @@ static void optProc(int argc, char *const *argv, int opt)
                     case 'f':
                         ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
                         break;
+		    default:
+		        fprintf(stderr, "Unknown flag passed to -C: %c\n", optarg[-1]);
+			exit(1);
                 }
             }
             break;

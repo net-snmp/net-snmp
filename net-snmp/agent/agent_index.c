@@ -35,6 +35,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -498,7 +501,7 @@ void dump_idx_registry( void )
     if ( snmp_index_head )
 	printf("\nIndex Allocations:\n");
     for( idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid) {
-	sprint_objid(start_oid, idxptr->varbind->name, idxptr->varbind->name_length);
+	snprint_objid(start_oid, sizeof(start_oid), idxptr->varbind->name, idxptr->varbind->name_length);
 	printf("%s indexes:\n", start_oid);
         for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
 	    switch( idxptr2->varbind->type ) {
@@ -515,7 +518,7 @@ void dump_idx_registry( void )
 			( idxptr2->session ? ' ' : ')' ));
 		    break;
 		case ASN_OBJECT_ID:
-		    sprint_objid(end_oid, idxptr2->varbind->val.objid,
+		    snprint_objid(end_oid, sizeof(end_oid), idxptr2->varbind->val.objid,
 				idxptr2->varbind->val_len/sizeof(oid));
 		    printf("    %c %s %c\n",
 			( idxptr2->session ? ' ' : '(' ),

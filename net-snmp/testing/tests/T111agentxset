@@ -33,7 +33,7 @@ if test "$snmp_last_test_result" = 1; then
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
   AGENT_FLAGS="$ORIG_AGENT_FLAGS -X -I system_mib"
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/bogus.conf"
-  echo "syscontact testcontact" >> $SNMP_CONFIG_FILE
+  echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
   STARTAGENT
 
   # test to see that the agent now supports the system mib

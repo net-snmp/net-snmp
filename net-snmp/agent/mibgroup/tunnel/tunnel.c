@@ -59,20 +59,20 @@
 #include <linux/if_tunnel.h>
 #include <linux/if_arp.h>
 
-#include "ucd-snmp/ucd-snmp-config.h"
-#include "ucd-snmp/snmp_alarm.h"
-#include "ucd-snmp/callback.h"
-#include "ucd-snmp/default_store.h"
-#include "ucd-snmp/asn1.h"
-#include "ucd-snmp/snmp.h"
-#include "ucd-snmp/snmp_debug.h"
-#include "ucd-snmp/snmp_api.h"
-#include "ucd-snmp/snmp_impl.h"
-#include "ucd-snmp/snmp_vars.h"
-#include "ucd-snmp/var_struct.h"
-#include "ucd-snmp/agent_read_config.h"
-#include "ucd-snmp/tools.h"
-#include "ucd-snmp/util_funcs.h"
+#include "config.h"
+#include "snmp_alarm.h"
+#include "callback.h"
+#include "default_store.h"
+#include "asn1.h"
+#include "snmp.h"
+#include "snmp_debug.h"
+#include "snmp_api.h"
+#include "snmp_impl.h"
+#include "snmp_vars.h"
+#include "var_struct.h"
+#include "agent_read_config.h"
+#include "tools.h"
+#include "util_funcs.h"
 
 #include "tunnel.h"
 
@@ -317,6 +317,9 @@ static struct tunnel *updateTunnel(struct tunnel *tunnel)
     /* NOTE: getTunnelParm() may adjust the passed ifname. */
     parm = getTunnelParm(tunnel->ifname);
     if (!parm) {
+	DEBUGMSGTL(("tunnel",
+		    "updateTunnel(): getTunnelParm(\"%s\") returned NULL\n",
+		    tunnel->ifname));
 	tunnel->active = 0;
 	return NULL;
     }
@@ -381,17 +384,28 @@ static void updateTunnels(void)
 	type = getType(max_index);
 	if (type == 131) {
 	    tunnel = (struct tunnel *)malloc(sizeof(struct tunnel));
-	    if (!tunnel) break;
+	    if (!tunnel) continue;
 
 	    tunnel->ifindex = max_index;
 	    tunnel->id = 1;
 	    
 	    ifname = getName(max_index);
-	    if (!ifname) break;
-	    tunnel->ifname = strdup(ifname);
-	    if (!tunnel->ifname) break;
+	    if (!ifname) {
+		free(tunnel);
+		continue;
+	    }
 
-	    if (!updateTunnel(tunnel)) break;
+	    tunnel->ifname = strdup(ifname);
+	    if (!tunnel->ifname) {
+		free(tunnel);
+		continue;
+	    }
+
+	    if (!updateTunnel(tunnel)) {
+		free(tunnel->ifname);
+		free(tunnel);
+		continue;
+	    }
 
 	    if (last_tunnel) last_tunnel->next = tunnel;
 	    if (!tunnels) tunnels = last_tunnel = tunnel;
@@ -401,7 +415,6 @@ static void updateTunnels(void)
 	    DEBUGMSG(("tunnel",
 		      "updateTunnels(): added %s (index=%d state=%d)\n",
 		      tunnel->ifname, tunnel->ifindex, tunnel->active));
-	    
 	}
 	if (type == 0) break;
     }
