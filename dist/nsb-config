@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# $Id$
+# Author: Robert Story <rstory@freesnmp.com>
+#
+########################################################################
+########################################################################
+
+usage()
+{
+   echo "Usage: $0  [-d|-x] [-s SRCD]"
+   echo ""
+   echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
+   echo ""
+   echo " -x : configure extra features for pre-release testing"
+   echo " -d : configure for binary distribution"
+   exit 1
+}
+
+#set -x
+
+
+if [ -f nsb-functions ];then
+   source nsb-functions
+elif [ -f $HOME/bin/nsb-functions ]; then
+   source $HOME/bin/nsb-functions
+else
+   echo "Cannot find nsb-functions"
+   exit 1
+fi
+
+
+########################################################################
+########################################################################
+NSB_CONFIG_ALL=2
+
+#      x)  x=$OPTARG ;;
+while getopts ds:x opt
+do
+    case "$opt" in
+      d)  NSB_CONFIG_ALL=0;;
+      s)  SRCD=$OPTARG ;;
+      x)  NSB_CONFIG_ALL=1;;
+      \?)# unknown flag
+        usage;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if [ $NSB_CONFIG_ALL -eq 2 ]; then
+   echo "You must specify -d or -x"
+   usage
+fi
+
+if [ -z "$SRCD" ]; then
+   SRCD=$HOME/src/net-snmp-$VERSION
+fi
+
+
+########################################################################
+########################################################################
+if [ $NSB_CONFIG_ALL -eq 0 ];then
+    nsb-config-dist $SRCD
+else
+    nsb-config-all $SRCD
+fi
