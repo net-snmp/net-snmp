@@ -675,6 +675,7 @@ eventSendTrap(struct eventEntry *event,
     struct variable_list *vp;
     struct snmp_pdu *pdu;
     struct partyEntry *pp;
+    struct sockaddr_in *pduIp;
     u_long uptime;
 
     for (np = eventNotifyTab; np; np = np->next) {
@@ -747,10 +748,11 @@ eventSendTrap(struct eventEntry *event,
 	}
 
 	pdu = snmp_pdu_create(SNMP_MSG_INFORM);
-	memcpy(&pdu->address.sin_addr.s_addr, pp->partyTAddress, 4);
-	memcpy(&pdu->address.sin_port, pp->partyTAddress + 4, 2);
-	pdu->address.sin_port = 162;
-	pdu->address.sin_family = AF_INET;
+	pduIp = (struct sockaddr_in *)&(pdu->address);
+	memcpy(&pduIp->sin_addr.s_addr, pp->partyTAddress, 4);
+	memcpy(&pduIp->sin_port, pp->partyTAddress + 4, 2);
+	pduIp->sin_port = 162;		/* Eh? */
+	pduIp->sin_family = AF_INET;
 	pdu->variables = vp;
 	(void)snmp_send(np->ss, pdu);
     }

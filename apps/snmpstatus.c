@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
+    struct sockaddr_in *respIp;
     struct variable_list *vars;
     char *sysdescr = NULL;
     u_long uptime = 0;
@@ -198,7 +199,8 @@ retry:
       exit(2);
     }
 
-    printf("[%s]=>[%s] Up: %s\n", inet_ntoa(response->address.sin_addr),
+    respIp = (struct sockaddr_in *)&(response->address);
+    printf("[%s]=>[%s] Up: %s\n", inet_ntoa(respIp->sin_addr),
             sysdescr, uptime_string(uptime, buf));
 
     if (response)
