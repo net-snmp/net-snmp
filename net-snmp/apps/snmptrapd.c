@@ -442,19 +442,16 @@ main(argc, argv)
 
     sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
     if (read_party_database(ctmp) != 0){
-	fprintf(stderr, "Couldn't read party database from %s\n",ctmp);
-	exit(1);
+	fprintf(stderr, "Warning: Couldn't read v2party database from %s\n",ctmp);
     }
     sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
     if (read_context_database(ctmp) != 0){
-	fprintf(stderr, "Couldn't read context database from %s\n",ctmp);
-	exit(1);
+	fprintf(stderr, "Warning: Couldn't read v2party's context database from %s\n",ctmp);
     }
     sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
     if (read_acl_database(ctmp) != 0){
 	fprintf(stderr,
-		"Couldn't read access control database from %s\n",ctmp);
-	exit(1);
+		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);
     }
 
     memset(&session, 0, sizeof(struct snmp_session));

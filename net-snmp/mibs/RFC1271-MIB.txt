@@ -2,7 +2,7 @@ RFC1271-MIB DEFINITIONS ::= BEGIN
 
               IMPORTS
                   Counter                              FROM RFC1155-SMI
-                  DisplayString                        FROM RFC1158-MIB
+                  DisplayString                        FROM RFC1213-MIB
                   mib-2                                FROM RFC1213-MIB
                   OBJECT-TYPE                          FROM RFC-1212;
 

@@ -129,7 +129,8 @@ extern void snmp_set_detail __P((char *));
 #define SNMPERR_BAD_PARTY	(-21)
 #define SNMPERR_ABORT		(-22)
 #define SNMPERR_UNKNOWN_PDU	(-23)
-#define SNMPERR_MAX		(-23)
+#define SNMPERR_TIMEOUT 	(-24)
+#define SNMPERR_MAX		(-24)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
@@ -295,3 +296,4 @@ void snmp_set_dump_packet __P((int));
 int snmp_get_dump_packet __P((void));
 void snmp_set_quick_print __P((int));
 int snmp_get_quick_print __P((void));
+int snmp_get_errno __P((void));

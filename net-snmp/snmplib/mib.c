@@ -91,8 +91,6 @@ static void sprint_counter64 __P((char *, struct variable_list *, struct enum_li
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
   
-static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
-static struct tree *get_tree __P((oid *, int, struct tree *));
 static char *get_description __P((oid *, int));
 
 static int quick_print = 0;
@@ -205,6 +203,8 @@ sprint_octet_string(buf, var, enums, hint, units)
 {
     int hex, x;
     u_char *cp;
+    char *saved_hint = hint;
+    char *saved_buf = buf;
 
     if (var->type != ASN_OCTET_STR){
 	sprintf(buf, "Wrong Type (should be OCTET STRING): ");
@@ -216,7 +216,7 @@ sprint_octet_string(buf, var, enums, hint, units)
     if (hint) {
 	int repeat, width = 1;
 	long value;
-	char code = 'd', separ = 0, term = 0;
+	char code = 'd', separ = 0, term = 0, ch;
 	u_char *ecp;
 
 	*buf = 0;
@@ -233,12 +233,15 @@ sprint_octet_string(buf, var, enums, hint, units)
 		while ('0' <= *hint && *hint <= '9')
 		    width = width * 10 + *hint++ - '0';
 		code = *hint++;
-		if (*hint && *hint != '*' && (*hint < '0' || *hint > '9'))
+		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
+                    && (width != 0 || ch != 'x' && ch != 'd' && ch != 'o'))
 		    separ = *hint++;
 		else separ = 0;
-		if (*hint && *hint != '*' && (*hint < '0' || *hint > '9'))
+		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
+                    && (width != 0 || ch != 'x' && ch != 'd' && ch != 'o'))
 		    term = *hint++;
 		else term = 0;
+		if (width == 0) width = 1;
 	    }
 	    while (repeat && cp < ecp) {
                 value = 0;
@@ -255,6 +258,12 @@ sprint_octet_string(buf, var, enums, hint, units)
                     for (x = 0; x < width && cp < ecp; x++)
 			*buf++ = *cp++;
 		    *buf = 0;
+		    break;
+		default:
+		    sprintf(saved_buf, "(Bad hint ignored: %s) ", saved_hint);
+		    sprint_octet_string(saved_buf+strlen(saved_buf),
+					var, enums, NULL, NULL);
+		    return;
 		}
 		buf += strlen (buf);
 		if (cp < ecp && separ) *buf++ = separ;
@@ -778,6 +787,11 @@ extern void    init_mib_internals __P((void));	/* from parse.c */
 extern int     which_module __P((char *));	/* from parse.c */
 extern struct tree *find_tree_node __P((char *, int));	/* from parse.c */
 
+struct tree *get_tree_head __P((void))
+{
+   return(tree_head);
+}
+
 void
 init_mib __P((void))
 {
@@ -1251,7 +1265,7 @@ fprint_value(f, objid, objidlen, variable)
     fprintf(f, "%s\n", tempbuf);
 }
 
-static struct tree *
+struct tree *
 get_symbol(objid, objidlen, subtree, buf)
     oid	    *objid;
     int	    objidlen;
@@ -1326,7 +1340,7 @@ lc_cmp(s1, s2)
 /*
  * Clone of get_symbol that doesn't take a buffer argument
  */
-static struct tree *
+struct tree *
 get_tree(objid, objidlen, subtree)
     oid     *objid;
     int     objidlen;
