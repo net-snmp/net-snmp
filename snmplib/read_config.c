@@ -701,7 +701,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       if (cptr)
         memcpy(cptr, buf, (*len+1));
     } else {
-      readfrom = copy_word(readfrom, *str);
+      readfrom = copy_word(readfrom, (char *)*str);
     }
   }
 
