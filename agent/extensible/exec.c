@@ -226,7 +226,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   oid newname[30], name[30];
   static struct subtree mysubtree[1];
 
-  for(i=0; i<= numrelocs; i++) {
+  for(i=1; i<= numrelocs; i++) {
     exten = get_exten_instance(relocs,i,numrelocs);
     if (exten->miblen != 0){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
