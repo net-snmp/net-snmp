@@ -87,7 +87,7 @@ GRONIK
 #------------------------------------ -o-
 #
 SKIPIFNOT() {
-	grep "define $1" $SNMP_UPDIR/config.h > /dev/null
+	grep "define $1" $SNMP_UPDIR/config.h $SNMP_UPDIR/mib_module_config.h > /dev/null
 	if [ $? != 0 ]; then
 	    REMOVETESTDATA
 	    echo "SKIPPED"
