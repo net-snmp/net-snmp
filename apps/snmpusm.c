@@ -137,7 +137,7 @@ int
 main(int argc, char *argv[])
 {
     struct snmp_session   session, *ss;
-    struct snmp_pdu      *pdu, *response;
+    struct snmp_pdu      *pdu=NULL, *response=NULL;
 #ifdef notused
     struct variable_list *vars;
 #endif
@@ -188,7 +188,7 @@ main(int argc, char *argv[])
     /*   Note:  this wil obtain the engineID needed below */
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpusm");
+      snmp_sess_perror("snmpusm", ss);
       exit(1);
     }
 
@@ -440,7 +440,7 @@ main(int argc, char *argv[])
       SOCK_CLEANUP;
       exit(1);
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmpset");
+      snmp_sess_perror("snmpset", ss);
       snmp_close(ss);
       SOCK_CLEANUP;
       exit(1);

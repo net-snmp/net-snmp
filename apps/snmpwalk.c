@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpwalk");
+      snmp_sess_perror("snmpwalk", ss);
       SOCK_CLEANUP;
       exit(1);
     }
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
         running = 0;
       } else {    /* status == STAT_ERROR */
-        snmp_perror("snmpwalk");
+        snmp_sess_perror("snmpwalk", ss);
         running = 0;
       }
       if (response)

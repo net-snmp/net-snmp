@@ -406,6 +406,15 @@ snmp_sess_error(void *sessp,
 	snmp_error(slp->session, p_errno, p_snmp_errno, p_str);
 }
 
+/* snmp_sess_perror(): print a error stored in a session pointer */ 
+void
+snmp_sess_perror(const char *prog_string, struct snmp_session *ss) {
+  char *err;
+  snmp_error(ss, NULL, NULL, &err);
+  snmp_log(LOG_ERR, "%s: %s\n", prog_string, err);
+  free(err);
+}
+
 
 /*
  * Gets initial request ID for all transactions,
@@ -2415,6 +2424,7 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
       }
     }
   }
+  DEBUGMSGTL(("report", "Report type: %d\n", rpt_type));
   return rpt_type;
 }
 
