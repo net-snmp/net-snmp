@@ -710,6 +710,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		break;
 	}
 	if (!strchr (ifrp->ifr_name, ':')) {
+	    unsigned long l_tmp;
 	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
 		ret = -1;
 		goto Return;
@@ -732,6 +733,12 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		ret = -1;
 		goto Return;
 	    }
+	    if (getKstat(ifrp->ifr_name, "brdcstrcv", &ifp->ifInNUcastPkts) == 0
+		 && getKstat(ifrp->ifr_name, "multircv", &l_tmp) == 0)
+		    ifp->ifInNUcastPkts += l_tmp;
+	    if (getKstat(ifrp->ifr_name, "brdcstxmt", &ifp->ifOutNUcastPkts) == 0
+		 && getKstat(ifrp->ifr_name, "multixmt", &l_tmp) == 0)
+		    ifp->ifOutNUcastPkts += l_tmp;
 	}
 	/*
 	 * An attempt to determine the physical address of the interface.
