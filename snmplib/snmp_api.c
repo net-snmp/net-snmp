@@ -322,14 +322,16 @@ static int  snmp_detail_f  = 0;
 /*
  * Prototypes.
  */
-int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
+//int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
+int snmp_build	(u_char **pkt, size_t *pkt_len, size_t *offset,
+		 struct snmp_session *pss, struct snmp_pdu *pdu);
 static int snmp_parse (void *, struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
 
 static void snmpv3_calc_msg_flags (int, int, u_char *);
 static int snmpv3_verify_msg (struct request_list *, struct snmp_pdu *);
 static int snmpv3_build_probe_pdu (struct snmp_pdu **);
-static int snmpv3_build (struct snmp_session *, struct snmp_pdu *, 
-			     u_char *, size_t *);
+static int snmpv3_build	(u_char **pkt, size_t *pkt_len, size_t *offset,
+			 struct snmp_session *session, struct snmp_pdu *pdu);
 static int snmp_parse_version (u_char *, size_t);
 static int snmp_resend_request (struct session_list *slp, 
 				struct request_list *rp, 
@@ -1678,10 +1680,10 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
 static int
-snmpv3_build(struct snmp_session	*session,
-             struct snmp_pdu	        *pdu,
-             u_char	        	*packet,
-             size_t			*out_length)
+snmpv3_build(u_char **pkt, size_t *pkt_len, size_t *offset,
+	     struct snmp_session *session, struct snmp_pdu *pdu)
+     //             u_char	        	*packet,
+     //             size_t			*out_length)
 {
   int ret;
 
@@ -1791,10 +1793,11 @@ snmpv3_build(struct snmp_session	*session,
   DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef USE_REVERSE_ASNENCODING
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
-      ret = snmpv3_packet_rbuild(session, pdu, packet, out_length, NULL, 0);
+    ret = snmpv3_packet_realloc_rbuild(pkt, pkt_len, offset,
+				       session, pdu, NULL, 0);
   } else {
 #endif
-      ret = snmpv3_packet_build(session, pdu, packet, out_length, NULL, 0);
+    ret = snmpv3_packet_build(session, pdu, *pkt, pkt_len, NULL, 0);
 #ifdef USE_REVERSE_ASNENCODING
   }
 #endif
@@ -1972,6 +1975,75 @@ snmpv3_header_rbuild(struct snmp_pdu *pdu, u_char *packet,
 
     return cp;
 }  /* end snmpv3_header_build() */
+
+static int
+snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
+			     struct snmp_pdu *pdu)
+{
+  size_t start_offset = *offset;
+  u_char msg_flags;
+  long max_size, sec_model;
+  int rc = 0;
+
+  /*  msgSecurityModel.  */
+  sec_model = pdu->securityModel;
+  DEBUGDUMPHEADER("send", "msgSecurityModel");
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &sec_model, sizeof(sec_model));
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  msgFlags.  */
+  snmpv3_calc_msg_flags(pdu->securityLevel, pdu->command, &msg_flags);
+  DEBUGDUMPHEADER("send", "msgFlags");
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       &msg_flags, sizeof(msg_flags));
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  msgMaxSize.  */
+  max_size = SNMP_MAX_MSG_SIZE;
+  DEBUGDUMPHEADER("send", "msgMaxSize");
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &max_size, sizeof(max_size));
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  msgID.  */
+  DEBUGDUMPHEADER("send", "msgID");
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &pdu->msgid, sizeof(pdu->msgid));
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  Global data sequence.  */
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   *offset - start_offset);
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  Store the version field - msgVersion.  */
+  DEBUGDUMPHEADER("send", "SNMP Version Number");
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 (long *)&pdu->version, sizeof(pdu->version));
+  DEBUGINDENTLESS();
+  return rc;
+}  /* end snmpv3_header_realloc_rbuild() */
 #endif /* USE_REVERSE_ASNENCODING */
 
 static u_char *
@@ -2044,7 +2116,42 @@ snmpv3_scopedPDU_header_rbuild(struct snmp_pdu *pdu,
 
   return pb;
 
-}  /* end snmpv3_scopedPDU_header_build() */
+}  /* end snmpv3_scopedPDU_header_rbuild() */
+
+static int
+snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
+				       size_t *offset, struct snmp_pdu *pdu)
+{
+  size_t start_offset = *offset;
+  //  u_char *startp = packet, *pb = packet;
+  int rc = 0;
+
+  /*  contextName.  */
+  DEBUGDUMPHEADER("send", "contextName");
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       (u_char *)pdu->contextName, pdu->contextNameLen);
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  /*  contextEngineID.  */
+  DEBUGDUMPHEADER("send", "contextEngineID");
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       pdu->contextEngineID, pdu->contextEngineIDLen);
+  DEBUGINDENTLESS();
+  if (rc == 0) {
+    return 0;
+  }
+
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   *offset - start_offset);
+
+  return rc;
+}  /* end snmpv3_scopedPDU_header_realloc_rbuild() */
 #endif /* USE_REVERSE_ASNENCODING */
 
 #ifdef USE_REVERSE_ASNENCODING
@@ -2146,6 +2253,103 @@ snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
     return result;
 
 }  /* end snmpv3_packet_rbuild() */
+
+
+/* returns 0 if success, -1 if fail, not 0 if SM build failure */
+int
+snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
+			     struct snmp_session *session,
+			     struct snmp_pdu *pdu,
+			     u_char *pdu_data, size_t pdu_data_len)
+{
+  u_char *scoped_pdu, *hdrbuf = NULL, *hdr = NULL;
+  size_t hdrbuf_len = SNMP_MAX_MSG_V3_HDRS, hdr_offset = 0, spdu_offset = 0;
+  struct snmp_secmod_def *sptr = NULL;
+  int rc = 0;
+
+  /*  Build a scopedPDU structure into the packet buffer.  */
+  DEBUGPRINTPDUTYPE("send", pdu->command);
+  if (pdu_data) {
+    while ((*pkt_len - *offset) < pdu_data_len) {
+      if (!asn_realloc(pkt, pkt_len)) {
+	return -1;
+      }
+    }
+
+    *offset += pdu_data_len;
+    memcpy(*pkt + *pkt_len - *offset, pdu_data, pdu_data_len);
+  } else {
+    rc = snmp_pdu_realloc_rbuild(pkt, pkt_len, offset, pdu);
+    if (rc == 0) {
+      return -1;
+    }
+  }
+
+  DEBUGDUMPSECTION("send", "ScopedPdu");
+  rc = snmpv3_scopedPDU_header_realloc_rbuild(pkt, pkt_len, offset, pdu);
+  if (rc == 0) {
+    return -1;
+  }
+  spdu_offset = *offset;
+  DEBUGINDENTADD(-4); /*  Return from Scoped PDU.  */
+
+  if ((hdrbuf = (u_char *)malloc(hdrbuf_len)) == NULL) {
+    return -1;
+  }
+
+  rc = snmpv3_header_realloc_rbuild(&hdrbuf, &hdrbuf_len, &hdr_offset, pdu);
+  if (rc == 0) {
+    free(hdrbuf);
+    return -1;
+  }
+  hdr = hdrbuf + hdrbuf_len - hdr_offset;
+  scoped_pdu = *pkt + *pkt_len - spdu_offset;
+    
+  /*  Call the security module to possibly encrypt and authenticate the
+      message---the entire message to transmitted on the wire is returned.  */
+
+  sptr = find_sec_mod(pdu->securityModel);
+  DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
+  if (sptr && sptr->encode_reverse) {
+    struct snmp_secmod_outgoing_params parms;
+
+    parms.msgProcModel = pdu->msgParseModel;
+    parms.globalData = hdr;
+    parms.globalDataLen = hdr_offset;
+    parms.maxMsgSize = SNMP_MAX_MSG_SIZE;
+    parms.secModel = pdu->securityModel;
+    parms.secEngineID = pdu->securityEngineID;
+    parms.secEngineIDLen = pdu->securityEngineIDLen;
+    parms.secName = pdu->securityName;
+    parms.secNameLen = pdu->securityNameLen;
+    parms.secLevel = pdu->securityLevel;
+    parms.scopedPdu = scoped_pdu;
+    parms.scopedPduLen = spdu_offset;
+    parms.secStateRef = pdu->securityStateRef;
+    parms.wholeMsg = pkt;
+    parms.wholeMsgLen = pkt_len;
+    parms.wholeMsgOffset = offset;
+    parms.session = session;
+    parms.pdu = pdu;
+
+    rc = (*sptr->encode_reverse)(&parms);
+  } else {
+    if (!sptr) {
+      snmp_log(LOG_ERR,
+	       "no such security service available: %d\n",
+	       pdu->securityModel);
+    } else if (!sptr->encode_reverse) {
+      snmp_log(LOG_ERR,
+	       "security service %d doesn't support reverse encoding.\n",
+	       pdu->securityModel);
+    }
+    rc = -1;
+  }
+
+  DEBUGINDENTLESS();
+  free(hdrbuf);
+  return rc;
+}  /* end snmpv3_packet_realloc_rbuild() */
 #endif /* USE_REVERSE_ASNENCODING */
 
 /* returns 0 if success, -1 if fail, not 0 if SM build failure */
@@ -2259,23 +2463,21 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
  */
 
 static int
-_snmp_build(struct snmp_session *session,
-             struct snmp_pdu *pdu,
-             u_char *packet,
-             size_t *out_length)
+_snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
+	    struct snmp_session *session, struct snmp_pdu *pdu)
 {
     u_char *h0, *h0e = 0, *h1;
-    u_char  *cp;
-    size_t length;
+    u_char *cp;
+    size_t length, start_offset = *offset;
     long version;
+    int rc = 0;
 
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
     if (pdu->version == SNMP_VERSION_3) {
-        return snmpv3_build(session, pdu, packet, out_length);
+      return snmpv3_build(pkt, pkt_len, offset, session, pdu);
     }
-    
 
     switch (pdu->command) {
 	case SNMP_MSG_RESPONSE:
@@ -2355,13 +2557,13 @@ _snmp_build(struct snmp_session *session,
     }
 
     /* save length */
-    length = *out_length;
+    length = *pkt_len;
 
     /* setup administrative fields based on version */
     /* build the message wrapper and all the administrative fields
        upto the PDU sequence
        (note that actual length of message will be inserted later) */
-    h0 = packet;
+    h0 = *pkt;
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
@@ -2408,44 +2610,46 @@ _snmp_build(struct snmp_session *session,
 #ifdef USE_REVERSE_ASNENCODING
         if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
             DEBUGPRINTPDUTYPE("send", pdu->command);
-            cp = snmp_pdu_rbuild(pdu, packet, out_length);
-            if (cp == NULL)
-                return -1;
+            rc = snmp_pdu_realloc_rbuild(pkt, pkt_len, offset, pdu);
+            if (rc == 0) {
+	      return -1;
+	    }
 
             DEBUGDUMPHEADER("send", "Community String");
-            cp = asn_rbuild_string(cp, out_length,
-                                   (u_char)
-                                   (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-                                   pdu->community, pdu->community_len);
+            rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       pdu->community, pdu->community_len);
             DEBUGINDENTLESS();
-            if (cp == NULL)
-                return -1;
+            if (rc == 0) {
+	      return -1;
+	    }
 
         
-        /* store the version field */
+	    /*  Store the version field.  */
             DEBUGDUMPHEADER("send", "SNMP Version Number");
 
             version = pdu->version;
-            cp = asn_rbuild_int(cp, out_length,
-                                (u_char)
-                                (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                                (long *) &version, sizeof(version));
+            rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 (long *)&version, sizeof(version));
             DEBUGINDENTLESS();
-            if (cp == NULL)
-                return -1;
+            if (rc == 0) {
+	      return -1;
+	    }
 
-        /* build the final sequence */
-            if (pdu->version == SNMP_VERSION_1)
-                DEBUGDUMPSECTION("send", "SNMPv1 Message");
-            else
-                DEBUGDUMPSECTION("send", "SNMPv2c Message");
-            cp = asn_rbuild_sequence(cp, out_length,
-                                     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                                     packet - cp);
+	    /*  Build the final sequence.  */
+            if (pdu->version == SNMP_VERSION_1) {
+	      DEBUGDUMPSECTION("send", "SNMPv1 Message");
+            } else {
+	      DEBUGDUMPSECTION("send", "SNMPv2c Message");
+	    }
+            rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				      (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				      *offset - start_offset);
 
-            if (cp == NULL)
-                return -1;
-
+            if (rc == 0) {
+	      return -1;
+	    }
             return 0;
         } else {
 
@@ -2453,7 +2657,7 @@ _snmp_build(struct snmp_session *session,
             /* Save current location and build SEQUENCE tag and length
                placeholder for SNMP message sequence
                (actual length will be inserted later) */
-            cp = asn_build_sequence(packet, out_length,
+            cp = asn_build_sequence(*pkt, pkt_len,
                                     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
                                     0);
             if (cp == NULL)
@@ -2469,7 +2673,7 @@ _snmp_build(struct snmp_session *session,
             DEBUGDUMPHEADER("send", "SNMP Version Number");
 
             version = pdu->version;
-            cp = asn_build_int(cp, out_length,
+            cp = asn_build_int(*pkt, pkt_len,
                                (u_char)
                                (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
                                (long *) &version, sizeof(version));
@@ -2479,7 +2683,7 @@ _snmp_build(struct snmp_session *session,
 
             /* store the community string */
             DEBUGDUMPHEADER("send", "Community String");
-            cp = asn_build_string(cp, out_length,
+            cp = asn_build_string(*pkt, pkt_len,
                                   (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                             ASN_OCTET_STR),
                                   pdu->community, pdu->community_len);
@@ -2503,7 +2707,7 @@ _snmp_build(struct snmp_session *session,
 
     h1 = cp;
     DEBUGPRINTPDUTYPE("send", pdu->command);
-    cp = snmp_pdu_build(pdu, cp, out_length);
+    cp = snmp_pdu_build(pdu, cp, pkt_len);
     DEBUGINDENTADD(-4); /* return from entire v1/v2c message */
     if (cp == NULL)
 	return -1;
@@ -2512,7 +2716,7 @@ _snmp_build(struct snmp_session *session,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
-        asn_build_sequence(packet, &length,
+        asn_build_sequence(*pkt, &length,
 		       (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
                        cp - h0e);
         break;
@@ -2525,24 +2729,24 @@ _snmp_build(struct snmp_session *session,
 	session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	return -1;
     }
-    *out_length = cp - packet;
+    *pkt_len = cp - *pkt;
     return 0;
 }
+
 int
-snmp_build(struct snmp_session *pss,
-	   struct snmp_pdu *pdu,
-	   u_char *packet,
-	   size_t *out_length)
+snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
+	   struct snmp_session *pss, struct snmp_pdu *pdu)
 {
-    int rc;
-    rc = _snmp_build(pss,pdu,packet,out_length);
-    if (rc) {
-        if ( !pss->s_snmp_errno)
-            pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
-        SET_SNMP_ERROR(pss->s_snmp_errno);
-        rc = -1;
+  int rc;
+  rc = _snmp_build(pkt, pkt_len, offset, pss, pdu);
+  if (rc) {
+    if (!pss->s_snmp_errno) {
+      pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
     }
-    return rc;
+    SET_SNMP_ERROR(pss->s_snmp_errno);
+    rc = -1;
+  }
+  return rc;
 }
 
 /* on error, returns NULL (likely an encoding problem). */
@@ -2721,7 +2925,7 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
               DEBUGINDENTLESS();
               if (cp == NULL)
                   return NULL;
-          }
+	  }
           
           if (final == 0)
               tmpvp = vpcache[VPCACHE_SIZE-1];
@@ -2843,6 +3047,180 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
                            startcp - cp);
 
   return cp;
+}
+
+/*  On error, returns 0 (likely an encoding problem).  */
+int
+snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset, 
+			struct snmp_pdu *pdu)
+{
+#ifndef VPCACHE_SIZE
+#define VPCACHE_SIZE 50
+#endif
+  struct variable_list *vpcache[VPCACHE_SIZE];
+  struct variable_list *vp, *tmpvp;
+  size_t start_offset = *offset;
+  int i, wrapped = 0, notdone, final, rc = 0;
+
+  DEBUGMSGTL(("snmp_pdu_realloc_rbuild", "starting\n"));
+  for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp;
+      vp = vp->next_variable, i--) {
+    if (i < 0) {
+      wrapped = notdone = 1;
+      i = VPCACHE_SIZE-1;
+      DEBUGMSGTL(("snmp_pdu_realloc_rbuild", "wrapped\n"));
+    }
+    vpcache[i] = vp;
+  }
+  final = i + 1;
+
+  do {
+    for(i = final; i < VPCACHE_SIZE; i++) {
+      vp = vpcache[i];
+      DEBUGDUMPSECTION("send", "VarBind");
+      rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset,
+				      vp->name, &vp->name_length, vp->type,
+				      (u_char *)vp->val.string, vp->val_len);
+      DEBUGINDENTLESS();
+      if (rc == 0) {
+	return 0;
+      }
+    }
+
+    DEBUGINDENTLESS();
+    if (wrapped) {
+      notdone = 1;
+      for(i = 0; i < final; i++) {
+	vp = vpcache[i];
+	DEBUGDUMPSECTION("send", "VarBind");
+	rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset,
+					vp->name, &vp->name_length, vp->type,
+					(u_char *)vp->val.string, vp->val_len);
+	DEBUGINDENTLESS();
+	if (rc == 0) {
+	  return 0;
+	}
+      }
+          
+      if (final == 0) {
+	tmpvp = vpcache[VPCACHE_SIZE-1];
+      } else {
+	tmpvp = vpcache[final-1];
+      }
+      wrapped = 0;
+
+      for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp && vp != tmpvp;
+	  vp = vp->next_variable, i--) {
+	if (i < 0) {
+	  wrapped = 1;
+	  i = VPCACHE_SIZE-1;
+	  DEBUGMSGTL(("snmp_pdu_realloc_rbuild","wrapped\n"));
+	}
+	vpcache[i] = vp;
+      }
+      final = i + 1;
+    } else {
+      notdone = 0;
+    }
+  } while (notdone);
+
+  /*  Save current location and build SEQUENCE tag and length placeholder for
+      variable-bindings sequence (actual length will be inserted later).  */
+
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   *offset - start_offset);
+
+  /*  Store fields in the PDU preceeding the variable-bindings sequence.  */
+  if (pdu->command != SNMP_MSG_TRAP) {
+    /*  Error index (getbulk max-repetitions).  */
+    DEBUGDUMPHEADER("send", "error index");
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &pdu->errindex, sizeof(pdu->errindex));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Error status (getbulk non-repeaters).  */
+    DEBUGDUMPHEADER("send", "error status");
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &pdu->errstat, sizeof(pdu->errstat));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Request ID.  */
+    DEBUGDUMPHEADER("send", "request_id");
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &pdu->reqid, sizeof(pdu->reqid));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+  } else {
+    /*  An SNMPv1 trap PDU.  */
+
+    /*  Timestamp.  */
+    DEBUGDUMPHEADER("send", "timestamp");
+    rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset,
+				       (u_char)(ASN_TIMETICKS | ASN_PRIMITIVE),
+				       &pdu->time, sizeof(pdu->time));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Specific trap.  */
+    DEBUGDUMPHEADER("send", "specific trap number");
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 (long *)&pdu->specific_type,
+			 sizeof(pdu->specific_type));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Generic trap.  */
+    DEBUGDUMPHEADER("send", "generic trap number");
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 (long *)&pdu->trap_type, sizeof(pdu->trap_type));
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Agent-addr.  */
+    DEBUGDUMPHEADER("send", "agent Address");
+    rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+				   (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
+				   (u_char *)pdu->agent_addr, 4);
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+
+    /*  Enterprise.  */
+    DEBUGDUMPHEADER("send", "enterprise OBJID");
+    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
+		       (oid *)pdu->enterprise, pdu->enterprise_length);
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      return 0;
+    }
+  }
+
+  /*  Build the PDU sequence.  */
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+				 (u_char)pdu->command, *offset - start_offset);
+  return rc;
 }
 #endif /* USE_REVERSE_ASNENCODING */
 
@@ -3813,9 +4191,8 @@ _sess_async_send(void *sessp,
   struct snmp_session *session;
   struct snmp_internal_session *isp;
   snmp_transport *transport = NULL;
-  u_char  realpacket[PACKET_LENGTH];
-  u_char  *packet = realpacket;
-  size_t length = PACKET_LENGTH;
+  u_char *pktbuf = NULL, *packet = NULL;
+  size_t pktbuf_len = 0, offset = 0, length = 0;
   int result;
   long reqid;
 
@@ -3829,6 +4206,13 @@ _sess_async_send(void *sessp,
       DEBUGMSGTL(("sess_async_send","send fail: closing...\n"));
       return 0;
     }
+  }
+
+  if ((pktbuf = malloc(256)) == NULL) {
+    DEBUGMSGTL(("sess_async_send", "couldn't malloc initial packet buffer\n"));
+    return 0;
+  } else {
+    pktbuf_len = 256;
   }
 
   session->s_snmp_errno = 0;
@@ -3885,22 +4269,28 @@ _sess_async_send(void *sessp,
 
   /*  Build the message to send.  */
   if (isp->hook_build) {
-    result = isp->hook_build(session, pdu, packet, &length);
+    packet = pktbuf;
+    length = pktbuf_len;
+    result = isp->hook_build(session, pdu, pktbuf, &length);
   } else {
 #ifdef USE_REVERSE_ASNENCODING
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
-      result = snmp_build(session, pdu, packet+length-1, &length);
-      packet = packet + length;
-      length = PACKET_LENGTH - length;
+      result = snmp_build(&pktbuf, &pktbuf_len, &offset, session, pdu);
+      packet = pktbuf + pktbuf_len - offset;
+      length = offset;
     } else {
 #endif
-      result = snmp_build(session, pdu, packet, &length);
+      packet = pktbuf;
+      length = pktbuf_len;
+      result = snmp_build(&pktbuf, &length, &offset, session, pdu);
 #ifdef USE_REVERSE_ASNENCODING
     }
 #endif
   }
 
   if (result < 0) {
+    DEBUGMSGTL(("sess_async_send", "encoding failure\n"));
+    free(pktbuf);
     return 0;
   }
 
@@ -3920,6 +4310,9 @@ _sess_async_send(void *sessp,
 
   /*  Send the message.  */
 
+  /*  XXX: We should check here that the underlying transport is capable of
+      sending a packet as large as length.  */
+
   result = transport->f_send(transport, packet, length,
 			     &(pdu->transport_data),
 			     &(pdu->transport_data_length));
@@ -3929,6 +4322,8 @@ _sess_async_send(void *sessp,
     session->s_errno = errno;
     return 0;
   }
+
+  free(pktbuf);
 
   reqid = pdu->reqid;
 
@@ -4308,9 +4703,9 @@ int
 _sess_read(void *sessp, fd_set *fdset)
 {
   struct session_list *slp = (struct session_list *)sessp;
-  struct snmp_session *sp = slp->session;
-  struct snmp_internal_session *isp = slp->internal;
-  snmp_transport *transport = slp->transport;
+  struct snmp_session *sp = slp?slp->session:NULL;
+  struct snmp_internal_session *isp = slp?slp->internal:NULL;
+  snmp_transport *transport = slp?slp->transport:NULL;
   u_char packet[PACKET_LENGTH], *packetptr = packet;
   size_t length = 0, packetlen = 0;
   int olength = 0, rc = 0;
@@ -4741,41 +5136,49 @@ static int
 snmp_resend_request(struct session_list *slp, struct request_list *rp, 
 		    int incr_retries)
 {
-  u_char  realpacket[PACKET_LENGTH];
-  u_char  *packet = realpacket;
-  size_t length = PACKET_LENGTH;
-  struct timeval tv;
-  struct snmp_session *sp;
   struct snmp_internal_session *isp;
+  struct snmp_session *sp;
   snmp_transport *transport;
-  struct timeval now;
-  int result;
+  u_char *pktbuf = NULL, *packet = NULL;
+  size_t pktbuf_len = 0, offset = 0, length = 0;
+  struct timeval tv, now;
+  int result = 0;
 
   sp = slp->session; isp = slp->internal; transport = slp->transport;
   if (!sp || !isp || !transport) {
-      DEBUGMSGTL(("sess_read","resend fail: closing...\n"));
+      DEBUGMSGTL(("sess_read", "resend fail: closing...\n"));
       return 0;
+  }
+
+  if ((pktbuf = malloc(256)) == NULL) {
+    DEBUGMSGTL(("sess_resend", "couldn't malloc initial packet buffer\n"));
+    return 0;
+  } else {
+    pktbuf_len = 256;
   }
 
   if (incr_retries) {
     rp->retries++;
   }
 
-  /* always increment msgId for resent messages */
+  /*  Always increment msgId for resent messages.  */
   rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
 
-  /* retransmit this pdu */
   if (isp->hook_build) {
-    result = isp->hook_build(sp, rp->pdu, packet, &length);
+    packet = pktbuf;
+    length = pktbuf_len;
+    result = isp->hook_build(sp, rp->pdu, pktbuf, &length);
   } else {
 #ifdef USE_REVERSE_ASNENCODING
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
-      result = snmp_build(sp, rp->pdu, packet+length-1, &length);
-      packet = packet + length;
-      length = PACKET_LENGTH - length;
+      result = snmp_build(&pktbuf, &pktbuf_len, &offset, sp, rp->pdu);
+      packet = pktbuf + pktbuf_len - offset;
+      length = offset;
     } else {
 #endif
-      result = snmp_build(sp, rp->pdu, packet, &length);
+      packet = pktbuf;
+      length = pktbuf_len;
+      result = snmp_build(&pktbuf, &length, &offset, sp, rp->pdu);
 #ifdef USE_REVERSE_ASNENCODING
     }
 #endif
@@ -4783,6 +5186,10 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
 
   if (result < 0) {
     /*  This should never happen.  */
+    DEBUGMSGTL(("sess_resend", "encoding failure\n"));
+    if (pktbuf != NULL) {
+      free(pktbuf);
+    }
     return -1;
   }
 
@@ -4804,6 +5211,14 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   result = transport->f_send(transport, packet, length,
 			     &(rp->pdu->transport_data),
 			     &(rp->pdu->transport_data_length));
+
+  /*  We are finished with the local packet buffer, if we allocated one (due
+      to there being no saved packet).  */
+
+  if (pktbuf != NULL) {
+    free(pktbuf);
+    pktbuf = packet = NULL;
+  }
 
   if (result < 0) {
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
@@ -5301,8 +5716,8 @@ snmp_add_var(struct snmp_pdu *pdu,
           ltmp = ascii_to_binary(value, buf);
         } else if (type == 's') {
 	  /*  Don't copy buffer here -- completely pointless.  */
-	  bufptr = value;
-          ltmp = strlen((char*)value);
+	  bufptr = (u_char *)value;
+          ltmp = strlen(value);
         } else if (type == 'x'){
           ltmp = hex_to_binary(value, buf);
         }
