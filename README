@@ -61,10 +61,10 @@ SUPPORTED ARCHITECTURES
        - known to work under 2.3, 2.5
      sparc-sun-sunos4.1.4
        - known to work under 4.1.2, 4.1.3
-     alpha-dec-osf3.2
-
      *-netbsd1.1
        - arp table mib disabled
+     alpha-dec-osf3.2
+     *-freebsd2.?
 
   Please let me know if you compile it on other OS versions and it
   works for you so I can add them to the above list.
@@ -86,7 +86,7 @@ COPYING AND COPYRIGHTS
   
   See the COPYING file distributed with this package.
 
-CODE UPDATE ANNOUNCEMENTS / MAILING LIST(s)
+CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
 
   See the NEWS file and the ChangeLog file for details on what changes
   between releases.
@@ -120,9 +120,9 @@ EXTENSIBILITY
 
 EXAMPLE USAGE 
 
-  See the 'EXAMPLE.conf' file in this directory (you must build the
-  package for this file to be generated).  Do NOT look at the
-  EXAMPLE.conf.def file.  It will only confuse you.
+  See the 'EXAMPLE.conf' file in the top level source directory (you
+  must build the package for this file to be generated).  Do NOT look
+  at the EXAMPLE.conf.def file.  It will only confuse you.
 
 CONFIGURATION
 
@@ -153,7 +153,9 @@ THANKS
     Mike Perik <mikep@crt.com>
     Sanjai Narain <narain@thumper.bellcore.com>
     francus@metsny.delphi.com
-
+    Gary Palmer <gpalmer@freebsd.org>
+    Marc G. Fournier <scrappy@ki.net>
+    
   I've probably forgotten people on this list.  Let me know if you've
   contributed code and I've left you out.
 
