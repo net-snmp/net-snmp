@@ -59,7 +59,7 @@ debug_print_requests(netsnmp_request_info *requests)
 
         if (request->processed)
             DEBUGMSGTL(("helper:debug", "        [processed]\n"));
-        if (request->processed)
+        if (request->delegated)
             DEBUGMSGTL(("helper:debug", "        [delegated]\n"));
         if (request->status)
             DEBUGMSGTL(("helper:debug", "        [status = %d]\n",
