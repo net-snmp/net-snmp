@@ -111,7 +111,7 @@ main(argc, argv)
     int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
-    u_long destAddr;
+    in_addr_t destAddr;
     char ctmp[300];
 
     init_mib();

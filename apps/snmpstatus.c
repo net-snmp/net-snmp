@@ -158,7 +158,7 @@ u_long srcclock, dstclock;
     int trivialSNMPv2 = FALSE;
     char ctmp [1024];
     struct hostent *hp;
-    u_long destAddr;
+    in_addr_t destAddr;
 
     if (strcasecmp(srcparty, "noauth") == 0) trivialSNMPv2 = TRUE;
 

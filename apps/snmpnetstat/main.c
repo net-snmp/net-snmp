@@ -146,7 +146,7 @@ main(argc, argv)
     int srclen = 0, dstlen = 0, contextlen = 0;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
-    u_long destAddr;
+    in_addr_t destAddr;
     int arg;
     
     init_mib();

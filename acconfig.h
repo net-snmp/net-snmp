@@ -106,6 +106,9 @@
 /* sysctl works to get boottime, etc... */
 #undef CAN_USE_SYSCTL
 
+/* type check for in_addr_t */
+#undef in_addr_t
+
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
  location in the tree your company/organization has been allocated. */
@@ -184,6 +187,7 @@
 #define HPUX10ID 6
 #define NETBSD1ID 7
 #define FREEBSD2ID 8
+#define IRIX6ID 9
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -209,6 +213,9 @@
 #endif
 #ifdef freebsd2
 #define OSTYPE FREEBSD2ID
+#endif
+#ifdef irix6
+#define OSTYPE IRIX6ID
 #endif
 /* unknown */
 #ifndef OSTYPE
