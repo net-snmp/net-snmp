@@ -1053,7 +1053,7 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%sINOPTS values:\n", lead);
   fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
   fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
-  fprintf(outf, "%f    f: Attempt to fix PDUs and resend them.\n", lead);
+  fprintf(outf, "%s    f: Attempt to fix PDUs and resend them.\n", lead);
 }
 
 void
