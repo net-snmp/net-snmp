@@ -623,7 +623,7 @@ snmp_enable_calllog(void)	/* XXX - or take a callback routine ??? */
 
 
 netsnmp_log_handler *
-netsnmp_find_loghandler( char *token )
+netsnmp_find_loghandler( const char *token )
 {
     netsnmp_log_handler *logh;
     if (!token)
@@ -724,7 +724,7 @@ netsnmp_register_loghandler( int type, int priority )
 
 
 int
-netsnmp_enable_loghandler(  char *token )
+netsnmp_enable_loghandler( const char *token )
 {
     netsnmp_log_handler *logh;
 
@@ -737,7 +737,7 @@ netsnmp_enable_loghandler(  char *token )
 
 
 int
-netsnmp_disable_loghandler( char *token )
+netsnmp_disable_loghandler( const char *token )
 {
     netsnmp_log_handler *logh;
 
@@ -858,7 +858,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 	 * We've got two "magic" locations (imagic & magic) plus the token
 	 */
     if (!(logh->imagic)) {
-        char *ident    = logh->token;
+        const char *ident    = logh->token;
         int   facility = (int)logh->magic;
         openlog(ident, LOG_CONS | LOG_PID, facility);
         logh->imagic = 1;
@@ -930,6 +930,8 @@ snmp_log_string(int priority, const char *string)
     /*
      * Start at the given priority, and work "upwards"....
      */
+    if (!logh_head)
+	snmp_enable_stderrlog();
     logh = logh_priorities[priority];
     for ( ; logh; logh = logh->next ) {
         /*
