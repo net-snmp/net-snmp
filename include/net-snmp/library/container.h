@@ -178,14 +178,31 @@ extern "C" {
 
     } netsnmp_container;
 
+    /*
+     * initialize a container of container factories. used by
+     * netsnmp_container_find* functions.
+     */
     void netsnmp_container_init_list(void);
+
+    /*
+     * register a new container factory
+     */
     int netsnmp_container_register(const char* name, netsnmp_factory *f);
 
+    /*
+     * search for and create a container from a list of types or a
+     * specific type.
+     */
     netsnmp_container * netsnmp_container_find(const char *type_list);
     netsnmp_container * netsnmp_container_get(const char *type);
 
-    int netsnmp_container_find_noalloc(const char *type_list, void* mem);
-    int netsnmp_container_get_noalloc(const char *type, void* mem);
+    /*
+     * search for and create a container from a list of types or a
+     * specific type, using the provided container structure
+     */
+    int netsnmp_container_find_noalloc(const char *type_list,
+                                       netsnmp_container* c);
+    int netsnmp_container_get_noalloc(const char *type, netsnmp_container* c);
 
     /*
      * utility routines
@@ -200,6 +217,7 @@ extern "C" {
     /** first data element is a 'netsnmp_index' */
     int netsnmp_compare_netsnmp_index(const void *lhs, const void *rhs);
     int netsnmp_ncompare_netsnmp_index(const void *lhs, const void *rhs);
+
     /** first data element is a 'char *' */
     int netsnmp_compare_cstring(const void * lhs, const void * rhs);
     int netsnmp_ncompare_cstring(const void * lhs, const void * rhs);
