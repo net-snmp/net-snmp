@@ -114,7 +114,7 @@ struct tc {     /* textual conventions */
     struct range_list *ranges;
 } tclist[MAXTC];
 
-int Line = 1;
+int Line = 0;
 const char *File = "(none)";
 static int anonymous = 0;
 
@@ -2499,6 +2499,9 @@ read_module_internal (const char *name)
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
+    	    const char *oldFile = File;
+    	    int oldLine = Line;
+	
 	    if ( mp->no_imports != -1 ) {
 		DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n", name));
 		return MODULE_ALREADY_LOADED;
@@ -2515,6 +2518,8 @@ read_module_internal (const char *name)
 		 */
 	    np = parse( fp, NULL );
 	    fclose(fp);
+	    File = oldFile;
+	    Line = oldLine;
 	    return MODULE_LOADED_OK;
 	}
 
@@ -2776,6 +2781,7 @@ parse(FILE *fp,
                 /*return NULL;*/
             }
             free_node(nnp); /* IGNORE */
+	    nnp = NULL;
             break;
         case MODULEIDENTITY:
             nnp = parse_moduleIdentity(fp, name);
