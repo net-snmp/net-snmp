@@ -1,6 +1,6 @@
 #!/bin/sh
 
-QUOTEFILES="version.h bug-report.h"
+QUOTEFILES="version.h bug-report"
 SEDFILES="sedscript.in"
 
 case "$1" in
