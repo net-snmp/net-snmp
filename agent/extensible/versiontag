@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ $2 = "add" ]; then
-  cd agent/extensible/	
+#  cd agent/extensible/	
   perl -p -i.bak -e 's/VersionInfo="(.*)"/VersionInfo="'$1'"/;' versioninfo.c
   cvs commit -m "version tag of versioninfo.c" versioninfo.c
 fi
