@@ -256,21 +256,33 @@ int main(int argc, char *argv[])
             SOCK_CLEANUP;
 	    exit (1);
 	}
-	snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
-		      'o', argv [arg]);
+	if (snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
+		      'o', argv [arg]) != 0) {
+	    snmp_perror(argv[arg]);
+	    SOCK_CLEANUP;
+	    exit(1);
+	}
     }
     arg++;
 
     while (arg < argc) {
 	arg += 3;
-	if (arg > argc) break;
+	if (arg > argc) {
+	    fprintf(stderr, "%s: Missing type/value for variable\n", argv[arg-3]);
+	    SOCK_CLEANUP;
+	    exit(1);
+	}
 	name_length = MAX_OID_LEN;
 	if (!snmp_parse_oid(argv [arg-3], name, &name_length)) {
 	    snmp_perror(argv [arg-3]);
             SOCK_CLEANUP;
 	    exit(1);
 	}
-	snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
+	if (snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]) != 0) {
+	    snmp_perror(argv[arg-3]);
+	    SOCK_CLEANUP;
+	    exit(1);
+	}
     }
 
     if (inform) status = snmp_synch_response(ss, pdu, &response);
