@@ -3105,6 +3105,19 @@ build_oid_segment(netsnmp_variable_list * var)
         var->name[0] = *(var->val.integer);
         break;
 
+    case ASN_IPADDRESS:
+        var->name_length = 4;
+        var->name = var->name_loc;
+        var->name[0] =
+            (((unsigned int) *(var->val.integer)) & 0xff000000) >> 24;
+        var->name[1] =
+            (((unsigned int) *(var->val.integer)) & 0x00ff0000) >> 16;
+        var->name[2] =
+            (((unsigned int) *(var->val.integer)) & 0x0000ff00) >> 8;
+        var->name[3] =
+            (((unsigned int) *(var->val.integer)) & 0x000000ff);
+        break;
+        
     case ASN_PRIV_IMPLIED_OBJECT_ID:
         var->name_length = var->val_len / sizeof(oid);
         if (var->name_length > (sizeof(var->name_loc) / sizeof(oid)))
@@ -3263,7 +3276,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
     netsnmp_variable_list *var = data;
     oid             tmpout[MAX_OID_LEN];
     unsigned int    i;
-    unsigned int    uitmp;
+    unsigned int    uitmp = 0;
 
     oid            *oidIndex = *oidStart;
 
@@ -3285,6 +3298,31 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             DEBUGMSGTL(("parse_oid_indexes",
                         "Parsed int(%d): %d\n", var->type,
                         *var->val.integer));
+            break;
+
+        case ASN_IPADDRESS:
+            if (*oidLen >= 4) {
+                for(i=0; i < 4; i++) {
+                    if (oidIndex[i] > 255) {
+                        DEBUGMSGTL(("parse_oid_indexes",
+                                    "illegal oid in index: %d.%d.%d.%d\n",
+                                    oidIndex[0], oidIndex[1],
+                                    oidIndex[2], oidIndex[3]));
+                        return SNMPERR_GENERR;  /* sub-identifier too large */
+                    } else {
+                        uitmp += oidIndex[i] << (8*(3-i));
+                    }
+                }
+                uitmp = 
+                    snmp_set_var_value(var, (u_char *) &uitmp, 4);
+            } else {
+                return SNMPERR_GENERR;  /* too few sub-identifiers (illegal) */
+            }
+            DEBUGMSGTL(("parse_oid_indexes",
+                        "Parsed ipaddr(%d): %d.%d.%d.%d\n", var->type,
+                        oidIndex[0], oidIndex[1], oidIndex[2], oidIndex[3]));
+            *oidLen -= 4;
+            oidIndex += 4;
             break;
 
         case ASN_OBJECT_ID:
