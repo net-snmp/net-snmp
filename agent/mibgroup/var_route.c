@@ -48,6 +48,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -363,8 +366,10 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 		long_return = 0;	/* Default route */
 	    else {
 #ifndef linux
-		klookup(rthead[RtIndex]->rt_ifp, &rt_ifnet, sizeof(rt_ifnet));
-		klookup(rt_ifnet.if_addrlist, &rt_ifnetaddr, sizeof(rt_ifnetaddr));
+		klookup((unsigned long) rthead[RtIndex]->rt_ifp,
+			(char *) &rt_ifnet, sizeof(rt_ifnet));
+		klookup((unsigned long) rt_ifnet.if_addrlist,
+			(char *) &rt_ifnetaddr, sizeof(rt_ifnetaddr));
 
 		long_return = rt_ifnetaddr.ia_subnetmask;
 #else /* linux */
@@ -773,14 +778,15 @@ static void Route_Scan_Reload()
 		    /*
 		     *	Dig the route out of the kernel...
 		     */
-		    klookup( m , (char *)&mb, sizeof (mb));
+		    klookup((unsigned long) m , (char *)&mb, sizeof (mb));
 		    m = mb.m_next;
 		    rt = mtod(&mb, RTENTRY *);
                     
 		    if (rt->rt_ifp != 0) {
 
-			klookup(rt->rt_ifp, (char *)&ifnet, sizeof (ifnet));
-			klookup(ifnet.if_name, name, 16);
+			klookup((unsigned long) rt->rt_ifp, (char *)&ifnet,
+				sizeof (ifnet));
+			klookup((unsigned long) ifnet.if_name, name, 16);
 			name[15] = '\0';
 			cp = (char *) index(name, '\0');
 			string_append_int (cp, ifnet.if_unit);
@@ -814,7 +820,8 @@ static void Route_Scan_Reload()
 	/*
 	 *  Sort it!
 	 */
-	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
+	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
+	      (int (*)(const void *, const void *))qsort_compare);
 }
 #else
 #ifdef linux

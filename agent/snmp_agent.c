@@ -37,6 +37,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -115,7 +118,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	pi->community_len = COMMUNITY_MAX_LEN;
         data = snmp_auth_parse(data, &length,
 			       pi->community, &pi->community_len,
-                               &pi->version);
+                               (long *) &pi->version);
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
         pi->srcPartyLength = sizeof(pi->srcParty)/sizeof(oid);
         pi->dstPartyLength = sizeof(pi->dstParty)/sizeof(oid);
@@ -997,7 +1000,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
     if (pi->version == SNMP_VERSION_1 || pi->version == SNMP_VERSION_2){
 	data = snmp_auth_build(snmp_out, (int *)&dummy,
 			       pi->community, &pi->community_len,
-			       (long *)&pi->version, messagelen);
+			       (int *)&pi->version, messagelen);
     } else if (pi->version == SNMP_VERSION_2_HISTORIC){
 	data = snmp_secauth_build(snmp_out, (int *)&dummy, pi, messagelen,
 				  pi->dstParty, pi->dstPartyLength,

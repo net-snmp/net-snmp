@@ -478,7 +478,8 @@ int a;
         i < numpassthrus && ptmp != 0;
         i++, ptmp = ptmp->next)
       etmp[i] = ptmp;
-    qsort(etmp, numpassthrus, sizeof(struct extensible *),pass_compare);
+    qsort(etmp, numpassthrus, sizeof(struct extensible *),
+	  (int (*)(const void *, const void *))pass_compare);
     passthrus = (struct extensible *) etmp[0];
     ptmp = (struct extensible *) etmp[0];
     

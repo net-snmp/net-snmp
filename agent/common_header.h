@@ -106,7 +106,7 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef osf4
+#if defined(osf4) || defined(aix4)
 /* these are undefed to remove a stupid warning on osf compilers
    because they get redefined with a slightly differnt notation of the
    same value.  -- Wes */

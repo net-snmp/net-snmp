@@ -60,6 +60,7 @@ SUPPORTED ARCHITECTURES
      linux-2.*
        - known to work under 1.3
      *-freebsd2.?
+     aix-4.1.5
 
   Please let us know if you compile it on other OS versions and it
   works for you so we can add them to the above list.
@@ -187,6 +188,7 @@ THANKS
     Philip Guenther <guenther@gac.edu>
     Elwyn B Davies <edavies@origin-at.co.uk>
     Simon Burge <simonb@telstra.com.au>
+    David Paul Zimmerman <dpz@apple.com>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
