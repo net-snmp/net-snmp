@@ -312,15 +312,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
          * Zero speed means link problem.
          * -i'm not sure this is always true...
          */
-        if(entry->speed == 0 && entry->os_flags & IFF_UP){
+        if((entry->speed == 0) && (entry->os_flags & IFF_UP)){
             entry->os_flags &= ~IFF_RUNNING;
         }
-        if(entry->os_flags & IFF_RUNNING)
-            entry->oper_status = IFOPERSTATUS_UP;
-        else
-            entry->oper_status = IFOPERSTATUS_UNKNOWN;
-
-        
 
         netsnmp_access_interface_entry_overrides(entry);
 
