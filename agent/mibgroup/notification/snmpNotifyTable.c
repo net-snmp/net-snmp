@@ -402,10 +402,8 @@ var_snmpNotifyTable(struct variable *vp,
     	    size_t  *var_len,
     	    WriteMethod **write_method)
 {
-
-
-struct snmpNotifyTable_data *StorageTmp = NULL;
-
+  struct snmpNotifyTable_data *StorageTmp = NULL;
+  int found = 1;
 
   DEBUGMSGTL(("snmpNotifyTable", "var_snmpNotifyTable: Entering...  \n"));
   /* 
@@ -414,43 +412,48 @@ struct snmpNotifyTable_data *StorageTmp = NULL;
   if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex((struct header_complex_index *)snmpNotifyTableStorage, vp,name,length,exact,
                       var_len,write_method)) == NULL) {
-      DEBUGMSGTL(("snmpNotifyTable", "no row: magic=%d...  \n", vp->magic));
-      if (vp->magic == SNMPNOTIFYROWSTATUS) {
-          DEBUGMSGTL(("snmpNotifyTable", "var_snmpNotifyTable: create?...  \n"));
-          *write_method = write_snmpNotifyRowStatus;
-      }
+      found = 0;
+  }
+
+  switch (vp->magic) {
+  case SNMPNOTIFYTAG:
+      *write_method = write_snmpNotifyTag;
+      break;
+  case SNMPNOTIFYTYPE:
+      *write_method = write_snmpNotifyType;
+      break;
+  case SNMPNOTIFYSTORAGETYPE:
+      *write_method = write_snmpNotifyStorageType;
+      break;
+  case SNMPNOTIFYROWSTATUS:
+      *write_method = write_snmpNotifyRowStatus;
+      break;
+  default:
+      *write_method = NULL;
+  }
+  
+  if (!found) {
       return NULL;
   }
 
-
-  /* 
-   * this is where we do the value assignments for the mib results.
-   */
   switch(vp->magic) {
+  case SNMPNOTIFYTAG:
+      *var_len = StorageTmp->snmpNotifyTagLen;
+      return (u_char *) StorageTmp->snmpNotifyTag;
 
+  case SNMPNOTIFYTYPE:
+      *var_len = sizeof(StorageTmp->snmpNotifyType);
+      return (u_char *) &StorageTmp->snmpNotifyType;
 
-    case SNMPNOTIFYTAG:
-        *write_method = write_snmpNotifyTag;
-        *var_len = StorageTmp->snmpNotifyTagLen;
-        return (u_char *) StorageTmp->snmpNotifyTag;
+  case SNMPNOTIFYSTORAGETYPE:
+      *var_len = sizeof(StorageTmp->snmpNotifyStorageType);
+      return (u_char *) &StorageTmp->snmpNotifyStorageType;
 
-    case SNMPNOTIFYTYPE:
-        *write_method = write_snmpNotifyType;
-        *var_len = sizeof(StorageTmp->snmpNotifyType);
-        return (u_char *) &StorageTmp->snmpNotifyType;
+  case SNMPNOTIFYROWSTATUS:
+      *var_len = sizeof(StorageTmp->snmpNotifyRowStatus);
+      return (u_char *) &StorageTmp->snmpNotifyRowStatus;
 
-    case SNMPNOTIFYSTORAGETYPE:
-        *write_method = write_snmpNotifyStorageType;
-        *var_len = sizeof(StorageTmp->snmpNotifyStorageType);
-        return (u_char *) &StorageTmp->snmpNotifyStorageType;
-
-    case SNMPNOTIFYROWSTATUS:
-        *write_method = write_snmpNotifyRowStatus;
-        *var_len = sizeof(StorageTmp->snmpNotifyRowStatus);
-        return (u_char *) &StorageTmp->snmpNotifyRowStatus;
-
-
-    default:
+  default:
       ERROR_MSG("");
   }
   return NULL;
@@ -461,7 +464,7 @@ snmpTagValid(const char *tag, const size_t tagLen)
 {
     size_t i = 0;
 
-    static inline int is_delim(const char c) {
+    static int is_delim(const char c) {
 	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
     }
 
