@@ -41,6 +41,7 @@ struct register_parameters {
     oid             range_ubound;
     int             timeout;
     u_char          flags;
+    const char     *contextName;
 };
 
 typedef struct subtree_context_cache_s {
