@@ -64,6 +64,7 @@ TABLE OF CONTENTS
    I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
    I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
    I'm trying to use tkmib and it can't locate Tk.pm?
+   I'm trying to install your RPM, but it complains about missing perl modules. Why?
    I've got a problem with the Net-SNMP module.  Can you help?
  MIBS
    Where can I find a MIB compiler?
@@ -1421,6 +1422,37 @@ I'm trying to use tkmib and it can't locate Tk.pm?
   "Tk800.011" or later.  It can be installed by issuing the command:
 
 		perl -MCPAN -e shell ; "install Tk"
+
+
+
+I'm trying to install your RPM, but it complains about missing perl modules. Why?
+--------------------------------------------------------------------------------
+
+  This has been particularly noted on RedHat 9, complaining about the
+  module "perl(Term::ReadKey)" - even if this is actually present (e.g.
+  having been installed directly from CPAN).  In fact, this is not
+  specific to perl modules - the same issue can potentially arise with
+  other RPM dependencies.
+
+  The problem is that the RPM mechanism keeps a local database of what
+  software packages have been installed, and checks this for any other
+  features that this RPM requires.  If software is installed "manually"
+  rather than via rpm packages, then it will not appear in this database.
+  Attempting to install another RPM that rely on this functionality will
+  then complain about the "missing" package, because the RPM system doesn't
+  know that's it's actually available.
+
+  The ideal solution is to *always* install software using a consistent
+  mechanism (which may involve building RPMs locally, or looking for a
+  suitable pre-built version).
+
+  Failing this, it's possible to tell the "rpm" command to ignore such
+  dependencies, and install the package anyway.  Try:
+
+              rpm -i --nodeps {package}
+
+  In this situation, it's then up to you to make sure that any other
+  necessary packages *are* actually present on the system.
 
 
 
