@@ -1,0 +1,59 @@
+.fi
+.SH FUNCTIONS
+.IP "ds_set_boolean(int storeid, int which, int value)"
+Stores
+.I true
+if 
+.I value
+!= 0 or else false into the bool_storage[storeid][which] slot.
+.IP "int ds_get_boolean(int storeid, int which)"
+Returns 1 if storage[storeid][which] is true, or 0 if false.
+.IP "int ds_set_string(int storeid, int which, const char *value)"
+Stores
+.I value
+into the string_storage[storeid][which] slot.
+.IP "char *ds_get_string(int storeid, int which)"
+Returns the string which has been stored in the
+string_storage[storeid][which] slot.
+.IP "ds_set_int(int storeid, int which, int value)"
+Stores
+.I value
+into the int_storage[storeid][which] slot.
+.IP "int ds_get_int(int storeid, int which)"
+Returns the integer which has been stored in the
+int_storage[storeid][which] slot.
+.IP "ds_register_config(u_char type, const char *ftype, const char *token, int storeid, int which)"
+This token registers a configuration file directive and attaches it to 
+a default storage type and slot.  Specifically,
+.I storeid
+and
+.I which
+indicate the storage slot in the data type indicated by
+.I type,
+where
+.I type
+is either one of the following constants: ASN_BOOLEAN, ASN_INTEGER, or
+ASN_OCTET_STR.  The
+.I ftype
+variable indicates the file name base string searched for the
+.I token
+keyword.  For example, the following call:
+.RS
+.IP
+ds_register_config(ASN_INTEGER, "snmp", "testtoken", DS_APPLICATION_ID, 5)
+.RE
+.IP
+would indicate that when the snmp.conf file(s) were found and parsed,
+that any line beginning with the word "testtoken" should be read and
+the value after "testtoken" should be stored into the
+int_storage[DS_APPLICATION_ID][5] slot.  For example the following
+line in the configuration file:
+.RS
+.IP
+testtoken 42
+.RE
+.IP
+would set int_storage[DS_APPLICATION_ID][5] = 42.
+.SH "SEE ALSO"
+snmp_config(5), read_config(3)
+
