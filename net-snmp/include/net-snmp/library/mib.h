@@ -155,6 +155,11 @@ int sprint_realloc_variable	(u_char **buf, size_t *buf_len,
 				 const oid *objid, size_t objidlen,
 				 netsnmp_variable_list *variable);
 
+struct tree *
+netsnmp_sprint_realloc_objid_tree(u_char **buf, size_t *buf_len,
+                                  size_t *out_len, int allow_realloc,
+                                  int *buf_overflow,
+                                  const oid *objid, size_t objidlen);
 
 void print_value		(const oid *objid, size_t objidlen,
 				 netsnmp_variable_list *variable);
