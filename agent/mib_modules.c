@@ -1,0 +1,39 @@
+/* wrapper to call all the mib module initialization functions */
+
+#include <config.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmp_impl.h"
+#include "system.h"
+#include "read_config.h"
+#include "snmp.h"
+#include "mib.h"
+#include "m2m.h"
+#include "snmp_vars.h"
+#include "agent_read_config.h"
+#include "snmpv3.h"
+#include "callback.h"
+#include "snmp_alarm.h"
+#include "default_store.h"
+#include "tools.h"
+
+#include "mibgroup/struct.h"
+#include "mib_modules.h"
+#include "mibgroup/mib_module_includes.h"
+
+void
+init_mib_modules(void) {
+  #include "mibgroup/mib_module_inits.h"
+}
