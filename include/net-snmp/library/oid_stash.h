@@ -70,6 +70,9 @@ extern          "C" {
                                 NetSNMPStashFreeNode *freefn);
                                 
 
+    /* a noop function that can be passed to netsnmp_oid_stash_node to
+       NOT free the data */
+    NetSNMPStashFreeNode netsnmp_oid_stash_no_free;
 #ifdef __cplusplus
 }
 #endif

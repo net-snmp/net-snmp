@@ -368,4 +368,10 @@ netsnmp_oid_stash_free(netsnmp_oid_stash_node **root,
     *root = NULL;
 }
 
+void
+netsnmp_oid_stash_no_free(void *bogus)
+{
+    /* noop */
+}
+
 /** @} */
