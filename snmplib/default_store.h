@@ -26,6 +26,8 @@ extern "C" {
 #define DS_LIB_LOG_TIMESTAMP       5
 #define DS_LIB_DONT_READ_CONFIGS   6
 #define DS_LIB_MIB_REPLACE         7  /* replace objects from latest module */
+#define DS_LIB_PRINT_NUMERIC_ENUM  8  /* print only numeric enum values */
+#define DS_LIB_PRINT_NUMERIC_OIDS  9  /* print only numeric enum values */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
