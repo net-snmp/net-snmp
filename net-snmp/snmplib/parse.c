@@ -414,11 +414,6 @@ void snmp_set_mib_parse_label(int save)
   ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, save);
 }
 
-void snmp_set_mib_parse_replace_objects(int save)
-{
-  /* 0=no, 1=replace objects with latest module */
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, save);
-}
 /* end wrappers */
 
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {

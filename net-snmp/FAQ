@@ -1505,7 +1505,8 @@ How do I replace MIB values with new ones ?
 
     4. The MIBFILES environment can specify the path of the new MIB file.
 
-  If you grok programmer-speak, invoke snmp_set_mib_parse_replace_objects
+  If you grok programmer-speak, invoke :
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, 1 | 0)
   to enable or disable the Replace MIB feature, then invoke read_mib
   specifying the MIB file name.  Then disable Replace MIB feature.
 
