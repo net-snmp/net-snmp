@@ -82,6 +82,10 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
+/* Define if statfs takes 2 args and the second argument has
+   type struct fs_data. [Ultrix] */
+#undef STAT_STATFS_FS_DATA
+
 @BOTTOM@
 
 /* ifnet structure tests */
@@ -255,7 +259,7 @@
 #define CACHEFILE "/tmp/.snmp-exec-cache"
 #define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 
-#define MAXDISKS 10                      /* can't scan more than this number */
+#define MAXDISKS 50                      /* can't scan more than this number */
 
 /* misc defaults */
 
@@ -382,3 +386,7 @@
 #define __P(params) ()
 #endif /* __STDC__ */
 #endif /* __P */
+
+#ifndef HAVE_STRDUP
+char *strdup __P((char *));
+#endif
