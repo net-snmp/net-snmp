@@ -89,6 +89,7 @@ static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
 static oid oid_cfg_nnets[] =	{1, 3, 6, 1, 2, 1, 2, 1, 0};
 static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
 
+#define IFINDEX		1
 #define IFNAME		2
 #define IFMTU		4
 #define IFOPERSTATUS	8
@@ -103,7 +104,7 @@ static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
 #define OUTQLEN		21
 
 #define IPADDR		1
-#define	IFINDEX		2
+#define	IPIFINDEX	2
 #define IPNETMASK	3
 
 
@@ -125,11 +126,16 @@ intpr(int interval)
 	    char name[128];
 	    char ip[128], route[128];
 	    int mtu;
-	    unsigned int ipkts, ierrs, opkts, oerrs, operstatus, outqueue;
+	    int ifindex;
+	    char s_ipkts[20], s_ierrs[20], s_opkts[20], s_oerrs[20], s_outq[20];
+	    unsigned long ipkts, opkts;
+	    int operstatus;
 	    u_long netmask;
 	    struct in_addr ifip, ifroute;
 	} *if_table, *cur_if;
-	int max_name = 0, max_ip = 0, max_route = 0, i;
+	int max_name = 4, max_ip = 7, max_route = 7, max_ipkts = 5,
+	    max_ierrs = 5, max_opkts = 5, max_oerrs = 5, max_outq = 5;
+	int i;
 
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
@@ -158,7 +164,7 @@ intpr(int interval)
 		varname_len = sizeof (oid_ipadentaddr) / sizeof (oid);
 		instance = varname + 9;
 		memmove (varname + 10, curifip, sizeof (curifip));
-		*instance = IFINDEX;
+		*instance = IPIFINDEX;
 		snmp_add_null_var (request, varname, varname_len);
 		*instance = IPADDR;
 		snmp_add_null_var (request, varname, varname_len);
@@ -168,6 +174,10 @@ intpr(int interval)
 		status = snmp_synch_response (Session, request, &response);
 		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
 		    fprintf (stderr, "SNMP request failed after %d out of %d interfaces (IP)\n", ifnum, cfg_nnets);
+		    if (snmp_get_do_debugging()) {
+			fprintf(stderr, "status = %d, errstat = %ld, errindex = %ld\n",
+				status, response->errstat, response->errindex);
+		    }
 		    cfg_nnets = ifnum;
 		    break;
 		}
@@ -176,9 +186,10 @@ intpr(int interval)
 			print_variable (var->name, var->name_length, var);
 		    }
 		    switch (var->name [9]) {
-		    case IFINDEX:
+		    case IPIFINDEX:
 			ifindex = *var->val.integer;
-			cur_if = if_table + ifindex - 1;
+			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++) ;
+			cur_if->ifindex = ifindex;
 			break;
 		    case IPADDR:
 			memmove (curifip, var->name+10, sizeof (curifip));
@@ -190,7 +201,7 @@ intpr(int interval)
 		}
 		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
 		if (cur_if->ifroute.s_addr)
-			strcpy(cur_if->route, netname (cur_if->ifroute, 0));
+			strcpy(cur_if->route, netname (cur_if->ifroute, cur_if->netmask));
 		else strcpy(cur_if->route, "none");
 		if ((i = strlen(cur_if->route)) > max_route) max_route = i;
 		if (cur_if->ifip.s_addr)
@@ -207,6 +218,8 @@ intpr(int interval)
 		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 
 		*instance = oldindex;
+		*ifentry = IFINDEX;
+		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFNAME;
 		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFMTU;
@@ -245,24 +258,54 @@ intpr(int interval)
 		    if (snmp_get_do_debugging()) {
 			print_variable (var->name, var->name_length, var);
 		    }
-		    if (var->val.integer)
+		    if (!var->val.integer) continue;
 		    switch (var->name [9]) {
+		    case IFINDEX:
+			ifindex = *var->val.integer;
+			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++) ;
+			cur_if->ifindex = ifindex;
+			break;
 		    case OUTQLEN:
-			cur_if->outqueue = *var->val.integer; break;
+			sprintf(cur_if->s_outq, "%lu", *var->val.integer);
+			i = strlen(cur_if->s_outq);
+			if (i > max_outq) max_outq = i;
+			break;
 		    case OUTERRORS:
-			cur_if->oerrs = *var->val.integer; break;
+			sprintf(cur_if->s_oerrs, "%lu", *var->val.integer);
+			i = strlen(cur_if->s_oerrs);
+			if (i > max_oerrs) max_oerrs = i;
+			break;
 		    case INERRORS:
-			cur_if->ierrs = *var->val.integer; break;
+			sprintf(cur_if->s_ierrs, "%lu", *var->val.integer);
+			i = strlen(cur_if->s_ierrs);
+			if (i > max_ierrs) max_ierrs = i;
+			break;
 		    case IFMTU:
 			cur_if->mtu = *var->val.integer; break;
 		    case INUCASTPKTS:
-			cur_if->ipkts += *var->val.integer; break;
+			cur_if->ipkts += *var->val.integer;
+			sprintf(cur_if->s_ipkts, "%lu", cur_if->ipkts);
+			i = strlen(cur_if->s_ipkts);
+			if (i > max_ipkts) max_ipkts = i;
+			break;
 		    case INNUCASTPKTS:
-			cur_if->ipkts += *var->val.integer; break;
+			cur_if->ipkts += *var->val.integer;
+			sprintf(cur_if->s_ipkts, "%lu", cur_if->ipkts);
+			i = strlen(cur_if->s_ipkts);
+			if (i > max_ipkts) max_ipkts = i;
+			break;
 		    case OUTUCASTPKTS:
-			cur_if->opkts += *var->val.integer; break;
+			cur_if->opkts += *var->val.integer;
+			sprintf(cur_if->s_opkts, "%lu", cur_if->opkts);
+			i = strlen(cur_if->s_opkts);
+			if (i > max_opkts) max_opkts = i;
+			break;
 		    case OUTNUCASTPKTS:
-			cur_if->opkts += *var->val.integer; break;
+			cur_if->opkts += *var->val.integer;
+			sprintf(cur_if->s_opkts, "%lu", cur_if->opkts);
+			i = strlen(cur_if->s_opkts);
+			if (i > max_opkts) max_opkts = i;
+			break;
 		    case IFNAME:
 			oldindex = var->name[10];
 			if (var->val_len >= sizeof(cur_if->name))
@@ -289,21 +332,25 @@ intpr(int interval)
 		}
 	}
 
-	printf("%*.*s %5.5s %*.*s %*.*s %10.10s %5.5s %10.10s %5.5s %5.5s",
+	printf("%*.*s %5.5s %*.*s %*.*s %*s %*s %*s %*s %*s",
 		-max_name, max_name, "Name", "Mtu",
 		-max_route, max_route, "Network",
-		-max_ip, max_ip, "Address", "Ipkts", "Ierrs",
-		"Opkts", "Oerrs", "Queue");
+		-max_ip, max_ip, "Address",
+		max_ipkts, "Ipkts",
+		max_ierrs, "Ierrs",
+		max_opkts, "Opkts",
+		max_oerrs, "Oerrs",
+		max_outq, "Queue");
 	putchar('\n');
 	for (ifnum = 0, cur_if = if_table; ifnum < cfg_nnets; ifnum++, cur_if++) {
 		if (cur_if->name [0] == 0) continue;
-		printf("%-*.*s %5d ", max_name, max_name, cur_if->name, cur_if->mtu);
-		printf("%-*.*s ", max_route, max_route, cur_if->route);
-		printf("%-*.*s ", max_ip, max_ip, cur_if->ip);
-		printf("%10u %5u %10u %5u %5u",
-		    cur_if->ipkts, cur_if->ierrs,
-		    cur_if->opkts, cur_if->oerrs,
-		    cur_if->outqueue);
+		printf("%*.*s %5d ", -max_name, max_name, cur_if->name, cur_if->mtu);
+		printf("%*.*s ", -max_route, max_route, cur_if->route);
+		printf("%*.*s ", -max_ip, max_ip, cur_if->ip);
+		printf("%*s %*s %*s %*s %*s",
+			max_ipkts, cur_if->s_ipkts, max_ierrs, cur_if->s_ierrs,
+			max_opkts, cur_if->s_opkts, max_oerrs, cur_if->s_oerrs,
+			max_outq, cur_if->s_outq);
 		putchar('\n');
 	}
 	free(if_table);
@@ -321,15 +368,18 @@ intpro(int interval)
 	struct variable_list *var;
 	struct snmp_pdu *request, *response;
 	int status;
-	int ifindex, oldindex;
+	int ifindex, oldindex = 0;
 	struct _if_info {
+	    int ifindex;
 	    char name[128];
 	    char ip[128], route[128];
-	    unsigned long ioctets, ierrs, ooctets, oerrs, operstatus, outqueue;
+	    char ioctets[20], ierrs[20], ooctets[20], oerrs[20], outqueue[20];
+	    int operstatus;
 	    u_long netmask;
 	    struct in_addr ifip, ifroute;
 	} *if_table, *cur_if;
-	int max_name = 0, max_route = 0, max_ip = 0, i;
+	int max_name = 4, max_route = 7, max_ip = 7, max_ioctets = 7, max_ooctets = 7;
+	int i;
 
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
@@ -358,7 +408,7 @@ intpro(int interval)
 		varname_len = sizeof (oid_ipadentaddr) / sizeof (oid);
 		instance = varname + 9;
 		memmove (varname + 10, curifip, sizeof (curifip));
-		*instance = IFINDEX;
+		*instance = IPIFINDEX;
 		snmp_add_null_var (request, varname, varname_len);
 		*instance = IPADDR;
 		snmp_add_null_var (request, varname, varname_len);
@@ -376,9 +426,10 @@ intpro(int interval)
 		    print_variable (var->name, var->name_length, var);
                   }
 		    switch (var->name [9]) {
-		    case IFINDEX:
+		    case IPIFINDEX:
 			ifindex = *var->val.integer;
-			cur_if = if_table + ifindex - 1;
+			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++);
+			cur_if->ifindex = ifindex;
 			break;
 		    case IPADDR:
 			memmove (curifip, var->name+10, sizeof (curifip));
@@ -390,7 +441,7 @@ intpro(int interval)
 		}
 		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
 		if (cur_if->ifroute.s_addr)
-			strcpy(cur_if->route, netname (cur_if->ifroute, 0));
+			strcpy(cur_if->route, netname (cur_if->ifroute, cur_if->netmask));
 		else strcpy(cur_if->route, "none");
 		if ((i = strlen(cur_if->route)) > max_route) max_route = i;
 		if (cur_if->ifip.s_addr)
@@ -407,6 +458,8 @@ intpro(int interval)
 		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 
 		*instance = oldindex;
+		*ifentry = IFINDEX;
+		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFNAME;
 		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFOPERSTATUS;
@@ -428,22 +481,27 @@ intpro(int interval)
 		    cfg_nnets = ifnum;
 		    break;
 		}
-		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
 		    if (snmp_get_do_debugging()) {
 			print_variable (var->name, var->name_length, var);
 		    }
+		    if (!var->val.integer) continue;
 		    switch (var->name [9]) {
-		    case OUTQLEN:
-			cur_if->outqueue = *var->val.integer; break;
-		    case OUTERRORS:
-			cur_if->oerrs = *var->val.integer; break;
-		    case INERRORS:
-			cur_if->ierrs = *var->val.integer; break;
+		    case IFINDEX:
+			ifindex = *var->val.integer;
+			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++);
+			cur_if->ifindex = ifindex;
+			break;
 		    case INOCTETS:
-			cur_if->ioctets += *var->val.integer; break;
+			sprintf(cur_if->ioctets, "%lu",  *var->val.integer);
+			i = strlen(cur_if->ioctets);
+			if (i > max_ioctets) max_ioctets = i;
+			break;
 		    case OUTOCTETS:
-			cur_if->ooctets += *var->val.integer; break;
+			sprintf(cur_if->ooctets, "%lu",  *var->val.integer);
+			i = strlen(cur_if->ooctets);
+			if (i > max_ooctets) max_ooctets = i;
+			break;
 		    case IFNAME:
 			oldindex = var->name[10];
 			if (var->val_len >= sizeof(cur_if->name))
@@ -470,19 +528,20 @@ intpro(int interval)
 		}
 	}
 
-	printf("%*.*s %*.*s %*.*s %12.12s %12.12s ",
+	printf("%*.*s %*.*s %*.*s %*.*s %*.*s ",
 		-max_name, max_name, "Name",
 		-max_route, max_route, "Network",
-		-max_ip, max_ip, "Address", "Ioctets", "Ooctets");
+		-max_ip, max_ip, "Address",
+		max_ioctets, max_ioctets, "Ioctets",
+		max_ooctets, max_ooctets, "Ooctets");
 	putchar('\n');
 	for (ifnum = 0, cur_if = if_table; ifnum < cfg_nnets; ifnum++, cur_if++) {
 		if (cur_if->name [0] == 0) continue;
 		printf("%*.*s ", -max_name, max_name, cur_if->name);
 		printf("%*.*s ", -max_route, max_route, cur_if->route);
 		printf("%*.*s ", -max_ip, max_ip, cur_if->ip);
-		printf("%12lu %12lu",
-		    cur_if->ioctets,
-		    cur_if->ooctets);
+		printf("%*s %*s", max_ioctets, cur_if->ioctets,
+		    max_ioctets, cur_if->ooctets);
 		putchar('\n');
 	}
 	free(if_table);
