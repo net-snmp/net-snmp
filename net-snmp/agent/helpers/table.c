@@ -550,6 +550,68 @@ table_helper_handler(netsnmp_mib_handler *handler,
     return status;
 }
 
+#define SPARSE_TABLE_HANDLER_NAME "sparse_table"
+
+/** implements the sparse table helper handler */
+int
+sparse_table_helper_handler(netsnmp_mib_handler *handler,
+                     netsnmp_handler_registration *reginfo,
+                     netsnmp_agent_request_info *reqinfo,
+                     netsnmp_request_info *requests)
+{
+    int             status;
+    netsnmp_request_info *request;
+    status = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    oid             coloid[MAX_OID_LEN];
+    netsnmp_table_request_info *table_info;
+
+    if (reqinfo->mode == MODE_GETNEXT) {
+        for(request = requests ; request; request = request->next) {
+            if (request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+                /*
+                 * get next skipped this value for this column, we
+                 * need to keep searching forward 
+                 */
+                request->requestvb->type = ASN_PRIV_RETRY;
+            }
+            if (request->requestvb->type == SNMP_NOSUCHOBJECT ||
+                request->requestvb->type == SNMP_ENDOFMIBVIEW) {
+                /*
+                 * get next has completely finished with this column,
+                 * so we need to try with the next column (if any)
+                 */
+                table_info = netsnmp_extract_table_info(request);
+
+                memcpy(coloid, reginfo->rootoid,
+                               reginfo->rootoid_len * sizeof(oid));
+                coloid[reginfo->rootoid_len]   = 1;   /* table.entry node */
+                coloid[reginfo->rootoid_len+1] = ++table_info->colnum;
+                snmp_set_var_objid(request->requestvb,
+                                   coloid, reginfo->rootoid_len + 2);
+
+                request->requestvb->type = ASN_PRIV_RETRY;
+            }
+        }
+    }
+    return status;
+}
+
+/** creates a table handler given the netsnmp_table_registration_info object,
+ *  inserts it into the request chain and then calls
+ *  netsnmp_register_handler() to register the table into the agent.
+ */
+int
+netsnmp_register_sparse_table(netsnmp_handler_registration *reginfo,
+                       netsnmp_table_registration_info *tabreq)
+{
+    netsnmp_inject_handler(reginfo,
+        netsnmp_create_handler(SPARSE_TABLE_HANDLER_NAME,
+                               sparse_table_helper_handler));
+    netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
+    return netsnmp_register_handler(reginfo);
+}
+
+
 /** Builds the result to be returned to the agent given the table information.
  *  Use this function to return results from lowel level handlers to
  *  the agent.  It takes care of building the proper resulting oid

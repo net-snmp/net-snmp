@@ -76,6 +76,8 @@ extern          "C" {
                                            *reginfo,
                                            netsnmp_table_registration_info
                                            *tabreq);
+    int   netsnmp_register_sparse_table(netsnmp_handler_registration    *reginfo,
+                                        netsnmp_table_registration_info *tabreq);
     int             netsnmp_table_build_oid(netsnmp_handler_registration
                                             *reginfo,
                                             netsnmp_request_info *reqinfo,
@@ -112,6 +114,7 @@ extern          "C" {
                                            *valid_columns);
 
     Netsnmp_Node_Handler table_helper_handler;
+    Netsnmp_Node_Handler sparse_table_helper_handler;
 
 #define netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
@@ -123,23 +126,7 @@ extern          "C" {
     void            netsnmp_table_helper_add_indexes(va_alist);
 #endif
 
-    int
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        netsnmp_check_getnext_reply(netsnmp_request_info *request,
+    int netsnmp_check_getnext_reply(netsnmp_request_info *request,
                                     oid * prefix, size_t prefix_len,
                                     netsnmp_variable_list * newvar,
                                     netsnmp_variable_list ** outvar);
