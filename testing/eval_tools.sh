@@ -471,6 +471,14 @@ FINISHED() {
       STOPTRAPD
     fi
     for pfile in $SNMP_TMPDIR/*pid* ; do
+        if [ "x$pfile" = "x$SNMP_TMPDIR/*pid*" ]; then
+            ECHO "(no pid file(s) found) "
+            break
+        fi
+        if [ ! -f $pfile ]; then
+            ECHO "('$pfile' disappeared) "
+            continue
+        fi
 	pid=`cat $pfile`
 	ps -e | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
