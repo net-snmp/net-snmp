@@ -32,6 +32,8 @@
 #include <sys/socket.h>
 #endif
 
+#include "mib_module_config.h"
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"

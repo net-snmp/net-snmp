@@ -1,4 +1,3 @@
-#include "mib_module_config.h"        /* list of which modules are supported */
 #include <config.h>                   /* local SNMP configuration details*/
 #if HAVE_STRING_H
 #include <string.h>

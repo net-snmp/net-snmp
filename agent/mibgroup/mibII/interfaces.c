@@ -3,8 +3,6 @@
  *
  */
 
-#include "mib_module_config.h"
-
 #include <config.h>
 
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && !defined(IFNET_NEEDS_KERNEL_LATE)
@@ -112,13 +110,13 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
 #endif
-
-#include "../mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>

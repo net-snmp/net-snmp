@@ -105,7 +105,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "read_config.h"
 #include "snmp_vars.h"
 #include "agent_read_config.h"
-#include "mib_module_config.h"
 #include "agent_registry.h"
 #include "transform_oids.h"
 #include "callback.h"
