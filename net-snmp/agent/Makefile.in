@@ -79,8 +79,8 @@ agent_read_config.o: ./../snmplib/mib.h ./../snmplib/snmp_debug.h
 agent_read_config.o: mibgroup/struct.h ./../snmplib/read_config.h
 agent_read_config.o: agent_read_config.h ./mibgroup/mib_module_includes.h
 agent_read_config.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
-agent_read_config.o: mibgroup/host.h mibgroup/ucd_attackHist.h
-agent_read_config.o: mibgroup/ucd_zoneWatch.h mibgroup/mibII/system_mib.h
+agent_read_config.o: mibgroup/host.h
+agent_read_config.o: mibgroup/mibII/system_mib.h
 agent_read_config.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 agent_read_config.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 agent_read_config.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
@@ -141,8 +141,8 @@ snmp_vars.o: ./../snmplib/snmp.h ./../snmplib/mib.h ./../snmplib/snmp_debug.h
 snmp_vars.o: m2m.h snmp_vars_m2m.h ../snmplib/system.h kernel.h
 snmp_vars.o: mibgroup/struct.h mibgroup/mib_module_includes.h
 snmp_vars.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
-snmp_vars.o: mibgroup/host.h mibgroup/ucd_attackHist.h
-snmp_vars.o: mibgroup/ucd_zoneWatch.h mibgroup/mibII/system_mib.h
+snmp_vars.o: mibgroup/host.h
+snmp_vars.o: mibgroup/mibII/system_mib.h
 snmp_vars.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 snmp_vars.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 snmp_vars.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
