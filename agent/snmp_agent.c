@@ -562,7 +562,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   exact, &write_method, pi, &noSuchObject);
-	if (statP == NULL) {
+	if (statP == NULL && pi->pdutype != SNMP_MSG_SET) {
 	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
 	    else {
 		char buf [256];
