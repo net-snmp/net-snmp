@@ -49,11 +49,6 @@
 /* add in recent resource lock functions (not complete) */
 #undef _REENTRANT
 
-/* should "--" comments in mibs be a comment till the end of the line
-   or also until another "--", the latter being the technically
-   correct. */
-#undef MIB_COMMENT_IS_EOL_TERMINATED
-
 /* debugging stuff */
 #undef SNMP_NO_DEBUGGING           /* if defined, we optimize the code
                                       to exclude all debugging calls. */

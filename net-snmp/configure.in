@@ -104,13 +104,6 @@ AC_ARG_ENABLE(internal-md5,
 AC_DEFINE(USE_INTERNAL_MD5))
 
 
-AC_ARG_ENABLE(eol-terminated-comments, [
-Configuring the SNMP library (and the applications that use it):
-  --enable-mib-eol-comments       Treat \"--\" as a mib comment terminated only
-                                  by an end of line condition.  (This can now
-                                  be turned on/off at runtime instead.)],
-    AC_DEFINE(MIB_COMMENT_IS_EOL_TERMINATED))
-
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
                                   SNMP normally can not handle
