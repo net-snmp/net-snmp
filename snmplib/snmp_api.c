@@ -592,7 +592,7 @@ register_default_handlers(void) {
 		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
   ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
                      DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
-  ds_register_config(ASN_OCTET_STR, "snmp","noRangeCheck",
+  ds_register_config(ASN_BOOLEAN, "snmp","noRangeCheck",
 		     DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE );
 }
 
