@@ -89,9 +89,9 @@ char	*snmp_trapcommunity	= NULL;
 
 /* Prototypes */
  /*
-static int create_v1_trap_session (const char *, const char *);
-static int create_v2_trap_session (const char *, const char *);
-static int create_v2_inform_session (const char *, const char *);
+static int create_v1_trap_session (const char *, u_short, const char *);
+static int create_v2_trap_session (const char *, u_short, const char *);
+static int create_v2_inform_session (const char *, u_short, const char *);
 static void free_trap_session (struct trap_sink *sp);
 static void send_v1_trap (struct snmp_session *, int, int);
 static void send_v2_trap (struct snmp_session *, int, int, int);
@@ -118,7 +118,7 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
     return 1;
 }
 
-int create_trap_session (char *sink, 
+int create_trap_session (char *sink, u_short sinkport,
 				char *com,
 				int version, int pdutype)
 {
@@ -131,7 +131,7 @@ int create_trap_session (char *sink,
         session.community = (u_char *)com;
         session.community_len = strlen (com);
     }
-    session.remote_port = SNMP_TRAP_PORT;
+    session.remote_port = sinkport;
     sesp = snmp_open (&session);
 
     if (sesp) {
@@ -143,22 +143,25 @@ int create_trap_session (char *sink,
     return 0;
 }
 
-static int create_v1_trap_session (char *sink, 
+static int create_v1_trap_session (char *sink, u_short sinkport,
 				   char *com)
 {
-    return create_trap_session( sink, com, SNMP_VERSION_1, SNMP_MSG_TRAP );
+    return create_trap_session( sink, sinkport, com,
+				SNMP_VERSION_1, SNMP_MSG_TRAP );
 }
 
-static int create_v2_trap_session (char *sink, 
+static int create_v2_trap_session (char *sink,  u_short sinkport,
 				   char *com)
 {
-    return create_trap_session( sink, com, SNMP_VERSION_2c, SNMP_MSG_TRAP2 );
+    return create_trap_session( sink, sinkport, com,
+				SNMP_VERSION_2c, SNMP_MSG_TRAP2 );
 }
 
-static int create_v2_inform_session (char *sink, 
+static int create_v2_inform_session (char *sink,  u_short sinkport,
 				     char *com)
 {
-    return create_trap_session( sink, com, SNMP_VERSION_2c, SNMP_MSG_INFORM );
+    return create_trap_session( sink, sinkport, com,
+				SNMP_VERSION_2c, SNMP_MSG_INFORM );
 }
 
 
@@ -427,12 +430,24 @@ void snmpd_parse_config_trapsink(const char *token,
 				 char *cptr)
 {
     char tmpbuf[1024];
-    char *sp, *cp;
-  
+    char *sp, *cp, *pp = NULL;
+    u_short sinkport;
+    
     if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     sp = strtok(cptr, " \t\n");
     cp = strtok(NULL, " \t\n");
-    if (create_v1_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
+    if (cp) pp = strtok(NULL, " \t\n");
+    if (cp && pp) {
+	sinkport = atoi(pp);
+	if ((sinkport < 1) || (sinkport > 0xffff)) {
+	    config_perror("trapsink port out of range");
+	    sinkport = SNMP_TRAP_PORT;
+	}
+    } else {
+	sinkport = SNMP_TRAP_PORT;
+    }
+    if (create_v1_trap_session(sp, sinkport,
+			       cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
 	config_perror(tmpbuf);
     }
@@ -443,12 +458,24 @@ void
 snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char tmpbuf[1024];
-    char *sp, *cp;
+    char *sp, *cp, *pp = NULL;
+    u_short sinkport;
   
     if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     sp = strtok(cptr, " \t\n");
     cp = strtok(NULL, " \t\n");
-    if (create_v2_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
+    if (cp) pp = strtok(NULL, " \t\n");
+    if (cp && pp) {
+	sinkport = atoi(pp);
+	if ((sinkport < 1) || (sinkport > 0xffff)) {
+	    config_perror("trapsink port out of range");
+	    sinkport = SNMP_TRAP_PORT;
+	}
+    } else {
+	sinkport = SNMP_TRAP_PORT;
+    }
+    if (create_v2_trap_session(sp, sinkport,
+			       cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
 	config_perror(tmpbuf);
     }
@@ -458,12 +485,24 @@ void
 snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char tmpbuf[1024];
-    char *sp, *cp;
+    char *sp, *cp, *pp = NULL;
+    u_short sinkport;
   
     if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     sp = strtok(cptr, " \t\n");
     cp = strtok(NULL, " \t\n");
-    if (create_v2_inform_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
+    if (cp) pp = strtok(NULL, " \t\n");
+    if (cp && pp) {
+	sinkport = atoi(pp);
+	if ((sinkport < 1) || (sinkport > 0xffff)) {
+	    config_perror("trapsink port out of range");
+	    sinkport = SNMP_TRAP_PORT;
+	}
+    } else {
+	sinkport = SNMP_TRAP_PORT;
+    }
+    if (create_v2_inform_session(sp, sinkport,
+				 cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create informsink: %s", cptr);
 	config_perror(tmpbuf);
     }

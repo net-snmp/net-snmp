@@ -275,15 +275,22 @@ information is reported by the 'system' table in the mibII tree.
 Setting authtrapenable to 1 enables generation of authentication failure
 traps. The default value is 2 (disable).
 .IP "trapcommunity STRING"
-.IP "trapsink HOST [COMMUNITY]"
-.IP "trap2sink HOST [COMMUNITY]"
-This defines the host to receive traps. The daemon sends a Cold Start
-trap when it starts up. If enabled, it also sends traps on
-authentication failures.  Multiple \fItrapsink\fR lines may be specified
-to specify multiple destinations.
-Use \fItrap2sink\fR to send SNMPv2 traps.
+This defines the default community string to be used when sending traps.
+Note that this command must be used prior to any of the following three
+commands that are intended use this community string.
+.IP "trapsink HOST [COMMUNITY [PORT]]"
+.IP "trap2sink HOST [COMMUNITY [PORT]]"
+.IP "informsink HOST [COMMUNITY [PORT]]"
+These commands define
+the hosts to receive traps (and/or inform notifications). The
+daemon sends a Cold Start trap when it starts up. If enabled, it also sends
+traps on authentication failures.  Multiple \fItrapsink\fR, \fItrap2sink\fR
+and \fIinformsink\fR lines may be specified to specify multiple destinations.
+Use \fItrap2sink\fR to send SNMPv2 traps and \fIinformsink\fR to send
+inform notifications.
 If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
-directive will be used.
+directive will be used. If PORT is not specified, the well known SNMP trap
+port (162) will be used.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program
