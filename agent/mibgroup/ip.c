@@ -511,7 +511,10 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     u_char		    *cp;
     int			    lowinterface=0;
     short                   interface;
-    static struct in_ifaddr in_ifaddr, lowin_ifaddr;
+    static struct in_ifaddr in_ifaddr;
+#if !defined(linux) && !defined(sunV3)
+    static struct in_ifaddr lowin_ifaddr;
+#endif
     static struct ifnet ifnet, lowin_ifnet;
 
     /* fill in object part of name for current (less sizeof instance part) */
