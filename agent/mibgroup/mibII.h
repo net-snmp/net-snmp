@@ -17,7 +17,7 @@ config_require(mibII/setSerialNo)
  * these new module re-rewrites have only been implemented for
  * linux.
  */
-#ifdef linux
+#if defined( linux ) && defined( NETSNMP_ENABLE_MFD_REWRITES )
 config_require(ip-mib)
 config_require(if-mib)
 config_require(ip-forward-mib)
