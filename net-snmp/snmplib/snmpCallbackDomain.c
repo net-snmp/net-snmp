@@ -48,6 +48,8 @@
 #define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
 
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
 static netsnmp_transport_list *trlist = NULL;
 
 static int      callback_count = 0;
@@ -529,9 +531,4 @@ netsnmp_clear_callback_list(void)
 
 }
 
-
-
-
-
-
-
+#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
