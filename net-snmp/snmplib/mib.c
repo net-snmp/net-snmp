@@ -838,6 +838,12 @@ init_mib __P((void))
 	read_all_mibs();
     }
     else {
+	if ( *env_var == '+' ) {
+	    strcpy(path, DEFAULT_MIBS);
+	    *env_var = ':';
+	    strcat(path, env_var);
+	    env_var = path ;
+	}
 	entry = strtok( env_var, ":" );
 	while ( entry ) {
 	    read_module(entry);
