@@ -48,12 +48,14 @@ void update_config();
 struct extensible *get_exten_instance();
 unsigned char *var_extensible_relocatable();
 
-extern struct myproc *procwatch;  /* moved to proc.c */
+extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */
-extern struct exstensible *extens;  /* In exec.c */
-extern struct exstensible *relocs;  /* In exec.c */
+extern struct exstensible *extens;       /* In exec.c */
+extern struct exstensible *relocs;       /* In exec.c */
 extern int numextens;                    /* ditto */
 extern int numrelocs;                    /* ditto */
+extern struct exstensible *passthrus;    /* In pass.c */
+extern int numpassthrus;                 /* ditto */
 
 int minimumswap;
 double maxload[3];
@@ -677,6 +679,7 @@ extern char version_descr[];
 extern char sysName[];
 extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
+extern struct variable2 extensible_passthru_variables[];
 
 extern int compare();
 
@@ -694,6 +697,7 @@ void setup_tree()
 {
   extern struct subtree *subtrees,subtrees_old[];
   extern struct variable2 extensible_relocatable_variables[];
+  extern struct variable2 extensible_passthru_variables[];
   struct subtree *sb;
   int i, old_treesz;
   static struct subtree mysubtree[1];
@@ -704,19 +708,31 @@ void setup_tree()
 
   old_treesz = subtree_old_size();
 
-  subtrees = (struct subtree *) malloc ((numrelocs + old_treesz)
+  subtrees = (struct subtree *) malloc ((numrelocs + old_treesz + numpassthrus)
                                         *sizeof(struct subtree));
   bcopy(subtrees_old,subtrees,old_treesz *sizeof(struct subtree));
   sb = subtrees;
   sb += old_treesz;
+
+  /* add in relocatable mibs */
   for(i=1;i<=numrelocs;i++, sb++) {
     exten = get_exten_instance(relocs,i);
     memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
     mysubtree[0].namelen = exten->miblen;
     mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
     mysubtree[0].variables_len = 6;
-      /* sizeof(extensible_relocatable_variables)/sizeof(*extensible_relocatable_variables); */
     mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
+    memcpy(sb,mysubtree,sizeof(struct subtree));
+  }
+
+  /* add in pass thrus */
+  for(i=1;i<=numpassthrus;i++, sb++) {
+    exten = get_exten_instance(passthrus,i);
+    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
+    mysubtree[0].namelen = exten->miblen;
+    mysubtree[0].variables = (struct variable *)extensible_passthru_variables;
+    mysubtree[0].variables_len = 1;
+    mysubtree[0].variables_width = sizeof(*extensible_passthru_variables);
     memcpy(sb,mysubtree,sizeof(struct subtree));
   }
 
@@ -724,7 +740,7 @@ void setup_tree()
      and also double check that our mibs were in the proper order in
      the first place */
 
-  qsort(subtrees,numrelocs + old_treesz,
+  qsort(subtrees,numrelocs + old_treesz + numpassthrus,
         sizeof(struct subtree),tree_compare);
 
 }
@@ -735,8 +751,8 @@ void update_config()
   int i;
   char configfile[300];
   
-  free_config(&procwatch,&extens,&relocs);
-  numprocs = numextens = numrelocs = 0;
+  free_config(&procwatch,&extens,&relocs,&passthrus);
+  numprocs = numextens = numrelocs = numpassthrus = 0;
   /* restore defaults */
   minimumswap = DEFAULTMINIMUMSWAP;
   for (i=0; i<=2;i++)
@@ -749,9 +765,9 @@ void update_config()
   }
   /* read the config files */
   sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
   sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 
   if (subtrees)
     free(subtrees);
@@ -780,13 +796,14 @@ init_extensible() {
   procwatch = NULL;   /* initialize to NULL */
   extens = NULL;
   relocs = NULL;
+  passthrus = NULL;
 
   /* read config file(s) */
   /* read the config files */
   sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
   sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
-  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&passthrus,&numpassthrus,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
   
   /* set default values of system stuff */
   strcpy(extmp.command,"/bin/uname -a");

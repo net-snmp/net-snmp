@@ -4,6 +4,7 @@
 #define STRMAX 1000
 #define SHPROC 1
 #define EXECPROC 2
+#define PASSTHRU 3
 #define MIBMAX 30
 
 struct extensible

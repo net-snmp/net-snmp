@@ -30,7 +30,8 @@ CC = @CC@ $(CPPFLAGS)
 DIRS=extensible
 EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o \
                extensible/extensible.o extensible/hpmibs.o \
-               extensible/versioninfo.o extensible/proc.o extensible/exec.o
+               extensible/versioninfo.o extensible/proc.o \
+               extensible/exec.o extensible/pass.o
 
 all: subdirs snmpd
 

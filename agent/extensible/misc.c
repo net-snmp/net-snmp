@@ -414,8 +414,21 @@ int print_mib_oid(name,len)
   int len;
 {
   int i;
-  printf("Mib:  ");
+  DEBUGP("Mib:  ");
   for(i=0; i < len; i++) {
-    printf(".%d",name[i]);
+    DEBUGP1(".%d",name[i]);
+  }
+}
+
+int sprint_mib_oid(buf,name,len)
+  char *buf;
+  oid name[];
+  int len;
+{
+  int i;
+  for(i=0; i < len; i++) {
+    sprintf(buf,".%d",name[i]);
+    while(*buf != NULL)
+      buf++;
   }
 }

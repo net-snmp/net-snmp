@@ -28,13 +28,15 @@ void copy_word();
 /* communities from agent/snmp_agent.c */
 extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
 
-int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
-                numexs,minimumswap,disk, numdisks,maxload)
+int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
+                numpassthrus, ppexten, numexs, minimumswap, disk, numdisks,
+                maxload)
      char *filename;
      struct myproc **procp;
      struct extensible **ppexten;
      struct extensible **pprelocs;
-     int *numexs, *numps, *numrelocs;
+     struct extensible **pppassthrus;
+     int *numexs, *numps, *numrelocs, *numpassthrus;
      int *minimumswap;
      struct diskpart disk[];
      int *numdisks;
@@ -59,6 +61,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
   /* skip past set procp/ppexten */
   while (*ppexten != NULL) ppexten = &((*ppexten)->next);
   while (*pprelocs != NULL) pprelocs = &((*pprelocs)->next);
+  while (*pppassthrus != NULL) pppassthrus = &((*pppassthrus)->next);
   while (*procp != NULL) procp = &((*procp)->next);
 
   while (fgets(line,STRMAX,ifile) != NULL) 
@@ -75,17 +78,25 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             fprintf(stderr,"snmpd: Blank line following %s command in %s:%d",
                     word,filename,linecount);
           }
-          else if (!strncasecmp(word,"sh",2) || !strncasecmp(word,"exec",4)) {
+          else if (!strncasecmp(word,"sh",2) || !strncasecmp(word,"exec",4) ||
+            !strncasecmp(word,"pass",4)) {
             /* determine type */
             if (*cptr == '.') cptr++;
             if (isdigit(*cptr)) {
-              (*numrelocs) = (*numrelocs)+1;
-              (*pprelocs) =
-                (struct extensible *) malloc(sizeof(struct extensible));
-              pptmp = pprelocs;
-              pprelocs = &((*pprelocs)->next);
-            }
-            else {
+              if (!strncasecmp(word,"pass",4)) {
+                (*numpassthrus) = (*numpassthrus)+1;
+                (*pppassthrus) =
+                  (struct extensible *) malloc(sizeof(struct extensible));
+                pptmp = pppassthrus;
+                pppassthrus = &((*pppassthrus)->next);
+              } else {
+                (*numrelocs) = (*numrelocs)+1;
+                (*pprelocs) =
+                  (struct extensible *) malloc(sizeof(struct extensible));
+                pptmp = pprelocs;
+                pprelocs = &((*pprelocs)->next);
+              }
+            } else {
               (*numexs) = (*numexs)+1;
               (*ppexten) =
                 (struct extensible *) malloc(sizeof(struct extensible));
@@ -94,34 +105,37 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             }
             if (!strncasecmp(word,"sh",2)) 
               (*pptmp)->type = SHPROC;
+            else if (!strncasecmp(word,"pass",2)) 
+              (*pptmp)->type = PASSTHRU;
             else
               (*pptmp)->type = EXECPROC;
             if (isdigit(*cptr)) {
-              for(i=0; isdigit(*cptr); i++) {
-                (*pptmp)->miboid[i] = atoi(cptr);
-                while(isdigit(*cptr++));
-                if (*cptr == '.') cptr++;
-              }
-              (*pptmp)->miboid[i] = -1;
-              (*pptmp)->miblen = i;
+              (*pptmp)->miblen = parse_miboid(cptr,(*pptmp)->miboid);
+              while (isdigit(*cptr) || *cptr == '.') cptr++;
             }
             else {
               (*pptmp)->miboid[0] = -1;
               (*pptmp)->miblen = 0;
             }
             /* name */
-            copy_word(cptr,(*pptmp)->name);
-            /* command */
-            cptr = skip_not_white(cptr);
+            if ((*pptmp)->type != PASSTHRU) {
+              copy_word(cptr,(*pptmp)->name);
+              cptr = skip_not_white(cptr);
+            }
             cptr = skip_white(cptr);
+            /* command */
             if (cptr == NULL) {
               fprintf(stderr,"No command specified on line:  %s\n",line);
+              fflush(stderr);
             } else {
               for(tcptr=cptr;*tcptr != NULL && *tcptr != '#' && *tcptr != ';';
                   tcptr++);
               strncpy((*pptmp)->command,cptr,tcptr-cptr);
               (*pptmp)->command[tcptr-cptr-1]=NULL;
               (*pptmp)->next = NULL;
+            }
+            if ((*pptmp)->type == PASSTHRU) {
+              strcpy((*pptmp)->name, (*pptmp)->command);
             }
           }
           else if (!strncmp(word,"disk",4)) {
@@ -220,7 +234,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             }
           }
           else {
-            fprintf(stderr,"snmpd: Unknown command in %s:%d  %s",
+            fprintf(stderr,"snmpd: Unknown command in %s:%d - %s\n",
                     filename,linecount,word);
           }
 	}
@@ -229,9 +243,9 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
   return(0);
 }
 
-free_config(procp,ppexten,pprelocs)
+free_config(procp,ppexten,pprelocs,pppassthrus)
      struct myproc **procp;
-     struct extensible **ppexten, **pprelocs;
+     struct extensible **ppexten, **pprelocs, **pppassthrus;
 {
   struct myproc *ptmp, *ptmp2;
   struct extensible *etmp, *etmp2;
@@ -254,9 +268,16 @@ free_config(procp,ppexten,pprelocs)
     free(etmp2);
   }
 
+  for (etmp = *pppassthrus; etmp != NULL;) {
+    etmp2 = etmp;
+    etmp = etmp->next;
+    free(etmp2);
+  }
+
   *procp = NULL;
   *ppexten = NULL;
   *pprelocs = NULL;
+  *pppassthrus = NULL;
 
 }
 /* skip all white spaces and return 1 if found something either end of
@@ -318,3 +339,20 @@ char *find_field(ptr,field)
   }
 }
 
+int parse_miboid(buf,oidout)
+char *buf;
+oid *oidout;
+{
+  int i;
+  
+  if (!buf)
+    return NULL;
+  if (*buf == '.') buf++;
+  for(i=0;isdigit(*buf);i++) {
+    oidout[i] = atoi(buf);
+    while(isdigit(*buf++));
+    if (*buf == '.') buf++;
+  }
+  oidout[i] = -1;
+  return i;
+}
