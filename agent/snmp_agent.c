@@ -1118,7 +1118,8 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 
 request_info *
 add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
-                     struct variable_list *varbind_ptr, struct subtree *tp) {
+                     struct variable_list *varbind_ptr, struct subtree *tp)
+{
     request_info *request = NULL;
     int cacheid;
 
@@ -1335,6 +1336,7 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
                             /* XXXWWW: ack!!! */
                         } else {
                             vbptr = vbptr->next_variable;
+			    vbptr->name_length = 0;
                             vbptr->type = ASN_NULL;
                             asp->bulkcache[bulkcount++] = vbptr;
                         }
