@@ -455,7 +455,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		    while ( --i > 0 ) 
 			if ( asp->end )
 			    asp->end = asp->end->next_variable;
-                    if ( asp->end )
+                    if ( asp->end ) {
                         snmp_free_varbind(asp->end->next_variable);
                         asp->end->next_variable = NULL;
                     }
