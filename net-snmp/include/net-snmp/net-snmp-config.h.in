@@ -589,6 +589,9 @@
 /* Define if you have the <rpmio.h> header file.  */
 #undef HAVE_RPMIO_H
 
+/* Define if you have the <search.h> header file.  */
+#undef HAVE_SEARCH_H
+
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
 

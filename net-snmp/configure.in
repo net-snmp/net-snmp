@@ -1503,6 +1503,8 @@ dnl KAME
 AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip6_var.h netinet6/tcp6.h netinet6/tcp6_fsm.h netinet6/nd6.h netinet6/tcp6_timer.h netinet6/tcp6_var.h)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_HEADERS(dlfcn.h)
+dnl table_array helper support
+AC_CHECK_HEADERS(search.h)
 
 dnl RPM subdirectory path (sigh)
 if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
