@@ -479,18 +479,10 @@ static struct subtree root_subtrees[] = {
    { { 2 }, 1 }		/* joint-ccitt-iso */
 };
 
-struct subtree subtrees_old[] = {
-#include "mibgroup/mib_module_loads.h"
-};
-
-int subtree_old_size (void) {
-  return (sizeof(subtrees_old)/ sizeof(struct subtree));
-}
 
 void setup_tree (void)
 {
-  extern struct subtree *subtrees,subtrees_old[];
-  int i;
+  extern struct subtree *subtrees;
     
   if ( subtrees == NULL ) {
 	subtrees =             &(root_subtrees[0]);
@@ -498,11 +490,7 @@ void setup_tree (void)
 	subtrees->next->next = &(root_subtrees[2]);
   }
 
-  /* Go through the 'static' subtrees (subtrees_old),
-	and link them into the global subtree structure */
-
-  for ( i=0 ; i < subtree_old_size(); i++ )
-	load_subtree( &(subtrees_old[i]) );
+  /* Support for 'static' subtrees (subtrees_old) has now been dropped */
 
   /* No longer necessary to sort the mib tree - this is inherent in
      the construction of the subtree structure */
