@@ -41,7 +41,7 @@
 @    include m2c_setup_table.m2i@
 
 /* PUBLIC interface initialization routine */
-void _${context}_initialize_interface(${context}_registration_ptr user_ctx,
+void _${context}_initialize_interface(${context}_registration * user_ctx,
                                     u_long flags);
 
 @   if $m2c_data_allocate == 1@
@@ -102,7 +102,7 @@ typedef struct ${context}_interface_ctx_s {
    netsnmp_container              *container;
    netsnmp_cache                  *cache; /* optional cache */
 
-   ${context}_registration_ptr      user_ctx;
+   ${context}_registration *      user_ctx;
    
    netsnmp_table_registration_info  tbl_info;
 
@@ -175,7 +175,7 @@ ${context}_data *${context}_allocate_data(void);
  *    (Define its contents and how it's structured)
  */
 void
-_${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flags)
+_${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flags)
 {
     netsnmp_baby_steps_access_methods *access_multiplexer =
         &${context}_if_ctx.access_multiplexer;
@@ -431,7 +431,6 @@ ${context}_allocate_rowreq_ctx($m2c_tmp)
     rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
 
     rowreq_ctx->${context}_data_list = NULL;
-    rowreq_ctx->${context}_reg = ${context}_if_ctx.user_ctx;
 
 @if $m2c_data_init == 1@
     if(SNMPERR_SUCCESS !=
@@ -981,7 +980,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
     /*
      * if individual parts look ok, check them as a whole
      */
-    return ${context}_validate_index( rowreq_ctx->${context}_reg, rowreq_ctx );
+    return ${context}_validate_index( ${context}_if_ctx.user_ctx, rowreq_ctx );
 } /* _${context}_check_indexes */
 @end@ # $m2c_table_row_creation
 
