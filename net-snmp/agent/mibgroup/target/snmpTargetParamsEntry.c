@@ -29,7 +29,7 @@ static struct targetParamTable_struct *aPTable=0;
 /* TargetParamTable_create creates and returns a pointer
    to a targetParamTable_struct with default values set */
 struct targetParamTable_struct 
-*snmpTargetParamTable_create()
+*snmpTargetParamTable_create(void)
 {
   struct targetParamTable_struct *newEntry;
 
@@ -52,8 +52,8 @@ struct targetParamTable_struct
 
 /* TargetParamTable_dispose frees the space allocated to a
    targetParamTable_struct */
-void snmpTargetParamTable_dispose(reaped)
-     struct targetParamTable_struct *reaped;
+void snmpTargetParamTable_dispose(
+     struct targetParamTable_struct *reaped)
 {
   free(reaped->paramName);
   free(reaped->secName);
@@ -67,8 +67,9 @@ void snmpTargetParamTable_dispose(reaped)
    low to high and this procedure inserts a new struct in the proper 
    location. Sorting uses OID values based on paramName. A new equal value 
    overwrites a current one. */
-void snmpTargetParamTable_addToList(newEntry, listPtr)
-     struct targetParamTable_struct *newEntry, **listPtr;
+void snmpTargetParamTable_addToList(
+     struct targetParamTable_struct *newEntry,
+     struct targetParamTable_struct **listPtr)
 {
   static struct targetParamTable_struct *curr_struct, *prev_struct;
   int    i, newOIDLen = 0, currOIDLen = 0;
@@ -120,8 +121,9 @@ void snmpTargetParamTable_addToList(newEntry, listPtr)
 
 /* snmpTargetParamTable_remFromList removes a targetParamTable_struct 
    from the list passed in */
-void snmpTargetParamTable_remFromList(oldEntry, listPtr)
-     struct targetParamTable_struct *oldEntry, **listPtr;
+void snmpTargetParamTable_remFromList(
+     struct targetParamTable_struct *oldEntry,
+     struct targetParamTable_struct **listPtr)
 {
   struct targetParamTable_struct *tptr;
 
@@ -146,12 +148,12 @@ void snmpTargetParamTable_remFromList(oldEntry, listPtr)
 
 /* lookup OID in the link list of Table Entries */
 struct targetParamTable_struct *
-search_snmpTargetParamsTable(baseName, baseNameLen, name, length, exact)
-     oid    *baseName;
-     int    baseNameLen;
-     oid    *name;
-     int    *length;
-     int    exact;
+search_snmpTargetParamsTable(
+     oid    *baseName,
+     int    baseNameLen,
+     oid    *name,
+     int    *length,
+     int    exact)
 {
    static struct targetParamTable_struct *temp_struct;
    int    i, myOIDLen = 0;
@@ -182,8 +184,8 @@ search_snmpTargetParamsTable(baseName, baseNameLen, name, length, exact)
 /* snmpTargetParams_rowStatusCheck is boolean funciton that  checks 
    the status of a row's values in order to determine whether
    the row should be notReady or notInService  */
-int snmpTargetParams_rowStatusCheck(entry)
-     struct targetParamTable_struct *entry;
+int snmpTargetParams_rowStatusCheck(
+     struct targetParamTable_struct *entry)
 {
   if ( (entry->mpModel  < 0) || (entry->secModel < 0) ||
        (entry->secLevel < 0) || (entry->secName == 0)   )
@@ -203,9 +205,9 @@ init_snmpTargetParamsEntry(void)
 }  /*  init_snmpTargetParmsEntry  */
 
 
-int snmpTargetParams_addParamName(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addParamName(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -227,9 +229,9 @@ int snmpTargetParams_addParamName(entry, cptr)
 }
   
 
-int snmpTargetParams_addMPModel(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addMPModel(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no mp model in config string\n");
@@ -248,9 +250,9 @@ int snmpTargetParams_addMPModel(entry, cptr)
 }  /* snmpTargetParams_addMPModel  */
   
 
-int snmpTargetParams_addSecModel(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addSecModel(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no sec model in config string\n");
@@ -269,9 +271,9 @@ int snmpTargetParams_addSecModel(entry, cptr)
 }  /*  snmpTargetParams_addSecModel  */
 
 
-int snmpTargetParams_addSecName(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addSecName(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -288,9 +290,9 @@ int snmpTargetParams_addSecName(entry, cptr)
 }  /* snmpTargetParams_addSecName  */
 
 
-int snmpTargetParams_addSecLevel(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addSecLevel(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no security level in config string\n");
@@ -309,9 +311,9 @@ int snmpTargetParams_addSecLevel(entry, cptr)
 }  /*  snmpTargetParams_addSecLevel  */
   
 
-int snmpTargetParams_addStorageType(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addStorageType(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no storage type in config string\n");
@@ -340,9 +342,9 @@ int snmpTargetParams_addStorageType(entry, cptr)
 }  /* snmpTargetParams_addStorageType  */
 
 
-int snmpTargetParams_addRowStatus(entry, cptr)
-     struct targetParamTable_struct *entry;
-     char   *cptr;
+int snmpTargetParams_addRowStatus(
+     struct targetParamTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no row status in config string\n");
@@ -367,8 +369,8 @@ int snmpTargetParams_addRowStatus(entry, cptr)
 }  /* snmpTargetParams_addRowStatus  */
     
 
-void snmpd_parse_config_targetParams(token, char_ptr)
-     char *token, *char_ptr;
+void snmpd_parse_config_targetParams(
+     char *token, char *char_ptr)
 {
   char *cptr = char_ptr, buff[1024];
   struct targetParamTable_struct *newEntry;
@@ -867,9 +869,9 @@ write_snmpTargetParamsStorageType(action, var_val, var_val_type,
    the index of the passed in 'name' (i.e. full index OID) and
    adds it to the linked list. 'name' should be the full OID of the new index. 
    It passes back 0 if unsuccessfull.*/
-int snmpTargetParams_createNewRow(name, name_len)
-     oid  *name;
-     int  name_len;
+int snmpTargetParams_createNewRow(
+     oid  *name,
+     int  name_len)
 {
   int    pNameLen, i;
   struct targetParamTable_struct *temp_struct;

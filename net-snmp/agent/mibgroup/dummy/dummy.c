@@ -127,12 +127,12 @@ header_dummy(struct variable *vp,
     DEBUGMSGOID(("dummy/dummy:var_dummy", name, *length));
     DEBUGMSG(("dummy/dummy:var_dummy", " %d\n", exact));
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     newname[DUMMY_NAME_LENGTH] = 0;
     result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -158,7 +158,6 @@ var_dummy(struct variable *vp,
 
   static long long_ret;
   static char string[30];
-  static oid oid_ret[8];
 
     if (header_dummy(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;

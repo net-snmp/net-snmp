@@ -1062,12 +1062,12 @@ header_ip(struct variable *vp,
     DEBUGMSGOID(("mibII/ip", name, *length));
     DEBUGMSG(("mibII/ip", " %d\n", exact));
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
     result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -1344,8 +1344,7 @@ var_ipAddrEntry(struct variable *vp,
 	int i, interface;
 
 	/* fill in object part of name for current (less sizeof instance part) */
-	bcopy((char *)vp->name, (char *)current, 
-	      (int)vp->namelen * sizeof(oid));
+	memcpy(current, vp->name, (int)vp->namelen * sizeof(oid));
 
 	/*
 	 * Get interface table from kernel.
