@@ -276,6 +276,8 @@ var_hrswrun(struct variable *vp,
 	if (now != when) oldpid = -1;
     }
     if (oldpid != pid || proc_buf == NULL) {
+	if (kd == NULL)
+	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
 	oldpid = pid;
 	when = now;
@@ -518,6 +520,8 @@ var_hrswrun(struct variable *vp,
 	    ++cp;
 	    long_return += atoi( cp );		/* + stime */
             fclose(fp);
+#elif defined(sunos4)
+	    long_return = proc_table[LowProcIndex].p_time;
 #else
 	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
