@@ -12,9 +12,6 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
@@ -110,6 +107,7 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "mib_module_config.h"
+#include "auto_nlist.h"
 #if USING_ERRORMIB_MODULE
 #include "errormib.h"
 #else

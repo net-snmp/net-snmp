@@ -5,14 +5,11 @@
 
 #include <config.h>
 
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-
 #include "host.h"
 #include "host_res.h"
 #include "hr_system.h"
 #include "hr_utils.h"
+#include "auto_nlist.h"
 #include "../../snmplib/system.h"
 
 #ifdef HAVE_SYS_PROC_H
@@ -32,19 +29,6 @@
 	 *
 	 *********************/
 
-#ifndef linux
-static struct nlist hrsys_nl[] = {
-#define N_NPROC    0		/* Max number of processes */
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_nproc"},
-#else
-        { "nproc"},
-#endif
-        { 0 },
-};
-#endif
-
-
 static int get_load_dev();
 static int count_users();
 extern int count_processes();
@@ -59,9 +43,7 @@ extern int count_processes();
 
 void	init_hr_system( )
 {
-#ifndef linux
-    init_nlist( hrsys_nl );
-#endif
+  auto_nlist(NPROC_SYMBOL,0,0);
 }
 
 
@@ -156,7 +138,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&long_return;
 	case HRSYS_MAXPROCS:
 #ifndef linux
-	    KNLookup(hrsys_nl, N_NPROC, (char *)&nproc, sizeof (int));
+	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
 #else
 #ifdef NR_TASKS

@@ -5,12 +5,10 @@
  */
 
 #include <config.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 
 #include "host_res.h"
 #include "hr_swrun.h"
+#include "auto_nlist.h"
 
 #if HAVE_SYS_PSTAT_H
 #include <sys/pstat.h>
@@ -43,28 +41,6 @@
 
 	/*********************
 	 *
-	 *  Kernel & interface information,
-	 *   and internal forward declarations
-	 *
-	 *********************/
-
-#ifndef linux
-static struct nlist hrswrun_nl[] = {
-#define N_NPROC    0		/* Max number of processes */
-#define N_PROC     1		/* location of the process table */
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_nproc"},
-        { "_proc"},
-#else
-        { "nproc"},
-        { "proc"},
-#endif
-        { 0 },
-};
-#endif
-
-	/*********************
-	 *
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
@@ -84,9 +60,8 @@ static int current_proc_entry;
 
 void	init_hr_swrun( )
 {
-#ifndef linux
-    init_nlist( hrswrun_nl );
-#endif
+  auto_nlist( PROC_SYMBOL,0,0 );
+  auto_nlist( NPROC_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	-1
@@ -515,8 +490,8 @@ Init_HR_SWRun()
     int bytes;
 
 #ifndef hpux10
-    KNLookup(hrswrun_nl, N_NPROC, (char *)&nproc, sizeof(int));
-    KNLookup(hrswrun_nl, N_PROC, (char *)&proc_table_base, sizeof(int));
+    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(int));
     bytes = nproc*sizeof(struct proc);
 #else
     pstat_getdynamic( &pst_dyn, sizeof( struct pst_dynamic ),

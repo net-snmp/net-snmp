@@ -10,9 +10,6 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
@@ -99,28 +96,13 @@
 #include "util_funcs.h"
 #include "../kernel.h"
 #include "read_config.h"
-
-#define  KNLookup(nl_which, buf, s)   (klookup((int) loadave_nl[nl_which].n_value, buf, s))
+#include "auto_nlist.h"
 
 double maxload[3];
 
-#ifndef linux
-static struct nlist loadave_nl[] = {
-#define NL_AVENRUN 0
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-  { "_avenrun"},
-#else
-  { "avenrun"},
-#endif
-  { 0 }
-};
-#endif
-
 void	init_loadave( )
 {
-#ifndef linux
-    init_nlist( loadave_nl );
-#endif
+  auto_nlist( LOADAVE_SYMBOL,0,0 );
 }
 
 void loadave_parse_config(word,cptr)
@@ -195,7 +177,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
     return(0);
 #else
 #if defined(ultrix) || defined(sun) || defined(__alpha)
-  if (KNLookup(NL_AVENRUN,(char *) favenrun, sizeof(favenrun)) == 0)
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
     return(0);
   for(i=0;i<3;i++)
     avenrun[i] = FIX_TO_DBL(favenrun[i]);
@@ -210,7 +192,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
     fclose(in);
   }
 #else
-  if (KNLookup(NL_AVENRUN,(char *) avenrun, sizeof(double)*3) == 0)
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) avenrun, sizeof(double)*3) == 0)
     return NULL;
 #endif /* !linux */
 #endif /* !HAVE_GETLOADAVG */

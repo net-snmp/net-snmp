@@ -105,9 +105,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
 #endif
 #endif
-#ifndef linux
-#include <nlist.h>
-#endif
 #ifndef NULL
 #define NULL 0
 #endif
@@ -136,6 +133,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/if_dl.h>
 #endif
 
+#include "auto_nlist.h"
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
@@ -452,27 +450,10 @@ static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
 
 #if !(defined(linux) || defined(solaris2))
-static struct nlist nl_var_route[] = {
-#define N_RTHOST	0
-#define N_RTNET		1
-#define N_RTHASHSIZE	2
-#define N_RTTABLES	3
-#if defined(hpux)
-	{ "rthost" },
-	{ "rtnet" },
-	{ "rthashsize" },
-	{ "rt_table" },
-#else 
-	{ "_rthost" },
-	{ "_rtnet" },
-	{ "_rthashsize" },
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
-	{ "_rt_tables" },
-#else
-	{ "_rt_table" },
-#endif
-#endif
-	{ 0 },
+#define NUM_ROUTE_SYMBOLS 2
+static char  route_symbols[] = {
+  RTHOST_SYMBOL,
+  RTNET_SYMBOL
 };
 #endif
 #endif
@@ -526,9 +507,10 @@ static void Route_Scan_Reload()
 
 void	init_var_route( )
 {
-#if !(defined(solaris2) || defined(linux))
-    init_nlist( nl_var_route );
-#endif
+  auto_nlist(RTTABLES_SYMBOL,0,0);
+  auto_nlist(RTHASHSIZE_SYMBOL,0,0);
+  auto_nlist(RTHOST_SYMBOL,0,0);
+  auto_nlist(RTNET_SYMBOL,0,0);
 }
 
 #ifndef solaris2
@@ -1012,7 +994,7 @@ static void Route_Scan_Reload()
 #define AF_UNSPEC AF_INET 
 #endif
 
-  KNLookup(nl_var_route, N_RTTABLES, (char *) rt_table, sizeof(rt_table));
+  auto_nlist(RTTABLES_SYMBOL, (char *) rt_table, sizeof(rt_table));
   for(i=0; i <= AF_MAX; i++) {
     if(rt_table[i] == 0)
       continue;
@@ -1022,12 +1004,11 @@ static void Route_Scan_Reload()
   }
         
 #else /* rtentry is a BSD 4.3 compat */
-  for (table=N_RTHOST; table<=N_RTNET; table++) {
-
-    KNLookup(nl_var_route, N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
+  for (table=0; table<NUM_ROUTE_SYMBOLS; table++) {
+    auto_nlist(RTHASHSIZE_SYMBOL, (char *)&hashsize, sizeof(hashsize));
     routehash = (RTENTRY **)malloc(hashsize * sizeof(struct mbuf *));
-    KNLookup(nl_var_route,  table, (char *)routehash,
-             hashsize * sizeof(struct mbuf *));
+    auto_nlist(route_symbols[table], (char *)routehash,
+               hashsize * sizeof(struct mbuf *));
     for (i = 0; i < hashsize; i++) {
       if (routehash[i] == 0)
         continue;
@@ -1122,15 +1103,15 @@ static void Route_Scan_Reload()
         /* reset the routing table size to zero -- was a CMU memory leak */
         rtsize = 0;
         
-	for (table=N_RTHOST; table<=N_RTNET; table++) {
-
+	for (table=0; table<NUM_ROUTE_SYMBOLS; table++) {
 #ifdef sunV3
 	    hashsize = RTHASHSIZ;
 #else
-	    KNLookup(nl_var_route,  N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
+	    auto_nlist(RTHASHSIZE_SYMBOL, (char *)&hashsize, sizeof(hashsize));
 #endif
 	    routehash = (struct mbuf **)malloc(hashsize * sizeof(struct mbuf *));
-	    KNLookup(nl_var_route,  table, (char *)routehash, hashsize * sizeof(struct mbuf *));
+	    auto_nlist(route_symbols[table], (char *)routehash,
+                       hashsize * sizeof(struct mbuf *));
 	    for (i = 0; i < hashsize; i++) {
 		if (routehash[i] == 0)
 			continue;
