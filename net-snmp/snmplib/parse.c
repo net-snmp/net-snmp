@@ -206,7 +206,11 @@ hash_init()
 	register int	h;
 	register int	b;
 
+#ifdef SVR4
+	memset((char *)buckets, NULL, sizeof(buckets));
+#else
 	bzero((char *)buckets, sizeof(buckets));
+#endif
 	for (tp = tokens; tp->name; tp++) {
 		for (h = 0, cp = tp->name; *cp; cp++)
 			h += *cp;
@@ -229,7 +233,11 @@ init_node_hash(nodes)
      register char *cp;
      register int hash;
 
+#ifdef SVR4
+     memset((char *)nbuckets, NULL, sizeof(nbuckets));
+#else
      bzero((char *)nbuckets,sizeof(nbuckets));
+#endif
      for(np = nodes; np;){
          nextp = np->next;
          hash = 0;
@@ -618,7 +626,11 @@ parse_objectid(fp, name)
     }
     if ((length = getoid(fp, oid, 32)) != 0){
 	np = root = (struct node *)Malloc(sizeof(struct node));
+#ifdef SVR4
+	memset((char *)np, NULL, sizeof(struct node));
+#else
 	bzero((char *)np, sizeof(struct node));
+#endif
 	/*
 	 * For each parent-child subid pair in the subid array,
 	 * create a node and link it into the node list.
@@ -636,7 +648,11 @@ parse_objectid(fp, name)
 		np->enums = 0;
 		/* set up next entry */
 		np->next = (struct node *)Malloc(sizeof(*np->next));
+#ifdef SVR4
+		memset((char *)np->next, NULL, sizeof(struct node));
+#else
 		bzero((char *)np->next, sizeof(struct node));
+#endif
 		oldnp = np;
 		np = np->next;
 	    }
@@ -1025,9 +1041,9 @@ parse_objecttype(fp, name)
 	    return 0;
     }
     if (nexttype == UNITS){
-	type = get_token(fp, token);
+	type = get_token(fp, quoted_string_buffer);
 	if (type != QUOTESTRING) {
-	    print_error("Bad DESCRIPTION", token, type);
+	    print_error("Bad DESCRIPTION", quoted_string_buffer, type);
 	    free_node(np);
 	    return 0;
 	}
@@ -1064,9 +1080,9 @@ parse_objecttype(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, token);
+          type = get_token(fp, quoted_string_buffer);
           if (type != QUOTESTRING) {
-              print_error("Bad DESCRIPTION", token, type);
+              print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
               return 0;
           }
@@ -1078,9 +1094,9 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
           break;
 
 	case REFERENCE:
-	  type = get_token(fp, token);
+	  type = get_token(fp, quoted_string_buffer);
 	  if (type != QUOTESTRING) {
-	      print_error("Bad DESCRIPTION", token, type);
+	      print_error("Bad DESCRIPTION", quoted_string_buffer, type);
 	      free_node(np);
 	      return 0;
 	  }
@@ -1162,9 +1178,9 @@ parse_objectgroup(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, token);
+          type = get_token(fp, quoted_string_buffer);
           if (type != QUOTESTRING) {
-              print_error("Bad DESCRIPTION", token, type);
+              print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
               return 0;
           }
@@ -1233,9 +1249,9 @@ parse_notificationDefinition(fp, name)
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
-          type = get_token(fp, token);
+          type = get_token(fp, quoted_string_buffer);
           if (type != QUOTESTRING) {
-              print_error("Bad DESCRIPTION", token, type);
+              print_error("Bad DESCRIPTION", quoted_string_buffer, type);
               free_node(np);
               return 0;
           }
@@ -1422,7 +1438,11 @@ parse(fp)
 
     hash_init();
     quoted_string_buffer = (char *)malloc(MAXQUOTESTR);  /* free this later */
+#ifdef SVR4
+    memset(tclist, NULL, 64 * sizeof(struct tc));
+#else
     bzero(tclist, 64 * sizeof(struct tc));
+#endif
 
     while(type != ENDOFFILE){
 	type = get_token(fp, token);
@@ -1743,17 +1763,16 @@ parseQuoteString(fp, token)
     register int ch;
     int eat_space = 0;
 
-    ch = ' ';
-    *token = '\0';                      /* make the token empty */
-
+    ch = getc(fp);
     while(ch != -1) {
-        ch = getc(fp);
 	if (ch == '\n')
 	    Line++;
 	else if (ch == '"') {
-            return QUOTESTRING;
-        }
-
+	    *token = '\0';
+	    return QUOTESTRING;
+	}
+	*token++ = ch;
+	ch = getc(fp);
     }
 
     return NULL;

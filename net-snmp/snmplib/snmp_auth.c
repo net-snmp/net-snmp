@@ -220,7 +220,11 @@ int		    	pass;
 	return NULL;
     }
     if (*dstPartyLength != dstParty2Length
+#ifdef SVR4
+	|| memcmp((char *)dstParty, (char *)dstParty2, dstParty2Length)){
+#else
 	|| bcmp((char *)dstParty, (char *)dstParty2, dstParty2Length)){
+#endif
 	ERROR("Mismatch of destination parties\n");
 	return NULL;
     }
@@ -272,7 +276,11 @@ int		    	pass;
 	md5Digest(authMsg, authMsgLen, digest);
 	
 	/* RFC1446, Pg 19, 3.2.6 */
+#ifdef SVR4
+	if (authDigestLen != 16 || memcmp(authDigest, digest, 16)){
+#else
 	if (authDigestLen != 16 || bcmp(authDigest, digest, 16)){
+#endif
 	    ERROR("unauthentic");
 	    /* snmpStatsWrongDigestValues++ */
 	    return NULL;
@@ -587,7 +595,11 @@ md5Digest(start, length, digest)
 #else
     /* do the computation in a static array */
     cp = buf = buffer;
+#ifdef SVR4
+    memmove(buf, (char *)start, length);
+#else
     bcopy((char *)start, buf, length);
+#endif
 #endif    
     
     MDbegin(&MD);

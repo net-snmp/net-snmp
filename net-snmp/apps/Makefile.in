@@ -1,30 +1,38 @@
 #
 # Makefile for snmpget, snmpwalk, snmpbulkwalk, snmptest, snmptranslate,
-# snmptrapd, snmptable
+# snmptrapd, snmptable, snmpset, snmpgetnext
 #
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext
 LIBS=	../lib/libsnmp.a
-CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG
+LDFLAGS=
+OSFLAGS=
+CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
 
 all: $(TARG)
 
 snmpwalk:    snmpwalk.o ${LIBS}
-	${CC} -o $@ snmpwalk.o ${LIBS}
+	${CC} -o $@ snmpwalk.o ${LIBS} ${LDFLAGS}
 
 snmpbulkwalk:    snmpbulkwalk.o ${LIBS}
-	${CC} -o $@ snmpbulkwalk.o ${LIBS}
+	${CC} -o $@ snmpbulkwalk.o ${LIBS} ${LDFLAGS}
 
 snmptranslate:    snmptranslate.o ${LIBS}
-	${CC} -o $@ snmptranslate.o ${LIBS}
+	${CC} -o $@ snmptranslate.o ${LIBS} ${LDFLAGS}
 
 snmpget:    snmpget.o ${LIBS}
-	${CC} -o $@ snmpget.o ${LIBS}
+	${CC} -o $@ snmpget.o ${LIBS} ${LDFLAGS}
 
 snmptest:    snmptest.o ${LIBS}
-	${CC} -o $@ snmptest.o ${LIBS}
+	${CC} -o $@ snmptest.o ${LIBS} ${LDFLAGS}
 
 snmptrapd:    snmptrapd.o ${LIBS}
-	${CC} -o $@ snmptrapd.o ${LIBS}
+	${CC} -o $@ snmptrapd.o ${LIBS} ${LDFLAGS}
+
+snmpset:    snmpset.o ${LIBS}
+	${CC} -o $@ snmpset.o ${LIBS} ${LDFLAGS}
+
+snmpgetnext:    snmpgetnext.o ${LIBS}
+	${CC} -o $@ snmpgetnext.o ${LIBS} ${LDFLAGS}
 
 clean:
 	rm -f *.o ${TARG}
@@ -39,3 +47,5 @@ snmptranslate.o:	../snmplib/party.h
 snmpwalk.o:	../snmplib/party.h
 snmptest.o:	../snmplib/party.h
 snmptable.o:    ../snmplib/party.h
+snmpset.o:	../snmplib/party.h
+snmpgetnext.o:	../snmplib/party.h

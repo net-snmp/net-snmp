@@ -25,6 +25,7 @@ SOFTWARE.
 ******************************************************************/
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/sockio.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -55,7 +56,11 @@ typedef long	fd_mask;
 #define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
 #define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
 #define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
+#ifdef SVR4
+#define FD_ZERO(p)	memset((char *)(p), NULL, sizeof(*(p)))
+#else
 #define FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
+#endif
 #endif
 
 extern int  errno;
@@ -126,7 +131,11 @@ snmp_clone_pdu2(pdu, command)
 
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+#ifdef SVR4
+    memmove((char *)newpdu, (char *)pdu, sizeof(struct snmp_pdu));
+#else
     bcopy((char *)pdu, (char *)newpdu, sizeof(struct snmp_pdu));
+#endif
     newpdu->variables = 0;
     newpdu->command = command;
     newpdu->reqid = pdu->reqid;
@@ -135,14 +144,26 @@ snmp_clone_pdu2(pdu, command)
     var = pdu->variables;
 
     newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+#ifdef SVR4
+    memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
     bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
     if (var->name != NULL){
 	newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+	memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 	bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
     }
     if (var->val.string != NULL){
 	newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+	memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 	bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
     }
     newvar->next_variable = 0;
 
@@ -150,14 +171,26 @@ snmp_clone_pdu2(pdu, command)
 	var = var->next_variable;
 	newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
 	newvar = newvar->next_variable;
+#ifdef SVR4
+	memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	if (var->name != NULL){
 	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+	    memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 	    bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
 	}
 	if (var->val.string != NULL){
 	    newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+	    memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 	    bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
 	}
 	newvar->next_variable = 0;
     }
@@ -183,22 +216,41 @@ event_input(vp)
 
     vp = vp->next_variable;	/* skip sysUptime */
     if (vp->val_len != sizeof(risingAlarm)
+#ifdef SVR4
+	|| !memcmp((char *)vp->val.objid, (char *)risingAlarm,
+		 sizeof(risingAlarm)))
+#else
 	|| !bcmp((char *)vp->val.objid, (char *)risingAlarm,
 		 sizeof(risingAlarm)))
+#endif
 	eventid = 1;
     else if (vp->val_len != sizeof(risingAlarm)
+#ifdef SVR4
+	|| !memcmp((char *)vp->val.objid, (char *)fallingAlarm,
+		 sizeof(fallingAlarm)))
+#else
 	|| !bcmp((char *)vp->val.objid, (char *)fallingAlarm,
 		 sizeof(fallingAlarm)))
+#endif
 	eventid = 2;
     else if (vp->val_len != sizeof(risingAlarm)
+#ifdef SVR4
+	|| !memcmp((char *)vp->val.objid, (char *)unavailableAlarm,
+		 sizeof(unavailableAlarm)))
+#else
 	|| !bcmp((char *)vp->val.objid, (char *)unavailableAlarm,
 		 sizeof(unavailableAlarm)))
+#endif
 	eventid = 3;
     else
 	printf("unknown event\n");
 
     vp = vp->next_variable;
+#ifdef SVR4
+    memmove((char *)variable, (char *)vp->val.objid, vp->val_len * sizeof(oid));
+#else
     bcopy((char *)vp->val.objid, (char *)variable, vp->val_len * sizeof(oid));
+#endif
     variablelen = vp->val_len;
     op = vp->name + 22;
     destip = 0;
@@ -341,7 +393,7 @@ main(argc, argv)
     init_syslog();
     init_mib();
     /*
-     * usage: snmptrapd [-v 1] [-P #] [-p] [-s] [-d]
+     * usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-d]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -356,6 +408,9 @@ main(argc, argv)
 		    break;
 		case 'd':
 		    snmp_dump_packet++;
+		    break;
+		case 'q':
+		    quick_print++;
 		    break;
                 case 'P':
                     port_flag++;
@@ -375,13 +430,13 @@ main(argc, argv)
                     if (version < 1 || version > 2){
                         fprintf(stderr, "Invalid version\n");
 
-                        printf("Usage: snmptrapd [-v 1] [-P #] [-p] [-s] [-e] [-d]\n");
+                        printf("Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
                         exit(1);
                     }
                     break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
-		    printf("Usage: snmptrapd [-v 1] [-P #] [-p ] [-s] [-e] [-d]\n");
+		    printf("Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
 		    break;
 	    }
 	    continue;
@@ -411,7 +466,11 @@ main(argc, argv)
 	}
     }
 
+#ifdef SVR4
+    memset((char *)&session, NULL, sizeof(struct snmp_session));
+#else
     bzero((char *)&session, sizeof(struct snmp_session));
+#endif
     session.peername = NULL;
     if (version == 1){
         session.version = SNMP_VERSION_1;

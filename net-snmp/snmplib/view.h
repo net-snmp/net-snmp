@@ -54,6 +54,7 @@ view_getEntry(/* int viewIndex */ );
  * Returns NULL if that entry does not exist.
  */
 
+int
 view_scanInit();
 /*
  * Initialized the scan routines so that they will begin at the

@@ -16,7 +16,9 @@
 #
 #	@(#)Makefile	5.10 (Berkeley) 9/20/88
 #
-CFLAGS=	-g -I../../snmplib
+OSFLAGS=
+LDFLAGS=
+CFLAGS=	-g -I../../snmplib ${OSFLAGS}
 LIBS=	../../lib/libsnmp.a
 SRCS=	inet.c if.c main.c route.c 
 OBJS=	inet.o if.o main.o route.o
@@ -24,7 +26,7 @@ OBJS=	inet.o if.o main.o route.o
 all: snmpnetstat
 
 snmpnetstat: ${OBJS} ${LIBS}
-	${CC} -o $@ ${CFLAGS} ${OBJS} ${LIBS}
+	${CC} -o $@ ${CFLAGS} ${OBJS} ${LIBS} ${LDFLAGS}
 
 clean:
 	rm -f ${OBJS} core snmpnetstat

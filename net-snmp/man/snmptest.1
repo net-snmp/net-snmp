@@ -19,27 +19,37 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTEST 1 "1 June 1992"
+.TH SNMPTEST 1 "13 July 1994"
 .UC 4
 .SH NAME
 snmptest - communicates with a network entity using SNMP Requests
 .SH SYNOPSIS
-snmptest host sourceParty destinationParty
+snmptest -v 1 hostname community
+.PP
+snmptest [-v 2] hostname noAuth
+.PP
+snmptest [-v 2] hostname srcParty dstParty
 .SH DESCRIPTION
 Snmptest is a flexible SNMP application that can monitor and manage
 information on a network entity.
 .PP
 The
-.I host
+.I hostname
 specification may be either a host name or an internet address
-specified in "dot notation"
+specified in "dot notation".
 .PP
-The
-.I sourceParty
+The version 1
+.I community
+specifies the community name for the transaction with the remote system.
+.PP
+The version 2
+.I srcParty
 and
-.I destinationParty
+.I dstParty
 specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.
+they are defined in /etc/party.conf.  To forgo authentication, use the
+.B noAuth
+keyword instead of specifying party names.
 .PP
 After invoking the program, a command line
 interpreter proceeds to accept commands.  It will prompt with:
@@ -52,24 +62,25 @@ packet) to the remote entity. Each variable name is given in the format specifie
 .IR variables (5).
 For example
 .PP
-.I snmpget zeus.andrew.cmu.edu zeusMS zeusAgent
+.I snmptest zeus zeusMS zeusAgent
 .br
-.I Please enter the variable name: system.sysdescr.0
+.I Variable: system.sysdescr.0
 .br
-.I Please enter the variable name: 
+.I Variable: 
 .PP
 Will return some information about the request and reply packets, as well as the
 information:
 .PP
-.I Name: system.sysDescr.0
-.br
-.I OCTET STRING- (ascii):	Unix 4.3BSD
+.I system.sysDescr.0 =
+"Unix 4.3BSD"
 .PP
 Upon startup, the program defaults to sending a GET Request packet.  This can be changed
 to a GET NEXT Request or a SET Request by typing the commands "$N" or "$S" repectively.  Typing
 "$G" will go back to the GET Request mode.
 .PP
 The command "$D" will toggle the dumping of each sent and received packet.
+.PP
+The command "$QP" will toggle a quicker, less verbose output form.
 .PP
 When in the "SET Request" mode, more information is requested by the prompt for each variable.  The prompt:
 .PP
@@ -88,6 +99,8 @@ the prompt for the variable name to send the packet.
 At the variable name line, typing "$Q" will quit the program.
 .PP
 Adding a "-d" to the argument list will cause the application to dump input and output packets.
+.PP
+Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
 .PP
 .SH "SEE ALSO"
 variables(5), RFC 1155, RFC1156, RFC1157, SNMP Security Internet Drafts
