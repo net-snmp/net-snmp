@@ -10,6 +10,34 @@
  * This file contains function to obtain statistics from SunOS 5.x kernel
  *
  */
+
+/*************
+ Sample tests were run on an idle Solaris machine:
+ SunOS 5.5.1 sun4m sparc SUNW,SPARCstation-5
+
+ Using snmpbulkwalk -v 2c from a remote machine on the same subnetwork,
+ recent test results show 20 percent improvement when kstat_open
+ and kstat_close are not frequently called.
+
+ The SHARE_KSTAT_FD constant will allow this module to use
+ the file descriptor "kc" opened in init_memory_solaris2,
+ file : agent/mibgroup/ucd-snmp/memory_solaris2.c.
+
+ Setting it to 0 will restore original functionality;
+ The functions herein invoke kstat_open and kstat_close
+ for each search through the kernel's statistics.
+
+ This is likely the wrong fix to be made.
+ Further study is needed.
+
+ Michael J. Slifcak, Internet Security Systems, Inc.
+
+ *************/
+
+/* set 1 to share to share kstat file descriptor;
+   set 0 to always invoke kstat_open/kstat_close */
+#define SHARE_KSTAT_FD 1
+
 #include <config.h>
 #ifdef solaris2
 /*-
@@ -56,6 +84,10 @@
 #include "mibincl.h"
 
 #include "kernel_sunos5.h"
+
+#if SHARE_KSTAT_FD
+extern kstat_ctl_t *kc;
+#endif
 
 /*-
  * Global variable definitions (with initialization)
@@ -161,18 +193,28 @@ extern "C" {
 
 int getKstatInt(char *classname, char *statname, char *varname, int *value)
 {
-    kstat_ctl_t *ksc = kstat_open();
+    kstat_ctl_t *ksc;
     kstat_t *ks;
     kid_t kid;
     kstat_named_t *named;
+    int ret = 0;  /* fail unless ... */
 
-    if (ksc == NULL) return 0;
+#if SHARE_KSTAT_FD
+    if ((ksc = kc) == NULL)
+#else
+    if ((ksc = kstat_open()) == NULL)
+#endif
+    {
+        goto Return;
+    }
     ks = kstat_lookup (ksc, classname, -1, statname);
-    if (ks == NULL) return 0;
+    if (ks == NULL) goto Return;
     kid = kstat_read (ksc, ks, NULL);
-    if (kid == -1) return 0;
+    if (kid == -1) goto Return;
     named = kstat_data_lookup(ks, varname);
-    if (named == NULL) return 0;
+    if (named == NULL) goto Return;
+
+    ret = 1;	/* maybe successful */
     switch (named->data_type) {
 #ifdef KSTAT_DATA_INT32		/* Solaris 2.6 and up */
     case KSTAT_DATA_INT32:
@@ -204,16 +246,22 @@ int getKstatInt(char *classname, char *statname, char *varname, int *value)
     default:
       DEBUGMSGTL(("kernel_sunos5", "non-integer type in kstat data: %s %s %s %d\n",
 	      classname, statname, varname, named->data_type));
+      ret = 0;  /* fail */
       break;
     }
+Return:
+#if SHARE_KSTAT_FD
+#else
+  if (ksc != NULL)
     kstat_close(ksc);
-    return 1;
+#endif
+    return ret;
 }
 
 int
 getKstat(const char *statname, const char *varname, void *value)
 {
-  kstat_ctl_t	*ksc;
+  kstat_ctl_t   *ksc;
   kstat_t	*ks, *kstat_data;
   kstat_named_t *d;
   size_t	i, instance;
@@ -226,7 +274,12 @@ getKstat(const char *statname, const char *varname, void *value)
     v = (void *)&val;
   else
     v = value;
-  if ((ksc = kstat_open()) == NULL) {
+#if SHARE_KSTAT_FD
+  if ((ksc = kc) == NULL)
+#else
+  if ((ksc = kstat_open()) == NULL)
+#endif
+  {
     ret = -10;
     goto Return;		/* kstat errors */
   }
@@ -341,8 +394,11 @@ getKstat(const char *statname, const char *varname, void *value)
   }
   ret = -4;			/* Name not found */
  Return:
+#if SHARE_KSTAT_FD
+#else
   if (ksc != NULL)
     kstat_close(ksc);
+#endif
   return (ret);
 }
 
