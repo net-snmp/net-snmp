@@ -55,19 +55,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_DIR_H
 #include <sys/dir.h>
 #endif
-/*
-#ifdef solaris2
-#define __EXTENSIONS__
-#endif
-*/
 #include <sys/signal.h>
-/*
-#ifdef solaris2
-#undef __EXTENSIONS__
-#endif
-*/
-#ifndef solaris2
+#if HAVE_SYS_USER_H
 #include <sys/user.h>
+#endif
+#if HAVE_SYS_PROC_H
 #include <sys/proc.h>
 #endif
 #ifdef HAVE_SYS_DMAP_H
@@ -97,8 +89,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_VMSYSTM_H
 #include <sys/vmsystm.h>
 #endif
-#endif
-#endif
+#endif /* vm/vm.h */
+#endif /* sys/vm.h */
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
