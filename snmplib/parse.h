@@ -45,6 +45,7 @@ struct node {
     struct node *next;
     char *label;                /* This node's (unique) textual name */
     u_long  subid;              /* This node's integer subidentifier */
+    int     modid;              /* The module containing this node */
     char *parent;               /* The parent's textual name */
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* The type of object this represents */
@@ -60,9 +61,11 @@ struct node {
 struct tree {
     struct tree *child_list;    /* list of children of this node */
     struct tree *next_peer;     /* Next node in list of peers */
+    struct tree *next;          /* Next node in hashed list of names */
     struct tree *parent;
     char *label;                /* This node's textual name */
     u_long subid;               /* This node's integer subidentifier */
+    int     modid;              /* The module containing this node */
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* This node's object type */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
@@ -73,6 +76,23 @@ struct tree {
     char *description;          /* description (a quoted string) */
 };
 
+/*
+ * Information held about each MIB module 
+ */
+struct module_import {
+    char *label;                /* The descriptor being imported */
+    int   modid;                /* The module imported from */
+};
+struct module {
+    char *name;                 /* This module's name */
+    char *file;                 /* The file containing the module */
+    struct module_import *imports;  /* List of descriptors being imported */
+    int  no_imports;            /* The number of such import descriptors */
+                     /* -1 implies the module hasn't been read in yet */
+    int   modid;                /* The index number of this module */
+    struct module *next;        /* Linked list pointer */
+};
+    
 /* non-aggregate types for tree end nodes */
 #define TYPE_OTHER          0
 #define TYPE_OBJID          1
@@ -90,5 +110,8 @@ struct tree {
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
 
+struct tree *read_module __P((char *));
 struct tree *read_mib __P((char *));
+struct tree *read_all_mibs __P((void));
+int  add_mibdir __P((char *));
 void print_subtree __P((FILE *, struct tree *, int));
