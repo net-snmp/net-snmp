@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #endif
 #include <stdio.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #ifdef HAVE_NLIST_H
