@@ -203,7 +203,7 @@ ipAddressTable_cache_load(netsnmp_container * container)
      * what we've already got, and make any adjustments, saving
      * missing addresses to be deleted.
      */
-    tmp_ptr[0] = ipaddress_container;
+    tmp_ptr[0] = ipaddress_container->next;
     tmp_ptr[1] = NULL;
     CONTAINER_FOR_EACH(container,
                        (netsnmp_container_obj_func*)_check_entry_for_updates,
