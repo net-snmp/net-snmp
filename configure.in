@@ -1050,12 +1050,16 @@ for i in $new_transport_list; do
       transport_def_list="SNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
     else
       echo
-      AC_MSG_ERROR(Cannot find file $transport_src to support SNMP transport domain $i.)
+      AC_MSG_ERROR(Cannot find file $srcdir/$rel_transport_src to support SNMP transport domain $i.)
     fi
   fi
 done
+transport_obj_list=`echo " $transport_src_list " | sed 's/\.c/\.o/g'` 	 
+transport_lobj_list=`echo " $transport_src_list " | sed 's/\.c/\.lo/g'`
 AC_SUBST(transport_hdr_list)
 AC_SUBST(transport_src_list)
+AC_SUBST(transport_obj_list)
+AC_SUBST(transport_lobj_list)
 for i in $transport_def_list; do
   AC_DEFINE_UNQUOTED($i)
 done
@@ -1069,6 +1073,8 @@ AC_MSG_CACHE_ADD(Network transport support: $transport_result_list)
 AC_MSG_CHECKING([for security modules to use])
 security_def_list="usm"
 security_src_list=""
+security_obj_list="" 	 
+security_lobj_list=""
 security_init_file="snmplib/snmpsm_init.h"
 security_incl_file="include/net-snmp/library/snmpv3-security-includes.h"
 new_with_security=`echo $with_security_modules | sed 's/,/ /g;'`
@@ -1122,6 +1128,8 @@ for i in $new_with_security; do
   # define a bunch of stuff to enable it
   security_src_list="$security_src_list $cfile"
   security_hdr_list="$security_hdr_list $hfile"
+  security_obj_list="$security_obj_list snmp"$i".o" 	 
+  security_lobj_list="$security_lobj_list snmp"$i".lo"
   def_name="SNMP_SECMOD_"`echo $i | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
   echo "init_"$i"();" >> $security_init_file
   echo "#include <net-snmp/library/$hfile>" >> $security_incl_file
@@ -1130,6 +1138,8 @@ done
 
 AC_SUBST(security_src_list)
 AC_SUBST(security_hdr_list)
+AC_SUBST(security_obj_list) 	 
+AC_SUBST(security_lobj_list)
 AC_MSG_RESULT($new_with_security)
 AC_MSG_CACHE_ADD(SNMPv3 Security Modules:   $new_with_security)
 
