@@ -32,8 +32,11 @@
 #endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
-#else
+#endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_STDLIB_H

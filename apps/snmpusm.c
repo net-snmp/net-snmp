@@ -44,7 +44,8 @@
 #endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
-#else
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_ARPA_INET_H
