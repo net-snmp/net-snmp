@@ -13,7 +13,6 @@ extern char *reverse_bytes __P((char *, int));
 extern void send_trap_pdu __P((struct snmp_pdu *));
 extern void send_easy_trap __P((int, int));
 extern u_char *getStatPtr __P((oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int * ));
-extern char *reverse_bytes __P((char *, int));
 
 /* config file parsing routines */
 void snmpd_parse_config_authtrap __P((char *, char *));

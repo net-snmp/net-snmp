@@ -424,18 +424,6 @@ void send_easy_trap (trap, specific)
     }
 }
   
-char *reverse_bytes(buf,num)
-  char *buf;
-  int num;
-{
-  static char outbuf[100];
-  int i;
-  
-  for(i=num-1;i>=0;i--)
-    outbuf[i] = *buf++;
-  return(outbuf);
-}
-
 char **argvrestartp;
 char *argvrestart;
 char *argvrestartname;
