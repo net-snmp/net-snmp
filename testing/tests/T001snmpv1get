@@ -13,10 +13,10 @@ HEADER SNMPv1 get of system.sysUpTime.0
 
 STARTAGENT
 
-CAPTURE "snmpget $SNMP_SNMPD_PORT -v 1 localhost testcommunityx system.sysUpTime.0"
+CAPTURE "snmpget $SNMP_SNMPD_PORT -v 1 localhost testcommunity system.sysUpTime.0"
 
 STOPAGENT
 
-CHECK "system.sysUpTime.0 ="
+CHECK "system.sysUpTime.0 = Timeticks:"
 
 FINISHED
