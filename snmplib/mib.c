@@ -4997,7 +4997,31 @@ mib_to_asn_type(int mib_type)
     return -1;
 }
 
-    
+/*
+ * convert a string to its OID form.
+ *   "hello" = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
+ */
+int
+netsnmp_str2oid( const char * S, oid * O, int L )
+{
+  const char *c = S;
+  oid *o = &O[1];
+
+  --L; /* leave room for length prefix */
+
+  for( ; *c && L; --L, ++o, ++c )
+    *o = *c;
+
+  /* make sure we got to the end of the string */
+  if( *c != 0 )
+    return 1;
+
+  /* set the length of the oid */
+  *O = c - S;
+
+  return 0;
+}
+
 
 #ifdef CMU_COMPATIBLE
 
