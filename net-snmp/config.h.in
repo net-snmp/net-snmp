@@ -99,6 +99,12 @@
    value returned by a query to sysObjectID is
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
 
+#define RESTARTSLEEP 5    /* How long to wait after a snmpset to
+                             EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT
+                             before restarting the agent.  This is
+                             necessary to finish the snmpset reply
+                             before restarting. */
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -327,6 +333,12 @@ sure to end it in -1.*/
 #define SNMPBLOCK 0       /* Set to 1 if you want snmpgets to block and never
                              timeout.  Original CMU code had this
                              hardcoded into the code as = 1 */
+
+#define RESTARTSLEEP 5    /* How long to wait after a snmpset to
+                             EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT
+                             before restarting the agent.  This is
+                             necessary to finish the snmpset reply
+                             before restarting. */
 
 /* #define EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
