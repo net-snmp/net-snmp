@@ -128,7 +128,7 @@ memdup(u_char **to, const u_char *from, size_t size)
     *to = NULL;
     return SNMPERR_SUCCESS;
   }
-  if ((*to = malloc(size)) == NULL)
+  if ((*to = (u_char *)malloc(size)) == NULL)
     return SNMPERR_GENERR;
   memcpy(*to, from, size);
   return SNMPERR_SUCCESS;
