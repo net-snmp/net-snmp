@@ -217,7 +217,7 @@ protopr (char *name)
 {
     struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
     struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
-    struct snmp_pdu *request, *response = NULL;
+    struct snmp_pdu *request=NULL, *response = NULL;
     struct variable_list *vp;
     oid *instance;
     int first, status;

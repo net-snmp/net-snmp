@@ -1,14 +1,15 @@
 #include <config.h>
 
 #include <sys/types.h>
-#if STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#else
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
 #endif
+#include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
 #include <errno.h>
@@ -268,6 +269,6 @@ snmpd_store_config(char *line)
   } else {
     snmp_perror("snmpd");
   }
-  close(OUT);
+  fclose(OUT);
 #endif
 }
