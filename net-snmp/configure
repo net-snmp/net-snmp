@@ -10861,7 +10861,6 @@ trap 'rm -fr `echo "
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
- testing/TESTCONF.sh:testing/TESTCONF.sh.in
  config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
@@ -10997,7 +10996,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile:Makefile.top:Makefile.in
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
- testing/TESTCONF.sh:testing/TESTCONF.sh.in
 "}
 EOF
 cat >> $CONFIG_STATUS <<\EOF

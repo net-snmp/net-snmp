@@ -37,12 +37,12 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
 fi
 
 if [ "x$MIBDIRS" = "x" ]; then
-    MIBDIRS=${SNMP_BASEDIR}/../mibs
+    MIBDIRS=../mibs
     export MIBDIRS
 fi
 
 # Set up the path to the programs we want to use.
-if [ "x$SNMP_PATH" = "x" ]; then
+if [ "x$SNMP_PATH" != "xyes" ]; then
     PATH=../agent:../apps:../../agent:../../apps:$PATH
     export PATH
     SNMP_PATH=yes
@@ -74,15 +74,12 @@ SNMP_SNMPD_PORT="-p 8765"
 SNMP_PERSISTENT_FILE="$SNMP_TMPDIR/persistent-store.conf"
 export SNMP_PERSISTENT_FILE
 
-## Setup flags iff not done
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
+    export SNMP_FLAGS
 fi
-echo $SNMP_FLAGS | egrep "\-p" > /dev/null
-if [ $? != 0 ]; then
-    SNMP_FLAGS="$SNMP_FLAGS $SNMP_SNMPD_PORT"
-fi
-export SNMP_FLAGS
+
+SNMP_FLAGS="$SNMP_FLAGS $SNMP_SNMPD_PORT"
 
 # Make sure the agent doesn't parse any config file but what we give it.  
 # this is mainly to protect against a broken agent that doesn't
