@@ -217,11 +217,11 @@ nsb-make()
    nsb_make_rc=$?
 
    nsb-info "Checking for errors..."
-   egrep "Error|FAIL|warn|No |exists|\*\*\*" $nsb_make_OUTPUT \
+   egrep "[Ee]rror|FAIL|[Ww]arn|No |exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$DATE
    egrep -v "^/usr" nsb-make-$target-allerrs.$DATE \
          > nsb-make-$target-nerrs.$DATE
-   egrep -v "warn" nsb-make-$target-nerrs.$DATE \
+   egrep -v "[Ww]arn" nsb-make-$target-nerrs.$DATE \
          > nsb-make-$target-errs.$DATE
    nsb_make_rc=$?
    if [ -s nsb-make-$target-errs.$DATE ]; then
@@ -277,7 +277,7 @@ nsb-build()
             make distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
-                nsb-abort "Error during makedistclean $nsb_build_rc"
+                nsb-abort "Error during makedistclean (rc=$nsb_build_rc)"
             fi
         fi
       fi
@@ -292,7 +292,7 @@ nsb-build()
       fi
       nsb_config_rc=$?
       if [ $nsb_config_rc -ne 0 ]; then
-         nsb-abort "Error during configure $nsb_config_rc"
+         nsb-abort "Error during configure (rc=$nsb_config_rc)"
       fi
       nsb-prompt "press enter to continue"
    fi
@@ -303,7 +303,7 @@ nsb-build()
       nsb-make all
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make all $nsb_build_rc"
+         nsb-abort "Error during make all (rc=$nsb_build_rc)"
       fi
    fi
 
@@ -314,7 +314,7 @@ nsb-build()
       nsb-make test
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make test: $nsb_build_rc"
+         nsb-abort "Error during make test (rc=$nsb_build_rc)"
       fi
    fi
 
@@ -325,7 +325,7 @@ nsb-build()
       nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         nsb-abort "Error during make install: $nsb_build_rc"
+         nsb-abort "Error during make install (rc=$nsb_build_rc)"
       fi
    fi
 
