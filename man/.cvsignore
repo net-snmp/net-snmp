@@ -16,7 +16,7 @@ snmpbulkget.1
 snmpbulkwalk.1
 snmpcmd.1
 snmpconf.1
-snmpd.1
+snmpd.8
 snmpd.conf.5
 snmpget.1
 snmpgetnext.1
@@ -28,6 +28,7 @@ snmptranslate.1
 snmptrap.1
 snmptrapd.8
 snmptrapd.conf.5
+snmpvacm.1
 snmpusm.1
 snmpwalk.1
 variables.5
