@@ -1,6 +1,10 @@
 /*
  * system.c
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
         Copyright 1992 by Carnegie Mellon University
 
@@ -22,6 +26,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 /*
  * System dependent routines go here
  */
@@ -752,8 +762,8 @@ get_uptime(void)
             if (kid != -1) {
                 named = kstat_data_lookup(ks, "lbolt");
                 if (named) {
-#ifdef KSTAT_DATA_INT32
-                    lbolt = named->value.ul;
+#ifdef KSTAT_DATA_UINT32
+                    lbolt = named->value.ui32;
 #else
                     lbolt = named->value.ul;
 #endif
