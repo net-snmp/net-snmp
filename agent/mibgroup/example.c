@@ -116,7 +116,7 @@ header_example(vp, name, length, exact, var_len, write_method)
     }
 
     /* copy our mib oid from the vp->name structure */
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[vp->namelen] = 0;
 
     /* compare it against the incoming request */
@@ -128,7 +128,7 @@ header_example(vp, name, length, exact, var_len, write_method)
 
     /* since it is inside our mib tree, copy it back onto the name
        outing pointer. */
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen+1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen+1) * sizeof(oid));
     *length = vp->namelen+1;
 
     *write_method = 0;          /* default to read-only */

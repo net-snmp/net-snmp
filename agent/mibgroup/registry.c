@@ -88,8 +88,8 @@ header_registry(vp, name, length, exact, var_len, write_method)
                                *length-REGISTRY_NAME_LENGTH,
                                subtrees);
     
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     if (mine != NULL) {
       bcopy((char *)mine->name, (char *)(name+vp->namelen),
             ((int)mine->namelen) * sizeof(oid));
@@ -112,7 +112,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
       return(NULL);
     }
     DEBUGP ("... doing %d\n", i);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;

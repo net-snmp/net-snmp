@@ -66,7 +66,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
       DEBUGP("var_hrprint: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* Find "next" print entry */
 
     Init_HR_Print();
@@ -96,7 +96,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
         return(MATCH_FAILED);
     }
 
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
