@@ -3,8 +3,6 @@
  *
  */
 
-#include "mib_module_config.h"
-
 #include <config.h>
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
@@ -75,6 +73,8 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -85,7 +85,6 @@
 #include "asn1.h"
 #include "snmp_debug.h"
 
-#include "mibincl.h"
 #include "auto_nlist.h"
 
 #ifdef MIB_IPCOUNTER_SYMBOL

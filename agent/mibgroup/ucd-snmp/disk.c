@@ -137,7 +137,6 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "agent_read_config.h"
-#include "mib_module_config.h"
 #include "auto_nlist.h"
 #if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"

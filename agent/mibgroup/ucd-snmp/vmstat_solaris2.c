@@ -22,12 +22,13 @@
 /* UCD-SNMP config details */
 #include <config.h>
 
-/* List of which modules are supported */
-#include "mib_module_config.h"
-
 /* kstat and sysinfo structs */
 #include <kstat.h>
 #include <sys/sysinfo.h>
+
+/* Includes needed for all modules */
+#include "mibdefs.h"
+#include "mibincl.h"
 
 /* Header file for this module */
 #include "vmstat_solaris2.h"

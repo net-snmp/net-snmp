@@ -6,7 +6,6 @@
 
 #include <config.h>
 #include <unistd.h>
-#include "mib_module_config.h"
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -90,7 +89,8 @@
 #else
 #include "kernel.h"
 #endif
-#include "../mibincl.h"
+
+#include "mibincl.h"
 #include "../../../snmplib/system.h"
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>

@@ -2,8 +2,6 @@
  *  Template MIB group implementation - sysORTable.c
  *
  */
-#include "mib_module_config.h"
-
 #include <config.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>

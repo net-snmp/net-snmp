@@ -782,8 +782,6 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
 
-#include <mib_module_config.h>
-
 #ifndef DONT_INC_STRUCTS
 /*#include "agent/mibgroup/struct.h" */
 #endif

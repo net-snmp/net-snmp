@@ -11,10 +11,6 @@
 #ifndef _MIBGROUP_VMSTAT_H
 #define _MIBGROUP_VMSTAT_H
 
-/* Includes needed for all modules */
-#include "../mibdefs.h"
-#include "../mibincl.h"
-
 /* Defines for vp magic numbers */
 #define SWAPIN 3
 #define SWAPOUT 4
