@@ -151,4 +151,5 @@ dist: version tag tar
 FAQ.html:
 	local/FAQ2HTML FAQ
 
-.PHONY: docs testdirs test
+.PHONY: docs testdirs test TAGS
+# note: tags and docs are phony to force rebulding
