@@ -206,17 +206,17 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
  */
 int CONTAINER_FREE(netsnmp_container *x)
 {
-
     if (NULL != x->next) {
-        netsnmp_container *tmp = x->next;
+        netsnmp_container *prev, *tmp = x->next;
         int                rc;
         while(tmp->next)
             tmp = tmp->next;
         while(tmp) {
+            prev = tmp->prev;
             rc = tmp->cfree(tmp);
             if (rc)
                 snmp_log(LOG_ERR,"error on subcontainer free (%d)\n", rc);
-            tmp = tmp->prev;
+            tmp = prev;
         }
     }
     return x->cfree(x);

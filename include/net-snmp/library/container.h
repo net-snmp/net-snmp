@@ -305,17 +305,17 @@ extern "C" {
     static NETSNMP_INLINE /* gcc docs recommend static w/inline */
     int CONTAINER_FREE(netsnmp_container *x)
     {
-        
         if (NULL != x->next) {
-            netsnmp_container *tmp = x->next;
+            netsnmp_container *prev, *tmp = x->next;
             int                rc;
             while(tmp->next)
                 tmp = tmp->next;
             while(tmp) {
+                prev = tmp->prev;
                 rc = tmp->cfree(tmp);
                 if (rc)
                     snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc);
-                tmp = tmp->prev;
+                tmp = prev;
             }
         }
         return x->cfree(x);
