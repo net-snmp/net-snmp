@@ -534,7 +534,7 @@ main(int argc, char *argv[])
                 if (*ecp) {
 #if HAVE_GETPWNAM && HAVE_PWD_H
                     struct passwd  *info;
-                    info = getpwnam(argv[arg]);
+                    info = getpwnam(optarg);
                     if (info) {
                         uid = info->pw_uid;
                     } else {
