@@ -408,8 +408,7 @@ char *skip_token(char *ptr)
    It returns a pointer to the white space at the end of the token
    or to 0 if there is no white space at the end.*/
 
-char *copy_word(from, to)
-     char *from, *to;
+char *copy_word(char *from, char *to)
 {
   char quote;
   if ( (*from == '\"') || (*from =='\'') ){
@@ -488,7 +487,7 @@ char *read_config_save_objid(char *saveto, oid *objid, int len) {
   saveto += strlen(saveto);
   
   for(i=0; i < len; i++) {
-    sprintf(saveto,".%d", objid[i]);
+    sprintf(saveto,".%ld", objid[i]);
     saveto += strlen(saveto);
   }
   return saveto;
