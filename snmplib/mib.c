@@ -2317,7 +2317,19 @@ netsnmp_get_mib_directory()
         if (dir == NULL) {
             DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
             /** Not set use hard coded path */
-           netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+            if (confmibdir == NULL) {
+                DEBUGMSGTL(("get_mib_directory", "no mib directories set by config\n"));
+                netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+            }
+            else if (*confmibdir == '+') {
+                DEBUGMSGTL(("get_mib_directory", "mib directories set by config (but added)\n"));
+                netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+                netsnmp_set_mib_directory(confmibdir);
+            }
+            else {
+                DEBUGMSGTL(("get_mib_directory", "mib directories set by config\n"));
+                netsnmp_set_mib_directory(confmibdir);
+            }
         } else if (*dir == '+') {
             DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
             netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
