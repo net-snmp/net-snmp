@@ -1,4 +1,4 @@
-.TH "old_api: Calls mib module code written in the old style of code." 3 "2 Aug 2002" "net-snmp" \" -*- nroff -*-
+.TH "old_api: Calls mib module code written in the old style of code." 3 "27 Aug 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,9 +38,6 @@ returns a old_api handler that should be the final calling handler.
 Don't use this function. Use the \fBnetsnmp_register_old_api\fP() function instead. 
 .PP
 Definition at line 40 of file old_api.c.
-.PP
-Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
-.PP
 .SS "int netsnmp_old_api_helper (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the old_api handler.

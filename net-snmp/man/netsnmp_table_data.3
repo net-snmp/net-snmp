@@ -1,4 +1,4 @@
-.TH "table_data: Helps you implement a table with datamatted storage." 3 "2 Aug 2002" "net-snmp" \" -*- nroff -*-
+.TH "table_data: Helps you implement a table with datamatted storage." 3 "27 Aug 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -102,9 +102,6 @@ It can be used to store a list of rows, where a row consists of the indexes to t
 creates and returns a pointer to table data set.
 .PP
 Definition at line 482 of file table_data.c.
-.PP
-Referenced by netsnmp_create_table_data_set().
-.PP
 .SS "netsnmp_table_row* netsnmp_create_table_data_row (void)"
 .PP
 creates and returns a pointer to table data set.
@@ -114,33 +111,21 @@ creates and returns a pointer to table data set.
 \fBdata_set.c\fP.
 .PP
 Definition at line 492 of file table_data.c.
-.PP
-Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults().
-.PP
 .SS "netsnmp_table_row* netsnmp_extract_table_row (netsnmp_request_info * request)"
 .PP
 extracts the row being accessed passed from the table_data helper.
 .PP
 Definition at line 500 of file table_data.c.
-.PP
-Referenced by netsnmp_extract_table_row_data(), and netsnmp_table_data_set_helper_handler().
-.PP
 .SS "void* netsnmp_extract_table_row_data (netsnmp_request_info * request)"
 .PP
 extracts the data from the row being accessed passed from the table_data helper.
 .PP
 Definition at line 509 of file table_data.c.
-.PP
-Referenced by netsnmp_extract_table_data_set_column().
-.PP
 .SS "netsnmp_mib_handler* netsnmp_get_table_data_handler (netsnmp_table_data * table)"
 .PP
 Creates a table_data handler and returns it.
 .PP
 Definition at line 236 of file table_data.c.
-.PP
-Referenced by netsnmp_register_table_data().
-.PP
 .SS "int netsnmp_register_read_only_table_data (netsnmp_handler_registration * reginfo, netsnmp_table_data * table, netsnmp_table_registration_info * table_info)"
 .PP
 registers a handler as a read-only data table If table_info != NULL, it registers it as a normal table too.
@@ -153,9 +138,6 @@ registers a handler as a data table.
 If table_info != NULL, it registers it as a normal table too. 
 .PP
 Definition at line 258 of file table_data.c.
-.PP
-Referenced by netsnmp_register_read_only_table_data(), and netsnmp_register_table_data_set().
-.PP
 .SS "int netsnmp_table_data_add_row (netsnmp_table_data * table, netsnmp_table_row * row)"
 .PP
 Adds a row of data to a given table (stored in proper lexographical order).
@@ -163,17 +145,11 @@ Adds a row of data to a given table (stored in proper lexographical order).
 returns SNMPERR_SUCCESS on successful addition. or SNMPERR_GENERR on failure (E.G., indexes already existed) 
 .PP
 Definition at line 51 of file table_data.c.
-.PP
-Referenced by netsnmp_config_parse_add_row(), netsnmp_table_data_replace_row(), and netsnmp_table_dataset_add_row().
-.PP
 .SS "int netsnmp_table_data_build_result (netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * request, netsnmp_table_row * row, int column, u_char type, u_char * result_data, size_t result_data_len)"
 .PP
 builds a result given a row, a varbind to set and the data.
 .PP
 Definition at line 521 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_set_helper_handler().
-.PP
 .SS "netsnmp_table_row* netsnmp_table_data_clone_row (netsnmp_table_row * row)"
 .PP
 clones a data row.
@@ -181,9 +157,6 @@ clones a data row.
 DOES NOT CLONE THE CONTAINED DATA. 
 .PP
 Definition at line 555 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_set_clone_row().
-.PP
 .SS "void* netsnmp_table_data_delete_row (netsnmp_table_row * row)"
 .PP
 deletes a row's memory.
@@ -191,17 +164,11 @@ deletes a row's memory.
 returns the void data that it doesn't know how to delete. 
 .PP
 Definition at line 150 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_dataset_delete_row().
-.PP
 .SS "void netsnmp_table_data_generate_index_oid (netsnmp_table_row * row)"
 .PP
 generates the index portion of an table oid from a varlist.
 .PP
 Definition at line 39 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_add_row().
-.PP
 .SS "netsnmp_table_row* netsnmp_table_data_get (netsnmp_table_data * table, netsnmp_variable_list * indexes)"
 .PP
 finds the data in 'datalist' stored at 'indexes'.
@@ -212,9 +179,6 @@ Definition at line 204 of file table_data.c.
 finds the data in 'datalist' stored at the searchfor oid.
 .PP
 Definition at line 218 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_get(), and netsnmp_table_data_helper_handler().
-.PP
 .SS "int netsnmp_table_data_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 The helper handler that takes care of passing a specific row of data down to the lower handler(s).
@@ -229,9 +193,6 @@ removes and frees a row of data to a given table and returns the void *.
 returns the void * data on successful deletion. or NULL on failure (bad arguments) 
 .PP
 Definition at line 179 of file table_data.c.
-.PP
-Referenced by netsnmp_table_dataset_remove_and_delete_row(), and netsnmp_table_dataset_remove_row().
-.PP
 .SS "netsnmp_table_row* netsnmp_table_data_remove_row (netsnmp_table_data * table, netsnmp_table_row * row)"
 .PP
 removes a row of data to a given table and returns it (no free's called).
@@ -239,9 +200,6 @@ removes a row of data to a given table and returns it (no free's called).
 returns the row pointer itself on successful removing. or NULL on failure (bad arguments) 
 .PP
 Definition at line 130 of file table_data.c.
-.PP
-Referenced by netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_replace_row().
-.PP
 .SS "void netsnmp_table_data_replace_row (netsnmp_table_data * table, netsnmp_table_row * origrow, netsnmp_table_row * newrow)\fC [inline]\fP"
 .PP
 swaps out origrow with newrow.
@@ -249,6 +207,3 @@ swaps out origrow with newrow.
 This does *not* delete/free anything! 
 .PP
 Definition at line 194 of file table_data.c.
-.PP
-Referenced by netsnmp_table_dataset_replace_row().
-.PP
