@@ -1599,9 +1599,7 @@ AC_CHECK_IFNET_FOR(if_addrlist)
 AC_CHECK_IFNET_FOR(if_addrhead.tqh_first)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1617,9 +1615,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_discard)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1635,9 +1631,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_noport)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1653,9 +1647,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_noportbcast)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1723,6 +1715,117 @@ AC_CHECK_STRUCT_FOR([
 #include <nlist.h>
 #endif
 ],nlist,n_value)
+
+dnl check struct ipstat for various things
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_cantforward)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_cantfrag)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_delivered)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_fragdropped)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_fragtimeout)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_localout)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_noproto)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_noroute)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_odropped)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_ofragments)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_reassembled)
 
 dnl attempt to figure out if sysctl is usable
 
