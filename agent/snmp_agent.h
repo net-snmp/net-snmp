@@ -29,5 +29,7 @@ int handle_agentx_packet(int, struct snmp_session *, int, struct snmp_pdu *, voi
 int handle_next_pass( struct agent_snmp_session *);
 int  handle_var_list( struct agent_snmp_session *);
 void snmp_agent_parse_config (char *, char *);
+struct agent_snmp_session  *init_agent_snmp_session( struct snmp_session *, struct snmp_pdu *);
+int getNextSessID(void);
 
 #endif
