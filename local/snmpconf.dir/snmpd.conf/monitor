@@ -57,16 +57,16 @@ info Check on the size of a file.
 info Display a files size statistics.
 info If it grows to be too large, report an error about it.
 info
-info # file /path/to/file [maxsize]
+info # file /path/to/file [maxsize_in_bytes]
 info #
 info #   if maxsize is not specified, assume only size reporting is needed.
 info #
 info The results are reported in the fileTable section of the UCD-SNMP-MIB tree
 question 1 Enter the path to the file you wish to monitor
-question 2 Enter the maximum size allowable for $1
+question 2 Enter the maximum size (in bytes) allowable for $1
 
 group monitoring_services
 multiple proc Do you want to configure the agents ability to monitor processes?
 multiple disk Do you want to configure the agents ability to monitor disk space?
 multiple load Do you want to configure the agents ability to monitor load average?
-multiple file Do you want to configure the agents ability to file sizes?
+multiple file Do you want to configure the agents ability to monitor file sizes?
