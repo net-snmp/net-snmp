@@ -437,7 +437,12 @@ store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
          hcindex = hcindex->next) {
         StorageTmp = (struct snmpNotifyTable_data *) hcindex->data;
 
-        if (StorageTmp->snmpNotifyStorageType == ST_NONVOLATILE) {
+        /*
+         * store permanent and nonvolatile rows.
+         * XXX should there be a qualification on RowStatus??
+         */
+        if ((StorageTmp->snmpNotifyStorageType == ST_NONVOLATILE) ||
+            (StorageTmp->snmpNotifyStorageType == ST_PERMANENT) ){
 
             memset(line, 0, sizeof(line));
             strcat(line, "snmpNotifyTable ");
