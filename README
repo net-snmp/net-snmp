@@ -65,7 +65,7 @@ SUPPORTED ARCHITECTURES
 	   this package.  I haven't implemented everything on the
 	   sun/dec architectures.  
 
-     sun4/4.1.4               (note:  NOT SOLARIS) (note: no disk/swap/load)
+     sun4/4.1.4               (note:  NOT SOLARIS) (note: no swap)
      Dec5000/Ultrix 4.3                            (note: no swap)
 
 INSTALLATION

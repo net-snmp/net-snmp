@@ -5,9 +5,9 @@
 CC = gcc -g 
 
 OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
-SRCS:=$(subst .o,.c,$(OBJS))
+SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c versioninfo.c 
 
-all: TAGS $(OBJS)
+all: $(OBJS)
 
 TAGS: $(SRCS)
 	etags *.c *.h

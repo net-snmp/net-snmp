@@ -1,0 +1,11 @@
+Mon Jun  5 12:40:12 1995  Wes Hardaker  (hardaker@teal.ece.ucdavis.edu)
+
+	* agent/extensible/Makefile:
+            --  no longer requires GNU make
+            --  etags no longer run by default
+
+	* SunOS additions:
+            -- loadaverage checking MIB enabled
+            -- disk checking MIB enabled
+
+

@@ -14,7 +14,7 @@
 #include <mtab.h>
 #endif
 #ifdef sun
-#include <fstab.h>
+#include <ufs/fs.h>
 #endif
 #include <sys/stat.h>
 #include <errno.h>
@@ -292,7 +292,7 @@ static int numdisks;
 struct diskpart disks[MAXDISKS];
 
 #ifdef DISKMIBNUM
-#if defined(hpux) || defined(ultrix)
+/*#if defined(hpux) || defined(ultrix) */
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -390,7 +390,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   }
 }
 
-#endif
+/*#endif*/
 #endif
 
 #define NOERR 0
@@ -515,6 +515,10 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #ifdef ultrix
   fix favenrun[3];
 #endif
+#ifdef sun
+  long favenrun[3];
+#define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
+#endif
   double avenrun[3];
   oid loadave[3];
   
@@ -531,7 +535,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
-#ifdef ultrix
+#if defined(ultrix) || defined(sun)
   if (KNLookup(NL_AVENRUN,(int *) favenrun, sizeof(favenrun)) == NULL)
     return(0);
   for(i=0;i<3;i++)
