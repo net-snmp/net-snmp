@@ -28,12 +28,11 @@ snmpcmd
 [-h|-V]
 [-R]
 [-f|-s|-S] [-q]
-[-v (1 | 2c | 2p | 3) ]
+[-v (1 | 2c | 3) ]
 [-d] [-D[TOKEN,TOKEN,...]]
 [-R] [-f|-s|-S] [-q]
 [-m mibs] [-M mibdirs]
 [-r retries] [-t timeout] [-p port]
-[-c srcclock dstclock]
 [-e engineid] [-T boots time] [-n contextname]
 [-l seclevel] [-u secname]
 [-a authproto] [-A authpasswd] [-x privproto] [-X privpasswd]
@@ -62,9 +61,9 @@ prints the applications version string
 request the application to dump all SNMP packets send and received
 .IP "-D"
 request debugging output
-.IP "-v 1 | 2c | 2p | 3"
+.IP "-v 1 | 2c | 3"
 specifies the protocol version to use: 1 (RFC 1155-1157), 2c (RFC 1901-1908),
-2p (RFC 1441-1452), or 3 (RFC 2271-2274)
+or 3 (RFC 2571-2574)
 The default is -v 1
 .IP "-R"
 requests random access to the MIB symbol table. See RANDOM ACCESS MIB below.
@@ -120,8 +119,6 @@ specifies the timeout between retries. The default is 1
 .IP "-p port"
 specifies the port to communicate with at the agent. The default is 161,
 except for snmptrap, which defaults to 162.
-.IP "-c srcclock dstclock"
-sets the clock values to be used for authenticated SNMP v2p messages
 .IP "-e engineid"
 sets the authoritative(security) engineID used for SNMP v3 Request messages.
 This is the engineID of the agent or proxy (e.g., 800000020109840301). (will 
@@ -163,17 +160,6 @@ The version 1, or version 2c,
 .I community
 specifies the community name for the transaction with the remote system.
 .PP
-The version 2p
-.IR srcParty ,
-.IR dstParty ,
-and
-.I context
-specify the party and context names for the transaction with the remote system, as
-they are defined in PREFIX/share/snmp/party.conf.
-To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
-.PP
 .SH "RANDOM ACCESS MIBS"
 Normally, an object identifier such as system.sysDescr.0 will be lookup
 in a single "wellknown" place, built into the SNMP library (or specified
@@ -205,11 +191,9 @@ If this variable is set, the applications acts as if the -s option is specified.
 .SH FILES
 .IP PREFIX/share/snmp/snmpd.conf
 Agent configuration file. See snmpd.conf(5)
-.IP PREFIX/share/snmp/party.conf
-.IP PREFIX/share/snmp/context.conf
-.IP PREFIX/share/snmp/view.conf
-.IP PREFIX/share/snmp/acl.conf
-SNMP v2p configuration files. Obsolete.
+.IP PREFIX/share/snmp/snmp.conf
+.IP ~/.snmp/snmp.conf
+Application configuration files. See snmp.conf(5)
 .SH "SEE ALSO"
 snmpget(1), snmpgetnext(1), snmpset(1), snmpbulkwalk(1), snmpwalk(1),
-snmptable(1), snmpdelta(1), snmptrap(1).
+snmptable(1), snmpdelta(1), snmptrap(1), snmp.conf(5).
