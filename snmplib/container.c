@@ -182,7 +182,7 @@ netsnmp_container_add_index(netsnmp_container *primary,
     primary->next = new_index;
 }
 
-#ifdef DONT_INLINE_CONTAINER_MACROS /* default is to inline */
+#ifndef NETSNMP_USE_INLINE /* default is to inline */
 
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
