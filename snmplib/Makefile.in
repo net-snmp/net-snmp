@@ -54,6 +54,32 @@ INCLUDESUBDIRHEADERS=\
 	@transport_hdr_list@ \
 	@security_hdr_list@
 
+INSTALLUCDHEADERS= asn1.h \
+	callback.h	\
+	default_store.h	\
+	int64.h		\
+	keytools.h	\
+	mib.h		\
+	parse.h		\
+	read_config.h	\
+	scapi.h		\
+	snmp_alarm.h	\
+	snmp_api.h	\
+	snmp_client.h	\
+	snmp_debug.h	\
+	snmp.h		\
+	snmp_impl.h	\
+	snmp_logging.h	\
+	snmp_parse_args.h \
+	snmp-tc.h	\
+	snmpusm.h	\
+	snmpv3.h	\
+	snmp_vars.h	\
+	struct.h	\
+	system.h	\
+	tools.h		\
+	transform_oids.h
+
 # libraries
 INSTALLLIBS=libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
