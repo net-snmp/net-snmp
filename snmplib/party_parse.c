@@ -74,7 +74,7 @@ read_party_database(filename)
     int blank, nonhex;
     int linenumber = 0, chars = 0, clock_pos;
     int state = IDENTITY_STATE;
-    u_long addr;
+    in_addr_t addr;
     u_short port;
     oid partyid[64];
     int partyidlen;
