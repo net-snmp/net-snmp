@@ -486,8 +486,10 @@ proxy -v 1 -c public remotehost .1.3.6.1.4.1.2021
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
-Passes entire control of MIBOID to the EXEC program.  The EXEC program
-is called in one of the following three ways:
+(If you're writing perl scripts, please see the embedded perl support
+information later in this manual page).  Passes entire control of
+MIBOID to the EXEC program.  The EXEC program is called in one of the
+following three ways:
 .RS
 .IP "EXEC -g MIBOID"
 .IP "EXEC -n MIBOID"
@@ -591,6 +593,69 @@ Example (in snmpd.conf):
 .IP
 pass_persist .1.3.6.1.4.1.2021.255 /path/to/local/pass_persisttest
 .RE
+.SH "EMBEDDED PERL SUPPORT"
+.PP
+Warning: though embedded perl is working, not much functionality has
+been implemented yet and thus writing mib module pieces for the agent
+within perl is not trivial at this point.  It should get better in
+future releases.
+.PP
+The net-snmp package has ability to call perl scripts directly inside
+the agent through embedded perl technology (similar to mod_perl for
+the apache web server).  This must be turned on at compile time by
+passing --enable-embedded-perl to the configure script when the
+package is built.  To see if your package was built with embedded
+perl, run "net-snmp-config --configure-options" and see if that flag
+was used.
+.PP
+If compiled in, it defines the following snmpd.conf configuration
+directives:
+.IP "disablePerl true"
+This will turn off perl support entirely.  If the embedded perl
+support stops working due to a change in perl, etc, this will stop any
+calls to the perl core.
+
+.IP "perlInitFile FILE"
+Use FILE as the initialization file.  This file is normally
+DATADIR/snmp/snmp_perl.pl but this token can override that default.
+This file performs any in-perl initialization that is needed before
+the rest of the perl directives (below) are called.  It is sourced
+once just before the first perl directive is parsed.  See the default
+file for an example of the initialization it performs.
+.IP "perl EXPRESSION"
+Calls perl to evaluate an expression.  Normally you'd want to do
+something like register a function to call when an OID is requested,
+but you can really do anything perl related you want.  For example:
+.IP
+.RS
+perl print "hello world\\n";
+.RE
+.IP
+is the most basic hello world example.
+.IP
+The init script by default initializes a $agent variable which
+is a pointer to a NetSnmp::agent object through which you can register
+callbacks when a section of the OID tree is hit:
+.IP
+.RS
+.nf
+perl use Data::Dumper;
+perl sub myroutine  { print "got called: ",Dumper(@_),"\\n"; }
+perl $agent->register('mylink', '.1.3.6.1.8765', \\&myroutine);
+.fi
+.RE
+.IP
+Sourcing an external file:
+.IP
+.RS
+.nf
+perl 'do /path/to/file.pl';
+.fi
+.RE
+.IP
+No better examples exist at the moment, unfortunately.  Look for
+improved support in future releases.  Comments on how this looks as an
+architecture are certainly appreciated now.
 .SH "DISMAN-EVENT-MIB SUPPORT (READ: SENDING TRAPS ON ERRORS)"
 .PP
 Warning: this implementation has not been extensively tested and is
