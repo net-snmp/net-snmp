@@ -88,7 +88,7 @@ and edit them as follows:
 
   It will then be necessary to (re-)run the configure script with the
 option
-	-with-mib-modules="MODULENAME"
+	--with-mib-modules="MODULENAME"
 
 (where MODULENAME matches the name of the .c/.h file pair exactly).
 Note that if anything in the config_* macros changes, or the init function
