@@ -121,6 +121,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
             /* check type */
             if (requests->requestvb->type != ASN_INTEGER) {
                 set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
+                free_delegated_cache(cache);
                 return;
             }
             break;
@@ -132,6 +133,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
             if (sleeptime_cache == NULL) {
                 set_request_error(reqinfo, requests,
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
+                free_delegated_cache(cache);
                 return;
             }
             request_add_list_data(requests,
@@ -155,6 +157,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
         case MODE_SET_FREE:
             break;
     }
+    free_delegated_cache(cache);
     accesses++;
 }
 
