@@ -87,4 +87,42 @@ int check_access(struct snmp_pdu *pdu);
                theoid, sizeof(theoid)/sizeof(oid)) != MIB_REGISTERED_OK ) \
 	DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));
 
+
+#define NUM_EXTERNAL_FDS 32
+
+#define FD_REGISTERED_OK		 0
+#define FD_REGISTRATION_FAILED		-2
+
+#define FD_UNREGISTERED_OK		 0
+#define FD_NO_SUCH_REGISTRATION		-1
+
+extern int external_readfd[NUM_EXTERNAL_FDS], external_readfdlen;
+extern int external_writefd[NUM_EXTERNAL_FDS], external_writefdlen;
+extern int external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen;
+
+extern void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int);
+extern void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int);
+extern void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int);
+
+int register_readfd(int, void (*func)(int));
+int register_writefd(int, void (*func)(int));
+int register_exceptfd(int, void (*func)(int));
+int unregister_readfd(int);
+int unregister_writefd(int);
+int unregister_exceptfd(int);
+
+
+#define SIG_REGISTERED_OK		 0
+#define SIG_REGISTRATION_FAILED		-2
+
+#define SIG_UNREGISTERED_OK		 0
+
+#define NUM_EXTERNAL_SIGS 32
+
+extern int external_signal_scheduled[NUM_EXTERNAL_SIGS];
+extern void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
+
+int register_signal(int, void (*func)(int));
+int unregister_signal(int);
+
 #endif /* AGENT_REGISTRY_H */
