@@ -29,8 +29,8 @@
 #define	TCPTABLE_STATE		State 
 #define	TCPTABLE_LOCALADDRESS	LocalAddress 
 #define	TCPTABLE_LOCALPORT	LocalPort 
-#define	TCPTABLE_REMOTEADDRESS	RemoteAddress 
-#define	TCPTABLE_REMOTEPORT	RemotePort 
+#define	TCPTABLE_REMOTEADDRESS	RemAddress 
+#define	TCPTABLE_REMOTEPORT	RemPort 
 #define	TCPTABLE_IS_TABLE
 #else
 
@@ -457,6 +457,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     int             val = 0;
     unsigned int    ulen;
     int             ret;
+    int             i;
 
     tcpTable_free(NULL, NULL);
 
@@ -469,7 +470,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
             tcp_size = val;
 
         if (tcp_size > 0) {
-            ulen = (unsigned) tcp_size *sizeof(mib_tcpLsnEnt);
+            ulen = (unsigned) tcp_size *sizeof(mib_tcpConnEnt);
             tcp_head = (mib_tcpConnEnt *) malloc(ulen);
             p.objid = ID_tcpConnTable;
             p.buffer = (void *) tcp_head;
@@ -486,7 +487,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
      * Count the number of established connections
      * Probably not actually necessary for HP-UX
      */
-    for (int i = 0; i < tcp_size; i++) {
+    for (i = 0; i < tcp_size; i++) {
         if (tcp_head[i].State == 5 /* established */ ||
             tcp_head[i].State == 8 /*  closeWait  */ )
             tcp_estab++;
