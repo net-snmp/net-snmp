@@ -44,6 +44,7 @@ $configfile="mib2c.conf";
 $debug=0;
 $quiet=0;
 $nostats = 0;
+$noindent = 0;
 
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
@@ -54,6 +55,7 @@ sub usage {
     print "  -d\t\tdebugging output (dont do it.  trust me.)\n\n";
     print "  -s\t\tDon't display statistics at the end\n\n";
     print "  -S VAR=VAL\tSet $VAR variable to $VAL\n";
+    print "  -i Don't run indent on the resulting code\n";
     1;
 }	
 
@@ -69,6 +71,7 @@ while($#ARGV >= 0) {
     }
     $quiet = 1 if (/^-q/);
     $nostats = 1 if (/^-s/);
+    $noindent = 1 if (/^-i/);
     usage && exit(1) if (/^-h/);
     $outputName = shift if (/^-f/);
     $oid = $_ if (/^[^-]/);
@@ -133,10 +136,12 @@ exit;
 process();
 $fh->close;
 
-foreach $i (keys(%written)) {
+if (!$noindent) {
+  foreach $i (keys(%written)) {
     next if ($i eq "-");
     print STDERR "running indent on $i\n" if (!$quiet);
     system("indent -orig -nbc -bap -nut -nfca -T netsnmp_mib_handler -T netsnmp_handler_registration -T netsnmp_delegated_cache -T netsnmp_mib_handler_methods -T netsnmp_old_api_info -T netsnmp_old_api_cache -T netsnmp_set_info -T netsnmp_request_info -T netsnmp_set_info -T netsnmp_tree_cache -T netsnmp_agent_request_info -T netsnmp_cachemap -T netsnmp_agent_session -T netsnmp_array_group_item -T netsnmp_array_group -T netsnmp_table_array_callbacks -T netsnmp_table_row -T netsnmp_table_data -T netsnmp_table_data_set_storage -T netsnmp_table_data_set -T netsnmp_column_info -T netsnmp_table_registration_info -T netsnmp_table_request_info -T netsnmp_iterator_info -T netsnmp_data_list -T netsnmp_oid_array_header -T netsnmp_oid_array_header_wrapper -T netsnmp_oid_stash_node -T netsnmp_pdu -T netsnmp_request_list -T netsnmp_callback_pass -T netsnmp_callback_info -T netsnmp_transport -T netsnmp_transport_list -T netsnmp_tdomain $i");
+  }
 }
 
 sub tocommas {
