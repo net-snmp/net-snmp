@@ -902,6 +902,7 @@ my %node_elements =
      hint => 0,     # returns HINT
      enums => 0,    # returns hash ref {tag => num, ...}
      ranges => 0,    # returns hash ref {low => num, high => num}
+     defaultValue => 0,   # returns default value
      description => 0, # returns DESCRIPTION ($SNMP::save_descriptions must
                     # be set prior to MIB initialization/parsing
     );
