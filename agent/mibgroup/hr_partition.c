@@ -251,7 +251,8 @@ Get_Next_HR_Partition __P((void))
 
 	fd=open( string, O_RDONLY  );
 	if (fd != -1 ) {
-	    return( HRP_index );
+            close(fd);
+            return( HRP_index );
 	}
 	HRP_index++;
     }
