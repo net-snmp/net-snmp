@@ -1518,8 +1518,12 @@ snmpv3_build(struct snmp_session	*session,
 	    break;
 
 	case SNMP_MSG_GETBULK:
-	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
+	    if (pdu->max_repetitions < 0) {
 	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        return -1;
+	    }
+	    if (pdu->non_repeaters < 0){
+	        session->s_snmp_errno = SNMPERR_BAD_REPEATERS;
 	        return -1;
 	    }
 	    break;
@@ -1865,8 +1869,12 @@ _snmp_build(struct snmp_session *session,
 	            session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	            return -1;
             }
-	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
+	    if (pdu->max_repetitions < 0) {
 	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        return -1;
+	    }
+	    if (pdu->non_repeaters < 0) {
+	        session->s_snmp_errno = SNMPERR_BAD_REPEATERS;
 	        return -1;
 	    }
 	    break;
