@@ -1,3 +1,5 @@
 Makefile
 snmpcheck
 *.made
+*.c
+*.h
