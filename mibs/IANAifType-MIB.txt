@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200210170000Z"  -- Oct 17, 2002
+       LAST-UPDATED "200303180000Z"  -- Mar 18, 2003
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,14 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200303180000Z"  -- Mar 18, 2003
+       DESCRIPTION  "Registration of new IANAifType
+                    221."
+
+       REVISION     "200301130000Z"  -- Jan 13, 2003
+       DESCRIPTION  "Registration of new IANAifType
+                    220."
 
        REVISION     "200210170000Z"  -- Oct 17, 2002
        DESCRIPTION  "Registration of new IANAifType
@@ -374,7 +382,9 @@
                    gtp (216), -- GTP (GPRS Tunneling Protocol)
                    pdnEtherLoop1 (217), -- Paradyne EtherLoop 1
                    pdnEtherLoop2 (218), -- Paradyne EtherLoop 2
-                   opticalChannelGroup (219) -- Optical Channel Group
+                   opticalChannelGroup (219), -- Optical Channel Group
+                   homepna (220), -- HomePNA ITU-T G.989				   
+                   gfp (221) -- Generic Framing Procedure (GFP)
     			   }
 
    END
