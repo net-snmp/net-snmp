@@ -648,14 +648,18 @@ struct variable2 eventnotifytab_variables[] = {
 #include "../config.h"
 #include "extensible/snmp_vars.h"
 struct subtree subtrees[] = {
+#ifdef PROCMIBNUM
   {{EXTENSIBLEMIB, PROCMIBNUM}, EXTENSIBLENUM+1,
    (struct variable *)extensible_proc_variables,
    sizeof(extensible_proc_variables)/sizeof(*extensible_proc_variables),
    sizeof(*extensible_proc_variables)},
+#endif
+#ifdef SHELLMIBNUM
   {{EXTENSIBLEMIB, SHELLMIBNUM}, EXTENSIBLENUM+1,
    (struct variable *)extensible_extensible_variables,
    sizeof(extensible_extensible_variables)/sizeof(*extensible_extensible_variables),
    sizeof(*extensible_extensible_variables)},
+#endif
 #ifdef hpux
   {{EXTENSIBLEMIB, MEMMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_mem_variables,
    sizeof(extensible_mem_variables)/sizeof(*extensible_mem_variables),
@@ -669,12 +673,21 @@ struct subtree subtrees[] = {
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},
 #endif
+#ifdef LOADAVEMIBNUM
   {{EXTENSIBLEMIB, LOADAVEMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_loadave_variables,
    sizeof(extensible_loadave_variables)/sizeof(*extensible_loadave_variables),
    sizeof(*extensible_loadave_variables)},
+#endif
+#ifdef VERSIONMIBNUM
   {{EXTENSIBLEMIB, VERSIONMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_version_variables,
    sizeof(extensible_version_variables)/sizeof(*extensible_version_variables),
    sizeof(*extensible_version_variables)},
+#endif
+#ifdef ERRORMIBNUM
+  {{EXTENSIBLEMIB, ERRORMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_error_variables,
+   sizeof(extensible_error_variables)/sizeof(*extensible_error_variables),
+   sizeof(*extensible_error_variables)},
+#endif
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -830,9 +843,11 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 						  len, write_method);
 		    if (write_method)
 			*acl = vp->acl;
-		    if (access && (pi->version == SNMP_VERSION_2)
-			&& !in_view(name, *namelen,
-				    pi->cxp->contextViewIndex)){
+		    if (access &&
+                        (((pi->version == SNMP_VERSION_2) &&
+                         !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+                         ((pi->version == SNMP_VERSION_1) &&
+                          (cvp->acl == PRIVRW || cvp->acl == PRIVRO)))) {
 			access = NULL;
 			*write_method = NULL;
 			/*

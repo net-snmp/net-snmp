@@ -35,5 +35,5 @@ snmp_vars.o: ../snmplib/party.h extensible/extensible.c ../config.h\
  extensible/snmp_vars.h extensible/mibdefs.h
 alarm.c:  ../snmplib/party.h
 event.c:  ../snmplib/party.h
-snmpd.c:  ../snmplib/party.h
+snmpd.c:  ../snmplib/party.h ../config.h
 
