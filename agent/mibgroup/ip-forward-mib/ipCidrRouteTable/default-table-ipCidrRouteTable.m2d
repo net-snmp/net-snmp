@@ -32,13 +32,13 @@
 ##
 ##
 ##
-@eval $m2c_data_context = "RTENTRY *"@ [generated|NAME]
+@eval $m2c_data_context = "netsnmp_route_entry"@ [generated|NAME]
 ##
 ########################################################################
 ##
 ##
 ##
-## @eval $m2c_data_allocate = 0@
+@eval $m2c_data_allocate = 1@
 ##
 ########################################################################
 ##
