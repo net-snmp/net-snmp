@@ -324,11 +324,7 @@ asn_parse_string(data, datalength, type, string, strlength)
 	ERROR("I don't support such long strings");
 	return NULL;
     }
-#ifdef SVR4
-    memmove((char *)string, (char *)bufp, (int)asn_length);
-#else
-    bcopy((char *)bufp, (char *)string, (int)asn_length);
-#endif
+    memmove(string, bufp, (int)asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
     return bufp + asn_length;
@@ -364,11 +360,7 @@ asn_build_string(data, datalength, type, string, strlength)
 	return NULL;
     if (*datalength < strlength)
 	return NULL;
-#ifdef SVR4
-    memmove((char *)data, (char *)string, strlength);
-#else
-    bcopy((char *)string, (char *)data, strlength);
-#endif
+    memmove(data, string, strlength);
     *datalength -= strlength;
     return data + strlength;
 }
@@ -496,11 +488,7 @@ asn_parse_length(data, length)
 	    ERROR("we can't support data lengths that long");
 	    return NULL;
 	}
-#ifdef SVR4
-	memmove((char *)length, (char *)data + 1, (int)lengthbyte);
-#else
-	bcopy((char *)data + 1, (char *)length, (int)lengthbyte);
-#endif
+	memmove(length, data + 1, (int)lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(int)) - lengthbyte));
 	return data + lengthbyte + 1;
@@ -698,11 +686,7 @@ asn_build_objid(data, datalength, type, objid, objidlength)
 	return NULL;
     if (*datalength < asnlength)
 	return NULL;
-#ifdef SVR4
-    memmove((char *)data, (char *)buf, asnlength);
-#else
-    bcopy((char *)buf, (char *)data, asnlength);
-#endif
+    memmove(data, buf, asnlength);
     *datalength -= asnlength;
     return data + asnlength;
 }
@@ -810,11 +794,7 @@ asn_parse_bitstring(data, datalength, type, string, strlength)
 	ERROR("Invalid bitstring");
 	return NULL;
     }
-#ifdef SVR4
-    memmove((char *)string, (char *)bufp, (int)asn_length);
-#else
-    bcopy((char *)bufp, (char *)string, (int)asn_length);
-#endif
+    memmove(string, bufp, (int)asn_length);
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
     return bufp + asn_length;
@@ -852,11 +832,7 @@ asn_build_bitstring(data, datalength, type, string, strlength)
 	return NULL;
     if (*datalength < strlength)
 	return NULL;
-#ifdef SVR4
-    memmove((char *)data, (char *)string, strlength);
-#else
-    bcopy((char *)string, (char *)data, strlength);
-#endif
+    memmove(data, string, strlength);
     *datalength -= strlength;
     return data + strlength;
 }
