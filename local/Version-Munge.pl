@@ -18,7 +18,8 @@ $0 [-v VERSION] -R -C -M -h
     exit 1;
 }
 
-getopts("v:T:RCMDhnf:t:V",\%opts) || usage;
+getopts("v:T:RCMDhnf:t:V",\%opts) || usage();
+if ($opts{'h'}) { usage(); }
 
 if (!$opts{'v'} && $opts{'M'} && !$opts{'T'}) {
   warn "no version (-v or -T) specified";
@@ -44,7 +45,7 @@ my @exprs = (
 
 	     # sed files
 	     { type => 'sed',
-	       expr => '^s\/VERSIONINFO\/.*\d' =>
+	       expr => '^s\/VERSIONINFO\/[^\/]*' =>
 	       repl => 's\/VERSIONINFO\/$VERSION',
 	       files => [qw(sedscript.in)]},
 
