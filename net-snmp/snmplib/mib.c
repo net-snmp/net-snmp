@@ -2057,7 +2057,7 @@ handle_mibdirs_conf(const char *token, char *line)
         if (*line == '+')
             line++;
         sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
-        free(confmibdir);
+        SNMP_FREE(confmibdir);
         confmibdir = ctmp;
     } else {
         confmibdir = strdup(line);
@@ -2079,7 +2079,7 @@ handle_mibs_conf(const char *token, char *line)
         if (*line == '+')
             line++;
         sprintf(ctmp, "%s%c%s", confmibs, ENV_SEPARATOR_CHAR, line);
-        free(confmibs);
+        SNMP_FREE(confmibs);
         confmibs = ctmp;
     } else {
         confmibs = strdup(line);
@@ -2361,7 +2361,7 @@ netsnmp_set_mib_directory(const char *dir)
 
     /** set_string calls strdup, so if we allocated memory, free it */
     if (tmpdir == newdir) {
-        free(tmpdir);
+        SNMP_FREE(tmpdir);
     }
 }
 
@@ -2447,7 +2447,7 @@ netsnmp_fixup_mib_directory(void)
                 /** swap in the new value and repeat */
                 mibpath = new_mibpath;
 		if (oldmibpath != NULL) {
-		    free(oldmibpath);
+		    SNMP_FREE(oldmibpath);
 		}
 		oldmibpath = new_mibpath;
             } else {
@@ -2460,8 +2460,9 @@ netsnmp_fixup_mib_directory(void)
 	/*  The above copies the mibpath for us, so...  */
 
 	if (oldmibpath != NULL) {
-	    free(oldmibpath);
+	    SNMP_FREE(oldmibpath);
 	}
+
     }
 
 }
@@ -2497,7 +2498,7 @@ init_mib(void)
         add_mibdir(entry);
         entry = strtok(NULL, ENV_SEPARATOR);
     }
-    free(env_var);
+    SNMP_FREE(env_var);
 
     init_mib_internals();
 
@@ -2523,7 +2524,7 @@ init_mib(void)
         } else
             sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
                 env_var + 1);
-        free(env_var);
+        SNMP_FREE(env_var);
         env_var = entry;
     }
 
@@ -2542,7 +2543,7 @@ init_mib(void)
         entry = strtok(NULL, ENV_SEPARATOR);
     }
     adopt_orphans();
-    free(env_var);
+    SNMP_FREE(env_var);
 
     env_var = getenv("MIBFILES");
     if (env_var != NULL) {
@@ -2556,7 +2557,7 @@ init_mib(void)
             } else
                 sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
                     env_var + 1);
-            free(env_var);
+            SNMP_FREE(env_var);
             env_var = entry;
 #else
             env_var = strdup(env_var + 1);
@@ -2579,7 +2580,7 @@ init_mib(void)
             read_mib(entry);
             entry = strtok(NULL, ENV_SEPARATOR);
         }
-        free(env_var);
+        SNMP_FREE(env_var);
     }
 
     prefix = getenv("PREFIX");
@@ -2634,14 +2635,14 @@ shutdown_mib(void)
     unload_all_mibs();
     if (tree_top) {
         if (tree_top->label)
-            free(tree_top->label);
-        free(tree_top);
+            SNMP_FREE(tree_top->label);
+        SNMP_FREE(tree_top);
         tree_top = NULL;
     }
     tree_head = NULL;
     Mib = NULL;
     if (Prefix != NULL && Prefix != &Standard_Prefix[0])
-        free(Prefix);
+        SNMP_FREE(Prefix);
     if (Prefix)
         Prefix = NULL;
 }
@@ -2817,10 +2818,10 @@ read_objid(const char *input, oid * output, size_t * out_len)
         if (ret == 0)
             ret = SNMPERR_UNKNOWN_OBJID;
         SET_SNMP_ERROR(ret);
-        free(name);
+        SNMP_FREE(name);
         return 0;
     }
-    free(name);
+    SNMP_FREE(name);
 
     return 1;
 }
@@ -2870,7 +2871,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
             snmp_strcat(buf, buf_len, out_len, allow_realloc, tbuf);
             *buf_overflow = 1;
         }
-        free(tbuf);
+        SNMP_FREE(tbuf);
 #ifndef DISABLE_MIB_LOADING
         return subtree;
 #else
@@ -2975,7 +2976,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp)) {
         *buf_overflow = 1;
     }
-    free(tbuf);
+    SNMP_FREE(tbuf);
 #ifndef DISABLE_MIB_LOADING
     return subtree;
 #endif /* DISABLE_MIB_LOADING */
@@ -3047,7 +3048,7 @@ fprint_objid(FILE * f, const oid * objid, size_t objidlen)
         }
     }
 
-    free(buf);
+    SNMP_FREE(buf);
 }
 
 int
@@ -3194,7 +3195,7 @@ fprint_variable(FILE * f,
         }
     }
 
-    free(buf);
+    SNMP_FREE(buf);
 }
 
 int
@@ -3288,7 +3289,7 @@ fprint_value(FILE * f,
         }
     }
 
-    free(buf);
+    SNMP_FREE(buf);
 }
 
 
@@ -4560,7 +4561,7 @@ get_module_node(const char *fname,
         }
     }
 
-    free(name);
+    SNMP_FREE(name);
     return (rc);
 }
 
@@ -4837,7 +4838,7 @@ _add_strings_to_oid(void *tp, char *cp,
 			    (*objidlen)++;
 			    pos++;
 			}
-			free(new_val);
+			SNMP_FREE(new_val);
 		    } else {
 			while(*cp) {
 			    if (*objidlen >= maxlen) goto bad_id;
@@ -5088,7 +5089,7 @@ get_node(const char *name, oid * objid, size_t * objidlen)
          * 'cp' and 'name' *do* go that way round! 
          */
         res = get_module_node(cp, module, objid, objidlen);
-        free(module);
+        SNMP_FREE(module);
     }
     if (res == 0) {
         SET_SNMP_ERROR(SNMPERR_UNKNOWN_OBJID);
@@ -5639,7 +5640,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 	*new_val_len = ph.result_len;
     } else {
 	if (ph.result) {
-	    free(ph.result);
+	    SNMP_FREE(ph.result);
 	}
 	*new_val = NULL;
 	*new_val_len = 0;
@@ -5678,7 +5679,7 @@ int main(int argc, const char **argv)
 	    int c = new_val[i] & 0xFF;
 	    printf("%02X(%c) ", c, isprint(c) ? c : ' ');
 	}
-	free(new_val);
+	SNMP_FREE(new_val);
     }
     printf("\n");
     exit(0);

@@ -255,7 +255,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
             if (!snmp_hex_to_binary
                 (&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
                 fprintf(stderr, "Bad engine ID value after -3e flag.\n");
-                free(ebuf);
+                SNMP_FREE(ebuf);
                 return (-1);
             }
             session->securityEngineID = ebuf;
@@ -274,7 +274,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
             if (!snmp_hex_to_binary
                 (&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
                 fprintf(stderr, "Bad engine ID value after -3E flag.\n");
-                free(ebuf);
+                SNMP_FREE(ebuf);
                 return (-1);
             }
             session->contextEngineID = ebuf;
@@ -672,7 +672,7 @@ usm_parse_create_usmUser(const char *token, char *line)
         if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, buf)) {
             config_perror("invalid EngineID argument to -e");
             usm_free_user(newuser);
-            free(ebuf);
+            SNMP_FREE(ebuf);
             return;
         }
 
@@ -913,7 +913,7 @@ engineIDNic_conf(const char *word, char *cptr)
          * See if already set if so erase & release it 
          */
         if (NULL != engineIDNic) {
-            free(engineIDNic);
+            SNMP_FREE(engineIDNic);
         }
         engineIDNic = (u_char *) malloc(strlen(cptr) + 1);
         if (NULL != engineIDNic) {
@@ -1130,7 +1130,7 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                    snmpv3_local_snmpEngineBoots(),
                    snmpv3_local_snmpEngineTime(), TRUE);
 
-    free(c_engineID);
+    SNMP_FREE(c_engineID);
     return SNMPERR_SUCCESS;
 }
 
