@@ -205,14 +205,18 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
         write(((callback_info *) other_side->data)->pipefds[1]," ",1);
         callback_push_queue(mystuff->linkedto, cp);
         /* we don't need the transport data any more */
-        if (*opaque)
+        if (*opaque) {
             free(*opaque);
+	    *opaque = NULL;
+	}
     } else {
         /* we're the server, send it to the person that sent us the request */
         from = **((int **) opaque);
         /* we don't need the transport data any more */
-        if (*opaque)
+        if (*opaque) {
             free(*opaque);
+	    *opaque = NULL;
+	}
         other_side = find_transport_from_callback_num(from);
         if (!other_side)
             return -1;
@@ -329,7 +333,7 @@ snmp_callback_hook_build(struct snmp_session *sp,
     DEBUGMSGTL(("transport_callback","hook_build enter\n"));
     ch->pdu = pdu;
     ch->orig_transport_data = pdu->transport_data;
-    pdu->transport_data = ch;;
+    pdu->transport_data = ch;
     *len = 1;
     DEBUGMSGTL(("transport_callback","hook_build exit\n"));
     return 1;
