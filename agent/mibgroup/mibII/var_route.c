@@ -148,6 +148,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #if HAVE_NLIST_H
 #include <nlist.h>
@@ -189,6 +192,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 extern WriteMethod write_rte;
 
+#ifndef WIN32
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
 static void Route_Scan_Reload (void);
@@ -1273,6 +1277,176 @@ static int qsort_compare(void *v1,
 
 #endif /* solaris2 */
 
+#else /* WIN32 */
+#include <iphlpapi.h>
+
+u_char *
+var_ipRouteEntry(struct variable *vp,
+		oid *name,
+		size_t *length,
+		int exact,
+		size_t *var_len,
+		WriteMethod **write_method)
+{
+    /*
+     * object identifier is of form:
+     * 1.3.6.1.2.1.4.21.1.?.A.B.C.D,  where A.B.C.D is IP address.
+     * IPADDR starts at offset 10.
+     */
+    register int Save_Valid, result, RtIndex;
+    static int saveNameLen=0, saveExact=0, saveRtIndex=0, rtsize = 0;
+    static oid saveName[14], Current[14];
+    u_char *cp;
+    oid *op;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    static PMIB_IPFORWARDTABLE pIpRtrTable = NULL;
+    struct timeval now;
+    static long Time_Of_Last_Reload = 0;
+
+
+    /** 
+     ** this optimisation fails, if there is only a single route avail.
+     ** it is a very special case, but better leave it out ...
+     **/
+#if NO_DUMMY_VALUES
+      saveNameLen = 0;
+#endif
+    if (rtsize <= 1)
+      Save_Valid = 0;
+    else
+    /*
+     *	OPTIMIZATION:
+     *
+     *	If the name was the same as the last name, with the possible
+     *	exception of the [9]th token, then don't read the routing table
+     *
+     */
+
+    if ((saveNameLen == (int)*length) && (saveExact == exact)) {
+	register int temp=name[9];
+	name[9] = 0;
+	Save_Valid = (snmp_oid_compare(name, *length, saveName, saveNameLen) == 0);
+	name[9] = temp;
+    } else
+	Save_Valid = 0;
+
+    if (Save_Valid) {
+	register int temp=name[9];    /* Fix up 'lowest' found entry */
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
+	name[9] = temp;
+	*length = 14;
+	RtIndex = saveRtIndex;
+    } else {
+	/* fill in object part of name for current (less sizeof instance part) */
+
+	memcpy( (char *)Current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
+
+  gettimeofday (&now, (struct timezone *) 0);
+    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pIpRtrTable == NULL) )
+    {
+        if(pIpRtrTable != NULL)
+            free(pIpRtrTable);
+        Time_Of_Last_Reload = now.tv_sec;
+        /* query for buffer size needed */
+        status = GetIpForwardTable(pIpRtrTable, &dwActualSize, TRUE);
+        if (status == ERROR_INSUFFICIENT_BUFFER)
+        {
+            pIpRtrTable = (PMIB_IPFORWARDTABLE) malloc(dwActualSize);
+            if(pIpRtrTable != NULL){  
+                /* Get the sorted IP Route Table */
+                status = GetIpForwardTable(pIpRtrTable, &dwActualSize, TRUE);
+            }
+        }
+    }
+    if(status == NO_ERROR)
+    {
+      rtsize = pIpRtrTable->dwNumEntries;
+	    for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
+        cp = (u_char *)&pIpRtrTable->table[RtIndex].dwForwardDest;
+	      op = Current + 10;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+	      *op++ = *cp++;
+
+	      result = snmp_oid_compare(name, *length, Current, 14);
+	      if ((exact && (result == 0)) || (!exact && (result < 0)))
+	    	break;
+      }
+    }
+  if (RtIndex >= rtsize){
+    free(pIpRtrTable);
+    pIpRtrTable = NULL;
+    rtsize = 0;
+	  return(NULL);
+  }
+	/*
+	 *  Save in the 'cache'
+	 */
+	memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+	saveName[9] = 0;
+	saveNameLen = *length;
+	saveExact = exact;
+	saveRtIndex = RtIndex;
+	/*
+	 *  Return the name
+	 */
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
+	*length = 14;
+    }
+   /*******Write method is not implemented*/
+  /*  *write_method = write_rte; */
+    *var_len = sizeof(long_return);
+
+    switch(vp->magic){
+	    case IPROUTEDEST:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardDest;
+		    return (u_char *)&long_return;
+	    case IPROUTEIFINDEX:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardIfIndex;
+		    return (u_char *)&long_return;
+    	case IPROUTEMETRIC1:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardMetric1;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC2:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric2;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC3:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric3;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC4:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric4;
+		    return (u_char *)&long_return;
+	    case IPROUTEMETRIC5:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMetric5;
+		    return (u_char *)&long_return;
+	    case IPROUTENEXTHOP:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardNextHop;
+		    return (u_char *)&long_return;
+	    case IPROUTETYPE:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardType;
+		    return (u_char *)&long_return;
+	    case IPROUTEPROTO:
+	      long_return = pIpRtrTable->table[RtIndex].dwForwardProto;
+		    return (u_char *)&long_return;
+	    case IPROUTEAGE:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardAge;
+		    return (u_char *)&long_return;
+	    case IPROUTEMASK:
+        long_return = pIpRtrTable->table[RtIndex].dwForwardMask;
+		    return (u_char *)&long_return;
+    	case IPROUTEINFO:
+	      *var_len = nullOidLen;
+	      return (u_char *)nullOid;
+	    default:
+	      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
+   }
+   return NULL;
+}
+
+#endif
+ 
 #else /* CAN_USE_SYSCTL */
 
 #include <stddef.h>

@@ -72,6 +72,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -225,6 +228,11 @@ void init_tcp(void)
 #define USES_SNMP_DESIGNED_TCPSTAT
 #endif
 
+#ifdef WIN32
+#include <iphlpapi.h>
+#define TCP_STAT_STRUCTURE     MIB_TCPSTATS
+#endif
+
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #define TCP_STAT_STRUCTURE	struct kna
 #define USES_TRADITIONAL_TCPSTAT
@@ -346,6 +354,23 @@ var_tcp(struct variable *vp,
 				return (u_char *) &long_return;
 #endif
 
+#ifdef WIN32
+       case TCPRTOALGORITHM:   return (u_char *) &tcpstat.dwRtoAlgorithm;
+       case TCPRTOMIN:         return (u_char *) &tcpstat.dwRtoMin;
+       case TCPRTOMAX:         return (u_char *) &tcpstat.dwRtoMax;
+       case TCPMAXCONN:        return (u_char *) &tcpstat.dwMaxConn;
+       case TCPACTIVEOPENS:    return (u_char *) &tcpstat.dwActiveOpens;
+       case TCPPASSIVEOPENS:   return (u_char *) &tcpstat.dwPassiveOpens;
+       case TCPATTEMPTFAILS:   return (u_char *) &tcpstat.dwAttemptFails;
+       case TCPESTABRESETS:    return (u_char *) &tcpstat.dwEstabResets;
+       case TCPCURRESTAB:      return (u_char *) &tcpstat.dwCurrEstab;
+       case TCPINSEGS:         return (u_char *) &tcpstat.dwInSegs;
+       case TCPOUTSEGS:        return (u_char *) &tcpstat.dwOutSegs;
+       case TCPRETRANSSEGS:    return (u_char *) &tcpstat.dwRetransSegs;
+       case TCPINERRS:   return (u_char *) &tcpstat.dwInErrs;
+       case TCPOUTRSTS:  return (u_char *) &tcpstat.dwOutRsts;
+#endif
+
 	default:
 		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
     }
@@ -402,6 +427,10 @@ read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
     else
 	ret_value = getMibstat(MIB_TCP, tcpstat, sizeof(mib2_tcp_t),
 					GET_FIRST, &Get_everything, NULL);
+#endif
+
+#ifdef WIN32
+    ret_value = GetTcpStatistics(tcpstat);
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H

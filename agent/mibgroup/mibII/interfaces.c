@@ -25,6 +25,9 @@
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -350,7 +353,7 @@ static void free_interface_config(void)
   write_method
   
 */
-
+#ifndef WIN32
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
@@ -2086,3 +2089,190 @@ var_ifEntry(struct variable *vp,
 
 #endif /* HAVE_NET_IF_MIB_H */
 #endif
+
+#else /* WIN32 */
+#include <iphlpapi.h>
+static int
+header_ifEntry(struct variable *vp,
+	       oid *name,
+	       size_t *length,
+	       int exact,
+	       size_t *var_len,
+	       WriteMethod **write_method)
+{
+#define IFENTRY_NAME_LENGTH	10
+    oid newname[MAX_OID_LEN];
+    register int	ifIndex;
+    int result, count;
+    DWORD status = NO_ERROR;
+    DWORD statusRetry = NO_ERROR;
+    DWORD dwActualSize = 0;
+    PMIB_IFTABLE pIfTable = NULL;
+ 
+    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
+    
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    /* find "next" ifIndex */
+    
+/* *****Check if caching is NECESSARY****************** */
+
+    /* query for buffer size needed */
+    status = GetIfTable(pIfTable, &dwActualSize, TRUE);
+
+    if (status == ERROR_INSUFFICIENT_BUFFER)
+    {
+        /* need more space */
+        pIfTable = (PMIB_IFTABLE) malloc(dwActualSize);
+        if(pIfTable != NULL){     
+            /* Get the sorted IF table */
+            GetIfTable(pIfTable, &dwActualSize, TRUE);
+        }
+    }
+    count = pIfTable->dwNumEntries;
+    for(ifIndex = 0; ifIndex < count; ifIndex++){
+      	newname[IFENTRY_NAME_LENGTH] = (oid)pIfTable->table[ifIndex].dwIndex;
+	      result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+	      if ((exact && (result == 0)) || (!exact && (result < 0)))
+	         break;
+    }
+    if (ifIndex > count) {
+        DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
+        return MATCH_FAILED;
+    }
+
+
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+
+    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces","\n"));
+
+    count = pIfTable->table[ifIndex].dwIndex;
+    free(pIfTable);
+    return count;
+}
+
+u_char *
+var_interfaces(struct variable *vp,
+	       oid *name,
+	       size_t *length,
+	       int exact,
+	       size_t *var_len,
+	       WriteMethod **write_method)
+{
+  if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    return NULL;
+
+  switch (vp->magic)
+    {
+    case IFNUMBER:
+      GetNumberOfInterfaces(&long_return);
+      return (u_char *)&long_return;
+    default:
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
+    }
+  return NULL;
+}
+
+u_char *
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    size_t *length,
+	    int exact,
+	    size_t *var_len,
+	    WriteMethod **write_method)
+{
+    int ifIndex;
+    static char Name[16];
+    conf_if_list *if_ptr = conf_list;
+    MIB_IFROW ifRow;
+
+    ifIndex = header_ifEntry(vp, name, length, exact, var_len, write_method);
+    if ( ifIndex == MATCH_FAILED )
+	      return NULL;
+
+    ifRow.dwIndex = ifIndex;
+    /* Get the If Table Row by passing index as argument */
+    if(GetIfEntry(&ifRow) != NO_ERROR)
+      return NULL;
+    switch (vp->magic){
+	case IFINDEX:
+	    long_return = ifIndex;
+	    return (u_char *) &long_return;
+	case IFDESCR:
+	    *var_len = ifRow.dwDescrLen;
+	    return (u_char *)ifRow.bDescr;
+	case IFTYPE:
+	    long_return = ifRow.dwType;
+	    return (u_char *) &long_return;
+	case IFMTU: 
+	    long_return = (long) ifRow.dwMtu;
+	    return (u_char *) &long_return;
+	case IFSPEED:
+      long_return = (long) ifRow.dwSpeed;
+	    return (u_char *) &long_return;
+	case IFPHYSADDRESS:
+	    *var_len = ifRow.dwPhysAddrLen;
+      memcpy(return_buf, ifRow.bPhysAddr, *var_len);
+	    return(u_char *) return_buf;
+	case IFADMINSTATUS:
+	    long_return = ifRow.dwAdminStatus;
+	    return (u_char *) &long_return;
+	case IFOPERSTATUS:
+	    long_return = ifRow.dwOperStatus;
+	    return (u_char *) &long_return;
+	case IFLASTCHANGE:
+          long_return = ifRow.dwLastChange; 
+          return (u_char *) &long_return;
+	case IFINOCTETS:
+	    long_return = ifRow.dwInOctets;
+	    return (u_char *) &long_return;
+	case IFINUCASTPKTS:
+	    long_return = ifRow.dwInUcastPkts;
+	    return (u_char *) &long_return;
+	case IFINNUCASTPKTS:
+	    long_return = ifRow.dwInNUcastPkts; 
+	    return (u_char *) &long_return;
+	case IFINDISCARDS:
+      long_return = ifRow.dwInDiscards; 
+	    return (u_char *) &long_return;
+	case IFINERRORS:
+	    long_return = ifRow.dwInErrors;
+	    return (u_char *) &long_return;
+	case IFINUNKNOWNPROTOS:
+	    long_return = ifRow.dwInUnknownProtos;
+	    return (u_char *) &long_return;
+	case IFOUTOCTETS:
+	    long_return = ifRow.dwOutOctets;
+	    return (u_char *) &long_return;
+	case IFOUTUCASTPKTS:
+	    long_return = ifRow.dwOutUcastPkts;
+	    return (u_char *) &long_return;
+	case IFOUTNUCASTPKTS:
+	    long_return = ifRow.dwOutNUcastPkts;
+	    return (u_char *) &long_return;
+	case IFOUTDISCARDS:
+      long_return = ifRow.dwOutDiscards;
+      return (u_char *) &long_return;
+	case IFOUTERRORS:
+      long_return = ifRow.dwOutErrors;
+      return (u_char *) &long_return;
+	case IFOUTQLEN:
+      long_return = ifRow.dwOutQLen;
+      return (u_char *) &long_return;
+	case IFSPECIFIC:
+	    *var_len = nullOidLen;
+	    return (u_char *) nullOid;
+	default:
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
+    }
+    return NULL;
+}
+
+#endif  /* WIN32 */
+

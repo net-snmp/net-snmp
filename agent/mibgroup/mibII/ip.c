@@ -21,6 +21,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_SYSCTL_H
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
@@ -235,6 +238,11 @@ void init_ip(void)
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
+#ifdef WIN32
+#include <iphlpapi.h>
+#define IP_STAT_STRUCTURE MIB_IPSTATS
+#endif
+
 #if !defined(IP_STAT_STRUCTURE)
 #define IP_STAT_STRUCTURE	struct ipstat
 #define	USES_TRADITIONAL_IPSTAT
@@ -391,6 +399,29 @@ var_ip(struct variable *vp,
 
 #endif		/* USE_TRADITIONAL_IPSTAT */
 
+#ifdef WIN32
+       case IPFORWARDING:      return (u_char *) &ipstat.dwForwarding;
+       case IPDEFAULTTTL:      return (u_char *) &ipstat.dwDefaultTTL;
+       case IPINRECEIVES:      return (u_char *) &ipstat.dwInReceives;
+       case IPINHDRERRORS:     return (u_char *) &ipstat.dwInHdrErrors;
+       case IPINADDRERRORS:    return (u_char *) &ipstat.dwInAddrErrors;
+       case IPFORWDATAGRAMS:   return (u_char *) &ipstat.dwForwDatagrams;
+       case IPINUNKNOWNPROTOS: return (u_char *) &ipstat.dwInUnknownProtos;
+       case IPINDISCARDS:      return (u_char *) &ipstat.dwInDiscards;
+       case IPINDELIVERS:      return (u_char *) &ipstat.dwInDelivers;
+       case IPOUTREQUESTS:     return (u_char *) &ipstat.dwOutRequests;
+       case IPOUTDISCARDS:     return (u_char *) &ipstat.dwOutDiscards;
+       case IPOUTNOROUTES:     return (u_char *) &ipstat.dwOutNoRoutes;
+       case IPREASMTIMEOUT:    return (u_char *) &ipstat.dwReasmTimeout;
+       case IPREASMREQDS:      return (u_char *) &ipstat.dwReasmReqds;
+       case IPREASMOKS:        return (u_char *) &ipstat.dwReasmOks;
+       case IPREASMFAILS:      return (u_char *) &ipstat.dwReasmFails;
+       case IPFRAGOKS:         return (u_char *) &ipstat.dwFragOks;
+       case IPFRAGFAILS:       return (u_char *) &ipstat.dwFragFails;
+       case IPFRAGCREATES:     return (u_char *) &ipstat.dwFragCreates;
+       case IPROUTEDISCARDS:   return (u_char *) &ipstat.dwRoutingDiscards;
+#endif /* WIN32 */
+
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
     }
@@ -449,8 +480,11 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
     ret_value = getMibstat(MIB_IP, ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL);
 #endif
 
+#ifdef WIN32
+    ret_value = GetIpStatistics(ipstat);
+#endif
 
-#if !(defined(linux) || defined(solaris2))
+#if !(defined(linux) || defined(solaris2) || defined(WIN32))
     if ( magic == IPFORWARDING ) {
 
 #if defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)

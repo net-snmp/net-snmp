@@ -21,6 +21,10 @@
 #else
 #include <strings.h>
 #endif
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_SYSCTL_H
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
@@ -112,6 +116,7 @@
 
 
 
+#ifndef WIN32
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 
@@ -649,3 +654,113 @@ var_ipAddrEntry(struct variable *vp,
 }
 
 #endif /* CAN_USE_SYSCTL && IPCTL_STATS */
+
+#else /* WIN32 */
+#include <iphlpapi.h>
+u_char *
+var_ipAddrEntry(struct variable *vp,
+		oid *name,
+		size_t *length,
+		int exact,
+		size_t *var_len,
+		WriteMethod **write_method)
+{
+	/*
+	 * object identifier is of form:
+	 * 1.3.6.1.2.1.4.20.1.?.A.B.C.D,  where A.B.C.D is IP address.
+	 * IPADDR starts at offset 10.
+	 */
+	oid lowest[14];
+	oid current[14], *op;
+	u_char *cp;
+	int lowinterface = -1;
+	int i;
+  PMIB_IPADDRTABLE pIpAddrTable = NULL;
+   /* static MIB_UDPROW Lowinpcb; */
+    DWORD status = NO_ERROR;
+    DWORD statusRetry = NO_ERROR;
+    DWORD dwActualSize = 0;
+
+	/* fill in object part of name for current (less sizeof instance part) */
+	memcpy(current, vp->name, (int)vp->namelen * sizeof(oid));
+
+	/*
+	 * Get interface table from kernel.
+	 */
+	 status = GetIpAddrTable(pIpAddrTable, &dwActualSize, TRUE);
+   if (status == ERROR_INSUFFICIENT_BUFFER)
+   {
+     pIpAddrTable = (PMIB_IPADDRTABLE) malloc(dwActualSize);
+     if(pIpAddrTable != NULL){       
+       statusRetry = GetIpAddrTable(pIpAddrTable, &dwActualSize, TRUE);
+     }
+   }
+
+	if(statusRetry == NO_ERROR || status == NO_ERROR)
+    {
+      
+        for (i = 0; i < (int)pIpAddrTable->dwNumEntries; ++i)
+        {
+		op = &current[10];
+		cp = (u_char *)&pIpAddrTable->table[i].dwAddr;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		if (exact) {
+			if (snmp_oid_compare(current, 14, name, *length) == 0) {
+				memcpy(lowest, current, 14 * sizeof(oid));
+				lowinterface = i;
+				break;	/* no need to search further */
+			}
+		} else {
+			if (snmp_oid_compare(current, 14, name, *length) > 0) {
+
+				lowinterface = i;
+				memcpy(lowest, current, 14 * sizeof(oid));
+        break; /* Since the table is sorted, no need to search further  */
+			}
+		}
+	}
+  }
+
+  if (lowinterface < 0){
+    free(pIpAddrTable);
+		return NULL;
+  }
+	i = lowinterface;
+	memcpy(name, lowest, 14 * sizeof(oid));
+	*length = 14;
+	*write_method = 0;
+	*var_len = sizeof(long_return);
+	switch (vp->magic) {
+	case IPADADDR:
+		long_return = pIpAddrTable->table[i].dwAddr;
+		return (u_char *)&long_return;
+
+	case IPADIFINDEX:
+		long_return = pIpAddrTable->table[i].dwIndex;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	case IPADNETMASK:
+		long_return = pIpAddrTable->table[i].dwMask;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	case IPADBCASTADDR:
+		long_return = pIpAddrTable->table[i].dwBCastAddr;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;	   
+
+	case IPADREASMMAX:
+		long_return = pIpAddrTable->table[i].dwReasmSize;
+    free(pIpAddrTable);
+		return (u_char *)&long_return;
+
+	default:
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
+	}
+	return NULL;
+}
+#endif /* WIN32 */

@@ -11,6 +11,9 @@
 #include <strings.h>
 #endif
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -93,8 +96,8 @@
 #include "asn1.h"
 #include "snmp_debug.h"
 
-#include "auto_nlist.h"
 #include "mibincl.h"
+#include "auto_nlist.h"
 
 #ifdef hpux
 #include <sys/mib.h>
@@ -138,6 +141,7 @@ static int UDP_Scan_Next (struct inpcb *);
 	 *********************/
 
 
+#ifndef WIN32 
 #ifndef solaris2 
 
 u_char *
@@ -413,4 +417,100 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
+#else /* WIN32 */
+#include <iphlpapi.h>
 
+u_char *
+var_udpEntry(struct variable *vp,
+             oid *name,
+             size_t *length,
+             int exact,
+             size_t *var_len,
+             WriteMethod **write_method)
+{  
+    oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
+    u_char *cp;
+    int LowState = -1;
+    static PMIB_UDPTABLE pUdpTable = NULL;
+    DWORD status = NO_ERROR;
+    DWORD dwActualSize = 0;
+    UINT i;
+    struct timeval now;
+    static long Time_Of_Last_Reload = 0;
+    struct in_addr inadLocal;
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    
+    /*
+     * save some cpu-cycles, and reload after 5 secs...
+     */
+    gettimeofday (&now, (struct timezone *) 0);
+    if ((Time_Of_Last_Reload + 5 <= now.tv_sec) || (pUdpTable == NULL) )
+    {
+        if(pUdpTable != NULL)
+            free(pUdpTable);
+        Time_Of_Last_Reload = now.tv_sec;
+        /* query for the buffer size needed */
+        status = GetUdpTable(pUdpTable, &dwActualSize, TRUE);
+        if (status == ERROR_INSUFFICIENT_BUFFER)
+        {
+            pUdpTable = (PMIB_UDPTABLE) malloc(dwActualSize);
+            if(pUdpTable != NULL){ 
+                /*Get the sorted UDP table */
+                status = GetUdpTable(pUdpTable, &dwActualSize, TRUE);
+   
+            }
+        }
+    }   
+    if(status == NO_ERROR)
+    {
+        for (i = 0; i < pUdpTable->dwNumEntries; ++i)
+        {
+            inadLocal.s_addr = pUdpTable->table[i].dwLocalAddr;
+            cp = (u_char *)&pUdpTable->table[i].dwLocalAddr;
+
+            op = newname + 10;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            *op++ = *cp++;
+            
+            newname[14] = ntohs((unsigned short)(0x0000FFFF & pUdpTable->table[i].dwLocalPort));
+ 
+            if (exact){
+                if (snmp_oid_compare(newname, 15, name, *length) == 0){
+                   memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
+                   LowState = 0;
+                   break;  /* no need to search further */
+               }
+            } else {
+                if (snmp_oid_compare(newname, 15, name, *length) > 0){
+                    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
+                    LowState = 0;
+                    inadLocal.s_addr = pUdpTable->table[i].dwLocalAddr;
+                    break; /* As the table is sorted, no need to search further */
+                }
+            }
+        }
+    }
+
+    if (LowState < 0) {
+       free(pUdpTable);
+       pUdpTable = NULL;
+       return(NULL);
+    }
+    memcpy( (char *)name,(char *)lowest, ((int)vp->namelen + 10) * sizeof(oid));
+    *length = vp->namelen + 5;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    switch (vp->magic) {
+        case UDPLOCALADDRESS:
+            return (u_char *) &pUdpTable->table[i].dwLocalAddr;
+        case UDPLOCALPORT:
+            long_return = ntohs((unsigned short)(0x0000FFFF & pUdpTable->table[i].dwLocalPort));
+            return (u_char *) &long_return;
+        default:
+            DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udpEntry\n", vp->magic));
+    }
+    return  NULL;
+}
+#endif /* WIN32 */

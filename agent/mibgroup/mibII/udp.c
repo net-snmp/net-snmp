@@ -11,6 +11,9 @@
 #include <strings.h>
 #endif
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -186,6 +189,11 @@ void init_udp(void)
 #define USES_SNMP_DESIGNED_UDPSTAT
 #endif
 
+#ifdef WIN32
+#include <iphlpapi.h>
+#define UDP_STAT_STRUCTURE MIB_UDPSTATS
+#endif
+
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #define UDP_STAT_STRUCTURE	struct kna
 #define USES_TRADITIONAL_UDPSTAT
@@ -277,6 +285,17 @@ var_udp(struct variable *vp,
 
 #endif		/* USES_TRADITIONAL_UDPSTAT */
 
+#ifdef WIN32
+       case UDPINDATAGRAMS:
+    return (u_char *) &udpstat.dwInDatagrams;
+       case UDPNOPORTS:
+                               return (u_char *) &udpstat.dwNoPorts;
+       case UDPOUTDATAGRAMS:
+    return (u_char *) &udpstat.dwOutDatagrams;
+       case UDPINERRORS:
+    return (u_char *) &udpstat.dwInErrors;
+#endif  /* WIN32*/
+
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
     }
@@ -322,6 +341,10 @@ read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 
 #ifdef linux
     ret_value = linux_read_udp_stat(udpstat);
+#endif
+
+#ifdef WIN32
+    ret_value = GetUdpStatistics(udpstat);
 #endif
 
 #ifdef solaris2
