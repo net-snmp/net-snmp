@@ -99,10 +99,13 @@ extern int callback_master_num;
 
 void
 init_subagent(void) {
-    agentx_callback_sess =
-        snmp_callback_open(callback_master_num,
-                           handle_subagent_response,
-                           NULL, NULL);
+    if (agentx_callback_sess == NULL) {
+	agentx_callback_sess = snmp_callback_open(callback_master_num,
+						  handle_subagent_response,
+						  NULL, NULL);
+	DEBUGMSGTL(("agentx/subagent", "init_subagent sess %08x\n",
+		    agentx_callback_sess));
+    }
 }
 
 
@@ -339,7 +342,7 @@ handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
     DEBUGMSGTL(("agentx/subagent",
                 "handling agentx subagent set response....\n"));
 
-    asi = (struct snmp_session *) magic;
+    asi = (struct agent_set_info *) magic;
     retsess = asi->sess;
     asi->errstat = pdu->errstat;
     
