@@ -1934,7 +1934,7 @@ while test "x$new_module_list" != "x"; do
       #
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
-        eval ${module_type}_list_code="\$${module_type}_list_code $i\"
+        eval ${module_type}_list_code="\$${module_type}_list_code $i"
         mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
         if test $module_debug -eq 1; then
           echo -e "\nchecking '$srcdir/$mibdir/$i.c' ($mnm/`basename $i`) C file for init/shutdown"
