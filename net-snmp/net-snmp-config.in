@@ -182,7 +182,7 @@ else
 	exit 1
       fi
       echo "generating the tmporary code file: $tmpfile"
-      rm -f $tmp
+      rm -f $tmpfile
       cat > $tmpfile <<EOF
 /* generated from net-snmp-config */
 #include <net-snmp/net-snmp-config.h>
@@ -196,10 +196,10 @@ EOF
     # add include files
     while test "$1" != ""; do
       cfiles="$cfiles $1"
-      name=`basename $1 | sed 's/\.[co]$/.h/'`
+      name=`basename $1 | sed 's/\.[co]$//'`
       if test -f $name.h; then
-        if grep "init_$name" $name; then
-          echo "  #include\"$name\"" >> $tmpfile
+        if grep "init_$name" $name.h; then
+          echo "  #include \"$name.h\"" >> $tmpfile
         fi
       fi
       shift
