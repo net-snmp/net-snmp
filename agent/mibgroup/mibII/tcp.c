@@ -7,13 +7,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
 #endif
