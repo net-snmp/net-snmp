@@ -14,9 +14,6 @@
 @eval $m2c_gi_others = (count_indexes($table) - 1)@
 typedef struct ${table}_idx {
 
-        /** object that is responsible for freeing this memory */
-    void *owner;
-
 @foreach $node index@
 @    include m2c_setup_node.m2i@
 ##@    include details-node.m2i@
