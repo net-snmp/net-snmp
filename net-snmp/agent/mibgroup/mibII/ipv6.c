@@ -1829,7 +1829,8 @@ var_ipv6(register struct variable *vp,
     case IPV6DEFAULTHOPLIMIT:
         return (u_char *) & ip6stat.Ipv6DefaultHopLimit;
     case IPV6FORWARDING:
-        return (u_char *) & ip6stat.Ipv6Forwarding;
+        long_return = (ip6stat.Ipv6Forwarding) ? 1 : 2;
+        return (u_char *) & long_return;
     case IPV6INTERFACES:
 #ifdef HAVE_IF_NAMEINDEX
         long_return = if_countifindex();
