@@ -9,7 +9,7 @@
 @eval $mfd_aue_wrap_param_decl = "$mfd_aue_wrap_param_type $mfd_aue_wrap_param"@
 ##
 @eval $mfd_aue_param = "${context}_reg"@
-@eval $mfd_aue_param_type = "${context}_registration_ptr"@
+@eval $mfd_aue_param_type = "${context}_registration *"@
 @eval $mfd_aue_param_decl = "$mfd_aue_param_type $mfd_aue_param"@
 @eval $mfd_aue_param_cmt = "$mfd_aue_param Pointer to a $mfd_aue_param_type"
 ##

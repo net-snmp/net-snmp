@@ -13,7 +13,7 @@
 @if $m2c_processing_type eq 'h'@
 
 @   if $m2c_table_row_creation == 1@
-int ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
+int ${context}_validate_index( ${context}_registration * ${context}_reg,
                                ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
@@ -147,7 +147,7 @@ int ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx);
  * @retval MFD_CANNOT_CREATE_EVER : index never valid
  */
 int
-${context}_validate_index( ${context}_registration_ptr ${context}_reg,
+${context}_validate_index( ${context}_registration * ${context}_reg,
                            ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
@@ -225,6 +225,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     /*
      * TODO:451:M: |-> Setup $context undo.
      * set up $context undo information, in preparation for a set.
+     * Undo storage is in ${m2c_ctx_lh}*
      */
 
     return rc;
@@ -259,6 +260,7 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
 
     /*
      * TODO:452:M: |-> Cleanup $context undo.
+     * Undo storage is in ${m2c_ctx_lh}*
      */
 
     return rc;
