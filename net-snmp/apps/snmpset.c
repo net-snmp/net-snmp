@@ -97,6 +97,11 @@ usage __P((void))
     "    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
   fprintf(stderr,
     "    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING\n");
+#ifdef OPAQUE_SPECIAL_TYPES
+  fprintf(stderr,
+    "    U: unsigned int64, I: signed int64, F: float, D: double\n");
+#endif /* OPAQUE_SPECIAL_TYPES */
+
 }
 
 void
@@ -135,6 +140,12 @@ main(argc, argv)
         case 's':
         case 'x':
         case 'd':
+#ifdef OPAQUE_SPECIAL_TYPES
+        case 'I':
+        case 'U':
+        case 'F':
+        case 'D':
+#endif /* OPAQUE_SPECIAL_TYPES */
           types[current_type++] = *argv[arg++];
           break;
         default:
@@ -322,6 +333,34 @@ snmp_add_var(pdu, name, name_length, type, value)
       vars->val.string = NULL;
       break;
 
+#ifdef OPAQUE_SPECIAL_TYPES
+    case 'U':
+    case 'I':
+      if (type == 'U')
+        vars->type = ASN_OPAQUE_U64;
+      else
+        vars->type = ASN_OPAQUE_I64;
+      vars->val_len = sizeof(struct counter64);
+      vars->val.counter64 =
+        (struct counter64 *) malloc(sizeof(struct counter64));
+      read64(vars->val.counter64, value);
+      break;
+
+    case 'F':
+      vars->type = ASN_OPAQUE_FLOAT;
+      vars->val_len = sizeof(float);
+      vars->val.floatVal = (float *) malloc(sizeof(float));
+      (*vars->val.floatVal) = atof(value);
+      break;
+      
+    case 'D':
+      vars->type = ASN_OPAQUE_DOUBLE;
+      vars->val_len = sizeof(double);
+      vars->val.doubleVal = (double *) malloc(sizeof(double));
+      (*vars->val.doubleVal) = atof(value);
+      break;
+#endif /* OPAQUE_SPECIAL_TYPES */
+      
     default:
       fprintf(stderr, "Internal error in type switching\n");
       exit(1);
