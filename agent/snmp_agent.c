@@ -437,17 +437,20 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode == COMMIT ) {
 	    status = handle_next_pass( asp );
 
-	    if ( status != SNMP_ERR_NOERROR )
-	        asp->mode = FINISHED_FAILURE;	/* or UNDO ? */
+	    if ( status != SNMP_ERR_NOERROR ) {
+		status    = SNMP_ERR_COMMITFAILED;
+	        asp->mode = FINISHED_FAILURE;
+	    }
 	    else
-	        asp->mode = FINISHED_SUCCESS;	/* or FREE ? */
+	        asp->mode = FINISHED_SUCCESS;
 
 	    if ( asp->outstanding_requests != NULL )
 		return 1;
 	}
 
 	if ( asp->mode == UNDO ) {
-	    status = handle_next_pass( asp );
+	    if (handle_next_pass( asp ) != SNMP_ERR_NOERROR )
+		status = SNMP_ERR_UNDOFAILED;
 
 	    asp->mode = FINISHED_FAILURE;
 	    break;
