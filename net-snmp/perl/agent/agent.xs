@@ -352,6 +352,43 @@ nsahr_register(me)
     OUTPUT:
 	RETVAL
 
+void
+nsahr_getRootOID(me)
+    SV *me;
+    PREINIT:
+        int i;
+        netsnmp_oid *o;
+        netsnmp_handler_registration *reginfo;
+        SV *optr, *arg, *rarg;
+    PPCODE:
+    {
+        dSP;
+        PUSHMARK(SP);
+        reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
+
+        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o->name = o->namebuf;
+        o->len = reginfo->rootoid_len;
+        memcpy(o->name, reginfo->rootoid,
+               reginfo->rootoid_len * sizeof(oid));
+
+        rarg = newSViv((int) 0);
+        arg = newSVrv(rarg, "netsnmp_oidPtr");
+        sv_setiv(arg, (int) o);
+
+        XPUSHs(rarg);
+
+        PUTBACK;
+        i = perl_call_pv("NetSNMP::OID::newwithptr", G_SCALAR);
+        SPAGAIN;
+        if (i != 1) {
+            fprintf(stderr, "unhandled OID error.\n");
+            /* ack XXX */
+        }
+        ST(0) = POPs;
+        XSRETURN(1);
+    }
+
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_request_infoPtr PREFIX = nari_
 
 void
