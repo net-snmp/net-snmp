@@ -846,10 +846,6 @@
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
-#define CAN_USE_NLIST
-#endif
-
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
@@ -886,3 +882,7 @@
 
 #include SYSTEM_INCLUDE_FILE
 #include MACHINE_INCLUDE_FILE
+
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
+#define CAN_USE_NLIST
+#endif
