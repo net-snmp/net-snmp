@@ -37,10 +37,13 @@
 #
 USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS]"
 
-usage() { echo; echo $USAGE; cat <<BLIK | sed 's/^#//' | sed '1d' | $PAGER
-$USAGE_LONG
-BLIK
-exit 0
+usage() { 
+    echo; 
+    echo $USAGE;
+    #cat <<BLIK | sed 's/^#//' | sed '1d' | $PAGER
+    #$USAGE_LONG
+    #BLIK
+    exit 0
 }
 
 # defaults
@@ -74,6 +77,12 @@ while [ -n "$1" ]; do
 	    ;;
 	-a)
 	    test_nums="all"
+	    ;;
+
+	-A)
+	    shift
+	    AGENT_FLAGS="$1"
+	    export AGENT_FLAGS
 	    ;;
 
     esac
