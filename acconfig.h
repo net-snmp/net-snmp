@@ -93,6 +93,9 @@
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
 
+/* sysctl works to get boottime, etc... */
+#undef CAN_USE_SYSCTL
+
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
  location in the tree your company/organization has been allocated. */
