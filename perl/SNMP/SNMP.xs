@@ -7,6 +7,8 @@
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 */
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 #define WIN32SCK_IS_STDSCK
 #include "EXTERN.h"
 #include "perl.h"
@@ -28,8 +30,10 @@
 #ifndef MSVC_PERL
 	#include <unistd.h>
 #endif
-/* XXX This is a problem if regex.h is not on the system. */
+
+#ifdef HAVE_REGEX_H
 #include <regex.h>
+#endif
 
 #ifndef __P
 #define __P(x) x
@@ -54,7 +58,12 @@
 #ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
+  #if 0
+    /* XX disabled until netsnmp library is made thread-safe */
 #define DLL_IMPORT   __declspec( dllimport )
+  #else
+    #define DLL_IMPORT
+  #endif
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #else
@@ -64,8 +73,6 @@
 #endif
 
 DLL_IMPORT extern struct tree *Mib;
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
 
 #include "perlsnmp.h"
 
@@ -799,18 +806,53 @@ compute_match(search_base, key)
 const char *search_base;
 const char *key;
 {
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
    int rc;
    regex_t parsetree;
    regmatch_t pmatch;
-
    rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
    if (rc == 0)
       rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
    regfree(&parsetree);
    if (rc == 0) {
+        /*
+         * found 
+         */
       return pmatch.rm_so;
    }
+#else                           /* use our own wildcard matcher */
+    /*
+     * first find the longest matching substring (ick) 
+     */
+    char           *first = NULL, *result = NULL, *entry;
+    const char     *position;
+    char           *newkey = strdup(key);
 
+
+    entry = strtok(newkey, "*");
+    position = search_base;
+    while (entry) {
+        result = strcasestr(position, entry);
+
+        if (result == NULL) {
+            free(newkey);
+            return MAX_BAD;
+        }
+
+        if (first == NULL)
+            first = result;
+
+        position = result + strlen(entry);
+        entry = strtok(NULL, "*");
+    }
+    free(newkey);
+    if (result)
+        return (first - search_base);
+#endif
+
+    /*
+     * not found 
+     */
    return MAX_BAD;
 }
 
