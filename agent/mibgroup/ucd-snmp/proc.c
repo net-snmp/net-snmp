@@ -352,64 +352,6 @@ get_proc_instance(struct myproc *proc, oid inst)
     return (proc);
 }
 
-static int
-slow_sh_count_procs(char *procname)
-{
-    char            line[STRMAX], *cptr, *cp;
-    int             ret = 0, fd;
-    FILE           *file;
-#ifndef EXCACHETIME
-#endif
-    struct extensible ex;
-    int             slow = strstr(PSCMD, "ax") != NULL;
-
-    strcpy(ex.command, PSCMD);
-    if ((fd = get_exec_output(&ex)) > 0) {
-        if ((file = fdopen(fd, "r")) == NULL) {
-            setPerrorstatus("fdopen");
-            close(fd);
-            return (-1);
-        }
-        while (fgets(line, sizeof(line), file) != NULL) {
-            if (slow) {
-                cptr = find_field(line, 5);
-                cp = strrchr(cptr, '/');
-                if (cp)
-                    cptr = cp + 1;
-                else if (*cptr == '-')
-                    cptr++;
-                else if (*cptr == '[') {
-                    cptr++;
-                    cp = strchr(cptr, ']');
-                    if (cp)
-                        *cp = 0;
-                }
-                copy_nword(cptr, line, sizeof(line));
-                cp = line + strlen(line) - 1;
-                if (*cp == ':')
-                    *cp = 0;
-            } else {
-                if ((cptr = find_field(line, LASTFIELD)) == NULL)
-                    continue;
-                copy_nword(cptr, line, sizeof(line));
-            }
-            if (!strcmp(line, procname))
-                ret++;
-        }
-        if (ftell(file) < 2) {
-#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
-            seterrorstatus("process list unreasonable short (mem?)", 2);
-#endif
-            ret = -1;
-        }
-        fclose(file);
-        wait_on_exec(&ex);
-    } else {
-        ret = -1;
-    }
-    return (ret);
-}
-
 #ifdef bsdi2
 #include <sys/param.h>
 #include <sys/sysctl.h>
