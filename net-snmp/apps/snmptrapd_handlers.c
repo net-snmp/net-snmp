@@ -758,50 +758,51 @@ do_external(char *cmd, struct hostent *host,
 }
 
 
+#define EXECUTE_FORMAT	"%b\n%B\n%V\n%v\n"
 
 int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
                        netsnmp_trapd_handler *handler)
 {
-    struct hostent *host = NULL;
+    u_char         *rbuf = NULL;
+    size_t          r_len = 64, o_len = 0;
+    int             oldquick, result;
 
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
-
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
     if (handler && handler->token && *handler->token) {
+        oldquick = snmp_get_quick_print();
+        snmp_set_quick_print(1);
 
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_APP_NUMERIC_IP)) {
-            /*
-             * Right, apparently a name lookup is wanted.  This is only
-             * reasonable for the UDP and TCP transport domains (we
-             * don't want to try to be too clever here).  
-             */
-            if (transport != NULL
-                && (transport->domain == netsnmpUDPDomain
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-                    || transport->domain == netsnmp_snmpTCPDomain
-#endif
-		)) {
-                /*
-                 * This is kind of bletcherous -- it breaks the opacity of
-                 * transport_data but never mind -- the alternative is a
-                 * lot of munging strings from f_fmtaddr.
-                 */
-                struct sockaddr_in *addr =
-                    (struct sockaddr_in *) pdu->transport_data;
-                if (addr != NULL && 
-		    pdu->transport_data_length == sizeof(struct sockaddr_in)) {
-                    host = gethostbyaddr((char *) &(addr->sin_addr),
-					     sizeof(struct in_addr), AF_INET);
-                }
-            }
+        /*
+	 * Format the trap and pass this string to the external command
+	 */
+        if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
+            snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
+            return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
         }
 
-	/*
-	 * XXX - Possibly better to pass the format token as well ??
-	 */
-        do_external(handler->token, host, pdu, transport);
+        /*
+         *  If there's a format string registered for this trap, then use it.
+         *  Otherwise use the standard execution format setting.
+         */
+        if (handler && handler->format && *handler->format) {
+            DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
+            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             handler->format,
+                                             pdu, transport);
+        } else {
+            DEBUGMSGTL(( "snmptrapd", "execute format\n"));
+            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+                                             EXECUTE_FORMAT,
+                                             pdu, transport);
+	}
+
+        /*
+         *  and pass this formatted string to the command specified
+         */
+        run_exec_command(handler->token, rbuf, NULL, 0);   /* Not interested in output */
+        snmp_set_quick_print(oldquick);
     }
     return NETSNMPTRAPD_HANDLER_OK;
 }
