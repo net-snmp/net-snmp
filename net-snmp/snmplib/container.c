@@ -1,7 +1,164 @@
+#include <string.h>
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/container.h>
+#include <net-snmp/library/container_binary_array.h>
 
+/*------------------------------------------------------------------
+ */
+static netsnmp_container *containers = NULL;
+
+typedef struct container_type_s {
+   const char                 *name;
+   netsnmp_factory            *factory;
+} container_type;
+
+
+/*------------------------------------------------------------------
+ */
+void
+netsnmp_container_init_list(void)
+{
+    container_type *ct;
+    
+    if (NULL != containers)
+        return;
+
+    containers = netsnmp_container_get_binary_array();
+    containers->compare = netsnmp_compare_cstring;
+
+    /*
+     */
+    ct = SNMP_MALLOC_TYPEDEF(container_type);
+    if (NULL == ct)
+        return;
+    ct->name = "binary_array";
+    ct->factory = netsnmp_container_get_binary_array_factory();
+    CONTAINER_INSERT(containers, ct);
+
+    netsnmp_container_register("table_container", ct->factory);
+}
+
+int
+netsnmp_container_register(const char* name, netsnmp_factory *f)
+{
+    container_type *ct, tmp;
+
+    tmp.name = name;
+    ct = CONTAINER_FIND(containers, &ct);
+    if (NULL!=ct) {
+        DEBUGMSGT(("container_registry",
+                   "replacing previous container factory\n"));
+        ct->factory = f;
+    }
+    else {
+        ct = SNMP_MALLOC_TYPEDEF(container_type);
+        if (NULL == ct)
+            return -1;
+        ct->name = strdup(name);
+        ct->factory = f;
+        CONTAINER_INSERT(containers, ct);
+    }
+    DEBUGMSGT(("container_registry", "registered container factory %s (%s)\n",
+               ct->name, f->product));
+
+    return 0;
+}
+
+/*------------------------------------------------------------------
+ */
+netsnmp_factory *
+netsnmp_container_get_factory(const char *type)
+{
+    container_type ct, *found;
+    
+    ct.name = type;
+    found = CONTAINER_FIND(containers, &ct);
+
+    return found ? found->factory : NULL;
+}
+
+netsnmp_factory *
+netsnmp_container_find_factory(const char *type_list)
+{
+    netsnmp_factory   *f = NULL;
+    char              *list, *entry;
+
+    if (NULL==type_list)
+        return NULL;
+
+    list = strdup(type_list);
+    entry = strtok(list, ":");
+    while(entry) {
+        f = netsnmp_container_get_factory(entry);
+        if (NULL != f)
+            break;
+        entry = strtok(NULL, ":");
+    }
+
+    free(list);
+    return f;
+}
+
+/*------------------------------------------------------------------
+ */
+netsnmp_container *
+netsnmp_container_get(const char *type)
+{
+    netsnmp_factory *f = netsnmp_container_get_factory(type);
+    if (f)
+        return f->produce();
+
+    return NULL;
+}
+
+int
+netsnmp_container_get_noalloc(const char *type, void *mem)
+{
+    netsnmp_factory *f = netsnmp_container_get_factory(type);
+    if (f)
+        return f->produce_noalloc(mem);
+
+    return FACTORY_NOTFOUND;
+}
+
+/*------------------------------------------------------------------
+ */
+netsnmp_container *
+netsnmp_container_find(const char *type)
+{
+    netsnmp_factory *f = netsnmp_container_find_factory(type);
+    if (f)
+        return f->produce();
+
+    return NULL;
+}
+
+int
+netsnmp_container_find_noalloc(const char *type, void *mem)
+{
+    netsnmp_factory *f = netsnmp_container_find_factory(type);
+    if (f)
+        return f->produce_noalloc(mem);
+
+    return FACTORY_NOTFOUND;
+}
+
+/*------------------------------------------------------------------
+ */
+void
+netsnmp_container_add_index(netsnmp_container *primary,
+                            netsnmp_container *new_index)
+{
+    while(primary->next)
+        primary = primary->next;
+
+    primary->next = new_index;
+}
+
+/*------------------------------------------------------------------
+ */
 void
 netsnmp_init_container(netsnmp_container         *c,
                        netsnmp_container_rc      *init,
@@ -19,21 +176,73 @@ netsnmp_init_container(netsnmp_container         *c,
     c->free = free;
     c->get_size = size;
     c->compare = cmp;
-    c->insert_data = ins;
-    c->remove_data = rem;
-    c->find_data = fnd;
+    c->insert = ins;
+    c->remove = rem;
+    c->find = fnd;
 }
 
-void
-netsnmp_init_sorted_container(netsnmp_sorted_container  *sc,
-                              netsnmp_container_rtn     *first,
-                              netsnmp_container_rtn     *next,
-                              netsnmp_container_set     *subset)
+/*------------------------------------------------------------------
+ *
+ * simple comparison routines
+ *
+ */
+int
+netsnmp_compare_netsnmp_index(const void *lhs, const void *rhs)
 {
-    if (sc == NULL)
-        return;
-
-    sc->first = first;
-    sc->next = next;
-    sc->subset = subset;
+    int rc;
+#ifndef NDEBUG
+    DEBUGIF("compare:index") {
+        DEBUGMSGT(("compare:index", "compare "));
+        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
+                     ((const netsnmp_index *) lhs)->len));
+        DEBUGMSG(("compare:index", " to "));
+        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
+                     ((const netsnmp_index *) rhs)->len));
+        DEBUGMSG(("compare:index", "\n"));
+    }
+#endif
+    rc = snmp_oid_compare(((const netsnmp_index *) lhs)->oids,
+                          ((const netsnmp_index *) lhs)->len,
+                          ((const netsnmp_index *) rhs)->oids,
+                          ((const netsnmp_index *) rhs)->len);
+    return rc;
 }
+
+int
+netsnmp_ncompare_netsnmp_index(const void *lhs, const void *rhs)
+{
+    int rc;
+#ifndef NDEBUG
+    DEBUGIF("compare:index") {
+        DEBUGMSGT(("compare:index", "compare "));
+        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) lhs)->oids,
+                     ((const netsnmp_index *) lhs)->len));
+        DEBUGMSG(("compare:index", " to "));
+        DEBUGMSGOID(("compare:index", ((const netsnmp_index *) rhs)->oids,
+                     ((const netsnmp_index *) rhs)->len));
+        DEBUGMSG(("compare:index", "\n"));
+    }
+#endif
+    rc = snmp_oid_ncompare(((const netsnmp_index *) lhs)->oids,
+                           ((const netsnmp_index *) lhs)->len,
+                           ((const netsnmp_index *) rhs)->oids,
+                           ((const netsnmp_index *) rhs)->len,
+                           ((const netsnmp_index *) rhs)->len);
+    return rc;
+}
+
+int
+netsnmp_compare_cstring(const void * lhs, const void * rhs)
+{
+    return strcmp(((const container_type*)lhs)->name,
+                  ((const container_type*)rhs)->name);
+}
+
+int
+netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
+{
+    return strncmp(((const container_type*)lhs)->name,
+                   ((const container_type*)rhs)->name,
+                   strlen(((const container_type*)rhs)->name));
+}
+
