@@ -1083,13 +1083,13 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	    ifp->ifType = 6;
 	    break;
 
-	case 'f':          /* fa (Fore ATM */
+	case 'f':          /* fa (Fore ATM) */
 	    if (!ifp->ifSpeed)
 		ifp->ifSpeed = 155000000;
 	    ifp->ifType = 37;
 	    break;
 
-	case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther)*/
+	case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
 	    if (ifrp->ifr_name[1] == 'a') {
 		if (!ifp->ifSpeed)
 		    ifp->ifSpeed = 155000000;
@@ -1103,6 +1103,10 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		    ifp->ifSpeed = 100000000;
 		ifp->ifType = 6;
 	    }
+	    break;
+
+	case 'i':          /* ibd (Infiniband) */
+	    ifp->ifType = 199;
 	    break;
 	}
 
