@@ -1,13 +1,15 @@
 SNMP-TARGET-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
-   TEXTUAL-CONVENTION,
    MODULE-IDENTITY,
    OBJECT-TYPE,
    snmpModules,
+   Counter32,
    Integer32
+
        FROM SNMPv2-SMI
 
+   TEXTUAL-CONVENTION,
    TDomain,
    TAddress,
    TimeInterval,
@@ -15,21 +17,23 @@ IMPORTS
    StorageType,
    TestAndIncr
        FROM SNMPv2-TC
+
    SnmpSecurityModel,
    SnmpMessageProcessingModel,
    SnmpSecurityLevel,
    SnmpAdminString
        FROM SNMP-FRAMEWORK-MIB
 
+   MODULE-COMPLIANCE,
    OBJECT-GROUP
        FROM SNMPv2-CONF;
 
 snmpTargetMIB MODULE-IDENTITY
-   LAST-UPDATED "9711210000Z"
+   LAST-UPDATED "9808040000Z"
    ORGANIZATION "IETF SNMPv3 Working Group"
    CONTACT-INFO
-       "WG-email:   snmpv3@tis.com
-	Subscribe:  majordomo@tis.com
+       "WG-email:   snmpv3@lists.tislabs.com
+	Subscribe:  majordomo@lists.tislabs.com
 		    In message body:  subscribe snmpv3
 
 	Chair:      Russ Mundy
@@ -37,36 +41,38 @@ snmpTargetMIB MODULE-IDENTITY
 	Postal:     3060 Washington Rd
 		    Glenwood MD 21738
 		    USA
-	Email:      mundy@tis.com
+	EMail:      mundy@tislabs.com
 	Phone:      +1-301-854-6889
 
 	Co-editor:  David B. Levi
 		    SNMP Research, Inc.
 	Postal:     3001 Kimberlin Heights Road
 		    Knoxville, TN 37920-9716
-	E-mail:     levi@snmp.com
+	EMail:      levi@snmp.com
 	Phone:      +1 423 573 1434
 
 	Co-editor:  Paul Meyer
 		    Secure Computing Corporation
 	Postal:     2675 Long Lake Road
 		    Roseville, MN 55113
-	E-mail:     paul_meyer@securecomputing.com
-	Phone:      +1 612 628 1592
+	EMail:      paul_meyer@securecomputing.com
+	Phone:      +1 651 628 1592
 
 	Co-editor:  Bob Stewart
 		    Cisco Systems, Inc.
 	Postal:     170 West Tasman Drive
 		    San Jose, CA 95134-1706
-	E-mail:     bstewart@cisco.com
-	Phone:      +1 603 654 6923"
+	EMail:      bstewart@cisco.com
+	Phone:      +1 603 654 2686"
    DESCRIPTION
        "This MIB module defines MIB objects which provide
 	mechanisms to remotely configure the parameters used
 	by an SNMP entity for the generation of SNMP messages."
-   REVISION        "9707140000Z"
-   DESCRIPTION
-       "The initial revision."
+   REVISION    "9808040000Z"
+   DESCRIPTION "Clarifications, published as
+		RFC2573."
+   REVISION    "9707140000Z"
+   DESCRIPTION "The initial revision, published as RFC2273."
    ::= { snmpModules 12 }
 
 snmpTargetObjects       OBJECT IDENTIFIER ::= { snmpTargetMIB 1 }
@@ -82,7 +88,7 @@ SnmpTagValue ::= TEXTUAL-CONVENTION
 	To facilitate internationalization, this information
 	is represented using the ISO/IEC IS 10646-1 character
 	set, encoded as an octet string using the UTF-8
-	character encoding scheme described in RFC 2044.
+	character encoding scheme described in RFC 2279.
 
 	Since additional code points are added by amendments
 	to the 10646 standard from time to time,
@@ -103,11 +109,12 @@ SnmpTagValue ::= TEXTUAL-CONVENTION
 	Note that when this TC is used for an object that
 	is used or envisioned to be used as an index, then a
 	SIZE restriction must be specified so that the number
-	sub-identifiers for any object instance do not exceed
-	the limit of 128, as defined by [RFC1905].
+	of sub-identifiers for any object instance does not
+	exceed the limit of 128, as defined by [RFC1905].
 
 	An object of this type contains a single tag value
 	which is used to select a set of entries in a table.
+
 	A tag value is an arbitrary string of octets, but
 	may not contain a delimiter character.  Delimiter
 	characters are defined to be one of the following:
@@ -147,7 +154,8 @@ SnmpTagList ::= TEXTUAL-CONVENTION
 	To facilitate internationalization, this information
 	is represented using the ISO/IEC IS 10646-1 character
 	set, encoded as an octet string using the UTF-8
-	character encoding scheme described in RFC 2044.
+	character encoding scheme described in RFC 2279.
+
 	Since additional code points are added by amendments
 	to the 10646 standard from time to time,
 	implementations must be prepared to encounter any code
@@ -196,6 +204,7 @@ SnmpTagList ::= TEXTUAL-CONVENTION
 	    - An empty string
 
 	    - 'acme router'
+
 	    - 'host managerStation'
 
 	Note that although a tag value may not have a length of
@@ -247,7 +256,6 @@ snmpTargetAddrTable OBJECT-TYPE
    DESCRIPTION
        "A table of transport addresses to be used in the generation
 	of SNMP messages."
-
    ::= { snmpTargetObjects 2 }
 
 snmpTargetAddrEntry OBJECT-TYPE
@@ -351,6 +359,7 @@ snmpTargetAddrTagList OBJECT-TYPE
        "This object contains a list of tag values which are
 	used to select target addresses for a particular
 	operation."
+   DEFVAL { "" }
    ::= { snmpTargetAddrEntry 6 }
 
 snmpTargetAddrParams OBJECT-TYPE
@@ -370,6 +379,7 @@ snmpTargetAddrStorageType OBJECT-TYPE
    STATUS      current
    DESCRIPTION
        "The storage type for this conceptual row."
+   DEFVAL { nonVolatile }
    ::= { snmpTargetAddrEntry 8 }
 
 snmpTargetAddrRowStatus OBJECT-TYPE
@@ -389,13 +399,17 @@ snmpTargetAddrRowStatus OBJECT-TYPE
 	column is 'notReady'.
 
 	In particular, a newly created row cannot be made
-	active until the corresponding snmpTargetAddrTDomain
-	and snmpTargetAddrTAddress have both been set.
+	active until the corresponding instances of
+	snmpTargetAddrTDomain, snmpTargetAddrTAddress, and
+	snmpTargetAddrParams have all been set.
 
 	The following objects may not be modified while the
 	value of this object is active(1):
 	    - snmpTargetAddrTDomain
-	    - snmpTargetAddrTAddress"
+	    - snmpTargetAddrTAddress
+	An attempt to set these objects while the value of
+	snmpTargetAddrRowStatus is active(1) will result in
+	an inconsistentValue error."
    ::= { snmpTargetAddrEntry 9 }
 
 snmpTargetParamsTable OBJECT-TYPE
@@ -448,12 +462,16 @@ snmpTargetParamsMPModel OBJECT-TYPE
    ::= { snmpTargetParamsEntry 2 }
 
 snmpTargetParamsSecurityModel OBJECT-TYPE
-   SYNTAX      SnmpSecurityModel (0..254 | 256..2147483647)
+   SYNTAX      SnmpSecurityModel (1..2147483647)
    MAX-ACCESS  read-create
    STATUS      current
    DESCRIPTION
        "The Security Model to be used when generating SNMP
-	 messages using this entry."
+	 messages using this entry.  An implementation may
+	 choose to return an inconsistentValue error if an
+	 attempt is made to set this variable to a value
+	 for a security model which the implementation does
+	 not support."
    ::= { snmpTargetParamsEntry 3 }
 
 snmpTargetParamsSecurityName OBJECT-TYPE
@@ -481,6 +499,7 @@ snmpTargetParamsStorageType OBJECT-TYPE
    STATUS      current
    DESCRIPTION
        "The storage type for this conceptual row."
+   DEFVAL { nonVolatile }
    ::= { snmpTargetParamsEntry 6 }
 
 snmpTargetParamsRowStatus OBJECT-TYPE
@@ -505,13 +524,15 @@ snmpTargetParamsRowStatus OBJECT-TYPE
 	snmpTargetParamsSecurityModel,
 	snmpTargetParamsSecurityName,
 	and snmpTargetParamsSecurityLevel have all been set.
-
 	The following objects may not be modified while the
 	value of this object is active(1):
 	    - snmpTargetParamsMPModel
 	    - snmpTargetParamsSecurityModel
 	    - snmpTargetParamsSecurityName
-	    - snmpTargetParamsSecurityLevel"
+	    - snmpTargetParamsSecurityLevel
+	An attempt to set these objects while the value of
+	snmpTargetParamsRowStatus is active(1) will result in
+	an inconsistentValue error."
    ::= { snmpTargetParamsEntry 7 }
 
 snmpUnavailableContexts OBJECT-TYPE
@@ -521,7 +542,7 @@ snmpUnavailableContexts OBJECT-TYPE
    DESCRIPTION
        "The total number of packets received by the SNMP
 	engine which were dropped because the context
-	contained in the mesage was unavailable."
+	contained in the message was unavailable."
    ::= { snmpTargetObjects 4 }
 
 snmpUnknownContexts OBJECT-TYPE
@@ -531,9 +552,9 @@ snmpUnknownContexts OBJECT-TYPE
    DESCRIPTION
        "The total number of packets received by the SNMP
 	engine which were dropped because the context
-	contained in the mesage was unknown."
-
+	contained in the message was unknown."
    ::= { snmpTargetObjects 5 }
+
 --
 --
 -- Conformance information
@@ -550,8 +571,6 @@ snmpTargetGroups      OBJECT IDENTIFIER ::=
 -- Compliance statements
 --
 --
-
-
 snmpTargetCommandResponderCompliance MODULE-COMPLIANCE
    STATUS      current
    DESCRIPTION
@@ -579,7 +598,6 @@ snmpTargetBasicGroup OBJECT-GROUP
    }
    STATUS      current
    DESCRIPTION
-
        "A collection of objects providing basic remote
 	configuration of management targets."
    ::= { snmpTargetGroups 1 }

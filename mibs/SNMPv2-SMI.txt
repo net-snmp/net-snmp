@@ -1,119 +1,75 @@
 SNMPv2-SMI DEFINITIONS ::= BEGIN
 
-org ::= { iso  3 }
 
-dod ::= { org  6 }
+-- the path to the root
 
-internet ::= { dod  1 }
+org            OBJECT IDENTIFIER ::= { iso 3 }  --  "iso" = 1
+dod            OBJECT IDENTIFIER ::= { org 6 }
+internet       OBJECT IDENTIFIER ::= { dod 1 }
 
-directory ::= { internet  1 }
+directory      OBJECT IDENTIFIER ::= { internet 1 }
 
-mgmt ::= { internet  2 }
+mgmt           OBJECT IDENTIFIER ::= { internet 2 }
+mib-2          OBJECT IDENTIFIER ::= { mgmt 1 }
+transmission   OBJECT IDENTIFIER ::= { mib-2 10 }
 
-mib-2 ::= { mgmt  1 }
+experimental   OBJECT IDENTIFIER ::= { internet 3 }
 
-transmission ::= { mib-2  10 }
+private        OBJECT IDENTIFIER ::= { internet 4 }
+enterprises    OBJECT IDENTIFIER ::= { private 1 }
 
-experimental ::= { internet  3 }
+security       OBJECT IDENTIFIER ::= { internet 5 }
 
-private ::= { internet  4 }
+snmpV2         OBJECT IDENTIFIER ::= { internet 6 }
 
-enterprises ::= { private  1 }
+-- transport domains
+snmpDomains    OBJECT IDENTIFIER ::= { snmpV2 1 }
 
-security ::= { internet  5 }
+-- transport proxies
+snmpProxys     OBJECT IDENTIFIER ::= { snmpV2 2 }
 
-snmpV2 ::= { internet  6 }
+-- module identities
+snmpModules    OBJECT IDENTIFIER ::= { snmpV2 3 }
 
-snmpDomains ::= { snmpV2  1 }
+-- Extended UTCTime, to allow dates with four-digit years
+-- (Note that this definition of ExtUTCTime is not to be IMPORTed
+--  by MIB modules.)
+ExtUTCTime ::= OCTET STRING(SIZE(11 | 13))
+    -- format is YYMMDDHHMMZ or YYYYMMDDHHMMZ
+    --   where: YY   - last two digits of year (only years
+    --                 between 1900-1999)
+    --          YYYY - last four digits of the year (any year)
+    --          MM   - month (01 through 12)
+    --          DD   - day of month (01 through 31)
+    --          HH   - hours (00 through 23)
+    --          MM   - minutes (00 through 59)
+    --          Z    - denotes GMT (the ASCII character Z)
+    --
+    -- For example, "9502192015Z" and "199502192015Z" represent
+    -- 8:15pm GMT on 19 February 1995. Years after 1999 must use
+    -- the four digit year format. Years 1900-1999 may use the
+    -- two or four digit format.
 
-snmpProxys ::= { snmpV2  2 }
+-- definitions for information modules
 
-snmpModules ::= { snmpV2  3 }
+-- names of objects
+-- (Note that these definitions of ObjectName and NotificationName
+--  are not to be IMPORTed by MIB modules.)
 
-ObjectName ::=
-    OBJECT IDENTIFIER
+-- syntax of objects
 
-NotificationName ::=
-    OBJECT IDENTIFIER
+-- the "base types" defined here are:
+--   3 built-in ASN.1 types: INTEGER, OCTET STRING, OBJECT IDENTIFIER
+--   8 application-defined types: Integer32, IpAddress, Counter32,
+--              Gauge32, Unsigned32, TimeTicks, Opaque, and Counter64
 
---ObjectSyntax ::=
---    CHOICE {
---        simple
---            SimpleSyntax,
---
---        application-wide
---            ApplicationSyntax
---}
 
---SimpleSyntax ::=
---    CHOICE {
---        integer-value
---            INTEGER,
---
---        string-value
---            OCTET STRING,
---
---        objectID-value
---            OBJECT IDENTIFIER
---}
+-- definitions of administrative identifiers
 
---Integer32 ::=
---    [UNIVERSAL 2]
---    IMPLICIT INTEGER
-
---ApplicationSyntax ::=
---    CHOICE {
---        ipAddress-value
---            IpAddress,
---
---        counter-value
---            Counter32,
---
---        timeticks-value
---            TimeTicks,
---
---        arbitrary-value
---            Opaque,
---
---        big-counter-value
---            Counter64,
---
---        unsigned-integer-value
---            Unsigned32
---}
-
---IpAddress ::=
---    [APPLICATION 0]
---    IMPLICIT OCTET STRING
-
---Counter32 ::=
---    [APPLICATION 1]
---    IMPLICIT INTEGER
-
---Gauge32 ::=
---    [APPLICATION 2]
---    IMPLICIT INTEGER
-
---Unsigned32 ::=
---    [APPLICATION 2]
---    IMPLICIT INTEGER
-
---TimeTicks ::=
---    [APPLICATION 3]
---    IMPLICIT INTEGER
-
---Opaque ::=
---    [APPLICATION 4]
---    IMPLICIT OCTET STRING
-
---Counter64 ::=
---    [APPLICATION 6]
---    IMPLICIT INTEGER
-
-zeroDotZero OBJECT-IDENTITY
-    STATUS       current
+zeroDotZero    OBJECT-IDENTITY
+    STATUS     current
     DESCRIPTION
-        "A value used for null identifiers."
-    ::= { 0  0 }
+            "A value used for null identifiers."
+    ::= { 0 0 }
 
 END

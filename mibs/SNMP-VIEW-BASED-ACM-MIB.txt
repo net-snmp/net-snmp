@@ -11,17 +11,18 @@ IMPORTS
     SnmpSecurityModel                     FROM SNMP-FRAMEWORK-MIB;
 
 snmpVacmMIB       MODULE-IDENTITY
-    LAST-UPDATED "9711200000Z"            -- 20 Nov 1997, midnight
+    LAST-UPDATED "9901200000Z"            -- 20 Jan 1999, midnight
     ORGANIZATION "SNMPv3 Working Group"
-    CONTACT-INFO "WG-email:   snmpv3@tis.com
-                  Subscribe:  majordomo@tis.com
+    CONTACT-INFO "WG-email:   snmpv3@lists.tislabs.com
+                  Subscribe:  majordomo@lists.tislabs.com
                               In message body:  subscribe snmpv3
+
                   Chair:      Russ Mundy
                               Trusted Information Systems
                   postal:     3060 Washington Rd
                               Glenwood MD 21738
                               USA
-                  email:      mundy@tis.com
+                  email:      mundy@tislabs.com
                   phone:      +1-301-854-6889
 
                   Co-editor:  Bert Wijnen
@@ -34,11 +35,11 @@ snmpVacmMIB       MODULE-IDENTITY
 
                   Co-editor:  Randy Presuhn
                               BMC Software, Inc
-                  postal:     1190 Saratoga Avenue, Suite 130
-                              San Jose, CA  95129-3433
+                  postal:     965 Stewart Drive
+                              Sunnyvale, CA 94086
                               USA
-                  email:      rpresuhn@bmc.com
-                  phone:      +1-408-556-0720
+                  email:      randy_presuhn@bmc.com
+                  phone:      +1-408-616-3100
 
                   Co-editor:  Keith McCloghrie
                               Cisco Systems, Inc.
@@ -51,6 +52,13 @@ snmpVacmMIB       MODULE-IDENTITY
     DESCRIPTION  "The management information definitions for the
                   View-based Access Control Model for SNMP.
                  "
+--  Revision history
+    REVISION     "9901200000Z"            -- 20 Jan 1999, midnight
+    DESCRIPTION  "Clarifications, published as RFC2575"
+
+    REVISION     "9711200000Z"            -- 20 Nov 1997, midnight
+    DESCRIPTION  "Initial version, published as RFC2275"
+
     ::= { snmpModules 16 }
 
 -- Administrative assignments ****************************************
@@ -175,9 +183,6 @@ vacmSecurityName OBJECT-TYPE
     DESCRIPTION "The securityName for the principal, represented in a
                  Security Model independent format, which is mapped by
                  this entry to a groupName.
-
-                 The securityName for a principal represented in a
-                 Security Model independent format.
                 "
     ::= { vacmSecurityToGroupEntry 2 }
 
@@ -191,6 +196,8 @@ vacmGroupName    OBJECT-TYPE
 
                  This groupName is used as index into the
                  vacmAccessTable to select an access control policy.
+                 However, a value in this table does not imply that an
+                 instance with the value exists in table vacmAccesTable.
                 "
     ::= { vacmSecurityToGroupEntry 3 }
 
@@ -211,7 +218,15 @@ vacmSecurityToGroupStatus OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The status of this conceptual row.
 
-                 The  RowStatus TC [RFC1903] requires that this
+                 Until instances of all corresponding columns are
+                 appropriately configured, the value of the
+                 corresponding instance of the vacmSecurityToGroupStatus
+                 column is 'notReady'.
+
+                 In particular, a newly created row cannot be made
+                 active until a value has been set for vacmGroupName.
+
+                 The  RowStatus TC [RFC2579] requires that this
                  DESCRIPTION clause states under which circumstances
                  other objects in this row can be modified:
 
@@ -228,7 +243,7 @@ vacmAccessTable  OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The table of access rights for groups.
 
-                 Each entry is indexed by a contextPrefix, a groupName
+                 Each entry is indexed by a groupName, a contextPrefix,
                  a securityModel and a securityLevel.  To determine
                  whether access is allowed, one entry from this table
                  needs to be selected and the proper viewName from that
@@ -257,11 +272,13 @@ vacmAccessTable  OBJECT-TYPE
                     otherwise, it comes down to deciding how to weight
                     the preferences between ContextPrefixes,
                     SecurityModels, and SecurityLevels as follows:
-                    a) if the subset of entries with identical
-                       securityModels is not empty, discard the rest.
-                    b) if the subset of entries with identical
-                       vacmAccessContextPrefix is not empty,
-                       discard the rest
+                    a) if the subset of entries with securityModel
+                       matching the securityModel in the message is
+                       not empty, then discard the rest.
+                    b) if the subset of entries with
+                       vacmAccessContextPrefix matching the contextName
+                       in the message is not empty,
+                       then discard the rest
                     c) discard all entries with ContextPrefixes shorter
                        than the longest one remaining in the set
                     d) select the entry with the highest securityLevel
@@ -278,6 +295,11 @@ vacmAccessEntry  OBJECT-TYPE
     STATUS       current
     DESCRIPTION "An access right configured in the Local Configuration
                  Datastore (LCD) authorizing access to an SNMP context.
+
+                 Entries in this table can use an instance value for
+                 object vacmGroupName even if no entry in table
+                 vacmAccessSecurityToGroupTable has a corresponding
+                 value for object vacmGroupName.
                 "
     INDEX       { vacmGroupName,
                   vacmAccessContextPrefix,
@@ -333,7 +355,7 @@ vacmAccessSecurityLevel OBJECT-TYPE
                  If multiple entries are equally indexed except for
                  this vacmAccessSecurityLevel index, then the entry
                  which has the highest value for
-                 vacmAccessSecurityLevel wins.
+                 vacmAccessSecurityLevel is selected.
                 "
     ::= { vacmAccessEntry 3 }
 
@@ -352,9 +374,8 @@ vacmAccessContextMatch OBJECT-TYPE
                  rows where the contextName whose starting octets
                  exactly match vacmAccessContextPrefix are selected.
                  This allows for a simple form of wildcarding.
-                 See also the example in the DESCRIPTION clause of
-                 the vacmAccessTable above.
                 "
+    DEFVAL      { exact }
     ::= { vacmAccessEntry 4 }
 
 vacmAccessReadViewName OBJECT-TYPE
@@ -400,6 +421,7 @@ vacmAccessNotifyViewName OBJECT-TYPE
     DESCRIPTION "The value of an instance of this object identifies
                  the MIB view of the SNMP context to which this
                  conceptual row authorizes access for notifications.
+
                  The identified MIB view is that one for which the
                  vacmViewTreeFamilyViewName has the same value as the
                  instance of this object; if the value is the empty
@@ -428,7 +450,7 @@ vacmAccessStatus OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The status of this conceptual row.
 
-                 The  RowStatus TC [RFC1903] requires that this
+                 The  RowStatus TC [RFC2579] requires that this
                  DESCRIPTION clause states under which circumstances
                  other objects in this row can be modified:
 
@@ -499,8 +521,9 @@ vacmViewTreeFamilyTable OBJECT-TYPE
                  value of vacmViewTreeFamilyType in the entry whose
                  value of vacmViewTreeFamilySubtree has the most
                  sub-identifiers.  If multiple entries match and have
-                 the same number of sub-identifiers, then the
-                 lexicographically greatest instance of
+                 the same number of sub-identifiers (when wildcarding
+                 is specified with the value of vacmViewTreeFamilyMask),
+                 then the lexicographically greatest instance of
                  vacmViewTreeFamilyType determines the inclusion or
                  exclusion.
 
@@ -592,6 +615,7 @@ vacmViewTreeFamilySubtree OBJECT-TYPE
                  defines a family of view subtrees.
                 "
     ::= { vacmViewTreeFamilyEntry 2 }
+
 vacmViewTreeFamilyMask OBJECT-TYPE
     SYNTAX       OCTET STRING (SIZE (0..16))
     MAX-ACCESS   read-create
@@ -677,7 +701,7 @@ vacmViewTreeFamilyStatus OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The status of this conceptual row.
 
-                 The  RowStatus TC [RFC1903] requires that this
+                 The  RowStatus TC [RFC2579] requires that this
                  DESCRIPTION clause states under which circumstances
                  other objects in this row can be modified:
 
@@ -705,6 +729,7 @@ vacmMIBCompliance MODULE-COMPLIANCE
         OBJECT        vacmAccessContextMatch
         MIN-ACCESS    read-only
         DESCRIPTION  "Write access is not required."
+
         OBJECT        vacmAccessReadViewName
         MIN-ACCESS    read-only
         DESCRIPTION  "Write access is not required."
