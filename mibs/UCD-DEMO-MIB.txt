@@ -22,7 +22,7 @@ ucdDemoMIB MODULE-IDENTITY
                  email:      wjhardaker@ucdavis.edu
                 "
    DESCRIPTION  "The UCD-SNMP Demonstration MIB"
-   ::= { ucdavis 15 }
+   ::= { ucdavis 14 }
 
 ucdDemoMIBObjects
    OBJECT IDENTIFIER ::= { ucdDemoMIB 1 }
