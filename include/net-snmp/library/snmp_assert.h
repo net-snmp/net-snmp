@@ -52,7 +52,7 @@
               }while(0)
 #      endif
 #   else /* NO DEBUGGING */
-#      define netsnmp_assert(x) void
+#      define netsnmp_assert(x)
 #   endif /* NO DEBUGGING */
 #endif /* not NETSNMP_USE_ASSERT */
 
