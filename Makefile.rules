@@ -48,7 +48,7 @@ installlocalheaders:
 		it="$(INSTALLHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $(top_srcdir)/include/net-snmp/$$i $(includedir) ; \
+			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$$i $(includedir) ; \
 	                echo "installing $$i in $(includedir)" ; \
 	        done \
 	fi
@@ -57,7 +57,7 @@ installlocalheaders:
 		it="$(INSTALLBUILTHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $$i $(includedir) ; \
+			$(INSTALL_DATA) $$i $(includedir) ; \
 	                echo "installing $$i in $(includedir)" ; \
 	        done \
 	fi
@@ -66,7 +66,7 @@ installlocalheaders:
 		it="$(INCLUDESUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDESUBDIR) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i $(includedir)/$(INCLUDESUBDIR) ; \
+			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i $(includedir)/$(INCLUDESUBDIR) ; \
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR)" ; \
 	        done \
 	fi
@@ -75,7 +75,7 @@ installlocalheaders:
 		it="$(INCLUDESUBDIRHEADERS2)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDESUBDIR2) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(includedir)/$(INCLUDESUBDIR2) ; \
+			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(includedir)/$(INCLUDESUBDIR2) ; \
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR2)" ; \
 	        done \
 	fi
@@ -84,7 +84,7 @@ installlocalheaders:
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INSTALLBUILTSUBDIR) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $$i $(includedir)/$(INSTALLBUILTSUBDIR) ; \
+			$(INSTALL_DATA) $$i $(includedir)/$(INSTALLBUILTSUBDIR) ; \
 	                echo "installing $$i in $(includedir)/$(INSTALLBUILTSUBDIR)" ; \
 	        done \
 	fi
@@ -107,7 +107,7 @@ installucdheaders:
 		it="$(INSTALLUCDHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(ucdincludedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $(top_srcdir)/include/ucd-snmp/$$i $(ucdincludedir) ; \
+			$(INSTALL_DATA) $(top_srcdir)/include/ucd-snmp/$$i $(ucdincludedir) ; \
 	                echo "installing $$i in $(ucdincludedir)" ; \
 	        done \
 	fi

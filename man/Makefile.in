@@ -143,10 +143,10 @@ default_store.3: $(srcdir)/default_store.3.top default_store.3.h $(srcdir)/defau
 	cat default_store.3.h $(srcdir)/default_store.3.bot >> default_store.3
 
 maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
-	@for i in $(MAN1) ; do $(INSTALL) $(srcdir)/$$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
+	@for i in $(MAN1) ; do $(INSTALL_DATA) $(srcdir)/$$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
 	@$(INSTALL_DATA) $(MAN1G) $(man1dir)
 	@for i in $(MAN1G) ; do echo "install:  installed $$i in $(man1dir)" ; done
-	@for i in $(MAN3) ; do $(INSTALL) $(srcdir)/$$i $(man3dir) ; echo "install:  installed $$i in $(man3dir)" ; done
+	@for i in $(MAN3) ; do $(INSTALL_DATA) $(srcdir)/$$i $(man3dir) ; echo "install:  installed $$i in $(man3dir)" ; done
 	@$(INSTALL_DATA) $(MAN3G) $(man3dir)
 	@for i in $(MAN3G) ; do echo "install:  installed $$i in $(man3dir)" ; done
 	@$(INSTALL_DATA) $(MAN5G) $(man5dir)
