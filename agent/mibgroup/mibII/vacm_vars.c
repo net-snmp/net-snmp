@@ -126,9 +126,9 @@ init_vacm_vars (void)
   snmpd_register_config_handler("rocommunity", vacm_parse_simple,
                                 NULL,"community [default|hostname|network/bits] [oid]");
   snmpd_register_config_handler("rwuser", vacm_parse_simple,
-                                NULL,"user [default|hostname|network/bits] [oid]");
+                                NULL,"user [noauth|auth|priv] [oid]");
   snmpd_register_config_handler("rouser", vacm_parse_simple,
-                                NULL,"user [default|hostname|network/bits] [oid]");
+                                NULL,"user [noauth|auth|priv] [oid]");
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
@@ -351,8 +351,8 @@ void vacm_parse_access (const char *token, char *param)
     else if (strcasecmp(level, "noauthnopriv") == 0) ilevel = SNMP_SEC_LEVEL_NOAUTH;
     else if (strcasecmp(level, "auth") == 0) ilevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
     else if (strcasecmp(level, "authnopriv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
-    else if (strcasecmp(model, "priv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
-    else if (strcasecmp(model, "authpriv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
+    else if (strcasecmp(level, "priv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
+    else if (strcasecmp(level, "authpriv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
     else {
 	config_perror("bad security level");
 	return;
@@ -459,14 +459,35 @@ void vacm_parse_simple(const char *token, char *confline) {
   char group[] = "group";
   char view[] = "view";
   char access[] = "access";
+  char any[] = "any";
+  char usm[] = "usm";
+  char *model = any;
   char secname[SPRINT_MAX_LEN];
+  char authtype[SPRINT_MAX_LEN];
 
+  /* community name or user name */
   cp = copy_word(confline, community);
-  if (cp && *cp) {
-    cp = copy_word(cp, addressname);
+
+  if (strcmp(token,"rouser") == 0 || strcmp(token,"rwuser") == 0) {
+    /* authentication type */
+    if (cp && *cp)
+      cp = copy_word(cp, authtype);
+    else
+      strcpy(authtype, "auth");
+    DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
+    model = usm;
   } else {
-    strcpy(addressname, "default");
+    /* source address */
+    if (cp && *cp) {
+      cp = copy_word(cp, addressname);
+    } else {
+      strcpy(addressname, "default");
+    }
+    /* authtype has to be noauth */
+    strcpy(authtype, "noauth");
   }
+
+  /* oid they can touch */
   if (cp && *cp) {
     cp = copy_word(cp, theoid);
   } else {
@@ -481,6 +502,7 @@ void vacm_parse_simple(const char *token, char *confline) {
     /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
     sprintf(secname, "anonymousSecName%03d", num);
     sprintf(line,"%s %s %s", secname, addressname, community);
+    DEBUGMSGTL((token,"passing: %s %s\n", com2sec, line));
     vacm_parse_security(com2sec,line);
   } else {
     strcpy(secname, community);
@@ -489,18 +511,21 @@ void vacm_parse_simple(const char *token, char *confline) {
   /* sec->group mapping */
   /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
   sprintf(line,"anonymousGroupName%03d any %s", num, secname);
+  DEBUGMSGTL((token,"passing: %s %s\n", group, line));
   vacm_parse_group(group,line);
 
   /* view definition */
   /* view    anonymousViewNUM       included OID */
   sprintf(viewname,"anonymousView%03d",num);
   sprintf(line,"%s included %s", viewname, theoid);
+  DEBUGMSGTL((token,"passing: %s %s\n", view, line));
   vacm_parse_view(view,line);
 
   /* map everything together */
-  /* access  anonymousGroupNameNUM  "" any noauth 0 anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
-  sprintf(line, "anonymousGroupName%03d  \"\" any noauth 0 %s %s %s", num,
-          viewname, rw, rw);
+  /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE 0 anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
+  sprintf(line, "anonymousGroupName%03d  \"\" %s %s 0 %s %s %s", num,
+          model, authtype, viewname, rw, rw);
+  DEBUGMSGTL((token,"passing: %s %s\n", access, line));
   vacm_parse_access(access,line);
   num++;
 }
