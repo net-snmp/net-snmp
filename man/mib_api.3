@@ -7,9 +7,9 @@ read_objid, read_module_node,
 print_mib,
 print_variable, print_value, print_objid, print_description
 .SH SYNOPSIS
-.B #include """mib.h""
+.B #include <ucd-snmp/mib.h>
 .br
-.B #include """parse.h""
+.B #include <ucd-snmp/parse.h>
 .PP
 .B "void init_mib( void )
 .br
@@ -38,6 +38,10 @@ print_variable, print_value, print_objid, print_description
 .B "void print_objid( oid *objid, int objidlen);
 .br
 .B "void print_description( oid *objid, int objidlen);
+.br
+.B "void snmp_set_mib_warnings( int );
+.br
+.B "void snmp_set_save_descriptions( int );
 .PP
 .SH DESCRIPTION
 The functions dealing with MIB modules fall into four groups.
@@ -212,6 +216,16 @@ above) and prints out the associated description.
 .b
 Note that there is no corresponding routine
 .I sprint_description
+
+By default the parser does not save descriptions - they may be huge.
+In order to be able to print them, you must call
+.IR "snmp_set_save_descriptions(1)" .
+
+In general the parser is silent about what strangenesses it sees
+in the mib files. To get warnings reported, call
+.I snmp_set_mib_warnings
+with a parameter of \fI1\fR (or \fI2\fR for even more warnings).
+
 .SH "ENVIRONMENT VARIABLES"
 .TP 10
 MIBDIRS
@@ -224,7 +238,6 @@ Default: (none)
 .TP 10
 MIBS
 A colon separated list of MIB modules to load.
-Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-S
-NMP-MIB.
+Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.
 .SH "SEE ALSO"
 snmp_api(3)
