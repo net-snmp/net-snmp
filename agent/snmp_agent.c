@@ -243,7 +243,7 @@ init_master_agent(int dest_port,
             if (strncasecmp(cptr,"tcp",3) == 0)
                 flags |= SNMP_FLAGS_STREAM_SOCKET;
             else if (strncasecmp(cptr,"udp",3) == 0)
-                flags ^= SNMP_FLAGS_STREAM_SOCKET; /* fix */
+                flags &= ~SNMP_FLAGS_STREAM_SOCKET;
             else {
                 snmp_log(LOG_ERR, "illegal port transport %s\n", buf);
                 return 1;
