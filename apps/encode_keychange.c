@@ -24,8 +24,11 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -33,6 +36,10 @@
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "asn1.h"
@@ -47,9 +54,6 @@
 #include "../snmplib/transform_oids.h"
 
 #include <stdlib.h>
-
-extern char     *optarg;
-extern int      optind, optopt, opterr;
 
 /*
  * Globals, &c...
@@ -103,27 +107,35 @@ int     get_user_passphrases(void);
 int	snmp_ttyecho(const int fd, const int echo);
 char   *snmp_getpassphrase(const char *prompt, int fvisible);
 
+#ifdef WIN32
+#define HAVE_GETPASS 1
+char *getpass( const char * prompt );
+int isatty(int);
+int _cputs(const char *);
+int _getch(void);
+#endif
+
 /*******************************************************************-o-******
  */
 int
 main(int argc, char **argv)
 {
-	int		  rval		= SNMPERR_SUCCESS;
-	size_t		  oldKu_len	= SNMP_MAXBUF_SMALL,
-			  newKu_len	= SNMP_MAXBUF_SMALL,
-			  oldkul_len	= SNMP_MAXBUF_SMALL,
-			  newkul_len	= SNMP_MAXBUF_SMALL,
-			  keychange_len	= SNMP_MAXBUF_SMALL;
+	int	  rval		= SNMPERR_SUCCESS;
+	size_t	  oldKu_len	= SNMP_MAXBUF_SMALL,
+		  newKu_len	= SNMP_MAXBUF_SMALL,
+		  oldkul_len	= SNMP_MAXBUF_SMALL,
+		  newkul_len	= SNMP_MAXBUF_SMALL,
+		  keychange_len	= SNMP_MAXBUF_SMALL;
 
-        char              ch,
-			 *s = NULL;
-	u_char		  oldKu[SNMP_MAXBUF_SMALL],
-			  newKu[SNMP_MAXBUF_SMALL],
-			  oldkul[SNMP_MAXBUF_SMALL],
-			  newkul[SNMP_MAXBUF_SMALL],
-			  keychange[SNMP_MAXBUF_SMALL];
+	char      *s = NULL;
+	u_char	  oldKu[SNMP_MAXBUF_SMALL],
+		  newKu[SNMP_MAXBUF_SMALL],
+		  oldkul[SNMP_MAXBUF_SMALL],
+		  newkul[SNMP_MAXBUF_SMALL],
+		  keychange[SNMP_MAXBUF_SMALL];
 
-        int               i;
+	int       i;
+	int       arg = 1;
 
  	local_progname = argv[0];
 
@@ -132,37 +144,26 @@ main(int argc, char **argv)
 	/*
 	 * Parse.
 	 */
-	while ( (ch = getopt(argc, argv, OPTIONLIST)) != EOF )
-	{
-		switch(ch) {
-
-                case 'D':       snmp_set_do_debugging(1);       break;
-		case 'E':	engineid = (u_char *)optarg;	break;
-		case 'f':	forcepassphrase = 1;		break;
-		case 'N':	newpass = optarg;		break;
-		case 'O':	oldpass = optarg;		break;
-		case 'P':	promptindicator = 0;		break;
-		case 't':	transform_type_input = optarg;	break;
-		case 'v':	verbose = 1;			break;
-		case 'V':	visible = 1;			break;
+	for(; (arg < argc) && (argv[arg][0] == '-') ; arg++){
+		switch(argv[arg][1]){
+		case 'D':  snmp_set_do_debugging(1);	break;
+		case 'E':  engineid = (u_char *)argv[++arg];	break;
+		case 'f':  forcepassphrase = 1;		break;
+		case 'N':  newpass = argv[++arg];	break;
+		case 'O':  oldpass = argv[++arg];	break;
+		case 'P':  promptindicator = 0;		break;
+		case 't':  transform_type_input = argv[++arg];	break;
+		case 'v':  verbose = 1;			break;
+		case 'V':  visible = 1;			break;
 		case 'h':
 			rval = 0;
 		default:
 			usage_to_file(stdout);
 			exit(rval);
 		}
+	}
 
-		argc -= 1; argv += 1;
-                if (optarg) { argc -= 1; argv += 1; optarg = NULL; }
-		optind = 1;
-
-	}  /* endwhile getopt */
-
-	if ((argc > 1)) {
-		usage_to_file(stdout);
-		exit(1000);
-
-	} else if ( !transform_type_input ) {
+	if ( !transform_type_input ) {
 		fprintf(stderr, "The -t option is mandatory.\n");
 		usage_synopsis(stdout);
 		exit(1000);
@@ -271,12 +272,12 @@ main(int argc, char **argv)
 
 
         DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
-        for(i=0; i < engineid_len; i++)
+        for(i=0; i < (int)engineid_len; i++)
           DEBUGMSGTL(("encode_keychange", "%02x",(int) (engineid[i])));
         DEBUGMSGTL(("encode_keychange","\n"));
 
         DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len, oldpass));
-        for(i=0; i < oldKu_len; i++)
+        for(i=0; i < (int)oldKu_len; i++)
           DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldKu[i])));
         DEBUGMSGTL(("encode_keychange","\n"));
 
@@ -288,7 +289,7 @@ main(int argc, char **argv)
 
 
         DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ", oldkul_len));
-        for(i=0; i < oldkul_len; i++)
+        for(i=0; i < (int)oldkul_len; i++)
           DEBUGMSGTL(("encode_keychange", "%02x",(int) (oldkul[i])));
         DEBUGMSGTL(("encode_keychange","\n"));
 
@@ -299,7 +300,7 @@ main(int argc, char **argv)
 	QUITFUN(rval, main_quit);
         
         DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ", oldkul_len));
-        for(i=0; i < newkul_len; i++)
+        for(i=0; i < (int)newkul_len; i++)
           DEBUGMSGTL(("encode_keychange", "%02x",newkul[i]));
         DEBUGMSGTL(("encode_keychange","\n"));
 
@@ -480,12 +481,13 @@ get_user_passphrases(void)
 	if ( stat(path, &statbuf) < 0 ) {
 		fprintf(stderr, "Cannot access directory \"%s\".\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
-
+#ifndef WIN32
 	} else if ( statbuf.st_mode & (S_IRWXG|S_IRWXO) ) {
 		fprintf(stderr,
 		    "Directory \"%s\" is accessible by group or world.\n",
 		    path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+#endif /* !WIN32 */
 	}
 
 							/* Test file. */
@@ -493,11 +495,12 @@ get_user_passphrases(void)
 	if ( stat(path, &statbuf) < 0 ) {
 		fprintf(stderr, "Cannot access file \"%s\".\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
-
+#ifndef WIN32
 	} else if ( statbuf.st_mode & (S_IRWXG|S_IRWXO) ) {
 		fprintf(stderr,
 			"File \"%s\" is accessible by group or world.\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
+#endif /* !WIN32 */
 	}
 
 							/* Open the file. */
@@ -723,4 +726,32 @@ snmp_getpassphrase(const char *prompt, int bvisible)
 	return bufp;
 
 }  /* end snmp_getpassphrase() */
+
+#ifdef WIN32
+
+int	snmp_ttyecho(const int fd, const int echo) { return 0; }
+
+/*
+ * stops at the first newline, carrier return, or backspace.
+ * WARNING! _getch does NOT read <Ctrl-C>
+ */
+char *getpass( const char * prompt )
+{
+	static char pbuf[128];
+	int ch, lim;
+
+	_cputs(prompt);
+	for (ch=0, lim=0; ch != '\n' && lim < sizeof(pbuf); )
+	{
+		ch = _getch();  /* look ma, no echo ! */
+		if (ch == '\r' || ch == '\n' || ch == '\b')
+			break;
+		pbuf[lim++] = ch;
+	}
+	pbuf[lim] = '\0';
+	puts("\n");
+
+	return pbuf;
+}
+#endif /* WIN32 */
 

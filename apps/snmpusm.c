@@ -123,13 +123,18 @@ setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
   int i;
   char buf[1024];
 
-  it[12] = idlen;
-  for(i=13; i < 13+idlen; i++)
-    it[i] = id[i-13];
-  it[13+idlen] = strlen(user);
-  for(i=14+idlen; i < 14+idlen+strlen(user); i++)
-    it[i] = user[i-14-idlen];
-  *len = 14+idlen+strlen(user);
+  int itIndex = 12;
+
+  *len = itIndex + 1 + idlen + 1 + strlen(user);
+
+  it[itIndex++] = idlen;
+  for(i=0; i < (int)idlen; i++)
+    it[itIndex++] = id[i];
+
+  it[itIndex++] = strlen(user);
+  for(i=0; i < (int)strlen(user); i++)
+    it[itIndex++] = user[i];
+
   sprint_objid(buf, it, *len);
 }
 

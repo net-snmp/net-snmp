@@ -58,6 +58,7 @@
 #include "tools.h"
 #include "lcd_time.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "callback.h"
 #include "default_store.h"
 

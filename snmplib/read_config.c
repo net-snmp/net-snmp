@@ -69,6 +69,7 @@
 #include "system.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "snmp_impl.h"
 
 #include "read_config.h"
