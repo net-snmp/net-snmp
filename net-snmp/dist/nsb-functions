@@ -90,11 +90,11 @@ nsb-config-all()
    *)
       echo $ngc_src/configure  --with-defaults \
          '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+         '--with-transports=UDPIPv6 TCPIPv6' \
           --enable-embedded-perl --enable-shared
       $ngc_src/configure  --with-defaults \
          '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' \
-         '--with-transports=UDPIPv6 TCPIPv6 IPX' \
+         '--with-transports=UDPIPv6 TCPIPv6' \
           --enable-embedded-perl --enable-shared
       ngc_rc=$?
       ;;
