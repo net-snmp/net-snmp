@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 
-#include <net-snmp/net-snmp-config.h>
+#ifndef NETSNMP_CONFIG_H
+#error "Please include <net-snmp/net-snmp-config.h> before this file"
+#endif
 
                         /*
                          * For 'timeval' 
