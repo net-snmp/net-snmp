@@ -3,6 +3,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.3*
  New:
+    Building:
+      - new option to disable set support in the agent (--disable-set-support)
+
    snmptrapd:
      - allow a non-default AgentX socket
 
