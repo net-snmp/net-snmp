@@ -1058,102 +1058,103 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     /*
      * some stuff needs to be saved in special subagent cases 
      */
-    switch (asp->pdu->command) {
-    case SNMP_MSG_INTERNAL_SET_BEGIN:
-    case SNMP_MSG_INTERNAL_SET_RESERVE1:
-    case SNMP_MSG_INTERNAL_SET_RESERVE2:
-    case SNMP_MSG_INTERNAL_SET_ACTION:
-    case SNMP_MSG_INTERNAL_SET_COMMIT:
-    case SNMP_MSG_INTERNAL_SET_FREE:
-    case SNMP_MSG_INTERNAL_SET_UNDO:
-        save_set_cache(asp);
-        break;
-    }
+    if (asp->pdu) {
 
-    /*
-     * if this is a GETBULK response we need to rearrange the varbinds 
-     */
-    if (asp->pdu->command == SNMP_MSG_GETBULK) {
-        int             repeats = asp->pdu->errindex;
-        int             j;
-
-        if (asp->pdu->errstat < asp->vbcount) {
-            n = asp->pdu->errstat;
-        } else {
-            n = asp->vbcount;
-        }
-        if ((r = asp->vbcount - n) < 0) {
-            r = 0;
-        }
-
-        for (i = 0; i < r - 1; i++) {
-            for (j = 0; j < repeats; j++) {
-                asp->bulkcache[i * repeats + j]->next_variable =
-                    asp->bulkcache[(i + 1) * repeats + j];
-            }
-        }
-        if (r > 0) {
-            for (j = 0; j < repeats - 1; j++) {
-                asp->bulkcache[(r - 1) * repeats + j]->next_variable =
-                    asp->bulkcache[j + 1];
-            }
-        }
-    }
-
-    /*
-     * May need to "dumb down" a SET error status for a
-     * v1 query.  See RFC2576 - section 4.3
-     */
-    if ((asp->pdu) &&
-        (asp->pdu->command == SNMP_MSG_SET) &&
-        (asp->pdu->version == SNMP_VERSION_1)) {
-        switch (status) {
-        case SNMP_ERR_WRONGVALUE:
-        case SNMP_ERR_WRONGENCODING:
-        case SNMP_ERR_WRONGTYPE:
-        case SNMP_ERR_WRONGLENGTH:
-        case SNMP_ERR_INCONSISTENTVALUE:
-            status = SNMP_ERR_BADVALUE;
-            asp->status = SNMP_ERR_BADVALUE;
-            break;
-        case SNMP_ERR_NOACCESS:
-        case SNMP_ERR_NOTWRITABLE:
-        case SNMP_ERR_NOCREATION:
-        case SNMP_ERR_INCONSISTENTNAME:
-        case SNMP_ERR_AUTHORIZATIONERROR:
-            status = SNMP_ERR_NOSUCHNAME;
-            asp->status = SNMP_ERR_NOSUCHNAME;
-            break;
-        case SNMP_ERR_RESOURCEUNAVAILABLE:
-        case SNMP_ERR_COMMITFAILED:
-        case SNMP_ERR_UNDOFAILED:
-            status = SNMP_ERR_GENERR;
-            asp->status = SNMP_ERR_GENERR;
-            break;
-        }
-    }
-    /*
-     * Similarly we may need to "dumb down" v2 exception
-     *  types to throw an error for a v1 query.
-     *  See RFC2576 - section 4.1.2.3
-     */
-    if ((asp->pdu) &&
-        (asp->pdu->command != SNMP_MSG_SET) &&
-        (asp->pdu->version == SNMP_VERSION_1)) {
-        for (var_ptr = asp->pdu->variables, i = 1;
-             var_ptr != NULL; var_ptr = var_ptr->next_variable, i++) {
-            switch (var_ptr->type) {
-            case SNMP_NOSUCHOBJECT:
-            case SNMP_NOSUCHINSTANCE:
-            case SNMP_ENDOFMIBVIEW:
-            case ASN_COUNTER64:
-                status = SNMP_ERR_NOSUCHNAME;
-                asp->status = SNMP_ERR_NOSUCHNAME;
-                asp->index = i;
+        switch (asp->pdu->command) {
+            case SNMP_MSG_INTERNAL_SET_BEGIN:
+            case SNMP_MSG_INTERNAL_SET_RESERVE1:
+            case SNMP_MSG_INTERNAL_SET_RESERVE2:
+            case SNMP_MSG_INTERNAL_SET_ACTION:
+            case SNMP_MSG_INTERNAL_SET_COMMIT:
+            case SNMP_MSG_INTERNAL_SET_FREE:
+            case SNMP_MSG_INTERNAL_SET_UNDO:
+                save_set_cache(asp);
                 break;
+        }
+
+        /*
+         * if this is a GETBULK response we need to rearrange the varbinds 
+         */
+        if (asp->pdu->command == SNMP_MSG_GETBULK) {
+            int             repeats = asp->pdu->errindex;
+            int             j;
+            
+            if (asp->pdu->errstat < asp->vbcount) {
+                n = asp->pdu->errstat;
+            } else {
+                n = asp->vbcount;
+            }
+            if ((r = asp->vbcount - n) < 0) {
+                r = 0;
+            }
+            
+            for (i = 0; i < r - 1; i++) {
+                for (j = 0; j < repeats; j++) {
+                    asp->bulkcache[i * repeats + j]->next_variable =
+                        asp->bulkcache[(i + 1) * repeats + j];
+                }
+            }
+            if (r > 0) {
+                for (j = 0; j < repeats - 1; j++) {
+                    asp->bulkcache[(r - 1) * repeats + j]->next_variable =
+                        asp->bulkcache[j + 1];
+                }
             }
         }
-    }
+
+        /*
+         * May need to "dumb down" a SET error status for a
+         * v1 query.  See RFC2576 - section 4.3
+         */
+        if ((asp->pdu->command == SNMP_MSG_SET) &&
+            (asp->pdu->version == SNMP_VERSION_1)) {
+            switch (status) {
+                case SNMP_ERR_WRONGVALUE:
+                case SNMP_ERR_WRONGENCODING:
+                case SNMP_ERR_WRONGTYPE:
+                case SNMP_ERR_WRONGLENGTH:
+                case SNMP_ERR_INCONSISTENTVALUE:
+                    status = SNMP_ERR_BADVALUE;
+                    asp->status = SNMP_ERR_BADVALUE;
+                    break;
+                case SNMP_ERR_NOACCESS:
+                case SNMP_ERR_NOTWRITABLE:
+                case SNMP_ERR_NOCREATION:
+                case SNMP_ERR_INCONSISTENTNAME:
+                case SNMP_ERR_AUTHORIZATIONERROR:
+                    status = SNMP_ERR_NOSUCHNAME;
+                    asp->status = SNMP_ERR_NOSUCHNAME;
+                    break;
+                case SNMP_ERR_RESOURCEUNAVAILABLE:
+                case SNMP_ERR_COMMITFAILED:
+                case SNMP_ERR_UNDOFAILED:
+                    status = SNMP_ERR_GENERR;
+                    asp->status = SNMP_ERR_GENERR;
+                    break;
+            }
+        }
+        /*
+         * Similarly we may need to "dumb down" v2 exception
+         *  types to throw an error for a v1 query.
+         *  See RFC2576 - section 4.1.2.3
+         */
+        if ((asp->pdu->command != SNMP_MSG_SET) &&
+            (asp->pdu->version == SNMP_VERSION_1)) {
+            for (var_ptr = asp->pdu->variables, i = 1;
+                 var_ptr != NULL; var_ptr = var_ptr->next_variable, i++) {
+                switch (var_ptr->type) {
+                    case SNMP_NOSUCHOBJECT:
+                    case SNMP_NOSUCHINSTANCE:
+                    case SNMP_ENDOFMIBVIEW:
+                    case ASN_COUNTER64:
+                        status = SNMP_ERR_NOSUCHNAME;
+                        asp->status = SNMP_ERR_NOSUCHNAME;
+                        asp->index = i;
+                        break;
+                }
+            }
+        }
+    } /** if asp->pdu */
 
     /*
      * Update the snmp error-count statistics
