@@ -160,9 +160,10 @@ agentx_var(struct variable *vp,
     int result;
     AddVarMethod *add_method;
 
-    DEBUGMSGTL(("agentx/master","request to pass to client:  "));
+    DEBUGMSGTL(("agentx/master", "%sexact request to pass to client: ",
+		exact?"":"in"));
     DEBUGMSGOID(("agentx/master", name, *length));
-    DEBUGMSG(("agentx/master","\n"));
+    DEBUGMSG(("agentx/master", "\n"));
 	/*
 	 * If the requested OID precedes the area of responsibility
 	 * of this subagent (and hence it's presumable a non-exact match),
@@ -170,8 +171,8 @@ agentx_var(struct variable *vp,
 	 */
         /* XXX shouldn't we check exact in this case? */
     result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
-    if ( result < 0 ) {
-	memcpy((char *)name,(char *)vp->name, vp->namelen*sizeof(oid));
+    if (result < 0) {
+	memcpy((char *)name, (char *)vp->name, vp->namelen*sizeof(oid));
 	*length = vp->namelen;
     }
 				/* Return a pointer to an appropriate method */
