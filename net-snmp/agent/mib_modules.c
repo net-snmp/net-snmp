@@ -59,7 +59,7 @@ struct module_init_list *noinitlist = NULL;
 
 
 void
-add_to_init_list(const char *module_list)
+add_to_init_list(char *module_list)
 {
     struct module_init_list *newitem, **list;
     char           *cp;

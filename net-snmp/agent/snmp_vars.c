@@ -121,6 +121,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmpd.h"
 #include "net-snmp/agent/all_helpers.h"
 #include "mib_module_includes.h"
+#include "net-snmp/library/container.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
