@@ -331,7 +331,6 @@ snmp_handler_free(mib_handler *handler)
 	    handler->next = NULL;
 	}
 	SNMP_FREE(handler->handler_name);
-	SNMP_FREE(handler->myvoid);
 	free(handler);
     }
 }
