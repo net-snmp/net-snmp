@@ -60,15 +60,18 @@ struct timeval;
 		(sizeof( unsigned short ) + _UCD_SS_PAD1SIZE + _UCD_SS_ALIGNSIZE ))
 
 typedef struct {
+/* NOTE: Underscore is inserted into member names
+ *       to avoid namespace pollution (IRIX 6.x)
+ */
 #ifdef STRUCT_SOCKADDR_HAS_SA_LEN
-    unsigned char	sa_len;
-    unsigned char	sa_family;
+    unsigned char	sa__len;
+    unsigned char	sa__family;
 #else
-    unsigned short	sa_family;
+    unsigned short	sa__family;
 #endif
-    char		sa_data[ _UCD_SS_PAD1SIZE ];
-    long		sa_align;
-    char		sa_pad2[ _UCD_SS_PAD2SIZE ];
+    char		sa__data[ _UCD_SS_PAD1SIZE ];
+    long		sa__align;
+    char		sa__pad2[ _UCD_SS_PAD2SIZE ];
 } snmp_ipaddr;
 
 #define USM_AUTH_KU_LEN     32
