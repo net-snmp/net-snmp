@@ -36,8 +36,6 @@ extern "C" {
 #define DS_LIB_REGEX_ACCESS	   15 /* regex matching to oid labels */
 #define DS_LIB_DONT_CHECK_RANGE    16 /* don't check values for ranges on send*/
 #define DS_LIB_NO_TOKEN_WARNINGS   17 /* no warn about unknown config tokens */
-#define DS_LIB_FIX_PDUS            18 /* Weather applications should fix PDUs
-                                         and resend them or not. */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
