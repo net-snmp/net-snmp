@@ -823,7 +823,7 @@ dnl check if compiler accepts void pointers
 AC_CACHE_CHECK(if $CC allows pointers to void,ac_cv_PTR_TO_VOID,
 [
 AC_TRY_COMPILE([
-void generic_function(a)
+void generic_function(void *a)
   void *a;
 {
 }
