@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
         snmp_sess_perror(inform ? "snmpinform" : "snmptrap", ss);
 	snmp_free_pdu(pdu);
     }
-    if (inform) snmp_free_pdu(response);
+    else if (inform) snmp_free_pdu(response);
 
 #ifdef _DEBUG_MALLOC_INC
     current_size = malloc_inuse(&histid2);
