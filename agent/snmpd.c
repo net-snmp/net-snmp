@@ -398,7 +398,7 @@ main(int argc, char *argv[])
                       strcpy(buf,argv[arg]);
 
                   DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
                   break;
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
