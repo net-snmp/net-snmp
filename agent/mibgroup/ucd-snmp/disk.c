@@ -241,7 +241,7 @@ void disk_parse_config(const char *token, char *cptr)
 #if HAVE_SETMNTENT
     mntfp = setmntent(ETC_MNTTAB, "r");
     disks[numdisks].device[0] = 0;
-    while (mntent && (mntent = getmntent (mntfp)))
+    while (mntfp && (mntent = getmntent (mntfp)))
       if (strcmp (disks[numdisks].path, mntent->mnt_dir) == 0) {
         copy_word (mntent->mnt_fsname, disks[numdisks].device);
         DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",mntent->mnt_fsname));
@@ -259,13 +259,14 @@ void disk_parse_config(const char *token, char *cptr)
     }
 #else /* getmentent but not setmntent */
     mntfp = fopen (ETC_MNTTAB, "r");
-    while ((i = getmntent (mntfp, &mnttab)) == 0)
+    while (mntfp && (i = getmntent (mntfp, &mnttab)) == 0)
       if (strcmp (disks[numdisks].path, mnttab.mnt_mountp) == 0)
         break;
       else {
         DEBUGMSGTL(("ucd-snmp/disk", "  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp));
       }
-    fclose (mntfp);
+    if (mntfp)
+      fclose (mntfp);
     if (i == 0) {
       copy_word (mnttab.mnt_special, disks[numdisks].device);
       numdisks += 1;
