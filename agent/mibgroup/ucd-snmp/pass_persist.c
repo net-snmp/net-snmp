@@ -541,11 +541,13 @@ static int open_persist_pipe(int iindex, char *command)
   return 1;
 }
 
+#if STRUCT_SIGACTION_HAS_SA_SIGACTION
 /* Generic handler */
 void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
 {
   return;
 }
+#endif
 
 static int write_persist_pipe(int iindex, const char *data)
 {
@@ -559,7 +561,9 @@ static int write_persist_pipe(int iindex, const char *data)
 
   /* Setup our signal action to catch SIGPIPEs */
   sa.sa_handler = NULL;
+#if STRUCT_SIGACTION_HAS_SA_SIGACTION
   sa.sa_sigaction = &sigpipe_handler;
+#endif
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = 0;
   if( sigaction( SIGPIPE, &sa, &osa ) ) {

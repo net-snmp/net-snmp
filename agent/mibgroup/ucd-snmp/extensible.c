@@ -165,68 +165,56 @@ void init_extensible(void)
 
 void extensible_parse_config(const char *token, char* cptr)
 {
-
-  struct extensible **pptmp;
-  struct extensible **pprelocs = &relocs;
-  struct extensible **ppexten = &extens;
+  struct extensible *ptmp, **pp;
   char *tcptr;
   
+  /* allocate and clear memory structure */
+  ptmp = (struct extensible *) calloc(1, sizeof(struct extensible));
+  if (ptmp == NULL)
+    return; /* XXX memory alloc error */
+
   if (*cptr == '.') cptr++;
   if (isdigit(*cptr)) {
     /* its a relocatable extensible mib */
-    while(*pprelocs != NULL)
-      pprelocs = &((*pprelocs)->next);
-    numrelocs++;
-    (*pprelocs) = (struct extensible *) malloc(sizeof(struct extensible));
-    pptmp = pprelocs;
+    for (pp = &relocs, numrelocs++; *pp; pp = &((*pp)->next) );
+    (*pp) = ptmp;
   } else {
     /* it goes in with the general extensible table */
-    while(*ppexten != NULL)
-      ppexten = &((*ppexten)->next);
-    numextens++;
-    (*ppexten) =
-      (struct extensible *) malloc(sizeof(struct extensible));
-    pptmp = ppexten;
+    for (pp = &extens, numextens++; *pp; pp = &((*pp)->next) );
+    (*pp) = ptmp;
   }
-  if (pptmp == NULL)
-    return; /* XXX memory alloc error */
 
   /* the rest is pretty much handled the same */
   if (!strncasecmp(token,"sh",2)) 
-    (*pptmp)->type = SHPROC;
+    ptmp->type = SHPROC;
   else
-    (*pptmp)->type = EXECPROC;
+    ptmp->type = EXECPROC;
   if (isdigit(*cptr)) {
-    (*pptmp)->miblen = parse_miboid(cptr,(*pptmp)->miboid);
+    ptmp->miblen = parse_miboid(cptr,ptmp->miboid);
     while (isdigit(*cptr) || *cptr == '.') cptr++;
   }
-  else {
-    (*pptmp)->miboid[0] = 0;
-    (*pptmp)->miblen = 0;
-  }
+
   /* name */
   cptr = skip_white(cptr);
-  copy_word(cptr,(*pptmp)->name);
+  copy_word(cptr,ptmp->name);
   cptr = skip_not_white(cptr);
   cptr = skip_white(cptr);
   /* command */
   if (cptr == NULL) {
     config_perror("No command specified on line");
-    (*pptmp)->command[0] = 0;
   } else {
     for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
         tcptr++);
-    strncpy((*pptmp)->command,cptr,tcptr-cptr);
-    (*pptmp)->command[tcptr-cptr] = 0;
-    (*pptmp)->next = NULL;
+    strncpy(ptmp->command,cptr,tcptr-cptr);
+    ptmp->command[tcptr-cptr] = 0;
   }
-#ifdef PROCFIXCMD
-  sprintf((*pptmp)->fixcmd, EXECFIXCMD, (*pptmp)->name);
+#ifdef EXECFIXCMD
+  sprintf(ptmp->fixcmd, EXECFIXCMD, ptmp->name);
 #endif
-  if ((*pptmp)->miblen > 0) {
+  if (ptmp->miblen > 0) {
     register_mib(token, (struct variable *) extensible_relocatable_variables,
                  sizeof(struct variable2),
-                 6, (*pptmp)->miboid, (*pptmp)->miblen);
+                 6, ptmp->miboid, ptmp->miblen);
   }
 }
 
