@@ -950,7 +950,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     }
     if ( asp->pdu ) {
         asp->pdu->command  = SNMP_MSG_RESPONSE;
-        asp->pdu->errstat  = asp->status;
+        asp->pdu->errstat  = status;
         asp->pdu->errindex = asp->index;
         if (! snmp_send( asp->session, asp->pdu )) {
             snmp_free_pdu(asp->pdu);
