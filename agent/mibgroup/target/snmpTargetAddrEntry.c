@@ -1020,7 +1020,7 @@ write_snmpTargetAddrRetryCount(
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrRetryCount */
 
-static inline int is_delim(const char c) {
+static int is_delim(const char c) {
     return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
 }
 
