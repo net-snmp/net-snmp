@@ -58,7 +58,7 @@ SOFTWARE.
 #endif
 
 #include <net-snmp/config_api.h>
-#include <net-snmp/logging_api.h>
+#include <net-snmp/output_api.h>
 #include <net-snmp/mib_api.h>
 
 int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);

@@ -30,7 +30,7 @@
 ./if.lo: ../../include/net-snmp/default_store.h
 ./if.lo: ../../include/net-snmp/snmp_parse_args.h
 ./if.lo: ../../include/net-snmp/snmp_enum.h ../../include/net-snmp/vacm.h
-./if.lo: ../../include/net-snmp/logging_api.h
+./if.lo: ../../include/net-snmp/output_api.h
 ./if.lo: ../../include/net-snmp/snmp_debug.h
 ./if.lo: ../../include/net-snmp/snmp_logging.h 
 ./if.lo:  ../../include/net-snmp/utilities.h
@@ -76,7 +76,7 @@
 ./inet.lo: ../../include/net-snmp/default_store.h
 ./inet.lo: ../../include/net-snmp/snmp_parse_args.h
 ./inet.lo: ../../include/net-snmp/snmp_enum.h ../../include/net-snmp/vacm.h
-./inet.lo: ../../include/net-snmp/logging_api.h
+./inet.lo: ../../include/net-snmp/output_api.h
 ./inet.lo: ../../include/net-snmp/snmp_debug.h
 ./inet.lo: ../../include/net-snmp/snmp_logging.h 
 ./inet.lo:  ../../include/net-snmp/utilities.h
@@ -122,7 +122,7 @@
 ./main.lo: ../../include/net-snmp/default_store.h
 ./main.lo: ../../include/net-snmp/snmp_parse_args.h
 ./main.lo: ../../include/net-snmp/snmp_enum.h ../../include/net-snmp/vacm.h
-./main.lo: ../../include/net-snmp/logging_api.h
+./main.lo: ../../include/net-snmp/output_api.h
 ./main.lo: ../../include/net-snmp/snmp_debug.h
 ./main.lo: ../../include/net-snmp/snmp_logging.h 
 ./main.lo:  ../../include/net-snmp/utilities.h
@@ -167,7 +167,7 @@
 ./route.lo: ../../include/net-snmp/default_store.h
 ./route.lo: ../../include/net-snmp/snmp_parse_args.h
 ./route.lo: ../../include/net-snmp/snmp_enum.h ../../include/net-snmp/vacm.h
-./route.lo: ../../include/net-snmp/logging_api.h
+./route.lo: ../../include/net-snmp/output_api.h
 ./route.lo: ../../include/net-snmp/snmp_debug.h
 ./route.lo: ../../include/net-snmp/snmp_logging.h 
 ./route.lo:  ../../include/net-snmp/utilities.h

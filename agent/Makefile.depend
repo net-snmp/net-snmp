@@ -567,7 +567,7 @@
 ./snmp_perl.lo: ../include/net-snmp/default_store.h
 ./snmp_perl.lo: ../include/net-snmp/snmp_parse_args.h
 ./snmp_perl.lo: ../include/net-snmp/snmp_enum.h ../include/net-snmp/vacm.h
-./snmp_perl.lo: ../include/net-snmp/logging_api.h
+./snmp_perl.lo: ../include/net-snmp/output_api.h
 ./snmp_perl.lo: ../include/net-snmp/snmp_debug.h
 ./snmp_perl.lo: ../include/net-snmp/snmp_logging.h 
 ./snmp_perl.lo:  ../include/net-snmp/utilities.h
