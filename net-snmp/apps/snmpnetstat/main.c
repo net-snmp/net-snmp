@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
 	exit(1);
     }
     
-    memset(&session, 0, sizeof(struct snmp_session));
+    snmp_sess_init(&session);
     session.peername = hostname;
     session.remote_port = dest_port;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
@@ -308,10 +308,6 @@ int main(int argc, char *argv[])
     }
 
     SOCK_STARTUP;
-    session.retries = SNMP_DEFAULT_RETRIES;
-    session.timeout = SNMP_DEFAULT_TIMEOUT;
-    session.authenticator = NULL;
-    snmp_synch_setup(&session);
     Session = snmp_open(&session);
     if (Session == NULL){
         snmp_perror("snmpnetstat: Couldn't open snmp");

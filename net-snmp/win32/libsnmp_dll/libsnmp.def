@@ -111,7 +111,6 @@ EXPORTS
 	snmp_clone_pdu
 	snmp_api_errstring
 	snmp_errstring
-	snmp_synch_setup
 	snmp_synch_response
 	init_snmp
 	snmp_add_var
@@ -140,7 +139,6 @@ EXPORTS
 	setenv
 	find_module
 	snmp_async_send
-	snmp_synch_reset
 	snmp_error
 	snmp_sess_init
 	snmp_sess_open

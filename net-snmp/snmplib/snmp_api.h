@@ -7,6 +7,8 @@
  * to obtain the library error codes.
  */
 
+
+ 
 #ifndef SNMP_API_H
 #define SNMP_API_H
 
@@ -39,7 +41,6 @@ SOFTWARE.
 
 struct variable_list;
 struct timeval;
-struct synch_state;
 
 	/*
 	 * Mimic size and alignment of 'struct sockaddr_storage' (see RFC 2553)
@@ -144,6 +145,9 @@ struct snmp_pdu {
     void * securityStateRef;
 };
 
+struct snmp_session;
+typedef int (*snmp_callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
+
 struct snmp_session {
 	/*
 	 * Protocol-version independent fields
@@ -160,8 +164,7 @@ struct snmp_session {
     u_short local_port; /* My UDP port number, 0 for default, picked randomly */
     /* Authentication function or NULL if null authentication is used */
     u_char    *(*authenticator) (u_char *, size_t *, u_char *, size_t);
-    int	    (*callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
-   	/* Function to interpret incoming data */
+    snmp_callback callback; /* Function to interpret incoming data */
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
 
@@ -208,10 +211,7 @@ struct snmp_session {
     size_t  securityPrivKeyLen; /* Length of Ku for priv protocol */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
-    struct synch_state * snmp_synch_state;
 };
-
-typedef int (*snmp_callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 
 /*
  * A list of all the outstanding requests for a particular session.
@@ -626,7 +626,6 @@ void snmp_error (struct snmp_session *, int *, int *, char **);
 	snmp_sess_init(&session);
 	session.retries = ...
 	session.remote_port = ...
-	snmp_synch_setup(&session);
 	sessp = snmp_sess_open(&session);
 	ss = snmp_sess_session(sessp);
 	if (ss == NULL)
@@ -638,7 +637,6 @@ void snmp_error (struct snmp_session *, int *, int *, char **);
 	...
 	snmp_sess_synch_response(sessp, pdu, &response);
 	...
-	snmp_synch_reset(&session);
 	snmp_sess_close(sessp);
 
  * See also:
