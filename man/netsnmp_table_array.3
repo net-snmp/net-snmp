@@ -1,4 +1,4 @@
-.TH "table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups." 3 "19 Jun 2002" "net-snmp" \" -*- nroff -*-
+.TH "table_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups." 3 "2 Aug 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,7 +8,7 @@ More...
 
 .in +1c
 .ti -1c
-.RI "int \fBnetsnmp_register_table_array\fP (netsnmp_handler_registration *reginfo, netsnmp_table_registration_info *tabreg, netsnmp_table_array_callbacks *cb, int group_rows)"
+.RI "int \fBnetsnmp_table_container_register\fP (netsnmp_handler_registration *reginfo, netsnmp_table_registration_info *tabreg, netsnmp_table_array_callbacks *cb, netsnmp_container *container, int group_rows)"
 .br
 .RI "\fIregister specified callbacks for the specified table/oid.\fP"
 .ti -1c
@@ -16,19 +16,11 @@ More...
 .br
 .RI "\fIfind the handler for the table_array helper.\fP"
 .ti -1c
-.RI "oid_array * \fBnetsnmp_extract_array_context\fP (netsnmp_request_info *request)"
+.RI "netsnmp_container * \fBnetsnmp_extract_array_context\fP (netsnmp_request_info *request)"
 .br
 .RI "\fIfind the context data used by the table_array helper.\fP"
 .ti -1c
-.RI "const netsnmp_oid_array_header * \fBnetsnmp_table_array_get_by_index\fP (netsnmp_handler_registration *reginfo, netsnmp_oid_array_header *hdr)"
-.br
-.RI "\fIsearch for the specified index.\fP"
-.ti -1c
-.RI "const netsnmp_oid_array_header ** \fBnetsnmp_table_array_get_subset\fP (netsnmp_handler_registration *reginfo, netsnmp_oid_array_header *hdr, int *len)"
-.br
-.RI "\fIreturns all rows in the data set with the same prefix.\fP"
-.ti -1c
-.RI "int \fBnetsnmp_table_array_check_row_status\fP (netsnmp_table_array_callbacks *cb, netsnmp_oid_array_header *ctx_new, netsnmp_oid_array_header *ctx_old, netsnmp_array_group *ag, int *rs_new, int *rs_old)"
+.RI "int \fBnetsnmp_table_array_check_row_status\fP (netsnmp_table_array_callbacks *cb, netsnmp_request_group *ag, long *rs_new, long *rs_old)"
 .br
 .RI "\fIthis function is called to validate RowStatus transitions.\fP"
 .in -1c
@@ -61,42 +53,25 @@ Code will be generated to maintain a secondary index for all rows, stored in a b
 The generated code contains many TODO comments. Make sure you check each one to see if it applies to your code. Examples include checking indices for syntax (ranges, etc), initializing default values in newly created rows, checking for row activation and deactivation requirements, etc. 
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "oid_array* netsnmp_extract_array_context (netsnmp_request_info * request)"
+.SS "netsnmp_container* netsnmp_extract_array_context (netsnmp_request_info * request)"
 .PP
 find the context data used by the table_array helper.
 .PP
-Definition at line 211 of file table_array.c.
+Definition at line 213 of file table_array.c.
 .SS "netsnmp_mib_handler* netsnmp_find_table_array_handler (netsnmp_handler_registration * reginfo)"
 .PP
 find the handler for the table_array helper.
 .PP
-Definition at line 197 of file table_array.c.
+Definition at line 196 of file table_array.c.
+.SS "int netsnmp_table_array_check_row_status (netsnmp_table_array_callbacks * cb, netsnmp_request_group * ag, long * rs_new, long * rs_old)"
 .PP
-Referenced by netsnmp_table_array_get_by_index(), and netsnmp_table_array_get_subset().
+this function is called to validate RowStatus transitions.
 .PP
-.SS "int netsnmp_register_table_array (netsnmp_handler_registration * reginfo, netsnmp_table_registration_info * tabreg, netsnmp_table_array_callbacks * cb, int group_rows)"
+Definition at line 220 of file table_array.c.
+.SS "int netsnmp_table_container_register (netsnmp_handler_registration * reginfo, netsnmp_table_registration_info * tabreg, netsnmp_table_array_callbacks * cb, netsnmp_container * container, int group_rows)"
 .PP
 register specified callbacks for the specified table/oid.
 .PP
 If the group_rows parameter is set, the row related callbacks will be called once for each unique row index. Otherwise, each callback will be called only once, for all objects. 
 .PP
-Definition at line 163 of file table_array.c.
-.SS "int netsnmp_table_array_check_row_status (netsnmp_table_array_callbacks * cb, netsnmp_oid_array_header * ctx_new, netsnmp_oid_array_header * ctx_old, netsnmp_array_group * ag, int * rs_new, int * rs_old)"
-.PP
-this function is called to validate RowStatus transitions.
-.PP
-Definition at line 303 of file table_array.c.
-.SS "const netsnmp_oid_array_header* netsnmp_table_array_get_by_index (netsnmp_handler_registration * reginfo, netsnmp_oid_array_header * hdr)"
-.PP
-search for the specified index.
-.PP
-This routine searches for modified rows first (i.e. during SET request processing). 
-.PP
-Definition at line 220 of file table_array.c.
-.SS "const netsnmp_oid_array_header** netsnmp_table_array_get_subset (netsnmp_handler_registration * reginfo, netsnmp_oid_array_header * hdr, int * len)"
-.PP
-returns all rows in the data set with the same prefix.
-.PP
-This is usefull when a table contains multiple indices. 
-.PP
-Definition at line 261 of file table_array.c.
+Definition at line 152 of file table_array.c.
