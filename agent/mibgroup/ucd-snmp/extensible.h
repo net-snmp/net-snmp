@@ -16,8 +16,8 @@ struct subtree *find_extensible __P((struct subtree *, oid *, int, int));
 /* config file parsing routines */
 void extensible_free_config __P((void));
 void extensible_parse_config __P((char *, char *));
-config_parse_dot_conf("exec", extensible_parse_config, extensible_free_config)
-config_parse_dot_conf("sh", extensible_parse_config, extensible_free_config)
+config_parse_dot_conf("exec", extensible_parse_config, extensible_free_config, "[miboid] name program arguments")
+config_parse_dot_conf("sh", extensible_parse_config, extensible_free_config,"[miboid] name program-or-script arguments")
 
 #include "mibdefs.h"
 

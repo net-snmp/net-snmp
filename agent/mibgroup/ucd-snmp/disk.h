@@ -12,7 +12,7 @@ unsigned char *var_extensible_disk __P((struct variable *, oid *, int *, int, in
 /* config file parsing routines */
 void disk_free_config __P((void));
 void disk_parse_config __P((char *, char *));
-config_parse_dot_conf("disk", disk_parse_config, disk_free_config);
+config_parse_dot_conf("disk", disk_parse_config, disk_free_config,"path [ minspace | minpercent% ]");
 
 #include "mibdefs.h"
 

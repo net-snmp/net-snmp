@@ -13,7 +13,7 @@ int pass_compare __P((void *, void *));
 /* config file parsing routines */
 void pass_free_config __P((void));
 void pass_parse_config __P((char *, char *));
-config_parse_dot_conf("pass", pass_parse_config, pass_free_config)
+config_parse_dot_conf("pass", pass_parse_config, pass_free_config,"miboid command")
 
 #include "mibdefs.h"
 

@@ -13,7 +13,8 @@ void load_subtree __P((struct subtree *));
 int is_parent __P((oid *, int, oid *));
 void snmpd_register_config_handler __P((char *,
                                         void (*parser)(char *, char *),
-                                        void (*releaser) (void)));
+                                        void (*releaser) (void),
+                                       char *));
 void snmpd_unregister_config_handler __P((char *));
 void snmpd_store_config __P((char *));
 

@@ -67,25 +67,27 @@ int config_errors;
 struct config_files *config_files = NULL;
 
 struct config_line *
-register_premib_handler(type, token, parser, releaser)
+register_premib_handler(type, token, parser, releaser, help)
   char *type;
   char *token;
   void (*parser) __P((char *, char *));
   void (*releaser) __P((void));
+  char *help;
 {
   struct config_line *ltmp;
-  ltmp = register_config_handler(type, token, parser, releaser);
+  ltmp = register_config_handler(type, token, parser, releaser, help);
   if (ltmp != NULL)
     ltmp->config_time = PREMIB_CONFIG;
   return (ltmp);
 }
 
 struct config_line *
-register_config_handler(type, token, parser, releaser)
+register_config_handler(type, token, parser, releaser, help)
   char *type;
   char *token;
   void (*parser) __P((char *, char *));
   void (*releaser) __P((void));
+  char *help;
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
@@ -117,6 +119,10 @@ register_config_handler(type, token, parser, releaser)
     (*ltmp)->parse_line = 0;
     (*ltmp)->free_func = 0;
     (*ltmp)->config_token = strdup(token);
+    if (help != NULL)
+      (*ltmp)->help = strdup(help);
+    else
+      (*ltmp)->help = strdup("");
   }
 
   /* Found the handler for this token.  Add/Replace the functions with */
@@ -154,6 +160,7 @@ unregister_config_handler(type, token)
     /* found it at the top of the list */
     (*ctmp)->start = (*ltmp)->next;
     free((*ltmp)->config_token);
+    free((*ltmp)->help);
     free(*ltmp);
     return;
   }
@@ -162,6 +169,7 @@ unregister_config_handler(type, token)
   }
   if (*ltmp == NULL) {
     free((*ltmp)->config_token);
+    free((*ltmp)->help);
     ltmp2 = (*ltmp)->next->next;
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
@@ -334,6 +342,24 @@ read_config_files(when)
   if (config_errors) {
     fprintf(stderr, "snmpd: errors in config file - abort.\n");
     exit(1);
+  }
+}
+
+void read_config_print_usage(char *lead) {
+  char *nothing = "";
+  struct config_files *ctmp = config_files;
+  struct config_line *ltmp;
+
+  if (lead == NULL)
+    lead == nothing;
+
+  for(ctmp = config_files; ctmp != NULL; ctmp = ctmp->next) {
+    fprintf(stderr, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
+            ctmp->fileHeader);
+    for(ltmp = ctmp->start; ltmp != NULL; ltmp = ltmp->next) {
+      fprintf(stderr, "%s%s%-15s %s\n", lead, lead, ltmp->config_token,
+              ltmp->help);
+    }
   }
 }
 

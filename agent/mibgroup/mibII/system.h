@@ -15,8 +15,8 @@ u_char	*var_system __P((struct variable *, oid *, int *, int, int *, int (**writ
 /* config file parsing routines */
 void system_parse_config_sysloc __P((char *, char *));
 void system_parse_config_syscon __P((char *, char *));
-config_parse_dot_conf("syslocation",system_parse_config_sysloc, NULL);
-config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL);
+config_parse_dot_conf("syslocation",system_parse_config_sysloc, NULL, "location");
+config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL,"contact-name");
 
 #define	VERSION_DESCR		1
 #define	VERSIONID		2

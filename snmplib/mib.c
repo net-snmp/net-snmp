@@ -1009,11 +1009,14 @@ handle_mibfile_conf(word, line)
 void
 register_mib_handlers __P((void)) {
   register_premib_handler("snmp","mibdirs",
-	  (void (*)(char *,char *))handle_mibdirs_conf,NULL);
+	  (void (*)(char *,char *))handle_mibdirs_conf,NULL,
+                          "[mib-dirs|+mib-dirs]");
   register_premib_handler("snmp","mibs",
-	  (void (*)(char *,char *))handle_mibs_conf,NULL);
+	  (void (*)(char *,char *))handle_mibs_conf,NULL,
+                          "[mib-tokens|+mib-tokens]");
   register_config_handler("snmp","mibfile",
-	  (void (*)(char *,char *))handle_mibfile_conf,NULL);
+	  (void (*)(char *,char *))handle_mibfile_conf,NULL,
+                          "mibfile-to-read");
 }
 
 void

@@ -672,7 +672,7 @@ main(argc, argv)
 	}
     }
 
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL);
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
     init_mib();
     read_configs();
     if (!Print) Syslog = 1;
