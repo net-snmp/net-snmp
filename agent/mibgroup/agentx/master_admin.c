@@ -189,6 +189,77 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
+allocate_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+{
+    struct snmp_session *sp;
+    struct variable_list *vp, *vp2, *next, *res;
+    int flags = 0;
+
+    sp = find_agentx_session( session, pdu->sessid );
+    if ( sp == NULL )
+        return AGENTX_ERR_NOT_OPEN;
+
+    if ( pdu->flags & AGENTX_MSG_FLAG_ANY_INSTANCE )
+	flags |= ALLOCATE_ANY_INDEX;
+    if ( pdu->flags & AGENTX_MSG_FLAG_NEW_INSTANCE )
+	flags |= ALLOCATE_NEW_INDEX;
+
+		/*
+		 * XXX - what about errors?
+		 *
+		 *  If any allocations fail, then we need to
+		 *    *fully* release the earlier ones.
+		 *  (i.e. remove them completely from the index registry,
+		 *    not simply mark them as available for re-use)
+		 *
+		 * For now - assume they all succeed.
+		 */
+    for ( vp = pdu->variables ; vp != NULL; vp = next ) {
+	next = vp->next_variable;
+	res = register_index( vp, flags, session );
+	if ( res == NULL ) {
+		/*
+		 *  If any allocations fail, we need to *fully* release
+		 *	all previous ones (i.e. remove them completely
+		 *	from the index registry)
+		 */
+	    for ( vp2 = pdu->variables ; vp2 != vp ; vp2=vp2->next_variable )
+		remove_index( vp2, session );
+	    return AGENTX_ERR_INDEX_NONE_AVAILABLE;	/* XXX */
+	}
+	(void)snmp_clone_var( res, vp );
+	vp->next_variable = next;
+    }
+    return AGENTX_ERR_NOERROR;
+}
+
+int
+release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+{
+    struct snmp_session *sp;
+    struct variable_list *vp, *vp2;
+    int res;
+
+    sp = find_agentx_session( session, pdu->sessid );
+    if ( sp == NULL )
+        return AGENTX_ERR_NOT_OPEN;
+
+    for ( vp = pdu->variables ; vp != NULL; vp = vp->next_variable ) {
+	res = unregister_index( vp, TRUE, session );
+		/*
+		 *  If any releases fail,
+		 *	we need to reinstate all previous ones.
+		 */
+	if ( res != SNMP_ERR_NOERROR ) {
+	    for ( vp2 = pdu->variables ; vp2 != vp; vp2 = vp2->next_variable )
+		(void) register_index( vp2, ALLOCATE_THIS_INDEX, session );
+	    return AGENTX_ERR_INDEX_NOT_ALLOCATED;	/* Probably */
+	}
+    }
+    return AGENTX_ERR_NOERROR;
+}
+
+int
 add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
@@ -305,6 +376,18 @@ handle_master_agentx_packet(int operation,
 
 	case AGENTX_MSG_UNREGISTER:
 		asp->status = unregister_agentx_list( session, pdu );
+		break;
+
+	case AGENTX_MSG_INDEX_ALLOCATE:
+		asp->status = allocate_idx_list( session, asp->pdu );
+		if ( asp->status != AGENTX_ERR_NOERROR) {
+		    snmp_free_pdu( asp->pdu );
+    		    asp->pdu = snmp_clone_pdu(pdu);
+		}
+		break;
+
+	case AGENTX_MSG_INDEX_DEALLOCATE:
+		asp->status = release_idx_list( session, pdu );
 		break;
 
 	case AGENTX_MSG_ADD_AGENT_CAPS:
