@@ -275,7 +275,7 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
  *
  * Should you need different behavior depending on which columns were
  * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
- * set. The definitions for the FLAG_* bits can be found in
+ * set. The definitions for the COLUMN_*_FLAG bits can be found in
 @if $m2c_create_fewer_files != 1@
  * ${context}_oids.h.
 @else@
@@ -319,8 +319,8 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 @      if $node.settable == 0@
 @          next@
 @      end@
-    if (save_flags & FLAG_$node.uc) {
-       save_flags &= ~FLAG_$node.uc; /* clear $node */
+    if (save_flags & COLUMN_$node.uc_FLAG) {
+       save_flags &= ~COLUMN_$node.uc_FLAG; /* clear $node */
        /*
         * TODO:482:o: |-> commit column $node.
         */
@@ -332,7 +332,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
             /*
              * set flag, in case we need to undo $node
              */
-            rowreq_ctx->column_set_flags |= FLAG_$node.uc;
+            rowreq_ctx->column_set_flags |= COLUMN_$node.uc_FLAG;
        }
     }
 
@@ -351,7 +351,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
  *
  * Should you need different behavior depending on which columns were
  * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
- * set. The definitions for the FLAG_* bits can be found in
+ * set. The definitions for the COLUMN_*_FLAG bits can be found in
 @if $m2c_create_fewer_files != 1@
  * ${context}_oids.h.
 @else@
@@ -380,7 +380,7 @@ ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
      * check the column's flag in rowreq_ctx->column_set_flags to see
      * if it was set during commit, then undo it.
      *
-     * eg: if (rowreq_ctx->column_set_flags & FLAG_$node.uc) {}
+     * eg: if (rowreq_ctx->column_set_flags & COLUMN_$node.uc_FLAG) {}
      */
 ##$example_start
 ##$example_end

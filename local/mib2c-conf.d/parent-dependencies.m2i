@@ -17,7 +17,7 @@
  *
  * Should you need different behavior depending on which columns were
  * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
- * set. The definitions for the FLAG_* bits can be found in
+ * set. The definitions for the COLUMN_*_FLAG bits can be found in
 @if $m2c_create_fewer_files != 1@
  * ${context}_oids.h.
 @else@
