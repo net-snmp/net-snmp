@@ -448,6 +448,12 @@ init_snmp __P((void)) {
   if (done_init)
     return;
   done_init = 1;
+
+/* set our current locale properly to initialize isprint() type functions */
+#ifdef HAVE_SETLOCAL
+  setlocale(LC_CTYPE, "");
+#endif
+
   init_snmp_session();
   register_mib_handlers();
   read_premib_configs();
