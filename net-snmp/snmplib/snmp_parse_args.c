@@ -496,7 +496,7 @@ snmp_parse_args(int argc,
          * compile time default version 
          */
         if (!session->version) {
-            switch (SNMP_DEFAULT_VERSION) {
+            switch (DEFAULT_SNMP_VERSION) {
             case 1:
                 session->version = SNMP_VERSION_1;
                 break;
