@@ -38,5 +38,7 @@ int init_master_agent(int dest_port,
                        int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                        int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int));
 int agent_check_and_process(int block);
+struct agent_snmp_session  *get_current_agent_session(void);
+
 
 #endif
