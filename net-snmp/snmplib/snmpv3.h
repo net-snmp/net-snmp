@@ -27,13 +27,9 @@ int     snmpv3_clone_engineID(u_char **, size_t* , u_char*, size_t);
 int     snmpv3_get_engineID(u_char *buf, size_t buflen);
 u_char *snmpv3_generate_engineID(size_t *);
 u_long  snmpv3_local_snmpEngineTime(void);
-char   *get_default_context(void);
-char   *get_default_secName(void);
 int     get_default_secLevel(void);
 oid    *get_default_authtype(size_t *);
 oid    *get_default_privtype(size_t *);
-char   *get_default_authpass(void);
-char   *get_default_privpass(void);
 void    snmpv3_set_engineBootsAndTime(int boots, int ttime); 
 
 #ifdef __cplusplus
