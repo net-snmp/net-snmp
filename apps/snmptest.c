@@ -258,6 +258,7 @@ int
 input_variable(struct variable_list *vp)
 {
     char  buf[256];
+    int val_len;
     u_char value[256], ch;
     oid name[MAX_OID_LEN];
 
@@ -384,20 +385,22 @@ getValue:
 		break;
 	    case ASN_OCTET_STR:
 		if (ch == 'd'){
-		    vp->val_len = ascii_to_binary(buf, value);
+		    val_len = ascii_to_binary(buf, value);
 		    if (vp->val_len < 0) {
 			printf("Bad value or no sub-identifier > 255\n");
 			goto getValue;
 		    }
+		    vp->val_len = val_len;
 		} else if (ch == 's'){
 		    strcpy((char*)value, buf);
 		    vp->val_len = strlen(buf);
 		} else if (ch == 'x'){
-		    vp->val_len = hex_to_binary(buf, value);
+		    val_len = hex_to_binary(buf, value);
 		    if (vp->val_len < 0) {
 			printf("Bad value (need pairs of hex digits)\n");
 			goto getValue;
 		    }
+		    vp->val_len = val_len;
 		}
 		vp->val.string = (u_char *)malloc(vp->val_len);
 		memmove(vp->val.string, value, vp->val_len);
