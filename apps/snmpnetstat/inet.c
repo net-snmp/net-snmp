@@ -661,9 +661,10 @@ inetname(struct in_addr in)
 	}
 	if (in.s_addr == INADDR_ANY)
 		strcpy(line, "*");
-	else if (cp)
-		strcpy(line, cp);
-	else {
+	else if (cp) {
+		strncpy(line, cp, sizeof(line));
+		line[ sizeof(line)-1 ] = 0;
+	} else {
 		in.s_addr = ntohl(in.s_addr);
 #define C(x)	(unsigned)((x) & 0xff)
 		sprintf(line, "%u.%u.%u.%u", C(in.s_addr >> 24),

@@ -122,7 +122,8 @@ var_ucdDemoPublic(
     case UCDDEMOUSERLIST:
       cp = string;
       for(i=0; i < num; i++) {
-        sprintf(cp, " %s", demoUsers[i]);
+        snprintf(cp, sizeof(string)-strlen(string), " %s", demoUsers[i]);
+        string[MYMAX] = 0;
         cp = cp + strlen(cp);
       }
       *var_len = strlen(string);

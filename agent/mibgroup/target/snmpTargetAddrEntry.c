@@ -477,7 +477,12 @@ int snmpTargetAddr_addStorageType(
 	    (entry->storageType != SNMP_STORAGE_NONVOLATILE)  &&
 	    (entry->storageType != SNMP_STORAGE_PERMANENT) && 
 	    (entry->storageType != SNMP_STORAGE_READONLY) )  {
-    sprintf(buff,"ERROR snmpTargetAddrEntry: storage type not a valid value of other(%d), volatile(%d), nonvolatile(%d), permanent(%d), or readonly(%d) in config string.\n", SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, SNMP_STORAGE_NONVOLATILE, SNMP_STORAGE_PERMANENT, SNMP_STORAGE_READONLY);
+    snprintf(buff, sizeof(buff),
+             "ERROR snmpTargetAddrEntry: storage type not a valid value of other(%d), volatile(%d), nonvolatile(%d), permanent(%d), or readonly(%d) in config string.\n",
+              SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE,
+              SNMP_STORAGE_NONVOLATILE, SNMP_STORAGE_PERMANENT,
+              SNMP_STORAGE_READONLY);
+    buff[ sizeof(buff)-1 ] = 0;
     DEBUGMSGTL(("snmpTargetAddrEntry", buff));
 
     return(0);
@@ -505,7 +510,10 @@ int snmpTargetAddr_addRowStatus(
 	     != SNMP_ROW_ACTIVE) &&
 	    (entry->rowStatus != SNMP_ROW_NOTINSERVICE) &&
 	    (entry->rowStatus != SNMP_ROW_NOTREADY) ) {
-    sprintf(buff, "ERROR snmpTargetAddrEntry: Row Status is not a valid value of active(%d), notinservice(%d), or notready(%d) in config string.\n", SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY);
+    snprintf(buff, sizeof(buff),
+             "ERROR snmpTargetAddrEntry: Row Status is not a valid value of active(%d), notinservice(%d), or notready(%d) in config string.\n",
+             SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY);
+    buff[ sizeof(buff)-1 ] = 0;
     DEBUGMSGTL(("snmpTargetAddrEntry", buff));
     
     return(0);
@@ -569,15 +577,20 @@ void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  sprintf(buff, "snmp_parse_config_targetAddr, read: %s\n",
-		   newEntry->name);
+  snprintf(buff, sizeof(buff),
+          "snmp_parse_config_targetAddr, read: %s\n", newEntry->name);
+  buff[ sizeof(buff)-1 ] = 0;
   for(i=0;i<newEntry->tDomainLen;i++) {
-    sprintf(&buff[strlen(buff)], ".%d", (int)newEntry->tDomain[i]);
+    snprintf(&buff[strlen(buff)], sizeof(buff)-strlen(buff)-1,
+             ".%d", (int)newEntry->tDomain[i]);
+    buff[ sizeof(buff)-1 ] = 0;
   }
-  sprintf(&buff[strlen(buff)], " %s %d %d %s %s %d %d\n",
+  snprintf(&buff[strlen(buff)], sizeof(buff)-strlen(buff)-1,
+          " %s %d %d %s %s %d %d\n",
 	  newEntry->tAddress, newEntry->timeout, newEntry->retryCount,
 	  newEntry->tagList,  newEntry->params,  newEntry->storageType, 
 	  newEntry->rowStatus);
+  buff[ sizeof(buff)-1 ] = 0;
   DEBUGMSGTL(("snmpTargetAddrEntry", buff));
 
   snmpTargetAddrTable_addToList(newEntry, &aAddrTable);
@@ -605,20 +618,28 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
 	   &&
 	   (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
 	    curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE) ) {
-	sprintf(line, "targetAddr %s ", curr_struct->name);
+	snprintf(line, sizeof(line), "targetAddr %s ", curr_struct->name);
+        line[ sizeof(line)-1 ] = 0;
 	for(i=0; i < curr_struct->tDomainLen; i++) {
-	  sprintf(&line[strlen(line)], ".%i", (int)curr_struct->tDomain[i]);
+	  snprintf(&line[strlen(line)], sizeof(line)-strlen(line)-1,
+                   ".%i", (int)curr_struct->tDomain[i]);
+          line[ sizeof(line)-1 ] = 0;
 	}
-        sprintf(&line[strlen(line)], " ");
+        if ( strlen(line)+2 < sizeof(line) ) {
+            line[ strlen(line)+1 ] = 0;
+            line[ strlen(line)   ] = ' ';
+        }
         read_config_save_octet_string(&line[strlen(line)],
                                       curr_struct->tAddress,
                                       curr_struct->tAddressLen);
 
-	sprintf(&line[strlen(line)], " %i %i \"%s\" %s %i %i", 
+	snprintf(&line[strlen(line)], sizeof(line)-strlen(line)-1,
+                         " %i %i \"%s\" %s %i %i", 
 			 curr_struct->timeout, 
 			 curr_struct->retryCount,  curr_struct->tagList,
 			 curr_struct->params,      curr_struct->storageType, 
 			 curr_struct->rowStatus);
+        line[ sizeof(line)-1 ] = 0;
 	
 	/* store to file */
 	snmpd_store_config(line);

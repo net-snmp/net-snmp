@@ -416,7 +416,8 @@ getValue:
 		    }
 		    vp->val_len = val_len;
 		} else if (ch == 's'){
-		    strcpy((char*)value, buf);
+		    strncpy((char*)value, buf, sizeof(value));
+                    value[ sizeof(value)-1 ] = 0;
 		    vp->val_len = strlen(buf);
 		} else if (ch == 'x'){
 		    val_len = hex_to_binary(buf, value);

@@ -223,13 +223,14 @@ init_master_agent(int dest_port,
     /* set the specification string up */
     if (cptr && dest_port)
         /* append to the older specification string */
-        sprintf(buf,"%d,%s", dest_port, cptr);
+        snprintf(buf, sizeof(buf), "%d,%s", dest_port, cptr);
     else if (cptr)
-        sprintf(buf,"%s",cptr);
+        snprintf(buf, sizeof(buf), "%s",cptr);
     else if (dest_port)
         sprintf(buf,"%d",dest_port);
     else
         sprintf(buf,"%d",SNMP_PORT);
+    buf[ sizeof(buf)-1 ] = 0;
 
     DEBUGMSGTL(("snmpd_ports","final port spec: %s\n", buf));
     cptr = strtok(buf, ",");

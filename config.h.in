@@ -793,6 +793,9 @@
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
 
+/* define if you have getdevs() */
+#undef HAVE_GETDEVS
+
 /* define if you have <netinet/in_pcb.h> */
 #undef HAVE_NETINET_IN_PCB_H
 
@@ -1004,7 +1007,7 @@
 #ifdef linux
 #define OSTYPE LINUXID
 #endif
-#if defined(bsdi2) || defined(bsdi3)
+#if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
 #ifdef openbsd2

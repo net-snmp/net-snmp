@@ -83,7 +83,9 @@ void _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
 {
     char ebuf[128];
 
-    sprintf(ebuf,"%s size %d: s/b %d",str, wrongsize, rightsize);
+    snprintf(ebuf, sizeof(ebuf),
+            "%s size %d: s/b %d",str, wrongsize, rightsize);
+    ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
 
@@ -92,7 +94,9 @@ void _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
 {
     char ebuf[128];
 
-    sprintf(ebuf,"%s length %d too large: exceeds %d",str, wrongsize, rightsize);
+    snprintf(ebuf, sizeof(ebuf),
+            "%s length %d too large: exceeds %d",str, wrongsize, rightsize);
+    ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
 
@@ -114,8 +118,10 @@ int _asn_parse_length_check(const char *str,
     header_len = bufp - data;
     if (plen > 0x7fffffff || header_len > 0x7fffffff ||
         ((size_t)plen + header_len) > dlen){
-	sprintf(ebuf, "%s: message overflow: %d len + %d delta > %d len",
+	snprintf(ebuf, sizeof(ebuf),
+                "%s: message overflow: %d len + %d delta > %d len",
 		str, (int)plen, (int)header_len, (int)dlen);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return 1;
     }
@@ -136,7 +142,10 @@ int _asn_build_header_check(const char *str, u_char *data,
 	return 1;
     }
     if (datalen < typedlen){
-	sprintf(ebuf, "%s: bad header, length too short: %d < %d", str, datalen, typedlen);
+	snprintf(ebuf, sizeof(ebuf),
+	        "%s: bad header, length too short: %d < %d",
+                str, datalen, typedlen);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return 1;
     }
@@ -173,7 +182,9 @@ int _asn_bitstring_check(const char * str, size_t asn_length, u_char datum)
     char ebuf[128];
 
     if (asn_length < 1){
-	sprintf(ebuf,"%s: length %d too small", str, (int) asn_length);
+	snprintf(ebuf, sizeof(ebuf),
+                 "%s: length %d too small", str, (int) asn_length);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return 1;
     }
@@ -677,8 +688,10 @@ asn_parse_sequence(u_char	*data,
     data = asn_parse_header(data, datalength, type);
     if (data && (*type != expected_type)) {
 	char ebuf[128];
-	sprintf(ebuf, "%s header type %02X: s/b %02X", estr,
+	snprintf(ebuf, sizeof(ebuf),
+	         "%s header type %02X: s/b %02X", estr,
 			(u_char)*type, (u_char)expected_type);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return NULL;
     }
@@ -715,7 +728,9 @@ asn_build_header (u_char *data,
     char ebuf[128];
     
     if (*datalength < 1){
-	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
+	snprintf(ebuf, sizeof(ebuf),
+	         "bad header length < 1 :%d, %d", *datalength, length);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return NULL;
     }	    
@@ -753,7 +768,9 @@ asn_build_sequence(u_char *data,
     char ebuf[128];
     
     if (*datalength < 4){
-	sprintf(ebuf, "%s: length %d < 4: PUNT", errpre, (int)*datalength);
+	snprintf(ebuf, sizeof(ebuf),
+	         "%s: length %d < 4: PUNT", errpre, (int)*datalength);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return NULL;
     }
@@ -794,13 +811,17 @@ asn_parse_length(u_char  *data,
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
 	if (lengthbyte == 0){
-	    sprintf(ebuf, "%s: indefinite length not supported", errpre);
+	snprintf(ebuf, sizeof(ebuf),
+	        "%s: indefinite length not supported", errpre);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
 	if (lengthbyte > sizeof(long)){
-	    sprintf(ebuf, "%s: data length %d > %d not supported", errpre,
+	    snprintf(ebuf, sizeof(ebuf),
+	         "%s: data length %d > %d not supported", errpre,
                  lengthbyte, sizeof(long));
+            ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
@@ -843,14 +864,18 @@ asn_build_length(u_char *data,
     /* no indefinite lengths sent */
     if (length < 0x80){
 	if (*datalength < 1){
-	    sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	    snprintf(ebuf, sizeof(ebuf),
+	             "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+            ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
 	*data++ = (u_char)length;
     } else if (length <= 0xFF){
 	if (*datalength < 2){
-	    sprintf(ebuf, "%s: bad length < 2 :%d, %d",errpre,*datalength,length);
+	    snprintf(ebuf, sizeof(ebuf),
+	             "%s: bad length < 2 :%d, %d",errpre,*datalength,length);
+            ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
@@ -858,7 +883,9 @@ asn_build_length(u_char *data,
 	*data++ = (u_char)length;
     } else { /* 0xFF < length <= 0xFFFF */
 	if (*datalength < 3){
-	    sprintf(ebuf, "%s: bad length < 3 :%d, %d",errpre,*datalength,length);
+	    snprintf(ebuf, sizeof(ebuf),
+	             "%s: bad length < 3 :%d, %d",errpre,*datalength,length);
+            ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
@@ -1610,8 +1637,10 @@ asn_parse_signed_int64(u_char *data,
   }
   /* this should always have been true until snmp gets int64 PDU types */
   else {
-    sprintf(ebuf, "%s: wrong type: %d, len %d, buf bytes (%02X,%02X)",
+    snprintf(ebuf, sizeof(ebuf),
+             "%s: wrong type: %d, len %d, buf bytes (%02X,%02X)",
              errpre, *type, (int)asn_length, *bufp, *(bufp+1));
+    ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
     return NULL;
   }
@@ -2225,7 +2254,9 @@ asn_rbuild_header (u_char *data,
     
     data = asn_rbuild_length(data, datalength, length);
     if (*datalength < 1 || data == NULL){
-	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
+	snprintf(ebuf, sizeof(ebuf),
+	         "bad header length < 1 :%d, %d", *datalength, length);
+        ebuf[ sizeof(ebuf)-1 ] = 0;
 	ERROR_MSG(ebuf);
 	return NULL;
     }
@@ -2256,7 +2287,9 @@ asn_rbuild_length (u_char *data,
 
     if (length <= 0x7f) {
         if ((*datalength)-- == 0) {
-	    sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	    snprintf(ebuf, sizeof(ebuf),
+	             "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+            ebuf[ sizeof(ebuf)-1 ] = 0;
 	    ERROR_MSG(ebuf);
             return NULL;
         }
@@ -2264,7 +2297,9 @@ asn_rbuild_length (u_char *data,
     } else {
         while(length > 0xff) {
             if ((*datalength)-- == 0) {
-                sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	        snprintf(ebuf, sizeof(ebuf),
+                    "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+                ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return NULL;
             }
@@ -2272,7 +2307,9 @@ asn_rbuild_length (u_char *data,
             length >>= 8;
         }
         if (*datalength <= 1) {
-            sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	    snprintf(ebuf, sizeof(ebuf),
+                     "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+            ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
         }

@@ -542,7 +542,8 @@ var_hrstore(struct variable *vp,
 	    return (u_char *)storage_type_id;
 	case HRSTORE_DESCR:
 	    if (store_idx<HRS_TYPE_FS_MAX) {
-	        strcpy(string, HRFS_entry->HRFS_mount);
+	        strncpy(string, HRFS_entry->HRFS_mount, sizeof(string)-1);
+                string[ sizeof(string)-1 ] = 0;
 	        *var_len = strlen(string);
 	        return (u_char *) string;
 	    }

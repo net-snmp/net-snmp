@@ -2321,10 +2321,29 @@ parse_objecttype(FILE *fp,
 		    if ((type == RIGHTBRACKET && --level == 0) || type == ENDOFFILE)
 		        break;
 		    else if (type == LEFTBRACKET) level++;
-		    if (type == QUOTESTRING) strcat(defbuf, "\"");
-		    strcat(defbuf, quoted_string_buffer);
-		    if (type == QUOTESTRING) strcat(defbuf, "\"");
-		    strcat(defbuf, " ");
+                    if (type == QUOTESTRING) {
+                        if (strlen(defbuf)+2 < sizeof(defbuf)) {
+                            defbuf[ strlen(defbuf)+2 ] = 0;
+                            defbuf[ strlen(defbuf)+1 ] = '"';
+                            defbuf[ strlen(defbuf)   ] = '\\';
+                        }
+                        defbuf[ sizeof(defbuf)-1 ] = 0;
+                    }
+                    strncat(defbuf, quoted_string_buffer,
+                            sizeof(defbuf)-strlen(defbuf));
+                    defbuf[ sizeof(defbuf)-1 ] = 0;
+                    if (type == QUOTESTRING) {
+                        if (strlen(defbuf)+2 < sizeof(defbuf)) {
+                            defbuf[ strlen(defbuf)+2 ] = 0;
+                            defbuf[ strlen(defbuf)+1 ] = '"';
+                            defbuf[ strlen(defbuf)   ] = '\\';
+                        }
+                        defbuf[ sizeof(defbuf)-1 ] = 0;
+                    }
+                    if (strlen(defbuf)+1 < sizeof(defbuf)) {
+                        defbuf[ strlen(defbuf)+1 ] = 0;
+                        defbuf[ strlen(defbuf)   ] = ' ';
+                    }
 		}
 
 		if (type != RIGHTBRACKET) {
@@ -4155,13 +4174,15 @@ add_mibdir(const char *dirname)
 
     DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
 #if !(defined(WIN32) || defined(cygwin))
-    sprintf(token, "%s/%s", dirname, ".index");
+    snprintf(token, sizeof(token), "%s/%s", dirname, ".index");
+    token[ sizeof(token)-1 ] = 0;
     if (stat(token, &idx_stat) == 0 && stat(dirname, &dir_stat) == 0) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
 	    DEBUGMSGTL(("parse-mibs", "The index is good\n"));
 	    if ((ip = fopen(token, "r")) != NULL) {
 		while (fscanf(ip, "%s %[^\n]\n", token, tmpstr) == 2) {
-		    sprintf(tmpstr1, "%s/%s", dirname, tmpstr);
+		    snprintf(tmpstr1, sizeof(tmpstr1), "%s/%s", dirname, tmpstr);
+                    tmpstr1[ sizeof(tmpstr1)-1 ] = 0;
 		    new_module(token, tmpstr1);
 		    count++;
 		}
@@ -4176,12 +4197,14 @@ add_mibdir(const char *dirname)
 #endif
 
     if ((dir = opendir(dirname))) {
-	sprintf(tmpstr, "%s/.index", dirname);
+	snprintf(tmpstr, sizeof(tmpstr), "%s/.index", dirname);
+        tmpstr[ sizeof(tmpstr)-1 ] = 0;
 	ip = fopen(tmpstr, "w");
         while ((file = readdir(dir))) {
             /* Only parse file names not beginning with a '.' */
             if (file->d_name != NULL && file->d_name[0] != '.') {
-                sprintf(tmpstr, "%s/%s", dirname, file->d_name);
+	        snprintf(tmpstr, sizeof(tmpstr), "%s/%s", dirname, file->d_name);
+                tmpstr[ sizeof(tmpstr)-1 ] = 0;
                 if ((dir2 = opendir(tmpstr))) {
                     /* file is a directory, don't read it */
                     closedir(dir2);
@@ -4620,7 +4643,8 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
 	char buf[80];
 	int bufw;
 	if (ep != tp->enums) fprintf(f, ", ");
-	sprintf(buf, "%s(%d)", ep->label, ep->value);
+	snprintf(buf, sizeof(buf), "%s(%d)", ep->label, ep->value);
+        buf[ sizeof(buf)-1 ] = 0;
 	cpos += (bufw = strlen(buf) + 2);
 	if (cpos >= cmax) {
 	  fprintf(f, "\n%s                ", leave_indent);

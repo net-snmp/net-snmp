@@ -316,7 +316,8 @@ void vacm_parse_group (const char *token,
 	config_perror("failed to create group entry");
 	return;
     }
-    strcpy (gp->groupName, group);
+    strncpy (gp->groupName, group, sizeof(gp->groupName));
+    gp->groupName[ sizeof(gp->groupName)-1 ] = 0;
     gp->storageType = SNMP_STORAGE_PERMANENT;
     gp->status = SNMP_ROW_ACTIVE;
     free (gp->reserved);
@@ -561,24 +562,32 @@ void vacm_parse_simple(const char *token, char *confline) {
     /* com2sec mapping */
     /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
     sprintf(secname, "anonymousSecName%03d", num);
-    sprintf(line,"%s %s %s", secname, addressname, community);
+    snprintf(line, sizeof(line), "%s %s %s", secname, addressname, community);
+    line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token,"passing: %s %s\n", "com2sec", line));
     vacm_parse_security("com2sec",line);
 
     /* sec->group mapping */
     /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-    sprintf(line,"anonymousGroupName%03d v1 %s", num, secname);
+    snprintf(line, sizeof(line),
+             "anonymousGroupName%03d v1 %s", num, secname);
+    line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
-    sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
+    snprintf(line, sizeof(line),
+             "anonymousGroupName%03d v2c %s", num, secname);
+    line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
   } else {
-    strcpy(secname, community);
+    strncpy(secname, community, sizeof(secname));
+    secname[ sizeof(secname)-1 ] = 0;
 
     /* sec->group mapping */
     /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-    sprintf(line,"anonymousGroupName%03d usm %s", num, secname);
+    snprintf(line, sizeof(line),
+             "anonymousGroupName%03d usm %s", num, secname);
+    line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
   }
@@ -587,14 +596,17 @@ void vacm_parse_simple(const char *token, char *confline) {
   /* view definition */
   /* view    anonymousViewNUM       included OID */
   sprintf(viewname,"anonymousView%03d",num);
-  sprintf(line,"%s included %s", viewname, theoid);
+  snprintf(line, sizeof(line), "%s included %s", viewname, theoid);
+  line[ sizeof(line)-1 ] = 0;
   DEBUGMSGTL((token,"passing: %s %s\n", "view", line));
   vacm_parse_view("view",line);
 
   /* map everything together */
   /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE exact anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
-  sprintf(line, "anonymousGroupName%03d  \"\" %s %s exact %s %s %s", num,
+  snprintf(line, sizeof(line),
+          "anonymousGroupName%03d  \"\" %s %s exact %s %s %s", num,
           model, authtype, viewname, rw, rw);
+  line[ sizeof(line)-1 ] = 0;
   DEBUGMSGTL((token,"passing: %s %s\n", "access", line));
   vacm_parse_access("access",line);
   num++;

@@ -526,23 +526,27 @@ var_hrswrun(struct variable *vp,
 	    return (u_char *)&long_return;
 	case HRSWRUN_NAME:
 #ifdef HAVE_SYS_PSTAT_H
-	    sprintf(string, "%s", proc_buf.pst_cmd);
+	    snprintf(string, sizeof(string), "%s", proc_buf.pst_cmd);
+            string[ sizeof(string)-1 ] = 0;
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
 #elif defined(dynix)
-	    sprintf(string, "%s", lowpsinfo.pr_fname);
+	    snprintf(string, sizeof(string), "%s", lowpsinfo.pr_fname);
+            string[ sizeof(string)-1 ] = 0;
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
 	    if (proc_buf)
-		    strcpy(string, proc_buf->pr_fname);
+		    strncpy(string, proc_buf->pr_fname, sizeof(string));
 	    else
 		    strcpy(string, "<exited>");
+            string[ sizeof(string)-1 ] = 0;
 #else
-	    strcpy(string, proc_buf->p_user.u_comm);
+	    strncpy(string, proc_buf->p_user.u_comm, sizeof(string));
+            string[ sizeof(string)-1 ] = 0;
 #endif
 #elif HAVE_KVM_GETPROCS
             strcpy(string, proc_table[LowProcIndex].kp_proc.p_comm);

@@ -372,8 +372,10 @@ void read_config(const char *filename,
               token[strlen(token)-1] = '\0';
               lptr = read_config_get_handlers(&token[1]);
               if (lptr == NULL) {
-                  sprintf(tmpbuf,"No handlers regestered for type %s.",
+                  snprintf(tmpbuf,  sizeof(tmpbuf),
+                          "No handlers regestered for type %s.",
                           &token[1]);
+                  tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
                   config_perror(tmpbuf);
                   continue;
               }
@@ -391,7 +393,8 @@ void read_config(const char *filename,
               lptr = line_handler;
           }
           if (cptr == NULL) {
-            sprintf(tmpbuf,"Blank line following %s token.", token);
+            snprintf(tmpbuf,  sizeof(tmpbuf), "Blank line following %s token.", token);
+            tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
             config_perror(tmpbuf);
           } else {
               
@@ -408,7 +411,8 @@ void read_config(const char *filename,
             }
             if (!done && when != PREMIB_CONFIG &&
                 !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
-              sprintf(tmpbuf,"Unknown token: %s.", token);
+              snprintf(tmpbuf, sizeof(tmpbuf), "Unknown token: %s.", token);
+              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
               config_pwarn(tmpbuf);
             }
           }
@@ -508,12 +512,13 @@ char *homepath;
 
     if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR)) {
         homepath=getenv("HOME");
-        sprintf(defaultPath,"%s%c%s%c%s%s%s%s",
+        snprintf(defaultPath, sizeof(defaultPath),"%s%c%s%c%s%s%s%s",
               SNMPCONFPATH, ENV_SEPARATOR_CHAR,
               SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
               ((homepath == NULL) ? "" : ENV_SEPARATOR),
               ((homepath == NULL) ? "" : homepath),
               ((homepath == NULL) ? "" : "/.snmp"));
+        defaultPath[ sizeof(defaultPath)-1 ] = 0;
         set_configuration_directory(defaultPath);
     }
     return(ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR));
@@ -610,10 +615,11 @@ read_config_files (int when)
 
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
-      sprintf(defaultPath,"%s%s%s",
+      snprintf(defaultPath, sizeof(defaultPath), "%s%s%s",
               ((confpath == NULL) ? "" : confpath),
               ((perspath == NULL) ? "" : ENV_SEPARATOR),
               ((perspath == NULL) ? "" : perspath));
+      defaultPath[ sizeof(defaultPath)-1 ] = 0;
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
@@ -641,7 +647,9 @@ read_config_files (int when)
                    strlen(getenv("SNMP_PERSISTENT_FILE"))) == 0)) {
         /* limit this to the known storage directory only */
         for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-          sprintf(configfile,"%s/%s.%d.conf",cptr2, ctmp->fileHeader, j);
+          snprintf(configfile, sizeof(configfile),
+                   "%s/%s.%d.conf",cptr2, ctmp->fileHeader, j);
+          configfile[ sizeof(configfile)-1 ] = 0;
           if (stat(configfile, &statbuf) != 0) {
             /* file not there, continue */
             break;
@@ -652,9 +660,13 @@ read_config_files (int when)
           }
         }
       }
-      sprintf(configfile,"%s/%s.conf",cptr2, ctmp->fileHeader);
+      snprintf(configfile, sizeof(configfile),
+               "%s/%s.conf",cptr2, ctmp->fileHeader);
+      configfile[ sizeof(configfile)-1 ] = 0;
       read_config (configfile, ltmp, when);
-      sprintf(configfile,"%s/%s.local.conf",cptr2, ctmp->fileHeader);
+      snprintf(configfile, sizeof(configfile),
+               "%s/%s.local.conf",cptr2, ctmp->fileHeader);
+      configfile[ sizeof(configfile)-1 ] = 0;
       read_config (configfile, ltmp, when);
       cptr2 = ++cptr1;
     }
@@ -729,7 +741,9 @@ read_config_store(const char *type, const char *line)
      2. configured <PERSISTENT_DIRECTORY>/<type>.conf
   */
   if ((filep = getenv("SNMP_PERSISTENT_FILE")) == NULL) {
-    sprintf(file,"%s/%s.conf",get_persistent_directory(),type);
+    snprintf(file, sizeof(file),
+            "%s/%s.conf",get_persistent_directory(),type);
+    file[ sizeof(file)-1 ] = 0;
     filep = file;
   }
   
@@ -792,10 +806,14 @@ snmp_save_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_save_persistent","saving %s files...\n", type));
-  sprintf(file,"%s/%s.conf", get_persistent_directory(), type);
+  snprintf(file, sizeof(file),
+           "%s/%s.conf",get_persistent_directory(),type);
+  file[ sizeof(file)-1 ] = 0;
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(fileold,"%s/%s.%d.conf", get_persistent_directory(), type, j);
+      snprintf(file, sizeof(file),
+               "%s/%s.%d.conf", get_persistent_directory(), type, j);
+      file[ sizeof(file)-1 ] = 0;
       if (stat(fileold, &statbuf) != 0) {
         DEBUGMSGTL(("snmp_save_persistent"," saving old config file: %s -> %s.\n", file, fileold));
         if (rename(file, fileold)) {
@@ -807,7 +825,10 @@ snmp_save_persistent(const char *type)
     }
   }
   /* save a warning header to the top of the new file */
-  sprintf(fileold, "#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n#\n", type, type, type);
+  snprintf(fileold, sizeof(fileold),
+          "#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n#\n",
+           type, type, type);
+  fileold[ sizeof(fileold)-1 ] = 0;
   read_config_store(type, fileold);
 }
 
@@ -837,10 +858,14 @@ snmp_clean_persistent(const char *type)
   int j;
 
   DEBUGMSGTL(("snmp_clean_persistent","cleaning %s files...\n", type));
-  sprintf(file,"%s/%s.conf",get_persistent_directory(),type);
+  snprintf(file, sizeof(file),
+           "%s/%s.conf",get_persistent_directory(),type);
+  file[ sizeof(file)-1 ] = 0;
   if (stat(file, &statbuf) == 0) {
     for(j=0; j <= MAX_PERSISTENT_BACKUPS; j++) {
-      sprintf(file,"%s/%s.%d.conf", get_persistent_directory(), type, j);
+      snprintf(file, sizeof(file),
+               "%s/%s.%d.conf", get_persistent_directory(), type, j);
+      file[ sizeof(file)-1 ] = 0;
       if (stat(file, &statbuf) == 0) {
         DEBUGMSGTL(("snmp_clean_persistent"," removing old config file: %s\n", file));
         unlink(file);

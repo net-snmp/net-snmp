@@ -513,9 +513,10 @@ main(int argc, char *argv[])
                   /* set the specification string up */
                   if (cptr)
                       /* append to the older specification string */
-                      sprintf(buf,"%s,%s", cptr, argv[arg]);
+                      snprintf(buf, sizeof(buf), "%s,%s", cptr, argv[arg]);
                   else
-                      strcpy(buf,argv[arg]);
+                      strncpy(buf, argv[arg], sizeof(buf));
+                  buf[ sizeof(buf)-1 ] = 0;
 
                   DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);

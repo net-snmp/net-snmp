@@ -96,7 +96,9 @@ snmptrapd_traphandle(const char *token, char *line)
     (*ttmp)->traplen = MAX_OID_LEN;
     if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {
       char buf1[STRINGMAX];
-      sprintf(buf1, "Bad trap OID in traphandle directive: %s", buf);
+      snprintf(buf1, sizeof(buf1),
+              "Bad trap OID in traphandle directive: %s", buf);
+      buf1[ sizeof(buf1)-1 ] = 0;
       config_perror(buf1);
       return;
     }

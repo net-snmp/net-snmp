@@ -480,7 +480,8 @@ get_user_passphrases(void)
 	 * if the permissions are wrong.
 	 */
 	s = getenv("HOME");
-	sprintf(path, "%s/%s", s, PASSPHRASE_DIR);
+	snprintf(path, sizeof(path), "%s/%s", s, PASSPHRASE_DIR);
+        path[ sizeof(path)-1 ] = 0;
 
 							/* Test directory. */
 	if ( stat(path, &statbuf) < 0 ) {
@@ -496,7 +497,8 @@ get_user_passphrases(void)
 	}
 
 							/* Test file. */
-	sprintf(path, "%s/%s", s, local_passphrase_filename);
+	snprintf(path, sizeof(path), "%s/%s", s, local_passphrase_filename);
+        path[ sizeof(path)-1 ] = 0;
 	if ( stat(path, &statbuf) < 0 ) {
 		fprintf(stderr, "Cannot access file \"%s\".\n", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);

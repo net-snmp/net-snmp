@@ -138,7 +138,8 @@ int shell_command(struct extensible *ex)
     return ex->result;
   }
 
-  sprintf(shellline,"%s > %s",ex->command, ofname);
+  snprintf(shellline, sizeof(shellline), "%s > %s",ex->command, ofname);
+  shellline[ sizeof(shellline)-1 ] = 0;
   ex->result = system(shellline);
   ex->result = WEXITSTATUS(ex->result);
   shellout = fopen(ofname,"r");

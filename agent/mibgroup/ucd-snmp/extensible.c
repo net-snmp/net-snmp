@@ -299,7 +299,8 @@ void execfix_parse_config(const char *token, char* cptr) {
     return;
   }
 
-  strcpy(execp->fixcmd, cptr);
+  strncpy(execp->fixcmd, cptr, sizeof(execp->fixcmd));
+  execp->fixcmd[ sizeof(execp->fixcmd)-1 ] = 0;
 }
 
 u_char *var_extensible_shell(struct variable *vp,
@@ -488,7 +489,8 @@ u_char *var_extensible_relocatable(struct variable *vp,
           return(NULL);
         }
         shell_command(exten);
-        strcpy(errmsg,exten->output);
+        strncpy(errmsg, exten->output, sizeof(errmsg));
+        errmsg[ sizeof(errmsg)-1 ] = 0;
       }
       *var_len = strlen(errmsg);
       if (errmsg[*var_len-1] == '\n')

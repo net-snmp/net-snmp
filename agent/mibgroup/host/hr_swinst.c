@@ -196,9 +196,10 @@ void init_hr_swinst(void)
 #endif
 	if (swi->swi_directory != NULL)
 	    free((void *)swi->swi_directory);
-	sprintf(path, "%s/Packages", swi->swi_dbpath);
+	snprintf(path, sizeof(path), "%s/Packages", swi->swi_dbpath);
 	if (stat(path, &stat_buf) == -1)
-	    sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
+	    snprintf(path, sizeof(path), "%s/packages.rpm", swi->swi_dbpath);
+	path[ sizeof(path)-1 ] = 0;
 	swi->swi_directory = strdup(path);
     }
 #else
@@ -355,8 +356,10 @@ var_hrswinst(struct variable *vp,
 	case HRSWINST_UPDATE:
 	    string[0] = '\0';
 
-	    if (swi->swi_directory != NULL)
-		strcpy(string, swi->swi_directory);
+	    if (swi->swi_directory != NULL) {
+                strncpy(string, swi->swi_directory, sizeof(string));
+                string[ sizeof(string)-1 ] = 0;
+            }
 
 	    if ( *string && (stat( string, &stat_buf ) != -1 )) {
 		if ( stat_buf.st_mtime > starttime.tv_sec )
@@ -427,7 +430,9 @@ var_hrswinst(struct variable *vp,
             }
 #else
 	    if (swi->swi_directory != NULL) {
-		sprintf(string, "%s/%s", swi->swi_directory, swi->swi_name);
+		snprintf(string, sizeof(string), "%s/%s",
+                         swi->swi_directory, swi->swi_name);
+                string[ sizeof(string)-1 ] = 0;
 		stat( string, &stat_buf );
 		ret = date_n_time(&stat_buf.st_mtime, var_len);
 	    } else {
@@ -595,10 +600,12 @@ Save_HR_SW_info (int ix)
 	headerGetEntry(swi->swi_h, RPMTAG_NAME, NULL, (void **) &n, NULL);
 	headerGetEntry(swi->swi_h, RPMTAG_VERSION, NULL, (void **) &v, NULL);
 	headerGetEntry(swi->swi_h, RPMTAG_RELEASE, NULL, (void **) &r, NULL);
-	sprintf(swi->swi_name, "%s-%s-%s", n, v, r);
+	snprintf(swi->swi_name, sizeof(swi->swi_name), "%s-%s-%s", n, v, r);
+        swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
     }
 #else
-    sprintf(swi->swi_name, swi->swi_dep->d_name);
+    snprintf(swi->swi_name, sizeof(swi->swi_name), swi->swi_dep->d_name);
+    swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
 #endif
 }
 
