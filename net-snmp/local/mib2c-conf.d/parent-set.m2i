@@ -16,7 +16,7 @@
 int ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
                                ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
-@   if "$m2c_data_context" ne "generated"@
+@   if ("$m2c_data_context" ne "generated") || ($m2c_data_init == 1)@
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
@@ -188,7 +188,7 @@ $example_end
 
 @end@ # row creation
 ##----------------------------------------------------------------------
-@if "$m2c_data_context" ne "generated"@
+@if ("$m2c_data_context" ne "generated") || ($m2c_data_init == 1)@
 /**
  * Setup up context with information needed to undo a set request.
  *
@@ -196,6 +196,14 @@ $example_end
  * functions are called. If you need to do any undo setup that is not
  * related to a specific column, you can do it here.
  *
+@if $m2c_undo_embed == 0@
+@   if $m2c_data_init == 1@
+ * Note that the undo context has been allocated with
+ * ${context}_allocate_data(), but may need extra
+ * initialization similar to what you may have done in
+ * ${context}_rowreq_ctx_init().
+@   end@
+@end@
  * Note that an individual node's undo_setup function will only be called
  * if that node is being set to a new value.
  *
@@ -281,6 +289,7 @@ int
 ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc = MFD_SUCCESS;
+    int             save_flags;
 
     DEBUGMSGTL(("verbose:${context}_commit","called\n"));
 
@@ -288,10 +297,37 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert( NULL != rowreq_ctx );
 
     /*
+     * save flags, then clear until we actually do something
+     */
+    save_flags = rowreq_ctx->set_flags;
+    rowreq_ctx->set_flags = 0;
+
+    /*
      * TODO:
      * commit data
      */
 ##$example_start
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.settable == 0@
+@          next@
+@      end@
+    if (save_flags & FLAG_$node.uc) {
+       save_flags &= ~FLAG_$node.uc; /* clear */
+       rc = TODO_commit_colum(...);
+       if(rc == TODO_success_code) {
+            /*
+             * set flag, in case we need to undo
+             */
+            rowreq_ctx->set_flags |= FLAG_$node.uc;
+       }
+    }
+
+@   end@ # foreach $node
+    if (save_flags) {
+       snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n", save_flags);
+       return MFD_ERROR;
+    }
 ##$example_end
 
     return rc;
