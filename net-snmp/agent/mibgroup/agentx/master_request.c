@@ -150,7 +150,7 @@ handle_agentx_response( int operation,
     oldreq = remove_outstanding_request( asp, pdu->reqid );
 
     switch(operation) {
-	case TIMED_OUT:
+	case SNMP_CALLBACK_OP_TIMED_OUT:
 			/*
 			 * Multiple timed out requests probably
 			 *  indicate that the subagent has died.
@@ -173,7 +173,7 @@ handle_agentx_response( int operation,
 		    asp->mode = RESERVE2;
 		break;
 
-	case SEND_FAILED:
+	case SNMP_CALLBACK_OP_SEND_FAILED:
 		if ( SET_SNMP_STRIKE_FLAGS( session->flags )) {
 		    (void) close_agentx_session(session, -1 );
 		}
@@ -184,7 +184,7 @@ handle_agentx_response( int operation,
 		return 0;
 
 
-	case RECEIVED_MESSAGE:
+	case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
 		/* This session is alive */
 		CLEAR_SNMP_STRIKE_FLAGS( session->flags );
 		break;
