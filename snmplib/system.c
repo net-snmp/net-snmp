@@ -473,7 +473,7 @@ get_myaddr(void)
          */
         remote_in_addr.sin_family = AF_INET;
         remote_in_addr.sin_port = htons(IPPORT_ECHO);
-        remote_in_addr.sin_addr.s_addr = inet_addr("128.22.33.11");
+        remote_in_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
         result =
             connect(hSock, (LPSOCKADDR) & remote_in_addr,
                     sizeof(SOCKADDR));
