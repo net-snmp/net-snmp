@@ -4,6 +4,7 @@
 #
 
 bug_reports_to=ucd-snmp-bugs@ucd-snmp.ucdavis.edu
+bug_report_file=/tmp/ucd-snmp-bug-report
 
 # changed automagically
 VersionInfo="4.1.1";
@@ -28,9 +29,14 @@ else
 fi
 
 
-echo "You are about to compose a mail message to the"
-echo "ucd-snmp-coders@ucd-snmp.ucdavis.edu.  Please write a detailed"
-echo "description of your problem.  At the end you will be given"
+echo "You are about to compose a bug-report message that is suitable"
+echo "for sending to $bug_reports_to." 
+echo ""
+echo "When the bug-report is completed, you may choose to save to a file"
+echo "       and you may choose to send the report in an e-mail."
+echo ""
+echo "Please write a detailed xdescription of your problem."
+echo "At the end you will be given"
 echo "the opportunity to include optional text files, such as"
 echo "patches, make output, error files, etc..."
 echo ""
@@ -112,7 +118,7 @@ echo "Content-Description: Version Information" >> ${msg_file}.2
 echo                                     	>> ${msg_file}.2
 echo "ucd-snmp Version:  $VersionInfo"   	>> ${msg_file}.2
 echo $n "System configuration:  $c"            	>> ${msg_file}.2
-uname -a                                 	>> ${msg_file}.2
+uname -a  | awk '{ $2=""; print; }'            	>> ${msg_file}.2
 if [ -f ./config.guess ]
 then
   echo $n "config.guess:  $c"                   >> ${msg_file}.2
@@ -170,11 +176,36 @@ fi
 #
 echo "--$boundary--"                            >> ${msg_file}.2
 
+sendit="y"
+echo $n "Do you want to send the bug-report in an e-mail [y] ? $c"
+read answer
+if [ "$answer" != "y" ]
+then
+    sendit="n"
+fi
+
+if [ "$sendit" = "y" ]
+then
 if [ -x /usr/lib/sendmail ]
 then
     /usr/lib/sendmail $bug_reports_to < ${msg_file}.2
 else
     mail $bug_reports_to < ${msg_file}.2
+fi
+fi
+
+echo $n "Do you want to save the bug-report to a file [y] ? $c"
+read answer
+if [ "$answer" != "n" ]
+then
+    echo $n "File to save bug-report [$bug_report_file]: $c"
+    read answer
+    if [ "$answer" != "" ]
+    then
+        bug_report_file=$answer
+    fi
+    rm -f $bug_report_file
+    cp ${msg_file}.2 $bug_report_file
 fi
 
 rm ${msg_file} ${msg_file}.2
