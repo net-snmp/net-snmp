@@ -118,7 +118,7 @@ void vacm_parse_security (word, param)
     }
     strcpy(se.securityName, name);
     strcpy(se.community, community);
-    sp = malloc (sizeof *sp);
+    sp = (struct vacm_securityEntry *)malloc (sizeof *sp);
     *sp = se;
     if (securityFirst != NULL) {
 	securityLast->next = sp;
