@@ -4689,7 +4689,7 @@ snmp_mib_node_FETCH(tp_ref, key)
            if (tp)
 	   switch (c) {
 	      case 'a': /* access */
-                 if (strncmp("access", key, strlen(key))) break;
+                  if (strncmp("access", key, strlen(key)) == 0) {
                  switch	(tp->access) {
                    case MIB_ACCESS_READONLY:
                      sv_setpv(ST(0),"ReadOnly");
@@ -4712,6 +4712,9 @@ snmp_mib_node_FETCH(tp_ref, key)
                    default:
                      break;
                  }
+                  } else if (strncmp("augments", key, strlen(key)) == 0) {
+                      sv_setpv(ST(0),tp->augments);
+                  }
                  break;
   	      case 'c': /* children */
                  if (strncmp("children", key, strlen(key))) break;
