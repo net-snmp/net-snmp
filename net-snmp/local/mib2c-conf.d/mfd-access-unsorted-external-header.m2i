@@ -9,12 +9,9 @@
 ########################################################################
 @include mfd-access-unsorted-external-setup.m2i@
 ##
+@if $m2c_include_examples == 1@
 $example_start
 /* *********************************************************************
- * TODO:
- * update dummy data storage
- @if $m2c_include_examples == 1@
- *
  * Since we have no idea how you really access your data, we'll go with
  * a worst case example: a flat text file.
  @   if $m2c_data_transient != 2@
@@ -22,10 +19,11 @@ $example_start
  @      print $@m2c_include_examples or set $@m2c_data_transient to 2.@
  @      exit@
  @   end@
- @end@
  */
-#define MAX_LINE_SIZE 128
+#define MAX_LINE_SIZE 256
+$example_end
 
+@end@
 /**
  * loop context
  *
@@ -51,18 +49,20 @@ $example_start
  *
  */
 typedef struct ${table}_loop_context_s {
+    /*
+     * temporary context used during iteration
+     */
+    ${context}_rowreq_ctx *rowreq_ctx;
 @if $m2c_include_examples == 1@
+    
     /*
      * this example code is based on a data source that is a
      * text file to be read and parsed.
      */
     FILE *filep;
-    int locked; 
     char line[MAX_LINE_SIZE];
-    ${context}_rowreq_ctx *rowreq_ctx; /* temp context */
 @end@
 } ${table}_loop_context;
-$example_end
 
 /*
  * define a reference to the loop context

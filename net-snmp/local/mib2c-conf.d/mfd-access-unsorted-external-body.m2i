@@ -9,11 +9,6 @@
 ########################################################################
 @include mfd-access-unsorted-external-setup.m2i@
 ##
-static int
-${table}_loop_read_and_update_index( $mfd_aue_param_decl,
-                                ${context}_ref_loop_ctx *loop_ctx_ref,
-                                ${context}_ref_rowreq_ctx *rowreq_ctx_ref);
-
 /**
  * unsorted-external overview
  *
@@ -112,26 +107,26 @@ ${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_c
         return MFD_ERROR;
 
     /*
-     * TODO:
-     * set loop context
-     */
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * allocate a context to use
+     * allocate a temporary context to use during iteration
      */
     loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
     if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
         SNMP_FREE(loop_ctx_ref->loop_ctx);
-        return MFD_ERROR; /* xxx-rks: resource unavailable? */
+        return MFD_RESOURCE_UNAVAILABLE;
     }
 
+    /*
+     * TODO:
+     * set up loop context
+     */
+@if $m2c_include_examples == 1@
+$example_start
     /*
      * open our data file.
      */
     loop_ctx_ref->loop_ctx->filep = fopen("/etc/dummy.conf", "r");
     if(NULL ==  loop_ctx_ref->loop_ctx->filep) {
-        return MFD_ERROR; /* xxx-rks: resource unavailable? */
+        return MFD_RESOURCE_UNAVAILABLE;
     }
 
 $example_end
@@ -196,20 +191,44 @@ ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_
 
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
-        
+
+    /*
+     * we just need the index for now. Reuse the one in the loop context's
+     * temporary row request context. (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+     */
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+
 @if $m2c_include_examples == 1@
 $example_start
+@ifconf ${table}_update_idx.m2i@
+@   include ${table}_update_idx.m2i@
+@else@
+    /*
+     * get a line (skip blank lines)
+     */
+    do {
+        if (!fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+                   loop_ctx_ref->loop_ctx->filep)) {
+            /* we're done */
+            fclose(loop_ctx_ref->loop_ctx->filep);
+            loop_ctx_ref->loop_ctx->filep = NULL;
+        }
+    } while (loop_ctx_ref->loop_ctx->filep && loop_ctx_ref->loop_ctx->line[0] == '\n');
+
     /*
      * check for end of data
      */
     if(NULL == loop_ctx_ref->loop_ctx->filep)
         return MFD_END_OF_DATA;
-
-/*
- * do actual read of data in update_index, since get and get_next do
- * the same thing...
- */
-    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
+    
+@foreach $node index@
+@    include m2c_setup_node.m2i@
+    /*
+     * TODO:
+     * parse loop_ctx_ref->line to set rowreq_ctx_ref->tbl_idx->$node
+     */
+@end@
+@end@
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -257,20 +276,12 @@ ${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
     
-    
 @if $m2c_include_examples == 1@
 $example_start
     /*
-     * check for end of data
+     * in this example, get first does the same thing as get next...
      */
-    if(NULL == loop_ctx_ref->loop_ctx->filep)
-        return MFD_END_OF_DATA;
-
-/*
- * do actual read of data in update_index, since get and get_next do
- * the same thing...
- */
-    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
+    return ${table}_loop_get_first($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -339,8 +350,6 @@ ${table}_loop_save_position($mfd_aue_param_decl,
      * 1) allocate new loop context, unless you can reuse a previous pointer.
      * 2) save information for the position of loop_ctx_ref in save_loop_ctx_ref.
      */
-@if $m2c_include_examples == 1@
-$example_start
     if((0 == reuse) || (NULL == save_loop_ctx_ref->loop_ctx))
         save_loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
     if(NULL == save_loop_ctx_ref->loop_ctx) {
@@ -364,47 +373,41 @@ $example_start
         save_loop_ctx_ref->loop_ctx->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
         
         /*
-         * allocate a new context to replace the one you took.
-         * shouldn't need the locked flag or the filep pointer.
-         * (well, you *could* use it to do things a little differently;
-         * like if you know you had the file locked and wanted to save
-         * the current offset for writing back new values... but we are
-         * trying to keep this example simple.)
+         * allocate a new context to replace the one you just took.
          */
         loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
         if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
             SNMP_FREE(loop_ctx_ref->loop_ctx);
-            return MFD_ERROR; /* xxx-rks: resource unavailable? */
+            return MFD_ERROR;
         }
     }
-
  
 @if $m2c_data_transient == 0@ # persistent
     /** non-TRANSIENT data: no need to copy */
 @elsif $m2c_data_transient == 1@ # short term
     /** semi-TRANSIENT data: will copy data when index found */
-    /** have to save line to do that */
-    memcpy(save_loop_ctx_ref->loop_ctx->line, loop_ctx_ref->loop_ctx->line,
-           sizeof(loop_ctx_ref->loop_ctx->line));
+    /** only need to copy pertinent data from loop context */
 @elsif $m2c_data_transient == 2@ # copy immediately
     /*
-     * TRANSIENT data: you are using a buffer in the loop ctx,
-     * So you need to copy the data.
+     * TRANSIENT data: copy all the data.
      */
-    /*
-     * for this example, it would be cheap to just save line.
-     * but we'll assume worst case, and just go ahead and setup
-     * the individual data items...
-     */
-@   foreach $node nonindex@
+@end@
+@if $m2c_include_examples == 1@
+$example_start
+@  if $m2c_data_transient == 1@ # short term
+    /** save line to do that */
+    memcpy(save_loop_ctx_ref->loop_ctx->line, loop_ctx_ref->loop_ctx->line,
+           sizeof(loop_ctx_ref->loop_ctx->line));
+@  elsif $m2c_data_transient == 2@ # copy immediately
+@    foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /*
      * TODO:
      * set rowreq_ctx_ref->${m2c_data_item}$node
-     *     from loop_ctx_ref->line
+     *     from the loop context
      */
-@   end@
-@end@
+@    end@
+@  end@
 $example_end
 @end@ # example
     
@@ -420,6 +423,9 @@ $example_end
  *  At the end of the loop, when the best match has been found, the saved
  *  loop context will be used to get the data for the row by calling
  *  ${table}_loop_get_data().
+ *
+ *  You should return a fully populated row request context in
+ *  rowreq_ctx_ref->rowreq_ctx.
  *
  * More Details
  * ------------
@@ -438,20 +444,17 @@ ${table}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
     netsnmp_assert(NULL != rowreq_ctx_ref->rowreq_ctx);
 
     /*
-     * TODO:
-     * get data for data context in table context (rowreq_ctx_ref->rowreq_ctx)
-     */
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * take table context from loop context
+     * take temporary row request context from loop context
      */
     rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
     loop_ctx_ref->loop_ctx->rowreq_ctx = NULL;
     
     /*
-     * copy data to the data context
+     * TODO:
+     * copy data to the data context (rowreq_ctx_ref->${m2c_data_item})
      */
+@if $m2c_include_examples == 1@
+$example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /*
@@ -474,7 +477,7 @@ $example_end
  * Summary
  * -------
  *  This function will be called once the loop iteration has completed
- *  to release any memory allocated for loop reference.
+ *  to release any memory or resources allocated for the loop context.
  *
  * More Details
  * ------------
@@ -491,21 +494,28 @@ ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loo
     
     netsnmp_assert(loop_ctx_ref);
     
-@if $m2c_include_examples == 1@
-$example_start
     if(!loop_ctx_ref->loop_ctx)
         return MFD_ERROR;
 
-if(loop_ctx_ref->loop_ctx->rowreq_ctx)
-    ${context}_release_rowreq_ctx(loop_ctx_ref->loop_ctx->rowreq_ctx);
- 
+    /*
+     * release the row request context, if it wasn't taken
+     */
+    if(loop_ctx_ref->loop_ctx->rowreq_ctx)
+        ${context}_release_rowreq_ctx(loop_ctx_ref->loop_ctx->rowreq_ctx);
+
+    /*
+     * TODO:
+     * release resources
+     */
+@if $m2c_include_examples == 1@
+$example_start
     /*
      * close file
      */
     if(loop_ctx_ref->loop_ctx->filep)
         fclose(loop_ctx_ref->loop_ctx->filep);
-    
 $example_end
+    
 @end@
     /*
      * free loop context
@@ -514,75 +524,6 @@ $example_end
     
     return MFD_SUCCESS;
 }
-
-########################################################################
-@if $m2c_include_examples == 1@
-$example_start
-/**
- * Update the index for the current iterator position.
- *
- * Summary
- * -------
- * This example routine updates the index for the current row. It is
- * called by the get_first and get_next functions.
- *
- * More Details
- * ------------
- * @return MFD_SUCCESS     : success
- *         MFD_END_OF_DATA : no data is available
- *         MFD_ERROR       : error.
- */
-static int
-${table}_loop_read_and_update_index( $mfd_aue_param_decl,
-                       ${context}_ref_loop_ctx *loop_ctx_ref,
-                       ${context}_ref_rowreq_ctx *rowreq_ctx_ref)
-{
-    int rc;
-
-    DEBUGTRACE;
-
-@ifconf ${table}_update_idx.m2i@
-@   include ${table}_update_idx.m2i@
-@else@
-    
-    /*
-     * mfd wrappers just need the index for now.
-     * reuse rowreq_ctx.tbl_idx.
-     */
-    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
-
-    /*
-     * get a line (skip blank lines)
-     */
-    do {
-        if (!fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
-                   loop_ctx_ref->loop_ctx->filep)) {
-            /* we're done */
-            fclose(loop_ctx_ref->loop_ctx->filep);
-            loop_ctx_ref->loop_ctx->filep = NULL;
-        }
-    } while (loop_ctx_ref->loop_ctx->filep && loop_ctx_ref->loop_ctx->line[0] == '\n');
-
-    /*
-     * check for end of data
-     */
-    if(NULL == loop_ctx_ref->loop_ctx->filep)
-        return MFD_END_OF_DATA;
-
-             
-@foreach $node index@
-@    include m2c_setup_node.m2i@
-    /*
-     * TODO:
-     * parse loop_ctx_ref->line to set rowreq_ctx_ref->tbl_idx->$node
-     */
-@end@
-@end@
-
-    return rc;
-}
-$example_end
-@end@
 
 ########################################################################
 @if $m2c_mark_boundary == 1@

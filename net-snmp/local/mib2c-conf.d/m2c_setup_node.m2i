@@ -4,7 +4,6 @@
 ########################################################################
 @if "$m2c_node_name" ne "$node"@
 ## if $node.accessible != 1, might be inaccessible index node
-@  end@
 @  eval $m2c_node_name = $node@
 @  eval $m2c_node_skip_mapping = 0@
 @  eval $m2c_node_needlength = $node.needlength@

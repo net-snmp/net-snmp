@@ -77,27 +77,27 @@ typedef struct ${context}_interface_ctx_s {
 
 static ${context}_interface_ctx ${context}_if_ctx;
 
-NETSNMP_STATIC_INLINE netsnmp_container * _${table}_container_init(
+static netsnmp_container * _${table}_container_init(
     ${context}_interface_ctx *if_ctx);
 
 
-NETSNMP_STATIC_INLINE int _mfd_${table}_pre_request( ${context}_interface_ctx *if_ctx,
+static int _mfd_${table}_pre_request( ${context}_interface_ctx *if_ctx,
                        netsnmp_data_list *data_list, u_long id);
-NETSNMP_STATIC_INLINE int _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
+static int _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
                        netsnmp_data_list *data_list, u_long id);
-NETSNMP_STATIC_INLINE int _mfd_${context}_object_lookup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_get_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_object_lookup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_get_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @   if $m2c_table_settable@
-NETSNMP_STATIC_INLINE int _mfd_${context}_check_objects($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_set_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_undo_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
-NETSNMP_STATIC_INLINE int _mfd_${context}_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_check_objects($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_set_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_undo_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      if $m2c_irreversible_commit == 1@
-NETSNMP_STATIC_INLINE int _mfd_${context}_irreversible_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_irreversible_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      end@
 @      if $m2c_table_dependencies == 1@
-NETSNMP_STATIC_INLINE int _mfd_${context}_check_dependencies($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
+static int _mfd_${context}_check_dependencies($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx);
 @      end@
 
 NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
@@ -109,6 +109,7 @@ NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowr
 @   end@ # writable
 
 /**
+ * @internal
  * Initialize the table $table 
  *    (Define its contents and how it's structured)
  */
@@ -246,6 +247,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
 @    end@
 ########################################################################
 /* *********************************************************************
+ * @internal
  * allocate resources for a ${context}_rowreq_ctx
  */
 ${context}_rowreq_ctx *
@@ -285,6 +287,7 @@ ${table}_allocate_rowreq_ctx(void)
 }
 
 /*
+ * @internal
  * release resources for a ${context}_rowreq_ctx
  */
 void
@@ -431,6 +434,7 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${context}_rowreq_ctx * rowreq_
  *
  ***********************************************************************/
 /*
+ * @internal
  * Retrieve the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
@@ -454,7 +458,7 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
     var->type = $node.type;
 @         if $m2c_node_needlength == 1@
     /*
-     * NOTE: val_len is in bytes, ${node}_len might not be
+     * NOTE: val_len is in bytes, ${node}_len might not be (e.g. oids)
      */
         if (var->val_len < (rowreq_ctx->tbl_idx.${node}_len *
                             sizeof(rowreq_ctx->tbl_idx.${node}[0]))) {
@@ -475,6 +479,9 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+@         if $m2c_node_needlength == 0@
+    var->val_len = sizeof($m2c_decl);
+@         end@
     var->type = $node.type;
 rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
         break;
@@ -568,6 +575,7 @@ _mfd_${table}_get_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
  *
  *---------------------------------------------------------------------*/
 /*
+ * @internal
  * Check the syntax for a particular column
  */
 NETSNMP_STATIC_INLINE int
@@ -706,9 +714,10 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
  *
  *---------------------------------------------------------------------*/
 /*
- * Set the value for a particular column
+ * @internal
+ * Check dependencies wrapper
  */
-NETSNMP_STATIC_INLINE int
+static int
 _mfd_${context}_check_dependencies($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
 {
     DEBUGTRACE;
@@ -762,7 +771,7 @@ $example_end
 ##----------------------------------------------------------------------
 /**
  * @internal
- * undo the value for a particular column
+ * undo setup
  */
 int
 _mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
@@ -788,6 +797,7 @@ _mfd_${context}_undo_setup($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
  *
  *---------------------------------------------------------------------*/
 /*
+ * @internal
  * Set the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
@@ -807,6 +817,15 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+@         if $m2c_node_needlength == 0@
+        if(var->val_len != sizeof($m2c_decl)) {
+            rc = MFD_ERROR;
+            snmp_log(LOG_ERROR,
+                     "varbind size of %d does not match expected size %d\n",
+                     var->val_len, sizeof($m2c_decl));
+            break;
+        }
+@         end@
         rc = ${node}_set(rowreq_ctx, $m2c_node_var_val );
         break;
  @      end@ # settable
@@ -851,7 +870,7 @@ _mfd_${table}_set_values($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)
  *---------------------------------------------------------------------*/
 /**
  * @internal
- * commit the value for a particular column
+ * commit the values
  */
 int
 _mfd_${context}_commit($mfd_base_params, ${context}_rowreq_ctx * rowreq_ctx)

@@ -10,6 +10,9 @@
 ## mfd function params
 @eval $mfd_base_params="mfd_pdu_context *pdu_ctx, netsnmp_request_info *requests"@
 ##
+@ifconf default-mfd-top.m2c@
+@   include default-mfd-top.m2c@
+@end@
 @ifconf ${name}.m2d@
 @   include ${name}.m2d@
 @end@
@@ -315,14 +318,6 @@ ${context}_post_request(${context}_registration_ptr reg,
 @run mfd-data-get.m2c@
 @run mfd-data-set.m2c@
 @run mfd-readme.m2c@
-@ifconf ${name}_Makefile@
-@else@
-@   run mfd-makefile.m2m@
-@end@
-@ifconf ${name}_subagent.c@
-@else@
-@   run subagent.m2c@
-@end@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
