@@ -164,7 +164,7 @@ void disk_parse_config(word,cptr)
     cptr = skip_white(cptr);
     /* read optional minimum disk usage spec */
     if (cptr != NULL) {
-      if (strchr(cptr, '%') == NULL) {
+      if (strchr(cptr, '%') == 0) {
         disks[numdisks].minimumspace = atoi(cptr);
         disks[numdisks].minpercent = -1;
       }
