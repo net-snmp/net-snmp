@@ -10,6 +10,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/stash_cache.h>
+#include <net-snmp/agent/stash_to_next.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -74,11 +75,25 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
                            netsnmp_agent_request_info *reqinfo,
                            netsnmp_request_info *requests)
 {
+    netsnmp_mib_handler      *h;
     netsnmp_stash_cache_info *cinfo;
     netsnmp_oid_stash_node *cnode;
     netsnmp_variable_list *cdata;
     netsnmp_request_info *request;
     int ret;
+
+    if ( !reginfo->modes & HANDLER_CAN_STASH ) {
+        /*
+         * Insert a 'stash_to_next' helper into the chain
+         * so that it will be the next thing to be called
+         */
+        h = netsnmp_get_stash_to_next_handler();
+        h->next       = handler->next;
+        handler->next = h;
+        h->next->prev = h;
+        h->prev       = handler;
+        reginfo->modes |= HANDLER_CAN_STASH;
+    }
 
     DEBUGMSGTL(("helper:stash_cache", "Got request\n"));
 
@@ -94,12 +109,16 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         if ((ret = netsnmp_stash_cache_update(handler, reginfo,
                                               reqinfo, requests, cinfo)))
             return ret;
+        DEBUGMSGTL(("helper:stash_cache", "Processing GET request\n"));
         for(request = requests; request; request = request->next) {
             cdata =
                 netsnmp_oid_stash_get_data(cinfo->cache,
                                            requests->requestvb->name,
                                            requests->requestvb->name_length);
             if (cdata && cdata->val.string && cdata->val_len) {
+                DEBUGMSGTL(("helper:stash_cache", "Found cached GET varbind\n"));
+                DEBUGMSGOID(("helper:stash_cache", cdata->name, cdata->name_length));
+                DEBUGMSG(("helper:stash_cache", "\n"));
                 snmp_set_var_typed_value(request->requestvb, cdata->type,
                                          cdata->val.string, cdata->val_len);
             }
@@ -111,6 +130,7 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         if ((ret = netsnmp_stash_cache_update(handler, reginfo,
                                               reqinfo, requests, cinfo)))
             return ret;
+        DEBUGMSGTL(("helper:stash_cache", "Processing GETNEXT request\n"));
         for(request = requests; request; request = request->next) {
             cnode =
                 netsnmp_oid_stash_getnext_node(cinfo->cache,
@@ -119,6 +139,9 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
             if (cnode && cnode->thedata) {
                 cdata = cnode->thedata;
                 if (cdata->val.string && cdata->name && cdata->name_length) {
+                    DEBUGMSGTL(("helper:stash_cache", "Found cached GETNEXT varbind\n"));
+                    DEBUGMSGOID(("helper:stash_cache", cdata->name, cdata->name_length));
+                    DEBUGMSG(("helper:stash_cache", "\n"));
                     snmp_set_var_typed_value(request->requestvb, cdata->type,
                                              cdata->val.string, cdata->val_len);
                     snmp_set_var_objid(request->requestvb, cdata->name,
