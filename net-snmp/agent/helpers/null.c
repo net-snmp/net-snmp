@@ -18,6 +18,13 @@
 int
 netsnmp_register_null(oid * loc, size_t loc_len)
 {
+    return netsnmp_register_null_context(loc, loc_len, NULL);
+}
+
+int
+netsnmp_register_null_context(oid * loc, size_t loc_len,
+                              const char *contextName)
+{
     netsnmp_handler_registration *reginfo;
     reginfo = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     reginfo->handlerName = strdup("");
@@ -25,6 +32,8 @@ netsnmp_register_null(oid * loc, size_t loc_len)
     reginfo->rootoid_len = loc_len;
     reginfo->handler =
         netsnmp_create_handler("null", netsnmp_null_handler);
+    if (contextName)
+        reginfo->contextName = strdup(contextName);
     reginfo->modes = HANDLER_CAN_DEFAULT;
     return netsnmp_register_handler(reginfo);
 }
