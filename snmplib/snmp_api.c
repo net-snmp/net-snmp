@@ -4749,11 +4749,9 @@ netsnmp_pdu    *
 snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
                      size_t olength)
 {
-    netsnmp_pdu    *pdu;
-    pdu = (netsnmp_pdu *) calloc(1, sizeof(netsnmp_pdu));
+    netsnmp_pdu *pdu = (netsnmp_pdu *)calloc(1, sizeof(netsnmp_pdu));
     if (pdu == NULL) {
-        DEBUGMSGTL(("sess_process_packet",
-                    "can't malloc space for PDU\n"));
+        DEBUGMSGTL(("sess_process_packet", "can't malloc space for PDU\n"));
         return NULL;
     }
 
@@ -4762,15 +4760,8 @@ snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
      * source address).  
      */
 
-    if ( opaque ) {
-        if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
-            pdu->transport_data = malloc(olength);
-            if (pdu->transport_data)
-                memcpy(pdu->transport_data, opaque, olength);
-        } else
-            pdu->transport_data = opaque;
-        pdu->transport_data_length = olength;
-    }
+    pdu->transport_data = opaque;
+    pdu->transport_data_length = olength;
     pdu->tDomain = transport->domain;
     pdu->tDomainLen = transport->domain_length;
     return pdu;
@@ -4801,10 +4792,10 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                 "session %p fd %d pkt %p length %d\n", sessp,
                 transport->sock, packetptr, length));
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_DUMP_PACKET)) {
         if (transport->f_fmtaddr != NULL) {
-            char           *addrtxt =
-                transport->f_fmtaddr(transport, opaque, olength);
+            char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
             if (addrtxt != NULL) {
                 snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n",
                          length, addrtxt);
@@ -4824,6 +4815,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     if (isp->hook_pre) {
         if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
             DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
+	    if (opaque != NULL) {
+	      free(opaque);
+	    }
             return -1;
         }
     }
@@ -4833,8 +4827,11 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     } else {
         pdu = snmp_create_sess_pdu(transport, opaque, olength);
     }
-    if (!pdu) {
+    if (pdu == NULL) {
         snmp_log(LOG_ERR, "pdu failed to be created\n");
+	if (opaque != NULL) {
+	  free(opaque);
+	}
         return -1;
     }
 
@@ -4964,8 +4961,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                     /*
                      * Handle engineID discovery.  
                      */
-                    if (!sp->securityEngineIDLen
-                        && pdu->securityEngineIDLen) {
+                    if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
                         sp->securityEngineID =
                             (u_char *) malloc(pdu->securityEngineIDLen);
                         if (sp->securityEngineID == NULL) {
@@ -5038,8 +5034,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     /*
      * Call USM to free any securityStateRef supplied with the message.  
      */
-    if (pdu != NULL && pdu->securityStateRef
-        && pdu->command == SNMP_MSG_TRAP2) {
+    if (pdu != NULL && pdu->securityStateRef &&
+	pdu->command == SNMP_MSG_TRAP2) {
         sptr = find_sec_mod(pdu->securityModel);
         if (sptr) {
             if (sptr->pdu_free_state_ref) {
@@ -5122,53 +5118,43 @@ _sess_read(void *sessp, fd_set * fdset)
 
         if (data_sock >= 0) {
             /*
-             * We've successfully accepted a new stream-based connection.  It's not 
-             * too clear what should happen here if we are using the single-session 
-             * API at this point.  Basically a "session accepted" callback is
-             * probably needed to hand the new session over to the application.
+             * We've successfully accepted a new stream-based connection.
+             * It's not too clear what should happen here if we are using the
+             * single-session API at this point.  Basically a "session
+             * accepted" callback is probably needed to hand the new session
+             * over to the application.
              * 
-             * However, for now, as in the original snmp_api, we will ASSUME that
-             * we're using the traditional API, and simply add the new session to
-             * the list.  Note we don't have to get the Session list lock here,
-             * because under that assumption we already hold it (this is also why
-             * we don't just use snmp_add).
+             * However, for now, as in the original snmp_api, we will ASSUME
+             * that we're using the traditional API, and simply add the new
+             * session to the list.  Note we don't have to get the Session
+             * list lock here, because under that assumption we already hold
+             * it (this is also why we don't just use snmp_add).
              * 
              * The moral of the story is: don't use listening stream-based
-             * transports in a multi-threaded environment because something will go 
-             * HORRIBLY wrong (and also that SNMP/TCP is not trivial).
+             * transports in a multi-threaded environment because something
+             * will go HORRIBLY wrong (and also that SNMP/TCP is not trivial).
              * 
-             * Another open issue: what should happen to sockets that have been
-             * accept()ed from a listening socket when that original socket is
-             * closed?  If they are left open, then attempting to re-open the
-             * listening socket will fail, which is semantically confusing.
-             * Perhaps there should be some kind of chaining in the transport
-             * structure so that they can all be closed.  Discuss.  ;-)  
+             * Another open issue: what should happen to sockets that have
+             * been accept()ed from a listening socket when that original
+             * socket is closed?  If they are left open, then attempting to
+             * re-open the listening socket will fail, which is semantically
+             * confusing.  Perhaps there should be some kind of chaining in
+             * the transport structure so that they can all be closed.
+             * Discuss.  ;-)
              */
 
-            netsnmp_transport *new_transport =
-                netsnmp_transport_copy(transport);
+	    netsnmp_transport *new_transport=netsnmp_transport_copy(transport);
             if (new_transport != NULL) {
                 struct session_list *nslp = NULL;
 
                 new_transport->sock = data_sock;
                 new_transport->flags &= ~NETSNMP_TRANSPORT_FLAG_LISTEN;
 
-                nslp =
-                    (struct session_list *) snmp_sess_add_ex(sp,
-                                                             new_transport,
-                                                             isp->hook_pre,
-                                                             isp->
-                                                             hook_parse,
-                                                             isp->
-                                                             hook_post,
-                                                             isp->
-                                                             hook_build,
-                                                             isp->
-                                                             hook_realloc_build,
-                                                             isp->
-                                                             check_packet,
-                                                             isp->
-                                                             hook_create_pdu);
+                nslp = (struct session_list *)snmp_sess_add_ex(sp,
+			  new_transport, isp->hook_pre, isp->hook_parse,
+			  isp->hook_post, isp->hook_build,
+			  isp->hook_realloc_build, isp->check_packet,
+			  isp->hook_create_pdu);
 
                 if (nslp != NULL) {
                     nslp->next = Sessions;
@@ -5202,8 +5188,7 @@ _sess_read(void *sessp, fd_set * fdset)
              * We have no saved packet.  Allocate one.  
              */
             if ((isp->packet = (u_char *) malloc(rxbuf_len)) == NULL) {
-                DEBUGMSGTL(("sess_read",
-                            "can't malloc %d bytes for rxbuf\n",
+                DEBUGMSGTL(("sess_read", "can't malloc %d bytes for rxbuf\n",
                             rxbuf_len));
                 return 0;
             } else {
@@ -5245,11 +5230,9 @@ _sess_read(void *sessp, fd_set * fdset)
         }
     }
 
-    length =
-        transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
+    length = transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
 
-    if (length == -1
-        && !(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
+    if (length == -1 && !(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
         sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
@@ -5269,8 +5252,7 @@ _sess_read(void *sessp, fd_set * fdset)
          * Alert the application if possible.  
          */
         if (sp->callback != NULL) {
-            DEBUGMSGTL(("sess_read",
-                        "perform callback with op=DISCONNECT\n"));
+            DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
             (void) sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT, sp, 0,
                                 NULL, sp->callback_magic);
         }
@@ -5288,13 +5270,16 @@ _sess_read(void *sessp, fd_set * fdset)
     }
 
     if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
-        u_char         *pptr = isp->packet;
+        u_char *pptr = isp->packet;
+	void *ocopy = NULL;
 
         isp->packet_len += length;
 
         while (isp->packet_len > 0) {
+
             /*
-             * Get the total data length we're expecting (and need to wait for).  
+             * Get the total data length we're expecting (and need to wait
+             * for).
              */
             if (isp->check_packet) {
                 pdulen = isp->check_packet(pptr, isp->packet_len);
@@ -5302,8 +5287,7 @@ _sess_read(void *sessp, fd_set * fdset)
                 pdulen = asn_check_packet(pptr, isp->packet_len);
             }
 
-            DEBUGMSGTL(("sess_read",
-                        "  loop packet_len %d, PDU length %d\n",
+            DEBUGMSGTL(("sess_read", "  loop packet_len %d, PDU length %d\n",
                         isp->packet_len, pdulen));
 
             if (pdulen > MAX_PACKET_LENGTH) {
@@ -5311,7 +5295,7 @@ _sess_read(void *sessp, fd_set * fdset)
                  * Illegal length, drop the connection.  
                  */
                 snmp_log(LOG_ERR,
-                         "Maximum packet size exceeded in a request.\n");
+			 "Maximum packet size exceeded in a request.\n");
                 transport->f_close(transport);
                 if (opaque != NULL) {
                     free(opaque);
@@ -5321,8 +5305,8 @@ _sess_read(void *sessp, fd_set * fdset)
 
             if (pdulen > isp->packet_len) {
                 /*
-                 * We don't have a complete packet yet.  Return, and wait for more
-                 * data to arrive.  
+                 * We don't have a complete packet yet.  Return, and wait for
+                 * more data to arrive.
                  */
                 DEBUGMSGTL(("sess_read",
                             "pkt not complete (need %d got %d so far)\n",
@@ -5333,12 +5317,26 @@ _sess_read(void *sessp, fd_set * fdset)
                 return 0;
             }
 
-            /*
-             * We have *at least* one complete packet in the buffer now.  
-             */
+            /*  We have *at least* one complete packet in the buffer now.  If
+		we have possibly more than one packet, we must copy the opaque
+		pointer because we may need to reuse it for a later packet.  */
+
+	    if (pdulen < isp->packet_len) {
+		if (olength > 0 && opaque != NULL) {
+		    ocopy = malloc(olength);
+		    if (ocopy != NULL) {
+			memcpy(ocopy, opaque, olength);
+		    }
+		}
+	    } else if (pdulen == isp->packet_len) {
+		/*  Common case -- exactly one packet.  No need to copy the
+		    opaque pointer.  */
+		ocopy = opaque;
+		opaque = NULL;
+	    }
 
             if ((rc = _sess_process_packet(sessp, sp, isp, transport,
-                                           opaque, olength, pptr,
+                                           ocopy, ocopy?olength:0, pptr,
                                            pdulen))) {
                 /*
                  * Something went wrong while processing this packet -- set the
@@ -5349,13 +5347,25 @@ _sess_read(void *sessp, fd_set * fdset)
                 }
             }
 
+	    /*  ocopy has been free()d by _sess_process_packet by this point,
+		so set it to NULL.  */
+
+	    ocopy = NULL;
+
+	    /*  Step past the packet we've just dealt with.  */
+
             pptr += pdulen;
             isp->packet_len -= pdulen;
         }
 
-        if (opaque != NULL) {
-            free(opaque);
-        }
+	/*  If we had more than one packet, then we were working with copies
+	    of the opaque pointer, so we still need to free() the opaque
+	    pointer itself.  */
+
+	if (opaque != NULL) {
+	    free(opaque);
+	}
+
         if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
             /*
              * Obviously this should never happen!  
@@ -5368,8 +5378,9 @@ _sess_read(void *sessp, fd_set * fdset)
         } else if (isp->packet_len == 0) {
             /*
              * This is good: it means the packet buffer contained an integral
-             * number of PDUs, so we don't have to save any data for next time.  We
-             * can free() the buffer now to keep the memory footprint down.  
+             * number of PDUs, so we don't have to save any data for next
+             * time.  We can free() the buffer now to keep the memory
+             * footprint down.
              */
             free(isp->packet);
             isp->packet = NULL;
@@ -5386,19 +5397,17 @@ _sess_read(void *sessp, fd_set * fdset)
          */
 
         memmove(isp->packet, pptr, isp->packet_len);
-        DEBUGMSGTL(("sess_read",
-                    "end: memmove(%p, %p, %d); realloc(%p, %d)\n",
+        DEBUGMSGTL(("sess_read", "end: memmove(%p, %p, %d); realloc(%p, %d)\n",
                     isp->packet, pptr, isp->packet_len, isp->packet,
                     isp->packet_len));
 
         if ((rxbuf = realloc(isp->packet, isp->packet_len)) == NULL) {
             /*
-             * I don't see why this should ever fail, but it's not a big deal.  
+             * I don't see why this should ever fail, but it's not a big deal.
              */
             DEBUGMSGTL(("sess_read", "realloc() failed\n"));
         } else {
-            DEBUGMSGTL(("sess_read",
-                        "realloc() okay, old buffer %p, new %p\n",
+            DEBUGMSGTL(("sess_read", "realloc() okay, old buffer %p, new %p\n",
                         isp->packet, rxbuf));
             isp->packet = rxbuf;
             isp->packet_size = isp->packet_len;
