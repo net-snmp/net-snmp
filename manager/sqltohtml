@@ -44,20 +44,32 @@ $query = new CGI;
 #===========================================================================
 print "Content-type:  text/html\n\n<body bgcolor=\"#ffffff\">\n";
 
+#===========================================================================
+# Display mib related information
+#===========================================================================
 if ($dispinfo = $query->param('displayinfo')) {
     makemibtable($dispinfo);
     Exit(0);
 }
 
+#===========================================================================
+# Display a generic sql table of any kind.
+#===========================================================================
 if ($disptable = $query->param('displaytable')) {
     displaytable($disptable);
     Exit(0);
 }
 
+#===========================================================================
+# Get host and group from CGI query.
+#===========================================================================
 $host = $query->param('host');
 $group = $query->param('group');
 
 
+#===========================================================================
+# show the list of groups a user belongs to.
+#===========================================================================
 if (!defined($group)) {
     @groups = getgroupsforuser($remuser);
     if ($#groups > 0) {
@@ -102,11 +114,17 @@ if (!defined($group)) {
     }
 }
 
+#===========================================================================
+# reject un-authorized people accessing a certain group
+#===========================================================================
 if (!isuser()) {
     print "Unauthorized access to that group ($group)\n";
     Exit(0);
 }    
 
+#===========================================================================
+# add a new host to a group
+#===========================================================================
 if (defined($newhost = $query->param('newhost'))) {
     if (isadmin()) {
 	if ($dbh->do("select * from hostgroups where host = '$newhost' and groupname = '$group'") eq "0E0") {
@@ -118,29 +136,18 @@ if (defined($newhost = $query->param('newhost'))) {
     }
 }
 
+#===========================================================================
+# display setup configuration for a group
+#===========================================================================
 if (defined($query->param('setupgroup')) && 
     isadmin()) {
     setupgroup($group);
     Exit(0);
 }
 
-if (defined($query->param('userprefs'))) {
-    setupuserpreferences($group);
-    Exit(0);
-}
-
-if (defined($query->param('summarizegroup'))) {
-    print "<title>group summary: $group</title>\n";
-    summarizeerrors("where groupname = '$group'");
-    Exit(0);
-}
-
-if (defined($host) && defined($query->param('summarizehost'))) {
-    print "<title>host summary: $host</title>\n";
-    summarizeerrors("where groupname = '$group' and host = '$host'");
-    Exit(0);
-}
-
+#===========================================================================
+# save configuration information submitted about a group
+#===========================================================================
 if (defined($query->param('setupgroupsubmit')) && 
     isadmin()) {
     setupgroupsubmit($group);
@@ -150,6 +157,17 @@ if (defined($query->param('setupgroupsubmit')) &&
     Exit(0);
 }
 
+#===========================================================================
+# user preferences
+#===========================================================================
+if (defined($query->param('userprefs'))) {
+    setupuserpreferences($group);
+    Exit(0);
+}
+
+#===========================================================================
+# save submitted user preferences
+#===========================================================================
 if (defined($query->param('setupuserprefssubmit')) && 
     isadmin()) {
     setupusersubmit($group);
@@ -159,6 +177,27 @@ if (defined($query->param('setupuserprefssubmit')) &&
     Exit(0);
 }
 
+#===========================================================================
+# summarize problems in a group
+#===========================================================================
+if (defined($query->param('summarizegroup'))) {
+    print "<title>group summary: $group</title>\n";
+    summarizeerrors("where groupname = '$group'");
+    Exit(0);
+}
+
+#===========================================================================
+# summarize problems on a host
+#===========================================================================
+if (defined($host) && defined($query->param('summarizehost'))) {
+    print "<title>host summary: $host</title>\n";
+    summarizeerrors("where groupname = '$group' and host = '$host'");
+    Exit(0);
+}
+
+#===========================================================================
+# display a list of hosts in a group
+#===========================================================================
 if (!defined($host)) {
     displaytable('hostgroups', 
 		 '-notitle',0,
@@ -191,10 +230,18 @@ if (!defined($host)) {
 	$q =~ s/\?.*//;
 	print "<a href=\"" . addtoken($q,"group=$group&setupgroup=1") . "\">setup group $group</a>\n";
     }
-} else {
-    showhost($host);
 }
+
+#===========================================================================
+# display inforamation about a host
+#===========================================================================
+showhost($host);
 Exit(0);
+
+#===========================================================================
+# END of main
+#===========================================================================
+
 
 # add a token to a url string.  Use either a ? or an & depending on
 # existence of ?.
@@ -228,6 +275,11 @@ sub summarizeerrors {
     print "</table>";
 }
 
+#
+# getcursor(CMD):
+#    genericlly get a cursor for a given sql command, displaying and
+#    printing errors where necessary.
+#
 sub getcursor {
     my $cmd = shift;
     my $cursor;
@@ -238,7 +290,11 @@ sub getcursor {
     return $cursor;
 }
 
-# sort things by mib location, or hard coded order.
+#
+# mykeysort($a, $b)
+#    sorts $a and $b against the order in the mib or against the hard
+#    coded special list.
+#
 sub mykeysort {
     $mb = $SNMP::MIB{SNMP::translateObj($b)};
     $ma = $SNMP::MIB{SNMP::translateObj($a)};
@@ -249,30 +305,25 @@ sub mykeysort {
     $ma->{'subID'} <=> $mb->{'subID'};
 }
 
-# if anything in a host is red, return 1, else 0
+#
+# checkhost(GROUP, HOST):
+#    if anything in a host is an error, as defined by the
+#    errorexpressions table, return 1, else 0
+#
 sub checkhost {
     my $group = shift;
     my $host = shift;
     my ($tblh);
 
+    return 2 if ($dbh->do("select * from hosterrors where host = '$host'"));
+
     # get a list of tables we want to display
-    my $cmd = "SELECT * FROM hosttables where (host = '$host' and groupname = '$group')";
-    print " $cmd\n" if ($verbose);
-    ( $tblh = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $tblh->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
+    $tblh = getcursor("SELECT * FROM hosttables where (host = '$host' and groupname = '$group')");
 
     # table data
-    my($exprs);
+    my($exprs, $tablelist);
     while ( $tablelist = $tblh->fetchrow_hashref ) {
-	$cmd = "SELECT * FROM errorexpressions where (tablename = '$tablelist->{tablename}')";
-	print " $cmd\n" if ($verbose);
-	( $exprs = $dbh->prepare( $cmd ) )
-	    or die "\nnot ok: $DBI::errstr\n";
-	( $exprs->execute )
-	    or print( "\tnot ok: $DBI::errstr\n" );
-
+	$exprs = getcursor("SELECT * FROM errorexpressions where (tablename = '$tablelist->{tablename}')");
 	while($expr = $exprs->fetchrow_hashref) {
 	    if ($dbh->do("select * from $tablelist->{tablename} where $expr->{expression} and host = '$host'") ne "0E0") {
 		return 1;
@@ -282,7 +333,11 @@ sub checkhost {
     return 0;
 }
 
-# display all the tables associated with a host
+#
+#  showhost(HOST):
+#
+#    display all the tables monitored for a given host (in a group).
+#
 sub showhost {
     my $host = shift;
     # host header
@@ -290,12 +345,7 @@ sub showhost {
     print "<h3>host: $host</h3>\n";
 
     # get a list of tables we want to display
-    $cmd = "SELECT * FROM hosttables where (host = '$host' and groupname = '$group')";
-    print " $cmd\n" if ($verbose);
-    ( $tblh = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $tblh->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
+    $tblh = getcursor("SELECT * FROM hosttables where (host = '$host' and groupname = '$group')");
 
     # table data
     my($tablelist);
@@ -310,13 +360,24 @@ sub showhost {
     }
 }
 
+#
+#  linktodisplayinfo(STRING):
+#
+#    returns a url to the appropriate displayinfo link if STRING is a
+#    mib node.
+#
 sub linktodisplayinfo {
     return if (exists($myorder{$l}));
     return $query->self_url . "&displayinfo=" . shift;
 }
 
-# display a red or a green dot in a table dependent on the table's
-# values and associated expression
+# printredgreen(TABLENAME, DATA):
+#
+#   display a red or a green dot in a table dependent on the table's
+#   values and associated expression
+#
+#   DATA is NULL when in a header row (displaying header names).
+#
 sub printredgreen {
     my $tablename = shift;
     my $data = shift;
@@ -344,7 +405,10 @@ sub printredgreen {
     print "<td><img src=$img></td>";
 }
 
-# genericly displays any sql table in existence.
+# displaytable(TABLENAME, CONFIG...):
+#
+#   genericly displays any sql table in existence.
+#
 sub displaytable {
     my $tablename = shift;
     my %config = @_;
@@ -359,12 +423,7 @@ sub displaytable {
     my ($thetable, $data, $ref);
 
     # get a list of data from the table we want to display
-    $cmd = "SELECT $selectwhat FROM $tablename $clauses";
-    print STDERR " $cmd\n" if ($verbose);
-    ( $thetable = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $thetable->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
+    $thetable = getcursor("SELECT $selectwhat FROM $tablename $clauses");
 
     my $prefs = $dbh->prepare($config{'-dontdisplaycol'}) if ($config{'-dontdisplaycol'});
 
@@ -427,6 +486,9 @@ sub displaytable {
 }
     
 
+#
+# display information about a given mib node as a table.
+#
 sub makemibtable {
     my $dispinfo = shift;
     # display information about a data type in a table
@@ -481,6 +543,7 @@ sub gethostsforgroup {
     @ret;
 }
 
+# display the host add entry box
 sub addhostentryform {
     print "<form method=\"get\" action=\"" . $query->self_url . "\">\n";
     print "Add new host to group: <input type=\"text\" name=\"newhost\">";
@@ -497,7 +560,7 @@ sub isadmin {
     return 0;
 }
 
-#is user a admin?
+#is user a member of this group?
 sub isuser {
     my $user = shift;
     $user = $remuser if (!defined($user));
@@ -506,6 +569,10 @@ sub isuser {
     return 0;
 }
 
+# displayconfigarray(HOSTS, NAMES, CONFIG):
+#
+#   displays an array of generic check buttons to turn on/off certain
+#   variables.
 sub displayconfigarray {
     my $hosts = shift;
     my $names = shift;
@@ -542,6 +609,9 @@ sub displayconfigarray {
 }
 
 
+#
+# display the setup information page for a given group.
+#
 sub setupgroup {
     my $group = shift;
     
@@ -557,21 +627,20 @@ sub setupgroup {
     print "</form>";
 }
 
+# a wrapper around fetching arrays of everything in a table.
 sub getarrays {
     my $table = shift;
     my %config = @_;
     my $selectwhat = $config{'-select'} || "*";
     my $handle;
     
-    my $cmd = "SELECT $selectwhat FROM $table $config{-clauses}";
-    print " $cmd\n" if ($verbose);
-    ( $handle = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $handle->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
+    $handle = getcursor("SELECT $selectwhat FROM $table $config{-clauses}");
     return $handle->fetchall_arrayref;
 }
 
+#
+# get a list of all tablenames and hostnames for a given group.
+#
 sub gethostandgroups {
     my $group = shift;
     my ($tbnms);
@@ -585,16 +654,6 @@ sub gethostandgroups {
 			  "-clauses", "where groupname = '$group'");
     
     return ($hosts, $names);
-}
-
-sub settable {
-    my $table = shift;
-    my $keys = shift;
-    my %config = @_;
-    if (defined($config{'-deleteclause'})) {
-	$dbh->do("delete from $table $config{-deleteclause}");
-    }
-
 }
 
 sub setupgroupsubmit {
@@ -616,6 +675,9 @@ sub setupgroupsubmit {
     
 }
 
+#
+# save user pref data submitted by the user
+#
 sub setupusersubmit {
     my $tables = getarrays('hosttables', 
 			   "-select", 'distinct tablename',
@@ -651,6 +713,10 @@ sub Exit {
     exit shift;
 }
 
+#
+# setup user preferences by displaying a configuration array of
+# checkbuttons for each table.
+#
 sub setupuserpreferences {
     my $tables = getarrays('hosttables', 
 			   "-select", 'distinct tablename',
