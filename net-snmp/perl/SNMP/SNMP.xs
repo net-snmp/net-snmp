@@ -4558,9 +4558,14 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            struct tree *module_tree = NULL;
            char modbuf[256];
+           int  old_format;   /* Current NETSNMP_DS_LIB_OID_OUTPUT_FORMAT */
 
            str_buf[0] = '\0';
            str_buf_temp[0] = '\0';
+
+           /* Save old output format and set to FULL so long_names works */
+           old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
+           netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, NETSNMP_OID_OUTPUT_FULL);
 
   	   switch (mode) {
               case SNMP_XLATE_MODE_TAG2OID:
@@ -4612,6 +4617,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
            } else {
               RETVAL = (char*)NULL;
            }
+           netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, old_format);
 	}
         OUTPUT:
         RETVAL
