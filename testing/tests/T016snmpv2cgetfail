@@ -21,6 +21,6 @@ CAPTURE "snmpget $SNMP_FLAGS -v 2c localhost notavalidcommunity system.sysUpTime
 
 STOPAGENT
 
-CHECK "No Such Object available on this agent"
+CHECK "authorizationError"
 
 FINISHED
