@@ -179,6 +179,7 @@ struct tree *find_node (char *, struct tree*);
 struct module *find_module (int);
 void adopt_orphans (void);
 void snmp_set_mib_warnings (int);
+void snmp_set_mib_errors (int);
 void snmp_set_save_descriptions (int);
 void snmp_set_mib_comment_term (int);
 void snmp_set_mib_parse_label (int);
