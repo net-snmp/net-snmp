@@ -1077,9 +1077,25 @@ the -h switch:
  snmpd -h
  snmptrapd -h
 
-Note:  -H will display all available snmpd.conf, snmptrapd.conf and snmp.conf
+Notes: -H will display all available snmpd.conf, snmptrapd.conf and snmp.conf
        configuration file options, not the command line options.
 
+       Like all Net-SNMP applications, snmpd and snmptrapd will read the 
+       system environment variables SNMPCONFPATH, SNMPSHAREPATH etc even when
+       run as a service.  Due to a limitation in the Windows SCM, if any system
+       environment variables are changed, the system will need to be rebooted 
+       to allow the services to access the changed environment variables (see 
+       Microsoft knowledge base article 821761).  Therefore, if the location 
+       of the various configuration files is different than what was selected 
+       during compilation, a reboot will be required after setting the environment
+       variables, otherwise the services may fail to start.
+
+       If Net-SNMP was installed from a .exe binary release and was installed 
+       in a non default directory, a reboot will be required to allow the
+       services to access the SNMPCONFPATH and SNMPSHAREPATH variables.  
+       If the system is not rebooted, the services may fail to start and they 
+       will not be able to locate any configuration or MIB files.
+     
 
 Unregistering the services
 --------------------------
