@@ -22,7 +22,7 @@ extern "C" {
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-#define DEFAULT_MIBDIRS INSTALL_BASE ## "/mibs"
+#define DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
 
 /* default mib files to load, specified by path. */
 #undef DEFAULT_MIBFILES
