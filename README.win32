@@ -33,6 +33,7 @@ a program that is available from Microsoft or ACE#COMM.
 
 The remainder of this guide has the following sections :
 
+Installing Platform SDK
 Removing agentx from MS VC++ build
 Building with MS VC++
 Building with OpenSSL with MS VC++
@@ -41,6 +42,30 @@ Building with Cygwin
 Installing with Cygwin
 Build script for use with Cygwin
 Acknowledgements
+
+----
+Installing Platform SDK
+
+The core elements of the mibII group of the agent, use the "IP Helper API"
+which is part of Microsoft's "Core Platform SDK".  This is typically
+not installed by default, but can be downloaded from
+		http://msdn.microsoft.com/downloads/
+as follows:
+
+    -  Using Internet Explorer (Netscape won't work), go to the above URL
+    -  From the menu at the left, select
+		"Software Development Kits"
+		"Platform SDK"
+    -  From the new window that appears, select "Core SDK".
+    -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
+       In fact, the only portion that's required is the basic "Build Environment" (36Mb)
+       so it's safe to deselect the pre-release version, documentation, sample code
+       and 64-bit elements.
+
+    -  Once this package has installed, from the Start Menu run
+	"Register PSDK directories with Visual Studio"
+
+The full agent should now compile successfully.
 
 ----
 Removing agentx from MS VC++ build
