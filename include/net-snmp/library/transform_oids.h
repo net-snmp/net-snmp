@@ -12,4 +12,10 @@ const oid usmHMACSHA1AuthProtocol[10]; 	/* == { 1,3,6,1,6,3,10,1,1,3 }; */
 const oid usmNoPrivProtocol[10];	/* == { 1,3,6,1,6,3,10,1,2,1 }; */
 const oid usmDESPrivProtocol[10];	/* == { 1,3,6,1,6,3,10,1,2,2 }; */
 
+#define USM_AUTH_PROTO_NOAUTH_LEN 10
+#define USM_AUTH_PROTO_MD5_LEN 10
+#define USM_AUTH_PROTO_SHA_LEN 10
+#define USM_PRIV_PROTO_NOPRIV_LEN 10
+#define USM_PRIV_PROTO_DES_LEN 10
+
 #endif
