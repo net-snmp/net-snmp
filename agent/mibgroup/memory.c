@@ -84,6 +84,76 @@
 int minimumswap;
 static int pageshift;           /* log base 2 of the pagesize */
 
+#ifdef linux
+enum meminfo_row { meminfo_main = 0,
+		   meminfo_swap };
+
+enum meminfo_col { meminfo_total = 0, meminfo_used, meminfo_free,
+		   meminfo_shared, meminfo_buffers, meminfo_cached
+};
+#define MEMINFO_FILE "/proc/meminfo"
+
+static char buf[300];
+
+/* This macro opens FILE only if necessary and seeks to 0 so that successive
+   calls to the functions are more efficient.  It also reads the current
+   contents of the file into the global buf.
+*/
+#define FILE_TO_BUF(FILE) {					\
+    static int n, fd = -1;					\
+    if (fd == -1 && (fd = open(FILE, O_RDONLY)) == -1) {	\
+	close(fd);						\
+	return 0;						\
+    }								\
+    lseek(fd, 0L, SEEK_SET);					\
+    if ((n = read(fd, buf, sizeof buf - 1)) < 0) {		\
+	close(fd);						\
+	fd = -1;						\
+	return 0;						\
+    }								\
+    buf[n] = '\0';						\
+}
+
+#define MAX_ROW 3	/* these are a little liberal for flexibility */
+#define MAX_COL 7
+
+unsigned** meminfo(void) {
+    static unsigned *row[MAX_ROW + 1];		/* row pointers */
+    static unsigned num[MAX_ROW * MAX_COL];	/* number storage */
+    char *p;
+    int i, j, k, l;
+    
+    FILE_TO_BUF(MEMINFO_FILE)
+    if (!row[0])				/* init ptrs 1st time through */
+	for (i=0; i < MAX_ROW; i++)		/* std column major order: */
+	    row[i] = num + MAX_COL*i;		/* A[i][j] = A + COLS*i + j */
+    p = buf;
+    for (i=0; i < MAX_ROW; i++)			/* zero unassigned fields */
+	for (j=0; j < MAX_COL; j++)
+	    row[i][j] = 0;
+    for (i=0; i < MAX_ROW && *p; i++) {		/* loop over rows */
+	while(*p && !isdigit(*p)) p++;		/* skip chars until a digit */
+	for (j=0; j < MAX_COL && *p; j++) {	/* scanf column-by-column */
+	    l = sscanf(p, "%u%n", row[i] + j, &k);
+	    p += k;				/* step over used buffer */
+	    if (*p == '\n' || l < 1)		/* end of line/buffer */
+		break;
+	}
+    }
+/*    row[i+1] = NULL;	terminate the row list, currently unnecessary */
+    return row;					/* NULL return ==> error */
+}
+unsigned memory(int index)
+{
+	unsigned **mem = meminfo();
+	return mem[meminfo_main][index] / 1024;
+}
+unsigned memswap(int index)
+{
+	unsigned **mem = meminfo();
+	return mem[meminfo_swap][index] / 1024;
+}
+#else
 #define  KNLookup(nl_which, buf, s)   (klookup((int) memory_nl[nl_which].n_value, buf, s))
 #define pagetok(size) ((size) << pageshift)
 
@@ -112,11 +182,12 @@ static struct nlist memory_nl[] = {
 #endif
   { 0 }
 };
+#endif
 
 void init_memory()
 {
   int pagesize;
-
+#ifndef linux
   init_nlist( memory_nl );
 
 #ifndef bsdi2
@@ -134,6 +205,7 @@ void init_memory()
     pagesize >>= 1;
   }
   pageshift -= 10;
+#endif
 }
 
 #define SWAPGETLEFT 0
@@ -147,6 +219,10 @@ int getswap(rettype)
 {
   int spaceleft=0, spacetotal=0, i, fd;
 
+#ifdef linux
+	spaceleft = memswap(meminfo_free);
+	spacetotal = memswap(meminfo_total);
+#else
 #ifdef bsdi2
   struct swapstats swapst;
   size_t size = sizeof(swapst);
@@ -196,6 +272,7 @@ int getswap(rettype)
     return(NULL);
   }
 #endif
+#endif
   switch
     (rettype) {
     case SWAPGETLEFT:
@@ -226,11 +303,13 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
   struct myproc *proc;
   static long long_ret;
   static char errmsg[300];
-
+#ifndef linux
   struct vmtotal total;
+#endif
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
+#ifndef linux
 #ifdef bsdi2
     /* sum memory statistics */
     {
@@ -242,6 +321,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
   if (KNLookup(NL_TOTAL, (int *)&total, sizeof(total)) == NULL) {
     return(0);
   }
+#endif
 #endif
   switch (vp->magic) {
     case MIBINDEX:
@@ -261,6 +341,9 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       long_ret = minimumswap;
       return((u_char *) (&long_ret));
     case MEMTOTALREAL:
+#ifdef linux
+	long_ret = memory(meminfo_total);
+#else
 #ifdef bsdi2
       {	
 	size_t size = sizeof(long_ret);
@@ -274,10 +357,16 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
         return NULL;
       long_ret = result*1000;
 #endif
+#endif
       return((u_char *) (&long_ret));
     case MEMUSEDREAL:
+#ifdef linux
+	long_ret = memory(meminfo_used);
+#else
       long_ret = pagetok((int) total.t_arm);
+#endif
       return((u_char *) (&long_ret));
+#ifndef linux
     case MEMTOTALSWAPTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_vmtxt);
@@ -298,8 +387,13 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       long_ret = pagetok(total.t_armtxt);
 #endif
       return((u_char *) (&long_ret));
+#endif
     case MEMTOTALFREE:
+#ifdef linux
+	long_ret = memory(meminfo_free);
+#else
       long_ret = pagetok(total.t_free);
+#endif
       return((u_char *) (&long_ret));
     case ERRORFLAG:
       long_ret = getswap(SWAPGETLEFT);
