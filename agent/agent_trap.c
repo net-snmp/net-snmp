@@ -300,8 +300,7 @@ void send_enterprise_trap_vars (int trap,
     netsnmp_variable_list uptime_var, snmptrap_var, enterprise_var;
     netsnmp_variable_list *v2_vars, *last_var=NULL;
     netsnmp_pdu	*template_pdu;
-    struct timeval	 now;
-    long uptime;
+    u_long uptime;
     in_addr_t *pdu_in_addr_t;
     struct trap_sink *sink;
     oid temp_oid[MAX_OID_LEN];
@@ -309,8 +308,7 @@ void send_enterprise_trap_vars (int trap,
 		/*
 		 * Initialise SNMPv2 required variables
 		 */
-    gettimeofday(&now, NULL);
-    uptime = calculate_time_diff(&now, &starttime);
+    uptime = netsnmp_get_agent_uptime();
     memset (&uptime_var, 0, sizeof (netsnmp_variable_list));
     snmp_set_var_objid( &uptime_var, sysuptime_oid, OID_LENGTH(sysuptime_oid));
     snmp_set_var_value( &uptime_var, (u_char *)&uptime, sizeof(uptime) );

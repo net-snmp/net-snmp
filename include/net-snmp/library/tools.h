@@ -147,7 +147,10 @@ typedef void * marker_t;
 marker_t atime_newMarker(void);
 void atime_setMarker(marker_t pm);
 long atime_diff( marker_t first, marker_t second );
+u_long uatime_diff( marker_t first, marker_t second ); /* 1/1000th sec */
+u_long uatime_hdiff( marker_t first, marker_t second ); /* 1/100th sec */
 int atime_ready( marker_t pm, int deltaT);
+int uatime_ready( marker_t pm, unsigned int deltaT);
 
 int marker_tticks( marker_t pm );
 int timeval_tticks( struct timeval *tv );

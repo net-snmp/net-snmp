@@ -716,6 +716,41 @@ long atime_diff( marker_t first, marker_t second )
 }
 
 /*
+ * Returns the difference (in u_long msec) between the two markers
+ */
+u_long uatime_diff( marker_t first, marker_t second )
+{
+    struct timeval *tv1, *tv2, diff;
+
+    tv1 = (struct timeval *)first;
+    tv2 = (struct timeval *)second;
+
+    diff.tv_sec  = tv2->tv_sec  - tv1->tv_sec  - 1;
+    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+
+    return ( ((u_long) diff.tv_sec) * 1000 + diff.tv_usec/1000 );
+}
+
+/*
+ * Returns the difference (in u_long 1/100th secs) between the two markers
+ * (functionally this is what sysUpTime needs)
+ */
+u_long uatime_hdiff( marker_t first, marker_t second )
+{
+    struct timeval *tv1, *tv2, diff;
+    u_long res;
+
+    tv1 = (struct timeval *)first;
+    tv2 = (struct timeval *)second;
+
+    diff.tv_sec  = tv2->tv_sec  - tv1->tv_sec  - 1;
+    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+
+    res = ((u_long) diff.tv_sec) * 100 + diff.tv_usec/10000;
+    return res;
+}
+
+/*
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
@@ -728,6 +763,26 @@ int atime_ready( marker_t pm, int deltaT)
   now = atime_newMarker();
 
   diff = atime_diff( pm, now );
+  free( now );
+  if ( diff < deltaT )
+	return 0;
+
+  return 1;
+}
+
+/*
+ * Test: Has (marked time plus delta) exceeded current time (in msec) ?
+ * Returns 0 if test fails or cannot be tested (no marker).
+ */
+int uatime_ready( marker_t pm, unsigned int deltaT)
+{
+  marker_t now;
+  u_long diff;
+  if (! pm) return 0;
+
+  now = atime_newMarker();
+
+  diff = uatime_diff( pm, now );
   free( now );
   if ( diff < deltaT )
 	return 0;

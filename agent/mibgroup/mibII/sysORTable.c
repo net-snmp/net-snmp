@@ -113,7 +113,7 @@ var_sysORTable(struct variable *vp,
 		size_t *var_len,
 		WriteMethod **write_method)
 {
-  unsigned long i = 0;
+  unsigned long i = 0, ret;
   struct sysORTable *ptr = table;
 
   if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
@@ -139,8 +139,8 @@ var_sysORTable(struct variable *vp,
     return (u_char *)ptr->OR_descr;
       
   case SYSORTABLEUPTIME:
-    long_return = netsnmp_timeval_uptime(&ptr->OR_uptime);
-    return (u_char *)&long_return;
+    ret = netsnmp_timeval_uptime(&ptr->OR_uptime);
+    return (u_char *)&ret;
 
   default:
     DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_sysORTable\n", vp->magic));
