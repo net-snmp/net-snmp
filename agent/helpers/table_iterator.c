@@ -368,6 +368,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
          */
         if (callback_loop_context && iinfo->free_loop_context) {
             (iinfo->free_loop_context) (callback_loop_context, iinfo);
+            callback_loop_context = NULL;
         }
 
       got_results:             /* not milk */
