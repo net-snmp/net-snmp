@@ -81,9 +81,11 @@ snmp_sess_timeout, snmp_sess_close, snmp_sess_error
 .br
 .B "int * block;
 .PP
-.B "void snmp_sess_read (Opaque)
+.B "void snmp_sess_read (Opaque, fdset)
 .br
 .B "void * Opaque;
+.br
+.B "fd_set * fdset;
 .PP
 .B "void snmp_sess_timeout (Opaque)
 .br
@@ -308,7 +310,7 @@ is called with the
 .I fd_set
 returned from
 .I select.
-This will read this session's SNMP socket with input.
+This will read any input from this session's SNMP socket.
 If
 .I select
 times out,
