@@ -1,93 +1,88 @@
 How to setup SNMPv3, a very brief document for Dave to elaborate and
 do a better job on since I suck and he doesn't ;-) --Wes:
 
-Note: Currently only MD5 support for authentication is available for
-snmpv3.  SHA support is coming shortly.  Also, due to U.S. export
-restrictions, which I haven't figured out how to handle yet,
-encryption support is not possible at this time.
+Note: Currently only authentication support for authentication is
+available for snmpv3.  SHA authentication support is only available if
+you have OpenSSL installed.  Due to U.S. export restrictions, which I
+haven't figured out how to handle yet, encryption support is not
+possible at this time.
 
-First, there are 3 users that exist in the agent already:
+CREATING THE FIRST USER:
 
-  initial:  something to start with, but probably shouldn't be used in 
-            production use.
+  First off, you need to add snmpd.conf VACM entries to allow you to use 
+  the SNMPv3 users you are going to create.  So, in your
+  /usr/local/share/snmp/snmpd.conf file (or equivalent) put the
+  following line:
 
-  templateMD5:
-  templateSHA:
-            These users are generic MD5 and SHA authentication users
-            (with DES where appropriate) that can be cloned from to
-            create new users.
+    rwuser myuser
 
-First off, you need to add snmpd.conf VACM entries to allow you to do
-something to allow you to create new users using an existing one
-(which will actually work with v1 and v2c, of course, but lets use v3
-authenticated requests only here):
+  Then, you need to actually create your new user and specify their
+  authentication type and pass phrase.  You can do this by putting the
+  following line in your /usr/local/share/snmp/snmpd.conf file:
 
-  group local   any        initial
-  view all    included  .1                               80
-  access local   ""      any       auth    0      all    all   all
+    createUser myuser MD5 my_password
 
-Note: these entries should only exist while you'red doing setup!
+  WARNING: SNMPv3 pass phrases must be at least 8 characters long!
 
-As long as we're here, lets add (which will be needed on a more
-permanent basis):
+  Now, you have a user "myuser" which can write to everything using MD5
+  authentication if the above 2 lines are in place.
 
-  group local   any        wes
+  Start the agent and test your setup:
 
-Also, you need to set the initial user's password in your snmpd.conf
-file.  Again, this entry shouldn't exist after you create your first
-user, because then you can use that instead. (the * is a wildcard for
-the engineID, which doesn't really need to be specified in 99% of the cases).
+    snmpget -v 3 -u myuser -n none -l authNoPriv -a MD5 -A my_password localhost sysUpTime.0
 
-  userSetAuthPass initial * setup_password
+  SECURITY CONSIDERATIONS: Even better is to place the above
+  "createUser" line in /var/ucd-snmp/snmpd.conf instead of
+  /usr/local/share/snmp/snmpd.conf.  The reason this is better is that
+  the password will be automatically erased from the file the next time
+  the agent shuts down and only the derived secret key will
+  remembered. Even better is that actually only the localized secret key
+  will be remembered and if the machine is broken into, it'll be
+  impossible to use this localized key to get access to any of your
+  other hosts.
 
-Now, you have a user "initial" which can write to everything using MD5
-authentication if the above 4 lines are in place.  Also add a line(s)
-to add a password for templateMD5 and templateSHA (only templaceMD5
-used here):
+CREATING A SECOND USER:
 
-  userSetAuthPass templateMD5 * initial_MD5_pass
+  Start the agent (if you haven't yet).
 
-Note: passwords (passphrases really) must be 8 characters minimum in length.
+  Now, lets create a second user using the first (just for fun) for both 
+  authentication and as a template (or "cloning source"):
 
-Start the agent.
+    snmpusm -v 3 -u myuser -n none -l authNoPriv -a MD5 -A my_password localhost create wes myuser
 
-Create a new user, here named "wes" using the user "initial" to do it.
-"wes" is cloned from templateMD5 in the process, so he inherits that
-users pasword.:
+  The above should have created the user "wes" with the same password as
+  the "myuser" user.  So then, you need to change his password using:
 
-  snmpusm -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost create wes templateMD5
+    snmpusm -v 3 -u wes -n none -l authNoPriv -a MD5 -A my_password localhost passwd -O my_password -N new_passphrase -a
 
-The above should have created the user "wes" with the same password as
-the templateMD5 user.  So then, you need to change his password using:
+  See, wasn't that easy?  You can now create users.  Wheeee....
 
-  snmpusm -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase -a
+  But, you'll have to add a configuration line that allows them access 
+  to do things.  Do this with another "rwuser" line in your
+  /usr/local/share/snmp/snmpd.conf file:
 
-See, wasn't that easy?
+    rwuser wes
 
-Now, test it:
+  Or, use "rouser" to only grant them read-only access.
 
-  snmpget -v 3 -u wes -n none -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0
+  Now, test your new user:
 
-Now, go remove the vacm "group" snmpd.conf entry for the "initial"
-user and you have a valid user 'wes' that you can use for future
-transactions instead of initial.
+    snmpget -v 3 -u wes -n none -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0
 
-The information about the newly created user is stored in
-/var/ucd-snmp/snmpd.conf, in the form of configuration lines, when the
-agent is shut down so that it is usable in next run in the future.
-Note that I think this file is currently world readable, which is very
-very wrong and we need to change this in snmplib/read_config.c.
+FURTHER STUDIES:
 
-Also note that the passkeys stored in /var/ucd-snmp/snmpd.conf are
-locked to a given engineID, which by default is based off of your IPv4 
-address.  This means that:
+  The information about the newly created users is stored in
+  /var/ucd-snmp/snmpd.conf, in the form of configuration lines, when the
+  agent is shut down so that it is usable in next run in the future.
 
-1) You can't copy/rdist the /var/ucd-snmp/snmpd.conf around.  (unless
-   you put a indentical "engineID" configuration lines in all your
-   snmpd.conf files).
-2) If you change the IP address of your machine and you're using the
-   default mechanism, your entire user database needs to be
-   re-created.  whee.
+  Also note that the passkeys stored in /var/ucd-snmp/snmpd.conf are
+  locked to a given engineID, which by default is based off of your IPv4 
+  address.  This means that:
+
+  1) You can't copy/rdist the /var/ucd-snmp/snmpd.conf around.
+  2) If you change the IP address of your machine and you're using the
+     default mechanism, your entire user database needs to be
+     re-created.  wheeee.
 
 Tired of all those command line options?
 ----------------------------------------
@@ -98,9 +93,10 @@ put this in your ~/.snmp/snmp.conf file:
   defAuthType MD5
   defSecurityLevel authNoPriv
   defAuthPassphrase new_passphrase
+  defVersion 3
 
 And then the above line boils down to:
 
-  snmpget -v 3 localhost sysUpTime.0
+  snmpget localhost sysUpTime.0
 
-Ugg.  Have fun?
+Which is about as simple as I can make it for ya ;-)
