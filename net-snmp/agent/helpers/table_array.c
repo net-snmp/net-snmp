@@ -518,7 +518,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             if (!row) {
                 DEBUGMSGTL(("table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current,
-                                          SNMP_ERR_NOSUCHNAME);
+                                          SNMP_NOSUCHINSTANCE);
                 continue;
             }
         } /** GET */
@@ -598,6 +598,8 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
             i->tri = tblreq_info;
             i->next = g->list;
             g->list = i;
+
+            /** xxx-rks: store map of colnum to request */
             continue;
         }
 
@@ -611,6 +613,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         g->table = tad->table;
         i->ri = current;
         i->tri = tblreq_info;
+        /** xxx-rks: store map of colnum to request */
 
         /*
          * search for row. all changes are made to the original row,
@@ -620,7 +623,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
         if (!g->existing_row) {
             if (!tad->cb->create_row) {
                 netsnmp_set_request_error(agtreq_info, current,
-                                          SNMP_ERR_NOSUCHNAME);
+                                          SNMP_NOSUCHINSTANCE);
                 free(g);
                 free(i);
                 continue;
