@@ -891,7 +891,7 @@ Again:	/*
 }
 #endif
 
-static struct inpcb tcp_inpcb, *tcp_prev
+static struct inpcb tcp_inpcb, *tcp_prev;
 #ifdef PCB_TABLE
 static struct inpcb *tcp_next, *tcp_head;
 #endif
@@ -912,7 +912,7 @@ void TCP_Scan_Init (void)
 #else	/* PCB_TABLE */
     auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
-    tcp_head = tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
+    tcp_prev = (struct inpcb *) auto_nlist_value(TCP_SYMBOL);
 #else
     tcp_head = tcp_prev = (struct inpcb *)&((struct inpcbtable *)auto_nlist_value(TCP_SYMBOL))->inpt_queue.cqh_first;
 #endif
