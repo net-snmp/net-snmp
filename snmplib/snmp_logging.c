@@ -948,7 +948,8 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
     }
     event_msg[0] = string;
     event_msg[1] = NULL;
-    if (!ReportEvent(eventlog_h, etype, 0, 0x64, NULL, 1, 0, event_msg, NULL)) {
+    /* NOTE: 4th parameter must match winservice.mc:MessageId value */
+    if (!ReportEvent(eventlog_h, etype, 0, 100, NULL, 1, 0, event_msg, NULL)) {
 	    /*
 	     * Hmmm.....
 	     * Maybe disable this handler, and log the error ?
