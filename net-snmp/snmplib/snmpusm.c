@@ -1183,28 +1183,17 @@ usm_secmod_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms) {
                                 parms->secName, parms->secNameLen,
                                 parms->secLevel,
                                 parms->scopedPdu, parms->scopedPduLen,
-                                parms->secStateRef,
-                                *(parms->wholeMsg), parms->wholeMsgLen);
+				parms->secStateRef,
+                                parms->wholeMsg, parms->wholeMsgLen,
+				parms->wholeMsgOffset);
 }
 
 int
 usm_rgenerate_out_msg (
      int      msgProcModel,	/* (UNUSED) */
-
      u_char  *globalData,	/* IN */
-		/* Pointer to msg header data will point to the beginning
-		 * of the entire packet buffer to be transmitted on wire,
-		 * memory will be contiguous with secParams, typically
-		 * this pointer will be passed back as beginning of
-		 * wholeMsg below.  asn seq. length is updated w/ new length.
-		 *
-		 * While this points to a buffer that should be big enough
-		 * for the whole message, only the first two parts
-		 * of the message are completed, namely SNMPv3Message and
-		 * HeaderData.  globalDataLen (next parameter) represents
-		 * the length of these two completed parts.
-		 */
-
+     /*  points at the msgGlobalData, which is of length given by next 
+	 parameter.  */
      size_t   globalDataLen,	/* IN - Length of msg header data.	*/
      int      maxMsgSize,	/* (UNUSED) */
      int      secModel,		/* (UNUSED) */
@@ -1228,14 +1217,16 @@ usm_rgenerate_out_msg (
 		 * Response, otherwise NULL.
 		 */
 
-     u_char *wholeMsg,         /* OUT */
-		/* Complete authenticated/encrypted message - typically
-		 * the pointer to start of packet buffer provided in
-		 * globalData is returned here, could also be a separate
-		 * buffer.
-		 */
-
-     size_t *wholeMsgLen)          /* IN/OUT - Len available, len returned. */
+     u_char **wholeMsg,         /*  IN/OUT  */
+     /*  Points at the pointer to the packet buffer, which might get extended
+	 if necessary via realloc().  */
+     size_t *wholeMsgLen,	/*  IN/OUT  */
+     /*  Length of the entire packet buffer, **not** the length of the
+	 packet.  */
+     size_t *offset		/*  IN/OUT  */
+     /*  Offset from the end of the packet buffer to the start of the packet,
+	 also known as the packet length.  */
+     )
 {
     size_t msgAuthParmLen = 0;
 #ifdef SNMP_TESTING_CODE
@@ -1272,12 +1263,11 @@ usm_rgenerate_out_msg (
     size_t  salt_length	 = 0;
     u_char  salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
     u_char  authParams[USM_MAX_AUTHSIZE];
-    u_char *authParamsPtr;
-    u_char *startcp;
-    u_char *endp = wholeMsg;
     u_char iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
+    size_t sp_offset = 0, mac_offset = 0;
+    int rc = 0;
 
-    DEBUGMSGTL(("usm","USM processing has begun.\n"));
+    DEBUGMSGTL(("usm", "USM processing has begun (offset %d)\n", *offset));
 
     if (secStateRef != NULL)
 	{
@@ -1388,266 +1378,245 @@ usm_rgenerate_out_msg (
     boots_long = boots_uint;
     time_long  = time_uint;
 	
-    /* 
-	 * Do the encryption.
-	 */
-    if (theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
-	{
-            /* XXX: the max padding size supported is no more than 64 */
-            size_t cyphertextLen = scopedPduLen + 64; 
-            u_char *cyphertext = (u_char *) malloc(cyphertextLen);
-            if (!cyphertext)
-                return SNMPERR_MALLOC;
-            
-            /* XXX  Hardwired to seek into a 1DES private key!
-             */
-            salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
-            if ( !thePrivKey ||
-                 ( usm_set_salt(    salt,	   &salt_length,
-                                    thePrivKey+8,	thePrivKeyLength-8,
-                                    iv)
-                   == -1 ) )
-		{
-                    DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    SNMP_FREE(cyphertext);
-                    return SNMPERR_USM_GENERICERROR;
-		}
+    if (theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+      /*  Initially assume that the ciphertext will end up the same size as
+	  the plaintext plus some padding.  Really sc_encrypt ought to be able
+	  to grow this for us, a la asn_realloc_rbuild_<type> functions, but
+	  this will do for now.  */
+      u_char *ciphertext = NULL;
+      size_t  ciphertextlen = scopedPduLen + 64;
+
+      if ((ciphertext = (u_char *)malloc(ciphertextlen)) == NULL) {
+	DEBUGMSGTL(("usm","couldn't malloc %d bytes for encrypted PDU\n",
+		    ciphertextlen));
+	usm_free_usmStateReference(secStateRef);
+	return SNMPERR_MALLOC;
+      }
+
+      /* XXX Hardwired to seek into a 1DES private key!  */
+      salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
+      if (!thePrivKey || (usm_set_salt(salt,		&salt_length,
+				       thePrivKey+8,	thePrivKeyLength-8,
+				       iv) == -1)) {
+	DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
+	usm_free_usmStateReference (secStateRef);
+	free(ciphertext);
+	return SNMPERR_USM_GENERICERROR;
+      }
 
 #ifdef SNMP_TESTING_CODE
-            if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
-                dump_chunk("usm/dump", "This data was encrypted:",
-                           scopedPdu, scopedPduLen);
-            }
+      if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+	dump_chunk("usm/dump", "This data was encrypted:",
+		   scopedPdu, scopedPduLen);
+      }
 #endif
                 
-            if ( sc_encrypt(
-                thePrivProtocol,	 thePrivProtocolLength,
-                thePrivKey,		 thePrivKeyLength,
-                salt,			 salt_length,
-                scopedPdu,		 scopedPduLen,
-                cyphertext,	&cyphertextLen)
-                 != SNMP_ERR_NOERROR )
-		{
-                    DEBUGMSGTL(("usm","DES-CBC error.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    SNMP_FREE(cyphertext);
-                    return SNMPERR_USM_ENCRYPTIONERROR;
-		}
+      if (sc_encrypt(thePrivProtocol,	 thePrivProtocolLength,
+		     thePrivKey,	 thePrivKeyLength,
+		     salt,		 salt_length,
+		     scopedPdu,		 scopedPduLen,
+		     ciphertext,	&ciphertextlen) != SNMP_ERR_NOERROR) {
+	DEBUGMSGTL(("usm", "DES-CBC error.\n"));
+	usm_free_usmStateReference(secStateRef);
+	free(ciphertext);
+	return SNMPERR_USM_ENCRYPTIONERROR;
+      }
 
-            if (cyphertextLen > *wholeMsgLen) {
-                    DEBUGMSGTL(("usm","encrypted size too long.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    SNMP_FREE(cyphertext);
-                    return SNMPERR_TOO_LONG;
-            }
-            
-            /* copy it back onto the outgoing packet */
-#ifdef SNMP_TESTING_CODE
-            theTotalLength = *wholeMsgLen;
-#endif
-            wholeMsg = asn_rbuild_string (wholeMsg, wholeMsgLen,
-                                          (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|
-                                                    ASN_OCTET_STR),
-                                          cyphertext, cyphertextLen);
+      /*  Write the encrypted scopedPdu back into the packet buffer.  */
 
 #ifdef SNMP_TESTING_CODE
-            if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
-                dump_chunk("usm/dump", "salt + Encrypted form:",
-                           salt, salt_length);
-                dump_chunk("usm/dump", "wholeMsg:",
-                           wholeMsg+1, theTotalLength - *wholeMsgLen);
-            }
+      theTotalLength = *wholeMsgLen;
+#endif
+      *offset = 0;
+      rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       ciphertext, ciphertextlen);
+#ifdef SNMP_TESTING_CODE
+      if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+	dump_chunk("usm/dump", "salt + Encrypted form: ", salt, salt_length);
+	dump_chunk("usm/dump", "wholeMsg:",
+		   (*wholeMsg + *wholeMsgLen - *offset), *offset);
+      }
 #endif
 
-            DEBUGMSGTL(("usm","Encryption successful.\n"));
-            SNMP_FREE(cyphertext);
-	}
-
-    /* 
-	 * No encryption for you!
-	 */
-    else
-	{
-            /* mark the scoped pdu beginning of the whole msg */
-            wholeMsg -= scopedPduLen;
-            *wholeMsgLen -= scopedPduLen;
-	}
-
-    /* Start encoding the msgSecurityParameters. */
-
-    /* msgPrivacyParameters (warning: assumes DES salt) */
-    startcp = wholeMsg;
-    wholeMsg = asn_rbuild_string (wholeMsg, wholeMsgLen,
-                                 (u_char)
-                                 (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                                 iv, salt_length);
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building privParams failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+      DEBUGMSGTL(("usm","Encryption successful.\n"));
+      free(ciphertext);
+    } else {
+      /*  theSecLevel != SNMP_SEC_LEVEL_AUTHPRIV  */
     }
 
+    /*  Start encoding the msgSecurityParameters.  */
 
-    /* msgAuthenticationParameters (warnings assumes 0x00 by 12) */
+    sp_offset = *offset;
+
+    DEBUGDUMPHEADER("send", "msgPrivacyParameters");
+    /*  msgPrivacyParameters (warning: assumes DES salt).  */
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       iv, salt_length);
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building privParams failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
+    }
+
+    DEBUGDUMPHEADER("send", "msgAuthenticationParameters");
+    /*  msgAuthenticationParameters (warnings assumes 0x00 by 12).  */
     if (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
         || theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
-        memset(authParams, 0, USM_MD5_AND_SHA_AUTH_LEN);
-        msgAuthParmLen = USM_MD5_AND_SHA_AUTH_LEN;
+      memset(authParams, 0, USM_MD5_AND_SHA_AUTH_LEN);
+      msgAuthParmLen = USM_MD5_AND_SHA_AUTH_LEN;
     }
-    authParamsPtr = wholeMsg - msgAuthParmLen +1; /* remember this spot */
-    wholeMsg =
-        asn_rbuild_string (wholeMsg, wholeMsgLen,
-                          (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                          authParams, msgAuthParmLen);
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building authParams failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       authParams, msgAuthParmLen);
+    DEBUGINDENTLESS();
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building authParams failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
+
+    /*  Remember where to put the actual HMAC we calculate later on.  An
+	encoded OCTET STRING of length USM_MD5_AND_SHA_AUTH_LEN has an ASN.1
+	header of length 2, hence the fudge factor.  */
+
+    mac_offset = *offset - 2;
     
-    /* msgUserName */
+    /*  msgUserName.  */
     DEBUGDUMPHEADER("send", "msgUserName");
-    wholeMsg =
-        asn_rbuild_string (wholeMsg, wholeMsgLen,
-                          (u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                          (u_char *)theName, theNameLength);
+    rc = asn_realloc_rbuild_string (wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       (u_char *)theName, theNameLength);
     DEBUGINDENTLESS();
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building authParams failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building authParams failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
 
-    
-    /* msgAuthoritativeEngineTime */
+    /*  msgAuthoritativeEngineTime.  */
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineTime");
-    wholeMsg =
-        asn_rbuild_int (wholeMsg, wholeMsgLen,
-                       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                       &time_long, sizeof(long));
+    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &time_long, sizeof(long));
     DEBUGINDENTLESS();
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building msgAuthoritativeEngineTime failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building msgAuthoritativeEngineTime failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
 
-
-    /* msgAuthoritativeEngineBoots */
+    /*  msgAuthoritativeEngineBoots.  */
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineBoots");
-    wholeMsg =
-        asn_rbuild_int (wholeMsg, wholeMsgLen,
-                       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                       &boots_long, sizeof(long));
+    rc = asn_realloc_rbuild_int(wholeMsg, wholeMsgLen, offset,
+			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+			 &boots_long, sizeof(long));
     DEBUGINDENTLESS();
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building msgAuthoritativeEngineBoots failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building msgAuthoritativeEngineBoots failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
-
 
     DEBUGDUMPHEADER("send", "msgAuthoritativeEngineID");
-    wholeMsg =
-        asn_rbuild_string (wholeMsg, wholeMsgLen,
-                          (u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                          theEngineID, theEngineIDLength);
+    rc = asn_realloc_rbuild_string(wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       theEngineID, theEngineIDLength);
     DEBUGINDENTLESS();
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building msgAuthoritativeEngineID failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building msgAuthoritativeEngineID failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
 
-    /* USM msgSecurityParameters sequence header */
-    wholeMsg =
-        asn_rbuild_sequence (wholeMsg, wholeMsgLen, 
-                            (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                            startcp - wholeMsg);
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building usm security parameters failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    /*  USM msgSecurityParameters sequence header  */
+    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset,
+				     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				     *offset - sp_offset);
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building usm security parameters failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
 
-    /* msgSecurityParameters OCTET STRING wrapper */
-    wholeMsg =
-        asn_rbuild_header(wholeMsg, wholeMsgLen,
-                          (u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                          startcp - wholeMsg);
+    /*  msgSecurityParameters OCTET STRING wrapper.  */
+    rc = asn_realloc_rbuild_header(wholeMsg, wholeMsgLen, offset,
+		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+		       *offset - sp_offset);
 
-    /* copy in the rest of the headers */
-    if (*wholeMsgLen < globalDataLen) {
-        DEBUGMSGTL(("usm","building global data failed.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
-    }
-    wholeMsg -= globalDataLen;
-    *wholeMsgLen -= globalDataLen;
-    memcpy(wholeMsg+1, globalData, globalDataLen);
-
-
-    /* total packet sequence */
-    wholeMsg =
-        asn_rbuild_sequence (wholeMsg, wholeMsgLen, 
-                            (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                            endp - wholeMsg);
-    if (wholeMsg == NULL) {
-        DEBUGMSGTL(("usm","building master packet sequence.\n"));
-        usm_free_usmStateReference (secStateRef);
-        return SNMPERR_TOO_LONG;
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building msgSecurityParameters failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
     }
 
-    /* 
-     * Now, time to consider / do authentication.
-     */
-    if (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
-        || theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
-	{
-            size_t	temp_sig_len	= msgAuthParmLen;
-            u_char *temp_sig	= (u_char *) malloc (temp_sig_len);
-            if (temp_sig == NULL)
-		{
-                    DEBUGMSGTL(("usm","Out of memory.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    return SNMPERR_USM_GENERICERROR;
-		}
+    /*  Copy in the msgGlobalData and msgVersion.  */
+    while ((*wholeMsgLen - *offset) < globalDataLen) {
+      if (!asn_realloc(wholeMsg, wholeMsgLen)) {
+        DEBUGMSGTL(("usm" ,"building global data failed.\n"));
+        usm_free_usmStateReference(secStateRef);
+        return SNMPERR_TOO_LONG;	
+      }
+    }
 
-            if ( sc_generate_keyed_hash (
-                theAuthProtocol,	 theAuthProtocolLength,
-                theAuthKey,		 theAuthKeyLength,
-                wholeMsg+1,		 endp - wholeMsg,
-                temp_sig,		&temp_sig_len)
-                 != SNMP_ERR_NOERROR )
-		{
-                    SNMP_FREE(temp_sig);
-                    DEBUGMSGTL(("usm","Signing failed.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    return SNMPERR_USM_AUTHENTICATIONFAILURE;
-		}
+    *offset += globalDataLen;
+    memcpy(*wholeMsg + *wholeMsgLen - *offset, globalData, globalDataLen);
 
-            if (temp_sig_len != msgAuthParmLen)
-		{
-                    SNMP_FREE(temp_sig);
-                    DEBUGMSGTL(("usm","Signing lengths failed.\n"));
-                    usm_free_usmStateReference (secStateRef);
-                    return SNMPERR_USM_AUTHENTICATIONFAILURE;
-		}
+    /*  Total packet sequence.  */
+    rc = asn_realloc_rbuild_sequence(wholeMsg, wholeMsgLen, offset,
+				     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				     *offset);
+    if (rc == 0) {
+      DEBUGMSGTL(("usm", "building master packet sequence failed.\n"));
+      usm_free_usmStateReference(secStateRef);
+      return SNMPERR_TOO_LONG;
+    }
 
-            memcpy (authParamsPtr, temp_sig, msgAuthParmLen);
+    /*  Now consider / do authentication.  */
 
-            SNMP_FREE(temp_sig);
-	}  /* endif -- create keyed hash */
+    if (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV ||
+	theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+      size_t temp_sig_len = msgAuthParmLen;
+      u_char *temp_sig = (u_char *)malloc(temp_sig_len);
+      u_char *proto_msg = *wholeMsg + *wholeMsgLen - *offset;
+      size_t  proto_msg_len = *offset;
+      
 
+      if (temp_sig == NULL) {
+	DEBUGMSGTL(("usm","Out of memory.\n"));
+	usm_free_usmStateReference (secStateRef);
+	return SNMPERR_USM_GENERICERROR;
+      }
 
-    usm_free_usmStateReference (secStateRef);
+      if (sc_generate_keyed_hash(theAuthProtocol,	 theAuthProtocolLength,
+				 theAuthKey,		 theAuthKeyLength,
+				 proto_msg,		 proto_msg_len,
+				 temp_sig,		&temp_sig_len)
+	  != SNMP_ERR_NOERROR) {
+	SNMP_FREE(temp_sig);
+	DEBUGMSGTL(("usm",  "Signing failed.\n"));
+	usm_free_usmStateReference (secStateRef);
+	return SNMPERR_USM_AUTHENTICATIONFAILURE;
+      }
 
-    DEBUGMSGTL(("usm","USM processing completed.\n"));
-	
+      if (temp_sig_len != msgAuthParmLen) {
+	SNMP_FREE(temp_sig);
+	DEBUGMSGTL(("usm", "Signing lengths failed.\n"));
+	usm_free_usmStateReference (secStateRef);
+	return SNMPERR_USM_AUTHENTICATIONFAILURE;
+      }
+
+      memcpy(*wholeMsg + *wholeMsgLen - mac_offset, temp_sig, msgAuthParmLen);
+      SNMP_FREE(temp_sig);
+    }  /* endif -- create keyed hash */
+
+    usm_free_usmStateReference(secStateRef);
+    DEBUGMSGTL(("usm", "USM processing completed.\n"));
     return SNMPERR_SUCCESS;
-
-}  /* end usm_generate_out_msg() */
+}  /* end usm_rgenerate_out_msg() */
 
 #endif /* */
 
