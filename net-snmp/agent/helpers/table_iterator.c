@@ -50,10 +50,10 @@ get_table_iterator_handler(iterator_info *iinfo) {
 int
 register_table_iterator(handler_registration *reginfo,
                         iterator_info *iinfo) {
+    inject_handler(reginfo, get_table_iterator_handler(iinfo));
 #ifndef NOT_SERIALIZED
     inject_handler(reginfo, get_serialize_handler());
 #endif
-    inject_handler(reginfo, get_table_iterator_handler(iinfo));
     return register_table(reginfo, iinfo->table_reginfo);
 }
 
