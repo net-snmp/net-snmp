@@ -14,16 +14,19 @@
 extern          "C" {
 #endif
 
+#define CACHE_NAME "cache_info"
+
     typedef struct netsnmp_cache_s netsnmp_cache;
 
     typedef int  (NetsnmpCacheLoad)(netsnmp_cache *, void*);
-    typedef void (NetsnmpCacheFree)(netsnmp_cache *);
+    typedef void (NetsnmpCacheFree)(netsnmp_cache *, void*);
 
     struct netsnmp_cache_s {
         /*
 	 * For operation of the data caches
 	 */
         int      enabled;
+        int      valid;
         int      timeout;	/* Length of time the cache is valid (in s) */
         marker_t timestamp;	/* When the cache was last loaded */
 
@@ -41,6 +44,8 @@ extern          "C" {
     };
 
 
+    netsnmp_cache* netsnmp_extract_cache_info(netsnmp_agent_request_info *);
+    int            netsnmp_is_cache_valid(    netsnmp_agent_request_info *);
     netsnmp_mib_handler *netsnmp_get_cache_handler(int, NetsnmpCacheLoad *,
                                                         NetsnmpCacheFree *,
                                                         oid*, int);
