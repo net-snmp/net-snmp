@@ -58,7 +58,7 @@ AC_ARG_WITH(dmalloc,
       AC_ADD_SEARCH_PATH(/usr/local)
       LIBS="$LIBS -ldmalloc"
       AC_DEFINE(HAVE_DMALLOC_H)
-    elif "x$withval" != "x"; then
+    elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
       LIBS="$LIBS -ldmalloc"
       AC_DEFINE(HAVE_DMALLOC_H)
@@ -74,7 +74,7 @@ AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
     if test "x$withval" = "xyes"; then
       AC_ADD_SEARCH_PATH(/usr/local/ssl)
-    else
+    elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
     fi
     tryopenssl=yes,
@@ -901,26 +901,34 @@ dnl check for tcp wrapper support
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
 
+use_wrap="false"
 AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],[
-  if test "$withval" != "no"; then
-    CPPFLAGS="${CPPFLAGS} -I$withval/include"
-    LDFLAGS="${LDFLAGS} -L$withval/lib"
-  fi
-])
+[  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
+    if test -d "$withval"; then
+        WRAPLIBS="-L$withval -lwrap"
+        AC_DEFINE(USE_LIBWRAP)
+        use_wrap="true"
+    elif test "x$withval" = "xyes"; then
+        WRAPLIBS="-lwrap"
+        AC_DEFINE(USE_LIBWRAP)
+        use_wrap="true"
+    fi
+)
 
-AC_CHECK_HEADER(tcpd.h,
-    AC_CHECK_LIB(wrap, main,
-	AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
-	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-
+if test "x$use_wrap" = "xtrue"; then
+  AC_CHECK_HEADER(tcpd.h,
+      AC_CHECK_LIB(wrap, main,
+  	AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
+  	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+  
 dnl Linux RedHat 6.1 won't link libwrap without libnsl
-case $target_os in
-    linux*)
-        AC_CHECK_LIB(nsl, yp_get_default_domain)
-    ;;
-esac
+  case $target_os in
+      linux*)
+          AC_CHECK_LIB(nsl, yp_get_default_domain)
+      ;;
+  esac
+fi
 
 dnl zlib is required for newer versions of rpm
 _cppflags="${CPPFLAGS}"
@@ -928,7 +936,7 @@ _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(zlib,
 [  --with-zlib[=DIR]       use libz in DIR],[
-  if test "$withval" != "no"; then
+  if test -d "$withval"; then
     CPPFLAGS="${CPPFLAGS} -I$withval/include"
     LDFLAGS="${LDFLAGS} -L$withval/lib"
   fi
@@ -953,7 +961,7 @@ _ldflags="${LDFLAGS}"
 
 AC_ARG_WITH(db,
 [  --with-db[=DIR]         use db in DIR],[
-  if test "$withval" != "no"; then
+  if test -d "$withval"; then
     CPPFLAGS="${CPPFLAGS} -I$withval/include"
     LDFLAGS="${LDFLAGS} -L$withval/lib"
   fi
