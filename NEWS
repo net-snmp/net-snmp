@@ -6,7 +6,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  New:
     - Support for OpenSSL 0.9.7
     - Beginning of support for AES encryption.
-      ( Currently only usable with net-snmp agents and software. )
+      ( Currently only usable with Net-SNMP and OpenSNMP software. )
 
  Ports:
     - win32 new project files win32sdk.dsw for those with the win32
@@ -17,6 +17,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Fixes:
     - Several AgentX (the subagent protocol) specific bugs have been fixed
     - many many misc fixes
+    - The perl agent module plugin should now work.
+    - Many other perl module related fixes.
+    - net-snmp-config --ldflags properly supplies -L flags
+    - misc make test fixes and improvements.
 
 *5.0.3*
 
