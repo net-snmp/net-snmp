@@ -42,8 +42,8 @@ clean:
 	cd mibgroup; make clean
 
 install:  installdirs
-	cd dlmods ; $(MAKE) install; cd ..
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
+#	cd dlmods ; $(MAKE) install; cd ..
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) 
