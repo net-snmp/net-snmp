@@ -182,14 +182,6 @@ static void usage (char *);
 int main (int, char **);
 static void SnmpTrapNodeDown (void);
 static int receive(void);
-<<<<<<< snmpd.c
-
-
-=======
-
-int             dont_fork = 0;
-
->>>>>>> 1.190
 
 static void usage(char *prog)
 {
@@ -295,6 +287,7 @@ main(int argc, char *argv[])
 {
 	int             arg, i;
 	int             ret;
+	int             dont_fork = 0;
 	char            logfile[SNMP_MAXBUF_SMALL];
 	char           *cptr, **argvptr;
 	char           *pid_file = NULL;
