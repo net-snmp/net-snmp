@@ -25,6 +25,8 @@
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 #include "agentx/master_request.h"
+#include "default_store.h"
+#include "ds_agent.h"
 
 
 int
@@ -42,7 +44,7 @@ void init_master(void)
 {
     struct snmp_session sess, *session=&sess;
 
-    if ( agent_role != MASTER_AGENT )
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return;
 
     snmp_sess_init( session );
@@ -88,6 +90,7 @@ agentx_var(struct variable *vp,
 	 * of this subagent (and hence it's presumable a non-exact match),
 	 * then update the "matched" name to be the starting point
 	 */
+        /* XXX shouldn't we check exact in this case? */
     result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
     if ( result < 0 ) {
 	memcpy((char *)name,(char *)vp->name, vp->namelen*sizeof(oid));

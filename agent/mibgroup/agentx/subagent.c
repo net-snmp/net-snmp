@@ -26,6 +26,10 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "default_store.h"
+#include "ds_agent.h"
+#include "callback.h"
+#include "snmp_debug.h"
 
 
 int
@@ -38,12 +42,15 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
     asp = init_agent_snmp_session( session, pdu );
 
+    DEBUGMSGTL(("agentx/subagent","handling agentx request....\n"));
     switch (pdu->command) {
     case AGENTX_MSG_GET:
+        DEBUGMSGTL(("agentx/subagent","  -> get\n"));
 	status = handle_next_pass( asp );
 	break;
 
     case AGENTX_MSG_GETBULK:
+        DEBUGMSGTL(("agentx/subagent","  -> getbulk\n"));
 	    /*
 	     * GETBULKS require multiple passes. The first pass handles the
 	     * explicitly requested varbinds, and subsequent passes append
@@ -102,11 +109,13 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	break;
 
     case AGENTX_MSG_GETNEXT:
+        DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
 	asp->exact   = FALSE;
 	status = handle_next_pass( asp );
 	break;
 
     case AGENTX_MSG_TESTSET:
+        DEBUGMSGTL(("agentx/subagent","  -> testset\n"));
     	    /*
 	     * In the UCD architecture the first two passes through var_op_list
 	     * verify that all types, lengths, and values are valid
@@ -140,6 +149,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	     *   as does the "undo" pass, in case of errors elsewhere
 	     */
     case AGENTX_MSG_COMMITSET:
+        DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
         asp->mode = ACTION;
 	status = handle_next_pass( asp );
 
@@ -150,20 +160,24 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	break;
 
     case AGENTX_MSG_CLEANUPSET:
+        DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
         asp->mode = COMMIT;
 	status = handle_next_pass( asp );
 	break;
 
     case AGENTX_MSG_UNDOSET:
+        DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
         asp->mode = UNDO;
 	status = handle_next_pass( asp );
 	break;
 
     case AGENTX_MSG_RESPONSE:
+        DEBUGMSGTL(("agentx/subagent","  -> response\n"));
 	free( asp );
 	return 0;
 
     default:
+        DEBUGMSGTL(("agentx/subagent","  -> unknown\n"));
 	free( asp );
 	return 0;
     }
@@ -176,6 +190,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	snmp_send( asp->session, asp->pdu );
 	free( asp );
     }
+    DEBUGMSGTL(("agentx/subagent","  FINISHED\n\n"));
 
     return 1;
 }
@@ -187,6 +202,21 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
 struct snmp_session *agentx_session;
 
+int
+shutdown_subagent(int majorID, int minorID, void *serverarg, void *clientarg) {
+  struct snmp_session *thesession = (struct snmp_session *) clientarg;
+  DEBUGMSGTL(("agentx/subagent","shutting down session....\n"));
+  if (thesession == NULL) {
+    DEBUGMSGTL(("agentx/subagent","Empty session to shutdown\n"));
+    return 0;
+  }
+  agentx_close_session(thesession);
+  snmp_close(thesession);
+  free(thesession);
+  DEBUGMSGTL(("agentx/subagent","shut down finished.\n"));
+  return 1;
+}
+
 void
 init_subagent( void )
 {
@@ -194,7 +224,8 @@ init_subagent( void )
                         sess,
                        *session=&sess;
 
-    if ( agent_role != SUB_AGENT )
+    DEBUGMSGTL(("agentx/subagent","initializing....\n"));
+    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
 	return;
 
     memset(session, 0, sizeof(struct snmp_session));
@@ -222,6 +253,10 @@ init_subagent( void )
 	free( agentx_session );
 	exit(1);
     }
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           shutdown_subagent, agentx_session);
+    DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
+
 
 
