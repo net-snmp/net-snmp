@@ -22,7 +22,6 @@ SOFTWARE.
 /*
  * Definitions for the system dependent library file
  */
-#include <config.h>
 #ifdef WIN32
 #include <sys/timeb.h>
 #include <time.h>
