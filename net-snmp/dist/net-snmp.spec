@@ -21,6 +21,7 @@
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
 Version: 5.1
+# update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
 Release: 1
 URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
@@ -30,8 +31,7 @@ Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
-# require perl til use of it on line 91 is removed
-Requires: perl
+BuildRequires: perl
 
 %description
 
