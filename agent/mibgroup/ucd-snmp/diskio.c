@@ -51,12 +51,12 @@ static int      cache_disknr = -1;
 #if defined (freebsd4) || defined(freebsd5)
 #include <sys/dkstat.h>
 #include <devstat.h>
+#endif                          /* freebsd */
+
 #ifdef linux
 #define MAX_DISKS 20
 #include <assert.h>
 #endif /* linux */
-
-#endif                          /* freebsd */
 
 #if defined (darwin)
 #include <CoreFoundation/CoreFoundation.h>
@@ -393,6 +393,66 @@ getstats(void)
     /* Gross hack to include device numbers in the device name array */
     for (i = 0; i < ndisk; i++) {
       char *cp = stat->dinfo->devices[i].device_name;
+      int len = strlen(cp);
+      if (len > DEVSTAT_NAME_LEN - 3)
+        len -= 3;
+      cp += len;
+      sprintf(cp, "%d", stat->dinfo->devices[i].unit_number);
+    }
+    cache_time = now;
+    return 0;
+}
+
+u_char         *
+var_diskio(struct variable * vp,
+           oid * name,
+           size_t * length,
+           int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    static long     long_ret;
+    unsigned int    indx;
+
+    if (getstats() == 1) {
+        return NULL;
+    }
+
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, ndisk)) {
+        return NULL;
+    }
+
+    indx = (unsigned int) (name[*length - 1] - 1);
+
+    if (indx >= ndisk)
+        return NULL;
+
+    switch (vp->magic) {
+    case DISKIO_INDEX:
+        long_ret = (long) indx + 1;;
+        return (u_char *) & long_ret;
+    case DISKIO_DEVICE:
+        *var_len = strlen(stat->dinfo->devices[indx].device_name);
+        return (u_char *) stat->dinfo->devices[indx].device_name;
+    case DISKIO_NREAD:
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
+        return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
+        return (u_char *) & long_ret;
+    case DISKIO_READS:
+        long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
+        return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+        long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+        return (u_char *) & long_ret;
+
+    default:
+        ERROR_MSG("diskio.c: don't know how to handle this request.");
+    }
+    return NULL;
+}
+#endif                          /* freebsd4 */
 
 
 #ifdef linux
@@ -468,9 +528,9 @@ int getstats(void)
 			if ((feof(parts) != 0) || head.length >= MAX_DISKS)
 				break;
 
-			fscanf (parts, "%d %d %d %s %d %d %d %d %d %d %d %d %d %d %d\n",
+			fscanf (parts, "%d %d %ld %s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
 				&pTemp->major,
-				&pTemp->minor, &pTemp->blocks, &pTemp->name, &pTemp->rio,
+				&pTemp->minor, &pTemp->blocks, pTemp->name, &pTemp->rio,
 				&pTemp->rmerge, &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
 				&pTemp->wmerge, &pTemp->wsect, &pTemp->wuse, &pTemp->running,
 				&pTemp->use, &pTemp->aveq);
@@ -537,66 +597,6 @@ var_diskio(struct variable * vp,
   return NULL;
 }
 #endif  /* linux */
-      int len = strlen(cp);
-      if (len > DEVSTAT_NAME_LEN - 3)
-        len -= 3;
-      cp += len;
-      sprintf(cp, "%d", stat->dinfo->devices[i].unit_number);
-    }
-    cache_time = now;
-    return 0;
-}
-
-u_char         *
-var_diskio(struct variable * vp,
-           oid * name,
-           size_t * length,
-           int exact, size_t * var_len, WriteMethod ** write_method)
-{
-    static long     long_ret;
-    unsigned int    indx;
-
-    if (getstats() == 1) {
-        return NULL;
-    }
-
-
-    if (header_simple_table
-        (vp, name, length, exact, var_len, write_method, ndisk)) {
-        return NULL;
-    }
-
-    indx = (unsigned int) (name[*length - 1] - 1);
-
-    if (indx >= ndisk)
-        return NULL;
-
-    switch (vp->magic) {
-    case DISKIO_INDEX:
-        long_ret = (long) indx + 1;;
-        return (u_char *) & long_ret;
-    case DISKIO_DEVICE:
-        *var_len = strlen(stat->dinfo->devices[indx].device_name);
-        return (u_char *) stat->dinfo->devices[indx].device_name;
-    case DISKIO_NREAD:
-        long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
-        return (u_char *) & long_ret;
-    case DISKIO_NWRITTEN:
-        long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
-        return (u_char *) & long_ret;
-    case DISKIO_READS:
-        long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
-        return (u_char *) & long_ret;
-    case DISKIO_WRITES:
-        long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
-        return (u_char *) & long_ret;
-
-    default:
-        ERROR_MSG("diskio.c: don't know how to handle this request.");
-    }
-    return NULL;
-}
-#endif                          /* freebsd4 */
 
 #if defined(darwin)
 
