@@ -120,17 +120,17 @@ static void _${context}_container_init(
  */
 #define LINE_TERM_CHAR '$'
 
-static void _mfd_${context}_container_init_persistence( netsnmp_container * container );
-static int _mfd_${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx);
-static int _mfd_${context}_container_save_rows(int majorID, int minorID, void *serverarg, void *clientarg);
-static void _mfd_${context}_container_row_restore(const char *token, char *buf);
-static int _mfd_${context}_container_row_save(
+static void _${context}_container_init_persistence( netsnmp_container * container );
+static int _${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx);
+static int _${context}_container_save_rows(int majorID, int minorID, void *serverarg, void *clientarg);
+static void _${context}_container_row_restore(const char *token, char *buf);
+static int _${context}_container_row_save(
             ${context}_rowreq_ctx *rowreq_ctx,
             void *type);
-static char * _mfd_${context}_container_col_restore(
+static char * _${context}_container_col_restore(
             ${context}_rowreq_ctx *rowreq_ctx,
             u_int col, char* buf);
-static char * _mfd_${context}_container_col_save(
+static char * _${context}_container_col_save(
             ${context}_rowreq_ctx *rowreq_ctx,
             u_int col, char* buf);
 
@@ -360,7 +360,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
     /*
      * register config/persistence callbacks
      */
-    _mfd_${context}_container_init_persistence(${context}_if_ctx.container);
+    _${context}_container_init_persistence(${context}_if_ctx.container);
     
 } /* _${context}_initialize_interface */
 
@@ -729,11 +729,29 @@ _${context}_get_column( ${context}_rowreq_ctx *rowreq_ctx,
 
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
+##         use sizeof except for BITS
 @         if $m2c_node_needlength == 0@
+@            if "$node.perltype" eq "BITS"@
+    {
+        $m2c_decl tmp = 0xff << ((sizeof($m2c_decl) - 1) * 8);
+@            else@
     var->val_len = sizeof($m2c_decl);
+@            end@
 @         end@
     var->type = $node.type;
 rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
+@         if ($m2c_node_needlength == 0) && ("$node.perltype" eq "BITS")@
+        /*
+         * check for length of bits string
+         */
+        var->val_len = 0;
+        while( 0 != tmp ) {
+            if ( *(($m2c_decl *) var->val.string) & tmp )
+                ++var->val_len;
+            tmp = tmp >> 8;
+        }
+    }
+@         end@
         break;
  @      end@ # accessible
 @   end@ # for each column
@@ -1443,24 +1461,24 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
  * (and re-created) before the dependent rows.
  */
 static void
-_mfd_${context}_container_init_persistence( netsnmp_container * container )
+_${context}_container_init_persistence( netsnmp_container * container )
 {
     int rc;
 
     register_config_handler(row_token, row_token,
-                            _mfd_${context}_container_row_restore, NULL, NULL);
+                            _${context}_container_row_restore, NULL, NULL);
     rc = snmp_register_callback( SNMP_CALLBACK_LIBRARY,
                                      SNMP_CALLBACK_STORE_DATA,
-                                     _mfd_${context}_container_save_rows,
+                                     _${context}_container_save_rows,
                                      container);
 
     if( rc != SNMP_ERR_NOERROR )
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
-                 "in _mfd_${context}_container_init_persistence\n");
+                 "in _${context}_container_init_persistence\n");
 }
 
 static int
-_mfd_${context}_container_save_rows(int majorID, int minorID, void *serverarg, void *clientarg)
+_${context}_container_save_rows(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                           NETSNMP_DS_LIB_APPTYPE);
@@ -1469,7 +1487,7 @@ _mfd_${context}_container_save_rows(int majorID, int minorID, void *serverarg, v
      * save all rows
      */
     CONTAINER_FOR_EACH((netsnmp_container*)clientarg,
-                       (netsnmp_container_obj_func*)_mfd_${context}_container_row_save,
+                       (netsnmp_container_obj_func*)_${context}_container_row_save,
                        appname);
 
     /*
@@ -1488,7 +1506,7 @@ _mfd_${context}_container_save_rows(int majorID, int minorID, void *serverarg, v
  * return 0 if the row should not be stored
  */
 static int
-_mfd_${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx)
+_${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx)
 {
 @   foreach $node column@
 @      if "$node.syntax" eq "StorageType"@
@@ -1502,21 +1520,13 @@ _mfd_${context}_container_should_save(${context}_rowreq_ctx * rowreq_ctx)
 }
 
 /************************************************************
- * _mfd_${context}_container_row_save
+ * _${context}_container_row_save
  */
 static int
-_mfd_${context}_container_row_save(
+_${context}_container_row_save(
             ${context}_rowreq_ctx *rowreq_ctx,
             void *type)
 {
-    char *buf, *line;
-    char *tmp;
-    int i, size;
-
-    if (_mfd_${context}_container_should_save(rowreq_ctx) == 0) {
-        return SNMP_ERR_NOERROR;
-    }
-
     /*
      * Allocate space for a line with all data for a row. An
      * attempt is made to come up with a default maximum size, but
@@ -1545,57 +1555,55 @@ _mfd_${context}_container_row_save(
      * column values, 12 bytes [11 for oid + 1 for ':'] per
      * column are added).
      */
-    size = sizeof(row_token) + 1 + 
-@   if $ext_index != 0@
         /** TODO: add storage for external index(s)! */
+#define MAX_ROW_SIZE (sizeof(row_token) + 1 +  \
+@   if $ext_index != 0@
 @   end@
-        /** columns (some of which may also be indexes) */
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
 @      if "$node.type" eq "ASN_OBJECT_ID"@
-        ( ( 12 * sizeof(${m2c_ctx_rh}) ) + 3 ) + /* $node.type */
+        ( ( 12 * sizeof(${m2c_ctx_rh}) ) + 3 ) + /* $node.type */ \
 @      elsif "$node.type" eq "ASN_OCTET_STR"@
-        ( ( 2 * sizeof(${m2c_ctx_rh}) ) + 3 ) + /* $node.type */
+        ( ( 2 * sizeof(${m2c_ctx_rh}) ) + 3 ) + /* $node.type */ \
 @      else@
-        ( 12 ) + /* $node.type $node */
+        ( 12 ) + /* $node.type $node */ \
 @      end@
 @   end@
-        ( $table.uc_MAX_COL * 12 ) + /* column num prefix + : */
-        2; /* LINE_TERM_CHAR + \n */
+        ( $table.uc_MAX_COL * 12 ) + /* column num prefix + : */ \
+    2 /* LINE_TERM_CHAR + \n */ )
 
-    /*
-     * allocate memory for the line
-     */
-    line = buf = calloc(1, size);
-    if(NULL == buf) {
-        snmp_log(LOG_ERR,"error allocating memory while saving row\n");
-        return SNMP_ERR_GENERR;
+    char buf[MAX_ROW_SIZE], *pos = buf;
+    char *tmp;
+    int i;
+
+    if (_${context}_container_should_save(rowreq_ctx) == 0) {
+        return SNMP_ERR_NOERROR;
     }
-    
+
     /*
      * build the line
      */
-    buf += sprintf(buf, "%s ", row_token);
-    buf = read_config_save_objid(buf, rowreq_ctx->oid_idx.oids,
+    pos += sprintf(pos, "%s ", row_token);
+    pos = read_config_save_objid(pos, rowreq_ctx->oid_idx.oids,
                                  rowreq_ctx->oid_idx.len);
-    if(NULL == buf) {
-        snmp_log(LOG_ERR,"error saving row to persistent file\n");
-        free(line);
+    if(NULL == pos) {
+        snmp_log(LOG_ERR,"error saving ${context} row "
+                 "to persistent file\n");
         return SNMP_ERR_GENERR;
     }
-    *buf++ = ' ';
+    *pos++ = ' ';
 
     /*
      * add each column
      */
     for(i = $table.uc_MIN_COL; i <= $table.uc_MAX_COL; ++i ) {
 
-        tmp = buf;
-        buf = _mfd_${context}_container_col_save(rowreq_ctx, i, buf);
-        if(NULL == buf)
-            buf = tmp;
+        tmp = pos;
+        pos = _${context}_container_col_save(rowreq_ctx, i, pos);
+        if(NULL == pos)
+            pos = tmp;
         else
-            *buf++ = ' ';        
+            *pos++ = ' ';        
     }
 
     /*
@@ -1606,30 +1614,30 @@ _mfd_${context}_container_row_save(
     /*
      * store the line
      */
-    sprintf(buf, "%c\n", LINE_TERM_CHAR);
-    read_config_store((char*)type, line);
+    sprintf(pos, "%c\n", LINE_TERM_CHAR);
+    read_config_store((char*)type, buf);
 
-    /*
-     * free memory
-     */
-    free(line);
+    DEBUGMSGTL(("internal:${context}:_${context}_container_row_save",
+                "saving line '%s'\n", buf));
     
     return SNMP_ERR_NOERROR;
 }
 
 static void
-_mfd_${context}_container_row_restore(const char *token, char *buf)
+_${context}_container_row_restore(const char *token, char *buf)
 {
     ${context}_rowreq_ctx * rowreq_ctx;
     netsnmp_index index;
     oid tmp_oid[ MAX_${context}_IDX_LEN];
+    u_int col;
+
     
     if (strncmp(token, row_token, sizeof(row_token)) != 0) {
-        snmp_log(LOG_ERR, "unknown token in _mfd_${context}_container_row_restore\n");
+        snmp_log(LOG_ERR, "unknown token in _${context}_container_row_restore\n");
         return;
     }
 
-    DEBUGMSGTL(("_mfd_${context}_container_row_restore",
+    DEBUGMSGTL(("internal:${context}:_${context}_container_row_restore",
                 "parsing line '%s'\n", buf));
 
     /*
@@ -1641,13 +1649,13 @@ _mfd_${context}_container_row_restore(const char *token, char *buf)
                                  &index.len);
     if (NULL == buf) {
         snmp_log(LOG_ERR, "error reading row index in "
-                 "_mfd_${context}_container_row_restore\n");
+                 "_${context}_container_row_restore\n");
         return;
     }
     rowreq_ctx = _mfd_${context}_rowreq_from_index( &index, NULL );
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "error creating row index in "
-                 "_mfd_${context}_container_row_restore\n");
+                 "_${context}_container_row_restore\n");
         return;
     }
     
@@ -1656,8 +1664,6 @@ _mfd_${context}_container_row_restore(const char *token, char *buf)
      */
     buf = skip_white(buf);
     while ( (NULL != buf) && isdigit(*buf) ) {
-        u_int col;
-
         /*
          * extract column, skip ':'
          */
@@ -1673,9 +1679,9 @@ _mfd_${context}_container_row_restore(const char *token, char *buf)
         /*
          * parse value
          */
-        DEBUGMSGTL(("_mfd_${context}_container_row_restore",
+        DEBUGMSGTL(("_${context}_container_row_restore",
                     "parsing column %d\n", col));
-        buf = _mfd_${context}_container_col_restore( rowreq_ctx, col, buf );
+        buf = _${context}_container_col_restore( rowreq_ctx, col, buf );
     }
 
     /*
@@ -1689,12 +1695,13 @@ _mfd_${context}_container_row_restore(const char *token, char *buf)
      * delete the row and bail.
      */
     if ((buf == NULL) || (*buf != LINE_TERM_CHAR)) {
-        snmp_log(LOG_ERR, "error parsing ${context} row");
+        snmp_log(LOG_ERR, "error parsing ${context} row around column %d",
+                 col);
         ${context}_release_rowreq_ctx( rowreq_ctx );
         return;
     }
 
-    DEBUGMSGTL(("_mfd_${context}_container_row_restore",
+    DEBUGMSGTL(("internal:${context}:_${context}_container_row_restore",
                 "inserting row\n"));
 
     /*
@@ -1707,18 +1714,21 @@ _mfd_${context}_container_row_restore(const char *token, char *buf)
 }
 
 /************************************************************
- * _mfd_${context}_container_col_save
+ * _${context}_container_col_save
  */
 static char *
-_mfd_${context}_container_col_save(
+_${context}_container_col_save(
             ${context}_rowreq_ctx *rowreq_ctx,
             u_int col, char* buf)
 {
     if( ( NULL == rowreq_ctx ) || ( NULL == buf )) {
         snmp_log(LOG_ERR, "bad parameter in "
-                 "_mfd_${context}_container_col_save\n");
+                 "_${context}_container_col_save\n");
         return NULL;
     }
+
+    DEBUGMSGTL(("internal:${context}:_${context}_container_col_save",
+                "processing column %d\n", col));
 
     /*
      * prefix with column number, so we don't ever depend on
@@ -1751,8 +1761,8 @@ _mfd_${context}_container_col_save(
     
 @   end@ # for each
     default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "_mfd_${context}_container_col_save\n");
+        snmp_log(LOG_ERR, "unknown column %d in "
+                 "_${context}_container_col_save\n", col);
         return NULL;
     }
 
@@ -1760,19 +1770,22 @@ _mfd_${context}_container_col_save(
 }
 
 /************************************************************
- * _mfd_${context}_container_col_restore
+ * _${context}_container_col_restore
  */
 static char *
-_mfd_${context}_container_col_restore(
+_${context}_container_col_restore(
             ${context}_rowreq_ctx *rowreq_ctx,
             u_int col, char* buf)
 {
     size_t len;
     if( ( NULL == rowreq_ctx ) || ( NULL == buf )) {
         snmp_log(LOG_ERR, "bad parameter in "
-                 "_mfd_${context}_container_col_restore\n");
+                 "_${context}_container_col_restore\n");
         return NULL;
     }
+
+    DEBUGMSGTL(("verbose:${context}:_${context}_container_col_restore",
+                "processing column %d\n", col));
 
     /*
      * restore data for the column
@@ -1805,8 +1818,8 @@ _mfd_${context}_container_col_restore(
     
 @   end@ # foreach col
     default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "_mfd_${context}_container_col_restore\n");
+        snmp_log(LOG_ERR, "unknown column %d in "
+                 "_${context}_container_col_restore\n", col);
         return NULL;
     }
 
