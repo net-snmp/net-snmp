@@ -32,7 +32,7 @@ struct subtree {
  */
 struct variable2 {
     u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
+    u_char          type;           /* type of variable */
     u_short         acl;            /* access control list for variable */
     FindVarMethod  *findVar;        /* function that finds variable */
     u_char          namelen;        /* length of name below */
@@ -41,7 +41,7 @@ struct variable2 {
 
 struct variable4 {
     u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
+    u_char          type;           /* type of variable */
     u_short         acl;            /* access control list for variable */
     FindVarMethod  *findVar;        /* function that finds variable */
     u_char          namelen;        /* length of name below */
@@ -50,7 +50,7 @@ struct variable4 {
 
 struct variable7 {
     u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
+    u_char          type;           /* type of variable */
     u_short         acl;            /* access control list for variable */
     FindVarMethod  *findVar;        /* function that finds variable */
     u_char          namelen;        /* length of name below */
@@ -59,7 +59,7 @@ struct variable7 {
 
 struct variable8 {
     u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
+    u_char          type;           /* type of variable */
     u_short         acl;            /* access control list for variable */
     FindVarMethod  *findVar;        /* function that finds variable */
     u_char          namelen;        /* length of name below */
@@ -68,7 +68,7 @@ struct variable8 {
 
 struct variable13 {
     u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
+    u_char          type;           /* type of variable */
     u_short         acl;            /* access control list for variable */
     FindVarMethod  *findVar;        /* function that finds variable */
     u_char          namelen;        /* length of name below */
