@@ -61,7 +61,7 @@ nsb-config-dist()
       exit
    fi
    ngc_src=$1
-   if [ ! -d ngc_$src ]; then
+   if [ ! -d $ngc_src ]; then
       echo "$ngc_src does not exist!"
       exit
    fi
@@ -86,7 +86,7 @@ nsb-config-all()
       exit
    fi
    ngc_src=$1
-   if [ ! -d ngc_$src ]; then
+   if [ ! -d $ngc_src ]; then
       echo "$ngc_src does not exist!"
       exit
    fi
