@@ -1,12 +1,11 @@
 		      ucd-snmp Version: 4.1.pre2
 DISCLAIMER
 
-  The Authors, the University of California, the University of
-  California at Davis, and the Electrical Engineering department at
-  the University of California at Davis assume no responsibility for
-  damage or loss of system performance as a direct or indirect result
-  of the use of this software.  This software is provided "as is"
-  without express or implied warranty.
+  The Authors, the University of California, and the University of
+  California at Davis assume no responsibility for damage or loss of
+  system performance as a direct or indirect result of the use of this
+  software.  This software is provided "as is" without express or
+  implied warranty.
 
 TABLE OF CONTENTS
 
@@ -35,9 +34,7 @@ INTRODUCTION
 
   This package was originally based on the CMU 2.1.2.1 snmp code.  It
   has been greatly modified, restructured, enhanced and fixed.  It
-  hardly looks the same at all as anything that CMU has ever released.
-  However, it maintains all the original API functions for complete
-  backwards compatibility.
+  hardly looks the same as anything that CMU has ever released.
 
 SUPPORTED ARCHITECTURES
 
@@ -50,8 +47,8 @@ SUPPORTED ARCHITECTURES
 
 AVAILABILITY
 
-  ftp://ucd-snmp.ucdavis.edu:/ucd-snmp.README
   ftp://ucd-snmp.ucdavis.edu:/ucd-snmp.tar.gz
+  ftp://ucd-snmp.ucdavis.edu:/ucd-snmp.README
 
   Mirrors:
 
@@ -67,6 +64,14 @@ WEB PAGE
   Make sure you check out the logo there, which is created using
   postcards submitted from various locations that make use of the
   ucd-snmp package.
+
+  If you wish to contribute a postcard to the logo (which makes Wes
+  happy) (and his co-workers for that matter), send them to:
+
+     Wes Hardaker
+     IT-DCAS
+     UCDavis
+     Davis CA  95616
 
 INSTALLATION
 
@@ -86,6 +91,9 @@ HELPING OUT
   your help, but please read the PORTING file first.  Also, subscribe
   to the ucd-snmp-coders list described below and mention what you're
   going to work on to make sure no one else is already doing so!
+  You'll also need to keep up to date with the latest code snap shot,
+  which can be obtained from CVS using the information found at
+  http://ucd-snmp.ucdavis.edu/developer.html.
 
 CODE UPDATE ANNOUNCEMENTS
 
@@ -95,13 +103,14 @@ CODE UPDATE ANNOUNCEMENTS
   We hate broadcasting announce messages to other mailing lists and
   newsgroups, so there is a mailing list set up to handle release
   announcements.  Any time we put new software out for ftp, we'll mail
-  this fact to ucd-snmp-announce@ucd-snmp.ucdavis.edu, described
-  below.
+  this fact to ucd-snmp-announce@ucd-snmp.ucdavis.edu.  See the
+  MAILING LISTS section described below to sign up for these
+  announcements.
 
   We will post new announcements on a very infrequent basis to the
-  other channels (the snmp mailing lists and comp.protocols.snmp), but
-  only for major code revisions and not for bug-fix patches or small
-  feature upgrades.
+  other channels (the other snmp mailing lists and newsgroups like
+  comp.protocols.snmp), but only for major code revisions and not for
+  bug-fix patches or small feature upgrades.
 
 MAILING LISTS
 
@@ -149,22 +158,23 @@ AGENT EXTENSIBILITY
 
   The agent that comes with this package is extensible through use of
   shell scripts and other methods.  See the configuration manual pages
-  (snmpd.conf) and the EXAMPLE.conf file for details.
+  (like snmpd.conf) and the EXAMPLE.conf file for details.
 
   You can also extend the agent by writing C code directly.  The agent
   is extremely modular in nature and you need only create new files,
   re-run configure and re-compile.  No modification of the distributed
-  source files are necessary.  See the following files in the
-  agent/mibgroup directory for details and examples: README,
-  examples/example.c,
-  examples/example.h.  Also, see the local/mib2c program and its
-  README file for help in turning a textual mib description into a C
-  code template.
+  source files are necessary.  See the following files for details on
+  how to go about this: AGENT.txt, agent/mibgroup/examples/example.c,
+  and agent/mibgroup/examples/example.h.  Also, see the local/mib2c
+  program and its README file for help in turning a textual mib
+  description into a C code template.
 
-  Note: This agent uses its own API for extensibility.  The IETF's
-  agentx working group have developed a common API for subagent
-  extensibility called AgentX, which we now have alpha level support
-  for (see configure --help).
+  We now support AgentX for subagent extensibility.  The ucd-snmp
+  agent can run as both a master agent and a subagent.  Additionally,
+  a toolkit is provided that enables users of it to easily embed a
+  agentx client into external applications.  See the tutorial at
+  http://ucd-snmp.ucdavis.edu/tutorial/toolkit for an example of how
+  go about doing this.
 
 CONFIGURATION
 
@@ -178,8 +188,7 @@ CONFIGURATION
 EXAMPLE AGENT CONFIGURATION AND USAGE
 
   See the 'EXAMPLE.conf' file in the top level source directory (you
-  must build the package for this file to be generated).  Do NOT look
-  at the EXAMPLE.conf.def file.  It will only confuse you.
+  must build the package for this file to be generated).
 
 SUBMITTING BUG REPORTS
 
@@ -188,19 +197,21 @@ SUBMITTING BUG REPORTS
   information about exactly what is wrong.
 
   To submit a bug report, ideally, you should use
-  http://ucd-snmp.ucdavis.edu/ucd-snmp-bugs to do your submissions.
+  http://ucd-snmp.ucdavis.edu/ucd-snmp-bugs to enter your
+  submissions.  It is a full-fledged bug-tracking system that will
+  allow you to search for already existing bug reports as well as
+  track the status of your report as it is processed by the core
+  developers.
+
   Alternatively, submit your bug report to
   ucd-snmp-bugs@ucd-snmp.ucdavis.edu.  Both paths do end up at the
-  same place, which is the above URL.  Through this URL you can track
-  your bug report.
+  same place in the bug tracking system, but the URL submissions are a 
+  bit more complete in nature.
 
   Patches should be sent to the above email address as well.
 
   If you intend to submit a patch as well, please read the PORTING
   file before you do so.  Thanks!
-
-  All discussions of general coding related questions take place on
-  the ucd-snmp-coders list, however.
 
 CLOSING
 
