@@ -24,7 +24,7 @@ ${context}_index_to_oid(netsnmp_index *oid_idx,
 @        include m2c_setup_node.m2i@
         /* $m2c_node_summary */
 @        if $m2c_node_needlength == 1@
-    snmp_set_var_value(var_$node, (u_char*)&mib_idx->$node,
+    snmp_set_var_value(&var_$node, (u_char*)&mib_idx->$node,
                        mib_idx->${node}_len);
 @        else@
     snmp_set_var_value(&var_$node, (u_char*)&mib_idx->$node,

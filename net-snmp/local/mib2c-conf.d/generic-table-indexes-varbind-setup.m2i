@@ -20,7 +20,7 @@
 @           eval $m2c_dii_first = $node@
 @           eval $m2c_dii_tmp = "var_${node}.next_variable = "@
 @        else@
-@            eval $m2c_dii_tmp = "$m2c_dii_tmp var_${node}; var_${node}.next_variable = "@
+@            eval $m2c_dii_tmp = "$m2c_dii_tmp &var_${node}; var_${node}.next_variable = "@
 @        end@
     /** $m2c_node_summary */
     netsnmp_variable_list var_$node;
