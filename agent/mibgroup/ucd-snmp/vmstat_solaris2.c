@@ -29,6 +29,7 @@
 
 /* Header file for this module */
 #include "vmstat_solaris2.h"
+#include "util_funcs.h"
 
 /* Includes end here */
 
@@ -42,8 +43,7 @@
 /* following function calls from libkstat */
 /* Pointer to structure to be opened with kstat_open in main procedure */
 /* We share this one with kernel_sunos5, where it's defined, and memory_solaris2 */
-extern kstat_ctl_t *kstat_fd;
-kstat_ctl_t *kctl;
+extern kstat_ctl_t *kstat_fd;  /* defined in kernel_sunos5.c */
 
 /* Holds number of CPUs this computer has. */
 static ulong num_cpu;
@@ -138,14 +138,16 @@ void init_vmstat_solaris2(void)
   REGISTER_MIB("ucd-snmp/vmstat", extensible_vmstat_variables, variable2, \
                vmstat_variables_oid);
 
-  /* Re-use kstat control from kernel_sunos5 */
-  if ((kctl = kstat_fd) == NULL)
-    {
-      snmp_log(LOG_ERR,"vmstat_solaris2 (init): Could not open shared kstat control.\n");
+  if (kstat_fd == 0) {
+    kstat_fd = kstat_open();
+    if (kstat_fd == 0) {
+      snmp_log(LOG_ERR, "kstat_open(): failed\n");
     }
+  }
   
   /* Get number of CPUs, needed for dimensions of arrays that hold CPU data */
-  num_cpu = countCPU(kctl);
+  if (kstat_fd != NULL)
+  num_cpu = countCPU(kstat_fd);
   
   /* For getMisc, calloc here at start of module since size is dependend on number of CPUs */
   swapin = (ulong *) calloc(num_cpu, sizeof(swapin));
@@ -234,14 +236,14 @@ long getMisc(int what)
 	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
 	  /* kstat_lookup: look for a kstat by module, instance and name */
-	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */  
 	      /* Read data from kstat into cs structure */
 	      /* kc is the control structure, ksp the kstat we are reading */
 	      /* and cs the buffer we are writing to. */
 	      /* Memory allocation is done automagically by the kstat library. */
-	      if (kstat_read(kctl, ksp, &cs) == -1)
+	      if (kstat_read(kstat_fd, ksp, &cs) == -1)
 		{
 		  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc:1): failure to init cs structure.\n");
 		  return(-1);
@@ -282,11 +284,11 @@ long getMisc(int what)
       
       for (cpu_slot=0;cpu_num<num_cpu;cpu_slot++)
 	{ 
-	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Update cs structure with new kstat values after we are awake again. */
-	      if (kstat_read(kctl, ksp, &cs) == -1)
+	      if (kstat_read(kstat_fd, ksp, &cs) == -1)
 		{
 		  snmp_log(LOG_ERR, "vmstat_solaris2 (getMisc:2): failure to update cs structure.\n");
 		  return(-1);
@@ -425,7 +427,7 @@ long getCPU(int state)
 	{ 
 	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
-	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Read data from kstat into cs structure */
@@ -433,7 +435,7 @@ long getCPU(int state)
 	      /* and cs the buffer we are writing to. */
 	      /* Memory allocation is done automagically by the kstat library. */
 	      
-	      if (kstat_read(kctl, ksp, &cs) == -1)
+	      if (kstat_read(kstat_fd, ksp, &cs) == -1)
 		{
 		  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): error getting cs.\n");
 		  return(-1);
@@ -475,7 +477,7 @@ long getCPU(int state)
 
        	  /* If ksp is NULL we don't have a CPU :) */
 	  /* For MP machines: We hit an empty CPU board, trying next one... */
-	  if ((ksp = kstat_lookup(kctl, "cpu_stat", cpu_slot, NULL)) != NULL)
+	  if ((ksp = kstat_lookup(kstat_fd, "cpu_stat", cpu_slot, NULL)) != NULL)
 	    {
 	      /* Yeah, we found a CPU. */
 	      /* Read data from kstat into cs structure */
@@ -485,7 +487,7 @@ long getCPU(int state)
 	      
 	      /* Update cs structure with new kstat values after we are awake again. */
 	      
-	      if (kstat_read(kctl, ksp, &cs) == -1)
+	      if (kstat_read(kstat_fd, ksp, &cs) == -1)
 		{
 		  snmp_log(LOG_ERR, "vmstat_solaris2 (getCPU): error getting cs.\n");
 		  return(-1);
