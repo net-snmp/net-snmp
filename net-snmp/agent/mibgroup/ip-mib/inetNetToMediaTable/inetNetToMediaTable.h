@@ -20,13 +20,6 @@ extern          "C" {
 #include <net-snmp/data_access/arp.h>
 
     /*
-     * other required module components 
-     */
-    config_require(ip-mib/data_access/arp);
-    config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_interface);
-    config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access);
-
-    /*
      * OID, column number and enum definions for  
      */
 #include "inetNetToMediaTable_constants.h"
