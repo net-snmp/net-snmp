@@ -359,7 +359,7 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
         int skip_count,               /* !=0 number of variables to skip */
         int copy_count)               /* !=0 number of variables to copy */
 {
-    struct variable_list *var, *newvar, *oldvar;
+    struct variable_list *var, *oldvar;
     int ii, copied, drop_idx;
 
     if (!newpdu) return 0;            /* where is PDU to copy to ? */
