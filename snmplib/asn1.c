@@ -41,6 +41,7 @@ SOFTWARE.
 #endif
 
 #include <sys/types.h>
+#include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
