@@ -74,13 +74,13 @@ init_vacm_vars(void)
 
 #define PRIVRW	(SNMPV2ANY | 0x5000)
 
-    struct variable2 vacm_sec2group[] = {
+    struct variable1 vacm_sec2group[] = {
         {SECURITYGROUP, ASN_OCTET_STR, RWRITE, var_vacm_sec2group, 1, {3}},
         {SECURITYSTORAGE, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {4}},
         {SECURITYSTATUS, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {5}},
     };
 
-    struct variable2 vacm_access[] = {
+    struct variable1 vacm_access[] = {
         {ACCESSMATCH, ASN_INTEGER, RWRITE, var_vacm_access, 1, {4}},
         {ACCESSREAD, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {5}},
         {ACCESSWRITE, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {6}},
@@ -89,7 +89,7 @@ init_vacm_vars(void)
         {ACCESSSTATUS, ASN_INTEGER, RWRITE, var_vacm_access, 1, {9}},
     };
 
-    struct variable4 vacm_view[] = {
+    struct variable3 vacm_view[] = {
         {VACMVIEWSPINLOCK, ASN_INTEGER, RWRITE, var_vacm_view, 1, {1}},
         {VIEWMASK, ASN_OCTET_STR, RWRITE, var_vacm_view, 3, {2, 1, 3}},
         {VIEWTYPE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 4}},
@@ -114,11 +114,11 @@ init_vacm_vars(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable2,
+    REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable1,
                  vacm_sec2group_oid);
-    REGISTER_MIB("mibII/vacm:access", vacm_access, variable2,
+    REGISTER_MIB("mibII/vacm:access", vacm_access, variable1,
                  vacm_access_oid);
-    REGISTER_MIB("mibII/vacm:view", vacm_view, variable4, vacm_view_oid);
+    REGISTER_MIB("mibII/vacm:view", vacm_view, variable3, vacm_view_oid);
     snmpd_register_config_handler("group", vacm_parse_group,
                                   vacm_free_group,
                                   "name v1|v2c|usm|... security");

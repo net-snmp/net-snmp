@@ -149,7 +149,7 @@ static int if_maxifindex __P((void));
 static char    *if_getname __P((int));
 static int if_getindex __P((const char *));
 
-struct variable4 ipv6_variables[] = {
+struct variable3 ipv6_variables[] = {
     {IPV6FORWARDING, ASN_INTEGER, RONLY, var_ipv6, 1, {1}},
     {IPV6DEFAULTHOPLIMIT, ASN_INTEGER, RONLY, var_ipv6, 1, {2}},
     {IPV6INTERFACES, ASN_GAUGE, RONLY, var_ipv6, 1, {3}},
@@ -253,7 +253,7 @@ config_load_mib(MIB .55 .1, 8, ipv6_variables)
     config_add_mib(IPV6 - TC)
     config_add_mib(IPV6 - MIB)
 #endif
-     struct variable4 ipv6icmp_variables[] = {
+     struct variable3 ipv6icmp_variables[] = {
          {IPV6IFICMPINMSG, ASN_COUNTER, RONLY, var_icmpv6Entry, 3,
           {1, 1, 1}},
          {IPV6IFICMPINERRORS, ASN_COUNTER, RONLY, var_icmpv6Entry, 3,
@@ -328,7 +328,7 @@ oid             ipv6icmp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 56, 1 };
 config_load_mib(MIB .56 .1, 8, ipv6icmp_variables)
     config_add_mib(IPV6 - ICMP - MIB)
 #endif
-     struct variable4 ipv6udp_variables[] = {
+     struct variable2 ipv6udp_variables[] = {
          {IPV6UDPLOCALADDRESS, ASN_OCTET_STR, RONLY, var_udp6, 2, {1, 1}},
          {IPV6UDPLOCALPORT, ASN_INTEGER, RONLY, var_udp6, 2, {1, 2}},
          {IPV6UDPIFINDEX, ASN_INTEGER, RONLY, var_udp6, 2, {1, 3}}
@@ -338,7 +338,7 @@ oid             ipv6udp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 7, 6 };
 config_load_mib(1.3 .6 .1 .3 .87 .1, 7, ipv6udp_variables)
     config_add_mib(IPV6 - UDP - MIB)
 #endif
-     struct variable4 ipv6tcp_variables[] = {
+     struct variable2 ipv6tcp_variables[] = {
          {IPV6TCPLOCALADDR, ASN_OCTET_STR, RONLY, var_tcp6, 2, {1, 1}},
          {IPV6TCPLOCALPORT, ASN_INTEGER, RONLY, var_tcp6, 2, {1, 2}},
          {IPV6TCPREMOTEADDR, ASN_OCTET_STR, RONLY, var_tcp6, 2, {1, 3}},
@@ -357,13 +357,13 @@ config_load_mib(1.3 .6 .1 .3 .86 .1, 7, ipv6tcp_variables)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/ipv6", ipv6_variables, variable4,
+    REGISTER_MIB("mibII/ipv6", ipv6_variables, variable3,
                  ipv6_variables_oid);
-    REGISTER_MIB("mibII/icmpv6", ipv6icmp_variables, variable4,
+    REGISTER_MIB("mibII/icmpv6", ipv6icmp_variables, variable3,
                  ipv6icmp_variables_oid);
-    REGISTER_MIB("mibII/ipv6udp", ipv6udp_variables, variable4,
+    REGISTER_MIB("mibII/ipv6udp", ipv6udp_variables, variable2,
                  ipv6udp_variables_oid);
-    REGISTER_MIB("mibII/ipv6tcp", ipv6tcp_variables, variable4,
+    REGISTER_MIB("mibII/ipv6tcp", ipv6tcp_variables, variable2,
                  ipv6tcp_variables_oid);
 }
 

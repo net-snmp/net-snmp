@@ -173,7 +173,7 @@ static unsigned int hz;
 	 *
 	 *********************/
 
-struct variable13 tcp_variables[] = {
+struct variable3 tcp_variables[] = {
     {TCPRTOALGORITHM, ASN_INTEGER, RONLY, var_tcp, 1, {1}},
     {TCPRTOMIN, ASN_INTEGER, RONLY, var_tcp, 1, {2}},
 #ifndef sunV3
@@ -219,7 +219,7 @@ init_tcp(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/tcp", tcp_variables, variable13,
+    REGISTER_MIB("mibII/tcp", tcp_variables, variable3,
                  tcp_variables_oid);
     REGISTER_SYSOR_ENTRY(tcp_module_oid,
                          "The MIB module for managing TCP implementations");
