@@ -53,3 +53,4 @@ installdirs:
 
 clean:
 	rm -f $(TARGETS)
+	rm -f default_store.3.h
