@@ -348,17 +348,49 @@ finish:
 	 */
 struct request_list *
 get_agentx_request(struct agent_snmp_session *asp,
-                   struct snmp_session *ax_session, int transID )
+                   struct snmp_session *ax_session, int transID,
+                   struct variable_list *vbp )
 {
     struct request_list     *req;
     struct snmp_pdu         *pdu;
     struct ax_variable_list *vlist;
+    struct subtree      *sub;
     int			    new_size;
 
-    DEBUGMSGTL(("agentx/master","processing request...\n"));
+    DEBUGMSGTL(("agentx/master", "processing "));
+    DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
+    DEBUGMSG(("agentx/master", "\n"));
 
-    for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
-	if ( req->message_id == transID && req->session == ax_session) {
+    sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
+
+    if (sub != NULL) {
+	DEBUGMSGTL(("agentx/master", "subtree found: "));
+	DEBUGMSGOID(("agentx/master", sub->name, sub->namelen));
+	DEBUGMSG(("agentx/master", "\n"));
+    }
+
+    for (req = asp->outstanding_requests; req != NULL; req=req->next_request) {
+	if (req->message_id == transID && req->session == ax_session) {
+		/*
+         * check if the command is getnext or getbulk, 
+         * if so check if the desired oid is a fully qualified instance, 
+         * if so check if the request list command in the req-pdu should is 
+         *     getnext command. 
+         * if so skip this req. (special handling of fully qual instance oid)
+         *
+         * Note if the first two checks are true the command should be a getnext
+         */
+	    if (asp->pdu->command == SNMP_MSG_GETNEXT || 
+		asp->pdu->command == SNMP_MSG_GETBULK) { 
+
+		if (sub->flags & FULLY_QUALIFIED_INSTANCE) { 
+		    if (req->pdu->command == AGENTX_MSG_GETNEXT) {
+			DEBUGMSGTL(("agentx/master", "skip request\n"));
+			continue;
+		    }
+		}
+	    }
+
 		/*
 		 * Check if there's room in this request for another variable.
 		 * If not, then expand it by 'VARLIST_ITERATION' variables.
@@ -381,15 +413,15 @@ get_agentx_request(struct agent_snmp_session *asp,
 		/*
 		 * No existing request found, so create a new one
 		 */
-    req   = (struct request_list     *)calloc( 1, sizeof(struct request_list));
+    req = (struct request_list *)calloc(1, sizeof(struct request_list));
     new_size = sizeof(struct ax_variable_list) +
 		VARLIST_ITERATION * sizeof(struct variable_list);
-    vlist = (struct ax_variable_list *)calloc( 1, new_size);
-    pdu   = snmp_pdu_create( 0 );
-    if ( req == NULL || pdu == NULL || vlist == NULL ) {
-	free_agentx_request( req, 1 );
-	snmp_free_pdu(       pdu );
-	free_agentx_varlist( vlist );
+    vlist = (struct ax_variable_list *)calloc(1, new_size);
+    pdu = snmp_pdu_create(0);
+    if (req == NULL || pdu == NULL || vlist == NULL) {
+	free_agentx_request(req, 1);
+	snmp_free_pdu(pdu);
+	free_agentx_varlist(vlist);
 	return NULL;
     }
 
@@ -409,7 +441,11 @@ get_agentx_request(struct agent_snmp_session *asp,
 	case SNMP_MSG_GETNEXT:
 	case SNMP_MSG_GETBULK:
                 DEBUGMSGTL(("agentx/master","-> getnext/bulk\n"));
-		pdu->command = AGENTX_MSG_GETNEXT;
+		if (sub->flags & FULLY_QUALIFIED_INSTANCE) {
+		    pdu->command = AGENTX_MSG_GET;
+		} else {
+		    pdu->command = AGENTX_MSG_GETNEXT;
+		}
 		break;
 	case SNMP_MSG_SET:
                 DEBUGMSGTL(("agentx/master","-> set\n"));
@@ -490,28 +526,32 @@ agentx_add_request( struct agent_snmp_session *asp,
     sessid = ax_session->sessid;
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
 	ax_session = ax_session->subsession;
-    request    = get_agentx_request( asp, ax_session, pdu->transid );
+    request    = get_agentx_request( asp, ax_session, pdu->transid, vbp );
     if ( !request )
 	return SNMP_ERR_GENERR;
-    request->pdu->sessid = sessid;	/* Use the registered (sub)session's ID,
-					   not the main listening session ID */
-    ax_vlist   = (struct ax_variable_list *)request->cb_data;
+    request->pdu->sessid = sessid;     /* Use the registered (sub)session's ID,
+					  not the main listening session ID */
 
-    ax_vlist->variables[ ax_vlist->num_vars ] = vbp;
+    ax_vlist = (struct ax_variable_list *)request->cb_data;
+    ax_vlist->variables[ax_vlist->num_vars] = vbp;
     vbp->index = asp->index;	/* Remember the variable index */
     ax_vlist->num_vars++;
     
-    sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
-    if ( asp->exact )
-        snmp_pdu_add_variable( request->pdu,
-			   vbp->name, vbp->name_length, vbp->type,
-			   (u_char*)(vbp->val.string), vbp->val_len);
-    else {
-        snmp_pdu_add_variable( request->pdu,
-			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
-			   (u_char*)sub->end, sub->end_len*sizeof(oid));
+    sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
+    DEBUGMSGTL(("agentx/master", "%sexact varbind: ", asp->exact?"":"in"));
+    if (asp->exact) {
+	DEBUGMSGOID(("agentx/master", vbp->val.string, vbp->val_len));
+        snmp_pdu_add_variable(request->pdu,
+			      vbp->name, vbp->name_length, vbp->type,
+			      (u_char*)(vbp->val.string), vbp->val_len);
+    } else {
+	DEBUGMSGOID(("agentx/master", sub->end, sub->end_len));
+        snmp_pdu_add_variable(request->pdu,
+			      vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
+			      (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
-    if ( sub->timeout > (int)request->pdu->time ) {
+    DEBUGMSG(("agentx/master", "\n"));
+    if (sub->timeout > (int)request->pdu->time) {
 	request->pdu->time = sub->timeout;
 	request->pdu->flags |= UCD_MSG_FLAG_PDU_TIMEOUT;
     }

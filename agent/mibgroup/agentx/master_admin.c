@@ -170,6 +170,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     char buf[32];
     oid ubound = 0;
+    u_long flags = 0;
 
     DEBUGMSGTL(("agentx:register","in register_agentx_list\n"));
     
@@ -184,12 +185,16 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 		*/ 
     if ( pdu->range_subid )
 	ubound = pdu->variables->val.objid[ pdu->range_subid-1 ];
+
+    if(pdu->flags & AGENTX_MSG_FLAG_INSTANCE_REGISTER)
+      flags = FULLY_QUALIFIED_INSTANCE;
+
     switch (register_mib_context(buf, (struct variable *)agentx_varlist,
 			 sizeof(agentx_varlist[0]), 1,
 			 pdu->variables->name, pdu->variables->name_length,
 			 pdu->priority, pdu->range_subid, ubound, sp,
 			 (char *)pdu->community, pdu->time,
-			 pdu->flags&AGENTX_MSG_FLAG_INSTANCE_REGISTER)) {
+			 flags)) {
 
 	case MIB_REGISTERED_OK:
 				DEBUGMSGTL(("agentx:register",
@@ -408,10 +413,11 @@ handle_master_agentx_packet(int operation,
 
     /*  Okay, it's a SNMP_CALLBACK_OP_RECEIVED_MESSAGE op.  */
 
-    if ( magic )
+    if (magic) {
         asp = (struct agent_snmp_session *)magic;
-    else
+    } else {
     	asp = init_agent_snmp_session(session, pdu);
+    }
 
     switch (pdu->command) {
         case AGENTX_MSG_OPEN:
@@ -478,15 +484,25 @@ handle_master_agentx_packet(int operation,
 		break;
     }
     
-    if ( asp->outstanding_requests == NULL ) {
+    if (asp->outstanding_requests == NULL) {
         gettimeofday(&now, NULL);
-	asp->pdu->time    = calculate_time_diff( &now, &starttime );
+	asp->pdu->time    = calculate_time_diff(&now, &starttime);
         asp->pdu->command = AGENTX_MSG_RESPONSE;
 	asp->pdu->errstat = asp->status;
-	if (! snmp_send( asp->session, asp->pdu ))
-	    snmp_free_pdu(asp->pdu);
+        DEBUGMSGTL(("agentx/master", "send response, stat %d\n", asp->status));
+	if (!snmp_send(asp->session, asp->pdu)) {
+	  char *eb = NULL;
+	  int pe, pse;
+	  snmp_error(asp->session, &pe, &pse, &eb);
+	  snmp_free_pdu(asp->pdu);
+	  DEBUGMSGTL(("agentx/master", "FAILED %d %d %s\n", pe, pse, eb));
+	  free(eb);
+	}
 	asp->pdu = NULL;
 	free_agent_snmp_session(asp);
+    } else {
+      DEBUGMSGTL(("agentx/master", "asp->outstanding %08p, no response\n",
+		  asp->outstanding_requests));
     }
 
     return 1;
