@@ -298,6 +298,7 @@ sub oidlength {
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
 #   $var.reference     -- node's reference
+#   $var.description   -- node's description
 
 sub process_vars {
     my $it = shift;
