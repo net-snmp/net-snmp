@@ -1137,9 +1137,6 @@ snmp_free_internal_pdu(pdu)
     }
     if (pdu->enterprise) free(pdu->enterprise);
     if (pdu->community) free(pdu->community);
-    if (pdu->srcParty) free(pdu->srcParty);
-    if (pdu->dstParty) free(pdu->dstParty);
-    if (pdu->context) free(pdu->context);
     if (!SavedPdu)
 	SavedPdu = pdu;
     else
