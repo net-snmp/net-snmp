@@ -23,6 +23,8 @@
 #include <sys/fs.h>
 #elif HAVE_UFS_FS_H
 #include <ufs/fs.h>
+#elif HAVE_UFS_FFS_FS_H
+#include <ufs/ffs/fs.h>
 #endif
 #if HAVE_MTAB_H
 #include <mtab.h>
