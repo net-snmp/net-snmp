@@ -1569,7 +1569,7 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
                  * Print to "separator" string rather than the output buffer
                  *    (a bit of a hack, but it should work!)
                  */
-                int i, j;
+                size_t i, j;
                 i = sizeof(separator);
                 j = 0;
                 memset(separator, 0, i);
