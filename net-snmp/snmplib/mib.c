@@ -1,6 +1,8 @@
 /*
  * mib.c
  *
+ * $Id$
+ *
  * Update: 1998-07-17 <jhy@gsu.edu>
  * Added print_oid_report* functions.
  *
@@ -2945,7 +2947,8 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
                            "No more variables left in this MIB View (It is past the end of the MIB tree)");
     } else if (subtree) {
         const char *units = NULL;
-        if (!netsnmp_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
         if (subtree->printomat) {
@@ -3052,7 +3055,8 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
     } else {
         const char *units = NULL;
         subtree = get_tree(objid, objidlen, subtree);
-        if (subtree && !netsnmp_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
+        if (subtree && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                            NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
         if (subtree && subtree->printomat) {
