@@ -35,7 +35,7 @@
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if STDC_HEADERS

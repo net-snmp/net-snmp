@@ -57,11 +57,6 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
-#ifdef STDC_HEADERS
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

@@ -13,7 +13,7 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -59,7 +59,7 @@ debug_indent_add(int amount) {
 }
 
 void
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 DEBUGP(const char *first, ...)
 #else
 DEBUGP(va_alist)
@@ -67,12 +67,12 @@ DEBUGP(va_alist)
 #endif
 {
   va_list args;
-#ifndef STDC_HEADERS
+#if HAVE_STDARG_H
+  va_start(args, first);
+#else
   const char *first;
   va_start(args);
   first = va_arg(args, const char *);
-#else
-  va_start(args, first);
 #endif
 
   if (dodebug && (debug_print_everything || debug_num_tokens == 0)) {
@@ -161,7 +161,7 @@ debug_is_token_registered(const char *token) {
 }
 
 void
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 debugmsg(const char *token, const char *format, ...)
 #else
 debugmsg(va_alist)
@@ -170,15 +170,15 @@ debugmsg(va_alist)
 {
   va_list debugargs;
   
-#ifndef STDC_HEADERS
+#if HAVE_STDARG_H
+  va_start(debugargs,format);
+#else
   const char *format;
   const char *token;
 
   va_start(debugargs);
   token = va_arg(debugargs, const char *);
   format = va_arg(debugargs, const char *); /* ??? */
-#else
-  va_start(debugargs,format);
 #endif
 
   if (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
@@ -222,7 +222,7 @@ debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
 }
 
 void
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 debugmsgtoken(const char *token, const char *format, ...)
 #else
 debugmsgtoken(va_alist)
@@ -231,13 +231,13 @@ debugmsgtoken(va_alist)
 {
   va_list debugargs;
 
-#ifndef STDC_HEADERS
+#if HAVE_STDARG_H
+  va_start(debugargs,format);
+#else
   const char *token;
 
   va_start(debugargs);
   token = va_arg(debugargs, const char *);
-#else
-  va_start(debugargs,format);
 #endif
 
   debugmsg(token, "%s: ", token);
