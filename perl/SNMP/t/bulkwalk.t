@@ -212,3 +212,5 @@ $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
 ok($s1->{ErrorNum} == 0);
 SNMP::MainLoop();
 ok(1);
+
+snmptest_cleanup();
