@@ -1,1 +1,1 @@
-static char *VersionInfo="3.4.pre7";
+static char *VersionInfo="3.4.pre8";
