@@ -19,6 +19,7 @@
 
 /* add the host resources mib to the default mibs to load */
         config_add_mib(HOST-RESOURCES-MIB) 
+        config_add_mib(HOST-RESOURCES-TYPES) 
 
 /*********************************************
  *
