@@ -166,7 +166,7 @@ int
 handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
-    struct agent_snmp_session  *asp;
+    struct agent_snmp_session  *asp = NULL;
     struct agent_set_info      *asi;
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2, *v = NULL, *ov = NULL, *w = NULL;
@@ -270,8 +270,8 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
     case AGENTX_MSG_GETNEXT:
         DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
-	asp->exact = FALSE;
 	ov = snmp_clone_varbind(asp->start);
+	asp->exact = FALSE;
 	status = handle_next_pass(asp);
 	
 	/*  Check results are in scope requested by the master agent.  This
@@ -280,7 +280,8 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	for (v = ov, w = asp->start;
 	     v != NULL && w != NULL;
 	     v = v->next_variable, w = w->next_variable) {
-	  if (v->type == ASN_PRIV_EXCL_RANGE) {
+	  if (snmp_oid_compare(v->val.objid, v->val_len/sizeof(oid),
+			       nullOid, nullOidLen) != 0) {
 	    /*  The master agent requested scoping for this variable.  */
 	    int rc = snmp_oid_compare(w->name, w->name_length,
 				      v->val.objid, v->val_len/sizeof(oid));
@@ -300,6 +301,8 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	      DEBUGMSGTL(("agentx/subagent",
 			  "scope violation -- return endOfMibView\n"));
 	    }
+	  } else {
+	    DEBUGMSGTL(("agentx/subagent", "unscoped var\n"));
 	  }
 	}
 

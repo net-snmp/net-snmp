@@ -173,6 +173,7 @@ agentx_var(struct variable *vp,
 	 * then update the "matched" name to be the starting point
 	 */
         /* XXX shouldn't we check exact in this case? */
+
     result = snmp_oid_compare(name, *length, vp->name, vp->namelen);
     DEBUGMSGTL(("agentx/master", "snmp_oid_compare(name, vp->name) = %d\n",
 		result));
@@ -181,6 +182,7 @@ agentx_var(struct variable *vp,
 	memcpy((char *)name, (char *)vp->name, vp->namelen*sizeof(oid));
 	*length = vp->namelen;
     }
+
 				/* Return a pointer to an appropriate method */
     add_method  = agentx_add_request;
     *var_len = sizeof( add_method );
