@@ -929,6 +929,7 @@ typedef struct _com2Sec6Entry {
     struct sockaddr_in6 network;
     struct sockaddr_in6 mask;
     char            secName[VACMSTRINGLEN];
+    char            contextName[VACMSTRINGLEN];
     struct _com2Sec6Entry *next;
 } com2Sec6Entry;
 
@@ -939,9 +940,11 @@ void
 memmove_com2Sec6Entry(com2Sec6Entry * c,
                       char *secName,
                       char *community,
-                      struct sockaddr_in6 net, struct sockaddr_in6 mask)
+                      struct sockaddr_in6 net, struct sockaddr_in6 mask,
+                      char *contextName)
 {
     snprintf(c->secName, strlen(secName) + 1, "%s", secName);
+    snprintf(c->contextName, strlen(contextName) + 1, "%s", contextName);
     snprintf(c->community, strlen(community) + 1, "%s", community);
     memmove(&c->network, &net, sizeof(net));
     memmove(&c->mask, &mask, sizeof(mask));
@@ -953,6 +956,7 @@ void
 netsnmp_udp6_parse_security(const char *token, char *param)
 {
     char            secName[VACMSTRINGLEN];
+    char            contextName[VACMSTRINGLEN];
     char            community[VACMSTRINGLEN];
     char            source[VACMSTRINGLEN];
     char           *cp = NULL, *strnetwork = NULL, *strmask = NULL;
@@ -972,6 +976,14 @@ netsnmp_udp6_parse_security(const char *token, char *param)
      * Get security, source address/netmask and community strings.  
      */
     cp = copy_nword( param, secName, sizeof(secName));
+    if (strcmp(secName, "-Cn") == 0) {
+        if (!cp) {
+            config_perror("missing CONTEXT_NAME parameter");
+            return;
+        }
+        cp = copy_nword( cp, contextName, sizeof(contextName));
+        cp = copy_nword( cp, secName, sizeof(secName));
+    }
     if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
         return;
@@ -1044,7 +1056,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             DEBUGMSGTL(("netsnmp_udp6_parse_security",
                         "Couldn't allocate enough memory\n"));
         }
-        memmove_com2Sec6Entry(e, secName, community, net, mask);
+        memmove_com2Sec6Entry(e, secName, community, net, mask, contextName);
         if (com2Sec6ListLast != NULL) {
             com2Sec6ListLast->next = e;
             com2Sec6ListLast = e;
@@ -1103,7 +1115,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 DEBUGMSGTL(("netsnmp_udp6_parse_security",
                             "Couldn't allocate enough memory\n"));
             }
-            memmove_com2Sec6Entry(e, secName, community, net, mask);
+            memmove_com2Sec6Entry(e, secName, community, net, mask,
+                                  contextName);
             if (com2Sec6ListLast != NULL) {
                 com2Sec6ListLast->next = e;
                 com2Sec6ListLast = e;
@@ -1151,7 +1164,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 DEBUGMSGTL(("netsnmp_udp6_parse_security",
                             "<\"%s\", %s> => \"%s\"\n", community, hbuf,
                             secName));
-                memmove_com2Sec6Entry(e, secName, community, net, mask);
+                memmove_com2Sec6Entry(e, secName, community, net, mask,
+                                      contextName);
                 if (com2Sec6ListLast != NULL) {
                     com2Sec6ListLast->next = e;
                     com2Sec6ListLast = e;
@@ -1191,7 +1205,7 @@ netsnmp_udp6_agent_config_tokens_register(void)
 #if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)
     register_app_config_handler("com2sec6", netsnmp_udp6_parse_security,
                                 netsnmp_udp6_com2Sec6List_free,
-                                "name IPv6-network-address[/netmask] community");
+                                "[-Cn CONTEXT] secName IPv6-network-address[/netmask] community");
 #endif /* support for community based SNMP */
 }
 
@@ -1208,7 +1222,7 @@ netsnmp_udp6_agent_config_tokens_register(void)
 int
 netsnmp_udp6_getSecName(void *opaque, int olength,
                         const char *community,
-                        int community_len, char **secName)
+                        int community_len, char **secName, char **contextName)
 {
     com2Sec6Entry  *c;
     struct sockaddr_in6 *from = (struct sockaddr_in6 *) opaque;
@@ -1268,6 +1282,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
             DEBUGMSG(("netsnmp_udp6_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
                 *secName = c->secName;
+                *contextName = c->contextName;
             }
             break;
         }

@@ -31,7 +31,8 @@ void netsnmp_unix_agent_config_tokens_register(void);
 void netsnmp_unix_parse_security(const char *token, char *param);
 int netsnmp_unix_getSecName(void *opaque, int olength,
                             const char *community,
-                            size_t community_len, char **secName);
+                            size_t community_len, char **secName,
+                            char **contextName);
 
 
 /*
