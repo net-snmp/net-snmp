@@ -6,7 +6,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  Important:
     - the UCD-SNMP specific mib structure changed.
       - many of the table oids have changed location and have been renamed.
-    - the SNMPv3 access control module was implemented in the agent.
+    - the View Based Access Control module was implemented in the agent.
       Therefore, the "community" snmpd.conf parameter no longer
       exists.  See the snmpd.conf file for how to control access via
       community names now.
