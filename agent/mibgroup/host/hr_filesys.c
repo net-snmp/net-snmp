@@ -41,7 +41,28 @@
 #if defined(freebsd3) || defined(bsdi4)
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
-#define MOUNT_NFS "nfs"
+#define MOUNT_NFS	"nfs"
+#define MNTTYPE_UFS	"ufs"
+#define BerkelyFS
+#define MNTTYPE_FFS	"ffs"
+#define MNTTYPE_NFS	"nfs"
+#define MNTTYPE_NFS3	"nfs"
+#define MNTTYPE_MFS	"mfs"
+#define MNTTYPE_MSDOS	"msdos"
+#define MNTTYPE_LFS	"lfs"
+#define MNTTYPE_FDESC	"fdesc"
+#define MNTTYPE_PORTAL	"portal"
+#define MNTTYPE_NULL	"null"
+#define MNTTYPE_UMAP	"umap"
+#define MNTTYPE_KERNFS	"kernfs"
+#define MNTTYPE_PROCFS	"procfs"
+#define MNTTYPE_AFS	"afs"
+#define MNTTYPE_CD9660	"cd9660"
+#define MNTTYPE_UNION	"union"
+#define MNTTYPE_ADOSFS	"adosfs"
+#define MNTTYPE_EXT2FS	"ext2fs"
+#define MNTTYPE_CFS	"coda"
+#define MNTTYPE_NTFS	"ntfs"
 #endif
 #endif
 #endif /* freebsd3 */
@@ -276,7 +297,7 @@ var_hrfilesys(struct variable *vp,
 	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
 	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
 #ifdef MOUNT_EXT2FS
-	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 1; break;
+	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 23; break;
 #endif
 #ifdef MOUNT_TFS
 	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
@@ -337,6 +358,22 @@ var_hrfilesys(struct variable *vp,
 #ifdef MNTTYPE_MFS
 	    else if (!strcmp( mnt_type, MNTTYPE_MFS))
 			fsys_type_id[fsys_type_len-1] = 8;
+#endif
+#ifdef MNTTYPE_EXT2FS
+	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
+			fsys_type_id[fsys_type_len-1] = 23;
+#endif
+#ifdef MNTTYPE_NTFS
+	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
+			fsys_type_id[fsys_type_len-1] = 9;
+#endif
+#ifdef MNTTYPE_EXT2FS
+	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
+			fsys_type_id[fsys_type_len-1] = 23;
+#endif
+#ifdef MNTTYPE_NTFS
+	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
+			fsys_type_id[fsys_type_len-1] = 9;
 #endif
 	    else
 			fsys_type_id[fsys_type_len-1] = 1;	/* Other */
