@@ -551,6 +551,12 @@ What's this about a "party database", when I try to send a query?
 
 Why can't I see values in the UCDavis 'extensible' tree?
 -------------------------------------------------------
+
+  The extensible tree is designed to report things you ask it to report
+  on.  If you don't declare anything in the snmpd.conf file for it to
+  monitor, it will not report anything.  See the snmpd.conf manual page
+  and the EXAMPLE.conf file for details no configuring the agent.
+
 Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 -----------------------------------------------------------
 
