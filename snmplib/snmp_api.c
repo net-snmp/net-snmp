@@ -3828,7 +3828,13 @@ hex_to_binary(const char *str,
 /*
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.
- * returns 0 if success, 1 if failure.
+ * Returns:
+ * may set these error types :
+ * SNMPERR_RANGE - type, value, or length not found or out of range
+ * SNMPERR_VALUE - value is not correct
+ * SNMPERR_BAD_NAME - name is not found
+ *
+ * returns 0 if success, error if failure.
  */
 int
 snmp_add_var(struct snmp_pdu *pdu,
@@ -3837,6 +3843,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     char type,
 	     const char *value)
 {
+    int result = 0;
     u_char buf[SPRINT_MAX_LEN];
     size_t tint;
     long ltmp;
@@ -3862,9 +3869,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 		ep = ep->next;
 	    }
 	    if (!ep) {
-		snmp_errno = SNMPERR_BAD_NAME; /*MTCRITICAL_RESOURCE*/
+		result = SNMPERR_BAD_NAME;
 		snmp_set_detail(value);
-		return 1;
+		break;
 	    }
 	}
 	if (tp && tp->ranges) {
@@ -3874,9 +3881,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 		rp = rp->next;
 	    }
 	    if (!rp) {
-		snmp_errno = SNMPERR_RANGE; /*MTCRITICAL_RESOURCE*/
-		snmp_set_detail("Value out of range");
-		return 1;
+		result = SNMPERR_RANGE;
+		snmp_set_detail("Value");
+		break;
 	    }
 	}
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
@@ -3920,9 +3927,9 @@ snmp_add_var(struct snmp_pdu *pdu,
           tint = hex_to_binary(value, buf);
         }
         if (tint < 0) {
-          snmp_errno = SNMPERR_VALUE; /*MTCRITICAL_RESOURCE*/
+          result = SNMPERR_VALUE;
           snmp_set_detail(value);
-          return 1;
+          break;
         }
 	tp = get_tree(name, name_length, get_tree_head());
 	if (tp && tp->ranges) {
@@ -3932,9 +3939,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 		rp = rp->next;
 	    }
 	    if (!rp) {
-		snmp_errno = SNMPERR_RANGE; /*MTCRITICAL_RESOURCE*/
+		result = SNMPERR_RANGE;
 		snmp_set_detail("Length");
-		return 1;
+		break;
 	    }
 	}
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
@@ -3971,10 +3978,13 @@ snmp_add_var(struct snmp_pdu *pdu,
 #endif /* OPAQUE_SPECIAL_TYPES */
 
       default:
-        snmp_set_detail("Internal error in type switching");
-        return 1;
+	result = SNMPERR_RANGE;
+	snmp_set_detail("Type");
+        break;
     }
-    return 0;
+
+    SET_SNMP_ERROR(result);
+    return (result);
 }
 
 /*
