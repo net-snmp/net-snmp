@@ -1299,7 +1299,7 @@ asn_build_bitstring(u_char *data,
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
     static const char *errpre = "build bitstring";
-    if (_asn_bitstring_check(errpre, strlength, ((string) ? *string : 0)))
+    if (_asn_bitstring_check(errpre, strlength, ((string) ? *string : (u_char)0)))
 	return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
@@ -2279,14 +2279,14 @@ asn_realloc_rbuild_objid (u_char **pkt, size_t *pkt_len,
       if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	return 0; 
       }
-      *(*pkt + *pkt_len - (++*offset)) = tmpint & 0x7f;
+      *(*pkt + *pkt_len - (++*offset)) = (u_char)tmpint & 0x7f;
       tmpint >>= 7;
 
       while (tmpint > 0) {
 	if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	  return 0; 
 	}
-	*(*pkt + *pkt_len - (++*offset)) = ((tmpint & 0x7f) | 0x80);
+	*(*pkt + *pkt_len - (++*offset)) = (u_char)((tmpint & 0x7f) | 0x80);
 	tmpint >>= 7;
       }
     }

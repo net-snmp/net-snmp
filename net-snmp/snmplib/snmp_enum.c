@@ -18,8 +18,8 @@ struct snmp_enum_list_str {
 };
    
 static struct snmp_enum_list ***snmp_enum_lists;
-int current_maj_num;
-int current_min_num;
+unsigned int current_maj_num;
+unsigned int current_min_num;
 struct snmp_enum_list_str *sliststorage;
 
 int init_snmp_enum(void) {

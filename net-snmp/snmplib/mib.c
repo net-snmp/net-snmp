@@ -3328,7 +3328,7 @@ int parse_one_oid_index(oid **oidStart, size_t *oidLen,
 {
   struct variable_list *var = data;
   oid tmpout[MAX_OID_LEN];
-  int i;
+  unsigned int i;
   unsigned int uitmp;
 
   oid *oidIndex = *oidStart;

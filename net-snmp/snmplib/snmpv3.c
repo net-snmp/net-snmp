@@ -71,7 +71,6 @@
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
-
 #include <net-snmp/library/transform_oids.h>
 
 static u_long		 engineBoots	   = 1;
