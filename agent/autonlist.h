@@ -1,7 +1,7 @@
 #ifndef AUTONLIST_H
 
 struct autonlist {
-   char symbol[128];
+   char *symbol;
    struct nlist nl[2];
    struct autonlist *left, *right;
 };
