@@ -906,11 +906,10 @@ compute_match(const char *search_base, const char *key) {
     regmatch_t pmatch;
 
     rc=regcomp(&parsetree, key, REG_ICASE);
-    rc=regexec(&parsetree, search_base, 1, &pmatch, 0);
-    if (rc > 0) {
-        /* not found */
-        return MAX_BAD;
-    } else {
+    if (rc == 0)
+        rc=regexec(&parsetree, search_base, 1, &pmatch, 0);
+    regfree(&parsetree);
+    if (rc == 0) {
         /* found */
         return pmatch.rm_so;
     }
@@ -938,10 +937,12 @@ compute_match(const char *search_base, const char *key) {
         entry = strtok( NULL, "*" );
     }
     free(newkey);
-    if (!result)
-        return MAX_BAD;
-    return(first-search_base);
+    if (result)
+        return(first-search_base);
 #endif
+
+    /* not found */
+    return MAX_BAD;
 }
 
 /*
