@@ -530,7 +530,7 @@ statp_loop:
 			   &statType, &statLen, &acl,
 			   asp->exact, &write_method, asp->pdu, &noSuchObject);
 			   
-	if (statP == NULL && asp->rw != WRITE) {
+	if (statP == NULL && (asp->rw != WRITE || write_method == NULL)) {
 	    	varbind_ptr->val.integer   = NULL;
 	    	varbind_ptr->val_len = 0;
 		if ( asp->exact ) {
