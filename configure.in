@@ -1684,6 +1684,6 @@ AC_OUTPUT([
 ], echo timestamp > stamp-h)
 
 dnl Local Variables:
-dnl mode: sh
+dnl mode: Autoconf
 dnl comment-start: "dnl"
 dnl End:
