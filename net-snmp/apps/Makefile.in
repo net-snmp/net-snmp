@@ -4,9 +4,12 @@
 #
 TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext
 LIBS=	../lib/libsnmp.a
-LDFLAGS=
-OSFLAGS=
-CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
+
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
+LDFLAGS=@LDFLAGS@
+
+CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
@@ -40,12 +43,48 @@ clean:
 install:
 	cp ${TARG} ../bin
 
-snmpbulkwalk.o:	../snmplib/party.h
-snmpget.o:	../snmplib/party.h
-snmptest.o:	../snmplib/party.h
-snmptranslate.o:	../snmplib/party.h
-snmpwalk.o:	../snmplib/party.h
-snmptest.o:	../snmplib/party.h
-snmptable.o:    ../snmplib/party.h
-snmpset.o:	../snmplib/party.h
-snmpgetnext.o:	../snmplib/party.h
+depend: 
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+snmpbulkwalk.o: ../config.h ../agent/extensible/struct.h
+snmpbulkwalk.o:   ../snmplib/snmp.h
+snmpbulkwalk.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h
+snmpbulkwalk.o: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
+snmpbulkwalk.o: ../snmplib/party.h ../snmplib/context.h ../snmplib/view.h
+snmpbulkwalk.o: ../snmplib/acl.h
+snmpget.o: ../config.h ../agent/extensible/struct.h 
+snmpget.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmpget.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmpget.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/context.h
+snmpget.o: ../snmplib/view.h ../snmplib/acl.h
+snmpgetnext.o: ../config.h ../agent/extensible/struct.h
+snmpgetnext.o:   ../snmplib/snmp.h
+snmpgetnext.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmpgetnext.o: ../snmplib/snmp_client.h ../snmplib/party.h
+snmpgetnext.o: ../snmplib/context.h ../snmplib/view.h ../snmplib/acl.h
+snmpset.o: ../config.h ../agent/extensible/struct.h 
+snmpset.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmpset.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmpset.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/context.h
+snmpset.o: ../snmplib/view.h ../snmplib/acl.h
+snmptest.o: ../config.h ../agent/extensible/struct.h 
+snmptest.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmptest.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmptest.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/context.h
+snmptest.o: ../snmplib/view.h ../snmplib/acl.h
+snmptranslate.o: ../config.h ../agent/extensible/struct.h
+snmptranslate.o:   ../snmplib/snmp.h
+snmptranslate.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h
+snmptranslate.o: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
+snmptrapd.o: ../config.h ../agent/extensible/struct.h
+snmptrapd.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmptrapd.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmptrapd.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/view.h
+snmptrapd.o: ../snmplib/acl.h
+snmpwalk.o: ../config.h ../agent/extensible/struct.h 
+snmpwalk.o: ../snmplib/snmp.h ../snmplib/asn1.h ../snmplib/snmp_impl.h
+snmpwalk.o: ../snmplib/snmp_api.h ../snmplib/snmp_client.h ../snmplib/party.h
+snmpwalk.o: ../snmplib/context.h ../snmplib/view.h ../snmplib/acl.h

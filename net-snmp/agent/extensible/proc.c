@@ -1,6 +1,7 @@
+#include <config.h>
+
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "../../config.h"
 
 int fixProcError();
 

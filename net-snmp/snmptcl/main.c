@@ -10,11 +10,15 @@
  * 920324 0.02
  */
 
+#include <config.h>
+
 #include <curses.h>
 
 #include <stdio.h>
 #include <errno.h>
+#if STDC_HEADERS
 #include <string.h>
+#endif
 #include "tcl.h"
 
 extern int exit();

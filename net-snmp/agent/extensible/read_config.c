@@ -1,10 +1,13 @@
+#include <config.h>
+
 #include <stdio.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#if HAVE_FSTAB_H
 #include <fstab.h>
+#endif
 #include <math.h>
-#include "../../config.h"
 
 #define ofile stderr
 #define debug 0
@@ -31,7 +34,9 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
   char *cptr, *tcptr;
   int linecount=0,i;
   struct stat stat1, stat2;
+#if HAVE_FSTAB_H
   struct fstab *fstab;
+#endif
   struct extensible **pptmp;
   
   if ((ifile = fopen(filename,"r")) == NULL) {
@@ -104,6 +109,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             (*pptmp)->next = NULL;
           }
           else if (!strncmp(word,"disk",4)) {
+#if HAVE_FSTAB_H
             if (*numdisks == MAXDISKS) {
               fprintf(stderr,"Too many disks specified in %s\n",filename);
               fprintf(stderr,"\tignoring:  %s\n",cptr);
@@ -135,6 +141,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
               }
               endfsent();
             }
+#else
+            fprintf(stderr,
+                    "'disk' checks not supported for this arcitecture.\n");
+#endif
           }
           else if (!strncmp(word,"proc",4)) {
             (*procp) = (struct myproc *) malloc(sizeof(struct myproc));

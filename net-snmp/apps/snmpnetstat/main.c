@@ -31,6 +31,8 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
+#include <config.h>
+
 #ifndef lint
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
@@ -47,7 +49,9 @@ char copyright[] =
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_api.h"

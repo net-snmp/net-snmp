@@ -1,33 +1,43 @@
+#include <config.h>
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <signal.h>
 #include <nlist.h>
-#ifndef __alpha
+#if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
+#endif
+#if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
 #include <sys/conf.h>
 #include <sys/param.h>
-#ifdef hpux
+#if HAVE_SYS_SWAP_H
 #include <sys/swap.h>
 #endif
-#if defined(hpux) || defined(ultrix)
+#if HAVE_SYS_FS_H
 #include <sys/fs.h>
-#include <mtab.h>
-#endif
-#if defined(sun) || defined(__alpha)
+#elif HAVE_UFS_FS_H
 #include <ufs/fs.h>
+#endif
+#if HAVE_MTAB_H
+#include <mtab.h>
 #endif
 #include <sys/stat.h>
 #include <errno.h>
+#if HAVE_FSTAB_H
 #include <fstab.h>
-#ifdef ultrix
+#endif
+#if HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
 #endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "../../config.h"
 
 void update_config();
 struct extensible *get_exten_instance();
@@ -122,7 +132,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
-#ifndef hpux
+#if !defined(hpux) && !defined(solaris2)
   { "_avenrun"},
   { "_total"},
   { "_swdevt"},
@@ -149,7 +159,6 @@ int nswapdev=10;            /* taken from <machine/space.h> */
 int nswapfs=10;            /* taken from <machine/space.h> */
 
 #ifdef MEMMIBNUM
-#ifdef hpux
 
 int getswap(rettype)
   int rettype;
@@ -205,9 +214,7 @@ int getswap(rettype)
       return(spacetotal);
   }
 }
-#endif
 
-#ifdef hpux
 unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -294,13 +301,11 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 }
 
 #endif
-#endif
 
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
-#ifdef DISKMIBNUM
-/*#if defined(hpux) || defined(ultrix) */
+#if DISKMIBNUM && HAVE_FSTAB_H
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -520,7 +525,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
   struct extensible *exten;
   long long_ret;
   static char errmsg[300];
-#ifdef ultrix
+#ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
 #endif
 #if defined(sun) || defined(__alpha)
@@ -662,6 +667,7 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 
 
 extern char version_descr[];
+extern char sysName[];
 extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
 
@@ -752,14 +758,6 @@ init_extensible() {
   struct extensible extmp;
   int ret,pagesize,i;
 
-#ifdef hpux
-  strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
-#else 
-  strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
-#endif
-  /* setup defaults */
-  extmp.type = EXECPROC;
-  extmp.next = NULL;
 
   minimumswap = DEFAULTMINIMUMSWAP;
   for (i=0; i<=2;i++)
@@ -783,17 +781,25 @@ init_extensible() {
 #endif  
   
   /* set default values of system stuff */
+  strcpy(extmp.command,"/bin/uname -a");
+  /* setup defaults */
+  extmp.type = EXECPROC;
+  extmp.next = NULL;
   exec_command(&extmp);
   strcpy(version_descr,extmp.output);
+
+  strcpy(extmp.command,"/bin/uname -n");
+  /* setup defaults */
+  extmp.type = EXECPROC;
+  extmp.next = NULL;
+  exec_command(&extmp);
+  strcpy(sysName,extmp.output);
+
   signal(SIGHUP,update_config);
 
   /* nlist stuff */
 
-#ifdef hpux
-  if ((ret = nlist("/hp-ux",nl)) == -1) {
-#else
-  if ((ret = nlist("/vmunix",nl)) == -1) {
-#endif
+  if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
     ERROR("nlist");
     exit(1);
   }
@@ -803,7 +809,7 @@ init_extensible() {
     }
   }
 
-#ifdef hpux
+#ifdef MEMMIBNUM
   if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
       == NULL)
     return(0);

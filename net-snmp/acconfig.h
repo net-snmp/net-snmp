@@ -36,18 +36,9 @@ sure to end it in -1.*/
 
 /* These are the system information variables. */
 
-#if defined(hpux)
-#define VERS_DESC   "HP-UX 9.0.5"
-#elif defined(ultrix)
-#define VERS_DESC   "Ultrix 4.2"
-#elif defined(osf)
-#define VERS_DESC   "OSF1"
-#else
-#define VERS_DESC   "SunOS 4.1.4"
-#endif
-
+#define VERS_DESC   "unknown"             /* overridden at run time */
 #define SYS_CONTACT "support@ece.ucdavis.edu"
-#define SYS_NAME    "unknown"
+#define SYS_NAME    "unknown"             /* overridden at run time */
 #define SYS_LOC     "UCDavis Electrical Engineering Departement"
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
@@ -69,7 +60,9 @@ sure to end it in -1.*/
 
 #define PROCMIBNUM 1              /*   proc PROCESSNAME [MAX] [MIN] */
 #define SHELLMIBNUM 3             /*   exec/shell NAME COMMAND      */
+#ifdef hpux
 #define MEMMIBNUM 4               /*   swap MIN                     */
+#endif
 #define DISKMIBNUM 6              /*   disk DISK MINSIZE            */
 #define LOADAVEMIBNUM 7           /*   load 1 5 15                  */
 
@@ -80,17 +73,6 @@ sure to end it in -1.*/
                                (typically its "can't fork, no mem" problems) */
 #define ERRORTIMELENGTH 600 /* how long to wait (seconds) for error querys
                                before reseting the error trap.*/
-
-/* Command to generate ps output, the final column must be the process
-   name withOUT arguments */
-
-#if defined(hpux) || defined(SYSV) 
-#define PSCMD "/bin/ps -e"
-#elif defined(__alpha)
-#define PSCMD "/bin/ps -el"
-#else
-#define PSCMD "/bin/ps -axc"
-#endif
 
 /* Exec command to fix PROC problems */
 /* %s will be replaced by the process name in error */
@@ -134,3 +116,19 @@ sure to end it in -1.*/
 #define LASTFIELD -1      /* internal define */
 
 #include "agent/extensible/struct.h"
+
+@TOP@
+
+/* location of UNIX kernel */
+#define KERNEL_LOC "/vmunix"
+
+/* location of swap device (ok if not found) */
+#undef DMEM_LOC
+
+/* define rtentry to ortentry on SYSV machines (alphas) */
+#define RTENTRY rtentry;
+
+/* Command to generate ps output, the final column must be the process
+   name withOUT arguments */
+
+#define PSCMD "/bin/ps"

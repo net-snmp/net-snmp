@@ -33,12 +33,12 @@ SOFTWARE.
 #include "glob.h"
 #endif
 
-#if (defined(unix) && !defined(KINETICS))
 #include <sys/types.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #ifndef NULL
 #define NULL 0
-#endif
 #endif
 
 #ifdef vms

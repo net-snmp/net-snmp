@@ -1,22 +1,38 @@
+#include <config.h>
+
 #include <sys/types.h>
 #include <sys/param.h>
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
 #include <sys/socket.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
+#endif
 
 
 #include <net/route.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 #include <netdb.h>
 
 #include <errno.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
+#if STDC_HEADERS
 #include <stdlib.h>
+#endif
+#if STDC_HEADERS
 #include <string.h>
+#endif
 
 
 
