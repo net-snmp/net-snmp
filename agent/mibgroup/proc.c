@@ -13,6 +13,7 @@
 #include <ctype.h>
 
 #include "mibincl.h"
+#include "struct.h"
 #include "proc.h"
 #ifdef USING_ERRORMIB_MODULE
 #include "errormib.h"

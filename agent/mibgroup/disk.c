@@ -102,6 +102,7 @@
 #endif
 
 #include "mibincl.h"
+#include "struct.h"
 #include "disk.h"
 #include "util_funcs.h"
 #include "read_config.h"

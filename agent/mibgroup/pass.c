@@ -17,6 +17,7 @@
 #include <ctype.h>
 
 #include "mibincl.h"
+#include "struct.h"
 #include "pass.h"
 #include "extensible.h"
 #include "util_funcs.h"

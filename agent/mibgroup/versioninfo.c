@@ -12,6 +12,7 @@
 #endif
 
 #include "mibincl.h"
+#include "struct.h"
 #include "versioninfo.h"
 #include "util_funcs.h"
 #include "read_config.h"

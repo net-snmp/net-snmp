@@ -94,6 +94,7 @@
 #endif
 
 #include "mibincl.h"
+#include "struct.h"
 #include "loadave.h"
 #include "util_funcs.h"
 #include "../kernel.h"
