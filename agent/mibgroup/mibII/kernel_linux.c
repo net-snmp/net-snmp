@@ -34,13 +34,6 @@ struct udp_mib  cached_udp_mib;
 #define TCP_STATS_PREFIX_LEN	5
 #define UDP_STATS_PREFIX_LEN	5
 
-#ifndef MIB_STATS_CACHE_TIMEOUT
-#define MIB_STATS_CACHE_TIMEOUT	5
-#endif
-#ifndef LINUX_STATS_CACHE_TIMEOUT
-#define LINUX_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
-#endif
-marker_t        linux_mibII_stats_cache_marker = NULL;
 
 int
 linux_read_mibII_stats(void)
@@ -49,23 +42,8 @@ linux_read_mibII_stats(void)
     char            line[1024];
 
     if (!in) {
-        free(linux_mibII_stats_cache_marker);
-        linux_mibII_stats_cache_marker = NULL;
         return -1;
     }
-
-    if (linux_mibII_stats_cache_marker &&
-        (!atime_ready
-         (linux_mibII_stats_cache_marker,
-          LINUX_STATS_CACHE_TIMEOUT * 1000))) {
-        fclose(in);
-        return 0;
-    }
-
-    if (linux_mibII_stats_cache_marker)
-        atime_setMarker(linux_mibII_stats_cache_marker);
-    else
-        linux_mibII_stats_cache_marker = atime_newMarker();
 
 
     while (line == fgets(line, sizeof(line), in)) {

@@ -8,34 +8,38 @@
 config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
 
-extern void     init_icmp(void);
-extern FindVarMethod var_icmp;
+#include <net-snmp/agent/cache_handler.h>
 
-#define ICMPINMSGS	     0
-#define ICMPINERRORS	     1
-#define ICMPINDESTUNREACHS   2
-#define ICMPINTIMEEXCDS      3
-#define ICMPINPARMPROBS      4
-#define ICMPINSRCQUENCHS     5
-#define ICMPINREDIRECTS      6
-#define ICMPINECHOS	     7
-#define ICMPINECHOREPS	     8
-#define ICMPINTIMESTAMPS     9
-#define ICMPINTIMESTAMPREPS 10
-#define ICMPINADDRMASKS     11
-#define ICMPINADDRMASKREPS  12
-#define ICMPOUTMSGS	    13
-#define ICMPOUTERRORS	    14
-#define ICMPOUTDESTUNREACHS 15
-#define ICMPOUTTIMEEXCDS    16
-#define ICMPOUTPARMPROBS    17
-#define ICMPOUTSRCQUENCHS   18
-#define ICMPOUTREDIRECTS    19
-#define ICMPOUTECHOS	    20
-#define ICMPOUTECHOREPS     21
-#define ICMPOUTTIMESTAMPS   22
-#define ICMPOUTTIMESTAMPREPS 23
-#define ICMPOUTADDRMASKS    24
-#define ICMPOUTADDRMASKREPS 25
+extern void     init_icmp(void);
+extern Netsnmp_Node_Handler icmp_handler;
+extern NetsnmpCacheLoad icmp_load;
+extern NetsnmpCacheFree icmp_free;
+
+#define ICMPINMSGS	      1
+#define ICMPINERRORS	      2
+#define ICMPINDESTUNREACHS    3
+#define ICMPINTIMEEXCDS       4
+#define ICMPINPARMPROBS       5
+#define ICMPINSRCQUENCHS      6
+#define ICMPINREDIRECTS       7
+#define ICMPINECHOS	      8
+#define ICMPINECHOREPS	      9
+#define ICMPINTIMESTAMPS     10
+#define ICMPINTIMESTAMPREPS  11
+#define ICMPINADDRMASKS      12
+#define ICMPINADDRMASKREPS   13
+#define ICMPOUTMSGS	     14
+#define ICMPOUTERRORS	     15
+#define ICMPOUTDESTUNREACHS  16
+#define ICMPOUTTIMEEXCDS     17
+#define ICMPOUTPARMPROBS     18
+#define ICMPOUTSRCQUENCHS    19
+#define ICMPOUTREDIRECTS     20
+#define ICMPOUTECHOS	     21
+#define ICMPOUTECHOREPS      22
+#define ICMPOUTTIMESTAMPS    23
+#define ICMPOUTTIMESTAMPREPS 24
+#define ICMPOUTADDRMASKS     25
+#define ICMPOUTADDRMASKREPS  26
 
 #endif                          /* _MIBGROUP_ICMP_H */

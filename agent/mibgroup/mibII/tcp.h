@@ -11,7 +11,9 @@ config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
 
 extern void     init_tcp(void);
-extern FindVarMethod var_tcp;
+extern Netsnmp_Node_Handler tcp_handler;
+extern NetsnmpCacheLoad tcp_load;
+extern NetsnmpCacheFree tcp_free;
 
 
 #define TCPRTOALGORITHM      1
@@ -26,12 +28,14 @@ extern FindVarMethod var_tcp;
 #define TCPINSEGS	    10
 #define TCPOUTSEGS	    11
 #define TCPRETRANSSEGS	    12
-#define TCPCONNSTATE	    13
-#define TCPCONNLOCALADDRESS 14
-#define TCPCONNLOCALPORT    15
-#define TCPCONNREMADDRESS   16
-#define TCPCONNREMPORT	    17
-#define TCPINERRS           18
-#define TCPOUTRSTS          19
+#define TCPCONNTABLE        13	/* Placeholder */
+#define TCPINERRS           14
+#define TCPOUTRSTS          15
+
+#define TCPCONNSTATE	    21
+#define TCPCONNLOCALADDRESS 22
+#define TCPCONNLOCALPORT    23
+#define TCPCONNREMADDRESS   24
+#define TCPCONNREMPORT	    25
 
 #endif                          /* _MIBGROUP_TCP_H */
