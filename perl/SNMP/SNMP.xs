@@ -146,7 +146,10 @@ static int __send_sync_pdu _((struct snmp_session *, struct snmp_pdu *,
                               struct snmp_pdu **, int , SV *, SV *, SV *));
 static int __snmp_xs_cb __P((int, struct snmp_session *, int,
                              struct snmp_pdu *, void *));
-static SV* __push_cb_args _((SV * sv, SV * esv));
+static int __callback_wrapper __P((int, struct snmp_session *, int,
+	                             struct snmp_pdu *, void *));
+static SV* __push_cb_args2 _((SV * sv, SV * esv, SV * tsv));
+#define __push_cb_args(a,b) __push_cb_args2(a,b,NULL)
 static int __call_callback _((SV * sv, int flags));
 static char* __av_elem_pv _((AV * av, I32 key, char *dflt));
 static u_int compute_match _((const char *, const char *));
@@ -1113,6 +1116,20 @@ retry:
 }
 
 static int
+__callback_wrapper (op, ss, reqid, pdu, cb_data)
+int op;
+struct snmp_session *ss;
+int reqid;
+struct snmp_pdu *pdu;
+void *cb_data;
+{
+  /* we should probably just increment the reference counter... */
+  /*  sv_inc(cb_data); */
+  return __snmp_xs_cb(op, ss, reqid, pdu, newSVsv(cb_data));
+}
+
+
+static int
 __snmp_xs_cb (op, ss, reqid, pdu, cb_data)
 int op;
 struct snmp_session *ss;
@@ -1124,6 +1141,8 @@ void *cb_data;
   AV *varlist;
   SV *varbind_ref;
   AV *varbind;
+  SV *traplist_ref;
+  AV *traplist;
   struct variable_list *vars;
   struct tree *tp;
   int len;
@@ -1139,6 +1158,7 @@ void *cb_data;
   char *cp;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
+  struct snmp_pdu *reply_pdu;
   int old_numeric, old_printfull;
   SV *sv_timestamp = NULL;
 
@@ -1162,7 +1182,37 @@ void *cb_data;
 
   switch (op) {
   case RECEIVED_MESSAGE:
+    traplist_ref = NULL;
     switch (pdu->command) {
+    case SNMP_MSG_INFORM:
+      /*
+       * Ideally, we would use the return value from the callback to
+       * decide what response, if any, we send, and what the error status
+       * and error index should be.
+       */
+      reply_pdu = snmp_clone_pdu(pdu);
+      if (reply_pdu) {
+        reply_pdu->command = SNMP_MSG_RESPONSE;
+        reply_pdu->reqid = pdu->reqid;
+        reply_pdu->errstat = reply_pdu->errindex = 0;
+        reply_pdu->address = pdu->address;
+        snmp_send(ss, reply_pdu);
+      } else {
+        warn("Couldn't clone PDU for inform response");
+      }
+      /* FALLTHRU */
+    case SNMP_MSG_TRAP2:
+      traplist = newAV();
+      traplist_ref = newRV_noinc((SV*)traplist);
+#if 0
+      /* of dubious utility... */
+      av_push(traplist, newSViv(pdu->command));
+#endif
+      av_push(traplist, newSViv(pdu->reqid));
+      cp = inet_ntoa(SIN_ADDR(pdu->address));
+      av_push(traplist, newSVpv(cp, strlen(cp)));
+      av_push(traplist, newSVpv((char*) pdu->community, pdu->community_len));
+      /* FALLTHRU */
     case SNMP_MSG_RESPONSE:
       {
       if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
@@ -1237,8 +1287,9 @@ void *cb_data;
   default:;
   } /* switch op */
   sv_2mortal(cb);
-  cb = __push_cb_args(cb,
-                 (SvTRUE(varlist_ref) ? sv_2mortal(varlist_ref):varlist_ref));
+  cb = __push_cb_args2(cb,
+                 (SvTRUE(varlist_ref) ? sv_2mortal(varlist_ref):varlist_ref),
+	         (SvTRUE(traplist_ref) ? sv_2mortal(traplist_ref):traplist_ref));
   __call_callback(cb, G_DISCARD);
 
   FREETMPS;
@@ -1248,9 +1299,10 @@ void *cb_data;
 }
 
 static SV *
-__push_cb_args(sv,esv)
+__push_cb_args2(sv,esv,tsv)
 SV *sv;
 SV *esv;
+SV *tsv;
 {
    dSP;
    if (SvTYPE(SvRV(sv)) != SVt_PVCV) sv = SvRV(sv);
@@ -1278,6 +1330,7 @@ SV *esv;
       }
    }
    if (esv) XPUSHs(sv_mortalcopy(esv));
+   if (tsv) XPUSHs(sv_mortalcopy(tsv));
    PUTBACK;
    return sv;
 }
@@ -2399,11 +2452,12 @@ snmp_sys_uptime()
 	RETVAL
 
 SnmpSession *
-snmp_new_session(version, community, peer, port, retries, timeout)
+snmp_new_session(version, community, peer, port, lport, retries, timeout)
         char *	version
         char *	community
         char *	peer
         int	port
+        int	lport
         int	retries
         int	timeout
 	CODE:
@@ -2428,6 +2482,7 @@ snmp_new_session(version, community, peer, port, retries, timeout)
            session.community = (u_char *)community;
 	   session.peername = peer;
 	   session.remote_port = port;
+	   session.local_port = lport;
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
@@ -2555,12 +2610,13 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 
 
 SnmpSession *
-snmp_update_session(sess_ref, version, community, peer, port, retries, timeout)
+snmp_update_session(sess_ref, version, community, peer, port, lport, retries, timeout)
         SV *	sess_ref
         char *	version
         char *	community
         char *	peer
         int	port
+        int	lport
         int	retries
         int	timeout
 	CODE:
@@ -2590,6 +2646,7 @@ snmp_update_session(sess_ref, version, community, peer, port, retries, timeout)
            ss->community = (u_char *)strdup(community);
 	   ss->peername = strdup(peer);
 	   ss->remote_port = port;
+	   ss->local_port = lport;
            ss->retries = retries; /* 5 */
            ss->timeout = timeout; /* 1000000L */
            ss->authenticator = NULL;
@@ -2854,6 +2911,47 @@ done:
            Safefree(oid_arr);
         }
 
+void
+snmp_catch(sess_ref, perl_callback)
+	SV *	sess_ref
+        SV *    perl_callback
+	PPCODE:
+	{
+	   struct snmp_session *ss;
+           SV **sess_ptr_sv;
+           SV **err_str_svp;
+           SV **err_num_svp;
+           SV **err_ind_svp;
+
+           if (SvROK(sess_ref)) {
+              sess_ptr_sv = hv_fetch((HV*)SvRV(sess_ref), "SessPtr", 7, 1);
+	      ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+              err_str_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorStr", 8, 1);
+              err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
+              err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
+              sv_setpv(*err_str_svp, "");
+              sv_setiv(*err_num_svp, 0);
+              sv_setiv(*err_ind_svp, 0);
+
+              snmp_synch_reset(ss);
+              ss->callback = NULL;
+              ss->callback_magic = NULL;
+
+              if (SvTRUE(perl_callback)) {
+                 perl_callback = newSVsv(perl_callback);
+                 # it might be more efficient to pass the varbind_ref to
+                 # __snmp_xs_cb as part of perl_callback so it is not freed
+                 # and reconstructed for each call
+                 ss->callback = __callback_wrapper;
+                 ss->callback_magic = perl_callback;
+                 sv_2mortal(newSViv(1));
+                 goto done;
+              }
+           }
+           sv_2mortal(newSViv(0));
+        done:
+           ;
+        }
 
 void
 snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)

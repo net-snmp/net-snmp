@@ -32,4 +32,5 @@ examples/mibwalk.pl
 examples/pingmib.pl
 examples/tablewalk.pl
 examples/testleak.pl
+examples/trap-example.pl
 
