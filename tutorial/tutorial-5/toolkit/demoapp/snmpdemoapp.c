@@ -1,13 +1,11 @@
-#include <ucd-snmp/ucd-snmp-config.h>
-#include <ucd-snmp/ucd-snmp-includes.h>
-#include <ucd-snmp/system.h>   /* remove if included by previous header file */
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <string.h>
 
 /* change the word "undef" to "define" to try the (insecure) SNMPv1 version */
 #define DEMO_USE_SNMP_VERSION_3
 
 #ifdef DEMO_USE_SNMP_VERSION_3
-#include "ucd-snmp/transform_oids.h"
 const char *our_v3_passphrase = "The UCD Demo Password";
 #endif
 
@@ -33,7 +31,7 @@ int main(int argc, char ** argv)
      * Initialize a "session" that defines who we're going to talk to
      */
     snmp_sess_init( &session );                   /* set up defaults */
-    session.peername = "ucd-snmp.ucdavis.edu";
+    session.peername = strdup("test.net-snmp.org");
 
     /* set up the authentication parameters for talking to the server */
 

@@ -35,6 +35,6 @@ example-demon: $(OBJS2)
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)
 
-ustScalarSet.so: ustScalarSet.c Makefile
-	$(CC) $(CFLAGS) $(DLFLAGS) -c -o ustScalarSet.o ustScalarSet.c
-	$(CC) $(CFLAGS) $(DLFLAGS) -o ustScalarSet.so ustScalarSet.o
+nstAgentPluginObject.so: nstAgentPluginObject.c Makefile
+	$(CC) $(CFLAGS) $(DLFLAGS) -c -o nstAgentPluginObject.o nstAgentPluginObject.c
+	$(CC) $(CFLAGS) $(DLFLAGS) -o nstAgentPluginObject.so nstAgentPluginObject.o
