@@ -21,7 +21,9 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/int64.h>
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/snmp_logging.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -326,6 +328,95 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
     return -2;
 }
 
+/**
+ * update a 64 bit value with the difference between two (possibly) 32 bit vals
+ *
+ * @param prev_val       : the 64 bit current counter
+ * @param old_prev_val   : the (possibly 32 bit) previous value
+ * @param new_val        : the (possible 32bit) new value
+ * @param need_wrap_check: pointer to integer indicating if wrap check is needed
+ *                         flag may be cleared if 64 bit counter is detected
+ *
+ *@Note:
+ * The old_prev_val and new_val values must be be from within a time
+ * period which would only allow the 32bit portion of the counter to
+ * wrap once. i.e. if the 32bit portion of the counter could
+ * wrap every 60 seconds, the old and new values should be compared
+ * at least every 59 seconds (though I'd recommend at least every
+ * 50 seconds to allow for timer inaccuracies).
+ *
+ * Suggested use:
+ *
+ *   static needwrapcheck = 1;
+ *   static counter64 current, prev_val, new_val;
+ *
+ *   your_functions_to_update_new_value(&new_val);
+ *   if (0 == needwrapcheck)
+ *      memcpy(current, new_val, sizeof(new_val));
+ *   else {
+ *      netsnmp_c64_check32_and_update(&current,&new,&prev,&needwrapcheck);
+ *      memcpy(prev_val, new_val, sizeof(new_val));
+ *   }
+ *
+ *
+ * @retval  0 : success
+ * @retval -1 : error checking for 32 bit wrap
+ * @retval -2 : look like we have 64 bit values, but sums aren't consistent
+ */
+int
+netsnmp_c64_check32_and_update(struct counter64 *prev_val, struct counter64 *new_val,
+                               struct counter64 *old_prev_val, int *need_wrap_check)
+{
+    int rc;
+
+    /*
+     * counters are 32bit or unknown (which we'll treat as 32bit).
+     * update the prev values with the difference between the
+     * new stats and the prev old_stats:
+     *    prev->stats += (new->stats - prev->old_stats)
+     */
+    if ((NULL == need_wrap_check) || (1 == *need_wrap_check)) {
+        rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
+        if (rc < 0) {
+            snmp_log(LOG_ERR,"c64 32 bit check failed\n");
+            return -1;
+        }
+    }
+    else
+        rc = 64;
+
+    /*
+     * update previous values
+     */
+    (void) u64UpdateCounter(prev_val, new_val, old_prev_val);
+
+    /*
+     * if wrap check was 32 bit, undo adjust, now that prev is updated
+     */
+    if (32 == rc) {
+        /*
+         * check wrap incremented high, so reset it. (Because having
+         * high set for a 32 bit counter will confuse us in the next update).
+         */
+        netsnmp_assert(1 == new_val->high);
+        new_val->high = 0;
+    }
+    else if (64 == rc) {
+        /*
+         * if we really have 64 bit counters, the summing we've been
+         * doing for prev values should be equal to the new values.
+         */
+        if ((prev_val->low != new_val->low) ||
+            (prev_val->high != new_val->high)) {
+            snmp_log(LOG_ERR, "looks like a 64bit wrap, but prev!=new\n");
+            return -2;
+        }
+        else if (NULL != need_wrap_check)
+            *need_wrap_check = 0;
+    }
+    
+    return 0;
+}
 
 void
 printU64(char *buf,     /* char [I64CHARSZ+1]; */
