@@ -14,6 +14,53 @@ static struct myproc *procwatch;
 static struct exstensible *extens;
 int numprocs, numextens;
 
+unsigned char *checkmib(vp,name,length,exact,var_len,write_method,newname,max)
+    register struct variable *vp;
+    register oid	*name;
+    register int	*length;
+    int			exact;
+    int			*var_len;
+    int			(**write_method)();
+    oid                 *newname;
+    int                 max;
+{
+  int i, rtest;
+  
+  for(i=0,rtest=0; i < *length-1; i++) {
+    if (name[i] != vp->name[i]) {
+      rtest = 1;
+    }
+  }
+  if (rtest) {
+    *var_len = NULL;
+    return NULL;
+  }
+  if (*length == vp->namelen) {
+    bcopy((char *) vp->name, (char *)newname,
+          (int)vp->namelen * sizeof (oid));
+    newname[*length] = 1;
+    *length = vp->namelen+1;
+  }
+  else if (*length != vp->namelen+1) {
+    *var_len = NULL;
+    return NULL;
+  }
+  else {
+    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
+    if (name[*length-1] >= max) {
+      *var_len = NULL;
+      return NULL;
+    }
+    if (!exact)
+      newname[*length-1] = name[*length-1] + 1;
+    else
+      newname[*length-1] = name[*length-1];
+  }  
+  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
+  *write_method = 0;
+  *var_len = sizeof(long);   /* default */
+}
+
 unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -37,40 +84,9 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
   char errmsg[300];
 
 
-  for(i=0,rtest=0; i < *length-1; i++) {
-    if (name[i] != vp->name[i]) {
-      rtest = 1;
-    }
-  }
-  if (rtest) {
-    *var_len = NULL;
-    return NULL;
-  }
-  if (*length == 8) {
-    bcopy((char *) vp->name, (char *)newname,
-          (int)vp->namelen * sizeof (oid));
-    newname[8] = 1;
-    *length = vp->namelen+1;
-  }
-  else if (*length != 9) {
-    *var_len = NULL;
-    return NULL;
-  }
-  else {
-    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
-    if (name[8] >= numprocs) {
-      *var_len = NULL;
-      return NULL;
-    }
-
-    if (!exact)
-      newname[8] = name[8] + 1;
-    else
-      newname[8] = name[8];
-  }  
-  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
-  *write_method = 0;
-  *var_len = sizeof(long);   /* default */
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numprocs))
+    return(NULL);
+  
   if (proc = get_proc_instance(procwatch,newname[8])) {
     switch (vp->magic) {
       case PROCINDEX:
@@ -145,39 +161,9 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   long long_ret;
   char errmsg[300];
 
-  for(i=0,rtest=0; i < *length-1; i++) {
-    if (name[i] != vp->name[i]) {
-      rtest = 1;
-    }
-  }
-  if (rtest) {
-    *var_len = NULL;
-    return NULL;
-  }
-  if (*length == 8) {
-    bcopy((char *) vp->name, (char *)newname,
-          (int)vp->namelen * sizeof (oid));
-    newname[8] = 1;
-    *length = vp->namelen+1;
-  }
-  else if (*length != 9) {
-    *var_len = NULL;
-    return NULL;
-  }
-  else {
-    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
-/*    printf("\nrtest:  %d, name[8]:  %d, num:  %d, exact:  %d\n",rtest,name[8],numextens,exact); */
-    if (exact)
-      newname[8] = name[8];
-    else
-      newname[8] = name[8] + 1;
-    if (newname[8] > numextens)
-      return NULL;
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
+    return(NULL);
 
-  }  
-  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
-  *write_method = 0;
-  *var_len = sizeof(long);   /* default */
   if (exten = get_exten_instance(extens,newname[8])) {
     switch (vp->magic) {
       case SHELLINDEX:
@@ -208,6 +194,8 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   }
   return NULL;
 }
+
+wes_var_misc();
 
 int update_config()
 {

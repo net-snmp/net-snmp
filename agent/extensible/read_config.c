@@ -19,7 +19,7 @@ int read_config(filename, procp, numps, ppexten, numexs)
   FILE *ifile;
   char line[STRMAX], word[STRMAX];
   char *cptr, *tcptr;
-  int linecount=0;;
+  int linecount=0,i;
   
   if ((ifile = fopen(filename,"r")) == NULL) {
     fprintf(ofile, "couldn't open %s for reading\n",filename);
@@ -42,8 +42,9 @@ int read_config(filename, procp, numps, ppexten, numexs)
             fprintf(stderr,"snmpd: Blank line following %s command in %s:%d",
                     word,filename,linecount);
           }
-          else if (!strncmp(word,"sh",2) || !strncmp(word,"exec",4)) {
-            (*ppexten) = (struct extensiblea *) malloc(sizeof(struct extensible));
+          else if (!strncasecmp(word,"sh",2) || !strncasecmp(word,"exec",4)) {
+            (*ppexten) =
+              (struct extensible *) malloc(sizeof(struct extensible));
             (*ppexten)->next = NULL;
             (*numexs)++;
             /* determine type */
@@ -51,6 +52,17 @@ int read_config(filename, procp, numps, ppexten, numexs)
               (*ppexten)->type = SHPROC;
             else
               (*ppexten)->type = EXECPROC;
+            if (word[0] == 'S' || word[0] == 'E') {
+              for(i=0; isdigit(*cptr); i++) {
+                (*ppexten)->miboid[i] = atoi(cptr);
+                while(isdigit(*cptr++));
+                if (*cptr == '.') cptr++;
+              }
+              (*ppexten)->miboid[i] = -1;
+                }
+            else {
+              (*ppexten)->miboid[0] = -1;
+            }
             /* name */
             copy_word(cptr,(*ppexten)->name);
             /* command */
