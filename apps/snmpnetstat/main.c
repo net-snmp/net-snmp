@@ -107,8 +107,6 @@ char	*interface;
 int debug = 0;
 
 
-extern	char *malloc();
-
 struct snmp_session *Session;
 int snmp_dump_packet = 0;
 int print_errors = 0;
