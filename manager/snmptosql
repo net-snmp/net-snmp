@@ -85,7 +85,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 				    %authvals );
     print "Sess ($host): $sess, ref=" . ref($sess). "\n" if ($verbose);
     if (ref ($sess) ne "SNMP::Session") {
-	print STDERR "ack: \$sess not a SNMP::Session for $host ($!)\n";
+#	print STDERR "ack: \$sess not a SNMP::Session for $host ($!)\n";
 	hosterror("$host");
 	next nexthost;
     }
@@ -110,7 +110,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	if ($delete) {
 	    setuptable($tablelist->{tablename});
 	} else {
-	    ($dbh->do("select * from $tablelist->{tablename}")) or
+	    ($dbh->do("show tables like \"$tablelist->{tablename}\"") eq "0E0") &&
 		setuptable($tablelist->{tablename});
 	}
 	
@@ -214,7 +214,7 @@ $dbh->disconnect();
 
 sub setuptable {
 
-    my %conversions = qw(INTEGER integer OCTETSTR varchar(254) COUNTER integer UINTEGER integer IPADDR varchar(254) OBJECTID varchar(254) GAGUE integer OPAQUE varchar(254) TICKS integer);
+    my %conversions = qw(INTEGER integer OCTETSTR varchar(254) COUNTER integer UINTEGER integer IPADDR varchar(254) OBJECTID varchar(254) GAGUE integer OPAQUE varchar(254) TICKS integer GAUGE integer);
 
     # set up mib info
     my ($mibnode) = @_;
@@ -233,6 +233,10 @@ sub setuptable {
 
     $cmd = "create table $mib->{label} (id integer auto_increment primary key, host varchar(16), oidindex varchar(254)";
     foreach $j (@$children) {
+	if (!defined($conversions{$j->{type}})) {
+	    print "no conversion for ". $j->{type} . "!\n";
+	    return;
+	}
 	$cmd .= ", $j->{label} $conversions{$j->{type}}";
     }
     $cmd .= ", updated timestamp)";
