@@ -248,7 +248,7 @@ struct iflist {
 } *Iflist = NULL;
 
 void
-get_ifname(char *name, int index)
+get_ifname(char *name, int ifIndex)
 {
     struct snmp_pdu *pdu, *response;
     struct variable_list *vp;
@@ -257,7 +257,7 @@ get_ifname(char *name, int index)
     int status;
 
     for(ip = Iflist; ip; ip = ip->next){
-	if (ip->index == index)
+	if (ip->index == ifIndex)
 	    break;
     }
     if (ip){
@@ -267,10 +267,10 @@ get_ifname(char *name, int index)
     ip = (struct iflist *)malloc(sizeof(struct iflist));
     ip->next = Iflist;
     Iflist = ip;
-    ip->index = index;
+    ip->index = ifIndex;
     pdu = snmp_pdu_create(SNMP_MSG_GET);
     memmove(varname, oid_ifdescr, sizeof(oid_ifdescr));
-    varname[10] = (oid)index;
+    varname[10] = (oid)ifIndex;
     snmp_add_null_var(pdu, varname, sizeof(oid_ifdescr)/sizeof(oid) + 1);
     status = snmp_synch_response(Session, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR){
@@ -279,7 +279,7 @@ get_ifname(char *name, int index)
 	ip->name[vp->val_len] = '\0';
 	snmp_free_pdu(response);
     } else {
-	sprintf(ip->name, "if%d", index);
+	sprintf(ip->name, "if%d", ifIndex);
     }    
     strcpy(name, ip->name);
 }
