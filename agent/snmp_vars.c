@@ -2045,7 +2045,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
     u_long		    Addr, LowAddr;
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
     u_short		    ifIndex, lowIfIndex;
 #endif
     u_long		    ifType, lowIfType;
@@ -2065,7 +2065,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     LowAddr = -1;      /* Don't have one yet */
     ARP_Scan_Init();
     for (;;) {
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 	if (ARP_Scan_Next(&Addr, PhysAddr, &ifType, &ifIndex) == 0)
 	    break;
 	current[10] = ifIndex;
@@ -2100,7 +2100,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    if (compare(current, oid_length, name, *length) == 0){
 		bcopy((char *)current, (char *)lowest, oid_length * sizeof(oid));
 		LowAddr = Addr;
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -2116,7 +2116,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		 */
 		bcopy((char *)current, (char *)lowest, oid_length * sizeof(oid));
 		LowAddr = Addr;
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
 #endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
@@ -2133,7 +2133,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     switch(vp->magic){
 	case IPMEDIAIFINDEX:			/* also ATIFINDEX */
 	    *var_len = sizeof long_return;
-#if defined(freebsd2) || defined(netbsd1) || defined(hpux)
+#if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 	    long_return = lowIfIndex;
 #else
 	    long_return = 1; /* XXX */
@@ -3729,7 +3729,7 @@ u_long *IPAddr;
 char *PhysAddr;
 u_long *ifType;
 {
-#if !defined (netbsd1) && !defined (freebsd2)
+#if !defined (netbsd1) && !defined (freebsd2) && !defined(bsdi2)
 	register struct arptab *atab;
 
 	while (arptab_current < arptab_size) {
@@ -3766,7 +3766,7 @@ u_long *ifType;
 	return(1);
 	}
 #endif
-#if defined(freebsd2) || defined(netbsd1)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	struct rt_msghdr *rtm;
 	struct sockaddr_inarp *sin;
 	struct sockaddr_dl *sdl;
@@ -4037,11 +4037,11 @@ u_char *EtherAddr;
 	    bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
 
 	} else {
-#if defined(sunV3) || defined(sparc) || defined(freebsd2) || defined(netbsd1)
-	    bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
-#endif
+
 #if defined(mips) || defined(hpux)
-	    bcopy((char *)  arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
+          bcopy((char *) arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
+#else
+          bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #endif
 
 
