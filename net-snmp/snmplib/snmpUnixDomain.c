@@ -180,7 +180,12 @@ int
 netsnmp_unix_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
-    int             newsock = -1, farendlen = sizeof(struct sockaddr_un);
+    int             newsock = -1;
+#ifdef HAVE_SOCKLEN_T
+    socklen_t       farendlen = sizeof(struct sockaddr_un);
+#else   /* HAVE_SOCKLEN_T */
+    size_t          farendlen = sizeof(struct sockaddr_un);
+#endif
 
     farend = (struct sockaddr *) malloc(farendlen);
 
@@ -256,8 +261,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
     t->domain = netsnmp_UnixDomain;
     t->domain_length =
-        sizeof(netsnmp_UnixDomain) /
-        sizeof(netsnmp_UnixDomain[0]);
+        sizeof(netsnmp_UnixDomain) / sizeof(netsnmp_UnixDomain[0]);
 
     t->data = malloc(sizeof(sockaddr_un_pair));
     if (t->data == NULL) {
@@ -414,8 +418,7 @@ void
 netsnmp_unix_ctor(void)
 {
     unixDomain.name = netsnmp_UnixDomain;
-    unixDomain.name_length =
-        sizeof(netsnmp_UnixDomain) / sizeof(oid);
+    unixDomain.name_length = sizeof(netsnmp_UnixDomain) / sizeof(oid);
     unixDomain.prefix = calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 
