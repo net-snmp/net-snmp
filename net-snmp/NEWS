@@ -1,14 +1,27 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.7*
+*5.0.7 pre1*
  New:
     - VACM (access control) optimizations which will greatly benefit
       people who wish to exclude large portions of the MIB tree from
       some people.  Previously this was a large resource drain.
+    - Add command line option to snmpd to set syslog facility
+    - Reverse DISPLAY-HINT processing, i.e. it allows you to input data
+      formatted like a DISPLAY-HINT prescribes
+    - Support setting of sysDescr and sysObjectID via snmpd.conf
+      configuration directives
+    - New output option to force display of strings as hex
+    - Persistent directory can be specified at runtime
+    - Add support for Linux virtual interfaces in the ipAddressTable.
+    - implemented the mteEventTable and the mteEventNotificationTable
+      form the DISMAN-EVENT-MIB.
 
  Fixes:
     - A few memory leak fixes for the table_iterator agent API.
+    - Processed flag cleared before each pass of a set request
+    - Remove snmpd pid file on exit
+    - misc other fixes
 
 *5.0.6*
 
