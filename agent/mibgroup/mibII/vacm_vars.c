@@ -504,7 +504,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	vn = ap->notifyView;
 	break;
       default:
-	fprintf(stderr,"bad msg type in vacm_in_view: %d\n", pdu->command);
+        snmp_log(LOG_ERR, "bad msg type in vacm_in_view: %d\n", pdu->command);
 	vn = ap->readView;
     }
     DEBUGMSG (("mibII/vacm_vars", ", vn=%s", vn));

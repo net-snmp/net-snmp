@@ -60,6 +60,8 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include <stdlib.h>
+#include "snmp_logging.h"
 #include "mib.h"
 
 void
@@ -68,34 +70,42 @@ xdump(const u_char *cp,
       const char *prefix)
 {
     int col, count;
+    char *buffer;
+
+    buffer=(char *)malloc(strlen(prefix)+5+4*13+2+16+1);
+    if (!buffer) {
+      snmp_log(LOG_NOTICE, "xdump: malloc failed. packet-dump skipped\n");
+      return;
+    }
 
     count = 0;
     while(count < (int)length){
-	printf("%s", prefix);
-	for(col = 0;
-	  ((count + col) < (int)length) && col < 16;
-	  col++){
-	    if (col == 0) printf ("%.4d: ", count);
-	    else if (col % 4 == 0) printf(" ");
-	    printf("%02X ", cp[count + col]);
+	strcpy(buffer, prefix);
+
+	for(col = 0; ((count + col) < (int)length) && col < 16; col++){
+	    if (col == 0) sprintf (buffer+strlen(buffer), "%.4d: ", count);
+	    else if (col % 4 == 0) strcat(buffer, " "); 
+	    sprintf(buffer+strlen(buffer), "%02X ", cp[count + col]);
 	}
 	while(col++ < 16){	/* pad end of buffer with zeros */
 	    if (col % 4 == 0)
-		printf(" ");
-	    printf("   ");
+		strcat(buffer, " ");
+	    strcat(buffer, "   ");
 	}
-	printf("  ");
+	strcat(buffer, "  ");
 	for(col = 0;
 	  ((count + col) < (int)length) && col < 16;
 	  col++){
 	    if (isprint(cp[count + col]))
-		printf("%c", cp[count + col]);
+		sprintf(buffer+strlen(buffer), "%c", cp[count + col]);
 	    else
-		printf(".");
+		strcat(buffer, ".");
 	}
-	printf("\n");
+	strcat(buffer, "\n");
+        snmp_log(LOG_DEBUG, buffer);
 	count += col;
     }
+    free(buffer);
 
 }  /* end xdump() */
 

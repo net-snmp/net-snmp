@@ -273,7 +273,7 @@ fixProcError(int action,
 
   if ((proc = get_proc_instance(procwatch,name[10]))) {
     if (var_val_type != ASN_INTEGER) {
-      printf("Wrong type != int\n");
+      snmp_log(LOG_ERR, "Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
     tmp = *((long *) var_val);

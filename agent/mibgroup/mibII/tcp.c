@@ -944,7 +944,7 @@ void TCP_Scan_Init (void)
 
     if (! (in = fopen ("/proc/net/tcp", "r")))
       {
-	fprintf (stderr, "snmpd: cannot open /proc/net/tcp ...\n");
+ snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/tcp ...\n");
 	tcp_prev = NULL;
 	return;
       }

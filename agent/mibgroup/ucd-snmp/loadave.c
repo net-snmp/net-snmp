@@ -193,7 +193,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
 #elif defined(linux)
   { FILE *in = fopen("/proc/loadavg", "r");
     if (!in) {
-      fprintf (stderr, "snmpd: cannot open /proc/loadavg\n");
+      snmp_log(LOG_ERR, "snmpd: cannot open /proc/loadavg\n");
       return (-1);
     }
     fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
@@ -241,10 +241,8 @@ u_char *var_extensible_loadave(struct variable *vp,
   static float float_ret;
   static char errmsg[300];
   double avenrun[3];
-  
   if (header_simple_table(vp,name,length,exact,var_len,write_method,3))
     return(NULL);
-
   switch (vp->magic) {
     case MIBINDEX:
       long_ret = name[*length-1];
@@ -259,7 +257,8 @@ u_char *var_extensible_loadave(struct variable *vp,
     return(0);
   switch (vp->magic) {
     case LOADAVE:
-      sprintf(errmsg,"%.2f",avenrun[name[*length-1]-1]);
+      
+      sprintf(errmsg,"%.2f",avenrun[name[*length-1]-1]); 
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case LOADMAXVAL:

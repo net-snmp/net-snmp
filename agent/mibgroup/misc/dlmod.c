@@ -60,7 +60,7 @@ init_dlmod (void)
 	    strncpy(dlmod_path, p, sizeof(dlmod_path));
     }
 #if 1
-    fprintf(stderr, "dlmod_path: %s\n", dlmod_path);
+    snmp_log(LOG_DEBUG, "dlmod_path: %s\n", dlmod_path);
     fflush(stderr);
 #endif
 }
@@ -108,7 +108,7 @@ dlmod_parse_config(char *token,
     dlmod_load_module(dlm);
 	
     if (dlm->status == DLMOD_ERROR) 
-	fprintf(stderr, "error: %s\n", dlm->error);
+ snmp_log(LOG_ERR, "%s\n", dlm->error);
 		
 }
 
@@ -132,8 +132,7 @@ dlmod_create_module (void)
 {
     struct dlmod **pdlmod, *dlm;
 #if 1
-    fprintf(stderr, "dlmod_create_module\n");
-    fflush(stderr);
+    snmp_log(LOG_DEBUG, "dlmod_create_module\n");
 #endif
     dlm = calloc(1, sizeof(struct dlmod));
     if (dlm == NULL) 
@@ -155,8 +154,7 @@ dlmod_delete_module(struct dlmod *dlm)
     struct dlmod **pdlmod;
  
 #if 1
-    fprintf(stderr, "dlmod_delete_module\n");
-    fflush(stderr);
+    snmp_log(LOG_DEBUG, "dlmod_delete_module\n");
 #endif
     if (!dlm || dlm->status != DLMOD_UNLOADED)
 	return;
@@ -176,8 +174,7 @@ dlmod_load_module(struct dlmod *dlm)
     char *p, tmp_path[255];
     int (*dl_init)(void);
 #if 1
-    fprintf(stderr, "dlmod_load_module\n");
-    fflush(stderr);
+    snmp_log(LOG_DEBUG, "dlmod_load_module\n");
 #endif
   
     if (!dlm || !dlm->path || !dlm->name || dlm->status != DLMOD_UNLOADED)
@@ -196,8 +193,7 @@ dlmod_load_module(struct dlmod *dlm)
 	for (p = strtok(dlmod_path, ":"); p; p = strtok(NULL, ":")) {
 	    snprintf(tmp_path, sizeof(tmp_path), "%s/%s.so", p, dlm->path);
 #if 1
-	    fprintf(stderr, "p: %s tmp_path: %s\n", p, tmp_path);
-	    fflush(stderr);
+	    snmp_log(LOG_DEBUG, "p: %s tmp_path: %s\n", p, tmp_path);
 #endif
 	    dlm->handle = dlopen(tmp_path, RTLD_NOW);
 	    if (dlm->handle == NULL) {
@@ -250,8 +246,7 @@ dlmod_unload_module (struct dlmod *dlm)
     dlclose(dlm->handle);
     dlm->status = DLMOD_UNLOADED;
 #if 1
-    fprintf(stderr, "Module %s unloaded\n", dlm->name);
-    fflush(stderr);
+    snmp_log(LOG_DEBUG, "Module %s unloaded\n", dlm->name);
 #endif
 }
 

@@ -357,7 +357,7 @@ u_char *var_extensible_disk(struct variable *vp,
 #else
   if (statvfs (disks[disknum].path, &vfs) == -1) {
 #endif
-    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
+    snmp_log(LOG_ERR,"Couldn't open device %s\n",disks[disknum].device);
     setPerrorstatus("statvfs dev/disk");
     return NULL;
   }
@@ -424,14 +424,14 @@ u_char *var_extensible_disk(struct variable *vp,
 #if HAVE_FSTAB_H
   /* read the disk information */
   if ((file = open(disks[disknum].device,0)) < 0) {
-    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
+    snmp_log(LOG_ERR,"Couldn't open device %s\n",disks[disknum].device);
     setPerrorstatus("open dev/disk");
     return(NULL);
   }
   lseek(file, (long) (SBLOCK * DEV_BSIZE), 0);
   if (read(file,(char *) &filesys, SBSIZE) != SBSIZE) {
     setPerrorstatus("open dev/disk");
-    fprintf(stderr,"Error reading device %s\n",disks[disknum].device);
+    snmp_log(LOG_ERR,"Error reading device %s\n",disks[disknum].device);
     close(file);
     return(NULL);
   }

@@ -115,7 +115,7 @@ smux_parse_peer_auth(char *token, char *cptr)
 	smux_peer_auth *aptr;
 
 	if ((aptr = (smux_peer_auth *)calloc(1, sizeof(smux_peer_auth))) == NULL) {
-		perror("smux_parse_peer_auth: malloc");
+		log_perror("smux_parse_peer_auth: malloc");
 		return;
 	}
 	aptr->sa_active_fd = -1;
@@ -186,24 +186,24 @@ init_smux(void)
 	lo_socket.sin_port = htons((u_short) SMUXPORT);
 
 	if ((smux_sd = socket (AF_INET, SOCK_STREAM, 0)) <  0) {
-		perror("[init_smux] socket failed\n");
+		log_perror("[init_smux] socket failed\n");
 		return SMUXNOTOK;
 	}
 	if (bind (smux_sd, (struct sockaddr *) &lo_socket, 
 	    sizeof (lo_socket)) < 0) {
-		perror("[init_smux] bind failed\n");
+		log_perror("[init_smux] bind failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 
 	if (setsockopt (smux_sd, SOL_SOCKET, SO_KEEPALIVE, (char *)&one, 
 			sizeof (one)) < 0) {
-		perror("[init_smux] setsockopt(SO_KEEPALIVE) failed\n");
+		log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
 	if(listen(smux_sd, SOMAXCONN) == -1) {
-		perror("[init_smux] listen failed\n");
+		log_perror("[init_smux] listen failed\n");
 		close(smux_sd);
 		return SMUXNOTOK;
 	}
@@ -211,9 +211,9 @@ init_smux(void)
 	sdlist[sdlen] = smux_sd;
 	sd_handlers[sdlen++] = smux_accept;
 
-	fprintf(stderr, "sdlen in smux_init: %d\n", sdlen);
+	DEBUGMSGTL(("smux_init","sdlen in smux_init: %d\n", sdlen));
 #endif
-	fprintf(stderr, "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
+	snmp_log(LOG_DEBUG, "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
 		 ntohs(lo_socket.sin_port));
 
 	return SMUXOK;
@@ -351,10 +351,10 @@ smux_accept(int sd)
 	DEBUGMSGTL (("smux","[smux_accept] Calling accept()\n"));
 	errno = 0;
 	if((fd = accept(sd, (struct sockaddr *)&in_socket, &alen)) < 0) {
-		perror("[smux_accept] accept failed\n");
+		log_perror("[smux_accept] accept failed\n");
 		return SMUXNOTOK;
 	} else {
-		fprintf(stderr, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
+	 snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
 		if (npeers + 1 == SMUXMAXPEERS) {
 			DEBUGMSGTL (("smux","[smux_accept] denied peer on fd %d, limit reached", fd));
 			close(sd);
@@ -391,7 +391,7 @@ smux_accept(int sd)
 #ifdef SO_RCVTIMEO
 		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) {
 			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n", fd));
-                        perror("smux/setsockopt");
+                        log_perror("smux/setsockopt");
                 }
 #endif
 
@@ -570,7 +570,7 @@ smux_send_close(int fd, int reason)
 
     /* send a response back */ 
     if (send (fd, (char *)outpacket, 3, 0) < 0) {
-	perror("[smux_send_close] send failed\n");
+        log_perror("[smux_snmp_close] send failed\n");
     }
 }
         
@@ -695,7 +695,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 			return NULL;
 		}
 		if((nrptr = malloc(sizeof(smux_reg))) == NULL) {
-			perror("[smux_rreq_process] malloc");
+                        log_perror("[smux_rreq_process] malloc");
 			return NULL;
 		}
 		nrptr->sr_priority = priority;
@@ -914,7 +914,7 @@ smux_snmp_process(int exact,
 
 	if (smux_build(type, smux_reqid, objid, len, 0, NULL, 
 	    *len, packet, &length) != SMUXOK) {
-		printf("[smux_snmp_process]: smux_build failed\n");
+	 snmp_log(LOG_NOTICE, "[smux_snmp_process]: smux_build failed\n");
 		return NULL;
 	}
         if (snmp_get_do_debugging()) {
@@ -923,7 +923,7 @@ smux_snmp_process(int exact,
         }
 
 	if (send(sd, (char *)packet, length, 0) < 0) {
-		perror("[smux_snmp_process] send failed\n");
+		log_perror("[smux_snmp_process] send failed\n");
 	}
 
 	DEBUGMSGTL(("smux",
@@ -935,7 +935,7 @@ smux_snmp_process(int exact,
 	 */
 	length = recv(sd, (char *)result, SMUXMAXPKTSIZE, 0);
 	if (length < 0) {
-		perror("[smux_snmp_process] recv failed\n");
+		log_perror("[smux_snmp_process] recv failed\n");
 		smux_peer_cleanup(sd);
 		return NULL;
 	}
@@ -1029,7 +1029,7 @@ smux_parse_var(u_char *varbind,
 
 	ptr = asn_parse_header(ptr, &len, &type);
 	if (ptr == NULL || type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
-		printf ("[smux_parse_var] Panic: type %d\n", (int)type);
+	 snmp_log(LOG_NOTICE, "[smux_parse_var] Panic: type %d\n", (int)type);
 		return NULL;
 	}
 
@@ -1120,7 +1120,7 @@ smux_parse_var(u_char *varbind,
 		return (u_char *)smux_str;
 		break;
 	    default:
-		fprintf(stderr, "bad type returned (%x)\n", *vartype);
+	 snmp_log(LOG_ERR, "bad type returned (%x)\n", *vartype);
 		return NULL;
 		break;
 	}
