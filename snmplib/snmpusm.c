@@ -64,11 +64,11 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 
-const oid usmNoAuthProtocol[10]		= { 1,3,6,1,6,3,10,1,1,1 };
-const oid usmHMACMD5AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,2 };
-const oid usmHMACSHA1AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,3 };
-const oid usmNoPrivProtocol[10]		= { 1,3,6,1,6,3,10,1,2,1 };
-const oid usmDESPrivProtocol[10]	= { 1,3,6,1,6,3,10,1,2,2 };
+static oid usmNoAuthProtocol[10]		= { 1,3,6,1,6,3,10,1,1,1 };
+static oid usmHMACMD5AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,2 };
+static oid usmHMACSHA1AuthProtocol[10]	= { 1,3,6,1,6,3,10,1,1,3 };
+static oid usmNoPrivProtocol[10]		= { 1,3,6,1,6,3,10,1,2,1 };
+static oid usmDESPrivProtocol[10]	= { 1,3,6,1,6,3,10,1,2,2 };
 
 static u_int    dummy_etime, dummy_eboot;	/* For ISENGINEKNOWN(). */
 
@@ -875,7 +875,8 @@ usm_generate_out_msg (
 		theAuthProtocol, theAuthProtocolLength,
 		thePrivProtocol, thePrivProtocolLength) == 1)
 	{
-		DEBUGMSGTL(("usm","Unsupported Security Level\n"));
+		DEBUGMSGTL(("usm","Unsupported Security Level (%d)\n",
+                            theSecLevel));
 		usm_free_usmStateReference (secStateRef);
 		return SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
 	}
@@ -1374,7 +1375,9 @@ usm_rgenerate_out_msg (
         theAuthProtocol, theAuthProtocolLength,
         thePrivProtocol, thePrivProtocolLength) == 1)
 	{
-            DEBUGMSGTL(("usm","Unsupported Security Level\n"));
+            DEBUGMSGTL(("usm","Unsupported Security Level or type (%d)\n",
+                        theSecLevel));
+            
             usm_free_usmStateReference (secStateRef);
             return SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
 	}
@@ -2268,7 +2271,8 @@ usm_process_in_msg (
 	 */
 	if (usm_check_secLevel(secLevel, user) == 1)
 	{
-		DEBUGMSGTL(("usm","Unsupported Security Level.\n"));
+		DEBUGMSGTL(("usm","Unsupported Security Level (%d).\n",
+                            secLevel));
 		if (snmp_increment_statistic
 					(STAT_USMSTATSUNSUPPORTEDSECLEVELS)==0)
 		{
@@ -2487,6 +2491,9 @@ void
 init_usm(void) {
   struct snmp_secmod_def *def;
 
+  DEBUGMSGTL(("init_usm","unit_usm: %d %d\n",usmNoPrivProtocol[0],
+              usmNoPrivProtocol[1]));
+
   sc_init(); /* initalize scapi code */
 
   /* register ourselves as a security service */
@@ -2551,17 +2558,34 @@ int
 usm_check_secLevel(int level, struct usmUser *user)
 {
 
+    DEBUGMSGTL(("comparex","Comparing: %d %d ",usmNoPrivProtocol[0],
+                usmNoPrivProtocol[1]));
+    DEBUGMSGOID(("comparex", usmNoPrivProtocol,
+                 sizeof(usmNoPrivProtocol)/sizeof(oid)));
+    DEBUGMSG(("comparex","\n"));
   if ( level == SNMP_SEC_LEVEL_AUTHPRIV
 	&& (snmp_oid_compare(user->privProtocol, user->privProtocolLen,
 		usmNoPrivProtocol, sizeof(usmNoPrivProtocol)/sizeof(oid))==0) )
   {
-    return 1;
+      DEBUGMSGTL(("usm","Level: %d\n",level));
+      DEBUGMSGTL(("usm","User (%s) Auth Protocol: ", user->name));
+      DEBUGMSGOID(("usm", user->authProtocol, user->authProtocolLen));
+      DEBUGMSG(("usm",", User Priv Protocol: "));
+      DEBUGMSGOID(("usm", user->privProtocol, user->privProtocolLen));
+      DEBUGMSG(("usm", "\n"));
+      return 1;
   } 
   if ( (level == SNMP_SEC_LEVEL_AUTHPRIV || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
 	&& (snmp_oid_compare(user->authProtocol, user->authProtocolLen,
 		usmNoAuthProtocol, sizeof(usmNoAuthProtocol)/sizeof(oid))==0) )
   {
-    return 1;
+      DEBUGMSGTL(("usm","Level: %d\n",level));
+      DEBUGMSGTL(("usm","User (%s) Auth Protocol: ", user->name));
+      DEBUGMSGOID(("usm", user->authProtocol, user->authProtocolLen));
+      DEBUGMSG(("usm",", User Priv Protocol: "));
+      DEBUGMSGOID(("usm", user->privProtocol, user->privProtocolLen));
+      DEBUGMSG(("usm", "\n"));
+      return 1;
   }
 
   return 0;
@@ -2583,7 +2607,7 @@ usm_check_secLevel(int level, struct usmUser *user)
  *      
  * Returns:
  *	0	On success,
- *	-1	Otherwise.
+ *	1	Otherwise.
  *
  * Same as above but with explicitly named transform types instead of taking
  * from the usmUser structure.
@@ -2598,13 +2622,25 @@ usm_check_secLevel_vs_protocols(int level,
 	&& (snmp_oid_compare(privProtocol, privProtocolLen, usmNoPrivProtocol,
               			sizeof(usmNoPrivProtocol)/sizeof(oid))==0) )
   {
-    return 1;
+      DEBUGMSGTL(("usm","Level: %d\n",level));
+      DEBUGMSGTL(("usm","Auth Protocol: "));
+      DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
+      DEBUGMSG(("usm",", Priv Protocol: "));
+      DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
+      DEBUGMSG(("usm", "\n"));
+      return 1;
   }
   if ( (level == SNMP_SEC_LEVEL_AUTHPRIV || level == SNMP_SEC_LEVEL_AUTHNOPRIV)
 	&& (snmp_oid_compare(authProtocol, authProtocolLen, usmNoAuthProtocol,
               			sizeof(usmNoAuthProtocol)/sizeof(oid))==0) )
   {
-    return 1;
+      DEBUGMSGTL(("usm","Level: %d\n",level));
+      DEBUGMSGTL(("usm","Auth Protocol: "));
+      DEBUGMSGOID(("usm", authProtocol, authProtocolLen));
+      DEBUGMSG(("usm",", Priv Protocol: "));
+      DEBUGMSGOID(("usm", privProtocol, privProtocolLen));
+      DEBUGMSG(("usm", "\n"));
+      return 1;
   }
 
   return 0;

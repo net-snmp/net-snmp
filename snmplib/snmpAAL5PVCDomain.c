@@ -29,7 +29,7 @@
 #include <net-snmp/library/snmpAAL5PVCDomain.h>
 
 
-const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
+static oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
 static netsnmp_tdomain aal5pvcDomain;
 
 
