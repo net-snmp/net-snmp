@@ -52,11 +52,15 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 
 4.  Remove the example MIB files:  
 
-    Edit win32\net-snmp\agent\mib_module_config.h and undef the following lines:
+    Edit win32\net-snmp\agent\mib_module_config.h and change the following lines:
 
-    #define USING_EXAMPLES_UCDDEMOPUBLIC_MODULE 1
+      #define USING_EXAMPLES_UCDDEMOPUBLIC_MODULE 1
+      #define USING_EXAMPLES_EXAMPLE_MODULE 1
 
-    #define USING_EXAMPLES_EXAMPLE_MODULE 1
+    to:
+
+      #undef USING_EXAMPLES_UCDDEMOPUBLIC_MODULE
+      #undef USING_EXAMPLES_EXAMPLE_MODULE    
 
 5.  cd (source dir)\win32
 
