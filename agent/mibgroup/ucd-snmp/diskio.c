@@ -348,6 +348,7 @@ static int
 getstats(void)
 {
     time_t          now;
+    int             i;
 
     now = time(NULL);
     if (cache_time + CACHE_TIMEOUT > now) {
@@ -364,6 +365,15 @@ getstats(void)
         return 1;
     }
     ndisk = stat->dinfo->numdevs;
+    /* Gross hack to include device numbers in the device name array */
+    for (i = 0; i < ndisk; i++) {
+      char *cp = stat->dinfo->devices[i].device_name;
+      int len = strlen(cp);
+      if (len > DEVSTAT_NAME_LEN - 3)
+        len -= 3;
+      cp += len;
+      sprintf(cp, "%d", stat->dinfo->devices[i].unit_number);
+    }
     cache_time = now;
     return 0;
 }
