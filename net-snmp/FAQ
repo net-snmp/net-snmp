@@ -84,7 +84,9 @@ TABLE OF CONTENTS
    How do I add a MIB to the agent?
    What's the difference between 'exec', 'sh' and 'pass'?
    What's the difference between AgentX, SMUX and proxied SNMP?
+   What about 'dlmod' - what's that about?
    Which should I use?
+   Can I use AgentX when running under Windows?
    How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
    How can I send a particular trap to selected destinations?
@@ -1267,6 +1269,17 @@ But compiling this fails! Why?
   If you're working with a ready-installed version of the library, make
   sure you obtain a compatible version of the perl module.
 
+    Note that the perl modules will be compiled using the compiler
+  (and compiler settings) used for compiling the original perl binary,
+  *not* those used for compiling the Net-SNMP (or UCD) library.
+  If these are different (e.g. 'gcc' used for one and 'cc' for the other)
+  then this may well cause problems.  It's much safer to use a consistent
+  environment for both.
+
+    Also note that the v5 Net-SNMP suite *must* be configured to provide
+  shared libraries in order for the perl modules to work correctly.  This
+  is not necessary with the v4 UCD-SNMP libraries.
+
 
 
 Compiling the perl module works OK, but 'make test' fails. Why?
@@ -1842,6 +1855,27 @@ Which should I use?
   code can be included as part of a pure-SNMP master agent, or an
   AgentX subagent, either compiled in or dynamically loaded with no
   modifications needed to the MIB module code itself.
+
+
+
+Can I use AgentX when running under Windows?
+-------------------------------------------
+
+  Yes, but there are a couple of things to be aware of.
+
+  Firstly, by default the AgentX master listens on the Unix domain
+  socket '/var/agentx/master', which doesn't work under Windows.
+  You'll need to tell it to listen on a TCP port, either by using
+  the command-line option "-x localhost:705",  or by adding the
+  directive "agentxAddress localhost:705" to the snmpd.conf file.
+
+  Secondly, be aware that the security of AgentX connectivity is not
+  particularly strong.  The examples given here would allow any process
+  running on the local machine to register as an AgentX subagent.  The
+  more obvious settings "-x 705" or "agentxAddress 705" would allow
+  a system *anywhere* on the network (or even from remote networks) to
+  register as an AgentX subagent.  This could potentially be used to
+  hijack the agent, or provide false information.
 
 
 
