@@ -2042,6 +2042,382 @@ fi
 done
 
 
+if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+cat << EOF
+
+	 ************** Configuration Section **************
+
+	You are about to be prompted by a series of questions.  Answer
+them carefully, as they determine how the snmp agent and related
+applications are to function.
+
+	After the configure script finishes, you can browse the newly
+created config.h file for further - less important - parameters to
+modify.  Be careful if you re-run configure though since config.h will
+be over written.
+
+-Press return to continue-
+EOF
+
+read tmpinput
+ac_cv_have_warned="yes"
+
+fi
+
+
+ME=`whoami`
+if test -f /etc/resolv.conf; then
+  LOC=`cat /etc/resolv.conf | grep domain | awk '{print $NF}'`
+else
+  LOC="@no.where"
+fi
+
+
+MSG_CHECK=`echo "
+
+*** System Contact Information:
+
+	Describes who should be contacted about the host the agent is
+running on.  This information is available in the MIB-II tree.
+
+System Contact Information" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "
+
+*** System Contact Information:
+
+	Describes who should be contacted about the host the agent is
+running on.  This information is available in the MIB-II tree.
+
+System Contact Information ($ME@$LOC): \c"
+read tmpinput
+if test "$tmpinput" = "" -a "$ME@$LOC" != ""; then
+  tmpinput="$ME@$LOC"
+fi
+eval SYS_CONTACT=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_SYS_CONTACT=\$SYS_CONTACT
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_SYS_CONTACT" != "none"; then
+  if test "1" != ""; then
+    cat >> confdefs.h <<EOF
+#define SYS_CONTACT "$ac_cv_user_prompt_SYS_CONTACT"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define SYS_CONTACT $ac_cv_user_prompt_SYS_CONTACT
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_SYS_CONTACT" 1>&6
+
+
+
+MSG_CHECK=`echo "
+
+*** System Location:
+
+	Describes the location of the system.  This information is
+available in the MIB-II tree.
+
+System Location" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "
+
+*** System Location:
+
+	Describes the location of the system.  This information is
+available in the MIB-II tree.
+
+System Location (UCDavis Electrical Engineering Departement): \c"
+read tmpinput
+if test "$tmpinput" = "" -a "UCDavis Electrical Engineering Departement" != ""; then
+  tmpinput="UCDavis Electrical Engineering Departement"
+fi
+eval SYS_LOC=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_SYS_LOC=\$SYS_LOC
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_SYS_LOC" != "none"; then
+  if test "1" != ""; then
+    cat >> confdefs.h <<EOF
+#define SYS_LOC "$ac_cv_user_prompt_SYS_LOC"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define SYS_LOC $ac_cv_user_prompt_SYS_LOC
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_SYS_LOC" 1>&6
+
+
+
+
+MSG_CHECK=`echo "
+
+*** Logfile location:
+
+	Enter the default location for the snmpd agent to dump
+information & errors to.  If not defined (enter the keyword \"none\"
+at the prompt below) the agent will use stdout and stderr instead.
+(Note: This value can be over-ridden using the command line)
+
+Location to write logfile" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "
+
+*** Logfile location:
+
+	Enter the default location for the snmpd agent to dump
+information & errors to.  If not defined (enter the keyword \"none\"
+at the prompt below) the agent will use stdout and stderr instead.
+(Note: This value can be over-ridden using the command line)
+
+Location to write logfile (/usr/adm/snmpd.log): \c"
+read tmpinput
+if test "$tmpinput" = "" -a "/usr/adm/snmpd.log" != ""; then
+  tmpinput="/usr/adm/snmpd.log"
+fi
+eval LOGFILE=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_LOGFILE=\$LOGFILE
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_LOGFILE" != "none"; then
+  if test "1" != ""; then
+    cat >> confdefs.h <<EOF
+#define LOGFILE "$ac_cv_user_prompt_LOGFILE"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define LOGFILE $ac_cv_user_prompt_LOGFILE
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_LOGFILE" 1>&6
+
+
+
+echo $ac_n "checking Default Extensible Mib location""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_EXTENSIBLEMIB'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+
+echo "
+
+*** Default Extensible Mib Location:
+
+	You need to pick a MIB location that will be the top of the
+extensible portion of the agent.  This should be the ASN identity
+assigned to your institution.  
+
+	If you don't have one:, make one up or use the default below.  
+
+Default Extensible Mib location (.1.3.6.1.4.10): \c"
+read tmpinput
+if test "$tmpinput" = "" -a ".1.3.6.1.4.10" != ""; then
+  tmpinput=".1.3.6.1.4.10"
+fi
+eval EXTENSIBLEMIB=\"$tmpinput\"
+
+
+
+ac_cv_user_prompt_EXTENSIBLEMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//;s/\./,/g'`
+echo "setting Default Mib location...  \c"
+
+fi
+ 
+cat >> confdefs.h <<EOF
+#define EXTENSIBLEMIB $ac_cv_user_prompt_EXTENSIBLEMIB
+EOF
+
+EXTENSIBLECOUNT=`echo $ac_cv_user_prompt_EXTENSIBLEMIB | sed -e 's/\,/ /g' | wc -w`
+cat >> confdefs.h <<EOF
+#define EXTENSIBLENUM $EXTENSIBLECOUNT
+EOF
+
+echo "$ac_t""$ac_cv_user_prompt_EXTENSIBLEMIB" 1>&6
+
+
+MSG_CHECK=`echo "Config File Location" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_CONFIGFILE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "Config File Location ("/etc/ece-snmpd.conf"): \c"
+read tmpinput
+if test "$tmpinput" = "" -a ""/etc/ece-snmpd.conf"" != ""; then
+  tmpinput=""/etc/ece-snmpd.conf""
+fi
+eval CONFIGFILE=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_CONFIGFILE=\$CONFIGFILE
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_CONFIGFILE" != "none"; then
+  if test "1" != ""; then
+    cat >> confdefs.h <<EOF
+#define CONFIGFILE "$ac_cv_user_prompt_CONFIGFILE"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define CONFIGFILE $ac_cv_user_prompt_CONFIGFILE
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_CONFIGFILE" 1>&6
+
+
+
+MSG_CHECK=`echo "Second Config File Location" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_CONFIGFILETWO'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "Second Config File Location ("/etc/ece-snmpd.local.conf"): \c"
+read tmpinput
+if test "$tmpinput" = "" -a ""/etc/ece-snmpd.local.conf"" != ""; then
+  tmpinput=""/etc/ece-snmpd.local.conf""
+fi
+eval CONFIGFILETWO=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_CONFIGFILETWO=\$CONFIGFILETWO
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_CONFIGFILETWO" != "none"; then
+  if test "1" != ""; then
+    cat >> confdefs.h <<EOF
+#define CONFIGFILETWO "$ac_cv_user_prompt_CONFIGFILETWO"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define CONFIGFILETWO $ac_cv_user_prompt_CONFIGFILETWO
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_CONFIGFILETWO" 1>&6
+
+
+
+
+MSG_CHECK=`echo "
+
+*** SNMP Security/Authentication:
+
+	You may pick one of two types of SNMP authentication to use
+for this agent.  Only the extensible section is affected by the
+following choices.  This will be handled better in version 3.2 and
+above.  Note that to use anything other than SNMPV1 the configuration
+files must be set up properly for SNMPV2 usage.
+
+	(Encryption is not supported because of U.S. cryptography laws)
+
+SNMPV1       Any type of snmp transmission can access the extensible tree.
+SNMPV2ANY    Any type of snmpV2 transmissions can access the extensible tree.
+SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
+
+	If you don't understand any of the above sentences: pick SNMPV1.
+
+What type of security to use" | tail -1`
+echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_user_prompt_GLOBALSECURITY'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  echo ""
+
+echo "
+
+*** SNMP Security/Authentication:
+
+	You may pick one of two types of SNMP authentication to use
+for this agent.  Only the extensible section is affected by the
+following choices.  This will be handled better in version 3.2 and
+above.  Note that to use anything other than SNMPV1 the configuration
+files must be set up properly for SNMPV2 usage.
+
+	(Encryption is not supported because of U.S. cryptography laws)
+
+SNMPV1       Any type of snmp transmission can access the extensible tree.
+SNMPV2ANY    Any type of snmpV2 transmissions can access the extensible tree.
+SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
+
+	If you don't understand any of the above sentences: pick SNMPV1.
+
+What type of security to use (SNMPV2AUTH): \c"
+read tmpinput
+if test "$tmpinput" = "" -a "SNMPV2AUTH" != ""; then
+  tmpinput="SNMPV2AUTH"
+fi
+eval GLOBALSECURITY=\"$tmpinput\"
+
+
+eval ac_cv_user_prompt_GLOBALSECURITY=\$GLOBALSECURITY
+echo "setting $MSG_CHECK to...  \c"
+
+fi
+ if test "$ac_cv_user_prompt_GLOBALSECURITY" != "none"; then
+  if test "" != ""; then
+    cat >> confdefs.h <<EOF
+#define GLOBALSECURITY "$ac_cv_user_prompt_GLOBALSECURITY"
+EOF
+
+  else
+    cat >> confdefs.h <<EOF
+#define GLOBALSECURITY $ac_cv_user_prompt_GLOBALSECURITY
+EOF
+
+  fi
+fi
+echo "$ac_t""$ac_cv_user_prompt_GLOBALSECURITY" 1>&6
+
+
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
