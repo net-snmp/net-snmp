@@ -22,6 +22,8 @@
 #include <fcntl.h>
 
 #include "mibincl.h"
+#include "default_store.h"
+#include "ds_agent.h"
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
@@ -252,7 +254,7 @@ register_mib(const char *moduleName,
   res = load_subtree(subtree);
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( agent_role == SUB_AGENT )
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
     agentx_register( agentx_session, mibloc, mibloclen );
 #endif
 
@@ -323,7 +325,7 @@ unregister_mib(oid *name,
 
   res = unload_subtree(name, len, subtrees);
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if ( agent_role == SUB_AGENT )
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
     agentx_unregister( agentx_session, name, len );
 #endif
 

@@ -3,9 +3,10 @@
 #
 
 TARG		= snmpd
+LIBTARG		= libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LOCAL_LIBS	= -L../snmplib
-LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
+LOCAL_LIBS	= -L../snmplib -L.
+LIBS		= $(CC_RUNTIME_ARG) -lagent -lsnmp @WRAPLIBS@ @LIBS@
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
@@ -16,7 +17,11 @@ MIBOBJS		= @mibgroup_list_o@
 
 PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
 
-all: subdirs snmpd
+AGENTOBJS=snmpd.o kernel.o auto_nlist.o
+LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
+	agent_trap.o
+
+all: subdirs snmpd libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 
 subdirs:
@@ -35,16 +40,16 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
+snmpd:	${AGENTOBJS} $(USELIBS) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+	${CC} -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${LIBS}  
 
-AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o auto_nlist.o
 
-
-snmpd:	${MIBOBJS} ${AGENTOBJS} $(USELIBS)
-	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${LIBS}  
-
+libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS} ${MIBOBJS} 
+	$(SHLIB_LD_CMD) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS} ${MIBOBJS} 
+	$(RANLIB) libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 clean:
-	rm -f *.o ${TARG}
+	rm -f *.o ${TARG} ${LIBTARG}
 	cd dlmods; make clean; cd ..
 	cd mibgroup; make clean
 

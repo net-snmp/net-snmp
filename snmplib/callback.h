@@ -8,16 +8,17 @@ extern "C" {
 #endif
 
 #define MAX_CALLBACK_IDS    2
-#define MAX_CALLBACK_SUBIDS 3
+#define MAX_CALLBACK_SUBIDS 4
 
 /* Callback Major Types */
 #define SNMP_CALLBACK_LIBRARY     0
 #define SNMP_CALLBACK_APPLICATION 1
 
 /* SNMP_CALLBACK_LIBRARY minor types */
-#define SNMP_CALLBACK_POST_READ_CONFIG	0
-#define SNMP_CALLBACK_STORE_DATA	1
-#define SNMP_CALLBACK_SHUTDOWN		2
+#define SNMP_CALLBACK_POST_READ_CONFIG	        0
+#define SNMP_CALLBACK_STORE_DATA	        1
+#define SNMP_CALLBACK_SHUTDOWN		        2
+#define SNMP_CALLBACK_POST_PREMIB_READ_CONFIG	3
 
 typedef int (SNMPCallback)(int majorID, int minorID, void *serverarg,
                            void *clientarg);

@@ -90,7 +90,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if USING_MIBII_VACM_VARS_MODULE
 #include "mibgroup/mibII/vacm_vars.h"
 #endif
-
+#include "agent_registry.h"
+#include "transform_oids.h"
+#include "callback.h"
 #include "snmpd.h"
 
 #ifndef  MIN
@@ -107,7 +109,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * particularily easy bug to track down so this saves debugging time at
  * the expense of a few memcpy's.
  */
-#define MIB_CLIENTS_ARE_EVIL
+#undef MIB_CLIENTS_ARE_EVIL
  
 extern struct subtree *subtrees;
 int subtree_size;
@@ -170,22 +172,69 @@ u_char		return_buf[258];
 u_char		return_buf[256]; /* nee 64 */
 #endif
 
+struct timeval	starttime;
+
+int
+setup_users(int majorid, int minorid, void *serverarg, void *clientarg) {
+    struct usmUser *user, *userListPtr;
+
+    /* create the initial user */
+    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
+                                   USM_LENGTH_OID_TRANSFORM,
+                                   usmDESPrivProtocol,
+                                   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+
+    /* create the templateMD5 user */
+    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
+                                   USM_LENGTH_OID_TRANSFORM,
+                                   usmDESPrivProtocol,
+                                   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+
+    /* create the templateSHA user */
+    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
+                                   USM_LENGTH_OID_TRANSFORM,
+                                   usmDESPrivProtocol,
+                                   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+
+    /* get current time (ie, the time the agent started) */
+    gettimeofday(&starttime, NULL);
+    starttime.tv_sec--;
+    starttime.tv_usec += 1000000L;
+
+    return SNMPERR_SUCCESS;
+}
 
 void
 init_agent (void)
 {
+  /* setup users *after* EngineID has been initialized. */
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                         setup_users, NULL);
+
+  usm_set_reportErrorOnUnknownID(1);
+
 #ifdef CAN_USE_NLIST
-	init_kmem("/dev/kmem");
+  init_kmem("/dev/kmem");
 #endif
 
-	setup_tree();
+  setup_tree();
 
 #include "mibgroup/mib_module_inits.h"
 
-	init_agent_read_config();
+  init_agent_read_config();
 
 #ifdef TESTING
-	auto_nlist_print_tree(-2, 0);
+  auto_nlist_print_tree(-2, 0);
 #endif
 }  /* end init_agent() */
 
