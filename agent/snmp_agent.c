@@ -732,6 +732,17 @@ handle_var_list(struct agent_snmp_session  *asp)
    return SNMP_ERR_NOERROR;
 }
 
+static struct agent_snmp_session *current_agent_session = NULL;
+struct agent_snmp_session  *
+get_current_agent_session() {
+    return current_agent_session;
+}
+
+void
+set_current_agent_session(struct agent_snmp_session  *asp) {
+    current_agent_session = asp;
+}
+
 int
 handle_one_var(struct agent_snmp_session  *asp, struct variable_list *varbind_ptr)
 {
@@ -776,11 +787,15 @@ statp_loop:
             memcpy(save, varbind_ptr->name,
 			varbind_ptr->name_length*sizeof(oid));
             savelen = varbind_ptr->name_length;
-	    if ( view == 0 )
+	    if ( view == 0 ) {
+                struct agent_snmp_session  *oldval = get_current_agent_session();
+                set_current_agent_session(asp);
 	        statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
 			   &statType, &statLen, &acl,
 			   asp->exact, &write_method, asp->pdu, &noSuchObject);
+                set_current_agent_session(oldval);
+            }
 	    else {
 		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 		statP        = NULL;
@@ -878,6 +893,8 @@ statp_loop:
 		 *  FINALLY we can act on SET requests ....
 		 */
 	    if ( asp->rw == WRITE ) {
+                    struct agent_snmp_session  *oldval =
+                        get_current_agent_session();
 		    if ( varbind_ptr->data == NULL ) {
 				/*
 				 * Save the results from 'getStatPtr'
@@ -897,12 +914,14 @@ statp_loop:
 				/*
 				 * Call the object's write method
 				 */
+                    set_current_agent_session(asp);
 		    return (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
                                                varbind_ptr->val_len, statP,
                                                varbind_ptr->name,
                                                varbind_ptr->name_length);
+                    set_current_agent_session(oldval);
 	    }
 		/*
 		 * ... or save the results from assorted GET requests
