@@ -2,7 +2,8 @@
 # May need an ANSI compiler for extensible.c depending on whether or
 # not SECURITYEXCEPTIONS is defined in config.h 
 
-CC = gcc -g 
+CC = gcc
+CFLAGS=-g
 
 OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
 SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c versioninfo.c 
