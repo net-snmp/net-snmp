@@ -29,6 +29,7 @@ if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
 #
 failcount=0
 junkoutputfile="$SNMP_TMPDIR/output-`basename $0`$$"
+seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 
 #
 # HEADER: returns a single line when SNMP_HEADERONLY mode and exits.
@@ -132,8 +133,10 @@ KNORG
 	( $* 2>&1 ) > $junkoutputfile
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
-		echo "Output: "
+		echo "Command Output: "
+		echo "$seperator"
 		cat $junkoutputfile | sed 's/^/  /'
+		echo "$seperator"
 	fi
 }
 
@@ -204,7 +207,9 @@ STOPAGENT() {
     fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
+	echo "$seperator"
 	cat $SNMP_SNMPD_LOG_FILE
+	echo "$seperator"
     fi
     rm $SNMP_SNMPD_PID_FILE
 }
