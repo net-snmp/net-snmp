@@ -4,12 +4,10 @@
 ## $Id$
 ########################################################################
 @if $m2c_create_fewer_files != 1@
-@   eval $m2c_processing_type = '2'@ // anything but 'b'
 @   run generic-table-oids.m2c@
 @   run generic-table-enums.m2c@
 ########################################################################
 @else@
-@   eval $m2c_processing_type = 'b'@
 @   eval $hack = "Id"@
 @   eval $m2c_save = "$name"@
 @   eval $name = "${m2c_save}_constants"@
