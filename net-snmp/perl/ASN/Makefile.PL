@@ -18,7 +18,7 @@ sub InitMakeParams {
 		  'XSPROTOARG'          => '-prototypes',
 		  'PREREQ_PM'           => {},
 		  );
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
 
     $opts = NetSNMPGetOpts();
     $Params{'LIBS'}    = `$opts->{'nsconfig'} --libs`;
