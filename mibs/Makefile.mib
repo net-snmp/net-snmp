@@ -91,7 +91,7 @@ INET-ADDRESS-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3291
 
 EtherLike-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2665
+	./mibfetch $(RFCHOST) $(RFCDIR) 3635
 
 IANAifType-MIB.txt:	$(MIBDEPS)
 	./mibfetch -x $(IANAHOST) $(IANADIR) ianaiftype-mib
