@@ -5,11 +5,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
   New:
     - Top level of the mib parser has been restructured
-      - no longer uses a default mib.txt file.
-      - reads the imports clauses of mibs to load other required mibs.
-      - No longer loads everything it can find.  Instead it uses
-        environmental variables MIBS and MIBDIRS to decide what to
-        load.
+      - no longer reads 'mib.txt'
+      - no longer reads everything (MIBS/MIBDIRS)
+      - reads import clauses to load other required modules
       - new man page: mib_api.3
     - The agent has been completely restructured (modularized) to
       allow for easier extension via C code and requires no
