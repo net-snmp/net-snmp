@@ -867,6 +867,7 @@ int unregister_readfd(int fd) {
 	    external_readfdlen--;
 	    for (j = i; j < external_readfdlen; j++) {
 		external_readfd[j] = external_readfd[j+1];
+                external_readfdfunc[j] = external_readfdfunc[j+1];
 		external_readfd_data[j] = external_readfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_readfd", "unregistered fd %d\n", fd));
@@ -884,6 +885,7 @@ int unregister_writefd(int fd) {
 	    external_writefdlen--;
 	    for (j = i; j < external_writefdlen; j++) {
 		external_writefd[j] = external_writefd[j+1];
+                external_writefdfunc[j] = external_writefdfunc[j+1];
 		external_writefd_data[j] = external_writefd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_writefd", "unregistered fd %d\n", fd));
@@ -901,6 +903,7 @@ int unregister_exceptfd(int fd) {
 	    external_exceptfdlen--;
 	    for (j = i; j < external_exceptfdlen; j++) {
 		external_exceptfd[j] = external_exceptfd[j+1];
+                external_exceptfdfunc[j] = external_exceptfdfunc[j+1];
 		external_exceptfd_data[j] = external_exceptfd_data[j+1];
 	    }
 	    DEBUGMSGTL(("unregister_exceptfd", "unregistered fd %d\n", fd));
