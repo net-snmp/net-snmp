@@ -1751,10 +1751,10 @@ snmpv3_build(struct snmp_session	*session,
   DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef USE_REVERSE_ASNENCODING
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
-      ret = snmpv3_packet_rbuild(pdu, packet, out_length, NULL, 0);
+      ret = snmpv3_packet_rbuild(session, pdu, packet, out_length, NULL, 0);
   } else {
 #endif
-      ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
+      ret = snmpv3_packet_build(session, pdu, packet, out_length, NULL, 0);
 #ifdef USE_REVERSE_ASNENCODING
   }
 #endif
@@ -2010,7 +2010,8 @@ snmpv3_scopedPDU_header_rbuild(struct snmp_pdu *pdu,
 #ifdef USE_REVERSE_ASNENCODING
 /* returns 0 if success, -1 if fail, not 0 if SM build failure */
 int
-snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
+snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
+                     u_char *packet, size_t *out_length,
                      u_char *pdu_data, size_t pdu_data_len)
 {
     u_char	*global_data;
@@ -2086,6 +2087,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
         parms.secStateRef = pdu->securityStateRef;
         parms.wholeMsg = &packet;
         parms.wholeMsgLen = out_length;
+        parms.session = session;
         result =
             (*sptr->reverse_encode_out)(&parms);
     } else {
@@ -2102,12 +2104,13 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     DEBUGINDENTLESS();
     return result;
 
-}  /* end snmpv3_packet_build() */
+}  /* end snmpv3_packet_rbuild() */
 #endif /* USE_REVERSE_ASNENCODING */
 
 /* returns 0 if success, -1 if fail, not 0 if SM build failure */
 int
-snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
+snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
+                    u_char *packet, size_t *out_length,
 		    u_char *pdu_data, size_t pdu_data_len)
 {
     u_char	*global_data,		*sec_params,	*spdu_hdr_e;
@@ -2187,6 +2190,7 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
         parms.secParamsLen = &sec_params_len;
         parms.wholeMsg = &cp;
         parms.wholeMsgLen = out_length;
+        parms.session = session;
         result =
             (*sptr->forward_encode_out)(&parms);
     } else {
