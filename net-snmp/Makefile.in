@@ -20,7 +20,7 @@ TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bi
 SUBDIRS = snmplib agent apps local
 INSTALLDIRS = $(SUBDIRS) man local
 
-all:	mib.txt sedscript subdirs
+all:	mib.txt sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/extensible/mibdefs.h
 	$(CPP) sedscript.in | sed 's/REMOVEME//g' > sedscript
@@ -87,3 +87,7 @@ config.status: configure
 
 mib.txt: ece-mib.def mibII.txt sedscript
 	cat ece-mib.def | $(SED) -f sedscript | cat mibII.txt - > mib.txt
+
+EXAMPLE.conf: sedscript EXAMPLE.conf.def
+	$(SED) -f sedscript EXAMPLE.conf.def > EXAMPLE.conf
+

@@ -101,6 +101,11 @@ SNMPv1 vs. SNMPv2
   anything I have said here, change GLOBALSECURITY to SNMPV1 and you
   shouldn't have problems.
 
+EXAMPLE USAGE 
+
+  See the 'EXAMPLE.conf' file in this directory (you must build the
+  package for this file to be generated).
+
 DESIGN
 
   The MIB base of the extensible section is defined in config.h by
@@ -141,7 +146,7 @@ CONFIGURATION
 
   By default, it looks for two files when it starts up, both of which
   are defined in config.h.  This file contains different types of
-  arguments, each described below.
+  arguments, each described below.  
 
 --
 
