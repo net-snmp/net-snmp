@@ -38,7 +38,10 @@ netsnmp_arch_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
                                   netsnmp_ipaddress_entry *rhs);
 extern void
 netsnmp_arch_ipaddress_entry_cleanup(netsnmp_ipaddress_entry *entry);
-
+extern int
+netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry);
+extern int
+netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry);
 
 
 /**---------------------------------------------------------------------*/
