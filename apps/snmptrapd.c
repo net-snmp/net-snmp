@@ -396,6 +396,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
 {
 #if USE_LIBWRAP
     char *addr_string = NULL;
+    int i = 0;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
         /*
@@ -409,6 +410,12 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
     }
 
     if (addr_string != NULL) {
+	if( addr_string[0] == '[' ) {
+	    for( i = 1; addr_string[i] != ']'; i++ ) {
+		addr_string[i-1] =  addr_string[i];
+	    }
+	    addr_string[i-1] = '\0';
+	}
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
 		      addr_string, STRING_UNKNOWN) == 0) {
             free(addr_string);

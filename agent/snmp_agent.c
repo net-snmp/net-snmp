@@ -803,6 +803,12 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
+      if( addr_string[0] == '[' ) {
+          for( i = 1; addr_string[i] != ']'; i++ ) {
+              addr_string[i-1] =  addr_string[i];
+          }
+          addr_string[i-1] = '\0';
+      }
       if ( strncmp(addr_string, "callback", 8) != 0 ) {
         if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
