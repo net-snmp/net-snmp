@@ -117,6 +117,9 @@ void init_agent_read_config (const char *app)
       register_app_config_handler("informsink",
                           snmpd_parse_config_informsink, NULL,
                           "host [community] [port]");
+      register_app_config_handler("trapsess",
+                          snmpd_parse_config_trapsess, NULL,
+                          "[snmpcmdargs] host");
   }
   register_app_config_handler("trapcommunity",
                           snmpd_parse_config_trapcommunity,
