@@ -97,6 +97,12 @@ netsnmp_stash_to_next_helper(netsnmp_mib_handler *handler,
                  */
                 netsnmp_oid_stash_add_data( cinfo, vb->name, vb->name_length,
                                             snmp_clone_varbind( vb ));
+                    /*
+                     * Tidy up the response structure,
+                     *  ready for retrieving the next entry
+                     */
+                netsnmp_free_all_list_data(reqtmp->parent_data);
+                reqtmp->parent_data = NULL;
                 reqtmp->processed = 0;
                 vb->type = ASN_NULL;
             } else {
