@@ -271,9 +271,8 @@ ${table}_allocate_rowreq_ctx(void)
 
     rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
 
-    rowreq_ctx->request_mode = 0;
-rowreq_ctx->${context}_data_list = NULL;
-rowreq_ctx->${context}_reg = ${context}_if_ctx.user_ctx;
+    rowreq_ctx->${context}_data_list = NULL;
+    rowreq_ctx->${context}_reg = ${context}_if_ctx.user_ctx;
 
 @if $m2c_data_init == 1@
     if(SNMPERR_SUCCESS != ${context}_rowreq_ctx_init(rowreq_ctx)) {
@@ -413,11 +412,6 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${context}_rowreq_ctx * rowreq_
          * set up registration pointer for user
          */
         rowreq_ctx->${context}_reg = if_ctx->user_ctx;
-
-        /*
-         * save mode
-         */
-        rowreq_ctx->request_mode = pdu_ctx->request_mode;
 
         /*
          * set up data list for user
