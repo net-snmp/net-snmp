@@ -19,7 +19,7 @@ $doit = 1;
 $somehosts = 0;
 
 sub usage {
-    print "$0 [-H host] [-u user] [-p password] [-l hostlist,...] [-v] [-h] [-n] [-d] <-m mibnode>\n";
+    print "$0 [-H host] [-u user] [-p password] [-l hostlist,...] [-v] [-h] [-n] [-d] [-m mib-to-load] <-m mibnode>\n";
     exit 0;
 }
 
@@ -41,6 +41,14 @@ while ($#ARGV > -1) {
     $verbose = 1 if (/-v/);
     $delete = 1 if (/-d/);
     $doit = 0 if (/-n/);
+    if (/-m/) {
+	# load some mibs
+      SNMP::loadModules(shift);
+    }
+    if (/-M/) {
+	# add a mib directory to look in
+      SNMP::addMibDirs(shift);
+    }
 }
 
 #===========================================================================
@@ -107,11 +115,9 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	die "children of $mib->{label} don't exist\n" if ($#{$children} == -1);
 
 	# create the table in our database if it doesn't exist.
-	if ($delete) {
-	    setuptable($tablelist->{tablename});
-	} else {
-	    ($dbh->do("show tables like \"$tablelist->{tablename}\"") eq "0E0") &&
-		setuptable($tablelist->{tablename});
+	setuptable($dbh, $tablelist->{tablename}, $delete);
+	if ($tablelist->{'keephistory'} == 1) {
+	    setuptable($dbh, $tablelist->{tablename}, $delete, "hist");
 	}
 	
 	$var = 
@@ -163,7 +169,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host'  and oidindex = '$id')");
 	    $res = $dbh->do("select * from $tablelist->{'tablename'} where ( host = '$host' and oidindex = '$id')");
 	    print "  result: $res/$\n" if ($verbose);
-	    if ($res ne "0E0" && $tablelist->{'keephistory'} != 1) {
+	    if ($res ne "0E0") {
 		$cmd = "update $tablelist->{'tablename'} set ";
 		foreach $h (keys(%vals)) {
 		    $cmd .= "$h = '$vals{$h}', ";
@@ -175,9 +181,20 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		    ") values('$host', '$id', '" .
 			join("', '",values(%vals)). "')";
 	    }
+
 	    print "  $cmd\n" if ($verbose);
 	    $dbh->do("$cmd")
 		or die "\nnot ok: $DBI::errstr\n" if ($doit);
+
+	    if ($tablelist->{'keephistory'} == 1) {
+		$cmd = "insert into $tablelist->{'tablename'}hist (host, oidindex, " 
+		    . join(", ",keys(%vals))
+		    . ") values('$host', '$id', '"
+		    . join("', '",values(%vals)). "')";
+		print "  $cmd\n" if ($verbose);
+		$dbh->do("$cmd")
+		    or die "\nnot ok: $DBI::errstr\n" if ($doit);
+	    }
 
 	    my $newerr = 
 		checkrowforerrors($tablelist->{'tablename'}, $host, $id);
@@ -212,26 +229,37 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 $cursor->finish();
 $dbh->disconnect();
 
+#
+# Subroutines
+#
+
+# setup a table in the database based on a MIB table.
 sub setuptable {
 
     my %conversions = qw(INTEGER integer OCTETSTR varchar(254) COUNTER integer UINTEGER integer IPADDR varchar(254) OBJECTID varchar(254) GAGUE integer OPAQUE varchar(254) TICKS integer GAUGE integer);
 
     # set up mib info
-    my ($mibnode) = @_;
+    my ($dbh, $mibnode, $delete, $suffix) = @_;
+
     my $mib = $SNMP::MIB{SNMP::translateObj($mibnode)};
     my $children = $$mib{'children'};
     die "$mib has no chlidren" if (ref($children) ne "ARRAY");
     my ($cmd, $j);
 
-    print " creating table for $mibnode\n" if ($verbose);
     if ($delete) {
 	$cmd = "drop table if exists $mib->{label}";
 	print "cmd: $cmd\n" if ($verbose);
 	$dbh->do($cmd)
 	    or die "\nnot ok: $DBI::errstr\n" if ($doit);
+    } elsif (($ret = $dbh->do("show tables like '$mib->{label}$suffix'")) ne "0E0") {
+	# the table already exists
+	return;
     }
 
-    $cmd = "create table $mib->{label} (id integer auto_increment primary key, host varchar(16), oidindex varchar(254)";
+    print "show tables like $mib->{label}$suffix: $ret\n" if($verbose);
+    print " creating table for $mibnode ($mib->{label}$suffix)\n" if ($verbose);
+    
+    $cmd = "create table $mib->{label}$suffix (id integer auto_increment primary key, host varchar(16), oidindex varchar(254)";
     foreach $j (@$children) {
 	if (!defined($conversions{$j->{type}})) {
 	    print "no conversion for ". $j->{type} . "!\n";
