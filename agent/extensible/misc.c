@@ -304,6 +304,30 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
+update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  
+  struct myproc *proc;
+  int tmp=0, tmplen=1000;
+
+  if (var_val_type != INTEGER) {
+    printf("Wrong type != int\n");
+    return SNMP_ERR_WRONGTYPE;
+  }
+  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  if (tmp == 1 && action == COMMIT) {
+    update_config();
+  } 
+  return SNMP_ERR_NOERROR;
+}
+
 int get_ps_output(ex)
   struct extensible *ex;
 {

@@ -70,6 +70,7 @@
 #define VERCDATE 4
 #define VERIDENT 5
 #define VERCLEARCACHE 10
+#define VERUPDATECONFIG 11
 
 #define HPCONF 1
 #define HPRECONFIG 2
