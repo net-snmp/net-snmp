@@ -341,6 +341,7 @@ usage(void)
     fprintf(stderr, "  \t\t\t  (followed -quiet to prevent message popups)\n");
 #endif
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
+    fprintf(stderr, "  -x ADDRESS\t\tuse ADDRESS as AgentX address\n");
     fprintf(stderr,
             "  -O <OUTOPTS>\t\ttoggle options controlling output display\n");
     snmp_out_toggle_options_usage("\t\t\t", stderr);
@@ -585,7 +586,7 @@ SnmpTrapdMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:L:m:M:no:PqsS:tvx:O:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -856,6 +857,16 @@ main(int argc, char *argv[])
         case 'v':
             version();
             exit(0);
+            break;
+
+        case 'x':
+            if (optarg != NULL) {
+                netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                                      NETSNMP_DS_AGENT_X_SOCKET, optarg);
+            } else {
+                usage();
+                exit(1);
+            }
             break;
 
         default:
