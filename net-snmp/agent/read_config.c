@@ -6,6 +6,7 @@
 #include "common_header.h"
 #include "read_config.h"
 #include "mib_module_includes.h"
+#include "mib_module_config.h"
 #include "../snmp_agent.h"
 #include "../snmpd.h"
 
@@ -230,12 +231,12 @@ void setup_tree __P((void))
   extern struct subtree *subtrees,subtrees_old[];
   struct subtree *sb;
   int old_treesz;
-#if USING_EXTENSIBLE_MIB_MODULE
+#if USING_EXTENSIBLE_MODULE
   int i;
   static struct subtree mysubtree[1];
   struct extensible *exten;
   extern int numrelocs, numpassthrus;
-  extern struct extensible relocs, passthrus;
+  extern struct extensible *relocs, *passthrus;
   extern struct variable2 extensible_relocatable_variables[];
   extern struct variable2 extensible_passthru_variables[];
 #endif
