@@ -14,6 +14,8 @@ typedef struct container_type_s {
    netsnmp_factory            *factory;
 } container_type;
 
+netsnmp_factory *
+netsnmp_container_get_factory(const char *type);
 
 static int
 _ba_release_with_free(netsnmp_container *container);
