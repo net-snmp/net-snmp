@@ -288,6 +288,12 @@
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 #undef HAVE_INET_MIB2_H
 
+/* Define to 1 if the system has the type `int32_t'. */
+#undef HAVE_INT32_T
+
+/* Define to 1 if the system has the type `int64_t'. */
+#undef HAVE_INT64_T
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -845,6 +851,12 @@
 /* Define to 1 if you have the <ufs/ufs/quota.h> header file. */
 #undef HAVE_UFS_UFS_QUOTA_H
 
+/* Define to 1 if the system has the type `uint32_t'. */
+#undef HAVE_UINT32_T
+
+/* Define to 1 if the system has the type `uint64_t'. */
+#undef HAVE_UINT64_T
+
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
 
@@ -865,6 +877,12 @@
 
 /* Define to 1 if you have the <uvm/uvm_param.h> header file. */
 #undef HAVE_UVM_UVM_PARAM_H
+
+/* Define to 1 if the system has the type `u_int32_t'. */
+#undef HAVE_U_INT32_T
+
+/* Define to 1 if the system has the type `u_int64_t'. */
+#undef HAVE_U_INT64_T
 
 /* Define to 1 if you have the <vm/swap_pager.h> header file. */
 #undef HAVE_VM_SWAP_PAGER_H
@@ -905,6 +923,18 @@
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
@@ -944,6 +974,24 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
+
+/* define if you have type int32_t */
+#undef HAVE_INT32_T
+
+/* define if you have type uint32_t */
+#undef HAVE_UINT32_T
+
+/* define if you have type u_int32_t */
+#undef HAVE_U_INT32_T
+
+/* define if you have type int64_t */
+#undef HAVE_INT64_T
+
+/* define if you have type uint64_t */
+#undef HAVE_UINT64_T
+
+/* define if you have type u_int64_t */
+#undef HAVE_U_INT64_T
 
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
