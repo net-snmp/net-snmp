@@ -1180,7 +1180,9 @@ _sess_open(struct snmp_session *in_session)
        created and inserted in the list so that the response can
        handled correctly */
     if (session->version == SNMP_VERSION_3) {
-      if (session->securityEngineIDLen == 0) {
+      if (session->securityEngineIDLen == 0 &&
+          (session->securityEngineIDLen & SNMP_FLAGS_DONT_PROBE) !=
+          SNMP_FLAGS_DONT_PROBE) {
 	snmpv3_build_probe_pdu(&pdu);
 	DEBUGMSGTL(("snmp_api","probing for engineID...\n"));
 	status = snmp_sess_synch_response(slp, pdu, &response);
@@ -4605,4 +4607,56 @@ int  snmp_get_errno   (void)  { return SNMPERR_SUCCESS; }
 /* synch_reset and synch_setup are no longer used. */
 void snmp_synch_reset (struct snmp_session * notused) {}
 void snmp_synch_setup (struct snmp_session * notused) {}
+
+/* provide for backwards compatibility */
+void
+snmp_set_dump_packet(int x) {
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET, x);
+}
+
+int
+snmp_get_dump_packet(void) {
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
+}
+
+void
+snmp_set_quick_print(int x) {
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, x);
+}
+  
+int
+snmp_get_quick_print(void) {
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
+}
+ 
+
+void
+snmp_set_suffix_only(int x) {
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, x);
+}
+  
+int
+snmp_get_suffix_only(void) {
+    return ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
+}
+ 
+void
+snmp_set_full_objid(int x) {
+      ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, x);
+}
+
+int
+snmp_get_full_objid(void) {
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
+}
+ 
+void
+snmp_set_random_access(int x) {
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS, x);
+}
+ 
+int
+snmp_get_random_access(void) {
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS);
+}
 
