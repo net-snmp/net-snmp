@@ -39,7 +39,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
         int             refcnt, flags, rc;
-        u_int32_t       dest, nexthop, mask;
+        uint32_t        dest, nexthop, mask;
         unsigned        use;
 
         entry = netsnmp_access_route_entry_create();

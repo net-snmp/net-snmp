@@ -150,10 +150,10 @@ var_extensible_vmstat(struct variable *vp,
     static time_t   time_diff;
 
 #if defined(KERN_CP_TIME)
-    static u_int64_t cpu_old[CPUSTATES];
-    static u_int64_t cpu_new[CPUSTATES];
-    static u_int64_t cpu_diff[CPUSTATES];
-    static u_int64_t cpu_total;
+    static uint64_t  cpu_old[CPUSTATES];
+    static uint64_t  cpu_new[CPUSTATES];
+    static uint64_t  cpu_diff[CPUSTATES];
+    static uint64_t  cpu_total;
 #elif defined(KERN_CPTIME)
     static long     cpu_old[CPUSTATES];
     static long     cpu_new[CPUSTATES];

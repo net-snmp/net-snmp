@@ -1308,7 +1308,7 @@ var_udp6(register struct variable * vp,
         newname[j++] = ntohs(in6pcb.in6p_lport);
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             newname[j++] =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             newname[j++] = 0;
         /*XXX*/
@@ -1374,7 +1374,7 @@ var_udp6(register struct variable * vp,
     case IPV6UDPIFINDEX:
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             long_return =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             long_return = 0;
         /*XXX*/ return (u_char *) & long_return;
@@ -1508,7 +1508,7 @@ var_tcp6(register struct variable * vp,
         newname[j++] = ntohs(in6pcb.in6p_fport);
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             newname[j++] =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             newname[j++] = 0;
         /*XXX*/ newname[j++] = tcp6statemap[tcp6cb.t_state];
@@ -1586,7 +1586,7 @@ var_tcp6(register struct variable * vp,
     case IPV6TCPIFINDEX:
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             long_return =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             long_return = 0;
         /*XXX*/ return (u_char *) & long_return;
@@ -1732,7 +1732,7 @@ var_tcp6(register struct variable * vp,
         newname[j++] = ntohs(in6pcb.in6p_fport);
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             newname[j++] =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             newname[j++] = 0;
         /*XXX*/ newname[j++] = mapTcpState((int)tcpcb.t_state);
@@ -1809,7 +1809,7 @@ var_tcp6(register struct variable * vp,
     case IPV6TCPIFINDEX:
         if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
             long_return =
-                ntohs(*(u_int16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
+                ntohs(*(uint16_t *) & in6pcb.in6p_laddr.s6_addr[2]);
         else
             long_return = 0;
         /*XXX*/ return (u_char *) & long_return;
