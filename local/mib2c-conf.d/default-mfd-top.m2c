@@ -47,11 +47,32 @@
 @   eval $m2c_const_sfx = ""@        # or ";"
 @end@
 ##
-
-@eval $mfd_default_include_examples = 1@
+## set defaults for mfd
+##
+@if "x$mfd_default_table_access" eq "x" @
 @eval $mfd_default_table_access = "unsorted-external"@
+@end@
+##
+@if "x$mfd_default_data_context" eq "x" @
 @eval $mfd_default_data_context = "generated"@
+@end@
+##
+@if "x$mfd_default_context_reg" eq "x" @
 @eval $mfd_default_context_reg = "netsnmp_data_list *"@
+@end@
+##
+@if "x$mfd_default_data_allocate" eq "x" @
 @eval $mfd_default_data_allocate = 0@
+@end@
+##
+@if "x$mfd_default_data_init" eq "x" @
 @eval $mfd_default_data_init = 0@
+@end@
+##
+@if "x$mfd_default_data_transient" eq "x" @
 @eval $mfd_default_data_transient = 2@ # TRANSIENT
+@end@
+##
+@if "x$mfd_default_include_examples" eq "x" @
+@eval $mfd_default_include_examples = 1@
+@end@
