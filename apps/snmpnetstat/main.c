@@ -102,6 +102,7 @@ char copyright[] =
 #include "version.h"
 #include "snmp_debug.h"
 #include "system.h"
+#include "default_store.h"
 
 #include "netstat.h"
 

@@ -108,6 +108,7 @@ SOFTWARE.
 #include "snmpv3.h"
 #include "callback.h"
 #include "snmp_alarm.h"
+#include "default_store.h"
 
 #ifndef BSD4_3
 #define BSD4_2
