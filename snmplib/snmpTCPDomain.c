@@ -36,7 +36,7 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 
 
-oid             netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
+oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
 static netsnmp_tdomain tcpDomain;
 
 
@@ -45,8 +45,8 @@ static netsnmp_tdomain tcpDomain;
  * address if data is NULL.  
  */
 
-char           *
-snmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
+static char *
+netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     struct sockaddr_in *to = NULL;
 
@@ -59,7 +59,7 @@ snmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
     if (to == NULL) {
         return strdup("TCP: unknown");
     } else {
-        char            tmp[64];
+        char tmp[64];
 
         /*
          * Here we just print the IP address of the peer for compatibility
@@ -80,16 +80,23 @@ snmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
  * remember where a PDU came from, so that you can send a reply there...  
  */
 
-int
-snmp_tcp_recv(netsnmp_transport *t, void *buf, int size,
-              void **opaque, int *olength)
+static int
+netsnmp_tcp_recv(netsnmp_transport *t, void *buf, int size,
+		 void **opaque, int *olength)
 {
-    int             rc = 0;
+    int rc = -1;
 
     if (t != NULL && t->sock >= 0) {
-        rc = recv(t->sock, buf, size, 0);
-        DEBUGMSGTL(("snmp_tcp_recv", "recv fd %d got %d bytes\n", t->sock,
-                    rc));
+	while (rc < 0) {
+	    rc = recv(t->sock, buf, size, 0);
+	    if (rc < 0 && errno != EINTR) {
+		DEBUGMSGTL(("netsnmp_tcp", "recv fd %d err %d (\"%s\")\n",
+			    t->sock, errno, strerror(errno)));
+		break;
+	    }
+	    DEBUGMSGTL(("netsnmp_tcp", "recv fd %d got %d bytes\n",
+			t->sock, rc));
+	}
     } else {
         return -1;
     }
@@ -113,44 +120,45 @@ snmp_tcp_recv(netsnmp_transport *t, void *buf, int size,
 
 
 
-int
-snmp_tcp_send(netsnmp_transport *t, void *buf, int size,
-              void **opaque, int *olength)
+static int
+netsnmp_tcp_send(netsnmp_transport *t, void *buf, int size,
+		 void **opaque, int *olength)
 {
-    int             rc = 0;
+    int rc = -1;
 
     if (t != NULL && t->sock >= 0) {
-        rc = send(t->sock, buf, size, 0);
-    } else {
-        return -1;
+	while (rc < 0) {
+	    rc = send(t->sock, buf, size, 0);
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
     }
     return rc;
 }
 
 
 
-int
-snmp_tcp_close(netsnmp_transport *t)
+static int
+netsnmp_tcp_close(netsnmp_transport *t)
 {
-    int             rc = 0;
+    int rc = -1;
     if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("snmp_tcp_close", "fd %d\n", t->sock));
+        DEBUGMSGTL(("netsnmp_tcp", "close fd %d\n", t->sock));
 #ifndef HAVE_CLOSESOCKET
         rc = close(t->sock);
 #else
         rc = closesocket(t->sock);
 #endif
         t->sock = -1;
-        return rc;
-    } else {
-        return -1;
     }
+    return rc;
 }
 
 
 
-int
-snmp_tcp_accept(netsnmp_transport *t)
+static int
+netsnmp_tcp_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
     int             newsock = -1, sockflags = 0;
@@ -163,7 +171,7 @@ snmp_tcp_accept(netsnmp_transport *t)
         /*
          * Indicate that the acceptance of this socket failed.  
          */
-        DEBUGMSGTL(("snmp_tcp_accept", "malloc failed\n"));
+        DEBUGMSGTL(("netsnmp_tcp", "accept: malloc failed\n"));
         return -1;
     }
 
@@ -171,7 +179,8 @@ snmp_tcp_accept(netsnmp_transport *t)
         newsock = accept(t->sock, farend, &farendlen);
 
         if (newsock < 0) {
-            DEBUGMSGTL(("snmp_tcp_accept", "accept failed\n"));
+            DEBUGMSGTL(("netsnmp_tcp", "accept failed rc %d errno %d \"%s\"\n",
+			newsock, errno, strerror(errno)));
             free(farend);
             return newsock;
         }
@@ -182,9 +191,8 @@ snmp_tcp_accept(netsnmp_transport *t)
 
         t->data = farend;
         t->data_length = farendlen;
-        string = snmp_tcp_fmtaddr(NULL, farend, farendlen);
-        DEBUGMSGTL(("snmp_tcp_accept", "accept succeeded (from %s)\n",
-                    string));
+        string = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
+        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", string));
         free(string);
 
         /*
@@ -197,11 +205,9 @@ snmp_tcp_accept(netsnmp_transport *t)
         if ((sockflags = fcntl(newsock, F_GETFL, 0)) >= 0) {
             fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
         } else {
-            DEBUGMSGTL(("snmp_tcp_accept", "couldn't f_getfl of fd %d\n",
-                        newsock));
+            DEBUGMSGTL(("netsnmp_tcp", "couldn't f_getfl of fd %d\n",newsock));
         }
 #endif
-
         return newsock;
     } else {
         free(farend);
@@ -221,7 +227,7 @@ netsnmp_transport *
 netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0;
+    int rc = 0;
 
 
     if (addr == NULL || addr->sin_family != AF_INET) {
@@ -255,7 +261,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-        int             sockflags = 0, opt = 1;
+        int sockflags = 0, opt = 1;
 
         /*
          * This session is inteneded as a server, so we must bind to the given 
@@ -266,7 +272,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = malloc(6);
         if (t->local == NULL) {
-            snmp_tcp_close(t);
+            netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -279,23 +285,22 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
          * We should set SO_REUSEADDR too.  
          */
 
-        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *) &opt,
-                   sizeof(opt));
+        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt,
+		   sizeof(opt));
 
-        rc = bind(t->sock, (struct sockaddr *) addr,
-                  sizeof(struct sockaddr));
+        rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
         if (rc != 0) {
-            snmp_tcp_close(t);
+            netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
 
         /*
-         * Since we are going to be letting select() tell us when connections are 
-         * ready to be accept()ed, we need to make the socket n0n-blocking to
-         * avoid the race condition described in W. R. Stevens, ``Unix Network
-         * Programming Volume I Second Edition'', pp. 422--4, which could
-         * otherwise wedge the agent.  
+         * Since we are going to be letting select() tell us when connections
+         * are ready to be accept()ed, we need to make the socket n0n-blocking
+         * to avoid the race condition described in W. R. Stevens, ``Unix
+         * Network Programming Volume I Second Edition'', pp. 422--4, which
+         * could otherwise wedge the agent.
          */
 
 #ifdef WIN32
@@ -312,14 +317,14 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
         rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
         if (rc != 0) {
-            snmp_tcp_close(t);
+            netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
     } else {
         t->remote = malloc(6);
         if (t->remote == NULL) {
-            snmp_tcp_close(t);
+            netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -329,17 +334,17 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         t->remote_length = 6;
 
         /*
-         * This is a client-type session, so attempt to connect to the far end.
-         * We don't go non-blocking here because it's not obvious what you'd then
-         * do if you tried to do snmp_sends before the connection had completed.
-         * So this can block.  
+         * This is a client-type session, so attempt to connect to the far
+         * end.  We don't go non-blocking here because it's not obvious what
+         * you'd then do if you tried to do snmp_sends before the connection
+         * had completed.  So this can block.
          */
 
-        rc = connect(t->sock, (struct sockaddr *) addr,
-                     sizeof(struct sockaddr));
+        rc = connect(t->sock, (struct sockaddr *)addr,
+		     sizeof(struct sockaddr));
 
         if (rc < 0) {
-            snmp_tcp_close(t);
+            netsnmp_tcp_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -351,11 +356,11 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
      */
 
     t->msgMaxSize = 0x7fffffff;
-    t->f_recv = snmp_tcp_recv;
-    t->f_send = snmp_tcp_send;
-    t->f_close = snmp_tcp_close;
-    t->f_accept = snmp_tcp_accept;
-    t->f_fmtaddr = snmp_tcp_fmtaddr;
+    t->f_recv     = netsnmp_tcp_recv;
+    t->f_send     = netsnmp_tcp_send;
+    t->f_close    = netsnmp_tcp_close;
+    t->f_accept   = netsnmp_tcp_accept;
+    t->f_fmtaddr  = netsnmp_tcp_fmtaddr;
 
     return t;
 }
@@ -363,7 +368,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
 
 netsnmp_transport *
-snmp_tcp_create_tstring(const char *string, int local)
+netsnmp_tcp_create_tstring(const char *string, int local)
 {
     struct sockaddr_in addr;
 
@@ -377,7 +382,7 @@ snmp_tcp_create_tstring(const char *string, int local)
 
 
 netsnmp_transport *
-snmp_tcp_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_tcp_create_ostring(const u_char * o, size_t o_len, int local)
 {
     struct sockaddr_in addr;
 
@@ -400,8 +405,8 @@ netsnmp_tcp_ctor(void)
     tcpDomain.prefix = calloc(2, sizeof(char *));
     tcpDomain.prefix[0] = "tcp";
 
-    tcpDomain.f_create_from_tstring = snmp_tcp_create_tstring;
-    tcpDomain.f_create_from_ostring = snmp_tcp_create_ostring;
+    tcpDomain.f_create_from_tstring = netsnmp_tcp_create_tstring;
+    tcpDomain.f_create_from_ostring = netsnmp_tcp_create_ostring;
 
     netsnmp_tdomain_register(&tcpDomain);
 }

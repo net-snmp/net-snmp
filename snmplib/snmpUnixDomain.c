@@ -43,7 +43,7 @@
                       + strlen ((ptr)->sun_path))
 #endif
 
-oid             netsnmp_UnixDomain[10] = { ENTERPRISE_MIB, 3, 3, 2 };
+oid netsnmp_UnixDomain[10] = { ENTERPRISE_MIB, 3, 3, 2 };
 static netsnmp_tdomain unixDomain;
 
 
@@ -63,8 +63,8 @@ typedef struct _sockaddr_un_pair {
  * address if data is NULL.  
  */
 
-char           *
-snmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
+static char *
+netsnmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     struct sockaddr_un *to = NULL;
 
@@ -76,15 +76,15 @@ snmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
     }
     if (to == NULL) {
         /*
-         * "Local IPC" is the Posix.1g term for Unix domain protocols, according
-         * to W. R. Stevens, ``Unix Network Programming Volume I Second
-         * Edition'', p. 374.  
+         * "Local IPC" is the Posix.1g term for Unix domain protocols,
+         * according to W. R. Stevens, ``Unix Network Programming Volume I
+         * Second Edition'', p. 374.
          */
         return strdup("Local IPC: unknown");
     } else if (to->sun_path[0] == 0) {
         /*
-         * This is an abstract name.  We could render it as hex or something but
-         * let's not worry about that for now.  
+         * This is an abstract name.  We could render it as hex or something
+         * but let's not worry about that for now.
          */
         return strdup("Local IPC: abstract");
     } else {
@@ -104,48 +104,55 @@ snmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
  * remember where a PDU came from, so that you can send a reply there...  
  */
 
-int
+static int
 netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
                   void **opaque, int *olength)
 {
-    int             rc = -1;
+    int rc = -1;
 
     *opaque = NULL;
     *olength = 0;
     if (t != NULL && t->sock >= 0) {
-        rc = recv(t->sock, buf, size, 0);
-        DEBUGMSGTL(("netsnmp_unix_recv", "recv fd %d got %d bytes\n",
-                    t->sock, rc));
-        return rc;
-    } else {
-        return -1;
+	while (rc < 0) {
+	    rc = recv(t->sock, buf, size, 0);
+	    if (rc < 0 && errno != EINTR) {
+		DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
+			    t->sock, errno, strerror(errno)));
+		return rc;
+	    }
+	}
+	DEBUGMSGTL(("netsnmp_unix", "recv fd %d got %d bytes\n", t->sock, rc));
     }
+    return rc;
 }
 
 
 
-int
+static int
 netsnmp_unix_send(netsnmp_transport *t, void *buf, int size,
                   void **opaque, int *olength)
 {
-    int             rc = 0;
+    int rc = -1;
 
     if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_unix_send", "%d bytes from %p on fd %d\n",
+        DEBUGMSGTL(("netsnmp_unix", "send %d bytes from %p on fd %d\n",
                     size, buf, t->sock));
-        rc = send(t->sock, buf, size, 0);
-        return rc;
-    } else {
-        return -1;
+	while (rc < 0) {
+	    rc = send(t->sock, buf, size, 0);
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
     }
+    return rc;
 }
 
 
 
-int
+static int
 netsnmp_unix_close(netsnmp_transport *t)
 {
-    int             rc = 0;
+    int rc = 0;
     sockaddr_un_pair *sup = (sockaddr_un_pair *) t->data;
 
     if (t->sock >= 0) {
@@ -157,13 +164,11 @@ netsnmp_unix_close(netsnmp_transport *t)
         t->sock = -1;
         if (sup != NULL) {
             if (sup->local) {
-                DEBUGMSGTL(("netsnmp_unix_close",
-                            "server unlink(\"%s\")\n",
+                DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
                             sup->server.sun_path));
                 unlink(sup->server.sun_path);
             } else {
-                DEBUGMSGTL(("netsnmp_unix_close",
-                            "client unlink(\"%s\")\n",
+                DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
                             sup->client.sun_path));
                 unlink(sup->client.sun_path);
             }
@@ -176,7 +181,7 @@ netsnmp_unix_close(netsnmp_transport *t)
 
 
 
-int
+static int
 netsnmp_unix_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
@@ -189,7 +194,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
         /*
          * Indicate that the acceptance of this socket failed.  
          */
-        DEBUGMSGTL(("netsnmp_unix_accept", "malloc failed\n"));
+        DEBUGMSGTL(("netsnmp_unix", "accept: malloc failed\n"));
         return -1;
     }
     memset(farend, 0, farendlen);
@@ -198,9 +203,8 @@ netsnmp_unix_accept(netsnmp_transport *t)
         newsock = accept(t->sock, farend, &farendlen);
 
         if (newsock < 0) {
-            DEBUGMSGTL(("netsnmp_unix_accept",
-                        "accept failed rc %d errno %d \"%s\"\n", newsock,
-                        errno, strerror(errno)));
+            DEBUGMSGTL(("netsnmp_unix","accept failed rc %d errno %d \"%s\"\n",
+			newsock, errno, strerror(errno)));
             free(farend);
             return newsock;
         }
@@ -209,9 +213,8 @@ netsnmp_unix_accept(netsnmp_transport *t)
             free(t->data);
         }
 
-        DEBUGMSGTL(("netsnmp_unix_accept",
-                    "accept succeeded (farend %p len %d)\n", farend,
-                    farendlen));
+        DEBUGMSGTL(("netsnmp_unix", "accept succeeded (farend %p len %d)\n",
+		    farend, farendlen));
         t->data = farend;
         t->data_length = sizeof(struct sockaddr_un);
         return newsock;
@@ -247,9 +250,9 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    string =
-        snmp_unix_fmtaddr(NULL, (void *) addr, sizeof(struct sockaddr_un));
-    DEBUGMSGTL(("snmp_unix", "open %s %s\n", local ? "local" : "remote",
+    string = netsnmp_unix_fmtaddr(NULL, (void *)addr, 
+				  sizeof(struct sockaddr_un));
+    DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
                 string));
     free(string);
 
@@ -304,8 +307,8 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         }
 
         /*
-         * Save the address in the transport-specific data pointer for later use
-         * by netsnmp_unix_close.  
+         * Save the address in the transport-specific data pointer for later
+         * use by netsnmp_unix_close.
          */
 
         sup->server.sun_family = AF_UNIX;
@@ -361,17 +364,17 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
      */
 
     t->msgMaxSize = 0x7fffffff;
-    t->f_recv = netsnmp_unix_recv;
-    t->f_send = netsnmp_unix_send;
-    t->f_close = netsnmp_unix_close;
-    t->f_accept = netsnmp_unix_accept;
-    t->f_fmtaddr = snmp_unix_fmtaddr;
+    t->f_recv     = netsnmp_unix_recv;
+    t->f_send     = netsnmp_unix_send;
+    t->f_close    = netsnmp_unix_close;
+    t->f_accept   = netsnmp_unix_accept;
+    t->f_fmtaddr  = netsnmp_unix_fmtaddr;
 
     return t;
 }
 
 netsnmp_transport *
-snmp_unix_create_tstring(const char *string, int local)
+netsnmp_unix_create_tstring(const char *string, int local)
 {
     struct sockaddr_un addr;
 
@@ -391,7 +394,7 @@ snmp_unix_create_tstring(const char *string, int local)
 
 
 netsnmp_transport *
-snmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
+netsnmp_unix_create_ostring(const u_char * o, size_t o_len, int local)
 {
     struct sockaddr_un addr;
 
@@ -418,8 +421,8 @@ netsnmp_unix_ctor(void)
     unixDomain.prefix = calloc(2, sizeof(char *));
     unixDomain.prefix[0] = "unix";
 
-    unixDomain.f_create_from_tstring = snmp_unix_create_tstring;
-    unixDomain.f_create_from_ostring = snmp_unix_create_ostring;
+    unixDomain.f_create_from_tstring = netsnmp_unix_create_tstring;
+    unixDomain.f_create_from_ostring = netsnmp_unix_create_ostring;
 
     netsnmp_tdomain_register(&unixDomain);
 }
