@@ -819,14 +819,14 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
     passwd[string_len] = '\0';
     if (!smux_auth_peer(oid_name, oid_name_len, passwd, fd)) {
         snmp_log(LOG_WARNING,
-                 "refused smux peer: oid %s, password %s, descr %s\n",
-                 oid_print, passwd, descr);
+                 "refused smux peer: oid %s, descr %s\n",
+                 oid_print, descr);
         *fail = TRUE;
         return ptr;
     }
     snmp_log(LOG_INFO,
-             "accepted smux peer: oid %s, password %s, descr %s\n",
-             oid_print, passwd, descr);
+             "accepted smux peer: oid %s, descr %s\n",
+             oid_print, descr);
     *fail = FALSE;
     return ptr;
 }
