@@ -102,9 +102,15 @@ extern void init_routes __P((void));
 void init_ip()
 {
   /* for speed optimization, we call this now to do the lookup */
-  auto_nlist("ipstat",0,0);
+#ifdef IPSTAT_SYMBOL
+  auto_nlist(IPSTAT_SYMBOL,0,0);
+#endif
+#ifdef IP_FORWARDING_SYMBOL
   auto_nlist(IP_FORWARDING_SYMBOL,0,0);
+#endif
+#ifdef TCP_TTL_SYMBOL
   auto_nlist(TCP_TTL_SYMBOL,0,0);
+#endif
 #ifdef MIB_IPCOUNTER_SYMBOL
   auto_nlist(MIB_IPCOUNTER_SYMBOL,0,0);
 #endif
@@ -514,8 +520,10 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     static struct in_ifaddr in_ifaddr;
 #if !defined(linux) && !defined(sunV3)
     static struct in_ifaddr lowin_ifaddr;
+#else
+    static struct ifnet lowin_ifnet;
 #endif
-    static struct ifnet ifnet, lowin_ifnet;
+    static struct ifnet ifnet;
 
     /* fill in object part of name for current (less sizeof instance part) */
 
