@@ -361,7 +361,7 @@
    Don't define CASHETIME to disable cashing completely */
 
 #define EXCACHETIME 30
-#define CACHEFILE PERSISTENT_DIRECTORY ## "/.snmp-exec-cache"
+#define CACHEFILE ".snmp-exec-cache"
 #define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
 
 #define MAXDISKS 50                      /* can't scan more than this number */
