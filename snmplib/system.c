@@ -108,6 +108,9 @@ SOFTWARE.
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>
