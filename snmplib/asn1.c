@@ -1282,7 +1282,9 @@ asn_build_bitstring(u_char *data,
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
     static const char *errpre = "build bitstring";
-    if (_asn_bitstring_check(errpre, strlength, ((string) ? *string : 0)))
+	u_char ufc = (u_char)0;
+	if (string) ufc = *string;
+    if (_asn_bitstring_check(errpre, strlength, ufc))
 	return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
