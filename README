@@ -60,7 +60,8 @@ INTRODUCTION
   This package was originally based on the CMU 2.1.2.1 snmp code.  It
   has been greatly modified, restructured, enhanced and fixed.  It
   hardly looks the same as anything that CMU has ever released.  It
-  was renamed from ucd-snmp to net-snmp in November 2000.
+  was renamed from cmu-snmp to ucd-snmp in 1995 and later renamed from
+  ucd-snmp to net-snmp in November 2000.
 
 SUPPORTED ARCHITECTURES
 
@@ -82,7 +83,7 @@ AVAILABILITY
       - http://www.net-snmp.org/project/
 
   FTP:
-    - ftp://download.sourceforge.net/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
+    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
     - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
     - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
     - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
@@ -119,7 +120,7 @@ HELPING OUT
   going to work on to make sure no one else is already doing so!
   You'll also need to keep up to date with the latest code snap shot,
   which can be obtained from CVS using the information found at
-  http://net-snmp.ucdavis.edu/cvs/?group_id=12694
+  http://www.net-snmp.org/cvs/.
 
 CODE UPDATE ANNOUNCEMENTS
 
