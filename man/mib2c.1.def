@@ -1,0 +1,44 @@
+.TH MIB2C 1 "04 April 2002" VVERSIONINFO "Net-SNMP"
+.UC 4
+.SH NAME
+mib2c -- produces template code from mib definitions
+.SH SYNOPSIS
+.B mib2c
+[-h] -c CONFIGFILE [-f OUTNAME] MIBNODE
+.SH DESCRIPTION
+.B mib2c
+merely takes a given OID and converts the MIB structures within it
+into template C code which can then be compiled into the agent.  It is
+.B not
+necessarily expected that the code can be used without a real human
+editing the code.  It is only a template.  (Now, having said that the
+mib2c.create-dataset.conf file actually produces code which doesn't
+necessarily need to be edited further, though it's likely you'll want
+to anyway).
+.PP
+You
+.B must
+give mib2c a mib node (e.g., ifTable) not a mib file on the
+command line.  (this is the most common mistake).
+.PP
+The default mib2c.conf file really does nothing but explain to the
+caller that other mib2c.conf files should actually be used.   We can't
+predict what type of tables you want to generate code for, so you must
+select an appropriate mib2c.conf file to use.  Run "
+.I "mib2c ifTable"
+" for help, as it'll display and explain the currently available
+mib2c.conf files you can use.
+.SH "OPTIONS"
+.TP
+.BI -h
+Display a help message.
+.TP
+.BI -c " CONFIGFILE"
+Use CONFIGFILE when generating code.  These files will be search for
+first in the current directory and then in the DATADIR directory
+(which is where the default mib2c configuration files can be found).
+.TP
+.BI -f " OUTNAME"
+Places the output code into OUTNAME.c and OUTNAME.h. Normally, mib2c
+will place the output code into files which correspond to the table
+names it is generating code for, which is probably what you want anyway.
