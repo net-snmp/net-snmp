@@ -854,13 +854,13 @@ const char *error_string[19] = {
     "wrongLength",
     "wrongEncoding",
     "wrongValue",
-    "noCreation",
+    "noCreation (that table does not support row creation)",
     "inconsistentValue",
     "resourceUnavailable",
     "commitFailed",
     "undoFailed",
-    "authorizationError",
-    "notWritable",
+    "authorizationError (access denied to that object)",
+    "notWritable (that object does not support modification)",
     "inconsistentName"
 };
 

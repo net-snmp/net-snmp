@@ -2080,13 +2080,13 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 
     if (variable->type == SNMP_NOSUCHOBJECT) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (const u_char*)"No Such Object available on this agent");
+			   (const u_char*)"No Such Object available on this agent at this OID");
     } else if (variable->type == SNMP_NOSUCHINSTANCE) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (const u_char*)"No Such Instance currently exists");
+			   (const u_char*)"No Such Instance currently exists at this OID");
     } else if (variable->type == SNMP_ENDOFMIBVIEW) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-			   (const u_char*)"No more variables left in this MIB View");
+			   (const u_char*)"No more variables left in this MIB View (It is past the end of the MIB tree)");
     } else if (subtree) {
 	if (subtree->printomat) {
 	    return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
@@ -2162,13 +2162,13 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 
   if (variable->type == SNMP_NOSUCHOBJECT) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		      (const u_char*)"No Such Object available on this agent");
+		      (const u_char*)"No Such Object available on this agent at this OID");
   } else if (variable->type == SNMP_NOSUCHINSTANCE) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		       (const u_char*)"No Such Instance currently exists");
+		       (const u_char*)"No Such Instance currently exists at this OID");
   } else if (variable->type == SNMP_ENDOFMIBVIEW) {
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-		     (const u_char*)"No more variables left in this MIB View");
+		     (const u_char*)"No more variables left in this MIB View (It is past the end of the MIB tree)");
   } else {
     u_char *tbuf = NULL;
     size_t tbuf_len = 0, tout_len = 0;
