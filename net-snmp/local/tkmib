@@ -8,17 +8,30 @@ require Tk::FileSelect;
 require Tk::Dialog;
 
 $host = 'localhost';
-$community = 'public';
-$port = '161';
 $OID = '.1.3.6.1';
+
+# default session options
+%session_opts = (Community    => "public",
+		 RemotePort   => 161,
+		 Timeout      => 5000000,
+		 Retries      => 5,
+		 Version      => 1,
+		 AuthProto    => 'MD5',
+		 PrivProto    => 'DES',
+		 AuthPass     => '',
+		 PrivPass     => '',
+		 Context      => 'default',
+		 SecName      => 'initial',
+		 SecLevel     => 'authNoPriv',
+		 UseLongNames => 1);
 
 while($#ARGV > -1 && $ARGV[0] =~ /^-/) {
     $_ = shift;
-    $port = shift if (/-p/);
+    $session_opts{'RemotePort'} = shift if (/-p/);
     $findoid = shift if (/-o/);
 }
 $host = shift if ($#ARGV > -1);
-$community = shift if ($#ARGV > -1);
+$session_opts{'Community'} = shift if ($#ARGV > -1);
 
 $graphtime=5;
 $graphdelta=1;
@@ -33,6 +46,7 @@ $SNMP::save_descriptions=1;
 $SNMP::use_long_names=1;
 $SNMP::use_enums=1;
 SNMP::initMib();
+$SNMP::verbose = 1;
 
 my $tmpbd = 3;
 
@@ -69,15 +83,72 @@ $MibMenuBut->pack(-side => 'left');
 $OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
 				     -menuitems =>
       [[Cascade => "~Display"],
+       [Cascade => "Use SNMP Version", -menuitems =>
+	[
+	 [Radiobutton => '1', -variable => \$session_opts{'Version'}],
+	 [Radiobutton => '2c', -variable => \$session_opts{'Version'}],
+	 [Radiobutton => '3', -variable => \$session_opts{'Version'}]
+	]
+       ], # ends version number specification
+       [Cascade => "SNMPv1/2c options", -menuitems =>
+	[
+	 [Button => "Community Name", 
+	  -command => [\&entryBox,"Community Name", "Community name to use:", 
+		       \$session_opts{'Community'}]]
+	]
+       ],
+       [Cascade => "SNMP3 options", -menuitems =>
+	[
+	 [Button => "Security Name", 
+	  -command => [\&entryBox,"Security Name", "Security Name to use:", 
+		       \$session_opts{'SecName'}]],
+         [Cascade => "Security Level", -menuitems =>
+          [
+	   [Radiobutton => 'noAuthNoPriv',
+	    -variable => \$session_opts{'SecLevel'}],
+           [Radiobutton => 'authNoPriv', 
+	    -variable => \$session_opts{'SecLevel'}],
+	   [Radiobutton => 'authPriv', 
+            -variable => \$session_opts{'SecLevel'}]
+          ]
+         ],
+	 [Button => "Authentication Passphrase", 
+	  -command => [\&entryBox,"Authentication Passphrase", 
+		       "Authentication Passphrase to use:", 
+		       \$session_opts{'AuthPass'}]],
+         [Cascade => "Authentication Type", -menuitems =>
+          [
+	   [Radiobutton => 'MD5',
+	    -variable => \$session_opts{'AuthProto'}],
+	   [Radiobutton => 'SHA',
+	    -variable => \$session_opts{'AuthProto'}],
+          ]
+         ],
+	 [Button => "Privacy Passphrase", 
+	  -command => [\&entryBox,"Privacy Passphrase", 
+		       "Privacy Passphrase to use:", 
+		       \$session_opts{'PrivPass'}]],
+         [Cascade => "Privacy Type", -menuitems =>
+          [
+	   [Radiobutton => 'DES',
+	    -variable => \$session_opts{'PrivProto'}],
+          ]
+         ],
+	]
+       ],
        [Button => "Time between graph polls", 
 	-command => sub { entryBox("graph polls", "Time between graph polls:", 
 				    \$graphtime);}],
        [Button => "Port number", 
 	-command => sub { entryBox("Port Number", "SNMP Port number to use:", 
-				    \$port);}],
-       [Button => "Community Name", 
-	-command => sub { entryBox("Community Name", "Community name to use:", 
-				    \$community);}]
+				    \$session_opts{'RemotePort'});}],
+       [Button => "TimeOut", 
+	-command => sub { entryBox("Time Out", "Timeout for SNMP requests:", 
+				    \$session_opts{'Timeout'});}],
+       [Button => "Retries", 
+	-command => sub { entryBox("Retries", 
+				   "Number of Times to Retransmit Requests:", 
+				    \$session_opts{'Retries'});}],
        ])->pack(-side => 'left');
         
 $tmp = $OptMenuBut->cget(-menu);
@@ -185,10 +256,16 @@ sub insertvar {
 sub snmpsetup {
     my $oid = $OID;
     my $tag = SNMP::translateObj($oid);
-    my $sess = new SNMP::Session(DestHost => $host, Community => $community,
-				 RemotePort => $port,
-				 UseLongNames => 1, Timeout => 5000000);
+    my $sess = new SNMP::Session(DestHost => $host, %session_opts);
+    print "session_opts:\n";
+    foreach $i (keys(%session_opts)) {
+	print "  $i => $session_opts{$i}\n";
+    }
+    print "\n";
     my $var = new SNMP::Varbind([$oid]);
+    if (!defined($var)) {
+	print "ack:  $@ $SNMP::ErrorStr $!\n";
+    }
     stop(0);
     initText();
     print "oid: $oid\n";
