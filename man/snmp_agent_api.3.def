@@ -8,42 +8,45 @@ snmp_agent_api \- embedding an agent into a external application
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-main () {
-  int agentx_subagent=1; /* change this if you're a master agent */
+int
+main (int argc, char *argv[])
+{
+  int agentx_subagent = 1;  /* Change this if you're a master agent.  */
 
   snmp_enable_stderrlog();
 
-  /* if we're an agentx subagent */
+  /*  If we're an AgentX subagent...  */
   if (agentx_subagent) {
-      /* make us a agentx client. */
-      ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
+      /* ...make us an AgentX client.  */
+      netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                             NETSNMP_DS_AGENT_ROLE, 1);
   }
 
   init_agent("yourappname");
 
-  /* initialize your MIB code here */
+  /*  Initialize your MIB code here.  */
   init_my_mib_code();
 
-  /* yourappname will be used to read yourappname.conf files. */
+  /*  `yourappname' will be used to read yourappname.conf files.  */
   init_snmp("yourappname");
 
-  /* If we're going to be a SNMP master agent */
+  /*  If we're going to be a SNMP master agent...  */
   if (!agentx_subagent)
       init_master_agent();  /*  Listen on default port (161).  */
 
-  /* you're main loop here... */
-  while(whatever) {
+  /*  Your main loop here...  */
+  while (whatever) {
       /* if you use select(), see snmp_api(3) */
       /*     --- OR ---  */
       agent_check_and_process(0); /* 0 == don't block */
   }
 
-  /* at shutdown time */
+  /*  At shutdown time:  */
   snmp_shutdown("yourappname");
 }
 
 Then:
-cc ... -lucdagent -lucdmibs -lsnmp # other libraries may be needed here
+$(CC) ... -lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp # other libraries may be needed here
 
 .fi
 .SH DESCRIPTION
@@ -75,19 +78,16 @@ configured the Net-SNMP package as follows:
 .RS
   ./configure --with-mib-modules="agentx/subagent"
 .RE
-Additionally, you will need to link against the libucdmibs library and 
+Additionally, you will need to link against the libraries and 
 call subagent_pre_init() as indicated above.
 .SH COMPILING
 .PP
-In order to make use of any of the above API, you will need to clinch
-against at least two libraries: the libucdagent library and the
-libsnmp library. Additionally, if you plan to make use of any of the
-code in the agent's MIB modules (like the AgentX subagent support),
-you will need to link against the libucdmibs library as well.
+In order to make use of any of the above API, you will need to link
+against at least the four libraries listed above.
 .SH FUNCTIONS
 .IP "snmp_enable_stderrlog()"
 Logs error output from the SNMP agent to the standard error stream.
-.IP "ds_set_boolean()"
+.IP "netsnmp_ds_set_boolean()"
 Please see the
 .IR default_store(3)
 manual page for more information
