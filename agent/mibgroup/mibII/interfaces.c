@@ -1289,6 +1289,7 @@ Interface_Scan_Init (void)
 	struct ifnet *old = ifnetaddr_list;
 	ifnetaddr_list = ifnetaddr_list->if_next;
 	free (old->if_name);
+	free (old->if_unit);
 	free (old);
       }
 
