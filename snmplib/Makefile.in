@@ -63,7 +63,7 @@ install:	$(TARG) installdirs
 
 ../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION):	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 	cp libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ../lib
-	@RANLIB@ ../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+	@RANLIB@ ../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) $(SHLIB_LD_LIBS)
 
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse

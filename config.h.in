@@ -71,7 +71,7 @@
 /* AGENT_DIRECTORY_MODE: the mode the agents should use to create
    directories with. Since the data stored here is probably sensitive, it
    probably should be read-only by root/administrator. */
-#define AGENT_DIRECTORY_MODE 700
+#define AGENT_DIRECTORY_MODE 0700
 
 /* MAX_PERSISTENT_BACKUPS:
  *   The maximum number of persistent backups the library will try to
