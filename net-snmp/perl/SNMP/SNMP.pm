@@ -173,9 +173,9 @@ sub translateObj {
    my $res;
    if ($obj =~ /^\.?(\d+\.)*\d+$/) {
       $res = SNMP::_translate_obj($obj,1,$long_names,$SNMP::auto_init_mib);
-   } elsif ($obj =~ /(\w+)(\.\d+)*$/) {
-      $res = SNMP::_translate_obj($1,0,$long_names,$SNMP::auto_init_mib);
-      $res .= $2 if defined $res and defined $2;
+   } elsif ($obj =~ /(\.\d+)*$/) {
+      $res = SNMP::_translate_obj($`,0,$long_names,$SNMP::auto_init_mib);
+      $res .= $& if defined $res and defined $&;
    }
 
    return($res);
