@@ -10,32 +10,32 @@ config_arch_require(solaris2, kernel_sunos5)
 #ifdef linux
 struct icmp_mib
 {
- 	unsigned long	IcmpInMsgs;
- 	unsigned long	IcmpInErrors;
-  	unsigned long	IcmpInDestUnreachs;
- 	unsigned long	IcmpInTimeExcds;
- 	unsigned long	IcmpInParmProbs;
- 	unsigned long	IcmpInSrcQuenchs;
- 	unsigned long	IcmpInRedirects;
- 	unsigned long	IcmpInEchos;
- 	unsigned long	IcmpInEchoReps;
- 	unsigned long	IcmpInTimestamps;
- 	unsigned long	IcmpInTimestampReps;
- 	unsigned long	IcmpInAddrMasks;
- 	unsigned long	IcmpInAddrMaskReps;
- 	unsigned long	IcmpOutMsgs;
- 	unsigned long	IcmpOutErrors;
- 	unsigned long	IcmpOutDestUnreachs;
- 	unsigned long	IcmpOutTimeExcds;
- 	unsigned long	IcmpOutParmProbs;
- 	unsigned long	IcmpOutSrcQuenchs;
- 	unsigned long	IcmpOutRedirects;
- 	unsigned long	IcmpOutEchos;
- 	unsigned long	IcmpOutEchoReps;
- 	unsigned long	IcmpOutTimestamps;
- 	unsigned long	IcmpOutTimestampReps;
- 	unsigned long	IcmpOutAddrMasks;
- 	unsigned long	IcmpOutAddrMaskReps;
+ 	unsigned long	icmpInMsgs;
+ 	unsigned long	icmpInErrors;
+  	unsigned long	icmpInDestUnreachs;
+ 	unsigned long	icmpInTimeExcds;
+ 	unsigned long	icmpInParmProbs;
+ 	unsigned long	icmpInSrcQuenchs;
+ 	unsigned long	icmpInRedirects;
+ 	unsigned long	icmpInEchos;
+ 	unsigned long	icmpInEchoReps;
+ 	unsigned long	icmpInTimestamps;
+ 	unsigned long	icmpInTimestampReps;
+ 	unsigned long	icmpInAddrMasks;
+ 	unsigned long	icmpInAddrMaskReps;
+ 	unsigned long	icmpOutMsgs;
+ 	unsigned long	icmpOutErrors;
+ 	unsigned long	icmpOutDestUnreachs;
+ 	unsigned long	icmpOutTimeExcds;
+ 	unsigned long	icmpOutParmProbs;
+ 	unsigned long	icmpOutSrcQuenchs;
+ 	unsigned long	icmpOutRedirects;
+ 	unsigned long	icmpOutEchos;
+ 	unsigned long	icmpOutEchoReps;
+ 	unsigned long	icmpOutTimestamps;
+ 	unsigned long	icmpOutTimestampReps;
+ 	unsigned long	icmpOutAddrMasks;
+ 	unsigned long	icmpOutAddrMaskReps;
 };
 #endif
 
