@@ -28,7 +28,7 @@
 int
 ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 {
-    int rc = SNMP_ERR_NOERROR;
+    int rc = MFD_SUCCESS;
     
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -46,6 +46,8 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 @foreach $node nonindex@
 @   ifconf syntax-$node.syntax-dependencies.m2i@
 @      include syntax-$node.syntax-dependencies.m2i@
+    if ( MFC_SUCCESS != rc )
+        return rc;
 
 @   end@
 @end@ # for each
