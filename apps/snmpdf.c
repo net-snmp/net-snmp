@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
             vlp2 = vlp2->next_variable;
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
-            printf("%-18s %15lld %15lld %15lld %4lld%%\n", descr,
+            printf("%-18s %15ld %15ld %15ld %4ld%%\n", descr,
                    ((units)?(hssize*units/1024):hssize), hsused,
                    hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
 
