@@ -61,7 +61,9 @@ If the
 flag is not set, then the function will only be called once and
 removed from the alarm system registration.
 .PP
-The clientarg parameter in the registration function is used only be
+The
+.B clientarg
+parameter in the registration function is used only be
 th client function and is stored and passed back directly to them on
 every call to the system.
 .PP
@@ -73,12 +75,15 @@ function returns a unique
 can then be used to remove the callback from the queue at a later
 point in the future using the
 .B snmp_alarm_unregister()
-function.
+function. If the
+.B snmp_alarm_register()
+call fails it returns zero.
 .SH INITIALIZATION
 The
 .B init_snmp_alarm()
 function initializes the routines, but a call to
-init_alarm_post_config should be called even later and setups up the
+.B init_alarm_post_config()
+should be called even later and sets up the
 first timer to initialize the callback function.  These two functions
 should not be used directly by applications, but are instead used by the
 .B init_snmp()
