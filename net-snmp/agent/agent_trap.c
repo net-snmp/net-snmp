@@ -270,8 +270,17 @@ create_trap_session(char *sink, u_short sinkport,
 static int
 create_v1_trap_session(char *sink, u_short sinkport, char *com)
 {
-    return create_trap_session(sink, sinkport, com,
-                               SNMP_VERSION_1, SNMP_MSG_TRAP);
+    int             rc;
+    char           *client_socket = NULL;
+    client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                          NETSNMP_DS_LIB_CLIENT_ADDR);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                          NETSNMP_DS_LIB_CLIENT_ADDR, "localhost");
+    rc = create_trap_session(sink, sinkport, com,
+                             SNMP_VERSION_1, SNMP_MSG_TRAP);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                          NETSNMP_DS_LIB_CLIENT_ADDR, client_socket);
+    return rc;
 }
 #endif
 
