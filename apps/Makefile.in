@@ -65,6 +65,9 @@ snmpgetnext:    snmpgetnext.o $(USELIBS)
 
 clean:
 	rm -f *.o ${TARG}
+	for i in $(SUBDIRS) ; do \
+	( cd $$i ; $(MAKE) clean ) \
+	done
 
 install: installdirs subdirs $(TARG)
 	for i in $(SUBDIRS) ; do \
