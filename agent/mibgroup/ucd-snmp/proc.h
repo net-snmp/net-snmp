@@ -6,6 +6,8 @@
 
 config_require(util_funcs)
 
+void init_proc(void);
+
 extern FindVarMethod var_extensible_proc;
 extern WriteMethod fixProcError;
 struct myproc *get_proc_instance (struct myproc*, int);

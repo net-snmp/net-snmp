@@ -9,7 +9,7 @@ config_require(util_funcs)
 
 extern char version_descr[];
 
-void init_system (void);
+void init_system_mib (void);
 extern FindVarMethod var_system;
 
 /* config file parsing routines */

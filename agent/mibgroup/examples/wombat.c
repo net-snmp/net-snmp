@@ -10,6 +10,8 @@
    return types and various defines and structures. */
 #include "mibincl.h"
 
+#include "auto_nlist.h"
+
 #include "wombat.h"
 
 
@@ -87,7 +89,7 @@ void init_wombat(void)
      the init_wombat() routine, but we've put it here for our
      example. */
 #ifdef CAN_USE_NLIST
-    auto_nlist("wombatstat");
+    auto_nlist("wombatstat",0,0);
 #endif
 };
 

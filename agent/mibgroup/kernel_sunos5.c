@@ -395,13 +395,14 @@ getentry(req_e req_type, void *bufaddr, int len, int entrysize,
 	    ((req_type == GET_NEXT) && previous_found)) {
 	    return (FOUND);
 	}
-	if ((*comp)(arg, bp) == 0)
+	if ((*comp)(arg, bp) == 0) {
 	    if (req_type == GET_EXACT) {
 		return (FOUND);
 	    } else {			/* GET_NEXT */
 		previous_found++;
 		continue;
 	    }
+        }
     }
     if (previous_found)
 	return (NEED_NEXT);
