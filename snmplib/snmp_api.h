@@ -560,12 +560,6 @@ void snmp_timeout (void);
 #define SNMP_CALLBACK_OP_CONNECT		4
 #define SNMP_CALLBACK_OP_DISCONNECT		5
 
-/*  Legacy names for callback operations.  */
-
-#define RECEIVED_MESSAGE   SNMP_CALLBACK_OP_RECEIVED_MESSAGE/*  DEPRECATED  */
-#define TIMED_OUT	   SNMP_CALLBACK_OP_TIMED_OUT       /*  DEPRECATED  */
-#define SEND_FAILED	   SNMP_CALLBACK_OP_SEND_FAILED     /*  DEPRECATED  */
-
 long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
 long snmp_get_next_sessid(void);
