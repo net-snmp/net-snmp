@@ -68,7 +68,8 @@ fi
 #    Start to build the bug report
 #
 echo "UCD-SNMP version $VersionInfo bug report" >  $msg_file
-echo "--------------------------------------" >> $msg_file
+echo "----------------------------------------------------------" >> $msg_file
+echo                                                              >> $msg_file
 
 echo $n "Press return to edit bug report file $c"
 read pause
@@ -120,18 +121,6 @@ fi
 echo                                     	>> ${msg_file}.2
 
 #
-# Add config.cache file
-#
-if [ -f config.cache ]
-then
-  echo "--$boundary"                              >> ${msg_file}.2
-  echo "Content-Description: config.cache"        >> ${msg_file}.2
-  echo                                            >> ${msg_file}.2
-  cat  config.cache                               >> ${msg_file}.2
-  echo                                            >> ${msg_file}.2
-fi
-
-#
 #    Any other files to add?
 #
 
@@ -158,6 +147,18 @@ do
     read answer
 done
 
+
+#
+# Add config.cache file
+#
+if [ -f config.cache ]
+then
+  echo "--$boundary"                              >> ${msg_file}.2
+  echo "Content-Description: config.cache"        >> ${msg_file}.2
+  echo                                            >> ${msg_file}.2
+  cat  config.cache                               >> ${msg_file}.2
+  echo                                            >> ${msg_file}.2
+fi
 
 #
 #  Finish off the message, send it and tidy up.
