@@ -611,6 +611,7 @@ main(int argc, char *argv[])
     send_easy_trap (0, 0);
         
 #if HAVE_UNISTD_H
+#ifdef HAVE_SETGID
 	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
 		if (setgid(gid)==-1) {
@@ -619,6 +620,8 @@ main(int argc, char *argv[])
 			    exit(1);
 		}
 	}
+#endif
+#ifdef HAVE_SETUID
 	if ((uid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_USERID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
 		if(setuid(uid)==-1) {
@@ -627,6 +630,7 @@ main(int argc, char *argv[])
 			    exit(1);
 		}
 	}
+#endif
 #endif
 
 	/* honor selection of standard error output */
