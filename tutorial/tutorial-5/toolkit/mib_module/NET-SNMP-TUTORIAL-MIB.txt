@@ -5,7 +5,8 @@ NET-SNMP-TUTORIAL-MIB DEFINITIONS ::= BEGIN
 -- IMPORTS: Include definitions from other mibs here, which is always
 -- the first item in a MIB file.
 IMPORTS
-	netSnmpExamples		              FROM NET-SNMP-EXAMPLES-MIB,
+	netSnmpExamples		              FROM NET-SNMP-EXAMPLES-MIB
+	OBJECT-TYPE, Integer32,
 	MODULE-IDENTITY                       FROM SNMPv2-SMI
 	MODULE-COMPLIANCE, OBJECT-GROUP       FROM SNMPv2-CONF;
 
@@ -81,20 +82,18 @@ nstAgentPluginObject OBJECT-TYPE
 -- snmptranslate command):
 --
 --
---   % snmptranslate -M+. -mNET-SNMP-TUTORIAL-MIB -p -R ucdExperimental
---   +-ucdExperimental(13)
---     |
---     +-netSnmpTutorialMIB(4242)
---       |
---       +-nstMIBObjects(1)
---       | |
---       | +-nstAgentModules(1)
---       |    |
---       |    +- -RW- Integer32 nstAgentModuleObject(1)
---       |    +- -RW- Integer32 nstAgentSubagentObject(2)
---       |    +- -RW- Integer32 nstAgentPluginObject(3)
---       |
---       +-nstMIBConformance(2)
+-- % snmptranslate -M+. -mNET-SNMP-TUTORIAL-MIB -Tp -IR netSnmpTutorialMIB
+-- +-netSnmpTutorialMIB(4)
+--   |
+--   +-nstMIBObjects(1)
+--   | |
+--   | +-nstAgentModules(1)
+--   |   |
+--   |   +- -RW- Integer32 nstAgentModuleObject(1)
+--   |   +- -RW- Integer32 nstAgentSubagentObject(2)
+--   |   +- -RW- Integer32 nstAgentPluginObject(3)
+--   |
+--   +-nstMIBConformance(2)
 
 
 -- You can then use the snmptranslate command to get the numerical or
@@ -102,17 +101,17 @@ nstAgentPluginObject OBJECT-TYPE
 
 
 -- Getting a OID:
---   % snmptranslate -M+. -mNET-SNMP-TUTORIAL-MIB -R nstSSSecondsSinceChanged
+--   % snmptranslate -M+. -mNET-SNMP-TUTORIAL-MIB -IR nstSSSecondsSinceChanged
 --   .1.3.6.1.4.1.2021.13.4242.1.1.2
 
 
 -- Getting a textual OID:
---   % snmptranslate -n -M+. -mNET-SNMP-TUTORIAL-MIB -R nstSSSecondsSinceChanged
+--   % snmptranslate -On -M+. -mNET-SNMP-TUTORIAL-MIB -IR nstSSSecondsSinceChanged
 --   enterprises.ucdavis.ucdExperimental.netSnmpTutorialMIB.nstMIBObjects.nstScalarSet.nstSSSecondsSinceChanged
 
 
 -- Getting a description:
---   % snmptranslate -d -M+. -mNET-SNMP-TUTORIAL-MIB -R nstSSSecondsSinceChanged 
+--   % snmptranslate -Td -M+. -mNET-SNMP-TUTORIAL-MIB -IR nstSSSecondsSinceChanged 
 --   .1.3.6.1.4.1.2021.13.4242.1.1.2
 --   SYNTAX  TimeTicks
 --   UNITS   "1/100th Seconds"
