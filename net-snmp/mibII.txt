@@ -1,4 +1,4 @@
-RFC1155-SMI DEFINITIONS ::= BEGIN;
+RFC1155-SMI DEFINITIONS ::= BEGIN
     nullOID       OBJECT IDENTIFIER ::= { ccitt 0 }
     internet      OBJECT IDENTIFIER ::= { iso org(3) dod(6) 1 }
     directory     OBJECT IDENTIFIER ::= { internet 1 }
@@ -2818,7 +2818,7 @@ mtrColumn OBJECT-TYPE
 
 
 END
-SNMPv2-SMI DEFINITIONS ::= BEGIN;
+SNMPv2-SMI DEFINITIONS ::= BEGIN
 
           security       OBJECT IDENTIFIER ::= { internet 5 }
 
@@ -9919,7 +9919,7 @@ RFC1271-MIB DEFINITIONS ::= BEGIN
               ::= { logEntry 4 }
 
 END
-CMU-MIB DEFINITIONS ::= BEGIN;
+CMU-MIB DEFINITIONS ::= BEGIN
 		Proteon OBJECT IDENTIFIER ::= { enterprises 1 }
 		IBM OBJECT IDENTIFIER ::= { enterprises 2 }
 		cmu OBJECT IDENTIFIER ::= { enterprises 3 }
