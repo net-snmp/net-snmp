@@ -29,6 +29,8 @@
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
+#include "default_store.h"
+#include "ds_agent.h"
 
 struct autonlist *nlists = 0;
 static void init_nlist (struct nlist *);
@@ -120,11 +122,17 @@ init_nlist(struct nlist nl[])
   if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
       snmp_log_perror("kvm_openfiles");
       snmp_log(LOG_ERR, "kvm_openfiles: %s\n", kvm_errbuf);
-      exit(1);
+      if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+	return;
+      else
+	exit(1);
   }
   if ((ret = kvm_nlist(kernel, nl)) == -1) {
       snmp_log_perror("kvm_nlist");
-      exit(1);
+      if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+	return;
+      else
+	exit(1);
   }
   kvm_close(kernel);
 #else /* ! HAVE_KVM_OPENFILES */
@@ -136,13 +144,19 @@ init_nlist(struct nlist nl[])
         nl[0].n_value = 0;
     } else {
         snmp_log_perror("knlist");
-        exit(1);
+        if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+	  return;
+        else
+	  exit(1);
     }
   }
 #else
   if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
     snmp_log_perror("nlist");
-    exit(1);
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+	return;
+    else
+	exit(1);
   }
 #endif /*aix4*/
 #endif /* ! HAVE_KVM_OPENFILES */

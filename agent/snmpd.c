@@ -524,10 +524,13 @@ main(int argc, char *argv[])
     if (pid_file != NULL) {
       if ((PID = fopen(pid_file, "w")) == NULL) {
         snmp_log_perror("fopen");
-        exit(1);
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+          exit(1);
       }
-      fprintf(PID, "%d\n", (int)getpid());
-      fclose(PID);
+      else {
+        fprintf(PID, "%d\n", (int)getpid());
+        fclose(PID);
+      }
     }
 #endif
 
@@ -566,14 +569,16 @@ main(int argc, char *argv[])
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
 		if (setgid(gid)==-1) {
 			snmp_log_perror("setgid failed");
-			exit(1);
+        		if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+			  exit(1);
 		}
 	}
 	if (uid) {
 		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
 		if(setuid(uid)==-1) {
 			snmp_log_perror("setuid failed");
-			exit(1);
+        		if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+			  exit(1);
 		}
 	}
 #endif
