@@ -3483,7 +3483,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         return (0);
     }
 
-    if (snmp_set_var_objid(vars, name, name_length)) {
+    if (name != NULL && snmp_set_var_objid(vars, name, name_length)) {
         snmp_free_var(vars);
         return (0);
     }
