@@ -49,7 +49,6 @@ SOFTWARE.
 #include "context.h"
 #include "mib.h"
 #include "mibgroup/snmp.h"
-#include "extensible/extproto.h"
 #include "snmpd.h"
 
 int	create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
