@@ -815,17 +815,27 @@ char *copy_word(char *from, char *to)
    followed by a string of hex */
 char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
   int i;
-  if (str != NULL) {
-    sprintf(saveto, "0x");
-    saveto += 2;
-    for(i = 0; i < (int)len; i++) {
-      sprintf(saveto,"%02x", str[i]);
-      saveto = saveto + 2;
-    }
-    return saveto;
+  char *cp;
+
+  /* is everything easily printable */
+  for(i=0, cp=str; i < len && cp &&
+          (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
+
+  if (len != 0 && i == len) {
+      sprintf(saveto, "\"%s\"", str);
+      saveto += strlen(saveto);
   } else {
-    sprintf(saveto,"\"\"");
-    saveto += 2;
+      if (str != NULL) {
+          sprintf(saveto, "0x");
+          saveto += 2;
+          for(i = 0; i < (int)len; i++) {
+              sprintf(saveto,"%02x", str[i]);
+              saveto = saveto + 2;
+          }
+      } else {
+          sprintf(saveto,"\"\"");
+          saveto += 2;
+      }
   }
   return saveto;
 }
