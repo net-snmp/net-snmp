@@ -619,8 +619,8 @@ void usage(void)
   -q        Quick print mib display\n\
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
   -p <port> Local port to listen from\n\
-  -T TCP|UDP Listen to traffic on the TCP or UDP transport.\n\
-  -P        Print to standard output\n\
+  -T TCP|UDP Listen to traffic on the TCP or UDP transport.
+  -P        Print to stderr\n\
   -o file   Print to the specified file\n\
   -F \"...\" Use custom format for logging to standard output\n\
   -u PIDFILE create PIDFILE with process id\n\
