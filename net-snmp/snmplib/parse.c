@@ -464,36 +464,6 @@ static struct enum_list  * copy_enums(struct enum_list *);
 
 static u_int compute_match(const char *search_base, const char *key);
 
-/* backwards compatibility wrappers */
-void snmp_set_mib_errors(int err)
-{
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS, err);
-}
-
-void snmp_set_mib_warnings(int warn)
-{
-  ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, warn);
-}
-
-void snmp_set_save_descriptions(int save)
-{
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS, save);
-}
-
-void snmp_set_mib_comment_term(int save)
-{
-  /* 0=strict, 1=EOL terminated */
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, save);
-}
-
-void snmp_set_mib_parse_label(int save)
-{
-  /* 0=strict, 1=underscore OK in label */
-  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, save);
-}
-
-/* end wrappers */
-
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
   fprintf(outf, "%sMIBOPTS values:\n", lead);
   fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",

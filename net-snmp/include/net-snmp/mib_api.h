@@ -24,5 +24,6 @@
 #include <net-snmp/parse.h>
 #include <net-snmp/oid_array.h>
 #include <net-snmp/oid_stash.h>
+#include <net-snmp/ucd_compat.h>
 
 #endif /* NET_SNMP_MIB_API_H */

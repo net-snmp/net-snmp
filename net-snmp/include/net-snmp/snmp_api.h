@@ -564,17 +564,6 @@ long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
 long snmp_get_next_sessid(void);
 long snmp_get_next_transid(void);
-/* provide for backwards compatibility */
-void snmp_set_dump_packet(int);
-int snmp_get_dump_packet(void);
-void snmp_set_quick_print(int);
-int snmp_get_quick_print(void);
-void snmp_set_suffix_only(int);
-int snmp_get_suffix_only(void);
-void snmp_set_full_objid(int);
-int snmp_get_full_objid(void);
-void snmp_set_random_access(int);
-int snmp_get_random_access(void);
 
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 int snmp_oid_ncompare(const oid *, size_t, const oid *, size_t, size_t);
@@ -655,10 +644,6 @@ void DEBUGPOID(oid *, size_t);
 void snmp_set_do_debugging (int);
 int snmp_get_do_debugging (void);
 
-#ifdef CMU_COMPATIBLE
-extern int snmp_dump_packet;
-extern int quick_print;
-#endif
 
 /*
  * snmp_error - return error data

@@ -57,7 +57,8 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	mt_support.c snmp_enum.c snmp-tc.c			\
 	snprintf.c strtol.c strtoul.c				\
 	snmp_transport.c @transport_src_list@                   \
-	snmp_secmod.c @security_src_list@ snmp_version.c
+	snmp_secmod.c @security_src_list@ snmp_version.c	\
+	cmu_compat.c ucd_compat.c
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o	  	\
@@ -69,7 +70,8 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	mt_support.o snmp_enum.o snmp-tc.o			\
 	snprintf.o strtol.o strtoul.o				\
 	snmp_transport.o @transport_obj_list@                   \
-	snmp_secmod.o @security_obj_list@ snmp_version.o
+	snmp_secmod.o @security_obj_list@ snmp_version.o	\
+	cmu_compat.lo ucd_compat.lo
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
@@ -81,7 +83,8 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	mt_support.lo snmp_enum.lo snmp-tc.lo			\
 	snprintf.lo strtol.lo strtoul.lo			\
 	snmp_transport.lo @transport_lobj_list@                 \
-        snmp_secmod.lo @security_lobj_list@ snmp_version.lo
+        snmp_secmod.lo @security_lobj_list@ snmp_version.lo	\
+	cmu_compat.lo ucd_compat.lo
 
 # just in case someone wants to remove libtool, change this to OBJS.
 TOBJS=$(LOBJS)

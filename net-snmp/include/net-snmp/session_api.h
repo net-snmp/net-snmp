@@ -48,4 +48,6 @@
 #include <net-snmp/snmpAAL5PVCDomain.h>
 #endif
 
+#include <net-snmp/ucd_compat.h>
+
 #endif /* NET_SNMP_SESSION_API_H */
