@@ -427,12 +427,11 @@ Miscellaneous:
     defaults="yes",defaults="no")
 
 AC_ARG_ENABLE(ucd-snmp-compatibility,
-[--enable-ucd-snmp-compatibility  Install ucd-snmp look-alike headers and libs.],
-    ucd_compat=yes)
+[--enable-ucd-snmp-compatibility  Install ucd-snmp look-alike headers and libs.], ucd_compat=yes, ucd_compat=no)
 dnl
 dnl setup install targets
 dnl
-if test "x$ucd_compat" = "xyes" ; then	
+if test "x$ucd_compat" != "xno" ; then	
   installucdheaders=installucdheaders
   installucdlibs=installucdlibs
 fi
