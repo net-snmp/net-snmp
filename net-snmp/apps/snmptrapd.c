@@ -626,6 +626,7 @@ int main(int argc, char *argv[])
     int local_port = SNMP_TRAP_PORT;
     int dofork=1;
     char *cp;
+    int tcp=0;
 #if HAVE_GETPID
 	FILE           *PID;
         char *pid_file = NULL;
@@ -660,7 +661,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:CF:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:CF:T:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -685,6 +686,16 @@ int main(int argc, char *argv[])
 	case 'M':
 	    setenv("MIBDIRS", optarg, 1);
 	    break;
+        case 'T':
+            if (strcasecmp(optarg,"TCP") == 0) {
+                tcp = 1;
+            } else if (strcasecmp(optarg,"UDP") == 0) {
+                tcp = 0;
+            } else {
+                fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", optarg);
+                exit(1);
+            }
+            break;
 	case 'O':
 	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
@@ -862,6 +873,8 @@ int main(int argc, char *argv[])
     session->callback_magic = NULL;
     session->authenticator = NULL;
     sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
+    if (tcp)
+        session->flags |= SNMP_FLAGS_STREAM_SOCKET;
 
     SOCK_STARTUP;
     ss = snmp_open( session );
