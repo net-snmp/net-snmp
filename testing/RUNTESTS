@@ -47,7 +47,10 @@ usage() {
 }
 
 # defaults
-interative=no
+interactive=no
+
+# HACK ATTACK! this works for subdirs NOT in the source path!
+PATH=.:$PATH ; export PATH
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -93,7 +96,7 @@ done
 #
 # Source the testing configuration file
 #
-. TESTCONF.sh
+. ./TESTCONF.sh
 
 # Hack: the above created a directory, now we have to nuke it and
 # forget about it...  All for the convenience of the test writer.

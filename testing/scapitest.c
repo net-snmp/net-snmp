@@ -44,10 +44,6 @@ static char *rcsid = "$Id$";	/* */
 extern char     *optarg;
 extern int      optind, optopt, opterr;
 
-#if !defined(__linux__)
-extern int	optreset;
-#endif
-
 #define DEBUG	/* */
 
 
@@ -154,10 +150,6 @@ main(int argc, char **argv)
 
 		argc -= 1; argv += 1;
 		optind = 1;
-#if !defined(__linux__)
-		optreset = 1;
-#endif
-
 	}  /* endwhile getopt */
 
 	if ((argc > 1)) {
