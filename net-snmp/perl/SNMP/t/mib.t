@@ -48,10 +48,10 @@ $res =  $SNMP::MIB{sysLocation}{type};
 ok($res eq 'OCTETSTR');
 #############################  6  ####################################
 $res =  $SNMP::MIB{sysLocation}{status};
-#print("status is: $res\n");
+#print STDERR ("status is: $res\n");
 #XXX: test fails due SMIv1 codes being returned intstead of SMIv2...
 #ok($res eq 'Current');
-#print("\n");
+#print STDERR ("\n");
 #############################  7  #################################
 $res =  $SNMP::MIB{sysORTable}{access};
 #print("access is: $res\n");
