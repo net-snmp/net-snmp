@@ -1929,6 +1929,9 @@ print_tree_node(FILE *f,
 	    fprintf(f, ", %s", str);
 	}
 	fprintf(f, "\n");
+	if (tp->tc_index != -1) {
+	    fprintf(f, "  -- TEXTUAL CONVENTION %s\n", get_tc_descriptor(tp->tc_index));
+	}
 	switch (tp->type) {
 	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
 	case TYPE_OCTETSTR:	cp = "OCTET STRING"; break;
