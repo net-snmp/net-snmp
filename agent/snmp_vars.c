@@ -129,8 +129,12 @@ extern char *Lookup_Device_Annotation();
 
 static struct nlist nl[] = {
 #ifndef hpux
-	{ "_ipstat"},  
+	{ "_ipstat"},
+#ifdef sun
+	{ "_ip_forwarding" },
+#else
 	{ "_ipforwarding" },
+#endif
 	{ "_tcp_ttl"},
 	{ "_udpstat" },
 	{ "_in_interfaces" },
@@ -673,7 +677,7 @@ struct subtree subtrees[] = {
   {{EXTENSIBLEMIB, LOCKDMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_lockd_variables,
    sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
    sizeof(*extensible_lockd_variables)},
-#if defined(hpux) || defined(ultrix)
+#ifdef DISKMIBNUM
   {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},

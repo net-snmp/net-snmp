@@ -65,7 +65,6 @@ struct variable2 extensible_mem_variables[] = {
 #endif
 
 #ifdef DISKMIBNUM
-#if defined(hpux) || defined(ultrix)
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
@@ -78,7 +77,6 @@ struct variable2 extensible_disk_variables[] = {
   {ERRORFLAG, INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG }},
   {ERRORMSG, STRING, RONLY, var_extensible_disk, 1, {ERRORMSG }}
 };
-#endif
 #endif
 
 #ifdef VERSIONMIBNUM
