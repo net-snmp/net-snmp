@@ -118,6 +118,7 @@ agentx_var(struct variable *vp,
     }
 				/* Return a pointer to an appropriate method */
     add_method  = agentx_add_request;
+    *var_len = sizeof( add_method );
     return (u_char*)add_method;
 }
 
