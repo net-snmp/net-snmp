@@ -199,41 +199,11 @@ _SCAPI_NOT_CONFIGURED
  *
  * ASSUMED that the number of hash bits is a multiple of 8.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
-                                u_char * key, u_int keylen,
-                                u_char * message, u_int msglen,
-                                u_char * MAC, size_t * maclen)
+int
+sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
+                       u_char * key, u_int keylen,
+                       u_char * message, u_int msglen,
+                       u_char * MAC, size_t * maclen)
 #if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -336,39 +306,9 @@ _SCAPI_NOT_CONFIGURED
  * SNMPERR_SUCCESS              Success.
  * SNMP_SC_GENERAL_FAILURE      Any error.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
-                 size_t buf_len, u_char * MAC, size_t * MAC_len)
+int
+sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
+        size_t buf_len, u_char * MAC, size_t * MAC_len)
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -441,41 +381,11 @@ _SCAPI_NOT_CONFIGURED
  * bytes are compared.  The length of MAC cannot be greater than the
  * length of the hash transform output.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
-                             u_char * key, u_int keylen,
-                             u_char * message, u_int msglen,
-                             u_char * MAC, u_int maclen)
+int
+sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
+                    u_char * key, u_int keylen,
+                    u_char * message, u_int msglen,
+                    u_char * MAC, u_int maclen)
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -558,42 +468,12 @@ _SCAPI_NOT_CONFIGURED
  * ctlen contains actual number of crypted bytes in ciphertext upon
  * successful return.
  */
-     int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         sc_encrypt(const oid * privtype, size_t privtypelen,
-                    u_char * key, u_int keylen,
-                    u_char * iv, u_int ivlen,
-                    u_char * plaintext, u_int ptlen,
-                    u_char * ciphertext, size_t * ctlen)
+int
+sc_encrypt(const oid * privtype, size_t privtypelen,
+           u_char * key, u_int keylen,
+           u_char * iv, u_int ivlen,
+           u_char * plaintext, u_int ptlen,
+           u_char * ciphertext, size_t * ctlen)
 #if defined(USE_OPENSSL)
 {
     int             rval = SNMPERR_SUCCESS;
