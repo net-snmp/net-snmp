@@ -108,6 +108,16 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(s)
   subject line of 'subscribe' or 'unsubscribe'.  To use it, mail to 
   ucd-snmp@ece.ucdavis.edu.
 
+EXTENSIBILITY
+
+  The agent that comes with this package is extensible through use of
+  shell scripts and other methods.  See the configuration manual pages
+  and the EXAMPLE.conf file for details.
+
+  Note:  This agent uses its own API for extensibility.  The IETF's
+  agentx working group is working on developing a common API for
+  subagent extensibility.  See them for details.
+
 EXAMPLE USAGE 
 
   See the 'EXAMPLE.conf' file in this directory (you must build the
