@@ -99,12 +99,10 @@ header_hrpartition(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int part_idx, LowDiskIndex=-1, LowPartIndex = -1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_partition", "var_hrpartition: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_partition", "var_hrpartition: "));
+    DEBUGMSGOID(("host/hr_partition", name, *length));
+    DEBUGMSG(("host/hr_partition"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* Find "next" partition entry */
@@ -180,10 +178,9 @@ header_hrpartition(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_partition", "... get partition stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_partition", "... get partition stats "));
+    DEBUGMSGOID(("host/hr_partition", name, *length));
+    DEBUGMSG(("host/hr_partition","\n"));
     return LowPartIndex;
 }
 

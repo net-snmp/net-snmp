@@ -160,14 +160,12 @@ int register_sysORTable_sess(oid *oidin,
 			 const char *descr,
 			 struct snmp_session *ss)
 {
-  char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table;
   struct register_sysOR_parameters reg_sysOR_parms;
 
-  if (snmp_get_do_debugging()) {
-    sprint_objid (c_oid, oidin, oidlen);
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable registering: %s\n",c_oid));
-  }
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable registering: "));
+    DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
+    DEBUGMSG(("mibII/sysORTable","\n"));
 
   while(*ptr != NULL)
     ptr = &((*ptr)->next);
@@ -216,15 +214,13 @@ int unregister_sysORTable_sess(oid *oidin,
 			 size_t oidlen,
 			 struct snmp_session *ss)
 {
-  char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table, *prev=NULL;
   int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
   struct register_sysOR_parameters reg_sysOR_parms;
 
-  if (snmp_get_do_debugging()) {
-    sprint_objid (c_oid, oidin, oidlen);
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: %s\n",c_oid));
-  }
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: "));
+    DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
+    DEBUGMSG(("mibII/sysORTable","\n"));
 
   while(*ptr != NULL) {
     if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {

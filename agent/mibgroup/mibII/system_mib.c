@@ -223,13 +223,10 @@ header_system(struct variable *vp,
 #define SYSTEM_NAME_LENGTH	8
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/system", "var_system: %s %d\n", c_oid, exact));
-      DEBUGMSGTL(("mibII/system", "vp len: %d / %d\n", vp->namelen, 8));
-    }
+    DEBUGMSGTL(("mibII/system", "var_system: "));
+    DEBUGMSGOID(("mibII/system", name, *length));
+    DEBUGMSG(("mibII/system"," %d\n", exact));
 
     memcpy((char *)newname, (char *)vp->name, vp->namelen * sizeof(oid));
     newname[SYSTEM_NAME_LENGTH] = 0;

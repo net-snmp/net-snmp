@@ -268,7 +268,6 @@ search_subtree_vars(struct subtree *tp,
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
 #endif
-    char		c_oid[SPRINT_MAX_LEN];
 
 	    if ( tp->variables == NULL )
 		return NULL;
@@ -311,24 +310,25 @@ search_subtree_vars(struct subtree *tp,
                     memcpy(save, name, *namelen*sizeof(oid));
                     savelen = *namelen;
 #endif
-	    	    sprint_objid(c_oid, cvp->name, cvp->namelen);
-	    	    DEBUGMSGTL(("snmp_vars", "Trying variable  %s....\n", c_oid));
+		    DEBUGMSGTL(("snmp_vars", "Trying variable: "));
+		    DEBUGMSGOID(("snmp_vars", cvp->name, cvp->namelen));
+		    DEBUGMSG(("snmp_vars"," ...\n"));
+
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 						  len, write_method);
 	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
 				(access==NULL) ? "(null)" : "something" ));
 #if MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
-		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0)
-		      {
-			char buf1[SPRINT_MAX_LEN];
-			snmp_set_suffix_only(2); /* XX short form for debug */
-			sprint_objid(buf1, save, savelen);
-			sprint_objid(c_oid, name, *namelen);
-			DEBUGMSGTL(("snmp_vars","evil_client: %s => %s\n", buf1, c_oid));
+		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0)) {
+			DEBUGMSGTL(("snmp_vars", "evil_client: "));
+			DEBUGMSGOID(("snmp_vars", save, savelen));
+			DEBUGMSG(("snmp_vars"," =>"));
+			DEBUGMSGOID(("snmp_vars", name, *namelen));
+			DEBUGMSG(("snmp_vars","\n"));
                         memcpy(name, save, savelen*sizeof(oid));
                         *namelen = savelen;
-		      }
+                      }
                     }
 #endif
 		    if (*write_method)
@@ -386,7 +386,6 @@ getStatPtr(
     u_char              result_type;
     u_short             result_acl;
     u_char        	*search_return=NULL;
-    char		c_oid[SPRINT_MAX_LEN];
 
     found = FALSE;
 
@@ -395,13 +394,17 @@ getStatPtr(
 	savelen = *namelen;
     }
     *write_method = NULL;
-    sprint_objid(c_oid, name, *namelen);
-    DEBUGMSGTL(("snmp_vars", "Looking for %s....\n", c_oid));
+
+    DEBUGMSGTL(("snmp_vars", "Looking for: "));
+    DEBUGMSGOID(("snmp_vars", name, *namelen));
+    DEBUGMSG(("snmp_vars"," ...\n"));
+
     tp = find_subtree(name, *namelen, NULL);
     
     while ( search_return == NULL && tp != NULL ) {
-	sprint_objid(c_oid, tp->name, tp->namelen);
-	DEBUGMSGTL(("snmp_vars", "Trying tree  %s....\n", c_oid));
+	DEBUGMSGTL(("snmp_vars", "Trying tree: "));
+	DEBUGMSGOID(("snmp_vars", tp->name, tp->namelen));
+	DEBUGMSG(("snmp_vars"," ...\n"));
 	search_return = search_subtree_vars( tp, name, namelen, &result_type,
                                         len, &result_acl, exact, write_method,
                                         pdu, noSuchObject);

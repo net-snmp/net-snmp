@@ -234,12 +234,10 @@ header_tcp(struct variable *vp,
 #define TCP_NAME_LENGTH	8
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/tcp", "var_tcp: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/tcp", "var_tcp: "));
+    DEBUGMSGOID(("mibII/tcp", name, *length));
+    DEBUGMSG(("mibII/tcp"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[TCP_NAME_LENGTH] = 0;

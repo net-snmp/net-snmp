@@ -307,7 +307,6 @@ register_mib_range(const char *moduleName,
 	     struct snmp_session *ss)
 {
   struct subtree *subtree, *sub2;
-  char c_oid[SPRINT_MAX_LEN];
   int res, i;
   struct register_parameters reg_parms;
   
@@ -316,9 +315,9 @@ register_mib_range(const char *moduleName,
     return MIB_REGISTRATION_FAILED;
   memset(subtree, 0, sizeof(struct subtree));
 
-  sprint_objid(c_oid, mibloc, mibloclen);
-  DEBUGMSGTL(("register_mib", "registering \"%s\" at %s\n",
-              moduleName, c_oid));
+  DEBUGMSGTL(("register_mib", "registering \"%s\" at ", moduleName));
+  DEBUGMSGOID(("register_mib", mibloc, mibloclen));
+  DEBUGMSG(("register_mib","\n"));
     
 	/*
 	 * Create the new subtree node being registered

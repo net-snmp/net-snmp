@@ -104,12 +104,11 @@ var_bgp(struct variable *vp,
 {
 	u_char *var;
 	int result;
-        char c_oid[SPRINT_MAX_LEN];
 
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, name, *length);
-          DEBUGMSGTL(("smux/snmp_bgp", "[var_bgp] var len %d, oid requested Len %d-%s\n",*var_len, *length,c_oid));
-        }
+    DEBUGMSGTL(("smux/snmp_bgp", "[var_bgp] var len %d, oid requested Len %d-",
+	*var_len, *length));
+    DEBUGMSGOID(("smux/snmp_bgp", name, *length));
+    DEBUGMSG(("smux/snmp_bgp"," %d\n", exact));
 
 	/* 
 	 * Pass on the request to Gated.
@@ -158,12 +157,10 @@ var_bgp(struct variable *vp,
 	 */
 	var = smux_snmp_process(exact, name, length, var_len);
 
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, name, *length);
-          DEBUGMSGTL(("smux/snmp_bgp",
-                      "[var_bgp] var len %d, oid obtained Len %d-%s\n",
-                      *var_len, *length,c_oid));
-        }
+    DEBUGMSGTL(("smux/snmp_bgp", "[var_bgp] var len %d, oid obtained Len %d-",
+	*var_len, *length));
+    DEBUGMSGOID(("smux/snmp_bgp", name, *length));
+    DEBUGMSG(("smux/snmp_bgp"," %d\n", exact));
 
 	vp->type = smux_type;
 

@@ -603,12 +603,10 @@ header_generic(struct variable *vp,
 {
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("util_funcs", "header_generic: %s exact=%d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("util_funcs", "header_generic: "));
+    DEBUGMSGOID(("util_funcs", name, *length));
+    DEBUGMSG(("util_funcs"," exact=%d\n", exact));
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[vp->namelen] = 0;

@@ -106,12 +106,10 @@ header_hrsys(struct variable *vp,
 #define HRSYS_NAME_LENGTH	9
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_system", "var_hrsys: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_system", "var_hrsys: "));
+    DEBUGMSGOID(("host/hr_system", name, *length));
+    DEBUGMSG(("host/hr_system"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSYS_NAME_LENGTH] = 0;

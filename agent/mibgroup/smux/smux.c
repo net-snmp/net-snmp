@@ -718,16 +718,15 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 	size_t oid_name_len;
 	int i, result;
 	u_char type;
-        char c_oid[SPRINT_MAX_LEN];
 	smux_reg *rptr, *nrptr;
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
 
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, oid_name, oid_name_len);
-          DEBUGMSGTL (("smux","[smux_rreq_process] smux subtree: %s\n", c_oid)); 
-        }
+    DEBUGMSGTL(("smux", "[smux_rreq_process] smux subtree: "));
+    DEBUGMSGOID(("smux", oid_name, oid_name_len));
+    DEBUGMSG(("smux","\n"));
+
 	if ((ptr = asn_parse_int(ptr, len, &type, &priority, 
 	    sizeof(priority))) == NULL) {
 		DEBUGMSGTL (("smux","[smux_rreq_process] priority parse failed\n"));
@@ -989,7 +988,6 @@ smux_snmp_process(int exact,
 	u_char packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
 	size_t length = SMUXMAXPKTSIZE;
 	u_char type;
-        char c_oid[SPRINT_MAX_LEN];
 	
 	/* 
 	 * Send the query to the peer
@@ -1006,10 +1004,9 @@ smux_snmp_process(int exact,
 	 snmp_log(LOG_NOTICE, "[smux_snmp_process]: smux_build failed\n");
 		return NULL;
 	}
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, objid, *len);
-          DEBUGMSGTL (("smux","[smux_snmp_process] oid from build: %s\n",c_oid));
-        }
+    DEBUGMSGTL(("smux", "[smux_snmp_process] oid from build: "));
+    DEBUGMSGOID(("smux", objid, *len));
+    DEBUGMSG(("smux","\n"));
 
 	if (send(sd, (char *)packet, length, 0) < 0) {
 		snmp_log_perror("[smux_snmp_process] send failed");
@@ -1106,15 +1103,13 @@ smux_parse_var(u_char *varbind,
 	size_t len;
 	u_char *ptr;
 	u_char type;
-        char c_oid[SPRINT_MAX_LEN];
         
 	ptr = varbind;
 	len = *varbindlength;
 
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, objid, *oidlen);
-          DEBUGMSGTL (("smux","[smux_parse_var] before any processing: %s\n", c_oid));
-        }
+    DEBUGMSGTL(("smux", "[smux_parse_var] before any processing: "));
+    DEBUGMSGOID(("smux", objid, *oidlen));
+    DEBUGMSG(("smux","\n"));
 
 	ptr = asn_parse_header(ptr, &len, &type);
 	if (ptr == NULL || type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
@@ -1130,10 +1125,9 @@ smux_parse_var(u_char *varbind,
 	*oidlen = var_name_len;
 	memcpy( objid,var_name, var_name_len * sizeof(oid));
 
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, objid, *oidlen);
-          DEBUGMSGTL (("smux","[smux_parse_var] returning oid : %s\n", c_oid));
-        }
+    DEBUGMSGTL(("smux", "[smux_parse_var] returning oid : "));
+    DEBUGMSGOID(("smux", objid, *oidlen));
+    DEBUGMSG(("smux","\n"));
 	/* XXX */
 	len = SMUXMAXPKTSIZE;
         DEBUGMSGTL(("smux",

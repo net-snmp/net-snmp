@@ -273,12 +273,10 @@ header_ifEntry(struct variable *vp,
     oid newname[MAX_OID_LEN];
     register int	interface;
     int result, count;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
     
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -300,8 +298,9 @@ header_ifEntry(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats %s\n", c_oid));
+    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces","\n"));
 
     return interface;
 }
@@ -330,12 +329,10 @@ header_interfaces(struct variable *vp,
 #define INTERFACES_NAME_LENGTH	8
   oid newname[MAX_OID_LEN];
   int result;
-  char c_oid[SPRINT_MAX_LEN];
 
-  if (snmp_get_do_debugging()) {
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: %s %d\n", c_oid, exact));
-  }
+    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
 
   memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[INTERFACES_NAME_LENGTH] = 0;
@@ -686,12 +683,10 @@ header_interfaces(struct variable *vp,
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/interfaces", "var_interfaces: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
@@ -720,12 +715,10 @@ header_ifEntry(struct variable *vp,
     oid newname[MAX_OID_LEN];
     register int	interface;
     int result, count;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
@@ -747,10 +740,9 @@ header_ifEntry(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/interfaces", "... get I/F stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces","\n"));
 
     return interface;
 }
@@ -1966,11 +1958,11 @@ header_ifEntry(struct variable *vp,
     static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
 				IFMIB_SYSTEM, IFMIB_IFCOUNT };
     size_t len;
-#ifdef DODEBUG
-    char c_oid[SPRINT_MAX_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("interfaces", "var_ifEntry: %s %d\n", c_oid, exact));
+#ifdef DODEBUG
+    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
 #endif
 
     memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
@@ -1999,8 +1991,9 @@ header_ifEntry(struct variable *vp,
     *var_len = sizeof(long);	/* default to 'long' results */
 
 #ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("interfaces", "... get I/F stats %s\n", c_oid));
+    DEBUGMSGTL(("interfaces", "... get I/F stats "));
+    DEBUGMSGOID(("interfaces", name, *length));
+    DEBUGMSG(("interfaces","\n"));
 #endif
 
     return interface;
