@@ -1,4 +1,4 @@
-.TH "table: Helps you implement a table." 3 "19 Apr 2002" "net-snmp" \" -*- nroff -*-
+.TH "table: Helps you implement a table." 3 "19 Jun 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -91,14 +91,14 @@ checks the original request against the current data being passed in if its grea
 .PP
 returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
-Definition at line 563 of file table.c.
+Definition at line 581 of file table.c.
 .SS "netsnmp_table_request_info* netsnmp_extract_table_info (netsnmp_request_info * request)\fC [inline]\fP"
 .PP
 extracts the processed table information from a given request.
 .PP
 call this from subhandlers on a request to extract the processed netsnmp_request_info information. The resulting information includes the index values and the column number. 
 .PP
-Definition at line 92 of file table.c.
+Definition at line 103 of file table.c.
 .PP
 Referenced by netsnmp_table_data_helper_handler(), and netsnmp_table_data_set_helper_handler().
 .PP
@@ -106,7 +106,7 @@ Referenced by netsnmp_table_data_helper_handler(), and netsnmp_table_data_set_he
 .PP
 extracts the registered netsnmp_table_registration_info object from a netsnmp_handler_registration object.
 .PP
-Definition at line 101 of file table.c.
+Definition at line 112 of file table.c.
 .PP
 Referenced by netsnmp_table_data_helper_handler().
 .PP
@@ -116,7 +116,7 @@ Given a netsnmp_table_registration_info object, creates a table handler.
 .PP
 You can use this table handler by injecting it into a calling chain. When the handler gets called, it'll do processing and store it's information into the request->parent_data structure. 
 .PP
-Definition at line 56 of file table.c.
+Definition at line 67 of file table.c.
 .PP
 Referenced by netsnmp_register_table().
 .PP
@@ -124,7 +124,7 @@ Referenced by netsnmp_register_table().
 .PP
 creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler\fP() to register the table into the agent.
 .PP
-Definition at line 79 of file table.c.
+Definition at line 90 of file table.c.
 .PP
 Referenced by netsnmp_register_table_array(), and netsnmp_register_table_data().
 .PP
@@ -132,7 +132,7 @@ Referenced by netsnmp_register_table_array(), and netsnmp_register_table_data().
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object.
 .PP
-Definition at line 488 of file table.c.
+Definition at line 505 of file table.c.
 .PP
 Referenced by netsnmp_table_build_result().
 .PP
@@ -140,26 +140,26 @@ Referenced by netsnmp_table_build_result().
 .PP
 Builds an oid from index information.
 .PP
-Definition at line 513 of file table.c.
+Definition at line 531 of file table.c.
 .SS "int netsnmp_table_build_result (netsnmp_handler_registration * reginfo, netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info, u_char type, u_char * result, size_t result_len)"
 .PP
 Builds the result to be returned to the agent given the table information.
 .PP
 Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind. 
 .PP
-Definition at line 456 of file table.c.
+Definition at line 472 of file table.c.
 .SS "int netsnmp_update_indexes_from_variable_list (netsnmp_table_request_info * tri)"
 .PP
 builds an oid given a set of indexes.
 .PP
-Definition at line 548 of file table.c.
+Definition at line 566 of file table.c.
 .SS "int netsnmp_update_variable_list_from_index (netsnmp_table_request_info * tri)"
 .PP
 parses an OID into table indexses.
 .PP
-Definition at line 540 of file table.c.
+Definition at line 558 of file table.c.
 .SS "int table_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the table helper handler.
 .PP
-Definition at line 109 of file table.c.
+Definition at line 120 of file table.c.

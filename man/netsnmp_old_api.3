@@ -1,4 +1,4 @@
-.TH "old_api: Calls mib module code written in the old style of code." 3 "19 Apr 2002" "net-snmp" \" -*- nroff -*-
+.TH "old_api: Calls mib module code written in the old style of code." 3 "19 Jun 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,7 +37,7 @@ returns a old_api handler that should be the final calling handler.
 .PP
 Don't use this function. Use the \fBnetsnmp_register_old_api\fP() function instead. 
 .PP
-Definition at line 38 of file old_api.c.
+Definition at line 40 of file old_api.c.
 .PP
 Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
 .PP
@@ -45,16 +45,16 @@ Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
 .PP
 implements the old_api handler.
 .PP
-Definition at line 218 of file old_api.c.
+Definition at line 233 of file old_api.c.
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, netsnmp_session * ss, const char * context, int timeout, int flags)"
 .PP
 registers a row within a mib table.
 .PP
-Definition at line 112 of file old_api.c.
+Definition at line 119 of file old_api.c.
 .SS "int netsnmp_register_old_api (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, netsnmp_session * ss, const char * context, int timeout, int flags)"
 .PP
 Registers an old API set into the mib tree.
 .PP
 Functionally this mimics the old register_mib_context() function (and in fact the new register_mib_context() function merely calls this new old_api one). 
 .PP
-Definition at line 48 of file old_api.c.
+Definition at line 51 of file old_api.c.
