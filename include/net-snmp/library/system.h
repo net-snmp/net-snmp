@@ -131,6 +131,9 @@ SOFTWARE.
 #ifndef HAVE_STRTOUL
     unsigned long   strtoul(const char *, char **, int);
 #endif
+#ifndef HAVE_STRTOK_R
+    char           *strtok_r(char *, const char *, char **);
+#endif
 #ifndef HAVE_SNPRINTF
     int             snprintf(char *, size_t, const char *, ...);
 #endif
