@@ -46,6 +46,8 @@ SOFTWARE.
 #include "context.h"
 #include "acl.h"
 
+#include "../config.h"
+
 extern int  errno;
 int	snmp_dump_packet = 0;
 int log_addresses = 0;
@@ -334,6 +336,18 @@ agent_party_init(myaddr, view)
     return 0; /* SUCCESS */
 }
 
+char *reverse_bytes(buf,num)
+  char *buf;
+  int num;
+{
+  static char outbuf[100];
+  int i;
+  
+  for(i=num-1;i>=0;i--)
+    outbuf[i] = *buf++;
+  return(outbuf);
+}
+
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -345,7 +359,8 @@ main(argc, argv)
     u_short dest_port = 0;
     struct partyEntry *pp;
     u_long myaddr;
-
+    int on=1;
+    int dont_fork=0;
 
     /*
      * usage: snmpd
@@ -366,6 +381,9 @@ main(argc, argv)
 		case 'a':
 		    log_addresses++;
 		    break;
+		case 'f':
+		    dont_fork=1;
+		    break;
 		default:
 		    printf("invalid option: -%c\n", argv[arg][1]);
 		    break;
@@ -373,6 +391,15 @@ main(argc, argv)
 	    continue;
 	}
     }
+#ifdef LOGFILE
+    close(1);
+    open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
+    close(2);
+    dup(1);
+    close(0);
+#endif
+    if (!dont_fork && fork() != 0)   /* detach from shell */
+      exit(0);
     init_snmp();
     init_mib();
     if (read_party_database("/etc/party.conf") > 0){
@@ -406,22 +433,32 @@ main(argc, argv)
 	}
     }
 
-    printf("Opening port(s): ");
+    printf("Opening port(s): "); 
     fflush(stdout);
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
+#ifdef ultrix                            /* little endian systems */
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
+	    || bcmp(reverse_bytes((char *)&myaddr,4), pp->partyTAddress, 4))
+          continue;	/* don't listen for non-local parties */
+#else
+        if ((pp->partyTDomain != DOMAINSNMPUDP)
 	    || bcmp((char *)&myaddr, pp->partyTAddress, 4))
-	    continue;	/* don't listen for non-local parties */
+          continue;	/* don't listen for non-local parties */
+#endif
 	
 	dest_port = 0;
+#ifdef ultrix                            /* little endian systems */
+	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
+#else
 	bcopy(pp->partyTAddress + 4, &dest_port, 2);
+#endif
 	for(index = 0; index < sdlen; index++)
 	    if (dest_port == portlist[index])
 		break;
 	if (index < sdlen)  /* found a hit before the end of the list */
 	    continue;
-	printf("%u ", dest_port);
+	printf("%u ", dest_port); 
 	fflush(stdout);
 	/* Set up connections */
 	sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -432,19 +469,21 @@ main(argc, argv)
 	me.sin_family = AF_INET;
 	me.sin_addr.s_addr = INADDR_ANY;
 	/* already in network byte order (I think) */
-	me.sin_port = dest_port;
+	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
 	    perror("bind");
 	    return 2;
 	}
 	sdlist[sdlen] = sd;
 	portlist[sdlen] = dest_port;
+        fcntl(sd,F_SETFD,1);           /* close on exec */
 	if (++sdlen == 32){
 	    printf("No more sockets... ignoring rest of file\n");
 	    break;
 	}	
     }
     printf("\n");
+    fflush(stdout);
     bzero((char *)addrCache, sizeof(addrCache));
     receive(sdlist, sdlen);
     return 0;

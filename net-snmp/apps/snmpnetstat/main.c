@@ -46,7 +46,6 @@ char copyright[] =
 
 #include <ctype.h>
 #include <errno.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <netinet/in.h>
 #include "asn1.h"

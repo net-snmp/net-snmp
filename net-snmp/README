@@ -1,0 +1,159 @@
+DISCLAIMER
+
+  This is an alpha release because I haven't tested everything yet.  I
+  use this software on over 150 hosts to monitor our systems.  Because
+  we use HP-OpenView as our manager, I haven't written any sort of
+  management platform, so there isn't one included here.
+
+  Also, "snmpwalk .1" will not work like it should for my mibs.  I've
+  been too lazy to fix this, but its on the top of my list now.
+
+  I suggest v2 authentication for the mibs...  
+
+INTRO
+
+  This package contains a port and modified code of the CMU 2.1.2.1
+  snmp agent.  It has been modified to to add extensibility quickly
+  and easily.  It is far from the best and most configurable systems;
+  but hey: its free.
+  
+  We use this here to monitor known system problems before they take
+  the machine over.  The agent can be easily configured to monitor the
+  number of processes running, run external scripts to check and
+  report functional status...  A good example is mountd(s) under
+  Ultrix 4.3 which tend to fork themselves crazy and eventually fill up
+  the process table.  On our hp700s, amd sometimes stops working, vue
+  hangs and fails to start X, etc.
+
+  We use HP-OpenView to poll the enclosed agent every half an hour
+  looking for these problems.  The problems are then logged in a file,
+  which the programmers monitor using xlbiff.  I don't know how useful
+  this package will be to the outside world, but I thought I'd let you
+  decide that for yourself.
+
+DESIGN
+
+  Each mib that we use has the following conventions:  Under each mib
+  in the extensible section, there are a number of tables that are
+  built into every mib:
+
+  .1    INDEX -- A unique numeral for each entry
+  .2    NAME  -- unique name 
+  .100  FLAG  -- In most cases a 1 or a 0 indicating an error.
+                 For extensible shell/exec functions, the exit status
+		 of the process.
+  .101  MESG  -- A message describing the problem or the first line of
+                 the output of the shell/exec.
+  .102  FIX   -- A settable entry to fix the given problem using a
+                 shell script or whatever that knows how to fix things.
+
+  Now, lets take the process check mib (defined in config.h).  Under this
+  mib there is the following set of additional mib tables:
+
+  .3    MIN   -- straight from the config file
+  .4    MAX   -- ditto
+  .5    NUM   -- the actual number found running
+
+  The exec entries that define their own mibs use the standard
+  extensions defined above.
+
+SUPPORTED ARCHITECTURES
+
+  I'm using it on three architectures:  
+     hp700s/hpux9.0.5
+        -- I develop here...  Its the architecture best supported in
+	   this package.  I haven't implemented everything on the
+	   sun/dec architectures.  
+
+     sun4/4.1.4               (note:  NOT SOLARIS) (note: no disk/swap/load)
+     Dec5000/Ultrix 4.3                            (note: no swap)
+
+INSTALLATION
+
+  Edit config.h in this directory to taste.  Its barely well documented. 
+
+  make
+
+MAN PAGES/DOCUMENTATION
+
+  Write them for me, would ya?  All you get is this file!
+
+CONFIGURATION
+
+  By default, it looks for two files when it starts up, both of which
+  are defined in config.h.  This file contains different types of
+  arguments (check the arch list above.  Only hp700s can do everything):
+
+--
+
+  proc PROCESSNAME [MAX] [MIN]
+  e.g.:  proc ntalkd 4 0
+
+  This checks the process list for PROCESSNAME, and reports an error
+  if not found or less than MIN are found or more than MAX are found.
+
+--
+
+  swap SIZE
+  e.g.:  swap 16000
+
+  Reports an error if less than SIZE swap space is available.
+
+--
+
+  disk MOUNTLOC SIZE
+  e.g.:  disk / 10000
+
+  Generates an error if MOUNTLOC has less than SIZE bytes of space.
+
+--
+
+  load ONE FIVE FIFTEEN
+  e.g.:  load 12 14 14
+  
+  Generates an error if the load-average of a machine grows beyond
+  these numbers.  Useful if your machine stops receiving mail beyond a
+  given load average.
+
+--
+
+  exec [MIB] NAME COMMAND
+  shell [MIB] NAME COMMAND
+  e.g.:  exec test /bin/sh /script/to/check/something
+  e.g.:  exec .1.3.6.4.1000.10 top /usr/local/bin/top
+
+  Execs the script and reports the exit status and one line output for
+  the default mib specified in config.h.  If a mib is given, it uses
+  that location in the mib tree instead and you can snmpwalk the
+  output for *all* the lines of output.
+
+  e.g.:  "snmpwalk -v 1 machine public .1.3.6.4.1000.10.101" will get you the
+         "top" output from the machine.
+
+--
+
+MISC
+
+  snmpd now detaches from the shell unless -f is specified (don't fork)
+
+  the "local" directory has some scripts I use here.  They will not
+  work straight up on your system without modification!
+
+    -- trapnotif -- called from OV upon detection of an error
+    -- snmpcheck -- pre-pre-alpha of a perl5.001/Tkb4 script to 
+                    fix/monitor problems
+    -- rsnmp     -- snmpwalks known mibs (so you don't have to
+                    remember them)
+    -- fixproc   -- the perl script we use to fix things remotely.
+
+CLOSING
+
+Have fun,
+I love patches.   Send some to me!
+                                                                _____
+			        			       / ___ \
+Wes Hardaker		             		       	      / /   \/
+Department of Electrical and Computer Engineering            \--/     /\
+University of California at Davis	 __________________   \/     /--\
+Davis CA  95616                         /     Recycle      \    /\___/ /
+(hardaker@ece.ucdavis.edu)             / It's not too late! \   \_____/
