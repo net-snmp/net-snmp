@@ -416,6 +416,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 {
     u_long addr;
     u_short port;
+    unsigned char *adp;
     struct partyEntry *pp1, *pp2, *rp;
     struct contextEntry *cxp, *rxp;
     struct aclEntry *ap;
@@ -427,10 +428,11 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
 	return -1;
     }
-    dst[9] =  (destaddr & 0xFF000000) >> 24;
-    dst[10] = (destaddr & 0x00FF0000) >> 16;
-    dst[11] = (destaddr & 0x0000FF00) >> 8;
-    dst[12] = (destaddr & 0x000000FF);
+    adp = (unsigned char *)&destaddr;
+    dst[9] =  adp[0];
+    dst[10] = adp[1];
+    dst[11] = adp[2];
+    dst[12] = adp[3];
     dst[13] = 1;
 
     pp1 = party_getEntry(dst, *dstlen);
@@ -469,10 +471,10 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
 	return -1;
     }
-    src[9] =  (destaddr & 0xFF000000) >> 24;
-    src[10] = (destaddr & 0x00FF0000) >> 16;
-    src[11] = (destaddr & 0x0000FF00) >> 8;
-    src[12] = (destaddr & 0x000000FF);
+    src[9] =  adp[0];
+    src[10] = adp[1];
+    src[11] = adp[2];
+    src[12] = adp[3];
     src[13] = 2;
     pp2 = party_getEntry(src, *srclen);
     if (!pp2){
@@ -508,10 +510,10 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.4.128.2.35.55.1");
 	return -1;
     }
-    context[9] =  (destaddr & 0xFF000000) >> 24;
-    context[10] = (destaddr & 0x00FF0000) >> 16;
-    context[11] = (destaddr & 0x0000FF00) >> 8;
-    context[12] = (destaddr & 0x000000FF);
+    context[9] =  adp[0];
+    context[10] = adp[1];
+    context[11] = adp[2];
+    context[12] = adp[3];
     context[13] = 1;
     cxp = context_getEntry(context, *contextlen);
     if (!cxp){
