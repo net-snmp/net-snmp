@@ -88,7 +88,7 @@
 
 void            Init_HR_Disk(void);
 int             Get_Next_HR_Disk(void);
-int             Get_Next_HR_Disk_Partition(char *, int);
+int             Get_Next_HR_Disk_Partition(char *, size_t, int);
 static void     Add_HR_Disk_entry(const char *, int, int, int, int,
                                   const char *, int, int);
 static void     Save_HR_Disk_General(void);
@@ -733,7 +733,7 @@ Get_Next_HR_Disk(void)
 }
 
 int
-Get_Next_HR_Disk_Partition(char *string, int HRP_index)
+Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
 {
     DEBUGMSGTL(("host/hr_disk", "Next_Partition type %d/%d:%d\n",
                 HRD_type_index, HRD_type_index, HRP_index));
@@ -751,20 +751,20 @@ Get_Next_HR_Disk_Partition(char *string, int HRP_index)
      * Construct the partition name in "string" 
      */
     if (disk_devices[HRD_type_index].disk_controller != -1) {
-        snprintf(string, sizeof(string),
+        snprintf(string, str_len,
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_controller,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
                 HRP_index);
     } else {
-        snprintf(string, sizeof(string),
+        snprintf(string, str_len,
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
                 HRP_index);
     }
-    string[ sizeof(string)-1 ] = 0;
+    string[ str_len-1 ] = 0;
 
     DEBUGMSGTL(("host/hr_disk",
                 "Get_Next_HR_Disk_Partition: %s (%d/%d:%d)\n", string,
