@@ -1363,7 +1363,7 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
-#ifdef WIN32
+#if defined (WIN32) || defined (mingw32)
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
 #else
