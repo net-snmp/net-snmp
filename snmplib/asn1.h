@@ -152,6 +152,9 @@ u_char	*asn_build_unsigned_int (u_char *, size_t *, u_char, u_long *, size_t);
 u_char	*asn_parse_string (u_char *, size_t *, u_char *, u_char *, size_t *);
 u_char	*asn_build_string (u_char *, size_t *, u_char, const u_char *, size_t);
 u_char	*asn_parse_header (u_char *, size_t *, u_char *);
+u_char	*asn_parse_sequence(u_char *, size_t *, u_char *,
+		 u_char	expected_type,	/* must be this type */
+		 const char *estr);	/* error message prefix */
 u_char	*asn_build_header (u_char *, size_t *, u_char, size_t);
 u_char	*asn_build_sequence (u_char *, size_t *, u_char, size_t);
 u_char	*asn_parse_length (u_char *, u_long *);

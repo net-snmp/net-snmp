@@ -64,6 +64,88 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_impl.h" /* to define ERROR_MSG */
 
+static
+void _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
+{
+    char ebuf[128];
+
+    sprintf(ebuf,"%s size %d: s/b %d",str, wrongsize, rightsize);
+    ERROR_MSG(ebuf);
+}
+
+static
+void _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
+{
+    char ebuf[128];
+
+    sprintf(ebuf,"%s length %d too large: exceeds %d",str, wrongsize, rightsize);
+    ERROR_MSG(ebuf);
+}
+
+/*
+ * call after asn_parse_length to verify result.
+ */
+static
+int _asn_parse_length_check(const char *str,
+                   u_char *bufp, u_char *data,
+                   u_long plen, size_t dlen)
+{
+    char ebuf[128];
+    size_t header_len;
+
+    if (bufp == NULL){
+	/* error message is set */
+	return 1;
+    }
+    header_len = bufp - data;
+    if (((size_t)plen + header_len) > dlen){
+	sprintf(ebuf, "%s: message overflow: %d len + %d delta > %d len",
+		str, (int)plen, (int)header_len, (int)dlen);
+	ERROR_MSG(ebuf);
+	return 1;
+    }
+    return 0;
+}
+
+/*
+ * call after asn_build_header to verify result.
+ */
+static
+int _asn_build_header_check(const char *str, u_char *data,
+                      size_t datalen, size_t typedlen)
+{
+    char ebuf[128];
+    
+    if (data == NULL){
+	/* error message is set */
+	return 1;
+    }
+    if (datalen < typedlen){
+	sprintf(ebuf, "%s: bad header, length too short: %d < %d", str, datalen, typedlen);
+	ERROR_MSG(ebuf);
+	return 1;
+    }
+    return 0;
+}
+
+static
+int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
+{
+    char ebuf[128];
+
+    if (asn_length < 1){
+	sprintf(ebuf,"%s: length %d too small", str, (int)asn_length);
+	ERROR_MSG(ebuf);
+	return 1;
+    }
+    if (datum > 7){
+	sprintf(ebuf,"%s: datum %d >7: too large", str, (int)(datum));
+	ERROR_MSG(ebuf);
+	return 1;
+    }
+    return 0;
+}
+
 /*
  * asn_parse_int - pulls a long out of an ASN int type.
  *  On entry, datalength is input as the number of valid bytes following
@@ -92,28 +174,26 @@ asn_parse_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
+    static const char *errpre = "parse int";
+    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register long   value = 0;
 
     if (intsize != sizeof (long)){
-	ERROR_MSG("not long");
+	_asn_size_err(errpre, intsize, sizeof(long));
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL){
-	ERROR_MSG("bad length");
+    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
+	return NULL;
+
+    if ((size_t)asn_length > intsize){
+	_asn_length_err(errpre, (size_t)asn_length, intsize);
 	return NULL;
     }
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
-    if ((int)asn_length > intsize){
-	ERROR_MSG("I don't support such large integers");
-	return NULL;
-    }
+
     *datalength -= (int)asn_length + (bufp - data);
     if (*bufp & 0x80)
 	value = -1; /* integer is negative */
@@ -157,27 +237,24 @@ asn_parse_unsigned_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
+    static const char *errpre = "parse uint";
+    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long value = 0;
 
     if (intsize != sizeof (long)){
-	ERROR_MSG("not long");
+	_asn_size_err(errpre, intsize, sizeof(long));
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL){
-	ERROR_MSG("bad length");
+    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
 	return NULL;
-    }
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+
     if (((int)asn_length > (intsize + 1)) ||
 	(((int)asn_length == intsize + 1) && *bufp != 0x00)){
-	ERROR_MSG("I don't support such large integers");
+	_asn_length_err(errpre, (size_t)asn_length, intsize);
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
@@ -223,12 +300,14 @@ asn_build_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
-
+	static const char *errpre = "build int";
     register long integer;
     register u_long mask;
 
-    if (intsize != sizeof (long))
+    if (intsize != sizeof (long)){
+	_asn_size_err(errpre, intsize, sizeof(long));
 	return NULL;
+    }
     integer = *intp;
     /*
      * Truncate "unnecessary" bytes off of the most significant end of this
@@ -244,10 +323,9 @@ asn_build_int(u_char *data,
 	integer <<= 8;
     }
     data = asn_build_header(data, datalength, type, intsize);
-    if (data == NULL)
+    if (_asn_build_header_check(errpre,data,*datalength,intsize))
 	return NULL;
-    if (*datalength < intsize)
-	return NULL;
+
     *datalength -= intsize;
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /* mask is 0xFF000000 on a big-endian machine */
@@ -286,13 +364,15 @@ asn_build_unsigned_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
-
+	static const char *errpre = "build uint";
     register u_long integer;
     register u_long mask;
     int add_null_byte = 0;
 
-    if (intsize != sizeof (long))
+    if (intsize != sizeof (long)){
+	_asn_size_err(errpre, intsize, sizeof(long));
 	return NULL;
+    }
     integer = *intp;
     mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
     /* mask is 0xFF000000 on a big-endian machine */
@@ -314,10 +394,9 @@ asn_build_unsigned_int(u_char *data,
 	}
     }
     data = asn_build_header(data, datalength, type, intsize);
-    if (data == NULL)
+    if (_asn_build_header_check(errpre,data,*datalength,intsize))
 	return NULL;
-    if (*datalength < intsize)
-	return NULL;
+
     *datalength -= intsize;
     if (add_null_byte == 1){
 	*data++ = '\0';
@@ -364,19 +443,18 @@ asn_parse_string(u_char *data,
 		 u_char *string,
 		 size_t *strlength)
 {
+    static const char *errpre = "parse string";
+    char ebuf[128];
     u_char *bufp = data;
     u_long  asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL)
+    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
 	return NULL;
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+
     if ((int)asn_length > *strlength){
-	ERROR_MSG("I don't support such long strings");
+	_asn_length_err(errpre, (size_t)asn_length, *strlength);
 	return NULL;
     }
 
@@ -424,10 +502,9 @@ asn_build_string(u_char *data,
  * This code will never send a compound string.
  */
     data = asn_build_header(data, datalength, type, strlength);
-    if (data == NULL)
+    if (_asn_build_header_check("build string", data, *datalength, strlength))
 	return NULL;
-    if (*datalength < strlength)
-	return NULL;
+
     if (strlength) {
       if (string == NULL) {
 	memset(data, 0, strlength);
@@ -460,10 +537,14 @@ asn_parse_header(u_char	*data,
 		 size_t *datalength,
 		 u_char	*type)
 {
-    register u_char *bufp = data;
-    register int    header_len;
+    register u_char *bufp;
     u_long	    asn_length;
 
+    if (!data || !datalength || !type) {
+	ERROR_MSG("parse header: NULL pointer");
+	return NULL;
+    }
+    bufp = data;
     /* this only works on data types < 30, i.e. no extension octets */
     if (IS_EXTENSION_ID(*bufp)){
 	ERROR_MSG("can't process ID >= 30");
@@ -473,13 +554,9 @@ asn_parse_header(u_char	*data,
     DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2x\n", *bufp));
     *type = *bufp;
     bufp = asn_parse_length(bufp + 1, &asn_length);
-    if (bufp == NULL)
+    if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
 	return NULL;
-    header_len = bufp - data;
-    if ((header_len + asn_length) > (u_long)(*datalength)){
-	ERROR_MSG("asn length too long");
-	return NULL;
-    }
+
 #ifdef OPAQUE_SPECIAL_TYPES
 
     if ((*type == ASN_OPAQUE) &&
@@ -506,21 +583,37 @@ asn_parse_header(u_char	*data,
       }
       /* value is encoded as special format */
       bufp = asn_parse_length(bufp + 2, &asn_length);
-      if (bufp == NULL)
+      if (_asn_parse_length_check("parse opaque header", bufp, data,
+                  asn_length, *datalength))
         return NULL;
-      header_len = bufp - data;
-      if ((header_len + (int)asn_length) > (int)*datalength){
-        ERROR_MSG("asn length too long");
-        return NULL;
-      }
     }
 #endif /* OPAQUE_SPECIAL_TYPES */
+
     *datalength = (int)asn_length;
 
-
     return bufp;
+}
 
-}  /* end asn_parse_header() */
+/*
+ * same as asn_parse_header with test for expected type.
+ */
+u_char *
+asn_parse_sequence(u_char	*data,
+		 size_t *datalength,
+		 u_char	*type,
+		 u_char	expected_type, /* must be this type */
+		 const char *estr)	/* error message prefix */
+{
+    data = asn_parse_header(data, datalength, type);
+    if (data && (*type != expected_type)) {
+	char ebuf[128];
+	sprintf(ebuf, "%s header type %02X: s/b %02X", estr,
+			(u_char)*type, (u_char)expected_type);
+	ERROR_MSG(ebuf);
+	return NULL;
+    }
+    return data;
+}
 
 
 
@@ -549,12 +642,16 @@ asn_build_header (u_char *data,
 		  u_char type,
 		  size_t length)
 {
-    if (*datalength < 1)
+    char ebuf[128];
+    
+    if (*datalength < 1){
+	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
+	ERROR_MSG(ebuf);
 	return NULL;
+    }	    
     *data++ = type;
     (*datalength)--;
     return asn_build_length(data, datalength, length);
-    
 }
 
 /*
@@ -582,9 +679,14 @@ asn_build_sequence(u_char *data,
 		  u_char type,
 		  size_t length)
 {
+    static const char *errpre = "build seq";
+    char ebuf[128];
+    
     *datalength -= 4;
     if (*datalength < 0){
 	*datalength += 4;	/* fix up before punting */
+	sprintf(ebuf, "%s: length %d < 4: PUNT", errpre, (int)*datalength);
+	ERROR_MSG(ebuf);
 	return NULL;
     }
     *data++ = type;
@@ -610,16 +712,27 @@ u_char *
 asn_parse_length(u_char  *data,
 		 u_long  *length)
 {
-    register u_char lengthbyte = *data;
+    static const char *errpre = "parse length";
+    char ebuf[128];
+    register u_char lengthbyte;
+    
+    if (!data || !length) {
+	ERROR_MSG("parse length: NULL pointer");
+	return NULL;
+    }
+    lengthbyte = *data;
 
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
 	if (lengthbyte == 0){
-	    ERROR_MSG("We don't support indefinite lengths");
+	    sprintf(ebuf, "%s: indefinite length not supported", errpre);
+	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
 	if (lengthbyte > sizeof(long)){
-	    ERROR_MSG("we can't support data lengths that long");
+	    sprintf(ebuf, "%s: data length %d > %d not supported", errpre,
+                 lengthbyte, sizeof(long));
+	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
 	*length = 0;  /* protect against short lengths */
@@ -652,25 +765,31 @@ asn_build_length(u_char *data,
 		 size_t *datalength,
 		 size_t length)
 {
+    static const char *errpre = "build length";
+    char ebuf[128];
+    
     u_char    *start_data = data;
 
     /* no indefinite lengths sent */
     if (length < 0x80){
 	if (*datalength < 1){
-	    ERROR_MSG("build_length");
+	    sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
 	*data++ = (u_char)length;
     } else if (length <= 0xFF){
 	if (*datalength < 2){
-	    ERROR_MSG("build_length");
+	    sprintf(ebuf, "%s: bad length < 2 :%d, %d",errpre,*datalength,length);
+	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
 	*data++ = (u_char)(0x01 | ASN_LONG_LEN);
 	*data++ = (u_char)length;
     } else { /* 0xFF < length <= 0xFFFF */
 	if (*datalength < 3){
-	    ERROR_MSG("build_length");
+	    sprintf(ebuf, "%s: bad length < 3 :%d, %d",errpre,*datalength,length);
+	    ERROR_MSG(ebuf);
 	    return NULL;
 	}	    
 	*data++ = (u_char)(0x02 | ASN_LONG_LEN);
@@ -722,12 +841,10 @@ asn_parse_objid(u_char *data,
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL)
+    if (_asn_parse_length_check("parse objid", bufp, data,
+                    asn_length, *datalength))
 	return NULL;
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+
     *datalength -= (int)asn_length + (bufp - data);
 
     DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
@@ -748,7 +865,7 @@ asn_parse_objid(u_char *data,
 /*?? note, this test will never be true, since the largest value
      of subidentifier is the value of MAX_SUBID! */
 	if (subidentifier > (u_long)MAX_SUBID){
-	    ERROR_MSG("subidentifier too long");
+	    ERROR_MSG("subidentifier too large");
 	    return NULL;
 	}
 	*oidp++ = (oid)subidentifier;
@@ -864,9 +981,7 @@ asn_build_objid(u_char *data,
 
     /* store the ASN.1 tag and length */
     data = asn_build_header(data, datalength, type, asnlength);
-    if (data == NULL)
-	return NULL;
-    if (*datalength < asnlength)
+    if (_asn_build_header_check("build objid", data, *datalength, asnlength))
 	return NULL;
 
     /* store the encoded OID value */
@@ -940,12 +1055,15 @@ asn_parse_null(u_char *data,
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL)
-	return NULL;
-    if (asn_length != 0){
-	ERROR_MSG("Malformed NULL");
+    if (bufp == NULL){
+	ERROR_MSG("parse null: bad length");
 	return NULL;
     }
+    if (asn_length != 0){
+	ERROR_MSG("parse null: malformed ASN.1 null");
+	return NULL;
+    }
+
     *datalength -= (bufp - data);
 
     DEBUGDUMPSETUP("dump_recv", data, bufp - data);
@@ -1010,29 +1128,24 @@ asn_parse_bitstring(u_char *data,
 /*
  * bitstring ::= 0x03 asnlength unused {byte}*
  */
+    static const char *errpre = "parse bitstring";
+    char ebuf[128];
+    
     register u_char *bufp = data;
     u_long	    asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL)
+    if (_asn_parse_length_check(errpre, bufp, data,
+               asn_length, *datalength))
 	return NULL;
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
-    if ((int)asn_length > *strlength){
-	ERROR_MSG("I don't support such long bitstrings");
+
+    if ((size_t)asn_length > *strlength){
+	_asn_length_err(errpre, (size_t)asn_length, *strlength);
 	return NULL;
     }
-    if (asn_length < 1){
-	ERROR_MSG("Invalid bitstring");
+    if (_asn_bitstring_check(errpre, asn_length, *bufp))
 	return NULL;
-    }
-    if (*bufp > 7){
-	ERROR_MSG("Invalid bitstring");
-	return NULL;
-    }
 
     DEBUGDUMPSETUP("dump_recv", data, bufp - data);
     DEBUGMSG(("dump_recv", "  ASN Bitstring: "));
@@ -1073,15 +1186,14 @@ asn_build_bitstring(u_char *data,
 /*
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
-    if (strlength < 1 || *string > 7){
-	ERROR_MSG("Building invalid bitstring");
+    static const char *errpre = "build bitstring";
+    if (_asn_bitstring_check(errpre, strlength, *string))
 	return NULL;
-    }
+
     data = asn_build_header(data, datalength, type, strlength);
-    if (data == NULL)
+    if (_asn_build_header_check(errpre,data,*datalength,strlength))
 	return NULL;
-    if (*datalength < strlength)
-	return NULL;
+
     memmove(data, string, strlength);
     *datalength -= strlength;
     return data + strlength;
@@ -1116,25 +1228,22 @@ asn_parse_unsigned_int64(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
+    static const char *errpre = "parse uint64";
+    const int uint64sizelimit = (4 * 2) + 1;
+    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long low = 0, high = 0;
-    int intsize = 4;
     
     if (countersize != sizeof(struct counter64)){
-	ERROR_MSG("not right size");
+	_asn_size_err(errpre, countersize, sizeof(struct counter64));
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL){
-	ERROR_MSG("bad length");
-	return NULL;
-    }
-    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
+        return NULL;
+
     DEBUGDUMPSETUP("dump_recv", data, bufp - data);
 #ifdef OPAQUE_SPECIAL_TYPES
 /* 64 bit counters as opaque */
@@ -1149,17 +1258,14 @@ asn_parse_unsigned_int64(u_char *data,
         *type = *(bufp+1);
         /* value is encoded as special format */
 	bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (bufp == NULL)
-            return NULL;
-        if ((int)(asn_length + (bufp - data)) > *datalength){
-            ERROR_MSG("overflow of message");
-            return NULL;
-        }
+	if (_asn_parse_length_check("parse opaque uint64", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
     }
 #endif /* OPAQUE_SPECIAL_TYPES */
-    if (((int)asn_length > (intsize * 2 + 1)) ||
-	(((int)asn_length == (intsize * 2 + 1)) && *bufp != 0x00)){
-	ERROR_MSG("I don't support such large integers");
+    if (((int)asn_length > uint64sizelimit) ||
+	(((int)asn_length == uint64sizelimit) && *bufp != 0x00)){
+	_asn_length_err(errpre, (size_t)asn_length, uint64sizelimit);
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
@@ -1218,8 +1324,10 @@ asn_build_unsigned_int64(u_char *data,
     int add_null_byte = 0;
     size_t intsize;
 
-    if (countersize != sizeof (struct counter64))
-	return NULL;
+  if (countersize != sizeof(struct counter64)){
+    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
+    return NULL;
+  }
     intsize = 8;
     low = cp->low;
     high = cp->high;
@@ -1251,10 +1359,9 @@ asn_build_unsigned_int64(u_char *data,
     if (type == ASN_OPAQUE_COUNTER64) {
         /* put the tag and length for the Opaque wrapper */
         data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
-        if (data == NULL)
-            return NULL;
-        if (*datalength < (intsize+3))
-            return NULL;
+    if (_asn_build_header_check("build counter u64", data, *datalength, intsize+3))
+	return NULL;
+
 	/* put the special tag and length */
 	*data++ = ASN_OPAQUE_TAG1;
 	*data++ = ASN_OPAQUE_COUNTER64;
@@ -1267,10 +1374,9 @@ asn_build_unsigned_int64(u_char *data,
     if (type == ASN_OPAQUE_U64) {
         /* put the tag and length for the Opaque wrapper */
         data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
-        if (data == NULL)
-            return NULL;
-        if (*datalength < (intsize+3))
-            return NULL;
+    if (_asn_build_header_check("build opaque u64", data, *datalength, intsize+3))
+	return NULL;
+
 	/* put the special tag and length */
 	*data++ = ASN_OPAQUE_TAG1;
 	*data++ = ASN_OPAQUE_U64;
@@ -1281,10 +1387,9 @@ asn_build_unsigned_int64(u_char *data,
     {
 #endif /* OPAQUE_SPECIAL_TYPES */
     data = asn_build_header(data, datalength, type, intsize);
-    if (data == NULL)
+    if (_asn_build_header_check("build uint64", data, *datalength, intsize))
 	return NULL;
-    if (*datalength < intsize)
-	return NULL;
+
 #ifdef OPAQUE_SPECIAL_TYPES
     }
 #endif /* OPAQUE_SPECIAL_TYPES */
@@ -1322,25 +1427,22 @@ asn_parse_signed_int64(u_char *data,
 		       struct counter64 *cp,
 		       size_t countersize)
 {
+  static const char *errpre = "parse int64";
+  const int int64sizelimit = (4 * 2) + 1;
+  char ebuf[128];
   register u_char *bufp = data;
   u_long	    asn_length;
   register u_int low = 0, high = 0;
-  int intsize = 4;
     
   if (countersize != sizeof(struct counter64)){
-    ERROR_MSG("not right size");
+    _asn_size_err(errpre, countersize, sizeof(struct counter64));
     return NULL;
   }
   *type = *bufp++;
   bufp = asn_parse_length(bufp, &asn_length);
-  if (bufp == NULL){
-    ERROR_MSG("bad length");
-    return NULL;
-  }
-  if ((asn_length + (bufp - data)) > (u_int)(*datalength)){
-    ERROR_MSG("overflow of message");
-    return NULL;
-  }
+  if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
+        return NULL;
+
   DEBUGDUMPSETUP("dump_recv", data, bufp - data);
   if ((*type == ASN_OPAQUE) &&
       (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
@@ -1351,21 +1453,20 @@ asn_parse_signed_int64(u_char *data,
     *type = *(bufp+1);
     /* value is encoded as special format */
     bufp = asn_parse_length(bufp + 2, &asn_length);
-    if (bufp == NULL)
-      return NULL;
-    if ((int)(asn_length + (bufp - data)) > *datalength){
-      ERROR_MSG("overflow of message");
-      return NULL;
-    }
+    if (_asn_parse_length_check("parse opaque int64", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
   }
   /* this should always have been true until snmp gets int64 PDU types */
   else {
-    ERROR_MSG("wrong type");
+    sprintf(ebuf, "%s: wrong type: %d, len %d, buf bytes (%02X,%02X)",
+             errpre, *type, (int)asn_length, *bufp, *(bufp+1));
+    ERROR_MSG(ebuf);
     return NULL;
   }
-  if (((int)asn_length > (intsize * 2 + 1)) ||
-      (((int)asn_length == (intsize * 2 + 1)) && *bufp != 0x00)){
-    ERROR_MSG("I don't support such large integers");
+  if (((int)asn_length > int64sizelimit) ||
+      (((int)asn_length == int64sizelimit) && *bufp != 0x00)){
+    _asn_length_err(errpre, (size_t)asn_length, int64sizelimit);
     return NULL;
   }
   *datalength -= (int)asn_length + (bufp - data);
@@ -1416,8 +1517,10 @@ asn_build_signed_int64(u_char *data,
     u_long low, high;
     size_t intsize;
 
-    if (countersize != sizeof (struct counter64))
-	return NULL;
+  if (countersize != sizeof(struct counter64)){
+    _asn_size_err("build int64", countersize, sizeof(struct counter64));
+    return NULL;
+  }
     intsize = 8;
     memcpy(&c64, cp, sizeof(struct counter64));  /* we're may modify it */
     low = c64.low;
@@ -1443,10 +1546,9 @@ asn_build_signed_int64(u_char *data,
        header and then the int64 tag type we use to mark it as an
        int64 in the opaque string. */
     data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
-    if (data == NULL)
+    if (_asn_build_header_check("build int64", data, *datalength, intsize+3))
 	return NULL;
-    if (*datalength < (intsize+3))
-	return NULL;
+
     *data++ = ASN_OPAQUE_TAG1;
     *data++ = ASN_OPAQUE_I64;
     *data++ = (u_char)intsize;
@@ -1495,19 +1597,15 @@ asn_parse_float(u_char *data,
     } fu;
 
     if (floatsize != sizeof(float)){
-	ERROR_MSG("not right size");
+	_asn_size_err("parse float", floatsize, sizeof(float));
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL){
-	ERROR_MSG("bad length");
-	return NULL;
-    }
-    if ((int)(asn_length + (bufp - data)) > *datalength){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+    if (_asn_parse_length_check("parse float", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
+
     DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 /* the float is encoded as an opaque */
     if ((*type == ASN_OPAQUE) &&
@@ -1518,20 +1616,19 @@ asn_parse_float(u_char *data,
 
         /* value is encoded as special format */
 	bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (bufp == NULL)
-            return NULL;
-        if ((int)(asn_length + (bufp - data)) > *datalength){
-            ERROR_MSG("overflow of message");
-            return NULL;
-        }
+	if (_asn_parse_length_check("parse opaque float", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
+
 	/* change type to Float */
 	*type = ASN_OPAQUE_FLOAT;
     }
 
     if (asn_length != sizeof(float)) {
-	ERROR_MSG("Size of float incorrect");
+	_asn_size_err("parse seq float", asn_length, sizeof(float));
 	return NULL;
     }
+
     *datalength -= (int)asn_length + (bufp - data);
     memcpy(&fu.c[0], bufp, asn_length);
 
@@ -1576,18 +1673,18 @@ asn_build_float(u_char *data,
 	u_char c[sizeof(float)];
     } fu;
 
-    if (floatsize != sizeof (float))
+    if (floatsize != sizeof (float)) {
+	_asn_size_err("build float", floatsize, sizeof(float));
 	return NULL;
-
+    }
 /* encode the float as an opaque */
     /* turn into Opaque holding special tagged value */
 
     /* put the tag and length for the Opaque wrapper */
     data = asn_build_header(data, datalength, ASN_OPAQUE, floatsize+3);
-    if (data == NULL)
-        return NULL;
-    if (*datalength < (floatsize+3))
-        return NULL;
+    if (_asn_build_header_check("build float", data, *datalength, (floatsize+3)))
+	return NULL;
+
     /* put the special tag and length */
     *data++ = ASN_OPAQUE_TAG1;
     *data++ = ASN_OPAQUE_FLOAT;
@@ -1632,19 +1729,15 @@ asn_parse_double(u_char *data,
   
 
     if (doublesize != sizeof(double)){
-	ERROR_MSG("not right size");
+	_asn_size_err("parse double", doublesize, sizeof(double));
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (bufp == NULL){
-	ERROR_MSG("bad length");
-	return NULL;
-    }
-    if ((int)(asn_length + (bufp - data)) > *datalength){
-	ERROR_MSG("overflow of message");
-	return NULL;
-    }
+    if (_asn_parse_length_check("parse double", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
+
     DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 /* the double is encoded as an opaque */
     if ((*type == ASN_OPAQUE) &&
@@ -1655,18 +1748,16 @@ asn_parse_double(u_char *data,
 
         /* value is encoded as special format */
 	bufp = asn_parse_length(bufp + 2, &asn_length);
-        if (bufp == NULL)
-            return NULL;
-        if ((int)(asn_length + (bufp - data)) > *datalength){
-            ERROR_MSG("overflow of message");
-            return NULL;
-        }
+	if (_asn_parse_length_check("parse opaque double", bufp, data,
+                  asn_length, *datalength))
+        return NULL;
+
 	/* change type to Double */
 	*type = ASN_OPAQUE_DOUBLE;
     }
 
     if (asn_length != sizeof(double)) {
-	ERROR_MSG("Size of double incorrect");
+	_asn_size_err("parse seq double", asn_length, sizeof(double));
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
@@ -1707,18 +1798,19 @@ asn_build_double(u_char *data,
 	u_char c[sizeof(double)];
     } fu;
 
-    if (doublesize != sizeof (double))
+    if (doublesize != sizeof(double)){
+	_asn_size_err("build double", doublesize, sizeof(double));
 	return NULL;
+    }
 
 /* encode the double as an opaque */
     /* turn into Opaque holding special tagged value */
 
     /* put the tag and length for the Opaque wrapper */
     data = asn_build_header(data, datalength, ASN_OPAQUE, doublesize+3);
-    if (data == NULL)
-        return NULL;
-    if (*datalength < (doublesize+3))
-        return NULL;
+    if (_asn_build_header_check("build double", data, *datalength, doublesize+3))
+	return NULL;
+
     /* put the special tag and length */
     *data++ = ASN_OPAQUE_TAG1;
     *data++ = ASN_OPAQUE_DOUBLE;
@@ -1738,3 +1830,4 @@ asn_build_double(u_char *data,
 }
 
 #endif /* OPAQUE_SPECIAL_TYPES */
+

@@ -134,13 +134,12 @@ snmp_parse_var_op(u_char *data,
     size_t		    var_op_len = *listlength;
     u_char	    *var_op_start = data;
 
-    data = asn_parse_header(data, &var_op_len, &var_op_type);
+    data = asn_parse_sequence(data, &var_op_len, &var_op_type,
+			(ASN_SEQUENCE | ASN_CONSTRUCTOR), "var_op");
     if (data == NULL){
-	ERROR_MSG("No header for variable");
+    	/* msg detail is set */
 	return NULL;
     }
-    if (var_op_type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
-	return NULL;
     data = asn_parse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len);
     if (data == NULL){
 	ERROR_MSG("No OID for variable");
@@ -155,6 +154,7 @@ snmp_parse_var_op(u_char *data,
 	ERROR_MSG("No header for value");
 	return NULL;
     }
+    /* XXX no check for type! */
     *var_val_len = var_op_len;
     data += var_op_len;
     *listlength -= (int)(data - var_op_start);

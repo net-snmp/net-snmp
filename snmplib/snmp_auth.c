@@ -116,16 +116,11 @@ snmp_comstr_parse(u_char *data,
 
     /* Message is an ASN.1 SEQUENCE.
      */
-    data = asn_parse_header(data, length, &type);
+    data = asn_parse_sequence(data, length, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "auth message");
     if (data == NULL){
-        ERROR_MSG("bad header");
         return NULL;
     }
-    if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-        ERROR_MSG("wrong auth header type");
-        return NULL;
-    }
-
 
     /* First field is the version.
      */
