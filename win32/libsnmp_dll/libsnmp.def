@@ -77,6 +77,7 @@ EXPORTS
 	get_myaddr
 	get_uptime
 	snmp_open
+	snmp_open_ex
 	snmp_close
 	snmp_send
 	snmp_read
@@ -91,18 +92,26 @@ EXPORTS
 	snmp_enable_filelog
 	snmp_log        
 	snmp_log_perror
-	DEBUGP
 	snmp_perror     
 	snmp_sess_perror        
 	snmp_add_null_var
 	snmp_pdu_create
 	snmp_fix_pdu
 	snmp_clone_pdu
+	snmp_set_var_value
+	snmp_set_var_objid
 	snmp_api_errstring
 	snmp_errstring
+	snmp_set_detail
 	snmp_synch_response
+	snmp_duplicate_objid
+	snmp_increment_statistic
+	snmp_get_statistic
 	init_snmp
+	snmp_shutdown
 	snmp_add_var
+	run_alarms
+	snmp_clone_var
 	print_oid_report
 	print_oid_report_enable_suffix
 	print_oid_report_enable_symbolic
@@ -129,6 +138,15 @@ EXPORTS
 	snmp_mib_toggle_options
 	snmp_mib_toggle_options_usage
 	read_config_print_usage
+	read_config_with_type
+	read_config_store
+	free_config
+	skip_white
+	skip_not_white
+	register_app_config_handler
+	unregister_app_config_handler
+	read_app_config_store
+	unregister_config_handler
 	snmp_set_do_debugging
 	snmp_get_do_debugging
 	debugmsg
@@ -144,6 +162,7 @@ EXPORTS
 	strncasecmp
 	init_snmp_alarm
 	ds_register_premib
+	ds_register_config
 	ds_set_boolean
 	ds_get_boolean
 	ds_toggle_boolean
@@ -153,6 +172,7 @@ EXPORTS
 	ds_get_string
 	snmp_pdu_add_variable
 	encode_keychange
+	decode_keychange
 	generate_kul
 	sc_init
 	setup_engineID
@@ -169,9 +189,19 @@ EXPORTS
 	usm_add_user
 	usm_create_initial_user
 	usm_parse_create_usmUser
+	usm_save_users
+	usm_parse_config_usmUser
+	usm_get_user
+	usm_get_userList
+	usm_cloneFrom_user
+	usm_create_user
+	usm_remove_user
 	read_premib_configs
 	register_mib_handlers
 	init_snmpv3
+	snmpv3_local_snmpEngineTime
+	snmpv3_local_snmpEngineBoots
+	snmpv3_get_engineID
 	usm_set_reportErrorOnUnknownID
 	get_default_authtype
 	get_default_privtype
@@ -180,6 +210,22 @@ EXPORTS
 	debugmsg_oid
 	config_perror
 	copy_word
+	calculate_time_diff
+	vacm_createGroupEntry
+	vacm_destroyAllGroupEntries
+	vacm_createAccessEntry
+	vacm_destroyAllAccessEntries
+	vacm_createViewEntry
+	vacm_destroyAllViewEntries
+	vacm_getViewEntry
+	vacm_getGroupEntry
+	vacm_getAccessEntry
+	vacm_scanGroupInit
+	vacm_scanGroupNext
+	vacm_scanAccessInit
+	vacm_scanAccessNext
+	vacm_scanViewInit
+	vacm_scanViewNext
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
