@@ -77,6 +77,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "snmp_debug.h"
 #include "int64.h"
 
 int failures = 0;
@@ -145,6 +146,9 @@ int main(int argc, char *argv[])
 
     /* get object names, types, and values */
     for(; arg < argc; arg++){
+      DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %s %s %s\n",
+                  arg,argv[arg], arg+1 < argc ? argv[arg+1] : NULL,
+                  arg+2 < argc ? argv[arg+2] : NULL));
       names[current_name++] = argv[arg++];
       if (arg < argc) {
         switch(*argv[arg]){
