@@ -45,12 +45,15 @@ LIBS=$(NETSNMPLIBS)
 
 @end@
 
-CFLAGS=-I. $(NETSNMPCFLAGS)
+STRICT_FLAGS = -Wall -Wstrict-prototypes
+CFLAGS=-I. $(NETSNMPCFLAGS) $(STRICT_FLAGS)
 
 USER_SRCS = \
-	${name}_data_access.c \
+@if $m2c_create_fewer_files != 1@
 	${name}_data_get.c \
-	${name}_data_set.c
+	${name}_data_set.c \
+@end@
+	${name}_data_access.c
 
 SRCS = $(USER_SRCS) \
 	${name}.c \
@@ -58,9 +61,11 @@ SRCS = $(USER_SRCS) \
 	${name}_interface.c
 
 USER_OBJS =  \
-	${name}_data_access.o \
+@if $m2c_create_fewer_files != 1@
 	${name}_data_get.o \
-	${name}_data_set.o
+	${name}_data_set.o \
+@end@
+	${name}_data_access.o 
 
 OBJS =  $(USER_OBJS) \
 	${name}.o \
@@ -88,8 +93,11 @@ clean:
 @if "$mfd_netsnmp_dir" ne ""@
 
 ${name}.deps ${name}_subagent.deps ${name}_interface.deps: ${name}_Makefile
-${name}_data_access.deps ${name}_data_get.deps:            ${name}_Makefile
+${name}_data_access.deps                                   ${name}_Makefile
+@if $m2c_create_fewer_files != 1@
+${name}_data_get.deps:                                     ${name}_Makefile
 ${name}_data_set.deps:                                     ${name}_Makefile
+@end@
 
 %.deps : %.c
 	@echo "Generating makefile $@ ..."
@@ -101,8 +109,10 @@ include ${name}.deps
 include ${name}_subagent.deps
 include ${name}_interface.deps
 include ${name}_data_access.deps
+@if $m2c_create_fewer_files != 1@
 include ${name}_data_get.deps
 include ${name}_data_set.deps
+@end@
 @end@
 
 
