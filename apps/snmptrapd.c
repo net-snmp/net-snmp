@@ -603,6 +603,7 @@ int main(int argc, char *argv[])
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
+	    char *opt;
 	    switch(argv[arg][1]){
 		case 'V':
                   fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -615,13 +616,25 @@ int main(int argc, char *argv[])
 		    snmp_set_quick_print(1);
 		    break;
 		case 'D':
-                    debug_register_tokens(&argv[arg][2]);
+		    opt = argv[arg]+2;
+		    if (*opt == 0) {
+			if (++arg == argc) {
+			    usage();
+			    exit(1);
+			}
+			opt = argv[arg];
+		    }
+                    debug_register_tokens(opt);
                     snmp_set_do_debugging(1);
                     break;
                 case 'p':
-		    if (++arg == argc) {
-			usage();
-			exit(1);
+		    opt = argv[arg]+2;
+		    if (*opt == 0) {
+			if (++arg == argc) {
+			    usage();
+			    exit(1);
+			}
+			opt = argv[arg];
 		    }
                     local_port = atoi(argv[arg]);
                     break;
@@ -666,8 +679,15 @@ int main(int argc, char *argv[])
 		    dofork = 0;
 		    break;
 		case 'l':
-		    arg++;
-		    switch(argv[arg][0]) {
+		    opt = argv[arg]+2;
+		    if (*opt == 0) {
+			if (++arg == argc) {
+			    usage();
+			    exit(1);
+			}
+			opt = argv[arg];
+		    }
+		    switch(*opt) {
 			case 'd':
 			   Facility = LOG_DAEMON; break;
 			case '0':
