@@ -441,7 +441,6 @@
 #else
 #define ENV_SEPARATOR ":"
 #define ENV_SEPARATOR_CHAR ':'
-#define _CRTIMP
 #endif
 
 #include SYSTEM_INCLUDE_FILE
