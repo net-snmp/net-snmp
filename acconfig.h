@@ -78,10 +78,10 @@
 @TOP@
 
 /* define the system type include file here */
-#define SYSTEM_INCLUDE_FILE "s/generic.h"
+#define SYSTEM_INCLUDE_FILE <net-snmp/system/generic.h>
 
 /* define the machine (cpu) type include file here */
-#define MACHINE_INCLUDE_FILE "m/generic.h"
+#define MACHINE_INCLUDE_FILE <net-snmp/machine/generic.h>
 
 /* SNMPLIBDIR contains important files */
 
