@@ -462,14 +462,17 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
 
         case 'l':
             if (!strcasecmp(optarg, "noAuthNoPriv") || !strcmp(optarg, "1")
+                || !strcasecmp(optarg, "noauth")
                 || !strcasecmp(optarg, "nanp")) {
                 session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
             } else if (!strcasecmp(optarg, "authNoPriv")
                        || !strcmp(optarg, "2")
+                       || !strcasecmp(optarg, "auth")
                        || !strcasecmp(optarg, "anp")) {
                 session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
             } else if (!strcasecmp(optarg, "authPriv")
                        || !strcmp(optarg, "3")
+                       || !strcasecmp(optarg, "priv")
                        || !strcasecmp(optarg, "ap")) {
                 session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
             } else {
