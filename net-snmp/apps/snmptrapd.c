@@ -898,10 +898,21 @@ main(int argc, char *argv[])
             *sep = 0;
         }
 
-        transport = netsnmp_tdomain_transport(cp, 1, "udp");
+            /*
+             * Make sure this defaults to listening on port 162
+             */
+        char  listen_name[128];
+        char *cp2 = strchr(cp, ':');
+        if (!cp2) {
+            snprintf(listen_name, sizeof(listen_name), "%s:162", cp);
+            cp2 = listen_name;
+        } else {
+            cp2 = cp;
+        }
+        transport = netsnmp_tdomain_transport(cp2, 1, "udp");
         if (transport == NULL) {
             snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
-                     cp, errno, strerror(errno));
+                     cp2, errno, strerror(errno));
             snmptrapd_close_sessions(sess_list);
             SOCK_CLEANUP;
             exit(1);
