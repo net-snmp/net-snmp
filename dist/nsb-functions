@@ -12,12 +12,14 @@ nsb-sysname()
 #
 # Utility vars
 #
+NSB_VERSION=${NSB_VERSION:=""}
 NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
-NSB_BUILD_PREF=${NSB_BUILD_PREF:="host"}
+NSB_BUILD_SUFFIX=${NSB_BUILD_SUFFIX:=""}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
 NSB_PLATFORM=${NSB_PLATFORM:=`nsb-sysname`}
-NSB_HOST=${NSB_HOST:=`hostname -s`}
+# sun doesn't support hostname -s
+NSB_HOST=${NSB_HOST:=`hostname | cut -f1 -d.`}
 NSB_QUIET=${NSB_QUIET:=0}
 NSB_PROMPT=${NSB_PROMPT:=0}
 NSB_CLEAN=${NSB_CLEAN:=1}
@@ -302,20 +304,18 @@ nsb-make()
 
 nsb-default-paths()
 {
+   if [ -z "$NSB_VERSION" ]; then
+      NSB_VERSION="unknown-version"
+   fi
    if [ -z "$NSB_SRC_DIR" ]; then
-      NSB_SRC_DIR=$HOME/src/net-snmp-$VERSION
+      NSB_SRC_DIR=$HOME/src/net-snmp-$NSB_VERSION
    fi
    if [ -z "$NSB_BUILD_DIR" ]; then
-      if [ "x$NSB_BUILD_PREF" = "xhost" ]; then
-         NSB_BUILD_DIR=$HOME/build/$NSB_HOST
-      else
-         NSB_BUILD_DIR=$HOME/build/$NSB_PLATFORM
-      fi
-      if [ $NSB_SRC_DIR != $NSB_BUILD_DIR ];then
-         NSB_BUILD_DIR=$NSB_BUILD_DIR/$VERSION
-      fi
+      NSB_BUILD_DIR=$HOME/build/$NSB_VERSION
    fi
-
+   if [ ! -z "$NSB_SUFFIX" ]; then
+      NSB_BUILD_DIR=$NSB_BUILD_DIR/$NSB_SUFFIX
+   fi
    if [ -z "$NSB_INSTALL_DIR" ]; then
       NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
    fi
