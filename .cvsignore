@@ -1,3 +1,4 @@
+.software.db.sh
 ChangeLog.add
 EXAMPLE.conf
 Makefile
@@ -9,6 +10,6 @@ config.status
 ece-mib.txt
 make.out
 mib.txt
+mib_module_config.h
 sedscript
 ucd-snmp.txt
-.software.db.sh
