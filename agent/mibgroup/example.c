@@ -79,9 +79,9 @@ header_example(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DODEBUG ("var_example: %s %d\n", c_oid, exact);
+      DEBUGP ("var_example: %s %d\n", c_oid, exact);
       sprint_objid (c_oid, vp->name, vp->namelen);
-      DODEBUG ("\tvp->name: %s\n", c_oid);
+      DEBUGP ("\tvp->name: %s\n", c_oid);
     }
 
     /* copy our mib oid from the vp->name structure */

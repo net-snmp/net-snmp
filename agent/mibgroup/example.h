@@ -51,7 +51,7 @@ u_char	*var_example __P((struct variable *, oid *, int *, int, int *, int (**wri
    last entry. */
 
 struct variable2 example_variables[] = {
-    { EXAMPLESTRING,  STRING, RONLY, var_example, 1, {1}},
+    { EXAMPLESTRING,  ASN_OCTET_STR, RONLY, var_example, 1, {1}},
   /* Load the first table entry.  arguments:
      1: EXAMPLESTRING: magic number to pass back to us and used to
                        check against the incoming mib oid requested

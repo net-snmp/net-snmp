@@ -3,6 +3,13 @@
  *
  */
 
+#include <config.h>
+#include <sys/types.h>
+
+/* mibincl.h contains all the snmp specific headers to define the
+   return types and various defines and structures. */
+#include "mibincl.h"
+
 #include "wombat.h"
 
 
@@ -63,12 +70,10 @@ void	init_wombat( )
      the kernel and returns the value.  It does not have to be done in
      the init_wombat() routine, but we've put it here for our
      example. */
+#ifdef CAN_USE_NLIST
     auto_nlist("wombatstat");
+#endif
 };
-
-
-
-}
 
 /* function which scans a given snmpd.conf line for information */
 
