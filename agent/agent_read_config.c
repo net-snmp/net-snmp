@@ -106,6 +106,7 @@
 #include <net-snmp/agent/table_iterator.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
+#include "agent_module_includes.h"
 #include "mib_module_includes.h"
 
 char            dontReadConfigFiles;
@@ -199,7 +200,14 @@ snmpd_set_agent_address(const char *token, char *cptr)
 void
 init_agent_read_config(const char *app)
 {
+    char buf[BUFSIZ];
+
     if (app != NULL) {
+#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
+        snprintf(buf, BUFSIZ, "agentx:%s", app);
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			      NETSNMP_DS_LIB_APPTYPES, buf);
+#endif
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
 			      NETSNMP_DS_LIB_APPTYPE, app);
     } else {
@@ -255,6 +263,7 @@ init_agent_read_config(const char *app)
 			       NETSNMP_DS_AGENT_LEAVE_PIDFILE);
     netsnmp_init_handler_conf();
 
+#include "agent_module_dot_conf.h"
 #include "mib_module_dot_conf.h"
 #ifdef TESTING
     print_config_handlers();
