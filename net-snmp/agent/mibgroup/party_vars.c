@@ -1,5 +1,11 @@
 #include <config.h>
 
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -16,7 +22,7 @@
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
-#include "system.h"
+#include "../../snmplib/system.h"
 
 #include "acl.h"
 #include "view.h"
@@ -33,7 +39,7 @@ static oid noPriv[] = {1, 3, 6, 1, 6, 3, 3, 1, 1, 2};
 static oid dESPrivProt[] = {1, 3, 6, 1, 6, 3, 3, 1, 1, 3};
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
-				&& !bcmp((char *)(o1), (char *)(o2), \
+				&& !memcmp((char *)(o1), (char *)(o2), \
 					 (l1)*sizeof(oid)))
 
 #define PARTYIDENTITY_MASK		0x0001
@@ -102,14 +108,12 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
    oid      *name;
    int      length;
 {
-    struct partyEntry *pp, *rp;
+    struct partyEntry *pp, *rp = NULL;
     int var, indexlen, len;
     oid *index;
     long val;
     oid buf[32];
     int bigsize = 1000, size;
-    struct aclEntry *ap;
-    struct viewEntry *vp;
     u_long myaddr;
     
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
@@ -131,7 +135,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	 * partyIndex is automatically defval'd by party_createEntry().
          */
 	rp->partyTDomain = DOMAINSNMPUDP;
-	bzero((char *)rp->partyTAddress, 6);
+	memset((char *)rp->partyTAddress, 0, 6);
 	rp->partyTAddressLen = 6;
 	rp->partyMaxMessageSize = 484;
 	rp->partyLocal = 2; /* FALSE */
@@ -158,7 +162,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	       to have overlayed data after the code above has executed.
 	      */
 	    pp->partyTDomain = rp->partyTDomain;
-	    bcopy(rp->partyTAddress, pp->partyTAddress, rp->partyTAddressLen);
+	    memcpy(pp->partyTAddress, rp->partyTAddress, rp->partyTAddressLen);
 	    pp->partyTAddressLen = rp->partyTAddressLen;
 	    pp->partyMaxMessageSize = rp->partyMaxMessageSize;
 	    pp->partyLocal = rp->partyLocal;
@@ -224,7 +228,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->partyBitMask |= PARTYTADDRESS_MASK;
 	} else if (action == COMMIT){
 	    pp->partyTAddressLen = rp->partyTAddressLen;
-	    bcopy(rp->partyTAddress, pp->partyTAddress, pp->partyTAddressLen);
+	    memcpy(pp->partyTAddress, rp->partyTAddress, pp->partyTAddressLen);
 	}
 	break;
       case PARTYMAXMESSAGESIZE:
@@ -239,7 +243,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	} else if (action == RESERVE2){
 	    myaddr = get_myaddr();
 	    if ((rp->partyTDomain == DOMAINSNMPUDP)
-		&& !bcmp((char *)&myaddr, rp->partyTAddress, 4)){
+		&& !memcmp((char *)&myaddr, rp->partyTAddress, 4)){
 		/* party is local */
 		/* 1500 should be constant in snmp_impl.h */
 		if (rp->partyMaxMessageSize > 1500)
@@ -261,7 +265,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	} else if (action == RESERVE2){
 	    myaddr = get_myaddr();
 	    if (val == 1 && (rp->partyTDomain == DOMAINSNMPUDP)
-		&& bcmp((char *)&myaddr, rp->partyTAddress, 4)){
+		&& memcmp((char *)&myaddr, rp->partyTAddress, 4)){
 		/* this is an attempt to set this party local with a
 		   remote IP address */
 		    return SNMP_ERR_INCONSISTENTVALUE;
@@ -341,8 +345,8 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->partyBitMask |= PARTYAUTHPUBLIC_MASK;
 	} else if (action == COMMIT){
 	    pp->partyAuthPublicLen = rp->partyAuthPublicLen;
-	    bcopy((char *)rp->partyAuthPublic,
-		  (char *)pp->partyAuthPublic, pp->partyAuthPublicLen);
+	    memcpy(pp->partyAuthPublic, rp->partyAuthPublic,
+                   pp->partyAuthPublicLen);
 	}
 	break;
       case PARTYAUTHLIFETIME:
@@ -417,8 +421,8 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 		return SNMP_ERR_WRONGLENGTH;
 	    rp->partyBitMask |= PARTYPRIVPUBLIC_MASK;
 	} else if (action == COMMIT){
-	    bcopy((char *)rp->partyPrivPublic, (char *)pp->partyPrivPublic,
-		  rp->partyPrivPublicLen);
+	    memcpy(pp->partyPrivPublic,
+		  rp->partyPrivPublic, rp->partyPrivPublicLen);
 	    pp->partyPrivPublicLen = rp->partyPrivPublicLen;
 	}
 	break;
@@ -475,10 +479,10 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    do {
 		for(; ap; ap = acl_scanNext()){
 		    if ((ap->aclTargetLen == pp->partyIdentityLen
-			 && !bcmp(ap->aclTarget, pp->partyIdentity,
+			 && !memcmp(ap->aclTarget, pp->partyIdentity,
 				  ap->aclTargetLen * sizeof(oid)))
 			|| (ap->aclSubjectLen == pp->partyIdentityLen
-			    && !bcmp(ap->aclSubject, pp->partyIdentity,
+			    && !memcmp(ap->aclSubject, pp->partyIdentity,
 				     ap->aclSubjectLen * sizeof(oid)))){
 			acl_destroyEntry(ap->aclTarget, ap->aclTargetLen,
 					 ap->aclSubject, ap->aclSubjectLen);
@@ -495,7 +499,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    do {
 		for(; vp; vp = view_scanNext()){
 		    if (vp->viewPartyLen == pp->partyIdentityLen
-			&& !bcmp(vp->viewParty, pp->partyIdentity,
+			&& !memcmp(vp->viewParty, pp->partyIdentity,
 				 vp->viewPartyLen * sizeof(oid))){
 			view_destroyEntry(vp->viewParty, vp->viewPartyLen,
 					  vp->viewSubtree, vp->viewSubtreeLen);
@@ -550,10 +554,10 @@ var_party(vp, name, length, exact, var_len, write_method)
  */
 
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     if (exact){
         if (*length < 13 ||
-	    bcmp((char *)name, (char *)vp->name, 11 * sizeof(oid)))
+	    memcmp((char *)name, (char *)vp->name, 11 * sizeof(oid)))
 	    return NULL;
     	*write_method = write_party;
         pp = party_getEntry(name + 12, *length - 12);
@@ -567,8 +571,8 @@ var_party(vp, name, length, exact, var_len, write_method)
       for(pp = party_scanNext(); pp; pp = party_scanNext()){
 	if (!(pp->partyBitMask & mask))
 	    continue;
-	bcopy((char *)pp->partyIdentity, (char *)(newname + 12),
-	      pp->partyIdentityLen * sizeof(oid));
+	memcpy((newname + 12),
+	      pp->partyIdentity, pp->partyIdentityLen * sizeof(oid));
 	newnamelen = 12 + pp->partyIdentityLen;
 	if ((compare(newname, newnamelen, name, *length) > 0) &&
 	    (!lowpp || compare(newname, newnamelen,
@@ -577,7 +581,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	     * if new one is greater than input and closer to input than
 	     * previous lowest, save this one as the "next" one.
 	     */
-	    bcopy((char *)newname, (char *)lowname, newnamelen * sizeof(oid));
+	    memcpy(lowname, newname, newnamelen * sizeof(oid));
 	    lownamelen = newnamelen;
 	    lowpp = pp;
 	}
@@ -585,7 +589,7 @@ var_party(vp, name, length, exact, var_len, write_method)
       if (lowpp == NULL)
 	  return NULL;
       pp = lowpp;
-      bcopy((char *)lowname, (char *)name, lownamelen * sizeof(oid));
+      memcpy(name, lowname, lownamelen * sizeof(oid));
       *length = lownamelen;
     }
 
@@ -650,7 +654,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	return (u_char *)pp->partyPrivPublic;
       case PARTYCLONEFROM:
 	*var_len = 8;
-	bzero(return_buf, 8);
+	memset(return_buf, 0, 8);
 	return (u_char *)return_buf;
       case PARTYSTORAGETYPE:
 	return (u_char *)&pp->partyStorageType;

@@ -24,6 +24,12 @@
 
 #include <config.h>
 
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -58,12 +64,34 @@
 #include "snmp_api.h"
 #include "party.h"
 #include "snmp_client.h"	
+#include "../../snmplib/system.h"
 
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;
 static long eventNextIndex = 1;
 static int write_eventtab __P((int, u_char *, u_char, int, u_char *, oid *,int));
 static int write_eventnotifytab __P((int, u_char *, u_char, int, u_char *, oid *,int));
+static struct eventNotifyEntry *eventNotifyNewRow __P((int, oid *, int));
+static struct eventNotifyEntry *eventNotifyGetRow __P((int, oid *, int));
+static void eventCommitRow __P((struct eventEntry *));
+static void eventNotifyCommitRow __P((struct eventNotifyEntry *));
+static void eventAlarmFillInVars __P((struct variable_list *,
+	struct alarmEntry *, int));
+static void eventSendTrap __P((struct eventEntry *, int, void *));
+static struct eventEntry *eventGetRow __P((int));
+static struct eventEntry *eventNewRow __P((int));
+static void eventUnavailFillInVars __P((struct variable_list *,
+	struct alarmEntry *));
+void eventNotifyUpdateSession __P((struct eventNotifyEntry *));
+static void eventNotifyInsertRow __P((struct eventNotifyEntry *));
+static void eventFreeShadow __P((struct eventEntry *));
+static void eventNotifyFreeShadow __P((struct eventNotifyEntry *));
+static void eventDeleteRow __P((struct eventEntry *));
+static void eventNotifyDeleteRow __P((struct eventNotifyEntry *));
+static int eventShadowRow __P((struct eventEntry *));
+void time_subtract __P((struct timeval *, struct timeval *, struct timeval *));
+static void eventInsertRow __P((struct eventEntry *));
+static int eventNotifyShadowRow __P((struct eventNotifyEntry *));
 
 #define MIN_INTERVAL	1	/* one second */
 #define MAX_RETRANSMISSIONS	20
@@ -259,7 +287,7 @@ eventShadowRow(event)
 	return 0;
     }
     
-    bcopy((char *)event, (char *)event->shadow, sizeof(struct eventEntry));
+    memcpy(event->shadow, event, sizeof(struct eventEntry));
     
     return 1;
 }
@@ -288,7 +316,7 @@ eventNotifyShadowRow(event)
 	return 0;
     }
     
-    bcopy((char *)event, (char *)event->shadow, sizeof(struct eventNotifyEntry));
+    memcpy(event->shadow, event, sizeof(struct eventNotifyEntry));
     
     return 1;
 }
@@ -337,7 +365,7 @@ eventNewRow(index)
 	return NULL;
     }
     
-    bzero((char *)event, sizeof(struct eventEntry));
+    memset((char *)event, 0, sizeof(struct eventEntry));
     
     event->index = index;
     event->status = ENTRY_DESTROY;
@@ -402,11 +430,11 @@ eventNotifyNewRow(index, context, contextLen)
 	return NULL;
     }
     
-    bzero((char *)event, sizeof(struct eventNotifyEntry));
+    memset((char *)event, 0, sizeof(struct eventNotifyEntry));
     
     event->index = index;
     event->contextLen = contextLen;
-    bcopy(context, event->context, contextLen * sizeof(oid));
+    memcpy(event->context, context, contextLen * sizeof(oid));
     event->status = ENTRY_DESTROY;
     event->interval = 30;
     event->retransmissions = 5;
@@ -449,7 +477,7 @@ eventNotifyGetRow(index, context, contextLen)
     
     for (event = eventNotifyTab; event; event = event->next) {
 	if (event->index == index && event->contextLen == contextLen
-	    && !bcmp(event->context, context,
+	    && !memcmp(event->context, context,
 		     contextLen * sizeof(oid))) {
 	    return event;
 		     }
@@ -483,7 +511,7 @@ eventCommitRow(event)
      ** have changed any of the event pointers.
      */
     nextPtr = event->next;
-    bcopy((char *)event->shadow, (char *)event, sizeof(struct eventEntry));
+    memcpy(event, event->shadow, sizeof(struct eventEntry));
     
     if (event->next != nextPtr) {
 	/* KLF debugging */
@@ -520,7 +548,7 @@ eventNotifyCommitRow(event)
      ** have changed any of the event pointers.
      */
     nextPtr = event->next;
-    bcopy((char *)event->shadow, (char *)event, sizeof(struct eventNotifyEntry));
+    memcpy(event, event->shadow, sizeof(struct eventNotifyEntry));
     
     if (event->next != nextPtr) {
 	/* KLF debugging */
@@ -562,6 +590,7 @@ eventNotifyFreeSpace()
 /* add the variables for a objectUnavailableAlarm trap to the
 ** end of varList.
 */
+static void
 eventUnavailFillInVars(varList, alarm)
     struct variable_list *varList;
     struct alarmEntry *alarm;
@@ -572,12 +601,12 @@ eventUnavailFillInVars(varList, alarm)
     varList->next_variable = vp;
 
     vp->name = (oid *)malloc(alarmVariableOidLen * sizeof(oid));
-    bcopy(alarmVariableOid, vp->name, alarmVariableOidLen * sizeof(oid));
+    memcpy(vp->name, alarmVariableOid, alarmVariableOidLen * sizeof(oid));
     vp->name_length = alarmVariableOidLen;
     vp->type = ASN_OBJECT_ID;
     vp->val_len = alarm->variableLen * sizeof(oid);
     vp->val.objid = (oid *)malloc(vp->val_len);
-    bcopy(alarm->variable, vp->val.objid, vp->val_len);
+    memcpy(vp->val.objid, alarm->variable, vp->val_len);
     vp->next_variable = NULL;
 }
 
@@ -595,15 +624,15 @@ eventAlarmFillInVars(varList, alarm, trapType)
     varList->next_variable = aVar;
     
     aVar->name = (oid *)malloc((alarmVariableOidLen + alarm->contextLength + 1) * sizeof(oid));
-    bcopy(alarmVariableOid, aVar->name, alarmVariableOidLen * sizeof(oid));
+    memcpy(aVar->name, alarmVariableOid, alarmVariableOidLen * sizeof(oid));
     aVar->name[alarmVariableOidLen] = alarm->contextLength;
-    bcopy(alarm->contextID, aVar->name + alarmVariableOidLen + 1,
-	  alarm->contextLength * sizeof(oid));
+    memcpy(aVar->name + alarmVariableOidLen + 1,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
     aVar->name_length = alarmVariableOidLen + alarm->contextLength + 1;
     aVar->type = ASN_OBJECT_ID;
     aVar->val_len = alarm->variableLen * sizeof(oid);
     aVar->val.objid = (oid *)malloc(aVar->val_len);
-    bcopy(alarm->variable, aVar->val.objid, aVar->val_len);
+    memcpy(aVar->val.objid, alarm->variable, aVar->val_len);
     aVar->next_variable = NULL;
     prevVar = aVar;
 
@@ -611,15 +640,15 @@ eventAlarmFillInVars(varList, alarm, trapType)
     prevVar->next_variable = aVar;
     
     aVar->name = (oid *)malloc((alarmSampleTypeOidLen + alarm->contextLength + 1) * sizeof(oid));
-    bcopy(alarmSampleTypeOid, aVar->name, alarmSampleTypeOidLen * sizeof(oid));
+    memcpy(aVar->name, alarmSampleTypeOid, alarmSampleTypeOidLen * sizeof(oid));
     aVar->name[alarmSampleTypeOidLen] = alarm->contextLength;
-    bcopy(alarm->contextID, aVar->name + alarmSampleTypeOidLen + 1,
-	  alarm->contextLength * sizeof(oid));
+    memcpy(aVar->name + alarmSampleTypeOidLen + 1,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
     aVar->name_length = alarmSampleTypeOidLen + alarm->contextLength + 1;
     aVar->type = ASN_INTEGER;
     aVar->val_len = sizeof(alarm->sampleType);
     aVar->val.integer = (long *)malloc(sizeof(long));
-    bcopy(&alarm->sampleType, aVar->val.integer, sizeof(long));
+    memcpy(aVar->val.integer, &alarm->sampleType, sizeof(long));
     aVar->next_variable = NULL;
     prevVar = aVar;
 
@@ -627,15 +656,15 @@ eventAlarmFillInVars(varList, alarm, trapType)
     prevVar->next_variable = aVar;
 
     aVar->name = (oid *)malloc((alarmValueOidLen + alarm->contextLength + 1) * sizeof(oid));
-    bcopy(alarmValueOid, aVar->name, alarmValueOidLen * sizeof(oid));
+    memcpy(aVar->name, alarmValueOid, alarmValueOidLen * sizeof(oid));
     aVar->name[alarmValueOidLen] = alarm->contextLength;
-    bcopy(alarm->contextID, aVar->name + alarmValueOidLen + 1,
-	  alarm->contextLength * sizeof(oid));
+    memcpy(aVar->name + alarmValueOidLen + 1,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
     aVar->name_length = alarmValueOidLen + alarm->contextLength + 1;
     aVar->type = ASN_INTEGER;
     aVar->val_len = sizeof(alarm->value);
     aVar->val.integer = (long *)malloc(sizeof(long));
-    bcopy(&alarm->value, aVar->val.integer, sizeof(long));
+    memcpy(aVar->val.integer, &alarm->value, sizeof(long));
     aVar->next_variable = NULL;
     prevVar = aVar;
 
@@ -644,29 +673,29 @@ eventAlarmFillInVars(varList, alarm, trapType)
     
     if (trapType == TRAP_RISING_ALARM) {
 	aVar->name = (oid *)malloc((alarmRisingThreshOidLen + alarm->contextLength + 1) * sizeof(oid));
-	bcopy(alarmRisingThreshOid, aVar->name,
-	      alarmRisingThreshOidLen * sizeof(oid));
+	memcpy(aVar->name,
+	      alarmRisingThreshOid, alarmRisingThreshOidLen * sizeof(oid));
 	aVar->name[alarmRisingThreshOidLen] = alarm->contextLength;
-	bcopy(alarm->contextID, aVar->name + alarmRisingThreshOidLen + 1,
-	  alarm->contextLength * sizeof(oid));
+	memcpy(aVar->name + alarmRisingThreshOidLen + 1,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
 	aVar->name_length = alarmRisingThreshOidLen + alarm->contextLength + 1;
 	aVar->type = ASN_INTEGER;
 	aVar->val_len = sizeof(alarm->risingThresh);
 	aVar->val.integer = (long *)malloc(sizeof(long));
-	bcopy(&alarm->risingThresh, aVar->val.integer, sizeof(long));
+	memcpy(aVar->val.integer, &alarm->risingThresh, sizeof(long));
     }
     else {
 	aVar->name = (oid *)malloc((alarmFallingThreshOidLen + alarm->contextLength + 1) * sizeof(oid));
-	bcopy(alarmFallingThreshOid, aVar->name,
-	      alarmFallingThreshOidLen * sizeof(oid));
+	memcpy(aVar->name,
+	      alarmFallingThreshOid, alarmFallingThreshOidLen * sizeof(oid));
 	aVar->name[alarmFallingThreshOidLen] = alarm->contextLength;
-	bcopy(alarm->contextID, aVar->name + alarmFallingThreshOidLen + 1,
-	  alarm->contextLength * sizeof(oid));
+	memcpy(aVar->name + alarmFallingThreshOidLen + 1,
+	  alarm->contextID, alarm->contextLength * sizeof(oid));
 	aVar->name_length = alarmFallingThreshOidLen + alarm->contextLength + 1;
 	aVar->type = ASN_INTEGER;
 	aVar->val_len = sizeof(alarm->fallingThresh);
 	aVar->val.integer = (long *)malloc(sizeof(long));
-	bcopy(&alarm->fallingThresh, aVar->val.integer, sizeof(long));
+	memcpy(aVar->val.integer, &alarm->fallingThresh, sizeof(long));
     }
     aVar->next_variable = NULL;
 }
@@ -697,13 +726,13 @@ eventSendTrap(event, eventType, generic)
 	
 	/* sysUpTime is the first oid in the inform pdu */
 	vp->name = (oid *)malloc(sysUpTimeOidLen * sizeof(oid));
-	bcopy(sysUpTimeOid, vp->name, sysUpTimeOidLen * sizeof(oid));
+	memcpy(vp->name, sysUpTimeOid, sysUpTimeOidLen * sizeof(oid));
 	vp->name_length = sysUpTimeOidLen;
 	vp->type = TIMETICKS;
 	uptime = get_uptime();
 	vp->val_len = sizeof(uptime);
 	vp->val.objid = (oid *)malloc(vp->val_len);
-	bcopy(&uptime, vp->val.integer, vp->val_len);
+	memcpy(vp->val.integer, &uptime, vp->val_len);
 	vp->next_variable = NULL;
 	
 	vp->next_variable
@@ -711,24 +740,24 @@ eventSendTrap(event, eventType, generic)
 
 	/* event->id is the second oid in the inform pdu */
 	vp->next_variable->name = (oid *)malloc((eventIdOidLen + 1) * sizeof(oid));
-	bcopy(eventIdOid, vp->next_variable->name, eventIdOidLen * sizeof(oid));
+	memcpy(vp->next_variable->name, eventIdOid, eventIdOidLen * sizeof(oid));
 	vp->next_variable->name[eventIdOidLen] = event->index;
 	vp->next_variable->name_length = eventIdOidLen + 1;
 	vp->next_variable->type = ASN_OBJECT_ID;
 	vp->next_variable->val_len = event->idLen * sizeof(oid);
 	vp->next_variable->val.objid = (oid *)malloc(vp->next_variable->val_len);
-	bcopy(event->id, vp->next_variable->val.objid, vp->next_variable->val_len);
+	memcpy(vp->next_variable->val.objid, event->id, vp->next_variable->val_len);
 	vp->next_variable->next_variable = NULL;
 	
 	/* event->id should override the eventType that was passed in */
-	if (!bcmp(trapRisingAlarmOid, event->id, trapRisingAlarmOidLen)) {
+	if (!memcmp(trapRisingAlarmOid, event->id, trapRisingAlarmOidLen)) {
 	    eventType = EVENT_TYPE_RISING;
 	}
-	else if (!bcmp(trapFallingAlarmOid, event->id,
+	else if (!memcmp(trapFallingAlarmOid, event->id,
 		       trapFallingAlarmOidLen)) {
 	    eventType = EVENT_TYPE_FALLING;
 	}
-	else if (!bcmp(trapObjUnavailAlarmOid, event->id,
+	else if (!memcmp(trapObjUnavailAlarmOid, event->id,
 		       trapObjUnavailAlarmOidLen)) {
 	    eventType = EVENT_TYPE_UNAVAILABLE;
 	}
@@ -753,8 +782,8 @@ eventSendTrap(event, eventType, generic)
 	}
 
 	pdu = snmp_pdu_create(INFORM_REQ_MSG);
-	bcopy(pp->partyTAddress, (char *)&pdu->address.sin_addr.s_addr, 4);
-	bcopy(pp->partyTAddress + 4, &pdu->address.sin_port, 2);
+	memcpy(&pdu->address.sin_addr.s_addr, pp->partyTAddress, 4);
+	memcpy(&pdu->address.sin_port, pp->partyTAddress + 4, 2);
 	pdu->address.sin_port = 162;
 	pdu->address.sin_family = AF_INET;
 	pdu->variables = vp;
@@ -930,7 +959,7 @@ write_eventtab(action, var_val, var_val_type, var_val_len, statP,
 		return SNMP_ERR_WRONGLENGTH;
 				}
 	    event->shadow->idLen = size;
-	    bcopy(id_value, event->shadow->id, size * sizeof(oid));
+	    memcpy(event->shadow->id, id_value, size * sizeof(oid));
 	    event->shadow->bitmask |= EVENTTABIDMASK;
 	}
 	break;
@@ -945,7 +974,7 @@ write_eventtab(action, var_val, var_val_type, var_val_len, statP,
 		return SNMP_ERR_WRONGLENGTH;
 				 }
 	    event->shadow->descriptionLen = size;
-	    bcopy(string_value, event->shadow->description, size);
+	    memcpy(event->shadow->description, string_value, size);
 	    event->shadow->bitmask |= EVENTTABDESCRIPTIONMASK;
 	}
 	break;
@@ -999,7 +1028,7 @@ eventNotifyUpdateSession(np)
 {
     struct snmp_session session;
     struct get_req_state *state;
-    extern int snmp_input();
+    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
     u_long destAddr;
 
     if (np->status != ENTRY_ACTIVE)
@@ -1023,7 +1052,7 @@ eventNotifyUpdateSession(np)
     state->type = EVENT_GET_REQ;
     state->info = (void *)NULL;
     np->magic = state;
-    bzero((char *)&session, sizeof(struct snmp_session));
+    memset((char *)&session, 0, sizeof(struct snmp_session));
     session.peername = SNMP_DEFAULT_PEERNAME;
     session.version = SNMP_VERSION_2_HISTORIC;
     session.srcParty = np->srcParty;
@@ -1244,8 +1273,7 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
-    bcopy((char *)vp->name, (char *)name,
-	  (int)vp->namelen * sizeof(oid));
+    memcpy(name, vp->name, (int)vp->namelen * sizeof(oid));
     *length = vp->namelen;
     *var_len = sizeof(long);
     
@@ -1281,7 +1309,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
     /* .1.3.6.1.6.3.2.1.2.2.1.6.int */
     
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, vp->namelen * sizeof(oid));
     *write_method = write_eventtab;
     
     /* find "next" process */
@@ -1299,7 +1327,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
 	return NULL;
     }
     
-    bcopy((char *)newname, (char *)name, (int)13 * sizeof(oid));
+    memcpy(name, newname, (int)13 * sizeof(oid));
     *length = 13;
     *var_len = sizeof(long);
     
@@ -1352,8 +1380,7 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
 	return NULL;
 
-    bcopy((char *)vp->name, (char *)name,
-	  (int)vp->namelen * sizeof(oid));
+    memcpy(name, vp->name, (int)vp->namelen * sizeof(oid));
     *length = vp->namelen;
     *var_len = sizeof(long);
     
@@ -1392,7 +1419,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
     
     
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, vp->namelen * sizeof(oid));
     *write_method = write_eventnotifytab;
     
     /* .1.3.6.1.6.3.2.1.2.5.1.4.int.len.context */
@@ -1405,7 +1432,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
 	}
 	newname[12] = (oid)event->index;
 	newname[13] = (oid)event->contextLen;
-	bcopy(event->context, newname+14, event->contextLen * sizeof(oid));
+	memcpy(newname+14, event->context, event->contextLen * sizeof(oid));
 	result = compare(name, *length, newname, 14 + event->contextLen);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
@@ -1414,8 +1441,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
 	return NULL;
     }
     
-    bcopy((char *)newname, (char *)name,
-	  (int)(14 + event->contextLen) * sizeof(oid));
+    memcpy(name, newname, (int)(14 + event->contextLen) * sizeof(oid));
     *length = 14 + event->contextLen;
     *var_len = sizeof(long);
     
