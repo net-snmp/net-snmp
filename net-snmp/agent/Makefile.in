@@ -17,7 +17,7 @@ all: subdirs snmpd
 
 subdirs:
 	cd mibgroup; $(MAKE); cd ..
-	cd dlmods; $(MAKE); cd ..
+#	cd dlmods; $(MAKE); cd ..
 
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
