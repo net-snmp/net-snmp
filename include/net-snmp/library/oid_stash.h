@@ -12,6 +12,13 @@
 extern          "C" {
 #endif
 
+    struct netsnmp_oid_stash_node_s;
+
+    /* args: buffer, sizeof(buffer), yourdata, stashnode */
+    typedef int     (NetSNMPStashDump) (char *, size_t,
+                                        void *,
+                                        struct netsnmp_oid_stash_node_s *);
+
     typedef struct netsnmp_oid_stash_node_s {
         oid             value;
         struct netsnmp_oid_stash_node_s **children;     /* array of children */
@@ -42,6 +49,9 @@ extern          "C" {
                                                                 mysize);
     netsnmp_oid_stash_node *netsnmp_oid_stash_create_node(void);        /* returns a malloced node */
 
+    void netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
+                                 char *tokenname, NetSNMPStashDump *dumpfn,
+                                 oid *curoid, size_t curoid_len);
 
 #ifdef __cplusplus
 }
