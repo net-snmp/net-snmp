@@ -2,19 +2,19 @@
                       ***       IMPORTANT      ***
                       ****************************
 
- NOTE WELL: this release is an alpha release and it's possible that
- things may change before the real release so don't become dependent
- on new features without first asking the developers if that
- particular area is fairly stable.
+ NOTE WELL: this release is close to the expect production release of
+ 5.0.  However, many many changes have been introduced within the 5.0
+ line of the net-snmp code, so please be aware that we may not have
+ caught all the bugs yet.  Please let us know if you find any
+ ( http://www.net-snmp.org//bugs/ ).  There are still some outstanding
+ todo items in Wes' head at least but don't let that stop you from
+ suggesting anything.
 
- Much will be done to clean things up before the release 5.0 release,
- like renaming of header files (ucd-snmp -> net-snmp), etc.
  Functionally, this release contains all the items listed in the NEWS
- file but many aren't documented (or are poorly documented).  It is
- not intended to be a "pretty" release.  But we'd love feedback about
- the new functionality found within.  To contact the developers about
- this prerelease, please either use the bug database
- (http://www.net-snmp.org/bugs/) or email the
+ file but many aren't documented (or are poorly documented).  We'd
+ love feedback about the new functionality found within.  To contact
+ the developers about this prerelease, please either use the bug
+ database (http://www.net-snmp.org/bugs/) or email the
  net-snmp-coders@lists.sourceforge.net mailing list.
 
 DISCLAIMER
