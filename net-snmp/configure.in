@@ -505,7 +505,7 @@ filebase=`echo $filebase | sed 's/elf//'`
 filebase=`echo $filebase | sed 's/aout//'`
 filebase=`echo $filebase | sed 's/ecoff//'`
 filebase=`echo $filebase | sed 's/coff//'`
-while test "x$filebase" != "x$last" -a ! -f $srcdir/s/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/system/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -517,7 +517,7 @@ done
 if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
-ac_cv_SYSTEM_INCLUDE_FILE="s/$filebase.h"
+ac_cv_SYSTEM_INCLUDE_FILE="net-snmp/system/$filebase.h"
 
 changequote([, ])
 AC_MSG_RESULT($ac_cv_SYSTEM_INCLUDE_FILE)
@@ -528,7 +528,7 @@ dnl second part, the CPU type.
 AC_MSG_CHECKING(for machine-type include file)
 changequote(, )
 filebase=$target_cpu
-while test "x$filebase" != "x$last" -a ! -f $srcdir/m/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/machine/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -537,7 +537,7 @@ done
 if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
-ac_cv_MACHINE_INCLUDE_FILE="m/$filebase.h"
+ac_cv_MACHINE_INCLUDE_FILE="net-snmp/machine/$filebase.h"
 AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
 
 changequote([, ])
@@ -1188,10 +1188,10 @@ if test "x$ac_cv_DMEM_LOC" != "xnone"; then
   AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
 fi
 
-dnl efence
-if test "x$developer" = "xyes" -a "x$use_efence" != "xno"; then
-    use_efence="yes"
-fi
+dnl forced efence turned off.
+dnl if test "x$developer" = "xyes" -a "x$use_efence" != "xno"; then
+dnl    use_efence="yes"
+dnl fi
 
 if test "x$use_efence" = "xyes"; then
     AC_CHECK_LIB(efence, EF_Exit)
@@ -1333,7 +1333,7 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   AC_CHECK_LIB(rpmio, Fopen)
 
   dnl
-  dnl now check for rpm using the appropriate db library
+  dnl now check for rpm
   dnl
   AC_CHECK_LIB(rpm, rpmdbOpen,[
     AC_DEFINE(HAVE_LIBRPM)
@@ -1342,7 +1342,7 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   ],,-lz)
 
   dnl
-  dnl now check for rpm using the appropriate db library
+  dnl now check for rpm using the popt library if it failed prev.
   dnl
   if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
     unset ac_cv_lib_rpm_rpmdbOpen
@@ -1352,6 +1352,19 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
       CFLAGS="$CFLAGS -I/usr/include/rpm"
     ],,-lpopt -lz)
   fi
+
+  dnl
+  dnl now check for rpm using the appropriate db library if it failed prev.
+  dnl
+  if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
+    unset ac_cv_lib_rpm_rpmdbOpen
+    AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
+      AC_DEFINE(HAVE_LIBRPM)
+      LIBS="-lrpm -lrpmdb -lpopt $LIBS"
+      CFLAGS="$CFLAGS -I/usr/include/rpm"
+    ],,-lrpmdb -lpopt -lz)
+  fi
+
 fi
 
 dnl Replace `main' with a function in -lkvm:
