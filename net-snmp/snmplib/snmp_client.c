@@ -113,6 +113,7 @@ snmp_pdu_create(int command)
     pdu->command		 = command;
     pdu->errstat		 = SNMP_DEFAULT_ERRSTAT;
     pdu->errindex		 = SNMP_DEFAULT_ERRINDEX;
+    pdu->securityModel		 = SNMP_DEFAULT_SECMODEL;
     pdu->transport_data		 = NULL;
     pdu->transport_data_length	 = 0;
     pdu->securityNameLen	 = 0;
