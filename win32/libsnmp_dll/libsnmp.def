@@ -325,6 +325,9 @@ EXPORTS
 	netsnmp_free_all_list_data
 	netsnmp_oid_stash_add_data
 	netsnmp_oid_stash_get_data
+	netsnmp_oid_find_prefix
+	netsnmp_container_init_list
+	netsnmp_strdup_and_null
 	build_oid
 	build_oid_noalloc
 	parse_one_oid_index
