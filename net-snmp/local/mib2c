@@ -72,6 +72,7 @@ sub usage {
     1;
 }	
 
+my @origargs = @ARGV;
 while($#ARGV >= 0) {
     $_ = shift;
     $configfile = shift if (/^-c/);
@@ -141,7 +142,29 @@ while($#ARGV >= 0) {
 	       "OPAQUE", "1");
 
 my $mibnode = $SNMP::MIB{$oid};
-die "you didn't give me a valid OID to start with" if (!$mibnode);
+
+if (!$mibnode) { 
+
+print STDERR "
+You didn't give mib2c a valid OID to start with.  IE, I could not find
+any information about the mib node \"$oid\".  This could be caused
+because you supplied an incorrectly node, or by the MIB that you're
+trying to generate code from isn't loaded.  To make sure your mib is
+loaded, run mib2c using this as an example:
+
+   env MIBS=\"+MY-PERSONAL-MIB\" mib2c " . join(" ",@origargs) . "
+
+You might wish to start by reading the MIB loading tutorial at:
+
+   http://www.net-snmp.org/tutorial-5/commands/mib-options.html
+
+And making sure you can get snmptranslate to display information about
+your MIB node.  Once snmptranslate works, then come back and try mib2c
+again.
+
+";
+exit;
+}
 
 # setup
 $outputName = $mibnode->{'label'} if (!defined($outputName));
