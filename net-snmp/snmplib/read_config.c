@@ -907,7 +907,7 @@ read_config_files(int when)
     }
 
     if (config_errors) {
-        snmp_log(LOG_ERR, "ucd-snmp: %d error(s) in config file(s)\n",
+        snmp_log(LOG_ERR, "net-snmp: %d error(s) in config file(s)\n",
                  config_errors);
         /*
          * exit(1); 
