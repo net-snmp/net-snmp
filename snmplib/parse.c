@@ -128,7 +128,7 @@ struct tc {     /* textual conventions */
     struct range_list *ranges;
 } tclist[MAXTC];
 
-int Line = 0;
+int mibLine = 0;
 const char *File = "(none)";
 static int anonymous = 0;
 
@@ -636,13 +636,13 @@ print_error(const char *string,
     erroneousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, Line,
+        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, mibLine,
                 File);
     else if (token && *token)
         snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", string, token,
-                Line, File);
+                mibLine, File);
     else
-        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
+        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, mibLine, File);
 }
 
 static void
@@ -2367,7 +2367,7 @@ parse_objectgroup(FILE *fp, char *name, int what, struct objgroup **ol)
 		goto skip;
 	    }
 	    o = (struct objgroup *)malloc(sizeof(struct objgroup));
-	    o->line = Line;
+	    o->line = mibLine;
 	    o->name = strdup(token);
 	    o->next = *ol;
 	    *ol = o;
@@ -2630,7 +2630,7 @@ static int compliance_lookup(const char *name, int modid)
 	struct objgroup *op = (struct objgroup *)malloc(sizeof(struct objgroup));
 	op->next = objgroups;
 	op->name = strdup(name);
-	op->line = Line;
+	op->line = mibLine;
 	objgroups = op;
 	return 1;
     }
@@ -3088,7 +3088,7 @@ parse_macro(FILE *fp,
     register int type;
     char token[MAXTOKEN];
     struct node *np;
-    int iLine = Line;
+    int iLine = mibLine;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
@@ -3108,7 +3108,7 @@ parse_macro(FILE *fp,
 
     if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 	snmp_log(LOG_WARNING,
-		 "%s MACRO (lines %d..%d parsed and ignored).\n", name, iLine, Line);
+		 "%s MACRO (lines %d..%d parsed and ignored).\n", name, iLine, mibLine);
 
     return np;
 }
@@ -3364,7 +3364,7 @@ read_module_internal (const char *name)
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
     	    const char *oldFile = File;
-    	    int oldLine = Line;
+    	    int oldLine = mibLine;
 	    int oldModule = current_module;
 
 	    if ( mp->no_imports != -1 ) {
@@ -3377,7 +3377,7 @@ read_module_internal (const char *name)
 	    }
 	    mp->no_imports=0;		/* Note that we've read the file */
 	    File = mp->file;
-	    Line = 1;
+	    mibLine = 1;
 	    current_module = mp->modid;
 		/*
 		 * Parse the file
@@ -3385,7 +3385,7 @@ read_module_internal (const char *name)
 	    np = parse( fp, NULL );
 	    fclose(fp);
 	    File = oldFile;
-	    Line = oldLine;
+	    mibLine = oldLine;
 	    current_module = oldModule;
 	    return MODULE_LOADED_OK;
 	}
@@ -3654,7 +3654,7 @@ new_module (const char *name,
 static void
 scan_objlist(struct node *root, struct objgroup *list, const char *error)
 {
-    int oLine = Line;
+    int oLine = mibLine;
 
     while (list) {
 	struct objgroup *gp = list;
@@ -3667,13 +3667,13 @@ scan_objlist(struct node *root, struct objgroup *list, const char *error)
 	    else
 		break;
 	if (!np) {
-	    Line = gp->line;
+	    mibLine = gp->line;
 	    print_error(error, gp->name, QUOTESTRING);
 	}
 	free(gp->name);
 	free(gp);
     }
-    Line = oLine;
+    mibLine = oLine;
 }
 
 /*
@@ -3954,7 +3954,7 @@ get_token(FILE *fp,
     do {
         ch = getc(fp);
         if (ch == '\n')
-            Line++;
+            mibLine++;
     }
     while(isspace(ch) && ch != EOF);
     *cp++ = ch; *cp = '\0';
@@ -4049,7 +4049,7 @@ get_token(FILE *fp,
 	    }
 	  }
 	    if (ch_next == EOF) return ENDOFFILE;
-	    if (ch_next == '\n') Line++;
+	    if (ch_next == '\n') mibLine++;
 	    return get_token (fp, token, maxtlen);
 	}
 	ungetc(ch_next, fp);
@@ -4079,7 +4079,7 @@ get_token(FILE *fp,
 	if (tp) {
 	    if (tp->token != CONTINUE) return (tp->token);
 	    while (isspace((ch_next = getc(fp))))
-		if (ch_next == '\n') Line++;
+		if (ch_next == '\n') mibLine++;
 	    if (ch_next == EOF) return ENDOFFILE;
 	    if (isalnum(ch_next)) {
 		*cp++ = ch_next;
@@ -4159,7 +4159,7 @@ add_mibdir(const char *dirname)
 			continue;
                     }
                     DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n", tmpstr));
-                    Line = 1;
+                    mibLine = 1;
                     File = tmpstr;
                     get_token( fp, token, MAXTOKEN);
 		    /* simple test for this being a MIB */
@@ -4196,7 +4196,7 @@ read_mib(const char *filename)
         snmp_log_perror(filename);
         return NULL;
     }
-    Line = 1;
+    mibLine = 1;
     File = filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
     get_token( fp, token, MAXTOKEN);
@@ -4258,7 +4258,7 @@ parseQuoteString(FILE *fp,
     for (ch = getc(fp); ch != EOF; ch = getc(fp)) {
         if (ch == '\r') continue;
         if (ch == '\n') {
-            Line++;
+            mibLine++;
         }
         else if (ch == '"') {
             *token = '\0';
