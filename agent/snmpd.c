@@ -123,13 +123,13 @@ typedef long    fd_mask;
 #include "snmpd.h"
 #include "var_struct.h"
 #include "mibgroup/struct.h"
-#include "mibgroup/util_funcs.h"
 #include "snmp_debug.h"
 #include "mib_modules.h"
 
 #include "snmpusm.h"
 #include "tools.h"
 #include "lcd_time.h"
+#include "mibgroup/util_funcs.h"
 
 #include "transform_oids.h"
 
