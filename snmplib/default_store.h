@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 #define DS_MAX_IDS 3
-#define DS_MAX_SUBIDS 20
+#define DS_MAX_SUBIDS 32    /* needs to be a multiple of 8 */
 
 /* begin storage definitions */
 /* These definitions correspond with the "storid" argument to the API */
