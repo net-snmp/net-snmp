@@ -215,8 +215,28 @@ memdup(u_char **to, const u_char *from, size_t size)
 
 }  /* end memdup() */
 
-
-
+/** copies a (possible) unterminated string of a given length into a
+ *  new buffer and null terminates it as well (new buffer MAY be one
+ *  byte longer to account for this */
+char *
+netsnmp_strdup_and_null(u_char *from, size_t from_len) 
+{
+    u_char *ret;
+    
+    if (from_len == 0 || from[from_len-1] != '\0') {
+        ret = malloc(from_len+1);
+        if (!ret)
+            return NULL;
+        ret[from_len] = '\0';
+    } else {
+        ret = malloc(from_len);
+        if (!ret)
+            return NULL;
+        ret[from_len-1] = '\0';
+    }
+    memcpy(ret, from, from_len);
+    return ret;
+}
 
 /*******************************************************************-o-******
  * binary_to_hex
