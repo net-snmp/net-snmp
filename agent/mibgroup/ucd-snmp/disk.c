@@ -155,8 +155,6 @@ static void       add_device(char *path, char *device,
 	                     int minspace, int minpercent, int override);
 static void       modify_disk_parameters(int index, int minspace,
 	                                 int minpercent);
-static int        find_disk_and_modify(char *path, int minspace,
-	                               int minpercent);
 static int        disk_exists(char *path);
 static u_char    *find_device(char *path);
 
