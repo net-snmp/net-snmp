@@ -214,9 +214,29 @@ se_find_value_in_list(struct snmp_enum_list *list, char *label)
 }
 
 int
+se_find_free_value_in_list(struct snmp_enum_list *list)
+{
+    int max_value = 0;
+    if (!list)
+        return SE_DNE;
+
+    for (;list; list=list->next) {
+        if (max_value < list->value)
+            max_value = list->value;
+    }
+    return max_value+1;
+}
+
+int
 se_find_value(unsigned int major, unsigned int minor, char *label)
 {
     return se_find_value_in_list(se_find_list(major, minor), label);
+}
+
+int
+se_find_free_value(unsigned int major, unsigned int minor)
+{
+    return se_find_free_value_in_list(se_find_list(major, minor));
 }
 
 char           *
@@ -323,6 +343,12 @@ int
 se_find_value_in_slist(const char *listname, char *label)
 {
     return (se_find_value_in_list(se_find_slist(listname), label));
+}
+
+int
+se_find_free_value_in_slist(const char *listname)
+{
+    return (se_find_free_value_in_list(se_find_slist(listname)));
 }
 
 int
