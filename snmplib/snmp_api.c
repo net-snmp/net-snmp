@@ -402,7 +402,10 @@ snmp_get_next_reqid(void)
         retVal = 2;
     Reqid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -415,7 +418,10 @@ snmp_get_next_msgid(void)
         retVal = 2;
     Msgid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -428,7 +434,10 @@ snmp_get_next_sessid(void)
         retVal = 2;
     Sessid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 long
@@ -441,7 +450,10 @@ snmp_get_next_transid(void)
         retVal = 2;
     Transid = retVal;
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_TRANSID);
-    return retVal;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
+        return (retVal & 0x7fff);	/* mask to 15 bits */
+    else
+        return retVal;
 }
 
 void
@@ -692,6 +704,8 @@ register_default_handlers(void)
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noDisplayHint",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "16bitIDs",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS);
 }
 
 void
