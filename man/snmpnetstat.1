@@ -36,26 +36,18 @@
 .\"
 .\"	@(#)netstat.1	6.8 (Berkeley) 9/20/88
 .\"
-.TH SNMPNETSTAT 1 "11 May 2000"
+.TH SNMPNETSTAT 1 "21 Aug 2000"
 .UC 5
 .SH NAME
 snmpnetstat \- show network status using SNMP
 .SH SYNOPSIS
-snmpnetstat -v 1 hostname community [-an]
+snmpnetstat [common arguments] [-a] [-n] host
 .br
-snmpnetstat -v 1 hostname community [-ionrs]
+snmpnetstat [common arguments] [-iors] [-n] host
 .br
-snmpnetstat -v 1 hostname community [-P protocol]
+snmpnetstat [common arguments] [-i] [-n] [-I interface] host [interval]
 .br
-snmpnetstat\ -v\ 1 hostname community [\-n] [\-I interface] interval
-.PP
-snmpnetstat [-v 2] hostname noAuth [-an]
-.br
-snmpnetstat [-v 2] hostname noAuth [-ionrs]
-.br
-snmpnetstat [-v 2] hostname noAuth [-P protocol]
-.br
-snmpnetstat\ [-v\ 2] hostname noAuth [\-n] [\-I interface] interval
+snmpnetstat [common arguments] [-a] [-n] [-P protocol] host
 .SH DESCRIPTION
 The
 .I snmpnetstat 
@@ -187,12 +179,12 @@ The first line of each screen of information contains a summary since the
 system was last rebooted.  Subsequent lines of output show values
 accumulated over the preceding interval.
 .SH SEE ALSO
+snmpcmd(1),
 iostat(1),
 vmstat(1),
 hosts(5),
 networks(5),
 protocols(5),
-services(5),
-RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+services(5).
 .SH BUGS
 The notion of errors is ill-defined.
