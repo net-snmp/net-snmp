@@ -98,7 +98,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
 			       it to our return list */
 			    netsnmp_transport *t = NULL;
 
-			    t = netnetsnmp_tdomain_transport_oid(targaddrs->tDomain,
+			    t = netsnmp_tdomain_transport_oid(targaddrs->tDomain,
 							targaddrs->tDomainLen,
 						        targaddrs->tAddress,
 						        targaddrs->tAddressLen,

@@ -23,7 +23,7 @@ static oid vacm_context_oid[] = {1,3,6,1,6,3,16,1,1};
  */
 struct variable_list *
 get_first_context(void **my_loop_context, void **my_data_context,
-                  struct variable_list *put_data, iterator_info *iinfo) {
+                  struct variable_list *put_data, netsnmp_iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
     context_ptr = get_top_context_cache();
 
@@ -46,7 +46,7 @@ struct variable_list *
 get_next_context(void **my_loop_context,
                  void **my_data_context,
                  struct variable_list *put_data,
-                 iterator_info *iinfo) {
+                 netsnmp_iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
 
     if (!my_loop_context || !*my_loop_context)
@@ -71,8 +71,8 @@ init_vacm_context(void) {
      * table vacm_context
      */
     netsnmp_handler_registration *my_handler;
-    table_registration_info *table_info;
-    iterator_info *iinfo;
+    netsnmp_table_registration_info *table_info;
+    netsnmp_iterator_info *iinfo;
 
     my_handler = netsnmp_create_handler_registration("vacm_context",
                                           vacm_context_handler,
@@ -83,19 +83,19 @@ init_vacm_context(void) {
     if (!my_handler)
         return;
 
-    table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
-    iinfo = SNMP_MALLOC_TYPEDEF(iterator_info);
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
 
     if (!table_info || !iinfo)
         return;
 
-    table_helper_add_index(table_info, ASN_OCTET_STR)
+    netsnmp_netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR)
     table_info->min_column = 1;
     table_info->max_column = 1;
     iinfo->get_first_data_point = get_first_context;
     iinfo->get_next_data_point = get_next_context;
     iinfo->table_reginfo = table_info;
-    register_table_iterator(my_handler, iinfo);
+    netsnmp_netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
 /*
@@ -117,7 +117,7 @@ vacm_context_handler(netsnmp_mib_handler               *handler,
 
         
         context_ptr = (subtree_context_cache *)
-            extract_iterator_context(requests);
+            netsnmp_extract_iterator_context(requests);
         
         if (context_ptr==NULL) {
             snmp_log(LOG_ERR, "vacm_context_handler called without data\n");

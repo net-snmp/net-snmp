@@ -625,7 +625,7 @@ register_mib_context(const char *moduleName,
                      const char *context,
                      int timeout,
                      int flags) {
-    return register_old_api(moduleName, var, varsize, numvars, mibloc,
+    return netsnmp_register_old_api(moduleName, var, varsize, numvars, mibloc,
                             mibloclen, priority,
                             range_subid, range_ubound,
                             ss, context, timeout, flags);
@@ -782,7 +782,7 @@ unregister_mib_context( oid *name, size_t len, int priority,
 }
 
 int 
-unregister_mib_table_row(oid *name, size_t len, int priority,
+unregister_mib_netsnmp_table_row(oid *name, size_t len, int priority,
 			 int var_subid, oid range_ubound, const char *context)
 {
   struct subtree *list, *myptr;
@@ -1098,9 +1098,9 @@ void setup_tree (void)
   ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
 #endif
 
-  register_null(root_subtrees[0].name,  root_subtrees[0].namelen);
-  register_null(root_subtrees[1].name,  root_subtrees[1].namelen);
-  register_null(root_subtrees[2].name,  root_subtrees[2].namelen);
+  netsnmp_register_null(root_subtrees[0].name,  root_subtrees[0].namelen);
+  netsnmp_register_null(root_subtrees[1].name,  root_subtrees[1].namelen);
+  netsnmp_register_null(root_subtrees[2].name,  root_subtrees[2].namelen);
   
   /* Support for 'static' subtrees (subtrees_old) has now been dropped */
 

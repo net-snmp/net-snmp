@@ -38,7 +38,7 @@ init_testdelayed(void) {
     my_test->rootoid_len = 4; /* [sic] */
     my_test->handler = netsnmp_create_handler("myDelayed", my_test_delayed_handler);
 
-    register_serialize(my_test);
+    netsnmp_register_serialize(my_test);
 
 }
 

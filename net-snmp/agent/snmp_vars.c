@@ -236,7 +236,7 @@ init_agent (const char *app)
   else
       callback_master_num = -1;
 
-  init_helpers();
+  netsnmp_init_helpers();
   init_traps();
 
   /* initialize agentx subagent if necessary. */

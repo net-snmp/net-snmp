@@ -23,21 +23,21 @@
  *  @{
  */
 netsnmp_mib_handler *
-get_instance_handler(void) {
-    return netsnmp_create_handler("instance", instance_helper_handler);
+netsnmp_get_instance_handler(void) {
+    return netsnmp_create_handler("instance", netsnmp_instance_helper_handler);
 }
 
 int
-register_instance(netsnmp_handler_registration *reginfo) {
-    netsnmp_inject_handler(reginfo, get_instance_handler());
-    return register_serialize(reginfo);
+netsnmp_register_instance(netsnmp_handler_registration *reginfo) {
+    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
+    return netsnmp_register_serialize(reginfo);
 }
 
 int
-register_read_only_instance(netsnmp_handler_registration *reginfo) {
-    netsnmp_inject_handler(reginfo, get_instance_handler());
-    netsnmp_inject_handler(reginfo, get_read_only_handler());
-    return register_serialize(reginfo);
+netsnmp_register_read_only_instance(netsnmp_handler_registration *reginfo) {
+    netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
+    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
+    return netsnmp_register_serialize(reginfo);
 }
 
 static
@@ -74,7 +74,7 @@ get_reg(const char *name,
 }
 
 int
-register_read_only_ulong_instance(const char *name,
+netsnmp_register_read_only_ulong_instance(const char *name,
                                   oid *reg_oid, size_t reg_oid_len,
                                   u_long *it,
                                   Netsnmp_Node_Handler *subhandler) 
@@ -82,12 +82,12 @@ register_read_only_ulong_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, instance_ulong_handler, subhandler);
-    return register_read_only_instance(myreg);
+                    HANDLER_CAN_RONLY, netsnmp_instance_ulong_handler, subhandler);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int
-register_ulong_instance(const char *name,
+netsnmp_register_ulong_instance(const char *name,
                         oid *reg_oid, size_t reg_oid_len,
                         u_long *it,
                         Netsnmp_Node_Handler *subhandler) 
@@ -95,12 +95,12 @@ register_ulong_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, instance_ulong_handler, subhandler);
-    return register_instance(myreg);
+                    HANDLER_CAN_RWRITE, netsnmp_instance_ulong_handler, subhandler);
+    return netsnmp_register_instance(myreg);
 }
 
 int
-register_read_only_counter32_instance(const char *name,
+netsnmp_register_read_only_counter32_instance(const char *name,
                                       oid *reg_oid, size_t reg_oid_len,
                                       u_long *it,
                                       Netsnmp_Node_Handler *subhandler) 
@@ -108,12 +108,12 @@ register_read_only_counter32_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, instance_counter32_handler, subhandler);
-    return register_read_only_instance(myreg);
+                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler, subhandler);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int
-register_read_only_long_instance(const char *name,
+netsnmp_register_read_only_long_instance(const char *name,
                                  oid *reg_oid, size_t reg_oid_len,
                                  long *it,
                                  Netsnmp_Node_Handler *subhandler) 
@@ -121,12 +121,12 @@ register_read_only_long_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, instance_long_handler, subhandler);
-    return register_read_only_instance(myreg);
+                    HANDLER_CAN_RONLY, netsnmp_instance_long_handler, subhandler);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int
-register_long_instance(const char *name,
+netsnmp_register_long_instance(const char *name,
                        oid *reg_oid, size_t reg_oid_len,
                        long *it,
                        Netsnmp_Node_Handler *subhandler) 
@@ -134,8 +134,8 @@ register_long_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, instance_long_handler, subhandler);
-    return register_instance(myreg);
+                    HANDLER_CAN_RWRITE, netsnmp_instance_long_handler, subhandler);
+    return netsnmp_register_instance(myreg);
 }
 
 int
@@ -147,12 +147,12 @@ register_read_only_int_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, instance_int_handler, subhandler);
-    return register_read_only_instance(myreg);
+                    HANDLER_CAN_RONLY, netsnmp_instance_int_handler, subhandler);
+    return netsnmp_register_read_only_instance(myreg);
 }
 
 int
-register_int_instance(const char *name,
+netsnmp_register_int_instance(const char *name,
                       oid *reg_oid, size_t reg_oid_len,
                       int *it,
                       Netsnmp_Node_Handler *subhandler) 
@@ -160,12 +160,12 @@ register_int_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, instance_int_handler, subhandler);
-    return register_instance(myreg);
+                    HANDLER_CAN_RWRITE, netsnmp_instance_int_handler, subhandler);
+    return netsnmp_register_instance(myreg);
 }
 
 int
-instance_ulong_handler(
+netsnmp_instance_ulong_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -174,7 +174,7 @@ instance_ulong_handler(
     u_long *it = (u_long *) handler->myvoid;
     u_long *it_save;
     
-    DEBUGMSGTL(("instance_ulong_handler", "Got request:  %d\n", reqinfo->mode));
+    DEBUGMSGTL(("netsnmp_instance_ulong_handler", "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
         /* data requests */
@@ -226,7 +226,7 @@ instance_ulong_handler(
 }
 
 int
-instance_counter32_handler(
+netsnmp_instance_counter32_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -234,7 +234,7 @@ instance_counter32_handler(
 
     u_long *it = (u_long *) handler->myvoid;
     
-    DEBUGMSGTL(("instance_counter32_handler",
+    DEBUGMSGTL(("netsnmp_instance_counter32_handler",
                 "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
@@ -247,7 +247,7 @@ instance_counter32_handler(
 
         /* SET requests.  Should only get here if registered RWRITE */
         default:
-            snmp_log(LOG_ERR,"instance_counter32_handler: illegal mode\n");
+            snmp_log(LOG_ERR,"netsnmp_instance_counter32_handler: illegal mode\n");
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
             return SNMP_ERR_NOERROR;
     }
@@ -255,7 +255,7 @@ instance_counter32_handler(
 }
 
 int
-instance_long_handler(
+netsnmp_instance_long_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -264,7 +264,7 @@ instance_long_handler(
     long *it = (u_long *) handler->myvoid;
     long *it_save;
     
-    DEBUGMSGTL(("instance_long_handler", "Got request:  %d\n", reqinfo->mode));
+    DEBUGMSGTL(("netsnmp_instance_long_handler", "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
         /* data requests */
@@ -316,7 +316,7 @@ instance_long_handler(
 }
 
 int
-instance_int_handler(
+netsnmp_instance_int_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -325,7 +325,7 @@ instance_int_handler(
     int *it = (u_int *) handler->myvoid;
     int *it_save;
     
-    DEBUGMSGTL(("instance_int_handler", "Got request:  %d\n", reqinfo->mode));
+    DEBUGMSGTL(("netsnmp_instance_int_handler", "Got request:  %d\n", reqinfo->mode));
 
     switch(reqinfo->mode) {
         /* data requests */
@@ -377,7 +377,7 @@ instance_int_handler(
 }
 
 int
-instance_helper_handler(
+netsnmp_instance_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,

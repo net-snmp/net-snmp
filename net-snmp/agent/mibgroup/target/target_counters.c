@@ -23,7 +23,7 @@ init_target_counters(void) {
      * unknown contexts
      */
 
-    register_read_only_instance(
+    netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("myInstance",
                                     get_unknown_context_count,
                                     unknown_context_oid,
@@ -34,7 +34,7 @@ init_target_counters(void) {
      * unavailable available
      */
 
-    register_read_only_instance(
+    netsnmp_register_read_only_instance(
         netsnmp_create_handler_registration("myInstance",
                                     get_unavailable_context_count,
                                     unavailable_context_oid,

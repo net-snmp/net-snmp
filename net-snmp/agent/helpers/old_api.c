@@ -20,23 +20,23 @@
 
 /* don't use these! */
 void set_current_agent_session(netsnmp_agent_session  *asp);
-netsnmp_agent_session  *get_current_agent_session(void);
+netsnmp_agent_session  *netsnmp_get_current_agent_session(void);
 
 /** @defgroup old_api old_api: Calls mib module code written in the old style of code.
  *  @ingroup handler
  *  This is a backwards compatilibity module that allows code written
  *  in the old API to be run under the new handler based architecture.
- *  Use it by calling register_old_api().
+ *  Use it by calling netsnmp_register_old_api().
  *  @{
  */
 
 /** returns a old_api handler that should be the final calling
- * handler.  Don't use this function.  Use the register_old_api()
+ * handler.  Don't use this function.  Use the netsnmp_register_old_api()
  * function instead.
  */
 netsnmp_mib_handler *
 get_old_api_handler(void) {
-    return netsnmp_create_handler("old_api", old_api_helper);
+    return netsnmp_create_handler("old_api", netsnmp_old_api_helper);
 }
     
 
@@ -45,7 +45,7 @@ get_old_api_handler(void) {
  * register_mib_context() function merely calls this new old_api one).
  */
 int
-register_old_api(const char *moduleName,
+netsnmp_register_old_api(const char *moduleName,
                  struct variable *var,
                  size_t varsize,
                  size_t numvars,
@@ -59,7 +59,7 @@ register_old_api(const char *moduleName,
                  int timeout,
                  int flags) {
     
-    old_api_info *old_info = SNMP_MALLOC_TYPEDEF(old_api_info);
+    netsnmp_old_api_info *old_info = SNMP_MALLOC_TYPEDEF(netsnmp_old_api_info);
     unsigned int i;
     
     old_info->var = var;
@@ -109,7 +109,7 @@ register_old_api(const char *moduleName,
 
 /** registers a row within a mib table */
 int 
-register_mib_table_row(const char *moduleName,
+register_mib_netsnmp_table_row(const char *moduleName,
                        struct variable *var,
                        size_t varsize,
                        size_t numvars,
@@ -156,9 +156,9 @@ register_mib_table_row(const char *moduleName,
         memcpy(r->rootoid, mibloc, mibloclen*sizeof(oid));
 	memcpy((u_char *)(r->rootoid + (var_subid - 1)), vr->name, 
 	       vr->namelen * sizeof(oid));
-	DEBUGMSGTL(("register_mib_table_row", "rootoid "));
-	DEBUGMSGOID(("register_mib_table_row", r->rootoid, r->rootoid_len));
-	DEBUGMSG(("register_mib_table_row", "\n"));
+	DEBUGMSGTL(("register_mib_netsnmp_table_row", "rootoid "));
+	DEBUGMSGOID(("register_mib_netsnmp_table_row", r->rootoid, r->rootoid_len));
+	DEBUGMSG(("register_mib_netsnmp_table_row", "\n"));
         r->handler->myvoid = (void *)malloc(varsize);
 	
 	if (r->handler->myvoid == NULL) {
@@ -184,7 +184,7 @@ register_mib_table_row(const char *moduleName,
 
         /*  Register this column and row  */
         if ((rc = netsnmp_register_handler_nocallback(r)) != MIB_REGISTERED_OK) {
-	    DEBUGMSGTL(("register_mib_table_row", "register failed %d\n", rc));
+	    DEBUGMSGTL(("register_mib_netsnmp_table_row", "register failed %d\n", rc));
 	    snmp_netsnmp_handler_registration_free(r);
 	    break;
 	}
@@ -215,7 +215,7 @@ register_mib_table_row(const char *moduleName,
 
 /** implements the old_api handler */
 int
-old_api_helper(netsnmp_mib_handler               *handler,
+netsnmp_old_api_helper(netsnmp_mib_handler               *handler,
                netsnmp_handler_registration      *reginfo,
                netsnmp_agent_request_info        *reqinfo,
                netsnmp_request_info              *requests) {
@@ -232,7 +232,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
     WriteMethod *write_method = NULL;
     size_t len;
     u_char *access = NULL;
-    old_api_cache *cacheptr;
+    netsnmp_old_api_cache *cacheptr;
     netsnmp_agent_session  *oldasp = NULL;
 
     vp = (struct variable *) handler->myvoid;
@@ -307,7 +307,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
                 if (reqinfo->mode != MODE_SET_RESERVE1)
                     break;
 
-                cacheptr = SNMP_MALLOC_TYPEDEF(old_api_cache);
+                cacheptr = SNMP_MALLOC_TYPEDEF(netsnmp_old_api_cache);
                 if (!cacheptr)
                     return netsnmp_set_request_error(reqinfo, requests,
                                              SNMP_ERR_RESOURCEUNAVAILABLE);
@@ -322,7 +322,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
                 /* WWW: explicitly list the SET conditions */
                 /* (the rest of the) SET contions */
                 cacheptr =
-                    (old_api_cache *) netsnmp_request_netsnmp_get_list_data(requests,
+                    (netsnmp_old_api_cache *) netsnmp_request_netsnmp_get_list_data(requests,
                                                             OLD_API_NAME);
 
                 if (cacheptr == NULL || cacheptr->write_method == NULL) {
@@ -331,7 +331,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
                                              SNMP_ERR_NOTWRITABLE);
                 }
 
-                oldasp = get_current_agent_session();
+                oldasp = netsnmp_get_current_agent_session();
                 set_current_agent_session(reqinfo->asp);
                 status =
                     (*(cacheptr->write_method))(reqinfo->mode,
@@ -361,7 +361,7 @@ old_api_helper(netsnmp_mib_handler               *handler,
 /* don't use this! */
 static netsnmp_agent_session *current_agent_session = NULL;
 netsnmp_agent_session  *
-get_current_agent_session() {
+netsnmp_get_current_agent_session() {
     return current_agent_session;
 }
 

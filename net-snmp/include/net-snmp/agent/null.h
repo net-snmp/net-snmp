@@ -5,7 +5,7 @@
    usage..
  */
 
-int register_null(oid *, size_t);
+int netsnmp_register_null(oid *, size_t);
    
-Netsnmp_Node_Handler null_handler;
+Netsnmp_Node_Handler netsnmp_null_handler;
 

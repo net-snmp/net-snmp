@@ -2026,7 +2026,7 @@ write_mteTriggerEntryStatus(int      action,
               StorageTmp->mteTriggerEntryStatus == RS_ACTIVE &&
               !StorageTmp->have_copied_auth_info) {
               
-              netsnmp_agent_session *asp = get_current_agent_session();
+              netsnmp_agent_session *asp = netsnmp_get_current_agent_session();
               struct snmp_pdu *pdu = NULL;
               
               if (!asp) {

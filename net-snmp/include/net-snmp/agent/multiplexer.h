@@ -21,8 +21,8 @@ typedef struct netsnmp_mib_handler_methods_s {
 
 /** @} */
 
-netsnmp_mib_handler *get_multiplexer_handler(netsnmp_mib_handler_methods *);
+netsnmp_mib_handler *netsnmp_get_multiplexer_handler(netsnmp_mib_handler_methods *);
 
-Netsnmp_Node_Handler multiplexer_helper_handler;
+Netsnmp_Node_Handler netsnmp_multiplexer_helper_handler;
 
 #endif /* NETSNMP_MULTIPLEXER_H */

@@ -5,8 +5,8 @@
  */
 
 
-netsnmp_mib_handler *get_bulk_to_next_handler(void);
-void init_bulk_to_next_helper(void);
+netsnmp_mib_handler *netsnmp_get_bulk_to_next_handler(void);
+void init_netsnmp_bulk_to_next_helper(void);
    
-Netsnmp_Node_Handler bulk_to_next_helper;
+Netsnmp_Node_Handler netsnmp_bulk_to_next_helper;
 

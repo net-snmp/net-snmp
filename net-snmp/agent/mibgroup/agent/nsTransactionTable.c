@@ -19,15 +19,15 @@ initialize_table_nsTransactionTable(void)
         { 1, 3, 6, 1, 4, 1, 8072, 1, 8, 1 };
     size_t          nsTransactionTable_oid_len =
         OID_LENGTH(nsTransactionTable_oid);
-    table_registration_info *table_info;
+    netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
-    iterator_info *iinfo;
+    netsnmp_iterator_info *iinfo;
 
     /*
      * create the table structure itself 
      */
-    table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
-    iinfo = SNMP_MALLOC_TYPEDEF(iterator_info);
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
 
     /*
      * if your table is read only, it's easiest to change the
@@ -46,7 +46,7 @@ initialize_table_nsTransactionTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    table_helper_add_index(table_info, ASN_INTEGER);    /* index:
+    netsnmp_netsnmp_table_helper_add_index(table_info, ASN_INTEGER);    /* index:
                                                          * nsTransactionID 
                                                          */
 
@@ -63,7 +63,7 @@ initialize_table_nsTransactionTable(void)
      */
     DEBUGMSGTL(("initialize_table_nsTransactionTable",
                 "Registering table nsTransactionTable as a table iterator\n"));
-    register_table_iterator(my_handler, iinfo);
+    netsnmp_netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
 /** Initialzies the nsTransactionTable module */
@@ -101,7 +101,7 @@ nsTransactionTable_get_first_data_point(void **my_loop_context,
                                         void **my_data_context,
                                         struct variable_list
                                         *put_index_data,
-                                        iterator_info *iinfo)
+                                        netsnmp_iterator_info *iinfo)
 {
 
     struct variable_list *vptr;
@@ -132,7 +132,7 @@ nsTransactionTable_get_next_data_point(void **my_loop_context,
                                        void **my_data_context,
                                        struct variable_list
                                        *put_index_data,
-                                       iterator_info *iinfo)
+                                       netsnmp_iterator_info *iinfo)
 {
 
     struct variable_list *vptr;
@@ -163,7 +163,7 @@ nsTransactionTable_handler(netsnmp_mib_handler * handler,
                            netsnmp_request_info * requests)
 {
 
-    table_netsnmp_request_info *table_info;
+    netsnmp_table_request_info *table_info;
     struct variable_list *var;
     netsnmp_agent_session *asp;
     
@@ -185,7 +185,7 @@ nsTransactionTable_handler(netsnmp_mib_handler * handler,
          * return data for the columns of the nsTransactionTable table in
          * question 
          */
-        asp = ( netsnmp_agent_session *)extract_iterator_context(requests);
+        asp = ( netsnmp_agent_session *)netsnmp_extract_iterator_context(requests);
         if ( asp == NULL) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
         }
@@ -193,7 +193,7 @@ nsTransactionTable_handler(netsnmp_mib_handler * handler,
         /*
          * extracts the information about the table from the request 
          */
-        table_info = extract_table_info(requests);
+        table_info = netsnmp_extract_table_info(requests);
 
         /*
          * table_info->colnum contains the column number requested 
