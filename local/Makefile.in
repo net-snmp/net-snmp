@@ -12,7 +12,7 @@ OTHERINSTALL=localinstall
 # local info
 #
 SNMPCONFPATH=@SNMPCONFPATH@
-PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf
+PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
