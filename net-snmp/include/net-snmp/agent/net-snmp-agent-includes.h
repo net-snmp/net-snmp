@@ -18,4 +18,6 @@
 
 #include <net-snmp/agent/mib_module_config.h>
 
+#include <net-snmp/data_access/net-snmp-data-access-includes.h>
+
 #endif                          /* NET_SNMP_AGENT_INCLUDES_H */
