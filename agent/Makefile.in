@@ -80,12 +80,12 @@ LMIBOBJS	= @mibgroup_list_lo@ mib_modules.lo auto_nlist.lo
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o auto_nlist.o
 
 # libnetsnmpagent objects
-LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
-	agent_index.o agent_trap.o kernel.o  agent_handler.o \
-	object_monitor.o @OTHERAGENTLIBOBJS@
-LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
-	agent_index.lo agent_trap.lo kernel.lo agent_handler.lo \
-	object_monitor.lo @OTHERAGENTLIBLOBJS@
+LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o \
+	agent_registry.o agent_index.o agent_trap.o kernel.o \
+	 agent_handler.o @OTHERAGENTLIBOBJS@
+LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo \
+	agent_registry.lo agent_index.lo agent_trap.lo kernel.lo \
+	agent_handler.lo @OTHERAGENTLIBLOBJS@
 
 # The agent objects.
 AGENTOBJS=snmpd.o
