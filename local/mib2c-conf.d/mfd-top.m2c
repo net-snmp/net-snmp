@@ -352,6 +352,10 @@ void ${context}_rowreq_ctx_cleanup(${context}_rowreq_ctx *rowreq_ctx)
 
 @   end@ // data_init
 ########################################################################
+@if $m2c_table_persistent == 1@
+@   include mfd-persistence.m2i@
+@end@
+########################################################################
 /**
  * pre-request callback
  *
