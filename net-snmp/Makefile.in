@@ -20,6 +20,7 @@ CPP		= @CPP@ 						\
 CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
 INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
+INSTALLSCRIPTS=net-snmp-config
 
 all:	sedscript EXAMPLE.conf ucd-snmp-config.h subdirs
 
@@ -57,6 +58,7 @@ install:    all installdirs
         ( cd $$i ; $(MAKE) install ) ;	\
 	done
 	@$(INSTALL) $(INSTALLHEADERS) $(includedir)
+	@$(INSTALL) $(INSTALLSCRIPTS) $(bindir)
 	@for i in $(INSTALLHEADERS) ; do \
 		echo "install:  installed $$i in $(includedir)";\
 	done
