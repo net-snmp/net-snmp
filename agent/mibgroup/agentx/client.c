@@ -125,7 +125,6 @@ agentx_open_session(netsnmp_session * ss)
 {
     netsnmp_pdu    *pdu, *response;
     extern oid      version_sysoid[];
-    extern int      version_sysoid_len;
 
     DEBUGMSGTL(("agentx/subagent", "opening session \n"));
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -136,8 +135,8 @@ agentx_open_session(netsnmp_session * ss)
     if (pdu == NULL)
         return 0;
     pdu->time = 0;
-    snmp_add_var(pdu, version_sysoid, version_sysoid_len, 's',
-                 "Net-SNMP AgentX sub-agent");
+    snmp_add_var(pdu, version_sysoid, sizeof(version_sysoid)/sizeof(oid),
+		 's', "Net-SNMP AgentX sub-agent");
 
     if (agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS)
         return 0;
