@@ -28,6 +28,9 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
@@ -253,6 +256,16 @@ snmp_udp6_transport(struct sockaddr_in6 *addr, int local)
          * INADDR_ANY, but certainly includes a port number.  
          */
 
+#ifdef IPV6_V6ONLY
+        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+        {
+	  int one=1;
+	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+	    DEBUGMSGTL(("snmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	  } 
+	}
+#endif
+
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr_in6));
         if (rc != 0) {
@@ -379,7 +392,21 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
         if (*peername == '[') {
             cp = strchr(peername, ']');
             if (cp != NULL) {
+	      /*
+	       * See if it is an IPv6 link-local address with interface
+	       * name as <zone_id>, like fe80::1234%eth0.
+	       * Please refer to the internet draft, IPv6 Scoped Address Architecture
+	       * http://www.ietf.org/internet-drafts/draft-ietf-ipngwg-scoping-arch-04.txt
+	       *
+	       */
+	        char *scope_id;
+		unsigned int if_index = 0;
                 *cp = '\0';
+		scope_id = strchr(peername + 1, '%');
+		if (scope_id != NULL) {
+		    *scope_id = '\0';
+		    if_index = if_nametoindex(scope_id + 1);
+		}
                 if (*(cp + 1) == ':') {
                     if (atoi(cp + 2) != 0 &&
                         inet_pton(AF_INET6, peername + 1,
@@ -388,6 +415,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                                     "IPv6 address with port suffix :%d\n",
                                     atoi(cp + 2)));
                         addr->sin6_port = htons(atoi(cp + 2));
+			addr->sin6_scope_id = if_index;
                         goto resolved;
                     }
                 } else {
@@ -397,15 +425,27 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
                                     "IPv6 address with square brankets\n"));
                         addr->sin6_port = htons(SNMP_PORT);
+			addr->sin6_scope_id = if_index;
                         goto resolved;
                     }
                 }
+		if (scope_id != NULL) {
+		  *scope_id = '%';
+		}
+		*cp = ']';
             }
         }
 
         cp = strrchr(peername, ':');
         if (cp != NULL) {
+	    char *scope_id;
+	    unsigned int if_index = 0;
             *cp = '\0';
+	    scope_id = strchr(peername + 1, '%');
+	    if (scope_id != NULL) {
+	      *scope_id = '\0';
+	      if_index = if_nametoindex(scope_id + 1);
+	    }
             if (atoi(cp + 1) != 0 &&
                 inet_pton(AF_INET6, peername,
                           (void *) &(addr->sin6_addr))) {
@@ -413,8 +453,12 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
                 addr->sin6_port = htons(atoi(cp + 1));
+		addr->sin6_scope_id = if_index;
                 goto resolved;
             }
+	    if (scope_id != NULL) {
+	      *scope_id = '%';
+	    }
             *cp = ':';
         }
 
@@ -850,8 +894,7 @@ void
 netsnmp_udp6_parse_security(const char *token, char *param)
 {
     char           *secName = NULL, *community = NULL, *source = NULL;
-    char           *cp = NULL, *strnetwork = NULL, *strmask =
-        NULL;
+    char           *cp = NULL, *strnetwork = NULL, *strmask = NULL;
     com2Sec6Entry  *e = NULL;
     struct sockaddr_in6 net, mask;
     struct sockaddr_in tmp;
