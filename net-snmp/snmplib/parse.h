@@ -1,5 +1,5 @@
 /***********************************************************
-	Copyright 1989 by Carnegie Mellon University
+        Copyright 1989 by Carnegie Mellon University
 
                       All Rights Reserved
 
@@ -23,9 +23,9 @@ SOFTWARE.
  * parse.h
  */
 
-#define MAXLABEL	64	/* maximum characters in a label */
-#define MAXTOKEN	64	/* maximum characters in a token */
-#define MAXQUOTESTR	4096	/* maximum characters in a quoted string */
+#define MAXLABEL        64      /* maximum characters in a label */
+#define MAXTOKEN        128     /* maximum characters in a token */
+#define MAXQUOTESTR     4096    /* maximum characters in a quoted string */
 
 
 
@@ -34,7 +34,7 @@ SOFTWARE.
  */
 struct enum_list {
     struct enum_list *next;
-    int	value;
+    int value;
     char *label;
 };
 
@@ -43,49 +43,47 @@ struct enum_list {
  */
 struct node {
     struct node *next;
-    char label[MAXLABEL]; /* This node's (unique) textual name */
-    u_long  subid;  /* This node's integer subidentifier */
-    char parent[MAXLABEL];/* The parent's textual name */
-    int tc_index;     /* index into tclist (-1 if NA) */
-    int type;	    /* The type of object this represents */
-    struct enum_list *enums;	/* (optional) list of enumerated integers
-(otherwise NULL) */
-    char *description;	/* description (a quoted string) */
+    char *label;                /* This node's (unique) textual name */
+    u_long  subid;              /* This node's integer subidentifier */
+    char *parent;               /* The parent's textual name */
+    int tc_index;               /* index into tclist (-1 if NA) */
+    int type;                   /* The type of object this represents */
+    struct enum_list *enums;    /* (optional) list of enumerated integers */
+    char *description;          /* description (a quoted string) */
 };
 
 /*
  * A tree in the format of the tree structure of the MIB.
  */
 struct tree {
-    struct tree *child_list;	/* list of children of this node */
-    struct tree *next_peer;	/* Next node in list of peers */
+    struct tree *child_list;    /* list of children of this node */
+    struct tree *next_peer;     /* Next node in list of peers */
     struct tree *parent;
-    char label[MAXLABEL];		/* This node's textual name */
-    u_long subid;		/* This node's integer subidentifier */
-    int tc_index;             /* index into tclist (-1 if NA) */
-    int type;			/* This node's object type */
-    struct enum_list *enums;	/* (optional) list of enumerated integers
-(otherwise NULL) */
-    void (*printer)();     /* Value printing function */
-    char *description;	/* description (a quoted string) */
+    char *label;                /* This node's textual name */
+    u_long subid;               /* This node's integer subidentifier */
+    int tc_index;               /* index into tclist (-1 if NA) */
+    int type;                   /* This node's object type */
+    struct enum_list *enums;    /* (optional) list of enumerated integers */
+    void (*printer)();          /* Value printing function */
+    char *description;          /* description (a quoted string) */
 };
 
 /* non-aggregate types for tree end nodes */
-#define TYPE_OTHER	    0
-#define TYPE_OBJID	    1
-#define TYPE_OCTETSTR	    2
-#define TYPE_INTEGER	    3
-#define TYPE_NETADDR	    4
-#define	TYPE_IPADDR	    5
-#define TYPE_COUNTER	    6
-#define TYPE_GAUGE	    7
-#define TYPE_TIMETICKS	    8
-#define TYPE_OPAQUE	    9
-#define TYPE_NULL	    10
+#define TYPE_OTHER          0
+#define TYPE_OBJID          1
+#define TYPE_OCTETSTR       2
+#define TYPE_INTEGER        3
+#define TYPE_NETADDR        4
+#define TYPE_IPADDR         5
+#define TYPE_COUNTER        6
+#define TYPE_GAUGE          7
+#define TYPE_TIMETICKS      8
+#define TYPE_OPAQUE         9
+#define TYPE_NULL           10
 #define TYPE_COUNTER64      11
 #define TYPE_BITSTRING      12
 #define TYPE_NSAPADDRESS    13
-#define TYPE_UINTEGER	    14
+#define TYPE_UINTEGER       14
 
 struct tree *read_mib();
-
+void print_subtree();

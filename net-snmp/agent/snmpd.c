@@ -80,7 +80,9 @@ struct addrCache {
 #define OLD	2
 };
 
-static struct addrCache addrCache[10];
+#define ADDRCACHE 10
+
+static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
 
@@ -417,7 +419,7 @@ main(argc, argv)
     char logfile[300], miscfile[300];
     char *cptr, **argvptr;
 
-    logfile[0] = NULL;
+    logfile[0] = 0;
 #ifdef LOGFILE
     strcpy(logfile,LOGFILE);
 #endif
@@ -448,7 +450,7 @@ main(argc, argv)
                     strcpy(logfile,argv[++arg]);
                     break;
                 case 'L':
-                    logfile[0] = NULL;
+                    logfile[0] = 0;
                     break;
                 case 'h':
                     usage(argv[0]);
@@ -579,8 +581,8 @@ main(argc, argv)
 	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-          fprintf(stderr,"bind/%d",me.sin_port);
-	    perror("bind");
+          fprintf(stderr,"bind/%d: ",me.sin_port);
+          perror(NULL);
 	    return 2;
 	}
 	sdlist[sdlen] = sd;
@@ -678,7 +680,7 @@ int counter = 0;
 		int count;
 		
 		lastAddrAge = 0;
-		for(count = 0; count < 10; count++){
+              for(count = 0; count < ADDRCACHE; count++){
 		    if (addrCache[count].status == OLD)
 			addrCache[count].status = UNUSED;
 		    if (addrCache[count].status == USED)
@@ -710,15 +712,21 @@ snmp_read_packet(sd)
     } else if (log_addresses){
 	int count;
 	
-	for(count = 0; count < 10; count++){
-	    if (addrCache[count].status > 0 /* used or old */
+      for(count = 0; count < ADDRCACHE; count++){
+          if (addrCache[count].status > UNUSED /* used or old */
 		&& from.sin_addr.s_addr == addrCache[count].addr)
 		break;
 	}
-	if (count >= 10){
-	    printf("Recieved SNMP packet(s) from %s\n",
+      if (count >= ADDRCACHE){
+          time_t now;
+          struct tm *tm;
+          time (&now);
+          tm = localtime (&now);
+          printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d Recieved SNMP packet(s) from %s\n",
+                 tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+                 tm->tm_hour, tm->tm_min, tm->tm_sec,
 		   inet_ntoa(from.sin_addr));
-	    for(count = 0; count < 10; count++){
+          for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = from.sin_addr.s_addr;
 		    addrCache[count].status = USED;
