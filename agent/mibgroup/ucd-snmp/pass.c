@@ -47,6 +47,7 @@ struct variable2 extensible_passthru_variables[] = {
 };
 #define BUFMAX 4096
 
+/*  This is also called from pass_persist.c */
 int asc2bin(char *p)
 {
     char *r, *q = p;
@@ -63,6 +64,7 @@ int asc2bin(char *p)
     return n;
 }
 
+/*  This is also called from pass_persist.c */
 int bin2asc(char *p, size_t n)
 {
     int i, flag = 0;
@@ -231,6 +233,7 @@ u_char *var_extensible_pass(struct variable *vp,
         }
         fclose(file);
         wait_on_exec(passthru);
+
         /* buf contains the return type, and buf2 contains the data */
         if (!strncasecmp(buf,"string",6)) {
           buf2[strlen(buf2)-1] = 0;  /* zap the linefeed */
@@ -280,7 +283,6 @@ u_char *var_extensible_pass(struct variable *vp,
           }
           long_ret = (objid[0] << (8*3)) + (objid[1] << (8*2)) +
             (objid[2] << 8) + objid[3];
-          long_ret = ntohl(long_ret);
           *var_len = sizeof(long_ret);
           vp->type = ASN_IPADDRESS;
           return((unsigned char *) &long_ret);
@@ -370,7 +372,7 @@ setPass(int action,
           memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
           buf2[var_val_len] = 0;
-          if ((int)bin2asc(buf2, itmp) == (int)itmp)
+          if (bin2asc(buf2, itmp) == (int)itmp)
               sprintf(buf,"string %s",buf2);
           else
               sprintf(buf,"octet %s",buf2);

@@ -46,6 +46,10 @@ static int open_persist_pipe (int iindex, char *command);
 static void destruct_persist_pipes (void);
 static int write_persist_pipe (int iindex, char *data);
 
+/*  These are defined in pass.c */
+extern int asc2bin(char *p);
+extern int bin2asc(char *p, size_t n);
+
 /* the relocatable extensible commands variables */
 struct variable2 extensible_persist_passthru_variables[] = {
   /* bogus entry.  Only some of it is actually used. */
@@ -228,17 +232,26 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
           return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
           *var_len = sizeof(long_ret);
-          long_ret = atoi(buf2);
+          long_ret = strtol(buf2, NULL, 10);
           vp->type = ASN_INTEGER;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"unsigned",7)) {
+          *var_len = sizeof(long_ret);
+          long_ret = strtoul(buf2, NULL, 10);
+          vp->type = ASN_UNSIGNED;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"counter",7)) {
           *var_len = sizeof(long_ret);
-          long_ret = atoi(buf2);
+          long_ret = strtoul(buf2, NULL, 10);
           vp->type = ASN_COUNTER;
           return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"octet",5)) {
+          *var_len = asc2bin(buf2);
+          vp->type = ASN_OCTET_STR;
+          return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"gauge",5)) {
           *var_len = sizeof(long_ret);
-          long_ret = atoi(buf2);
+          long_ret = strtoul(buf2, NULL, 10);
           vp->type = ASN_GAUGE;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"objectid",8)) {
@@ -248,7 +261,7 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
           return((unsigned char *) objid);
         } else if (!strncasecmp(buf,"timetick",8)) {
           *var_len = sizeof(long_ret);
-          long_ret = atoi(buf2);
+          long_ret = strtoul(buf2, NULL, 10);
           vp->type = ASN_TIMETICKS;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"ipaddress",9)) {
@@ -348,9 +361,14 @@ setPassPersist(int action,
                   (int) ((utmp & 0xff)));
           break;
         case ASN_OCTET_STR:
+          itmp = sizeof(buf);
+          memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
           buf2[var_val_len] = 0;
-          sprintf(buf,"string %s",buf2);
+          if (bin2asc(buf2, itmp) == (int)itmp)
+              sprintf(buf,"string %s",buf2);
+          else
+              sprintf(buf,"octet %s",buf2);
           break;
         case ASN_OBJECT_ID:
           itmp = var_val_len/sizeof(oid);
