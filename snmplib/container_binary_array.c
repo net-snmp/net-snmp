@@ -153,7 +153,7 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     return first;
 }
 
-binary_array_table *
+NETSNMP_STATIC_INLINE binary_array_table *
 netsnmp_binary_array_initialize(void)
 {
     binary_array_table *t;
@@ -182,7 +182,7 @@ netsnmp_binary_array_release(netsnmp_container *c)
     SNMP_FREE(c);
 }
 
-size_t
+NETSNMP_STATIC_INLINE size_t
 netsnmp_binary_array_count(netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -192,7 +192,7 @@ netsnmp_binary_array_count(netsnmp_container *c)
     return t ? t->count : 0;
 }
 
-void           *
+NETSNMP_STATIC_INLINE void           *
 netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -221,7 +221,7 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
     return t->data[index];
 }
 
-int
+NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_replace(netsnmp_container *c, void *entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -297,7 +297,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
     return 0;
 }
 
-void
+NETSNMP_STATIC_INLINE void
 netsnmp_binary_array_for_each(netsnmp_container *c,
                               netsnmp_container_obj_func *fe,
                               void *context, int sort)
@@ -312,7 +312,25 @@ netsnmp_binary_array_for_each(netsnmp_container *c,
         (*fe) (t->data[i], context);
 }
 
-int
+NETSNMP_STATIC_INLINE void
+netsnmp_binary_array_clear(netsnmp_container *c,
+                           netsnmp_container_obj_func *fe,
+                           void *context)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+
+    if( NULL != fe ) {
+        size_t             i;
+
+        for (i = 0; i < t->count; ++i)
+            (*fe) (t->data[i], context);
+    }
+
+    t->count = 0;
+    t->dirty = 0;
+}
+
+NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -348,7 +366,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     return 0;
 }
 
-void           *
+NETSNMP_STATIC_INLINE void           *
 netsnmp_binary_array_retrieve(netsnmp_container *c, int *max_oids, int sort)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -488,6 +506,13 @@ _ba_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
     netsnmp_binary_array_for_each(container, f, context, 1);
 }
 
+static void
+_ba_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+             void *context)
+{
+    netsnmp_binary_array_clear(container, f, context);
+}
+
 static netsnmp_void_array *
 _ba_get_subset(netsnmp_container *container, void *data)
 {
@@ -533,6 +558,7 @@ netsnmp_container_get_binary_array(void)
     c->get_subset = _ba_get_subset;
     c->get_iterator = NULL;
     c->for_each = _ba_for_each;
+    c->clear = _ba_clear;
         
     return c;
 }
@@ -647,7 +673,7 @@ netsnmp_binary_array_iterator_last(netsnmp_iterator *it)
 /*  } */
 
 netsnmp_iterator *
-netsnmp_binary_array_get_iterator(netsnmp_container *c)
+netsnmp_binary_array_iterator_get(netsnmp_container *c)
 {
     netsnmp_iterator* it;
 
