@@ -455,6 +455,60 @@ getstruct(off_t loc,
 }
 #elif OSTYPE == SOLARISID
 
+#ifdef _SLASH_PROC_METHOD_
+
+#include <fcntl.h>
+#include <dirent.h>
+
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+
+/*
+ * Gets process information from /proc/.../psinfo
+ */
+ 
+int
+sh_count_procs(char *procname)
+{
+  int fd,total = 0;
+  struct psinfo info;
+  char fbuf[32];
+  struct dirent *ent;
+  DIR *dir;
+
+  if (!(dir = opendir("/proc")))
+    return -1;
+
+  while ((ent = readdir(dir))) {
+    if (!strcmp(ent->d_name,"..") || !strcmp(ent->d_name,"."))
+      continue;
+
+    snprintf(fbuf,64,"/proc/%s/psinfo",ent->d_name);
+    if ((fd = open(fbuf,O_RDONLY)) < 0)  { /* Continue or return error? */
+      closedir(dir);
+      return -1;
+    }
+
+    if (read(fd,(char*)&info,sizeof(struct psinfo)) != sizeof(struct psinfo)) {
+      close(fd);
+      closedir(dir);
+      return -1;
+    }
+    
+    if (!info.pr_nlwp && !info.pr_lwp.pr_lwpid) {
+      /* Zombie process */      
+    } else
+      if (!strcmp(procname,info.pr_fname))
+	total++;
+
+    close(fd);
+  }
+  closedir(dir);
+  return total;
+}
+ 
+#else  /* _SLASH_PROC_METHOD_ */
+
 #define _KMEMUSER	/* Needed by <sys/user.h> */
 
 #include <kvm.h>
@@ -496,6 +550,7 @@ sh_count_procs(char *procname)
 	}
 	return(total);
 }
+#endif /* _SLASH_PROC_METHOD_ */
 #else
 int sh_count_procs(char *procname)
 {

@@ -1,5 +1,8 @@
 #include "sysv.h"
 
+/* use /proc to obtain process information */
+#define _SLASH_PROC_METHOD_
+
 #undef bsdlike
 #undef IP_FORWARDING_SYMBOL
 #undef ARPTAB_SYMBOL
