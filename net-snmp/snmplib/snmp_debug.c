@@ -74,10 +74,10 @@ void debug_config_turn_on_debugging(const char *configtoken, char *line) {
 void
 snmp_debug_init(void) {
   debugindentchars[0] = '\0'; /* zero out the debugging indent array. */
-  register_premib_handler("snmp","doDebugging",
+  register_prenetsnmp_mib_handler("snmp","doDebugging",
                           debug_config_turn_on_debugging, NULL,
                           "(1|0)");
-  register_premib_handler("snmp","debugTokens",
+  register_prenetsnmp_mib_handler("snmp","debugTokens",
                           debug_config_register_tokens, NULL,
                           "token[,token...]");
 }

@@ -27,15 +27,15 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpIPXDomain.h>
+#include <net-snmp/library/netsnmpIPXDomain.h>
 
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
-static snmp_tdomain ipxDomain;
+static netsnmp_tdomain ipxDomain;
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_ipx_fmtaddr	(snmp_transport *t,
+char	       *snmp_ipx_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
   struct sockaddr_ipx *to = NULL;
@@ -63,7 +63,7 @@ char	       *snmp_ipx_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_ipx_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_ipx_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength) 
 {
   int rc = -1, fromlen = sizeof(struct sockaddr);
@@ -98,7 +98,7 @@ int		snmp_ipx_recv	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_ipx_send	(snmp_transport *t, void *buf, int size,
+int		snmp_ipx_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength)
 {
   int rc = 0;
@@ -127,7 +127,7 @@ int		snmp_ipx_send	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_ipx_close	(snmp_transport *t)
+int		snmp_ipx_close	(netsnmp_transport *t)
 {
   int rc = 0;
   if (t->sock >= 0) {
@@ -149,10 +149,10 @@ int		snmp_ipx_close	(snmp_transport *t)
     address to bind to (i.e. this is a server-type session); otherwise addr is 
     the remote address to send things to.  */
 
-snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
+netsnmp_transport		*netsnmp_ipx_transport	(struct sockaddr_ipx *addr,
 						 int local)
 {
-  snmp_transport *t = NULL;
+  netsnmp_transport *t = NULL;
   int rc = 0;
   char *string = NULL;
 
@@ -160,7 +160,7 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
     return NULL;
   }
 
-  t = (snmp_transport *)malloc(sizeof(snmp_transport));
+  t = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (t == NULL) {
     return NULL;
   }
@@ -169,21 +169,21 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
   DEBUGMSGTL(("snmp_ipx", "open %s %s\n", local?"local":"remote", string));
   free(string);
 
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
-  t->domain = snmpIPXDomain;
-  t->domain_length = sizeof(snmpIPXDomain)/sizeof(snmpIPXDomain[0]);
+  t->domain = netsnmpIPXDomain;
+  t->domain_length = sizeof(netsnmpIPXDomain)/sizeof(netsnmpIPXDomain[0]);
 
   t->sock = socket(AF_IPX, SOCK_DGRAM, AF_IPX);
   if (t->sock < 0) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
 
   if (local) {
     t->local = malloc(12);
     if (t->local == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(&(t->local[00]), (u_char *)&(addr->sipx_network), 4);
@@ -198,7 +198,7 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {
       snmp_ipx_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     t->data = NULL;
@@ -206,7 +206,7 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
   } else {
     t->remote = malloc(12);
     if (t->remote == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(&(t->remote[00]), (u_char *)&(addr->sipx_network), 4);
@@ -219,7 +219,7 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
 
     t->data = malloc(sizeof(struct sockaddr_ipx));
     if (t->data == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->data, addr, sizeof(struct sockaddr_ipx));
@@ -244,7 +244,7 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
 /*  Attempt to parse a string of the form [%08x]:%12x[/%d] where the parts
     are the network number, the node address and the port in that order.  */
 
-int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
+int			netsnmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 						 const char *peername)
 {
   char *cp = NULL;
@@ -255,7 +255,7 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
   }
   memset(addr, 0, sizeof(struct sockaddr_ipx));
 
-  DEBUGMSGTL(("snmp_sockaddr_ipx", "addr %p, peername \"%s\"\n",
+  DEBUGMSGTL(("netsnmp_sockaddr_ipx", "addr %p, peername \"%s\"\n",
 	      addr, peername?peername:"[NIL]"));
 
   addr->sipx_family = AF_IPX;
@@ -286,11 +286,11 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 
   network = strtoul(peername, &cp, 16);
   if (cp != peername) {
-    DEBUGMSGTL(("snmp_sockaddr_ipx", "network parsed okay\n"));
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "network parsed okay\n"));
     addr->sipx_network = htonl(network);
     peername = cp;
   } else {
-    DEBUGMSGTL(("snmp_sockaddr_ipx", "no network part of address\n"));
+    DEBUGMSGTL(("netsnmp_sockaddr_ipx", "no network part of address\n"));
     addr->sipx_network = htonl(0);
   }
 
@@ -302,16 +302,16 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 		&node[0], &node[1], &node[2], &node[3], &node[4], &node[5],
 		&port);
     if (rc < 6) {
-      DEBUGMSGTL(("snmp_sockaddr_ipx", "no node -- fail (rc %d)\n", rc));
+      DEBUGMSGTL(("netsnmp_sockaddr_ipx", "no node -- fail (rc %d)\n", rc));
       return 0;
     } else if (rc == 6) {
-      DEBUGMSGTL(("snmp_sockaddr_ipx", "node, no port\n"));
+      DEBUGMSGTL(("netsnmp_sockaddr_ipx", "node, no port\n"));
       for (i = 0; i < 6; i++) {
 	addr->sipx_node[i] = node[i];
       }
       addr->sipx_port = htons(SNMP_IPX_DEFAULT_PORT);
     } else if (rc == 7) {
-      DEBUGMSGTL(("snmp_sockaddr_ipx", "node and port\n"));
+      DEBUGMSGTL(("netsnmp_sockaddr_ipx", "node and port\n"));
       for (i = 0; i < 6; i++) {
 	addr->sipx_node[i] = node[i];
       }
@@ -324,7 +324,7 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
       addr->sipx_node[i] = 0;
     }
     if (sscanf(peername, "/%hu", &port) != 1) {
-      DEBUGMSGTL(("snmp_sockaddr_ipx", "no port\n"));
+      DEBUGMSGTL(("netsnmp_sockaddr_ipx", "no port\n"));
       addr->sipx_port = htons(SNMP_IPX_DEFAULT_PORT);
     } else {
       addr->sipx_port = htons(port);
@@ -338,12 +338,12 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 
 
 
-snmp_transport	*snmp_ipx_create_tstring	(const char *string, int local)
+netsnmp_transport	*snmp_ipx_create_tstring	(const char *string, int local)
 {
   struct sockaddr_ipx addr;
 
-  if (snmp_sockaddr_ipx(&addr, string)) {
-    return snmp_ipx_transport(&addr, local);
+  if (netsnmp_sockaddr_ipx(&addr, string)) {
+    return netsnmp_ipx_transport(&addr, local);
   } else {
     return NULL;
   }
@@ -351,7 +351,7 @@ snmp_transport	*snmp_ipx_create_tstring	(const char *string, int local)
 
 
 
-snmp_transport	*snmp_ipx_create_ostring	(const u_char *o, size_t o_len,
+netsnmp_transport	*snmp_ipx_create_ostring	(const u_char *o, size_t o_len,
 						 int local)
 {
   struct sockaddr_ipx addr;
@@ -361,22 +361,22 @@ snmp_transport	*snmp_ipx_create_ostring	(const u_char *o, size_t o_len,
     memcpy((u_char *)&(addr.sipx_network), &(o[00]), 4);
     memcpy((u_char *)&(addr.sipx_node),    &(o[04]), 6);
     memcpy((u_char *)&(addr.sipx_port),    &(o[10]), 2);
-    return snmp_ipx_transport(&addr, local);
+    return netsnmp_ipx_transport(&addr, local);
   }
   return NULL;
 }
 
 
 
-void		snmp_ipx_ctor			(void)
+void		netsnmp_ipx_ctor			(void)
 {
-  ipxDomain.name        = snmpIPXDomain;
-  ipxDomain.name_length = sizeof(snmpIPXDomain)/sizeof(oid);
+  ipxDomain.name        = netsnmpIPXDomain;
+  ipxDomain.name_length = sizeof(netsnmpIPXDomain)/sizeof(oid);
   ipxDomain.prefix	= calloc(2, sizeof(char *));
   ipxDomain.prefix[0] 	= "ipx";
 
   ipxDomain.f_create_from_tstring = snmp_ipx_create_tstring;
   ipxDomain.f_create_from_ostring = snmp_ipx_create_ostring;
 
-  snmp_tdomain_register(&ipxDomain);
+  netsnmp_tdomain_register(&ipxDomain);
 }

@@ -1,5 +1,5 @@
 /*
- * data_list.c
+ * netsnmp_data_list.c
  *
  * $Id$
  */
@@ -9,6 +9,8 @@
 
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <net-snmp/library/data_list.h>
@@ -16,11 +18,37 @@
 /***********************************************************************/
 /* New Handler based API */
 /***********************************************************************/
-inline data_list *
-create_data_list(const char *name, void *data,
-                         Free_List_Data *beer)
+
+inline void
+netsnmp_free_list_data(netsnmp_data_list *node)
 {
-    data_list *node = SNMP_MALLOC_TYPEDEF(data_list);
+  Netsnmp_Free_List_Data *beer;
+  if (!node)
+    return;
+
+  beer = node->free_func;
+  if (beer)
+    (beer)(node->data);
+  SNMP_FREE(node->name);
+}
+
+inline void
+netsnmp_free_all_list_data(netsnmp_data_list *head) 
+{
+    netsnmp_data_list *tmpptr;
+    for(; head; ) {
+        netsnmp_free_list_data(head);
+        tmpptr = head;
+        head = head->next;
+        SNMP_FREE(tmpptr);
+    }
+}
+
+inline netsnmp_data_list *
+netsnmp_create_netsnmp_data_list(const char *name, void *data,
+                         Netsnmp_Free_List_Data *beer)
+{
+    netsnmp_data_list *node = SNMP_MALLOC_TYPEDEF(netsnmp_data_list);
     if (!node)
         return NULL;
     node->name = strdup(name);
@@ -31,9 +59,9 @@ create_data_list(const char *name, void *data,
    
     
 inline void
-add_list_data(data_list **head, data_list *node) 
+netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node) 
 {
-    data_list *ptr;
+    netsnmp_data_list *ptr;
     if (!*head) {
         *head = node;
         return;
@@ -49,7 +77,7 @@ add_list_data(data_list **head, data_list *node)
 }
 
 inline void *
-get_list_data(data_list *head, const char *name)
+netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
 {
   for(; head; head = head->next)
     if (head->name && strcmp(head->name, name) == 0)
@@ -60,7 +88,7 @@ get_list_data(data_list *head, const char *name)
 }
 
 inline void *
-get_list_node(data_list *head, const char *name)
+netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
 {
   for(; head; head = head->next)
     if (head->name && strcmp(head->name, name) == 0)
@@ -71,16 +99,16 @@ get_list_node(data_list *head, const char *name)
 }
 
 int
-remove_list_node(data_list **realhead, const char *name)
+netsnmp_remove_list_node(netsnmp_data_list **realhead, const char *name)
 {
-    data_list *head, *prev;
+    netsnmp_data_list *head, *prev;
     for(head = *realhead, prev = NULL; head; prev = head, head = head->next) {
         if (head->name && strcmp(head->name, name) == 0) {
             if (prev)
                 prev->next = head->next;
             else
                 *realhead = head->next;
-            free_list_data(head);
+            netsnmp_free_list_data(head);
             free(head);
             return 0;
         }
@@ -89,28 +117,4 @@ remove_list_node(data_list **realhead, const char *name)
 }
 
 
-inline void
-free_list_data(data_list *node)
-{
-  Free_List_Data *beer;
-  if (!node)
-    return;
-
-  beer = node->free_func;
-  if (beer)
-    (beer)(node->data);
-  SNMP_FREE(node->name);
-}
-
-inline void
-free_all_list_data(data_list *head) 
-{
-    data_list *tmpptr;
-    for(; head; ) {
-        free_list_data(head);
-        tmpptr = head;
-        head = head->next;
-        SNMP_FREE(tmpptr);
-    }
-}
 
