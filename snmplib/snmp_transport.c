@@ -219,7 +219,7 @@ netsnmp_clear_tdomain_list(void)
 
     while (list != NULL) {
 	next = list->next;
-	free(list->prefix);
+	free((void *)list->prefix);
         /* attention!! list itself is not in the heap, so we must not free it! */
 	list = next;
     }
@@ -285,7 +285,7 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
             if (netsnmp_oid_equals(n->name, n->name_length,
                                 d->name, d->name_length) == 0) {
                 *prevNext = n->next;
-		free(n->prefix);
+		free((void *)n->prefix);
                 return 1;
             }
             prevNext = &(d->next);

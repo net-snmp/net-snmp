@@ -545,7 +545,7 @@ parse_simple_monitor(const char *token, char *line)
          * if nothing beyond here, it's an existence test 
          */
         if (!cp) {
-            StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
+            StorageNew->mteTriggerTest[0] = (u_char)MTETRIGGERTEST_EXISTENCE;
             if (eventname[0] != '\0') {
                 StorageNew->mteTriggerExistenceEventOwner =
                     strdup("snmpd.conf");
@@ -1391,7 +1391,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                                            &tmpint);
                 cptr =
                     read_config_store_data(ASN_OBJECT_ID, cptr,
-                                           &StorageTmp->pdu_tDomain,
+                                           (void *)(&StorageTmp->pdu_tDomain),
                                            &StorageTmp->pdu_tDomainLen);
                 cptr =
                     read_config_store_data(ASN_OCTET_STR, cptr,
