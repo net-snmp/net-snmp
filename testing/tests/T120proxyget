@@ -23,7 +23,7 @@ AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib -Dproxy"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
-#CAPTURE "snmpget -On -t 3 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+#CAPTURE "snmpget -On -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 #CHECK ".1.3.6.1.2.1.1.3.0 = No Such Object"
 
@@ -43,7 +43,7 @@ STARTAGENT
   SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
 
   # test to see that the agent now supports the system mib
-  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
   CHECK ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
