@@ -540,8 +540,8 @@ vacm_parse_simple(const char *token, char *confline)
         netsnmp_udp_parse_security("com2sec", line);
 
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-        snprintf(line, sizeof(line), "%s %s",
-                 secname, community);
+        snprintf(line, sizeof(line), "%s %s %s",
+                 secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
         netsnmp_unix_parse_security("com2secunix", line);

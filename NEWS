@@ -14,6 +14,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - snmptable sports 3 new options: fixed width, max-repeaters, left-justify.
       (see snmptable -h for details)
     - the UCD-DISKIO-MIB will now work on linux.
+    - com2sec mappings for SNMP over unix sockets.
 
  Fixes:
     - More patches to properly demonize snmpd (close std*, double fork, ...).
