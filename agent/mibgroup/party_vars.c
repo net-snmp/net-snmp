@@ -1,5 +1,10 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
