@@ -36,7 +36,12 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 #if STDC_HEADERS
+#include <string.h>
 #include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/time.h>
@@ -69,6 +74,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/struct.h"
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
+#include "agent_read_config.h"
 #include "mib_module_config.h"
 #if USING_MIBII_VACM_VARS_MODULE
 #include "mibgroup/mibII/vacm_vars.h"
