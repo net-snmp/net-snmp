@@ -14,6 +14,17 @@ operate and report mib entries.
 First, make sure you have read the snmp_config(5) manual page that
 describes how the ucd-snmp configuration files operate, where they
 are located and how they all work together.
+.PP
+Also, you might consider looking into the
+.I snmpconf
+application (perl script) which can help you build a snmpd.conf file
+by prompting you for information.  You should try it.  Really.  Go
+ahead.  Right now.  Run:
+.RS
+.IP "snmpconf -g basic_setup"
+.RE
+.PP
+to get you started.
 .SH EXTENSIBLE-MIB
 .PP
 The ucd-snmp SNMP agent reports much of its information through
@@ -498,7 +509,7 @@ A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
 DATADIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmp.conf(5), snmp_config(5), snmpd(1), EXAMPLE.conf, read_config(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
