@@ -4836,7 +4836,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    (*objidlen)++;
 	    cp = cp2;
 	    if (subid == 1) {
-		for (len = 0; len < 4; len++) {
+		for (len = 0; cp && len < 4; len++) {
 		    fcp = cp;
 		    cp2 = strchr(cp, '.');
 		    if (cp2)
@@ -4851,8 +4851,6 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		    objid[*objidlen] = subid;
 	            (*objidlen)++;
 		    cp = cp2;
-                    if (!cp)
-                        goto bad_id;
 		}
 	    }
 	    else {
