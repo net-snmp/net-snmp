@@ -174,7 +174,7 @@ void snmpd_set_agent_address(const char *token, char *cptr)
     buf[sizeof(buf)-1] = '\0';
 
     DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
-    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
+    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
 
 }
 
