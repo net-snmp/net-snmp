@@ -29,6 +29,10 @@ SOFTWARE.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#ifdef ultrix4
+extern char *optarg;
+extern int optind;
+#endif
 #else
 #include <strings.h>
 extern char getopt();
