@@ -1644,6 +1644,19 @@ print_tree_node(FILE *f,
 	default:			sprintf(str,"status_%d", tp->status); cp = str;
 	}
 	if (cp) fprintf(f, "STATUS\t%s\n", cp);
+	if (tp->indexes) {
+            struct index_list *ip = tp->indexes;
+            int first=1;
+            fprintf(f, "INDEXES\t");
+            fprintf(f," { ");
+	    while (ip) {
+		if (first) first = 0;
+		else fprintf(f, ", ");
+		fprintf(f, "%s", ip->ilabel);
+		ip = ip->next;
+	    }
+	    fprintf(f," }\n");
+	}
 	if (tp->description) fprintf(f, "DESCRIPTION\t\"%s\"\n", tp->description);
     }
     else
