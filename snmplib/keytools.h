@@ -34,13 +34,14 @@ extern "C" {
  * FIX	Offer an snmp_hash() function to hide away differences between
  *	this an "internal" MD5 (& whatever else might come...)?
  */
+
+#ifdef HAVE_LIBKMT
 extern int (*kmt_hash) (
 	const int	  mode,		void  	 **context,
 	const u_int8_t	 *data,		const int  data_len,     
 	u_int8_t	**digest,	size_t	  *digest_len);
 
 
-#ifdef HAVE_LIBKMT
 extern int (*kmt_s_md5) (
 		const int	  mode,		void  	 **context,
 		const u_int8_t	 *data,		const int  data_len,     

@@ -34,8 +34,11 @@
    privacy support. */
 #undef SCAPI_AUTHPRIV
 
-/* define if you are using the MD5 code */
+/* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
+
+/* ... or define this if you're using openssl support */
+#undef USE_OPENSSL
 
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
@@ -319,12 +322,6 @@
 /* Define if you have the <ioctls.h> header file.  */
 #undef HAVE_IOCTLS_H
 
-/* Define if you have the <kmt.h> header file.  */
-#undef HAVE_KMT_H
-
-/* Define if you have the <kmt_algs.h> header file.  */
-#undef HAVE_KMT_ALGS_H
-
 /* Define if you have the <kstat.h> header file.  */
 #undef HAVE_KSTAT_H
 
@@ -426,6 +423,12 @@
 
 /* Define if you have the <nlist.h> header file.  */
 #undef HAVE_NLIST_H
+
+/* Define if you have the <openssl/evp.h> header file.  */
+#undef HAVE_OPENSSL_EVP_H
+
+/* Define if you have the <openssl/hmac.h> header file.  */
+#undef HAVE_OPENSSL_HMAC_H
 
 /* Define if you have the <osreldate.h> header file.  */
 #undef HAVE_OSRELDATE_H
@@ -630,9 +633,6 @@
 
 /* Define if you have the elf library (-lelf).  */
 #undef HAVE_LIBELF
-
-/* Define if you have the kmt library (-lkmt).  */
-#undef HAVE_LIBKMT
 
 /* Define if you have the kstat library (-lkstat).  */
 #undef HAVE_LIBKSTAT

@@ -26,8 +26,12 @@
 
 #include "asn1.h"
 #include "snmp_api.h"
+#ifdef USE_OPENSSL
+#	include <openssl/hmac.h>
+#else 
 #ifdef USE_INTERNAL_MD5
 #include "md5.h"
+#endif
 #endif
 
 #include "scapi.h"
@@ -83,7 +87,7 @@ int
 generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 		u_char	*P,		size_t  pplen,
 		u_char	*Ku,		size_t *kulen)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
 	int		 rval   = SNMPERR_SUCCESS,
 			 nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
@@ -94,12 +98,11 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 	u_char		 buf[USM_LENGTH_KU_HASHBLOCK],
 			*bufp;
 
-#ifdef HAVE_LIBKMT
-	void		*context = NULL;
+#ifdef USE_OPENSSL
+	EVP_MD_CTX      *ctx = malloc(sizeof(EVP_MD_CTX));
 #else
         MDstruct         MD;
 #endif
-        
 	/*
 	 * Sanity check.
 	 */
@@ -123,45 +126,38 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 	/*
 	 * Setup for the transform type.
 	 */
-        transform = sc_get_transform_type(hashtype, hashtype_len, &kmt_hash);
-        if (transform == SNMPERR_GENERR)
-          QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
-
-	/*
-	 * Expand passphrase and reduce it to a hash.
-	 */
-#ifdef HAVE_LIBKMT
-        rval = kmt_hash(KMT_CRYPT_MODE_INIT, &context, NULL, 0, NULL, NULL);
-        QUITFUN(rval, generate_Ku_quit);
-#else
+#ifdef USE_OPENSSL
+	
+	if (ISTRANSFORM(hashtype, HMACMD5Auth))
+	  EVP_DigestInit(ctx, EVP_md5());
+	else if (ISTRANSFORM(hashtype, HMACSHA1Auth))
+	  EVP_DigestInit(ctx, EVP_sha1());
+	else 
+	  return (SNMPERR_GENERR);
+#else 
         MDbegin(&MD);
-#endif
+#endif /* USE_OPENSSL */
 
         while (nbytes > 0) {
                 bufp = buf;
                 for (i = 0; i < USM_LENGTH_KU_HASHBLOCK; i++) {
                         *bufp++ = P[pindex++ % pplen];
                 }
-
-#ifdef HAVE_LIBKMT
-                rval = kmt_hash(KMT_CRYPT_MODE_UPDATE,
-                                &context,
-                                buf,    USM_LENGTH_KU_HASHBLOCK,
-                                NULL,   NULL);
-                QUITFUN(rval, generate_Ku_quit);
+#ifdef USE_OPENSSL
+		EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
 #else
                 if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK*8)) {
                     rval = SNMPERR_USM_ENCRYPTIONERROR;
                     goto md5_fin;
                 }
-#endif
+#endif /* USE_OPENSSL */
 
                 nbytes -= USM_LENGTH_KU_HASHBLOCK;
         }
 
-#ifdef HAVE_LIBKMT
-        rval = kmt_hash(KMT_CRYPT_MODE_FINAL, &context, NULL, 0, &Ku, kulen);
-	QUITFUN(rval, generate_Ku_quit);
+#ifdef USE_OPENSSL
+	EVP_DigestFinal(ctx, (unsigned char *) Ku, (unsigned int *) kulen);
+	/* what about free() */
 #else
         if (MDupdate(&MD, buf, 0)) {
             rval = SNMPERR_USM_ENCRYPTIONERROR;
@@ -171,7 +167,7 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
         MDget(&MD, Ku, *kulen);
 md5_fin:
         memset(&MD, 0, sizeof(MD));
-#endif
+#endif /* USE_OPENSSL */
 
 
 #ifdef SNMP_TESTING_CODE
@@ -184,8 +180,8 @@ md5_fin:
 
 generate_Ku_quit:
 	memset(buf, 0, sizeof(buf));
-#ifdef HAVE_LIBKMT
-        SNMP_FREE(context);
+#ifdef USE_OPENSSL
+	free(ctx);
 #endif
 	return rval;
 
@@ -242,7 +238,7 @@ generate_kul(	oid	*hashtype,	u_int  hashtype_len,
 		u_char	*engineID,	size_t  engineID_len,
 		u_char	*Ku,		size_t  ku_len,
 		u_char	*Kul,		size_t *kul_len)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
 	u_int		 nbytes  = 0;
@@ -353,7 +349,7 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 			u_char	*oldkey,	size_t  oldkey_len,
 			u_char	*newkey,	size_t  newkey_len,
 			u_char	*kcstring,	size_t *kcstring_len)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
 	size_t		 properlength;
@@ -484,7 +480,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 			u_char	*oldkey,	size_t  oldkey_len,
 			u_char	*kcstring,	size_t  kcstring_len,
 			u_char	*newkey,	size_t *newkey_len)
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
+#if defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
 	size_t		 properlength = 0;
