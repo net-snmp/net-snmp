@@ -19,28 +19,26 @@ int swap, mem;
 init_kmem(file)
     char *file;
 {
-  kmem = open(file, 0);
+    kmem = open(file, 0);
     if (kmem < 0){
 	fprintf(stderr, "cannot open ");
 	perror(file);
 	exit(1);
-    } 
+    }
+
     mem = open("/dev/mem",0);    
     if (mem < 0){
 	fprintf(stderr, "cannot open ");
-	perror("/dev/mem");
+	perror(file);
 	exit(1);
     }
-#ifdef hpux
-    swap = open("/dev/dmem",0);
-#else
     swap = open("/dev/drum",0);
-#endif
     if (swap < 0){
 	fprintf(stderr, "cannot open ");
-	perror("/dev/drum");
+	perror(file);
 	exit(1);
     }
+
 }
 
 
@@ -86,7 +84,7 @@ klookup(off, target, siz)
      int     siz;
 {
 
-  klseek(off);
+  klseek(off);      
   if (siz != klread(target, siz)) {
     ERROR("klread\n");
     exit(-1);

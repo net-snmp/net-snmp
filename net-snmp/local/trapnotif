@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PATH=/usr/local/bin/:/usr/support/bin/:/1/OV/bin/:$PATH
+PATH=/usr/local/bin/:/usr/support/bin/:$PATH
 
 # testing
 #echo user: `whoami`
@@ -26,7 +26,6 @@ HOST=`echo $FULLHOST | sed 's/\.[^.]*\.ucdavis\.edu//'`
 HOSTEXIT=0
 case "$FULLHOST" in
   *.ece.ucdavis.edu)   HOSTEXIT=1 ;;
-  *.eecs.ucdavis.edu)   HOSTEXIT=1 ;;
   *.cipic.ucdavis.edu) HOSTEXIT=1 ;;
 esac
 
@@ -58,6 +57,13 @@ log_error()
 
   if [ `egrep "$HOST[ 	]*$PROC" $CURLOGFILE | wc -l` = 0 ]; then
     lockfile $CURLOGLOCKFILE
+    #    if [ $status ]
+      #      then
+      #      /bin/cat << ++ | /usr/lib/sendmail hardaker
+      #Unable to lock the $CURLOGLOCKFILE
+      #++
+      #      exit 1
+      #    fi
     cp $CURLOGFILE $TMPFILE
     echo "$HOST@$PROC@$ERROR@(`date +'%m/%d %H:%M'`)" | awk -F @ '{ printf("%-8.8s %-12.12s %-42.42s %-13.13s\n",$1,$2,$3,$4);}' >> $TMPFILE
     sort $TMPFILE > $CURLOGFILE
@@ -116,14 +122,32 @@ if [ $TYPE = "down" -o $TYPE = "up" ]; then
   exit 0
 fi
 
+if [ $TYPE = "swaperr" ]; then
+
+  # swap problem
+  PROC="swap"
+  ERROR="$HOST is low on swap"
+  log_error
+  exit 0
+  
+fi
+if [ $TYPE = "swapnorm" ]; then
+
+  # swap problem
+
+  PROC="swap"
+  ERROR="$HOST swap is ok"
+  unlog_error
+  exit 0
+fi
+
 # More Variable declairations for ece-snmpd events
 
-MIBERRFLAG="$4"
-MIBLOC=`echo $MIBERRFLAG | sed 's/\.[^.]*$//'`
-ERRTABLENO="$3"
+MIBLOC=`echo $4 | sed 's/\.[^.]*$//'`
+ERRTABLENO=$3
 MIBPROC=$MIBLOC.2.$ERRTABLENO
-MIBERRMSG=$MIBLOC.101.$ERRTABLENO
-PROC=`snmpget -t 5 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
+MIBERR=$MIBLOC.101.$ERRTABLENO
+PROC=`/1/OV/bin/snmpget -t 5 -r 3 $FULLHOST $MIBPROC | sed 's/^.*: *//'`
 if [ $PROC = "" ]; then
   PROC="traperr"
 fi
@@ -134,13 +158,8 @@ if [ $TYPE = "err" ];   then
   
   # The problem is an error
   
-  ERROR=`snmpget -t 5 -r 3 $FULLHOST $MIBERRMSG | sed 's/^.*: *//'`
-  if [ "$ERROR" = "" ]; then
-    ERROR="Error MSG disappeared."
-    total_log
-  else
-    log_error
-  fi
+  ERROR=`/1/OV/bin/snmpget -t 5 -r 3 $FULLHOST $MIBERR | sed 's/^.*: *//'`
+  log_error
   
 else
 
@@ -151,9 +170,6 @@ else
   
 fi
 
-# Log event
-
-echo "`date`\t$1|$2|$3|$4" >> /1/OV/log/trapnotif.log
 
 #
 # Generate a mail message to 'prog'

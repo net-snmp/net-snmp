@@ -29,10 +29,6 @@ SOFTWARE.
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <errno.h>
-#ifdef hpux
-/* needed for htonl funcs */
-#include <netinet/in.h>
-#endif
 
 #include "asn1.h"
 #include "snmp.h"
