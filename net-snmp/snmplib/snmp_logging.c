@@ -70,18 +70,17 @@ init_snmp_logging(void) {
 
 
 static char *
-sprintf_stamp (time_t *now)
+sprintf_stamp (time_t *now, char *sbuf)
 {
     time_t Now;
     struct tm *tm;
-    static char sbuf [32];
 
     if (now == NULL) {
 	now = &Now;
 	time (now);
     }
     tm = localtime (now);
-    sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
+    sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
 	    tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
     return sbuf;
@@ -151,51 +150,32 @@ snmp_enable_stderrlog(void) {
 
 
 void
-snmp_log_syslog (int priority, const char *string)
+snmp_log_string (int priority, const char *string)
 {
+    char sbuf[40];
+
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
     syslog(priority, string);
   }
 #endif
-}
 
+  if (do_filelogging || do_stderrlogging) {
 
-void
-snmp_log_filelog (int priority, const char *string)
-{
-  if (do_filelogging) {
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
-      fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
+      sprintf_stamp(NULL, (char *)&sbuf);
     } else {
-      fprintf(logfile, "%s", string);
+      strcpy(sbuf, "");
     }
     newline = string[strlen(string)-1] == '\n';
+
+    if (do_filelogging)
+      fprintf(logfile, "%s%s", sbuf, string);
+
+    if (do_stderrlogging)
+      fprintf(stderr, "%s%s", sbuf, string);
   }
 }
-
-
-void
-snmp_log_stderrlog (int priority, const char *string)
-{
-  if (do_stderrlogging) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
-      fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
-    } else {
-      fprintf(stderr, "%s", string);
-    }
-    newline = string[strlen(string)-1] == '\n';
-  }
-}
-
-void 
-snmp_log_string (int priority, const char *string)
-{
-  snmp_log_syslog(priority, string);
-  snmp_log_filelog(priority, string);
-  snmp_log_stderrlog(priority, string);
-}
-
 
 int
 snmp_vlog (int priority, const char *format, va_list ap)
