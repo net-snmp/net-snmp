@@ -170,6 +170,12 @@ EXPORTS
 	snmp_call_callbacks
 	malloc_zero
 	strncasecmp
+	init_snmp_alarm
+	ds_register_premib
+	ds_set_boolean
+	ds_get_boolean
+	ds_set_int
+	ds_get_int
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
