@@ -101,6 +101,12 @@ static struct tree *_get_realloc_symbol(oid *objid, size_t objidlen,
 					size_t *end_of_known);
   
 static void print_tree_node (FILE *, struct tree *, int);
+static void handle_mibdirs_conf(const char *token, char *line);
+static void handle_mibs_conf(const char *token, char *line);
+static void handle_mibfile_conf(const char *token, char *line);
+static char *dump_oid_to_string(oid *objid, size_t objidlen,
+                   char *buf, char quotechar);
+
 
 /* helper functions for get_module_node */
 static int node_to_oid(struct tree *, oid *, size_t *);
@@ -145,7 +151,7 @@ uptimeString(u_long timeticks,
     int	centisecs, seconds, minutes, hours, days;
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-	sprintf(buf,"%ld",timeticks);
+	sprintf(buf,"%lu",timeticks);
 	return buf;
     }
 
@@ -326,8 +332,13 @@ void sprint_asciistring(char *buf,
 
     for(x = 0; x < (int)len; x++){
 	if (isprint(*cp)){
-	    if (*cp == '\\' || *cp == '"')
+	    if (*cp == '\\' || *cp == '"') {
+                if (++x >= len) {
+                    *buf = '\0';
+                    return;
+                }
 		*buf++ = '\\';
+            }
 	    *buf++ = *cp++;
 	} else {
 	    *buf++ = '.';
@@ -486,7 +497,7 @@ sprint_octet_string(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     }
-    if (hex){
+    if (hex) {
 	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	    *buf++ = '"';
 	    *buf = '\0';
@@ -2164,7 +2175,7 @@ struct tree *get_tree_head(void)
 static char *confmibdir=NULL;
 static char *confmibs=NULL;
 
-void
+static void
 handle_mibdirs_conf(const char *token,
 		    char *line)
 {
@@ -2183,7 +2194,7 @@ handle_mibdirs_conf(const char *token,
     DEBUGMSGTL(("read_config:initmib", "using mibdirs: %s\n", confmibdir));
 }
 
-void
+static void
 handle_mibs_conf(const char *token,
 		 char *line)
 {
@@ -2202,7 +2213,8 @@ handle_mibs_conf(const char *token,
     DEBUGMSGTL(("read_config:initmib", "using mibs: %s\n", confmibs));
 }
 
-void
+
+static void
 handle_mibfile_conf(const char *token,
 		    char *line)
 {
@@ -3111,7 +3123,7 @@ fprint_value(FILE *f,
  * Display '.' for all non-printable sub-identifiers.
  * If successful, "buf" points past the appended string.
  */
-char *
+static char *
 dump_oid_to_string(oid *objid,
                    size_t objidlen,
                    char *buf,
