@@ -1318,6 +1318,8 @@ PERL
 How do I install the Perl SNMP module?
 -------------------------------------
 
+  (first, see "Where can I get the perl SNMP package?" above)
+
   Assuming you have a reasonably new (and properly configured) perl system,
   this should be simply:
 
