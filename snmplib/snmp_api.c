@@ -6531,6 +6531,8 @@ snmp_add_var(netsnmp_pdu *pdu,
                 snmp_set_detail(value);
                 break;
             }
+            /* initialize itmp value so that range check below works */
+            itmp = value_len;
             buf_ptr = buf;
         } else if (type == 's') {
             buf_ptr = value;
