@@ -105,7 +105,7 @@ SOFTWARE.
      * versions not based on a version field 
      */
 #define SNMP_VERSION_sec   128  /* not (will never be) supported by this code */
-#define SNMP_VERSION_2p	   129
+#define SNMP_VERSION_2p	   129  /* no longer supported by this code (> 4.0) */
 #define SNMP_VERSION_2star 130  /* not (will never be) supported by this code */
 
     /*
@@ -144,6 +144,8 @@ SOFTWARE.
 #define SNMP_MSG_INTERNAL_SET_COMMIT       3
 #define SNMP_MSG_INTERNAL_SET_FREE         4
 #define SNMP_MSG_INTERNAL_SET_UNDO         5
+
+#define SNMP_MSG_INTERNAL_GET_STASH        10
 
     /*
      * test for member of Confirmed Class i.e., reportable 
