@@ -18,7 +18,8 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#include <net-snmp/asn1.h>
+
+#include <net-snmp/types.h>	
 #include <net-snmp/int64.h>
 
 #define TRUE 1

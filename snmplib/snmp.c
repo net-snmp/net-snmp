@@ -66,12 +66,12 @@ SOFTWARE.
 #include <in.h>
 #endif
 
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+
 #include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
+#include <net-snmp/snmp.h>	/* for "internal" definitions */
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/snmp_debug.h>
 #include <net-snmp/mib.h>
 
 void

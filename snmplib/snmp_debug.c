@@ -26,14 +26,14 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/asn1.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/snmp_debug.h>	/* For this file's "internal" definitions */
+#include <net-snmp/config_api.h>
+#include <net-snmp/utilities.h>
+
 #include <net-snmp/mib.h>
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/tools.h>
 
 static int   dodebug = SNMP_ALWAYS_DEBUG;
 static int   debug_num_tokens=0;

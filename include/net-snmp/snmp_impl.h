@@ -94,7 +94,9 @@ SOFTWARE.
 #endif /* OPAQUE_SPECIAL_TYPES */
 
 /* changed to ERROR_MSG to eliminate conflict with other includes */
+#ifndef ERROR_MSG
 #define ERROR_MSG(string)	snmp_set_detail(string)
+#endif
 
 /* from snmp.c */
 extern u_char	sid[];	/* size SID_MAX_LEN */

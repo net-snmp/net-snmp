@@ -35,22 +35,20 @@
 #include <netinet/in.h>
 #endif
 
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/utilities.h>
+
 #ifdef USE_INTERNAL_MD5
 #include <net-snmp/md5.h>
 #endif
-#include <net-snmp/asn1.h>
-#include <net-snmp/tools.h>
 #include <net-snmp/snmp_api.h>
 #include <net-snmp/callback.h>
 #include <net-snmp/snmp_secmod.h>
 #include <net-snmp/snmpusm.h>
 #include <net-snmp/keytools.h>
-#include <net-snmp/snmp_debug.h>
 #include <net-snmp/scapi.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/system.h>
 #include <net-snmp/mib.h>
-#include <net-snmp/snmp_logging.h>
 #include <net-snmp/transform_oids.h>
 
 #ifdef USE_OPENSSL

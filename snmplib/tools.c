@@ -46,12 +46,12 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/asn1.h> 
-#include <net-snmp/system.h>
+#include <net-snmp/types.h>	
+#include <net-snmp/output_api.h>
+#include <net-snmp/utilities.h>
+#include <net-snmp/tools.h>		/* for "internal" definitions */
+
 #include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/tools.h>
 #include <net-snmp/mib.h>
 #include <net-snmp/scapi.h> 
 
