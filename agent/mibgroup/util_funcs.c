@@ -62,6 +62,7 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "../../snmplib/system.h"
+#include "values.h"
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "ucd-snmp/errormib.h"
 #else
@@ -79,7 +80,7 @@ extern int numprocs, numextens;
 void
 Exit(int var)
 {
-  fprintf(stderr, "Server Exiting with code %d\n",var);
+  snmp_log(LOG_ERR, "Server Exiting with code %d\n",var);
   fclose (stderr);
   exit(var);
 }
@@ -361,7 +362,7 @@ int clear_cache(int action,
   long tmp=0;
 
   if (var_val_type != ASN_INTEGER) {
-    printf("Wrong type != int\n");
+    snmp_log(LOG_NOTICE, "Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
   tmp = *((long *) var_val);
@@ -401,7 +402,7 @@ restart_hook(int action,
   long tmp=0;
 
   if (var_val_type != ASN_INTEGER) {
-    printf("Wrong type != int\n");
+    snmp_log(LOG_NOTICE, "Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
   tmp = *((long *) var_val);
@@ -416,11 +417,15 @@ void
 print_mib_oid(oid name[],
 	      size_t len)
 {
-  int i;
-  printf("Mib:  ");
-  for(i=0; i < len; i++) {
-    printf(".%d",(int) name[i]);
+  char *buffer;
+  buffer=malloc((floor(log(MAXINT))+1)*len);
+  if (!buffer) {
+    snmp_log(LOG_ERR, "Malloc failed - out of memory?");
+    return;
   }
+  sprint_mib_oid(buffer, name, len);
+  snmp_log(LOG_NOTICE, "Mib: %s\n", buffer);
+  free(buffer);
 }
 
 void

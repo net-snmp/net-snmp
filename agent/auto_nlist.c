@@ -1,4 +1,3 @@
-
 #include <config.h>
 
 #ifdef CAN_USE_NLIST
@@ -24,6 +23,7 @@
 #include "../snmplib/asn1.h"
 #include "../snmplib/snmp_api.h"
 #include "../snmplib/snmp_debug.h"
+#include "snmp_logging.h"
 
 struct autonlist *nlists = 0;
 static void init_nlist (struct nlist *);
@@ -65,7 +65,7 @@ auto_nlist_value(const char *string)
       init_nlist(it->nl);
     }
     if (it->nl[0].n_type == 0) {
-      fprintf(stderr, "nlist err: neither %s nor _%s found.\n", string, string);
+      snmp_log(LOG_ERR, "nlist err: neither %s nor _%s found.\n", string, string);
       return( -1 );
     } else {
       DEBUGMSGTL(("auto_nlist", "nlist:  found symbol %s at %x.\n", it->symbol, it->nl[0].n_value));
@@ -83,13 +83,12 @@ auto_nlist(const char *string,
 {
   long result;
   int ret;
-
   result = auto_nlist_value(string);
   if (result != -1) {
     if (var != NULL) {
       ret = klookup(result, var, size);
       if (!ret)
-        fprintf(stderr, "auto_nlist failed on %s at location %lx\n",
+        snmp_log(LOG_ERR, "auto_nlist failed on %s at location %lx\n",
                string, result);
       return ret;
     } else
@@ -109,17 +108,17 @@ init_nlist(struct nlist nl[])
   char kvm_errbuf[4096];
 
   if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
-      fprintf(stderr, "kvm_openfiles: %s\n", kvm_errbuf);
+      snmp_log(LOG_ERR, "kvm_openfiles: %s\n", kvm_errbuf);
       exit(1);
   }
   if ((ret = kvm_nlist(kernel, nl)) == -1) {
-      perror("kvm_nlist");
+      log_perror("kvm_nlist");
       exit(1);
   }
   kvm_close(kernel);
 #else
   if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
-    perror("nlist");
+    log_perror("nlist");
     exit(1);
   }
 #endif
@@ -146,7 +145,7 @@ int KNLookup(struct nlist nl[],
     struct nlist *nlp = &nl[nl_which];
 
     if (nlp->n_value == 0) {
-        fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
+        snmp_log(LOG_ERR, "Accessing non-nlisted variable: %s\n", nlp->n_name);
 	nlp->n_value = -1;	/* only one error message ... */
 	return 0;
     }
@@ -163,14 +162,14 @@ auto_nlist_print_tree(int indent,
 {
   char buf[1024];
   if (indent == -2) {
-    fprintf(stderr, "nlist tree:\n");
+    snmp_log(LOG_ERR, "nlist tree:\n");
     auto_nlist_print_tree(12,nlists);
   } else {
     if (ptr == 0)
       return;
     sprintf(buf,"%%%ds\n",indent);
 /*    DEBUGMSGTL(("auto_nlist", "buf: %s\n",buf)); */
-    fprintf(stderr, buf, ptr->symbol);
+    snmp_log(LOG_DEBUG, buf, ptr->symbol);
     auto_nlist_print_tree(indent+2,ptr->left);
     auto_nlist_print_tree(indent+2,ptr->right);
   }

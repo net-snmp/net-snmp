@@ -72,7 +72,7 @@ void init_memory_solaris2(void)
 
   kc = kstat_open();
   if (kc == 0) {
-    printf("kstat_open(): failed\n");
+    snmp_log(LOG_ERR, "kstat_open(): failed\n");
   }
 }
 

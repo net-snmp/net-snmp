@@ -42,7 +42,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 #include <config.h>
-
+#include <snmp_logging.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -550,13 +550,13 @@ print_error(const char *string,
 {
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        fprintf(stderr, "%s(EOF): At line %d in %s\n", string, Line,
+        snmp_log(LOG_ERR, "%s(EOF): At line %d in %s\n", string, Line,
                 File);
     else if (token)
-        fprintf(stderr, "%s(%s): At line %d in %s\n", string, token,
+        snmp_log(LOG_ERR, "%s(%s): At line %d in %s\n", string, token,
                 Line, File);
     else
-        fprintf(stderr, "%s: At line %d in %s\n", string, Line, File);
+        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
 }
 
 static long xmalloc_calls = 0;

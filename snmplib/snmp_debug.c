@@ -28,6 +28,7 @@
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_impl.h"
+#include "snmp_logging.h"
 
 static int   dodebug = SNMP_ALWAYS_DEBUG;
 static int   debug_num_tokens=0;
@@ -177,7 +178,7 @@ debugmsg(va_alist)
 #endif
 
   if (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
-    vfprintf(stderr, format, debugargs);
+    vlog(LOG_DEBUG, format, debugargs);
   }
   va_end(debugargs);
 }

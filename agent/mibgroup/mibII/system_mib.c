@@ -332,17 +332,17 @@ writeSystem(int action,
     switch ( action ) {
 	case RESERVE1:		/* Check values for acceptability */
 	    if (var_val_type != ASN_OCTET_STR){
-		printf("not string\n");
+                snmp_log(LOG_ERR, "not string\n");
 		return SNMP_ERR_WRONGTYPE;
 	    }
 	    if (var_val_len > sizeof(version_descr)-1){
-		printf("bad length\n");
+                snmp_log(LOG_ERR, "bad length\n");
 		return SNMP_ERR_WRONGLENGTH;
 	    }
 	    
 	    for(cp = var_val, count = 0; count < var_val_len; count++, cp++){
 		if (!isprint(*cp)){
-		    printf("not print %x\n", *cp);
+                    snmp_log(LOG_ERR, "not print %x\n", *cp);
 		    return SNMP_ERR_WRONGVALUE;
 		}
 	    }

@@ -2,6 +2,7 @@
 #include "asn1.h"
 #define NULL 0
 #include "history.h"
+#include "snmp_logging.h"
 
 static struct historyControlEntry *List = NULL, *ScanPtr = NULL;
 
@@ -96,7 +97,7 @@ hc_freeBuckets(blp)
     struct bucketList *blp;
 {
     if (!blp){
-      printf("Error: Free NULL Bucket pointer\n");
+      snmp_log(LOG_ERR, "Free NULL Bucket pointer\n");
       return;
     }
     if (blp->buckets)

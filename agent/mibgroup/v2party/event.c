@@ -68,6 +68,7 @@
 #include "party.h"
 #include "snmp_client.h"	
 #include "../../../snmplib/system.h"
+#include "snmp_logging.h"
 
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;
@@ -194,7 +195,7 @@ eventDeleteRow(struct eventEntry *event)
     
     /* KLF debugging */
     if (temp == NULL) {
-	printf("eventDeleteRow: didn't find row (%d) in eventTab\n",
+ snmp_log(LOG_ERR, "eventDeleteRow: didn't find row (%d) in eventTab\n",
 	       event->index);
     }
     
@@ -229,7 +230,7 @@ eventNotifyDeleteRow(struct eventNotifyEntry *event)
     
     /* KLF debugging */
     if (temp == NULL) {
-	printf("eventNotifyDeleteRow: didn't find row (%d) in eventNotifyTab\n",
+ snmp_log(LOG_ERR, "eventNotifyDeleteRow: didn't find row (%d) in eventNotifyTab\n",
 	       event->index);
     }
     
@@ -483,7 +484,7 @@ eventCommitRow(struct eventEntry *event)
     
     if (event->next != nextPtr) {
 	/* KLF debugging */
-	printf("eventCommitRow(%d): next pointer was different\n",
+ snmp_log(LOG_ERR, "eventCommitRow(%d): next pointer was different\n",
 	       event->index);
 	event->next = nextPtr;
     }
@@ -519,7 +520,7 @@ eventNotifyCommitRow(struct eventNotifyEntry *event)
     
     if (event->next != nextPtr) {
 	/* KLF debugging */
-	printf("eventNotifyCommitRow(%d): next pointer was different\n",
+ snmp_log(LOG_ERR, "eventNotifyCommitRow(%d): next pointer was different\n",
 	       event->index);
 	event->next = nextPtr;
     }
@@ -743,7 +744,7 @@ eventSendTrap(struct eventEntry *event,
 	    eventUnavailFillInVars(vp, (struct alarmEntry *)generic);
 	    break;
 	  default:
-	    printf("eventSendTrap: unrecognized eventType %d\n", eventType);
+	    snmp_log(LOG_ERR, "eventSendTrap: unrecognized eventType %d\n", eventType);
 	    break;
 	}
 

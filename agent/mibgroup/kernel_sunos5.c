@@ -53,6 +53,7 @@
 #include "../../snmplib/system.h"
 #include "asn1.h"
 #include "snmp_debug.h"
+#include "mibincl.h"
 
 #include "kernel_sunos5.h"
 
@@ -642,7 +643,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     ifconf.ifc_buf = buf;
     ifconf.ifc_len = sizeof(buf);
     if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
-	fprintf (stderr, "cannot SIOCGIFCONF - increase buffer size\n");
+ snmp_log(LOG_ERR, "cannot SIOCGIFCONF - increase buffer size\n");
 	ret = -1;
 	goto Return;
     }
@@ -816,7 +817,7 @@ main (int argc, char **argv)
   u_long val = 0;
 
   if (argc != 3) {
-    fprintf(stderr, "Usage: %s stat_name var_name\n", argv[0]);
+    snmp_log(LOG_ERR, "Usage: %s stat_name var_name\n", argv[0]);
     exit(1);
   }
 
@@ -824,9 +825,9 @@ main (int argc, char **argv)
   rc = getKstat(argv[1], argv[2], &val);
 
   if (rc == 0)
-    fprintf(stderr, "%s = %lu\n", argv[2], val);
+    snmp_log(LOG_ERR, "%s = %lu\n", argv[2], val);
   else
-    fprintf(stderr, "rc =%d\n", rc);
+    snmp_log(LOG_ERR, "rc =%d\n", rc);
   return 0;
 }
 #endif /*_GETKSTAT_TEST */
@@ -873,7 +874,7 @@ main (int argc, char **argv)
   IpAddress		LastAddr = 0;
 
   if (argc != 3) {
-    fprintf(stderr, "Usage: %s if_name req_type (0 first, 1 exact, 2 next) \n",
+    snmp_log(LOG_ERR, "Usage: %s if_name req_type (0 first, 1 exact, 2 next) \n",
 	    argv[0]);
     exit(1);
   }
@@ -894,21 +895,21 @@ main (int argc, char **argv)
   while ((rc = getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
 			  req_type, &IF_cmp, &idx)) == 0) {
       idx = ifstat.ifIndex;
-      fprintf(stdout, "Ifname = %s\n", ifstat.ifDescr.o_bytes);
+      snmp_log(LOG_DEBUG, "Ifname = %s\n", ifstat.ifDescr.o_bytes);
       req_type = GET_NEXT;
   }
   rc = getMibstat(MIB_IP_ADDR, &ipbuf, sizeof(mib2_ipAddrEntry_t),
 		  req_type, ip20comp, argv[1]); 
 
   if (rc == 0)
-    fprintf(stdout, "mtu = %ld\n", ipp->ipAdEntInfo.ae_mtu);
+    snmp_log(LOG_DEBUG, "mtu = %ld\n", ipp->ipAdEntInfo.ae_mtu);
   else
-    fprintf(stderr, "rc =%d\n", rc);
+    snmp_log(LOG_DEBUG, "rc =%d\n", rc);
 
   while ((rc = getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
 			  req_type, &ARP_Cmp_Addr, &LastAddr)) == 0) {
     LastAddr = ep->ipNetToMediaNetAddress;
-    fprintf(stdout, "Ipaddr = %lX\n", (u_long)LastAddr);
+    snmp_log(LOG_DEBUG, "Ipaddr = %lX\n", (u_long)LastAddr);
     req_type = GET_NEXT;
   }
   return 0;

@@ -442,7 +442,7 @@ static void ARP_Scan_Init (void)
 	int za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
 
 	if (!in) {
-		fprintf (stderr, "snmpd: Cannot open /proc/net/arp\n");
+	 snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
 		arptab_current = 0;
 		return;
 	}

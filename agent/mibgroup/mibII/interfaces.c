@@ -1899,7 +1899,7 @@ header_ifEntry(struct variable *vp,
     char c_oid[SPRINT_MAX_LEN];
 
     sprint_objid (c_oid, name, *length);
-    printf ("var_ifEntry: %s %d\n", c_oid, exact);
+    snmp_log(LOG_DEBUG, "var_ifEntry: %s %d\n", c_oid, exact);
 #endif
 
     memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
@@ -1916,7 +1916,7 @@ header_ifEntry(struct variable *vp,
     }
     if (interface > count) {
 #ifdef DODEBUG
-	printf ("... index out of range\n");
+ snmp_log(LOG_DEBUG, "... index out of range\n");
 #endif
         return MATCH_FAILED;
     }
@@ -1929,7 +1929,7 @@ header_ifEntry(struct variable *vp,
 
 #ifdef DODEBUG
     sprint_objid (c_oid, name, *length);
-    printf ("... get I/F stats %s\n", c_oid);
+    snmp_log(LOG_DEBUG, "... get I/F stats %s\n", c_oid);
 #endif
 
     return interface;

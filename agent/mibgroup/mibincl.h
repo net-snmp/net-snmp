@@ -30,6 +30,7 @@
 #include "../../snmplib/snmp.h"
 #include "../../snmplib/mib.h"
 #include "../../snmplib/snmp_debug.h"
+#include "../../snmplib/snmp_logging.h"
 #include "../../snmplib/read_config.h"
 #include "../../snmplib/tools.h"
 #define u_char unsigned char
