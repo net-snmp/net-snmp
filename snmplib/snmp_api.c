@@ -719,7 +719,7 @@ snmp_sess_open(struct snmp_session *in_session)
 
     if (session->contextName) {
       session->contextName = strdup(session->contextName);
-      if (cp == NULL) {
+      if (session->contextName == NULL) {
 	snmp_errno = SNMPERR_GENERR;
 	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
@@ -1033,7 +1033,7 @@ create_user_from_session(struct snmp_session *session)
 
     /* copy in the authentication Key, and convert to the localized version */
     if (session->securityAuthKey != NULL && session->securityAuthKeyLen != 0) {
-      user->authKey = malloc (USM_LENGTH_KU_HASHBLOCK);
+      user->authKey = (u_char *)malloc (USM_LENGTH_KU_HASHBLOCK);
       user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
       if (generate_kul( user->authProtocol, user->authProtocolLen,
                         session->securityEngineID, session->securityEngineIDLen,
@@ -1046,7 +1046,7 @@ create_user_from_session(struct snmp_session *session)
 
     /* copy in the privacy Key, and convert to the localized version */
     if (session->securityPrivKey != NULL && session->securityPrivKeyLen != 0) {
-      user->privKey = malloc (USM_LENGTH_KU_HASHBLOCK);
+      user->privKey = (u_char *)malloc (USM_LENGTH_KU_HASHBLOCK);
       user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
       if (generate_kul( user->authProtocol, user->authProtocolLen,
                         session->securityEngineID, session->securityEngineIDLen,
@@ -1180,8 +1180,7 @@ shift_array(u_char *begin,
 #endif
 
 static int
-snmpv3_build_probe_pdu (pdu)
-     struct snmp_pdu **pdu;
+snmpv3_build_probe_pdu (struct snmp_pdu **pdu)
 {
   struct usmUser *user;
 
@@ -1212,10 +1211,7 @@ snmpv3_build_probe_pdu (pdu)
 }
 
 static void
-snmpv3_calc_msg_flags (sec_level, msg_command, flags)
-     int sec_level;
-     int msg_command;
-     u_char *flags;
+snmpv3_calc_msg_flags (int sec_level, int msg_command, u_char *flags)
 {
   *flags = 0;
   if (sec_level == SNMP_SEC_LEVEL_AUTHNOPRIV)
@@ -1229,9 +1225,7 @@ snmpv3_calc_msg_flags (sec_level, msg_command, flags)
 }
 
 static int
-snmpv3_verify_msg(rp, pdu)
-     struct request_list *rp;
-     struct snmp_pdu     *pdu;
+snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
 {
   struct snmp_pdu     *rpdu;
   
@@ -2977,7 +2971,8 @@ snmp_sess_read(void *sessp,
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
     struct sockaddr_in	from;
-    size_t length, fromlength;
+    size_t length;
+    int  fromlength;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
     snmp_callback callback;
@@ -3067,12 +3062,12 @@ snmp_sess_read(void *sessp,
 	      }
 	      /* handle engineID discovery - */
 	      if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
-		sp->securityEngineID = malloc(pdu->securityEngineIDLen);
+		sp->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
 		memcpy(sp->securityEngineID, pdu->securityEngineID,
 		       pdu->securityEngineIDLen);
 		sp->securityEngineIDLen = pdu->securityEngineIDLen;
 		if (!sp->contextEngineIDLen) {
-		sp->contextEngineID = malloc(pdu->securityEngineIDLen);
+		sp->contextEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
 		memcpy(sp->contextEngineID, pdu->securityEngineID,
 		       pdu->securityEngineIDLen);
 		sp->contextEngineIDLen = pdu->securityEngineIDLen;

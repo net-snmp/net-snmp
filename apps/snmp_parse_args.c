@@ -342,7 +342,7 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
 	}
-	session->securityEngineID = malloc(bsize);
+	session->securityEngineID = (u_char *)malloc(bsize);
 	memcpy(session->securityEngineID, buf, bsize);
 	session->securityEngineIDLen = bsize;
         break;
@@ -362,7 +362,7 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
 	}
-	session->contextEngineID = malloc(bsize);
+	session->contextEngineID = (u_char *)malloc(bsize);
 	memcpy(session->contextEngineID, buf, bsize);
 	session->contextEngineIDLen = bsize;
         break;

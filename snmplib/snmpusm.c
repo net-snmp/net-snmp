@@ -119,21 +119,21 @@ usm_set_reportErrorOnUnknownID (int value)
 struct usmStateReference *
 usm_malloc_usmStateReference(void)
 {
-	struct usmStateReference *new = (struct usmStateReference *)
+	struct usmStateReference *retval = (struct usmStateReference *)
 		malloc (sizeof(struct usmStateReference));
 
-	if (new == NULL) return NULL;
+	if (retval == NULL) return NULL;
 
-	memset (new, 0, sizeof(struct usmStateReference));
+	memset (retval, 0, sizeof(struct usmStateReference));
 
-	return new;
+	return retval;
 }  /* end usm_malloc_usmStateReference() */
 
 
 void
 usm_free_usmStateReference (void *old)
 {
-	struct usmStateReference *old_ref = old;
+	struct usmStateReference *old_ref = (struct usmStateReference *)old;
 
 	if (old_ref->usr_name)		free(old_ref->usr_name);
 	if (old_ref->usr_engine_id)	free(old_ref->usr_engine_id);
@@ -1588,7 +1588,7 @@ usm_process_in_msg (
 	size_t  *scopedPduLen,	   /* IN/OUT - Len available, len returned.   */
 
 	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
-	void   **secStateRef)	   /* OUT    - Ref to security state.         */
+	void   **secStateRf)	   /* OUT    - Ref to security state.         */
 {
 	u_int   remaining = wholeMsgLen
 				- (u_int)
@@ -1607,6 +1607,7 @@ usm_process_in_msg (
 	u_char *end_of_overhead;
 	int     error;
         int     i;
+	struct usmStateReference **secStateRef = (struct usmStateReference **)secStateRf;
 
 	struct usmUser *user;
 
@@ -2689,7 +2690,7 @@ usm_set_user_password(struct usmUser *user, char *token, char *line)
   }
   
   if (type < 2) {
-    *key = malloc(SNMP_MAXBUF_SMALL);
+    *key = (u_char *)malloc(SNMP_MAXBUF_SMALL);
     *keyLen = SNMP_MAXBUF_SMALL;
     ret = generate_kul(	user->authProtocol, user->authProtocolLen,
 			engineID, engineIDLen,
