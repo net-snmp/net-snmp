@@ -541,10 +541,16 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
             free(peername);
             return 0;
         }
+        if (addrs != NULL) {
         DEBUGMSGTL(("netsnmp_sockaddr_in6", "hostname (resolved okay)\n"));
         memcpy(&addr->sin6_addr,
                &((struct sockaddr_in6 *) addrs->ai_addr)->sin6_addr,
                sizeof(struct in6_addr));
+		freeaddrinfo(addrs);
+        }
+		else {
+        DEBUGMSGTL(("netsnmp_sockaddr_in6", "Failed to resolve IPv6 hostname\n"));
+		}
 #elif HAVE_GETIPNODEBYNAME
         hp = getipnodebyname(peername, AF_INET6, 0, &err);
         if (hp == NULL) {
