@@ -104,8 +104,7 @@ extern          "C" {
 	netsnmp_log_handler	*next, *prev;
     };
 
-extern netsnmp_log_handler  *logh_head;
-
+netsnmp_log_handler *get_logh_head( void );
 netsnmp_log_handler *netsnmp_register_loghandler( int type, int pri );
 netsnmp_log_handler *netsnmp_find_loghandler( const char *token );
 int netsnmp_add_loghandler(    netsnmp_log_handler *logh );

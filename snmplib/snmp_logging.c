@@ -1100,3 +1100,11 @@ snmp_log_perror(const char *s)
             snmp_log(LOG_ERR, "Error %d out-of-range\n", errno);
     }
 }
+
+/* external access to logh_head variable */
+netsnmp_log_handler  *
+get_logh_head(void)
+{
+	return logh_head;
+}
+
