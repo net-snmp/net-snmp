@@ -173,7 +173,7 @@ struct variable4 interfaces_variables[] = {
     {IFMTU, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 4}},
     {IFSPEED, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 5}},
     {IFPHYSADDRESS, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 6}},
-    {IFADMINSTATUS, ASN_INTEGER, RWRITE, var_ifEntry, 3, {2, 1, 7}},
+    {IFADMINSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 7}},
     {IFOPERSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 8}},
     {IFLASTCHANGE, ASN_TIMETICKS, RONLY, var_ifEntry, 3, {2, 1, 9}},
     {IFINOCTETS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 10}},
