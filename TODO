@@ -1,19 +1,12 @@
-V3.1
+V3.2
+  snmpv2c support.
   Gnu Auto-conf
     AC_FUNC_MEMCMP
-  Solaris port (finish working out bugs...)
-  Manual pages/Documentation
-
-V3.2
-  Pass off extensibles
-  snmpset'able variables
+  Continue to add and improve manual pages/documentation.
+  more snmpset'able variables
   Should be able to set the fix script line in the .conf files per type.
   agent should send traps to a trap daemon.  
     (it might all ready, just needs configuration)
-
-??? (3.2?)
-  Define snmpv1 parties in the configuration file, acl.conf, and
-    view.conf rather than being hard compiled in
 
 ===================
 
