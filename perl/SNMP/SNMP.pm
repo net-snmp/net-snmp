@@ -130,16 +130,18 @@ sub initMib {
 sub addMibDirs {
 # adds directories to search path when a module is requested to be loaded
   foreach (@_) {
-    SNMP::_add_mib_dir($_);
+    SNMP::_add_mib_dir($_) or return undef;
   }
+  return 1;
 }
 
 sub addMibFiles {
 # adds mib definitions to currently loaded mib database from
 # file(s) supplied
   foreach (@_) {
-    SNMP::_read_mib($_);
+    SNMP::_read_mib($_) or return undef;
   }
+  return 1;
 }
 
 sub loadModules {
@@ -147,8 +149,9 @@ sub loadModules {
 # Modules will be searched from previously defined mib search dirs
 # Passing and arg of 'ALL' will cause all known modules to be loaded
    foreach (@_) {
-     SNMP::_read_module($_);
+     SNMP::_read_module($_) or return undef;
    }
+   return 1;
 }
 
 sub unloadModules {
@@ -694,7 +697,7 @@ sub trap {
        my $trap_oid = $param{oid} || $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
-   } 
+   }
 
    return(wantarray() ? @res : $res[0]);
 }
