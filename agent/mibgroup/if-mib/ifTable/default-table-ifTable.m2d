@@ -32,19 +32,19 @@
 ##
 ##
 ##
-@eval $m2c_data_context = "netsnmp_ifentry"@ [generated|NAME]
+## @eval $m2c_data_context = "generated"@ [generated|NAME]
 ##
 ########################################################################
 ##
 ##
 ##
-@eval $m2c_data_allocate = 1@
+## @eval $m2c_data_allocate = 0@
 ##
 ########################################################################
 ##
 ##
 ##
-## @eval $m2c_data_init = 0@
+@eval $m2c_data_init = 1@
 ##
 ########################################################################
 ##
