@@ -205,9 +205,9 @@ int Facility = LOG_DAEMON;
 #define SNMPTRAPD_RUNNING 1
 #define SNMPTRAPD_STOPPED 0
 int             trapd_status = SNMPTRAPD_STOPPED;
-LPTSTR          g_szAppName = _T("Net-SNMP Trap Handler");     /* Application Name */
+LPTSTR          app_name = _T("Net-SNMP Trap Handler");     /* Application Name */
 #else
-char           *g_szAppName = "snmptrapd";
+char           *app_name = "snmptrapd";
 #endif
 
 struct timeval  Now;
@@ -626,7 +626,7 @@ main(int argc, char *argv[])
     strcat(options, "p:u:");
 #endif
 
-    snmp_log_syslogname(g_szAppName);
+    snmp_log_syslogname(app_name);
 
     /*
      * Now process options normally.  
@@ -1032,7 +1032,7 @@ main(int argc, char *argv[])
 #endif
 
     if (Syslog) {
-        snmp_enable_syslog_ident(g_szAppName, Facility);
+        snmp_enable_syslog_ident(app_name, Facility);
         snmp_log(LOG_INFO, "Starting snmptrapd %s\n", netsnmp_get_version());
 	if (depmsg) {
 	    snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
@@ -1253,7 +1253,7 @@ _tmain(int argc, TCHAR * argv[])
     /*
      * Define Service Name and Description, which appears in windows SCM 
      */
-    LPCTSTR         lpszServiceName = g_szAppName;      /* Service Registry Name */
+    LPCTSTR         lpszServiceName = app_name;      /* Service Registry Name */
     LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Trap Handler");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
 #ifdef IFDESCR

@@ -39,7 +39,7 @@ labelFIN: \
      * This should be declared by the application, which wants to register as
      * windows service
      */
-extern LPTSTR g_szAppName;
+extern LPTSTR app_name;
 
     /*
      * Declare global variable
@@ -201,7 +201,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 	 * Create Registry Key path 
 	 */
 	_tcscpy (szRegKey, _T ("SYSTEM\\CurrentControlSet\\Services\\"));
-	_tcscat (szRegKey, g_szAppName);
+	_tcscat (szRegKey, app_name);
 	hKey = NULL;
 
 	/*
@@ -442,7 +442,7 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
   _vsnprintf (szMessage, sizeof(szMessage), pszFormat, ArgList);
   va_end (ArgList);
   LogStr[0] = szMessage;
-  hEventSource = RegisterEventSource (NULL, g_szAppName);
+  hEventSource = RegisterEventSource (NULL, app_name);
   if (hEventSource == NULL)
     return;
   ReportEvent (hEventSource, wType, 0,
@@ -542,7 +542,7 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
     _snprintf (pszMessageFull, sizeof(pszMessageFull), "%s", pszMessage);
   }
   
-  hEventSource = RegisterEventSource (NULL, g_szAppName);
+  hEventSource = RegisterEventSource (NULL, app_name);
   if (hEventSource != NULL) {
     pErrorMsgTemp = pszMessageFull;
     
@@ -577,16 +577,16 @@ ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int qu
       else {
     switch (eventLogType) {
       case EVENTLOG_INFORMATION_TYPE:
-        MessageBox (NULL, pszMessageFull, g_szAppName, MB_ICONASTERISK);
+        MessageBox (NULL, pszMessageFull, app_name, MB_ICONASTERISK);
         break;
       case EVENTLOG_WARNING_TYPE:
-        MessageBox (NULL, pszMessageFull, g_szAppName, MB_ICONEXCLAMATION);
+        MessageBox (NULL, pszMessageFull, app_name, MB_ICONEXCLAMATION);
         break;
       case EVENTLOG_ERROR_TYPE:
-        MessageBox (NULL, pszMessageFull, g_szAppName, MB_ICONSTOP);
+        MessageBox (NULL, pszMessageFull, app_name, MB_ICONSTOP);
         break;
       default:
-        MessageBox (NULL, pszMessageFull, g_szAppName, EVENTLOG_WARNING_TYPE);
+        MessageBox (NULL, pszMessageFull, app_name, EVENTLOG_WARNING_TYPE);
         break;
       }
     }
@@ -683,7 +683,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
    * Create Registry Key path 
    */
   _snprintf (szRegKey, sizeof(szRegKey), "%s%s\\%s",
-	     _T ("SYSTEM\\CurrentControlSet\\Services\\"), g_szAppName,
+	     _T ("SYSTEM\\CurrentControlSet\\Services\\"), app_name,
 	     "Parameters");
   if (RegOpenKeyEx
       (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_ALL_ACCESS, &hParamKey) == ERROR_SUCCESS)
@@ -751,7 +751,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   /*
    * Register Service Control Handler 
    */
-  hServiceStatus = RegisterServiceCtrlHandler (g_szAppName, ControlHandler);
+  hServiceStatus = RegisterServiceCtrlHandler (app_name, ControlHandler);
   if (hServiceStatus == 0)
     {
       WriteToEventLog (EVENTLOG_ERROR_TYPE,
@@ -845,7 +845,7 @@ RunAsService (INT (*ServiceFunction) (INT, LPTSTR *))
   /*
    * Initialize ServiceTableEntry table 
    */
-  ServiceTableEntry[0].lpServiceName = g_szAppName;	/* Application Name */
+  ServiceTableEntry[0].lpServiceName = app_name;	/* Application Name */
 
   /*
    * Call SCM via StartServiceCtrlDispatcher to run as Service 
@@ -859,7 +859,7 @@ RunAsService (INT (*ServiceFunction) (INT, LPTSTR *))
        * Some other error has occurred. 
        */
       WriteToEventLog (EVENTLOG_ERROR_TYPE,
-		       _T ("Couldn't start service - %s"), g_szAppName);
+		       _T ("Couldn't start service - %s"), app_name);
     }
   return g_fRunningAsService;
 }
