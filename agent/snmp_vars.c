@@ -246,7 +246,7 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
 
-#ifdef USING_MIBII_VIEW_VARS_MODULE
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
 extern int in_view __P((oid *, int, int));
 #endif
 
@@ -428,7 +428,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 			*acl = cvp->acl;
 		    if (access &&
                         (
-#ifdef USING_MIBII_VIEW_VARS_MODULE
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
                          (pi->version == SNMP_VERSION_2p &&
                           !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
 #endif
