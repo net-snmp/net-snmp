@@ -2212,11 +2212,13 @@ snmp_out_toggle_options_usage(const char *lead, FILE * outf)
     fprintf(outf, "%sX:  extended index format\n", lead);
 }
 
-char           *
-snmp_in_toggle_options(char *options)
+char *
+snmp_in_options(char *optarg, int argc, char *const *argv)
 {
-    while (*options) {
-        switch (*options++) {
+    char *cp;
+
+    for (cp = optarg; *cp; cp++) {
+        switch (*cp) {
         case 'b':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REGEX_ACCESS);
             break;
@@ -2232,11 +2234,39 @@ snmp_in_toggle_options(char *options)
         case 'u':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_READ_UCD_STYLE_OID);
             break;
+        case 's':
+            /* What if argc/argv are null ? */
+            if (!*(++cp))
+                cp = argv[optind++];
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_OIDSUFFIX,
+                                  cp);
+            return NULL;
+
+        case 'S':
+            /* What if argc/argv are null ? */
+            if (!*(++cp))
+                cp = argv[optind++];
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                                  NETSNMP_DS_LIB_OIDPREFIX,
+                                  cp);
+            return NULL;
+
         default:
-            return options - 1;
+           /*
+            *  Here?  Or in snmp_parse_args?
+            snmp_log(LOG_ERR, "Unknown input option passed to -I: %c.\n", *cp);
+            */
+            return cp;
         }
     }
     return NULL;
+}
+
+char           *
+snmp_in_toggle_options(char *options)
+{
+    return snmp_in_options( options, 0, NULL );
 }
 
 
@@ -2250,14 +2280,17 @@ snmp_in_toggle_options(char *options)
 void
 snmp_in_toggle_options_usage(const char *lead, FILE * outf)
 {
-    fprintf(outf, "%sb:  do best/regex matching to find a MIB node\n",
-            lead);
-    fprintf(outf, "%sr:  do not check values for range/type legality\n",
-            lead);
-    fprintf(outf, "%sR:  do random access to OID labels\n", lead);
+    fprintf(outf, "%sb:  do best/regex matching to find a MIB node\n", lead);
     fprintf(outf, "%sh:  don't apply DISPLAY-HINTs\n", lead);
+    fprintf(outf, "%sr:  do not check values for range/type legality\n", lead);
+    fprintf(outf, "%sR:  do random access to OID labels\n", lead);
     fprintf(outf,
-            "%su:  top-level OIDs must have '.' prefix (UCD-style)\n",
+            "%su:  top-level OIDs must have '.' prefix (UCD-style)\n", lead);
+    fprintf(outf,
+            "%ss SUFFIX:  Append all textual OIDs with SUFFIX before parsing\n",
+            lead);
+    fprintf(outf,
+            "%sS PREFIX:  Prepend all textual OIDs with PREFIX before parsing\n",
             lead);
 }
 

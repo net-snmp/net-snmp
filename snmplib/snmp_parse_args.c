@@ -124,10 +124,6 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");
     fprintf(outf,
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
-    fprintf(outf,
-            "  -s SUFFIX\t\tAppend all textual OIDs with SUFFIX before parsing\n");
-    fprintf(outf,
-            "  -S PREFIX\t\tPrepend all textual OIDs with PREFIX before parsing\n");
 #ifndef DISABLE_MIB_LOADING
     fprintf(outf,
             "  -P MIBOPTS\t\tToggle various defaults controlling MIB parsing:\n");
@@ -270,24 +266,12 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             break;
 
         case 'I':
-            cp = snmp_in_toggle_options(optarg);
+            cp = snmp_in_options(optarg, argc, argv);
             if (cp != NULL) {
                 fprintf(stderr, "Unknown input option passed to -I: %c.\n",
 			*cp);
                 return (-1);
             }
-            break;
-
-        case 's':
-            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                                  NETSNMP_DS_LIB_OIDSUFFIX,
-                                  optarg);
-            break;
-
-        case 'S':
-            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                                  NETSNMP_DS_LIB_OIDPREFIX,
-                                  optarg);
             break;
 
 #ifndef DISABLE_MIB_LOADING
