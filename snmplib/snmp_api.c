@@ -2046,7 +2046,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     /* 
      * build the headers for the packet, returned addr = start of secParams
      */
-    global_data = snmpv3_header_rbuild(pdu, header_buf + header_buf_len,
+    global_data = snmpv3_header_rbuild(pdu, header_buf + header_buf_len - 1,
                                        &header_buf_len, 0, NULL);
     if (global_data == NULL) {
         return -1;
