@@ -151,7 +151,10 @@ main(argc, argv)
       }
       break;
     case 'f':
-      field_separator = argv[++arg];
+      if (argv[arg][2] != NULL)
+        field_separator = &argv[arg][2];
+      else
+        field_separator = argv[++arg];
       break;
     case 'h':
       headers_only = 1;
