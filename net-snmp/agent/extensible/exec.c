@@ -11,6 +11,8 @@ struct exstensible *extens=NULL;  /* In exec.c */
 struct exstensible *relocs=NULL;  /* In exec.c */
 int numextens=0,numrelocs=0;                    /* ditto */
 
+#ifdef SHELLMIBNUM
+
 unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -36,10 +38,10 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
     return(NULL);
 
-  if (exten = get_exten_instance(extens,newname[8])) {
+  if (exten = get_exten_instance(extens,newname[*length-1])) {
     switch (vp->magic) {
       case MIBINDEX:
-        long_ret = newname[8];
+        long_ret = newname[*length-1];
         return((u_char *) (&long_ret));
       case ERRORNAME: /* name defined in config file */
         *var_len = strlen(exten->name);
@@ -70,6 +72,8 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
   return NULL;
 }
 
+#endif
+
 fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -91,6 +95,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
       return SNMP_ERR_WRONGTYPE;
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+#ifdef EXECFIXCMD
     if (tmp == 1 && action == COMMIT) {
       sprintf(ex.command,EXECFIXCMD,exten->name);
       fd = get_exec_output(&ex);
@@ -99,6 +104,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
       fclose(file);
       close(fd);
     } 
+#endif
     return SNMP_ERR_NOERROR;
   }
   return SNMP_ERR_WRONGTYPE;
