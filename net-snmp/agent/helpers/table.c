@@ -117,7 +117,7 @@ table_helper_handler(mib_handler * handler,
     int             oid_index_pos = reginfo->rootoid_len + 2;
     int             oid_column_pos = reginfo->rootoid_len + 1;
     int             tmp_idx, tmp_len;
-    int             incomplete, out_of_range;
+    int             incomplete, out_of_range, cleaned_up = 0;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
     table_request_info *tbl_req_info;
@@ -354,7 +354,8 @@ table_helper_handler(mib_handler * handler,
                  */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, requests,
-                                         SNMP_ERR_NOSUCHNAME);
+					 SNMP_ERR_NOSUCHNAME);
+		    cleaned_up = 1;
                 }
                 tmp_len = 0;
                 tmp_name = (oid *) & tmp_len;
@@ -386,18 +387,20 @@ table_helper_handler(mib_handler * handler,
         DEBUGIF("helper:table") {
             int             count;
             char            buf[SPRINT_MAX_LEN];
-            DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
-                        tbl_req_info->colnum,
-                        tbl_req_info->number_indexes));
-            for (vb = tbl_req_info->indexes, count = 0;
-                 vb && count < tbl_info->number_indexes;
-                 count++, vb = vb->next_variable) {
+	    if (!cleaned_up) {
+	      DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",
+			  tbl_req_info->colnum,
+			  tbl_req_info->number_indexes));
+	      for (vb = tbl_req_info->indexes, count = 0;
+		   vb && count < tbl_info->number_indexes;
+		   count++, vb = vb->next_variable) {
                 sprint_by_type(buf, vb, 0, 0, 0);
                 DEBUGMSG(("helper:table",
-                            "    index: type=%d, value=%s", vb->type,
-                            buf));
-            }
-            DEBUGMSG(("helper:table","\n"));
+			  "    index: type=%d, value=%s", vb->type,
+			  buf));
+	      }
+	      DEBUGMSG(("helper:table","\n"));
+	    }
         }
 
 
@@ -408,7 +411,7 @@ table_helper_handler(mib_handler * handler,
         if ((reqinfo->mode != MODE_GETNEXT) &&
             ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
              (tmp_len != -1))) {
-            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
         }
 
         ++need_processing;
