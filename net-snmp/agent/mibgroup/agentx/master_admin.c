@@ -135,6 +135,9 @@ close_agentx_session(netsnmp_session * session, int sessid)
         unregister_mibs_by_session(session);
         unregister_index_by_session(session);
         unregister_sysORTable_by_session(session);
+	if (session->myvoid != NULL) {
+	  free(session->myvoid);
+	}
         return AGENTX_ERR_NOERROR;
     }
 
