@@ -84,7 +84,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #if STDC_HEADERS
+#if HAVE_STRINGS_H
 #include <strings.h>
+#endif
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
