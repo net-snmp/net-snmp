@@ -248,97 +248,116 @@ memory_free_config(void)
 }
 
 #ifdef linux
-enum meminfo_row { meminfo_main = 0,
-    meminfo_swap
-};
-
-enum meminfo_col { meminfo_total = 0, meminfo_used, meminfo_free,
-    meminfo_shared, meminfo_buffers, meminfo_cached
-};
 #define MEMINFO_FILE "/proc/meminfo"
 
-static char     buf[1024];
-
-/*
- * This macro opens FILE only if necessary and seeks to 0 so that successive
- * calls to the functions are more efficient.  It also reads the current
- * contents of the file into the global buf.
- */
-#define FILE_TO_BUF(FILE) {					\
-    static int n, fd = -1;					\
-    if (fd == -1 && (fd = open(FILE, O_RDONLY)) == -1) {	\
-	return 0;						\
-    }								\
-    lseek(fd, 0L, SEEK_SET);					\
-    if ((n = read(fd, buf, sizeof buf - 1)) < 0) {		\
-	close(fd);						\
-	fd = -1;						\
-	return 0;						\
-    }								\
-    buf[n] = '\0';						\
-}
-
-#define MAX_ROW 3               /* these are a little liberal for flexibility */
-#define MAX_COL 7
-
-unsigned      **
-meminfo(void)
+void
+getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared, 
+       unsigned long *buffers, unsigned long *cached, unsigned long *swaptotal, 
+       unsigned long *swapfree)
 {
-    static unsigned *row[MAX_ROW + 1];  /* row pointers */
-    static unsigned num[MAX_ROW * MAX_COL];     /* number storage */
-    char           *p;
-    int             i, j, k, l;
-    unsigned long   m;
+    int         statfd;
+    static char *buff = NULL;
+    static int  bsize = 0;
 
-    FILE_TO_BUF(MEMINFO_FILE)
-        if (!row[0])            /* init ptrs 1st time through */
-        for (i = 0; i < MAX_ROW; i++)   /* std column major order: */
-            row[i] = num + MAX_COL * i; /* A[i][j] = A + COLS*i + j */
-    p = buf;
-    for (i = 0; i < MAX_ROW; i++)       /* zero unassigned fields */
-        for (j = 0; j < MAX_COL; j++)
-            row[i][j] = 0;
-    for (i = 0; i < MAX_ROW && *p; i++) {       /* loop over rows */
-        while (*p && !isdigit(*p))
-            p++;                /* skip chars until a digit */
-        for (j = 0; j < MAX_COL && *p; j++) {   /* scanf column-by-column */
-            l = sscanf(p, "%lu%n", &m, &k);
-            m /= 1024;
-            if (0x7fffffff < m) {
-                *(row[i] + j) = 0x7fffffff;
-            } else {
-                *(row[i] + j) = (unsigned) m;
-            }
-            p += k;             /* step over used buffer */
-            if (*p == '\n' || l < 1)    /* end of line/buffer */
-                break;
+    if ((statfd = open(MEMINFO_FILE, O_RDONLY, 0)) != -1) {
+        char *b;
+        if (bsize == 0) {
+            bsize = 128;
+            buff = malloc(bsize);
         }
+        while (read(statfd, buff, bsize) == bsize) {
+            bsize += 256;
+            buff = realloc(buff, bsize);
+            close(statfd);
+            statfd = open(MEMINFO_FILE, O_RDONLY, 0);
+        }
+        close(statfd);
+        b = strstr(buff, "MemTotal: ");
+        if (b) 
+            sscanf(b, "MemTotal: %lu", memtotal);
+        else {
+            snmp_log(LOG_ERR, "No MemTotal line in /proc/meminfo\n");
+            *memtotal = 0;
+        }
+        b = strstr(buff, "MemFree: ");
+        if (b) 
+            sscanf(b, "MemFree: %lu", memfree);
+        else {
+            snmp_log(LOG_ERR, "No MemFree line in /proc/meminfo\n");
+            *memfree = 0;
+        }
+        b = strstr(buff, "MemShared: ");
+        if (b)
+            sscanf(b, "MemShared: %lu", memshared);
+        else {
+            snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
+            *memshared = 0;
+        }
+        b = strstr(buff, "Buffers: ");
+        if (b)
+            sscanf(b, "Buffers: %lu", buffers);
+        else {
+            snmp_log(LOG_ERR, "No Buffers line in /proc/meminfo\n");
+            *buffers = 0;
+        }
+        b = strstr(buff, "Cached: ");
+        if (b)
+            sscanf(b, "Cached: %lu", cached);
+        else {
+            snmp_log(LOG_ERR, "No Cached line in /proc/meminfo\n");
+            *cached = 0;
+        }
+        b = strstr(buff, "SwapTotal: ");
+        if (b)
+            sscanf(b, "SwapTotal: %lu", swaptotal);
+        else {
+            snmp_log(LOG_ERR, "No SwapTotal line in /proc/meminfo\n");
+            *swaptotal = 0;
+        }
+        b = strstr(buff, "SwapFree: ");
+        if (b)
+            sscanf(b, "SwapFree: %lu", swapfree);
+        else {
+            snmp_log(LOG_ERR, "No SwapFree line in /proc/meminfo\n");
+            *swapfree = 0;
+        }
+    } else {
+        snmp_log_perror(MEMINFO_FILE);
     }
-    /*
-     * row[i+1] = NULL;     terminate the row list, currently unnecessary 
-     */
-    return row;                 /* NULL return ==> error */
 }
+
+enum memory_index { memtotal, memfree, memshared, buffers, cached, swaptotal, 
+    swapfree
+};
 
 unsigned
 memory(int iindex)
 {
-    unsigned      **mem = meminfo();
-    if (mem != NULL)
-        return mem[meminfo_main][iindex];
-    else
-        return -1;
+    unsigned long   mem_total[2], mem_free[2], mem_shared[2], mem_buffers[2], 
+                    mem_cached[2],  swap_total[2], swap_free[2];
+
+    getmem(mem_total, mem_free, mem_shared, mem_buffers, mem_cached, swap_total,
+           swap_free);
+    switch (iindex) {
+        case memtotal:
+            return *(mem_total);
+        case memfree:
+            return *(mem_free);
+        case memshared:
+            return *(mem_shared);
+        case buffers:
+            return *(mem_buffers);
+        case cached:
+            return *(mem_cached);
+        case swaptotal:
+            return *(swap_total);
+        case swapfree:
+            return *(swap_free);
+        default:
+            return -1;
+    }
 }
 
-unsigned
-memswap(int iindex)
-{
-    unsigned      **mem = meminfo();
-    if (mem != NULL)
-        return mem[meminfo_swap][iindex];
-    else
-        return -1;
-}
 #else
 #define pagetok(size) ((size) << pageshift)
 #endif
@@ -352,8 +371,8 @@ getswap(int rettype)
     long            spaceleft = 0, spacetotal = 0;
 
 #if defined(linux)
-    spaceleft = memswap(meminfo_free);
-    spacetotal = memswap(meminfo_total);
+    spaceleft = memory(swapfree);
+    spacetotal = memory(swaptotal);
 #elif defined(bsdi2)
     struct swapstats swapst;
     size_t          size = sizeof(swapst);
@@ -575,7 +594,7 @@ var_extensible_mem(struct variable *vp,
                 pst_buf.physical_memory * (pst_buf.page_size / 1024);
         }
 #elif defined(linux)
-        long_ret = memory(meminfo_total);
+        long_ret = memory(memtotal);
 #elif defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
         long_ret =
             sysconf(_SC_PHYS_PAGES) * (sysconf(_SC_PAGESIZE) / 1024);
@@ -593,7 +612,7 @@ var_extensible_mem(struct variable *vp,
         return ((u_char *) (&long_ret));
     case MEMAVAILREAL:
 #ifdef linux
-        long_ret = memory(meminfo_free);
+        long_ret = memory(memfree);
 #elif defined(hpux10) || defined(hpux11)
         long_ret = pagetok((int) pst_buf.psd_arm);
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
@@ -642,7 +661,7 @@ var_extensible_mem(struct variable *vp,
 #endif                          /* linux */
     case MEMTOTALFREE:
 #ifdef linux
-        long_ret = memory(meminfo_free) + memswap(meminfo_free);
+        long_ret = memory(memfree) + memory(swapfree);
 #elif defined(hpux10) || defined(hpux11)
         long_ret = pagetok((int) pst_buf.psd_free);
 #else
@@ -651,21 +670,21 @@ var_extensible_mem(struct variable *vp,
         return ((u_char *) (&long_ret));
     case MEMCACHED:
 #ifdef linux
-        long_ret = memory(meminfo_cached);
+        long_ret = memory(cached);
 #else
         return NULL;            /* no dummy values */
 #endif
         return ((u_char *) (&long_ret));
     case MEMBUFFER:
 #ifdef linux
-        long_ret = memory(meminfo_buffers);
+        long_ret = memory(buffers);
 #else
         return NULL;            /* no dummy values */
 #endif
         return ((u_char *) (&long_ret));
     case MEMSHARED:
 #ifdef linux
-        long_ret = memory(meminfo_shared);
+        long_ret = memory(memshared);
 #else
         return NULL;            /* no dummy values */
 #endif
