@@ -461,7 +461,7 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     case MODE_GET:
         if (cmp != 0) {
             netsnmp_set_request_error(reqinfo, requests,
-                                      SNMP_NOSUCHOBJECT);
+                                      SNMP_NOSUCHINSTANCE);
             return SNMP_ERR_NOERROR;
         } else {
             return netsnmp_call_next_handler(handler, reginfo, reqinfo,
@@ -477,7 +477,7 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     case MODE_SET_FREE:
         if (cmp != 0) {
             netsnmp_set_request_error(reqinfo, requests,
-                                      SNMP_NOSUCHOBJECT);
+                                      SNMP_ERR_NOCREATION);
             return SNMP_ERR_NOERROR;
         } else {
             return netsnmp_call_next_handler(handler, reginfo, reqinfo,
