@@ -5,6 +5,7 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
