@@ -24,6 +24,13 @@
       from the list of --with-mib-modules option, or else this example
       won't work correctly.
 
+    <p><b>Note:</b> All command line options below assume you have an
+    appropriately setup ~/.snmp/snmp.conf file that allows you to not
+    have to specify a snmp version number, community name, username,
+    or whatever else in order to talk to your agent.  The agent, of
+    course, must have a matching /usr/local/share/snmp/snmpd.conf file 
+    (or equivalent).
+
     <p>
       Here are the files discussed in this example so you can download
       them:
@@ -34,10 +41,10 @@
 	href="../mib-modules/Makefile">Makefile</a></td><td>A simple makefile 
 	used to build the projects</td>
 	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib-module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	href="../mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
 	code for</td>
 	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib-module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td>
+	href="../mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="../mib-module/ustScalarSet.c">ustScalarSet.c</a></td><td>The mib module's C source code</td>
       </table>
@@ -47,6 +54,9 @@
       The shared object loader calls the "init_ustScalarSet()"
       function when the module gets loaded, and calls the
       "deinit_ustScalarSet()" when (and if) the module is unloaded.
+      These function names to use are built by adding the shared
+      object's module name (UCD-DLMOD-MIB::dlmodName) to the `init_'
+      and `deinit_' prefixes.
       <p>
       Steps to build the shared object:
       <ol>
@@ -70,21 +80,21 @@ href="../mib_module/ustScalarSet.c">ustScalarSet.c</a> file.
       running this command you need to recompile the ucd-snmp agent
       without the ustScalarSet mib module compiled in directly):
 	<p><ul>
-	  <li> % <b>snmpget -c public localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	  <li> % <b>snmpget  localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 	<p><pre>
 ustSSSimpleString.0 = No Such Object available on this agent
 	    </pre>	</ul><p>
 
       <li> Then, run snmpset to create a new row in the dlmod table:
 	<p><ul>
-	  <li> % <b>snmpset -c public localhost UCD-DLMOD-MIB::dlmodStatus.1 i create </b>
+	  <li> % <b>snmpset  localhost UCD-DLMOD-MIB::dlmodStatus.1 i create </b>
 <p><pre>
 dlmodStatus.1 = create(6)
 </pre>
 	<p></ul>
-      <li> See tha the row was created:
+      <li> See that the row was created:
 	<p><ul>
-	    <li> % <b>snmptable -c public localhost UCD-DLMOD-MIB::dlmodTable </b>
+	    <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
 <p><pre>
 SNMP table: dlmodTable
 
@@ -95,11 +105,12 @@ SNMP table: dlmodTable
       <li> Then set the properties of the row up to point to our new
       object and to give it a name:
 	<p><ul>
-	  <li> % <b>snmpset -c public localhost UCD-DLMOD-MIB::dlmodName.1 s "ustScalarSet" UCD-DLMOD-MIB::dlmodName.1 s "/path/to/ustScalarSet.so" </b>
+	  <li> % <b>snmpset localhost UCD-DLMOD-MIB::dlmodName.1 s "ustScalarSet" UCD-DLMOD-MIB::dlmodPath.1 s "/path/to/ustScalarSet.so" </b>
 <p><pre>
-dlmodStatus.1 = create(6)
+dlmodName.1 = "ustScalarSet" 
+dlmodName.1 = "/path/to/ustScalarSet.so"
 </pre>
-	  <li> % <b>snmptable -c public localhost UCD-DLMOD-MIB::dlmodTable </b>
+	  <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
 <p><pre>
 SNMP table: dlmodTable
 
@@ -109,12 +120,12 @@ SNMP table: dlmodTable
 	</ul>
 	<li> Finally, load the shared object into the running agent:
 	<p><ul>
-	  <li> % <b>snmpset -c public localhost UCD-DLMOD-MIB::dlmodStatus.1 i load </b>
+	  <li> % <b>snmpset  localhost UCD-DLMOD-MIB::dlmodStatus.1 i load </b>
 <p><pre>
-dlmodName.2 = ustScalarSet
-dlmodName.2 = /path/to/ustScalarSet.so
+dlmodName.1 = ustScalarSet
+dlmodName.1 = /path/to/ustScalarSet.so
 </pre>
-	  <li> % <b>snmptable -c public localhost UCD-DLMOD-MIB::dlmodTable </b>
+	  <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
 <p><pre>
 SNMP table: dlmodTable
 
@@ -124,24 +135,26 @@ SNMP table: dlmodTable
 	</ul>
       <li> If everything above was done correctly, then the following
 	command should work and will access the shared object's data:
-	<p><ul><li> % <b>snmpget -c public localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	<p><ul><li> % <b>snmpget  localhost UCD-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 <p><pre>
 ustSSSimpleString.0 = "Hello World"
 </pre><p>
 	</ul>
     </ol>
     <hr>
-    <p> You can also load shared objects using the "dlmod" tokens in the
+    <p> You can also load shared objects using the "dlmod" token in the
     snmpd.conf file by putting a line like this in your snmpd.conf file:
 <p><pre>
       dlmod ustScalarSet /path/to/ustScalarSet.so
     </pre>  
-
+    <p>The first argument specifies the shared object's module name
+      (UCD-DLMOD-MIB::dlmodName) and second argument specifies the
+      full pathname of the shared object file.
     <hr>
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>">Wes Hardaker</a></address>
 <!-- Created: Thu Oct  5 16:20:27 PDT 2000 -->
 <!-- hhmts start -->
-Last modified: Mon Oct  9 14:08:04 PDT 2000
+Last modified: Wed Oct 11 14:01:34 PDT 2000
 <!-- hhmts end -->
   </body>
 </html>
