@@ -9,18 +9,18 @@ BEGIN {
 use Test;
 BEGIN { $n = 17; plan tests => $n }
 use SNMP;
+require "t/startagent.pl";
 $SNMP::debugging = 0;
+$SNMP::verbose = 0;
+$SNMP::dump_packet = 0;
+use vars qw($agent_port $comm $agent_host);
 
-my $host = 'localhost';
-my $comm = 'v1_private';
-my $port = 12000;
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
 my $oid = '.1.3.6.1.2.1.1.1';
 my $junk_name = 'fooDescr';
 my $junk_host = 'no.host.here';
 my $name = "gmarzot\@nortelnetworks.com";
-
-my $snmpd_cmd;
+my $s1;
 
 if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
 # Making sure that any running agents are killed.
@@ -28,22 +28,11 @@ if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
     unlink "t/snmpd.pid";
 }
 
-if (open(CMD,"<t/snmpd.cmd")) {
-    ($snmpd_cmd) = (<CMD> =~ /SNMPD => (\S+)\s*/);
-    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-	system "$snmpd_cmd -r -l t/snmpd.log -C -c t/snmpd.conf -p $port -P t/snmpd.pid > /dev/null 2>&1";
-    } else {
-	undef $snmpd_cmd;
-    }
-    close CMD;
-}
-
-
 # create list of varbinds for GETS, val field can be null or omitted
 $vars = new SNMP::VarList (
 			   ['sysDescr', '0', ''],
 			   ['sysObjectID', '0'],
-			   ['sysUpTime', '0'],	
+			   ['sysUpTime', '0'],
 			   ['sysContact', '0'],
 			   ['sysName', '0'],
 			   ['sysLocation', '0'],
@@ -51,7 +40,7 @@ $vars = new SNMP::VarList (
 			   ['ifNumber', '0'],
 			   ['ifDescr', '1'],
 			   ['ifSpeed', '1'],
-			   
+
 			   ['snmpInPkts', '0'],
 			   ['snmpInBadVersions', '0'],
 			   ['snmpInBadCommunityNames', '0'],
@@ -76,7 +65,7 @@ $vars = new SNMP::VarList (
 		          );
 ################################################################
 # Yet to do:
-# test for the max limit the 'get' can provide. 
+# test for the max limit the 'get' can provide.
 # Figure out why the IP and Physical address are not getting printed.
 # why ifname is not getting printed?
 ################################################################
@@ -91,19 +80,9 @@ $vars = new SNMP::VarList (
 
 ######################################################################
 # Fire up a session.
-my $s1 = 
-    new SNMP::Session (DestHost=>$host,Community=>$comm,RemotePort=>$port);
-ok(defined($s1));
-#####################################################################
-# if no snmpd then skip dynamic tests
-unless ($snmpd_cmd) {
-    print STDERR "[no agent running]";
-    for (3..$n) {
-	skip(1,0);
-    }
-    exit(0);
-}
-
+    $s1 =
+    new SNMP::Session (DestHost=>$agent_host,Community=>$comm,RemotePort=>$agent_port);
+    ok(defined($s1));
 
 ######################################################################
 # Get the standard Vars and check that we got some defined vars back
@@ -144,7 +123,7 @@ ok( defined($ttl));
 $time = $s1->get('sysUpTime.0');
 #print("up time is : $time hundredths of a second\n");
 ok( defined($time));
-######################################### 
+#########################################
 
 
 #Test for a Counter32 type.
@@ -231,10 +210,7 @@ $unknown = $s1->get('ifmyData.0');
 ok(!defined($unknown));
 ##############################################
 
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-}
 
+snmptest_cleanup();
 
 

@@ -10,26 +10,9 @@ BEGIN {
 use Test;
 BEGIN {plan tests => 20}
 use SNMP;
+use vars qw($agent_port $comm $agent_host);
+require "t/startagent.pl";
 
-my $port = 7000;
-my $comm = 'v1_private';
-my $snmpd_cmd;
-
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-    unlink "t/snmpd.pid";
-}
-
-if (open(CMD,"<t/snmpd.cmd")) {
-    ($snmpd_cmd) = (<CMD> =~ /SNMPD => (\S+)\s*/);
-    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-	system "$snmpd_cmd -r -l t/snmpd.log -C -c t/snmpd.conf -p $port -P t/snmpd.pid > /dev/null 2>&1";
-    } else {
-	undef $snmpd_cmd;
-    }
-    close CMD;
-}
 
 sub cb1; # forward reference
 sub cb2;
@@ -40,14 +23,15 @@ sub cb6;
 sub cb7;
 sub cbDummy;
 
-#$SNMP::verbose = 1;
-#$SNMP::dump_packet = 1;
+$SNMP::verbose = 0;
+$SNMP::dump_packet = 0;
 
-$sess = new SNMP::Session(Community=>$comm, RemotePort=>$port);
+$sess = new SNMP::Session(DestHost => $agent_host, Community=>$comm, RemotePort=>$agent_port);
 
 # try getting unregistered OID.
 my $result = $sess->get([["HooHaaHooHaa","0"]], [\&cbDummy, $sess]);
-ok(!defined $result);
+#print("result = $result\n");
+ok(!defined($result));
 
 # this get should work
 $result = $sess->get([["sysDescr","0"]], [\&cb1, $sess]);
@@ -160,10 +144,7 @@ sub cb7{
 
     ok(@{$vlist} == 23);
 
-    if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-	# Making sure that any running agents are killed.
-	system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-    }
+    snmptest_cleanup();
 
     exit(0);
 } # end of cb7

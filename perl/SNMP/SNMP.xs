@@ -63,19 +63,6 @@
 #define DLL_IMPORT
 #endif
 
-/* this should be removed as ucd-snmp no longer needs these types
-   previosly required by KMT - REMOVE ASAP */
-#ifndef u_int8_t
-#define u_int8_t u_char
-#endif
-#ifndef u_int16_t
-#define u_int16_t u_short
-#endif
-#ifndef u_int32_t
-#define u_int32_t u_long
-#endif
-/* end KMT type - REMOVE ASAP */
-
 extern int Suffix;
 DLL_IMPORT extern struct tree *Mib;
 #include "ucd-snmp/ucd-snmp-config.h"
@@ -84,6 +71,7 @@ DLL_IMPORT extern struct tree *Mib;
 #include "ucd-snmp/snmp_client.h"
 #include "ucd-snmp/snmp_impl.h"
 #include "ucd-snmp/snmp.h"
+#undef CMU_COMPATIBLE
 #include "ucd-snmp/parse.h"
 #include "ucd-snmp/mib.h"
 #include "ucd-snmp/scapi.h"

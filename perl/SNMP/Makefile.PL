@@ -23,7 +23,7 @@ sub InitMakeParams {
 
     my $snmp_lib, $snmp_llib, $sep;
     if ($Config{'osname'} eq 'MSWin32') {
-	$snmp_lib = 'libsnmp.dll';
+	$snmp_lib = 'libsnmp.lib';
 	$snmp_link_lib = 'libsnmp';
 	$sep = '\\';
     } else {
@@ -37,10 +37,10 @@ sub InitMakeParams {
     my $lib_path2 = "${sep}usr${sep}lib";
 
     my @IncludeFiles = qw[ucd-snmp/ucd-snmp-config.h
-			  ucd-snmp/asn1.h ucd-snmp/mib.h ucd-snmp/parse.h 
-			  ucd-snmp/snmp.h ucd-snmp/snmp_api.h 
-			  ucd-snmp/snmp_client.h ucd-snmp/snmp_impl.h 
-			  ucd-snmp/scapi.h ucd-snmp/keytools.h 
+			  ucd-snmp/asn1.h ucd-snmp/mib.h ucd-snmp/parse.h
+			  ucd-snmp/snmp.h ucd-snmp/snmp_api.h
+			  ucd-snmp/snmp_client.h ucd-snmp/snmp_impl.h
+			  ucd-snmp/scapi.h ucd-snmp/keytools.h
 			  ucd-snmp/snmpv3.h ucd-snmp/transform_oids.h];
 
     my @IncludeDirs = ($inc_path2, $inc_path1);
@@ -54,15 +54,16 @@ sub InitMakeParams {
 	prompt("Where is the ucd-snmp library installed?","$lib_path2");
 
     @IncludeFiles = map {"$IncludeDir$sep$_";} @IncludeFiles;
-
+    $ssl_lib = ($^O =~ /win32/i ? 'libeay32.lib' : 'libcrypto.a');
+    $ssl_link_lib = ($^O =~ /win32/i ? 'libeay32' : 'crypto');
     my $ssl_link_libs;
     if (HasSSL("$IncludeDir${sep}ucd-snmp/ucd-snmp-config.h")) {
 	my @SSLLibDirs = ("/usr/local/lib", "/usr/local/ssl/lib", "/usr/lib");
-	my $SSLLibDir = find_files(["libcrypto.a"], \@SSLLibDirs) ||
+	my $SSLLibDir = find_files([$ssl_lib], \@SSLLibDirs) ||
 	    prompt("Where is the SSL library installed?", $SSLLibDirs[1]);
-	$ssl_link_lib = "-L$SSLLibDir -lcrypto" if $SSLLibDir;
+	$ssl_link = "-L$SSLLibDir -l$ssl_link_lib" if $SSLLibDir;
     }
-    $Params{LIBS} = "-L$LibDir -l$snmp_link_lib $ssl_link_lib";
+    $Params{LIBS} = "-L$LibDir -l$snmp_link_lib $ssl_link";
     $Params{INC}  = "-I$IncludeDir";
     $Params{H}    = \@IncludeFiles;
 
@@ -85,18 +86,47 @@ sub find_files {
 
 sub GetTestInfo {
     my $sep = ($^O =~ /win32/i ? '\\' : '/');
-    my $info_file = "t${sep}snmpd.cmd";
+    my $info_file = "t${sep}snmptest.cmd";
     my $snmpd_path1 = "${sep}usr${sep}local${sep}sbin";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
-
+    my $snmpd_path3 = "${sep}usr${sep}bin";
+    return if -e $info_file;
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
+    if($^O =~ /win32/i) {
+#you are using WIN 32
+       print <<WIN32
+==================================================================
+You are using Windows 32. The testing of Perl/SNMP API here would
+require you to start an snmpd agent and a trap receiver using the
+config file provided ( t\\snmptest.conf) manually.The
+test scripts will not do this(as in unix testing). So, please
+run those agents and enter the following information.If the data
+about host, agent_port and trap_port are already present in your
+snmptest.cmd file, make test will use those data for testing.
+=================================================================
+WIN32
+    ;
 
+         $host = prompt("Please enter the host IP address/host name: ");
+         print H "HOST => $host\n";
+         $agent_port = prompt("Please enter the agent port number: ");
+         print H "AGENT_PORT => $agent_port\n";
+         $trap_port = prompt("Please enter the trap port number: ");
+         print H "TRAP_PORT => $trap_port\n";
+    } else {
+# you are using UNIX
+# remember to add snmptrapd too
     my $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
+    my $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
 
-    $snmpd = prompt("Unable to locate \"snmpd\". Please enter the path: ") 
+    $snmpd = prompt("Unable to locate \"snmpd\". Please enter the path: ")
 	unless $snmpd;
+    $snmptrapd = prompt("Unable to locate \"snmptrapd\". Please enter the path: ")
+	unless $snmptrapd;
+
 
     $snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
+    $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
 
     if (-e $snmpd and -r $snmpd) {
 	if (not -x $snmpd) {
@@ -108,6 +138,19 @@ sub GetTestInfo {
 	warn("Error: $snmpd does not exist or is unreadable. 'make test' will not work.\n");
     }
 
+    if (-e $snmptrapd and -r $snmptrapd) {
+	if (not -x $snmptrapd) {
+	    warn("Error: $snmptrapd not executable. 'make test' will not work.\n");
+	} else {
+	    print H "SNMPTRAPD => $snmptrapd\n";
+	}
+    } else {
+	warn("Error: $snmptrapd does not exist or is unreadable. 'make test' will not work.\n");
+    }
+
+
+    }
+# end of else
     close H;
 }
 
@@ -119,7 +162,7 @@ sub HasSSL {
 	return undef;
     }
     while (<C>) {
-	$has_ssl++, last if /^\s*#define\s+USE_OPENSSL\s+1/;
+	$has_ssl++, last if /^\s*#define\s+USE_OPENSSL/;
     }
     close C;
     return $has_ssl;

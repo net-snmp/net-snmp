@@ -10,36 +10,17 @@ BEGIN {
 use Test;
 BEGIN { plan tests => 9 }
 use SNMP;
+require "t/startagent.pl";
+use vars qw($agent_port $comm $agent_host);
 
-my $host = 'localhost';
-my $comm = 'v1_private';
-my $port = 8000;
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
 my $oid = '.1.3.6.1.2.1.1.1';
 my $junk_name = 'fooDescr';
 my $junk_host = 'no.host.here';
 my $name = "gmarzot\@nortelnetworks.com";
 
-my $snmpd_cmd;
-
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-    unlink "t/snmpd.pid";
-}
-
-if (open(CMD,"<t/snmpd.cmd")) {
-    ($snmpd_cmd) = (<CMD> =~ /SNMPD => (\S+)\s*/);
-    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-	system "$snmpd_cmd -r -l t/snmpd.log -C -c t/snmpd.conf -p $port -P t/snmpd.pid > /dev/null 2>&1";
-    } else {
-	undef $snmpd_cmd;
-    }
-    close CMD;
-}
-
 $SNMP::debugging = 0;
-$n = 9;  # Number of tests to run
+my $n = 9;  # Number of tests to run
 
 #print "1..$n\n";
 #if ($n == 0) { exit 0; }
@@ -59,19 +40,9 @@ my $vars = new SNMP::VarList (
 
 ##############################  1  #####################################
 # Fire up a session.
-my $s1 = new SNMP::Session (DestHost=>$host,Community=>$comm,RemotePort=>$port);
-ok(defined($s1),1);
-#print("\n");
-#####################################################################
-# if no snmpd then skip dynamic tests
-unless ($snmpd_cmd) {
-    print STDERR "[no agent running]";
-    for (3..$n) {
-	skip(1,0);
-    }
-    exit(0);
-}
-
+    my $s1 =
+    new SNMP::Session (DestHost=>$agent_host,Community=>$comm,RemotePort=>$agent_port);
+    ok(defined($s1));
 
 #############################  2  #######################################
 # Try getnext on sysDescr.0
@@ -124,8 +95,4 @@ ok((defined $var->tag and $var->tag eq 'sysObjectID'));
 ok((defined $var->val and $var->val eq $res3));
 
 
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-}
-
+    snmptest_cleanup();

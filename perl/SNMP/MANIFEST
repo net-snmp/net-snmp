@@ -18,8 +18,10 @@ t/getnext.t
 t/set.t
 t/async.t
 t/mib.txt
+t/notify.t
 t/mibload.t
-t/snmpd.conf
+t/snmptest.conf
+t/startagent.pl
 examples/async1.pl
 examples/async2.pl
 examples/ipforward.pl

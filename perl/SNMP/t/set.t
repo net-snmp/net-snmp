@@ -9,34 +9,14 @@ BEGIN {
 use Test;
 BEGIN { plan tests => 7 }
 use SNMP;
+require "t/startagent.pl";
+use vars qw($agent_port $comm $agent_host);
 
-my $host = 'localhost';
-my $comm = 'v1_private';
-my $port = 12000;
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
 my $oid = ".1.3.6.1.2.1.1.1";
 my $junk_name = 'fooDescr';
 my $junk_host = 'no.host.here';
 my $name = "gmarzot\@nortelnetworks.com";
-
-my $snmpd_cmd;
-
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-    unlink "t/snmpd.pid";
-}
-
-
-if (open(CMD,"<t/snmpd.cmd")) {
-    ($snmpd_cmd) = (<CMD> =~ /SNMPD => (\S+)\s*/);
-    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-	system "$snmpd_cmd -r -l t/snmpd.log -C -c t/snmpd.conf -p $port -P t/snmpd.pid > /dev/null 2>&1";
-    } else {
-	undef $snmpd_cmd;
-    }
-    close CMD;
-}
 
 $SNMP::debugging = 0;
 $n = 15;  # Number of tests to run
@@ -48,7 +28,7 @@ if ($n == 0) { exit 0; }
 my $vars = new SNMP::VarList (
 			   ['sysDescr', '0', ''],
 			   ['sysObjectID', '0'],
-			   ['sysUpTime', '0'],	
+			   ['sysUpTime', '0'],
 			   ['sysContact', '0'],
 			   ['sysName', '0'],
 			   ['sysLocation', '0'],
@@ -56,7 +36,7 @@ my $vars = new SNMP::VarList (
 			   ['ifNumber', '0'],
 			   ['ifDescr', '1'],
 			   ['ifSpeed', '1'],
-			   
+
 			   ['snmpInPkts', '0'],
 			   ['snmpInBadVersions', '0'],
 			   ['snmpInBadCommunityNames', '0'],
@@ -91,18 +71,9 @@ my $vars = new SNMP::VarList (
 
 #########################  1  #######################################
 # Fire up a session.
-my $s1 = new SNMP::Session (DestHost=>$host,Community=>$comm,RemotePort=>$port);
-ok(defined($s1),1);
-#####################################################################
-# if no snmpd then skip dynamic tests
-unless ($snmpd_cmd) {
-    print STDERR "[no agent running]";
-    for (3..$n) {
-	skip(1,0);
-    }
-    exit(0);
-}
-
+    my $s1 =
+    new SNMP::Session (DestHost=>$agent_host,Community=>$comm,RemotePort=>$agent_port);
+    ok(defined($s1));
 
 #######################  2  ##########################################
 # Set some value and see if the value is set properly.
@@ -111,10 +82,10 @@ $originalLocation = $s1->get('sysLocation.0');
 $value = 'Router Management Labs';
 $s1->set('sysLocation.0', $value);
 $finalvalue = $s1->get('sysLocation.0');
-ok($originalLocation ne $finalvalue); 
+ok($originalLocation ne $finalvalue);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
-#print("set value is: $finalvalue\n\n"); 
-$s1->set('sysLocation.0', $originalLocation);  
+#print("set value is: $finalvalue\n\n");
+$s1->set('sysLocation.0', $originalLocation);
 
 ########################   3   #######################################
 
@@ -152,7 +123,7 @@ $s1->set('sysServices.0',$originalservice);
 ##################   5   ######################
 # Test for an integer (READ-WRITE)
 # The snmpEnableAuthenTraps takes only two values - 1 and 2.
-# If any other value is tried to be set, it doesn't set and 
+# If any other value is tried to be set, it doesn't set and
 # retains the old value.
 
 $originalTrap = $s1->get('snmpEnableAuthenTraps.0');
@@ -181,7 +152,7 @@ $s1->set('snmpEnableAuthenTraps.0',$originalTrap);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
 #print("\n");
 
-###################   7   ###################### 
+###################   7   ######################
 
 
 #Test for a Counter32 type.
@@ -229,7 +200,7 @@ my $oldoid = $s1->get("sysORID.1");
 $junk_OID = .6.6.6.6.6.6;
 $s1->set('sysORID.1', $junk_OID);
 $newOID = $s1->get("sysORID.1");
-#print("new oid is $newOID\n"); 
+#print("new oid is $newOID\n");
 ok($oldoid eq $newOID);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
 #print("\n");
@@ -244,10 +215,6 @@ ok( $s1->{ErrorStr} =~ /^Unknown/ );
 
 ##############################################
 
-if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-# Making sure that any running agents are killed.
-    system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-}
-
+    snmptest_cleanup();
 
 
