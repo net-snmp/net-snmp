@@ -10,8 +10,8 @@ extern          "C" {
 
 extern oid      netsnmp_TCPIPv6Domain[]; /* = { ENTERPRISE_MIB, 3, 3, 5 }; */
 
-netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr,
-                                          int local);
+netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr, 
+					  int local);
 
 /*
  * "Constructor" for transport domain object.  

@@ -12,8 +12,7 @@ extern          "C" {
 #endif
 
 
-netsnmp_transport *netsnmp_ipx_transport(struct sockaddr_ipx *addr,
-                                         int local);
+netsnmp_transport *netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local);
 
 /*
  * Convert an textually formatted IPX address into a sockaddr_ipx
