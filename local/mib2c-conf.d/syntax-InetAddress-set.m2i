@@ -9,12 +9,12 @@
 ########################################################################
 ##
     /*
-     * At this point, we can't be sure which address type we should use
-     * to interpret this data (unless, for example, you ONLY support one
-     * type). So we need to store the data in the temporary context until
-     * the consistency check funtion is called.
+     * Note: if there is a corresponding InetAddressType object, we don't
+     * know if they'll be set together, or which order they will be set.
+     * So we just accept the value here, and check that both values are
+     * consistent in ${context}_check_dependencies().
      */
-
+@include generic-ctx-set.m2i@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
