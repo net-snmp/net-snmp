@@ -15,16 +15,21 @@ IMPORTS
 -- private	  OBJECT IDENTIFIER ::= { internet 4 }
 -- enterprises    OBJECT IDENTIFIER ::= { private 1 }
 ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
--- processes      OBJECT IDENTIFIER ::= { ucdavis 1 }
--- exec           OBJECT IDENTIFIER ::= { ucdavis 3 }
 -- memory         OBJECT IDENTIFIER ::= { ucdavis 4 }
--- lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
--- disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
--- load           OBJECT IDENTIFIER ::= { ucdavis 7 }
+-- processes      OBJECT IDENTIFIER ::= { ucdavis 11 }
+-- exec           OBJECT IDENTIFIER ::= { ucdavis 12 }
+-- disk           OBJECT IDENTIFIER ::= { ucdavis 13 }
+-- load           OBJECT IDENTIFIER ::= { ucdavis 14 }
 -- vmstat         OBJECT IDENTIFIER ::= { ucdavis 8 }
 -- version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 -- snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
 -- mibRegistryTable    OBJECT IDENTIFIER ::= { ucdavis 102 }
+
+-- Older mib table entries that were moved:
+-- old-processes      OBJECT IDENTIFIER ::= { ucdavis 1 }
+-- old-exec           OBJECT IDENTIFIER ::= { ucdavis 3 }
+-- old-disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
+-- old-load           OBJECT IDENTIFIER ::= { ucdavis 7 }
 
 -- These are the returned values of the agent type.
 -- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
@@ -58,7 +63,7 @@ processes OBJECT-TYPE
 	STATUS current
 	DESCRIPTION
 		"A set of information on running programs/daemons."
-	::= { ucdavis 1 }
+	::= { ucdavis 11 }
 
 prEntry OBJECT-TYPE
     SYNTAX     PREntry
@@ -166,7 +171,7 @@ extensible OBJECT-TYPE
 		"A table of extensible commands returning output and
 		 result codes."
 	INDEX { extensibleIndex }
-	::= { ucdavis 3 }
+	::= { ucdavis 12 }
 
 extEntry OBJECT-TYPE
     SYNTAX     ExtEntry
@@ -449,7 +454,7 @@ disk 	OBJECT-TYPE
 	STATUS current
 	DESCRIPTION
 		"Disk watching information."
-	::= { ucdavis 6 }
+	::= { ucdavis 13 }
 
 diskEntry OBJECT-TYPE
     SYNTAX     DiskEntry
@@ -575,7 +580,7 @@ loadaves OBJECT-TYPE
 	STATUS current
 	DESCRIPTION
 		"Load average information."
-	::= { ucdavis 7 }
+	::= { ucdavis 14 }
 
 loadEntry OBJECT-TYPE
     SYNTAX     LoadEntry
