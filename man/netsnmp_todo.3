@@ -1,13 +1,8 @@
-.TH "todo" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "todo" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 todo \- Todo List
- 
-.IP "\fBGlobal \fBnetsnmp_table_get_or_create_row_stash\fP(netsnmp_agent_request_info *reqinfo, const u_char *storage_name) \fP" 1c
-This function will likely change to add free pointer functions.
-.PP
-.PP
  
 .IP "\fBGlobal \fBnetsnmp_add_varbind_to_cache\fP(netsnmp_agent_session *asp, int vbcount, netsnmp_variable_list *varbind_ptr, netsnmp_subtree *tp) \fP" 1c
 make this be more intelligent about ranges. Right now we merely take the highest level commonality of a registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to the node above where the range exists, but I doubt this will come up all that frequently.

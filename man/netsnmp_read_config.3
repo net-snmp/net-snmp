@@ -1,9 +1,10 @@
-.TH "parsing various configuration files at run time" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 parsing various configuration files at run time \- The read_config related functions are a fairly extensible system of parsing various configuration files at the run time.  
-More...
+
+.PP
 .SS "Defines"
 
 .in +1c
@@ -15,39 +16,39 @@ More...
 
 .in +1c
 .ti -1c
-.RI "config_line * \fBregister_prenetsnmp_mib_handler\fP (const  char *type, const  char *token, void(*parser)(const  char *, char *), void(*releaser)(void), const  char *help)"
+.RI "config_line * \fBregister_prenetsnmp_mib_handler\fP (const char *type, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
-.RI "config_line * \fBregister_app_prenetsnmp_mib_handler\fP (const  char *token, void(*parser)(const  char *, char *), void(*releaser)(void), const  char *help)"
+.RI "config_line * \fBregister_app_prenetsnmp_mib_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
-.RI "config_line * \fBregister_config_handler\fP (const  char *type_param, const  char *token, void(*parser)(const  char *, char *), void(*releaser)(void), const  char *help)"
+.RI "config_line * \fBregister_config_handler\fP (const char *type_param, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .RI "\fIregister_config_handler registers handlers for certain tokens specified in certain types of files. \fP"
 .ti -1c
-.RI "config_line * \fBregister_app_config_handler\fP (const  char *token, void(*parser)(const  char *, char *), void(*releaser)(void), const  char *help)"
+.RI "config_line * \fBregister_app_config_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
-.RI "void \fBunregister_config_handler\fP (const  char *type_param, const  char *token)"
+.RI "void \fBunregister_config_handler\fP (const char *type_param, const char *token)"
 .br
 .RI "\fIuregister_config_handler un-registers handlers given a specific type_param and token. \fP"
 .ti -1c
-.RI "void \fBunregister_app_config_handler\fP (const  char *token)"
+.RI "void \fBunregister_app_config_handler\fP (const char *token)"
 .br
 .ti -1c
 .RI "void \fBunregister_all_config_handlers\fP ()"
 .br
 .ti -1c
-.RI "config_line * \fBread_config_get_handlers\fP (const  char *type)"
+.RI "config_line * \fBread_config_get_handlers\fP (const char *type)"
 .br
 .ti -1c
-.RI "void \fBread_config_with_type\fP (const  char *filename, const  char *type)"
+.RI "void \fBread_config_with_type\fP (const char *filename, const char *type)"
 .br
 .ti -1c
-.RI "config_line * \fBread_config_find_handler\fP (struct config_line *line_handlers, const  char *token)"
+.RI "config_line * \fBread_config_find_handler\fP (struct config_line *line_handlers, const char *token)"
 .br
 .ti -1c
-.RI "int \fBrun_config_handler\fP (struct config_line *lptr, const  char *token, char *cptr, int when)"
+.RI "int \fBrun_config_handler\fP (struct config_line *lptr, const char *token, char *cptr, int when)"
 .br
 .ti -1c
 .RI "int \fBsnmp_config_when\fP (char *line, int when)"
@@ -74,7 +75,7 @@ More...
 .RI "void \fBnetsnmp_config_process_memories_when\fP (int when, int clear)"
 .br
 .ti -1c
-.RI "void \fBread_config\fP (const  char *filename, struct config_line *line_handler, int when)"
+.RI "void \fBread_config\fP (const char *filename, struct config_line *line_handler, int when)"
 .br
 .ti -1c
 .RI "void \fBfree_config\fP (void)"
@@ -86,47 +87,47 @@ More...
 .RI "void \fBread_premib_configs\fP (void)"
 .br
 .ti -1c
-.RI "void \fBset_configuration_directory\fP (const  char *dir)"
+.RI "void \fBset_configuration_directory\fP (const char *dir)"
 .br
 .ti -1c
-.RI "const  char * \fBget_configuration_directory\fP ()"
+.RI "const char * \fBget_configuration_directory\fP ()"
 .br
 .ti -1c
-.RI "void \fBset_persistent_directory\fP (const  char *dir)"
+.RI "void \fBset_persistent_directory\fP (const char *dir)"
 .br
 .ti -1c
-.RI "const  char * \fBget_persistent_directory\fP ()"
+.RI "const char * \fBget_persistent_directory\fP ()"
 .br
 .ti -1c
-.RI "void \fBset_temp_file_pattern\fP (const  char *pattern)"
+.RI "void \fBset_temp_file_pattern\fP (const char *pattern)"
 .br
 .ti -1c
-.RI "const  char * \fBget_temp_file_pattern\fP ()"
+.RI "const char * \fBget_temp_file_pattern\fP ()"
 .br
 .ti -1c
 .RI "void \fBread_config_files\fP (int when)"
 .br
 .ti -1c
-.RI "void \fBread_config_print_usage\fP (const  char *lead)"
+.RI "void \fBread_config_print_usage\fP (const char *lead)"
 .br
 .ti -1c
-.RI "void \fBread_config_store\fP (const  char *type, const  char *line)"
+.RI "void \fBread_config_store\fP (const char *type, const char *line)"
 .br
 .RI "\fIread_config_store intended for use by applications to store permenant configuration information generated by sets or persistent counters. \fP"
 .ti -1c
-.RI "void \fBread_app_config_store\fP (const  char *line)"
+.RI "void \fBread_app_config_store\fP (const char *line)"
 .br
 .ti -1c
-.RI "void \fBsnmp_save_persistent\fP (const  char *type)"
+.RI "void \fBsnmp_save_persistent\fP (const char *type)"
 .br
 .ti -1c
-.RI "void \fBsnmp_clean_persistent\fP (const  char *type)"
+.RI "void \fBsnmp_clean_persistent\fP (const char *type)"
 .br
 .ti -1c
-.RI "void \fBconfig_perror\fP (const  char *string)"
+.RI "void \fBconfig_perror\fP (const char *string)"
 .br
 .ti -1c
-.RI "void \fBconfig_pwarn\fP (const  char *string)"
+.RI "void \fBconfig_pwarn\fP (const char *string)"
 .br
 .ti -1c
 .RI "char * \fBskip_white\fP (char *ptr)"
@@ -150,10 +151,10 @@ More...
 .RI "char * \fBread_config_read_octet_string\fP (char *readfrom, u_char **str, size_t *len)"
 .br
 .ti -1c
-.RI "char * \fBread_config_save_objid\fP (char *saveto, \fBoid\fP *objid, size_t len)"
+.RI "char * \fBread_config_save_objid\fP (char *saveto, oid *objid, size_t len)"
 .br
 .ti -1c
-.RI "char * \fBread_config_read_objid\fP (char *readfrom, \fBoid\fP **objid, size_t *len)"
+.RI "char * \fBread_config_read_objid\fP (char *readfrom, oid **objid, size_t *len)"
 .br
 .ti -1c
 .RI "char * \fBread_config_read_data\fP (int type, char *readfrom, void *dataptr, size_t *len)"
@@ -180,7 +181,7 @@ More...
 .RI "int \fBlinecount\fP"
 .br
 .ti -1c
-.RI "const  char * \fBcurfilename\fP"
+.RI "const char * \fBcurfilename\fP"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -240,7 +241,7 @@ ASN_OBJECT_ID
 the next token in the configuration line. NULL if none left or if an unknown type. 
 .RE
 .PP
-Definition at line 1663 of file read_config.c.
+Definition at line 1665 of file read_config.c.
 .PP
 Referenced by netsnmp_read_data_callback().
 .SS "void read_config_store (const char * type, const char * line)"
@@ -298,7 +299,7 @@ ASN_OBJECT_ID
 character pointer to the end of the line. NULL if an unknown type. 
 .RE
 .PP
-Definition at line 1790 of file read_config.c.
+Definition at line 1792 of file read_config.c.
 .SS "struct config_line* register_config_handler (const char * type_param, const char * token, void(* parser)(const char *, char *), void(* releaser)(void), const char * help)"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files. Allows a module writer use/register multiple configuration files based off of the type parameter. A module writer may want to set up multiple configuration files to separate out related tasks/variables or just for management of where to put tokens as the module or modules get more complex in regard to handling token registrations.

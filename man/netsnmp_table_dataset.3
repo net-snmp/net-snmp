@@ -1,21 +1,18 @@
-.TH "table_dataset: Helps you implement a table with automatted storage." 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset: Helps you implement a table with automatted storage." 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 table_dataset: Helps you implement a table with automatted storage. \- This handler helps you implement a table where all the data is expected to be stored within the agent itself and not in some external storage location.  
-More...
-.SS "handler"
+
+.PP
+.SS "Functions"
 
 .in +1c
 .ti -1c
 .RI "void \fBnetsnmp_init_table_dataset\fP (void)"
 .br
-.in -1c
-.SS "Functions"
-
-.in +1c
 .ti -1c
-.RI "netsnmp_table_data_set * \fBnetsnmp_create_table_data_set\fP (const  char *table_name)"
+.RI "netsnmp_table_data_set * \fBnetsnmp_create_table_data_set\fP (const char *table_name)"
 .br
 .RI "\fICreate a netsnmp_table_data_set structure given a table_data definition. \fP"
 .ti -1c
@@ -43,7 +40,7 @@ More...
 .br
 .RI "\fImarks a given column in a row as writable or not. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_set_row_column\fP (netsnmp_table_row *row, unsigned int column, int type, const  char *value, size_t value_len)"
+.RI "int \fBnetsnmp_set_row_column\fP (netsnmp_table_row *row, unsigned int column, int type, const char *value, size_t value_len)"
 .br
 .RI "\fIsets a given column in a row with data given a type, value, and length. \fP"
 .ti -1c
@@ -70,10 +67,10 @@ More...
 .br
 .RI "\fIregisters a table_dataset so that the 'add_row' snmpd.conf token can be used to add data to this table. \fP"
 .ti -1c
-.RI "void \fBnetsnmp_config_parse_table_set\fP (const  char *token, char *line)"
+.RI "void \fBnetsnmp_config_parse_table_set\fP (const char *token, char *line)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_config_parse_add_row\fP (const  char *token, char *line)"
+.RI "void \fBnetsnmp_config_parse_add_row\fP (const char *token, char *line)"
 .br
 .ti -1c
 .RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_add_index\fP (netsnmp_table_data_set *table, u_char type)"
@@ -108,11 +105,11 @@ More...
 .br
 .RI "\fIremoves a row from the table and then deletes it (and all it's data) \fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_set_multi_add_default_row\fP (va_dcl) va_dcl"
+.RI "void \fBnetsnmp_table_set_multi_add_default_row\fP (va_dcl)"
 .br
 .RI "\fIadds multiple data column definitions to each row. \fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_set_add_indexes\fP (va_alist) va_dcl"
+.RI "void \fBnetsnmp_table_set_add_indexes\fP (va_alist)"
 .br
 .RI "\fIadds multiple indexes to a table_dataset helper object. \fP"
 .ti -1c

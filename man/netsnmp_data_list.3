@@ -1,4 +1,4 @@
-.TH "generic linked-list data handling with a string as a key." 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "generic linked-list data handling with a string as a key." 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -15,7 +15,7 @@ generic linked-list data handling with a string as a key. \-
 .br
 .RI "\fIfrees all data and nodes in a list. \fP"
 .ti -1c
-.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_create_data_list\fP (const  char *name, void *data, Netsnmp_Free_List_Data *beer)"
+.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_create_data_list\fP (const char *name, void *data, Netsnmp_Free_List_Data *beer)"
 .br
 .RI "\fIadds creates a data_list node given a name, data and a free function ptr. \fP"
 .ti -1c
@@ -27,23 +27,23 @@ generic linked-list data handling with a string as a key. \-
 .br
 .RI "\fIadds data to a datalist \fP"
 .ti -1c
-.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_data_list_add_data\fP (\fBnetsnmp_data_list\fP **head, const  char *name, void *data, Netsnmp_Free_List_Data *beer)"
+.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_data_list_add_data\fP (\fBnetsnmp_data_list\fP **head, const char *name, void *data, Netsnmp_Free_List_Data *beer)"
 .br
 .RI "\fIadds data to a datalist \fP"
 .ti -1c
-.RI "NETSNMP_INLINE void * \fBnetsnmp_get_list_data\fP (\fBnetsnmp_data_list\fP *head, const  char *name)"
+.RI "NETSNMP_INLINE void * \fBnetsnmp_get_list_data\fP (\fBnetsnmp_data_list\fP *head, const char *name)"
 .br
 .RI "\fIreturns a data_list node's data for a given name within a data_list \fP"
 .ti -1c
-.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_get_list_node\fP (\fBnetsnmp_data_list\fP *head, const  char *name)"
+.RI "NETSNMP_INLINE \fBnetsnmp_data_list\fP * \fBnetsnmp_get_list_node\fP (\fBnetsnmp_data_list\fP *head, const char *name)"
 .br
 .RI "\fIreturns a data_list node for a given name within a data_list \fP"
 .ti -1c
-.RI "int \fBnetsnmp_remove_list_node\fP (\fBnetsnmp_data_list\fP **realhead, const  char *name)"
+.RI "int \fBnetsnmp_remove_list_node\fP (\fBnetsnmp_data_list\fP **realhead, const char *name)"
 .br
 .RI "\fIRemoves a named node from a data_list (and frees it). \fP"
 .ti -1c
-.RI "void \fBnetsnmp_register_save_list\fP (\fBnetsnmp_data_list\fP **datalist, const  char *type, const  char *token, Netsnmp_Save_List_Data *data_list_save_ptr, Netsnmp_Read_List_Data *data_list_read_ptr, Netsnmp_Free_List_Data *data_list_free_ptr)"
+.RI "void \fBnetsnmp_register_save_list\fP (\fBnetsnmp_data_list\fP **datalist, const char *type, const char *token, Netsnmp_Save_List_Data *data_list_save_ptr, Netsnmp_Read_List_Data *data_list_read_ptr, Netsnmp_Free_List_Data *data_list_free_ptr)"
 .br
 .RI "\fIregisters to store a data_list set of data at persistant storage time \fP"
 .ti -1c
@@ -51,11 +51,11 @@ generic linked-list data handling with a string as a key. \-
 .br
 .RI "\fIintended to be registerd as a callback operation. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_save_all_data\fP (\fBnetsnmp_data_list\fP *head, const  char *type, const  char *token, Netsnmp_Save_List_Data *data_list_save_ptr)"
+.RI "int \fBnetsnmp_save_all_data\fP (\fBnetsnmp_data_list\fP *head, const char *type, const char *token, Netsnmp_Save_List_Data *data_list_save_ptr)"
 .br
 .RI "\fIintended to be called as a callback during persistent save operations. \fP"
 .ti -1c
-.RI "void \fBnetsnmp_read_data_callback\fP (const  char *token, char *line)"
+.RI "void \fBnetsnmp_read_data_callback\fP (const char *token, char *line)"
 .br
 .RI "\fIintended to be registerd as a .conf parser It should be registered using: \fP"
 .in -1c
@@ -209,7 +209,7 @@ registers to store a data_list set of data at persistant storage time \fBParamet
 .br
 \fIdata_list_read_ptr\fP a function pointer which can read the remainder of a saved line and return the application specific void * pointer. 
 .br
-\fIdata_list_free_ptr\fP a function pointer which will be passed to the data node for freeing it in the future when/if the list/node is cleaned up or destroyed.
+\fIdata_list_free_ptr\fP a function pointer which will be passed to the data node for freeing it in the future when/if the list/node is cleaned up or destroyed. 
 .RE
 .PP
 \fBTodo\fP

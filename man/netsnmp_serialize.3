@@ -1,17 +1,10 @@
-.TH "serialize: Calls sub handlers one request at a time." 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "serialize: Calls sub handlers one request at a time." 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 serialize: Calls sub handlers one request at a time. \- This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once.  
-More...
-.SS "handler"
 
-.in +1c
-.ti -1c
-.RI "void \fBnetsnmp_init_serialize\fP (void)"
-.br
-.RI "\fIinitializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. \fP"
-.in -1c
+.PP
 .SS "Functions"
 
 .in +1c
@@ -27,6 +20,10 @@ More...
 .RI "int \fBnetsnmp_serialize_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .RI "\fIImplements the serial handler. \fP"
+.ti -1c
+.RI "void \fBnetsnmp_init_serialize\fP (void)"
+.br
+.RI "\fIinitializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. \fP"
 .in -1c
 .SH "Detailed Description"
 .PP 
@@ -44,7 +41,7 @@ Referenced by netsnmp_init_serialize(), and netsnmp_register_serialize().
 .PP
 initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. Definition at line 96 of file serialize.c.
 .PP
-Referenced by netsnmp_init_helpers().
+References netsnmp_get_serialize_handler(), and netsnmp_register_handler_by_name().
 .SS "int netsnmp_register_serialize (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you. Definition at line 43 of file serialize.c.

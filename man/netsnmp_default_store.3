@@ -1,9 +1,10 @@
-.TH "storage space for defaults" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 storage space for defaults \- The purpose of the default storage is three-fold:.  
-More...
+
+.PP
 .SS "Data Structures"
 
 .in +1c
@@ -22,7 +23,7 @@ More...
 
 .in +1c
 .ti -1c
-.RI "void \fBnetsnmp_ds_handle_config\fP (const  char *token, char *line)"
+.RI "void \fBnetsnmp_ds_handle_config\fP (const char *token, char *line)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_ds_set_boolean\fP (int storeid, int which, int value)"
@@ -41,7 +42,7 @@ More...
 .RI "int \fBnetsnmp_ds_get_int\fP (int storeid, int which)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_ds_set_string\fP (int storeid, int which, const  char *value)"
+.RI "int \fBnetsnmp_ds_set_string\fP (int storeid, int which, const char *value)"
 .br
 .ti -1c
 .RI "char * \fBnetsnmp_ds_get_string\fP (int storeid, int which)"
@@ -53,10 +54,10 @@ More...
 .RI "void * \fBnetsnmp_ds_get_void\fP (int storeid, int which)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_ds_register_config\fP (u_char type, const  char *ftype, const  char *token, int storeid, int which)"
+.RI "int \fBnetsnmp_ds_register_config\fP (u_char type, const char *ftype, const char *token, int storeid, int which)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_ds_register_premib\fP (u_char type, const  char *ftype, const  char *token, int storeid, int which)"
+.RI "int \fBnetsnmp_ds_register_premib\fP (u_char type, const char *ftype, const char *token, int storeid, int which)"
 .br
 .ti -1c
 .RI "void \fBnetsnmp_ds_shutdown\fP ()"

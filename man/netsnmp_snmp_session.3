@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -131,7 +131,7 @@ snmp_session \- The snmp session structure.
 .br
 .RI "\fILength of securityName. \fP"
 .ti -1c
-.RI "\fBoid\fP * \fBsecurityAuthProto\fP"
+.RI "oid * \fBsecurityAuthProto\fP"
 .br
 .RI "\fIauth protocol oid \fP"
 .ti -1c
@@ -147,7 +147,7 @@ snmp_session \- The snmp session structure.
 .br
 .RI "\fILength of Ku for auth protocol. \fP"
 .ti -1c
-.RI "\fBoid\fP * \fBsecurityPrivProto\fP"
+.RI "oid * \fBsecurityPrivProto\fP"
 .br
 .RI "\fIpriv protocol oid \fP"
 .ti -1c
@@ -252,7 +252,7 @@ Ku for auth protocol XXX. Definition at line 266 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::securityAuthKeyLen\fP"
 .PP
 Length of Ku for auth protocol. Definition at line 268 of file snmp_api.h.
-.SS "\fBoid\fP* \fBsnmp_session::securityAuthProto\fP"
+.SS "oid* \fBsnmp_session::securityAuthProto\fP"
 .PP
 auth protocol oid Definition at line 262 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::securityAuthProtoLen\fP"
@@ -285,7 +285,7 @@ Ku for privacy protocol XXX. Definition at line 274 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::securityPrivKeyLen\fP"
 .PP
 Length of Ku for priv protocol. Definition at line 276 of file snmp_api.h.
-.SS "\fBoid\fP* \fBsnmp_session::securityPrivProto\fP"
+.SS "oid* \fBsnmp_session::securityPrivProto\fP"
 .PP
 priv protocol oid Definition at line 270 of file snmp_api.h.
 .SS "size_t \fBsnmp_session::securityPrivProtoLen\fP"

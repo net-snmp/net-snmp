@@ -1,4 +1,4 @@
-.TH "instance: process individual MIB instances easily." 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "instance: process individual MIB instances easily." 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -19,28 +19,28 @@ instance: process individual MIB instances easily. \-
 .br
 .RI "\fIThis function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_ulong_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_counter32_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_long_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBregister_read_only_int_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBregister_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_int_instance\fP (const  char *name, \fBoid\fP *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
+.RI "int \fBnetsnmp_register_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .RI "\fIThis function registers an int helper handler to a specified OID. \fP"
 .ti -1c
@@ -102,7 +102,7 @@ Definition at line 71 of file instance.c.
 References netsnmp_get_instance_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and netsnmp_register_serialize().
 .PP
 Referenced by netsnmp_register_int_instance().
-.SS "int netsnmp_register_int_instance (const char * name, \fBoid\fP * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
+.SS "int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
 .PP
 This function registers an int helper handler to a specified OID. \fBParameters:\fP
 .RS 4

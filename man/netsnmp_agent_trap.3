@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -52,7 +52,7 @@ Trap generation routines for mib modules to use \-
 .br
 .RI "\fIThis function allows you to make a distinction between generic traps from different classes of equipment. \fP"
 .ti -1c
-.RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_in_list\fP (\fBnetsnmp_variable_list\fP *vblist, \fBoid\fP *name, size_t len)"
+.RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_in_list\fP (\fBnetsnmp_variable_list\fP *vblist, oid *name, size_t len)"
 .br
 .ti -1c
 .RI "\fBnetsnmp_pdu\fP * \fBconvert_v2pdu_to_v1\fP (\fBnetsnmp_pdu\fP *template_v2pdu)"
@@ -61,10 +61,10 @@ Trap generation routines for mib modules to use \-
 .RI "\fBnetsnmp_pdu\fP * \fBconvert_v1pdu_to_v2\fP (\fBnetsnmp_pdu\fP *template_v1pdu)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_send_traps\fP (int trap, int specific, \fBoid\fP *enterprise, int enterprise_length, \fBnetsnmp_variable_list\fP *vars, char *context, int flags)"
+.RI "int \fBnetsnmp_send_traps\fP (int trap, int specific, oid *enterprise, int enterprise_length, \fBnetsnmp_variable_list\fP *vars, char *context, int flags)"
 .br
 .ti -1c
-.RI "void \fBsend_enterprise_trap_vars\fP (int trap, int specific, \fBoid\fP *enterprise, int enterprise_length, \fBnetsnmp_variable_list\fP *vars)"
+.RI "void \fBsend_enterprise_trap_vars\fP (int trap, int specific, oid *enterprise, int enterprise_length, \fBnetsnmp_variable_list\fP *vars)"
 .br
 .ti -1c
 .RI "void \fBsend_trap_to_sess\fP (\fBnetsnmp_session\fP *sess, \fBnetsnmp_pdu\fP *template_pdu)"
@@ -84,22 +84,22 @@ Trap generation routines for mib modules to use \-
 .RI "void \fBsend_trap_pdu\fP (\fBnetsnmp_pdu\fP *pdu)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_authtrap\fP (const  char *token, char *cptr)"
+.RI "void \fBsnmpd_parse_config_authtrap\fP (const char *token, char *cptr)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_trapsink\fP (const  char *token, char *cptr)"
+.RI "void \fBsnmpd_parse_config_trapsink\fP (const char *token, char *cptr)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_trap2sink\fP (const  char *word, char *cptr)"
+.RI "void \fBsnmpd_parse_config_trap2sink\fP (const char *word, char *cptr)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_informsink\fP (const  char *word, char *cptr)"
+.RI "void \fBsnmpd_parse_config_informsink\fP (const char *word, char *cptr)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_trapsess\fP (const  char *word, char *cptr)"
+.RI "void \fBsnmpd_parse_config_trapsess\fP (const char *word, char *cptr)"
 .br
 .ti -1c
-.RI "void \fBsnmpd_parse_config_trapcommunity\fP (const  char *word, char *cptr)"
+.RI "void \fBsnmpd_parse_config_trapcommunity\fP (const char *word, char *cptr)"
 .br
 .ti -1c
 .RI "void \fBsnmpd_free_trapcommunity\fP (void)"
@@ -115,10 +115,10 @@ Trap generation routines for mib modules to use \-
 .RI "timeval \fBstarttime\fP"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBobjid_enterprisetrap\fP [] = { NOTIFICATION_MIB }"
+.RI "oid \fBobjid_enterprisetrap\fP [] = { NOTIFICATION_MIB }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBtrap_version_id\fP [] = { SYSTEM_MIB }"
+.RI "oid \fBtrap_version_id\fP [] = { SYSTEM_MIB }"
 .br
 .ti -1c
 .RI "int \fBenterprisetrap_len\fP"
@@ -127,34 +127,34 @@ Trap generation routines for mib modules to use \-
 .RI "int \fBtrap_version_id_len\fP"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBtrap_prefix\fP [] = { SNMPV2_TRAPS_PREFIX }"
+.RI "oid \fBtrap_prefix\fP [] = { SNMPV2_TRAPS_PREFIX }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBcold_start_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 1 }"
+.RI "oid \fBcold_start_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 1 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBwarm_start_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 2 }"
+.RI "oid \fBwarm_start_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 2 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBlink_down_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 3 }"
+.RI "oid \fBlink_down_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 3 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBlink_up_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 4 }"
+.RI "oid \fBlink_up_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 4 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBauth_fail_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 5 }"
+.RI "oid \fBauth_fail_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 5 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBegp_xxx_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 99 }"
+.RI "oid \fBegp_xxx_oid\fP [] = { SNMPV2_TRAPS_PREFIX, 99 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBsnmptrap_oid\fP [] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 }"
+.RI "oid \fBsnmptrap_oid\fP [] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBsnmptrapenterprise_oid\fP []"
+.RI "oid \fBsnmptrapenterprise_oid\fP []"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBsysuptime_oid\fP [] = { SNMP_OID_MIB2, 1, 3, 0 }"
+.RI "oid \fBsysuptime_oid\fP [] = { SNMP_OID_MIB2, 1, 3, 0 }"
 .br
 .ti -1c
 .RI "size_t \fBsnmptrap_oid_len\fP"
@@ -166,10 +166,10 @@ Trap generation routines for mib modules to use \-
 .RI "size_t \fBsysuptime_oid_len\fP"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBagentaddr_oid\fP [] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 }"
+.RI "oid \fBagentaddr_oid\fP [] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 }"
 .br
 .ti -1c
-.RI "\fBoid\fP \fBcommunity_oid\fP [] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 }"
+.RI "oid \fBcommunity_oid\fP [] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 }"
 .br
 .ti -1c
 .RI "size_t \fBagentaddr_oid_len\fP"
@@ -292,7 +292,7 @@ void
 Definition at line 328 of file agent_trap.c.
 .SH "Variable Documentation"
 .PP 
-.SS "\fBoid\fP snmptrapenterprise_oid[]"
+.SS "oid snmptrapenterprise_oid[]"
 .PP
 \fBInitial value:\fP.nf
 

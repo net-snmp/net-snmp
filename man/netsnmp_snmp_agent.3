@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,10 +7,10 @@ net-snmp agent related processing \-
 
 .in +1c
 .ti -1c
-.RI "struct \fB_agent_nsap\fP"
+.RI "struct \fBaddrCache\fP"
 .br
 .ti -1c
-.RI "struct \fBaddrCache\fP"
+.RI "struct \fB_agent_nsap\fP"
 .br
 .ti -1c
 .RI "struct \fBagent_set_cache_s\fP"
@@ -229,7 +229,7 @@ net-snmp agent related processing \-
 .RI "NETSNMP_INLINE void \fBnetsnmp_agent_add_list_data\fP (\fBnetsnmp_agent_request_info\fP *ari, \fBnetsnmp_data_list\fP *node)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE void * \fBnetsnmp_agent_get_list_data\fP (\fBnetsnmp_agent_request_info\fP *ari, const  char *name)"
+.RI "NETSNMP_INLINE void * \fBnetsnmp_agent_get_list_data\fP (\fBnetsnmp_agent_request_info\fP *ari, const char *name)"
 .br
 .ti -1c
 .RI "NETSNMP_INLINE void \fBnetsnmp_free_agent_data_set\fP (\fBnetsnmp_agent_request_info\fP *ari)"
@@ -273,6 +273,12 @@ net-snmp agent related processing \-
 .br
 .ti -1c
 .RI "timeval \fBstarttime\fP"
+.br
+.ti -1c
+.RI "int \fBlog_addresses\fP"
+.br
+.ti -1c
+.RI "int \fBlastAddrAge\fP"
 .br
 .in -1c
 .SH "Function Documentation"
@@ -392,11 +398,6 @@ handles an incoming SNMP packet into the agent Definition at line 1573 of file s
 References snmp_pdu::command, snmp_session::s_snmp_errno, send_easy_trap(), and snmp_pdu::version.
 .SS "\fBnetsnmp_request_info\fP* netsnmp_add_varbind_to_cache (netsnmp_agent_session * asp, int vbcount, \fBnetsnmp_variable_list\fP * varbind_ptr, netsnmp_subtree * tp)"
 .PP
-\fBTodo\fP
-.RS 4
-make this be more intelligent about ranges. Right now we merely take the highest level commonality of a registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to the node above where the range exists, but I doubt this will come up all that frequently.
-.RE
-.PP
 Definition at line 1670 of file snmp_agent.c.
 .PP
 References netsnmp_request_info_s::agent_req_info, netsnmp_request_info_s::delegated, netsnmp_request_info_s::inclusive, netsnmp_request_info_s::index, variable_list::name, variable_list::name_length, netsnmp_acm_check_subtree(), netsnmp_free_request_data_sets(), netsnmp_oid_find_prefix(), netsnmp_request_info_s::next, netsnmp_request_info_s::parent_data, netsnmp_request_info_s::prev, netsnmp_request_info_s::processed, netsnmp_request_info_s::range_end, netsnmp_request_info_s::range_end_len, netsnmp_request_info_s::requestvb, netsnmp_request_info_s::requestvb_start, netsnmp_request_info_s::status, netsnmp_request_info_s::subtree, and variable_list::type.
@@ -430,7 +431,7 @@ set error for all requests \fBParameters:\fP
 .PP
 \fBReturns:\fP
 .RS 4
-SNMPERR_SUCCESS, or an error code
+SNMPERR_SUCCESS, or an error code 
 .RE
 .PP
 paranoid sanity checks Definition at line 3155 of file snmp_agent.c.
@@ -522,6 +523,6 @@ References _request_set_error(), and netsnmp_agent_request_info_s::mode.
 Referenced by netsnmp_old_api_helper(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), and table_helper_handler().
 .SS "int netsnmp_wrap_up_request (netsnmp_agent_session * asp, int status)"
 .PP
-if asp->pdu Definition at line 1343 of file snmp_agent.c.
+Definition at line 1343 of file snmp_agent.c.
 .PP
 References variable_list::next_variable, and variable_list::type.

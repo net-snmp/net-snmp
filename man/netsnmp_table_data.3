@@ -1,14 +1,15 @@
-.TH "table_data: Helps you implement a table with datamatted storage." 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "table_data: Helps you implement a table with datamatted storage." 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 table_data: Helps you implement a table with datamatted storage. \- This helper helps you implement a table where all the indexes are expected to be stored within the agent itself and not in some external storage location.  
-More...
+
+.PP
 .SS "Modules"
 
 .in +1c
 .ti -1c
-.RI "\fBtable_dataset: Helps you implement a table with automatted storage.\fP"
+.RI "group\fBtable_dataset: Helps you implement a table with automatted storage.\fP"
 .br
 .RI "\fIThis handler helps you implement a table where all the data is expected to be stored within the agent itself and not in some external storage location. \fP"
 .PP
@@ -46,7 +47,7 @@ More...
 .br
 .RI "\fIfinds the data in 'datalist' stored at 'indexes' \fP"
 .ti -1c
-.RI "netsnmp_table_row * \fBnetsnmp_table_data_get_from_oid\fP (netsnmp_table_data *table, \fBoid\fP *searchfor, size_t searchfor_len)"
+.RI "netsnmp_table_row * \fBnetsnmp_table_data_get_from_oid\fP (netsnmp_table_data *table, oid *searchfor, size_t searchfor_len)"
 .br
 .RI "\fIfinds the data in 'datalist' stored at the searchfor oid \fP"
 .ti -1c
@@ -66,7 +67,7 @@ More...
 .br
 .RI "\fIThe helper handler that takes care of passing a specific row of data down to the lower handler(s). \fP"
 .ti -1c
-.RI "netsnmp_table_data * \fBnetsnmp_create_table_data\fP (const  char *name)"
+.RI "netsnmp_table_data * \fBnetsnmp_create_table_data\fP (const char *name)"
 .br
 .RI "\fIcreates and returns a pointer to table data set \fP"
 .ti -1c
@@ -191,7 +192,7 @@ Referenced by netsnmp_table_data_add_row().
 finds the data in 'datalist' stored at 'indexes' Definition at line 204 of file table_data.c.
 .PP
 References netsnmp_table_data_get_from_oid().
-.SS "netsnmp_table_row* netsnmp_table_data_get_from_oid (netsnmp_table_data * table, \fBoid\fP * searchfor, size_t searchfor_len)"
+.SS "netsnmp_table_row* netsnmp_table_data_get_from_oid (netsnmp_table_data * table, oid * searchfor, size_t searchfor_len)"
 .PP
 finds the data in 'datalist' stored at the searchfor oid Definition at line 218 of file table_data.c.
 .PP

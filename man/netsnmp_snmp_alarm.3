@@ -1,4 +1,4 @@
-.TH "generic library based alarm timers for various parts of an application" 3 "6 Jun 2004" "net-snmp" \" -*- nroff -*-
+.TH "generic library based alarm timers for various parts of an application" 3 "16 Jul 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -89,7 +89,7 @@ Definition at line 400 of file snmp_alarm.c.
 .PP
 References SNMP_MALLOC_STRUCT.
 .PP
-Referenced by netsnmp_cache_helper_handler(), and release_cached_resources().
+Referenced by netsnmp_cache_helper_handler().
 .SS "unsigned int snmp_alarm_register_hr (struct timeval t, unsigned int flags, SNMPAlarmCallback * cb, void * cd)"
 .PP
 This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. \fBParameters:\fP
