@@ -2846,12 +2846,13 @@ read_objid(const char *input, oid * output, size_t * out_len)
 #ifndef DISABLE_MIB_LOADING
     if ((ret =
          _add_strings_to_oid(root, name, output, out_len,
-                             max_out_len)) <= 0) {
+                             max_out_len)) <= 0)
 #else
     if ((ret =
          _add_strings_to_oid(NULL, name, output, out_len,
-                             max_out_len)) <= 0) {
+                             max_out_len)) <= 0)
 #endif /* DISABLE_MIB_LOADING */
+    {
         if (ret == 0)
             ret = SNMPERR_UNKNOWN_OBJID;
         SET_SNMP_ERROR(ret);
@@ -2866,21 +2867,14 @@ read_objid(const char *input, oid * output, size_t * out_len)
 /**
  * 
  */
-#ifndef DISABLE_MIB_LOADING
-struct tree    *
-#else
 void
-#endif /* DISABLE_MIB_LOADING */
-netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
-                                  size_t * out_len, int allow_realloc,
-                                  int *buf_overflow,
-                                  const oid * objid, size_t objidlen)
+netsnmp_sprint_realloc_objid(u_char ** buf, size_t * buf_len,
+                             size_t * out_len, int allow_realloc,
+                             int *buf_overflow,
+                             const oid * objid, size_t objidlen)
 {
     u_char         *tbuf = NULL, *cp = NULL;
     size_t          tbuf_len = 256, tout_len = 0;
-#ifndef DISABLE_MIB_LOADING
-    struct tree    *subtree = tree_head;
-#endif /* DISABLE_MIB_LOADING */
     size_t          midpoint_offset = 0;
     int             tbuf_overflow = 0;
     int             output_format;
@@ -2892,16 +2886,9 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         tout_len = 1;
     }
 
-#ifndef DISABLE_MIB_LOADING
-    subtree = _get_realloc_symbol(objid, objidlen, subtree,
-                                  &tbuf, &tbuf_len, &tout_len,
-                                  allow_realloc, &tbuf_overflow, NULL,
-                                  &midpoint_offset);
-#else
     _oid_finish_printing(objid, objidlen,
                          &tbuf, &tbuf_len, &tout_len,
                          allow_realloc, &tbuf_overflow);
-#endif /* DISABLE_MIB_LOADING */
 
     if (tbuf_overflow) {
         if (!*buf_overflow) {
@@ -2909,32 +2896,91 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
             *buf_overflow = 1;
         }
         SNMP_FREE(tbuf);
-#ifndef DISABLE_MIB_LOADING
-        return subtree;
-#else
         return;
-#endif /* DISABLE_MIB_LOADING */
     }
 
     output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
     if (0 == output_format) {
-#ifndef DISABLE_MIB_LOADING
-        output_format = NETSNMP_OID_OUTPUT_MODULE;
-#else
         output_format = NETSNMP_OID_OUTPUT_NUMERIC;
-#endif /* DISABLE_MIB_LOADING */
     }
     switch (output_format) {
     case NETSNMP_OID_OUTPUT_FULL:
     case NETSNMP_OID_OUTPUT_NUMERIC:
-#ifdef DISABLE_MIB_LOADING
     case NETSNMP_OID_OUTPUT_SUFFIX:
     case NETSNMP_OID_OUTPUT_MODULE:
-#endif
         cp = tbuf;
         break;
 
-#ifndef DISABLE_MIB_LOADING
+    case NETSNMP_OID_OUTPUT_NONE:
+    default:
+        cp = NULL;
+    }
+
+    if (!*buf_overflow &&
+        !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp)) {
+        *buf_overflow = 1;
+    }
+    SNMP_FREE(tbuf);
+}
+
+/**
+ * 
+ */
+#ifdef DISABLE_MIB_LOADING
+void
+netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
+                                  size_t * out_len, int allow_realloc,
+                                  int *buf_overflow,
+                                  const oid * objid, size_t objidlen)
+{
+    netsnmp_sprint_realloc_objid(buf, buf_len, out_len, allow_realloc,
+                                 buf_overflow, objid, objidlen);
+}
+#else
+struct tree    *
+netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
+                                  size_t * out_len, int allow_realloc,
+                                  int *buf_overflow,
+                                  const oid * objid, size_t objidlen)
+{
+    u_char         *tbuf = NULL, *cp = NULL;
+    size_t          tbuf_len = 256, tout_len = 0;
+    struct tree    *subtree = tree_head;
+    size_t          midpoint_offset = 0;
+    int             tbuf_overflow = 0;
+    int             output_format;
+
+    if ((tbuf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
+        tbuf_overflow = 1;
+    } else {
+        *tbuf = '.';
+        tout_len = 1;
+    }
+
+    subtree = _get_realloc_symbol(objid, objidlen, subtree,
+                                  &tbuf, &tbuf_len, &tout_len,
+                                  allow_realloc, &tbuf_overflow, NULL,
+                                  &midpoint_offset);
+
+    if (tbuf_overflow) {
+        if (!*buf_overflow) {
+            snmp_strcat(buf, buf_len, out_len, allow_realloc, tbuf);
+            *buf_overflow = 1;
+        }
+        SNMP_FREE(tbuf);
+        return subtree;
+    }
+
+    output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
+    if (0 == output_format) {
+        output_format = NETSNMP_OID_OUTPUT_MODULE;
+    }
+    switch (output_format) {
+    case NETSNMP_OID_OUTPUT_FULL:
+    case NETSNMP_OID_OUTPUT_NUMERIC:
+        cp = tbuf;
+        break;
+
     case NETSNMP_OID_OUTPUT_SUFFIX:
     case NETSNMP_OID_OUTPUT_MODULE:
         for (cp = tbuf; *cp; cp++);
@@ -3003,7 +3049,6 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         break;
     }
 
-#endif /* DISABLE_MIB_LOADING */
     case NETSNMP_OID_OUTPUT_NONE:
     default:
         cp = NULL;
@@ -3014,10 +3059,9 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
         *buf_overflow = 1;
     }
     SNMP_FREE(tbuf);
-#ifndef DISABLE_MIB_LOADING
     return subtree;
-#endif /* DISABLE_MIB_LOADING */
 }
+#endif /* DISABLE_MIB_LOADING */
 
 int
 sprint_realloc_objid(u_char ** buf, size_t * buf_len,
@@ -3479,10 +3523,20 @@ build_oid(oid ** out, size_t * out_len,
 {
     oid             tmpout[MAX_OID_LEN];
 
+    /*
+     * xxx-rks: inefficent. try only building segments to find index len:
+     *   for (var = indexes; var != NULL; var = var->next_variable) {
+     *      if (build_oid_segment(var) != SNMPERR_SUCCESS)
+     *         return SNMPERR_GENERR;
+     *      *out_len += var->name_length;
+     *
+     * then see if it fits in existing buffer, or realloc buffer.
+     */
     if (build_oid_noalloc(tmpout, sizeof(tmpout), out_len,
                           prefix, prefix_len, indexes) != SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
+    /** xxx-rks: should free previous value? */
     snmp_clone_mem((void **) out, (void *) tmpout, *out_len * sizeof(oid));
 
     return SNMPERR_SUCCESS;
