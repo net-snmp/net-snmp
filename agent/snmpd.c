@@ -320,7 +320,7 @@ static void send_v1_trap (struct snmp_session *ss,
     gettimeofday(&now, NULL);
 
     pdu = snmp_pdu_create (SNMP_MSG_TRAP);
-    pduIp = (struct sockaddr_in *)&(pdu->address);
+    pduIp = (struct sockaddr_in *)&pdu->agent_addr;
 
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
 	pdu->enterprise		 = objid_enterprisetrap;
@@ -330,7 +330,8 @@ static void send_v1_trap (struct snmp_session *ss,
 	pdu->enterprise		 = version_id;
 	pdu->enterprise_length	 = version_id_len;
     }
-    pduIp->sin_addr.s_addr	  = get_myaddr();
+    pduIp->sin_family		 = AF_INET;
+    pduIp->sin_addr.s_addr	 = get_myaddr();
     pdu->trap_type		 = trap;
     pdu->specific_type		 = specific;
     pdu->time		 	 = calculate_time_diff(&now, &starttime);
@@ -469,116 +470,116 @@ void send_easy_trap (int trap,
 	while (sink) {
 	    switch (sink->ses.version) {
 	    case SNMP_VERSION_1:
-		send_v1_trap (sink->sesp, trap, specific);
-		break;
+		    send_v1_trap (sink->sesp, trap, specific);
+		    break;
 	    case SNMP_VERSION_2c:
-		send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_TRAP2);
-		/*
-		send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_INFORM);
-		*/
-		break;
+		    send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_TRAP2);
+		    /*
+		       send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_INFORM);
+		     */
+		    break;
 	    }
 	    sink = sink->next;
 	}
     }
 }
-  
+
 static void usage(char *prog)
 {
-  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
+	printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
 #if HAVE_UNISTD_H
-  printf(" [-u uid] [-g gid]");
+	printf(" [-u uid] [-g gid]");
 #endif
-  printf("\n");
-  printf("\n\tVersion:  %s\n",VersionInfo);
-  printf("\tAuthor:   Wes Hardaker\n");
-  printf("\tEmail:    ucd-snmp-coders@ucd-snmp.ucdavis.edu\n");
-  printf("\n-h\t\tThis usage message.\n");
-  printf("-H\t\tDisplay configuration file directives understood.\n");
-  printf("-v\t\tVersion information.\n");
-  printf("-f\t\tDon't fork from the shell.\n");
-  printf("-a\t\tLog addresses.\n");
-  printf("-d\t\tDump sent and received UDP SNMP packets\n");
-  printf("-V\t\tVerbose display\n");
-  printf("-P PIDFILE\tUse PIDFILE to store process id\n");
-  printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
-  printf("-D\t\tTurn on debugging output\n");
-  printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
-  printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
-  printf("-C\t\tDon't read the default configuration files.\n");
-  printf("-L\t\tPrint warnings/messages to stdout/err\n");
-  printf("-s\t\tLog warnings/messages to syslog\n");
-  printf("-A\t\tAppend to the logfile rather than truncating it.\n");
-  printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
-  printf("\t\t(By default LOGFILE=%s)\n",
+	printf("\n");
+	printf("\n\tVersion:  %s\n",VersionInfo);
+	printf("\tAuthor:   Wes Hardaker\n");
+	printf("\tEmail:    ucd-snmp-coders@ucd-snmp.ucdavis.edu\n");
+	printf("\n-h\t\tThis usage message.\n");
+	printf("-H\t\tDisplay configuration file directives understood.\n");
+	printf("-v\t\tVersion information.\n");
+	printf("-f\t\tDon't fork from the shell.\n");
+	printf("-a\t\tLog addresses.\n");
+	printf("-d\t\tDump sent and received UDP SNMP packets\n");
+	printf("-V\t\tVerbose display\n");
+	printf("-P PIDFILE\tUse PIDFILE to store process id\n");
+	printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
+	printf("-D\t\tTurn on debugging output\n");
+	printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
+	printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
+	printf("-C\t\tDon't read the default configuration files.\n");
+	printf("-L\t\tPrint warnings/messages to stdout/err\n");
+	printf("-s\t\tLog warnings/messages to syslog\n");
+	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
+	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
+	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
-         LOGFILE
+			LOGFILE
 #else
-    "none"
+			"none"
 #endif
-    );
+	      );
 #if HAVE_UNISTD_H
-  printf("-g \t\tChange to this gid after opening port\n");
-  printf("-u \t\tChange to this uid after opening port\n");
+	printf("-g \t\tChange to this gid after opening port\n");
+	printf("-u \t\tChange to this uid after opening port\n");
 #endif
-  printf("\n");
-  exit(1);
+	printf("\n");
+	exit(1);
 }
 
-RETSIGTYPE
+	RETSIGTYPE
 SnmpdShutDown(int a)
 {
-  running = 0;
+	running = 0;
 }
 
 #ifdef SIGHUP
-RETSIGTYPE
+	RETSIGTYPE
 SnmpdReconfig(int a)
 {
-  reconfig = 1;
-  signal(SIGHUP, SnmpdReconfig);
+	reconfig = 1;
+	signal(SIGHUP, SnmpdReconfig);
 }
 #endif
 
-static void
+	static void
 SnmpTrapNodeDown(void)
 {
-    send_easy_trap (SNMP_TRAP_ENTERPRISESPECIFIC, 2);
-    /* XXX  2 - Node Down #define it as NODE_DOWN_TRAP */
+	send_easy_trap (SNMP_TRAP_ENTERPRISESPECIFIC, 2);
+	/* XXX  2 - Node Down #define it as NODE_DOWN_TRAP */
 }
 
-void
+	void
 init_master_agent(int dest_port)
 {
-    struct snmp_session
-                        sess,
-                       *session=&sess;
+	struct snmp_session
+		sess,
+	*session=&sess;
 
-    if ( agent_role != MASTER_AGENT )
-	return;
+	if ( agent_role != MASTER_AGENT )
+		return;
 
-    /* set up a fake session for incoming requests that opens a port
-     * that we listen to. */
+	/* set up a fake session for incoming requests that opens a port
+	 * that we listen to. */
 
-    snmp_sess_init(session);
-    
-    session->version = SNMP_DEFAULT_VERSION;
-    session->peername = SNMP_DEFAULT_PEERNAME;
-    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
-     
-    session->local_port = dest_port;
-    session->callback = handle_snmp_packet;
-    session->authenticator = NULL;
-    session = snmp_open( session );
+	snmp_sess_init(session);
 
-    if ( session == NULL ) {
-	snmp_sess_perror("init_master_agent", &sess);
-	/*return;*/
-	exit(1);
-    }
+	session->version = SNMP_DEFAULT_VERSION;
+	session->peername = SNMP_DEFAULT_PEERNAME;
+	session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
 
-    set_pre_parse( session, snmp_check_packet );
-    set_post_parse( session, snmp_check_parse );
+	session->local_port = dest_port;
+	session->callback = handle_snmp_packet;
+	session->authenticator = NULL;
+	session = snmp_open( session );
+
+	if ( session == NULL ) {
+		snmp_sess_perror("init_master_agent", &sess);
+		/*return;*/
+		exit(1);
+	}
+
+	set_pre_parse( session, snmp_check_packet );
+	set_post_parse( session, snmp_check_parse );
 }
 
 /*******************************************************************-o-******
@@ -596,7 +597,7 @@ init_master_agent(int dest_port)
  *
  * Also successfully EXITs with zero for some options.
  */
-int
+	int
 main(int argc, char *argv[])
 {
 	int             arg, i;
@@ -605,12 +606,12 @@ main(int argc, char *argv[])
 	int             dont_fork = 0;
 	char            logfile[SNMP_MAXBUF_SMALL];
 	char           *cptr, **argvptr;
-        struct usmUser *user, *userListPtr;
-        char           *pid_file = NULL;
-        FILE           *PID;
-        int             dont_zero_log = 0;
-        int             stderr_log=0, syslog_log=0;
-        int             uid=0, gid=0;
+	struct usmUser *user, *userListPtr;
+	char           *pid_file = NULL;
+	FILE           *PID;
+	int             dont_zero_log = 0;
+	int             stderr_log=0, syslog_log=0;
+	int             uid=0, gid=0;
 
 	logfile[0]		= 0;
 	optconfigfile		= NULL;
@@ -625,119 +626,119 @@ main(int argc, char *argv[])
 	 * usage: snmpd
 	 */
 	for (arg = 1; arg < argc; arg++)
-          {
-            if (argv[arg][0] == '-') {
-              switch (argv[arg][1]) {
+	{
+		if (argv[arg][0] == '-') {
+			switch (argv[arg][1]) {
 
-                case 'c':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  optconfigfile = strdup(argv[arg]);
-                  break;
+				case 'c':
+					if (++arg == argc)
+						usage(argv[0]);
+					optconfigfile = strdup(argv[arg]);
+					break;
 
-                case 'C':
-                    dontReadConfigFiles = 1;
-                    break;
+				case 'C':
+					dontReadConfigFiles = 1;
+					break;
 
-		case 'd':
-                    snmp_set_dump_packet(++snmp_dump_packet);
-		    verbose = 1;
-		    break;
+				case 'd':
+					snmp_set_dump_packet(++snmp_dump_packet);
+					verbose = 1;
+					break;
 
-		case 'q':
-		    snmp_set_quick_print(1);
-		    break;
+				case 'q':
+					snmp_set_quick_print(1);
+					break;
 
-		case 'D':
-                    debug_register_tokens(&argv[arg][2]);
-		    snmp_set_do_debugging(1);
-		    break;
+				case 'D':
+					debug_register_tokens(&argv[arg][2]);
+					snmp_set_do_debugging(1);
+					break;
 
-                case 'p':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  dest_port = atoi(argv[arg]);
-                  if (dest_port <= 0)
-                    usage(argv[0]);
-                  break;
+				case 'p':
+					if (++arg == argc)
+						usage(argv[0]);
+					dest_port = atoi(argv[arg]);
+					if (dest_port <= 0)
+						usage(argv[0]);
+					break;
 
-                case 'P':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  pid_file = argv[arg];
+				case 'P':
+					if (++arg == argc)
+						usage(argv[0]);
+					pid_file = argv[arg];
 
-                case 'a':
-                      log_addresses++;
-                  break;
+				case 'a':
+					log_addresses++;
+					break;
 
-                case 'V':
-                  verbose = 1;
-                  break;
+				case 'V':
+					verbose = 1;
+					break;
 
-                case 'f':
-                  dont_fork = 1;
-                  break;
+				case 'f':
+					dont_fork = 1;
+					break;
 
-                case 'l':
-                  if (++arg == argc)
-                    usage(argv[0]);
-                  strcpy(logfile, argv[arg]);
-                  break;
+				case 'l':
+					if (++arg == argc)
+						usage(argv[0]);
+					strcpy(logfile, argv[arg]);
+					break;
 
-                case 'L':
-		    stderr_log=1;
-                    break;
-		case 's':
-		    syslog_log=1;
-		    break;
-                case 'A':
-                    dont_zero_log = 1;
-                    break;
+				case 'L':
+					stderr_log=1;
+					break;
+				case 's':
+					syslog_log=1;
+					break;
+				case 'A':
+					dont_zero_log = 1;
+					break;
 #if HAVE_UNISTD_H
-		case 'u':
-                    if (++arg == argc) usage(argv[0]);
-                    uid = atoi(argv[arg]);
-                    break;
-		case 'g':
-                    if (++arg == argc) usage(argv[0]);
-                    gid = atoi(argv[arg]);
-                    break;
+				case 'u':
+					if (++arg == argc) usage(argv[0]);
+					uid = atoi(argv[arg]);
+					break;
+				case 'g':
+					if (++arg == argc) usage(argv[0]);
+					gid = atoi(argv[arg]);
+					break;
 #endif
-                case 'h':
-                    usage(argv[0]);
-                    break;
-                case 'H':
-                    init_snmpv3("snmpd");
-                    init_agent();            /* register our .conf handlers */
-                    register_mib_handlers(); /* snmplib .conf handlers */
-                    fprintf(stderr, "Configuration directives understood:\n");
-                    read_config_print_usage("  ");
-                    exit(0);
-                case 'v':
-                    printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                    printf("Author:            Wes Hardaker\n");
-                    printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
-                    exit (0);
-                case '-':
-                  switch(argv[arg][2]){
-                    case 'v': 
-                      printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
-                      exit (0);
-                    case 'h':
-                      usage(argv[0]);
-                      exit(0);
-                  }
+				case 'h':
+					usage(argv[0]);
+					break;
+				case 'H':
+					init_snmpv3("snmpd");
+					init_agent();            /* register our .conf handlers */
+					register_mib_handlers(); /* snmplib .conf handlers */
+					fprintf(stderr, "Configuration directives understood:\n");
+					read_config_print_usage("  ");
+					exit(0);
+				case 'v':
+					printf("\nUCD-snmp version:  %s\n",VersionInfo);
+					printf("Author:            Wes Hardaker\n");
+					printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+					exit (0);
+				case '-':
+					switch(argv[arg][2]){
+						case 'v': 
+							printf("\nUCD-snmp version:  %s\n",VersionInfo);
+							printf("Author:            Wes Hardaker\n");
+							printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+							exit (0);
+						case 'h':
+							usage(argv[0]);
+							exit(0);
+					}
 
-                default:
-                  printf("invalid option: %s\n", argv[arg]);
-                  usage(argv[0]);
-                  break;
-              }
-              continue;
-            }
-          }  /* end-for */
+				default:
+					printf("invalid option: %s\n", argv[arg]);
+					usage(argv[0]);
+					break;
+			}
+			continue;
+		}
+	}  /* end-for */
 
 
 	/* 
@@ -752,9 +753,9 @@ main(int argc, char *argv[])
 	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
 	strcpy(argvrestartname, argv[0]);
 	if ( strstr(argvrestartname, "agentxd") != NULL)
-	    agent_role = SUB_AGENT;
+		agent_role = SUB_AGENT;
 	else
-	    agent_role = MASTER_AGENT;
+		agent_role = MASTER_AGENT;
 	for (cptr = argvrestart, i = 0; i < argc; i++) {
 		strcpy(cptr, argv[i]);
 		*(argvptr++) = cptr;
@@ -768,120 +769,121 @@ main(int argc, char *argv[])
 	 * Open the logfile if necessary.
 	 */
 
-    /* Should open logfile and/or syslog based on arguments */
-    if (logfile[0])
-      snmp_enable_filelog(logfile, dont_zero_log);
-    if (syslog_log)
-      snmp_enable_syslog(); 
+	/* Should open logfile and/or syslog based on arguments */
+	if (logfile[0])
+		snmp_enable_filelog(logfile, dont_zero_log);
+	if (syslog_log)
+		snmp_enable_syslog(); 
 #ifdef BUFSIZ
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+	setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 #endif
-    /* 
-     * Initialize the world.  Detach from the shell.
-     * Create initial user.
-     */
-    if (!dont_fork && fork() != 0) {
-      exit(0);
-    }
+	/* 
+	 * Initialize the world.  Detach from the shell.
+	 * Create initial user.
+	 */
+	if (!dont_fork && fork() != 0) {
+		exit(0);
+	}
 
-    if (pid_file != NULL) {
-      if ((PID = fopen(pid_file, "w")) == NULL) {
-        snmp_log_perror("fopen");
-        exit(1);
-      }
-      fprintf(PID, "%d\n", (int)getpid());
-      fclose(PID);
-    }
+	if (pid_file != NULL) {
+		if ((PID = fopen(pid_file, "w")) == NULL) {
+			snmp_log_perror("fopen");
+			exit(1);
+		}
+		fprintf(PID, "%d\n", (int)getpid());
+		fclose(PID);
+	}
 
-    snmp_debug_init();
-    init_master_agent( dest_port );
+	snmp_debug_init();
+	init_master_agent( dest_port );
 
-    usm_set_reportErrorOnUnknownID(1);
-    init_agent();		/* register our .conf handlers */
-    init_snmp_alarm();
-    init_snmpv3("snmpd");	/* register the v3 handlers */
-    register_mib_handlers();	/* snmplib .conf handlers */
-    read_premib_configs();	/* read pre-mib-reading .conf handlers */
+	usm_set_reportErrorOnUnknownID(1);
+	init_agent();		/* register our .conf handlers */
+	init_snmp_alarm();
+	init_snmpv3("snmpd");	/* register the v3 handlers */
+	register_mib_handlers();	/* snmplib .conf handlers */
+	read_premib_configs();	/* read pre-mib-reading .conf handlers */
 
-    /* create the initial and template users */
-    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
-                                   USM_LENGTH_OID_TRANSFORM,
-                                   usmDESPrivProtocol,
-                                   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-    register_mib_handlers(); /* snmplib .conf handlers */
-    read_premib_configs();   /* read pre-mib-reading .conf handlers */
-    init_mib();              /* initialize the mib structures */
-    update_config();         /* read in config files and register HUP */
+	/* create the initial and template users */
+	user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
+			USM_LENGTH_OID_TRANSFORM,
+			usmDESPrivProtocol,
+			USM_LENGTH_OID_TRANSFORM);
+	userListPtr = usm_add_user(user);
+	if (userListPtr == NULL) /* user already existed */
+		usm_free_user(user);
+	user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
+			USM_LENGTH_OID_TRANSFORM,
+			usmDESPrivProtocol,
+			USM_LENGTH_OID_TRANSFORM);
+	userListPtr = usm_add_user(user);
+	if (userListPtr == NULL) /* user already existed */
+		usm_free_user(user);
+	user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
+			USM_LENGTH_OID_TRANSFORM,
+			usmDESPrivProtocol,
+			USM_LENGTH_OID_TRANSFORM);
+	userListPtr = usm_add_user(user);
+	if (userListPtr == NULL) /* user already existed */
+		usm_free_user(user);
+	register_mib_handlers(); /* snmplib .conf handlers */
+	read_premib_configs();   /* read pre-mib-reading .conf handlers */
+	init_mib();              /* initialize the mib structures */
+	update_config();         /* read in config files and register HUP */
 
-    /* get current time (ie, the time the agent started) */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
+	/* get current time (ie, the time the agent started) */
+	gettimeofday(&starttime, NULL);
+	starttime.tv_sec--;
+	starttime.tv_usec += 1000000L;
 
-    /* send coldstart trap via snmptrap(1) if possible */
-    send_easy_trap (0, 0);
+	/* send coldstart trap via snmptrap(1) if possible */
+	send_easy_trap (0, 0);
 #ifdef SIGTERM
-    signal(SIGTERM, SnmpdShutDown);
+	signal(SIGTERM, SnmpdShutDown);
 #endif
 #ifdef SIGINT
-    signal(SIGINT, SnmpdShutDown);
+	signal(SIGINT, SnmpdShutDown);
 #endif
 #ifdef SIGHUP
-    signal(SIGHUP, SnmpdReconfig);
+	signal(SIGHUP, SnmpdReconfig);
 #endif
-        
+
 #if HAVE_UNISTD_H
-    if (gid) {
-      DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
-      if (setgid(gid)==-1) {
-          snmp_log_perror("setgid failed");
-          exit(1);
-      }
-    }
-    if (uid) {
-      DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
-      if(setuid(uid)==-1) {
-          snmp_log_perror("setuid failed");
-          exit(1);
-      }
-    }
+	if (gid) {
+		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
+		if (setgid(gid)==-1) {
+			snmp_log_perror("setgid failed");
+			exit(1);
+		}
+	}
+	if (uid) {
+		DEBUGMSGTL(("snmpd", "Changing uid to %d.\n", uid));
+		if(setuid(uid)==-1) {
+			snmp_log_perror("setuid failed");
+			exit(1);
+		}
+	}
 #endif
 
-    /* honor selection of standard error output */
-    if (!stderr_log)
-      snmp_disable_stderrlog();
+	/* honor selection of standard error output */
+	if (!stderr_log)
+		snmp_disable_stderrlog();
 
-    /* we're up, log our version number */
-    snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
+	/* we're up, log our version number */
+	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
 
-    memset(addrCache, 0, sizeof(addrCache));
-    /* 
-     * Forever monitor the dest_port for incoming PDUs.
-     */
-    DEBUGMSGTL(("snmpd", "We're up.  Starting to process data.\n"));
-    receive();
+	memset(addrCache, 0, sizeof(addrCache));
+	/* 
+	 * Forever monitor the dest_port for incoming PDUs.
+	 */
+	DEBUGMSGTL(("snmpd", "We're up.  Starting to process data.\n"));
+	receive();
 #include "mib_module_shutdown.h"
-    DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
-    SnmpTrapNodeDown();
-    DEBUGMSGTL(("snmpd", "Bye...\n"));
-    return 0;
+	DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
+	SnmpTrapNodeDown();
+	DEBUGMSGTL(("snmpd", "Bye...\n"));
+	snmp_shutdown("snmpd");
+	return 0;
 
 }  /* End main() -- snmpd */
 
@@ -898,115 +900,105 @@ main(int argc, char *argv[])
  * Invoke the established message handlers for incoming messages on a per
  * port basis.  Handle timeouts.
  */
-static int
+	static int
 receive(void)
 {
-    int numfds;
-    fd_set fdset;
-    struct timeval	timeout, *tvp = &timeout;
-    struct timeval	sched,   *svp = &sched,
-			now,     *nvp = &now;
-    int count, block;
+	int numfds;
+	fd_set fdset;
+	struct timeval	timeout, *tvp = &timeout;
+	struct timeval	sched,   *svp = &sched,
+	now,     *nvp = &now;
+	int count, block;
 
-
-
-    /*
-     * Set the 'sched'uled timeout to the current time + one TIMETICK.
-     */
-    gettimeofday(nvp, (struct timezone *) NULL);
-    svp->tv_usec = nvp->tv_usec + TIMETICK;
-    svp->tv_sec = nvp->tv_sec;
-    
-    while (svp->tv_usec >= ONE_SEC){
-	svp->tv_usec -= ONE_SEC;
-	svp->tv_sec++;
-    }
-
-    /*
-     * Loop-forever: execute message handlers for sockets with data,
-     * reset the 'sched'uler.
-     */
-    while (running) {
-	if (reconfig) {
-	    reconfig = 0;
-	    snmp_log(LOG_INFO, "Reconfiguring daemon\n");
-	    update_config();
-	}
-	tvp =  &timeout;
-	tvp->tv_sec = 0;
-	tvp->tv_usec = TIMETICK;
-
-	numfds = 0;
-	FD_ZERO(&fdset);
-        block = 0;
-        snmp_select_info(&numfds, &fdset, tvp, &block);
-        if (block == 1)
-            tvp = NULL; /* block without timeout */
-	count = select(numfds, &fdset, 0, 0, tvp);
-
-	if (count > 0){
-	    snmp_read(&fdset);
-	} else switch(count){
-	    case 0:
-                snmp_timeout();
-                break;
-	    case -1:
-		if (errno == EINTR){
-		    continue;
-		} else {
-		    snmp_log_perror("select");
-		}
-		return -1;
-	    default:
-		snmp_log(LOG_ERR, "select returned %d\n", count);
-		return -1;
-	}  /* endif -- count>0 */
 
 
 	/*
-	 * If the time 'now' is greater than the 'sched'uled time, then:
-	 *
-	 *	Check alarm and event timers if v2p is configured.
-	 *	Reset the 'sched'uled time to current time + one TIMETICK.
-	 *	Age the cache network addresses (from whom messges have
-	 *		been received).
+	 * Set the 'sched'uled timeout to the current time + one TIMETICK.
 	 */
-        gettimeofday(nvp, (struct timezone *) NULL);
+	gettimeofday(nvp, (struct timezone *) NULL);
+	svp->tv_usec = nvp->tv_usec + TIMETICK;
+	svp->tv_sec = nvp->tv_sec;
 
-	if (nvp->tv_sec > svp->tv_sec
-	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
-            svp->tv_usec = nvp->tv_usec + TIMETICK;
-            svp->tv_sec = nvp->tv_sec;
-    
-            while (svp->tv_usec >= ONE_SEC){
-	        svp->tv_usec -= ONE_SEC;
-	        svp->tv_sec++;
-            }
-	    if (log_addresses && lastAddrAge++ > 600){
-		
-		lastAddrAge = 0;
-		for(count = 0; count < ADDRCACHE; count++){
-		    if (addrCache[count].status == OLD)
-			addrCache[count].status = UNUSED;
-		    if (addrCache[count].status == USED)
-			addrCache[count].status = OLD;
+	while (svp->tv_usec >= ONE_SEC){
+		svp->tv_usec -= ONE_SEC;
+		svp->tv_sec++;
+	}
+
+	/*
+	 * Loop-forever: execute message handlers for sockets with data,
+	 * reset the 'sched'uler.
+	 */
+	while (running) {
+		if (reconfig) {
+			reconfig = 0;
+			snmp_log(LOG_INFO, "Reconfiguring daemon\n");
+			update_config();
 		}
-	    }
-	}  /* endif -- now>sched */
-    }  /* endwhile */
+		tvp =  &timeout;
+		tvp->tv_sec = 0;
+		tvp->tv_usec = TIMETICK;
 
-    /* We've received a sigTERM.  Shutdown by calling mib-module
-       functions and sending out a shutdown trap. */
-    snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
-    snmp_shutdown("snmpd");
+		numfds = 0;
+		FD_ZERO(&fdset);
+		block = 0;
+		snmp_select_info(&numfds, &fdset, tvp, &block);
+		if (block == 1)
+			tvp = NULL; /* block without timeout */
+		count = select(numfds, &fdset, 0, 0, tvp);
 
-  #include "mib_module_shutdown.h"
+		if (count > 0){
+			snmp_read(&fdset);
+		} else switch(count){
+			case 0:
+				snmp_timeout();
+				break;
+			case -1:
+				if (errno == EINTR){
+					continue;
+				} else {
+					snmp_log_perror("select");
+				}
+				return -1;
+			default:
+				snmp_log(LOG_ERR, "select returned %d\n", count);
+				return -1;
+		}  /* endif -- count>0 */
 
-    DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
-    SnmpTrapNodeDown();
-    DEBUGMSGTL(("snmpd", "Bye...\n"));
 
-    return 0;
+		/*
+		 * If the time 'now' is greater than the 'sched'uled time, then:
+		 *
+		 *	Check alarm and event timers if v2p is configured.
+		 *	Reset the 'sched'uled time to current time + one TIMETICK.
+		 *	Age the cache network addresses (from whom messges have
+		 *		been received).
+		 */
+		gettimeofday(nvp, (struct timezone *) NULL);
+
+		if (nvp->tv_sec > svp->tv_sec
+				|| (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
+			svp->tv_usec = nvp->tv_usec + TIMETICK;
+			svp->tv_sec = nvp->tv_sec;
+
+			while (svp->tv_usec >= ONE_SEC){
+				svp->tv_usec -= ONE_SEC;
+				svp->tv_sec++;
+			}
+			if (log_addresses && lastAddrAge++ > 600){
+
+				lastAddrAge = 0;
+				for(count = 0; count < ADDRCACHE; count++){
+					if (addrCache[count].status == OLD)
+						addrCache[count].status = UNUSED;
+					if (addrCache[count].status == USED)
+						addrCache[count].status = OLD;
+				}
+			}
+		}  /* endif -- now>sched */
+	}  /* endwhile */
+
+	snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
+	return 0;
 
 }  /* end receive() */
 

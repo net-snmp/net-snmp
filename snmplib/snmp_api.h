@@ -112,6 +112,7 @@ struct snmp_pdu {
     size_t  enterprise_length;
     long    trap_type;		/* trap type */
     long    specific_type;	/* specific type */
+    snmp_ipaddr	agent_addr;
 
 	/*
 	 * SNMPv3 fields
