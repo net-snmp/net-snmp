@@ -188,6 +188,10 @@ unsigned char *var_extensible_loadave(struct variable *vp,
   int i;
 #endif
   double avenrun[3];
+#if defined(solaris2)
+  unsigned long load_avg;
+#endif
+
   
   if (!checkmib(vp,name,length,exact,var_len,write_method,3))
     return(NULL);
@@ -202,7 +206,19 @@ unsigned char *var_extensible_loadave(struct variable *vp,
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
-#ifdef HAVE_GETLOADAVG
+#if defined(solaris2)
+  snprintf(errmsg,300,"avenrun_%dmin",((name[*length-1] == 1) ? 1 :
+				       ((name[*length-1] == 2) ? 5 : 15)));
+
+  /*
+   * Should include kernel_sunos5.h (definition of getKstat) somewhere.
+   * Return type of avenrun_*min is KSTAT_DATA_ULONG
+   */
+  if (getKstat("system_misc",errmsg,&load_avg) < 0) 
+    return (NULL);
+  /* Convert into float */
+  avenrun[name[*length-1]-1] = (double)load_avg/FSCALE;
+#elif HAVE_GETLOADAVG
   if (getloadavg(avenrun, sizeof(avenrun) / sizeof(avenrun[0])) == -1)
     return(0);
 #elif defined(linux)
