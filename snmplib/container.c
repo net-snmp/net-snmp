@@ -172,7 +172,7 @@ int CONTAINER_INSERT(netsnmp_container *x, const void *k)
         while(tmp) {
             rc2 = tmp->insert(tmp,k);
             if (rc)
-                snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc2);
+                snmp_log(LOG_ERR,"error on subcontainer insert (%d)", rc2);
             tmp = tmp->next;
         }
     }
@@ -313,3 +313,19 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
                    strlen(((const container_type*)rhs)->name));
 }
 
+int
+netsnmp_compare_mem(const char * lhs, size_t lhs_len,
+                    const char * rhs, size_t rhs_len)
+{
+    int rc, min = SNMP_MIN(lhs_len, rhs_len);
+
+    rc = memcmp(lhs, rhs, min);
+    if((rc==0) && (lhs_len != rhs_len)) {
+        if(lhs_len < rhs_len)
+            rc = -1;
+        else
+            rc = 1;
+    }
+
+    return rc;
+}
