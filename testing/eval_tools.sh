@@ -476,9 +476,9 @@ FINISHED() {
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
             if [ "x$OSTYPE" = "xmsys" ]; then
-              COMMAND="kill -9 $pid"
-            else
               COMMAND="kill.exe $pid"
+            else
+              COMMAND="kill -9 $pid"
             fi
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
