@@ -238,9 +238,11 @@ void print_log(char *file, char *message)
 void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
-  char buf[SPRINT_MAX_LEN] = { 0 }, *cp;
+  char *buf = malloc(SPRINT_MAX_LEN), *cp;
+  int buf_len = SPRINT_MAX_LEN, str_len = 0;
 
-  sprint_objid(buf, vip->info_oid, vip->oidlen);
+  sprint_realloc_objid((u_char **)&buf, &buf_len, &str_len, 1, 
+	  vip->info_oid, vip->oidlen);
   for(cp = buf; *cp; cp++)
     ;
   while(cp >= buf){
@@ -257,6 +259,7 @@ void sprint_descriptor(char *buffer,
   if (cp < buf)
     cp = buf;
   strcpy(buffer, cp);
+  free(buf);
 }
 
 void processFileArgs(char *fileName)
