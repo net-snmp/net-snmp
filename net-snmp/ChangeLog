@@ -1,7 +1,692 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0 -> V5.0.1
+
+2002-05-10 17:09  hardaker
+
+   * FAQ, NEWS, README, README.agentx:
+
+   mention tutorial-5 instead of tutorial
+   
+2002-05-10 17:04  hardaker
+
+   * perl/agent/: Makefile.PL, agent.pm,
+   netsnmp_request_info.pm:
+
+   request info perl code moved to separate file.
+   
+2002-05-10 17:01  hardaker
+
+   * perl/OID/OID.pm:
+
+   documentation for the OID building overloads.
+   
+2002-05-10 16:55  hardaker
+
+   * apps/snmpvacm.c:
+
+   Add proper length segment to the build view OID.
+   
+2002-05-10 14:41  hardaker
+
+   * snmplib/mib.c:
+
+   new doc patch from Axel Kittenberg
+   
+2002-05-10 14:04  hardaker
+
+   * agent/mibgroup/mibII/: vacm_vars.c (V4-2-patches.0), vacm_vars.c
+:
+
+   fix vacm problem on sets with OIDs containing large numbers as noted
+   by Vinay Gaonkar on the -coders mailing list.
+   
+2002-05-10 13:46  hardaker
+
+   * local/mib2c:
+
+   fix calling on multiple tables
+   
+2002-05-10 03:23  dts12
+
+   * snmplib/mib.c:
+
+   Merge "STRING: Hex:" type tokens into a single token "Hex-STRING:"
+   
+2002-05-10 03:12  dts12
+
+   * agent/helpers/instance.c:
+
+   Report non-exitent subinstances as 'noSuchInstance' rather than 'noSuchObject'.
+   "snmpget .... .1.3.6.1.6.3.12.1.5.0.99" now responds correctly.
+   (though "snmpget .... .1.3.6.1.6.3.12.1.5.1" still returns 'noSuchObject')
+   
+   Also guess that failed SET requests are 'noCreation' errors (which is
+   probably the most likely option).
+   
+2002-05-09 15:54  hardaker
+
+   * Makefile.rules:
+
+   exit properly when a subdir fails to make properly
+   
+2002-05-09 15:30  hardaker
+
+   * snmplib/mib.c:
+
+   create a token for the -Ov equivelant
+   
+2002-05-09 09:12  hardaker
+
+   * agent/mibgroup/ucd-snmp/: memory_solaris2.c (V4-2-patches.5),
+   memory_solaris2.c:
+
+   patch from Takumi Kadode to fix memory usage on solaris
+   
+2002-05-09 08:54  hardaker
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   updates from malloced vmstat fixes from patches branch
+   
+2002-05-08 16:34  hardaker
+
+   * net-snmp-config.in:
+
+   new --compile-subagent features:
+     --cflags
+     --norm
+     --ldflags
+     includes header files
+     misc other bug fixes.
+   
+2002-05-08 13:13  hardaker
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   make the subagent properly call the reserve2 state again.
+   
+2002-05-08 10:02  hardaker
+
+   * agent/mibgroup/examples/notification.c:
+
+   run indent
+   
+2002-05-08 09:01  hardaker
+
+   * agent/mibgroup/examples/notification.c:
+
+   um, use 30 seconds like advertised.
+   
+2002-05-08 08:59  hardaker
+
+   * agent/mibgroup/examples/notification.c,
+   agent/mibgroup/examples/notification.h,
+   mibs/NET-SNMP-EXAMPLES-MIB.txt:
+
+   define a better notification example (no requests.  just alarm -> send)
+   
+2002-05-07 22:45  hardaker
+
+   * local/mib2c:
+
+   update to current indent command
+   
+2002-05-07 22:44  hardaker
+
+   * local/mib2c.create-dataset.conf:
+
+   move text in comment left slight (was too long).
+   
+2002-05-07 22:43  hardaker
+
+   * local/mib2c:
+
+   enum fixes.
+   
+2002-05-07 22:42  hardaker
+
+   * local/: Makefile.in, mib2c.column_defines.conf,
+   mib2c.column_enums.conf, mib2c.conf:
+
+   New mib2c files for generating headers full of column number defines
+   and enum defines.
+   
+2002-05-07 22:40  hardaker
+
+   * net-snmp-config.in:
+
+   - --compile-subagent agent library reordering so it actually works.
+   - --compile-subagent now supports .o files (precompiled code).
+   
+2002-05-07 22:31  hardaker
+
+   * acconfig.h, configure:
+
+   hmm.  missed some checkin files.
+   
+2002-05-07 11:15  hardaker
+
+   * perl/SNMP/t/: conftest.conf, startagent.pl, conf.t
+:
+
+   test for configuration file/default_store support
+   
+2002-05-07 11:14  hardaker
+
+   * perl/SNMP/: SNMP.pm, SNMP.xs:
+
+   make init_snmp() take a char * argument like the real API
+   
+2002-05-07 11:00  hardaker
+
+   * agent/helpers/instance.c:
+
+   typos.
+   
+2002-05-07 09:41  hardaker
+
+   * local/snmpconf:
+
+   fix the -g flag.
+   
+2002-05-07 09:16  hardaker
+
+   * agent/helpers/instance.c:
+
+   call netsnmp_set_request_error like a good boy.
+   
+2002-05-06 20:43  rstory
+
+   * mibs/Makefile.mib:
+
+   fix missing $ noted by John Mills on the coders list
+   
+2002-05-06 16:12  hardaker
+
+   * configure, config.h.in, configure.in, snmplib/snmp_api.c
+   (V4-2-patches.[4,2,3,3]), configure, configure.in,
+   include/net-snmp/net-snmp-config.h.in,
+   snmplib/snmpTCPDomain.c, snmplib/snmpTCPIPv6Domain.c,
+   snmplib/snmpUDPDomain.c, snmplib/snmpUDPIPv6Domain.c,
+   snmplib/snmpUnixDomain.c:
+
+   use size_t when socklen_t is not available (correctly done this time)
+   
+2002-05-06 15:59  hardaker
+
+   * snmplib/: snmpTCPDomain.c, snmpTCPIPv6Domain.c,
+   snmpUDPDomain.c, snmpUDPIPv6Domain.c, snmpUnixDomain.c
+:
+
+   use size_t when socklen_t is not available
+   
+2002-05-06 15:49  hardaker
+
+   * configure, acconfig.h, config.h.in, configure.in
+   (V4-2-patches.[3,7,1,2]), acconfig.h, configure,
+   configure.in, include/net-snmp/net-snmp-config.h.in:
+
+   use size_t when socklen_t is not available
+   
+2002-05-06 15:11  hardaker
+
+   * agent/mibgroup/ucd-snmp/: memory_hpux.c, memory_hpux.h
+, vmstat_hpux.c, vmstat_hpux.h:
+
+   run indent
+   
+2002-05-06 15:10  hardaker
+
+   * agent/mibgroup/ucd-snmp/: memory_hpux.c, memory_hpux.h
+, vmstat_hpux.c, vmstat_hpux.h:
+
+   Patches #551914+ from Gary Edwards to support hpux11 for memory and vmstat modules
+   
+2002-05-06 15:07  hardaker
+
+   * agent/mibgroup/ucd_snmp.h:
+
+   add new hpux modules
+   
+2002-05-06 14:34  hardaker
+
+   * README:
+
+   new contributors.
+   
+2002-05-06 14:32  hardaker
+
+   * include/net-snmp/library/default_store.h, man/snmpcmd.1.def
+, snmplib/mib.c:
+
+   Patch #551489: From Jeffrey Watson to add a -Q option for quick but w/ an '='
+   
+2002-05-06 14:28  hardaker
+
+   * man/snmpd.1.def:
+
+   change -D documentation to reflect current code.
+   
+2002-05-06 14:27  hardaker
+
+   * agent/agent_handler.c:
+
+   misc small bugs and error message wording fixes.
+   
+2002-05-06 09:37  hardaker
+
+   * agent/mibgroup/smux/: smux.c (V4-2-patches.9), smux.c:
+
+   bug #547010: fix smux auth bug as reported and fixed by Stefan Radman
+   
+2002-05-01 23:01  rstory
+
+   * local/mib2c.array-user.conf:
+
+   tweaks for update to table_array
+   
+2002-05-01 23:00  rstory
+
+   * agent/Makefile.in:
+
+   add object_monitor stuff
+   
+2002-05-01 22:46  rstory
+
+   * snmplib/Makefile.in:
+
+   add check_varbind stuff
+   
+2002-05-01 22:45  rstory
+
+   * include/net-snmp/library/check_varbind.h,
+   snmplib/check_varbind.c:
+
+   convenience functions for validation vabrind info
+   
+2002-05-01 22:43  rstory
+
+   * agent/helpers/table_array.c,
+   include/net-snmp/agent/table_array.h:
+
+   do I really have to do this? sigh. Ok, rename debug token; revamp logic to
+   modify rows in place, keeping undo info (vs always changing a copy of a row
+   and swapping rows when set completed successfully) to allow external code
+   to keep pointers that don't disappear on them; add a few callbacks, including
+   row_compare, so table_array can maintain the secondary index tree; don't call
+   can_activate/can_delete unless we are actually trying to activate/delete row;
+   add skeleton (ifdef'd out) code for cooperative notifications of row events;
+   update changing array in commit & undo cases, not just commit; change typdefs
+   for a few callback pointers; ummmm... I *think* that's it....:-)
+   
+2002-05-01 17:30  hardaker
+
+   * perl/OID/: OID.pm, OID.xs, test.pl:
+
+   Add index building to the + operator.
+   
+2002-05-01 09:52  hardaker
+
+   * perl/: OID/OID.pm, OID/OID.xs, agent/Makefile.PL
+, agent/agent.pm, agent/agent.xs, agent/test.pl
+, agent/typemap:
+
+   Make getOID for requests returned a NetSNMP::OID blessed reference.
+   I'm not happy about how this is done, but all attempts to do it
+   correctly only left me in confusion.
+   
+2002-05-01 09:31  hardaker
+
+   * agent/mibgroup/mibII/vacm_vars.c,
+   include/net-snmp/library/snmpAAL5PVCDomain.h,
+   include/net-snmp/library/snmpTCPIPv6Domain.h,
+   include/net-snmp/library/snmpUDPIPv6Domain.h,
+   include/net-snmp/library/snmpUnixDomain.h,
+   snmplib/snmpAAL5PVCDomain.c, snmplib/snmpTCPIPv6Domain.c
+, snmplib/snmpUDPIPv6Domain.c, snmplib/snmpUnixDomain.c
+:
+
+   Change the domain OIDs to point to the net-snmp domains created by Dave.
+   This fixes bug #544245 as well.
+   
+2002-05-01 09:30  hardaker
+
+   * Makefile.in:
+
+   Add the OID perl module to the list of modules.
+   
+2002-05-01 07:45  hardaker
+
+   * mibs/: UCD-SNMP-MIB.txt (V4-2-patches.0), UCD-SNMP-MIB.txt:
+
+   remove old (and conflicting with traps) transport domain OIDs
+   
+2002-05-01 06:19  dts12
+
+   * man/: snmpbulkget.1.def, snmpbulkwalk.1.def,
+   snmpcmd.1.def, snmpdelta.1, snmpget.1.def,
+   snmpset.1.def, snmpstatus.1.def, snmptest.1.def,
+   snmpwalk.1.def:
+
+   Add type tags "STRING: " and "INTEGER: " to example output.
+   Add explicit setting of protocol version to example commands.
+   
+2002-05-01 03:34  jbpn
+
+   * agent/mibgroup/Rmon/: agutil.c, agutil.h,
+   agutil_api.h, alarm.c, alarm.h, event.c,
+   event.h, history.c, history.h, row_api.h,
+   rows.c, rows.h, statistics.c, statistics.h:
+
+     - remove CVS Log: entries which are causing problems since they are
+       embedded in a comment, but some of the log entries contain comment
+       delimiters.
+   
+2002-04-30 22:15  rstory
+
+   * agent/snmpd.c:
+
+   remove netsnmp_processing_set, it lives in snmp_agent.c
+   
+2002-04-30 22:13  rstory
+
+   * include/net-snmp/library/snmp-tc.h, snmplib/snmp-tc.c
+:
+
+   remove unused parameter; allow NONE as old value for storage type transtions
+   
+2002-04-30 22:12  rstory
+
+   * include/net-snmp/agent/table.h:
+
+   remove overly complex macro stuff for rowstatus/storagetype
+   
+2002-04-30 09:28  hardaker
+
+   * perl/OID/: Makefile.PL, OID.pm, OID.xs, README
+, test.pl:
+
+   - allow conversions to an array (needs to be tied still).
+   - documentation.
+   
+2002-04-30 08:15  jbpn
+
+   * agent/: snmpd.c (V4-2-patches.3), snmpd.c:
+
+     - fix bug #545775, reported by Dave Denson, whereby the PID of an
+       already-running snmpd would be overwritten by starting a new snmpd
+       (which would then exit, leaving the original snmpd running and the
+       wrong PID in the file).  Solution is not to write the PID until we
+       have successfully opened all our sockets.
+   
+2002-04-30 07:23  hardaker
+
+   * perl/OID/: .cvsignore, Changes, MANIFEST,
+   Makefile.PL, OID.pm, OID.xs, README,
+   test.pl, typemap:
+
+   OID perl module so you can do simple OID manipulations within perl easily:
+     - Example:  new NetSNMP::OID('interfaces') > new NetSNMP::OID('system')
+   
+2002-04-29 16:52  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   regexp fix for white space checks in indent formatted code
+   
+2002-04-29 16:47  hardaker
+
+   * Makefile.in:
+
+   reorder perl module names to reflect (new) dependencies.
+   
+2002-04-29 09:42  hardaker
+
+   * perl/SNMP/t/mib.t:
+
+   fix a few warnings on failed tests (just screen cleanups)
+   
+2002-04-29 09:41  hardaker
+
+   * perl/SNMP/: Makefile.PL, SNMP.pm:
+
+   Make the perl module respect snmp.conf settings (finally).
+     - Now requires a dependency on the NetSNMP::default_store module though.
+   
+2002-04-27 08:19  rstory
+
+   * agent/snmp_agent.c:
+
+   don't process set request till delegated requests are complete, and queue
+   any other received packets until a set has completed processing.
+   
+2002-04-27 08:10  rstory
+
+   * snmplib/snmp_api.c:
+
+   clean up comments munged by indent
+   
+2002-04-27 08:08  rstory
+
+   * agent/mibgroup/agentx/subagent.h:
+
+   add missing prototype to fix compiler warning
+   
+2002-04-27 08:07  rstory
+
+   * agent/: object_monitor.c, helpers/table.c,
+   helpers/table_array.c:
+
+   ifdef gymnastics to make sure asserts are only compiled in only if explicity
+   requested
+   
+2002-04-26 21:26  rstory
+
+   * agent/mibgroup/host/hr_storage.c:
+
+   fix unbalanced endif on linux. hope I didn't break anything else.
+   
+2002-04-26 19:14  rstory
+
+   * agent/snmpd.c:
+
+   fix unused var warning for !windows
+   
+2002-04-26 14:33  hardaker
+
+   * agent/mibgroup/Rmon/event.c,
+   include/net-snmp/library/asn1.h:
+
+   fix OID_LENGTH definitions
+   
+2002-04-26 10:53  hardaker
+
+   * Makefile.in, perl/ASN/Makefile.PL,
+   perl/agent/Makefile.PL, perl/agent/default_store/Makefile.PL:
+
+   fix --with-perl-modules in makefiles.  Make everything use
+   net-snmp-config, ...
+   
+2002-04-26 10:27  hardaker
+
+   * perl/SNMP/: Makefile.PL, README, SNMP.pm:
+
+   - Cleanup.
+   - Make buildable from within the source.
+   - Change documentation references for ucd-snmp
+   - Change contact location to net-snmp-users (per Joe's agreement)
+   
+2002-04-26 10:19  hardaker
+
+   * perl/default_store/: MANIFEST, Makefile.PL, README, 
+	default_store.pm, test.pl:
+
+   - cleanup.
+   - Use net-snmp-config to find library, etc.
+   - Make buildable from within the source.
+   - a few more tests added
+   - use correct libraries
+   - add documentation
+   
+2002-04-26 04:22  dts12
+
+   * configure, configure.in:
+
+   Extracting the version from 'snmplib/snmp_version.c' needs to take account
+   of blank space.  Reported by Stefan Radman (Bug #547379)
+   
+2002-04-26 04:11  dts12
+
+   * agent/mibgroup/ucd-snmp/: memory.c (V4-2-patches.8), memory.c
+:
+
+   Handle memory values > 32bit (latching at 2^32-1)
+   Patch #548663 from Rob Myers
+   
+2002-04-26 03:55  dts12
+
+   * agent/snmpd.c:
+
+   Remove redundant 'Invalid option' message, since this is typically
+   reported by getopt().  (Suggested by Andrew Rucker Jones - patch #548748 )
+   
+2002-04-26 03:51  dts12
+
+   * agent/snmpd.c:
+
+   Add 'v' to the list of valid options (patch #548748)
+   Thanks to Andrew Rucker Jones.
+   
+2002-04-26 03:36  dts12
+
+   * README.hpux11, agent/mibgroup/host/hr_storage.c,
+   agent/mibgroup/host/hr_system.c,
+   agent/mibgroup/mibII/var_route.c,
+   include/net-snmp/system/hpux.h,
+   agent/mibgroup/ucd-snmp/loadave.c,
+   agent/mibgroup/ucd-snmp/memory.c,
+   agent/mibgroup/ucd-snmp/memory.h:
+
+   Apply Johannes Schmidt-Fischer's improved HP-UX 11 patch
+   (#530724) to the main v5 line, as well as the v4-2 branch.
+   The code now compiles cleanly under HP-UX 11 using gcc.
+   
+2002-04-25 07:19  hardaker
+
+   * README, include/net-snmp/library/vacm.h,
+   snmplib/vacm.c:
+
+   Patch from Axel Kittenberg to fix possible variable name clash
+   
+2002-04-24 22:39  rstory
+
+   * agent/object_monitor.c:
+
+   handle callbacks sending new notifications (while processing notifications)
+   
+2002-04-24 21:35  rstory
+
+   * include/net-snmp/agent/object_monitor.h:
+
+   header for new fucntions for monitoring objects
+   
+2002-04-24 21:34  rstory
+
+   * agent/object_monitor.c:
+
+   new functions for monitoring object values
+   
+2002-04-24 15:02  hardaker
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   /proc/stat can be larger than 1024
+   
+2002-04-24 06:19  dts12
+
+   * snmplib/Makefile.in:
+
+   Install the missing 'md5.h' header file.
+   
+2002-04-23 09:43  rstory
+
+   * agent/helpers/: table.c, table_array.c:
+
+   remove last of the #warnings, add xxx-rks if necessary
+   
+2002-04-23 07:53  hardaker
+
+   * agent/helpers/table_array.c:
+
+   remove warnings
+   
+2002-04-22 19:11  rstory
+
+   * agent/mibgroup/ipfwchains/README:
+
+   update URL to use freenmp.com mirror (unless someone knows a better place?)
+   
+2002-04-22 14:10  rstory
+
+   * snmplib/mib.c:
+
+   apply documentatin patch from Axel Kittenberger <Axel.Kittenberger@maxxio.com>
+   
+2002-04-22 13:50  rstory
+
+   * local/mib2c.array-user.conf:
+
+   remove extra @end@ (sure would be nice if mib2c would check for unbalanced
+   @end@s)
+   
+2002-04-22 09:48  rstory
+
+   * snmplib/oid_array.c:
+
+   update function names to match header (no mixed case)
+   
+2002-04-22 08:11  hardaker
+
+   * include/net-snmp/library/snmp_debug.h:
+
+   fix bug #547110: properly spell define
+   
+2002-04-21 16:44  hardaker
+
+   * agent/mibgroup/mibII/sysORTable.c:
+
+   add static to a returned variable
+   
+2002-04-21 16:42  hardaker
+
+   * configure, configure.in:
+
+   fix --with-perl-modules
+   
+2002-04-21 11:37  rstory
+
+   * snmplib/snmp_version.c:
+
+   5.0.pre3 -> 5.0; (I'm sure there are other places this needs to change,
+   but I wanted to get the first post 5.0 checkin...:-)
+   
+2002-04-20 00:37  hardaker
+
+   * FAQ, sedscript.in, perl/SNMP/SNMP.pm:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0 )
+	
+-------------------------------------------------------------------------------
+
 Changes: V4.2 -> V5.0
 
+2002-04-20 00:27  hardaker
+
+   * everything:
+
+   set all CVS/RCS revision control numbers to 5.0
+	
 2002-04-20 00:07  hardaker
 
    * everything:

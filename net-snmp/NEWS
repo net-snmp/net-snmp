@@ -3,7 +3,34 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.0.1*
 
+ New:
+    - A new flag: -OQ which does quick printing (-Oq), but with an '=' sign.
+    - All output should now have type tags in front of them.
+      (STRING: and INTEGER: were added)
+    - the snmplib/mib.c file has been instrumented with doxygen comments.
+    - two new mib2c configuration files for generating column and enum defines.
+    - a agent coding example: agent/mibgroup/examples/notification.c
 
+ Perl:
+    - the SNMP perl module properly uses snmp.conf values as defaults.
+    - --with-perl should work this time.
+    - more embedded perl support, but it still isn't complete yet.
+      (the NetSNMP::OID module has received many new features)
+
+ Ports:
+    - added vmstat and memory support for hpux11
+    - other misc improvements for hpux11
+
+ Fixes:
+    - the agent should properly handle requests in the right order.
+      (e.g., restrict the agent to processing only one SET at a time)
+    - net-snmp-config --compile-subagent has been greatly improved.
+    - the tools should report the right version number.
+    - large /proc/stat files on linux shouldn't crash the agent.
+    - the smux module should handle multiple registrations better.
+    - various documentation clean ups.
+    - 64 bit address clean ups.
+    - misc other bug fixes.
 
 *5.0*
 
