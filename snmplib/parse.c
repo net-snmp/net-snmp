@@ -76,7 +76,9 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#include <regex.h>
+#endif
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -898,15 +900,31 @@ find_tree_node(const char *name,
 
 u_int
 compute_match(const char *search_base, const char *key) {
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    int rc;
+    regex_t parsetree;
+    regmatch_t pmatch;
+
+    rc=regcomp(&parsetree, key, REG_ICASE);
+    rc=regexec(&parsetree, search_base, 1, &pmatch, 0);
+    if (rc > 0) {
+        /* not found */
+        return MAX_BAD;
+    } else {
+        /* found */
+        return pmatch.rm_so;
+    }
+#else /* use our own wildcard matcher */
     /* first find the longest matching substring (ick) */
     char *first = NULL, *result = NULL, *entry;
     const char *position;
     char *newkey = strdup(key);
+
     
     entry = strtok( newkey, "*" );
     position = search_base;
     while ( entry ) {
-        result = strstr(position, entry);
+        result = strcasestr(position, entry);
 
         if (result == NULL) {
             free(newkey);
@@ -923,6 +941,7 @@ compute_match(const char *search_base, const char *key) {
     if (!result)
         return MAX_BAD;
     return(first-search_base);
+#endif
 }
 
 
