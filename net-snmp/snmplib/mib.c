@@ -500,6 +500,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                         return 0;
                     }
                     break;
+                case 't': /* new in rfc 3411 */
                 case 'a':
                     while ((*out_len + width + 1) >= *buf_len) {
                         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
