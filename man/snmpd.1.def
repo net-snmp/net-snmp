@@ -66,7 +66,6 @@ option.
 .PP
 .B snmpd
 checks for the existence of and parses the following files:
-.RS
 .TP 6
 .B DATADIR/snmp/snmp.conf
 Common configuration for the agend and the application. See snmp.conf(5)
@@ -84,52 +83,22 @@ default) is allowed write access as well.  The 3-5th community strings
 are read-only as well.
 .IP
 In addition to these two configuration files in DATADIR/snmp, the
-agent will read any files with the names snmpd.conf and
-snmpd.local.conf in a colon separated path specified in the
+agent will read any files with the names
+.I snmpd.conf
+and
+.I snmpd.local.conf
+in a colon separated path specified in the
 SNMPCONFPATH environment variable.
 .TP
 .B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or descend into
 subdirectories.
-.B 
-.TP
-.B DATADIR/snmp/party.conf
-Defines the classic SNMP V2 parties.
-.TP
-.B DATADIR/snmp/view.conf
-Defines which parties defined in the 
-.B party.conf
-have access to which parts of the mib.
-.TP
-.B DATADIR/snmp/context.conf
-Maps names to numerical view contexts.
-.TP
-.B DATADIR/snmp/acl.conf
-Defines the classic SNMP V2 action types usable by two communicating parties.
-.RE
-.PP
-See the associated manual pages for information on the content of
-these files.
-.SH FILES
-DATADIR/snmp/snmpd.conf
-.br
-DATADIR/snmp/party.conf
-.br
-DATADIR/snmp/view.conf
-.br
-DATADIR/snmp/context.conf
-.br
-DATADIR/snmp/acl.conf
 .SH SEE ALSO
 (in recommended reading order)
 .PP
 snmp.conf(5),
-snmpd.conf(5),
-party.conf(5),
-view.conf(5),
-context.conf(5),
-acl.conf(5)
+snmpd.conf(5)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

@@ -56,14 +56,6 @@ snmpnetstat [-v 2] hostname noAuth [-ionrs]
 snmpnetstat [-v 2] hostname noAuth [-p protocol]
 .br
 snmpnetstat\ [-v\ 2] hostname noAuth [\-n] [\-I interface] interval
-.PP
-snmpnetstat [-v 2] hostname srcParty dstParty [-an]
-.br
-snmpnetstat [-v 2] hostname srcParty dstParty [-ionrs]
-.br
-snmpnetstat [-v 2] hostname srcParty dstParty [-p protocol]
-.br
-snmpnetstat\ [-v\ 2] hostname srcParty dstParty [\-n] [\-I interface] interval
 .SH DESCRIPTION
 The
 .I snmpnetstat 
@@ -87,18 +79,9 @@ The
 specification may be either a host name or an internet address
 specified in "dot notation".
 .PP
-The version 1
+The version 1 and version 2c
 .I community
 specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
 .PP
 The options have the following meaning:
 .TP
