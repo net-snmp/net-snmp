@@ -1,7 +1,6 @@
 
 CPPFLAGS=-I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
-	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I.. \
-	@CPPFLAGS@
+	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I.. @CPPFLAGS@
 CC = @CC@
 
 # Need a special .c -> .o definition here to make sure we place the
