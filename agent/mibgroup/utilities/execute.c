@@ -38,45 +38,58 @@ run_shell_command( char *command, char *input,
 #if HAVE_SYSTEM
     const char *ifname;    /* Filename for input  redirection */
     const char *ofname;    /* Filename for output redirection */
-    FILE       *file;
     char        shellline[STRMAX];   /* The full command to run */
     int         result;    /* and the return value of the command */
-    int         fd;        /* For processing any output */
-    int         len;
 
     if (!command)
         return -1;
+
+    DEBUGMSGTL(("run_shell_command", "running %s\n", command));
 
     /*
      * Set up the command to run....
      */
     if (input) {
+        FILE       *file;
+
         ifname = make_tempfile();
-        file   = fopen(ifname, "w");
+        if(NULL == ifname)
+            return -1;
+        file = fopen(ifname, "w");
+        if(NULL == file) {
+            snmp_log(LOG_ERR,"couldn't open temporary file %s\n", ifname);
+            unlink(ifname);
+            return -1;
+        }
 	fprintf(file, "%s", input);
         fclose( file );
 
         if (output) {
             ofname = make_tempfile();
+            if(NULL == ofname) {
+                if(ifname)
+                    unlink(ifname);
+                return -1;
+            }
             snprintf( shellline, sizeof(shellline), "(%s) < %s > %s",
                       command, ifname, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
             snprintf( shellline, sizeof(shellline), "(%s) < %s",
                       command, ifname );
-            *out_len = 0;
         }
     } else {
         ifname = NULL;   /* Just to shut the compiler up! */
         if (output) {
             ofname = make_tempfile();
+            if(NULL == ofname)
+                return -1;
             snprintf( shellline, sizeof(shellline), "(%s) > %s",
                       command, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
             snprintf( shellline, sizeof(shellline), "%s",
                       command );
-            *out_len = 0;
         }
     }
 
@@ -89,9 +102,12 @@ run_shell_command( char *command, char *input,
      * If output was requested, then retrieve & return it.
      * Tidy up, and return the result of the command.
      */
-    if ( output ) {
-        fd   = open(ofname, O_RDONLY);
-        len  = read( fd, output, *out_len );
+    if ( output && out_len && (*out_len != 0) ) {
+        int         fd;        /* For processing any output */
+        int         len = 0;
+        fd = open(ofname, O_RDONLY);
+        if(fd >= 0)
+            len  = read( fd, output, *out_len );
 	*out_len = len;
 	close(fd);
         unlink(ofname);
