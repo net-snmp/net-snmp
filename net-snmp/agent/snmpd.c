@@ -138,6 +138,7 @@ typedef long    fd_mask;
 #include "ds_agent.h"
 #include "agent_read_config.h"
 #include "snmp_logging.h"
+#include "snmp_transport.h"
 
 #include "version.h"
 
@@ -156,23 +157,10 @@ int deny_severity	 = LOG_WARNING;
 #define TIMETICK         500000L
 #define ONE_SEC         1000000L
 
-int 		log_addresses	 = 0;
 int 		snmp_dump_packet;
 int             running          = 1;
 int		reconfig	 = 0;
 
-struct addrCache {
-    in_addr_t	addr;
-    int		status;
-#define UNUSED	0
-#define USED	1
-#define OLD	2
-};
-
-#define ADDRCACHE 10
-
-static struct addrCache	addrCache[ADDRCACHE];
-static int		lastAddrAge = 0;
 
 extern char **argvrestartp;
 extern char  *argvrestart;
@@ -194,8 +182,9 @@ static void usage (char *);
 int main (int, char **);
 static void SnmpTrapNodeDown (void);
 static int receive(void);
-int snmp_check_packet(struct snmp_session*, snmp_ipaddr);
-int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
+
+int             dont_fork = 0;
+
 
 static void usage(char *prog)
 {
@@ -301,7 +290,6 @@ main(int argc, char *argv[])
 {
 	int             arg, i;
 	int             ret;
-	int             dont_fork = 0;
 	char            logfile[SNMP_MAXBUF_SMALL];
 	char           *cptr, **argvptr;
 	char           *pid_file = NULL;
@@ -391,11 +379,12 @@ main(int argc, char *argv[])
                   cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
                       
                   /* set the specification string up */
-                  if (cptr)
-                      /* append to the older specification string */
-                      sprintf(buf,"%s,%s", cptr, argv[arg]);
-                  else
-                      strcpy(buf,argv[arg]);
+                  if (cptr) {
+                      /*  Append to the older specification string.  */
+		    sprintf(buf,"%s,%s", cptr, argv[arg]);
+                  } else {
+		    strcpy(buf,argv[arg]);
+		  }
 
                   DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
@@ -583,11 +572,10 @@ main(int argc, char *argv[])
     /* start library */
     init_snmp("snmpd");
 
-    ret = init_master_agent( 0,
-                       snmp_check_packet,
-                       snmp_check_parse );
-	if( ret != 0 )
-		Exit(1); /* Exit logs exit val for us */
+    if ((ret = init_master_agent()) != 0) {
+      /*  Some error opening one of the specified agent transports.  */
+      Exit(1); /*  Exit logs exit val for us  */
+    }
 
 #ifdef SIGTERM
     signal(SIGTERM, SnmpdShutDown);
@@ -640,8 +628,7 @@ main(int argc, char *argv[])
 
 	/* we're up, log our version number */
 	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
-
-	memset(addrCache, 0, sizeof(addrCache));
+	snmp_addrcache_initialise();
 	/* 
 	 * Forever monitor the dest_port for incoming PDUs.
 	 */
@@ -729,13 +716,6 @@ receive(void)
 	}
 #endif	/* USING_SMUX_MODULE */
 
-	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
-	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i]--;
-		external_signal_handler[i](i);
-	    }
-	}
-
 	for (i = 0; i < external_readfdlen; i++) {
 	    FD_SET(external_readfd[i], &readfds);
 	    if (external_readfd[i] >= numfds)
@@ -751,8 +731,16 @@ receive(void)
 	    if (external_exceptfd[i] >= numfds)
 		numfds = external_exceptfd[i] + 1;
 	}
+
+	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
+	    if (external_signal_scheduled[i]) {
+		external_signal_scheduled[i]--;
+		external_signal_handler[i](i);
+	    }
+	}
 	
 	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+	DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 
 	if (count > 0) {
 
@@ -843,15 +831,8 @@ receive(void)
                 svp->tv_usec -= ONE_SEC;
                 svp->tv_sec++;
             }
-            if (log_addresses && lastAddrAge++ > 600){
-
-                lastAddrAge = 0;
-                for(count = 0; count < ADDRCACHE; count++){
-                    if (addrCache[count].status == OLD)
-                        addrCache[count].status = UNUSED;
-                    if (addrCache[count].status == USED)
-                        addrCache[count].status = OLD;
-                }
+            if (log_addresses && lastAddrAge++ > 600) {
+	      snmp_addrcache_age();
             }
         }  /* endif -- now>sched */
 
@@ -866,123 +847,6 @@ receive(void)
 }  /* end receive() */
 
 
-
-
-/*******************************************************************-o-******
- * snmp_check_packet
- *
- * Parameters:
- *	session, from
- *      
- * Returns:
- *	1	On success.
- *	0	On error.
- *
- * Handler for all incoming messages (a.k.a. packets) for the agent.  If using
- * the libwrap utility, log the connection and deny/allow the access. Print
- * output when appropriate, and increment the incoming counter.
- *
- */
-int
-snmp_check_packet(struct snmp_session *session,
-  snmp_ipaddr from)
-{
-    struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
-
-#ifdef USE_LIBWRAP
-    const char *addr_string;
-    /*
-     * Log the message and/or dump the message.
-     * Optionally cache the network address of the sender.
-     */
-    addr_string = inet_ntoa(fromIp->sin_addr);
-
-    if(!addr_string) {
-      addr_string = STRING_UNKNOWN;
-    }
-    if(hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
-      snmp_log(allow_severity, "Connection from %s\n", addr_string);
-    } else {
-      snmp_log(deny_severity, "Connection from %s REFUSED\n", addr_string);
-      return(0);
-    }
-#endif	/* USE_LIBWRAP */
-
-    snmp_increment_statistic(STAT_SNMPINPKTS);
-
-    if (log_addresses || ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)){
-	int count;
-	
-	for(count = 0; count < ADDRCACHE; count++){
-	    if (addrCache[count].status > UNUSED /* used or old */
-		&& fromIp->sin_addr.s_addr == addrCache[count].addr)
-		break;
-	}
-
-	if (count >= ADDRCACHE ||
-            ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)){
-	    snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n",
-                        inet_ntoa(fromIp->sin_addr));
-	    for(count = 0; count < ADDRCACHE; count++){
-		if (addrCache[count].status == UNUSED){
-		    addrCache[count].addr = fromIp->sin_addr.s_addr;
-		    addrCache[count].status = USED;
-		    break;
-		}
-	    }
-	} else {
-	    addrCache[count].status = USED;
-	}
-    }
-
-    return ( 1 );
-}
-
-
-int
-snmp_check_parse( struct snmp_session *session,
-    struct snmp_pdu     *pdu,
-    int    result)
-{
-    if ( result == 0 ) {
-        if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
-             snmp_get_do_logging() ) {
-	     char c_oid [SPRINT_MAX_LEN];
-	     struct variable_list *var_ptr;
-	    
-	    switch (pdu->command) {
-	    case SNMP_MSG_GET:
-	    	snmp_log(LOG_DEBUG, "  GET message\n"); break;
-	    case SNMP_MSG_GETNEXT:
-	    	snmp_log(LOG_DEBUG, "  GETNEXT message\n"); break;
-	    case SNMP_MSG_RESPONSE:
-	    	snmp_log(LOG_DEBUG, "  RESPONSE message\n"); break;
-	    case SNMP_MSG_SET:
-	    	snmp_log(LOG_DEBUG, "  SET message\n"); break;
-	    case SNMP_MSG_TRAP:
-	    	snmp_log(LOG_DEBUG, "  TRAP message\n"); break;
-	    case SNMP_MSG_GETBULK:
-	    	snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
-			pdu->errstat, pdu->errindex); break;
-	    case SNMP_MSG_INFORM:
-	    	snmp_log(LOG_DEBUG, "  INFORM message\n"); break;
-	    case SNMP_MSG_TRAP2:
-	    	snmp_log(LOG_DEBUG, "  TRAP2 message\n"); break;
-	    case SNMP_MSG_REPORT:
-	    	snmp_log(LOG_DEBUG, "  REPORT message\n"); break;
-	    }
-	     
-	    for ( var_ptr = pdu->variables ;
-	        var_ptr != NULL ; var_ptr=var_ptr->next_variable )
-	    {
-                sprint_objid (c_oid, var_ptr->name, var_ptr->name_length);
-                snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
-	    }
-	}
-    	return 1;
-    }
-    return 0; /* XXX: does it matter what the return value is? */
-}
 
 /*******************************************************************-o-******
  * snmp_input

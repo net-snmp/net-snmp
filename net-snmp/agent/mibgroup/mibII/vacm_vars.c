@@ -48,6 +48,11 @@
 #include "agent_callbacks.h"
 #include "vacm_vars.h"
 #include "util_funcs.h"
+#include "snmp_transport.h"
+#include "snmpUDPDomain.h"
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+# include "snmpTCPDomain.h"
+#endif
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -115,9 +120,6 @@ init_vacm_vars (void)
                vacm_sec2group_oid);
   REGISTER_MIB("mibII/vacm:access", vacm_access, variable2, vacm_access_oid);
   REGISTER_MIB("mibII/vacm:view", vacm_view, variable4, vacm_view_oid);
-
-  snmpd_register_config_handler("com2sec", vacm_parse_security,
-                                vacm_free_security,"name source community");
   snmpd_register_config_handler("group", vacm_parse_group, vacm_free_group,
                                 "name v1|v2c|usm security");
   snmpd_register_config_handler("access", vacm_parse_access, vacm_free_access,
@@ -152,126 +154,7 @@ init_vacm_vars (void)
                          vacm_in_view_callback, NULL);
 }
 
-static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 
-#define EXAMPLE_NETWORK		"NETWORK"
-#define EXAMPLE_COMMUNITY	"COMMUNITY"
-
-void vacm_parse_security (const char *token, 
-			  char *param)
-{
-    char *name, *source, *community;
-    const char *mask;
-    char *cp;
-    struct vacm_securityEntry *sp, se;
-    int maskLength, maskBit;
-    struct sockaddr_in *srcIp, *srcMask;
-    char null[] = "";
-
-    memset (&se, 0 , sizeof se);
-    name = strtok(param, "\t\n ");
-    if (!name) {
-	config_perror("missing NAME parameter");
-	return;
-    }
-    source = strtok(NULL, "\t\n ");
-    if (!source) {
-	config_perror("missing SOURCE parameter");
-	return;
-    }
-    if ( !strncmp( source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ) {
-	config_perror("Example config NETWORK not properly configured");
-	return;		/* or exit(1); */
-    }
-    community = strtok(NULL, "\t\n ");
-    if (!community) {
-	config_perror("missing COMMUNITY parameter");
-	return;
-    }
-    if ( !strncmp( community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY)) ) {
-	config_perror("Example config COMMUNITY not properly configured");
-	return;		/* or exit(1); */
-    }
-    srcIp   = (struct sockaddr_in*)&(se.sourceIp);
-    srcMask = (struct sockaddr_in*)&(se.sourceMask);
-    cp = strchr(source, '/');
-    if (cp == NULL) cp = null;
-    else *cp++ = 0;
-    mask = cp;
-    if (strcmp("default", source) == 0 || strcmp("0.0.0.0", source) == 0) {
-	memset(&(srcIp->sin_addr), 0, sizeof(struct in_addr));
-	mask = "0.0.0.0";
-    }
-    else if ((srcIp->sin_addr.s_addr = inet_addr (source)) == (unsigned) -1) {
-	struct hostent *hp = gethostbyname(source);
-	if (hp != NULL) {
-	    memcpy(&(srcIp->sin_addr), hp->h_addr, 4);
-	}
-	else {
-	    config_perror ("bad source address");
-	    return;
-	}
-    }
-    if (*mask == 0) memset (&(srcMask->sin_addr), 0xff, sizeof(struct in_addr));
-    else {
-	if (strchr(mask, '.')) {
-	    if ((srcMask->sin_addr.s_addr = inet_addr(mask)) == (unsigned)-1) {
-		config_perror("bad mask");
-		return;
-	    }
-	}
-	else {
-	    maskLength = atoi(mask);
-	    if (maskLength <= 0 || maskLength > 32) {
-		config_perror("bad mask length");
-		return;
-	    }
-	    maskBit = 0x80000000L;
-	    srcMask->sin_addr.s_addr = 0;
-	    while (maskLength--) {
-		srcMask->sin_addr.s_addr |= maskBit;
-		maskBit >>= 1;
-	    }
-	    srcMask->sin_addr.s_addr = htonl(srcMask->sin_addr.s_addr);
-	}
-    }
-    if ((srcIp->sin_addr.s_addr & ~srcMask->sin_addr.s_addr) != 0) {
-	config_perror("source/mask mismatch");
-	return;
-    }
-    if (strlen(name)+1 > sizeof(se.securityName)) {
-    	config_perror("security name too long");
-	return;
-    }
-    if (strlen(community)+1 > sizeof(se.community)) {
-    	config_perror("community name too long");
-	return;
-    }
-    strcpy(se.securityName, name);
-    strcpy(se.community, community);
-    sp = (struct vacm_securityEntry *)malloc (sizeof *sp);
-    if (sp == NULL) {
-    	config_perror("memory error");
-	return;
-    }
-    *sp = se;
-    if (securityFirst != NULL) {
-	securityLast->next = sp;
-	securityLast = sp;
-    }
-    else {
-	securityFirst = securityLast = sp;
-    }
-}
-
-void vacm_free_security (void)
-{
-    struct vacm_securityEntry *sp;
-    while ((sp = securityFirst)) {
-	securityFirst = sp->next;
-	free(sp);
-    }
-}
 
 void vacm_parse_group (const char *token, 
 		       char *param)
@@ -563,7 +446,7 @@ void vacm_parse_simple(const char *token, char *confline) {
     sprintf(secname, "anonymousSecName%03d", num);
     sprintf(line,"%s %s %s", secname, addressname, community);
     DEBUGMSGTL((token,"passing: %s %s\n", "com2sec", line));
-    vacm_parse_security("com2sec",line);
+    snmp_udp_parse_security("com2sec",line);
 
     /* sec->group mapping */
     /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
@@ -639,14 +522,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
 		  oid *name,
 		  size_t namelen)
 {
-    struct vacm_securityEntry *sp = securityFirst;
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
-    struct sockaddr_in *pduIp = (struct sockaddr_in*)&(pdu->address);
-    struct sockaddr_in *srcIp, *srcMask;
     char *vn;
-    char *sn;
+    char *sn = NULL;
 
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
 	if (snmp_get_do_debugging()) {
@@ -660,34 +540,35 @@ int vacm_in_view (struct snmp_pdu *pdu,
                 buf = strdup("NULL");
             }
             
-	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pdu->version, pduIp->sin_addr.s_addr, buf));
+	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, community=%s\n", pdu->version, buf));
 	    free (buf);
 	}
 
-	/* allow running without snmpd.conf */
-	if (sp == NULL) {
-	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: accepted with no com2sec entries\n"));
+	/*  Okay, if this PDU was received from a UDP or a TCP transport then
+	    ask the transport abstraction layer to map its source address and
+	    community string to a security name for us.  */
+	
+	if (pdu->tDomain == snmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
+	  if (!snmp_udp_getSecName(pdu->transport_data,
+				   pdu->transport_data_length,
+				   pdu->community, pdu->community_len, &sn)) {
+	    /*  There are no com2sec entries.  */
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"vacm_in_view: accepted with no com2sec entries\n"));
 	    switch (pdu->command) {
 	    case SNMP_MSG_GET:
 	    case SNMP_MSG_GETNEXT:
 	    case SNMP_MSG_GETBULK:
-		return 0;
+	      return 0;
 	    default:
-		return 1;
+	      return 1;
 	    }
+	  }
 	}
-	while (sp) {
-	    srcIp   = (struct sockaddr_in *)&(sp->sourceIp);
-	    srcMask = (struct sockaddr_in *)&(sp->sourceMask);
-	    if ((pduIp->sin_addr.s_addr & srcMask->sin_addr.s_addr)
-		    == srcIp->sin_addr.s_addr
-                && strlen(sp->community) == pdu->community_len
-		&& !strncmp(sp->community, (char *)pdu->community, pdu->community_len))
-		break;
-	    sp = sp->next;
-	}
-	if (sp == NULL) return 1;
-	sn = sp->securityName;
+	
+	/*  Map other <community, transport-address> pairs to security names
+	    here.  */
+
     } else if (pdu->securityModel == SNMP_SEC_MODEL_USM) {
       DEBUGMSG (("mibII/vacm_vars",
                  "vacm_in_view: ver=%d, model=%d, secName=%s\n",

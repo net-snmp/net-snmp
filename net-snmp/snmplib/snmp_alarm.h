@@ -11,14 +11,14 @@ typedef void (SNMPAlarmCallback)(unsigned int clientreg, void *clientarg);
 #define SA_REPEAT 0x01  /* keep repeating every X seconds */
 
 struct snmp_alarm {
-   unsigned int seconds;
-   unsigned int flags;
-   unsigned int clientreg;
-   time_t lastcall;
-   time_t nextcall;
-   void *clientarg;
-   SNMPAlarmCallback *thecallback;
-   struct snmp_alarm *next;
+  struct timeval t;
+  unsigned int flags;
+  unsigned int clientreg;
+  struct timeval t_last;
+  struct timeval t_next;
+  void *clientarg;
+  SNMPAlarmCallback *thecallback;
+  struct snmp_alarm *next;
 };
 
 /* the ones you should need */
@@ -26,6 +26,11 @@ void snmp_alarm_unregister(unsigned int clientreg);
 unsigned int snmp_alarm_register(unsigned int when, unsigned int flags,
                                  SNMPAlarmCallback *thecallback,
                                  void *clientarg);
+
+unsigned int snmp_alarm_register_hr(struct timeval t, unsigned int flags,
+				    SNMPAlarmCallback *cb,
+				    void *cd);
+
 
 /* the ones you shouldn't */
 void init_snmp_alarm(void);
@@ -36,7 +41,7 @@ struct snmp_alarm *sa_find_next(void);
 void run_alarms(void);
 RETSIGTYPE alarm_handler(int a);
 void set_an_alarm(void);
-int get_next_alarm_delay_time(void);
+int get_next_alarm_delay_time(struct timeval *delta);
 
 #ifdef __cplusplus
 }
