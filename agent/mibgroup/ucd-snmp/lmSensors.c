@@ -4,12 +4,6 @@
  */
 
 
-#ifdef IN_UCD_SNMP_SOURCE
-/*
- * If we're compiling this file inside the ucd-snmp source tree 
- */
-
-
 /*
  * This should always be included first before anything else 
  */
@@ -23,16 +17,6 @@
  */
 #include "util_funcs.h"
 
-
-#else                           /* !IN_UCD_SNMP_SOURCE */
-
-
-#include <net-snmp/net-snmp-config.h>
-#include <ucd-snmp/ucd-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
-
-#endif                          /* !IN_UCD_SNMP_SOURCE */
 
 #include <time.h>
 #include <sensors/sensors.h>

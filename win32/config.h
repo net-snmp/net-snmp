@@ -4,9 +4,6 @@
 extern "C" {
 #endif
 
-/* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
-#define IN_UCD_SNMP_SOURCE 1
-
 /* UC-Davis' IANA-assigned enterprise number is 2021 */
 #define ENTERPRISE_NUMBER 2021
 

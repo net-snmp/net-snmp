@@ -8,11 +8,7 @@
 extern "C" {
 #endif
 
-#ifdef IN_UCD_SNMP_SOURCE
-#include "struct.h"
-#else
-#include <ucd-snmp/struct.h>
-#endif
+#include <net-snmp/struct.h>
 
 void            Exit(int);
 int             shell_command(struct extensible *);
