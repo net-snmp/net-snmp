@@ -103,6 +103,7 @@ register_old_api(const char *moduleName,
     return SNMPERR_SUCCESS;
 }
 
+/** registers a row within a mib table */
 int 
 register_mib_table_row(const char *moduleName,
                        struct variable *var,
