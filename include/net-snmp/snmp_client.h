@@ -46,11 +46,11 @@ struct synch_state {
     struct snmp_pdu *pdu;
 };
 
-int snmp_set_var_value(struct variable_list *, u_char *, size_t);
+int snmp_set_var_value(struct variable_list *, const u_char *, size_t);
 int snmp_set_var_objid (struct variable_list *vp,
                     const oid *objid, size_t name_length);
 int snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
-                             u_char *val_str, size_t val_len);
+                             const u_char *val_str, size_t val_len);
 void snmp_replace_var_types(struct variable_list *vbl, int old_type,
                             int new_type);
 void snmp_reset_var_buffers( struct variable_list * var );
