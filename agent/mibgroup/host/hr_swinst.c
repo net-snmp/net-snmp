@@ -401,6 +401,7 @@ var_hrswinst(struct variable *vp,
 	    } else {
 	      long_return = 1;  /*  unknown  */
 	    }
+	    free(catg);
 	  }
 #else
 	  long_return = 1;	/* unknown */
