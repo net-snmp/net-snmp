@@ -135,13 +135,13 @@ RELEASING:
 
 	b) Create the dependencies
 
-           For 4.x:
-
-             $ make makefileindepend
-
            For 5.x:
 
              $ make distdepend
+
+           For 4.x:
+
+             $ make makefileindepend
 
            This runs a complicated series of scripts to update all the
            various Makefile.depend files sprinkled in the directories.
