@@ -39,7 +39,7 @@ static int NextIndex = 1;
 
 struct partyEntry *
 party_getEntry(oid *partyID,
-	       int partyIDLen)
+	       size_t partyIDLen)
 {
     struct partyEntry *pp;
 
@@ -86,7 +86,7 @@ party_scanNext(void)
 
 struct partyEntry *
 party_createEntry(oid *partyID,
-		  int partyIDLen)
+		  size_t partyIDLen)
 {
     struct partyEntry *pp;
 
@@ -107,7 +107,7 @@ party_createEntry(oid *partyID,
 
 void
 party_destroyEntry(oid *partyID,
-		   int partyIDLen)
+		   size_t partyIDLen)
 {
     struct partyEntry *pp, *lastpp = NULL;
 

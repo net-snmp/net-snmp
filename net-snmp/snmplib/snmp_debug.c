@@ -59,7 +59,7 @@ DEBUGP(va_alist)
 
 void
 DEBUGPOID(oid *theoid,
-	  int len)
+	  size_t len)
 {
   char c_oid[SPRINT_MAX_LEN];
   sprint_objid(c_oid,theoid,len);
@@ -144,7 +144,7 @@ debugmsg(va_alist)
 }
 
 void
-debugmsg_oid(const char *token, oid *theoid, int len) {
+debugmsg_oid(const char *token, oid *theoid, size_t len) {
   char c_oid[SPRINT_MAX_LEN];
   
   sprint_objid(c_oid, theoid, len);

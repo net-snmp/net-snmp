@@ -115,16 +115,17 @@ static	int		sd = -1;	/* /dev/ip stream descriptor. */
  */
 
 static found_e
-getentry(req_e req_type, void *bufaddr, int len, int entrysize,
-void *resp, int (*comp)(void *, void *), void *arg);
+getentry(req_e req_type, void *bufaddr, size_t len, size_t entrysize,
+	void *resp, int (*comp)(void *, void *), void *arg);
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysize,
-req_e req_type, void *resp, int *length, int (*comp)(void *, void *), void *arg);
+getmib(int groupname, int subgroupname, void *statbuf, size_t size,
+	size_t entrysize, req_e req_type, void *resp, size_t *length,
+	int (*comp)(void *, void *), void *arg);
 
 static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type, mib2_ifEntry_t *resp,
-int *length, int (*comp)(void *, void *), void *arg);
+	size_t *length, int (*comp)(void *, void *), void *arg);
 
 static int
 Name_cmp(void *, void *);
@@ -283,7 +284,7 @@ getKstat(const char *statname, const char *varname, void *value)
  * If search is successful getMibstat returns 0, otherwise 1.
  */
 int
-getMibstat(mibgroup_e grid,  void *resp, int entrysize,
+getMibstat(mibgroup_e grid,  void *resp, size_t entrysize,
 	   req_e req_type, int (*comp)(void *, void *), void *arg)
 {
     int		ret, rc=-1, mibgr, mibtb, cache_valid, length;
@@ -380,7 +381,7 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
  */
 
 static found_e
-getentry(req_e req_type, void *bufaddr, int len, int entrysize,
+getentry(req_e req_type, void *bufaddr, size_t len, size_t entrysize,
 	 void *resp, int (*comp)(void *, void *), void *arg)
 {     
     void *bp = bufaddr, **rp = resp;
@@ -450,8 +451,8 @@ init_mibcache_element(mibcache *cp)
    NOTE: needs to be protected by a mutex in reentrant environment */
 
 static int
-getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysize,
-	   req_e req_type, void *resp, int *length, int (*comp)(void *, void *), void *arg)
+getmib(int groupname, int subgroupname, void *statbuf, size_t size, size_t entrysize,
+	   req_e req_type, void *resp, size_t *length, int (*comp)(void *, void *), void *arg)
 {
   int 		rc, ret = 0, flags;
   char		buf[BUFSIZE];
@@ -600,7 +601,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
  */
 static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
-      mib2_ifEntry_t *resp, int *length, int (*comp)(void *, void *), void *arg)
+      mib2_ifEntry_t *resp, size_t *length, int (*comp)(void *, void *), void *arg)
 {
     int 		i, ret, idx = 1;
     int 		sd;

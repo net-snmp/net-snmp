@@ -1,5 +1,9 @@
 #ifndef SNMP_IMPL_H
 #define SNMP_IMPL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
 * file: snmp_impl.h
 */
@@ -172,13 +176,17 @@ extern int snmp_errno;
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_comstr_parse (u_char *, int *, u_char *, int *, int *);
-u_char	*snmp_comstr_build (u_char *, int *, u_char *, int *, int *, int);
+u_char	*snmp_comstr_parse (u_char *, size_t *, u_char *, size_t *, int *);
+u_char	*snmp_comstr_build (u_char *, size_t *, u_char *, size_t *, int *, size_t);
 
-u_char	*snmp_party_parse (u_char *, int *, struct packet_info *,
-                                 oid *, int *, oid *, int *, oid *, int *, int);
-u_char	*snmp_party_build (u_char *, int *, struct packet_info *, int,
-                                 oid *, int, oid *, int, oid *, int, int *, int);
+u_char	*snmp_party_parse (u_char *, size_t *, struct packet_info *,
+			   oid *, size_t *, oid *, size_t *, oid *, size_t *, int);
+u_char	*snmp_party_build (u_char *, size_t *, struct packet_info *, size_t,
+                                 oid *, size_t, oid *, size_t, oid *, size_t, size_t *, int);
 
 int has_access (u_char, int, int, int);
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* SNMP_IMPL_H */

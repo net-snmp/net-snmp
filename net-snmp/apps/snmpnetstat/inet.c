@@ -434,7 +434,7 @@ void
 udp_stats(void)
 {
     oid varname[MAX_OID_LEN], *udpentry;
-    int varname_len;
+    size_t varname_len;
     struct variable_list *var;
     int count;
     struct stat_table *sp = udp_stattab;
@@ -465,7 +465,7 @@ void
 tcp_stats(void)
 {
     oid varname[MAX_OID_LEN], *tcpentry;
-    int varname_len;
+    size_t varname_len;
     struct variable_list *var;
     int count;
     struct stat_table *sp = tcp_stattab;
@@ -496,7 +496,7 @@ void
 ip_stats(void)
 {
     oid varname[MAX_OID_LEN], *ipentry;
-    int varname_len;
+    size_t varname_len;
     struct variable_list *var;
     int count;
     struct stat_table *sp = ip_stattab;
@@ -527,7 +527,7 @@ void
 icmp_stats(void)
 {
     oid varname[MAX_OID_LEN], *icmpentry;
-    int varname_len;
+    size_t varname_len;
     struct variable_list *var;
     int count, first;
     struct stat_table *sp;

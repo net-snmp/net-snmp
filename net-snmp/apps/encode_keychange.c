@@ -83,11 +83,11 @@ int	forcepassphrase		= 0,	/* Always prompt for passphrases. */
 	promptindicator		= 1,	/* Output an indicator that input
 					 *   is requested.		  */
 	visible			= 0,	/* Echo passphrases to terminal.  */
-	verbose			= 0,	/* Output progress to stderr. 	  */
-	engineid_len		= 0;
+	verbose			= 0;	/* Output progress to stderr. 	  */
+size_t	engineid_len		= 0;
 
-u_char	*engineid		= NULL,	/* Both input & final binary form.*/
-	*newpass		= NULL,
+u_char	*engineid		= NULL;	/* Both input & final binary form.*/
+char	*newpass		= NULL,
         *oldpass		= NULL;
 
 char	*transform_type_input	= NULL;
@@ -102,7 +102,7 @@ oid	*transform_type		= NULL;	/* Type of HMAC hash to use.	  */
 void	usage(FILE *ofp);
 void	usage_synopsis(FILE *ofp);
 int     get_user_passphrases(void);
-int	    snmp_ttyecho(const int fd, const int echo);
+int	snmp_ttyecho(const int fd, const int echo);
 char   *snmp_getpassphrase(const char *prompt, int fvisible);
 
 /*******************************************************************-o-******
@@ -139,7 +139,7 @@ main(int argc, char **argv)
 		switch(ch) {
 
                 case 'D':       snmp_set_do_debugging(1);       break;
-		case 'E':	engineid = optarg;		break;
+		case 'E':	engineid = (u_char *)optarg;	break;
 		case 'f':	forcepassphrase = 1;		break;
 		case 'N':	newpass = optarg;		break;
 		case 'O':	oldpass = optarg;		break;
@@ -209,11 +209,11 @@ main(int argc, char **argv)
 	 */
 	if ( engineid && (tolower(*(engineid+1)) == 'x') ) {
 		engineid_len = hex_to_binary2(	engineid+2,
-						strlen(engineid)-2,
+						strlen((char *)engineid)-2,
 						(char **) &engineid);
                 DEBUGMSGTL(("encode_keychange","engineIDLen: %d\n", engineid_len));
 	} else {
-		engineid_len = setup_engineID(&engineid, engineid);
+		engineid_len = setup_engineID(&engineid, (char *)engineid);
 
 	} 
 
@@ -261,13 +261,13 @@ main(int argc, char **argv)
 
 
 	rval = generate_Ku(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				oldpass, strlen(oldpass),
+				(u_char *)oldpass, strlen(oldpass),
 				oldKu, &oldKu_len);
 	QUITFUN(rval, main_quit);
 
 
 	rval = generate_Ku(	transform_type, USM_LENGTH_OID_TRANSFORM,
-				newpass, strlen(newpass),
+				(u_char *)newpass, strlen(newpass),
 				newKu, &newKu_len);
 	QUITFUN(rval, main_quit);
 
@@ -350,17 +350,17 @@ main_quit:
 void
 usage_synopsis(FILE *ofp)
 {
-	fprintf(ofp, USAGE "
-
-    -E [0x]<engineID>		EngineID used for kul generation.
-    -f				Force passphrases to be read from stdin.
-    -h				Help.
-    -N \"<new_passphrase>\"	Passphrase used to generate new Ku.
-    -O \"<old_passphrase>\"	Passphrase used to generate old Ku.
-    -P				Turn off prompt indicators.
-    -t md5 | sha1		HMAC hash transform type.
-    -v				Verbose.
-    -V				Visible.  Echo passphrases to terminal.
+	fprintf(ofp, USAGE "\n\
+\n\
+    -E [0x]<engineID>		EngineID used for kul generation.\n\
+    -f				Force passphrases to be read from stdin.\n\
+    -h				Help.\n\
+    -N \"<new_passphrase>\"	Passphrase used to generate new Ku.\n\
+    -O \"<old_passphrase>\"	Passphrase used to generate old Ku.\n\
+    -P				Turn off prompt indicators.\n\
+    -t md5 | sha1		HMAC hash transform type.\n\
+    -v				Verbose.\n\
+    -V				Visible.  Echo passphrases to terminal.\n\
 		"
 		NL, local_progname);
 
@@ -374,21 +374,21 @@ usage(FILE *ofp)
 	usage_synopsis(ofp);
 
 	fprintf(ofp,
-		"
-    Only -t is mandatory.  The transform is used to convert P=>Ku, convert
-    Ku=>Kul, and to hash the old Kul with the random bits.
-
-    Passphrase will be taken from the first successful source as follows:
-	a) Commandline options,
-	b) The file \"%s/%s\",
-	c) stdin  -or-  User input from the terminal.
-
-    -f will require reading from the stdin/terminal, ignoring a) and b).
-    -P will prevent prompts for passphrases to stdout from being printed.
-
-    <engineID> is intepreted as a hex string when preceeded by \"0x\",
-    otherwise it is created to contain \"text\".  If nothing is given,
-    <engineID> is constructed from the first IP address for the local host.
+		"\n\
+    Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
+    Ku=>Kul, and to hash the old Kul with the random bits.\n\
+\n\
+    Passphrase will be taken from the first successful source as follows:\n\
+	a) Commandline options,\n\
+	b) The file \"%s/%s\",\n\
+	c) stdin  -or-  User input from the terminal.\n\
+\n\
+    -f will require reading from the stdin/terminal, ignoring a) and b).\n\
+    -P will prevent prompts for passphrases to stdout from being printed.\n\
+\n\
+    <engineID> is intepreted as a hex string when preceeded by \"0x\",\n\
+    otherwise it is created to contain \"text\".  If nothing is given,\n\
+    <engineID> is constructed from the first IP address for the local host.\n\
 		"
 		NL, (s = getenv("HOME"))?s:"$HOME", PASSPHRASE_FILE);
 
@@ -437,10 +437,10 @@ usage(FILE *ofp)
 int
 get_user_passphrases(void)
 {
-	int		 rval = SNMPERR_SUCCESS,
-			 len;
+	int		 rval = SNMPERR_SUCCESS;
+	size_t		 len;
 
-	u_char		*obuf = NULL,
+	char		*obuf = NULL,
 			*nbuf = NULL;
         
 	char		 path[SNMP_MAXBUF],
@@ -494,7 +494,7 @@ get_user_passphrases(void)
 	}
 
 							/* Open the file. */
-	if ( (fp = fopen(path, "r")) < 0 ) {
+	if ( (fp = fopen(path, "r")) == NULL ) {
 		fprintf(stderr, "Cannot open \"%s\".", path);
 		QUITFUN(rval = SNMPERR_GENERR, get_user_passphrases_quit);
 	}
@@ -510,7 +510,7 @@ get_user_passphrases(void)
 	} else if ( !oldpass ) {
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
-		oldpass = SNMP_MALLOC(len+1);
+		oldpass = (char *)SNMP_MALLOC(len+1);
 		memcpy(oldpass, buf, len+1);
 	}
 							/* Read 2nd line. */
@@ -523,7 +523,7 @@ get_user_passphrases(void)
 	} else if ( !newpass ) {
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
-		newpass = SNMP_MALLOC(len+1);
+		newpass = (char *)SNMP_MALLOC(len+1);
 		memcpy(newpass, buf, len+1);
 	}
 
@@ -669,8 +669,8 @@ snmp_ttyecho(const int fd, const int echo)
 char *
 snmp_getpassphrase(const char *prompt, int visible)
 {
-	int		 ti=0,
-			 len;
+	int		 ti = 0;
+	size_t		 len;
 
 	char		*bufp = NULL;
 	static char	 buffer[SNMP_MAXBUF];
@@ -707,7 +707,7 @@ snmp_getpassphrase(const char *prompt, int visible)
 	len = strlen(buffer);
 	if ( buffer[len-1] == '\n' )	buffer[--len] = '\0';
 
-	bufp = SNMP_MALLOC(len+1);
+	bufp = (char *)SNMP_MALLOC(len+1);
 	memcpy(bufp, buffer, len+1);
 
 	SNMP_ZERO(buffer, SNMP_MAXBUF);

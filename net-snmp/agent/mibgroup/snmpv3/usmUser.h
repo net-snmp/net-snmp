@@ -37,12 +37,13 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
 extern void   init_usmUser(void);
 extern FindVarMethod var_usmUser;
 
+void shutdown_usmUser(void);
 int store_usmUser(int majorID, int minorID, void *serverarg, void *clientarg);
-oid *usm_generate_OID(oid *prefix, int prefixLen, struct usmUser *uptr,
-                  int *length);
-int usm_parse_oid(oid *oidIndex, int oidLen,
-              unsigned char **engineID, int *engineIDLen,
-              unsigned char **name, int *nameLen);
+oid *usm_generate_OID(oid *prefix, size_t prefixLen, struct usmUser *uptr,
+                  size_t *length);
+int usm_parse_oid(oid *oidIndex, size_t oidLen,
+              unsigned char **engineID, size_t *engineIDLen,
+              unsigned char **name, size_t *nameLen);
 
 WriteMethod write_usmUserSpinLock;
 WriteMethod write_usmUserCloneFrom;

@@ -50,11 +50,11 @@ read_view_database(char *filename)
     int linenumber = 0;
     int viewIndex;
     oid viewSubtree[MAX_OID_LEN];
-    int viewSubtreeLen;
+    size_t viewSubtreeLen;
     int status = 0;
     u_long byte;
     u_char mask[16], *ucp;
-    int maskLen;
+    size_t maskLen;
     struct viewEntry *vwp;
 
     fp = fopen(filename, "r");

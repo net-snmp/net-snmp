@@ -616,7 +616,7 @@ char *copy_word(char *from, char *to)
 
 /* read_config_save_octet_string(): saves an octet string as a length
    followed by a string of hex */
-char *read_config_save_octet_string(char *saveto, u_char *str, int len) {
+char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
   int i;
   if (str != NULL) {
     sprintf(saveto, "0x");
@@ -635,8 +635,9 @@ char *read_config_save_octet_string(char *saveto, u_char *str, int len) {
 
 /* read_config_read_octet_string(): reads an octet string that was
    saved by the read_config_save_octet_string() function */
-char *read_config_read_octet_string(char *readfrom, u_char **str, int *len) {
-  char *cptr=NULL;
+char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
+  u_char *cptr=NULL;
+  char *cptr1;
   u_int tmp;
   int i;
 
@@ -646,9 +647,9 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, int *len) {
   if (strncasecmp(readfrom,"0x",2) == 0) {
     /* A hex string submitted. How long? */
     readfrom += 2;
-    cptr = skip_not_white(readfrom);
-    if (cptr)
-      *len = (cptr - readfrom);
+    cptr1 = skip_not_white(readfrom);
+    if (cptr1)
+      *len = (cptr1 - readfrom);
     else
       *len = strlen(readfrom);
 
@@ -706,7 +707,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, int *len) {
 
 
 /* read_config_save_objid(): saves an objid as a numerical string */
-char *read_config_save_objid(char *saveto, oid *objid, int len) {
+char *read_config_save_objid(char *saveto, oid *objid, size_t len) {
   int i;
   
   if (len == 0) {
@@ -724,7 +725,7 @@ char *read_config_save_objid(char *saveto, oid *objid, int len) {
 }
 
 /* read_config_read_objid(): reads an objid from a format saved by the above */
-char *read_config_read_objid(char *readfrom, oid **objid, int *len) {
+char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
 
   if (objid == NULL || readfrom == NULL)
     return NULL;
@@ -756,7 +757,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, int *len) {
       /* space needs to be malloced.  Call ourself recursively to figure
        out how long the oid actually is */
       oid obuf[MAX_OID_LEN];
-      int obuflen = MAX_OID_LEN;
+      size_t obuflen = MAX_OID_LEN;
       oid *oidp = obuf;
       oid **oidpp = &oidp;   /* done this way for odd, untrue, gcc warnings */
 
@@ -781,7 +782,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, int *len) {
             NULL if none left.
             NULL if an unknown type.
 */
-char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len) {
+char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len) {
 
   int *intp;
   char **charpp;
@@ -819,10 +820,10 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len) {
             NULL if none left.
             NULL if an unknown type.
 */
-char *read_config_store_data(int type, char *storeto, void *dataptr, int *len) {
+char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len) {
 
   int *intp;
-  char **charpp;
+  u_char **charpp;
   oid  **oidpp;
 
   if (dataptr == NULL || storeto == NULL)
@@ -835,7 +836,7 @@ char *read_config_store_data(int type, char *storeto, void *dataptr, int *len) {
       return (storeto + strlen(storeto));
       
     case ASN_OCTET_STR:
-      charpp = (char **) dataptr;
+      charpp = (u_char **) dataptr;
       return read_config_save_octet_string(storeto, *charpp, *len);
 
     case ASN_OBJECT_ID:

@@ -90,7 +90,7 @@ int Argc;
 struct varInfo {
   char *name;
   oid *info_oid;
-  int oidlen;
+  size_t oidlen;
   char descriptor[64];
   u_int value;
   float max;
@@ -271,7 +271,7 @@ void wait_for_period(int period)
 }
 
 oid sysUpTimeOid[9] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
-int sysUpTimeLen = 9;
+size_t sysUpTimeLen = 9;
 
 int main(int argc, char *argv[])
 {

@@ -70,16 +70,17 @@ int
 write_acl(int action,
 	u_char *var_val,
 	u_char var_val_type,
-	int var_val_len,
+	size_t var_val_len,
 	u_char *statP,
 	oid *name,
-	int length)
+	size_t length)
 {
     struct aclEntry *ap, *rp = NULL;
-    int var, targetlen, subjectlen;
+    int var;
+    size_t targetlen, subjectlen;
     oid *target, *subject;
     long val;
-    int bigsize = 1000;
+    size_t bigsize = 1000;
     struct partyEntry *tg, *su;
 
 /*
@@ -191,16 +192,16 @@ write_acl(int action,
     return SNMP_ERR_NOERROR;
 }
 
-u_char *
+const u_char *
 var_acl(struct variable *vp,
 	oid *name,
-	int *length,
+	size_t *length,
 	int exact,
-	int *var_len,
+	size_t *var_len,
 	WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN], *np;
-    int newnamelen, lownamelen=0;
+    size_t newnamelen, lownamelen=0;
     struct aclEntry *ap, *lowap = NULL;
     u_long mask;
     int target, subject, resources;

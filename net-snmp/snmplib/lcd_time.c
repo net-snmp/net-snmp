@@ -322,8 +322,8 @@ search_enginetime_list_quit:
 int
 hash_engineID(u_char *engineID, u_int engineID_len)
 {
-	int		 rval		= SNMPERR_GENERR,
-			 buf_len	= SNMP_MAXBUF;
+	int		 rval		= SNMPERR_GENERR;
+	size_t		 buf_len	= SNMP_MAXBUF;
 	u_int		 additive	= 0;
 	u_char		*bufp,
 			 buf[SNMP_MAXBUF];

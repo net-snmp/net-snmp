@@ -5,6 +5,10 @@
 #ifndef _SCAPI_H
 #define _SCAPI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef			HAVE_LIBKMT
 #	include <kmt.h>
 #	include <kmt_algs.h>
@@ -37,30 +41,30 @@ int	sc_shutdown (int majorID, int minorID, void *serverarg,
 int	sc_random (	u_char *buf, u_int *buflen);
 
 int	sc_generate_keyed_hash (
-		oid    *authtype,	int   authtypelen,
+		oid    *authtype,	size_t   authtypelen,
 		u_char *key,		u_int keylen,
 		u_char *message,	u_int msglen,
 		u_char *MAC,		u_int *maclen);
 
 int	sc_check_keyed_hash (
-		oid    *authtype,	int   authtypelen,
+		oid    *authtype,	size_t   authtypelen,
 		u_char *key,		u_int keylen,
 		u_char *message,	u_int msglen,
 		u_char *MAC,		u_int maclen);
 
-int	sc_encrypt (	oid    *privtype,	int   privtypelen,
+int	sc_encrypt (	oid    *privtype,	size_t   privtypelen,
 				u_char *key,		u_int keylen,
 				u_char *iv,		u_int ivlen,
 				u_char *plaintext,	u_int ptlen,
 				u_char *ciphertext,	u_int *ctlen);
 
-int	sc_decrypt (	oid    *privtype,	int   privtypelen,
+int	sc_decrypt (	oid    *privtype,	size_t   privtypelen,
 				u_char *key,		u_int keylen,
 				u_char *iv,		u_int ivlen,
 				u_char *ciphertext,	u_int ctlen,
 				u_char *plaintext,	u_int *ptlen);
 
-int     sc_hash(oid *hashtype, int hashtypelen, u_char *buf, int buf_len,
+int     sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
                 u_char *MAC, u_int *MAC_len);
 
 int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
@@ -97,5 +101,8 @@ int	sc_internal_kmtlookup (
 #define INTERNAL_MD5 1
 #endif
 
-#endif	/* _SCAPI_H */
+#ifdef __cplusplus
+}
+#endif
 
+#endif	/* _SCAPI_H */

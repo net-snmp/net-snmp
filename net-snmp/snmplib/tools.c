@@ -33,7 +33,7 @@
  *	size	Number of bytes in buf.
  */
 void
-free_zero(void *buf, u_long size)
+free_zero(void *buf, size_t size)
 {
 	if (buf) {
 		memset(buf, 0, size);
@@ -58,11 +58,11 @@ free_zero(void *buf, u_long size)
  *
  * (Degenerates to malloc_zero if HAVE_LIBKMT is not defined.)
  */
-char *
-malloc_random(int *size)
+u_char *
+malloc_random(size_t *size)
 {
 	int	 rval	= SNMPERR_SUCCESS;
-	char	*buf	= (char *) malloc_zero(*size);
+	u_char	*buf	= (u_char *) malloc_zero(*size);
 
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 	if (buf) {
@@ -92,10 +92,10 @@ malloc_random(int *size)
  *      
  * Returns pointer to allocaed & zeroed buffer on success.
  */
-char *
-malloc_zero(u_long size)
+u_char *
+malloc_zero(size_t size)
 {
-	char	*buf = (char *) malloc(size);
+	u_char	*buf = (u_char *) malloc(size);
 
 	if (buf) {
 		memset(buf, 0, size);
@@ -120,7 +120,7 @@ malloc_zero(u_long size)
  *      SNMPERR_GENERR	On failure.
  */
 int
-memdup(u_char **to, u_char *from, u_int size)
+memdup(u_char **to, const u_char *from, size_t size)
 {
   if (to == NULL)
     return SNMPERR_GENERR;
@@ -154,12 +154,12 @@ memdup(u_char **to, u_char *from, u_int size)
  *	snmplib/snmp_api.c.
  */
 u_int
-binary_to_hex(char *input, u_long len, char **output)
+binary_to_hex(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len * 2) + 1;
 	char	*s	= (char *) SNMP_MALLOC(olen),
-		*op	= s,
-		*ip	= input;
+		*op	= s;
+	const u_char *ip	= input;
 
 
 	while (ip-input < (int)len) {
@@ -197,12 +197,12 @@ binary_to_hex(char *input, u_long len, char **output)
  *	Should be integrated with the official hex_to_binary() function.
  */
 int
-hex_to_binary2(char *input, u_long len, char **output)
+hex_to_binary2(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len/2) + (len%2);
 	char	*s	= (char *) malloc_zero(olen),
-		*op	= s,
-		*ip	= input;
+		*op	= s;
+	const u_char *ip	= input;
 
 
 	*output = NULL;
@@ -241,9 +241,9 @@ hex_to_binary2_quit:
  *	 size
  */
 void
-dump_chunk(char *debugtoken, char *title, char *buf, int size)
+dump_chunk(const char *debugtoken, const char *title, const u_char *buf, int size)
 {
-	int		printunit = 64;		/* XXX  Make global. */
+	u_int		printunit = 64;		/* XXX  Make global. */
 	char		chunk[SNMP_MAXBUF],
 			*s, *sp;
 
@@ -333,7 +333,7 @@ dump_chunk(char *debugtoken, char *title, char *buf, int size)
  */
 #ifdef SNMP_TESTING_CODE
 char *
-dump_snmpEngineID(u_char *estring, u_int *estring_len)
+dump_snmpEngineID(u_char *estring, size_t *estring_len)
 {
 #define eb(b)	( *(esp+b) & 0xff )
 

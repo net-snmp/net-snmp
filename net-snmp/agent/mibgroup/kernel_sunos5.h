@@ -138,7 +138,7 @@ extern "C" {
 #endif
 
   int 	getKstat(const char *statname, const char *varname, void *value);
-  int	getMibstat(mibgroup_e grid, void *resp, int entrysize,
+  int	getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 		   req_e req_type, int (*comp)(void *, void *), void *arg);
   int	Get_everything(void *, void *);
 

@@ -64,7 +64,7 @@ SOFTWARE.
 
 void
 xdump(const u_char *cp,
-      int length,
+      size_t length,
       const char *prefix)
 {
     int col, count;
@@ -109,14 +109,14 @@ xdump(const u_char *cp,
 u_char *
 snmp_parse_var_op(u_char *data,
 		  oid *var_name,
-		  int *var_name_len,
+		  size_t *var_name_len,
 		  u_char *var_val_type,
-		  int *var_val_len,
+		  size_t *var_val_len,
 		  u_char **var_val,
-		  int *listlength)
+		  size_t *listlength)
 {
     u_char	    var_op_type;
-    int		    var_op_len = *listlength;
+    size_t		    var_op_len = *listlength;
     u_char	    *var_op_start = data;
 
     data = asn_parse_header(data, &var_op_len, &var_op_type);
@@ -161,14 +161,14 @@ snmp_parse_var_op(u_char *data,
 u_char *
 snmp_build_var_op(u_char *data,
 		  oid *var_name,
-		  int *var_name_len,
+		  size_t *var_name_len,
 		  u_char var_val_type,
-		  int var_val_len,
+		  size_t var_val_len,
 		  u_char *var_val,
-		  int *listlength)
+		  size_t *listlength)
 {
-    int		    dummyLen, headerLen;
-    u_char	    *dataPtr;
+    size_t     dummyLen, headerLen;
+    u_char    *dataPtr;
 
     dummyLen = *listlength;
     dataPtr = data;

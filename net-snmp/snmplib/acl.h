@@ -1,5 +1,10 @@
 #ifndef ACL_H
 #define ACL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
   aclTarget        INTEGER,
   aclSubject       INTEGER,
@@ -78,4 +83,9 @@ acl_createEntry (int target, int subject, int resources);
  */
 
 int read_acl_database (char *);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* ACL_H */

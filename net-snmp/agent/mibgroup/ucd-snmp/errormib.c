@@ -168,11 +168,11 @@ void init_errormib(void)
   write_method
   
 */
-unsigned char *var_extensible_errors(struct variable *vp,
+const u_char *var_extensible_errors(struct variable *vp,
 				     oid *name,
-				     int *length,
+				     size_t *length,
 				     int exact,
-				     int *var_len,
+				     size_t *var_len,
 				     WriteMethod **write_method)
 {
 

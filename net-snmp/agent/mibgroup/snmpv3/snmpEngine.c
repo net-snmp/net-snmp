@@ -30,17 +30,17 @@ void init_snmpEngine (void) {
 extern struct timeval starttime;
 
 #ifdef SNMP_TESTING_CODE
-int write_engineBoots(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_engineTime(int, u_char *,u_char, int, u_char *,oid*, int);
+int write_engineBoots(int, u_char *,u_char, size_t, u_char *,oid*, size_t);
+int write_engineTime(int, u_char *,u_char, size_t, u_char *,oid*, size_t);
 #endif /* SNMP_TESTING_CODE */
 
-unsigned char *
+const u_char *
 var_snmpEngine(
     struct variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
 
@@ -97,14 +97,15 @@ write_engineBoots(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long long_ret;
-  int size, bigsize=SNMP_MAXBUF_MEDIUM;
+  size_t size;
+  int bigsize=SNMP_MAXBUF_MEDIUM;
   u_char engineIDBuf[SNMP_MAXBUF_MEDIUM];
   int engineIDBufLen = 0;
 
@@ -139,14 +140,15 @@ write_engineTime(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long long_ret;
-  int size, bigsize=SNMP_MAXBUF_MEDIUM;
+  size_t size;
+  int bigsize=SNMP_MAXBUF_MEDIUM;
   u_char engineIDBuf[SNMP_MAXBUF_MEDIUM];
   int engineIDBufLen = 0;
 

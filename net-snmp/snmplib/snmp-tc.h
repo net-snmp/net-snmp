@@ -1,5 +1,9 @@
 #ifndef SNMP_TC_H
 #define SNMP_TC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* snmp-tc.h: Provide some standard #defines for Textual Convention
    related value information */
 
@@ -21,5 +25,9 @@
 #define ST_NONVOLATILE	3
 #define ST_PERMANENT	4
 #define ST_READONLY	5
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMP_TC_H */

@@ -242,9 +242,9 @@ static size_t if_list_size = 0;
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
@@ -300,9 +300,9 @@ header_ifEntry(struct variable *vp,
 static int
 header_interfaces(struct variable *vp,
 		  oid *name,
-		  int *length,
+		  size_t *length,
 		  int exact,
-		  int *var_len,
+		  size_t *var_len,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
@@ -328,12 +328,12 @@ header_interfaces(struct variable *vp,
   return MATCH_SUCCEEDED;
 };
 
-u_char *
+const u_char *
 var_interfaces(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
   if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -512,12 +512,12 @@ Interface_Scan_Init (void)
     }
 }
 
-u_char *
+const u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
   int interface;
@@ -652,9 +652,9 @@ struct ifnet *ifnetaddr_list;
 static int
 header_interfaces(struct variable *vp,
 		  oid *name,
-		  int *length,
+		  size_t *length,
 		  int exact,
-		  int *var_len,
+		  size_t *var_len,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
@@ -669,7 +669,7 @@ header_interfaces(struct variable *vp,
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return MATCH_FAILED;
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -685,9 +685,9 @@ header_interfaces(struct variable *vp,
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
@@ -706,7 +706,7 @@ header_ifEntry(struct variable *vp,
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
 	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+	result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }
@@ -737,12 +737,12 @@ header_ifEntry(struct variable *vp,
 	 *
 	 *********************/
 
-u_char	*
+const u_char	*
 var_interfaces(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
     if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -762,12 +762,12 @@ var_interfaces(struct variable *vp,
 #ifndef solaris2
 #ifndef hpux
 
-u_char *
+const u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     static struct ifnet ifnet;
@@ -939,7 +939,7 @@ var_ifEntry(struct variable *vp,
 
 #else /* hpux */
 
-u_char *
+const u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    int *length,
@@ -1111,12 +1111,12 @@ IF_cmp(void *addr, void *ep)
 	return (1);
 }
 
-u_char *
+const u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
     int        interface;
@@ -1529,7 +1529,7 @@ int Interface_Scan_Next(short *Index,
 }
 
 
-#endif sunV3
+#endif /* sunV3 */
 
 static int Interface_Scan_By_Index(int Index,
 				   char *Name,
@@ -1721,11 +1721,11 @@ Interface_Index_By_Name(char *Name,
 #include <net/if_mib.h>
 #include <net/route.h>
 
-static int header_interfaces(struct variable *, oid *, int *, int, int *,
+static int header_interfaces(struct variable *, oid *, size_t *, int, size_t *,
                              WriteMethod **write);
-static int header_ifEntry(struct variable *, oid *, int *, int, int *,
+static int header_ifEntry(struct variable *, oid *, size_t *, int, size_t *,
                              WriteMethod **write);
-u_char	*var_ifEntry(struct variable *, oid *, int *, int, int *, 
+const u_char	*var_ifEntry(struct variable *, oid *, size_t *, int, size_t *, 
                              WriteMethod **write);
 
 static	char *physaddrbuf;
@@ -1846,9 +1846,9 @@ get_phys_address(int iindex, char **ap, int *len)
 static int
 header_interfaces(struct variable *vp,
 		  oid *name,
-		  int *length,
+		  size_t *length,
 		  int exact,
-		  int *var_len,
+		  size_t *var_len,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
@@ -1878,9 +1878,9 @@ static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC,
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
@@ -1930,12 +1930,12 @@ header_ifEntry(struct variable *vp,
     return interface;
 }
 
-u_char	*
+const u_char *
 var_interfaces(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
     size_t len;
@@ -1958,12 +1958,12 @@ var_interfaces(struct variable *vp,
     return NULL;
 }
 
-u_char *
+const u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
 	int interface;

@@ -709,7 +709,7 @@ main(int argc, char *argv[])
 	for (i = 0, ret = 1; i < argc; i++) {
 		ret += strlen(argv[i]) + 1;
 	}
-	argvrestart = (char *) malloc((ret));
+	argvrestart = (char *) malloc(ret);
 	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
 	strcpy(argvrestartname, argv[0]);
 	for (cptr = argvrestart, i = 0; i < argc; i++) {

@@ -32,14 +32,14 @@ struct alarmEntry {
     struct alarmEntry *next;
     int index;			/* 1..65535 */
     oid dstPartyID[MAX_OID_LEN];
-    int dstPartyLength;
+    size_t dstPartyLength;
     oid srcPartyID[MAX_OID_LEN];
-    int srcPartyLength;
+    size_t srcPartyLength;
     oid contextID[MAX_OID_LEN];
-    int contextLength;
+    size_t contextLength;
     long interval;
     oid variable[MAX_OID_LEN];
-    int variableLen;		/* number of subids in "variable" */
+    size_t variableLen;		/* number of subids in "variable" */
     int sampleType;
     long value;
     int startupAlarm;

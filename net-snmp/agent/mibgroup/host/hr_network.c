@@ -24,7 +24,7 @@ void  Save_HR_Network_Info (void);
 const char *describe_networkIF (int);
 int   network_status (int);
 int   network_errors (int);
-int header_hrnet (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrnet (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 #define HRN_MONOTONICALLY_INCREASING
 
@@ -64,9 +64,9 @@ void init_hr_network(void)
 int
 header_hrnet(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
 #define HRNET_ENTRY_NAME_LENGTH	11
@@ -81,7 +81,7 @@ header_hrnet(struct variable *vp,
       DEBUGMSGTL(("host/hr_network", "var_hrnet: %s %d\n", c_oid, exact));
     }
 
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" net entry */
 
     Init_HR_Network();
@@ -90,7 +90,7 @@ header_hrnet(struct variable *vp,
         if ( net_idx == -1 )
 	    break;
 	newname[HRNET_ENTRY_NAME_LENGTH] = net_idx;
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = net_idx;
             break;
@@ -110,7 +110,7 @@ header_hrnet(struct variable *vp,
     }
 
     newname[HRNET_ENTRY_NAME_LENGTH] = LowIndex;
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -130,12 +130,12 @@ header_hrnet(struct variable *vp,
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrnet(struct variable *vp,
 	  oid *name,
-	  int *length,
+	  size_t *length,
 	  int exact,
-	  int *var_len,
+	  size_t *var_len,
 	  WriteMethod **write_method)
 {
     int  net_idx;
@@ -170,8 +170,8 @@ static char		HRN_name[16];
 static struct ifnet	HRN_ifnet;
 
 static char		HRN_savedName[16];
-static u_short		HRN_savedFlags;;
-static int		HRN_savedErrors;;
+static u_short		HRN_savedFlags;
+static int		HRN_savedErrors;
 
 
 void

@@ -110,15 +110,14 @@ usm_check_secLevel_vs_protocols(int level,
 
 
 void
-usm_set_reportErrorOnUnknownID (value)
-int value;
+usm_set_reportErrorOnUnknownID (int value)
 {
 	reportErrorOnUnknownID = value;
 }
 
 
 struct usmStateReference *
-usm_malloc_usmStateReference()
+usm_malloc_usmStateReference(void)
 {
 	struct usmStateReference *new = (struct usmStateReference *)
 		malloc (sizeof(struct usmStateReference));
@@ -132,8 +131,7 @@ usm_malloc_usmStateReference()
 
 
 void
-usm_free_usmStateReference (old)
-void *old;
+usm_free_usmStateReference (void *old)
 {
 	struct usmStateReference *old_ref = old;
 
@@ -159,68 +157,68 @@ void *old;
 
 
 int
-usm_set_usmStateReference_name (ref, name, name_len)
-	struct usmStateReference *ref;
-	u_char *name;
-	u_int name_len;
+usm_set_usmStateReference_name (
+	struct usmStateReference *ref,
+	char *name,
+	size_t name_len)
 {
-	MAKE_ENTRY (u_char,name,name_len,usr_name,usr_name_length);
+	MAKE_ENTRY (char,name,name_len,usr_name,usr_name_length);
 }
 
 int
-usm_set_usmStateReference_engine_id (ref, engine_id, engine_id_len)
-	struct usmStateReference *ref;
-	u_char *engine_id;
-	u_int engine_id_len;
+usm_set_usmStateReference_engine_id (
+	struct usmStateReference *ref,
+	u_char *engine_id,
+	u_int engine_id_len)
 {
 	MAKE_ENTRY (u_char,engine_id,engine_id_len,
 		usr_engine_id,usr_engine_id_length);
 }
 
 int
-usm_set_usmStateReference_auth_protocol (ref, auth_protocol, auth_protocol_len)
-	struct usmStateReference *ref;
-	oid *auth_protocol;
-	u_int auth_protocol_len;
+usm_set_usmStateReference_auth_protocol (
+	struct usmStateReference *ref,
+	oid *auth_protocol,
+	u_int auth_protocol_len)
 {
 	MAKE_ENTRY (oid ,auth_protocol,auth_protocol_len,
 		usr_auth_protocol,usr_auth_protocol_length);
 }
 
 int
-usm_set_usmStateReference_auth_key (ref, auth_key, auth_key_len)
-	struct usmStateReference *ref;
-	u_char *auth_key;
-	u_int auth_key_len;
+usm_set_usmStateReference_auth_key (
+	struct usmStateReference *ref,
+	u_char *auth_key,
+	u_int auth_key_len)
 {
 	MAKE_ENTRY (u_char,auth_key,auth_key_len,
 		usr_auth_key,usr_auth_key_length);
 }
 
 int
-usm_set_usmStateReference_priv_protocol (ref, priv_protocol, priv_protocol_len)
-	struct usmStateReference *ref;
-	oid *priv_protocol;
-	u_int priv_protocol_len;
+usm_set_usmStateReference_priv_protocol (
+	struct usmStateReference *ref,
+	oid *priv_protocol,
+	u_int priv_protocol_len)
 {
 	MAKE_ENTRY (oid,priv_protocol,priv_protocol_len,
 		usr_priv_protocol,usr_priv_protocol_length);
 }
 
 int
-usm_set_usmStateReference_priv_key (ref, priv_key, priv_key_len)
-	struct usmStateReference *ref;
-	u_char *priv_key;
-	u_int priv_key_len;
+usm_set_usmStateReference_priv_key (
+	struct usmStateReference *ref,
+	u_char *priv_key,
+	u_int priv_key_len)
 {
 	MAKE_ENTRY (u_char,priv_key,priv_key_len,
 		usr_priv_key,usr_priv_key_length);
 }
 
 int
-usm_set_usmStateReference_sec_level (ref, sec_level)
-	struct usmStateReference *ref;
-	u_int sec_level;
+usm_set_usmStateReference_sec_level (
+	struct usmStateReference *ref,
+	int sec_level)
 {
 	if (ref == NULL) return -1;
 	ref->usr_sec_level = sec_level;
@@ -287,7 +285,7 @@ emergency_print (u_char *field, u_int length)
  *	Do this the same way as asn_build_int()...
  */
 int
-asn_predict_int_length (int type, long number, int len)
+asn_predict_int_length (int type, long number, size_t len)
 {
 	register u_long mask;
 
@@ -332,7 +330,7 @@ asn_predict_int_length (int type, long number, int len)
  * XXX	How is <n> chosen, exactly??
  */
 int
-asn_predict_length (int type, u_char *ptr, int u_char_len)
+asn_predict_length (int type, u_char *ptr, size_t u_char_len)
 {
 
 	if (type & ASN_SEQUENCE) return 1+3+u_char_len;
@@ -413,26 +411,26 @@ asn_predict_length (int type, u_char *ptr, int u_char_len)
  */
 int
 usm_calc_offsets (
-	int     globalDataLen,	/* SNMPv3Message + HeaderData */
+	size_t  globalDataLen,	/* SNMPv3Message + HeaderData */
 	int     secLevel,
-	int     secEngineIDLen,
-	int     secNameLen,
-	int     scopedPduLen,	/* An BER encoded sequence. */
-	long    engineboots,	/* XXX (asn1.c works in long, not int.) */
+	size_t  secEngineIDLen,
+	size_t  secNameLen,
+	size_t  scopedPduLen,	/* An BER encoded sequence. */
+	u_long  engineboots,	/* XXX (asn1.c works in long, not int.) */
 	long    engine_time,	/* XXX (asn1.c works in long, not int.) */
 
-	int    *theTotalLength,	 /* globalDataLen + msgSecurityP. + msgData */
-	int    *authParamsOffset,/* Distance to auth bytes.                 */
-	int    *privParamsOffset,/* Distance to priv bytes.                 */
-	int    *dataOffset,	 /* Distance to scopedPdu SEQ  -or-  the
+	size_t *theTotalLength,	 /* globalDataLen + msgSecurityP. + msgData */
+	size_t *authParamsOffset,/* Distance to auth bytes.                 */
+	size_t *privParamsOffset,/* Distance to priv bytes.                 */
+	size_t *dataOffset,	 /* Distance to scopedPdu SEQ  -or-  the
 				  *   crypted (data) portion of msgData.    */
 
-	int    *datalen,	/* Size of msgData OCTET STRING encoding.  */
-	int    *msgAuthParmLen,	/* Size of msgAuthenticationParameters.    */
-	int    *msgPrivParmLen,	/* Size of msgPrivacyParameters.           */
-	int    *otstlen,	/* Size of msgSecurityP. O.S. encoding.    */
-	int    *seq_len,	/* Size of msgSecurityP. SEQ data.         */
-	int    *msgSecParmLen)	/* Size of msgSecurityP. SEQ.              */
+	size_t *datalen,	/* Size of msgData OCTET STRING encoding.  */
+	size_t *msgAuthParmLen,	/* Size of msgAuthenticationParameters.    */
+	size_t *msgPrivParmLen,	/* Size of msgPrivacyParameters.           */
+	size_t *otstlen,	/* Size of msgSecurityP. O.S. encoding.    */
+	size_t *seq_len,	/* Size of msgSecurityP. SEQ data.         */
+	size_t *msgSecParmLen)	/* Size of msgSecurityP. SEQ.              */
 {
 	int	engIDlen,	/* Sizes of OCTET STRING and SEQ encodings */
 		engBtlen,	/*   for fields within                     */
@@ -580,12 +578,12 @@ usm_calc_offsets (
  */
 int
 usm_set_salt (	u_char		*iv,
-		int		*iv_length,
+		size_t		*iv_length,
 		u_char		*priv_salt,
-		int		 priv_salt_length,
+		size_t		 priv_salt_length,
 		u_char		*msgSalt)
 {
-	int propersize_salt     = BYTESIZE(USM_MAX_SALT_LENGTH);
+	size_t propersize_salt     = BYTESIZE(USM_MAX_SALT_LENGTH);
 	int net_boots;
         int net_salt_int;
 		/* net_* should be encoded in network byte order.  XXX  Why?
@@ -651,13 +649,10 @@ usm_set_salt (	u_char		*iv,
  * XXX	Beware of misnomers!
  */
 int
-usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize, 
-		    secModel, secEngineID, secEngineIDLen, secName, secNameLen,
-		    secLevel, scopedPdu, scopedPduLen, secStateRef,
-		    secParams, secParamsLen, wholeMsg, wholeMsgLen)
-     int      msgProcModel;	/* (UNUSED) */
+usm_generate_out_msg (
+     int      msgProcModel,	/* (UNUSED) */
 
-     u_char  *globalData;	/* IN */
+     u_char  *globalData,	/* IN */
 		/* Pointer to msg header data will point to the beginning
 		 * of the entire packet buffer to be transmitted on wire,
 		 * memory will be contiguous with secParams, typically
@@ -671,30 +666,30 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 		 * the length of these two completed parts.
 		 */
 
-     int      globalDataLen;	/* IN - Length of msg header data.	*/
-     int      maxMsgSize;	/* (UNUSED) */
-     int      secModel;		/* (UNUSED) */
-     u_char  *secEngineID;	/* IN - Pointer snmpEngineID.		*/
-     int      secEngineIDLen;	/* IN - SnmpEngineID length.		*/
-     u_char  *secName;		/* IN - Pointer to securityName.	*/
-     int      secNameLen;	/* IN - SecurityName length.		*/
-     int      secLevel;		/* IN - AuthNoPriv, authPriv etc.	*/
+     size_t   globalDataLen,	/* IN - Length of msg header data.	*/
+     int      maxMsgSize,	/* (UNUSED) */
+     int      secModel,		/* (UNUSED) */
+     u_char  *secEngineID,	/* IN - Pointer snmpEngineID.		*/
+     size_t   secEngineIDLen,	/* IN - SnmpEngineID length.		*/
+     char    *secName,		/* IN - Pointer to securityName.	*/
+     size_t   secNameLen,	/* IN - SecurityName length.		*/
+     int      secLevel,		/* IN - AuthNoPriv, authPriv etc.	*/
 
-     u_char  *scopedPdu;	/* IN */
+     u_char  *scopedPdu,	/* IN */
 		/* Pointer to scopedPdu will be encrypted by USM if needed
 		 * and written to packet buffer immediately following
 		 * securityParameters, entire msg will be authenticated by
 		 * USM if needed.
 		 */
 
-     int      scopedPduLen;	/* IN - scopedPdu length. */
+     size_t   scopedPduLen,	/* IN - scopedPdu length. */
 
-     void    *secStateRef;	/* IN */
+     void    *secStateRef,	/* IN */
 		/* secStateRef, pointer to cached info provided only for
 		 * Response, otherwise NULL.
 		 */
 
-     u_char  *secParams;	/* OUT */
+     u_char  *secParams,	/* OUT */
 		/* BER encoded securityParameters pointer to offset within
 		 * packet buffer where secParams should be written, the
 		 * entire BER encoded OCTET STRING (including header) is
@@ -702,32 +697,32 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 		 * globalDataLen.
 		 */
 
-     int     *secParamsLen;	/* IN/OUT - Len available, len returned. */
+     size_t  *secParamsLen,	/* IN/OUT - Len available, len returned. */
 
-     u_char **wholeMsg;         /* OUT */
+     u_char **wholeMsg,         /* OUT */
 		/* Complete authenticated/encrypted message - typically
 		 * the pointer to start of packet buffer provided in
 		 * globalData is returned here, could also be a separate
 		 * buffer.
 		 */
 
-     int *wholeMsgLen;          /* IN/OUT - Len available, len returned. */
+     size_t *wholeMsgLen)          /* IN/OUT - Len available, len returned. */
 {
-	int otstlen;
-	int seq_len;
-	int msgAuthParmLen;
-	int msgPrivParmLen;
-	int msgSecParmLen;
-	int authParamsOffset;
-	int privParamsOffset;
-	int datalen;
-	int dataOffset;
-	int theTotalLength;
+	size_t otstlen;
+	size_t seq_len;
+	size_t msgAuthParmLen;
+	size_t msgPrivParmLen;
+	size_t msgSecParmLen;
+	size_t authParamsOffset;
+	size_t privParamsOffset;
+	size_t datalen;
+	size_t dataOffset;
+	size_t theTotalLength;
 
 	u_char         *ptr;
-	int             ptr_len;
-	int             remaining;
-	int             offSet;
+	size_t          ptr_len;
+	size_t          remaining;
+	size_t          offSet;
 	u_int           boots_uint;
 	u_int           time_uint;
 	long            boots_long;
@@ -741,7 +736,7 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 		actual prarmeter list or the user list.
 	*/
 
-	u_char *theName		 	= NULL;
+	char   *theName		 	= NULL;
 	u_int   theNameLength		= 0;
 	u_char *theEngineID		= NULL;
 	u_int   theEngineIDLength	= 0;
@@ -753,7 +748,7 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 	u_int   thePrivKeyLength	= 0;
 	oid    *thePrivProtocol		= NULL;
 	u_int   thePrivProtocolLength	= 0;
-	u_int   theSecLevel		= 0;	/* No defined const for bad
+	int     theSecLevel		= 0;	/* No defined const for bad
 						 * value (other then err).
 						 */
 
@@ -921,8 +916,8 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 	 */
 	if (theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
 	{
-		int	encrypted_length = theTotalLength - dataOffset,
-			salt_length	 = BYTESIZE(USM_MAX_SALT_LENGTH);
+		size_t	encrypted_length = theTotalLength - dataOffset;
+		size_t	salt_length	 = BYTESIZE(USM_MAX_SALT_LENGTH);
                 u_char	salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
 
 		/* XXX  Hardwired to seek into a 1DES private key!
@@ -1031,7 +1026,7 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 	offSet = ptr_len - remaining;
 	asn_build_string (&ptr[offSet], &remaining,
 		(u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-		theName, theNameLength);
+		(u_char *)theName, theNameLength);
 
 
 	/*
@@ -1105,7 +1100,7 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 	if (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
 		|| theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
 	{
-		int	temp_sig_len	= msgAuthParmLen;
+		size_t	temp_sig_len	= msgAuthParmLen;
 		u_char *temp_sig	= (u_char *) malloc (temp_sig_len);
 
 		if (temp_sig == NULL)
@@ -1184,17 +1179,17 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 int
 usm_parse_security_parameters (
 	u_char  *secParams,
-	u_int    remaining,
+	size_t   remaining,
 	u_char  *secEngineID,
-	int     *secEngineIDLen,
+	size_t  *secEngineIDLen,
 	u_int   *boots_uint,
 	u_int   *time_uint,
-	u_char  *secName,
-	int     *secNameLen,
+	char    *secName,
+	size_t  *secNameLen,
 	u_char  *signature,
-	u_int   *signature_length,
+	size_t  *signature_length,
 	u_char  *salt,
-	u_int   *salt_length,
+	size_t  *salt_length,
 	u_char **data_ptr)
 {
 	u_char  *parse_ptr = secParams;
@@ -1306,7 +1301,7 @@ usm_parse_security_parameters (
 
 	if ( (next_ptr
 		= asn_parse_string (next_ptr, &remaining_bytes, &type_value,
-			secName, secNameLen)) == NULL )
+			(u_char *)secName, secNameLen)) == NULL )
 	{
 		/* RETURN parse error */ return -1;
 	}
@@ -1391,16 +1386,15 @@ usm_parse_security_parameters (
  * Performs the incoming timeliness checking and setting.
  */
 int
-usm_check_and_update_timeliness(secEngineID, secEngineIDLen, boots_uint,
-		time_uint, error)
-	u_char *secEngineID;
-	int     secEngineIDLen;
-	u_int   boots_uint;
-	u_int   time_uint;
-	int    *error;
+usm_check_and_update_timeliness(
+	u_char *secEngineID,
+	size_t  secEngineIDLen,
+	u_int   boots_uint,
+	u_int   time_uint,
+	int    *error)
 {
 	u_char	myID[USM_MAX_ID_LENGTH];
-	int	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
+	size_t	myIDLength = snmpv3_get_engineID(myID, USM_MAX_ID_LENGTH);
 	u_int	myBoots;
 	u_int	myTime;
 
@@ -1572,33 +1566,29 @@ usm_check_and_update_timeliness(secEngineID, secEngineIDLen, boots_uint,
  *	without cleaning up.  May contain secrets...
  */
 int
-usm_process_in_msg (msgProcModel, maxMsgSize, secParams, secModel, secLevel, 
-    wholeMsg, wholeMsgLen, secEngineID, secEngineIDLen, 
-    secName, secNameLen, scopedPdu, scopedPduLen, 
-    maxSizeResponse, secStateRef)
+usm_process_in_msg (
+	int      msgProcModel,	   /* (UNUSED) */
+	size_t   maxMsgSize,	   /* IN     - Used to calc maxSizeResponse.  */
 
-	int      msgProcModel;	   /* (UNUSED) */
-	int      maxMsgSize;	   /* IN     - Used to calc maxSizeResponse.  */
+	u_char  *secParams,	   /* IN     - BER encoded securityParameters.*/
+	int      secModel,	   /* (UNUSED) */
+	int      secLevel,	   /* IN     - AuthNoPriv, authPriv etc.      */
 
-	u_char  *secParams;	   /* IN     - BER encoded securityParameters.*/
-	int      secModel;	   /* (UNUSED) */
-	int      secLevel;	   /* IN     - AuthNoPriv, authPriv etc.      */
+	u_char  *wholeMsg,	   /* IN     - Original v3 message.           */
+	size_t   wholeMsgLen,	   /* IN     - Msg length.                    */
 
-	u_char  *wholeMsg;	   /* IN     - Original v3 message.           */
-	int      wholeMsgLen;	   /* IN     - Msg length.                    */
-
-	u_char  *secEngineID;	   /* OUT    - Pointer snmpEngineID.          */
-	int     *secEngineIDLen;   /* IN/OUT - Len available, len returned.   */
+	u_char  *secEngineID,	   /* OUT    - Pointer snmpEngineID.          */
+	size_t  *secEngineIDLen,   /* IN/OUT - Len available, len returned.   */
 	                           /*   NOTE: Memory provided by caller.      */
 
-	u_char *secName;           /* OUT    - Pointer to securityName.       */
-	int     *secNameLen;	   /* IN/OUT - Len available, len returned.   */
+	char *secName,             /* OUT    - Pointer to securityName.       */
+	size_t  *secNameLen,	   /* IN/OUT - Len available, len returned.   */
 
-	u_char **scopedPdu;        /* OUT    - Pointer to plaintext scopedPdu.*/
-	int     *scopedPduLen;	   /* IN/OUT - Len available, len returned.   */
+	u_char **scopedPdu,        /* OUT    - Pointer to plaintext scopedPdu.*/
+	size_t  *scopedPduLen,	   /* IN/OUT - Len available, len returned.   */
 
-	int     *maxSizeResponse;  /* OUT    - Max size of Response PDU.      */
-	void   **secStateRef;	   /* OUT    - Ref to security state.         */
+	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
+	void   **secStateRef)	   /* OUT    - Ref to security state.         */
 {
 	u_int   remaining = wholeMsgLen
 				- (u_int)
@@ -1972,7 +1962,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
   initialUser->engineID = NULL;
   initialUser->engineIDLen = 0;
 
-  if ( sc_random((char *) &salt_integer, &salt_integer_len) != SNMPERR_SUCCESS )
+  if ( sc_random((u_char *) &salt_integer, &salt_integer_len) != SNMPERR_SUCCESS )
   {
 	DEBUGMSGTL(("usm","sc_random() failed: using time() as salt.\n"));
 	salt_integer	 = (u_int) time(NULL);
@@ -2089,14 +2079,14 @@ usm_check_secLevel_vs_protocols(int level,
    engineIDLen and name of the requested user. */
 
 struct usmUser *
-usm_get_user(char *engineID, int engineIDLen, char *name)
+usm_get_user(u_char *engineID, size_t engineIDLen, char *name)
 {
   DEBUGMSGTL(("usm","getting user %s\n", name));
   return usm_get_user_from_list(engineID, engineIDLen, name, userList, 1);
 }
 
 struct usmUser *
-usm_get_user_from_list(char *engineID, int engineIDLen,
+usm_get_user_from_list(u_char *engineID, size_t engineIDLen,
                        char *name, struct usmUser *puserList, int use_default)
 {
   struct usmUser *ptr;
@@ -2325,7 +2315,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
     free(to->authKey);
 
   if (from->authKeyLen > 0 &&
-      (to->authKey = (char *) malloc(sizeof(char) * from->authKeyLen))
+      (to->authKey = (u_char *) malloc(sizeof(char) * from->authKeyLen))
       != NULL) {
     to->authKeyLen = from->authKeyLen;
     memcpy(to->authKey, from->authKey, to->authKeyLen);
@@ -2350,7 +2340,7 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
     free(to->privKey);
 
   if (from->privKeyLen > 0 &&
-      (to->privKey = (char *) malloc(sizeof(char) * from->privKeyLen))
+      (to->privKey = (u_char *) malloc(sizeof(char) * from->privKeyLen))
       != NULL) {
     to->privKeyLen = from->privKeyLen;
     memcpy(to->privKey, from->privKey, to->privKeyLen);
@@ -2404,8 +2394,8 @@ usm_create_user(void)
    USM document.
 */
 struct usmUser *
-usm_create_initial_user(const char *name, oid *authProtocol, int authProtocolLen,
-                        oid *privProtocol, int privProtocolLen)
+usm_create_initial_user(const char *name, oid *authProtocol, size_t authProtocolLen,
+                        oid *privProtocol, size_t privProtocolLen)
 {
   struct usmUser *newUser  = usm_create_user();
   if (newUser == NULL)
@@ -2479,11 +2469,11 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
   cptr = &line[strlen(line)]; /* the NULL */
   cptr = read_config_save_octet_string(cptr, user->engineID, user->engineIDLen);
   *cptr++ = ' ';
-  cptr = read_config_save_octet_string(cptr, user->name,
+  cptr = read_config_save_octet_string(cptr, (u_char *)user->name,
                                        (user->name == NULL) ? 0 :
                                        strlen(user->name)+1);
   *cptr++ = ' ';
-  cptr = read_config_save_octet_string(cptr, user->secName,
+  cptr = read_config_save_octet_string(cptr, (u_char *)user->secName,
                                        (user->secName == NULL) ? 0 :
                                        strlen(user->secName)+1);
   *cptr++ = ' ';
@@ -2501,7 +2491,7 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
   *cptr++ = ' ';
   cptr = read_config_save_octet_string(cptr, user->userPublicString,
                                        (user->userPublicString == NULL) ? 0 :
-                                       strlen(user->userPublicString)+1);
+                                       strlen((char *)user->userPublicString)+1);
   read_config_store(type, line);
 }
 
@@ -2511,7 +2501,7 @@ struct usmUser *
 usm_read_user(char *line)
 {
   struct usmUser *user;
-  int len;
+  size_t len;
 
   user = usm_create_user();
   if (user == NULL)
@@ -2523,9 +2513,9 @@ usm_read_user(char *line)
   line = skip_token(line);
   line = read_config_read_octet_string(line, &user->engineID,
                                        &user->engineIDLen);
-  line = read_config_read_octet_string(line, &user->name,
+  line = read_config_read_octet_string(line, (u_char *)&user->name,
                                        &len);
-  line = read_config_read_octet_string(line, &user->secName,
+  line = read_config_read_octet_string(line, (u_char *)&user->secName,
                                        &len);
   if (user->cloneFrom) {
     free(user->cloneFrom);
@@ -2592,7 +2582,7 @@ usm_set_password(char *token, char *line)
   char		 *cp;
   char		  nameBuf[SNMP_MAXBUF];
   u_char	 *engineID;
-  int		  engineIDLen;
+  size_t	  engineIDLen;
   struct usmUser *user;
 
   cp = copy_word(line, nameBuf);
@@ -2630,14 +2620,14 @@ usm_set_password(char *token, char *line)
 void
 usm_set_user_password(struct usmUser *user, char *token, char *line)
 {
-  char		 *cp = line;
+  u_char	 *cp = (u_char *)line;
   u_char	 *engineID = user->engineID;
-  int		  engineIDLen = user->engineIDLen;
+  size_t	  engineIDLen = user->engineIDLen;
 
   u_char	**key;
-  int		 *keyLen;
+  size_t	 *keyLen;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
-  int		  userKeyLen = SNMP_MAXBUF_SMALL;
+  size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
   int		  type, ret;
 
   /*
@@ -2682,7 +2672,7 @@ usm_set_user_password(struct usmUser *user, char *token, char *line)
     /* convert the password into a key 
      */
     ret = generate_Ku(	user->authProtocol, user->authProtocolLen,
-			cp, strlen(cp),
+			cp, strlen((char *)cp),
 			userKey, &userKeyLen );
   
     if (ret != SNMPERR_SUCCESS) {

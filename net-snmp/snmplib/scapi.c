@@ -298,7 +298,7 @@ _SCAPI_NOT_CONFIGURED
  * ASSUMED that the number of hash bits is a multiple of 8.
  */
 int
-sc_generate_keyed_hash(	oid	*authtype,	int    authtypelen,
+sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
 			u_char	*key,		u_int  keylen,
 			u_char	*message,	u_int  msglen,
 			u_char	*MAC,		u_int *maclen)
@@ -429,7 +429,7 @@ _SCAPI_NOT_CONFIGURED
 
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 int
-sc_hash(oid *hashtype, int hashtypelen, u_char *buf, int buf_len,
+sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
         u_char *MAC, u_int *MAC_len)
 {
 
@@ -497,14 +497,14 @@ _SCAPI_NOT_CONFIGURED
  * length of the hash transform output.
  */
 int
-sc_check_keyed_hash(	oid	*authtype,	int   authtypelen,
+sc_check_keyed_hash(	oid	*authtype,	size_t authtypelen,
 			u_char	*key,		u_int keylen,
 			u_char	*message,	u_int msglen,
 			u_char	*MAC,		u_int maclen)
 #if defined(USE_INTERNAL_MD5) || defined(HAVE_LIBKMT)
 {
-	int		 rval	 = SNMPERR_SUCCESS,
-			 buf_len = SNMP_MAXBUF_SMALL;
+	int		 rval	 = SNMPERR_SUCCESS;
+	size_t		 buf_len = SNMP_MAXBUF_SMALL;
 
 	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
 
@@ -589,7 +589,7 @@ _SCAPI_NOT_CONFIGURED
  * successful return.
  */
 int
-sc_encrypt(	oid    *privtype,	int    privtypelen,
+sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *plaintext,	u_int  ptlen,
@@ -716,7 +716,7 @@ sc_encrypt_quit:
  * successful return.
  */
 int
-sc_decrypt(	oid    *privtype,	int    privtypelen,
+sc_decrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *ciphertext,	u_int  ctlen,

@@ -1,5 +1,9 @@
 #ifndef PARSE_H
 #define PARSE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * parse.h
  *
@@ -121,7 +125,7 @@ struct module_compatability {
     const char *new_module;
     const char *tag;		/* NULL implies unconditional replacement,
 				otherwise node identifier or prefix */
-    int   tag_len;		/* 0 implies exact match (or unconditional) */
+    size_t tag_len;		/* 0 implies exact match (or unconditional) */
     struct module_compatability *next;	/* linked list */
 };
 
@@ -207,4 +211,8 @@ void print_subtree_oid_report_disable_labeledoid (void);
 void print_subtree_oid_report_disable_oid (void);
 void print_subtree_oid_report_disable_suffix (void);
 void print_subtree_oid_report_disable_symbolic (void);
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* PARSE_H */

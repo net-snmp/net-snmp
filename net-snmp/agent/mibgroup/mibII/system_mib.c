@@ -52,7 +52,7 @@ extern struct timeval starttime;
 
 WriteMethod writeVersion;
 WriteMethod writeSystem;
-int header_system(struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 /* snmpd.conf config parsing */
 
@@ -172,9 +172,9 @@ void init_system_mib(void)
 int
 header_system(struct variable *vp,
 	      oid *name,
-	      int *length,
+	      size_t *length,
 	      int exact,
-	      int *var_len,
+	      size_t *var_len,
 	      WriteMethod **write_method)
 {
 #define SYSTEM_NAME_LENGTH	8
@@ -188,12 +188,12 @@ header_system(struct variable *vp,
       DEBUGMSGTL(("mibII/system", "vp len: %d / %d\n", vp->namelen, 8));
     }
 
-    memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
+    memcpy((char *)newname, (char *)vp->name, vp->namelen * sizeof(oid));
     newname[SYSTEM_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -212,12 +212,12 @@ header_system(struct variable *vp,
 extern struct timeval sysOR_lastchange;
 #endif
 
-u_char	*
+const u_char	*
 var_system(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
 
@@ -289,14 +289,15 @@ int
 writeVersion(int action,	     
 	     u_char *var_val,
 	     u_char var_val_type,
-	     int var_val_len,
+	     size_t var_val_len,
 	     u_char *statP,
 	     oid *name,
-	     int name_len)
+	     size_t name_len)
 {
-    int bigsize = 1000;
+    size_t bigsize = 1000;
     u_char buf[sizeof(version_descr)], *cp;
-    int count, size;
+    int count;
+    size_t size;
 
     if (var_val_type != ASN_OCTET_STR){
 	printf("not string\n");
@@ -327,14 +328,15 @@ int
 writeSystem(int action,	     
 	    u_char *var_val,
 	    u_char var_val_type,
-	    int var_val_len,
+	    size_t var_val_len,
 	    u_char *statP,
 	    oid *name,
-	    int name_len)
+	    size_t name_len)
 {
-    int bigsize = 1000;
+    size_t bigsize = 1000;
     u_char buf[sizeof(version_descr)], *cp;
-    int count, size;
+    int count;
+    size_t size;
 
     if (var_val_type != ASN_OCTET_STR){
 	printf("not string\n");

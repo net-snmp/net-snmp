@@ -10,6 +10,10 @@
 #ifndef SNMP_API_H
 #define SNMP_API_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***********************************************************
 	Copyright 1989 by Carnegie Mellon University
 
@@ -46,24 +50,24 @@ struct snmp_pdu {
 
     snmp_ipaddr  address;	/* Address of peer */
     u_char  *contextEngineID;	/* context snmpEngineID */
-    int	    contextEngineIDLen;  /* Length of contextEngineID */
-    u_char  *contextName;	/* authoritative contextName */
-    int	    contextNameLen;  /* Length of contextName */
+    size_t  contextEngineIDLen;  /* Length of contextEngineID */
+    char    *contextName;	/* authoritative contextName */
+    size_t  contextNameLen;  /* Length of contextName */
     u_char  *securityEngineID;	/* authoritative snmpEngineID for security */
-    int	    securityEngineIDLen;  /* Length of securityEngineID */
-    u_char  *securityName;	/* on behalf of this principal */
-    int	    securityNameLen;  /* Length of securityName. */
+    size_t  securityEngineIDLen;  /* Length of securityEngineID */
+    char    *securityName;	/* on behalf of this principal */
+    size_t  securityNameLen;  /* Length of securityName. */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     oid	    *srcParty;
-    int	    srcPartyLen;
+    size_t  srcPartyLen;
     oid	    *dstParty;
-    int	    dstPartyLen;
+    size_t  dstPartyLen;
     oid	    *context;
-    int     contextLen;
+    size_t  contextLen;
 
     u_char  *community;	/* community for outgoing requests. */
-    int	    community_len;  /* Length of community name. */
+    size_t  community_len;  /* Length of community name. */
 
     int	    command;	/* Type of this PDU */
 
@@ -75,7 +79,7 @@ struct snmp_pdu {
 
     /* Trap information */
     oid	    *enterprise;/* System OID */
-    int	    enterprise_length;
+    size_t  enterprise_length;
     snmp_ipaddr  agent_addr;	/* address of object generating trap */
     long    trap_type;	/* trap type */
     long    specific_type;  /* specific type */
@@ -92,25 +96,25 @@ struct snmp_pdu {
 
 struct snmp_session {
     u_char  *community;	        /* community for outgoing requests. */
-    int	    community_len;      /* Length of community name. */
+    size_t  community_len;      /* Length of community name. */
     u_char  *contextEngineID;	/* authoritative snmpEngineID */
-    int	    contextEngineIDLen; /* Length of contextEngineID */
+    size_t  contextEngineIDLen; /* Length of contextEngineID */
     u_int   engineBoots;        /* initial engineBoots for remote engine */
     u_int   engineTime;         /* initial engineTime for remote engine */
-    u_char  *contextName;	/* authoritative contextName */
-    int	    contextNameLen;     /* Length of contextName */
+    char    *contextName;	/* authoritative contextName */
+    size_t  contextNameLen;     /* Length of contextName */
     u_char  *securityEngineID;	/* authoritative snmpEngineID */
-    int	    securityEngineIDLen;  /* Length of contextEngineID */
-    u_char  *securityName;	/* on behalf of this principal */
-    int	    securityNameLen;    /* Length of securityName. */
+    size_t  securityEngineIDLen;  /* Length of contextEngineID */
+    char    *securityName;	/* on behalf of this principal */
+    size_t  securityNameLen;    /* Length of securityName. */
     oid     *securityAuthProto; /* auth protocol oid */
-    int     securityAuthProtoLen; /* Length of auth protocol oid */
+    size_t  securityAuthProtoLen; /* Length of auth protocol oid */
     u_char  securityAuthKey[USM_AUTH_KU_LEN];  /* Ku for auth protocol XXX */
-    int     securityAuthKeyLen; /* Length of Ku for auth protocol */
+    size_t  securityAuthKeyLen; /* Length of Ku for auth protocol */
     oid     *securityPrivProto; /* priv protocol oid */
-    int     securityPrivProtoLen; /* Length of priv protocol oid */
+    size_t  securityPrivProtoLen; /* Length of priv protocol oid */
     u_char  securityPrivKey[USM_PRIV_KU_LEN];  /* Ku for privacy protocol XXX */
-    int     securityPrivKeyLen; /* Length of Ku for priv protocol */
+    size_t  securityPrivKeyLen; /* Length of Ku for priv protocol */
     int	    securityModel;
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     int	    retries;	/* Number of retries before timeout. */
@@ -119,18 +123,18 @@ struct snmp_session {
     u_short remote_port;/* UDP port number of peer. */
     u_short local_port; /* My UDP port number, 0 for default, picked randomly */
     /* Authentication function or NULL if null authentication is used */
-    u_char    *(*authenticator) (u_char *, int *, char *, int);
+    u_char    *(*authenticator) (u_char *, size_t *, u_char *, size_t);
     int	    (*callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
    	/* Function to interpret incoming data */
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
     int	    version;
     oid	    *srcParty;
-    int	    srcPartyLen;
+    size_t  srcPartyLen;
     oid	    *dstParty;
-    int	    dstPartyLen;
+    size_t  dstPartyLen;
     oid	    *context;
-    int	    contextLen;
+    size_t  contextLen;
     struct synch_state * snmp_synch_state;
     int     s_errno;        /* copy of system errno */
     int     s_snmp_errno;   /* copy of library errno */
@@ -276,7 +280,7 @@ extern void snmp_set_detail (const char *);
 struct variable_list {
     struct variable_list *next_variable;    /* NULL for last variable */
     oid	    *name;  /* Object identifier of variable */
-    int	    name_length;    /* number of subid's in name */
+    size_t  name_length;    /* number of subid's in name */
     u_char  type;   /* ASN type of variable */
     union { /* value of variable */
 	long	*integer;
@@ -290,7 +294,7 @@ struct variable_list {
 /*	t_union *unionVal; */
 #endif /* OPAQUE_SPECIAL_TYPES */
     } val;
-    int	    val_len;
+    size_t	    val_len;
     oid name_loc[MAX_OID_LEN];  /* 90 percentile < 24. */
     u_char buf[40];             /* 90 percentile < 40. */
 };
@@ -473,25 +477,26 @@ int snmp_get_full_objid (void);
 void snmp_set_suffix_only (int);
 int snmp_get_suffix_only (void);
 int snmp_get_errno (void);
-int snmp_oid_compare (const oid *, int, const oid *, int);
+int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
-u_char * snmp_pdu_build (struct snmp_pdu *, u_char *, int *);
-int snmpv3_parse(struct snmp_pdu *, u_char *, int *, u_char  **);
-int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, int *out_length, u_char *pdu_data, int pdu_data_len);
+u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
+int snmpv3_parse(struct snmp_pdu *, u_char *, size_t *, u_char  **);
+int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len);
 int snmpv3_make_report(struct snmp_pdu *pdu, int error);
 int snmpv3_get_report_type(struct snmp_pdu *pdu);
-int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, int *length);
-u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, int *length);
+int snmp_pdu_parse(struct snmp_pdu *pdu, u_char *data, size_t *length);
+u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, size_t *length);
 void set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) );
 /*void set_pre_parse(struct snmp_session *, int* (struct snmp_session *, snmp_ipaddr);*/
 void set_post_parse (struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *,int));
 void snmp_shutdown(const char *type);
-struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
-struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist, oid *name, int name_length, u_char type, u_char *value, int len);
-int hex_to_binary (u_char *, u_char *);
-int ascii_to_binary (u_char *, u_char *);
-int snmp_add_var (struct snmp_pdu *, oid*, int, char, char *);
-oid  *snmp_duplicate_objid(oid *objToCopy, int);
+struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
+struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
+	oid *name, size_t name_length, u_char type, u_char *value, size_t len);
+int hex_to_binary (const char *, u_char *);
+int ascii_to_binary (const char *, u_char *);
+int snmp_add_var (struct snmp_pdu *, oid*, size_t, char, const char *);
+oid  *snmp_duplicate_objid(oid *objToCopy, size_t);
 u_int snmp_increment_statistic(int which);
 u_int snmp_increment_statistic_by(int which, int count);
 u_int snmp_get_statistic(int which);
@@ -506,7 +511,7 @@ void DEBUGP (const char *, ...);
 #else
 void DEBUGP (va_alist);
 #endif
-void DEBUGPOID(oid *, int);
+void DEBUGPOID(oid *, size_t);
 void snmp_set_do_debugging (int);
 int snmp_get_do_debugging (void);
 
@@ -580,6 +585,10 @@ int    snmp_sess_close      (void *);
 void   snmp_sess_error      (void *, int *, int *, char **);
 
 /* end single session API */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMP_API_H */
 

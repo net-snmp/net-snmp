@@ -58,11 +58,11 @@
 
 #include "transform_oids.h"
 
-static int		 engineBoots	   = 1;
+static u_long		 engineBoots	   = 1;
 static unsigned char	*engineID	   = NULL;
-static int		 engineIDLength	   = 0;
+static size_t		 engineIDLength	   = 0;
 static unsigned char	*oldEngineID	   = NULL;
-static int		 oldEngineIDLength = 0;
+static size_t		 oldEngineIDLength = 0;
 static struct timeval	 snmpv3starttime;
 
 /* 
@@ -74,9 +74,9 @@ static char	*defaultPassphrase	= NULL;
 static char	*defaultAuthPassphrase	= NULL;
 static char	*defaultPrivPassphrase	= NULL;
 static oid	*defaultAuthType	= NULL;
-static int	 defaultAuthTypeLen	= 0;
+static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
-static int	 defaultPrivTypeLen	= 0;
+static size_t	 defaultPrivTypeLen	= 0;
 int		defaultSecurityLevel	= 0;
 
 
@@ -152,7 +152,7 @@ snmpv3_authtype_conf(char *word, char *cptr)
 }
 
 oid *
-get_default_authtype(int *len)
+get_default_authtype(size_t *len)
 {
   if (len)
     *len = defaultAuthTypeLen;
@@ -171,7 +171,7 @@ snmpv3_privtype_conf(char *word, char *cptr)
 }
 
 oid *
-get_default_privtype(int *len)
+get_default_privtype(size_t *len)
 {
   if (len)
     *len = defaultPrivTypeLen;
@@ -266,15 +266,15 @@ get_default_secLevel(void)
  *       tricks won't work). 
  */
 int
-setup_engineID(u_char **eidp, char *text)
+setup_engineID(u_char **eidp, const char *text)
 {
   int		  enterpriseid	= htonl(ENTERPRISE_NUMBER),
-		  len,
 		  localsetup	= (eidp) ? 0 : 1;
 			/* Use local engineID if *eidp == NULL.  */
-  char		  buf[SNMP_MAXBUF_SMALL],
+  u_char	  buf[SNMP_MAXBUF_SMALL],
 		 *bufp = NULL;
   struct hostent *hent;
+  size_t	  len;
  
 
   /*
@@ -285,8 +285,8 @@ setup_engineID(u_char **eidp, char *text)
 
   } else {
     len = 5 + 4;		/* 5 leading bytes + four byte IPv4 address */
-    gethostname(buf, SNMP_MAXBUF_SMALL);
-    hent = gethostbyname(buf);
+    gethostname((char *)buf, SNMP_MAXBUF_SMALL);
+    hent = gethostbyname((char *)buf);
 #ifdef AF_INET6
     if (hent && hent->h_addrtype == AF_INET6)
       len += 12;		/* 16 bytes total for IPv6 address. */
@@ -297,7 +297,7 @@ setup_engineID(u_char **eidp, char *text)
   /*
    * Allocate memory and store enterprise ID.
    */
-  if ((bufp = (char *) malloc(len)) == NULL) {
+  if ((bufp = (u_char *) malloc(len)) == NULL) {
     perror("malloc");
     return -1;
   }
@@ -311,12 +311,12 @@ setup_engineID(u_char **eidp, char *text)
    */
   if (text) {
     bufp[4] = 4;
-    sprintf(bufp+5,text);
+    sprintf((char *)bufp+5,text);
 
   } else {
     bufp[4] = 1;
-    gethostname(buf, SNMP_MAXBUF_SMALL);
-    hent = gethostbyname(buf);
+    gethostname((char *)buf, SNMP_MAXBUF_SMALL);
+    hent = gethostbyname((char *)buf);
 
     if (hent && hent->h_addrtype == AF_INET) {
       memcpy(bufp+5, hent->h_addr_list[0], hent->h_length);
@@ -479,7 +479,7 @@ int
 init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                         void *clientarg) {
 
-  int engineIDLen;
+  size_t engineIDLen;
   u_char *c_engineID;
 
   c_engineID = snmpv3_generate_engineID(&engineIDLen);
@@ -510,14 +510,14 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 int
 snmpv3_store(int majorID, int minorID, void *serverarg, void *clientarg) {
   char line[SNMP_MAXBUF_SMALL];
-  char c_engineID[SNMP_MAXBUF_SMALL];
-  int  engineIDLen;
+  u_char c_engineID[SNMP_MAXBUF_SMALL];
+  size_t  engineIDLen;
   const char *type = (const char *) clientarg;
 
   if (type == NULL)  /* should never happen, since the arg is ours */
     type = "unknown";
 
-  sprintf(line, "engineBoots %d", engineBoots);
+  sprintf(line, "engineBoots %ld", engineBoots);
   read_config_store(type, line);
 
   engineIDLen = snmpv3_get_engineID(c_engineID, SNMP_MAXBUF_SMALL);
@@ -532,7 +532,7 @@ snmpv3_store(int majorID, int minorID, void *serverarg, void *clientarg) {
   return SNMPERR_SUCCESS;
 }  /* snmpv3_store() */
 
-int
+u_long
 snmpv3_local_snmpEngineBoots(void)
 {
   return engineBoots;
@@ -555,7 +555,7 @@ snmpv3_local_snmpEngineBoots(void)
  *
  */
 int
-snmpv3_get_engineID(char *buf, int buflen)
+snmpv3_get_engineID(u_char *buf, size_t buflen)
 {
   /*
    * Sanity check.
@@ -587,7 +587,7 @@ snmpv3_get_engineID(char *buf, int buflen)
  *
  */
 int
-snmpv3_clone_engineID(u_char **dest, int* destlen, u_char*src, int srclen)
+snmpv3_clone_engineID(u_char **dest, size_t* destlen, u_char*src, size_t srclen)
 {
   if ( !dest || !destlen ) return 0;
 
@@ -619,10 +619,10 @@ snmpv3_clone_engineID(u_char **dest, int* destlen, u_char*src, int srclen)
  * 'length' is set to the length of engineID  -OR-  < 0 on failure.
  */
 u_char *
-snmpv3_generate_engineID(int *length)
+snmpv3_generate_engineID(size_t *length)
 {
-  char *newID;
-  newID = (char *) malloc(engineIDLength);
+  u_char *newID;
+  newID = (u_char *) malloc(engineIDLength);
 
   if (newID) {
     *length = snmpv3_get_engineID(newID, engineIDLength);
@@ -639,7 +639,7 @@ snmpv3_generate_engineID(int *length)
 
 /* snmpv3_local_snmpEngineTime(): return the number of seconds since the
    snmpv3 engine last incremented engine_boots */
-int
+u_long
 snmpv3_local_snmpEngineTime(void)
 {
   struct timeval now;

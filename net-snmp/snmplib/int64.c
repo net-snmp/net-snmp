@@ -268,7 +268,7 @@ printI64(char * buf, /* char [I64CHARSZ+1]; */
 
 void
 read64(U64 *i64,
-       char *string)
+       const char *string)
 {
   U64 i64p;
   unsigned int u;

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     int   current_name = 0;
     char  *names[128];
     oid   name[MAX_OID_LEN];
-    int   name_length;
+    size_t name_length;
     int   status;
     int   failures = 0;
 

@@ -35,7 +35,7 @@ PFI device_errors[ HRDEV_TYPE_MAX ];
 int current_type;
 
 void Init_Device (void);
-int header_hrdevice (struct variable *,oid *, int *, int, int *, WriteMethod **);
+int header_hrdevice (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
 
 	/*********************
@@ -84,9 +84,9 @@ void init_hr_device(void)
 int
 header_hrdevice(struct variable *vp,
 		oid *name,
-		int *length,
+		size_t *length,
 		int exact,
-		int *var_len,
+		size_t *var_len,
 		WriteMethod **write_method)
 {
 #define HRDEV_ENTRY_NAME_LENGTH	11
@@ -116,7 +116,7 @@ header_hrdevice(struct variable *vp,
 		 *     (i.e. *length is too short to be a full instance)
 		 */
 
-    if (( snmp_oid_compare( vp->name, (int)vp->namelen, name, (int)vp->namelen ) == 0 ) &&
+    if (( snmp_oid_compare( vp->name, vp->namelen, name, vp->namelen ) == 0 ) &&
 	( *length > HRDEV_ENTRY_NAME_LENGTH ))
         current_type = (name[HRDEV_ENTRY_NAME_LENGTH]>>HRDEV_TYPE_SHIFT);
     else
@@ -135,7 +135,7 @@ header_hrdevice(struct variable *vp,
           sprint_objid (c_oid, newname, *length);
           DEBUGMSGTL(("host/hr_device", "%s\n", c_oid));
         }
-        result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    if ( save_device[current_type] != NULL )
 		(*save_device[current_type])();
@@ -184,12 +184,12 @@ int device_type_len = sizeof(device_type_id)/sizeof(device_type_id[0]);
 	 *********************/
 
 
-u_char	*
+const u_char *
 var_hrdevice(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     size_t *length,
 	     int exact,
-	     int *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
     int dev_idx, type;

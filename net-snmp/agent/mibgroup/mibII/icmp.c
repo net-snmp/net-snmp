@@ -162,9 +162,9 @@ void init_icmp(void)
 int
 header_icmp(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
 #define ICMP_NAME_LENGTH	8
@@ -200,12 +200,12 @@ header_icmp(struct variable *vp,
 #ifndef linux
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
-u_char *
+const u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
-	 int *length,
+	 size_t *length,
 	 int exact,
-	 int *var_len,
+	 size_t *var_len,
 	 WriteMethod **write_method)
 {
     register int i;
@@ -316,12 +316,12 @@ var_icmp(struct variable *vp,
 
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
-u_char *
+const u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
-	 int *length,
+	 size_t *length,
 	 int exact,
-	 int *var_len,
+	 size_t *var_len,
 	 WriteMethod **write_method)
 {
     register int i;
@@ -442,12 +442,12 @@ var_icmp(struct variable *vp,
 
 #else /* linux */
 
-u_char *
+const u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
-	 int *length,
+	 size_t *length,
 	 int exact,
-	 int *var_len,
+	 size_t *var_len,
 	 WriteMethod **write_method)
 {
     static struct icmp_mib icmpstat;
@@ -495,12 +495,12 @@ var_icmp(struct variable *vp,
 #endif /* linux */
 #else /* solaris2 */
 
-u_char *
+const u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
-	 int *length,
+	 size_t *length,
 	 int exact,
-	 int *var_len,
+	 size_t *var_len,
 	 WriteMethod **write_method)
 {
     mib2_icmp_t icmpstat;

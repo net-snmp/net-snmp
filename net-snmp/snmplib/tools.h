@@ -5,6 +5,10 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 
 /* 
@@ -105,17 +109,20 @@
 /* 
  * Prototypes.
  */
-void	free_zero (void *buf, u_long size);
+void	free_zero (void *buf, size_t size);
 
-char   *malloc_random (int *size);
-char   *malloc_zero (u_long size);
-int     memdup (u_char **to, u_char *from, u_int size);
+u_char *malloc_random (size_t *size);
+u_char *malloc_zero (size_t size);
+int     memdup (u_char **to, const u_char *from, size_t size);
 
-u_int	binary_to_hex (char *input, u_long len, char **output);
-int	hex_to_binary2 (char *input, u_long len, char **output);
+u_int	binary_to_hex (const u_char *input, size_t len, char **output);
+int	hex_to_binary2 (const u_char *input, size_t len, char **output);
 
-void	dump_chunk (char *debugtoken, char *title, char *buf, int size);
-char   *dump_snmpEngineID (u_char *buf, u_int *buflen);
+void	dump_chunk (const char *debugtoken, const char *title, const u_char *buf, int size);
+char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _TOOLS_H */
-

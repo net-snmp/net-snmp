@@ -111,6 +111,8 @@ SOFTWARE.
 	bundled with UCD SNMP (See configure option --enable-internal-md5).
 
 	"
+#	else
+static void md5Digest(u_char *, size_t, u_char *);
 #	endif
 #	endif
 
@@ -136,9 +138,9 @@ SOFTWARE.
  */
 u_char *
 snmp_comstr_parse(u_char *data,
-		  int *length,
+		  size_t *length,
 		  u_char *psid,
-		  int *slen,
+		  size_t *slen,
 		  int *version)
 {
     u_char   	type;
@@ -208,16 +210,16 @@ snmp_comstr_parse(u_char *data,
  */
 u_char *
 snmp_comstr_build(	u_char	*data,
-			int	*length,
+			size_t	*length,
 			u_char	*psid,
-			int	*slen,
+			size_t	*slen,
 			int	*version,
-			int	messagelen)
+			size_t	messagelen)
 {
     long	 verfix	 = *version;
     u_char	*h1	 = data;
     u_char	*h1e;
-    int		 hlength = *length;
+    size_t	 hlength = *length;
 
 
     /* Build the the message wrapper (note length will be inserted later).
@@ -245,7 +247,7 @@ snmp_comstr_build(	u_char	*data,
      */
     data = asn_build_string(data, length,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-            psid, *slen);
+            psid, *(u_char *)slen);
     if (data == NULL){
         ERROR_MSG("buildstring");
         return NULL;
@@ -297,6 +299,65 @@ has_access(	u_char	msg_type,
 
 }  /* end has_access() */
 
+
+
+#ifdef USE_INTERNAL_MD5
+
+static void
+md5Digest(	u_char	*start,
+		size_t	 length,
+		u_char	*digest)
+{
+    MDstruct	 MD;
+
+    int		 i, j;
+    u_char	*cp;
+#if WORDS_BIGENDIAN
+    u_char	*buf;
+    u_char	 buffer[SNMP_MAX_LEN];
+#endif
+
+
+#if 0
+    int count, sum;
+
+    sum = 0;
+    for(count = 0; count < length; count++)
+	sum += start[count];
+    printf("sum %d (%d)\n", sum, length);
+#endif
+
+
+#if WORDS_BIGENDIAN
+    /* Do the computation in an array.
+     */
+    cp = buf = buffer;
+    memmove(buf, start, length);
+#else
+    /* Do the computation in place.
+     */
+    cp = start;
+#endif
+
+
+    MDbegin(&MD);
+    while(length >= 64){
+	MDupdate(&MD, cp, 64 * 8);
+	cp += 64;
+	length -= 64;
+    }
+    MDupdate(&MD, cp, length * 8);
+    /* MDprint(&MD); */
+
+   for (i=0;i<4;i++)
+     for (j=0;j<32;j=j+8)
+	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
+
+}  /* end md5Digest() */
+
+#endif /* USE_INTERNAL_MD5 */
+
+
 #ifdef USE_V2PARTY_PROTOCOL
 
 /*******************************************************************-o-******
@@ -322,27 +383,27 @@ has_access(	u_char	msg_type,
  */
 u_char *
 snmp_party_parse(u_char *data,
-		 int *length,
+		 size_t *length,
 		 struct packet_info *pi,
 		 oid *srcParty,
-		 int *srcPartyLength,
+		 size_t *srcPartyLength,
 		 oid *dstParty,
-		 int *dstPartyLength,
+		 size_t *dstPartyLength,
 		 oid *context,		 
-		 int *contextLength,
+		 size_t *contextLength,
 		 int pass)
 {
-    int			 dstParty2Length = MAX_OID_LEN,
+    size_t		 dstParty2Length = MAX_OID_LEN,
    			 authMsgLen,
 			 authMsgInternalLen;
-    int			 authDigestLen;
-    int			 biglen,
-			 ismd5 = 0;
+    size_t		 authDigestLen;
+    size_t		 biglen;
+    int			 ismd5 = 0;
 
     u_char   		 type;
     u_char		 authDigest[MD5_HASHSIZE_BYTES],
 			 digest[MD5_HASHSIZE_BYTES];
-    int                  digest_len = MD5_HASHSIZE_BYTES;
+    size_t               digest_len = MD5_HASHSIZE_BYTES;
     u_char		*authMsg,
 			*digestStart = NULL,
 			*digestEnd   = NULL;
@@ -637,19 +698,19 @@ snmp_party_parse(u_char *data,
  */
 u_char *
 snmp_party_build(u_char *data,
-		 int *length,
+		 size_t *length,
 		 struct packet_info *pi,
-		 int messagelen,
+		 size_t messagelen,
 		 oid *srcParty,
-		 int srcPartyLen,
+		 size_t srcPartyLen,
 		 oid *dstParty,
-		 int dstPartyLen,
+		 size_t dstPartyLen,
 		 oid *context,
-		 int contextLen,
-		 int *packet_len,    /* OUT - length of complete packet */
+		 size_t contextLen,
+		 size_t *packet_len,    /* OUT - length of complete packet */
 		 int pass)  /* FIRST_PASS, LAST_PASS, none, or both */
 {
-    int			 dummyLength;
+    size_t		 dummyLength;
     int			 pad;
     int			 authInfoSize = 0;
 
@@ -658,7 +719,7 @@ snmp_party_build(u_char *data,
 			*digestEnd   = NULL,
 			*authMsgStart;
     u_char		 authDigest[MD5_HASHSIZE_BYTES];
-    int			 authDigestLen = MD5_HASHSIZE_BYTES;
+    size_t		 authDigestLen = MD5_HASHSIZE_BYTES;
     u_char		*h1, *h2,
 			*h3 = NULL,
 			*h5;

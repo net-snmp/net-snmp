@@ -40,7 +40,7 @@
 struct viewEntry *
 view_rowCreate(int viewIndex,
 	       oid *viewSubtree,
-	       int viewSubtreeLen)
+	       size_t viewSubtreeLen)
 {
     struct viewEntry *vp;
 
@@ -62,7 +62,7 @@ view_rowCreate(int viewIndex,
 void
 view_rowDelete(int viewIndex, 
 	       oid *viewSubtree, 
-	       int viewSubtreeLen)
+	       size_t viewSubtreeLen)
 {
     view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen);
 }
@@ -78,14 +78,15 @@ int
 write_view(int action,
 	   u_char *var_val,
 	   u_char var_val_type,
-	   int var_val_len,
+	   size_t var_val_len,
 	   u_char *statP,
 	   oid *name,
-	   int length)
+	   size_t length)
 {
 #if 0
     struct viewEntry *vp, *rp;
-    int var, size, viewSubtreeLen;
+    int var, size;
+    size_t viewSubtreeLen;
     int viewIndex;
     oid *viewSubtree;
     long val;
@@ -201,16 +202,16 @@ write_view(int action,
     return TRUE;
 }
 
-u_char *
+const u_char *
 var_view(struct variable *vp,
 	 oid *name,
-	 int *length,
+	 size_t *length,
 	 int exact,
-	 int *var_len,
+	 size_t *var_len,
 	 WriteMethod **write_method)
 {
     oid newname[MAX_OID_LEN], lowname[MAX_OID_LEN], *np;
-    int newnamelen, lownamelen=0;
+    size_t newnamelen, lownamelen=0;
     struct viewEntry *vwp, *lowvwp = NULL;
     u_long mask;
     oid *viewSubtree;
@@ -290,7 +291,7 @@ var_view(struct variable *vp,
 }
 
 int
-in_view(oid *name, int namelen, int viewIndex)
+in_view(oid *name, size_t namelen, int viewIndex)
 {
     struct viewEntry *vwp, *savedvwp = NULL;
 

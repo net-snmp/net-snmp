@@ -92,7 +92,7 @@ read_party_database(char *filename)
     in_addr_t addr;
     u_short port;
     oid partyid[MAX_OID_LEN];
-    int partyidlen;
+    size_t partyidlen;
     int priv = 0, auth = 0;
 #if 0
     int proxy;
@@ -102,7 +102,7 @@ read_party_database(char *filename)
     u_char privPrivate[32], authPrivate[32], privPublic[64], authPublic[64];
     u_char *ucp;
     u_long byte;
-    int privPublicLength, authPublicLength = 0;
+    size_t privPublicLength, authPublicLength = 0;
     char name[64];	/* friendly name */
     struct partyEntry *pp, *rp;
     u_int myaddr;

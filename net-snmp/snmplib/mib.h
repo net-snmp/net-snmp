@@ -1,5 +1,9 @@
 #ifndef MIB_H
 #define MIB_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * mib.h - Definitions for the variables as defined in the MIB
  *
@@ -262,24 +266,24 @@ struct variable_list;
 
 void print_mib (FILE *);
 void print_ascii_dump (FILE *);
-int read_objid (const char *, oid *, int *);
+int read_objid (const char *, oid *, size_t *);
 void register_mib_handlers (void);
 void init_mib (void);
-void print_variable (oid *, int, struct variable_list *);
-void fprint_variable (FILE *, oid *, int, struct variable_list *);
-void sprint_variable (char *, oid *, int, struct variable_list *);
-void print_value (oid *, int, struct variable_list *);
-void fprint_value (FILE *, oid *, int, struct variable_list *);
-void sprint_value (char *, oid *, int, struct variable_list *);
-void print_objid (oid *, int);
-void fprint_objid (FILE *, oid *, int);
-char *sprint_objid (char *, oid *, int);
-void print_description (oid *, int);
-void fprint_description (FILE *, oid *, int);
-int get_module_node (const char *, const char *, oid *, int *);
-int get_node (const char *, oid *, int *);
-struct tree *get_symbol (oid *, int, struct tree *, char *);
-struct tree *get_tree (oid *, int, struct tree *);
+void print_variable (oid *, size_t, struct variable_list *);
+void fprint_variable (FILE *, oid *, size_t, struct variable_list *);
+void sprint_variable (char *, oid *, size_t, struct variable_list *);
+void print_value (oid *, size_t, struct variable_list *);
+void fprint_value (FILE *, oid *, size_t, struct variable_list *);
+void sprint_value (char *, oid *, size_t, struct variable_list *);
+void print_objid (oid *, size_t);
+void fprint_objid (FILE *, oid *, size_t);
+char *sprint_objid (char *, oid *, size_t);
+void print_description (oid *, size_t);
+void fprint_description (FILE *, oid *, size_t);
+int get_module_node (const char *, const char *, oid *, size_t *);
+int get_node (const char *, oid *, size_t *);
+struct tree *get_symbol (oid *, size_t, struct tree *, char *);
+struct tree *get_tree (oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 void print_oid_report (FILE *);
@@ -291,4 +295,9 @@ void print_oid_report_disable_labeledoid (void);
 void print_oid_report_disable_oid (void);
 void print_oid_report_disable_suffix (void);
 void print_oid_report_disable_symbolic (void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* MIB_H */
