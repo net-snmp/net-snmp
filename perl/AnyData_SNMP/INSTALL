@@ -1,0 +1,27 @@
+NOTE NOTE NOTE: this module depends on a modified version of the
+DBD::AnyData module.  The DBD_AnyData.patch file should be applied to version
+0.5 of the DBD::AnyData module.  This patch won't be needed in the future
+when that modules supports the needed features of the patch.  This is
+planned for the future of the DBD::AnyData model, but will probably be done
+in a different way.  In other words, *don't* apply this patch to 0.6
+or higher of the DBD::AnyData model but instead convince the author of this
+module to update to the newer DBD::AnyData API instead.  You'll probably
+never have to do this.
+
+You also need the SQL-Statement module of version 0.2001 or higher.
+
+Install steps:
+  [download, and install the AnyData, and DBI modules]
+  [download, patch, and install the DBD::AnyData modules]
+  perl Makefile.PL
+  make
+  make install
+
+To use it:
+  API documentation:
+    perldoc AnyData::Storage::SNMP;
+  SQL like Shell script:
+    snmpsh [snmpcmd arguments] HOST [SQL COMMAND]
+
+
+
