@@ -768,6 +768,7 @@ snmp_build(session, pdu, packet, out_length)
                          &packet_length, LAST_PASS);
 	/* encryption might bump length of packet */
 	cp = packet + packet_length;
+	break;
 
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
@@ -811,7 +812,13 @@ snmp_parse(session, pdu, data, length)
 
     /* parse the message wrapper and all the administrative fields
        upto the PDU sequence */
-    switch (session->version) {
+    if (session->version != SNMP_DEFAULT_VERSION)
+	version = session->version;
+    else if (type == (ASN_SEQUENCE | ASN_CONSTRUCTOR))
+	version = SNMP_VERSION_1;
+    else
+	version = SNMP_VERSION_2p;
+    switch (version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
         /* message tag is a sequence */
@@ -824,7 +831,7 @@ snmp_parse(session, pdu, data, length)
 			         &version);
 	if (data == NULL)
 	    return -1;
-        if (version != session->version)
+        if (version != session->version && session->version != SNMP_DEFAULT_VERSION)
             return -1;
 	pdu->community_len = community_length;
 	pdu->community = (u_char *)malloc(community_length);

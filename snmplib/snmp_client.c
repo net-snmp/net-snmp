@@ -454,9 +454,8 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     struct aclEntry *ap;
     int oneIndex, twoIndex, cxindex;
 
-
     if (!read_objid(PARTY_MIB_BASE, dst, dstlen)){
-	snmp_errno = SNMPERR_GENERR;
+	snmp_errno = SNMPERR_BAD_PARTY;
 	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }
@@ -500,7 +499,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     oneIndex = pp1->partyIndex;
 
     if (!read_objid(PARTY_MIB_BASE, src, srclen)){
-	snmp_errno = SNMPERR_GENERR;
+	snmp_errno = SNMPERR_BAD_PARTY;
 	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }
@@ -539,7 +538,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     twoIndex = pp2->partyIndex;
 
     if (!read_objid(PARTY_MIB_BASE, context, contextlen)){
-	snmp_errno = SNMPERR_GENERR;
+	snmp_errno = SNMPERR_BAD_CONTEXT;
 	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }

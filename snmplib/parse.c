@@ -29,6 +29,7 @@ SOFTWARE.
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 /* Wow.  This is ugly.  -- Wes */
 #if HAVE_DIRENT_H
@@ -49,6 +50,9 @@ SOFTWARE.
 #endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 #include "system.h"
@@ -77,12 +81,10 @@ struct tc {     /* textual conventions */
     struct enum_list *enums;
 } tclist[MAXTC];
 
-
-
 int Line = 1;
 char File[300];
-int save_mib_descriptions = 0;
-int mib_warnings = 0;
+static int save_mib_descriptions = 0;
+static int mib_warnings = 0;
 static int anonymous = 0;
 
 #define SYNTAX_MASK     0x80
@@ -352,6 +354,18 @@ static void  new_module  __P((char *, char *));
 extern void  set_function __P((struct tree *));	/* from 'mib.c' */
 extern void init_mib __P((void));	/* from mib.c */
 static int read_module_internal __P((char *));
+
+void snmp_set_mib_warnings(warn)
+    int warn;
+{
+    mib_warnings = warn;
+}
+
+void snmp_set_save_descriptions(save)
+    int save;
+{
+    save_mib_descriptions = save;
+}
 
 static int
 name_hash( name )
@@ -1376,7 +1390,7 @@ parse_asntype(fp, name, ntype, ntoken)
                     else hint = Strdup (token);
                 }
                 else
-		    type = get_token(fp, token, MAXTOKEN);
+		    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             }
             type = get_token(fp, token, MAXTOKEN);
         }
@@ -1749,9 +1763,6 @@ parse_notificationDefinition(fp, name)
               free_node(np);
               return NULL;
           }
-#ifdef TEST2
-printf("Description== \"%.50s\"\n", quoted_string_buffer);
-#endif
           if (save_mib_descriptions) {
               np->description = Strdup (quoted_string_buffer);
           }
@@ -1910,7 +1921,7 @@ parse_moduleIdentity(fp, name)
     np->description = NULL;        /* default to an empty description */
     type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
-        type = get_token(fp, token, MAXTOKEN);
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
     }
     nnp = parse_objectid(fp, name);
     if (nnp) {
@@ -2459,7 +2470,7 @@ static void unget_token (token)
 }
 
 static int
-get_token(fp, token,maxtlen)
+get_token(fp, token, maxtlen)
     register FILE *fp;
     register char *token;
     int maxtlen;
@@ -2488,6 +2499,40 @@ get_token(fp, token,maxtlen)
         return ENDOFFILE;
     } else if (ch == '"') {
         return parseQuoteString(fp, token, maxtlen);
+    } else if (ch == '\'') {	/* binary or hex constant */
+	*cp++ = '\'';
+	while ((ch = getc(fp)) != EOF && ch != '\'' && cp-token < maxtlen-2)
+	    *cp++ = ch;
+	if (ch == '\'') {
+	    unsigned long val = 0;
+	    *cp++ = '\'';
+	    *cp++ = ch = getc(fp);
+	    *cp = 0;
+	    cp = token+1;
+	    switch (ch) {
+	    case EOF:
+		return ENDOFFILE;
+	    case 'b':
+	    case 'B':
+		while ((ch = *cp++) != '\'')
+		    if (ch != '0' && ch != '1') return LABEL;
+		    else val = val * 2 + ch - '0';
+		break;
+	    case 'h':
+	    case 'H':
+		while ((ch = *cp++) != '\'')
+		    if ('0' <= ch && ch <= '9') val = val*16+ch-'0';
+		    else if ('a' <= ch && ch <= 'f') val = val*16+ch-'a'+10;
+		    else if ('A' <= ch && ch <= 'F') val = val*16+ch-'A'+10;
+		    else return LABEL;
+		break;
+	    default:
+		return LABEL;
+	    }
+	    sprintf(token, "%ld", val);
+	    return NUMBER;
+	}
+	else return LABEL;
     }
 
     /*
@@ -2580,14 +2625,38 @@ int
 add_mibdir( dirname )
     char *dirname;
 {
-    FILE *fp;
+    FILE *fp, *ip;
     DIR *dir, *dir2;
     struct dirent *file;
     char token[MAXTOKEN];
     char tmpstr[300];
+    char tmpstr1[300];
     int count = 0;
+    struct stat dir_stat, idx_stat;
+
+    stat(dirname, &dir_stat);
+    sprintf(token, "%s/%s", dirname, ".index");
+    if (stat (token, &idx_stat) == 0) {
+	if (dir_stat.st_mtime < idx_stat.st_mtime) {
+	    DEBUGP("The index is good\n");
+	    if ((ip = fopen(token, "r")) != NULL) {
+		while (fscanf(ip, "%s %s\n", token, tmpstr) == 2) {
+		    sprintf(tmpstr1, "%s/%s", dirname, tmpstr);
+		    new_module(token, tmpstr1);
+		    count++;
+		}
+		fclose(ip);
+		return count;
+	    }
+	    else DEBUGP("Can't read index\n");
+	}
+	else DEBUGP("Index outdated\n");
+    }
+    else DEBUGP("No index\n");
 
     if ((dir = opendir(dirname))) {
+	sprintf(tmpstr, "%s/.index", dirname);
+	ip = fopen(tmpstr, "w");
         while ((file = readdir(dir))) {
             /* Only parse file names not beginning with a '.' */
             if (file->d_name != NULL && file->d_name[0] != '.') {
@@ -2609,10 +2678,12 @@ add_mibdir( dirname )
                     count++;
                     DEBUGP("done\n");
                     fclose (fp);
+		    if (ip) fprintf(ip, "%s %s\n", token, file->d_name);
                 }
             }
         }
         closedir(dir);
+	if (ip) fclose(ip);
         return(count);
     }
     return(-1);
