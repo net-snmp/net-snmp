@@ -183,7 +183,6 @@ snmp_synch_input(op, session, reqid, pdu, magic)
     return 1;
 }
 
-
 /*
  * If there was an error in the input pdu, creates a clone of the pdu
  * that includes all the variables except the one marked by the errindex.
