@@ -41,8 +41,5 @@
 
 void
 init_mib_modules(void) {
-#ifdef USING_AGENTX_SUBAGENT_MODULE
-  subagent_pre_init();
-#endif
   #include "mibgroup/mib_module_inits.h"
 }
