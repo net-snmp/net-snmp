@@ -556,6 +556,9 @@
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
+/* Define if you have the z library (-lz).  */
+#undef HAVE_LIBZ
+
 /* define if sys/cdefs.h doesn't define the __P() macro */
 #undef SYS_CDEFS_DEFINES___P
 
