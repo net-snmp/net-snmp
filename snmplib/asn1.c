@@ -2398,13 +2398,13 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
   intsize = initdatap-data;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-  if (*datalength < 5) return NULL;
-  *datalength -= 3;
-  *data-- = (u_char)intsize;
-
   /* encode a Counter64 as an opaque (it also works in SNMPv1) */
   /* turn into Opaque holding special tagged value */
   if (type == ASN_OPAQUE_COUNTER64) {
+      if (*datalength < 5) return NULL;
+      *datalength -= 3;
+      *data-- = (u_char)intsize;
+
       *data-- = ASN_OPAQUE_COUNTER64;
       *data-- = ASN_OPAQUE_TAG1;
       
@@ -2417,6 +2417,10 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
       /* Encode the Unsigned int64 in an opaque */
       /* turn into Opaque holding special tagged value */
 
+      if (*datalength < 5) return NULL;
+      *datalength -= 3;
+      *data-- = (u_char)intsize;
+
       *data-- = ASN_OPAQUE_U64;
       *data-- = ASN_OPAQUE_TAG1;
       
@@ -2426,6 +2430,7 @@ u_char	*asn_rbuild_unsigned_int64 (u_char *data,
           return NULL;
     } else {
 #endif /* OPAQUE_SPECIAL_TYPES */
+
     data = asn_rbuild_header(data, datalength, type, intsize);
     if (_asn_build_header_check("build uint64", data+1, *datalength, intsize))
 	return NULL;
