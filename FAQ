@@ -101,10 +101,12 @@ WWW:
   - http://ucd-snmp.ucdavis.edu
 
 FTP:
-  - ftp://ucd-snmp.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
+  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
+
+
 
 What documentation is available?
 -------------------------------
