@@ -1,5 +1,5 @@
 How to setup SNMPv3, a very brief document for Dave to elaborate and
-do a better job on since I suck and he doesn't ;-):
+do a better job on since I suck and he doesn't ;-) --Wes:
 
 First, there are 3 users that exist in the agent already:
 
@@ -15,7 +15,7 @@ First, there are 3 users that exist in the agent already:
 First off, you need to add snmpd.conf VACM entries to allow you to do
 something to allow you to create new users using an existing one
 (which will actually work with v1 and v2c, of course, but lets use v3
-here):
+authenticated requests only here):
 
   group local   any        initial
   view all    included  .1                               80
@@ -69,9 +69,13 @@ However, the above should have created the user "wes" with the same
 password as the templateMD5 user.  So then, you need to change his
 password using:
 
-snmpusm -e 800007e501a896be01 -E 800007e501a896be01 -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase
+snmpusm -e 800007e501a896be01 -E 800007e501a896be01 -v 3 -u wes -n none -l authNoPriv -a MD5 -A initial_MD5_pass localhost passwd -O initial_MD5_pass -N new_passphrase -a
 
 See, wasn't that easy?
+
+Now, test it:
+
+  snmpget -v 3 -u wes -n none -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0
 
 Now, go remove the vacm entries for initial and you have a valid user 'wes'
 that you can use for future transactions instead of initial.
@@ -80,5 +84,30 @@ The information is all stored in /var/ucd-snmp/snmpd.conf, in the form
 of configuration lines, when the agent is shut down.  Note that I
 think this file is currently world readable, which is very very wrong
 and we need to change this in snmplib/read_config.c.
+
+Also note that the passkeys stored in /var/ucd-snmp/snmpd.conf are
+locked to a given engineID, which by default is based off of your IPv4 
+address.  This means that:
+
+1) You can't copy/rdist the /var/ucd-snmp/snmpd.conf around.  (unless
+   you put a indentical "engineID" configuration lines in all your
+   snmpd.conf files).
+2) If you change the IP address of your machine and you're using the
+   default mechanism, your entire user database needs to be
+   re-created.  whee.
+
+Tired of all those command line options?
+----------------------------------------
+put this in your ~/.snmp/snmp.conf file:
+
+  defSecurityName wes
+  defContext none
+  defAuthType MD5
+  defSecurityLevel authNoPriv
+  defPassphrase new_passphrase
+
+And then the above line boils down to:
+
+  snmpget -v 3 localhost sysUpTime.0
 
 Ugg.  Have fun?
