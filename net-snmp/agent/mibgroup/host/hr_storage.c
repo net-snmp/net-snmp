@@ -96,6 +96,10 @@
 #include <sys/vfs.h>
 #endif
 #if HAVE_SYS_MOUNT_H
+#ifdef __osf__
+#undef m_next
+#undef m_data
+#endif
 #include <sys/mount.h>
 #endif
 #ifdef HAVE_MACHINE_PARAM_H
