@@ -10,5 +10,3 @@ config_require(mibII/icmp)
 config_require(mibII/ip)
 config_require(mibII/udp)
 config_require(mibII/vacm_vars)
-
-void init_mibII(void);
