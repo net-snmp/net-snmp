@@ -27,13 +27,13 @@
       First, we must include some header files.  After you've
       installed the ucd-snmp toolkit, some easy to use header files
       have been installed that handle most situations you'll run
-      into.  We start are <i>snmpdemoapp.c</i> file with these:
+      into.  We start our <i>snmpdemoapp.c</i> file with these:
 <pre>
 #include &lt;ucd-snmp/ucd-snmp-config.h&gt;
 #include &lt;ucd-snmp/ucd-snmp-includes.h&gt;
 </pre>
     <p>
-      Next, we declair our main() routine and the variables we need:
+      Next, we declare our main() routine and the variables we need:
 <pre>
 main() {
 </pre>
@@ -119,9 +119,9 @@ main() {
     pdu = snmp_pdu_create(SNMP_MSG_GET);
     </pre>
     <p>
-      So, lets fill it with our requested oid.  Lets get the
+      So, let's fill it with our requested oid.  Let's get the
       <i>system.sysDescr.0</i> variable for this example.
-      There are numerious was you could create the oid in question.
+      There are numerious ways you could create the oid in question.
       You could put in the numerical unsigned integer values yourself
       into the <i>anOID</i> array we created above, or you could use
       one of the following function calls to do it.  We recommend the
@@ -248,7 +248,7 @@ value #1 is a string: HP-UX ucd-snmp B.10.20 A 9000/715
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Fri Nov  5 13:08:41 PST 1999
+Last modified: Fri Aug 11 08:53:39 PDT 2000
 <!-- hhmts end -->
   </body>
 </html>
