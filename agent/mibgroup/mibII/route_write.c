@@ -343,6 +343,7 @@ write_rte(int action,
             snmp_log(LOG_ERR, "newCacheRTE");
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
+        rp->rt_dst = dst;
         rp->rt_type = rp->xx_type = 2;
 
     } else if (action == COMMIT) {
@@ -354,7 +355,7 @@ write_rte(int action,
         }
     }
 
-
+    netsnmp_assert(NULL != rp);  /* should have found or created rp */
 
 
     switch (var) {
