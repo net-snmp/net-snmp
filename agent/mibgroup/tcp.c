@@ -4,6 +4,7 @@
  *
  */
 
+#include "mib_module_config.h"
 #include "../common_header.h"
 #include "tcp.h"
 
