@@ -3,7 +3,11 @@
  *
  */
 
-#include "../common_header.h"
+#include <config.h>
+
+#include "../mibincl.h"
+#include "../struct.h"
+#include "../../../snmplib/system.h"
 #include "dummy.h"
 
 /*  
@@ -48,24 +52,6 @@
 	 *
 	 *********************/
 
-
-/* this shouldn't be done this way anymore.  Use auto_nlist() instead. */
-static struct nlist dummy_nl[] = {
-#define N_DUMMYSTAT    0
-#define N_MIN_DUMMY    1
-#define N_MAX_DUMMY    2
-#if !defined(hpux) && !defined(solaris2)
-        { "_dummystat"},
-        { "_dummy_min"},
-        { "_dummy_max"},
-#else
-        { "dummystat"},
-        { "dummy_min"},
-        { "dummy_max"},
-#endif
-        { 0 },
-};
-
 void calculate_dummy();
 
 	/*********************
@@ -77,8 +63,6 @@ void calculate_dummy();
 
 void	init_dummy( )
 {
-/* this shouldn't be done this way anymore.  Use auto_nlist() instead. */
-    init_nlist( dummy_nl );
 }
 
 /* function which scans a given snmpd.conf line for information */
