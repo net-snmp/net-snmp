@@ -73,8 +73,6 @@ static long cachetime;
 
 extern int numprocs, numextens;
 
-static int exceptions[] = SECURITYEXCEPTIONS;
-
 void
 Exit(var)
   int var;
@@ -407,21 +405,6 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     *write_method = 0;
   if (var_len)
     *var_len = sizeof(long);   /* default */
-#ifdef GLOBALSECURITY
-  vp->acl =
-    ((int) vp->acl & 0x03) |           /* save right most two bits */
-    ((int)vp->acl & (GLOBALSECURITY >> 1))      /* and with WRITE bits */
-/*    ((((int)(vp->acl & 0x5555) >> 1) & GLOBALSECURITY) << 1) / * ick */
-    | GLOBALSECURITY;                           /* include READ bits */
-#ifdef SECURITYEXCEPTIONS
-  for(i=0; exceptions[i] != -1; i += 2)
-    if (vp->magic == exceptions[i])
-      vp->acl =
-        ((int) vp->acl & 0x03) |                /* save right most two bits */
-        ((int)vp->acl & (exceptions[i+1] >> 1)) /* and with WRITE bits */
-        | exceptions[i+1];                      /* include READ bits */
-#endif
-#endif
   return(1);
 }
 
