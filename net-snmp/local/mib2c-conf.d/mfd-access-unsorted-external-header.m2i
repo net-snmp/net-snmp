@@ -11,8 +11,10 @@
 ##
 $example_start
 /* *********************************************************************
- * TODO: update dummy data storage
+ * TODO:
+ * update dummy data storage
  @if $m2c_include_examples == 1@
+ *
  * Since we have no idea how you really access your data, we'll go with
  * a worst case example: a flat text file.
  @   if $m2c_data_transient != 2@
@@ -27,7 +29,8 @@ $example_start
 /**
  * loop context
  *
- * TODO: define loop context structure
+ * TODO:
+ * define loop context structure
  *
  *  Since the actual loop is in the MFD handler, a loop contex parameter
  *  is provided to help you keep track of where you are in between calls

@@ -9,7 +9,8 @@
 ########################################################################
 ##
 /*
- * TODO: check dependencies
+ * TODO:
+ * check dependencies
  *
  * return SNMP_ERR_NOERROR if the all the changes to the row are legal,
  *        an SNMP error code otherwise.
@@ -24,7 +25,9 @@ ${context}_check_dependencies(${context}_ctx *ctx)
     netsnmp_assert(NULL != ctx);
 
     /*
-     * TODO: check that all new value are legal.
+     * TODO:
+     * check that all new value are legal.
+     *
      * This is useful for for tables which have dependencies
      * between columns.
      *

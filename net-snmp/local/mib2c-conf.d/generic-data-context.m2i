@@ -33,7 +33,9 @@ typedef struct ${context}_data_s {
 @    end@ # foreach nonindex
 } $m2c_data_refdcl ${context}_data;
 @elsif "$m2c_data_context" eq "unknown"@
-    /** TODO: update typedef to correct pointer type.
+    /*
+     * TODO:
+     * update typedef to correct pointer type.
      * (or add @eval $@m2c_data_context = "TYPE"@ and regenerate code) */
 typedef void * ${context}_data;
 @else@

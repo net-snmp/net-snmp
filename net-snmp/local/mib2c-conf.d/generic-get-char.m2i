@@ -13,7 +13,9 @@
 @if ($node.enums == 1) && ("$node.perltype" eq "BITS")@
 $example_start
     /*
-     * TODO: update or replace IS_SET_* values.
+     * TODO:
+     * update or replace IS_SET_* values.
+     *
      * These macros can be used if there is a simple, direct way to determine
      * if this bit defined for the MIB object is set for the data in your ctx.
      * Return 1 if the bit should be set, or 0 if it should not be set.
