@@ -46,6 +46,7 @@ struct node {
     char label[MAXLABEL]; /* This node's (unique) textual name */
     u_long  subid;  /* This node's integer subidentifier */
     char parent[MAXLABEL];/* The parent's textual name */
+    int tc_index;     /* index into tclist (-1 if NA) */
     int type;	    /* The type of object this represents */
     struct enum_list *enums;	/* (optional) list of enumerated integers
 (otherwise NULL) */
@@ -61,6 +62,7 @@ struct tree {
     struct tree *parent;
     char label[MAXLABEL];		/* This node's textual name */
     u_long subid;		/* This node's integer subidentifier */
+    int tc_index;             /* index into tclist (-1 if NA) */
     int type;			/* This node's object type */
     struct enum_list *enums;	/* (optional) list of enumerated integers
 (otherwise NULL) */
