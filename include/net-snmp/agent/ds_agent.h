@@ -8,12 +8,14 @@
 #define DS_AGENT_NO_ROOT_ACCESS 2            /* 1 if we can't get root access */
 #define DS_AGENT_AGENTX_MASTER  3            /* 1 if AgentX desired */
 #define DS_AGENT_QUIT_IMMEDIATELY 4          /* 1 to never start the agent */
+#define DS_AGENT_DISABLE_PERL   5            /* 1 to never start the agent */
 
 /* strings */
 #define DS_AGENT_PROGNAME 0        /* argv[0] */
 #define DS_AGENT_X_SOCKET 1        /* AF_UNIX or ip:port socket addr */
 #define DS_AGENT_PORTS    2        /* localhost:9161,tcp:localhost:9161... */
 #define DS_AGENT_INTERNAL_SECNAME  3 /* used by disman/mteTriggerTable. */
+#define DS_AGENT_PERL_INIT_FILE    4 /* used by embedded perl */
 
 /* integers */
 #define DS_AGENT_FLAGS    0       /* session.flags */

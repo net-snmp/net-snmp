@@ -1433,7 +1433,7 @@ if test "x$embed_perl" = "xyes"; then
     AC_MSG_CHECKING(for perl CFLAGS)
     perlcflags=`$myperl -MExtUtils::Embed -e ccopts`
     AC_MSG_RESULT($perlcflags)
-    CFLAGS="$CFLAGS $perlcflags"
+    CPPFLAGS="$CPPFLAGS $perlcflags"
 
     AC_MSG_CHECKING(for perl LDFLAGS)
     perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
@@ -1443,6 +1443,9 @@ if test "x$embed_perl" = "xyes"; then
     AC_DEFINE(NETSNMP_EMBEDDED_PERL)
     OTHERAGENTLIBOBJS="snmp_perl.o"
     OTHERAGENTLIBLOBJS="snmp_perl.lo"
+
+    EMBEDPERLINSTALL="embedperlinstall"
+    AC_SUBST(EMBEDPERLINSTALL)
 fi
 
 dnl reset libs
