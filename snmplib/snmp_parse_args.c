@@ -332,6 +332,7 @@ snmp_parse_args(int argc,
 	}
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
           fprintf(stderr, "Bad engine ID value after -e flag.\n");
+	  free(ebuf);
           return(-1);
 	}
 	session->securityEngineID = ebuf;
@@ -349,6 +350,7 @@ snmp_parse_args(int argc,
 	}
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
           fprintf(stderr, "Bad engine ID value after -E flag.\n");
+	  free(ebuf);
           return(-1);
 	}
 	session->contextEngineID = ebuf;
