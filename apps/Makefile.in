@@ -62,8 +62,7 @@ snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) 
-	/bin/sh ../libtool --mode=link gcc -I/usr/include/rpm -g -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts -Dlinux -o snmptrapd $(TRAPD_OBJECTS) $(TRAPLIBS)
-#	$(LINK) -o $@ $(TRAPD_OBJECTS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
+	$(LINK) -o $@ $(TRAPD_OBJECTS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
