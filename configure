@@ -1844,7 +1844,7 @@ fi;
 # Check whether --enable-local-smux or --disable-local-smux was given.
 if test "${enable_local_smux+set}" = set; then
   enableval="$enable_local_smux"
-  if test "x$local_smux" = "xyes"; then
+  if test "x$enable_local_smux" = "xyes"; then
       cat >>confdefs.h <<\_ACEOF
 #define LOCAL_SMUX 1
 _ACEOF
