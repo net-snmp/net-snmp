@@ -410,7 +410,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 }
 
 char *
-snmp_log_syslogname(char *pstr)
+snmp_log_syslogname(const char *pstr)
 {
   if (pstr)
     strncpy (syslogname, pstr, sizeof(syslogname));
