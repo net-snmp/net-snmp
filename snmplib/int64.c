@@ -10,7 +10,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #include "asn1.h"
 #include "int64.h"
 
