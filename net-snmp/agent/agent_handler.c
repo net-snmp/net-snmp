@@ -15,7 +15,7 @@
  * New Handler based API 
  */
 /***********************************************************************/
-/** @defgroup handler Agent handler API
+/** @defgroup handler Net-SNMP Agent handler and extensibility API
  *  @ingroup agent
  *
  *  The basic theory goes something like this: In the past, with the
