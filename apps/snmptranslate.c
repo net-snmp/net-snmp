@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
             print = 1;
             break;
 	case 't':
-	    fprintf(stderr, "Warning: this option is deprecated - use -Tt\n");
+	    fprintf(stderr, "Warning: -t option is deprecated - use -Tt\n");
             print = 3;
             print_oid_report_enable_suffix();
             break;
@@ -271,14 +271,13 @@ int main(int argc, char *argv[])
     
     if (optind < argc)
 	current_name = argv[optind];
-    else if (!print) {
-        usage(); 
-        exit(1);
-    }
     
     init_snmp("snmpapp");
     if (current_name == NULL) {
         switch (print) {
+	case 0:
+	    usage();
+	    exit(1);
         case 1:
             print_mib_tree (stdout, get_tree_head());
             break;
