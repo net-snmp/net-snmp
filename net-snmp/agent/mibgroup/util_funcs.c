@@ -556,15 +556,26 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
   } else if (((int)*length) > (int)vp->namelen+1) {  /* exact case checked earlier */
     *length = vp->namelen+1;
     memmove(newname, name, (*length) * sizeof(oid));
-    newname[*length-1] = name[*length-1] + 1;
+    if (name[*length - 1] < ULONG_MAX) {
+      newname[*length - 1] = name[*length - 1] + 1;
+    } else {
+      /*  Careful not to overflow...  */
+      newname[*length - 1] = name[*length - 1];
+    }
   }
   else {
     *length = vp->namelen+1;
     memmove(newname, name, (*length) * sizeof(oid));
-    if (!exact)
-      newname[*length-1] = name[*length-1] + 1;
-    else
+    if (!exact) {
+      if (name[*length - 1] < ULONG_MAX) {
+	newname[*length - 1] = name[*length - 1] + 1;
+      } else {
+	/*  Careful not to overflow...  */
+	newname[*length - 1] = name[*length - 1];
+      }
+    } else {
       newname[*length-1] = name[*length-1];
+    }
   }  
   if (max >= 0 && ((int)newname[*length-1] > max)) {
     if(var_len)
