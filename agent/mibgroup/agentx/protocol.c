@@ -1100,7 +1100,6 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     u_int           prefix;
     int             i;
     int             int_offset;
-    oid            *oid_ptr = oid_buf;
     u_int          *int_ptr = (u_int *)oid_buf;
     u_char         *buf_ptr = data;
 
