@@ -56,6 +56,63 @@
 #include "scapi.h" 
 
 
+/*  snmp_realloc:
+
+    Parameters:
+
+      buf	pointer to a buffer pointer
+      buf_len	pointer to current size of buffer in bytes
+
+    This function increase the size of the buffer pointed at by *buf, which is
+    initially of size *buf_len.  Contents are preserved **AT THE BOTTOM END OF
+    THE BUFFER**.  If memory can be (re-)allocated then it returns 1, else it
+    returns 0.
+
+*/
+
+int
+snmp_realloc(u_char **buf, size_t *buf_len)
+{
+  u_char *new_buf = NULL;
+  size_t  new_buf_len = 0;
+
+  if (buf == NULL) {
+    return 0;
+  }
+
+  /*  The current re-allocation algorithm is to increase the buffer size by
+      whichever is the greater of 256 bytes or the current buffer size, up to
+      a maximum increase of 8192 bytes.  */
+
+  if (*buf_len <= 255) {
+    new_buf_len = *buf_len + 256;
+  } else if (*buf_len > 255 && *buf_len <= 8191) {
+    new_buf_len = *buf_len * 2;
+  } else if (*buf_len > 8191) {
+    new_buf_len = *buf_len + 8192;
+  }
+    
+  DEBUGMSGTL(("snmp_realloc", "*buf %p, *buf_len %d", *buf, *buf_len));
+
+  if (*buf == NULL) {
+    new_buf = (u_char *)malloc(new_buf_len);
+  } else {
+    new_buf = (u_char *)realloc(*buf, new_buf_len);
+  }
+
+  DEBUGMSG(("snmp_realloc", " new_buf %p, new_buf_len %d\n", new_buf,
+	    new_buf_len));
+
+  if (new_buf != NULL) {
+    *buf = new_buf;
+    *buf_len = new_buf_len;
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
 /*******************************************************************-o-******
  * free_zero
  *
@@ -234,8 +291,84 @@ hex_to_binary2_quit:
 
 }  /* end hex_to_binary2() */
 
+int
+snmp_decimal_to_binary	(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc, const char *decimal)
+{
+  int subid = 0;
+  const char *cp = decimal;
 
+  if (buf == NULL || buf_len == NULL || out_len == NULL || decimal == NULL) {
+    return 0;
+  }
 
+  *out_len = 0;
+  while (*cp != '\0') {
+    if (isspace((int)*cp) || *cp == '.') {
+      cp++;
+      continue;
+    }
+    if (!isdigit((int)*cp)) {
+      return 0;
+    }
+    if ((subid = atoi(cp)) > 255) {
+      return 0;
+    }
+    if ((*out_len >= *buf_len) &&
+	!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+    *(*buf + *out_len) = (u_char)subid;
+    (*out_len)++;
+    while (isdigit((int)*cp)) {
+      cp++;
+    }
+  }
+  return 1;
+}
+
+int
+snmp_hex_to_binary	(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc, const char *hex)
+{
+  int subid = 0;
+  const char *cp = hex;
+
+  if (buf == NULL || buf_len == NULL || out_len == NULL || hex == NULL) {
+    return 0;
+  }
+
+  if ((*cp == '0') && ((*(cp + 1) == 'x') || (*(cp + 1) == 'X'))) {
+    cp += 2;
+  }
+
+  *out_len = 0;
+  while (*cp != '\0') {
+    if (isspace((int)*cp)) {
+      cp++;
+      continue;
+    }
+    if (!isxdigit((int)*cp)) {
+      return 0;
+    }
+    if (sscanf(cp, "%2x", &subid) == 0) {
+      return 0;
+    }
+    if ((*out_len >= *buf_len) &&
+	!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+    *(*buf + *out_len) = (u_char)subid;
+    (*out_len)++;
+    if (*++cp == '\0') {
+      /*  Odd number of hex digits is an error.  */
+      return 0;
+    } else {
+      cp++;
+    }
+  }
+  return 1;
+}
 
 /*******************************************************************-o-******
  * dump_chunk
