@@ -16,6 +16,6 @@
 #include <net-snmp/agent/table_iterator.h>
 /* #include <net-snmp/agent/table_array.h> */
 
-void init_helpers(void);
+void netsnmp_init_helpers(void);
 
 #endif /* ALL_HANDLERS_H */

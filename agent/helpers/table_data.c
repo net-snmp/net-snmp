@@ -21,7 +21,7 @@
  * generates the index portion of an table oid from a varlist.
  */
 void
-table_data_generate_index_oid(table_row *row)
+netsnmp_table_data_generate_index_oid(netsnmp_table_row *row)
 {
     build_oid(&row->index_oid, &row->index_oid_len, NULL,
               0, row->indexes);
@@ -34,12 +34,12 @@ table_data_generate_index_oid(table_row *row)
  *      or SNMPERR_GENERR  on failure (E.G., indexes already existed)
  */
 int
-table_data_add_row(table_data *table, table_row *row)
+netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row)
 {
-    table_row *nextrow, *prevrow;
+    netsnmp_table_row *nextrow, *prevrow;
     
     if (row->indexes)
-        table_data_generate_index_oid(row);
+        netsnmp_table_data_generate_index_oid(row);
 
     /* we don't store the index info as it
        takes up memory. */
@@ -89,21 +89,21 @@ table_data_add_row(table_data *table, table_row *row)
 }
 
 /** finds the data in "datalist" stored at "indexes" */
-table_row *
-table_data_get(table_data *table,
+netsnmp_table_row *
+netsnmp_table_data_get(table_data *table,
                struct variable_list *indexes) {
     oid searchfor[MAX_OID_LEN];
     size_t searchfor_len = MAX_OID_LEN;
     
     build_oid_noalloc(searchfor, MAX_OID_LEN, &searchfor_len, NULL, 0, indexes);
-    return table_data_get_from_oid(table, searchfor, searchfor_len);
+    return netsnmp_netsnmp_table_data_get_from_oid(table, searchfor, searchfor_len);
 }
 
 /** finds the data in "datalist" stored at the searchfor oid */
-table_row *
-table_data_get_from_oid(table_data *table,
+netsnmp_table_row *
+netsnmp_netsnmp_table_data_get_from_oid(table_data *table,
                         oid *searchfor, size_t searchfor_len) {
-    table_row *row;
+    netsnmp_table_row *row;
     for(row = table->first_row; row != NULL; row = row->next) {
         if (snmp_oid_compare(searchfor, searchfor_len,
                              row->index_oid, row->index_oid_len) == 0)
@@ -114,16 +114,16 @@ table_data_get_from_oid(table_data *table,
 
 /** Creates a table_data handler and returns it */
 netsnmp_mib_handler *
-get_table_data_handler(table_data *table)
+netsnmp_netsnmp_get_table_data_handler(table_data *table)
 {
     netsnmp_mib_handler *ret = NULL;
   
     if (!table) {
-        snmp_log(LOG_INFO, "get_table_data_handler(NULL) called\n");
+        snmp_log(LOG_INFO, "netsnmp_netsnmp_get_table_data_handler(NULL) called\n");
         return NULL;
     }
   
-    ret = netsnmp_create_handler(TABLE_DATA_NAME, table_data_helper_handler);
+    ret = netsnmp_create_handler(TABLE_DATA_NAME, netsnmp_table_data_helper_handler);
     if (ret) {
         ret->myvoid = (void *) table;
     }
@@ -133,21 +133,21 @@ get_table_data_handler(table_data *table)
 /** registers a handler as a data table.
  *  If table_info != NULL, it registers it as a normal table too. */
 int
-register_table_data(netsnmp_handler_registration *reginfo,
+netsnmp_netsnmp_register_table_data(netsnmp_handler_registration *reginfo,
                     table_data *table,
-                    table_registration_info *table_info) {
-    netsnmp_inject_handler(reginfo, get_table_data_handler(table));
-    return register_table(reginfo, table_info);
+                    netsnmp_table_registration_info *table_info) {
+    netsnmp_inject_handler(reginfo, netsnmp_netsnmp_get_table_data_handler(table));
+    return netsnmp_register_table(reginfo, table_info);
 }
 
 /** registers a handler as a read-only data table
  *  If table_info != NULL, it registers it as a normal table too. */
 int
-register_read_only_table_data(netsnmp_handler_registration *reginfo,
+netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
                               table_data *table,
-                              table_registration_info *table_info) {
-    netsnmp_inject_handler(reginfo, get_read_only_handler());
-    return register_table_data(reginfo, table, table_info);
+                              netsnmp_table_registration_info *table_info) {
+    netsnmp_inject_handler(reginfo, netsnmp_get_read_only_handler());
+    return netsnmp_netsnmp_register_table_data(reginfo, table, table_info);
 }
 
 
@@ -157,7 +157,7 @@ register_read_only_table_data(netsnmp_handler_registration *reginfo,
  * the request should not be handled.
  */
 int
-table_data_helper_handler(
+netsnmp_table_data_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -166,17 +166,17 @@ table_data_helper_handler(
     table_data *table = (table_data *) handler->myvoid;
     netsnmp_request_info *request;
     int valid_request = 0;
-    table_row *row;
-    table_netsnmp_request_info *table_info;
-    table_registration_info *table_reg_info =
-        find_table_registration_info(reginfo);
+    netsnmp_table_row *row;
+    netsnmp_table_request_info *table_info;
+    netsnmp_table_registration_info *table_reg_info =
+        netsnmp_find_netsnmp_table_registration_info(reginfo);
     int result, regresult;
     
     for(request = requests; request; request = request->next) {
         if (request->processed)
             continue;
 
-        table_info = extract_table_info(request);
+        table_info = netsnmp_extract_table_info(request);
         if (!table_info)
             continue; /* ack */
 
@@ -264,7 +264,7 @@ table_data_helper_handler(
                     break;
                 } else if (NULL ==
                            (row =
-                            table_data_get_from_oid(table,
+                            netsnmp_netsnmp_table_data_get_from_oid(table,
                                                     request->requestvb->name +
                                                     reginfo->rootoid_len + 2,
                                                     request->requestvb->name_length -
@@ -283,7 +283,7 @@ table_data_helper_handler(
                 valid_request = 1;
                 if (NULL !=
                     (row =
-                     table_data_get_from_oid(table,
+                     netsnmp_netsnmp_table_data_get_from_oid(table,
                                              request->requestvb->name +
                                              reginfo->rootoid_len + 2,
                                              request->requestvb->name_length -
@@ -311,7 +311,7 @@ table_data_helper_handler(
 
 /** creates and returns a pointer to table data set */
 table_data *
-create_table_data(const char *name) 
+netsnmp_create_table_data(const char *name) 
 {
     table_data *table = SNMP_MALLOC_TYPEDEF(table_data);
     if (name)
@@ -320,32 +320,32 @@ create_table_data(const char *name)
 }
 
 /** creates and returns a pointer to table data set */
-table_row *
-create_table_data_row(void) 
+netsnmp_table_row *
+netsnmp_netsnmp_create_table_data_row(void) 
 {
-    table_row *row = SNMP_MALLOC_TYPEDEF(table_row);
+    netsnmp_table_row *row = SNMP_MALLOC_TYPEDEF(netsnmp_table_row);
     return row;
 }
 
 /** extracts the row being accessed passed from the table_data helper */
-table_row *extract_table_row(netsnmp_request_info *request) 
+netsnmp_table_row *netsnmp_extract_netsnmp_table_row(netsnmp_request_info *request) 
 {
-    return (table_row *) netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_NAME);
+    return (netsnmp_table_row *) netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_NAME);
 }
 
 /** extracts the data from the row being accessed passed from the
  * table_data helper */
-void *extract_table_row_data(netsnmp_request_info *request) 
+void *netsnmp_netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *request) 
 {
-    return (extract_table_row(request))->data;
+    return (netsnmp_extract_netsnmp_table_row(request))->data;
 }
 
 /** builds a result given a row, a varbind to set and the data */
 int
-table_data_build_result(netsnmp_handler_registration *reginfo,
+netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
                         netsnmp_agent_request_info   *reqinfo,
                         netsnmp_request_info *request,
-                        table_row *row,
+                        netsnmp_table_row *row,
                         int column,
                         u_char type,
                         u_char *result_data, size_t result_data_len) 

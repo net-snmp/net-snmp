@@ -33,15 +33,15 @@
 /** returns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers.
  */
 netsnmp_mib_handler *
-get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
+netsnmp_get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
     netsnmp_mib_handler *ret = NULL;
     
     if (!req) {
-        snmp_log(LOG_INFO, "get_multiplexer_handler(NULL) called\n");
+        snmp_log(LOG_INFO, "netsnmp_get_multiplexer_handler(NULL) called\n");
         return NULL;
     }
     
-    ret = netsnmp_create_handler("multiplexer", multiplexer_helper_handler);
+    ret = netsnmp_create_handler("multiplexer", netsnmp_multiplexer_helper_handler);
     if (ret) {
         ret->myvoid = (void *) req;
     }
@@ -50,7 +50,7 @@ get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
 
 /** implements the multiplexer helper */
 int
-multiplexer_helper_handler(
+netsnmp_multiplexer_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,

@@ -15,18 +15,18 @@
 #include <dmalloc.h>
 #endif
 
-int register_null(oid *loc, size_t loc_len) {
+int netsnmp_register_null(oid *loc, size_t loc_len) {
     netsnmp_handler_registration *reginfo;
     reginfo = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     reginfo->handlerName = strdup("");
     reginfo->rootoid = loc;
     reginfo->rootoid_len = loc_len;
-    reginfo->handler = netsnmp_create_handler("null", null_handler);
+    reginfo->handler = netsnmp_create_handler("null", netsnmp_null_handler);
     return netsnmp_register_handler(reginfo);
 }
 
 int
-null_handler(netsnmp_mib_handler               *handler,
+netsnmp_null_handler(netsnmp_mib_handler               *handler,
              netsnmp_handler_registration      *reginfo,
              netsnmp_agent_request_info        *reqinfo,
              netsnmp_request_info              *requests) {

@@ -32,11 +32,11 @@ void
 init_testhandler(void) {
     /* we're registering at .1.2.3.4 */
     netsnmp_handler_registration *my_test;
-    table_registration_info *table_info;
+    netsnmp_table_registration_info *table_info;
     u_long ind1;
     table_data *table;
-    table_data_set *table_set;
-    table_row *row;
+    netsnmp_table_data_set *table_set;
+    netsnmp_table_row *row;
     
     DEBUGMSGTL(("testhandler", "initializing\n"));
 
@@ -51,12 +51,12 @@ init_testhandler(void) {
      * instance handler test
      */
 
-    register_instance(netsnmp_create_handler_registration("myInstance",
+    netsnmp_register_instance(netsnmp_create_handler_registration("myInstance",
                                                   my_test_instance_handler,
                                                   my_instance_oid, 5,
                                                   HANDLER_CAN_RWRITE));
 
-    register_ulong_instance("myulong",
+    netsnmp_register_ulong_instance("myulong",
                             my_data_ulong_instance, 4,
                             &my_ulong, NULL);
     
@@ -71,12 +71,12 @@ init_testhandler(void) {
     if (!my_test)
         return;
 
-    table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER, 0);
+    netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_INTEGER, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
-    register_table(my_test, table_info);
+    netsnmp_register_table(my_test, table_info);
 
     /*
      * data table helper test
@@ -86,38 +86,38 @@ init_testhandler(void) {
        column so the data pointer is merely the data in that
        column. */
         
-    table = create_table_data("data_table_test");
+    table = netsnmp_create_table_data("data_table_test");
 
-    table_data_add_index(table, ASN_INTEGER);
-    table_data_add_index(table, ASN_OCTET_STR);
+    netsnmp_table_data_add_index(table, ASN_INTEGER);
+    netsnmp_table_data_add_index(table, ASN_OCTET_STR);
 
     /* 1 partridge in a pear tree */
-    row = create_table_data_row();
+    row = netsnmp_netsnmp_create_table_data_row();
     ind1 = 1;
-    table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
-    table_row_add_index(row, ASN_OCTET_STR, "partridge",\
+    netsnmp_netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
+    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "partridge",\
                         strlen("partridge"));
     row->data = (void *) "pear tree";
-    table_data_add_row(table, row);
+    netsnmp_table_data_add_row(table, row);
 
     /* 2 turtle doves */
-    row = create_table_data_row();
+    row = netsnmp_netsnmp_create_table_data_row();
     ind1 = 2;
-    table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
-    table_row_add_index(row, ASN_OCTET_STR, "turtle",\
+    netsnmp_netsnmp_table_row_add_index(row, ASN_INTEGER, &ind1, sizeof(ind1));
+    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "turtle",\
                         strlen("turtle"));
     row->data = (void *) "doves";
-    table_data_add_row(table, row);
+    netsnmp_table_data_add_row(table, row);
 
     /* we're going to register it as a normal table too, so we get the
        automatically parsed column and index information */
-    table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    table_helper_add_indexes(table_info, ASN_INTEGER, ASN_OCTET_STR, 0);
+    netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, ASN_OCTET_STR, 0);
     table_info->min_column = 3;
     table_info->max_column = 3;
 
-    register_read_only_table_data(
+    netsnmp_register_read_only_table_data(
         netsnmp_create_handler_registration("12days",
                                     my_data_table_handler,
                                     my_data_table_oid,
@@ -135,43 +135,43 @@ init_testhandler(void) {
         column 2 = string = chair #1
         column 3 = string = chair #2  (most WGs have 2 chairs now)
     */
-    table_set = create_table_data_set("chairs");
+    table_set = netsnmp_create_netsnmp_table_data_set("chairs");
     
     /* set up what a row "should" look like */
-    table_dataset_add_index(table_set, ASN_OCTET_STR);
-    table_set_multi_add_default_row(table_set,
+    netsnmp_table_dataset_add_index(table_set, ASN_OCTET_STR);
+    netsnmp_netsnmp_table_set_multi_add_default_row(table_set,
                                     2, ASN_OCTET_STR, 1,
                                     3, ASN_OCTET_STR, 1);
 
     /* register the table */
-    register_table_data_set(netsnmp_create_handler_registration("chairs",
+    netsnmp_register_netsnmp_table_data_set(netsnmp_create_handler_registration("chairs",
                                                         NULL,
                                                         my_data_table_set_oid,
                                                         4, HANDLER_CAN_RWRITE),
                             table_set, NULL);
 
     /* add the data, for the first row */
-    row = create_table_data_row();
-    table_row_add_index(row, ASN_OCTET_STR, "snmpv3",\
+    row = netsnmp_netsnmp_create_table_data_row();
+    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpv3",\
                         strlen("snmpv3"));
-    set_row_column(row, 2, ASN_OCTET_STR, "Russ Mundy", strlen("Russ Mundy"));
-    mark_row_column_writable(row, 2, 1); /* make writable */
-    set_row_column(row, 3, ASN_OCTET_STR, "David Harrington",
+    netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "Russ Mundy", strlen("Russ Mundy"));
+    netsnmp_mark_row_column_writable(row, 2, 1); /* make writable */
+    netsnmp_set_row_column(row, 3, ASN_OCTET_STR, "David Harrington",
                    strlen("David Harrington"));
-    mark_row_column_writable(row, 3, 1); /* make writable */
-    table_dataset_add_row(table_set, row);
+    netsnmp_mark_row_column_writable(row, 3, 1); /* make writable */
+    netsnmp_table_dataset_add_row(table_set, row);
 
     /* add the data, for the second row */
-    row = create_table_data_row();
-    table_row_add_index(row, ASN_OCTET_STR, "snmpconf",\
+    row = netsnmp_netsnmp_create_table_data_row();
+    netsnmp_netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpconf",\
                         strlen("snmpconf"));
-    set_row_column(row, 2, ASN_OCTET_STR, "David Partain",
+    netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "David Partain",
                    strlen("David Partain"));
-    mark_row_column_writable(row, 2, 1); /* make writable */
-    set_row_column(row, 3, ASN_OCTET_STR, "Jon Saperia",
+    netsnmp_mark_row_column_writable(row, 2, 1); /* make writable */
+    netsnmp_set_row_column(row, 3, ASN_OCTET_STR, "Jon Saperia",
                    strlen("Jon Saperia"));
-    mark_row_column_writable(row, 3, 1); /* make writable */
-    table_dataset_add_row(table_set, row);
+    netsnmp_mark_row_column_writable(row, 3, 1); /* make writable */
+    netsnmp_table_dataset_add_row(table_set, row);
 }
 
 int
@@ -239,9 +239,9 @@ my_test_table_handler(netsnmp_mib_handler               *handler,
                       netsnmp_agent_request_info        *reqinfo,
                       netsnmp_request_info              *requests) {
 
-    table_registration_info
-        *handler_reg_info = (table_registration_info *) handler->prev->myvoid;
-    table_netsnmp_request_info *table_info;
+    netsnmp_table_registration_info
+        *handler_reg_info = (netsnmp_table_registration_info *) handler->prev->myvoid;
+    netsnmp_table_request_info *table_info;
     u_long result;
     int x, y;
     
@@ -257,7 +257,7 @@ my_test_table_handler(netsnmp_mib_handler               *handler,
         DEBUGMSGOID(("testhandler_table", var->name, var->name_length));
         DEBUGMSG(("testhandler_table", "\n"));
 
-        table_info = extract_table_info(requests);
+        table_info = netsnmp_extract_table_info(requests);
         if (table_info==NULL) {
             requests = requests->next;
             continue;
@@ -293,7 +293,7 @@ my_test_table_handler(netsnmp_mib_handler               *handler,
 
                     *(table_info->indexes->val.integer) = x;
                     *(table_info->indexes->next_variable->val.integer) = y;
-                    table_build_result(reginfo, requests,
+                    netsnmp_table_build_result(reginfo, requests,
                                        table_info, ASN_INTEGER,
                                        (u_char *) &result,
                                        sizeof(result));
@@ -397,23 +397,23 @@ my_data_table_handler(
     netsnmp_request_info              *requests) {
 
     char *column3;
-    table_netsnmp_request_info *table_info;
-    table_row *row;
+    netsnmp_table_request_info *table_info;
+    netsnmp_table_row *row;
     
     while(requests) {
         if (requests->processed)
             continue;
 
         /* extract our stored data and table info */
-        row = extract_table_row(requests);
-        table_info = extract_table_info(requests);
+        row = netsnmp_extract_netsnmp_table_row(requests);
+        table_info = netsnmp_extract_table_info(requests);
         if (row)
             column3 = (char *) row->data;
         if (!row || !table_info || !column3)
             continue;
         
         /* there's only one column, we don't need to check if it's right */
-        table_data_build_result(reginfo, reqinfo, requests, row,
+        netsnmp_table_data_build_result(reginfo, reqinfo, requests, row,
                                 table_info->colnum,
                                 ASN_OCTET_STR, column3, strlen(column3));
         requests = requests->next;

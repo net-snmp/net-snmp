@@ -31,21 +31,21 @@
  *  handler chain.  
  */
 netsnmp_mib_handler *
-get_serialize_handler(void) {
-    return netsnmp_create_handler("serialize", serialize_helper_handler);
+netsnmp_get_serialize_handler(void) {
+    return netsnmp_create_handler("serialize", netsnmp_serialize_helper_handler);
 }
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a serialize handler at the same time for you. */
 int
-register_serialize(netsnmp_handler_registration *reginfo) {
-    netsnmp_inject_handler(reginfo, get_serialize_handler());
+netsnmp_register_serialize(netsnmp_handler_registration *reginfo) {
+    netsnmp_inject_handler(reginfo, netsnmp_get_serialize_handler());
     return netsnmp_register_handler(reginfo);
 }
 
 /** Implements the serial handler */
 int
-serialize_helper_handler(
+netsnmp_serialize_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -72,7 +72,7 @@ serialize_helper_handler(
  *  use.
  */
 void
-init_serialize(void) 
+netsnmp_init_serialize(void) 
 {
-    netsnmp_register_handler_by_name("serialize", get_serialize_handler());
+    netsnmp_register_handler_by_name("serialize", netsnmp_get_serialize_handler());
 }

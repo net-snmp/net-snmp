@@ -44,7 +44,7 @@ static const char *mode_name[] = {
  * structure for holding important info for each table.
  */
 typedef struct table_array_data_s {
-    table_registration_info * tblreg_info;
+    netsnmp_table_registration_info * tblreg_info;
     oid_array                 array;
 
     /*    mutex_type                lock;*/
@@ -52,7 +52,7 @@ typedef struct table_array_data_s {
 
     int                       group_rows;
 
-    table_array_callbacks     *cb;
+    netsnmp_table_array_callbacks     *cb;
 
 } table_array_data;
 
@@ -66,9 +66,9 @@ typedef struct table_array_data_s {
  **********************************************************************
  **********************************************************************/
 int
-register_table_array(netsnmp_handler_registration *reginfo,
-                     table_registration_info *tabreg,
-                     table_array_callbacks   *cb,
+netsnmp_netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
+                     netsnmp_table_registration_info *tabreg,
+                     netsnmp_table_array_callbacks   *cb,
                      int                     group_rows)
 {
     table_array_data * tad = SNMP_MALLOC_TYPEDEF(table_array_data);
@@ -80,7 +80,7 @@ register_table_array(netsnmp_handler_registration *reginfo,
 
     reginfo->handler->myvoid = tad;
 
-    return register_table(reginfo, tabreg);
+    return netsnmp_register_table(reginfo, tabreg);
 }
 
 netsnmp_mib_handler*
@@ -88,7 +88,7 @@ find_table_array_handler(netsnmp_handler_registration *reginfo)
 {
     netsnmp_mib_handler *mh = reginfo->handler;
     while( mh ) {
-        if(mh->access_method == table_array_helper_handler)
+        if(mh->access_method == netsnmp_table_array_helper_handler)
             break;
         mh = mh->next;
     }
@@ -97,13 +97,13 @@ find_table_array_handler(netsnmp_handler_registration *reginfo)
 }
 
 oid_array *
-extract_array_context(netsnmp_request_info *request) 
+netsnmp_extract_array_context(netsnmp_request_info *request) 
 {
     return netsnmp_request_netsnmp_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
 const netsnmp_oid_array_header*
-table_array_get_by_index(netsnmp_handler_registration *reginfo,
+netsnmp_table_array_get_by_index(netsnmp_handler_registration *reginfo,
                          netsnmp_oid_array_header * hdr)
 {
     table_array_data* tad;
@@ -138,7 +138,7 @@ table_array_get_by_index(netsnmp_handler_registration *reginfo,
 }
 
 const netsnmp_oid_array_header**
-table_array_get_subset(netsnmp_handler_registration *reginfo,
+netsnmp_table_array_get_subset(netsnmp_handler_registration *reginfo,
                        netsnmp_oid_array_header * hdr, int * len)
 {
     table_array_data* tad;
@@ -170,8 +170,8 @@ table_array_get_subset(netsnmp_handler_registration *reginfo,
 }
 
 int
-ta_check_row_status(table_array_callbacks *cb, netsnmp_oid_array_header* ctx_new,
-                    netsnmp_oid_array_header* ctx_old, array_group* ag,
+ta_check_row_status(netsnmp_table_array_callbacks *cb, netsnmp_oid_array_header* ctx_new,
+                    netsnmp_oid_array_header* ctx_old, netsnmp_array_group* ag,
                     int* rs_new, int* rs_old)
 {
     if (ctx_new) {
@@ -263,10 +263,10 @@ typedef struct set_context_s {
 } set_context;
 
 static void
-release_array_group( netsnmp_oid_array_header * g, void *v )
+release_netsnmp_array_group( netsnmp_oid_array_header * g, void *v )
 {
-    array_group_item *tmp;
-    array_group * group = (array_group*)g;
+    netsnmp_netsnmp_array_group_item *tmp;
+    netsnmp_array_group * group = (netsnmp_array_group*)g;
 
     while(group->list) {
         tmp = group->list;
@@ -278,14 +278,14 @@ release_array_group( netsnmp_oid_array_header * g, void *v )
 }
 
 static void
-release_array_groups( void * vp )
+release_netsnmp_array_groups( void * vp )
 {
     oid_array a = (oid_array)vp;
-    netsnmp_For_each_oid_data( a, release_array_group, NULL, 0 );
+    netsnmp_For_each_oid_data( a, release_netsnmp_array_group, NULL, 0 );
 }
 
 inline netsnmp_oid_array_header *
-find_next_row( table_netsnmp_request_info *tblreq_info, table_array_data *tad)
+find_next_row( netsnmp_table_request_info *tblreq_info, table_array_data *tad)
 {
     netsnmp_oid_array_header *row = NULL;
     netsnmp_oid_array_header index;
@@ -310,7 +310,7 @@ find_next_row( table_netsnmp_request_info *tblreq_info, table_array_data *tad)
         if (!row) {
             ++tblreq_info->colnum;
             if(tad->tblreg_info->valid_columns) {
-                tblreq_info->colnum = closest_column
+                tblreq_info->colnum = netsnmp_closest_column
                     (tblreq_info->colnum,
                      tad->tblreg_info->valid_columns);
             }
@@ -327,7 +327,7 @@ find_next_row( table_netsnmp_request_info *tblreq_info, table_array_data *tad)
 
 inline void
 build_new_oid( netsnmp_handler_registration *reginfo,
-               table_netsnmp_request_info   *tblreq_info,
+               netsnmp_table_request_info   *tblreq_info,
                netsnmp_oid_array_header     *row,
                netsnmp_request_info         *current )
 {
@@ -369,7 +369,7 @@ process_get_requests(netsnmp_handler_registration  *reginfo,
     int rc = SNMP_ERR_NOERROR;
     netsnmp_request_info * current;
     netsnmp_oid_array_header *row = NULL;
-    table_netsnmp_request_info *tblreq_info;
+    netsnmp_table_request_info *tblreq_info;
     struct variable_list * var;
 
     /*
@@ -397,7 +397,7 @@ process_get_requests(netsnmp_handler_registration  *reginfo,
          * debugging, we double check a few assumptions. For example,
          * the table_helper_handler should enforce column boundaries.
          */
-        tblreq_info = extract_table_info(current);
+        tblreq_info = netsnmp_extract_table_info(current);
         assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
         
         if((agtreq_info->mode == MODE_GETNEXT) ||
@@ -464,14 +464,14 @@ process_get_requests(netsnmp_handler_registration  *reginfo,
  **********************************************************************/
 inline void
 group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * requests,
-                oid_array array_group_tbl, table_array_data *tad )
+                oid_array netsnmp_array_group_tbl, table_array_data *tad )
 {
-    table_netsnmp_request_info *tblreq_info;
+    netsnmp_table_request_info *tblreq_info;
     struct variable_list * var;
     netsnmp_oid_array_header *row, *tmp, index;
     netsnmp_request_info * current;
-    array_group * g;
-    array_group_item * i;
+    netsnmp_array_group * g;
+    netsnmp_netsnmp_array_group_item * i;
 
     for( current = requests; current; current = current->next) {
             
@@ -498,7 +498,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
          * the table_helper_handler should enforce column boundaries.
          */
         row = NULL;
-        tblreq_info = extract_table_info(current);
+        tblreq_info = netsnmp_extract_table_info(current);
         assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
         
         /*
@@ -506,13 +506,13 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
          */
         index.idx = tblreq_info->index_oid;
         index.idx_len = tblreq_info->index_oid_len;
-        tmp = netsnmp_Get_oid_data( array_group_tbl, &index, 1);
+        tmp = netsnmp_Get_oid_data( netsnmp_array_group_tbl, &index, 1);
         if(tmp) {
             DEBUGMSGTL(("helper:table_array:group", "    existing group:"));
             DEBUGMSGOID(("helper:table_array:group", index.idx,index.idx_len));
             DEBUGMSG(("helper:table_array:group", "\n"));
-            g = (array_group*)tmp;
-            i = SNMP_MALLOC_TYPEDEF(array_group_item);
+            g = (netsnmp_array_group*)tmp;
+            i = SNMP_MALLOC_TYPEDEF(netsnmp_netsnmp_array_group_item);
             i->ri = current;
             i->tri = tblreq_info;
             i->next = g->list;
@@ -523,8 +523,8 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
         DEBUGMSGTL(("helper:table_array:group", "    new group"));
         DEBUGMSGOID(("helper:table_array:group", index.idx,index.idx_len));
         DEBUGMSG(("helper:table_array:group", "\n"));
-        g = SNMP_MALLOC_TYPEDEF(array_group);
-        i = SNMP_MALLOC_TYPEDEF(array_group_item);
+        g = SNMP_MALLOC_TYPEDEF(netsnmp_array_group);
+        i = SNMP_MALLOC_TYPEDEF(netsnmp_netsnmp_array_group_item);
         g->list = i;
         g->table = tad->array;
         i->ri = current;
@@ -554,7 +554,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
         g->index.idx = row->idx;
         g->index.idx_len = row->idx_len;
 
-        netsnmp_Add_oid_data( array_group_tbl, g );
+        netsnmp_Add_oid_data( netsnmp_array_group_tbl, g );
 
     } /** for( current ... ) */
 }
@@ -566,7 +566,7 @@ process_set_group( netsnmp_oid_array_header* o, void *c )
 #pragma warning "should we continue processing after an error??"
 #endif
     set_context * context = (set_context *)c;
-    array_group * ag = (array_group *)o;
+    netsnmp_array_group * ag = (netsnmp_array_group *)o;
 
     switch(context->agtreq_info->mode) {
 
@@ -663,7 +663,7 @@ process_set_group( netsnmp_oid_array_header* o, void *c )
         
     default:
         snmp_log(LOG_ERR, "unknown mode processing SET for "
-                 "table_array_helper_handler\n");
+                 "netsnmp_table_array_helper_handler\n");
         /**context->status = SNMP_ERR_GENERR*/;
         break;
     }
@@ -677,27 +677,27 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
                       char               *handler_name)
 {
     set_context context;
-    oid_array array_group_tbl;
+    oid_array netsnmp_array_group_tbl;
 
     /*
      * create and save structure for set info
      */
-    array_group_tbl = (oid_array)netsnmp_agent_netsnmp_get_list_data
+    netsnmp_array_group_tbl = (oid_array)netsnmp_agent_netsnmp_get_list_data
         (agtreq_info, handler_name);
-    if(array_group_tbl == NULL) {
+    if(netsnmp_array_group_tbl == NULL) {
         netsnmp_data_list *tmp;
-        array_group_tbl = netsnmp_Initialise_oid_array( sizeof(void*) );
+        netsnmp_array_group_tbl = netsnmp_Initialise_oid_array( sizeof(void*) );
 
         DEBUGMSGTL(("helper:table_array", "Grouping requests by oid\n"));
 
         tmp = netsnmp_create_netsnmp_data_list(handler_name,
-                               array_group_tbl,
-                               release_array_groups);
+                               netsnmp_array_group_tbl,
+                               release_netsnmp_array_groups);
         netsnmp_agent_netsnmp_add_list_data(agtreq_info, tmp);
         /*
          * group requests.
          */
-        group_requests( agtreq_info, requests, array_group_tbl, tad );
+        group_requests( agtreq_info, requests, netsnmp_array_group_tbl, tad );
     }
 
     /*
@@ -706,7 +706,7 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
     context.agtreq_info = agtreq_info;
     context.tad = tad;
     context.status = SNMP_ERR_NOERROR;
-    netsnmp_For_each_oid_data( array_group_tbl, process_set_group, &context, 0 );
+    netsnmp_For_each_oid_data( netsnmp_array_group_tbl, process_set_group, &context, 0 );
 
     return context.status;
 }
@@ -716,13 +716,13 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
  **********************************************************************
  *                                                                    *
  *                                                                    *
- * table_array_helper_handler()                                       *
+ * netsnmp_table_array_helper_handler()                                       *
  *                                                                    *
  *                                                                    *
  **********************************************************************
  **********************************************************************/
 int
-table_array_helper_handler(
+netsnmp_table_array_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *agtreq_info,

@@ -7,11 +7,11 @@
 extern "C" {
 #endif
 
-netsnmp_mib_handler *get_serialize_handler(void);
-int register_serialize(netsnmp_handler_registration *reginfo);
-void init_serialize(void);
+netsnmp_mib_handler *netsnmp_get_serialize_handler(void);
+int netsnmp_register_serialize(netsnmp_handler_registration *reginfo);
+void netsnmp_init_serialize(void);
     
-Netsnmp_Node_Handler serialize_helper_handler;
+Netsnmp_Node_Handler netsnmp_serialize_helper_handler;
 
 #ifdef __cplusplus
 };

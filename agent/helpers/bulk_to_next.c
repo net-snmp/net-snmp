@@ -27,8 +27,8 @@
  *  handler chain.
  */
 netsnmp_mib_handler *
-get_bulk_to_next_handler(void) {
-    return netsnmp_create_handler("bulk_to_next", bulk_to_next_helper);
+netsnmp_get_bulk_to_next_handler(void) {
+    return netsnmp_create_handler("bulk_to_next", netsnmp_bulk_to_next_helper);
 }
 
 void
@@ -53,7 +53,7 @@ bulk_to_next_fix_requests(netsnmp_request_info              *requests)
 
 /** @internal Implements the bulk_to_next handler */
 int
-bulk_to_next_helper(
+netsnmp_bulk_to_next_helper(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -84,7 +84,7 @@ bulk_to_next_helper(
  *  use.
  */
 void
-init_bulk_to_next_helper(void) 
+init_netsnmp_bulk_to_next_helper(void) 
 {
-    netsnmp_register_handler_by_name("bulk_to_next", get_bulk_to_next_handler());
+    netsnmp_register_handler_by_name("bulk_to_next", netsnmp_get_bulk_to_next_handler());
 }

@@ -13,19 +13,19 @@ extern "C" {
    functions found below.
  */
 
-#define TABLE_DATA_SET_NAME "table_data_set"
+#define TABLE_DATA_SET_NAME "netsnmp_table_data_set"
 
-typedef int (Value_Change_Ok)(char *old_value, size_t old_value_len,
+typedef int (Netsnmp_Value_Change_Ok)(char *old_value, size_t old_value_len,
                               char *new_value, size_t new_value_len);
 
 /* stored within a given row */
-typedef struct table_data_set_storage_s {
+typedef struct netsnmp_netsnmp_table_data_set_storage_s {
    unsigned int column;
 
    /* info about it? */
    char writable;
    u_char type;
-   Value_Change_Ok *change_ok_fn;
+   Netsnmp_Value_Change_Ok *change_ok_fn;
 
    /* data actually stored */
     union { /* value of variable */
@@ -42,42 +42,42 @@ typedef struct table_data_set_storage_s {
     } data;
    u_long  data_len;
    
-   struct table_data_set_storage_s *next;
-} table_data_set_storage;
+   struct netsnmp_netsnmp_table_data_set_storage_s *next;
+} netsnmp_netsnmp_table_data_set_storage;
 
-typedef struct table_data_set_s {
+typedef struct netsnmp_table_data_set_s {
    table_data *table;
-   table_data_set_storage *default_row;
-} table_data_set;
+   netsnmp_netsnmp_table_data_set_storage *default_row;
+} netsnmp_table_data_set;
 
-Netsnmp_Node_Handler table_data_set_helper_handler;
+Netsnmp_Node_Handler netsnmp_netsnmp_table_data_set_helper_handler;
 
 /* to set, add column, type, (writable) ? 1 : 0 */
-int table_set_add_default_row(table_data_set *, unsigned int, int, int);
+int netsnmp_table_set_add_default_row(netsnmp_table_data_set *, unsigned int, int, int);
 /* to set, add column, type, (writable) ? 1 : 0, ... */
 #if HAVE_STDARG_H
-void table_set_multi_add_default_row(table_data_set *, ...);
+void netsnmp_netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *, ...);
 #else
-void table_set_multi_add_default_row(va_alist);
+void netsnmp_netsnmp_table_set_multi_add_default_row(va_alist);
 #endif
-int set_row_column(table_row *, unsigned int, int, const char *, size_t);
-table_data_set_storage *table_data_set_find_column(table_data_set_storage *,
+int netsnmp_set_row_column(netsnmp_table_row *, unsigned int, int, const char *, size_t);
+netsnmp_netsnmp_table_data_set_storage *netsnmp_netsnmp_table_data_set_find_column(netsnmp_netsnmp_table_data_set_storage *,
                                                    unsigned int);
-int register_table_data_set(netsnmp_handler_registration *, table_data_set *,
-                            table_registration_info *);
-netsnmp_mib_handler *get_table_data_set_handler(table_data_set *);
-table_data_set *create_table_data_set(const char *);
-int mark_row_column_writable(table_row *row, int column, int writable);
-inline table_data_set *extract_table_data_set(netsnmp_request_info *request);
-void config_parse_table_set(const char *token, char *line);
-void config_parse_add_row(const char *token, char *line);
-inline void table_dataset_add_index(table_data_set *table, u_char type);
-inline void table_dataset_add_row(table_data_set *table, table_row *row);
+int netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *, netsnmp_table_data_set *,
+                            netsnmp_table_registration_info *);
+netsnmp_mib_handler *get_netsnmp_table_data_set_handler(netsnmp_table_data_set *);
+netsnmp_table_data_set *netsnmp_create_netsnmp_table_data_set(const char *);
+int netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column, int writable);
+inline netsnmp_table_data_set *extract_netsnmp_table_data_set(netsnmp_request_info *request);
+void netsnmp_config_parse_table_set(const char *token, char *line);
+void netsnmp_config_parse_add_row(const char *token, char *line);
+inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type);
+inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
     
 #ifdef __cplusplus
 };
 #endif
 
-#define table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
+#define netsnmp_netsnmp_table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
 
 #endif /* _TABLE_DATA_SET_HANDLER_H_ */

@@ -32,7 +32,7 @@ static void table_data_free_func(void *data);
  *  
  *  This handler truly shows the power of the new handler mechanism.
  *  By creating a table handler and injecting it into your calling
- *  chain, or by using the register_table() function to register your
+ *  chain, or by using the netsnmp_register_table() function to register your
  *  table, you get access to some pre-parsed information.
  *  Specifically, the table handler pulls out the column number and
  *  indexes from the request oid so that you don't have to do the
@@ -47,18 +47,18 @@ static void table_data_free_func(void *data);
  *  @{
  */
 
-/** Given a table_registration_info object, creates a table handler.
+/** Given a netsnmp_table_registration_info object, creates a table handler.
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
  *  store it's information into the request->parent_data structure.
  */
 netsnmp_mib_handler    *
-get_table_handler(table_registration_info * tabreq)
+netsnmp_get_table_handler(netsnmp_table_registration_info * tabreq)
 {
     netsnmp_mib_handler    *ret = NULL;
 
     if (!tabreq) {
-        snmp_log(LOG_INFO, "get_table_handler(NULL) called\n");
+        snmp_log(LOG_INFO, "netsnmp_get_table_handler(NULL) called\n");
         return NULL;
     }
 
@@ -71,15 +71,15 @@ get_table_handler(table_registration_info * tabreq)
 }
 
 
-/** creates a table handler given the table_registration_info object,
+/** creates a table handler given the netsnmp_table_registration_info object,
  *  inserts it into the request chain and then calls
  *  netsnmp_register_handler() to register the table into the agent.
  */
 int
-register_table(netsnmp_handler_registration * reginfo,
-               table_registration_info * tabreq)
+netsnmp_register_table(netsnmp_handler_registration * reginfo,
+               netsnmp_table_registration_info * tabreq)
 {
-    netsnmp_inject_handler(reginfo, get_table_handler(tabreq));
+    netsnmp_inject_handler(reginfo, netsnmp_get_table_handler(tabreq));
     return netsnmp_register_handler(reginfo);
 }
 
@@ -88,19 +88,19 @@ register_table(netsnmp_handler_registration * reginfo,
  *  netsnmp_request_info information.  The resulting information includes the
  *  index values and the column number.
  */
-inline table_netsnmp_request_info *
-extract_table_info(netsnmp_request_info * request)
+inline netsnmp_table_request_info *
+netsnmp_extract_table_info(netsnmp_request_info * request)
 {
-    return (table_netsnmp_request_info *)
+    return (netsnmp_table_request_info *)
         netsnmp_request_netsnmp_get_list_data(request, TABLE_HANDLER_NAME);
 }
 
-/** extracts the registered table_registration_info object from a
+/** extracts the registered netsnmp_table_registration_info object from a
  *  netsnmp_handler_registration object */
-table_registration_info *
-find_table_registration_info(netsnmp_handler_registration * reginfo)
+netsnmp_table_registration_info *
+netsnmp_find_netsnmp_table_registration_info(netsnmp_handler_registration * reginfo)
 {
-    return (table_registration_info *)
+    return (netsnmp_table_registration_info *)
         netsnmp_find_handler_data_by_name(reginfo, TABLE_HANDLER_NAME);
 }
 
@@ -113,17 +113,17 @@ table_helper_handler(netsnmp_mib_handler * handler,
 
     netsnmp_request_info   *request;
 
-    table_registration_info *tbl_info;
+    netsnmp_table_registration_info *tbl_info;
     int             oid_index_pos = reginfo->rootoid_len + 2;
     unsigned int    oid_column_pos = reginfo->rootoid_len + 1;
     unsigned int    tmp_idx, tmp_len;
     int             incomplete, out_of_range, cleaned_up = 0;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
-    table_netsnmp_request_info *tbl_req_info;
+    netsnmp_table_request_info *tbl_req_info;
     struct variable_list *vb;
 
-    tbl_info = (table_registration_info *) handler->myvoid;
+    tbl_info = (netsnmp_table_registration_info *) handler->myvoid;
 
     if ((!handler->myvoid) || (!tbl_info->indexes)) {
         snmp_log(LOG_INFO, "improperly registered table found\n");
@@ -251,7 +251,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
          */
 
         incomplete = 0;
-        tbl_req_info = SNMP_MALLOC_TYPEDEF(table_netsnmp_request_info);
+        tbl_req_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_request_info);
         tbl_req_info->reg_info = tbl_info;
         tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
         tbl_req_info->number_indexes = 0;       /* none yet */
@@ -295,7 +295,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
              */
             else if (tbl_info->valid_columns) {
                 tbl_req_info->colnum =
-                    closest_column(var->name[oid_column_pos],
+                    netsnmp_closest_column(var->name[oid_column_pos],
                                    tbl_info->valid_columns);
                 if (tbl_req_info->colnum == 0)
                     continue;
@@ -453,9 +453,9 @@ table_helper_handler(netsnmp_mib_handler * handler,
  *  returning varbind.
  */
 int
-table_build_result(netsnmp_handler_registration * reginfo,
+netsnmp_table_build_result(netsnmp_handler_registration * reginfo,
                    netsnmp_request_info * reqinfo,
-                   table_netsnmp_request_info * table_info, u_char type,
+                   netsnmp_table_request_info * table_info, u_char type,
                    u_char * result, size_t result_len)
 {
 
@@ -470,7 +470,7 @@ table_build_result(netsnmp_handler_registration * reginfo,
         free(var->name);
     var->name = NULL;
 
-    if (table_build_oid(reginfo, reqinfo, table_info) != SNMPERR_SUCCESS)
+    if (netsnmp_table_build_oid(reginfo, reqinfo, table_info) != SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
     snmp_set_var_typed_value(var, type, result, result_len);
@@ -485,8 +485,8 @@ table_build_result(netsnmp_handler_registration * reginfo,
  *  object.
  */
 int
-table_build_oid(netsnmp_handler_registration * reginfo,
-                netsnmp_request_info * reqinfo, table_netsnmp_request_info * table_info)
+netsnmp_table_build_oid(netsnmp_handler_registration * reginfo,
+                netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
     struct variable_list *var;
@@ -510,9 +510,9 @@ table_build_oid(netsnmp_handler_registration * reginfo,
 /** Builds an oid from index information.
  */
 int
-table_build_oid_from_index(netsnmp_handler_registration * reginfo,
+netsnmp_netsnmp_table_build_oid_from_index(netsnmp_handler_registration * reginfo,
                            netsnmp_request_info * reqinfo,
-                           table_netsnmp_request_info * table_info)
+                           netsnmp_table_request_info * table_info)
 {
     oid             tmpoid[MAX_OID_LEN];
     struct variable_list *var;
@@ -537,7 +537,7 @@ table_build_oid_from_index(netsnmp_handler_registration * reginfo,
 
 /** parses an OID into table indexses */
 int
-update_variable_list_from_index(table_netsnmp_request_info * tri)
+netsnmp_update_variable_list_from_index(netsnmp_table_request_info * tri)
 {
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
@@ -545,7 +545,7 @@ update_variable_list_from_index(table_netsnmp_request_info * tri)
 
 /** builds an oid given a set of indexes. */
 int
-update_indexes_from_variable_list(table_netsnmp_request_info * tri)
+netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info * tri)
 {
     return build_oid_noalloc(tri->index_oid, sizeof(tri->index_oid),
                              &tri->index_oid_len, NULL, 0, tri->indexes);
@@ -560,7 +560,7 @@ update_indexes_from_variable_list(table_netsnmp_request_info * tri)
  * returns 0 if not. 
  */
 int
-check_getnext_reply(netsnmp_request_info * request,
+netsnmp_check_getnext_reply(netsnmp_request_info * request,
                     oid * prefix,
                     size_t prefix_len,
                     struct variable_list *newvar,
@@ -604,7 +604,7 @@ check_getnext_reply(netsnmp_request_info * request,
 void
 table_data_free_func(void *data)
 {
-    table_netsnmp_request_info *info = (table_netsnmp_request_info *) data;
+    netsnmp_table_request_info *info = (netsnmp_table_request_info *) data;
     if (!info)
         return;
     snmp_free_varbind(info->indexes);
@@ -624,7 +624,7 @@ table_helper_cleanup(netsnmp_agent_request_info * reqinfo, netsnmp_request_info 
 
 
 unsigned int
-closest_column(unsigned int current, column_info * valid_columns)
+netsnmp_closest_column(unsigned int current, netsnmp_column_info * valid_columns)
 {
     unsigned int    closest = 0;
     char            done = 0;
@@ -682,9 +682,9 @@ closest_column(unsigned int current, column_info * valid_columns)
 
 void
 #if HAVE_STDARG_H
-table_helper_add_indexes(table_registration_info *tinfo, ...)
+netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo, ...)
 #else
-table_helper_add_indexes(va_alist)
+netsnmp_netsnmp_netsnmp_netsnmp_table_helper_add_indexes(va_alist)
   va_dcl
 #endif
 {
@@ -694,14 +694,14 @@ table_helper_add_indexes(va_alist)
 #if HAVE_STDARG_H
   va_start(debugargs,tinfo);
 #else
-  table_registration_info *tinfo;
+  netsnmp_table_registration_info *tinfo;
   
   va_start(debugargs);
   tinfo = va_arg(debugargs, table_info *);
 #endif
 
   while((type = va_arg(debugargs, int)) != 0) {
-      table_helper_add_index(tinfo, type);
+      netsnmp_netsnmp_table_helper_add_index(tinfo, type);
   }
 
   va_end(debugargs);
