@@ -330,7 +330,6 @@ static void do_linkup (struct module *, struct node *);
 static void dump_module_list (void);
 static int get_token (FILE *, char *, int);
 static char last = ' ';
-static void unget_token (int);
 static int parseQuoteString (FILE *, char *, int);
 static int tossObjectIdentifier (FILE *);
 static int  name_hash (const char *);
@@ -376,6 +375,8 @@ static void  new_module  (const char *, const char *);
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 static struct index_list *getIndexes(FILE *fp);
 static void free_indexes(struct index_list *idxs);
+static void free_ranges(struct range_list *idxs);
+static void free_enums(struct enum_list *idxs);
 
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
@@ -633,34 +634,9 @@ free_tree(struct tree *Tree)
         return;
     }
 
-    if (Tree->enums)
-    {
-        struct enum_list *ep, *tep;
-
-        ep = Tree->enums;
-        while(ep)
-        {
-            tep = ep;
-            ep = ep->next;
-            if (tep->label)
-                free(tep->label);
-            free((char*)tep);
-        }
-    }
-    if (Tree->ranges)
-    {
-        struct range_list *rp, *trp;
-
-        rp = Tree->ranges;
-        while(rp)
-        {
-            trp = rp;
-            rp = rp->next;
-            free((char*)trp);
-        }
-    }
-    if (Tree->indexes)
-      free_indexes(Tree->indexes);
+    free_enums(Tree->enums);
+    free_ranges(Tree->ranges);
+    free_indexes(Tree->indexes);
     if (Tree->description)
         free(Tree->description);
     if (Tree->label)
@@ -676,23 +652,18 @@ free_tree(struct tree *Tree)
 static void
 free_node(struct node *np)
 {
-    struct enum_list *ep, *tep;
-
-    if (np->tc_index == -1) ep = np->enums;
-    else ep = NULL;
-    while (ep) {
-        tep = ep;
-        ep = ep->next;
-        if (tep->label)
-            free(tep->label);
-        free((char*)tep);
+    if (np->tc_index == -1) {
+        free_enums(np->enums);
     }
+    free_ranges(np->ranges);
+    free_indexes(np->indexes);
     if (np->description)
         free(np->description);
-    if (np->indexes)
-        free_indexes(np->indexes);
     if (np->label)
         free(np->label);
+
+    if (np->units)
+        free(np->units);
     if (np->parent)
         free(np->parent);
 
@@ -942,6 +913,9 @@ find_tree_node(const char *name,
     struct tree *tp, *headtp;
     int count, *int_p;
 
+    if (!name || !*name)
+	return(NULL);
+
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
         if ( !label_compare(tp->label, name) ) {
@@ -1181,6 +1155,7 @@ do_subtree(struct tree *root,
                 anon_tp->indexes = tp->indexes;  tp->indexes=NULL;
                 anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
                 anon_tp->hint = tp->hint;  tp->hint=NULL;
+                anon_tp->units = tp->units;  tp->units = NULL;
                 anon_tp->description = tp->description;  tp->description=NULL;
                 set_function(anon_tp);
             }
@@ -1655,7 +1630,8 @@ parse_asntype(FILE *fp,
         return NULL;
     } else if (type == LEFTBRACKET) {
         struct node *np;
-        unget_token (type);
+        int ch_next = '{';
+        ungetc(ch_next, fp);
         np = parse_objectid (fp, name);
         if (np != NULL) {
             *ntype = get_token(fp, ntoken, MAXTOKEN);
@@ -2711,21 +2687,6 @@ parse(FILE *fp,
     return root;
 }
 
-/*
- * Parses a token from the file.  The type of the token parsed is returned,
- * and the text is placed in the string pointed to by token.
- */
-
-static int ungotten_token = CONTINUE;
-
-static void unget_token (int token)
-{
-    if (ungotten_token != CONTINUE) {
-        print_error("Double unget", "ungotten_token", CONTINUE);
-    }
-    ungotten_token = token;
-}
-
 /* return zero if character is not a label character. */
 static int
 is_labelchar (int ich)
@@ -2738,6 +2699,11 @@ is_labelchar (int ich)
     return 0;
 }
 
+/*
+ * Parses a token from the file.  The type of the token parsed is returned,
+ * and the text is placed in the string pointed to by token.
+ */
+
 static int
 get_token(FILE *fp,
 	  char *token,
@@ -2748,12 +2714,6 @@ get_token(FILE *fp,
     register int hash = 0;
     register struct tok *tp;
     int too_long = 0;
-
-    if (ungotten_token != CONTINUE) {
-        int tok = ungotten_token;
-        ungotten_token = CONTINUE;
-        return tok;
-    }
 
     *cp = '\0';
     ch = last;
@@ -2898,6 +2858,14 @@ get_token(FILE *fp,
 	}
 	return LABEL;
     }
+}
+
+int
+snmp_get_token(FILE *fp,
+	  char *token,
+	  int maxtlen)
+{
+    return get_token(fp, token, maxtlen);
 }
 
 int
@@ -3087,23 +3055,20 @@ getIndexes(FILE *fp) {
   struct index_list *mylist = NULL;
   struct index_list **mypp = &mylist;
   
-  
   type = get_token(fp, token, MAXTOKEN);
 
   if (type != LEFTBRACKET) {
-    free(mylist);
     return NULL;
   }
 
   type = get_token(fp, token, MAXTOKEN);
   while (type != RIGHTBRACKET && type != ENDOFFILE) {
-    if (type == LABEL) {
-      *mypp = (struct index_list *) xmalloc(sizeof(struct index_list));
-      if (*mypp == NULL)
-        return NULL;
-      (*mypp)->ilabel = xstrdup(token);
-      (*mypp)->next = NULL;
-      mypp = &(*mypp)->next;
+    if ((type == LABEL) || (type & SYNTAX_MASK)) {
+      *mypp = (struct index_list *) xcalloc(1, sizeof(struct index_list));
+      if (*mypp) {
+        (*mypp)->ilabel = xstrdup(token);
+        mypp = &(*mypp)->next;
+      }
     }
     type = get_token(fp, token, MAXTOKEN);
   }
@@ -3117,8 +3082,35 @@ free_indexes(struct index_list *idxs) {
   
   while(idxs) {
     idxp = idxs->next;
+    if (idxs->ilabel) free(idxs->ilabel);
     free(idxs);
     idxs = idxp;
+  }
+}
+
+static void
+free_ranges(struct range_list *idxs) {
+  struct range_list *idxp;
+  
+  while(idxs) {
+    idxp = idxs->next;
+    free(idxs);
+    idxs = idxp;
+  }
+}
+
+static void
+free_enums(struct enum_list *ep)
+{
+  struct enum_list *tep;
+
+  while(ep)
+  {
+    tep = ep;
+    ep = ep->next;
+    if (tep->label)
+      free(tep->label);
+    free((char*)tep);
   }
 }
 
