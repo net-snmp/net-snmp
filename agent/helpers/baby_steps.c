@@ -224,13 +224,21 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
             u_int    mode_flag;
 
             /*
-             * skip undo commit if commit wasn't hit
+             * skip undo commit if commit wasn't hit, and
+             * undo_cleanup if undo_setup wasn't hit.
              */
             if((MODE_SET_UNDO == save_mode) &&
                (MODE_BSTEP_UNDO_COMMIT == mode_map_ptr[i]) &&
                !(BABY_STEP_COMMIT & bs_modes->completed)) {
                 DEBUGMSGTL(("baby_steps",
-                            "   skipping commit undo (no previous commit)\n"));
+                            "   skipping commit undo (no commit)\n"));
+                continue;
+            }
+            else if((MODE_SET_FREE == save_mode) &&
+               (MODE_BSTEP_UNDO_CLEANUP == mode_map_ptr[i]) &&
+               !(BABY_STEP_UNDO_SETUP & bs_modes->completed)) {
+                DEBUGMSGTL(("baby_steps",
+                            "   skipping undo cleanup (no undo setup)\n"));
                 continue;
             }
 
