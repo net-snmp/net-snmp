@@ -181,7 +181,7 @@ agentx_close_session(netsnmp_session * ss, int why)
 int
 agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
                 int priority, int range_subid, oid range_ubound,
-                int timeout, u_char flags)
+                int timeout, u_char flags, const char *contextName)
 {
     netsnmp_pdu    *pdu, *response;
 
@@ -202,6 +202,11 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
     pdu->range_subid = range_subid;
+    if (contextName) {
+        pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
+        pdu->community = strdup(contextName);
+        pdu->community_len = strlen(contextName);
+    }
 
     if (flags & FULLY_QUALIFIED_INSTANCE) {
         pdu->flags |= AGENTX_MSG_FLAG_INSTANCE_REGISTER;
@@ -234,7 +239,8 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
 
 int
 agentx_unregister(netsnmp_session * ss, oid start[], size_t startlen,
-                  int priority, int range_subid, oid range_ubound)
+                  int priority, int range_subid, oid range_ubound,
+                  const char *contextName)
 {
     netsnmp_pdu    *pdu, *response;
 
@@ -254,6 +260,12 @@ agentx_unregister(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->priority = priority;
     pdu->sessid = ss->sessid;
     pdu->range_subid = range_subid;
+    if (contextName) {
+        pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
+        pdu->community = strdup(contextName);
+        pdu->community_len = strlen(contextName);
+    }
+
     if (range_subid) {
         snmp_pdu_add_variable(pdu, start, startlen, ASN_OBJECT_ID,
                               (u_char *) start, startlen * sizeof(oid));

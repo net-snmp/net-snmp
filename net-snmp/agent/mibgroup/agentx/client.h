@@ -13,9 +13,9 @@ extern          "C" {
     int             agentx_open_session(netsnmp_session *);
     int             agentx_close_session(netsnmp_session *, int);
     int             agentx_register(netsnmp_session *, oid *, size_t, int,
-                                    int, oid, int, u_char);
+                                    int, oid, int, u_char, const char *);
     int             agentx_unregister(netsnmp_session *, oid *, size_t,
-                                      int, int, oid);
+                                      int, int, oid, const char *);
     netsnmp_variable_list *agentx_register_index(netsnmp_session *,
                                                  netsnmp_variable_list *,
                                                  int);
