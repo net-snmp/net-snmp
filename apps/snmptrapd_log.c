@@ -147,7 +147,7 @@ typedef enum {
   CHR_TRAP_NUM   = 'w',       /* trap number */
   CHR_TRAP_DESC  = 'W',       /* trap's description (textual) */
   CHR_TRAP_STYPE = 'q',       /* trap's subtype */
-  CHR_TRAP_VARS  = 'v',       /* tab-separated list of trap's variables */
+  CHR_TRAP_VARS  = 'v'        /* tab-separated list of trap's variables */
 } parse_chr_type;
 
 /* These symbols define the states for the parser's state machine */
@@ -156,7 +156,7 @@ typedef enum {
   PARSE_BACKSLASH,           /* saw a backslash */
   PARSE_IN_FORMAT,           /* saw a % sign, in a format command */
   PARSE_GET_WIDTH,           /* getting field width */
-  PARSE_GET_PRECISION,       /* getting field precision */
+  PARSE_GET_PRECISION        /* getting field precision */
 } parse_state_type;
 
 /* macros */
