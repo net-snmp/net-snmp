@@ -859,7 +859,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
           struct timeval now;
 #endif
     struct nmparms hp_nmparms;
-    mib_ifEntry hp_ifEntry;
+    static mib_ifEntry hp_ifEntry;
     int  hp_fd;
     int  hp_len=sizeof(hp_ifEntry);
 
