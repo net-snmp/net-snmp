@@ -208,9 +208,17 @@ sub async_cb1 {
 $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
 			    ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
-@list = $s1->bulkwalk(2, 16, $vars, [ \&async_cb1, $vars ] );
-ok($s1->{ErrorNum} == 0);
-SNMP::MainLoop();
+if ($^O =~ /win32/i) {
+  warn "Win32 detected - skipping and failing async calls\n";
+  for (my $i=1;$i <= 21; $i++) {
+    ok(0);
+  }
+}
+else {
+  @list = $s1->bulkwalk(2, 16, $vars, [ \&async_cb1, $vars ] );
+  ok($s1->{ErrorNum} == 0);
+  SNMP::MainLoop();
+}
 ok(1);
 
 snmptest_cleanup();
