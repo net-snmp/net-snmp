@@ -47,7 +47,7 @@ unsigned char *var_extensible_hp(vp, name, length, exact, var_len, write_method)
   int count, result,i, rtest=0;
   register int interface;
   struct myproc *proc;
-  long long_ret;
+  static long long_ret;
   char errmsg[300];
 
   bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
