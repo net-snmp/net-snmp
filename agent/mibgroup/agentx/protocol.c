@@ -587,14 +587,6 @@ _agentx_build(struct snmp_session        *session,
 		DEBUGINDENTLESS();
 		bufp        += 4;
 		*out_length -= 4;
-
-			/* If the OID has been 'compacted', then tweak
-			     the packet's 'range_subid' to reflect this */
-		if ( *prefix_ptr ) {
-		     *range_ptr -= 5;
-		     DEBUGPRINTINDENT("dumpv_send");
-		     DEBUGMSG(("dumpv_send", "  Range SubID tweaked:\t%d\n", *(range_ptr) ));
-		}
 	    }
 	    break;
 	    
@@ -1307,10 +1299,6 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
                 }
 
 		if ( pdu->range_subid ) {
-		
-			if ( *prefix_ptr ) {
-			    pdu->range_subid += 5;
-			}
     			range_bound = agentx_parse_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 			bufp    += 4;
