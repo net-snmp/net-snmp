@@ -136,6 +136,12 @@ struct addrCache {
 #define OLD	2
 };
 
+struct trap_sink {
+    struct snmp_session ses;
+    struct snmp_session *sesp;
+    struct trap_sink *next;
+} *sinks = NULL;
+
 #define ADDRCACHE 10
 
 static struct addrCache addrCache[ADDRCACHE];
@@ -148,6 +154,7 @@ int snmp_read_packet __P((int));
 char *sprintf_stamp __P((time_t *));
 int agent_party_init __P((in_addr_t, u_short, char *));
 int create_v1_trap_session __P((char *, char *));
+static void free_v1_trap_session __P((struct trap_sink *sp));
 void send_v1_trap __P((struct snmp_session *, int, int));
 char *reverse_bytes __P((char *, int));
 void usage __P((char *));
@@ -437,15 +444,8 @@ agent_party_init(myaddr, dest_port, view)
     return 0; /* SUCCESS */
 }
 
-struct trap_sink {
-    struct snmp_session ses;
-    struct snmp_session *sesp;
-    struct trap_sink *next;
-} *sinks = NULL;
-
 int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
-char *snmp_trapsink;
-char *snmp_trapcommunity = "public";
+char *snmp_trapcommunity = NULL;
 
 int create_v1_trap_session (sink, com)
     char *sink, *com;
@@ -453,6 +453,7 @@ int create_v1_trap_session (sink, com)
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
 
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
     new_sink->ses.version = SNMP_VERSION_1;
@@ -470,6 +471,28 @@ int create_v1_trap_session (sink, com)
     snmp_perror("snmpd");
     free(new_sink);
     return 0;
+}
+
+static void free_v1_trap_session (sp)
+    struct trap_sink *sp;
+{
+    snmp_close(sp->sesp);
+    if (sp->ses.community) free(sp->ses.community);
+    free (sp);
+}
+
+void snmpd_free_trapsinks __P((void))
+{
+    struct trap_sink *sp = sinks;
+    while (sp) {
+	sinks = sinks->next;
+	switch (sp->ses.version) {
+	case SNMP_VERSION_1:
+	    free_v1_trap_session(sp);
+	    break;
+	}
+	sp = sinks;
+    }
 }
 
 void
@@ -1020,34 +1043,43 @@ snmp_input(op, session, reqid, pdu, magic)
 }
     
 void snmpd_parse_config_authtrap(word, cptr)
-  char *word;
-  char *cptr;
+    char *word;
+    char *cptr;
 {
-  int i;
+    int i;
   
-  i = atoi(cptr);
-  if (i < 1 || i > 2)
-    config_perror("authtrapenable must be 1 or 2");
-  else
-    snmp_enableauthentraps = i;
+    i = atoi(cptr);
+    if (i < 1 || i > 2)
+	config_perror("authtrapenable must be 1 or 2");
+    else
+	snmp_enableauthentraps = i;
 }
 
 void snmpd_parse_config_trapsink(word, cptr)
-  char *word;
-  char *cptr;
+    char *word;
+    char *cptr;
 {
-  char tmpbuf[1024];
+    char tmpbuf[1024];
   
-  if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
-    sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
-    config_perror(tmpbuf);
-  }
+    if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
+	config_perror(tmpbuf);
+    }
 }
 
 void snmpd_parse_config_trapcommunity(word,cptr)
-  char *word;
-  char *cptr;
+    char *word;
+    char *cptr;
 {
-  snmp_trapcommunity = malloc (strlen(cptr));
-  copy_word(cptr, snmp_trapcommunity);
+    if (snmp_trapcommunity) free(snmp_trapcommunity);
+    snmp_trapcommunity = malloc (strlen(cptr));
+    copy_word(cptr, snmp_trapcommunity);
+}
+
+void snmpd_free_trapcommunity __P((void))
+{
+    if (snmp_trapcommunity) {
+	free(snmp_trapcommunity);
+	snmp_trapcommunity = NULL;
+    }
 }

@@ -10,5 +10,7 @@ extern u_char *getStatPtr __P((oid *, int *, u_char *, int *, u_short *, int, in
 /* config file parsing routines */
 void snmpd_parse_config_authtrap __P((char *, char *));
 void snmpd_parse_config_trapsink __P((char *, char *));
+void snmpd_free_trapsinks __P((void));
 void snmpd_parse_config_trapcommunity __P((char *, char *));
+void snmpd_free_trapcommunity __P((void));
 
