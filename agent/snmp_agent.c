@@ -103,6 +103,7 @@ int             deny_severity = LOG_WARNING;
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include <net-snmp/agent/mib_module_config.h>
+#include <net-snmp/agent/mib_modules.h>
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
@@ -330,10 +331,10 @@ get_set_cache(netsnmp_agent_session *asp)
                  * - one don't match case: agentx subagents. prev asp & reqinfo
                  *   freed, request reqinfo ptrs not cleared.
                  */
+                netsnmp_request_info *tmp = asp->requests;
                 DEBUGMSGTL(("verbose:asp",
                             "  reqinfo %p doesn't match cached reqinfo %p\n",
                             asp->reqinfo, asp->requests->agent_req_info));
-                netsnmp_request_info *tmp = asp->requests;
                 for(; tmp; tmp = tmp->next)
                     tmp->agent_req_info = asp->reqinfo;
             } else {
