@@ -149,6 +149,13 @@ Default is 1 second.
 .IP "AgentXRetries addr"
 Defines the number of retries for an AgentX request.
 Default is 5 retries.
+.P
+You can also put the following in your subagent.conf file (where
+"subagent" is the name you used in your init_snmp("subagent") api call:
+.IP "agentPingInterval NUM"
+This makes the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
+>>>>>>> 5.4.2.3
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
