@@ -63,6 +63,8 @@ portable package that solves this headache very neatly.
 
 -SEan <burke_sp@pacbell.net>
 
+------------------------------------------------------------
+
 Solaris 8 ships with a version of PERL compiled using sun's cc.  
 
 This causes a problem when attempting to compile net-snmp with the
@@ -128,3 +130,5 @@ make install
 perl -V
 
 if everything looks all right, do the net-snmp ./configure (don't forget to make clean if necessary)
+
+ -- Bruce Shaw <Bruce.Shaw@gov.ab.ca>
