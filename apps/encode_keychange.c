@@ -86,7 +86,7 @@ char	*newpass		= NULL,
 
 char	*transform_type_input	= NULL;
 
-oid	*transform_type		= NULL;	/* Type of HMAC hash to use.	  */
+const oid *transform_type	= NULL;	/* Type of HMAC hash to use.	  */
 
 
 

@@ -272,14 +272,14 @@ main(int argc, char *argv[])
       /* the old Ku is in the session, but we need the new one */
       if (session.securityAuthProto == NULL) {
           /* get .conf set default */
-          session.securityAuthProto =
-              get_default_authtype(&session.securityAuthProtoLen);
+	const oid *def = get_default_authtype(&session.securityAuthProtoLen);
+	session.securityAuthProto = snmp_duplicate_objid(def, session.securityAuthProtoLen);
       }
       if (session.securityAuthProto == NULL) {
           /* assume MD5 */
-          session.securityAuthProto = usmHMACMD5AuthProtocol;
-          session.securityAuthProtoLen =
-              sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+	  session.securityAuthProtoLen =
+	    sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+          session.securityAuthProto = snmp_duplicate_objid(usmHMACMD5AuthProtocol, session.securityAuthProtoLen);
       }
       rval = generate_Ku(session.securityAuthProto,
                          session.securityAuthProtoLen,
