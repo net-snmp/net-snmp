@@ -25,13 +25,13 @@
 snmptrap, snmpinform - sends an SNMP trap to a manager
 .SH SYNOPSIS
 .B snmptrap -v 1
-[COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID type value]...
+[COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID TYPE VALUE]...
 .PP
 .B snmptrap -v [2c|3]
-[COMMON OPTIONS] [-Ci] uptime trap-oid [OID type value]...
+[COMMON OPTIONS] [-Ci] uptime trap-oid [OID TYPE VALUE]...
 .PP
 .B snmpinform -v [2c|3]
-[COMMON OPTIONS] uptime trap-oid [OID type value]...
+[COMMON OPTIONS] uptime trap-oid [OID TYPE VALUE]...
 .SH DESCRIPTION
 .B snmptrap
 is an SNMP application that uses the SNMP TRAP operation to send
@@ -63,7 +63,7 @@ and
 respectively.
 .PP
 The
-.I type
+.I TYPE
 is a single character, one of:
 .RS
 .PD 0
