@@ -456,7 +456,7 @@ _mfd_${context}_pre_request(netsnmp_mib_handler *handler,
          * nothing we can do about it but log it
          */
         DEBUGMSGTL(("internal:${context}","error %d from "
-                    "${context}_undo_cleanup\n", rc));
+                    "${context}_pre_request\n", rc));
         netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
     
@@ -480,7 +480,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
          * nothing we can do about it but log it
          */
         DEBUGMSGTL(("internal:${context}","error %d from "
-                    "${context}_undo_cleanup\n", rc));
+                    "${context}_post_request\n", rc));
     }
     
     /*
@@ -647,6 +647,9 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
  @      end@ # accessible
 @   end@ # for each column
 
+     default:
+         snmp_log(LOG_ERR,"unknown column %d in _${context}_get_column\n", column);
+         break;
     }
 
     return rc;
@@ -789,7 +792,7 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
 
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
-        snmp_log(LOG_ERR, "unknown column in _${context}_check_column\n");
+            snmp_log(LOG_ERR, "unknown column %d in _${context}_check_column\n", column);
     }
 
     return rc;
@@ -918,57 +921,42 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
  * SET: Undo setup
  *
  *---------------------------------------------------------------------*/
-@if ("$m2c_data_context" eq "generated") && ($m2c_data_init == 0)@
-/**
+/*
  * @internal
- * Setup up context with information needed to undo a set request.
+ * Set the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
+_${context}_undo_setup_column( ${context}_rowreq_ctx *rowreq_ctx, int column )
 {
-    int rc = SNMP_ERR_NOERROR;
+    int rc = SNMPERR_SUCCESS;
+    
+    DEBUGMSGTL(("internal:${context}:_${context}_undo_setup_column","called\n"));
 
-    DEBUGMSGTL(("internal:${context}:${context}_undo_setup","called\n"));
+    netsnmp_assert(NULL != rowreq_ctx);
 
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != rowreq_ctx );
+    switch(column) {
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.settable == 1@
 
-    /*
-     * copy data to undo
-     */
-@    foreach $node nonindex@
-@        include m2c_setup_node.m2i@
-@        if $node.settable == 0@
-@           next@
-@        end@
-@        eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
-@        eval $m2c_ctx_lhs = "${m2c_undo_item}${node}_len"@
-@        include generic-ctx-copy.m2i@
-@    end@ # foreach nonindex
+    /* $m2c_node_summary */
+    case COLUMN_$node.uc:
+        rowreq_ctx->column_set_flags |= FLAG_$node.uc;
+        rc = ${node}_undo_setup(rowreq_ctx );
+        break;
+ @      end@ # settable
+@   end@ # for each column
+
+     default:
+         snmp_log(LOG_ERR,"unknown column %d in _${context}_undo_setup_column\n", column);
+         break;
+    }
+        
 
     return rc;
 }
 
-/**
- * @internal
- * Cleanup up undo context information.
- */
-NETSNMP_STATIC_INLINE int
-${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx )
-{
-    DEBUGMSGTL(("internal:${context}:${context}_undo_cleanup","called\n"));
 
-    /*
-     * nothing to do for generated undo context
-     */
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != rowreq_ctx );
-
-    return SNMP_ERR_NOERROR;
-}
-
-@end@
 ##----------------------------------------------------------------------
 /**
  * @internal
@@ -1000,13 +988,38 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
     }
 
 @end@
+    /*
+     * row undo setup
+     */
+    rowreq_ctx->column_set_flags = 0;
     rc = ${context}_undo_setup(rowreq_ctx);
     if (MFD_SUCCESS != rc)  {
         DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
                     "${context}_undo_setup\n", rc));
         netsnmp_request_set_error_all(requests, SNMP_VALIDATE_ERR(rc));
     }
-
+    else {
+        /*
+         * column undo setup
+         */
+        netsnmp_table_request_info * tri;
+        for(;requests; requests = requests->next) {
+            /*
+             * set column data
+             */
+            tri = netsnmp_extract_table_info(requests);
+            if(NULL == tri)
+                continue;
+            
+            rc = _${context}_undo_setup_column(rowreq_ctx, tri->colnum);
+            if(MFD_SUCCESS != rc)  {
+                DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                            "${context}_undo_setup_column\n", rc));
+                netsnmp_set_request_error(agtreq_info, requests, SNMP_VALIDATE_ERR(rc));
+            }
+        } /* for results */
+    }
+    
     return SNMP_ERR_NOERROR;
 }
 
@@ -1103,9 +1116,11 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
  @      end@ # settable
 @   end@ # for each column
 
+     default:
+         snmp_log(LOG_ERR,"unknown column %d in _${context}_set_column\n", column);
+         break;
     }
-        
-
+    
     return rc;
 }
 
@@ -1237,6 +1252,9 @@ _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
  @      end@ # settable
 @   end@ # for each column
 
+     default:
+         snmp_log(LOG_ERR,"unknown column %d in _${context}_undo_column\n", column);
+         break;
     }
 
     return rc;
