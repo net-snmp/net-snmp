@@ -55,6 +55,7 @@
  * Includes of local application header files 
  */
 
+#include "../../snmplib/system.h"
 #include "kernel_sunos5.h"
 
 /*-
@@ -600,7 +601,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 {
     int 		i, ret, idx = 1;
     int 		sd;
-    char 		buf[1024];
+    char 		buf[10240];
     struct ifconf 	ifconf;
     struct ifreq 	*ifrp;
     mib2_ifEntry_t	*ifp;
@@ -613,6 +614,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     ifconf.ifc_buf = buf;
     ifconf.ifc_len = sizeof(buf);
     if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
+	fprintf (stderr, "cannot SIOCGIFCONF - increase buffer size\n");
 	ret = -1;
 	goto Return;
     }
@@ -790,6 +792,7 @@ main (int argc, char **argv)
     exit(1);
   }
 
+  snmp_set_do_debugging(1);
   rc = getKstat(argv[1], argv[2], &val);
 
   if (rc == 0)
@@ -842,6 +845,7 @@ main (int argc, char **argv)
 	    argv[0]);
     exit(1);
   }
+
   switch (atoi(argv[2])) {
   case 0:
     req_type = GET_FIRST;
@@ -853,6 +857,8 @@ main (int argc, char **argv)
     req_type = GET_NEXT;
     break;
   };
+
+  snmp_set_do_debugging(1);
   while ((rc = getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
 			  req_type, &IF_cmp, &idx)) == 0) {
       idx = ifstat.ifIndex;
