@@ -139,6 +139,7 @@ TABLE OF CONTENTS
    I've created a new module with 'mib2c' but it doesn't work.  Why not?
    Where should I put the files produced by 'mib2c'?
    Mib2c only handles a single table in my MIB. How can I fix this?
+   How can I support a large table, with more than 256 column objects?
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
  MISC
@@ -3020,6 +3021,45 @@ Mib2c only handles a single table in my MIB. How can I fix this?
 	+       $variables{$ptable}{'processed'} .= 
 	            (eval "\"$variables{$ptable}{'code'}\"") . "\n\n";
 	     }
+
+
+
+How can I support a large table, with more than 256 column objects?
+------------------------------------------------------------------
+
+    This is a problem (at least apparently) with the v4 UCD module
+  API, which uses a "magic number" to distinguish between the various
+  column objects implemented by a common variable handling routine.
+  Since this field is defined as an unsigned character, it can only
+  take values 0-255.   So it would appear that the agent cannot
+  support tables (or scalar groups) with more than 256 objects,
+  since this would start to duplicate these magic numbers.
+
+    However, the agent doesn't actually care which routine implements
+  a given object, and magic numbers only need to be unique within a
+  single variable handling routine.  So it is actually perfectly
+  possible to implement a larger table by splitting it between two
+  (or more) variable handling routines.  These can then re-use the
+  magic numbers quite safely:
+
+    struct variable1 [] = {
+       {MAGIC1,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  1}},
+       {MAGIC2,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  2}},
+    		:
+       {MAGIC255, ASN_INTEGER, RWRITE, var_myfirst,  1, {255}},
+       {MAGIC1,   ASN_INTEGER, RWRITE, var_mysecond, 1, {256}},
+       {MAGIC2,   ASN_INTEGER, RWRITE, var_mysecond, 1, {257}},
+    		:
+       {MAGIC255, ASN_INTEGER, RWRITE, var_mysecond, 1, {510}}
+    };
+
+  All that matters is that a given magic number isn't re-used within
+  the same variable handling routine.  The v5 table handlers typically
+  use an integer variable for holding column information, so aren't
+  subject to the same limitations.
+
+    Though I'd have to question whether having such a wide table is
+  necessarily a particularly good design strategy!
 
 
 
