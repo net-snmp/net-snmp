@@ -219,7 +219,7 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyTag = strdup(buf);
     nptr->snmpNotifyTagLen = strlen(buf);
     nptr->snmpNotifyType = confirm ?
-        SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
+        SNMPNOTIFYTYPE_INFORM : SNMPNOTIFYTYPE_TRAP;
     nptr->snmpNotifyStorageType = ST_READONLY;
     nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
