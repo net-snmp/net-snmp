@@ -555,3 +555,44 @@ calculate_time_diff(struct timeval *now, struct timeval *then)
   return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
 }
 
+#ifndef HAVE_STRCASESTR
+/*
+ * only glibc2 has this.
+ */
+char *strcasestr(const char *haystack, const char *needle)
+{
+    register char *cp1=haystack, *cp2=needle;
+    char *cx;
+    int tstch1, tstch2;
+
+    /* printf("looking for '%s' in '%s'\n", needle, haystack); */
+    if (cp1 && cp2 && *cp1 && *cp2)
+        for (cp1=haystack, cp2=needle; *cp1; ) {
+            cx = cp1; cp2 = needle;
+            do {
+                /* printf("T'%c' ", *cp1); */
+                if (! *cp2) { /* found the needle */
+                    /* printf("\nfound '%s' in '%s'\n", needle, cx); */
+                    return (cx);
+                }
+                if (! *cp1)
+                    break;
+
+                tstch1 = toupper(*cp1);
+                tstch2 = toupper(*cp2);
+                if (tstch1 != tstch2)
+                    break;
+                /* printf("M'%c' ", *cp1); */
+                cp1++; cp2++;
+            }
+            while (1);
+            if (*cp1)
+                cp1++;
+        }
+    /* printf("\n"); */
+    if (cp1 && *cp1)
+        return (cp1);
+
+    return 0;
+}
+#endif
