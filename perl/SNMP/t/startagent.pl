@@ -1,7 +1,7 @@
 # common parameters used in SNMP::Session creation and tests
 $agent_host = 'localhost';
-$agent_port = 7000;
-$trap_port = 8000;
+$agent_port = 8765;
+$trap_port = 8764;
 $mibdir = '/usr/local/share/snmp/mibs';
 $comm = 'v1_private';
 $comm2 = 'v2c_private';
