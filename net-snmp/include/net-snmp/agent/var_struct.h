@@ -16,10 +16,6 @@
 #define FULLY_QUALIFIED_INSTANCE    0x01 
 #define SUBTREE_ATTACHED	    	0x02
 
-/* pre-defines for circular definitions */
-struct _netsnmp_handler_registration_data;
-typedef struct _netsnmp_handler_registration_data registration_data;
-
 struct subtree {
     oid			name[UCD_REGISTRY_OID_MAX_LEN];
 					/* objid prefix of registered subtree */
