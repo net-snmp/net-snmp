@@ -373,9 +373,9 @@ set_an_alarm(void)
  *             will be called in seconds.
  *
  * @param flags is an unsigned integer that specifies how frequent the callback
- *	function is called in seconds.  Should be SA_REPEAT or NULL.  If  
+ *	function is called in seconds.  Should be SA_REPEAT or 0.  If  
  *	flags  is  set with SA_REPEAT, then the registered callback function
- *	will be called every SA_REPEAT seconds.  If flags is NULL then the 
+ *	will be called every SA_REPEAT seconds.  If flags is 0 then the 
  *	function will only be called once and then removed from the 
  *	registered alarm list.
  *
