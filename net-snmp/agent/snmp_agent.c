@@ -7,6 +7,10 @@
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
  */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 
@@ -1354,6 +1358,11 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          */
         if ( status != 0  && asp->status == 0 )
             asp->status = status;
+
+        /* save the error status */ 
+        if (status != 0 && asp->status == 0) {
+           asp->status = status;
+        }
 
         switch (asp->pdu->command) {
             case SNMP_MSG_INTERNAL_SET_BEGIN:
