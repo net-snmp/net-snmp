@@ -340,7 +340,7 @@ $example_start
      * it out with the loop iterator
      */
     if(reuse && loop_save->itr_ctx->ctx) {
-        ifXTable_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
+        ${context}_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
         loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
         loop_ref->itr_ctx->ctx = tmp_ctx;
     }
