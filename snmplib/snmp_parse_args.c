@@ -66,15 +66,9 @@
 #include <net-snmp/version.h>
 #include <net-snmp/library/parse.h>
 #include <net-snmp/library/snmpv3.h>
+#include <net-snmp/library/transform_oids.h>
 
 int random_access = 0;
-
-#define USM_AUTH_PROTO_MD5_LEN 10
-static oid usmHMACMD5AuthProtocol[]  = { 1,3,6,1,6,3,10,1,1,2 };
-#define USM_AUTH_PROTO_SHA_LEN 10
-static oid usmHMACSHA1AuthProtocol[] = { 1,3,6,1,6,3,10,1,1,3 };
-#define USM_PRIV_PROTO_DES_LEN 10
-static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
 
 void
 snmp_parse_args_usage(FILE *outf)
@@ -148,6 +142,7 @@ handle_long_opt(const char *myoptarg)
     free(cp);
 }
 
+extern int snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz);
 int
 snmp_parse_args(int argc, 
 		char *const *argv, 
@@ -163,7 +158,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:");
+  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -292,6 +287,14 @@ snmp_parse_args(int argc,
 	Cpsz = optarg;
 	break;
 
+      case '3':
+        if (snmpv3_options(optarg, session, &Apsz, &Xpsz) < 0 ) {
+          return(-1);
+        }
+        break;
+
+#define SNMPV3_CMD_OPTIONS
+#ifdef  SNMPV3_CMD_OPTIONS
       case 'Z':
         session->engineBoots = strtoul(optarg, NULL, 10);
         if (session->engineBoots == 0 || !isdigit(optarg[0])) {
@@ -403,6 +406,7 @@ snmp_parse_args(int argc,
       case 'X':
         Xpsz = optarg;
         break;
+#endif /* SNMPV3_CMD_OPTIONS */
 
       case '?':
         return(-1);
