@@ -415,6 +415,9 @@ snmpget -c public -v 1 -Ov localhost ip.ipForwarding.0
 .br
 INTEGER: forwarding(1)
 .TP
+.B -OU
+Don't print the UNITS suffix at the end of the value.
+.TP
 .B -Ot
 Output timeticks values as raw numbers:
 .br
