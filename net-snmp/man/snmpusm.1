@@ -47,15 +47,17 @@ which sets up another default user called "initial" with the
 passphrase "setup_password" so that we can perform the initial setup
 of an agent:
 .RS
+.nf
 # VACM configuration entries
-group v3group   any        initial
-view all    included  .1                               80
-access v3group   ""      any       auth    0      all    all   all
+group v3group any initial
+view all included .1 80
+access v3group "" any auth 0 all all all
 # The new user's access:
-group v3group   any        wes
+group v3group any wes
 # USM configuration entries
 userSetAuthPass initial * setup_password
 userSetAuthPass templateMD5 * initial_MD5_pass
+.fi
 .RE
 Note: that the "initial" user's setup should be removed after creating
 a real user that you grant administrative privledges to (like the user 
