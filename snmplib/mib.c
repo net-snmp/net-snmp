@@ -3033,8 +3033,7 @@ sprint_value(char *buf,
 	     size_t objidlen,
 	     struct variable_list *variable)
 {
-    char    tempbuf[SPRINT_MAX_LEN];
-    struct tree    *subtree = tree_head;
+    struct tree *subtree = tree_head;
 
     if (variable->type == SNMP_NOSUCHOBJECT)
 	sprintf(buf, "No Such Object available on this agent");
@@ -3043,7 +3042,7 @@ sprint_value(char *buf,
     else if (variable->type == SNMP_ENDOFMIBVIEW)
 	sprintf(buf, "No more variables left in this MIB View");
     else {
-	subtree = get_symbol(objid, objidlen, subtree, tempbuf);
+	subtree = get_tree(objid, objidlen, subtree);
 	if (subtree->printer)
 	    (*subtree->printer)(buf, variable, subtree->enums, subtree->hint, subtree->units);
 	else {
@@ -3058,7 +3057,6 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     oid *objid, size_t objidlen,
 		     struct variable_list *variable)
 {
-  char tempbuf[SPRINT_MAX_LEN];
   struct tree *subtree = tree_head;
 
   if (variable->type == SNMP_NOSUCHOBJECT) {
@@ -3071,7 +3069,7 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
     return snmp_strcat(buf, buf_len, out_len, allow_realloc,
 		       (const u_char*)"No more variables left in this MIB View");
   } else {
-    subtree = get_symbol(objid, objidlen, subtree, tempbuf);
+    subtree = get_tree(objid, objidlen, subtree);
     if (subtree && subtree->printomat) {
       return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
 				   variable, subtree->enums,
