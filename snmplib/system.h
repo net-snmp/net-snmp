@@ -30,11 +30,11 @@ SOFTWARE.
  * Definitions for the system dependent library file
  */
 #ifndef HAVE_SOCKLEN_T
-typedef u_int socklen_t
+typedef u_int socklen_t;
 #endif
 
 #ifndef HAVE_IN_ADDR_T
-typedef u_int socklen_t
+typedef u_int in_addr_t;
 #endif
 
 
