@@ -126,12 +126,14 @@ AC_ARG_WITH(out_mib_modules,
     misc/ipfwacc:          accounting rules IP firewall information.
                              (only under linux)
     target:                Support for the TARGET-MIB.
-    ucd-snmp/pass_persist: Persistent pass scripts that stay around.  Not currently included by default solely because it needs 
+    ucd-snmp/pass_persist: Persistent pass scripts that stay around.
+                           Not currently included by default solely because
+                           it needs more testing.
 
   Optional modules for C coders to look at and/or include as extension examples:
   
-    example/example:       example C code extension.
-    example/wombat:        template file similar to example.])
+    examples/example:      example C code extension.
+    examples/wombat:       template file similar to example.])
 
 dnl
 dnl otherwise prompted information
