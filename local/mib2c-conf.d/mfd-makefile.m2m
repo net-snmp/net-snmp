@@ -47,19 +47,25 @@ LIBS=$(NETSNMPLIBS)
 
 CFLAGS=-I. $(NETSNMPCFLAGS)
 
-SRCS = ${name}.c \
-	${name}_subagent.c \
-	${name}_interface.c \
+USER_SRCS = \
 	${name}_data_access.c \
 	${name}_data_get.c \
 	${name}_data_set.c
 
-OBJS =  ${name}.o \
-	${name}_subagent.o \
-	${name}_interface.o \
+SRCS = $(USER_SRCS) \
+	${name}.c \
+	${name}_subagent.c \
+	${name}_interface.c
+
+USER_OBJS =  \
 	${name}_data_access.o \
 	${name}_data_get.o \
 	${name}_data_set.o
+
+OBJS =  $(USER_OBJS) \
+	${name}.o \
+	${name}_subagent.o \
+	${name}_interface.o
 
 TARGETS=${name}
 
@@ -68,6 +74,8 @@ TARGETS=${name}
 
 
 all: $(TARGETS)
+
+user: $(USER_OBJS)
 
 $(TARGETS): $(LIB_DEPS)
 
