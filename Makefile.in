@@ -15,10 +15,18 @@ INSTALL = @INSTALL@
 
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
-all:	makeall mib.txt
+SUBDIRS = snmplib agent apps
+
+all:	subdirs mib.txt
+
+subdirs:
+	for i in $(SUBDIRS) ; do \
+        ( cd $$i ; $(MAKE) ) \
+	done
+
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
-install:    apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd
+install:    subdirs apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd
 	$(INSTALL) apps/snmpget $(bindir)/snmpget
 	$(INSTALL) apps/snmpgetnext $(bindir)/snmpgetnext
 	$(INSTALL) apps/snmpset $(bindir)/snmpset
@@ -65,7 +73,7 @@ configclean:
 	rm -f config.cache config.status
 	rm -f snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile
 
-${srcdir}/configure: configure.in
+${srcdir}/configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf
 	echo "Please run configure now."
 	sh -c exit 2

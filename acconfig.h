@@ -1,25 +1,64 @@
 /* config.h:  a general config file */
 
-/* configuration files.  I rdist the first one and leave machine
-   specific stuff in the second one */
-
-#define CONFIGFILE "/etc/ece-snmpd.conf"          /* default config file */
-#define CONFIGFILETWO "/etc/ece-snmpd.local.conf" /* optional second file */
-
-/* to hack in forced V2 security, I had to reserve the left byte of
-   the ACL Mib word for V2.  Do NOT define more than 5 V1 communities
-   else they will roll into these definitions (see snmp_vars.c:340) */
-   
 /* don't change these values! */
 #define SNMPV1      0xAAAA       /* readable by anyone */
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
-/* If GLOBALSECURITY is defined, it sets the default SNMP access type
+@TOP@
+
+/* mib pointer to the top of the extensible tree point this to the
+ location in the tree your company/organization has been allocated.
+ If you don't have an official one (like me), just make one up that
+ doesn't overlap with other mibs you are using on the system */
+
+#define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
+#define EXTENSIBLENUM 6            /* count the above numbers */
+
+/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
+   place.  (stdin is closed so that sh scripts won't wait for it) */
+
+#undef LOGFILE
+
+/* to hack in forced V2 security, I had to reserve the left byte of
+   the ACL Mib word for V2.  Do NOT define more than 5 V1 communities
+   else they will roll into these definitions (see snmp_vars.c:340) 
+   If GLOBALSECURITY is defined, it sets the default SNMP access type
    for the extensible mibs to the setting type described. */
 
 #define GLOBALSECURITY SNMPV2AUTH    /* only authenticated snmpv2 requests
                                         permited */
+
+/* configuration files.  I rdist the first one and leave machine
+   specific stuff in the second one */
+
+/* default config file */
+#define CONFIGFILE "/etc/ece-snmpd.conf"
+
+/* optional second file */
+#define CONFIGFILETWO "/etc/ece-snmpd.local.conf" 
+
+/* default system contact */
+#undef SYS_CONTACT
+
+/* system location */
+#undef SYS_LOC
+
+/* location of UNIX kernel */
+#define KERNEL_LOC "/vmunix"
+
+/* location of swap device (ok if not found) */
+#undef DMEM_LOC
+
+/* define rtentry to ortentry on SYSV machines (alphas) */
+#define RTENTRY rtentry;
+
+/* Command to generate ps output, the final column must be the process
+   name withOUT arguments */
+
+#define PSCMD "/bin/ps"
+
+@BOTTOM@
 
 
 /* the ErrorFlag is V1 accessable because HP Openview does not support
@@ -28,32 +67,11 @@ sure to end it in -1.*/
 
 #define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1 */
 
-/* additional note:  if SECURITYEXCEPTIONS is defined, you must use an
-                     ANSI compiler (gcc) for agent/extensible/extensible.c */
-
-
 /* Mib-2 tree Info */
-
 /* These are the system information variables. */
 
 #define VERS_DESC   "unknown"             /* overridden at run time */
-#define SYS_CONTACT "support@ece.ucdavis.edu"
 #define SYS_NAME    "unknown"             /* overridden at run time */
-#define SYS_LOC     "UCDavis Electrical Engineering Departement"
-
-/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
-   place.  (stdin is closed so that sh scripts won't wait for it) */
-
-#define LOGFILE "/usr/adm/ece-snmpd.log"
-
-/* mib pointer to the top of the extensible tree */
-/* point this to the location in the tree your company/organization
-   has been allocated.  If you don't have an official one (like me),
-   just make one up that doesn't overlap with other mibs you are using
-   on the system */
-
-#define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
-#define EXTENSIBLENUM 6            /* count the above numbers */
 
 /* comment out to turn off functionality for any of these: */
 /* (See README for details) */
@@ -117,18 +135,3 @@ sure to end it in -1.*/
 
 #include "agent/extensible/struct.h"
 
-@TOP@
-
-/* location of UNIX kernel */
-#define KERNEL_LOC "/vmunix"
-
-/* location of swap device (ok if not found) */
-#undef DMEM_LOC
-
-/* define rtentry to ortentry on SYSV machines (alphas) */
-#define RTENTRY rtentry;
-
-/* Command to generate ps output, the final column must be the process
-   name withOUT arguments */
-
-#define PSCMD "/bin/ps"
