@@ -68,7 +68,7 @@ AC_SUBST(HAVE_DMALLOC_H)
 
 AC_ARG_WITH(efence,
 [  --with-efence                   Look for and use libefence (malloc).],
-      use_efence="true")
+      use_efence="$withval")
 
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
@@ -878,7 +878,11 @@ if test "x$ac_cv_DMEM_LOC" != "xnone"; then
 fi
 
 dnl efence
-if test "x$use_efence" = "xtrue" -o "x$developer" = "xyes"; then
+if test "x$developer" = "xyes" -a "x$use_efence" != "xno"; then
+    use_efence="yes"
+fi
+
+if test "x$use_efence" = "xyes"; then
     AC_CHECK_LIB(efence, EF_Exit)
 fi
 
@@ -916,18 +920,13 @@ AC_ARG_WITH(libwrap,
 )
 
 if test "x$use_wrap" = "xtrue"; then
-  AC_CHECK_HEADER(tcpd.h,
+    dnl Linux RedHat 6.1 won't link libwrap without libnsl
+    AC_CHECK_LIB(nsl, yp_get_default_domain)
+    AC_CHECK_HEADER(tcpd.h,
       AC_CHECK_LIB(wrap, main,
-  	AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
-  	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-  
-dnl Linux RedHat 6.1 won't link libwrap without libnsl
-  case $target_os in
-      linux*)
-          AC_CHECK_LIB(nsl, yp_get_default_domain)
-      ;;
-  esac
+	    AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
+	    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 fi
 
 dnl zlib is required for newer versions of rpm

@@ -721,6 +721,9 @@
 /* Define if you have the mld library (-lmld).  */
 #undef HAVE_LIBMLD
 
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
 
