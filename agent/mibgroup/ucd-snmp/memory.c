@@ -407,7 +407,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       long_ret = pagetok(total.t_vmtxt);
 #endif
       return((u_char *) (&long_ret));
-    case MEMAVAILSWAPTXT:
+    case MEMUSEDSWAPTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_avmtxt);
 #endif
@@ -417,7 +417,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       long_ret = pagetok(total.t_rmtxt);
 #endif
       return((u_char *) (&long_ret));
-    case MEMAVAILREALTXT:
+    case MEMUSEDREALTXT:
 #ifndef bsdi2
       long_ret = pagetok(total.t_armtxt);
 #endif

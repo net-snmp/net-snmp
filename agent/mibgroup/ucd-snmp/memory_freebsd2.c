@@ -232,13 +232,13 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
     case MEMTOTALSWAPTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
-    case MEMAVAILSWAPTXT:
+    case MEMUSEDSWAPTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
-    case MEMAVAILREALTXT:
+    case MEMUSEDREALTXT:
 	long_ret = -1;
 	return((u_char *) (&long_ret));
     case MEMTOTALFREE:

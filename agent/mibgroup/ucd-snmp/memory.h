@@ -22,9 +22,9 @@ config_parse_dot_conf("swap", memory_parse_config, memory_free_config);
 #define MEMTOTALREAL 5
 #define MEMAVAILREAL 6
 #define MEMTOTALSWAPTXT 7
-#define MEMAVAILSWAPTXT 8
+#define MEMUSEDSWAPTXT 8
 #define MEMTOTALREALTXT 9
-#define MEMAVAILREALTXT 10
+#define MEMUSEDREALTXT 10
 #define MEMTOTALFREE 11
 #define MEMSWAPMINIMUM 12
 #define MEMSHARED 13
@@ -42,9 +42,9 @@ struct variable2 extensible_mem_variables[] = {
   {MEMTOTALREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREAL}},
   {MEMAVAILREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMAVAILREAL}},
   {MEMTOTALSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAPTXT}},
-  {MEMAVAILSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMAVAILSWAPTXT}},
+  {MEMUSEDSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAPTXT}},
   {MEMTOTALREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREALTXT}},
-  {MEMAVAILREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMAVAILREALTXT}},
+  {MEMUSEDREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREALTXT}},
   {MEMTOTALFREE, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALFREE}},
   {MEMSWAPMINIMUM, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMSWAPMINIMUM}},
   {MEMSHARED, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMSHARED}},
