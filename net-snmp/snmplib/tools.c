@@ -5,7 +5,11 @@
 #include <config.h>
 
 #include <ctype.h>
+#include <stdio.h>
 #include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET.H
+#include <sys/socket.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -24,7 +28,9 @@
 #include "asn1.h" 
 #include "snmp_api.h"
 #include "snmp_debug.h"
-#include "tools.h" 
+#include "snmp_debug.h"
+#include "tools.h"
+#include "mib.h"
 #include "scapi.h" 
 
 
@@ -336,7 +342,7 @@ dump_chunk(const char *debugtoken, const char *title, const u_char *buf, int siz
  */
 #ifdef SNMP_TESTING_CODE
 char *
-dump_snmpEngineID(u_char *estring, size_t *estring_len)
+dump_snmpEngineID(const u_char *estring, size_t *estring_len)
 {
 #define eb(b)	( *(esp+b) & 0xff )
 
@@ -347,8 +353,8 @@ dump_snmpEngineID(u_char *estring, size_t *estring_len)
 
 	char	 	 buf[SNMP_MAXBUF],
 			*s = NULL,
-			*t,
-			*esp = estring;
+			*t;
+        const u_char    *esp = estring;
 
 	struct	in_addr	 iaddr;
 
