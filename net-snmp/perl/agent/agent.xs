@@ -546,60 +546,176 @@ int
 nari_setValue(me, type, value)
         SV *me;
         int type;
-        char *value;
+        SV *value;
     PREINIT:
         u_char *oidbuf = NULL;
         size_t ob_len = 0, oo_len = 0;
         netsnmp_request_info *request;
         u_long utmp;
-        struct hostent *hent;
         long ltmp;
 	oid myoid[MAX_OID_LEN];
 	size_t myoid_len;
+        STRLEN stringlen;
+        char * stringptr;
     CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
         switch(type) {
           case ASN_INTEGER:
-              ltmp = strtol(value, NULL, 0);
-              snmp_set_var_typed_value(request->requestvb, type,
-                                       (u_char *) &ltmp, sizeof(ltmp));
-              RETVAL = 1;
-              break;
+	      /* We want an integer here */
+	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
+		  /* Good - got a real one (or a blessed object that we hope will turn out OK) */
+		  ltmp = SvIV(value);
+		  snmp_set_var_typed_value(request->requestvb, type,
+					   (u_char *) &ltmp, sizeof(ltmp));
+		  RETVAL = 1;
+		  break;
+	      }
+	      else if (SvPOKp(value)) {
+	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
+	          stringptr = SvPV(value, stringlen);
+		  ltmp = strtol( stringptr, NULL, 0 );
+		  if (errno == EINVAL) {
+		  	fprintf(stderr, "Could not convert string to number in setValue: '%s'", stringptr);
+			RETVAL = 0;
+			break;
+		  }
+
+		  snmp_set_var_typed_value(request->requestvb, type,
+					   (u_char *) &ltmp, sizeof(ltmp));
+		  RETVAL = 1;
+		  break;
+	      }
+	      else {
+		fprintf(stderr, "Non-integer value passed to setValue with ASN_INTEGER: type was %d\n",
+			SvTYPE(value));
+		RETVAL = 0;
+		break;
+	      }
+
+
           case ASN_UNSIGNED:
           case ASN_COUNTER:
+          case ASN_COUNTER64:
           case ASN_TIMETICKS:
-              utmp = strtoul(value, NULL, 0);
-              snmp_set_var_typed_value(request->requestvb, type,
+	      /* We want an integer here */
+	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
+		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
+		  utmp = SvIV(value);
+                  snmp_set_var_typed_value(request->requestvb, type,
                                        (u_char *) &utmp, sizeof(utmp));
-              RETVAL = 1;
-              break;
+		  RETVAL = 1;
+		  break;
+	      }
+	      else if (SvPOKp(value)) {
+	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
+	          stringptr = SvPV(value, stringlen);
+		  utmp = strtoul( stringptr, NULL, 0 );
+		  if (errno == EINVAL) {
+		  	fprintf(stderr, "Could not convert string to number in setValue: '%s'", stringptr);
+			RETVAL = 0;
+			break;
+		  }
+
+                  snmp_set_var_typed_value(request->requestvb, type,
+                                       (u_char *) &utmp, sizeof(utmp));
+		  RETVAL = 1;
+		  break;
+	      }
+	      else {
+		fprintf(stderr, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %d\n",
+			SvTYPE(value));
+		RETVAL = 0;
+		break;
+	      }
+
           case ASN_OCTET_STR:
           case ASN_BIT_STR:
+	      /* Check that we have been passed something with a string value (or a blessed scalar) */
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		fprintf(stderr, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %d\n",
+			SvTYPE(value));
+		RETVAL = 0;
+		break;
+	      }
+
+	      /* Find length of string (strlen will *not* do, as these are binary strings) */
+	      stringptr = SvPV(value, stringlen);
+
               snmp_set_var_typed_value(request->requestvb, type,
-                                       (u_char *) value,
-                                       strlen(value)); /* XXX: null strs */
+                                       (u_char *) stringptr,
+                                       stringlen);
               RETVAL = 1;
               break;
+
           case ASN_IPADDRESS:
-              hent = gethostbyname(value);
+	      /* IP addresses are passed as *binary* strings.
+	       * In the case of IPv4 addresses, these are 4 bytes long.
+	       * NOTE: the use of binary strings rather than dotted-quad or FQDNs was
+	       * introduced here by Andrew Findlay's patch of March 17th 2003,
+	       * and is effectively a change to the previous implied API which assumed
+	       * the value was a (valid) hostname.
+	       * Responsibility for decoding and resolving has been passed up to the Perl script.
+	       */
+
+	      /* Check that we have been passed something with a string value (or a blessed scalar) */
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		fprintf(stderr, "Non-string value passed to setValue with ASN_IPADDRESS: type was %d\n",
+			SvTYPE(value));
+		RETVAL = 0;
+		break;
+	      }
+
+	      /* Find length of string (strlen will *not* do, as these are binary strings) */
+	      stringptr = SvPV(value, stringlen);
+
+	      # fprintf(stderr, "IP address returned with length %d: %u.%u.%u.%u\n", stringlen, stringptr[0],
+	      #     stringptr[1], stringptr[2], stringptr[3] );
+
+	      # Sanity check on address length
+	      if ((stringlen != 4) && (stringlen != 16)) {
+	      		fprintf(stderr, "IP address of %d bytes passed to setValue with ASN_IPADDRESS\n", stringlen);
+			RETVAL = 0;
+			break;
+	      }
+
               snmp_set_var_typed_value(request->requestvb, type,
-                                   hent->h_addr_list[0], 4); /* XXX: i4v6... */
+                                   stringptr, stringlen);
               RETVAL = 1;
               break;
+
           case ASN_OBJECT_ID:
-              if (!snmp_parse_oid(value, myoid, &myoid_len)) {
-                  fprintf(stderr, "couldn't parse %s in setOID\n", value);
+	      /* Check that we have been passed something with a string value (or a blessed scalar) */
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		fprintf(stderr, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %d\n",
+			SvTYPE(value));
+		RETVAL = 0;
+		break;
+	      }
+
+	      /* Extract the string */
+	      stringptr = SvPV(value, stringlen);
+
+	      /* fprintf(stderr, "setValue returning OID '%s'\n", stringptr); */
+
+	      myoid_len = MAX_OID_LEN;
+              if (!snmp_parse_oid(stringptr, myoid, &myoid_len)) {
+                  fprintf(stderr, "couldn't parse %s in setValue\n", stringptr);
+		  RETVAL = 0;
+		  break;
               } else {
+		  /* fprintf(stderr, "setValue returning OID length %d\n", myoid_len); */
+
                   request = (netsnmp_request_info *) SvIV(SvRV(me));
                   snmp_set_var_typed_value(request->requestvb, type,
-                                           (u_char *) myoid, myoid_len);
+                                           (u_char *) myoid, (myoid_len * sizeof(myoid[0])) );
               }
+
               RETVAL = 1;
               break;
               
             default:
-                fprintf(stderr, "unknown var value type: %d (%s)\n",
-                        type, value);
+                fprintf(stderr, "unknown var value type: %d\n",
+                        type);
                 RETVAL = 0;
                 break;
         }
@@ -616,6 +732,7 @@ nari_setOID(me, value)
 	size_t myoid_len = MAX_OID_LEN;
         netsnmp_request_info *request;
     CODE:
+	myoid_len = MAX_OID_LEN;
 	if (!snmp_parse_oid(value, myoid, &myoid_len)) {
             fprintf(stderr, "couldn't parse %s in setOID\n", value);
         } else {
