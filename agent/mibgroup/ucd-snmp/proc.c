@@ -168,11 +168,9 @@ void proc_parse_config(const char *token, char* cptr)
   while (*procp != NULL)
     procp = &((*procp)->next);
   
-  (*procp) = (struct myproc *) malloc(sizeof(struct myproc));
+  (*procp) = (struct myproc *) calloc(1,sizeof(struct myproc));
   if (*procp == NULL)
     return; /* memory alloc error */
-  memset(*procp, 0, sizeof(struct myproc));
-  (*procp)->next = NULL;
   numprocs++;
   /* not blank and not a comment */
   copy_word(cptr,(*procp)->name);
