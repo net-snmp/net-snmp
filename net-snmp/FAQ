@@ -20,6 +20,7 @@ TABLE OF CONTENTS
    What's the difference between SNMPv1 and SNMPv2?
    What are all these different SNMPv2's anyway?
    Which SNMPv2 is supported in this package?
+   Where can I find more information?
  AGENT
    What MIBs are supported?
    How do I add a MIB?
@@ -228,6 +229,24 @@ Which SNMPv2 is supported in this package?
   SNMPv2c as soon as possible.
   When an agreed standard for SNMPv3 (by whatever name) finally emerges,
   we would hope to include support for that.
+
+
+Where can I find more information?
+---------------------------------
+
+  A couple of sites with network management information on the WWW are
+
+      http://netman.cit.buffalo.edu/index.html
+      http://wwwsnmp.cs.utwente.nl/
+
+  The newsgroup 'comp.protocols.snmp' has an FAQ (split into two parts)
+  which discusses more general issues related to SNMP, including books,
+  software, other sites, how to get an enterprise number, etc, etc.
+  These are available from
+
+      ftp://rtfm.mit.edu/pub/usenet/comp.protocols.snmp/
+
+  or via either of the two Web sites above.
 
 
 
