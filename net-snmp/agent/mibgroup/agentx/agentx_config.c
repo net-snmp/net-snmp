@@ -52,6 +52,37 @@ agentx_parse_agentx_socket(const char *token, char *cptr)
 }
 
 void
+agentx_parse_agentx_perms(const char *token, char *cptr)
+{
+    char *socket_perm, *dir_perm, *socket_user, *socket_group;
+
+    DEBUGMSGTL(("agentx/config", "port permissions: %s\n", cptr));
+    socket_perm = strtok(cptr, " \t");
+    dir_perm    = strtok(NULL, " \t");
+    socket_user = strtok(NULL, " \t");
+    socket_group = strtok(NULL, " \t");
+
+    if (socket_perm)
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_X_SOCK_PERM,
+                           strtol(socket_perm, NULL, 8));
+    if (dir_perm)
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_X_DIR_PERM,
+                           strtol(dir_perm, NULL, 8));
+    if (socket_user)
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_X_SOCK_USER, atoi(socket_user));
+    if (socket_group)
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_X_SOCK_GROUP, atoi(socket_group));
+    DEBUGMSGTL(("agentx/config", "port permissions: %o (%d), %o (%d), %d, %d\n",
+			atoi(socket_perm), atoi(socket_perm),
+			atoi(dir_perm), atoi(dir_perm),
+                        atoi(socket_user), atoi(socket_group)));
+}
+
+void
 agentx_parse_agentx_timeout(const char *token, char *cptr)
 {
     int x = atoi(cptr);
@@ -88,6 +119,9 @@ init_agentx_config(void)
     snmpd_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
+    snmpd_register_config_handler("agentxperms",
+                                  agentx_parse_agentx_perms, NULL,
+                                  "AgentX socket permissions");
     snmpd_register_config_handler("agentxRetries",
                                   agentx_parse_agentx_retries, NULL,
                                   "AgentX Retries");

@@ -33,5 +33,9 @@
 #define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL 3 /* ping master every SECONDS */
 #define NETSNMP_DS_AGENT_AGENTX_TIMEOUT  4
 #define NETSNMP_DS_AGENT_AGENTX_RETRIES  5
+#define NETSNMP_DS_AGENT_X_SOCK_PERM     6      /* permissions for the */
+#define NETSNMP_DS_AGENT_X_DIR_PERM      7      /*     AgentX socket   */
+#define NETSNMP_DS_AGENT_X_SOCK_USER     8      /* ownership for the   */
+#define NETSNMP_DS_AGENT_X_SOCK_GROUP    9      /*     AgentX socket   */
 
 #endif

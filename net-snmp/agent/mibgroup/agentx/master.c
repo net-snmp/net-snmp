@@ -29,6 +29,9 @@
 #include <dmalloc.h>
 #endif
 
+#include <unistd.h>
+#include <sys/stat.h>
+
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -42,6 +45,10 @@ real_init_master(void)
     netsnmp_session sess, *session;
     char *agentx_sockets;
     char *cp1, *cp2;
+    int agentx_dir_perm;
+    int agentx_sock_perm;
+    int agentx_sock_user;
+    int agentx_sock_group;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
@@ -84,7 +91,11 @@ real_init_master(void)
              *  If this is a Unix pathname,
              *  try and create the directory first.
              */
-            if (mkdirhier(sess.peername, AGENT_DIRECTORY_MODE, 1)) {
+            agentx_dir_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+                                                 NETSNMP_DS_AGENT_X_DIR_PERM);
+            if (agentx_dir_perm == 0)
+                agentx_dir_perm = AGENT_DIRECTORY_MODE;
+            if (mkdirhier(sess.peername, agentx_dir_perm, 1)) {
                 snmp_log(LOG_ERR,
                          "Failed to create the directory for the agentX socket: %s\n",
                          sess.peername);
@@ -124,6 +135,32 @@ real_init_master(void)
                                        &sess);
             }
         }
+
+
+    /*
+     * Apply any settings to the ownership/permissions of the AgentX socket
+     */
+    agentx_sock_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+                                          NETSNMP_DS_AGENT_X_SOCK_PERM);
+    agentx_sock_user = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+                                          NETSNMP_DS_AGENT_X_SOCK_USER);
+    agentx_sock_group = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+                                          NETSNMP_DS_AGENT_X_SOCK_GROUP);
+
+    if (agentx_sock_perm != 0)
+        chmod(sess.peername, agentx_sock_perm);
+    if (agentx_sock_user || agentx_sock_group) {
+        /*
+         * If either of user or group haven't been set,
+         *  then leave them unchanged.
+         */
+        if (agentx_sock_user == 0 )
+            agentx_sock_user = -1;
+        if (agentx_sock_group == 0 )
+            agentx_sock_group = -1;
+        chown(sess.peername, agentx_sock_user, agentx_sock_group);
+    }
+
         /*
          * If we've processed the last (or only) socket, then we're done.
          */
