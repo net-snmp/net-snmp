@@ -64,11 +64,6 @@
 ./if.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./if.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./if.lo: ../../include/net-snmp/library/snmpusm.h netstat.h
-./inet6.lo: ../../include/net-snmp/net-snmp-config.h
-./inet6.lo: ../../include/net-snmp/system/linux.h
-./inet6.lo: ../../include/net-snmp/system/sysv.h
-./inet6.lo: ../../include/net-snmp/system/generic.h
-./inet6.lo: ../../include/net-snmp/machine/generic.h
 ./inet.lo: ../../include/net-snmp/net-snmp-config.h
 ./inet.lo: ../../include/net-snmp/system/linux.h
 ./inet.lo: ../../include/net-snmp/system/sysv.h
@@ -134,6 +129,11 @@
 ./inet.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./inet.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./inet.lo: ../../include/net-snmp/library/snmpusm.h netstat.h
+./inet6.lo: ../../include/net-snmp/net-snmp-config.h
+./inet6.lo: ../../include/net-snmp/system/linux.h
+./inet6.lo: ../../include/net-snmp/system/sysv.h
+./inet6.lo: ../../include/net-snmp/system/generic.h
+./inet6.lo: ../../include/net-snmp/machine/generic.h
 ./main.lo: ../../include/net-snmp/net-snmp-config.h
 ./main.lo: ../../include/net-snmp/system/linux.h
 ./main.lo: ../../include/net-snmp/system/sysv.h

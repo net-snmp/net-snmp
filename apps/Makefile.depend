@@ -1409,11 +1409,6 @@
 ./snmpnetstat/if.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ./snmpnetstat/if.lo: ../include/net-snmp/library/snmpusm.h
 ./snmpnetstat/if.lo: ./snmpnetstat/netstat.h
-./snmpnetstat/inet6.lo: ../include/net-snmp/net-snmp-config.h
-./snmpnetstat/inet6.lo: ../include/net-snmp/system/linux.h
-./snmpnetstat/inet6.lo: ../include/net-snmp/system/sysv.h
-./snmpnetstat/inet6.lo: ../include/net-snmp/system/generic.h
-./snmpnetstat/inet6.lo: ../include/net-snmp/machine/generic.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/system/linux.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/system/sysv.h
@@ -1481,6 +1476,11 @@
 ./snmpnetstat/inet.lo: ../include/net-snmp/library/snmpv3-security-includes.h
 ./snmpnetstat/inet.lo: ../include/net-snmp/library/snmpusm.h
 ./snmpnetstat/inet.lo: ./snmpnetstat/netstat.h
+./snmpnetstat/inet6.lo: ../include/net-snmp/net-snmp-config.h
+./snmpnetstat/inet6.lo: ../include/net-snmp/system/linux.h
+./snmpnetstat/inet6.lo: ../include/net-snmp/system/sysv.h
+./snmpnetstat/inet6.lo: ../include/net-snmp/system/generic.h
+./snmpnetstat/inet6.lo: ../include/net-snmp/machine/generic.h
 ./snmpnetstat/main.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpnetstat/main.lo: ../include/net-snmp/system/linux.h
 ./snmpnetstat/main.lo: ../include/net-snmp/system/sysv.h

@@ -193,9 +193,10 @@
 ./agent_index.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./agent_index.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_index.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
-./agent_index.lo: mibgroup/utilities.h mibgroup/host.h mibgroup/examples.h
-./agent_index.lo: mibgroup/examples/example.h mibgroup/testhandler.h
-./agent_index.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
+./agent_index.lo: mibgroup/utilities.h mibgroup/host.h
+./agent_index.lo: mibgroup/disman/event-mib.h mibgroup/smux.h
+./agent_index.lo: mibgroup/examples.h mibgroup/examples/example.h
+./agent_index.lo: mibgroup/testhandler.h mibgroup/Rmon.h
 ./agent_index.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./agent_index.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 ./agent_index.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -229,13 +230,7 @@
 ./agent_index.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 ./agent_index.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 ./agent_index.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./agent_index.lo: mibgroup/host/hr_swinst.h mibgroup/examples/scalar_int.h
-./agent_index.lo: mibgroup/examples/data_set.h
-./agent_index.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
-./agent_index.lo: mibgroup/struct.h mibgroup/smux/smux.h mibgroup/Rmon/rows.h
-./agent_index.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
-./agent_index.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
-./agent_index.lo: mibgroup/Rmon/event.h mibgroup/disman/mteTriggerTable.h
+./agent_index.lo: mibgroup/host/hr_swinst.h mibgroup/disman/mteTriggerTable.h
 ./agent_index.lo: mibgroup/disman/mteTriggerDeltaTable.h
 ./agent_index.lo: mibgroup/disman/mteTriggerExistenceTable.h
 ./agent_index.lo: mibgroup/disman/mteTriggerBooleanTable.h
@@ -243,12 +238,19 @@
 ./agent_index.lo: mibgroup/disman/mteObjectsTable.h
 ./agent_index.lo: mibgroup/disman/mteEventTable.h
 ./agent_index.lo: mibgroup/disman/mteEventNotificationTable.h
-./agent_index.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
-./agent_index.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
-./agent_index.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
-./agent_index.lo: mibgroup/mibII/vacm_context.h mibgroup/utilities/execute.h
-./agent_index.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./agent_index.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./agent_index.lo: mibgroup/smux/smux.h mibgroup/examples/scalar_int.h
+./agent_index.lo: mibgroup/examples/data_set.h
+./agent_index.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
+./agent_index.lo: mibgroup/struct.h mibgroup/Rmon/rows.h
+./agent_index.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
+./agent_index.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
+./agent_index.lo: mibgroup/Rmon/event.h mibgroup/mibII/kernel_linux.h
+./agent_index.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
+./agent_index.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./agent_index.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
+./agent_index.lo: mibgroup/utilities/execute.h mibgroup/header_complex.h
+./agent_index.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./agent_index.lo: mibgroup/agentx/master_admin.h
 ./agent_index.lo: mibgroup/agentx/agentx_config.h
 ./agent_index.lo: ./mibgroup/agentx/subagent.h ./mibgroup/agentx/client.h
 ./agent_read_config.lo: ../include/net-snmp/net-snmp-config.h
@@ -352,9 +354,9 @@
 ./agent_read_config.lo: mibgroup/notification.h mibgroup/target.h
 ./agent_read_config.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
 ./agent_read_config.lo: mibgroup/utilities.h mibgroup/host.h
+./agent_read_config.lo: mibgroup/disman/event-mib.h mibgroup/smux.h
 ./agent_read_config.lo: mibgroup/examples.h mibgroup/examples/example.h
-./agent_read_config.lo: mibgroup/testhandler.h mibgroup/smux.h
-./agent_read_config.lo: mibgroup/Rmon.h mibgroup/disman/event-mib.h
+./agent_read_config.lo: mibgroup/testhandler.h mibgroup/Rmon.h
 ./agent_read_config.lo: mibgroup/mibII/system_mib.h
 ./agent_read_config.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 ./agent_read_config.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -396,14 +398,6 @@
 ./agent_read_config.lo: mibgroup/host/hr_partition.h
 ./agent_read_config.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
 ./agent_read_config.lo: mibgroup/host/hr_swinst.h
-./agent_read_config.lo: mibgroup/examples/scalar_int.h
-./agent_read_config.lo: mibgroup/examples/data_set.h
-./agent_read_config.lo: mibgroup/examples/delayed_instance.h
-./agent_read_config.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_read_config.lo: mibgroup/smux/smux.h mibgroup/Rmon/rows.h
-./agent_read_config.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
-./agent_read_config.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
-./agent_read_config.lo: mibgroup/Rmon/event.h
 ./agent_read_config.lo: mibgroup/disman/mteTriggerTable.h
 ./agent_read_config.lo: mibgroup/disman/mteTriggerDeltaTable.h
 ./agent_read_config.lo: mibgroup/disman/mteTriggerExistenceTable.h
@@ -412,6 +406,13 @@
 ./agent_read_config.lo: mibgroup/disman/mteObjectsTable.h
 ./agent_read_config.lo: mibgroup/disman/mteEventTable.h
 ./agent_read_config.lo: mibgroup/disman/mteEventNotificationTable.h
+./agent_read_config.lo: mibgroup/smux/smux.h mibgroup/examples/scalar_int.h
+./agent_read_config.lo: mibgroup/examples/data_set.h
+./agent_read_config.lo: mibgroup/examples/delayed_instance.h
+./agent_read_config.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./agent_read_config.lo: mibgroup/Rmon/rows.h mibgroup/Rmon/agutil.h
+./agent_read_config.lo: mibgroup/Rmon/statistics.h mibgroup/Rmon/alarm.h
+./agent_read_config.lo: mibgroup/Rmon/history.h mibgroup/Rmon/event.h
 ./agent_read_config.lo: mibgroup/mibII/kernel_linux.h
 ./agent_read_config.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
 ./agent_read_config.lo: mibgroup/mibII/var_route.h
@@ -524,19 +525,19 @@
 ./agent_registry.lo: mibgroup/snmpv3mibs.h mibgroup/notification.h
 ./agent_registry.lo: mibgroup/target.h mibgroup/agent_mibs.h
 ./agent_registry.lo: mibgroup/agentx.h mibgroup/utilities.h mibgroup/host.h
+./agent_registry.lo: mibgroup/disman/event-mib.h mibgroup/smux.h
 ./agent_registry.lo: mibgroup/examples.h mibgroup/examples/example.h
-./agent_registry.lo: mibgroup/testhandler.h mibgroup/smux.h mibgroup/Rmon.h
-./agent_registry.lo: mibgroup/disman/event-mib.h mibgroup/mibII/system_mib.h
-./agent_registry.lo: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
-./agent_registry.lo: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
-./agent_registry.lo: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
-./agent_registry.lo: mibgroup/mibII/ip.h mibgroup/mibII/var_route.h
-./agent_registry.lo: mibgroup/mibII/route_write.h mibgroup/mibII/at.h
-./agent_registry.lo: mibgroup/mibII/udp.h mibgroup/mibII/vacm_vars.h
-./agent_registry.lo: mibgroup/mibII/setSerialNo.h mibgroup/ucd-snmp/memory.h
-./agent_registry.lo: ./mibgroup/mibdefs.h mibgroup/ucd-snmp/vmstat.h
-./agent_registry.lo: mibgroup/ucd-snmp/proc.h mibgroup/ucd-snmp/versioninfo.h
-./agent_registry.lo: mibgroup/ucd-snmp/pass.h
+./agent_registry.lo: mibgroup/testhandler.h mibgroup/Rmon.h
+./agent_registry.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
+./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
+./agent_registry.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
+./agent_registry.lo: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+./agent_registry.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./agent_registry.lo: mibgroup/mibII/at.h mibgroup/mibII/udp.h
+./agent_registry.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
+./agent_registry.lo: mibgroup/ucd-snmp/memory.h ./mibgroup/mibdefs.h
+./agent_registry.lo: mibgroup/ucd-snmp/vmstat.h mibgroup/ucd-snmp/proc.h
+./agent_registry.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
 ./agent_registry.lo: mibgroup/ucd-snmp/pass_persist.h
 ./agent_registry.lo: mibgroup/ucd-snmp/disk.h mibgroup/ucd-snmp/loadave.h
 ./agent_registry.lo: mibgroup/ucd-snmp/extensible.h
@@ -563,14 +564,8 @@
 ./agent_registry.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 ./agent_registry.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 ./agent_registry.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./agent_registry.lo: mibgroup/host/hr_swinst.h mibgroup/examples/scalar_int.h
-./agent_registry.lo: mibgroup/examples/data_set.h
-./agent_registry.lo: mibgroup/examples/delayed_instance.h
-./agent_registry.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./agent_registry.lo: mibgroup/smux/smux.h mibgroup/Rmon/rows.h
-./agent_registry.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
-./agent_registry.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
-./agent_registry.lo: mibgroup/Rmon/event.h mibgroup/disman/mteTriggerTable.h
+./agent_registry.lo: mibgroup/host/hr_swinst.h
+./agent_registry.lo: mibgroup/disman/mteTriggerTable.h
 ./agent_registry.lo: mibgroup/disman/mteTriggerDeltaTable.h
 ./agent_registry.lo: mibgroup/disman/mteTriggerExistenceTable.h
 ./agent_registry.lo: mibgroup/disman/mteTriggerBooleanTable.h
@@ -578,6 +573,13 @@
 ./agent_registry.lo: mibgroup/disman/mteObjectsTable.h
 ./agent_registry.lo: mibgroup/disman/mteEventTable.h
 ./agent_registry.lo: mibgroup/disman/mteEventNotificationTable.h
+./agent_registry.lo: mibgroup/smux/smux.h mibgroup/examples/scalar_int.h
+./agent_registry.lo: mibgroup/examples/data_set.h
+./agent_registry.lo: mibgroup/examples/delayed_instance.h
+./agent_registry.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./agent_registry.lo: mibgroup/Rmon/rows.h mibgroup/Rmon/agutil.h
+./agent_registry.lo: mibgroup/Rmon/statistics.h mibgroup/Rmon/alarm.h
+./agent_registry.lo: mibgroup/Rmon/history.h mibgroup/Rmon/event.h
 ./agent_registry.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
 ./agent_registry.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
 ./agent_registry.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
@@ -764,9 +766,10 @@
 ./mib_modules.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./mib_modules.lo: mibgroup/notification.h mibgroup/target.h
 ./mib_modules.lo: mibgroup/agent_mibs.h mibgroup/agentx.h
-./mib_modules.lo: mibgroup/utilities.h mibgroup/host.h mibgroup/examples.h
-./mib_modules.lo: mibgroup/examples/example.h mibgroup/testhandler.h
-./mib_modules.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
+./mib_modules.lo: mibgroup/utilities.h mibgroup/host.h
+./mib_modules.lo: mibgroup/disman/event-mib.h mibgroup/smux.h
+./mib_modules.lo: mibgroup/examples.h mibgroup/examples/example.h
+./mib_modules.lo: mibgroup/testhandler.h mibgroup/Rmon.h
 ./mib_modules.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./mib_modules.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 ./mib_modules.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -800,13 +803,7 @@
 ./mib_modules.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 ./mib_modules.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 ./mib_modules.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./mib_modules.lo: mibgroup/host/hr_swinst.h mibgroup/examples/scalar_int.h
-./mib_modules.lo: mibgroup/examples/data_set.h
-./mib_modules.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
-./mib_modules.lo: mibgroup/struct.h mibgroup/smux/smux.h mibgroup/Rmon/rows.h
-./mib_modules.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
-./mib_modules.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
-./mib_modules.lo: mibgroup/Rmon/event.h mibgroup/disman/mteTriggerTable.h
+./mib_modules.lo: mibgroup/host/hr_swinst.h mibgroup/disman/mteTriggerTable.h
 ./mib_modules.lo: mibgroup/disman/mteTriggerDeltaTable.h
 ./mib_modules.lo: mibgroup/disman/mteTriggerExistenceTable.h
 ./mib_modules.lo: mibgroup/disman/mteTriggerBooleanTable.h
@@ -814,12 +811,19 @@
 ./mib_modules.lo: mibgroup/disman/mteObjectsTable.h
 ./mib_modules.lo: mibgroup/disman/mteEventTable.h
 ./mib_modules.lo: mibgroup/disman/mteEventNotificationTable.h
-./mib_modules.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
-./mib_modules.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
-./mib_modules.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
-./mib_modules.lo: mibgroup/mibII/vacm_context.h mibgroup/utilities/execute.h
-./mib_modules.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./mib_modules.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+./mib_modules.lo: mibgroup/smux/smux.h mibgroup/examples/scalar_int.h
+./mib_modules.lo: mibgroup/examples/data_set.h
+./mib_modules.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
+./mib_modules.lo: mibgroup/struct.h mibgroup/Rmon/rows.h
+./mib_modules.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
+./mib_modules.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
+./mib_modules.lo: mibgroup/Rmon/event.h mibgroup/mibII/kernel_linux.h
+./mib_modules.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
+./mib_modules.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./mib_modules.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
+./mib_modules.lo: mibgroup/utilities/execute.h mibgroup/header_complex.h
+./mib_modules.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./mib_modules.lo: mibgroup/agentx/master_admin.h
 ./mib_modules.lo: mibgroup/agentx/agentx_config.h
 ./mib_modules.lo: ./mibgroup/mib_module_inits.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-config.h
@@ -1009,162 +1013,12 @@
 ./snmp_agent.lo: ../include/net-snmp/agent/table_data.h
 ./snmp_agent.lo: ../include/net-snmp/agent/table_dataset.h
 ./snmp_agent.lo: ../include/net-snmp/agent/table_iterator.h
-./snmp_agent.lo: ../include/net-snmp/agent/mib_module_config.h snmpd.h
-./snmp_agent.lo: mibgroup/struct.h mibgroup/util_funcs.h mibgroup/struct.h
+./snmp_agent.lo: ../include/net-snmp/agent/mib_module_config.h
+./snmp_agent.lo:  snmpd.h mibgroup/struct.h
+./snmp_agent.lo: mibgroup/util_funcs.h mibgroup/struct.h
 ./snmp_agent.lo: ../include/net-snmp/agent/mib_modules.h
 ./snmp_agent.lo: ./mibgroup/agentx/protocol.h ./mibgroup/agentx/master.h
 ./snmp_agent.lo: ./mibgroup/smux/smux.h
-./snmpd.lo: ../include/net-snmp/net-snmp-config.h
-./snmpd.lo: ../include/net-snmp/system/linux.h
-./snmpd.lo: ../include/net-snmp/system/sysv.h
-./snmpd.lo: ../include/net-snmp/system/generic.h
-./snmpd.lo: ../include/net-snmp/machine/generic.h 
-./snmpd.lo: ../include/net-snmp/net-snmp-includes.h
-./snmpd.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
-./snmpd.lo: ../include/net-snmp/library/snmp_api.h
-./snmpd.lo: ../include/net-snmp/library/asn1.h
-./snmpd.lo: ../include/net-snmp/library/snmp_impl.h
-./snmpd.lo: ../include/net-snmp/library/snmp.h
-./snmpd.lo: ../include/net-snmp/library/snmp-tc.h
-./snmpd.lo: ../include/net-snmp/utilities.h
-./snmpd.lo: ../include/net-snmp/library/snmp_client.h
-./snmpd.lo: ../include/net-snmp/library/system.h
-./snmpd.lo: ../include/net-snmp/library/tools.h
-./snmpd.lo: ../include/net-snmp/library/int64.h
-./snmpd.lo: ../include/net-snmp/library/mt_support.h
-./snmpd.lo: ../include/net-snmp/library/snmp_alarm.h
-./snmpd.lo: ../include/net-snmp/library/callback.h
-./snmpd.lo: ../include/net-snmp/library/data_list.h
-./snmpd.lo: ../include/net-snmp/library/oid_stash.h
-./snmpd.lo: ../include/net-snmp/library/check_varbind.h
-./snmpd.lo: ../include/net-snmp/library/container.h
-./snmpd.lo: ../include/net-snmp/library/factory.h
-./snmpd.lo: ../include/net-snmp/library/snmp_logging.h 
-./snmpd.lo: ../include/net-snmp/library/container_binary_array.h
-./snmpd.lo: ../include/net-snmp/library/container_list_ssll.h
-./snmpd.lo: ../include/net-snmp/library/container_iterator.h
-./snmpd.lo: ../include/net-snmp/library/container.h
-./snmpd.lo: ../include/net-snmp/library/snmp_assert.h
-./snmpd.lo: ../include/net-snmp/version.h ../include/net-snmp/session_api.h
-./snmpd.lo: ../include/net-snmp/library/snmp_transport.h
-./snmpd.lo: ../include/net-snmp/library/snmpCallbackDomain.h
-./snmpd.lo: ../include/net-snmp/library/snmpUnixDomain.h
-./snmpd.lo:  ../include/net-snmp/library/snmpUDPDomain.h
-./snmpd.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpd.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpd.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpd.lo: ../include/net-snmp/library/snmpIPXDomain.h
-./snmpd.lo: ../include/net-snmp/library/ucd_compat.h
-./snmpd.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
-./snmpd.lo: ../include/net-snmp/library/mib.h
-./snmpd.lo: ../include/net-snmp/library/parse.h
-./snmpd.lo: ../include/net-snmp/varbind_api.h
-./snmpd.lo: ../include/net-snmp/config_api.h
-./snmpd.lo: ../include/net-snmp/library/read_config.h
-./snmpd.lo: ../include/net-snmp/library/default_store.h
-./snmpd.lo: ../include/net-snmp/library/snmp_parse_args.h
-./snmpd.lo: ../include/net-snmp/library/snmp_enum.h
-./snmpd.lo: ../include/net-snmp/library/vacm.h
-./snmpd.lo: ../include/net-snmp/output_api.h
-./snmpd.lo: ../include/net-snmp/library/snmp_debug.h
-./snmpd.lo: ../include/net-snmp/snmpv3_api.h
-./snmpd.lo: ../include/net-snmp/library/snmpv3.h
-./snmpd.lo: ../include/net-snmp/library/transform_oids.h
-./snmpd.lo: ../include/net-snmp/library/keytools.h
-./snmpd.lo: ../include/net-snmp/library/scapi.h
-./snmpd.lo: ../include/net-snmp/library/lcd_time.h
-./snmpd.lo: ../include/net-snmp/library/snmp_secmod.h
-./snmpd.lo: ../include/net-snmp/library/snmpv3-security-includes.h
-./snmpd.lo: ../include/net-snmp/library/snmpusm.h
-./snmpd.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
-./snmpd.lo: ../include/net-snmp/agent/snmp_agent.h
-./snmpd.lo: ../include/net-snmp/agent/snmp_vars.h
-./snmpd.lo: ../include/net-snmp/agent/agent_handler.h
-./snmpd.lo: ../include/net-snmp/agent/var_struct.h
-./snmpd.lo: ../include/net-snmp/agent/agent_registry.h
-./snmpd.lo: ../include/net-snmp/agent/ds_agent.h
-./snmpd.lo: ../include/net-snmp/agent/agent_read_config.h
-./snmpd.lo: ../include/net-snmp/agent/agent_trap.h
-./snmpd.lo: ../include/net-snmp/agent/all_helpers.h
-./snmpd.lo: ../include/net-snmp/agent/instance.h
-./snmpd.lo: ../include/net-snmp/agent/baby_steps.h
-./snmpd.lo: ../include/net-snmp/agent/scalar.h
-./snmpd.lo: ../include/net-snmp/agent/scalar_group.h
-./snmpd.lo: ../include/net-snmp/agent/multiplexer.h
-./snmpd.lo: ../include/net-snmp/agent/null.h
-./snmpd.lo: ../include/net-snmp/agent/debug_handler.h
-./snmpd.lo: ../include/net-snmp/agent/cache_handler.h
-./snmpd.lo: ../include/net-snmp/agent/old_api.h
-./snmpd.lo: ../include/net-snmp/agent/read_only.h
-./snmpd.lo: ../include/net-snmp/agent/row_merge.h
-./snmpd.lo: ../include/net-snmp/agent/serialize.h
-./snmpd.lo: ../include/net-snmp/agent/bulk_to_next.h
-./snmpd.lo: ../include/net-snmp/agent/mode_end_call.h
-./snmpd.lo: ../include/net-snmp/agent/table.h
-./snmpd.lo: ../include/net-snmp/agent/table_data.h
-./snmpd.lo: ../include/net-snmp/agent/table_dataset.h
-./snmpd.lo: ../include/net-snmp/agent/table_iterator.h
-./snmpd.lo: ../include/net-snmp/agent/mib_module_config.h m2m.h snmpd.h
-./snmpd.lo: mibgroup/struct.h ../include/net-snmp/agent/mib_modules.h
-./snmpd.lo: mibgroup/util_funcs.h mibgroup/struct.h
-./snmpd.lo: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
-./snmpd.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/notification.h
-./snmpd.lo: mibgroup/target.h mibgroup/agent_mibs.h mibgroup/agentx.h
-./snmpd.lo: mibgroup/utilities.h mibgroup/host.h mibgroup/examples.h
-./snmpd.lo: mibgroup/examples/example.h mibgroup/testhandler.h
-./snmpd.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
-./snmpd.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
-./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
-./snmpd.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
-./snmpd.lo: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
-./snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/udp.h
-./snmpd.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
-./snmpd.lo: mibgroup/ucd-snmp/memory.h ./mibgroup/mibdefs.h
-./snmpd.lo: mibgroup/ucd-snmp/vmstat.h mibgroup/ucd-snmp/proc.h
-./snmpd.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
-./snmpd.lo: mibgroup/ucd-snmp/pass_persist.h mibgroup/ucd-snmp/disk.h
-./snmpd.lo: mibgroup/ucd-snmp/loadave.h mibgroup/ucd-snmp/extensible.h
-./snmpd.lo: mibgroup/ucd-snmp/errormib.h mibgroup/ucd-snmp/file.h
-./snmpd.lo: mibgroup/ucd-snmp/dlmod.h mibgroup/ucd-snmp/proxy.h
-./snmpd.lo: mibgroup/ucd-snmp/logmatch.h 
-./snmpd.lo: mibgroup/snmpv3/snmpEngine.h mibgroup/snmpv3/snmpMPDStats.h
-./snmpd.lo: mibgroup/snmpv3/usmStats.h mibgroup/snmpv3/usmUser.h
-./snmpd.lo: mibgroup/notification/snmpNotifyTable.h
-./snmpd.lo: mibgroup/notification/snmpNotifyFilterTable.h
-./snmpd.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
-./snmpd.lo: mibgroup/target/snmpTargetAddrEntry.h
-./snmpd.lo: mibgroup/target/snmpTargetParamsEntry.h mibgroup/target/target.h
-./snmpd.lo: mibgroup/target/target_counters.h
-./snmpd.lo: mibgroup/agent/nsTransactionTable.h
-./snmpd.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
-./snmpd.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
-./snmpd.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
-./snmpd.lo: mibgroup/utilities/override.h mibgroup/host/hr_system.h
-./snmpd.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_device.h
-./snmpd.lo: mibgroup/host/hr_other.h mibgroup/host/hr_proc.h
-./snmpd.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
-./snmpd.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
-./snmpd.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./snmpd.lo: mibgroup/host/hr_swinst.h mibgroup/examples/scalar_int.h
-./snmpd.lo: mibgroup/examples/data_set.h mibgroup/examples/delayed_instance.h
-./snmpd.lo: mibgroup/smux/smux.h mibgroup/Rmon/rows.h mibgroup/Rmon/agutil.h
-./snmpd.lo: mibgroup/Rmon/statistics.h mibgroup/Rmon/alarm.h
-./snmpd.lo: mibgroup/Rmon/history.h mibgroup/Rmon/event.h
-./snmpd.lo: mibgroup/disman/mteTriggerTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerDeltaTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerExistenceTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerBooleanTable.h
-./snmpd.lo: mibgroup/disman/mteTriggerThresholdTable.h
-./snmpd.lo: mibgroup/disman/mteObjectsTable.h mibgroup/disman/mteEventTable.h
-./snmpd.lo: mibgroup/disman/mteEventNotificationTable.h
-./snmpd.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
-./snmpd.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
-./snmpd.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
-./snmpd.lo: mibgroup/mibII/vacm_context.h mibgroup/utilities/execute.h
-./snmpd.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
-./snmpd.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
-./snmpd.lo: mibgroup/agentx/agentx_config.h ./mibgroup/mib_module_shutdown.h
 ./snmp_perl.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_perl.lo: ../include/net-snmp/system/linux.h
 ./snmp_perl.lo: ../include/net-snmp/system/sysv.h
@@ -1353,9 +1207,9 @@
 ./snmp_vars.lo: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 ./snmp_vars.lo: mibgroup/notification.h mibgroup/target.h
 ./snmp_vars.lo: mibgroup/agent_mibs.h mibgroup/agentx.h mibgroup/utilities.h
-./snmp_vars.lo: mibgroup/host.h mibgroup/examples.h
-./snmp_vars.lo: mibgroup/examples/example.h mibgroup/testhandler.h
-./snmp_vars.lo: mibgroup/smux.h mibgroup/Rmon.h mibgroup/disman/event-mib.h
+./snmp_vars.lo: mibgroup/host.h mibgroup/disman/event-mib.h mibgroup/smux.h
+./snmp_vars.lo: mibgroup/examples.h mibgroup/examples/example.h
+./snmp_vars.lo: mibgroup/testhandler.h mibgroup/Rmon.h
 ./snmp_vars.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 ./snmp_vars.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 ./snmp_vars.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -1389,13 +1243,7 @@
 ./snmp_vars.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 ./snmp_vars.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 ./snmp_vars.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
-./snmp_vars.lo: mibgroup/host/hr_swinst.h mibgroup/examples/scalar_int.h
-./snmp_vars.lo: mibgroup/examples/data_set.h
-./snmp_vars.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
-./snmp_vars.lo: mibgroup/struct.h mibgroup/smux/smux.h mibgroup/Rmon/rows.h
-./snmp_vars.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
-./snmp_vars.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
-./snmp_vars.lo: mibgroup/Rmon/event.h mibgroup/disman/mteTriggerTable.h
+./snmp_vars.lo: mibgroup/host/hr_swinst.h mibgroup/disman/mteTriggerTable.h
 ./snmp_vars.lo: mibgroup/disman/mteTriggerDeltaTable.h
 ./snmp_vars.lo: mibgroup/disman/mteTriggerExistenceTable.h
 ./snmp_vars.lo: mibgroup/disman/mteTriggerBooleanTable.h
@@ -1403,6 +1251,12 @@
 ./snmp_vars.lo: mibgroup/disman/mteObjectsTable.h
 ./snmp_vars.lo: mibgroup/disman/mteEventTable.h
 ./snmp_vars.lo: mibgroup/disman/mteEventNotificationTable.h
+./snmp_vars.lo: mibgroup/smux/smux.h mibgroup/examples/scalar_int.h
+./snmp_vars.lo: mibgroup/examples/data_set.h
+./snmp_vars.lo: mibgroup/examples/delayed_instance.h mibgroup/util_funcs.h
+./snmp_vars.lo: mibgroup/struct.h mibgroup/Rmon/rows.h mibgroup/Rmon/agutil.h
+./snmp_vars.lo: mibgroup/Rmon/statistics.h mibgroup/Rmon/alarm.h
+./snmp_vars.lo: mibgroup/Rmon/history.h mibgroup/Rmon/event.h
 ./snmp_vars.lo: mibgroup/mibII/kernel_linux.h mibgroup/mibII/tcpTable.h
 ./snmp_vars.lo: mibgroup/mibII/ipAddr.h mibgroup/mibII/var_route.h
 ./snmp_vars.lo: mibgroup/mibII/route_write.h mibgroup/mibII/udpTable.h
@@ -1410,6 +1264,157 @@
 ./snmp_vars.lo: mibgroup/header_complex.h mibgroup/agentx/protocol.h
 ./snmp_vars.lo: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
 ./snmp_vars.lo: mibgroup/agentx/agentx_config.h
+./snmpd.lo: ../include/net-snmp/net-snmp-config.h
+./snmpd.lo: ../include/net-snmp/system/linux.h
+./snmpd.lo: ../include/net-snmp/system/sysv.h
+./snmpd.lo: ../include/net-snmp/system/generic.h
+./snmpd.lo: ../include/net-snmp/machine/generic.h 
+./snmpd.lo: ../include/net-snmp/net-snmp-includes.h
+./snmpd.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./snmpd.lo: ../include/net-snmp/library/snmp_api.h
+./snmpd.lo: ../include/net-snmp/library/asn1.h
+./snmpd.lo: ../include/net-snmp/library/snmp_impl.h
+./snmpd.lo: ../include/net-snmp/library/snmp.h
+./snmpd.lo: ../include/net-snmp/library/snmp-tc.h
+./snmpd.lo: ../include/net-snmp/utilities.h
+./snmpd.lo: ../include/net-snmp/library/snmp_client.h
+./snmpd.lo: ../include/net-snmp/library/system.h
+./snmpd.lo: ../include/net-snmp/library/tools.h
+./snmpd.lo: ../include/net-snmp/library/int64.h
+./snmpd.lo: ../include/net-snmp/library/mt_support.h
+./snmpd.lo: ../include/net-snmp/library/snmp_alarm.h
+./snmpd.lo: ../include/net-snmp/library/callback.h
+./snmpd.lo: ../include/net-snmp/library/data_list.h
+./snmpd.lo: ../include/net-snmp/library/oid_stash.h
+./snmpd.lo: ../include/net-snmp/library/check_varbind.h
+./snmpd.lo: ../include/net-snmp/library/container.h
+./snmpd.lo: ../include/net-snmp/library/factory.h
+./snmpd.lo: ../include/net-snmp/library/snmp_logging.h 
+./snmpd.lo: ../include/net-snmp/library/container_binary_array.h
+./snmpd.lo: ../include/net-snmp/library/container_list_ssll.h
+./snmpd.lo: ../include/net-snmp/library/container_iterator.h
+./snmpd.lo: ../include/net-snmp/library/container.h
+./snmpd.lo: ../include/net-snmp/library/snmp_assert.h
+./snmpd.lo: ../include/net-snmp/version.h ../include/net-snmp/session_api.h
+./snmpd.lo: ../include/net-snmp/library/snmp_transport.h
+./snmpd.lo: ../include/net-snmp/library/snmpCallbackDomain.h
+./snmpd.lo: ../include/net-snmp/library/snmpUnixDomain.h
+./snmpd.lo:  ../include/net-snmp/library/snmpUDPDomain.h
+./snmpd.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./snmpd.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./snmpd.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./snmpd.lo: ../include/net-snmp/library/snmpIPXDomain.h
+./snmpd.lo: ../include/net-snmp/library/ucd_compat.h
+./snmpd.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
+./snmpd.lo: ../include/net-snmp/library/mib.h
+./snmpd.lo: ../include/net-snmp/library/parse.h
+./snmpd.lo: ../include/net-snmp/varbind_api.h
+./snmpd.lo: ../include/net-snmp/config_api.h
+./snmpd.lo: ../include/net-snmp/library/read_config.h
+./snmpd.lo: ../include/net-snmp/library/default_store.h
+./snmpd.lo: ../include/net-snmp/library/snmp_parse_args.h
+./snmpd.lo: ../include/net-snmp/library/snmp_enum.h
+./snmpd.lo: ../include/net-snmp/library/vacm.h
+./snmpd.lo: ../include/net-snmp/output_api.h
+./snmpd.lo: ../include/net-snmp/library/snmp_debug.h
+./snmpd.lo: ../include/net-snmp/snmpv3_api.h
+./snmpd.lo: ../include/net-snmp/library/snmpv3.h
+./snmpd.lo: ../include/net-snmp/library/transform_oids.h
+./snmpd.lo: ../include/net-snmp/library/keytools.h
+./snmpd.lo: ../include/net-snmp/library/scapi.h
+./snmpd.lo: ../include/net-snmp/library/lcd_time.h
+./snmpd.lo: ../include/net-snmp/library/snmp_secmod.h
+./snmpd.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./snmpd.lo: ../include/net-snmp/library/snmpusm.h
+./snmpd.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
+./snmpd.lo: ../include/net-snmp/agent/snmp_agent.h
+./snmpd.lo: ../include/net-snmp/agent/snmp_vars.h
+./snmpd.lo: ../include/net-snmp/agent/agent_handler.h
+./snmpd.lo: ../include/net-snmp/agent/var_struct.h
+./snmpd.lo: ../include/net-snmp/agent/agent_registry.h
+./snmpd.lo: ../include/net-snmp/agent/ds_agent.h
+./snmpd.lo: ../include/net-snmp/agent/agent_read_config.h
+./snmpd.lo: ../include/net-snmp/agent/agent_trap.h
+./snmpd.lo: ../include/net-snmp/agent/all_helpers.h
+./snmpd.lo: ../include/net-snmp/agent/instance.h
+./snmpd.lo: ../include/net-snmp/agent/baby_steps.h
+./snmpd.lo: ../include/net-snmp/agent/scalar.h
+./snmpd.lo: ../include/net-snmp/agent/scalar_group.h
+./snmpd.lo: ../include/net-snmp/agent/multiplexer.h
+./snmpd.lo: ../include/net-snmp/agent/null.h
+./snmpd.lo: ../include/net-snmp/agent/debug_handler.h
+./snmpd.lo: ../include/net-snmp/agent/cache_handler.h
+./snmpd.lo: ../include/net-snmp/agent/old_api.h
+./snmpd.lo: ../include/net-snmp/agent/read_only.h
+./snmpd.lo: ../include/net-snmp/agent/row_merge.h
+./snmpd.lo: ../include/net-snmp/agent/serialize.h
+./snmpd.lo: ../include/net-snmp/agent/bulk_to_next.h
+./snmpd.lo: ../include/net-snmp/agent/mode_end_call.h
+./snmpd.lo: ../include/net-snmp/agent/table.h
+./snmpd.lo: ../include/net-snmp/agent/table_data.h
+./snmpd.lo: ../include/net-snmp/agent/table_dataset.h
+./snmpd.lo: ../include/net-snmp/agent/table_iterator.h
+./snmpd.lo: ../include/net-snmp/agent/mib_module_config.h m2m.h snmpd.h
+./snmpd.lo: mibgroup/struct.h ../include/net-snmp/agent/mib_modules.h
+./snmpd.lo: mibgroup/util_funcs.h mibgroup/struct.h
+./snmpd.lo: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
+./snmpd.lo: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/notification.h
+./snmpd.lo: mibgroup/target.h mibgroup/agent_mibs.h mibgroup/agentx.h
+./snmpd.lo: mibgroup/utilities.h mibgroup/host.h mibgroup/disman/event-mib.h
+./snmpd.lo: mibgroup/smux.h mibgroup/examples.h mibgroup/examples/example.h
+./snmpd.lo: mibgroup/testhandler.h mibgroup/Rmon.h
+./snmpd.lo: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
+./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
+./snmpd.lo: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
+./snmpd.lo: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+./snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./snmpd.lo: mibgroup/mibII/at.h mibgroup/mibII/udp.h
+./snmpd.lo: mibgroup/mibII/vacm_vars.h mibgroup/mibII/setSerialNo.h
+./snmpd.lo: mibgroup/ucd-snmp/memory.h ./mibgroup/mibdefs.h
+./snmpd.lo: mibgroup/ucd-snmp/vmstat.h mibgroup/ucd-snmp/proc.h
+./snmpd.lo: mibgroup/ucd-snmp/versioninfo.h mibgroup/ucd-snmp/pass.h
+./snmpd.lo: mibgroup/ucd-snmp/pass_persist.h mibgroup/ucd-snmp/disk.h
+./snmpd.lo: mibgroup/ucd-snmp/loadave.h mibgroup/ucd-snmp/extensible.h
+./snmpd.lo: mibgroup/ucd-snmp/errormib.h mibgroup/ucd-snmp/file.h
+./snmpd.lo: mibgroup/ucd-snmp/dlmod.h mibgroup/ucd-snmp/proxy.h
+./snmpd.lo: mibgroup/ucd-snmp/logmatch.h 
+./snmpd.lo: mibgroup/snmpv3/snmpEngine.h mibgroup/snmpv3/snmpMPDStats.h
+./snmpd.lo: mibgroup/snmpv3/usmStats.h mibgroup/snmpv3/usmUser.h
+./snmpd.lo: mibgroup/notification/snmpNotifyTable.h
+./snmpd.lo: mibgroup/notification/snmpNotifyFilterTable.h
+./snmpd.lo: mibgroup/notification/snmpNotifyFilterProfileTable.h
+./snmpd.lo: mibgroup/target/snmpTargetAddrEntry.h
+./snmpd.lo: mibgroup/target/snmpTargetParamsEntry.h mibgroup/target/target.h
+./snmpd.lo: mibgroup/target/target_counters.h
+./snmpd.lo: mibgroup/agent/nsTransactionTable.h
+./snmpd.lo: mibgroup/agent/nsModuleTable.h mibgroup/agent/nsDebug.h
+./snmpd.lo: mibgroup/agent/nsCache.h mibgroup/agent/nsLogging.h
+./snmpd.lo: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
+./snmpd.lo: mibgroup/utilities/override.h mibgroup/host/hr_system.h
+./snmpd.lo: mibgroup/host/hr_storage.h mibgroup/host/hr_device.h
+./snmpd.lo: mibgroup/host/hr_other.h mibgroup/host/hr_proc.h
+./snmpd.lo: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
+./snmpd.lo: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
+./snmpd.lo: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
+./snmpd.lo: mibgroup/host/hr_swinst.h mibgroup/disman/mteTriggerTable.h
+./snmpd.lo: mibgroup/disman/mteTriggerDeltaTable.h
+./snmpd.lo: mibgroup/disman/mteTriggerExistenceTable.h
+./snmpd.lo: mibgroup/disman/mteTriggerBooleanTable.h
+./snmpd.lo: mibgroup/disman/mteTriggerThresholdTable.h
+./snmpd.lo: mibgroup/disman/mteObjectsTable.h mibgroup/disman/mteEventTable.h
+./snmpd.lo: mibgroup/disman/mteEventNotificationTable.h mibgroup/smux/smux.h
+./snmpd.lo: mibgroup/examples/scalar_int.h mibgroup/examples/data_set.h
+./snmpd.lo: mibgroup/examples/delayed_instance.h mibgroup/Rmon/rows.h
+./snmpd.lo: mibgroup/Rmon/agutil.h mibgroup/Rmon/statistics.h
+./snmpd.lo: mibgroup/Rmon/alarm.h mibgroup/Rmon/history.h
+./snmpd.lo: mibgroup/Rmon/event.h mibgroup/mibII/kernel_linux.h
+./snmpd.lo: mibgroup/mibII/tcpTable.h mibgroup/mibII/ipAddr.h
+./snmpd.lo: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+./snmpd.lo: mibgroup/mibII/udpTable.h mibgroup/mibII/vacm_context.h
+./snmpd.lo: mibgroup/utilities/execute.h mibgroup/header_complex.h
+./snmpd.lo: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+./snmpd.lo: mibgroup/agentx/master_admin.h mibgroup/agentx/agentx_config.h
+./snmpd.lo:  ./mibgroup/mib_module_shutdown.h
 ./helpers/all_helpers.lo: ../include/net-snmp/net-snmp-config.h
 ./helpers/all_helpers.lo: ../include/net-snmp/system/linux.h
 ./helpers/all_helpers.lo: ../include/net-snmp/system/sysv.h
@@ -2827,6 +2832,100 @@
 ./helpers/stash_cache.lo: ../include/net-snmp/agent/table_iterator.h
 ./helpers/stash_cache.lo: ../include/net-snmp/agent/mib_module_config.h
 ./helpers/stash_cache.lo: ../include/net-snmp/agent/stash_cache.h
+./helpers/table.lo: ../include/net-snmp/net-snmp-config.h
+./helpers/table.lo: ../include/net-snmp/system/linux.h
+./helpers/table.lo: ../include/net-snmp/system/sysv.h
+./helpers/table.lo: ../include/net-snmp/system/generic.h
+./helpers/table.lo: ../include/net-snmp/machine/generic.h
+./helpers/table.lo: ../include/net-snmp/net-snmp-includes.h
+./helpers/table.lo: ../include/net-snmp/definitions.h
+./helpers/table.lo: ../include/net-snmp/types.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_api.h
+./helpers/table.lo: ../include/net-snmp/library/asn1.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_impl.h
+./helpers/table.lo: ../include/net-snmp/library/snmp.h
+./helpers/table.lo: ../include/net-snmp/library/snmp-tc.h
+./helpers/table.lo: ../include/net-snmp/utilities.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_client.h
+./helpers/table.lo: ../include/net-snmp/library/system.h
+./helpers/table.lo: ../include/net-snmp/library/tools.h
+./helpers/table.lo: ../include/net-snmp/library/int64.h
+./helpers/table.lo: ../include/net-snmp/library/mt_support.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_alarm.h
+./helpers/table.lo: ../include/net-snmp/library/callback.h
+./helpers/table.lo: ../include/net-snmp/library/data_list.h
+./helpers/table.lo: ../include/net-snmp/library/oid_stash.h
+./helpers/table.lo: ../include/net-snmp/library/check_varbind.h
+./helpers/table.lo: ../include/net-snmp/library/container.h
+./helpers/table.lo: ../include/net-snmp/library/factory.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_logging.h
+./helpers/table.lo: ../include/net-snmp/library/container_binary_array.h
+./helpers/table.lo: ../include/net-snmp/library/container_list_ssll.h
+./helpers/table.lo: ../include/net-snmp/library/container_iterator.h
+./helpers/table.lo: ../include/net-snmp/library/container.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_assert.h
+./helpers/table.lo: ../include/net-snmp/version.h
+./helpers/table.lo: ../include/net-snmp/session_api.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_transport.h
+./helpers/table.lo: ../include/net-snmp/library/snmpCallbackDomain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpUnixDomain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpUDPDomain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./helpers/table.lo: ../include/net-snmp/library/snmpIPXDomain.h
+./helpers/table.lo: ../include/net-snmp/library/ucd_compat.h
+./helpers/table.lo: ../include/net-snmp/pdu_api.h
+./helpers/table.lo: ../include/net-snmp/mib_api.h
+./helpers/table.lo: ../include/net-snmp/library/mib.h
+./helpers/table.lo: ../include/net-snmp/library/parse.h
+./helpers/table.lo: ../include/net-snmp/varbind_api.h
+./helpers/table.lo: ../include/net-snmp/config_api.h
+./helpers/table.lo: ../include/net-snmp/library/read_config.h
+./helpers/table.lo: ../include/net-snmp/library/default_store.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_parse_args.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_enum.h
+./helpers/table.lo: ../include/net-snmp/library/vacm.h
+./helpers/table.lo: ../include/net-snmp/output_api.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_debug.h
+./helpers/table.lo: ../include/net-snmp/snmpv3_api.h
+./helpers/table.lo: ../include/net-snmp/library/snmpv3.h
+./helpers/table.lo: ../include/net-snmp/library/transform_oids.h
+./helpers/table.lo: ../include/net-snmp/library/keytools.h
+./helpers/table.lo: ../include/net-snmp/library/scapi.h
+./helpers/table.lo: ../include/net-snmp/library/lcd_time.h
+./helpers/table.lo: ../include/net-snmp/library/snmp_secmod.h
+./helpers/table.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./helpers/table.lo: ../include/net-snmp/library/snmpusm.h
+./helpers/table.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
+./helpers/table.lo: ../include/net-snmp/agent/snmp_agent.h
+./helpers/table.lo: ../include/net-snmp/agent/snmp_vars.h
+./helpers/table.lo: ../include/net-snmp/agent/agent_handler.h
+./helpers/table.lo: ../include/net-snmp/agent/var_struct.h
+./helpers/table.lo: ../include/net-snmp/agent/agent_registry.h
+./helpers/table.lo: ../include/net-snmp/agent/ds_agent.h
+./helpers/table.lo: ../include/net-snmp/agent/agent_read_config.h
+./helpers/table.lo: ../include/net-snmp/agent/agent_trap.h
+./helpers/table.lo: ../include/net-snmp/agent/all_helpers.h
+./helpers/table.lo: ../include/net-snmp/agent/instance.h
+./helpers/table.lo: ../include/net-snmp/agent/baby_steps.h
+./helpers/table.lo: ../include/net-snmp/agent/scalar.h
+./helpers/table.lo: ../include/net-snmp/agent/scalar_group.h
+./helpers/table.lo: ../include/net-snmp/agent/multiplexer.h
+./helpers/table.lo: ../include/net-snmp/agent/null.h
+./helpers/table.lo: ../include/net-snmp/agent/debug_handler.h
+./helpers/table.lo: ../include/net-snmp/agent/cache_handler.h
+./helpers/table.lo: ../include/net-snmp/agent/old_api.h
+./helpers/table.lo: ../include/net-snmp/agent/read_only.h
+./helpers/table.lo: ../include/net-snmp/agent/row_merge.h
+./helpers/table.lo: ../include/net-snmp/agent/serialize.h
+./helpers/table.lo: ../include/net-snmp/agent/bulk_to_next.h
+./helpers/table.lo: ../include/net-snmp/agent/mode_end_call.h
+./helpers/table.lo: ../include/net-snmp/agent/table.h
+./helpers/table.lo: ../include/net-snmp/agent/table_data.h
+./helpers/table.lo: ../include/net-snmp/agent/table_dataset.h
+./helpers/table.lo: ../include/net-snmp/agent/table_iterator.h
+./helpers/table.lo: ../include/net-snmp/agent/mib_module_config.h
 ./helpers/table_array.lo: ../include/net-snmp/net-snmp-config.h
 ./helpers/table_array.lo: ../include/net-snmp/system/linux.h
 ./helpers/table_array.lo: ../include/net-snmp/system/sysv.h
@@ -2922,100 +3021,6 @@
 ./helpers/table_array.lo: ../include/net-snmp/agent/table_iterator.h
 ./helpers/table_array.lo: ../include/net-snmp/agent/mib_module_config.h
 ./helpers/table_array.lo: ../include/net-snmp/agent/table_array.h
-./helpers/table.lo: ../include/net-snmp/net-snmp-config.h
-./helpers/table.lo: ../include/net-snmp/system/linux.h
-./helpers/table.lo: ../include/net-snmp/system/sysv.h
-./helpers/table.lo: ../include/net-snmp/system/generic.h
-./helpers/table.lo: ../include/net-snmp/machine/generic.h
-./helpers/table.lo: ../include/net-snmp/net-snmp-includes.h
-./helpers/table.lo: ../include/net-snmp/definitions.h
-./helpers/table.lo: ../include/net-snmp/types.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_api.h
-./helpers/table.lo: ../include/net-snmp/library/asn1.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_impl.h
-./helpers/table.lo: ../include/net-snmp/library/snmp.h
-./helpers/table.lo: ../include/net-snmp/library/snmp-tc.h
-./helpers/table.lo: ../include/net-snmp/utilities.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_client.h
-./helpers/table.lo: ../include/net-snmp/library/system.h
-./helpers/table.lo: ../include/net-snmp/library/tools.h
-./helpers/table.lo: ../include/net-snmp/library/int64.h
-./helpers/table.lo: ../include/net-snmp/library/mt_support.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_alarm.h
-./helpers/table.lo: ../include/net-snmp/library/callback.h
-./helpers/table.lo: ../include/net-snmp/library/data_list.h
-./helpers/table.lo: ../include/net-snmp/library/oid_stash.h
-./helpers/table.lo: ../include/net-snmp/library/check_varbind.h
-./helpers/table.lo: ../include/net-snmp/library/container.h
-./helpers/table.lo: ../include/net-snmp/library/factory.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_logging.h
-./helpers/table.lo: ../include/net-snmp/library/container_binary_array.h
-./helpers/table.lo: ../include/net-snmp/library/container_list_ssll.h
-./helpers/table.lo: ../include/net-snmp/library/container_iterator.h
-./helpers/table.lo: ../include/net-snmp/library/container.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_assert.h
-./helpers/table.lo: ../include/net-snmp/version.h
-./helpers/table.lo: ../include/net-snmp/session_api.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_transport.h
-./helpers/table.lo: ../include/net-snmp/library/snmpCallbackDomain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpUnixDomain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpUDPDomain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./helpers/table.lo: ../include/net-snmp/library/snmpIPXDomain.h
-./helpers/table.lo: ../include/net-snmp/library/ucd_compat.h
-./helpers/table.lo: ../include/net-snmp/pdu_api.h
-./helpers/table.lo: ../include/net-snmp/mib_api.h
-./helpers/table.lo: ../include/net-snmp/library/mib.h
-./helpers/table.lo: ../include/net-snmp/library/parse.h
-./helpers/table.lo: ../include/net-snmp/varbind_api.h
-./helpers/table.lo: ../include/net-snmp/config_api.h
-./helpers/table.lo: ../include/net-snmp/library/read_config.h
-./helpers/table.lo: ../include/net-snmp/library/default_store.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_parse_args.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_enum.h
-./helpers/table.lo: ../include/net-snmp/library/vacm.h
-./helpers/table.lo: ../include/net-snmp/output_api.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_debug.h
-./helpers/table.lo: ../include/net-snmp/snmpv3_api.h
-./helpers/table.lo: ../include/net-snmp/library/snmpv3.h
-./helpers/table.lo: ../include/net-snmp/library/transform_oids.h
-./helpers/table.lo: ../include/net-snmp/library/keytools.h
-./helpers/table.lo: ../include/net-snmp/library/scapi.h
-./helpers/table.lo: ../include/net-snmp/library/lcd_time.h
-./helpers/table.lo: ../include/net-snmp/library/snmp_secmod.h
-./helpers/table.lo: ../include/net-snmp/library/snmpv3-security-includes.h
-./helpers/table.lo: ../include/net-snmp/library/snmpusm.h
-./helpers/table.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
-./helpers/table.lo: ../include/net-snmp/agent/snmp_agent.h
-./helpers/table.lo: ../include/net-snmp/agent/snmp_vars.h
-./helpers/table.lo: ../include/net-snmp/agent/agent_handler.h
-./helpers/table.lo: ../include/net-snmp/agent/var_struct.h
-./helpers/table.lo: ../include/net-snmp/agent/agent_registry.h
-./helpers/table.lo: ../include/net-snmp/agent/ds_agent.h
-./helpers/table.lo: ../include/net-snmp/agent/agent_read_config.h
-./helpers/table.lo: ../include/net-snmp/agent/agent_trap.h
-./helpers/table.lo: ../include/net-snmp/agent/all_helpers.h
-./helpers/table.lo: ../include/net-snmp/agent/instance.h
-./helpers/table.lo: ../include/net-snmp/agent/baby_steps.h
-./helpers/table.lo: ../include/net-snmp/agent/scalar.h
-./helpers/table.lo: ../include/net-snmp/agent/scalar_group.h
-./helpers/table.lo: ../include/net-snmp/agent/multiplexer.h
-./helpers/table.lo: ../include/net-snmp/agent/null.h
-./helpers/table.lo: ../include/net-snmp/agent/debug_handler.h
-./helpers/table.lo: ../include/net-snmp/agent/cache_handler.h
-./helpers/table.lo: ../include/net-snmp/agent/old_api.h
-./helpers/table.lo: ../include/net-snmp/agent/read_only.h
-./helpers/table.lo: ../include/net-snmp/agent/row_merge.h
-./helpers/table.lo: ../include/net-snmp/agent/serialize.h
-./helpers/table.lo: ../include/net-snmp/agent/bulk_to_next.h
-./helpers/table.lo: ../include/net-snmp/agent/mode_end_call.h
-./helpers/table.lo: ../include/net-snmp/agent/table.h
-./helpers/table.lo: ../include/net-snmp/agent/table_data.h
-./helpers/table.lo: ../include/net-snmp/agent/table_dataset.h
-./helpers/table.lo: ../include/net-snmp/agent/table_iterator.h
-./helpers/table.lo: ../include/net-snmp/agent/mib_module_config.h
 ./helpers/table_data.lo: ../include/net-snmp/net-snmp-config.h
 ./helpers/table_data.lo: ../include/net-snmp/system/linux.h
 ./helpers/table_data.lo: ../include/net-snmp/system/sysv.h
