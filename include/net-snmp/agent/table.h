@@ -181,6 +181,9 @@ extern          "C" {
                                                 *reqinfo,
                                                 const u_char *
                                                 storage_name);
+	unsigned int
+		netsnmp_table_next_column(netsnmp_table_request_info *table_info);
+
 
 #ifdef __cplusplus
 };
