@@ -277,7 +277,7 @@ var_smux(struct variable *vp,
 	if (valptr == NULL)
 		return NULL;
 
-	if ((compare_tree(name, *length, rptr->sr_name,
+	if ((snmp_oidtree_compare(name, *length, rptr->sr_name,
 	    rptr->sr_name_len)) != 0) {
 		/* the peer has returned a value outside
 		 * of the registered tree
@@ -317,7 +317,7 @@ var_smux_write(
 
 	/* XXX find the descriptor again */
 	for (rptr = ActiveRegs; rptr; rptr = rptr->sr_next) {
-		if (!compare_tree(name, name_len, rptr->sr_name,
+		if (!snmp_oidtree_compare(name, name_len, rptr->sr_name,
 		     rptr->sr_name_len))
 			break;
 	}
@@ -662,7 +662,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 		*fail = TRUE;
 		return((ptr += *len));
 	}
-	sprint_objid(oid_print, oid_name, oid_name_len);
+	snprint_objid(oid_print, sizeof(oid_print), oid_name, oid_name_len);
 
         if (snmp_get_do_debugging()) {
 	    DEBUGMSGTL (("smux","[smux_open_process] smux peer: %s\n", oid_print)); 
@@ -1068,7 +1068,7 @@ smux_find_replacement(oid *name, size_t name_len)
 	bestptr = NULL;
 
 	for (rptr = PassiveRegs; rptr; rptr = rptr->sr_next) {
-		if (!compare_tree(rptr->sr_name, rptr->sr_name_len,
+		if (!snmp_oidtree_compare(rptr->sr_name, rptr->sr_name_len,
 		    name, name_len)) {
 			if ((difflen = rptr->sr_name_len - name_len)
 			    < bestlen) {
@@ -1462,7 +1462,7 @@ smux_peer_cleanup(int sd)
 		if (Auths[i]->sa_active_fd == sd) {
 		  	char oid_name[128];
 			Auths[i]->sa_active_fd = -1;
-			sprint_objid(oid_name, Auths[i]->sa_oid, Auths[i]->sa_oid_len);
+			snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid, Auths[i]->sa_oid_len);
 			snmp_log(LOG_INFO, "peer disconnected: %s\n", oid_name);
 		}
 	}
