@@ -7,6 +7,7 @@
 
 unsigned char *var_extensible_version __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 int update_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
+int debugging_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
 
 #include "mibdefs.h"
 
@@ -18,6 +19,7 @@ int update_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
 #define VERCLEARCACHE 10
 #define VERUPDATECONFIG 11
 #define VERRESTARTAGENT 12
+#define VERDEBUGGING 20
 
 config_require(util_funcs)
 
@@ -31,7 +33,8 @@ struct variable2 extensible_version_variables[] = {
   {VERIDENT, STRING, RONLY, var_extensible_version, 1, {VERIDENT}},
   {VERCLEARCACHE, INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
   {VERUPDATECONFIG, INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
-  {VERRESTARTAGENT, INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}}
+  {VERRESTARTAGENT, INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
+  {VERDEBUGGING, INTEGER, RWRITE, var_extensible_version, 1, {VERDEBUGGING}}
 };
 
 config_load_mib(EXTENSIBLEMIB.VERSIONMIBNUM, EXTENSIBLENUM+1, extensible_version_variables)

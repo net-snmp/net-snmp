@@ -38,6 +38,12 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
   static char errmsg[300];
   char *cptr;
   time_t curtime;
+  char c_oid[MAX_NAME_LEN];
+
+  if (snmp_get_do_debugging()) {
+    sprint_objid (c_oid, name, *length);
+    DEBUGP ("versionMib: %s %d\n", c_oid, exact);
+  }
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
@@ -76,6 +82,10 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
       *write_method = restart_hook;
       long_ret = 0;
       return((u_char *) &long_ret);
+    case VERDEBUGGING:
+      *write_method = debugging_hook;
+      long_ret = snmp_get_do_debugging();
+      return((u_char *) &long_ret);
   }      
   return NULL;
 }
@@ -100,6 +110,30 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
     update_config(0);
+  } 
+  return SNMP_ERR_NOERROR;
+}
+
+int
+debugging_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  long tmp=0;
+  int tmplen=1000;
+
+  if (var_val_type != INTEGER) {
+    printf("Wrong type != int\n");
+    return SNMP_ERR_WRONGTYPE;
+  }
+  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  if (action == COMMIT) {
+    snmp_set_do_debugging(tmp);
   } 
   return SNMP_ERR_NOERROR;
 }
