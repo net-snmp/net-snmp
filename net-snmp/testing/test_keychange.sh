@@ -13,7 +13,7 @@
 #
 
 
-. ./eval_tools.sh
+. eval_tools.sh
 
 VERIFY ktest
 

@@ -14,28 +14,23 @@ CC		= @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
-test:
-	./RUNTESTS -a
+test:   all
+	$(srcdir)/RUNTESTS -a -D `pwd`/..
 
-#
-# FIX	Ick, get rid of the direct reference to libsnmp.a...
-#
 etest:    etimetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ etimetest.o ../snmplib/libsnmp.a $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ etimetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 ktest:    keymanagetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ keymanagetest.o ../snmplib/libsnmp.a $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ keymanagetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 misctest:    misctest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ misctest.o ../snmplib/libsnmp.a $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ misctest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ scapitest.o ../snmplib/libsnmp.a $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
-
+	${CC} -o $@ scapitest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 clean:
-	rm -f *.o core *.core $(TARG) 
-
+	rm -f *.o core *.core $(TARG)
 
 install: installdirs $(TARG)
 	@for i in $(TARG) ; \
@@ -43,10 +38,8 @@ install: installdirs $(TARG)
 		echo "install:  installed $$i in $(bindir)" ; \
 	done
 
-
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
-
 
 dependlocal: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c
