@@ -40,6 +40,7 @@ TABLE OF CONTENTS
    Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
    I cannot set any variables in the MIB.
    Variables seem to disappear when I try to set them.  Why?
+   I still can't change sysLocation, though the access settings allow it.  Why not?
    I get an error when trying to set a negative value - why?
    How do I send traps and notifications?
    How do I handle traps and notifications?
@@ -116,6 +117,7 @@ TABLE OF CONTENTS
    Mib2c complains about a missing "mib reference" - what does this mean?
    Mib2c complains about not having a "valid OID" - what does this mean?
    Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
+   Mib2c talks about "configuration files". Why has this stopped working?
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
    I'm getting an error "autoheader: not found" - what's wrong?
@@ -885,6 +887,22 @@ Variables seem to disappear when I try to set them.  Why?
   If you are sure that the object is writeable (and has been implemented
   as such), then you probably need to look at the agent access control.
   See the AGENT section for more details.
+
+
+
+I still can't change sysLocation, though the access settings allow it.  Why not?
+-------------------------------------------------------------------------------
+
+    One other possibility for the 'sysLocation' and 'sysContact' objects,
+  is that you've got a configuration option in the 'snmpd.conf' file which
+  already sets the corresponding value there.
+
+    Earlier versions of the agent would allow you to write to these objects,
+  but the new value would be forgotten the next time the agent was re-started.
+  More recent versions of the agent reject such write requests if there's a
+  value set via the config file.   If there isn't such a config setting, then
+  the write request will succeed (assuming the access settings allow it), and
+  the new value will be retained the next time the agent restarts.
 
 
 
@@ -2478,33 +2496,49 @@ Mib2c complains about a missing "mib reference" - what does this mean?
 Mib2c complains about not having a "valid OID" - what does this mean?
 ---------------------------------------------------------------------
 
-    It probably means that you gave it the name of a MIB file (or
+    This probably means that you gave it the name of a MIB file (or
   module), rather than the name of an object defined in that file.
-  If you've got a file 'MY-MIB.txt', defining the MIB module 'MY-MIB'
-  which contains a subtree based on the object 'myMib', then you
-  should invoke mib2c as
+  Mib2c expects the name of a 'root' object, and will generate a
+  template for the sub-tree starting from there.
+
+    If you've got a file 'MY-MIB.txt', defining the MIB module
+  'MY-MIB' which contains a subtree based on the object 'myMib',
+  then you should invoke mib2c as
             "mib2c .... myMib"
   rather than
             "mib2c .... MY-MIB.txt"
   or        "mib2c .... MY-MIB"
+
+    Note that you'll probably also have to add your MIB to the list of
+  MIBs that are loaded automatically, in order for mib2c to recognise
+  the name of this object.  So the command would typically be
+            "MIBS=+MY-MIB mib2c .... myMib"
+  or        "MIBS=ALL     mib2c .... myMib"
 
 
 
 Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 ---------------------------------------------------------------------
 
-    This probably means that you've given mib2c the name of the file
-  containing the MIB, rather than an object within it.  Mib2c expect
-  the name of a 'root' object, and will generate a template for the
-  sub-tree starting from there.
+    This is the same problem as above -  giving mib2c the name of
+  the file containing the MIB, rather than an object within it.
+  Earlier versions of mib2c didn't detect this situation, and
+  rather than report an error, it merrily constructed a template
+  for a default starting point of the mib-2 node.
 
-    Unfortunately, rather than report an error in this situation,
-  it merrily constructs a template for a default starting point of
-  the mib-2 node.  This should have been corrected in the latest
-  release, which should issue an error instead.
+  More recent versions issue the error mentioned above, instead.
 
-    But in both cases, the underlying problem is the same - using
-  the name of the file rather than the name of an object within it.
+
+
+Mib2c talks about "configuration files". Why has this stopped working?
+---------------------------------------------------------------------
+
+    You've probably upgraded to the v5 net-snmp release (from the
+  v4 ucd-snmp release).  This introduced a new approach to agent
+  module development, including a number of different "helpers".
+  The mib2c tool comes with configurations to generate code for
+  many of these, but you'll need to select which is most convenient
+  for your particular case.
 
 
 
