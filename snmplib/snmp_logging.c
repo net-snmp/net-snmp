@@ -109,6 +109,7 @@ log_filelog (int priority, const char *format)
   /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_filelogging) {
     fprintf(logfile, format);
+    fflush(logfile);
   }
 }
 
@@ -119,6 +120,7 @@ log_stderrlog (int priority, const char *format)
   /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_stderrlogging) {
     fprintf(stderr, format);
+    fflush(stderr);
   }
 }
 
