@@ -292,6 +292,29 @@ debugmsg_oid(const char *token, const oid * theoid, size_t len)
 }
 
 void
+debugmsg_suboid(const char *token, const oid * theoid, size_t len)
+{
+    u_char         *buf = NULL;
+    size_t          buf_len = 0, out_len = 0, buf_overflow = 0;
+
+    netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
+                                 &buf_overflow, theoid, len);
+    if(buf_overflow) {
+        if (buf != NULL) {
+            debugmsg(token, "%s [TRUNCATED]", buf);
+        }
+    } else {
+        if (buf != NULL) {
+            debugmsg(token, "%s", buf);
+        }
+    }
+
+    if (buf != NULL) {
+        free(buf);
+    }
+}
+
+void
 debugmsg_var(const char *token, netsnmp_variable_list * var)
 {
     u_char         *buf = NULL;
