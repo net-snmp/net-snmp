@@ -228,11 +228,17 @@ header_complex_get(struct header_complex_index *datalist,
                     struct variable_list *index) {
     oid searchfor[MAX_OID_LEN];
     size_t searchfor_len;
-    struct header_complex_index *nptr;
     
     header_complex_generate_oid(searchfor,     /* out */
                                 &searchfor_len, /* out */
                                 NULL, 0, index);
+    return header_complex_get_from_oid(datalist, searchfor, searchfor_len);
+}
+
+void *
+header_complex_get_from_oid(struct header_complex_index *datalist,
+                            oid *searchfor, size_t searchfor_len) {
+    struct header_complex_index *nptr;
     for(nptr = datalist; nptr != NULL; nptr = nptr->next) {
         if (snmp_oid_compare(searchfor, searchfor_len,
                              nptr->name, nptr->namelen) == 0)
@@ -310,14 +316,27 @@ header_complex(struct header_complex_index *datalist,
 struct header_complex_index *
 header_complex_add_data(struct header_complex_index **thedata,
                         struct variable_list *var, void *data) {
-  struct header_complex_index *hciptrn, *hciptrp, *ourself;
   oid newoid[MAX_OID_LEN];
   size_t newoid_len;
+  struct header_complex_index *ret;
 
   if (thedata == NULL || var == NULL || data == NULL)
     return NULL;
   
   header_complex_generate_oid(newoid, &newoid_len, NULL, 0, var);
+  ret = header_complex_add_data_by_oid(thedata, newoid, newoid_len, data);
+  /* free the variable list, but not the enclosed data!  it's not ours! */
+  snmp_free_varbind(var);
+  return (ret);
+}
+
+struct header_complex_index *
+header_complex_add_data_by_oid(struct header_complex_index **thedata,
+                               oid *newoid, size_t newoid_len, void *data) {
+  struct header_complex_index *hciptrn, *hciptrp, *ourself;
+
+  if (thedata == NULL || newoid == NULL || data == NULL)
+    return NULL;
 
   for(hciptrn = *thedata, hciptrp = NULL;
       hciptrn != NULL;
@@ -347,9 +366,6 @@ header_complex_add_data(struct header_complex_index **thedata,
   ourself->data = data;
   ourself->name = snmp_duplicate_objid(newoid, newoid_len);
   ourself->namelen = newoid_len;
-
-  /* free the variable list, but not the enclosed data!  it's not ours! */
-  snmp_free_varbind(var);
 
   /* rewind to the head of the list and return it (since the new head
      could be us, we need to notify the above routine who the head now is. */
