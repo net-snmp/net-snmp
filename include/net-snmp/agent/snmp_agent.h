@@ -66,7 +66,6 @@ typedef struct netsnmp_tree_cache_s {
    netsnmp_request_info *requests_end;
 } netsnmp_tree_cache;
 
-/* (will likely change later) */
 #define MODE_GET              SNMP_MSG_GET
 #define MODE_GETNEXT          SNMP_MSG_GETNEXT
 #define MODE_GETBULK          SNMP_MSG_GETBULK
@@ -154,7 +153,7 @@ int netsnmp_agent_check_parse(netsnmp_session*, netsnmp_pdu*, int);
 struct netsnmp_transport_s;
  
 int	netsnmp_register_agent_nsap	(struct netsnmp_transport_s *t);
-void	denetsnmp_register_agent_nsap	(int handle);
+void	netsnmp_deregister_agent_nsap	(int handle);
 
 inline void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent, netsnmp_data_list *node);
