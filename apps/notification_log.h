@@ -8,6 +8,7 @@
 void            init_notification_log(void);
 Netsnmp_Node_Handler nlmLogTable_handler;
 Netsnmp_Node_Handler nlmLogVariableTable_handler;
+Netsnmp_Trap_Handler notification_handler;
 
 void
                 log_notification(struct hostent *host, netsnmp_pdu *pdu,
