@@ -2798,6 +2798,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                                              (u_char) (ASN_SEQUENCE |
                                                        ASN_CONSTRUCTOR),
                                              *offset - start_offset);
+            DEBUGINDENTLESS();
 
             if (rc == 0) {
                 return -1;
