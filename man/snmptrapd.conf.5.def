@@ -50,6 +50,10 @@ SNMPv1 traps have been converted to the SNMPv2 trap PDU type by the
 method described in the SNMPv1/SNMPv2 coexistence document, for which
 I forget the appropriate RFC number.
 .RE
+.IP "createUser username (MD5|SHA) authpassphrase [DES]"
+See the snmpd.conf manual page for a description of how to create
+SNMPv3 users.  It's roughly the same, but the file name changes to
+snmptrapd.conf from snmpd.conf. 
 .SH NOTES
 .IP o
 The demon blocks on the executing traphandle commands.  (This should
