@@ -21,7 +21,6 @@
 
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/parse.h>
-#include <net-snmp/library/oid_array.h>
 #include <net-snmp/library/oid_stash.h>
 #include <net-snmp/library/ucd_compat.h>
 
