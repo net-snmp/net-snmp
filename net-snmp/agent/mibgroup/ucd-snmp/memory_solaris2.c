@@ -1,5 +1,5 @@
-#include "mib_module_config.h"        // list of which modules are supported 
-#include <config.h>                   // local SNMP configuration details
+#include "mib_module_config.h"        /* list of which modules are supported */
+#include <config.h>                   /* local SNMP configuration details*/
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
@@ -12,15 +12,15 @@
 #include <sys/types.h>
 
 
-#include "mibincl.h"                  // Standard set of SNMP includes
-#include "util_funcs.h"               // utility function declarations
-#include "read_config.h"              // if the module uses run-time
-                                        //      configuration controls
-#include "auto_nlist.h"               // if the module needs to read
-                                       //      kernel data structures
+#include "mibincl.h"                  /* Standard set of SNMP includes*/
+#include "util_funcs.h"               /* utility function declarations*/
+#include "read_config.h"              /* if the module uses run-time*/
+                                        /*      configuration controls*/
+#include "auto_nlist.h"               /* if the module needs to read*/
+                                       /*      kernel data structures*/
 #include "../../../snmplib/system.h"
 
-#include "memory_solaris2.h"                     // the module-specific header
+#include "memory_solaris2.h"                     /* the module-specific header*/
 
 #include <kstat.h>
 #include <sys/stat.h>
