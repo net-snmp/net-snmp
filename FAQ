@@ -1,5 +1,40 @@
       Frequently Asked Questions (FAQ) for the UCD SNMP package
       =========================================================
+			 Author: Dave Shield
+		Email: ucd-snmp-coders@ece.ucdavis.edu
+
+TABLE OF CONTENTS
+=================
+
+ TABLE OF CONTENTS
+ GENERAL
+   What is it?
+   Where can I get it?
+   What documentation is available?
+   Are there binaries available?
+   What operating systems does it run on?
+   What happens if mine isn't listed?
+   How do I find out about new releases?
+   How can I find out what other people are doing?
+   How do I submit a patch or bug report?
+   What's the difference between SNMPv1 and SNMPv2?
+   What are all these different SNMPv2's anyway?
+   Which SNMPv2 is supported in this package?
+ AGENT
+   What MIBs are supported?
+   How do I add a MIB?
+   How do I add functionality?
+   When I run the agent it runs and then quits without staying around. Why?
+ TECHNICAL
+   How do I write C code to integrate with the agent?
+   What ASN.1 parser is used?
+   How does the agent fetch the value of a variable from the system?
+ PROBLEMS
+   What does "klread:  bad address" mean?
+   What does "nlist err:  wombat not found" (or similar) mean?
+   How about "Can't open /dev/kmem"?
+   I cannot set any variables in the MIB.
+   Sometimes I seem to get the wrong answers.  Why?
 
 
 GENERAL
