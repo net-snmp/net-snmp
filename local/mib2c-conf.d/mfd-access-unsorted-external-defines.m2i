@@ -95,7 +95,6 @@ int ${table}_loop_save_position($mfd_aue_param_decl,
                        ${context}_ref_loop_ctx *loop_ctx_ref,
                        ${context}_ref_loop_ctx *save_loop_ctx_ref, int reuse);
 int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
-int ${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *ref);
 
 ##
 @end@ // m2c_processing_type eq 'h'
@@ -104,21 +103,6 @@ int ${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *re
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'i'@
-/**
- * @internal
- * wrapper around init_context
- */
-static int
-_${table}_loop_init_context( $mfd_aue_wrap_param_decl,
-                        ${context}_ref_loop_ctx *ref)
-{
-   DEBUGTRACE;
-
-   netsnmp_assert(NULL != $mfd_aue_wrap_param);
-   
-   return ${table}_loop_init_context($mfd_aue_wrap_param->user_ctx, ref);
-}
-
 /**
  * @internal
  * wrapper around clean up a loop reference
@@ -216,8 +200,7 @@ _${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
                            ${context}_ref_loop_ctx * loop_ctx_ref,
                            ${context}_ref_rowreq_ctx * rowreq_ctx_ref)
 {
-    ${context}_rowreq_ctx *orig_ctx = rowreq_ctx_ref->rowreq_ctx;
-    int rc;
+//    ${context}_rowreq_ctx *orig_ctx = rowreq_ctx_ref->rowreq_ctx;
 
     DEBUGTRACE;
 
@@ -251,7 +234,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
         /** save_pos */
         (Netsnmp_Iterator_Ctx_Dup*)_${table}_loop_save_position,
         /** init_context */
-        (Netsnmp_Iterator_Ctx*)_${table}_loop_init_context,
+        (Netsnmp_Iterator_Ctx*)NULL,
         /** cleanup_context */
         (Netsnmp_Iterator_Ctx*)_${table}_loop_cleanup_context,
         /** free_user_ctx */
@@ -277,7 +260,6 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  *
  * A simplified version of the pseudo-code looks like this:
  *
- *    ${table}_loop_init_context(loop)
  *    ${table}_loop_get_first(loop,data)
  *    while( no_error ) {
  *       if( best_match(data, key)
@@ -295,80 +277,12 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
  ***********************************************************************/
 
 /**
- * initialize the iterator loop context for a new iteration loop.
- *
- * Summary
- * -------
- *  This function will be called before the start of a new itertion over
- *  the data. The loop context that is initialized here will be passed to
- *  ${table}_loop_get_first and ${table}_loop_get_next.
- *
- *  Set the loop context variable loop_ctx_ref->loop_ctx so that the iteration
- *  functions (get_first and get_next) can locate the apropriate data
- *  context.
- *
- * More Details
- * ------------
- * @param $mfd_aue_param_cmt
- * @param loop_ctx_ref  Pointer to your loop reference.
- *
- * @retval MFD_SUCCESS     : success.
- * @retval MFD_END_OF_DATA : an empty data set.
- * @retval MFD_ERROR       : other error.
- */
-int
-${table}_loop_init_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_ref)
-{
-    DEBUGTRACE;
-
-    netsnmp_assert(loop_ctx_ref);
-    
-    /*
-     * allocate memory for new structure
-     */
-    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
-    if(NULL == loop_ctx_ref->loop_ctx)
-        return MFD_ERROR;
-
-    /*
-     * allocate a temporary context to use during iteration
-     */
-@if $m2c_data_allocate == 1@
-    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
-@else@
-    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
-@end@
-    if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
-        SNMP_FREE(loop_ctx_ref->loop_ctx);
-        return MFD_RESOURCE_UNAVAILABLE;
-    }
-
-    /*
-     * TODO:
-     * set up loop context
-     */
-@if $m2c_include_examples == 1@
-$example_start
-    /*
-     * open our data file.
-     */
-    loop_ctx_ref->loop_ctx->filep = fopen("/etc/dummy.conf", "r");
-    if(NULL ==  loop_ctx_ref->loop_ctx->filep) {
-        return MFD_RESOURCE_UNAVAILABLE;
-    }
-
-$example_end
-@end@
-
-    return MFD_SUCCESS;
-}
-
-/**
  * get the first data index
  *
  * Summary
  * -------
- *  This function is called to return set the index(es) for the first
+ *  This function is called to initialize the iterator loop context for a
+ *  new iteration loop and return the index(es) for the first
  *  ${table}_data in the data set.
  *
  *  Note that during the loop, the only important thing is the indexes.
@@ -417,14 +331,45 @@ ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_
 {
     DEBUGTRACE;
 
-    netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
+    netsnmp_assert(loop_ctx_ref);
+    
+    /*
+     * allocate memory for new structure
+     */
+    loop_ctx_ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+    if(NULL == loop_ctx_ref->loop_ctx)
+        return MFD_ERROR;
 
     /*
-     * we just need the index for now. Reuse the one in the loop context's
-     * temporary row request context. (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+     * allocate a temporary context to use during iteration
      */
-    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+@if $m2c_data_allocate == 1@
+    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx(NULL);
+@else@
+    loop_ctx_ref->loop_ctx->rowreq_ctx = ${context}_allocate_rowreq_ctx();
+@end@
+    if(NULL == loop_ctx_ref->loop_ctx->rowreq_ctx) {
+        SNMP_FREE(loop_ctx_ref->loop_ctx);
+        return MFD_RESOURCE_UNAVAILABLE;
+    }
+
+    /*
+     * TODO:
+     * set up loop context
+     */
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * open our data file.
+     */
+    loop_ctx_ref->loop_ctx->filep = fopen("/etc/dummy.conf", "r");
+    if(NULL ==  loop_ctx_ref->loop_ctx->filep) {
+        return MFD_RESOURCE_UNAVAILABLE;
+    }
+
+$example_end
+@end@
 
 @ifconf ${table}_update_idx.m2i@
 @   include ${table}_update_idx.m2i@
@@ -432,24 +377,17 @@ ${table}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_
 @   if $m2c_include_examples == 1@
 $example_start
     /*
-     * get a line (skip blank lines)
+     * in this example, after opening the file, get next does the same thing
+     * as get first, we let's just call get next...
      */
-    do {
-        if (!fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
-                   loop_ctx_ref->loop_ctx->filep)) {
-            /* we're done */
-            fclose(loop_ctx_ref->loop_ctx->filep);
-            loop_ctx_ref->loop_ctx->filep = NULL;
-        }
-    } while (loop_ctx_ref->loop_ctx->filep && (loop_ctx_ref->loop_ctx->line[0] == '\n'));
-
-    /*
-     * check for end of data
-     */
-    if(NULL == loop_ctx_ref->loop_ctx->filep)
-        return MFD_END_OF_DATA;
+    return ${table}_loop_get_next($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
 $example_end
-@    end@ # example
+@   else@
+    /*
+     * we just need the index for now. Reuse the one in the loop context's
+     * temporary row request context. (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+     */
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
 
     /*
      * TODO:
@@ -488,6 +426,7 @@ $example_end
 @   end@ # foreach index
     *      );
     */
+@   end@ # example
 @end@ #ifconf
 
     return MFD_SUCCESS;
@@ -533,17 +472,75 @@ ${table}_loop_get_next( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx_r
 
     netsnmp_assert(loop_ctx_ref && loop_ctx_ref->loop_ctx);
     netsnmp_assert(rowreq_ctx_ref);
-    
-@if $m2c_include_examples == 1@
+
+    /*
+     * we just need the index for now. Reuse the one in the loop context's
+     * temporary row request context. (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+     */
+    rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
+   
+@   if $m2c_include_examples == 1@
 $example_start
     /*
-     * in this example, get first does the same thing as get next...
+     * get a line (skip blank lines)
      */
-    return ${table}_loop_get_first($mfd_aue_param, loop_ctx_ref, rowreq_ctx_ref);
+    do {
+        if (!fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+                   loop_ctx_ref->loop_ctx->filep)) {
+            /* we're done */
+            fclose(loop_ctx_ref->loop_ctx->filep);
+            loop_ctx_ref->loop_ctx->filep = NULL;
+        }
+    } while (loop_ctx_ref->loop_ctx->filep && (loop_ctx_ref->loop_ctx->line[0] == '\n'));
+
+    /*
+     * check for end of data
+     */
+    if(NULL == loop_ctx_ref->loop_ctx->filep)
+        return MFD_END_OF_DATA;
+
+    /*
+     * TODO:
+     * set local vars for index from loop_ctx_ref->loop_ctx
+     *  this can be done in one of two ways:
+     */
+    
+    /*
+     * 1) individually
+     */
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+        /*
+         * TODO:
+         * set rowreq_ctx_ref->rowreq_ctx->tbl_idx->$node
+@      if $m2c_node_needlength == 1@
+         *     and rowreq_ctx_ref->tbl_idx->${node}_len
+@      end@
+         */
+@   end@ #foreach
+
+    /*
+     * OR
+     */
+
+        /*
+         * 2) by calling ${context}_indexes_set()
+         * ${context}_indexes_set(rowreq_ctx_ref->tbl_idx,
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+@        if $m2c_node_needlength == 1@
+    *       ${node}_ptr, ${node}_len
+@        else@
+    *       $node
+@        end@
+@   end@ # foreach index
+    *      );
+    */
 $example_end
-@else@
+@    end@ # example
+
     return MFD_SUCCESS;
-@end@ # example
+
 }
 
 /**
@@ -677,7 +674,7 @@ $example_end
     return MFD_SUCCESS;
 }
 
-@if $m2c_data_transient == 1@ # semi-transient
+@if $m2c_data_transient != 0@ # semi-transient
 /**
  * set ${table}_data from a data context
  *
