@@ -73,6 +73,7 @@ void netsnmp_config_parse_table_set(const char *token, char *line);
 void netsnmp_config_parse_add_row(const char *token, char *line);
 inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type);
 inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
+inline void netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
     
 #ifdef __cplusplus
 };

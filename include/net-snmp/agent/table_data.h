@@ -34,7 +34,9 @@ typedef struct table_data_s {
 netsnmp_mib_handler *netsnmp_get_table_data_handler(table_data *table);
 void netsnmp_table_data_generate_index_oid(netsnmp_table_row *row);
 int netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row);
-int netsnmp_table_data_remove_row(table_data *table, netsnmp_table_row *row);
+netsnmp_table_row *netsnmp_table_data_remove_row(table_data *table,
+                                                 netsnmp_table_row *row);
+void *netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row);
   
 netsnmp_table_row *netsnmp_table_data_get(table_data *table, netsnmp_variable_list *indexes);
     
