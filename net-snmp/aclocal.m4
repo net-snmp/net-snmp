@@ -37,29 +37,50 @@ if test "$ac_cv_user_prompt_$1" != "none"; then
 fi
 ]) dnl
 
-dnl AC_CHECK_IFNET_FOR(SUBSTRUCT,DEFINE,[no])
-AC_DEFUN(AC_CHECK_IFNET_FOR,[
-dnl check for $1 in struct ifnet
-AC_CACHE_CHECK(for ifnet.$1,
-	ac_cv_struct_ifnet_$2,
+dnl AC_CHECK_STRUCT_FOR(INCLUDES,STRUCT,MEMBER,DEFINE,[no])
+AC_DEFUN(AC_CHECK_STRUCT_FOR,[
+
+ac_safe_struct=`echo "$2" | sed 'y%./+-%__p_%'`
+ac_safe_member=`echo "$3" | sed 'y%./+-%__p_%'`
+ac_safe_all="ac_cv_struct_$ac_safe_struct_has_$ac_safe_member"
+changequote(, )dnl
+  ac_uc_define=STRUCT_`echo "$ac_safe_struct_HAS_$ac_safe_member" | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+changequote([, ])dnl
+
+AC_MSG_CHECKING([for $2.$3])
+AC_CACHE_VAL($ac_safe_all,
 [
-if test "x$3" = "x"; then
+if test "x$4" = "x"; then
   defineit="= 0"
-else
+elif test "x$4" = "xno"; then
   defineit=""
+else
+  defineit="$4"
 fi
 AC_TRY_COMPILE([
+$1
+],[
+struct $2 testit; 
+testit.$3 $defineit;
+], eval "$ac_safe_all=yes", eval "$ac_safe_all=no" )
+])
+
+if eval "test \"x$`echo $ac_safe_all`\" = \"xyes\""; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE_UNQUOTED($ac_uc_define)
+else
+  AC_MSG_RESULT(no)
+fi
+
+])
+
+dnl AC_CHECK_IFNET_FOR(SUBSTRUCT,[no])
+AC_DEFUN(AC_CHECK_IFNET_FOR,[
+dnl check for $1 in struct ifnet
+AC_CHECK_STRUCT_FOR([
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-],[
-struct ifnet dergel; 
-dergel.$1 $defineit;
-], ac_cv_struct_ifnet_$2=yes, ac_cv_struct_ifnet_$2=no )
+], ifnet, $1, $2)
 ])
 
-if test "x$ac_cv_struct_ifnet_$2" = "xyes"; then
-  AC_DEFINE_UNQUOTED(STRUCT_IFNET_HAS_$2)
-fi
-
-])

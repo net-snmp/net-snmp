@@ -79,7 +79,10 @@
 #undef STRUCT_IFNET_HAS_IF_IBYTES
 
 /* tcpstat.tcps_rcvmemdrop */
-#undef HAVE_TCPSTAT_TCPS_RCVMEMDROP
+#undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
 
 @BOTTOM@
 
