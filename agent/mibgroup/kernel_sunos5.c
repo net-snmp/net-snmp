@@ -773,7 +773,8 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		    ifp->ifType = 37;
 	    }
 	    break;
-	case 'h': /* hme */
+	case 'h': /* hme (SBus card) */
+	case 'e': /* eri (PCI card) */
 	case 'b': /* be */
 	    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
 	    ifp->ifType = 6;
