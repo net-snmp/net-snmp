@@ -3906,14 +3906,20 @@ snmp_sess_timeout(void *sessp)
  * Returns -1 if name1 < name2,
  *          0 if name1 = name2,
  *          1 if name1 > name2
+ *
+ * Caution: this method is called often by
+ *          command responder applications (ie, agent).
  */
 int
-snmp_oid_compare(const oid *name1, 
+snmp_oid_compare(const oid *in_name1, 
 		 size_t len1,
-		 const oid *name2, 
+		 const oid *in_name2, 
 		 size_t len2)
 {
-    int len;
+    register int len, res;
+    register const oid * name1 = in_name1;
+    register const oid * name2 = in_name2;
+
     /* len = minimum of len1 and len2 */
     if (len1 < len2)
 	len = len1;
@@ -3921,9 +3927,10 @@ snmp_oid_compare(const oid *name1,
 	len = len2;
     /* find first non-matching OID */
     while(len-- > 0){
-	if (*name1 < *name2)
+	res = *(name1++) - *(name2++);
+	if (res < 0)
 	    return -1;
-	if (*name2++ < *name1++)
+	if (res > 0)
 	    return 1;
     }
     /* both OIDs equal up to length of shorter OID */

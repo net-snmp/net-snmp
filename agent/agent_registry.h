@@ -69,7 +69,7 @@ int unregister_mib_range (oid *, size_t, int, int, oid);
 void unregister_mibs_by_session (struct snmp_session *);
 
 struct subtree *free_subtree (struct subtree *);
-int compare_tree (oid *, size_t, oid *, size_t);
+int compare_tree (const oid *, size_t, const oid *, size_t);
 int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
