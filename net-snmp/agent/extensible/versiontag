@@ -11,7 +11,7 @@ if [ $2 = "add" ]; then
 #  cd agent/extensible/	
   perl -p -i.bak -e 's/VersionInfo="(.*)"/VersionInfo="'$VERSION'"/;' versioninfo.c ../../bug-report
   perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' ../../sedscript.in
-#  cvs commit -m "version tag ( $VERSION )" versioninfo.c ../../sedscript.in ../../bug-report
+  cvs commit -m "version tag ( $VERSION )" versioninfo.c ../../sedscript.in ../../bug-report
 fi
 
 exit 0
