@@ -41,6 +41,7 @@
 #include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp-tc.h>
+#include <net-snmp/library/check_varbind.h>
 
 #include <net-snmp/version.h>
 
