@@ -582,4 +582,18 @@ netsnmp_container_table_insert_row(netsnmp_request_info *request,
         }
     }
 }
+
+#ifndef NETSNMP_USE_INLINE
+/** find the context data used by the table_container helper */
+void *
+netsnmp_container_table_extract_context(netsnmp_request_info *request)
+{
+    /*
+     * NOTE: this function must match in table_container.c and table_container.h.
+     *       if you change one, change them both!
+     */
+    return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
+}
+#endif /* inline */
+
 #endif /** DOXYGEN_SHOULD_SKIP_THIS */

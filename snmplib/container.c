@@ -277,7 +277,6 @@ int CONTAINER_FREE(netsnmp_container *x)
  * *only* the first container, call the function f for each item.
  * After calling this function, all containers should be empty.
  */
-NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
 void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
                     void *c)
 {
@@ -298,7 +297,6 @@ void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
 /*
  * Find a sub-container with the given name
  */
-NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
 netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
                                      const char* name)
 {
@@ -309,7 +307,7 @@ netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
     while(x->prev)
         x = x->prev;
     while(x) {
-        if ((NULL != x->name) && (0 == strcmp(name,x->name)))
+        if ((NULL != x->container_name) && (0 == strcmp(name,x->container_name)))
             break;
         x = x->next;
     }
