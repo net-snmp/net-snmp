@@ -580,7 +580,7 @@ dskTotal OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION  
-	"Total size of the disk/partion (kbytes)"
+	"Total size of the disk/partion (kBytes)"
     ::= { dskEntry 6 } 
 
 dskAvail OBJECT-TYPE
@@ -1069,7 +1069,7 @@ fileSize OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Size of file (kb)"
+	"Size of file (kB)"
     ::= { fileEntry 3 }
 
 fileMax	OBJECT-TYPE
@@ -1077,7 +1077,7 @@ fileMax	OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Limit of filesize (kb)"
+	"Limit of filesize (kB)"
     ::= { fileEntry 4 }
 
 fileErrorFlag OBJECT-TYPE
