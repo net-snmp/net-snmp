@@ -51,14 +51,14 @@ unsigned char *checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   }
   else {
     bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
-    if (name[*length-1] >= max) {
-      *var_len = NULL;
-      return NULL;
-    }
     if (!exact)
       newname[*length-1] = name[*length-1] + 1;
     else
       newname[*length-1] = name[*length-1];
+    if (newname[*length-1] > max) {
+      *var_len = NULL;
+      return NULL;
+    }
   }  
   bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
   *write_method = 0;
@@ -246,6 +246,27 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
       return((u_char *) (&long_ret));
     case MEMUSEDSWAP:
       long_ret = pagetok(total.t_avm);
+      return((u_char *) (&long_ret));
+    case MEMTOTALREAL:
+      long_ret = pagetok((int) total.t_rm);
+      return((u_char *) (&long_ret));
+    case MEMUSEDREAL:
+      long_ret = pagetok((int) total.t_arm);
+      return((u_char *) (&long_ret));
+    case MEMTOTALSWAPTXT:
+      long_ret = pagetok(total.t_vmtxt);
+      return((u_char *) (&long_ret));
+    case MEMUSEDSWAPTXT:
+      long_ret = pagetok(total.t_avmtxt);
+      return((u_char *) (&long_ret));
+    case MEMTOTALREALTXT:
+      long_ret = pagetok(total.t_rmtxt);
+      return((u_char *) (&long_ret));
+    case MEMUSEDREALTXT:
+      long_ret = pagetok(total.t_armtxt);
+      return((u_char *) (&long_ret));
+    case MEMTOTALFREE:
+      long_ret = pagetok(total.t_free);
       return((u_char *) (&long_ret));
   }
 }
