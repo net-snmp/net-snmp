@@ -233,6 +233,7 @@ main(int argc, char *argv[])
     if (optind + 1 != argc) {
         fprintf(stderr, "Must have exactly one table name\n");
         usage();
+        exit(1);
     }
 
     rootlen = MAX_OID_LEN;
