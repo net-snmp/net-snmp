@@ -4,41 +4,6 @@
 
 top_builddir=..
 
-
-#
-#  Yes - I know these header files have nothing to do with the MIBs, but we need a
-#    couple of spare 'INCLUDESUBDIR' definitions to get these files installed properly.
-#  We can tidy this up and do it cleanly later.
-#
-
-INCLUDESUBDIR=system
-INCLUDESUBDIRHEADERS=aix.h \
-	bsd.h		\
-	bsdi3.h		\
-	bsdi4.h		\
-	bsdi.h		\
-	cygwin.h	\
-	darwin.h	\
-	dynix.h		\
-	freebsd2.h	\
-	freebsd3.h	\
-	freebsd4.h	\
-	freebsd.h	\
-	generic.h	\
-	hpux.h		\
-	irix.h		\
-	linux.h		\
-	mips.h		\
-	netbsd.h	\
-	openbsd.h	\
-	solaris2.6.h	\
-	solaris2.7.h	\
-	solaris2.8.h	\
-	solaris.h	\
-	sunos.h		\
-	svr5.h		\
-	sysv.h		\
-	ultrix4.h
 #
 # Stuff here
 #
