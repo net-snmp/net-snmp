@@ -574,11 +574,7 @@ library malloc */
     if (!p) {
         print_error("Out of memory", NULL, CONTINUE);
 	xmalloc_errors++;
-#ifdef NO_EXCEPTION
-        exit (1);
-#else
         return (NULL);
-#endif
     }
     xmalloc_calls++;
     xmalloc_bytes += num;
@@ -2138,14 +2134,10 @@ parse_imports(FILE *fp)
 	if (type == LABEL ) {
 	    if (import_count == MAX_IMPORTS ) {
 		print_error("Too many imported symbols", token, type);
-#ifdef NO_EXCEPTION
-		exit(1);
-#else
 		do {
 		    type = get_token(fp, token, MAXTOKEN);
 		} while (type != SEMI && type != ENDOFFILE);
 		return;
-#endif
 	    }
 	    import_list[import_count++].label = xstrdup(token);
 	}
@@ -2207,11 +2199,7 @@ parse_imports(FILE *fp)
 	 * Shouldn't get this far
 	 */
     print_error("Cannot find module", module_name(current_module,modbuf), CONTINUE);
-#ifdef NO_EXCEPTION
-    exit(1);
-#else
     return;
-#endif
 }
 
 
@@ -2673,12 +2661,7 @@ static int ungotten_token = CONTINUE;
 static void unget_token (int token)
 {
     if (ungotten_token != CONTINUE) {
-#ifdef NO_EXCEPTION
-        fprintf (stderr, "Double unget\n");
-        exit (1);
-#else
         print_error("Double unget", "ungotten_token", CONTINUE);
-#endif
     }
     ungotten_token = token;
 }
