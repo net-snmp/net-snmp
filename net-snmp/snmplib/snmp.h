@@ -90,7 +90,7 @@ SOFTWARE.
 #define SNMP_VERSION_1	   0
 #define SNMP_VERSION_2c    1
 #define SNMP_VERSION_2u    2   /* not (will never be) supported by this code */
-#define SNMP_VERSION_3     3   /* not yet supported by this code */
+#define SNMP_VERSION_3     3   
 
 /* versions not based on a version field */
 #define SNMP_VERSION_sec   128 /* not (will never be) supported by this code */
@@ -114,6 +114,11 @@ SOFTWARE.
 /* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
 #define SNMP_MSG_REPORT	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8)
 
+/* test for member of Confirmed Class i.e., reportable */
+#define SNMP_CMD_CONFIRMED(c) (c == SNMP_MSG_INFORM || c == SNMP_MSG_GETBULK ||\
+                               c == SNMP_MSG_GETNEXT || c == SNMP_MSG_GET || \
+                               c == SNMP_MSG_SET)
+
 /* Exception values for SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
 #define SNMP_NOSUCHOBJECT    (ASN_CONTEXT | ASN_PRIMITIVE | 0x0)
 #define SNMP_NOSUCHINSTANCE  (ASN_CONTEXT | ASN_PRIMITIVE | 0x1)
@@ -122,7 +127,7 @@ SOFTWARE.
 /* Error codes (the value of the field error-status in PDUs) */
 
 /* in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
-#define SNMP_ERR_NOERROR                (0)
+#define SNMP_ERR_NOERROR                (0)	/* XXX  Used only for PDUs? */
 #define SNMP_ERR_TOOBIG	                (1)
 #define SNMP_ERR_NOSUCHNAME             (2)
 #define SNMP_ERR_BADVALUE               (3)
@@ -146,7 +151,8 @@ SOFTWARE.
 /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
 #define SNMP_ERR_INCONSISTENTNAME	(18)
 
-#define MAX_SNMP_ERR 18
+#define MAX_SNMP_ERR	18
+
 
 /* values of the generic-trap field in trap PDUs */
 #define SNMP_TRAP_COLDSTART		(0)
@@ -190,6 +196,10 @@ SOFTWARE.
 #define SNMP_SEC_LEVEL_NOAUTH		1
 #define SNMP_SEC_LEVEL_AUTHNOPRIV	2
 #define SNMP_SEC_LEVEL_AUTHPRIV		3
+
+#define SNMP_MSG_FLAG_AUTH_BIT          0x01
+#define SNMP_MSG_FLAG_PRIV_BIT          0x02
+#define SNMP_MSG_FLAG_RPRT_BIT          0x04
 
 /* view status */
 #define SNMP_VIEW_INCLUDED		1

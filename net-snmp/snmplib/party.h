@@ -1,7 +1,12 @@
+/*
+ * party.h
+ */
+
 #ifndef IN_PARTY_H
 #define IN_PARTY_H
 
-/*
+
+/*						FIXtoss?
     partyIdentity        Party,
     partyIndex           INTEGER,
     partyTDomain         OBJECT IDENTIFIER,
@@ -39,19 +44,19 @@
 #define PARTYSTATUS		17
 
 
-#define DOMAINSNMPUDP 1
-/* extern oid snmpUdpDomain; */
-/* no others defined yet */
+#define DOMAINSNMPUDP		1	/* extern oid snmpUdpDomain;
+					 *   -- no others defined yet
+					 */
+#define NOAUTH			1	/* extern oid noAuth[];		   */
 
-#define NOAUTH		1
-/* extern oid noAuth[]; */
+#define NOPRIV			3	/* extern oid noPriv[];		   */
+#define DESPRIVPROT		4	/* extern oid dESPrivProt[];	   */
+#define SNMPV2MD5AUTHPROT  	6	/* extern oid snmpv2MD5AuthProt[]; */
 
-#define NOPRIV		3
-/* extern oid noPriv[]; */
-#define DESPRIVPROT	4
-/* extern oid dESPrivProt[]; */
-#define SNMPV2MD5AUTHPROT  6
-/* extern oid snmpv2MD5AuthProt[]; */
+
+#define MD5_HASHSIZE_BYTES	16
+
+
 
 struct partyEntry {
     oid		partyIdentity[32];
@@ -125,4 +130,7 @@ party_createEntry __P((oid *partyID, int partyIDLen));
 
 void party_destroyEntry __P((oid *, int));
 int read_party_database __P((char *));
-#endif
+
+
+#endif  /* IN_PARTY_H */
+

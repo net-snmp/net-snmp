@@ -78,6 +78,9 @@ struct packet_info {
     struct partyEntry *srcp, *dstp;
     struct contextEntry *cxp;
 
+   /* SNMPv3 parameters */
+    u_char      *securityName;
+
     u_char	*packet_end;
 };
 
@@ -86,9 +89,12 @@ struct packet_info {
 
 #define RESERVE1    0
 #define RESERVE2    1
-#define COMMIT      2
-#define ACTION	    3
+#define ACTION	    2
+#define COMMIT      3
 #define FREE        4
+#define UNDO        5
+#define FINISHED_SUCCESS        9
+#define FINISHED_FAILURE	10
 
 /* Access control statements for the agent */
 #define RONLY	0x1	/* read access only */

@@ -1,5 +1,5 @@
 /*
- *  read_config: reads configuration files for extensible sections.
+ * agent_read_config.h: reads configuration files for extensible sections.
  *
  */
 #ifndef _MIBGROUP_READ_CONFIG_H

@@ -1,0 +1,64 @@
+.TH SNMP.CONF 1 "2 Dec 1998"
+.ds )H U.C. Davis.
+.ds ]W VVERSIONINFO
+.UC 4
+.SH NAME
+DATADIR/snmp/snmp.conf
+.br
+DATADIR/snmp/snmpd.local.conf 
+.br
+$HOME/.snmp/snmp.conf
+.br
+       - configuration files for ucd-snmp.
+.SH DESCRIPTION
+.B snmp.conf
+are the configuration files which define how the ucd-smnp SNMP
+application sweep works and operates.  These files may contain any of
+the directives found in the DIRECTIVES section below.  Many of these
+directives are used to specify default values in case none is
+specified on the command lien of the application in question.
+.SH COMMENTS
+.PP
+Any lines beginning with the character '#' in the configuration files
+are treated as a comment and are not parsed.
+.SH DIRECTIVES
+.IP "defSecurityName STRING"
+Sets the default securityName to use when sending snmpv3 requests.
+.IP "defContext STRING"
+Sets the default contextName to use when sending snmpv3 requests.
+.IP "defAuthType MD5|SHA"
+Sets the default authentication type to use when sending snmpv3 requests.
+.IP "defPrivType DES"
+Sets the default privacy type to use when sending snmpv3 requests (only DES is
+currently supported).
+.IP "defPassphrase STRING"
+.IP "defAuthPassphrase STRING"
+.IP "defPrivPassphrase STRING"
+Sets the default passphrase to be used for authenticating and/or
+encrypting snmpv3 requests.  The
+.I defPassphrase
+token sets them both to be the same
+.IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
+Sets the default security level to use when transmitting snmp
+requests.
+.IP "mibdirs [MIBDIRS|+MIBDIRS]"
+Secifies that the colon seperated MIBDIRS path set should be used to
+look for textual mib files.  When a "+" sign preceeds the argument,
+the MIBDIRS path set is appended to the default list.  Also see the
+MIBDIRS environmental variable description in the snmpcmd(1) manual
+page.
+.IP "mibs [MIBTOKENS|+MIBTOKENS]"
+Secifies that the colon seperated MIBS path set should be used to
+initialize the numerical oid to text translations utilized by the snmp
+applications.  When a "+" sign preceeds the argument, the MIBDIRS path
+set is appended to the default list.  Also see the MIBDIRS
+environmental variable description in the snmpcmd(1) manual page.
+.IP "mibfile MIBFILETO-READ"
+Reads in the mibfile specified on the path into the mib tree database
+structure fro the numerical oid to text translations utilized by the
+snmp applications.
+.SH "SEE ALSO"
+snmpcmd(1)
+.\" Local Variables:
+.\"  mode: nroff
+.\" End:

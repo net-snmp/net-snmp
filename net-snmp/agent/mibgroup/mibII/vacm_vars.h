@@ -23,13 +23,13 @@ config_parse_dot_conf("group", vacm_parse_group, vacm_free_group,"name v1|v2c|us
 config_parse_dot_conf("access", vacm_parse_access, vacm_free_access,"name context model level prefx read write notify");
 config_parse_dot_conf("view", vacm_parse_view, vacm_free_view,"name type subtree [mask]");
 
-int vacm_in_view __P((struct packet_info *, oid *, int));
+int vacm_in_view __P((struct snmp_pdu *, oid *, int));
 
 extern u_char *var_vacm_sec2group __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern u_char *var_vacm_access __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 extern u_char *var_vacm_view __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
-#define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 13
+#define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 16
 #define OID_VACMMIBOBJECTS	OID_SNMPVACMMIB, 1
 
 #define OID_VACMCONTEXTTABLE	OID_VACMMIBOBJECTS, 1
