@@ -20,3 +20,7 @@
 
 /* don't define _KERNEL before including sys/unistd.h */
 #define IFNET_NEEDS_KERNEL_LATE  1
+
+/* configure fails to detect these properly because they're broken headers */
+#define HAVE_NETINET_TCP_H 1
+#define HAVE_NETINET_IP_H 1
