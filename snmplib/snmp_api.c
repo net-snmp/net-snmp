@@ -4702,6 +4702,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 
       case ASN_PRIV_IMPLIED_OCTET_STR:
       case ASN_OCTET_STR:
+      case ASN_BIT_STR:
       case ASN_OPAQUE:
       case ASN_NSAP:
         if (largeval) {
@@ -4961,7 +4962,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    goto type_error;
 	}
         tint = sizeof(buf) / sizeof(oid);
-        if (read_objid(value, (oid *)buf, &tint))
+        if (snmp_parse_oid(value, (oid *)buf, &tint))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);
 	else result = snmp_errno;
@@ -5043,7 +5044,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	  }
 	  free(lvalue);
 	}
-	snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
+	snmp_pdu_add_variable(pdu, name, name_length, ASN_BIT_STR,
 	  		      buf, tint);
 	break;
 
