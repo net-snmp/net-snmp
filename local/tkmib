@@ -91,6 +91,7 @@ if (test_version(1,5,0,0)) {
 SNMP::initMib();
 $SNMP::verbose = 1;
 my $tmpbd = 1;
+$writecolor = "blue";
 
 $top = MainWindow->new();
 $top->title("tkmib");
@@ -286,7 +287,7 @@ sub insertresult {
     my $mib = $SNMP::MIB{"$oid"};
     $output->insert('end', $val, "value:$oid");
     if ($mib->{'access'} =~ /(Write|Create)/) {
-	$output->tagConfigure("value:$oid", -foreground => 'blue');
+	$output->tagConfigure("value:$oid", -foreground => $writecolor);
 	$output->tagBind("value:$oid", '<1>', [sub{shift; 
 						   my $oid = shift;
 						   my $value = shift;
@@ -526,7 +527,7 @@ sub snmptable {
 	for(my $k=0;$k <= $#tags;$k++) {
 	    my $mib = $SNMP::MIB{"$tboids{$index[$i]}{$tags[$k]}"};
 	    if ($mib->{'access'} =~ /(Write|Create)/) {
-		$output->put($i+2,$k+2,$output->Button(-pady => $tmpbd, -padx => $tmpbd, -text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
+		$output->put($i+2,$k+2,$output->Button(-fg => $writecolor, -pady => $tmpbd, -padx => $tmpbd, -text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
 	    } else {
 		$output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
 	    }
@@ -908,9 +909,6 @@ sub save_options {
     }
     foreach my $i (@displayInfo) {
 	print O '$displayInfoStates{' . $i . '} = ' . "\"$displayInfoStates{$i}\"\n;";
-    }
-    foreach $i (keys(%session_opts)) {
-	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
     }
     print O '$graphtime = ' . $graphtime . ";\n";
     close(O);
