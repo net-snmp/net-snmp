@@ -22,6 +22,10 @@ typedef struct netsnmp_stash_cache_data_s {
 /* function prototypes */
 netsnmp_mib_handler *netsnmp_get_bare_stash_cache_handler(void);
 netsnmp_mib_handler *netsnmp_get_stash_cache_handler(void);
+netsnmp_mib_handler *netsnmp_get_timed_bare_stash_cache_handler(int timeout,
+                                           oid *rootoid, size_t rootoid_len);
+netsnmp_mib_handler *netsnmp_get_timed_stash_cache_handler(int timeout,
+                                           oid *rootoid, size_t rootoid_len);
 Netsnmp_Node_Handler netsnmp_stash_cache_helper;
 netsnmp_oid_stash_node  **netsnmp_extract_stash_cache(netsnmp_agent_request_info *reqinfo);
 int netsnmp_stash_cache_update(netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests, netsnmp_stash_cache_info *cinfo);

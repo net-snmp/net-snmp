@@ -39,18 +39,18 @@ netsnmp_get_new_stash_cache(void)
     return cinfo;
 }
 
-/** returns a single stash_cache handler that can be injected into a given
- *  handler chain, but *only* if that handler chain explicitly supports
- *  stash cache processing.
+/** returns a stash_cache handler that can be injected into a given
+ *  handler chain (with the specified timeout and root OID values),
+ *  but *only* if that handler chain explicitly supports stash cache processing.
  */
 netsnmp_mib_handler *
-netsnmp_get_bare_stash_cache_handler(void)
+netsnmp_get_timed_bare_stash_cache_handler(int timeout, oid *rootoid, size_t rootoid_len)
 {
     netsnmp_mib_handler *handler;
     netsnmp_cache       *cinfo;
 
-    cinfo = netsnmp_cache_create( 30, _netsnmp_stash_cache_load,
-                                 _netsnmp_stash_cache_free, NULL, 0 );
+    cinfo = netsnmp_cache_create( timeout, _netsnmp_stash_cache_load,
+                                 _netsnmp_stash_cache_free, rootoid, rootoid_len );
 
     if (!cinfo)
         return NULL;
@@ -72,13 +72,37 @@ netsnmp_get_bare_stash_cache_handler(void)
     return handler;
 }
 
+/** returns a single stash_cache handler that can be injected into a given
+ *  handler chain (with a fixed timeout), but *only* if that handler chain
+ *  explicitly supports stash cache processing.
+ */
+netsnmp_mib_handler *
+netsnmp_get_bare_stash_cache_handler(void)
+{
+    return netsnmp_get_timed_bare_stash_cache_handler( 30, NULL, 0 );
+}
+
 /** returns a stash_cache handler sub-chain that can be injected into a given
- *  (arbitrary) handler chain.
+ *  (arbitrary) handler chain, using a fixed cache timeout.
  */
 netsnmp_mib_handler *
 netsnmp_get_stash_cache_handler(void)
 {
     netsnmp_mib_handler *handler = netsnmp_get_bare_stash_cache_handler();
+    if (handler && handler->next) {
+        handler->next->next = netsnmp_get_stash_to_next_handler();
+    }
+    return handler;
+}
+
+/** returns a stash_cache handler sub-chain that can be injected into a given
+ *  (arbitrary) handler chain, using a configurable cache timeout.
+ */
+netsnmp_mib_handler *
+netsnmp_get_timed_stash_cache_handler(int timeout, oid *rootoid, size_t rootoid_len)
+{
+    netsnmp_mib_handler *handler = 
+       netsnmp_get_timed_bare_stash_cache_handler(timeout, rootoid, rootoid_len);
     if (handler && handler->next) {
         handler->next->next = netsnmp_get_stash_to_next_handler();
     }
