@@ -79,9 +79,11 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 
+#include "system.h"
 #include "parse.h"
 #include "asn1.h"
 #include "mib.h"
+#include "snmp_api.h"
 
 /*
  * This is one element of an object identifier with either an integer
@@ -1471,11 +1473,11 @@ get_tc_index(descriptor, modid)
          }
 
 
-    for(i = 0; i < MAXTC; i++){
-      if (tclist[i].type == 0)
+    for(i=0, tcp=tclist; i < MAXTC; i++, tcp++){
+      if (tcp->type == 0)
           break;
-      if (!label_compare(descriptor, tclist[i].descriptor) &&
-		((modid == tclist[i].modid) || (modid == -1))){
+      if (!label_compare(descriptor, tcp->descriptor) &&
+		((modid == tcp->modid) || (modid == -1))){
           return i;
       }
     }
@@ -1666,7 +1668,7 @@ parse_objecttype(fp, name)
     char nexttoken[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
     int nexttype, tctype;
-    register struct node *np, *nnp;
+    register struct node *np;
 
     type = get_token(fp, token, MAXTOKEN);
     if (type != SYNTAX){
@@ -1883,7 +1885,7 @@ parse_objectgroup(fp, name)
     register int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np, *nnp;
+    register struct node *np;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
@@ -1932,7 +1934,7 @@ parse_notificationDefinition(fp, name)
     register int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np, *nnp;
+    register struct node *np;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
@@ -2052,7 +2054,7 @@ parse_compliance(fp, name)
     register int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np, *nnp;
+    register struct node *np;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
@@ -2075,7 +2077,7 @@ parse_moduleIdentity(fp, name)
     register int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np, *nnp;
+    register struct node *np;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
