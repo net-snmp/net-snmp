@@ -555,6 +555,8 @@ netsnmp_unix_parse_security(const char *token, char *param)
         }
         param = copy_nword( param, contextName, sizeof(contextName));
         param = copy_nword( param, secName, sizeof(secName));
+    } else {
+        contextName[0] = '\0';
     }
     if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
