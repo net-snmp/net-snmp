@@ -1,0 +1,29 @@
+--------------------Configuration: snmptrap - Win32 Release--------------------
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.5.1.pre2\win32\snmptrap\snmptrap.dsp", at root.
+Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmptrap.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Release/snmptrap.bsc" "
+			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmptrap.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmptrap.exe" /libpath:"../lib" "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "c:\windows\TEMP\RSP4110.TMP" with contents </nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmptrap.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\usr\local\builds\ucd-snmp-3.5.1.pre2\apps\snmp_parse_args.c"
+"C:\usr\local\builds\ucd-snmp-3.5.1.pre2\apps\snmptrap.c"
+>
+Creating command line "cl.exe @c:\windows\TEMP\RSP4110.TMP" 
+Creating temp file "c:\windows\TEMP\RSP4111.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmptrap.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmptrap.exe" /libpath:"../lib" 
+".\Release\snmp_parse_args.obj"
+".\Release\snmptrap.obj">
+Creating command line "link.exe @c:\windows\TEMP\RSP4111.TMP" 
+Compiling...
+snmp_parse_args.c
+snmptrap.c
+Linking...
+
+
+
+snmptrap.exe - 0 error(s), 0 warning(s)

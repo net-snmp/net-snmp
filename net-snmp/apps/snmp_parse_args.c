@@ -161,7 +161,7 @@ snmp_parse_args(argc, argv, session)
         else if (++arg < argc)
           setenv("MIBDIRS",argv[arg], 1);
         else {
-          fprintf(stderr,"Need MIBS after -m flag.\n");
+          fprintf(stderr,"Need MIBDIRS after -M flag.\n");
           usage();
           exit(1);
         }
@@ -238,7 +238,6 @@ snmp_parse_args(argc, argv, session)
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
         exit(0);
-        break;
 
       case 'v':
         if (argv[arg][2] != 0)

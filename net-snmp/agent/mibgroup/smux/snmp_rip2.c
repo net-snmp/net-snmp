@@ -44,15 +44,18 @@
 #include <netinet/in.h>
 #endif
 
+#include "../../../snmplib/system.h"
 #include "asn1.h"
 #include "snmp.h"
 #include "mib.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "smux.h"
+#include "snmp_rip2.h"
 
-static u_int max_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 3, 1, 9, 255, 255, 255, 255};
-static u_int min_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 1, 1, 0};
+static oid max_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 3, 1, 9, 255, 255, 255, 255};
+static oid min_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 1, 1, 0};
 extern u_char smux_type;
 
 u_char *
@@ -62,7 +65,7 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 	register int        *length;
 	int                 exact;
 	int                 *var_len;
-	int                 (**write_method)();
+	int                 (**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 	u_char *var;
 	int result;
@@ -134,7 +137,7 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 	 * Any resullt returned should be within the rip2 tree.
 	 * rip_mib - static u_int rip_mib[] = {1, 3, 6, 1, 2, 1, 23};
 	 */
-	if (bcmp(rip_mib, name, sizeof(rip_mib)) != 0) {
+	if (memcmp(rip_mib, name, sizeof(rip_mib)) != 0) {
 		return NULL;
 	}
 	else {

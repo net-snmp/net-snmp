@@ -36,7 +36,12 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 #if STDC_HEADERS
+#include <string.h>
 #include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/time.h>
@@ -82,12 +87,16 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
-int compare_tree __P((oid *, int, oid *, int));
+static int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
-u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+static u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
 struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
-u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
+static u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+
+static int in_a_view __P((oid *, int *, struct packet_info *, struct variable *));
 
 int subtree_size;
 int subtree_malloc_size;
@@ -241,7 +250,7 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
 
-#ifdef USING_MIBII_VIEW_VARS_MODULE
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
 extern int in_view __P((oid *, int, int));
 #endif
 
@@ -265,9 +274,7 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   char c_oid[MAX_NAME_LEN];
 
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
-  memset(subtree, 0, sizeof(subtree));
-  subtree->children = 0;
-  subtree->next = 0;
+  memset(subtree, 0, sizeof(struct subtree));
 
   if (snmp_get_do_debugging()) {
     sprint_objid(c_oid, mibloc, mibloclen);
@@ -347,6 +354,42 @@ free_subtree(st)
   return ret;
 }
 
+/* in_a_view: determines if a given packet_info is allowed to see a
+   given name/namelen OID pointer */
+
+static int
+in_a_view(name, namelen, pi, cvp)
+  struct packet_info *pi;   /* IN - relevant auth info re PDU */
+  struct variable	*cvp; /* IN - relevant auth info re mib module */
+  oid		*name;	    /* IN - name of var, OUT - name matched */
+  int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+{
+  /* check for v1 and counter64s, since snmpv1 doesn't support it */
+  if (pi->version == SNMP_VERSION_1 && cvp->type == ASN_COUNTER64)
+    return 0;
+  return (
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
+#define GOT_A_VIEW_CHECK
+    /* check against the older v2party view support */
+    (pi->version == SNMP_VERSION_2p &&
+     in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+#endif
+#ifdef USING_MIBII_VACM_VARS_MODULE
+#define GOT_A_VIEW_CHECK
+    /* check against the snmpv3 VACM support */
+    (vacm_in_view(pi, name, *namelen)) ||
+#endif
+#ifndef GOT_A_VIEW_CHECK
+    /* no support at all for views?  Ick!
+       Oh well, default to allowing access to everyone then. */
+    1
+#else
+    0  /* needed for end of || clauses above */
+#endif
+    );
+}
+
+
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
@@ -361,7 +404,7 @@ free_subtree(st)
  */
 static  int 		found;
 
-u_char	*
+static u_char *
 search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	   noSuchObject)
     struct subtree *tp;
@@ -423,16 +466,9 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 						  len, write_method);
 		    if (write_method)
 			*acl = cvp->acl;
-		    if (access &&
-                        (
-#ifdef USING_MIBII_VIEW_VARS_MODULE
-                         (pi->version == SNMP_VERSION_2p &&
-                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
-#endif
-                         (pi->version == SNMP_VERSION_1 &&
-                          cvp->type == ASN_COUNTER64) ||
-                         !vacm_in_view(pi, name, *namelen)) ) {
-                      access = NULL;
+                    /* check for permission to view this part of the OID tree */
+		    if (access && !in_a_view(name, namelen, pi, cvp)) {
+                        access = NULL;
 			*write_method = NULL;
 			/*
 			  if (in_view(vp->name, vp->namelen,
@@ -454,9 +490,9 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	            *type = cvp->type;
 		    *acl = cvp->acl;
 		    if (found)
-			*noSuchObject = FALSE;
+                      *noSuchObject = FALSE;
 		    else
-			*noSuchObject = TRUE;
+                      *noSuchObject = TRUE;
 		    return NULL;
 		}
 	    }
@@ -468,7 +504,7 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	    return NULL;
 }
 
-u_char	*
+static u_char *
 search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	   noSuchObject)
     struct subtree *sub_tp;
@@ -732,7 +768,7 @@ compare(name1, len1, name2, len2)
     return 0;	/* both strings are equal */
 }
 
-int
+static int
 compare_tree(name1, len1, name2, len2)
     register oid	    *name1, *name2;
     register int	    len1, len2;

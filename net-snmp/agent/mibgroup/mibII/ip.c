@@ -230,17 +230,20 @@ var_ip(vp, name, length, exact, var_len, write_method)
               long_return = 60;	    /* XXX */
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
-	    return (u_char *) &ipstat.ips_total;
+          long_return = ipstat.ips_total;
+          return (u_char *) &long_return;
 	case IPINHDRERRORS:
 	    long_return = ipstat.ips_badsum + ipstat.ips_tooshort +
 			  ipstat.ips_toosmall + ipstat.ips_badhlen +
 			  ipstat.ips_badlen;
 	    return (u_char *) &long_return;
 	case IPINADDRERRORS:
-	    return (u_char *) &ipstat.ips_cantforward;
+          long_return = ipstat.ips_cantforward;
+          return (u_char *) &long_return;
 
 	case IPFORWDATAGRAMS:
-	    return (u_char *) &ipstat.ips_forward;
+          long_return = ipstat.ips_forward;
+          return (u_char *) &long_return;
 
 	case IPINUNKNOWNPROTOS:
 #ifdef MIB_IP_COUNTER_SYMBOL
@@ -279,13 +282,15 @@ var_ip(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IPOUTNOROUTES:
-	    return (u_char *) &ipstat.ips_cantforward;
+          long_return = ipstat.ips_cantforward;
+          return (u_char *) &long_return;
 
 	case IPREASMTIMEOUT:
 	    long_return = IPFRAGTTL;
 	    return (u_char *) &long_return;
 	case IPREASMREQDS:
-	    return (u_char *) &ipstat.ips_fragments;
+          long_return = ipstat.ips_fragments;
+          return (u_char *) &long_return;
 
 	case IPREASMOKS:
 #ifdef MIB_IP_COUNTER_SYMBOL
@@ -405,34 +410,46 @@ var_ip(vp, name, length, exact, var_len, write_method)
               long_return = 60;	    /* XXX */
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
-	    return (u_char *) &ipstat.ips_total;
+          long_return = ipstat.ips_total;
+          return (u_char *) &long_return;
 	case IPINHDRERRORS:
 	    long_return = ipstat.ips_badsum + ipstat.ips_tooshort +
 			  ipstat.ips_toosmall + ipstat.ips_badhlen +
 			  ipstat.ips_badlen;
 	    return (u_char *) &long_return;
 	case IPINADDRERRORS:
-	  return (u_char *) &ipstat.ips_cantforward;
+          long_return = ipstat.ips_cantforward;
+          return (u_char *) &long_return;
 	case IPFORWDATAGRAMS:
-	  return (u_char *) &ipstat.ips_forward;
+          long_return = ipstat.ips_forward;
+          return (u_char *) &long_return;
 	case IPINUNKNOWNPROTOS:
-	    return (u_char *) &ipstat.ips_noproto;
+          long_return = ipstat.ips_noproto;
+          return (u_char *) &long_return;
 	case IPINDISCARDS:
-	  return (u_char *) &ipstat.ips_fragdropped;
+          long_return = ipstat.ips_fragdropped;
+          return (u_char *) &long_return;
 	case IPINDELIVERS:
-	  return (u_char *) &ipstat.ips_delivered;
+          long_return = ipstat.ips_delivered;
+          return (u_char *) &long_return;
 	case IPOUTREQUESTS:
-	    return (u_char *) &ipstat.ips_localout;
+          long_return = ipstat.ips_localout;
+          return (u_char *) &long_return;
 	case IPOUTDISCARDS:
-	    return (u_char *) &ipstat.ips_odropped;
+          long_return = ipstat.ips_odropped;
+          return (u_char *) &long_return;
 	case IPOUTNOROUTES:
-	    return (u_char *) &ipstat.ips_noroute;
+          long_return = ipstat.ips_noroute;
+          return (u_char *) &long_return;
 	case IPREASMTIMEOUT:
-	    return (u_char *) &ipstat.ips_fragtimeout;
+          long_return = ipstat.ips_fragtimeout;
+          return (u_char *) &long_return;
 	case IPREASMREQDS:
-	    return (u_char *) &ipstat.ips_fragments;
+          long_return = ipstat.ips_fragments;
+          return (u_char *) &long_return;
 	case IPREASMOKS:
-	    return (u_char *) &ipstat.ips_reassembled;
+          long_return = ipstat.ips_reassembled;
+          return (u_char *) &long_return;
 	case IPREASMFAILS:
 	    long_return = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
 	    return (u_char *) &long_return;
@@ -444,9 +461,11 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    long_return = 0;
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
-	    return (u_char *) &ipstat.ips_ofragments;
+          long_return = ipstat.ips_ofragments;
+          return (u_char *) &long_return;
 	case IPROUTEDISCARDS:
-	    return (u_char *) &ipstat.ips_noroute;
+          long_return = ipstat.ips_noroute;
+          return (u_char *) &long_return;
 	default:
 	    ERROR_MSG("");
     }

@@ -17,7 +17,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o \
 INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
 
 CFLAGS=@CFLAGS@ @SHLIB_CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir)
+CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir) -I$(srcdir)/..
 CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
@@ -99,7 +99,7 @@ parse.o: ../config.h ../mib_module_config.h
 parse.o:   ../s/linux.h
 parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 parse.o:   system.h
-parse.o: parse.h asn1.h mib.h
+parse.o: parse.h asn1.h snmp_api.h mib.h
 party.o: ../config.h ../mib_module_config.h 
 party.o:   ../s/linux.h
 party.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
@@ -133,8 +133,7 @@ snmp_client.o: view.h acl.h mib.h
 system.o: ../config.h ../mib_module_config.h 
 system.o:   ../s/linux.h
 system.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
-system.o:   asn1.h
-system.o: snmp_api.h system.h
+system.o:  asn1.h snmp_api.h system.h
 vacm.o: ../config.h ../mib_module_config.h 
 vacm.o:   ../s/linux.h
 vacm.o: ../s/sysv.h ../s/generic.h ../m/generic.h 

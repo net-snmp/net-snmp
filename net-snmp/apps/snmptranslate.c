@@ -57,8 +57,49 @@ SOFTWARE.
 #include "parse.h"
 #include "mib.h"
 #include "snmp.h"
+#include "../snmplib/system.h"
+
+#include "version.h"
 
 int main __P((int, char **));
+
+void
+usage __P((void))
+{
+  fprintf(stderr,
+	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+  fprintf(stderr,
+          "  -V\t\tPrint snmptranslate version then exit.\n");
+  fprintf(stderr,
+          "  -p\t\tPrint MIB symbol table report.\n");
+  fprintf(stderr,
+          "  -a\t\tPrint MIB ascii symbol table.\n");
+  fprintf(stderr,
+          "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(stderr,
+	  "  -D\t\tenable snmplib debugging messages\n");
+  fprintf(stderr,
+          "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
+  fprintf(stderr,
+          "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
+  fprintf(stderr,
+          "  -W\t\tEnable detailed warnings of MIB symbol conflicts.\n");
+  fprintf(stderr,
+          "  -R\t\tUse \"random access\" to access objectID.\n");
+  fprintf(stderr,
+          "  -r\t\tUse \"random access\" to access objectID. (Obsolete, -R preferred)\n");
+  fprintf(stderr,
+          "  -n\t\tDisplay OID in symbolic form for objectID.\n");
+  fprintf(stderr,
+          "  -d\t\tDisplay detailed information for objectID.\n");
+  fprintf(stderr,
+          "  -f\t\tDisplay full OID for objectID.\n");
+  fprintf(stderr,
+          "  -s\t\tDisplay last symbolic part of OID for objectID.\n");
+  fprintf(stderr,
+          "  -S\t\tDisplay MIB and last symbolic part of OID for objectID.\n");
+  exit(1);
+}
 
 int
 main(argc, argv)
@@ -80,6 +121,9 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+	      case 'h':
+		usage();
+                exit(1);
 	      case 'n':
 		tosymbolic = 1;
 		break;	     
@@ -114,8 +158,39 @@ main(argc, argv)
 		snmp_set_suffix_only(2);
 		tosymbolic = 1;
 		break;
+              case 'm':
+                if (argv[arg][2] != 0)
+                  setenv("MIBS",&argv[arg][2], 1);
+                else if (++arg < argc)
+                  setenv("MIBS",argv[arg], 1);
+                else {
+                  fprintf(stderr,"Need MIBS after -m flag.\n");
+                  usage();
+                  exit(1);
+                }
+                break;
+              case 'M':
+                if (argv[arg][2] != 0)
+                  setenv("MIBDIRS",&argv[arg][2], 1);
+                else if (++arg < argc)
+                  setenv("MIBDIRS",argv[arg], 1);
+                else {
+                  fprintf(stderr,"Need MIBDIRS after -M flag.\n");
+                  usage();
+                  exit(1);
+                }
+                break;
+	      case 'D':
+		snmp_set_do_debugging(1);
+		break;
+              case 'V':
+                fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                exit(0);
+                break;
+
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
+                usage();
 		break;
 	    }
 	    continue;

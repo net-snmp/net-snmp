@@ -4,6 +4,7 @@ EXAMPLE.conf
 Makefile
 config.cache
 config.h
+ucd-snmp-config.h
 config.log
 config.out
 config.status

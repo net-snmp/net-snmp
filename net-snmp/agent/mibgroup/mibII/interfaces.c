@@ -6,16 +6,22 @@
 #include "mib_module_config.h"
 
 #include <config.h>
-#if STDC_HEADERS
-#include <stdlib.h>
-#endif
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <string.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
@@ -64,17 +70,6 @@
 #endif
 #if HAVE_IOCTLS_H
 #include <ioctls.h>
-#endif
-#if STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#else
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -794,7 +789,8 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IFINERRORS:
-	    return (u_char *) &ifnet.if_ierrors;
+	    long_return = (u_long) ifnet.if_ierrors;
+	    return (u_char *) &long_return;
 	case IFINUNKNOWNPROTOS:
 #if STRUCT_IFNET_HAS_IF_NOPROTO
 	    long_return = (u_long)  ifnet.if_noproto;
@@ -825,11 +821,14 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
-	    return (u_char *) &ifnet.if_snd.ifq_drops;
+          long_return = ifnet.if_snd.ifq_drops;
+          return (u_char *) &long_return;
 	case IFOUTERRORS:
-	    return (u_char *) &ifnet.if_oerrors;
+          long_return = ifnet.if_oerrors;
+          return (u_char *) &long_return;
 	case IFOUTQLEN:
-	    return (u_char *) &ifnet.if_snd.ifq_len;
+          long_return = ifnet.if_snd.ifq_len;
+          return (u_char *) &long_return;
 	case IFSPECIFIC:
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
@@ -859,7 +858,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
           struct timeval now;
 #endif
     struct nmparms hp_nmparms;
-    mib_ifEntry hp_ifEntry;
+    static mib_ifEntry hp_ifEntry;
     int  hp_fd;
     int  hp_len=sizeof(hp_ifEntry);
 
@@ -1080,6 +1079,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
       return (u_char *) &long_return;
     case IFINERRORS:
       long_return = (u_long)ifstat.ifInErrors;
+      return (u_char *) &long_return;
     case IFINUNKNOWNPROTOS:
       long_return = (u_long)ifstat.ifInUnknownProtos;
       return (u_char *) &long_return;
