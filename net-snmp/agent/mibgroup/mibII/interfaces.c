@@ -575,7 +575,7 @@ var_ifEntry(struct variable *vp,
 
     if (Interface_Scan_By_Index(interface, &if_msg, if_name, NULL) != 0)
         return NULL;
-    if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+    if_ptr = netsnmp_access_interface_entry_overrides_get(if_name);
 
     switch (vp->magic) {
     case IFINDEX:
@@ -1241,7 +1241,7 @@ var_ifEntry(struct variable * vp,
 {
     int             interface;
     mib2_ifEntry_t  ifstat;
-    conf_if_list   *if_ptr;
+    conf_if_list   *if_ptr = NULL;
 
     interface =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
@@ -1253,7 +1253,11 @@ var_ifEntry(struct variable * vp,
         DEBUGMSGTL(("mibII/interfaces", "... no mib stats\n"));
         return NULL;
     }
-    if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+    /*
+     * hmmm.. where to get the interface name to check overrides?
+     *
+     * if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+     */
     switch (vp->magic) {
     case IFINDEX:
         long_return = ifstat.ifIndex;
@@ -2400,7 +2404,7 @@ var_ifEntry(struct variable * vp,
     static struct ifmibdata ifmd;
     size_t          len;
     char           *cp;
-    conf_if_list   *if_ptr;
+    conf_if_list   *if_ptr = NULL;
 
     interface = header_ifEntry(vp, name, length, exact, var_len,
                                write_method);
@@ -2411,7 +2415,11 @@ var_ifEntry(struct variable * vp,
     len = sizeof ifmd;
     if (sysctl(sname, 6, &ifmd, &len, 0, 0) < 0)
         return NULL;
-    if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+    /*
+     * hmmm.. where to get the interface name to check overrides?
+     *
+     * if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+     */
 
     switch (vp->magic) {
     case IFINDEX:
@@ -2628,13 +2636,16 @@ var_ifEntry(struct variable * vp,
     int             ifIndex;
     static MIB_IFROW ifRow;
     conf_if_list   *if_ptr;
-    static char     Name[16];
     
     ifIndex =
         header_ifEntry(vp, name, length, exact, var_len, write_method);
     if (ifIndex == MATCH_FAILED)
         return NULL;
-    if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+    /*
+     * hmmm.. where to get the interface name to check overrides?
+     *
+     * if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
+     */
 
     /*
      * Get the If Table Row by passing index as argument 
