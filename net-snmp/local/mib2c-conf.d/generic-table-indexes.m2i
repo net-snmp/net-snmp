@@ -9,9 +9,12 @@
 ########################################################################
 ##
 /*
- * This structure is used to represent the index for a table.
+ * TODO:120:r: |-> Review $context mib index.
+ * This structure is used to represent the index for $context.
  */
 @eval $m2c_gi_others = (count_indexes($context) - 1)@
+@eval $m2c_gi_len = 0@
+@eval $m2c_gi_warn = 0@
 typedef struct ${context}_mib_index_s {
 
 @foreach $node index@
@@ -21,17 +24,38 @@ typedef struct ${context}_mib_index_s {
          * $m2c_node_summary
          */
 @    if $m2c_node_needlength == 1@
-@        eval $m2c_gi_maxlen = (126 - $node.oidlength - $m2c_gi_others)@
+@        eval $m2c_gi_warn = 1@
+@        eval $m2c_gi_maxlen = (126 - $context.oidlength - $m2c_gi_others)@
 @        if $m2c_node_maxlen > $m2c_gi_maxlen@
 @            eval $m2c_node_maxlen = $m2c_gi_maxlen@
         /** 128 - 1(entry) - 1(col) - $m2c_gi_others(other indexes) = $m2c_node_maxlen */
 @        end@
+@        eval $m2c_gi_len = $m2c_gi_len + $m2c_node_maxlen@
+@    else@
+@        eval $m2c_gi_len = $m2c_gi_len + 1@
 @    end@ # needlength
 @    include node-storage.m2i@
 
 @end@ # foreach
 
 } ${context}_mib_index;
+
+    /*
+     * TODO:121:r: |   |-> Review $context max index length.
+     * If you KNOW that your indexes will never exceed a certain
+     * length, update this macro to that length.
+@    if $m2c_gi_warn == 1@
+     *
+     * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
+     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+@        if $m2c_gi_len > 126@
+@            eval $m2c_gi_len = 126 - $context.oidlen@
+@        end@
+@    else@
+@        eval $m2c_gi_len = count_indexes($context)@
+@    end@
+*/
+#define MAX_${context}_IDX_LEN     $m2c_gi_len
 
 ##
 ########################################################################
