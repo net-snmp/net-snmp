@@ -1,3 +1,6 @@
+.\" Portions of this file are subject to the following copyright.  See
+.\" the Net-SNMP's COPYING file for more details and other copyrights
+.\" that may apply:
 .\"/***********************************************************
 .\" 	Copyright 1988, 1989 by Carnegie Mellon University
 .\" 
@@ -19,7 +22,12 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "07 Nov 2002" VVERSIONINFO "Net-SNMP"
+.\" Portions of this file are copyrighted by:
+.\" Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+.\" Use is subject to license terms specified in the COPYING file
+.\" distributed with the Net-SNMP package.
+.\" ******************************************************************/
+.TH SNMPCMD 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -30,7 +38,8 @@ snmpcmd - commands to communicate with a network entity using SNMP Requests.
 This manual page describes the common options for the SNMP commands:
 .BR snmpbulkget ", " snmpbulkwalk ", "  snmpdelta ", " snmpget ", "
 .BR snmpgetnext ", " snmpnetstat ", " snmpset ", " snmpstatus ", "
-.BR snmptable ", " snmptest ", " snmptrap ", " snmpusm ", " snmpwalk ".  "
+.BR snmptable ", " snmptest ", " snmptrap ", 
+.BR " snmpdf", " snmpusm ", " snmpwalk ".  "
 The command line applications use the SNMP protocol to communicate
 with an SNMP capable network entity, an agent.  Individual
 applications typically (but not necessarily) take additional
@@ -41,14 +50,23 @@ parameters are documented in the manual pages for each application.
 .TP
 .BI -a " authProtocol"
 Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
-messages.
+messages. Overrides the defAuthType token in the
+.I  snmp.conf
+file.
 .TP
 .BI -A " authPassword"
 Set the authentication pass phrase used for authenticated SNMPv3
-messages.
+messages.  Overrides the defAuthPassphrase token in the
+.I snmp.conf
+file. Insecure to specify pass word phrases on the command line,
+see
+.I snmp.conf(5).
 .TP
 .BI -c " community"
 Set the community string for SNMPv1/v2c transactions.
+Overrides the defcommunity token in the
+.I snmp.conf
+file.
 .TP
 .B -d
 Dump (in hexadecimal) the sent and received SNMP packets.
@@ -70,14 +88,14 @@ Set the context engineID used for SNMPv3 REQUEST messages scopedPdu.
 This is the engineID of the agent (e.g., 800000020109840301). (will be
 authoritative engineID if not specified)
 .TP
-.B -h
+.B -h, --help
 Display a brief usage message and then exit.
 .TP
 .B -H
 Display a list of configuration file directives understood by the
 command and then exit.
 .TP
-.BI -I " brRh"
+.BI -I " brRhu"
 Specifies input parsing options. See 
 .B INPUT OPTIONS 
 below.
@@ -86,6 +104,9 @@ below.
 Set the securityLevel used for SNMPv3 messages
 (noAuthNoPriv|authNoPriv|authPriv).  Appropriate pass phrase(s) must
 provided when using any level higher than noAuthNoPriv.
+Overrides the defSecurityLevel token in the
+.I snmp.conf
+file.
 .TP
 .BI -m " MIBLIST"
 Specifies a colon separated list of MIB modules to load for this
@@ -96,16 +117,60 @@ The special keyword
 is used to specify all modules in all directories when searching for MIB
 files.  Every file whose name does not begin with "." will be parsed as
 if it were a MIB file.
+.IP
+If the
+.I MIBLIST
+has a leading '+', then the listed MIB modules are loaded in 
+addition to MIB modules specified in the environment variable MIBS.
+.IP
+If a
+.I mibfile
+token is specified in the
+.I snmp.conf file,
+the 
+.I -m MIB
+option overrides the 
+.I mibfile
+token.
 .TP
 .BI -M " DIRLIST"
 Specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
+.IP
+If 
+.I DIRLIST
+has a leading '+', then the given directories are added to the list
+of MIB directories.  Without the leading '+', the
+given directory list overrides the list specified with the
+environment variable MIBDIRS. Note that the directories listed at the
+end of the list have precedence over directories at the beginning
+of the list. 
+.IP
+If no value is specified for the environment variable MIBDIRS,
+then the command will still search a default mib directory,
+after it searches the MIB directories specified on the -M
+option.  The default directory is DATADIR/snmp/mibs.
+To avoid having a default mib directory searched, set the
+MIBDIRS environment variable to "".  Even if the default
+MIB directory is searched, the directories specified in the
+-M option have precedence in the search order over the
+default directory.
+.IP
+If the -M option is specified and either a mibfile or mibdirs token
+is also specified in the
+.I snmp.conf
+file, the directories in the
+-M option have precedence in the MIB search order, over the
+directories set with both the mibdirs token and the mibfile token.
 .TP
 .BI -n " contextName"
 Set the destination contextName used for SNMPv3 messages.  The default
-contextName is the empty string "".
+contextName is the empty string "".  Overrides the defContext token
+in the
+.I snmp.conf
+file. 
 .TP
-.BI -O " nEebqQfsSvXT"
+.BI -O " anEebqQfsSvXTuxUt"
 Specifies output printing options. See 
 .B OUTPUT OPTIONS
 below.
@@ -124,12 +189,18 @@ Specifies the timeout in seconds between retries. The default is 1.
 .TP
 .BI -u " secName"
 Set the securityName used for authenticated SNMPv3 messages.
+Overrides the defSecurityName token in the
+.I snmp.conf
+file.
 .TP
 .B -v \fI1\fR | \fI2c\fR | \fI3
 Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908),
-or 3 (RFCs 2571-2574).  The default is version 1.
+or 3 (RFCs 2571-2574).  The default is version 1. This option overrides
+the defVersion token in the
+.I snmp.conf
+file.
 .TP
-.B -V
+.B -V, --version
 Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
@@ -137,6 +208,11 @@ Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
 .TP
 .BI -X " privPassword"
 Set the privacy pass phrase used for encrypted SNMPv3 messages.
+Overrides the defPrivPassphrase token in the
+.I snmp.conf
+file.
+Insecure to specify pass word phrases on the command line, see
+.I snmp.conf(5).
 .TP
 .BI -Z " boots,time"
 Set the engineBoots and engineTime used for authenticated SNMPv3
@@ -291,17 +367,32 @@ Show additional warning messages.
 Can be also set with the configuration token "mibWarningLevel".
 .TP
 .B "-Pe"
-Do not show MIB errors.
+Show MIB errors.
 Can be also set with the configuration token "showMibErrors".
+An example of an error that would be shown is if an imported
+module is not found during MIB parsing.
 .TP
 .B "-Pc"
-Allow ASN.1 comment to extend to the end of the MIB source line.
+Allow ASN.1 comment to extend to the end of the MIB source line
+(i.e. disallow the use of "--" to terminate comments).
 This overcomes some problems with manually maintained MIB files.
 Can be also set with the configuration token "strictCommentTerm".
 .TP
 .B "-Pd"
-Collect the DESCRIPTION information into the parsed hierarchy.
-This increases the memory used by the size of each DESCRIPTION clause.
+Toggles the default of whether or not to save the DESCRIPTIONs
+of the MIB objects when parsing.  Since the default is to save
+the DESCRIPTIONS, specifying -Pd will cause the DESCRIPTIONs not
+to be saved during MIB parsing.  For example:
+
+snmptranslate -Td -OS -IR system.sysDescr.0
+
+will show a description, while
+
+snmptranslate -Td -OS -IR -Pd system.sysDescr.0
+
+will not show a description.  Collecting the
+DESCRIPTION information into the parsed hierarchy
+increases the memory used by the size of each DESCRIPTION clause.
 .TP
 .B "-Pu"
 Allow underline characters in symbols.
@@ -309,6 +400,8 @@ Can be also set with the configuration token "mibAllowUnderline".
 .TP
 .B "-PR"
 Replace MIB objects using the last read MIB file.
+The parser will replace MIB objects in its hierarchy whenever
+it sees a sub-identifier and name match.  
 .B WARNING:
 Setting this option may result in an incorrect hierarchy.
 Can be also set with the configuration token "mibReplaceWithLatest".
@@ -329,9 +422,8 @@ Removes the equal sign and type information:
 .br
 system.sysUpTime.0 1:15:09:27.63
 .TP
-.TP
 .B -OQ
-Removes the equal sign and type information:
+Removes the type information:
 .br
 system.sysUpTime.0 = 1:15:09:27.63
 .TP
@@ -355,8 +447,13 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 (from release 5.0, this is now the default output format)
 .TP
 .B -Ou
-Prints the OID in the UCD-style (inherited from the original CMU code)
-removing a series of "standard" prefixes (if relevant).
+Prints the OID in the UCD-style (inherited from the original CMU code),
+That means removing a series of "standard" prefixes, if relevant,
+and breaking down the OID into the displayable pieces.  For example,
+the OID vacmSecruityModel.0.3.119.101.115 is broken down by default
+and the string hidden in the OID is shown.  The result would
+look like: vacmSecurityModel.0."test".  The -Ob option disables this
+feature.
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 .TP
@@ -394,6 +491,8 @@ vacmSecurityModel.0.\\"wes\\"
 .TP
 .B -OX
 This modifies the output of index OIDs, to look more "program like".
+Square brackets are placed around each index, and the DISPLAY-HINT
+information and string conversions are used to format each index.
 If you take an entry from the IPV6-MIB::ipv6RouteTable, it is indexed with
 an IPv6 address and two integers, and if you are used to IPv6 addresses
 you will know that decimal OIDs are not the preferred notation. Compare:
@@ -436,7 +535,9 @@ Output timeticks values as raw numbers:
 system.sysUpTime.0 = 14096763
 .PP
 Note that most of these options can be turned on or off by default by
-tuning the snmp.conf file.  See the
+tuning the
+.I snmp.conf file.
+See the
 .I snmp.conf(5)
 manual page for details.
 .SH "INPUT OPTIONS"

@@ -1,4 +1,4 @@
-.TH "set_data: helps storing and retriving of data during set transactions" 3 "28 Apr 2003" "net-snmp" \" -*- nroff -*-
+.TH "set_data: helps storing and retriving of data during set transactions" 3 "2 Sep 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,29 +14,9 @@ More...
 .RI "struct \fBnetsnmp_set_data_store_s\fP"
 .br
 .in -1c
-.SS "Defines"
-
-.in +1c
-.ti -1c
-.RI "#define \fBSET_DATA_NAME\fP   'set_data'"
-.br
-.in -1c
-.SS "Typedefs"
-
-.in +1c
-.ti -1c
-.RI "typedef netsnmp_set_data_store_s \fBnetsnmp_set_data_store\fP"
-.br
-.ti -1c
-.RI "typedef netsnmp_set_data_master_s \fBnetsnmp_set_data_master\fP"
-.br
-.in -1c
 .SS "Functions"
 
 .in +1c
-.ti -1c
-.RI "void \fBnetsnmp_set_data_free_data\fP (netsnmp_set_data_store *st)"
-.br
 .ti -1c
 .RI "void \fBnetsnmp_set_data_cache\fP (netsnmp_request_info *request, unsigned int magic_num, void *new_data, size_t new_data_len, void *old_data, size_t old_data_len)"
 .br
@@ -48,7 +28,7 @@ More...
 .ti -1c
 .RI "int \fBnetsnmp_multiplexer_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
 .br
-.RI "\fIimplements the multiplexer helper.\fP"
+.RI "\fIimplements the multiplexer helper\fP"
 .in -1c
 .SH "DETAILED DESCRIPTION"
 .PP 
@@ -61,13 +41,21 @@ The set_data helper.
 returns a multiplixer handler given a \fBnetsnmp_mib_handler_methods\fP structure of subhandlers.
 .PP
 Definition at line 84 of file set_data.c.
+.PP
+References netsnmp_create_handler(), and netsnmp_multiplexer_helper_handler().
 .SS "int netsnmp_multiplexer_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
-implements the multiplexer helper.
+implements the multiplexer helper
 .PP
 Definition at line 105 of file set_data.c.
+.PP
+References netsnmp_call_handler(), and netsnmp_extract_iterator_context().
+.PP
+Referenced by netsnmp_get_multiplexer_handler().
 .SS "void netsnmp_set_data_cache (netsnmp_request_info * request, unsigned int magic_num, void * new_data, size_t new_data_len, void * old_data, size_t old_data_len)"
 .PP
 stores new and old information based on the magic number.
 .PP
 Definition at line 45 of file set_data.c.
+.PP
+References netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_request_add_list_data(), and SNMP_MIN.
