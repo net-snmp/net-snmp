@@ -412,6 +412,11 @@ int snmpTargetParams_addRowStatus(
   return(1);
 }  /* snmpTargetParams_addRowStatus  */
     
+/* timestamp the current entry's modification time */
+void
+update_timestamp(struct targetParamTable_struct *temp_struct) {
+    temp_struct->updateTime = time(NULL);
+}
 
 void snmpd_parse_config_targetParams(
      const char *token, char *char_ptr)
@@ -462,6 +467,7 @@ void snmpd_parse_config_targetParams(
 	  newEntry->rowStatus);
   DEBUGMSGTL(("snmpTargetParamsEntry", buff));
 
+  update_timestamp(newEntry);
   snmpTargetParamTable_addToList(newEntry, &aPTable);
 } /* snmpd_parse_config_target */
 
@@ -583,12 +589,6 @@ var_snmpTargetParamsEntry(
   }
   return 0;
 }  /* var_snmpTargetParamsEntry */
-
-/* timestamp the current entry's modification time */
-void
-update_timestamp(struct targetParamTable_struct *temp_struct) {
-    temp_struct->updateTime = time(NULL);
-}
 
 /* Assign a value to the mpModel variable */
 int
