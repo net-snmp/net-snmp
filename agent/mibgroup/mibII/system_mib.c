@@ -45,17 +45,22 @@
 	 *
 	 *********************/
 
-char version_descr[256] = VERS_DESC;
-char sysContact[128] = SYS_CONTACT;
-char sysName[128] = SYS_NAME;
-char sysLocation[128] = SYS_LOC;
+#define SYS_STRING_LEN	256
+char version_descr[ SYS_STRING_LEN ] = VERS_DESC;
+char sysContact[    SYS_STRING_LEN ] = SYS_CONTACT;
+char sysName[       SYS_STRING_LEN ] = SYS_NAME;
+char sysLocation[   SYS_STRING_LEN ] = SYS_LOC;
+
+char oldversion_descr[ SYS_STRING_LEN ];
+char oldsysContact[    SYS_STRING_LEN ];
+char oldsysName[       SYS_STRING_LEN ];
+char oldsysLocation[   SYS_STRING_LEN ];
 
 extern oid version_id[];
 extern int version_id_len;
 
 extern struct timeval starttime;
 
-WriteMethod writeVersion;
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
@@ -234,7 +239,7 @@ var_system(struct variable *vp,
     switch (vp->magic){
         case VERSION_DESCR:
             *var_len = strlen(version_descr);
-            *write_method = writeVersion;
+            *write_method = writeSystem;
             return (u_char *)version_descr;
         case VERSIONID:
             *var_len = version_id_len*sizeof(version_id[0]);
@@ -290,44 +295,6 @@ var_system(struct variable *vp,
 }
 
 
-int
-writeVersion(int action,	     
-	     u_char *var_val,
-	     u_char var_val_type,
-	     size_t var_val_len,
-	     u_char *statP,
-	     oid *name,
-	     size_t name_len)
-{
-    size_t bigsize = 1000;
-    u_char buf[sizeof(version_descr)], *cp;
-    int count;
-    size_t size;
-
-    if (var_val_type != ASN_OCTET_STR){
-	printf("not string\n");
-	return SNMP_ERR_WRONGTYPE;
-    }
-    if (var_val_len > sizeof(version_descr)-1){
-	printf("bad length\n");
-	return SNMP_ERR_WRONGLENGTH;
-    }
-    size = sizeof(buf);
-    asn_parse_string(var_val, &bigsize, &var_val_type, buf, &size);
-    for(cp = buf, count = 0; count < size; count++, cp++){
-	if (!isprint(*cp)){
-	    printf("not print %x\n", *cp);
-	    return SNMP_ERR_WRONGVALUE;
-	}
-    }
-    buf[size] = 0;
-    if (action == COMMIT){
-	strcpy(version_descr, (char *) buf);
-	
-    }
-    return SNMP_ERR_NOERROR;
-} /* end of writeVersion */
-
 
 int
 writeSystem(int action,	     
@@ -339,42 +306,76 @@ writeSystem(int action,
 	    size_t name_len)
 {
     size_t bigsize = 1000;
-    u_char buf[sizeof(version_descr)], *cp;
+    u_char *cp, *buf = NULL, *oldbuf = NULL;
     int count;
-    size_t size;
+    size_t size = var_val_len;
 
-    if (var_val_type != ASN_OCTET_STR){
-	printf("not string\n");
-	return SNMP_ERR_WRONGTYPE;
+    switch((char)name[7]){
+      case 1:
+        buf    = version_descr;
+        oldbuf = oldversion_descr;
+        break;
+      case 4:
+        buf    = sysContact;
+        oldbuf = oldsysContact;
+        break;
+      case 5:
+        buf    = sysName;
+        oldbuf = oldsysName;
+        break;
+      case 6:
+        buf    = sysLocation;
+        oldbuf = oldsysLocation;
+        break;
+      default:
+	return SNMP_ERR_GENERR;		/* ??? */
     }
-    if (var_val_len > sizeof(version_descr)-1){
-	printf("bad length\n");
-	return SNMP_ERR_WRONGLENGTH;
-    }
-    size = sizeof(buf);
-    asn_parse_string(var_val, &bigsize, &var_val_type, buf, &size);
-    for(cp = buf, count = 0; count < size; count++, cp++){
-	if (!isprint(*cp)){
-	    printf("not print %x\n", *cp);
-	    return SNMP_ERR_WRONGVALUE;
-	}
-    }
-    buf[size] = 0;
-    if (action == COMMIT){
-	switch((char)name[7]){
-	  case 1:
-	    strcpy(version_descr, (char *) buf);
+
+    switch ( action ) {
+	case RESERVE1:		/* Check values for acceptability */
+	    if (var_val_type != ASN_OCTET_STR){
+		printf("not string\n");
+		return SNMP_ERR_WRONGTYPE;
+	    }
+	    if (var_val_len > sizeof(version_descr)-1){
+		printf("bad length\n");
+		return SNMP_ERR_WRONGLENGTH;
+	    }
+	    
+	    for(cp = var_val, count = 0; count < var_val_len; count++, cp++){
+		if (!isprint(*cp)){
+		    printf("not print %x\n", *cp);
+		    return SNMP_ERR_WRONGVALUE;
+		}
+	    }
 	    break;
-	  case 4:
-	    strcpy(sysContact, (char *) buf);
+
+	case RESERVE2:		/* Allocate memory and similar resources */
+
+		/* Using static strings, so nothing needs to be done */
 	    break;
-	  case 5:
-	    strcpy(sysName, (char *) buf);
+
+	case ACTION:		/* Perform the SET action (if reversible) */
+
+		/* Save the old value, in case of UNDO */
+	    strcpy( oldbuf, buf);
+	    strncpy( buf, var_val, var_val_len);
+	    buf[var_val_len] = 0;
 	    break;
-	  case 6:
-	    strcpy(sysLocation, (char *) buf);
+
+	case UNDO:		/* Reverse the SET action and free resources */
+
+	    strcpy( buf, oldbuf);
+	    oldbuf[0] = 0;
 	    break;
-	}
+
+	case COMMIT:		/* Confirm the SET, performing any irreversible actions,
+					and free resources */
+	case FREE:		/* Free any resources allocated */
+
+		/* No resources have been allocated, but "empty" the 'oldbuf' */
+	    oldbuf[0] = 0;
+	    break;
     }
     return SNMP_ERR_NOERROR;
 } /* end of writeSystem */

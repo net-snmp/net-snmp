@@ -29,6 +29,7 @@
 	 *********************/
 
 extern int snmp_enableauthentraps;
+       int old_snmp_enableauthentraps;
 
 /*********************
  *
@@ -142,23 +143,45 @@ write_snmp (int action,
 	    oid *name,
 	    size_t name_len)
 {
-    long intval;
+    long intval = *((long *) var_val);
 
-    if (var_val_type != ASN_INTEGER){
-	ERROR_MSG("not integer");
-	return SNMP_ERR_WRONGTYPE;
-    }
+    switch ( action ) {
+	case RESERVE1:			/* Check values for acceptability */
+	    if (var_val_type != ASN_INTEGER){
+		ERROR_MSG("not integer");
+		return SNMP_ERR_WRONGTYPE;
+	    }
+	
+	    if (intval != 1 && intval != 2) {
+	        DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
+		return SNMP_ERR_WRONGVALUE;
+	    }
+	    break;
 
-    intval = *((long *) var_val);
+	case RESERVE2:			/* Allocate memory and similar resources */
 
-    if (intval != 1 && intval != 2) {
-        DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
-	return SNMP_ERR_WRONGVALUE;
-    }
+		/* Using static variables, so nothing needs to be done */
+	    break;
 
-    if (action == COMMIT) {
-	snmp_enableauthentraps = intval;	
-	/* save_into_conffile ("authentraps:", intval == 1 ? "yes" : "no"); */
+	case ACTION:			/* Perform the SET action (if reversible) */
+
+		/* Save the old value, in case of UNDO */
+	    old_snmp_enableauthentraps = snmp_enableauthentraps;
+	    snmp_enableauthentraps = intval;	
+	    break;
+
+	case UNDO:			/* Reverse the SET action and free resources */
+
+	    snmp_enableauthentraps = old_snmp_enableauthentraps;
+	    break;
+
+	case COMMIT:			/* Confirm the SET, performing any irreversible actions,
+						and free resources */
+	    /* save_into_conffile ("authentraps:", intval == 1 ? "yes" : "no"); */
+	    break;
+
+	case FREE:			/* Free any resources allocated */
+	    break;
     }
     return SNMP_ERR_NOERROR;
 }
