@@ -82,7 +82,6 @@ SOFTWARE.
 #include "default_store.h"
 #include "snmp_logging.h"
 
-static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 
 static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 					   size_t *out_len, int allow_realloc, 
@@ -90,8 +89,6 @@ static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 					   oid *objid, size_t objidlen);
 
 static char *uptimeString (u_long, char *);
-static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree,
-    			char *buf, struct index_list *in_dices, char **end_of_known);
 static struct tree *_get_realloc_symbol(oid *objid, size_t objidlen,
 					struct tree *subtree,
 					u_char **buf, size_t *buf_len,
@@ -104,8 +101,6 @@ static void print_tree_node (FILE *, struct tree *, int);
 static void handle_mibdirs_conf(const char *token, char *line);
 static void handle_mibs_conf(const char *token, char *line);
 static void handle_mibfile_conf(const char *token, char *line);
-static char *dump_oid_to_string(oid *objid, size_t objidlen,
-                   char *buf, char quotechar);
 
 
 /* helper functions for get_module_node */
@@ -186,7 +181,6 @@ uptimeString(u_long timeticks,
 }
 
 
-
 /* prints character pointed to if in human-readable ASCII range,
 	otherwise prints a blank space */
 static void sprint_char(char *buf, const u_char ch)
@@ -203,46 +197,8 @@ void sprint_hexstring(char *buf,
                       const u_char *cp,
                       size_t len)
 {
-	const u_char *tp;
-	size_t lenleft;
-	
-    for(; len >= 16; len -= 16){
-	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
-	buf += strlen(buf);
-	cp += 8;
-	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
-	buf += strlen(buf);
-	cp += 8;
-	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
-	{
-		sprintf(buf, "  [");
-		buf += strlen(buf);
-		for (tp = cp - 16; tp < cp; tp ++)
-		{
-			sprint_char(buf++, *tp);
-		}
-		sprintf(buf, "]");
-		buf += strlen(buf);
-	}
-	if (len > 16) { *buf++ = '\n'; *buf = 0; }
-    }
-    lenleft = len;
-    for(; len > 0; len--){
-	sprintf(buf, "%02X ", *cp++);
-	buf += strlen(buf);
-    }
-	if ((lenleft > 0) && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
-	{
-		sprintf(buf, " [");
-		buf += strlen(buf);
-		for (tp = cp - lenleft; tp < cp; tp ++)
-		{
-			sprint_char(buf++, *tp);
-		}
-		sprintf(buf, "]");
-		buf += strlen(buf);
-    }
-    *buf = '\0';
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_hexstring((u_char **)&buf, &buflen, &outlen, 0, cp, len);
 }
 
 int
@@ -328,24 +284,8 @@ void sprint_asciistring(char *buf,
 		        const u_char  *cp,
 		        size_t	    len)
 {
-    unsigned int x;
-
-    for(x = 0; x < (int)len; x++){
-	if (isprint(*cp)){
-	    if (*cp == '\\' || *cp == '"') {
-                if (++x >= len) {
-                    *buf = '\0';
-                    return;
-                }
-		*buf++ = '\\';
-            }
-	    *buf++ = *cp++;
-	} else {
-	    *buf++ = '.';
-	    cp++;
-	}
-    }
-    *buf = '\0';
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_asciistring((u_char **)&buf, &buflen, &outlen, 0, cp, len);
 }
 
 int
@@ -407,112 +347,9 @@ sprint_octet_string(char *buf,
 		    const char *hint,
 		    const char *units)
 {
-    int hex, x;
-    u_char *cp;
-    const char *saved_hint = hint;
-    char *saved_buf = buf;
-
-    if (var->type != ASN_OCTET_STR){
-	sprintf(buf, "Wrong Type (should be OCTET STRING): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-
-    if (hint) {
-	int repeat, width = 1;
-	long value;
-	char code = 'd', separ = 0, term = 0, ch;
-	u_char *ecp;
-
-	*buf = 0;
-	cp = var->val.string;
-	ecp = cp + var->val_len;
-	while (cp < ecp) {
-	    repeat = 1;
-	    if (*hint) {
-		if (*hint == '*') {
-		    repeat = *cp++;
-		    hint++;
-		}
-		width = 0;
-		while ('0' <= *hint && *hint <= '9')
-		    width = width * 10 + *hint++ - '0';
-		code = *hint++;
-		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-                    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
-		    separ = *hint++;
-		else separ = 0;
-		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-                    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
-		    term = *hint++;
-		else term = 0;
-		if (width == 0) width = 1;
-	    }
-	    while (repeat && cp < ecp) {
-                value = 0;
-		if (code != 'a')
-		    for (x = 0; x < width; x++) value = value * 256 + *cp++;
-		switch (code) {
-		case 'x':
-                    sprintf (buf, "%lx", value); break;
-		case 'd':
-                    sprintf (buf, "%ld", value); break;
-		case 'o':
-                    sprintf (buf, "%lo", value); break;
-		case 'a':
-                    for (x = 0; x < width && cp < ecp; x++)
-			*buf++ = *cp++;
-		    *buf = 0;
-		    break;
-		default:
-		    sprintf(saved_buf, "(Bad hint ignored: %s) ", saved_hint);
-		    sprint_octet_string(saved_buf+strlen(saved_buf),
-					var, enums, NULL, NULL);
-		    return;
-		}
-		buf += strlen (buf);
-		if (cp < ecp && separ) *buf++ = separ;
-		repeat--;
-	    }
-	    if (term && cp < ecp) *buf++ = term;
-	}
-	if (units) sprintf (buf, " %s", units);
-        return;
-    }
-
-    hex = 0;
-    for(cp = var->val.string, x = 0; x < (int)var->val_len; x++, cp++){
-	if (!(isprint(*cp) || isspace(*cp)))
-	    hex = 1;
-    }
-    if (var->val_len == 0){
-	strcpy(buf, "\"\"");
-	return;
-    }
-    if (!hex){
-	*buf++ = '"';
-	sprint_asciistring(buf, var->val.string, var->val_len);
-	buf += strlen(buf);
-	*buf++ = '"';
-	*buf = '\0';
-    }
-    if (hex) {
-	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	    *buf++ = '"';
-	    *buf = '\0';
-	} else {
-	    sprintf(buf, " Hex: ");
-	    buf += strlen(buf);
-	}
-	sprint_hexstring(buf, var->val.string, var->val_len);
-	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	    buf += strlen(buf);
-	    *buf++ = '"';
-	    *buf = '\0';
-	}
-    }
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_octet_string((u_char **)&buf, &buflen, &outlen, 0,
+	    var, enums, hint, units);
 }
 
 
@@ -717,19 +554,9 @@ sprint_float(char *buf,
 	     const char *hint,
 	     const char *units)
 {
-  if (var->type != ASN_OPAQUE_FLOAT) {
-	sprintf(buf, "Wrong Type (should be Float): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "Opaque: Float:");
-	buf += strlen(buf);
-    }
-    sprintf(buf, " %f", *var->val.floatVal);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_float((u_char **)&buf, &buflen, &outlen, 0,
+	    var, enums, hint, units);
 }
 
 int
@@ -782,19 +609,9 @@ sprint_double(char *buf,
 	      const char *hint,
 	      const char *units)
 {
-  if (var->type != ASN_OPAQUE_DOUBLE) {
-	sprintf(buf, "Wrong Type (should be Double): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "Opaque: Double:");
-	buf += strlen(buf);
-    }
-    sprintf(buf, " %f", *var->val.doubleVal);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_double((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -848,49 +665,9 @@ sprint_opaque(char *buf,
 	      const char *hint,
 	      const char *units)
 {
-
-    if (var->type != ASN_OPAQUE
-#ifdef OPAQUE_SPECIAL_TYPES
-        && var->type != ASN_OPAQUE_COUNTER64
-        && var->type != ASN_OPAQUE_U64
-        && var->type != ASN_OPAQUE_I64
-        && var->type != ASN_OPAQUE_FLOAT
-        && var->type != ASN_OPAQUE_DOUBLE
-#endif /* OPAQUE_SPECIAL_TYPES */
-      ){
-	sprintf(buf, "Wrong Type (should be Opaque): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-#ifdef OPAQUE_SPECIAL_TYPES
-    switch(var->type) {
-      case ASN_OPAQUE_COUNTER64:
-      case ASN_OPAQUE_U64:
-      case ASN_OPAQUE_I64:
-        sprint_counter64(buf, var, enums, hint, units);
-        break;
-
-      case ASN_OPAQUE_FLOAT:
-        sprint_float(buf, var, enums, hint, units);
-        break;
-
-      case ASN_OPAQUE_DOUBLE:
-        sprint_double(buf, var, enums, hint, units);
-        break;
-
-      case ASN_OPAQUE:
-#endif
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "OPAQUE: ");
-	buf += strlen(buf);
-    }
-    sprint_hexstring(buf, var->val.string, var->val_len);
-    buf += strlen (buf);
-#ifdef OPAQUE_SPECIAL_TYPES
-    }
-#endif
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_opaque((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1047,19 +824,9 @@ sprint_object_identifier(char *buf,
 			 const char *hint,
 			 const char *units)
 {
-    if (var->type != ASN_OBJECT_ID){
-	sprintf(buf, "Wrong Type (should be OBJECT IDENTIFIER): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "OID: ");
-	buf += strlen(buf);
-    }
-    _sprint_objid(buf, (oid *)(var->val.objid), var->val_len / sizeof(oid));
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int len = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_object_identifier((u_char **)&buf, &len, &outlen, 0,
+	    var, enums, hint, units);
 }
 
 int
@@ -1110,25 +877,9 @@ sprint_timeticks(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    char timebuf[32];
-
-    if (var->type != ASN_TIMETICKS){
-	sprintf(buf, "Wrong Type (should be Timeticks): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-        sprintf(buf,"%lu", *(u_long *)(var->val.integer));
-        return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "Timeticks: (%lu) ", *(u_long *)(var->val.integer));
-	buf += strlen(buf);
-    }
-    sprintf(buf, "%s", uptimeString(*(u_long *)(var->val.integer), timebuf));
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_timeticks((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1183,42 +934,9 @@ sprint_hinted_integer (char *buf,
 		       const char *hint,
 		       const char *units)
 {
-    char code;
-    int shift, len;
-    char tmp[256];
-    char fmt[10];
-
-    code = hint[0];
-    if (hint [1] == '-') {
-        shift = atoi (hint+2);
-    }
-    else shift = 0;
-    fmt[0] = '%';
-    fmt[1] = 'l';
-    fmt[2] = code;
-    fmt[3] = 0;
-    sprintf (tmp, fmt, val);
-    if (shift != 0) {
-	len = strlen (tmp);
-	if (shift <= len) {
-	    tmp[len+1] = 0;
-	    while (shift--) {
-		tmp[len] = tmp[len-1];
-		len--;
-	    }
-	    tmp[len] = '.';
-	}
-	else {
-	    tmp[shift+1] = 0;
-	    while (shift) {
-		if (len-- > 0) tmp [shift] = tmp [len];
-		else tmp[shift] = '0';
-		shift--;
-	    }
-	    tmp[0] = '.';
-	}
-    }
-    strcpy (buf, tmp);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_hinted_integer((u_char **)&buf, &buflen, &outlen, 0,
+	val, 'd', hint, units);
 }
 
 int
@@ -1278,30 +996,9 @@ sprint_integer(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    char    *enum_string = NULL;
-
-    if (var->type != ASN_INTEGER){
-	sprintf(buf, "Wrong Type (should be INTEGER): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    for (; enums; enums = enums->next)
-	if (enums->value == *var->val.integer){
-	    enum_string = enums->label;
-	    break;
-	}
-    if (enum_string == NULL ||
-        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM)) {
-	if (hint) sprint_hinted_integer(buf, *var->val.integer, hint, units);
-	else sprintf(buf, "%ld", *var->val.integer);
-    }
-    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	sprintf(buf, "%s", enum_string);
-    else
-	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_integer((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 
@@ -1375,28 +1072,9 @@ sprint_uinteger(char *buf,
 		const char *hint,
 		const char *units)
 {
-    char    *enum_string = NULL;
-
-    if (var->type != ASN_UINTEGER){
-	sprintf(buf, "Wrong Type (should be UInteger32): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    for (; enums; enums = enums->next)
-	if (enums->value == *var->val.integer){
-	    enum_string = enums->label;
-	    break;
-	}
-    if (enum_string == NULL ||
-        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM))
-	sprintf(buf, "%lu", *var->val.integer);
-    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	sprintf(buf, "%s", enum_string);
-    else
-	sprintf(buf, "%s(%lu)", enum_string, *var->val.integer);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_uinteger((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1470,18 +1148,9 @@ sprint_gauge(char *buf,
 	     const char *hint,
 	     const char *units)
 {
-    if (var->type != ASN_GAUGE){
-	sprintf(buf, "Wrong Type (should be Gauge32 or Unsigned32): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	sprintf(buf, "%lu", *var->val.integer);
-    else
-	sprintf(buf, "Gauge32: %lu", *var->val.integer);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_gauge((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1536,18 +1205,9 @@ sprint_counter(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    if (var->type != ASN_COUNTER){
-	sprintf(buf, "Wrong Type (should be Counter32): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	sprintf(buf, "%lu", *var->val.integer);
-    else
-	sprintf(buf, "Counter32: %lu", *var->val.integer);
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_counter((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1594,27 +1254,9 @@ sprint_networkaddress(char *buf,
 		      const char *hint,
 		      const char *units)
 {
-    int x, len;
-    u_char *cp;
-
-    if (var->type != ASN_IPADDRESS){
-	sprintf(buf, "Wrong Type (should be NetworkAddress): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "Network Address: ");
-	buf += strlen(buf);
-    }
-    cp = var->val.string;
-    len = var->val_len;
-    for(x = 0; x < len; x++){
-	sprintf(buf, "%02X", *cp++);
-	buf += strlen(buf);
-	if (x < (len - 1))
-	    *buf++ = ':';
-    }
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_networkaddress((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1668,19 +1310,9 @@ sprint_ipaddress(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    u_char *ip;
-
-    if (var->type != ASN_IPADDRESS){
-	sprintf(buf, "Wrong Type (should be IpAddress): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    ip = var->val.string;
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	sprintf(buf, "%d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
-    else
-	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_ipaddress((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1726,13 +1358,9 @@ sprint_null(char *buf,
 	    const char *hint,
 	    const char *units)
 {
-    if (var->type != ASN_NULL){
-	sprintf(buf, "Wrong Type (should be NULL): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    sprintf(buf, "NULL");
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_null((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1764,52 +1392,9 @@ sprint_bitstring(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    int len, bit;
-    u_char *cp;
-    char *enum_string;
-
-    if (var->type != ASN_BIT_STR && var->type != ASN_OCTET_STR){
-	sprintf(buf, "Wrong Type (should be BITS): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	*buf++ = '"';
-	*buf = '\0';
-    } else {
-	sprintf(buf, "BITS: ");
-	buf += strlen(buf);
-    }
-    sprint_hexstring(buf, var->val.bitstring, var->val_len);
-    buf += strlen(buf);
-
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	buf += strlen(buf);
-	*buf++ = '"';
-	*buf = '\0';
-    } else {
-	cp = var->val.bitstring;
-	for(len = 0; len < (int)var->val_len; len++){
-	    for(bit = 0; bit < 8; bit++){
-		if (*cp & (0x80 >> bit)){
-		    enum_string = NULL;
-		    for (; enums; enums = enums->next)
-			if (enums->value == (len * 8) + bit){
-			    enum_string = enums->label;
-			    break;
-			}
-		    if (enum_string == NULL ||
-                        ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM))
-			sprintf(buf, "%d ", (len * 8) + bit);
-		    else
-			sprintf(buf, "%s(%d) ", enum_string, (len * 8) + bit);
-		    buf += strlen(buf);
-		}
-	    }
-	    cp ++;
-	}
-    }
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_bitstring((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1899,17 +1484,9 @@ sprint_nsapaddress(char *buf,
 		   const char *hint,
 		   const char *units)
 {
-    if (var->type != ASN_NSAP){
-	sprintf(buf, "Wrong Type (should be NsapAddress): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-	sprintf(buf, "NsapAddress: ");
-	buf += strlen(buf);
-    }
-    sprint_hexstring(buf, var->val.string, var->val_len);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_nsapaddress((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -1948,58 +1525,9 @@ sprint_counter64(char *buf,
 		 const char *hint,
 		 const char *units)
 {
-    char a64buf[I64CHARSZ+1];
-
-  if (var->type != ASN_COUNTER64
-#ifdef OPAQUE_SPECIAL_TYPES
-      && var->type != ASN_OPAQUE_COUNTER64
-      && var->type != ASN_OPAQUE_I64
-      && var->type != ASN_OPAQUE_U64
-#endif
-    ){
-	sprintf(buf, "Wrong Type (should be Counter64): ");
-	buf += strlen(buf);
-	sprint_by_type(buf, var, NULL, NULL, NULL);
-	return;
-    }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
-#ifdef OPAQUE_SPECIAL_TYPES
-      if (var->type != ASN_COUNTER64) {
-	sprintf(buf, "Opaque: ");
-	buf += strlen(buf);
-      }
-#endif
-#ifdef OPAQUE_SPECIAL_TYPES
-        switch(var->type) {
-          case ASN_OPAQUE_U64:
-            sprintf(buf, "UInt64: ");
-            break;
-          case ASN_OPAQUE_I64:
-            sprintf(buf, "Int64: ");
-            break;
-          case ASN_COUNTER64:
-          case ASN_OPAQUE_COUNTER64:
-#endif
-            sprintf(buf, "Counter64: ");
-#ifdef OPAQUE_SPECIAL_TYPES
-        }
-#endif
-	buf += strlen(buf);
-    }
-#ifdef OPAQUE_SPECIAL_TYPES
-    if (var->type == ASN_OPAQUE_I64)
-    {
-      printI64(a64buf, var->val.counter64);
-      sprintf(buf, a64buf);
-    }
-    else
-#endif
-    {
-      printU64(a64buf, var->val.counter64);
-      sprintf(buf, a64buf);
-    }
-    buf += strlen (buf);
-    if (units) sprintf (buf, " %s", units);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_counter64((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 void
@@ -2009,8 +1537,9 @@ sprint_unknowntype(char *buf,
 		   const char *hint,
 		   const char *units)
 {
-/*    sprintf(buf, "Variable has bad type"); */
-    sprint_by_type(buf, var, NULL, NULL, NULL);
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_by_type((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 void
@@ -2020,7 +1549,9 @@ sprint_badtype(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    sprintf(buf, "Variable has bad type");
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_badtype((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -2043,61 +1574,9 @@ sprint_by_type(char *buf,
 	       const char *hint,
 	       const char *units)
 {
-    switch (var->type){
-	case ASN_INTEGER:
-	    sprint_integer(buf, var, enums, hint, units);
-	    break;
-	case ASN_OCTET_STR:
-	    sprint_octet_string(buf, var, enums, hint, units);
-	    break;
-	case ASN_BIT_STR:
-	    sprint_bitstring(buf, var, enums, hint, units);
-	    break;
-	case ASN_OPAQUE:
-	    sprint_opaque(buf, var, enums, hint, units);
-	    break;
-	case ASN_OBJECT_ID:
-	    sprint_object_identifier(buf, var, enums, hint, units);
-	    break;
-	case ASN_TIMETICKS:
-	    sprint_timeticks(buf, var, enums, hint, units);
-	    break;
-	case ASN_GAUGE:
-	    sprint_gauge(buf, var, enums, hint, units);
-	    break;
-	case ASN_COUNTER:
-	    sprint_counter(buf, var, enums, hint, units);
-	    break;
-	case ASN_IPADDRESS:
-	    sprint_ipaddress(buf, var, enums, hint, units);
-	    break;
-	case ASN_NULL:
-	    sprint_null(buf, var, enums, hint, units);
-	    break;
-	case ASN_UINTEGER:
-	    sprint_uinteger(buf, var, enums, hint, units);
-	    break;
-	case ASN_COUNTER64:
-#ifdef OPAQUE_SPECIAL_TYPES
-	case ASN_OPAQUE_U64:
-	case ASN_OPAQUE_I64:
-	case ASN_OPAQUE_COUNTER64:
-#endif /* OPAQUE_SPECIAL_TYPES */
-	    sprint_counter64(buf, var, enums, hint, units);
-	    break;
-#ifdef OPAQUE_SPECIAL_TYPES
-	case ASN_OPAQUE_FLOAT:
-	    sprint_float(buf, var, enums, hint, units);
-	    break;
-	case ASN_OPAQUE_DOUBLE:
-	    sprint_double(buf, var, enums, hint, units);
-	    break;
-#endif /* OPAQUE_SPECIAL_TYPES */
-	default:
-            DEBUGMSGTL(("sprint_by_type", "bad type: %d\n", var->type));
-	    sprint_badtype(buf, var, enums, hint, units);
-	    break;
-    }
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_by_type((u_char **)&buf, &buflen, &outlen, 0,
+	var, enums, hint, units);
 }
 
 int
@@ -2696,65 +2175,9 @@ _sprint_objid(char *buf,
 	     oid *objid,
 	     size_t objidlen)	/* number of subidentifiers */
 {
-    char    tempbuf[SPRINT_MAX_LEN], *cp;
-    struct tree    *subtree = tree_head;
-    char *midpoint = 0;
-
-    *tempbuf = '.';	/* this is a fully qualified name */
-    subtree = _get_symbol(objid, objidlen, subtree, tempbuf + 1, 0, &midpoint);
-    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
-        cp = tempbuf;
-    } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)){
-	for(cp = tempbuf; *cp; cp++)
-	    ;
-        if (midpoint)
-            cp = midpoint-2; /* beyond the '.' */
-        else {
-            while(cp >= tempbuf){
-                if (isalpha(*cp))
-                    break;
-                cp--;
-            }
-        }
-	while(cp >= tempbuf){
-	    if (*cp == '.')
-		break;
-	    cp--;
-	}
-	cp++;
-	if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2 && cp > tempbuf) {
-	    char modbuf[256];
-	    char *mod = module_name(subtree->modid, modbuf);
-	    size_t len = strlen(mod);
-	    if ((int)len+1 >= cp-tempbuf) {
-		memmove(tempbuf+len+2, cp, strlen(cp)+1);
-		cp = tempbuf+len+2;
-	    }
-	    cp -= len+2;
-	    memcpy(cp, mod, len);
-	    cp[len] = ':';
-	    cp[len+1] = ':';
-	}
-    }
-    else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
-	PrefixListPtr pp = &mib_prefixes[0];
-	int ii;
-	size_t ilen, tlen;
-	const char *testcp;
-	cp = tempbuf; tlen = strlen(tempbuf);
-	ii = 0;
-	while (pp->str) {
-	    ilen = pp->len; testcp = pp->str;
-	    if ((tlen > ilen) && !memcmp(tempbuf, testcp, ilen)) {
-		cp += (ilen + 1);
-		break;
-	    }
-	    pp++;
-	}
-    }
-    else cp = tempbuf;
-    strcpy(buf, cp);
-    return subtree;
+    int len = SPRINT_MAX_LEN, overflow = 0, outlen = 0;
+    return _sprint_realloc_objid((u_char **)&buf, &len, &outlen, 0, &overflow,
+	    objid, objidlen);
 }
 
 static struct tree *
@@ -2909,34 +2332,9 @@ sprint_variable(char *buf,
 		size_t objidlen,
 		struct variable_list *variable)
 {
-    struct tree    *subtree;
-
-    subtree = _sprint_objid(buf, objid, objidlen);
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
-	buf += strlen(buf);
-	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
-	    strcat(buf, " ");
-	else
-	    strcat(buf, " = ");
-	buf += strlen(buf);
-    }
-
-    if (variable->type == SNMP_NOSUCHOBJECT)
-	strcpy(buf, "No Such Object available on this agent");
-    else if (variable->type == SNMP_NOSUCHINSTANCE)
-	strcpy(buf, "No Such Instance currently exists");
-    else if (variable->type == SNMP_ENDOFMIBVIEW)
-	strcpy(buf, "No more variables left in this MIB View");
-    else if (subtree) {
-	if (subtree->printer)
-	    (*subtree->printer)(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	  else {
-	    sprint_by_type(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	  }
-    }
-    else { /* handle rare case where tree is empty */
-        sprint_by_type(buf, variable, 0, 0, 0);
-    }
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_variable((u_char **)&buf, &buflen, &outlen, 0,
+	objid, objidlen, variable);
 }
 
 int
@@ -3033,22 +2431,9 @@ sprint_value(char *buf,
 	     size_t objidlen,
 	     struct variable_list *variable)
 {
-    struct tree *subtree = tree_head;
-
-    if (variable->type == SNMP_NOSUCHOBJECT)
-	sprintf(buf, "No Such Object available on this agent");
-    else if (variable->type == SNMP_NOSUCHINSTANCE)
-	sprintf(buf, "No Such Instance currently exists");
-    else if (variable->type == SNMP_ENDOFMIBVIEW)
-	sprintf(buf, "No more variables left in this MIB View");
-    else {
-	subtree = get_tree(objid, objidlen, subtree);
-	if (subtree->printer)
-	    (*subtree->printer)(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	else {
-	    sprint_by_type(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	}
-    }
+    int buflen = SPRINT_MAX_LEN, outlen = 0;
+    sprint_realloc_variable((u_char **)&buf, &buflen, &outlen, 0,
+	objid, objidlen, variable);
 }
 
 int
@@ -3122,42 +2507,6 @@ fprint_value(FILE *f,
  * Display '.' for all non-printable sub-identifiers.
  * If successful, "buf" points past the appended string.
  */
-static char *
-dump_oid_to_string(oid *objid,
-                   size_t objidlen,
-                   char *buf,
-                   char quotechar)
-{
-  if (buf)
-  { int ii, alen;
-    char *scp;
-    char *cp = buf + (strlen(buf));
-    scp = cp;
-    for (ii= 0, alen = 0; ii < (int)objidlen; ii++)
-    {
-        oid tst = objid[ii];
-        if ((tst > 254) || (!isprint(tst)))
-            tst = (oid)'.';
-
-        if (alen == 0) {
-	    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-		*cp++ = '\\';
-	    *cp++ = quotechar;
-	}
-        *cp++ = (char)tst;
-        alen++;
-    }
-    if (alen) {
-	if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-	    *cp++ = '\\';
-	*cp++ = quotechar;
-    }
-    *cp = '\0';
-    buf = cp;
-  }
-
-  return buf;
-}
 
 int
 dump_realloc_oid_to_string(oid *objid, size_t objidlen,
@@ -3227,213 +2576,6 @@ dump_realloc_oid_to_string(oid *objid, size_t objidlen,
   return 1;
 }
 
-static struct tree *
-_get_symbol(oid *objid,
-	   size_t objidlen,
-	   struct tree *subtree,
-	   char *buf,
-	   struct index_list *in_dices,
-           char **end_of_known)
-{
-    struct tree    *return_tree = NULL;
-    int extended_index = ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
-
-    if (!objid || !buf)
-        return NULL;
-
-    for(; subtree; subtree = subtree->next_peer){
-	if (*objid == subtree->subid){
-	    if (subtree->indexes)
-		in_dices = subtree->indexes;
-	    else if (subtree->augments) {
-	        struct tree *tp2 = find_tree_node(subtree->augments, -1);
-		if (tp2) in_dices = tp2->indexes;
-	    }
-	    if (!strncmp( subtree->label, ANON, ANON_LEN) ||
-                ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS))
-                sprintf(buf, "%lu", subtree->subid);
-	    else
-                strcpy(buf, subtree->label);
-	    if (objidlen > 1){
-		while(*buf)
-		    buf++;
-		*buf++ = '.';
-		*buf = '\0';
-
-		return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
-					 buf, in_dices, end_of_known);
-	    }
-	    if (return_tree != NULL)
-		return return_tree;
-	    else
-		return subtree;
-	}
-    }
-
-    if (end_of_known)
-        *end_of_known = buf;
-
-    /* subtree not found */
-
-    while (in_dices && (objidlen > 0) &&
-           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS) &&
-           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS)) {
-	size_t numids;
-	struct tree *tp;
-	tp = find_tree_node(in_dices->ilabel, -1);
-	if (!tp) {
-            /* ack.  Can't find an index in the mib tree.  bail */
-            goto finish_it;
-        }
-	if (extended_index) {
-	    if (buf[-1] == '.') buf--;
-	    *buf++ = '[';
-	    *buf = 0;
-	}
-	switch(tp->type) {
-	case TYPE_OCTETSTR:
-	    if (extended_index && tp->hint) {
-	    	struct variable_list var;
-		u_char buffer[1024];
-		int i;
-		memset(&var, 0, sizeof var);
-		if (in_dices->isimplied) {
-		    numids = objidlen;
-		    if (numids > objidlen)
-			goto finish_it;
-		} else if (tp->ranges && !tp->ranges->next
-		  	 && tp->ranges->low == tp->ranges->high) {
-		    numids = tp->ranges->low;
-		    if (numids > objidlen)
-			goto finish_it;
-		} else {
-		    numids = *objid;
-		    if (numids >= objidlen)
-			goto finish_it;
-		    objid++;
-		    objidlen--;
-		}
-		if (numids > objidlen)
-		    goto finish_it;
-		for (i = 0; i < (int)numids; i++) buffer[i] = (u_char)objid[i];
-		var.type = ASN_OCTET_STR;
-		var.val.string = buffer;
-		var.val_len = numids;
-		sprint_octet_string(buf, &var, NULL, tp->hint, NULL);
-		while (*buf) buf++;
-	    } else if (in_dices->isimplied) {
-                numids = objidlen;
-                if (numids > objidlen)
-                    goto finish_it;
-                buf = dump_oid_to_string(objid, numids, buf, '\'');
-	    } else if (tp->ranges && !tp->ranges->next
-	      	       && tp->ranges->low == tp->ranges->high) {
-		/* a fixed-length object string */
-	        numids = tp->ranges->low;
-                if (numids > objidlen)
-                    goto finish_it;
-		buf = dump_oid_to_string(objid, numids, buf, '\'');
-            } else {
-                numids = (size_t)*objid+1;
-                if (numids > objidlen)
-                    goto finish_it;
-		if (numids == 1) {
-		    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-			*buf++ = '\\';
-		    *buf++ = '"';
-		    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
-			*buf++ = '\\';
-		    *buf++ = '"';
-		}
-		else
-		    buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
-            }
-            objid += numids;
-            objidlen -= numids;
-	    break;
-	case TYPE_INTEGER32:
-	case TYPE_UINTEGER:
-	case TYPE_UNSIGNED32:
-	case TYPE_GAUGE:
-	case TYPE_INTEGER:
-	    if (tp->enums) {
-		struct enum_list *ep = tp->enums;
-		while (ep && ep->value != (int)(*objid)) ep = ep->next;
-		if (ep) sprintf(buf, "%s", ep->label);
-		else sprintf(buf, "%lu", *objid);
-	    }
-	    else sprintf(buf, "%lu", *objid);
-	    while(*buf)
-		buf++;
-	    objid++;
-	    objidlen--;
-	    break;
-	case TYPE_OBJID:
-	    if (in_dices->isimplied) {
-                numids = objidlen;
-            } else {
-                numids = (size_t)*objid+1;
-            }
-	    if ( numids > objidlen)
-		goto finish_it;
-	    if (extended_index)
-	        if (in_dices->isimplied) _sprint_objid(buf, objid, numids);
-		else _sprint_objid(buf, objid+1, numids-1);
-	    else _get_symbol(objid, numids, NULL, buf, NULL, NULL);
-	    objid += (numids);
-	    objidlen -= (numids);
-            buf += strlen(buf);
-	    break;
-	case TYPE_IPADDR:
-	    if (objidlen < 4)
-	        goto finish_it;
-	    sprintf(buf, "%lu.%lu.%lu.%lu",
-	    	    objid[0], objid[1], objid[2], objid[3]);
-	    objid += 4;
-	    objidlen -= 4;
-	    while (*buf) buf++;
-	    break;
-	case TYPE_NETADDR:
-	    {   oid ntype;
-	     	ntype = *objid++; objidlen--;
-		sprintf(buf, "%lu.", ntype);
-		buf += strlen(buf);
-		switch (ntype) {
-		case 1:
-		    if (objidlen < 4)
-			goto finish_it;
-		    sprintf(buf, "%lu.%lu.%lu.%lu",
-			    objid[0], objid[1], objid[2], objid[3]);
-		    objid += 4;
-		    objidlen -= 4;
-		    break;
-		default:
-		    goto finish_it;
-		}
-	    }
-	    while (*buf) buf++;
-	    break;
-	case TYPE_NSAPADDRESS:
-	default:
-	    goto finish_it;
-	    break;
-	}
-	if (extended_index) *buf++ = ']';
-	else *buf++ = '.';
-	*buf = 0;
-        in_dices = in_dices->next;
-    }
-
-finish_it:
-    if (buf[-1] != '.') *buf++ = '.';
-    while(objidlen-- > 0){	/* output rest of name, uninterpreted */
-	sprintf(buf, "%lu.", *objid++);
-	while(*buf)
-	    buf++;
-    }
-    buf[-1] = '\0'; /* remove trailing dot */
-    return NULL;
-}
 
 static struct tree *
 _get_realloc_symbol(oid *objid, size_t objidlen,
@@ -3770,7 +2912,9 @@ get_symbol(oid *objid,
 	   struct tree *subtree,
 	   char *buf)
 {
-   return _get_symbol(objid, objidlen, subtree, buf, NULL, NULL);
+    int len = SPRINT_MAX_LEN, overflow = 0, outlen;
+    return _get_realloc_symbol(objid, objidlen, subtree, (u_char **)&buf, &len, &outlen, 0,
+	   &overflow, NULL, NULL);
 }
 
 /*
