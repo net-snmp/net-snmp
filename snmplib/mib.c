@@ -2246,7 +2246,7 @@ netsnmp_set_mib_directory(const char *dir)
             if (*dir == '+') {
                 /* New dir starts with '+', thus we add it. */
                 newdir = malloc(strlen(dir) + strlen(olddir) + 1);
-                sprintf(newdir, "%s:%s", ++dir, olddir);
+                sprintf(newdir, "%s%c%s", ++dir, ENV_SEPARATOR_CHAR, olddir);
             } else {
                 newdir = dir;
             }
