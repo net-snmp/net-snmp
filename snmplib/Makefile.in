@@ -65,7 +65,6 @@ INCLUDESUBDIRHEADERS=README \
 	system.h \
 	tools.h \
 	transform_oids.h \
-	winservice.h \
         cmu_compat.h \
         getopt.h \
         lcd_time.h \
@@ -78,6 +77,8 @@ INCLUDESUBDIRHEADERS=README \
         vacm.h \
 	check_varbind.h \
 	snmp_transport.h \
+	winpipe.h \
+	winservice.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@
 
@@ -131,7 +132,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_secmod.c @security_src_list@ snmp_version.c        \
 	check_varbind.c container.c container_binary_array.c	\
 	container_null.c container_list_ssll.c container_iterator.c \
-	cmu_compat.c ucd_compat.c
+	cmu_compat.c ucd_compat.c winpipe.c
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
@@ -146,7 +147,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_secmod.o @security_obj_list@ snmp_version.o        \
 	check_varbind.o container.o container_binary_array.o	\
 	container_null.o container_list_ssll.o container_iterator.o \
-	cmu_compat.o ucd_compat.o
+	cmu_compat.o ucd_compat.o winpipe.o
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
@@ -161,7 +162,7 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 		\
 	snmp_secmod.lo @security_lobj_list@ snmp_version.lo       \
 	check_varbind.lo container.lo container_binary_array.lo	\
 	container_null.lo container_list_ssll.lo container_iterator.lo \
-	cmu_compat.lo ucd_compat.lo
+	cmu_compat.lo ucd_compat.lo winpipe.lo
 
 # just in case someone wants to remove libtool, change this to OBJS.
 TOBJS=$(LOBJS)
