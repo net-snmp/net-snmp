@@ -569,6 +569,7 @@ handle_var_list(struct agent_snmp_session  *asp)
 
     while (1) {
     
+	count++;
 statp_loop:
 	statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
@@ -587,7 +588,13 @@ statp_loop:
 		} else {
 	            statType = SNMP_ENDOFMIBVIEW;
 		}
-		varbind_ptr->type = statType;
+		if (asp->pdu->version == SNMP_VERSION_1) {
+		    asp->pdu->errstat = SNMP_ERR_NOSUCHNAME;
+		    asp->pdu->errindex = count;
+		    return SNMP_ERR_NOSUCHNAME;
+		}
+		else
+		    varbind_ptr->type = statType;
 	}
                 /* Delegated variables should be added to the
                    relevant outgoing request */
@@ -667,7 +674,6 @@ statp_loop:
 	if ( varbind_ptr == asp->end )
 	     return SNMP_ERR_NOERROR;
 	varbind_ptr = varbind_ptr->next_variable;
-	count++;
 	if ( asp->mode == RESERVE1 )
 	    snmp_vars_inc++;
     }
