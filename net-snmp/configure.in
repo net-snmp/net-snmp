@@ -753,13 +753,19 @@ AC_CACHE_CHECK(for struct rtentry, ac_cv_struct_rtentry,
 #include<net/route.h>
 ],  ac_cv_struct_rtentry=ortentry,  ac_cv_struct_rtentry=rtentry )
 if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
-  AC_DEFINE(RTENTRY,struct rtentry)
+  ac_cv_struct_rtentry="rtentry"
 else
-  AC_DEFINE(RTENTRY,struct ortentry)
+  ac_cv_struct_rtentry="ortentry"
 fi
 ])
 else
   RTENTRY_TYPE="rtentry"
+  ac_cv_struct_rtentry="rtentry"
+fi
+
+if test "xac_cv_struct_rtentry" != "x"; then
+  AC_DEFINE_UNQUOTED(RTENTRY,struct ${ac_cv_struct_rtentry})
+else
   AC_DEFINE(RTENTRY,struct rtentry)
 fi
 
