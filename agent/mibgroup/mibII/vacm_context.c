@@ -73,6 +73,7 @@ init_vacm_context(void) {
      */
     handler_registration *my_handler;
     table_registration_info *table_info;
+    iterator_info *iinfo;
 
     my_handler = create_handler_registration("vacm_context",
                                           vacm_context_handler,
@@ -84,16 +85,18 @@ init_vacm_context(void) {
         return;
 
     table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
+    iinfo = SNMP_MALLOC_TYPEDEF(iterator_info);
 
-    if (!table_info)
+    if (!table_info || !iinfo)
         return;
 
     table_helper_add_index(table_info, ASN_OCTET_STR)
     table_info->min_column = 1;
     table_info->max_column = 1;
-    table_info->get_first_data_point = get_first_context;
-    table_info->get_next_data_point = get_next_context;
-    register_table_iterator(my_handler, table_info);
+    iinfo->get_first_data_point = get_first_context;
+    iinfo->get_next_data_point = get_next_context;
+    iinfo->table_reginfo = table_info;
+    register_table_iterator(my_handler, iinfo);
 }
 
 /*

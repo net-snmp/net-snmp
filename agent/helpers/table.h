@@ -61,15 +61,6 @@ typedef struct _table_registration_info {
 
    column_info *valid_columns;    /* more details on columns */
 
-   /* used by the table_iterator helper */
-   /* XXXWWW: move these to an iterator specific struct */
-   FirstDataPoint  *get_first_data_point;
-   NextDataPoint   *get_next_data_point;
-   FreeLoopContext *free_loop_context;
-   FreeDataContext *free_data_context;
-
-   /* get_first_index *() */
-  /* unsigned int auto_getnext; */
 } table_registration_info;
 
 typedef struct _table_request_info {

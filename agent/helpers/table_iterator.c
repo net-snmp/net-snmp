@@ -1,4 +1,14 @@
 /* table_iterator.c */
+/** @defgroup table_iterator table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
+ *  @ingroup table
+ *  Functionally, it is a specialized version of the more
+ *  generic table helper but easies the burden of GETNEXT processing by
+ *  manually looping through all the data indexes retrieved through
+ *  function calls which should be supplied by the module that wishes
+ *  help.  The module the table_iterator helps should, afterwards,
+ *  never be called for the case of "MODE_GETNEXT" and only for the GET
+ *  and SET related modes instead.
+ */
 
 #include <config.h>
 
@@ -22,25 +32,39 @@
 /* doesn't work yet, but shouldn't be serialized (for efficiency) */
 #undef NOT_SERIALIZED
 
+/** returns a mib_handler object for the table_iterator helper */
 mib_handler *
-get_table_iterator_handler(table_registration_info *tabreq) {
+get_table_iterator_handler(iterator_info *iinfo) {
     mib_handler *me=
         create_handler(TABLE_ITERATOR_NAME, table_iterator_helper_handler);
-    me->myvoid = tabreq; /* we need it too, but it really is not ours */
+
+    if (!me || !iinfo)
+        return NULL;
+    
+    me->myvoid = iinfo; 
     return me;
 }
 
     
+/** registers a table after attaching it to a table_iterator helper */
 int
 register_table_iterator(handler_registration *reginfo,
-                        table_registration_info *tabreq) {
+                        iterator_info *iinfo) {
 #ifndef NOT_SERIALIZED
     inject_handler(reginfo, get_serialize_handler());
 #endif
-    inject_handler(reginfo, get_table_iterator_handler(tabreq));
-    return register_table(reginfo, tabreq);
+    inject_handler(reginfo, get_table_iterator_handler(iinfo));
+    return register_table(reginfo, iinfo->table_reginfo);
 }
 
+/** extracts the table_iterator specific data from a request */
+inline void *
+extract_iterator_context(request_info *request) 
+{
+    return request_get_list_data(request, TABLE_ITERATOR_NAME);
+}
+
+/** implements the table_iterator helper */
 int
 table_iterator_helper_handler(
     mib_handler               *handler,
@@ -55,8 +79,10 @@ table_iterator_helper_handler(
     static oid myname[MAX_OID_LEN];
     static int myname_len;
     int oldmode;
+    iterator_info *iinfo;
     
-    tbl_info = (table_registration_info *) handler->myvoid;
+    iinfo = (iterator_info *) handler->myvoid;
+    tbl_info = iinfo->table_reginfo;
 
     /* copy in the table registration oid for later use */
     coloid_len = reginfo->rootoid_len+2;
@@ -64,8 +90,8 @@ table_iterator_helper_handler(
     coloid[reginfo->rootoid_len] = 1; /* table.entry node */
     
     /* illegally got here if these functions aren't defined */
-    if (tbl_info->get_first_data_point == NULL ||
-        tbl_info->get_next_data_point == NULL) {
+    if (iinfo->get_first_data_point == NULL ||
+        iinfo->get_next_data_point == NULL) {
         snmp_log(LOG_ERR, "table_iterator helper called without data accessor functions\n");
         return SNMP_ERR_GENERR;
     }
@@ -107,11 +133,11 @@ table_iterator_helper_handler(
         /* below our minimum column? */
         if (table_info->colnum < tbl_info->min_column) {
             /* XXX: mem leak, index_search vs results */
-            results = (tbl_info->get_first_data_point)(&callback_loop_context,
+            results = (iinfo->get_first_data_point)(&callback_loop_context,
                                                        &callback_data_context,
                                                        index_search);
-            if (tbl_info->free_loop_context)
-                (tbl_info->free_loop_context)(callback_loop_context);
+            if (iinfo->free_loop_context)
+                (iinfo->free_loop_context)(callback_loop_context);
             goto got_results;
         }
 
@@ -124,7 +150,7 @@ table_iterator_helper_handler(
         index_search = snmp_clone_varbind(table_info->indexes);
         
         /* find the first node */
-        index_search = (tbl_info->get_first_data_point)(&callback_loop_context,
+        index_search = (iinfo->get_first_data_point)(&callback_loop_context,
                                                         &callback_data_context,
                                                         index_search);
 
@@ -145,19 +171,19 @@ table_iterator_helper_handler(
                            remember (possibly freeing the last known "good"
                            result data pointer) */
                         if (callback_data_keep &&
-                            tbl_info->free_data_context) {
-                            (tbl_info->free_data_context)(callback_data_keep);
+                            iinfo->free_data_context) {
+                            (iinfo->free_data_context)(callback_data_keep);
                         }
                         callback_data_keep = callback_data_context;
 
                     } else {
-                        if (callback_data_context && tbl_info->free_data_context)
-                            (tbl_info->free_data_context)(callback_data_context);
+                        if (callback_data_context && iinfo->free_data_context)
+                            (iinfo->free_data_context)(callback_data_context);
                     }
 
                     /* get the next node in the data chain */
                     index_search =
-                        (tbl_info->get_next_data_point)(&callback_loop_context,
+                        (iinfo->get_next_data_point)(&callback_loop_context,
                                                         &callback_data_context,
                                                         index_search);
 
@@ -169,7 +195,7 @@ table_iterator_helper_handler(
                         /* XXX: free old contexts first? */
                         index_search = snmp_clone_varbind(table_info->indexes);
                         index_search =
-                            (tbl_info->get_first_data_point)(&callback_loop_context,
+                            (iinfo->get_first_data_point)(&callback_loop_context,
                                                              &callback_data_context,
                                                              index_search);
                     }
@@ -193,21 +219,21 @@ table_iterator_helper_handler(
                         goto got_results;
                     } else {
                         /* free not-needed data context */
-                        if (callback_data_context && tbl_info->free_data_context)
-                            (tbl_info->free_data_context)(callback_data_context);
+                        if (callback_data_context && iinfo->free_data_context)
+                            (iinfo->free_data_context)(callback_data_context);
                     }
                     
                     /* get the next node in the data chain */
                     index_search =
-                        (tbl_info->get_next_data_point)(&callback_loop_context,
+                        (iinfo->get_next_data_point)(&callback_loop_context,
                                                         &callback_data_context,
                                                         index_search);
                 }
         }
         
         /* XXX: free index_search? */
-        if (callback_loop_context && tbl_info->free_loop_context)
-            (tbl_info->free_loop_context)(callback_loop_context);
+        if (callback_loop_context && iinfo->free_loop_context)
+            (iinfo->free_loop_context)(callback_loop_context);
 
       got_results: /* not milk */
         
@@ -234,8 +260,8 @@ table_iterator_helper_handler(
         if (oldmode == MODE_GETNEXT)
             reqinfo->mode = oldmode;
 
-        if (callback_data_keep && tbl_info->free_data_context)
-            (tbl_info->free_data_context)(callback_data_keep);
+        if (callback_data_keep && iinfo->free_data_context)
+            (iinfo->free_data_context)(callback_data_keep);
         
 #ifdef NOT_SERIALIZED
         return ret;
@@ -246,8 +272,3 @@ table_iterator_helper_handler(
     return SNMP_ERR_NOERROR;
 }
 
-inline void *
-extract_iterator_context(request_info *request) 
-{
-    return request_get_list_data(request, TABLE_ITERATOR_NAME);
-}
