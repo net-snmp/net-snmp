@@ -15,12 +15,12 @@
 #
 # defaults
 #
-UPDATE_CURR=.
-UPDATE_ORIG=.orig
-UPDATE_NEW=.new
-UPDATE_MERGED=.merged
-UPDATE_BACKUP=.backup
-UPDATE_PATCH=.patch
+UPDATE_CURR=$PWD
+UPDATE_ORIG=$PWD/.orig
+UPDATE_NEW=$PWD/.new
+UPDATE_MERGED=$PWD/.merged
+UPDATE_BACKUP=$PWD/.backup
+UPDATE_PATCH=$PWD/.patch
 
 #
 # number of diff context lines / patch fuzz factor
@@ -117,16 +117,18 @@ do_diff()
     # p     Show which C function each change is in.
     # d     smaller changes
     #    --exclude='*Makefile' --unidirectional-new-file
+    safecd $1
     diff -U $FUZZ -p -b -w --show-c-function \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
         --exclude="*.deps" \
         --exclude='*.o' --exclude='*.lo' --exclude='*.a' --exclude='*.la' \
-        --new-file $1 $2 > $3
+        --new-file . $2 > $3
     local rc=$?
     if [ $rc -eq 0 ]; then
         rm -f $3
     fi
+    safecd -
     return $rc
 }
 
@@ -137,29 +139,22 @@ do_cp()
     src=$1
     dest=$2
     if [ ! -d $dest ]; then
-        die "dest $dest is not a directory in $PWD"
+        die "dest $dest is not a directory"
     fi
-    if [ "x$src" = "x." ]; then
-        DOCPREL=
-    else
-        if [ ! -d $src ]; then
-            die "src $src is not a directory in $PWD"
-        fi
-        DOCPREL=../
-        safecd $src
+    if [ ! -d $src ]; then
+        die "src $src is not a directory"
     fi
+    safecd $src
     files=`ls *$UPDATE_OID* 2>/dev/null| egrep "(file|onf|m2d|txt|\.c|\.h)$"`
     if [ -z "$files" ]; then
        echo "   no files to copy from $src"
     else
-       safecp $files $DOCPREL$dest
+       safecp $files $dest
        if [ $? -ne 0 ]; then
            die "error while copying files from $src to $dest in $PWD"
        fi
     fi
-    if [ "x$src" != "x." ]; then
-        safecd -
-    fi
+    safecd -
 }
 
 #----------------------------------------------------------------------
@@ -167,13 +162,13 @@ do_cp()
 save_diff()
 {
     echo "Creating patch for your custom code"
-    cnt=`ls 2>/dev/null | grep -v "^default-" | wc -l`
+    cnt=`ls $UPDATE_CURR/*$UPDATE_OID* 2>/dev/null | egrep "(file|onf|m2d|txt|\.c|\.h)$" | grep -v "^default-" | wc -l`
     if [ $cnt -eq 0 ]; then
         echo "   no custom code!"
         return
     fi
 
-    do_diff $UPDATE_ORIG/ ./ $UPDATE_PATCH/custom.$UPDATE_DATE
+    do_diff $UPDATE_ORIG/ $UPDATE_CURR/ $UPDATE_PATCH/custom.$UPDATE_DATE
     if [ $? -eq 0 ]; then
         echo "   no custom code changes found."
     fi
@@ -183,7 +178,6 @@ save_diff()
 #
 gen_code()
 {
-    OLD_PWD=$PWD
     files=`ls default-* 2>/dev/null `
     if [ ! -z "$files" ]; then
        safecp $files $UPDATE_NEW/
@@ -232,7 +226,7 @@ merge_code()
     if [ -f $UPDATE_PATCH/custom.$UPDATE_DATE ]; then
        touch .M2C-UPDATE-MERGE-FAILED
        echo "Patching new generated code"
-       patch -F $FUZZ -N -d $UPDATE_MERGED -p1 -i ../$UPDATE_PATCH/custom.$UPDATE_DATE
+       patch -F $FUZZ -N -d $UPDATE_MERGED -p1 -i $UPDATE_PATCH/custom.$UPDATE_DATE
        if [ $? -ne 0 ]; then
            error "Could not apply custom code patch to new generated code"
            die   "You must fix the problem in $UPDATE_MERGED, and then re-run mib2c-update."
@@ -244,7 +238,7 @@ merge_code()
 copy_merged()
 {
     echo "Backing up current code to $UPDATE_BACKUP/curr"
-    do_cp . $UPDATE_BACKUP/curr/
+    do_cp $UPDATE_CURR $UPDATE_BACKUP/curr/
     echo "Copying merged code to $UPDATE_CURR"
     do_cp $UPDATE_MERGED $UPDATE_CURR/
 
