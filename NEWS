@@ -4,6 +4,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *5.1*
  New:
     - configure is now generated using autoconf 2.57.
+    - linkUp and linkDown notifications can be enabled
+      (see the linkUpDownNotifications snmpd.conf token documentation)
+    - traps can be generated when a disman monitor event is triggered.
+      (see the snmpd.conf documentation on "monitor" and "notificatonEvent")
     - new configure options to disable building of the agent, apps, ...
       ./configure --help for a list of package sections that can be excluded.
     - new configure option to remove specific code pieces (mib reading, ...)
