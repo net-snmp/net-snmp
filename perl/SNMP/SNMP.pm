@@ -1973,6 +1973,10 @@ returns 'textualConvention' if defined else 'type'
 
 returns TEXTUAL-CONVENTION
 
+=item TCDescription
+
+returns the TEXTUAL-CONVENTION's DESCRIPTION field.
+
 =item units
 
 returns UNITS
