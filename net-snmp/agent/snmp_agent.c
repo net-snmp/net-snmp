@@ -1725,13 +1725,24 @@ handle_getnext_loop(struct agent_snmp_session  *asp) {
           break; */
         
         DEBUGIF("results") {
-            DEBUGMSGTL(("results","getnext results, before next pass: \n"));
-            for(var_ptr = asp->pdu->variables; var_ptr;
-                var_ptr = var_ptr->next_variable) {
-                char buf[SPRINT_MAX_LEN];
-                sprint_variable(buf, var_ptr->name, var_ptr->name_length, var_ptr);
-                DEBUGMSGTL(("results","  %s\n", buf));
+	    u_char *buf = NULL;
+	    size_t buf_len = 0, out_len = 0;
+            DEBUGMSGTL(("results", "getnext results, before next pass:\n"));
+            for (var_ptr = asp->pdu->variables; var_ptr;
+		 var_ptr = var_ptr->next_variable) {
+		out_len = 0;
+		if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
+			      var_ptr->name, var_ptr->name_length, var_ptr)) {
+		    DEBUGMSGTL(("results", " %s\n", buf));
+		} else {
+		    if (buf != NULL) {
+			DEBUGMSGTL(("results", " %s [TRUNCATED]\n", buf));
+		    }
+		}
             }
+	    if (buf != NULL) {
+		free(buf);
+	    }
         }
 
         reassign_requests(asp);
