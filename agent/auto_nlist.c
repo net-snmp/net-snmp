@@ -51,7 +51,7 @@ auto_nlist_value(string)
       init_nlist(it->nl);
     }
     if (it->nl[0].n_type == 0) {
-      DEBUGP("nlist err:  neither %s nor _%s found.\n",string);
+      DEBUGP("nlist err:  neither %s nor _%s found.\n",string,string);
       return( -1 );
     } else {
       DEBUGP("nlist:  found symbol %s.\n",it->symbol);
