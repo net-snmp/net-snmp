@@ -32,9 +32,6 @@
 ./header_complex.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/ucd_compat.h
 ./header_complex.lo: ../../include/net-snmp/pdu_api.h
 ./header_complex.lo: ../../include/net-snmp/mib_api.h
@@ -77,6 +74,7 @@
 ./header_complex.lo: ../../include/net-snmp/agent/read_only.h
 ./header_complex.lo: ../../include/net-snmp/agent/serialize.h
 ./header_complex.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./header_complex.lo: ../../include/net-snmp/agent/mode_end_call.h
 ./header_complex.lo: ../../include/net-snmp/agent/table.h
 ./header_complex.lo: ../../include/net-snmp/agent/table_data.h
 ./header_complex.lo: ../../include/net-snmp/agent/table_dataset.h
@@ -120,9 +118,6 @@
 ./testhandler.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/ucd_compat.h
 ./testhandler.lo: ../../include/net-snmp/pdu_api.h
 ./testhandler.lo: ../../include/net-snmp/mib_api.h
@@ -165,6 +160,7 @@
 ./testhandler.lo: ../../include/net-snmp/agent/read_only.h
 ./testhandler.lo: ../../include/net-snmp/agent/serialize.h
 ./testhandler.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./testhandler.lo: ../../include/net-snmp/agent/mode_end_call.h
 ./testhandler.lo: ../../include/net-snmp/agent/table.h
 ./testhandler.lo: ../../include/net-snmp/agent/table_data.h
 ./testhandler.lo: ../../include/net-snmp/agent/table_dataset.h
@@ -203,9 +199,6 @@
 ./util_funcs.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs.lo: ../../include/net-snmp/pdu_api.h
 ./util_funcs.lo: ../../include/net-snmp/mib_api.h
@@ -248,6 +241,7 @@
 ./util_funcs.lo: ../../include/net-snmp/agent/read_only.h
 ./util_funcs.lo: ../../include/net-snmp/agent/serialize.h
 ./util_funcs.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./util_funcs.lo: ../../include/net-snmp/agent/mode_end_call.h
 ./util_funcs.lo: ../../include/net-snmp/agent/table.h
 ./util_funcs.lo: ../../include/net-snmp/agent/table_data.h
 ./util_funcs.lo: ../../include/net-snmp/agent/table_dataset.h
