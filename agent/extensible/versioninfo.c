@@ -4,7 +4,7 @@
 #include "mibincl.h"
 #include "wes.h"
 
-static char *VersionInfo="Ext2-4";
+static char *VersionInfo="Ext2-6";
 
 int clear_cache();
 
