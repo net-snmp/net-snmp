@@ -127,6 +127,8 @@ struct snmp_internal_session {
 struct request_list {
     struct request_list *next_request;
     long  request_id;	/* request id */
+    snmp_callback callback; /* user callback per request (NULL if unused) */
+    void   *cb_data;   /* user callback data per request (NULL if unused) */
     int	    retries;	/* Number of retries */
     u_long timeout;	/* length to wait for timeout */
     struct timeval time; /* Time this request was made */
@@ -1111,6 +1113,32 @@ snmp_send(session, pdu)
     struct snmp_session *session;
     struct snmp_pdu	*pdu;
 {
+  return snmp_async_send(session, pdu, NULL, NULL);
+}
+
+/*
+ * int snmp_async_send(session, pdu, callback, cb_data)
+ *     struct snmp_session *session;
+ *     struct snmp_pdu	*pdu;
+ *     snmp_callback callback;
+ *     void   *cb_data;
+ * 
+ * Sends the input pdu on the session after calling snmp_build to create
+ * a serialized packet.  If necessary, set some of the pdu data from the
+ * session defaults.  Add a request corresponding to this pdu to the list
+ * of outstanding requests on this session and store callback and data, 
+ * then send the pdu.
+ * Returns the request id of the generated packet if applicable, otherwise 1.
+ * On any error, 0 is returned.
+ * The pdu is freed by snmp_send() unless a failure occured.
+ */
+int
+snmp_async_send(session, pdu, callback, cb_data)
+    struct snmp_session *session;
+    struct snmp_pdu	*pdu;
+    snmp_callback	callback;
+    void	        *cb_data;
+{
     struct session_list *slp;
     struct snmp_internal_session *isp = NULL;
     u_char  packet[PACKET_LENGTH];
@@ -1329,7 +1357,8 @@ snmp_send(session, pdu)
 	}
 	rp->pdu = pdu;
 	rp->request_id = pdu->reqid;
-
+        rp->callback = callback;
+        rp->cb_data = cb_data;
 	rp->retries = 1;
 	rp->timeout = session->timeout;
 	rp->time = tv;
@@ -1428,11 +1457,15 @@ snmp_read(fdset)
     int length, fromlength;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
+    snmp_callback callback;
+    void *magic;
 
     for(slp = Sessions; slp; slp = slp->next){
 	if (FD_ISSET(slp->internal->sd, fdset)){
 	    sp = slp->session;
 	    isp = slp->internal;
+	    callback = sp->callback;
+	    magic = sp->callback_magic;
 	    fromlength = sizeof from;
 	    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 			      (struct sockaddr *)&from, &fromlength);
@@ -1464,8 +1497,10 @@ snmp_read(fdset)
 	    if (pdu->command == SNMP_MSG_RESPONSE){
 		for(rp = isp->requests; rp; rp = rp->next_request){
 		    if (rp->request_id == pdu->reqid){
-			if (sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid,
-					 pdu, sp->callback_magic) == 1){
+			if (rp->callback) callback = rp->callback;
+			if (rp->cb_data) magic = rp->cb_data;
+		        if (callback(RECEIVED_MESSAGE, sp, pdu->reqid,
+					 pdu, magic) == 1){
 			    /* successful, so delete request */
 			    if (isp->requests == rp){
 				/* first in list */
@@ -1514,11 +1549,11 @@ snmp_read(fdset)
  * If a timeout is received, snmp_timeout should be called to check if the
  * timeout was for SNMP.  (snmp_timeout is idempotent)
  *
- * Block is 1 if the select is requested to block indefinitely, rather than
- * time out.
- * If block is input as 1, the timeout value will be treated as undefined,
- * but it must be available for setting in snmp_select_info.  On return, if
- * block is true, the value of timeout will be undefined.
+ * The value of block indicates how the timeout value is interpreted.
+ * If block is true on input, the timeout value will be treated as undefined,
+ * but it must be available for setting in snmp_select_info.  On return, 
+ * block is set to true if the value returned for timeout is undefined; 
+ * when block is set to false, timeout may be used as a parmeter to 'select'.
  *
  * snmp_select_info returns the number of open sockets.  (i.e. The number of
  * sessions open)
@@ -1528,8 +1563,10 @@ snmp_select_info(numfds, fdset, timeout, block)
     int	    *numfds;
     fd_set  *fdset;
     struct timeval *timeout;
-    int	    *block; /* should the select block until input arrives
-		       (i.e. no input) */
+    int	    *block; /* input:  set to 1 if input timeout value is undefined  */
+                    /*         set to 0 if input timeout value is defined    */
+                    /* output: set to 1 if output timeout value is undefined */
+                    /*         set to 0 if output rimeout vlaue id defined   */
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
@@ -1558,8 +1595,10 @@ snmp_select_info(numfds, fdset, timeout, block)
 	    }
 	}
     }
-    if (requests == 0)	/* if none are active, skip arithmetic */
+    if (requests == 0) { /* if none are active, skip arithmetic */
+       *block = 1; /* can block - timeout value is undefined if no requests*/
 	return active;
+    }
 
     /*
      * Now find out how much time until the earliest timeout.  This
@@ -1590,7 +1629,7 @@ snmp_select_info(numfds, fdset, timeout, block)
     }
 
     /* if it was blocking before or our delta time is less, reset timeout */
-    if (*block == 1 || timercmp(&earliest, timeout, <)){
+    if (*block || timercmp(&earliest, timeout, <)){
 	*timeout = earliest;
 	*block = 0;
     }
@@ -1614,6 +1653,8 @@ snmp_timeout __P((void))
     struct snmp_internal_session *isp;
     struct request_list *rp, *orp, *freeme = NULL;
     struct timeval now;
+    snmp_callback callback;
+    void *magic;
 
     gettimeofday(&now,(struct timezone *)0);
 
@@ -1633,9 +1674,10 @@ snmp_timeout __P((void))
 	    if (timercmp(&rp->expire, &now, <)){
 		/* this timer has expired */
 		if (rp->retries >= sp->retries){
+		    callback = (rp->callback ? rp->callback : sp->callback);
+		    magic = (rp->cb_data ? rp->cb_data : sp->callback_magic);
 		    /* No more chances, delete this entry */
-		    sp->callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu,
-				 sp->callback_magic);
+		    callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
 		    if (orp == NULL){
 			isp->requests = rp->next_request;
 			if (isp->requestsEnd == rp)
