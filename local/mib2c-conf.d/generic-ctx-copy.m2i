@@ -9,13 +9,13 @@
 ########################################################################
 ##
     /*
-     * TODO:
+     * TODO: copy $node data
 @if $m2c_node_needlength == 1@
      * copy $node and ${node}_len data
 @else@
      * copy $node data
 @end@
-     *  from '${m2c_ctx_rh} to '${m2c_ctx_lh}'
+     *  from ${m2c_ctx_rh} to ${m2c_ctx_lh}
      */
 @if ($m2c_include_examples != 0) || ("$m2c_data_context" eq "generated")@
 @   if $m2c_node_needlength == 0@
