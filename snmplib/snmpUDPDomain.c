@@ -391,6 +391,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
      * response.  Linux turns the failed ICMP response into an error message
      * and return value, unlike all other OS's.  
      */
+    if (0 == netsnmp_os_prematch("Linux","2.4"))
     {
         int             one = 1;
         setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, (void *) &one,
