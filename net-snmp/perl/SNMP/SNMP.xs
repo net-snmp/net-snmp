@@ -494,7 +494,7 @@ int flag;
           break;
 
         case ASN_BIT_STR:
-            sprint_bitstring(buf, var, NULL, NULL, NULL);
+            snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
 
@@ -1510,7 +1510,7 @@ _bulkwalk_done(walk_context *context)
  	*/
  	DBPRT(1, (DBOUT "Ignoring %s request oid %s\n",
  	      bt_entry->norepeat? "nonrepeater" : "completed",
- 	      sprint_objid(_debugx, bt_entry->req_oid,
+ 	      snprint_objid(_debugx, sizeof(_debugx), bt_entry->req_oid,
  				    bt_entry->req_len)));
 
  	/* Ignore this OID in any further packets. */
@@ -1720,7 +1720,7 @@ _bulkwalk_send_pdu(walk_context *context)
       nvars ++;
 
       DBPRT(1, (DBOUT "   Add %srepeater %s\n", bt_entry->norepeat ? "non" : "",
-	         sprint_objid(_debugx, bt_entry->last_oid, bt_entry->last_len)));
+	         snprint_objid(_debugx, sizeof(_debugx), bt_entry->last_oid, bt_entry->last_len)));
    }
 
    /* Make sure variables are actually being requested in the packet. */
@@ -1925,7 +1925,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 }
       }
 
-      DBPRT(2, (DBOUT "Var %03d request %s\n", pix, sprint_objid(_debugx,
+      DBPRT(2, (DBOUT "Var %03d request %s\n", pix, snprint_objid(_debugx, sizeof(_debugx), 
 					     expect->req_oid, expect->req_len)));
 
       /* Did we receive an error condition for this variable?
@@ -1947,7 +1947,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 {
 	    expect->complete = 1;
 	    DBPRT(2, (DBOUT "Ran out of tree for oid %s\n",
-			   sprint_objid(_debugx, vars->name,vars->name_length)));
+			   snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
 
 	    context->req_remain --;
 
@@ -1974,7 +1974,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 				   context->reqbase[pix].last_len) == 0)
 	 {
 	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
-			sprint_objid(_debugx, vars->name,vars->name_length)));
+			snprint_objid(_debugx, sizeof(_debugx), vars->name,vars->name_length)));
 
 	    continue;
 	 }
@@ -1992,11 +1992,11 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       */
       if (context->oid_saved < context->non_reps) {
 	 DBPRT(2, (DBOUT "   expected var %s (nonrepeater %d/%d)\n",
-		     sprint_objid(_debugx, context->req_oids[pix].req_oid,
+		     snprint_objid(_debugx, sizeof(_debugx), context->req_oids[pix].req_oid,
 					   context->req_oids[pix].req_len),
 		     pix, context->non_reps));
 	 DBPRT(2, (DBOUT "   received var %s\n",
-		     sprint_objid(_debugx, vars->name, vars->name_length)));
+		     snprint_objid(_debugx, sizeof(_debugx), vars->name, vars->name_length)));
 
 	 /* This non-repeater has now been seen, so mark the sub-tree as
 	 ** completed.  Note that this may not be the same oid as requested,
@@ -2008,7 +2008,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       } else {		/* Must be a repeater variable. */
 
 	 DBPRT(2, (DBOUT "   received oid %s\n",
-	       sprint_objid(_debugx, vars->name, vars->name_length)));
+	       snprint_objid(_debugx, sizeof(_debugx), vars->name, vars->name_length)));
 
 	 /* Are we already done with this tree?  If so, just ignore this
 	 ** variable and move on to the next expected variable.
@@ -2198,7 +2198,7 @@ _bulkwalk_finish(walk_context *context, int okay)
 
 	  DBPRT(2, (DBOUT "  %sreq #%d (%s) => %d var%s\n",
 		 bt_entry->complete ? "" : "incomplete ", i,
-		 sprint_objid(_debugx, bt_entry->req_oid, bt_entry->req_len),
+		 snprint_objid(_debugx, sizeof(_debugx), bt_entry->req_oid, bt_entry->req_len),
 		 (int)av_len(bt_entry->vars) + 1,
 		 (int)av_len(bt_entry->vars) > 0 ? "s" : ""));
 
@@ -3687,7 +3687,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 		 goto err;
 	      }
 
-	      DBPRT(1,( "%s\n", sprint_objid(_debugx, oid_arr, oid_arr_len)));
+	      DBPRT(1,( "%s\n", snprint_objid(_debugx, sizeof(_debugx), oid_arr, oid_arr_len)));
 
 	      context->nreq_oids ++;
 	   }
@@ -4372,7 +4372,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
              case SNMP_XLATE_MODE_OID2TAG:
 		oid_arr_len = 0;
 		__concat_oid_str(oid_arr, &oid_arr_len, var);
-		sprint_objid(str_buf, oid_arr, oid_arr_len);
+		snprint_objid(str_buf, sizeof(str_buf), oid_arr, oid_arr_len);
 		if (!use_long) {
                   label = NULL; iid = NULL;
 		  if (((status=__get_label_iid(str_buf,
