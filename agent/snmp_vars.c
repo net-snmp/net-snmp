@@ -647,22 +647,22 @@ struct variable2 eventnotifytab_variables[] = {
 #include "wes/wes.h"
 #include "wes/wes_vars.h"
 struct subtree subtrees[] = {
-  {{WESMIB, 1}, 7, (struct variable *)wes_proc_variables,
+  {{WESMIB, PROCMIBNUM}, 7, (struct variable *)wes_proc_variables,
    sizeof(wes_proc_variables)/sizeof(*wes_proc_variables),
    sizeof(*wes_proc_variables)},
-  {{WESMIB, 3}, 7, (struct variable *)wes_extensible_variables,
+  {{WESMIB, SHELLMIBNUM}, 7, (struct variable *)wes_extensible_variables,
    sizeof(wes_extensible_variables)/sizeof(*wes_extensible_variables),
    sizeof(*wes_extensible_variables)},
 #ifdef hpux
-  {{WESMIB, 4}, 7, (struct variable *)wes_mem_variables,
+  {{WESMIB, MEMMIBNUM}, 7, (struct variable *)wes_mem_variables,
    sizeof(wes_mem_variables)/sizeof(*wes_mem_variables),
    sizeof(*wes_mem_variables)},
 #endif
-  {{WESMIB, 5}, 7, (struct variable *)wes_lockd_variables,
+  {{WESMIB, LOCKDMIBNUM}, 7, (struct variable *)wes_lockd_variables,
    sizeof(wes_lockd_variables)/sizeof(*wes_lockd_variables),
    sizeof(*wes_lockd_variables)},
 #ifdef hpux
-  {{WESMIB, 6}, 7, (struct variable *)wes_disk_variables,
+  {{WESMIB, DISKMIBNUM}, 7, (struct variable *)wes_disk_variables,
    sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
    sizeof(*wes_disk_variables)},
 #endif
