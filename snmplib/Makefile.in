@@ -2,6 +2,7 @@
 # the Net-SNMP's COPYING file for more details and other copyrights
 # that may apply:
 #
+# Portions of this file are copyrighted by:
 # Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms specified in the COPYING file
 # distributed with the Net-SNMP package.
@@ -117,7 +118,7 @@ INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 #
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_auth.c asn1.c md5.c snmp_parse_args.c		\
-	system.c vacm.c int64.c read_config.c 			\
+	system.c vacm.c int64.c read_config.c pkcs.c		\
 	snmp_debug.c tools.c  snmp_logging.c			\
 	snmpv3.c lcd_time.c keytools.c		                \
 	scapi.c callback.c default_store.c snmp_alarm.c		\

@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  * scapi.c
  *
@@ -76,6 +87,10 @@
 
 #endif /* HAVE_OPENSSL */
 
+#ifdef USE_PKCS
+#include <security/cryptoki.h>
+#endif
+
 #ifdef QUITFUN
 #undef QUITFUN
 #define QUITFUN(e, l)					\
@@ -130,9 +145,12 @@ sc_init(void)
     gettimeofday(&tv, (struct timezone *) 0);
 
     srandom(tv.tv_sec ^ tv.tv_usec);
+#elif USE_PKCS
+    DEBUGTRACE;
+    rval = pkcs_init();
 #else
     rval = SNMPERR_SC_NOT_CONFIGURED;
-#endif
+#endif                           /* USE_INTERNAL_MD5 */
     /*
      * XXX ogud: The only reason to do anything here with openssl is to 
      * * XXX ogud: seed random number generator 
@@ -153,7 +171,7 @@ sc_init(void)
  */
 int
 sc_random(u_char * buf, size_t * buflen)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
 #ifdef USE_INTERNAL_MD5
@@ -166,6 +184,8 @@ sc_random(u_char * buf, size_t * buflen)
 
 #ifdef USE_OPENSSL
     RAND_bytes(buf, *buflen);   /* will never fail */
+#elif USE_PKCS			/* USE_PKCS */
+    pkcs_random(buf, *buflen);
 #else                           /* USE_INTERNAL_MD5 */
     /*
      * fill the buffer with random integers.  Note that random()
@@ -223,14 +243,14 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
                        u_char * key, u_int keylen,
                        u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
-#if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
     int             properlength;
 
     u_char          buf[SNMP_MAXBUF_SMALL];
-#if  defined(USE_OPENSSL)
-    int             buf_len = sizeof(buf);
+#if  defined(USE_OPENSSL) || defined(USE_PKCS)
+    size_t             buf_len = sizeof(buf);
 #endif
 
     DEBUGTRACE;
@@ -279,7 +299,31 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     if (*maclen > buf_len)
         *maclen = buf_len;
     memcpy(MAC, buf, *maclen);
-#else
+
+#elif USE_PKCS                    /* USE_PKCS */
+
+    if (ISTRANSFORM(authtype, HMACMD5Auth)) {
+	if (pkcs_sign(CKM_MD5_HMAC,key, keylen, message,
+			msglen, buf, &buf_len) != SNMPERR_SUCCESS) {
+            QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+        }
+    } else if (ISTRANSFORM(authtype, HMACSHA1Auth)) {
+	if (pkcs_sign(CKM_SHA_1_HMAC,key, keylen, message,
+			msglen, buf, &buf_len) != SNMPERR_SUCCESS) {
+            QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+        }
+    } else {
+        QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+    }
+
+    if (buf_len != properlength) {
+        QUITFUN(rval, sc_generate_keyed_hash_quit);
+    }
+    if (*maclen > buf_len)
+        *maclen = buf_len;
+    memcpy(MAC, buf, *maclen);
+
+#else                            /* USE_INTERNAL_MD5 */
     if ((int) *maclen > properlength)
         *maclen = properlength;
     if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
@@ -297,7 +341,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         SNMP_ZERO(s, len);
         SNMP_FREE(s);
     }
-#endif
+#endif                          /* SNMP_TESTING_CODE */
 
   sc_generate_keyed_hash_quit:
     SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
@@ -328,10 +372,13 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 int
 sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
 {
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_PKCS)
     int             rval = SNMPERR_SUCCESS;
+#endif
+
+#ifdef USE_OPENSSL
     const EVP_MD         *hashfn;
     EVP_MD_CTX     ctx, *cptr;
 #endif
@@ -388,8 +435,20 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         EVP_DigestFinal_ex(cptr, MAC, MAC_len);
         EVP_MD_CTX_cleanup(cptr);
     }
-#endif
+#endif                          /* OLD_DES */
     return (rval);
+#elif USE_PKCS                  /* USE_PKCS */
+
+    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+	rval = pkcs_digest(CKM_MD5, buf, buf_len, MAC, MAC_len);
+    } else if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+	rval = pkcs_digest(CKM_SHA_1, buf, buf_len, MAC, MAC_len);
+    } else {
+        return (SNMPERR_GENERR);
+    }
+
+     return (rval);
+
 #else                           /* USE_INTERNAL_MD5 */
 
     if (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
@@ -432,7 +491,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
                     u_char * key, u_int keylen,
                     u_char * message, u_int msglen,
                     u_char * MAC, u_int maclen)
-#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+#if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          buf_len = SNMP_MAXBUF_SMALL;
@@ -690,7 +749,55 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     return rval;
 
 }                               /* end sc_encrypt() */
+#elif defined(USE_PKCS)
+{
+    int             rval = SNMPERR_SUCCESS;
+    u_int           properlength, properlength_iv;
+    u_char	    pkcs_des_key[8];
 
+    DEBUGTRACE;
+
+    /*
+     * Sanity check.
+     */
+#if	!defined(SCAPI_AUTHPRIV)
+    snmp_log(LOG_ERR, "Encryption support not enabled.\n");
+    return SNMPERR_SC_NOT_CONFIGURED;
+#endif
+
+    if (!privtype || !key || !iv || !plaintext || !ciphertext || !ctlen
+        || (keylen <= 0) || (ivlen <= 0) || (ptlen <= 0) || (*ctlen <= 0)
+        || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+        QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+    } else if (ptlen > *ctlen) {
+        QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+    }
+
+    /*
+     * Determine privacy transform.
+     */
+    if (ISTRANSFORM(privtype, DESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+    } else {
+        QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+    }
+
+    if ((keylen < properlength) || (ivlen < properlength_iv)) {
+	QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+    }
+
+    if (ISTRANSFORM(privtype, DESPriv)) {
+	memset(pkcs_des_key, 0, sizeof(pkcs_des_key));
+	memcpy(pkcs_des_key, key, sizeof(pkcs_des_key));
+	rval = pkcs_encrpyt(CKM_DES_CBC, pkcs_des_key,
+		sizeof(pkcs_des_key), iv, ivlen, plaintext, ptlen,
+		ciphertext, ctlen);
+    }
+
+  sc_encrypt_quit:
+    return rval;
+}
 #else
 {
 #	if USE_INTERNAL_MD5
@@ -854,8 +961,48 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     memset(key_struct, 0, sizeof(key_struct));
     memset(my_iv, 0, sizeof(my_iv));
     return rval;
-}
-#else                           /* USE OPEN_SSL */
+}				/* USE OPEN_SSL */
+#elif USE_PKCS                  /* USE PKCS */
+{
+    int             rval = SNMPERR_SUCCESS;
+    u_int           properlength, properlength_iv;
+    u_char	    pkcs_des_key[8];
+
+    DEBUGTRACE;
+
+    if (!privtype || !key || !iv || !plaintext || !ciphertext || !ptlen
+        || (ctlen <= 0) || (*ptlen <= 0) || (*ptlen < ctlen)
+        || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+        QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+    }
+
+    /*
+     * Determine privacy transform.
+     */
+    if (ISTRANSFORM(privtype, DESPriv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+    } else {
+        QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+    }
+
+    if ((keylen < properlength) || (ivlen < properlength_iv)) {
+        QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+    }
+
+    if (ISTRANSFORM(privtype, DESPriv)) {
+	memset(pkcs_des_key, 0, sizeof(pkcs_des_key));
+	memcpy(pkcs_des_key, key, sizeof(pkcs_des_key));
+	rval = pkcs_decrpyt(CKM_DES_CBC, pkcs_des_key, 
+		sizeof(pkcs_des_key), iv, ivlen, ciphertext,
+		ctlen, plaintext, ptlen);
+        *ptlen = ctlen;
+    }
+
+  sc_decrypt_quit:
+    return rval;
+}				/* USE PKCS */
+#else
 {
 #if	!defined(SCAPI_AUTHPRIV)
     snmp_log(LOG_ERR, "Encryption support not enabled.\n");
