@@ -12,6 +12,7 @@
 #else
 #include <strings.h>
 #endif
+#include <ctype.h>
 #include <sys/types.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>

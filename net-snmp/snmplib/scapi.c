@@ -526,7 +526,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     u_int           properlength, properlength_iv;
     u_char          pad_block[128];      /* bigger than anything I need */
     u_char          my_iv[128];  /* ditto */
-    int             pad, plast, pad_size;
+    int             pad, plast, pad_size = 0;
 #ifdef OLD_DES
     DES_key_schedule key_sch;
 #else

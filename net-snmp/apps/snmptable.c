@@ -92,7 +92,7 @@ static int      max_width = 0;
 static int      column_width = 0;
 static int      brief = 0;
 static int      show_index = 0;
-static char    *left_justify_flag = "";
+static const char    *left_justify_flag = "";
 static char    *field_separator = NULL;
 static char    *table_name;
 static oid      name[MAX_OID_LEN];
@@ -254,7 +254,7 @@ main(int argc, char *argv[])
 {
     netsnmp_session session, *ss;
     char           *tblname;
-    int            total_entries;
+    int            total_entries = 0;
 
     setvbuf(stdout, NULL, _IOLBF, 1024);
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 

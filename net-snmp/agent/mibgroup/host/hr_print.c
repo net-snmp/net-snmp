@@ -202,12 +202,13 @@ void
 Init_HR_Print(void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
-    int             i, fd;
+    int             i;
 #if HAVE_PRINTCAP
     FILE           *p;
 #elif HAVE_CGETNEXT
     const char     *caps[] = { "/etc/printcap", NULL };
 #elif HAVE_LPSTAT
+    int	            fd;
     FILE           *p;
 #endif
 
@@ -268,13 +269,13 @@ Init_HR_Print(void)
 #endif
         }
 finish:
-#if HAVE_LPSTAT
+#if HAVE_PRINTCAP
         fclose(p);
-        close(fd);
 #elif HAVE_CGETNEXT
         cgetclose();
-#elif HAVE_PRINTCAP
+#elif HAVE_LPSTAT
         fclose(p);
+        close(fd);
 #endif
     }
 #endif                          /* HAVE_anything */
