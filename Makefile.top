@@ -54,9 +54,10 @@ CC	        = @CC@
 # version number is prefixed by a 0 for a better shared library version number
 #
 # ok, use libtool proper versioning:
-LIBCURRENT  = 5
-LIBREVISION = 10
-LIBAGE      = 0
+LIBCURRENT  = 6
+LIBREVISION = 0
+LIBAGE      = 1
+
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  
 # Increment AGE if new stuff is available.
