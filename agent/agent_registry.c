@@ -942,38 +942,43 @@ unregister_mibs_by_session (struct snmp_session *ss)
   struct subtree *child, *prev, *next_child;
   struct register_parameters rp;
   oid namecopy[UCD_REGISTRY_OID_MAX_LEN] = { 0 };
+  subtree_context_cache *contextptr;
 
   DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%08p)\n", ss));
 
-  for( list = (find_first_subtree(ss->contextName)); list != NULL;
-       list = list2) {
-    list2 = list->next;
+  for(contextptr = get_top_context_cache(); contextptr;
+      contextptr = contextptr->next) {
+      for( list = contextptr->first_subtree; list != NULL;
+           list = list2) {
+          list2 = list->next;
 
-    for (child=list, prev=NULL;  child != NULL; child=next_child) {
-      next_child = child->children;
+          for (child=list, prev=NULL;  child != NULL; child=next_child) {
+              next_child = child->children;
 
-      if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && child->session == ss ) ||
-          (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
-                                      child->session->subsession == ss )) {
+              if (( (ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                    child->session == ss ) ||
+                  (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
+                   child->session->subsession == ss )) {
 
-	memcpy(namecopy, child->name, child->namelen*sizeof(oid));
-	rp.name         = namecopy;
-	rp.namelen      = child->namelen;
-	rp.priority     = child->priority;
-	rp.range_subid  = child->range_subid;
-	rp.range_ubound = child->range_ubound;
-	rp.timeout      = child->timeout;
-	rp.flags        = child->flags;
+                  memcpy(namecopy, child->name, child->namelen*sizeof(oid));
+                  rp.name         = namecopy;
+                  rp.namelen      = child->namelen;
+                  rp.priority     = child->priority;
+                  rp.range_subid  = child->range_subid;
+                  rp.range_ubound = child->range_ubound;
+                  rp.timeout      = child->timeout;
+                  rp.flags        = child->flags;
 
-	unload_subtree(child, prev);
-	free_subtree(child);
+                  unload_subtree(child, prev);
+                  free_subtree(child);
 
-	snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
-			    SNMPD_CALLBACK_UNREGISTER_OID, &rp);
-      } else {
-          prev = child;
+                  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                                      SNMPD_CALLBACK_UNREGISTER_OID, &rp);
+              } else {
+                  prev = child;
+              }
+          }
       }
-    }
   }
 }
 
