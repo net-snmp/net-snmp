@@ -5,6 +5,7 @@
 #define SHPROC 1
 #define EXECPROC 2
 #define PASSTHRU 3
+#define PASSTHRU_PERSIST 4
 #define MIBMAX 30
 
 struct extensible
