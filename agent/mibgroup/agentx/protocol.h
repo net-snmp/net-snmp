@@ -57,8 +57,8 @@ extern "C" {
 /* added in 1999 revision */
 #define AGENTX_ERR_NOERROR		SNMP_ERR_NOERROR
 #define AGENTX_ERR_PARSE_FAILED         (266)
-#define AGENTX_ERR_REQUEST_DENIED       (266)
-#define AGENTX_ERR_PROCESSING_ERROR     (266)
+#define AGENTX_ERR_REQUEST_DENIED       (267)
+#define AGENTX_ERR_PROCESSING_ERROR     (268)
 
 /* Message processing models */
 #define AGENTX_MP_MODEL_AGENTXv1        (257)

@@ -219,8 +219,8 @@ get_agentx_request(struct agent_snmp_session *asp,
 		 *	pdu,
 		 */
     pdu->version     = AGENTX_VERSION_1;
-    pdu->reqid       = transID;		/* ??? */
-    pdu->msgid       = transID;		/* ??? */
+    pdu->reqid       = snmp_get_next_transid();
+    pdu->transid     = asp->pdu->transid;
     pdu->sessid      = ax_session->sessid;
     switch (asp->pdu->command ) {
 	case SNMP_MSG_GET:
@@ -271,7 +271,7 @@ get_agentx_request(struct agent_snmp_session *asp,
 
 		/*	and request		*/
     req->request_id  = pdu->reqid;
-    req->message_id  = pdu->msgid;
+    req->message_id  = pdu->transid;
     req->callback    = handle_agentx_response;
     req->cb_data     = vlist;
     req->pdu         = pdu;
@@ -296,18 +296,16 @@ agentx_add_request( struct agent_snmp_session *asp,
 		    struct variable_list *vbp)
 {
     struct snmp_pdu     *pdu = asp->pdu;
-    int                  transID;
     struct snmp_session *ax_session;
     struct request_list *request;
     struct ax_variable_list *ax_vlist;
     struct subtree      *sub;
 
 				/* Or msgid ? */
-    transID    = get_agentx_transID( pdu->reqid, &(pdu->address));
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
 	ax_session = ax_session->subsession;
-    request    = get_agentx_request( asp, ax_session, transID );
+    request    = get_agentx_request( asp, ax_session, pdu->transid );
     ax_vlist   = (struct ax_variable_list *)request->cb_data;
 
     ax_vlist->variables[ ax_vlist->num_vars ] = vbp;
