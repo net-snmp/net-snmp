@@ -5250,6 +5250,12 @@ snmp_oid_compare(const oid *in_name1,
     register const oid * name1 = in_name1;
     register const oid * name2 = in_name2;
 
+    DEBUGMSGTL(("compare","Comparing: "));
+    DEBUGMSGOID(("compare", name1, len1));
+    DEBUGMSG(("compare"," and "));
+    DEBUGMSGOID(("compare", name2, len2));
+    DEBUGMSG(("compare","\n"));
+    
     /* len = minimum of len1 and len2 */
     if (len1 < len2)
 	len = len1;
