@@ -446,11 +446,11 @@ char *snmp_mib_toggle_options(char *options) {
         case 'c':
           ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
           break;
-           
+
         case 'e':
           ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
           break;
-           
+
         case 'w':
           ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 1);
           break;
@@ -458,7 +458,7 @@ char *snmp_mib_toggle_options(char *options) {
         case 'W':
           ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
           break;
-          
+
         case 'd':
           ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS);
           break;
@@ -943,7 +943,7 @@ compute_match(const char *search_base, const char *key) {
     const char *position;
     char *newkey = strdup(key);
 
-    
+
     entry = strtok( newkey, "*" );
     position = search_base;
     while ( entry ) {
@@ -956,7 +956,7 @@ compute_match(const char *search_base, const char *key) {
 
         if (first == NULL)
             first = result;
-        
+
         position = result + strlen(entry);
         entry = strtok( NULL, "*" );
     }
@@ -1112,7 +1112,7 @@ merge_anon_children(struct tree *tp1,
             previous->next_peer = tp2->child_list;
             tp2->child_list = previous;
         }
-next:
+      next:;
     }
 }
 
@@ -1991,7 +1991,7 @@ parse_objecttype(FILE *fp,
             return NULL;
           }
           break;
-          
+
         case DEFVAL:
         case AUGMENTS:
         case NUM_ENTRIES:
@@ -2059,7 +2059,7 @@ parse_objectgroup(FILE *fp,
               return NULL;
           }
 	  break;
-	  
+
         default:
           /* NOTHING */
           break;
@@ -2493,7 +2493,7 @@ read_module_replacements(const char *name)
 	    return;
 	}
     }
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS)) 
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS))
 	print_error("Cannot find module", name, CONTINUE);
 
 }
@@ -2556,7 +2556,7 @@ read_module_internal (const char *name)
 	if ( !label_compare(mp->name, name)) {
     	    const char *oldFile = File;
     	    int oldLine = Line;
-	
+
 	    if ( mp->no_imports != -1 ) {
 		DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n", name));
 		return MODULE_ALREADY_LOADED;
@@ -2699,7 +2699,7 @@ unload_module_by_ID( int modID, struct tree *tree_top )
 		 */
 	if ( tp->child_list )
 	    unload_module_by_ID( modID, tp->child_list );
-		
+
 
 	if ( tp->number_modules == 0 ) {
 			/* This node isn't needed any more (except perhaps
@@ -2745,7 +2745,7 @@ new_module (const char *name,
 	    const char *file)
 {
     struct module *mp;
-    
+
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
 	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
@@ -3332,7 +3332,7 @@ parseQuoteString(FILE *fp,
  * getIndexes(FILE *fp):
  *   This routine parses a string like  { blah blah blah } and returns a
  *   list of the strings enclosed within it.
- *    
+ *
  */
 static struct index_list *
 getIndexes(FILE *fp, struct index_list **retp) {
@@ -3342,7 +3342,7 @@ getIndexes(FILE *fp, struct index_list **retp) {
 
   struct index_list *mylist = NULL;
   struct index_list **mypp = &mylist;
-  
+
   free_indexes(retp);
 
   type = get_token(fp, token, MAXTOKEN);
@@ -3377,7 +3377,7 @@ free_indexes(struct index_list **spp) {
   struct index_list *pp, *npp;
 
   pp = *spp; *spp = NULL;
-  
+
   while(pp) {
     npp = pp->next;
     if (pp->ilabel) free(pp->ilabel);
@@ -3391,9 +3391,9 @@ static void
 free_ranges(struct range_list **spp) {
   if (spp && *spp) {
   struct range_list *pp, *npp;
-  
+
   pp = *spp; *spp = NULL;
-  
+
   while(pp) {
     npp = pp->next;
     free(pp);
@@ -3409,7 +3409,7 @@ free_enums(struct enum_list **spp)
   struct enum_list *pp, *npp;
 
   pp = *spp; *spp = NULL;
-  
+
   while(pp)
   {
     npp = pp->next;
@@ -3508,7 +3508,7 @@ struct module *
 find_module(int mid)
 {
   struct module *mp;
-  
+
   for(mp=module_head; mp!=NULL; mp = mp->next) {
     if (mp->modid == mid)
       break;
