@@ -73,7 +73,10 @@ int sh_count_procs(procname)
   struct extensible ex;
   
   if (fd = get_ps_output(&ex)) {
-    file = fdopen(fd,"r");
+    if ((file = fdopen(fd,"r")) == NULL) {
+      setPerrorstatus("fdopen");
+      return (-1);
+    }
     while(fgets(line,STRMAX,file) != NULL)
       {
         if ((cptr = find_field(line,LASTFIELD)) == NULL)
@@ -83,7 +86,7 @@ int sh_count_procs(procname)
       }
 #ifdef ERRORMIBNUM
     if (ftell(file) < 2) {
-      seterrorstatus("process list unreasonable short (mem?)");
+      seterrorstatus("process list unreasonable short (mem?)",2);
       ret = -1;
     }
 #endif
@@ -92,7 +95,7 @@ int sh_count_procs(procname)
 #ifndef EXCACHETIME
     printf("waitpid:  %d\n",ex.pid);
     if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
-      perror("waitpid():");
+      setPerrorstatus("waitpid");
     }
     ex.pid = 0;
 #endif
@@ -144,7 +147,7 @@ int exec_command(ex)
     close(fd);
 #ifndef EXCACHETIME
     if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
-      perror("waitpid():");
+      setPerrorstatus("waitpid");
     }
     ex->pid = 0;
 #endif
@@ -228,10 +231,10 @@ int get_exec_output(ex)
       {
         close(fd[1]);
         if (ex->pid < 0) {
+          close(fd[0]);
           setPerrorstatus("fork");
           return (NULL);
         }
-/*      ret = fdopen(fd[0],"r"); */
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
@@ -324,6 +327,30 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
     update_config();
+  } 
+  return SNMP_ERR_NOERROR;
+}
+
+restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  
+  int tmp=0, tmplen=1000;
+
+  if (var_val_type != INTEGER) {
+    printf("Wrong type != int\n");
+    return SNMP_ERR_WRONGTYPE;
+  }
+  asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+  if (tmp == 1 && action == COMMIT) {
+    execl("/etc/ece-snmpd","/etc/ece-snmpd",NULL);
+    setPerrorstatus("execv");
   } 
   return SNMP_ERR_NOERROR;
 }

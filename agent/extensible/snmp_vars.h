@@ -87,7 +87,8 @@ struct variable2 extensible_version_variables[] = {
   {VERCDATE, STRING, RONLY, var_extensible_version, 1, {VERCDATE}},
   {VERIDENT, STRING, RONLY, var_extensible_version, 1, {VERIDENT}},
   {VERCLEARCACHE, INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
-  {VERUPDATECONFIG, INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}}
+  {VERUPDATECONFIG, INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
+  {VERRESTARTAGENT, INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}}
 };
 #endif
 
