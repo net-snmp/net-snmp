@@ -375,5 +375,8 @@ Requirements
 9.  You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
     package
 
-10.  Test the package
+10. Test the package
 
+11. Compare the directory contents of the compiled folder with the installed
+    folder to ensure there are no missing MIB files etc.  Modify net-snmp.nsi
+    and rebuild if required.
