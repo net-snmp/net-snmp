@@ -1522,7 +1522,7 @@ snmpv3_build(struct snmp_session	*session,
 	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
 	        return -1;
 	    }
-	    if (pdu->non_repeaters < 0){
+	    if (pdu->non_repeaters < 0) {
 	        session->s_snmp_errno = SNMPERR_BAD_REPEATERS;
 	        return -1;
 	    }
@@ -3878,6 +3878,11 @@ snmp_sess_timeout(void *sessp)
     }
 }
 
+/* lexicographical compare two object identifiers.
+ * Returns -1 if name1 < name2,
+ *          0 if name1 = name2,
+ *          1 if name1 > name2
+ */
 int
 snmp_oid_compare(const oid *name1, 
 		 size_t len1,
@@ -3890,19 +3895,19 @@ snmp_oid_compare(const oid *name1,
 	len = len1;
     else
 	len = len2;
-    /* find first non-matching byte */
+    /* find first non-matching OID */
     while(len-- > 0){
 	if (*name1 < *name2)
 	    return -1;
 	if (*name2++ < *name1++)
 	    return 1;
     }
-    /* bytes match up to length of shorter string */
+    /* both OIDs equal up to length of shorter OID */
     if (len1 < len2)
-	return -1;  /* name1 shorter, so it is "less" */
+	return -1;
     if (len2 < len1)
 	return 1;
-    return 0;	/* both strings are equal */
+    return 0;
 }
 
 /*

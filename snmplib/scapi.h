@@ -68,7 +68,7 @@ int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
   
 
 /*
- * All functions devolve to the following block if we can't do cryptograhpy
+ * All functions devolve to the following block if we can't do cryptography
  */
 #define	_SCAPI_NOT_CONFIGURED			\
 {						\
