@@ -251,14 +251,14 @@ _set_key( container_table_data * tad, netsnmp_request_info *request,
         *key = NULL;
 }
 
-NETSNMP_STATIC_INLINE void *
+static void *
 _find_next_row(netsnmp_container *c,
                netsnmp_table_request_info *tblreq,
                void * key)
 {
     void *row = NULL;
 
-    if (!c || !tblreq || !tblreq->reg_info || !key) {
+    if (!c || !tblreq || !tblreq->reg_info ) {
         snmp_log(LOG_ERR,"_find_next_row param error\n");
         return NULL;
     }
@@ -278,7 +278,15 @@ _find_next_row(netsnmp_container *c,
     if(tblreq->number_indexes == 0) {
         row = CONTAINER_FIRST(c);
     } else {
-        row = CONTAINER_NEXT(c, key);
+
+        if(NULL == key) {
+            netsnmp_index index;
+            index.oids = tblreq->index_oid;
+            index.len = tblreq->index_oid_len;
+            row = CONTAINER_NEXT(c, &index);
+        }
+        else
+            row = CONTAINER_NEXT(c, key);
 
         /*
          * we don't have a row, but we might be at the end of a
@@ -289,9 +297,26 @@ _find_next_row(netsnmp_container *c,
             row = CONTAINER_FIRST(c);
         
     }
-
+    
     return row;
 }
+
+/**
+ * deprecated, backwards compatability only
+ *
+ * expected impact to remove: none
+ *  - used between helpers, shouldn't have been used by end users
+ *
+ * replacement: none
+ *  - never should have been a public method in the first place
+ */
+netsnmp_index *
+netsnmp_table_index_find_next_row(netsnmp_container *c,
+                                  netsnmp_table_request_info *tblreq)
+{
+    return _find_next_row(c, tblreq, NULL );
+}
+
 
 NETSNMP_STATIC_INLINE void
 _data_lookup(netsnmp_handler_registration *reginfo,
