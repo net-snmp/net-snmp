@@ -156,22 +156,33 @@ esac
 AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
-dnl Set SNMPLIBPATH
+dnl Set SNMPLIBPATH & SNMPSHAREPATH
 
 if test "x$prefix" = "xNONE"; then
   prefix=/usr/local
 fi
+if test "x$exec_prefix" = "xNONE"; then
+  exec_prefix=$prefix
+fi
 
 SNMPLIBPATH=""
-tmpset="$datadir/snmp"
+tmpset="$libdir/snmp"
 while test "x$tmpset" != "x$SNMPLIBPATH"; do
   SNMPLIBPATH="$tmpset"
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
 
+SNMPSHAREPATH=""
+tmpset="$datadir/snmp"
+while test "x$tmpset" != "x$SNMPSHAREPATH"; do
+  SNMPSHAREPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
+
 if test "x$DEFAULT_MIBDIRS" = "x"; then
-  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPLIBPATH/mibs")
+  AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPSHAREPATH/mibs")
 fi
 
 dnl
@@ -1054,4 +1065,5 @@ AC_OUTPUT([
 
 dnl Local Variables:
 dnl mode: sh
+dnl comment-start: "dnl"
 dnl End:

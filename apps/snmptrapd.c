@@ -556,15 +556,15 @@ main(argc, argv)
     srclen = dstlen = contextlen = MAX_NAME_LEN;
     ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
 
-    sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+    sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
     if (read_party_database(ctmp) != 0){
 	fprintf(stderr, "Warning: Couldn't read v2party database from %s\n",ctmp);
     }
-    sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+    sprintf(ctmp,"%s/context.conf",SNMPSHAREPATH);
     if (read_context_database(ctmp) != 0){
 	fprintf(stderr, "Warning: Couldn't read v2party's context database from %s\n",ctmp);
     }
-    sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+    sprintf(ctmp,"%s/acl.conf",SNMPSHAREPATH);
     if (read_acl_database(ctmp) != 0){
 	fprintf(stderr,
 		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);

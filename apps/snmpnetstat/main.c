@@ -242,17 +242,17 @@ main(argc, argv)
                    && community == NULL){
 	    community = argv[arg]; 
 	} else if (version == SNMP_VERSION_2p && srclen == 0 && !trivialSNMPv2){
-	    sprintf(ctmp, "%s/party.conf", SNMPLIBPATH);
+	    sprintf(ctmp, "%s/party.conf", SNMPSHAREPATH);
 	    if (read_party_database(ctmp) > 0){
 		snmp_perror(argv[0]);
 		exit(1);
 	    }
-	    sprintf(ctmp, "%s/context.conf", SNMPLIBPATH);
+	    sprintf(ctmp, "%s/context.conf", SNMPSHAREPATH);
 	    if (read_context_database(ctmp) > 0){
 		snmp_perror(argv[0]);
 		exit(1);
 	    }
-	    sprintf(ctmp, "%s/acl.conf", SNMPLIBPATH);
+	    sprintf(ctmp, "%s/acl.conf", SNMPSHAREPATH);
 	    if (read_acl_database(ctmp) > 0){
 		snmp_perror(argv[0]);
 		exit(1);
