@@ -1193,8 +1193,8 @@ changequote([,]), [#include <sys/types.h>
 #endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
 
 AC_MSG_RESULT($ac_cv_type_in_addr_t)
-if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(HAVE_IN_ADDR_T);
+if test $ac_cv_type_in_addr_t = yes; then
+  AC_DEFINE(HAVE_IN_ADDR_T)
 fi
 
 dnl Check ps args
