@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-package ucdsnmp::manager;
+package netsnmp::manager;
 
 use strict ();
 use Apache::Constants qw(:common);
