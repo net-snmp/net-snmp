@@ -72,6 +72,10 @@ oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
 u_char smux_type;
 
+extern int sdlist[];
+extern int sdlen;
+extern int (*sd_handlers[])__P((int));
+
 static int smux_mibs[SMUXMIBS];
 static int nfds;
 static fd_set sfds, rfds, ifds;
@@ -153,13 +157,16 @@ init_smux __P((void))
 		return SMUXNOTOK;
 	}
 
-	listen(smux_sd, SOMAXCONN);
+	if(listen(smux_sd, SOMAXCONN) == -1)) {
+		perror("[init_smux] listen failed");
+		close(smux_sd);
+		return SMUXNOTOK;
+	}
 
 	ioctl(smux_sd, FIOCLEX, NULL);
 
-	if (smux_sd >= nfds)
-		nfds = smux_sd + 1;
-	FD_SET(smux_sd, &ifds);
+	sdlist[sdlen] = smux_sd;
+	sd_handlers[sdlen++] = smux_accept;
 
 	printf ("[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
 		 htons(smux_port));
@@ -169,77 +176,58 @@ init_smux __P((void))
 
 
 void
-smux_select(tvp)
-	struct timeval *tvp;
+smux_accept(sd)
+int sd;
 {
 	int fd;
 	struct sockaddr_in in_socket;
 	int count;
 	int len;
 
-	/* Copy the next to current */
-	FD_COPY(&ifds, &rfds);
+	if (fd < 0) {
+		perror("[smux_accept] accept failed");
+		return;
+	}
+	else {
+		ioctl(fd, FIOCLEX, NULL);
 
-	/* 
-	 * Select on the current.
-	 * If there is a connection waiting on smux_fd, accept the connection
-	 * and record the fd in next. This will be looked at in the next 
-	 * round. For the the other current fds showing activity, run thru
-	 * the packets and see what needs to be done with them.
-	 */
-
-	count = select(nfds, &rfds, 0, 0, tvp);
-	DEBUGMSGTL(("smux/smux", "count is %d\n", count));
-	if (count > 0) {
-		if (smux_sd > 0 && FD_ISSET(smux_sd, &rfds)) {
-			/* connection request from gated */
-                        DEBUGMSGTL(("smux/smux", "Calling Accept\n"));
-			fd = accept(smux_sd, (struct sockaddr *)&in_socket,
-				    &len);
-			if (fd < 0) {
-				perror("[smux_select] accept failed");
-				/* XXX what other action should be taken here */
-			}
-			else {
-				ioctl(fd, FIOCLEX, NULL);
-				if (fd >= nfds)
-					nfds = fd + 1;
-	
-				FD_SET(fd, &ifds);
-				FD_SET(fd, &sfds);
-	
-				/* 
-				 * XXX
-				 * The FreeBSD (4.4BSD?) RCVTIMEO is reset
-				 * everytime some data is received. It is 
-				 * therefore * really an inacativity timer. 
-				 * Implications?
-				 */
-				setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, 
-					   (char *)&smux_rcv_timeout, 
-					   sizeof(smux_rcv_timeout));
-	
-				gated_sd = fd;
-				
-				printf ("accepted fd %d, nfds, %d\n", fd, nfds);
-			}
-		}
-		
 		/* 
-		 * The for loop would be useful if multiple smux conections 
-		 * were * expected. For now, we handle gated only.
+		 * XXX
+		 * The FreeBSD (4.4BSD?) RCVTIMEO is reset
+		 * everytime some data is received. It is 
+		 * therefore * really an inacativity timer. 
+		 * Implications?
 		 */
-		/*
-		for (i=0; i<nfds; i++) {
-			if (FD_ISSET(i, &rfds) && FD_ISSET(i, &sfds)) {
-				smux_process(i);
-			}
-		}
-		*/
-		if (FD_ISSET(gated_sd, &rfds) && FD_ISSET(gated_sd, &sfds)) {
-			smux_process(gated_sd);
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, 
+			   (char *)&smux_rcv_timeout, 
+			   sizeof(smux_rcv_timeout));
+
+		gated_sd = fd;
+
+		/* close the listen socket */
+		close(sdlist[0]);
+
+		sdlist[0] = gated_sd;
+		sd_handlers[0] = smux_process;
+		
+		printf ("accepted fd %d, nfds, %d\n", fd, nfds);
+	}
+		
+	/* 
+	 * The for loop would be useful if multiple smux conections 
+	 * were * expected. For now, we handle gated only.
+	 */
+	/*
+	for (i=0; i<nfds; i++) {
+		if (FD_ISSET(i, &rfds) && FD_ISSET(i, &sfds)) {
+			smux_process(i);
 		}
 	}
+	*/
+	if (FD_ISSET(gated_sd, &rfds) && FD_ISSET(gated_sd, &sfds)) {
+		smux_process(gated_sd);
+	}
+  }
 }
 
 
