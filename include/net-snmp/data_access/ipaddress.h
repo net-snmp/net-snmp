@@ -6,16 +6,9 @@
 #ifndef NETSNMP_ACCESS_IPADDRESS_H
 #define NETSNMP_ACCESS_IPADDRESS_H
 
-#ifndef NETSNMP_CPP_WRAP_START
 # ifdef __cplusplus
-#  define NETSNMP_CPP_WRAP_START extern          "C" {
-#  define NETSNMP_CPP_WRAP_END                   };
-# else
-#  define NETSNMP_CPP_WRAP_START
-#  define NETSNMP_CPP_WRAP_END
-# endif
+extern          "C" {
 #endif
-NETSNMP_CPP_WRAP_START  /* no semi-colon */
 
 /**---------------------------------------------------------------------*/
 /*
@@ -98,6 +91,8 @@ void netsnmp_access_ipaddress_entry_free(netsnmp_ipaddress_entry * entry);
 
 /**---------------------------------------------------------------------*/
 
-NETSNMP_CPP_WRAP_END
+# ifdef __cplusplus
+};
+#endif
 
 #endif /* NETSNMP_ACCESS_IPADDRESS_H */
