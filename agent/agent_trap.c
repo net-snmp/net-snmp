@@ -133,8 +133,6 @@ static void free_trap_session (struct trap_sink *sp)
 
 int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int version )
 {
-    struct trap_sink *new_sink;
-    
 #ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
 #define MAX_ENTRIES 1024
     struct targetAddrTable_struct *ptr;
@@ -228,15 +226,17 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
 
         snmpNotifyTable_add(nptr);
 #else /* ! USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE */
-        new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
-        if ( new_sink == NULL )
-            return 0;
+    struct trap_sink *new_sink;
+    
+    new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
+    if ( new_sink == NULL )
+	return 0;
 
-        new_sink->sesp    = ss;
-        new_sink->pdutype = pdutype;
-        new_sink->version = version;
-        new_sink->next    = sinks;
-        sinks = new_sink;
+    new_sink->sesp    = ss;
+    new_sink->pdutype = pdutype;
+    new_sink->version = version;
+    new_sink->next    = sinks;
+    sinks = new_sink;
 #endif
     return 1;
 }
