@@ -584,25 +584,26 @@ void
 snmp_mib_toggle_options_usage(const char *lead, FILE * outf)
 {
     fprintf(outf, "%su:  %sallow the use of underlines in MIB symbols\n",
-            lead,
-            ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL)) ?
-             "dis" : ""));
-    fprintf(outf,
-            "%sc:  %sallow the use of \"--\" to terminate comments\n",
-            lead,
-            ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM)) ? ""
-             : "dis"));
+            lead, ((netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+					   NETSNMP_DS_LIB_MIB_PARSE_LABEL)) ?
+		   "dis" : ""));
+    fprintf(outf, "%sc:  %sallow the use of \"--\" to terminate comments\n",
+            lead, ((netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+					   NETSNMP_DS_LIB_MIB_COMMENT_TERM)) ?
+		   "" : "dis"));
+
     fprintf(outf, "%sd:  %ssave the DESCRIPTIONs of the MIB objects\n",
-            lead,
-            ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) ?
-             "do not " : ""));
-    fprintf(outf, "%se:  disable errors when MIB symbols conflict\n",
+            lead, ((netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) ?
+		   "do not " : ""));
+
+    fprintf(outf, "%se:  disable errors when MIB symbols conflict\n", lead);
+
+    fprintf(outf, "%sw:  enable warnings when MIB symbols conflict\n", lead);
+
+    fprintf(outf, "%sW:  enable detailed warnings when MIB symbols conflict\n",
             lead);
-    fprintf(outf, "%sw:  enable warnings when MIB symbols conflict\n",
-            lead);
-    fprintf(outf,
-            "%sW:  enable detailed warnings when MIB symbols conflict\n",
-            lead);
+
     fprintf(outf, "%sR:  replace MIB symbols from latest module\n", lead);
 }
 
@@ -613,33 +614,39 @@ snmp_mib_toggle_options(char *options)
         while (*options) {
             switch (*options) {
             case 'u':
-                ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL,
-                               !ds_get_boolean(DS_LIBRARY_ID,
-                                               DS_LIB_MIB_PARSE_LABEL));
+                netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL,
+                               !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                               NETSNMP_DS_LIB_MIB_PARSE_LABEL));
                 break;
 
             case 'c':
-                ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID,
+					  NETSNMP_DS_LIB_MIB_COMMENT_TERM);
                 break;
 
             case 'e':
-                ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID,
+					  NETSNMP_DS_LIB_MIB_ERRORS);
                 break;
 
             case 'w':
-                ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 1);
+                netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+				   NETSNMP_DS_LIB_MIB_WARNINGS, 1);
                 break;
 
             case 'W':
-                ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
+                netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+				   NETSNMP_DS_LIB_MIB_WARNINGS, 2);
                 break;
 
             case 'd':
-                ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, 
+					  NETSNMP_DS_LIB_SAVE_MIB_DESCRS);
                 break;
 
             case 'R':
-                ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, 
+					  NETSNMP_DS_LIB_MIB_REPLACE);
                 break;
 
             default:
@@ -1341,11 +1348,13 @@ merge_anon_children(struct tree *tp1, struct tree *tp2)
                         previous->parent = tp2;
                     goto next;
                 } else if (!label_compare(child1->label, child2->label)) {
-                    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+                    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_MIB_WARNINGS)) {
                         snmp_log(LOG_WARNING,
                                  "Warning: %s.%ld is both %s and %s (%s)\n",
                                  tp2->label, child1->subid, child1->label,
                                  child2->label, File);
+		    }
                     continue;
                 } else {
                     /*
@@ -1478,7 +1487,8 @@ do_subtree(struct tree *root, struct node **nodes)
                 ++tp->number_modules;
                 tp->module_list = int_p;
 
-                if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE)) {
+                if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_MIB_REPLACE)) {
                     /*
                      * Replace from node 
                      */
@@ -1493,11 +1503,13 @@ do_subtree(struct tree *root, struct node **nodes)
             if (!strncmp(np->label, ANON, ANON_LEN) ||
                 !strncmp(tp->label, ANON, ANON_LEN)) {
                 anon_tp = tp;   /* Need to merge these two trees later */
-            } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+            } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+					  NETSNMP_DS_LIB_MIB_WARNINGS)) {
                 snmp_log(LOG_WARNING,
                          "Warning: %s.%ld is both %s and %s (%s)\n",
                          root->label, np->subid, tp->label, np->label,
                          File);
+	    }
         }
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
@@ -1597,10 +1609,12 @@ do_subtree(struct tree *root, struct node **nodes)
                 /*
                  * Uh?  One of these two should have been anonymous! 
                  */
-                if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_MIB_WARNINGS)) {
                     snmp_log(LOG_WARNING,
                              "Warning: expected anonymous node (either %s or %s) in %s\n",
                              tp->label, anon_tp->label, File);
+		}
             }
             anon_tp = NULL;
         }
@@ -2347,7 +2361,8 @@ parse_objecttype(FILE * fp, char *name)
         tctype = get_tc(token, current_module, &tmp_index,
                         &np->enums, &np->ranges, &np->hint);
         if (tctype == LABEL &&
-            ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1) {
+            netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
             print_error("Warning: No known translation for type", token,
                         type);
         }
@@ -2473,7 +2488,8 @@ parse_objecttype(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -2650,7 +2666,8 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
         free_node(np);
         return NULL;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
         np->description = strdup(quoted_string_buffer);
     }
     type = get_token(fp, token, MAXTOKEN);
@@ -2697,7 +2714,8 @@ parse_notificationDefinition(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -2745,7 +2763,8 @@ parse_trapDefinition(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -2933,7 +2952,8 @@ parse_compliance(FILE * fp, char *name)
         print_error("Bad DESCRIPTION", quoted_string_buffer, type);
         goto skip;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_SAVE_MIB_DESCRS))
         np->description = strdup(quoted_string_buffer);
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
@@ -3028,7 +3048,8 @@ parse_compliance(FILE * fp, char *name)
                 print_error("Bad DESCRIPTION", token, type);
                 goto skip;
             }
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
                 np->description = strdup(token);
             }
             type = get_token(fp, token, MAXTOKEN);
@@ -3087,8 +3108,10 @@ parse_capabilities(FILE * fp, char *name)
         print_error("Bad DESCRIPTION", token, type);
         goto skip;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
         np->description = strdup(token);
+    }
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
         type = get_token(fp, token, MAXTOKEN);
@@ -3323,8 +3346,10 @@ parse_moduleIdentity(FILE * fp, char *name)
         print_error("Bad DESCRIPTION", quoted_string_buffer, type);
         goto skip;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
         np->description = strdup(quoted_string_buffer);
+    }
     type = get_token(fp, token, MAXTOKEN);
     while (type == REVISION) {
         type = get_token(fp, token, MAXTOKEN);
@@ -3388,10 +3413,12 @@ parse_macro(FILE * fp, char *name)
     if (type != END)
         return NULL;
 
-    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_MIB_WARNINGS)) {
         snmp_log(LOG_WARNING,
                  "%s MACRO (lines %d..%d parsed and ignored).\n", name,
                  iLine, mibLine);
+    }
 
     return np;
 }
@@ -3582,17 +3609,20 @@ read_module_replacements(const char *name)
 
     for (mcp = module_map_head; mcp; mcp = mcp->next) {
         if (!label_compare(mcp->old_module, name)) {
-            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+            if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_MIB_WARNINGS)) {
                 snmp_log(LOG_WARNING,
                          "Loading replacement module %s for %s (%s)\n",
                          mcp->new_module, name, File);
+	    }
             (void) read_module(mcp->new_module);
             return;
         }
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_MIB_ERRORS)) {
         print_module_not_found(name);
-
+    }
 }
 
 static void
@@ -3618,11 +3648,13 @@ read_import_replacements(const char *old_module_name,
                     !strncmp(mcp->tag, identifier->label, mcp->tag_len))
                 ) {
 
-                if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_MIB_WARNINGS)) {
                     snmp_log(LOG_WARNING,
                              "Importing %s from replacement module %s instead of %s (%s)\n",
                              identifier->label, mcp->new_module,
                              old_module_name, File);
+		}
                 (void) read_module(mcp->new_module);
                 identifier->modid = which_module(mcp->new_module);
                 return;         /* finished! */
@@ -3681,8 +3713,10 @@ read_module_internal(const char *name)
             return MODULE_LOADED_OK;
         }
 
-    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1)
+    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 	
+			   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
         snmp_log(LOG_WARNING, "Module %s not found\n", name);
+    }
     return MODULE_NOT_FOUND;
 }
 
@@ -3933,10 +3967,12 @@ new_module(const char *name, const char *file)
              * Not the same file 
              */
             if (label_compare(mp->file, file)) {
-                if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+                if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_MIB_WARNINGS)) {
                     snmp_log(LOG_WARNING,
                              "Warning: Module %s was in %s now is %s\n",
                              name, mp->file, file);
+		}
 
                 /*
                  * Use the new one in preference 
@@ -4057,8 +4093,10 @@ parse(FILE * fp, struct node *root)
             }
             state = BETWEEN_MIBS;
 #ifdef TEST
-            if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+            if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_MIB_WARNINGS)) {
                 xmalloc_stats(stderr);
+	    }
 #endif
             continue;
         case IMPORTS:
@@ -4266,9 +4304,10 @@ is_labelchar(int ich)
 {
     if ((isalnum(ich)) || (ich == '-'))
         return 1;
-    if (ich == '_'
-        && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))
+    if (ich == '_' && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					     NETSNMP_DS_LIB_MIB_PARSE_LABEL)) {
         return 1;
+    }
 
     return 0;
 }
@@ -4382,7 +4421,8 @@ get_token(FILE * fp, char *token, int maxtlen)
     case '-':
         ch_next = getc(fp);
         if (ch_next == '-') {
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM)) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_MIB_COMMENT_TERM)) {
                 /*
                  * Treat the rest of this line as a comment. 
                  */
@@ -4599,7 +4639,7 @@ main(int argc, char *argv[])
 {
     int             i;
     struct tree    *tp;
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
+    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_WARNINGS, 2);
 
     init_mib();
 
@@ -4632,8 +4672,8 @@ parseQuoteString(FILE * fp, char *token, int maxtlen)
             mibLine++;
         } else if (ch == '"') {
             *token = '\0';
-            if (too_long &&
-                ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1) {
+            if (too_long && netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
                 /*
                  * show short form for brevity sake 
                  */

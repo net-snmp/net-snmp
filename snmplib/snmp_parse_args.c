@@ -274,7 +274,8 @@ snmp_parse_args(int argc,
             break;
 
         case 'd':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET, 1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_DUMP_PACKET, 1);
             break;
 
         case 'v':
@@ -488,7 +489,8 @@ snmp_parse_args(int argc,
         /*
          * run time default version 
          */
-        session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+        session->version = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+					      NETSNMP_DS_LIB_SNMPVERSION);
 
         /*
          * compile time default version 
@@ -508,7 +510,7 @@ snmp_parse_args(int argc,
                 break;
             }
         } else {
-            if (session->version == DS_SNMP_VERSION_1)  /* bogus value.  version 1 actually = 0 */
+            if (session->version == NETSNMP_DS_SNMP_VERSION_1)  /* bogus value.  version 1 actually = 0 */
                 session->version = SNMP_VERSION_1;
         }
     }
@@ -595,7 +597,8 @@ snmp_parse_args(int argc,
     if (session->version == SNMP_VERSION_1 ||
         session->version == SNMP_VERSION_2c) {
         if (Cpsz == NULL) {
-            Cpsz = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY);
+            Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					 NETSNMP_DS_LIB_COMMUNITY);
         }
         if (Cpsz == NULL) {
             fprintf(stderr, "No community name specified.\n");
