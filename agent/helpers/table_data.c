@@ -296,6 +296,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_registration_info *table_reg_info =
         netsnmp_find_table_registration_info(reginfo);
     int             result, regresult;
+    int             oldmode;
 
     for (request = requests; request; request = request->next) {
         if (request->processed)
@@ -396,6 +397,14 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                                               netsnmp_create_data_list
                                               (TABLE_DATA_NAME, row,
                                                NULL));
+                /*
+                 * Set the name appropriately, so we can pass this
+                 *  request on as a simple GET request
+                 */
+                netsnmp_table_data_build_result(reginfo, reqinfo, request,
+                                                row,
+                                                table_info->colnum,
+                                                ASN_NULL, NULL, 0);
             } else {            /* no decent result found.  Give up. It's beyond us. */
                 request->processed = 1;
             }
@@ -470,9 +479,41 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         }
     }
 
-    if (valid_request)
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+    if (valid_request) {
+        /*
+         * If this is a GetNext or GetBulk request, then we've identified
+         *  the row that ought to include the appropriate next instance.
+         *  Convert the request into a Get request, so that the lower-level
+         *  handlers don't need to worry about skipping on....
+         */
+        oldmode = reqinfo->mode;
+        if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
+            reqinfo->mode = MODE_GET;
+        }
+        result = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
+        if (oldmode == MODE_GETNEXT || oldmode == MODE_GETBULK) {       /* XXX */
+            for (request = requests; request; request = request->next) {
+                /*
+                 *  ... but if the lower-level handlers aren't dealing with
+                 *  skipping on to the next instance, then we must handle
+                 *  this situation here.
+                 *    Mark 'holes' in the table as needing to be retried.
+                 *
+                 *    This approach is less efficient than handling such
+                 *  holes directly in the table_dataset handler, but allows
+                 *  user-provided handlers to override the dataset handler
+                 *  if this proves necessary.
+                 */
+                if (requests->requestvb->type == ASN_NULL ||
+                    requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
+                    requests->requestvb->type = ASN_PRIV_RETRY;
+                }
+            }
+            reqinfo->mode = oldmode;
+        }
+        return result;
+    }
     else
         return SNMP_ERR_NOERROR;
 }

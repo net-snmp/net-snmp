@@ -481,54 +481,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_GET:
         case MODE_GETNEXT:
         case MODE_GETBULK:     /* XXXWWW */
-            if (!data) {
-                netsnmp_table_row *newrow;
-                netsnmp_table_data_set_storage *newdata = NULL;
-                /*
-                 * unsigned int column = table_info->colnum; 
-                 */
-
-                while (table_info->colnum <=
-                       table_info->reg_info->max_column) {
-                    if (table_info->colnum != table_info->colnum) {
-                        /*
-                         * start with a new row 
-                         */
-                        row = datatable->table->first_row;
-                    }
-                    for (newrow = row; newrow; newrow = newrow->next) {
-                        newdata =
-                            (netsnmp_table_data_set_storage *) newrow->
-                            data;
-                        if (newdata)
-                            newdata =
-                                netsnmp_table_data_set_find_column(newdata,
-                                                                   table_info->
-                                                                   colnum);
-                        if (newdata) {
-                            /*
-                             * this is it 
-                             */
-                            data = newdata;
-                            row = newrow;
-                            goto done;
-                        }
-                    }
-                    table_info->colnum++;
-                    row = datatable->table->first_row;
-                    /*
-                     * ???
-                     *
-                     * We probably need to 'rewind' the
-                     * request->parent_data list entry to
-                     * refer back to the first row as well.
-                     * 
-                     * How can this best be done?
-                     * ???
-                     */
-                }
-            }
-          done:
             if (data && data->data.voidp)
                 netsnmp_table_data_build_result(reginfo, reqinfo, request,
                                                 row,
@@ -536,29 +488,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                                 data->type,
                                                 data->data.voidp,
                                                 data->data_len);
-            else {
-                /*
-                 * deal with holes by going to the next data set
-                 * in the row or possibly onward to new columns 
-                 */
-                if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {   /* XXXWWW */
-                    if (row)
-                        row = row->next;
-                    if (row) {
-                        data =
-                            (netsnmp_table_data_set_storage *) row->data;
-                        goto topsearch;
-                    }
-                    if (table_info->colnum <=
-                        table_info->reg_info->max_column) {
-                        table_info->colnum++;
-                        row = datatable->table->first_row;
-                        data =
-                            (netsnmp_table_data_set_storage *) row->data;
-                        goto topsearch;
-                    }
-                }
-            }
             break;
 
         case MODE_SET_RESERVE1:
