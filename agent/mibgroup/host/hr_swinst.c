@@ -63,12 +63,13 @@ int header_hrswinst __P((struct variable *,oid *, int *, int, int *, int (**writ
 int header_hrswInstEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
        char *HRSW_directory = NULL;
-extern char  HRSW_name[];
 
 extern struct timeval starttime;
 
 #ifdef HAVE_LIBRPM
-static rpmdb	rpm_db;
+static rpmdb	rpm_db = NULL;
+#else
+extern char  HRSW_name[];
 #endif
 
 	/*********************
@@ -109,7 +110,9 @@ void	init_hr_swinst( )
 #endif
     }
 
+#ifndef HAVE_LIBRPM
     strcpy(HRSW_name, "[installed name]");	/* default name */
+#endif
 }
 
 #define MATCH_FAILED	-1
@@ -232,13 +235,11 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
     int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int sw_idx=0;
-    static char string[100];
+    static char string[256];
+    u_char *ret = NULL;
     struct stat stat_buf;
 #ifdef HAVE_LIBRPM
-    char *cp;
-    int_32 *rpm_data;
-    time_t installTime;
-    Header rpm_head;
+    Header h = NULL;
 #endif
 
     if ( vp->magic < HRSWINST_INDEX ) {
@@ -252,13 +253,16 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 	    return NULL;
         
 #ifdef HAVE_LIBRPM
-	rpm_head = rpmdbGetRecord( rpm_db, sw_idx );
-	rpmdbClose(rpm_db);		/* or only on finishing ? */
-	if ( rpm_head == NULL )
+	if (rpm_db == NULL) {
+	    Init_HR_SWInst();
+	    if (rpm_db == NULL)
+		return NULL;
+	}
+	h = rpmdbGetRecord( rpm_db, sw_idx );
+	if ( h == NULL )
 	    return NULL;
 #endif
     }
-    
 
     switch (vp->magic){
 	case HRSWINST_CHANGE:
@@ -278,55 +282,73 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 		    long_return = (stat_buf.st_mtime-starttime.tv_sec)*100;
 		else
 		    long_return = 0;	/* predates this agent */
-	    }
-	    else
+	    } else
 		long_return = 363136200;
-	    return (u_char *)&long_return;
+	    ret = (u_char *) &long_return;
+	    break;
 
 	case HRSWINST_INDEX:
 	    long_return = sw_idx;
-	    return (u_char *)&long_return;
+	    ret = (u_char *) &long_return;
+	    break;
 	case HRSWINST_NAME:
+	{
 #ifdef HAVE_LIBRPM
-	    headerGetEntry(rpm_head, RPMTAG_NAME, NULL,(void **) &cp, NULL );
-	    strcpy(string, cp);
+	    char *cp;
+	    int type;
+	    string[0] = '\0';
+	    if (headerGetEntry(h, RPMTAG_NAME, &type, (void **) &cp, NULL) && cp != NULL) {
+		strcpy(string, cp);
+		if(type == RPM_STRING_ARRAY_TYPE || type == RPM_I18NSTRING_TYPE)
+		    free(cp);
+	    }
 #else
 	    sprintf(string, HRSW_name);
 			/* This will be unchanged from the initial "null"
 			   value, if HRSW_directory is not defined */
 #endif
 	    *var_len = strlen(string);
-	    return (u_char *) string;
+	    ret = (u_char *) string;
+	}   break;
 	case HRSWINST_ID:
             *var_len = nullOidLen;
-	    return (u_char *) nullOid;
+	    ret = (u_char *) nullOid;
+	    break;
 	case HRSWINST_TYPE:
 	    long_return = 4;	/* application */
-	    return (u_char *)&long_return;
+	    ret = (u_char *) &long_return;
+	    break;
 	case HRSWINST_DATE:
+	{
 #ifdef HAVE_LIBRPM
-	    headerGetEntry(rpm_head, RPMTAG_INSTALLTIME, NULL,(void **) &rpm_data, NULL );
+	    int_32 *rpm_data;
+	    headerGetEntry(h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL);
             if (rpm_data != NULL) {
-              installTime = *rpm_data;
-              return ( date_n_time(&installTime, var_len));
+              time_t installTime = *rpm_data;
+              ret = date_n_time(&installTime, var_len);
             } else {
-              return ( date_n_time(0,var_len));
+              ret = date_n_time(0, var_len);
             }
 #else
 	    if ( HRSW_directory ) {
 		sprintf(string, "%s/%s", HRSW_directory, HRSW_name);
 		stat( string, &stat_buf );
-		return ( date_n_time(&stat_buf.st_mtime, var_len));
-	    }
-	    else
+		ret = date_n_time(&stat_buf.st_mtime, var_len);
+	    } else {
 		sprintf(string, "back in the mists of time");
+		*var_len = strlen(string);
+		ret = (u_char *) string;
+	    }
 #endif
-	    *var_len = strlen(string);
-	    return (u_char *) string;
+	}   break;
 	default:
 	    ERROR_MSG("");
+	    ret = NULL;
+	    break;
     }
-    return NULL;
+    if (h)
+	headerFree(h);
+    return ret;
 }
 
 
@@ -338,11 +360,11 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 
 static int HRSW_index;
 
-static DIR *dp = NULL;
 #ifndef HAVE_LIBRPM
+static DIR *dp = NULL;
 static struct dirent *de_p;
-#endif
 static char HRSW_name[100];
+#endif
 
 
 void
@@ -351,6 +373,8 @@ Init_HR_SWInst __P((void))
     HRSW_index = 0;
 
 #ifdef HAVE_LIBRPM
+    if (rpm_db != NULL)
+	return;
     if (rpmdbOpen( "", &rpm_db, O_RDONLY, 0644) != 0 )
 	HRSW_index = -1;
 #else
@@ -407,7 +431,12 @@ Save_HR_SW_info __P((void))
 void
 End_HR_SWInst __P((void))
 {
+#ifdef HAVE_LIBRPM
+    rpmdbClose(rpm_db);		/* or only on finishing ? */
+    rpm_db = NULL;
+#else
    if ( dp != NULL )
 	closedir( dp );
    dp = NULL;
+#endif
 }
