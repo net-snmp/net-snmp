@@ -33,11 +33,6 @@
 #include "snmpTCPDomain.h"
 
 
-#ifndef SNMP_STREAM_QUEUE_LEN
-#define SNMP_STREAM_QUEUE_LEN  5
-#endif
-
-
 const oid snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
 static snmp_tdomain tcpDomain;
 
@@ -245,6 +240,7 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
     t->flags |= SNMP_TRANSPORT_FLAG_LISTEN;
     t->local = malloc(6);
     if (t->local == NULL) {
+      snmp_tcp_close(t);
       snmp_transport_free(t);
       return NULL;
     }

@@ -10,6 +10,14 @@ extern "C" {
 
 
 
+/*  Some transport-type constants.  */
+
+#ifndef SNMP_STREAM_QUEUE_LEN
+#define		SNMP_STREAM_QUEUE_LEN		5
+#endif
+
+
+
 /*  Some transport-type flags.  */
 
 #define		SNMP_TRANSPORT_FLAG_STREAM	0x01
