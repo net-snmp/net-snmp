@@ -730,8 +730,9 @@ main(int argc, char *argv[])
                     init_agent();            /* register our .conf handlers */
                     register_mib_handlers(); /* snmplib .conf handlers */
                     fprintf(stderr, "Configuration directives understood:\n");
+                    enable_stderrlog();
                     read_config_print_usage("  ");
-                    break;
+                    exit(0);
                 case 'v':
                     printf("\nUCD-snmp version:  %s\n",VersionInfo);
                     printf("Author:            Wes Hardaker\n");
