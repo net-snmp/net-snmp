@@ -543,7 +543,7 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
     return 1;
   }
 
-  ztcommunity = malloc(community_len + 1);
+  ztcommunity = (char *)malloc(community_len + 1);
   if (ztcommunity != NULL) {
     memcpy(ztcommunity, community, community_len);
     ztcommunity[community_len] = '\0';

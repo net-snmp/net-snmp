@@ -77,7 +77,7 @@ char	       *snmp_unix_fmtaddr	(snmp_transport *t,
 	let's not worry about that for now.  */
     return strdup("Local IPC: abstract");
   } else {
-    char *tmp = malloc(16 + len);
+    char *tmp = (char *)malloc(16 + len);
     if (tmp != NULL) {
       sprintf(tmp, "Local IPC: %s", to->sun_path);
     }
