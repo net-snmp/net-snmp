@@ -29,8 +29,14 @@
 netsnmp_mib_handler *
 netsnmp_get_bulk_to_next_handler(void)
 {
-    return netsnmp_create_handler("bulk_to_next",
-                                  netsnmp_bulk_to_next_helper);
+    netsnmp_mib_handler *handler =
+        netsnmp_create_handler("bulk_to_next",
+                               netsnmp_bulk_to_next_helper);
+
+    if (NULL != handler)
+        handler->flags |= MIB_HANDLER_AUTO_NEXT;
+
+    return handler;
 }
 
 /** takes answered requests and decrements the repeat count and
@@ -65,11 +71,22 @@ netsnmp_bulk_to_next_helper(netsnmp_mib_handler *handler,
                             netsnmp_request_info *requests)
 {
 
-    int             ret;
+    int             ret = SNMP_ERR_NOERROR;
 
-    switch (reqinfo->mode) {
+    /*
+     * this code depends on AUTO_NEXT being set
+     */
+    netsnmp_assert(handler->flags & MIB_HANDLER_AUTO_NEXT);
 
-    case MODE_GETBULK:
+    /*
+     * don't do anything for any modes besides GETBULK. Just return, and
+     * the agent will call the next handler (AUTO_NEXT).
+     *
+     * for GETBULK, we munge the mode, call the next handler ourselves
+     * (setting AUTO_NEXT_OVERRRIDE so the agent knows what we did),
+     * restore the mode and fix up the requests.
+     */
+    if(MODE_GETBULK == reqinfo->mode) {
         reqinfo->mode = MODE_GETNEXT;
         ret =
             netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
@@ -79,13 +96,14 @@ netsnmp_bulk_to_next_helper(netsnmp_mib_handler *handler,
          * update the varbinds for the next request series 
          */
         netsnmp_bulk_to_next_fix_requests(requests);
-        return ret;
 
-    default:
-        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                         requests);
+        /*
+         * let agent handler know that we've already called next handler
+         */
+        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
     }
-    return SNMP_ERR_GENERR;     /* should never get here */
+
+    return ret;
 }
 
 /** initializes the bulk_to_next helper which then registers a bulk_to_next
