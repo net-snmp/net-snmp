@@ -1,0 +1,115 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+
+use DBI;
+use Term::ReadLine;
+
+$opts{'t'} = ! eval { require Text::FormatTable; };
+
+#defaults
+$opts{'d'} = "\t";
+$opts{'v'} = 1;
+$opts{'l'} = 'authNoPriv';
+$params = "";
+
+getopts('hd:tR:u:l:v:a:A:x:X:p:c:t:r:',\%opts);
+
+usage() if ($#ARGV == -1 || $opts{'h'});
+
+$params .= ";ad_SNMP_Version=$opts{'v'}" if ($opts{'v'});
+$params .= ";ad_SNMP_SecName=$opts{'u'}" if ($opts{'u'});
+$params .= ";ad_SNMP_AuthProto=$opts{'a'}" if ($opts{'a'});
+$params .= ";ad_SNMP_AuthPass=$opts{'A'}" if ($opts{'A'});
+$params .= ";ad_SNMP_PrivProto=$opts{'x'}" if ($opts{'x'});
+$params .= ";ad_SNMP_PrivPass=$opts{'X'}" if ($opts{'X'});
+$params .= ";ad_SNMP_RemotePort=$opts{'p'}" if ($opts{'p'});
+$params .= ";ad_SNMP_Timeout=$opts{'t'}" if ($opts{'t'});
+$params .= ";ad_SNMP_Retries=$opts{'r'}" if ($opts{'r'});
+$params .= ";ad_SNMP_Community=$opts{'c'}" if ($opts{'c'});
+$params .= ";ad_SNMP_SecLevel=$opts{'l'}" if ($opts{'l'});
+
+$params .= ";ad_SNMP_DestHost=" . shift @ARGV;
+
+# connect to the DBI interface
+$AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
+($dbh = DBI->connect("dbi:AnyData:ad_default=SNMP$params"))
+    || die "\tConnection problem: $DBI::errstr\n";
+$AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
+
+if ($#ARGV >= 0) {
+    # command line command
+    if ($ARGV[0] =~ /(select|delete|update|insert)/) {
+	doit(join(" ",@ARGV));
+    } else {
+	usage();
+    }
+} else {
+    # interactive shell
+    $term = new Term::ReadLine 'snmpsh';
+    while($cmd = $term->readline("snmpsh> ")) {
+	last if ($cmd eq "exit" || $cmd eq "quit" || $cmd eq "q");
+	doit($cmd, \%conf);
+    }
+}
+
+sub doit {
+    my $select = shift;
+    $sth = $dbh->prepare($select);
+    $sth->execute();
+    if ($select =~ /^select/) {
+	my $table;
+	while($row = $sth->fetchrow_arrayref) {
+	    if ($opts{'t'}) {
+		print STDERR join($opts{'d'},@$row),"\n";
+	    } elsif (!$table) {
+		$table = Text::FormatTable->new('|r' x ($#$row+1) . "|");
+		$table->rule('-');
+		$table->head(@{$sth->{NAME}});
+		$table->rule('-');
+	    } else {
+		$table->row(@$row);
+	    }
+	}
+	if ($table) {
+	    $table->rule('-');
+	    print $table->render();
+	}
+    }
+    $sth->finish();
+}
+
+sub usage {
+    print STDERR "
+$0 [ARGUMENTS] HOSTNAME [SQL_COMMAND] 
+
+  $0 implements a simple SQL shell which maps onto SNMP.  All
+  statements issued within the shell are converted to SNMP requests and
+  sent to HOSTNAME and the results displayed in a nice table output
+  format if the Text::FormatTable module is available.  If SQL_COMMAND
+  is given on the command line, then it's interpreted and control is
+  returned to the caller.  If not, an interactive prompt is given where
+  multiple commands can be issued.
+
+ARGUMENTS may include:
+
+  -t         delimiter separated output, don't print pretty tables.
+  -d DELIM   use DELIM as the delimiter.  A tab is the default delimiter.
+
+ARGUMENTS also may include the following.  See the net-snmp snmpcmd
+manual page for details on what they mean:
+
+  -v VERSION        (default: 1)
+  -t TIMEOUT
+  -r RETRIES
+  -p PORT
+  -c COMMUNITY
+  -a AUTHPROTOCOL   (default: MD5)
+  -x PRIVPROTOCOL   (default: DES)
+  -A AUTHPASS
+  -X PRIVPASS
+  -l SECURITY_LEVEL (default: authNoPriv)
+  
+";
+    exit;
+}
