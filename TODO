@@ -1,6 +1,7 @@
 TODO list for the ucd-snmp-coders:
 
   snmpv3 support
+  possibly add WinSNMP wrappers around the ucd-snmp functions
   Continue to add and improve manual pages/documentation.
   More snmpset'able variables.
   Should be able to set the fix script line in the .conf files per type.
