@@ -15,15 +15,24 @@ stop_server(int a) {
 int
 main (int argc, char **argv) {
   int agentx_subagent=1; /* change this if you want to be a SNMP master agent */
+  int background = 0; /* change this if you want to run in the background */
+  int syslog = 0; /* change this if you want to use syslog */
 
-  /* print log errors to stderr */
-  snmp_enable_stderrlog();
+  /* print log errors to syslog or stderr */
+  if (syslog)
+    snmp_enable_calllog();
+  else
+    snmp_enable_stderrlog();
 
   /* we're an agentx subagent? */
   if (agentx_subagent) {
     /* make us a agentx client. */
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
   }
+
+  /* run in background, if requested */
+  if (background && netsnmp_daemonize(1, !syslog))
+      exit(1);
 
   /* initialize the agent library */
   init_agent("example-demon");
