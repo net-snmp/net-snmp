@@ -94,6 +94,10 @@ int             deny_severity = LOG_WARNING;
 #include "agentx/master.h"
 #endif
 
+#ifdef USING_SMUX_MODULE
+#include "smux/smux.h"
+#endif
+
 #define SNMP_ADDRCACHE_SIZE 10
 
 struct addrCache {
@@ -812,6 +816,9 @@ init_master_agent(void)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_AGENTX_MASTER) == 1)
         real_init_master();
+#endif
+#ifdef USING_SMUX_MODULE
+    real_init_smux();
 #endif
 
     /*
