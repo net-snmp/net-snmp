@@ -1124,7 +1124,6 @@ static void *
 _sess_open(netsnmp_session *in_session)
 {
     struct session_list *slp;
-    struct snmp_internal_session *isp;
     netsnmp_session *session;
 
     in_session->s_snmp_errno = 0;
@@ -1137,7 +1136,6 @@ _sess_open(netsnmp_session *in_session)
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
       return(NULL);
     }
-    isp     = slp->internal;
     session = slp->session;
     slp->transport = NULL;
 
