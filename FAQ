@@ -951,8 +951,11 @@ How can I monitor my systems (disk, memory, etc)?
   purpose.  Two of the most widely used are MRTG (http://www.mrtg.org/)
   and Cricket (http://cricket.sourceforge.net/).  There are details of
   how to set up Cricket to monitor some of the UCD extensions at
-  http://www.afn.org/~jam/software/cricket/   If anyone has something
-  similar for MRTG, please let us know.
+  http://www.afn.org/~jam/software/cricket/
+
+     We have also set up a page that describes in detail how MRTG
+  can be set up to monitor disk, memory and cpu activity at
+  http://www.net-snmp.org/tutorial/mrtg/index.html
 
     The net-snmp package contains a web based manager itself that
   runs on top of a mysql database, but it is extremely beta in
