@@ -9,6 +9,8 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "Net-SNMP:StartMenuDir"
 
+; For environment variables
+!define ALL_USERS
 !include "SetEnVar.nsi"
 !include "Add2Path.nsi"
 
@@ -255,7 +257,7 @@ Function CreateSnmpConf
   FileClose $0
   
   ; For environment variables
-  !define ALL_USERS
+  ;!define ALL_USERS
   
   ; Set the conf path
   Push "SNMPCONFPATH"
