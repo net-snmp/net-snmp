@@ -462,6 +462,9 @@ when_dumped( filesys, level, length )
 	return date_n_time (NULL, length);
     cp1=strrchr( filesys, '/' );	/* Find the last element of the current FS */
 
+    if ( cp1 == NULL )
+        cp1 = filesys;
+    
     if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
 	return date_n_time (NULL, length);
 
@@ -470,6 +473,8 @@ when_dumped( filesys, level, length )
 	if ( cp2!=NULL ) {
 	    *cp2 = '\0';
 	    cp3=strrchr( line, '/' );  /* and find the last element */
+            if ( cp3 == NULL )
+                cp3 = line;
 
 	    if ( strcmp( cp1, cp3 ) != 0 )	/* Wrong FS */
 		continue;
