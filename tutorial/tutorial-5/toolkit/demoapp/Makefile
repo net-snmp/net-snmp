@@ -10,11 +10,11 @@
 CC=gcc
 
 OBJS1=snmpdemoapp.o
-OBJS2=ustMain.o XXX.o
+OBJS2=example-demon.o nstAgentSubagentObject.o
 OBJS3=asyncapp.o
-TARGETS=ustMain snmpdemoapp asyncapp
+TARGETS=example-demon snmpdemoapp asyncapp
 
-CFLAGS=`net-snmp-config --cflags`
+CFLAGS=-I. `net-snmp-config --cflags`
 BUILDLIBS=`net-snmp-config --libs`
 BUILDAGENTLIBS=`net-snmp-config --agent-libs`
 
@@ -29,8 +29,8 @@ snmpdemoapp: $(OBJS1)
 asyncapp: $(OBJS3)
 	$(CC) -o asyncapp $(OBJS3) $(BUILDLIBS)
 
-ustMain: $(OBJS2)
-	$(CC) -o ustMain $(OBJS2)  $(BUILDAGENTLIBS)
+example-demon: $(OBJS2)
+	$(CC) -o example-demon $(OBJS2)  $(BUILDAGENTLIBS)
 
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)

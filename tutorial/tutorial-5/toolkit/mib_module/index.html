@@ -55,18 +55,28 @@
     <h2>Compiling in your new MIB module</h2>
     <p>
       There are a few ways to get your new MIB module loaded and
-      accessible via SNMP requests.
-
+      accessible via SNMP requests.  We'll discuss all three ways
+      separately.  To make this easy to test the procedures outlined
+      below, we've provided three simple mib modules which implement
+      the three simple scalars in the <a
+      href="NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB</a> MIB.
+      To see how MIBs can be properly used by the tools, please see
+      the <a
+      href="http://www.net-snmp.org/tutorial-5/commands/mib-options.html">mib-options
+      tutorial</a>.
       <ol>
       <li>
 	Compile it into the master agent.
 	<p>
-	  Lets assume you're going to compile in a new mib module
-	  called "XXX", for lack of a better name.  To do this, you
-	  would put the XXX.h and XXX.c files that make up your MIB
-	  instrumentation into the net-snmp source code.  You do this
-	  by copying them into a agent/mibgroup/XXX.h and
-	  agent/mibgroup/XXX.c file.
+	  Lets assume you're going to compile in a new mib module.
+	  For our example, lets use the <a
+	  href="nstAgentModuleObject.c">example mib module</a> and
+	  it's <a href="nstAgentModuleObject.h">header file</a>.  To
+	  do this, you would put the nstAgentModuleObject.h and
+	  nstAgentModuleObject.c files into the net-snmp source code
+	  directory.  You do this by copying them into a
+	  agent/mibgroup/nstAgentModuleObject.h and
+	  agent/mibgroup/nstAgentModuleObject.c file.
 	<p>
 	  Next, you have to configure the package to find them and
 	  compile them into the agent.  To do this, you run the
@@ -74,17 +84,20 @@
 	  it to load:
 
 	  <pre>
-% <b>./configure --with-mib-modules="XXX"</b>
+% <b>./configure --with-mib-modules="nstAgentModuleObject"</b>
 	</pre>
 
 	<p>
-	  If you had multiple modules to include, you can separate them
-	  with spaces inside the quotes (e.g., --with-mib-modules="XXX YYY").
+	  If you had multiple modules to include (like a second "XXX"
+	  module, for example), you can separate them with spaces
+	  inside the quotes (e.g.,
+	  --with-mib-modules="nstAgentModuleObject XXX").
 	<p>
-	  Note that XXX is the prefix and the configure script will
-	  actually look for a XXX.h and a XXX.c file.  You *must* have
-	  a XXX.h file and you can not get it to work with just a
-	  XXX.c file.
+	  Note that nstAgentModuleObject is the prefix and the
+	  configure script will actually look for a
+	  nstAgentModuleObject.h and a nstAgentModuleObject.c file.
+	  You <b>must</b> have a .h file and you can not get it to work
+	  with just a .c file.
 	<p>
 	  Build your new agent with your new code in it by running make:
 	<pre>
@@ -95,6 +108,26 @@
     <pre>
 % <b>make install</b>
     </pre>
+	<p>
+	  You can test out the functionality by starting the snmpd
+	  agent:
+    <pre>
+% <b>/usr/local/sbin/snmpd</b>
+    </pre>
+	<p>
+	  And then running snmpget and snmpset on the scalar object
+	  [proper authentication information not shown in this command]:
+    <pre>
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 1
+
+% <b>snmpset localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = 5</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 5
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 5
+    </pre>
+
       <li> You can also compile your code into a "subagent" which then
       attaches itself to the master agent using the <a
       href="http://www.ietf.org/html.charters/agentx-charter.html">AgentX
@@ -134,7 +167,7 @@
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Tue Apr 23 11:16:57 PDT 2002
+Last modified: Tue Jun 18 23:15:10 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
