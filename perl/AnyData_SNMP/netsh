@@ -64,21 +64,34 @@ $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
 
 $prompt = "netsh> ";
 
-if (-f "$ENV{'HOME'}/.snmp/netshrc") {
-    source_file("$ENV{'HOME'}/.snmp/netshrc");
-}
+load_rcs();
+
+# setup terminal prompter
+$ENV{'PERL_RL'}='o=0' if (!exists($ENV{'PERL_RL'}));
+# the ornaments are too ugly
+$term = new Term::ReadLine 'netsh';
 
 if ($#ARGV >= 0) {
     # command line command
     netsh(join(" ",@ARGV));
 } else {
     # interactive shell
-    $ENV{'PERL_RL'}='o=0' if (!exists($ENV{'PERL_RL'}));
-    # the ornaments are too ugly
-    $term = new Term::ReadLine 'netsh';
     while($cmd = $term->readline($prompt)) {
 	last if ($cmd eq "exit" || $cmd eq "quit" || $cmd eq "q");
 	netsh($cmd, \%conf);
+    }
+}
+
+sub load_rcs {
+    if (-f "$ENV{'HOME'}/.snmp/netshrc") {
+	source_file("$ENV{'HOME'}/.snmp/netshrc");
+    }
+    if (-d "$ENV{'HOME'}/.snmp/netsh") {
+	foreach my $i (glob("$ENV{'HOME'}/.snmp/netsh/*")) {
+	    if (-f "$i" && "$i" !~ /.*(~|.bak)$/) {
+		source_file("$i");
+	    }
+	}
     }
 }
 
@@ -115,9 +128,11 @@ sub my_export {
 
 sub netsh {
     my $stmt = shift;
-    chomp($stmt);
-    next if ($stmt =~ /^\s*$/);
-    next if ($stmt =~ /^\s*\#/);
+    chomp($stmt);      # remove trailing white space
+    $stmt =~ s/^\s+//; # remove leading white space
+    $stmt =~ s/;*$//;  # get rid of trailing semicolons
+    return if ($stmt =~ /^\s*$/);
+    return if ($stmt =~ /^\s*\#/);
     my ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
 
     #eval
@@ -131,12 +146,21 @@ sub netsh {
 #    print "doing [$multi_alias]: $stmt\n";
     if ($name eq "alias" || $multi_alias) {
 	if ($multi_alias) {
-	    if ($stmt =~ /^\s*\}\s*$/) {
+	    if ($stmt =~ /^prompt\s+(\d+)\s+[\"\'](.+)[\"\']/) {
+		$aliases{$current_alias}{'prompts'}[$1] = $2;
+		return;
+	    } elsif ($stmt =~ /^prompt\s+(\d+)\s+(.+)/) {
+		my $x = $2;
+		my $spot = $1;
+		$x =~ s/\s+$//;
+		$aliases{$current_alias}{'prompts'}[$spot] = "$x ";
+		return;
+	    } elsif ($stmt =~ /^\s*\}\s*$/) {
 		$prompt = $oprompt;
 		$multi_alias = 0;
 		return;
 	    }
-	    push @{$aliases{$current_alias}},$stmt;
+	    push @{$aliases{$current_alias}{'definition'}},$stmt;
 	    return;
 	}
 	$stmt =~ s/^alias\s+//;
@@ -157,24 +181,35 @@ sub netsh {
 	    $prompt = "define $name> ";
 	    $current_alias = $name;
 	    $multi_alias = 1;
-	    $aliases{$name} = [];
+	    $aliases{$name}{'definition'} = [];
 	    return;
 	}
-	$aliases{$name} = $args;
+	$aliases{$name}{'definition'} = $args;
 	return;
     }
 
     #eval aliases
     while (exists $aliases{$name}) {
 #	print "modified: $stmt -> ";
+	my @ARGS = split(/\s+/,$args);
 	my $statements;
-	if (ref($aliases{$name}) eq "ARRAY") {
-	    $statements = $aliases{$name};
+	if (ref($aliases{$name}{'definition'}) eq "ARRAY") {
+	    $statements = $aliases{$name}{'definition'};
+
+	    # maybe prompt for values
+	    if ($#{$aliases{$name}{'prompts'}} > -1) {
+		my $i;
+		for($i = 1; $i <= $#{$aliases{$name}{'prompts'}}; $i++) {
+		    if (!$ARGS[$i-1] && $term) {
+			$ARGS[$i-1] = 
+			    $term->readline($aliases{$name}{'prompts'}[$i]);
+		    }
+		}
+	    }
 	} else {
-	    $statements = [$aliases{$name}];
+	    $statements = [$aliases{$name}{'definition'}];
 	}
 	foreach my $stmt (@$statements) {
-	    my @ARGS = split(/\s+/,$args);
 	    #print "$stmt -> ";
 	    $stmt =~ s/\\(\d+)/$ARGS[$1-1]/g;
 #	    print "running $stmt\n";
@@ -184,8 +219,10 @@ sub netsh {
 	return;
     }
 
-    $stmt =~ s/;*$//; # get rid of trailing semicolons
-    $stmt =~ s/^\s*//; # get rid of leading spaces
+    if ($stmt =~ /^rehash$/) {
+	load_rcs();
+	return;
+    }
 
     my $subfn;
 
@@ -427,13 +464,13 @@ sub my_printf {
 
 sub display_alias {
     my $name = shift;
-    if (exists $aliases{$name}) {
-	if (ref($aliases{$name}) eq "ARRAY") {
+    if (exists $aliases{$name}{'definition'}) {
+	if (ref($aliases{$name}{'definition'}) eq "ARRAY") {
 	    print "alias $name {\n";
-	    map { print "  $_\n"; } @{$aliases{$name}};
+	    map { print "  $_\n"; } @{$aliases{$name}{'definition'}};
 	    print "}\n";
 	} else {
-	    print "alias $name $aliases{$name}\n";
+	    print "alias $name $aliases{$name}{'definition'}\n";
 	}
     } else {
 	print "no alias defined for \"$name\"\n";
