@@ -983,10 +983,18 @@ snmp_log_string(int priority, const char *string)
     netsnmp_log_handler *logh;
 
     /*
+     * We've got to be able to log messages *somewhere*!
+     * If you don't want stderr logging, then enable something else.
+     */
+    if (!logh_head) {
+        snmp_enable_stderrlog();
+        snmp_log_string(LOG_WARNING,
+                        "No log handling enabled - turning on stderr logging\n");
+    }
+
+    /*
      * Start at the given priority, and work "upwards"....
      */
-    if (!logh_head)
-	snmp_enable_stderrlog();
     logh = logh_priorities[priority];
     for ( ; logh; logh = logh->next ) {
         /*
