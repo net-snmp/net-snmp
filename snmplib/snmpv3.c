@@ -512,7 +512,7 @@ init_snmpv3(const char *type) {
                      DS_LIB_AUTHPASSPHRASE);
   ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase", DS_LIBRARY_ID,
                      DS_LIB_PRIVPASSPHRASE);
-  register_config_handler("snmp","defVersion", version_conf, NULL, "num");
+  register_config_handler("snmp","defVersion", version_conf, NULL, "1|2c|3");
 
   register_config_handler("snmp","defAuthType", snmpv3_authtype_conf, NULL,
                           "MD5|SHA");
