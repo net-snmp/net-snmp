@@ -22,6 +22,7 @@ struct snmpNotifyTable_data {
     char   *snmpNotifyTag;
     size_t  snmpNotifyTagLen;
     long    snmpNotifyType;
+    long    snmpNotifyCommand;
     long    snmpNotifyStorageType;
     long    snmpNotifyRowStatus;
 

@@ -89,9 +89,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg) {
                 send_trap_to_sess(sptr, template_pdu);
             } else if (sptr->version != SNMP_VERSION_1 &&
                        minor == SNMPD_CALLBACK_SEND_TRAP2) {
-                template_pdu->command =
-                    (nptr->snmpNotifyType == SNMPNOTIFYTYPE_INFORM) ?
-                    SNMP_MSG_INFORM : SNMP_MSG_TRAP2;
+                template_pdu->command = nptr->snmpNotifyCommand;
                 send_trap_to_sess(sptr, template_pdu);
             }
         }
