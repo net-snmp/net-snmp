@@ -216,6 +216,7 @@
 #define FREEBSDID 8
 #define IRIXID 9
 #define LINUXID 10
+#define BSDIID 11
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -247,6 +248,9 @@
 #endif
 #ifdef linux
 #define OSTYPE LINUXID
+#endif
+#if defined(bsdi2) || defined(bsdi3)
+#define OSTYPE IRIXID
 #endif
 /* unknown */
 #ifndef OSTYPE
