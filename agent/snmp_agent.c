@@ -34,6 +34,9 @@ SOFTWARE.
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -84,6 +87,7 @@ SOFTWARE.
 #include "default_store.h"
 #include "ds_agent.h"
 #include "snmp_agent.h"
+#include "agent_trap.h"
 
 static int snmp_vars_inc;
 
@@ -506,7 +510,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     WriteMethod *write_method;
     AddVarMethod *add_method;
     int	    noSuchObject;
-    int count;
+    int     count, view;
     
     count = 0;
     varbind_ptr = asp->start;
@@ -550,15 +554,14 @@ statp_loop:
                 statType = (*add_method)( asp, varbind_ptr );
         }
 		/* GETNEXT/GETBULK should just skip inaccessible entries */
-	else if ( !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
-                             asp->pdu, varbind_ptr->type)
+	else if ((view = in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
+				   asp->pdu, varbind_ptr->type))
 			 && !asp->exact) {
+		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 		goto statp_loop;
 	}
 		/* Other access problems are permanent */
-	else if (( asp->rw == WRITE && !(acl & 2))
-	      || !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
-                            asp->pdu, varbind_ptr->type)) {
+	else if (( asp->rw == WRITE && !(acl & 2)) || view) {
 	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
 		if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE))
                   DEBUGMSGTL(("snmp_agent", "    >> noSuchName (read-only)\n"));

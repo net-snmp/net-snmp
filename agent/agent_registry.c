@@ -562,14 +562,14 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   view_parms.pdu = pdu;
   view_parms.name = name;
   view_parms.namelen = *namelen;
-  view_parms.errorcode = 1;
+  view_parms.errorcode = 0;
 
   if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
-    return 1;		/* Enable bypassing of view-based access control */
+    return 0;		/* Enable bypassing of view-based access control */
 
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
   if (pdu->version == SNMP_VERSION_1 && type == ASN_COUNTER64)
-    return 0;
+    return 1;
   switch (pdu->version) {
   case SNMP_VERSION_1:
   case SNMP_VERSION_2c:
@@ -578,7 +578,7 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
                         &view_parms);
     return view_parms.errorcode;
   }
-  return 0;
+  return 1;
 }
 
 
