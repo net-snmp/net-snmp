@@ -107,7 +107,7 @@ struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char
 static void sprint_float (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_double (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 #endif
-void print_tree_node (FILE *f, struct tree *tp);
+static void print_tree_node (FILE *, struct tree *, int);
 
 /* helper functions for get_module_node */
 int node_to_oid(struct tree *, oid *, size_t *);
@@ -1918,28 +1918,41 @@ found:
 
 void
 print_description(oid *objid,
-		  size_t objidlen)   /* number of subidentifiers */
+		  size_t objidlen,   /* number of subidentifiers */
+		  int width)
 {
-    fprint_description(stdout, objid, objidlen);
+    fprint_description(stdout, objid, objidlen, width);
 }
 
 void
 fprint_description(FILE *f,
 		   oid *objid,
-		   size_t objidlen)   /* number of subidentifiers */
+		   size_t objidlen,   /* number of subidentifiers */
+		   int width)
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
     struct tree *subtree = tree_head;
+    int pos, len;
+    char buf[128];
+
     fprintf(f, "%s OBJECT-TYPE\n", tp->label);
-    print_tree_node(f, tp);
+    print_tree_node(f, tp, width);
     fprintf(f, "::= {");
+    pos = 5;
     while (objidlen > 1) {
 	for(; subtree; subtree = subtree->next_peer){
 	    if (*objid == subtree->subid){
 		if (strncmp( subtree->label, ANON, ANON_LEN))
-		    fprintf(f, " %s(%lu)", subtree->label, subtree->subid);
+		    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
 		else
-		    fprintf(f, " %lu", subtree->subid);
+		    sprintf(buf, " %lu", subtree->subid);
+		len = strlen(buf);
+		if (pos + len + 2 > width) {
+		    fprintf(f, "\n     ");
+		    pos = 5;
+		}
+		fprintf(f, "%s", buf);
+		pos += len;
 		break;
 	    }
 	}
@@ -1950,13 +1963,14 @@ fprint_description(FILE *f,
     fprintf(f, " %lu }\n", *objid);
 }
 
-void
+static void
 print_tree_node(FILE *f,
-		struct tree *tp)
+		struct tree *tp, int width)
 {
     const char *cp;
     char str[MAXTOKEN];
-    int i, prevmod;
+    int i, prevmod, pos, len;
+
     if (tp) {
 	module_name(tp->modid, str);
 	fprintf(f, "  -- FROM\t%s", str);
@@ -2015,10 +2029,18 @@ print_tree_node(FILE *f,
 	    struct enum_list *ep = tp->enums;
 	    int first = 1;
 	    fprintf(f," { ");
+	    pos = 16+strlen(cp)+2;
 	    while (ep) {
 		if (first) first = 0;
 		else fprintf(f, ", ");
-		fprintf(f, "%s(%d)", ep->label, ep->value);
+		sprintf(str, "%s(%d)", ep->label, ep->value);
+		len = strlen(str);
+		if (pos+len+2 > width) {
+		    fprintf(f, "\n\t\t  ");
+		    pos = 18;
+		}
+		fprintf(f, "%s", str);
+		pos += len+2;
 		ep = ep->next;
 	    }
 	    fprintf(f," } ");
@@ -2057,14 +2079,21 @@ print_tree_node(FILE *f,
 	if (tp->indexes) {
             struct index_list *ip = tp->indexes;
             int first=1;
-            fprintf(f, "  INDEXES\t");
+            fprintf(f, "  INDEX\t\t");
             fprintf(f," { ");
+	    pos = 16+3;
 	    while (ip) {
 		if (first) first = 0;
 		else fprintf(f, ", ");
-                if (ip->isimplied)
-                    fprintf(f, "IMPLIED ");
-		fprintf(f, "%s", ip->ilabel);
+		sprintf(str, "%s%s", ip->isimplied ? "IMPLIED " : "",
+			ip->ilabel);
+		len = strlen(str);
+		if (pos+len+2 > width) {
+		    fprintf(f, "\n\t\t   ");
+		    pos = 16+3;
+		}
+		fprintf(f, "%s", str);
+		pos += len+2;
 		ip = ip->next;
 	    }
 	    fprintf(f," }\n");

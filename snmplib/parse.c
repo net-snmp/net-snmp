@@ -118,6 +118,12 @@ int Line = 0;
 const char *File = "(none)";
 static int anonymous = 0;
 
+struct objgroup {
+    char *name;
+    int line;
+    struct objgroup *next;
+} *objgroups = NULL, *objects = NULL, *notifs = NULL;
+
 #define SYNTAX_MASK     0x80
 /* types of tokens
  Tokens wiht the SYNTAX_MASK bit set are syntax tokens */
@@ -196,9 +202,30 @@ static int anonymous = 0;
 #define CONVENTION  70
 #define DISPLAYHINT 71
 #define FROM        72
-#define CAPABILITIES 73
+#define AGENTCAP    73
 #define MACRO       74
 #define IMPLIED     75
+#define SUPPORTS    76
+#define INCLUDES    77
+#define VARIATION   78
+#define REVISION    79
+#define NOTIMPL	    80
+#define OBJECTS	    81
+#define NOTIFICATIONS	82
+#define MODULE	    83
+#define MINACCESS   84
+#define PRODREL	    85
+#define WRSYNTAX    86
+#define CREATEREQ   87
+#define NOTIFGROUP  88
+#define MANDATORYGROUPS	89
+#define GROUP	    90
+#define OBJECT	    91
+#define IDENTIFIER  92
+#define CHOICE	    93
+#define LEFTSQBRACK	95
+#define RIGHTSQBRACK	96
+#define IMPLICIT    97
 
 struct tok {
     const char *name;                 /* token name */
@@ -235,8 +262,8 @@ static struct tok tokens[] = {
     { "NOTIFICATION-TYPE", sizeof ("NOTIFICATION-TYPE")-1, NOTIFTYPE },
     { "OBJECT-GROUP", sizeof ("OBJECT-GROUP")-1, OBJGROUP },
     { "OBJECT-IDENTITY", sizeof ("OBJECT-IDENTITY")-1, OBJGROUP },
-    { "OBJECTIDENTIFIER", sizeof ("OBJECTIDENTIFIER")-1, OBJID },
-    { "OBJECT", sizeof ("OBJECT")-1, CONTINUE },
+    { "IDENTIFIER", sizeof ("IDENTIFIER")-1, IDENTIFIER },
+    { "OBJECT", sizeof ("OBJECT")-1, OBJECT },
     { "NetworkAddress", sizeof ("NetworkAddress")-1, NETADDR },
     { "Gauge", sizeof ("Gauge")-1, GAUGE },
     { "Gauge32", sizeof ("Gauge32")-1, GAUGE },
@@ -274,12 +301,28 @@ static struct tok tokens[] = {
     { "EXPORTS", sizeof ("EXPORTS")-1, EXPORTS },
     { "accessible-for-notify", sizeof ("accessible-for-notify")-1, ACCNOTIFY },
     { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
-    { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
+    { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFGROUP },
     { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
     { "FROM", sizeof ("FROM")-1, FROM },
-    { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
+    { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, AGENTCAP },
     { "MACRO", sizeof ("MACRO")-1, MACRO },
     { "IMPLIED", sizeof ("IMPLIED")-1, IMPLIED },
+    { "SUPPORTS", sizeof ("SUPPORTS")-1, SUPPORTS },
+    { "INCLUDES", sizeof ("INCLUDES")-1, INCLUDES },
+    { "VARIATION", sizeof ("VARIATION")-1, VARIATION },
+    { "REVISION", sizeof ("REVISION")-1, REVISION },
+    { "not-implemented", sizeof ("not-implemented")-1, NOTIMPL },
+    { "OBJECTS", sizeof ("OBJECTS")-1, OBJECTS },
+    { "NOTIFICATIONS", sizeof("NOTIFICATIONS")-1, NOTIFICATIONS },
+    { "MODULE", sizeof ("MODULE")-1, MODULE},
+    { "MIN-ACCESS", sizeof ("MIN-ACCESS")-1, MINACCESS },
+    { "PRODUCT-RELEASE", sizeof ("PRODUCT-RELEASE")-1, PRODREL },
+    { "WRITE-SYNTAX", sizeof ("WRITE-SYNTAX")-1, WRSYNTAX },
+    { "CREATION-REQUIRES", sizeof ("CREATION-REQUIRES")-1, CREATEREQ },
+    { "MANDATORY-GROUPS", sizeof ("MANDATORY-GROUPS")-1, MANDATORYGROUPS },
+    { "GROUP", sizeof("GROUP")-1, GROUP },
+    { "CHOICE", sizeof("CHOICE")-1, CHOICE },
+    { "IMPLICIT", sizeof("IMPLICIT")-1, IMPLICIT },
     { NULL }
 };
 
@@ -308,6 +351,7 @@ static struct module_compatability module_map[] = {
 	{ "RFC1315-MIB",	"FRAME-RELAY-DTE-MIB",	NULL,	0},
 	{ "RFC1316-MIB",	"CHARACTER-MIB", NULL,	0},
 };
+
 #define MODULE_NOT_FOUND	0
 #define MODULE_LOADED_OK	1
 #define MODULE_ALREADY_LOADED	2
@@ -363,7 +407,7 @@ static struct enum_list *parse_enumlist (FILE *, struct enum_list **);
 static struct range_list *parse_ranges(FILE *fp, struct range_list **);
 static struct node *parse_asntype (FILE *, char *, int *, char *);
 static struct node *parse_objecttype (FILE *, char *);
-static struct node *parse_objectgroup (FILE *, char *);
+static struct node *parse_objectgroup (FILE *, char *, int, struct objgroup **);
 static struct node *parse_notificationDefinition (FILE *, char *);
 static struct node *parse_trapDefinition (FILE *, char *);
 static struct node *parse_compliance (FILE *, char *);
@@ -1355,13 +1399,12 @@ static void do_linkup(struct module *mp,
 		onp = orphan_nodes = nbuckets[i];
 	    nbuckets[i] = NULL;
 	    while (onp) {
-		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-		    snmp_log(LOG_WARNING,
-                             "Unlinked OID in %s: %s ::= { %s %ld }\n",
-                             (mp->name ? mp->name : "<no module>"),
-                             (onp->label ? onp->label : "<no label>"),
-                             (onp->parent ? onp->parent : "<no parent>"),
-                             onp->subid);
+		snmp_log(LOG_WARNING,
+			 "Unlinked OID in %s: %s ::= { %s %ld }\n",
+			 (mp->name ? mp->name : "<no module>"),
+			 (onp->label ? onp->label : "<no label>"),
+			 (onp->parent ? onp->parent : "<no parent>"),
+			 onp->subid);
 		np = onp;
 		onp = onp->next;
 	    }
@@ -1748,7 +1791,7 @@ parse_asntype(FILE *fp,
     int level;
 
     type = get_token(fp, token, MAXTOKEN);
-    if (type == SEQUENCE){
+    if (type == SEQUENCE || type == CHOICE){
         level = 0;
         while((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE){
             if (type == LEFTBRACKET){
@@ -1771,19 +1814,94 @@ parse_asntype(FILE *fp,
             return np;
         }
         return NULL;
+    } else if (type == LEFTSQBRACK) {
+	int size = 0;
+    	do {
+	    type = get_token(fp, token, MAXTOKEN);
+	} while (type != ENDOFFILE && type != RIGHTSQBRACK);
+	if (type != RIGHTSQBRACK) {
+	    print_error("Expected \"]\"", token, type);
+	    return NULL;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+	if (type == IMPLICIT)
+	    type = get_token(fp, token, MAXTOKEN);
+	*ntype = get_token(fp, ntoken, MAXTOKEN);
+	if (*ntype == LEFTPAREN) {
+	    switch (type) {
+	    case OCTETSTR:
+	    	*ntype = get_token(fp, ntoken, MAXTOKEN);
+		if (*ntype != SIZE) {
+		    print_error("Expected SIZE", ntoken, *ntype);
+		    return NULL;
+		}
+		size = 1;
+		*ntype = get_token(fp, ntoken, MAXTOKEN);
+		if (*ntype != LEFTPAREN) {
+		    print_error("Expected \"(\" after SIZE", ntoken, *ntype);
+		    return NULL;
+		}
+		/* fall through */
+	    case INTEGER:
+		*ntype = get_token(fp, ntoken, MAXTOKEN);
+		do {
+		    if (*ntype != NUMBER)
+		        print_error("Expected NUMBER", ntoken, *ntype);
+		    *ntype = get_token(fp, ntoken, MAXTOKEN);
+		    if (*ntype == RANGE) {
+		    	*ntype = get_token(fp, ntoken, MAXTOKEN);
+			if (*ntype != NUMBER)
+			    print_error("Expected NUMBER", ntoken, *ntype);
+			*ntype = get_token(fp, ntoken, MAXTOKEN);
+		    }
+		} while (*ntype == BAR);
+		if (*ntype != RIGHTPAREN) {
+		    print_error("Expected \")\"", ntoken, *ntype);
+		    return NULL;
+		}
+		*ntype = get_token(fp, ntoken, MAXTOKEN);
+		if (size) {
+		    if (*ntype != RIGHTPAREN) {
+		        print_error("Expected \")\" to terminate SIZE",
+				ntoken, *ntype);
+			return NULL;
+		    }
+		    *ntype = get_token(fp, ntoken, MAXTOKEN);
+		}
+	    }
+	}
+	return NULL;
     } else {
         if (type == CONVENTION) {
             while (type != SYNTAX && type != ENDOFFILE) {
                 if (type == DISPLAYHINT) {
                     type = get_token(fp, token, MAXTOKEN);
-                    if (type != QUOTESTRING) print_error("DISPLAY-HINT must be string", token, type);
+                    if (type != QUOTESTRING)
+		    	print_error("DISPLAY-HINT must be string", token, type);
                     else hint = strdup (token);
                 }
                 else
 		    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             }
             type = get_token(fp, token, MAXTOKEN);
+	    if (type == OBJECT) {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != IDENTIFIER) {
+		    print_error("Expected IDENTIFIER", token, type);
+		    SNMP_FREE(hint);
+		    return NULL;
+		}
+		type = OBJID;
+	    }
         }
+	else if (type == OBJECT) {
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != IDENTIFIER) {
+	        print_error("Expected IDENTIFIER", token, type);
+		return NULL;
+	    }
+	    type = OBJID;
+	}
 
         if (type == LABEL)
         {
@@ -1849,6 +1967,15 @@ parse_objecttype(FILE *fp,
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
+    if (type == OBJECT) {
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != IDENTIFIER) {
+	    print_error("Expected IDENTIFIER", token, type);
+	    free (np);
+	    return NULL;
+	}
+	type = OBJID;
+    }
     if (type == LABEL){
         int tmp_index;
         tctype = get_tc(token, current_module, &tmp_index,
@@ -2026,46 +2153,81 @@ parse_objecttype(FILE *fp,
  *   - WJH 10/96
  */
 static struct node *
-parse_objectgroup(FILE *fp,
-		  char *name)
+parse_objectgroup(FILE *fp, char *name, int what, struct objgroup **ol)
 {
-    register int type;
+    int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np;
+    struct node *np;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
-    while (type != EQUALS && type != ENDOFFILE) {
-      switch (type) {
-        case DESCRIPTION:
-          type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
-          if (type != QUOTESTRING) {
-              print_error("Bad DESCRIPTION", quoted_string_buffer, type);
-              free_node(np);
-              return NULL;
-          }
-          if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-              np->description = strdup (quoted_string_buffer);
-          }
-          break;
-
-	case REFERENCE:
-	  type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
-          if (type != QUOTESTRING) {
-              print_error("Bad REFERENCE", quoted_string_buffer, type);
-              free_node(np);
-              return NULL;
-          }
-	  break;
-
-        default:
-          /* NOTHING */
-          break;
-      }
-      type = get_token(fp, token, MAXTOKEN);
+    if (type == what) {
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != LEFTBRACKET) {
+	    print_error("Expected \"{\"", token, type);
+	    goto skip;
+	}
+	do {
+	    struct objgroup *o;
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != LABEL) {
+		print_error("Bad identifier", token, type);
+		goto skip;
+	    }
+	    o = (struct objgroup *)malloc(sizeof(struct objgroup));
+	    o->line = Line;
+	    o->name = strdup(token);
+	    o->next = *ol;
+	    *ol = o;
+	    type = get_token(fp, token, MAXTOKEN);
+	} while (type == COMMA);
+	if (type != RIGHTBRACKET) {
+	    print_error("Expected \"}\" after list", token, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, type);
     }
+    if (type != STATUS) {
+	  print_error("Expected STATUS", token, type);
+	  goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != CURRENT && type != DEPRECATED && type != OBSOLETE) {
+	  print_error("Bad STATUS value", token, type);
+	  goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != DESCRIPTION) {
+	  print_error("Expected DESCRIPTION", token, type);
+	  goto skip;
+    }
+    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    if (type != QUOTESTRING) {
+	  print_error("Bad DESCRIPTION", quoted_string_buffer, type);
+	  free_node(np);
+	  return NULL;
+    }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+	  np->description = strdup (quoted_string_buffer);
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type == REFERENCE) {
+	  type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+        if (type != QUOTESTRING) {
+            print_error("Bad REFERENCE", quoted_string_buffer, type);
+            free_node(np);
+            return NULL;
+        }
+        type = get_token(fp, token, MAXTOKEN);
+    }
+    if (type != EQUALS)
+	  print_error("Expected \"::=\"", token, type);
+skip:
+    while (type != EQUALS && type != ENDOFFILE)
+	type = get_token(fp, token, MAXTOKEN);
+
     return merge_parse_objectid(np, fp, name);
 }
 
@@ -2191,21 +2353,218 @@ parse_trapDefinition(FILE *fp,
  * Parses a compliance macro
  * Returns 0 on error.
  */
+static int eat_syntax(FILE *fp, char *token, int maxtoken)
+{
+    int type, nexttype;
+    struct node *np = alloc_node(current_module);
+    char nexttoken[MAXTOKEN];
+    
+    type = get_token(fp, token, maxtoken);
+    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+    switch(type){
+    case INTEGER:
+    case UINTEGER32:
+    case COUNTER:
+    case GAUGE:
+    case BITSTRING:
+    case LABEL:
+	if (nexttype == LEFTBRACKET) {
+	    /* if there is an enumeration list, parse it */
+	    np->enums = parse_enumlist(fp, &np->enums);
+	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	} else if (nexttype == LEFTPAREN){
+	    /* if there is a range list, parse it */
+	    np->ranges = parse_ranges(fp, &np->ranges);
+	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	}
+	break;
+    case OCTETSTR:
+    case KW_OPAQUE:
+	/* parse any SIZE specification */
+	if (nexttype == LEFTPAREN) {
+	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
+	    if (nexttype == SIZE) {
+		nexttype = get_token(fp, nexttoken, MAXTOKEN);
+		if (nexttype == LEFTPAREN) {
+		    np->ranges = parse_ranges(fp, &np->ranges);
+		    nexttype = get_token(fp, nexttoken, MAXTOKEN); /* ) */
+		    if (nexttype == RIGHTPAREN)
+		    {
+			nexttype = get_token(fp, nexttoken, MAXTOKEN);
+			break;
+		    }
+		}
+	    }
+	    print_error("Bad SIZE syntax", token, type);
+	    free_node(np);
+	    return nexttype;
+	}
+	break;
+    case OBJID:
+    case NETADDR:
+    case IPADDR:
+    case TIMETICKS:
+    case NUL:
+    case NSAPADDRESS:
+    case COUNTER64:
+	break;
+    default:
+	print_error("Bad syntax", token, type);
+	free_node(np);
+	return nexttype;
+    }
+    free_node(np);
+    return nexttype;
+}
+
+static int compliance_lookup(const char *name, int modid)
+{
+    if (modid == -1) {
+	struct objgroup *op = malloc(sizeof(struct objgroup));
+	op->next = objgroups;
+	op->name = strdup(name);
+	op->line = Line;
+	objgroups = op;
+	return 1;
+    }
+    else return find_tree_node(name, modid) != NULL;
+}
+
 static struct node *
 parse_compliance(FILE *fp,
 		 char *name)
 {
-    register int type;
+    int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np;
-
+    struct node *np;
+    
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
-    while (type != EQUALS && type != ENDOFFILE) {
-        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    if (type != STATUS) {
+	print_error("Expected STATUS", token, type);
+	goto skip;
     }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != CURRENT && type != DEPRECATED && type != OBSOLETE) {
+	print_error("Bad STATUS", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != DESCRIPTION) {
+	print_error("Expected DESCRIPTION", token, type);
+	goto skip;
+    }
+    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    if (type != QUOTESTRING) {
+	print_error("Bad DESCRIPTION", quoted_string_buffer, type);
+	goto skip;
+    }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+	np->description = strdup (quoted_string_buffer);
+    type = get_token(fp, token, MAXTOKEN);
+    if (type == REFERENCE) {
+	type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+	if (type != QUOTESTRING) {
+	    print_error("Bad REFERENCE", quoted_string_buffer, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+    }
+    if (type != MODULE) {
+	print_error("Expected MODULE", token, type);
+	goto skip;
+    }
+    while (type == MODULE) {
+	int modid = -1;
+	struct tree *tp;
+	char modname[MAXTOKEN];
+	type = get_token(fp, token, MAXTOKEN);
+	if (type == LABEL && strcmp(token, module_name(current_module, modname))) {
+	    modid = read_module_internal(token);
+	    if (modid != MODULE_LOADED_OK && modid != MODULE_ALREADY_LOADED) {
+	    	print_error("Unknown module", token, type);
+		goto skip;
+	    }
+	    modid = which_module(token);
+	    type = get_token(fp, token, MAXTOKEN);
+	}
+	if (type == MANDATORYGROUPS) {
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != LEFTBRACKET) {
+		print_error("Expected \"{\"", token, type);
+		goto skip;
+	    }
+	    do {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != LABEL) {
+		    print_error("Bad group name", token, type);
+		    goto skip;
+		}
+		if (!compliance_lookup(token, modid))
+		    print_error("Unknown group", token, type);
+		type = get_token(fp, token, MAXTOKEN);
+	    } while (type == COMMA);
+	    if (type != RIGHTBRACKET) {
+		print_error("Expected \"}\"", token, type);
+		goto skip;
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	}
+	while (type == GROUP || type == OBJECT) {
+	    if (type == GROUP) {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != LABEL) {
+		    print_error("Bad group name", token, type);
+		    goto skip;
+		}
+		if (!compliance_lookup(token, modid))
+		    print_error("Unknown group", token, type);
+		type = get_token(fp, token, MAXTOKEN);
+	    }
+	    else {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != LABEL) {
+		    print_error("Bad object name", token, type);
+		    goto skip;
+		}
+		if (!compliance_lookup(token, modid))
+		    print_error("Unknown group", token, type);
+		type = get_token(fp, token, MAXTOKEN);
+		if (type == SYNTAX)
+		    type = eat_syntax(fp, token, MAXTOKEN);
+		if (type == WRSYNTAX)
+		    type = eat_syntax(fp, token, MAXTOKEN);
+		if (type == MINACCESS) {
+		    type = get_token(fp, token, MAXTOKEN);
+		    if (type != NOACCESS && type != ACCNOTIFY && type != READONLY
+			    && type != WRITEONLY && type != READCREATE && type != READWRITE) {
+			print_error("Bad MIN-ACCESS spec", token, type);
+			goto skip;
+		    }
+		type = get_token(fp, token, MAXTOKEN);
+		}
+	    }
+	    if (type != DESCRIPTION) {
+		print_error("Expected DESCRIPTION", token, type);
+		goto skip;
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != QUOTESTRING) {
+		print_error("Bad DESCRIPTION", token, type);
+		goto skip;
+	    }
+            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+                np->description = strdup (token);
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	}
+    }
+skip:
+    while (type != EQUALS && type != ENDOFFILE)
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    
     return merge_parse_objectid(np, fp, name);
 }
 
@@ -2218,14 +2577,168 @@ static struct node *
 parse_capabilities(FILE *fp,
 		   char *name)
 {
-    register int type;
+    int type;
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
-    register struct node *np;
-
+    struct node *np;
+    
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
+    if (type != PRODREL) {
+	print_error("Expected PRODUCT-RELEASE", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != QUOTESTRING) {
+	print_error("Expected STRING after PRODUCT-RELEASE", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != STATUS) {
+	print_error("Expected STATUS", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != CURRENT && type != OBSOLETE) {
+	print_error("STATUS should be current or obsolete", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != DESCRIPTION) {
+	print_error("Expected DESCRIPTION", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != QUOTESTRING) {
+	print_error("Bad DESCRIPTION", token, type);
+	goto skip;
+    }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+	np->description = strdup (token);
+    type = get_token(fp, token, MAXTOKEN);
+    if (type == REFERENCE) {
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != QUOTESTRING) {
+	    print_error("Bad REFERENCE", token, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, type);
+    }
+    while (type == SUPPORTS) {
+	int modid;
+	struct tree *tp;
+
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != LABEL) {
+	    print_error("Bad module name", token, type);
+	    goto skip;
+	}
+	modid = read_module_internal(token);
+	if (modid != MODULE_LOADED_OK && modid != MODULE_ALREADY_LOADED) {
+	    print_error("Module not found", token, type);
+	    goto skip;
+	}
+	modid = which_module(token);
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != INCLUDES) {
+	    print_error("Expected INCLUDES", token, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != LEFTBRACKET) {
+	    print_error("Expected \"{\"", token, type);
+	    goto skip;
+	}
+	do {
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != LABEL) {
+		print_error("Expected group name", token, type);
+		goto skip;
+	    }
+	    tp = find_tree_node(token, modid);
+	    if (!tp) print_error("Group not found in module", token, type);
+	    type = get_token(fp, token, MAXTOKEN);
+	} while (type == COMMA);
+	if (type != RIGHTBRACKET) {
+	    print_error("Expected \"}\" after group list", token, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+	while (type == VARIATION) {
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != LABEL) {
+		print_error("Bad object name", token, type);
+		goto skip;
+	    }
+	    tp = find_tree_node(token, modid);
+	    if (!tp) print_error("Object not found in module", token, type);
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type == SYNTAX) {
+		type = eat_syntax(fp, token, MAXTOKEN);
+	    }
+	    if (type == WRSYNTAX) {
+		type = eat_syntax(fp, token, MAXTOKEN);
+	    }
+	    if (type == ACCESS) {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != ACCNOTIFY && type != READONLY && type != READWRITE
+		    && type != READCREATE && type != WRITEONLY && type != NOTIMPL) {
+		    print_error("Bad ACCESS", token, type);
+		    goto skip;
+		}
+		type = get_token(fp, token, MAXTOKEN);
+	    }
+	    if (type == CREATEREQ) {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != LEFTBRACKET) {
+		    print_error("Expected \"{\"", token, type);
+		    goto skip;
+		}
+		do {
+		    type = get_token(fp, token, MAXTOKEN);
+		    if (type != LABEL) {
+			print_error("Bad object name in list", token, type);
+			goto skip;
+		    }
+		    type = get_token(fp, token, MAXTOKEN);
+		} while (type == COMMA);
+		if (type != RIGHTBRACKET) {
+		    print_error("Expected \"}\" after list", token, type);
+		    goto skip;
+		}
+		type = get_token(fp, token, MAXTOKEN);
+	    }
+	    if (type == DEFVAL) {
+		type = get_token(fp, token, MAXTOKEN);
+		if (type != LEFTBRACKET) {
+		    print_error("Expected \"{\" after DEFVAL", token, type);
+		    goto skip;
+		}
+		do {
+		    get_token(fp, token, MAXTOKEN);
+		} while (type != RIGHTBRACKET && type != ENDOFFILE);
+		if (type != RIGHTBRACKET) {
+		    print_error("Missing \"}\" after DEFVAL", token, type);
+		    goto skip;
+		}
+		type = get_token(fp, token, MAXTOKEN);
+	    }
+	    if (type != DESCRIPTION) {
+		print_error("Expected DESCRIPTION", token, type);
+		goto skip;
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	    if (type != QUOTESTRING) {
+		print_error("Bad DESCRIPTION", token, type);
+		goto skip;
+	    }
+	    type = get_token(fp, token, MAXTOKEN);
+	}
+    }
+    if (type != EQUALS)
+	print_error("Expected \"::=\"", token, type);
+skip:
     while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
     }
@@ -2236,6 +2749,40 @@ parse_capabilities(FILE *fp,
  * Parses a module identity macro
  * Returns 0 on error.
  */
+static void check_utc(const char *utc)
+{
+    int len, year, month, day, hour, minute;
+    
+    len = strlen(utc);
+    if (utc[len-1] != 'Z' && utc[len-1] != 'z') {
+	print_error("Timestamp should end with Z", utc, QUOTESTRING);
+	return;
+    }
+    if (len == 11) {
+	len = sscanf(utc, "%2d%2d%2d%2d%2dZ", &year, &month, &day, &hour, &minute);
+	year += 1900;
+    }
+    else if (len == 13)
+	len = sscanf(utc, "%4d%2d%2d%2d%2dZ", &year, &month, &day, &hour, &minute);
+    else {
+	print_error("Bad timestamp format (11 or 13 characters)",
+		    utc, QUOTESTRING);
+	return;
+    }
+    if (len != 5) {
+	print_error("Bad timestamp format", utc, QUOTESTRING);
+	return;
+    }
+    if (month < 1 || month > 12)
+    	print_error("Bad month in timestamp", utc, QUOTESTRING);
+    if (day < 1 || day > 31)
+    	print_error("Bad day in timestamp", utc, QUOTESTRING);
+    if (hour < 0 || hour > 23)
+    	print_error("Bad hour in timestamp", utc, QUOTESTRING);
+    if (minute < 0 || minute > 59)
+    	print_error("Bad minute in timestamp", utc, QUOTESTRING);
+}
+
 static struct node *
 parse_moduleIdentity(FILE *fp,
 		     char *name)
@@ -2244,10 +2791,75 @@ parse_moduleIdentity(FILE *fp,
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
     register struct node *np;
-
+    
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
+    if (type != LASTUPDATED) {
+	print_error("Expected LAST-UPDATED", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != QUOTESTRING) {
+	print_error("Need STRING for LAST-UPDATED", token, type);
+	goto skip;
+    }
+    check_utc(token);
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != ORGANIZATION) {
+	print_error("Expected ORGANIZATION", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != QUOTESTRING) {
+	print_error("Bad ORGANIZATION", token, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != CONTACTINFO) {
+	print_error("Expected CONTACT-INFO", token, type);
+	goto skip;
+    }
+    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    if (type != QUOTESTRING) {
+	print_error("Bad CONTACT-INFO", quoted_string_buffer, type);
+	goto skip;
+    }
+    type = get_token(fp, token, MAXTOKEN);
+    if (type != DESCRIPTION) {
+	print_error("Expected DESCRIPTION", token, type);
+	goto skip;
+    }
+    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    if (type != QUOTESTRING) {
+	print_error("Bad DESCRIPTION", quoted_string_buffer, type);
+	goto skip;
+    }
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+	np->description = strdup (quoted_string_buffer);
+    type = get_token(fp, token, MAXTOKEN);
+    while (type == REVISION) {
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != QUOTESTRING) {
+	    print_error("Bad REVISION", token, type);
+	    goto skip;
+	}
+	check_utc(token);
+	type = get_token(fp, token, MAXTOKEN);
+	if (type != DESCRIPTION) {
+	    print_error("Expected DESCRIPTION", token, type);
+	    goto skip;
+	}
+	type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+	if (type != QUOTESTRING) {
+	    print_error("Bad DESCRIPTION", quoted_string_buffer, type);
+	    goto skip;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+    }
+    if (type != EQUALS)
+	print_error("Expected \"::=\"", token, type);
+skip:
     while (type != EQUALS && type != ENDOFFILE) {
         type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
     }
@@ -2339,11 +2951,6 @@ parse_imports(FILE *fp)
 	    for ( old_i=i ; i<import_count ; ++i)
 		import_list[i].modid = this_module;
 
-	    old_current_module = current_module;	/* Save state */
-            old_File = File;
-	    old_line = Line;
-	    current_module = this_module;
-
 		/*
 		 * Recursively read any pre-requisite modules
 		 */
@@ -2352,10 +2959,6 @@ parse_imports(FILE *fp)
 		    read_import_replacements( token, &import_list[old_i]);
 		}
 	    }
-
-	    current_module = old_current_module;	/* Restore state */
-	    File = old_File;
-	    Line = old_line;
 	}
 	type = get_token(fp, token, MAXTOKEN);
     }
@@ -2372,20 +2975,20 @@ parse_imports(FILE *fp)
 	    {
 		/* this can happen if all modules are in one source file. */
 		for ( i=0 ; i<mp->no_imports; ++i ) {
-	DEBUGMSGTL(("parse-mibs",  "#### freeing Module %d '%s' %d\n",
-	mp->modid, mp->imports[i].label, mp->imports[i].modid));
+		    DEBUGMSGTL(("parse-mibs",  "#### freeing Module %d '%s' %d\n",
+			mp->modid, mp->imports[i].label, mp->imports[i].modid));
 		    free((char *)mp->imports[i].label);
 		}
 		free((char*)mp->imports);
 	    }
             mp->imports = (struct module_import *)
-              calloc(import_count, sizeof(struct module_import));
+		calloc(import_count, sizeof(struct module_import));
             if (mp->imports == NULL) return;
 	    for ( i=0 ; i<import_count ; ++i ) {
 		mp->imports[i].label = import_list[i].label;
 		mp->imports[i].modid = import_list[i].modid;
-	DEBUGMSGTL(("parse-mibs",  "#### adding Module %d '%s' %d\n",
-	mp->modid, mp->imports[i].label, mp->imports[i].modid));
+		DEBUGMSGTL(("parse-mibs",  "#### adding Module %d '%s' %d\n",
+		mp->modid, mp->imports[i].label, mp->imports[i].modid));
 	    }
 	    mp->no_imports = import_count;
 	    return;
@@ -2556,6 +3159,7 @@ read_module_internal (const char *name)
 	if ( !label_compare(mp->name, name)) {
     	    const char *oldFile = File;
     	    int oldLine = Line;
+	    int oldModule = current_module;
 
 	    if ( mp->no_imports != -1 ) {
 		DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n", name));
@@ -2568,6 +3172,7 @@ read_module_internal (const char *name)
 	    mp->no_imports=0;		/* Note that we've read the file */
 	    File = mp->file;
 	    Line = 1;
+	    current_module = mp->modid;
 		/*
 		 * Parse the file
 		 */
@@ -2575,6 +3180,7 @@ read_module_internal (const char *name)
 	    fclose(fp);
 	    File = oldFile;
 	    Line = oldLine;
+	    current_module = oldModule;
 	    return MODULE_LOADED_OK;
 	}
 
@@ -2588,14 +3194,14 @@ adopt_orphans (void)
 {
     struct node *np, *onp;
     struct tree *tp;
-    int i, adopted;
+    int i, adopted = 1;
 
     if ( !orphan_nodes )
 	return;
     init_node_hash(orphan_nodes);
     orphan_nodes = NULL;
 
-    while (1) {
+    while (adopted) {
 	adopted = 0;
 	for ( i = 0; i < NHASHSIZE; i++)
 	    if ( nbuckets[i] ) {
@@ -2606,8 +3212,6 @@ adopt_orphans (void)
 		        adopted = 1;
 	            }
 	    }
-	if ( adopted == 0 )
-	    break;
     }
 
 	/*
@@ -2779,7 +3383,30 @@ new_module (const char *name,
 }
 
 
+static void
+scan_objlist(struct node *root, struct objgroup *list, const char *error)
+{
+    int oLine = Line;
 
+    while (list) {
+	struct objgroup *gp = list;
+	struct node *np;
+	list = list->next;
+	np = root;
+	while (np)
+	    if (label_compare(np->label, gp->name))
+		np = np->next;
+	    else
+		break;
+	if (!np) {
+	    Line = gp->line;
+	    print_error(error, gp->name, QUOTESTRING);
+	}
+	free(gp->name);
+	free(gp);
+    }
+    Line = oLine;
+}
 
 /*
  * Parses a mib file and returns a linked list of nodes found in the file.
@@ -2798,6 +3425,7 @@ parse(FILE *fp,
 #define IN_MIB                2
     int state = BETWEEN_MIBS;
     struct node *np, *nnp;
+    struct objgroup *oldgroups = NULL, *oldobjects = NULL, *oldnotifs = NULL;
 
     DEBUGMSGTL(("parse-file", "Parsing file:  %s...\n", File));
 
@@ -2824,8 +3452,14 @@ parse(FILE *fp,
 		struct module *mp;
 #ifdef TEST
 		printf("\nNodes for Module %s:\n", name);
-		print_nodes( stdout, np );
+		print_nodes( stdout, root );
 #endif
+		scan_objlist(root, objgroups, "Undefined OBJECT-GROUP");
+		scan_objlist(root, objects, "Undefined OBJECT");
+		scan_objlist(root, notifs, "Undefined NOTIFICATION");
+		objgroups = oldgroups;
+		objects = oldobjects;
+		notifs = oldnotifs;
 		for (mp = module_head; mp; mp = mp->next)
 		    if (mp->modid == current_module) break;
 		do_linkup(mp, root);
@@ -2845,6 +3479,16 @@ parse(FILE *fp,
                 type = get_token(fp, token, MAXTOKEN);
             continue;
         case LABEL:
+	case INTEGER32:
+	case UINTEGER32:
+	case COUNTER:
+	case COUNTER64:
+	case GAUGE:
+	case IPADDR:
+	case NETADDR:
+	case NSAPADDRESS:
+	case KW_OPAQUE:
+	case TIMETICKS:
             break;
         case ENDOFFILE:
             continue;
@@ -2889,6 +3533,9 @@ parse(FILE *fp,
             }
             state = IN_MIB;
             current_module = which_module( name );
+	    oldgroups = objgroups;
+	    oldobjects = objects;
+	    oldnotifs = notifs;
             if ( current_module == -1 ) {
                 new_module(name, File);
                 current_module = which_module(name);
@@ -2905,9 +3552,16 @@ parse(FILE *fp,
             }
             break;
         case OBJGROUP:
-            nnp = parse_objectgroup(fp, name);
+            nnp = parse_objectgroup(fp, name, OBJECTS, &objects);
             if (nnp == NULL){
                 print_error("Bad parse of OBJECT-GROUP", NULL, type);
+                return NULL;
+            }
+            break;
+        case NOTIFGROUP:
+            nnp = parse_objectgroup(fp, name, NOTIFICATIONS, &notifs);
+            if (nnp == NULL){
+                print_error("Bad parse of NOTIFICATION-GROUP", NULL, type);
                 return NULL;
             }
             break;
@@ -2932,7 +3586,7 @@ parse(FILE *fp,
                 return NULL;
             }
             break;
-        case CAPABILITIES:
+        case AGENTCAP:
             nnp = parse_capabilities(fp, name);
             if (nnp == NULL){
                 print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
@@ -2955,7 +3609,12 @@ parse(FILE *fp,
                 return NULL;
             }
             break;
-        case OBJID:
+        case OBJECT:
+            type = get_token(fp, token, MAXTOKEN);
+	    if (type != IDENTIFIER) {
+		print_error("Expected IDENTIFIER", token, type);
+		return NULL;
+	    }
             type = get_token(fp, token, MAXTOKEN);
             if (type != EQUALS){
                 print_error("Expected \"::=\"", token, type);
@@ -3069,6 +3728,10 @@ get_token(FILE *fp,
 	return LEFTBRACKET;
     case '}':
 	return RIGHTBRACKET;
+    case '[':
+    	return LEFTSQBRACK;
+    case ']':
+    	return RIGHTSQBRACK;
     case ';':
 	return SEMI;
     case ',':
@@ -3543,8 +4206,29 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
   char last_ipch = *ip;
 
   *ip = '+';
-  if (tp->type == 0)
+  if (tp->type == 0) {
     fprintf(f, "%s--%s(%ld)\n", leave_indent, tp->label, tp->subid);
+    if (tp->indexes) {
+      struct index_list *xp = tp->indexes;
+      int first = 1, cpos = 0, len, cmax = width - strlen(leave_indent) - 12;
+      *ip = last_ipch;
+      fprintf(f, "%s  |  Index: ", leave_indent);
+      while (xp) {
+	if (first) first = 0;
+	else fprintf (f, ", ");
+	cpos += (len = strlen(xp->ilabel) + 2);
+	if (cpos > cmax) {
+	  fprintf(f, "\n");
+	  fprintf(f, "%s  |         ", leave_indent);
+	  cpos = len;
+	}
+        fprintf(f, "%s", xp->ilabel);
+	xp = xp->next;
+      }
+      fprintf(f, "\n");
+      *ip = '+';
+    }
+  }
   else {
     const char *acc, *typ;
     int size = 0;
