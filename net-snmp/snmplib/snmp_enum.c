@@ -151,7 +151,7 @@ se_add_pair(unsigned int major, unsigned int minor, char *label, int value) {
  * remember a list of enums based on a lookup name.
  */
 struct snmp_enum_list *
-se_find_slist(char *listname) {
+se_find_slist(const char *listname) {
     struct snmp_enum_list_str *sptr, *lastp = NULL;
     if (!listname)
         return NULL;
@@ -178,16 +178,16 @@ se_find_slist(char *listname) {
 }
 
 
-char * se_find_label_in_slist(char *listname, int value) {
+char * se_find_label_in_slist(const char *listname, int value) {
     return (se_find_label_in_list(se_find_slist(listname), value));
 }
 
     
-int se_find_value_in_slist(char *listname, char *label) {
+int se_find_value_in_slist(const char *listname, char *label) {
     return (se_find_value_in_list(se_find_slist(listname), label));
 }
 
-int se_add_pair_to_slist(char *listname, char *label, int value) {
+int se_add_pair_to_slist(const char *listname, char *label, int value) {
     struct snmp_enum_list *list = se_find_slist(listname);
     int created = (list)?1:0;
     int ret = se_add_pair_to_list(&list, label, value);
