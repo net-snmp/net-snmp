@@ -63,10 +63,6 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
@@ -90,6 +86,10 @@
 
 #include "icmp.h"
 #include "sysORTable.h"
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5

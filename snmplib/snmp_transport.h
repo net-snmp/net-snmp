@@ -79,11 +79,15 @@ typedef struct _snmp_transport {
   char *(*f_fmtaddr) (struct _snmp_transport *, void *, int);
 } snmp_transport;
 
+typedef struct snmp_transport_list_s {
+   snmp_transport *transport;
+   struct snmp_transport_list_s *next;
+} snmp_transport_list;
+
 typedef struct _snmp_tdomain {
   const oid		*name;
   size_t		 name_length;
   const char 	       **prefix;
-
   snmp_transport	*(*f_create)(const char *, int);
 
   struct _snmp_tdomain	*next;
@@ -92,6 +96,11 @@ typedef struct _snmp_tdomain {
 
 /*  Some utility functions.  */
 
+int snmp_transport_add_to_list(snmp_transport_list **transport_list,
+                               snmp_transport *transport);
+int snmp_transport_remove_from_list(snmp_transport_list **transport_list,
+                                    snmp_transport *transport);
+    
 
 /*  Return an exact (deep) copy of t, or NULL if there is a memory allocation
     problem (for instance).  */

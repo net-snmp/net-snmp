@@ -29,6 +29,7 @@
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
+#include "tools.h"
 
 
 /*  Our list of supported transport domains.  */
@@ -333,3 +334,49 @@ snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
   free(mystring);
   return NULL;
 }
+
+
+/** adds a transport to a linked list of transports.
+    Returns 1 on failure, 0 on success */
+int
+snmp_transport_add_to_list(snmp_transport_list **transport_list,
+                           snmp_transport *transport) {
+    snmp_transport_list *newptr = SNMP_MALLOC_TYPEDEF(snmp_transport_list);
+
+    if (!newptr)
+        return 1;
+
+    newptr->next = *transport_list;
+    newptr->transport = transport;
+    
+    *transport_list = newptr;
+
+    return 0;
+}
+
+
+/**  removes a transport from a linked list of transports.
+     Returns 1 on failure, 0 on success */
+int
+snmp_transport_remove_from_list(snmp_transport_list **transport_list,
+                                snmp_transport *transport) {
+    snmp_transport_list *ptr = *transport_list, *lastptr = NULL;
+
+    while(ptr && ptr->transport != transport) {
+        lastptr = ptr;
+        ptr = ptr->next;
+    }
+
+    if (!ptr)
+        return 1;
+
+    if (lastptr)
+        lastptr->next = ptr->next;
+    else
+        *transport_list = ptr->next;
+    
+    free(ptr);
+
+    return 0;
+}
+
