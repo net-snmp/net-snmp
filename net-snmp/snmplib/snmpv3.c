@@ -750,8 +750,8 @@ usm_parse_create_usmUser(const char *token, char *line)
 #ifdef HAVE_AES
     } else if (strncmp(cp, "AES128", 3) == 0 ||
                strncmp(cp, "AES", 3) == 0) {
-        memcpy(newuser->privProtocol, usmAES128PrivProtocol,
-               sizeof(usmAES128PrivProtocol));
+        memcpy(newuser->privProtocol, usmAESPrivProtocol,
+               sizeof(usmAESPrivProtocol));
 #endif
     } else {
         config_perror("Unknown privacy protocol");
