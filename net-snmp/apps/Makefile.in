@@ -86,78 +86,65 @@ depend: dependlocal
         ( cd $$i ; $(MAKE) depend ) \
 	done
 
-nosysdepend: dependlocal
+nosysdepend: 
+	for i in $(SUBDIRS) ; do \
+        ( cd $$i ; $(MAKE) nosysdepend ) \
+	done
+	makedepend $(CPPFLAGS) *.c
 	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; s#$(srcdir)/##g; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-snmpbulkwalk.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_api.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/snmp_client.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/mib.h ../../cmusnmp/snmplib/snmp.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/snmp_impl.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/context.h
-snmpbulkwalk.o: ../../cmusnmp/snmplib/view.h ../../cmusnmp/snmplib/acl.h
-snmpget.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpget.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_impl.h
-snmpget.o: ../../cmusnmp/snmplib/snmp_api.h
-snmpget.o: ../../cmusnmp/snmplib/snmp_client.h ../../cmusnmp/snmplib/mib.h
-snmpget.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/party.h
-snmpget.o: ../../cmusnmp/snmplib/context.h ../../cmusnmp/snmplib/view.h
-snmpget.o: ../../cmusnmp/snmplib/acl.h
-snmpgetnext.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpgetnext.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_impl.h
-snmpgetnext.o: ../../cmusnmp/snmplib/snmp_api.h
-snmpgetnext.o: ../../cmusnmp/snmplib/snmp_client.h
-snmpgetnext.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/mib.h
-snmpgetnext.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/context.h
-snmpgetnext.o: ../../cmusnmp/snmplib/view.h ../../cmusnmp/snmplib/acl.h
-snmpset.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpset.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_impl.h
-snmpset.o: ../../cmusnmp/snmplib/snmp_api.h
-snmpset.o: ../../cmusnmp/snmplib/snmp_client.h ../../cmusnmp/snmplib/mib.h
-snmpset.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/party.h
-snmpset.o: ../../cmusnmp/snmplib/context.h ../../cmusnmp/snmplib/view.h
-snmpset.o: ../../cmusnmp/snmplib/acl.h
-snmpstatus.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpstatus.o:  ../../cmusnmp/snmplib/asn1.h
-snmpstatus.o: ../../cmusnmp/snmplib/snmp_impl.h
-snmpstatus.o: ../../cmusnmp/snmplib/snmp_api.h
-snmpstatus.o: ../../cmusnmp/snmplib/snmp_client.h
-snmpstatus.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/context.h
-snmpstatus.o: ../../cmusnmp/snmplib/view.h ../../cmusnmp/snmplib/acl.h
-snmpstatus.o: ../../cmusnmp/snmplib/mib.h ../../cmusnmp/snmplib/snmp.h
-snmptest.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmptest.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_impl.h
-snmptest.o: ../../cmusnmp/snmplib/snmp_api.h ../../cmusnmp/snmplib/mib.h
-snmptest.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/snmp_client.h
-snmptest.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/context.h
-snmptest.o: ../../cmusnmp/snmplib/view.h ../../cmusnmp/snmplib/acl.h
-snmptranslate.o: ../config.h ../mib_module_config.h
-snmptranslate.o: ../agent/mibgroup/struct.h 
-snmptranslate.o: ../../cmusnmp/snmplib/asn1.h
-snmptranslate.o: ../../cmusnmp/snmplib/snmp_impl.h
-snmptranslate.o: ../../cmusnmp/snmplib/snmp_api.h
-snmptranslate.o: ../../cmusnmp/snmplib/snmp_client.h
-snmptranslate.o: ../../cmusnmp/snmplib/mib.h ../../cmusnmp/snmplib/snmp.h
-snmptrap.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmptrap.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_impl.h
-snmptrap.o: ../../cmusnmp/snmplib/snmp_api.h
-snmptrap.o: ../../cmusnmp/snmplib/snmp_client.h ../../cmusnmp/snmplib/mib.h
-snmptrap.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/party.h
-snmptrap.o: ../../cmusnmp/snmplib/system.h
-snmptrapd.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmptrapd.o:  ../../cmusnmp/snmplib/asn1.h
-snmptrapd.o: ../../cmusnmp/snmplib/snmp_impl.h
-snmptrapd.o: ../../cmusnmp/snmplib/snmp_api.h
-snmptrapd.o: ../../cmusnmp/snmplib/snmp_client.h
-snmptrapd.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/view.h
-snmptrapd.o: ../../cmusnmp/snmplib/acl.h ../../cmusnmp/snmplib/context.h
-snmptrapd.o: ../../cmusnmp/snmplib/mib.h ../../cmusnmp/snmplib/snmp.h
-snmptrapd.o: ../../cmusnmp/snmplib/system.h
-snmpwalk.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
-snmpwalk.o: ../../cmusnmp/snmplib/asn1.h ../../cmusnmp/snmplib/snmp_api.h
-snmpwalk.o: ../../cmusnmp/snmplib/snmp_client.h ../../cmusnmp/snmplib/mib.h
-snmpwalk.o: ../../cmusnmp/snmplib/snmp.h ../../cmusnmp/snmplib/snmp_impl.h
-snmpwalk.o: ../../cmusnmp/snmplib/party.h ../../cmusnmp/snmplib/context.h
-snmpwalk.o: ../../cmusnmp/snmplib/view.h ../../cmusnmp/snmplib/acl.h
+snmpbulkwalk.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpbulkwalk.o: .snmpliasn1.h .snmplisnmp_api.h
+snmpbulkwalk.o: .snmplisnmp_client.h .snmplimib.h
+snmpbulkwalk.o: .snmplisnmp.h .snmplisnmp_impl.h
+snmpbulkwalk.o: .snmpliparty.h .snmplicontext.h
+snmpbulkwalk.o: .snmpliview.h .snmpliacl.h
+snmpget.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpget.o: .snmpliasn1.h .snmplisnmp_impl.h
+snmpget.o: .snmplisnmp_api.h .snmplisnmp_client.h
+snmpget.o: .snmplimib.h .snmplisnmp.h .snmpliparty.h
+snmpget.o: .snmplicontext.h .snmpliview.h .snmpliacl.h
+snmpgetnext.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpgetnext.o: .snmpliasn1.h .snmplisnmp_impl.h
+snmpgetnext.o: .snmplisnmp_api.h .snmplisnmp_client.h
+snmpgetnext.o: .snmplisnmp.h .snmplimib.h .snmpliparty.h
+snmpgetnext.o: .snmplicontext.h .snmpliview.h .snmpliacl.h
+snmpset.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpset.o: .snmpliasn1.h .snmplisnmp_impl.h
+snmpset.o: .snmplisnmp_api.h .snmplisnmp_client.h
+snmpset.o: .snmplimib.h .snmplisnmp.h .snmpliparty.h
+snmpset.o: .snmplicontext.h .snmpliview.h .snmpliacl.h
+snmpstatus.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpstatus.o: .snmpliasn1.h .snmplisnmp_impl.h
+snmpstatus.o: .snmplisnmp_api.h .snmplisnmp_client.h
+snmpstatus.o: .snmpliparty.h .snmplicontext.h .snmpliview.h
+snmpstatus.o: .snmpliacl.h .snmplimib.h .snmplisnmp.h
+snmptest.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmptest.o:  .snmpliasn1.h .snmplisnmp_impl.h
+snmptest.o: .snmplisnmp_api.h .snmplimib.h .snmplisnmp.h
+snmptest.o: .snmplisnmp_client.h .snmpliparty.h
+snmptest.o: .snmplicontext.h .snmpliview.h .snmpliacl.h
+snmptranslate.o: .config.h .mib_module_config.h
+snmptranslate.o: .agenmibgroustruct.h 
+snmptranslate.o:  .snmpliasn1.h
+snmptranslate.o: .snmplisnmp_impl.h .snmplisnmp_api.h
+snmptranslate.o: .snmplisnmp_client.h .snmplimib.h
+snmptranslate.o: .snmplisnmp.h
+snmptrap.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmptrap.o:   .snmpliasn1.h
+snmptrap.o: .snmplisnmp_impl.h .snmplisnmp_api.h
+snmptrap.o: .snmplisnmp_client.h .snmplimib.h .snmplisnmp.h
+snmptrap.o: .snmpliparty.h .snmplisystem.h
+snmptrapd.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmptrapd.o: .snmpliasn1.h .snmplisnmp_impl.h
+snmptrapd.o: .snmplisnmp_api.h .snmplisnmp_client.h
+snmptrapd.o: .snmpliparty.h .snmpliview.h .snmpliacl.h
+snmptrapd.o: .snmplicontext.h .snmplimib.h .snmplisnmp.h
+snmptrapd.o: .snmplisystem.h
+snmpwalk.o: .config.h .mib_module_config.h .agenmibgroustruct.h
+snmpwalk.o: .snmpliasn1.h .snmplisnmp_api.h
+snmpwalk.o: .snmplisnmp_client.h .snmplimib.h .snmplisnmp.h
+snmpwalk.o: .snmplisnmp_impl.h .snmpliparty.h
+snmpwalk.o: .snmplicontext.h .snmpliview.h .snmpliacl.h
