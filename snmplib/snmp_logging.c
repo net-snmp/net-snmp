@@ -109,10 +109,6 @@ snmp_disable_filelog(void) {
 
 void
 snmp_disable_stderrlog(void) {
-  if (do_stderrlogging)
-  {
-    fputs("\n",stderr);
-  }
   do_stderrlogging=0;
 }
 
@@ -125,8 +121,8 @@ snmp_disable_log(void) {
 }
 
 
-void 
-snmp_enable_syslog(void) 
+void
+snmp_enable_syslog(void)
 {
   snmp_disable_syslog();
 #if HAVE_SYSLOG_H
@@ -137,7 +133,7 @@ snmp_enable_syslog(void)
 
 
 void
-snmp_enable_filelog(const char *logfilename, int dont_zero_log) 
+snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 {
   snmp_disable_filelog();
   logfile=fopen(logfilename, dont_zero_log ? "a" : "w");
@@ -188,7 +184,7 @@ int
 snmp_vlog (int priority, const char *format, va_list ap)
 {
   char buffer[LOGLENGTH];
-  int length; 
+  int length;
 #if HAVE_VSNPRINTF
   char *dynamic;
 
@@ -206,7 +202,7 @@ snmp_vlog (int priority, const char *format, va_list ap)
   if (length < LOGLENGTH) {
     snmp_log_string(priority, buffer);
     return(0);
-  } 
+  }
 
 #if HAVE_VSNPRINTF
   dynamic=malloc(length+1);
@@ -261,7 +257,7 @@ snmp_log_perror(const char *s)
   if (s) {
     if (error)
       snmp_log(LOG_ERR, "%s: %s\n", s, error);
-    else 
+    else
       snmp_log(LOG_ERR, "%s: Error %d out-of-range\n", s, errno);
   } else {
     if (error)
