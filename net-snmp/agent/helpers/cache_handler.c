@@ -344,8 +344,8 @@ netsnmp_cache_reqinfo_insert(netsnmp_cache* cache,
 
 /** Extract the cache information for a given request (PDU) */
 netsnmp_cache  *
-netsnmp_cache_extract_from_reqinfo(netsnmp_agent_request_info * reqinfo,
-                                   const char *name)
+netsnmp_cache_reqinfo_extract(netsnmp_agent_request_info * reqinfo,
+                              const char *name)
 {
     netsnmp_cache  *result;
     char *cache_name = _build_cache_name(name);
@@ -358,7 +358,7 @@ netsnmp_cache_extract_from_reqinfo(netsnmp_agent_request_info * reqinfo,
 netsnmp_cache  *
 netsnmp_extract_cache_info(netsnmp_agent_request_info * reqinfo)
 {
-    return netsnmp_cache_extract_from_reqinfo(reqinfo, CACHE_NAME);
+    return netsnmp_cache_reqinfo_extract(reqinfo, CACHE_NAME);
 }
 
 
@@ -399,7 +399,7 @@ int
 netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo, 
                        const char* name)
 {
-    netsnmp_cache  *cache = netsnmp_cache_extract_from_reqinfo(reqinfo, name);
+    netsnmp_cache  *cache = netsnmp_cache_reqinfo_extract(reqinfo, name);
     return (cache && cache->valid);
 }
 
