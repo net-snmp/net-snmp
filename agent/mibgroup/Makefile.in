@@ -97,39 +97,6 @@ examples/example.o: ./../../snmplib/snmp_logging.h
 examples/example.o:  ./../../snmplib/read_config.h
 examples/example.o: ./../../snmplib/tools.h ./../agent_trap.h util_funcs.h
 examples/example.o: struct.h examples/example.h
-vestinternett/diskio.o: ../../config.h ../../mib_module_config.h
-vestinternett/diskio.o: ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-vestinternett/diskio.o: ../../m/generic.h 
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  
-vestinternett/diskio.o: 
-vestinternett/diskio.o: 
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  
-vestinternett/diskio.o: mibincl.h 
-vestinternett/diskio.o: 
-vestinternett/diskio.o:  
-vestinternett/diskio.o: 
-vestinternett/diskio.o:  
-vestinternett/diskio.o: 
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  
-vestinternett/diskio.o: 
-vestinternett/diskio.o: 
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  
-vestinternett/diskio.o:  ./../../snmplib/asn1.h
-vestinternett/diskio.o: ./../../snmplib/snmp_api.h
-vestinternett/diskio.o: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-vestinternett/diskio.o: ./../agent_registry.h ./../agent_read_config.h
-vestinternett/diskio.o: ./../var_struct.h ./../../snmplib/snmp.h
-vestinternett/diskio.o: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-vestinternett/diskio.o: ./../../snmplib/snmp_logging.h 
-vestinternett/diskio.o: 
-vestinternett/diskio.o: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-vestinternett/diskio.o: ./../agent_trap.h util_funcs.h struct.h
-vestinternett/diskio.o: vestinternett/diskio.h
 mibII/system_mib.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 mibII/system_mib.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/system_mib.o:  

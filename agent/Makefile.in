@@ -113,7 +113,7 @@ agent_read_config.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 agent_read_config.o: mibgroup/host.h mibgroup/agentx.h
 agent_read_config.o: mibgroup/examples/ucdDemoPublic.h
 agent_read_config.o: mibgroup/examples/example.h
-agent_read_config.o: mibgroup/vestinternett/diskio.h mibgroup/target.h
+agent_read_config.o: mibgroup/target.h
 agent_read_config.o: mibgroup/smux.h mibgroup/mibII/system_mib.h
 agent_read_config.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 agent_read_config.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -162,7 +162,7 @@ agent_registry.o: ./../snmplib/snmp_alarm.h snmpd.h mibgroup/struct.h
 agent_registry.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 agent_registry.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
 agent_registry.o: mibgroup/agentx.h mibgroup/examples/ucdDemoPublic.h
-agent_registry.o: mibgroup/examples/example.h mibgroup/vestinternett/diskio.h
+agent_registry.o: mibgroup/examples/example.h
 agent_registry.o: mibgroup/target.h mibgroup/smux.h
 agent_registry.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_registry.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
@@ -221,7 +221,7 @@ mib_modules.o: mibgroup/struct.h mib_modules.h
 mib_modules.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 mib_modules.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
 mib_modules.o: mibgroup/agentx.h mibgroup/examples/ucdDemoPublic.h
-mib_modules.o: mibgroup/examples/example.h mibgroup/vestinternett/diskio.h
+mib_modules.o: mibgroup/examples/example.h
 mib_modules.o: mibgroup/target.h mibgroup/smux.h mibgroup/mibII/system_mib.h
 mib_modules.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 mib_modules.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -279,7 +279,7 @@ snmp_vars.o: ./../snmplib/snmp_alarm.h snmpd.h
 snmp_vars.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
 snmp_vars.o: mibgroup/agentx.h mibgroup/examples/ucdDemoPublic.h
-snmp_vars.o: mibgroup/examples/example.h mibgroup/vestinternett/diskio.h
+snmp_vars.o: mibgroup/examples/example.h
 snmp_vars.o: mibgroup/target.h mibgroup/smux.h mibgroup/mibII/system_mib.h
 snmp_vars.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 snmp_vars.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
@@ -326,7 +326,7 @@ snmpd.o:   ../version.h
 snmpd.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmpd.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
 snmpd.o: mibgroup/agentx.h mibgroup/examples/ucdDemoPublic.h
-snmpd.o: mibgroup/examples/example.h mibgroup/vestinternett/diskio.h
+snmpd.o: mibgroup/examples/example.h
 snmpd.o: mibgroup/target.h mibgroup/smux.h mibgroup/mibII/system_mib.h
 snmpd.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 snmpd.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
