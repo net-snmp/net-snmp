@@ -167,11 +167,13 @@ static void send_v1_trap (struct snmp_session *ss,
     pduIp = (struct sockaddr_in *)&pdu->agent_addr;
 
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
-	pdu->enterprise		 = objid_enterprisetrap;
+	pdu->enterprise		 = (oid *)malloc(sizeof(objid_enterprisetrap));
+	memcpy (pdu->enterprise, objid_enterprisetrap, sizeof(objid_enterprisetrap));
 	pdu->enterprise_length	 = length_enterprisetrap-2;
 
     } else { 
-	pdu->enterprise		 = version_id;
+	pdu->enterprise		 = (oid *)malloc(sizeof(version_id));
+	memcpy (pdu->enterprise, version_id, sizeof(version_id));
 	pdu->enterprise_length	 = version_id_len;
     }
     pduIp->sin_family		 = AF_INET;
@@ -182,6 +184,7 @@ static void send_v1_trap (struct snmp_session *ss,
 
     if (snmp_send (ss, pdu) == 0) {
         snmp_sess_perror ("snmpd: send_v1_trap", ss);
+        snmp_free_pdu(pdu);
     }
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
@@ -206,9 +209,14 @@ static void send_v2_trap (struct snmp_session *ss,
     struct variable_list *var;
     struct timeval now;
     static oid objid_sysuptime[] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
+    static const size_t objid_sysuptime_len =
+	sizeof(objid_sysuptime) / sizeof(objid_sysuptime[0]);
     static oid objid_snmptrap[]  = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+    static const size_t objid_snmptrap_len =
+	sizeof(objid_snmptrap) / sizeof(objid_snmptrap[0]);
     static oid objid_trapoid[]   = {1, 3, 6, 1, 6, 3, 1, 1, 5, 1};
-
+    static const size_t objid_trapoid_len =
+	sizeof(objid_trapoid) / sizeof(objid_trapoid[0]);
 
     gettimeofday(&now, NULL);
 
@@ -225,14 +233,11 @@ static void send_v2_trap (struct snmp_session *ss,
 
     var->name		 = (oid *)malloc(sizeof(objid_sysuptime));
     memcpy (var->name, objid_sysuptime, sizeof(objid_sysuptime));
-    var->name_length	 = sizeof(objid_sysuptime)/sizeof(objid_sysuptime[0]);
-
+    var->name_length	 = objid_sysuptime_len;
     var->type		 = ASN_TIMETICKS;
     var->val.integer	 = (long *)malloc(sizeof(long));
     *var->val.integer	 = calculate_time_diff(&now, &starttime);
     var->val_len	 = sizeof(long);
-
-
 
     /*
      * Allocate space for another var-bind to contain the trap data.
@@ -242,33 +247,30 @@ static void send_v2_trap (struct snmp_session *ss,
     var		 	 = var->next_variable;
     var->next_variable	 = NULL;
 
-
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC) {
-	objid_enterprisetrap[length_enterprisetrap-1] = specific;
-
-	var->name		 = (oid *)malloc(sizeof(objid_snmptrap));
-	var->name_length	 = length_enterprisetrap;
+	var->name	 = (oid *)malloc(sizeof(objid_snmptrap));
+	var->name_length = objid_snmptrap_len;
 	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
-	var->type		 = ASN_OBJECT_ID;
-	var->val.objid		 = (oid *)malloc(sizeof(objid_enterprisetrap));
-	var->val_len		 = sizeof(objid_enterprisetrap);
+	var->type	 = ASN_OBJECT_ID;
+	var->val.objid	 = (oid *)malloc(sizeof(objid_enterprisetrap));
+	var->val_len	 = sizeof(objid_enterprisetrap);
 	memcpy(var->val.objid,
 		objid_enterprisetrap, sizeof(objid_enterprisetrap));
-
+	var->val.objid[length_enterprisetrap-1] = specific;
     } else {
-	objid_trapoid[9] = trap+1;
-
 	var->name	 = (oid *)malloc(sizeof(objid_snmptrap));
-	var->name_length = sizeof(objid_snmptrap)/sizeof(objid_snmptrap[0]);
+	var->name_length = objid_snmptrap_len;
 	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
 	var->type	 = ASN_OBJECT_ID;
 	var->val.objid	 = (oid *)malloc(sizeof(objid_trapoid));
 	var->val_len	 = sizeof(objid_trapoid);
 	memcpy(var->val.objid, objid_trapoid, sizeof(objid_trapoid));
+	var->val.objid[9] = trap+1;
     }
 
     if (snmp_send (ss, pdu) == 0) {
         snmp_sess_perror ("snmpd: send_v2_trap", ss);
+        snmp_free_pdu(pdu);
     }
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
