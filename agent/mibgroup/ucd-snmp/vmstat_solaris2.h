@@ -2,9 +2,11 @@
  *  vmstat_solaris2.h
  *  Header file for vmstat_solaris2 module for UCD-SNMP
  *  Jochen Kmietsch <jochen.kmietsch@gmx.de>
+ *  see vmstat_solaris2.c for more comments
  *  Version 0.1 initial release (Dec 1999)
  *  Version 0.2 added support for multiprocessor machines (Jan 2000)
- *  see vmstat_solaris2.c for more comments
+ *  Version 0.3 some reliability enhancements and compile time fixes (Feb 2000)
+ *
  */
 
 /* Prevent accidental double inclusions */
@@ -34,5 +36,8 @@ extern void init_vmstat_solaris2(void);
 
 /* Declared in snmp_vars.h */
 extern FindVarMethod var_extensible_vmstat; 
+
+/* Missing in Solaris header files prior to 2.6, no harm done on 2.6 and up. */
+extern int getpagesize(void);
 
 #endif /* _MIBGROUP_VMSTAT_H */
