@@ -920,6 +920,7 @@ receive(void)
 		numfds = external_exceptfd[i] + 1;
 	}
 	
+reselect:
 	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
 
 #ifdef WIN32
@@ -989,6 +990,11 @@ receive(void)
                 break;
 	    case -1:
 		if (errno == EINTR) {
+		    /*
+		     * Likely we got a signal - check before retrying select
+		     */
+		    if (running & !reconfig)
+                        goto reselect;
 		    continue;
 		} else {
                     snmp_log_perror("select");
