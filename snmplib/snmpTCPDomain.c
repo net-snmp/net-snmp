@@ -287,6 +287,7 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
   } else {
     t->remote = malloc(6);
     if (t->remote == NULL) {
+      snmp_tcp_close(t);
       snmp_transport_free(t);
       return NULL;
     }
