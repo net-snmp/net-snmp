@@ -300,7 +300,7 @@ in_addr_t get_myaddr(void)
 
   in_addr.sin_addr.s_addr = INADDR_ANY;
 
-  result = gethostname(local_host, 130);
+  result = gethostname(local_host, sizeof(local_host));
   if (result == 0)
   {
 	lpstHostent = gethostbyname((LPSTR)local_host);
