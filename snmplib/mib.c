@@ -91,8 +91,6 @@ static void sprint_counter64 __P((char *, struct variable_list *, struct enum_li
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
   
-static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
-static struct tree *get_tree __P((oid *, int, struct tree *));
 static char *get_description __P((oid *, int));
 
 static int quick_print = 0;
@@ -778,6 +776,11 @@ extern void    init_mib_internals __P((void));	/* from parse.c */
 extern int     which_module __P((char *));	/* from parse.c */
 extern struct tree *find_tree_node __P((char *, int));	/* from parse.c */
 
+struct tree *get_tree_head __P((void))
+{
+   return(tree_head);
+}
+
 void
 init_mib __P((void))
 {
@@ -1251,7 +1254,7 @@ fprint_value(f, objid, objidlen, variable)
     fprintf(f, "%s\n", tempbuf);
 }
 
-static struct tree *
+struct tree *
 get_symbol(objid, objidlen, subtree, buf)
     oid	    *objid;
     int	    objidlen;
@@ -1326,7 +1329,7 @@ lc_cmp(s1, s2)
 /*
  * Clone of get_symbol that doesn't take a buffer argument
  */
-static struct tree *
+struct tree *
 get_tree(objid, objidlen, subtree)
     oid     *objid;
     int     objidlen;

@@ -272,3 +272,6 @@ void print_description __P((oid *, int));
 void fprint_description __P((FILE *, oid *, int));
 int get_module_node __P((char *, char *, oid *, int *));
 int get_node __P((char *, oid *, int *));
+struct tree *get_symbol __P((oid *, int, struct tree *, char *));
+struct tree *get_tree __P((oid *, int, struct tree *));
+struct tree *get_tree_head __P((void));

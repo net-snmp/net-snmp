@@ -41,6 +41,7 @@ EXPORTS
 	print_mib
 	print_ascii_dump
 	read_objid
+	get_tree_head
 	init_mib
 	init_mib_internals
 	print_variable
@@ -54,6 +55,8 @@ EXPORTS
 	get_module_node
 	get_node
 	find_node
+	get_symbol
+	get_tree
 	read_module
 	read_mib
 	read_all_mibs
@@ -88,6 +91,7 @@ EXPORTS
 	snmp_free_var
 	snmp_select_info
 	snmp_timeout
+	snmp_get_errno
 	snmp_set_dump_packet
 	snmp_get_dump_packet
 	snmp_set_quick_print
@@ -97,6 +101,7 @@ EXPORTS
 	snmp_pdu_create
 	snmp_fix_pdu
 	snmp_clone_pdu
+	snmp_api_errstring
 	snmp_errstring
 	snmp_synch_setup
 	snmp_synch_response
