@@ -93,7 +93,48 @@ struct extensible *get_exten_instance(exten,inst)
   for (i=1;i != inst && exten != NULL; i++) exten = exten->next;
   return(exten);
 }
+#ifdef bsdi2
+#include <sys/param.h>
+#include <sys/sysctl.h>
 
+#define PP(pp, field) ((pp)->kp_proc . field)
+#define EP(pp, field) ((pp)->kp_eproc . field)
+#define VP(pp, field) ((pp)->kp_eproc.e_vm . field)
+
+/* these are for keeping track of the proc array */
+
+static int nproc = 0;
+static int onproc = -1;
+static struct kinfo_proc *pbase = 0;
+
+int sh_count_procs(procname)
+  char *procname;
+{
+  register int i,ret = 0;
+  register struct kinfo_proc *pp;
+  static int mib[] = { CTL_KERN, KERN_PROC , KERN_PROC_ALL };
+
+  if (sysctl(mib, 3, NULL, &nproc, NULL, 0) < 0) return 0;
+
+  if(nproc > onproc || !pbase) {
+    if((pbase = (struct kinfo_proc*) realloc(pbase, 
+                                             nproc + sizeof(struct kinfo_proc))) == 0) return -1;
+    onproc = nproc;
+    memset(pbase,0,nproc + sizeof(struct kinfo_proc));
+  }
+
+  if (sysctl(mib, 3, pbase, &nproc, NULL, 0) < 0) return -1;
+   
+  for (pp = pbase, i = 0; i < nproc / sizeof(struct kinfo_proc); pp++, i++)
+    {
+      if (PP(pp, p_stat) != 0 && (((PP(pp, p_flag) & P_SYSTEM) == 0)))
+	{
+          if (PP(pp, p_stat) != SZOMB && !strcmp(PP(pp,p_comm),procname)) ret++;
+	}
+    }
+  return ret;
+}
+#else
 int sh_count_procs(procname)
      char *procname;
 {
@@ -136,6 +177,7 @@ int sh_count_procs(procname)
   }
   return(ret);
 }
+#endif
 
 int shell_command(ex)
   struct extensible *ex;
