@@ -2240,11 +2240,12 @@ netsnmp_set_mib_directory(const char *dir)
     char *olddir, *tmpdir = NULL;
 
     DEBUGTRACE;
-    if (NULL == dir)
+    if (NULL == dir) {
         return;
+    }
     
     olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                   NETSNMP_DS_LIB_MIBDIRS);
+				   NETSNMP_DS_LIB_MIBDIRS);
     if (olddir) {
         if (*dir == '+') {
             /** New dir starts with '+', thus we add it. */
@@ -2262,8 +2263,9 @@ netsnmp_set_mib_directory(const char *dir)
                           newdir);
 
     /** set_string calls strdup, so if we allocated memory, free it */
-    if (tmpdir == newdir)
+    if (tmpdir == newdir) {
         free(tmpdir);
+    }
 }
 
 /*
@@ -2339,6 +2341,7 @@ netsnmp_fixup_mib_directory()
             }
         }
         netsnmp_set_mib_directory(mibpath);
+	SNMP_FREE(mibpath);
     }
 
 }
