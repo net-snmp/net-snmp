@@ -1353,6 +1353,12 @@ snmp_async_send(session, pdu, callback, cb_data)
 
 	/* set up to expect a response */
 	rp = (struct request_list *)malloc(sizeof(struct request_list));
+	if (rp == NULL) {
+	    snmp_errno = SNMPERR_GENERR;
+	    return 0;
+	}
+	memset(rp, 0, sizeof(struct request_list));
+	/* XX isp needs lock iff multiple threads can handle this session */
 	if (isp->requestsEnd){
 	    rp->next_request = isp->requestsEnd->next_request;
 	    isp->requestsEnd->next_request = rp;
