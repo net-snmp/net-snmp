@@ -29,7 +29,7 @@ snmpcmd
 .br
 [-v (1 | 2c | 3) ]
 .br
-[-R] [-f|-s|-S] [-q]
+[-R] [-f|-s|-S] [-q[o][e]]
 .br
 [-P [w] [W] [e] [c] [d] [u] [R] ]
 .br
@@ -37,9 +37,9 @@ snmpcmd
 .br
 [-d] [-D[TOKEN,TOKEN,...]]
 .br
-[-r retries] [-t timeout] [-p port]
+[-r retries] [-t timeout] [-p port] [-T UDP|TCP]
 .br
-[-e engineid] [-T boots time] [-n contextname]
+[-e engineid] [-Z boots time] [-n contextname]
 .br
 [-l seclevel] [-u secname]
 .br
@@ -96,9 +96,16 @@ request object identifiers with suffix and MIB name.
 .I interfaces.iftable.ifentry.ifindex.1
 will show up as
 .I IF-MIB:ifindex.1
-.IP "-q"
+.IP "-q[FLAGS]"
 request a "quick print" output format, that also is easier to
-parse for programs
+parse for programs.  If FLAGS are present, the following flags modify
+the printing behaviour:
+.RS
+.IP "o"
+Print oids numerically rather than translating them into text strings.
+.IP "e"
+Print enums as numeric values only, without their labels.
+.RE
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
 The special name ALL is used to specify all modules in all directories.
@@ -132,6 +139,9 @@ specifies the timeout between retries. The default is 1
 .IP "-p port"
 specifies the port to communicate with at the agent. The default is 161,
 except for snmptrap, which defaults to 162.
+.IP "-T UDP|TCP"
+specifies the transport type to use.  By default, UDP is used unless
+TCP is specified here.
 .IP "-e engineid"
 sets the authoritative(security) engineID used for SNMP v3 Request messages.
 This is the engineID of the agent or proxy (e.g., 800000020109840301). (will 
@@ -140,7 +150,7 @@ be discovered if not supplied)
 sets the context engineID used for SNMP v3 Request messages scopedPdu.
 This is the engineID of the agent (e.g., 800000020109840301). (will be
 authoritative engineID if not specified)
-.IP "-T boots time"
+.IP "-Z boots time"
 sets the engineBoots and engineTime used for authenticated SNMP v3 messages.
 This will initialize the local notion of the agents boots/time with an
 authenticated value stored in the LCD. (will be discovered if not supplied)
