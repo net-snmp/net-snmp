@@ -513,12 +513,13 @@ asn_parse_string(u_char *data,
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
-    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
-	return NULL;
+    if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength)) {
+      return NULL;
+    }
 
-    if ((int)asn_length > *strlength){
-	_asn_length_err(errpre, (size_t)asn_length, *strlength);
-	return NULL;
+    if ((int)asn_length > *strlength) {
+      _asn_length_err(errpre, (size_t)asn_length, *strlength);
+      return NULL;
     }
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
@@ -1970,29 +1971,25 @@ asn_build_double(u_char *data,
 int
 asn_realloc(u_char **pkt, size_t *pkt_len)
 {
-  u_char *old_pkt = NULL;
-  size_t old_pkt_len;
+  if (pkt != NULL && pkt_len != NULL) {
+    size_t old_pkt_len = *pkt_len;
 
-  if (pkt != NULL) {
-    old_pkt     = *pkt;
-    old_pkt_len = *pkt_len;
-  } else {
-    return 0;
-  }
+    DEBUGMSGTL(("asn_realloc", " old_pkt %08p, old_pkt_len %08x\n",
+		*pkt, old_pkt_len));
 
-  DEBUGMSGTL(("asn_realloc", "old_pkt %08p, old_pkt_len %08x ",
-	      old_pkt, old_pkt_len));
-  if (snmp_realloc(pkt, pkt_len)) {
-    DEBUGMSG(("asn_realloc", "new_pkt %08p, new_pkt_len %08x\n",
-	      *pkt, *pkt_len));
-    DEBUGMSGTL(("asn_realloc", "memmove(%08p, %08p, %08x)\n",
-		*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
-    memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
-    return 1;
-  } else {
-    DEBUGMSG(("asn_realloc", "CANNOT REALLOC()\n"));
-    return 0;
+    if (snmp_realloc(pkt, pkt_len)) {
+      DEBUGMSGTL(("asn_realloc", " new_pkt %08p, new_pkt_len %08x\n",
+		  *pkt, *pkt_len));
+      DEBUGMSGTL(("asn_realloc", " memmove(%08p + %08x, %08p, %08x)\n",
+		  *pkt, (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
+      memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
+      memset(*pkt, (int)' ', *pkt_len - old_pkt_len);
+      return 1;
+    } else {
+      DEBUGMSG(("asn_realloc", " CANNOT REALLOC()\n"));
+    }
   }
+  return 0;
 }
 
 #ifdef USE_REVERSE_ASNENCODING
@@ -2016,7 +2013,7 @@ asn_realloc_rbuild_length (u_char **pkt, size_t *pkt_len,
     }
     *(*pkt + *pkt_len - (++*offset)) = length;
   } else {
-    while(length > 0xff) {
+    while (length > 0xff) {
       if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
 	sprintf(ebuf, "%s: bad length < 1 :%d, %d", errpre, *pkt_len - *offset,
 		length);
