@@ -67,7 +67,7 @@ init_vacm_vars (void)
 {
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
-  static oid reg[] = {1,3,6,1,6,3,16,2,2,1};
+  static oid reg[] = {SNMP_OID_SNMPMODULES,16,2,2,1};
 #endif
   
 #define PRIVRW	(SNMPV2ANY | 0x5000)
