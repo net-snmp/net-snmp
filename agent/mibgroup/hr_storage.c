@@ -5,7 +5,9 @@
 
 #include <config.h>
 
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>

@@ -5,7 +5,9 @@
 
 #include <config.h>
 
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 #include "host.h"
 #include "host_res.h"
