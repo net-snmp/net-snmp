@@ -593,4 +593,57 @@ versionClearCache OBJECT-TYPE
           "Set to 1 to clear the exec cache, if enabled"
      ::= { Version 10 } 
 
+Snmperrs OBJECT-TYPE
+	SYNTAX snmperrs
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A place for the agent to report problems."
+	INDEX { snmperrIndex }
+	::= { local 101 }
+
+
+snmperrs ::= SEQUENCE {
+   snmperrIndex  INTEGER,
+   snmperrNames  DisplayString,
+   snmperrLoad   DisplayString,
+   snmperrConfig DisplayString
+   snmperrError  INTEGER,
+   snmperrErrMessage  DisplayString,
+}
+
+snmperrIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for each observed snmperr."
+	::= { Snmperrs 1 }
+
+snmperrNames OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"snmp"
+	::= { Snmperrs 2 }
+
+snmperrErrorFlag OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"A Error flag to indicate trouble with the agent.  It
+		goes to 1 if there is an error, 0 if no error."
+	::= { Snmperrs 100 }
+
+snmperrErrMessage OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"An error message describing the problem (if one exists)."
+	::= { Snmperrs 101 }
+
 END
+
