@@ -59,7 +59,7 @@ extern struct timeval	starttime;
 
 #define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
 
-oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251, 0, 0 };
+oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251 };
 oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
 int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
 int version_id_len     = OID_LENGTH( version_id );
@@ -185,8 +185,9 @@ void snmpd_free_trapsinks (void)
 	 *
 	 *******************/
 
-void send_trap_vars (int trap, 
+void send_enterprise_trap_vars (int trap, 
 		     int specific,
+		     oid *enterprise, int enterprise_length,
 		     struct variable_list *vars)
 {
     struct variable_list uptime_var, snmptrap_var, enterprise_var;
@@ -226,7 +227,7 @@ void send_trap_vars (int trap,
     memset (&enterprise_var, 0, sizeof (struct variable_list));
     snmp_set_var_objid( &enterprise_var,
 		 snmptrapenterprise_oid, OID_LENGTH(snmptrapenterprise_oid));
-    snmp_set_var_value( &enterprise_var, (char *)version_id, sizeof(version_id));
+    snmp_set_var_value( &enterprise_var, (char *)enterprise, enterprise_length*sizeof(oid));
     enterprise_var.type           = ASN_OBJECT_ID;
     enterprise_var.next_variable  = NULL;
 
@@ -240,8 +241,12 @@ void send_trap_vars (int trap,
 	return;
     template_pdu->trap_type     = trap;
     template_pdu->specific_type = specific;
-    template_pdu->enterprise    = version_id;
-    template_pdu->enterprise_length = OID_LENGTH(version_id);
+    if ( snmp_clone_mem((void **)&template_pdu->enterprise,
+				enterprise, enterprise_length*sizeof(oid))) {
+	snmp_free_pdu( template_pdu );
+	return;
+    }
+    template_pdu->enterprise_length = enterprise_length;
     template_pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
     pduIp = (struct sockaddr_in *)&template_pdu->agent_addr;
     pduIp->sin_family		 = AF_INET;
@@ -309,13 +314,11 @@ void send_trap_vars (int trap,
 		break;
 
 	case SNMP_TRAP_ENTERPRISESPECIFIC:
-			/* Point to the ucdTrap subtree instead */
-		template_pdu->enterprise        = objid_enterprisetrap;
-		template_pdu->enterprise_length = enterprisetrap_len -2;
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)objid_enterprisetrap,
-				    sizeof(objid_enterprisetrap));
-		snmptrap_var.val.objid[ enterprisetrap_len-1 ] = specific;
+				    (char *)enterprise,
+				    (enterprise_length+2)*sizeof(oid));
+		snmptrap_var.val.objid[ enterprise_length   ] = 0;
+		snmptrap_var.val.objid[ enterprise_length+1 ] = specific;
 		snmptrap_var.next_variable  = vars;
 		last_var = NULL;	/* Don't need version info */
 		break;
@@ -353,6 +356,24 @@ void send_trap_vars (int trap,
 	if ( sink->version != SNMP_VERSION_1 && last_var )
 	    last_var->next_variable = NULL;
     }
+
+	/* Ensure we don't free anything we shouldn't */
+    if ( last_var )
+	last_var->next_variable = NULL;
+    template_pdu->variables = NULL;
+    snmp_free_pdu( template_pdu );
+}
+
+void send_trap_vars (int trap, 
+		     int specific,
+		     struct variable_list *vars)
+{
+    if ( trap == SNMP_TRAP_ENTERPRISESPECIFIC )
+        send_enterprise_trap_vars( trap, specific, objid_enterprisetrap,
+			OID_LENGTH(objid_enterprisetrap), vars );
+    else
+        send_enterprise_trap_vars( trap, specific, version_id,
+			OID_LENGTH(version_id), vars );
 }
 
 void send_easy_trap (int trap, 
