@@ -199,7 +199,7 @@ snmp_synch_input(int op,
 int
 snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
 {
-    if (!newvar || !var) return 1;
+    if (!newvar || !var || !var->name) return 1;
 
     memmove(newvar, var, sizeof(struct variable_list));
     newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
@@ -543,6 +543,9 @@ snmp_set_var_objid (struct variable_list *vp,
 {
     size_t len = sizeof(oid) * name_length;
 
+    if (!vp || !vp->name)
+        return 1;
+    
     /* use built-in storage for smaller values */
     if (len <= sizeof(vp->name_loc)) {
         vp->name = vp->name_loc;
