@@ -89,3 +89,17 @@ nsop_to_string(oid1)
         RETVAL = mystr;
     OUTPUT:
         RETVAL
+
+void
+nsop_to_array(oid1)
+    netsnmp_oid *oid1;
+    PREINIT:
+        int i;
+
+    PPCODE:
+        EXTEND(SP, oid1->len);
+        for(i=0; i < oid1->len; i++) {
+            PUSHs(sv_2mortal(newSVnv(oid1->name[i])));
+        }
+
+        
