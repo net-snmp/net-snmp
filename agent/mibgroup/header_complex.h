@@ -32,6 +32,7 @@ void header_complex_free_entry(struct header_complex_index *theentry,
                                HeaderComplexCleaner *cleaner);
 void *header_complex_extract_entry(struct header_complex_index **thetop,
                                    struct header_complex_index *thespot);
+struct header_complex_index *header_complex_find_entry(struct header_complex_index *thestuff, void *entry);
 
 struct header_complex_index *
   header_complex_add_data(struct header_complex_index **thedata,

@@ -329,6 +329,16 @@ header_complex_free_all(struct header_complex_index *thestuff,
   }
 }
 
+struct header_complex_index *
+header_complex_find_entry(struct header_complex_index *thestuff,
+                          void *theentry) {
+  struct header_complex_index *hciptr;  
+
+  for(hciptr = thestuff; hciptr != NULL && hciptr->data != theentry;
+      hciptr = hciptr->next);
+  return hciptr;
+}
+
 void
 header_complex_dump(struct header_complex_index *thestuff) {
   struct header_complex_index *hciptr;
