@@ -341,6 +341,12 @@ updateTunnel(struct tunnel *tunnel)
         DEBUGMSGTL(("snmpd", "socket open failure in updateTunnels()\n"));
         return NULL;
     } else {
+        /*
+         * NOTE: this ioctl does not guarantee 6 bytes of a physaddr.
+         * In particular, a 'sit0' interface only appears to get back
+         * 4 bytes of sa_data. We don't use sa_data here, or we'd
+         * need to memset it to 0 before the ioct.
+         */
         strcpy(ifrq.ifr_name, tunnel->ifname);
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) == 0)
             switch (ifrq.ifr_hwaddr.sa_family) {
