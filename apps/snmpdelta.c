@@ -108,12 +108,31 @@ struct varInfo {
 };
 
 
+#define DS_APP_DONT_FIX_PDUS 0
+
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'f':
+                        ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+                        break;
+                }
+            }
+            break;
+    }
+}
+
 void usage (void) 
 {
   fprintf(stderr, "Usage:\nsnmpdelta ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr, "[-f commandFile]\n[-l] [-L SumFileName] [-s] [-k] [-t] [-S] [-v vars/pkt]\n [-p period] [-P peaks] oid [oid ...]\n");
+  fprintf(stderr, "[-Cf] [-f commandFile]\n[-l] [-L SumFileName] [-s] [-k] [-t] [-S] [-v vars/pkt]\n [-p period] [-P peaks] oid [oid ...]\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "snmpdelta specific options\n");
+  fprintf(stderr, "\t\t-Cf\t\tDon't fix errors and retry the request.\n");
   fprintf(stderr, "  -l\t\twrite configuration to file\n");
   fprintf(stderr, "  -f config\tload configuration from file\n");
   fprintf(stderr, "  -p period\tspecifies the poll period\n");
@@ -312,7 +331,7 @@ int main(int argc, char *argv[])
   int print = 1;
   int exit_code = 0;
     
-  arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
+  arg = snmp_parse_args(argc, argv, &session, "C:", &optProc);
   gateway = session.peername;
 
   /*
@@ -633,7 +652,7 @@ int main(int argc, char *argv[])
 	}
 
         /* retry if the errored variable was successfully removed */
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_FIX_PDUS)) {
+        if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS)) {
             pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
             snmp_free_pdu(response);
             response = NULL;
