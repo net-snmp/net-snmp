@@ -278,6 +278,10 @@ u_char *var_extensible_pass(struct variable *vp,
           *var_len = strlen(buf2);
           vp->type = ASN_OCTET_STR;
           return((unsigned char *) buf2);
+        } else if (!strncasecmp(buf,"opaque",6)) {
+          *var_len = asc2bin(buf2);
+          vp->type = ASN_OPAQUE;
+          return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
           *var_len = sizeof(long_ret);
           long_ret = strtol(buf2, NULL, 10);
