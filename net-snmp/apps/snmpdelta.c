@@ -285,6 +285,7 @@ int main(int argc, char *argv[])
   int	count, current_name = 0;
   struct varInfo varinfo[128], *vip;
   u_int value;
+  struct counter64 c64value;
   float printvalue;
   int period = 1;
   int deltat = 0, timestamp = 0, fileout = 0, dosum = 0, printmax = 0;
@@ -481,8 +482,13 @@ int main(int argc, char *argv[])
 	      fprintf(stderr, "Missing variable in reply\n");
 	      break;
 	    }
-	    value = *(vars->val.integer) - vip->value;
-	    vip->value = *(vars->val.integer);
+            if (vars->type == ASN_COUNTER64) {
+              u64Subtract(vars->val.counter64, vip->c64value, c64value);
+              value = *(vars->val.integer) - vip->value;
+            } else {
+              value = *(vars->val.integer) - vip->value;
+              vip->value = *(vars->val.integer);
+            }
 	    vars = vars->next_variable;
 	  } else {
 	    value = sum;
