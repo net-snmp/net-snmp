@@ -169,7 +169,6 @@ intpr(interval)
 		}
 		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
 
-		snmp_free_pdu (request);
 		snmp_free_pdu (response);
 
 		memmove (varname, oid_ifname, sizeof(oid_ifname));
@@ -237,7 +236,6 @@ intpr(interval)
 		    }
 		}
 
-		snmp_free_pdu (request);
 		snmp_free_pdu (response);
 
 		cur_if->name[6] = '\0';

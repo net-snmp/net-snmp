@@ -192,6 +192,8 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
     struct sockaddr_in *sa;
 #endif
+    struct ifnet     rt_ifnet;
+    struct in_ifaddr rt_ifnetaddr;
 
     /*
      *	OPTIMIZATION:
@@ -290,6 +292,9 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	case IPROUTEMETRIC4:
 	    long_return = -1;
 	    return (u_char *)&long_return;
+	case IPROUTEMETRIC5:
+	    long_return = -1;
+	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
 	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
@@ -305,6 +310,25 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	case IPROUTEAGE:
 	    long_return = 0;
 	    return (u_char *)&long_return;
+	case IPROUTEMASK:
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+		/* XXX - Almost certainly not right
+		    but I don't have a suitable system to test this on */
+	    long_return = 0;
+#else
+	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
+		long_return = 0;	/* Default route */
+	    else {
+		klookup(rthead[RtIndex]->rt_ifp, &rt_ifnet, sizeof(rt_ifnet));
+		klookup(rt_ifnet.if_addrlist, &rt_ifnetaddr, sizeof(rt_ifnetaddr));
+
+		long_return = rt_ifnetaddr.ia_subnetmask;
+	    }
+#endif
+	    return (u_char *)&long_return;
+	case IPROUTEINFO:
+	    *var_len = nullOidLen;
+	    return (u_char *)&nullOid;
 	default:
 	    ERROR("");
    }

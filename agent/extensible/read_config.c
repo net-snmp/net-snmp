@@ -43,6 +43,10 @@ extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
 extern char sysContact[];
 extern char sysLocation[];
 
+extern int snmp_enableauthentraps;
+extern char *snmp_trapsink;
+extern char *snmp_trapcommunity;
+
 int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 numpassthrus, ppexten, numexs, minimumswap, disk, numdisks,
                 maxload)
@@ -288,15 +292,27 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 if (((int) strlen(cptr)) < COMMUNITY_MAX_LEN) {
                   copy_word(cptr,communities[i-1]);
                 } else {
-                  fprintf(stderr,"snmpd.conf:  comminity %s too long\n",cptr);
+                  fprintf(stderr,"%s:  community %s too long\n",filename,cptr);
                 }
               } else {
-                fprintf(stderr,"snmpd.conf:  no community name found\n");
+                fprintf(stderr,"%s:  no community name found\n",filename);
               }
             } else {
               fprintf(stderr,"snmpd: community number invalid:  %d\n",i);
               fprintf(stderr,"       must be > 0 and < %d\n",NUM_COMMUNITIES+1);
             }
+	  } else if (!strncasecmp(word,"authtrap", 8)) {
+	    i = atoi(cptr);
+	    if (i < 1 || i > 2)
+	      fprintf(stderr,"snmpd: authtrapenable must be 1 or 2\n");
+	    else
+	      snmp_enableauthentraps = i;
+	  } else if (!strncasecmp(word, "trapsink", 8)) {
+	    snmp_trapsink = malloc (strlen (cptr));
+	    copy_word(cptr, snmp_trapsink);
+	  } else if (!strncasecmp(word, "trapcomm", 8)) {
+	    snmp_trapcommunity = malloc (strlen(cptr));
+	    copy_word(cptr, snmp_trapcommunity);
           } else if (!strncasecmp(word,"syscon",6)) {
             if (strlen(cptr) < 128) {
               strcpy(sysContact,cptr);

@@ -25,6 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -42,9 +53,13 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #include <errno.h>
 
 #include "snmp.h"
+#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -58,18 +73,22 @@ extern int  errno;
 int command = GET_REQ_MSG;
 int	snmp_dump_packet = 0;
 
+int input_variable();
+
+void
 usage(){
     fprintf(stderr, "Usage: snmptest -v 1 [-q] hostname community      or:\n");
     fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname noAuth       or:\n");
     fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context\n");
 }
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
     struct snmp_session session, *ss;
-    struct snmp_pdu *pdu, *response, *copy = NULL;
+    struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
     struct variable_list *vars, *vp;
     int	arg, ret, version = 2;
     char *hostname = NULL;
@@ -142,19 +161,19 @@ main(argc, argv)
 	    community = argv[arg]; 
 	} else if (version == 2 && srclen == 0 && !trivialSNMPv2) {
             sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	    if (read_party_database(ctmp) > 0){
+	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	    if (read_context_database(ctmp) > 0){
+	    if (read_context_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read context database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	    if (read_acl_database(ctmp) > 0){
+	    if (read_acl_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read access control database from %s\n",ctmp);
 		exit(0);
@@ -391,7 +410,7 @@ main(argc, argv)
 			break;
 		    }
 		    printf("from %s\n", inet_ntoa(response->address.sin_addr));
-		    printf("requestid 0x%X errstat 0x%X errindex 0x%X\n",
+		    printf("requestid 0x%lX errstat 0x%lX errindex 0x%lX\n",
 			   response->reqid, response->errstat,
 			   response->errindex);
 		    if (response->errstat == SNMP_ERR_NOERROR){
@@ -489,6 +508,7 @@ hex_to_binary(cp, bufp)
 }
 
 
+int
 input_variable(vp)
     struct variable_list    *vp;
 {

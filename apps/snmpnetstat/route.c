@@ -196,7 +196,7 @@ routepr()
 		&& rp->set_type && rp->set_interface)){
 		    if (request)
 			snmp_free_pdu(request);
-		    request = 0;
+		    request = NULL;
 		    continue;
 	    }
 	    toloopback = *(char *)&rp->gateway == LOOPBACKNET;

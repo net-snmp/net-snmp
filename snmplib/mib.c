@@ -48,7 +48,7 @@ SOFTWARE.
 
 static void sprint_by_type();
 static parse_subtree();
-static set_functions();
+static void set_functions();
 static int lc_cmp ();
 char *sprint_objid();
   
@@ -85,7 +85,7 @@ uptimeString(timeticks, buf)
     return buf;
 }
 
-static sprint_hexstring(buf, cp, len)
+static void sprint_hexstring(buf, cp, len)
     char *buf;
     u_char  *cp;
     int	    len;
@@ -106,7 +106,7 @@ static sprint_hexstring(buf, cp, len)
     *buf = '\0';
 }
 
-static sprint_asciistring(buf, cp, len)
+static void sprint_asciistring(buf, cp, len)
     char *buf;
     u_char  *cp;
     int	    len;
@@ -185,7 +185,7 @@ sprint_octet_string(buf, var, enums)
     struct variable_list *var;
     struct enum_list	    *enums;
 {
-    int hex, x, guessed = 0;
+    int hex, x;
     u_char *cp;
 
     if (var->type != ASN_OCTET_STR){
@@ -307,11 +307,11 @@ sprint_integer(buf, var, enums)
 	    break;
 	}
     if (enum_string == NULL)
-	sprintf(buf, "%d", *var->val.integer);
+	sprintf(buf, "%ld", *var->val.integer);
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
     else
-	sprintf(buf, "%s(%d)", enum_string, *var->val.integer);
+	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
 }
 
 static void
@@ -334,11 +334,11 @@ sprint_uinteger(buf, var, enums)
 	    break;
 	}
     if (enum_string == NULL)
-	sprintf(buf, "%d", *var->val.integer);
+	sprintf(buf, "%ld", *var->val.integer);
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
     else
-	sprintf(buf, "%s(%d)", enum_string, *var->val.integer);
+	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
 }
 
 static void
@@ -529,8 +529,6 @@ sprint_counter64(buf, var, enums)
     struct variable_list *var;
     struct enum_list	    *enums;
 {
-    struct counter64 *cp;
-
     if (var->type != COUNTER64){
 	sprintf(buf, "Wrong Type (should be Counter64): ");
 	buf += strlen(buf);
@@ -626,6 +624,7 @@ char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
 int Suffix;
 
+void
 init_mib()
 {
     char *file, *getenv(), *prefix, mibpath[300];
@@ -670,7 +669,7 @@ print_mib (fp)
     print_subtree (fp, Mib, 0);
 }
 
-static
+static void
 set_functions(subtree)
     struct tree *subtree;
 {
@@ -848,7 +847,7 @@ int read_objid(input, output, out_len)
 }
 #endif
 
-static
+static int
 parse_subtree(subtree, input, output, out_len)
     struct tree *subtree;
     char *input;
@@ -991,6 +990,7 @@ sprint_objid(buf, objid, objidlen)
     return buf;
 }
 
+void
 print_objid(objid, objidlen)
     oid	    *objid;
     int	    objidlen;	/* number of subidentifiers */
@@ -1001,26 +1001,14 @@ print_objid(objid, objidlen)
     printf("%s\n", buf);
 }
 
-
-print_variable(objid, objidlen, variable)
-    oid     *objid;
-    int	    objidlen;
-    struct  variable_list *variable;
-{
-    char    buf[2048];
-    struct tree    *subtree = Mib;
-
-    sprint_variable(buf, objid, objidlen, variable);
-    printf("%s", buf);
-}
-
+void
 sprint_variable(buf, objid, objidlen, variable)
     char *buf;
     oid     *objid;
     int	    objidlen;
     struct  variable_list *variable;
 {
-    char    tempbuf[2048], *cp;
+    char    tempbuf[2048];
     struct tree    *subtree = Mib;
 
     sprint_objid(buf, objid, objidlen);
@@ -1050,6 +1038,20 @@ sprint_variable(buf, objid, objidlen, variable)
     }
 }
 
+
+void
+print_variable(objid, objidlen, variable)
+    oid     *objid;
+    int	    objidlen;
+    struct  variable_list *variable;
+{
+    char    buf[2048];
+
+    sprint_variable(buf, objid, objidlen, variable);
+    printf("%s", buf);
+}
+
+void
 sprint_value(buf, objid, objidlen, variable)
     char *buf;
     oid     *objid;
@@ -1075,13 +1077,13 @@ sprint_value(buf, objid, objidlen, variable)
     }
 }
 
+void
 print_value(objid, objidlen, variable)
     oid     *objid;
     int	    objidlen;
     struct  variable_list *variable;
 {
     char    tempbuf[2048];
-    struct tree    *subtree = Mib;
 
     sprint_value(tempbuf, objid, objidlen, variable);
     printf("%s\n", tempbuf);
@@ -1105,7 +1107,7 @@ get_symbol(objid, objidlen, subtree, buf)
 
     /* subtree not found */
     while(objidlen--){	/* output rest of name, uninterpreted */
-	sprintf(buf, "%u.", *objid++);
+	sprintf(buf, "%lu.", *objid++);
 	while(*buf)
 	    buf++;
     }

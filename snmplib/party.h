@@ -132,4 +132,5 @@ party_createEntry(/* oid *partyID, int partyIDLen */);
  * The status of this entry is created as invalid.
  */
 
-
+void party_destroyEntry();
+int read_party_database();

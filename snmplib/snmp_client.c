@@ -25,6 +25,14 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -46,6 +54,7 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 
+#include "mib.h"
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
@@ -101,6 +110,7 @@ snmp_pdu_create(command)
  * Add a null variable with the requested name to the end of the list of
  * variables for this pdu.
  */
+void
 snmp_add_null_var(pdu, name, name_length)
     struct snmp_pdu *pdu;
     oid *name;
@@ -126,6 +136,7 @@ snmp_add_null_var(pdu, name, name_length)
     vars->val_len = 0;
 }
 
+int
 snmp_synch_input(op, session, reqid, pdu, magic)
     int op;
     struct snmp_session *session;
@@ -366,6 +377,7 @@ snmp_synch_response(ss, pdu, response)
     return state->status;
 }
 
+void
 snmp_synch_setup(session)
     struct snmp_session *session;
 {
@@ -411,6 +423,7 @@ snmp_errstring(errstat)
  * (Are two acl entries really needed?)
  * Out: returns 0 if OK, -1 if an error occurred.
  */
+int
 ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     u_long destaddr;
     oid *src, *dst, *context;
@@ -420,10 +433,6 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     u_short port;
     struct partyEntry *pp1, *pp2, *rp;
     struct contextEntry *cxp, *rxp;
-    int viewIndex;
-    oid viewSubtree[64];
-    int viewSubtreeLen;
-    struct viewEntry *vwp;
     struct aclEntry *ap;
     int oneIndex, twoIndex, cxindex;
 
@@ -471,8 +480,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     }
     oneIndex = pp1->partyIndex;
 
-    if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1",
-		    src, srclen)){
+    if (!read_objid(".1.3.6.1.6.3.3.1.3.128.2.35.55.1", src, srclen)){
 	fprintf(stderr, "Bad object identifier: %s\n", ".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
 	return -1;
     }
@@ -548,6 +556,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	/* all collumns - from acl_vars.c XXX */
 	ap->aclBitMask = ACLCOMPLETE_MASK;
 	ap->reserved->aclBitMask = ap->aclBitMask;
-    }    return 0; /* SUCCESS */
+    }
+    return 0; /* SUCCESS */
 }
 

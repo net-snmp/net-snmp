@@ -99,4 +99,4 @@ context_createEntry(/* oid *contextID, int contextIDLen */);
  * The status of this entry is created as invalid.
  */
 
-
+int read_context_database();

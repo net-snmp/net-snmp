@@ -6,6 +6,7 @@ extern u_char *var_eventtab();
 extern u_char *var_eventnotifyvars();
 extern u_char *var_eventnotifytab();
 extern void eventGenerate();
+extern void eventTimer();
 
 #define MAX_COMMUNITY_LEN 128
 

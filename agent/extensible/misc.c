@@ -455,9 +455,9 @@ print_mib_oid(name,len)
   int len;
 {
   int i;
-  DEBUGP("Mib:  ");
+  printf("Mib:  ");
   for(i=0; i < len; i++) {
-    DEBUGP1(".%d",(int) name[i]);
+    printf(".%d",(int) name[i]);
   }
 }
 

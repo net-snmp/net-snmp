@@ -254,3 +254,10 @@ struct	mib_egpNeighEntry {
 #define MIB_EGPNEIGHSTATE_CEASE		5
 
 void print_mib();
+int read_objid();
+void init_mib();
+void print_variable();
+void print_objid();
+char *sprint_objid();
+void print_description();
+int get_node();

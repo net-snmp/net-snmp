@@ -25,6 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #if HAVE_SYS_SOCKIO_H
@@ -54,7 +65,9 @@ SOFTWARE.
 #endif
 #include <net/if.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 
 #include "snmp.h"
 #include "asn1.h"
@@ -64,7 +77,9 @@ SOFTWARE.
 #include "party.h"
 #include "view.h"
 #include "acl.h"
+#include "context.h"
 #include "mib.h"
+#include "system.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -78,7 +93,7 @@ typedef long	fd_mask;
 #define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
 #define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
 #define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
-#define FD_ZERO(p)      memset((char *)(p), 0, sizeof(*(p)))
+#define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
 extern int  errno;
@@ -87,6 +102,8 @@ int Print = 0;
 int Event = 0;
 int Syslog = 0;
 struct timeval Now;
+
+void init_syslog();
 
 char *
 trap_description(trap)
@@ -191,6 +208,7 @@ static oid risingAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 1};
 static oid fallingAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2};
 static oid unavailableAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3};
 
+void
 event_input(vp)	
     struct variable_list *vp;
 {
@@ -214,8 +232,10 @@ event_input(vp)
     else if (vp->val_len != sizeof(risingAlarm)
 	|| !memcmp(vp->val.objid, unavailableAlarm, sizeof(unavailableAlarm)))
 	eventid = 3;
-    else
+    else {
 	printf("unknown event\n");
+	eventid = 0;
+    }
 
     vp = vp->next_variable;
     memmove(variable, vp->val.objid, vp->val_len * sizeof(oid));
@@ -236,7 +256,7 @@ event_input(vp)
     vp = vp->next_variable;
     threshold = *vp->val.integer;
     
-    printf("%d: 0x%02X %d %d %d\n", eventid, destip, sampletype, value, threshold);
+    printf("%d: 0x%02lX %d %d %d\n", eventid, destip, sampletype, value, threshold);
     
 }
 
@@ -295,7 +315,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    if (pdu->command == INFORM_REQ_MSG){
 		if (!(reply = snmp_clone_pdu2(pdu, GET_RSP_MSG))){
 		    printf("Couldn't clone PDU for response\n");
-		    return;
+		    return 1;
 		}
 		reply->errstat = 0;
 		reply->errindex = 0;
@@ -308,51 +328,18 @@ int snmp_input(op, session, reqid, pdu, magic)
     } else if (op == TIMED_OUT){
 	printf("Timeout: This shouldn't happen!\n");
     }
-}
-
-#define NUM_NETWORKS    32   /* max number of interfaces to check */
-
-#ifndef IFF_LOOPBACK
-#define IFF_LOOPBACK 0
-#endif
-#define LOOPBACK    0x7f000001
-u_long
-get_myaddr(){
-    int sd;
-    struct ifconf ifc;
-    struct ifreq conf[NUM_NETWORKS], *ifrp, ifreq;
-    struct sockaddr_in *in_addr;
-    int count;
-    int interfaces;             /* number of interfaces returned by ioctl */
-
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-        return 0;
-    ifc.ifc_len = sizeof(conf);
-    ifc.ifc_buf = (caddr_t)conf;
-    if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0){
-        close(sd);
-        return 0;
-    }
-    ifrp = ifc.ifc_req;
-    interfaces = ifc.ifc_len / sizeof(struct ifreq);
-    for(count = 0; count < interfaces; count++, ifrp++){
-        ifreq = *ifrp;
-        if (ioctl(sd, SIOCGIFFLAGS, (char *)&ifreq) < 0)
-            continue;
-        in_addr = (struct sockaddr_in *)&ifrp->ifr_addr;
-        if ((ifreq.ifr_flags & IFF_UP)
-            && (ifreq.ifr_flags & IFF_RUNNING)
-            && !(ifreq.ifr_flags & IFF_LOOPBACK)
-            && in_addr->sin_addr.s_addr != LOOPBACK){
-                close(sd);
-                return in_addr->sin_addr.s_addr;
-            }
-    }
-    close(sd);
-    return 0;
+    return 1;
 }
 
 
+void usage ()
+{
+    fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+    exit (1);
+}
+
+
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -366,7 +353,7 @@ main(argc, argv)
     u_long myaddr;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen, dstlen, contextlen;
-    int local_port = 0, port_flag = 0;
+    int local_port = SNMP_TRAP_PORT;
     char *config_file = NULL;
     struct config_module *dp;
     struct sockaddr_in me;
@@ -396,7 +383,6 @@ main(argc, argv)
 		    quick_print++;
 		    break;
                 case 'P':
-                    port_flag++;
                     local_port = atoi(argv[++arg]);
                     break;
 		case 'p':
@@ -419,11 +405,12 @@ main(argc, argv)
                     break;
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
-		    fprintf(stderr,"Usage: snmptrapd [-v 1] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
+		    usage();
 		    break;
 	    }
 	    continue;
 	}
+	else usage();
     }
 
     myaddr = get_myaddr();
@@ -432,24 +419,22 @@ main(argc, argv)
 		  context, &contextlen);
 
     if (version == 2){
-            sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	    if (read_party_database(ctmp) > 0){
-		fprintf(stderr,
-			"Couldn't read party database from %s\n",ctmp);
-		exit(0);
-	    }
-            sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	    if (read_context_database(ctmp) > 0){
-		fprintf(stderr,
-			"Couldn't read context database from %s\n",ctmp);
-		exit(0);
-	    }
-            sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	    if (read_acl_database(ctmp) > 0){
-		fprintf(stderr,
-			"Couldn't read access control database from %s\n",ctmp);
-		exit(0);
-	    }
+	sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+	if (read_party_database(ctmp) != 0){
+	    fprintf(stderr, "Couldn't read party database from %s\n",ctmp);
+	    exit(1);
+	}
+	sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+	if (read_context_database(ctmp) != 0){
+	    fprintf(stderr, "Couldn't read context database from %s\n",ctmp);
+	    exit(1);
+	}
+	sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+	if (read_acl_database(ctmp) != 0){
+	    fprintf(stderr,
+		    "Couldn't read access control database from %s\n",ctmp);
+	    exit(1);
+	}
     }
 
     memset(&session, 0, sizeof(struct snmp_session));
@@ -458,18 +443,15 @@ main(argc, argv)
         session.version = SNMP_VERSION_1;
     } else if (version == 2){
         session.version = SNMP_VERSION_2;
+	session.srcPartyLen = 0;
+	session.dstPartyLen = 0;
     }
-    session.srcPartyLen = 0;
-    session.dstPartyLen = 0;
     session.retries = SNMP_DEFAULT_RETRIES;
     session.timeout = SNMP_DEFAULT_TIMEOUT;
     session.authenticator = NULL;
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    if (port_flag)
-        session.local_port = local_port;
-    else
-	session.local_port = SNMP_TRAP_PORT;
+    session.local_port = local_port;
     ss = snmp_open(&session);
     if (ss == NULL){
 	fprintf(stderr,"Couldn't open snmp\n");
@@ -500,14 +482,15 @@ main(argc, argv)
 		} else {
 		    perror("select");
 		}
-		return -1;
+		return 1;
 	    default:
 		printf("select returned %d\n", count);
-		return -1;
+		return 1;
 	}
     }
 }
 
+void
 init_syslog(){
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.

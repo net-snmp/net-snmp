@@ -35,6 +35,9 @@ SOFTWARE.
 #include "glob.h"
 #endif
 
+#include <stdio.h>
+#include <ctype.h>
+
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -50,10 +53,10 @@ SOFTWARE.
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
-
 #include "mib.h"
 
 
+void
 xdump(cp, length, prefix)
     u_char *cp;
     int length;
@@ -142,7 +145,7 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
     register int *listlength;   /* IN/OUT - number of valid bytes left in
 				   output buffer */
 {
-    int		    dummyLen, headerLen, header_shift;
+    int		    dummyLen, headerLen;
     u_char	    *dataPtr;
 
     dummyLen = *listlength;

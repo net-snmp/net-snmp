@@ -24,6 +24,7 @@
 static int kmem;
 int swap, mem;
 
+void
 init_kmem(file)
     char *file;
 {
@@ -94,7 +95,7 @@ klread(buf, buflen)
  */
 
 
-
+int
 klookup(off, target, siz) 
      unsigned long off;
      char   *target;
@@ -102,7 +103,6 @@ klookup(off, target, siz)
 {
 
   long retsiz;
-  char buf[300];
 
   if ((retsiz = klseek((off_t) off)) != off) {
     perror("klseek");

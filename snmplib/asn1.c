@@ -34,6 +34,12 @@ SOFTWARE.
 #include "gw.h"
 #endif
 
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
+
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
