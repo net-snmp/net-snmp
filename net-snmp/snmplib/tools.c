@@ -72,13 +72,13 @@ free_zero(void *buf, size_t size)
  *
  * buf is NULL and *size set to KMT error value upon failure.
  *
- * (Degenerates to malloc_zero if HAVE_LIBKMT is not defined.)
+ * (Memory is zeroed if HAVE_LIBKMT is not defined.)
  */
 u_char *
 malloc_random(size_t *size)
 {
 	int	 rval	= SNMPERR_SUCCESS;
-	u_char	*buf	= (u_char *) malloc_zero(*size);
+	u_char	*buf	= (u_char *)calloc (1, *size);
 
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 	if (buf) {
@@ -97,29 +97,6 @@ malloc_random(size_t *size)
 
 }  /* end malloc_random() */
 
-
-
-
-/*******************************************************************-o-******
- * malloc_zero
- *
- * Parameters:
- *	size	Number of bytes to malloc().
- *      
- * Returns pointer to allocaed & zeroed buffer on success.
- */
-u_char *
-malloc_zero(size_t size)
-{
-	u_char	*buf = (u_char *) malloc(size);
-
-	if (buf) {
-		memset(buf, 0, size);
-	}
-
-	return buf;
-
-}  /* end malloc_zero() */
 
 
 
@@ -173,7 +150,7 @@ u_int
 binary_to_hex(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len * 2) + 1;
-	char	*s	= (char *) SNMP_MALLOC(olen),
+	char	*s	= (char *) calloc(1,olen),
 		*op	= s;
 	const u_char *ip	= input;
 
@@ -216,7 +193,7 @@ int
 hex_to_binary2(const u_char *input, size_t len, char **output)
 {
 	u_int	olen	= (len/2) + (len%2);
-	char	*s	= (char *) malloc_zero(olen),
+	char	*s	= (char *)calloc (1,olen),
 		*op	= s;
 	const u_char *ip	= input;
 
@@ -506,7 +483,7 @@ dump_snmpEngineID_violation:
 dump_snmpEngineID_quit:
 	if (s) {
                 slen = s-buf+1;
-		s = SNMP_MALLOC(slen);
+		s = calloc(1,slen);
 		memcpy(s, buf, (slen)-1);
 	}
 
@@ -517,4 +494,3 @@ dump_snmpEngineID_quit:
 #undef eb
 }  /* end dump_snmpEngineID() */
 #endif /* SNMP_TESTING_CODE */
-

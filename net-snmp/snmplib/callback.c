@@ -2,6 +2,10 @@
 
 #include <config.h>
 #include <sys/types.h>
+#include <stdio.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
