@@ -57,6 +57,13 @@ can be used as a trap handle directive:
 traphandle /usr/bin/perl BINDIR/traptoemail -s mysmtp.somewhere.com -f admin@somewhere.com me@somewhere.com
 .RE
 .RE
+.IP "dontRetainLogs true"
+Turns off the support for the NOTIFICATION-LOG-MIB and thus doesn't
+retain logged traps.  Normally the snmptrapd program keeps a certain
+number of traps around in memory so they can be retrieved via querying
+the nlmLogTable and nlmLogvariableTable tables.  
+See the snmptrapd manual page and the
+NOTIFICATION-LOG-MIB for details.
 .IP "createUser username (MD5|SHA) authpassphrase [DES]"
 See the 
 .I snmpd.conf(5)
