@@ -61,9 +61,9 @@ option.
 checks for the existance of and parses the following files:
 .RS
 .TP 6
-.B LIBDIR/snmp/snmpd.conf
+.B DATADIR/snmp/snmpd.conf
 .TP
-.B LIBDIR/snmp/snmpd.local.conf
+.B DATADIR/snmp/snmpd.local.conf
 Configures the agent.  See snmpd.conf(5) for details.  These files are
 optional and are only used to configure the extensible portions of the
 agent, the values of the community strings, and the optional trap
@@ -72,28 +72,28 @@ default) is allowed read-only access and the second ("private" by
 default) is allowed write access as well.  The 3-5th community strings
 are read-only as well.
 .IP
-In addition to these two configuration files in LIBDIR/snmp, the
+In addition to these two configuration files in DATADIR/snmp, the
 agent will read any files with the names snmpd.conf and
 snmpd.local.conf in a colon sepereated path specified in the
 SNMPCONFPATH environmental variable.
 .TP
-.B LIBDIR/snmp/mib.txt
+.B DATADIR/snmp/mib.txt
 Defines the mib it should use.
 The location of this
 .B mib.txt 
 file may by overridden at run time be setting the enviornmental variable
 .B MIBFILE.
 .TP 
-.B LIBDIR/snmp/mibs/
+.B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or decend into
 subdirectories.
 .B 
 .TP
-.B LIBDIR/snmp/party.conf
+.B DATADIR/snmp/party.conf
 Defines the classic SNMP V2 parties.
 .TP
-.B LIBDIR/snmp/view.conf
+.B DATADIR/snmp/view.conf
 Defines which parties defined in the 
 .B party.conf
 have access to the
@@ -101,29 +101,29 @@ mibs in the
 .B mib.txt
 file.
 .TP
-.B LIBDIR/snmp/context.conf
+.B DATADIR/snmp/context.conf
 Maps names to numerical view contexts.
 .TP
-.B LIBDIR/snmp/acl.conf
+.B DATADIR/snmp/acl.conf
 Defines the classic SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
 See the associated manual pages for information on the content of
 these files.
 .SH FILES
-LIBDIR/snmpd.conf
+DATADIR/snmpd.conf
 .br
-LIBDIR/snmpd.local.conf
+DATADIR/snmpd.local.conf
 .br
-LIBDIR/snmp/snmpd.conf
+DATADIR/snmp/snmpd.conf
 .br
-LIBDIR/snmp/party.conf
+DATADIR/snmp/party.conf
 .br
-LIBDIR/snmp/view.conf
+DATADIR/snmp/view.conf
 .br
-LIBDIR/snmp/context.conf
+DATADIR/snmp/context.conf
 .br
-LIBDIR/snmp/acl.conf
+DATADIR/snmp/acl.conf
 .SH SEE ALSO
 (in recomended reading order)
 .PP
