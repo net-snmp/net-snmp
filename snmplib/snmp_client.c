@@ -292,7 +292,7 @@ struct snmp_pdu *
 snmp_clone_pdu(pdu)
     struct snmp_pdu *pdu;
 {
-    struct variable_list *var, *newvar;
+    struct variable_list *var, *newvar, *oldvar;
     struct snmp_pdu *newpdu;
 
     /* clone the pdu */
@@ -300,37 +300,29 @@ snmp_clone_pdu(pdu)
     memmove(newpdu, pdu, sizeof(struct snmp_pdu));
     newpdu->variables = 0;
     var = pdu->variables;
-    if (var != NULL){
-	newpdu->variables = newvar =
+    oldvar = 0;
+    while (var) {
+	newvar =
 	    (struct variable_list *)malloc(sizeof(struct variable_list));
 	memmove(newvar, var, sizeof(struct variable_list));
 	if (var->name != NULL){
 	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
 	    memmove(newvar->name, var->name, var->name_length * sizeof(oid));
 	}
-	if (var->val.string != NULL){
+	/* need a pointer and a length to copy a string value. */
+	if ((var->val.string != NULL) && (var->val_len)) {
 	    newvar->val.string = (u_char *)malloc(var->val_len);
 	    memmove(newvar->val.string, var->val.string, var->val_len);
 	}
-	newvar->next_variable = 0;
-
-	while(var->next_variable){
-	    var = var->next_variable;
-	    newvar->next_variable =
-		(struct variable_list *)malloc(sizeof(struct variable_list));
-	    newvar = newvar->next_variable;
-	    memmove(newvar, var, sizeof(struct variable_list));
-	    if (var->name != NULL){
-		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-		memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	    }
-/* XX CISCO Catalyst 2900 returns NULL strings as data of length 0. */
-	    if ((var->val.string != NULL) && (var->val_len)) {
-		newvar->val.string = (u_char *)malloc(var->val_len);
-		memmove(newvar->val.string, var->val.string, var->val_len);
-	    }
-	    newvar->next_variable = 0;
+	else {
+	    newvar->val.string = NULL; newvar->val_len = 0;
 	}
+
+	if (0 == newpdu->variables) newpdu->variables = newvar;
+	if (oldvar) oldvar->next_variable = newvar;
+	oldvar = newvar;
+	oldvar->next_variable = 0;
+	var = var->next_variable;
     }
     if (pdu->enterprise){
 	newpdu->enterprise = (oid *)malloc(sizeof(oid)*pdu->enterprise_length);
@@ -449,7 +441,7 @@ snmp_sess_synch_response(sessp, pdu, response)
 	    tvp = NULL;	/* block without timeout */
 	count = select(numfds, &fdset, 0, 0, tvp);
 	if (count > 0){
-	    snmp_sess_read(sessp);
+	    snmp_sess_read(sessp, &fdset);
 	} else switch(count){
 	    case 0:
 		snmp_sess_timeout(sessp);
