@@ -22,7 +22,7 @@ $graphtime=5;
 $graphdelta=1;
 @graphcolors=qw(blue red green yellow purple);
 
-@displayInfo=qw(type access status units hint enums moduleID);
+@displayInfo=qw(type access status units hint moduleID enums);
 
 use Tk;
 require Tk::HList;
@@ -189,6 +189,7 @@ sub snmpsetup {
     my $var = new SNMP::Varbind([$oid]);
     stop(0);
     initText();
+    print "oid: $oid\n";
     return ($oid, $sess, $var);
 }
 
@@ -219,6 +220,7 @@ sub initCanvas {
 
 sub snmpget {
     (my $oid, my $sess, my $var) = snmpsetup();
+    print "getting:  $host $community $oid\n";
     $status->configure(-text => "getting:  $host $community $oid");
     $top->update();
     my $val = $sess->get($var);
@@ -232,6 +234,7 @@ sub snmpget {
 
 sub snmpgetnext {
     (my $oid, my $sess, my $var) = snmpsetup();
+    print "getnexting:  $host $community $oid\n";
     $status->configure(-text => "get next:  $host $community $oid");
     $top->update();
     my $val = $sess->getnext($var);
@@ -318,15 +321,23 @@ sub snmpgraph {
 
 sub updateGraph() {
     $status->configure(-text => "collecting data:  $host $community $graphoid");
+    print "updating\n";
     my $oid = $graphoid;
     my $tag = SNMP::translateObj($graphoid,0);
     my $var = new SNMP::Varbind([$oid]);
     $graphsess->{ErrorStr} = "";    
     while (!$graphsess->{ErrorStr} && !$stopit) {
 	my $val = $graphsess->getnext($var);
-	last if ($graphsess->{ErrorStr} ||
-		 !defined($var->tag) ||
-	         SNMP::translateObj($var->tag) !~ /^$oid/);
+	if ($#graphvars == -1 && SNMP::translateObj($var->tag) !~ /^$oid/) {
+	    # if an exact oid, do a get instead.
+	    $var = new SNMP::Varbind([$oid]);
+	    $val = $graphsess->get($var);
+	}
+	if ($graphsess->{ErrorStr} ||
+	    !defined($var->tag) ||
+	    SNMP::translateObj($var->tag) !~ /^$oid/) {
+	    last;
+	}
 	my $newoid = SNMP::translateObj("$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]");
 	$top->update();
 	$newoid =~ /$oid\.([0-9\.]+)$/;
@@ -503,11 +514,11 @@ sub createRow {
     my $i = shift;
     $dispFrame->Label(-text => $displayInfo[$i], 
 		     -anchor => 'w', -borderwidth => $tmpbd)
-	->grid(-column => 0, -row => $i, -sticky => 'w');
+	->grid(-column => ($i%2)*2, -row => int($i/2), -sticky => 'w');
     $dpyInfo[$i] = "" if (!defined($dpyInfo[$i]));
-    my $ent = $dispFrame->Entry(-textvariable => \$dpyInfo[$i], -width => 80, 
+    my $ent = $dispFrame->Entry(-textvariable => \$dpyInfo[$i], -width => 40, 
 		      -relief => 'flat', -borderwidth => $tmpbd);
-    $ent->grid(-column => 1, -row => $i, -sticky => 'w');
+    $ent->grid(-column => ($i%2)*2 + 1, -row => int($i/2), -sticky => 'w');
 }
 
 sub toggleWidgetShown {
