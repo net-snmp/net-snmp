@@ -74,8 +74,6 @@
 
 int random_access = 0;
 
-void usage(void);
-
 #define USM_AUTH_PROTO_MD5_LEN 10
 static oid usmHMACMD5AuthProtocol[]  = { 1,3,6,1,6,3,10,1,1,2 };
 #define USM_AUTH_PROTO_SHA_LEN 10
