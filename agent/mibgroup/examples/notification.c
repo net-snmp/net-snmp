@@ -48,7 +48,30 @@ init_notification(void)
 }
 
 /** here we send a SNMP v2 trap (which can be sent through snmpv3 and
- *  snmpv1 as well) and send it out. */
+ *  snmpv1 as well) and send it out.
+ *
+ *     The various "send_trap()" calls allow you to specify traps in different
+ *  formats.  And the various "trapsink" directives allow you to specify
+ *  destinations to receive different formats.
+ *  But *all* traps are sent to *all* destinations, regardless of how they
+ *  were specified.
+ *  
+ *  
+ *  I.e. it's
+ *                                           ___  trapsink
+ *                                          /
+ *      send_easy_trap \___  [  Trap      ] ____  trap2sink
+ *                      ___  [ Generator  ]
+ *      send_v2trap    /     [            ] ----- informsink
+ *                                          \____
+ *                                                trapsess
+ *  
+ *  *Not*
+ *       send_easy_trap  ------------------->  trapsink
+ *       send_v2trap     ------------------->  trap2sink
+ *       ????            ------------------->  informsink
+ *       ????            ------------------->  trapsess
+ */
 void
 send_example_notification(unsigned int clientreg, void *clientarg)
 {
