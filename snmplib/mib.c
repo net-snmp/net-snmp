@@ -1665,43 +1665,42 @@ _get_symbol(oid *objid,
     /* subtree not found */
 
     while (in_dices) {
+	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
-	if (tp) {
-	    size_t buflen;
-	    switch(tp->type) {
-	    case TYPE_OCTETSTR:
-		buflen = (size_t)*objid;
-		if ( (1+buflen) > objidlen)
-		    goto finish_it;
-		buf = dump_oid_to_string(objid + 1, buflen, buf);
-		*buf++ = '.';
-		*buf = '\0';
-		objid += (1+buflen);
-		objidlen -= (1+buflen);
-		break;
-	    case TYPE_INTEGER:
-		sprintf(buf, "%lu.", *objid++);
-		while(*buf)
-		    buf++;
-		objidlen--;
-		break;
-	    case TYPE_OBJID:
-		buflen = (size_t)*objid;
-		if ( (1+buflen) > objidlen)
-		    goto finish_it;
-		_get_symbol(objid + 1, buflen, NULL, buf, NULL);
-		objid += (1+buflen);
-		objidlen -= (1+buflen);
-		break;
-	    default:
-		goto finish_it;
-		break;
-	    }
-	} else {
+	if (0 == tp) {
             /* ack.  Can't find an index in the mib tree.  bail */
             goto finish_it;
         }
+	switch(tp->type) {
+	case TYPE_OCTETSTR:
+	    numids = (size_t)*objid;
+	    if ( (1+numids) > objidlen)
+		goto finish_it;
+	    buf = dump_oid_to_string(objid + 1, numids, buf);
+	    *buf++ = '.';
+	    *buf = '\0';
+	    objid += (1+numids);
+	    objidlen -= (1+numids);
+	    break;
+	case TYPE_INTEGER:
+	    sprintf(buf, "%lu.", *objid++);
+	    while(*buf)
+		buf++;
+	    objidlen--;
+	    break;
+	case TYPE_OBJID:
+	    numids = (size_t)*objid;
+	    if ( (1+numids) > objidlen)
+		goto finish_it;
+	    _get_symbol(objid + 1, numids, NULL, buf, NULL);
+	    objid += (1+numids);
+	    objidlen -= (1+numids);
+	    break;
+	default:
+	    goto finish_it;
+	    break;
+	}
         in_dices = in_dices->next;
     }
 
