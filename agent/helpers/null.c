@@ -25,6 +25,7 @@ netsnmp_register_null(oid * loc, size_t loc_len)
     reginfo->rootoid_len = loc_len;
     reginfo->handler =
         netsnmp_create_handler("null", netsnmp_null_handler);
+    reginfo->mode = HANDLER_CAN_DEFAULT
     return netsnmp_register_handler(reginfo);
 }
 
