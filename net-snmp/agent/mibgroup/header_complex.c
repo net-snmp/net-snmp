@@ -94,11 +94,13 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
         if (itmp == 0)
           break;        /* zero length strings shouldn't malloc */
         
+        /* malloc by size+1 to allow a null to be appended. */
         var->val_len = itmp;
-        var->val.string = (u_char *) SNMP_MALLOC(itmp);
+        var->val.string = (u_char *) SNMP_MALLOC(itmp+1);
 
         for(i = 0; i < itmp; i++)
           var->val.string[i] = (u_char) *oidIndex++;
+        var->val.string[itmp] = NULL;
         oidLen -= itmp;
 
         DEBUGMSGTL(("header_complex_parse_oid",
