@@ -391,6 +391,8 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     pdu->reqid = snmp_get_next_transid();
     pdu->transid = reqinfo->asp->pdu->transid;
     pdu->sessid = ax_session->subsession->sessid;
+    if (ax_session->subsession->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER)
+        pdu->flags |= AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER;
 
     while (request) {
 
