@@ -290,6 +290,7 @@ int main(int argc, char *argv[])
     }
     
     snmp_sess_init(&session);
+    enable_stderrlog();
     session.peername = hostname;
     session.remote_port = dest_port;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
@@ -301,7 +302,7 @@ int main(int argc, char *argv[])
     SOCK_STARTUP;
     Session = snmp_open(&session);
     if (Session == NULL){
-        snmp_sess_perror("snmpnetstat", &session);
+        snmp_perror("snmpnetstat");
         SOCK_CLEANUP;
 	exit(1);
     }
