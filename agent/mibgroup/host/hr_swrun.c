@@ -461,6 +461,7 @@ var_hrswrun(struct variable * vp,
     static psinfo_t psinfo;
     static psinfo_t *proc_buf;
     int             procfd;
+    int             ret;
     char            procfn[sizeof "/proc/00000/psinfo"];
 #else
     static struct proc *proc_buf;
@@ -507,12 +508,12 @@ var_hrswrun(struct variable * vp,
         proc_buf = &psinfo;
         sprintf(procfn, "/proc/%.5d/psinfo", pid);
         if ((procfd = open(procfn, O_RDONLY)) != -1) {
-            if (read(procfd, proc_buf, sizeof(*proc_buf)) !=
-                sizeof(*proc_buf))
-                abort();
+            ret =  read(procfd, proc_buf, sizeof(*proc_buf));
             close(procfd);
+            if (ret != sizeof(*proc_buf))
+                return NULL;
         } else
-            proc_buf = NULL;
+            return NULL;
 #else
         if (kd == NULL)
             return NULL;
