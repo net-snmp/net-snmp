@@ -254,6 +254,7 @@ init_agent(const char *app)
 
     netsnmp_init_helpers();
     init_traps();
+    netsnmp_container_init_list();
 
     /*
      * initialize agentx subagent if necessary. 
