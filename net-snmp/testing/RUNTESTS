@@ -41,7 +41,7 @@
 
 # Usage mess.  (No, it works.)
 #
-USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS] [-D bindir]"
+USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS] [-D bindir] [-S seconds]"
 
 usage() { 
     echo; 
@@ -51,6 +51,8 @@ usage() {
     #BLIK
     exit 0
 }
+
+trap "exit 1;" 1 2 3 9 13 15 17
 
 SNMP_BASEDIR=`dirname $0`
 
@@ -64,6 +66,7 @@ ORIGDIR=`pwd`		## this script may be invoked with relative path
 SNMP_UPDIR=..		## building from the source tree
 interactive=no
 SNMP_VERBOSE=0
+SNMP_SLEEP=1		## default seconds to sleep
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -102,12 +105,17 @@ while [ -n "$1" ]; do
 	    AGENT_FLAGS="$1"
 	    export AGENT_FLAGS
 	    ;;
+	-S)
+	    shift
+	    SNMP_SLEEP="$1"
+	    ;;
 
     esac
 
     shift
 done
 
+export SNMP_SLEEP
 
 # Find executables in source first, then build, then existing PATH.
 ## Add to PATH if a binary is found.
@@ -150,6 +158,20 @@ export SNMP_PATH
 export SNMP_UPDIR
 export SNMP_VERBOSE
 
+WHICH=which
+$WHICH $0 > /dev/null 2>&1
+if [ $? -ne 0 ] ; then
+    WHICH=type
+fi
+
+for needed in snmpd snmpget snmpgetnext; do
+    $WHICH $needed > /dev/null 2>&1
+    if [ $? -ne 0  ] ; then 
+        echo "No $needed found. Exiting"
+        exit 1
+    fi
+done
+
 #
 # Distinguished expectations.
 #
@@ -158,13 +180,7 @@ if [ $SNMP_VERBOSE -gt 0 ]; then
     echo path is $PATH
     echo top of build is $SNMP_UPDIR
     echo source testing is $SNMP_BASEDIR
-    which snmpget
-    which snmpgetnext
-    which snmpusm
-    which snmpd
-    if [ $? -ne 0  ] ; then 
-        exit 0
-    fi
+    $WHICH snmpusm
 fi
 
 #
@@ -201,11 +217,8 @@ if [ "x$do_tests" = "x" ]; then
     #
     # List the tests in question
     #
-    SNMP_HEADERONLY=yes
-    export SNMP_HEADERONLY
     num=0
     for testfile in T*; do
-
 	case $testfile in
 	    # Skip backup files, and the like.
 	    *~)     ;;
@@ -217,16 +230,13 @@ if [ "x$do_tests" = "x" ]; then
 	    *)
 		num=`expr $num + 1`
 		if [ "x$interactive" != "xyes" -a "x$test_nums" = "x" ]; then
-		    ECHO "$num:  "
-		    eval_onescript.sh $testfile
+		    eval_onescript.sh $testfile $num "yes"
 		fi
 		all_tests="$all_tests $num"
 		all_files="$all_files $testfile"
 		;;
 	esac
     done
-    unset SNMP_HEADERONLY
-    export SNMP_HEADERONLY
 
     #
     # TODO: allow user to interactively pick the list of tests to run.
@@ -264,18 +274,16 @@ fi
 #
 # Run the tests
 #
-num=1
+if [ "x$test_nums" = "xall" ]; then
+    num=1
+else
+    num="$test_nums"
+fi
 for testfile in $do_tests; do
     dothisone="yes";
     if [ "x$interactive" = "xyes" ]; then
-	SNMP_HEADERONLY=yes
-	export SNMP_HEADERONLY
 
-        ECHO "$num:  "
-	eval_onescript.sh $testfile
-
-	unset SNMP_HEADERONLY
-	export SNMP_HEADERONLY
+	eval_onescript.sh $testfile $num "yes"
 
 	ECHO "  Run test #$num (y/n) [y]? "
 	read inp
@@ -285,8 +293,7 @@ for testfile in $do_tests; do
     fi
   
     if [ "x$dothisone" = "xyes" ]; then
-	ECHO "  $num:  "
-	eval_onescript.sh $testfile
+	eval_onescript.sh $testfile $num "no"
 	if [ $? = 0 ]; then
 	    success_count=`expr $success_count + 1`
 	else

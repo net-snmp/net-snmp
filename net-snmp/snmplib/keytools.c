@@ -21,6 +21,12 @@
 #include <strings.h>
 #endif
 
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -412,7 +418,7 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
             kcstring += properlength;
             nbytes    = 0;
             while ((int)(nbytes++) < properlength) {
-            	*kcstring++ = *kcstring ^ *newkey++;
+            	*kcstring++ ^= *newkey++;
             }
         }
 
@@ -527,7 +533,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
             bufp   = kcstring+properlength;
             nbytes = 0;
             while ((int)(nbytes++) < properlength) {
-                    *newkey++ = *newkey ^ *bufp++;
+                    *newkey++ ^= *bufp++;
             }
         }
 

@@ -177,7 +177,7 @@ u64Subtract(U64 *pu64one,
             U64 *pu64two,
             U64 *pu64out)
 {
-  if (pu64one->low > pu64two->low) {
+  if (pu64one->low < pu64two->low) {
     pu64out->low = 0xffffffff - pu64two->low + pu64one->low + 1;
     pu64out->high = pu64one->high - pu64two->high - 1;
   } else {

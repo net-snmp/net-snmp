@@ -1,8 +1,8 @@
 /*
  *  vmstat_solaris2.c
- *  UCD SNMP module for sysStatus section of UCD-SNMP-MIB for SunOS/Solaris
+ *  UCD SNMP module for systemStats section of UCD-SNMP-MIB for SunOS/Solaris
  *  Jochen Kmietsch <kmietsch@jochen.de>
- *  with fixes from the UCD-SNMP community
+ *  with fixes and additions from the UCD-SNMP community
  *  Uses some ideas from xosview and top
  *  Some comments paraphrased from the SUN man pages 
  *  Version 0.1 initial release (Dec 1999)
@@ -11,6 +11,7 @@
  *  Version 0.4 portability issue and raw cpu value support (Jun 2000)
  *  Version 0.5 64-bit Solaris support and new data gathering routine (Aug 2000)
  *  Version 0.6 Memory savings, overroll precautions and lint checks (Aug 2000)
+ *  Version 0.7 More raw counters and some cosmetic changes (Jan 2001)
  *
  */
 
@@ -44,6 +45,7 @@
 #include <snmp_alarm.h>
 
 /* Header file for this module */
+#include "vmstat.h"
 #include "vmstat_solaris2.h"
 
 /* Includes end here */
@@ -115,17 +117,14 @@ static struct cpu_stat_snapshot raw_values;
 /* Function prototype */
 static void update_stats(unsigned int registrationNumber, void *clientarg);
 static int take_snapshot(struct cpu_stat_snapshot *css);
-static unsigned char *var_extensible_vmstat(struct variable *vp,
-                                            oid *name,
-                                            size_t *length,
-                                            int exact,
-                                            size_t *var_len,
-                                            WriteMethod **write_method);
 
 /* init_vmstat_solaris2 starts here */
 /* Init function for this module, from prototype */
 /* Defines variables handled by this module, defines root OID for */
 /* this module and registers it with the agent */
+
+static FindVarMethod var_extensible_vmstat;
+
 void init_vmstat_solaris2(void) 
 {
   
@@ -145,6 +144,10 @@ void init_vmstat_solaris2(void)
     {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
     {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWWAIT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWWAIT}},
+    {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
+    {IORAWSENT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWSENT}},
+    {IORAWRECEIVE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWRECEIVE}},
     /* Future use: */
     /*
       {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -260,7 +263,7 @@ static int take_snapshot(struct cpu_stat_snapshot *css)
 	          (ksp->ks_data_size != sizeof cs) || 
 	          (kstat_read(kstat_fd, ksp, &cs) == -1))
 		{
-		  snmp_log(LOG_ERR, "vmstat_solaris2 (take_snapshot): could not read cs structure.");
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (take_snapshot): could not read cs structure.\n");
 		  return(-1);
 		}
 	      
@@ -319,18 +322,20 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
     {
       if (kid == -1)
         {
-          snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Could not update kstat chain.");
+          snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Could not update kstat chain.\n");
         }
       else
         {
-          snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain changed.");
+	  /* On some machines this floods the logfile, thus commented out */
+          /* snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain ch
+anged."); */
         }
     }
                  
   /* Take the current snapshot */
   if (take_snapshot(&snapshot[0]) == -1)
     {
-      snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Something went wrong with take_snapshot.");
+      snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Something went wrong with take_snapshot.\n");
       return;
     }
   
@@ -343,11 +348,11 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
         {
           if (snapshot[0].css_cpus > snapshot[1].css_cpus)
             {
-              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Cool ! Number of CPUs increased, must be hot-pluggable.");
+              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Cool ! Number of CPUs increased, must be hot-pluggable.\n");
             }
           else
             {
-              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Lost at least one CPU, RIP.");
+              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Lost at least one CPU, RIP.\n");
             }
 	  /* Make all snapshots but the current one invalid */
           number_of_snapshots = 1;
@@ -380,9 +385,11 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
       /* decided to use sysconf(_SC_PAGESIZE) instead to get around an #ifndef (I don't like those) */
       /* that was needed b/c some old Solaris versions don't have getpagesize() */
       /* LINTED cast needed, really */
-      swapin       = (uint_t)((css_new->css_swapin - css_old->css_swapin) * (hrtime_t) 1000 * sysconf(_SC_PAGESIZE) / 1024 / time_diff ); 
+      swapin       = (uint_t)((css_new->css_swapin - css_old->css_swapin) * (hrtime_t) 1000
+			* sysconf(_SC_PAGESIZE) / 1024 / time_diff ); 
       /* LINTED cast needed, really */
-      swapout      = (uint_t)((css_new->css_swapout - css_old->css_swapout) * (hrtime_t) 1000 * sysconf(_SC_PAGESIZE) / 1024 / time_diff); 
+      swapout      = (uint_t)((css_new->css_swapout - css_old->css_swapout) * (hrtime_t) 1000
+			* sysconf(_SC_PAGESIZE) / 1024 / time_diff); 
       /* LINTED cast needed, really */
       blocks_read  = (uint_t)((css_new->css_blocks_read - css_old->css_blocks_read) * (hrtime_t) 1000 / time_diff); 
       /* LINTED cast needed, really */
@@ -416,7 +423,7 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
     }
 
   /* Make the current one the first one and move the whole thing one place down */
-  memmove(&snapshot[1], &snapshot[0], (size_t)(((char *)&snapshot[POLL_VALUES - 1]) - ((char *)&snapshot[0])));
+  memmove(&snapshot[1], &snapshot[0], (size_t)(((char *)&snapshot[POLL_VALUES]) - ((char *)&snapshot[0])));
 
   /* Erase the current one */
   memset(&snapshot[0], 0, sizeof snapshot[0]);
@@ -486,6 +493,7 @@ static unsigned char *var_extensible_vmstat(struct variable *vp,
   /* We are missing CPURAWNICE, Solaris does not account for this in the kernel so this OID can not */
   /* be returned.  Also, these values will roll over sooner or later and then return inaccurate data */
   /* but the MIB wants Integer32 so we cannot put a counter here */
+  /* (Has been changed to Counter32 in the latest MIB version!) */
   case CPURAWSYSTEM:
     take_snapshot(&raw_values);
     /* LINTED has to be 'long' */
@@ -496,6 +504,23 @@ static unsigned char *var_extensible_vmstat(struct variable *vp,
     /* LINTED has to be 'long' */
     long_ret = (long)(raw_values.css_cpu[CPU_IDLE] / raw_values.css_cpus);
     return((u_char *) (&long_ret));    
+  case CPURAWWAIT:
+    take_snapshot(&raw_values);
+    /* LINTED has to be 'long' */
+    long_ret = (long)(raw_values.css_cpu[CPU_WAIT] / raw_values.css_cpus);
+    return((u_char *) (&long_ret));    
+  case CPURAWKERNEL:
+    take_snapshot(&raw_values);
+    /* LINTED has to be 'long' */
+    long_ret = (long)(raw_values.css_cpu[CPU_KERNEL] / raw_values.css_cpus);
+    return((u_char *) (&long_ret));    
+  case IORAWSENT:
+    long_ret = (long)(raw_values.css_blocks_write);
+    return((u_char *) (&long_ret));
+  case IORAWRECEIVE:
+    long_ret = (long)(raw_values.css_blocks_read);
+    return((u_char *) (&long_ret));
+
     /* reserved for future use */
     /*
       case ERRORFLAG:

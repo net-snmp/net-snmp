@@ -44,6 +44,7 @@ extern "C" {
 
 					/* XXX Not optimal everywhere. */
 #define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))
+#define SNMP_MALLOC_TYPEDEF(td)  (td *) calloc(1, sizeof(td))
 #define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
 
 
@@ -119,6 +120,9 @@ extern "C" {
 /* 
  * Prototypes.
  */
+
+int	snmp_realloc(u_char **buf, size_t *buf_len);
+
 void	free_zero (void *buf, size_t size);
 
 u_char *malloc_random (size_t *size);
@@ -128,14 +132,17 @@ int     memdup (u_char **to, const u_char *from, size_t size);
 u_int	binary_to_hex (const u_char *input, size_t len, char **output);
 int	hex_to_binary2 (const u_char *input, size_t len, char **output);
 
+int snmp_strcat		   (u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc, const u_char *s);
+
 void	dump_chunk (const char *debugtoken, const char *title, const u_char *buf, int size);
 char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
 
 typedef void * marker_t;
 marker_t atime_newMarker(void);
 void atime_setMarker(marker_t pm);
-long atime_diff( marker_t first, marker_t second );
-int atime_ready( marker_t pm, int deltaT);
+u_long atime_diff( marker_t first, marker_t second );
+u_long atime_ready( marker_t pm, u_long deltaT);
 
 #ifdef __cplusplus
 }
