@@ -79,8 +79,8 @@ ${node}_check_value( ${context}_ctx *ctx, $m2c_node_param_val)
 @end@
 
     /*
-     * TODO: check that new value is legal, and/or if the
-     * new value 
+     * TODO:
+     * check that new value is legal
      */
 
     /* if everything looks ok, return 0 */
@@ -118,17 +118,9 @@ ${node}_undo_setup( ${context}_ctx *ctx )
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != ctx);
 
-    /*
-     * copy data to undo
-     */
-@if $m2c_data_context ne "generated"@
-$example_start
-@end@
-@        eval $m2c_ctx_lh = "$m2c_undo_item"@
-@        eval $m2c_ctx_rh = "$m2c_data_item"@
-@        include generic-ctx-copy.m2i@
-@if $m2c_data_context ne "generated"@
-$example_end
+@   eval $m2c_ctx_lh = "$m2c_undo_item"@
+@   eval $m2c_ctx_rh = "$m2c_data_item"@
+@   include generic-ctx-copy.m2i@
 @end@
 
     return MFD_SUCCESS;
