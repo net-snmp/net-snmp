@@ -705,7 +705,6 @@ sprint_counter64(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
-    U64 u64a;
     if (var->type != ASN_COUNTER64){
 	sprintf(buf, "Wrong Type (should be Counter64): ");
 	buf += strlen(buf);
@@ -717,9 +716,7 @@ sprint_counter64(buf, var, enums, hint, units)
 	sprintf(buf, "Counter64: ");
 	buf += strlen(buf);
     }
-    u64a.ulHi = var->val.counter64->high;
-    u64a.ulLo = var->val.counter64->low;
-    sprintf(buf, printU64(&u64a));
+    sprintf(buf, printU64(var->val.counter64));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
