@@ -5,30 +5,61 @@ IMPORTS
     TimeTicks, Counter32, snmpModules, mib-2
         FROM SNMPv2-SMI
     DisplayString, TestAndIncr, TimeStamp
+
         FROM SNMPv2-TC
     MODULE-COMPLIANCE, OBJECT-GROUP, NOTIFICATION-GROUP
         FROM SNMPv2-CONF;
 
 snmpMIB MODULE-IDENTITY
-    LAST-UPDATED "9511090000Z"
-    ORGANIZATION "IETF SNMPv2 Working Group"
+    LAST-UPDATED "200210160000Z"
+    ORGANIZATION "IETF SNMPv3 Working Group"
     CONTACT-INFO
-            "        Marshall T. Rose
+            "WG-EMail:   snmpv3@lists.tislabs.com
+             Subscribe:  snmpv3-request@lists.tislabs.com
 
-             Postal: Dover Beach Consulting, Inc.
-                     420 Whisman Court
-                     Mountain View, CA  94043-2186
-                     US
+             Co-Chair:   Russ Mundy
+                         Network Associates Laboratories
+             postal:     15204 Omega Drive, Suite 300
+                         Rockville, MD 20850-4601
+                         USA
+             EMail:      mundy@tislabs.com
+             phone:      +1 301 947-7107
 
-                Tel: +1 415 968 1052
+             Co-Chair:   David Harrington
+                         Enterasys Networks
+             postal:     35 Industrial Way
+                         P. O. Box 5005
+                         Rochester, NH 03866-5005
+                         USA
+             EMail:      dbh@enterasys.com
+             phone:      +1 603 337-2614
 
-             E-mail: mrose@dbc.mtview.ca.us"
+             Editor:     Randy Presuhn
+                         BMC Software, Inc.
+             postal:     2141 North First Street
+                         San Jose, CA 95131
+                         USA
+             EMail:      randy_presuhn@bmc.com
+             phone:      +1 408 546-1006"
     DESCRIPTION
-            "The MIB module for SNMPv2 entities."
-    REVISION      "9304010000Z"
+            "The MIB module for SNMP entities.
+
+             Copyright (C) The Internet Society (2002). This
+             version of this MIB module is part of RFC 3418;
+             see the RFC itself for full legal notices.
+            "
+    REVISION      "200210160000Z"
     DESCRIPTION
-            "The initial revision of this MIB module was published as
-            RFC 1450."
+            "This revision of this MIB module was published as
+             RFC 3418."
+    REVISION      "199511090000Z"
+    DESCRIPTION
+            "This revision of this MIB module was published as
+             RFC 1907."
+    REVISION      "199304010000Z"
+    DESCRIPTION
+            "The initial revision of this MIB module was published
+            as RFC 1450."
     ::= { snmpModules 1 }
 
 snmpMIBObjects OBJECT IDENTIFIER ::= { snmpMIB 1 }
@@ -49,9 +80,9 @@ sysDescr OBJECT-TYPE
     STATUS      current
     DESCRIPTION
             "A textual description of the entity.  This value should
-            include the full name and version identification of the
-            system's hardware type, software operating-system, and
-            networking software."
+            include the full name and version identification of
+            the system's hardware type, software operating-system,
+            and networking software."
     ::= { system 1 }
 
 sysObjectID OBJECT-TYPE
@@ -59,14 +90,15 @@ sysObjectID OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-            "The vendor's authoritative identification of the network
-            management subsystem contained in the entity.  This value is
-            allocated within the SMI enterprises subtree (1.3.6.1.4.1)
-            and provides an easy and unambiguous means for determining
-            `what kind of box' is being managed.  For example, if vendor
-            `Flintstones, Inc.' was assigned the subtree
-            1.3.6.1.4.1.4242, it could assign the identifier
-            1.3.6.1.4.1.4242.1.1 to its `Fred Router'."
+            "The vendor's authoritative identification of the
+            network management subsystem contained in the entity.
+            This value is allocated within the SMI enterprises
+            subtree (1.3.6.1.4.1) and provides an easy and
+            unambiguous means for determining `what kind of box' is
+            being managed.  For example, if vendor `Flintstones,
+            Inc.' was assigned the subtree 1.3.6.1.4.1.424242,
+            it could assign the identifier 1.3.6.1.4.1.424242.1.1
+            to its `Fred Router'."
     ::= { system 2 }
 
 sysUpTime OBJECT-TYPE
@@ -74,8 +106,9 @@ sysUpTime OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-            "The time (in hundredths of a second) since the network
-            management portion of the system was last re-initialized."
+            "The time (in hundredths of a second) since the
+            network management portion of the system was last
+            re-initialized."
     ::= { system 3 }
 
 sysContact OBJECT-TYPE
@@ -83,10 +116,10 @@ sysContact OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-            "The textual identification of the contact person for this
-            managed node, together with information on how to contact
-            this person.  If no contact information is known, the value
-            is the zero-length string."
+            "The textual identification of the contact person for
+            this managed node, together with information on how
+            to contact this person.  If no contact information is
+            known, the value is the zero-length string."
     ::= { system 4 }
 
 sysName OBJECT-TYPE
@@ -94,10 +127,10 @@ sysName OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-            "An administratively-assigned name for this managed node.
-            By convention, this is the node's fully-qualified domain
-            name.  If the name is unknown, the value is the zero-length
-            string."
+            "An administratively-assigned name for this managed
+            node.  By convention, this is the node's fully-qualified
+            domain name.  If the name is unknown, the value is
+            the zero-length string."
     ::= { system 5 }
 
 sysLocation OBJECT-TYPE
@@ -105,9 +138,9 @@ sysLocation OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-            "The physical location of this node (e.g., `telephone
-            closet, 3rd floor').  If the location is unknown, the value
-            is the zero-length string."
+            "The physical location of this node (e.g., 'telephone
+            closet, 3rd floor').  If the location is unknown, the
+            value is the zero-length string."
     ::= { system 6 }
 
 sysServices OBJECT-TYPE
@@ -116,16 +149,17 @@ sysServices OBJECT-TYPE
     STATUS      current
     DESCRIPTION
             "A value which indicates the set of services that this
-            entity may potentially offers.  The value is a sum.  This
-            sum initially takes the value zero, Then, for each layer, L,
-            in the range 1 through 7, that this node performs
-            transactions for, 2 raised to (L - 1) is added to the sum.
-            For example, a node which performs only routing functions
-            would have a value of 4 (2^(3-1)).  In contrast, a node
-            which is a host offering application services would have a
-            value of 72 (2^(4-1) + 2^(7-1)).  Note that in the context
-            of the Internet suite of protocols, values should be
-            calculated accordingly:
+            entity may potentially offer.  The value is a sum.
+
+            This sum initially takes the value zero. Then, for
+            each layer, L, in the range 1 through 7, that this node
+            performs transactions for, 2 raised to (L - 1) is added
+            to the sum.  For example, a node which performs only
+            routing functions would have a value of 4 (2^(3-1)).
+            In contrast, a node which is a host offering application
+            services would have a value of 72 (2^(4-1) + 2^(7-1)).
+            Note that in the context of the Internet suite of
+            protocols, values should be calculated accordingly:
 
                  layer      functionality
                    1        physical (e.g., repeaters)
@@ -134,13 +168,13 @@ sysServices OBJECT-TYPE
                    4        end-to-end  (e.g., supports the TCP)
                    7        applications (e.g., supports the SMTP)
 
-            For systems including OSI protocols, layers 5 and 6 may also
-            be counted."
+            For systems including OSI protocols, layers 5 and 6
+            may also be counted."
     ::= { system 7 }
 
 -- object resource information
 --
--- a collection of objects which describe the SNMPv2 entity's
+-- a collection of objects which describe the SNMP entity's
 -- (statically and dynamically configurable) support of
 -- various MIB modules.
 
@@ -150,7 +184,6 @@ sysORLastChange OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The value of sysUpTime at the time of the most recent
-
             change in state or value of any instance of sysORID."
     ::= { system 8 }
 
@@ -159,11 +192,12 @@ sysORTable OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-            "The (conceptual) table listing the capabilities of the
-            local SNMPv2 entity acting in an agent role with respect to
-            various MIB modules.  SNMPv2 entities having dynamically-
-            configurable support of MIB modules will have a
-            dynamically-varying number of conceptual rows."
+            "The (conceptual) table listing the capabilities of
+            the local SNMP application acting as a command
+            responder with respect to various MIB modules.
+            SNMP entities having dynamically-configurable support
+            of MIB modules will have a dynamically-varying number
+            of conceptual rows."
     ::= { system 9 }
 
 sysOREntry OBJECT-TYPE
@@ -187,8 +221,8 @@ sysORIndex OBJECT-TYPE
     MAX-ACCESS not-accessible
     STATUS     current
     DESCRIPTION
-            "The auxiliary variable used for identifying instances of
-            the columnar objects in the sysORTable."
+            "The auxiliary variable used for identifying instances
+            of the columnar objects in the sysORTable."
     ::= { sysOREntry 1 }
 
 sysORID OBJECT-TYPE
@@ -196,9 +230,10 @@ sysORID OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "An authoritative identification of a capabilities statement
-            with respect to various MIB modules supported by the local
-            SNMPv2 entity acting in an agent role."
+            "An authoritative identification of a capabilities
+            statement with respect to various MIB modules supported
+            by the local SNMP application acting as a command
+            responder."
     ::= { sysOREntry 2 }
 
 sysORDescr OBJECT-TYPE
@@ -206,8 +241,8 @@ sysORDescr OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "A textual description of the capabilities identified by the
-            corresponding instance of sysORID."
+            "A textual description of the capabilities identified
+            by the corresponding instance of sysORID."
     ::= { sysOREntry 3 }
 
 sysORUpTime OBJECT-TYPE
@@ -215,8 +250,8 @@ sysORUpTime OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The value of sysUpTime at the time this conceptual row was
-            last instanciated."
+            "The value of sysUpTime at the time this conceptual
+            row was last instantiated."
     ::= { sysOREntry 4 }
 
 -- the SNMP group
@@ -231,8 +266,8 @@ snmpInPkts OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of messages delivered to the SNMP entity
-            from the transport service."
+            "The total number of messages delivered to the SNMP
+            entity from the transport service."
     ::= { snmp 1 }
 
 snmpInBadVersions OBJECT-TYPE
@@ -240,8 +275,9 @@ snmpInBadVersions OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of SNMP messages which were delivered to
-            the SNMP entity and were for an unsupported SNMP version."
+            "The total number of SNMP messages which were delivered
+            to the SNMP entity and were for an unsupported SNMP
+            version."
     ::= { snmp 3 }
 
 snmpInBadCommunityNames OBJECT-TYPE
@@ -249,9 +285,20 @@ snmpInBadCommunityNames OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of SNMP messages delivered to the SNMP
-            entity which used a SNMP community name not known to said
-            entity."
+           "The total number of community-based SNMP messages (for
+           example,  SNMPv1) delivered to the SNMP entity which
+           used an SNMP community name not known to said entity.
+           Also, implementations which authenticate community-based
+           SNMP messages using check(s) in addition to matching
+           the community name (for example, by also checking
+           whether the message originated from a transport address
+           allowed to use a specified community name) MAY include
+           in this value the number of messages which failed the
+           additional check(s).  It is strongly RECOMMENDED that
+
+           the documentation for any security model which is used
+           to authenticate community-based SNMP messages specify
+           the precise conditions that contribute to this value."
     ::= { snmp 4 }
 
 snmpInBadCommunityUses OBJECT-TYPE
@@ -259,9 +306,18 @@ snmpInBadCommunityUses OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of SNMP messages delivered to the SNMP
-            entity which represented an SNMP operation which was not
-            allowed by the SNMP community named in the message."
+           "The total number of community-based SNMP messages (for
+           example, SNMPv1) delivered to the SNMP entity which
+           represented an SNMP operation that was not allowed for
+           the SNMP community named in the message.  The precise
+           conditions under which this counter is incremented
+           (if at all) depend on how the SNMP entity implements
+           its access control mechanism and how its applications
+           interact with that access control mechanism.  It is
+           strongly RECOMMENDED that the documentation for any
+           access control mechanism which is used to control access
+           to and visibility of MIB instrumentation specify the
+           precise conditions that contribute to this value."
     ::= { snmp 5 }
 
 snmpInASNParseErrs OBJECT-TYPE
@@ -269,8 +325,8 @@ snmpInASNParseErrs OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of ASN.1 or BER errors encountered by the
-            SNMP entity when decoding received SNMP messages."
+            "The total number of ASN.1 or BER errors encountered by
+            the SNMP entity when decoding received SNMP messages."
     ::= { snmp 6 }
 
 snmpEnableAuthenTraps OBJECT-TYPE
@@ -278,15 +334,16 @@ snmpEnableAuthenTraps OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-            "Indicates whether the SNMP entity is permitted to generate
-            authenticationFailure traps.  The value of this object
-            overrides any configuration information; as such, it
-            provides a means whereby all authenticationFailure traps may
-            be disabled.
+            "Indicates whether the SNMP entity is permitted to
+            generate authenticationFailure traps.  The value of this
+            object overrides any configuration information; as such,
+            it provides a means whereby all authenticationFailure
+            traps may be disabled.
 
-            Note that it is strongly recommended that this object be
-            stored in non-volatile memory so that it remains constant
-            across re-initializations of the network management system."
+            Note that it is strongly recommended that this object
+            be stored in non-volatile memory so that it remains
+            constant across re-initializations of the network
+            management system."
     ::= { snmp 30 }
 
 snmpSilentDrops OBJECT-TYPE
@@ -294,13 +351,16 @@ snmpSilentDrops OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of GetRequest-PDUs, GetNextRequest-PDUs,
-            GetBulkRequest-PDUs, SetRequest-PDUs, and InformRequest-PDUs
-            delivered to the SNMP entity which were silently dropped
-            because the size of a reply containing an alternate
-            Response-PDU with an empty variable-bindings field was
-            greater than either a local constraint or the maximum
-            message size associated with the originator of the request."
+           "The total number of Confirmed Class PDUs (such as
+           GetRequest-PDUs, GetNextRequest-PDUs,
+           GetBulkRequest-PDUs, SetRequest-PDUs, and
+           InformRequest-PDUs) delivered to the SNMP entity which
+           were silently dropped because the size of a reply
+           containing an alternate Response Class PDU (such as a
+           Response-PDU) with an empty variable-bindings field
+           was greater than either a local constraint or the
+           maximum message size associated with the originator of
+           the request."
     ::= { snmp 31 }
 
 snmpProxyDrops OBJECT-TYPE
@@ -308,19 +368,22 @@ snmpProxyDrops OBJECT-TYPE
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
-            "The total number of GetRequest-PDUs, GetNextRequest-PDUs,
-            GetBulkRequest-PDUs, SetRequest-PDUs, and InformRequest-PDUs
-            delivered to the SNMP entity which were silently dropped
-            because the transmission of the (possibly translated)
-            message to a proxy target failed in a manner (other than a
-            time-out) such that no Response-PDU could be returned."
+            "The total number of Confirmed Class PDUs
+            (such as GetRequest-PDUs, GetNextRequest-PDUs,
+            GetBulkRequest-PDUs, SetRequest-PDUs, and
+            InformRequest-PDUs) delivered to the SNMP entity which
+            were silently dropped because the transmission of
+            the (possibly translated) message to a proxy target
+            failed in a manner (other than a time-out) such that
+            no Response Class PDU (such as a Response-PDU) could
+            be returned."
     ::= { snmp 32 }
 
 -- information for notifications
 --
--- a collection of objects which allow the SNMPv2 entity, when
--- acting in an agent role, to be configured to generate
--- SNMPv2-Trap-PDUs.
+-- a collection of objects which allow the SNMP entity, when
+-- supporting a notification originator application,
+-- to be configured to generate SNMPv2-Trap-PDUs.
 
 snmpTrap       OBJECT IDENTIFIER ::= { snmpMIBObjects 4 }
 
@@ -330,8 +393,9 @@ snmpTrapOID OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The authoritative identification of the notification
-            currently being sent.  This variable occurs as the second
-            varbind in every SNMPv2-Trap-PDU and InformRequest-PDU."
+            currently being sent.  This variable occurs as
+            the second varbind in every SNMPv2-Trap-PDU and
+            InformRequest-PDU."
     ::= { snmpTrap 1 }
 
 --  ::= { snmpTrap 2 }   this OID is obsolete
@@ -342,9 +406,10 @@ snmpTrapEnterprise OBJECT-TYPE
     STATUS     current
     DESCRIPTION
             "The authoritative identification of the enterprise
-            associated with the trap currently being sent.  When a
-            SNMPv2 proxy agent is mapping an RFC1157 Trap-PDU into a
-            SNMPv2-Trap-PDU, this variable occurs as the last varbind."
+            associated with the trap currently being sent.  When an
+            SNMP proxy agent is mapping an RFC1157 Trap-PDU
+            into a SNMPv2-Trap-PDU, this variable occurs as the
+            last varbind."
     ::= { snmpTrap 3 }
 
 --  ::= { snmpTrap 4 }   this OID is obsolete
@@ -356,42 +421,44 @@ snmpTraps      OBJECT IDENTIFIER ::= { snmpMIBObjects 5 }
 coldStart NOTIFICATION-TYPE
     STATUS  current
     DESCRIPTION
-            "A coldStart trap signifies that the SNMPv2 entity, acting
-            in an agent role, is reinitializing itself and that its
-            configuration may have been altered."
+            "A coldStart trap signifies that the SNMP entity,
+            supporting a notification originator application, is
+            reinitializing itself and that its configuration may
+            have been altered."
     ::= { snmpTraps 1 }
 
 warmStart NOTIFICATION-TYPE
     STATUS  current
     DESCRIPTION
-            "A warmStart trap signifies that the SNMPv2 entity, acting
-            in an agent role, is reinitializing itself such that its
-            configuration is unaltered."
+            "A warmStart trap signifies that the SNMP entity,
+            supporting a notification originator application,
+            is reinitializing itself such that its configuration
+            is unaltered."
     ::= { snmpTraps 2 }
 
 -- Note the linkDown NOTIFICATION-TYPE ::= { snmpTraps 3 }
 -- and the linkUp NOTIFICATION-TYPE ::= { snmpTraps 4 }
--- are defined in RFC 1573
+-- are defined in RFC 2863 [RFC2863]
 
 authenticationFailure NOTIFICATION-TYPE
     STATUS  current
     DESCRIPTION
-            "An authenticationFailure trap signifies that the SNMPv2
-            entity, acting in an agent role, has received a protocol
-            message that is not properly authenticated.  While all
-            implementations of the SNMPv2 must be capable of generating
-            this trap, the snmpEnableAuthenTraps object indicates
-            whether this trap will be generated."
+            "An authenticationFailure trap signifies that the SNMP
+             entity has received a protocol message that is not
+             properly authenticated.  While all implementations
+             of SNMP entities MAY be capable of generating this
+             trap, the snmpEnableAuthenTraps object indicates
+             whether this trap will be generated."
     ::= { snmpTraps 5 }
 
--- Note the egpNeighborLoss NOTIFICATION-TYPE ::= { snmpTraps 6 }
--- is defined in RFC 1213
+-- Note the egpNeighborLoss notification is defined
+-- as { snmpTraps 6 } in RFC 1213
 
 -- the set group
 --
 -- a collection of objects which allow several cooperating
--- SNMPv2 entities, all acting in a manager role, to
--- coordinate their use of the SNMPv2 set operation.
+-- command generator applications to coordinate their use of the
+-- set operation.
 
 snmpSet        OBJECT IDENTIFIER ::= { snmpMIBObjects 6 }
 
@@ -400,13 +467,14 @@ snmpSetSerialNo OBJECT-TYPE
     MAX-ACCESS read-write
     STATUS     current
     DESCRIPTION
-            "An advisory lock used to allow several cooperating SNMPv2
-            entities, all acting in a manager role, to coordinate their
-            use of the SNMPv2 set operation.
+            "An advisory lock used to allow several cooperating
+            command generator applications to coordinate their
+            use of the SNMP set operation.
 
-            This object is used for coarse-grain coordination.  To
-            achieve fine-grain coordination, one or more similar objects
-            might be defined within each MIB group, as appropriate."
+            This object is used for coarse-grain coordination.
+            To achieve fine-grain coordination, one or more similar
+            objects might be defined within each MIB group, as
+            appropriate."
     ::= { snmpSet 1 }
 
 -- conformance information
@@ -421,12 +489,14 @@ snmpMIBGroups  OBJECT IDENTIFIER ::= { snmpMIBConformance 2 }
 -- compliance statements
 
 --    ::= { snmpMIBCompliances 1 }      this OID is obsolete
-
 snmpBasicCompliance MODULE-COMPLIANCE
-    STATUS  current
+    STATUS  deprecated
     DESCRIPTION
             "The compliance statement for SNMPv2 entities which
-            implement the SNMPv2 MIB."
+            implement the SNMPv2 MIB.
+
+            This compliance statement is replaced by
+            snmpBasicComplianceRev2."
     MODULE  -- this module
         MANDATORY-GROUPS { snmpGroup, snmpSetGroup, systemGroup,
                            snmpBasicNotificationsGroup }
@@ -437,11 +507,34 @@ snmpBasicCompliance MODULE-COMPLIANCE
             support community-based authentication."
     ::= { snmpMIBCompliances 2 }
 
+snmpBasicComplianceRev2 MODULE-COMPLIANCE
+    STATUS  current
+    DESCRIPTION
+            "The compliance statement for SNMP entities which
+            implement this MIB module."
+    MODULE  -- this module
+        MANDATORY-GROUPS { snmpGroup, snmpSetGroup, systemGroup,
+                           snmpBasicNotificationsGroup }
+
+        GROUP   snmpCommunityGroup
+        DESCRIPTION
+            "This group is mandatory for SNMP entities which
+            support community-based authentication."
+
+        GROUP   snmpWarmStartNotificationGroup
+        DESCRIPTION
+            "This group is mandatory for an SNMP entity which
+            supports command responder applications, and is
+            able to reinitialize itself such that its
+            configuration is unaltered."
+    ::= { snmpMIBCompliances 3 }
+
 -- units of conformance
 
 --  ::= { snmpMIBGroups 1 }           this OID is obsolete
 --  ::= { snmpMIBGroups 2 }           this OID is obsolete
 --  ::= { snmpMIBGroups 3 }           this OID is obsolete
+
 --  ::= { snmpMIBGroups 4 }           this OID is obsolete
 
 snmpGroup OBJECT-GROUP
@@ -453,8 +546,8 @@ snmpGroup OBJECT-GROUP
               snmpEnableAuthenTraps }
     STATUS  current
     DESCRIPTION
-            "A collection of objects providing basic instrumentation and
-            control of an SNMPv2 entity."
+            "A collection of objects providing basic instrumentation
+            and control of an SNMP entity."
     ::= { snmpMIBGroups 8 }
 
 snmpCommunityGroup OBJECT-GROUP
@@ -462,8 +555,8 @@ snmpCommunityGroup OBJECT-GROUP
               snmpInBadCommunityUses }
     STATUS  current
     DESCRIPTION
-            "A collection of objects providing basic instrumentation of
-            a SNMPv2 entity which supports community-based
+            "A collection of objects providing basic instrumentation
+            of a SNMP entity which supports community-based
             authentication."
     ::= { snmpMIBGroups 9 }
 
@@ -472,8 +565,8 @@ snmpSetGroup OBJECT-GROUP
     STATUS  current
     DESCRIPTION
             "A collection of objects which allow several cooperating
-            SNMPv2 entities, all acting in a manager role, to coordinate
-            their use of the SNMPv2 set operation."
+            command generator applications to coordinate their
+            use of the set operation."
     ::= { snmpMIBGroups 5 }
 
 systemGroup OBJECT-GROUP
@@ -492,9 +585,26 @@ snmpBasicNotificationsGroup NOTIFICATION-GROUP
     NOTIFICATIONS { coldStart, authenticationFailure }
     STATUS        current
     DESCRIPTION
-            "The two notifications which an SNMPv2 entity is required to
-            implement."
+       "The basic notifications implemented by an SNMP entity
+        supporting command responder applications."
     ::= { snmpMIBGroups 7 }
+
+snmpWarmStartNotificationGroup NOTIFICATION-GROUP
+   NOTIFICATIONS { warmStart }
+   STATUS        current
+   DESCRIPTION
+     "An additional notification for an SNMP entity supporting
+     command responder applications, if it is able to reinitialize
+     itself such that its configuration is unaltered."
+  ::= { snmpMIBGroups 11 }
+
+snmpNotificationGroup OBJECT-GROUP
+    OBJECTS { snmpTrapOID, snmpTrapEnterprise }
+    STATUS  current
+    DESCRIPTION
+            "These objects are required for entities
+            which support notification originator applications."
+    ::= { snmpMIBGroups 12 }
 
 -- definitions in RFC 1213 made obsolete by the inclusion of a
 -- subset of the snmp group in this MIB
@@ -518,7 +628,7 @@ snmpInTooBigs OBJECT-TYPE
     DESCRIPTION
             "The total number of SNMP PDUs which were
             delivered to the SNMP protocol entity and for
-            which the value of the error-status field is
+            which the value of the error-status field was
             `tooBig'."
     ::= { snmp 8 }
 
@@ -529,7 +639,7 @@ snmpInNoSuchNames OBJECT-TYPE
     DESCRIPTION
             "The total number of SNMP PDUs which were
             delivered to the SNMP protocol entity and for
-            which the value of the error-status field is
+            which the value of the error-status field was
             `noSuchName'."
     ::= { snmp 9 }
 
@@ -540,7 +650,7 @@ snmpInBadValues OBJECT-TYPE
     DESCRIPTION
             "The total number of SNMP PDUs which were
             delivered to the SNMP protocol entity and for
-            which the value of the error-status field is
+            which the value of the error-status field was
             `badValue'."
     ::= { snmp 10 }
 
@@ -549,15 +659,14 @@ snmpInReadOnlys OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number valid SNMP PDUs which were
-            delivered to the SNMP protocol entity and for
-            which the value of the error-status field is
-            `readOnly'.  It should be noted that it is a
-            protocol error to generate an SNMP PDU which
-            contains the value `readOnly' in the error-status
-            field, as such this object is provided as a means
-            of detecting incorrect implementations of the
-            SNMP."
+            "The total number valid SNMP PDUs which were delivered
+            to the SNMP protocol entity and for which the value
+            of the error-status field was `readOnly'.  It should
+            be noted that it is a protocol error to generate an
+            SNMP PDU which contains the value `readOnly' in the
+            error-status field, as such this object is provided
+            as a means of detecting incorrect implementations of
+            the SNMP."
     ::= { snmp 11 }
 
 snmpInGenErrs OBJECT-TYPE
@@ -565,10 +674,9 @@ snmpInGenErrs OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP PDUs which were
-            delivered to the SNMP protocol entity and for
-            which the value of the error-status field is
-            `genErr'."
+            "The total number of SNMP PDUs which were delivered
+            to the SNMP protocol entity and for which the value
+            of the error-status field was `genErr'."
     ::= { snmp 12 }
 
 snmpInTotalReqVars OBJECT-TYPE
@@ -588,9 +696,8 @@ snmpInTotalSetVars OBJECT-TYPE
     STATUS      obsolete
     DESCRIPTION
             "The total number of MIB objects which have been
-            altered successfully by the SNMP protocol entity
-            as the result of receiving valid SNMP Set-Request
-            PDUs."
+            altered successfully by the SNMP protocol entity as
+            the result of receiving valid SNMP Set-Request PDUs."
     ::= { snmp 14 }
 
 snmpInGetRequests OBJECT-TYPE
@@ -608,9 +715,8 @@ snmpInGetNexts OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP Get-Next PDUs which have
-            been accepted and processed by the SNMP protocol
-            entity."
+            "The total number of SNMP Get-Next PDUs which have been
+            accepted and processed by the SNMP protocol entity."
     ::= { snmp 16 }
 
 snmpInSetRequests OBJECT-TYPE
@@ -619,8 +725,8 @@ snmpInSetRequests OBJECT-TYPE
     STATUS      obsolete
     DESCRIPTION
             "The total number of SNMP Set-Request PDUs which
-            have been accepted and processed by the SNMP
-            protocol entity."
+            have been accepted and processed by the SNMP protocol
+            entity."
     ::= { snmp 17 }
 
 snmpInGetResponses OBJECT-TYPE
@@ -629,8 +735,8 @@ snmpInGetResponses OBJECT-TYPE
     STATUS      obsolete
     DESCRIPTION
             "The total number of SNMP Get-Response PDUs which
-            have been accepted and processed by the SNMP
-            protocol entity."
+            have been accepted and processed by the SNMP protocol
+            entity."
     ::= { snmp 18 }
 
 snmpInTraps OBJECT-TYPE
@@ -638,9 +744,8 @@ snmpInTraps OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP Trap PDUs which have
-            been accepted and processed by the SNMP protocol
-            entity."
+            "The total number of SNMP Trap PDUs which have been
+            accepted and processed by the SNMP protocol entity."
     ::= { snmp 19 }
 
 snmpOutTooBigs OBJECT-TYPE
@@ -648,10 +753,9 @@ snmpOutTooBigs OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP PDUs which were
-            generated by the SNMP protocol entity and for
-            which the value of the error-status field is
-            `tooBig.'"
+            "The total number of SNMP PDUs which were generated
+            by the SNMP protocol entity and for which the value
+            of the error-status field was `tooBig.'"
     ::= { snmp 20 }
 
 snmpOutNoSuchNames OBJECT-TYPE
@@ -659,10 +763,9 @@ snmpOutNoSuchNames OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP PDUs which were
-            generated by the SNMP protocol entity and for
-            which the value of the error-status is
-            `noSuchName'."
+            "The total number of SNMP PDUs which were generated
+            by the SNMP protocol entity and for which the value
+            of the error-status was `noSuchName'."
     ::= { snmp 21 }
 
 snmpOutBadValues OBJECT-TYPE
@@ -670,10 +773,9 @@ snmpOutBadValues OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP PDUs which were
-            generated by the SNMP protocol entity and for
-            which the value of the error-status field is
-            `badValue'."
+            "The total number of SNMP PDUs which were generated
+            by the SNMP protocol entity and for which the value
+            of the error-status field was `badValue'."
     ::= { snmp 22 }
 
 -- { snmp 23 } is not used
@@ -683,10 +785,9 @@ snmpOutGenErrs OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      obsolete
     DESCRIPTION
-            "The total number of SNMP PDUs which were
-            generated by the SNMP protocol entity and for
-            which the value of the error-status field is
-            `genErr'."
+            "The total number of SNMP PDUs which were generated
+            by the SNMP protocol entity and for which the value
+            of the error-status field was `genErr'."
     ::= { snmp 24 }
 
 snmpOutGetRequests OBJECT-TYPE
@@ -740,13 +841,14 @@ snmpObsoleteGroup OBJECT-GROUP
               snmpInTotalReqVars, snmpInTotalSetVars,
               snmpInGetRequests, snmpInGetNexts, snmpInSetRequests,
               snmpInGetResponses, snmpInTraps, snmpOutTooBigs,
-              snmpOutNoSuchNames, snmpOutBadValues, snmpOutGenErrs,
-              snmpOutGetRequests, snmpOutGetNexts, snmpOutSetRequests,
-              snmpOutGetResponses, snmpOutTraps }
+              snmpOutNoSuchNames, snmpOutBadValues,
+              snmpOutGenErrs, snmpOutGetRequests, snmpOutGetNexts,
+              snmpOutSetRequests, snmpOutGetResponses, snmpOutTraps
+              }
     STATUS  obsolete
     DESCRIPTION
-            "A collection of objects from RFC 1213 made obsolete by this
-            MIB."
+            "A collection of objects from RFC 1213 made obsolete
+            by this MIB module."
     ::= { snmpMIBGroups 10 }
 
 END

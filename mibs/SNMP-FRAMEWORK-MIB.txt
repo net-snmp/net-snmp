@@ -8,60 +8,83 @@ IMPORTS
     MODULE-COMPLIANCE, OBJECT-GROUP       FROM SNMPv2-CONF;
 
 snmpFrameworkMIB MODULE-IDENTITY
-    LAST-UPDATED "9901190000Z"            -- 19 January 1999
+    LAST-UPDATED "200210140000Z"
     ORGANIZATION "SNMPv3 Working Group"
-    CONTACT-INFO "WG-EMail:   snmpv3@tis.com
-                  Subscribe:  majordomo@tis.com
-                              In message body:  subscribe snmpv3
+    CONTACT-INFO "WG-EMail:   snmpv3@lists.tislabs.com
+                  Subscribe:  snmpv3-request@lists.tislabs.com
 
-                  Chair:      Russ Mundy
-                              TIS Labs at Network Associates
-                  postal:     3060 Washington Rd
-                              Glenwood MD 21738
+                  Co-Chair:   Russ Mundy
+                              Network Associates Laboratories
+                  postal:     15204 Omega Drive, Suite 300
+                              Rockville, MD 20850-4601
                               USA
-                  EMail:      mundy@tis.com
-                  phone:      +1 301-854-6889
+                  EMail:      mundy@tislabs.com
+                  phone:      +1 301-947-7107
 
-                  Co-editor   Dave Harrington
-                              Cabletron Systems, Inc.
-                  postal:     Post Office Box 5005
-                              Mail Stop: Durham
-                              35 Industrial Way
-                              Rochester, NH 03867-5005
+                  Co-Chair &
+                  Co-editor:  David Harrington
+                              Enterasys Networks
+                  postal:     35 Industrial Way
+                              P. O. Box 5005
+                              Rochester, New Hampshire 03866-5005
                               USA
-                  EMail:      dbh@ctron.com
-                  phone:      +1 603-337-7357
+                  EMail:      dbh@enterasys.com
+                  phone:      +1 603-337-2614
 
-                  Co-editor   Randy Presuhn
+                  Co-editor:  Randy Presuhn
                               BMC Software, Inc.
-                  postal:     965 Stewart Drive
-                              Sunnyvale, CA 94086
+                  postal:     2141 North First Street
+                              San Jose, California 95131
                               USA
                   EMail:      randy_presuhn@bmc.com
-                  phone:      +1 408-616-3100
+                  phone:      +1 408-546-1006
 
                   Co-editor:  Bert Wijnen
-                              IBM T.J. Watson Research
+                              Lucent Technologies
                   postal:     Schagen 33
                               3461 GL Linschoten
-
                               Netherlands
-                  EMail:      wijnen@vnet.ibm.com
-                  phone:      +31 348-432-794
-                 "
-    DESCRIPTION  "The SNMP Management Architecture MIB"
--- Revision History
 
-    REVISION     "9901190000Z"            -- 19 January 1999
-    DESCRIPTION  "Updated editors' addresses, fixed typos.
-                  Published as RFC2571.
-                 "
-    REVISION     "9711200000Z"            -- 20 November 1997
-    DESCRIPTION  "The initial version, published in RFC 2271.
-                 "
-    ::= { snmpModules 10 }
+                  EMail:      bwijnen@lucent.com
+                  phone:      +31 348-680-485
+                    "
+       DESCRIPTION  "The SNMP Management Architecture MIB
 
--- Textual Conventions used in the SNMP Management Architecture ***
+                     Copyright (C) The Internet Society (2002). This
+                     version of this MIB module is part of RFC 3411;
+                     see the RFC itself for full legal notices.
+                    "
+
+       REVISION     "200210140000Z"         -- 14 October 2002
+       DESCRIPTION  "Changes in this revision:
+                     - Updated various administrative information.
+                     - Corrected some typos.
+                     - Corrected typo in description of SnmpEngineID
+                       that led to range overlap for 127.
+                     - Changed '255a' to '255t' in definition of
+                       SnmpAdminString to align with current SMI.
+                     - Reworded 'reserved' for value zero in
+                       DESCRIPTION of SnmpSecurityModel.
+                     - The algorithm for allocating security models
+                       should give 256 per enterprise block, rather
+                       than 255.
+                     - The example engine ID of 'abcd' is not
+                       legal. Replaced with '800002b804616263'H based
+                       on example enterprise 696, string 'abc'.
+                     - Added clarification that engineID should
+                       persist across re-initializations.
+                     This revision published as RFC 3411.
+                    "
+       REVISION     "199901190000Z"         -- 19 January 1999
+       DESCRIPTION  "Updated editors' addresses, fixed typos.
+                     Published as RFC 2571.
+                    "
+       REVISION     "199711200000Z"         -- 20 November 1997
+       DESCRIPTION  "The initial version, published in RFC 2271.
+                    "
+       ::= { snmpModules 10 }
+
+   -- Textual Conventions used in the SNMP Management Architecture ***
 
 SnmpEngineID ::= TEXTUAL-CONVENTION
     STATUS       current
@@ -120,7 +143,7 @@ SnmpEngineID ::= TEXTUAL-CONVENTION
                     octet indicate the method being used and the
                     remaining octets be a function of the method.
 
-                 3) The length of the octet strings varies.
+                 3) The length of the octet string varies.
 
                     The first four octets are set to the binary
                     equivalent of the agent's SNMP management
@@ -141,7 +164,6 @@ SnmpEngineID ::= TEXTUAL-CONVENTION
                       0     - reserved, unused.
 
                       1     - IPv4 address (4 octets)
-
                               lowest non-special IP address
 
                       2     - IPv6 address (16 octets)
@@ -159,7 +181,7 @@ SnmpEngineID ::= TEXTUAL-CONVENTION
 
                       6-127 - reserved, unused
 
-                    127-255 - as defined by the enterprise
+                    128-255 - as defined by the enterprise
                               Maximum remaining length 27
                 "
     SYNTAX       OCTET STRING (SIZE(5..32))
@@ -167,13 +189,15 @@ SnmpEngineID ::= TEXTUAL-CONVENTION
 SnmpSecurityModel ::= TEXTUAL-CONVENTION
     STATUS       current
     DESCRIPTION "An identifier that uniquely identifies a
-                 securityModel of the Security Subsystem within the
-                 SNMP Management Architecture.
+                 Security Model of the Security Subsystem within
+                 this SNMP Management Architecture.
 
                  The values for securityModel are allocated as
                  follows:
 
-                 - The zero value is reserved.
+                 - The zero value does not identify any particular
+                   security model.
+
                  - Values between 1 and 255, inclusive, are reserved
                    for standards-track Security Models and are
                    managed by the Internet Assigned Numbers Authority
@@ -188,12 +212,12 @@ SnmpSecurityModel ::= TEXTUAL-CONVENTION
 
                    For example, the fourth Security Model defined by
                    the enterprise whose enterpriseID is 1 would be
-                   260.
+                   259.
 
                  This scheme for allocation of securityModel
                  values allows for a maximum of 255 standards-
                  based Security Models, and for a maximum of
-                 255 Security Models per enterprise.
+                 256 Security Models per enterprise.
 
                  It is believed that the assignment of new
                  securityModel values will be rare in practice
@@ -204,12 +228,13 @@ SnmpSecurityModel ::= TEXTUAL-CONVENTION
                  will be sufficient.  In the unlikely event that
                  the standards committee finds this number to be
                  insufficient over time, an enterprise number
-                 can be allocated to obtain an additional 255
+                 can be allocated to obtain an additional 256
                  possible values.
 
                  Note that the most significant bit must be zero;
                  hence, there are 23 bits allocated for various
                  organizations to design and define non-standard
+
                  securityModels.  This limits the ability to
                  define new proprietary implementations of Security
                  Models to the first 8,388,608 enterprises.
@@ -237,7 +262,7 @@ SnmpMessageProcessingModel ::= TEXTUAL-CONVENTION
     STATUS       current
     DESCRIPTION "An identifier that uniquely identifies a Message
                  Processing Model of the Message Processing
-                 Subsystem within a SNMP Management Architecture.
+                 Subsystem within this SNMP Management Architecture.
 
                  The values for messageProcessingModel are
                  allocated as follows:
@@ -257,12 +282,13 @@ SnmpMessageProcessingModel ::= TEXTUAL-CONVENTION
 
                    For example, the fourth Message Processing Model
                    defined by the enterprise whose enterpriseID
-                   is 1 would be 260.
+
+                   is 1 would be 259.
 
                  This scheme for allocating messageProcessingModel
                  values allows for a maximum of 255 standards-
                  based Message Processing Models, and for a
-                 maximum of 255 Message Processing Models per
+                 maximum of 256 Message Processing Models per
                  enterprise.
 
                  It is believed that the assignment of new
@@ -287,7 +313,6 @@ SnmpMessageProcessingModel ::= TEXTUAL-CONVENTION
 
                  It is worthwhile to note that, in its encoded
                  form, the messageProcessingModel value will
-
                  normally require only a single byte since, in
                  practice, the leftmost bits will be zero for
                  most messages and sign extension is suppressed
@@ -327,7 +352,7 @@ SnmpSecurityLevel ::= TEXTUAL-CONVENTION
                          }
 
 SnmpAdminString ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "255a"
+    DISPLAY-HINT "255t"
     STATUS       current
     DESCRIPTION "An octet string containing administrative
                  information, preferably in human-readable form.
@@ -336,7 +361,6 @@ SnmpAdminString ::= TEXTUAL-CONVENTION
                  information is represented using the ISO/IEC
                  IS 10646-1 character set, encoded as an octet
                  string using the UTF-8 transformation format
-
                  described in [RFC2279].
 
                  Since additional code points are added by
@@ -378,7 +402,7 @@ SnmpAdminString ::= TEXTUAL-CONVENTION
                  a SIZE restriction MUST be specified so that the
                  number of sub-identifiers for any object instance
                  does not exceed the limit of 128, as defined by
-                 [RFC1905].
+                 [RFC3416].
 
                  Note that the size of an SnmpAdminString object is
                  measured in octets, not characters.
@@ -403,6 +427,10 @@ snmpEngineID     OBJECT-TYPE
     MAX-ACCESS   read-only
     STATUS       current
     DESCRIPTION "An SNMP engine's administratively-unique identifier.
+
+                 This information SHOULD be stored in non-volatile
+                 storage so that it remains constant across
+                 re-initializations of the SNMP engine.
                 "
     ::= { snmpEngine 1 }
 
@@ -490,6 +518,7 @@ snmpEngineGroup OBJECT-GROUP
     STATUS       current
     DESCRIPTION "A collection of objects for identifying and
                  determining the configuration and current timeliness
+
                  values of an SNMP engine.
                 "
     ::= { snmpFrameworkMIBGroups 1 }
