@@ -316,7 +316,7 @@ void detect_hrproc(void)
     }
 
     i = 0;
-    while (fgets(tmpbuf, BUFSIZ, fp)) {
+    while (fgets(tmpbuf, BUFSIZ, fp) && i < MAX_NUM_HRPROC) {
         if ( !strncmp( tmpbuf, "vendor_id", 9)) {
 	    /* Stomp on trailing newline... */
             cp = &tmpbuf[strlen(tmpbuf)-1];
