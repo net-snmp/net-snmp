@@ -852,8 +852,7 @@ do_subtree(root, nodes)
 	    if (strcmp (tp->label, np->label) == 0) {
 		    /* Update list of modules */
                 int_p = Malloc((tp->number_modules+1) * sizeof(int));
-                bcopy((char *)tp->module_list, (char *)int_p,
-			((tp->number_modules)*sizeof(int)) );
+                memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
                 if (tp->number_modules > 1 )
                    free(tp->module_list);
@@ -1404,7 +1403,6 @@ parse_objecttype(fp, name)
         case UINTEGER32:
         case COUNTER:
         case GAUGE:
-        case LABEL:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
                 np->enums = parse_enumlist(fp);
@@ -1443,6 +1441,7 @@ parse_objecttype(fp, name)
 		nexttype = get_token (fp, nexttoken, MAXTOKEN);
             }
             break;
+        case LABEL:
         case OCTETSTR:
             /* ignore the "constrained octet string" for now */
             if (nexttype == LEFTPAREN) {
@@ -2007,6 +2006,7 @@ read_module (name )
 		 * Parse the file
 		 */
 	    np = parse( fp, orphan_nodes );
+	    fclose(fp);
 #ifdef TEST
 	    printf("\nNodes for Module %s:\n", name);
 	    print_nodes( stdout, np );
