@@ -2603,13 +2603,21 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
 
            __libraries_init("perl");
            
+           session.version = -1;
+#ifndef DISABLE_SNMPV1
 	   if (!strcmp(version, "1")) {
 		session.version = SNMP_VERSION_1;
-           } else if ((!strcmp(version, "2")) || (!strcmp(version, "2c"))) {
+           }
+#endif
+#ifndef DISABLE_SNMPV2C
+           if ((!strcmp(version, "2")) || (!strcmp(version, "2c"))) {
 		session.version = SNMP_VERSION_2c;
-           } else if (!strcmp(version, "3")) {
+           }
+#endif
+           if (!strcmp(version, "3")) {
 	        session.version = SNMP_VERSION_3;
-	   } else {
+	   }
+           if (session.version == -1) {
 		if (verbose)
                    warn("error:snmp_new_session:Unsupported SNMP version (%s)\n", version);
                 goto end;
@@ -2697,12 +2705,15 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                              (char **) &session.contextEngineID);
            session.engineBoots = eng_boots;
            session.engineTime = eng_time;
+#ifndef DISABLE_MD5
            if (!strcmp(auth_proto, "MD5")) {
                session.securityAuthProto = 
                   snmp_duplicate_objid(usmHMACMD5AuthProtocol,
                                           USM_AUTH_PROTO_MD5_LEN);
               session.securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-           } else if (!strcmp(auth_proto, "SHA")) {
+           } else
+#endif
+               if (!strcmp(auth_proto, "SHA")) {
                session.securityAuthProto = 
                    snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
                                         USM_AUTH_PROTO_SHA_LEN);
@@ -2744,12 +2755,15 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    }
                }
            }
+#ifndef DISABLE_DES
            if (!strcmp(priv_proto, "DES")) {
               session.securityPrivProto =
                   snmp_duplicate_objid(usmDESPrivProtocol,
                                        USM_PRIV_PROTO_DES_LEN);
               session.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
-           } else if (!strncmp(priv_proto, "AES", 3)) {
+           } else
+#endif
+               if (!strncmp(priv_proto, "AES", 3)) {
               session.securityPrivProto =
                   snmp_duplicate_objid(usmAESPrivProtocol,
                                        USM_PRIV_PROTO_AES_LEN);
@@ -2823,13 +2837,21 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
 
            if (!ss) goto update_end;
 
+           ss->version = -1;
+#ifndef DISABLE_SNMPV1
            if (!strcmp(version, "1")) {
 		ss->version = SNMP_VERSION_1;
-           } else if (!strcmp(version, "2") || !strcmp(version, "2c")) {
+           }
+#endif
+#ifndef DISABLE_SNMPV2C
+           if (!strcmp(version, "2") || !strcmp(version, "2c")) {
 		ss->version = SNMP_VERSION_2c;
-	   } else if (!strcmp(version, "3")) {
+	   }
+#endif
+           if (!strcmp(version, "3")) {
 	        ss->version = SNMP_VERSION_3;
-	   } else {
+	   }
+           if (ss->version == -1) {
 		if (verbose)
                    warn("Unsupported SNMP version (%s)\n", version);
                 goto update_end;
