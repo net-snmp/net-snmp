@@ -1,4 +1,0 @@
-#!/bin/sh 
-
-gmake tmp.make > /dev/null 2>&1
-
