@@ -62,4 +62,3 @@ init_scalar_int(void)
     DEBUGMSGTL(("scalar_int","Done initalizing example scalar int\n"));
 }
 
-/** @} */

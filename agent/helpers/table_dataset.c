@@ -24,6 +24,38 @@ typedef struct data_set_cache_s {
    size_t data_len;
 } data_set_cache;
 
+#define STATE_ACTION   1
+#define STATE_COMMITED 2
+#define STATE_UNDO     3
+#define STATE_FREE     4
+typedef struct newrow_stash_s {
+   netsnmp_table_row *newrow;
+   int state;
+   int created;
+} newrow_stash;
+
+/** @defgroup table_dataset table_dataset: Helps you implement a table with datamatted storage.
+ *  @ingroup handler
+ *
+ *  This handler helps you implement a table where all the data is
+ *  expected to be stored within the agent itself and not in some
+ *  external storage location.  It handles all MIB requests including
+ *  GETs, GETNEXTs and SETs.  It's possible to simply create a table
+ *  without actually ever defining a handler to be called when SNMP
+ *  requests come in.  To use the data, you can either attach a
+ *  sub-handler that merely uses/manipulates the data further when
+ *  requests come in, or you can loop through it externally when it's
+ *  actually needed.  This handler is most useful in cases where a
+ *  table is holding configuration data for something which gets
+ *  triggered via another event.
+ *
+ *  NOTE NOTE NOTE: This helper isn't complete and is likely to change
+ *  somewhat over time.  Specifically, the way it stores data
+ *  internally may change drastically.
+ *  
+ *  @{
+ */
+
 /** Create a netsnmp_table_data_set structure given a table_data definition */
 netsnmp_table_data_set *
 netsnmp_create_table_data_set(const char *table_name) 
@@ -263,7 +295,7 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
     return newrow;
 }
 
-/* creates a new row from an existing defined default set */
+/** creates a new row from an existing defined default set */
 netsnmp_table_row *
 netsnmp_table_data_set_create_row_from_defaults(netsnmp_table_data_set_storage *defrow)
 {
@@ -281,16 +313,8 @@ netsnmp_table_data_set_create_row_from_defaults(netsnmp_table_data_set_storage *
     return row;
 }
 
-#define STATE_ACTION   1
-#define STATE_COMMITED 2
-#define STATE_UNDO     3
-#define STATE_FREE     4
-typedef struct newrow_stash_s {
-   netsnmp_table_row *newrow;
-   int state;
-   int created;
-} newrow_stash;
-
+/** implements the table data helper.  This is the routine that takes
+ *  care of all SNMP requests coming into the table. */
 int
 netsnmp_table_data_set_helper_handler(
     netsnmp_mib_handler               *handler,
@@ -501,6 +525,7 @@ netsnmp_table_data_set_helper_handler(
     return SNMP_ERR_NOERROR;
 }
     
+/** @internal */
 void
 netsnmp_config_parse_table_set(const char *token, char *line) 
 {
@@ -596,6 +621,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
     netsnmp_add_list_data(&auto_tables, netsnmp_create_data_list(line, tables, NULL));
 }
 
+/** @internal */
 void
 netsnmp_config_parse_add_row(const char *token, char *line) 
 {
@@ -649,6 +675,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     netsnmp_table_data_add_row(tables->table_set->table, row);
 }
 
+/** adds an index to the table.  Call this repeatly for each index. */
 inline void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type) 
 {
@@ -691,7 +718,11 @@ netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table,
     }
 }
 
-void
+/** adds multiple data column definitions to each row.  Functionally,
+ *  this is a wrapper around calling netsnmp_table_set_add_default_row
+ *  repeatedly for you.
+ */
+  void
 #if HAVE_STDARG_H
 netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
 #else
@@ -725,3 +756,5 @@ netsnmp_table_set_multi_add_default_row(va_dcl)
 
   va_end(debugargs);
 }
+
+/* @} */
