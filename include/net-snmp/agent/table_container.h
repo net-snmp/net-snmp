@@ -32,17 +32,25 @@ extern          "C" {
 #define TABLE_CONTAINER_KEY_VARBIND_INDEX         2
 #define TABLE_CONTAINER_KEY_VARBIND_RAW           3
 
+    /*
+     * register a container table
+     */
     int            
     netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
                                      netsnmp_table_registration_info
                                      *tabreq,
                                      netsnmp_container *container,
-                                     char key_type, char group_rows);
-    
-    Netsnmp_Node_Handler netsnmp_container_table_handler;
+                                     char key_type);
+    /*
+     * get an injectable containe table handler
+     */
+    netsnmp_mib_handler *
+    netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreq,
+                                        netsnmp_container *container,
+                                        char key_type);
     
     /** find the context data used by the table_container helper */
-    NETSNMP_INLINE void *
+    NETSNMP_STATIC_INLINE void *
     netsnmp_container_table_extract_context(netsnmp_request_info *request) {
         return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
     }
