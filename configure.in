@@ -128,6 +128,8 @@ dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_physaddr)
+dnl Check for nlist in mld (irix)
+AC_CHECK_LIB(mld, nlist)
 
 dnl Checks for header files.
 AC_HEADER_STDC

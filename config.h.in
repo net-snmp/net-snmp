@@ -354,6 +354,9 @@
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
 
+/* Define if you have the mld library (-lmld).  */
+#undef HAVE_LIBMLD
+
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 
