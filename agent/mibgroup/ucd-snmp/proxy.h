@@ -11,7 +11,8 @@ struct simple_proxy {
    struct simple_proxy *next;
 };
 
-extern FindVarMethod var_simple_proxy;
+FindVarMethod var_simple_proxy;
+WriteMethod proxy_set;
 void proxy_parse_config (const char *, char *);
 void init_proxy(void);
 
