@@ -279,8 +279,9 @@ count_users(void)
     setutent();
     while ((utmp_p = getutent()) != NULL) {
 #ifndef UTMP_HAS_NO_TYPE
-        if (utmp_p->ut_type == USER_PROCESS) {
+        if (utmp_p->ut_type == USER_PROCESS)
 #endif
+        {
             /* This block of code fixes zombie user PIDs in the
                utmp/utmpx file that would otherwise be counted as a
                current user */
