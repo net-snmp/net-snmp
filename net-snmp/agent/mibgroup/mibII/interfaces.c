@@ -244,12 +244,6 @@ if_type_from_name( const char *pcch)
 }
 
 
-#ifdef USE_SYSCTL_IFLIST
-
-static u_char * if_list = 0;
-static const u_char * if_list_end;
-static size_t if_list_size = 0;
-
 /*
   header_ifEntry(...
   Arguments:
@@ -307,46 +301,6 @@ header_ifEntry(struct variable *vp,
 }
 
 
-/*
-  header_interfaces(...
-  Arguments:
-  vp	  IN      - pointer to variable entry that points here
-  name    IN/OUT  - IN/name requested, OUT/name found
-  length  IN/OUT  - length of IN/OUT oid's 
-  exact   IN      - TRUE if an exact match was requested
-  var_len OUT     - length of variable or 0 if function returned
-  write_method
-  
-*/
-
-static int
-header_interfaces(struct variable *vp,
-		  oid *name,
-		  size_t *length,
-		  int exact,
-		  size_t *var_len,
-		  WriteMethod **write_method)
-{
-#define INTERFACES_NAME_LENGTH	8
-  oid newname[MAX_OID_LEN];
-  int result;
-
-    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
-
-  memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-  newname[INTERFACES_NAME_LENGTH] = 0;
-  result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-  if ((exact && (result != 0)) || (!exact && (result >= 0)))
-    return MATCH_FAILED;
-  memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
-  *length = vp->namelen + 1;
-
-  *write_method = 0;
-  *var_len = sizeof(long);	/* default to 'long' results */
-  return MATCH_SUCCEEDED;
-}
 
 u_char *
 var_interfaces(struct variable *vp,
@@ -356,7 +310,7 @@ var_interfaces(struct variable *vp,
 	       size_t *var_len,
 	       WriteMethod **write_method)
 {
-  if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+  if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
     return NULL;
 
   switch (vp->magic)
@@ -369,6 +323,12 @@ var_interfaces(struct variable *vp,
     }
   return NULL;
 }
+
+#ifdef USE_SYSCTL_IFLIST
+
+static u_char * if_list = 0;
+static const u_char * if_list_end;
+static size_t if_list_size = 0;
 
 struct small_ifaddr
 {
@@ -673,80 +633,6 @@ conf_if_list *if_list;
 struct ifnet *ifnetaddr_list;
 #endif /* linux */
 
-static int
-header_interfaces(struct variable *vp,
-		  oid *name,
-		  size_t *length,
-		  int exact,
-		  size_t *var_len,
-		  WriteMethod **write_method)
-{
-#define INTERFACES_NAME_LENGTH	8
-    oid newname[MAX_OID_LEN];
-    int result;
-
-    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
-
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-    newname[INTERFACES_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return MATCH_FAILED;
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return MATCH_SUCCEEDED;
-}
-
-
-
-static int
-header_ifEntry(struct variable *vp,
-	       oid *name,
-	       size_t *length,
-	       int exact,
-	       size_t *var_len,
-	       WriteMethod **write_method)
-{
-#define IFENTRY_NAME_LENGTH	10
-    oid newname[MAX_OID_LEN];
-    register int	interface;
-    int result, count;
-
-    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
-
-    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-    /* find "next" interface */
-    count = Interface_Scan_Get_Count();
-    for(interface = 1; interface <= count; interface++){
-	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-	if ((exact && (result == 0)) || (!exact && (result < 0)))
-	    break;
-    }
-    if (interface > count) {
-        DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
-        return MATCH_FAILED;
-    }
-
-
-    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-
-    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces","\n"));
-
-    return interface;
-}
 
 
 
@@ -755,27 +641,6 @@ header_ifEntry(struct variable *vp,
 	 *  System specific implementation functions
 	 *
 	 *********************/
-
-u_char	*
-var_interfaces(struct variable *vp,
-	       oid *name,
-	       size_t *length,
-	       int exact,
-	       size_t *var_len,
-	       WriteMethod **write_method)
-{
-    if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
-	return NULL;
-
-    switch (vp->magic){
-	case IFNUMBER:
-	    long_return = Interface_Scan_Get_Count();
-	    return (u_char *)&long_return;
-	default:
-	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
-    }
-    return NULL;
-}
 
 
 #ifndef solaris2
@@ -1913,120 +1778,19 @@ get_phys_address(int iindex, char **ap, int *len)
 }
 
 static int
-header_interfaces(struct variable *vp,
-		  oid *name,
-		  size_t *length,
-		  int exact,
-		  size_t *var_len,
-		  WriteMethod **write_method)
+Interface_Scan_Get_Count (void)
 {
-#define INTERFACES_NAME_LENGTH	8
-    oid newname[MAX_OID_LEN];
-    int result;
-
-    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces", " %d\n", exact));
-
-    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
-    newname[INTERFACES_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return MATCH_FAILED;
-    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return MATCH_SUCCEEDED;
-}
-
-static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
-			    IFMIB_SYSTEM, IFMIB_IFCOUNT };
-
-static int
-header_ifEntry(struct variable *vp,
-	       oid *name,
-	       size_t *length,
-	       int exact,
-	       size_t *var_len,
-	       WriteMethod **write_method)
-{
-#define IFENTRY_NAME_LENGTH	10
-    oid newname[MAX_OID_LEN];
-    register int	interface;
-    int result, count;
     static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
 				IFMIB_SYSTEM, IFMIB_IFCOUNT };
     size_t len;
-
-#ifdef DODEBUG
-    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
-    DEBUGMSGOID(("mibII/interfaces", name, *length));
-    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
-#endif
-
-    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
-    /* find "next" interface */
-    len = sizeof count;
-    if (sysctl(count_oid, 5, &count, &len, (void *)0, (size_t)0) < 0)
-	    return MATCH_FAILED;
-
-    for(interface = 1; interface <= count; interface++){
-	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-	if ((exact && (result == 0)) || (!exact && (result < 0)))
-	    break;
-    }
-    if (interface > count) {
-#ifdef DODEBUG
- DEBUGMSGTL(("interfaces", "... index out of range\n"));
-#endif
-        return MATCH_FAILED;
-    }
-
-
-    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-
-#ifdef DODEBUG
-    DEBUGMSGTL(("interfaces", "... get I/F stats "));
-    DEBUGMSGOID(("interfaces", name, *length));
-    DEBUGMSG(("interfaces","\n"));
-#endif
-
-    return interface;
-}
-
-u_char *
-var_interfaces(struct variable *vp,
-		oid *name,
-		size_t *length,
-		int exact,
-		size_t *var_len,
-		WriteMethod **write_method)
-{
-    size_t len;
     int count;
 
-    if (header_interfaces(vp, name, length, exact, var_len, write_method)
-	== MATCH_FAILED)
-	    return NULL;
-
-    switch (vp->magic){
-    case IFNUMBER:
-	    len = sizeof count;
-	    if (sysctl(count_oid, 5, &count, &len, 0, 0) < 0)
-		    return NULL;
-	    long_return = count;
-	    return (u_char *)&long_return;
-    default:
-	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
-    }
-    return NULL;
+    len = sizeof count;
+    if (sysctl(count_oid, 5, &count, &len, (void *)0, (size_t)0) < 0)
+	    return -1;
+    return count;
 }
+
 
 u_char *
 var_ifEntry(struct variable *vp,
