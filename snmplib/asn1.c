@@ -912,8 +912,10 @@ asn_parse_objid(u_char *data,
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check("parse objid", bufp, data,
-                    asn_length, *datalength))
+                                asn_length, *datalength)) {
+        *objidlength = 0;
 	return NULL;
+    }
 
     *datalength -= (int)asn_length + (bufp - data);
 
@@ -936,6 +938,7 @@ asn_parse_objid(u_char *data,
      of subidentifier is the value of MAX_SUBID! */
 	if (subidentifier > (u_long)MAX_SUBID){
 	    ERROR_MSG("subidentifier too large");
+            *objidlength = 0;
 	    return NULL;
 	}
 	*oidp++ = (oid)subidentifier;

@@ -3456,8 +3456,10 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     DEBUGDUMPSECTION("recv", "VarBind");
     data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
 			     &vp->val_len, &var_val, length);
-    if (data == NULL)
-      return -1;
+    if (data == NULL) {
+        vp->name_length = 0;
+        return -1;
+    }
     if (snmp_set_var_objid(vp, objid, vp->name_length))
         return -1;
 
