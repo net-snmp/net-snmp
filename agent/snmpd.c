@@ -808,60 +808,16 @@ main(int argc, char *argv[])
     /*
      * Initialize the world.  Detach from the shell.  Create initial user.  
      */
-#if HAVE_FORK
-    if (!dont_fork) {
+    if(!dont_fork) {
+        int quit = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                          NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
+        ret = netsnmp_daemonize(quit, stderr_log);
         /*
-         * Fork to return control to the invoking process and to
-         * guarantee that we aren't a process group leader.
+         * xxx-rks: do we care if fork fails? I think we should...
          */
-        if (fork() != 0) {
-            /* Parent. */
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                        NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
-                exit(0);
-            }
-        } else {
-            /* Child. */
-#ifdef HAVE_SETSID
-            /* Become a process/session group leader. */
-            setsid();
-#endif
-            /*
-             * Fork to let the process/session group leader exit.
-             */
-            if (fork() != 0) {
-                /* Parent. */
-                exit(0);
-            }
-#ifndef WIN32
-            else {
-                /* Child. */
-
-                /* Avoid keeping any directory in use. */
-                chdir("/");
-
-                if (!stderr_log) {
-                    /*
-                     * Close inherited file descriptors to avoid
-                     * keeping unnecessary references.
-                     */
-                    close(0);
-                    close(1);
-                    close(2);
-
-                    /*
-                     * Redirect std{in,out,err} to /dev/null, just in
-                     * case.
-                     */
-                    open("/dev/null", O_RDWR);
-                    dup(0);
-                    dup(0);
-                }
-            }
-#endif /* !WIN32 */
-        }
+        if(ret)
+            Exit(1);                /*  Exit logs exit val for us  */
     }
-#endif /* HAVE_FORK */
 
     SOCK_STARTUP;
     init_agent("snmpd");        /* do what we need to do first. */
