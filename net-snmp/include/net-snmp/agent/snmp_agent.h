@@ -96,7 +96,7 @@ extern          "C" {
 #define MODE_GETNEXT          SNMP_MSG_GETNEXT
 #define MODE_GETBULK          SNMP_MSG_GETBULK
 #define MODE_GET_STASH        SNMP_MSG_INTERNAL_GET_STASH
-#define MODE_IS_GET(x)        ((x >= 128) && (x != -1))
+#define MODE_IS_GET(x)        ((x >= 128) && (x != -1)  && (x != SNMP_MSG_SET))
     /* #define MODE_IS_GET(x)        ((x == SNMP_MSG_GET) || (x == SNMP_MSG_GETNEXT) || (x == SNMP_MSG_GETBULK) || (x == SNMP_MSG_INTERNAL_GET_STASH)) */
 
 #define MODE_SET_BEGIN        SNMP_MSG_INTERNAL_SET_BEGIN
@@ -127,8 +127,8 @@ extern          "C" {
 
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
-        int             next_mode_ok;
-        int             next_mode_fail;
+        int             next_mode_ok;  /* only valid for baby step modes */
+        int             next_mode_fail; /* not used yet (for 5.2) */
 /*        netsnmp_pdu    *pdu;    */ /* pdu contains authinfo, eg */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
         /*
@@ -136,9 +136,6 @@ extern          "C" {
          * helper to the later handlers 
          */
         netsnmp_data_list *agent_data;
-        /*
-         * ... 
-         */
     } netsnmp_agent_request_info;
 
     typedef struct netsnmp_cachemap_s {
