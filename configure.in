@@ -353,6 +353,9 @@ AC_ARG_WITH(enterprise-oid,
                                      to get one, though using the default is
                                      probably the right choice is most cases.
                                      (default 8072 = "enterprise.net-snmp")],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a value for the enterprise number ]);
+  fi
   AC_DEFINE_UNQUOTED(ENTERPRISE_OID, $withval)
   ent_oid="1,3,6,1,4,1,$withval"
   AC_DEFINE_UNQUOTED(ENTERPRISE_MIB, $ent_oid)
@@ -369,6 +372,9 @@ AC_ARG_WITH(enterprise-sysoid,
                                      of the system group
                                      (default .1.6.3.1.4.1.8072.3.2... = 
                                       "netSnmpAgentOIDs...")],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a base OID value ]);
+  fi
   sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
   sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
@@ -385,6 +391,9 @@ AC_ARG_WITH(enterprise-notification-oid,
   --with-enterprise-notification-oid The OID used for the root of
 				     enterprise specific notifications.
                                      (default .1.6.3.1.4.1.2021 = "enterprise.ucdavis")],[
+  if test "$withval" = yes; then
+    AC_MSG_ERROR([ Please provide a base OID value ]);
+  fi
   notification_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_MIB, $notification_oid)
   notification_dot_oid=`echo "$withval" | sed 's/^\.//'`
