@@ -251,6 +251,9 @@ init_agent (const char *app)
 #ifdef SNMP_TRANSPORT_UDP_DOMAIN
   netsnmp_udp_agent_config_tokens_register();
 #endif
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+  netsnmp_udp6_agent_config_tokens_register();
+#endif
 
 #ifdef NETSNMP_EMBEDDED_PERL
   init_perl();
