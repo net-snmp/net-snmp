@@ -1053,8 +1053,8 @@ AC_PROMPT_USER(SYS_LOC,[
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
-\"syslocation\" Syntax In The Agent'S Configuration Files.
+available in the MIB-II tree.  This Can also be over-ridden using the
+\"syslocation\" syntax in the agent's configuration files.
 
 System Location],Unknown,1)
 
@@ -1071,7 +1071,7 @@ AC_PROMPT_USER(LOGFILE,[
 	Enter the default location for the snmpd agent to dump
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
-(Note: This value can be over-ridden using the command line options.)
+(Note: This value can be over-ridden using command line options.)
 
 Location to write logfile],$defaultlog,1)
 

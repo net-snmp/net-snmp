@@ -7029,8 +7029,8 @@ MSG_CHECK=`echo "
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
-\"syslocation\" Syntax In The Agent'S Configuration Files.
+available in the MIB-II tree.  This Can also be over-ridden using the
+\"syslocation\" syntax in the agent's configuration files.
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
@@ -7046,8 +7046,8 @@ echo $ac_n "
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
-\"syslocation\" Syntax In The Agent'S Configuration Files.
+available in the MIB-II tree.  This Can also be over-ridden using the
+\"syslocation\" syntax in the agent's configuration files.
 
 System Location (Unknown): $ac_c"
 read tmpinput
