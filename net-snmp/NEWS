@@ -12,6 +12,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
           (This requires you have OpenSSL to support SHA1 and AES instead)
       - Diffie-Helman key negotianion (perfect-forward-secrecy - RFC2786)
           has been implemented in both the agent and "snmpusm".
+
+    library:
       - send and receive buffer sizes for UDP/TCP are configurable
 
     snmptrapd:
@@ -30,6 +32,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - more flexibility added to netsnmp_cache helper, including periodic
           refreshing of caches and cache pre-loading.
       - experimental implementation of DisMan Remote Operations MIB groups
+        (remote nslookup, ping, traceroute and expressions via SNMP)
 
     mib2c:
       - a number of new or updated configuration templates:
@@ -46,7 +49,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     documentation:
       - New README.agent-mibs: an attempt to start documenting what
-          MIBs are implemented in the agent.
+          MIBs are implemented in the agent and on what architectures.
 
 
  Ports:
