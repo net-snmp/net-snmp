@@ -35,6 +35,8 @@ CLEAN :
 	-@erase "$(INTDIR)\default_store.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\int64.obj"
+	-@erase "$(INTDIR)\inet_ntop.obj"
+	-@erase "$(INTDIR)\inet_pton.obj"
 	-@erase "$(INTDIR)\keytools.obj"
 	-@erase "$(INTDIR)\lcd_time.obj"
 	-@erase "$(INTDIR)\md5.obj"
@@ -59,7 +61,9 @@ CLEAN :
 	-@erase "$(INTDIR)\snmp_version.obj"
 	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPDomain.obj"
+	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
 	-@erase "$(INTDIR)\snmpUDPDomain.obj"
+	-@erase "$(INTDIR)\snmpUDPIPv6Domain.obj"
 	-@erase "$(INTDIR)\snmpusm.obj"
 	-@erase "$(INTDIR)\snmpv3.obj"
 	-@erase "$(INTDIR)\strlcpy.obj"
@@ -139,6 +143,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\default_store.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\int64.obj" \
+	"$(INTDIR)\inet_ntop.obj" \
+	"$(INTDIR)\inet_pton.obj" \
 	"$(INTDIR)\keytools.obj" \
 	"$(INTDIR)\lcd_time.obj" \
 	"$(INTDIR)\md5.obj" \
@@ -163,7 +169,9 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp_version.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
+	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
 	"$(INTDIR)\snmpUDPDomain.obj" \
+	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
 	"$(INTDIR)\snmpusm.obj" \
 	"$(INTDIR)\snmpv3.obj" \
 	"$(INTDIR)\strlcpy.obj" \
@@ -197,6 +205,8 @@ CLEAN :
 	-@erase "$(INTDIR)\default_store.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\int64.obj"
+	-@erase "$(INTDIR)\inet_ntop.obj"
+	-@erase "$(INTDIR)\inet_pton.obj"
 	-@erase "$(INTDIR)\keytools.obj"
 	-@erase "$(INTDIR)\lcd_time.obj"
 	-@erase "$(INTDIR)\md5.obj"
@@ -221,7 +231,9 @@ CLEAN :
 	-@erase "$(INTDIR)\snmp_version.obj"
 	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
 	-@erase "$(INTDIR)\snmpTCPDomain.obj"
+	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
 	-@erase "$(INTDIR)\snmpUDPDomain.obj"
+	-@erase "$(INTDIR)\snmpUDPIPv6Domain.obj"
 	-@erase "$(INTDIR)\snmpusm.obj"
 	-@erase "$(INTDIR)\snmpv3.obj"
 	-@erase "$(INTDIR)\strlcpy.obj"
@@ -303,6 +315,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\default_store.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\int64.obj" \
+	"$(INTDIR)\inet_ntop.obj" \
+	"$(INTDIR)\inet_pton.obj" \
 	"$(INTDIR)\keytools.obj" \
 	"$(INTDIR)\lcd_time.obj" \
 	"$(INTDIR)\md5.obj" \
@@ -327,7 +341,9 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp_version.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
+	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
 	"$(INTDIR)\snmpUDPDomain.obj" \
+	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
 	"$(INTDIR)\snmpusm.obj" \
 	"$(INTDIR)\snmpv3.obj" \
 	"$(INTDIR)\strlcpy.obj" \
@@ -430,6 +446,18 @@ SOURCE=..\..\snmplib\getopt.c
 SOURCE=..\..\snmplib\int64.c
 
 "$(INTDIR)\int64.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\inet_ntop.c
+
+"$(INTDIR)\inet_ntop.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\inet_pton.c
+
+"$(INTDIR)\inet_pton.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -577,9 +605,21 @@ SOURCE=..\..\snmplib\snmpTCPDomain.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
+SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
+
+"$(INTDIR)\snmpTCPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
 SOURCE=..\..\snmplib\snmpUDPDomain.c
 
 "$(INTDIR)\snmpUDPDomain.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\snmpUDPIPv6Domain.c
+
+"$(INTDIR)\snmpUDPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

@@ -115,3 +115,6 @@
   if (should_init("ucdDemoPublic")) init_ucdDemoPublic();
 #endif
 
+#ifdef USING_MIBII_IPV6_MODULE
+  if (should_init("ipv6")) init_ipv6();
+#endif

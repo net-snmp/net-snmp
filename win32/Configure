@@ -11,6 +11,7 @@ my $sdk = 0;
 my $linktype;
 my $prefix;
 my $openssl = 0;
+my $b_ipv6 = 0;
 my $help = 0;
 
 GetOptions      ('config=s' => \$config,
@@ -19,6 +20,7 @@ GetOptions      ('config=s' => \$config,
                  'destdir=s' => \$prefix,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
+                 'with-ipv6' => \$b_ipv6,
                  'help' => \$help);
 
 if ($help == 1)
@@ -35,6 +37,7 @@ Options:
     --prefix=\"path\"                  Set INSTALL_BASE path (install path)
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
+    --with-ipv6                      Build in IPv6 transports
     --help                           This help screen
 /;
 
@@ -203,6 +206,7 @@ foreach my $progName (@programs) {
 my @programs = qw 
 /libagent
 libhelpers
+libnetsnmptrapd
 /;
 
 if ($sdk == 1) {
@@ -347,6 +351,9 @@ while (<MAKE_IN>)
     if ($openssl == 1) {
       s/^.*#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
     }
+    if ($b_ipv6 == 1) {
+      s/^.*#undef INET6.*/#define INET6 1/;
+    }
 
     print FILE_OUT $_ . "\n";
   }
@@ -364,6 +371,7 @@ print "  SDK:                        " . ($sdk == 1 ? "enabled" : "disabled") . 
 print "  Link type:                  $linktype\n";
 print "  Prefix / Destdir:           " . ($prefix ne "" ? $prefix : "(default)") . "\n";
 print "  OpenSSL:                    " . ($openssl == 1 ? "enabled" : "disabled") . "\n";
+print "  IPv6 transport:             " . ($b_ipv6 == 1 ? "enabled" : "disabled") . "\n";
 
 if ($ENV{INCLUDE} eq "") {
   print "\n\nVisual Studio environment not detected.  Please run VCVARS32.BAT before\n";

@@ -140,6 +140,14 @@ SOURCE=..\..\snmplib\getopt.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\inet_ntop.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\inet_pton.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\int64.c
 # End Source File
 # Begin Source File
@@ -240,7 +248,15 @@ SOURCE=..\..\snmplib\snmpTCPDomain.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpUDPDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpUDPIPv6Domain.c
 # End Source File
 # Begin Source File
 
