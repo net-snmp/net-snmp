@@ -134,10 +134,12 @@ table_iterator_helper_handler(
         if (table_info->colnum < tbl_info->min_column) {
             /* XXX: mem leak, index_search vs results */
             results = (iinfo->get_first_data_point)(&callback_loop_context,
-                                                       &callback_data_context,
-                                                       index_search);
+                                                    &callback_data_context,
+                                                    index_search,
+                                                    iinfo->myvoid);
             if (iinfo->free_loop_context)
-                (iinfo->free_loop_context)(callback_loop_context);
+                (iinfo->free_loop_context)(callback_loop_context,
+                                           iinfo->myvoid);
             goto got_results;
         }
 
@@ -151,8 +153,9 @@ table_iterator_helper_handler(
         
         /* find the first node */
         index_search = (iinfo->get_first_data_point)(&callback_loop_context,
-                                                        &callback_data_context,
-                                                        index_search);
+                                                     &callback_data_context,
+                                                     index_search,
+                                                     iinfo->myvoid);
 
         /* table.entry.column node */
         coloid[reginfo->rootoid_len+1] = table_info->colnum;
@@ -172,20 +175,23 @@ table_iterator_helper_handler(
                            result data pointer) */
                         if (callback_data_keep &&
                             iinfo->free_data_context) {
-                            (iinfo->free_data_context)(callback_data_keep);
+                            (iinfo->free_data_context)(callback_data_keep,
+                                                       iinfo->myvoid);
                         }
                         callback_data_keep = callback_data_context;
 
                     } else {
                         if (callback_data_context && iinfo->free_data_context)
-                            (iinfo->free_data_context)(callback_data_context);
+                            (iinfo->free_data_context)(callback_data_context,
+                                                       iinfo->myvoid);
                     }
 
                     /* get the next node in the data chain */
                     index_search =
                         (iinfo->get_next_data_point)(&callback_loop_context,
-                                                        &callback_data_context,
-                                                        index_search);
+                                                     &callback_data_context,
+                                                     index_search,
+                                                     iinfo->myvoid);
 
                     if (!index_search && !results &&
                         tbl_info->max_column > table_info->colnum) {
@@ -196,8 +202,9 @@ table_iterator_helper_handler(
                         index_search = snmp_clone_varbind(table_info->indexes);
                         index_search =
                             (iinfo->get_first_data_point)(&callback_loop_context,
-                                                             &callback_data_context,
-                                                             index_search);
+                                                          &callback_data_context,
+                                                          index_search,
+                                                          iinfo->myvoid);
                     }
                 }
 
@@ -220,20 +227,23 @@ table_iterator_helper_handler(
                     } else {
                         /* free not-needed data context */
                         if (callback_data_context && iinfo->free_data_context)
-                            (iinfo->free_data_context)(callback_data_context);
+                            (iinfo->free_data_context)(callback_data_context,
+                                                       iinfo->myvoid);
                     }
                     
                     /* get the next node in the data chain */
                     index_search =
                         (iinfo->get_next_data_point)(&callback_loop_context,
-                                                        &callback_data_context,
-                                                        index_search);
+                                                     &callback_data_context,
+                                                     index_search,
+                                                     iinfo->myvoid);
                 }
         }
         
         /* XXX: free index_search? */
         if (callback_loop_context && iinfo->free_loop_context)
-            (iinfo->free_loop_context)(callback_loop_context);
+            (iinfo->free_loop_context)(callback_loop_context,
+                                       iinfo->myvoid);
 
       got_results: /* not milk */
         
@@ -261,7 +271,8 @@ table_iterator_helper_handler(
             reqinfo->mode = oldmode;
 
         if (callback_data_keep && iinfo->free_data_context)
-            (iinfo->free_data_context)(callback_data_keep);
+            (iinfo->free_data_context)(callback_data_keep,
+                                       iinfo->myvoid);
         
 #ifdef NOT_SERIALIZED
         return ret;
