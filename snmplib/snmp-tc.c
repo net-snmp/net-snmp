@@ -21,7 +21,11 @@
 #endif
 
 #if TIME_WITH_SYS_TIME
+#ifdef WIN32
+# include <sys/timeb.h>
+#else
 # include <sys/time.h>
+#endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -75,10 +79,8 @@ date_n_time ( time_t *when, size_t  *length)
 	/*
 	 * Timezone offset
 	 */
-#ifndef SYSV
-#ifndef aix
+#if !defined(SYSV) && !defined(aix) && !defined(WIN32)
 #define timezone tm_p->tm_gmtoff
-#endif
 #endif
     if ( timezone > 0 )
 	string[8] = '-';
