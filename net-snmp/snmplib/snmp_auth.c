@@ -137,11 +137,18 @@ static void md5Digest(u_char *, size_t, u_char *);
  * in SNMPv1 and SNMPv2c.
  */
 u_char *
-snmp_comstr_parse(u_char *data,
+snmp_comstr_parse(u_char *data, size_t *length,
+		  u_char *psid, size_t *slen, int *version)
+{
+    return(snmp_comstr_dparse(data, length, psid, slen, version, PARSE_PACKET));
+}
+u_char *
+snmp_comstr_dparse(u_char *data,
 		  size_t *length,
 		  u_char *psid,
 		  size_t *slen,
-		  int *version)
+		  int *version,
+		  int  action)
 {
     u_char   	type;
     long	ver;
@@ -149,7 +156,7 @@ snmp_comstr_parse(u_char *data,
 
     /* Message is an ASN.1 SEQUENCE.
      */
-    data = asn_parse_header(data, length, &type);
+    data = asn_dparse_header(data, length, &type, action);
     if (data == NULL){
         ERROR_MSG("bad header");
         return NULL;
@@ -162,7 +169,7 @@ snmp_comstr_parse(u_char *data,
 
     /* First field is the version.
      */
-    data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
+    data = asn_dparse_int(data, length, &type, &ver, sizeof(ver), action);
     *version = ver;
     if (data == NULL){
         ERROR_MSG("bad parse of version");
@@ -170,7 +177,7 @@ snmp_comstr_parse(u_char *data,
     }
 
     /* second field is the community string for SNMPv1 & SNMPv2c */
-    data = asn_parse_string(data, length, &type, psid, slen);
+    data = asn_dparse_string(data, length, &type, psid, slen, action);
     if (data == NULL){
         ERROR_MSG("bad parse of community");
         return NULL;
@@ -377,10 +384,17 @@ md5Digest(	u_char	*start,
  * Parse the header of a party-based message such as that found in SNMPv2p.
  */
 u_char *
-snmp_party_parse(u_char *data,
+snmp_party_parse(u_char *data, size_t *length, struct snmp_pdu *pdu, int pass)
+{
+  return( snmp_party_dparse(data, length, pdu, pass, PARSE_PACKET));
+
+}
+u_char *
+snmp_party_dparse(u_char *data,
 		 size_t *length,
 		 struct snmp_pdu *pdu,
-		 int pass)
+		 int pass,
+		 int action)
 {
     oid *srcParty       =   pdu->srcParty;
     size_t *srcPartyLength = &(pdu->srcPartyLen);
@@ -413,7 +427,7 @@ snmp_party_parse(u_char *data,
 
 
 
-    data = asn_parse_header(data, length, &type);
+    data = asn_dparse_header(data, length, &type, action);
     if (data == NULL){
 	ERROR_MSG("bad header");
 	return NULL;
@@ -424,7 +438,7 @@ snmp_party_parse(u_char *data,
     }
 
 
-    data = asn_parse_objid(data, length, &type, dstParty, dstPartyLength);
+    data = asn_dparse_objid(data, length, &type, dstParty, dstPartyLength, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of dstParty");
 	return NULL;
@@ -442,7 +456,7 @@ snmp_party_parse(u_char *data,
      * function to the API that would validate the address.	XXX
      */
 
-    data = asn_parse_header(data, length, &type);
+    data = asn_dparse_header(data, length, &type, action);
     if (data == NULL || type != (ASN_CONTEXT | 1)){
 	ERROR_MSG("bad parse of privData");
 	return NULL;
@@ -450,7 +464,7 @@ snmp_party_parse(u_char *data,
     authMsg = data;
 
 
-    data = asn_parse_header(data, length, &type);
+    data = asn_dparse_header(data, length, &type, action);
     if (data == NULL || type != (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
 	ERROR_MSG("bad parse of snmpAuthMsg (DES decode probably failed!)");
 	return NULL;
@@ -459,7 +473,7 @@ snmp_party_parse(u_char *data,
 
     authMsgLen = *length + data - authMsg;
     authMsgInternalLen = *length;
-    data = asn_parse_header(data, &authMsgInternalLen, &type);
+    data = asn_dparse_header(data, &authMsgInternalLen, &type, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of snmpAuthMsg");
 	return NULL;
@@ -485,23 +499,23 @@ snmp_party_parse(u_char *data,
 
 	digestStart = data;
 	authDigestLen = sizeof(authDigest);
-	data = asn_parse_string(data, length, &type, authDigest,
-				&authDigestLen);
+	data = asn_dparse_string(data, length, &type, authDigest,
+				&authDigestLen, action);
 	if (data == NULL){
 	    ERROR_MSG("Digest");
 	    return NULL;
 	}
 	digestEnd = data;
 
-	data = asn_parse_unsigned_int(data, length, &type, &authDstTimeStamp,
-			     sizeof(authDstTimeStamp));
+	data = asn_dparse_unsigned_int(data, length, &type, &authDstTimeStamp,
+			     sizeof(authDstTimeStamp), action);
 	if (data == NULL){
 	    ERROR_MSG("DstTimeStamp");
 	    return NULL;
 	}
 
-	data = asn_parse_unsigned_int(data, length, &type, &authSrcTimeStamp,
-				      sizeof(authSrcTimeStamp));
+	data = asn_dparse_unsigned_int(data, length, &type, &authSrcTimeStamp,
+				      sizeof(authSrcTimeStamp), action);
 	if (data == NULL){
 	    ERROR_MSG("SrcTimeStamp");
 	    return NULL;
@@ -514,24 +528,24 @@ snmp_party_parse(u_char *data,
     }  /* endif -- Parse crypto bytes out of message */
 
 
-    data = asn_parse_header(data, length, &type);
+    data = asn_dparse_header(data, length, &type, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of snmpMgmtCom");
 	return NULL;
     }
 
 
-    data = asn_parse_objid(data, length, &type, dstParty2, &dstParty2Length);
+    data = asn_dparse_objid(data, length, &type, dstParty2, &dstParty2Length, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of dstParty");
 	return NULL;
     }
-    data = asn_parse_objid(data, length, &type, srcParty, srcPartyLength);
+    data = asn_dparse_objid(data, length, &type, srcParty, srcPartyLength, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of srcParty");
 	return NULL;
     }
-    data = asn_parse_objid(data, length, &type, context, contextLength);
+    data = asn_dparse_objid(data, length, &type, context, contextLength, action);
     if (data == NULL){
 	ERROR_MSG("bad parse of context");
 	return NULL;

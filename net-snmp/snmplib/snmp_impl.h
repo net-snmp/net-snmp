@@ -149,9 +149,11 @@ extern int snmp_errno;
 #define FIRST_PASS	1
 #define	LAST_PASS	2
 u_char	*snmp_comstr_parse (u_char *, size_t *, u_char *, size_t *, int *);
+u_char	*snmp_comstr_dparse(u_char *, size_t *, u_char *, size_t *, int *, int);
 u_char	*snmp_comstr_build (u_char *, size_t *, u_char *, size_t *, int *, size_t);
 
 u_char	*snmp_party_parse (u_char *, size_t *, struct snmp_pdu *, int);
+u_char	*snmp_party_dparse(u_char *, size_t *, struct snmp_pdu *, int, int);
 u_char	*snmp_party_build (u_char *, size_t *, struct snmp_pdu *, size_t, size_t *, int);
 
 int has_access (u_char, int, int, int);
