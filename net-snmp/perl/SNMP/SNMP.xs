@@ -228,7 +228,7 @@ __libraries_init()
     
         snmp_set_quick_print(1);
         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-y
+
         SOCK_STARTUP;
     
     }
