@@ -123,7 +123,6 @@ void getSwap(void)
       while (fgets(ext.output,STRMAX,file) != NULL);
       
       fclose(file);
-      close(fd);
       wait_on_exec(&ext);
 
       sscanf(ext.output, "%*s%*d%ld%ld", &swapUsed, &swapFree);

@@ -354,7 +354,6 @@ int getswap(int rettype)
       spaceleft -= atoi(cp);       /* reserved swap */
     }
     fclose(file);
-    close(fd);
     wait_on_exec(&ex);
   } else {
     return(0);
