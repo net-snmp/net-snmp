@@ -345,8 +345,10 @@ void send_trap_vars (int trap,
             snmp_sess_perror ("snmpd: send_trap", sink->sesp);
 	    snmp_free_pdu( pdu );
 	}
-	else
+	else {
 	    snmp_increment_statistic(STAT_SNMPOUTTRAPS);
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	}
 		
 	if ( sink->version != SNMP_VERSION_1 && last_var )
 	    last_var->next_variable = NULL;
