@@ -73,7 +73,7 @@ int snmp_res_destroy_mutex(int groupID, int resourceID);
 #endif /* !_REENTRANT */
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* MT_SUPPORT_H */
