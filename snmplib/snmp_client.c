@@ -122,6 +122,7 @@ snmp_pdu_create(int command)
     pdu->contextNameLen		 = -1;
     pdu->reqid                   = snmp_get_next_reqid();
     pdu->msgid                   = snmp_get_next_msgid();
+    }
     return pdu;
 
 }  /* end snmp_pdu_create() */
