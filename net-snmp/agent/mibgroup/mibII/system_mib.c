@@ -7,6 +7,11 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include "../mibincl.h"
 
 #ifdef HAVE_SYS_TIME_H
@@ -92,7 +97,7 @@ void system_parse_config_syscon(char *token,
 /* define the structure we're going to ask the agent to register our
    information at */
 struct variable2 system_variables[] = {
-    {VERSION_DESCR, ASN_OCTET_STR, RWRITE, var_system, 1, {1}},
+    {VERSION_DESCR, ASN_OCTET_STR, RONLY, var_system, 1, {1}},
     {VERSIONID, ASN_OBJECT_ID, RONLY, var_system, 1, {2}},
     {UPTIME, ASN_TIMETICKS, RONLY, var_system, 1, {3}},
     {SYSCONTACT, ASN_OCTET_STR, RWRITE, var_system, 1, {4}},

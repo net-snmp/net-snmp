@@ -197,6 +197,9 @@
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
 
+/* Define if you have the rpmGetPath function.  */
+#undef HAVE_RPMGETPATH
+
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
@@ -344,17 +347,14 @@
 /* Define if you have the <netinet/in_systm.h> header file.  */
 #undef HAVE_NETINET_IN_SYSTM_H
 
-/* Define if you have the <netinet/tcp.h> header file.  */
-#undef HAVE_NETINET_TCP_H
-
-/* Define if you have the <netinet/udp.h> header file.  */
-#undef HAVE_NETINET_UDP_H
-
 /* Define if you have the <netinet/in_var.h> header file.  */
 #undef HAVE_NETINET_IN_VAR_H
 
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H
+
+/* Define if you have the <netinet/tcp.h> header file.  */
+#undef HAVE_NETINET_TCP_H
 
 /* Define if you have the <netinet/tcp_fsm.h> header file.  */
 #undef HAVE_NETINET_TCP_FSM_H
@@ -367,6 +367,9 @@
 
 /* Define if you have the <netinet/tcpip.h> header file.  */
 #undef HAVE_NETINET_TCPIP_H
+
+/* Define if you have the <netinet/udp.h> header file.  */
+#undef HAVE_NETINET_UDP_H
 
 /* Define if you have the <netinet/udp_var.h> header file.  */
 #undef HAVE_NETINET_UDP_VAR_H
@@ -460,6 +463,9 @@
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/socketvar.h> header file.  */
+#undef HAVE_SYS_SOCKETVAR_H
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
@@ -785,9 +791,9 @@
 
 #define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
-#define MAXREADCOUNT 20   /* max times to loop reading output from
-                             execs.  Because of sleep(1)s, this will also
-                             be time to wait (in seconds) for exec to finish */
+#define MAXREADCOUNT 100   /* max times to loop reading output from
+                              execs.  Because of sleep(1)s, this will also
+                              be time to wait (in seconds) for exec to finish */
 
 #define SNMPBLOCK 1       /* Set to 1 if you want snmpgets to block and never
                              timeout.  Original CMU code had this

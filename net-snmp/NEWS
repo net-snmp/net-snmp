@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.6.2*
+ Fixes:
+    - An important multi-session bug fix, especially needed for the
+      SNMP perl module.
+    - Many minor bug fixes.
+
 *3.6.1*
  Fixes:
     - Minor last second fixes mostly.

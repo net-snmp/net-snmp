@@ -29,7 +29,7 @@ LIBS=	 -L../../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 all: $(TARG)
 
 snmpnetstat: ${OBJS} ${USELIBS}
-	${CC} -o $@ ${CFLAGS} ${OBJS} ${LDFLAGS} ${LIBS}
+	${CC} -o $@ ${OBJS} ${LDFLAGS} ${LIBS}
 
 distclean: clean
 

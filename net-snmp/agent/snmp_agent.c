@@ -606,14 +606,14 @@ parse_var_op_list(u_char *data,
 			else
 			    return SNMP_ERR_BADVALUE;
 		    }
-		    /* actually do the set if necessary */
+		    /* actually do the set if nescessary */
 		    if (action == COMMIT)
 			setVariable(var_val, var_val_type, var_val_len,
 				    statP, statLen);
 		} else {
 		    if (pi->version == SNMP_VERSION_2p
                         || pi->version == SNMP_VERSION_2c)
-			return SNMP_ERR_NOCREATION;
+			return SNMP_ERR_NOACCESS; /* NOCREATION? */
 		    else
 			return SNMP_ERR_NOSUCHNAME;
 		}

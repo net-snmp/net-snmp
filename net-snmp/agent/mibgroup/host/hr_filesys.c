@@ -37,6 +37,14 @@
 #endif
 #endif
 
+#ifdef freebsd3
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+#define MOUNT_NFS "nfs"
+#endif
+#endif
+#endif /* freebsd3 */
+
 #define HRFS_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -208,7 +216,7 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_RMOUNT:
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
-	    if (!strcmp( HRFS_entry->HRFS_type, MOUNT_NFS))
+	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
@@ -244,8 +252,12 @@ var_hrfilesys(struct variable *vp,
 	    case MOUNT_CD9660: fsys_type_id[fsys_type_len-1] = 12; break;
 	    case MOUNT_UNION: fsys_type_id[fsys_type_len-1] = 1; break;
 	    case MOUNT_DEVFS: fsys_type_id[fsys_type_len-1] = 1; break;
+#ifdef MOUNT_EXT2FS
 	    case MOUNT_EXT2FS: fsys_type_id[fsys_type_len-1] = 1; break;
+#endif
+#ifdef MOUNT_TFS
 	    case MOUNT_TFS: fsys_type_id[fsys_type_len-1] = 15; break;
+#endif
 	    }
 #else
 	    mnt_type = HRFS_entry->HRFS_type;
@@ -474,7 +486,7 @@ when_dumped(char *filesys,
     if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
 	return date_n_time (NULL, length);
 
-    while ( fgets( line, 100, dump_fp ) != NULL ) {
+    while ( fgets( line, sizeof(line), dump_fp ) != NULL ) {
         cp2=strchr( line, ' ' );	/* Start by looking at the device name only */
 	if ( cp2!=NULL ) {
 	    *cp2 = '\0';

@@ -1,4 +1,4 @@
-		      ucd-snmp Version: 3.6.1
+		      ucd-snmp Version: 3.6.2.pre2
 DISCLAIMER
 
   The Authors, the University of California, the University of
@@ -20,14 +20,15 @@ TABLE OF CONTENTS
   Copying And Copyrights
 * Frequently Asked Questions
   Helping Out
-* Code Update Announcements / Mailing List(S)
-  Extensibility
-  Example Usage 
+* Code Update Announcements
+* Mailing Lists
+  Agent Extensibility
+  Example Agent Configuration and Usage 
   Configuration
   Snmpv1 Vs. Snmpv2
   Submitting Bug Reports
-  Thanks
   Closing
+  Thanks
 
   * = Required Reading.
 
@@ -35,9 +36,9 @@ INTRODUCTION
 
   This package was originally based on the CMU 2.1.2.1 snmp code.  It
   has been greatly modified, restructured, enhanced and fixed.  It
-  hardly looks the same at all as anything that CMU has ever
-  released.  However, it maintains all the original API functions for
-  complete backwards compatibility.
+  hardly looks the same at all as anything that CMU has ever released.
+  However, it maintains all the original API functions for complete
+  backwards compatibility.
 
 SUPPORTED ARCHITECTURES
 
@@ -53,14 +54,19 @@ AVAILABILITY
   ftp://ucd-snmp.ucdavis.edu:/ucd-snmp.README
   ftp://ucd-snmp.ucdavis.edu:/ucd-snmp.tar.gz
 
-  or [mirrors in Switzerland and Japan]:
+  Mirrors:
 
-  ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-  ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
+  Switzerland: ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp
+  Japan:       ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp
+  Russia:      ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp
 
 WEB PAGE
 
   http://ucd-snmp.ucdavis.edu.
+
+  Make sure you check out the logo there, which is created using
+  postcards submitted from various locations that make use of the
+  ucd-snmp package.
   
 INSTALLATION
 
@@ -81,7 +87,7 @@ HELPING OUT
   to the ucd-snmp-coders list described below and mention what you're
   going to work on to make sure no one else is already doing so!
 
-CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
+CODE UPDATE ANNOUNCEMENTS
 
   See the NEWS file and the ChangeLog file for details on what has
   changed between releases.
@@ -89,31 +95,57 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
   We hate broadcasting announce messages to other mailing lists and
   newsgroups, so there is a mailing list set up to handle release
   announcements.  Any time we put new software out for ftp, we'll mail
-  this fact to ucd-snmp-announce@ucd-snmp.ucdavis.edu.  To
-  subscribe/unsubscribe yourself to/from this list, mail a note to
-  ucd-snmp-announce-request@ucd-snmp.ucdavis.edu with a subject line of
-  'subscribe' or 'unsubscribe'.  We will post new announcements on a
-  very infrequent basis to the other channels (the snmp mailing lists
-  and comp.protocols.snmp), but only for major code revisions and not
-  for bug-fix patches or small feature upgrades.
+  this fact to ucd-snmp-announce@ucd-snmp.ucdavis.edu, described
+  below.
 
-  The above mailing list is not a general purpose discussion list.  A
-  separate list has been created for that purpose.  To subscribe to
-  it, mail a note to ucd-snmp-request@ucd-snmp.ucdavis.edu with a
-  subject line of 'subscribe' or 'unsubscribe'.  To use it, mail to 
-  ucd-snmp@ucd-snmp.ucdavis.edu.
+  We will post new announcements on a very infrequent basis to the
+  other channels (the snmp mailing lists and comp.protocols.snmp), but
+  only for major code revisions and not for bug-fix patches or small
+  feature upgrades.
 
-  In addition, there is yet another mailing list called
-  ucd-snmp-coders@ucd-snmp.ucdavis.edu, which is where all bug reports,
-  questions and patches should be sent to.  The traffic volume is a
-  lot higher and is really only of interest to those who intend to
-  work on the code and submit patches frequently.  To join it, mail a
-  "subscribe" request to ucd-snmp-coders-request@ucd-snmp.ucdavis.edu.
+MAILING LISTS
 
-  The archives for these mailing lists can be found at
-  http://ucd-snmp.ucdavis.edu.
+  The lists:
 
-EXTENSIBILITY
+    The following mailing lists have been created for your use:
+  
+      ucd-snmp-announce@ucd-snmp.ucdavis.edu  -- For announcements
+         Subscribe to ucd-snmp-announce-request@ucd-snmp.ucdavis.edu
+         
+      ucd-snmp@ucd-snmp.ucdavis.edu           -- For usage discussions
+         Subscribe to ucd-snmp-request@ucd-snmp.ucdavis.edu
+
+      ucd-snmp-coders@ucd-snmp.ucdavis.edu    -- For development discussions
+         Subscribe to ucd-snmp-coders-request@ucd-snmp.ucdavis.edu
+
+      ucd-snmp-cvs@ucd-snmp.ucdavis.edu       -- For cvs update announcements
+         Subscribe to ucd-snmp-cvs-request@ucd-snmp.ucdavis.edu
+
+      ucd-snmp-bugs-mail@ucd-snmp.ucdavis.edu -- Where bug reports are sent.
+         Subscribe to ucd-snmp-bugs-mail-request@ucd-snmp.ucdavis.edu
+
+    The lists you definitely want to subscribe to is the
+    ucd-snmp-announce@ucd-snmp.ucdavis.edu list and the
+    ucd-snmp@ucd-snmp.ucdavis.edu list.
+
+  Subscribing:
+    
+    To (un)subscribe any of the above lists, mail a note to the same
+    address with -request appended to the list name with a subject
+    line of "subscribe" or "unsubscribe".
+
+    For example:   mailing a note to
+
+          ucd-snmp-announce-request@ucd-snmp.ucdavis.edu
+
+    with a subject line of "subscribe" will subscribe
+    you to the announcement list.
+
+  Archives:
+    The archives for these mailing lists can be found at
+    http://ucd-snmp.ucdavis.edu.
+
+AGENT EXTENSIBILITY
 
   The agent that comes with this package is extensible through use of
   shell scripts and other methods.  See the configuration manual pages
@@ -123,37 +155,67 @@ EXTENSIBILITY
   is extremely modular in nature and you need only create new files,
   re-run configure and re-compile.  No modification of the distributed
   source files are necessary.  See the following files in the
-  agent/mibgroup directory for details and examples: README, examples/wombat.c,
-  examples/wombat.h, examples/example.c, examples/example.h.
+  agent/mibgroup directory for details and examples: README,
+  examples/wombat.c, examples/wombat.h, examples/example.c,
+  examples/example.h.  Also, see the local/mib2c program and its
+  README file for help in turning a textual mib description into a C
+  code template.
 
-  Note:  This agent uses its own API for extensibility.  The IETF's
-  agentx working group is working on developing a common API for
-  subagent extensibility.  When they have finished the development of
-  their specifications, we will begin working on implementing them.
+  Note: This agent uses its own API for extensibility.  The IETF's
+  agentx working group have developed a common API for subagent
+  extensibility, which we are working on providing support for in our
+  agent.
 
-EXAMPLE USAGE 
+CONFIGURATION
+
+  See the man/snmp.conf.5 manual page.
+
+  For the agent, additionally see the man/snmpd.conf.5 manual page and
+  the EXAMPLE.conf file mentioned above.
+
+  For the snmptrapd, see the man/snmptrapd.conf.5 manual page.
+
+EXAMPLE AGENT CONFIGURATION AND USAGE
 
   See the 'EXAMPLE.conf' file in the top level source directory (you
   must build the package for this file to be generated).  Do NOT look
   at the EXAMPLE.conf.def file.  It will only confuse you.
 
-CONFIGURATION
-
-  See man/snmpd.conf.5 and the EXAMPLE.conf file mentioned above.
-
 SUBMITTING BUG REPORTS
 
-  The best way to submit a bug report is to use the enclosed
-  "bug-report" script.  Please run the script on the architecture you
-  are having problems with, as it automatically mails us with uname
-  output for our usage.
+  Important: *Please* include what version of the ucd-snmp package you
+  are using and what architecture(s) you're using, as well as detailed
+  information about exactly what is wrong.
 
-  Please submit all bug reports and patches to
-  ucd-snmp-coders@ucd-snmp.ucdavis.edu.  *Please* include what version of
-  the ucd-snmp package you are using and what architecture(s) you're
-  using, as well as detailed information about exactly what is wrong.
+  To submit a bug report, ideally, you should use
+  http://ucd-snmp.ucdavis.edu/ucd-snmp-bugs to do your submissions.
+  Alternatively, submit your bug report to
+  ucd-snmp-bugs@ucd-snmp.ucdavis.edu.  Both paths do end up at the
+  same place, which is the above URL.  Through this URL you can track
+  your bug report.
+
+  Patches should be sent to the above email address as well.
+
   If you intend to submit a patch as well, please read the PORTING
   file before you do so.  Thanks!
+
+  All discussions of general coding related questions take place on
+  the ucd-snmp-coders list, however.
+
+CLOSING
+
+  We love patches.  Send some to us!  But before you do, please see
+  the 'PORTING' file for information on helping us out with the
+  process of integrating your patches (regardless of weather its a new 
+  feature implementation or a new port).
+
+  Also, We're interested if anyone actually uses/likes/hates/whatever
+  this package...  Mail us a note and let us know what you think of it!
+
+  Have fun and may it make your life easier,
+
+    Wes Hardaker
+    ucd-snmp-coders@ucd-snmp.ucdavis.edu
 
 THANKS
 
@@ -200,21 +262,7 @@ THANKS
     David F. Newman <dnewman@epnet.com>
     Nick Amato <naamato@merit.edu>
     Mike Baer <baerm@calweb.com>
+    Chris Smith <csmith@platform.com>
 
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
-
-CLOSING
-
-  We love patches.  Send some to us!  But before you do, please see
-  the 'PORTING' file for information on helping us out with the
-  process of integrating your patches (regardless of weather its a new 
-  feature implementation or a new port).
-
-  Also, We're interested if anyone actually uses/likes/hates/whatever
-  this package...  Mail us a note and let us know what you think of it!
-
-  Have fun and may it make your life easier,
-
-    Wes Hardaker
-    ucd-snmp-coders@ucd-snmp.ucdavis.edu

@@ -272,7 +272,8 @@ int main(int argc, char *argv[])
     if (status) {
         snmp_perror(inform ? (char*)"snmpinform" : (char*)"snmptrap");
     }
-    snmp_free_pdu(pdu);
+    if (inform) snmp_free_pdu(response);
+    else snmp_free_pdu(pdu);
 
 #ifdef _DEBUG_MALLOC_INC
     current_size = malloc_inuse(&histid2);

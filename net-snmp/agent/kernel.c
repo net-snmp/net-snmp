@@ -69,6 +69,7 @@ klookup(unsigned long off,
 	int     siz)
 {
     int result;
+    if (kd == NULL) return 0;
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
 #if HAVE_KVM_OPENFILES
@@ -163,6 +164,8 @@ klookup(unsigned long off,
 	int     siz)
 {
   long retsiz;
+
+  if (kmem < 0) return 0;
 
   if ((retsiz = klseek((off_t) off)) != off) {
     fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);

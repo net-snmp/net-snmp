@@ -22,6 +22,9 @@
 #include <netinet/in_systm.h>
 #endif
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #include <sys/socket.h>
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
@@ -61,10 +64,10 @@ void init_agent_read_config (void)
                           "1 | 2\t\t(1 = enable, 2 = disable)");
   register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
-                          "host");
+                          "host [community]");
   register_config_handler("snmpd","trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
-                          "host");
+                          "host [community]");
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
@@ -77,6 +80,7 @@ void init_agent_read_config (void)
 
 RETSIGTYPE update_config(int a)
 {
+  free_config();
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
     read_configs();
   }

@@ -74,7 +74,7 @@ mibcache Mibcache[MIBCACHE_SIZE] = {
 {MIB_IP,		sizeof(mib2_ip_t),			(void *)-1, 0, 20, 0, 0},
 {MIB_IP_ADDR,		20*sizeof(mib2_ipAddrEntry_t),		(void *)-1, 0, 20, 0, 0},
 {MIB_IP_ROUTE,		200*sizeof(mib2_ipRouteEntry_t),	(void *)-1, 0, 10, 0, 0},
-{MIB_IP_NET,		20*sizeof(mib2_ipNetToMediaEntry_t),	(void *)-1, 0, 100, 0, 0},
+{MIB_IP_NET,		100*sizeof(mib2_ipNetToMediaEntry_t),	(void *)-1, 0, 100, 0, 0},
 {MIB_ICMP,		sizeof(mib2_icmp_t),			(void *)-1, 0, 20, 0, 0},
 {MIB_TCP,		sizeof(mib2_tcp_t),			(void *)-1, 0, 20, 0, 0},
 {MIB_TCP_CONN,		1000*sizeof(mib2_tcpConnEntry_t),	(void *)-1, 0, 15, 0, 0},
@@ -158,6 +158,25 @@ extern "C" {
    doesn't seem to be reasonable. In any case I'd expect more reasonable kstat
    interface. :-(*/
 
+
+int getKstatInt(char *classname, char *statname, char *varname, int *value)
+{
+    kstat_ctl_t *ksc = kstat_open();
+    kstat_t *ks;
+    kid_t kid;
+    kstat_named_t *named;
+
+    if (ksc == NULL) return 0;
+    ks = kstat_lookup (ksc, classname, -1, statname);
+    if (ks == NULL) return 0;
+    kid = kstat_read (ksc, ks, NULL);
+    if (kid == -1) return 0;
+    named = kstat_data_lookup(ks, varname);
+    if (named == NULL) return 0;
+    *value = named->value.ul;
+    kstat_close(ksc);
+    return 1;
+}
 
 int
 getKstat(char *statname, char *varname, void *value)
@@ -243,14 +262,18 @@ getKstat(char *statname, char *varname, void *value)
 	*(ulong_t *)v = d->value.ul;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ul));
 	break;
+#if KSTAT_DATA_LONGLONG != KSTAT_DATA_LONG
       case KSTAT_DATA_LONGLONG:
 	*(longlong_t *)v = d->value.ll;
 	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", (long)d->value.ll));
 	break;
+#endif
+#if KSTAT_DATA_ULONGLONG != KSTAT_DATA_ULONG
       case KSTAT_DATA_ULONGLONG:
 	*(u_longlong_t *)v = d->value.ull;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", (unsigned long)d->value.ul));
 	break;
+#endif
       case KSTAT_DATA_FLOAT:
 	*(float *)v = d->value.f;
 	DEBUGMSGTL(("kernel_sunos5", "value: %f\n", d->value.f));
@@ -260,6 +283,8 @@ getKstat(char *statname, char *varname, void *value)
         DEBUGMSGTL(("kernel_sunos5", "value: %f\n", d->value.d));
 	break;
       default:
+	fprintf(stderr, "Unknown type in kstat data: %s %s %d\n",
+		statname, varname, d->data_type);
 	ret = -3;
 	goto Return;		/* Invalid data type */
       }
@@ -568,7 +593,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
 
       case MOREDATA:
       case 0:
-	if ((req_type == GET_NEXT)  && (result == NEED_NEXT))
+	if (req_type == GET_NEXT  && result == NEED_NEXT)
 	    /* End of buffer, so "next" is the first item in the next buffer */
 	    req_type = GET_FIRST;
 	result = getentry(req_type, (void *)strbuf.buf, strbuf.len, entrysize,
@@ -576,7 +601,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
 	*length = strbuf.len;	/* To use in caller for cacheing */
 	break;
       }
-    } while ((rc == MOREDATA) && (result != FOUND));
+    } while (rc == MOREDATA && result != FOUND);
     if (result == FOUND) {	/* Search is successful */
 	if (rc != MOREDATA)
 	    ret = 0;		/* Found and no more data */
@@ -784,7 +809,7 @@ Name_cmp(void *ifrp, void *ep)
 
 #ifdef _GETKSTAT_TEST
 
-void
+int
 main (int argc, char **argv)
 {
   int rc = 0;
@@ -802,6 +827,7 @@ main (int argc, char **argv)
     fprintf(stderr, "%s = %lu\n", argv[2], val);
   else
     fprintf(stderr, "rc =%d\n", rc);
+  return 0;
 }
 #endif /*_GETKSTAT_TEST */
 
@@ -818,6 +844,9 @@ ip20comp(void *ifname, void *ipp)
 int
 ARP_Cmp_Addr(void *addr, void *ep)
 {
+  fprintf(stderr, "ARP: %lx <> %lx\n",
+      ((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress,
+      *(IpAddress *)addr);
   if (((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress ==
       *(IpAddress *)addr)
     return (0);
@@ -833,7 +862,7 @@ IF_cmp(void *addr, void *ep)
 	return (1);
 }
 
-void
+int
 main (int argc, char **argv)
 {
   int rc = 0, i, idx;
@@ -841,7 +870,7 @@ main (int argc, char **argv)
   mib2_ipNetToMediaEntry_t entry, *ep = &entry;
   mib2_ifEntry_t	ifstat;
   req_e 		req_type;
-  IpAddress		LastAddr = -1;
+  IpAddress		LastAddr = 0;
 
   if (argc != 3) {
     fprintf(stderr, "Usage: %s if_name req_type (0 first, 1 exact, 2 next) \n",
@@ -861,7 +890,7 @@ main (int argc, char **argv)
     break;
   };
 
-  snmp_set_do_debugging(1);
+  snmp_set_do_debugging(0);
   while ((rc = getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
 			  req_type, &IF_cmp, &idx)) == 0) {
       idx = ifstat.ifIndex;
@@ -882,7 +911,7 @@ main (int argc, char **argv)
     fprintf(stdout, "Ipaddr = %lX\n", (u_long)LastAddr);
     req_type = GET_NEXT;
   }
-
+  return 0;
 }	
 #endif /*_GETMIBSTAT_TEST */
 #endif /* SUNOS5 */

@@ -67,7 +67,7 @@ read_acl_database(char *filename)
     char *cp;
     int blank;
     int linenumber = 0;
-    oid targetParty[64], subjectParty[64], resources[64];
+    oid targetParty[MAX_OID_LEN], subjectParty[MAX_OID_LEN], resources[MAX_OID_LEN];
     int targetPartyLen, subjectPartyLen, resourcesLen;
     int priveleges;
     struct aclEntry *ap;
@@ -78,7 +78,7 @@ read_acl_database(char *filename)
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return -1;
-    while (fgets(buf, 256, fp)){
+    while (fgets(buf, sizeof(buf), fp)){
 	linenumber++;
 	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
@@ -108,7 +108,7 @@ read_acl_database(char *filename)
 	    }
 	}
 	if (!pp){
-	    targetPartyLen = 64;
+	    targetPartyLen = MAX_OID_LEN;
 	    if (!read_objid(buf1, targetParty, &targetPartyLen)) {
 		error_exit("Bad target object identifier", linenumber, filename);
 		fclose(fp);
@@ -133,7 +133,7 @@ read_acl_database(char *filename)
 	    }
 	}
 	if (!pp){
-	    subjectPartyLen = 64;
+	    subjectPartyLen = MAX_OID_LEN;
 	    if (!read_objid(buf2, subjectParty, &subjectPartyLen)) {
 		error_exit("Bad subject object identifier", linenumber, filename);
 		fclose(fp);
@@ -158,7 +158,7 @@ read_acl_database(char *filename)
 	    }
 	}
 	if (!cxp){
-	    resourcesLen = 64;
+	    resourcesLen = MAX_OID_LEN;
 	    if (!read_objid(buf3, resources, &resourcesLen)) {
 		error_exit("Bad context object identifier", linenumber, filename);
 		fclose(fp);

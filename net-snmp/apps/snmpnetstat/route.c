@@ -267,7 +267,7 @@ get_ifname(char *name, int ifIndex)
     struct snmp_pdu *pdu, *response;
     struct variable_list *vp;
     struct iflist *ip;
-    oid varname[32];
+    oid varname[MAX_OID_LEN];
     int status;
 
     for(ip = Iflist; ip; ip = ip->next){

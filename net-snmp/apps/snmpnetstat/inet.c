@@ -416,11 +416,11 @@ int
 validUShortAssign( unsigned short * pushort, int ival, char * errstr)
 {
     u_long ulval = (u_long)ival;
-    if ((ival < 1) || (ival > 65535))
+    if (ival > 65535)
     {
 	printf("Warning: %s value %ld (0x%lx) is not a port address\n",
 		errstr, ulval, ulval);
-	/*return 0;*/
+	return 0;
     }
     *pushort = (unsigned short)ulval;
     return 1;

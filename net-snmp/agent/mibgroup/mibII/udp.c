@@ -63,6 +63,12 @@
 
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
@@ -530,13 +536,31 @@ static struct inpcb *udp_inpcb_list;
 
 #ifndef solaris2
 static struct inpcb udp_inpcb, *udp_prev;
+#ifdef PCB_TABLE
+static struct inpcb *udp_head, *udp_next;
+#endif
+#if defined(CAN_USE_SYSCTL) && defined(UDPCTL_PCBLIST)
+static char *udpcb_buf = NULL;
+static struct xinpgen *xig = NULL;
+#endif /* !defined(CAN_USE_SYSCTL) || !define(UDPCTL_PCBLIST) */
+
 
 static void UDP_Scan_Init(void)
 {
+#if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
+#ifdef PCB_TABLE
+    struct inpcbtable table;
+#endif
 #ifndef linux
+#ifdef PCB_TABLE
+    auto_nlist(UDB_SYMBOL, (char *)&table, sizeof(table));
+    udp_next = table.inpt_queue.cqh_first;
+    udp_head = udp_prev = (struct inpcb *)&((struct inpcbtable *)auto_nlist_value(UDB_SYMBOL))->inpt_queue.cqh_first;
+#else
     auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
     udp_prev = (struct inpcb *) auto_nlist_value(UDB_SYMBOL);
+#endif
 #endif
 #else /* linux */
     FILE *in;
@@ -576,7 +600,7 @@ static void UDP_Scan_Init(void)
 
     pp = &udp_inpcb_list;
     
-    while (line == fgets (line, 256, in))
+    while (line == fgets (line, sizeof(line), in))
       {
 	struct inpcb pcb, *nnew;
 	unsigned int state, lport;
@@ -604,25 +628,64 @@ static void UDP_Scan_Init(void)
     /* first entry to go: */
     udp_prev = udp_inpcb_list;
 #endif /*linux */
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
+    {
+	size_t len;
+	int cc;
+	int sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
+
+	if (udpcb_buf) {
+	    free(udpcb_buf);
+	    udpcb_buf = NULL;
+	}
+	xig = NULL;
+
+	len = 0;
+	if (sysctl(sname, 4, 0, &len, 0, 0) < 0) {
+	    return;
+	}
+	if ((udpcb_buf = malloc(len)) == NULL) {
+	    return;
+	}
+	if (sysctl(sname, 4, udpcb_buf, &len, 0, 0) < 0) {
+	    free(udpcb_buf);
+	    udpcb_buf = NULL;
+	    return;
+	}
+
+	xig = (struct xinpgen *)udpcb_buf;
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+	return;
+    }
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 }
 
 static int UDP_Scan_Next(struct inpcb *RetInPcb)
 {
+#if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
 	register struct inpcb *next;
 
 #ifndef linux
+#ifdef PCB_TABLE
+	if (udp_next == udp_head) return 0;
+#else
 	if ((udp_inpcb.INP_NEXT_SYMBOL == NULL) ||
 	    (udp_inpcb.INP_NEXT_SYMBOL ==
              (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
 	    return(0);	    /* "EOF" */
 	}
+#endif
 
+#ifdef PCB_TABLE
+	klookup((unsigned long)udp_next, (char *)&udp_inpcb, sizeof(udp_inpcb));	udp_next = udp_inpcb.inp_queue.cqe_next;
+#else
         next = udp_inpcb.INP_NEXT_SYMBOL;
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
 #if !(defined(netbsd1) || defined(freebsd2) || defined(linux) || defined(openbsd2))
 	if (udp_inpcb.INP_PREV_SYMBOL != udp_prev)	   /* ??? */
           return(-1); /* "FAILURE" */
+#endif
 #endif
 	*RetInPcb = udp_inpcb;
 #if !(defined(netbsd1) || defined(freebsd2) || defined(openbsd2))
@@ -635,7 +698,18 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	next = udp_inpcb.inp_next;
 	*RetInPcb = udp_inpcb;
 	udp_prev = next;
-#endif linux
+#endif /* linux */
+#else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
+	/* Are we done? */
+	if ((xig == NULL) ||
+	    (xig->xig_len <= sizeof(struct xinpgen)))
+	    return(0);  
+	    
+	*RetInPcb = ((struct xinpcb *)xig)->xi_inp;
+	
+	/* Prepare for Next read */
+	xig = (struct xinpgen *)((char *)xig + xig->xig_len);
+#endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
 #endif /* solaris2 */
@@ -653,7 +727,7 @@ linux_read_udp_stat (struct udp_mib *udpstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (4 == sscanf (line, "Udp: %lu %lu %lu %lu\n",
 			&udpstat->UdpInDatagrams, &udpstat->UdpNoPorts,

@@ -30,7 +30,7 @@
 #define CACHETIME	3	/* not implemented */
 
 struct contextEntry {
-    oid		contextIdentity[32];
+    oid		contextIdentity[MAX_OID_LEN];
     int		contextIdentityLen;
     int		contextIndex;
     char	contextName[64];	/* friendly name */
@@ -41,7 +41,7 @@ struct contextEntry {
     int		contextLocalTime;
     int		contextDstPartyIndex;
     int		contextSrcPartyIndex;
-    oid		contextProxyContext[32];
+    oid		contextProxyContext[MAX_OID_LEN];
     int		contextProxyContextLen;
     int		contextStorageType;
     int		contextStatus;

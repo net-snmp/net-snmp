@@ -1,5 +1,5 @@
 : maketarget
-DIRS=`find . -name targets -prune -o -type d ! -name . -print | sed s/..//`
+DIRS=`find . -name targets -prune -o -type d ! -name . -print | grep -v CVS | sed s/..//`
 TARGET=${1-`./config.guess`}
 echo Target directory: $TARGET
 echo Sub directories: $DIRS
