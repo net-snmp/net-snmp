@@ -146,6 +146,9 @@
 /* Define if you have the memcpy function.  */
 #undef HAVE_MEMCPY
 
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
+
 /* Define if you have the rand function.  */
 #undef HAVE_RAND
 
