@@ -192,24 +192,24 @@ version:
 	  echo "you need to supply a VERSION string."; \
 	  exit 2; \
 	fi
-	agent/mibgroup/versiontag $(VERSION) reverse
+	${srcdir}/agent/mibgroup/versiontag $(VERSION) reverse
 
 tag:
 	@if test "x$(VERSION)" = "x"; then \
 	  echo "you need to supply a VERSION string."; \
 	  exit 2; \
 	fi
-	agent/mibgroup/versiontag $(VERSION) tag
+	${srcdir}/agent/mibgroup/versiontag $(VERSION) tag
 
 tar:
 	@if test "x$(VERSION)" = "x"; then \
 	  echo "you need to supply a VERSION string."; \
 	  exit 2; \
 	fi
-	agent/mibgroup/versiontag $(VERSION) tar
+	${srcdir}/agent/mibgroup/versiontag $(VERSION) tar
 
 tarclean:
-	agent/mibgroup/versiontag Ext clean
+	${srcdir}/agent/mibgroup/versiontag Ext clean
 
 commentcheck:
 	grep // `find $(srcdir) -name \*.\[ch\]` | grep -v http | grep -v /win32/
