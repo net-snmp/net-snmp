@@ -103,6 +103,7 @@
 #include "disk.h"
 #include "util_funcs.h"
 #include "read_config.h"
+#include "mib_module_config.h"
 #if USING_ERRORMIB_MODULE
 #include "errormib.h"
 #else
