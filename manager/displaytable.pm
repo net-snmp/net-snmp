@@ -199,15 +199,12 @@ sub displaytable {
     # editable/markable setup
     my $edited = 0;
     my $editable = 0;
-    my (@indexkeys, @valuekeys, $uph, %indexhash);
-    if (defined($config{'-CGI'}) &&  ref($config{'-CGI'}) eq "CGI" &&
-	defined($config{'-editable'}) && ref($config{'-indexes'}) eq ARRAY) {
+    my (@indexkeys, @valuekeys, $uph, %indexhash, $q);
+    if (defined($config{'-editable'})) {
 	$editable = 1;
     }
 
-    if (defined($config{'-CGI'}) &&  ref($config{'-CGI'}) eq "CGI" &&
-	(defined($config{'-mark'}) || defined($config{'-onmarked'})) && 
-	ref($config{'-indexes'}) eq ARRAY) {
+    if (defined($config{'-mark'}) || defined($config{'-onmarked'})) {
 	$markable = 1;
     }
 
@@ -215,23 +212,23 @@ sub displaytable {
 	$q = $config{'-CGI'};
     }
 
-    if ($q->param('edited_' . toalpha($tablename))) {
-	$edited = 1;
-    }
-	
-
     if (($editable || $markable)) {
-	if (ref($config{'-indexes'}) eq ARRAY) {
+	if (ref($config{'-indexes'}) eq ARRAY && defined($q)) {
 	    @indexkeys = @{$config{'-indexes'}};
 	    foreach my $kk (@indexkeys) {
 		$indexhash{$kk} = 1;
 	    }
 	} else {
 	    $editable = $markable = 0;
-	    print STDERR "displaytable error: no -indexes option specified\n";
+	    print STDERR "displaytable error: no -indexes option specified or -CGI not specified\n";
 	}
     }
 
+    if (($editable || $markable) && 
+	$q->param('edited_' . toalpha($tablename))) {
+	$edited = 1;
+    }
+	
     # table header
     my $doheader = 1;
     my @keys;
@@ -243,7 +240,7 @@ sub displaytable {
 
     while( $data = $thetable->fetchrow_hashref() ) {
 	$rowcount++;
-	if ($edited && !defined($uph)) {
+	if ($edited && $editable && !defined($uph)) {
 	    foreach my $kk (keys(%$data)) {
 		push (@valuekeys, $kk) if (!defined($indexhash{$kk}));
 	    }
@@ -331,7 +328,7 @@ sub displaytable {
 	if (defined($beginhook)) {
 	    &$beginhook($dbh, $tablename, $data);
 	}
-	if ($edited) {
+	if ($edited && $editable) {
 	    my $ret = $uph->execute(getquery($q, $data, \@indexkeys, @valuekeys), 
 				    getvalues($data, @indexkeys));
 	    foreach my $x (@indexkeys) {
