@@ -620,94 +620,15 @@ init_master_agent(void)
       return 1;
     }
 
-    /*  Transport type specifier?  */
-
-    if ((cptr2 = strchr(cptr, ':')) != NULL) {
-      if (strncasecmp(cptr, "none", 4) == 0) {
-	DEBUGMSGTL(("snmp_agent",
-		 "init_master_agent; pseudo-transport \"none\" requested\n"));
-	return 0;
-      } else if (strncasecmp(cptr, "tcp", 3) == 0) {
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-	struct sockaddr_in addr;
-	if (snmp_sockaddr_in(&addr, cptr2+1, 0)) {
-	  transport = snmp_tcp_transport(&addr, 1);
-	} else {
-	  snmp_log(LOG_ERR,
-		   "Badly formatted IP address (should be [a.b.c.d:]p)\n");
-	  return 1;
-	}
-#else
-	snmp_log(LOG_ERR, "No support for requested TCP domain\n");
-	return 1;
-#endif
-      } else if (strncasecmp(cptr, "ipx", 3) == 0) {
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
-	struct sockaddr_ipx addr;
-	if (snmp_sockaddr_ipx(&addr, cptr2+1)) {
-	  transport = snmp_ipx_transport(&addr, 1);
-	} else {
-	  snmp_log(LOG_ERR,
-	       "Badly formatted IPX address (should be [net]:node[/port])\n");
-	  return 1;
-	}
-#else
-	snmp_log(LOG_ERR, "No support for requested IPX domain\n");
-#endif
-      } else if (strncasecmp(cptr, "aal5pvc", 7) == 0) {
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-	struct sockaddr_atmpvc addr;
-	if (sscanf(cptr2+1, "%d.%d.%d", &(addr.sap_addr.itf),
-		   &(addr.sap_addr.vpi), &(addr.sap_addr.vci))==3) {
-	  addr.sap_family = AF_ATMPVC;
-	  transport = snmp_aal5pvc_transport(&addr, 1);
-	} else {
-	  snmp_log(LOG_ERR,
-		 "Badly formatted AAL5 PVC address (should be itf.vpi.vci)\n");
-	  return 1;
-	}
-#else
-	snmp_log(LOG_ERR, "No support for requested AAL5 PVC domain\n");
-	return 1;
-#endif
-      } else if (strncasecmp(cptr, "unix", 4) == 0) {
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-	struct sockaddr_un addr;
-	addr.sun_family = AF_UNIX;
-	strncpy(addr.sun_path, cptr2+1, 
-		sizeof(addr) - (size_t) (((struct sockaddr_un *)0)->sun_path));
-	transport = snmp_unix_transport(&addr, 1);
-#else
-	snmp_log(LOG_ERR, "No support for requested Unix domain\n");
-	return 1;
-#endif
-      } else if (strncasecmp(cptr, "udp", 3) == 0) {
-	struct sockaddr_in addr;
-	if (snmp_sockaddr_in(&addr, cptr2+1, 0)) {
-	  transport = snmp_udp_transport(&addr, 1);
-	} else {
-	  snmp_log(LOG_ERR,
-		   "Badly formatted IP address (should be [a.b.c.d:]p)\n");
-	  return 1;
-	}
-      } else {
-	snmp_log(LOG_ERR, "Unknown transport domain \"%s\"\n", cptr);
-	return 1;
-      }
-    } else {
-      /*  No transport type specifier; default to UDP.  */
-      struct sockaddr_in addr;
-      if (snmp_sockaddr_in(&addr, cptr, 0)) {
-	transport = snmp_udp_transport(&addr, 1);
-      } else {
-	snmp_log(LOG_ERR,
-		 "Badly formatted IP address (should be [a.b.c.d:]p)\n");
-	return 1;
-      }
-    }
+    if (strncasecmp(cptr, "none", 4) == 0) {
+      DEBUGMSGTL(("snmp_agent",
+		  "init_master_agent; pseudo-transport \"none\" requested\n"));
+      return 0;
+    } 
+    transport = snmp_tdomain_transport(cptr, 1, "udp");
 
     if (transport == NULL) {
-      snmp_log(LOG_ERR, "Error opening specified transport \"%s\"\n", cptr);
+      snmp_log(LOG_ERR, "Error opening specified endpoint \"%s\"\n", cptr);
       return 1;
     }
 
