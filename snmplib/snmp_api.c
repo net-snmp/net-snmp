@@ -1979,10 +1979,9 @@ int
 snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
                      u_char *pdu_data, size_t pdu_data_len)
 {
-    u_char	*global_data,		*sec_params;
-    size_t	 global_data_len,	 sec_params_len;
+    u_char	*global_data;
     u_char	 header_buf[SNMP_MAX_MSG_V3_HDRS];
-    size_t	 header_buf_len = SNMP_MAX_MSG_V3_HDRS, spdu_len;
+    size_t	 header_buf_len = SNMP_MAX_MSG_V3_HDRS;
     u_char	*cp = packet;
     int      result;
     size_t      tmp_len = *out_length;
@@ -2567,7 +2566,6 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
   struct variable_list *vpcache[VPCACHE_SIZE];
   struct variable_list *vp, *tmpvp;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
-  size_t length;
   u_char *startcp = cp;
   int i, wrapped=0, notdone, final;
 
