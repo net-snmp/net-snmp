@@ -97,7 +97,6 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
 {
     netsnmp_baby_steps_modes *bs_modes;
     int save_mode, i, rc = SNMP_ERR_NOERROR;
-    u_int    mode_flag;
     u_short *mode_map_ptr;
     
     DEBUGMSGTL(("baby_steps", "Got request, mode %s\n",
@@ -221,31 +220,42 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         /*
          * skip modes the handler didn't register for
          */
-        mode_flag = netsnmp_baby_step_mode2flag( mode_map_ptr[i] );
-        if(!(mode_flag & bs_modes->registered)) {
-            DEBUGMSGTL(("baby_steps",
-                        "   skipping mode (not registered)\n"));
-            continue;
+        if (BSTEP_USE_ORIGINAL != mode_map_ptr[i]) {
+            u_int    mode_flag;
+
+            /*
+             * skip undo commit if commit wasn't hit
+             */
+            if((MODE_SET_UNDO == save_mode) &&
+               (MODE_BSTEP_UNDO_COMMIT == mode_map_ptr[i]) &&
+               !(BABY_STEP_COMMIT & bs_modes->completed)) {
+                DEBUGMSGTL(("baby_steps",
+                            "   skipping commit undo (no previous commit)\n"));
+                continue;
+            }
+
+            reqinfo->mode = mode_map_ptr[i];
+            mode_flag = netsnmp_baby_step_mode2flag( mode_map_ptr[i] );
+            if((mode_flag & bs_modes->registered))
+                bs_modes->completed |= mode_flag;
+            else {
+                DEBUGMSGTL(("baby_steps",
+                            "   skipping mode (not registered)\n"));
+                continue;
+            }
+
+        
+        }
+        else {
+            reqinfo->mode = save_mode;
         }
 
+#ifdef BABY_STEPS_NEXT_MODE
         /*
-         * skip undo commit if commit wasn't hit
+         * I can't remember why I wanted the next mode in the request,
+         * but it's not used anywhere, so don't use this code. saved,
+         * in case I remember why I thought needed it. - rstory 040911
          */
-        if((MODE_SET_UNDO == save_mode) &&
-           (MODE_BSTEP_UNDO_COMMIT== mode_map_ptr[i]) &&
-           !(BABY_STEP_COMMIT & bs_modes->completed)) {
-            DEBUGMSGTL(("baby_steps",
-                        "   skipping commit undo (no previous commit)\n"));
-            continue;
-        }
-        
-        /*
-         * call handlers for baby step
-         */
-        if(BSTEP_USE_ORIGINAL == mode_map_ptr[i])
-            reqinfo->mode = save_mode;
-        else
-            reqinfo->mode = mode_map_ptr[i];
         if((BABY_STEPS_PER_MODE_MAX - 1) == i)
             reqinfo->next_mode_ok = BABY_STEP_NONE;
         else {
@@ -254,7 +264,11 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
             else
                 reqinfo->next_mode_ok = mode_map_ptr[i+1];
         }
-        bs_modes->completed |= mode_flag;
+#endif
+
+        /*
+         * call handlers for baby step
+         */
         rc = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                        requests);
 
@@ -315,7 +329,7 @@ netsnmp_baby_steps_access_multiplexer_get(netsnmp_baby_steps_access_methods *am)
 {
     netsnmp_mib_handler *mh;
 
-    mh = netsnmp_create_handler("baby_steps_access_multiplexer",
+    mh = netsnmp_create_handler("baby_steps_mux",
                                 _baby_steps_access_multiplexer);
     if(!mh)
         return NULL;
@@ -342,7 +356,7 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
     netsnmp_assert((handler!=NULL) && (reginfo!=NULL) && (reqinfo!=NULL) &&
                    (requests!=NULL));
 
-    DEBUGMSGT(("baby_steps_access_multiplexer", "mode %s\n",
+    DEBUGMSGT(("baby_steps_mux", "mode %s\n",
                se_find_label_in_slist("babystep_mode",reqinfo->mode)));
 
     access_methods = (netsnmp_baby_steps_access_methods *)handler->myvoid;
