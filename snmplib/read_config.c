@@ -446,8 +446,16 @@ read_configs (void)
     read_config_files(NORMAL_CONFIG);
 
  /* do this even when the normal above wasn't done */
-  if (optional_config && type)
-    read_config_with_type(optional_config, type);
+  if (optional_config && type) {
+      struct stat statbuf;
+      if (stat(optional_config, &statbuf)) {
+          DEBUGMSGTL(("read_config","Optional File \"%s\" does not exist.\n",
+                      optional_config));
+          snmp_log_perror(optional_config);
+      } else {
+          read_config_with_type(optional_config, type);
+      }
+  }
 
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
