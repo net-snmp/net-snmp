@@ -268,6 +268,18 @@ snmp_perror(prog_string)
   fprintf(stderr,"%s: %s\n",prog_string, snmp_api_errstring(snmp_errno));
 }
 
+void
+snmp_set_detail(string)
+  char *string;
+{
+  if (snmp_detail != NULL) {
+    free(snmp_detail);
+    snmp_detail = NULL;
+  }
+  if (string != NULL)
+    snmp_detail = strdup(string);
+}
+
 char *
 snmp_api_errstring(snmp_errnumber)
     int	snmp_errnumber;
@@ -404,11 +416,11 @@ snmp_open(session)
     /* Set up connections */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd < 0){
-	snmp_detail = strerror(errno);
+	snmp_set_detail(strerror(errno));
 	snmp_errno = SNMPERR_NO_SOCKET;
 	if (!snmp_close(session)){
 	    snmp_errno = SNMPERR_ABORT;
-	    snmp_detail = api_errors[-SNMPERR_NO_SOCKET];
+	    snmp_set_detail(api_errors[-SNMPERR_NO_SOCKET]);
 	}
 	return 0;
     }
@@ -420,10 +432,10 @@ snmp_open(session)
 	    hp = gethostbyname(session->peername);
 	    if (hp == NULL){
 		snmp_errno = SNMPERR_BAD_ADDRESS;
-		snmp_detail = session->peername;
+		snmp_set_detail(session->peername);
 		if (!snmp_close(session)){
 		    snmp_errno = SNMPERR_ABORT;
-		    snmp_detail = api_errors[-SNMPERR_BAD_ADDRESS];
+		    snmp_set_detail(api_errors[-SNMPERR_BAD_ADDRESS]);
 		}
 		return 0;
 	    } else {
@@ -448,11 +460,11 @@ snmp_open(session)
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(session->local_port);
     if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-	snmp_detail = strerror(errno);
+	snmp_set_detail(strerror(errno));
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	if (!snmp_close(session)){
 	    snmp_errno = SNMPERR_ABORT;
-	    snmp_detail = api_errors[-SNMPERR_BAD_LOCPORT];
+	    snmp_set_detail(api_errors[-SNMPERR_BAD_LOCPORT]);
 	}
 	return 0;
     }
@@ -1373,7 +1385,7 @@ snmp_read(fdset)
 	    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 			      (struct sockaddr *)&from, &fromlength);
 	    if (length == -1) {
-		snmp_detail = strerror(errno);
+		snmp_set_detail(strerror(errno));
 		continue;
 	    }
 	    if (snmp_dump_packet){
@@ -1609,7 +1621,7 @@ snmp_timeout __P((void))
 		    if (sendto(isp->sd, (char *)packet, length, 0,
 			       (struct sockaddr *)&rp->pdu->address,
 			       sizeof(rp->pdu->address)) < 0){
-			snmp_detail = strerror(errno);
+			snmp_set_detail(strerror(errno));
 		    }
 		    tv = now;
 		    rp->time = tv;

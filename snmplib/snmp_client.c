@@ -380,7 +380,7 @@ snmp_synch_response(ss, pdu, response)
 		if (errno == EINTR){
 		    continue;
 		} else {
-		    snmp_detail = strerror(errno);
+		    snmp_set_detail(strerror(errno));
 		    snmp_errno = SNMPERR_GENERR;
 		}
 	    /* FALLTHRU */
@@ -456,7 +456,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     
     if (!read_objid(PARTY_MIB_BASE, dst, dstlen)){
 	snmp_errno = SNMPERR_GENERR;
-	snmp_detail = PARTY_MIB_BASE;
+	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }
     adp = (unsigned char *)&destaddr;
@@ -500,7 +500,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 
     if (!read_objid(PARTY_MIB_BASE, src, srclen)){
 	snmp_errno = SNMPERR_GENERR;
-	snmp_detail = PARTY_MIB_BASE;
+	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }
     src[9] =  adp[0];
@@ -539,7 +539,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 
     if (!read_objid(PARTY_MIB_BASE, context, contextlen)){
 	snmp_errno = SNMPERR_GENERR;
-	snmp_detail = PARTY_MIB_BASE;
+	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
     }
     context[9] =  adp[0];

@@ -72,10 +72,10 @@ static void error_exit(str, linenumber, filename)
     int linenumber;
     char *filename;
 {
-    snmp_errno = SNMPERR_BAD_PARTY;
-    if (!snmp_detail)
-      snmp_detail = malloc(SNMP_DETAIL_SIZE);
-    sprintf(snmp_detail, "%s on line %d of %s", str, linenumber, filename);
+  char tmpbuf[1024];
+  snmp_errno = SNMPERR_BAD_PARTY;
+  sprintf(tmpbuf, "%s on line %d of %s", str, linenumber, filename);
+  snmp_set_detail(tmpbuf);
 }
 
 int
