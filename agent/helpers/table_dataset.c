@@ -1213,11 +1213,18 @@ netsnmp_table_set_add_indexes(va_alist)
 }
 
 int
-netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
+netsnmp_table_dataset_num_rows(netsnmp_table_data_set *table)
 {
     if (!table)
         return 0;
     return netsnmp_table_data_num_rows(table->table);
+}
+
+     /* Confusingly named, and not declared properly */
+int
+netsnmp_table_set_num_rows(netsnmp_table_data_set *table)
+{
+ return netsnmp_table_set_num_rows(table);
 }
 
 /*

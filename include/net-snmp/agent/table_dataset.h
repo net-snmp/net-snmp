@@ -1,5 +1,5 @@
 /*
- * table_iterator.h 
+ * table_data_set.h 
  */
 #ifndef _TABLE_DATA_SET_HANDLER_H_
 #define _TABLE_DATA_SET_HANDLER_H_
@@ -150,7 +150,7 @@ extern          "C" {
                                                      *table_set,
                                                      char
                                                      *registration_name);
-    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
+    int netsnmp_table_dataset_num_rows(netsnmp_table_data_set *table);
 
 #if HAVE_STDARG_H
     void           
