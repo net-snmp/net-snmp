@@ -7,8 +7,9 @@ SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
 is the configuration file which defines how the Net-SNMP SNMP agent
 operates.  These files may contain any of the directives found in the
 .B DIRECTIVES
-section below.  This file is not required for the agent to
-operate and respond to requests.
+section below.  If this file is not found (or does not contain any
+access control directives), the agent will run but will not respond
+to any requests.
 .SH PLEASE READ FIRST
 First, make sure you have read the
 .I snmp_config(5) 
