@@ -11,7 +11,7 @@
 /*
  * ${context}_allocate_data
  *
- * Purpose: create new ${table}_data.
+ * Purpose: create new ${context}_data.
  */
 ${context}_data *
 ${context}_allocate_data(void)
@@ -28,7 +28,7 @@ ${context}_allocate_data(void)
 
     if(NULL == rtn) {
         snmp_log(LOG_ERR, "unable to malloc memory for new "
-                 "${table}_data.\n");
+                 "${context}_data.\n");
     }
 
     return rtn;
@@ -40,7 +40,7 @@ ${context}_allocate_data(void)
  * Purpose: release data data.
  */
 void
-${context}_release_data(${table}_data *data)
+${context}_release_data(${context}_data *data)
 {
     DEBUGMSGTL(("verbose:${context}_release_data","called\n"));
 
