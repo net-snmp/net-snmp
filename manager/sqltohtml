@@ -36,41 +36,27 @@ $remuser = "guest" if (!defined($remuser) || $remuser eq "");
 ( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
+$query = new CGI;
+
 # print header
 print "Content-type:  text/html\n\n<body bgcolor=\"#ffffff\"><h3>user: $remuser</h3>\n";
-
-$query = new CGI;
+my $tq = $query->self_url;
+$tq =~ s/\?.*//;
+print "<a href=\"$tq\">[TOP]</a>\n";
 
 if ($dispinfo = $query->param('displayinfo')) {
     makemibtable($dispinfo);
-    $dbh->disconnect();
-    exit;
+    Exit(0);
 }
 
 if ($disptable = $query->param('displaytable')) {
     displaytable($disptable);
-    exit;
+    Exit(0);
 }
 
 $host = $query->param('host');
 $group = $query->param('group');
 
-if (defined($group) && defined($newhost = $query->param('newhost'))) {
-    if (isadmin()) {
-	if ($dbh->do("select * from hostgroups where host = '$newhost' and groupname = '$group'") eq "0E0") {
-	    $dbh->do("insert into hostgroups(host,groupname) values('$newhost','$group')") ;
-	} else {
-	    print "<b>ERROR: host $newhost already in $group</b>\n";
-	}
-	$query->delete('newhost');
-    }
-}
-
-if (defined($group) && defined($query->param('setupgroup')) && 
-    isadmin()) {
-    setupgroup($group);
-    exit;
-}
 
 if (!defined($group)) {
     @groups = getgroupsforuser($remuser);
@@ -88,14 +74,51 @@ if (!defined($group)) {
 		     );
 #	showgeneric("group",@groups);
 	$dbh->disconnect();
-	exit;
+	Exit(0);
     } else {
 	$group = $groups[0];
     }
 }
 
+if (!isuser()) {
+    print "Unauthorized access to that group\n";
+    Exit(0);
+}    
+
+if (defined($newhost = $query->param('newhost'))) {
+    if (isadmin()) {
+	if ($dbh->do("select * from hostgroups where host = '$newhost' and groupname = '$group'") eq "0E0") {
+	    $dbh->do("insert into hostgroups(host,groupname) values('$newhost','$group')") ;
+	} else {
+	    print "<b>ERROR: host $newhost already in $group</b>\n";
+	}
+	$query->delete('newhost');
+    }
+}
+
+if (defined($query->param('setupgroup')) && 
+    isadmin()) {
+    setupgroup($group);
+    Exit(0);
+}
+
+if (defined($query->param('userprefs'))) {
+    setupuserpreferences($group);
+    Exit(0);
+}
+
+if (defined($query->param('setupgroupsubmit')) && 
+    isadmin()) {
+    setupgroupsubmit($group);
+    $query->delete_all();
+    $query->param(-name => 'group', -value => $group);
+    print "<a href=\"" . $query->self_url . "\">Entries submitted</a>";
+    Exit(0);
+}
+
 if (!defined($host)) {
     displaytable('hostgroups', 
+		 '-notitle',0,
 		 '-clauses', "where (groupname = '$group')",
 		 '-select', 'distinct host',
 		 '-datalink', sub { my $q = $query->self_url;
@@ -142,7 +165,7 @@ sub showhost {
     print "<h3>host: $host</h3>\n";
 
     # get a list of tables we want to display
-    $cmd = "SELECT * FROM hosttables where (host = '$host')";
+    $cmd = "SELECT * FROM hosttables where (host = '$host' and groupname = '$group')";
     print " $cmd\n" if ($verbose);
     ( $tblh = $dbh->prepare( $cmd ) )
 	or die "\nnot ok: $DBI::errstr\n";
@@ -255,15 +278,15 @@ sub displaytable {
 	if (defined($beginhook)) {
 	    &$beginhook($tablename, $data);
 	}
-	print "<td>";
 	foreach $key (@keys) {
+	    print "<td>";
 	    print "<a href=\"$ref\">" if (defined($datalink) && 
 					  defined($ref = &$datalink($key, $data->{$key})));
 	    print $data->{$key};
 	    print "</a>" if (defined($ref));
-	    print "</td><td>";
+	    print "</td>";
 	}
-	print "</td></tr>\n";
+	print "</tr>\n";
     }
     print "</table>\n";
 }
@@ -282,7 +305,7 @@ sub makemibtable {
 	if (ref($$mib{$i}) eq "HASH") {
 	    print "<table $tableparms><tr><td>\n";
 	    foreach $j (sort { $$mib{$i}{$a} <=> $$mib{$i}{$b} } keys(%{$$mib{$i}})) {
-		print "<tr><td>$$mib{$i}{$j}</td><td>$j</td></tr>";
+ 		print "<tr><td>$$mib{$i}{$j}</td><td>$j</td></tr>";
 	    }
 	    print "</table>\n";
 	} else {
@@ -346,6 +369,12 @@ sub isadmin {
     return 0;
 }
 
+sub isuser {
+    return 0 if (!defined($remuser) || !defined($group));
+    return 1 if ($dbh->do("select * from usergroups where user = '$remuser' and groupname = '$group'") ne "0E0");
+    return 0;
+}
+
 sub displayconfigarray {
     my $hosts = shift;
     my $names = shift;
@@ -361,13 +390,19 @@ sub displayconfigarray {
     print "<tr><td></td>";
     my ($i, $j);
     foreach $j (@$names) {
-	print "<td>${$j}[0]</td>";
+	my $nj = $j;
+	$nj = $j->[0] if ($config{'-arrayrefs'} || $config{'-arrayref2'});
+	print "<td>$nj</td>";
     }
     foreach $i (@$hosts) {
-	print "<tr><td>${$i}[0]</td>";
+	my $ni = $i;
+	$ni = $i->[0] if ($config{'-arrayrefs'} || $config{'-arrayref1'});
+	print "<tr><td>$ni</td>";
 	foreach $j (@$names) {
-	    my $checked = "checked" if (defined($cmd) && $cmd->execute(${$i}[0],${$j}[0]) ne "0E0");
-	    print "<td><input type=checkbox $checked value=y name=$config{prefix}${$i}[0]${$j}[0]></td>";
+	    my $nj = $j;
+	    $nj = $j->[0] if ($config{'-arrayrefs'} || $config{'-arrayref2'});
+	    my $checked = "checked" if (defined($cmd) && $cmd->execute($ni,$nj) ne "0E0");
+	    print "<td><input type=checkbox $checked value=y name=" . $config{prefix} . $ni . $nj . "></td>\n";
 	}
 	print "</tr>\n";
     }	
@@ -384,31 +419,93 @@ sub setupgroup {
     print "<form method=\"post\" action=\"" . $query->self_url . "\">\n";
     print "<input type=hidden text=\"setupgroupsubmit\" value=\"y\">";
     displayconfigarray($hosts, $names, 
-		       -check, "select * from hosttables where (host = ? and tablename = ?)");
+		       -arrayrefs, 1,
+		       -check, "select * from hosttables where (host = ? and tablename = ? and groupname = '$group')");
     print "<input type=hidden name=group value=\"$group\">\n";
-    print "<input type=submit value=submit name=\"setupsubmit\">\n";
+    print "<input type=submit value=submit name=\"setupgroupsubmit\">\n";
     print "</form>";
+}
+
+sub getarrays {
+    my $table = shift;
+    my %config = @_;
+    my $selectwhat = $config{'-select'} || "*";
+    my $handle;
+    
+    my $cmd = "SELECT $selectwhat FROM $table $config{-clauses}";
+    print " $cmd\n" if ($verbose);
+    ( $handle = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $handle->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+    return $handle->fetchall_arrayref;
 }
 
 sub gethostandgroups {
     my $group = shift;
     my ($tbnms);
 
-    my $cmd = "SELECT distinct tablename FROM hosttables";
-    print " $cmd\n" if ($verbose);
-    ( $tbnms = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $tbnms->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
-    my $names = $tbnms->fetchall_arrayref;
-    
-    $cmd = "SELECT distinct host FROM hostgroups where groupname = '$group'";
-    print " $cmd\n" if ($verbose);
-    ( $tbnms = $dbh->prepare( $cmd ) )
-	or die "\nnot ok: $DBI::errstr\n";
-    ( $tbnms->execute )
-	or print( "\tnot ok: $DBI::errstr\n" );
+    my $names = getarrays('hosttables', 
+			  "-select", 'distinct tablename',
+			  "-clauses", "where groupname = '$group'");
 
-    my $hosts = $tbnms->fetchall_arrayref;
+    my $hosts = getarrays('hostgroups', 
+			  "-select", 'distinct host',
+			  "-clauses", "where groupname = '$group'");
+    
     return ($hosts, $names);
+}
+
+sub settable {
+    my $table = shift;
+    my $keys = shift;
+    my %config = @_;
+    if (defined($config{'-deleteclause'})) {
+	$dbh->do("delete from $table $config{-deleteclause}");
+    }
+
+}
+
+sub setupgroupsubmit {
+    my $group = shift;
+    
+    my ($hosts, $names) = gethostandgroups($group);
+    foreach $i (@$hosts) {
+	$dbh->do("delete from hosttables where host = '${$i}[0]' and groupname = '$group'");
+    }
+    my $rep = $dbh->prepare("insert into hosttables(host,tablename,groupname) values(?,?,$group)");
+
+    foreach $i (@$hosts) {
+	foreach $j (@$names) {
+	    if ($query->param("${$i}[0]" . "${$j}[0]")) {
+		$rep->execute("${$i}[0]", "${$j}[0]");
+            }
+	}
+    }
+    
+}
+
+sub Exit {
+    $dbh->disconnect() if (defined($dbh));
+    exit shift;
+}
+
+sub setupuserpreferences {
+    my $tables = getarrays('hosttables', 
+			   "-select", 'distinct tablename',
+			   "-clauses", "where groupname = '$group'");
+
+    print "<form method=\"post\" action=\"" . $query->self_url . "\">\n";
+
+    my ($i, $j);
+    foreach $i (@$tables) {
+	my $sth = $dbh->prepare("select * from ${$i}[0] where 1 = 0");
+	$sth->execute();
+	displayconfigarray([${$i}[0]], $sth->{NAME},
+			   -check, "select * from userprefs where (columnname = ? and tablename = ? and user = '$remuser' and groupname = '$group' and displayit = 'Y')");
+    print "<br>\n";
+    }
+    print "<input type=hidden name=group value=\"$group\">\n";
+    print "<input type=submit value=submit name=\"setupuserpreferencessubmit\">\n";
+    print "</form>";
 }
