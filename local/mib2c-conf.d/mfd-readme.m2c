@@ -355,7 +355,7 @@ File: ${name}_enums.h
 
 File: ${name}_data_get.c
 ------------------------------------------------------------------------
-@    if $m2c_data_allocate eq "yes" && $m2c_data_context ne "generated"@
+@    if ("$m2c_data_allocate" eq "yes") && ("$m2c_data_context" ne "generated")@
   Allocate data context
   ---------------------
   TODO : XXXXXXXXXXX
