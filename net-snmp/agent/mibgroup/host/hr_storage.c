@@ -242,7 +242,7 @@ int storage_type_len = sizeof(storage_type_id)/sizeof(storage_type_id[0]);
 	 *
 	 *********************/
 
-static char *hrs_descr[] = {
+static const char *hrs_descr[] = {
 	NULL,
 	"Real Memory",		/* HRS_TYPE_MEM */
 	"Swap Space",		/* HRS_TYPE_SWAP */

@@ -264,11 +264,11 @@ int subtree_old_size (void) {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
 }
 
-/* register_mib(char *moduleName, struct variable *, int varsize,
+/* register_mib(const char *moduleName, struct variable *, int varsize,
                 int numvars, oid mibloc, int mibloclen)
  */
 void
-register_mib(char *moduleName,
+register_mib(const char *moduleName,
 	     struct variable *var,
 	     int varsize,
 	     int numvars,

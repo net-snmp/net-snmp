@@ -362,7 +362,7 @@ Init_HR_FileSys (void)
 #endif
 }
 
-char *HRFS_ignores[] = {
+const char *HRFS_ignores[] = {
 #ifdef MNTTYPE_IGNORE
 	MNTTYPE_IGNORE,
 #endif

@@ -67,12 +67,12 @@
 static oid noProxy[] = {1, 3, 6, 1, 2, 1, 20, 1, 3, 1};
 #endif
 
-static void error_exit (char *, int, char *);
+static void error_exit (const char *, int, const char *);
 int update_clock (char *, int, u_long);
 
-static void error_exit(char *str,
+static void error_exit(const char *str,
 		       int linenumber,
-		       char *filename)
+		       const char *filename)
 {
   char tmpbuf[SPRINT_MAX_LEN];
   snmp_errno = SNMPERR_BAD_PARTY;

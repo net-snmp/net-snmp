@@ -66,7 +66,7 @@
 typedef	void (*PFV) (void);
 typedef	int  (*PFI) (int);
 typedef	int  (*PFIV) (void);
-typedef	char* (*PFS) (int);
+typedef	const char* (*PFS) (int);
 typedef	oid* (*PFO) (int, int *);
 
 extern PFV init_device[];	/* Routines for stepping through devices */

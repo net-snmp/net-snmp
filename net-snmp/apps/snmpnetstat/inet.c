@@ -201,30 +201,30 @@ static oid oid_tcpconntable[] = {1, 3, 6, 1, 2, 1, 6, 13, 1};
 static oid oid_udptable[] = {1, 3, 6, 1, 2, 1, 7, 5, 1};
 #define UDP_ENTRY 9
 
-char *tcpstates[] = {
-    (char*)"",
-    (char*)"CLOSED",
-    (char*)"LISTEN",
-    (char*)"SYNSENT",
-    (char*)"SYNRECEIVED",
-    (char*)"ESTABLISHED",
-    (char*)"FINWAIT1",
-    (char*)"FINWAIT2",
-    (char*)"CLOSEWAIT",
-    (char*)"LASTACK",
-    (char*)"CLOSING",
-    (char*)"TIMEWAIT"
+const char *tcpstates[] = {
+    "",
+    "CLOSED",
+    "LISTEN",
+    "SYNSENT",
+    "SYNRECEIVED",
+    "ESTABLISHED",
+    "FINWAIT1",
+    "FINWAIT2",
+    "CLOSEWAIT",
+    "LASTACK",
+    "CLOSING",
+    "TIMEWAIT"
 };
 #define TCP_NSTATES 11
 
-int validUShortAssign( unsigned short *, int, char *);
+int validUShortAssign( unsigned short *, int, const char *);
 
 /*
  * Print a summary of connections related to an Internet
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
 void
-protopr (char *name)
+protopr (const char *name)
 {
     struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
     struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
@@ -413,7 +413,7 @@ protopr (char *name)
 }
 
 int
-validUShortAssign( unsigned short * pushort, int ival, char * errstr)
+validUShortAssign( unsigned short * pushort, int ival, const char * errstr)
 {
     u_long ulval = (u_long)ival;
     if ((ival < 1) || (ival > 65535))
@@ -596,7 +596,7 @@ icmp_stats(void)
 void
 inetprint(struct in_addr *in,
 	  u_short port,
-	  char *proto)
+	  const char *proto)
 {
 	struct servent *sp = 0;
 	char line[80], *cp;

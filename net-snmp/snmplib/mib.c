@@ -74,32 +74,32 @@ SOFTWARE.
 #include "read_config.h"
 #include "snmp_debug.h"
 
-static void sprint_by_type (char *, struct variable_list *, struct enum_list *, char *, char *);
-static int parse_subtree (struct tree *, char *, oid *, int *);
+static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static int parse_subtree (struct tree *, const char *, oid *, int *);
 static char *uptimeString (u_long, char *);
 static void sprint_hexstring (char *, u_char *, int);
 static void sprint_asciistring (char *, u_char *, int);
-static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_opaque (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_object_identifier (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_timeticks (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_hinted_integer (char *, long, char *, char *);
-static void sprint_integer (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_uinteger (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_gauge (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_counter (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_networkaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_ipaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_null (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_bitstring (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_counter64 (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_unknowntype (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_badtype (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_opaque (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_object_identifier (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_timeticks (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_hinted_integer (char *, long, const char *, const char *);
+static void sprint_integer (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_uinteger (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_gauge (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_counter (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_networkaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_ipaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_null (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_bitstring (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_counter64 (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_unknowntype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_badtype (char *, struct variable_list *, struct enum_list *, const char *, const char *);
   
 #ifdef OPAQUE_SPECIAL_TYPES
-static void sprint_float (char *, struct variable_list *, struct enum_list *, char *, char *);
-static void sprint_double (char *, struct variable_list *, struct enum_list *, char *, char *);
+static void sprint_float (char *, struct variable_list *, struct enum_list *, const char *, const char *);
+static void sprint_double (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 #endif
 void print_tree_node (FILE *f, struct tree *tp);
 
@@ -113,7 +113,7 @@ static char Standard_Prefix[] = ".1.3.6.1.2.1";
 /* Set default here as some uses of read_objid require valid pointer. */
 static char *Prefix = &Standard_Prefix[0];
 typedef struct _PrefixList {
-	char * str;
+	const char *str;
 	int len;
 } *PrefixListPtr, PrefixList;
 
@@ -125,13 +125,11 @@ typedef struct _PrefixList {
  */
 PrefixList mib_prefixes[] = {
 	{ &Standard_Prefix[0] }, /* placeholder for Prefix data */
-	{ (char*)".iso.org.dod.internet.mgmt.mib-2" },
-	{ (char*)".iso.org.dod.internet.experimental" },
-	{ (char*)".iso.org.dod.internet.private" },
-	{ (char*)".iso.org.dod.internet.experimental" },
-	{ (char*)".iso.org.dod.internet.snmpParties" },
-	{ (char*)".iso.org.dod.internet.experimental" },
-	{ (char*)".iso.org.dod.internet.snmpSecrets" },
+	{ ".iso.org.dod.internet.mgmt.mib-2" },
+	{ ".iso.org.dod.internet.experimental" },
+	{ ".iso.org.dod.internet.private" },
+	{ ".iso.org.dod.internet.snmpParties" },
+	{ ".iso.org.dod.internet.snmpSecrets" },
 	{ NULL, 0 }  /* end of list */
 };
 
@@ -265,12 +263,12 @@ static void
 sprint_octet_string(char *buf,
 		    struct variable_list *var,
 		    struct enum_list *enums,
-		    char *hint,
-		    char *units)
+		    const char *hint,
+		    const char *units)
 {
     int hex, x;
     u_char *cp;
-    char *saved_hint = hint;
+    const char *saved_hint = hint;
     char *saved_buf = buf;
 
     if (var->type != ASN_OCTET_STR){
@@ -382,8 +380,8 @@ static void
 sprint_float(char *buf,
 	     struct variable_list *var,
 	     struct enum_list *enums,
-	     char *hint,
-	     char *units)
+	     const char *hint,
+	     const char *units)
 {
   if (var->type != ASN_OPAQUE_FLOAT) {
 	sprintf(buf, "Wrong Type (should be Float): ");
@@ -404,8 +402,8 @@ static void
 sprint_double(char *buf,
 	      struct variable_list *var,
 	      struct enum_list *enums,
-	      char *hint,
-	      char *units)
+	      const char *hint,
+	      const char *units)
 {
   if (var->type != ASN_OPAQUE_DOUBLE) {
 	sprintf(buf, "Wrong Type (should be Double): ");
@@ -428,8 +426,8 @@ static void
 sprint_opaque(char *buf,
 	      struct variable_list *var,
 	      struct enum_list *enums,
-	      char *hint,
-	      char *units)
+	      const char *hint,
+	      const char *units)
 {
 
     if (var->type != ASN_OPAQUE
@@ -480,8 +478,8 @@ static void
 sprint_object_identifier(char *buf,
 			 struct variable_list *var,
 			 struct enum_list *enums,
-			 char *hint,
-			 char *units)
+			 const char *hint,
+			 const char *units)
 {
     if (var->type != ASN_OBJECT_ID){
 	sprintf(buf, "Wrong Type (should be OBJECT IDENTIFIER): ");
@@ -502,8 +500,8 @@ static void
 sprint_timeticks(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
-		 char *hint,
-		 char *units)
+		 const char *hint,
+		 const char *units)
 {
     char timebuf[32];
 
@@ -525,8 +523,8 @@ sprint_timeticks(char *buf,
 static void
 sprint_hinted_integer (char *buf,
 		       long val,
-		       char *hint,
-		       char *units)
+		       const char *hint,
+		       const char *units)
 {
     char code;
     int shift, len;
@@ -570,8 +568,8 @@ static void
 sprint_integer(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
-	       char *hint,
-	       char *units)
+	       const char *hint,
+	       const char *units)
 {
     char    *enum_string = NULL;
 
@@ -602,8 +600,8 @@ static void
 sprint_uinteger(char *buf,
 		struct variable_list *var,
 		struct enum_list *enums,
-		char *hint,
-		char *units)
+		const char *hint,
+		const char *units)
 {
     char    *enum_string = NULL;
 
@@ -632,8 +630,8 @@ static void
 sprint_gauge(char *buf,
 	     struct variable_list *var,
 	     struct enum_list *enums,
-	     char *hint,
-	     char *units)
+	     const char *hint,
+	     const char *units)
 {
     if (var->type != ASN_GAUGE){
 	sprintf(buf, "Wrong Type (should be Gauge): ");
@@ -653,8 +651,8 @@ static void
 sprint_counter(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
-	       char *hint,
-	       char *units)
+	       const char *hint,
+	       const char *units)
 {
     if (var->type != ASN_COUNTER){
 	sprintf(buf, "Wrong Type (should be Counter): ");
@@ -671,8 +669,8 @@ static void
 sprint_networkaddress(char *buf,
 		      struct variable_list *var,
 		      struct enum_list *enums,
-		      char *hint,
-		      char *units)
+		      const char *hint,
+		      const char *units)
 {
     int x, len;
     u_char *cp;
@@ -695,8 +693,8 @@ static void
 sprint_ipaddress(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
-		 char *hint,
-		 char *units)
+		 const char *hint,
+		 const char *units)
 {
     u_char *ip;
 
@@ -717,8 +715,8 @@ static void
 sprint_null(char *buf,
 	    struct variable_list *var,
 	    struct enum_list *enums,
-	    char *hint,
-	    char *units)
+	    const char *hint,
+	    const char *units)
 {
     if (var->type != ASN_NULL){
 	sprintf(buf, "Wrong Type (should be NULL): ");
@@ -733,8 +731,8 @@ static void
 sprint_bitstring(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
-		 char *hint,
-		 char *units)
+		 const char *hint,
+		 const char *units)
 {
     int len, bit;
     u_char *cp;
@@ -787,8 +785,8 @@ static void
 sprint_nsapaddress(char *buf,
 		   struct variable_list *var,
 		   struct enum_list *enums,
-		   char *hint,
-		   char *units)
+		   const char *hint,
+		   const char *units)
 {
     if (var->type != ASN_NSAP){
 	sprintf(buf, "Wrong Type (should be NsapAddress): ");
@@ -807,8 +805,8 @@ static void
 sprint_counter64(char *buf,
 		 struct variable_list *var,
 		 struct enum_list *enums,
-		 char *hint,
-		 char *units)
+		 const char *hint,
+		 const char *units)
 {
     char a64buf[I64CHARSZ+1];
 
@@ -868,8 +866,8 @@ static void
 sprint_unknowntype(char *buf,
 		   struct variable_list *var,
 		   struct enum_list *enums,
-		   char *hint,
-		   char *units)
+		   const char *hint,
+		   const char *units)
 {
 /*    sprintf(buf, "Variable has bad type"); */
     sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -879,8 +877,8 @@ static void
 sprint_badtype(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
-	       char *hint,
-	       char *units)
+	       const char *hint,
+	       const char *units)
 {
     sprintf(buf, "Variable has bad type");
 }
@@ -889,8 +887,8 @@ static void
 sprint_by_type(char *buf,
 	       struct variable_list *var,
 	       struct enum_list *enums,
-	       char *hint,
-	       char *units)
+	       const char *hint,
+	       const char *units)
 {
     switch (var->type){
 	case ASN_INTEGER:
@@ -987,20 +985,20 @@ void
 register_mib_handlers (void) 
 {
     register_premib_handler("snmp","mibdirs",
-			    (void (*)(char *,char *))handle_mibdirs_conf,NULL,
+			    handle_mibdirs_conf, NULL,
 			    "[mib-dirs|+mib-dirs]");
     register_premib_handler("snmp","mibs",
-			    (void (*)(char *,char *))handle_mibs_conf,NULL,
+			    handle_mibs_conf,NULL,
 			    "[mib-tokens|+mib-tokens]");
     register_config_handler("snmp","mibfile",
-			    (void (*)(char *,char *))handle_mibfile_conf,NULL,
+			    handle_mibfile_conf, NULL,
 			    "mibfile-to-read");
 }
 
 void
 init_mib (void)
 {
-    char *prefix;
+    const char *prefix;
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
     
@@ -1189,7 +1187,7 @@ set_function(struct tree *subtree)
 	}
 }
 
-int read_objid(char *input,
+int read_objid(const char *input,
 	       oid *output,
 	       int *out_len)   /* number of subid's in "output" */
 {
@@ -1212,8 +1210,8 @@ int read_objid(char *input,
     }
 
     if (root == NULL){
-	fprintf(stderr, "Mib not initialized.  Exiting.\n");
-	exit(1);
+	snmp_errno = SNMPERR_NOMIB;
+	return 0;
     }
     if ((*out_len =
 	 parse_subtree(root, input, output, out_len)) == 0)
@@ -1226,7 +1224,7 @@ int read_objid(char *input,
 
 static int
 parse_subtree(struct tree *subtree,
-	      char *input,
+	      const char *input,
 	      oid *output,
 	      int *out_len)   /* number of subid's */
 {
@@ -1280,19 +1278,21 @@ parse_subtree(struct tree *subtree,
 	 * If we didn't find the entry, punt...
 	 */
 	if (tp == NULL) {
-	    fprintf(stderr, "sub-identifier not found: %s\n", buf);
+	    snmp_errno = SNMPERR_BAD_SUBID;
+	    snmp_set_detail(buf);
 	    return (0);
 	}
     }
 
 found:
     if(subid > (u_long)MAX_SUBID){
-	fprintf(stderr, "sub-identifier too large: %s\n", buf);
+	snmp_errno = SNMPERR_MAX_SUBID;
+	snmp_set_detail(buf);
 	return (0);
     }
 
     if ((*out_len)-- <= 0){
-	fprintf(stderr, "object identifier too long\n");
+	snmp_errno = SNMPERR_LONG_OID;
 	return (0);
     }
     *output++ = subid;
@@ -1345,7 +1345,7 @@ sprint_objid(char *buf,
     else if (!full_objid) {
 	PrefixListPtr pp = &mib_prefixes[0];
 	int ii, ilen, tlen;
-	char * testcp;
+	const char *testcp;
 	cp = tempbuf; tlen = strlen(tempbuf);
 	ii = 0;
 	while (pp->str) {
@@ -1568,49 +1568,75 @@ void
 print_tree_node(FILE *f,
 		struct tree *tp)
 {
-    char *cp;
+    const char *cp;
     char str[32];
     if (tp) {
 	switch (tp->type) {
-	case TYPE_OBJID:	cp = (char*)"OBJECT IDENTIFIER"; break;
-	case TYPE_OCTETSTR:	cp = (char*)"OCTET STRING"; break;
-	case TYPE_INTEGER:	cp = (char*)"INTEGER"; break;
-	case TYPE_NETADDR:	cp = (char*)"NetworkAddress"; break;
-	case TYPE_IPADDR:	cp = (char*)"IpAddress"; break;
-	case TYPE_COUNTER:	cp = (char*)"Counter"; break;
-	case TYPE_GAUGE:	cp = (char*)"Gauge"; break;
-	case TYPE_TIMETICKS:	cp = (char*)"TimeTicks"; break;
-	case TYPE_OPAQUE:	cp = (char*)"Opaque"; break;
-	case TYPE_NULL:		cp = (char*)"NULL"; break;
-	case TYPE_COUNTER64:	cp = (char*)"Counter64"; break;
-	case TYPE_BITSTRING:	cp = (char*)"BIT STRING"; break;
-	case TYPE_NSAPADDRESS:	cp = (char*)"NsapAddress"; break;
-	case TYPE_UINTEGER:	cp = (char*)"UInteger32"; break;
+	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
+	case TYPE_OCTETSTR:	cp = "OCTET STRING"; break;
+	case TYPE_INTEGER:	cp = "INTEGER"; break;
+	case TYPE_NETADDR:	cp = "NetworkAddress"; break;
+	case TYPE_IPADDR:	cp = "IpAddress"; break;
+	case TYPE_COUNTER:	cp = "Counter"; break;
+	case TYPE_GAUGE:	cp = "Gauge"; break;
+	case TYPE_TIMETICKS:	cp = "TimeTicks"; break;
+	case TYPE_OPAQUE:	cp = "Opaque"; break;
+	case TYPE_NULL:		cp = "NULL"; break;
+	case TYPE_COUNTER64:	cp = "Counter64"; break;
+	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
+	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
+	case TYPE_UINTEGER:	cp = "UInteger32"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"type_%d", tp->type); cp = str;
 	}
-	if (cp) fprintf(f, "SYNTAX\t%s\n", cp);
+	if (cp) fprintf(f, "SYNTAX\t%s", cp);
+	if (tp->ranges) {
+	    struct range_list *rp = tp->ranges;
+	    int first = 1;
+	    fprintf(f, " (");
+	    while (rp) {
+		if (first) first = 0;
+		else fprintf(f, " | ");
+		if (rp->low == rp->high) fprintf(f, "%d", rp->low);
+		else fprintf(f, "%d..%d", rp->low, rp->high);
+		rp = rp->next;
+	    }
+	    fprintf(f, ") ");
+	}
+	if (tp->enums) {
+	    struct enum_list *ep = tp->enums;
+	    int first = 1;
+	    fprintf(f," { ");
+	    while (ep) {
+		if (first) first = 0;
+		else fprintf(f, ", ");
+		fprintf(f, "%s(%d)", ep->label, ep->value);
+		ep = ep->next;
+	    }
+	    fprintf(f," } ");
+	}
+	if (cp) fprintf(f, "\n");
 	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
 	if (tp->units) fprintf(f, "UNITS\t\"%s\"\n", tp->units);
 	switch (tp->access) {
-	case MIB_ACCESS_READONLY:	cp = (char*)"read-only"; break;
-	case MIB_ACCESS_READWRITE:	cp = (char*)"read-write"; break;
-	case MIB_ACCESS_WRITEONLY:	cp = (char*)"write-only"; break;
-	case MIB_ACCESS_NOACCESS:	cp = (char*)"not-accessible"; break;
-	case MIB_ACCESS_NOTIFY:	cp = (char*)"accessible-for-notify"; break;
-	case MIB_ACCESS_CREATE:	cp = (char*)"read-create"; break;
-	case 0:			cp = NULL; break;
-	default:		sprintf(str,"access_%d", tp->access); cp = str;
+	case MIB_ACCESS_READONLY:	cp = "read-only"; break;
+	case MIB_ACCESS_READWRITE:	cp = "read-write"; break;
+	case MIB_ACCESS_WRITEONLY:	cp = "write-only"; break;
+	case MIB_ACCESS_NOACCESS:	cp = "not-accessible"; break;
+	case MIB_ACCESS_NOTIFY:		cp = "accessible-for-notify"; break;
+	case MIB_ACCESS_CREATE:		cp = "read-create"; break;
+	case 0:				cp = NULL; break;
+	default:			sprintf(str,"access_%d", tp->access); cp = str;
 	}
 	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
 	switch (tp->status) {
-	case MIB_STATUS_MANDATORY:	cp = (char*)"mandatory"; break;
-	case MIB_STATUS_OPTIONAL:	cp = (char*)"optional"; break;
-	case MIB_STATUS_OBSOLETE:	cp = (char*)"obsolete"; break;
-	case MIB_STATUS_DEPRECATED:	cp = (char*)"deprecated"; break;
-	case MIB_STATUS_CURRENT:	cp = (char*)"current"; break;
-	case 0:			cp = NULL; break;
-	default:		sprintf(str,"status_%d", tp->status); cp = str;
+	case MIB_STATUS_MANDATORY:	cp = "mandatory"; break;
+	case MIB_STATUS_OPTIONAL:	cp = "optional"; break;
+	case MIB_STATUS_OBSOLETE:	cp = "obsolete"; break;
+	case MIB_STATUS_DEPRECATED:	cp = "deprecated"; break;
+	case MIB_STATUS_CURRENT:	cp = "current"; break;
+	case 0:				cp = NULL; break;
+	default:			sprintf(str,"status_%d", tp->status); cp = str;
 	}
 	if (cp) fprintf(f, "STATUS\t%s\n", cp);
 	if (tp->description) fprintf(f, "DESCRIPTION\t\"%s\"\n", tp->description);
@@ -1620,8 +1646,8 @@ print_tree_node(FILE *f,
 }
 
 int
-get_module_node(char *name,
-		char *module,
+get_module_node(const char *name,
+		const char *module,
 		oid *objid,
 		int *objidlen)
 {
@@ -1709,7 +1735,7 @@ get_module_node(char *name,
 
 
 int
-get_node(char *name,
+get_node(const char *name,
 	 oid *objid,
 	 int *objidlen)
 {

@@ -9,7 +9,7 @@
 
 int getswap (int);
 extern FindVarMethod var_extensible_mem;
-extern void	init_memory (void);
+extern void	init_memory_freebsd2 (void);
 
 /* config file parsing routines */
 void memory_parse_config (char *, char *);

@@ -12,11 +12,11 @@ int tree_compare (const struct subtree *, const struct subtree *);
 void setup_tree (void);
 void load_subtree (struct subtree *);
 int is_parent (oid *, int, oid *);
-void snmpd_register_config_handler (char *,
-                                        void (*parser)(char *, char *),
-                                        void (*releaser) (void),
-                                       char *);
-void snmpd_unregister_config_handler (char *);
-void snmpd_store_config (char *);
+void snmpd_register_config_handler (const char *,
+                                    void (*parser)(char *, char *),
+                                    void (*releaser) (void),
+                                    const char *);
+void snmpd_unregister_config_handler (const char *);
+void snmpd_store_config (const char *);
 
 #endif /* _AGENT_READ_CONFIG_H */

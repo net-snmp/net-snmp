@@ -63,9 +63,9 @@ SOFTWARE.
 #include "mib.h"
 
 void
-xdump(u_char *cp,
+xdump(const u_char *cp,
       int length,
-      char *prefix)
+      const char *prefix)
 {
     int col, count;
 

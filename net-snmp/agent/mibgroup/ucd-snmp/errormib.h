@@ -8,8 +8,8 @@ void init_errormib(void);
 
 config_require(util_funcs)
 
-void setPerrorstatus (char *);
-void seterrorstatus (char *, int);
+void setPerrorstatus (const char *);
+void seterrorstatus (const char *, int);
 extern FindVarMethod var_extensible_errors;
 
 #include "mibdefs.h"

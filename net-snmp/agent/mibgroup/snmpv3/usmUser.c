@@ -663,8 +663,8 @@ write_usmUserAuthKeyChange(
   unsigned char          buf[SNMP_MAXBUF_SMALL];
   int                    buflen = SNMP_MAXBUF_SMALL;
 
-  char                  *fnAuthKey    = "write_usmUserAuthKeyChange",
-                        *fnOwnAuthKey = "write_usmUserOwnAuthKeyChange",
+  char                  fnAuthKey[]    = "write_usmUserAuthKeyChange",
+                        fnOwnAuthKey[] = "write_usmUserOwnAuthKeyChange",
                         *fname;
   
   if (name[USM_MIB_LENGTH-1] == 6)
@@ -782,8 +782,8 @@ write_usmUserPrivKeyChange(
   unsigned char          buf[SNMP_MAXBUF_SMALL];
   int                    buflen = SNMP_MAXBUF_SMALL;
 
-  char                  *fnPrivKey    = "write_usmUserPrivKeyChange",
-                        *fnOwnPrivKey = "write_usmUserOwnPrivKeyChange",
+  char                  fnPrivKey[]    = "write_usmUserPrivKeyChange",
+                        fnOwnPrivKey[] = "write_usmUserOwnPrivKeyChange",
                         *fname;
   
   if (name[USM_MIB_LENGTH-1] == 9)

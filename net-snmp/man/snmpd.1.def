@@ -28,6 +28,7 @@ Dumps the sent and received UDP packets to stderr or logfile.
 .TP 
 .B -q
 Print simpler output for easier automated parsing.
+.TP
 .B -D
 Turn on debugging output
 .TP
@@ -66,6 +67,10 @@ option.
 checks for the existence of and parses the following files:
 .RS
 .TP 6
+.B DATADIR/snmp/snmp.conf
+Common configuration for the agend and the application. See snmp.conf(5)
+for details.
+.TP
 .B DATADIR/snmp/snmpd.conf
 .TP
 .B DATADIR/snmp/snmpd.local.conf
@@ -118,6 +123,7 @@ DATADIR/snmp/acl.conf
 .SH SEE ALSO
 (in recommended reading order)
 .PP
+snmp.conf(5),
 snmpd.conf(5),
 party.conf(5),
 view.conf(5),

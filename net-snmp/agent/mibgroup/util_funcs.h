@@ -20,7 +20,7 @@ int header_simple_table (struct variable *, oid *, int *, int, int *, WriteMetho
 int header_generic (struct variable *,oid *, int *, int, int *, WriteMethod **);
 int checkmib (struct variable *, oid *, int *, int, int *, WriteMethod **write_method, int);
 char *find_field (char *, int);
-int parse_miboid (char *, oid *);
+int parse_miboid (const char *, oid *);
 void string_append_int (char *, int);
 void wait_on_exec (struct extensible *);
 

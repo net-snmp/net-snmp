@@ -68,7 +68,7 @@ unsigned char *var_extensible_version(struct variable *vp,
   time_t curtime;
   char c_oid[SPRINT_MAX_LEN];
 #ifdef CONFIGURE_OPTIONS
-  static char *config_opts = CONFIGURE_OPTIONS;
+  static char config_opts[] = CONFIGURE_OPTIONS;
 #endif
 
   if (snmp_get_do_debugging()) {

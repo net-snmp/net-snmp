@@ -732,7 +732,7 @@ var_ipAddrEntry(struct variable *vp,
 #if defined(linux) || defined(sunV3)
 	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifnet.ifu_broadaddr)->sin_addr.s_addr) & 1;
 #else
-          long_return = ntohl(((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr) & 1;
+	    long_return = ntohl(((struct sockaddr_in *) &lowin_ifaddr.ia_broadaddr)->sin_addr.s_addr) & 1;
 #endif
 	    return(u_char *) &long_return;	   
 	case IPADREASMMAX:
@@ -1192,6 +1192,7 @@ var_ip(struct variable *vp,
 	default:
 		ERROR_MSG("");
 	}
+	return NULL;
 }
 
 /*

@@ -288,8 +288,8 @@ void vacm_destroyAllGroupEntries (void)
 }
 
 struct vacm_accessEntry *
-vacm_getAccessEntry(char *groupName, 
-		    char *contextPrefix,
+vacm_getAccessEntry(const char *groupName, 
+		    const char *contextPrefix,
 		    int securityModel, 
 		    int securityLevel)
 {
