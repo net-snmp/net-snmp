@@ -29,11 +29,37 @@ void            release_cached_resources(unsigned int regNo,
  *  (according to the timeout for that particular cache) and calls the
  *  registered "load_cache" routine if necessary.
  *  The lower handlers can then work with this local cached data.
+ *
+ *  To minimze resource use by the agent, a periodic callback checks for
+ *  expired caches, and will call the free_cache function for any expired
+ *  cache.
+ *
+ *  The load_cache route should return a negative number if the cache
+ *  was not successfully loaded. 0 or any positive number indicates successs.
+ *
+ *
+ *  Several flags can be set to affect the operations on the cache.
+ *
+ *  If NETSNMP_CACHE_DONT_INVALIDATE_ON_SET is set, the free_cache method
+ *  will not be called after a set request has processed. It is assumed that
+ *  the lower mib handler using the cache has maintained cache consistency.
+ *
+ *  If NETSNMP_CACHE_DONT_FREE_EXPIRED is set, the free_cache method will
+ *  not be called with the cache expires. The expired flag will be set, but
+ *  the valid flag will not be cleared. It is assumed that the load_cache
+ *  routine will properly deal with being called with a valid cache.
+ *
+ *  If NETSNMP_CACHE_DONT_AUTO_RELEASE is set, the periodic callback that
+ *  checks for expired caches will skip the cache. The cache will only be
+ *  checked for expiration when a request triggers the cache handler. This
+ *  is useful if the cache has it's own periodic callback to keep the cache
+ *  fresh.
+ *
  *  @{
  */
 
 /** get cache head
- *
+ * @internal
  * unadvertised function to get cache head. You really should not
  * do this, since the internal storage mechanism might change.
  */
@@ -70,13 +96,18 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
 
     cache = SNMP_MALLOC_TYPEDEF(netsnmp_cache);
     if (NULL == cache) {
-        snmp_log(LOG_ERR,"malloc error in netsnmp_cache_get\n");
+        snmp_log(LOG_ERR,"malloc error in netsnmp_cache_create\n");
         return NULL;
     }
     cache->timeout = timeout;
     cache->load_cache = load_hook;
     cache->free_cache = free_hook;
     cache->enabled = 1;
+
+    if(0 == cache->timeout)
+        cache->timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                            NETSNMP_DS_AGENT_CACHE_TIMEOUT);
+
     
     /*
      * Add the registered OID information, and tack
@@ -167,12 +198,37 @@ netsnmp_extract_cache_info(netsnmp_agent_request_info * reqinfo)
     return netsnmp_agent_get_list_data(reqinfo, CACHE_NAME);
 }
 
+
+/** Check if the cache timeout has passed. Sets and return the expired flag. */
+int
+netsnmp_cache_check_expired(netsnmp_cache *cache)
+{
+    if(NULL == cache)
+        return 0;
+    
+    if(!cache->valid || (NULL == cache->timestamp))
+        cache->expired = 1;
+    else
+        cache->expired = atime_ready(cache->timestamp, 1000 * cache->timeout);
+    
+    return cache->expired;
+}
+
 /** Is the cache valid for a given request? */
 int
-netsnmp_is_cache_valid(netsnmp_agent_request_info * reqinfo)
+netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo)
 {
     netsnmp_cache  *cache = netsnmp_extract_cache_info(reqinfo);
     return (cache && cache->valid);
+}
+
+/** Is the cache valid for a given request?
+ * for backwards compatability. netsnmp_cache_is_valid() is preferred.
+ */
+int
+netsnmp_is_cache_valid(netsnmp_agent_request_info * reqinfo)
+{
+    return netsnmp_cache_is_valid(reqinfo);
 }
 
 /** Implements the cache handler */
@@ -183,7 +239,6 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                              netsnmp_request_info * requests)
 {
     netsnmp_cache  *cache = NULL;
-    long            cache_timeout;
     int             ret;
 
     DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ",
@@ -194,17 +249,11 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     cache = (netsnmp_cache *) handler->myvoid;
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NO_CACHING) ||
-        !cache || !cache->enabled) {
-        DEBUGMSG(("helper:cache_handler", " caching disabled, "
-                    "cache not found or cache is disabled\n"));
+        !cache || !cache->enabled || !cache->load_cache) {
+        DEBUGMSG(("helper:cache_handler", " caching disabled or "
+                  "cache not found, disabled or had no load method\n"));
         return SNMP_ERR_NOERROR;
     }
-
-    /*
-     * only touch cache once per pdu request
-     */
-    if(cache->valid && netsnmp_agent_get_list_data(reqinfo, CACHE_NAME))
-        return SNMP_ERR_NOERROR;
 
     switch (reqinfo->mode) {
 
@@ -212,18 +261,20 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GETNEXT:
     case MODE_GETBULK:
         /*
+         * only touch cache once per pdu request
+         */
+        if(netsnmp_is_cache_valid(reqinfo))
+        return SNMP_ERR_NOERROR;
+
+        /*
          * call the load hook, and update the cache timestamp.
          */
-        cache_timeout = cache->timeout;
-        if (cache_timeout == 0)
-            cache_timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                               NETSNMP_DS_AGENT_CACHE_TIMEOUT);
-        if (!cache->valid || !cache->timestamp ||
-            atime_ready(cache->timestamp, 1000 * cache_timeout)) {
+        if (!cache->valid || netsnmp_cache_check_expired(cache)) {
             /*
              * If we've got a valid cache, then release it before reloading
              */
-            if (cache->valid && cache->free_cache) {
+            if (cache->valid && cache->free_cache &&
+                ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
                 cache->free_cache(cache, cache->magic);
                 cache->valid = 0;
             }
@@ -250,10 +301,10 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             else
                 cache->timestamp = atime_newMarker();
             DEBUGMSG(("helper:cache_handler", " loaded (%d)\n",
-                      cache_timeout));
+                      cache->timeout));
         } else {
             DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
-                      cache_timeout));
+                      cache->timeout));
         }
         netsnmp_agent_add_list_data(reqinfo,
                                     netsnmp_create_data_list(CACHE_NAME,
@@ -272,7 +323,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_UNDO:
         break;
     case MODE_SET_COMMIT:
-        if (cache->valid /* && some flag ? */ ) {
+        if (cache->valid && 
+            ! (cache->flags & NETSNMP_CACHE_DONT_INVALIDATE_ON_SET) ) {
             cache->free_cache(cache, cache->magic);
             cache->valid = 0;
         }
@@ -304,22 +356,20 @@ release_cached_resources(unsigned int regNo, void *clientargs)
     cache_outstanding_valid = 0;
     DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
     for (cache = cache_head; cache; cache = cache->next) {
-        if (cache->valid) {
+        if (cache->valid &&
+            ! (cache->flags & NETSNMP_CACHE_DONT_AUTO_RELEASE)) {
             /*
              * Check to see if this cache has timed out.
              * If so, release the cached resources.
              * Otherwise, note that we still have at
              *   least one active cache.
              */
-            cache_timeout = cache->timeout;
-            if (cache_timeout == 0)
-                cache_timeout =
-                    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
-                                       NETSNMP_DS_AGENT_CACHE_TIMEOUT);
-            if (!cache->timestamp ||
-                atime_ready(cache->timestamp, 1000 * cache_timeout)) {
-                cache->free_cache(cache, cache->magic);
-                cache->valid = 0;
+            if (netsnmp_cache_check_expired(cache)) {
+                if ( (NULL != cache->free_cache) &&
+                     ! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED)) {
+                    cache->free_cache(cache, cache->magic);
+                    cache->valid = 0;
+                }
             } else {
                 cache_outstanding_valid = 1;
             }

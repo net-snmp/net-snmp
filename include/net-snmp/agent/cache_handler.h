@@ -25,8 +25,10 @@ extern          "C" {
         /*
 	 * For operation of the data caches
 	 */
+        int      flags;
         int      enabled;
         int      valid;
+        char     expired;
         int      timeout;	/* Length of time the cache is valid (in s) */
         marker_t timestamp;	/* When the cache was last loaded */
 
@@ -45,6 +47,9 @@ extern          "C" {
 
 
     netsnmp_cache* netsnmp_extract_cache_info(netsnmp_agent_request_info *);
+    int            netsnmp_cache_check_expired(netsnmp_cache *cache);
+    int            netsnmp_cache_is_valid(    netsnmp_agent_request_info *);
+    /** for backwards compat */
     int            netsnmp_is_cache_valid(    netsnmp_agent_request_info *);
     netsnmp_mib_handler *netsnmp_get_cache_handler(int, NetsnmpCacheLoad *,
                                                         NetsnmpCacheFree *,
@@ -65,6 +70,9 @@ extern          "C" {
     netsnmp_cache * netsnmp_cache_find_by_oid(oid * rootoid,
                                               int rootoid_len);
 
+#define NETSNMP_CACHE_DONT_INVALIDATE_ON_SET                0x0001
+#define NETSNMP_CACHE_DONT_FREE_EXPIRED                     0x0002
+#define NETSNMP_CACHE_DONT_AUTO_RELEASE                     0x0004
 
 #ifdef __cplusplus
 };
