@@ -654,10 +654,18 @@ fi
 dnl AC_CHECK_LIB(ucb, bzero)
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
-  LIBS="$LIBS -lrpm -ldb"
+  LIBS="$LIBS -lrpm -ldb1"
   dnl zlib is required for newer versions of rpm
   AC_CHECK_LIB(z, zlibVersion)
-],,-ldb -lz)
+],[
+  dnl Ok, -ldb1 may not exist, try -ldb
+  AC_CHECK_LIB(rpm, rpmdbOpen,[
+    AC_DEFINE(HAVE_LIBRPM)
+    LIBS="$LIBS -lrpm -ldb"
+    dnl zlib is required for newer versions of rpm
+    AC_CHECK_LIB(z, zlibVersion)
+  ],,-ldb -lz)
+],-ldb1 -lz)
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
