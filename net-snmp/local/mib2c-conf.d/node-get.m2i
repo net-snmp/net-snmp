@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -14,15 +14,17 @@
  *
  * Extract the current value of the $node data.
  *
- * Param: ${context}_ctx
- *        Pointer to the context.
 @if $m2c_node_get_comments ne ""@
 $m2c_node_get_comments
-@else@
- * Param: ${node}
+*
+@end@
+ * @param ${context}_ctx
+ *        Pointer to the users context. You should know how to
+ *        manipulate the value from this object.
+ * @param ${node}
  *        Pointer to storage for a $node.decl variable
-@    if $m2c_node_needlength == 1@
- * Param: ${node}_len
+@if $m2c_node_needlength == 1@
+ * @param ${node}_len
  *        Pointer to a size_t. On entry, it will contain the size (in bytes)
  *        pointed to by $node.
  *        On exit, this value should contain the data size (in bytes).
@@ -30,8 +32,10 @@ $m2c_node_get_comments
  *        the $node pointer.
  *        NOTE: DO NOT free the previous pointer.
  *        NOTE: The agent will release the memory you allocate.
-@    end@
 @end@
+*
+ * @return SNMP_ERR_NOERROR on success.
+ *         SNMP_ERR_GENERR for any other error
  */
 int
 ${node}_get( ${context}_ctx *ctx, $m2c_node_get_parms )
