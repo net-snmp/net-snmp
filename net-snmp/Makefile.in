@@ -5,13 +5,15 @@ INSTALLDIRS = snmplib agent apps local man mibs
 
 CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
+INSTALLHEADERS=ucd-snmp-config.h version.h
+
 all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
 sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
 
 ucd-snmp-config.h:
-	cp config.h ucd-snmp-config.h
+	@egrep -v "SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module" config.h > ucd-snmp-config.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -24,8 +26,10 @@ install:    all installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) ; \
 	done
-	@$(INSTALL) ucd-snmp-config.h $(includedir)
-	@echo "install:  installed ucd-snmp-config.h in $(includedir)"
+	for i in $(INSTALLHEADERS) ; do \
+		@$(INSTALL) $$i $(includedir) ; \
+		@echo "install:  installed $$i in $(includedir)";\
+	done
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir) $(includedir)
