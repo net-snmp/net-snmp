@@ -323,7 +323,7 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
     if (!line_len)
         line_len=len;
 
-    for (; len > line_len; len -= line_len) {
+    for (; (int)len > line_len; len -= line_len) {
         _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len);
         cp += line_len;
     }
