@@ -388,6 +388,14 @@ if test "x$DEFAULT_MIBDIRS" = "x"; then
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$SNMPSHAREPATH/mibs")
 fi
 
+SNMPCONFPATH=""
+tmpset="$datadir/snmp"
+while test "x$tmpset" != "x$SNMPCONFPATH"; do
+  SNMPCONFPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
+
 dnl
 dnl Figure out appropriate shared libraries extensions if necessary.
 dnl
