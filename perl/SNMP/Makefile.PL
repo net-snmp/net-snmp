@@ -33,7 +33,7 @@ sub InitMakeParams {
 
       $Params{'DEFINE'} = "-DMSVC_PERL";
       
-      if ($opts->{'insource'}) {
+      if (lc($opts->{'insource'}) eq "true") {
 	$Params{'LIBS'} = "-L$basedir\\win32\\lib\\ -l$snmp_link_lib";
       }
       else {
@@ -76,7 +76,7 @@ sub InitMakeParams {
 	} else {
 	    $Params{'CCFLAGS'} = $ENV{'NETSNMP_CCFLAGS'};
 	}
-	if ($opts->{'insource'} eq "true") {
+	if (lc($opts->{'insource'}) eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
@@ -159,7 +159,7 @@ WIN32
 	print H "SNMPTRAPD => $snmptrapd\n";
 	print H "MIBDIR => $mibdir\n";
 
-	if (!$opts->{'insource'}) {
+	if (!(lc($opts->{'insource'}) eq "true")) {
 	    if (-e $snmpd and -r $snmpd) {
 		if (not -x $snmpd) {
 		    warn("Error: $snmpd not executable. 'make test' will not work.\n");
@@ -240,7 +240,7 @@ sub NetSNMPGetOpts {
 	GetOptions("NET-SNMP-CONFIG=s" => \$ret{'nsconfig'},
 	           "NET-SNMP-IN-SOURCE=s" => \$ret{'insource'});
 
-	if ($ret{'insource'} eq "true" && $ret{'nsconfig'} eq "") {
+	if (lc($ret{'insource'}) eq "true" && $ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="sh ROOTPATH../net-snmp-config";
 	} elsif ($ret{'nsconfig'} eq "") {
 	    $ret{'nsconfig'}="net-snmp-config";
