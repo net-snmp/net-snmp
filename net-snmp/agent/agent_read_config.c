@@ -219,7 +219,8 @@ void init_agent_read_config (const char *app)
   register_app_config_handler("table",
                               netsnmp_config_parse_table_set, NULL, "tableoid");
   register_app_config_handler("add_row",
-                              netsnmp_config_parse_add_row, NULL, "indexes... values...");
+                              netsnmp_config_parse_add_row, NULL,
+                              "indexes... values...");
   ds_register_config(ASN_BOOLEAN, app, "quit",
                      DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY);
   netsnmp_init_handler_conf();
