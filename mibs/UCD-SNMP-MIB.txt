@@ -238,6 +238,15 @@ prErrFix OBJECT-TYPE
 		snmp operations."
 	::= { prEntry 102 }
 
+prErrFixCmd OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The command that gets run when the prErrFix column is 
+		set to 1."
+	::= { prEntry 103 }
+
 ExtIndex ::= INTEGER (0..6535)
 
 extTable OBJECT-TYPE
@@ -320,6 +329,15 @@ extErrFix OBJECT-TYPE
 		snmp operations."
 	::= { extEntry 102 }
 	
+extErrFixCmd OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The command that gets run when the extErrFix column is 
+		set to 1."
+	::= { extEntry 103 }
+
 --
 -- Memory usage/watch reporting.
 --   Not supported on all systems!
