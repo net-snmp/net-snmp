@@ -166,20 +166,20 @@ touchit:
 	touch config.status
 	touch stamp-h stamp-h.in
 
-Makefile: $(srcdir)/Makefile.in config.status $(srcdir)/Makefile.rules $(srcdir)/Makefile.top
+Makefile: Makefile.in config.status Makefile.rules Makefile.top
 	CONFIG_HEADERS= ./config.status
 
-$(srcdir)/include/net-snmp/net-snmp-config.h.in: $(srcdir)/stamp-h.in
+$(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
 $(srcdir)/stamp-h.in: configure.in acconfig.h
 	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
 include/net-snmp/net-snmp-config.h: stamp-h
-stamp-h: $(srcdir)/include/net-snmp/net-snmp-config.h.in config.status
+stamp-h: include/net-snmp/net-snmp-config.h.in config.status
 	CONFIG_FILES= ./config.status
 	echo timestamp > stamp-h
 
-$(srcdir)/configure: $(srcdir)/configure.in aclocal.m4
+$(srcdir)/configure: configure.in aclocal.m4
 	cd ${srcdir} && $(AUTOCONF)
 	echo "Please run configure now."
 	sh -c exit 2
