@@ -420,6 +420,7 @@ netsnmp_oid_stash_free(netsnmp_oid_stash_node **root,
             }
         }
     }
+    free((*root)->children);
     free (*root);
     *root = NULL;
 }
