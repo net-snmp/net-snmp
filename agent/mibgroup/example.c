@@ -6,6 +6,18 @@
 /* include important headers */
 #include <config.h>
 
+/* needed by util_funcs.h */
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 /* mibincl.h contains all the snmp specific headers to define the
    return types and various defines and structures. */
 #include "mibincl.h"
