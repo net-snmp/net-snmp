@@ -29,7 +29,6 @@
 #include "mteTriggerThresholdTable.h"
 #include "mteObjectsTable.h"
 
-
 /* 
  * mteTriggerTable_variables_oid:
  *   this is the top level oid that we want to register under.  This
@@ -101,8 +100,8 @@ struct variable2 mteTriggerTable_variables[] = {
 /* global storage of our data, saved in and configured by header_complex() */
 struct header_complex_index *mteTriggerTableStorage = NULL;
 
-
-
+struct snmp_session *mte_callback_sess = NULL;
+extern int callback_master_num;
 
 /*
  * init_mteTriggerTable():
@@ -148,6 +147,14 @@ void init_mteTriggerTable(void) {
   se_add_pair_to_slist("mteBooleanOperators", strdup(">="),
                        MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
+  /* open a 'callback' session to the main agent */
+    if (mte_callback_sess == NULL) {
+	mte_callback_sess = snmp_callback_open(callback_master_num,
+                                               NULL,
+                                               NULL, NULL);
+	DEBUGMSGTL(("mteTriggerTable", "created callback session = %08x\n",
+		    mte_callback_sess));
+    }
   DEBUGMSGTL(("mteTriggerTable", "done.\n"));
 }
 
@@ -2019,10 +2026,7 @@ write_mteTriggerEntryStatus(int      action,
               StorageTmp->mteTriggerEntryStatus == RS_ACTIVE &&
               !StorageTmp->have_copied_auth_info) {
               
-              struct agent_snmp_session *asp;
-/* XXXWWW: fix me for new api
               struct agent_snmp_session *asp = get_current_agent_session();
-*/
               struct snmp_pdu *pdu = NULL;
               
               if (!asp) {
@@ -2164,7 +2168,6 @@ last_state_clean(void *data) {
 /* retrieves requested info in pdu from the current target */
 struct snmp_pdu *
 mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
-    struct agent_snmp_session *asp = NULL;
     struct snmp_pdu *response = NULL;
     int status = 0;
     char buf[SPRINT_MAX_LEN];
@@ -2195,32 +2198,20 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
 		item->pdu_community?(char *)item->pdu_community:"[NIL]"));
         
     if (item->mteTriggerTargetTagLen == 0) {
-        asp = init_agent_snmp_session(NULL, pdu);
-        if (!asp) {
-	  /*  Should free PDU here to be consistent  */
-            return NULL;
-	}
+        /* send to the local agent */
         
-        if (pdu->command == SNMP_MSG_GETNEXT) {
-            /* why can't handle next pass do this for me? */
-            asp->exact = FALSE;
-            asp->mode = RESERVE2;
-        }
-        
-/* XXXWWW: fixme for new api
-        status = handle_next_pass(asp);
-*/
-        
+        status = snmp_synch_response(mte_callback_sess, pdu, &response);
+
         if (status != SNMP_ERR_NOERROR) {
             /* xxx */
-            DEBUGMSGTL(("mteTriggerTable","Error received\n"));
-            free_agent_snmp_session(asp);
-            snmp_free_pdu(pdu);
+            char *errstr;
+            snmp_error(mte_callback_sess, 0, 0, &errstr);
+            DEBUGMSGTL(("mteTriggerTable","Error received: %s, %d\n", errstr,
+                        pdu->version));
+            if (errstr)
+                free(errstr);
             return NULL; /* XXX: proper failure, trap sent, etc */
         }
-        response = asp->pdu;
-        asp->pdu = NULL;
-        free_agent_snmp_session(asp);
     } else {
         /* remote target list */
         /* XXX */
@@ -2232,7 +2223,6 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
     else
         strcpy(buf,"empty");
     DEBUGMSGTL(("mteTriggerTable","got a variables: %s\n", buf));
-    snmp_free_pdu(pdu);
     return response;
 }
 
