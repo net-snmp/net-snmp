@@ -11,7 +11,9 @@
 #define _I_DEFINED_KERNEL
 #endif
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <sys/socket.h>
 
 #if STDC_HEADERS

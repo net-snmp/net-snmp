@@ -41,7 +41,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <sys/socket.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

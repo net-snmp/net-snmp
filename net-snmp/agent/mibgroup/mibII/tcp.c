@@ -23,7 +23,9 @@
 #endif
 
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <sys/socket.h>
 #if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
