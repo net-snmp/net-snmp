@@ -31,6 +31,7 @@
 #  include <sys/time.h>
 # else
 #  include <time.h>
+# endif
 #endif
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
