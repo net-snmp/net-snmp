@@ -44,6 +44,7 @@ extern "C" {
 
 					/* XXX Not optimal everywhere. */
 #define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))
+#define SNMP_MALLOC_TYPEDEF(td)  (td *) calloc(1, sizeof(td))
 #define SNMP_ZERO(s,l)		if (s) memset(s, 0, l);
 
 
