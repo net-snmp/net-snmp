@@ -414,7 +414,7 @@ agentx_build_header(struct snmp_pdu *pdu, u_char *bufp, size_t *out_length)
 
     *bufp = 1;			bufp++;		/* version */
     *bufp = pdu->command;	bufp++;		/* type    */
-    *bufp = pdu->flags & AGENTX_MSG_FLAGS_MASK;
+    *bufp = (u_char)(pdu->flags & AGENTX_MSG_FLAGS_MASK);
     				bufp++;		/* AgentX flags */
     *bufp = 0;			bufp++;		/* <reserved> */
     *out_length -=4;
@@ -504,8 +504,7 @@ _agentx_build(struct snmp_session        *session,
 			/* Timeout */
 	    if ( *out_length < 4 )
 	        return -1;
-/* XX pdu->time size is u_long !! */
-	    *bufp = pdu->time;		bufp++;
+	    *bufp = (u_char)pdu->time;		bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
@@ -535,8 +534,7 @@ _agentx_build(struct snmp_session        *session,
 			/* Reason */
 	    if ( *out_length < 4 )
 	        return -1;
-/* XX pdu->errstat size is long !! */
-	    *bufp = pdu->errstat;	bufp++;
+	    *bufp = (u_char)pdu->errstat;	bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
 	    *bufp = 0;			bufp++;
@@ -551,8 +549,7 @@ _agentx_build(struct snmp_session        *session,
 	case AGENTX_MSG_UNREGISTER:
 	    if ( *out_length < 4 )
 	        return -1;
-/* XX pdu->time size is u_long !! */
-	    *bufp = pdu->time;		bufp++;	    /* Timeout (Register only) */
+	    *bufp = (u_char)pdu->time;		bufp++;	    /* Timeout (Register only) */
 	    *bufp = pdu->priority;		bufp++;
 	    range_ptr = bufp;	 	/* Points to the 'range_subid' field */
 	    *bufp = pdu->range_subid;	bufp++;
