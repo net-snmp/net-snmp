@@ -16,7 +16,7 @@ use Data::Dumper;
 %arrayitems=qw(question 1 validanswer 1);
 
 #defaults
-$opts{'c'} = "/usr/local/share/snmp/snmpconf";
+$opts{'c'} = "/usr/local/share/snmp/snmpconf-data";
 
 # read the argument string
 getopts("qadhfc:piI:r:R:g:G", \%opts);
@@ -186,6 +186,7 @@ the -i option to the command line I'll copy them there automatically for you.
 Or, if you want them for your personal use only, copy them to
 $ENV{HOME}/.snmp .  In the future, if you add the -p option to the
 command line I'll copy them there automatically for you.
+
 ");
 }
 
@@ -344,12 +345,34 @@ sub read_config_files {
     my $filetypes = shift;
     opendir(DH, $readdir) || die "no such directory $readdir, did you run make install?\n";
     my $dir;
+    my $configfilename="snmpconf-config";
+
     while(defined($dir = readdir(DH))) {
 	next if ($dir =~ /^\./);
 	next if ($dir =~ /CVS/);
 	debug("dir entry: $dir\n");
-	if (-d "$readdir/$dir") {
-	    $filetypes->{$dir} = read_config_items("$readdir/$dir", $dir);
+	if (-d "$readdir/$dir" && -f "$readdir/$dir/$configfilename") {
+
+	    my $conffile;
+
+	    # read the top level configuration inforamation about the direcotry.
+	    open(I, "$readdir/$dir/$configfilename");
+	    while(<I>) {
+		$conffile = $1 if (/forconffile: (.*)/);
+	    }
+	    close(I);
+
+	    # no README informatino.
+	    if ($conffile eq "") {
+		print STDERR "Warning: No 'forconffile' information in $readdir/$dir/$configfilename\n";
+		next;
+	    }
+
+	    # read all the daat in the directory
+	    $filetypes->{$conffile} = read_config_items("$readdir/$dir", $dir);
+	} else {
+	    # no README informatino.
+	    print STDERR "Warning: No $configfilename file found in $readdir/$dir\n";
 	}
     }
     closedir DH;
@@ -366,6 +389,7 @@ sub read_config_items {
     my @results;
     while(defined($file = readdir(ITEMS))) {
 	next if ($file =~ /~$/);
+	next if ($file =~ /^.config$/);
 	if (-f "$itemdir/$file") {
 	    my $res = read_config_item("$itemdir/$file", $type);
 	    if (scalar(keys(%$res)) > 0) {
