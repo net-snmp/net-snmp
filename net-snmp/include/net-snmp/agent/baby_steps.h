@@ -8,15 +8,7 @@
 extern          "C" {
 #endif
 
-/*
- * The helper expands the original net-snmp set modes into the newer, finer
- * grained set modes.
- */
-
-netsnmp_mib_handler *netsnmp_get_baby_steps_handler(u_long modes);
-void            netsnmp_init_baby_steps_helper(void);
-
-Netsnmp_Node_Handler netsnmp_baby_steps_helper;
+#include <net-snmp/agent/agent_handler.h>
 
     /*
      * Flags for baby step modes
@@ -37,6 +29,67 @@ Netsnmp_Node_Handler netsnmp_baby_steps_helper;
 #define BABY_STEP_POST_REQUEST          (0x1 << 13)
 
 #define BABY_STEP_ALL                   (0xffffffff)
+
+/** @name access_multiplexer
+ *
+ * This helper expands the original net-snmp set modes into the newer, finer
+ * grained modes.
+ *
+ *  @{ */
+
+void                 netsnmp_baby_steps_init(void);
+
+netsnmp_mib_handler *netsnmp_baby_steps_handler_get(u_long modes);
+
+/** @} */
+
+
+/** @name access_multiplexer
+ *
+ * This helper calls individual access methods based on the mode. All
+ * access methods share the same handler, and the same myvoid pointer.
+ * If you need individual myvoid pointers, check out the multiplexer
+ * handler (though it currently only works for traditional modes).
+ *
+ *  @{ */
+
+/** @struct netsnmp_mib_handler_access_methods
+ *  Defines the access methods to be called by the access_multiplexer helper
+ */
+typedef struct netsnmp_baby_steps_access_methods_s {
+      
+   /*
+    * baby step modes
+    */
+   Netsnmp_Node_Handler *pre_request;
+   Netsnmp_Node_Handler *object_lookup;
+   Netsnmp_Node_Handler *get_values;
+   Netsnmp_Node_Handler *object_syntax_checks;
+   Netsnmp_Node_Handler *row_creation;
+   Netsnmp_Node_Handler *undo_setup;
+   Netsnmp_Node_Handler *set_values;
+   Netsnmp_Node_Handler *consistency_checks;
+   Netsnmp_Node_Handler *commit;
+   Netsnmp_Node_Handler *undo_sets;
+   Netsnmp_Node_Handler *undo_cleanup;
+   Netsnmp_Node_Handler *undo_commit;
+   Netsnmp_Node_Handler *irreversible_commit;
+   Netsnmp_Node_Handler *post_request;
+
+   void                 *my_access_void;
+
+} netsnmp_baby_steps_access_methods;
+
+    netsnmp_mib_handler * netsnmp_baby_steps_access_multiplexer_get(
+        netsnmp_baby_steps_access_methods *);
+
+/** @} */
+
+
+/** backwards compatability. don't use in new code */
+#define netsnmp_get_baby_steps_handler netsnmp_baby_steps_handler_get
+#define netsnmp_init_baby_steps_helper netsnmp_baby_steps_handler_init
+
 
 #ifdef __cplusplus
 };
