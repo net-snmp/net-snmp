@@ -36,7 +36,7 @@ BROKEINSTALL= \
 	mibgroup/mibincl.h \
 	mibgroup/header_complex.h
 
-INSTALLUCDHEADERS= agent  \
+INSTALLUCDHEADERS= \
 	agent_index.h	\
 	agent_read_config.h \
 	agent_registry.h \
