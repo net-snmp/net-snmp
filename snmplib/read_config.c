@@ -956,14 +956,11 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
             NULL if an unknown type.
 */
 char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len) {
-
   int *intp;
   char **charpp;
   oid  **oidpp;
 
-  if (dataptr == NULL || readfrom == NULL)
-    return NULL;
-  
+  if (dataptr && readfrom)
   switch(type) {
     case ASN_INTEGER:
       intp = (int *) dataptr;
@@ -994,14 +991,11 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
             NULL if an unknown type.
 */
 char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len) {
-
   int *intp;
   u_char **charpp;
   oid  **oidpp;
 
-  if (dataptr == NULL || storeto == NULL)
-    return NULL;
-  
+  if (dataptr && storeto)
   switch(type) {
     case ASN_INTEGER:
       intp = (int *) dataptr;
