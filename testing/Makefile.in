@@ -31,7 +31,7 @@ stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
 
 clean:
 	rm -f *.o core *.core $(TARG)
-	rm -fr /tmp/snmp-test*
+	-rm -fr /tmp/snmp-test*
 
 install: installdirs $(TARG)
 	@for i in $(TARG) ; \
