@@ -183,15 +183,13 @@ void disk_parse_config(word,cptr)
     while ((mntent = getmntent (mntfp)))
       if (strcmp (disks[numdisks].path, mntent->mnt_dir) == 0) {
         copy_word (mntent->mnt_fsname, disks[numdisks].device);
-        DEBUGP1("Disk:  %s\n",mntent->mnt_fsname);
+        DEBUGP("Disk:  %s\n",mntent->mnt_fsname);
         break;
       }
-#ifdef DODEBUG
       else {
-        printf ("  %s != %s\n", disks[numdisks].path,
+        DEBUGP("  %s != %s\n", disks[numdisks].path,
                 mntent->mnt_dir);
       }
-#endif
     endmntent(mntfp);
     if (disks[numdisks].device[0] != 0) {
       /* dummy clause for else below */
@@ -203,9 +201,7 @@ void disk_parse_config(word,cptr)
       if (strcmp (disks[numdisks].path, mnttab.mnt_mountp) == 0)
         break;
       else {
-#ifdef DODEBUG
-        printf ("  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp);
-#endif
+        DEBUGP("  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp);
       }
     fclose (mntfp);
     if (i == 0) {

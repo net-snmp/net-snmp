@@ -59,12 +59,12 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int print_idx, LowIndex = -1;
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrprint: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP("var_hrprint: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
 	/* Find "next" print entry */
@@ -92,9 +92,7 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-#ifdef DODEBUG
-        printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return(MATCH_FAILED);
     }
 
@@ -103,10 +101,10 @@ header_hrprint(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("... get print stats %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("... get print stats %s\n", c_oid);
+    }
     return LowIndex;
 }
 

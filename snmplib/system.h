@@ -61,6 +61,12 @@ void winsock_cleanup __P((void));
 
 in_addr_t get_myaddr __P((void));
 long get_uptime __P((void));
+#ifdef __STDC__
+void DEBUGP __P((const char *, ...));
+#else
+void DEBUGP __P((va_alist));
+#endif
+void set_do_debugging __P((int));
 
 #ifndef HAVE_STRDUP
 char *strdup __P((char *));

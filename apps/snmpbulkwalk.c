@@ -113,9 +113,6 @@ main(argc, argv)
     int  status;
     int  reps = 1000;
 
-    /* read in MIB database */
-    init_mib();
-
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
 

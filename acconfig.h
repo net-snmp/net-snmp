@@ -65,7 +65,7 @@
 #define UNAMEPROG "/bin/uname"
 
 /* debugging stuff */
-#undef DODEBUG
+#define DODEBUG 0
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
@@ -311,14 +311,6 @@
 #define LASTFIELD -1      /* internal define */
 
 /* debugging macros */
-
-#ifdef DODEBUG
-#define DEBUGP(x) fprintf(stderr,x);
-#define DEBUGP1(x,y) fprintf(stderr,x,y);
-#else
-#define DEBUGP(x)
-#define DEBUGP1(x,y)
-#endif
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX

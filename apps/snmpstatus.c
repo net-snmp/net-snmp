@@ -157,9 +157,6 @@ main(argc, argv)
     int interfaces;
     int count;
 
-    /* read in MIB database */
-    init_mib();
-
     /* get the common command line arguments */
     snmp_parse_args(argc, argv, &session);
 

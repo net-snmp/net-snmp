@@ -186,15 +186,11 @@ smux_select(tvp)
 	 */
 
 	count = select(nfds, &rfds, 0, 0, tvp);
-#ifdef DODEBUG
-	printf ("count is %d\n", count);
-#endif
+	DEBUGP ("count is %d\n", count);
 	if (count > 0) {
 		if (smux_sd > 0 && FD_ISSET(smux_sd, &rfds)) {
 			/* connection request from gated */
-#ifdef DODEBUG
-			printf ("Calling Accept\n");
-#endif
+                        DEBUGP ("Calling Accept\n");
 			fd = accept(smux_sd, (struct sockaddr *)&in_socket,
 				    &len);
 			if (fd < 0) {
@@ -259,9 +255,7 @@ smux_process(fd)
 		return SMUXNOTOK;
 	}
 
-#ifdef DODEBUG
-	printf ("[smux_process] Processing %d bytes\n", length);
-#endif
+	DEBUGP ("[smux_process] Processing %d bytes\n", length);
 
 	error = SMUXOK;
 
@@ -270,9 +264,7 @@ smux_process(fd)
 	while (ptr != NULL && ptr < data + length) {
 		len = length;
 		ptr = asn_parse_header(ptr, &len, &type);
-#ifdef DODEBUG
-		printf ("[smux_process] type is %d\n", (int) type);
-#endif
+		DEBUGP ("[smux_process] type is %d\n", (int) type);
 		switch (type) {
 		case SMUX_OPEN:
 			ptr = smux_open_process(ptr, &len);
@@ -290,14 +282,10 @@ smux_process(fd)
 			break;
 		case SMUX_SOUT:
 			ptr = smux_sout_process(ptr, &len);
-#ifdef DODEBUG
-			printf("This shouldn't have happened!\n");
-#endif
+			DEBUGP("This shouldn't have happened!\n");
 			break;
 		default:
-#ifdef DODEBUG
-			printf("[smux_process] Wrong type %d\n", (int)type);
-#endif /* DODEBUG */
+                        DEBUGP("[smux_process] Wrong type %d\n", (int)type);
 			error = SMUXNOTOK;
 			break;
 		}
@@ -323,49 +311,47 @@ smux_open_process(ptr, len)
 	int oid_name_len;
 	u_char descr[SMUXMAXSTRLEN];
 	int descr_len;
-
+        int i;
 
 	ptr = asn_parse_int(ptr, len, &type, &version, 
 				      sizeof(version));
-#ifdef DODEBUG
-	printf("[smux_open_process] version %d, len %d, type %d\n", 
+	DEBUGP("[smux_open_process] version %d, len %d, type %d\n", 
 		version, *len, (int)type);
-#endif /* DODEBUG */
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
 				 
 
-#ifdef DODEBUG
-	printf("[smux_open_process] smux peer:"); 
-	for (i=0; i<oid_name_len; i++) 
-		printf(".%d", oid_name[i]);
-	printf (" \n");
-	printf("[smux_open_process] len %d, type %d\n", *len, (int)type);
-#endif /* DODEBUG */
-
+        if (snmp_get_do_debugging()) {
+          DEBUGP("[smux_open_process] smux peer:"); 
+          for (i=0; i<oid_name_len; i++) 
+            DEBUGG(".%d", oid_name[i]);
+          DEBUGP (" \n");
+          DEBUGP("[smux_open_process] len %d, type %d\n", *len, (int)type);
+        }
+    
 	
 	descr_len = SMUXMAXSTRLEN;
 	ptr = asn_parse_string(ptr, len, &type, descr, &descr_len);
 
-#ifdef DODEBUG
-	printf("[smux_open_process] smux peer descr:"); 
-	for (i=0; i<descr_len; i++) 
-		printf("%c", descr[i]);
-	printf (" \n");
-	printf("[smux_open_process] len %d, type %d\n", *len, (int)type);
-#endif /* DODEBUG */
-
+        if (snmp_get_do_debugging()) {
+          DEBUGP("[smux_open_process] smux peer descr:"); 
+          for (i=0; i<descr_len; i++) 
+            DEBUGP("%c", descr[i]);
+          DEBUGP (" \n");
+          DEBUGP ("[smux_open_process] len %d, type %d\n", *len, (int)type);
+        }
+        
 	descr_len = SMUXMAXSTRLEN;
 	ptr = asn_parse_string(ptr, len, &type, descr, &descr_len);
 
-#ifdef DODEBUG
-	printf("[smux_open_process] smux peer passwd:"); 
-	for (i=0; i<descr_len; i++) 
-		printf("%c", descr[i]);
-	printf (" \n");
-	printf("[smux_open_process] len %d, type %d\n", *len, (int)type);
-#endif /* DODEBUG */
+        if (snmp_get_do_debugging()) {
+          DEBUGP("[smux_open_process] smux peer passwd:"); 
+          for (i=0; i<descr_len; i++) 
+            DEBUGP("%c", descr[i]);
+          DEBUGP (" \n");
+          DEBUGP("[smux_open_process] len %d, type %d\n", *len, (int)type);
+        }
 
 	return ptr;
 }
@@ -410,27 +396,23 @@ smux_rreq_process(sd, ptr, len)
 	oid oid_name[MAX_OID_LEN];
 	int oid_name_len;
 	u_char type;
+        char c_oid[MAX_NAME_LEN];
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
 
-#ifdef DODEBUG
-	printf("[smux_rreq_process] smux subtree:"); 
-	print_oid(oid_name, oid_name_len);
-	printf (" \n");
-#endif /* DODEBUG */
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, oid_name, oid_name_len);
+          DEBUGP("[smux_rreq_process] smux subtree: %s\n", c_oid); 
+        }
 
 	ptr = asn_parse_int(ptr, len, &type, &priority, 
 				      sizeof(priority));
-#ifdef DODEBUG
-	printf("[smux_rreq_process] priority %d\n", priority);
-#endif /* DODEBUG */
+	DEBUGP("[smux_rreq_process] priority %d\n", priority);
 
 	ptr = asn_parse_int(ptr, len, &type, &operation, 
 				      sizeof(operation));
-#ifdef DODEBUG
-	printf("[smux_rreq_process] operation %d\n", operation);
-#endif /* DODEBUG */
+	DEBUGP("[smux_rreq_process] operation %d\n", operation);
 
 	/* TODO: Register */
 
@@ -447,9 +429,7 @@ smux_sout_process(ptr, len)
 	u_char *ptr;
 	int *len;
 {
-#ifdef DODEBUG
-	printf("[smux_sout_process] will be implemented later\n");
-#endif 
+        DEBUGP("[smux_sout_process] will be implemented later\n");
 	return NULL;
 }
 
@@ -465,9 +445,8 @@ smux_snmp_process(exact, objid, len, return_len)
 	u_char  result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
 	u_char type;
-#ifdef DODEBUG
 	int i;
-#endif
+        char c_oid[MAX_NAME_LEN];
 	
 	/* 
 	 * XXX Check if Gated is currently handling this oid.
@@ -494,11 +473,10 @@ smux_snmp_process(exact, objid, len, return_len)
 		printf("[smux_snmp_process]: smux_build failed\n");
 		return NULL;
 	}
-#ifdef DODEBUG
-	printf("[smux_snmp_process] oid from build :");
-	print_oid(objid, *len);
-	printf("\n");
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, objid, *len);
+          DEBUGP("[smux_snmp_process] oid from build: %s\n",c_oid);
+        }
 
 	/* 
 	 * XXX, send  and receive use gated_sd. This is ok for now.
@@ -509,10 +487,8 @@ smux_snmp_process(exact, objid, len, return_len)
 		perror("[smux_snmp_process] send failed");
 	}
 
-#ifdef DODEBUG
-	printf("[smux_snmp_process] Sent %d request to Gated; %d bytes\n", 
+	DEBUGP("[smux_snmp_process] Sent %d request to Gated; %d bytes\n", 
 		(int)type, length);
-#endif
 	/* 
 	 * receive 
 	 * XXX the RCVTIMEO could return a short result.
@@ -523,9 +499,7 @@ smux_snmp_process(exact, objid, len, return_len)
 		return NULL;
 	}
 
-#ifdef DODEBUG
-	printf("[smux_snmp_process] Recived %d bytes from gated\n", length);
-#endif
+	DEBUGP("[smux_snmp_process] Recived %d bytes from gated\n", length);
 
 	/* Interpret Gateds reply */
 	return (smux_parse(result, objid, len, return_len));
@@ -567,9 +541,7 @@ smux_parse(rsp, objid, oidlen, return_len)
 
 
 	/* XXX How to send something intelligent back in case of an error */
-#ifdef DODEBUG
-	printf("[smux_parse] Message type %d, reqid %d, errstat %d, \n\terrindex %d\n", (int)type, reqid, errstat, errindex);
-#endif 
+	DEBUGP("[smux_parse] Message type %d, reqid %d, errstat %d, \n\terrindex %d\n", (int)type, reqid, errstat, errindex);
 	if (ptr == NULL || errstat != SNMP_ERR_NOERROR)
 		return NULL;
 
@@ -596,15 +568,15 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	int len;
 	u_char *ptr;
 	u_char type;
-
+        char c_oid[MAX_NAME_LEN];
+        
 	ptr = varbind;
 	len = *varbindlength;
 
-#ifdef DODEBUG
-	printf("[smux_parse_var] before any processing:");
-	print_oid(objid, *oidlen);
-	printf("\n");
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, objid, *oidlen);
+          DEBUGP("[smux_parse_var] before any processing: %s\n", c_oid);
+        }
 
 	ptr = asn_parse_header(ptr, &len, &type);
 	if (ptr == NULL || type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
@@ -624,17 +596,14 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	*oidlen = var_name_len;
 	bcopy(var_name, objid, var_name_len * sizeof(oid));
 
-#ifdef DODEBUG
-	printf("[smux_parse_var] returning oid :");
-	print_oid(objid, *oidlen);
-	printf("\n");
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, objid, oidlen);
+          DEBUGP("[smux_parse_var] returning oid : %s\n", c_oid);
+        }
 	/* XXX */
 	len = SMUXMAXPKTSIZE;
-#ifdef DODEBUG
-	printf("[smux_parse_var] Asn coded len of var %d, type %d\n", 
+        DEBUGP("[smux_parse_var] Asn coded len of var %d, type %d\n", 
 		var_val_len, (int)var_val_type);
-#endif
 
 	switch((short)var_val_type){
 	case ASN_INTEGER:
@@ -823,16 +792,4 @@ print_fdbits (fdp)
                 printf ("%ld ", fdp->fds_bits[i]);
         }
         printf ("\n");
-}
-
-static void
-print_oid(o, l)
-	oid *o;
-	int l;
-{
-	int i;
-
-	for (i=0; i<l; i++) {
-		printf(".%ld", *(o+i));
-	}
 }

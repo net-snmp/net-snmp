@@ -69,7 +69,7 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-d] [-q] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p] [-h] [-d] [-q] [-D] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
@@ -82,6 +82,7 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
+  fprintf(outf, "  -D\t\tturn on debugging output.\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
@@ -132,6 +133,10 @@ snmp_parse_args(argc, argv, session)
         snmp_set_quick_print(1);
         break;
 
+      case 'D':
+        snmp_set_do_debugging(1);
+        break;
+        
       case 'p':
         if (isdigit(argv[arg][2]))
           session->remote_port = atoi(&(argv[arg][2]));
@@ -232,6 +237,9 @@ snmp_parse_args(argc, argv, session)
         break;
     }
   }
+
+  /* read in MIB database */
+  init_mib();
 
   /* get the hostname */
   if (arg == argc) {

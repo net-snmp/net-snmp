@@ -101,12 +101,12 @@ header_hrswinst(vp, name, length, exact, var_len, write_method)
 #define HRSWINST_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrswinst: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrswinst: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[HRSWINST_NAME_LENGTH] = 0;
@@ -134,12 +134,12 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int swinst_idx, LowIndex = -1;
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrswInstEntry: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrswInstEntry: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
 	/* Find "next" installed software entry */
@@ -147,16 +147,14 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
     Init_HR_SWInst();
     for ( ;; ) {
         swinst_idx = Get_Next_HR_SWInst();
-#ifdef DODEBUG
-printf ("(index %d ....", swinst_idx);
-#endif
+        DEBUGP ("(index %d ....", swinst_idx);
         if ( swinst_idx == -1 )
 	    break;
 	newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
-#ifdef DODEBUG
-sprint_objid (c_oid, newname, *length);
-printf ("%s\n", c_oid);
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, newname, *length);
+          DEBUGP ("%s\n", c_oid);
+        }
         result = compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = swinst_idx;
@@ -175,9 +173,7 @@ printf ("%s\n", c_oid);
 
     End_HR_SWInst();
     if ( LowIndex == -1 ) {
-#ifdef DODEBUG
-        printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return(MATCH_FAILED);
     }
 
@@ -186,10 +182,10 @@ printf ("%s\n", c_oid);
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("... get installed S/W stats %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("... get installed S/W stats %s\n", c_oid);
+    }
     return LowIndex;
 }
 

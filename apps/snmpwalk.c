@@ -115,9 +115,6 @@ main(argc, argv)
     unsigned long histid1, histid2, orig_size, current_size;
 #endif
 
-    /* read in MIB database */
-    init_mib();
-
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
 
