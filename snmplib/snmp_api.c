@@ -103,7 +103,13 @@ SOFTWARE.
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "callback.h"
+#include "snmp_secmod.h"
+#ifdef SNMP_SECMOD_USM
 #include "snmpusm.h"
+#endif
+#ifdef SNMP_SECMOD_KSM
+#include "snmpksm.h"
+#endif
 #include "tools.h"
 #include "keytools.h"
 #include "lcd_time.h"
@@ -276,7 +282,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Out of memory (malloc failure)",	   /* SNMPERR_MALLOC */
 };
 
-static const char * usmSecLevelName[] =
+static const char * secLevelName[] =
 	{
 		"BAD_SEC_LEVEL",
 		"noAuthNoPriv",
@@ -593,6 +599,7 @@ snmp_sess_init(struct snmp_session *session)
     session->timeout = SNMP_DEFAULT_TIMEOUT;
     session->retries = SNMP_DEFAULT_RETRIES;
     session->version = SNMP_DEFAULT_VERSION;
+    session->securityModel = SNMP_DEFAULT_SECMODEL;
 }
 
 
@@ -743,6 +750,7 @@ _sess_copy( struct snmp_session *in_session)
     struct session_list *slp;
     struct snmp_internal_session *isp;
     struct snmp_session *session;
+    struct snmp_secmod_def *sptr;
     char *cp;
     u_char *ucp;
     size_t i;
@@ -976,6 +984,14 @@ _sess_copy( struct snmp_session *in_session)
 	session->timeout = DEFAULT_TIMEOUT;
     session->sessid = snmp_get_next_sessid();
 
+    if ((sptr = find_sec_mod(session->securityModel)) != NULL &&
+        sptr->init_sess_secmod != NULL) {
+        /* security module specific inialization */
+        (*sptr->init_sess_secmod)(session, sptr);
+    }
+
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SESSION_INIT,
+                        session);
     return( slp );
 }
 
@@ -1704,7 +1720,7 @@ snmpv3_build(struct snmp_session	*session,
 	}
 	pdu->contextNameLen = session->contextNameLen;
       }
-      pdu->securityModel = SNMP_SEC_MODEL_USM;
+      pdu->securityModel = session->securityModel;
       if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
 	if (session->securityNameLen == 0){
 	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
@@ -1729,7 +1745,7 @@ snmpv3_build(struct snmp_session	*session,
                   ((session->securityName) ? (char *)session->securityName :
                    ((pdu->securityName) ? (char *)pdu->securityName : 
                     "ERROR: undefined")),
-                  usmSecLevelName[pdu->securityLevel]));
+                  secLevelName[pdu->securityLevel]));
 
   DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef USE_REVERSE_ASNENCODING
@@ -1821,7 +1837,7 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
     if (cp == NULL) return NULL;
 
     							/* msgSecurityModel */
-    sec_model = SNMP_SEC_MODEL_USM;
+    sec_model = pdu->securityModel;
     DEBUGDUMPHEADER("send", "msgSecurityModel");
     cp = asn_build_int(cp, out_length,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
@@ -1860,7 +1876,7 @@ snmpv3_header_rbuild(struct snmp_pdu *pdu, u_char *packet,
     long			 sec_model;
 
     /* msgSecurityModel */
-    sec_model = SNMP_SEC_MODEL_USM;
+    sec_model = pdu->securityModel;
     DEBUGDUMPHEADER("send", "msgSecurityModel");
     cp = asn_rbuild_int(cp, out_length,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
@@ -1991,7 +2007,7 @@ snmpv3_scopedPDU_header_rbuild(struct snmp_pdu *pdu,
 #endif /* USE_REVERSE_ASNENCODING */
 
 #ifdef USE_REVERSE_ASNENCODING
-/* returns 0 if success, -1 if fail, not 0 if USM build failure */
+/* returns 0 if success, -1 if fail, not 0 if SM build failure */
 int
 snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
                      u_char *pdu_data, size_t pdu_data_len)
@@ -2002,6 +2018,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     u_char	*cp = packet;
     int      result;
     size_t      tmp_len = *out_length;
+    struct snmp_secmod_def *sptr;
 
     if (!out_length)
         return -1;
@@ -2048,26 +2065,46 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
      * call the security module to possibly encrypt and authenticate the
      * message - the entire message to transmitted on the wire is returned
      */
-    DEBUGDUMPSECTION("send", "USM msgSecurityParameters");
-    result =
-     	usm_rgenerate_out_msg(
-			SNMP_VERSION_3,		
-			global_data+1, SNMP_MAX_MSG_V3_HDRS - header_buf_len,
-                        SNMP_MAX_MSG_SIZE,	
-			SNMP_SEC_MODEL_USM,
-                        pdu->securityEngineID,	pdu->securityEngineIDLen,
-                        pdu->securityName,	pdu->securityNameLen,
-                        pdu->securityLevel,	
-			cp+1, packet-cp,
-			pdu->securityStateRef,
-                        packet, out_length);
+
+    sptr = find_sec_mod(pdu->securityModel);
+    DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
+    if (sptr && sptr->reverse_encode_out) {
+        struct snmp_secmod_outgoing_params parms;
+        parms.msgProcModel = pdu->msgParseModel;
+        parms.globalData = global_data+1;
+        parms.globalDataLen = SNMP_MAX_MSG_V3_HDRS - header_buf_len;
+        parms.maxMsgSize = SNMP_MAX_MSG_SIZE;
+        parms.secModel = pdu->securityModel;
+        parms.secEngineID = pdu->securityEngineID;
+        parms.secEngineIDLen = pdu->securityEngineIDLen;
+        parms.secName = pdu->securityName;
+        parms.secNameLen = pdu->securityNameLen;
+        parms.secLevel = pdu->securityLevel;
+        parms.scopedPdu = cp+1;
+        parms.scopedPduLen = packet-cp;
+        parms.secStateRef = pdu->securityStateRef;
+        parms.wholeMsg = &packet;
+        parms.wholeMsgLen = out_length;
+        result =
+            (*sptr->reverse_encode_out)(&parms);
+    } else {
+        if (!sptr)
+            snmp_log(LOG_ERR, "no such security service available: %d\n",
+                     pdu->securityModel);
+        else if (!sptr->reverse_encode_out) {
+            snmp_log(LOG_ERR, "security service %d doesn't support reverse outgoing encoding.\n",
+                     pdu->securityModel);
+        }
+        result = -1;
+    }
+    
     DEBUGINDENTLESS();
     return result;
 
 }  /* end snmpv3_packet_build() */
 #endif /* USE_REVERSE_ASNENCODING */
 
-/* returns 0 if success, -1 if fail, not 0 if USM build failure */
+/* returns 0 if success, -1 if fail, not 0 if SM build failure */
 int
 snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 		    u_char *pdu_data, size_t pdu_data_len)
@@ -2078,6 +2115,7 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     size_t	 spdu_buf_len, spdu_len;
     u_char	*cp;
     int      result;
+    struct snmp_secmod_def *sptr;
 
     global_data = packet;
 
@@ -2127,22 +2165,40 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
      * message - the entire message to transmitted on the wire is returned
      */
     cp = NULL; *out_length = SNMP_MAX_MSG_SIZE;
-    DEBUGDUMPSECTION("send", "USM msgSecurityParameters");
-    result =
-     	usm_generate_out_msg(
-			SNMP_VERSION_3,		
-			global_data,		global_data_len,
-                        SNMP_MAX_MSG_SIZE,	
-			SNMP_SEC_MODEL_USM,
-                        pdu->securityEngineID,	pdu->securityEngineIDLen,
-                        pdu->securityName,	pdu->securityNameLen,
-                        pdu->securityLevel,	
-			spdu_buf,		spdu_len, 
-			pdu->securityStateRef,
-			sec_params,		&sec_params_len,
-                        &cp,			out_length);
+    DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
+    sptr = find_sec_mod(pdu->securityModel);
+    if (sptr && sptr->forward_encode_out) {
+        struct snmp_secmod_outgoing_params parms;
+        parms.msgProcModel = pdu->msgParseModel;
+        parms.globalData = global_data;
+        parms.globalDataLen = global_data_len;
+        parms.maxMsgSize = SNMP_MAX_MSG_SIZE;
+        parms.secModel = pdu->securityModel;
+        parms.secEngineID = pdu->securityEngineID;
+        parms.secEngineIDLen = pdu->securityEngineIDLen;
+        parms.secName = pdu->securityName;
+        parms.secNameLen = pdu->securityNameLen;
+        parms.secLevel = pdu->securityLevel;
+        parms.scopedPdu = spdu_buf;
+        parms.scopedPduLen = spdu_len;
+        parms.secStateRef = pdu->securityStateRef;
+        parms.secParams = sec_params;
+        parms.secParamsLen = &sec_params_len;
+        parms.wholeMsg = &cp;
+        parms.wholeMsgLen = out_length;
+        result =
+            (*sptr->forward_encode_out)(&parms);
+    } else {
+        if (!sptr) {
+            snmp_log(LOG_ERR, "no such security service available: %d\n",
+                     pdu->securityModel);
+        } else if (!sptr->forward_encode_out) {
+            snmp_log(LOG_ERR, "security service %d doesn't support forward out encoding.\n",
+                     pdu->securityModel);
+        }
+        result = -1;
+    }
     DEBUGINDENTLESS();
-
     return result;
 
 }  /* end snmpv3_packet_build() */
@@ -2784,6 +2840,7 @@ snmpv3_parse(
   u_char	*cp;
   size_t	 asn_len, msg_len;
   int		 ret, ret_val;
+  struct snmp_secmod_def *sptr;
 
 
   msg_data =  data;
@@ -2881,8 +2938,9 @@ snmpv3_parse(
     DEBUGINDENTLESS();
     return SNMPERR_ASN_PARSE_ERR;
   }
-  if (msg_sec_model != SNMP_SEC_MODEL_USM) {
-    ERROR_MSG("unknown security model");
+  sptr = find_sec_mod(msg_sec_model);
+  if (!sptr) {
+    snmp_log(LOG_WARNING, "unknown security model: %d", msg_sec_model);
     snmp_increment_statistic(STAT_SNMPUNKNOWNSECURITYMODELS);
     DEBUGINDENTLESS();
     return SNMPERR_UNKNOWN_SEC_MODEL;
@@ -2921,16 +2979,34 @@ snmpv3_parse(
   memset(pdu_buf, 0, pdu_buf_len);
   cp = pdu_buf;
 
-  DEBUGDUMPSECTION("recv", "USM msgSecurityParameters");
-  ret_val = usm_process_in_msg(SNMP_VERSION_3, msg_max_size,
-			       sec_params, msg_sec_model, pdu->securityLevel,
-			       msg_data, msg_len,
-			       pdu->securityEngineID, &pdu->securityEngineIDLen,
-			       pdu->securityName, &pdu->securityNameLen,
-			       &cp,
-			       &pdu_buf_len, &max_size_response,
-			       &pdu->securityStateRef, sess, msg_flags);
-  DEBUGINDENTLESS();
+  DEBUGDUMPSECTION("recv", "SM msgSecurityParameters");
+  if (sptr->decode_in) {
+      struct snmp_secmod_incoming_params parms;
+      parms.msgProcModel = pdu->msgParseModel;
+      parms.maxMsgSize = msg_max_size;
+      parms.secParams = sec_params;
+      parms.secModel = msg_sec_model;
+      parms.secLevel = pdu->securityLevel;
+      parms.wholeMsg = msg_data;
+      parms.wholeMsgLen = msg_len;
+      parms.secEngineID = pdu->securityEngineID;
+      parms.secEngineIDLen = &pdu->securityEngineIDLen;
+      parms.secName = pdu->securityName;
+      parms.secNameLen = &pdu->securityNameLen;
+      parms.scopedPdu = &cp;
+      parms.scopedPduLen = &pdu_buf_len;
+      parms.maxSizeResponse = &max_size_response;
+      parms.secStateRef = &pdu->securityStateRef;
+      parms.sess = sess;
+      parms.msg_flags = msg_flags;
+      ret_val =
+          (*sptr->decode_in)(&parms);
+  } else {
+      DEBUGINDENTLESS();
+      snmp_log(LOG_WARNING, "security service %d can't decode packets\n",
+               msg_sec_model);
+      return(-1);
+  }
 
   if (ret_val != SNMPERR_SUCCESS) {
     DEBUGDUMPSECTION("recv", "ScopedPDU");
@@ -2995,7 +3071,8 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
   oid *err_var;
   int err_var_len;
   int stat_ind;
-
+  struct snmp_secmod_def *sptr;
+  
   switch (error) {
   case SNMPERR_USM_UNKNOWNENGINEID:
     stat_ind = STAT_USMSTATSUNKNOWNENGINEIDS;
@@ -3050,10 +3127,22 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
      which cached values to use 
   */
   if (pdu->securityStateRef) {
-    usm_free_usmStateReference(pdu->securityStateRef);
-    pdu->securityStateRef = NULL;
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr) {
+          if (sptr->free_state_ref) {
+              (*sptr->free_state_ref)(pdu->securityStateRef);
+          } else {
+              snmp_log(LOG_ERR,
+                       "Security Model %d can't free state references\n",
+                       pdu->securityModel);
+          }
+      } else {
+          snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+                   pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
   }
-  
+
   if (error != SNMPERR_USM_NOTINTIMEWINDOW) 
     pdu->securityLevel          = SNMP_SEC_LEVEL_NOAUTH;
   else
@@ -3210,7 +3299,7 @@ _snmp_parse(void * sessp,
       result = snmpv3_parse(pdu, data, &length, NULL, session);
       DEBUGMSGTL(("snmp_parse",
                    "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
-                   pdu->securityName, usmSecLevelName[pdu->securityLevel],
+                   pdu->securityName, secLevelName[pdu->securityLevel],
                    snmp_api_errstring(result)));
 
       if (result) {
@@ -3943,7 +4032,8 @@ _sess_read(void *sessp,
   struct request_list *rp, *orp = NULL;
   int ret, olength = 0;
   void *opaque = NULL;
-
+  struct snmp_secmod_def *sptr;
+  
   sp = slp->session; isp = slp->internal;
   transport = slp->transport;
 
@@ -4172,8 +4262,20 @@ _sess_read(void *sessp,
   if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
     /* call USM to free any securityStateRef supplied with the message */
     if (pdu->securityStateRef) {
-      usm_free_usmStateReference(pdu->securityStateRef);
-      pdu->securityStateRef = NULL;
+        sptr = find_sec_mod(pdu->securityModel);
+        if (sptr) {
+            if (sptr->free_state_ref) {
+                (*sptr->free_state_ref)(pdu->securityStateRef);
+            } else {
+                snmp_log(LOG_ERR,
+                         "Security Model %d can't free state references\n",
+                         pdu->securityModel);
+            }
+        } else {
+            snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+                     pdu->securityModel);
+        }
+        pdu->securityStateRef = NULL;
     }
     for(rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
       snmp_callback callback;
@@ -4264,8 +4366,20 @@ _sess_read(void *sessp,
   }
   /* call USM to free any securityStateRef supplied with the message */
   if (pdu != NULL && pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
-    usm_free_usmStateReference(pdu->securityStateRef);
-    pdu->securityStateRef = NULL;
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr) {
+          if (sptr->free_state_ref) {
+              (*sptr->free_state_ref)(pdu->securityStateRef);
+          } else {
+              snmp_log(LOG_ERR,
+                       "Security Model %d can't free state references\n",
+                       pdu->securityModel);
+          }
+      } else {
+          snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+                   pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
   }
   snmp_free_pdu(pdu);
   return 0;
@@ -4661,7 +4775,7 @@ snmp_oid_compare(const oid *in_name1,
 		 const oid *in_name2, 
 		 size_t len2)
 {
-    register int len, res;
+    register int len;
     register const oid * name1 = in_name1;
     register const oid * name2 = in_name2;
 

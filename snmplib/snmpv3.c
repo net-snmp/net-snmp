@@ -72,6 +72,7 @@
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 
 #include "transform_oids.h"
@@ -720,12 +721,7 @@ init_snmpv3(const char *type) {
   /* initialize submodules */
   /*   NOTE: this must be after the callbacks are registered above,
              since they need to be called before the USM callbacks. */
-  init_usm();
-
-#if		!defined(USE_INTERNAL_MD5)
-  /* doesn't belong here at all */
-  sc_init();
-#endif		/* !USE_INTERNAL_MD5 */
+  init_secmod();
 
   /* register all our configuration handlers (ack, there's a lot) */
 

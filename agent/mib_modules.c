@@ -42,6 +42,7 @@
 #include "snmp_debug.h"
 #include "tools.h"
 #include "ds_agent.h"
+#include "snmp_secmod.h"
 
 #include "mibgroup/struct.h"
 #include "mib_modules.h"

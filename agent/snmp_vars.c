@@ -107,6 +107,8 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "mibincl.h"
 #include "snmpv3.h"
+#include "snmp_secmod.h"
+#include "snmpusm.h"
 #include "snmpusm.h"
 #include "system.h"
 #include "kernel.h"

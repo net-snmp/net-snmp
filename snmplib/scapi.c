@@ -42,6 +42,7 @@
 #include "tools.h"
 #include "snmp_api.h"
 #include "callback.h"
+#include "snmp_secmod.h"
 #include "snmpusm.h"
 #include "keytools.h"
 #include "snmp_debug.h"

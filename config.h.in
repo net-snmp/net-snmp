@@ -1146,6 +1146,11 @@
     available.  */
 #undef SNMP_TRANSPORT_IPX_DOMAIN
 
+/* define this if the USM security module is available */
+#undef SNMP_SECMOD_USM
+
+/* define this if the KSM (kerberos based snmp) security module is available */
+#undef SNMP_SECMOD_KSM
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
