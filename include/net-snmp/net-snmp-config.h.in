@@ -1377,5 +1377,6 @@
 #endif
 
 #undef INET6
+#undef LOCAL_SMUX
 
 #endif /* NET_SNMP_CONFIG_H */
