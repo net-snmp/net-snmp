@@ -3533,9 +3533,9 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     printf("\n");
   }
 
-  if (pdu->address.sa_family == AF_INET)
+  if (rp->pdu->address.sa_family == AF_INET)
 	addr_size = sizeof( struct sockaddr_in );
-  else if (pdu->address.sa_family == AF_UNIX)
+  else if (rp->pdu->address.sa_family == AF_UNIX)
 	addr_size = sizeof( struct sockaddr_un );
   else
 	addr_size = sizeof( struct sockaddr );
