@@ -31,14 +31,18 @@ init_kmem(file)
   if (kmem < 0){
     fprintf(stderr, "cannot open %s: ",file);
     perror(NULL);
+#ifndef NO_ROOT_ACCESS
     exit(1);
+#endif
   }
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
     fprintf(stderr, "cannot open /dev/mem: ");
     perror(NULL);
+#ifndef NO_ROOT_ACCESS
     exit(1);
+#endif
   }
   fcntl(mem,F_SETFD,1);
 #ifdef DMEM_LOC
@@ -46,7 +50,9 @@ init_kmem(file)
   if (swap < 0){
     fprintf(stderr, "cannot open %s: ",DMEM_LOC);
     perror(NULL);
+#ifndef NO_ROOT_ACCESS
     exit(1);
+#endif
   }
   fcntl(swap,F_SETFD,1);
 #endif
