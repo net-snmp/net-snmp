@@ -172,6 +172,20 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
     return NULL;
 }
 
+int
+netsnmp_oid_stash_store_all(int majorID, int minorID,
+                            void *serverarg, void *clientarg) {
+    oid oidbase[MAX_OID_LEN];
+    netsnmp_oid_stash_save_info *sinfo;
+    
+    if (!clientarg)
+        return SNMP_ERR_NOERROR;
+    
+    sinfo = clientarg;
+    netsnmp_oid_stash_store(*(sinfo->root), sinfo->token, sinfo->dumpfn,
+                            oidbase,0);
+}
+
 void
 netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
                         char *tokenname, NetSNMPStashDump *dumpfn,
