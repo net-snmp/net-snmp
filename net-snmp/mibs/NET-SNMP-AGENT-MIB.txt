@@ -14,7 +14,7 @@ IMPORTS
     OBJECT-GROUP, NOTIFICATION-GROUP
 	FROM SNMPv2-CONF
 
-    DisplayString, TruthValue FROM SNMPv2-TC;
+    DisplayString, RowStatus, TruthValue FROM SNMPv2-TC;
 
 
 netSnmpAgentMIB MODULE-IDENTITY
@@ -96,45 +96,39 @@ nsDebugTokenEntry     OBJECT-TYPE
     STATUS      current
     DESCRIPTION
       "A conceptual row within the debug token table."
+    INDEX       { IMPLIED nsDebugTokenPrefix }
     ::= { nsDebugTokenTable 1 }
 
 NsDebugTokenEntry ::= SEQUENCE {
-    nsDebugTokenIndex   INTEGER,
     nsDebugTokenPrefix  DisplayString,
-    nsDebugTokenEnabled TruthValue
+    nsDebugTokenStats   RowStatus
 }
-
-nsDebugTokenIndex     OBJECT-TYPE
-    SYNTAX      INTEGER(0..128)
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-      "An arbitrary index into the debug token table."
-    ::= { nsDebugTokenEntry 1 }
 
 nsDebugTokenPrefix    OBJECT-TYPE
     SYNTAX      DisplayString
-    MAX-ACCESS  read-create
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
       "A token prefix for which to generate the corresponding
        debugging output.  Note that debug output will be generated
        for all registered debug statements sharing this prefix
        (rather than an exact match).  Nothing will be generated
-       unless both nsDebuggingEnabled and the corresponding
-       nsDebugTokenEnabled values are also true(1)."
+       unless both nsDebuggingEnabled is set true(1) and the
+       corresponding nsDebugTokenStatus value is active(1)."
     ::= { nsDebugTokenEntry 2 }
 
-nsDebugTokenEnabled   OBJECT-TYPE
-    SYNTAX      TruthValue
-    MAX-ACCESS  not-accessible
+nsDebugTokenStatus   OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
       "Whether to generate debug output for the corresponding debug
        token prefix.  Nothing will be generated unless both
-       nsDebuggingEnabled and this instance are true(1)."
-    DEFVAL { false }
-    ::= { nsDebugTokenEntry 3 }
+       nsDebuggingEnabled is true(1) and this instance is active(1).
+       Note that is valid for an instance to be left with the value
+       notInService(2) indefinitely - i.e. the meaning of 'abnormally
+       long' (see RFC 2579, RowStatus) for this table is infinite."
+    ::= { nsDebugTokenEntry 4 }
 
 --
 --  Monitoring outstanding "transactions"
@@ -312,7 +306,7 @@ nsConfigGroups OBJECT IDENTIFIER ::= {netSnmpGroups 7}
 nsDebugGroup  OBJECT-GROUP
     OBJECTS {
         nsDebugEnabled, nsDebugOutputAll, nsDebugDumpPdu,
-        nsDebugTokenPrefix, nsDebugTokenEnabled
+        nsDebugTokenPrefix, nsDebugTokenStatus
     }
     STATUS	current
     DESCRIPTION
