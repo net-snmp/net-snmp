@@ -36,6 +36,7 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
 	table_container.h \
         table.h \
         table_iterator.h \
+	mfd.h \
 	mode_end_call.h
 
 
