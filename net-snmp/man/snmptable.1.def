@@ -15,37 +15,60 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTABLE 1 "11 Sep 2000" "" "Net-SNMP"
+.TH SNMPTABLE 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptable - obtain and print an SNMP table
 .SH SYNOPSIS
-snmptable [common arguments] [options] tableID
+.B snmptable
+[COMMON OPTIONS] table-OID
 .SH DESCRIPTION
-Snmptable is an SNMP application that uses the GETNEXT Request to query for
-information on a network entity.
-The \fItableID\fR must specify an SNMP table.
-.PP
-.I snmptable
-has the following special options:
-.IP "-Cf F"
-\fIF\fR is a string used to separate table columns.
-With this option, each table entry will be printed in compact form, just with
-the string given to separate the columns (useful if you want to import it
-into a database).
-Otherwise it is printed in nicely aligned columns.
-.IP "-Cw W"
-\fIW\fR specifies the width of the lines when the table is printed.
+.B snmptable
+is an SNMP application that repeatedly uses the SNMP GETNEXT or
+GETBULK requests to query for information on a network entity.  The
+parameter
+.I table-OID
+must specify an SNMP table.
+.SH OPTIONS
+.TP 8
+.B -Cb
+Display only a brief heading. Any common prefix of the table field
+names will be deleted.
+.TP 
+.B -CB
+Do not use GETBULK requests to retrieve data, only GETNEXT.
+.TP
+.BI -Cf " STRING"
+The string
+.I STRING
+is used to separate table columns.  With this option, each table entry
+will be printed in compact form, just with the string given to
+separate the columns (useful if you want to import it into a
+database).  Otherwise it is printed in nicely aligned columns.
+.TP
+.B -Ch
+Display
+.I only
+the column headings.
+.TP
+.B -CH
+Do not display the column headings.
+.TP
+.B -Ci
+This option prepends the index of the entry to all printed lines.
+.TP 
+.BI -Cw " WIDTH"
+Specifies the width of the lines when the table is printed.
 If the lines will be longer, the table will be printed in sections of
-max \fIW\fR characters.
-.IP "-Ci"
-this option prepends the index of the entry to all printed lines
-.IP "-Cb"
-brief heading. Any common prefix of the table field names will be
-deleted
-.IP "-CB"
-don't use GETBULK requests to retrieve data, only GETNEXT
+at most 
+.I WIDTH 
+characters.
 .PP
+In addition to these options,
+.B snmptable
+takes the common options described in the 
+.I snmpcmd(1)
+manual page.
 .SH EXAMPLES
 $ snmptable localhost public at.attable
 
@@ -62,8 +85,10 @@ atIfIndex+atPhysAddress+atNetAddress
 1+8:0:20:20:0:ab+130.225.243.33
 .PP
 .SH "BUGS"
-The test for tableID actually specifying a table is rather heuristic.
-Note also, that the test requires the defining MIB file to be loaded.
+The test for
+.I table-OID
+actually specifying a table is rather heuristic.  Note also that the
+test requires the defining MIB file to be loaded.
 .PP
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
