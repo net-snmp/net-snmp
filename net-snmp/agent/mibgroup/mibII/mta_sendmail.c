@@ -7,6 +7,25 @@
  *    - supports sendmail 8.10.0 statistics files now
  *    - function read_option has been removed
  *
+ *  12.04.2000:
+ *
+ *    - renamed configuration tokens:
+ *        sendmail config        -> sendmail_config
+ *        sendmail stats         -> sendmail_stats
+ *        sendmail queue         -> sendmail_queue
+ *        sendmail index         -> sendmail_index
+ *        sendmail statcachetime -> sendmail_stats_t
+ *        sendmail dircacetime   -> sendmail_queue_t
+ *
+ *    - now using snmpd_register_config_handler instead of config_parse_dot_conf
+ *
+ *  15.04.2000:
+ *
+ *    - introduced new function print_error
+ *    - changed open_sendmailst and read_sendmailcf to use the new function
+ *    - changed calls to open_sendmailst and read_sendmailcf
+ *    - added some error handling to calls to chdir(), close() and closedir()
+ *
  */
 
 
@@ -73,6 +92,14 @@
 #  include <time.h>
 # endif
 #endif
+
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
+#include <errno.h>
 
 /**/
 
@@ -206,7 +233,7 @@ static long   *stat_nr;   /* pointer to stat_nr array within the statistics stru
 static long   *stat_nd;   /* pointer to stat_nd array within the statistics structure,
                              only valid for statistics files from sendmail >=V8.9.0    */
 static int    stats_size; /* size of statistics structure */
-static long   stats[sizeof (struct statisticsV8_10) / sizeof (int) + 1]; /* buffer for statistics structure */
+static long   stats[sizeof (struct statisticsV8_10) / sizeof (long) + 1]; /* buffer for statistics structure */
 static time_t lastreadstats;        /* time stats file has been read */
 static long   mqueue_count;         /* number of messages in queue */
 static long   mqueue_size;          /* total size of messages in queue */
@@ -217,7 +244,76 @@ static long   dir_cache_time = 10;  /* time (in seconds) to wait before scanning
 
 /**/
 
-/** static void open_sendmailst(void)
+/** static void print_error(int priority, BOOL config, BOOL config_only, char *function, char *format, ...)
+ *
+ *  Description:
+ *
+ *    Called to print errors. It uses the config_perror or the snmp_log function
+ *    depending on whether the config parameter is TRUE or FALSE.
+ *
+ *  Parameters:
+ *
+ *    priority:    priority to be used when calling the snmp_log function
+ *
+ *    config:      indicates whether this function has been called during the
+ *                 configuration process or not. If set to TRUE, the function
+ *                 config_perror will be used to report the error.
+ *
+ *    config_only: if set to TRUE, the error will only be printed when function
+ *                 has been called during the configuration process.
+ *
+ *    function:    name of the calling function. Used when printing via snmp_log.
+ *
+ *    format:      format string for the error message
+ *
+ *    ...:         additional parameters to insert into the error message string
+ *
+ */
+
+#if HAVE_STDARG_H
+static void print_error(int priority, BOOL config, BOOL config_only, const char *function, const char *format, ...)
+#else
+static void print_error(va_alist)
+  va_dcl
+#endif
+{
+  va_list ap;
+  char buffer[2*FILENAMELEN+200]; /* I know, that's not perfectly safe, but since I don't use more
+                                     than two filenames in one error message, that should be enough */
+
+#if HAVE_STDARG_H
+  va_start(ap, format);
+#else
+  int priority;
+  BOOL config;
+  BOOL config_only;
+  const char *function;
+  const char *format;
+
+  va_start(ap);
+  priority    = va_arg(ap, int);
+  config      = va_arg(ap, BOOL);
+  config_only = va_arg(ap, BOOL);
+  function    = va_arg(ap, char *);
+  format      = va_arg(ap, char *);
+#endif
+
+  vsprintf(buffer, format, ap);
+
+  if (config)
+  {
+    config_perror(buffer);
+  }
+  else if (!config_only)
+  {
+    snmp_log(priority, "%s: %s\n", function, buffer);
+  }
+  va_end(ap);
+}
+
+/**/
+
+/** static void open_sendmailst(BOOL config)
  *
  *  Description:
  *
@@ -227,7 +323,7 @@ static long   dir_cache_time = 10;  /* time (in seconds) to wait before scanning
  *
  *  Parameters:
  *
- *    none
+ *    config: TRUE if function has been called during the configuration process
  *
  *  Returns:
  *
@@ -235,19 +331,23 @@ static long   dir_cache_time = 10;  /* time (in seconds) to wait before scanning
  *
  */
 
-static void open_sendmailst(void)
+static void open_sendmailst(BOOL config)
 {
   int filelen;
 
   if (sendmailst_fh != -1)
   {
-    close(sendmailst_fh);
+      while (close(sendmailst_fh) == -1 && errno == EINTR)
+      {
+        /* do nothing */
+      }
   }
 
   sendmailst_fh = open(sendmailst_fn, O_RDONLY);
 
   if (sendmailst_fh == -1)
   {
+    print_error(LOG_ERR, config, TRUE, "mibII/mta_sendmail.c:open_sendmailst","could not open file \"%s\"\n", sendmailst_fn);
     return;
   }
 
@@ -281,8 +381,11 @@ static void open_sendmailst(void)
       stat_nd = (((struct statisticsV8_9 *)stats)->stat_nd);
       stats_size = sizeof (struct statisticsV8_9);
     } else {
-      snmp_log(LOG_ERR, "mibII/mta_sendmail.c:open_sendmailst: could not guess version of statistics file \"%s\"\n", sendmailst_fn);
-      close(sendmailst_fh);
+      print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:open_sendmailst", "could not guess version of statistics file \"%s\"\n", sendmailst_fn);
+      while (close(sendmailst_fh) == -1 && errno == EINTR)
+      {
+        /* do nothing */
+      }
       sendmailst_fh = -1;
     }
   } else {
@@ -298,8 +401,11 @@ static void open_sendmailst(void)
       stat_nd = (long *) NULL;
       stats_size = sizeof (struct statisticsV8_8);
     } else {
-      snmp_log(LOG_ERR, "mibII/mta_sendmail.c:open_sendmailst: could not guess version of statistics file \"%s\"\n", sendmailst_fn);
-      close(sendmailst_fh);
+      print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:open_sendmailst", "could not guess version of statistics file \"%s\"\n", sendmailst_fn);
+      while (close(sendmailst_fh) == -1 && errno == EINTR)
+      {
+        /* do nothing */
+      }
       sendmailst_fh = -1;
     }
   }
@@ -307,7 +413,7 @@ static void open_sendmailst(void)
 
 /**/
 
-/** int read_sendmailcf(void)
+/** static BOOL read_sendmailcf(BOOL config)
  *
  *  Description:
  *
@@ -316,21 +422,17 @@ static void open_sendmailst(void)
  *
  *  Parameters:
  *
- *    none
+ *    config: TRUE if function has been called during the configuration process
  *
  *  Returns:
  *
- *    0 : no error
+ *    TRUE  : config file has been successfully opened
  *
- *    1 : couldn't read file
- *
- *    2 : couldn't open file
- *
- *    3 : couldn't open status file or mailqueue directory named in file
+ *    FALSE : could not open config file
  *
  */
 
-static int read_sendmailcf(void)
+static BOOL read_sendmailcf(BOOL config)
 {
   FILE *sendmailcf_fp;
   char line[500];
@@ -339,14 +441,14 @@ static int read_sendmailcf(void)
   int  linelen;
   int  found_sendmailst = FALSE;
   int  found_mqueue     = FALSE;
-  int  ErrorStatus = 0;
   int  i;
 
 
   sendmailcf_fp = fopen(sendmailcf_fn, "r");
   if (sendmailcf_fp == NULL)
   {
-    return 2;
+    print_error(LOG_ERR, config, TRUE, "mibII/mta_sendmail.c:read_sendmailcf", "could not open file \"%s\"\n", sendmailcf_fn);
+    return FALSE;
   }
 
   /* initializes the standard mailers, which aren't necessarily mentioned in the sendmail.cf file */
@@ -362,7 +464,7 @@ static int read_sendmailcf(void)
 
     if (line[linelen - 1] != '\n')
     {
-      snmp_log(LOG_WARNING, "mibII/mta_sendmail.c:read_sendmailcf: line %d in config file \"%s\" is too long\n", linenr, sendmailcf_fn);
+      print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d in config file \"%s\" is too long\n", linenr, sendmailcf_fn);
       while (fgets(line, sizeof line, sendmailcf_fp) != NULL && line[strlen(line) - 1] != '\n') /* skip rest of the line */
       {
         /* nothing to do */
@@ -386,12 +488,13 @@ static int read_sendmailcf(void)
           }
           mailernames[mailers][i-1] = '\0';
 
+          DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailer \"%s\"\n",mailernames[mailers]));
+
           for (i=0; i < mailers && strcmp(mailernames[mailers], mailernames[i]) != 0; i++)
           {
             /* nothing to do */
           }
 
-          DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailer \"%s\"\n",mailernames[mailers]));
           if (i == mailers)
           {
             mailers++;
@@ -405,8 +508,7 @@ static int read_sendmailcf(void)
             mailernames[mailers][0]='\0';
           }
         } else {
-          snmp_log(LOG_WARNING, "mibII/mta_sendmail.c:read_sendmailcf: found too many mailers in config file \"%s\"\n", sendmailcf_fn);
-          ErrorStatus = 1;
+          print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "found too many mailers in config file \"%s\"\n", sendmailcf_fn);
         }
 
 
@@ -444,8 +546,7 @@ static int read_sendmailcf(void)
 
             if (*filename != '=')
             {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: line %d in config file \"%s\" ist missing an '='\n", linenr, sendmailcf_fn);
-              ErrorStatus = 1;
+              print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d in config file \"%s\" ist missing an '='\n", linenr, sendmailcf_fn);
               break;
             }
 
@@ -457,8 +558,7 @@ static int read_sendmailcf(void)
 
             if (strlen(filename) > FILENAMELEN)
             {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
-              ErrorStatus = 1;
+              print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
 
@@ -475,7 +575,7 @@ static int read_sendmailcf(void)
               found_mqueue = TRUE;
               DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailqueue directory \"%s\"\n", mqueue_dn));
             } else {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: I refuse to believe, that this actually did happen.\n");
+              print_error(LOG_CRIT, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "This shouldn't happen.\n");
             }
 
            break;
@@ -484,8 +584,7 @@ static int read_sendmailcf(void)
 
             if (strlen(line+2) > FILENAMELEN)
             {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
-              ErrorStatus = 1;
+              print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
             strcpy(sendmailst_fn, line+2);
@@ -497,8 +596,7 @@ static int read_sendmailcf(void)
 
             if (strlen(line+2) > FILENAMELEN)
             {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
-              ErrorStatus = 1;
+              print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
             strcpy(mqueue_dn, line+2);
@@ -513,7 +611,10 @@ static int read_sendmailcf(void)
     linenr++;
   }
 
-  fclose(sendmailcf_fp);
+  for (i = 0; i < 10 && fclose(sendmailcf_fp) != 0; i++)
+  {
+    /* nothing to do */
+  }
 
   for (i = mailers; i < MAXMAILERS; i++)
   {
@@ -522,47 +623,46 @@ static int read_sendmailcf(void)
 
   if (found_sendmailst)
   {
-    open_sendmailst();
-    if (sendmailst_fh == -1)
-    {
-      ErrorStatus = 3;
-    }
+    open_sendmailst(config);
   }
 
   if (found_mqueue)
   {
     if (mqueue_dp)
     {
-      closedir(mqueue_dp);
+      while (closedir(mqueue_dp) == -1 && errno == EINTR)
+      {
+        /* do nothing */
+      }
+
     }
     mqueue_dp = opendir(mqueue_dn);
     if (mqueue_dp == NULL)
     {
-      snmp_log(LOG_ERR, "mibII/mta_sendmail.c:read_sendmailcf: could not open mailqueue directory \"%s\" mentioned in config file \"%s\"\n", mqueue_dn, sendmailcf_fn);
-      ErrorStatus = 3;
+      print_error(LOG_ERR, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "could not open mailqueue directory \"%s\" mentioned in config file \"%s\"\n", mqueue_dn, sendmailcf_fn);
     }
   }
 
-  return ErrorStatus;
+  return TRUE;
 }
 /**/
 
-/** void mta_sendmail_parse_config(const char* token, char *line)
+/** static void mta_sendmail_parse_config(const char* token, char *line)
  *
  *  Description:
  *
- *    Called by the agent for each configuration line beginning with "sendmail".
- *    The second word in the line determines the meaning of the rest of that line:
+ *    Called by the agent for each configuration line that belongs to this module.
+ *    The possible tokens are:
  *
- *    config        - filename of the sendmail configutarion file
- *    stats         - filename of the sendmail statistics file
- *    queue         - name of the sendmail mailqueue directory
- *    index         - the ApplIndex to use for the table
- *    statcachetime - the time (in seconds) to cache statistics
- *    dircacetime   - the time (in seconds) to cache the directory scanning results
+ *    sendmail_config  - filename of the sendmail configutarion file
+ *    sendmail_stats   - filename of the sendmail statistics file
+ *    sendmail_queue   - name of the sendmail mailqueue directory
+ *    sendmail_index   - the ApplIndex to use for the table
+ *    sendmail_stats_t - the time (in seconds) to cache statistics
+ *    sendmail_queue_t - the time (in seconds) to cache the directory scanning results
  *
- *    For "config", "stats" and "queue", the copy_word function is used to copy
- *    the filename.
+ *    For "sendmail_config", "sendmail_stats" and "sendmail_queue", the copy_word
+ *    function is used to copy the filename.
  *
  *  Parameters:
  *
@@ -576,31 +676,23 @@ static int read_sendmailcf(void)
  *
  */
 
-void mta_sendmail_parse_config(const char *token, char *line)
+static void mta_sendmail_parse_config(const char *token, char *line)
 {
-  int result;
-
-  if (strcmp(token, "sendmail") != 0)
-  {
-    config_perror("unexpected config token");
-    return;
-  }
-
-  if (strlen(line) > FILENAMELEN + 6) /* Might give some false alarm, but better to be safe than sorry */
+  if (strlen(line) > FILENAMELEN) /* Might give some false alarm, but better to be safe than sorry */
   {
     config_perror("line too long");
     return;
   }
 
-  if (strncasecmp(line,"stats", 5) == 0 && isspace(line[5]))
+  if (strcasecmp(token,"sendmail_stats") == 0)
   {
-    for (line += 6; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     copy_word(line, sendmailst_fn);
 
-    open_sendmailst();
+    open_sendmailst(TRUE);
 
     if (sendmailst_fh == -1)
     {
@@ -613,53 +705,33 @@ void mta_sendmail_parse_config(const char *token, char *line)
     DEBUGMSGTL(("mibII/mta_sendmail.c:mta_sendmail_parse_config", "opened statistics file \"%s\"\n", sendmailst_fn));
     return;
   }
-  else if (strncasecmp(line,"config", 6) == 0 && isspace(line[6]))
+  else if (strcasecmp(token,"sendmail_config") == 0)
   {
-    for (line += 7; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     copy_word(line, sendmailcf_fn);
 
-    result = read_sendmailcf();
-
-    if (result == 3)
-    {
-      char str[FILENAMELEN+50];
-      sprintf (str, "could not open a file mentioned in configfile \"%s\"", sendmailcf_fn);
-      config_perror(str);
-      return;
-    }
-
-    if (result == 2)
-    {
-      char str[FILENAMELEN+50];
-      sprintf (str, "could not open file \"%s\"", sendmailcf_fn);
-      config_perror(str);
-      return;
-    }
-
-    if (result == 1)
-    {
-      char str[FILENAMELEN+50];
-      sprintf (str, "an error occured while reading config file \"%s\"", sendmailcf_fn);
-      config_perror(str);
-    }
+    read_sendmailcf(TRUE);
 
     DEBUGMSGTL(("mibII/mta_sendmail.c:mta_sendmail_parse_config", "read config file \"%s\"\n", sendmailcf_fn));
     return;
   }
-  else if (strncasecmp(line,"queue", 5) == 0 && isspace(line[5]))
+  else if (strcasecmp(token,"sendmail_queue") == 0)
   {
-    for (line += 6; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     copy_word(line, mqueue_dn);
 
     if (mqueue_dp != NULL)
     {
-      closedir(mqueue_dp);
+      while (closedir(mqueue_dp) == -1 && errno == EINTR)
+      {
+        /* do nothing */
+      }
     }
 
     mqueue_dp = opendir(mqueue_dn);
@@ -675,11 +747,11 @@ void mta_sendmail_parse_config(const char *token, char *line)
     DEBUGMSGTL(("mibII/mta_sendmail.c:mta_sendmail_parse_config", "opened mailqueue directory \"%s\"\n", mqueue_dn));
     return;
   }
-  else if (strncasecmp(line,"index", 5) == 0 && isspace(line[5]))
+  else if (strcasecmp(token,"sendmail_index") == 0)
   {
-    for (line += 6; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     applindex = atol(line);
     if (applindex < 1)
@@ -688,11 +760,11 @@ void mta_sendmail_parse_config(const char *token, char *line)
       applindex = 1;
     }
   }
-  else if (strncasecmp(line,"statcachetime", 13) == 0 && isspace(line[13]))
+  else if (strcasecmp(token,"sendmail_stats_t") == 0)
   {
-    for (line += 14; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     stat_cache_time = atol(line);
     if (stat_cache_time < 1)
@@ -701,11 +773,11 @@ void mta_sendmail_parse_config(const char *token, char *line)
       applindex = 5;
     }
   }
-  else if (strncasecmp(line,"dircachetime", 12) == 0 && isspace(line[12]))
+  else if (strcasecmp(token,"sendmail_queue_t") == 0)
   {
-    for (line += 13; isspace(*line); line++)
+    while (isspace(*line))
     {
-      /* nothing to do */
+      line++;
     }
     dir_cache_time = atol(line);
     if (dir_cache_time < 1)
@@ -713,8 +785,10 @@ void mta_sendmail_parse_config(const char *token, char *line)
       config_perror("invalid cache time");
       applindex = 10;
     }
-  } else {
-    config_perror("unexpected configuration token");
+  }
+  else
+  {
+    config_perror("mibII/mta_sendmail.c says: What should I do with that token? Did you ./configure the agent properly?");
   }
 
   return;
@@ -726,8 +800,8 @@ void mta_sendmail_parse_config(const char *token, char *line)
  *  Description:
  *
  *    Called by the agent to initialize the module. The function will register
- *    the OID tree and try some default values for the sendmail.cf and
- *    sendmail.st files and for the mailqueue directory.
+ *    the OID tree and the config handler and try some default values for the
+ *    sendmail.cf and sendmail.st files and for the mailqueue directory.
  *
  *  Parameters:
  *
@@ -743,23 +817,28 @@ void init_mta_sendmail(void)
 {
   REGISTER_MIB("mibII/mta_sendmail", mta_variables, variable4, mta_variables_oid);
 
-  DEBUGMSGTL(("mibII/mta_sendmail.c", "initialized\n"));
+  snmpd_register_config_handler("sendmail_config" , mta_sendmail_parse_config, NULL, "file");
+  snmpd_register_config_handler("sendmail_stats"  , mta_sendmail_parse_config, NULL, "file");
+  snmpd_register_config_handler("sendmail_queue"  , mta_sendmail_parse_config, NULL, "directory");
+  snmpd_register_config_handler("sendmail_index"  , mta_sendmail_parse_config, NULL, "integer");
+  snmpd_register_config_handler("sendmail_stats_t", mta_sendmail_parse_config, NULL, "cachetime/sec");
+  snmpd_register_config_handler("sendmail_queue_t", mta_sendmail_parse_config, NULL, "cachetime/sec");
 
   strcpy(sendmailcf_fn, "/etc/mail/sendmail.cf");
-  if (read_sendmailcf() == 2)
+  if (read_sendmailcf(FALSE) == FALSE)
   {
     strcpy(sendmailcf_fn, "/etc/sendmail.cf");
-    read_sendmailcf();
+    read_sendmailcf(FALSE);
   }
 
   if (sendmailst_fh == -1)
   {
     strcpy(sendmailst_fn, "/etc/mail/statistics");
-    open_sendmailst();
+    open_sendmailst(FALSE);
     if (sendmailst_fh == -1)
     {
       strcpy(sendmailst_fn, "/etc/mail/sendmail.st");
-      open_sendmailst();
+      open_sendmailst(FALSE);
     }
   }
 
@@ -891,16 +970,22 @@ var_mtaEntry(struct variable *vp,
         {
           if(stat(dirptr->d_name, &filestat) == 0)
           {
-            mqueue_size += (filestat.st_size + 999) / 1000;
+            mqueue_size += (filestat.st_size + 999) / 1000; /* That's how sendmail calculates it's statistics too */
             mqueue_count++;
           } else {
             snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not get size of file \"%s\" in directory \"%s\"\n", dirptr->d_name, mqueue_dn);
-            chdir(cwd);
+            if (chdir(cwd) != 0)
+            {
+              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not go back to directory \"%s\"  where I just came from\n", mqueue_dn);
+            }
             return NULL;
           }
         }
       }
-      chdir(cwd);
+      if (chdir(cwd) != 0)
+      {
+        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not go back to directory \"%s\"  where I just came from\n", mqueue_dn);
+      }
       if (current_time != (time_t) -1)
       {
         lastreaddir = current_time;
@@ -957,7 +1042,7 @@ var_mtaEntry(struct variable *vp,
         return (unsigned char *) &long_ret;
 
     default:
-        DEBUGMSGTL(("mibII/mta_sendmail.c:mtaEntry","unknown magic value\n"));
+        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:mtaEntry: unknown magic value\n");
   }
   return NULL;
 }
@@ -1002,11 +1087,8 @@ var_mtaGroupEntry(struct variable *vp,
       return NULL;
     }
     result = snmp_oid_compare(name, *length - 2, vp->name, vp->namelen);
-    if (result != 0 || name[*length - 2] != applindex)
-    {
-      return NULL;
-    }
-    if (name[*length - 1] <= 0 || name[*length - 1] > mailers)
+    if (result != 0 || name[*length - 2] != applindex ||
+        name[*length - 1] <= 0 || name[*length - 1] > mailers)
     {
       return NULL;
     }
@@ -1044,7 +1126,6 @@ var_mtaGroupEntry(struct variable *vp,
         name[vp->namelen] = applindex;
         name[vp->namelen + 1] = 1;
       }
-
     } else { /* OID prefix too small */
       memcpy(name, vp->name, (int) vp->namelen * (int) sizeof *name);
       name[vp->namelen] = applindex;
@@ -1124,8 +1205,9 @@ var_mtaGroupEntry(struct variable *vp,
         return (unsigned char *) &long_ret;
 
     default:
-        DEBUGMSGTL(("mibII/mta_sendmail.c:mtaGroupEntry","unknown OID\n"));
+        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:mtaGroupEntry: unknown magic value\n");
   }
   return NULL;
 }
 /**/
+
