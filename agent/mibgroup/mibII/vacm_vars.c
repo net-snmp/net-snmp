@@ -791,13 +791,12 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen)
         contextNameIndex[0] = '\0';
 
     contextNameIndex[pdu->contextNameLen] = '\0';
-    if (!find_first_subtree(contextNameIndex)) {
+    if (!netsnmp_subtree_find_first(contextNameIndex)) {
         /*
          * rfc2575 section 3.2, step 1
          * no such context here; return no such context error 
          */
-        DEBUGMSGTL(("mibII/vacm_vars",
-                    "vacm_in_view: no such ctxt \"%s\"\n",
+        DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: no such ctxt \"%s\"\n",
                     contextNameIndex));
         return 6;
     }
