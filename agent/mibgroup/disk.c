@@ -171,7 +171,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
         sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
                 disks[disknum].minimumspace, (int) vfs.f_bavail);
       else
-        errmsg[0] = NULL;
+        errmsg[0] = 0;
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
@@ -220,12 +220,12 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
         sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
                 disks[disknum].minimumspace, avail * filesys.fs_fsize/1024);
       else
-        errmsg[0] = NULL;
+        errmsg[0] = 0;
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
 #endif
 #endif
-  return ((u_char *) 0);
+  return NULL;
 }
 

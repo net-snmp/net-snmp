@@ -41,10 +41,8 @@ static struct nlist tcp_nl[] = {
 #ifdef linux
 static void linux_read_tcp_stat __P((struct tcp_mib *));
 #endif
-static int TCP_Count_Connections __P((void));
-static void TCP_Scan_Init __P((void));
-static int TCP_Scan_Next __P((int *, struct inpcb *));
 
+static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -63,7 +61,7 @@ void	init_tcp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-int
+static int
 header_tcp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -423,7 +421,6 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
 {
   oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
   u_char *cp;
-  int State, LowState;
 
 #define TCP_CONN_LENGTH	20
 #define TCP_LOCADDR_OFF	10
@@ -553,12 +550,13 @@ struct tcp_mib *tcpstat;
 #define inp_prev inp_list.le_prev
 #endif
 
+#ifndef solaris2
 #ifndef linux
 /*
  *	Print INTERNET connections
  */
 
-static int TCP_Count_Connections __P((void))
+int TCP_Count_Connections __P((void))
 {
 	int Established;
 	struct inpcb cb;
@@ -622,7 +620,7 @@ static struct inpcb tcp_inpcb, *tcp_prev;
 static struct inpcb *inpcb_list;
 #endif
 
-static void TCP_Scan_Init __P((void))
+void TCP_Scan_Init __P((void))
 {
 #ifndef linux
     KNLookup(tcp_nl, N_TCB, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
@@ -702,7 +700,7 @@ static void TCP_Scan_Init __P((void))
 #endif /* linux */
 }
 
-static int TCP_Scan_Next(State, RetInPcb)
+int TCP_Scan_Next(State, RetInPcb)
 int *State;
 struct inpcb *RetInPcb;
 {
@@ -743,3 +741,4 @@ struct inpcb *RetInPcb;
 #endif
 	return(1);	/* "OK" */
 }
+#endif /* solaris2 */

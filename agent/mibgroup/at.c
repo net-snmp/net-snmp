@@ -31,11 +31,13 @@ static struct nlist at_nl[] = {
 };
 #endif
 
+#ifndef solaris2
 static void ARP_Scan_Init __P((void));
 #if defined(freebsd2) || defined (netbsd1) || defined (hpux) || defined (bsdi2)
 static int ARP_Scan_Next __P((u_long *, char *, u_long *, u_short *));
 #else
 static int ARP_Scan_Next __P((u_long *, char *, u_long *));
+#endif
 #endif
 
 
@@ -238,7 +240,6 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     oid		*op;
     oid		lowest[AT_NAME_LENGTH];
     oid		current[AT_NAME_LENGTH];
-    char	PhysAddr[6], LowPhysAddr[6];
     if_ip_t	NextAddr;
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
@@ -329,6 +330,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	 *
 	 *********************/
 
+#ifndef solaris2
 
 #if CAN_USE_SYSCTL
 static char *lim, *rtnext;
@@ -493,4 +495,4 @@ u_long *ifType;
 #endif /* netbsd1, freebsd2, bsdi2 */
 	return(0);	    /* "EOF" */
 }
-
+#endif /* solaris2 */

@@ -97,8 +97,7 @@ main(argc, argv)
     int	arg, ret, version = 2;
     char *hostname = NULL;
     char *community = NULL;
-    int port_flag = 0;
-    int dest_port = 0;
+    int dest_port = SNMP_PORT;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen = 0, dstlen = 0, contextlen = 0;
     u_long      srcclock = 0, dstclock = 0;
@@ -129,7 +128,6 @@ main(argc, argv)
 		    snmp_set_quick_print(1);
 		    break;
                 case 'p':
-                    port_flag++;
                     dest_port = atoi(argv[++arg]);
                     break;
                 case 't':
@@ -166,19 +164,19 @@ main(argc, argv)
 	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
 	    if (read_context_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read context database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
 	    if (read_acl_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read access control database from %s\n",ctmp);
-		exit(0);
+		exit(1);
 	    }
             if (!strcasecmp(argv[arg], "noauth")){
                 trivialSNMPv2 = TRUE;
@@ -286,8 +284,11 @@ main(argc, argv)
 
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
-    if (port_flag)
-        session.remote_port = dest_port;
+    session.remote_port = dest_port;
+    session.retries = retransmission;
+    session.timeout = timeout;
+    session.authenticator = NULL;
+
     if (version == 1){
 	session.version = SNMP_VERSION_1;
         session.community = (u_char *)community;
@@ -301,14 +302,12 @@ main(argc, argv)
         session.context = context;
         session.contextLen = contextlen;
     }
-    session.retries = retransmission;
-    session.timeout = timeout;
-    session.authenticator = NULL;
+
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
 	fprintf(stderr, "Couldn't open snmp\n");
-	exit(-1);
+	exit(1);
     }
 
     varcount = 0;
@@ -349,7 +348,7 @@ main(argc, argv)
 		    } else {
 			printf("What repeat count? ");
 			fflush(stdout);
-			gets(input);
+			fgets(input, sizeof input, stdin);
 			maxRepetitions = atoi(input);
 			pdu->non_repeaters = nonRepeaters;
 			pdu->max_repetitions = maxRepetitions;
@@ -514,7 +513,7 @@ input_variable(vp)
 
     printf("Variable: ");
     fflush(stdout);
-    gets(buf);
+    fgets(buf, sizeof buf, stdin);
 
     if (*buf == 0){
 	vp->name_length = 0;
@@ -591,7 +590,7 @@ input_variable(vp)
 	|| command == TRP2_REQ_MSG){
 	printf("Type [i|s|x|d|n|o|t|a]: ");
 	fflush(stdout);
-	gets(buf);
+	fgets(buf, sizeof buf, stdin);
 	ch = *buf;
 	switch(ch){
 	    case 'i':
@@ -623,7 +622,7 @@ input_variable(vp)
 		return -1;
 	}
 	printf("Value: "); fflush(stdout);
-	gets(buf);
+	fgets(buf, sizeof buf, stdin);
 	switch(vp->type){
 	    case INTEGER:
 		vp->val.integer = (long *)malloc(sizeof(long));

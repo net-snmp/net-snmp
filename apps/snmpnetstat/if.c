@@ -34,12 +34,9 @@ SOFTWARE.
 #include <config.h>
 
 #if STDC_HEADERS
-#include <string.h>
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#include <string.h>
 #endif
 
 #include <sys/types.h>
@@ -119,8 +116,10 @@ intpr(interval)
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var)
+	if (var) {
 	    cfg_nnets = *var->val.integer;
+	    snmp_free_var(var);
+	}
 	else {
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
@@ -272,6 +271,7 @@ intpr(interval)
 		    cur_if->outqueue);
 		putchar('\n');
 	}
+	free(if_table);
 }
 /*
  * Print a description of the network interfaces.
@@ -300,8 +300,10 @@ intpro(interval)
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var)
+	if (var) {
 	    cfg_nnets = *var->val.integer;
+	    snmp_free_var(var);
+	}
 	else {
 	    fprintf (stderr, "No response when requesting number of interfaces.\n");
 	    return;
@@ -473,8 +475,10 @@ sidewaysintpr(interval)
 	total = sum - 1;
 	interesting = iftot;
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var)
+	if (var) {
 	    cfg_nnets = *var->val.integer;
+	    snmp_free_var(var);
+	}
 	else
 	    return;
 	memmove(varname, oid_ifname, sizeof(oid_ifname));
@@ -487,6 +491,7 @@ sidewaysintpr(interval)
 		var = getvarbyname(Session, varname, varname_len);
 		if (var){
 		    memmove(ip->ift_name + 1, var->val.string, var->val_len);
+		    snmp_free_var(var);
 		}
                 cp = (char *) strchr(ip->ift_name, ' ');
                 if ( cp != NULL )
@@ -544,28 +549,40 @@ loop:
 		*instance = ifnum;
 		*ifentry = INUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_ip = *var->val.integer;
+		    snmp_free_var(var);
+		}
 		*ifentry = INNUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_ip += *var->val.integer;
+		    snmp_free_var(var);
+		}
 		*ifentry = INERRORS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_ie = *var->val.integer;
+		    snmp_free_var(var);
+		}
 		*ifentry = OUTUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_op = *var->val.integer;
+		    snmp_free_var(var);
+		}
 		*ifentry = OUTNUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_op += *var->val.integer;
+		    snmp_free_var(var);
+		}
 		*ifentry = OUTERRORS;
 		var = getvarbyname(Session, varname, varname_len);
-		if (var)
+		if (var) {
 		    now->ift_oe = *var->val.integer;
+		    snmp_free_var(var);
+		}
 
 		if (ip == interesting)
 			printf("%8d %5d %8d %5d %5d ",

@@ -83,7 +83,7 @@ static void sprint_badtype __P((char *, struct variable_list *, struct enum_list
 static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
 static struct tree *get_tree __P((oid *, int, struct tree *));
 static char *get_description __P((oid *, int));
-struct tree *find_node __P((char *, struct tree *));
+static struct tree *find_node __P((char *, struct tree *));
 
 static int quick_print = 0;
 
@@ -804,7 +804,7 @@ init_mib __P((void))
 {
     char *file, *prefix, mibpath[300];
 
-    Mib = 0;
+    Mib = NULL;
     file = getenv("MIBFILE");
     if (file)
 	Mib = read_mib(file);

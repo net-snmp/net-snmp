@@ -127,7 +127,7 @@ int snmp_read_packet __P((int));
 char *sprintf_stamp __P((time_t *));
 int agent_party_init __P((u_int, u_short, char *));
 struct snmp_session *create_v1_trap_session __P((struct snmp_session*, char *, char *));
-void send_v1_trap __P((struct snmp_session *, int));
+void send_v1_trap __P((struct snmp_session *, int, int));
 char *reverse_bytes __P((char *, int));
 void usage __P((char *));
 int main __P((int, char **));
@@ -423,23 +423,22 @@ struct snmp_session *create_v1_trap_session (ses, sink, com)
     memset (ses, 0, sizeof (struct snmp_session));
     ses->peername = sink;
     ses->version = SNMP_VERSION_1;
-    ses->community = strdup (com);
-    ses->community_len = strlen (com);
+    if (com) {
+        ses->community = strdup (com);
+        ses->community_len = strlen (com);
+    }
     ses->retries = SNMP_DEFAULT_RETRIES;
     ses->timeout = SNMP_DEFAULT_TIMEOUT;
     ses->callback = NULL;
     ses->remote_port = SNMP_TRAP_PORT;
     sesp = snmp_open (ses);
-    if (sesp == NULL) {
-	fprintf (stderr, "snmpd: cannot open SNMP session to %s\n", sink);
-    }
     return sesp;
 }
 
 void
-send_v1_trap (ss, trap)
+send_v1_trap (ss, trap, specific)
     struct snmp_session *ss;
-    int trap;
+    int trap, specific;
 {   struct snmp_pdu *pdu;
 
     pdu = snmp_pdu_create (TRP_REQ_MSG);
@@ -447,7 +446,7 @@ send_v1_trap (ss, trap)
     pdu->enterprise_length = version_id_len;
     pdu->agent_addr.sin_addr.s_addr = get_myaddr();
     pdu->trap_type = trap;
-    pdu->specific_type = 0;
+    pdu->specific_type = specific;
     pdu->time = get_uptime();
     if (snmp_send (ss, pdu) == 0) {
         fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
@@ -464,11 +463,13 @@ send_easy_trap (trap)
 	    trap_sesp = create_v1_trap_session (&trap_session, snmp_trapsink,
 	                                     snmp_trapcommunity);
 	    if (trap_sesp == NULL) {
+		fprintf (stderr, "snmpd: cannot open SNMP session to %s\n",
+                         snmp_trapsink);
 		snmp_enableauthentraps = 2;
 		return;
 	    }
 	}
-	send_v1_trap (trap_sesp, trap);
+	send_v1_trap (trap_sesp, trap, 0);
     }
 }
   
@@ -617,7 +618,7 @@ main(argc, argv)
       ret += strlen(argv[i])+1;
     }
     argvrestart = (char *) malloc((ret));
-    argvrestartname = (char *) malloc(strlen(argv[0]));
+    argvrestartname = (char *) malloc(strlen(argv[0])+1);
     strcpy(argvrestartname,argv[0]);
     for(cptr = argvrestart,i = 0; i < argc; i++) {
       strcpy(cptr,argv[i]);
