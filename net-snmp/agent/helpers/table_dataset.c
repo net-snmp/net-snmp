@@ -692,7 +692,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             break;
 
         case MODE_SET_FREE:
-            if (newrowstash->state != STATE_FREE) {
+            if (newrowstash && newrowstash->state != STATE_FREE) {
                 newrowstash->state = STATE_FREE;
                 netsnmp_table_dataset_delete_row(newrow);
             }
