@@ -47,6 +47,10 @@ SOFTWARE.
 #include "parse.h"
 
 static void sprint_by_type();
+static parse_subtree();
+static set_functions();
+static int lc_cmp ();
+
 int quick_print = 0;
 
 static char *
