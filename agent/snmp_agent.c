@@ -120,6 +120,9 @@ int             deny_severity = LOG_WARNING;
 #include "smux/smux.h"
 #endif
 
+oid      version_sysoid[] = { SYSTEM_MIB };
+int      version_sysoid_len = OID_LENGTH(version_sysoid);
+
 #define SNMP_ADDRCACHE_SIZE 10
 #define SNMP_ADDRCACHE_MAXAGE 300 /* in seconds */
 
@@ -828,11 +831,17 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             return 0;
         }
     } else {
-        if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
-            snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
+        /*
+         * don't log callback connections.
+         * What about 'Local IPC', 'IPX' and 'AAL5 PVC'?
+         */
+        if (0 == strncmp(addr_string, "callback", 8))
+            ;
+        else if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+            snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
             addr_string = strdup("<UNKNOWN>");
         } else {
-            snmp_log(deny_severity, "Connection from <UNKNOWN> REFUSED\n");
+            snmp_log(deny_severity, "Connection from <UNKNOWN> (%s) REFUSED\n", addr_string);
             return 0;
         }
     }
@@ -1765,7 +1774,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
     if ((access_ret = check_access(asp->pdu)) != 0) {
         if (access_ret == VACM_NOSUCHCONTEXT) {
             /*
-             * rfc2573 section 3.2, step 5 says that we increment the
+             * rfc3413 section 3.2, step 5 says that we increment the
              * counter but don't return a response of any kind 
              */
 
