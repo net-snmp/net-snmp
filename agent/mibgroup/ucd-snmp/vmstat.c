@@ -99,6 +99,8 @@
 # endif
 #endif
 
+#include <sys/utsname.h>
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
@@ -110,6 +112,15 @@
 
 FindVarMethod var_extensible_vmstat;
 
+static int has_vmstat = 1;
+static int has_cpu_26 = 1;
+static time_t cache_time;
+#define CACHE_TIMEOUT	5
+
+#define STAT_FILE	"/proc/stat"
+#define VMSTAT_FILE	"/proc/vmstat"
+
+
 void
 init_vmstat(void)
 {
@@ -120,9 +131,14 @@ init_vmstat(void)
          {ERRORNAME}},
         {SWAPIN, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPIN}},
         {SWAPOUT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SWAPOUT}},
+        {RAWSWAPIN, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {RAWSWAPIN}},
+        {RAWSWAPOUT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {RAWSWAPOUT}},
         {IOSENT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {IOSENT}},
         {IORECEIVE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
          {IORECEIVE}},
+        {IORAWSENT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {IORAWSENT}},
+        {IORAWRECEIVE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {IORAWRECEIVE}},
         {SYSINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
          {SYSINTERRUPTS}},
         {SYSCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1,
@@ -316,9 +332,6 @@ var_extensible_vmstat(struct variable *vp,
 
     static long     long_ret;
     static char     errmsg[300];
-#ifndef linux
-    struct vmtotal  total;
-#endif
 
     long_ret = 0;               /* set to 0 as default */
 
@@ -416,6 +429,9 @@ var_extensible_vmstat(struct variable *vp,
          * case ERRORMSG:
          * return((u_char *) (&long_ret));
          */
+    default:
+	snmp_log(LOG_ERR, "vmstat.c: don't know how to handle %d request\n",
+		vp->magic);
     }
     return NULL;
 }
