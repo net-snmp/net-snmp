@@ -1,10 +1,5 @@
 #include "generic.h"
 
-#ifndef __GNUC__
-#undef inline
-#define inline
-#endif
-
 #define osf4
 
 /* Needed by <sys/socket.h> to give us the correct sockaddr structures */
@@ -20,3 +15,8 @@
 #define RTTABLES_SYMBOL "rtable"
 #undef RTHASHSIZE_SYMBOL
 #define RTHASHSIZE_SYMBOL "rhash_size"
+
+#ifndef __GNUC__
+#  undef NETSNMP_ENABLE_INLINE
+#  define NETSNMP_ENABLE_INLINE 0
+#endif
