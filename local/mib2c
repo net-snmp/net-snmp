@@ -248,6 +248,8 @@ sub process {
 	    print STDERR "writing to $spec\n" if (!$quiet);
 	    $written{$spec} = '1';
 	} elsif (/\@run (.*)\@/) {
+	    next if ($ranalready{$1});
+	    $ranalready{$1} = 1;
 	    my $oldfh = $fh;
 	    my $oldout = $out;
 	    my %oldvars = %vars;
@@ -356,7 +358,7 @@ sub process {
 	    } else {
 		skippart();
 	    }
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
+	} elsif (/\@\s*foreach\s+\$([^\@,]+)\s*,*\s+\$([^\@]+)\s+(enums*)\s*\@/) {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
 	    my $enum;
