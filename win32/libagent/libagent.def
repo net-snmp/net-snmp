@@ -13,4 +13,5 @@ EXPORTS
 	argvrestartp
 	update_config
 	dump_idx_registry
+	netsnmp_clear_handler_list
 
