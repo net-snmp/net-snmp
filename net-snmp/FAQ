@@ -1,8 +1,12 @@
+      Frequently Asked Questions (FAQ) for the UCD SNMP package
+      =========================================================
+
 
 GENERAL
 =======
 
 What is it?
+----------
 
   - Various tools relating to the Simple Network Management Protocol
     including:
@@ -12,18 +16,22 @@ What is it?
 	* tools to request or set information from SNMP agents
 	* tools to generate and handle SNMP traps
 	* a version of the unix 'netstat' command using SNMP
-	* what else?
+	* a Tk/perl interface to the UCD extensions
+
+    This package is originally based on the Carnegie Mellon University
+    SNMP implementation (version 2.1.2.1)
+
 
 Where can I get it?
+------------------
 
   - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
 
 	This file will always point to the latest revision.
-	If you see newer revisions in the directory marked with
-	a '-A[1-9]' or '-B[1-9]' or similar, please note that
-	these are pre-release ports of the next release.
+
 
 What documentation is available?
+-------------------------------
 
 	This FAQ (!)
 	README
@@ -32,7 +40,9 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 
+
 Are there binaries available?
+----------------------------
 
   - Nope, sorry.
 
@@ -40,23 +50,26 @@ Are there binaries available?
 	on a range of systems (see the next answer).
 	See the file INSTALL for more details.
 
+
 What operating systems does it run on?
+-------------------------------------
 
 	* HP-UX 9.05, 9.03, 9.01 on HPPA 1.1 systems
 	* HP-UX 10.10, 10.01 on HPPA 1.1 systems
 	* Ultrix 4.4, 4.3, 4.2 on DEC MIPS systems
 	* Solaris 2.5, 2.4, 2.3 on Sun SPARC systems
+	* Solaris 2.5 on x86 systems
 	* SunOS 4.1.3, 4.1.3, 4.1.2 on Sun SPARC systems
 	* OSF 3.2 on DEC Alpha systems
-
-  [ The following need clarifying.]
-
 	* NetBSD 1.2, 1.1, 1.0 on all? systems
-	* FreeBSD 2.something on all? systems (possibly)
-	* maybe on BSDI systems (with a following wind)
-	* rumours about Linux
+	* FreeBSD 2.x on all? systems
+	* BSDi 2.1 on all? systems
+
+  It is believed to also run on Linux and Irix systems
+
 
 What happens if mine isn't listed?
+---------------------------------
 
   It's worth trying anyway, particularly if the system is based
 	around the BSD kernel.  If it seems to work correctly,
@@ -66,6 +79,7 @@ What happens if mine isn't listed?
 	
 
 How do I find out about new releases?
+------------------------------------
 
   There is a mailing list for these announcements
   	ucd-snmp-announce@ece.ucdavis.edu
@@ -79,6 +93,7 @@ How do I find out about new releases?
 
 
 How can I find out what other people are doing?
+----------------------------------------------
 
   There is a general purpose discussion list
   	ucd-snmp@ece.ucdavis.edu
@@ -87,24 +102,27 @@ How can I find out what other people are doing?
   with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   There's not a great deal of traffic at the moment, but you can
-  always try to do somehing about that!
+  always try to do something about that!
   
 
 How do I submit a patch or bug report?
+-------------------------------------
 
-  - Send a message to 'ucd-snmp-coders@ece.ucdavis.edu' containing
-	a description of the problem, and as much other relevant
-	details as you can. Useful information includes the version
-	of the package that you've been working with, the output of
-	the command 'uname a', the precise command that you've used,
+   There is a script that you can use to submit a bug report.
+	This allow you to describe the problem you're having, and
+	includes various pieces of information about your system
+	that are useful in trying to track down the problem.
+
+	Alternatively, you can send a message to
+		'ucd-snmp-coders@ece.ucdavis.edu'
+	containing a description of the problem, and as much other
+	relevant details as you can. Useful information includes the
+	version of the package that you've been working with, the output
+	of the command 'uname -a', the precise command that you've used,
 	and a copy of the output it produces.
 
 	We can't promise to be able to solve the problem, but we'll
 	certainly try and help.
-
-   There is [will be?] a script that you can use to submit a bug
-	report that will provide much of this general information
-	automatically.
 
 
    If you're trying to port the package to a new system, the output
@@ -117,58 +135,68 @@ How do I submit a patch or bug report?
 	Oh, and congratulations!
 
 
-Whats the difference between snmpv1 and snmpv2?
-
-  [Umm.  A bloody good question.
-  Where can I 'borrow' the answer from?
-  Here goes nothing:]
+What's the difference between SNMPv1 and SNMPv2?
+-----------------------------------------------
+What are all these different SNMPv2's anyway?
+--------------------------------------------
 
 
   A full description is probably beyond the scope of this FAQ.
-	[pointer to somewhere?]
   Very briefly, practical experience showed up various problems and
-  deficiencies with the original protocol and framewok (described in
+  deficiencies with the original protocol and framework (described in
   RFCs 1155-1157 and known now as SNMPv1).
-  The revised framework that attempted to address these was (and is)
-  known as SNMPv2.  The changes that have been made are described in
-  RFCs 1901-1910 and include:
 
-	* new protocol packet types (what and why)
-		(Protocol and Transport mappings)
+  The revised framework that attempted to address these was described
+  in RFCs 1441-1452, and is known as "SNMPv2 classic".
+  The changes proposed include:
+
 	* new ways of defining information (MIB structure)
 		(SMI, Textual conventions, conformance statements)
-	* what else ?
-
+	* new protocol packet types and transport mappings
 	* new mechanisms for administration and security
 	* mechanisms for remote configuration
 
-  Unfortunately, while much of these are generally accepted, there
+  Unfortunately, while much of these were generally accepted, there
   is still some disagreement in these last two areas, security/admin
   and remote configuration.  This has resulted in a number of
   variants and alternative proposals:
 
 	SNMPv2c		Contains the new protocol and MIB structure elements,
-			using the existing v1 administration structure.
-			This is known as "Community-based SNMPv2".
-	SNMPv2 usec
-	SNMPv2*
-	SNMP-NG
-
-  [ Need a bit more about these perhaps? Or just drop it?]
+			using the existing SNMPv1 administration structure.
+			This is the agreed SNMPv2 standard (described in
+			RFCs 1901-1908), superseding SNMPv2 classic, and
+			known as "Community-based SNMPv2" or simply "SNMPv2".
 
 
-Which snmpv2 is supported in this package?
+	SNMPv2 usec	} Alternative proposals to address the
+	SNMPv2*		} limitations of SNMPv1 administration
+			} These are both super-sets of SNMPv2c
 
-  [Some SNMPv2 stuff is already supported.
-   need more details as to precisely what.]
+	SNMP-NG		The most recent (and on-going) attempt to reach
+			agreement between the proponents of usec and v2star
+			The eventual result of this process will probably
+			be regarded as a new version of SNMP
+			(perhaps SNMPv3 but don't quote me on that!)
 
-  - snmpv2c coming soon hopefully
+
+Which SNMPv2 is supported in this package?
+-----------------------------------------
+
+  This package currently supports SNMPv2 classic (i.e. RFCs 1441-1452),
+  as that was the version current at the time the package was originally
+  developed.
+  This is now regarded as "historic", and it is hoped to move to
+  SNMPv2c as soon as possible.
+  When an agreed standard for SNMPv3 (by whatever name) finally emerges,
+  we would hope to include support for that.
+
 
 
 AGENT
 =====
 
 What MIBs are supported?
+-----------------------
 
   The following MIBs are supported (at least in part):
 
@@ -176,11 +204,12 @@ What MIBs are supported?
 	- UCD agent extensions
 		(processes, disks, memory, load average,
 		 shell commands, error handling)
-	- HP OpenView		(HP-UX only)
-	- SNMPv2 
+	- SNMPv2 Party MIB (RFC 1447 - now 'historic')
+	- SNMPv2 Manager-to-Manager MIB (RFC 1451 - now 'historic')
 
 
-How do I add a mib?
+How do I add a MIB?
+------------------
 
   The agent and tools look in a predefined directory (PREFIX/lib/snmp/mibs)
   and regard any file held there as defining a MIB or MIBs to be included.
@@ -188,16 +217,17 @@ How do I add a mib?
   in this directory.
 
   Note, however, that this is purely concerned with the syntax and
-  OID translation of the obects within that MIB.  Simply adding a file
+  OID translation of the objects within that MIB.  Simply adding a file
   to this directory does not automatically extend the functionality
   of the agent to include this MIB.  (Would that life were so simple).
 
   However, if the agent to be queried supports the new MIB, then the
-  presence of this file is all that the query tools need to advantage
-
+  presence of this file is all that the query tools need to take
+  advantage of this information.
 
 
 How do I add functionality?
+--------------------------
 
   Some extra functionality is already provided - in particular
   the ability to monitor a station for the presence, absence or
@@ -210,24 +240,12 @@ How do I add functionality?
   EXAMPLE.conf file.
  
 
-
-How do I write C code to integrate with the agent?
-
-  At the moment, the only technique for integrating external C code
-  with the agent is to implement it within the agent itself.
-  The place to start looking is in the file 'agent/snmp_vars.c'
-  or contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for advice.
-
-  It is hoped to implement some form of proxy mechanism (such as the
-  agentx protocols) once the specification for these have settled.
-
-
-
-When I run the agent it runs and then quits without staying around.
+When I run the agent it runs and then quits without staying around. Why?
+-----------------------------------------------------------------------
 
   The normal operation of the agent is to 'fork' itself into the
   background, detaching itself so that it will continue running even
-  when you log out, and freeing the command line for subseqent use.
+  when you log out, and freeing the command line for subsequent use.
   This looks at first sight as if the agent has died, but using 'ps'
   to show all processes should reveal that the agent is still running.
 
@@ -237,13 +255,47 @@ When I run the agent it runs and then quits without staying around.
 
 
 
+TECHNICAL
+=========
+
+How do I write C code to integrate with the agent?
+-------------------------------------------------
+
+  At the moment, the only technique for integrating external C code
+  with the agent is to implement it within the agent itself.
+  The place to start looking is the file 'agent/snmp_vars.c'
+  or contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for advice.
+
+  It is hoped to implement some form of proxy mechanism (such as the
+  agentx protocols) once the specification for these have settled.
+
+
+What ASN.1 parser is used?
+-------------------------
+
+  The parser used by both the agent and client programs is coded by hand.
+  The source code can be found in the snmplib directory, and the parser
+  is usually bundled into the library 'libsnmp.a'
+
+
+How does the agent fetch the value of a variable from the system?
+----------------------------------------------------------------
+
+  Much of the information is extracted from kernel memory - usually
+  by seeking to the appropriate location and reading the structures
+  directly.
+    Some systems provide cleaner interfaces to such kernel information
+  (it would be hard to think of a less clean interface!), via ioctl()
+  calls or similar system routines and these mechanisms are usually used
+  in preference.
+
 
 
 PROBLEMS
 ========
 
-
 What does "klread:  bad address" mean?
+-------------------------------------
 
   This means that the agent was unable to extract some of the
   necessary information from the kernel structures.  This is
@@ -255,10 +307,24 @@ What does "klread:  bad address" mean?
 		OID is generating the error, and contact the
 		list 'ucd-snmp-coders@ece.ucdavis.edu'
 
-  [ What's this comment about 'debugging support', Wes? ]
+
+What does "nlist err:  wombat not found" (or similar) mean?
+----------------------------------------------------------
+
+  This means that the agent wasn't able to locate one of the
+  kernel structures it was looking for.  This may or may not
+  be important - some systems provide alternative mechanisms
+  for obtaining the necessary information - Solaris, for example,
+  will produce a whole slew of such messages, but still provide
+  the correct information.
+    This error only occurs if you have used the flag
+  '--enable-debugging' as part of the initial configuration.
+  Reconfigure the agent with '--disable-debugging' and these
+  messages will disappear.
 
 
 How about "Can't open /dev/kmem"?
+--------------------------------
 
   This device is normally restricted to just being accessible by root
   (or possibly by a special group such as 'kmem' or 'sys').  The agent
@@ -268,17 +334,19 @@ How about "Can't open /dev/kmem"?
   (or suitable GID if appropriate)
  
 
-I cannot set any variables in the mib.
+I cannot set any variables in the MIB.
+-------------------------------------
 
   There are relatively few variables in the standard MIB tree that
-  are writeable, mostly regarding the status of various elements of the
-  system [Chek This, Dave!].  Few of these are currently settable in the agent.
+  are writable, mostly regarding the status of various elements of the
+  system.  Few of these are currently setable in the agent.
 
   The main variables that can be changes are purely those within the
   'system' group, relating to general contact information.
   
 
-snmpwalk of some.textual.notation doesn't work (eg, enterprises.ucDavis).
+snmpwalk of some.textual.notation doesn't work (eg, enterprises.ucdavis).
+------------------------------------------------------------------------
 
   The tools assume that the names of variables will normally be within
   the main 'mib-2' tree.  In order to access a variable elsewhere within
@@ -286,11 +354,13 @@ snmpwalk of some.textual.notation doesn't work (eg, enterprises.ucDavis).
 
 	.iso.org.dod......
 
-  Alternatively, the tools could be recompiled to start searching from
-  a different value of PREFIX (though this is perhaps less desirable).
+  Alternatively, by defining the environmental variable PREFIX, the
+  tools can be told to look for non-fully specified objects in
+  a different sub-tree.
 
 
 Sometimes I seem to get the wrong answers.  Why?
+-----------------------------------------------
 
   Many of the variables in the basic MIB-2 tree require information
   that is not easily available in the common Unix kernels.  In the
@@ -343,8 +413,9 @@ Sometimes I seem to get the wrong answers.  Why?
 	tcp.tcpEstabResets		} something different
 
   Some systems may return the correct information for these values.
-  Systems that are known to have corrected these values are as follows:
+  Systems that are known to have corrected some of these values are as follows:
 
-	*  what???
-	*  HP-UX (when David gets his finger out!)
+	*  FreeBSD & BSDi provide correct interface statistics
+	*  Solaris provides correct statistics throughout
+	*  Correct information for HP-UX is imminent
 
