@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "07 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "07 Nov 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -495,7 +495,7 @@ In previous releases of the UCD-SNMP package (and if using the
 .B -Iu
 option), an object identifier such as system.sysDescr.0 will be
 lookup in a single "well known" place, built into the SNMP library (or
-specified by the PREFIX environment variable).  The standard place
+specified by the P@REFIX environment variable).  The standard place
 is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
 a complete object identifier, this is designated by a leading "dot"
 if using UCD-input style, and is the first thing tried otherwise.
@@ -516,7 +516,7 @@ that the specified MIB is loaded, i.e. it need not be mentioned in the
 .B -m
 option (or MIBS environment variable).
 .SH "ENVIRONMENT VARIABLES"
-.IP PREFIX
+.IP P@REFIX
 The standard prefix for object identifiers (if using UCD-style output).
 Defaults to .iso.org.dod.internet.mgmt.mib-2
 .IP MIBS
