@@ -611,7 +611,7 @@ alarmTimer(struct timeval *now)
 	    continue;
 	}
 	
-	if (timercmp(now, &alarm->update, <)) {
+	if ((timercmp(now, &alarm->update, <))) {
 	    continue;
 	}
 	

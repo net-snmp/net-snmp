@@ -1905,8 +1905,8 @@ snmp_sess_select_info(void *sessp,
 	    /* found another session with outstanding requests */
 	    requests++;
 	    for(rp = isp->requests; rp; rp = rp->next_request){
-		if (!timerisset(&earliest)
-		    || timercmp(&rp->expire, &earliest, <))
+		if ((!timerisset(&earliest)
+		    || timercmp(&rp->expire, &earliest, <)))
 		    earliest = rp->expire;
 	    }
 	}
@@ -1946,7 +1946,7 @@ snmp_sess_select_info(void *sessp,
     }
 
     /* if it was blocking before or our delta time is less, reset timeout */
-    if (*block || timercmp(&earliest, timeout, <)){
+    if ((*block || timercmp(&earliest, timeout, <))){
 	*timeout = earliest;
 	*block = 0;
     }
