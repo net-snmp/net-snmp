@@ -77,6 +77,10 @@ static u_int salt_integer;
 	 */
 
 static struct usmUser *noNameUser = NULL;
+/* 
+ * Local storage (LCD) of the default user list.
+ */
+static struct usmUser *userList=NULL;
 
 /*
  * Prototypes
@@ -162,7 +166,11 @@ usm_free_usmStateReference (void *old)
 
 }  /* end usm_free_usmStateReference() */
 
-
+struct usmUser *
+usm_get_userList(void)
+{
+  return userList;
+}
 
 int
 usm_set_usmStateReference_name (
@@ -1935,7 +1943,7 @@ usm_check_and_update_timeliness(
 					"Failed to increment statistic."));
 			}
 
-			DEBUGMSGTL(("usm","%s\n", "Not in local time window."));
+			DEBUGMSGTL(("usm","boot_uint %u myBoots %u time_diff %u => not in time window\n", boots_uint, myBoots, time_difference));
 			*error = SNMPERR_USM_NOTINTIMEWINDOW;
 			return -1;
 		}
@@ -2238,15 +2246,12 @@ usm_process_in_msg (
 	 * Locate the User record.
 	 * If the user/engine ID is unknown, report this as an error.
 	 */
-	if ( (user = 
-		usm_get_user(secEngineID, *secEngineIDLen, secName))
-			== NULL )
-	{
+	if ((user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
+					   secName, userList, 0)) == NULL) {
 	  DEBUGMSGTL(("usm","Unknown User(%s)\n",secName));		
-	  if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0)
-	    {
+	  if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0) {
 	      DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
-	    }
+	  }
 	  return SNMPERR_USM_UNKNOWNSECURITYNAME;
 	}
 
@@ -2503,19 +2508,6 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
   return SNMPERR_SUCCESS;
 }  /* end init_usm_post_config() */
  
-
-/* 
- * Local storage (LCD) of the default user list.
- */
-static struct usmUser *userList=NULL;
-
-struct usmUser *
-usm_get_userList(void)
-{
-  return userList;
-}
-
-
 
 /*******************************************************************-o-******
  * usm_check_secLevel
