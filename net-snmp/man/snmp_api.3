@@ -30,15 +30,13 @@ snmp_open, snmp_close, snmp_send, snmp_read, snmp_free_pdu, snmp_select_info, sn
 .br
 .B "#include <sys/time.h>
 .br
-.B #include """snmp.h""
+.B #include <ucd-snmp/snmp.h>
 .br
-.B #include """snmp_impl.h""
+.B #include <ucd-snmp/snmp_impl.h>
 .br
-.B #include """asn1.h""
+.B #include <ucd-snmp/asn1.h>
 .br
-.B #include """snmp_api.h""
-.PP
-.B "extern int snmp_errno;
+.B #include <ucd-snmp/snmp_api.h>
 .PP
 .B "struct snmp_session *snmp_open(session)
 .br
@@ -73,6 +71,16 @@ snmp_open, snmp_close, snmp_send, snmp_read, snmp_free_pdu, snmp_select_info, sn
 .B "void snmp_free_pdu(pdu)
 .br
 .B "struct snmp_pdu *pdu;
+.PP
+.B "int snmp_get_errno()
+.PP
+.B "char *snmp_api_errstring(snmp_errno)
+.br
+.B "int snmp_errno;
+.PP
+.B "void snmp_perror(msg)
+.br
+.B "char *msg;
 .PP
 .SH DESCRIPTION
 .I Snmp_open, snmp_close,
@@ -269,22 +277,52 @@ Error return status from
 and
 .I snmp_send
 is indicated by return of 0.  A successful status will return a 1.
-The external integer
+The integer
 .IR snmp_errno
-may then be checked to see what type of error has occurred
+may then be retrieved using
+.I snmp_get_errno
+to see what type of error has occurred
 .PP
 .IR snmp_errno
 can have the following values:
-.RS
-.IP SNMPERR_GENERR \w'SNMPERR_BAD_LOCPORT'u+2n
+.RS 2n
+.IP SNMPERR_GENERR \w'SNMPERR_BAD_REPETITIONS'u+2n
 A generic error occurred.
-.IP SNMPERR_BAD_LOCPORT \w'SNMPERR_BAD_LOCPORT'u+2n
+.IP SNMPERR_BAD_LOCPORT \w'SNMPERR_BAD_REPETITIONS'u+2n
 The local port was bad because it had already been
 allocated or permission was denied.
-.IP SNMPERR_BAD_ADDRESS \w'SNMPERR_BAD_LOCPORT'u+2n
+.IP SNMPERR_BAD_ADDRESS \w'SNMPERR_BAD_REPETITIONS'u+2n
 The host name or address given was not useable.
-.IP SNMPERR_BAD_SESSION \w'SNMPERR_BAD_SESSION'u+2n
+.IP SNMPERR_BAD_SESSION \w'SNMPERR_BAD_REPETITIONS'u+2n
 The specified session was not open.
+.IP SNMPERR_TOO_LONG \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_NO_SOCKET \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_V2_IN_V1 \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_V1_IN_V2 \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_REPEATERS \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_REPETITIONS \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_ASN1_BUILD \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_SENDTO \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_PARSE \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_VERSION \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_SRC_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_DST_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_CONTEXT \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_COMMUNITY \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_NOAUTH_DESPRIV \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_ACL \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_BAD_PARTY \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_ABORT \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_UNKNOWN_PDU \w'SNMPERR_BAD_REPETITIONS'u+2n
+.IP SNMPERR_TIMEOUT \w'SNMPERR_BAD_REPETITIONS'u+2n
 .RE
+.PP
+A string representation of the error code can be obtained with
+.IR snmp_api_errstring ,
+and a standard error message may be printed using
+.I snmp_perror
+that functions like the
+.I perror
+standard routine.
 .SH "SEE ALSO"
 select(2), snmp_api.h
