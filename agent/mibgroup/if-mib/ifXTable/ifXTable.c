@@ -132,6 +132,46 @@ ifXTable_post_request(ifXTable_registration_ptr user_context)
  * OID: .1.3.6.1.2.1.31.1.1, length: 9
  */
 
+/*
+ * ifXTable_allocate_data
+ *
+ * Purpose: create new ifXTable_data.
+ */
+ifXTable_data  *
+ifXTable_allocate_data(void)
+{
+    /*
+     * allocate memory for the context
+     */
+    /** this might not be right for netsnmp_interface_entry */
+    ifXTable_data  *rtn = SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
+
+    DEBUGTRACE;
+
+    if (NULL == rtn) {
+        snmp_log(LOG_ERR, "unable to malloc memory for new "
+                 "ifXTable_data.\n");
+    }
+
+    return rtn;
+}
+
+/*
+ * ifXTable_allocate_data
+ *
+ * Purpose: release data data.
+ */
+void
+ifXTable_release_data(ifXTable_data * data)
+{
+    DEBUGTRACE;
+
+    /*
+     * release memory for the context
+     */
+    free(data);
+}
+
 
 
 /**
@@ -157,7 +197,7 @@ ifXTable_indexes_set_tbl_idx(ifXTable_mib_index * tbl_idx, long ifIndex)
      * ifIndex(1)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/r/d/h 
      */
     /** no mapping */
-    /** WARNING: this code might not work for netsnmp_ifentry* */
+    /** WARNING: this code might not work for netsnmp_interface_entry */
     /*
      * TODO:
      * update, replace or delete, if needed.
@@ -505,6 +545,7 @@ ifHCInOctets_get(ifXTable_rowreq_ctx * rowreq_ctx, U64 * ifHCInOctets_ptr)
     (* ifHCInOctets_ptr ).low = rowreq_ctx->data->if_ibytes.low;
     (* ifHCInOctets_ptr ).high = rowreq_ctx->data->if_ibytes.high;
 
+
     return MFD_SUCCESS;
 }
 
@@ -598,6 +639,7 @@ ifHCInMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
     (* ifHCInMulticastPkts_ptr ).low =rowreq_ctx->data->if_imcast.low;
     (* ifHCInMulticastPkts_ptr ).high = rowreq_ctx->data->if_imcast.high;
 
+
     return MFD_SUCCESS;
 }
 
@@ -643,6 +685,7 @@ ifHCInBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
      */
     (* ifHCInBroadcastPkts_ptr ).low = rowreq_ctx->data->if_ibcast.low;
     (* ifHCInBroadcastPkts_ptr ).high = rowreq_ctx->data->if_ibcast.high;
+
 
     return MFD_SUCCESS;
 }
@@ -690,6 +733,7 @@ ifHCOutOctets_get(ifXTable_rowreq_ctx * rowreq_ctx,
     (* ifHCOutOctets_ptr ).low = rowreq_ctx->data->if_obytes.low;
     (* ifHCOutOctets_ptr ).high = rowreq_ctx->data->if_obytes.high;
 
+
     return MFD_SUCCESS;
 }
 
@@ -735,6 +779,7 @@ ifHCOutUcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
      */
     (* ifHCOutUcastPkts_ptr ).low = rowreq_ctx->data->if_oucast.low;
     (* ifHCOutUcastPkts_ptr ).high = rowreq_ctx->data->if_oucast.high;
+
 
     return MFD_SUCCESS;
 }
@@ -782,6 +827,7 @@ ifHCOutMulticastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
     (* ifHCOutMulticastPkts_ptr ).low = rowreq_ctx->data->if_omcast.low;
     (* ifHCOutMulticastPkts_ptr ).high = rowreq_ctx->data->if_omcast.high;
 
+
     return MFD_SUCCESS;
 }
 
@@ -827,6 +873,7 @@ ifHCOutBroadcastPkts_get(ifXTable_rowreq_ctx * rowreq_ctx,
      */
     (* ifHCOutBroadcastPkts_ptr ).low = rowreq_ctx->data->if_obcast.low;
     (* ifHCOutBroadcastPkts_ptr ).high = rowreq_ctx->data->if_obcast.high;
+
 
     return MFD_SUCCESS;
 }
@@ -924,6 +971,7 @@ ifLinkUpDownTrapEnable_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ifLinkUpDownTrapEnable_ptr ) from rowreq_ctx->data->
      */
+    return MFD_SKIP;            /* TODO: remove this once you've set data */
     /*
      * TODO:
      * value mapping
@@ -1076,13 +1124,14 @@ ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ifPromiscuousMode_ptr ) from rowreq_ctx->data->
      */
+    return MFD_SKIP;            /* TODO: remove this once you've set data */
     /*
      * TODO:
      * value mapping
      */
     if (MFD_SUCCESS !=
         ifPromiscuousMode_map(&(*ifPromiscuousMode_ptr),
-                               rowreq_ctx->data->if_promiscuous)) {
+                              rowreq_ctx->data->if_promiscuous)) {
         return MFD_ERROR;
     }
 
@@ -1181,6 +1230,7 @@ ifConnectorPresent_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ifConnectorPresent_ptr ) from rowreq_ctx->data->
      */
+    return MFD_SKIP;            /* TODO: remove this once you've set data */
     /*
      * TODO:
      * value mapping
@@ -1544,7 +1594,7 @@ ifLinkUpDownTrapEnable_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifLinkUpDownTrapEnable data
-     *  from 'rowreq_ctx->data->ifLinkUpDownTrapEnable to 'rowreq_ctx->undo.ifLinkUpDownTrapEnable'
+     *  from 'rowreq_ctx->data->ifLinkUpDownTrapEnable to 'rowreq_ctx->undo->ifLinkUpDownTrapEnable'
      */
 
 
@@ -1618,7 +1668,7 @@ ifLinkUpDownTrapEnable_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifLinkUpDownTrapEnable data
-     *  from 'rowreq_ctx->undo.ifLinkUpDownTrapEnable to 'rowreq_ctx->data->ifLinkUpDownTrapEnable'
+     *  from 'rowreq_ctx->undo->ifLinkUpDownTrapEnable to 'rowreq_ctx->data->ifLinkUpDownTrapEnable'
      */
 
 
@@ -1731,7 +1781,7 @@ ifPromiscuousMode_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifPromiscuousMode data
-     *  from 'rowreq_ctx->data->ifPromiscuousMode to 'rowreq_ctx->undo.ifPromiscuousMode'
+     *  from 'rowreq_ctx->data->ifPromiscuousMode to 'rowreq_ctx->undo->ifPromiscuousMode'
      */
 
 
@@ -1778,7 +1828,6 @@ ifPromiscuousMode_set(ifXTable_rowreq_ctx * rowreq_ctx,
     case TRUTHVALUE_FALSE:
         ifPromiscuousMode = INTERNAL_IFPROMISCUOUSMODE_FALSE;
         break;
-
     }
     /***---------------------------------------------***/
     /***              END  EXAMPLE CODE              ***/
@@ -1806,7 +1855,7 @@ ifPromiscuousMode_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifPromiscuousMode data
-     *  from 'rowreq_ctx->undo.ifPromiscuousMode to 'rowreq_ctx->data->ifPromiscuousMode'
+     *  from 'rowreq_ctx->undo->ifPromiscuousMode to 'rowreq_ctx->data->ifPromiscuousMode'
      */
 
 
@@ -1924,7 +1973,7 @@ ifAlias_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifAlias and ifAlias_len data
-     *  from 'rowreq_ctx->data->ifAlias to 'rowreq_ctx->undo.ifAlias'
+     *  from 'rowreq_ctx->data->ifAlias to 'rowreq_ctx->undo->ifAlias'
      */
 
 
@@ -1972,7 +2021,7 @@ ifAlias_undo(ifXTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:
      * copy ifAlias and ifAlias_len data
-     *  from 'rowreq_ctx->undo.ifAlias to 'rowreq_ctx->data->ifAlias'
+     *  from 'rowreq_ctx->undo->ifAlias to 'rowreq_ctx->data->ifAlias'
      */
 
 
