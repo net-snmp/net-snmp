@@ -335,11 +335,32 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     return count;
 }
 
+static void
+_remove_duplicates(void *ptr, int i, int j)
+{
+    struct snmp_gen_callback *scp = NULL;
+
+    for (; i < MAX_CALLBACK_IDS; i++) {
+	for (; j < MAX_CALLBACK_SUBIDS; j++) {
+	    scp = thecallbacks[i][j]; 
+	    while (scp != NULL) {
+		if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL) &&
+                    (scp->sc_client_arg == ptr)) {
+                    DEBUGMSGTL(("callback", "duplicate client arg\n"));
+		    scp->sc_client_arg = NULL;
+                }
+		scp = scp->next;
+	    }
+	}
+    }
+}
+
 void
 clear_callback(void)
 {
     unsigned int i = 0, j = 0; 
-    struct snmp_gen_callback *scp = NULL, *next = NULL;
+    struct snmp_gen_callback *scp = NULL;
 
     if(++_lock > 1) {
         snmp_log(LOG_WARNING,
@@ -349,15 +370,30 @@ clear_callback(void)
     DEBUGMSGTL(("callback", "clear callback\n"));
     for (i = 0; i < MAX_CALLBACK_IDS; i++) {
 	for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
-	    scp = thecallbacks[i][j]; 
+	    scp = thecallbacks[i][j];
 	    while (scp != NULL) {
-		next = scp->next;
-		if ((NULL != scp->sc_callback) && (scp->sc_client_arg != NULL))
-		    SNMP_FREE(scp->sc_client_arg);
+		thecallbacks[i][j] = scp->next;
+                /*
+                 * if there is a client arg, check for duplicates
+                 * and then free it.
+                 */
+		if ((NULL != scp->sc_callback) &&
+                    (scp->sc_client_arg != NULL)) {
+                    void *tmp_arg;
+                    /*
+                     * save the client arg, then set it to null so that it
+                     * won't look like a duplicate, then check for duplicates
+                     * starting at the current i,j (earlier dups should have
+                     * already been found) and free the pointer.
+                     */
+                    tmp_arg = scp->sc_client_arg;
+		    scp->sc_client_arg = NULL;
+                    _remove_duplicates(tmp_arg, i, j);
+                    free(tmp_arg);
+                }
 		SNMP_FREE(scp);
-		scp = next;
+		scp = thecallbacks[i][j];
 	    }
-	    thecallbacks[i][j] = NULL;
 	}
     }
     --_lock;
