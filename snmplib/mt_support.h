@@ -65,10 +65,10 @@ int snmp_res_destroy_mutex(int groupID, int resourceID);
 
 #else  /* !_REENTRANT */
 
-#define snmp_res_init() 0
-#define snmp_res_lock(x,y) 0
-#define snmp_res_unlock(x,y) 0
-#define snmp_res_destroy_mutex(x,y) 0
+#define snmp_res_init() do {} while (0)
+#define snmp_res_lock(x,y) do {} while (0)
+#define snmp_res_unlock(x,y) do {} while (0)
+#define snmp_res_destroy_mutex(x,y) do {} while (0)
 
 #endif /* !_REENTRANT */
 
