@@ -351,7 +351,6 @@ void
 release_cached_resources(unsigned int regNo, void *clientargs)
 {
     netsnmp_cache  *cache = NULL;
-    long            cache_timeout;
 
     cache_outstanding_valid = 0;
     DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
