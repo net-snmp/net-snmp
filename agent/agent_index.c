@@ -73,6 +73,9 @@ struct snmp_index {
 
 extern struct snmp_session *main_session;
 
+/*  The caller is responsible for free()ing the memory returned by
+    this function.  */
+
 char *
 register_string_index( oid *name, size_t name_len, char *cp )
 {
@@ -83,15 +86,18 @@ register_string_index( oid *name, size_t name_len, char *cp )
     snmp_set_var_objid( &varbind, name, name_len );
     if ( cp != ANY_STRING_INDEX ) {
         snmp_set_var_value( &varbind, (u_char *)cp, strlen(cp) );
-	res = register_index( &varbind, ALLOCATE_THIS_INDEX, main_session );
+	res = register_index(&varbind, ALLOCATE_THIS_INDEX, main_session);
+    } else {
+	res = register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
-    else
-	res = register_index( &varbind, ALLOCATE_ANY_INDEX, main_session );
 
-    if ( res == NULL )
+    if (res == NULL) {
 	return NULL;
-    else
-	return (char *)res->val.string;
+    } else {
+	char *rv = strdup(res->val.string);
+	free(res);
+	return rv;
+    }
 }
 
 int
@@ -106,16 +112,22 @@ register_int_index( oid *name, size_t name_len, int val )
     if ( val != ANY_INTEGER_INDEX ) {
         varbind.val_len = sizeof(long);
         *varbind.val.integer = val;
-	res = register_index( &varbind, ALLOCATE_THIS_INDEX, main_session );
+	res = register_index(&varbind, ALLOCATE_THIS_INDEX, main_session);
+    } else {
+	res = register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
-    else
-	res = register_index( &varbind, ALLOCATE_ANY_INDEX, main_session );
 
-    if ( res == NULL )
+    if (res == NULL) {
 	return -1;
-    else
-	return *res->val.integer;
+    } else {
+	int rv = *(res->val.integer);
+	free(res);
+	return rv;
+    }
 }
+
+/*  The caller is responsible for free()ing the memory returned by
+    this function.  */
 
 struct variable_list *
 register_oid_index( oid *name, size_t name_len,
@@ -126,17 +138,21 @@ register_oid_index( oid *name, size_t name_len,
     memset( &varbind, 0, sizeof(struct variable_list));
     varbind.type = ASN_OBJECT_ID;
     snmp_set_var_objid( &varbind, name, name_len );
-    if ( value != ANY_OID_INDEX ) {
-        snmp_set_var_value( &varbind, (u_char*)value, value_len*sizeof(oid) );
-	return( register_index( &varbind, ALLOCATE_THIS_INDEX, main_session ));
+    if (value != ANY_OID_INDEX) {
+        snmp_set_var_value(&varbind, (u_char*)value, value_len*sizeof(oid));
+	return register_index(&varbind, ALLOCATE_THIS_INDEX, main_session);
+    } else {
+	return register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
-    else
-	return( register_index( &varbind, ALLOCATE_ANY_INDEX, main_session ));
 }
+
+/*  The caller is responsible for free()ing the memory returned by
+    this function.  */
 
 struct variable_list*
 register_index(struct variable_list *varbind, int flags, struct snmp_session *ss )
 {
+    struct variable_list *rv = NULL;
     struct snmp_index *new_index, *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
     size_t buf_len = 0, out_len = 0;
@@ -191,9 +207,11 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	if ( flags & ALLOCATE_ANY_INDEX ) {
             for(idxptr2 = idxptr ; idxptr2 != NULL;
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
-		if ( flags == ALLOCATE_ANY_INDEX && idxptr2->session == NULL ) {
-		    idxptr2->session = ss ;
-		    return idxptr2->varbind;
+		if (flags == ALLOCATE_ANY_INDEX && idxptr2->session == NULL) {
+		    if ((rv = snmp_clone_varbind(idxptr2->varbind)) != NULL) {
+			idxptr2->session = ss;
+		    }
+		    return rv;
 		}
 	    }
 	} else {
@@ -359,9 +377,17 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		    break;
 		default:
 		    snmp_free_var(new_index->varbind);
-		    free( new_index );
+		    free(new_index);
 		    return NULL;	/* Index type not supported */
 	    }
+	}
+
+	/*  Try to duplicate the new varbind for return.  */
+
+	if ((rv = snmp_clone_varbind(new_index->varbind)) == NULL) {
+	    snmp_free_var(new_index->varbind);
+	    free(new_index);
+	    return NULL;
 	}
 
 		/*
@@ -394,7 +420,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	    else
 	        snmp_index_head = new_index;
 	}
-    return new_index->varbind;
+    return rv;
 }
 
 	/*
