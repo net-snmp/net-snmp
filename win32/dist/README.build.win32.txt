@@ -50,11 +50,19 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 
 3.  Apply any required patches
 
-4.  cd (source dir)\win32
+4.  Remove the example MIB files:  
 
-5.  Run build.bat
+    Edit win32\net-snmp\agent\mib_module_config.h and undef the following lines:
 
-6.  Set to the following:
+    #define USING_EXAMPLES_UCDDEMOPUBLIC_MODULE 1
+
+    #define USING_EXAMPLES_EXAMPLE_MODULE 1
+
+5.  cd (source dir)\win32
+
+6.  Run build.bat
+
+7.  Set to the following:
 
     Net-SNMP build and install options
     ==================================
@@ -72,9 +80,9 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     8. Debug mode:           disabled
     9. IPv6 transports:      disabled
 
-7.  F to start the build and verify everything was built ok
+8.  F to start the build and verify everything was built ok
 
-8.  Delete any generated config files from c:\usr\snmp\persist
+9.  Delete any generated config files from c:\usr\snmp\persist
 
 
 Creating the Perl package
