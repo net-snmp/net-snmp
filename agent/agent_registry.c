@@ -548,6 +548,11 @@ netsnmp_register_mib(const char *moduleName,
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
 
+    if (moduleName == NULL ||
+        mibloc     == NULL) {
+        /* Shouldn't happen ??? */
+        return MIB_REGISTRATION_FAILED;
+    }
     subtree = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
     if (subtree == NULL) {
         return MIB_REGISTRATION_FAILED;
