@@ -830,10 +830,15 @@ init_mib __P((void))
         strcpy(path, DEFAULT_MIBS);
 	env_var = path;
     }
-    entry = strtok( env_var, ":" );
-    while ( entry ) {
-        read_module(entry);
-        entry = strtok( NULL, ":");
+    if (strcmp (env_var, "ALL") == 0) {
+	read_all_mibs();
+    }
+    else {
+	entry = strtok( env_var, ":" );
+	while ( entry ) {
+	    read_module(entry);
+	    entry = strtok( NULL, ":");
+	}
     }
 
     env_var = getenv("MIBFILE");
