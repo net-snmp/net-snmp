@@ -353,6 +353,12 @@ usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (!rowreq_ctx || !usmDHUserAuthKeyChange_val_ptr_len_ptr ||
+        !usmDHUserAuthKeyChange_val_ptr_ptr ||
+        !*usmDHUserAuthKeyChange_val_ptr_ptr) {
+        return MFD_ERROR;
+    }
+
     return usmDHGetUserKeyChange(rowreq_ctx->data, 1,
                                  usmDHUserAuthKeyChange_val_ptr_ptr,
                                  usmDHUserAuthKeyChange_val_ptr_len_ptr);
@@ -454,6 +460,12 @@ usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    if (!rowreq_ctx || !usmDHUserOwnAuthKeyChange_val_ptr_len_ptr ||
+        !usmDHUserOwnAuthKeyChange_val_ptr_ptr ||
+        !*usmDHUserOwnAuthKeyChange_val_ptr_ptr) {
+        return MFD_ERROR;
+    }
+
     return usmDHGetUserKeyChange(rowreq_ctx->data, 1,
                                  usmDHUserOwnAuthKeyChange_val_ptr_ptr,
                                  usmDHUserOwnAuthKeyChange_val_ptr_len_ptr);
@@ -551,6 +563,12 @@ usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != usmDHUserPrivKeyChange_val_ptr_len_ptr);
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if (!rowreq_ctx || !usmDHUserPrivKeyChange_val_ptr_len_ptr ||
+        !usmDHUserPrivKeyChange_val_ptr_ptr ||
+        !*usmDHUserPrivKeyChange_val_ptr_ptr) {
+        return MFD_ERROR;
+    }
 
     return usmDHGetUserKeyChange(rowreq_ctx->data, 0,
                                  usmDHUserPrivKeyChange_val_ptr_ptr,
@@ -652,6 +670,12 @@ usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != usmDHUserOwnPrivKeyChange_val_ptr_len_ptr);
 
     netsnmp_assert(NULL != rowreq_ctx);
+
+    if (!rowreq_ctx || !usmDHUserOwnPrivKeyChange_val_ptr_len_ptr ||
+        !usmDHUserOwnPrivKeyChange_val_ptr_ptr ||
+        !*usmDHUserOwnPrivKeyChange_val_ptr_ptr) {
+        return MFD_ERROR;
+    }
 
     return usmDHGetUserKeyChange(rowreq_ctx->data, 0,
                                  usmDHUserOwnPrivKeyChange_val_ptr_ptr,
