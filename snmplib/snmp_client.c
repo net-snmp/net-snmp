@@ -110,14 +110,16 @@ struct snmp_pdu *
 snmp_pdu_create(int command)
 {
     struct snmp_pdu *pdu;
+    struct sockaddr_in *pduIp;
 
     pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
     if (pdu) {
+    pduIp = (struct sockaddr_in *)&(pdu->address);
     pdu->version		 = SNMP_DEFAULT_VERSION;
     pdu->command		 = command;
     pdu->errstat		 = SNMP_DEFAULT_ERRSTAT;
     pdu->errindex		 = SNMP_DEFAULT_ERRINDEX;
-    pdu->address.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
+    pduIp->sin_addr.s_addr       = SNMP_DEFAULT_ADDRESS;
     pdu->securityNameLen	 = 0;
     pdu->contextNameLen		 = 0;
     pdu->reqid                   = snmp_get_next_reqid();

@@ -41,7 +41,7 @@ struct variable_list;
 struct timeval;
 struct synch_state;
 
-typedef struct sockaddr_in  snmp_ipaddr;
+typedef struct sockaddr  snmp_ipaddr;		/* was struct sockaddr_in */
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
 
