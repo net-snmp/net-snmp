@@ -453,6 +453,8 @@ read_configs (void)
                       optional_config));
           snmp_log_perror(optional_config);
       } else {
+          DEBUGMSGTL(("read_config","Reading optional config file: \"%s\"\n",
+                      optional_config));
           read_config_with_type(optional_config, type);
       }
   }
