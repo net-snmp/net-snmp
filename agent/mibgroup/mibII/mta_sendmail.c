@@ -147,7 +147,7 @@ enum {
 /*
  * structure that tells the agent, which function returns what values 
  */
-static struct variable4 mta_variables[] = {
+static struct variable3 mta_variables[] = {
     {MTARECEIVEDMESSAGES, ASN_COUNTER, RONLY, var_mtaEntry, 3, {1, 1, 1}},
     {MTASTOREDMESSAGES, ASN_GAUGE, RONLY, var_mtaEntry, 3, {1, 1, 2}},
     {MTATRANSMITTEDMESSAGES, ASN_COUNTER, RONLY, var_mtaEntry, 3,
@@ -1095,7 +1095,7 @@ mta_sendmail_parse_config(const char *token, char *line)
     void
 init_mta_sendmail(void)
 {
-    REGISTER_MIB("mibII/mta_sendmail", mta_variables, variable4,
+    REGISTER_MIB("mibII/mta_sendmail", mta_variables, variable3,
                  mta_variables_oid);
 
     snmpd_register_config_handler("sendmail_config",

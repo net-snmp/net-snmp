@@ -147,7 +147,7 @@ marker_t        udp_stats_cache_marker = NULL;
 	 *
 	 *********************/
 
-struct variable8 udp_variables[] = {
+struct variable3 udp_variables[] = {
     {UDPINDATAGRAMS, ASN_COUNTER, RONLY, var_udp, 1, {1}},
     {UDPNOPORTS, ASN_COUNTER, RONLY, var_udp, 1, {2}},
     {UDPINERRORS, ASN_COUNTER, RONLY, var_udp, 1, {3}},
@@ -170,7 +170,7 @@ init_udp(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/udp", udp_variables, variable8, udp_variables_oid);
+    REGISTER_MIB("mibII/udp", udp_variables, variable3, udp_variables_oid);
     REGISTER_SYSOR_ENTRY(udp_module_oid,
                          "The MIB module for managing UDP implementations");
 

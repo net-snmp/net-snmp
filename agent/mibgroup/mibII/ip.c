@@ -137,7 +137,7 @@ extern void     init_routes(void);
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable4 ip_variables[] = {
+struct variable3 ip_variables[] = {
 #ifdef WIN32
     {IPFORWARDING, ASN_INTEGER, RWRITE, var_ip, 1, {1}},
     {IPDEFAULTTTL, ASN_INTEGER, RWRITE, var_ip, 1, {2}},
@@ -224,7 +224,7 @@ init_ip(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/ip", ip_variables, variable4, ip_variables_oid);
+    REGISTER_MIB("mibII/ip", ip_variables, variable3, ip_variables_oid);
     if (++ip_module_count == 2)
         REGISTER_SYSOR_ENTRY(ip_module_oid,
                              "The MIB module for managing IP and ICMP implementations");

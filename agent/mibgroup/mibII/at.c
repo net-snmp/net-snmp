@@ -134,7 +134,7 @@ static int      ARP_Scan_Next(u_long *, char *, u_long *);
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable4 at_variables[] = {
+struct variable1 at_variables[] = {
     {ATIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 1, {1}},
     {ATPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
     {ATNETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}}
@@ -152,7 +152,7 @@ init_at(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/at", at_variables, variable4, at_variables_oid);
+    REGISTER_MIB("mibII/at", at_variables, variable1, at_variables_oid);
 #ifdef solaris2
     init_kernel_sunos5();
 #endif
