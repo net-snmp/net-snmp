@@ -74,6 +74,10 @@ to the label and values from the enum list.
 .IP "@foreach $RANGE_START, $RANGE_END range NODE@"
 repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
 to the legal accepted range set for a given mib NODE.
+.IP "@foreach $var stuff a b c d@"
+repeat iterate over values a, b, c, d as assigned generically
+(ie, the values are taken straight from the list with no
+mib-expansion, etc).
 .IP "@eval $VAR = expression@"
 evaluates expression and assigns the results to $VAR.  This is
 not a full perl eval, but sort of a "psuedo" eval useful for
