@@ -152,6 +152,8 @@ struct snmp_session {
     int	    retries;	/* Number of retries before timeout. */
     long    timeout;    /* Number of uS until first timeout, then exponential backoff */
     u_long  flags;
+    struct  snmp_session *subsession;
+    struct  snmp_session *next;
 
     char    *peername;	/* Domain name or dotted IP address of default peer */
     u_short remote_port;/* UDP port number of peer. */
@@ -225,6 +227,7 @@ struct request_list {
     u_long timeout;	/* length to wait for timeout */
     struct timeval time; /* Time this request was made */
     struct timeval expire;  /* time this request is due to expire */
+    struct  snmp_session *session;
     struct snmp_pdu *pdu;   /* The pdu for this request
 			       (saved so it can be retransmitted */
 };
@@ -275,6 +278,7 @@ extern void snmp_set_detail (const char *);
 
 #define SNMP_FLAGS_STREAM_SOCKET   0x80
 #define SNMP_FLAGS_LISTENING       0x40     /* Server stream sockets only */
+#define SNMP_FLAGS_SUBSESSION      0x20
 
 /*
  * Error return values.
