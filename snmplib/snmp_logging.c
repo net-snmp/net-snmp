@@ -93,17 +93,7 @@
 netsnmp_log_handler *logh_head;
 netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
-/*
-static int      do_syslogging = 0;
-static int      do_filelogging = 0;
-static int      do_stderrlogging = 1;
-static int      do_log_callback = 0;
-static FILE    *logfile;
-*/
-static int      newline = 1;
-#ifdef WIN32
-static HANDLE   eventlog_h;
-#endif
+static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
 
 #ifndef HAVE_VSNPRINTF
                 /*
