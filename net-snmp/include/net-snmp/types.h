@@ -5,7 +5,6 @@
      *  Definitions of data structures, used within the library API.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <sys/types.h>
 
 #ifndef MAX_SUBID	/* temporary - duplicate definition protection */

@@ -5,7 +5,6 @@
      *  Library API routines concerned with MIB files and objects, and OIDs
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

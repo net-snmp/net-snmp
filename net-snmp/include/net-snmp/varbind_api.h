@@ -5,7 +5,6 @@
      *  Library API routines concerned with variable bindings and values.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*

@@ -9,7 +9,6 @@
      *    particular O/S distributiones.
      */
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 
     /*
