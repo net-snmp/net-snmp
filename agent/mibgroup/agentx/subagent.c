@@ -92,6 +92,11 @@ extern int      callback_master_num;
 void
 init_subagent(void)
 {
+#ifndef SNMP_TRANSPORT_CALLBACK_DOMAIN
+    snmp_log(LOG_WARNING,"AgentX subagent has been disabled because "
+               "the callback transport is not available.\n");
+    return;
+#else
     if (agentx_callback_sess == NULL) {
         agentx_callback_sess = netsnmp_callback_open(callback_master_num,
                                                      handle_subagent_response,
@@ -99,6 +104,7 @@ init_subagent(void)
         DEBUGMSGTL(("agentx/subagent", "init_subagent sess %08x\n",
                     agentx_callback_sess));
     }
+#endif /* SNMP_TRANSPORT_CALLBACK_DOMAIN */
 }
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
@@ -713,7 +719,11 @@ subagent_open_master_session(void)
         /* was memduped above and is no longer needed */
         free(sess.peername);
 
-    if (agentx_open_session(main_session) < 0) {
+    /*
+     * I don't know why 1 is success instead of the usual 0 = noerr, 
+     * but that's what the function returns.
+     */
+    if (1 != agentx_open_session(main_session)) {
         snmp_close(main_session);
         main_session = NULL;
         return -1;
