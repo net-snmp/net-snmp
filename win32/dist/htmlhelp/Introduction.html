@@ -1,16 +1,17 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta name="generator" content=
-"HTML Tidy for Linux/x86 (vers 1st October 2003), see www.w3.org">
+"HTML Tidy for Windows (vers 1st October 2003), see www.w3.org" />
 <meta content="text/html; charset=us-ascii" http-equiv=
-"content-type">
+"content-type" />
 <title>Introduction</title>
 </head>
 <body>
 <img style="width: 600px; height: 171px;" alt="Net-SNMP Logo" src=
-"net-snmp-4.2-800.jpg"><br>
-<br>
+"net-snmp-4.2-800.jpg" /><br />
+<br />
 <h2>What Is It?</h2>
 Various tools relating to the Simple Network Management Protocol
 including:
@@ -24,6 +25,7 @@ request or set information from SNMP agents</a></li>
 <li><a href=
 "http://www.net-snmp.org/tutorial-5/commands/snmptrap.html">tools
 to generate and handle SNMP traps</a></li>
+<li>A slew of SNMP related perl modules</li>
 <li>a version of the unix 'netstat' command using SNMP</li>
 <li><a href="http://www.net-snmp.org/tkmib.jpg">a Tk/perl mib
 browser</a></li>
@@ -37,8 +39,8 @@ Windows help file.</p>
 This package was originally based on the Carnegie Mellon University
 and Univerisity of California at Davis SNMP implementations, but
 has been greatly enhanced, ported, fixed, made easier to use and
-barely resembles the original package anymore.<br>
-<br>
+barely resembles the original package anymore.<br />
+<br />
 <h2>Distribution</h2>
 Be sure and check out the <a href=
 "http://www.net-snmp.org/#Related">other related software
@@ -70,12 +72,6 @@ project</a> links as well.
 "http://www.Net-SNMP.org/net-snmp-admin.asc">http://www.Net-SNMP.org/net-snmp-admin.asc</a></li>
 </ul>
 </li>
-<li>MD5 Sums:
-<ul>
-<li><a href=
-"http://www.net-snmp.org/md5/">http://www.net-snmp.org/md5/</a></li>
-</ul>
-</li>
 <li>Mirrors (note that sourceforge download servers are mirrored
 themselves):
 <ul>
@@ -92,7 +88,7 @@ ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/</a></li>
 </li>
 </ul>
 <h2>Documentation</h2>
-<div style="margin-left: 2em">
+<div style="margin-left: 2em;">
 <h2>Introduction/Overview</h2>
 <ul>
 <li><a href="http://www.net-snmp.org/tutorial">The net-snmp
@@ -103,11 +99,14 @@ Tutorial</a>,</li>
 <li><a href="readme-INSTALL.html">INSTALL</a> file</li>
 <li><a href="readme-COPYING.html">The copyright</a></li>
 <li><a href="FAQ.html">Frequently Asked Questions</a></li>
-<li><a href="Developer_FAQ.html">Developer Frequently Asked Questions</a></li>
+<li><a href="Developer_FAQ.html">Developer Frequently Asked
+Questions</a></li>
 <li><a href="readme-NEWS.html">News</a> and <a href=
 "http://www.net-snmp.org/ChangeLog.txt">ChangeLog files</a></li>
 <li><a href="http://www.net-snmp.org/projects.html">The Projects
 Page</a></li>
+<li><a href="http://www.net-snmp.org/mibs/">MIB files distributed
+with Net-SNMP</a></li>
 </ul>
 <h2>Manual Pages</h2>
 <p>A full list of manual pages can be found in the various sections
@@ -115,12 +114,22 @@ listed in the table of contents; this is merely a summary of the
 most important.</p>
 <ul>
 <li style="list-style: none">
+<h3>General</h3>
+</li>
+<li><a href="man5-snmp_config.5.html">Configuring the software via
+.conf files.</a></li>
+<li><a href="http://www.net-snmp.org/tutorial-5/agent/">The doxygen
+generated API documentation</a></li>
+</ul>
+<ul>
+<li style=
+"list-style-type: none; list-style-image: none; list-style-position: outside;">
 <h3>The Agent</h3>
 </li>
 <li><a href="man8-snmpd.8.html">snmpd</a></li>
 <li><a href="man5-snmpd.conf.5.html">snmpd.conf</a></li>
 <li><a href="http://www.net-snmp.org/tutorial/agent/index.html">How
-to extend the agent</a><br>
+to extend the agent</a><br />
 (plus a <a href=
 "http://www.net-snmp.org/tutorial/agent/CheckList.html">list of
 things to check</a> in case this doesn't seem to work)
@@ -137,8 +146,8 @@ arguments</a></li>
 generator</a></li>
 <li><a href=
 "http://www.net-snmp.org/tutorial/commands">Applications
-Tutorial</a><br>
-<br></li>
+Tutorial</a><br />
+<br /></li>
 <li><a href="man1-snmpget.1.html">snmpget</a></li>
 <li><a href="man1-snmpset.1.html">snmpset</a></li>
 <li><a href="man1-snmpwalk.1.html">snmpwalk</a></li>
@@ -157,8 +166,8 @@ Tutorial</a><br>
 <h3>The Library API</h3>
 </li>
 <li><a href="http://www.net-snmp.org/tutorial/toolkit">Library
-Tutorial</a><br>
-<br></li>
+Tutorial</a><br />
+<br /></li>
 <li><a href="man3-snmp_api.3.html">snmp_api</a></li>
 <li><a href="man3-snmp_sess_api.3.html">snmp_sess_api</a></li>
 <li><a href="man3-mib_api.3.html">mib_api</a></li>
@@ -171,13 +180,22 @@ Tutorial</a><br>
 </ul>
 </div>
 <h2>Mailing Lists</h2>
-<div style="margin-left: 2em">There are two main discussion lists:
+<div style="margin-left: 2em;">There is one announcement mailing
+list:
 <ul>
-<li><b>net-snmp-users</b><br>
+<li><b><a href=
+"http://www.net-snmp.org/lists/announce/">net-snmp-announce</a></b></li>
+</ul>
+There are two main discussion lists:
+<ul>
+<li><b><a href=
+"http://www.net-snmp.org/lists/users/">net-snmp-users</a></b><br />
 for discussion on configuring and using the package, including
 coding issues for user-developed applications (clients, managers,
 MIB modules, etc).</li>
-<li><b>net-snmp-coders</b><br>
+<li><b><a href=
+"http://www.net-snmp.org/lists/coders/">net-snmp-coders</a></b><br />
+
 for discussion on development of code that will be shipped as part
 of the package.</li>
 </ul>
@@ -190,36 +208,38 @@ lists.</p>
 <p>See sourceforge.net's <a href=
 "http://sourceforge.net/mail/?group_id=12694">mailing list
 instructions</a> for further details, and to subscribe (or
-unsubscribe) to individual lists.<br>
+unsubscribe) to individual lists.<br />
 Note that messages for non-subscribers will be held for approval
 before appearing on the list. This is purely intended to stem the
 recent flood of spam email, and is not meant to deter requests for
 assistance or information.</p>
 </div>
-<div style="margin-left: 2em">Also, stop by the #net-snmp IRC
+<div style="margin-left: 2em;">Also, stop by the #net-snmp IRC
 channel on the <a href="http://www.freenode.net/">freenode.net</a>
 IRC servers to gather, mingle, and chat. At least 3 of the core
 developers are known to hang out there regularily.</div>
-<a name="Contacting"></a>
+<a name="Contacting" id="Contacting"></a>
 <h2>Contacting the Authors and Submitting Bug Reports</h2>
-<div style="margin-left: 2em">There are many authors from around
+<div style="margin-left: 2em;">There are many authors from around
 the net working on the project. To report a bug, see the <a href=
 "http://sourceforge.net/bugs/?group_id=12694">net-snmp bugs
 database</a>. For support, please mail a note to our "users
 discussion mailing list" at <a href=
 "mailto:net-snmp-users@lists.sourceforge.net">net-snmp-users@lists.sourceforge.net</a>.</div>
-<a name="Helping"></a>
+<a name="Helping" id="Helping"></a>
 <h2>Helping Out!</h2>
-<div style="margin-left: 2em">Want to help? There are many <a href=
-"http://www.net-snmp.org/projects.html">projects</a> that need to
-be tackled to make this software better. To help us out, <a href=
+<div style="margin-left: 2em;">Want to help? There are many
+<a href="http://www.net-snmp.org/projects.html">projects</a> that
+need to be tackled to make this software better. To help us out,
+<a href=
 "http://lists.sourceforge.net/lists/listinfo/net-snmp-coders">join
 the net-snmp-coders mailing list</a>, announce what you're wanting
 to work on (to make sure its not being done and won't conflict with
 someone elses work) and start writing! Submit your ideas,
 questions, patches etc. to the net-snmp-coders list as you come up
 with them.</div>
-<div style="margin-left: 2em">Contributions to the Net-SNMP source
+<br />
+<div style="margin-left: 2em;">Contributions to the Net-SNMP source
 code in any form are greatly appreciated. We expect the parties
 providing such contributions to have the right to contribute them
 to the Net-SNMP project or that the parties that do have the right
@@ -234,9 +254,9 @@ in summary BSD-like <em>not</em> GPL or LGPL). If this license
 agreement ever changes the contribution will continue to be
 released under any new licenses as well. Thank you, in advance, for
 your gracious contributions.</div>
-<a name="Related"></a>
+<a name="Related" id="Related"></a>
 <h2>Related Software and Information</h2>
-<div style="margin-left: 2em">
+<div style="margin-left: 2em;">
 <h3>Software</h3>
 <ul>
 <li><a href=
@@ -308,8 +328,8 @@ future changes to the SMI language are being defined. (SMI is the
 language in which MIBs are written).</li>
 </ul>
 </div>
-<br>
-<br>
-<br>
+<br />
+<br />
+<br />
 </body>
 </html>
