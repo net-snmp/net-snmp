@@ -4,22 +4,36 @@
 ##
 ########################################################################
 ## mark boundarys
-@eval $m2c_mark_boundary = 0@
+@if "x$m2c_mark_boundary" eq "x"@
+@   eval $m2c_mark_boundary = 0@
+@end@
 ##
-@eval $mfd_readme_verbose = 1@
-@eval $m2c_data_transient = 2@ # TRANSIENT
-@eval $m2c_include_examples = 1@
+@if "x$mfd_readme_verbose" eq "x"@
+@   eval $mfd_readme_verbose = 1@
+@end@
+@if "x$m2c_data_transient" eq "x"@
+@   eval $m2c_data_transient = 2@ # TRANSIENT
+@end@
+@if "x$m2c_include_examples" eq "x"@
+@   eval $m2c_include_examples = 1@
+@end@
 ########################################################################
 ## enum constants upper or lower case? (NODE_NAME vs node_name)
-@eval $m2c_const_lc = 0@
+@if "x$m2c_const_lc" eq "x"@
+@   eval $m2c_const_lc = 0@
+@end@
 ##
 ########################################################################
 ## prefix for all enums  (NODE_NAME vs XYZ_NODE_NAME)
-@eval $m2c_const_pfx = ""@        # or "XYZ_"
+@if "x$m2c_const_pfx" eq "x"@
+@   eval $m2c_const_pfx = ""@        # or "XYZ_"
+@end@
 ##
 ########################################################################
 ## use temporary values in get routines, or direct pointers?
-@eval $m2c_get_use_temp = 1@
+@if "x$m2c_get_use_temp" eq "x"@
+@   eval $m2c_get_use_temp = 1@
+@end@
 ##
 ########################################################################
 ########################################################################
@@ -29,7 +43,13 @@
 ########################################################################
 ########################################################################
 ## allow for different style enums (#define vs const)
-@eval $m2c_const_dcl = "#define"@ # or "const int"
-@eval $m2c_const_del = ""@        # or "="
-@eval $m2c_const_sfx = ""@        # or ";"
+@if "x$m2c_const_dcl" eq "x"@
+@   eval $m2c_const_dcl = "#define"@ # or "const int"
+@end@
+@if "x$m2c_const_del" eq "x"@
+@   eval $m2c_const_del = ""@        # or "="
+@end@
+@if "x$m2c_const_sfx" eq "x"@
+@   eval $m2c_const_sfx = ""@        # or ";"
+@end@
 ##
