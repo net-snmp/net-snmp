@@ -19,6 +19,7 @@
 #include <malloc.h>
 #endif
 #include <ctype.h>
+#include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -26,7 +27,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include <sys/types.h>
 #include <netdb.h>
 
 #include "mibincl.h"
