@@ -2454,9 +2454,14 @@ _snmp_parse(struct snmp_session *session,
         DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
+        DEBUGDUMPSETUP("dump_recv", data, 4);
+        DEBUGMSG(("dump_recv", "SNMPv%d message\n", (1+pdu->version)));
+
+        DEBUGINDENTMORE();
 	data = snmp_comstr_dparse(data, &length,
                                  community, &community_length,
 			         &pdu->version, action);
+        DEBUGINDENTLESS();
 	if (data == NULL)
 	    return -1;
         if (pdu->version != session->version &&
@@ -2580,6 +2585,9 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
 
   badtype = 0;
 
+  DEBUGPRINTINDENT("dump_recv");
+  DEBUGINDENTMORE();
+  DEBUGMSG(("dump_recv", "PDU\n"));
   /* Get the PDU type */
   data = asn_dparse_header(data, length, &msg_type, action);
   if (data == NULL)
@@ -2635,28 +2643,35 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
     /* PDU is not an SNMPv1 TRAP */
 
     /* request id */
+    DEBUGDUMPHEADER("dump_recv", "Parsing request_id\n");
     data = asn_dparse_int(data, length, &type, &pdu->reqid,
 			 sizeof(pdu->reqid), action);
+    DEBUGINDENTLESS();
     if (data == NULL) {
       return -1;
     }
 
     /* error status (getbulk non-repeaters) */
+    DEBUGDUMPHEADER("dump_recv", "Parsing error status\n");
     data = asn_dparse_int(data, length, &type, &pdu->errstat,
 			 sizeof(pdu->errstat), action);
+    DEBUGINDENTLESS();
     if (data == NULL) {
       return -1;
     }
 
     /* error index (getbulk max-repetitions) */
+    DEBUGDUMPHEADER("dump_recv", "Parsing error index\n");
     data = asn_dparse_int(data, length, &type, &pdu->errindex,
 			 sizeof(pdu->errindex), action);
+    DEBUGINDENTLESS();
     if (data == NULL) {
       return -1;
     }
   }
 
   /* get header for variable-bindings sequence */
+  DEBUGDUMPHEADER("dump_recv", "VarBindList:\n");
   data = asn_dparse_header(data, length, &type, action);
   if (data == NULL)
     return -1;
@@ -2681,6 +2696,7 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
     vp->val.string = NULL;
     vp->name_length = MAX_OID_LEN;
     vp->name = 0;
+    DEBUGDUMPHEADER("dump_recv", "VarBind:\n");
     data = snmp_dparse_var_op(data, objid, &vp->name_length, &vp->type,
 			     &vp->val_len, &var_val, length, action);
     if (data == NULL)
@@ -2776,7 +2792,10 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
         badtype = 1;
         break;
     }
+    DEBUGINDENTLESS();
   }
+  DEBUGINDENTLESS();
+  DEBUGINDENTLESS();
   return badtype;
 }
 
