@@ -52,9 +52,9 @@ echo Copying link libraries to %INSTALL_BASE%\lib
 Copy win32\lib\*.*   %INSTALL_BASE%\lib > NUL:
 
 echo Copying header files to %INSTALL_BASE%\include
-Copy include\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
-Copy include\ucd-snmp\*.h %INSTALL_BASE%\include\ucd-snmp > NUL:
-Copy win32\net-snmp\net-snmp-config.h %INSTALL_BASE%\include\net-snmp > NUL:
+xcopy /E /Y include\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
+xcopy /E /Y include\ucd-snmp\*.h %INSTALL_BASE%\include\ucd-snmp > NUL:
+xcopy /E /Y win32\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
 
 echo Deleting debugging files from %INSTALL_BASE%
 
