@@ -22,12 +22,20 @@ NSB_EXTRA_MODULES="examples examples/example testhandler smux Rmon"
 NSB_VIEW=cat
 NSB_PERL=
 #NSB_PERL=--enable-embedded-perl
+NSB_FLOW=
 DATE=`date +%y%m%d_%H%M`
 
 #----------------------------------------------------------------------
 #
 # Utility functions
 #
+
+nsb-abort()
+{
+   echo "ABORTING: $@" >&2
+#   echo "last step: $NSB_FLOW" >&2
+   exit 255
+}
 
 nsb-info()
 {
@@ -52,18 +60,23 @@ nsb-prompt()
    fi
 }
 
+nsb-flow()
+{
+    NSB_FLOW=$NSB_FLOW:$@
+    echo "Running $@" >&2
+}
+
 #----------------------------------------------------------------------
 #
 nsb-config-dist()
 {
+   nsb-flow config-dist
    if [ $# -lt 1 ]; then
-      echo "usage: nsb-config-dist src_dir"
-      exit
+      nsb-abort "usage: nsb-config-dist src_dir"
    fi
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
-      echo "$ngc_src does not exist!"
-      exit
+      nsb-abort "$ngc_src does not exist!"
    fi
 
    #
@@ -93,14 +106,13 @@ nsb-config-dist()
 
 nsb-config-all()
 {
+   nsb-flow config-all
    if [ $# -lt 1 ]; then
-      echo "usage: nsb-config-with src_dir"
-      exit
+      nsb-abort "usage: nsb-config-with src_dir"
    fi
    ngc_src=$1
    if [ ! -d $ngc_src ]; then
-      echo "$ngc_src does not exist!"
-      exit
+      nsb-abort "$ngc_src does not exist!"
    fi
 
    #
@@ -159,8 +171,7 @@ nsb-sysname()
 nsb-zip()
 {
    if [ $# -ne 3 ]; then
-      echo "usage: $0 release build_directory dest_dir"
-      exit
+      nsb-abort "usage: $0 release build_directory dest_dir"
    fi
 
    release=$1
@@ -171,13 +182,11 @@ nsb-zip()
    build=$build_dir/$platform
 
    if [ ! -d $build ]; then
-      echo "$build directory does not exist!"
-      exit;
+      nsb-abort "$build directory does not exist!"
    fi
 
    if [ ! -d $build/usr ]; then
-      echo "install directory $build/usr directory does not exist!"
-      exit;
+      nsb-abort "install directory $build/usr directory does not exist!"
    fi
 
    cd $build
@@ -196,26 +205,32 @@ nsb-zip()
 
 nsb-make()
 {
+   nsb-flow make $1
    target=$1
    shift 1
    parms=$@
 
    nsb_make_OUTPUT=nsb-make-$target.$DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
-   make touchit 2>&1 | tee $nsb_make_OUTPUT
-   make $target $parms 2>&1 | tee -a $nsb_make_OUTPUT
+   #make touchit 2>&1 | tee $nsb_make_OUTPUT
+   make start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   nsb_make_rc=$?
 
    nsb-info "Checking for errors..."
-   egrep "Error|FAIL|warn|No |exists" $nsb_make_OUTPUT \
+   egrep "Error|FAIL|warn|No |exists|\*\*\*" $nsb_make_OUTPUT \
          > nsb-make-$target-allerrs.$DATE
    egrep -v "^/usr" nsb-make-$target-allerrs.$DATE \
          > nsb-make-$target-nerrs.$DATE
    egrep -v "warn" nsb-make-$target-nerrs.$DATE \
          > nsb-make-$target-errs.$DATE
    nsb_make_rc=$?
-   if [ $nsb_make_rc -eq 0 ]; then
+   if [ -s nsb-make-$target-errs.$DATE ]; then
       nsb-prompt "press enter to view errors"
-      $NSB_VIEW nsb-make-$target-errs.$DATE
+      cat nsb-make-$target-errs.$DATE >&2
+   fi
+
+   if [ -f build-in-progress-flag ];then
+     nsb-abort "make $target incomplete"
    fi
 
    return $nsb_make_rc
@@ -223,9 +238,9 @@ nsb-make()
 
 nsb-build()
 {
+   nsb-flow build
    if [ $# -lt 5 ]; then
-      echo "usage: $0 release src_dir build_directory dest_dir config_all_flag"
-      exit
+      nsb-abort "usage: $0 release src_dir build_directory dest_dir config_all_flag"
    fi
 
    nsb_config_all=0
@@ -237,32 +252,34 @@ nsb-build()
    shift 5
 
    if [ ! -d $src_dir ]; then
-      echo "$src_dir does not exist!"
-      exit
+      nsb-abort "$src_dir does not exist!"
    fi
 
    if [ ! -d $build_dir ]; then
       mkdir $build_dir
       if [ ! -d $build_dir ]; then
-         echo "$build_dir directory does not exist!"
-         exit;
+         nsb-abort "$build_dir directory does not exist!"
       fi
    fi
 
    nsb-info "Changing directories to $build_dir"
    cd $build_dir
 
-   if [ $NSB_CLEAN -eq 1 ]; then
+   if [ $NSB_CLEAN -gt 0 ]; then
       nsb-info "Cleaning up..."
-      nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
-      rm -fR nsb-* $dest_dir 2>&1 > /dev/null
-      if [ -f Makefile ]; then
-         make distclean
-         nsb_build_rc=$?
-         if [ $nsb_build_rc -ne 0 ]; then
-            echo "Error during cleanup... aborting."
-            return 0
-         fi
+      if [ $NSB_CLEAN -eq 2 ];then
+        nsb-info "rm -fR * .[a-zA-Z]* 2>&1 > /dev/null"
+        rm -fR * .[a-zA-Z]* 2>&1 > /dev/null
+      else
+        nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
+        rm -fR nsb-* $dest_dir 2>&1 > /dev/null
+        if [ -f Makefile ]; then
+            make distclean
+            nsb_build_rc=$?
+            if [ $nsb_build_rc -ne 0 ]; then
+                nsb-abort "Error during makedistclean $nsb_build_rc"
+            fi
+        fi
       fi
    fi
 
@@ -275,7 +292,7 @@ nsb-build()
       fi
       nsb_config_rc=$?
       if [ $nsb_config_rc -ne 0 ]; then
-         return $nsb_config_rc
+         nsb-abort "Error during configure $nsb_config_rc"
       fi
       nsb-prompt "press enter to continue"
    fi
@@ -286,7 +303,7 @@ nsb-build()
       nsb-make all
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         return $nsb_build_rc
+         nsb-abort "Error during make all $nsb_build_rc"
       fi
    fi
 
@@ -297,7 +314,7 @@ nsb-build()
       nsb-make test
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         return $nsb_build_rc
+         nsb-abort "Error during make test: $nsb_build_rc"
       fi
    fi
 
@@ -308,7 +325,7 @@ nsb-build()
       nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
       nsb_build_rc=$?
       if [ $nsb_build_rc -eq 0 ]; then
-         return $nsb_build_rc
+         nsb-abort "Error during make install: $nsb_build_rc"
       fi
    fi
 
