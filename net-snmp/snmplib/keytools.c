@@ -459,7 +459,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval    = SNMPERR_SUCCESS;
-	int		 properlength;
+	int		 properlength = 0;
 	u_int		 nbytes  = 0;
 
 	u_int8_t	*bufp,
