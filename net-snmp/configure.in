@@ -140,6 +140,7 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr memcpy index bcopy)
+AC_CHECK_FUNCS(random lrand48 rand)
 
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
