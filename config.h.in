@@ -523,12 +523,12 @@
 #define HPUX9ID 1
 #define SUNOS4ID 2 
 #define SOLARISID 3
-#define OSF3ID 4
+#define OSFID 4
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
 #define FREEBSD2ID 8
-#define IRIX6ID 9
+#define IRIXID 9
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -543,8 +543,8 @@
 #ifdef solaris2
 #define OSTYPE SOLARISID
 #endif
-#ifdef osf3
-#define OSTYPE OSF3ID
+#if defined(osf3) || defined(osf4)
+#define OSTYPE OSFID
 #endif
 #ifdef ultrix4
 #define OSTYPE ULTRIXID
@@ -555,8 +555,8 @@
 #ifdef freebsd2
 #define OSTYPE FREEBSD2ID
 #endif
-#ifdef irix6
-#define OSTYPE IRIX6ID
+#if defined(irix6) || defined(irix5)
+#define OSTYPE IRIXID
 #endif
 /* unknown */
 #ifndef OSTYPE
