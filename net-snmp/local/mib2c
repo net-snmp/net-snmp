@@ -213,7 +213,7 @@ sub loadMib {
     my $children = $$mib{'children'}; 
     my $i;
     my $newdepth = $depth;
-    foreach $i (@{$children}) {
+    foreach $i (sort {$a->{subID} <=> $b->{subID}} @{$children}) {
 	if ( $name =~ /Table$/ ) {
 	    $vroutine="$name";
 	    push @table_list, $name;
