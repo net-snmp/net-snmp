@@ -48,7 +48,7 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_alarm.h>
 
-static struct snmp_alarm *thealarms;
+static struct snmp_alarm *thealarms = NULL;
 static int      start_alarms = 0;
 static unsigned int regnum = 1;
 
