@@ -172,7 +172,7 @@ netsnmp_register_read_only_counter32_instance(const char *name,
     netsnmp_handler_registration *myreg;
 
     myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_counter32_handler,
+                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
                     subhandler);
     return netsnmp_register_read_only_instance(myreg);
 }
