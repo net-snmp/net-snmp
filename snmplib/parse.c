@@ -387,7 +387,7 @@ static struct tree *tbuckets[NHASHSIZE];
 static struct module *module_head = NULL;
 
 struct node *orphan_nodes = NULL;
-struct tree   *tree_head = NULL;
+struct tree *tree_head = NULL;
 
 #define	NUMBER_OF_ROOT_NODES	3
 static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
@@ -546,11 +546,9 @@ name_hash(const char* name)
     int hash = 0;
     const char *cp;
 
-    if (name) {
-      for(cp = name; *cp; cp++) {
+    if (!name) return 0;
+    for (cp = name; *cp; cp++)
         hash += tolower(*cp);
-      }
-    }
     return(hash);
 }
 
@@ -597,8 +595,8 @@ init_mib_internals (void)
 static void
 init_node_hash(struct node *nodes)
 {
-     register struct node *np, *nextp;
-     register int hash;
+     struct node *np, *nextp;
+     int hash;
 
      memset(nbuckets, 0, sizeof(nbuckets));
      for(np = nodes; np;){
@@ -1418,9 +1416,9 @@ static void do_linkup(struct module *mp,
 		      struct node *np)
 {
     struct module_import *mip;
-    struct node *onp;
+    struct node *onp, *oldp, *newp;
     struct tree *tp;
-    int i;
+    int i, more;
 	/*
 	 * All modules implicitly import
 	 *   the roots of the tree
@@ -1461,6 +1459,56 @@ static void do_linkup(struct module *mp,
     for ( tp = tree_head ; tp ; tp=tp->next_peer )
         do_subtree( tp, &np );
     if (!np) return;
+
+    /* quietly move all internal references to the orphan list */
+    oldp = orphan_nodes;
+    do {
+	for (i = 0; i < NHASHSIZE; i++)
+	    for (onp = nbuckets[i]; onp; onp = onp->next) {
+		struct node *op = NULL;
+		int hash = NBUCKET(name_hash(onp->label));
+		np = nbuckets[hash];
+		while (np) {
+		    if (label_compare(onp->label, np->parent)) {
+			op = np;
+			np = np->next;
+		    }
+		    else {
+			if (op) op->next = np->next;
+			else nbuckets[hash] = np->next;
+			np->next = orphan_nodes;
+			orphan_nodes = np;
+			op = NULL;
+			np = nbuckets[hash];
+		    }
+		}
+	    }
+	newp = orphan_nodes;
+	more = 0;
+	for (onp = orphan_nodes; onp != oldp; onp = onp->next) {
+	    struct node *op = NULL;
+	    int hash = NBUCKET(name_hash(onp->label));
+	    np = nbuckets[hash];
+	    while (np) {
+		if (label_compare(onp->label, np->parent)) {
+		    op = np;
+		    np = np->next;
+		}
+		else {
+		    if (op) op->next = np->next;
+		    else nbuckets[hash] = np->next;
+		    np->next = orphan_nodes;
+		    orphan_nodes = np;
+		    op = NULL;
+		    np = nbuckets[hash];
+		    more = 1;
+		}
+	    }
+	}
+	oldp = newp;
+    } while (more);
+
+    /* complain about left over nodes */
     for ( np = orphan_nodes ; np && np->next ; np = np->next )
 	;	/* find the end of the orphan list */
     for (i = 0; i < NHASHSIZE; i++)
@@ -1481,7 +1529,6 @@ static void do_linkup(struct module *mp,
 		onp = onp->next;
 	    }
 	}
-
     return;
 }
 
@@ -1510,12 +1557,8 @@ getoid(FILE *fp,
         id->label = NULL;
         id->modid = current_module;
         id->subid = -1;
-        if (type == RIGHTBRACKET){
+        if (type == RIGHTBRACKET)
             return count;
-        } else if (type != LABEL && type != NUMBER){
-            print_error("Not valid for object identifier", token, type);
-            return 0;
-        }
         if (type == LABEL){
             /* this entry has a label */
             id->label = strdup(token);
@@ -1536,7 +1579,8 @@ getoid(FILE *fp,
             } else {
                 continue;
             }
-        } else if (type == NUMBER) {
+        }
+	else if (type == NUMBER) {
             /* this entry  has just an integer sub-identifier */
             id->subid = atoi(token);
         }
@@ -1604,6 +1648,7 @@ parse_objectid(FILE *fp,
      * Handle  "label OBJECT-IDENTIFIER ::= { subid }"
      */
     if (length == 1) {
+#if 0
         op = loid;
         np = alloc_node(op->modid);
         if (np == NULL) return(NULL);
@@ -1611,6 +1656,10 @@ parse_objectid(FILE *fp,
         np->label = strdup(name);
         if (op->label) free(op->label);
         return np;
+#else
+	print_error("List too short", NULL, CONTINUE);
+	return NULL;
+#endif
     }
 
     /*
@@ -3373,7 +3422,7 @@ adopt_orphans (void)
 	    while (onp) {
         	char modbuf[256];
         	snmp_log (LOG_WARNING,
-                          "Unlinked OID in %s: %s ::= { %s %ld }\n",
+                          "Cannot adopt OID in %s: %s ::= { %s %ld }\n",
                           module_name(onp->modid, modbuf),
                           (onp->label ? onp->label : "<no label>"),
                           (onp->parent ? onp->parent : "<no parent>"),
