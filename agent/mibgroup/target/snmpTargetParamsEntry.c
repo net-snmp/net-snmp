@@ -26,7 +26,7 @@
 #define snmpTargetParamsOIDLen 11  /*This is base+column, 
 				     i.e. everything but index*/
 
-oid snmpTargetParamsOID[snmpTargetParamsOIDLen] = {1,3,6,1,6,3,15,1,3,1,0};
+oid snmpTargetParamsOID[snmpTargetParamsOIDLen] = {1,3,6,1,6,3,12,1,3,1,0};
 
 static struct targetParamTable_struct *aPTable=0;
 
