@@ -108,7 +108,7 @@ void read_config_with_type(filename, type)
   struct config_files *ctmp = config_files;
   for(;ctmp != NULL && strcmp(ctmp->fileHeader,"snmpd"); ctmp = ctmp->next);
   if (ctmp)
-    read_config(filename,ctmp->start);
+    read_config(filename, ctmp->start);
   else
     fprintf(stderr, "snmpd: %s: %s\n", filename, strerror(errno));
 }
