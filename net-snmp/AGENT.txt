@@ -1,5 +1,5 @@
 Note, this is based on the text from a web page, which can be found in 
-the documentation section of the http://ucd-snmp.ucdavis.edu web page.
+the documentation section of the http://net-snmp.sourceforge.net web page.
 
 Extending the UCD-SNMP agent
 ============================
@@ -159,7 +159,7 @@ It is simple and cheap (i.e. free!) to obtain your own official segment of
 the MIB tree (see http://www.iana.org for an application form), and having
 done so, you then have complete global authority over it. If you have
 problems with this, it's worth contacting the development team (email:
-ucd-snmp-coders@ucd-snmp.ucdavis.edu) for advice. Please do think to the
+net-snmp-coders@lists.sourceforge.net) for advice. Please do think to the
 future, and be a good Net citizen by using a legitimately assigned OID as
 the root of your new MIB.
 
