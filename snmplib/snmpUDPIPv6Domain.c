@@ -1,5 +1,21 @@
 #include <net-snmp/net-snmp-config.h>
+
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+
+/*
+ * hack-o-matic for Cygwin to use winsock2
+*/
+#if defined(cygwin)
+#undef HAVE_UNISTD_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_NET_IF_H
+#undef HAVE_NETDB_H
+#undef HAVE_SYS_PARAM_H
+#undef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_IN_ADDR_T
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -22,7 +38,7 @@
 #endif
 
 #define HAVE_IF_NAMETOINDEX
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
     /*
      *  Windows IPv6 support is part of WinSock2 only
      */
@@ -1313,6 +1329,15 @@ netsnmp_udp6_ctor(void)
 
     netsnmp_tdomain_register(&udp6Domain);
 }
+
+#else
+
+#ifdef NETSNMP_DLL
+/* need this hook for win32 MSVC++ DLL build */
+void
+netsnmp_udp6_agent_config_tokens_register(void)
+{ }
+#endif
 
 #endif /* SNMP_TRANSPORT_UDPIPV6_DOMAIN */
 

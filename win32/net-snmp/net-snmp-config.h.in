@@ -165,6 +165,12 @@
 /* Define to 1 if using `alloca.c'. */
 /* #undef C_ALLOCA */
 
+/* Define if DES encryption should not be supported */
+/* #undef DISABLE_DES */
+
+/* Define if MD5 authentication should not be supported */
+/* #undef DISABLE_MD5 */
+
 /* Define if mib loading and parsing code should not be included */
 /* #undef DISABLE_MIB_LOADING */
 
@@ -1250,7 +1256,7 @@
 #define CONFIGURE_OPTIONS ""
 
 /* got socklen_t? */
-/* #undef HAVE_SOCKLEN_T */
+#define HAVE_SOCKLEN_T 1
 
 /* got in_addr_t? */
 /* #undef HAVE_IN_ADDR_T */
