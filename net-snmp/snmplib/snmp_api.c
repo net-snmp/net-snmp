@@ -3797,6 +3797,13 @@ snmp_varlist_add_variable(struct variable_list **varlist,
 	return vars;
 }
 
+/*
+ * Parses dotted notation object identifier
+ * into unsigned character array.
+ * Returns: SNMPERR_RANGE if any sub-identifier > 255.
+ * Returns: SNMPERR_VALUE if input string is not object identifier.
+ * Returns: non-negative number of sub-identifiers parsed,
+ */
 int
 ascii_to_binary(const char *cp,
 		u_char *bufp)
@@ -3808,14 +3815,11 @@ ascii_to_binary(const char *cp,
       if (isspace(*cp) || *cp == '.')
         continue;
       if (!isdigit(*cp)){
-        fprintf(stderr, "Input error\n");
-        return -1;
+        return SNMPERR_VALUE;
       }
       subidentifier = atoi(cp);
       if (subidentifier > 255){
-        fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
-                subidentifier);
-        return -1;
+        return SNMPERR_RANGE;
       }
       *bp++ = (u_char)subidentifier;
       while(isdigit(*cp))

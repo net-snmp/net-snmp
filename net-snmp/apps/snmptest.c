@@ -372,6 +372,7 @@ input_variable(struct variable_list *vp)
 		printf("bad type \"%c\", use \"i\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
 		return -1;
 	}
+getValue:
 	printf("Value: "); fflush(stdout);
 	fgets(buf, sizeof(buf), stdin);
 	switch(vp->type){
@@ -383,11 +384,19 @@ input_variable(struct variable_list *vp)
 	    case ASN_OCTET_STR:
 		if (ch == 'd'){
 		    vp->val_len = ascii_to_binary(buf, value);
+		    if (vp->val_len < 0) {
+			printf("Bad value or no sub-identifier > 255\n");
+			goto getValue;
+		    }
 		} else if (ch == 's'){
 		    strcpy((char*)value, buf);
 		    vp->val_len = strlen(buf);
 		} else if (ch == 'x'){
 		    vp->val_len = hex_to_binary(buf, value);
+		    if (vp->val_len < 0) {
+			printf("Bad value (need pairs of hex digits)\n");
+			goto getValue;
+		    }
 		}
 		vp->val.string = (u_char *)malloc(vp->val_len);
 		memmove(vp->val.string, value, vp->val_len);
