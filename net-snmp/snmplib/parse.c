@@ -138,6 +138,7 @@ struct tc {                     /* textual conventions */
     char           *hint;
     struct enum_list *enums;
     struct range_list *ranges;
+    char           *description;
 } tclist[MAXTC];
 
 int             mibLine = 0;
@@ -2060,6 +2061,14 @@ get_tc_descriptor(int tc_index)
     return (tclist[tc_index].descriptor);
 }
 
+const char     *
+get_tc_description(int tc_index)
+{
+    if (tc_index < 0 || tc_index >= MAXTC)
+        return NULL;
+    return (tclist[tc_index].description);
+}
+
 
 /*
  * Parses an enumeration list of the form:
@@ -2182,6 +2191,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
     char            token[MAXTOKEN];
     char            quoted_string_buffer[MAXQUOTESTR];
     char           *hint = NULL;
+    char           *descr = NULL;
     struct tc      *tcp;
     int             level;
 
@@ -2278,6 +2288,15 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                                     type);
                     else
                         hint = strdup(token);
+                } else if (type == DESCRIPTION &&
+                           netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                                  NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
+                    type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+                    if (type != QUOTESTRING)
+                        print_error("DESCRIPTION must be string", token,
+                                    type);
+                    else
+                        descr = strdup(quoted_string_buffer);
                 } else
                     type =
                         get_token(fp, quoted_string_buffer, MAXQUOTESTR);
@@ -2328,6 +2347,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         tcp->modid = current_module;
         tcp->descriptor = strdup(name);
         tcp->hint = hint;
+        tcp->description = descr;
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN) {
