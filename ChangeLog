@@ -1,7 +1,79 @@
 -------------------------------------------------------------------------------
 
-Changes: V4.2.5 -> V4.2.6pre1
+Changes: V4.2.5 -> V4.2.6
 
+2002-10-11 10:54  dts12
+
+   * snmplib/winservice.c:
+
+   Remove C++-style comments.
+   
+2002-10-08 13:33  dts12
+
+   * testing/eval_tools.sh:
+
+   Pause after killing the agent (as well as before) to give it a chance
+   to finish shutting down, before moving on to the next test.
+   
+2002-10-02 18:56  hardaker
+
+   * agent/mibgroup/tunnel/tunnel.c:
+
+   Patch from Frank Strauss to fix some coding errors
+   
+2002-09-18 16:10  jbpn
+
+   * snmplib/snmp_client.c:
+
+     - remove very obsolete (and not used anywhere) #definitions of
+       PARTY_MIB_BASE and CONTEXT_MIB_BASE
+   
+2002-09-18 16:05  hardaker
+
+   * perl/SNMP/Makefile.PL:
+
+   POD fixes
+   
+2002-09-06 23:39  driehuis
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   MFC: Deprecate the non-raw objects to cut down on customer support,
+   and protect the users against the pitfalls.
+   
+2002-08-30 14:16  hardaker
+
+   * FAQ, README:
+
+   delete old mirror
+   
+2002-08-29 09:35  dts12
+
+   * agent/snmp_vars.c, snmplib/snmp_api.c,
+   win32/config.h, win32/libsnmp_dll/libsnmp.def
+:
+
+   Declare new routine 'snmp_disable_log', and assorted Win32 cleanup fixes.
+   
+2002-08-27 12:32  dts12
+
+   * agent/mibgroup/versiontag:
+
+   Bring in line with 5.x version, without hardwiring CVS user as 'hardaker'
+   
+2002-08-27 12:26  dts12
+
+   * version.h, FAQ, README,
+   sedscript.in, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.6pre1 )
+   
+2002-08-27 12:20  dts12
+
+   * configure:
+
+   New version of configure, to pick up the latest 'configure.in' changes.
+   
 2002-08-24 18:25  driehuis
 
    * agent/mibgroup/ucd-snmp/diskio.c, configure.in:
