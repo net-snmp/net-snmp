@@ -24,6 +24,11 @@ SOFTWARE.
  */
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
