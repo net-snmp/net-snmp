@@ -1769,3 +1769,90 @@ snmp_get_do_debugging __P((void))
 {
   return dodebug;
 }
+
+/*
+ * Add a variable with the requested name to the end of the list of
+ * variables for this pdu.
+ */
+void
+snmp_pdu_add_variable(pdu, name, name_length, type, value, len)
+    struct snmp_pdu *pdu;
+    oid *name;
+    int name_length;
+    u_char type;
+    u_char *value;
+    int len;
+{
+    struct variable_list *vars;
+
+    if (pdu->variables == NULL){
+      pdu->variables = vars =
+            (struct variable_list *)malloc(sizeof(struct variable_list));
+    } else {
+      for(vars = pdu->variables;
+            vars->next_variable;
+            vars = vars->next_variable)
+        ;
+
+      vars->next_variable =
+            (struct variable_list *)malloc(sizeof(struct variable_list));
+      vars = vars->next_variable;
+    }
+
+    vars->next_variable = NULL;
+    vars->name = (oid *)malloc(name_length * sizeof(oid));
+    memmove(vars->name, name, name_length * sizeof(oid));
+    vars->name_length = name_length;
+
+    vars->type = type;
+    vars->val_len = len;
+    switch(type){
+      case ASN_INTEGER:
+      case ASN_UNSIGNED:
+      case ASN_TIMETICKS:
+      case ASN_IPADDRESS:
+        vars->val.integer = (long *)malloc(sizeof(long));
+        memmove(vars->val.integer, value, vars->val_len);
+        vars->val_len = sizeof(long);
+        break;
+
+      case ASN_OBJECT_ID:
+        vars->val.objid = (oid *)malloc(vars->val_len);
+        memmove(vars->val.objid, value, vars->val_len);
+        break;
+
+      case ASN_OCTET_STR:
+        vars->val.string = (u_char *)malloc(vars->val_len);
+        memmove(vars->val.string, value, vars->val_len);
+        break;
+
+      case ASN_NULL:
+        vars->val_len = 0;
+        vars->val.string = NULL;
+        break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+      case ASN_OPAQUE_U64:
+      case ASN_OPAQUE_I64:
+        vars->val.counter64 =
+          (struct counter64 *) malloc(sizeof(struct counter64));
+        memmove(vars->val.counter64, value, vars->val_len);
+        break;
+
+      case ASN_OPAQUE_FLOAT:
+        vars->val.floatVal = (float *) malloc(sizeof(float));
+        memmove(vars->val.floatVal, value, vars->val_len);
+        break;
+      
+      case ASN_OPAQUE_DOUBLE:
+        vars->val.doubleVal = (double *) malloc(sizeof(double));
+        memmove(vars->val.doubleVal, value, vars->val_len);
+
+#endif /* OPAQUE_SPECIAL_TYPES */
+      
+      default:
+        fprintf(stderr, "Internal error in type switching\n");
+        exit(1);
+    }
+}
+

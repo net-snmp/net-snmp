@@ -17,7 +17,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o \
 INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
 
 CFLAGS=@CFLAGS@ @SHLIB_CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir)
+CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir) -I$(srcdir)/..
 CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
