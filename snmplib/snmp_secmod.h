@@ -24,6 +24,7 @@ struct snmp_secmod_outgoing_params {
    size_t  *secParamsLen;
    u_char **wholeMsg;
    size_t  *wholeMsgLen;
+   size_t  *wholeMsgOffset;
    struct snmp_pdu *pdu;           /* IN - the pdu getting encoded            */
    struct snmp_session *session;   /* IN - session sending the message        */
 };
