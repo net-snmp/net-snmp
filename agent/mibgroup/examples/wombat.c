@@ -91,7 +91,7 @@ void init_wombat(void)
 #ifdef CAN_USE_NLIST
     auto_nlist("wombatstat",0,0);
 #endif
-};
+}
 
 /* function which scans a given snmpd.conf line for information */
 
@@ -123,9 +123,9 @@ void wombat_free_config (void)
 int
 header_wombat(struct variable *vp,
 	      oid *name,
-	      int *length,
+	      size_t *length,
 	      int exact,
-	      int *var_len,
+	      size_t *var_len,
 	      WriteMethod **write_method)
 {
 #define WOMBAT_NAME_LENGTH	8
@@ -161,9 +161,9 @@ header_wombat(struct variable *vp,
 u_char	*
 var_wombat(struct variable *vp,
 	   oid *name,
-	   int *length,
+	   size_t *length,
 	   int exact,
-	   int *var_len,
+	   size_t *var_len,
 	   WriteMethod **write_method)
 {
     if (header_wombat(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )

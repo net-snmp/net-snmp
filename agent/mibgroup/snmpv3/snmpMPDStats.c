@@ -37,6 +37,7 @@ var_snmpMPDStats(
 
   /* variables we may use later */
   static long long_ret;
+  int tmagic;
 
 
   *write_method = 0;           /* assume it isnt writable for the time being */
@@ -46,10 +47,10 @@ var_snmpMPDStats(
       return 0;
 
   /* this is where we do the value assignments for the mib results. */
-
-  if ( (vp->magic >= 0)
-	&& (vp->magic <= (STAT_MPD_STATS_END - STAT_MPD_STATS_START)) ) {
-    long_ret = snmp_get_statistic(vp->magic + STAT_MPD_STATS_START);
+  tmagic = vp->magic;
+  if ( (tmagic >= 0)
+	&& (tmagic <= (STAT_MPD_STATS_END - STAT_MPD_STATS_START)) ) {
+    long_ret = snmp_get_statistic(tmagic + STAT_MPD_STATS_START);
     return (unsigned char *) &long_ret;
   }
   return 0;

@@ -102,14 +102,14 @@ SOFTWARE.
 #	else
 #	ifndef			USE_INTERNAL_MD5
 #	error \
-	"
-
-	***  Lacking MD5 transform.  ***
-
-	SNMP v2p requires an MD5 transform to create message hashes.
-	Be sure that KMT is available or compile with the implementation 
-	bundled with UCD SNMP (See configure option --enable-internal-md5).
-
+	"\
+\
+	***  Lacking MD5 transform.  ***\
+\
+	SNMP v2p requires an MD5 transform to create message hashes.\
+	Be sure that KMT is available or compile with the implementation \
+	bundled with UCD SNMP (See configure option --enable-internal-md5).\
+\
 	"
 #	else
 static void md5Digest(u_char *, size_t, u_char *);
