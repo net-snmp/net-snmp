@@ -526,7 +526,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 What type of security to use],SNMPV1)
 
-AC_OUTPUT(Makefile snmplib/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile man/Makefile ov/Makefile, echo timestamp > stamp-h)
+AC_OUTPUT(Makefile snmplib/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/mibgroup/Makefile agent/extensible/Makefile local/Makefile man/Makefile ov/Makefile, echo timestamp > stamp-h)
 
 dnl Local Variables:
 dnl mode: sh

@@ -1,3 +1,5 @@
+#ifndef VAR_STRUCT_H
+#define VAR_STRUCT_H
 /*
  * The subtree structure contains a subtree prefix which applies to
  * all variables in the associated variable list.
@@ -64,3 +66,4 @@ struct variable13 {
     u_char          namelen;        /* length of name below */
     oid             name[13];       /* object identifier of variable */
 };
+#endif /* VAR_STRUCT_H */

@@ -48,7 +48,7 @@ SOFTWARE.
 #include "party.h"
 #include "context.h"
 #include "mib.h"
-#include "snmp_groupvars.h"
+#include "mibgroup/snmp.h"
 #include "extensible/extproto.h"
 
 extern int snmp_dump_packet;
