@@ -325,16 +325,28 @@ tcpTable_next_entry( void **loop_context,
      * Set up the indexing for the specified row...
      */
     idx = index;
+#ifdef WIN32
+    port = ntohl((u_long)tcp_head[i].TCPTABLE_LOCALADDRESS);
+    snmp_set_var_value(idx, (u_char *)&port,
+                                sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
+#else
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_LOCALADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
+#endif
 
     port = ntohs((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
     idx = idx->next_variable;
+#ifdef WIN32
+    port = ntohl((u_long)tcp_head[i].TCPTABLE_REMOTEADDRESS);
+    snmp_set_var_value(idx, (u_char *)&port,
+                                sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
+#else
     snmp_set_var_value(idx, (u_char *)&tcp_head[i].TCPTABLE_REMOTEADDRESS,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
+#endif
 
     port = ntohs((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;

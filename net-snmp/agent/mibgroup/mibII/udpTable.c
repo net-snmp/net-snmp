@@ -265,8 +265,14 @@ udpTable_next_entry( void **loop_context,
     /*
      * Set up the indexing for the specified row...
      */
+#ifdef WIN32
+    port = ntohl((u_long)udp_head[i].UDPTABLE_LOCALADDRESS);
+    snmp_set_var_value(index, (u_char *)&port,
+                                  sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
+#else
     snmp_set_var_value(index, (u_char *)&udp_head[i].UDPTABLE_LOCALADDRESS,
                                   sizeof(udp_head[i].UDPTABLE_LOCALADDRESS));
+#endif 
     port = ntohs((u_short)udp_head[i].UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
                                (u_char*)&port, sizeof(port));
