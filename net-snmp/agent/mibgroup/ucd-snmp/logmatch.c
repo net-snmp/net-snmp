@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #ifdef HAVE_REGEX_H
@@ -131,6 +136,10 @@ logmatch_free_config(void)
 void
 logmatch_parse_config(const char *token, char *cptr)
 {
+
+    char space_name;
+    char space_path;
+
     if (logmatchCount < MAXLOGMATCH) {
         logmatchTable[logmatchCount].frequency = 30;
         logmatchTable[logmatchCount].thisIndex = logmatchCount;
@@ -158,12 +167,29 @@ logmatch_parse_config(const char *token, char *cptr)
          * ------------------------------------ 
          */
 
-        sscanf(cptr, "%s %s %d %255c\n",
+        sscanf(cptr, "%255s%c%255s%c %d %255c\n",
                logmatchTable[logmatchCount].name,
+	       &space_name,
                logmatchTable[logmatchCount].filename,
+	       &space_path,
                &(logmatchTable[logmatchCount].frequency),
                logmatchTable[logmatchCount].regEx);
 
+	/*
+	 * Log an error then return if any of the strings scanned in were
+	 * larger then they should have been.
+	 */
+	if (space_name != ' ') {
+		snmp_log(LOG_ERR, "logmatch_parse_config: the name scanned " \
+		 "in from line %s is too large. logmatchCount = %d\n",
+		 cptr, logmatchCount);
+		return;
+	} else if (space_path != ' ') {
+		snmp_log(LOG_ERR, "logmatch_parse_config: the file name " \
+		 "scanned in from line %s is too large. logmatchCount = %d\n",
+		    cptr, logmatchCount);
+		return;
+	}
 
         /*
          * ------------------------------------ 
@@ -236,9 +262,8 @@ updateLogmatch(int iindex)
      * ------------------------------------ 
      */
 
-    sprintf(perfilename, "%s/snmpd_logmatch_%s.pos", get_persistent_directory(),
-            logmatchTable[iindex].name);
-
+    snprintf(perfilename, sizeof(perfilename), "%s/snmpd_logmatch_%s.pos",
+	get_persistent_directory(), logmatchTable[iindex].name);
 
     if (logmatchTable[iindex].virgin) {
 
