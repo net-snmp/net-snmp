@@ -29,14 +29,14 @@ sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) ) \
+        ( cd $$i ; $(MAKE) ) ; \
 	done
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
 install:    subdirs installdirs
 	for i in $(INSTALLDIRS) ; do \
-        ( cd $$i ; $(MAKE) install ) \
+        ( cd $$i ; $(MAKE) install ) ; \
 	done
 	@if test -f $(snmplibdir)/mib.txt; then echo "*** warning: $(snmplibdir)/mib.txt exists, but is no longer needed.  You might wish to remove it as we will still try to read it even though its not necessary."; fi
 
@@ -59,7 +59,7 @@ nosysdepend:
 
 clean:
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) clean ) \
+        ( cd $$i ; $(MAKE) clean ) ; \
 	done
 	rm -f EXAMPLE.conf sedscript ucd-snmp.txt
 
