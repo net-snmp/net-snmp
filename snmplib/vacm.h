@@ -148,6 +148,7 @@ struct vacm_securityEntry *vacm_createSecurityEntry (const char *);
 struct vacm_securityEntry *vacm_getSecurityEntry (const char *);
 void vacm_scanSecurityInit (void);
 struct vacm_securityEntry *vacm_scanSecurityEntry (void);
+int vacm_is_configured(void);
 
 #ifdef __cplusplus
 }

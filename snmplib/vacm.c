@@ -452,3 +452,13 @@ void vacm_destroyAllAccessEntries (void)
 	free(ap);
     }
 }
+
+/* returns 1 if vacm has *any* configuration entries in it (regardless
+   of weather or not there is enough to make a decision based on it),
+   else return 0 */
+int vacm_is_configured(void) {
+    if (viewList == NULL && accessList == NULL && groupList == NULL)
+        return 0;
+    return 1;
+}
+
