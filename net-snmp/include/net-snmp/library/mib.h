@@ -145,6 +145,17 @@ int build_oid(oid **out, size_t *out_len, oid *prefix, size_t prefix_len,
 int build_oid_segment(struct variable_list *var);
     
 
+int snprint_variable		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+
+int snprint_objid		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen);
+
+int snprint_value		(char *buf, size_t buf_len,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+
 int sprint_realloc_variable	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 const oid *objid, size_t objidlen,
@@ -156,7 +167,7 @@ int sprint_realloc_objid	(u_char **buf, size_t *buf_len,
 
 int sprint_realloc_value	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
-				 oid *objid, size_t objidlen,
+				 const oid *objid, size_t objidlen,
 				 struct variable_list *variable);
 
 int sprint_realloc_by_type	(u_char **buf, size_t *buf_len,

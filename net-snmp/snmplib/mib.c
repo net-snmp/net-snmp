@@ -2002,6 +2002,20 @@ sprint_realloc_objid(u_char **buf, size_t *buf_len,
   return !buf_overflow;
 }
 
+int
+snprint_objid(char *buf, size_t buf_len,
+	      const oid *objid, size_t objidlen)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 0, 
+			   objid, objidlen)) {
+    return (int)out_len;
+  } else {
+    return -1;
+  }
+}
+
 void
 print_objid(oid *objid,
 	    size_t objidlen)	/* number of subidentifiers */
@@ -2090,6 +2104,22 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
     }
 }
 
+int
+snprint_variable(char *buf, size_t buf_len,
+		 const oid *objid, size_t objidlen,
+		 struct variable_list *variable)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_variable((u_char **)&buf, &buf_len, &out_len, 0, 
+			      objid, objidlen, variable)) {
+    return (int)out_len;
+  } else {
+    return -1;
+  }
+}
+
+
 void
 print_variable(const oid *objid,
 	       size_t objidlen,
@@ -2125,7 +2155,7 @@ fprint_variable(FILE *f,
 int
 sprint_realloc_value(u_char **buf, size_t *buf_len,
 		     size_t *out_len, int allow_realloc,
-		     oid *objid, size_t objidlen,
+		     const oid *objid, size_t objidlen,
 		     struct variable_list *variable)
 {
   struct tree *subtree = tree_head;
@@ -2157,6 +2187,21 @@ sprint_realloc_value(u_char **buf, size_t *buf_len,
 				    variable, subtree->enums,
 				    subtree->hint, subtree->units);
     }
+  }
+}
+
+int
+snprint_value(char *buf, size_t buf_len,
+	      const oid *objid, size_t objidlen,
+	      struct variable_list *variable)
+{
+  size_t out_len = 0;
+
+  if (sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 0,
+			   objid, objidlen, variable)) {
+    return (int)out_len;
+  } else {
+    return -1;
   }
 }
 
