@@ -408,6 +408,7 @@ main(argc, argv)
     struct config_module *dp;
     int sd;
     struct sockaddr_in me;
+    char ctmp[300];
 
     init_syslog();
     init_mib();
@@ -468,21 +469,24 @@ main(argc, argv)
 		  context, &contextlen);
 
     if (version == 2){
-	if (read_party_database("/etc/party.conf") > 0){
-	    fprintf(stderr,
-		    "Couldn't read party database from /etc/party.conf\n");
-	    exit(0);
-	}
-	if (read_context_database("/etc/context.conf") > 0){
-	    fprintf(stderr,
-		    "Couldn't read context database from /etc/context.conf\n");
-	    exit(0);
-	}
-	if (read_acl_database("/etc/acl.conf") > 0){
-	    fprintf(stderr,
-		    "Couldn't read access control database from /etc/acl.conf\n");
-	    exit(0);
-	}
+            sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+	    if (read_party_database(ctmp) > 0){
+		fprintf(stderr,
+			"Couldn't read party database from %s\n",ctmp);
+		exit(0);
+	    }
+            sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+	    if (read_context_database(ctmp) > 0){
+		fprintf(stderr,
+			"Couldn't read context database from %s\n",ctmp);
+		exit(0);
+	    }
+            sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+	    if (read_acl_database(ctmp) > 0){
+		fprintf(stderr,
+			"Couldn't read access control database from %s\n",ctmp);
+		exit(0);
+	    }
     }
 
 #ifdef SVR4
