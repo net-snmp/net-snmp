@@ -1265,8 +1265,6 @@ shutdown_mib (void)
     tree_head = NULL;
     Mib = NULL;
     free(Prefix); Prefix = NULL;
-    ds_shutdown();
-    unregister_all_config_handlers();
 }
 
 void
