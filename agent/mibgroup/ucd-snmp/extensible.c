@@ -381,7 +381,7 @@ fixExecError(int action,
       sprintf(ex.command, exten->fixcmd);
       if ((fd = get_exec_output(&ex))) {
         file = fdopen(fd,"r");
-        while (fgets(ex.output,STRMAX,file) != NULL);
+        while (fgets(ex.output,sizeof(ex.output),file) != NULL);
         fclose(file);
         wait_on_exec(&ex);
       }

@@ -344,8 +344,8 @@ int getswap(int rettype)
 #endif
   if ((fd = get_exec_output(&ex))) {
     file = fdopen(fd,"r");
-    for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
-    if (fgets(ex.output,STRMAX,file) != NULL) {
+    for (i=1;i <= 2 && fgets(ex.output,sizeof(ex.output),file) != NULL; i++);
+    if (fgets(ex.output,sizeof(ex.output),file) != NULL) {
       cp = skip_white(ex.output);  /* not there should be any */
       cp = skip_not_white(cp);     /* skip over "reserve" */
       cp = skip_white(cp);

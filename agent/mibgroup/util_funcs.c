@@ -112,7 +112,7 @@ int shell_command(struct extensible *ex)
   ex->result = WEXITSTATUS(ex->result);
   shellout = fopen("/tmp/shoutput","r");
   if((shellout = fopen("/tmp/shoutput","r")) != NULL) {
-    if (fgets(ex->output,STRMAX,shellout) == NULL) {
+    if (fgets(ex->output,sizeof(ex->output),shellout) == NULL) {
       ex->output[0] = 0;
     }
     fclose(shellout);
@@ -135,7 +135,7 @@ int exec_command(struct extensible *ex)
   
   if ((fd = get_exec_output(ex))) {
     file = fdopen(fd,"r");
-    if (fgets(ex->output,STRMAX,file) == NULL) {
+    if (fgets(ex->output,sizeof(ex->output),file) == NULL) {
       ex->output[0] = 0;
     }
     fclose(file);
