@@ -314,6 +314,9 @@ snmp_parse_args(int argc,
         cp = strchr(optarg,',');
         if (cp && *(++cp) && isdigit(*cp))
           session->engineTime = strtoul(cp, NULL, 10);
+		/* Handle previous '-Z boot time' syntax */
+	else if ((optind<argc) && isdigit(argv[optind][0]))
+	  session->engineTime = strtoul(argv[optind], NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
