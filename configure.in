@@ -1,3 +1,10 @@
+#
+# Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+# Use is subject to license terms specified in the COPYING file
+# distributed with the Net-SNMP package.
+#
+
+#
 # Process this file with autoconf to produce a configure script.
 #
 AC_INIT([Net-SNMP], [5.0.7], [net-snmp-coders@lists.sourceforge.net])
@@ -567,7 +574,7 @@ if test "x$embed_perl" = "xyes"; then
     fi
 fi
 
-dnl AIX has problems with shared libs
+# AIX has problems with shared libs
 case $target_os in
     aix*)
         AC_MSG_CHECKING([whether using AIX and if we should disable shared libraries])
@@ -1627,7 +1634,7 @@ AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
     LIBS="${LIBS} -ladm"
     AGENTLIBS="${AGENTLIBS} -ladm"))
-dnl AIX perfstat library, needed for CPU/memory statistics
+# AIX perfstat library, needed for CPU/memory statistics
 case $target_os in
     aix*)
         AC_CHECK_HEADERS(libperfstat.h,
@@ -1820,7 +1827,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul)
+AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul strlcpy)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
 AC_CHECK_FUNCS(sigaction)
