@@ -12,7 +12,6 @@
 # endif
 #endif
 #include "asn1.h"
-#define NULL 0
 #include "party.h"
 
 
