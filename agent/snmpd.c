@@ -637,7 +637,7 @@ int counter = 0;
         snmp_select_info(&numfds, &fdset, tvp, &block);
         if (block == 1)
             tvp = NULL; /* block without timeout */
-	count = select(numfds, (int *) &fdset, 0, 0, tvp);
+	count = select(numfds, &fdset, 0, 0, tvp);
 	if (count > 0){
 	    for(index = 0; index < sdlen; index++){
 		if(FD_ISSET(sdlist[index], &fdset)){
@@ -696,7 +696,7 @@ snmp_read_packet(sd)
     u_char  packet[1500], outpacket[1500];
 
     fromlength = sizeof from;
-    length = recvfrom(sd, packet, 1500, 0, (struct sockaddr *)&from,
+    length = recvfrom(sd, (char *) packet, 1500, 0, (struct sockaddr *)&from,
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");

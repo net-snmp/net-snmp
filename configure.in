@@ -18,18 +18,25 @@ AC_CHECK_PROGS(SED,sed gsed)
 
 AC_AIX
 
-dnl CPPFLAGS
+dnl system check
+AC_CANONICAL_SYSTEM
+CFLAGS="$CFLAGS -D`echo $target_os | sed 's/\..*//'`"
+
+AC_MSG_CHECKING(for additional cpp flags)
+dnl gcc extra CPPFLAGS
 if test "x$GCC" = "xyes" -a "x$CPP" = "x$CC -E"; then
   dnl extra cpp flags for gnu c compiler to allow .in file extensions.
   EXTRACPPFLAGS="-x c"
 else
   EXTRACPPFLAGS=""
 fi
-AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
+dnl Solaris extra cpp flags.
+case $target_os in
+  solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
+esac
 
-dnl system check
-AC_CANONICAL_SYSTEM
-CFLAGS="$CFLAGS -D`echo $target_os | sed 's/\..*//'`"
+AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
+AC_MSG_RESULT($EXTRACPPFLAGS)
 
 dnl Set SNMPLIBPATH
 if test "x$prefix" = "xNONE"; then

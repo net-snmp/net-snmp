@@ -368,7 +368,8 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
 extern char **argvrestartp, *argvrestartname;
 
-void restart_doit()
+RETSIGTYPE restart_doit(a)
+int a;
 {
   execv(argvrestartname,argvrestartp);
   setPerrorstatus("execv");
