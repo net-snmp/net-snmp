@@ -478,7 +478,7 @@ Address_Scan_Init(void)
     int num_interfaces = 0;
     int fd;
 
-    // get info about all interfaces
+    /* get info about all interfaces */
 
     ifc.ifc_len = 0;
     ifc.ifc_buf = NULL;
@@ -566,7 +566,7 @@ Address_Scan_Next(Index, Retifnet)
 	ifr_counter+=sizeof(struct ifreq);
 	if (ifr_counter >= ifc.ifc_len)
 	{
-	    ifr = NULL;	// beyond the end
+	    ifr = NULL;	/* beyond the end */
 	}
 
         close(fd);
