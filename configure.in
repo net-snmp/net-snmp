@@ -91,9 +91,10 @@ AC_MSG_CHECKING(for mib modules to use)
 mibdir="agent/mibgroup"
 module_list=""
 new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible acl_vars party_vars view_vars context_vars alarm event $with_mib_modules"
+trap_list_o=""
 
 case $target_os in
-  solaris*) new_module_list="$new_module_list kernel_sunos5" ;;
+  solaris*) new_module_list="$new_module_list kernel_sunos5" ; trap_list_o="../agent/mibgroup/kernel_sunos5.o" ;;
   hpux*) new_module_list="$new_module_list hpux memory" ;;
   bsdi*) new_module_list="$new_module_list memory" ;;
 esac
@@ -162,6 +163,7 @@ changequote([, ])
 AC_SUBST(module_list_c)
 AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
+AC_SUBST(trap_list_o)
 
 AC_MSG_RESULT(.)
 
