@@ -330,6 +330,7 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "    --configure-options   Display original configure arguments"
   echo "    --snmpd-module-list   Display the modules compiled into the agent"
+  echo "    --prefix              Display the installation prefix"
   echo ""
   exit
 fi  
