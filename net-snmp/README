@@ -77,7 +77,9 @@ FREQUENTLY ASKED QUESTIONS
 HELPING OUT
 
   This is a project worked on by people around the net.  We'd love
-  your help, but please read the PORTING file first.
+  your help, but please read the PORTING file first.  Also, subscribe
+  to the ucd-snmp-coders list described below and mention what you're
+  going to work on to make sure no one else is already doing so!
 
 CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
 
@@ -121,8 +123,8 @@ EXTENSIBILITY
   is extremely modular in nature and you need only create new files,
   re-run configure and re-compile.  No modification of the distributed
   source files are necessary.  See the following files in the
-  agent/mibgroup directory for details: README, wombat.c, wombat.h,
-  example.c, example.h.
+  agent/mibgroup directory for details and examples: README, examples/wombat.c,
+  examples/wombat.h, examples/example.c, examples/example.h.
 
   Note:  This agent uses its own API for extensibility.  The IETF's
   agentx working group is working on developing a common API for
