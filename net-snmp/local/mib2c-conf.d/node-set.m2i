@@ -93,7 +93,7 @@ ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
 
     /*
      * TODO:
-     * check that new value is legal
+     * check that new value ($m2c_node_param_val_name) is legal
      */
 
     /* if everything looks ok, return 0 */

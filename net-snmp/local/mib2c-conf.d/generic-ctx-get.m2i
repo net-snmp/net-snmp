@@ -31,18 +31,9 @@
 @if "$m2c_data_context" ne "generated"@
     /** WARNING: this code might not work for $m2c_data_context */
 @end@
-/*
- * TODO:
- * update, replace or delete, if needed.
-@if $mfd_code_verbose == 1@
- *
- * This code can be used if there is a simple, direct relationship
- * beteen the MIB object ${node} and data in ctx.
-@end@
- */
 @if $m2c_node_needlength == 1@
     /*
-     * make sure there is enough space for data
+     * make sure there is enough space for $node data
      */
     if ((NULL == $m2c_ctx_lh) || ($m2c_ctx_lhs < $m2c_ctx_rhs)) {
 @   if $m2c_node_realloc == 0@
@@ -50,7 +41,7 @@
         return MFD_ERROR;
 @   else@
         /*
-         * allocate space for data
+         * allocate space for $node data
          */
 @      if $m2c_node_realloc == 1@
         $m2c_ctx_lh = realloc($m2c_ctx_lh, $m2c_ctx_rhs * sizeof(${m2c_ctx_lh}[0]));
