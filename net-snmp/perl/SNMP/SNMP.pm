@@ -719,10 +719,8 @@ sub trap {
 #             uptime => 1234,       # default to localhost uptime (0 on win32)
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
-# (v2) srcParty, dstParty, oid, uptime, <vars>
-# $sess->trap(srcParty => party1,
-#             dstParty => party2,
-#             oid => 'snmpRisingAlarm',
+# (v2) oid, uptime, <vars>
+# $sess->trap(oid => 'snmpRisingAlarm',
 #             uptime => 1234,
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
@@ -752,12 +750,11 @@ sub trap {
        @res = SNMP::_trapV1($this, $enterprise, $agent, $generic, $specific,
 			  $uptime, $varbind_list_ref);
    } else {
-       my $dstParty = $param{dstParty};
-       my $srcParty = $param{srcParty};
-       my $oid = $param{oid};
+#       my $dstParty = $param{dstParty};
+#       my $srcParty = $param{srcParty};
+       my $trap_oid = $param{oid};
        my $uptime = $param{uptime};
-       @res = SNMP::_trapV2($this, $dstParty, $srcParty, $oid,
-			  $uptime, $varbind_list_ref);
+       @res = SNMP::_trapV2($this, $trap_oid, $uptime, $varbind_list_ref);
    }
 
    return(wantarray() ? @res : $res[0]);
@@ -1205,11 +1202,9 @@ supports all applicable fields from SNMP::Session
                 [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
                                                              # always last
 
-=item trap(srcParty, dstParty, oid, uptime, <vars>) - v2 format - B<* Not Implemented *>
+=item trap(oid, uptime, <vars>) - v2 format - B<* Not Implemented *>
 
-    $sess->trap(srcParty => party1,
-                dstParty => party2,
-                oid => 'snmpRisingAlarm',
+    $sess->trap(oid => 'snmpRisingAlarm',
                 uptime => 1234,
                 [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
                                                              # always last
