@@ -92,7 +92,7 @@ snmp_alarm_unregister(unsigned int clientreg) {
   }
   else {
     for(sa_ptr = thealarms;
-        sa_ptr != NULL && sa_ptr->next->clientreg != alrm->clientreg;
+        sa_ptr != NULL && sa_ptr->next->clientreg != clientreg;
         sa_ptr = sa_ptr->next);
     if (sa_ptr) {
       if (sa_ptr->next) {
