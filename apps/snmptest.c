@@ -40,8 +40,14 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <stdio.h>
+#include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -53,9 +59,11 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#include <stdio.h>
-#include <ctype.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -63,9 +71,10 @@ SOFTWARE.
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "snmp_client.h"
+#include "system.h"
 #include "snmp_parse_args.h"
 
 int main __P((int, char **));
@@ -243,6 +252,7 @@ main(argc, argv)
 	varcount = 0;
 	nonRepeaters = -1;
     }
+	return 0;
 }
 
 int
@@ -361,7 +371,7 @@ input_variable(vp)
 	    case 'Q':
 		switch((toupper(buf[2]))){
                     case '\n':
-		    case NULL:
+		    case 0:
 		        printf("Quitting,  Goodbye\n");
 			exit(0);
 			break;
