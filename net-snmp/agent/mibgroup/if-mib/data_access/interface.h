@@ -3,6 +3,9 @@
  *
  * $Id$
  */
+#ifndef NETSNMP_ACCESS_INTERFACE_CONFIG_H
+#define NETSNMP_ACCESS_INTERFACE_CONFIG_H
+
 /**---------------------------------------------------------------------*/
 /*
  * configure required files
@@ -35,3 +38,11 @@ config_require(if-mib/data_access/interface_bsd);
 configure_require(if-mib/data_access/interface-unknown-arch);
 #endif
 
+void netsnmp_access_interface_arch_init(void);
+
+int netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
+                                  int ifAdminStatus_val);
+
+
+
+#endif /* NETSNMP_ACCESS_INTERFACE_CONFIG_H */
