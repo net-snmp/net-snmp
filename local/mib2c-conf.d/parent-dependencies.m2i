@@ -47,7 +47,7 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 @foreach $node nonindex@
 @   ifconf syntax-$node.syntax-dependencies.m2i@
 @      include syntax-$node.syntax-dependencies.m2i@
-    if ( MFC_SUCCESS != rc )
+    if ( MFD_SUCCESS != rc )
         return rc;
 
 @   end@
