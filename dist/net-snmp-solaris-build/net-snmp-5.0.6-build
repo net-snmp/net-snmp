@@ -1,0 +1,379 @@
+#!/bin/ksh
+#
+# automatic build (configure/make/package) script 
+# for NET-SNMP on Solaris
+#
+# request for contribution
+# https://sourceforge.net/tracker/?func=detail&atid=112694&aid=596250&group_id=12694
+#
+# 2002/11 Stefan.Radman@CTBTO.ORG
+#
+# this script still requires customization to your own environment (see DEVENV)
+# do not run it if you dont know what you are doing
+#
+
+. $TOP/DEVENV
+set -x # be verbose
+# set up the proper environment
+tmp=`pwd`/pkgroot
+#trap 's=$?; rm -rf $tmp $tmp; exit $s' EXIT
+# NET-SNMP uses the PREFIX environment variable differently - avoid it
+# it would collide with the NET-SNMP PREFIX during "make test" - hmpff
+prefix=${PREFIX:=/opt/OSS} && unset PREFIX
+PERL=${PERL:=`which perl`}
+MAKE=${MAKE:=`which make`}
+
+# cleanup on demand
+${MAKE:=make} ${@:-nothing} # or distclean or whatever
+[ "$1" = distclean ] && rm -rf $tmp prototype depend pkginfo postinstall config.cache snmpd-init.d
+
+# preload attached config cache to ignore RPM-related stuff on solaris
+[ -f config.cache ] || awk /^___config.cache/,/___EOF/ $0 | grep -v ^___ >config.cache
+# extract and apply attached patches
+awk /^___PAT/,/___EOF/ $0 | grep -v ^___ | patch -Nblp0 -z.orig
+# extract and create attached init file
+awk /^___snmpd-init.d/,/___EOF/ $0 | grep -v ^___ | sed "s,@prefix@,$prefix,g" >|snmpd-init.d
+
+# configure
+
+# additional modules to build in
+cat <<== | sed 's/#.*//' | tr -d '\012' | tr -s ' ' | read modules
+# additional (non-default) modules to load
+host                 # HOST-RESOURCED-MIB
+disman/event-mib     # DISMAN-EVENT-MIB
+smux                 # SMUX support
+ucd-snmp/diskio      # table of io-devices
+# below modules are not documented in configure
+mibII/mta_sendmail   # MTA-MIB: very basic support
+ucd-snmp/dlmod       # support for dynamically loadable modules
+#Rmon                # RMON-MIB: what a surprise !!! seems 2b alpha
+#smux_gated          # BGP-MIB ??
+==
+
+# additional transports to build in
+transports="Callback"
+[ "`uname -sr`" = "SunOS 5.9" ] && \
+  transports="$transports UDPIPv6 TCPIPv6" # Solaris 9 should support IPv6
+
+VARDIR=/var/snmp/agent
+LOGFILE=$VARDIR/snmpd.log
+echo "Configuring for $prefix"
+[ -f Makefile ] || ./configure --prefix=$prefix \
+        --with-defaults \
+        --enable-shared \
+        --enable-static \
+	--enable-ucd-snmp-compatibility \
+        --with-sys-contact="unknown" \
+        --with-sys-location="unknown" \
+        --with-transports="$transports" \
+        --with-mib-modules="$modules" \
+        --without-root-access \
+        --with-openssl=$prefix \
+        --with-persistent-directory=$VARDIR \
+        --with-logfile=$LOGFILE \
+        --with-default-snmp-version=1 \
+        --with-perl-modules \
+	--enable-embedded-perl \
+|| exit 
+#        --with-ldflags="-R $prefix/lib" \
+# for production (or not?):
+#        --with-libwrap \
+# following causes "`__builtin_va_alist' undeclared", still in 5.0
+# and "symbol `setenv' is multiply-defined" only in 5.0
+#        --with-libwrap=/usr
+# wont build without kerberos 5 (krb5.h && libraries)
+#       --with-security-modules="ksm" \
+# we will keep ucd-snmp compatibility for a while
+
+# procfs (needed by agent) not supported in largefile enviropnment
+# (usually caused by --enable-embedded-perl)
+if grep _LARGEFILE_SOURCE config.status 1>&- 2>&-
+then
+  ${PERL:=`which perl`} -pi -e 's,-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64,,' config.status
+  ./config.status # need to recreate Makefiles
+fi
+
+$MAKE depend || exit
+$MAKE || exit
+$MAKE test || exit
+
+# install to temporary package build root
+$MAKE \
+	prefix=$tmp$prefix \
+	exec_prefix=$tmp$prefix \
+	persistentdir=$tmp/$VARDIR \
+        INSTALLMAN1DIR=$tmp'$(PREFIX)/man/man1' \
+        INSTALLMAN3DIR=$tmp'$(PREFIX)/man/man3' \
+	INSTALLPRIVLIB=$tmp'$(PERL_LIB)' \
+	INSTALLARCHLIB=$tmp'$(ARCHLIB)' \
+	INSTALLSITELIB=$tmp'$(SITELIBEXP)' \
+	INSTALLSITEARCH=$tmp'$(SITEARCHEXP)' \
+	install || exit # tmp install
+[ -d $tmp$VARDIR ] || install -d -m 0755 $tmp$VARDIR # create persistent directory if it does not exist
+# we should try and replace the INSTALL*= with PREFIX=$tmp$perlprefix
+# see if it works. after having run the tests the PREFIX variable should not hurt any more
+# hmmm - probably the perl/SNMP tests will fail ???
+
+# postinstall
+LD_LIBRARY_PATH=$tmp$prefix/lib:$LD_LIBRARY_PATH $tmp$prefix/bin/snmptranslate \
+  -M$tmp$prefix/share/snmp/mibs -m SNMPv2-SMI .1 >&- || exit $? # create MIB index
+# to be honest: I dont know if below is still necessary - it used to be
+chmod 0755 `find $tmp -type d` # directories
+chmod 0755 `file \`find $tmp -type f\` | sed 's/:	/;/' | egrep ';ELF |;executable' | cut -d';' -f1`
+chmod 0644 `file \`find $tmp -type f\` | sed 's/:	/;/' | egrep -v ';ELF |;executable' | cut -d';' -f1`
+
+# package
+version=`./net-snmp-config --version`
+os=`uname -s`
+rel=`uname -r`
+class=snmp
+owner=$LOGNAME
+groups | awk '{print $1}' | read group
+cat <<== >|pkginfo
+PKG="OSSsnmp"
+NAME="net-snmp-$version"
+ARCH="`uname -p`"
+VERSION="$version, $os $rel, `date +%Y.%m.%d.%H.%M.%S`"
+CATEGORY="OpenSource"
+DESC="The NET-SNMP Tools and Library"
+VENDOR="http://net-snmp.sourceforge.net"
+CLASSES="$class"
+BASEDIR="$prefix"
+==
+. ./pkginfo
+
+echo 'checking dependencies'
+unset LD_LIBRARY_PATH # binaries and libraries should have RPATH now
+$TOP/../elfdepend.sh $tmp | grep -v "P  *$PKG " >|depend # ignore own package
+
+echo 'creating prototype file'
+cat <<== >|prototype
+i pkginfo
+i copyright=./COPYING
+#i preinstall=./preinstall-postremove
+#i postinstall=./preinstall-postremove
+i depend
+# set default mode, owner and group
+! default 0644 bin bin
+f snmp /etc/init.d/snmpd=./snmpd-init.d 0755 root sys
+#l snmp /etc/rc2.d/S76snmpd=/etc/init.d/snmpd # not yet
+==
+pkgproto -c snmp $tmp=/ |\
+egrep -v '^d .* / |^d .* /var |^d .* /opt |^ .*perllocal.pod=' |\
+sed -e "s/ $owner $group\$//" \
+>>prototype || exit $?
+# and ignore top level directories (must pre-exist)
+
+echo 'creating package'
+pkgmk -od . || exit $?
+pkgtrans . $PKG-$version-$ARCH-$os$rel-pkgadd $PKG || exit $?
+
+echo "build was successfull"
+exit 0
+
+# here are the attached files and patches 
+# they are extracted somehwere around the start of this script
+
+# when configure finds the rpm libraries and headers, it automatically 
+# assumes that the native package manager is RPM and tries to build it into 
+# the HOST-RESOURCES-MIB part of the agent
+# this is not intended on Solaris ...
+# the only way to get around this, is to preload config.cache
+___config.cache___
+ac_cv_func_rpmGetPath=${ac_cv_func_rpmGetPath='no'}
+ac_cv_header_rpm_rpmio_h=${ac_cv_header_rpm_rpmio_h='no'}
+ac_cv_header_rpmio_h=${ac_cv_header_rpmio_h='no'}
+ac_cv_lib_bz2_BZ2_bzread=${ac_cv_lib_bz2_BZ2_bzread='no'}
+ac_cv_lib_bz2_bzread=${ac_cv_lib_bz2_bzread='no'}
+ac_cv_lib_db1_dbopen=${ac_cv_lib_db1_dbopen='no'}
+ac_cv_lib_db_3_1_db_create=${ac_cv_lib_db_3_1_db_create='no'}
+ac_cv_lib_db_dbopen=${ac_cv_lib_db_dbopen='no'}
+ac_cv_lib_popt_poptParseArgvString=${ac_cv_lib_popt_poptParseArgvString='no'}
+ac_cv_lib_rpm_rpmGetFilesystemList=${ac_cv_lib_rpm_rpmGetFilesystemList='no'}
+ac_cv_lib_rpmdb_rpmdbOpen=${ac_cv_lib_rpmdb_rpmdbOpen='no'}
+ac_cv_lib_rpmio_Fopen=${ac_cv_lib_rpmio_Fopen='no'}
+ac_cv_lib_z_gzread=${ac_cv_lib_z_gzread='no'}
+___EOF___
+
+___PATCHES___
+#
+# patch agent/Makefile.in to create share/snmp directory BEFORE installing
+# https://sourceforge.net/tracker/?group_id=12694&atid=112694&func=detail&aid=617891
+#
+*** ./agent/Makefile.in.orig      Thu May  2 06:00:02 2002
+--- ./agent/Makefile.in   Thu Oct  3 02:14:24 2002
+***************
+*** 127,128 ****
+--- 127,129 ----
+  embedperlinstall:
++ 	  @$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir)
+  	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(snmplibdir)/snmp_perl.pl
+#
+# patch local/Makefile.in to include missing mib2c.*.conf
+# https://sourceforge.net/tracker/?group_id=12694&atid=112694&func=detail&aid=627932
+#
+*** ./local/Makefile.in.orig	Wed Jul 17 22:43:12 2002
+--- ./local/Makefile.in	Thu Oct 24 09:47:00 2002
+***************
+*** 19,20 ****
+--- 19,21 ----
+  DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.create-dataset.conf \
++ 	mib2c.int_watch.conf mib2c.scalar.conf \
+  	mib2c.array-user.conf mib2c.column_enums.conf \
+#
+# fix a bug in mib.c that ignores the mibdirs config directive
+# https://sourceforge.net/tracker/?group_id=12694&atid=112694&func=detail&aid=628424
+#
+*** ./snmplib/mib.c.orig	Thu Sep 26 15:10:06 2002
+--- ./snmplib/mib.c	Fri Oct 25 02:47:55 2002
+***************
+*** 2295,2302 ****
+          dir = getenv("MIBDIRS");
+          if (dir == NULL) {
+              DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
+!             /** Not set use hard coded path */
+!            netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+          } else if (*dir == '+') {
+              DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
+              netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+--- 2295,2313 ----
+          dir = getenv("MIBDIRS");
+          if (dir == NULL) {
+              DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
+!             /** Check if the config handler found anything */
+!             if (confmibdir == NULL) {
+!                 DEBUGMSGTL(("get_mib_directory", "no mib directories set by config\n"));
+!                 /** Not set use hard coded path */
+!                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+!             } else if (*confmibdir == '+') {
+!                 DEBUGMSGTL(("get_mib_directory", "mib directories set by config (but added)\n"));
+!                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+!                 netsnmp_set_mib_directory(confmibdir);
+!             } else {
+!                 DEBUGMSGTL(("get_mib_directory", "mib directories set by config\n"));
+!                 netsnmp_set_mib_directory(confmibdir);
+!             }
+          } else if (*dir == '+') {
+              DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
+              netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+#
+# patch sedscript.in and man/snmpcmd.1.def
+# environment var name was replaced by path in the manpages
+# https://sourceforge.net/tracker/?func=detail&atid=112694&aid=635022&group_id=12694
+# 
+*** ./sedscript.in.orig Sat Oct  5 21:42:14 2002
+--- ./sedscript.in      Thu Nov  7 15:52:04 2002
+***************
+*** 4,5 ****
+--- 4,6 ----
+  s#PREMOVEMEREFIX#PREFIX#g
++ s#PREMOVEME@REFIX#PREMOVEMEREFIX#g
+  s#DREMOVEMEATADIR#DATADIR#g
+*** ./man/snmpcmd.1.def.orig    Wed Jun  5 11:43:26 2002
+--- ./man/snmpcmd.1.def Thu Nov  7 15:50:50 2002
+***************
+*** 492,494 ****
+  lookup in a single "well known" place, built into the SNMP library (or
+! specified by the PREFIX environment variable).  The standard place
+  is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
+--- 492,494 ----
+  lookup in a single "well known" place, built into the SNMP library (or
+! specified by the P@REFIX environment variable).  The standard place
+  is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
+***************
+*** 513,515 ****
+  .SH "ENVIRONMENT VARIABLES"
+! .IP PREFIX
+  The standard prefix for object identifiers (if using UCD-style output).
+--- 513,515 ----
+  .SH "ENVIRONMENT VARIABLES"
+! .IP P@REFIX
+  The standard prefix for object identifiers (if using UCD-style output).
+#
+# snmpinform symbolic link should be relative instead of absolute
+# https://sourceforge.net/tracker/?group_id=12694&atid=112694&func=detail&aid=652587
+#
+*** ./apps/Makefile.in.orig	Fri May 24 14:44:01 2002
+--- ./apps/Makefile.in	Thu Dec 12 10:03:01 2002
+***************
+*** 114,116 ****
+  snmpinforminstall:
+! 	rm -f $(bindir)/snmpinform$(EXEEXT)
+! 	$(LN_S) $(bindir)/snmptrap$(EXEEXT) $(bindir)/snmpinform$(EXEEXT)
+--- 114,115 ----
+  snmpinforminstall:
+! 	( cd $(bindir); rm -f snmpinform$(EXEEXT); $(LN_S) snmptrap$(EXEEXT) snmpinform$(EXEEXT) )
+#
+# patches to autoconf/automake files below are disabled because
+# autoconf 2.5x does not like net-snmp (or vice versa)
+#
+# patch configure.in to mention mibII/mta_sendmail in --help
+# https://sourceforge.net/tracker/?func=detail&atid=112694&aid=617508&group_id=12694
+#
+#*** configure.in.orig	Mon Sep  9 13:09:07 2002
+#--- configure.in	Thu Oct 24 12:05:06 2002
+#***************
+#*** 338,339 ****
+#--- 338,340 ----
+#      tunnel                 Linux TUNNEL-MIB support (ifTable extension)
+#+     mibII/mta_sendmail     MTA-MIB implementation for sendmail
+#
+# net-snmp-config not configclean
+# https://sourceforge.net/tracker/?func=detail&aid=654570&group_id=12694&atid=112694
+#
+#*** Makefile.in.orig	Wed Sep 18 04:59:18 2002
+#--- Makefile.in	Mon Dec 16 12:22:08 2002
+#***************
+#*** 150,152 ****
+#  	rm -f config.cache config.status config.log \
+#! 		libtool include/net-snmp/net-snmp-config.h
+#  	rm -f mibs/.index
+#--- 150,153 ----
+#  	rm -f config.cache config.status config.log \
+#! 		libtool include/net-snmp/net-snmp-config.h \
+#! 		net-snmp-config
+#  	rm -f mibs/.index
+___EOF___
+
+___snmpd-init.d___
+#! /bin/sh
+#
+# start/stop the NET-SNMP master agent (snmpd)
+#
+# Location:      /etc/init.d/snmpd
+#                /etc/rc3.d/S??snmpd
+#
+name="NET-SNMP agent"
+daemon=@prefix@/sbin/snmpd
+
+case "$1" in
+start)
+        [ ! -x $daemon ] && echo "ERROR: cannot start $name ($daemon)" && exit 1
+        echo "Starting $name ... \c"
+        pid=`pgrep -fx $daemon`
+        [ ! -z "$pid" ] && echo "already running with pid $pid." && exit 0
+        $daemon && echo "done."
+        ;;
+stop)
+        echo "Stopping $name ... \c"
+        pkill -fx $daemon && echo "done." || echo "not running."
+        ;;
+status)
+        echo "$name is \c"
+        pid=`pgrep -fx $daemon`
+        [ -z "$pid" ] && echo "not running" || echo "running with pid $pid"
+        ;;
+restart)
+        $0 stop && $0 start
+        ;;
+reload)
+        echo "Re-initializing $name ...\c"
+        pkill -HUP -fx $daemon && echo "done." || echo "not running."
+        ;;
+*)
+        echo "Usage: $0 { start | stop | status | restart | reload }"
+        ;;
+esac
+
+exit 0
+___EOF___
