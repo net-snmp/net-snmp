@@ -47,6 +47,8 @@ CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 		  -I$(srcdir)/../agent/mibgroup
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) notification_log.$(OSUFFIX)
+OBJS  = *.o
+LOBJS = *.lo
 
 all: standardall
 
