@@ -75,7 +75,7 @@ For example, linking in an snmplib built to use the Multithreaded DLL
 runtime library to an application configured for the Debug
 Multithreaded DLL runtime library results in a link error along the
 lines of 'defaultlib "MSVCRT" conflicts with use of other libs'.   If
-you receive a similair message, check that the projects settings
+you receive a similar message, check that the projects settings
 between library and application match up.
 
 Debug Information
