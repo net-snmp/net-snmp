@@ -267,6 +267,7 @@ struct	mib_egpNeighEntry {
 #define MIB_EGPNEIGHSTATE_CEASE		5
 
 struct variable_list;
+struct enum_list;
 
 void print_mib (FILE *);
 void print_ascii_dump (FILE *);
