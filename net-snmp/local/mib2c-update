@@ -5,14 +5,6 @@
 # script to merge custom code into updated mib2c code
 #
 #----- example .mib2c-updaterc -----
-## use my cvs version of mib2c-conf.d
-#if [ -z "$MIB2C_DIR" ]; then
-#        export MIB2C_DIR=~/snmp/local/mib2c-conf.d:~/snmp/local
-#fi
-#
-## pick up my cvs version of mib2c
-#export PATH=~/snmp/local:$PATH
-#
 #UPDATE_OID=ipAddressTable
 #UPDATE_CONF=mib2c.mfd.conf
 #UPDATE_MIB2C_OPTS=
@@ -120,7 +112,7 @@ do_diff()
     # p     Show which C function each change is in.
     # d     smaller changes
     #    --exclude='*Makefile' --unidirectional-new-file
-    diff -cp -C 5 \
+    diff -cp -C 5 --show-c-function \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
         --exclude="*.deps" \
@@ -273,7 +265,7 @@ if [ $? -ne 1 ]; then
     exit 1
 fi
 
-UPDATE_DATE=`date "+%F_%R"`
+UPDATE_DATE=`date "+%F_%I.%M"`
 echo "Starting regneration of $UPDATE_OID using $UPDATE_CONF at $UPDATE_DATE"
 
 if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
