@@ -757,9 +757,11 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Configuration directives understood:\n");
 	    read_config_print_usage("  ");
             exit(0);
+#if HAVE_GETPID
         case 'u':
           pid_file = optarg;
           break;
+#endif
 
 	default:
 	    fprintf(stderr,"invalid option: -%c\n", arg);
