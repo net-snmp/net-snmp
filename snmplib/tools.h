@@ -41,11 +41,15 @@
 #define VAL2HEX(s)	( (s) + (((s) >= 10) ? ('a'-10) : '0') )
 
 
-
-/* XXX	Got these two somewhere already?
- */
 #define SNMP_MAX(a,b) ((a) > (b) ? (a) : (b))
 #define SNMP_MIN(a,b) ((a) > (b) ? (b) : (a))
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE  1
+#endif
 
 /*
  * QUIT the FUNction:

@@ -96,13 +96,11 @@ SOFTWARE.
 
 #include "transform_oids.h"
 
-#	ifdef			USE_INTERNAL_MD5
-static void md5Digest (u_char *, int, u_char *);
-
-#	elif			HAVE_LIBKMT
+#	ifdef			HAVE_LIBKMT
 /* No problem.  SCAPI and KMT stuff defined elsewhere... */
 
 #	else
+#	ifndef			USE_INTERNAL_MD5
 #	error \
 	"
 
@@ -113,6 +111,7 @@ static void md5Digest (u_char *, int, u_char *);
 	bundled with UCD SNMP (See configure option --enable-internal-md5).
 
 	"
+#	endif
 #	endif
 
 #endif	/* USE_V2PARTY_PROTOCOL */
@@ -297,67 +296,6 @@ has_access(	u_char	msg_type,
     return FALSE;
 
 }  /* end has_access() */
-
-
-
-#ifdef USE_INTERNAL_MD5
-
-static void
-md5Digest(	u_char	*start,
-		int	 length,
-		u_char	*digest)
-{
-    MDstruct	 MD;
-
-    int		 i, j;
-    u_char	*cp;
-#if WORDS_BIGENDIAN
-    u_char	*buf;
-    u_char	 buffer[SNMP_MAX_LEN];
-#endif
-
-
-#if 0
-    int count, sum;
-
-    sum = 0;
-    for(count = 0; count < length; count++)
-	sum += start[count];
-    printf("sum %d (%d)\n", sum, length);
-#endif
-
-
-#if WORDS_BIGENDIAN
-    /* Do the computation in an array.
-     */
-    cp = buf = buffer;
-    memmove(buf, start, length);
-#else
-    /* Do the computation in place.
-     */
-    cp = start;
-#endif
-
-
-    MDbegin(&MD);
-    while(length >= 64){
-	MDupdate(&MD, cp, 64 * 8);
-	cp += 64;
-	length -= 64;
-    }
-    MDupdate(&MD, cp, length * 8);
-    /* MDprint(&MD); */
-
-   for (i=0;i<4;i++)
-     for (j=0;j<32;j=j+8)
-	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
-
-}  /* end md5Digest() */
-
-#endif /* USE_INTERNAL_MD5 */
-
-
-
 
 #ifdef USE_V2PARTY_PROTOCOL
 

@@ -5,8 +5,44 @@
  * XXX	Need a routine to free the memory?  (Perhaps at shutdown?)
  */
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
+
+#include <sys/types.h>
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmpusm.h"
+#include "lcd_time.h"
+#include "snmp_debug.h"
+#include "tools.h"
+#include "scapi.h"
+
 #include "transform_oids.h"
 
 
@@ -327,7 +363,6 @@ hash_engineID_quit:
 
 
 
-#ifdef SNMP_TESTING_CODE
 /*******************************************************************-o-******
  * dump_etimelist_entry
  *
@@ -338,9 +373,6 @@ hash_engineID_quit:
 void
 dump_etimelist_entry(Enginetime e, int count)
 {
-#define pt	DEBUGMSGTL(("dump_etimelist", "%s", tabs)); DEBUGMSG(("dump_etimelist",
-#define p	));
-
 	u_int	 buflen;
 	char	 tabs[SNMP_MAXBUF],
 		*t = tabs, 
@@ -355,28 +387,31 @@ dump_etimelist_entry(Enginetime e, int count)
 
 
 	buflen = e->engineID_len;
+#ifdef SNMP_TESTING_CODE
 	if ( !(s = dump_snmpEngineID(e->engineID, &buflen)) ) {
+#endif
 		binary_to_hex(e->engineID, e->engineID_len, &s);
+#ifdef SNMP_TESTING_CODE
 	}
+#endif
 
-	pt	"\n"						p
-	pt	"%s (len=%d) <%d,%d>\n",
-			s, e->engineID_len,
-			e->engineTime, e->engineBoot		p
-	pt	"%ld (%ld) -- %s",
-			e->lastReceivedEngineTime,
-			time(NULL) - e->lastReceivedEngineTime,
-			ctime(&e->lastReceivedEngineTime)	p
+	DEBUGMSGTL(("dump_etimelist", "%s\n",tabs));
+	DEBUGMSGTL(("dump_etimelist", "%s%s (len=%d) <%d,%d>\n", tabs,
+                    s, e->engineID_len,
+                    e->engineTime, e->engineBoot));
+	DEBUGMSGTL(("dump_etimelist", "%s%ld (%ld) -- %s", tabs,
+                    e->lastReceivedEngineTime,
+                    time(NULL) - e->lastReceivedEngineTime,
+                    ctime(&e->lastReceivedEngineTime)));
 
 	SNMP_FREE(s);
 
-#undef pt p
-	
 }  /* end dump_etimelist_entry() */
 
 
 
 
+#ifdef SNMP_TESTING_CODE
 /*******************************************************************-o-******
  * dump_etimelist
  */
@@ -392,7 +427,7 @@ dump_etimelist(void)
 	DEBUGMSGTL(("dump_etimelist", "\n"));
 
 	while (++iindex < ETIMELIST_SIZE) {
-		DEBUGMSG(("dump_etimelist", "[%d]", index));
+		DEBUGMSG(("dump_etimelist", "[%d]", iindex));
 
 		count = 0;
 		e = etimelist[iindex];
@@ -410,5 +445,4 @@ dump_etimelist(void)
 	DEBUGMSG(("dump_etimelist", "\n"));
 
 }  /* end dump_etimelist() */
-
 #endif /* SNMP_TESTING_CODE */
