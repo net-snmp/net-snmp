@@ -15,14 +15,17 @@
  *
  * Purpose: create new data context, if specified index is valid.
  *
- * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ${context}_reg
+ *        Pointer to the user registration data
  * @param ${context}_ctx
  *        Pointer to the users context.
- * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
+ * @return MFD_SUCCESS   : success
+ *         MFD_BAD_VALUE : index not valid
  * code on failure.
  */
 int
-${context}_validate_index( netsnmp_mfd_registration *mfdr, ${context}_ctx *ctx )
+${context}_validate_index( ${context}_registration_ptr ${context}_reg,
+                           ${context}_ctx *ctx )
 {
     int rc;
 
@@ -57,7 +60,7 @@ $example_start
     }
 $example_end
 
-    return SNMP_ERR_NOERROR;
+    return MFD_SUCCESS;
 }
 
 @end@ # row creation
@@ -69,6 +72,19 @@ $example_end
  * This function will be called before the individual node undo setup
  * functions are called. If you need to do any undo setup that is not
  * related to a specific column, you can do it here.
+ *
+ * Note that an individual node's undo_setup function will only be called
+ * if that node is being set to a new value.
+ *
+ * If there is any setup specific to a particular column (e.g. allocating
+ * memory for a string), you should do that setup in the node's undo_setup
+ * function, so it won't be done unless it is necessary.
+ *
+ * @param ctx
+ *        Pointer to the table context (${context}_ctx)
+ *
+ * @return MFD_SUCCESS : success
+ *         MFD_ERROR   : error. set will fail.
  */
 int
 ${context}_undo_setup( ${context}_ctx *ctx )
@@ -80,76 +96,28 @@ ${context}_undo_setup( ${context}_ctx *ctx )
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
 
-    /*
-     * copy data to undo
-     */
-@if $m2c_data_context ne "generated"@
-$example_start
-@end@
-@    foreach $node nonindex@
-@        include m2c_setup_node.m2i@
-@        eval $m2c_ctx_lh = "$m2c_undo_item"@
-@        eval $m2c_ctx_rh = "$m2c_data_item"@
-@        include generic-ctx-copy.m2i@
-@    end@ # foreach nonindex
-@if $m2c_data_context ne "generated"@
-$example_end
-@end@
 
-    return SNMP_ERR_NOERROR;
+    return MFD_SUCCESS;
 }
+
 @end@
 ##----------------------------------------------------------------------
 /*
- * ${context}_reversible_commit
+ * ${context}_commit
  *
- * Purpose: perform commit actions that are reversible
- *
- * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
- * @param requests A linked list of requests for this row
- * @param ${context}_ctx
- *        Pointer to the users context.
- * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
- */
-int
-${context}_reversible_commit( $mfd_base_params, ${context}_ctx *ctx )
-{
-    int rc;
-
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
-
-    /*
-     * TODO: commit any data that is not difficult to undo and/or
-     * is not service affecting.
-     */
-##$example_start
-##$example_end
-
-    return SNMP_ERR_NOERROR;
-}
-
-##----------------------------------------------------------------------
-/*
- * ${context}_final_commit
- *
- * Purpose: perform remaining commit actions.
+ * Purpose: commit new valies.
  *
  * At this point, you should have done everything you can to ensure that
  * this commit will not fail.
  *
- * THERE IS NO ATTEMPT AT RECOVERY FOR ERRORS FROM THIS STATE!
- *
- * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
- * @param requests A linked list of requests for this row
  * @param ${context}_ctx
  *        Pointer to the users context.
- * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
+ *
+ * @return MFD_SUCCESS : success
+ *         MFD_ERROR   : error
  */
 int
-${context}_final_commit( $mfd_base_params, ${context}_ctx *ctx )
+${context}_commit( ${context}_ctx *ctx )
 {
     int rc;
 
@@ -159,12 +127,47 @@ ${context}_final_commit( $mfd_base_params, ${context}_ctx *ctx )
     netsnmp_assert( NULL != ctx );
 
     /*
-     * TODO: commit any remaining data.
+     * TODO: commit your data
      */
 ##$example_start
 ##$example_end
 
-    return SNMP_ERR_NOERROR;
+    return MFD_SUCCESS;
+}
+
+@end@
+@if $m2c_irreversible_commit == 1@
+##----------------------------------------------------------------------
+/*
+ * ${context}_irreversible_commit
+ *
+ * Purpose: perform commit actions that are not reversible
+ *
+ * THERE IS NO ATTEMPT AT RECOVERY FOR ERRORS FROM THIS STATE!
+ *
+ * @param ${context}_ctx
+ *        Pointer to the users context.
+ *
+ * @return MFD_SUCCESS : success
+ *         MFD_ERROR   : other error
+ */
+int
+${context}_irreversible_commit( ${context}_ctx *ctx )
+{
+    int rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != ctx );
+
+    /*
+     * TODO: commit your data here
+     */
+##$example_start
+##$example_end
+
+    return MFD_SUCCESS;
 }
 
 @end@
