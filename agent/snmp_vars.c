@@ -667,6 +667,9 @@ struct subtree subtrees[] = {
    sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
    sizeof(*wes_disk_variables)},
 #endif
+  {{WESMIB, LOADAVEMIBNUM}, 7, (struct variable *)wes_loadave_variables,
+   sizeof(wes_loadave_variables)/sizeof(*wes_loadave_variables),
+   sizeof(*wes_loadave_variables)},
   {{WESMIB, VERSIONMIBNUM}, 7, (struct variable *)wes_version_variables,
    sizeof(wes_version_variables)/sizeof(*wes_version_variables),
    sizeof(*wes_version_variables)},
@@ -782,8 +785,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (y = 0, tp = subtrees; y < sizeof(subtrees)/sizeof(struct subtree);
-	 tp++, y++){
+    for (y = 0, tp = find_extensible(subtrees,name,*namelen,exact);
+         y < sizeof(subtrees)/sizeof(struct subtree); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treerresult == 0
 	   if next  and treeresult <= 0 */
