@@ -1,0 +1,1159 @@
+/*
+ * snmpksm.c
+ *
+ * This code implements the Kerberos Security Model (KSM) for SNMP.
+ *
+ * Security number - 2066432
+ */
+
+#include <config.h>  
+
+#include <sys/types.h>
+#if HAVE_WINSOCK_H 
+#include <winsock.h>
+#endif
+#include <stdio.h>  
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#include <errno.h>
+
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
+#include <krb5.h>
+#include <com_err.h>
+  
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmp_debug.h"
+#include "callback.h"
+#include "tools.h"
+#include "keytools.h"
+#include "snmp.h"
+#include "read_config.h"
+#include "snmpv3.h"
+#include "snmp-tc.h"
+#include "lcd_time.h"
+#include "scapi.h"
+#include "callback.h"
+#include "default_store.h"
+#include "snmp_secmod.h"
+#include "snmp_logging.h"
+#include "snmpksm.h"
+
+static krb5_context kcontext = NULL;
+static int ksm_session_init(struct snmp_session *);
+static void ksm_free_state_ref(void *);
+static int ksm_free_pdu(struct snmp_pdu *);
+
+static int ksm_insert_cache(long, krb5_auth_context, u_char *, size_t);
+static void ksm_delete_cache(long);
+static struct ksm_cache_entry *ksm_get_cache(long);
+
+#define HASHSIZE	64
+
+/*
+ * Our information stored for the response PDU.
+ */
+
+struct ksm_secStateRef {
+    krb5_auth_context auth_context;
+    krb5_cksumtype cksumtype;
+};
+
+/*
+ * A KSM outgoing pdu cache entry
+ */
+
+struct ksm_cache_entry {
+    long msgid;
+    krb5_auth_context auth_context;
+    u_char *secName;
+    size_t secNameLen;
+    struct ksm_cache_entry *next;
+};
+
+/*
+ * Poor man's hash table
+ */
+
+static struct ksm_cache_entry *ksm_hash_table[HASHSIZE];
+
+/*
+ * Initialize all of the state required for Kerberos (right now, just call
+ * krb5_init_context).
+ */
+
+void
+init_ksm(void)
+{
+    krb5_error_code retval;
+    struct snmp_secmod_def *def;
+    int i;
+
+    if (kcontext == NULL) {
+	retval = krb5_init_context(&kcontext);
+
+	if (retval) {
+	    snmp_log(LOG_ERR, "KSM: krb5_init_context failed: %s\n",
+		     error_message(retval));
+	}
+    }
+
+    for (i = 0; i < HASHSIZE; i++)
+	ksm_hash_table[i] = NULL;
+
+    def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
+    def->encode_reverse = ksm_rgenerate_out_msg;
+    def->decode = ksm_process_in_msg;
+    def->session_open = ksm_session_init;
+    def->pdu_free_state_ref = ksm_free_state_ref;
+    def->pdu_free = ksm_free_pdu;
+
+    register_sec_mod(2066432, "ksm", def);
+}
+
+/*
+ * These routines implement a simple cache for information we need to
+ * process responses.  When we send out a request, it contains an AP_REQ;
+ * we get back an AP_REP, and we need the authorization context from the
+ * AP_REQ to decrypt the AP_REP.  But because right now there's nothing
+ * that gets preserved across calls to rgenerate_out_msg to process_in_msg,
+ * we cache these internally based on the message ID (we also cache the
+ * passed-in security name, for reasons that are mostly stupid).
+ */
+
+static int
+ksm_insert_cache(long msgid, krb5_auth_context auth_context, u_char *secName,
+		 size_t secNameLen)
+{
+    struct ksm_cache_entry *entry;
+    int bucket;
+    int retval;
+
+    entry = SNMP_MALLOC_STRUCT(ksm_cache_entry);
+
+    if (!entry)
+	return SNMPERR_MALLOC;
+
+    entry->msgid = msgid;
+    entry->auth_context = auth_context;
+
+    retval = memdup(&entry->secName, secName, secNameLen);
+
+    if (retval != SNMPERR_SUCCESS) {
+	free(entry);
+	return retval;
+    }
+
+    entry->secNameLen = secNameLen;
+
+    bucket = msgid % HASHSIZE;
+
+    entry->next = ksm_hash_table[bucket];
+    ksm_hash_table[bucket] = entry;
+
+    return SNMPERR_SUCCESS;
+}
+
+static struct ksm_cache_entry *
+ksm_get_cache(long msgid)
+{
+    struct ksm_cache_entry *entry;
+    int bucket;
+
+    bucket = msgid % HASHSIZE;
+
+    for (entry = ksm_hash_table[bucket]; entry != NULL; entry = entry->next)
+	if (entry->msgid == msgid)
+	    return entry;
+
+    return NULL;
+}
+
+static void
+ksm_delete_cache(long msgid)
+{
+    struct ksm_cache_entry *entry, *entry1;
+    int bucket;
+
+    bucket = msgid % HASHSIZE;
+
+    if (ksm_hash_table[bucket] && ksm_hash_table[bucket]->msgid == msgid) {
+	entry = ksm_hash_table[bucket];
+	krb5_auth_con_free(kcontext, entry->auth_context);
+	free(entry->secName);
+	ksm_hash_table[bucket] = entry->next;
+	free(entry);
+	return;
+    } else if (ksm_hash_table[bucket])
+	for (entry1 = ksm_hash_table[bucket], entry = entry1->next;
+	     entry != NULL; entry1 = entry, entry = entry->next)
+	    if (entry->msgid == msgid) {
+		krb5_auth_con_free(kcontext, entry->auth_context);
+		free(entry->secName);
+		entry1->next = entry->next;
+		free(entry);
+		return;
+	    }
+
+    DEBUGMSGTL(("ksm", "KSM: Unable to delete cache entry for msgid %ld.\n",
+		msgid));
+}
+
+/*
+ * Initialize specific session information (right now, just set up things to
+ * not do an engineID probe)
+ */
+
+static int
+ksm_session_init(struct snmp_session *sess)
+{
+    DEBUGMSGTL(("ksm", "KSM: Reached our session initialization callback\n"));
+
+    sess->flags |= SNMP_FLAGS_DONT_PROBE;
+
+    return SNMPERR_SUCCESS;
+}
+
+/*
+ * Free our state information (this is only done on the agent side)
+ */
+
+static void
+ksm_free_state_ref(void *ptr)
+{
+    struct ksm_secStateRef *ref = (struct ksm_secStateRef *) ptr;
+
+    DEBUGMSGTL(("ksm", "KSM: Freeing state reference\n"));
+
+    krb5_auth_con_free(kcontext, ref->auth_context);
+
+    free(ref);
+}
+
+/*
+ * This is called when the PDU is freed; this will delete entries from our
+ * request cache.
+ */
+
+static int
+ksm_free_pdu(struct snmp_pdu *pdu)
+{
+    ksm_delete_cache(pdu->msgid);
+
+    DEBUGMSGTL(("ksm", "KSM: Freeing cache entry for PDU msgid %ld\n",
+		pdu->msgid));
+
+    return SNMPERR_SUCCESS;
+}
+
+/****************************************************************************
+ *
+ * ksm_generate_out_msg
+ *
+ * Parameters:
+ *	(See list below...)
+ *
+ * Returns:
+ *	SNMPERR_GENERIC                        On success.
+ *	SNMPERR_KRB5
+ *	... and others
+ *
+ *
+ * Generate an outgoing message.
+ *
+ ****************************************************************************/
+
+int
+ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
+{
+    krb5_auth_context	auth_context = NULL;
+    krb5_error_code	retcode;
+    krb5_ccache		cc = NULL;
+    int			retval = SNMPERR_SUCCESS;
+    krb5_data		outdata;
+    krb5_keyblock	*subkey = NULL;
+    krb5_encrypt_block	eblock;
+    unsigned char	*encrypted_data = NULL;
+    int			encrypted_length, zero = 0, i;
+    u_char		*seqBegin, *cksum_pointer, *endp = *parms->wholeMsg;
+    krb5_cksumtype	cksumtype = CKSUMTYPE_RSA_MD5_DES;
+    krb5_checksum	pdu_checksum;
+    u_char		*wholeMsg = *parms->wholeMsg;
+    struct ksm_secStateRef *ksm_state = (struct ksm_secStateRef *)
+							parms->secStateRef;
+
+    DEBUGMSGTL(("ksm", "Starting KSM processing\n"));
+
+    outdata.length = 0;
+    outdata.data = NULL;
+    pdu_checksum.contents = NULL;
+
+    if (! ksm_state) {
+	/*
+	 * If we don't have a ksm_state, then we're a request.  Get a
+	 * credential cache and build a ap_req.
+	 */
+	retcode = krb5_cc_default(kcontext, &cc);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_cc_default failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	DEBUGMSGTL(("ksm", "KSM: Set credential cache successfully\n"));
+
+	/*
+	 * This seems odd, since we don't need this until later (or earlier,
+	 * depending on how you look at it), but because the most likely
+	 * errors are Kerberos at this point, I'll get this now to save
+	 * time not encoding the rest of the packet.
+	 *
+	 * Also, we need the subkey to encrypt the PDU (if required).
+	 */
+
+	retcode = krb5_mk_req(kcontext, &auth_context, AP_OPTS_MUTUAL_REQUIRED |
+		  AP_OPTS_USE_SUBKEY, (char *) "host",
+		  parms->session->peername, NULL, cc, &outdata);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_mk_req failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	DEBUGMSGTL(("ksm", "KSM: ticket retrieved successfully\n"));
+
+    } else {
+
+	/*
+	 * Grab the auth_context from our security state reference
+	 */
+
+	auth_context = ksm_state->auth_context;
+
+	/*
+	 * Bundle up an AP_REP.  Note that we do this only when we
+	 * have a security state reference (which means we're in an agent
+	 * and we're sending a response).
+	 */
+
+	DEBUGMSGTL(("ksm", "KSM: Starting reply processing.\n"));
+
+	retcode = krb5_mk_rep(kcontext, auth_context, &outdata);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_mk_rep failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	DEBUGMSGTL(("ksm", "KSM: Finished with krb5_mk_rep()\n"));
+    }
+
+    /*
+     * If we have to encrypt the PDU, do that now
+     */
+
+    if (parms->secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+
+	DEBUGMSGTL(("ksm", "KSM: Starting PDU encryption.\n"));
+
+	/*
+	 * It's weird -
+	 *
+	 * If we're on the manager, it's a local subkey (because that's in
+	 * our AP_REQ)
+	 *
+	 * If we're on the agent, it's a remote subkey (because that comes
+	 * FROM the received AP_REQ).
+	 */
+
+	if (ksm_state)
+	    retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+						    &subkey);
+	else
+	    retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+						   &subkey);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_auth_con_getlocalsubkey failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	krb5_use_enctype(kcontext, &eblock, subkey->enctype);
+	retcode = krb5_process_key(kcontext, &eblock, subkey);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_process_key failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	encrypted_length = krb5_encrypt_size(parms->scopedPduLen,
+					     eblock.crypto_entry);
+	encrypted_data = malloc(encrypted_length);
+
+	if (! encrypted_data) {
+	    DEBUGMSGTL(("ksm", "KSM: Unable to malloc %d bytes for encrypt "
+			"buffer: %s\n", parms->scopedPduLen, strerror(errno)));
+	    retval = SNMPERR_MALLOC;
+	    krb5_finish_key(kcontext, &eblock);
+
+	    goto error;
+	}
+
+	retcode = krb5_encrypt(kcontext, (krb5_pointer) parms->scopedPdu,
+			       (krb5_pointer) encrypted_data,
+			       parms->scopedPduLen, &eblock, 0);
+
+	krb5_finish_key(kcontext, &eblock);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_encrypt failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail(error_message(retcode));
+	    goto error;
+	}
+
+	seqBegin = wholeMsg;
+
+	wholeMsg = asn_rbuild_string(wholeMsg, parms->wholeMsgLen,
+				     (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					       ASN_OCTET_STR),
+				     encrypted_data, encrypted_length);
+
+	if (!wholeMsg) {
+	    DEBUGMSGTL(("ksm", "Building encrypted payload failed.\n"));
+	    retval = SNMPERR_TOO_LONG;
+	    goto error;
+	}
+
+	DEBUGMSGTL(("ksm", "KSM: Encryption complete.\n"));
+
+    } else {
+	/*
+	 * Plaintext PDU (not encrypted)
+	 */
+
+	if (*parms->wholeMsgLen < parms->scopedPduLen) {
+	    DEBUGMSGTL(("ksm", "Not enough room for plaintext PDU.\n"));
+	    retval = SNMPERR_TOO_LONG;
+	    goto error;
+	}
+	
+	wholeMsg -= parms->scopedPduLen;
+	*parms->wholeMsgLen -= parms->scopedPduLen;
+    }
+
+    /*
+     * Start encoding the msgSecurityParameters
+     *
+     * For now, use 0 for the response hint
+     */
+
+    DEBUGMSGTL(("ksm", "KSM: scopedPdu added to payload\n"));
+
+    seqBegin = wholeMsg;
+
+    wholeMsg = asn_rbuild_int(wholeMsg, parms->wholeMsgLen,
+			       (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					    ASN_INTEGER),
+			       (long *) &zero, sizeof(zero));
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    wholeMsg = asn_rbuild_string(wholeMsg, parms->wholeMsgLen,
+				  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					    ASN_OCTET_STR), outdata.data,
+				  outdata.length);
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm AP_REQ failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    /*
+     * Hardcode checksum type FOR NOW! XXX (but make sure the response
+     * checksum type is the same as the request).
+     *
+     * Not sure what we're supposed to do about checksum negotiation.
+     */
+
+    if (ksm_state)
+	cksumtype = ksm_state->cksumtype;
+
+    pdu_checksum.length = krb5_checksum_size(kcontext, cksumtype);
+    pdu_checksum.checksum_type = cksumtype;
+
+    /*
+     * Note that here, we're just leaving blank space for the checksum;
+     * we remember where that is, and we'll fill it in later.
+     */
+
+    *parms->wholeMsgLen -= pdu_checksum.length;
+    wholeMsg -= pdu_checksum.length;
+    memset(wholeMsg + 1, 0, pdu_checksum.length);
+
+    cksum_pointer = wholeMsg + 1; 
+
+    wholeMsg = asn_rbuild_header(wholeMsg, parms->wholeMsgLen,
+				  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					    ASN_OCTET_STR), pdu_checksum.length);
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    wholeMsg = asn_rbuild_int(wholeMsg, parms->wholeMsgLen,
+			       (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					 ASN_OCTET_STR), (long *) &cksumtype,
+					 sizeof(cksumtype));
+				  
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    wholeMsg = asn_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   seqBegin - wholeMsg);
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    wholeMsg = asn_rbuild_header(wholeMsg, parms->wholeMsgLen,
+				 (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					   ASN_OCTET_STR), seqBegin - wholeMsg);
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    DEBUGMSGTL(("ksm", "KSM: Security parameter encoding completed\n"));
+
+    /*
+     * We're done with the KSM security parameters - now we do the global
+     * header and wrap up the whole PDU.
+     */
+
+    if (*parms->wholeMsgLen < parms->globalDataLen) {
+	DEBUGMSGTL(("ksm", "Building global data failed.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    wholeMsg -= parms->globalDataLen;
+    *parms->wholeMsgLen -= parms->globalDataLen;
+    memcpy(wholeMsg + 1, parms->globalData, parms->globalDataLen);
+
+    wholeMsg = asn_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+				   (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				   endp - wholeMsg);
+
+    if (!wholeMsg) {
+	DEBUGMSGTL(("ksm", "Building master packet sequence.\n"));
+	retval = SNMPERR_TOO_LONG;
+	goto error;
+    }
+
+    DEBUGMSGTL(("ksm", "KSM: PDU master packet encoding complete.\n"));
+
+    /*
+     * Now we need to checksum the entire PDU (since it's built).
+     */
+
+    pdu_checksum.contents = malloc(pdu_checksum.length);
+
+    if (!pdu_checksum.contents) {
+	DEBUGMSGTL(("ksm", "Unable to malloc %d bytes for checksum\n",
+		    pdu_checksum.length));
+	retval = SNMPERR_MALLOC;
+	goto error;
+    }
+
+    /*
+     * If we didn't encrypt the packet, we haven't yet got the subkey.
+     * Get that now.
+     */
+
+    if (!subkey) {
+	if (ksm_state)
+	    retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+						    &subkey);
+	else retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+						    &subkey);
+	if (retcode) {
+	    snmp_log(LOG_ERR, "KSM: krb5_auth_con_getlocalsubkey failed: %s\n",
+	    error_message(retcode));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+    }
+
+    retcode = krb5_calculate_checksum(kcontext, cksumtype, wholeMsg + 1,
+				      endp - wholeMsg,
+				      (krb5_pointer) subkey->contents,
+				      subkey->length, &pdu_checksum);
+
+    if (retcode) {
+	DEBUGMSGTL(("ksm", "Calculate checksum failed: %s\n",
+		   error_message(retcode)));
+	retval = SNMPERR_KRB5;
+	snmp_set_detail(error_message(retcode));
+	goto error;
+    }
+
+    DEBUGMSGTL(("ksm", "KSM: Checksum calculation complete.\n"));
+
+    memcpy(cksum_pointer, pdu_checksum.contents, pdu_checksum.length);
+
+    DEBUGMSGTL(("ksm", "KSM: Writing checksum of %d bytes at offset %d\n",
+		pdu_checksum.length, cksum_pointer - (wholeMsg + 1)));
+
+    DEBUGMSGTL(("ksm", "KSM: Checksum:"));
+
+    for (i = 0; i < pdu_checksum.length; i++)
+	DEBUGMSG(("ksm", " %02x", (unsigned int) pdu_checksum.contents[i]));
+
+    DEBUGMSG(("ksm", "\n"));
+
+    /*
+     * If we're _not_ called as part of a response (null ksm_state),
+     * then save the auth_context for later using our cache routines.
+     */
+
+    if (!ksm_state) {
+	if ((retval = ksm_insert_cache(parms->pdu->msgid, auth_context,
+				       parms->secName, parms->secNameLen)) !=
+							SNMPERR_SUCCESS)
+	    goto error;
+	auth_context = NULL;
+    }
+
+    DEBUGMSGTL(("ksm", "KSM processing complete!\n"));
+
+error:
+
+    if (pdu_checksum.contents)
+	free(pdu_checksum.contents);
+
+    if (subkey)
+	krb5_free_keyblock(kcontext, subkey);
+
+    if (encrypted_data)
+	free(encrypted_data);
+
+    if (cc)
+	krb5_cc_close(kcontext, cc);
+
+    if (auth_context && !ksm_state)
+	krb5_auth_con_free(kcontext, auth_context);
+
+    return retval;
+}
+
+/****************************************************************************
+ *
+ * ksm_process_in_msg
+ *
+ * Parameters:
+ *	(See list below...)
+ *
+ * Returns:
+ *	KSM_ERR_NO_ERROR                        On success.
+ *	SNMPERR_KRB5
+ *	KSM_ERR_GENERIC_ERROR
+ *	KSM_ERR_UNSUPPORTED_SECURITY_LEVEL
+ *
+ *
+ * Processes an incoming message.
+ *
+ ****************************************************************************/
+
+int
+ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
+{
+    long		temp;
+    krb5_cksumtype	cksumtype;
+    krb5_auth_context	auth_context = NULL;
+    krb5_error_code	retcode;
+    krb5_checksum	checksum;
+    krb5_data		ap_req;
+    krb5_flags		flags;
+    krb5_keyblock	*subkey = NULL;
+    krb5_encrypt_block	eblock;
+    krb5_ticket		*ticket = NULL;
+    int			retval = SNMPERR_SUCCESS, response = 0;
+    size_t		length = parms->wholeMsgLen - (u_int)(parms->secParams -
+						       parms->wholeMsg);
+    u_char		*current = parms->secParams, type;
+    size_t		cksumlength;
+    long		hint;
+    char		*cname;
+    struct ksm_secStateRef *ksm_state;
+    struct ksm_cache_entry *entry;
+
+    DEBUGMSGTL(("ksm", "KSM Processing has begun\n"));
+
+    checksum.contents = NULL;
+    ap_req.data = NULL;
+
+    /*
+     * First, parse the security parameters (because we need the subkey inside
+     * of the ticket to do anything
+     */
+
+    if ((current = asn_parse_sequence(current, &length, &type,
+				      (ASN_UNIVERSAL | ASN_PRIMITIVE |
+				       ASN_OCTET_STR), "ksm first octet")) ==
+								NULL) {
+	DEBUGMSGTL(("ksm", "KSM initial security paramter parsing failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    if ((current = asn_parse_sequence(current, &length, &type,
+				      (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+				      "ksm sequence")) == NULL) {
+	DEBUGMSGTL(("ksm", "KSM security parameter sequence parsing failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    if ((current = asn_parse_int(current, &length, &type, &temp,
+				 sizeof(temp))) == NULL) {
+	DEBUGMSGTL(("ksm", "KSM security parameter checksum type parsing"
+		    "failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    cksumtype = temp;
+
+    if (!valid_cksumtype(cksumtype)) {
+	DEBUGMSGTL(("ksm", "KSM Invalid checksum type (%d)\n", cksumtype));
+
+	retval = SNMPERR_KRB5;
+	snmp_set_detail("Invalid checksum type");
+	goto error;
+    }
+
+    checksum.checksum_type = cksumtype;
+
+    cksumlength = length;
+
+    if ((current = asn_parse_sequence(current, &cksumlength, &type,
+				      (ASN_UNIVERSAL | ASN_PRIMITIVE |
+				       ASN_OCTET_STR), "ksm checksum")) ==
+								NULL) {
+	DEBUGMSGTL(("ksm", "KSM security parameter checksum parsing failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    checksum.contents = malloc(cksumlength);
+    if (!checksum.contents) {
+	DEBUGMSGTL(("ksm", "KSM unable to malloc %d bytes for checksum.\n",
+		    cksumlength));
+        retval = SNMPERR_MALLOC;
+	goto error;
+    }
+
+    memcpy(checksum.contents, current, cksumlength);
+
+    checksum.length = cksumlength;
+
+    /*
+     * Zero out the checksum so the validation works correctly
+     */
+
+    memset(current, 0, cksumlength);
+
+    current += cksumlength;
+    length = parms->wholeMsgLen - (u_int)(current - parms->wholeMsg);
+
+    if ((current = asn_parse_sequence(current, &length, &type,
+				      (ASN_UNIVERSAL | ASN_PRIMITIVE |
+				       ASN_OCTET_STR), "ksm ap_req")) ==
+								NULL) {
+	DEBUGMSGTL(("ksm", "KSM security parameter AP_REQ/REP parsing "
+		    "failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    ap_req.length = length;
+    ap_req.data = malloc(length);
+    if (!ap_req.data) {
+	DEBUGMSGTL(("ksm", "KSM unable to malloc %d bytes for AP_REQ/REP.\n",
+		    length));
+        retval = SNMPERR_MALLOC;
+	goto error;
+    }
+
+    memcpy(ap_req.data, current, length);
+
+    current += length;
+    length = parms->wholeMsgLen - (u_int)(current - parms->wholeMsg);
+
+    if ((current = asn_parse_int(current, &length, &type, &hint,
+				 sizeof(hint))) == NULL) {
+	DEBUGMSGTL(("ksm", "KSM security parameter hint parsing failed\n"));
+
+	retval = SNMPERR_ASN_PARSE_ERR;
+	goto error;
+    }
+
+    /*
+     * Okay!  We've got it all!  Now try decoding the damn ticket.
+     *
+     * But of course there's a WRINKLE!  We need to figure out if we're
+     * processing a AP_REQ or an AP_REP.  How do we do that?  We're going
+     * to cheat, and look at the first couple of bytes (which is what
+     * the Kerberos library routines do anyway).
+     *
+     * If there are ever new Kerberos message formats, we'll need to fix
+     * this here.
+     *
+     * If it's a _response_, then we need to get the auth_context
+     * from our cache.
+     */
+
+    if (ap_req.length && (ap_req.data[0] == 0x6e || ap_req.data[0] == 0x4e)) {
+	retcode = krb5_rd_req(kcontext, &auth_context, &ap_req, NULL,
+			      NULL, &flags, &ticket);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM krb5_rd_req() failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail(error_message(retcode));
+	    goto error;
+	}
+
+	retcode = krb5_unparse_name(kcontext, ticket->enc_part2->client, &cname);
+
+	if (retcode == 0) {
+	    DEBUGMSGTL(("ksm", "KSM authenticated principal name: %s\n",
+			cname));
+	    free(cname);
+	}
+
+	/*
+	 * Check to make sure AP_OPTS_MUTUAL_REQUIRED was set
+	 */
+
+	if (! (flags & AP_OPTS_MUTUAL_REQUIRED)) {
+	    DEBUGMSGTL(("ksm", "KSM MUTUAL_REQUIRED not set in request!\n"));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail("MUTUAL_REQUIRED not set in message");
+	    goto error;
+	}
+
+	retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context, &subkey);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM remote subkey retrieval failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    snmp_set_detail(error_message(retcode));
+	    goto error;
+	}
+
+    } else if (ap_req.length && (ap_req.data[0] == 0x6f ||
+						ap_req.data[0] == 0x4f)) {
+	/*
+	 * Looks like a response; let's see if we've got that auth_context
+	 * in our cache.
+	 */
+
+	krb5_ap_rep_enc_part *repl = NULL;
+
+	response = 1;
+
+	entry = ksm_get_cache(parms->pdu->msgid);
+
+	if (! entry) {
+	    DEBUGMSGTL(("ksm", "KSM: Unable to find auth_context for PDU with "
+			"message ID of %ld\n", parms->pdu->msgid));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	auth_context = entry->auth_context;
+
+	/*
+	 * In that case, let's call the rd_rep function
+	 */
+
+	retcode = krb5_rd_rep(kcontext, auth_context, &ap_req, &repl);
+
+	if (repl)
+	    krb5_free_ap_rep_enc_part(kcontext, repl);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM: krb5_rd_rep() failed: %s\n",
+			error_message(retcode)));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	DEBUGMSGTL(("ksm", "KSM: krb5_rd_rep() decoded successfully.\n"));
+
+	retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context, &subkey);
+
+	if (retcode) {
+	    snmp_log(LOG_ERR, "KSM: Unable to retrieve local subkey: %s\n",
+		     error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+    } else {
+	snmp_log(LOG_ERR, "Unknown Kerberos ticket type\n");
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+    retcode = krb5_verify_checksum(kcontext, cksumtype, &checksum,
+				   parms->wholeMsg, parms->wholeMsgLen,
+				   (krb5_pointer) subkey->contents,
+				   subkey->length);
+
+    if (retcode) {
+	DEBUGMSGTL(("ksm", "KSM checksum verification failed: %s\n",
+		    error_message(retcode)));
+        retval = SNMPERR_KRB5;
+	snmp_set_detail(error_message(retcode));
+	goto error;
+    }
+
+    /*
+     * Handle an encrypted PDU.  Note that it's an OCTET_STRING of the
+     * output of whatever Kerberos cryptosystem you're using (defined by
+     * the encryption type).  Note that this is NOT the EncryptedData
+     * sequence - it's what goes in the "cipher" field of EncryptedData.
+     */
+
+    if (parms->secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+	
+        if ((current = asn_parse_sequence(current, &length, &type,
+					  (ASN_UNIVERSAL | ASN_PRIMITIVE |
+					   ASN_OCTET_STR), "ksm pdu")) ==
+								NULL) {
+	    DEBUGMSGTL(("ksm", "KSM sPDU octet decoding failed\n"));
+	    retval = SNMPERR_ASN_PARSE_ERR;
+	    goto error;
+	}
+
+	/*
+	 * The PDU is now pointed at by "current", and the length is in
+	 * "length".
+	 */
+
+	DEBUGMSGTL(("ksm", "KSM starting sPDU decode\n"));
+
+	krb5_use_enctype(kcontext, &eblock, subkey->enctype);
+
+	retcode = krb5_process_key(kcontext, &eblock, subkey);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM key post-processing failed: %s\n",
+		       error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	if (length > *parms->scopedPduLen) {
+	    DEBUGMSGTL(("ksm", "KSM not enough room - have %d bytes to "
+		       "decrypt but only %d bytes available\n", length,
+		       *parms->scopedPduLen));
+	    retval = SNMPERR_TOO_LONG;
+	    goto error;
+	}
+
+	retcode = krb5_decrypt(kcontext, (krb5_pointer) current,
+			       *parms->scopedPdu, length, &eblock, NULL);
+
+	krb5_finish_key(kcontext, &eblock);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM decryption failed: %s\n",
+		       error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	*parms->scopedPduLen = length;
+
+    } else {
+	/*
+	 * Clear PDU
+	 */
+
+	*parms->scopedPdu = current;
+	*parms->scopedPduLen = parms->wholeMsgLen - (current - parms->wholeMsg);
+    }
+
+    /*
+     * A HUGE GROSS HACK
+     */
+
+    *parms->maxSizeResponse = parms->maxMsgSize - 200;
+
+    DEBUGMSGTL(("ksm", "KSM processing complete\n"));
+
+    /*
+     * Set the secName to the right value (a hack for now).  But that's
+     * only used for when we're processing a request, not a response.
+     */
+
+    if (!response) {
+
+	retcode = krb5_unparse_name(kcontext, ticket->enc_part2->client,
+				    &cname);
+
+	if (retcode) {
+	    DEBUGMSGTL(("ksm", "KSM krb5_unparse_name failed: %s\n",
+			error_message(retcode)));
+	    snmp_set_detail(error_message(retcode));
+	    retval = SNMPERR_KRB5;
+	    goto error;
+	}
+
+	if (strlen(cname) > *parms->secNameLen + 1) {
+	    DEBUGMSGTL(("ksm", "KSM: Principal length (%d) is too long (%d)\n",
+			strlen(cname), parms->secNameLen));
+	    retval = SNMPERR_TOO_LONG;
+	    free(cname);
+	    goto error;
+	}
+
+	strcpy(parms->secName, cname);
+	*parms->secNameLen = strlen(cname);
+
+	free(cname);
+
+    /*
+     * Also, if we're not a response, keep around our auth_context so we
+     * can encode the reply message correctly
+     */
+
+	ksm_state = SNMP_MALLOC_STRUCT(ksm_secStateRef);
+
+	if (!ksm_state) {
+	    DEBUGMSGTL(("ksm", "KSM unable to malloc memory for "
+			"ksm_secStateRef\n"));
+	    retval = SNMPERR_MALLOC;
+	    goto error;
+	}
+
+	ksm_state->auth_context = auth_context;
+	auth_context = NULL;
+	ksm_state->cksumtype = cksumtype;
+
+	*parms->secStateRef = ksm_state;
+    } else {
+
+	/*
+	 * We _still_ have to set the secName in process_in_msg().  Do
+	 * that now with what we were passed in before (we cached it,
+	 * remember?)
+	 */
+
+	memcpy(parms->secName, entry->secName, entry->secNameLen);
+	*parms->secNameLen = entry->secNameLen;
+    }
+
+    /*
+     * Just in case
+     */
+
+    parms->secEngineID = "";
+    *parms->secEngineIDLen = 0;
+
+    auth_context = NULL;	/* So we don't try to free it on success */
+
+error:
+    if (retval == SNMPERR_ASN_PARSE_ERR &&
+	snmp_increment_statistic(STAT_SNMPINASNPARSEERRS) == 0)
+	DEBUGMSGTL(("ksm", "Failed to increment statistics.\n"));
+
+    if (subkey)
+	krb5_free_keyblock(kcontext, subkey);
+
+    if (checksum.contents)
+	free(checksum.contents);
+
+    if (ticket)
+	krb5_free_ticket(kcontext, ticket);
+
+    if (!response && auth_context)
+	krb5_auth_con_free(kcontext, auth_context);
+
+    if (ap_req.data)
+	free(ap_req.data);
+
+    return retval;
+}

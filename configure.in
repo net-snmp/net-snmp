@@ -250,17 +250,16 @@ dnl
 
 AC_ARG_WITH(security-modules,
 [  --with-security-modules=\"s1 s2 ...\"   Compile in the given SNMP security
-                                    module services (space separated list).])
-AC_ARG_WITH(out-security-modules,
-[  --with-out-transports=\"t1 ...\"  Exclude listed SNMP security services
+                                    module services (space separated list).
 
   Available SNMP security services:
 
-        usm                support for user based SNMP security (required)
+        usm                support for user based SNMP security
+                           (required and always compiled in)
+        ksm                support for kerberos based SNMP security
 ])
 
 dnl coming soon:
-dnl        ksm                support for kerberos based SNMP security
 
 dnl
 dnl mib modules
