@@ -1,0 +1,53 @@
+.\* /***********************************************************
+.\" 	Copyright 1988, 1989 by Carnegie Mellon University
+.\" 
+.\"                       All Rights Reserved
+.\" 
+.\" Permission to use, copy, modify, and distribute this software and its 
+.\" documentation for any purpose and without fee is hereby granted, 
+.\" provided that the above copyright notice appear in all copies and that
+.\" both that copyright notice and this permission notice appear in 
+.\" supporting documentation, and that the name of CMU not be
+.\" used in advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.  
+.\" 
+.\" CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+.\" ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+.\" CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+.\" ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+.\" WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+.\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+.\" SOFTWARE.
+.\" ******************************************************************/
+.TH SNMPTRANSLATE 1 "11 July 1994"
+.UC 4
+.SH NAME
+snmptranslate - translate SNMP objects into more useful information
+.SH SYNOPSIS
+snmptranslate [-n] [-d] [-r] objectID
+.SH DESCRIPTION
+Snmptranslate is an application that translates an SNMP object (SMI value or
+symbolic form) into another form of information.  With no other options, an
+SNMP object will be translated to its SMI value.
+.PP
+The options have the following meanings:
+.TP
+.B \-n
+Translate an SNMP object to its symbolic form.
+.TP
+.B \-d
+Print a description of the object.
+.TP
+.B \-r
+Use "random access" to access the symbolic object wherever in the MIB tree it
+lives.  For example
+.PP
+.I snmptranslate -n -r sysdescr
+.PP
+will translate "sysDescr" to a more qualified form:
+.PP
+.I system.sysDescr
+.PP
+.SH "SEE ALSO"
+variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+
