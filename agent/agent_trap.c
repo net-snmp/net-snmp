@@ -372,7 +372,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
                              snmptrapenterprise_oid_len);
         if (var) {
             memdup((u_char**)&template_v1pdu->enterprise,
-                   (const u_char*)var->val.objid, var->val_len);
+                   var->val.objid, var->val_len);
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
         } else {
             template_v1pdu->enterprise        = NULL;
@@ -510,7 +510,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
                  community_oid, community_oid_len,
                  ASN_OCTET_STR,
                  template_v1pdu->community, 
-                 strlen(template_v1pdu->community)))
+                 template_v1pdu->community_len))
             snmp_log(LOG_WARNING,
                  "send_trap: failed to append snmpTrapCommunity varbind\n");
     }
