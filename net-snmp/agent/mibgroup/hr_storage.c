@@ -73,9 +73,17 @@
 
 
 #ifdef solaris2
+
 extern struct mnttab *HRFS_entry;
+#define HRFS_mount	mnt_mountp
+#define HRFS_statfs	statvfs
+
 #else
+
 extern struct mntent *HRFS_entry;
+#define HRFS_mount	mnt_dir
+#define HRFS_statfs	statfs
+
 #endif
 
 	/*********************
@@ -237,11 +245,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
     struct stat  kc_buf;
 #endif
     static char string[100];
-#ifdef solaris2
-    struct statvfs stat_buf;
-#else
-    struct statfs stat_buf;
-#endif
+    struct HRFS_statfs stat_buf;
 
     if ( vp->magic == HRSTORE_MEMSIZE ) {
         if (header_hrstore(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -257,11 +261,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    return NULL;
 
 	if ( store_idx < HRS_TYPE_FS_MAX ) {
-#ifdef solaris2
-	    if ( statvfs( HRFS_entry->mnt_mountp, &stat_buf) < 0 )
-#else
-	    if ( statfs( HRFS_entry->mnt_dir, &stat_buf) < 0 )
-#endif
+	    if ( HRFS_statfs( HRFS_entry->HRFS_mount, &stat_buf) < 0 )
 		return NULL;
 	}
 #if !defined(linux) && !defined(solaris2)
@@ -319,11 +319,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&storage_type_id;
 	case HRSTORE_DESCR:
 	    if (store_idx<HRS_TYPE_FS_MAX) {
-#ifdef solaris2
-	        strcpy(string, HRFS_entry->mnt_mountp);
-#else
-	        strcpy(string, HRFS_entry->mnt_dir);
-#endif
+	        strcpy(string, HRFS_entry->HRFS_mount);
 	        *var_len = strlen(string);
 	        return (u_char *) string;
 	    }

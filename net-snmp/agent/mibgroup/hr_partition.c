@@ -5,6 +5,7 @@
 
 #include <config.h>
 
+#include <fcntl.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -29,7 +30,13 @@
 	 *********************/
 
 static int  HRP_savedDiskIndex;
+static int  HRP_savedPartIndex;
 static char HRP_savedName[100];
+
+extern int   HRD_index;
+extern int   HRD_type_index;
+
+void  Save_HR_Partition __P((int, int));
 
 
 	/*********************
@@ -40,8 +47,6 @@ static char HRP_savedName[100];
 
 void  Init_HR_Partition __P((void));
 int   Get_Next_HR_Partition __P((void));
-extern int   HRD_index;
-void  Save_HR_Partition __P((int, int));
 int header_hrpartition __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 #define MATCH_FAILED	-1
@@ -102,7 +107,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
         part_idx = Get_Next_HR_Partition();
         if ( part_idx == -1 )
 	    break;
-	newname[HRPART_DISK_NAME_LENGTH] = HRD_index;
+	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index;
 	newname[HRPART_ENTRY_NAME_LENGTH] = part_idx;
         result = compare(name, *length, newname, (int)vp->namelen + 2);
         if (exact && (result == 0)) {
@@ -135,7 +140,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
         return(MATCH_FAILED);
     }
 
-    newname[HRPART_DISK_NAME_LENGTH] = LowDiskIndex;
+    newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + LowDiskIndex;
     newname[HRPART_ENTRY_NAME_LENGTH] = LowPartIndex;
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 2) * sizeof(oid));
     *length = vp->namelen + 2;
@@ -209,36 +214,53 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 static int HRP_index;
+extern char *disk_device_strings[];
+extern char disk_device_id[];
+extern char disk_device_last[];
+extern char disk_device_full[];
+extern char disk_partition_first[];
+extern char disk_partition_last[];
 
 void
 Init_HR_Partition __P((void))
 {
    (void)Get_Next_HR_Disk();
 
-   HRP_index = 0;
+   HRP_index = -1;
 }
 
 int
 Get_Next_HR_Partition __P((void))
 {
+    char string[100];
+    int max_partitions;
+    int fd;
+
     if ( HRD_index == -1 )
 	return -1;
-			/*
-			 *  Gross Simplification:
-			 *     Assume that each disk is 
-			 *     a single partition.
-			 *
-			 *  This will in general not be true
-			 *   but was the case on the initial
-			 *   development system.
-			 */
-    if ( HRP_index == 0 ) 
-        return ++HRP_index;
 
-    else {
-	Init_HR_Partition();
-        return( Get_Next_HR_Partition() );
+    HRP_index++;
+    max_partitions = disk_partition_last[ HRD_type_index ]
+		   - disk_partition_first[ HRD_type_index ] +1;
+    while ( HRP_index < max_partitions ) {
+	sprintf(string, disk_device_strings[  HRD_type_index ],
+			disk_device_id[       HRD_type_index ] + HRD_index,
+			disk_partition_first[ HRD_type_index ] + HRP_index );
+	DEBUGP("Get_Next_HR_Partition: %s (%d/%d:%d)\n",
+		string, HRD_type_index, HRD_index, HRP_index );
+
+	fd=open( string, O_RDONLY  );
+	if (fd != -1 ) {
+	    return( HRP_index );
+	}
+	HRP_index++;
     }
+
+	/*
+	 * Finished with this disk, try the next
+	 */
+    Init_HR_Partition();
+    return( Get_Next_HR_Partition() );
 }
 
 void
@@ -247,5 +269,8 @@ Save_HR_Partition( disk_idx, part_idx )
    int part_idx;
 {
    HRP_savedDiskIndex = disk_idx;
-   sprintf( HRP_savedName, "/dev/dsk/c201d%ds%d", disk_idx, part_idx-1);
+   HRP_savedPartIndex = part_idx;
+   sprintf( HRP_savedName, disk_device_strings[  HRD_type_index ],
+			   disk_device_id[       HRD_type_index ] + HRD_index,
+			   disk_partition_first[ HRD_type_index ] + HRP_index );
 }
