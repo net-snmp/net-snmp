@@ -69,7 +69,7 @@ is used to define the range of directory locations which are searched for files
 containing MIB modules (one module per file).
 By default, this will be set to the directory
 .I DATADIR/mibs
-but this can be overridden by setting the environmental variable
+but this can be overridden by setting the environment variable
 .I MIBDIRS
 to a (colon-separated) list of directories to search.
 Note that this does not actually load the MIB modules located
@@ -121,7 +121,7 @@ module definition, if this is not in the standard path.
 .br
 By default, the following mib modules will be loaded:  IP-MIB, IF-MIB,
 TCP-MIB, UDP-MIB, SNMPv2-MIB, RFC1213-MIB, UCD-SNMP-MIB.
-This can be overridden by setting the environmental variable
+This can be overridden by setting the environment variable
 .I MIBS
 to a (colon-separated) list of modules to load.
 If this variable starts with a plus character, then the specified modules
@@ -147,7 +147,7 @@ directories initialised by
 .I add_mibdir
 (or the default setup), though any imported modules do.
 .br
-The environmental variable
+The environment variable
 .I MIBFILES
 can be set to a (colon-separated) list of files containing mibs to load.
 
@@ -173,7 +173,7 @@ above.
 If the module name is specified as "ANY", then this routine will assume
 that the descriptor given is unique within the tree, and will return the
 matching entry.  If this assumption is invalid, then the behaviour
-as to which variable is returned is implementation dependant.
+as to which variable is returned is implementation dependent.
 
 .I print_mib
 will print out a representation of the currently active MIB tree to

@@ -15,7 +15,7 @@ receive, or report traps.  It is used solely as a method of providing
 extensibility to the trap demon.
 .SH PLEASE READ FIRST
 First, make sure you have read the snmp_config(5) manual page that
-describes how the ucd-snmp configuration files opperate, where they
+describes how the ucd-snmp configuration files operate, where they
 are located and how they all work together.
 .SH DIRECTIVES
 .IP "traphandle OID PROGRAM [ARGS ...]"

@@ -48,7 +48,7 @@ read_premib_configs, config_perror, config_pwarn
 .B "void read_premib_configs(void)"
 .PP
 .SH DESCRIPTION
-The functions are a faily extensible system of parsing various
+The functions are a fairly extensible system of parsing various
 configuration files at the run time of an application.  The
 configuration file flow is broken into the following phases:
 .RS
@@ -163,7 +163,7 @@ configuration system understands.  The usageLine parameter should be a
 list of arguments expected after the token, and not a lengthy
 description (which should go into a manual page instead).  The
 .I lead
-prefix will be pre-pended to each line that the function prints to
+prefix will be prepended to each line that the function prints to
 stderr, where it displays its output.
 .PP
 The
@@ -203,7 +203,7 @@ below.
 .IP read_configs()
 Reads all the configuration files it can find in the 
 .I SNMPCONFPATH
-enviornment variable (or its default value) for tokens and
+environment variable (or its default value) for tokens and
 appropriately calls the handlers registered to it, or prints a
 "Unknown token" warning message.  It looks for any file that it has
 previously received a registration request for.
@@ -211,7 +211,7 @@ previously received a registration request for.
 .PP
 The configuration files read are found by using the colon separated
 .I SNMPCONFPATH
-environmental variable (or its default value, which will be
+environment variable (or its default value, which will be
 DATADIR/snmp, followed by LIBDIR/snmp, followed by $HOME/.snmp) and
 reading in the files found that match both the prefix registered and
 the two suffixes
@@ -232,7 +232,7 @@ both take an error string as an argument and print it to stderr along
 with the file and line number that caused the error.  A call to the
 second function will also force read_configs() to eventually return
 with an error code indicating to it's calling function that it should
-abort the opperation of the application.
+abort the operation of the application.
 .SH "ENVIRONMENT VARIABLES"
 .TP 10
 SNMPCONFPATH
