@@ -1020,20 +1020,20 @@ EOF
 fi
 
 
-echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c"
+echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c" 1>&6
 if test -f /hp-ux -a -f /bin/ksh; then
   if (PATH=.; alias -x) >/dev/null 2>&1; then
-    echo "no"
+    echo "no"	1>&6
   else
-    echo "yes"
+    echo "yes"	1>&6
     if test "x$1" = "x"; then
-      exec /bin/ksh $0
+      exec /bin/ksh $0	
     else
       exec /bin/ksh $0 "$@"
     fi
   fi
 else
-  echo "no"
+  echo "no"	1>&6
 fi
 
 
@@ -3342,7 +3342,7 @@ while test "x$new_module_list" != "x"; do
       echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
       echo " " >> mib_module_config.h
-      echo $ac_n " $i$ac_c"
+      echo $ac_n " $i$ac_c" 1>&6
     fi
   done
   new_module_list="$new_list_two"
@@ -10427,7 +10427,7 @@ fi
 
 
 eval ac_cv_user_prompt_SYS_CONTACT=\$SYS_CONTACT
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c" 1>&6
 
 fi
 
@@ -10486,7 +10486,7 @@ fi
 
 
 eval ac_cv_user_prompt_SYS_LOC=\$SYS_LOC
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c" 1>&6
 
 fi
 
@@ -10553,7 +10553,7 @@ fi
 
 
 eval ac_cv_user_prompt_LOGFILE=\$LOGFILE
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c" 1>&6
 
 fi
 
@@ -10616,7 +10616,7 @@ fi
 
 
 eval ac_cv_user_prompt_PERSISTENT_DIRECTORY=\$PERSISTENT_DIRECTORY
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c" 1>&6
 
 fi
 
