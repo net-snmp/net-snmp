@@ -4835,7 +4835,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 			goto bad_id;
 		    if (subid > 255)
 			goto bad_id;
-		    objid[*objidlen++] = subid;
+		    objid[*objidlen] = subid;
+	            (*objidlen)++;
 		    cp = cp2;
 		}
 	    }
