@@ -19,16 +19,21 @@ typedef struct netsnmp_watcher_info_s {
     int       flags;
 } netsnmp_watcher_info;
 
-int netsnmp_register_watched_instance(netsnmp_handler_registration *reginfo,
-                                      netsnmp_watcher_info         *winfo);
-int netsnmp_register_watched_scalar(  netsnmp_handler_registration *reginfo,
-                                      netsnmp_watcher_info         *winfo);
+int netsnmp_register_watched_instance( netsnmp_handler_registration *reginfo,
+                                       netsnmp_watcher_info         *winfo);
+int netsnmp_register_watched_scalar(   netsnmp_handler_registration *reginfo,
+                                       netsnmp_watcher_info         *winfo);
+int netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
+                                       marker_t *timestamp);
 
 #define WATCHER_HANDLER_NAME "watcher"
 
 netsnmp_mib_handler  *netsnmp_get_watcher_handler(void);
 netsnmp_watcher_info *netsnmp_create_watcher_info(void *, size_t, u_char, int);
 Netsnmp_Node_Handler  netsnmp_watcher_helper_handler;
+
+netsnmp_mib_handler  *netsnmp_get_watched_timestamp_handler(void);
+Netsnmp_Node_Handler  netsnmp_watched_timestamp_handler;
 
 #ifdef __cplusplus
 };
