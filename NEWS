@@ -9,10 +9,14 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       ( Currently only usable with net-snmp agents and software. )
 
  Ports:
-    - win32 builds should work properly again.
+    - win32 new project files win32sdk.dsw for those with the win32
+      platform sdk.
+    - win32 builds should work properly again, minus callbacks and thus
+      AgentX.
 
  Fixes:
     - Several AgentX (the subagent protocol) specific bugs have been fixed
+    - many many misc fixes
 
 *5.0.3*
 
