@@ -13,7 +13,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern const oid netsnmp_ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
+extern oid netsnmp_ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
 
 netsnmp_transport		*netsnmp_unix_transport	(struct sockaddr_un *addr,
 						 int local);
