@@ -41,6 +41,7 @@ freebsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
 irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
 linux             OBJECT IDENTIFIER ::= { ucdSnmpAgent 10 }
 bsdi              OBJECT IDENTIFIER ::= { ucdSnmpAgent 11 }
+openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
