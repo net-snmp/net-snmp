@@ -95,6 +95,18 @@ whardake 30 Aug 96 09:23:42
 whardake 30 Aug 96 09:24:31
     - (apps/Makefile.in):  Added kernel_sunos5.o to snmptrap for getKstat.
 	
+whardake 30 Aug 96 09:34:09
+    - (NEWS, ChangeLog): Updated for 3.1.0.1
+
+whardake 30 Aug 96 09:34:48
+    version tag ( 3.1.0.1 )
+
+whardake 30 Aug 96 10:15:18
+    - (README): Updated for 3.1.0.1
+
+whardake 30 Aug 96 11:49:38
+    - (snmp_vars.c): removed malloc prototype due to conflictions.
+
 -------------------------------------------------------------------------------
 
 Changes: V3.0.7.2 -> V3.1
