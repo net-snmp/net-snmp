@@ -447,6 +447,115 @@ getKstat(const char *statname, const char *varname, void *value)
     return ret;
 }
 
+int
+getKstatString(const char *statname, const char *varname,
+               char *value, size_t value_len)
+{
+    kstat_ctl_t    *ksc;
+    kstat_t        *ks, *kstat_data;
+    kstat_named_t  *d;
+    size_t          i, instance;
+    char            module_name[64];
+    int             ret;
+
+    if (kstat_fd == 0) {
+        kstat_fd = kstat_open();
+        if (kstat_fd == 0) {
+            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+        }
+    }
+    if ((ksc = kstat_fd) == NULL) {
+        ret = -10;
+        goto Return;        /* kstat errors */
+    }
+    if (statname == NULL || varname == NULL) {
+        ret = -20;
+        goto Return;
+    }
+
+    /*
+     * First, get "kstat_headers" statistics. It should
+     * contain all available modules.
+     */
+
+    if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
+        ret = -10;
+        goto Return;        /* kstat errors */
+    }
+    if (kstat_read(ksc, ks, NULL) <= 0) {
+        ret = -10;
+        goto Return;        /* kstat errors */
+    }
+    kstat_data = ks->ks_data;
+
+    /*
+     * Now, look for the name of our stat in the headers buf
+     */
+    for (i = 0; i < ks->ks_ndata; i++) {
+        DEBUGMSGTL(("kernel_sunos5",
+                    "module: %s instance: %d name: %s class: %s type: %d flags: %x\n",
+                    kstat_data[i].ks_module, kstat_data[i].ks_instance,
+                    kstat_data[i].ks_name, kstat_data[i].ks_class,
+                    kstat_data[i].ks_type, kstat_data[i].ks_flags));
+        if (strcmp(statname, kstat_data[i].ks_name) == 0) {
+            strcpy(module_name, kstat_data[i].ks_module);
+            instance = kstat_data[i].ks_instance;
+            break;
+        }
+    }
+
+    if (i == ks->ks_ndata) {
+        ret = -1;
+        goto Return;        /* Not found */
+    }
+
+    /*
+     * Get the named statistics
+     */
+    if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
+        ret = -10;
+        goto Return;        /* kstat errors */
+    }
+
+    if (kstat_read(ksc, ks, NULL) <= 0) {
+        ret = -10;
+        goto Return;        /* kstat errors */
+    }
+    /*
+     * This function expects only name/value type of statistics, so if it is
+     * not the case return an error
+     */
+    if (ks->ks_type != KSTAT_TYPE_NAMED) {
+        ret = -2;
+        goto Return;        /* Invalid stat type */
+    }
+
+    for (i = 0, d = KSTAT_NAMED_PTR(ks); i < ks->ks_ndata; i++, d++) {
+        DEBUGMSGTL(("kernel_sunos5", "variable: \"%s\" (type %d)\n",
+                    d->name, d->data_type));
+
+        if (strcmp(d->name, varname) == 0) {
+            switch (d->data_type) {
+            case KSTAT_DATA_CHAR:
+                value[value_len-1] = '\0';
+                strncpy(value, value_len-1, d->value.c); 
+                DEBUGMSGTL(("kernel_sunos5", "value: %s\n", d->value.c));
+                break;
+            default:
+                DEBUGMSGTL(("kernel_sunos5",
+                            "NONSTRING TYPE %d (stat \"%s\" var \"%s\")\n",
+                            d->data_type, statname, varname));
+                ret = -3;
+                goto Return;        /* Invalid data type */
+            }
+            ret = 0;        /* Success  */
+            goto Return;
+        }
+    }
+    ret = -4;               /* Name not found */
+ Return:
+    return ret;
+}
 
 /*
  * get MIB-II statistics. It maintaines a simple cache which buffers the last
