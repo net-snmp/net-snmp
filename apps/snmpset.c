@@ -197,7 +197,6 @@ int main(int argc, char *argv[])
     }
 
     /* do the request */
-retry:
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS){
       if (response->errstat == SNMP_ERR_NOERROR){
