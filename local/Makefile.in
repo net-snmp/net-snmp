@@ -1,0 +1,20 @@
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+
+SED = @SED@
+
+INSTALL = @INSTALL@
+
+snmpcheck: snmpcheck.def ../sedscript
+	$(SED) -f ../sedscript snmpcheck.def > snmpcheck
+
+install:
+	@$(INSTALL) snmpcheck $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
