@@ -349,7 +349,11 @@ int snmp_add_var (struct snmp_pdu *, oid*, int, char, char *);
 /* provided for backwards compatability.  Don't use these functions.
    See snmp_debug.h and snmp_debug.c instead.
 */
-void DEBUGP(const char *, ...);
+#ifdef STDC_HEADERS
+void DEBUGP (const char *, ...);
+#else
+void DEBUGP (va_alist);
+#endif
 void DEBUGPOID(oid *, int);
 void snmp_set_do_debugging (int);
 int snmp_get_do_debugging (void);

@@ -12,8 +12,13 @@
 
 /* These functions should not be used, if at all possible.  Instead, use
    the macros below. */
+#ifdef STDC_HEADERS
 void debugmsg(const char *token, const char *format, ...);
 void debugmsgtoken(const char *token, const char *format, ...);
+#else
+void debugmsg(va_alist);
+void debugmsgtoken(va_alist);
+#endif
 void debugmsg_oid(char *token, oid *theoid, int len);
 
 /* Use these macros instead of the functions above to allow them to be
@@ -110,7 +115,11 @@ void debug_register_tokens(char *tokens);
 int debug_is_token_registered(const char *token);
 
 /* provided for backwards compatability.  Don't use these functions. */
-void DEBUGP(const char *, ...);
+#ifdef STDC_HEADERS
+void DEBUGP (const char *, ...);
+#else
+void DEBUGP (va_alist);
+#endif
 void DEBUGPOID(oid *, int);
 void snmp_set_do_debugging (int);
 int snmp_get_do_debugging (void);
