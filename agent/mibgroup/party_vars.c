@@ -18,6 +18,10 @@
 # endif
 #endif
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
