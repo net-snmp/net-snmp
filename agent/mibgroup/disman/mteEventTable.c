@@ -146,7 +146,9 @@ parse_notificationEvent(const char *token, char *line) {
         return;
     }
 
-    for(row = table_set->table->first_row; row; row = row->next) {
+    for(row = netsnmp_table_data_set_get_first_row(table_set);
+        row;
+        row = netsnmp_table_data_set_get_next_row(table_set, row)) {
         if (strcmp(row->indexes->val.string, owner) == 0 &&
             strcmp(row->indexes->next_variable->val.string,
                    name_buf) == 0) {
@@ -249,7 +251,9 @@ run_mte_events(struct mteTriggerTable_data *item,
     netsnmp_table_row *row, *notif_row;
     netsnmp_table_data_set_storage *col1, *tc, *no, *noo;
 
-    for(row = table_set->table->first_row; row; row = row->next) {
+    for(row = netsnmp_table_data_set_get_first_row(table_set);
+        row;
+        row = netsnmp_table_data_set_get_next_row(table_set, row)) {
         if (strcmp(row->indexes->val.string, eventobjowner) == 0 &&
             strcmp(row->indexes->next_variable->val.string,
                    eventobjname) == 0) {
@@ -279,8 +283,9 @@ run_mte_events(struct mteTriggerTable_data *item,
             var_list = NULL;
 
             /* XXX: get notif information */
-            for(notif_row = mteEventNotif_table_set->table->first_row;
-                notif_row; notif_row = notif_row->next) {
+            for(notif_row = netsnmp_table_data_set_get_first_row(mteEventNotif_table_set);
+                notif_row;
+                notif_row = netsnmp_table_data_set_get_next_row(mteEventNotif_table_set, notif_row)) {
                 if (strcmp(notif_row->indexes->val.string,
                            eventobjowner) == 0 &&
                     strcmp(notif_row->indexes->next_variable->val.string,
