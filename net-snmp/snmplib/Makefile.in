@@ -3,17 +3,6 @@
 #
 
 TARG=	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c \
-	snmp_auth.c asn1.c md5.c \
-	party.c context.c acl.c view.c \
-	party_parse.c context_parse.c acl_parse.c \
-	system.c vacm.c int64.c read_config.c
-OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o \
-	snmp_auth.o asn1.o md5.o \
-	party.o context.o acl.o view.o \
-	party_parse.o context_parse.o acl_parse.o \
-	system.o vacm.o int64.o read_config.o
-
 ALLHEADERS=\
 	acl.h \
 	asn1.h \
@@ -32,10 +21,6 @@ ALLHEADERS=\
 	vacm.h \
 	view.h
 
-#INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
-
-#all but md5.h, vacm.h, and libsnmp.h are copied to the installed
-#include directory
 INSTALLHEADERS=\
 	acl.h \
 	asn1.h \
@@ -51,9 +36,27 @@ INSTALLHEADERS=\
 	system.h \
 	view.h
 
-CFLAGS=@CFLAGS@ @SHLIB_CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I. -I.. -I$(srcdir) -I$(srcdir)/..
-CC = @CC@ $(CPPFLAGS)
+CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
+	snmp_auth.c asn1.c md5.c 				\
+	party.c context.c acl.c view.c 				\
+	party_parse.c context_parse.c acl_parse.c 		\
+	system.c vacm.c int64.c read_config.c 			\
+	tools.c 						\
+	snmpv3.c snmpusm.c lcd_time.c keytools.c		\
+	scapi.c
+
+OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
+	snmp_auth.o asn1.o md5.o 				\
+	party.o context.o acl.o view.o 				\
+	party_parse.o context_parse.o acl_parse.o 		\
+	system.o vacm.o int64.o read_config.o 			\
+	tools.o 						\
+	snmpv3.o snmpusm.o lcd_time.o keytools.o		\
+	scapi.o
+
+CFLAGS	 = @CFLAGS@ @SHLIB_CFLAGS@
+CPPFLAGS = -I. -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
+CC	 = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
@@ -121,6 +124,8 @@ int64.o: ../config.h ../mib_module_config.h
 int64.o:   ../s/linux.h
 int64.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 int64.o:   asn1.h int64.h
+keytools.o:	keytools.h tools.h debug.h
+lcd_time.o:	lcd_time.h tools.h debug.h
 md5.o: ../config.h ../mib_module_config.h 
 md5.o:   ../s/linux.h
 md5.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
@@ -144,6 +149,7 @@ party_parse.o:   ../s/linux.h
 party_parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 party_parse.o:  asn1.h mib.h party.h system.h
 party_parse.o: snmp_api.h snmp_impl.h snmp.h
+scapi.o:	scapi.h tools.h debug.h
 snmp.o: ../config.h ../mib_module_config.h 
 snmp.o:   ../s/linux.h
 snmp.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
@@ -169,6 +175,7 @@ system.o: ../config.h ../mib_module_config.h
 system.o:   ../s/linux.h
 system.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 system.o:  asn1.h snmp_api.h system.h
+tools.o:	tools.h debug.h
 vacm.o: ../config.h ../mib_module_config.h 
 vacm.o:   ../s/linux.h
 vacm.o: ../s/sysv.h ../s/generic.h ../m/generic.h 

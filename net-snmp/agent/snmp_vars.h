@@ -53,3 +53,4 @@ void register_mib __P((char *, struct variable *, int , int , oid *, int));
 void unregister_mib __P((oid *, int));
 struct subtree *unregister_mib_tree __P((oid *, int, struct subtree *));
 struct subtree *free_subtree __P((struct subtree *));
+int in_a_view(oid *, int *, struct snmp_pdu *, int);

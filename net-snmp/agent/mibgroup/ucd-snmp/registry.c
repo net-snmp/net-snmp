@@ -27,8 +27,6 @@ extern int subtree_size;
 extern struct subtree *subtrees;
 static struct subtree *header_registry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
-#define MATCH_FAILED	-1
-
 static struct subtree *
 header_registry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
