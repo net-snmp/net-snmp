@@ -182,6 +182,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
       snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
 			  SNMPD_CALLBACK_INDEX_STOP, (void *)session);
       agentx_unregister_callbacks(session);
+      register_mib_detach();
       main_session = NULL;
       if (period != 0) {
 	/*  Pings are enabled, so periodically attempt to re-establish contact 
