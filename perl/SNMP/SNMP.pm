@@ -2,12 +2,12 @@
 #
 # written by G. S. Marzot (gmarzot@nortelnetworks.com)
 #
-#     Copyright (c) 1995-1999 G. S. Marzot. All rights reserved.
+#     Copyright (c) 1995-2000 G. S. Marzot. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
 package SNMP;
-$VERSION = '3.1.0b1';   # current release version number
+$VERSION = '3.1.0';   # current release version number
 
 require Exporter;
 require DynaLoader;
@@ -659,7 +659,7 @@ sub trap {
 #                                                          # always last
 # (v2) oid, uptime, <vars>
 # $sess->trap(uptime => 1234,
-#             trapoid => 'snmpRisingAlarm',
+#             oid => 'snmpRisingAlarm',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
 #                                                          # always last
@@ -691,7 +691,7 @@ sub trap {
        @res = SNMP::_trapV1($this, $enterprise, $agent, $generic, $specific,
 			  $uptime, $varbind_list_ref);
    } elsif  (($this->{Version} eq '2')|| ($this->{Version} eq '2c')) {
-       my $trap_oid = $param{trapoid};
+       my $trap_oid = $param{oid} || $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
    } 
@@ -700,9 +700,9 @@ sub trap {
 }
 
 sub inform {
-# (v3) trapoid, uptime, <vars>
+# (v3) oid, uptime, <vars>
 # $sess->inform(uptime => 1234,
-#             trapoid => 'coldStart',
+#             oid => 'coldStart',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
 
@@ -721,7 +721,7 @@ sub inform {
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    }
 
-   my $trap_oid = $param{trapoid};
+   my $trap_oid = $param{oid} || $param{trapoid};
    my $uptime = $param{uptime} || SNMP::_sys_uptime();
    if($this->{Version} eq '3') {
      @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref);
@@ -736,7 +736,6 @@ package SNMP::TrapSession;
 @ISA = ('SNMP::Session');
 
 sub new {
-
    my $type = shift;
 
    # allow override of remote SNMP trap port
@@ -936,15 +935,27 @@ __END__
 
 =head1 NAME
 
-SNMP - The Perl5 'SNMP' Extension Module v3.0.0b1 for the UCD SNMPv3 Library
+SNMP - The Perl5 'SNMP' Extension Module v3.1.0 for the UCD SNMPv3 Library
 
 =head1 SYNOPSIS
 
  use SNMP;
-
- $sess = new SNMP::Session(...);
- $sess->get();
  ...
+ $sess = new SNMP::Session(DestHost => localhost, Community => public);
+ $val = $sess->get('sysDescr.0');
+ ...
+ $vars = new SNMP::VarList([sysDescr,0], [sysContact,0], [sysLocation,0]);
+ @vals = $sess->get($vars);
+ ...
+ $vb = new SNMP::Varbind();
+ do {
+    $val = $sess->getnext($vb);
+    print "@{$vb}\n";
+ until ($sess->{ErrorNum});
+ ...
+ $SNMP::save_descriptions = 1;
+ SNMP::initMib(); # assuming mib is not already loaded
+ print "$SNMP::MIB{sysDescr}{description}\n";
 
 =head1 DESCRIPTION
 
@@ -1163,7 +1174,11 @@ will operate asyncronously
 
 =item $sess->getbulk(E<lt>non-repeatersE<gt>, E<lt>max-repeatersE<gt>, E<lt>varsE<gt>)
 
-B<* Not Implemented *>
+do an SNMP GETBULK, from the list of Varbinds, the single
+next lexico instance is fetched for the first n Varbinds
+as defined by <non-repeaters>. For remaining Varbinds,
+the m lexico instances are retrieved each of the remaining
+Varbinds, where m is <max-repeaters>.
 
 =back
 
@@ -1386,7 +1401,7 @@ interupted. If <timeout(sic)
 
 =item $SNMP::VERSION
 
-the current version specifier (e.g., 3.0)
+the current version specifier (e.g., 3.1.0)
 
 =item $SNMP::auto_init_mib
 
@@ -1721,7 +1736,6 @@ feedback.
  Michael Slifcak
  Perl5 Porters
 
-
 Apologies to any/all who's patch/feature/request was not mentioned or
 included - most likely it was lost when paying work intruded on my
 fun. Please try again if you do not see a desired feature. This may
@@ -1734,7 +1748,7 @@ bugs, comments, questions to gmarzot@nortelnetworks.com
 
 =head1 Copyright
 
-     Copyright (c) 1995-1999 G. S. Marzot. All rights reserved.
+     Copyright (c) 1995-2000 G. S. Marzot. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
