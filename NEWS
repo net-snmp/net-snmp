@@ -53,6 +53,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       subroutines directly within the net-snmp agent.
     - Much of the code is getting documented with "doxygen" style
       documentation.  Run "make docs" if you have doxygen installed.
+    - RMON support is available.  See agent/mibgroup/Rmon/README for details.
 
 
 *4.2.3*
