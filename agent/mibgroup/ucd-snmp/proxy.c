@@ -46,6 +46,7 @@ static void proxyOptProc(int argc, char *const *argv, int opt)
             }
             break;
         default:
+			break;
             /* shouldn't get here */
     }
 }

@@ -1019,15 +1019,16 @@ write_snmpTargetAddrRetryCount(
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrRetryCount */
 
+static int is_delim(const char c) {
+	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+}
+
 int
 snmpTagListValid(const char *tagList, const size_t tagListLen)
 {
     size_t i = 0;
     int inTag = 0;
 
-    static int is_delim(const char c) {
-	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
-    }
 
     for (i = 0; i < tagListLen; i++) {
 	if (is_delim(tagList[i]) && !inTag) {

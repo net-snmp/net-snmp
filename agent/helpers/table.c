@@ -115,8 +115,8 @@ table_helper_handler(mib_handler * handler,
 
     table_registration_info *tbl_info;
     int             oid_index_pos = reginfo->rootoid_len + 2;
-    int             oid_column_pos = reginfo->rootoid_len + 1;
-    int             tmp_idx, tmp_len;
+    unsigned int    oid_column_pos = reginfo->rootoid_len + 1;
+    unsigned int    tmp_idx, tmp_len;
     int             incomplete, out_of_range, cleaned_up = 0;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
@@ -151,7 +151,9 @@ table_helper_handler(mib_handler * handler,
         if (MODE_IS_SET(reqinfo->mode)) {
             return call_next_handler(handler, reginfo, reqinfo, requests);
         } else {
+#ifndef WIN32
 #pragma warning "XXX-rks: memory leak. add cleanup handler?"
+#endif
             free_agent_data_sets(reqinfo);
         }
     }
@@ -385,7 +387,7 @@ table_helper_handler(mib_handler * handler,
         }                       /** for loop */
 
         DEBUGIF("helper:table") {
-            int             count;
+            unsigned int    count;
             char            buf[SPRINT_MAX_LEN];
 	    if (!cleaned_up) {
 	      DEBUGMSGTL(("helper:table", "  column: %d, indexes: %d",

@@ -474,7 +474,9 @@ process_get_requests(handler_registration  *reginfo,
 			/*
              * if data was found, make sure it has the column we want
              */
-#warning "xxx-rks: add suport for sparse tables"
+#ifndef WIN32
+#pragma warning "xxx-rks: add suport for sparse tables"
+#endif
 
             /*
              * build new oid
@@ -614,7 +616,9 @@ group_requests( agent_request_info *agtreq_info, request_info * requests,
 void
 process_set_group( oid_array_header* o, void *c )
 {
-#warning "should we continue processing after an error??"
+#ifndef WIN32
+#pragma warning "should we continue processing after an error??"
+#endif
     set_context * context = (set_context *)c;
     array_group * ag = (array_group *)o;
 
