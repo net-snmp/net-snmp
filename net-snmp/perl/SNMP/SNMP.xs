@@ -772,6 +772,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     struct variable_list *vars;
     oid oidbuf[MAX_OID_LEN];
     int ret = SUCCESS;
+    struct tree *tp;
 
     if (pdu->variables == NULL){
 	pdu->variables = vars =
@@ -833,12 +834,13 @@ UINT:
       case TYPE_OBJID:
         vars->type = ASN_OBJECT_ID;
 	vars->val_len = MAX_OID_LEN;
-        if (read_objid(val, oidbuf, &(vars->val_len))) {
+        /* if (read_objid(val, oidbuf, &(vars->val_len))) { */
+	tp = __tag2oid(val,NULL,oidbuf,&(vars->val_len),NULL);
+        if (vars->val_len) {
         	vars->val_len *= sizeof(oid);
 		vars->val.objid = (oid *)malloc(vars->val_len);
 		bcopy((char *)oidbuf, (char *)vars->val.objid,vars->val_len);
         } else {
-            vars->val_len = 0;
             vars->val.objid = NULL;
 	    ret = FAILURE;
         }
@@ -850,7 +852,8 @@ UINT:
 	vars->val.string = NULL;
 	ret = FAILURE;
     }
-    return ret;
+ 
+     return ret; 
 }
 
 #define NO_RETRY_NOSUCH 0
@@ -2355,10 +2358,10 @@ err:
 
 
 int
-snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
+snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
         SV *	sess_ref
+        char *	uptime  
         char *	trap_oid 
-        long	uptime  
         SV *	varlist_ref
 	PPCODE:
 	{
@@ -2384,10 +2387,10 @@ snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
            SV **err_ind_svp;
            int status = 0;
            int type;
+           int res;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
-	   char uptime_str[STR_BUF_SIZE];
 
            oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
 
@@ -2402,17 +2405,27 @@ snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
 
-              pdu = snmp_pdu_create(SNMP_MSG_SET);
+              pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
 
               varlist = (AV*) SvRV(varlist_ref);
               varlist_len = av_len(varlist);
 	      /************************************************/
-	      sscanf(uptime_str,"%lu",uptime);
-              __add_var_val_str(pdu, sysUpTime, SYS_UPTIME_OID_LEN,
-				uptime_str, strlen(uptime_str), TYPE_TIMETICKS);
+              res = __add_var_val_str(pdu, sysUpTime, SYS_UPTIME_OID_LEN,
+				uptime, strlen(uptime), TYPE_TIMETICKS);
 
-              __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN, 
+              if(res == FAILURE) {
+                if(verbose) warn("error:snmp_trapv2: unable to add sysUpTime.\n");
+		goto err;
+              }
+
+	      res = __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN, 
 				trap_oid ,strlen(trap_oid) ,TYPE_OBJID);
+
+              if(res == FAILURE) {
+                if(verbose) warn("error:snmp_trapv2: Invalid trap_oid.\n");
+		goto err;
+              }
+
 
 	      /******************************************************/
 
@@ -2427,7 +2440,7 @@ snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
 
                     if (oid_arr_len == 0) {
                        if (verbose)
-                        warn("error: set: unable to determine oid for object");
+                        warn("error: snmp_trapv2: unable to determine oid for object");
                        continue;
                     }
 
@@ -2436,7 +2449,7 @@ snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
                                  __av_elem_pv(varbind, VARBIND_TYPE_F, NULL));
                       if (type == TYPE_UNKNOWN) {
                          if (verbose)
-                            warn("error: set: no type found for object");
+                            warn("error: snmp_trapv2: no type found for object");
                          continue;
                       }
                     }
@@ -2462,11 +2475,7 @@ snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
                  } /* if var_ref is ok */
               } /* for all the vars */
 
-	      /*    status = __send_sync_pdu(ss, pdu, &response,
-				       NO_RETRY_NOSUCH,
-                                       *err_str_svp, *err_num_svp,
-                                       *err_ind_svp);  */
-
+	
               if (snmp_send(ss, pdu) == 0) {
 	         snmp_free_pdu(pdu);
                  snmp_perror("snmptrap");
@@ -2569,12 +2578,12 @@ snmp_translate_obj(var,mode,use_long,auto_init)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
            if (Mib == NULL && auto_init) {
-              if (verbose) warn("initializing MIB\n");
+              if (verbose) warn("snmp_translate_obj:initializing MIB\n");
                  init_mib();
               if (Mib) {
-                 if (verbose) warn("done\n");
+                 if (verbose) warn("snmp_translate_obj:done\n");
               } else {
-                 if (verbose) warn("failed\n");
+                 if (verbose) warn("snmp_translate_obj:failed\n");
               }
            }
 
@@ -2582,7 +2591,7 @@ snmp_translate_obj(var,mode,use_long,auto_init)
   	   switch (mode) {
               case SNMP_XLATE_MODE_TAG2OID:
 		if (!__tag2oid(var, NULL, oid_arr, &oid_arr_len, NULL)) {
-		   if (verbose) warn("Unknown OID %s\n",var);
+		   if (verbose) warn("error:snmp_translate_obj:Unknown OID %s\n",var);
                 } else {
                    status = __sprint_num_objid(str_buf, oid_arr, oid_arr_len);
                 }
@@ -2605,7 +2614,7 @@ snmp_translate_obj(var,mode,use_long,auto_init)
 	        }
                 break;
              default:
-	       if (verbose) warn("unknown translation mode: %s\n", mode);
+	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %s\n", mode);
            }
            if (*str_buf) {
               RETVAL = (char*)str_buf;
