@@ -116,7 +116,9 @@ usage (void)
 }
 
 /* setup_oid appends to the oid the index for the engineid/user */
-setup_oid(oid *it, int *len, u_char *id, int idlen, u_char *user) {
+void
+setup_oid(oid *it, int *len, u_char *id, int idlen, u_char *user)
+{
   int i;
   char buf[1024];
 
@@ -138,9 +140,12 @@ main(argc, argv)
 {
     struct snmp_session   session, *ss;
     struct snmp_pdu      *pdu, *response;
+#ifdef notused
     struct variable_list *vars;
+#endif
 
     int                   arg;
+#ifdef notused
     int                   count;
     int                   current_name    = 0;
     int                   current_type    = 0;
@@ -148,14 +153,15 @@ main(argc, argv)
     char                 *names[128];
     char                  types[128];
     char                 *values[128];
-    oid                   name[MAX_NAME_LEN];
+    oid                   name[MAX_OID_LEN];
+#endif
     int                   name_length = USM_OID_LEN;
     int                   name_length2 = USM_OID_LEN;
     int                   status;
     int                   rval;
     int                   doauthkey       = 0,
                           doprivkey       = 0,
-                          command;
+                          command         = 0;
     long                  longvar;
                          
     oid                  *authKeyChange   = authKeyOid,

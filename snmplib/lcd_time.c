@@ -146,7 +146,7 @@ set_enginetime(	u_char	*engineID,
 		u_int    authenticated)
 {
 	int		rval = SNMPERR_SUCCESS,
-			index;
+			iindex;
 	Enginetime	e = NULL;
 
 EM(-1); /* */
@@ -166,15 +166,15 @@ EM(-1); /* */
 	 */
 	if ( !(e = search_enginetime_list(engineID, engineID_len)) )
 	{
-		if ( (index = hash_engineID(engineID, engineID_len)) < 0 )
+		if ( (iindex = hash_engineID(engineID, engineID_len)) < 0 )
 		{
 			QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
 		}
 
 		e = (Enginetime) SNMP_MALLOC(sizeof(*e));
 
-		e->next = etimelist[index];
-		etimelist[index] = e;
+		e->next = etimelist[iindex];
+		etimelist[iindex] = e;
 
 		e->engineID = (u_char *) SNMP_MALLOC(engineID_len);
 		memcpy(e->engineID, engineID, engineID_len);
@@ -388,7 +388,7 @@ EM(-1); /* */
 void
 dump_etimelist(void)
 {
-	int		index = -1,
+	int		iindex = -1,
 			count = 0;
 	Enginetime	e;
 
@@ -397,11 +397,11 @@ EM(-1); /* */
 
 	DEBUGP("\n");
 
-	while (++index < ETIMELIST_SIZE) {
-		DEBUGP("[%d]", index);
+	while (++iindex < ETIMELIST_SIZE) {
+		DEBUGP("[%d]", iindex);
 
 		count = 0;
-		e = etimelist[index];
+		e = etimelist[iindex];
 
 		while (e) {
 			dump_etimelist_entry(e, count++);

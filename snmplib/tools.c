@@ -359,7 +359,7 @@ EM(-1); /* */
 	 */
 	if ( !(*esp & 0x80) ) {
 		sprint_hexstring(buf, esp, remaining_len);
-		s  = index(buf, '\0');
+		s  = strchr(buf, '\0');
 		s -= 1;
 		goto dump_snmpEngineID_quit;
 	}
@@ -434,7 +434,7 @@ EM(-1); /* */
 	case 5:					/* Octets. */
 
 		sprint_hexstring(s, esp, remaining_len);
-		s  = index(buf, '\0');
+		s  = strchr(buf, '\0');
 		s -= 1;
 		goto dump_snmpEngineID_quit;
 		break;	/*NOTREACHED*/
@@ -453,7 +453,7 @@ dump_snmpEngineID_violation:
 			s += sprintf(s, "??? ");
 		}
 		sprint_hexstring(s, esp, remaining_len);
-		s  = index(buf, '\0');
+		s  = strchr(buf, '\0');
 		s -= 1;
 
 		goto dump_snmpEngineID_quit;
@@ -470,7 +470,7 @@ dump_snmpEngineID_violation:
 		s += sprintf(s, " (??? ");
 
 		sprint_hexstring(s, esp, remaining_len);
-		s  = index(buf, '\0');
+		s  = strchr(buf, '\0');
 		s -= 1;
 
 		s += sprintf(s, ")");

@@ -328,7 +328,7 @@ static int Interface_Scan_By_Index (int, struct if_msghdr *, char *, struct smal
 static int Interface_Get_Ether_By_Index (int, u_char *);
 
 static int
-Interface_Scan_By_Index (int index,
+Interface_Scan_By_Index (int iindex,
 			 struct if_msghdr *if_msg,
 			 char *if_name,
 			 struct small_ifaddr *sifa)
@@ -351,7 +351,7 @@ Interface_Scan_By_Index (int index,
 	  {
 	    const struct sockaddr *a;
 
-	    if (ifp->ifm_index == index)
+	    if (ifp->ifm_index == iindex)
 	      {
 		a = get_address (ifp+1, ifp->ifm_addrs, RTA_IFP);
                 if (a == NULL)
@@ -369,7 +369,7 @@ Interface_Scan_By_Index (int index,
 	  {
 	    struct ifa_msghdr *ifap = (struct ifa_msghdr *) cp;
 
-	    if (ifap->ifam_index == index)
+	    if (ifap->ifam_index == iindex)
 	      {
 		const struct in_addr *ia;
 
@@ -1788,14 +1788,14 @@ loop:
 }
 
 static int
-get_phys_address(int index, char **ap, int *len)
+get_phys_address(int iindex, char **ap, int *len)
 {
 	int i;
 	int once = 1;
 
 	do {
 		for (i = 0; i < nphysaddrs; i++) {
-			if (physaddrs[i]->sdl_index == index)
+			if (physaddrs[i]->sdl_index == iindex)
 				break;
 		}
 		if (i < nphysaddrs)

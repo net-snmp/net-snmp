@@ -68,12 +68,12 @@ void file_parse_config(char *token, char* cptr)
     }
 }
 
-void updateFile(int index)
+void updateFile(int iindex)
 {
     struct stat sb;
     
-    if (stat(fileTable[index].name, &sb) == 0)
-	fileTable[index].size = sb.st_size >> 10;
+    if (stat(fileTable[iindex].name, &sb) == 0)
+	fileTable[iindex].size = sb.st_size >> 10;
 }
 
 /* OID functions */
@@ -87,22 +87,22 @@ u_char *var_file_table(struct variable *vp,
 {
   static long long_ret;
   static char error[256];
-  int index;
+  int iindex;
   struct filestat *file;
 
   if (header_simple_table(vp, name, length, exact, var_len, write_method, fileCount))
       return(NULL);
   
-  index = name[*length-1]-1;
+  iindex = name[*length-1]-1;
 
-  updateFile(index);
+  updateFile(iindex);
 
-  file = &fileTable[index];
+  file = &fileTable[iindex];
   
   switch (vp->magic) 
   {
   case FILE_INDEX:
-      long_ret = index+1;
+      long_ret = iindex+1;
       return (u_char *)&long_ret;
 
   case FILE_NAME:

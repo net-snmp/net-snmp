@@ -207,14 +207,14 @@ usm_set_usmStateReference_sec_level (ref, sec_level)
 void
 emergency_print (u_char *field, u_int length)
 {
-	int index;
+	int iindex;
 	int start=0;
 	int stop=25;
 
 	while (start < stop)
 	{
-		for (index = start; index < stop; index++)
-			printf ("%02X ", field[index]);
+		for (iindex = start; iindex < stop; iindex++)
+			printf ("%02X ", field[iindex]);
 
 		printf ("\n");
 		start = stop;
@@ -552,7 +552,7 @@ usm_set_salt (	u_char		*iv,
         int net_salt_int;
 		/* net_* should be encoded in network byte order.  XXX  Why?
 		 */
-	int index;
+	int iindex;
 
 EM(-1);
 
@@ -582,8 +582,8 @@ EM(-1);
 	 * Turn the salt into an IV: XOR <boots, salt_int> with salt
 	 * portion of priv_key.
 	 */
-	for (index = 0; index < propersize_salt; index++)
-		iv[index] ^= priv_salt[index];
+	for (iindex = 0; iindex < propersize_salt; iindex++)
+		iv[iindex] ^= priv_salt[iindex];
 
 
 	return 0;

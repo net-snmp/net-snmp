@@ -84,9 +84,9 @@ struct snmp_pdu {
     void * securityStateRef;
 
     struct variable_list *variables;
-    oid srcPartyBuf[MAX_NAME_LEN];
-    oid dstPartyBuf[MAX_NAME_LEN];
-    oid contextBuf[MAX_NAME_LEN];
+    oid srcPartyBuf[MAX_OID_LEN];
+    oid dstPartyBuf[MAX_OID_LEN];
+    oid contextBuf[MAX_OID_LEN];
     /* XXX do community later */
 };
 
@@ -284,7 +284,7 @@ struct variable_list {
 #endif /* OPAQUE_SPECIAL_TYPES */
     } val;
     int	    val_len;
-    oid name_loc[MAX_NAME_LEN];
+    oid name_loc[MAX_OID_LEN];
     u_char buf[32];
     int usedBuf;
 };

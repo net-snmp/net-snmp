@@ -35,13 +35,13 @@ int write_engineTime(int, u_char *,u_char, int, u_char *,oid*, int);
 #endif /* SNMP_TESTING_CODE */
 
 unsigned char *
-var_snmpEngine(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    WriteMethod **write_method;
+var_snmpEngine(
+    struct variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
 
   /* variables we may use later */
@@ -93,14 +93,14 @@ var_snmpEngine(vp, name, length, exact, var_len, write_method)
    allow it so we can run some time synchronization tests.
 */
 int
-write_engineBoots(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_engineBoots(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;
@@ -135,14 +135,14 @@ write_engineBoots(action, var_val, var_val_type, var_val_len, statP, name, name_
    allow it so we can run some time synchronization tests.
 */
 int
-write_engineTime(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_engineTime(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;

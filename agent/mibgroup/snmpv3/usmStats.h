@@ -25,7 +25,7 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
 /* function definitions */
 
 extern void           init_usmStats(void);
-extern unsigned char *var_usmStats(struct variable *, oid *, int *, int, int *, WriteMethod **write_method);
+extern FindVarMethod  var_usmStats;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

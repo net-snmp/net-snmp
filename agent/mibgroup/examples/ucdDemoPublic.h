@@ -17,9 +17,9 @@ config_require(util_funcs)
 /* function definitions */
 
 extern void   init_ucdDemoPublic(void);
-extern unsigned char *var_ucdDemoPublic(struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
-int write_ucdDemoResetKeys(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_ucdDemoPublicString(int, u_char *,u_char, int, u_char *,oid*, int);
+extern FindVarMethod var_ucdDemoPublic;
+WriteMethod write_ucdDemoResetKeys;
+WriteMethod write_ucdDemoPublicString;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

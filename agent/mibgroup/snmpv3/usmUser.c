@@ -229,13 +229,13 @@ usm_parse_user(oid *name, int name_len)
  * results in a NULL return value.
  */
 unsigned char *
-var_usmUser(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    WriteMethod **write_method;
+var_usmUser(
+    struct variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
   struct usmUser *uptr=NULL, *nptr, *pptr;
   int i, rtest, result;
@@ -426,14 +426,14 @@ var_usmUser(vp, name, length, exact, var_len, write_method)
 /* write_usmUserSpinLock(): called when a set is performed on the
    usmUserSpinLock object */
 int
-write_usmUserSpinLock(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserSpinLock(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;
@@ -483,14 +483,14 @@ write_usmUserSpinLock(action, var_val, var_val_type, var_val_len, statP, name, n
  * XXX:  should handle action=UNDO's.
  */
 int
-write_usmUserCloneFrom(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserCloneFrom(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static oid objid[USM_LENGTH_OID_MAX], *oidptr;
@@ -568,14 +568,14 @@ write_usmUserCloneFrom(action, var_val, var_val_type, var_val_len, statP, name, 
  *	SNMP_ERR_WRONGTYPE
  */
 int
-write_usmUserAuthProtocol(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserAuthProtocol(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static oid objid[USM_LENGTH_OID_MAX];
@@ -652,14 +652,14 @@ write_usmUserAuthProtocol(action, var_val, var_val_type, var_val_len, statP, nam
  * XXX:  should handle action=UNDO's.
  */
 int
-write_usmUserAuthKeyChange(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserAuthKeyChange(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static unsigned char   string[SNMP_MAXBUF_SMALL];
   struct usmUser        *uptr;
@@ -711,14 +711,14 @@ write_usmUserAuthKeyChange(action, var_val, var_val_type, var_val_len, statP, na
 } /* end write_usmUserAuthKeyChange() */
 
 int
-write_usmUserPrivProtocol(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserPrivProtocol(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static oid objid[USM_LENGTH_OID_MAX];
@@ -771,14 +771,14 @@ write_usmUserPrivProtocol(action, var_val, var_val_type, var_val_len, statP, nam
  *
  */
 int
-write_usmUserPrivKeyChange(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserPrivKeyChange(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static unsigned char   string[SNMP_MAXBUF_SMALL];
   struct usmUser        *uptr;
@@ -830,14 +830,14 @@ write_usmUserPrivKeyChange(action, var_val, var_val_type, var_val_len, statP, na
 }  /* end write_usmUserPrivKeyChange() */
 
 int
-write_usmUserPublic(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserPublic(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static unsigned char string[SNMP_MAXBUF];
@@ -872,14 +872,14 @@ write_usmUserPublic(action, var_val, var_val_type, var_val_len, statP, name, nam
 }  /* end write_usmUserPublic() */
 
 int
-write_usmUserStorageType(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserStorageType(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;
@@ -930,14 +930,14 @@ write_usmUserStorageType(action, var_val, var_val_type, var_val_len, statP, name
  *	SNMP_ERR_WRONGTYPE
  */
 int
-write_usmUserStatus(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_usmUserStatus(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   /* variables we may use later */
   static long long_ret;

@@ -470,7 +470,7 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * timing precision is not considered important.
  */
 
-#if (defined(WIN32) || defined(cygwin32))
+#if (defined(WIN32) || defined(cygwin))
 static int sav_int;
 static time_t timezup;
 static void
@@ -539,7 +539,7 @@ timerPause(void)
 #endif
 }
 
-#endif /* !WIN32 && !cygwin32 */
+#endif /* !WIN32 && !cygwin */
 
 /*
  * Print a running summary of interface statistics.

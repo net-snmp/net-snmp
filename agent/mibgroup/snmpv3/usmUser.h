@@ -35,7 +35,7 @@ config_add_mib(SNMP-USER-BASED-SM-MIB)
 /* function definitions */
 
 extern void   init_usmUser(void);
-extern unsigned char *var_usmUser(struct variable *, oid *, int *, int, int *,  WriteMethod **write_method);
+extern FindVarMethod var_usmUser;
 
 void shutdown_usmUser(void);
 oid *usm_generate_OID(oid *prefix, int prefixLen, struct usmUser *uptr,
@@ -43,15 +43,16 @@ oid *usm_generate_OID(oid *prefix, int prefixLen, struct usmUser *uptr,
 int usm_parse_oid(oid *oidIndex, int oidLen,
               unsigned char **engineID, int *engineIDLen,
               unsigned char **name, int *nameLen);
-int write_usmUserSpinLock(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserCloneFrom(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserAuthProtocol(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserAuthKeyChange(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserPrivProtocol(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserPrivKeyChange(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserPublic(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserStorageType(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_usmUserStatus(int, u_char *,u_char, int, u_char *,oid*, int);
+
+WriteMethod write_usmUserSpinLock;
+WriteMethod write_usmUserCloneFrom;
+WriteMethod write_usmUserAuthProtocol;
+WriteMethod write_usmUserAuthKeyChange;
+WriteMethod write_usmUserPrivProtocol;
+WriteMethod write_usmUserPrivKeyChange;
+WriteMethod write_usmUserPublic;
+WriteMethod write_usmUserStorageType;
+WriteMethod write_usmUserStatus;
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 
    file in tha agent subdirectory of the source tree */

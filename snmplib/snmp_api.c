@@ -218,7 +218,7 @@ static char *api_errors[-SNMPERR_MAX+1] = {
     (char*)"Unsupported security level",          /* SNMPERR_UNSUPPORTED_SEC_LEVEL */
     (char*)"Authentication failure",              /* SNMPERR_AUTHENTICATION_FAILURE */
     (char*)"Not in time window",                  /* SNMPERR_NOT_IN_TIME_WINDOW */
-    (char*)"Decryptiion error",                   /* SNMPERR_DECRYPTION_ERR */
+    (char*)"Decryption error",                    /* SNMPERR_DECRYPTION_ERR */
     (char*)"SCAPI general failure",		  /* SNMPERR_SC_GENERAL_FAILURE */
     (char*)"SCAPI sub-system not configured",	  /* SNMPERR_SC_NOT_CONFIGURED */
     (char*)"Key tools not available",		  /* SNMPERR_KT_NOT_AVAILABLE */
@@ -626,7 +626,6 @@ snmp_sess_open(struct snmp_session *in_session)
       return(NULL);
     }
     session->community = cp;	/* replace pointer with pointer to new data */
-#endif /* NO_ZEROLENGTH_COMMUNITY */
 
     if (session->securityLevel <= 0)
       session->securityLevel = get_default_secLevel();
@@ -2943,8 +2942,7 @@ snmp_free_var(struct variable_list *var)
     free((char *)var);
 }
 
-void snmp_free_varbind(var)
-    struct variable_list *var;
+void snmp_free_varbind(struct variable_list *var)
 {
   struct variable_list *ptr;
   while(var) {
@@ -3023,7 +3021,7 @@ snmp_sess_read(void *sessp,
     struct request_list *rp, *orp = NULL;
     snmp_callback callback;
     void *magic;
-    int rpt_type, ret;
+    int ret;
 
     if (!(FD_ISSET(slp->internal->sd, fdset)))
         return;
@@ -3351,7 +3349,6 @@ snmp_sess_timeout(void *sessp)
     struct timeval now;
     snmp_callback callback;
     void *magic;
-    int ret;
 
     sp = slp->session; isp = slp->internal;
 
