@@ -12,6 +12,7 @@
 #endif
 
 #include "mibincl.h"
+#include "hpux.h"
 
 int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
