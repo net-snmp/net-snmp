@@ -58,6 +58,7 @@ struct snmp_pdu *snmp_split_pdu (struct snmp_pdu *, int skipCount,
 
 unsigned long snmp_varbind_len(struct snmp_pdu * pdu);
 int snmp_clone_var(struct variable_list *, struct variable_list *);
+struct variable_list *snmp_clone_varbind(struct variable_list *);
 const char *snmp_errstring (int);
 int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
 int snmp_synch_response_cb (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **, snmp_callback);
