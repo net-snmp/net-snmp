@@ -99,7 +99,6 @@ configclean:
 		apps/Makefile  apps/snmpnetstat/Makefile	\
 		man/Makefile mibs/Makefile ov/Makefile		\
 		local/Makefile testing/Makefile
-	rm -f agent/dlmods/Makefile
 	rm -f mibs/.index
 	rm -f mib_module_config.h ucd-snmp-config.h 	\
 		agent/mibgroup/mib_module_includes.h 	\

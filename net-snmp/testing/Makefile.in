@@ -4,7 +4,7 @@
 
 #TARG		= etest ktest misctest stest
 
-USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS		= -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 PARSEOBJS	=
