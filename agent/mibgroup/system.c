@@ -65,7 +65,6 @@ void system_parse_config_sysloc(word, cptr)
   
   if (strlen(cptr) < 128) {
     strcpy(sysLocation,cptr);
-    sysLocation[strlen(sysLocation)-1] = 0; /* chomp new line */
   } else {
     sprintf(tmpbuf, "syslocation token too long (must be < 128):\n\t%s", cptr);
     config_perror(tmpbuf);
@@ -80,7 +79,6 @@ void system_parse_config_syscon(word, cptr)
 
   if (strlen(cptr) < 128) {
     strcpy(sysContact,cptr);
-    sysContact[strlen(sysContact)-1] = 0;  /* chomp new line */
   } else {
     sprintf(tmpbuf, "syscontact token too long (must be < 128):\n\t%s", cptr);
     config_perror(tmpbuf);
