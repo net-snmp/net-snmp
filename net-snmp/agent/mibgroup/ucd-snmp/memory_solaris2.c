@@ -76,7 +76,7 @@ void init_memory_solaris2(void)
   }
 }
 
-const u_char *var_extensible_mem(
+u_char *var_extensible_mem(
     struct variable *vp,
     oid        *name,
     size_t     *length,

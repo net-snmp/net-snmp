@@ -1211,7 +1211,7 @@ write_eventnotifytab( int action,
     return SNMP_ERR_NOERROR;
 }
 
-const u_char *
+u_char *
 var_eventnextindex(struct variable *vp,
 		   oid *name,
 		   size_t *length,
@@ -1241,7 +1241,7 @@ var_eventnextindex(struct variable *vp,
 }
     
 /* respond to requests for variables in the event table */
-const u_char *
+u_char *
 var_eventtab(struct variable *vp,
 	     oid *name,
 	     size_t *length,
@@ -1308,7 +1308,7 @@ var_eventtab(struct variable *vp,
 }
 
 /* respond to queries for eventNotifyMinInterval and eventNotifyMaxRetransmissions */
-const u_char *
+u_char *
 var_eventnotifyvars(struct variable *vp,
 		    oid *name,
 		    size_t *length,
@@ -1342,7 +1342,7 @@ var_eventnotifyvars(struct variable *vp,
 }
 
 /* respond to requests for variables in the event table */
-const u_char *
+u_char *
 var_eventnotifytab(struct variable *vp,
 		   oid *name,
 		   size_t *length,

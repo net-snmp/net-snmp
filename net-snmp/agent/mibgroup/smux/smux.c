@@ -94,7 +94,7 @@ static int 	smux_build (u_char, u_long, oid *,
 static 		int smux_list_add (smux_reg **, smux_reg *);
 static 		int smux_send_rrsp (int, int);
 static 		smux_reg *smux_find_replacement (oid *, size_t);
-const u_char 	*var_smux (struct variable *, oid *, size_t *, int, size_t *,
+u_char 	*var_smux (struct variable *, oid *, size_t *, int, size_t *,
                            WriteMethod **write_method);
 int 		var_smux_write (int, u_char *, u_char, size_t, u_char *, oid *, size_t);
 
@@ -219,7 +219,7 @@ init_smux(void)
 	return SMUXOK;
 }
 
-const u_char *
+u_char *
 var_smux(struct variable *vp,
 	oid *name,
 	size_t *length,

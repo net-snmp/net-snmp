@@ -205,7 +205,7 @@ header_udp(struct variable *vp,
 #ifndef MIB_UDPCOUNTER_SYMBOL
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
-const u_char *
+u_char *
 var_udp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -299,7 +299,7 @@ var_udp(struct variable *vp,
 #else /* HAVE_SYS_TCPIPSTATS_H */
 
 
-const u_char *
+u_char *
 var_udp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -341,7 +341,7 @@ var_udp(struct variable *vp,
 
 #else /* hpux */
 
-const u_char *
+u_char *
 var_udp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -391,7 +391,7 @@ var_udp(struct variable *vp,
 
 
 
-const u_char *
+u_char *
 var_udpEntry(struct variable *vp,
 	     oid *name,
 	     size_t *length,
@@ -461,7 +461,7 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 
 #else /* solaris2 - udp */
 
-const u_char *
+u_char *
 var_udp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -505,7 +505,7 @@ var_udp(struct variable *vp,
     return (ret);
 }
 
-const u_char *
+u_char *
 var_udpEntry(struct variable *vp,
 	     oid *name,
 	     size_t *length,

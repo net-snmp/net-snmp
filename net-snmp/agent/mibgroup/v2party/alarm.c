@@ -93,7 +93,7 @@ rmonGetValue(oid *srcParty,
     size_t len;
     u_short acl;
     WriteMethod *write_method;
-    const u_char *var;
+    u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
     struct partyEntry *srcp, *dstp;
@@ -1060,7 +1060,7 @@ write_alarmtab(int action,
     return SNMP_ERR_NOERROR;
 }
 
-const u_char *
+u_char *
 var_alarmnextindex(struct variable *vp,
 		   oid *name,
 		   size_t *length,
@@ -1090,7 +1090,7 @@ var_alarmnextindex(struct variable *vp,
 }
     
 /* respond to requests for variables in the alarm table */
-const u_char *
+u_char *
 var_alarmtab(struct variable *vp,
 	     oid *name,
 	     size_t *length,

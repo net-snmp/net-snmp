@@ -172,7 +172,7 @@ header_hrpartition(struct variable *vp,
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrpartition(struct variable *vp,
 		oid *name,
 		size_t *length,

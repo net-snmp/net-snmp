@@ -202,7 +202,7 @@ write_view(int action,
     return TRUE;
 }
 
-const u_char *
+u_char *
 var_view(struct variable *vp,
 	 oid *name,
 	 size_t *length,

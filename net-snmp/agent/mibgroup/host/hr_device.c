@@ -184,7 +184,7 @@ int device_type_len = sizeof(device_type_id)/sizeof(device_type_id[0]);
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrdevice(struct variable *vp,
 	     oid *name,
 	     size_t *length,

@@ -469,7 +469,7 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
 /* MIB table access routines */
 
 
-const u_char *
+u_char *
 var_snmpTargetParamsEntry(
     struct  variable *vp,
     oid     *name,

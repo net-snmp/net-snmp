@@ -34,7 +34,7 @@ int write_engineBoots(int, u_char *,u_char, size_t, u_char *,oid*, size_t);
 int write_engineTime(int, u_char *,u_char, size_t, u_char *,oid*, size_t);
 #endif /* SNMP_TESTING_CODE */
 
-const u_char *
+u_char *
 var_snmpEngine(
     struct variable *vp,
     oid     *name,
