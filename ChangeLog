@@ -1,4 +1,4 @@
-Changes: V3.5.1 -> V3.5.2
+Changes: V3.5.2 -> V3.5.3
 
 hardaker 12 Sep 98 09:02:37
     - (snmp_api.c): Patch from Michael Slifcak:
