@@ -218,6 +218,8 @@ sprint_octet_string(buf, var, enums, hint, units)
 	long value;
 	char code = 'd', separ = 0, term = 0;
 	u_char *ecp;
+
+	*buf = 0;
 	cp = var->val.string;
 	ecp = cp + var->val_len;
 	while (cp < ecp) {
@@ -412,7 +414,7 @@ sprint_hinted_integer (buf, val, hint, units)
 	    tmp[0] = '.';
 	}
     }
-    strcat (buf, tmp);
+    strcpy (buf, tmp);
 }
 
 static void

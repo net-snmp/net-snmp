@@ -37,13 +37,13 @@ getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getkstat.o: mibgroup/kernel_sunos5.c
-	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DKDEBUG -c $? 
+	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DDODEBUG -c $? 
 
 getmibstat: getmibstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getmibstat.o: mibgroup/kernel_sunos5.c
-	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DKDEBUG -c $? 
+	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
 AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o read_config.o
 
