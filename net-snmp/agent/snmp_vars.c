@@ -104,53 +104,76 @@ extern char *Lookup_Device_Annotation();
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 
-static struct nlist nl[] = {
-
 #define N_IPSTAT	0
-	{ "_ipstat"},
 #define N_IPFORWARDING	1
-	{ "_ipforwarding" },
 #define N_TCP_TTL	2
-	{ "_tcp_ttl"},
 #define N_UDPSTAT	3
-	{ "_udpstat" },
 #define N_IN_INTERFACES 4
-	{ "_in_interfaces" },
 #define N_ICMPSTAT	5
-	{ "_icmpstat" },
 #define N_IFNET		6
-	{ "_ifnet" },
 #define N_TCPSTAT	7
-	{ "_tcpstat" },
 #define N_TCB		8
-	{ "_tcb" },
 #define N_ARPTAB_SIZE	9
-	{ "_arptab_size" },
 #define N_ARPTAB        10
-	{ "_arptab" },
 #define N_IN_IFADDR     11
-	{ "_in_ifaddr" },
 #define N_BOOTTIME	12
-	{ "_boottime" },
 #define N_PROC		13
-	{ "_proc" },
 #define N_NPROC		14
-	{ "_nproc" },
 #define N_DMMIN		15
-	{ "_dmmin" },
 #define N_DMMAX		16
-	{ "_dmmax" },
 #define N_NSWAP		17
-	{ "_nswap" },
 #define N_USRPTMAP	18
- 	{ "_Usrptmap" },
 #define N_USRPT		19
+
+static struct nlist nl[] = {
+#ifndef hpux
+	{ "_ipstat"},  
+	{ "_ipforwarding" },
+	{ "_tcp_ttl"},
+	{ "_udpstat" },
+	{ "_in_interfaces" },
+	{ "_icmpstat" },
+	{ "_ifnet" },
+	{ "_tcpstat" },
+	{ "_tcb" },
+	{ "_arptab_size" }, 
+	{ "_arptab" },      
+	{ "_in_ifaddr" },
+	{ "_boottime" },
+	{ "_proc" },
+	{ "_nproc" },
+	{ "_dmmin" },
+	{ "_dmmax" },
+	{ "_nswap" },
+ 	{ "_Usrptmap" },
 	{ "_usrpt" },
+#else
+	{ "ipstat"},  
+	{ "ipforwarding" },
+	{ "tcp_ttl"},
+	{ "udpstat" },
+	{ "in_interfaces" },
+	{ "icmpstat" },
+	{ "ifnet" },
+	{ "tcpstat" },
+	{ "tcb" },
+	{ "arptab_size" }, 
+	{ "arptab" },      
+	{ "in_ifaddr" },
+	{ "boottime" },
+	{ "proc" },
+	{ "nproc" },
+	{ "dmmin" },
+	{ "dmmax" },
+	{ "nswap" },
+        { "mpid" },
+        { "hz"},
+#endif
 #ifdef ibm032
 #define N_USERSIZE	20
 	{ "_userSIZE" },
 #endif
-	0,
+	{ 0 },
 };
 
 /*
@@ -212,9 +235,22 @@ u_char		return_buf[256]; /* nee 64 */
  
 init_snmp()
 {
-	nlist("/vmunix",nl);
-	init_kmem("/dev/kmem"); 
-	init_routes();
+  int ret;
+#ifdef hpux
+  if ((ret = nlist("/hp-ux",nl)) == -1) {
+    ERROR("nlist");
+    exit(1);
+  }
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+    if (nl[ret].n_type == 0) {
+      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+    }
+  }
+#else
+  nlist("/vmunix",nl);
+#endif
+  init_kmem("/dev/kmem"); 
+  init_routes();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
