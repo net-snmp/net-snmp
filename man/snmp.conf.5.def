@@ -1,15 +1,18 @@
 .TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-SYSCONFDIR/snmp/snmp.conf - configuration file for the Net-SNMP applications.
-.br
-~/.snmp/snmp.conf - personal configuration file.
+SYSCONFDIR/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the Net-SNMP applications.
 .SH DESCRIPTION
 .B snmp.conf
 is the configuration file which define how the Net-SNMP applications
 operate.  Tokens that can be put in them are described in the
 .B DIRECTIVES
 section below.
+.PP
+SYSCONFDIR/snmp/snmp.conf is a common file, shared by all users of the system.
+.br
+~/.snmp/snmp.conf is a personal file, with configuration settings for a
+particular user.
 .SH PLEASE READ FIRST
 Make sure you make these files readable only by the user if you are
 storing sensitive information in them like passphrases!
