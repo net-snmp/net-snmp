@@ -2416,7 +2416,11 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, newViewSubtree, viewSubtreeLen,
                               VACM_MODE_IGNORE_MASK);
-
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
                 free(newViewName);
