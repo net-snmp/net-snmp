@@ -108,6 +108,21 @@ extern          "C" {
      * Returns NULL if that entry does not exist.
      */
 
+    int vacm_checkSubtree(const char *, oid *, size_t);
+
+    /*
+     * Check to see if everything within a subtree is in view, not in view,
+     * or possibly both.
+     *
+     * Returns:
+     *   VACM_SUCCESS          The OID is included in the view.
+     *   VACM_NOTINVIEW        If no entry in the view list includes the
+     *                         provided OID, or the OID is explicitly excluded
+     *                         from the view. 
+     *   VACM_SUBTREE_UNKNOWN  The entire subtree has both allowed and
+     *                         disallowed portions.
+     */
+
     void
                     vacm_scanViewInit(void);
     /*
