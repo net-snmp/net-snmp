@@ -18,6 +18,7 @@ t/getnext.t
 t/set.t
 t/async.t
 t/mib.txt
+t/mibload.t
 t/snmpd.conf
 examples/async1.pl
 examples/async2.pl
