@@ -120,10 +120,6 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 @           print | |   +-> Processing index $node@
 @        end@
 @        include details-node.m2i@
-@        if $m2c_node_skip_mapping != 1@
-@            include generic-value-map-func.m2i@
-@        end@
-
 @        if $m2c_table_row_creation == 1@
 /**
  * check validity of ${node} external index portion
@@ -138,6 +134,8 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 int
 ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 {
+    DEBUGMSGTL(("verbose:${context}:${context}_${node}_check_index","called\n"));
+
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
@@ -173,6 +171,8 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 int
 ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 {
+    DEBUGMSGTL(("verbose:${context}:${node}_check_index","called\n"));
+
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
