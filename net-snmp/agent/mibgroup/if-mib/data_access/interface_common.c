@@ -38,7 +38,7 @@ static void _free_interface_config(void);
  * These shouldn't be called by the general public, so they aren't in
  * the header file.
  */
-#ifdef NETSNMP_ACCESS_INTERFACE_NOARCH
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 extern void netsnmp_arch_interface_init(void);
 extern int
 netsnmp_arch_interface_container_load(netsnmp_container* container,
