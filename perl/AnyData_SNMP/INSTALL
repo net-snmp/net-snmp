@@ -14,16 +14,17 @@ Install steps:
      http://www.net-snmp.org/AnyData-wes/DBD-AnyData-0.05.wes.tar.gz
      http://www.net-snmp.org/AnyData-wes/SQL-Statement-1.002.tar.gz
 
-  2) Extract each of the above tar balls and in the resulting directories
-     run:
-    perl Makefile.PL
-    make
-    make install   (as root)
+     Extract each of the above tar balls and in the resulting
+     directories run:
 
-  3) Then in this directory, run:
-    perl Makefile.PL
-    make
-    make install   (as root)
+    	perl Makefile.PL
+    	make
+    	make install   (as root)
+
+  2) Then in this directory, run:
+    	perl Makefile.PL
+    	make
+    	make install   (as root)
 
 To use it:
   SQL like Shell script:
