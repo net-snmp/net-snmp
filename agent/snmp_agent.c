@@ -2282,7 +2282,9 @@ check_getnext_results(netsnmp_agent_session *asp)
                                 request->index));
                     snmp_set_var_typed_value(request->requestvb,
                                              ASN_PRIV_RETRY, NULL, 0);
-                } else if (request->requestvb->type == ASN_NULL) {
+                } else if (request->requestvb->type == ASN_NULL ||
+                           request->requestvb->type == SNMP_NOSUCHINSTANCE ||
+                           request->requestvb->type == SNMP_NOSUCHOBJECT) {
                     /*
                      * it was inclusive, but no results.  Still retry this
                      * search. 
