@@ -104,6 +104,13 @@ static void send_v2_trap (struct snmp_session *, int, int, int);
 	 * Trap session handling
 	 *
 	 *******************/
+
+static void free_trap_session (struct trap_sink *sp)
+{
+    snmp_close(sp->sesp);
+    free (sp);
+}
+
 int add_trap_session( struct snmp_session *ss, int pdutype, int version )
 {
     struct trap_sink *new_sink =
@@ -117,6 +124,24 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
     new_sink->next    = sinks;
     sinks = new_sink;
     return 1;
+}
+
+int remove_trap_session( struct snmp_session *ss ) {
+    struct trap_sink *sp = sinks, *prev = 0;
+    while (sp) {
+        if (sp->sesp == ss) {
+            if (prev) {
+                prev->next = sp->next;
+            } else {
+                sinks = sp->next;
+            }
+            free_trap_session(sp);
+            return 1;
+        }
+        prev = sp;
+	sp = sp->next;
+    }
+    return 0;
 }
 
 int create_trap_session (char *sink, u_short sinkport,
@@ -163,13 +188,6 @@ static int create_v2_inform_session (char *sink,  u_short sinkport,
 {
     return create_trap_session( sink, sinkport, com,
 				SNMP_VERSION_2c, SNMP_MSG_INFORM );
-}
-
-
-static void free_trap_session (struct trap_sink *sp)
-{
-    snmp_close(sp->sesp);
-    free (sp);
 }
 
 
