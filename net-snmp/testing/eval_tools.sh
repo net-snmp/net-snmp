@@ -189,6 +189,11 @@ CONFIGAGENT() {
 }
 
 STARTAGENT() {
+    if [ $SNMP_VERBOSE -gt 1 ]; then
+	echo "agent config: "
+	cat $SNMP_CONFIG_FILE
+    fi
+#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_SNMPD_PORT -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
     snmpd $SNMP_SNMPD_PORT -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE
 }
 
@@ -197,12 +202,15 @@ STOPAGENT() {
 	kill `cat $SNMP_SNMPD_PID_FILE`
 	# XXX: kill -9 later (after sleep and ps grok?)?
     fi
+    if [ $SNMP_VERBOSE -gt 1 ]; then
+	echo "Agent Output:"
+	cat $SNMP_SNMPD_LOG_FILE
+    fi
     rm $SNMP_SNMPD_PID_FILE
 }
 
 FINISHED() {
-#    sleep 5
-    if [ $SNMP_SAVE_TMPDIR != "xyes" ]; then
+    if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
 	rm -rf $SNMP_TMPDIR
     fi
     if [ "x$return_value" = "x0" ]; then
@@ -212,6 +220,13 @@ FINISHED() {
     fi
     exit $return_value
 	
+}
+
+VERBOSE_OUT() {
+    if [ $SNMP_VERBOSE > $1 ]; then
+	shift
+	echo "$*"
+    fi
 }
 
 fi # Only allow ourselves to be eval'ed once
