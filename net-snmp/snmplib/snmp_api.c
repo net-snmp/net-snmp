@@ -842,7 +842,7 @@ _sess_open(struct snmp_session *in_session)
     int sd;
     in_addr_t addr;
     struct sockaddr_in *isp_addr, *meIp;
-#ifdef HAVE_GETHOSTBYNAME
+#ifdef HAVE_GETHOSTNAME
     struct hostent *hp;
 #endif
     struct snmp_pdu *pdu, *response;
@@ -881,7 +881,7 @@ _sess_open(struct snmp_session *in_session)
                 if ((int)(addr = inet_addr(session->peername)) != -1){
                     memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
                 } else {
-#ifdef HAVE_GETHOSTBYNAME
+#ifdef HAVE_GETHOSTNAME
                     hp = gethostbyname(session->peername);
                     if (hp == NULL){
                         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -893,12 +893,12 @@ _sess_open(struct snmp_session *in_session)
                         memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
                     }
 
-#else /* HAVE_GETHOSTBYNAME */
+#else /* HAVE_GETHOSTNAME */
                     fprintf(stderr,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
                             __FILE__,__LINE__,
                             session->peername);
                     return(0);
-#endif /* HAVE_GETHOSTBYNAME */
+#endif /* HAVE_GETHOSTNAME */
 
                 }
                 if (session->remote_port == SNMP_DEFAULT_REMPORT){
