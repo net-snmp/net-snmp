@@ -96,87 +96,85 @@ void real_init_master(void)
 	 *   merging the answers back into the original query
 	 */
 int
-agentx_got_response( int operation,
-                     struct snmp_session *session,
-                     int reqid,
-                     struct snmp_pdu *pdu,
-                     void *magic)
+agentx_got_response(int operation,
+		    struct snmp_session *session,
+		    int reqid,
+		    struct snmp_pdu *pdu,
+		    void *magic)
 {
     delegated_cache *cache = (delegated_cache *) magic;
     int i, ret;
-    char buf[SPRINT_MAX_LEN];
-    request_info              *requests, *request;
+    request_info *requests, *request;
     struct variable_list *var;
-    struct snmp_session       *ax_session;
+    struct snmp_session *ax_session;
 
     cache = handler_check_cache(cache);
     if (!cache) {
-        DEBUGMSGTL(("agentx/master","response too late\n"));
+        DEBUGMSGTL(("agentx/master", "response too late on session %08p\n",
+		    session));
         return 0;
     }
-    
     requests = cache->requests;
 
-    switch(operation) {
-        case SNMP_CALLBACK_OP_TIMED_OUT: {
-            void *s = snmp_sess_pointer(session);
-            DEBUGMSGTL(("agentx/master", "timeout on session %08p\n", session));
+    switch (operation) {
+    case SNMP_CALLBACK_OP_TIMED_OUT: {
+	void *s = snmp_sess_pointer(session);
+	DEBUGMSGTL(("agentx/master", "timeout on session %08p\n", session));
 
-            /*  This is a bit sledgehammer because the other sessions on this
+	/*  This is a bit sledgehammer because the other sessions on this
 	    transport may be okay (e.g. some thread in the subagent has
 	    wedged, but the others are alright).  OTOH the overwhelming
 	    probability is that the whole agent has died somehow.  */
 
-            if (s != NULL) {
-                snmp_transport *t = snmp_sess_transport(s);
+	if (s != NULL) {
+	    snmp_transport *t = snmp_sess_transport(s);
+	    close_agentx_session(session, -1);
 
-                close_agentx_session(session, -1);
+	    if (t != NULL) {
+		DEBUGMSGTL(("agentx/master", "close transport\n"));
+		t->f_close(t);
+	    } else {
+		DEBUGMSGTL(("agentx/master", "NULL transport??\n"));
+	    }
+	} else {
+	    DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
+	}
+	handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
+	set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
+			  SNMP_ERR_GENERR);
+	ax_session = (struct snmp_session *) cache->localinfo;
+	free_agent_snmp_session_by_session(ax_session, NULL);
+	free_delegated_cache(cache);
+	return 0;
+    }
 
-                if (t != NULL) {
-                    DEBUGMSGTL(("agentx/master", "close transport\n"));
-                    t->f_close(t);
-                } else {
-                    DEBUGMSGTL(("agentx/master", "NULL transport??\n"));
-                }
-            } else {
-                DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
-            }
-            handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
-            set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
-                              SNMP_ERR_GENERR);
-            ax_session = (struct snmp_session *) cache->localinfo;
-            free_agent_snmp_session_by_session(ax_session, NULL);
-            free_delegated_cache(cache);
-            return 0;
-        }
+    case SNMP_CALLBACK_OP_DISCONNECT:
+    case SNMP_CALLBACK_OP_SEND_FAILED:
+	if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+	    DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
+			session));
+	} else {
+	    DEBUGMSGTL(("agentx/master", "send failed on session %08p\n",
+			session));
+	}
+	close_agentx_session(session, -1);
+	handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
+	set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
+			  SNMP_ERR_GENERR);
+	free_delegated_cache(cache);
+	return 0;
 
-        case SNMP_CALLBACK_OP_DISCONNECT:
-        case SNMP_CALLBACK_OP_SEND_FAILED:
-            if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
-                DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
-                            session));
-            } else {
-                DEBUGMSGTL(("agentx/master", "send failed on session %08p\n",
-                            session));
-            }
-            close_agentx_session(session, -1);
-            handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
-            set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
-                              SNMP_ERR_GENERR);
-            free_delegated_cache(cache);
-            return 0;
-
-        case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
-            /* This session is alive */
-            CLEAR_SNMP_STRIKE_FLAGS( session->flags );
-            break;
-        default:
-            free_delegated_cache(cache);
-            return 0;
+    case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+	/* This session is alive */
+	CLEAR_SNMP_STRIKE_FLAGS( session->flags );
+	break;
+    default:
+	free_delegated_cache(cache);
+	return 0;
     }
 
 
-    if ( pdu->errstat != AGENTX_ERR_NOERROR ) {
+    if (pdu->errstat != AGENTX_ERR_NOERROR) {
         /*
          *  If the request failed, locate the
          *    original index of the variable resonsible
@@ -192,30 +190,42 @@ agentx_got_response( int operation,
             }
             request->delegated = REQUEST_IS_NOT_DELEGATED;
         }
-        if (!ret)
+        if (!ret) {
             /* ack, unknown, mark the first one */
-            set_request_error(cache->reqinfo, request,
-                              SNMP_ERR_GENERR);
+            set_request_error(cache->reqinfo, request, SNMP_ERR_GENERR);
+	}
         free_delegated_cache(cache);
 	DEBUGMSGTL(("agentx/master","end error branch\n"));
         return 1;
-    } else if (cache->reqinfo->mode == MODE_GET
-               || cache->reqinfo->mode == MODE_GETNEXT
-               || cache->reqinfo->mode == MODE_GETBULK) {
-        /* replace varbinds for data request types, but not sets */
-	DEBUGMSGTL(("agentx/master","agentx_got_response() beginning...\n"));
-        for(var = pdu->variables, request = requests;
-            request && var;
-            request = request->next, var = var->next_variable) {
+    } else if (cache->reqinfo->mode == MODE_GET     ||
+               cache->reqinfo->mode == MODE_GETNEXT ||
+               cache->reqinfo->mode == MODE_GETBULK) {
+        /*  Replace varbinds for data request types, but not SETs.  */
+	DEBUGMSGTL(("agentx/master", "agentx_got_response() beginning...\n"));
+        for (var = pdu->variables, request = requests;
+	     request && var;
+	     request = request->next, var = var->next_variable) {
             /*
-		 * Otherwise, process successful requests
-		 */
-            DEBUGMSGTL(("agentx/master","  handle_agentx_response: processing: "));
-            DEBUGMSGOID(("agentx/master",var->name, var->name_length));
-            DEBUGMSG(("agentx/master","\n"));
-            if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
-                sprint_variable (buf, var->name, var->name_length, var);
-                DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
+	     * Otherwise, process successful requests
+	     */
+            DEBUGMSGTL(("agentx/master", "  handle_agentx_response: processing: "));
+            DEBUGMSGOID(("agentx/master", var->name, var->name_length));
+            DEBUGMSG(("agentx/master", "\n"));
+            if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
+		u_char *buf = NULL;
+		size_t buf_len = 0, out_len = 0;
+		if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
+					  var->name, var->name_length, var)) {
+		    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
+		} else {
+		    if (buf != NULL) {
+			DEBUGMSGTL(("snmp_agent", "    >> %s [TRUNCATED]\n",
+				    buf));
+		    }
+		}
+		if (buf != NULL) {
+		    free(buf);
+		}
             }
 
             /* update the oid in the original request */
