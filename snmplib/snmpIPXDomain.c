@@ -32,6 +32,10 @@
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
 static netsnmp_tdomain ipxDomain;
 
+oid netsnmpIPXDomain[]	 = { 1, 3, 6, 1, 6, 1, 5 };
+size_t netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
+
+
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
