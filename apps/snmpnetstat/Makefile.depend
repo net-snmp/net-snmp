@@ -130,14 +130,14 @@
 ./main.lo: ../../include/net-snmp/machine/generic.h 
 ./main.lo:  ../../include/net-snmp/utilities.h
 ./main.lo: ../../include/net-snmp/types.h 
-./main.lo: ../../include/net-snmp/definitions.h
+./main.lo:  ../../include/net-snmp/definitions.h
 ./main.lo: ../../include/net-snmp/library/snmp_api.h
 ./main.lo: ../../include/net-snmp/library/asn1.h
-./main.lo: ../../include/net-snmp/library/snmp_impl.h 
+./main.lo: ../../include/net-snmp/library/snmp_impl.h
 ./main.lo: ../../include/net-snmp/library/snmp.h
 ./main.lo: ../../include/net-snmp/library/snmp-tc.h
 ./main.lo: ../../include/net-snmp/library/snmp_client.h
-./main.lo: ../../include/net-snmp/library/getopt.h 
+./main.lo: ../../include/net-snmp/library/getopt.h
 ./main.lo: ../../include/net-snmp/library/system.h
 ./main.lo: ../../include/net-snmp/library/tools.h
 ./main.lo: ../../include/net-snmp/library/int64.h
