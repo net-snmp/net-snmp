@@ -124,7 +124,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	pi->community_len = COMMUNITY_MAX_LEN;
         data = snmp_comstr_parse(data, &length,
 			       pi->community, &pi->community_len,
-                               (long *) &pi->version);
+                               &pi->version);
 	switch (pi->version) {
 	case SNMP_VERSION_1:
 	    pi->mp_model = SNMP_MP_MODEL_SNMPv1;
@@ -925,7 +925,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
 	pi->community_len = COMMUNITY_MAX_LEN;
         headerPtr = snmp_comstr_parse(snmp_in, &length,
 				    pi->community, &pi->community_len,
-				    (long *)&pi->version);
+				    &pi->version);
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
         pi->srcPartyLength = sizeof(pi->srcParty)/sizeof(oid);
         pi->dstPartyLength = sizeof(pi->dstParty)/sizeof(oid);

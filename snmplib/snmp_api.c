@@ -813,7 +813,7 @@ snmp_parse(session, pdu, data, length)
     u_char  type;
     struct packet_info pkt, *pi = &pkt;
     u_char  *var_val;
-    long    version;
+    int     version;
     int	    len, four;
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
