@@ -532,7 +532,8 @@ SnmpdShutDown(int a)
 {
   /* We've received a sigTERM.  Shutdown by calling mib-module
      functions and sending out a shutdown trap. */
-  fprintf(stderr, "Received TERM or STOP signal...  shutting down...\n");
+  fprintf(stderr, "%s Received TERM or STOP signal...  shutting down...\n",
+          sprintf_stamp(NULL));
 
   snmp_shutdown("snmpd");
 
