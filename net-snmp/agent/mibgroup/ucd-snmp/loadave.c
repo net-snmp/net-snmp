@@ -198,6 +198,9 @@ int try_getloadavg(double *r_ave, size_t s_ave)
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
 #endif
+#ifdef aix4
+  int favenrun[3];
+#endif
 
 
 #ifdef HAVE_GETLOADAVG
@@ -219,7 +222,15 @@ int try_getloadavg(double *r_ave, size_t s_ave)
     *(pave+i) = FIX_TO_DBL(favenrun[i]);
 #elif !defined(cygwin)
 #ifdef CAN_USE_NLIST
+#if aix4
+  if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
+    return -1;
+  r_ave[0] = favenrun[0]/65536.0;
+  r_ave[1] = favenrun[1]/65536.0;
+  r_ave[2] = favenrun[2]/65536.0;
+#else
   if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
+#endif
 #endif
     return (-1);
 #endif
