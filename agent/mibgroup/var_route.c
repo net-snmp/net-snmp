@@ -80,12 +80,28 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net/route.h>
 #undef	KERNEL
 #ifdef RTENTRY_4_4
+#ifndef STRUCT_RTENTRY_HAS_RT_UNIT
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
-#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
 #endif
-#else
+#else /* RTENTRY_4_3 */
+#ifndef STRUCT_RTENTRY_HAS_RT_DST
+#define rt_dst rt_nodes->rn_key
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_HASH
+#define rt_hash rt_pad1
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_REFCNT
+#define rt_refcnt rt_pad2
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_USE
+#define rt_use rt_pad3
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_UNIT
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
+#endif
 #endif
 #ifndef linux
 #include <nlist.h>

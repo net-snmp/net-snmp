@@ -59,15 +59,6 @@
 /* location of swap device (ok if not found) */
 #undef DMEM_LOC
 
-/* define rtentry to ortentry on SYSV machines (alphas) */
-#define RTENTRY rtentry;
-
-/* Use BSD 4.4 routing table entries? */
-#undef RTENTRY_4_4
-
-/* Does the rtentry structure have a rt_next node */
-#undef RTENTRY_RT_NEXT
-
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
@@ -87,6 +78,20 @@
 #undef STAT_STATFS_FS_DATA
 
 @BOTTOM@
+
+/* define rtentry to ortentry on SYSV machines (alphas) */
+#define RTENTRY rtentry;
+
+/* Use BSD 4.4 routing table entries? */
+#undef RTENTRY_4_4
+
+/* rtentry structure tests */
+#undef RTENTRY_RT_NEXT
+#undef STRUCT_RTENTRY_HAS_RT_DST
+#undef STRUCT_RTENTRY_HAS_RT_UNIT
+#undef STRUCT_RTENTRY_HAS_RT_USE
+#undef STRUCT_RTENTRY_HAS_RT_REFCNT
+#undef STRUCT_RTENTRY_HAS_RT_HASH
 
 /* ifnet structure tests */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
