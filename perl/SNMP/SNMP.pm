@@ -1156,7 +1156,7 @@ default 'public', SNMP community string (used for both R/W)
 
 =item Version
 
-default '1', [2 (same as 2c), 2c, 3]
+default taken from library configuration - probably 3 [1, 2 (same as 2c), 2c, 3]
 
 =item RemotePort
 
