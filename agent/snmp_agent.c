@@ -433,6 +433,25 @@ int snmp_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
 	snmp_log(LOG_DEBUG, "  TRAP2 message\n"); break;
       case SNMP_MSG_REPORT:
 	snmp_log(LOG_DEBUG, "  REPORT message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_RESERVE1:
+	snmp_log(LOG_DEBUG, "  INTERNAL RESERVE1 message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_RESERVE2:
+	snmp_log(LOG_DEBUG, "  INTERNAL RESERVE2 message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_ACTION:
+	snmp_log(LOG_DEBUG, "  INTERNAL ACTION message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_COMMIT:
+	snmp_log(LOG_DEBUG, "  INTERNAL COMMIT message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_FREE:
+	snmp_log(LOG_DEBUG, "  INTERNAL FREE message\n"); break;
+
+      case SNMP_MSG_INTERNAL_SET_UNDO:
+	snmp_log(LOG_DEBUG, "  INTERNAL UNDO message\n"); break;
+
       default:
 	snmp_log(LOG_DEBUG, "  UNKNOWN message, type=%02X\n", pdu->command);
 	snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
