@@ -116,7 +116,7 @@ marker_t        icmp_stats_cache_marker = NULL;
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable2 icmp_variables[] = {
+struct variable1 icmp_variables[] = {
     {ICMPINMSGS, ASN_COUNTER, RONLY, var_icmp, 1, {1}},
     {ICMPINERRORS, ASN_COUNTER, RONLY, var_icmp, 1, {2}},
     {ICMPINDESTUNREACHS, ASN_COUNTER, RONLY, var_icmp, 1, {3}},
@@ -162,7 +162,7 @@ init_icmp(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/icmp", icmp_variables, variable2,
+    REGISTER_MIB("mibII/icmp", icmp_variables, variable1,
                  icmp_variables_oid);
 
 #ifdef USING_MIBII_IP_MODULE

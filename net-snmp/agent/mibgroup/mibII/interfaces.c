@@ -199,7 +199,7 @@ extern struct timeval starttime;
 static void     parse_interface_config(const char *, char *);
 static void     free_interface_config(void);
 
-struct variable4 interfaces_variables[] = {
+struct variable3 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
     {IFINDEX, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 1}},
     {IFDESCR, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 2}},
@@ -242,7 +242,7 @@ init_interfaces(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/interfaces", interfaces_variables, variable4,
+    REGISTER_MIB("mibII/interfaces", interfaces_variables, variable3,
                  interfaces_variables_oid);
     REGISTER_SYSOR_ENTRY(interfaces_module_oid,
                          "The MIB module to describe generic objects for network interface sub-layers");

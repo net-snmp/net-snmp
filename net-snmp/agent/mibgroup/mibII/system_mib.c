@@ -247,7 +247,7 @@ system_parse_config_sysServices(const char *token, char *cptr)
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable2 system_variables[] = {
+struct variable1 system_variables[] = {
     {VERSION_DESCR, ASN_OCTET_STR, RONLY, var_system, 1, {1}},
     {VERSIONID, ASN_OBJECT_ID, RONLY, var_system, 1, {2}},
     {UPTIME, ASN_TIMETICKS, RONLY, var_system, 1, {3}},
@@ -345,7 +345,7 @@ init_system_mib(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/system", system_variables, variable2,
+    REGISTER_MIB("mibII/system", system_variables, variable1,
                  system_variables_oid);
 
     if (++system_module_count == 3)

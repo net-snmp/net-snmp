@@ -61,7 +61,7 @@ static int      numEntries = 0;
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable2 sysORTable_variables[] = {
+struct variable1 sysORTable_variables[] = {
     {SYSORTABLEID, ASN_OBJECT_ID, RONLY, var_sysORTable, 1, {2}},
     {SYSORTABLEDESCR, ASN_OCTET_STR, RONLY, var_sysORTable, 1, {3}},
     {SYSORTABLEUPTIME, ASN_TIMETICKS, RONLY, var_sysORTable, 1, {4}}
@@ -90,15 +90,15 @@ init_sysORTable(void)
         (void) register_mib_priority("mibII/sysORTable",
                                      (struct variable *)
                                      sysORTable_variables,
-                                     sizeof(struct variable2),
+                                     sizeof(struct variable1),
                                      sizeof(sysORTable_variables) /
-                                     sizeof(struct variable2),
+                                     sizeof(struct variable1),
                                      sysORTable_variables_oid,
                                      sizeof(sysORTable_variables_oid) /
                                      sizeof(oid), 1);
     else
 #endif
-        REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2,
+        REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable1,
                      sysORTable_variables_oid);
 
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE

@@ -47,7 +47,7 @@ int             old_snmp_enableauthentraps;
  * define the structure we're going to ask the agent to register our
  * information at 
  */
-struct variable2 snmp_variables[] = {
+struct variable1 snmp_variables[] = {
     {SNMPINPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {1}},
     {SNMPOUTPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {2}},
     {SNMPINBADVERSIONS, ASN_COUNTER, RONLY, var_snmp, 1, {3}},
@@ -110,7 +110,7 @@ init_snmp_mib(void)
     /*
      * register ourselves with the agent to handle our mib tree 
      */
-    REGISTER_MIB("mibII/snmp", snmp_variables, variable2,
+    REGISTER_MIB("mibII/snmp", snmp_variables, variable1,
                  snmp_variables_oid);
 
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE

@@ -59,6 +59,15 @@ struct subtree {
  * structures can be created with lengths tailor made to a particular
  * application.  The first 5 elements of the structure must remain constant.
  */
+struct variable1 {
+    u_char          magic;      /* passed to function as a hint */
+    u_char          type;       /* type of variable */
+    u_short         acl;        /* access control list for variable */
+    FindVarMethod  *findVar;    /* function that finds variable */
+    u_char          namelen;    /* length of name below */
+    oid             name[1];    /* object identifier of variable */
+};
+
 struct variable2 {
     u_char          magic;      /* passed to function as a hint */
     u_char          type;       /* type of variable */
@@ -66,6 +75,15 @@ struct variable2 {
     FindVarMethod  *findVar;    /* function that finds variable */
     u_char          namelen;    /* length of name below */
     oid             name[2];    /* object identifier of variable */
+};
+
+struct variable3 {
+    u_char          magic;      /* passed to function as a hint */
+    u_char          type;       /* type of variable */
+    u_short         acl;        /* access control list for variable */
+    FindVarMethod  *findVar;    /* function that finds variable */
+    u_char          namelen;    /* length of name below */
+    oid             name[3];    /* object identifier of variable */
 };
 
 struct variable4 {
