@@ -19,7 +19,7 @@ else
       echo @MODULE_LIST@
       ;;
     --cflags)
-      echo @CFLAGS@
+      echo @CFLAGS@ -I. -I@includedir@
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
