@@ -331,6 +331,7 @@ AC_ARG_WITH(out_mib_modules,
                              (supports self monitoring and notification 
                               delivery when error conditions are found)
     smux                   smux support to allow subagents to attach to snmpd.
+    mibII/mta_sendmail     Sendmail statistics monitoring (MTA-MIB)
     misc/ipfwacc           accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains  firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
