@@ -13,6 +13,10 @@
 #include <strings.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include <net-snmp/library/data_list.h>
 
 /***********************************************************************/
