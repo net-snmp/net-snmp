@@ -188,7 +188,7 @@ netsnmp_get_watched_timestamp_handler(void)
 
 int
 netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
-                                   marker_t *timestamp)
+                                   marker_t timestamp)
 {
     netsnmp_mib_handler *whandler;
 
