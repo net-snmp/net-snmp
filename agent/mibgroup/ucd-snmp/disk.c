@@ -533,6 +533,13 @@ find_device(char *path)
     copy_nword(fstab->fs_spec, device,
 	       sizeof(device));
   }
+  endfsent();
+  if (device[0] != '\0') {
+     /*
+      * dummy clause for else below
+      */
+   }
+
 #elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
     copy_word(statf.f_mntfromname, device);
@@ -545,9 +552,6 @@ find_device(char *path)
 	    path);
     config_pwarn(tmpbuf);
   }
-#if HAVE_FSTAB_H
-  endfsent();
-#endif
 #else
   config_perror("'disk' checks not supported on this architecture.");
 #endif                   /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */  
