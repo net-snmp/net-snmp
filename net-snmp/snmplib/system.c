@@ -252,9 +252,9 @@ int gettimeofday(struct timeval *tv,
     struct _timeb timebuffer;
 
     _ftime(&timebuffer);
-    tv->tv_usec = timebuffer.millitm;
+    tv->tv_usec = timebuffer.millitm * 1000;
     tv->tv_sec = timebuffer.time;
-    return(1);
+    return(0);
 }
 #endif
 
