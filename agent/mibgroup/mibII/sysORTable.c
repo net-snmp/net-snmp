@@ -51,7 +51,6 @@
 #include "agentx/client.h"
 #endif
 
-extern struct timeval starttime;
 
 struct timeval sysOR_lastchange;
 static struct sysORTable *table=NULL;
@@ -113,7 +112,6 @@ var_sysORTable(struct variable *vp,
 		size_t *var_len,
 		WriteMethod **write_method)
 {
-  struct timeval diff;
   int i;
   struct sysORTable *ptr;
 
@@ -141,18 +139,7 @@ var_sysORTable(struct variable *vp,
       return (u_char *) ptr->OR_descr;
 
     case SYSORTABLEUPTIME:
-      ptr->OR_uptime.tv_sec--;
-      ptr->OR_uptime.tv_usec += 1000000L;
-      diff.tv_sec = ptr->OR_uptime.tv_sec - 1 - starttime.tv_sec;
-      diff.tv_usec = ptr->OR_uptime.tv_usec + 1000000L - starttime.tv_usec;
-      if (diff.tv_usec > 1000000L){
-        diff.tv_usec -= 1000000L;
-        diff.tv_sec++;
-      }
-      if ((diff.tv_sec * 100) + (diff.tv_usec / 10000) < 0)
-        long_return = 0;
-      else
-        long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+      long_return = timeval_uptime( &ptr->OR_uptime );
       return ((u_char *) &long_return);
 
     default:
@@ -195,6 +182,7 @@ int register_sysORTable_sess(oid *oidin,
   }
   memcpy((*ptr)->OR_oid, oidin, sizeof(oid)*oidlen);
   gettimeofday(&((*ptr)->OR_uptime), NULL);
+  gettimeofday(&(sysOR_lastchange), NULL);
   (*ptr)->OR_sess = ss;
   (*ptr)->next = NULL;
   numEntries++;
@@ -242,6 +230,7 @@ int unregister_sysORTable_sess(oid *oidin,
       free( (*ptr)->OR_oid );
       free( (*ptr) );
       numEntries--;
+      gettimeofday(&(sysOR_lastchange), NULL);
       found = SYS_ORTABLE_UNREGISTERED_OK;
       break;
     }
@@ -281,7 +270,7 @@ void unregister_sysORTable_by_session(struct snmp_session *ss)
         free( ptr->OR_oid );
         free( ptr );
         numEntries--;
-
+        gettimeofday(&(sysOR_lastchange), NULL);
     } 
     else
       prev = ptr;
