@@ -63,6 +63,7 @@ SOFTWARE.
 #include "system.h"
 #include "parse.h"
 #include "asn1.h"
+#include "snmp_api.h"
 #include "mib.h"
 
 /* A quoted string value-- too long for a general "token" */
