@@ -250,7 +250,6 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     (source dir)\win32\dist\htmlhelp\Developer FAQ.html
     (source dir)\win32\dist\htmlhelp\FAQ.html
     (source dir)\win32\dist\htmlhelp\Help Caveats.html
-    (source dir)\win32\dist\htmlhelp\Installation.html
     (source dir)\win32\dist\htmlhelp\Introduction.html
     (source dir)\win32\dist\htmlhelp\Net-SNMP.hhc
     (source dir)\win32\dist\htmlhelp\Net-SNMP.hhp
@@ -278,7 +277,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     Only add the relevent section to each file from the .options files
     created above, ensure the font is set to fixed width.
 
-4.  Update the Build section in Installation.html
+4.  Update the Build Information in README.txt 
 
 5.  Run HTML Workshop
 
@@ -300,8 +299,6 @@ Combining the binaries, HTMLHelp and README files
 
     (source dir)\COPYING
     c:\temp\Net-SNMP\Net-SNMP.chm
-
-3.  Update the Build section in README-FIRST.txt 
 
 
 Bulding a NullSoft installer package

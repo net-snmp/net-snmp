@@ -42,7 +42,7 @@ var ICONS_GROUP
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\docs\README-FIRST.txt"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.txt"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -146,7 +146,6 @@ Section "Main (Applications, Documentation, and MIBs)" SEC01
   File "share\snmp\mibs\UCD-SNMP-MIB-OLD.txt"
   File "share\snmp\mibs\UDP-MIB.txt"
   SetOutPath "$INSTDIR\docs"
-  File "docs\README-FIRST.txt"
   File "docs\COPYING"
   File "docs\Net-SNMP.chm"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmp-data"
@@ -342,7 +341,6 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\net-snmp-config.h"
   Delete "$INSTDIR\include\net-snmp\agent\mib_module_config.h"
   Delete "$INSTDIR\docs\COPYING"
-  Delete "$INSTDIR\docs\README-FIRST.txt"
   Delete "$INSTDIR\docs\Net-SNMP.chm"
   Delete "$INSTDIR\bin\snmpwalk.exe"
   Delete "$INSTDIR\bin\snmpbulkget.exe"
