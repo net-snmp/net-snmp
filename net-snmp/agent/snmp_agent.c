@@ -1066,6 +1066,7 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
                 return SNMPERR_GENERR; /* shouldn't get here */
         }
     } else {
+        /* for non-SET modes, set the type to NULL */
         if (!MODE_IS_SET(asp->pdu->command))
             varbind_ptr->type = ASN_NULL;
 
@@ -1079,7 +1080,7 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
         if (tp->cacheid > -1 && tp->cacheid <= asp->treecache_num &&
             asp->treecache[tp->cacheid]->subtree == tp) {
             /* we have already added a request to this tree
-                   pointer before */
+               pointer before */
 					cacheid = tp->cacheid;
 
         } else {
