@@ -87,6 +87,7 @@ TABLE OF CONTENTS
    What about 'dlmod' - what's that about?
    Which should I use?
    Can I use AgentX when running under Windows?
+   Can I use AgentX (or an embedded SNMP agent) in a threaded application?
    How can I run AgentX with a different socket address?
    How can I combine two copies of the 'mib2' tree from separate subagents?
    What traps are sent by the agent?
@@ -1814,7 +1815,9 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   agent includes the possibility of acting as a SMUX master agent, but the
   suite does not include a subagent API.   Note that the SMUX protocol has
   essentially been superceded by AgentX, but is still provided in order to
-  support existing SMUX subagents.
+  support existing SMUX subagents.  However the core developers have little
+  experience (and even less interest!) in this code, so assistance with
+  SMUX-related problems is likely to be somewhat limited.
     See the file 'agent/mibgroup/README.smux' for details.
 
     AgentX uses a more compact (and simpler) packet format, with a richer
@@ -1927,6 +1930,30 @@ Can I use AgentX when running under Windows?
   a system *anywhere* on the network (or even from remote networks) to
   register as an AgentX subagent.  This could potentially be used to
   hijack the agent, or provide false information.
+
+
+
+Can I use AgentX (or an embedded SNMP agent) in a threaded application?
+-----------------------------------------------------------------------
+
+  With care.
+
+  As mentioned in the earlier "thread-safe" FAQ entry, the Net-SNMP
+  agent (including the AgentX subagent) has not been designed for
+  threaded operation.  In particular, it makes use of various global
+  variables without attempting to protect them against simultaneous
+  use.  This means that it is *NOT* safe to have SNMP or AgentX
+  related processing in two separate threads.  This also applies to
+  handling GET (and SET) processing in one thread, and generating traps
+  in another.  This is still vulnerable to the usual threading problems.
+
+    However, as long as *all* of the SNMP-related activity is limited
+  to the one thread, then there should be no reason why this cannot
+  safely communicate with other threads within the same application,
+  using private (thread-safe) mechanisms.
+
+    But in terms of the Net-SNMP-provided code, the agent (and AgentX
+  subagent) should *not* be regarded as thread-safe.
 
 
 
@@ -2150,17 +2177,22 @@ How can I stop other people getting at my agent?
   specified.  You will need to set appropriate values for both NETWORK
   and COMMUNITY in this file before using it.
     This mechanism can also be used to control access much more precisely.
-  (see the next questions for details)
+  (see the next few questions for details)
 
   Other options include:
 	- Blocking access to port 161 from outside your organisation
 		(using filters on network routers)
+	- Using kernel-level network filtering on the system itself
+                (such as IPTables)
 	- Configuring TCP wrapper support ("--with-libwrap")
 		This uses the TCP 'libwrap' library (available separately)
 		to allow/deny access via /etc/hosts.{allow,deny}
 
   For strict security you should use only SNMPv3, which is the secure
-  form of the protocol.
+  form of the protocol.  However, note that the agent access control
+  mechanisms does not restrict SNMPv3 traffic by location - an SNMPv3
+  request will be accepted or rejected based purely on the user
+  authentication, irrespective of where it originated.
 
 
 
