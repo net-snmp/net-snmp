@@ -1436,6 +1436,7 @@ dnl
 dnl XXX  Broken on FreeBSD where these are #define'd in <net/if.h>
 dnl
 AC_CHECK_IFNET_FOR(if_baudrate)
+AC_CHECK_IFNET_FOR(if_baudrate.ifs_value)
 AC_CHECK_IFNET_FOR(if_speed)
 AC_CHECK_IFNET_FOR(if_type)
 AC_CHECK_IFNET_FOR(if_imcasts)
