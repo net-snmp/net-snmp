@@ -496,7 +496,7 @@ ifTable_cache_load(netsnmp_container * container)
          * TODO:
          * update, replace or delete, if needed.
          */<font color=blue>
-        rowreq_ctx->data.ifInDiscards = snd_drop;
+        rowreq_ctx->data.ifInDiscards = rec_drop;
 </font>
         /*
          * TODO: setup/save data for ifInErrors
@@ -709,7 +709,7 @@ ifTable_row_prep(ifTable_rowreq_ctx * rowreq_ctx)
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Tue Jun 22 16:25:05 EDT 2004
+Last modified: Sun Aug 29 00:10:56 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
