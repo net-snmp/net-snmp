@@ -398,7 +398,7 @@ vacm_parse_view(const char *token, char *param)
         return;
     }
     suboid_len = MAX_OID_LEN;
-    if (!read_objid(subtree, suboid, &suboid_len)) {
+    if (!snmp_parse_oid(subtree, suboid, &suboid_len)) {
         config_perror("bad SUBTREE object id");
         return;
     }
