@@ -110,6 +110,11 @@ DLL_IMPORT extern struct tree *Mib;
 #define STR_BUF_SIZE 1024
 #define ENG_ID_BUF_SIZE 32
 
+#define SYS_UPTIME_OID_LEN 9
+#define SNMP_TRAP_OID_LEN 11
+static oid sysUpTime[SYS_UPTIME_OID_LEN] = {1,3,6,1,2,1,1,3,0};
+static oid snmpTrapOID[SNMP_TRAP_OID_LEN] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+
 /* these should be part of transform_oids.h ? */
 #define USM_AUTH_PROTO_MD5_LEN 10
 #define USM_AUTH_PROTO_SHA_LEN 10
@@ -2350,12 +2355,10 @@ err:
 
 
 int
-snmp_trapV2(sess_ref,dstParty,srcParty,trap_oid,uptime,varlist_ref)
+snmp_trapV2(sess_ref,trap_oid,uptime,varlist_ref)
         SV *	sess_ref
-        char *	dstParty
-        char *	srcParty
-        char *	trap_oid
-        int	uptime
+        char *	trap_oid 
+        long	uptime  
         SV *	varlist_ref
 	PPCODE:
 	{
@@ -2384,11 +2387,9 @@ snmp_trapV2(sess_ref,dstParty,srcParty,trap_oid,uptime,varlist_ref)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
+	   char uptime_str[STR_BUF_SIZE];
 
            oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
-
-                        warn("error: NOT IMPLEMENTED");
-	                goto err;
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -2405,6 +2406,16 @@ snmp_trapV2(sess_ref,dstParty,srcParty,trap_oid,uptime,varlist_ref)
 
               varlist = (AV*) SvRV(varlist_ref);
               varlist_len = av_len(varlist);
+	      /************************************************/
+	      sscanf(uptime_str,"%lu",uptime);
+              __add_var_val_str(pdu, sysUpTime, SYS_UPTIME_OID_LEN,
+				uptime_str, strlen(uptime_str), TYPE_TIMETICKS);
+
+              __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN, 
+				trap_oid ,strlen(trap_oid) ,TYPE_OBJID);
+
+	      /******************************************************/
+
 	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
@@ -2451,12 +2462,17 @@ snmp_trapV2(sess_ref,dstParty,srcParty,trap_oid,uptime,varlist_ref)
                  } /* if var_ref is ok */
               } /* for all the vars */
 
-	      status = __send_sync_pdu(ss, pdu, &response,
+	      /*    status = __send_sync_pdu(ss, pdu, &response,
 				       NO_RETRY_NOSUCH,
                                        *err_str_svp, *err_num_svp,
-                                       *err_ind_svp);
+                                       *err_ind_svp);  */
 
-              if (response) snmp_free_pdu(response);
+              if (snmp_send(ss, pdu) == 0) {
+	         snmp_free_pdu(pdu);
+                 snmp_perror("snmptrap");
+              }
+
+              /*if (response) snmp_free_pdu(response); */
 
               XPUSHs(sv_2mortal(newSViv(ss->s_snmp_errno)));
            } else {
