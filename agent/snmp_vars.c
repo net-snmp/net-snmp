@@ -4516,12 +4516,14 @@ union {
 #endif
 #if defined(mips)
         vstodb(0, CLSIZE, proc->p_smap, &db, 1);
-#elif !defined(ibm032) || !defined(BSD4_3)
+#else
+#if !defined(ibm032) || !defined(BSD4_3)
 	vstodb(0, CLSIZE, &u.u_smap, &db, 1);
 #else
      	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
 #endif
-
+#endif
+        
 #ifdef mips
 	lseek(swap, (long)dtob(db.db_base), 0);
 #else
