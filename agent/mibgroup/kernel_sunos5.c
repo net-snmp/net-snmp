@@ -700,7 +700,8 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 {
     int 		i, ret, idx = 1;
     int 		ifsd;
-    char 		buf[10240];
+    static char 	*buf = NULL;
+    static int          bufsize = 0;
     struct ifconf 	ifconf;
     struct ifreq 	*ifrp;
     mib2_ifEntry_t	*ifp;
@@ -709,13 +710,27 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     found_e		result = NOT_FOUND;
 
     if ((ifsd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	return (-1);
+	return -1;
+    if (!buf) {
+	bufsize = 10240;
+	buf = malloc(bufsize);
+	if (!buf) {
+	    ret = -1;
+	    goto Return;
+	}
+    }
     ifconf.ifc_buf = buf;
-    ifconf.ifc_len = sizeof(buf);
-    if (ioctl(ifsd, SIOCGIFCONF, &ifconf) == -1) {
- snmp_log(LOG_ERR, "cannot SIOCGIFCONF - increase buffer size\n");
-	ret = -1;
-	goto Return;
+    ifconf.ifc_len = bufsize;
+    while (ioctl(ifsd, SIOCGIFCONF, &ifconf) == -1) {
+	bufsize += 10240;
+	free(buf);
+	buf = malloc(bufsize);
+	if (!buf) {
+	    ret = -1;
+	    goto Return;
+	}
+	ifconf.ifc_buf = buf;
+	ifconf.ifc_len = bufsize;
     }
  Again:
     for (i = 0, ifp = (mib2_ifEntry_t *)ifbuf, ifrp = ifconf.ifc_req;
