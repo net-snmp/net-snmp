@@ -1,21 +1,22 @@
-.TH SNMPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmpd.conf - configuration file for the ucd-snmp SNMP agent.
+DATADIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
 .SH DESCRIPTION
 .B snmpd.conf
-is the configuration file which defines how the ucd-smnp SNMP agent
+is the configuration file which defines how the Net-SNMP SNMP agent
 operates.  These files may contain any of the directives found in the
 DIRECTIVES section below.  This file is not required for the agent to
-operate and report mib entries.
+operate and respond to requests.
 .SH PLEASE READ FIRST
-First, make sure you have read the snmp_config(5) manual page that
-describes how the ucd-snmp configuration files operate, where they
-are located and how they all work together.
+First, make sure you have read the
+.I snmp_config(5) 
+manual page that describes how the Net-SNMP configuration files
+operate, where they are located and how they all work together.
 .PP
 Also, you might consider looking into the
 .I snmpconf
-application (perl script) which can help you build a snmpd.conf file
+application (perl script) which can help you build an snmpd.conf file
 by prompting you for information.  You should try it.  Really.  Go
 ahead.  Right now.  Run:
 .RS
@@ -25,7 +26,7 @@ ahead.  Right now.  Run:
 to get you started.
 .SH EXTENSIBLE-MIB
 .PP
-The ucd-snmp SNMP agent reports much of its information through
+The Net-SNMP SNMP agent reports much of its information through
 queries to the EXTENSIBLEDOTMIB section of the mib tree.  Every mib in
 this section has the following table entries in it.
 .IP ".MIBINDEX -- index"
@@ -39,7 +40,7 @@ is detected for this table entry.
 .IP ".ERRORMSG -- errorMsg"
 This is a DISPLAY-STRING describing any error triggering the errorFlag above.
 .IP ".ERRORFIX -- errorFix"
-If this entry is SNMPset to the integer value of 1 AND the errorFlag
+If this entry is set to the integer value of 1 AND the errorFlag
 defined above is indeed a 1, a program or script will get executed
 with the table entry name from above as the argument.  The program to
 be executed is configured in the config.h file at compile time.
@@ -48,11 +49,12 @@ be executed is configured in the config.h file at compile time.
 .IP "proc NAME MAX"
 .IP "proc NAME MAX MIN"
 .IP
-Checks to see if the NAME'd processes are running on the agent's
+Checks to see if processes called NAME are running on the agent
 machine.  An error flag (1) and a description message are then passed
 to the EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORFLAG and
-EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG mib columns (respectively) if the
-NAME'd program is not found in the process table as reported by PSCMD.
+EXTENSIBLEDOTMIB.PROCMIBNUM.1.ERRORMSG mib columns (respectively) if
+the NAME'd program is not found in the process table as reported by
+PSCMD.
 .IP
 If MAX and MIN are not specified, MAX is assumed to be 
 .B infinity
@@ -155,12 +157,12 @@ uses the module name prefix NAME.
 .IP "dlmod NAME PATH"
 .IP
 .SH ACCESS CONTROL
-snmpd supports the View-Based Access Control Model (vacm)
-as defined in RFC 2275.
-To this end, it recognizes the following keywords in the configuration
-file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR as well 
-as some easier-to-use wrapper directives: \fIrocommunity\fR,
-\fIrwcommunity\fR, \fIrouser\fR, \fIrwuser\fR.
+.B snmpd
+supports the View-Based Access Control Model (VACM) as defined in RFC
+2275.  To this end, it recognizes the following keywords in the
+configuration file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and
+\fIview\fR as well as some easier-to-use wrapper directives:
+\fIrocommunity\fR, \fIrwcommunity\fR, \fIrouser\fR, \fIrwuser\fR.
 .IP "rocommunity COMMUNITY [SOURCE] [OID]"
 .IP "rwcommunity COMMUNITY [SOURCE] [OID]"
 These create read-only and read-write communities that can be used to
@@ -302,22 +304,19 @@ a notWritable error response.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
-.IP "agentaddress [(udp|tcp):]port[@address][,...]"
-Makes the agent list on the specified list of sockets instead of the
-default port, which is port 161.  Multiple ports can be separated by
-commas.  Transports can be specified by prepending the port number
-with the transport name ("udp" or "tcp") followed by a colon.
-Finally, to bind to a particular interface, you can specify the
-address you want it to bind with.
-For example, specifying
-.I "agentaddress 161,tcp:161,9161@localhost"
-will make the agent listen on: udp port 161 for any address, tcp port
-161 for any address, and udp port 9161 on only the interface
-associated with the localhost address.  Note that the 
-.I "-T"
-flag changes the default transport mapping to use (in the
-above example, the default transport mapping is 
-.I udp.
+.IP "agentaddress [<transport-specifier>:]<transport-address>[,...]"
+Makes the agent list on the specified comma-separated list of
+listening addresses instead of the default behaviour, which is to
+listen on UDP port 161 on all IPv4 interfaces.  See the section 
+.B LISTENING ADDRESSES
+in the
+.I snmpd(1)
+manual page for more information about the format of listening
+addresses.  For example, specifying
+.I "agentaddress 161,tcp:161,localhost:9161"
+will make the agent listen on UDP port 161 on all IPv4 interfaces, TCP
+port 161 on all IPv4 interfaces and UDP port 9161 only on the interface
+associated with the localhost address.
 .IP "agentgroup groupid"
 Change to this gid after opening port. The groupid may refer to a group
 by name or a number if the group number starts with '#'. For example,
@@ -541,7 +540,7 @@ See the EXAMPLE.CONF file in the top level source directory for a more
 detailed example of how the above information is used in real
 examples.
 .SH "RE-READING snmpd.conf and snmpd.local.conf"
-The ucd-snmp agent can be forced to re-read its configuration files.
+The Net-SNMP agent can be forced to re-read its configuration files.
 It can be told to do so by one of two ways:
 .IP 1.
 An snmpset of integer(1) to UCD-SNMP-MIB::versionUpdateConfig.0

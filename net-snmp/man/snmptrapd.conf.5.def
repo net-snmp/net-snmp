@@ -1,19 +1,21 @@
 .TH SNMPTRAPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-DATADIR/snmp/snmptrapd.conf - configuration file for the ucd-snmp trap demon.
+DATADIR/snmp/snmptrapd.conf - configuration file for the Net-SNMP trap daemon.
 .SH DESCRIPTION
 .B snmptrapd.conf
-is the configuration file(s) which define how the ucd-snmp SNMP trap
-receiving demon operates when it receives a trap.  These files may
+is the configuration file(s) which define how the Net-SNMP SNMP trap
+receiving daemon operates when it receives a trap.  These files may
 contain any of the directives found in the
 .B DIRECTIVES
-section below.  This file is not required for the demon to operate,
+section below.  This file is not required for the daemon to operate,
 receive, or report traps.  It is used solely as a method of providing
-extensibility to the trap demon.
+extensibility to the trap daemon.
 .SH PLEASE READ FIRST
-First, make sure you have read the snmp_config(5) manual page that
-describes how the ucd-snmp configuration files operate, where they
+First, make sure you have read the
+.I snmp_config(5)
+manual page that
+describes how the Net-SNMP configuration files operate, where they
 are located and how they all work together.
 .SH DIRECTIVES
 .IP "traphandle OID|default PROGRAM [ARGS ...]"
@@ -30,7 +32,7 @@ following format, one entry per line:
 .RS
 .IP HOSTNAME
 The name of the host in question that sent the trap, as determined by
-gethostbyaddr().
+.IR gethostbyaddr(3) .
 .br
 .IP IPADDRESS
 The IP address of the host that sent the trap.
@@ -62,7 +64,7 @@ snmptrapd.conf from snmpd.conf.
 .RE
 .IP "format1 format"
 The format used to print a SNMPv1 TRAP message. See
-.IR snmptrapd (8)
+.IR snmptrapd(8)
 for the layout characters available.
 .RE
 .IP "format2 format"
@@ -70,7 +72,7 @@ The format used to print a SNMPv2 TRAP2 or INFORM message (note that
 the SNMPv3 protocol uses SNMPv2 style TRAPs and INFORMs).
 .SH NOTES
 .IP o
-The demon blocks on the executing traphandle commands.  (This should
+The daemon blocks on the executing traphandle commands.  (This should
 be fixed in the future with an appropriate signal catch and wait()
 combination).
 .SH "SEE ALSO"

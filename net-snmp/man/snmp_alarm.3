@@ -107,7 +107,7 @@ represented by
 .B hr
 stand for "high resolution").  The operation of this function is
 dependent on the provision of the
-.BR "setitimer"(2)
+.IR setitimer(2)
 system call by the operating system.  If this system call is not
 available, the alarm will be scheduled as if
 .B snmp_alarm_register()
@@ -130,9 +130,9 @@ function which you should call instead.
 The default behaviour of the snmp_alarm subsystem is to request
 .B SIGALRM
 signals from the operating system via the
-.BR "alarm"(2)
+.IR alarm(2)
 or
-.BR "setitimer"(2)
+.IR setitimer(2)
 system calls.  This has the disadvantage, however, that no other part
 of the application can use the
 .B SIGLARM
@@ -143,7 +143,7 @@ use the
 functionality, the snmp_alarm subsystem will not work correctly).
 .PP
 If your application runs a 
-.BR "select"(2)-based
+.IR select(2) -based
 event loop, however, there is no need to use
 .BR "SIGALRM"
 for the snmp_alarm subsystem, leaving it available for other parts of
@@ -159,26 +159,22 @@ Then,
 .BR snmp_select_info()
 takes alarms into account when calculating the timeout value to be
 used for
-.BR "select"(2).
+.IR select(2) .
 All you need to do is call
 .BR run_alarms()
 when
-.BR "select"(2)
+.IR select(2)
 times out (return value of zero).  This is the approach taken in the
 agent; see
 .IR "snmpd.c".
 Furthermore, when using this method, high resolution alarms do not
 depend on the presence of the
-.BR "setitimer"(2)
+.IR setitimer(2)
 system call, although overall precision is of course still determined
 by the underlying operating system.  Recommended.
 .SH "SEE ALSO"
-.BR "snmp_api"(3),
-.BR "default_store"(3),
-.BR "snmp_select_info"(3),
-.BR "alarm"(2),
-.BR "setitimer"(2),
-.BR "select"(2)
+snmp_api(3), default_store(3), snmp_select_info(3), alarm(2),
+setitimer(2), select(2)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

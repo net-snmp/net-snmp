@@ -89,7 +89,7 @@ you will need to link against the libucdmibs library as well.
 Logs error output from the SNMP agent to the standard error stream.
 .IP "ds_set_boolean()"
 Please see the
-.BR "default_store"(3)
+.IR default_store(3)
 manual page for more information
 about this API.
 .IP "init_agent(char *name)"
@@ -108,9 +108,8 @@ the
 .I name
 string that you passed in.  It can be used to configure access
 control, for instance.   Please see the
-.BR "read_config" "(3), " "snmp_config" "(5), and " "snmpd.conf"(5)
-manual pages for further details on
-this subject.
+.IR read_config(3) ", " snmp_config(5) ", and " snmpd.conf(5)
+manual pages for further details on this subject.
 .IP "init_master_agent(void)"
 Initializes the master agent and causes it to listen for SNMP requests 
 on its default UDP port of 161.
@@ -120,16 +119,11 @@ if some are found.  If
 .I block
 is non-zero, the function call will block until a packet arrives or an 
 alarm must be run (see
-.BR "snmp_alarm" "(3)). The return value from this"
-function is a positive integer if packets were processed, zero if an
-alarm occurred and -1 if an error occured.
+.IR snmp_alarm(3) ).
+The return value from this function is a positive integer if packets
+were processed, zero if an alarm occurred and -1 if an error occured.
 .IP "snmp_shutdown(char *name);"
 This shuts down the agent, saving any needed persistent storage, etc.
 .SH "SEE ALSO"
-.BR "select"(2), 
-.BR "snmp_api"(3),
-.BR "default_store"(3),
-.BR "snmp_alarm"(3),
-.BR "read_config(3)",
-.BR "snmp_config"(5),
-.BR "snmpd.conf"(5)
+select(2), snmp_api(3), default_store(3), snmp_alarm(3), read_config(3),
+snmp_config(5), snmpd.conf(5)
