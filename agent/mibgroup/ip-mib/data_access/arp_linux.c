@@ -60,7 +60,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
     int             rc = 0;
     netsnmp_arp_entry *entry;
     
-    assert(NULL != container);
+    netsnmp_assert(NULL != container);
 
 #define PROCFILE "/proc/net/arp"
     if (!(in = fopen(PROCFILE, "r"))) {
