@@ -2630,8 +2630,8 @@ snmp_sess_async_send(void *sessp,
         /* not supported in SNMPv1 and SNMPsec */
 	if ((pdu->version == SNMP_VERSION_1) ||
                 (pdu->version == SNMP_VERSION_sec)) {
-	    snmp_errno = SNMPERR_V1_IN_V2;
-	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
+	    snmp_errno = SNMPERR_V2_IN_V1;
+	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
 	if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
