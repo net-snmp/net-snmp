@@ -157,6 +157,9 @@ struct snmp_session {
     u_char  *community;	        /* community for outgoing requests. */
     size_t  community_len;      /* Length of community name. */
 
+    size_t  rcvMsgMaxSize;	/*  Largest message to try to receive.  */
+    size_t  sndMsgMaxSize;	/*  Largest message to try to send.  */
+  
 	/*
 	 * SNMPv3 fields
 	 */
@@ -602,8 +605,6 @@ void snmp_shutdown(const char *type);
 struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u_char, u_char *, size_t);
 struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
 	oid *name, size_t name_length, u_char type, u_char *value, size_t len);
-int hex_to_binary (const char *, u_char *);
-int ascii_to_binary (const char *, u_char *);
 int snmp_add_var (struct snmp_pdu *, oid*, size_t, char, const char *);
 oid  *snmp_duplicate_objid(oid *objToCopy, size_t);
 u_int snmp_increment_statistic(int which);
