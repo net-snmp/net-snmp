@@ -41,7 +41,10 @@
 #if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#if !defined(HAVE_STATVFS) && defined(HAVE_STATFS)
+#if HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+#if (!defined(HAVE_STATVFS)) && defined(HAVE_STATFS)
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -398,7 +401,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   static long long_ret;
   static char errmsg[300];
 
-#if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
+#if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
   struct statvfs vfs;
 #else
 #if HAVE_FSTAB_H
