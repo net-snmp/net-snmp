@@ -1016,7 +1016,7 @@ void
 init_mib __P((void))
 {
     char *prefix;
-    char  *env_var, *entry, path[300];
+    char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
 
     if (Mib) return;
@@ -1028,27 +1028,28 @@ init_mib __P((void))
 
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
-      if (confmibdir != NULL) {
-        if (*confmibdir == '+')
-          sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR,
-                  confmibdir+1);
-        else
-          strcpy(path, confmibdir);
-      } else
-        strcpy(path, DEFAULT_MIBDIRS);
-    } else if ( *env_var == '+' ) {
-      sprintf(path, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+      if (confmibdir != NULL)
+        env_var = strdup(confmibdir);
+      else
+        env_var = strdup(DEFAULT_MIBDIRS);
     } else {
-      strcpy(path, env_var);
+      env_var = strdup(env_var);
+    }
+    if (*env_var == '+') {
+      entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+      free(env_var);
+      env_var = entry;
     }
 
-    DEBUGP("Looking in %s for mibs...\n",path);
+    DEBUGP("Looking in %s for mibs...\n",env_var);
 
-    entry = strtok( path, ENV_SEPARATOR );
+    entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
         entry = strtok( NULL, ENV_SEPARATOR);
     }
+    free(env_var);
 
     init_mib_internals();
 
@@ -1056,52 +1057,51 @@ init_mib __P((void))
 
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
-      if (confmibs != NULL) {
-        if (*confmibs == '+')
-          sprintf(path, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
-                  confmibs+1);
-        else
-          strcpy(path, confmibs);
-      } else
-        strcpy(path, DEFAULT_MIBS);
+      if (confmibs != NULL)
+        env_var = strdup(confmibs);
+      else
+        env_var = strdup(DEFAULT_MIBS);
     } else {
-      if ( *env_var == '+' ) {
-        sprintf(path, "%s%c%s",DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
-      } else {
-        strcpy(path, env_var);
-      }
+      env_var = strdup(env_var);
     }
-    DEBUGP("Looking for mibs... %s\n",path);
-    if (strcmp (path, "ALL") == 0) {
+    if (*env_var == '+') {
+      entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
+      sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+      free(env_var);
+      env_var = entry;
+    }
+
+    DEBUGP("Looking for mibs... %s\n",env_var);
+    if (strcmp (env_var, "ALL") == 0) {
 	read_all_mibs();
     } else {
-	entry = strtok( path, ENV_SEPARATOR );
+	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
 	adopt_orphans();
     }
+    free(env_var);
 
-    path[0] = 0;
     env_var = getenv("MIBFILES");
     if ( env_var == NULL ) {
-      env_var = getenv("MIBFILE");  /* backwards compatibility */
-      if ( env_var == NULL ) {
 #ifdef DEFAULT_MIBFILES
-        strcpy(path, DEFAULT_MIBFILES);
-      } else if ( *path == '+') {
-        sprintf(path, "%s%c%s",DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR, env_var);
-#endif
+      if (*env_var == '+') {
+        entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
+        sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+                env_var+1);
+        env_var = entry;
       } else {
-        strcpy(path, env_var);
+        env_var = strdup(DEFAULT_MIBFILES);
       }
+#endif
     } else {
-      strcpy(path, env_var);
+      env_var = strdup(env_var);
     }
     
-    if ( path[0] != 0 ) {
-      entry = strtok( path, ENV_SEPARATOR );
+    if ( env_var != 0 ) {
+      entry = strtok( env_var, ENV_SEPARATOR );
       while ( entry ) {
         read_mib(entry);
         entry = strtok( NULL, ENV_SEPARATOR);

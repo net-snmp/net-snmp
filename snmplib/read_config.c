@@ -170,7 +170,8 @@ void read_config_with_type(filename, type)
   if (ctmp)
     read_config(filename, ctmp->start, EITHER_CONFIG);
   else
-    DEBUGP("%s: %s: %s\n", type, filename, strerror(errno));
+    DEBUGP("read_config: I have no registrations for type:%s,file:%s\n",
+           type, filename);
 }
 
 void read_config(filename, line_handler, when)
@@ -189,7 +190,7 @@ void read_config(filename, line_handler, when)
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    fprintf(stderr, "ucd-snmp: %s: %s\n", filename, strerror(errno));
+    DEBUGP("ucd-snmp: %s: %s\n", filename, strerror(errno));
     return;
   } else {
     DEBUGP("ucd-snmp: Reading configuration %s\n", filename);
