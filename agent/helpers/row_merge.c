@@ -17,8 +17,8 @@
 
 /** @defgroup row_merge row_merge: Calls sub handlers with request for one row at a time.
  *  @ingroup utilities
- *  This helper splits a whole bunch of requests into chunks based on the row index
- *  that they refer to, and passes all requests for a given row to the lower handlers.
+ *  This helper splits a whole bunch of requests into chunks based on the row
+ *  index that they refer to, and passes all requests for a given row to the lower handlers.
  *  This is useful for handlers that don't want to process multiple rows at the
  *  same time, but are happy to iterate through the request list for a single row.
  *  @{
@@ -67,43 +67,7 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     /*
      * xxx-rks - for sets, should store this info in agent request info, so it
      *           doesn't need to be done for every mode.
-     */
-#if 0
-    /*
-     * create and save structure for set info
-     */
-    request_groups = (netsnmp_container*) netsnmp_agent_get_list_data
-        (agtreq_info, handler_name);
-    if (request_group == NULL) {
-        netsnmp_data_list *tmp;
-        request_group = netsnmp_container_find("request_group:"
-                                               "table_container");
-        request_group->compare = netsnmp_compare_netsnmp_index;
-        request_group->ncompare = netsnmp_ncompare_netsnmp_index;
-
-        DEBUGMSGTL(("table_array", "Grouping requests by oid\n"));
-
-        tmp = netsnmp_create_data_list(handler_name,
-                                       request_group,
-                                       release_netsnmp_request_groups);
-        netsnmp_agent_add_list_data(agtreq_info, tmp);
-        /*
-         * group requests.
-         */
-        group_requests(agtreq_info, requests, request_group, tad);
-    }
-
-    /*
-     * process each group one at a time
-     */
-    context.agtreq_info = agtreq_info;
-    context.tad = tad;
-    context.status = SNMP_ERR_NOERROR;
-    CONTAINER_FOR_EACH(request_group,
-                       (netsnmp_container_obj_func*)process_set_group,
-                       &context);
-#endif
-    /*
+     *
      * XXX - Need some mechanism for specifying the length of the table OID
      *  i.e. where to start looking for shared indexes
      *  N.B: The first subidentifier after the table OID will typically vary,
