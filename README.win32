@@ -771,7 +771,20 @@ Project changes
 
        	#define INET6 1
 
- 2. Continue with the section 'Microsoft Visual C++ - Building"
+ 2. Edit the win32\libsnmp_dll\libsnmp.def file.  All the IPv6 functions will
+    be commented out and will need to be enabled by removing ';IPv6' from the
+    beginning of each line.  
+
+    For example, change:
+
+
+        ;IPv6        netsnmp_udp6_parse_security
+
+    to:
+
+                netsnmp_udp6_parse_security
+
+ 3. Continue with the section 'Microsoft Visual C++ - Building"
 
 
 ***************************************************************************
