@@ -114,4 +114,28 @@ diskIOWrites OBJECT-TYPE
         "The number of write accesses to this device since boot."
     ::= { diskIOEntry 6 }
 
+diskIOLA1 OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The 1 minute average load of disk (%)"
+    ::= { diskIOEntry 9 }
+
+diskIOLA5 OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The 5 minute average load of disk (%)"
+    ::= { diskIOEntry 10 }
+
+diskIOLA15 OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The 15 minute average load of disk (%)"
+    ::= { diskIOEntry 11 }
+
 END
