@@ -175,6 +175,7 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
     callback_hack *ch = (callback_hack *) *opaque;
     struct snmp_pdu *pdu = ch->pdu;
     *opaque = ch->orig_transport_data;
+    free(ch);
 
     DEBUGMSGTL(("transport_callback","hook_send enter\n"));
 
