@@ -3656,10 +3656,6 @@ read_module_replacements(const char *name)
             return 1;
         }
     }
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-			       NETSNMP_DS_LIB_MIB_ERRORS)) {
-        print_module_not_found(name);
-    }
     return 0;
 }
 
@@ -3751,7 +3747,6 @@ read_module_internal(const char *name)
             return MODULE_LOADED_OK;
         }
 
-    snmp_log(LOG_WARNING, "%s: Module not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
@@ -3830,7 +3825,8 @@ struct tree    *
 read_module(const char *name)
 {
     if (read_module_internal(name) == MODULE_NOT_FOUND)
-        read_module_replacements(name);
+        if (!read_module_replacements(name))
+	    print_module_not_found(name);
     return tree_head;
 }
 
