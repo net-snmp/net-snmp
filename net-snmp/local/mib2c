@@ -137,6 +137,14 @@ die "you didn't give me a valid OID to start with" if (!$mibnode);
 $outputName = $mibnode->{'label'} if (!defined($outputName));
 $vars{'name'} = $outputName;
 $vars{'oid'} = $oid;
+$vars{'example_start'} =
+"    /***************************************************/\n" .
+"    /***             START EXAMPLE CODE              ***/\n" .
+"    /***---------------------------------------------***/";
+$vars{'example_end'} =
+"    /***---------------------------------------------***/\n" .
+"    /***              END  EXAMPLE CODE              ***/\n" .
+"    /***************************************************/";
 
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
@@ -233,7 +241,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(defval)/$SNMP::MIB{$vars{$1}}{'defaultValue'}/g;
     $it =~ s/\$(\w+)\.(hashint)/(length($SNMP::MIB{$vars{$1}}{'hint'}) == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(hint)/$SNMP::MIB{$vars{$1}}{'hint'}/g;
-    $it =~ s/\$(\w+)\.(ranges)/($#{$SNMP::MIB{$vars{$1}}{'ranges'}} == 0) ? 0 : 1/eg;
+    $it =~ s/\$(\w+)\.(ranges)/($#{$SNMP::MIB{$vars{$1}}{'ranges'}} == -1) ? 0 : 1/eg;
     # check for enums
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
@@ -243,6 +251,8 @@ sub process_vars {
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
+    # use $@var to put literal '$var'
+    $it =~ s/\$\@(\w+)/\$$1/g;
     return $it;
 }
 
@@ -785,6 +795,19 @@ sub count_tables {
 sub count_columns {
     my $table = shift;
     return $#{$tables{$table}{'column'}} + 1;
+}
+
+sub table_is_writable {
+    my $table = shift;
+    my $column;
+    my $result = 0;
+    foreach $column (@{$tables{$table}{'column'}}) {
+      if($SNMP::MIB{$column}{access} =~ /(ReadWrite|Create|WriteOnly)/) {
+        $result = 1;
+        last;
+      }
+    }
+    return $result;
 }
 
 sub count_indexes {
