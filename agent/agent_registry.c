@@ -169,10 +169,8 @@ netsnmp_subtree_find_first(const char *context_name)
 netsnmp_subtree *
 add_subtree(netsnmp_subtree *new_tree, const char *context_name)
 {
-    oid ccitt[1]           = { 0 };
-    oid iso[1]             = { 1 };
-    oid joint_ccitt_iso[1] = { 2 };
     subtree_context_cache *ptr = SNMP_MALLOC_TYPEDEF(subtree_context_cache);
+    
     if (!context_name) {
         context_name = "";
     }
@@ -180,22 +178,15 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     if (!ptr) {
         return NULL;
     }
-
+    
     DEBUGMSGTL(("subtree", "adding subtree for context: \"%s\"\n",	
 		context_name));
+
     ptr->next = context_subtrees;
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
     context_subtrees = ptr;
 
-    /* register null handlers at the top or else getnext breaks */
-    netsnmp_register_null_context(snmp_duplicate_objid(ccitt, 1), 1,
-                                  context_name);
-    netsnmp_register_null_context(snmp_duplicate_objid(iso, 1), 1,
-                                  context_name);
-    netsnmp_register_null_context(snmp_duplicate_objid(joint_ccitt_iso, 1), 1,
-                                  context_name);
-    
     return ptr->first_subtree;
 }
 
@@ -390,6 +381,23 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 
     if (new_sub == NULL) {
         return MIB_REGISTERED_OK;       /* Degenerate case */
+    }
+
+    if (!netsnmp_subtree_find_first(context_name)) {
+        static int inloop = 0;
+        if (!inloop) {
+            oid ccitt[1]           = { 0 };
+            oid iso[1]             = { 1 };
+            oid joint_ccitt_iso[1] = { 2 };
+            inloop = 1;
+            netsnmp_register_null_context(snmp_duplicate_objid(ccitt, 1), 1,
+                                          context_name);
+            netsnmp_register_null_context(snmp_duplicate_objid(iso, 1), 1,
+                                          context_name);
+            netsnmp_register_null_context(snmp_duplicate_objid(joint_ccitt_iso, 1),
+                                          1, context_name);
+            inloop = 0;
+        }
     }
 
     /*  Find the subtree that contains the start of the new subtree (if
