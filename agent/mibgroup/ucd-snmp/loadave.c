@@ -228,6 +228,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
   r_ave[0] = favenrun[0]/65536.0;
   r_ave[1] = favenrun[1]/65536.0;
   r_ave[2] = favenrun[2]/65536.0;
+  return 0;
 #else
   if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
 #endif
