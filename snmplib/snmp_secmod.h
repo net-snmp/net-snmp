@@ -60,8 +60,7 @@ struct snmp_secmod_incoming_params {
  */
 
 /* free's a given security module's data; called at unregistration time */
-typedef int (SecmodFree)(struct snmp_secmod_def *);
-typedef int (SecmodInitSess)(struct snmp_session *, struct snmp_secmod_def *);
+typedef int (SecmodInitSess)(struct snmp_session *);
 typedef int (SecmodOutMsg)(struct snmp_secmod_outgoing_params *);
 typedef int (SecmodInMsg)(struct snmp_secmod_incoming_params *);
 typedef void (SecmodFreeState) (void *);
@@ -70,11 +69,7 @@ typedef void (SecmodFreeState) (void *);
  * definition of a security module
  */
 struct snmp_secmod_def {
-   /* local data pointer for the security module to use */
-   void *local_data;
-
    /* maniplation functions */
-   SecmodFree      *free_secmod;
    SecmodInitSess  *init_sess_secmod;
 
    /* encoding routines */

@@ -988,7 +988,7 @@ _sess_copy( struct snmp_session *in_session)
     if ((sptr = find_sec_mod(session->securityModel)) != NULL &&
         sptr->init_sess_secmod != NULL) {
         /* security module specific inialization */
-        (*sptr->init_sess_secmod)(session, sptr);
+        (*sptr->init_sess_secmod)(session);
     }
 
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SESSION_INIT,
