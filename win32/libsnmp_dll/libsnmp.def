@@ -216,7 +216,6 @@ EXPORTS
 	snmpv3_local_snmpEngineBoots
 	snmpv3_get_engineID
 	snmpv3_generate_engineID
-	usm_set_reportErrorOnUnknownID
 	get_default_authtype
 	get_default_privtype
 	register_config_handler
