@@ -228,14 +228,6 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-struct token_descr {
-    char *token_name;
-    char  enabled;
-};
-extern int debug_num_tokens;
-extern struct token_descr dbg_tokens[];
-
-
 /*
  * var_tzIntTableFixed():
  *   Handle the tzIntTable as a fixed table of NUMBER_TZ_ENTRIES rows,
