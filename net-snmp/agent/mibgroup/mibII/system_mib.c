@@ -74,7 +74,6 @@ int sysServicesConfiged=0;
 extern oid version_id[];
 extern int version_id_len;
 
-extern struct timeval starttime;
 
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
@@ -225,7 +224,7 @@ var_system(struct variable *vp,
 	   WriteMethod **write_method)
 {
 
-    struct timeval now, diff;
+    struct timeval now;
 
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -240,15 +239,7 @@ var_system(struct variable *vp,
             return (u_char *)version_id;
         case UPTIME:
             gettimeofday(&now, NULL);
-            now.tv_sec--;
-            now.tv_usec += 1000000L;
-            diff.tv_sec = now.tv_sec - starttime.tv_sec;
-            diff.tv_usec = now.tv_usec - starttime.tv_usec;
-            if (diff.tv_usec > 1000000L){
-                diff.tv_usec -= 1000000L;
-                diff.tv_sec++;
-            }
-            long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+	    long_return = timeval_uptime( &now );
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
@@ -272,17 +263,7 @@ var_system(struct variable *vp,
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
         case SYSORLASTCHANGE:
-              diff.tv_sec = sysOR_lastchange.tv_sec - 1 - starttime.tv_sec;
-              diff.tv_usec =
-                sysOR_lastchange.tv_usec + 1000000L - starttime.tv_usec;
-              if (diff.tv_usec > 1000000L){
-                diff.tv_usec -= 1000000L;
-                diff.tv_sec++;
-              }
-              if ((diff.tv_sec * 100) + (diff.tv_usec / 10000) < 0)
-                long_return = 0;
-              else
-                long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+	      long_return = timeval_uptime( &sysOR_lastchange );
               return ((u_char *) &long_return);
 #endif
               
