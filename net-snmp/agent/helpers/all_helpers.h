@@ -4,7 +4,7 @@
 #include "instance.h"
 #include "multiplexer.h"
 #include "null.h"
-#include "debug.h"
+#include "debug_handler.h"
 #include "old_api.h"
 #include "read_only.h"
 #include "serialize.h"
