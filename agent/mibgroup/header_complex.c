@@ -263,7 +263,7 @@ header_complex_get_from_oid(struct header_complex_index *datalist,
 {
     struct header_complex_index *nptr;
     for (nptr = datalist; nptr != NULL; nptr = nptr->next) {
-        if (snmp_oid_compare(searchfor, searchfor_len,
+        if (netsnmp_oid_equals(searchfor, searchfor_len,
                              nptr->name, nptr->namelen) == 0)
             return nptr->data;
     }

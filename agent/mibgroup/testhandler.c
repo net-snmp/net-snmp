@@ -159,7 +159,7 @@ my_test_handler(netsnmp_mib_handler *handler,
 
         switch (reqinfo->mode) {
         case MODE_GET:
-            if (snmp_oid_compare(var->name, var->name_length, myoid1, 6)
+            if (netsnmp_oid_equals(var->name, var->name_length, myoid1, 6)
                 == 0) {
                 snmp_set_var_typed_value(var, ASN_INTEGER,
                                          (u_char *) & accesses,

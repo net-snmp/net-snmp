@@ -317,7 +317,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
                  */
 #if MIB_CLIENTS_ARE_EVIL
                 if (access == NULL) {
-                    if (snmp_oid_compare(requests->requestvb->name,
+                    if (netsnmp_oid_equals(requests->requestvb->name,
                                          requests->requestvb->name_length,
                                          save, savelen) != 0) {
                         DEBUGMSGTL(("old_api", "evil_client: %s\n",
