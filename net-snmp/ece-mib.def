@@ -452,6 +452,7 @@ Version	OBJECT-TYPE
 
 version ::= SEQUENCE {
    versionIndex   INTEGER,
+   versionTag  DisplayString,
    versionDate  DisplayString,
    versionCDate  DisplayString,
    versionIdent  DisplayString
@@ -465,6 +466,14 @@ versionIndex OBJECT-TYPE
           "Index to mib (always 1)"
      ::= { Version 1 } 
 
+versionTag OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "CVS tag keyword"
+     ::= { Version 2 } 
+     
 versionDate OBJECT-TYPE
      SYNTAX  DisplayString
      ACCESS  read-only
