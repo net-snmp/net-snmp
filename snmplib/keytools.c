@@ -93,7 +93,6 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 			 nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
 
         u_int            i, pindex = 0;
-        int		 transform;
 
 	u_char		 buf[USM_LENGTH_KU_HASHBLOCK],
 			*bufp;

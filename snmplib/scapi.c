@@ -103,7 +103,7 @@ sc_init(void)
   int		rval = SNMPERR_SUCCESS;
 
 #ifndef USE_OPENSSL
-#ifdef defined(USE_INTERNAL_MD5)
+#ifdef USE_INTERNAL_MD5
   struct timeval tv;
   
   DEBUGTRACE;
@@ -207,7 +207,7 @@ sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
 #if  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
   int		 rval	 = SNMPERR_SUCCESS;
-  int		 transform, properlength;
+  int		 properlength;
 
   u_int8_t	 buf[SNMP_MAXBUF_SMALL];
 #if  defined(USE_OPENSSL)
@@ -329,7 +329,7 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
 
   if (hashtype == NULL || hashtypelen < 0 || buf == NULL ||
       buf_len < 0 || MAC == NULL ||  MAC_len == NULL ||
-      *MAC_len <= sc_get_properlength(hashtype, hashtypelen))
+      (int)(*MAC_len) <= sc_get_properlength(hashtype, hashtypelen))
     return (SNMPERR_GENERR);
 
 #ifdef USE_OPENSSL 

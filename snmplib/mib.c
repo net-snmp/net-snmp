@@ -1613,7 +1613,7 @@ dump_oid_to_string(oid *objid,
     char *scp;
     char *cp = buf + (strlen(buf));
     scp = cp; kk = 0;
-    for (ii= 0, jj = 0; ii < objidlen; ii++)
+    for (ii= 0, jj = 0; ii < (int)objidlen; ii++)
     {
 	oid tst = objid[ii];
 	if (tst > 254) continue;
@@ -1677,21 +1677,21 @@ _get_symbol(oid *objid,
 		objidlen -= (1+buflen);
 		break;
 	    case TYPE_INTEGER:
-                sprintf(buf, "%lu.", *objid++);
-                while(*buf)
-                    buf++;
+		sprintf(buf, "%lu.", *objid++);
+		while(*buf)
+		    buf++;
 		objidlen--;
-                break;
-            case TYPE_OBJID:
-                buflen = (size_t)*objid;
+		break;
+	    case TYPE_OBJID:
+		buflen = (size_t)*objid;
 		if ( (1+buflen) > objidlen)
 		    goto finish_it;
-                _get_symbol(objid + 1, buflen, NULL, buf, NULL);
-		objidlen -= buflen+1;
-                objid += (1+buflen);
-                break;
+		_get_symbol(objid + 1, buflen, NULL, buf, NULL);
+		objid += (1+buflen);
+		objidlen -= (1+buflen);
+		break;
 	    default:
-                goto finish_it;
+		goto finish_it;
 		break;
 	    }
 	    in_dices = in_dices->next;
