@@ -127,8 +127,8 @@ EXPORTS
 	print_oid_report_enable_symbolic
 	print_oid_report_enable_oid
 	print_oid_report_enable_labeledoid
-	ascii_to_binary
-	hex_to_binary
+;	ascii_to_binary
+;	hex_to_binary
 	get_tc_descriptor
 	setenv
 	find_module
@@ -288,6 +288,7 @@ EXPORTS
 	snmp_strcat
 	sprint_realloc_variable
 	snmp_realloc
+	snmp_tdomain_transport
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
