@@ -608,6 +608,9 @@ asn_parse_header(u_char	*data,
     *type = *bufp;
     bufp = asn_parse_length(bufp + 1, &asn_length);
 
+    if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
+	return NULL;
+
 #ifdef DUMP_PRINT_HEADERS
     DEBUGDUMPSETUP("recv", data, (bufp-data));
     DEBUGMSG(("dumpv_recv", "  Header: 0x%.2X, len = %d (0x%X)\n", *data,
@@ -618,9 +621,6 @@ asn_parse_header(u_char	*data,
     DEBUGMSG(("dumpH_recv","\n"));
 */
 #endif
-
-    if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
-	return NULL;
 
 #ifdef OPAQUE_SPECIAL_TYPES
 
@@ -1283,6 +1283,40 @@ asn_build_bitstring(u_char *data,
     return data + strlength;
 }
 
+#ifdef USE_REVERSE_ASNENCODING
+u_char *
+asn_rbuild_bitstring(u_char *data,
+		    size_t *datalength,
+		    u_char type,
+		    u_char *string,
+		    size_t strlength)
+{
+/*
+ * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
+ */
+    static const char *errpre = "build bitstring";
+    u_char *initdatap = data;
+
+    if (strlength > *datalength)
+        return NULL;
+    data -= strlength;
+    memcpy(data+1, string, strlength);
+    *datalength -= strlength;
+    
+    data = asn_rbuild_header(data, datalength, type, strlength);
+    if (_asn_build_header_check(errpre, data+1, *datalength, strlength))
+	return NULL;
+
+    DEBUGDUMPSETUP("send", data+1, initdatap - data);
+    DEBUGIF("dumpv_send") {
+      char *buf = (char *)malloc(2*strlength);
+      sprint_asciistring(buf, string, strlength);
+      DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n", buf));
+      free (buf);
+    }
+    return data;
+}
+#endif /* USE_REVERSE_ASNENCODING */
 
 /*
  * asn_parse_unsigned_int64 - pulls a 64 bit unsigned long out of an ASN int
@@ -1944,3 +1978,424 @@ asn_build_double(u_char *data,
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
+#ifdef USE_REVERSE_ASNENCODING
+u_char	*
+asn_rbuild_int (u_char *data,
+                size_t *datalength,
+                u_char type,
+                long *intp,
+                size_t intsize)
+{
+    static const char *errpre = "build int";
+    register long integer;
+    register u_long mask;
+    u_char *initdatap = data;
+    int testvalue = (*intp < 0) ? -1 : 0;
+    
+    if (intsize != sizeof (long)){
+	_asn_size_err(errpre, intsize, sizeof(long));
+	return NULL;
+    }
+    integer = *intp;
+
+    (*datalength)--;
+    if (*datalength == 0) {
+        return NULL;
+    }
+    *data-- = integer & 0xff;
+    integer >>= 8;
+    while (integer != testvalue) {
+        (*datalength)--;
+        if (*datalength == 0) {
+            return NULL;
+        }
+        *data-- = integer & 0xff;
+        integer >>= 8;
+    }
+    if ((*(data+1) & 0x80) != (testvalue & 0x80)) {
+        /* make sure left most bit is representational of the rest of
+           the bits that aren't encoded */
+        (*datalength)--;
+        if (*datalength == 0) {
+            return NULL;
+        }
+        *data-- = testvalue & 0xff;
+    }
+
+    intsize = initdatap-data;
+    data = asn_rbuild_header(data, datalength, type, intsize);
+    if (_asn_build_header_check(errpre, data+1, *datalength, intsize))
+	return NULL;
+
+    DEBUGDUMPSETUP("send", data+1, intsize);
+    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
+    return data;
+}
+
+u_char	*
+asn_rbuild_string (u_char *data,
+                   size_t *datalength,
+                   u_char	type,
+                   const u_char *string,
+                   size_t strlength)
+{
+    static const char *errpre = "build string";
+    u_char *initdatap = data;
+
+    if (strlength > *datalength)
+        return NULL;
+    data -= strlength;
+    memcpy(data+1, string, strlength);
+    *datalength -= strlength;
+    
+    data = asn_rbuild_header(data, datalength, type, strlength);
+    if (_asn_build_header_check(errpre, data+1, *datalength, strlength))
+	return NULL;
+
+    DEBUGDUMPSETUP("send", data+1, initdatap - data);
+    DEBUGIF("dumpv_send") {
+        if (strlength == 0) {
+            DEBUGMSG(("dumpv_send", "  String: [NULL]\n"));
+        } else {
+            char *buf = (char *)malloc(2*strlength);
+            sprint_asciistring(buf, string, strlength);
+            DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
+            free (buf);
+        }
+    }
+    return data;
+}
+
+u_char	*
+asn_rbuild_unsigned_int (u_char *data,
+		       size_t *datalength,
+		       u_char type,
+		       u_long *intp,
+		       size_t intsize)
+{
+    static const char *errpre = "build uint";
+    register long integer;
+    register u_long mask;
+    u_char *initdatap = data;
+    
+    if (intsize != sizeof (long)){
+	_asn_size_err(errpre, intsize, sizeof(long));
+	return NULL;
+    }
+    integer = *intp;
+
+    (*datalength)--;
+    if (*datalength == 0) {
+        return NULL;
+    }
+    *data-- = integer & 0xff;
+    integer >>= 8;
+    while (integer != 0) {
+        (*datalength)--;
+        if (*datalength == 0) {
+            return NULL;
+        }
+        *data-- = integer & 0xff;
+        integer >>= 8;
+    }
+    if ((*(data+1) & 0x80) != (0 & 0x80)) {
+        /* make sure left most bit is representational of the rest of
+           the bits that aren't encoded */
+        (*datalength)--;
+        if (*datalength == 0) {
+            return NULL;
+        }
+        *data-- = 0;
+    }
+
+    intsize = initdatap-data;
+    data = asn_rbuild_header(data, datalength, type, intsize);
+    if (_asn_build_header_check(errpre, data+1, *datalength, intsize))
+	return NULL;
+
+    DEBUGDUMPSETUP("send", data+1, intsize);
+    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2X)\n", *intp, *intp));
+    return data;
+}
+
+u_char	*
+asn_rbuild_header (u_char *data,
+                   size_t *datalength,
+                   u_char type,
+                   size_t length)
+{
+    char ebuf[128];
+    
+    data = asn_rbuild_length(data, datalength, length);
+    if (*datalength < 1){
+	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
+	ERROR_MSG(ebuf);
+	return NULL;
+    }
+    *data-- = type;
+    (*datalength)--;
+    return data;
+}
+
+u_char	*
+asn_rbuild_sequence (u_char *data,
+                     size_t *datalength,
+                     u_char type,
+                     size_t length)
+{
+    static const char *errpre = "build seq";
+    char ebuf[128];
+
+    return asn_rbuild_header(data, datalength, type, length);
+}
+
+u_char	*
+asn_rbuild_length (u_char *data,
+		 size_t *datalength,
+		 size_t length)
+{
+    static const char *errpre = "build length";
+    char ebuf[128];
+    
+    u_char    *start_data = data;
+
+    if (length <= 0x7f) {
+        if ((*datalength)-- == 0) {
+	    sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+	    ERROR_MSG(ebuf);
+            return NULL;
+        }
+        *data-- = length;
+    } else {
+        while(length > 0xff) {
+            if ((*datalength)-- == 0) {
+                sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+                ERROR_MSG(ebuf);
+                return NULL;
+            }
+            *data-- = length & 0xff;
+            length >>= 8;
+        }
+        if (*datalength <= 1) {
+            sprintf(ebuf, "%s: bad length < 1 :%d, %d",errpre,*datalength,length);
+            ERROR_MSG(ebuf);
+            return NULL;
+        }
+        *data-- = length & 0xff;
+        *data-- = (start_data - data) | 0x80;
+        *datalength -= 2;
+    }
+    return data;
+}
+
+u_char	*
+asn_rbuild_objid (u_char *data,
+		size_t *datalength,
+		u_char type,
+		oid *objid,
+		size_t objidlength)
+{
+/*
+ * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
+ * subidentifier ::= {leadingbyte}* lastbyte
+ * leadingbyte ::= 1 7bitvalue
+ * lastbyte ::= 0 7bitvalue
+ */
+    size_t asnlength;
+    register oid *op = objid;
+    u_char objid_size[MAX_OID_LEN];
+    register u_long objid_val;
+    u_long first_objid_val;
+    register int i, tmpint;
+    u_char *initdatap = data;
+    char ebuf[128];
+    static const char *errpre = "build objid";
+
+    /* check if there are at least 2 sub-identifiers */
+    if (objidlength == 0) {
+        /* there are not, so make OID have two with value of zero */
+        if (*datalength < 2) {
+            return NULL;
+        }
+        *data-- = 0;
+        *data-- = 0;
+        *datalength -= 2;
+    } else if (objidlength == 1) {
+        /* encode the first value */
+        if ((*datalength)-- < 1) {
+            return NULL;
+        }
+        *data-- = objid[0];
+    } else {
+        for(i = objidlength; i > 2; i--) {
+            tmpint = objid[i-1];
+            if ((*datalength)-- < 1) {
+                return NULL;
+            }
+            *data-- = tmpint & 0x7f;
+            tmpint >>= 7;
+
+            while (tmpint > 0) {
+                if ((*datalength)-- < 1) {
+                    return NULL;
+                }
+                *data-- = ((tmpint & 0x7f) | 0x80);
+                tmpint >>= 7;
+            }
+        }
+
+        /* combine the first two values */
+	if ( op[1] > 40 ) {
+	    ERROR_MSG("build objid: bad second subidentifier");
+	    return NULL;
+	}
+        if ((*datalength)-- < 1) {
+            return NULL;
+        }
+	*data-- = (op[0] * 40) + op[1];
+    }
+    
+    tmpint = initdatap-data;
+    data = asn_rbuild_header(data, datalength, type, tmpint);
+    if (_asn_build_header_check(errpre, data+1, *datalength, tmpint))
+	return NULL;
+
+    /* return the length and data ptr */
+    DEBUGDUMPSETUP("send", data+1, tmpint);
+    DEBUGMSG(("dumpv_send", "  ObjID: "));
+    DEBUGMSGOID(("dumpv_send", objid, objidlength));
+    DEBUGMSG(("dumpv_send", "\n"));
+    return data;
+}
+
+u_char	*asn_rbuild_null (u_char *data,
+                          size_t *datalength,
+                          u_char type)
+{
+/*
+ * ASN.1 null ::= 0x05 0x00
+ */
+    u_char *initdatap = data;
+    
+    data = asn_rbuild_header(data, datalength, type, 0);
+    DEBUGDUMPSETUP("send", data+1, initdatap - data);
+    DEBUGMSG(("dumpv_send", "  NULL\n"));
+    return data;
+}
+
+
+u_char	*asn_rbuild_unsigned_int64 (u_char *data,
+			 size_t *datalength,
+			 u_char type,
+			 struct counter64 *cp,
+			 size_t countersize)
+{
+/*
+ * ASN.1 integer ::= 0x02 asnlength byte {byte}*
+ */
+
+    register u_long low, high;
+    register u_long mask, mask2;
+    int add_null_byte = 0;
+    size_t intsize;
+    u_char *initdatap = data;
+
+  if (countersize != sizeof(struct counter64)){
+    _asn_size_err("build uint64", countersize, sizeof(struct counter64));
+    return NULL;
+  }
+    intsize = 8;
+    low = cp->low;
+    high = cp->high;
+    mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
+    /* mask is 0xFF000000 on a big-endian machine */
+    if ((u_char)((high & mask) >> (8 * (sizeof(long) - 1))) & 0x80){
+	/* if MSB is set */
+	add_null_byte = 1;
+	intsize++;
+    } else {
+	/*
+	 * Truncate "unnecessary" bytes off of the most significant end of this 2's
+	 * complement integer.
+	 * There should be no sequence of 9 consecutive 1's or 0's at the most
+	 * significant end of the integer.
+	 */
+	mask2 = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
+	/* mask2 is 0xFF800000 on a big-endian machine */
+	while((((high & mask2) == 0) || ((high & mask2) == mask2)) && intsize > 1){
+	    intsize--;
+	    high = (high << 8)
+		| ((low & mask) >> (8 * (sizeof(long) - 1)));
+	    low <<= 8;
+	}
+    }
+#ifdef OPAQUE_SPECIAL_TYPES
+/* encode a Counter64 as an opaque (it also works in SNMPv1) */
+    /* turn into Opaque holding special tagged value */
+    if (type == ASN_OPAQUE_COUNTER64) {
+        /* put the tag and length for the Opaque wrapper */
+        data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
+    if (_asn_build_header_check("build counter u64", data, *datalength, intsize+3))
+	return NULL;
+
+	/* put the special tag and length */
+	*data++ = ASN_OPAQUE_TAG1;
+	*data++ = ASN_OPAQUE_COUNTER64;
+	*data++ = (u_char)intsize;
+	*datalength = *datalength - 3;
+    }
+    else
+/* Encode the Unsigned int64 in an opaque */
+    /* turn into Opaque holding special tagged value */
+    if (type == ASN_OPAQUE_U64) {
+        /* put the tag and length for the Opaque wrapper */
+        data = asn_build_header(data, datalength, ASN_OPAQUE, intsize+3);
+    if (_asn_build_header_check("build opaque u64", data, *datalength, intsize+3))
+	return NULL;
+
+	/* put the special tag and length */
+	*data++ = ASN_OPAQUE_TAG1;
+	*data++ = ASN_OPAQUE_U64;
+	*data++ = (u_char)intsize;
+	*datalength = *datalength - 3;
+    }
+    else
+    {
+#endif /* OPAQUE_SPECIAL_TYPES */
+    data = asn_build_header(data, datalength, type, intsize);
+    if (_asn_build_header_check("build uint64", data, *datalength, intsize))
+	return NULL;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    }
+#endif /* OPAQUE_SPECIAL_TYPES */
+    *datalength -= intsize;
+    if (add_null_byte == 1){
+	*data++ = '\0';
+	intsize--;
+    }
+    while(intsize--){
+	*data++ = (u_char)((high & mask) >> (8 * (sizeof(long) - 1)));
+	high = (high << 8)
+	    | ((low & mask) >> (8 * (sizeof(long) - 1)));
+	low <<= 8;
+	
+    }
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGIF("dumpv_send") {
+      char i64buf[I64CHARSZ+1];
+      printU64(i64buf, cp);
+      DEBUGMSG(("dumpv_send", i64buf));
+    }
+    return data;
+}
+
+u_char	*asn_rbuild_bitstring (u_char *, size_t *, u_char, u_char *, size_t);
+u_char	*asn_rbuild_signed_int64 (u_char *, size_t *, u_char,
+                                       struct counter64 *, size_t);
+u_char	*asn_rbuild_float (u_char *, size_t *, u_char, float *,
+                              size_t);
+u_char	*asn_rbuild_double (u_char *, size_t *, u_char, double *,
+                               size_t);
+
+#endif

@@ -289,6 +289,13 @@ u_char *snmp_parse_var_op (u_char *, oid *, size_t *, u_char *, size_t *,
                                u_char **, size_t *);
 u_char *snmp_build_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,
                                size_t *);
+
+
+#ifdef USE_REVERSE_ASNENCODING
+u_char *snmp_rbuild_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,
+                            size_t *);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
