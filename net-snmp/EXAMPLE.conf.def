@@ -378,3 +378,5 @@ load 12 14 14
 # Further Information
 #
 #  See the snmpd.conf manual page, and the output of "snmpd -H".
+#  MUCH more can be done with the snmpd.conf than is shown as an
+#  example here.
