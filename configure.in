@@ -138,7 +138,7 @@ AC_DEFINE(USE_INTERNAL_MD5))
 
 AC_ARG_WITH(opaque-special-types,
 [  --without-opaque-special-types  Don't use special opaque encodings.
-                                  SNMP normally can not handle
+                                  SNMP normally cannot handle
                                   floating numbers, nor large 64 bit
                                   integers well.  By default, the
                                   ucd-snmp package compiles in
@@ -308,7 +308,7 @@ AC_ARG_WITH(out_mib_modules,
     tunnel:                Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
-    agentx/client:         allows the agent to run as either a snmp agent
+    agentx/subagent:       allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
     agentx/master:         makes the agent run as an agentX master agent
                            as well as a normal snmp agent.
@@ -386,17 +386,17 @@ Miscellaneous:
   --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
 fi
 
-dnl Define unless specifically suppressed (ie, option defaults to false). 
+dnl Define unless specifically suppressed (i.e., option defaults to false). 
 if test "x$with_dummy_values" != "xyes"; then
   AC_DEFINE(NO_DUMMY_VALUES)
 fi
 
-dnl Only define if specifically chosen as --without (ie, default to true). 
+dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_opaque_special_types" != "xno"; then
   AC_DEFINE(OPAQUE_SPECIAL_TYPES)
 fi
@@ -1090,7 +1090,7 @@ AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
 
-AC_MSG_CHECKING(if directories neeed to be created)
+AC_MSG_CHECKING(if directories need to be created)
 for i in $module_directories; do
   $srcdir/mkinstalldirs $i
 done
@@ -1339,7 +1339,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h netinet/ip.h netinet/ip_icmp.h net/if.h netdb.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h pwd.h grp.h utmpx.h)
+AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h netinet/ip.h netinet/ip_icmp.h net/if.h netdb.h sys/dmap.h machine/pte.h xti.h sys/sockio.h sys/socket.h sys/un.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h locale.h pthread.h sys/loadavg.h regex.h linux/tasks.h pwd.h grp.h utmpx.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_mib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h sys/disklabel.h machine/types.h sys/socketvar.h)
 dnl Linux
@@ -1883,9 +1883,7 @@ AC_CHECK_IFNET_FOR(if_addrlist)
 AC_CHECK_IFNET_FOR(if_addrhead.tqh_first)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1901,9 +1899,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_discard)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1919,9 +1915,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_noport)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1937,9 +1931,7 @@ AC_CHECK_STRUCT_FOR([
 ],udpstat,udps_noportbcast)
 
 AC_CHECK_STRUCT_FOR([
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -2007,6 +1999,117 @@ AC_CHECK_STRUCT_FOR([
 #include <nlist.h>
 #endif
 ],nlist,n_value)
+
+dnl check struct ipstat for various things
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_cantforward)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_cantfrag)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_delivered)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_fragdropped)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_fragtimeout)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_localout)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_noproto)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_noroute)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_odropped)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_ofragments)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+], ipstat, ips_reassembled)
 
 dnl attempt to figure out if sysctl is usable
 
@@ -2083,14 +2186,14 @@ cat << EOF
 
 	 ************** Configuration Section **************
 
-	You are about to be prompted by a series of questions.  Answer
+	You are about to be prompted with a series of questions.  Answer
 them carefully, as they determine how the snmp agent and related
 applications are to function.
 
 	After the configure script finishes, you can browse the newly
 created config.h file for further - less important - parameters to
-modify.  Be careful if you re-run configure though since config.h will
-be over written.
+modify.  Be careful if you re-run configure though, since config.h will
+be overwritten.
 
 -Press return to continue-
 EOF
@@ -2119,8 +2222,8 @@ AC_PROMPT_USER(SYS_CONTACT,[
 
 	Describes who should be contacted about the host the agent is
 running on.  This information is available in the MIB-II tree.  This
-Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
-Configuration Files.
+can also be over-ridden using the \"syscontact\" syntax in the agent's
+configuration files.
 
 System Contact Information],$ME@$LOC,1)
 
@@ -2129,7 +2232,7 @@ AC_PROMPT_USER(SYS_LOC,[
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.  This Can also be over-ridden using the
+available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
 
 System Location],Unknown,1)

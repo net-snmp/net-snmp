@@ -75,6 +75,9 @@ char oldsysLocation[   SYS_STRING_LEN ];
 int sysServices=72;
 int sysServicesConfiged=0;
 
+extern oid version_id[];
+extern int version_id_len;
+
 static int sysContactSet = 0, sysLocationSet = 0, sysNameSet = 0;
 
 WriteMethod writeSystem;

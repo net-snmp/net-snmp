@@ -69,7 +69,7 @@
 /*
  * define BLKGETSIZE from <linux/fs.h>:
  * Note: cannot include this file completely due to errors with redefinition
- * of structures (at least with older linux versions)
+ * of structures (at least with older linux versions) --jsf
  */
 #define BLKGETSIZE _IO(0x12,96) /* return device size */
 #endif
@@ -100,8 +100,8 @@ static const char *describe_disk (int);
 
 int header_hrdisk (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
-static int HRD_index;
 static int HRD_type_index;
+static int HRD_index;
 static char HRD_savedModel[40];
 static long HRD_savedCapacity = 1044;
 static int  HRD_savedFlags;
@@ -132,7 +132,6 @@ static struct disklabel HRD_info;
 
 static void parse_disk_config(const char *, char *);
 static void free_disk_config(void);
-
 
 	/*********************
 	 *
@@ -173,7 +172,7 @@ void init_hr_disk(void)
 #elif defined(hpux)
 #if defined(hpux10) || defined(hpux11)
     Add_HR_Disk_entry ( "/dev/rdsk/c%dt%xd%d", 0, 1, 0, 15, "/dev/rdsk/c%dt%xd0", 0, 4 );
-#else	/* hpux9 */
+#else /* hpux9 */
     Add_HR_Disk_entry ( "/dev/rdsk/c%dd%xs%d", 201, 201, 0, 15, "/dev/rdsk/c%dd%xs0", 0, 4 );
 #endif
 #elif defined(solaris2)
@@ -203,17 +202,36 @@ void init_hr_disk(void)
 				  free_disk_config, "name");
 }
 
+#define ITEM_STRING	1
+#define ITEM_SET	2
+#define ITEM_STAR	3
+#define ITEM_ANY	4
+
+typedef unsigned char details_set[32];
+
+typedef struct _conf_disk_item {
+    int item_type;	/* ITEM_STRING, ITEM_SET, ITEM_STAR, ITEM_ANY */
+    void *item_details;	/* content depends upon item_type */
+    struct _conf_disk_item *item_next;
+} conf_disk_item;
+
 typedef struct _conf_disk_list {
-    char *name;
-    struct _conf_disk_list *next;
+    conf_disk_item *list_item;
+    struct _conf_disk_list *list_next;
 } conf_disk_list;
 static conf_disk_list *conf_list;
+
+static int match_disk_config(const char *);
+static int match_disk_config_item(const char *, conf_disk_item *);
 
 static void
 parse_disk_config(const char *token, char *cptr)
 {
     conf_disk_list *d_new;
-    char *name;
+    conf_disk_item *di_curr;
+    details_set *d_set;
+    char *name, *p, *d_str, c;
+    unsigned int i, neg, c1, c2;
 
     name = strtok(cptr, " \t");
     if (!name) {
@@ -225,12 +243,86 @@ parse_disk_config(const char *token, char *cptr)
 	config_perror("Out of memory");
 	return;
     }
-    d_new->name = strdup(name);
-    if (!d_new->name) {
+    di_curr = (conf_disk_item *)malloc(sizeof(conf_disk_item));
+    if (!di_curr) {
 	config_perror("Out of memory");
 	return;
     }
-    d_new->next = conf_list;
+    d_new->list_item = di_curr;
+    for (;;) {
+	if (*name == '?') {
+	    di_curr->item_type = ITEM_ANY;
+	    di_curr->item_details = (void *)0;
+	    name++;
+	} else if (*name == '*') {
+	    di_curr->item_type = ITEM_STAR;
+	    di_curr->item_details = (void *)0;
+	    name++;
+	} else if (*name == '[') {
+	    d_set = (details_set *)malloc(sizeof(details_set));
+	    if (!d_set) {
+		config_perror("Out of memory");
+		return;
+	    }
+	    for (i = 0; i < sizeof(details_set); i++)
+		(*d_set)[i] = (unsigned char)0;
+	    name++;
+	    if (*name == '^' || *name == '!') {
+		neg = 1;
+		name++;
+	    } else {
+		neg = 0;
+	    }
+	    while (*name && *name != ']') {
+		c1 = ((unsigned int)*name++) & 0xff;
+		if (*name == '-' && *(name + 1) != ']') {
+		    name++;
+		    c2 = ((unsigned int)*name++) & 0xff;
+		} else {
+		    c2 = c1;
+		}
+		for (i = c1; i <= c2; i++)
+		    (*d_set)[i / 8] |= (unsigned char)(1 << (i % 8));
+	    }
+	    if (*name != ']') {
+		config_perror("Syntax error in NAME: invalid set specified");
+		return;
+	    }
+	    if (neg) {
+		for (i = 0; i < sizeof(details_set); i++)
+		    (*d_set)[i] = (*d_set)[i] ^ (unsigned char)0xff;
+	    }
+	    di_curr->item_type = ITEM_SET;
+	    di_curr->item_details = (void *)d_set;
+	    name++;
+	} else {
+	    for (p = name; *p != '\0' && *p != '?' && *p != '*' && *p != '[';
+		p++);
+	    c = *p;
+	    *p = '\0';
+	    d_str = (char *)malloc(strlen(name) + 1);
+	    if (!d_str) {
+		config_perror("Out of memory");
+		return;
+	    }
+	    strcpy(d_str, name);
+	    *p = c;
+	    di_curr->item_type = ITEM_STRING;
+	    di_curr->item_details = (void *)d_str;
+	    name = p;
+	}
+	if (!*name) {
+	    di_curr->item_next = (conf_disk_item *)0;
+	    break;
+	}
+	di_curr->item_next = (conf_disk_item *)malloc(sizeof(conf_disk_item));
+	if (!di_curr->item_next) {
+	    config_perror("Out of memory");
+	    return;
+	}
+	di_curr = di_curr->item_next;
+    }
+    d_new->list_next = conf_list;
     conf_list = d_new;
 }
 
@@ -238,14 +330,85 @@ static void
 free_disk_config(void)
 {
     conf_disk_list *d_ptr = conf_list, *d_next;
+    conf_disk_item *di_ptr, *di_next;
 
     while (d_ptr) {
-	d_next = d_ptr->next;
-	free(d_ptr->name);
-	free(d_ptr);
+	d_next = d_ptr->list_next;
+	di_ptr = d_ptr->list_item;
+	while (di_ptr) {
+	    di_next = di_ptr->item_next;
+	    if (di_ptr->item_details)
+		free(di_ptr->item_details);
+	    free((void *)di_ptr);
+	    di_ptr = di_next;
+	}
+	free((void *)d_ptr);
 	d_ptr = d_next;
     }
-    conf_list = NULL;
+    conf_list = (conf_disk_list *)0;
+}
+
+static int
+match_disk_config_item(const char *name, conf_disk_item *di_ptr)
+{
+    int result = 0;
+    size_t len;
+    details_set *d_set;
+    unsigned int c;
+
+    if (di_ptr) {
+	switch (di_ptr->item_type) {
+	    case ITEM_STRING:
+		len = strlen((const char *)di_ptr->item_details);
+		if (!strncmp(name, (const char *)di_ptr->item_details, len))
+		    result = match_disk_config_item(name + len,
+						    di_ptr->item_next);
+		break;
+	    case ITEM_SET:
+		if (*name) {
+		    d_set = (details_set *)di_ptr->item_details;
+		    c = ((unsigned int)*name) & 0xff;
+		    if ((*d_set)[c / 8] & (unsigned char)(1 << (c % 8)))
+			result = match_disk_config_item(name + 1,
+							di_ptr->item_next);
+		}
+		break;
+	    case ITEM_STAR:
+		if (di_ptr->item_next) {
+		    for (; !result && *name; name++)
+			result = match_disk_config_item(name,
+							di_ptr->item_next);
+		} else {
+		    result = 1;
+		}
+		break;
+	    case ITEM_ANY:
+		if (*name)
+		    result = match_disk_config_item(name + 1,
+						    di_ptr->item_next);
+		break;
+	}
+    } else {
+	if (*name == '\0')
+	    result = 1;
+    }
+
+    return result;
+}
+
+static int
+match_disk_config(const char *name)
+{
+    conf_disk_list *d_ptr = conf_list;
+
+    while (d_ptr) {
+	if (match_disk_config_item(name, d_ptr->list_item))
+	    return 1;		/* match found in ignorelist */
+	d_ptr = d_ptr->list_next;
+    }
+
+    /* no match in ignorelist */
+    return 0;
 }
 
 /*
@@ -385,7 +548,6 @@ typedef struct {
 static HRD_disk_t disk_devices[ MAX_NUMBER_DISK_TYPES ];
 static int HR_number_disk_types = 0;
 
-
 static void
 Add_HR_Disk_entry (const char *devpart_string,
 		   int first_ctl,
@@ -433,7 +595,6 @@ Add_HR_Disk_entry (const char *devpart_string,
 	HR_number_disk_types++;
     }
 }
-  
 
 void
 Init_HR_Disk(void)
@@ -472,30 +633,58 @@ Get_Next_HR_Disk (void)
 			 * This has a *major* impact on run
 			 *   times (by a factor of 10!)
 			 */
-	    if (( HRD_history[ iindex ] != 0 ) &&
+	    if (( HRD_history[ iindex ] > 0 ) &&
 		(( now - HRD_history[ iindex ]) < 60 ))
 	    {
 			HRD_index++;
 			continue;
 	    }
 
-		/* Construct the device name in "string" */
-	    sprintf(string, disk_device_strings[ HRD_type_index ], 
-			    disk_device_id[      HRD_type_index ] + HRD_index,
-			    disk_device_full[    HRD_type_index ] );
+		/* Construct the full device name in "string" */
+	    if ( disk_devices[ HRD_type_index ].disk_controller != -1 ) {
+		sprintf( string,
+		    disk_devices[ HRD_type_index ].disk_devfull_string,
+		    disk_devices[ HRD_type_index ].disk_controller,
+		    disk_devices[ HRD_type_index ].disk_device_first +
+			HRD_index);
+	    } else {
+		sprintf( string,
+		    disk_devices[ HRD_type_index ].disk_devfull_string,
+		    disk_devices[ HRD_type_index ].disk_device_first +
+			HRD_index);
+	    }
 
 	    DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
                         string, HRD_type_index, HRD_index ));
 	
+	    if ( HRD_history[ iindex ] == -1 ) {
+		/*
+		 * check whether this device is in the "ignoredisk" list in
+		 * the config file. if yes this device will be marked as
+		 * invalid for the future, i.e. it won't ever be checked
+		 * again.
+		 */
+		if (match_disk_config(string)) {
+		    /* device name matches entry in ignoredisk list */
+		    DEBUGMSGTL(("host/hr_disk",
+				"Get_Next_HR_Disk: %s ignored\n", string ));
+		    HRD_history[ iindex ] = LONG_MAX;
+		    HRD_index++;
+		    continue;
+		}
+	    }
+
 	    /* use O_NDELAY to avoid CDROM spin-up and media detection
 	     * (too slow) --okir */
+	    /* at least with HP-UX 11.0 this doesn't seem to work properly
+	     * when accessing an empty CDROM device --jsf */
 #ifdef O_NDELAY /* I'm sure everything has it, but just in case...  --Wes */
 	    fd = open( string, O_RDONLY | O_NDELAY );
 #else
 	    fd = open( string, O_RDONLY );
 #endif
 	    if (fd != -1 ) {
-		result = Query_Disk( fd );
+		result = Query_Disk( fd, string );
 		close(fd);
 		if ( result != -1 ) {
 		    HRD_history[ iindex ] = 0;

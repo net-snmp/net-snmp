@@ -127,9 +127,9 @@ header_hrpartition(struct variable *vp,
 	( *length > HRPART_DISK_NAME_LENGTH )) {
         LowDiskIndex = (name[HRPART_DISK_NAME_LENGTH] & ((1<<HRDEV_TYPE_SHIFT)-1));
 
-	while ( HRD_index < LowDiskIndex ) {
+	while ( HRP_DiskIndex < LowDiskIndex ) {
             Init_HR_Partition();	/* moves to next disk */
-	    if ( HRD_index == -1 )
+	    if ( HRP_DiskIndex == -1 )
 		return(MATCH_FAILED);
 	}
     }

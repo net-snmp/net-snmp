@@ -105,6 +105,7 @@
 #include "system.h"
 #include "snmp_debug.h"
 #include "snmp_alarm.h"
+#include "agent_callbacks.h"
 #include "default_store.h"
 #include "ds_agent.h"
 #include "helpers/table.h"
@@ -233,6 +234,8 @@ void init_agent_read_config (const char *app)
 
 void update_config(void)
 {
+  snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                      SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
   free_config();
   read_configs();
 }

@@ -237,6 +237,7 @@ EXPORTS
 	read_configs
 	debugmsg_oid
 	config_perror
+	config_pwarn
 	copy_word
 	calculate_time_diff
 	vacm_is_configured
@@ -274,12 +275,19 @@ EXPORTS
 	snmp_set_quick_print
 	snmp_set_random_access
 	snmp_set_suffix_only
+	snmp_clean_persistent
+	snmp_save_persistent
 	usm_store_users
 	snmp_store
 	atime_diff
 	atime_newMarker
 	atime_setMarker
 	atime_ready
+	fprint_variable
+	sprint_realloc_objid
+	snmp_strcat
+	sprint_realloc_variable
+	snmp_realloc
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA

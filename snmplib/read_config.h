@@ -91,10 +91,16 @@ void  read_app_config_store(const char *line);
 void  snmp_save_persistent(const char *type);
 void  snmp_clean_persistent(const char *type);
 struct config_line *read_config_get_handlers(const char *type);
+
 /* external memory list handlers */
 void snmp_config_remember_in_list(char *line, struct read_config_memory **mem);
 void snmp_config_process_memory_list(struct read_config_memory *mem, int);
 void snmp_config_remember_free_list(struct read_config_memory *mem);
+
+void set_configuration_directory(const char *dir);
+const char *get_configuration_directory(void);
+void set_persistent_directory(const char *dir);
+const char *get_persistent_directory(void);
 
 #ifdef __cplusplus
 }
