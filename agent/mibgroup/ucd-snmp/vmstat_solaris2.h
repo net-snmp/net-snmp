@@ -13,6 +13,9 @@
 #ifndef _MIBGROUP_VMSTAT_H
 #define _MIBGROUP_VMSTAT_H
 
+/* dependency requirements */
+config_arch_require(solaris2, kernel_sunos5)
+
 /* Defines for vp magic numbers */
 #define SWAPIN 3
 #define SWAPOUT 4
