@@ -138,13 +138,11 @@ register_config_handler(const char *type_param,
 
   if (*ctmp == NULL) {
     *ctmp = (struct config_files *)
-      malloc(sizeof(struct config_files));
+      calloc(1,sizeof(struct config_files));
     if ( !*ctmp ) {
       return NULL;
     }
 
-    (*ctmp)->next		 = NULL;
-    (*ctmp)->start		 = NULL;
     (*ctmp)->fileHeader	 = strdup(type);
   }
 
@@ -160,20 +158,15 @@ register_config_handler(const char *type_param,
 
   if (*ltmp == NULL) {
     *ltmp = (struct config_line *)
-      malloc(sizeof(struct config_line));
+      calloc(1,sizeof(struct config_line));
     if ( !*ltmp ) {
       return NULL;
     }
 
-    (*ltmp)->next		 = NULL;
     (*ltmp)->config_time	 = NORMAL_CONFIG;
-    (*ltmp)->parse_line	 = 0;
-    (*ltmp)->free_func	 = 0;
     (*ltmp)->config_token	 = strdup(token);
     if (help != NULL)
       (*ltmp)->help = strdup(help);
-    else (*ltmp)->help = NULL;
-
   }
 
   /* 
@@ -755,7 +748,6 @@ void config_pwarn(const char *string)
    line or a comment character */
 char *skip_white(char *ptr)
 {
-
   if (ptr == NULL) return (NULL);
   while (*ptr != 0 && isspace(*ptr)) ptr++;
   if (*ptr == 0 || *ptr == '#') return (NULL);
@@ -764,7 +756,6 @@ char *skip_white(char *ptr)
 
 char *skip_not_white(char *ptr)
 {
-  
   if (ptr == NULL) return (NULL);
   while (*ptr != 0 && !isspace(*ptr)) ptr++;
   if (*ptr == 0 || *ptr == '#') return (NULL);
@@ -865,13 +856,9 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
     }
     *len = *len / 2;
 
-    /* malloc data space if needed */
+    /* malloc data space if needed (+1 for good measure) */
     if (*str == NULL) {
-      if (*len == 0) {
-        /* null length string found, malloc 1 bogus byte */
-        cptr = malloc(1);
-
-      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len+1)) == NULL)) {
+      if ((cptr = (u_char *)malloc(*len + 1)) == NULL) {
         return NULL;
       }
       *str = cptr;
@@ -879,10 +866,14 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       cptr = *str;
     }
 
-    /* copy data */
+    /* copy validated data */
     for(i = 0; i < (int)*len; i++) {
-      sscanf(readfrom,"%2x",&tmp);
-      *cptr++ = (u_char) tmp;
+      if (1 == sscanf(readfrom,"%2x",&tmp))
+        *cptr++ = (u_char) tmp;
+      else {
+        /* we may lose memory, but don't know caller's buffer XX free(cptr); */
+        return (NULL);
+      }
       readfrom += 2;
     }
     *cptr++ = '\0';
@@ -890,16 +881,13 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
   } else {
     /* Normal string */
 
-    /* malloc data space if needed */
+    /* malloc string space if needed (including NULL terminator) */
     if (*str == NULL) {
       char buf[SNMP_MAXBUF];
       readfrom = copy_word(readfrom, buf);
 
       *len = strlen(buf);
-      /* malloc an extra space to add a null */
-      if (*len > 0 && (str == NULL ||
-                       (cptr = (u_char *) malloc(*len + 1))
-                       == NULL))
+      if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
         return NULL;
       *str = cptr;
       if (cptr)
@@ -937,48 +925,26 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
   if (objid == NULL || readfrom == NULL)
     return NULL;
 
-  if (*objid != NULL) {
-    char buf[SPRINT_MAX_LEN];
+  if (*objid == NULL) {
+      if ((*objid = (oid*)malloc(MAX_OID_LEN * sizeof(oid))) == NULL)
+        return NULL;
+  }
 
-    if (strncmp(readfrom,"NULL",4) == 0) {
+  if (strncmp(readfrom,"NULL",4) == 0) {
       /* null length oid */
       *len = 0;
-    } else {
-      /* read_objid is touchy with trailing stuff */
+  } else {
+      /* qualify the string for read_objid */
+      char buf[SPRINT_MAX_LEN];
       copy_word(readfrom, buf);
 
-      /* read the oid into the buffer passed to us */
       if (!read_objid(buf, *objid, len)) {
         DEBUGMSGTL(("read_config_read_objid","Invalid OID"));
         return NULL;
       }
-    }
-    
-    readfrom = skip_token(readfrom);
-  } else {
-    if (strncmp(readfrom,"NULL",4) == 0) {
-      /* null length oid */
-      *len = 0;
-      readfrom = skip_token(readfrom);
-    } else {
-      /* space needs to be malloced.  Call ourself recursively to figure
-       out how long the oid actually is */
-      oid obuf[MAX_OID_LEN];
-      size_t obuflen = MAX_OID_LEN;
-      oid *oidp = obuf;
-      oid **oidpp = &oidp;   /* done this way for odd, untrue, gcc warnings */
-
-      readfrom = read_config_read_objid(readfrom, oidpp, &obuflen);
-
-      /* Then malloc and copy the results */
-      *len = obuflen;
-      if (*len > 0 && (*objid = (oid*)malloc(*len * sizeof(oid))) == NULL)
-        return NULL;
-
-      if (obuflen > 0)
-        memcpy(*objid, obuf, obuflen*sizeof(oid));
-    }
   }
+    
+  readfrom = skip_token(readfrom);
   return readfrom;
 }
 
