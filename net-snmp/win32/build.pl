@@ -1,8 +1,16 @@
 #!/usr/bin/perl
-my $install_base = "c:/Program Files/Net-SNMP";
+# 
+# Build script for Net-SNMP and MSVC
+# Written by Alex Burger - alex_b@users.sourceforge.net
+# March 12th, 2004
+#
 my $openssl = "disabled";
 my $sdk = "disabled";
+my $default_install_base = "c:/Program Files/Net-SNMP";
+my $install_base = $default_install_base;
+my $install = "enabled";
 my $perl = "disabled";
+my $perl_install = "disabled";
 my $logging = "enabled";
 my $debug = "disabled";
 
@@ -11,6 +19,8 @@ my $current_pwd = `%COMSPEC% /c cd`;
 chomp $current_pwd;
 if (! ($current_pwd =~ /\\win32$/)) {
   chdir ("win32");
+  $current_pwd = `%COMSPEC% /c cd`;
+  chomp $current_pwd;
 }
 
 if (! (-d $ENV{MSVCDir})) {
@@ -20,30 +30,40 @@ if (! (-d $ENV{MSVCDir})) {
   exit;
 }
 
+# Set PATH environment variable so Perl make tests can locate the DLL
+$ENV{MIBDIRS}="$current_pwd\\bin;$ENV{MIBDIRS}";
+
+# Set MIBDIRS environment variable so Perl make tests can locate the mibs
+my $temp_mibdir = "$current_pwd/../mibs";
+$temp_mibdir =~ s/\\/\//g;
+$ENV{MIBDIRS}=$temp_mibdir;
+
+# Set SNMPCONFPATH environment variable so Perl conf.t test can locate
+# the configuration files.
+# See the note about environment variables in the Win32 section of 
+# perl/SNMP/README for details on why this is needed. 
+$ENV{SNMPCONFPATH}=t;$ENV{SNMPCONFPATH};
+
 while (1) {
-  print "\n\nNet-SNMP build options\n";
-  print "======================\n\n";
-  print "1. Install path:         " . $install_base . "\n";
-  print "2. OpenSSL:              " . $openssl. "\n";
-  print "3. Platform SDK:         " . $sdk . "\n";
-  print "4. Perl modules:         " . $perl . "\n";
-  print "5. Quiet build (logged): " . $logging . "\n";
-  print "6. Debug mode:           " . $debug . "\n";
+  print "\n\nNet-SNMP build and install options\n";
+  print "==================================\n\n";
+  print "1. OpenSSL support:      " . $openssl. "\n";
+  print "2. Platform SDK support: " . $sdk . "\n";
+  print "\n";
+  print "3. Install path:         " . $install_base . "\n";
+  print "4. Install after build:  " . $install . "\n";
+  print "\n";
+  print "5. Perl modules:         " . $perl . "\n";
+  print "6. Install perl modules: " . $perl_install . "\n";
+  print "\n";
+  print "7. Quiet build (logged): " . $logging . "\n";
+  print "8. Debug mode:           " . $debug . "\n";
   print "\nF. Finished - start build\n";
   print "Q. Quit - abort build\n\n";
-  print "Select option to set/toggle: ";
+  print "Select option to set / toggle: ";
 
   chomp ($option = <>);
   if ($option eq "1") {
-    my $default_install_base = "c:/Program Files/Net-SNMP";
-    print "Please enter the new install path [$default_install_base]: ";
-    chomp ($install_base = <>);
-    if ($install_base eq "") {
-      $install_base = $default_install_base;
-    }
-    $install_base =~ s/\\/\//g;
-  }
-  elsif ($option eq "2") {
     if ($openssl eq "enabled") {
       $openssl = "disabled";
     }
@@ -51,7 +71,7 @@ while (1) {
       $openssl = "enabled";
     }
   }
-  elsif ($option eq "3") {
+  elsif ($option eq "2") {
     if ($sdk eq "enabled") {
       $sdk = "disabled";
     }
@@ -59,7 +79,23 @@ while (1) {
       $sdk = "enabled";
     }
   }
+  elsif ($option eq "3") {
+    print "Please enter the new install path [$default_install_base]: ";
+    chomp ($install_base = <>);
+    if ($install_base eq "") {
+      $install_base = $default_install_base;
+    }
+    $install_base =~ s/\\/\//g;
+  }
   elsif ($option eq "4") {
+    if ($install eq "enabled") {
+      $install = "disabled";
+    }
+    else {
+      $install = "enabled";
+    }
+  }
+  elsif ($option eq "5") {
     if ($perl eq "enabled") {
       $perl = "disabled";
     }
@@ -67,7 +103,15 @@ while (1) {
       $perl = "enabled";
     }
   }
-  elsif ($option eq "5") {
+  elsif ($option eq "6") {
+    if ($perl_install eq "enabled") {
+      $perl_install = "disabled";
+    }
+    else {
+      $perl_install = "enabled";
+    }
+  }
+  elsif ($option eq "7") {
     if ($logging eq "enabled") {
       $logging = "disabled";
     }
@@ -75,7 +119,7 @@ while (1) {
       $logging = "enabled";
     }
   }
-  elsif ($option eq "6") {
+  elsif ($option eq "8") {
     if ($debug eq "enabled") {
       $debug = "disabled";
     }
@@ -117,9 +161,6 @@ if ($logging eq "enabled") {
   print "Building main package...\n";
   system("nmake /nologo > make.out 2>&1") == 0 || die "Build error (see make.out)";
 
-  print "Installing main package...\n";
-  system("nmake /nologo install > install.out 2>&1") == 0 || die "Build error (see install.out)";
-
   if ($perl eq "enabled") {
     print "Running Configure for DLL...\n";
     system("perl Configure $openssl $sdk $debug --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
@@ -129,11 +170,7 @@ if ($logging eq "enabled") {
 
     print "Building DLL libraries...\n";
     system("nmake /nologo libs > dll.out 2>&1") == 0 || die "Build error (see dll.out)";
-
-    print "Installing DLL libraries...\n";
-    system("nmake /nologo install > installdll.out 2>&1") == 0 || die "Build error (see installdll.out)";
-
-    
+   
     print "Cleaning Perl....\n";
     system("nmake /nologo perl_clean >> clean.out 2>&1"); # If already cleaned, Makefile is gone so don't worry about errors!
 
@@ -142,11 +179,26 @@ if ($logging eq "enabled") {
 
     print "Testing Perl modules...\n";
     system("nmake /nologo perl_test > perltest.out 2>&1"); # Don't die if all the tests don't pass..
+  
+    if ($perl_install eq "enabled") {
+      print "Installing Perl modules...\n";
+      system("nmake /nologo perl_install > perlinstall.out 2>&1") == 0 || die "Build error (see perlinstall.out)";
+    }
+      
+    print "\nSee perltest.out for Perl test results\n";
+  }
 
-    print "Installing Perl modules...\n";
-    system("nmake /nologo perl_install > perlinstall.out 2>&1") == 0 || die "Build error (see perlinstall.out)";
-    
-    print "\nSee perltest.out for Perl test results\n\n";
+  print "\n";
+  if ($install eq "enabled") {
+    print "Installing main package...\n";
+    system("nmake /nologo install > install.out 2>&1") == 0 || die "Build error (see install.out)";
+  }
+  else {
+    print "Type nmake install to install the package to $install_base\n";
+  }
+  
+  if ($perl_install eq "disabled" && $perl eq "enabled") {
+    print "Type nmake perl_install to install the Perl modules\n";
   }
 }
 else {
@@ -158,19 +210,35 @@ else {
   system("perl Configure $openssl $sdk $debug --linktype=static --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
   system("nmake /nologo clean") == 0 || die "Build error (see above)";
   system("nmake /nologo") == 0 || die "Build error (see above)";
-  system("nmake /nologo install") == 0 || die "Build error (see above)";
   
   if ($perl eq "enabled") {
     system("perl Configure $openssl $sdk $debug --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
     system("nmake /nologo libs_clean") == 0 || die "Build error (see above)";
     system("nmake /nologo libs") == 0 || die "Build error (see above)";
-    system("nmake /nologo install") == 0 || die "Build error (see above)";
     
     system("nmake /nologo perl_clean"); # If already cleaned, Makefile is gone so don't worry about errors!
     system("nmake /nologo perl") == 0 || die "Build error (see above)";
     system("nmake /nologo perl_test"); # Don't die if all the tests don't pass..
-    system("nmake /nologo perl_install") == 0 || die "Build error (see above)";
+    
+    if ($perl_install eq "enabled") {      
+      print "Installing Perl modules...\n";
+      system("nmake /nologo perl_install") == 0 || die "Build error (see above)";
+    }
+  }
+
+  print "\n";
+  if ($install eq "enabled") {
+    print "Installing main package...\n";
+    system("nmake /nologo install") == 0 || die "Build error (see above)";
+  }
+  else {
+    print "Type nmake install to install the package to $install_base\n";
+  }
+  
+  if ($perl_install eq "disabled" && $perl eq "enabled") {
+    print "Type nmake perl_install to install the Perl modules\n";
   }
 }
 
 print "\nDone!\n";
+
