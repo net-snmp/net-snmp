@@ -283,7 +283,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Finally, handle ".... -Lx value ...." syntax
      *   (*without* surrounding quotes)
      */
-    if (!*optarg) {
+    if ((!*optarg) && (NULL != argv)) {
         /*
          * We've run off the end of the argument
          *  so move on to the next.
@@ -1036,9 +1036,11 @@ snmp_log_string(int priority, const char *string)
     for ( ; logh; logh = logh->next ) {
         /*
          * ... but skipping any handlers with a "maximum priority"
-	 *     that we have already exceeded.
+         *     that we have already exceeded. And don't forget to
+         *     ensure this logging is turned on (see snmp_disable_stderrlog
+         *     and its cohorts).
          */
-        if (priority >= logh->pri_max)
+        if (logh->enabled && (priority >= logh->pri_max))
             logh->handler( logh, priority, string );
     }
 }
