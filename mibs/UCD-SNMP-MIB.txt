@@ -5,16 +5,13 @@ UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 --
 
 IMPORTS
-        private, NetworkAddress, IpAddress, Counter, Gauge,
-		TimeTicks
-            FROM RFC1155-SMI
-	OBJECT-TYPE 				
-	    FROM RFC-1212
+        enterprises, OBJECT-TYPE 				
+	    FROM SNMPv2-SMI
 	DisplayString 				
-	    FROM RFC1213-MIB;
+	    FROM SNMPv2-TC;
 
-private	       OBJECT IDENTIFIER ::= { internet 4 }
-enterprises    OBJECT IDENTIFIER ::= { private 1 }
+-- private	  OBJECT IDENTIFIER ::= { internet 4 }
+-- enterprises    OBJECT IDENTIFIER ::= { private 1 }
 ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
 -- processes      OBJECT IDENTIFIER ::= { ucdavis 1 }
 -- exec           OBJECT IDENTIFIER ::= { ucdavis 3 }
