@@ -65,7 +65,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
       DEBUGP("var_hrpartition: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* Find "next" partition entry */
 
     Init_HR_Disk();
@@ -134,7 +134,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 
     newname[HRPART_DISK_NAME_LENGTH] = LowDiskIndex;
     newname[HRPART_ENTRY_NAME_LENGTH] = LowPartIndex;
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 2) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 2) * sizeof(oid));
     *length = vp->namelen + 2;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */

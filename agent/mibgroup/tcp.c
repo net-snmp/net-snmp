@@ -156,12 +156,12 @@ header_tcp(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_tcp: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[TCP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -457,7 +457,7 @@ var_tcpEntry(vp, name, length, exact, var_len, write_method)
 #endif
 #endif
 
-	bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+	memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 	/* find "next" connection */
 Again:
 LowState = -1;	    /* Don't have one yet */
@@ -485,7 +485,7 @@ LowState = -1;	    /* Don't have one yet */
 
 	    if (exact){
 		if (compare(newname, 20, name, *length) == 0){
-		    bcopy((char *)newname, (char *)lowest, 20 * sizeof(oid));
+		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
 		    LowState = State;
 		    Lowinpcb = inpcb;
 		    break;  /* no need to search further */
@@ -497,14 +497,14 @@ LowState = -1;	    /* Don't have one yet */
 		     * if new one is greater than input and closer to input than
 		     * previous lowest, save this one as the "next" one.
 		     */
-		    bcopy((char *)newname, (char *)lowest, 20 * sizeof(oid));
+		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
 		    LowState = State;
 		    Lowinpcb = inpcb;
 		}
 	    }
 	}
 	if (LowState < 0) return(NULL);
-	bcopy((char *)lowest, (char *)name, ((int)vp->namelen + 10) * sizeof(oid));
+	memcpy( (char *)name,(char *)lowest, ((int)vp->namelen + 10) * sizeof(oid));
 	*length = vp->namelen + 10;
 	*write_method = 0;
 	*var_len = sizeof(long);
@@ -636,9 +636,9 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
     int			Found = 0;
     
     memset (&Lowentry, 0, sizeof (Lowentry));
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     if (*length == TCP_CONN_LENGTH) /* Assume that the input name is the lowest */
-      bcopy((char *)name, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+      memcpy( (char *)lowest,(char *)name, TCP_CONN_LENGTH * sizeof(oid));
     for (Nextentry.tcpConnLocalAddress = (u_long)-1, req_type = GET_FIRST;
 	 ;
 	 Nextentry = entry, req_type = GET_NEXT) {
@@ -652,7 +652,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
 
       if (exact){
 	if (compare(newname, TCP_CONN_LENGTH, name, *length) == 0){
-	  bcopy((char *)newname, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+	  memcpy( (char *)lowest,(char *)newname, TCP_CONN_LENGTH * sizeof(oid));
 	  Lowentry = entry;
 	  Found++;
 	  break;  /* no need to search further */
@@ -666,7 +666,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
 	  /* if new one is greater than input and closer to input than
 	   * previous lowest, and is not equal to it, save this one as the "next" one.
 	   */
-	  bcopy((char *)newname, (char *)lowest, TCP_CONN_LENGTH * sizeof(oid));
+	  memcpy( (char *)lowest,(char *)newname, TCP_CONN_LENGTH * sizeof(oid));
 	  Lowentry = entry;
 	  Found++;
 	}

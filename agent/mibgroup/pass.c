@@ -182,7 +182,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         newlen = parse_miboid(buf,newname);
 
         /* its good, so copy onto name/length */
-        bcopy((char *) newname, (char *)name, (int)newlen * sizeof (oid));
+        memcpy( (char *)name,(char *) newname, (int)newlen * sizeof (oid));
         *length = newlen;
 
         /* set up return pointer for setable stuff */

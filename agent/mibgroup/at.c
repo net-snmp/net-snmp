@@ -129,7 +129,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     int                     oid_length;
 
     /* fill in object part of name for current (less sizeof instance part) */
-    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    memcpy((char *)current, (char *)vp->name, (int)vp->namelen * sizeof(oid));
 
     if (current[6] == 3 ) {	/* AT group oid */
 	oid_length = 16;
@@ -174,12 +174,12 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 
 	if (exact){
 	    if (compare(current, oid_length, name, *length) == 0){
-		bcopy((char *)current, (char *)lowest, oid_length * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
 #endif /*  defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
-		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
+		memcpy( LowPhysAddr,PhysAddr, sizeof(PhysAddr));
 		lowIfType = ifType;
 		break;	/* no need to search further */
 	    }
@@ -190,12 +190,12 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, save this one as the "next" one.
 		 */
-		bcopy((char *)current, (char *)lowest, oid_length * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, oid_length * sizeof(oid));
 		LowAddr = Addr;
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
 		lowIfIndex = ifIndex;
 #endif /*  defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
-		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
+		memcpy( LowPhysAddr,PhysAddr, sizeof(PhysAddr));
 		lowIfType = ifType;
 	    }
 	}
@@ -203,7 +203,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     if (LowAddr == -1)
 	return(NULL);
 
-    bcopy((char *)lowest, (char *)name, oid_length * sizeof(oid));
+    memcpy( (char *)name,(char *)lowest, oid_length * sizeof(oid));
     *length = oid_length;
     *write_method = 0;
     switch(vp->magic){
@@ -287,9 +287,9 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
       DEBUGP("var_atEntry: %s %d\n", c_oid, exact);
     }
     memset (&Lowentry, 0, sizeof (Lowentry));
-    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
-      bcopy((char *)name, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+      memcpy( (char *)lowest,(char *)name, AT_NAME_LENGTH * sizeof(oid));
     for (NextAddr.ipAddr = (u_long)-1, NextAddr.ifIdx = 255, req_type = GET_FIRST;
 	 ;
 	 NextAddr.ipAddr = entry.ipNetToMediaNetAddress,
@@ -303,7 +303,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
         COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+AT_IPADDR_OFF);  
 	if (exact){
 	    if (compare(current, AT_NAME_LENGTH, name, *length) == 0){
-		bcopy((char *)current, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, AT_NAME_LENGTH * sizeof(oid));
 		Lowentry = entry;
 		Found++;
 		break;	/* no need to search further */
@@ -320,7 +320,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, and is not equal to it, save this one as the "next" one.
 		 */
-		bcopy((char *)current, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, AT_NAME_LENGTH * sizeof(oid));
 		Lowentry = entry;
 		Found++;
 	    }
@@ -329,7 +329,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     DEBUGP("... Found = %d\n", Found);
     if (Found == 0)
       return(NULL);
-    bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));
+    memcpy( (char *)name,(char *)lowest, AT_NAME_LENGTH * sizeof(oid));
     *length = AT_NAME_LENGTH;
     *write_method = 0;
     switch(vp->magic){
@@ -497,10 +497,10 @@ u_long *ifType;
 		*ifType = (atab->at_flags & ATF_PERM) ? 4 : 3 ;
 		*IPAddr = atab->at_iaddr.s_addr;
 #if defined (sunV3) || defined(sparc) || defined(hpux)
-		bcopy((char *) &atab->at_enaddr, PhysAddr, sizeof(atab->at_enaddr));
+		memcpy( PhysAddr,(char *) &atab->at_enaddr, sizeof(atab->at_enaddr));
 #endif
 #if defined(mips) || defined(ibm032) 
-		bcopy((char *)  atab->at_enaddr, PhysAddr, sizeof(atab->at_enaddr));
+		memcpy( PhysAddr,(char *)  atab->at_enaddr, sizeof(atab->at_enaddr));
 #endif
 	return(1);
 	}
@@ -517,7 +517,7 @@ u_long *ifType;
 		rtnext += rtm->rtm_msglen;
 		if (sdl->sdl_alen) {
 			*IPAddr = sin->sin_addr.s_addr;
-			bcopy((char *) LLADDR(sdl), PhysAddr, sdl->sdl_alen);
+			memcpy( PhysAddr,(char *) LLADDR(sdl), sdl->sdl_alen);
 			*ifIndex = sdl->sdl_index;
 			*ifType = 1;	/* XXX */
 			return(1);

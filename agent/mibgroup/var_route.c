@@ -230,7 +230,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
   if (Save_Valid && saveRtp) {
     register int temp=name[9];    /* Fix up 'lowest' found entry */
-    bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+    memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
     name[9] = temp;
     *length = 14;
     rtp = saveRtp;
@@ -238,7 +238,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 #endif /* 0 */
     /* fill in object part of name for current (less sizeof instance part) */
 
-    bcopy((char *)vp->name, (char *)Current, (int)(vp->namelen) * sizeof(oid));
+    memcpy( (char *)Current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
 
 #if 0
     /*
@@ -285,7 +285,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     /*
      *  Save in the 'cache'
      */
-    bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
+    memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
     saveName[9] = '\0';
     saveNameLen = *length;
     saveExact = exact;
@@ -293,7 +293,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     /*
      *  Return the name
      */
-    bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+    memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
     *length = 14;
 #if 0
   }
@@ -584,14 +584,14 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
     if (Save_Valid) {
 	register int temp=name[9];    /* Fix up 'lowest' found entry */
-	bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
 	name[9] = temp;
 	*length = 14;
 	RtIndex = saveRtIndex;
     } else {
 	/* fill in object part of name for current (less sizeof instance part) */
 
-	bcopy((char *)vp->name, (char *)Current, (int)(vp->namelen) * sizeof(oid));
+	memcpy( (char *)Current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
 
 #if 0
 	/*
@@ -629,7 +629,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	/*
 	 *  Save in the 'cache'
 	 */
-	bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
+	memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
 	saveName[9] = 0;
 	saveNameLen = *length;
 	saveExact = exact;
@@ -637,7 +637,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	/*
 	 *  Return the name
 	 */
-	bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+	memcpy( (char *) name,(char *) Current, 14 * sizeof(oid));
 	*length = 14;
     }
 
@@ -777,9 +777,9 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
   /* fill in object part of name for current (less sizeof instance part) */
   
-  bcopy((char *)vp->name, (char *)current, (int)(vp->namelen) * sizeof(oid));
+  memcpy( (char *)current,(char *)vp->name, (int)(vp->namelen) * sizeof(oid));
   if (*length == IP_ROUTENAME_LENGTH) /* Assume that the input name is the lowest */
-    bcopy((char *)name, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+    memcpy( (char *)lowest,(char *)name, IP_ROUTENAME_LENGTH * sizeof(oid));
   else
     name[IP_ROUTEADDR_OFF] = -1; /* Grhhh: to prevent accidental comparison :-( */
   for (Nextentry.ipRouteDest = (u_long)-2, req_type = GET_FIRST;
@@ -791,7 +791,7 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     COPY_IPADDR(cp, (u_char *)&entry.ipRouteDest, op, current + IP_ROUTEADDR_OFF);
     if (exact){
       if (compare(current, IP_ROUTENAME_LENGTH, name, *length) == 0){
-	bcopy((char *)current, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+	memcpy( (char *)lowest,(char *)current, IP_ROUTENAME_LENGTH * sizeof(oid));
 	Lowentry = entry;
 	Found++;
 	break;  /* no need to search further */
@@ -805,7 +805,7 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 	/* if new one is greater than input and closer to input than
 	 * previous lowest, and is not equal to it, save this one as the "next" one.
 	 */
-	bcopy((char *)current, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+	memcpy( (char *)lowest,(char *)current, IP_ROUTENAME_LENGTH * sizeof(oid));
 	Lowentry = entry;
 	Found++;
       }
@@ -813,7 +813,7 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
   }
   if (Found == 0)
     return(NULL);
-  bcopy((char *)lowest, (char *) name, IP_ROUTENAME_LENGTH * sizeof(oid));
+  memcpy( (char *) name,(char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
   *length = IP_ROUTENAME_LENGTH;
   *write_method = write_rte;
   *var_len = sizeof(long_return);
@@ -936,7 +936,7 @@ struct radix_node *pt;
         /*
          *	Add this to the database
          */
-        bcopy((char *) &rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+        memcpy( (char *)rthead[rtsize],(char *) &rt, sizeof(RTENTRY));
         rtsize++;
 #if defined(freebsd2) || defined(bsdi2)
       }
@@ -1047,7 +1047,7 @@ static void Route_Scan_Reload()
         /*
          *	Add this to the database
          */
-        bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+        memcpy( (char *)rthead[rtsize],(char *)rt, sizeof(RTENTRY));
         rtsize++;
       }
     }
@@ -1153,7 +1153,7 @@ static void Route_Scan_Reload()
                       /*
 		     *	Add this to the database
 		     */
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+		    memcpy( (char *)rthead[rtsize],(char *)rt, sizeof(RTENTRY));
 		    rtsize++;
 		}
 	    }
@@ -1266,7 +1266,7 @@ static void Route_Scan_Reload __P((void))
 	    /*
 	     *	Add this to the database
 	     */
-	    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct rtentry));
+	    memcpy( (char *)rthead[rtsize],(char *)rt, sizeof(struct rtentry));
 	    rtsize++;
 	  }
 
