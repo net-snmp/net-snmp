@@ -42,6 +42,7 @@
 #include "snmp_impl.h"
 #include "snmp_client.h"
 #include "snmp.h"
+#include "snmp_debug.h"
 
 #include "agentx/protocol.h"
 
@@ -66,6 +67,7 @@ agentx_synch_input(int op,
     if ( reqid != state->reqid )
 	return 0;
 
+    DEBUGMSGTL(("agentx/subagent","synching input\n"));
     state->waiting = 0;
     if (op == RECEIVED_MESSAGE) {
 	if (pdu->command == AGENTX_MSG_RESPONSE) {
@@ -101,6 +103,7 @@ agentx_open_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
 
+    DEBUGMSGTL(("agentx/subagent","opening session \n"));
     if (! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
@@ -120,6 +123,7 @@ agentx_open_session( struct snmp_session *ss )
 
     ss->sessid = response->sessid;
     snmp_free_pdu(response);
+    DEBUGMSGTL(("agentx/subagent","open \n"));
     return 1;
 }
 
@@ -127,6 +131,7 @@ int
 agentx_close_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
+    DEBUGMSGTL(("agentx/subagent","closing session\n"));
 
     if (! IS_AGENTX_VERSION( ss->version ))
 	return 0;
@@ -139,6 +144,7 @@ agentx_close_session( struct snmp_session *ss )
 
     (void) agentx_synch_response(ss, pdu, &response);
     snmp_free_pdu(response);
+    DEBUGMSGTL(("agentx/subagent","closed\n"));
     return 1;
 }
 
@@ -147,6 +153,9 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
 {
     struct snmp_pdu *pdu, *response;
 
+    DEBUGMSGTL(("agentx/subagent","registering: "));
+    DEBUGMSGOID(("agentx/subagent", start, startlen));
+    DEBUGMSG(("agentx/subagent","\n"));
     if (! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
@@ -157,15 +166,20 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen)
     pdu->sessid = ss->sessid;
     snmp_add_null_var( pdu, start, startlen);
 
-    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
-	return 0;
+    if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS ) {
+        DEBUGMSGTL(("agentx/subagent","registering failed!\n"));
+        return 0;
+    }
 
     if ( response->errstat != SNMP_ERR_NOERROR ) {
+        DEBUGMSGTL(("agentx/subagent","registering pdu failed: %d!\n",
+                    response->errstat));
 	snmp_free_pdu(response);
 	return 0;
     }
 
     snmp_free_pdu(response);
+    DEBUGMSGTL(("agentx/subagent","registered\n"));
     return 1;
 }
 
@@ -177,6 +191,9 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
     if (! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
+    DEBUGMSGTL(("agentx/subagent","unregistering: "));
+    DEBUGMSGOID(("agentx/subagent", start, startlen));
+    DEBUGMSG(("agentx/subagent","\n"));
     pdu = snmp_pdu_create(AGENTX_MSG_UNREGISTER);
     if ( pdu == NULL )
 	return 0;
@@ -193,6 +210,7 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
     }
 
     snmp_free_pdu(response);
+    DEBUGMSGTL(("agentx/subagent","unregistered\n"));
     return 1;
 }
 
