@@ -237,11 +237,11 @@ Export int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
 Export oid eventIdOid[] = {SNMPV2EVENTENTRY, EVENTTABID};
 Export int eventIdOidLen = sizeof(eventIdOid)/sizeof(oid);
 Export oid trapRisingAlarmOid[] = {SNMPV2ALARMEVENTS, 1};
-Export int trapRisingAlarmOidLen = sizeof(trapRisingAlarmOidLen)/sizeof(oid);
+Export int trapRisingAlarmOidLen = sizeof(trapRisingAlarmOid)/sizeof(oid);
 Export oid trapFallingAlarmOid[] = {SNMPV2ALARMEVENTS, 2};
-Export int trapFallingAlarmOidLen = sizeof(trapFallingAlarmOidLen)/sizeof(oid);
+Export int trapFallingAlarmOidLen = sizeof(trapFallingAlarmOid)/sizeof(oid);
 Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
-Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
+Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOid)/sizeof(oid);
 #endif
 
 struct subtree *subtrees;   /* this is now set up in
