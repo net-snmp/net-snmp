@@ -3,6 +3,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *3.6*
  New:
+    - The configure --help output has been greatly improved for better
+      readability and has been broken into sections.
     - The snmptrapd has been make extensible so you can call other
       programs and scripts when a trap has been received.
       (see snmptrapd.conf(5))
@@ -25,6 +27,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - persistent storage of information is possible from the agent's
       mib modules now.
       (see read_config(3))
+    - The target mib has been implemented as an optional module.
     
   Fixes:
     - many misc bug fixes, as always.

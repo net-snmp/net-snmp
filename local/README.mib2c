@@ -3,7 +3,7 @@ This README describes the ./local/mib2c script.
 Author:  Derek Simkowiak
          dereks@kd-dev.com
          http://www.kd-dev.com
-         (please mail questions to ucd-snmp-coders@ece.ucdavis.edu,
+         (please mail questions to ucd-snmp-coders@ucd-snmp.ucdavis.edu,
          not to the author directly.  Thanks!)
 
 Date:    Wed Jan 20 02:51:06 PST 1999
@@ -207,7 +207,7 @@ not speaking from experience here.  Really.)
 ACKNOWLEGMENTS
 
 	Many thanks to the people on the UCD-SNMP mailing list
-(ucd-snmp@ece.ucdavis.edu).  In particular, many thanks to
+(ucd-snmp@ucd-snmp.ucdavis.edu).  In particular, many thanks to
 
 Wes Hardaker <wjhardaker@ucdavis.edu>
 Ken McNamara <conmara@tcon.net>

@@ -3,7 +3,7 @@
 		       FAQ Author: Dave Shield
 		      ucd-snmp Version: 
 		ucd-snmp Project Author: Wes Hardaker
-		Email: ucd-snmp-coders@ece.ucdavis.edu
+		Email: ucd-snmp-coders@ucd-snmp.ucdavis.edu
 
 TABLE OF CONTENTS
 =================
@@ -103,7 +103,7 @@ WWW:
         http://ucd-snmp.ucdavis.edu
 
 FTP:
-  - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
+  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
 
@@ -196,9 +196,9 @@ How do I find out about new releases?
 ------------------------------------
 
   There is a mailing list for these announcements
-  	ucd-snmp-announce@ece.ucdavis.edu
+  	ucd-snmp-announce@ucd-snmp.ucdavis.edu
   To be added to (or removed from) this list, send a message
-  to the address 'ucd-snmp-announce-request@ece.ucdavis.edu'
+  to the address 'ucd-snmp-announce-request@ucd-snmp.ucdavis.edu'
   with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   Major code revisions may be announced more widely (e.g. on the
@@ -211,9 +211,9 @@ How can I find out what other people are doing?
 ----------------------------------------------
 
   There is a general purpose discussion list
-  	ucd-snmp@ece.ucdavis.edu
+  	ucd-snmp@ucd-snmp.ucdavis.edu
   To be added to (or removed from) this list, send a message
-  to the address 'ucd-snmp-request@ece.ucdavis.edu'
+  to the address 'ucd-snmp-request@ucd-snmp.ucdavis.edu'
   with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   To find out what the coders are doing, and to help them out, please
@@ -230,7 +230,7 @@ How do I submit a patch or bug report?
 	that are useful in trying to track down the problem.
 
    Alternatively, you can send a message to
-		'ucd-snmp-coders@ece.ucdavis.edu'
+		'ucd-snmp-coders@ucd-snmp.ucdavis.edu'
 	containing a description of the problem, and as much other
 	relevant details as you can. Useful information includes the
 	version of the package that you've been working with, the output
@@ -640,7 +640,7 @@ How do I write C code to integrate with the agent?
   header) per group in most cases.  The README file in that directory
   gives more information as to the structure of these files, and how
   to add a new group. 
-  Contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for further advice.
+  Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further advice.
 
   Work is underway (or at least being discussed!) for implementing
   proxy/multi-agent support using the AgentX (and SMUX) mechanisms.
@@ -990,7 +990,7 @@ What does "klread:  bad address" mean?
 	- an error in the implementation of part of the MIB tree
 		for that architecture.  Try and identify which
 		OID is generating the error, and contact the
-		list 'ucd-snmp-coders@ece.ucdavis.edu'
+		list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu'
 
 
 

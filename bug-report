@@ -3,7 +3,7 @@
 #  Quick hack at UCD bug-report script
 #
 
-bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
+bug_reports_to=ucd-snmp-coders@ucd-snmp.ucdavis.edu
 
 # changed automagically
 VersionInfo="3.6.pre9";
@@ -29,7 +29,7 @@ fi
 
 
 echo "You are about to compose a mail message to the"
-echo "ucd-snmp-coders@ece.ucdavis.edu.  Please write a detailed"
+echo "ucd-snmp-coders@ucd-snmp.ucdavis.edu.  Please write a detailed"
 echo "description of your problem.  At the end you will be given"
 echo "the opportunity to include optional text files, such as"
 echo "patches, make output, error files, etc..."
