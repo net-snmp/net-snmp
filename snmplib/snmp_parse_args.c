@@ -139,6 +139,9 @@ snmp_parse_args_descriptions(FILE * outf)
     fprintf(outf,
             "  -I INOPTS\t\tToggle various defaults controlling input parsing:\n");
     snmp_in_toggle_options_usage("\t\t\t  ", outf);
+    fprintf(outf,
+            "  -L LOGOPTS\t\tToggle various defaults controlling logging:\n");
+    snmp_log_options_usage("\t\t\t  ", outf);
     fflush(outf);
 }
 
