@@ -139,6 +139,8 @@ agentx_build_string(u_char *bufp, size_t *out_length,
     agentx_build_int( bufp, (u_int)name_len, network_byte_order );
     bufp        += 4;
     *out_length -= 4;
+    if ( name_len == 0 )
+	return bufp;
     
     memmove( bufp, name, name_len );
     bufp        +=  name_len;
