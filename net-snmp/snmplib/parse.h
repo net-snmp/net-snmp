@@ -66,6 +66,8 @@ struct tree {
     char *label;                /* This node's textual name */
     u_long subid;               /* This node's integer subidentifier */
     int     modid;              /* The module containing this node */
+    int     number_modules;
+    int    *module_list;        /* To handle multiple modules */
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* This node's object type */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
