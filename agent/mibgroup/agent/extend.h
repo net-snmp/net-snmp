@@ -3,6 +3,7 @@
 
 config_require( util_funcs )
 config_require( utilities/execute )
+config_add_mib(NET-SNMP-EXTEND-MIB)
 
 typedef struct netsnmp_extend_s {
     char    *token;
