@@ -84,7 +84,7 @@ if ($opts{'G'}) {
 #
 # Find existing files to possibly read in.
 #
-my @searchpath = ("$confpath", qw("/usr/local/etc/snmp" .), "$home");
+my @searchpath = ("$confpath","/usr/local/etc/snmp", ".", "$home");
 push @searchpath, $opts{I} if ($opts{I});
 foreach my $i (@searchpath) {
     debug("searching $i\n");
