@@ -947,6 +947,11 @@ linux*) host=`echo $host | sed 's/^\(.*-.*-linux\)\(.*\)$/\1-gnu\2/'`
 esac
 
 case $host_os in
+netbsdelf1*) host=`echo $host | sed 's/netbsdelf1/netbsd1/'`
+             host_os=netbsd1
+esac
+
+case $host_os in
 aix3*)
   # AIX sometimes has problems with the GCC collect2 program.  For some
   # reason, if we set the COLLECT_NAMES environment variable, the problems
