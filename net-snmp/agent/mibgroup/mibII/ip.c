@@ -221,7 +221,7 @@ void init_ip(void)
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
-int read_ip_stat (IP_STAT_STRUCTURE *, int);
+long read_ip_stat (IP_STAT_STRUCTURE *, int);
 
 u_char *
 var_ip(struct variable *vp,
@@ -232,7 +232,7 @@ var_ip(struct variable *vp,
        WriteMethod **write_method)
 {
     static IP_STAT_STRUCTURE ipstat;
-    int	ret_value;
+    static long ret_value;
 
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -273,10 +273,8 @@ var_ip(struct variable *vp,
 
 
 #ifdef USES_TRADITIONAL_IPSTAT
-	case IPFORWARDING:	long_return = ret_value;
-			        return (u_char *) &long_return;
-	case IPDEFAULTTTL:	long_return = ret_value;
-			        return (u_char *) &long_return;
+	case IPFORWARDING:	return (u_char *) &ret_value;
+	case IPDEFAULTTTL:	return (u_char *) &ret_value;
 	case IPINRECEIVES:	long_return = ipstat.ips_total;
 			        return (u_char *) &long_return;
 	case IPINHDRERRORS:	long_return = ipstat.ips_badsum
@@ -401,7 +399,7 @@ var_ip(struct variable *vp,
 	 *
 	 *********************/
 
-int
+long
 read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 {
    long ret_value;
@@ -410,7 +408,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 #if ((defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)) ||	\
      (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
-   int len;
+   size_t len;
 #endif
 
 
@@ -418,7 +416,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
    return linux_read_ip_stat(ipstat);
 #else
 #ifdef solaris2
-    return getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL);
+    return getMibstat(MIB_IP, ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL);
 #else
 
     if ( magic == IPFORWARDING ) {
@@ -434,9 +432,8 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 	if (!auto_nlist(IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
 	    return -1;
 	else
-	return (ret_value ? 1	/* GATEWAY */
-		          : 2	/* HOST    */  );
-	    return ret_value;
+	    return (ret_value ? 1	/* GATEWAY */
+			      : 2	/* HOST    */  );
 #endif
 
     }
@@ -462,12 +459,12 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
     return sysmp (MP_SAGET, MPSA_TCPIPSTATS, ipstat, sizeof *ipstat);
 #endif
 #if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
-    len = sizeof ipstat;
+    len = sizeof *ipstat;
     sname[3] = IPCTL_STATS;
-    return sysctl(sname, 4, &ipstat, &len, 0, 0);
+    return sysctl(sname, 4, ipstat, &len, 0, 0);
 #endif
 #ifdef IPSTAT_SYMBOL
-    if (auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof (ipstat)))
+    if (auto_nlist(IPSTAT_SYMBOL, (char *)ipstat, sizeof (*ipstat)))
 	return 0;
 #endif
 
