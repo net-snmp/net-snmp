@@ -20,10 +20,10 @@
 #include <strings.h>
 #endif
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -45,7 +45,7 @@
 /*
  * Must be right after system headers, but before library code for best usage 
  */
-#ifdef HAVE_DMALLOC_H
+#if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
 
