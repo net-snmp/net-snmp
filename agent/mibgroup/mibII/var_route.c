@@ -399,7 +399,7 @@ var_ipRouteEntry(struct variable *vp,
 				     rtp->rtm_addrs, RTA_GATEWAY);
   case IPROUTETYPE:
     long_return = (rtp->rtm_flags & RTF_UP)
-      ? (rtp->rtm_flags & RTF_UP) ? 4 : 3
+      ? (rtp->rtm_flags & RTF_GATEWAY) ? 4 : 3
       : 2;
     return (u_char *)&long_return;
   case IPROUTEPROTO:
@@ -718,7 +718,9 @@ var_ipRouteEntry(struct variable *vp,
 #ifdef hpux11
 	    long_return = rt[RtIndex].Type;
 #else
-	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
+            long_return = (rthead[RtIndex]->rt_flags & RTF_UP)
+              ? (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3
+              : 2;
 #endif
 	    return (u_char *)&long_return;
 	case IPROUTEPROTO:
@@ -1918,7 +1920,9 @@ var_ipRouteEntry(struct variable *vp,
 		return (u_char *)&long_return;
 
 	case IPROUTETYPE:
-		long_return = (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3;
+                long_return = (rt->hdr->rtm_flags & RTF_UP)
+                  ? (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3
+                  : 2;
 		return (u_char *)&long_return;
 
 	case IPROUTEPROTO:
