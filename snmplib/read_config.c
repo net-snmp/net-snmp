@@ -414,7 +414,8 @@ read_config_files (int when)
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
       homepath=getenv("HOME");
-      sprintf(defaultPath,"%s:%s%s%s%s:%s",SNMPSHAREPATH,SNMPLIBPATH,
+      sprintf(defaultPath,"%s:%s:%s%s%s%s:%s",SNMPCONFPATH,
+              SNMPSHAREPATH,SNMPLIBPATH,
               ((homepath == NULL) ? "" : ":"),
               ((homepath == NULL) ? "" : homepath),
               ((homepath == NULL) ? "" : "/.snmp"),
