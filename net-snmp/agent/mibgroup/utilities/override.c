@@ -75,8 +75,7 @@ netsnmp_parse_override(const char *token, char *line)
         return;
     }
 
-    oidbuf_len = parse_miboid(buf, oidbuf);
-    if (!oidbuf_len) {
+    if (!snmp_parse_oid(buf, oidbuf, &oidbuf_len)) {
         config_perror("illegal oid");
         return;
     }
