@@ -1480,9 +1480,10 @@ int unregister_exceptfd(int fd) {
     return FD_NO_SUCH_REGISTRATION;
 }
 
-
 int external_signal_scheduled[NUM_EXTERNAL_SIGS];
 void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
+
+#ifndef WIN32
 
 /*
  * TODO: add agent_SIGXXX_handler functions and `case SIGXXX: ...' lines
@@ -1538,3 +1539,5 @@ int unregister_signal(int sig) {
     DEBUGMSGTL(("unregister_signal", "unregistered signal %d\n", sig));
     return SIG_UNREGISTERED_OK;
 }
+
+#endif /* !WIN32 */
