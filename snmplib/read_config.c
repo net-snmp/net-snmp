@@ -1369,6 +1369,8 @@ char           *
 copy_nword(char *from, char *to, int len)
 {
     char            quote;
+    if ( !from || !to )
+        return NULL;
     if ((*from == '\"') || (*from == '\'')) {
         quote = *(from++);
         while ((*from != quote) && (*from != 0)) {
