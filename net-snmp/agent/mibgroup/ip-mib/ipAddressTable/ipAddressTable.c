@@ -159,8 +159,7 @@ ipAddressTable_allocate_data(void)
     /*
      * TODO:201:r: |-> allocate memory for the ipAddressTable data context.
      */
-    ipAddressTable_data *rtn =
-        netsnmp_access_ipaddress_entry_create();
+    ipAddressTable_data *rtn = netsnmp_access_ipaddress_entry_create();
 
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_allocate_data",
                 "called\n"));
@@ -290,7 +289,8 @@ ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
      * ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
      */
     /** WARNING: this code might not work for netsnmp_ipaddress_entry */
-    ipAddressAddrType_map(&tbl_idx->ipAddressAddrType, ipAddressAddrType_val);
+    ipAddressAddrType_map(&tbl_idx->ipAddressAddrType,
+                          ipAddressAddrType_val);
 
     /*
      * ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
@@ -405,9 +405,9 @@ ipAddressIfIndex_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressIfIndex data.
-     * set (* ipAddressIfIndex_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressIfIndex_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressIfIndex_val_ptr ) = rowreq_ctx->data->if_index;
+    (*ipAddressIfIndex_val_ptr) = rowreq_ctx->data->if_index;
 
     return MFD_SUCCESS;
 }                               /* ipAddressIfIndex_get */
@@ -460,7 +460,7 @@ ipAddressType_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressType data.
-     * set (* ipAddressType_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressType_val_ptr ) from rowreq_ctx->data
      */
     (*ipAddressType_val_ptr) = rowreq_ctx->data->ia_type;
 
@@ -520,8 +520,8 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
                     oid ** ipAddressPrefix_val_ptr_ptr,
                     size_t *ipAddressPrefix_val_ptr_len_ptr)
 {
-    oid * src;
-    int len;
+    oid            *src;
+    int             len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ipAddressPrefix_val_ptr_ptr)
@@ -535,13 +535,12 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressPrefix data.
-     * set (* ipAddressPrefix_val_ptr_ptr ) and (* ipAddressPrefix_val_ptr_len_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressPrefix_val_ptr_ptr ) and (* ipAddressPrefix_val_ptr_len_ptr ) from rowreq_ctx->data
      */
-    if(NULL == rowreq_ctx->data->ia_prefix_oid) {
+    if (NULL == rowreq_ctx->data->ia_prefix_oid) {
         src = nullOid;
         len = nullOidLen / sizeof(oid);
-    }
-    else {
+    } else {
         src = rowreq_ctx->data->ia_prefix_oid;
         len = rowreq_ctx->data->ia_prefix_oid_len;
     }
@@ -556,7 +555,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     (*ipAddressPrefix_val_ptr_len_ptr) = len;
     memcpy((*ipAddressPrefix_val_ptr_ptr), src,
            len * sizeof((*ipAddressPrefix_val_ptr_ptr)[0]));
-    
+
     return MFD_SUCCESS;
 }                               /* ipAddressPrefix_get */
 
@@ -606,9 +605,9 @@ ipAddressOrigin_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressOrigin data.
-     * set (* ipAddressOrigin_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressOrigin_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressOrigin_val_ptr ) = rowreq_ctx->data->ia_origin;
+    (*ipAddressOrigin_val_ptr) = rowreq_ctx->data->ia_origin;
 
     return MFD_SUCCESS;
 }                               /* ipAddressOrigin_get */
@@ -665,9 +664,9 @@ ipAddressStatus_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressStatus data.
-     * set (* ipAddressStatus_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressStatus_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressStatus_val_ptr ) = rowreq_ctx->data->ia_status;
+    (*ipAddressStatus_val_ptr) = rowreq_ctx->data->ia_status;
 
     return MFD_SUCCESS;
 }                               /* ipAddressStatus_get */
@@ -721,9 +720,9 @@ ipAddressCreated_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressCreated data.
-     * set (* ipAddressCreated_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressCreated_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressCreated_val_ptr ) = rowreq_ctx->ipAddressCreated;
+    (*ipAddressCreated_val_ptr) = rowreq_ctx->ipAddressCreated;
 
     return MFD_SUCCESS;
 }                               /* ipAddressCreated_get */
@@ -777,9 +776,9 @@ ipAddressLastChanged_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressLastChanged data.
-     * set (* ipAddressLastChanged_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressLastChanged_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressLastChanged_val_ptr ) = rowreq_ctx->ipAddressLastChanged;
+    (*ipAddressLastChanged_val_ptr) = rowreq_ctx->ipAddressLastChanged;
 
     return MFD_SUCCESS;
 }                               /* ipAddressLastChanged_get */
@@ -890,9 +889,9 @@ ipAddressStorageType_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ipAddressStorageType data.
-     * set (* ipAddressStorageType_val_ptr ) from rowreq_ctx->data->
+     * set (* ipAddressStorageType_val_ptr ) from rowreq_ctx->data
      */
-    (* ipAddressStorageType_val_ptr ) = rowreq_ctx->data->ia_storagetype;
+    (*ipAddressStorageType_val_ptr) = rowreq_ctx->data->ia_storagetype;
 
     return MFD_SUCCESS;
 }                               /* ipAddressStorageType_get */
@@ -1039,12 +1038,15 @@ ipAddressTable_validate_index(ipAddressTable_registration_ptr
         } else {
             return MFD_CANNOT_CREATE_NOW;
         }
-    }
-    else {
-        rowreq_ctx->data->ia_address[0] = rowreq_ctx->tbl_idx.ipAddressAddr[0];
-        rowreq_ctx->data->ia_address[1] = rowreq_ctx->tbl_idx.ipAddressAddr[1];
-        rowreq_ctx->data->ia_address[2] = rowreq_ctx->tbl_idx.ipAddressAddr[2];
-        rowreq_ctx->data->ia_address[3] = rowreq_ctx->tbl_idx.ipAddressAddr[3];
+    } else {
+        rowreq_ctx->data->ia_address[0] =
+            rowreq_ctx->tbl_idx.ipAddressAddr[0];
+        rowreq_ctx->data->ia_address[1] =
+            rowreq_ctx->tbl_idx.ipAddressAddr[1];
+        rowreq_ctx->data->ia_address[2] =
+            rowreq_ctx->tbl_idx.ipAddressAddr[2];
+        rowreq_ctx->data->ia_address[3] =
+            rowreq_ctx->tbl_idx.ipAddressAddr[3];
         rowreq_ctx->data->ia_address_len = 4;
     }
 
@@ -1099,10 +1101,12 @@ ipAddressTable_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /*
      * save last changed
      */
-    rowreq_ctx->ipAddressLastChanged_undo = rowreq_ctx->ipAddressLastChanged;
+    rowreq_ctx->ipAddressLastChanged_undo =
+        rowreq_ctx->ipAddressLastChanged;
 
 
-    rowreq_ctx->ipAddressLastChanged = rowreq_ctx->ipAddressLastChanged_undo;
+    rowreq_ctx->ipAddressLastChanged =
+        rowreq_ctx->ipAddressLastChanged_undo;
 
     return rc;
 }                               /* ipAddressTable_undo_setup */
@@ -1199,25 +1203,22 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * let data access know what columns are set
      */
     rowreq_ctx->data->flags = save_flags;
-    
+
     if (save_flags & FLAG_IPADDRESSROWSTATUS) {
         save_flags &= ~FLAG_IPADDRESSROWSTATUS; /* clear */
-        
+
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-            netsnmp_assert(ROWSTATUS_CREATEANDGO == 
+            netsnmp_assert(ROWSTATUS_CREATEANDGO ==
                            rowreq_ctx->ipAddressRowStatus);
             rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CREATE;
             rowreq_ctx->ipAddressCreated = netsnmp_get_agent_uptime();
-        }
-        else if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
+        } else if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
             rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_DELETE;
-        }
-        else
+        } else
             rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
-    }
-    else
+    } else
         rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
-    
+
     /*
      * do it
      */
@@ -1226,8 +1227,7 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
         DEBUGMSGTL(("ipAddressTable",
                     "bad rc %d from IP address data access\n", rc));
         rc = MFD_ERROR;
-    }
-    else {
+    } else {
         rowreq_ctx->ipAddressLastChanged = netsnmp_get_agent_uptime();
         /*
          * set flag, in case we need to undo
@@ -1328,13 +1328,13 @@ ipAddressAddrType_check_index(ipAddressTable_rowreq_ctx * rowreq_ctx)
      */
     switch (rowreq_ctx->tbl_idx.ipAddressAddrType) {
 
-        case INETADDRESSTYPE_IPV4:
-        case INETADDRESSTYPE_IPV6:
-            break;
+    case INETADDRESSTYPE_IPV4:
+    case INETADDRESSTYPE_IPV6:
+        break;
 
-        default:
-            DEBUGMSGT(("ipAddressTable", "illegal addr type\n"));
-            return MFD_ERROR;
+    default:
+        DEBUGMSGT(("ipAddressTable", "illegal addr type\n"));
+        return MFD_ERROR;
     }
 
     return MFD_SUCCESS;         /* ipAddressAddrType index ok */
@@ -1397,26 +1397,26 @@ ipAddressAddr_check_index(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * for ipAddressAddr is legal.
      */
     switch (rowreq_ctx->tbl_idx.ipAddressAddrType) {
-        
-        case INETADDRESSTYPE_IPV4:
-            if (4 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
-                DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
-                return MFD_ERROR;
-            }
-            break;
-            
-        case INETADDRESSTYPE_IPV6:
-            /** xxx-rks: allow 20? */
-            if (16 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
-                DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
-                return MFD_ERROR;
-            }
-            break;
-            
-        default:
+
+    case INETADDRESSTYPE_IPV4:
+        if (4 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
+            DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
             return MFD_ERROR;
+        }
+        break;
+
+    case INETADDRESSTYPE_IPV6:
+            /** xxx-rks: allow 20? */
+        if (16 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
+            DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
+            return MFD_ERROR;
+        }
+        break;
+
+    default:
+        return MFD_ERROR;
     }
-    
+
     return MFD_SUCCESS;         /* ipAddressAddr index ok */
 }                               /* ipAddressAddr_check_index */
 
@@ -1509,12 +1509,12 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * currently don't support moving addresses between interfaces, so
      * if this isn't a new row, return error.
      */
-    if (! (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED)) {
+    if (!(rowreq_ctx->rowreq_flags & MFD_ROW_CREATED)) {
         DEBUGMSGT(("ipAddressTable",
                    "changing ifIndex value not supported\n"));
         return MFD_NOT_VALID_EVER;
     }
-    
+
     /*
      * find name for ifIndex
      */
@@ -1523,7 +1523,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                    ipAddressIfIndex_val));
         return MFD_NOT_VALID_NOW;
     }
-    
+
     return MFD_SUCCESS;         /* ipAddressIfIndex value not illegal */
 }                               /* ipAddressIfIndex_check_value */
 
@@ -1589,7 +1589,7 @@ ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipAddressIfIndex value.
-     * set ipAddressIfIndex value in rowreq_ctx->data->
+     * set ipAddressIfIndex value in rowreq_ctx->data
      */
     if (rowreq_ctx->data->if_index != ipAddressIfIndex_val)
         rowreq_ctx->data->if_index = ipAddressIfIndex_val;
@@ -1766,7 +1766,7 @@ ipAddressType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipAddressType value.
-     * set ipAddressType value in rowreq_ctx->data->
+     * set ipAddressType value in rowreq_ctx->data
      */
     rowreq_ctx->data->ia_type = ipAddressType_val;
 
@@ -1944,7 +1944,7 @@ ipAddressStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipAddressStatus value.
-     * set ipAddressStatus value in rowreq_ctx->data->
+     * set ipAddressStatus value in rowreq_ctx->data
      */
     rowreq_ctx->data->ia_status = ipAddressStatus_val;
 
@@ -2049,7 +2049,7 @@ int
 ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                u_long ipAddressRowStatus_val)
 {
-    int rc;
+    int             rc;
 
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressRowStatus_check_value",
                 "called\n"));
@@ -2067,10 +2067,10 @@ ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
         DEBUGMSGTL(("ipAddressTable", "createAndWait not supported\n"));
         return MFD_NOT_VALID_EVER;
     }
-    
+
     rc = check_rowstatus_transition(rowreq_ctx->ipAddressRowStatus,
                                     ipAddressRowStatus_val);
-    if (MFD_SUCCESS != rc )
+    if (MFD_SUCCESS != rc)
         return rc;
 
     return MFD_SUCCESS;         /* ipAddressRowStatus value not illegal */
@@ -2138,7 +2138,7 @@ ipAddressRowStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipAddressRowStatus value.
-     * set ipAddressRowStatus value in rowreq_ctx->data->
+     * set ipAddressRowStatus value in rowreq_ctx->data
      */
     rowreq_ctx->ipAddressRowStatus = ipAddressRowStatus_val;
 
@@ -2235,7 +2235,7 @@ int
 ipAddressStorageType_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                  u_long ipAddressStorageType_val)
 {
-    int rc;
+    int             rc;
 
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressStorageType_check_value",
                 "called\n"));
@@ -2264,15 +2264,15 @@ ipAddressStorageType_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
      */
     if (STORAGETYPE_VOLATILE != ipAddressStorageType_val)
         return MFD_NOT_VALID_EVER;
-    
+
     /*
      * check for valid StorageType transition (old, new)
      */
     rc = check_storage_transition(rowreq_ctx->data->ia_storagetype,
                                   ipAddressStorageType_val);
-    if (MFD_SUCCESS != rc )
+    if (MFD_SUCCESS != rc)
         return rc;
-    
+
     return MFD_SUCCESS;         /* ipAddressStorageType value not illegal */
 }                               /* ipAddressStorageType_check_value */
 
@@ -2338,7 +2338,7 @@ ipAddressStorageType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ipAddressStorageType value.
-     * set ipAddressStorageType value in rowreq_ctx->data->
+     * set ipAddressStorageType value in rowreq_ctx->data
      */
     rowreq_ctx->data->ia_storagetype = ipAddressStorageType_val;
 
@@ -2411,8 +2411,7 @@ ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx * rowreq_ctx)
          * row creation requirements
          */
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-            if (ROWSTATUS_CREATEANDGO ==
-                rowreq_ctx->ipAddressRowStatus) {
+            if (ROWSTATUS_CREATEANDGO == rowreq_ctx->ipAddressRowStatus) {
                 if (rowreq_ctx->column_set_flags !=
                     IPADDRESSTABLE_REQUIRED_COLS) {
                     DEBUGMSGTL(("ipAddressTable",

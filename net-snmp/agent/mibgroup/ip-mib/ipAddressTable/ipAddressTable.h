@@ -90,8 +90,8 @@ extern          "C" {
         /*
          * ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
          */
-        /** 128 - 1(other indexes) - oid length(10) = 117 */
-        char            ipAddressAddr[117];
+        /** 128 - 1(other indexes) - oid length(10) = 116 */
+        char            ipAddressAddr[116];
         size_t          ipAddressAddr_len;
 
 
@@ -146,9 +146,9 @@ extern          "C" {
         /*
          * not available from net-snmp ipaddress data_access
          */
-        uint32_t  ipAddressCreated;      /* sysUpTime */
-        uint32_t  ipAddressLastChanged, ipAddressLastChanged_undo;  /* sysUpTime */
-        int       ipAddressRowStatus, ipAddressRowStatus_undo;
+        uint32_t        ipAddressCreated;       /* sysUpTime */
+        uint32_t        ipAddressLastChanged, ipAddressLastChanged_undo;        /* sysUpTime */
+        int             ipAddressRowStatus, ipAddressRowStatus_undo;
 
         /*
          * storage for future expansion
@@ -165,10 +165,10 @@ extern          "C" {
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         ipAddressTable_pre_request(ipAddressTable_registration_ptr
                                    user_context);
-    int            
+    int
         ipAddressTable_post_request(ipAddressTable_registration_ptr
                                     user_context);
 
@@ -176,7 +176,7 @@ extern          "C" {
     void            ipAddressTable_release_data(ipAddressTable_data *
                                                 data);
 
-    int            
+    int
         ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx *
                                           rowreq_ctx);
     int             ipAddressTable_commit(ipAddressTable_rowreq_ctx *
@@ -252,7 +252,7 @@ extern          "C" {
                                              ipAddressStorageType_val_ptr);
 
 
-    int            
+    int
         ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index *
                                            tbl_idx,
                                            u_long ipAddressAddrType_val,
@@ -294,7 +294,7 @@ extern          "C" {
     int             ipAddressAddr_check_index(ipAddressTable_rowreq_ctx * rowreq_ctx);  /* internal */
 
 
-    int            
+    int
         ipAddressTable_validate_index(ipAddressTable_registration_ptr
                                       ipAddressTable_reg,
                                       ipAddressTable_rowreq_ctx *
@@ -310,9 +310,9 @@ extern          "C" {
 
 
     int             ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx
-                                                 * rowreq_ctx,
-                                                 long
+                                                 * rowreq_ctx, long
                                                  ipAddressIfIndex_val);
+
     int             ipAddressIfIndex_undo_setup(ipAddressTable_rowreq_ctx *
                                                 rowreq_ctx);
     int             ipAddressIfIndex_set(ipAddressTable_rowreq_ctx *
@@ -384,11 +384,11 @@ extern          "C" {
     int             ipAddressCreated_undo(ipAddressTable_rowreq_ctx *
                                           rowreq_ctx);
 
-    int            
+    int
         ipAddressLastChanged_check_value(ipAddressTable_rowreq_ctx *
                                          rowreq_ctx,
                                          u_long ipAddressLastChanged_val);
-    int            
+    int
         ipAddressLastChanged_undo_setup(ipAddressTable_rowreq_ctx *
                                         rowreq_ctx);
     int             ipAddressLastChanged_set(ipAddressTable_rowreq_ctx *
@@ -398,7 +398,7 @@ extern          "C" {
     int             ipAddressLastChanged_undo(ipAddressTable_rowreq_ctx *
                                               rowreq_ctx);
 
-    int            
+    int
         ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx *
                                        rowreq_ctx,
                                        u_long ipAddressRowStatus_val);
@@ -410,11 +410,11 @@ extern          "C" {
     int             ipAddressRowStatus_undo(ipAddressTable_rowreq_ctx *
                                             rowreq_ctx);
 
-    int            
+    int
         ipAddressStorageType_check_value(ipAddressTable_rowreq_ctx *
                                          rowreq_ctx,
                                          u_long ipAddressStorageType_val);
-    int            
+    int
         ipAddressStorageType_undo_setup(ipAddressTable_rowreq_ctx *
                                         rowreq_ctx);
     int             ipAddressStorageType_set(ipAddressTable_rowreq_ctx *
@@ -425,7 +425,7 @@ extern          "C" {
                                               rowreq_ctx);
 
 
-    int            
+    int
         ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx * ctx);
 
 

@@ -214,8 +214,7 @@ inetNetToMediaTable_indexes_set_tbl_idx(inetNetToMediaTable_mib_index *
                                         u_long
                                         inetNetToMediaNetAddressType_val,
                                         char
-                                        *inetNetToMediaNetAddress_val_ptr,
-                                        size_t
+                                        *inetNetToMediaNetAddress_val_ptr, size_t
                                         inetNetToMediaNetAddress_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_indexes_set_tbl_idx", "called\n"));
@@ -373,10 +372,12 @@ inetNetToMediaPhysAddress_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaPhysAddress data.
-     * set (* inetNetToMediaPhysAddress_val_ptr_ptr ) and (* inetNetToMediaPhysAddress_val_ptr_len_ptr ) from rowreq_ctx->data->
+     * set (* inetNetToMediaPhysAddress_val_ptr_ptr ) and (* inetNetToMediaPhysAddress_val_ptr_len_ptr ) from rowreq_ctx->data
      */
-    (* inetNetToMediaPhysAddress_val_ptr_ptr ) = rowreq_ctx->data->arp_physaddress;
-    (* inetNetToMediaPhysAddress_val_ptr_len_ptr ) = rowreq_ctx->data->arp_physaddress_len;
+    (*inetNetToMediaPhysAddress_val_ptr_ptr) =
+        rowreq_ctx->data->arp_physaddress;
+    (*inetNetToMediaPhysAddress_val_ptr_len_ptr) =
+        rowreq_ctx->data->arp_physaddress_len;
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaPhysAddress_get */
@@ -429,7 +430,7 @@ inetNetToMediaLastUpdated_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaLastUpdated data.
-     * set (* inetNetToMediaLastUpdated_val_ptr ) from rowreq_ctx->data->
+     * set (* inetNetToMediaLastUpdated_val_ptr ) from rowreq_ctx->data
      */
     return MFD_SKIP;            /* TODO:235:M: |-> Remove SKIP once you've set inetNetToMediaLastUpdated data */
 
@@ -521,9 +522,9 @@ inetNetToMediaType_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaType data.
-     * set (* inetNetToMediaType_val_ptr ) from rowreq_ctx->data->
+     * set (* inetNetToMediaType_val_ptr ) from rowreq_ctx->data
      */
-    (* inetNetToMediaType_val_ptr ) = rowreq_ctx->data->arp_type;
+    (*inetNetToMediaType_val_ptr) = rowreq_ctx->data->arp_type;
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaType_get */
@@ -578,9 +579,9 @@ inetNetToMediaState_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaState data.
-     * set (* inetNetToMediaState_val_ptr ) from rowreq_ctx->data->
+     * set (* inetNetToMediaState_val_ptr ) from rowreq_ctx->data
      */
-    (* inetNetToMediaState_val_ptr ) = INETNETTOMEDIASTATE_UNKNOWN;
+    (*inetNetToMediaState_val_ptr) = INETNETTOMEDIASTATE_UNKNOWN;
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaState_get */
@@ -1253,10 +1254,8 @@ The media-dependent `physical' address.
  */
 int
 inetNetToMediaPhysAddress_check_value(inetNetToMediaTable_rowreq_ctx *
-                                      rowreq_ctx,
-                                      char
-                                      *inetNetToMediaPhysAddress_val_ptr,
-                                      size_t
+                                      rowreq_ctx, char
+                                      *inetNetToMediaPhysAddress_val_ptr, size_t
                                       inetNetToMediaPhysAddress_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaPhysAddress_check_value", "called\n"));
@@ -1337,7 +1336,7 @@ inetNetToMediaPhysAddress_set(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set inetNetToMediaPhysAddress value.
-     * set inetNetToMediaPhysAddress value in rowreq_ctx->data->
+     * set inetNetToMediaPhysAddress value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -1540,7 +1539,7 @@ inetNetToMediaType_set(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set inetNetToMediaType value.
-     * set inetNetToMediaType value in rowreq_ctx->data->
+     * set inetNetToMediaType value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -1727,7 +1726,7 @@ inetNetToMediaRowStatus_set(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set inetNetToMediaRowStatus value.
-     * set inetNetToMediaRowStatus value in rowreq_ctx->data->
+     * set inetNetToMediaRowStatus value in rowreq_ctx->data
      */
 
     return MFD_SUCCESS;
@@ -1803,8 +1802,10 @@ inetNetToMediaTable_check_dependencies(inetNetToMediaTable_rowreq_ctx *
          * (Note: move transition check to 
          *  to catch errors earlier)
          */
-        rc = check_rowstatus_transition(rowreq_ctx->inetNetToMediaRowStatus_undo,
-                                        rowreq_ctx->inetNetToMediaRowStatus);
+        rc = check_rowstatus_transition(rowreq_ctx->
+                                        inetNetToMediaRowStatus_undo,
+                                        rowreq_ctx->
+                                        inetNetToMediaRowStatus);
         if (MFD_SUCCESS != rc)
             return rc;
 
@@ -1833,8 +1834,7 @@ inetNetToMediaTable_check_dependencies(inetNetToMediaTable_rowreq_ctx *
              * you may or may not require the row be notInService before it
              * can be destroyed.
              */
-            if (ROWSTATUS_DESTROY ==
-                rowreq_ctx->inetNetToMediaRowStatus) {
+            if (ROWSTATUS_DESTROY == rowreq_ctx->inetNetToMediaRowStatus) {
                 if (rowreq_ctx->
                     column_set_flags & ~FLAG_INETNETTOMEDIAROWSTATUS) {
                     DEBUGMSGTL(("inetNetToMediaTable",
