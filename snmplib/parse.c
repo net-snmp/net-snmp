@@ -417,6 +417,8 @@ void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
           lead, ((mib_comment_term)?"dis":""));
   fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
           lead, ((save_mib_descriptions)?"don't ":""));
+  fprintf(outf, "%s    l: %sallow underscore in MIB symbols.\n",
+          lead, ((save_mib_descriptions)?"don't ":""));
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
@@ -445,6 +447,10 @@ char *snmp_mib_toggle_options(char *options) {
           
         case 'd':
           save_mib_descriptions = !save_mib_descriptions;
+          break;
+          
+        case 'l':
+          mib_parse_label = !mib_parse_label;
           break;
 
         default:
