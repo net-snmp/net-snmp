@@ -972,12 +972,14 @@ write_arp(
               arp_row->dwIndex = temp_row.dwIndex;
               retval = SNMP_ERR_COMMITFAILED;
             }
-          //Don't know yet, whether change in ifIndex creates new row or not
-          //else{
-            //temp_row.dwType = 2;
-            //if(SetIpNetEntry(&temp_row) != NO_ERROR)
-              //retval = SNMP_ERR_COMMITFAILED;
-          //}
+	    /*  Don't know yet, whether change in ifIndex creates new
+		row or not.  */
+	    /*  else {  */
+	    /*    temp_row.dwType = 2;  */
+	    /*      if (SetIpNetEntry(&temp_row) != NO_ERROR) {  */
+	    /*        retval = SNMP_ERR_COMMITFAILED;  */
+	    /*      }  */
+	    /*  }  */
           }
           break;
         case IPMEDIANETADDRESS:
@@ -1019,16 +1021,16 @@ write_arp(
     case UNDO :
       /* Reverse the SET action and free resources */            
       if(oldarp_row != NULL){   
-        //UNDO the changes done for existing entry.
+        /*  UNDO the changes done for existing entry.  */
         if(!create_flag){
           if((status = SetIpNetEntry(oldarp_row)) != NO_ERROR){
-            snmp_log(LOG_ERR, "Error in case UNDO, status : %d\n", status);            
+            snmp_log(LOG_ERR, "Error in case UNDO, status : %d\n", status);
             retval = SNMP_ERR_UNDOFAILED;
           } 
         }
 
         if(oldarp_row->dwAddr != arp_row->dwAddr){
-          arp_row->dwType = 2; //If row was added/created delete that row
+          arp_row->dwType = 2; /*  If row was added/created delete that row  */
           
           if((status = SetIpNetEntry(arp_row)) != NO_ERROR){
             snmp_log(LOG_ERR, "Error while deleting added row, status : %d\n", 
