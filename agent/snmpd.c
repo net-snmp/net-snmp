@@ -106,7 +106,6 @@ typedef long    fd_mask;
 #include "snmp_client.h"
 #include "snmpd.h"
 #include "var_struct.h"
-#include "read_config.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 

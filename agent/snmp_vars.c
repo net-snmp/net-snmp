@@ -159,7 +159,7 @@ init_snmp __P((void))
 
   setup_tree();
 #include "mibgroup/mib_module_inits.h"
-  init_read_config();
+  init_agent_read_config();
 #ifdef TESTING
   auto_nlist_print_tree(-2,0);
 #endif
@@ -702,33 +702,6 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
   }
 }
 */
-
-int
-compare(name1, len1, name2, len2)
-    register oid	    *name1, *name2;
-    register int	    len1, len2;
-{
-    register int    len;
-
-    /* len = minimum of len1 and len2 */
-    if (len1 < len2)
-	len = len1;
-    else
-	len = len2;
-    /* find first non-matching byte */
-    while(len-- > 0){
-	if (*name1 < *name2)
-	    return -1;
-	if (*name2++ < *name1++)
-	    return 1;
-    }
-    /* bytes match up to length of shorter string */
-    if (len1 < len2)
-	return -1;  /* name1 shorter, so it is "less" */
-    if (len2 < len1)
-	return 1;
-    return 0;	/* both strings are equal */
-}
 
 int
 compare_tree(name1, len1, name2, len2)
