@@ -218,7 +218,7 @@ static void usage(char *prog)
 	printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
 	printf("-D\t\tTurn on debugging output\n");
 	printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
-	printf("-x SOCKADDR\t\tBind AgentX port to this address\n");
+	printf("-x SOCKADDR\tBind AgentX port to this address\n");
 	printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
 	printf("-C\t\tDon't read the default configuration files.\n");
 	printf("-L\t\tPrint warnings/messages to stdout/err\n");
