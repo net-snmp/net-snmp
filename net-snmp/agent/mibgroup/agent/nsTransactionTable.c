@@ -19,11 +19,13 @@ initialize_table_nsTransactionTable(void)
         OID_LENGTH(nsTransactionTable_oid);
     table_registration_info *table_info;
     handler_registration *my_handler;
+    iterator_info *iinfo;
 
     /*
      * create the table structure itself 
      */
     table_info = SNMP_MALLOC_TYPEDEF(table_registration_info);
+    iinfo = SNMP_MALLOC_TYPEDEF(iterator_info);
 
     /*
      * if your table is read only, it's easiest to change the
@@ -36,7 +38,7 @@ initialize_table_nsTransactionTable(void)
                                              / sizeof(oid),
                                              HANDLER_CAN_RONLY);
 
-    if (!my_handler || !table_info)
+    if (!my_handler || !table_info || !iinfo)
         return;                 /* mallocs failed */
 
     /***************************************************
@@ -48,17 +50,18 @@ initialize_table_nsTransactionTable(void)
 
     table_info->min_column = 2;
     table_info->max_column = 2;
-    table_info->get_first_data_point =
+    iinfo->get_first_data_point =
         nsTransactionTable_get_first_data_point;
-    table_info->get_next_data_point =
+    iinfo->get_next_data_point =
         nsTransactionTable_get_next_data_point;
+    iinfo->table_reginfo = table_info;
 
     /***************************************************
      * registering the table with the master agent
      */
     DEBUGMSGTL(("initialize_table_nsTransactionTable",
                 "Registering table nsTransactionTable as a table iterator\n"));
-    register_table_iterator(my_handler, table_info);
+    register_table_iterator(my_handler, iinfo);
 }
 
 /** Initialzies the nsTransactionTable module */
