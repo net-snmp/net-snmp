@@ -839,6 +839,7 @@ done
 AC_SUBST(security_src_list)
 AC_SUBST(security_obj_list)
 AC_SUBST(security_lobj_list)
+AC_SUBST(security_hdr_list)
 AC_MSG_RESULT($new_with_security)
 
 dnl
