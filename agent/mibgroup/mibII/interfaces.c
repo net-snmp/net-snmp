@@ -1623,8 +1623,6 @@ int Interface_Scan_Next(short *Index,
 		    *Index = ++saveIndex;
 		if (Retifnet)
 		    *Retifnet = ifnet;
-		if (Retin_ifaddr)
-		    *Retin_ifaddr = in_ifaddr;
 		if (Retin_ifaddr && has_ipaddr) /* assign the in_ifaddr only
                                                    if the IF has IP-address */
 		    *Retin_ifaddr = in_ifaddr;
