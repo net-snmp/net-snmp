@@ -47,6 +47,7 @@ TABLE OF CONTENTS
    How do I handle traps and notifications?
    My traphandler script doesn't work when run like this - why not?
    The ucdShutdown trap OID received by my manager is wrong. Why?
+   Why does snmptrapd complain about AgentX?
    How do I use SNMPv3?
    How big can an SNMP request (or reply) be?
    How can I monitor my systems (disk, memory, etc)?
@@ -1049,6 +1050,26 @@ The ucdShutdown trap OID received by my manager is wrong. Why?
   objects, under the 'net-snmp' enterprise tree.  This will
   include new trap OIDs, which will be designed such that
   this problem does not arise in the future.
+
+
+Why does snmptrapd complain about AgentX?
+----------------------------------------
+
+    Starting from the v5 release, the trap handling daemon has
+  implemented the notification logging aspects of the NOTIFICATION-MIB
+  (RFC 3014).  This is handled by the trap handler daemon registering
+  as an AgentX subagent, to supply this statistical information.
+
+    If there is no AgentX master agent available, this registration
+  fails, generating the warning about "failed to connect to the agentx
+  master".  This failure does not affect the main operation of the
+  trap handler.  It simply means that the nsmLog information won't be
+  available for query via SNMP.
+
+    Basically, this is a warning that can safely be ignored.  In the
+  future, we hope to suppress this message, and allow the connection
+  to fail silently.
+
 
 
 How do I use SNMPv3?
