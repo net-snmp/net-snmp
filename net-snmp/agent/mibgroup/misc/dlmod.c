@@ -44,7 +44,7 @@ init_dlmod __P((void)) {
 
 	snmpd_register_config_handler("dlmod", dlmod_parse_config,
                                       dlmod_free_config,
-                                      "dlmod-file-to-load);
+                                      "dlmod-file-to-load");
 
 	p = getenv("SNMP_DLMOD_PATH");
 	strncpy(dlmod_path, DLMOD_DEFAULT_PATH, sizeof(dlmod_path));
