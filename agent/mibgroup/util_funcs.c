@@ -248,7 +248,8 @@ int get_exec_output(struct extensible *ex)
           *cptr2 = *cptr1;
           if (*cptr1 == ' ') {
             *(cptr2++) = 0;
-            cptr1 = skip_white(cptr1);
+            if ((cptr1 = skip_white(cptr1)) == NULL)
+                break;
             if (cptr1) {
                 *cptr2 = *cptr1;
                 if (*cptr1 != 0) cnt++;
@@ -389,7 +390,8 @@ int get_exec_pipes(char *cmd,
         *cptr2 = *cptr1;
         if (*cptr1 == ' ') {
           *(cptr2++) = 0;
-          cptr1 = skip_white(cptr1);
+          if ((cptr1 = skip_white(cptr1)) == NULL)
+              break;
           *cptr2 = *cptr1;
           if (*cptr1 != 0) cnt++;
         }
