@@ -140,8 +140,24 @@ static struct protoent *getprotoent46(void);
 
 void usage(void)
 {
-    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-P proto] [-I interface] [interval]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-q] [-D] hostname noAuth [-ainrs] [-P proto] [-I interface] [interval]\n");
+    fprintf(stderr, "Usage: snmpnetstat [options...] hostname [ community ] [interval]\n");
+    fprintf(stderr, "UCD-snmp version: %s\n", VersionInfo);
+    fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
+    fprintf(stderr, "  -V             display version number\n");
+    fprintf(stderr, "  -p port        specify agent port number\n");
+    fprintf(stderr, "  -c community   specify community name\n");
+    fprintf(stderr, "  -t timeout     SNMP packet timeout (seconds)\n");
+    fprintf(stderr, "  -i             show interfaces with packet counters\n");
+    fprintf(stderr, "  -o             show interfaces with octet counters\n");
+    fprintf(stderr, "  -r             show routing table\n");
+    fprintf(stderr, "  -s             show general statistics\n");
+    fprintf(stderr, "  -n             show IP addresses, not names\n");
+    fprintf(stderr, "  -a             show sockets in LISTEN mode too\n");
+    fprintf(stderr, "  -P proto       show only details for this protocol\n");
+    fprintf(stderr, "  -I interface   show only this interface\n");
+    fprintf(stderr, "  -d             dump packets\n");
+    fprintf(stderr, "  -Ddebugspec    \n");
+
 }
 
 int main(int argc, char *argv[])
@@ -151,13 +167,11 @@ int main(int argc, char *argv[])
     struct protox *tp = NULL;	/* for printing cblocks & stats */
     int allprotos = 1;
     char *community = NULL;
+    char *argp;
     struct snmp_session session;
     int dest_port = SNMP_PORT;
-    int clock_flag = 0;
-    u_long	srcclock = 0, dstclock = 0;
+    int timeout = SNMP_DEFAULT_TIMEOUT;
     int version = SNMP_VERSION_1;
-    size_t srclen = 0, dstlen = 0, contextlen = 0;
-    int trivialSNMPv2 = FALSE;
     int arg;
 
     init_mib();
@@ -172,46 +186,69 @@ int main(int argc, char *argv[])
                 fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                 exit(0);
                 break;
+
+	      case 'h':
+		usage();
+		exit(0);
+
 	      case 'd':
 		snmp_set_dump_packet(1);
 		break;
+
 	      case 'q':
 		snmp_set_quick_print(1);
 		break;
+
 	      case 'D':
                 debug_register_tokens(&argv[arg][2]);
 		snmp_set_do_debugging(1);
 		break;
 	      case 'p':
-		if (++arg == argc) {
+		if (argv[arg][2] != 0) dest_port = atoi(argv[arg]+2);
+		else if (++arg == argc) {
 		    usage();
 		    exit(1);
 		}
-		dest_port = atoi(argv[arg]);
+		else dest_port = atoi(argv[arg]);
 		break;
+
+	      case 't':
+		if (argv[arg][2] != 0) timeout = atoi(argv[arg]+2);
+		else if (++arg == argc) {
+		    usage();
+		    exit(1);
+		}
+		else timeout = atoi(argv[arg]);
+		timeout *= 1000000;
+		break;
+
 	      case 'c':
-		clock_flag++;
-		srcclock = atoi(argv[++arg]);
-		dstclock = atoi(argv[++arg]);
-		break;
-	      case 'v':
 		if (argv[arg][2] != 0) community = argv[arg]+2;
-		else community = argv[++arg];
-		if (arg == argc) {
+		else if (++arg == argc) {
 		    usage();
 		    exit(1);
 		}
-		if (!strcmp(community,"1"))
+		else community = argv[arg];
+		break;
+
+	      case 'v':
+		if (argv[arg][2] != 0) argp = argv[arg]+2;
+		else if (arg == argc) {
+		    usage();
+		    exit(1);
+		}
+		else argp = argv[arg];
+		if (!strcmp(argp,"1"))
 		    version = SNMP_VERSION_1;
-		else if (!strcmp(community,"2c"))
+		else if (!strcmp(argp,"2c"))
 		    version = SNMP_VERSION_2c;
 		else {
-		    fprintf(stderr, "Invalid version: %s\n", community);
+		    fprintf(stderr, "Invalid version: %s\n", argp);
 		    usage();
 		    exit(1);
 		}
-		community = NULL;
 		break;
+
 	      case 'a':
 		aflag++;
 		break;
@@ -295,6 +332,7 @@ int main(int argc, char *argv[])
     snmp_sess_init(&session);
     session.peername = hostname;
     session.remote_port = dest_port;
+    session.timeout = timeout;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
         session.version = version;
         session.community = (u_char *)community;
