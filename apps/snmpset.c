@@ -178,7 +178,7 @@ main(argc, argv)
     for(count = 0; count < current_name; count++){
       name_length = MAX_NAME_LEN;
       if (!read_objid(names[count], name, &name_length)){
-        printf("Invalid object identifier: %s\n", names[count]);
+        fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
         failures++;
       } else
         snmp_add_var(pdu, name, name_length, types[count], values[count]);
@@ -197,17 +197,17 @@ retry:
         for(vars = response->variables; vars; vars = vars->next_variable)
           print_variable(vars->name, vars->name_length, vars);
         } else {
-          printf("Error in packet.\nReason: %s\n",
+          fprintf(stderr, "Error in packet.\nReason: %s\n",
                  snmp_errstring(response->errstat));
           if (response->errstat == SNMP_ERR_NOSUCHNAME){
-            printf("This name doesn't exist: ");
+            fprintf(stderr, "This name doesn't exist: ");
             for(count = 1, vars = response->variables;
                   vars && (count != response->errindex);
                   vars = vars->next_variable, count++)
               ;
             if (vars)
-              print_objid(vars->name, vars->name_length);
-            printf("\n");
+              fprint_objid(stderr, vars->name, vars->name_length);
+            fprintf(stderr, "\n");
           }
           if ((pdu = snmp_fix_pdu(response, SET_REQ_MSG)) != NULL)
             goto retry;
@@ -269,14 +269,14 @@ snmp_add_var(pdu, name, name_length, type, value)
     case 'u':
       vars->type = UNSIGNED;
       vars->val.integer = (long *)malloc(sizeof(long));
-      *(vars->val.integer) = (long)strtoul(value, NULL, 10);
+      sscanf(value, "%lu", vars->val.integer);
       vars->val_len = sizeof(long);
       break;
 
     case 't':
       vars->type = TIMETICKS;
       vars->val.integer = (long *)malloc(sizeof(long));
-      *(vars->val.integer) = (long)strtoul(value, NULL, 10);
+      sscanf(value, "%lu", vars->val.integer);
       vars->val_len = sizeof(long);
       break;
 
@@ -324,7 +324,7 @@ snmp_add_var(pdu, name, name_length, type, value)
       break;
 
     default:
-      printf("Internal error in type switching\n");
+      fprintf(stderr, "Internal error in type switching\n");
       exit(1);
     }
 }

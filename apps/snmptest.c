@@ -223,7 +223,7 @@ main(argc, argv)
 			    print_variable(vars->name, vars->name_length,
 					   vars);
 		    } else {
-			fprintf(stderr, "Error in packet.\nReason: %s\n",
+			printf("Error in packet.\nReason: %s\n",
 				snmp_errstring(response->errstat));
 			if (response->errstat == SNMP_ERR_NOSUCHNAME){
 			    for(count = 1, vars = response->variables;
@@ -239,7 +239,7 @@ main(argc, argv)
 		    }
 		}
 	    } else if (status == STAT_TIMEOUT){
-		fprintf(stderr, "No Response from %s\n", session.peername);
+		printf("No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
               snmp_perror("snmptest: An error occurred");
 	    }
@@ -264,13 +264,12 @@ ascii_to_binary(cp, bufp)
 	if (isspace(*cp))
 	    continue;
 	if (!isdigit(*cp)){
-	    fprintf(stderr, "Input error\n");
+	    printf("Input error\n");
 	    return -1;
 	}
 	subidentifier = atoi(cp);
 	if (subidentifier > 255){
-	    fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
-		    subidentifier);
+	    printf("subidentifier %d is too large ( > 255)\n", subidentifier);
 	    return -1;
 	}
 	*bp++ = (u_char)subidentifier;
@@ -294,13 +293,12 @@ hex_to_binary(cp, bufp)
 	if (isspace(*cp))
 	    continue;
 	if (!isxdigit(*cp)){
-	    fprintf(stderr, "Input error\n");
+	    printf("Input error\n");
 	    return -1;
 	}
 	sscanf((char *)cp, "%x", &subidentifier);
 	if (subidentifier > 255){
-	    fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
-		    subidentifier);
+	    printf("subidentifier %d is too large ( > 255)\n", subidentifier);
 	    return -1;
 	}
 	*bp++ = (u_char)subidentifier;
@@ -386,7 +384,7 @@ input_variable(vp)
 		}
 		break;
 	    default:
-		fprintf(stderr, "Bad command\n");
+		printf("Bad command\n");
 	}
 	return -1;
     }
@@ -428,7 +426,7 @@ input_variable(vp)
 		vp->type = IPADDRESS;
 		break;
 	    default:
-		fprintf(stderr, "bad type \"%c\", use \"i\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
+		printf("bad type \"%c\", use \"i\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
 		return -1;
 	}
 	printf("Value: "); fflush(stdout);
@@ -473,7 +471,7 @@ input_variable(vp)
 		vp->val_len = sizeof(long);
 		break;
 	    default:
-		fprintf(stderr, "Internal error\n");
+		printf("Internal error\n");
 		break;
 	}
     } else {	/* some form of get message */

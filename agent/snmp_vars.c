@@ -37,6 +37,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <config.h>
 #include "common_header.h"
 #include "mibgroup/mib_module_includes.h"
+#include "read_config.h"
 
 #include "snmpd.h"
 #include "party.h"

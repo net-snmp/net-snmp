@@ -58,6 +58,7 @@ SOFTWARE.
 #include "mibgroup/snmp_mib.h"
 #include "snmpd.h"
 #include "mibgroup/util_funcs.h"
+#include "snmp_agent.h"
 #include "read_config.h"
 
 static int create_identical __UCD_P((u_char *, u_char *, int, long, long, struct packet_info *));

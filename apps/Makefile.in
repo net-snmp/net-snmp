@@ -15,7 +15,7 @@ snmplibdir = $(datadir)/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap snmpstatus
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap snmpstatus snmpdelta
 SUBDIRS=  snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	  $(USELIBS) @LIBS@
@@ -50,6 +50,9 @@ snmpstatus:    snmpstatus.o $(PARSEOBJS) $(USELIBS)
 
 snmpget:    snmpget.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpget.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+
+snmpdelta:    snmpdelta.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpdelta.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
