@@ -45,6 +45,7 @@ EXPORTS
 	fprint_description
 	get_module_node
 	get_node
+	snmp_parse_oid
 	find_node
 	find_best_tree_node
 	get_wild_node
@@ -90,6 +91,7 @@ EXPORTS
 	snmp_get_do_logging
 	snmp_disable_stderrlog
 	snmp_enable_syslog
+	snmp_enable_stderrlog
 	snmp_enable_filelog
 	snmp_log
 	snmp_log_perror
@@ -155,7 +157,11 @@ EXPORTS
 	unregister_config_handler
 	snmp_set_do_debugging
 	snmp_get_do_debugging
+	debug_indent
+	debug_is_token_registered
 	debugmsg
+	debugmsg_hex
+	debugmsg_hextli
 	debugmsgtoken
 	debug_register_tokens
 	generate_Ku
@@ -165,6 +171,8 @@ EXPORTS
 	init_callbacks
 	snmp_register_callback
 	snmp_call_callbacks
+	snmp_count_callbacks
+	snmp_callback_available
 	strncasecmp
 	strcasecmp
 	init_snmp_alarm

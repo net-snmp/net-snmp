@@ -2743,7 +2743,7 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 
   /* build the PDU sequence */
   cp = asn_rbuild_sequence(cp, out_length,
-                           pdu->command,
+                           (u_char)pdu->command,
                            startcp - cp);
 
   return cp;
