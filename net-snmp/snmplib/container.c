@@ -17,26 +17,20 @@ typedef struct container_type_s {
 netsnmp_factory *
 netsnmp_container_get_factory(const char *type);
 
-static int
-_ba_release_with_free(netsnmp_container *container);
-void 
-_ba_free_container_type(void *data, void *context);
-static int
-_ba_remove_with_free(netsnmp_container *container, const void *data);
-
-/* return top containers */
-netsnmp_container **
-netsnmp_get_top_containers(void)
+/*------------------------------------------------------------------
+ */
+static void 
+_factory_free(container_type *data, void *context)
 {
-    return &containers;
-}
-
-void
-netsnmp_release_if_top(netsnmp_container *cont)
-{
-    if (cont == containers) {
-        containers = NULL;
+    if (data == NULL)
+	return;
+    
+    if (data->name != NULL) {
+        DEBUGMSGTL(("container", "  _factory_free_list() called for %s\n",
+                    data->name));
+	free(data->name); /* SNMP_FREE wasted on object about to be freed */
     }
+    free(data); /* SNMP_FREE wasted on param */
 }
 
 /*------------------------------------------------------------------
@@ -53,8 +47,6 @@ netsnmp_container_init_list(void)
      */
     containers = netsnmp_container_get_binary_array();
     containers->compare = netsnmp_compare_cstring;
-    containers->cfree = _ba_release_with_free;
-    containers->remove = _ba_remove_with_free;
 
     /*
      * register containers
@@ -75,12 +67,20 @@ netsnmp_container_init_list(void)
 }
 
 void
-netsnmp_clear_container(void)
+netsnmp_container_free_list(void)
 {
-    DEBUGMSGTL(("container", "netsnmp_clear_container() called\n"));
+    DEBUGMSGTL(("container", "netsnmp_container_free_list() called\n"));
     if (containers == NULL)
 	return;
 
+    /*
+     * free memory used by each factory entry
+     */
+    CONTAINER_FOR_EACH(containers, _factory_free, NULL);
+
+    /*
+     * free factory container
+     */
     CONTAINER_FREE(containers);
     containers = NULL;
 }
@@ -247,11 +247,6 @@ int CONTAINER_FREE(netsnmp_container *x)
         }
     }
     rc = x->cfree(x);
-    if (rc == 0) {
-	if (containers == x) {
-	    containers = NULL;
-	}
-    }
 
     return rc;
 }
@@ -363,50 +358,3 @@ netsnmp_compare_mem(const char * lhs, size_t lhs_len,
 
     return rc;
 }
-
-static int
-_ba_remove_with_free(netsnmp_container *container, const void *data)
-{
-    container_type *ct, *tmp;
-    int rc;
-
-    ct = SNMP_MALLOC_TYPEDEF(container_type);
-    if (NULL == ct)
-        return -1;
-
-    tmp = ct;
-    rc = netsnmp_binary_array_remove(container, data, (void*)ct);
-    
-    if (ct != NULL)
-	SNMP_FREE(ct);
-
-    if (tmp != NULL)
-	SNMP_FREE(tmp);
-
-    return rc;
-}
-
-
-void 
-_ba_free_container_type(void *data, void *context)
-{
-    if (data == NULL)
-	return;
-    
-    if (((container_type *)data)->name != NULL) {
-	free(((container_type *)data)->name);
-    }
-    SNMP_FREE(data);
-}
-
-
-static int
-_ba_release_with_free(netsnmp_container *container)
-{
-    container->for_each(container, _ba_free_container_type, NULL);
-    netsnmp_binary_array_release(container);
-
-    return 0;
-}
-
-
