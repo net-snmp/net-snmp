@@ -450,7 +450,10 @@
 #define CONFIGURE_OPTIONS ""
 
 /* got socklen_t? */
-#undef socklen_t
+#undef HAVE_SOCKLEN_T
+
+/* got in_addr_t? */
+#undef HAVE_IN_ADDR_T
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
