@@ -362,7 +362,7 @@ static void build_translation_table (void);
 char *module_name (int, char *);
 static void init_tree_roots (void);
 static void merge_anon_children (struct tree *, struct tree *);
-static int getoid (FILE *, struct subid *, int);
+static int getoid (FILE *, struct subid_s *, int);
 static struct node *parse_objectid (FILE *, char *);
 static int get_tc (char *, int, struct enum_list **, char **);
 static int get_tc_index (char *, int);
@@ -3142,7 +3142,7 @@ print_subtree_oid_report(FILE *f,
     count++;
     current_subid = 0;
 
-    while(tp = get_next_subid(&current_subid, tree->child_list))
+    while((tp = get_next_subid(&current_subid, tree->child_list)))
     {
         if(print_subtree_oid_report_labeledoid)
         {

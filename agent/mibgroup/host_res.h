@@ -3,6 +3,9 @@
  *	Device index manipulation data
  */
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>

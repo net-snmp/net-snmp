@@ -1,5 +1,8 @@
 #include <config.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
@@ -19,6 +22,7 @@
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_impl.h"
+#include "mib.h"
 
 static int   dodebug = DODEBUG;
 static int   debug_num_tokens=0;
