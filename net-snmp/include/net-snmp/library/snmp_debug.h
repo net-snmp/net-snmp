@@ -107,9 +107,24 @@ extern          "C" {
 
 #define __DBGMSGT(x)     debugmsgtoken x,  debugmsg x
 
+/*
+ *  DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG  
+ *  DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG    DEBUG  
+ */
+/*
+ * define __STRING for systems (*cough* sun *cough*) that don't have it
+ */
+#ifndef __STRING
+#  ifdef __STDC__
+#    define __STRING(x) #x
+#  else
+#    define __STRING(x) "x"
+#  endif /* __STDC__ */
+#endif /* __STRING */
+
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",__FUNCTION__,\
-                                 __FILE__,__LINE__))
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",__FUNCTION__, \
+  __FILE__,__LINE__))
 #else
 #define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
 #endif

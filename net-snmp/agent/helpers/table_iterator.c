@@ -99,11 +99,15 @@
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 {
-    netsnmp_mib_handler *me =
-        netsnmp_create_handler(TABLE_ITERATOR_NAME,
-                               netsnmp_table_iterator_helper_handler);
+    netsnmp_mib_handler *me;
 
-    if (!me || !iinfo)
+    if (!iinfo)
+        return NULL;
+
+    me = netsnmp_create_handler(TABLE_ITERATOR_NAME,
+                                netsnmp_table_iterator_helper_handler);
+
+    if (!me)
         return NULL;
 
     me->myvoid = iinfo;
@@ -210,6 +214,10 @@ typedef struct ti_cache_info_s {
 static void
 netsnmp_free_ti_cache(void *it) {
     ti_cache_info *beer = it;
+    /*
+     * xxx-rks: errr... what if another request has saved this
+     * data_context pointer?
+     */
     if (beer->data_context && beer->free_context) {
             (beer->free_context)(beer->data_context, beer->iinfo);
     }
@@ -246,6 +254,10 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
                                        netsnmp_free_ti_cache));
     }
 
+    /*
+     * xxx-rks: errr... what if another request has saved this
+     * data_context pointer?
+     */
     /* free existing cache before replacing */
     if (ti_info->data_context && ti_info->free_context)
         (ti_info->free_context)(ti_info->data_context, iinfo);
@@ -380,10 +392,17 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         reqinfo->mode == MODE_GET_STASH ||
         reqinfo->mode == MODE_SET_RESERVE1) {
         /*
+         * yyy-rks: probably could optimize even further if you sorted
+         * request list. only 1 compare per index search instead of N.
+         */
+        /*
          * Count the number of request in the list,
          *   so that we'll know when we're finished
          */
         for(request = requests ; request; request = request->next)
+            /*
+             * xxx-rks: why not skip processed here?
+             */
             request_count++;
         notdone = 1;
         while(notdone) {
@@ -449,8 +468,16 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                       myname, myname_len,
                                                       callback_data_context,
                                                       callback_loop_context, iinfo);
+                            /*
+                             * xxx-rks: how do we know to skip this request
+                             * the next time through?
+                             */
                             request_count--;   /* One less to look for */
                         } else {
+                            /*
+                             * xxx-rks: shouldn't we only do this after the
+                             * last request has been compared?
+                             */
                             if (iinfo->free_data_context && callback_data_context) {
                                 (iinfo->free_data_context)(callback_data_context,
                                                            iinfo);
@@ -517,9 +544,17 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                              *   must be the right one.
                              */
                             if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)
+                                /*
+                                 * xxx-rks: how do we know to skip this request
+                                 * the next time through?
+                                 */
                                 request_count--;
                         
                         } else {
+                            /*
+                             * xxx-rks: shouldn't we only do this after the
+                             * last request has been compared?
+                             */
                             if (iinfo->free_data_context && callback_data_context) {
                                 (iinfo->free_data_context)(callback_data_context,
                                                            iinfo);
@@ -540,7 +575,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         break;  /* XXX return */
                 
                     }
-                }
+                } /* for request */
 
                 /* Is there any point in carrying on? */
                 if (!request_count)
@@ -556,7 +591,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     (iinfo->free_loop_context) (last_loop_context, iinfo);
                     last_loop_context = NULL;
                 }
-            }
+            } /* while index_search */
 
             /* free loop context before going on */
             if (callback_loop_context && iinfo->free_loop_context_at_end) {
@@ -570,6 +605,13 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 for(request = requests ; request; request = request->next) {
                     if (request->processed)
                         continue;
+                    /*
+                     * xxx-rks: err, shouldn't this be here?
+                     * ti_info =
+                     * netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+                     * if (!ti_info)
+                     *    continue;
+                     */
                     if (!ti_info->results) {
                         if (table_info->colnum == tbl_info->max_column) {
                             coloid[reginfo->rootoid_len+1] = table_info->colnum+1;
@@ -578,6 +620,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             requests->processed = 1;
                             break;
                         } else {
+                            /*
+                             * xxx-rks: don't we know that these will be for
+                             * the first row (ignoring sparse tables)? So
+                             * why not save the first row while we have it?
+                             */
                             table_info->colnum++;
                             notdone = 1;
                         }

@@ -342,6 +342,13 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
                    strlen(((const container_type*)rhs)->name));
 }
 
+/*
+ * compare two memory buffers
+ *
+ * since snmp strings aren't NULL terminated, we can't use strcmp. So
+ * compare up to the length of the smaller, and then use length to
+ * break any ties.
+ */
 int
 netsnmp_compare_mem(const char * lhs, size_t lhs_len,
                     const char * rhs, size_t rhs_len)
