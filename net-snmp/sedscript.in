@@ -1,6 +1,8 @@
 #include <config.h>
 #include <agent/extensible/mibdefs.h>
 
+s#PREMOVEME#PREFIX#g
+
 s/EREMOVEMEXTENSIBLEDOTMIB/EXTENSIBLEDOTMIB/g
 
 s/PREMOVEMEROCMIBNUM/PROCMIBNUM/g
