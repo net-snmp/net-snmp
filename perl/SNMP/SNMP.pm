@@ -689,6 +689,7 @@ sub new {
      }
    }
 
+   if (!($this->{Version} eq '3')) {
    $this->{SessPtr} = SNMP::_new_session($this->{Version},
 					 $this->{Community},
 					 $this->{DestAddr},
@@ -696,7 +697,26 @@ sub new {
 					 $this->{Retries},
 					 $this->{Timeout},
 					);
-
+   } else {
+   $this->{SessPtr} = SNMP::_new_v3_session($this->{Version},
+						$this->{DestAddr},
+						$this->{RemotePort},
+						$this->{Retries},
+						$this->{Timeout},
+						$this->{SecName},
+						$this->{SecLevel},
+						$this->{SecEngineId},
+						$this->{ContextEngineId},
+						$this->{Context},
+						$this->{AuthProto},
+						$this->{AuthPass},
+						$this->{PrivProto},
+						$this->{PrivPass},
+						$this->{EngineBoots},
+						$this->{EngineTime},
+						);
+   }
+   
    return undef unless $this->{SessPtr};
 
    SNMP::initMib() if $SNMP::auto_init_mib; # ensures that *some* mib is loaded
@@ -724,6 +744,13 @@ sub trap {
 #             trapoid => 'snmpRisingAlarm',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
 #                                                          # always last
+# (v3) oid, uptime, <vars>
+# $sess->informv3(uptime => 1234,
+#             trapoid => 'snmpRisingAlarm',
+#             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+#                                                          # always last
+
+
    my $this = shift;
    my $vars = pop if ref($_[$#_]); # last arg may be varbind or varlist
    my %param = @_;
@@ -749,11 +776,19 @@ sub trap {
        my $specific = $param{specific} || 0;
        @res = SNMP::_trapV1($this, $enterprise, $agent, $generic, $specific,
 			  $uptime, $varbind_list_ref);
-   } else {
+   } elsif (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_trapV2($this, $uptime, $trap_oid, $varbind_list_ref);
+   } else {
+# Should the parent subroutine be called "notification" instead of "trap"?
+# in v2 and v3, we have 2 childs...trap and inform. How do we make it
+# unambiguous?
+       my $trap_oid = $param{trapoid};
+       my $uptime = $param{uptime};
+       @res = SNMP::_informV3($this, $uptime, $trap_oid, $varbind_list_ref);
    }
+
 
    return(wantarray() ? @res : $res[0]);
 }
@@ -1200,7 +1235,7 @@ supports all applicable fields from SNMP::Session
                 [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
                                                              # always last
 
-=item trap(oid, uptime, <vars>) - v2 format - B<* Not Implemented *>
+=item trap(oid, uptime, <vars>) - v2 format
 
     $sess->trap(oid => 'snmpRisingAlarm',
                 uptime => 1234,
