@@ -227,7 +227,7 @@ sub skippart {
 	    $endcount--;
 	}
 	if (/\@else\@/) {
-	    return if ($endcount == 1);
+	    return process() if ($endcount == 1);
 	}
 	if (/\@(foreach|if)/) {
 	    $endcount++;
@@ -240,6 +240,8 @@ sub process {
     while(<$fh>) {
 	if (/^\s*\#\#/) {
 	    # noop, it's a comment
+	} elsif (/\@else\@/) {
+	    return skippart();
 	} elsif (/\@open\s+([^\@]+)\@/) {
 	    my $spec = process_vars($1);
 	    $out->close() if ($out);
