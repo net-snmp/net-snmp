@@ -223,7 +223,7 @@ Do you want example code to be generated?
 @   end@ # do not use hardcoded
 @end@ # $mfd_interactive_setup == 1
 ##################################
-@open default-table-${context}.m2d@
+@open ${m2c_defaults_dir}table-${context}.m2d@
 @eval $m2c_conf_comment = "##"@
 @eval $m2c_conf_comment_divider = "########################################################################"@
 $m2c_conf_comment_divider
@@ -304,7 +304,7 @@ $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_maybe_comment @eval $@m2c_irreversible_commit = $m2c_irreversible_commit@
 $m2c_conf_comment
-@close default-table-${context}.m2d@
+@close ${m2c_defaults_dir}table-${context}.m2d@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
