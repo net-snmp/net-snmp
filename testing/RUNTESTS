@@ -132,18 +132,24 @@ export SNMP_SLEEP
 cd $SNMP_UPDIR
 SNMP_UPDIR=`pwd`
 bf=snmpget
-if [ -f "$bf" ] ; then
+if [ -x "$bf" ] ; then
    PATH=$SNMP_UPDIR:$PATH
 else
-   bf=apps/snmpget
-   if [ -f "$bf" ] ; then
-      PATH=$SNMP_UPDIR/apps:$PATH
+  for dd in apps bin ; do
+   bf=$dd/snmpget
+   if [ -x "$bf" ] ; then
+      PATH=$SNMP_UPDIR/$dd:$PATH
+      break
    fi
+  done
 fi
-bf=agent/snmpd
-if [ -f "$bf" ] ; then
-   PATH=$SNMP_UPDIR/agent:$PATH
-fi
+for dd in agent bin sbin ; do
+   bf=$dd/snmpd
+   if [ -x "$bf" ] ; then
+      PATH=$SNMP_UPDIR/$dd:$PATH
+      break
+   fi
+done
 
 bf=include/net-snmp/net-snmp-config.h
 if [ ! -s "$bf" ] ; then
