@@ -111,8 +111,8 @@ To this end, it recognizes the following keywords in the configuration
 file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR.
 .IP "com2sec NAME SOURCE COMMUNITY"
 This directive specifies the mapping from a source/community pair to
-a security name. SOURCE can be a hostname, a subnet, of the word
-\fIdefault\fR.
+a security name. SOURCE can be a hostname, a subnet, or the word
+\fI"default"\fR.
 A subnet can be specified as IP/MASK or IP/BITS.
 The first source/community combination that matches the incoming packet
 is selected.
