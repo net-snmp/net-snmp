@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-my $install_base = "c:/Program Files/Net-SNMP";
+my $install_base = "c:/usr";
 my $openssl = "disabled";
 my $sdk = "disabled";
 my $perl = "disabled";
@@ -31,11 +31,11 @@ while (1) {
   print "6. Debug mode:           " . $debug . "\n";
   print "\nF. Finished - start build\n";
   print "Q. Quit - abort build\n\n";
-  print "Option: ";
+  print "Select option to set/toggle: ";
 
   chomp ($option = <>);
   if ($option eq "1") {
-    my $default_install_base = "c:/Program Files/Net-SNMP";
+    my $default_install_base = "c:/usr";
     print "Please enter the new install path [$default_install_base]: ";
     chomp ($install_base = <>);
     if ($install_base eq "") {
