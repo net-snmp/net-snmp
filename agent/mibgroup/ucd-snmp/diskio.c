@@ -22,16 +22,26 @@
 /* include our .h file */
 #include "diskio.h"
 
+#define CACHE_TIMEOUT 10
+static time_t cache_time=0;
+
+#ifdef solaris2
 #include <kstat.h>
 
 #define MAX_DISKS 20
-#define CACHE_TIMEOUT 10
 
 static kstat_ctl_t *kc;
 static kstat_t *ksp;
 static kstat_io_t kio;
-static time_t cache_time=0;
 static int cache_disknr=-1;
+#endif /* solaris2 */
+
+#if defined(bsdi3) || defined(bsdi4)
+#include <string.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/diskstats.h>
+#endif /* bsdi */
 
 	/*********************
 	 *
@@ -82,14 +92,15 @@ void init_diskio(void)
   */
   REGISTER_MIB("diskio", diskio_variables, variable2, diskio_variables_oid);
 
+#ifdef solaris2
   kc=kstat_open();
 
   if (kc==NULL) 
     snmp_log(LOG_ERR, "diskio: Couln't open kstat\n");
-
+#endif
 }
 
-
+#ifdef solaris2
 int get_disk(int disknr) {
   time_t now;
   int i=0;
@@ -165,3 +176,115 @@ var_diskio(struct variable *vp,
   /* if we fall to here, fail by returning NULL */
   return NULL;
 }
+#endif /* solaris2 */
+
+#if defined(bsdi3) || defined(bsdi4)
+static int ndisk;
+static struct diskstats *dk;
+static char **dkname;
+
+static int
+getstats(void)
+{
+  time_t now;
+  int mib[2];
+  char *t, *tp;
+  int size, dkn_size, i;
+
+  now = time(NULL);
+  if (cache_time + CACHE_TIMEOUT > now) {
+    return 1;
+  }
+  mib[0] = CTL_HW;
+  mib[1] = HW_DISKSTATS;
+  size = 0;
+  if (sysctl(mib, 2, NULL, &size, NULL, 0) < 0) {
+    perror("Can't get size of HW_DISKSTATS mib");
+    return 0;
+  }
+  if (ndisk != size / sizeof(*dk)) {
+    if (dk)
+      free(dk);
+    if (dkname) {
+      for (i = 0; i < ndisk; i++)
+	if (dkname[i])
+	  free(dkname[i]);
+      free(dkname);
+    }
+    ndisk = size / sizeof(*dk);
+    if (ndisk == 0)
+      return 0;
+    dkname = malloc(ndisk * sizeof(char *));
+    mib[0] = CTL_HW;
+    mib[1] = HW_DISKNAMES;
+    if (sysctl(mib, 2, NULL, &dkn_size, NULL, 0) < 0) {
+      perror("Can't get size of HW_DISKNAMES mib");
+      return 0;
+    }
+    tp = t = malloc(dkn_size);
+    if (sysctl(mib, 2, t, &dkn_size, NULL, 0) < 0) {
+      perror("Can't get size of HW_DISKNAMES mib");
+      return 0;
+    }
+    for (i = 0; i < ndisk; i++) {
+      dkname[i] = strdup(tp);
+      tp += strlen(tp) + 1;
+    }
+    free(t);
+    dk = malloc(ndisk * sizeof(*dk));
+  }
+  mib[0] = CTL_HW;
+  mib[1] = HW_DISKSTATS;
+  if (sysctl(mib, 2, dk, &size, NULL, 0) < 0) {
+    perror("Can't get HW_DISKSTATS mib");
+    return 0;
+  }
+  cache_time = now;
+  return 1;
+}
+
+u_char *
+var_diskio(struct variable * vp,
+	   oid * name,
+	   size_t * length,
+	   int exact,
+	   size_t * var_len,
+	   WriteMethod ** write_method)
+{
+  static long long_ret;
+  unsigned int indx;
+
+  if (getstats() == 0)
+    return 0;
+
+  if (header_simple_table(vp, name, length, exact, var_len, write_method, ndisk))
+    return NULL;
+
+  indx = (unsigned int) (name[*length - 1] - 1);
+  if (indx >= ndisk)
+    return NULL;
+
+  switch (vp->magic) {
+    case DISKIO_INDEX:
+      long_ret = (long) indx + 1;
+      return (u_char *) & long_ret;
+    case DISKIO_DEVICE:
+      *var_len = strlen(dkname[indx]);
+      return (u_char *) dkname[indx];
+    case DISKIO_NREAD:
+      long_ret = (signed long) (dk[indx].dk_sectors * dk[indx].dk_secsize);
+      return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+      return NULL;		/* Sigh... BSD doesn't keep seperate track */
+    case DISKIO_READS:
+      long_ret = (signed long) dk[indx].dk_xfers;
+      return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+      return NULL;		/* Sigh... BSD doesn't keep seperate track */
+
+    default:
+      ERROR_MSG("diskio.c: don't know how to handle this request.");
+  }
+  return NULL;
+}
+#endif /* bsdi */
