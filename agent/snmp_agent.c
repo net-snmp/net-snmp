@@ -766,6 +766,8 @@ handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
     int     status;
+    int     saved_status = SNMP_ERR_NOERROR;
+    int     saved_index;
     int     count;
 
     count = 0;
@@ -780,7 +782,12 @@ handle_var_list(struct agent_snmp_session  *asp)
 	status = handle_one_var(asp, varbind_ptr);
 
 	if ( status != SNMP_ERR_NOERROR ) {
-	    return status;
+	    if (asp->rw == WRITE ) {
+	        saved_status = status;
+	        saved_index  = count;
+	    }
+	    else
+	        return status;
 	}
 
 	if ( varbind_ptr == asp->end )
@@ -788,9 +795,11 @@ handle_var_list(struct agent_snmp_session  *asp)
 	varbind_ptr = varbind_ptr->next_variable;
 	if ( asp->mode == RESERVE1 )
 	    snmp_vars_inc++;
-   }
-    //   asp->index = 0;
-   return SNMP_ERR_NOERROR;
+    }
+    if (saved_status != SNMP_ERR_NOERROR ) {
+       asp->index = saved_index;
+    }
+    return saved_status;
 }
 
 int
