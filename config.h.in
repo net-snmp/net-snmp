@@ -140,6 +140,9 @@
 /* Define if you have the getdtablesize function.  */
 #undef HAVE_GETDTABLESIZE
 
+/* Define if you have the getfsstat function.  */
+#undef HAVE_GETFSSTAT
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -151,6 +154,9 @@
 
 /* Define if you have the index function.  */
 #undef HAVE_INDEX
+
+/* Define if you have the kvm_getprocs function.  */
+#undef HAVE_KVM_GETPROCS
 
 /* Define if you have the kvm_openfiles function.  */
 #undef HAVE_KVM_OPENFILES
@@ -349,6 +355,9 @@
 
 /* Define if you have the <sys/diskio.h> header file.  */
 #undef HAVE_SYS_DISKIO_H
+
+/* Define if you have the <sys/disklabel.h> header file.  */
+#undef HAVE_SYS_DISKLABEL_H
 
 /* Define if you have the <sys/dkio.h> header file.  */
 #undef HAVE_SYS_DKIO_H
