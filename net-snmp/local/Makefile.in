@@ -10,8 +10,8 @@ PERLPROG=@PERLPROG@
 DATASRCS=mib2c.conf mib2c.storage.conf mib2c.vartypes.conf
 CONFINSTALLDIR=$(snmplibdir)/snmpconf
 CONFDATASRC=snmpconf.dir
-CONFDIRS=snmpd.conf
-CONFFILES=snmpd.conf/system snmpd.conf/acl snmpd.conf/trapsinks
+CONFDIRS=snmpd.conf snmp.conf
+CONFFILES=snmpd.conf/system snmpd.conf/acl snmpd.conf/trapsinks snmp.conf/authopts
 
 all: $(SCRIPTSMADEFORPERL)
 
@@ -73,7 +73,7 @@ snmpconf.made: $(srcdir)/snmpconf
         fi
 
 
-install:
+install: all
 	@if test "x$(PERLPROG)" != "x"; then \
 	  for i in $(SCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done; \
 	  for i in $(DATASRCS) ; do $(INSTALL) $$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done; \
