@@ -31,7 +31,7 @@ all: $(TARG) subdirs
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) ) \
+        ( cd $$i ; $(MAKE) ) ; \
 	done
 
 snmpwalk:    snmpwalk.o $(USELIBS)
@@ -67,12 +67,12 @@ snmpgetnext:    snmpgetnext.o $(USELIBS)
 clean:
 	rm -f *.o ${TARG}
 	for i in $(SUBDIRS) ; do \
-	( cd $$i ; $(MAKE) clean ) \
+	( cd $$i ; $(MAKE) clean ) ; \
 	done
 
 install: installdirs subdirs $(TARG)
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) install ) \
+        ( cd $$i ; $(MAKE) install ) ; \
 	done
 	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
 
@@ -84,12 +84,12 @@ dependlocal:
 
 depend: dependlocal
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) depend ) \
+        ( cd $$i ; $(MAKE) depend ) ; \
 	done
 
 nosysdepend: 
 	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) nosysdepend ) \
+        ( cd $$i ; $(MAKE) nosysdepend ) ; \
 	done
 	makedepend $(CPPFLAGS) *.c
 	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
