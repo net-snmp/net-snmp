@@ -15,7 +15,9 @@
 #endif
 #endif
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <sys/socket.h>
 
 #if TIME_WITH_SYS_TIME
