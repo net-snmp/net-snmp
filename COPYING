@@ -1,4 +1,4 @@
-		   Copyright (c) 1996 Wes Hardaker
+		   Copyright (c) 1996,1997 Wes Hardaker
 	      and the University of California at Davis
 
 COPYRIGHT
@@ -7,8 +7,9 @@ COPYRIGHT
   Carnegie Mellon University.  The copyright for their code can be
   found in the top of most of the source code.
 
-  All other code written by Wes Hardaker at the University of
-  California at Davis is copyrighted under the following copyright:
+  All other code and changes to the original code written by Wes
+  Hardaker at the University of California at Davis is copyrighted
+  under the following copyright:
 
     Permission is granted to use, copy, modify and distribute this
     software and documentation.  This software is distributed freely
