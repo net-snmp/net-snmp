@@ -430,7 +430,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:L:P:qrsS:UvV-:";
+    const char      options[128] = "aAc:CdD::fhHI:l:L:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
