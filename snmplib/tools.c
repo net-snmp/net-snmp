@@ -24,6 +24,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "asn1.h" 
 #include "snmp_api.h"
@@ -435,7 +438,7 @@ dump_snmpEngineID(const u_char *estring, size_t *estring_len)
 		if (remaining_len < 6) goto dump_snmpEngineID_violation;
 
 		s += sprintf( s, "%02X:%02X:%02X:%02X:%02X:%02X",
-			eb(0), eb(1), eb(2), eb(3), eb(4), eb(5), eb(6) );
+			eb(0), eb(1), eb(2), eb(3), eb(4), eb(5) );
 
 		esp += 6;
 		remaining_len -= 6;
