@@ -66,7 +66,7 @@
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
-#ifdef freebsd3
+#if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_PCB_H
