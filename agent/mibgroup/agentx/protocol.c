@@ -1697,7 +1697,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
      DEBUGDUMPSETUP("recv", data, 4);
      DEBUGMSG(("dumpv_recv", "  # subids:\t%d (0x%.2X)\n", data[0], data[0]));
      DEBUGPRINTINDENT("dumpv_recv");
-     DEBUGMSG(("dumpv_recv", "  prefix:\t%d (0x%.2X)\n",   data[1], data[1]));
+     DEBUGMSG(("dumpv_recv", "  prefix: \t%d (0x%.2X)\n",   data[1], data[1]));
      DEBUGPRINTINDENT("dumpv_recv");
      DEBUGMSG(("dumpv_recv", "  inclusive:\t%d (0x%.2X)\n",data[2], data[2]));
 
@@ -2162,46 +2162,56 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 
 	case AGENTX_MSG_UNREGISTER:
 	case AGENTX_MSG_REGISTER:
-		pdu->time = *bufp;	/* Timeout (Register only) */
+                DEBUGDUMPHEADER("recv", "Registration Header");
+	        if (pdu->command == AGENTX_MSG_REGISTER) {
+		    pdu->time = *bufp;	/* Timeout (Register only) */
+		    DEBUGDUMPSETUP("recv", bufp, 1);
+		    DEBUGMSG(("dumpv_recv", "  Timeout:     \t%d\n", *bufp));
+		}
 		bufp++;
 		pdu->priority = *bufp;
+		DEBUGDUMPSETUP("recv", bufp, 1);
+		DEBUGMSG(("dumpv_recv", "  Priority:    \t%d\n", *bufp));
 		bufp++;
 		pdu->range_subid = *bufp;
+		DEBUGDUMPSETUP("recv", bufp, 1);
+		DEBUGMSG(("dumpv_recv", "  Range Sub-Id:\t%d\n", *bufp));
 		bufp++;
 		bufp++;
 		*length -= 4;
+                DEBUGINDENTLESS();
 
 		prefix_ptr = bufp+1;
                 DEBUGDUMPHEADER("recv", "Registration OID");
-		bufp = agentx_parse_oid( bufp, length, NULL,
+		bufp = agentx_parse_oid(bufp, length, NULL,
 				oid_buffer, &oid_buf_len,
-				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER );
+				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
                 DEBUGINDENTLESS();
-		if ( bufp == NULL ) {
+		if (bufp == NULL) {
                     DEBUGINDENTLESS();
 		    return SNMPERR_ASN_PARSE_ERR;
                 }
 
-		if ( pdu->range_subid ) {
-		
-			if ( *prefix_ptr ) {
-			    pdu->range_subid += 5;
-			}
-    			range_bound = agentx_parse_int( bufp,
-				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
-			bufp    += 4;
-			*length -= 4;
+		if (pdu->range_subid) {
+		    if (*prefix_ptr) {
+			pdu->range_subid += 5;
+		    }
 
-				/* Construct the end-OID */
-			end_oid_buf_len = oid_buf_len*sizeof(oid);
-			memmove( &end_oid_buf, oid_buffer, end_oid_buf_len );
-			end_oid_buf[ pdu->range_subid-1 ] = range_bound;
+		    range_bound = agentx_parse_int(bufp,
+				 pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+		    bufp    += 4;
+		    *length -= 4;
+
+		    /*  Construct the end-OID.  */
+		    end_oid_buf_len = oid_buf_len*sizeof(oid);
+		    memcpy(end_oid_buf, oid_buffer, end_oid_buf_len);
+		    end_oid_buf[pdu->range_subid-1] = range_bound;
 			
-			snmp_pdu_add_variable( pdu, oid_buffer, oid_buf_len,
-				ASN_PRIV_INCL_RANGE, (u_char *)end_oid_buf, end_oid_buf_len);
-		}
-		else {
-			snmp_add_null_var( pdu, oid_buffer, oid_buf_len );
+		    snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
+				      ASN_PRIV_INCL_RANGE,
+				      (u_char *)end_oid_buf, end_oid_buf_len);
+		} else {
+		    snmp_add_null_var(pdu, oid_buffer, oid_buf_len);
 		}
 
 		oid_buf_len = MAX_OID_LEN;

@@ -229,9 +229,14 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     oid ubound = 0;
 
-    sp = find_agentx_session( session, pdu->sessid );
-    if ( sp == NULL )
+    if (pdu->range_subid != 0) {
+	ubound = pdu->variables->val.objid[pdu->range_subid-1];
+    }
+
+    sp = find_agentx_session(session, pdu->sessid);
+    if (sp == NULL) {
         return AGENTX_ERR_NOT_OPEN;
+    }
 
     switch (unregister_mib_context(pdu->variables->name,
     		       pdu->variables->name_length,
