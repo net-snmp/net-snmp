@@ -1311,11 +1311,13 @@ snmp_new_session(version, community, peer, port, retries, timeout)
 
 	   if (!strcmp(version, "1")) {
 		session.version = SNMP_VERSION_1;
-           } else if (!strcmp(version, "2") || !strcmp(version, "2c")) {
+           } else if ((!strcmp(version, "2")) || (!strcmp(version, "2c"))) {
 		session.version = SNMP_VERSION_2c;
-           } else {
+           } else if (!strcmp(version, "3")) {
+	        session.version = SNMP_VERSION_3;
+	   } else {
 		if (verbose)
-                   warn("Unsupported SNMP version (%s)\n", version);
+                   warn("error:snmp_new_session:Unsupported SNMP version (%s)\n", version);
                 goto end;
 	   }
 
@@ -1332,7 +1334,7 @@ snmp_new_session(version, community, peer, port, retries, timeout)
            ss = snmp_open(&session);
 
            if (ss == NULL) {
-	      if (verbose) warn("Couldn't open SNMP session");
+	      if (verbose) warn("error:snmp_new_session: Couldn't open SNMP session");
            }
         end:
            RETVAL = ss;
@@ -1370,7 +1372,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
 		session.version = SNMP_VERSION_3;
            } else {
 		if (verbose)
-                   warn("Unsupported SNMP version (%d)\n", version);
+                   warn("error:snmp_new_v3_session:Unsupported SNMP version (%d)\n", version);
                 goto end;
 	   }
 
@@ -1402,7 +1404,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
               session.securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
            } else {
               if (verbose)
-                 warn("Unsupported authentication protocol(%s)\n", auth_proto);
+                 warn("error:snmp_new_v3_session:Unsupported authentication protocol(%s)\n", auth_proto);
               goto end;
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
@@ -1413,7 +1415,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
                               session.securityAuthKey,
                               &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
                  if (verbose)
-                    warn("Error generating Ku from authentication password.\n");
+                    warn("error:snmp_new_v3_session:Error generating Ku from authentication password.\n");
                  goto end;
               }
            }
@@ -1422,7 +1424,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
               session.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
            } else {
               if (verbose)
-                 warn("Unsupported privacy protocol(%s)\n", priv_proto);
+                 warn("error:snmp_new_v3_session:Unsupported privacy protocol(%s)\n", priv_proto);
               goto end;
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
@@ -1433,7 +1435,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
                               session.securityPrivKey,
                               &session.securityPrivKeyLen) != SNMPERR_SUCCESS) {
                  if (verbose)
-                    warn("Error generating Ku from privacy pass phrase.\n");
+                    warn("error:snmp_new_v3_session:Error generating Ku from privacy pass phrase.\n");
                  goto end;
                }
             }
@@ -1442,7 +1444,7 @@ snmp_new_v3_session(version, peer, port, retries, timeout, sec_name, sec_level, 
            ss = snmp_open(&session);
 
            if (ss == NULL) {
-	      if (verbose) warn("Couldn't open SNMP session");
+	      if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
            }
         end:
            RETVAL = ss;
@@ -1476,7 +1478,9 @@ snmp_update_session(sess_ref, version, community, peer, port, retries, timeout)
 		ss->version = SNMP_VERSION_1;
            } else if (!strcmp(version, "2") || !strcmp(version, "2c")) {
 		ss->version = SNMP_VERSION_2c;
-           } else {
+	   } else if (!strcmp(version, "3")) {
+	        ss->version = SNMP_VERSION_3;
+	   } else {
 		if (verbose)
                    warn("Unsupported SNMP version (%s)\n", version);
                 goto update_end;
@@ -2504,6 +2508,155 @@ err:
            }
 	Safefree(oid_arr);
         }
+
+
+
+int
+snmp_informV3(sess_ref,uptime,trap_oid,varlist_ref)
+        SV *	sess_ref
+        char *	uptime
+        char *	trap_oid
+        SV *	varlist_ref
+	PPCODE:
+	{
+           AV *varlist;
+           SV **varbind_ref;
+           SV **varbind_val_f;
+           AV *varbind;
+	   I32 varlist_len;
+	   I32 varlist_ind;
+	   I32 varbind_len;
+           SnmpSession *ss;
+           struct snmp_pdu *pdu = NULL;
+           struct snmp_pdu *response;
+           struct variable_list *vars;
+           struct variable_list *last_vars;
+           struct tree *tp;
+	   oid *oid_arr;
+	   int oid_arr_len = MAX_OID_LEN;
+           SV *tmp_sv;
+           snmp_xs_cb_data *xs_cb_data;
+           SV **sess_ptr_sv;
+           SV **err_str_svp;
+           SV **err_num_svp;
+           SV **err_ind_svp;
+           int status = 0;
+           int type;
+           int res;
+           int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+           int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
+           struct enum_list *ep;
+
+           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+
+           if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
+
+              sess_ptr_sv = hv_fetch((HV*)SvRV(sess_ref), "SessPtr", 7, 1);
+	      ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+              err_str_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorStr", 8, 1);
+              err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
+              err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
+              sv_setpv(*err_str_svp, "");
+              sv_setiv(*err_num_svp, 0);
+              sv_setiv(*err_ind_svp, 0);
+
+              pdu = snmp_pdu_create(SNMP_MSG_INFORM);
+
+              varlist = (AV*) SvRV(varlist_ref);
+              varlist_len = av_len(varlist);
+	      /************************************************/
+              res = __add_var_val_str(pdu, sysUpTime, SYS_UPTIME_OID_LEN,
+				uptime, strlen(uptime), TYPE_TIMETICKS);
+
+              if(res == FAILURE) {
+                if(verbose) warn("error:inform v3: adding sysUpTime varbind");
+		goto err;
+              }
+
+	      res = __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN,
+				trap_oid ,strlen(trap_oid) ,TYPE_OBJID);
+
+              if(res == FAILURE) {
+                if(verbose) warn("error:inform v3: adding snmpTrapOID varbind");
+		goto err;
+              }
+
+
+	      /******************************************************/
+
+	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
+                 varbind_ref = av_fetch(varlist, varlist_ind, 0);
+                 if (SvROK(*varbind_ref)) {
+                    varbind = (AV*) SvRV(*varbind_ref);
+
+                    tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
+                                 __av_elem_pv(varbind, VARBIND_IID_F,NULL),
+                                 oid_arr, &oid_arr_len, &type);
+
+                    if (oid_arr_len == 0) {
+                       if (verbose)
+                        warn("error:inform v3: unable to determine oid for object");
+                       goto err;
+                    }
+
+                    if (type == TYPE_UNKNOWN) {
+                      type = __translate_appl_type(
+                                 __av_elem_pv(varbind, VARBIND_TYPE_F, NULL));
+                      if (type == TYPE_UNKNOWN) {
+                         if (verbose)
+                            warn("error:inform v3: no type found for object");
+                         goto err;
+                      }
+                    }
+
+	            varbind_val_f = av_fetch(varbind, VARBIND_VAL_F, 0);
+
+                    if (type==TYPE_INTEGER && use_enums && tp && tp->enums) {
+                      for(ep = tp->enums; ep; ep = ep->next) {
+                        if (varbind_val_f && SvOK(*varbind_val_f) &&
+                            !strcmp(ep->label, SvPV(*varbind_val_f,na))) {
+                          sv_setiv(*varbind_val_f, ep->value);
+                          break;
+                        }
+                      }
+                    }
+
+                    res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
+                                  (varbind_val_f && SvOK(*varbind_val_f) ?
+                                   SvPV(*varbind_val_f,na):NULL),
+                                  (varbind_val_f && SvOK(*varbind_val_f) ?
+                                   SvCUR(*varbind_val_f):0),
+                                  type);
+
+                    if(res == FAILURE) {
+                        if(verbose) warn("error:inform v3: adding varbind");
+                        goto err;
+                    }
+
+                 } /* if var_ref is ok */
+              } /* for all the vars */
+
+
+	      status = __send_sync_pdu(ss, pdu, &response,
+				       NO_RETRY_NOSUCH,
+                                       *err_str_svp, *err_num_svp,
+                                       *err_ind_svp);
+
+              if (response) snmp_free_pdu(response);
+
+              if (status) {
+		 XPUSHs(&sv_undef);
+	      } else {
+                 XPUSHs(sv_2mortal(newSVpv(ZERO_BUT_TRUE,0)));
+              }
+           } else {
+err:
+              XPUSHs(&sv_undef); /* no mem or bad args */
+              if (pdu) snmp_free_pdu(pdu);
+           }
+	Safefree(oid_arr);
+        }
+
 
 
 char *
