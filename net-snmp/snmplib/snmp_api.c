@@ -2579,6 +2579,7 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
   pdu->command		= SNMP_MSG_REPORT;
   pdu->errstat		= 0;
   pdu->errindex		= 0;
+  SNMP_FREE(pdu->contextName);
   pdu->contextName	= strdup("");
   pdu->contextNameLen	= strlen(pdu->contextName);
 
