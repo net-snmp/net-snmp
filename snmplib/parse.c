@@ -1880,12 +1880,17 @@ parse_objectid(FILE * fp, char *name)
      *  by labelling the first sub-identifier
      */
     op = loid;
-    if (!op->label)
+    if (!op->label) {
+        if (length == 1) {
+            print_error("Attempt to define a root oid", name, OBJECT);
+            return NULL;
+        }
         for (tp = tree_head; tp; tp = tp->next_peer)
             if ((int) tp->subid == op->subid) {
                 op->label = strdup(tp->label);
                 break;
             }
+    }
 
     /*
      * Handle  "label OBJECT-IDENTIFIER ::= { subid }"
