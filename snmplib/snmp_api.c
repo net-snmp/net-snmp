@@ -111,6 +111,7 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmpv3.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_secmod.h>
 #ifdef SNMP_SECMOD_USM
 #include <net-snmp/library/snmpusm.h>
@@ -750,6 +751,7 @@ init_snmp(const char *type)
 #endif
 
     snmp_debug_init();          /* should be done first, to turn on debugging ASAP */
+    netsnmp_container_init_list();
     init_callbacks();
     init_snmp_logging();
     snmp_init_statistics();
