@@ -156,6 +156,10 @@ agent_check_and_process(int block) {
       snmp_log(LOG_ERR, "select returned %d\n", count);
       return -1;
   }  /* endif -- count>0 */
+
+  /* run requested alarms */
+  run_alarms();
+
   return count;
 }
 
