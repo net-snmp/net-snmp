@@ -76,7 +76,7 @@ date_n_time ( time_t *when, size_t  *length)
 #ifndef SYSV
 #define timezone tm_p->tm_gmtoff
 #endif
-    if ( timezone < 0 )
+    if ( timezone > 0 )
 	string[8] = '-';
     else
 	string[8] = '+';
