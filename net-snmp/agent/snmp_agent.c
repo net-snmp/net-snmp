@@ -57,6 +57,7 @@ SOFTWARE.
 #include "mib.h"
 #include "mibgroup/snmp_mib.h"
 #include "snmpd.h"
+#include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include "snmp_agent.h"
 #include "read_config.h"
