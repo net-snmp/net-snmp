@@ -425,10 +425,6 @@ search_enginetime_list_quit:
  * to hash the engineID, then split the hash into u_int's and add them up
  * and modulo the size of the list.
  *
- * XXX	Devolves and returns always 0 if HAVE_LIBKMT is not defined.
- *	(Thus the etimelist hash table devolves to a linked list from
- *	index 0.)
- * XXX	Retrofit "internal" MD5 routines?
  */
 int
 hash_engineID(u_char *engineID, u_int engineID_len)

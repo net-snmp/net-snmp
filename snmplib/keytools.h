@@ -20,43 +20,6 @@ extern "C" {
 	 * parsing, and out of the internal routine?  XXX
 	 */
 
-#define SET_HASH_TRANSFORM(t)   kmt_hash = t;
-
-
-
-/*
- * Simple hash function pointer, and the internal hash functions offered
- * by KMT.
- *
- * FIX  Resolve the broken KMT API issue.
- * 	kmt_s_* prototypes stolen from KMT/algs/kmt_hash.h.
- *
- * FIX	Offer an snmp_hash() function to hide away differences between
- *	this an "internal" MD5 (& whatever else might come...)?
- */
-
-#ifdef HAVE_LIBKMT
-extern int (*kmt_hash) (
-	const int	  mode,		void  	 **context,
-	const u_int8_t	 *data,		const int  data_len,     
-	u_int8_t	**digest,	size_t	  *digest_len);
-
-
-extern int (*kmt_s_md5) (
-		const int	  mode,		void  	 **context,
-		const u_int8_t	 *data,		const int  data_len,     
-		u_int8_t	**digest,	size_t	  *digest_len);
-extern int (*kmt_s_sha1) (
-		const int	  mode,		void  	 **context,
-		const u_int8_t	 *data,		const int  data_len,     
-		u_int8_t	**digest,	int	  *digest_len);
-extern int (*kmt_s_ripemd) (
-		const int	  mode,		void  	 **context,
-		const u_int8_t	 *data,		const int  data_len,     
-		u_int8_t	**digest,	size_t	  *digest_len);
-
-#endif
-
 /*
  * Prototypes.h
  */
@@ -81,7 +44,7 @@ int	decode_keychange (	oid	*hashtype,	u_int  hashtype_len,
 
 
 /*
- * All functions devolve to the following block if HAVE_LIBKMT is not defined.
+ * All functions devolve to the following block if we can't do cryptography
  */
 #define	_KEYTOOLS_NOT_AVAILABLE			\
 {						\

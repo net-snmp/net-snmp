@@ -9,13 +9,6 @@
 extern "C" {
 #endif
 
-#ifdef			HAVE_LIBKMT
-#	include <kmt.h>
-#	include <kmt_algs.h>
-#endif
-
-
-
 /* 
  * Authentication/privacy transform bitlengths.
  */
@@ -73,22 +66,9 @@ int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
                                 const u_char	 *data,	  const int  data_len,
                                 u_char		**digest, size_t    *digest_len));
   
-/*
- * SCAPI functions specific to KMT.
- */
-#ifdef								HAVE_LIBKMT
-
-int	sc_internal_kmtlookup (
-		u_int 	 transform, 	
-		u_char	*key,		u_int		  keylen,
-		u_int	 properlength,	KMT_KEY_LIST	**kmtkeylist,
-		int	 dospecify);
-#endif
-
-
 
 /*
- * All functions devolve to the following block if HAVE_LIBKMT is not defined.
+ * All functions devolve to the following block if we can't do cryptograhpy
  */
 #define	_SCAPI_NOT_CONFIGURED			\
 {						\
