@@ -6,6 +6,16 @@
  * XXX read passwords from prompts
  * XXX customize responses with user names, etc.
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STDLIB_H
@@ -103,7 +113,7 @@ usage(void)
     fprintf(stderr, "  delete    USER\n");
     fprintf(stderr, "  cloneFrom USER CLONEFROM-USER\n");
     fprintf(stderr,
-            "  passwd    [-Co] [-Ca] [-Cx] OLD-PASSPHRASE NEW-PASSPHRASE\n");
+            "  [-Co] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE\n");
     fprintf(stderr, "\t\t-Co\t\tUse the ownKeyChange objects.\n");
     fprintf(stderr, "\t\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t\t-Ca\t\tChange the authentication key.\n");
