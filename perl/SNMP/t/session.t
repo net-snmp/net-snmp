@@ -9,8 +9,9 @@ BEGIN {
 use Test;
 BEGIN { plan tests => 5 }
 use SNMP;
-require "t/startagent.pl";
 use vars qw($agent_port $comm $agent_host);
+require "t/startagent.pl";
+
 
 my $badcomm = 'KKK';
 my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
