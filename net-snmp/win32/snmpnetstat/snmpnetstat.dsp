@@ -92,6 +92,10 @@ SOURCE=..\..\apps\snmpnetstat\inet.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmpnetstat\inet6.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmpnetstat\main.c
 # End Source File
 # Begin Source File
