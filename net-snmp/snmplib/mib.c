@@ -2397,14 +2397,17 @@ netsnmp_set_mib_directory(const char *dir)
     olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
 				   NETSNMP_DS_LIB_MIBDIRS);
     if (olddir) {
-        if (*dir == '+') {
+        if ((*dir == '+') || (*dir == '-')) {
             /** New dir starts with '+', thus we add it. */
             tmpdir = malloc(strlen(dir) + strlen(olddir) + 2);
             if (!tmpdir) {
                 DEBUGMSGTL(("read_config:initmib", "set mibdir malloc failed"));
                 return;
             }
-            sprintf(tmpdir, "%s%c%s", ++dir, ENV_SEPARATOR_CHAR, olddir);
+            if (*dir++ == '+')
+                sprintf(tmpdir, "%s%c%s", olddir, ENV_SEPARATOR_CHAR, dir);
+            else
+                sprintf(tmpdir, "%s%c%s", dir, ENV_SEPARATOR_CHAR, olddir);
             newdir = tmpdir;
         } else {
             newdir = dir;
@@ -2454,7 +2457,7 @@ netsnmp_get_mib_directory(void)
                 DEBUGMSGTL(("get_mib_directory", "no mib directories set by config\n"));
                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
             }
-            else if ((*confmibdir == '+') || (*confmibdir == '+')) {
+            else if ((*confmibdir == '+') || (*confmibdir == '-')) {
                 DEBUGMSGTL(("get_mib_directory", "mib directories set by config (but added)\n"));
                 netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
                 netsnmp_set_mib_directory(confmibdir);
@@ -2463,7 +2466,7 @@ netsnmp_get_mib_directory(void)
                 DEBUGMSGTL(("get_mib_directory", "mib directories set by config\n"));
                 netsnmp_set_mib_directory(confmibdir);
             }
-        } else if (*dir == '+') {
+        } else if ((*dir == '+') || (*dir == '-')) {
             DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
             netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
             netsnmp_set_mib_directory(dir);
