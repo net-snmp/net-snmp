@@ -19,6 +19,7 @@ usage()
    echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
    echo ""
    echo " -x : configure extra features for pre-release testing"
+   echo " -C : don't source $HOME/.nsb-nightly"
    echo ""
    echo " -h : host to upload results to"
    echo " -p : path to upload results to"
@@ -45,8 +46,12 @@ else
    exit 1
 fi
 
-if [ -f $HOME/.nsb-nightly ];then
-   source $HOME/.nsb-nightly
+if [ $1 == "-C" ]; then
+    shift
+else
+    if [ -f $HOME/.nsb-nightly ];then
+        source $HOME/.nsb-nightly
+    fi
 fi
 
 ########################################################################
@@ -105,13 +110,7 @@ fi
 echo "Finish: `date`"
 echo -n "Result: "
 case $RC in
-    0)  echo "Success!"
-        nsb-prompt "press enter to remove $NSB_BUILD_DIR"
-        if [ "x$NSB_BUILD_DIR" = "/" ]; then
-            nsb-abort "Not running rm -fR from /"
-        fi
-        /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
-        ;;
+    0)  echo "Success!" ;;
     *) echo "Error!";;
 esac
 
