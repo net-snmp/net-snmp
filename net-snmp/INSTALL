@@ -1,11 +1,15 @@
 QUICK INSTRUCTIONS
 ==================
 
-  1) ./configure
-     (type "./configure --help" for a quick usage summary)
+  1) Run ./configure
+     (type "./configure --help" for a quick usage summary.)
+     (--prefix=PATH will change the default /usr/local installation path.)
 
-  2) Edit config.h
-     (due to prompting done by the configure script, this is not mandatory)
+  2) Optionally edit config.h
+     (due to prompting done by the configure script, this is not
+     mandatory.  If you want to change things here, it would better to
+     change them in config.h.in instead and then run config.status to
+     update config.h).
 
   3) make
 
@@ -61,7 +65,8 @@ The simplest way to compile this package is:
 
   2. Edit config.h.  IMPORTANT information is in here.  Like the
      location of the log file and the location of the configuration
-     files.
+     files.  Again, you should really edit config.h.in instead and
+     then run config.status, which will generate config.h from config.h.in.
 
   3. Type `make' to compile the package.
 
@@ -135,6 +140,10 @@ package recognizes.
 find the X include and library files automatically, but if it doesn't,
 you can use the `configure' options `--x-includes=DIR' and
 `--x-libraries=DIR' to specify their locations.
+
+Optional features for ucd-snmp:
+  --enable-debugging      Outputs extra debugging information.
+  --with-defaults         Use defaults for prompted values.
 
 Specifying the System Type
 ==========================
