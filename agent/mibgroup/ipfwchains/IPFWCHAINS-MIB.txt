@@ -1,10 +1,9 @@
                           -- IPFWCHAINS-MIB
               -- gedefinieerd door Didier Dhaenens
 		-- Versie 3 : 25/02/99
+		--          : 16/04/99 M. Slifcak ipfwChainTable {ipfw 1}
 
-IPFWCHAINS-MIB 
- 
-DEFINITIONS ::= BEGIN
+IPFWCHAINS-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
       enterprises, INTEGER
@@ -25,7 +24,7 @@ ipfwChainTable OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Table with the chains of the firewall"
-	::= { ipfw }
+	::= { ipfw 1 }
 
 ipfwChain OBJECT-TYPE 
 	SYNTAX IpfwChain
