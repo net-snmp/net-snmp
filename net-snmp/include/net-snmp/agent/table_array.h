@@ -101,6 +101,11 @@ const oid_array_header*
 table_array_get_by_index(handler_registration *reginfo,
                          oid_array_header * hdr);
 
+const oid_array_header**
+table_array_get_subset(handler_registration *reginfo,
+                       oid_array_header * hdr, int * len);
+
+
 #ifdef __cplusplus
 };
 #endif
