@@ -143,7 +143,6 @@ netsnmp_table_iterator_helper_handler(
            these */
         
         index_search = snmp_clone_varbind(table_info->indexes);
-        DEBUGMSGTL(("index_search", "%x\n", index_search));
         free_this_index_search = index_search;
 
         /* below our minimum column? */
