@@ -5780,7 +5780,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 	HINT_1_2,
 	HINT_2_3,
 	HINT_1_2_4,
-	HINT_1_2_5,
+	HINT_1_2_5
     } state = HINT_1_2;
 
     parse_hints_ctor(&ph);
