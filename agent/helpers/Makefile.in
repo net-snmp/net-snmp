@@ -6,6 +6,7 @@ CPPFLAGS=-I. -I.. -I../.. -I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../mibgroup \
 OBJS =  all_helpers.o \
 	multiplexer.o \
 	read_only.o \
+	bulk_to_next.o \
 	instance.o \
 	null.o \
 	debug_handler.o \
@@ -20,6 +21,7 @@ OBJS =  all_helpers.o \
 LOBJS = all_helpers.lo \
 	multiplexer.lo \
 	read_only.lo \
+	bulk_to_next.lo \
 	instance.lo \
 	null.lo \
 	debug_handler.lo \
@@ -34,6 +36,7 @@ LOBJS = all_helpers.lo \
 SRCS =  all_helpers.c \
 	multiplexer.c \
 	read_only.c \
+	bulk_to_next.c \
 	instance.c \
 	null.c \
 	debug_handler.c \
@@ -48,6 +51,7 @@ SRCS =  all_helpers.c \
 INSTALLHEADERS=all_helpers.h \
 	instance.h \
         multiplexer.h \
+	bulk_to_next.h \
         null.h \
         debug_handler.h \
         old_api.h \
@@ -56,7 +60,7 @@ INSTALLHEADERS=all_helpers.h \
         set_helper.h \
         table_data.h \
         table_dataset.h \
-		table_array.h \
+	table_array.h \
         table.h \
         table_iterator.h
 
