@@ -142,7 +142,7 @@ var_hrprint(vp, name, length, exact, var_len, write_method)
 	    long_return = 0;	/* Null string */
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
