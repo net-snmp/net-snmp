@@ -46,7 +46,7 @@ static oid example_name[16] = {1,3,6,1,4,1,2021,254};
 static int example_name_len = 8;
 
 void
-init_example () 
+init_example (void) 
 {
   /* call auto_nlist to load the nlist symbols.  We
      actually don't need it, so its commented out. */
@@ -58,7 +58,7 @@ init_example ()
 }
 
 void
-deinit_example () 
+deinit_example (void) 
 {
     unregister_mib(example_name, example_name_len);
 }
@@ -84,8 +84,8 @@ var_example(struct variable *vp,
 	    oid *name,
 	    int *length,
 	    int exact,
-	    int *var_len;
-	    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	    int *var_len,
+	    WriteMethod **write_method)
 {
   /* define any variables we might return as static! */
   static long long_ret;
