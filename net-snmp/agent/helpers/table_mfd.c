@@ -10,24 +10,40 @@
 
 #include <net-snmp/agent/table_mfd.h>
 
+/**********************************************************************
+ *
+ * typedefs
+ *
+ */
+#if 0 /* were these ever used?? */
 typedef struct netsnmp_mfd_container_s {
    netsnmp_container *original_container; /* original */
 } netsnmp_mfd_container;
 
 typedef struct mfd_context_s {
-    netsnmp_index    idx;
-    oid              idx_oid[MAX_OID_LEN];
-    netsnmp_ref_void tbl_ctx;
-    netsnmp_ref_void data;
+   netsnmp_index    idx;
+   oid              idx_oid[MAX_OID_LEN];
+   netsnmp_ref_void tbl_ctx;
+   netsnmp_ref_void data;
 } mfd_ctx;
+#endif
 
 
+
+/**********************************************************************
+ *
+ * Prototypes
+ *
+ */
 static int
 netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
                            netsnmp_handler_registration *reginfo,
                            netsnmp_agent_request_info *reqinfo,
                            netsnmp_request_info *requests);
 
+/*
+ * Modes
+ */
 static netsnmp_request_group *
 _mfd_data_lookup(netsnmp_mib_handler *handler,
                  netsnmp_handler_registration *reginfo,
@@ -38,6 +54,19 @@ _mfd_data_find(netsnmp_mib_handler *handler,
                netsnmp_handler_registration *reginfo,
                netsnmp_request_info *requests);
 
+/*
+ * Utilities
+ */
+static netsnmp_request_group *
+_mfd_group(netsnmp_handler_registration *reginfo, netsnmp_index *row,
+           netsnmp_request_info *requests);
+
+
+/**********************************************************************
+ *
+ * Registration
+ *
+ */
 /** register specified callbacks for the specified table/oid. If the
     group_rows parameter is set, the row related callbacks will be
     called once for each unique row index. Otherwise, each callback
@@ -138,6 +167,11 @@ netsnmp_mfd_register_table(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
+/**********************************************************************
+ *
+ * Helper
+ *
+ */
 static int
 netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
                            netsnmp_handler_registration *reginfo,
@@ -145,7 +179,7 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
                            netsnmp_request_info *requests)
 {
     netsnmp_mfd_registration *mfdr;
-    netsnmp_request_group *rg  = NULL;
+    void *row  = NULL;
     
     /** call handlers should enforce these */
     netsnmp_assert((handler!=NULL) && (reginfo!=NULL) && (reqinfo!=NULL) &&
@@ -159,81 +193,123 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
         snmp_log(LOG_ERR,"mfd handler called with null registration\n");
         return SNMPERR_GENERR;
     }
-    
+
+    /*
+     * see if we've already got the row. 
+     */
+    if( MODE_IS_SET(reqinfo->mode))
+        row = netsnmp_get_list_data(&requests->parent_data, "table_mfd_row");
+
     switch(reqinfo->mode) {
         
     case SNMP_MSG_GET:
-        rg = _mfd_data_lookup(handler, reginfo, requests);
-        if( rg && mfdr->cbsm.get_values )
-            (*mfdr->cbsm.get_values)(mfdr, rg);
+        row = _mfd_data_lookup(handler, reginfo, requests);
+        if( row && mfdr->cbsm.get_values )
+            (*mfdr->cbsm.get_values)(mfdr, requests, row);
         break;
         
     case SNMP_MSG_GETNEXT:
-        rg = _mfd_data_find(handler, reginfo, requests);
-        if( rg && mfdr->cbsm.get_values )
-            (*mfdr->cbsm.get_values)(mfdr, rg);
+        row = _mfd_data_find(handler, reginfo, requests);
+        if( row && mfdr->cbsm.get_values )
+            (*mfdr->cbsm.get_values)(mfdr, requests, row);
         break;
-
+        
     case BABY_STEP_PRE_REQUEST:
         if( mfdr->cbse.pre_request )
             (*mfdr->cbse.pre_request)(mfdr, (u_long)reqinfo);
         break;
         
     case BABY_STEP_DATA_LOOKUP:
-        rg = _mfd_data_lookup(handler, reginfo, requests);
+        /*
+         * get the row and save it in the first request
+         */
+        row = _mfd_data_lookup(handler, reginfo, requests);
+        netsnmp_add_list_data2(&requests->parent_data, "table_mfd_row", row,
+                               (Netsnmp_Free_List_Data*)mfdr->container->release );
+        
         break;
 
-      case BABY_STEP_CHECK_OBJECT:
-        if( mfdr->cbsm.object_syntax_checks )
-            (*mfdr->cbsm.object_syntax_checks)(mfdr, rg);
+    case BABY_STEP_CHECK_OBJECT:
+        if( mfdr->cbsm.object_syntax_checks ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbsm.object_syntax_checks)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_ROW_CREATE:
-        if( mfdr->cbse.row_creation )
-            (*mfdr->cbse.row_creation)(mfdr, rg);
+    case BABY_STEP_ROW_CREATE:
+        if( mfdr->cbse.row_creation ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.row_creation)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_UNDO_SETUP:
-        if( mfdr->cbse.undo_setup )
-            (*mfdr->cbse.undo_setup)(mfdr, rg);
+    case BABY_STEP_UNDO_SETUP:
+        if( mfdr->cbse.undo_setup ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.undo_setup)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_SET_VALUES:
-        if( mfdr->cbsm.set_values )
-            (*mfdr->cbsm.set_values)(mfdr, rg);
+    case BABY_STEP_SET_VALUES:
+        if( mfdr->cbsm.set_values ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbsm.set_values)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_CHECK_CONSISTENCY:
-        if( mfdr->cbse.consistency_checks )
-            (*mfdr->cbse.consistency_checks)(mfdr, rg);
+    case BABY_STEP_CHECK_CONSISTENCY:
+        if( mfdr->cbse.consistency_checks ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.consistency_checks)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_UNDO_SETS:
-        if( mfdr->cbse.undo_sets )
-            (*mfdr->cbse.undo_sets)(mfdr, rg);
+    case BABY_STEP_UNDO_SETS:
+        if( mfdr->cbse.undo_sets ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.undo_sets)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_UNDOABLE_COMMIT:
-        if( mfdr->cbse.undoable_commit )
-            (*mfdr->cbse.undoable_commit)(mfdr, rg);
+    case BABY_STEP_UNDOABLE_COMMIT:
+        if( mfdr->cbse.undoable_commit ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.undoable_commit)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_UNDO_COMMIT:
-        if( mfdr->cbse.undo_commit )
-            (*mfdr->cbse.undo_commit)(mfdr, rg);
+    case BABY_STEP_UNDO_COMMIT:
+        if( mfdr->cbse.undo_commit ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.undo_commit)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_FINAL_COMMIT:
-        if( mfdr->cbsm.final_commit )
-            (*mfdr->cbsm.final_commit)(mfdr, rg);
+    case BABY_STEP_FINAL_COMMIT:
+        if( mfdr->cbsm.final_commit ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbsm.final_commit)(mfdr, requests, row);
+        }
         break;
 
-      case BABY_STEP_UNDO_CLEANUP:
-        if( mfdr->cbse.undo_cleanup )
-            (*mfdr->cbse.undo_cleanup)(mfdr, rg);
+    case BABY_STEP_UNDO_CLEANUP:
+        if( mfdr->cbse.undo_cleanup ) {
+            row = netsnmp_get_list_data(requests->parent_data,
+                                        "table_mfd_row" );
+            (*mfdr->cbse.undo_cleanup)(mfdr, requests, row);
+        }            
         break;
-
-      case BABY_STEP_POST_REQUEST:
+        
+    case BABY_STEP_POST_REQUEST:
         if( mfdr->cbse.post_request )
             (*mfdr->cbse.post_request)(mfdr, (u_long)reqinfo);
         break;
@@ -243,63 +319,18 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    return SNMP_ERR_NOERROR;
+    /*
+     * call any lower handlers
+     */
+    return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+;
 }
 
-static netsnmp_request_group *
-_mfd_group(netsnmp_handler_registration *reginfo, netsnmp_index *row,
-           netsnmp_request_info *requests)
-{
-    netsnmp_request_group_item *i;
-    netsnmp_table_request_info *tblreq_info;
-    netsnmp_request_group *rg;
-    
-    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
-
-    if(NULL == row)
-        return NULL;
-    
-    rg = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
-    if(NULL==rg) {
-        snmp_log(LOG_ERR,"could not allocate request group\n");
-        return NULL;
-    }
-
-    rg->existing_row = row;
-
-    while(requests) {
-        tblreq_info = netsnmp_extract_table_info(requests);
-        if(tblreq_info) {
-            i = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
-            if(NULL==i) {
-                snmp_log(LOG_ERR,"could not allocate request item\n");
-                /** xxx-rks: better cleanup */
-                return NULL;
-            }
-            i->ri = requests;
-            i->tri = tblreq_info;
-            i->next = rg->list;
-            rg->list = i;
-        }
-        /*
-         * copy index to agent request info
-         */
-        memcpy(tblreq_info->index_oid, row->oids,
-               row->len * sizeof(oid));
-        tblreq_info->index_oid_len = row->len;
-        netsnmp_update_variable_list_from_index(tblreq_info);
-
-        /*
-         * build oid in varbind
-         */
-        netsnmp_table_build_oid_from_index(reginfo, requests, tblreq_info);
-        
-        requests = requests->next;
-    }
-    
-    return rg;
-}
-
+/**********************************************************************
+ *
+ * Implement modes
+ *
+ */
 static netsnmp_request_group *
 _mfd_data_lookup(netsnmp_mib_handler *handler,
                  netsnmp_handler_registration *reginfo,
@@ -308,7 +339,7 @@ _mfd_data_lookup(netsnmp_mib_handler *handler,
     netsnmp_mfd_registration *mfdr;
     netsnmp_table_request_info *tblreq_info;
     netsnmp_index index;
-    void *tmp;
+    void *row;
     
     DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
 
@@ -322,11 +353,11 @@ _mfd_data_lookup(netsnmp_mib_handler *handler,
     
     index.oids = tblreq_info->index_oid;
     index.len = tblreq_info->index_oid_len;
-    tmp = CONTAINER_FIND(mfdr->container, &index);
-    if(NULL == tmp) 
+    row = CONTAINER_FIND(mfdr->container, &index);
+    if(NULL == row) 
         return NULL;
 
-    return _mfd_group(reginfo, tmp, requests);
+    return _mfd_group(reginfo, row, requests);
 }
 
 /*
@@ -355,3 +386,75 @@ _mfd_data_find(netsnmp_mib_handler *handler,
 
     return _mfd_group(reginfo, row, requests);
 }
+
+/**********************************************************************
+ *
+ * Internal helpers
+ *
+ */
+static netsnmp_request_group *
+_mfd_group(netsnmp_handler_registration *reginfo, netsnmp_index *row,
+           netsnmp_request_info *requests)
+{
+    netsnmp_request_group_item *ritem;
+    netsnmp_table_request_info *tblreq_info;
+    netsnmp_request_group *rgroup;
+    
+    DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
+
+    if(NULL == row)
+        return NULL;
+
+    /*
+     * allocate a request group
+     */
+    rgroup = SNMP_MALLOC_TYPEDEF(netsnmp_request_group);
+    if(NULL==rgroup) {
+        snmp_log(LOG_ERR,"could not allocate request group\n");
+        return NULL;
+    }
+
+    rgroup->existing_row = row;
+
+    while(requests) {
+
+        /*
+         * check for table info, so we can update the index
+         */
+        tblreq_info = netsnmp_extract_table_info(requests);
+        netsnmp_assert(NULL != tblreq_info); /* should never happen */
+
+        /*
+         * add a requiest item for this request to the request group
+         */
+        ritem = SNMP_MALLOC_TYPEDEF(netsnmp_request_group_item);
+        if(NULL==ritem) {
+            snmp_log(LOG_ERR,"could not allocate request item\n");
+            /** xxx-rks: better cleanup */
+            return NULL;
+        }
+        ritem->ri = requests;
+        ritem->tri = tblreq_info;
+
+        ritem->next = rgroup->list;
+        rgroup->list = ritem;
+        
+        /*
+         * copy index to agent request info
+         */
+        memcpy(tblreq_info->index_oid, row->oids,
+               row->len * sizeof(oid));
+        tblreq_info->index_oid_len = row->len;
+        netsnmp_update_variable_list_from_index(tblreq_info);
+
+        /*
+         * build oid in varbind
+         */
+        netsnmp_table_build_oid_from_index(reginfo, requests, tblreq_info);
+        
+        requests = requests->next;
+    }
+    
+    return rgroup;
+}
+
