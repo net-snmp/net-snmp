@@ -337,16 +337,16 @@ Get_Next_HR_FileSys __P((void))
 	return -1;
 
 #ifdef solaris2
-    getmntent( fp, HRFS_entry);
+    if (getmntent( fp, HRFS_entry) != 0)
+	return -1;
 #else
     HRFS_entry = getmntent( fp );
-#endif
-
     if ( HRFS_entry == NULL )
 	return -1;
+#endif
 
     for ( cpp = HRFS_ignores ; *cpp != NULL ; ++cpp )
-	if ( !strcmp( HRFS_entry->mnt_type, *cpp ))
+	if ( !strcmp( HRFS_entry->HRFS_type, *cpp ))
 	    return Get_Next_HR_FileSys();
 
     return HRFS_index++;

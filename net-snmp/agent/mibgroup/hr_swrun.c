@@ -9,6 +9,7 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <fcntl.h>
 
 #include "host_res.h"
 #include "hr_swrun.h"
@@ -20,6 +21,9 @@
 #endif
 #if HAVE_SYS_PROC_H
 #include <sys/proc.h>
+#endif
+#if HAVE_KVM_H
+#include <kvm.h>
 #endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
@@ -499,26 +503,39 @@ Init_HR_SWRun __P((void))
     int proc_table_base;
     int bytes;
 
-#ifndef hpux10
-    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
-    auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(int));
-    bytes = nproc*sizeof(struct proc);
-#else
+#if defined(hpux10)
     pstat_getdynamic( &pst_dyn, sizeof( struct pst_dynamic ),
 			1, 0 );
     nproc = pst_dyn.psd_activeprocs ;
     bytes = nproc*sizeof(struct pst_status);
+#elif defined(solaris2)
+    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    bytes = nproc*sizeof(struct proc);
+#else
+    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int));
+    bytes = nproc*sizeof(struct proc);
 #endif
     if ((proc_table=(struct pst_status *) malloc(bytes)) == NULL ) {
 	current_proc_entry = nproc+1;
 	return;
     }
 
-#ifndef hpux10
-    klookup( proc_table_base, (char *)proc_table, bytes);
-#else
+#if defined(hpux10)
     pstat_getproc( proc_table, sizeof( struct pst_status ),
 			nproc, 0 );
+#elif defined(solaris2)
+    {   struct proc *pp;
+	kvm_t *kd;
+	kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "oops");
+	current_proc_entry = 0;
+	kvm_setproc(kd);
+	while ((pp = kvm_nextproc(kd)) != NULL && current_proc_entry < nproc)
+	    proc_table[current_proc_entry++] = *pp;
+	kvm_close(kd);
+    }
+#else
+    auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base));
+    klookup( proc_table_base, (char *)proc_table, bytes);
 #endif
     current_proc_entry = 0;
 }
