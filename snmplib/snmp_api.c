@@ -2930,6 +2930,7 @@ _sess_async_send(void *sessp,
     struct sockaddr_in *pduIp;
     struct timeval tv;
     int result, addr_size;
+    long reqid;
 
     session = slp->session; isp = slp->internal;
     session->s_snmp_errno = 0;
@@ -2997,6 +2998,8 @@ _sess_async_send(void *sessp,
 	return 0;
     }
 
+    reqid = pdu->reqid;
+
     /* check if should get a response */
     if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
         gettimeofday(&tv, (struct timezone *)0);
@@ -3031,7 +3034,10 @@ _sess_async_send(void *sessp,
 	tv.tv_usec %= 1000000L;
 	rp->expire = tv;
     }
-    return pdu->reqid;
+    else
+        snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU */
+
+    return reqid;
 }
 
 int
