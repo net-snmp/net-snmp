@@ -1690,7 +1690,7 @@ Interface_Index_By_Name(char *Name,
 	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	  return (0);
 	ifconf.ifc_buf = buf;
-	ifconf.ifc_len = 1024;
+	ifconf.ifc_len = sizeof(buf);
 	if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
 	  ret = 0;
 	  goto Return;

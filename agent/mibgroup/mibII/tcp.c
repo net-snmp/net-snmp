@@ -57,7 +57,7 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef freebsd3
+#if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
 #if HAVE_NETINET_IN_PCB_H

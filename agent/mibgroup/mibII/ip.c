@@ -1309,7 +1309,12 @@ var_ipAddrEntry(struct variable *vp,
 	get_iflist();
 
 	for (i = 0; i < nifs; i++) {
-		memcpy(current + 10, &ifs[i].addr, 4);
+		op = &current[10];
+		cp = (u_char *)&ifs[i].addr;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
+		*op++ = *cp++;
 		if (exact) {
 			if (snmp_oid_compare(current, 14, name, *length) == 0) {
 				memcpy(lowest, current, 14 * sizeof(oid));
