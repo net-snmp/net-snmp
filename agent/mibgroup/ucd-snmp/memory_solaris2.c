@@ -186,9 +186,12 @@ long getTotalSwap(void)
   return (total_mem);
 }
 
+/*
+ * returns -1 if malloc fails.
+ */
 long getFreeSwap(void)
 {
-  long free_mem = 0;
+  long free_mem = -1;
 
   size_t num;
   int i, n;
@@ -197,52 +200,38 @@ long getFreeSwap(void)
 
   num = swapctl(SC_GETNSWP, 0);
   s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
-  strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
-  for (i = 0; i < (num + 1); i++) {
-    s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
+  if (s) {
+      strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
+      if (strtab) {
+	  free_mem = 0;
+          for (i = 0; i < (num + 1); i++) {
+            s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
+          }
+          s->swt_n = num + 1;
+          n = swapctl(SC_LIST, s);
+
+          for (i = 0; i < n; i++)
+            free_mem += s->swt_ent[i].ste_free;
+     
+          free (strtab);
+      }
+      free (s);
   }
-  s->swt_n = num + 1;
-  n = swapctl(SC_LIST, s);
-
-  for (i = 0; i < n; i++)
-    free_mem += s->swt_ent[i].ste_free;
-
-  free (s);
-  free (strtab);
 
   return (free_mem);
 }
 
 long getTotalFree(void)
 {
-  long free_mem = 0;
+  long free_mem = getFreeSwap();
 
-  size_t num;
-  int i, n;
-  swaptbl_t      *s;
-  char *strtab;
-
-  num = swapctl(SC_GETNSWP, 0);
-  s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
-  strtab = (char *) malloc((num + 1) * MAXSTRSIZE);
-  for (i = 0; i < (num + 1); i++) {
-    s->swt_ent[i].ste_path = strtab + (i * MAXSTRSIZE);
-  }
-  s->swt_n = num + 1;
-  n = swapctl(SC_LIST, s);
-
-  for (i = 0; i < n; i++)
-    free_mem += s->swt_ent[i].ste_free;
-
-  free (s);
-  free (strtab);
+  if (free_mem < 0) return (free_mem);
 
   ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
   kstat_read(kc, ksp1, 0);
   kn = kstat_data_lookup(ksp1, "freemem");
 
   free_mem += kn->value.ul;
-
-
   return (free_mem);
 }
+
