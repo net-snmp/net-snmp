@@ -476,7 +476,7 @@ u_long *ifType;
               /* The arp table is an array of linked lists of arptab entries.
                  Unused slots have pointers back to the array entry itself */
 
-              if ( at_ptr == (at_nl[N_ARPTAB].n_value +
+              if ( at_ptr == (auto_nlist_value(ARPTAB_SYMBOL) +
                               arptab_current*sizeof(struct arphd))) {
                       /* Usused */
                   arptab_current++;
