@@ -720,6 +720,18 @@ sub process {
               warn "$@";
               warn "$currentfile:$currentline [$_]\n";
             }
+	} elsif (/\@\s*startperl\s*\@/) { #                          STARTPERL
+	    my $text;
+	    while (get_next_line()) {
+		last if (/\@\s*endperl\s*\@/);
+		$text .= $_;
+	    }
+	    my $res = eval($text);
+            if ($res) {
+              warn "$@";
+              warn "$currentfile:$currentline [$_]\n";
+            }
+#	    print STDERR "perleval: $1\n";
 	} elsif (/\@\s*printf\s+(\"[^\"]+\")\s*,?(.*)\@/) { #           PRINTF
 	    my ($f, $rest) = ($1, $2);
 	    $rest = process_vars($rest);
@@ -866,9 +878,7 @@ sub process {
           print "$line\n";
 	} else {
           my $line = process_vars($_);
-          foreach $file (values(%outputs)) {
-            print $file "$line";
-          }
+	  mib2c_output($line);
           chop $_;
           warn "$currentfile:$currentline contained a line that started with a @ but did not match any mib2c configuration tokens.\n";
           warn "(maybe missing the trailing @?)\n";
@@ -889,6 +899,14 @@ sub process {
   $currentlevel--;
   return $return;
 }
+
+sub mib2c_output {
+    my $line = shift;
+    foreach $file (values(%outputs)) {
+	print $file "$line";
+    }
+}
+
 
 sub setup_data {
     my $mib = shift;
