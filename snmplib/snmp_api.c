@@ -4325,7 +4325,7 @@ _sess_read(void *sessp,
       pdu->securityStateRef = NULL;
     }
     if (!handled) {
-      snmp_increment_statistics(STAT_SNMPUNKNOWNPDUHANDLERS);
+      snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
       DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
     }
     snmp_free_pdu(pdu);
