@@ -1,17 +1,7 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.8.pre2*
- New:
-    - No new features will be added to the 5.0.x line.
-
- Fixes:
-    - find libwrap w/nsl on RedHat
-    - fix for openssl 0.9.7
-    - Fix some AgentX memory leaks
-    - use macro for inline function prototypes
-
-*5.0.8.pre1*
+*5.0.8*
  New:
     - No new features will be added to the 5.0.x line.
 
@@ -22,6 +12,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - Updates to solaris README
 
  Fixes:
+    - find libwrap w/nsl on RedHat
+    - fix for openssl 0.9.7
+    - Fix some AgentX memory leaks
+    - use macro for inline function prototypes
     - Attempt to find unused port before running tests
     - Use SNMP_SLEEP environment variable when running tests
     - calculate a proper ifSpeed under linux when possible
