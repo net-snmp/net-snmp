@@ -120,6 +120,8 @@ EXPORTS
 	view_scanInit
 	view_scanNext
 	view_createEntry
+ 	get_tc_index
+ 	snmp_async_send
 	Mib				DATA
 	tree_head		DATA
 	snmp_errno		DATA
