@@ -325,14 +325,15 @@ printf("\n\t\t[-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L]
 	RETSIGTYPE
 SnmpdShutDown(int a)
 {
+        extern struct snmp_session *main_session;
 	running = 0;
 #ifdef WIN32
 	/*
 	 * In case of windows, select() in receive() function will not return 
 	 * on signal. Thats why following function is called, which closes the 
-	 * socket descriptors and causes the select() to return
+	 * main socket descriptor and causes the select() to return
 	*/
-	snmp_close_sessions();
+	snmp_close(main_session);
 #endif
 }
 
@@ -772,14 +773,14 @@ main(int argc, char *argv[])
 	 */
 	DEBUGMSGTL(("snmpd", "We're up.  Starting to process data.\n"));
 	receive();
-#ifdef WIN32
-	agent_status = AGENT_STOPPED; 
-#endif
 #include "mib_module_shutdown.h"
 	DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
 	SnmpTrapNodeDown();
 	DEBUGMSGTL(("snmpd", "Bye...\n"));
 	snmp_shutdown("snmpd");
+#ifdef WIN32
+	agent_status = AGENT_STOPPED; 
+#endif
 	return 0;
 
 }  /* End main() -- snmpd */
