@@ -23,10 +23,8 @@ QUICK INSTRUCTIONS
      (see "Compilers and Options" on changing the complier to use)
 
   2) Optionally edit config.h
-     (due to prompting done by the configure script, this is not
-     mandatory.  If you want to change things here, it would better to
-     change them in config.h.in instead and then run config.status to
-     update config.h).
+     (due to prompting done by the configure script, this is rarely
+     necessary.)
 
   3) make
 
