@@ -12,4 +12,5 @@ EXPORTS
 	argvrestart
 	argvrestartp
 	update_config
+	dump_idx_registry
 
