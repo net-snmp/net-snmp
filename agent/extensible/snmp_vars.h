@@ -51,7 +51,7 @@ struct variable2 wes_mem_variables[] = {
 };
 #endif
 
-#ifdef hpux
+#if defined(hpux) || defined(ultrix)
 struct variable2 wes_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_wes_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_wes_disk, 1, {ERRORNAME}},
