@@ -30,143 +30,123 @@
 #include <net-snmp/library/container_list_ssll.h>
 
 typedef struct sl_node {
-   void           *data;
+   const void     *data;
    struct sl_node *next;
 } sl_node;
 
-typedef struct binary_array_table_s {
+typedef struct sl_container_s {
+   netsnmp_container          c;
+   
    size_t                     count;      /* Index of the next free entry */
    sl_node                   *head;       /* head of list */
-} sl_table;
+} sl_container;
 
-
-static sl_table *
-_ssll_initialize(void)
-{
-    sl_table *t;
-
-    t = SNMP_MALLOC_TYPEDEF(sl_table);
-    if (t == NULL)
-        return NULL;
-
-    return t;
-}
-
-static void
-_ssll_free(netsnmp_container *c)
-{
-    if(c) {
-        if(c->private)
-            free(c->private);
-        free(c);
-    }
-}
 
 static void *
-_ssll_get(netsnmp_container *c, const void *key, int exact)
+_get(netsnmp_container *c, const void *key, int exact)
 {
-    sl_table *t = (sl_table*)c->private;
-    sl_node  *curr;
+    sl_container *sl = (sl_container*)c;
+    sl_node  *curr = sl->head;
     
-    if (NULL == key) {
-        if(exact || (NULL==t->head))
-            return NULL;;
-
-        return t->head->data;
-    }
-    
-    if (NULL == (curr = t->head))
-        return NULL;
-
-    while (curr) {
-        if (c->compare(curr->data, key) == 0)
-            break;
-        curr = curr->next;
-    }
-
-    if((curr) && (!exact)) {
-        curr = curr->next;
+    if( (NULL != curr) && (NULL != key)) {
+        while (curr) {
+            if (sl->c.compare(curr->data, key) == 0)
+                break;
+            curr = curr->next;
+        }
+        
+        if((curr) && (!exact)) {
+            curr = curr->next;
+        }
     }
 
     return curr ? curr->data : NULL;
 }
 
+/**********************************************************************
+ *
+ *
+ *
+ **********************************************************************/
+static void
+_ssll_free(netsnmp_container *c)
+{
+    if(c) {
+        free(c);
+    }
+}
+
 static void *
 _ssll_find(netsnmp_container *c, const void *data)
 {
-    if((NULL == c) || (NULL == c->private))
+    if((NULL == c) || (NULL == data))
         return NULL;
 
-    return _ssll_get(c, data, data ? 1 : 0);
+    return _get(c, data, 1);
 }
 
 static void *
 _ssll_find_next(netsnmp_container *c, const void *data)
 {
-    if((NULL == c) || (NULL == c->private))
+    if(NULL == c)
         return NULL;
 
-    return _ssll_get(c, data, 0);
+    return _get(c, data, 0);
 }
 
 static int
 _ssll_insert(netsnmp_container *c, const void *data)
 {
-    sl_table *t;
+    sl_container *sl = (sl_container*)c;
     sl_node  *new_node;
     
-    if((NULL == c) || (NULL == c->private))
+    if(NULL == c)
         return -1;
 
-    t = (sl_table*)c->private;
     new_node = SNMP_MALLOC_TYPEDEF(sl_node);
     if(NULL == new_node)
         return -1;
-    new_node->data = (void*)data;
+    new_node->data = data;
     
-    if(NULL == t->head) {
-        t->head = new_node;
+    if(NULL == sl->head) {
+        sl->head = new_node;
     }
     else {
-        sl_node *curr = t->head, *last = NULL;
+        sl_node *curr = sl->head, *last = NULL;
         for( ; curr; last = curr, curr = curr->next) {
-            if(c->compare(curr->data, data) > 0)
+            if(sl->c.compare(curr->data, data) > 0)
                 break;
         }
         if(NULL == last) {
-            new_node->next = t->head;
-            t->head = new_node;
+            new_node->next = sl->head;
+            sl->head = new_node;
         }
         else {
             new_node->next = last->next;
             last->next = new_node;
         }
     }
-    ++t->count;
+    ++sl->count;
     return 0;
 }
 
 static int
 _ssll_remove(netsnmp_container *c, const void *data)
 {
-    sl_table *t;
-    sl_node  *curr;
+    sl_container *sl = (sl_container*)c;
+    sl_node  *curr = sl->head;
     
-    if((NULL == c) || (NULL == c->private))
-        return 0;
-
-    t = (sl_table*)c->private;
-    if(NULL == t->head)
+    if((NULL == c) || (NULL == curr))
         return -1;
 
-    if(c->compare(t->head->data, data) == 0) {
-        curr = t->head;
-        t->head = t->head->next;
+    if(sl->c.compare(sl->head->data, data) == 0) {
+        curr = sl->head;
+        sl->head = sl->head->next;
     }
     else {
-        sl_node *last = t->head;
-        for(curr = t->head->next ; curr; last = curr, curr = curr->next)
-            if(c->compare(curr->data, data) == 0) {
+        sl_node *last = sl->head;
+        for(curr = sl->head->next ; curr; last = curr, curr = curr->next)
+            if(sl->c.compare(curr->data, data) == 0) {
                 last->next = curr->next;
                 break;
             }
@@ -179,7 +159,7 @@ _ssll_remove(netsnmp_container *c, const void *data)
      * free our node structure, but not the data
      */
     free(curr);
-    --t->count;
+    --sl->count;
     
     return 0;
 }
@@ -187,75 +167,59 @@ _ssll_remove(netsnmp_container *c, const void *data)
 static size_t
 _ssll_size(netsnmp_container *c)
 {
-    sl_table *t;
+    sl_container *sl = (sl_container*)c;
     
-    if((NULL == c) || (NULL == c->private))
+    if(NULL == c)
         return 0;
 
-    t = (sl_table*)c->private;
-
-    /*
-     * return count
-     */
-    return t->count;
+    return sl->count;
 }
 
 static void
 _ssll_for_each(netsnmp_container *c, netsnmp_container_obj_func *f,
              void *context)
 {
-    sl_table *t;
+    sl_container *sl = (sl_container*)c;
     sl_node  *curr;
     
-    if((NULL == c) || (NULL == c->private))
+    if(NULL == c)
         return;
-
-    t = (sl_table*)c->private;
     
-    for(curr = t->head; curr; curr = curr->next)
+    for(curr = sl->head; curr; curr = curr->next)
         (*f) (curr->data, context);
 }
 
-int
-netsnmp_container_get_ssll_noalloc(netsnmp_container *c)
-{
-    if (NULL==c)
-        return -1;
-    
-    c->private = _ssll_initialize();
-    c->cfree = (netsnmp_container_rc*)_ssll_free;
-        
-    c->get_size = _ssll_size;
-    c->init = NULL;
-    c->insert = _ssll_insert;
-    c->remove = _ssll_remove;
-    c->find = _ssll_find;
-    c->find_next = _ssll_find_next;
-    c->get_subset = NULL;
-    c->get_iterator = NULL;
-    c->for_each = _ssll_for_each;
-
-    return 0;
-}
-
+/**********************************************************************
+ *
+ *
+ *
+ **********************************************************************/
 netsnmp_container *
-netsnmp_container_get_sorted_singly_linked_list(void)
+netsnmp_container_get_ssll(void)
 {
     /*
      * allocate memory
      */
-    netsnmp_container *c = SNMP_MALLOC_TYPEDEF(netsnmp_container);
-    if (NULL==c) {
+    sl_container *sl = SNMP_MALLOC_TYPEDEF(sl_container);
+    if (NULL==sl) {
         snmp_log(LOG_ERR, "couldn't allocate memory\n");
         return NULL;
     }
 
-    if (0 != netsnmp_container_get_ssll_noalloc(c)) {
-        free(c);
-        return NULL;
-    }
+    sl->c.cfree = (netsnmp_container_rc*)_ssll_free;
         
-    return c;
+    sl->c.get_size = _ssll_size;
+    sl->c.init = NULL;
+    sl->c.insert = _ssll_insert;
+    sl->c.remove = _ssll_remove;
+    sl->c.find = _ssll_find;
+    sl->c.find_next = _ssll_find_next;
+    sl->c.get_subset = NULL;
+    sl->c.get_iterator = NULL;
+    sl->c.for_each = _ssll_for_each;
+
+       
+    return (netsnmp_container*)sl;
 }
 
 netsnmp_factory *
@@ -263,9 +227,7 @@ netsnmp_container_get_ssll_factory(void)
 {
     static netsnmp_factory f = {"sorted_singly_linked_list",
                                 (netsnmp_factory_produce_f*)
-                                netsnmp_container_get_sorted_singly_linked_list,
-                                (netsnmp_factory_produce_noalloc_f*)
-                                netsnmp_container_get_ssll_noalloc };
+                                netsnmp_container_get_ssll };
     
     return &f;
 }
