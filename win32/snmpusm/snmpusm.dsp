@@ -83,6 +83,14 @@ LINK32=link.exe
 # Name "snmpusm - Win32 Debug"
 # Begin Source File
 
+SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\apps\snmp_parse_args.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmpusm.c
 # End Source File
 # End Target

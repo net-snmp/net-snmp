@@ -86,7 +86,7 @@ int input_variable (struct variable_list *);
 
 void usage(void)
 {
-  fprintf(stderr,"Usage:\n  snmptest ");
+  fprintf(stderr,"Usage: snmptest ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     int varcount, nonRepeaters = -1, maxRepetitions;
 
     /* get the common command line arguments */
-    snmp_parse_args(argc, argv, &session);
+    snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     SOCK_STARTUP;
 

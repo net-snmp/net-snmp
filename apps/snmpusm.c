@@ -100,7 +100,7 @@ static oid  authKeyOid[MAX_OID_LEN]          = {1,3,6,1,6,3,15,1,2,2,1,6},
 void
 usage (void)
 {
-  fprintf(stderr,"Usage:\n  snmpusm ");
+  fprintf(stderr,"Usage: snmpusm ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr," COMMAND\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -185,7 +185,7 @@ main(int argc, char *argv[])
                           keychange[SNMP_MAXBUF_SMALL];
                          
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     SOCK_STARTUP;
 
@@ -458,5 +458,5 @@ main(int argc, char *argv[])
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 }

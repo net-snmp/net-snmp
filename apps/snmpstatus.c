@@ -100,7 +100,7 @@ size_t	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
 void usage(void)
 {
-  fprintf(stderr,"Usage:\n  snmpstatus ");
+  fprintf(stderr,"Usage: snmpstatus ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     int count;
 
     /* get the common command line arguments */
-    snmp_parse_args(argc, argv, &session);
+    snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     SOCK_STARTUP;
 
@@ -292,5 +292,5 @@ retry:
 
     snmp_close(ss);
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 }

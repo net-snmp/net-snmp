@@ -82,7 +82,7 @@ oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 void usage(void)
 {
-  fprintf(stderr,"Usage:\n  snmpwalk ");
+  fprintf(stderr,"Usage: snmpwalk ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
@@ -101,12 +101,9 @@ int main(int argc, char *argv[])
     int    count;
     int    running;
     int    status;
-#ifdef _DEBUG_MALLOC_INC
-    unsigned long histid1, histid2, orig_size, current_size;
-#endif
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session);
+    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
 
     /* get the initial object and subtree */
     if (arg < argc) {
@@ -208,5 +205,5 @@ int main(int argc, char *argv[])
 #endif
 
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 }

@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
   int print = 1;
   int exit_code = 0;
     
-  arg = snmp_parse_args(argc, argv, &session);
+  arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
   gateway = session.peername;
 
   /*
