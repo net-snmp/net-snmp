@@ -150,13 +150,13 @@ var_hrprint(struct variable *vp,
 
     switch (vp->magic){
 	case HRPRINT_STATUS:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 3;	/* idle */
 	    return (u_char *)&long_return;
 	case HRPRINT_ERROR:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;	/* Null string */
