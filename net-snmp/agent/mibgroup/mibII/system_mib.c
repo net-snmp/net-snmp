@@ -74,7 +74,9 @@ char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
 oid             sysObjectID[MAX_OID_LEN];
 size_t          sysObjectIDLength;
-oid             version_sysoid[] = { SYSTEM_MIB };
+
+extern oid      version_sysoid[];
+extern int      version_sysoid_len;
 
 char            oldversion_descr[SYS_STRING_LEN];
 char            oldsysContact[SYS_STRING_LEN];
@@ -281,8 +283,8 @@ void system_parse_config_sysObjectID(const char *token, char *cptr)
                  "sysobjectid token not a parsable OID:\n\t%s",
                  cptr);
         config_perror(tmpbuf);
-        memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
-        sysObjectIDLength = OID_LENGTH(version_sysoid);
+        memcpy(sysObjectID, version_sysoid, version_sysoid_len);
+        sysObjectIDLength = version_sysoid_len;
     }
 }
 
@@ -415,8 +417,8 @@ init_system_mib(void)
 #endif
 
     /* default sysObjectID */
-    memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
-    sysObjectIDLength = OID_LENGTH(version_sysoid);
+    memcpy(sysObjectID, version_sysoid, version_sysoid_len);
+    sysObjectIDLength = version_sysoid_len;
 
     /*
      * register ourselves with the agent to handle our mib tree 
