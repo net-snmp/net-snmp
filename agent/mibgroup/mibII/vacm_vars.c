@@ -1099,12 +1099,12 @@ u_char *var_vacm_view(struct variable *vp,
 	    *cp++ = (char) *op++;
 	}
 	*cp = 0;
-	len = *length - (op - name);
-	if (len > VACM_MAX_STRING)
+	len = *op++;
+	if (len > MAX_OID_LEN)
 	    return 0;
 	op1 = subtree;
 	while (len-- > 0) {
-	    *op1++ = *op++;
+	    *op1++ = (op != name + *length) ? *op++ : 0;
 	    subtreeLen++;
 	}
 	if (op != name + *length) {
@@ -1126,7 +1126,7 @@ u_char *var_vacm_view(struct variable *vp,
 	    if (len > VACM_MAX_STRING)
 	        return 0;
 	    cp = viewName;
-	    while (len-- >= 0) {
+	    while (len-- >= 0 && op < name + *length) {
                 if (*op > 255)
 		    return 0; 
 		*cp++ = (char) *op++;
@@ -1136,21 +1136,22 @@ u_char *var_vacm_view(struct variable *vp,
 	if (op >= name + *length) {
 	}
 	else {
-	    len = *length - (op - name);
+	    len = *op++;
 	    op1 = subtree;
-	    while (len-- >= 0) {
+	    *op1++ = len;
+	    subtreeLen++;
+	    while (len-- >= 0 && op < name + *length) {
 		*op1++ = *op++;
 		subtreeLen++;
 	    }
-	    subtreeLen--;
 	}
 	vacm_scanViewInit();
 	while ((gp = vacm_scanViewNext()) != NULL) {
 	    cmp = strcmp(gp->viewName, viewName);
-	    cmp2= memcmp(gp->viewSubtree,subtree,sizeof(oid)*subtreeLen);
-		if (cmp==0 && cmp2>0) break;
+	    cmp2 = snmp_oid_compare(gp->viewSubtree, gp->viewSubtreeLen,
+		                    subtree, subtreeLen);
+	    if (cmp == 0 && cmp2 > 0) break;
 	    if (cmp > 0) break;
-	    if (cmp < 0) continue;
 	}
 	if (gp) {
 	    *length = 12;

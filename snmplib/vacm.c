@@ -255,7 +255,7 @@ vacm_parse_config_group(const char *token, char *line)
 
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,
-		  oid *viewSubtree,
+	      oid *viewSubtree,
 		  size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
@@ -337,18 +337,17 @@ vacm_createViewEntry(const char *viewName,
 
     vp->viewName[0] = glen;
     strcpy(vp->viewName+1, viewName);
-    memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
-    vp->viewSubtreeLen = viewSubtreeLen;
+    vp->viewSubtree[0] = viewSubtreeLen;
+    memcpy(vp->viewSubtree+1, viewSubtree, viewSubtreeLen * sizeof(oid));
+    vp->viewSubtreeLen = viewSubtreeLen+1;
 
     lp = viewList;
     while (lp) {
 	cmp = memcmp(lp->viewName, vp->viewName, glen+1);
-	cmp2= memcmp(lp->viewSubtree,viewSubtree,sizeof(oid)*viewSubtreeLen);
-	if (cmp==0 && cmp2>0) break;
+	cmp2 = snmp_oid_compare(lp->viewSubtree, lp->viewSubtreeLen,
+	                        vp->viewSubtree, vp->viewSubtreeLen);
+	if (cmp == 0 && cmp2 > 0) break;
 	if (cmp > 0) break;
-	if (cmp < 0) goto next;
-	
-next:
 	op = lp;
 	lp = lp->next;
     }
