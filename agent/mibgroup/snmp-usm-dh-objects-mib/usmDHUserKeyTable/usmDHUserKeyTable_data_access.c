@@ -124,7 +124,8 @@ usmDHUserKeyTable_container_init(netsnmp_container ** container_ptr_ptr,
      *
      * Also for advanced users, you can set parameters for the
      * cache. Do not change the magic pointer, as it is used
-     * by the MFD helper.
+     * by the MFD helper. To completely disable caching, set
+     * cache->enabled to 0.
      */
     cache->timeout = USMDHUSERKEYTABLE_CACHE_TIMEOUT;   /* seconds */
 }                               /* usmDHUserKeyTable_container_init */
