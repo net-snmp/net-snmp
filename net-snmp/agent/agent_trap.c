@@ -64,7 +64,7 @@ oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
 int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
 int version_id_len     = OID_LENGTH( version_id );
 
-#define SNMPV2_TRAPS_PREFIX	1,3,6,1,6,3,1,1,5
+#define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 oid  cold_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	/* SNMPv2-MIB */
 oid  warm_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 2 };	/* SNMPv2-MIB */
 oid  link_down_oid[] =		{ SNMPV2_TRAPS_PREFIX, 3 };	/* IF-MIB */
@@ -72,10 +72,10 @@ oid  link_up_oid[] =		{ SNMPV2_TRAPS_PREFIX, 4 };	/* IF-MIB */
 oid  auth_fail_oid[] =		{ SNMPV2_TRAPS_PREFIX, 5 };	/* SNMPv2-MIB */
 oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 
-#define SNMPV2_TRAP_OBJS_PREFIX	1,3,6,1,6,3,1,1,4
+#define SNMPV2_TRAP_OBJS_PREFIX	SNMP_OID_SNMPMODULES,1,1,4
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3 };
-oid  sysuptime_oid[] 	      =	{ 1,3,6,1,2,1,1,3,0 };
+oid  sysuptime_oid[] 	      =	{ SNMP_OID_MIB2,1,3,0 };
 int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
 int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
 int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);

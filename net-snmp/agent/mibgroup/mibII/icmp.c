@@ -88,6 +88,7 @@
 /* #include "../common_header.h" */
 
 #include "icmp.h"
+#include "sysORTable.h"
 
 	/*********************
 	 *
@@ -143,12 +144,23 @@ struct variable2 icmp_variables[] = {
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid icmp_variables_oid[] = { 1,3,6,1,2,1,5 };
+oid icmp_variables_oid[] = { SNMP_OID_MIB2,5 };
+#ifdef USING_MIBII_IP_MODULE
+extern oid ip_module_oid[];
+extern int ip_module_oid_len;
+extern int ip_module_count;
+#endif
 
 void init_icmp(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/icmp", icmp_variables, variable2, icmp_variables_oid);
+
+#ifdef USING_MIBII_IP_MODULE
+  if ( ++ip_module_count == 2 )
+	REGISTER_SYSOR_TABLE( ip_module_oid, ip_module_oid_len,
+		"The MIB module for managing IP and ICMP implementations");
+#endif 
 
 #ifdef ICMPSTAT_SYMBOL
     auto_nlist( ICMPSTAT_SYMBOL,0,0 );

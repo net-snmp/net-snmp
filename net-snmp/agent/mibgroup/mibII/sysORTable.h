@@ -4,6 +4,7 @@
  */
 #ifndef _MIBGROUP_SYSORTABLE_H
 #define _MIBGROUP_SYSORTABLE_H
+#ifdef  USING_MIBII_SYSORTABLE_MODULE
 
 config_require(util_funcs)
 
@@ -41,5 +42,13 @@ extern void   unregister_sysORTable_by_session (struct snmp_session *);
 #define SYS_ORTABLE_UNREGISTERED_OK            0
 #define SYS_ORTABLE_NO_SUCH_REGISTRATION      -1
 
+#define REGISTER_SYSOR_ENTRY(theoid, descr)                      \
+  (void)register_sysORTable(theoid, sizeof(theoid)/sizeof(oid), descr);
+#define REGISTER_SYSOR_TABLE(theoid, len, descr)                      \
+  (void)register_sysORTable(theoid, len, descr);
 
+#else
+#define REGISTER_SYSOR_ENTRY
+#define REGISTER_SYSOR_TABLE
+#endif /* USING_MIBII_SYSORTABLE_MODULE */
 #endif /* _MIBGROUP_SYSORTABLE_H */

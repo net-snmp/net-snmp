@@ -115,7 +115,7 @@ struct variable4 at_variables[] = {
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid at_variables_oid[] = { 1,3,6,1,2,1,3,1,1 };
+oid at_variables_oid[] = { SNMP_OID_MIB2,3,1,1 };
 
 void init_at(void)
 {

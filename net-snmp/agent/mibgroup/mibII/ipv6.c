@@ -222,7 +222,7 @@ struct variable4 ipv6_variables[] = {
     {IPV6NETTOMEDIAVALID, INTEGER, RONLY, var_ndpEntry, 3, {12, 1, 6}},
 #endif
 };
-oid ipv6_variables_oid[] = {1,3,6,1,2,1,55,1};
+oid ipv6_variables_oid[] = {SNMP_OID_MIB2,55,1};
 #if 0
     config_load_mib(MIB.55.1, 8, ipv6_variables)
     config_add_mib(IPV6-TC)

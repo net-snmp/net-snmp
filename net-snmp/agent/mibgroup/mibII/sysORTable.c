@@ -60,7 +60,12 @@ struct variable2 sysORTable_variables[] = {
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid sysORTable_variables_oid[] = { 1,3,6,1,2,1,1,9,1 };
+oid sysORTable_variables_oid[] = { SNMP_OID_MIB2,1,9,1 };
+#ifdef USING_MIBII_SYSTEM_MIB_MODULE
+extern oid system_module_oid[];
+extern int system_module_oid_len;
+extern int system_module_count;
+#endif
 
 void
 init_sysORTable(void) {
@@ -77,6 +82,12 @@ init_sysORTable(void) {
   else
 #endif
     REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);
+
+#ifdef USING_MIBII_SYSTEM_MIB_MODULE
+  if ( ++system_module_count == 3 )
+	REGISTER_SYSOR_TABLE( system_module_oid, system_module_oid_len,
+		"The MIB module for SNMPv2 entities");
+#endif
 
   gettimeofday(&sysOR_lastchange, NULL);
 }
