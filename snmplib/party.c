@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <stdio.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
