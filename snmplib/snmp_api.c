@@ -700,6 +700,7 @@ snmp_sess_close(void *sessp)
 	snmp_free(sesp->srcParty);
 	snmp_free(sesp->peername);
 	snmp_free(sesp->community);
+	snmp_synch_reset(sesp);
 	free((char *)sesp);
     }
 
