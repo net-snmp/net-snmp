@@ -18,8 +18,10 @@ int ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
 @   end@
 @   if "$m2c_data_context" ne "generated"@
 int ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx);
+int ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
 int ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx);
+int ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx);
 @   if $m2c_irreversible_commit == 1@
 int ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx);
 @   end@
@@ -30,16 +32,115 @@ int ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx);
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ##//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @if $m2c_processing_type eq 'c'@
+##
+## MASTER COPY OF THIS FLOWCHART IS IN agent/helpers/baby_steps.c
+##
+    /*
+     ***********************************************************************
+     * Baby Steps Flow Chart (2004.06.05)                                  *
+     *                                                                     *
+     * +--------------+    +================+    U = unconditional path    *
+     * |optional state|    ||required state||    S = path for success      *
+     * +--------------+    +================+    E = path for error        *
+     ***********************************************************************
+     *
+     *                        +--------------+
+     *                        |     pre      |
+     *                        |   request    |
+     *                        +--------------+
+     *                               | U
+@if $m2c_table_row_creation == 1@
+     * +-------------+        +==============+
+     * |    row    |f|<-------||  object    ||
+     * |  create   |1|      E ||  lookup    ||
+     * +-------------+        +==============+
+     *     E |   | S                 | S
+     *       |   +------------------>|
+     *       |                +==============+
+     *       |              E ||   check    ||
+     *       |<---------------||   values   ||
+@else@
+     *                        +==============+
+     *       +----------------||  object    ||
+     *       |              E ||  lookup    ||
+     *       |                +==============+
+     *       |                       | S
+     *       |                +==============+
+     *       |              E ||   check    ||
+     *       |<---------------||   values   ||
+@end@ # row creation
+     *       |                +==============+
+     *       |                       | S
+     *       |                +==============+
+     *       |       +<-------||   undo     ||
+     *       |       |      E ||   setup    ||
+     *       |       |        +==============+
+     *       |       |               | S
+     *       |       |        +==============+
+     *       |       |        ||    set     ||-------------------------->+
+     *       |       |        ||   value    || E                         |
+     *       |       |        +==============+                           |
+     *       |       |               | S                                 |
+     *       |       |        +--------------+                           |
+     *       |       |        |    check     |-------------------------->|
+     *       |       |        |  consistency | E                         |
+     *       |       |        +--------------+                           |
+     *       |       |               | S                                 |
+     *       |       |        +==============+         +==============+  |
+     *       |       |        ||   commit   ||-------->||     undo   ||  |
+     *       |       |        ||            || E       ||    commit  ||  |
+     *       |       |        +==============+         +==============+  |
+     *       |       |               | S                     U |<--------+
+     *       |       |        +--------------+         +==============+
+     *       |       |        | irreversible |         ||    undo    ||
+     *       |       |        |    commit    |         ||     set    ||
+     *       |       |        +--------------+         +==============+
+     *       |       |               | U                     U |
+     *       |       +-------------->|<------------------------+
+     *       |                +==============+
+     *       |                ||   undo     ||
+     *       |                ||  cleanup   ||
+     *       |                +==============+
+     *       +---------------------->| U
+@if $m2c_table_row_creation == 1@
+     *                               |
+     *                          (err && f1)------------------->+
+     *                               |                         |
+     *                        +--------------+         +--------------+
+     *                        |    post      |<--------|      row     |
+     *                        |   request    |       U |    release   |
+     *                        +--------------+         +--------------+
+@else@
+     *                        +--------------+
+     *                        |    post      |
+     *                        |   request    |
+     *                        +--------------+
+@end@ # row creation
+     *
+     */
+
 @if $m2c_table_row_creation == 1@
 /**
- * create new data context, if specified index is valid.
+ * verify specified index is valid.
+ *
+ * This check is independent of whether or not the values specified for
+ * the columns of the new row are valid. Column values and row consistency
+ * will be checked later. At this point, only the index values should be
+ * checked.
+ *
+ * All of the individual index validation functions have been called, so this
+ * is the place to make sure they are valid as a whole when combined. If
+ * you only have one index, 
+ * 
+ *
  *
  * @param ${context}_reg
  *        Pointer to the user registration data
  * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
- * @retval MFD_SUCCESS   : success
- * @retval MFD_BAD_VALUE : index not valid
+ * @retval MFD_SUCCESS            : success
+ * @retval MFD_CANNOT_CREATE_NOW  : index not valid right now
+ * @retval MFD_CANNOT_CREATE_EVER : index never valid
  */
 int
 ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
@@ -54,12 +155,7 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
 
     /*
      * TODO:
-     * Validate incoming index
-     *
-     * Check that the values specified in the incoming index are valid
-     * values. All of the individual index component functions have been
-     * called, so this is the place to make sure they are valid as
-     * a whole when combined.
+     * Validate incoming index(es)
      */
 $example_start
     /*
@@ -73,16 +169,16 @@ $example_start
          * TODO:
          * determine failure type.
          *
-         * If the index could not ever be created, SNMP_ERR_NOCREATION.
-         * If the index can not be created under the  present circumstances
+         * If the index could not ever be created, return MFD_NOT_EVER
+         * If the index can not be created under the present circumstances
          * (even though it could be created under other circumstances),
-         * SNMP_ERR_INCONSISTENTNAME.
+         * return MFD_NOT_NOW.
          */
         if(0) {
-            return SNMP_ERR_NOCREATION;
+            return MFD_NOT_EVER;
         }
         else {
-            return SNMP_ERR_INCONSISTENTNAME;
+            return MFD_NOT_NOW;
         }
     }
 $example_end
@@ -127,6 +223,37 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     return rc;
 }
 
+/**
+ * Cleanup up context undo information.
+ *
+ * This function will be called after set/commit processing. If you
+ * allocated any resources in undo_setup, this is the place to release
+ * those resources.
+ *
+ * This function is called regardless of the success or failure of the set
+ * request. If you need to perform different steps for cleanup depending
+ * on success or failure, you can add a flag to the rowreq_ctx.
+ *
+ * @param rowreq_ctx
+ *        Pointer to the table context (${context}_rowreq_ctx)
+ *
+ * @retval MFD_SUCCESS : success
+ * @retval MFD_ERROR   : error
+ */
+int
+${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
+{
+    int rc = MFD_SUCCESS;
+
+    DEBUGMSGTL(("verbose:${context}_undo_cleanup","called\n"));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != rowreq_ctx );
+
+
+    return rc;
+}
+
 @end@ // ne generated
 ##----------------------------------------------------------------------
 /**
@@ -161,6 +288,34 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     return rc;
 }
 
+/**
+ * undo commit new values.
+ *
+ * @param ${context}_rowreq_ctx
+ *        Pointer to the users context.
+ *
+ * @retval MFD_SUCCESS : success
+ * @retval MFD_ERROR   : error
+ */
+int
+${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
+{
+    int rc = MFD_SUCCESS;
+
+    DEBUGMSGTL(("verbose:${context}_undo_commit","called\n"));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != rowreq_ctx );
+
+    /*
+     * TODO:
+     * undo commit data
+     */
+##$example_start
+##$example_end
+
+    return rc;
+}
 
 @if $m2c_irreversible_commit == 1@
 ##----------------------------------------------------------------------
