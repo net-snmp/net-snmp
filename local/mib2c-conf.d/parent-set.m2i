@@ -39,7 +39,9 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
      * Validate incoming index
      *
      * Check that the values specified in the incoming index are valid
-     * values.
+     * values. All of the individual index component functions have been
+     * called, so this is the place to make sure they are valid as
+     * a whole when combined.
      */
 $example_start
     /*
