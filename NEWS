@@ -1,10 +1,16 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*3.?*
+*3.0.3*
+
+  *** default location for .conf and mib.txt files moved to
+      .configure's --prefix location
 
   Now using GNU's auto-conf for better portability
+    - prompts for important config.h information as well
+
   Port to Sun4/Solaris 2.4
+
   -h/--help and -v/--version flags added to snmpd
 
 *3.0.2.1*
