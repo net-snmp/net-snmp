@@ -299,7 +299,7 @@
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
 #endif
-#if defined(freebsd2) || defined(freebsd3)
+#if defined(freebsd2) || defined(freebsd3) || defined(freebsd4)
 #define OSTYPE FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
