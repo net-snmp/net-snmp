@@ -22,5 +22,43 @@ SOFTWARE.
 /*
  * Definitions for the system dependent library file
  */
+#include <config.h>
+#ifdef WIN32
+#include <sys/timeb.h>
+#include <time.h>
+// structure of a directory entry
+typedef struct direct 
+{
+	long	d_ino;		// inode number (not used by MS-DOS) 
+	int	d_namlen;		// Name length 
+	char	d_name[257];// file name 
+} _DIRECT;
+
+// structure for dir operations 
+typedef struct _dir_struc
+{
+	char	*start;			// Starting position
+	char	*curr;			// Current position
+	long	size;			// Size of string table
+	long	nfiles;			// number if filenames in table
+	struct direct dirstr;	// Directory structure to return
+} DIR;
+
+DIR *opendir __P((char *filename));
+struct direct *readdir __P((DIR *dirp));
+int closedir __P((DIR *dirp));
+
+int gettimeofday __P((struct timeval *, struct timezone *tz));
+
+char * winsock_startup __P((void));
+void winsock_cleanup __P((void));
+
+#define SOCK_STARTUP winsock_startup()
+#define SOCK_CLEANUP winsock_cleanup()
+#else
+#define SOCK_STARTUP
+#define SOCK_CLEANUP
+#endif
+
 in_addr_t get_myaddr __P((void));
 long get_uptime __P((void));

@@ -42,6 +42,9 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #ifndef NULL
 #define NULL 0
 #endif
@@ -106,14 +109,14 @@ snmp_parse_var_op(data, var_name, var_name_len, var_val_type, var_val_len, var_v
 
     data = asn_parse_header(data, &var_op_len, &var_op_type);
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("No header for variable");
 	return NULL;
     }
     if (var_op_type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
 	return NULL;
     data = asn_parse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len);
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("No OID for variable");
 	return NULL;
     }
     if (var_op_type != (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
@@ -122,7 +125,7 @@ snmp_parse_var_op(data, var_name, var_name_len, var_val_type, var_val_len, var_v
     /* find out what type of object this is */
     data = asn_parse_header(data, &var_op_len, var_val_type);
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("No header for value");
 	return NULL;
     }
     *var_val_len = var_op_len;
@@ -152,7 +155,7 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
     data = asn_build_sequence(data, &dummyLen,
 			      (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("Can't build sequence header");
 	return NULL;
     }
 #endif
@@ -167,7 +170,7 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
 	    var_name, *var_name_len);
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("Can't build OID for variable");
 	return NULL;
     }
     switch(var_val_type){
@@ -189,7 +192,7 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	    break;
 	case ASN_OCTET_STR:
 	case IPADDRESS:
-	case OPAQUE:
+	case ASNT_OPAQUE:
         case NSAP:
 	    data = asn_build_string(data, listlength, var_val_type,
 		    var_val, var_val_len);
@@ -211,11 +214,11 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	    data = asn_build_null(data, listlength, var_val_type);
 	    break;
 	default:
-	    ERROR("wrong type");
+	    ERROR_MSG("wrong type");
 	    return NULL;
     }
     if (data == NULL){
-	ERROR("");
+	ERROR_MSG("Can't build value");
 	return NULL;
     }
     dummyLen = (data - dataPtr) - headerLen;
@@ -224,6 +227,7 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 		       (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), dummyLen);
     return data;
 }
+
 
 #ifndef HAVE_STRDUP
 char *

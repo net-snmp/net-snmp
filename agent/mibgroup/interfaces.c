@@ -191,7 +191,7 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
 	    long_return = Interface_Scan_Get_Count();
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -402,7 +402,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -568,7 +568,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -679,7 +679,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
       long_return = (u_long)ifstat.ifOutQLen;
       return (u_char *) &long_return;
     default:
-      ERROR("");
+      ERROR_MSG("");
     }
     return NULL;
 }

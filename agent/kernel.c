@@ -122,7 +122,7 @@ klookup(off, target, siz)
   if ((retsiz = klread(target, siz)) != siz ) { 
     fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
     perror("klread");
-    ERROR("klread");
+    ERROR_MSG("klread");
 #ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
 #endif
