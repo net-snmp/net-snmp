@@ -14,8 +14,19 @@ config_require(util_funcs)
 /*
  * config file parsing routines 
  */
-     void            disk_free_config(void);
-     void            disk_parse_config(const char *, char *);
+void            disk_free_config(void);
+void            disk_parse_config(const char *, char *);
+void            disk_parse_config_all(const char *, char *);
+void            find_and_add_allDisks(int minpercent);
+void            add_device(char *path, char *device,
+			   int minspace, int minpercent, int override);
+void            modify_disk_parameters(int index, int minspace, 
+				       int minpercent);
+int             find_disk_and_modify(char *path, int minspace, 
+				     int minpercent);
+int             disk_exists(char *path);
+u_char    *     find_device(char *path);
+
 
 #include "mibdefs.h"
 
