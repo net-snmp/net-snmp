@@ -4,6 +4,9 @@
  */
 
 #include <config.h>
+#include "mibincl.h"
+#include "util_funcs.h"
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -39,10 +42,8 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
 #include "system_mib.h"
-#include "../struct.h"
-#include "../util_funcs.h"
+#include "struct.h"
 #include "read_config.h"
 #include "agent_read_config.h"
 #include "system.h"
@@ -78,7 +79,11 @@ extern struct timeval starttime;
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
-/* snmpd.conf config parsing */
+	/*********************
+	 *
+	 *  snmpd.conf config parsing
+	 *
+	 *********************/
 
 void system_parse_config_sysloc(const char *token, 
 				char *cptr)
@@ -200,51 +205,10 @@ void init_system_mib(void)
 
 }
 
-/*
-  header_system(...
-  Arguments:
-  vp	  IN      - pointer to variable entry that points here
-  name    IN/OUT  - IN/name requested, OUT/name found
-  length  IN/OUT  - length of IN/OUT oid's 
-  exact   IN      - TRUE if an exact match was requested
-  var_len OUT     - length of variable or 0 if function returned
-  write_method
-  
-*/
-
-int
-header_system(struct variable *vp,
-	      oid *name,
-	      size_t *length,
-	      int exact,
-	      size_t *var_len,
-	      WriteMethod **write_method)
-{
-#define SYSTEM_NAME_LENGTH	8
-    oid newname[MAX_OID_LEN];
-    int result;
-
-    DEBUGMSGTL(("mibII/system", "var_system: "));
-    DEBUGMSGOID(("mibII/system", name, *length));
-    DEBUGMSG(("mibII/system"," %d\n", exact));
-
-    memcpy((char *)newname, (char *)vp->name, vp->namelen * sizeof(oid));
-    newname[SYSTEM_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return(MATCH_FAILED);
-    memcpy( (char *)name,(char *)newname, (vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return(MATCH_SUCCEEDED);
-}
 
 	/*********************
 	 *
 	 *  System specific implementation functions
-	 *	(actually common!)
 	 *
 	 *********************/
 
@@ -261,9 +225,9 @@ var_system(struct variable *vp,
 	   WriteMethod **write_method)
 {
 
-  struct timeval now, diff;
+    struct timeval now, diff;
 
-    if (header_system(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
     switch (vp->magic){

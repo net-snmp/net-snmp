@@ -6,57 +6,30 @@
 #define _MIBGROUP_TCP_H
 
 #ifdef linux
-/* ugly mapping of `struct tcpstat' -> `struct tcp_mib' (but what the heck): */
-#define tcpstat tcp_mib
-#define tcps_connattempt TcpActiveOpens
-#define tcps_accepts TcpPassiveOpens
-#define tcps_conndrops TcpAttemptFails
-#define tcps_drops TcpEstabResets
-#define tcps_rcvtotal TcpInSegs
-#define tcps_sndtotal TcpOutSegs
-#define tcps_sndrexmitpack TcpRetransSegs
 
 struct tcp_mib
 {
- 	unsigned long	TcpRtoAlgorithm;
- 	unsigned long	TcpRtoMin;
- 	unsigned long	TcpRtoMax;
- 	unsigned long	TcpMaxConn;
- 	unsigned long	TcpActiveOpens;
- 	unsigned long	TcpPassiveOpens;
- 	unsigned long	TcpAttemptFails;
- 	unsigned long	TcpEstabResets;
- 	unsigned long	TcpCurrEstab;
- 	unsigned long	TcpInSegs;
- 	unsigned long	TcpOutSegs;
- 	unsigned long	TcpRetransSegs;
+ 	unsigned long	tcpRtoAlgorithm;
+ 	unsigned long	tcpRtoMin;
+ 	unsigned long	tcpRtoMax;
+ 	unsigned long	tcpMaxConn;
+ 	unsigned long	tcpActiveOpens;
+ 	unsigned long	tcpPassiveOpens;
+ 	unsigned long	tcpAttemptFails;
+ 	unsigned long	tcpEstabResets;
+ 	unsigned long	tcpCurrEstab;
+ 	unsigned long	tcpInSegs;
+ 	unsigned long	tcpOutSegs;
+ 	unsigned long	tcpRetransSegs;
 };
 
-struct inpcb {
-        struct  inpcb *inp_next;        /* pointers to other pcb's */
-        struct  in_addr inp_faddr;      /* foreign host table entry */
-        u_short inp_fport;              /* foreign port */
-        struct  in_addr inp_laddr;      /* local host table entry */
-        u_short inp_lport;              /* local port */
-	int     inp_state;
-	int     uid;			/* owner of the connection */
-};
 #endif
 
 config_arch_require(solaris2, kernel_sunos5)
-
-#ifndef solaris2
-#ifndef linux
-extern int TCP_Count_Connections (void);
-#endif
-extern  void TCP_Scan_Init (void);
-struct inpcb;
-extern  int TCP_Scan_Next (int *, struct inpcb *);
-#endif
+config_require(mibII/tcpTable util_funcs)
 
 extern void	init_tcp (void);
 extern FindVarMethod var_tcp;
-extern FindVarMethod var_tcpEntry;
 
 
 #define TCPRTOALGORITHM      1

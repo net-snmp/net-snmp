@@ -8,18 +8,18 @@
 #ifdef linux
 struct udp_mib
 {
- 	unsigned long	UdpInDatagrams;
- 	unsigned long	UdpNoPorts;
- 	unsigned long	UdpInErrors;
- 	unsigned long	UdpOutDatagrams;
+ 	unsigned long	udpInDatagrams;
+ 	unsigned long	udpNoPorts;
+ 	unsigned long	udpInErrors;
+ 	unsigned long	udpOutDatagrams;
 };
 #endif
 
 config_arch_require(solaris2, kernel_sunos5)
+config_require(mibII/udpTable util_funcs)
 
 extern void	init_udp (void);
 extern FindVarMethod var_udp;
-extern FindVarMethod var_udpEntry;
 
 
 #define UDPINDATAGRAMS	    0
