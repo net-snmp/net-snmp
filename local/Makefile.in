@@ -1,11 +1,42 @@
 SCRIPTS=snmpcheck tkmib
+SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
+	ipf-mod.pl.made rsnmp
+PERLPROG=@PERLPROG@
+
+all:
+	@if test "x$(PERLPROG)" != "x"; then \
+	  make $(SCRIPTSMADEFORPERL); \
+	fi
 
 snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
 	chmod a+x snmpcheck
 
 clean:
-	rm -f snmpcheck
+	rm -f snmpcheck $(SCRIPTSMADEFORPERL)
+
+snmpcheck.made: snmpcheck
+	touch snmpcheck.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+
+tkmib.made: tkmib
+	touch $@
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+
+mib2c.made: mib2c
+	touch $@
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+
+ipf-mod.pl.made: ipf-mod.pl
+	touch $@
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
+
+fixproc.made: fixproc
+	touch $@
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' $<
 
 install:
-	@-for i in $(SCRIPTS) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
+	@if test "x$(PERLPROG)" != "x"; then \
+	  for i in $(SCRIPTS) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done \
+	fi
+
