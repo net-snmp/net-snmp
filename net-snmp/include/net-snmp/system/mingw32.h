@@ -7,6 +7,15 @@
 #undef HAVE_SOCKET
 #undef HAVE_SIGNAL
 
+/* Define if you have raise() instead of alarm() */
+#define HAVE_RAISE 1
+
+/* Define to 1 if you have the `execv' function. */
+#undef HAVE_EXECV
+
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
 /*
  * I'm sure there is a cleaner way to do this.
  * Probably should be in net_snmp_config.h and
