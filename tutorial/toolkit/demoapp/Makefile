@@ -9,22 +9,14 @@
 
 CC=gcc
 
-CFLAGS=-I/usr/local/include -g
-
 OBJS1=snmpdemoapp.o
 OBJS2=ustMain.o ustScalarSet.o
 OBJS3=asyncapp.o
 TARGETS=ustMain snmpdemoapp asyncapp
 
-# if ucd-snmp was compiled with openssl support
-CRYPTO=-L/usr/local/ssl/lib -lcrypto
-
-# for Solaris
-#SYSLIBS=-lsocket -lnsl -lkstat
-# for BSD
-#SYSLIBS=-lkvm
-# for Linux and many other OSes
-#SYSLIBS=-ldl
+CFLAGS=`net-snmp-config --cflags`
+BUILDLIBS=`net-snmp-config --libs`
+BUILDAGENTLIBS=`net-snmp-config --agent-libs`
 
 # shared library flags (assumes gcc)
 DLFLAGS=-fPIC -shared
@@ -32,13 +24,13 @@ DLFLAGS=-fPIC -shared
 all: $(TARGETS)
 
 snmpdemoapp: $(OBJS1)
-	$(CC) -o snmpdemoapp $(OBJS1) -L/usr/local/lib -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o snmpdemoapp $(OBJS1) $(BUILDLIBS)
 
 asyncapp: $(OBJS3)
-	$(CC) -o asyncapp $(OBJS3) -L/usr/local/lib -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o asyncapp $(OBJS3) $(BUILDLIBS)
 
 ustMain: $(OBJS2)
-	$(CC) -o ustMain $(OBJS2) -L/usr/local/lib -lucdagent -lucdmibs -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o ustMain $(OBJS2)  $(BUILDAGENTLIBS)
 
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)

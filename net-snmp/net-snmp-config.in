@@ -9,16 +9,31 @@
 if test "x$1" = "x"; then
   usage="yes"
 else
+  exec_prefix=@exec_prefix@
+  prefix=@exec_prefix@
   case $1 in
     --cflags)
       echo @CFLAGS@
       ;;
     --agent-libs)
-      # should be different some day
-      echo @AGENTLIBS@
+      # use this one == --netsnmp-agent-libs + --external-libs
+      echo -L@libdir@ -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@
       ;;
     --libs)
+      # use this one == --netsnmp-libs + --external-libs
+      echo -L@libdir@ -lnetsnmp @LIBS@
+      ;;
+    --external-libs)
       echo @LIBS@
+      ;;
+    --external-agent-libs)
+      echo @AGENTLIBS@
+      ;;
+    --netsnmp-libs)
+      echo -L@libdir@ -lnetsnmp
+      ;;
+    --netsnmp-agent-libs)
+      echo -L@libdir@ -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp
       ;;
     --version)
       echo @VERSION@
@@ -137,8 +152,13 @@ if test "x$usage" = "xyes"; then
   echo "  These options produce the various compilation flags needed when"
   echo "  building external SNMP applications:"
   echo "    --cflags          lists additional compilation flags needed"
-  echo "    --libs            lists additional libraries needed for programs"
-  echo "    --agent-libs      lists additional libraries needed for subagents"
+  echo "    --libs            lists libraries needed for building applications"
+  echo "    --agent-libs      lists libraries needed for building subagents"
+  echo ""
+  echo "    --netsnmp-libs        lists netsnmp specific libraries"
+  echo "    --external-libs       lists libraries needed by netsnmp libs"
+  echo "    --netsnmp-agent-libs  lists netsnmp specific agent libraries"
+  echo "    --external-agent-libs lists libraries needed by netsnmp libs"
   echo ""
   echo "  Automatted subagent building (produces an outputname binary file):"
   echo "    --compile-subagent outputname mibmodule1.c [...]]"
