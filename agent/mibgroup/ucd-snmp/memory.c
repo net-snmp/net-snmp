@@ -320,7 +320,7 @@ int getswap(int rettype)
   if (auto_nlist(SWDEVT_SYMBOL,(char *) swdevt, sizeof(struct swdevt)*nswapdev)
       == 0)
     return(0);
-  DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
+  DEBUGMSGTL(("ucd-snmp/memory", "%d block swap devices: \n", nswapdev));
   for (i=0; i < nswapdev; i++) {
 #ifdef hpux11
     DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_flags & SW_ENABLE));
