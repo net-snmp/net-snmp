@@ -60,7 +60,7 @@ nsExtendConfigEntry     OBJECT-TYPE
     INDEX       { nsExtendToken }
     ::= { nsExtendConfigTable 1 }
 
-NsExtendEntry ::= SEQUENCE {
+NsExtendConfigEntry ::= SEQUENCE {
     nsExtendToken       DisplayString,
     nsExtendCommand     DisplayString,
     nsExtendArgs        DisplayString,
