@@ -187,23 +187,6 @@ u_char	*asn_build_double (u_char *, size_t *, u_char, double *,
 u_char	*asn_parse_double (u_char *, size_t *, u_char *, double *, size_t);
 
 #ifdef USE_REVERSE_ASNENCODING
-u_char	*asn_rbuild_int (u_char *, size_t *, u_char, long *, size_t);
-u_char	*asn_rbuild_string (u_char *, size_t *, u_char, const u_char *, size_t);
-u_char	*asn_rbuild_unsigned_int (u_char *, size_t *, u_char, u_long *, size_t);
-u_char	*asn_rbuild_header (u_char *, size_t *, u_char, size_t);
-u_char	*asn_rbuild_sequence (u_char *, size_t *, u_char, size_t);
-u_char	*asn_rbuild_length (u_char *, size_t *, size_t);
-u_char	*asn_rbuild_objid (u_char *, size_t *, u_char, oid *, size_t);
-u_char	*asn_rbuild_null (u_char *, size_t *, u_char);
-u_char	*asn_rbuild_bitstring (u_char *, size_t *, u_char, u_char *, size_t);
-u_char	*asn_rbuild_unsigned_int64 (u_char *, size_t *, u_char,
-                                       struct counter64 *, size_t);
-u_char	*asn_rbuild_signed_int64 (u_char *, size_t *, u_char,
-                                       struct counter64 *, size_t);
-u_char	*asn_rbuild_float (u_char *, size_t *, u_char, float *,
-                              size_t);
-u_char	*asn_rbuild_double (u_char *, size_t *, u_char, double *,
-                               size_t);
 
 /*  Re-allocator function for below.  */
 
@@ -212,32 +195,35 @@ int asn_realloc				(u_char **, size_t *);
 /*  Re-allocating reverse ASN.1 encoder functions.  Synopsis:
 
     u_char *buf = (u_char*)malloc(100);
+    u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
     size_t buf_len = 100, offset = 0;
     long data = 12345;
+    int allow_realloc = 1;
 
-    if (asn_realloc_rbuild_int(&buf, &buf_len, &offset,
-                               &data, sizeof(long)) == 0) {
+    if (asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                               type, &data, sizeof(long)) == 0) {
        error;
     }
 
-    NOTE WELL: after calling one of these functions, buf might have moved,
-               buf_len might have grown and offset will have increased by the
-               size of the encoded data.  You should **NEVER** do soemthing
-	       like this:
+    NOTE WELL: after calling one of these functions with allow_realloc
+               non-zero, buf might have moved, buf_len might have grown and
+	       offset will have increased by the size of the encoded data.
+	       You should **NEVER** do soemthing like this:
 
     u_char *buf = (u_char *)malloc(100), *ptr;
+    u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
     size_t buf_len = 100, offset = 0;
     long data1 = 1234, data2 = 5678;
-    int rc = 0;
+    int rc = 0, allow_realloc = 1;
     
-    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
-                                 &data1, sizeof(long));
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                                 type, &data1, sizeof(long));
     ptr = buf[buf_len - offset];   // points at encoding of data1
     if (rc == 0) {
        error;
     }
-    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
-                                 &data2, sizeof(long));
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                                 type, &data2, sizeof(long));
     make use of ptr here;
 
 
@@ -247,18 +233,19 @@ int asn_realloc				(u_char **, size_t *);
 
 
     u_char *buf = (u_char *)malloc(100), *ptr;
+    u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
     size_t buf_len = 100, offset = 0, ptr_offset;
     long data1 = 1234, data2 = 5678;
-    int rc = 0;
+    int rc = 0, allow_realloc = 1;
     
-    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
-                                 &data1, sizeof(long));
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                                 type, &data1, sizeof(long));
     ptr_offset = offset;
     if (rc == 0) {
        error;
     }
-    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset,
-                                 &data2, sizeof(long));
+    rc  = asn_realloc_rbuild_int(&buf, &buf_len, &offset, allow_realloc,
+                                 type, &data2, sizeof(long));
     ptr = buf + buf_len - ptr_offset
     make use of ptr here;
 
@@ -268,35 +255,109 @@ int asn_realloc				(u_char **, size_t *);
     memory has been moved, as it may well have been.  Plenty of examples of
     usage all over asn1.c, snmp_api.c, snmpusm.c.
 
+    The other thing you should **NEVER** do is to pass a pointer to a buffer
+    on the stack as the first argument when allow_realloc is non-zero, unless
+    you really know what you are doing and your machine/compiler allows you to
+    free non-heap memory.  There are rumours that such things exist, but many
+    consider them no more than the wild tales of a fool.
+
+    Of course, you can pass allow_realloc as zero, to indicate that you do not
+    wish the packet buffer to be reallocated for some reason; perhaps because
+    it is on the stack.  This may be useful to emulate the functionality of
+    the old API:
+
+    u_char my_static_buffer[100], *cp = NULL;
+    size_t my_static_buffer_len = 100;
+    float my_pi = (float)22/(float)7;
+
+    cp = asn_rbuild_float(my_static_buffer, &my_static_buffer_len,
+                          ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+    if (cp == NULL) {
+       error;
+    }
+
+   
+    IS EQUIVALENT TO:
+
+ 
+    u_char my_static_buffer[100];
+    size_t my_static_buffer_len = 100, my_offset = 0;
+    float my_pi = (float)22/(float)7;
+    int rc = 0;
+
+    rc = asn_realloc_rbuild_float(&my_static_buffer, &my_static_buffer_len,
+                                  &my_offset, 0,
+				  ASN_OPAQUE_FLOAT, &my_pi, sizeof(float));
+    if (rc == 0) {
+       error;
+    }
+
+
 */
 
 
-int asn_realloc_rbuild_int		(u_char **, size_t *, size_t *, u_char,
-					 long *, size_t);
-int asn_realloc_rbuild_string		(u_char **, size_t *, size_t *, u_char,
-					 const u_char *, size_t);
-int asn_realloc_rbuild_unsigned_int	(u_char **, size_t *, size_t *, u_char,
-					 u_long *, size_t);
-int asn_realloc_rbuild_header		(u_char **, size_t *, size_t *, u_char,
-					 size_t);
-int asn_realloc_rbuild_sequence		(u_char **, size_t *, size_t *, u_char,
-					 size_t);
-int asn_realloc_rbuild_length		(u_char **, size_t *, size_t *,
-					 size_t);
-int asn_realloc_rbuild_objid		(u_char **, size_t *, size_t *, u_char,
+int asn_realloc_rbuild_int		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 long *data, size_t data_size);
+
+int asn_realloc_rbuild_string		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 const u_char *data, size_t data_size);
+
+int asn_realloc_rbuild_unsigned_int	(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 u_long *data, size_t data_size);
+
+int asn_realloc_rbuild_header		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 size_t data_size);
+
+int asn_realloc_rbuild_sequence		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 size_t data_size);
+
+int asn_realloc_rbuild_length		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 size_t data_size);
+
+int asn_realloc_rbuild_objid		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
 					 const oid *, size_t);
-int asn_realloc_rbuild_null		(u_char **, size_t *, size_t *,
-					 u_char);
-int asn_realloc_rbuild_bitstring	(u_char **, size_t *, size_t *, u_char,
-					 u_char *, size_t);
-int asn_realloc_rbuild_unsigned_int64	(u_char **, size_t *, size_t *, u_char,
-					 struct counter64 *, size_t);
-int asn_realloc_rbuild_signed_int64	(u_char **, size_t *, size_t *, u_char,
-					 struct counter64 *, size_t);
-int asn_realloc_rbuild_float		(u_char **, size_t *, size_t *, u_char,
-					 float *, size_t);
-int asn_realloc_rbuild_double		(u_char **, size_t *, size_t *, u_char,
-					 double *, size_t);
+
+int asn_realloc_rbuild_null		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type);
+
+int asn_realloc_rbuild_bitstring	(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 u_char *data, size_t data_size);
+
+int asn_realloc_rbuild_unsigned_int64	(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 struct counter64 *data, size_t);
+
+int asn_realloc_rbuild_signed_int64	(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 struct counter64 *data, size_t);
+
+int asn_realloc_rbuild_float		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 float *data, size_t data_size);
+
+int asn_realloc_rbuild_double		(u_char **pkt, size_t *pkt_len,
+					 size_t *offset, int allow_realloc,
+					 u_char type,
+					 double *data, size_t data_size);
 #endif
 
 #ifdef __cplusplus
