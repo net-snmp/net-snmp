@@ -38,6 +38,7 @@ $FileMenuBut = $MenuFrame->Menubutton(-text => "File",
 $MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
 				      -menuitems =>
       [[Button => "Load a New Mib File", -command => [\&loadNewMibFile]],
+       [Button => "Load a New Mib Module", -command => [\&loadNewMibModule]]
        ])->pack(-side => 'left');
 
 $OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
@@ -403,4 +404,32 @@ sub loadNewMibFile {
     my $sel = $top->FileSelect();
     my $file = $sel->Show();
     SNMP::addMibFiles($file);
+    showChildren("1.3.6.1");
+    showChildren("1.3.6.1");
+}
+
+sub loadNewMibModule {
+    my $tmptop = MainWindow->new();
+    my $var = "";
+    $tmptop->Label(-text => "Enter a SNMP MIB module name")
+	->pack(-side => 'top');
+    my $e = $tmptop->Entry(-textvariable => \$var);
+    $e->pack(-side => 'top');
+    $e->bind('<Return>',[\&loadIt,\$var,$tmptop]);
+    my $f = $tmptop->Frame();
+    $f->pack(-side => 'top');
+    $f->Button(-text => 'Ok', -command => [\&loadIt,\$var,$tmptop])
+	->pack(-side => 'left');
+    $f->Button(-text => 'Cancel', -command => [sub { my $wid = shift;
+						     $wid->destroy(); },
+					       $tmptop])
+	->pack(-side => 'left');
+}
+
+sub loadIt {
+    my $tmp = shift;
+    my $var = shift;
+    my $wid = shift;
+    $wid->destroy();
+  SNMP::loadModules($$var);
 }
