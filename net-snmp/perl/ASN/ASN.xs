@@ -3,8 +3,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_impl.h>
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_impl.h>
 
 static int
 not_here(char *s)

@@ -2,7 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <net-snmp/default_store.h>
+#include <net-snmp/library/default_store.h>
 
 static int
 not_here(char *s)
