@@ -321,6 +321,18 @@ handler_check_cache(delegated_cache *dcache)
     return NULL;
 }
 
+/** frees a cache once you're finished using it */
+inline void
+free_delegated_cache(delegated_cache *dcache)
+{
+    /* right now, no extra data is there that needs to be freed */
+    if (dcache)
+        free(dcache);
+    
+    return NULL;
+}
+
+
 /** marks a list of requests as delegated (or not if isdelegaded = 0) */
 void
 handler_mark_requests_as_delegated(request_info *requests, int isdelegated) 
