@@ -418,33 +418,33 @@ void vacm_parse_simple(const char *token, char *confline) {
   strcpy(model,"any");
 
   /* community name or user name */
-  cp = copy_word(confline, community);
+  cp = copy_nword(confline, community, sizeof(community));
 
   if (strcmp(token,"rouser") == 0 || strcmp(token,"rwuser") == 0) {
     /* maybe security model type */
       if (strcmp(community, "-s") == 0) {
           /* -s model ... */
           if (cp)
-              cp = copy_word(cp, model);
+              cp = copy_nword(cp, model, sizeof(authtype));
           if (!cp) {
               config_perror("illegal line");
               return;
           }
           if (cp)
-              cp = copy_word(cp, community);
+              cp = copy_nword(cp, community, sizeof(community));
       } else {
           strcpy(model, "usm");
       }
       /* authentication type */
       if (cp && *cp)
-          cp = copy_word(cp, authtype);
+          cp = copy_nword(cp, authtype, sizeof(authtype));
       else
           strcpy(authtype, "auth");
       DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
   } else {
     /* source address */
     if (cp && *cp) {
-      cp = copy_word(cp, addressname);
+      cp = copy_nword(cp, addressname, sizeof(addressname));
     } else {
       strcpy(addressname, "default");
     }
@@ -454,7 +454,7 @@ void vacm_parse_simple(const char *token, char *confline) {
 
   /* oid they can touch */
   if (cp && *cp) {
-    cp = copy_word(cp, theoid);
+    cp = copy_nword(cp, theoid, sizeof(theoid));
   } else {
     strcpy(theoid, ".1");
   }
