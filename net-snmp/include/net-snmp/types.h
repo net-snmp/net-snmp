@@ -5,6 +5,7 @@
      *  Definitions of data structures, used within the library API.
      */
 
+#include <stdio.h>
                         /*
                          * For 'timeval' 
                          */
@@ -26,6 +27,10 @@
 #include <sys/types.h>
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifndef MAX_SUBID               /* temporary - duplicate definition protection */
@@ -62,5 +67,15 @@ typedef u_int in_addr_t;
 /*
  * #include <net-snmp/library/libsnmp.h> 
  */
+
+
+    typedef struct netsnmp_void_array_s {
+       size_t  size;
+       void *   array;
+    } netsnmp_void_array;
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif                          /* NET_SNMP_TYPES_H */
