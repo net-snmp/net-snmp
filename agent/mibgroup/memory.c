@@ -161,12 +161,18 @@ unsigned** meminfo(void) {
 unsigned memory(int index)
 {
 	unsigned **mem = meminfo();
-	return mem[meminfo_main][index] / 1024;
+        if (mem != NULL)
+          return mem[meminfo_main][index] / 1024;
+        else
+          return -1;
 }
 unsigned memswap(int index)
 {
 	unsigned **mem = meminfo();
-	return mem[meminfo_swap][index] / 1024;
+        if (mem != NULL)
+          return mem[meminfo_swap][index] / 1024;
+        else
+          return -1;
 }
 #else
 #define  KNLookup(nl_which, buf, s)   (klookup((int) memory_nl[nl_which].n_value, buf, s))

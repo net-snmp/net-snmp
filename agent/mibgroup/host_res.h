@@ -1,0 +1,73 @@
+/*
+ *  Host Resources
+ *	Device index manipulation data
+ */
+
+#include <config.h>
+
+#include <sys/types.h>
+
+#include "asn1.h"
+#include "snmp.h"
+#include "snmp_impl.h"
+#include "mib.h"
+#include "var_struct.h"
+#include "snmp_vars.h"
+#include <config.h>
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
+#include <sys/socket.h>
+#include <net/if.h>
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
+#if HAVE_NETINET_IN_VAR_H
+#include <netinet/in_var.h>
+#endif
+
+#include "snmp_vars.linux.h"
+
+		/* Deliberately set to the same values as hrDeviceTypes */
+#define	HRDEV_OTHER	1
+#define	HRDEV_UNKNOWN	2
+#define	HRDEV_PROC	3
+#define	HRDEV_NETWORK	4
+#define	HRDEV_PRINTER	5
+#define	HRDEV_DISK	6
+#define	HRDEV_VIDEO	10
+#define	HRDEV_AUDIO	11
+#define	HRDEV_COPROC	12
+#define	HRDEV_KEYBOARD	13
+#define	HRDEV_MODEM	14
+#define	HRDEV_PARALLEL	15
+#define	HRDEV_POINTER	16
+#define	HRDEV_SERIAL	17
+#define	HRDEV_TAPE	18
+#define	HRDEV_CLOCK	19
+#define	HRDEV_VMEM	20
+#define	HRDEV_NVMEM	21
+
+#define	HRDEV_TYPE_MAX	22	/* one greater than largest device type */
+#define	HRDEV_TYPE_SHIFT  8
+
+typedef	void (*PFV)();
+typedef	int  (*PFI)();
+typedef	char* (*PFS)();
+typedef	oid* (*PFO)();
+
+extern PFV init_device[];	/* Routines for stepping through devices */
+extern PFI next_device[];
+extern PFV save_device[];
+extern int dev_idx_inc[];	/* Flag - are indices returned in strictly
+					increasing order */
+
+extern PFS device_descr[];	/* Return data for a particular device */
+extern PFO device_prodid[];
+extern PFI device_status[];
+extern PFI device_errors[];

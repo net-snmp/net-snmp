@@ -321,6 +321,9 @@
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
 
+/* Define if you have the <sys/diskio.h> header file.  */
+#undef HAVE_SYS_DISKIO_H
+
 /* Define if you have the <sys/dmap.h> header file.  */
 #undef HAVE_SYS_DMAP_H
 
@@ -362,6 +365,9 @@
 
 /* Define if you have the <sys/protosw.h> header file.  */
 #undef HAVE_SYS_PROTOSW_H
+
+/* Define if you have the <sys/pstat.h> header file.  */
+#undef HAVE_SYS_PSTAT_H
 
 /* Define if you have the <sys/queue.h> header file.  */
 #undef HAVE_SYS_QUEUE_H
@@ -470,6 +476,9 @@
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
+
+/* Define if you have the rpm library (-lrpm).  */
+#undef HAVE_LIBRPM
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
