@@ -22,7 +22,7 @@ LIBS		= $(USELIBS) @LIBS@
 TRAPLIBS	= $(USETRAPLIBS) @LIBS@
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib @CPPFLAGS@ \
-		  -I../agent -I../agent/helpers -I../agent/mibgroup
+		  -I$(srcdir)/../agent -I../agent/helpers -I$(srcdir)/../agent/mibgroup
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) notification_log.$(OSUFFIX)
 
