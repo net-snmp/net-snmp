@@ -19,7 +19,7 @@
 @include generic-header-top.m2i@
 @eval $name = $m2c_save@
 
-#include "ppk.h"
+#include "${name}.h"
 
 /* ********************************************************************
  * Table declarations
@@ -27,21 +27,15 @@
 @foreach $table table@
 @    include m2c_setup_table.m2i@
 
-void initialize_table_$table(void);
+/* PUBLIC interface initialization routine */
+void _${table}_initialize_interface(${context}_registration_ptr user_ctx,
+                                    u_long flags);
 
-@    if $m2c_data_context eq "generated"@
-    ${table}_ctx * _${table}_allocate_ctx(netsnmp_mfd_registration *reg);
-@        if $m2c_data_allocate == 1@
-    ${context}_data *${context}_allocate_data(void);
-@        end@
+${table}_ctx * ${table}_allocate_ctx(void);
+void ${table}_release_ctx(${table}_ctx *ctx);
+@    if ($m2c_data_context eq "generated") && ($m2c_data_allocate == 1)@
+static ${context}_data *${context}_allocate_data(void);
 
-@   end@
-int _${context}_get_values($mfd_base_params, ${table}_ctx * ctx);
-@   if $m2c_table_writable@
-int _${context}_check_objects($mfd_base_params, ${table}_ctx * ctx);
-int _${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx);
-int _${context}_set_values($mfd_base_params, ${table}_ctx * ctx);
-int _${context}_undo_values($mfd_base_params, ${table}_ctx * ctx);
 @   end@
 
 @end@ # for each
@@ -58,60 +52,77 @@ int _${context}_undo_values($mfd_base_params, ${table}_ctx * ctx);
  */
 @include generic-source-includes.m2i@
 
-#include "ppk_interface.h"
-
 #include <net-snmp/agent/table_mfd.h>
+#include <net-snmp/library/container.h>
+
+#include "${name}_interface.h"
 
 @foreach $table table@
 @   include m2c_setup_table.m2i@
 @   include details-table.m2i@
 ########################################################################
+typedef struct ${context}_interface_ctx_s {
+
+   netsnmp_container              *container;
+
+   ${context}_registration_ptr      user_ctx;
+   
+   netsnmp_table_registration_info  tbl_inf;
+   
+} ${context}_interface_ctx;
+
+static ${context}_interface_ctx ${context}_if_ctx;
+
+NETSNMP_STATIC_INLINE netsnmp_container * _${table}_container_init(
+    ${context}_interface_ctx *if_ctx);
+
+
+NETSNMP_STATIC_INLINE int _mfd_${table}_pre_request( ${context}_interface_ctx *if_ctx,
+                       netsnmp_data_list *data_list, u_long id);
+NETSNMP_STATIC_INLINE int _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
+                       netsnmp_data_list *data_list, u_long id);
+NETSNMP_STATIC_INLINE int _mfd_${context}_object_lookup($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_get_values($mfd_base_params, ${table}_ctx * ctx);
+@   if $m2c_table_settable@
+NETSNMP_STATIC_INLINE int _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_set_values($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx);
+NETSNMP_STATIC_INLINE int _mfd_${context}_commit($mfd_base_params, ${table}_ctx * ctx);
+@      if $m2c_irreversible_commit == 1@
+NETSNMP_STATIC_INLINE int _mfd_${context}_irreversible_commit($mfd_base_params, ${table}_ctx * ctx);
+@      end@
+@      if $m2c_table_dependencies == 1@
+NETSNMP_STATIC_INLINE int _mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx);
+@      end@
+
+NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_ctx *ctx,
+                                                   netsnmp_variable_list *var, int column );
+NETSNMP_STATIC_INLINE int _${context}_check_indexes(${table}_ctx * ctx);
+
+@   end@ # writable
+
 /**
  * Initialize the table $table 
  *    (Define its contents and how it's structured)
  */
 void
-_${table}_initialize_table(netsnmp_mfd_registration *mfdr)
+_${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flags)
 {
     static oid ${table}_oid[] = { $table.uc_OID };
-    netsnmp_handler_registration *my_handler;
-    netsnmp_table_registration_info *table_info;
-    
-    netsnmp_container *container;
+    netsnmp_mfd_registration *mfd_reg;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    /* create the table registration information structures */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    if (!table_info) {
-        snmp_log(LOG_ERR, "table_info malloc failed in "
-                          "initialize_table_$table");
-        return; /** Serious error. */
-    }
 
-    /* if your table is read only, it's easiest to change the
-        HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("$table",
-                                             NULL,
-                                             ${table}_oid,
-                                             OID_LENGTH(${table}_oid),
-                                             HANDLER_CAN_BABY_STEP |
-@if $m2c_table_writable == 1@
-                                             HANDLER_CAN_RWRITE
-@else@
-                                             HANDLER_CAN_RONLY
-@end@
-);
-    if (!my_handler) {
-        snmp_log(LOG_ERR, "handler registration failed in "
-                          "initialize_table_$table");
-        return; /** Serious error. */
-    }
-
-    /* *************************************************
+    /*************************************************
+     *
+     * save interface context for ${context}
+     */
+    /*
      * Setting up the table's definition
      */
-    netsnmp_table_helper_add_indexes(table_info,
+    netsnmp_table_helper_add_indexes(&${context}_if_ctx.tbl_inf,
     @foreach $tabledx index@
                                   $tabledx.type, /** index: $tabledx */
     @end@
@@ -119,29 +130,104 @@ _${table}_initialize_table(netsnmp_mfd_registration *mfdr)
 
     /*  Define the minimum and maximum accessible columns.  This
         optimizes retrival. */
-    table_info->min_column = $table.uc_MIN_COL;
-    table_info->max_column = $table.uc_MAX_COL;
+    ${context}_if_ctx.tbl_inf.min_column = $table.uc_MIN_COL;
+    ${context}_if_ctx.tbl_inf.max_column = $table.uc_MAX_COL;
 
 
-    mfdr->cbsm.get_values = (Netsnmp_MFD_Request_Op*)_${table}_get_values;
-@   if $m2c_table_writable@
-    mfdr->cbsm.object_syntax_checks = (Netsnmp_MFD_Request_Op*)_${table}_check_objects;
-    mfdr->cbse.undo_setup = (Netsnmp_MFD_Request_Op*)_${table}_undo_setup;
-    mfdr->cbsm.set_values = (Netsnmp_MFD_Request_Op*)_${table}_set_values;
-    mfdr->cbse.undo_sets = (Netsnmp_MFD_Request_Op*)_${table}_undo_values;
-@   end@ # writable
-
-    /* *************************************************
-     * set up container
+    /*
+     * save users context
      */
-    container = ${table}_container_init(mfdr);
+    ${context}_if_ctx.user_ctx = reg_ptr;
+
+    /*
+     * set up the container
+     */
+    ${context}_if_ctx.container =
+                  _${table}_container_init(&${context}_if_ctx);
+
+    /*************************************************
+     *
+     * Create registration
+     */
+    mfd_reg = SNMP_MALLOC_TYPEDEF(netsnmp_mfd_registration);
+    if (!mfd_reg) {
+        snmp_log(LOG_ERR, "malloc failed in %s\n", __FUNCTION__);
+        return; /** Serious error. */
+    }
+    
+    /*
+     * save our context
+     */
+    mfd_reg->mfd_user_ctx = (void*)&${context}_if_ctx;
+
+    /*
+     * No flags yet, but in the future thie is where to
+     * validate and save flags
+     */
+    mfd_reg->mfd_flags = flags;
+    
+    /*
+     * set up the container
+     */
+    mfd_reg->container = ${context}_if_ctx.container;
+    mfd_reg->table_info = &${context}_if_ctx.tbl_inf;
+
+    /*
+     * OPTIONAL pre/post request handlers
+     */
+    mfd_reg->pre_request = (Netsnmp_MFD_Organize_Op*)_mfd_${table}_pre_request;
+    mfd_reg->post_request = (Netsnmp_MFD_Organize_Op*)_mfd_${table}_post_request;
+
+    /*
+     * REQUIRED wrapper for get request handling
+     */
+    mfd_reg->object_lookup = (Netsnmp_MFD_Request_Op*)_mfd_${table}_object_lookup;
+    mfd_reg->get_values = (Netsnmp_MFD_Request_Op*)_mfd_${table}_get_values;
+##
+@   if $m2c_table_settable@
+
+    /*
+     * REQUIRED wrappers for set request handling
+     */
+    mfd_reg->object_syntax_checks = (Netsnmp_MFD_Request_Op*)_mfd_${table}_check_objects;
+    mfd_reg->undo_setup = (Netsnmp_MFD_Request_Op*)_mfd_${table}_undo_setup;
+    mfd_reg->set_values = (Netsnmp_MFD_Request_Op*)_mfd_${table}_set_values;
+    mfd_reg->undo_sets = (Netsnmp_MFD_Request_Op*)_mfd_${table}_undo_values;
+
+    /*
+     * no wrappers yet
+     */
+    mfd_reg->commit = (Netsnmp_MFD_Request_Op*)_mfd_${table}_commit;
+@   if $m2c_irreversible_commit == 1@
+    mfd_reg->irreversible_commit = (Netsnmp_MFD_Request_Op*)_mfd_${table}_irreversible_commit;
+@   end@
+##
+@      if $m2c_table_dependencies == 1@
+    
+    /*
+     * REQUIRED for tables with dependencies
+     */
+    mfd_reg->consistency_checks = (Netsnmp_MFD_Request_Op*)_mfd_${table}_check_dependencies;
+@      end@
+@   end@ # writable
 
     /* *************************************************
      * registering the table with the master agent
      */
     DEBUGMSGTL(("$name:init_$table",
                 "Registering $table as a mibs-for-dummies table.\n"));		 
-    netsnmp_mfd_register_table(my_handler, table_info, container, mfdr);
+          
+    /* if your table is read only, it's easiest to change the
+        HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+    netsnmp_mfd_register_table(mfd_reg, "$table", NULL,
+                               ${table}_oid, OID_LENGTH(${table}_oid),
+                               HANDLER_CAN_BABY_STEP |
+@if $m2c_table_settable == 1@
+                               HANDLER_CAN_RWRITE
+@else@
+                               HANDLER_CAN_RONLY
+@end@
+        );
 }
 
 ########################################################################
@@ -154,7 +240,7 @@ _${table}_initialize_table(netsnmp_mfd_registration *mfdr)
  * allocate resources for a ${table}_ctx
  */
 ${table}_ctx *
-_${table}_allocate_ctx(netsnmp_mfd_registration *reg)
+${table}_allocate_ctx(void)
 {
     ${table}_ctx *ctx = SNMP_MALLOC_TYPEDEF(${table}_ctx);
 
@@ -173,7 +259,20 @@ _${table}_allocate_ctx(netsnmp_mfd_registration *reg)
      * undo context will be allocated when needed (in *_undo_setup)
      */
 @end@
-    
+
+    ctx->oid_idx.oids = ctx->oid_tmp;
+
+    ctx->request_mode = 0;
+ctx->${context}_data_list = NULL;
+ctx->${context}_reg = ${context}_if_ctx.user_ctx;
+
+@if $m2c_data_init == 1@
+    if(SNMPERR_SUCCESS != ${context}_ctx_init(ctx)) {
+       ${table}_release_ctx(if_ctx, ctx);
+       ctx = NULL;
+    }
+@end@
+
     return ctx;
 }
 
@@ -181,9 +280,15 @@ _${table}_allocate_ctx(netsnmp_mfd_registration *reg)
  * release resources for a ${table}_ctx
  */
 void
-_${table}_release_ctx(netsnmp_mfd_registration *reg, ${table}_ctx *ctx)
+${table}_release_ctx(${table}_ctx *ctx)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(NULL != ctx);
+    
+@if $m2c_data_init == 1@
+    ${context}_ctx_cleanupx(ctx);
+@end@
 
 @if $m2c_data_allocate == 1@
     if(ctx->data)
@@ -192,7 +297,117 @@ _${table}_release_ctx(netsnmp_mfd_registration *reg, ${table}_ctx *ctx)
      if(ctx->undo) 
          ${table}_release_data(ctx->undo);
 @end@ 
+
+    /*
+     * free index oid pointer
+     */
+    if(ctx->oid_idx.oids != ctx->oid_tmp)
+        free(ctx->oid_idx.oids);
+
     SNMP_FREE(ctx);
+}
+
+########################################################################
+##
+/**
+ * @internal
+ * wrapper
+ */
+static int
+_mfd_${table}_pre_request( ${context}_interface_ctx *if_ctx,
+                       netsnmp_data_list *data_list, u_long id)
+{
+   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+
+    netsnmp_assert(NULL != if_ctx);
+    
+   return ${table}_pre_request(if_ctx->user_ctx, data_list, id);
+}
+
+/**
+ * @internal
+ * wrapper
+ */
+static int
+_mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
+                        netsnmp_data_list *data_list, u_long id)
+{
+   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+
+    netsnmp_assert(NULL != if_ctx);
+    
+    return ${table}_post_request(if_ctx->user_ctx, data_list, id);
+}
+
+/**
+ * @internal
+ * wrapper
+ */
+static int
+_mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
+{
+    int rc = MFD_SUCCESS;
+    
+    /*
+     * get our context from mfd
+     */
+    ${context}_interface_ctx *if_ctx =
+                  (${context}_interface_ctx *)pdu_ctx->mfd_user_ctx;
+
+    if(NULL == ctx) {
+        /*
+         * xxx-rks:
+         *   check indexes vs check syntax?
+         *   row creation flag check?
+         *   create temporary context?
+         */
+        rc = _${context}_check_indexes(ctx);
+        if(rc) {
+            netsnmp_request_set_error_all(requests, rc);
+        }
+
+    }
+    else {
+        netsnmp_table_request_info * tri;
+        
+        /*
+         * set indexes
+         */
+        for(;requests; requests = requests->next) {
+            tri = netsnmp_extract_table_info(requests);
+            if(NULL == tri)
+                continue;
+            /*
+             * xxx-rks: this is silly. we set the vb in index2oid to set oid,
+             * to set the vb here, which is used to set the vb oid. sheesh.
+             */
+            memcpy(tri->index_oid, ctx->oid_idx.oids,
+                   ctx->oid_idx.len * sizeof(oid));
+            tri->index_oid_len = ctx->oid_idx.len;
+            netsnmp_update_variable_list_from_index(tri);
+            netsnmp_assert(requests->subtree && requests->subtree->reginfo);
+            netsnmp_table_build_oid(requests->subtree->reginfo, requests, tri);
+
+        }
+        
+        /*
+         * set up registration pointer for user
+         */
+        ctx->${context}_reg = if_ctx->user_ctx;
+
+        /*
+         * save mode
+         */
+        ctx->request_mode = pdu_ctx->request_mode;
+
+        /*
+         * set up data list for user
+         */
+        ctx->${context}_data_list = pdu_ctx->mfd_data_list;
+
+    }
+
+    return MFD_SUCCESS;
 }
 
 ########################################################################
@@ -211,10 +426,12 @@ _${context}_get_column( ${context}_ctx *ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+    DEBUGMSGT(("${name}:trace",">%s column %d\n",__FUNCTION__, column));
+
+    netsnmp_assert(NULL != ctx);
 
     switch(column) {
-@   foreach $node index@
+@   foreach $node internalindex@
 @      include m2c_setup_node.m2i@
 @      if $node.accessible == 1@
 
@@ -240,7 +457,7 @@ _${context}_get_column( ${context}_ctx *ctx,
     /* $m2c_node_summary */
     case COLUMN_$node.uc:
     var->type = $node.type;
-        rc = ${node}_get(ctx, $m2c_node_var_val_ptr );
+rc = ${node}_get(ctx, $m2c_node_var_ref );
         break;
  @      end@ # accessible
 @   end@ # for each column
@@ -253,15 +470,16 @@ _${context}_get_column( ${context}_ctx *ctx,
 ########################################################################
 ##
 int
-_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
 {
     netsnmp_table_request_info * tri;
-    u_char * old_string;
-    void    (*dataFreeHook)(void *);
+    u_char                     * old_string;
+    void                      (*dataFreeHook)(void *);
+    int                        rc;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    netsnmp_assert(ctx);
+    netsnmp_assert(NULL != ctx);
     
     for(;requests; requests = requests->next) {
         /*
@@ -281,14 +499,20 @@ _${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
         
-        _${table}_get_column(ctx, requests->requestvb, tri->colnum);
+        rc = _${table}_get_column(ctx, requests->requestvb, tri->colnum);
+        if(!rc && (NULL == requests->requestvb->val.string)) {
+            snmp_log(LOG_ERR,"NULL varbind data pointer!\n");
+            rc = SNMP_ERR_GENERR;
+        }
+        if(rc)
+            netsnmp_request_set_error(requests, rc);
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
          * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
-        if((old_string != requests->requestvb->buf) &&
+        if(old_string && (old_string != requests->requestvb->buf) &&
            (requests->requestvb->val.string != old_string)) {
             if(dataFreeHook)
                 (*dataFreeHook)(old_string);
@@ -308,7 +532,7 @@ _${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
  *
  ***********************************************************************/
 
-@if $m2c_table_writable == 0@
+@if $m2c_table_settable == 0@
 /*
  * NOT APPLICABLE (per MIB or user setting)
  */
@@ -329,8 +553,10 @@ _${context}_check_column( ${context}_ctx *ctx,
     
     DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
 
+    netsnmp_assert(NULL != ctx);
+
     switch(column) {
-@   foreach $node index@
+@   foreach $node internalindex@
 @      include m2c_setup_node.m2i@
 @      if $node.settable == 1@
 
@@ -367,14 +593,14 @@ _${context}_check_column( ${context}_ctx *ctx,
 
 ##----------------------------------------------------------------------
 int
-_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    netsnmp_assert(ctx);
+    netsnmp_assert(NULL != ctx);
     
     for(;requests; requests = requests->next) {
 
@@ -397,144 +623,74 @@ _${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
 }
 
 ##----------------------------------------------------------------------
-/*
- * Check the syntax for a particular column
- */
 NETSNMP_STATIC_INLINE int
-_${context}_check_index( ${context}_ctx *ctx,
-                         netsnmp_variable_list *var, int column )
-{
-    int rc = SNMPERR_SUCCESS;
-    
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
-
-    switch(column) {
-@   foreach $node index@
-@      include m2c_setup_node.m2i@
-
-    /* (INDEX) $m2c_node_summary */
-    case COLUMN_$node.uc:
-@      eval $m2c_nvv_sizeof="ctx->tbl_idx.$node"@
-@      include node-varbind-validate.m2i@
-
-       /* call user code */
-       if(SNMPERR_SUCCESS == rc) {
-          ${node}_check_index( ctx, $m2c_node_var_ref );
-       }
-        break;
-@   end@ # for each nonindex
-
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
- snmp_log(LOG_ERR, "unknown column in %s\n", __FUNCTION__);
-    }
-
-    return rc;
-}
-
-##----------------------------------------------------------------------
-int
-_${context}_check_indexes($mfd_base_params, ${table}_ctx * ctx)
+_${context}_check_indexes(${table}_ctx * ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    netsnmp_assert(ctx);
+    netsnmp_assert(NULL != ctx);
 
     /*
      * xxx-rks: extract indexes from oid and set them in ctx.
      *          or has that already been done??
      */
 
-    
+##
+@if $m2c_table_external_indexes != 0@
     /*
-     * get column number from table request info, and check that column
+     * check that the corresponding row exists
      */
-    for(;requests; requests = requests->next) {
+@   foreach $node externalindex@
+@      include m2c_setup_node.m2i@
 
-        tri = netsnmp_extract_table_info(requests);
-        if(NULL == tri)
-            continue;
+    /* (INDEX) $m2c_node_summary */
+    rc = ${table}_${node}_check_index( ctx );
+    if(SNMPERR_SUCCESS != rc)
+        return rc;
+@   end@ # for each nonindex
 
-        rc = _${table}_check_index(ctx, requests->requestvb, tri->colnum);
-        if(rc) {
-            netsnmp_request_set_error(requests, rc);
-            break;
-        }
+@end@ # external index
+@   foreach $node internalindex@
+@      include m2c_setup_node.m2i@
 
-    } /* for requests */
+    /* (INDEX) $m2c_node_summary */
+        rc = ${node}_check_index( ctx );
+       if(SNMPERR_SUCCESS != rc)
+           return rc;
+@   end@ # for each internalindex
 
     /*
      * if individual parts look ok, check them as a whole
      */
     if(!rc)
-        rc = ${context}_validate_index( mfdr, ctx );
+        rc = ${context}_validate_index( ctx->${context}_reg, ctx );
     
     return rc;
 }
 
+@      if $m2c_table_dependencies == 1@
 /*----------------------------------------------------------------------
  *
- * SET: Set values
+ * SET: check dependencies
  *
  *---------------------------------------------------------------------*/
 /*
  * Set the value for a particular column
  */
 NETSNMP_STATIC_INLINE int
-_${context}_set_column( ${context}_ctx *ctx,
-                       netsnmp_variable_list *var, int column )
+_mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx)
 {
-    int rc = SNMPERR_SUCCESS;
-    
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
-
-    switch(column) {
-@   foreach $node nonindex@
-@      include m2c_setup_node.m2i@
-@      if $node.settable == 1@
-
-    /* $m2c_node_summary */
-    case COLUMN_$node.uc:
-        rc = ${node}_set(ctx, $m2c_node_var_val );
-        break;
- @      end@ # settable
-@   end@ # for each column
-
-    }
-
-    return rc;
-}
-
-########################################################################
-##
-int
-_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
-{
-    netsnmp_table_request_info * tri;
-    int                          rc = SNMP_ERR_NOERROR;
-
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    netsnmp_assert(ctx);
-    
-    for(;requests; requests = requests->next) {
-        /*
-         * set column data
-         */
-        tri = netsnmp_extract_table_info(requests);
-        if(NULL == tri)
-            continue;
-        
-        _${table}_set_column(ctx, requests->requestvb, tri->colnum);
+    netsnmp_assert(NULL != ctx);
 
-    } /* for results */
-
-    return SNMP_ERR_NOERROR;
+    return ${context}_check_dependencies(ctx);
 }
 
+@end@ dependencies
 /*----------------------------------------------------------------------
  *
  * SET: Undo setup
@@ -581,8 +737,9 @@ $example_end
  * undo the value for a particular column
  */
 int
-_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx)
 {
+    netsnmp_assert(NULL != ctx);
 @if $m2c_data_allocate == 1@
     /*
      * allocate context, if needed
@@ -599,13 +756,81 @@ _${context}_undo_setup($mfd_base_params, ${table}_ctx * ctx)
 
 /*----------------------------------------------------------------------
  *
- * SET: reversible commit
+ * SET: Set values
+ *
+ *---------------------------------------------------------------------*/
+/*
+ * Set the value for a particular column
+ */
+NETSNMP_STATIC_INLINE int
+_${context}_set_column( ${context}_ctx *ctx,
+                       netsnmp_variable_list *var, int column )
+{
+    int rc = SNMPERR_SUCCESS;
+    
+    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+
+    netsnmp_assert(NULL != ctx);
+
+    switch(column) {
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.settable == 1@
+
+    /* $m2c_node_summary */
+    case COLUMN_$node.uc:
+        rc = ${node}_set(ctx, $m2c_node_var_val );
+        break;
+ @      end@ # settable
+@   end@ # for each column
+
+    }
+
+    return rc;
+}
+
+########################################################################
+##
+int
+_mfd_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
+{
+    netsnmp_table_request_info * tri;
+    int                          rc = SNMP_ERR_NOERROR;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(NULL != ctx);
+    
+    for(;requests; requests = requests->next) {
+        /*
+         * set column data
+         */
+        tri = netsnmp_extract_table_info(requests);
+        if(NULL == tri)
+            continue;
+        
+        _${table}_set_column(ctx, requests->requestvb, tri->colnum);
+
+    } /* for results */
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*----------------------------------------------------------------------
+ *
+ * SET: commit
  *
  *---------------------------------------------------------------------*/
 /**
  * @internal
- * no interface code, call user code directly
+ * commit the value for a particular column
  */
+int
+_mfd_${context}_commit($mfd_base_params, ${table}_ctx * ctx)
+{
+    netsnmp_assert(NULL != ctx);
+    return ${context}_commit(ctx);
+}
 
 /*----------------------------------------------------------------------
  *
@@ -623,6 +848,8 @@ _${context}_undo_column( ${context}_ctx *ctx,
     int rc = SNMPERR_SUCCESS;
     
     DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+
+    netsnmp_assert(NULL != ctx);
 
     switch(column) {
 @   foreach $node nonindex@
@@ -644,14 +871,14 @@ _${context}_undo_column( ${context}_ctx *ctx,
 ########################################################################
 ##
 int
-_${table}_undo_values($mfd_base_params, ${table}_ctx * ctx)
+_mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx)
 {
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    netsnmp_assert(ctx);
+    netsnmp_assert(NULL != ctx);
     
     for(;requests; requests = requests->next) {
         /*
@@ -661,22 +888,31 @@ _${table}_undo_values($mfd_base_params, ${table}_ctx * ctx)
         if(NULL == tri)
             continue;
         
-        _${table}_undo_column(ctx, requests->requestvb, tri->colnum);
+        _${context}_undo_column(ctx, requests->requestvb, tri->colnum);
 
     } /* for results */
 
     return SNMP_ERR_NOERROR;
 }
 
+@   if $m2c_irreversible_commit == 1@
 /*----------------------------------------------------------------------
  *
- * SET: final commit
+ * SET: irreversible commit
  *
  *---------------------------------------------------------------------*/
-/*
-* no interface code, call user code directly
-*/
+/**
+ * @internal
+ * commit irreversible actions
+ */
+int
+_mfd_${context}_irreversible_commit($mfd_base_params, ${table}_ctx * ctx)
+{
+    netsnmp_assert(NULL != ctx);
+    return ${context}_irreversible_commit(ctx);
+}
 
+@end@
 @end@ # settable
 /***********************************************************************
  *
