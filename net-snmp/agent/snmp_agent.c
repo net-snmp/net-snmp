@@ -223,6 +223,9 @@ save_set_cache(netsnmp_agent_session *asp)
 {
     agent_set_cache *ptr;
 
+    if (!asp->reqinfo || !asp->pdu)
+        return NULL;
+
     ptr = SNMP_MALLOC_TYPEDEF(agent_set_cache);
     if (ptr == NULL)
         return NULL;
@@ -905,7 +908,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->status = SNMP_ERR_NOERROR;
     asp->index = 0;
     asp->oldmode = 0;
-    asp->treecache_num = 0;
+    asp->treecache_num = -1;
     asp->treecache_len = 0;
     asp->vbcount = count_varbinds(asp->pdu->variables);
     asp->requests =
