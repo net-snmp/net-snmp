@@ -49,6 +49,19 @@ void	init_example( )
   /* auto_nlist( "example_symbol" ); */
 }
 
+#if USING_DLMOD_MODULE
+
+static struct subtree example_subtree = {
+	{1,3,6,1,4,1,2021,254}, 8, example_variables, 
+	sizeof(example_variables)/sizeof(*example_variables), 
+	sizeof(*example_variables), "example"
+};
+
+int example_init() {
+  load_subtree(&example_subtree);
+  return 0;
+}
+#endif
 	/*********************
 	 *
 	 *  System specific implementation functions
