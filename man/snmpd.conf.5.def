@@ -3,8 +3,14 @@
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
-snmpd.conf       - configuration file for the ucd-snmp SNMP agent.
-snmpd.local.conf - an optional second configuration file
+PREFIX/lib/snmp/snmpd.conf
+.br
+       - configuration file for the ucd-snmp SNMP agent.
+.br
+.br
+PREFIX/lib/snmp/snmpd.local.conf 
+.br
+       - an optional second configuration file
 .SH DESCRIPTION
 .B snmpd.conf
 and 
@@ -18,15 +24,15 @@ defined by the EXTENSIBLE-MIB section below.
 These files must be found in the PREFIX/lib/snmp directory.  Neither
 of these files are required for the agent to operate and report mib
 entries defined by rfc-1156.
-.SS Comments
+.SH COMMENTS
 .PP
-Any line beginning with the character '#' is treated as a comment and
-is not parsed.
+Any lines beginning with the character '#' in the configuration files
+are treated as a comment and are not parsed.
 .SH EXTENSIBLE-MIB
 .PP
-The ucd-snmp SNMP agent reports its information through queries to the
-EXTENSIBLEDOTMIB section of the mib tree.  Every mib in this section
-has the following sub-tables to it.
+The ucd-snmp SNMP agent reports much of its information through
+queries to the EXTENSIBLEDOTMIB section of the mib tree.  Every mib in
+this section has the following table entries in it.
 .IP ".MIBINDEX -- index"
 This is the table's index numbers for each of the DIRECTIVES listed below.
 .IP ".ERRORNAME -- name"
@@ -38,14 +44,15 @@ is detected for this table entry.
 .IP ".ERRORMSG -- errorMsg"
 This is a DISPLAY-STRING describing any error triggering the errorFlag above.
 .IP ".ERRORFIX -- errorFix"
-If this entry is SNMPset to the integer value of 1, a program or
-script will get executed with the table entry name from above as the
-argument.  The program to be executed is configured in the config.h
-file at compile time.
+If this entry is SNMPset to the integer value of 1 AND the errorFlag
+defined above is indeed a 1, a program or script will get executed
+with the table entry name from above as the argument.  The program to
+be executed is configured in the config.h file at compile time.
 .SS Directives
 .IP "proc NAME"
 .IP "proc NAME MAX"
 .IP "proc NAME MAX MIN"
+.IP
 Checks to see if the NAME'd processes are running on the agent's
 machine.  An error flag (1) and a description message are then passed
 to the EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORFLAG and
@@ -53,35 +60,43 @@ EXTENSIBLEDOTMIB.PROCMIBNUM.ERRORMSG mib tables (respectively) if the
 NAME'd program is not found in the process table as reported by PSCMD.
 .IP
 If MAX and MIN are not specified, MAX is assumed to be 
-.B inf
+.B infinity
 and MIN is assumed to be 1.
 .IP
-if MIN is not specified, it is assumed to be 0.
+If MAX is specified but MIN is not specified, MIN is assumed to be 0.
 .IP "exec NAME PROG ARGS"
 .IP "exec MIBNUM NAME PROG ARGS"
-If MIBNUM is not specified, the agent executes the named PROG with arguments
-of ARGS and returns the exit status and STDOUT output of the program to
-queries of the the EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFLAG and
+.IP
+If MIBNUM is not specified, the agent executes the named PROG with
+arguments of ARGS and returns the exit status and the first line of
+the STDOUT output of the PROG program to queries of the
+EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORFLAG and
 EXTENSIBLEDOTMIB.SHELLMIBNUM.ERRORMSG mib tables (respectively).  All
 STDOUT output beyound the first line is silently truncated.
 .IP
 If MIBNUM is specified, it acts as above but returns the exit status
 to MIBNUM.ERRORFLAG.0 and the entrire STDOUT output to the table
-MIBNUM.ERRORMSG in the mib tree.  In this case, the MIBNUM.ERRORMSG mib
-contains the entire STDOUT output, one mib table entry per line of output.
-.IP
-Note: the MIBNUM must be specified in dotted-interger notation and can
-not be specified as ".iso.org.dod.internet..." (should instead be .1.3.6.1...).
-.IP
-Note: the agent caches the exit status and STDOUT of the executed
-program for 30 seconds after the initial query.  This is to increase
-speed and maintain consistancy of information for consecutive queries.
+MIBNUM.ERRORMSG in a mib table.  In this case, the MIBNUM.ERRORMSG mib
+contains the entire STDOUT output, one mib table entry per line of
+output (ie, the first line is output as MIBNUM.ERRORMSG.1, the second
+at MIBNUM.ERRORMSG.2, etc...).
+.RS
+.IP Note:
+The MIBNUM must be specified in dotted-interger notation and can
+not be specified as ".iso.org.dod.internet..." (should instead be
+.1.3.6.1...).
+.IP Note: 
+The agent caches the exit status and STDOUT of the executed program
+for 30 seconds after the initial query.  This is to increase speed and
+maintain consistancy of information for consecutive table queries.
 The cache can be flushed by a snmp-set request of integer(1) to
 EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
+.RE
 .IP "disk PATH"
 .IP "disk PATH MINSPACE"
-Checks the named disks mount at PATH for available disk space.  If the
-diskspace is less than MINSPACE (kB) if specified, or
+.IP
+Checks the named disks mounted at PATH for available disk space.  If
+the diskspace is less than MINSPACE (kB) if specified, or
 DEFDISKMINIMUMSPACE (kB) if not specified, the associated entry in the
 EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORFLAG mib table will be set to (1) and
 a descriptive error message will be returned to queries of
@@ -89,6 +104,7 @@ EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORMSG.
 .IP "load MAX1"
 .IP "load MAX1 MAX5"
 .IP "load MAX1 MAX5 MAX15"
+.IP
 Checks the load average of the machine and returns an error flag (1),
 and an text-string error message
 to queries of EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORFLAG and
@@ -96,35 +112,45 @@ EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG (respectively) when the
 1-minute, 5-minute, or 15-minute averages excede the associated
 maximum values.  If any of the MAX1, MAX5, or MAX15 values are
 unspecified, they default to a value of DEFMAXLOADAVE.
-.IP "community N STRING"
-Sets the community string in slot N to be STRING.  N must be less than
-or equal to the hard coded value of NUM_COMMUNITIES.  The default
-NUM_COMMUNITIES names are set in the source code of the agent in the
-file "config.h".
 .SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
-EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG text-string description.
-.SH "PASS-THROUGH"
+EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
+.SH CHANGING THE COMMUNITY STRINGS
+.IP "community N STRING"
+.IP
+Sets the community string in slot N to be STRING.  N must be less than
+or equal to the hard coded value of NUM_COMMUNITIES.  The default
+NUM_COMMUNITIES names are set in the source code of the agent in the
+file "agent/snmp_agent.c".  The number N is defined in the "config.h"
+source file.
+.SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program
-is called in one of the following ways:
+is called in one of the following three ways:
+.RS
 .IP "EXEC -g MIBOID"
 .IP "EXEC -n MIBOID"
-.IP "EXEC -s MIBOID TYPE VALUE"
-The first and second call lines match to SNMP get and getnext
-requests.  It is expected that the EXEC program will take the
-arguments passed to it and return the appropriate response through
-stdout.  The first line of stdout should be the mib OID of the
-returning value.  The second line should be the TYPE of value
-returned, where TYPE is one of
+.IP
+These call lines match to SNMP get and getnext requests.  It is
+expected that the EXEC program will take the arguments passed to it
+and return the appropriate response through it's stdout.  
+.IP
+The first line of stdout should be the mib OID of the returning value.
+The second line should be the TYPE of value returned, where TYPE is
+one of the text strings:
 .B string, integer, objectid, timeticks, ipaddress, counter, 
 or
 .B gague.
-The third line of stdout should be the VALUE of the returned mib OID.
+The third line of stdout should be the VALUE corresponding with the
+returned TYPE.
+.IP
+For instance, if a script was to return the value integer value "42"
+when a request for .1.3.6.1.4.100 was requested, the script should
+return the following 3 lines:
+.br
 .RS
-.IP "Example EXEC output:"
   .1.3.6.1.4.100
 .br
   integer
@@ -134,10 +160,12 @@ The third line of stdout should be the VALUE of the returned mib OID.
 .IP
 To indicate that the script is unable to comply with the request due
 to an end-of-mib condition or an invalid request, simple exit and
-return no output.
+return no output to stdout at all.  A snmp error will be generated
+corresponding to the SNMP NO-SUCH-NAME response.
+.IP "EXEC -s MIBOID TYPE VALUE"
 .IP 
-For SNMP set requests, the third method above is used.  The TYPE
-passed to the EXEC program is one of: 
+For SNMP set requests, the adove call method is used.  The TYPE passed
+to the EXEC program is one of the text strings:
 .B integer, counter, gauge, timeticks, ipaddress, objid,
 or 
 .B string,
@@ -148,16 +176,34 @@ successful.  Otherwise, return one of the following error strings to
 signal an error:
 .B not-writable, 
 or 
-.B wrong-type.
+.B wrong-type
+and the appropriate error response will be generated instead.
+.RS
+.IP Note:
+By default, the only community allowed to write (ie snmpset) to your
+script will be the "private" community,or community #2 if definied
+differently by the "community" token discussed above.  Which
+communities are allowed write access are controlled by the RWRITE
+definition in the snmplib/snmp_impl.h source file.
+.RE
+.RE
 .SH "EXAMPLE"
-See the example.conf file for a more detailed example of how the above
-information is used in real examples.
-.SH "RE-READING snmpd.conf"
-The ucd-snmp agent can be forced to re-read its configuration file.
+See the EXAMPLE.CONF file in the top level source directory for a more
+detailed example of how the above information is used in real
+examples.
+.SH "RE-READING snmpd.conf and snmpd.local.conf"
+The ucd-snmp agent can be forced to re-read its configuration files.
 It can be told to do so by one of two ways:
 .IP 1.
 An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
+.SH "FILES"
+PREFIX/lib/snmpd.conf
+.br
+PREFIX/lib/snmpd.local.conf
 .SH "SEE ALSO"
 snmpd(1), EXAMPLE.conf.
+.\" Local Variables:
+.\"  mode: nroff
+.\" End:
