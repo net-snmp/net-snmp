@@ -352,10 +352,12 @@ snmp_error(struct snmp_session *psess,
     if (p_snmp_errno) *p_snmp_errno = psess->s_snmp_errno;
     if (p_str == NULL) return;
 
+    strcpy(buf, "");
     snmp_errnumber = psess->s_snmp_errno;
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
 	strcpy(buf, api_errors[-snmp_errnumber]);
     } else {
+	if (snmp_errnumber)
 	sprintf(buf, "Unknown Error %d", snmp_errnumber);
     }
 
@@ -498,22 +500,20 @@ snmp_sess_open(struct snmp_session *in_session)
       init_snmp_session();
 
     /* Copy session structure and link into list */
-    slp = (struct session_list *)malloc(sizeof(struct session_list));
+    slp = (struct session_list *)calloc(1,sizeof(struct session_list));
     if (slp == NULL) { 
       snmp_errno = SNMPERR_GENERR;
       in_session->s_snmp_errno = SNMPERR_GENERR;
       return(NULL);
     }
-    memset(slp, 0, sizeof(struct session_list));
 
-    isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
+    isp = (struct snmp_internal_session *)calloc(1,sizeof(struct snmp_internal_session));
     if (isp == NULL) { 
       snmp_errno = SNMPERR_GENERR;
       in_session->s_snmp_errno = SNMPERR_GENERR;
       snmp_sess_close(slp);
       return(NULL);
     }
-    memset(isp, 0, sizeof(struct snmp_internal_session));
 
     slp->internal = isp;
     slp->internal->sd = -1; /* mark it not set */
@@ -679,11 +679,10 @@ snmp_sess_open(struct snmp_session *in_session)
     return (void *)slp;
 }
 
-static void
-_snmp_free(char * cp)
+void snmp_free(void * cp)
 {
     if (cp)
-	free(cp);
+	free((char *)cp);
 }
 
 /*
@@ -729,11 +728,11 @@ snmp_sess_close(void *sessp)
 
     sesp = slp->session; slp->session = 0;
     if (sesp) {
-	_snmp_free((char *)sesp->context);
-	_snmp_free((char *)sesp->dstParty);
-	_snmp_free((char *)sesp->srcParty);
-	_snmp_free((char *)sesp->peername);
-	_snmp_free((char *)sesp->community);
+	snmp_free(sesp->context);
+	snmp_free(sesp->dstParty);
+	snmp_free(sesp->srcParty);
+	snmp_free(sesp->peername);
+	snmp_free(sesp->community);
 	free((char *)sesp);
     }
 
@@ -1075,7 +1074,7 @@ snmp_parse(struct snmp_session *session,
             return -1;
 
 	/* maybe get the community string. */
-	_snmp_free((char*)pdu->community);
+	snmp_free(pdu->community);
 	pdu->community_len = 0;
 	pdu->community = (u_char *)0;
 	if (community_length) {
@@ -1539,14 +1538,14 @@ snmp_sess_async_send(void *sessp,
 #else /* !NO_ZEROLENGTH_COMMUNITY */
 	/* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
-		_snmp_free((char*)pdu->community); pdu->community = 0;
+		snmp_free(pdu->community); pdu->community = 0;
 	    }
 	    else if (pdu->community_len == session->community_len) {
 		memmove(pdu->community, session->community,
 			    session->community_len);
 	    }
 	    else {
-	    _snmp_free((char*)pdu->community);
+	    snmp_free(pdu->community);
 	    pdu->community = (u_char *)malloc(session->community_len);
 	    memmove(pdu->community, session->community,
                         session->community_len);
@@ -2093,7 +2092,7 @@ snmp_oid_compare(const oid *name1,
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.
  */
-void
+struct variable_list *
 snmp_pdu_add_variable(struct snmp_pdu *pdu,
 		      oid *name,
 		      int name_length,
@@ -2171,8 +2170,10 @@ snmp_pdu_add_variable(struct snmp_pdu *pdu,
       default:
         snmp_set_detail("Internal error in type switching\n");
         snmp_errno = SNMPERR_BAD_PARSE; /* XX SNMP_BAD_ENCODE */
-        return;
+        return (0);
     }
+
+    return (vars);
 }
 
 int
