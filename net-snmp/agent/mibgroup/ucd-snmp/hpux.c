@@ -9,6 +9,9 @@
 #if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "mibincl.h"
 #include "hpux.h"

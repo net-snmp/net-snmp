@@ -43,6 +43,7 @@
 #include "auto_nlist.h"
 
 #include "memory.h"
+#include "memory_netbsd1.h"
 
 /* Default swap warning limit (kb) */
 #define DEFAULTMINIMUMSWAP 16000
@@ -54,6 +55,8 @@ long minimumswap;
 quad_t swapTotal;
 quad_t swapUsed;
 quad_t swapFree;
+
+static FindVarMethod var_extensible_mem;
 
 void init_memory_netbsd1(void) 
 {
@@ -114,6 +117,7 @@ void memory_free_config (void)
   
 */
 
+static
 unsigned char *var_extensible_mem(struct variable *vp,
 				  oid *name,
 				  size_t *length,

@@ -480,6 +480,9 @@
 #undef LPSTAT_PATH
 #undef HAVE_PRINTCAP
 
+/* define if you want to build with reentrant/threaded code */
+#undef NS_REENTRANT
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)
@@ -499,6 +502,10 @@
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
+#endif
+
+#if HAVE_DMALLOC_H
+#define DMALLOC_FUNC_CHECK
 #endif
 
 #undef INET6

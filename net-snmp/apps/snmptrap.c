@@ -141,8 +141,7 @@ static void optProc(int argc, char *const *argv, int opt)
                         break;
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }
@@ -166,6 +165,8 @@ int main(int argc, char *argv[])
     prognam = strrchr(argv[0], '/');
     if (prognam) prognam++;
     else prognam = argv[0];
+
+    putenv(strdup("POSIXLY_CORRECT=1"));
 
     if (strcmp(prognam, "snmpinform") == 0) inform = 1;
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {

@@ -63,7 +63,7 @@ snmp_oid_min_compare(const oid *in_name1,
 		 const oid *in_name2, 
 		 size_t len2)
 {
-    register int len, res;
+    register int len;
     register const oid * name1 = in_name1;
     register const oid * name2 = in_name2;
 
@@ -74,10 +74,12 @@ snmp_oid_min_compare(const oid *in_name1,
 	len = len2;
     /* find first non-matching OID */
     while(len-- > 0){
-	res = *(name1++) - *(name2++);
-	if (res < 0)
+        /* these must be done in seperate comparisons, since
+           subtracting them and using that result has problems with
+           subids > 2^31. */
+	if (*(name1) < *(name2))
 	    return -1;
-	if (res > 0)
+	if (*(name1++) > *(name2++))
 	    return 1;
     }
     /* both OIDs equal up to length of shorter OID */
@@ -404,10 +406,12 @@ setPass(int action,
         case ASN_OCTET_STR:
           itmp = sizeof(buf2);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, var_val_len) == (int)var_val_len)
-              sprintf(buf,"string %s",buf2);
+          if (var_val_len == 0)
+              sprintf(buf,"string \"\"");
+          else if (bin2asc(buf2, var_val_len) == (int)var_val_len)
+              sprintf(buf,"string \"%s\"",buf2);
           else
-              sprintf(buf,"octet %s",buf2);
+              sprintf(buf,"octet \"%s\"",buf2);
           break;
         case ASN_OBJECT_ID:
           sprint_mib_oid(buf2, (oid *)var_val, var_val_len);

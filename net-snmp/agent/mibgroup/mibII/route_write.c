@@ -7,7 +7,9 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
@@ -22,7 +24,9 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

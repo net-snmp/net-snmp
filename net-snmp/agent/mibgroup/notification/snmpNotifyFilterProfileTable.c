@@ -4,6 +4,11 @@
 
 /* This should always be included first before anything else */
 #include <config.h>
+
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -105,7 +110,7 @@ snmpNotifyFilterProfileTable_add(struct snmpNotifyFilterProfileTable_data *theda
     used by header_complex to index the data */
 
   snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                            (char *) thedata->snmpTargetParamsName,
+                            (u_char *) thedata->snmpTargetParamsName,
                             thedata->snmpTargetParamsNameLen);
 
   header_complex_add_data(&snmpNotifyFilterProfileTableStorage, vars, thedata);
@@ -217,8 +222,8 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
   /* 
    * this assumes you have registered all your data properly
    */
-  if ((StorageTmp =
-       header_complex(snmpNotifyFilterProfileTableStorage, vp,name,length,exact,
+  if ((StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+       header_complex((struct header_complex_index *)snmpNotifyFilterProfileTableStorage, vp,name,length,exact,
                       var_len,write_method)) == NULL) {
       if (vp->magic == SNMPNOTIFYFILTERPROFILEROWSTATUS)
           *write_method = write_snmpNotifyFilterProfileRowStatus;
@@ -271,8 +276,8 @@ write_snmpNotifyFilterProfileName(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyFilterProfileTable", "write_snmpNotifyFilterProfileName entering action=%d...  \n", action));
-  if ((StorageTmp =
-       header_complex(snmpNotifyFilterProfileTableStorage, NULL,
+  if ((StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+       header_complex((struct header_complex_index *)snmpNotifyFilterProfileTableStorage, NULL,
                       &name[sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -342,8 +347,8 @@ write_snmpNotifyFilterProfileStorType(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyFilterProfileTable", "write_snmpNotifyFilterProfileStorType entering action=%d...  \n", action));
-  if ((StorageTmp =
-       header_complex(snmpNotifyFilterProfileTableStorage, NULL,
+  if ((StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+       header_complex((struct header_complex_index *)snmpNotifyFilterProfileTableStorage, NULL,
                       &name[sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -415,8 +420,8 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
   struct header_complex_index *hciptr;
 
 
-  StorageTmp =
-    header_complex(snmpNotifyFilterProfileTableStorage, NULL,
+  StorageTmp = (struct snmpNotifyFilterProfileTable_data *)
+    header_complex((struct header_complex_index *)snmpNotifyFilterProfileTableStorage, NULL,
                    &name[sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
   
@@ -446,17 +451,6 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
             if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
               return SNMP_ERR_INCONSISTENTVALUE;
     
-
-            /* destroying a non-existent row is actually legal */
-            if (set_value == RS_DESTROY) {
-              return SNMP_ERR_NOERROR;
-            }
-
-
-            /* illegal creation values */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
-              return SNMP_ERR_INCONSISTENTVALUE;
-            }
           } else {
             /* row exists.  Check for a valid state change */
             if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
@@ -483,15 +477,18 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
               return SNMP_ERR_INCONSISTENTNAME;
             }
 
-            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-            memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
-                   vars->val.string,
-                   vars->val_len);
-            StorageNew->snmpTargetParamsNameLen = vars->val_len;
-            StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
+            if (set_value != RS_DESTROY) {
+                StorageNew =
+                    SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
+                memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
+                       vars->val.string,
+                       vars->val_len);
+                StorageNew->snmpTargetParamsNameLen = vars->val_len;
+                StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
 
-            StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
-            snmp_free_var(vars);
+                StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
+                snmp_free_var(vars);
+            }
           }
           
 
@@ -525,13 +522,16 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
                old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
                StorageTmp->snmpNotifyFilterProfileRowStatus = *((long *) var_val);
              } else {
-               /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
-                                           StorageTmp);
-               StorageDel =
-                 header_complex_extract_entry(&snmpNotifyFilterProfileTableStorage,
-                                              hciptr);
+                 /* destroy...  extract it for now */
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyFilterProfileTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterProfileTableStorage,
+                                                      hciptr);
+                 }
+                 
              }
           break;
 
@@ -544,9 +544,9 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
-                                           StorageTmp);
-               StorageDel =
-                 header_complex_extract_entry(&snmpNotifyFilterProfileTableStorage,
+                                           StorageNew);
+               StorageDel = (struct snmpNotifyFilterProfileTable_data *)
+                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterProfileTableStorage,
                                               hciptr);
                /* XXX: free it */
              } else if (StorageDel != NULL) {
@@ -588,7 +588,7 @@ get_FilterName(char *targetName, size_t targetName_len,
     
     /* put requested info into var structure */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                              (char *) targetName,
+                              (u_char *) targetName,
                               targetName_len);
 
     /* get the data from the header_complex storage */
