@@ -462,6 +462,8 @@ static void free_enums(struct enum_list **);
 static struct range_list * copy_ranges(struct range_list *);
 static struct enum_list  * copy_enums(struct enum_list *);
 
+static u_int compute_match(const char *search_base, const char *key);
+
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
 {
@@ -1054,8 +1056,9 @@ find_tree_node(const char *name,
  */
 #define MAX_BAD 0xffffff
 
-u_int
-compute_match(const char *search_base, const char *key) {
+static u_int
+compute_match(const char *search_base, const char *key)
+{
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
     int rc;
     regex_t parsetree;
@@ -1257,11 +1260,20 @@ static void
 do_subtree(struct tree *root,
 	   struct node **nodes)
 {
-    register struct tree *tp, *anon_tp=NULL;
-    register struct node *np, **headp;
+    struct tree *tp, *anon_tp=NULL;
+    struct tree *xroot = root;
+    struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int hash;
     int *int_p;
+
+    while (xroot->next_peer && xroot->next_peer->subid == root->subid) {
+#if 0
+    	printf("xroot: %s.%s => %s\n", xroot->parent->label, xroot->label,
+		xroot->next_peer->label);
+#endif
+    	xroot = xroot->next_peer;
+    }
 
     tp = root;
     headp = &nbuckets[NBUCKET(name_hash(tp->label))];
@@ -1291,11 +1303,25 @@ do_subtree(struct tree *root,
      * Take each element in the child list and place it into the tree.
      */
     for(np = child_list; np; np = np->next){
+	struct tree *otp = NULL;
+	struct tree *xxroot = xroot;
 	anon_tp = NULL;
-        tp = root->child_list;
-        while (tp)
+        tp = xroot->child_list;
+
+	if (np->subid == -1) {
+	    /* name ::= { parent } */
+	    np->subid = xroot->subid;
+	    tp = xroot;
+	    xxroot = xroot->parent;
+	}
+
+        while (tp) {
             if (tp->subid == np->subid) break;
-            else tp = tp->next_peer;
+            else {
+	    	otp = tp;
+		tp = tp->next_peer;
+	    }
+	}
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
@@ -1327,19 +1353,19 @@ do_subtree(struct tree *root,
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL) return;
-        tp->parent = root;
+        tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
-        tp->next_peer = root->child_list;
-        root->child_list = tp;
+        tp->next_peer = otp ? otp->next_peer : xxroot->child_list;
+        if (otp) otp->next_peer = tp;
+	else xxroot->child_list = tp;
         hash = NBUCKET(name_hash(tp->label));
         tp->next = tbuckets[hash];
         tbuckets[hash] = tp;
-/*      if (tp->type == TYPE_OTHER) */
-            do_subtree(tp, nodes);      /* recurse on this child if it isn't
-                                           an end node */
+	do_subtree(tp, nodes);
+
         if ( anon_tp ) {
             if (!strncmp( tp->label, ANON, ANON_LEN)) {
 			/*
@@ -1660,18 +1686,13 @@ parse_objectid(FILE *fp,
      * Handle  "label OBJECT-IDENTIFIER ::= { subid }"
      */
     if (length == 1) {
-#if 0
         op = loid;
         np = alloc_node(op->modid);
         if (np == NULL) return(NULL);
         np->subid = op->subid;
         np->label = strdup(name);
-        if (op->label) free(op->label);
+	np->parent = op->label;
         return np;
-#else
-	print_error("List too short", NULL, CONTINUE);
-	return NULL;
-#endif
     }
 
     /*
@@ -3453,6 +3474,9 @@ read_module(const char *name)
 	read_module_replacements( name );
     return tree_head;
 }
+
+/* Prototype definition */
+void unload_module_by_ID(int modID, struct tree *tree_top);
 
 void
 unload_module_by_ID( int modID, struct tree *tree_top )

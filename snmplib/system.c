@@ -334,7 +334,41 @@ in_addr_t get_myaddr(void)
 
 long get_uptime (void)
 {
-    return (0); /* not implemented */
+  long             return_value = 0;
+  DWORD            buffersize   = (sizeof(PERF_DATA_BLOCK)+
+                                  sizeof(PERF_OBJECT_TYPE)),
+                   type         = REG_EXPAND_SZ;
+  PPERF_DATA_BLOCK perfdata     = NULL;
+
+  /* min requirement is one PERF_DATA_BLOCK plus one PERF_OBJECT_TYPE */ 
+  perfdata = (PPERF_DATA_BLOCK) malloc(buffersize);
+
+
+  memset(perfdata,0,buffersize);
+
+  RegQueryValueEx( HKEY_PERFORMANCE_DATA,
+                   "Global",
+                   NULL,
+                   &type,
+                   (LPBYTE) perfdata,
+                   &buffersize );
+
+  /* we can not rely on the return value since there is always more so
+     we check the signature */
+
+  if (wcsncmp(perfdata->Signature,L"PERF",4)==0)
+  {
+     /* signature ok, and all we need is in the in the PERF_DATA_BLOCK */
+     return_value = (long)((perfdata->PerfTime100nSec.QuadPart / 
+                           (LONGLONG)100000));
+  }
+  else
+    return_value = GetTickCount()/10;
+
+  RegCloseKey(HKEY_PERFORMANCE_DATA);
+  free(perfdata);
+
+  return return_value;
 }
 
 char *

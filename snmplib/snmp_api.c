@@ -330,6 +330,11 @@ static int snmp_parse_version (u_char *, size_t);
 static int snmp_resend_request (struct session_list *slp, 
 				struct request_list *rp, 
 				int incr_retries);
+static void register_default_handlers(void);
+static struct session_list *snmp_sess_copy( struct snmp_session *pss);
+int  snmp_get_errno(void);
+void snmp_synch_reset(struct snmp_session * notused);
+void snmp_synch_setup(struct snmp_session * notused);
 
 #ifndef HAVE_STRERROR
 const char *strerror(int err)
@@ -604,7 +609,7 @@ snmp_sess_init(struct snmp_session *session)
 }
 
 
-void
+static void
 register_default_handlers(void) {
   ds_register_config(ASN_BOOLEAN, "snmp","dumpPacket",
                      DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
@@ -997,7 +1002,7 @@ _sess_copy( struct snmp_session *in_session)
     return( slp );
 }
 
-struct session_list *
+static struct session_list *
 snmp_sess_copy( struct snmp_session *pss)
 {
     struct session_list * psl;
@@ -4501,25 +4506,10 @@ _sess_read(void *sessp, fd_set *fdset)
 	isp->packet_len = 0;
       }
     } else {
-      /*  We have saved a partial packet from last time.  Extend that, if
-	  necessary, and receive new data after the old data.  */
-      u_char *newbuf;
-
-      if (isp->packet_size < isp->packet_len + rxbuf_len) {
-	newbuf = (u_char *)realloc(isp->packet, isp->packet_len + rxbuf_len);
-	if (newbuf == NULL) {
-	  DEBUGMSGTL(("sess_read","can't malloc %d more for rxbuf (%d tot)\n",
-		      rxbuf_len, isp->packet_len + rxbuf_len));
-	  return 0;
-	} else {
-	  isp->packet = newbuf;
-	  isp->packet_size = isp->packet_len + rxbuf_len;
-	  rxbuf = isp->packet + isp->packet_len;
-	}
-      } else {
-	rxbuf = isp->packet + isp->packet_len;
-	rxbuf_len = isp->packet_size - isp->packet_len;
-      }
+        length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
+		      (struct sockaddr *)&from, &fromlength);
+        if (from.sa_family == AF_UNSPEC)
+            from.sa_family = AF_INET; /* bad bad bad OS, no bone! */
     }
   } else {
     if ((rxbuf = (u_char *)malloc(rxbuf_len)) == NULL) {
@@ -5287,6 +5277,32 @@ snmp_add_var(struct snmp_pdu *pdu,
   tp = get_tree(name, name_length, get_tree_head());
   if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
     check = 0;
+  }
+
+  if (tp && type == '=') {
+      /* generic assignment - let the tree node decide value format */
+      switch (tp->type) {
+          case TYPE_INTEGER:
+          case TYPE_INTEGER32:
+              type = 'i'; break;
+          case TYPE_GAUGE:
+          case TYPE_UNSIGNED32:
+              type = 'u'; break;
+          case TYPE_UINTEGER:
+              type = '3'; break;
+          case TYPE_COUNTER:
+              type = 'c'; break;
+          case TYPE_TIMETICKS:
+              type = 't'; break;
+          case TYPE_OCTETSTR:
+              type = 's'; break;
+          case TYPE_BITSTRING:
+              type = 'b'; break;
+          case TYPE_IPADDR:
+              type = 'a'; break;
+          case TYPE_OBJID:
+              type = 'o'; break;
+      }
   }
 
   switch(type) {
