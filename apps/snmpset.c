@@ -81,9 +81,6 @@ SOFTWARE.
 int failures = 0;
 
 void main __P((int, char **));
-void snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
-int ascii_to_binary __P((u_char *, u_char *));
-int hex_to_binary __P((u_char *, u_char *));
 
 void
 usage __P((void))
@@ -186,7 +183,10 @@ main(argc, argv)
         fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
         failures++;
       } else
-        snmp_add_var(pdu, name, name_length, types[count], values[count]);
+        if (snmp_add_var(pdu, name, name_length, types[count], values[count])) {
+          snmp_perror("snmpset");
+          failures++;
+        }
     }
 
     if (failures) {
@@ -235,194 +235,3 @@ retry:
     SOCK_CLEANUP;
     exit (0);
 }
-
-/*
- * Add a variable with the requested name to the end of the list of
- * variables for this pdu.
- */
-void
-snmp_add_var(pdu, name, name_length, type, value)
-    struct snmp_pdu *pdu;
-    oid *name;
-    int name_length;
-    char type, *value;
-{
-    struct variable_list *vars;
-    char buf[2048];
-
-    if (pdu->variables == NULL){
-      pdu->variables = vars =
-            (struct variable_list *)malloc(sizeof(struct variable_list));
-    } else {
-      for(vars = pdu->variables;
-            vars->next_variable;
-            vars = vars->next_variable)
-        ;
-
-      vars->next_variable =
-            (struct variable_list *)malloc(sizeof(struct variable_list));
-      vars = vars->next_variable;
-    }
-
-    vars->next_variable = NULL;
-    vars->name = (oid *)malloc(name_length * sizeof(oid));
-    memmove(vars->name, name, name_length * sizeof(oid));
-    vars->name_length = name_length;
-
-    switch(type){
-    case 'i':
-      vars->type = ASN_INTEGER;
-      vars->val.integer = (long *)malloc(sizeof(long));
-      *(vars->val.integer) = atol(value);
-      vars->val_len = sizeof(long);
-      break;
-
-    case 'u':
-      vars->type = ASN_UNSIGNED;
-      vars->val.integer = (long *)malloc(sizeof(long));
-      sscanf(value, "%lu", vars->val.integer);
-      vars->val_len = sizeof(long);
-      break;
-
-    case 't':
-      vars->type = ASN_TIMETICKS;
-      vars->val.integer = (long *)malloc(sizeof(long));
-      sscanf(value, "%lu", vars->val.integer);
-      vars->val_len = sizeof(long);
-      break;
-
-    case 'a':
-      vars->type = ASN_IPADDRESS;
-      vars->val.integer = (long *)malloc(sizeof(long));
-      *(vars->val.integer) = inet_addr(value);
-      vars->val_len = sizeof(long);
-      break;
-
-    case 'o':
-      vars->type = ASN_OBJECT_ID;
-      vars->val_len = MAX_NAME_LEN;
-      read_objid(value, (oid *)buf, &vars->val_len);
-      vars->val_len *= sizeof(oid);
-      vars->val.objid = (oid *)malloc(vars->val_len);
-            memmove(vars->val.objid, buf, vars->val_len);
-      break;
-
-    case 's':
-    case 'x':
-    case 'd':
-      vars->type = ASN_OCTET_STR;
-      if (type == 'd'){
-        vars->val_len = ascii_to_binary((u_char *)value, buf);
-      } else if (type == 's'){
-        strcpy(buf, value);
-        vars->val_len = strlen(buf);
-      } else if (type == 'x'){
-        vars->val_len = hex_to_binary((u_char *)value, buf);
-      }
-      if (vars->val_len < 0) {
-        fprintf (stderr, "Bad value: %s\n", value);
-        failures++;
-        vars->val_len = 0;
-      }
-      vars->val.string = (u_char *)malloc(vars->val_len);
-      memmove(vars->val.string, buf, vars->val_len);
-      break;
-
-    case 'n':
-      vars->type = ASN_NULL;
-      vars->val_len = 0;
-      vars->val.string = NULL;
-      break;
-
-#ifdef OPAQUE_SPECIAL_TYPES
-    case 'U':
-    case 'I':
-      if (type == 'U')
-        vars->type = ASN_OPAQUE_U64;
-      else
-        vars->type = ASN_OPAQUE_I64;
-      vars->val_len = sizeof(struct counter64);
-      vars->val.counter64 =
-        (struct counter64 *) malloc(sizeof(struct counter64));
-      read64(vars->val.counter64, value);
-      break;
-
-    case 'F':
-      vars->type = ASN_OPAQUE_FLOAT;
-      vars->val_len = sizeof(float);
-      vars->val.floatVal = (float *) malloc(sizeof(float));
-      (*vars->val.floatVal) = atof(value);
-      break;
-      
-    case 'D':
-      vars->type = ASN_OPAQUE_DOUBLE;
-      vars->val_len = sizeof(double);
-      vars->val.doubleVal = (double *) malloc(sizeof(double));
-      (*vars->val.doubleVal) = atof(value);
-      break;
-#endif /* OPAQUE_SPECIAL_TYPES */
-      
-    default:
-      fprintf(stderr, "Internal error in type switching\n");
-      exit(1);
-    }
-}
-
-int
-ascii_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
-{
-    int  subidentifier;
-    u_char *bp = bufp;
-
-    for(; *cp != '\0'; cp++){
-      if (isspace(*cp) || *cp == '.')
-        continue;
-      if (!isdigit(*cp)){
-        fprintf(stderr, "Input error\n");
-        return -1;
-      }
-      subidentifier = atoi(cp);
-      if (subidentifier > 255){
-        fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
-                subidentifier);
-        return -1;
-      }
-      *bp++ = (u_char)subidentifier;
-      while(isdigit(*cp))
-        cp++;
-      cp--;
-    }
-    return bp - bufp;
-}
-
-int
-hex_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
-{
-    int  subidentifier;
-    u_char *bp = bufp;
-
-    for(; *cp != '\0'; cp++){
-      if (isspace(*cp))
-        continue;
-      if (!isxdigit(*cp)){
-        fprintf(stderr, "Input error\n");
-        return -1;
-      }
-      sscanf((char *)cp, "%x", &subidentifier);
-      if (subidentifier > 255){
-        fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
-                subidentifier);
-        return -1;
-      }
-      *bp++ = (u_char)subidentifier;
-      while(isxdigit(*cp))
-        cp++;
-      cp--;
-    }
-    return bp - bufp;
-}
-

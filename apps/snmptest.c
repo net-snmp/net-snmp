@@ -69,8 +69,6 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 
 int main __P((int, char **));
-int ascii_to_binary __P((u_char *, u_char *));
-int hex_to_binary __P((u_char *, u_char *));
 
 int command = SNMP_MSG_GET;
 
@@ -244,64 +242,6 @@ main(argc, argv)
 	nonRepeaters = -1;
     }
 }
-
-int
-ascii_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
-{
-    int	subidentifier;
-    u_char *bp = bufp;
-
-    for(; *cp != '\0'; cp++){
-	if (isspace(*cp))
-	    continue;
-	if (!isdigit(*cp)){
-	    printf("Input error\n");
-	    return -1;
-	}
-	subidentifier = atoi(cp);
-	if (subidentifier > 255){
-	    printf("subidentifier %d is too large ( > 255)\n", subidentifier);
-	    return -1;
-	}
-	*bp++ = (u_char)subidentifier;
-	while(isdigit(*cp))
-	    cp++;
-	cp--;
-    }
-    return bp - bufp;
-}
-
-
-int
-hex_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
-{
-    int	subidentifier;
-    u_char *bp = bufp;
-
-    for(; *cp != '\0'; cp++){
-	if (isspace(*cp))
-	    continue;
-	if (!isxdigit(*cp)){
-	    printf("Input error\n");
-	    return -1;
-	}
-	sscanf((char *)cp, "%x", &subidentifier);
-	if (subidentifier > 255){
-	    printf("subidentifier %d is too large ( > 255)\n", subidentifier);
-	    return -1;
-	}
-	*bp++ = (u_char)subidentifier;
-	while(isxdigit(*cp))
-	    cp++;
-	cp--;
-    }
-    return bp - bufp;
-}
-
 
 int
 input_variable(vp)
