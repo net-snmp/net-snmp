@@ -2792,11 +2792,6 @@ parse_compliance(FILE *fp,
 		print_error("Bad DESCRIPTION", token, type);
 		goto skip;
 	    }
-            if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-		if (np->description == NULL) {
-		    np->description = strdup(token);		    
-		}
-	    }
 	    type = get_token(fp, token, MAXTOKEN);
 	}
     }
