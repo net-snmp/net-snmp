@@ -54,14 +54,11 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "parse.h"
 #include "mib.h"
 #include "snmp.h"
 
 int main __P((int, char **));
-
-_CRTIMP extern int  errno;
-extern int save_mib_descriptions;
-extern int mib_warnings;
 
 int
 main(argc, argv)
@@ -88,16 +85,16 @@ main(argc, argv)
 		break;	     
 	      case 'd':
 		description = 1;
-		save_mib_descriptions = 1;
+		snmp_set_save_descriptions(1);
 		break;
 	      case 'r':
 		random_access = 1;
 		break;
               case 'w':
-                mib_warnings = 1;
+                snmp_set_mib_warnings(1);
                 break;
               case 'W':
-                mib_warnings = 2;
+                snmp_set_mib_warnings(2);
                 break;
               case 'p':
                 print = 1;

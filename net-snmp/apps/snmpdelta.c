@@ -61,7 +61,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <ctype.h>
-#include <errno.h>
 
 #include "asn1.h"
 #include "snmp_impl.h"
@@ -70,11 +69,10 @@
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_parse_args.h"
+#include "system.h"
 
 #define MAX_ARGS 256
     
-extern int  errno;
-
 char *SumFile = "Sum";
 char *Argv[MAX_ARGS];
 int Argc;
@@ -257,10 +255,6 @@ int period;
     case 0:
       break;
     case -1:
-      if (errno == EINTR){
-	fprintf(stderr, "signal!\n");
-	break;
-      }
       /* FALLTHRU */
     default:
       perror("select");
@@ -354,7 +348,7 @@ char **argv;
 	keepSeconds = 1;
 	break;
       default:
-	fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
+	fprintf(stderr, "Invalid option: -%c\n", argv[arg][1]);
 	usage();
 	exit(1);
 	break;
@@ -376,10 +370,12 @@ char **argv;
     varinfo[current_name++].name = 0;
   }
 
+  SOCK_STARTUP;
   snmp_synch_setup(&session);
   ss = snmp_open(&session);
   if (ss == NULL){
-    fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
+    snmp_perror("snmpdelta");
+    SOCK_CLEANUP;
     exit(1);
   }
     
@@ -390,6 +386,8 @@ char **argv;
       vip->oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
       if (!read_objid(vip->name, vip->oid, &vip->oidlen)) {
 	fprintf(stderr, "Invalid object identifier: %s\n", vip->name);
+	SOCK_CLEANUP;
+	exit(1);
       }
       sprint_descriptor(vip->descriptor, vip);
     } else {
@@ -424,8 +422,7 @@ char **argv;
     for(; count < current_name
 	  && count < begin + varbindsPerPacket - deltat; count++){
       if (varinfo[count].oidlen)
-	snmp_add_null_var(pdu, varinfo[count].oid,
-			  varinfo[count].oidlen);
+	snmp_add_null_var(pdu, varinfo[count].oid, varinfo[count].oidlen);
     }
     last_end = end;
     end = count;
@@ -576,11 +573,14 @@ char **argv;
 	  if (vars)
 	    fprint_objid(stderr, vars->name, vars->name_length);
 	  fprintf(stderr, "\n");
+	  SOCK_CLEANUP;
+	  exit(1);
 	} else {
 	  fprintf(stderr, "Error in packet: %s\n",
 		  snmp_errstring(response->errstat));
+	  SOCK_CLEANUP;
+	  exit(1);
 	}
-	exit(1);
 	if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
 	  goto retry;
       }
@@ -588,8 +588,9 @@ char **argv;
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "No Response from %s\n", gateway);
       response = 0;
+      break;
     } else {    /* status == STAT_ERROR */
-      fprintf(stderr, "An error occurred: %s, Quitting\n", snmp_api_errstring(snmp_errno));
+      snmp_perror("An error occurred");
       response = 0;
       break;
     }
@@ -601,5 +602,6 @@ char **argv;
     }
   }
   snmp_close(ss);
+  SOCK_CLEANUP;
   exit(0);
 }

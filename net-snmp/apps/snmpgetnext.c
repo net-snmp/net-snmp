@@ -82,7 +82,6 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 
 void main __P((int, char **));
-_CRTIMP extern int  errno;
 
 void
 usage __P((void))
