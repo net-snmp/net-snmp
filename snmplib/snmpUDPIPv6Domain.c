@@ -310,6 +310,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         if (t->local == NULL) {
             netsnmp_udp6_close(t);
             netsnmp_transport_free(t);
+            return NULL;
         }
         memcpy(t->local, addr->sin6_addr.s6_addr, 16);
         t->local[16] = (addr->sin6_port & 0xff00) >> 8;
@@ -325,6 +326,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 
         t->data = malloc(sizeof(struct sockaddr_in6));
         if (t->data == NULL) {
+            netsnmp_udp6_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
