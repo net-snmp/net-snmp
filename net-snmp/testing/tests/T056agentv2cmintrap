@@ -17,7 +17,7 @@ CONFIGAGENT trap2sink localhost public $SNMP_SNMPTRAPD_PORT
 STARTTRAPD
 
 # initialize only the example mib, and not the notification mib stuff
-AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap,mib_init,callback -I example,usmUser,vacm_vars"
+AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap,mib_init,callback -I example,usmUser,usmConf,vacm_vars"
 STARTAGENT
 
 #DELAY
