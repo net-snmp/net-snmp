@@ -58,7 +58,6 @@ static unsigned int usmUserSpinLock = 0;
 void
 init_usmUser(void)
 {
-    init_usm_conf(NULL);
     REGISTER_MIB("snmpv3/usmUser", usmUser_variables, variable4,
                  usmUser_variables_oid);
 }
