@@ -51,7 +51,6 @@
  * Includes of local application header files 
  */
 
-#include "../../snmplib/system.h"
 #include <net-snmp/asn1.h>
 #include <net-snmp/snmp_debug.h>
 #include "mibincl.h"
