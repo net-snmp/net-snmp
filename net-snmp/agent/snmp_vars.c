@@ -200,8 +200,26 @@ u_char          return_buf[256];        /* nee 64 */
 #endif
 
 struct timeval  starttime;
-netsnmp_session *callback_master_sess;
-int             callback_master_num;
+
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
+netsnmp_session *callback_master_sess = NULL;
+int             callback_master_num = -1;
+
+static void
+_init_agent_callback_transport(void)
+{
+    /*
+     * always register a callback transport for internal use 
+     */
+    callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
+                                                 netsnmp_agent_check_packet,
+                                                 netsnmp_agent_check_parse);
+    if (callback_master_sess)
+        callback_master_num = callback_master_sess->local_port;
+}
+#else
+#define _init_agent_callback_transport()
+#endif
 
 /*
  * init_agent() returns non-zero on error 
@@ -236,23 +254,8 @@ init_agent(const char *app)
     auto_nlist_print_tree(-2, 0);
 #endif
 
-#ifndef WIN32
-	/*
-	 * the pipe call creates fds that select chokes on, so
-	 * disable callbacks on WIN32 until a fix can be found
-	 */
-    /*
-     * always register a callback transport for internal use 
-     */
-    callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
-                                                 netsnmp_agent_check_packet,
-                                                 netsnmp_agent_check_parse);
-    if (callback_master_sess)
-        callback_master_num = callback_master_sess->local_port;
-    else
-#endif
-        callback_master_num = -1;
-
+    _init_agent_callback_transport();
+    
     netsnmp_init_helpers();
     init_traps();
     netsnmp_container_init_list();
