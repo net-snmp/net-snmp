@@ -16,7 +16,7 @@
 @include generic-source-includes.m2i@
 
 @foreach $table table@
-@    include generic-table.m2d@
+@    include m2c_setup_table.m2i@
 @    if $m2c_table_writable == 0@
 @        break@ # skip to next table
 @    end@

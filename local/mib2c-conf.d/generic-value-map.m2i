@@ -16,7 +16,7 @@
 ##&& ($node.syntax ne $node.perltype) 
 @if ("$node.perltype" eq "INTEGER") && ($node.enums == 1)@
 $example_start
- /* TODO: update INTERNAL_* macros defined in the header */
+    /** TODO: update INTERNAL_* macros defined in the header */
     switch($m2c_node_lh) {
 @    if $node.syntax ne $node.perltype@
 @        eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@

@@ -15,13 +15,13 @@ $example_start
  * beteen the MIB object ${node} and data in ctx.
  */
 @if $m2c_node_needlength == 1@
-    if ($m2c_node_lhs < ctx->${node}_len) {
-       $m2c_node_lh = malloc(ctx->${node}_len);
+    if ($m2c_node_lhs < ctx->data->${node}_len) {
+       $m2c_node_lh = malloc(ctx->data->${node}_len);
     }
-    $m2c_node_lhs = ctx->${node}_len;
-    memcpy( $m2c_node_lh, ctx->$node, $m2c_node_lhs );
+    $m2c_node_lhs = ctx->data->${node}_len;
+    memcpy( $m2c_node_lh, ctx->data->$node, $m2c_node_lhs );
 @else@
-    $m2c_node_lh = ctx->$node;
+    $m2c_node_lh = ctx->data->$node;
 @end@
 $example_end
 
