@@ -5,6 +5,7 @@
 #include "mibincl.h"
 #include "snmpv3.h"
 #include "snmpusm.h"
+#include "agent_read_config.h"
 #include "ucdDemoPublic.h"
 
 #define MYMAX 1024
@@ -35,9 +36,9 @@ void ucdDemo_parse_userpass(char *word, char *line) {
 
 void init_ucdDemoPublic(void) {
   snmpd_register_config_handler("demoUser",
-                                ucdDemo_parse_user, NULL);
+                                ucdDemo_parse_user, NULL, "USER");
   snmpd_register_config_handler("demoPass",
-                                ucdDemo_parse_userpass, NULL);
+                                ucdDemo_parse_userpass, NULL, "PASSPHASE");
 }
 
 unsigned char publicString[MYMAX];
@@ -124,7 +125,7 @@ write_ucdDemoResetKeys(action, var_val, var_val_type, var_val_len, statP, name, 
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
-      long_ret = *((long) var_val);
+      long_ret = *((long *) var_val);
       if (long_ret == 1) {
         engineID = snmpv3_generate_engineID(&engineIDLen);
         for(i=0; i < num; i++) {

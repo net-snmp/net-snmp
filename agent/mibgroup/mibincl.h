@@ -14,6 +14,7 @@
 #include "../../snmplib/snmp_impl.h"
 
 #include "../snmp_vars.h"
+#include "../agent_read_config.h"
 #include "../var_struct.h"
 
 #include "../../snmplib/snmp.h"
