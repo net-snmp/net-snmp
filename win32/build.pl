@@ -31,7 +31,7 @@ while (1) {
   print "6. Debug mode:           " . $debug . "\n";
   print "\nF. Finished - start build\n";
   print "Q. Quit - abort build\n\n";
-  print "Option: ";
+  print "Select option to set/toggle: ";
 
   chomp ($option = <>);
   if ($option eq "1") {
