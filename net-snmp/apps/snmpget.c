@@ -78,7 +78,7 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 
 
-int failures;
+int failures=0;
 
 void
 usage (void)
