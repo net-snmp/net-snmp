@@ -63,6 +63,13 @@ struct variable2 wes_disk_variables[] = {
 };
 #endif
 
+struct variable2 wes_version_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_wes_version, 1, {MIBINDEX}},
+  {VERDATE, STRING, RONLY, var_wes_version, 1, {VERDATE}},
+  {VERCDATE, STRING, RONLY, var_wes_version, 1, {VERCDATE}},
+  {VERIDENT, STRING, RONLY, var_wes_version, 1, {VERIDENT}}
+};
+
 struct variable2 wes_hp_variables[] = {
   {HPCONF, INTEGER, RWRITE, var_wes_hp, 1, {HPCONF}},
   {HPRECONFIG, INTEGER, RWRITE, var_wes_hp, 1, {HPRECONFIG}},

@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include <unistd.h>
 #include <sys/fcntl.h>
-#include <sys/types.h>
 #include <signal.h>
 #include <nlist.h>
 #include <machine/param.h>
@@ -18,13 +16,9 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fstab.h>
-#include "../../snmplib/asn1.h"
-#include "../../snmplib/snmp_impl.h"
-#include "../snmp_vars.h"
-#include "../var_struct.h"
-#define u_char unsigned char
-#define u_short unsigned short
 
+#include "mibincl.h"
+#include "mibdefs.h"
 #include "wes.h"
 
 struct myproc *get_proc_instance();
@@ -379,7 +373,11 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
       long_ret = (long_ret > minimumswap)?0:1;
       return((u_char *) (&long_ret));
     case ERRORMSG:
-      sprintf(errmsg,"Running out of swap space");
+      long_ret = getswap(SWAPGETLEFT);
+      if ((long_ret > minimumswap)?0:1)
+        sprintf(errmsg,"Running out of swap space (%d)",getswap(SWAPGETLEFT));
+      else
+        errmsg[0] = NULL;
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
@@ -479,8 +477,8 @@ unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
       return((u_char *) (&long_ret));
     case ERRORMSG:
       if (avail * filesys.fs_fsize/1024 < disks[disknum].minimumspace) 
-        sprintf(errmsg,"%s: under %d left",disks[disknum].path,
-                disks[disknum].minimumspace);
+        sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+                disks[disknum].minimumspace, avail * filesys.fs_fsize/1024);
       else
         errmsg[0] = NULL;
       *var_len = strlen(errmsg);
