@@ -2204,7 +2204,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	if ((compare(current, IP_ADDRNAME_LENGTH, name, *length) > 0) 
 	    && (((NextAddr == (u_long)-1))
 		|| (compare(current, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) < 0)
-		|| (compare(name, IP_ADDRNAME_LENGTH, lowest, IP_ADDRNAME_LENGTH) == 0))){
+		|| (compare(name, *length, lowest, IP_ADDRNAME_LENGTH) == 0))){
 	  /*
 	   * if new one is greater than input and closer to input than
 	   * previous lowest, and is not equal to it, save this one as the "next" one.
