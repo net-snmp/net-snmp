@@ -110,6 +110,9 @@ struct module {
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
 
+#define	ANON	"anonymous#"
+#define	ANON_LEN  strlen(ANON)
+
 struct tree *read_module __P((char *));
 struct tree *read_mib __P((char *));
 struct tree *read_all_mibs __P((void));
