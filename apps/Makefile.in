@@ -63,7 +63,7 @@ snmptrapd:    snmptrapd.o snmptrapd_handlers.o $(USELIBS)
 snmptrap:    snmptrap.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptrap.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 	rm -f snmpinform
-	ln -s snmptrap snmpinform
+	$(LN_S) snmptrap snmpinform
 
 snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpset.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
@@ -91,7 +91,7 @@ install: installdirs subdirs $(TARG)
 	done
 	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
 	rm -f $(bindir)/snmpinform
-	ln -s snmptrap $(bindir)/snmpinform
+	(cd $(bindir) && $(LN_S) snmptrap snmpinform)
 	@for i in $(SBINTARG) ; do $(INSTALL) $$i $(sbindir) ; echo "install:  installed $$i in $(sbindir)" ; done
 
 installdirs:
