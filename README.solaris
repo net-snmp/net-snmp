@@ -1,0 +1,64 @@
+Solaris has a limitation on the number of file descriptors (255)
+available in stdio, so that fopen() fails if more than
+255 file descriptors (sockets) are open. This prevents mibs from 
+being loaded after 250 sockets are open, since parse.c uses stdio.
+
+SEan <burke_sp@pacbell.net> investigated this problem, and had this
+report on using the SFIO package to solve this problem.
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The SFIO package ( http://www.research.att.com/sw/tools/sfio/ ) 
+is a buffered streams IO package that is much more more sophisticated 
+than stdio, but it does support stdio API's for backward compatibility,
+and that's the aspect that is important here.
+
+To compile with SFIO, we simply add -I/usr/local/sfio/include to the
+$CPPFLAGS before compiling net-snmp. This causes SFIO's stdio.h to
+preempt Solaris stdio, mapping calls like fopen() and fprintf() to
+the SFIO implementations. This produces a libnetsnmp that does not
+have the fopen() limitation. Any application that links to this 
+libnetsnmp must also be linked to libsfio. 
+
+Here are the two caveats:
+
+1. libsfio exports the functions 'getc' and 'putc', for reasons that
+are not clear. These are the only symbols it exports that conflict
+with stdio. While getc and putc are traditionally macros, Solaris
+makes them functions in multithreaded code (compiled with -mt,
+-pthread, or -D_REENTRANT). If your native stdio code links to the
+libsfio versions, a crash will result.
+
+There are two solutions to this problem. You may remove getc and putc 
+from libsfio, since SFIO defines getc and putc as macros, by doing:
+
+	ar d libsfio.a getc.o
+	ar d libsfio.a putc.o
+
+or link to SFIO's stdio compatibility library, libstdio, ahead of
+libsfio. This library wraps all of the native stdio calls with 
+versions that are safe for native or sfio streams, in case you
+need to share streams between SFIO and native stdio codes.
+
+2. libsfio provides 64-bit offsets in fseek(), ftell(). This is
+a good thing, since SFIO is intened to avoid needless limitations,
+but it means that SFIO's stdio.h defines off_t to be a 64-bit offset. 
+Net-SNMP uses readdir(), which returns a struct dirent containing 
+a 32-bit off_t, so the code compiled for SFIO doesn't access 
+struct dirent's correctly.
+
+There are two solutions to this problem, as well. The first is to
+include <dirent.h> at the start of SFIO's stdio.h. Since SFIO 
+defines a macro substitution for off_t, this leaves struct dirent's 
+definition unchanged.
+
+An alternative, which I haven't verified, is to define _FILE_OFFSET_BITS
+to be 64 when compiling libnetsnmp. According to what I see in Solaris's 
+/usr/include/sys/feature_tests.h, you can select a 64-bit off_t at 
+compile time with this setting, which should make readdir()'s off_t 
+compatible with SFIO's ftell(), fseek().
+
+Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
+portable package that solves this headache very neatly.
+
+-SEan <burke_sp@pacbell.net>
