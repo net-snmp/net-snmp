@@ -11,11 +11,11 @@
 ##  the iname enum should be unique per column, so always use node name
 ##
 @        if $m2c_const_lc == 1@
-@            eval $m2c_ename = "${m2c_de_pfx}_${e}"@
-@            eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
+@            eval $m2c_ename = "${m2c_de_pfx}_${e}${m2c_enum_sfx}"@
+@            eval $m2c_iname = "${m2c_const_pfx}${node}_${e}${m2c_enum_sfx}"@
 @        else@
-@            eval $m2c_ename = "${m2c_de_pfx}_$e.uc"@
-@            eval $m2c_iname = "${m2c_const_pfx}$node.uc_$e.uc"@
+@            eval $m2c_ename = "${m2c_de_pfx}_$e.uc${m2c_enum_sfx}"@
+@            eval $m2c_iname = "${m2c_const_pfx}$node.uc_$e.uc${m2c_enum_sfx}"@
 @        end@
 ##
 ########################################################################
