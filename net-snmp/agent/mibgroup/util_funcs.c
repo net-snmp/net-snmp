@@ -375,7 +375,7 @@ int clear_cache(int action,
   return SNMP_ERR_NOERROR;
 }
 
-extern char **argvrestartp, *argvrestartname;
+char **argvrestartp, *argvrestartname, *argvrestart;
 
 RETSIGTYPE restart_doit(int a)
 {

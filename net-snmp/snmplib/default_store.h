@@ -20,6 +20,7 @@ extern "C" {
 #define DS_LIB_MIB_PARSE_LABEL     3
 #define DS_LIB_DUMP_PACKET         4
 #define DS_LIB_LOG_TIMESTAMP       5
+#define DS_LIB_DONT_READ_CONFIGS   6
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
@@ -32,6 +33,8 @@ extern "C" {
 #define DS_LIB_PASSPHRASE      2
 #define DS_LIB_AUTHPASSPHRASE  3
 #define DS_LIB_PRIVPASSPHRASE  4
+#define DS_LIB_OPTIONALCONFIG  5
+#define DS_LIB_APPTYPE         6
 
 
 struct ds_read_config {

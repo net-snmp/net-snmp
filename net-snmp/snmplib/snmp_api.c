@@ -522,6 +522,7 @@ init_snmp(const char *type)
 #endif
 
   snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
+  ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, type);
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
@@ -534,8 +535,6 @@ init_snmp(const char *type)
   init_mib();
 
   read_configs();
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-                      NULL);
 
   init_snmp_session();
 

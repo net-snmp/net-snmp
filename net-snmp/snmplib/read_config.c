@@ -71,6 +71,8 @@
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "snmp_impl.h"
+#include "default_store.h"
+#include "callback.h"
 
 #include "read_config.h"
 #include "tools.h"
@@ -350,13 +352,30 @@ free_config (void)
 void
 read_configs (void)
 {
-  read_config_files(NORMAL_CONFIG);
+
+  char *optional_config = ds_get_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG);
+  char *type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+    read_config_files(NORMAL_CONFIG);
+
+ /* do this even when the normal above wasn't done */
+  if (optional_config && type)
+    read_config_with_type(optional_config, type);
+
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
+                      NULL);
 }
 
 void
 read_premib_configs (void)
 {
-  read_config_files(PREMIB_CONFIG);
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+    read_config_files(PREMIB_CONFIG);
+
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+                      SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                      NULL);
 }
 
 

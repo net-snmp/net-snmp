@@ -30,5 +30,8 @@ int  handle_var_list( struct agent_snmp_session *);
 void snmp_agent_parse_config (char *, char *);
 struct agent_snmp_session  *init_agent_snmp_session( struct snmp_session *, struct snmp_pdu *);
 int getNextSessID(void);
+void init_master_agent(int dest_port,
+                       int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
+                       int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int));
 
 #endif
