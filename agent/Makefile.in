@@ -82,8 +82,8 @@ read_config.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h
 read_config.o: mibgroup/struct.h read_config.h
 read_config.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 read_config.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/host.h
-read_config.o: mibgroup/mibII/system.h
-read_config.o: ./var_struct.h mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
+read_config.o: mibgroup/mibII/system.h ./var_struct.h
+read_config.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 read_config.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 read_config.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
 read_config.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h

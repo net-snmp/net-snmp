@@ -99,7 +99,7 @@ parse.o: ../config.h ../mib_module_config.h
 parse.o:   ../s/linux.h
 parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 parse.o:   system.h
-parse.o: parse.h asn1.h mib.h
+parse.o: parse.h asn1.h snmp_api.h mib.h
 party.o: ../config.h ../mib_module_config.h 
 party.o:   ../s/linux.h
 party.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
