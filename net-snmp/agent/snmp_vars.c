@@ -105,6 +105,15 @@ PERFORMANCE OF THIS SOFTWARE.
 extern  int swap, mem;
 extern char *Lookup_Device_Annotation();
 
+static int TCP_Count_Connections();
+static TCP_Scan_Init();
+static int TCP_Scan_Next();
+static ARP_Scan_Init();
+static int ARP_Scan_Next();
+static int Interface_Scan_Get_Count();
+static int Interface_Scan_By_Index();
+static int Interface_Get_Ether_By_Index();
+
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 
@@ -391,7 +400,7 @@ struct variable4 interface_variables[] = {
 
 struct variable2 system_variables[] = {
     {VERSION_DESCR, STRING, RWRITE, var_system, 1, {1}},
-    {VERSION_ID, OBJID, RONLY, var_system, 1, {2}},
+    {VERSIONID, OBJID, RONLY, var_system, 1, {2}},
     {UPTIME, TIMETICKS, RONLY, var_system, 1, {3}},
     {SYSCONTACT, STRING, RWRITE, var_system, 1, {4}},
     {SYSNAME, STRING, RWRITE, var_system, 1, {5}},

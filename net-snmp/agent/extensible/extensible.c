@@ -619,9 +619,6 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  struct myproc *proc;
   long long_ret;
   char errmsg[300];
 
@@ -659,6 +656,8 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 extern char version_descr[];
 extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
+
+extern int compare();
 
 int tree_compare(a, b)
   const void *a, *b;

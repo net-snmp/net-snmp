@@ -501,7 +501,11 @@ receive(sdlist, sdlen)
 int counter = 0;
 
 
+#ifdef hpux
+    gettimeofday(nvp, (struct timezone *) NULL);
+#else
     gettimeofday(nvp);
+#endif
     if (nvp->tv_usec < 500000L){
 	svp->tv_usec = nvp->tv_usec + 500000L;
 	svp->tv_sec = nvp->tv_sec;
@@ -529,7 +533,7 @@ int counter = 0;
         snmp_select_info(&numfds, &fdset, tvp, &block);
         if (block == 1)
             tvp = NULL; /* block without timeout */
-	count = select(numfds, &fdset, 0, 0, tvp);
+	count = select(numfds, (int *) &fdset, 0, 0, tvp);
 	if (count > 0){
 	    for(index = 0; index < sdlen; index++){
 		if(FD_ISSET(sdlist[index], &fdset)){
@@ -553,7 +557,11 @@ int counter = 0;
 		printf("select returned %d\n", count);
 		return -1;
 	}
-	gettimeofday(nvp);
+#ifdef hpux
+        gettimeofday(nvp, (struct timezone *) NULL);
+#else
+        gettimeofday(nvp);
+#endif
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
 	    alarmTimer(nvp);
