@@ -49,6 +49,7 @@
     /*
      *  The full Net-SNMP API
      */
+#include <net-snmp/utilities.h>
 #include <net-snmp/definitions.h>
 #include <net-snmp/types.h>
 
