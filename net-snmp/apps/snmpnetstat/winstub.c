@@ -4,12 +4,22 @@
 
 #include <config.h>
 
-#ifdef WIN32
+#if (defined(WIN32) || defined(cygwin32))
 
 #include <stdio.h>
 #include <sys/types.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_WINSOCK_H
 #include <winsock.h>
-
+#else
+#include <netinet/in.h>
+#include <netdb.h>
+#endif
 
 static int h_stay_open, s_stay_open, p_stay_open, n_stay_open;
 static FILE *h_fp, *s_fp, *p_fp, *n_fp;
@@ -104,7 +114,6 @@ getprotoent (void)
 	char *cp, **alp, lbuf[256];
 	static struct protoent spx;
 	static char *ali[10];
-	static char nbuf[64];
 	struct protoent *px = &spx;
 	int linecnt = 0;
 
@@ -128,7 +137,7 @@ getprotoent (void)
 
 		cp = strtok(NULL, STRTOK_DELIMS);
 		if (!cp) { free(px->p_name); continue; }
-		px->p_proto = atoi(cp);
+		px->p_proto = (short)atoi(cp);
 
 		for (alp = px->p_aliases; cp; alp++)
 		{
@@ -146,7 +155,7 @@ getprotoent (void)
 struct netent *getnetent (void) { return 0; }
 
 struct netent *
-getnetbyaddr (unsigned long net, int type)
+getnetbyaddr (long net, int type)
 {
     return 0;
 }
@@ -181,5 +190,5 @@ inet_lnaof(struct in_addr in)
 
 #else
 static int module_dummy = 0;
-#endif /* WIN32 */
+#endif /* WIN32 or cygwin32 */
 
