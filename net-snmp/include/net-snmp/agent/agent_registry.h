@@ -67,6 +67,9 @@ netsnmp_session *get_session_for_oid	   (oid *, size_t,
 
 subtree_context_cache *get_top_context_cache(void);
 
+void netsnmp_set_lookup_cache_size(int newsize);
+int netsnmp_get_lookup_cache_size(void);
+
 #define MIB_REGISTERED_OK		 0
 #define MIB_DUPLICATE_REGISTRATION	-1
 #define MIB_REGISTRATION_FAILED		-2
