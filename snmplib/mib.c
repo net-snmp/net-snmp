@@ -1211,8 +1211,12 @@ int read_objid(char *input,
     }
 
     if (root == NULL){
+#if 0
 	fprintf(stderr, "Mib not initialized.  Exiting.\n");
 	exit(1);
+#endif
+	*outlen = 0;
+	return(0);
     }
     if ((*out_len =
 	 parse_subtree(root, input, output, out_len)) == 0)

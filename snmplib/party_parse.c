@@ -401,7 +401,7 @@ read_party_database(char *filename)
 		    sizeof(noProxy)/sizeof(oid);
 	    } else {
 		fprintf(stderr, "Can't handle proxy\n");
-		exit(1);
+		return -1;
 	    }
 #endif
 	    pp->partyAuthProtocol = rp->partyAuthProtocol = auth;
