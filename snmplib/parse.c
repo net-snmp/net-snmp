@@ -85,6 +85,7 @@ SOFTWARE.
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
+#include "tools.h"
 
 /*
  * This is one element of an object identifier with either an integer
@@ -190,6 +191,7 @@ static int anonymous = 0;
 #define DISPLAYHINT 71
 #define FROM        72
 #define CAPABILITIES 73
+#define MACRO       74
 
 struct tok {
     const char *name;                 /* token name */
@@ -269,6 +271,7 @@ struct tok tokens[] = {
     { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
     { "FROM", sizeof ("FROM")-1, FROM },
     { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
+    { "MACRO", sizeof ("MACRO")-1, MACRO },
     { NULL }
 };
 
@@ -325,6 +328,7 @@ static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
 static int current_module = 0;
 static int     max_module = 0;
 
+static void tree_from_node(struct tree *tp, struct node *np);
 static void do_subtree (struct tree *, struct node **);
 static void do_linkup (struct module *, struct node *);
 static void dump_module_list (void);
@@ -352,9 +356,10 @@ static void init_tree_roots (void);
 static void merge_anon_children (struct tree *, struct tree *);
 static int getoid (FILE *, struct subid_s *, int);
 static struct node *parse_objectid (FILE *, char *);
-static int get_tc (const char *, int, struct enum_list **, struct range_list **, char **);
+static int get_tc (const char *, int, int *, struct enum_list **, struct range_list **, char **);
 static int get_tc_index (const char *, int);
-static struct enum_list *parse_enumlist (FILE *);
+static struct enum_list *parse_enumlist (FILE *, struct enum_list **);
+static struct range_list *parse_ranges(FILE *fp, struct range_list **);
 static struct node *parse_asntype (FILE *, char *, int *, char *);
 static struct node *parse_objecttype (FILE *, char *);
 static struct node *parse_objectgroup (FILE *, char *);
@@ -363,6 +368,7 @@ static struct node *parse_trapDefinition (FILE *, char *);
 static struct node *parse_compliance (FILE *, char *);
 static struct node *parse_capabilities(FILE *, char *);
 static struct node *parse_moduleIdentity (FILE *, char *);
+static struct node *parse_macro(FILE *, char *);
 static        void  parse_imports (FILE *);
 static struct node *parse (FILE *, struct node *);
 
@@ -373,10 +379,13 @@ static void read_import_replacements (const char *, struct module_import *);
 static void  new_module  (const char *, const char *);
 
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
-static struct index_list *getIndexes(FILE *fp);
-static void free_indexes(struct index_list *idxs);
-static void free_ranges(struct range_list *idxs);
-static void free_enums(struct enum_list *idxs);
+static struct index_list *getIndexes(FILE *fp, struct index_list **);
+static void free_indexes(struct index_list **);
+static void free_ranges(struct range_list **);
+static void free_enums(struct enum_list **);
+static struct range_list * copy_ranges(struct range_list *);
+static struct enum_list  * copy_enums(struct enum_list *);
+static struct index_list * copy_indexes(struct index_list *);
 
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
@@ -405,6 +414,12 @@ void snmp_set_mib_parse_label(int save)
   /* 0=strict, 1=underscore OK in label */
   ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL, save);
 }
+
+void snmp_set_mib_parse_replace_objects(int save)
+{
+  /* 0=no, 1=replace objects with latest module */
+  ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE, save);
+}
 /* end wrappers */
 
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
@@ -420,6 +435,8 @@ void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
+          lead);
+  fprintf(outf, "%s    R: Replace MIB symbols from latest module\n",
           lead);
 }
 
@@ -453,6 +470,11 @@ char *snmp_mib_toggle_options(char *options) {
         case 'd':
           ds_set_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS,
                          !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS));
+          break;
+
+        case 'R':
+          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE,
+                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE));
           break;
 
         default:
@@ -641,9 +663,9 @@ free_tree(struct tree *Tree)
         return;
     }
 
-    free_enums(Tree->enums);
-    free_ranges(Tree->ranges);
-    free_indexes(Tree->indexes);
+    free_enums(&Tree->enums);
+    free_ranges(&Tree->ranges);
+    free_indexes(&Tree->indexes);
     if (Tree->description)
         free(Tree->description);
     if (Tree->label)
@@ -660,10 +682,10 @@ static void
 free_node(struct node *np)
 {
     if (np->tc_index == -1) {
-        free_enums(np->enums);
-        free_ranges(np->ranges);
+        free_enums(&np->enums);
+        free_ranges(&np->ranges);
     }
-    free_indexes(np->indexes);
+    free_indexes(&np->indexes);
     if (np->description)
         free(np->description);
     if (np->label)
@@ -1085,7 +1107,7 @@ do_subtree(struct tree *root,
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
-                int_p = (int *) xcalloc((tp->number_modules+1), sizeof(int));
+                int_p = (int *) xmalloc((tp->number_modules+1) * sizeof(int));
                 if (int_p == NULL) return;
                 memcpy(int_p, tp->module_list, tp->number_modules*sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -1093,6 +1115,11 @@ do_subtree(struct tree *root,
                    free((char*)tp->module_list);
                 ++tp->number_modules;
                 tp->module_list = int_p;
+
+		if ( ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE) ) {
+		    /* Replace from node */
+		    tree_from_node(tp,np);
+		}
 		    /* Handle children */
 		do_subtree(tp, nodes);
 		continue;
@@ -1105,31 +1132,14 @@ do_subtree(struct tree *root,
 		snmp_log(LOG_WARNING, "Warning: %s.%ld is both %s and %s (%s)\n",
 			root->label, np->subid, tp->label, np->label, File);
 	}
+
         tp = (struct tree *) xcalloc(1, sizeof(struct tree));
         if (tp == NULL) return;
         tp->parent = root;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
-        tp->subid = np->subid;
-        tp->tc_index = np->tc_index;
-        tp->type = translation_table[np->type];
-
-        /*
-         * move pointers for alloc'd data from np to tp.
-         * this prevents them from being freed when np is released.
-         */
-        tp->label = np->label;  np->label = NULL;
-        tp->enums = np->enums;  np->enums = NULL;
-        tp->indexes = np->indexes;  np->indexes = NULL;
-        tp->ranges = np->ranges;  np->ranges = NULL;
-        tp->hint = np->hint;  np->hint = NULL;
-        tp->units = np->units;  np->units = NULL;
-        tp->description = np->description;  np->description = NULL;
-
-	tp->access = np->access;
-	tp->status = np->status;
-        set_function(tp);	/* from mib.c */
+        tree_from_node(tp, np);
         tp->next_peer = root->child_list;
         root->child_list = tp;
         hash = NBUCKET(name_hash(tp->label));
@@ -1158,8 +1168,11 @@ do_subtree(struct tree *root,
                 anon_tp->modid = tp->modid;
                 anon_tp->tc_index = tp->tc_index;
                 anon_tp->type = tp->type;
+                free_enums(&anon_tp->enums);
                 anon_tp->enums = tp->enums;  tp->enums=NULL;
+                free_indexes(&anon_tp->indexes);
                 anon_tp->indexes = tp->indexes;  tp->indexes=NULL;
+                free_ranges(&anon_tp->ranges);
                 anon_tp->ranges = tp->ranges;  tp->ranges=NULL;
                 anon_tp->hint = tp->hint;  tp->hint=NULL;
                 anon_tp->units = tp->units;  tp->units = NULL;
@@ -1206,7 +1219,7 @@ static void do_linkup(struct module *mp,
 	 *   the roots of the tree
 	 */
     if (snmp_get_do_debugging() > 1) dump_module_list();
-    DEBUGMSGTL(("parse-mibs", "Processing IMPORTS for module %s\n", mp->name));
+    DEBUGMSGTL(("parse-mibs", "Processing IMPORTS for module %d %s\n", mp->modid, mp->name));
     if ( mp->no_imports == 0 ) {
 	mp->no_imports = NUMBER_OF_ROOT_NODES;
 	mp->imports = root_imports;
@@ -1440,6 +1453,7 @@ parse_objectid(FILE *fp,
 static int
 get_tc(const char *descriptor,
        int modid,
+       int *tc_index,
        struct enum_list **ep,
        struct range_list **rp,
        char **hint)
@@ -1451,10 +1465,19 @@ get_tc(const char *descriptor,
     if (i != -1)
       {
  	tcp = &tclist[i];
-        *ep = tcp->enums;
-        *rp = tcp->ranges;
-        *hint = tcp->hint;
-        return tcp->type;
+	if (tc_index) *tc_index = i;
+	if (ep) {
+	    free_enums(ep);
+	    *ep = copy_enums(tcp->enums);
+	}
+	if (rp) {
+	    free_ranges(rp);
+	    *rp = copy_ranges(tcp->ranges);
+	}
+	if (hint) {
+	    *hint = (tcp->hint ? xstrdup(tcp->hint) : NULL);
+	}
+	return tcp->type;
       }
     return LABEL;
 }
@@ -1520,23 +1543,23 @@ get_tc_descriptor(int tc_index)
  */
 
 static struct enum_list *
-parse_enumlist(FILE *fp)
+parse_enumlist(FILE *fp, struct enum_list **retp)
 {
     register int type;
     char token [MAXTOKEN];
-    struct enum_list *ep = NULL, *rep;
+    struct enum_list *ep = NULL, **epp = &ep;
+
+    free_enums(retp);
 
     while((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE){
         if (type == RIGHTBRACKET)
             break;
         if (type == LABEL){
             /* this is an enumerated label */
-            rep = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
-            if (rep == NULL) return(NULL);
-            rep->next = ep;
-            ep = rep;
+            *epp = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
+            if (*epp == NULL) return(NULL);
             /* a reasonable approximation for the length */
-            ep->label = xstrdup(token);
+            (*epp)->label = xstrdup(token);
             type = get_token(fp, token, MAXTOKEN);
             if (type != LEFTPAREN) {
                 print_error("Expected \"(\"", token, type);
@@ -1547,27 +1570,31 @@ parse_enumlist(FILE *fp)
                 print_error("Expected integer", token, type);
                 return NULL;
             }
-            ep->value = atoi(token);
+            (*epp)->value = atoi(token);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
                 return NULL;
             }
+            epp = &(*epp)->next;
         }
     }
     if (type == ENDOFFILE){
         print_error("Expected \"}\"", token, type);
         return NULL;
     }
+    *retp = ep;
     return ep;
 }
 
-static struct range_list *parse_ranges(FILE *fp)
+static struct range_list *parse_ranges(FILE *fp, struct range_list **retp)
 {   int low, high;
     char nexttoken[MAXTOKEN];
     int nexttype;
-    struct range_list *r, *rl = NULL;
+    struct range_list *rp = NULL, **rpp = &rp;
     int size = 0, taken = 1;
+
+    free_ranges(retp);
 
     nexttype = get_token(fp, nexttoken, MAXTOKEN);
     if (nexttype == SIZE) {
@@ -1588,11 +1615,11 @@ static struct range_list *parse_ranges(FILE *fp)
 	    high = atol(nexttoken);
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	}
-	r = (struct range_list *)malloc (sizeof(*r));
-	r->next = rl;
-	r->low = low;
-	r->high = high;
-	rl = r;
+	*rpp = (struct range_list *)xcalloc (1, sizeof(struct range_list));
+	(*rpp)->low = low;
+	(*rpp)->high = high;
+	rpp = &(*rpp)->next;
+
     } while (nexttype == BAR);
     if (size) {
 	if (nexttype != RIGHTPAREN)
@@ -1601,7 +1628,9 @@ static struct range_list *parse_ranges(FILE *fp)
     }
     if (nexttype != RIGHTPAREN)
 	print_error ("Expected \")\"", nexttoken, nexttype);
-    return rl;
+
+    *retp = rp;
+    return rp;
 }
 
 /*
@@ -1618,9 +1647,6 @@ parse_asntype(FILE *fp,
     char token[MAXTOKEN];
     char quoted_string_buffer[MAXQUOTESTR];
     char *hint = NULL;
-    char *tmp_hint;
-    struct enum_list *ep;
-    struct range_list *rp;
     struct tc *tcp;
     int level;
 
@@ -1664,7 +1690,7 @@ parse_asntype(FILE *fp,
 
         if (type == LABEL)
         {
-            type = get_tc(token, current_module, &ep, &rp, &tmp_hint);
+            type = get_tc(token, current_module, NULL, NULL, NULL, NULL);
         }
 
         /* textual convention */
@@ -1689,11 +1715,11 @@ parse_asntype(FILE *fp,
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN){
-	    tcp->ranges = parse_ranges(fp);
+	    tcp->ranges = parse_ranges(fp, &tcp->ranges);
             *ntype = get_token(fp, ntoken, MAXTOKEN);
         } else if (*ntype == LEFTBRACKET) {
             /* if there is an enumeration list, parse it */
-            tcp->enums = parse_enumlist(fp);
+            tcp->enums = parse_enumlist(fp, &tcp->enums);
             *ntype = get_token(fp, ntoken, MAXTOKEN);
         }
         return NULL;
@@ -1725,13 +1751,15 @@ parse_objecttype(FILE *fp,
     if (np == NULL) return(NULL);
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
-        tctype = get_tc(token, current_module, &np->enums, &np->ranges, &np->hint);
+        int tmp_index;
+        tctype = get_tc(token, current_module, &tmp_index,
+                        &np->enums, &np->ranges, &np->hint);
         if (tctype == LABEL &&
             ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS) > 1){
             print_error("Warning: No known translation for type", token, type);
         }
         type = tctype;
-        np->tc_index = get_tc_index(token, current_module); /* store TC for later reference */
+        np->tc_index = tmp_index; /* store TC for later reference */
     }
     np->type = type;
     nexttype = get_token(fp, nexttoken, MAXTOKEN);
@@ -1748,21 +1776,21 @@ parse_objecttype(FILE *fp,
         case GAUGE:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
-                np->enums = parse_enumlist(fp);
+                np->enums = parse_enumlist(fp, &np->enums);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
-		np->ranges = parse_ranges(fp);
+		np->ranges = parse_ranges(fp, &np->ranges);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             }
             break;
         case BITSTRING:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
-                np->enums = parse_enumlist(fp);
+                np->enums = parse_enumlist(fp, &np->enums);
                 nexttype = get_token(fp, nexttoken, MAXTOKEN);
             } else if (nexttype == LEFTPAREN){
                 /* ignore the "constrained integer" for now */
-		np->ranges = parse_ranges(fp);
+		np->ranges = parse_ranges(fp, &np->ranges);
 		nexttype = get_token (fp, nexttoken, MAXTOKEN);
             }
             break;
@@ -1775,7 +1803,7 @@ parse_objecttype(FILE *fp,
                 if (nexttype == SIZE) {
                     nexttype = get_token(fp, nexttoken, MAXTOKEN);
                     if (nexttype == LEFTPAREN) {
-			np->ranges = parse_ranges(fp);
+			np->ranges = parse_ranges(fp, &np->ranges);
                         nexttype = get_token(fp, nexttoken, MAXTOKEN); /* ) */
                         if (nexttype == RIGHTPAREN)
                         {
@@ -1866,7 +1894,7 @@ parse_objecttype(FILE *fp,
           }
           break;
         case INDEX:
-          np->indexes = getIndexes(fp);
+          np->indexes = getIndexes(fp, &np->indexes);
           if (np->indexes == NULL) {
             print_error("Bad Index List",token,type);
             free_node(np);
@@ -2136,6 +2164,45 @@ parse_moduleIdentity(FILE *fp,
     return merge_parse_objectid(np, fp, name);
 }
 
+
+/*
+ * Parses a MACRO definition
+ * Expect BEGIN, discard everything to end.
+ * Returns 0 on error.
+ */
+static struct node *
+parse_macro(FILE *fp,
+	    char *name)
+{
+    register int type;
+    char token[MAXTOKEN];
+    char quoted_string_buffer[MAXQUOTESTR];
+    struct node *np;
+    int iLine = Line;
+
+    np = (struct node *)1;  /* alloc_node(current_module); */
+    if (np == NULL) return(NULL);
+    type = get_token(fp, token, MAXTOKEN);
+    while (type != EQUALS && type != ENDOFFILE) {
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    }
+    if (type != EQUALS) return NULL;
+    while (type != BEGIN && type != ENDOFFILE) {
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    }
+    if (type != BEGIN) return NULL;
+    while (type != END && type != ENDOFFILE) {
+        type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+    }
+    if (type != END) return NULL;
+
+    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
+	snmp_log(LOG_WARNING,
+		 "%s MACRO (lines %d..%d parsed and ignored).\n", name, iLine, Line);
+
+    return np;
+}
+
 /*
  * Parses a module import clause
  *   loading any modules referenced
@@ -2386,7 +2453,7 @@ read_module_internal (const char *name)
     struct node *np;
 
     if ( tree_head == NULL )
-	init_mib();
+	init_mib_internals(); /* was init_mib */
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
@@ -2487,7 +2554,7 @@ new_module (const char *name,
 	    if (label_compare(mp->file, file)) {
 		if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 		    snmp_log(LOG_WARNING,
-                             "Warning: Module %s in both %s and %s\n",
+                             "Warning: Module %s was in %s now is %s\n",
                              name, mp->file, file);
 
 			/* Use the new one in preference */
@@ -2498,7 +2565,7 @@ new_module (const char *name,
 	}
 
 	/* Add this module to the list */
-    DEBUGMSGTL(("parse-mibs", "  Module %s is in %s\n", name, file));
+    DEBUGMSGTL(("parse-mibs", "  Module %d %s is in %s\n", max_module, name, file));
     mp = (struct module *) xcalloc(1, sizeof(struct module));
     if (mp == NULL) return;
     mp->name = xstrdup(name);
@@ -2607,12 +2674,12 @@ parse(FILE *fp,
                 return NULL;
             }
             state = IN_MIB;
-            DEBUGMSGTL(("parse-mibs", "Parsing MIB: %s\n", name));
             current_module = which_module( name );
             if ( current_module == -1 ) {
                 new_module(name, File);
                 current_module = which_module(name);
             }
+            DEBUGMSGTL(("parse-mibs", "Parsing MIB: %d %s\n", current_module, name));
             while ((type = get_token (fp, token, MAXTOKEN)) != ENDOFFILE)
                 if (type == BEGIN) break;
             break;
@@ -2657,6 +2724,14 @@ parse(FILE *fp,
                 print_error("Bad parse of AGENT-CAPABILITIES", NULL, type);
                 return NULL;
             }
+            break;
+        case MACRO:
+            nnp = parse_macro(fp, name);
+            if (nnp == NULL){
+                print_error("Bad parse of MACRO", NULL, type);
+                return NULL;
+            }
+            nnp = NULL; /* IGNORE MACRO */
             break;
         case MODULEIDENTITY:
             nnp = parse_moduleIdentity(fp, name);
@@ -2992,7 +3067,7 @@ main(int argc, char *argv[])
 {
     int i;
     struct tree *tp;
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, ) = 2;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS, 2);
 
     init_mib();
 
@@ -3019,8 +3094,6 @@ parseQuoteString(FILE *fp,
     int count = 0;
     int too_long = 0;
     char *token_start = token;
-
-    maxtlen--;  /* allow room for string terminator in buffer */
 
     for (ch = getc(fp); ch != EOF; ch = getc(fp)) {
         if (ch == '\r') continue;
@@ -3059,13 +3132,15 @@ parseQuoteString(FILE *fp,
  *    
  */
 static struct index_list *
-getIndexes(FILE *fp) {
+getIndexes(FILE *fp, struct index_list **retp) {
   int type;
   char token[MAXTOKEN];
 
   struct index_list *mylist = NULL;
   struct index_list **mypp = &mylist;
   
+  free_indexes(retp);
+
   type = get_token(fp, token, MAXTOKEN);
 
   if (type != LEFTBRACKET) {
@@ -3084,45 +3159,104 @@ getIndexes(FILE *fp) {
     type = get_token(fp, token, MAXTOKEN);
   }
 
+  *retp = mylist;
   return mylist;
 }
 
 static void
-free_indexes(struct index_list *idxs) {
-  struct index_list *idxp;
+free_indexes(struct index_list **spp) {
+  if (spp && *spp) {
+  struct index_list *pp, *npp;
+
+  pp = *spp; *spp = NULL;
   
-  while(idxs) {
-    idxp = idxs->next;
-    if (idxs->ilabel) free(idxs->ilabel);
-    free(idxs);
-    idxs = idxp;
+  while(pp) {
+    npp = pp->next;
+    if (pp->ilabel) free(pp->ilabel);
+    free(pp);
+    pp = npp;
+  }
   }
 }
 
 static void
-free_ranges(struct range_list *idxs) {
-  struct range_list *idxp;
+free_ranges(struct range_list **spp) {
+  if (spp && *spp) {
+  struct range_list *pp, *npp;
   
-  while(idxs) {
-    idxp = idxs->next;
-    free(idxs);
-    idxs = idxp;
+  pp = *spp; *spp = NULL;
+  
+  while(pp) {
+    npp = pp->next;
+    free(pp);
+    pp = npp;
+  }
   }
 }
 
 static void
-free_enums(struct enum_list *ep)
+free_enums(struct enum_list **spp)
 {
-  struct enum_list *tep;
+  if (spp && *spp) {
+  struct enum_list *pp, *npp;
 
-  while(ep)
+  pp = *spp; *spp = NULL;
+  
+  while(pp)
   {
-    tep = ep;
-    ep = ep->next;
-    if (tep->label)
-      free(tep->label);
-    free((char*)tep);
+    npp = pp->next;
+    if (pp->label) free(pp->label);
+    free(pp);
+    pp = npp;
   }
+  }
+}
+
+static struct enum_list *
+copy_enums (struct enum_list *sp)
+{
+  struct enum_list *xp = NULL, **spp = &xp;
+
+  while (sp) {
+    *spp = (struct enum_list *) xcalloc(1, sizeof(struct enum_list));
+    if (!*spp) break;
+    (*spp)->label = xstrdup(sp->label);
+    (*spp)->value = sp->value;
+    spp = &(*spp)->next;
+    sp = sp->next;
+  }
+  return (xp);
+}
+
+static struct range_list *
+copy_ranges (struct range_list *sp)
+{
+  struct range_list *xp = NULL, **spp = &xp;
+
+  while (sp) {
+    *spp = (struct range_list *) xcalloc(1, sizeof(struct range_list));
+    if (!*spp) break;
+    (*spp)->low = sp->low;
+    (*spp)->high = sp->high;
+    spp = &(*spp)->next;
+    sp = sp->next;
+  }
+  return (xp);
+}
+
+static struct index_list *
+copy_indexes (struct index_list *sp)
+{
+  struct index_list *xp = NULL, **spp = &xp;
+
+  while (sp) {
+    *spp = (struct index_list *) xcalloc(1, sizeof(struct index_list));
+    if (!*spp) break;
+    (*spp)->ilabel = xstrdup(sp->ilabel);
+    spp = &(*spp)->next;
+    sp = sp->next;
+  }
+  return (xp);
 }
 
 /*
@@ -3326,5 +3460,44 @@ merge_parse_objectid(struct node *np,
     }
 
     return np;
+}
+
+/*
+ * transfer data to tree from node
+ *
+ * move pointers for alloc'd data from np to tp.
+ * this prevents them from being freed when np is released.
+ * parent member is not moved.
+ *
+ * CAUTION: nodes may be repeats of existing tree nodes.
+ * This can happen especially when resolving IMPORT clauses.
+ *
+ */
+static void
+tree_from_node(struct tree *tp, struct node *np)
+{
+    free_enums(&tp->enums);
+    free_ranges(&tp->ranges);
+    free_indexes(&tp->indexes);
+
+    SNMP_FREE(tp->label);
+    SNMP_FREE(tp->hint);
+    SNMP_FREE(tp->units);
+    SNMP_FREE(tp->description);
+
+    tp->label = np->label;  np->label = NULL;
+    tp->enums = np->enums;  np->enums = NULL;
+    tp->ranges = np->ranges;  np->ranges = NULL;
+    tp->indexes = np->indexes;  np->indexes = NULL;
+    tp->hint = np->hint;  np->hint = NULL;
+    tp->units = np->units;  np->units = NULL;
+    tp->description = np->description;  np->description = NULL;
+
+    tp->subid = np->subid;
+    tp->tc_index = np->tc_index;
+    tp->type = translation_table[np->type];
+    tp->access = np->access;
+    tp->status = np->status;
+    set_function(tp);
 }
 

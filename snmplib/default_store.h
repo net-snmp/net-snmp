@@ -21,6 +21,7 @@ extern "C" {
 #define DS_LIB_DUMP_PACKET         4
 #define DS_LIB_LOG_TIMESTAMP       5
 #define DS_LIB_DONT_READ_CONFIGS   6
+#define DS_LIB_MIB_REPLACE         7  /* replace objects from latest module */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0

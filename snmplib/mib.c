@@ -1004,6 +1004,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL);
     ds_register_premib(ASN_INTEGER, "snmp","mibWarningLevel",
                        DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS);
+    ds_register_premib(ASN_BOOLEAN, "snmp","mibReplaceWithLatest",
+                       DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
@@ -1043,7 +1045,7 @@ init_mib (void)
 	env_var = entry;
     }
     
-    DEBUGMSGTL(("init_mib","Looking in %s for mibs...\n",env_var));
+    DEBUGMSGTL(("init_mib","Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",env_var));
     
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
@@ -1072,7 +1074,7 @@ init_mib (void)
 	env_var = entry;
     }
     
-    DEBUGMSGTL(("init_mib","Looking for mibs... %s\n",env_var));
+    DEBUGMSGTL(("init_mib","Seen MIBS: Looking in '%s' for mib files ...\n",env_var));
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         if (strcmp (entry, "ALL") == 0) {
@@ -1096,6 +1098,7 @@ init_mib (void)
 	    entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
 	    sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
 		    env_var+1);
+	    free(env_var);
 	    env_var = entry;
 #else
 	    env_var = strdup(env_var+1);
@@ -1109,6 +1112,7 @@ init_mib (void)
 #endif
     }
 
+    DEBUGMSGTL(("init_mib","Seen MIBFILES: Looking in '%s' for mib files ...\n",env_var));
     if ( env_var != 0 ) {
 	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
@@ -1116,6 +1120,7 @@ init_mib (void)
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
     }
+    free(env_var);
     
     prefix = getenv("PREFIX");
     
@@ -1124,6 +1129,8 @@ init_mib (void)
 
     Prefix = (char*)malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
+
+    DEBUGMSGTL(("init_mib","Seen PREFIX: Looking in '%s' for prefix ...\n", Prefix));
     
     /* remove trailing dot */
     env_var = &Prefix[strlen(Prefix) - 1];
@@ -1639,7 +1646,7 @@ print_tree_node(FILE *f,
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"type_%d", tp->type); cp = str;
 	}
-#ifdef SNMP_TESTING_CODE
+#if SNMP_TESTING_CODE
 	if (!cp && (tp->ranges || tp->enums)) { /* ranges without type ? */
 	    sprintf(str,"?0 with %s %s ?",
 	    tp->ranges ? "Range" : "",
@@ -1696,7 +1703,7 @@ print_tree_node(FILE *f,
 	case 0:				cp = NULL; break;
 	default:			sprintf(str,"status_%d", tp->status); cp = str;
 	}
-#ifdef SNMP_TESTING_CODE
+#if SNMP_TESTING_CODE
 	if (!cp && (tp->indexes)) { /* index without status ? */
 	    sprintf(str,"?0 with %s ?",
 	    tp->indexes ? "Index" : "");
