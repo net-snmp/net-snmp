@@ -397,7 +397,7 @@ int trap;
     char *cmd;
     char *argv[] = {cmd, "-v", "1", host, comm, dev, "", trapt, "0", "", NULL};
 #ifdef SNMPPATH
-    char *cmd = (char *) malloc(strlen(SNMPPATH) + strlen("snmptrap") + 2);
+    cmd = (char *) malloc(strlen(SNMPPATH) + strlen("snmptrap") + 2);
     sprintf(cmd,"%s/%s",SNMPPATH,"snmptrap");
 #else
     cmd = strdup("/home/local/sbin/snmptrap");
