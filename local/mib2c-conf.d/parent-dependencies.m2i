@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -11,31 +11,40 @@
 /*
  * TODO: check dependencies
  *
- * return 0 if the all the changes to the row are legal,
+ * return SNMP_ERR_NOERROR if the all the changes to the row are legal,
  *        an SNMP error code otherwise.
  *
  * (see README-table-${table} if you don't have dependencies)
  */
 int
 ${context}_check_dependencies(netsnmp_mfd_registration *reg,
-                              ${context}_ctx *ctx,
-                              ${context}_ctx *undo_ctx )
+                              ${context}_ctx *ctx)
 {
+    int rc = SNMP_ERR_NOERROR;
+    
     netsnmp_assert(NULL != reg);
     netsnmp_assert(NULL != ctx);
-    netsnmp_assert(NULL != undo_ctx);
 
     /*
      * TODO: check that all new value are legal.
      * This is useful for for tables which have dependencies
      * between columns.
      *
+     * For example, two columns allocating a percentage of something
+     * should add up to 100%.
+     *
      * At this point in the error checking, if anything goes
      * wrong, SNMP_ERR_GENERR is probably the best error code.
      */
+## }
+@foreach $node nonindex@
+@   ifconf syntax-$node.syntax-dependencies.m2i@
+@      include syntax-$node.syntax-dependencies.m2i@
 
-    /* everything looks ok */
-    return SNMP_ERR_NOERROR;
+@   end@
+@end@ # for each
+## {
+    return rc;
 }
 
 ##
