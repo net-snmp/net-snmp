@@ -410,7 +410,7 @@ snmp_errstring(errstat)
  */
 int
 ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
-    u_long destaddr;
+    in_addr_t destaddr;
     oid *src, *dst, *context;
     int *srclen, *dstlen, *contextlen;
 {
