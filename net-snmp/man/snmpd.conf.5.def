@@ -3,12 +3,12 @@
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
-LIBDIR/snmp/snmpd.conf
+DATADIR/snmp/snmpd.conf
 .br
        - configuration file for the ucd-snmp SNMP agent.
 .br
 .br
-LIBDIR/snmp/snmpd.local.conf 
+DATADIR/snmp/snmpd.local.conf 
 .br
        - an optional second configuration file
 .SH DESCRIPTION
@@ -21,7 +21,7 @@ DIRECTIVES section below.  The information pertaining to the
 configuration of the agent is reported in the EXTENSIBLE-MIB, as
 defined by the EXTENSIBLE-MIB section below.
 .PP
-These files must be found in the LIBDIR/snmp directory.  Neither
+These files must be found in the DATADIR/snmp directory.  Neither
 of these files are required for the agent to operate and report mib
 entries defined by rfc-1156.
 .SH COMMENTS
@@ -213,9 +213,9 @@ An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
-LIBDIR/snmp/snmpd.conf
+DATADIR/snmp/snmpd.conf
 .br
-LIBDIR/snmp/snmpd.local.conf
+DATADIR/snmp/snmpd.local.conf
 .SH "SEE ALSO"
 snmpd(1), EXAMPLE.conf.
 .\" Local Variables:
