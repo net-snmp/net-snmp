@@ -294,11 +294,11 @@ main(int argc, char *argv[])
 {
 	int             arg, i;
 	int             ret;
-	u_short         dest_port = SNMP_PORT;
 	int             dont_fork = 0;
 	char            logfile[SNMP_MAXBUF_SMALL];
 	char           *cptr, **argvptr;
 	char           *pid_file = NULL;
+        char            buf[SPRINT_MAX_LEN];
 #if HAVE_GETPID
 	FILE           *PID;
 #endif
@@ -378,9 +378,19 @@ main(int argc, char *argv[])
                 case 'p':
                   if (++arg == argc)
                     usage(argv[0]);
-                  dest_port = atoi(argv[arg]);
-                  if (dest_port <= 0)
-                    usage(argv[0]);
+
+                  /* has something been specified before? */
+                  cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+                      
+                  /* set the specification string up */
+                  if (cptr)
+                      /* append to the older specification string */
+                      sprintf(buf,"%s,%s", cptr, argv[arg]);
+                  else
+                      strcpy(buf,argv[arg]);
+
+                  DEBUGMSGTL(("snmpd_ports","port spec: %s\n", buf));
+                  ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
                   break;
 
                 case 'x':
@@ -542,7 +552,7 @@ main(int argc, char *argv[])
     /* start library */
     init_snmp("snmpd");
 
-    ret = init_master_agent( dest_port,
+    ret = init_master_agent( 0,
                        snmp_check_packet,
                        snmp_check_parse );
 	if( ret != 0 )
