@@ -331,7 +331,8 @@ when_dumped( filesys, level, length )
 
     cp1=strrchr( filesys, '/' );	/* Find the last element of the current FS */
 
-    dump_fp = fopen("/etc/dumpdates", "r");
+    if ((dump_fp = fopen("/etc/dumpdates", "r")) == NULL )
+	return date_n_time (NULL, length);
 
     while ( fgets( line, 100, dump_fp ) != NULL ) {
         cp2=strchr( line, ' ' );	/* Start by looking at the device name only */

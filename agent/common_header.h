@@ -108,9 +108,9 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#if defined(osf4) || defined(aix4)
+#if defined(osf4) || defined(aix4) || defined(hpux10)
 /* these are undefed to remove a stupid warning on osf compilers
-   because they get redefined with a slightly differnt notation of the
+   because they get redefined with a slightly different notation of the
    same value.  -- Wes */
 #undef TCP_NODELAY
 #undef TCP_MAXSEG
