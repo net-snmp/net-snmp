@@ -67,9 +67,13 @@ echo "UCD-SNMP version $VersionInfo bug report" >  $msg_file
 echo "----------------------------------------------------------" >> $msg_file
 echo                                                              >> $msg_file
 
+cp $msg_file ${msg_file}.2
+
 echo $n "Press return to edit bug report file $c"
 read pause
 ${EDITOR:-vi} $msg_file || exit
+
+cmp -s $msg_file ${msg_file}.2 &&  echo "No description of the bug submitted. Please try again" && exit 1
 
 #
 #    Start to create the mail message
