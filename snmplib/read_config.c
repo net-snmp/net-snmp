@@ -834,7 +834,7 @@ read_config_files(int when)
 {
     int             i, j;
     char            configfile[300];
-    char           *envconfpath;
+    char           *envconfpath, *persfile;
     const char     *confpath, *perspath;
     char           *cptr1, *cptr2;
     char            defaultPath[SPRINT_MAX_LEN];
@@ -867,9 +867,11 @@ read_config_files(int when)
                     ((perspath == NULL) ? "" : ENV_SEPARATOR),
                     ((perspath == NULL) ? "" : perspath));
             defaultPath[ sizeof(defaultPath)-1 ] = 0;
-            envconfpath = defaultPath;
+	    envconfpath = strdup(defaultPath);
+        } else {
+	    envconfpath = strdup(envconfpath);
         }
-        envconfpath = strdup(envconfpath);      /* prevent actually writing in env */
+
         DEBUGMSGTL(("read_config", "config path used:%s\n", envconfpath));
         cptr1 = cptr2 = envconfpath;
         i = 1;
@@ -887,11 +889,10 @@ read_config_files(int when)
              * then we read all the configuration files we can, starting with
              * the oldest first.
              */
-            if (strncmp(cptr2, perspath,
-                        strlen(perspath)) == 0 ||
-                (getenv("SNMP_PERSISTENT_FILE") != NULL &&
-                 strncmp(cptr2, getenv("SNMP_PERSISTENT_FILE"),
-                         strlen(getenv("SNMP_PERSISTENT_FILE"))) == 0)) {
+	    persfile = getenv("SNMP_PERSISTENT_FILE");
+            if (strncmp(cptr2, perspath, strlen(perspath)) == 0 ||
+                (persfile != NULL &&
+                 strncmp(cptr2, persfile, strlen(persfile)) == 0)) {
                 /*
                  * limit this to the known storage directory only 
                  */

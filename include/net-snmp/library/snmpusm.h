@@ -231,6 +231,9 @@ extern          "C" {
     void            init_usm(void);
     int             init_usm_post_config(int majorid, int minorid,
                                          void *serverarg, void *clientarg);
+    int             deinit_usm_post_config(int majorid, int minorid, void *serverarg,
+					   void *clientarg);
+    void            clear_user_list(void);
 
 #ifdef __cplusplus
 }

@@ -52,6 +52,8 @@ typedef struct subtree_context_cache_s {
 
 
 void             setup_tree		  (void);
+void             shutdown_tree    (void);
+
 
 netsnmp_subtree *netsnmp_subtree_find	  (oid *, size_t, netsnmp_subtree *,
 					   const char *context_name);
@@ -107,6 +109,7 @@ int             unregister_mib_priority	   (oid *, size_t, int);
 int             unregister_mib_range	   (oid *, size_t, int, int, oid);
 int             unregister_mib_context	   (oid *, size_t, int, int, oid,
 					    const char *);
+void            clear_context              (void);
 void            unregister_mibs_by_session (netsnmp_session *);
 int     netsnmp_unregister_mib_table_row   (oid *mibloc, size_t mibloclen,
 					    int priority, int var_subid,

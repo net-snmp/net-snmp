@@ -2649,6 +2649,15 @@ init_usm(void)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            init_usm_post_config, NULL);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           deinit_usm_post_config, NULL);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           free_engineID, NULL);
+
 }
 
 /*
@@ -2696,6 +2705,33 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     return SNMPERR_SUCCESS;
 }                               /* end init_usm_post_config() */
 
+int
+deinit_usm_post_config(int majorid, int minorid, void *serverarg,
+		       void *clientarg)
+{
+    if (usm_free_user(noNameUser) != NULL) {
+	DEBUGMSGTL(("deinit_usm_post_config", "could not free initial user\n"));
+	return SNMPERR_GENERR;
+    }
+    noNameUser = NULL;
+
+    DEBUGMSGTL(("deinit_usm_post_config", "initial user removed\n"));
+    return SNMPERR_SUCCESS;
+}                               /* end deinit_usm_post_config() */
+
+void
+clear_user_list(void)
+{
+    struct usmUser *tmp = userList, *next = NULL;
+
+    while (tmp != NULL) {
+	next = tmp->next;
+	usm_free_user(tmp);
+	tmp = next;
+    }
+    userList = NULL;
+
+}
 
 /*******************************************************************-o-******
  * usm_check_secLevel
@@ -2977,6 +3013,9 @@ usm_remove_user_from_list(struct usmUser *user,
      * NULL pointers aren't allowed 
      */
     if (ppuserList == NULL)
+        return NULL;
+
+    if (*ppuserList == NULL)
         return NULL;
 
     /*

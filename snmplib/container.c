@@ -13,6 +13,14 @@ typedef struct container_type_s {
 } container_type;
 
 
+static int
+_ba_release_with_free(netsnmp_container *container);
+void 
+_ba_free_container_type(void *data, void *context);
+static int
+_ba_remove_with_free(netsnmp_container *container, const void *data);
+
+
 /*------------------------------------------------------------------
  */
 void
@@ -25,17 +33,29 @@ netsnmp_container_init_list(void)
 
     containers = netsnmp_container_get_binary_array();
     containers->compare = netsnmp_compare_cstring;
-
+    containers->cfree = _ba_release_with_free;
+    containers->remove = _ba_remove_with_free;
     /*
      */
     ct = SNMP_MALLOC_TYPEDEF(container_type);
     if (NULL == ct)
         return;
-    ct->name = "binary_array";
+    ct->name = strdup("binary_array");
     ct->factory = netsnmp_container_get_binary_array_factory();
     CONTAINER_INSERT(containers, ct);
 
     netsnmp_container_register("table_container", ct->factory);
+}
+
+void
+netsnmp_clear_container(void)
+{
+    DEBUGMSGTL(("container", "netsnmp_clear_container() called\n"));
+    if (containers == NULL)
+	return;
+
+    CONTAINER_FREE(containers);
+    containers = NULL;
 }
 
 int
@@ -206,10 +226,10 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
  */
 int CONTAINER_FREE(netsnmp_container *x)
 {
+    int                rc;
 
     if (NULL != x->next) {
         netsnmp_container *tmp = x->next;
-        int                rc;
         while(tmp->next)
             tmp = tmp->next;
         while(tmp) {
@@ -217,9 +237,18 @@ int CONTAINER_FREE(netsnmp_container *x)
             if (rc)
                 snmp_log(LOG_ERR,"error on subcontainer free (%d)\n", rc);
             tmp = tmp->prev;
+ 	    SNMP_FREE(tmp->next);
         }
     }
-    return x->cfree(x);
+    rc = x->cfree(x);
+    if (rc == 0) {
+	if (containers == x) {
+	    containers = NULL;
+	}
+	SNMP_FREE(x);
+    }
+
+    return rc;
 }
 #endif
 
@@ -329,3 +358,50 @@ netsnmp_compare_mem(const char * lhs, size_t lhs_len,
 
     return rc;
 }
+
+static int
+_ba_remove_with_free(netsnmp_container *container, const void *data)
+{
+    container_type *ct, *tmp;
+    int rc;
+
+    ct = SNMP_MALLOC_TYPEDEF(container_type);
+    if (NULL == ct)
+        return -1;
+
+    tmp = ct;
+    rc = netsnmp_binary_array_remove(container, data, (void*)ct);
+    
+    if (ct != NULL)
+	SNMP_FREE(ct);
+
+    if (tmp != NULL)
+	SNMP_FREE(tmp);
+
+    return rc;
+}
+
+
+void 
+_ba_free_container_type(void *data, void *context)
+{
+    if (data == NULL)
+	return;
+    
+    if (((container_type *)data)->name != NULL) {
+	free(((container_type *)data)->name);
+    }
+    SNMP_FREE(data);
+}
+
+
+static int
+_ba_release_with_free(netsnmp_container *container)
+{
+    container->for_each(container, _ba_free_container_type, NULL);
+    netsnmp_binary_array_release(container);
+
+    return 0;
+}
+
+

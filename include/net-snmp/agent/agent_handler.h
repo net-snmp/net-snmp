@@ -149,22 +149,9 @@ extern          "C" {
                                                      netsnmp_mib_handler
                                                      *);
 
+    void            netsnmp_clear_handler_list(void);
+
     inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         netsnmp_request_add_list_data(netsnmp_request_info *request,
                                       netsnmp_data_list *node);
 

@@ -108,7 +108,8 @@ unregister_sec_mod(int secmod)
          lptr = sptr, sptr = sptr->next) {
         if (sptr->securityModel == secmod) {
             lptr->next = sptr->next;
-            free(sptr);
+	    SNMP_FREE(sptr->secDef);
+            SNMP_FREE(sptr);
             return SNMPERR_SUCCESS;
         }
     }
@@ -117,6 +118,21 @@ unregister_sec_mod(int secmod)
      */
     return SNMPERR_GENERR;
 }
+
+void            
+clear_sec_mod(void)
+{
+    struct snmp_secmod_list *tmp = registered_services, *next = NULL;
+
+    while (tmp != NULL) {
+	next = tmp->next;
+	SNMP_FREE(tmp->secDef);
+	SNMP_FREE(tmp);
+	tmp = next;
+    }
+    registered_services = NULL;
+}
+
 
 struct snmp_secmod_def *
 find_sec_mod(int secmod)

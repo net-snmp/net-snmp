@@ -210,6 +210,21 @@ netsnmp_tdomain_init(void)
     netsnmp_tdomain_dump();
 }
 
+void
+netsnmp_clear_tdomain_list(void)
+{
+    netsnmp_tdomain *list = domain_list, *next = NULL;
+    DEBUGMSGTL(("tdomain", "clear_tdomain_list() called\n"));
+
+    while (list != NULL) {
+	next = list->next;
+	free(list->prefix);
+        /* attention!! list itself is not in the heap, so we must not free it! */
+	list = next;
+    }
+    domain_list = NULL;
+}
+
 
 static void
 netsnmp_tdomain_dump(void)
@@ -269,6 +284,7 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
             if (netsnmp_oid_equals(n->name, n->name_length,
                                 d->name, d->name_length) == 0) {
                 *prevNext = n->next;
+		free(n->prefix);
                 return 1;
             }
             prevNext = &(d->next);

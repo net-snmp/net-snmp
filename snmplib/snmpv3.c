@@ -615,6 +615,26 @@ setup_engineID(u_char ** eidp, const char *text)
 
 }                               /* end setup_engineID() */
 
+int
+free_engineID(int majorid, int minorid, void *serverarg,
+	      void *clientarg)
+{
+    SNMP_FREE(engineID);
+    SNMP_FREE(engineIDNic);
+    SNMP_FREE(oldEngineID);
+    return 0;
+}
+
+int
+free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
+			    void *clientarg)
+{
+    DEBUGMSGTL(("snmpv3", "free enginetime callback called\n"));
+    if (engineID != NULL)
+	free_enginetime(engineID, engineIDLength);
+    return 0;
+}
+
 void
 usm_parse_create_usmUser(const char *token, char *line)
 {
@@ -989,6 +1009,11 @@ init_snmpv3(const char *type)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            init_snmpv3_post_config, NULL);
+
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           free_enginetime_on_shutdown, NULL);
+
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            init_snmpv3_post_premib_config, NULL);

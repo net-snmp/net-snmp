@@ -14,6 +14,7 @@
 #endif
 
 #include <net-snmp/library/snmp_enum.h>
+#include <net-snmp/library/tools.h>
 
 struct snmp_enum_list_str {
     char           *name;
@@ -227,6 +228,29 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
         sliststorage = sptr;
     }
     return ret;
+}
+
+void
+clear_snmp_enum(void)
+{
+    struct snmp_enum_list_str *sptr = sliststorage, *next = NULL;
+    struct snmp_enum_list *list = NULL, *nextlist = NULL;
+
+    while (sptr != NULL) {
+	next = sptr->next;
+	list = sptr->list;
+	while (list != NULL) {
+	    nextlist = list->next;
+	    SNMP_FREE(list->label);
+	    SNMP_FREE(list);
+	    list = nextlist;
+	}
+	SNMP_FREE(sptr->name);
+	SNMP_FREE(sptr);
+	sptr = next;
+    }
+    sliststorage = NULL;
+
 }
 
 void
