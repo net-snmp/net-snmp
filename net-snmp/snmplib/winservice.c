@@ -74,8 +74,8 @@ SERVICE_TABLE_ENTRY ServiceTableEntry[] = {
 static HANDLE hServiceThread = NULL;	/* Thread Handle */
 
     /*
-     * Holds calling partys Function Entry point, that should started 
-     * when entered to service mode
+     * Holds calling partys Function Entry point, that should start
+     * when entering service mode
      */
 static INT (*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
 
@@ -146,7 +146,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       }
 
     /*
-     * Create registry entires for EventLog 
+     * Create registry entries for EventLog 
      */
     /*
      * Create registry Application event log key 
@@ -160,7 +160,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     if (RegCreateKey (HKEY_LOCAL_MACHINE, szRegKey, &hKey) != ERROR_SUCCESS)
       {
 	_stprintf (MsgErrorString, "%s %s",
-		   _T ("Unable to create registry entires"), lpszServiceDisplayName);
+		   _T ("Unable to create registry entries"), lpszServiceDisplayName);
 	DisplayError (MsgErrorString);
 	LEAVE;
       }
@@ -203,7 +203,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 			  &hKey) != ERROR_SUCCESS)
 	  {
 	    _stprintf (MsgErrorString, "%s %s",
-		       _T ("Unable to create registry entires"),
+		       _T ("Unable to create registry entries"),
 		       lpszServiceDisplayName);
 	    DisplayError (MsgErrorString);
 	    LEAVE;
@@ -220,7 +220,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 			       sizeof (TCHAR)) != ERROR_SUCCESS)
 	      {
 		_stprintf (MsgErrorString, "%s %s",
-			   _T ("Unable to create registry entires"),
+			   _T ("Unable to create registry entries"),
 			   lpszServiceDisplayName);
 		DisplayError (MsgErrorString);
 		LEAVE;
@@ -241,7 +241,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		 &hParamKey, NULL) != ERROR_SUCCESS)
 	      {
 		_stprintf (MsgErrorString, "%s %s",
-			   _T ("Unable to create registry entires"),
+			   _T ("Unable to create registry entries"),
 			   lpszServiceDisplayName);
 		DisplayError (MsgErrorString);
 		LEAVE;
@@ -268,7 +268,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		     sizeof (TCHAR)) != ERROR_SUCCESS)
 		  {
 		    _stprintf (MsgErrorString, "%s %s",
-			       _T ("Unable to create registry entires"),
+			       _T ("Unable to create registry entries"),
 			       lpszServiceDisplayName);
 		    DisplayError (MsgErrorString);
 		    LEAVE;
@@ -386,7 +386,7 @@ UnregisterService (LPCSTR lpszServiceName)
     WriteToEventLog (EVENTLOG_INFORMATION_TYPE, MsgErrorString);
 
     /*
-     * Delete registry entires for EventLog 
+     * Delete registry entries for EventLog 
      */
     _tcscpy (szRegKey, szRegAppLogKey);
     _tcscat (szRegKey, lpszServiceName);
@@ -437,13 +437,13 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
 }
 
     /*
-     * Handle command-line arguments from the user. 
-     *     Serivce related options are:
+     * Pre-process the second command-line argument from the user. 
+     *     Service related options are:
      *     -register       - registers the service
      *     -unregister     - unregisters the service
-     *     -service        - run as serivce
-     *     other command-line arguments are unaltered/ignored.
-     *     They should supplied as first arguments(other wise they will be ignored
+     *     -service        - run as service
+     *     other command-line arguments are ignored here.
+     *
      * Return: Type indicating the option specified
      */
 INT
@@ -510,7 +510,6 @@ DisplayError (LPCTSTR pszTitle)
 static BOOL
 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
 {
-/*  BOOL fReturn = FALSE; ?* not used*/
   DWORD static dwCheckpoint = 1;
   DWORD dwControls = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
   if (g_fRunningAsService == FALSE)
@@ -575,7 +574,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
   InputParams ThreadInputParams;
 
   /*
-   * Build the Input parameters to pass to thread 
+   * Build the Input parameters to pass to worker thread 
    */
 
   /*
@@ -658,7 +657,7 @@ ServiceMain (DWORD argc, LPTSTR argv[])
     }
 
   /*
-   * Register Serivce Control Handler 
+   * Register Service Control Handler 
    */
   hServiceStatus = RegisterServiceCtrlHandler (g_szAppName, ControlHandler);
   if (hServiceStatus == 0)
@@ -776,32 +775,36 @@ RunAsService (INT (*ServiceFunction) (INT, LPTSTR *))
     /*
      * Service control handler function
      * Responds to SCM commands/requests
-     * The service handles 4 commands
-     * commands - interrogate,pause, continue and stop.
+     * This service handles 4 commands
+     * - interrogate, pause, continue and stop.
      */
 VOID WINAPI
 ControlHandler (DWORD dwControl)
 {
   switch (dwControl)
     {
-    case SERVICE_CONTROL_STOP:
-      ProcessServiceStop ();	/* To stop the service */
-      break;
     case SERVICE_CONTROL_INTERROGATE:
-      ProcessServiceInterrogate ();	/* Report Current state of the Service */
+      ProcessServiceInterrogate ();
       break;
+
     case SERVICE_CONTROL_PAUSE:
-      ProcessServicePause ();	/* To puase service */
+      ProcessServicePause ();
       break;
+
     case SERVICE_CONTROL_CONTINUE:
-      ProcessServiceContinue ();	/* To continue Service */
+      ProcessServiceContinue ();
+      break;
+
+    case SERVICE_CONTROL_STOP:
+      ProcessServiceStop ();
       break;
     }
 }
 
     /*
-     * To stop the service.  This invokes registered
-     * stop function to stop the service(gracefull exit)
+     * To stop the service.
+     * If a stop function was registered, invoke it,
+     * otherwise terminate the worker thread.
      * After stopping, Service status is set to STOP in 
      * main loop
      */
@@ -810,9 +813,6 @@ ProcessServiceStop (VOID)
 {
   UpdateServiceStatus (SERVICE_STOP_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
 
-  /*
-   * Invoke registered Stop funciton 
-   */
   if (StopFunction != NULL)
     {
       (*StopFunction) ();
@@ -820,9 +820,6 @@ ProcessServiceStop (VOID)
 
   else
     {
-      /*
-       * There is no registered stop function, so terminate the thread 
-       */
       TerminateThread (hServiceThread, 0);
     }
 }
@@ -841,7 +838,7 @@ ProcessServiceInterrogate (VOID)
      * allows unlimited access. Returns a SECURITY_ATTRIBUTES
      * structure that contains the security descriptor.
      * The structure contains a dynamically allocated security
-     * descriptor that must be freed; either manually, or by
+     * descriptor that must be freed either manually, or by
      * calling FreeSecurityAttributes 
      */
 BOOL
@@ -851,7 +848,7 @@ SetSimpleSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
   SECURITY_DESCRIPTOR *pSecurityDesc = NULL;
 
   /*
-   * If an invalid address passed as a parameter, return
+   * If an invalid address is passed as a parameter, return
    * FALSE right away. 
    */
   if (!pSecurityAttr)
@@ -884,8 +881,7 @@ SetSimpleSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
 }
 
     /*
-     * This funciton Frees the security descriptor owned by a SECURITY_ATTRIBUTES
-     * structure.
+     * This function Frees the security descriptor, if any was created.
      */
 VOID
 FreeSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
@@ -895,31 +891,24 @@ FreeSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
 }
 
     /*
-     * TheadFunction
-     * This function is spawn as thread.
+     * This function runs in the worker thread
+     * until an exit is forced, or until the SCM issues the STOP command.
      * Invokes registered service function
      * Returns when called registered function returns
+     *
+     * Input:
+     *   lpParam contains argc and argv, pass to service main function 
      */
 DWORD WINAPI
 ThreadFunction (LPVOID lpParam)
 {
-
-  /*
-   * lpParam contains argc and argv, pass to service main function 
-   */
-
-  /*
-   * Declare pointer to InputParams 
-   */
-  InputParams *pInputArg;
-  pInputArg = (InputParams *) lpParam;
+  InputParams * pInputArg = (InputParams *) lpParam;
   return (*ServiceEntryPoint) (pInputArg->Argc, pInputArg->Argv);
 }
 
     /*
-     * To register STOP function with the framework
-     * This function will be inovked when SCM sends
-     * STOP command
+     * This function is called to register an application-specific function
+     *   which is invoked when the SCM stops the worker thread.
      */
 VOID
 RegisterStopFunction (VOID (*StopFunc) (VOID))
@@ -928,9 +917,9 @@ RegisterStopFunction (VOID (*StopFunc) (VOID))
 }
 
     /*
-     * To Pause the service whec SCM sends pause command
-     * Invokes PauseThread on worker Thread handle, only
-     * when Service status is Running
+     * SCM pause command invokes this function
+     * If the service is not running, this function does nothing.
+     * Otherwise, suspend the worker thread and update the status.
      */
 VOID
 ProcessServicePause (VOID)
@@ -939,9 +928,6 @@ ProcessServicePause (VOID)
     {
       UpdateServiceStatus (SERVICE_PAUSE_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
 
-      /*
-       * Invoke Thread pause on ThreadHandle 
-       */
       if (SuspendThread (hServiceThread) != -1)
 	{
 	  UpdateServiceStatus (SERVICE_PAUSED, NO_ERROR, SCM_WAIT_INTERVAL);
@@ -950,8 +936,9 @@ ProcessServicePause (VOID)
 }
 
     /*
-     * To Continue paused service
-     * Invoke ResumeThread, if thread is paused
+     * SCM resume command invokes this function
+     * If the service is not paused, this function does nothing.
+     * Otherwise, resume the worker thread and update the status.
      */
 VOID
 ProcessServiceContinue (VOID)
@@ -960,9 +947,6 @@ ProcessServiceContinue (VOID)
     {
       UpdateServiceStatus (SERVICE_CONTINUE_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
 
-      /*
-       * Invoke Thread pause on ThreadHandle 
-       */
       if (ResumeThread (hServiceThread) != -1)
 	{
 	  UpdateServiceStatus (SERVICE_RUNNING, NO_ERROR, SCM_WAIT_INTERVAL);
