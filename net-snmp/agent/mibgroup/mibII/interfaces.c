@@ -12,6 +12,8 @@
 
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -23,11 +25,22 @@
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -51,15 +64,14 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
-#endif
-#if HAVE_SYS_STREAM_H
-#include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
@@ -73,7 +85,9 @@
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #ifdef INET6
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
@@ -342,7 +356,7 @@ static void free_interface_config(void)
   write_method
   
 */
-
+#ifndef WIN32
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
@@ -627,10 +641,10 @@ var_ifEntry(struct variable *vp,
     /* XXX */
     return NULL;
   case IFADMINSTATUS:
-    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
     return (u_char *) &long_return;
   case IFOPERSTATUS:
-    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
     return (u_char *) &long_return;
     /* ifLastChange */
   case IFINOCTETS:
@@ -674,6 +688,9 @@ var_ifEntry(struct variable *vp,
     long_return = (u_long) if_msg.ifm_data.ifi_oerrors;
     return (u_char *) &long_return;
   case IFLASTCHANGE:
+#ifdef irix6
+      long_return = 0;
+#else
     if (if_msg.ifm_data.ifi_lastchange.tv_sec == 0 &&
 	if_msg.ifm_data.ifi_lastchange.tv_usec == 0)
       long_return = 0;
@@ -684,6 +701,7 @@ var_ifEntry(struct variable *vp,
 	((if_msg.ifm_data.ifi_lastchange.tv_sec - starttime.tv_sec) * 100
 	 + (if_msg.ifm_data.ifi_lastchange.tv_usec - starttime.tv_usec) / 10000);
     }
+#endif
     return (u_char *) &long_return;
   default:
     return 0;
@@ -760,37 +778,39 @@ var_ifEntry(struct variable *vp,
 	    *var_len = strlen(cp);
 	    return (u_char *)cp;
 	case IFTYPE:
-#if STRUCT_IFNET_HAS_IF_TYPE
-	    long_return = ifnet.if_type;
-#else
 	    if (if_ptr) long_return = if_ptr->type;
-	    else long_return = 1;	/* OTHER */
+            else {
+#if STRUCT_IFNET_HAS_IF_TYPE
+                long_return = ifnet.if_type;
+#else
+                long_return = 1;	/* OTHER */
 #endif
+            }
 	    return (u_char *) &long_return;
 	case IFMTU: {
 	    long_return = (long) ifnet.if_mtu;
 	    return (u_char *) &long_return;
 	}
 	case IFSPEED:
-#if STRUCT_IFNET_HAS_IF_BAUDRATE
-	    long_return = ifnet.if_baudrate;
-#elif STRUCT_IFNET_HAS_IF_SPEED
-	    long_return = ifnet.if_speed;
-#elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
 	    if (if_ptr) long_return = if_ptr->speed;
 	    else {
+#if STRUCT_IFNET_HAS_IF_BAUDRATE
+                long_return = ifnet.if_baudrate;
+#elif STRUCT_IFNET_HAS_IF_SPEED
+                long_return = ifnet.if_speed;
+#elif STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
 		if(ifnet.if_type == IFT_ETHER) long_return=10000000;
 		if(ifnet.if_type == IFT_P10) long_return=10000000;
 		if(ifnet.if_type == IFT_P80) long_return=80000000;
 		if(ifnet.if_type == IFT_ISDNBASIC) long_return=64000; /* EDSS1 only */
 		if(ifnet.if_type == IFT_ISDNPRIMARY) long_return=64000*30;
-	    }
 #else
 #if NO_DUMMY_VALUES
-	    return NULL;
+                return NULL;
 #endif
-	    long_return = (u_long) 10000000;
+                long_return = (u_long) 10000000;
 #endif
+	    }
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 	    Interface_Get_Ether_By_Index(interface, return_buf);
@@ -801,10 +821,10 @@ var_ifEntry(struct variable *vp,
 		*var_len = 0;
 	    return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 #if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
@@ -966,7 +986,7 @@ var_ifEntry(struct variable *vp,
 	 */
     hp_ifEntry.ifIndex = interface;
     hp_nmparms.objid  = ID_ifEntry;
-    hp_nmparms.buffer = &hp_ifEntry;
+    hp_nmparms.buffer = (char *)&hp_ifEntry;
     hp_nmparms.len    = &hp_len;
     if ((hp_fd=open("/dev/netman", O_RDONLY)) != -1 ) {
       if (ioctl(hp_fd, NMIOGET, &hp_nmparms) != -1 ) {
@@ -1014,10 +1034,10 @@ var_ifEntry(struct variable *vp,
 		    *var_len = 0;
 		return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 	  if ( hp_fd != -1 )
@@ -1288,21 +1308,38 @@ Interface_Scan_Init (void)
       
     while (fgets (line, sizeof(line), devin))
       {
-	struct ifnet *nnew;
-	char *stats, *ifstart = line;
+        struct ifnet *nnew;
+        char *stats, *ifstart = line;
 
-	while (*ifstart == ' ') ifstart++;
-	if ((stats = strrchr(ifstart, ':')) == NULL)  /* /proc/net/dev bug */
-            continue;
-	*stats++ = 0;
-	strcpy(ifname_buf, ifstart);
-	while (*stats == ' ') stats++;
+        if ( line[strlen(line)-1] == '\n' )
+                line[strlen(line)-1]='\0';
 
-	if ((scan_line_to_use == scan_line_2_2 &&
-	    sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err, &snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
-	    (scan_line_to_use == scan_line_2_0 && 
-	    sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt, &snd_err, &coll) != 5))
-	  continue;
+        while (*ifstart == ' ') ifstart++;
+
+        if ( (stats = strrchr(ifstart, ':')) == NULL ) {
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
+                continue;
+        }
+        if ( (scan_line_to_use == scan_line_2_2) &&
+                ( (stats-line) < 6 ) ) {
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
+        }
+
+        *stats++ = 0;
+        strcpy(ifname_buf, ifstart);
+        while (*stats == ' ') stats++;
+
+        if ((scan_line_to_use == scan_line_2_2 &&
+            sscanf (stats, scan_line_to_use, &rec_oct, &rec_pkt, &rec_err,
+&snd_oct, &snd_pkt, &snd_err, &coll) != 7) ||
+            (scan_line_to_use == scan_line_2_0 &&
+            sscanf (stats, scan_line_to_use, &rec_pkt, &rec_err, &snd_pkt,
+&snd_err, &coll) != 5)) {
+          if ( (scan_line_to_use == scan_line_2_2) &&
+                !strstr(line,"No statistics available") )
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
+          continue;
+        }
 	
 	nnew = (struct ifnet *) calloc (1, sizeof (struct ifnet));	    
 	if (nnew == NULL)  break; /* alloc error */
@@ -1512,6 +1549,21 @@ int Interface_Scan_Next(short *Index,
 	return(0);	    /* EOF */
 }
 
+#ifdef linux
+int
+Interface_Index_By_Name(char *Name, 
+			int Len)
+{
+	short ifIndex = 0;
+	char ifName[20];
+
+	Interface_Scan_Init();
+	while(Interface_Scan_Next(&ifIndex, ifName, NULL, NULL) && strcmp(Name, ifName))
+		;
+	return ifIndex;
+}
+#endif
+
 
 #else
 
@@ -1575,8 +1627,6 @@ int Interface_Scan_Next(short *Index,
 		    *Index = ++saveIndex;
 		if (Retifnet)
 		    *Retifnet = ifnet;
-		if (Retin_ifaddr)
-		    *Retin_ifaddr = in_ifaddr;
 		if (Retin_ifaddr && has_ipaddr) /* assign the in_ifaddr only
                                                    if the IF has IP-address */
 		    *Retin_ifaddr = in_ifaddr;
@@ -1614,11 +1664,14 @@ static int Interface_Scan_By_Index(int Index,
 
 
 static int Interface_Count=0;
+static time_t scan_time = 0;
 
 static int Interface_Scan_Get_Count (void)
 {
-
-	if (!Interface_Count) {
+        time_t time_now = time(NULL);
+    
+	if (!Interface_Count || (time_now > scan_time + 60)) {
+            scan_time = time_now;
 	    Interface_Scan_Init();
 	    while (Interface_Scan_Next(NULL, NULL, NULL, NULL) != 0) {
 		Interface_Count++;
@@ -1975,10 +2028,10 @@ var_ifEntry(struct variable *vp,
 			return cp;
 	}
 	case IFADMINSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFOPERSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFLASTCHANGE:
 		if (ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 &&
@@ -2041,3 +2094,190 @@ var_ifEntry(struct variable *vp,
 
 #endif /* HAVE_NET_IF_MIB_H */
 #endif
+
+#else /* WIN32 */
+#include <iphlpapi.h>
+static int
+header_ifEntry(struct variable *vp,
+	       oid *name,
+	       size_t *length,
+	       int exact,
+	       size_t *var_len,
+	       WriteMethod **write_method)
+{
+#define IFENTRY_NAME_LENGTH	10
+    oid newname[MAX_OID_LEN];
+    register int	ifIndex;
+    int result, count;
+    DWORD status = NO_ERROR;
+    DWORD statusRetry = NO_ERROR;
+    DWORD dwActualSize = 0;
+    PMIB_IFTABLE pIfTable = NULL;
+ 
+    DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces"," %d\n", exact));
+    
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
+    /* find "next" ifIndex */
+    
+/* *****Check if caching is NECESSARY****************** */
+
+    /* query for buffer size needed */
+    status = GetIfTable(pIfTable, &dwActualSize, TRUE);
+
+    if (status == ERROR_INSUFFICIENT_BUFFER)
+    {
+        /* need more space */
+        pIfTable = (PMIB_IFTABLE) malloc(dwActualSize);
+        if(pIfTable != NULL){     
+            /* Get the sorted IF table */
+            GetIfTable(pIfTable, &dwActualSize, TRUE);
+        }
+    }
+    count = pIfTable->dwNumEntries;
+    for(ifIndex = 0; ifIndex < count; ifIndex++){
+      	newname[IFENTRY_NAME_LENGTH] = (oid)pIfTable->table[ifIndex].dwIndex;
+	      result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+	      if ((exact && (result == 0)) || (!exact && (result < 0)))
+	         break;
+    }
+    if (ifIndex > count) {
+        DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
+        return MATCH_FAILED;
+    }
+
+
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);	/* default to 'long' results */
+
+    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces","\n"));
+
+    count = pIfTable->table[ifIndex].dwIndex;
+    free(pIfTable);
+    return count;
+}
+
+u_char *
+var_interfaces(struct variable *vp,
+	       oid *name,
+	       size_t *length,
+	       int exact,
+	       size_t *var_len,
+	       WriteMethod **write_method)
+{
+  if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    return NULL;
+
+  switch (vp->magic)
+    {
+    case IFNUMBER:
+      GetNumberOfInterfaces(&long_return);
+      return (u_char *)&long_return;
+    default:
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
+    }
+  return NULL;
+}
+
+u_char *
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    size_t *length,
+	    int exact,
+	    size_t *var_len,
+	    WriteMethod **write_method)
+{
+    int ifIndex;
+    static char Name[16];
+    conf_if_list *if_ptr = conf_list;
+    MIB_IFROW ifRow;
+
+    ifIndex = header_ifEntry(vp, name, length, exact, var_len, write_method);
+    if ( ifIndex == MATCH_FAILED )
+	      return NULL;
+
+    ifRow.dwIndex = ifIndex;
+    /* Get the If Table Row by passing index as argument */
+    if(GetIfEntry(&ifRow) != NO_ERROR)
+      return NULL;
+    switch (vp->magic){
+	case IFINDEX:
+	    long_return = ifIndex;
+	    return (u_char *) &long_return;
+	case IFDESCR:
+	    *var_len = ifRow.dwDescrLen;
+	    return (u_char *)ifRow.bDescr;
+	case IFTYPE:
+	    long_return = ifRow.dwType;
+	    return (u_char *) &long_return;
+	case IFMTU: 
+	    long_return = (long) ifRow.dwMtu;
+	    return (u_char *) &long_return;
+	case IFSPEED:
+      long_return = (long) ifRow.dwSpeed;
+	    return (u_char *) &long_return;
+	case IFPHYSADDRESS:
+	    *var_len = ifRow.dwPhysAddrLen;
+      memcpy(return_buf, ifRow.bPhysAddr, *var_len);
+	    return(u_char *) return_buf;
+	case IFADMINSTATUS:
+	    long_return = ifRow.dwAdminStatus;
+	    return (u_char *) &long_return;
+	case IFOPERSTATUS:
+	    long_return = ifRow.dwOperStatus;
+	    return (u_char *) &long_return;
+	case IFLASTCHANGE:
+          long_return = ifRow.dwLastChange; 
+          return (u_char *) &long_return;
+	case IFINOCTETS:
+	    long_return = ifRow.dwInOctets;
+	    return (u_char *) &long_return;
+	case IFINUCASTPKTS:
+	    long_return = ifRow.dwInUcastPkts;
+	    return (u_char *) &long_return;
+	case IFINNUCASTPKTS:
+	    long_return = ifRow.dwInNUcastPkts; 
+	    return (u_char *) &long_return;
+	case IFINDISCARDS:
+      long_return = ifRow.dwInDiscards; 
+	    return (u_char *) &long_return;
+	case IFINERRORS:
+	    long_return = ifRow.dwInErrors;
+	    return (u_char *) &long_return;
+	case IFINUNKNOWNPROTOS:
+	    long_return = ifRow.dwInUnknownProtos;
+	    return (u_char *) &long_return;
+	case IFOUTOCTETS:
+	    long_return = ifRow.dwOutOctets;
+	    return (u_char *) &long_return;
+	case IFOUTUCASTPKTS:
+	    long_return = ifRow.dwOutUcastPkts;
+	    return (u_char *) &long_return;
+	case IFOUTNUCASTPKTS:
+	    long_return = ifRow.dwOutNUcastPkts;
+	    return (u_char *) &long_return;
+	case IFOUTDISCARDS:
+      long_return = ifRow.dwOutDiscards;
+      return (u_char *) &long_return;
+	case IFOUTERRORS:
+      long_return = ifRow.dwOutErrors;
+      return (u_char *) &long_return;
+	case IFOUTQLEN:
+      long_return = ifRow.dwOutQLen;
+      return (u_char *) &long_return;
+	case IFSPECIFIC:
+	    *var_len = nullOidLen;
+	    return (u_char *) nullOid;
+	default:
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
+    }
+    return NULL;
+}
+
+#endif  /* WIN32 */
+

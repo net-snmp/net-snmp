@@ -3,6 +3,7 @@
  */
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -12,9 +13,19 @@
 #else
 #include <strings.h>
 #endif
-#include <sys/errno.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <errno.h>
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include "asn1.h"
@@ -33,9 +44,56 @@
 #include "ds_agent.h"
 #include "system.h"
 #include "snmp_logging.h"
+#include "read_config.h"
+#include "agent_read_config.h"
 
+
+void parse_master_extensions(const char *token, 
+				 char *cptr)
+{
+    int i;
+    char buf[BUFSIZ];
+
+    if ( !strcmp( cptr, "agentx" ) ||
+         !strcmp( cptr, "all"    ) ||
+         !strcmp( cptr, "yes"    ) ||
+         !strcmp( cptr, "on"     )) {
+		i = 1;
+         snmp_log(LOG_INFO,
+		"Turning on AgentX master support.\n");
+	 snmp_log(LOG_INFO,
+		"Note this is still experimental and shouldn't be used on critical systems.\n");
+    }
+    else if ( !strcmp( cptr, "no"  ) ||
+              !strcmp( cptr, "off" ))
+		i = 0;
+    else
+		i = atoi(cptr);
+
+    if (i < 0 || i > 1) {
+	sprintf(buf, "master '%s' unrecognised", cptr);
+	config_perror( buf );
+    }
+    else
+	ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, i );
+}
 
 void init_master(void)
+{
+    /*
+     * Don't set this up as part of the per-module initialisation.
+     * Delay this until the 'init_master_agent()' routine is called,
+     *   so that the config settings have been processed.
+     * This means that we can use a config directive to determine
+     *   whether or not to run as an AgentX master.
+     */
+
+  snmpd_register_config_handler("master",
+                          parse_master_extensions, NULL,
+                          "specify 'agentx' for AgentX support");
+}
+
+void real_init_master(void)
 {
     struct snmp_session sess, *session;
 

@@ -80,8 +80,9 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 #include "getopt.h"
 
-#define DS_WALK_INCLUDE_REQUESTED 1
-#define DS_WALK_PRINT_STATISTICS  2
+#define DS_WALK_INCLUDE_REQUESTED	1
+#define DS_WALK_PRINT_STATISTICS	2
+#define DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int numprinted = 0;
@@ -96,6 +97,7 @@ void usage(void)
   fprintf(stderr, "\t\t  APPOPTS values:\n");
   fprintf(stderr,"\t\t      p: Print the number of variables found.\n");
   fprintf(stderr,"\t\t      i: Include the requested OID in the search range.\n");
+  fprintf(stderr,"\t\t      c: Don't check that the returned OID's are increasing.\n");
 }
 
 void
@@ -134,10 +136,13 @@ static void optProc(int argc, char *const *argv, int opt)
                                           DS_WALK_PRINT_STATISTICS);
                         break;
 
+		    case 'c':
+                        ds_toggle_boolean(DS_APPLICATION_ID,
+                                          DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+			break;
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }
@@ -158,12 +163,15 @@ int main(int argc, char *argv[])
     int    count;
     int    running;
     int    status;
+    int    check;
     int    exitval = 0;
 
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
                        DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
                        DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
+                       DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
@@ -205,8 +213,10 @@ int main(int argc, char *argv[])
     memmove(name, root, rootlen * sizeof(oid));
     name_length = rootlen;
 
-    running = -1;
+    running = 1;
 
+    check =
+        !ds_get_boolean(DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
     if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
         snmp_get_and_print(ss, root, rootlen);
     }
@@ -234,6 +244,16 @@ int main(int argc, char *argv[])
                 (vars->type != SNMP_NOSUCHOBJECT) &&
                 (vars->type != SNMP_NOSUCHINSTANCE)){
               /* not an exception value */
+	      if (check && snmp_oid_compare(name, name_length, vars->name,
+	      				    vars->name_length) >= 0) {
+		char name_buf[SPRINT_MAX_LEN], var_buf[SPRINT_MAX_LEN];
+		sprint_objid(name_buf, name, name_length);
+		sprint_objid(var_buf, vars->name, vars->name_length);
+		fprintf(stderr, "Error: OID not increasing: %s >= %s\n",
+			name_buf, var_buf);
+	        running = 0;
+		exitval = 1;
+	      }
               memmove((char *)name, (char *)vars->name,
               vars->name_length * sizeof(oid));
               name_length = vars->name_length;

@@ -3,11 +3,13 @@ the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
 ----
-Status as of 1-Jul-2000 for Win32 platforms
+Status as of 4-Mar-2001 for Win32 platforms
 
   -  the client applications work
   -  the core framework of the agent works
   -  the 'system' and 'snmp' mibgroups work
+  -  the target, smux, notification groups compile
+  -  the agentX module compiles
   -  no other elements of the standard agent distribution work
   -  extending the agent to support enterprise-specific MIBs works
   -  running the agent on a non-standard port works
@@ -18,7 +20,8 @@ Status as of 1-Jul-2000 for Win32 platforms
   -  running the UCD agent as a subagent of an AgentX master "works"
           (bearing in mind this support is alpha-code)
 
-All applications build with MSVC++ and Cygwin.
+All applications build with Cygwin.
+All applications build with MSVC++, except that snmpdf does not build.
 
 The applications build and run fine.  The agent builds and runs,
 but there is no support for MIB-II, which means no
@@ -39,6 +42,7 @@ a program that is available from Microsoft or ACE#COMM.
 ----
 The remainder of this guide has the following sections :
 
+Removing agentx from MS VC++ build
 Building with MS VC++
 Building with OpenSSL with MS VC++
 Installing from MS VC++ build
@@ -46,6 +50,28 @@ Building with Cygwin
 Installing with Cygwin
 Build script for use with Cygwin
 Acknowledgements
+
+
+----
+Removing agentx from MS VC++ build
+
+Since this was added near the release date, we are compelled
+to offer this note.
+
+If you add the agentX modules (default), you will need to
+add "-r" to your command invocation for master agent,
+otherwise it will not start.
+
+To Remove agentx
+
+ 1. Edit win32/*.h.  Remove references to "agentx", "master", 
+    and "subagent" from these files.  Undefine the USING lines
+    that refer to AGENTX.
+
+ 2. Start Visual Studio.  Focus the libucdmibs project.
+    Remove all "agentx" related files from the project.
+
+
 
 
 ----

@@ -1,5 +1,8 @@
 /* config.h:  a general config file */
 
+/* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
+#define IN_UCD_SNMP_SOURCE 1
+
 /* UC-Davis' IANA-assigned enterprise number is 2021 */
 #define ENTERPRISE_NUMBER 2021
 
@@ -9,7 +12,7 @@
 #define SNMPV2AUTH  0x8000       /* V2 Authenticated requests only */
 
 /* default list of mibs to load */
-#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB"
+#define DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;SNMPv2-MIB;RFC1213-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;UCD-DLMOD-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
@@ -106,6 +109,7 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+#define SNMPDLMODPATH "/USR/LIB/DLMOD"
 #define SNMPLIBPATH "/USR/LIB"
 #define SNMPSHAREPATH "/USR/SHARE/SNMP"
 #define SNMPCONFPATH "/USR"
@@ -135,7 +139,7 @@
 #define KERNEL_LOC "unknown"
 
 /* location of mount table list */
-#define ETC_MNTTAB "/etc/mnttab"
+#define ETC_MNTTAB "unknown"
 
 /* location of swap device (ok if not found) */
 #undef DMEM_LOC
@@ -255,6 +259,9 @@
 
 /* Define if you have <io.h> header file. */
 #define HAVE_IO_H 1
+
+/* Define if you have <process.h> header file. (Win32-getpid) */
+#define HAVE_PROCESS_H 1
 
 /* Define if you have the <arpa/inet.h> header file.  */
 #undef HAVE_ARPA_INET_H
@@ -800,13 +807,17 @@
 
 #ifdef WIN32
 
-#define IN_UCD_SNMP_SOURCE 1
+#define HAVE_GETPID 1
 
 int strcasecmp(const char *s1, const char *s2);
 #define vsnprintf _vsnprintf
+#define snprintf  _snprintf
+
+#define EADDRINUSE	WSAEADDRINUSE
 
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
+
 
 #else
 
