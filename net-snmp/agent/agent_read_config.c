@@ -78,6 +78,7 @@
 #include "snmpd.h"
 #include "system.h"
 #include "snmp_debug.h"
+#include "snmp_alarm.h"
 #include "default_store.h"
 #include "ds_agent.h"
 #include "mib_module_includes.h"

@@ -46,6 +46,7 @@
 #include "callback.h"
 #include "agent_callbacks.h"
 #include "agent_registry.h"
+#include "snmp_alarm.h"
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
