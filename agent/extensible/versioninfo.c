@@ -4,7 +4,7 @@
 #include "mibincl.h"
 #include "wes.h"
 
-static char *VersionInfo="Ext2-3-2";
+static char *VersionInfo="Ext2-3-4";
 
 unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;

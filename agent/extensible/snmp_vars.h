@@ -12,7 +12,8 @@ struct variable2 wes_proc_variables[] = {
     {PROCMAX, INTEGER, RONLY, var_wes_proc, 1, {PROCMAX}},
     {PROCCOUNT, INTEGER, RONLY, var_wes_proc, 1, {PROCCOUNT}},
     {ERRORFLAG, INTEGER, RONLY, var_wes_proc, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_wes_proc, 1, {ERRORMSG}}
+    {ERRORMSG, STRING, RONLY, var_wes_proc, 1, {ERRORMSG}},
+  {ERRORFIX, INTEGER, RWRITE, var_wes_proc, 1, {ERRORFIX }}
 };
 
 /* the extensible commands variables */
@@ -21,7 +22,8 @@ struct variable2 wes_extensible_variables[] = {
   {ERRORNAME, STRING, RONLY, var_wes_shell, 1, {ERRORNAME}}, 
     {SHELLCOMMAND, STRING, RONLY, var_wes_shell, 1, {SHELLCOMMAND}}, 
     {ERRORFLAG, INTEGER, RONLY, var_wes_shell, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_wes_shell, 1, {ERRORMSG}}
+    {ERRORMSG, STRING, RONLY, var_wes_shell, 1, {ERRORMSG}},
+  {ERRORFIX, INTEGER, RWRITE, var_wes_shell, 1, {ERRORFIX }}
 };
 
 /* the lockd test variables */
