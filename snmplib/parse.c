@@ -339,7 +339,7 @@ static struct node *parse_compliance __P((FILE *, char *));
 static struct node *parse_moduleIdentity __P((FILE *, char *));
 static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
-struct tree *find_node __P((char *, struct tree*)); /* backwards compatability */
+
 static int read_module_internal __P((char *));
 static void read_module_replacements __P((char *));
 static void read_import_replacements __P((char *, char *));
@@ -364,7 +364,7 @@ name_hash( name )
         hash += *cp;
     return(hash);
 }
-    
+
 void
 init_mib_internals __P((void))
 {
@@ -1385,8 +1385,8 @@ parse_asntype(fp, name, ntype, ntoken)
         {
             type = get_tc(token, current_module, &ep, &tmp_hint);
         }
-        
-        
+
+
         /* textual convention */
         for(i = 0; i < MAXTC; i++){
             if (tclist[i].type == 0)
@@ -1834,7 +1834,7 @@ parse_trapDefinition(fp, name)
     type = get_token(fp, token, MAXTOKEN);
 
     np->label = Strdup(name);
-    
+
     if (type != NUMBER) {
         print_error("Expected a Number", token, type);
         free_node(np);
@@ -2117,7 +2117,7 @@ read_import_replacements( module_name, node_identifier )
 		    (mcp->tag == NULL ||
                      !strcmp( mcp->tag, node_identifier ))) ||
 		/* prefix match */
-	          ( mcp->tag_len!=0 && 
+	          ( mcp->tag_len!=0 &&
 		    !strncmp( mcp->tag, node_identifier, mcp->tag_len ))
 	   ) {
 
@@ -2208,7 +2208,7 @@ read_module_internal (name )
 		 * If any nodes left over,
 		 *   add them to the list of orphans
 		 */
-	    
+
 	    if (!orphan_nodes) return MODULE_LOADED_OK;
 	    for ( np = orphan_nodes ; np->next ; np = np->next )
 		;	/* find the end of the orphan list */
@@ -2340,7 +2340,7 @@ parse(fp, root)
         type = get_token(fp, token, MAXTOKEN);
         nnp = NULL;
 
-	/* Handle obsolete method to assign an object identifier to a 
+	/* Handle obsolete method to assign an object identifier to a
 	   module*/
 	if (lasttype == LABEL && type == LEFTBRACKET) {
 	    while (type != RIGHTBRACKET && type != ENDOFFILE)
@@ -2555,7 +2555,7 @@ get_token(fp, token,maxtlen)
                   if (!isdigit(*cp))
                       return LABEL;
                return NUMBER;
-            } 
+            }
 
             for(cp = token; *cp; cp++)
                 if (!isdigit(*cp))
@@ -2729,9 +2729,9 @@ tossObjectIdentifier(fp)
     int type;
     char token[MAXTOKEN];
     int bracketcount = 1;
-    
+
     type = get_token(fp, token, MAXTOKEN);
-    
+
     if (type != LEFTBRACKET)
         return 0;
     while ((type != RIGHTBRACKET || bracketcount > 0) && type != ENDOFFILE )
@@ -2742,7 +2742,7 @@ tossObjectIdentifier(fp)
         else if (type == RIGHTBRACKET)
           bracketcount--;
     }
-    
+
     if (type == RIGHTBRACKET)
         return OBJID;
     else

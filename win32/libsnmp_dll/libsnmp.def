@@ -49,6 +49,7 @@ EXPORTS
 	sprint_value
 	print_objid
 	sprint_objid
+	fprint_objid
 	print_description
 	get_module_node
 	get_node
@@ -57,6 +58,8 @@ EXPORTS
 	read_mib
 	read_all_mibs
 	add_mibdir
+	mib_warnings
+	save_mib_descriptions
 	add_module_replacement
 	print_subtree
 	print_ascii_dump_tree
@@ -89,6 +92,7 @@ EXPORTS
 	snmp_get_dump_packet
 	snmp_set_quick_print
 	snmp_get_quick_print
+	snmp_perror	
 	snmp_add_null_var
 	snmp_pdu_create
 	snmp_fix_pdu
