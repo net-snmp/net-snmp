@@ -318,6 +318,20 @@ search_subtree_vars(struct subtree *tp,
 						  len, write_method);
 	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
 				(access==NULL) ? "(null)" : "something" ));
+
+			/*
+			 * Check that the answer is acceptable.
+			 *  i.e. lies within the current subtree chunk
+			 *
+			 * It might be worth saving this answer just in
+			 *  case it turns out to be valid, but for now
+			 *  we'll simply discard it.
+			 */
+		    if ( access && snmp_oid_compare(name, *namelen,
+						    tp->end, tp->end_len) > 0) {
+			memcpy(name, tp->end, tp->end_len);
+			access = 0;
+		    }
 #if MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
 		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0) {
