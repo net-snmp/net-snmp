@@ -1,4 +1,4 @@
-.TH SNMP.CONF 5 "18 Dec 1999"
+.TH SNMP.CONF 5 "17 Nov 2000"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
@@ -99,6 +99,11 @@ Equivalent to -Oq
 .IP "suffixPrinting (0|1|2)"
 If the value is 1, its equivalent to -Os and if the value is 2 it's
 equivalent to -OS.
+.IP "extendedIndex (1|yes|true|0|no|false)"
+Equivalent to -OX
+.IP "noRangeCheck (1|yes|true|0|no|false)"
+disables the validation of values that is done by snmpset before issuing
+the reuqest to the agent.
 .IP "dumpPacket      (1|yes|true|0|no|false)"
 Whether the commands should dump packets by default.
 .IP "doDebugging (1|0)"
