@@ -36,6 +36,11 @@ static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      netsnmp_request_info *request,
                                      int status);
 static void     table_data_free_func(void *data);
+static int
+sparse_table_helper_handler(netsnmp_mib_handler *handler,
+                            netsnmp_handler_registration *reginfo,
+                            netsnmp_agent_request_info *reqinfo,
+                            netsnmp_request_info *requests);
 
 /** @defgroup table table: Helps you implement a table.
  *  @ingroup handler
@@ -586,8 +591,15 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
 #define SPARSE_TABLE_HANDLER_NAME "sparse_table"
 
-/** implements the sparse table helper handler */
-int
+/** implements the sparse table helper handler
+ * @internal
+ *
+ * @note
+ * This function is static to prevent others from calling it
+ * directly. It it automatically called by the table helper,
+ * 
+ */
+static int
 sparse_table_helper_handler(netsnmp_mib_handler *handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *reqinfo,
@@ -597,6 +609,28 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request;
     oid             coloid[MAX_OID_LEN];
     netsnmp_table_request_info *table_info;
+
+    /*
+     * since we don't call child handlers, warn if one was registered
+     * beneath us. A special exception for the table helper, which calls
+     * the handler directly. Use handle custom flag to only log once.
+     */
+    if((table_helper_handler != handler->access_method) &&
+       (NULL != handler->next)) {
+        /*
+         * always warn if called without our own handler. If we
+         * have our own handler, use custom bit 1 to only log once.
+         */
+        if((sparse_table_helper_handler != handler->access_method) ||
+           !(handler->flags & MIB_HANDLER_CUSTOM1)) {
+            snmp_log(LOG_WARNING, "handler (%s) registered after sparse table "
+                     "hander will not be called\n",
+                     handler->next->handler_name ?
+                     handler->next->handler_name : "" );
+            if(sparse_table_helper_handler == handler->access_method)
+                handler->flags |= MIB_HANDLER_CUSTOM1;
+        }
+    }
 
     if (reqinfo->mode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
@@ -631,12 +665,21 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
     return status;
 }
 
+/** create sparse table handler
+ */
+netsnmp_mib_handler *
+netsnmp_sparse_table_handler_get(void)
+{
+    return netsnmp_create_handler(SPARSE_TABLE_HANDLER_NAME,
+                                  sparse_table_helper_handler);
+}
+
 /** creates a table handler given the netsnmp_table_registration_info object,
  *  inserts it into the request chain and then calls
  *  netsnmp_register_handler() to register the table into the agent.
  */
 int
-netsnmp_register_sparse_table(netsnmp_handler_registration *reginfo,
+netsnmp_sparse_table_register(netsnmp_handler_registration *reginfo,
                        netsnmp_table_registration_info *tabreq)
 {
     netsnmp_inject_handler(reginfo,
