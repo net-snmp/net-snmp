@@ -54,10 +54,9 @@ static void linux_read_ip_stat ();
 
 extern void init_routes __P((void));
 
-void	init_ip( )
+void init_ip()
 {
     init_nlist( ip_nl );
-    init_routes();
 }
 
 
