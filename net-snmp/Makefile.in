@@ -38,7 +38,6 @@ install:    subdirs installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) \
 	done
-	@$(INSTALL) mib.txt $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir)
@@ -60,7 +59,7 @@ clean:
 	for i in $(SUBDIRS) ; do \
         ( cd $$i ; $(MAKE) clean ) \
 	done
-	rm -f mib.txt EXAMPLE.conf sedscript ucd-snmp.txt
+	rm -f EXAMPLE.conf sedscript ucd-snmp.txt
 
 distclean: clean configclean
 
