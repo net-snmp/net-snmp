@@ -189,7 +189,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     switch (unregister_mib_context(pdu->variables->name,
     		       pdu->variables->name_length,
 		       pdu->priority, pdu->range_subid, ubound,
-		       pdu->community, -1, pdu->flags)) {
+		       pdu->community)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:
