@@ -42,6 +42,31 @@ const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
 
 
 
+const char *
+trap_description(int trap)
+{
+    switch (trap) {
+    case SNMP_TRAP_COLDSTART:
+        return "Cold Start";
+    case SNMP_TRAP_WARMSTART:
+        return "Warm Start";
+    case SNMP_TRAP_LINKDOWN:
+        return "Link Down";
+    case SNMP_TRAP_LINKUP:
+        return "Link Up";
+    case SNMP_TRAP_AUTHFAIL:
+        return "Authentication Failure";
+    case SNMP_TRAP_EGPNEIGHBORLOSS:
+        return "EGP Neighbor Loss";
+    case SNMP_TRAP_ENTERPRISESPECIFIC:
+        return "Enterprise Specific";
+    default:
+        return "Unknown Type";
+    }
+}
+
+
+
 void
 snmptrapd_parse_traphandle(const char *token, char *line)
 {
@@ -584,10 +609,154 @@ int   print_handler(   netsnmp_pdu           *pdu,
 /*
  *  Trap handler for invoking a suitable script
  */
-		/* XXX - in snmptrapd.c */
+void
+send_handler_data(FILE * file, struct hostent *host,
+                  netsnmp_pdu *pdu, netsnmp_transport *transport)
+{
+    netsnmp_variable_list tmpvar, *vars;
+    static oid      trapoids[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 0 };
+    static oid      snmpsysuptime[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
+    static oid      snmptrapoid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+    static oid      snmptrapent[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 3, 0 };
+    static oid      snmptrapaddr[] = { 1, 3, 6, 1, 6, 3, 18, 1, 3, 0 };
+    static oid      snmptrapcom[] = { 1, 3, 6, 1, 6, 3, 18, 1, 4, 0 };
+    oid             enttrapoid[MAX_OID_LEN];
+    int             enttraplen = pdu->enterprise_length;
+    char           *tstr = NULL;
+
+    if (transport != NULL && transport->f_fmtaddr != NULL) {
+        tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+                                    pdu->transport_data_length);
+        fprintf(file, "%s\n%s\n", host ? host->h_name : tstr, tstr);
+        free(tstr);
+    } else {
+        fprintf(file, "%s\n<UNKNOWN>\n", host ? host->h_name : "<UNKNOWN>");
+    }
+    if (pdu->command == SNMP_MSG_TRAP) {
+        /*
+         * convert a v1 trap to a v2 variable binding list:
+         * The uptime and trapOID go first in the list. 
+         */
+        tmpvar.val.integer = (long *) &pdu->time;
+        tmpvar.val_len = sizeof(pdu->time);
+        tmpvar.type = ASN_TIMETICKS;
+        fprint_variable(file, snmpsysuptime,
+                        sizeof(snmpsysuptime) / sizeof(oid), &tmpvar);
+        tmpvar.type = ASN_OBJECT_ID;
+        if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+            memcpy(enttrapoid, pdu->enterprise, sizeof(oid) * enttraplen);
+            if (enttrapoid[enttraplen - 1] != 0)
+                enttrapoid[enttraplen++] = 0;
+            enttrapoid[enttraplen++] = pdu->specific_type;
+            tmpvar.val.objid = enttrapoid;
+            tmpvar.val_len = enttraplen * sizeof(oid);
+        } else {
+            trapoids[9] = pdu->trap_type + 1;
+            tmpvar.val.objid = trapoids;
+            tmpvar.val_len = 10 * sizeof(oid);
+        }
+        fprint_variable(file, snmptrapoid,
+                        sizeof(snmptrapoid) / sizeof(oid), &tmpvar);
+    }
+    /*
+     * do the variables in the pdu 
+     */
+    for (vars = pdu->variables; vars; vars = vars->next_variable) {
+        fprint_variable(file, vars->name, vars->name_length, vars);
+    }
+    if (pdu->command == SNMP_MSG_TRAP) {
+        /*
+         * convert a v1 trap to a v2 variable binding list:
+         * The enterprise goes last. 
+         */
+        tmpvar.val.string = pdu->agent_addr;
+        tmpvar.val_len = 4;
+        tmpvar.type = ASN_IPADDRESS;
+        fprint_variable(file, snmptrapaddr,
+                        sizeof(snmptrapaddr) / sizeof(oid), &tmpvar);
+        tmpvar.val.string = pdu->community;
+        tmpvar.val_len = pdu->community_len;
+        tmpvar.type = ASN_OCTET_STR;
+        fprint_variable(file, snmptrapcom,
+                        sizeof(snmptrapcom) / sizeof(oid), &tmpvar);
+        tmpvar.val.objid = pdu->enterprise;
+        tmpvar.val_len = pdu->enterprise_length * sizeof(oid);
+        tmpvar.type = ASN_OBJECT_ID;
+        fprint_variable(file, snmptrapent,
+                        sizeof(snmptrapent) / sizeof(oid), &tmpvar);
+    }
+}
+
 void
 do_external(char *cmd, struct hostent *host,
-            netsnmp_pdu *pdu, netsnmp_transport *transport);
+            netsnmp_pdu *pdu, netsnmp_transport *transport)
+{
+    FILE           *file;
+    int             oldquick, result;
+
+    DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
+    oldquick = snmp_get_quick_print();
+    snmp_set_quick_print(1);
+    if (cmd) {
+#ifndef WIN32
+        int             fd[2];
+        int             pid;
+
+        if (pipe(fd)) {
+            snmp_log_perror("pipe");
+        }
+        if ((pid = fork()) == 0) {
+            /*
+             * child 
+             */
+            close(0);
+            if (dup(fd[0]) != 0) {
+                snmp_log_perror("dup");
+            }
+            close(fd[1]);
+            close(fd[0]);
+            system(cmd);
+            exit(0);
+        } else if (pid > 0) {
+            file = fdopen(fd[1], "w");
+            send_handler_data(file, host, pdu, transport);
+            fclose(file);
+            close(fd[0]);
+            close(fd[1]);
+            if (waitpid(pid, &result, 0) < 0) {
+                snmp_log_perror("waitpid");
+            }
+        } else {
+            snmp_log_perror("fork");
+        }
+#else
+        char            command_buf[128];
+        char            file_buf[L_tmpnam];
+
+        tmpnam(file_buf);
+        file = fopen(file_buf, "w");
+        if (!file) {
+            fprintf(stderr, "fopen: %s: %s\n", file_buf, strerror(errno));
+        } else {
+            send_handler_data(file, host, pdu, transport);
+            fclose(file);
+            snprintf(command_buf, sizeof(command_buf),
+                     "%s < %s", cmd, file_buf);
+            command_buf[ sizeof(command_buf)-1 ] = 0;
+            result = system(command_buf);
+            if (result == -1)
+                fprintf(stderr, "system: %s: %s\n", command_buf,
+                        strerror(errno));
+            else if (result)
+                fprintf(stderr, "system: %s: %d\n", command_buf, result);
+            remove(file_buf);
+        }
+#endif                          /* WIN32 */
+    }
+    snmp_set_quick_print(oldquick);
+}
+
+
 
 int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
@@ -724,5 +893,180 @@ int   forward_handler( netsnmp_pdu           *pdu,
     snmp_send( ss, pdu2 );
     snmp_close( ss );
     return NETSNMPTRAPD_HANDLER_OK;
+}
+
+
+/*-----------------------------
+ *
+ * Main driving code, to process an incoming trap
+ *
+ *-----------------------------*/
+
+
+
+int
+snmp_input(int op, netsnmp_session *session,
+           int reqid, netsnmp_pdu *pdu, void *magic)
+{
+    oid stdTrapOidRoot[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5 };
+    oid snmpTrapOid[]    = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+    oid trapOid[MAX_OID_LEN+2] = {0};
+    int trapOidLen;
+    netsnmp_variable_list *vars;
+    netsnmp_trapd_handler *traph;
+    netsnmp_transport *transport = (netsnmp_transport *) magic;
+    int ret;
+    extern netsnmp_trapd_handler *netsnmp_auth_global_traphandlers;
+    extern netsnmp_trapd_handler *netsnmp_pre_global_traphandlers;
+    extern netsnmp_trapd_handler *netsnmp_post_global_traphandlers;
+
+
+    switch (op) {
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        /*
+	 * Determine the OID that identifies the trap being handled
+	 */
+        DEBUGMSGTL(("snmptrapd", "input: %x\n", pdu->command));
+        switch (pdu->command) {
+        case SNMP_MSG_TRAP:
+            /*
+	     * Convert v1 traps into a v2-style trap OID
+	     *    (following RFC 2576)
+	     */
+            if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+                trapOidLen = pdu->enterprise_length;
+                memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
+                if (trapOid[trapOidLen - 1] != 0) {
+                    trapOid[trapOidLen++] = 0;
+                }
+                trapOid[trapOidLen++] = pdu->specific_type;
+            } else {
+                memcpy(trapOid, stdTrapOidRoot, sizeof(stdTrapOidRoot));
+                trapOidLen = OID_LENGTH(stdTrapOidRoot);  /* 9 */
+                trapOid[trapOidLen++] = pdu->trap_type+1;
+            }
+            break;
+
+        case SNMP_MSG_TRAP2:
+        case SNMP_MSG_INFORM:
+            /*
+	     * v2c/v3 notifications *should* have snmpTrapOID as the
+	     *    second varbind, so we can go straight there.
+	     *    But check, just to make sure
+	     */
+            vars = pdu->variables;
+            if (vars)
+                vars = vars->next_variable;
+            if (!vars || snmp_oid_compare(vars->name, vars->name_length,
+                                          snmpTrapOid, OID_LENGTH(snmpTrapOid))) {
+	        /*
+		 * Didn't find it!
+		 * Let's look through the full list....
+		 */
+		for ( vars = pdu->variables; vars; vars=vars->next_variable) {
+                    if (!snmp_oid_compare(vars->name, vars->name_length,
+                                          snmpTrapOid, OID_LENGTH(snmpTrapOid)))
+                        break;
+                }
+                if (!vars) {
+	            /*
+		     * Still can't find it!  Give up.
+		     */
+		    return 1;		/* ??? */
+		}
+	    }
+            memcpy(trapOid, vars->val.objid, vars->val_len);
+            trapOidLen = vars->val_len /sizeof(oid);
+            break;
+
+        default:
+            /* SHOULDN'T HAPPEN! */
+            return 1;	/* ??? */
+	}
+        DEBUGMSGTL(( "snmptrapd", "Trap OID: "));
+        DEBUGMSGOID(("snmptrapd", trapOid, trapOidLen));
+        DEBUGMSG(( "snmptrapd", "\n"));
+
+
+        /*
+	 *  OK - We've found the Trap OID used to identify this trap.
+         *  Call each of the various lists of handlers:
+         *     a) authentication-related handlers,
+         *     b) other handlers to be applied to all traps
+         *		(*before* trap-specific handlers)
+         *     c) the handler(s) specific to this trap
+t        *     d) any other global handlers
+         *
+	 *  In each case, a particular trap handler can abort further
+         *     processing - either just for that particular list,
+         *     or for the trap completely.
+         *
+	 *  This is particularly designed for authentication-related
+	 *     handlers, but can also be used elsewhere.
+         *
+         *  OK - Enough waffling, let's get to work.....
+	 */
+
+        /*
+	 *  a) authentication handlers
+	 */
+        traph = netsnmp_auth_global_traphandlers;
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+
+        /*
+	 *  b) pre-specific global handlers
+	 */
+        traph = netsnmp_pre_global_traphandlers;
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+
+        /*
+	 *  c) trap-specific handlers
+	 */
+        traph = netsnmp_get_traphandler(trapOid, trapOidLen);
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+
+        /*
+	 *  d) other global handlers
+	 */
+        traph = netsnmp_post_global_traphandlers;
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+        break;
+
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
+        fprintf(stderr, "Timeout: This shouldn't happen!\n");
+        break;
+    default:
+        fprintf(stderr, "Unknown operation (%d): This shouldn't happen!\n", op);
+        break;
+    }
+    return 0;
 }
 
