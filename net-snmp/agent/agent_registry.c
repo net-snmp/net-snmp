@@ -344,7 +344,7 @@ register_mib_context(const char *moduleName,
   subtree->priority = priority;
   subtree->timeout  = timeout;
   subtree->range_subid = range_subid;
-  subtree->range_ubound = range_subid;
+  subtree->range_ubound = range_ubound;
   subtree->session = ss;
   subtree->flags = (u_char)flags;  /* used to identify instance oids */
   res = load_subtree(subtree);
@@ -427,6 +427,7 @@ register_mib_reattach_subtree(struct subtree *it) {
       reg_parms.range_subid  = it->range_subid;
       reg_parms.range_ubound = it->range_ubound;
       reg_parms.timeout = it->timeout;
+      reg_parms.flags = it->flags;
       snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_REGISTER_OID,
                           &reg_parms);
   }
@@ -545,9 +546,13 @@ register_mib_table_row(const char *moduleName,
 
     subtree->priority = priority;
     subtree->timeout  = timeout;
-    subtree->range_subid = var_subid;
     subtree->session = ss;
     subtree->flags = (u_char)flags;
+
+    /*  Since we're not really making use of this in the normal way:  */
+
+    subtree->range_subid = 0;
+    subtree->range_ubound = 0;
 
     /*
      * load the subtree
@@ -657,6 +662,7 @@ unregister_mib_context( oid *name, size_t len, int priority,
   reg_parms.priority = priority;
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
+  reg_parms.flags = 0x00;  /*  this is okay I think  */
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREGISTER_OID,
                       &reg_parms);
 
@@ -841,8 +847,9 @@ struct subtree *find_subtree_previous(oid *name,
 	myptr = subtrees;	/* look through everything */
 
   for( ; myptr != NULL; previous = myptr, myptr = myptr->next) {
-    if (snmp_oid_compare(name, len, myptr->start, myptr->start_len) < 0)
+    if (snmp_oid_compare(name, len, myptr->start, myptr->start_len) < 0) {
       return previous;
+    }
   }
   return previous;
 }
@@ -939,10 +946,11 @@ void dump_registry( void )
     for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
 	sprint_objid(start_oid, myptr->start, myptr->start_len);
 	sprint_objid(end_oid, myptr->end, myptr->end_len);
-	printf("%c %s - %s %c\n",
-		( myptr->variables ? ' ' : '(' ),
-		  start_oid, end_oid,
-		( myptr->variables ? ' ' : ')' ));
+	printf("%s%c %s - %s %c\n",
+	       (myptr->flags & FULLY_QUALIFIED_INSTANCE)?"[FQI] ":"",
+	       ( myptr->variables ? ' ' : '(' ),
+	       start_oid, end_oid,
+	       ( myptr->variables ? ' ' : ')' ));
 	for( myptr2 = myptr ; myptr2 != NULL; myptr2 = myptr2->children) {
 	    if ( myptr2->label && myptr2->label[0] )
 		printf("\t%s\n", myptr2->label);
