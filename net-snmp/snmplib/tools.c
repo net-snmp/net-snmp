@@ -921,10 +921,10 @@ timeval_tticks(struct timeval *tv)
 
 char *netsnmp_getenv(const char *name)
 {
-  char *temp = NULL;  
 #ifndef WIN32
   return (getenv(name));
 #else
+  char *temp = NULL;  
   HKEY hKey;
   unsigned char * key_value = NULL;
   DWORD key_value_size = 0;
