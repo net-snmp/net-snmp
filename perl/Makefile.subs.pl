@@ -1,27 +1,3 @@
-use ExtUtils::MakeMaker;
-use Config;
-use Getopt::Long;
-require 5;
-
-%MakeParams = InitMakeParams();
-
-WriteMakefile(%MakeParams);
-
-sub InitMakeParams {
-    $nsconfig="net-snmp-config"; # in path by default
-    my %Params = (
-		  'NAME' => 'Bundle::NetSNMP',
-		  'DIR' => [qw(default_store ASN OID agent SNMP)]
-		  );
-
-    # bogus, but these options need to be passed to the lower levels
-    $opts = NetSNMPGetOpts("./");
-
-    return(%Params);
-}
-
-# common subroutines -- DO NOT EDIT.
-# They are imported from the Makefile.subs.pl file
 sub NetSNMPGetOpts {
     my %ret;
     my $rootpath = shift;
