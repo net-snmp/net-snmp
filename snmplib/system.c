@@ -78,7 +78,11 @@ SOFTWARE.
 #include <sys/sysctl.h>
 #endif
 
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
