@@ -107,18 +107,15 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
     my $sysDescr = $sess->get('sysDescr.0');
     my $sysId = SNMP::translateObj($sess->get('sysObjectID.0'));
     my $versiontag = $sess->get('versionTag.0');
+    my $sysuptime = $sess->get('sysUpTime.0');
 
-    if ($sysDescr eq "" || $sysId eq "" || $versiontag eq "") {
+    if ($sysDescr eq "" || $sysId eq "" || $versiontag eq "" || 
+	$sysuptime eq "") {
 	hosterror("$host","Problem collecting basic info");
 	next;
     }
 
-    if ($sysDescr ne "$hostrow->{'sysDescr'}" ||
-	$versiontag ne "$hostrow->{'versionTag'}" ||
-	$sysId ne "$hostrow->{'sysObjectId'}" ||
-	$md5versiontag ne "$hostrow->{'ucdMd5SumVersion'}") {
-	$dbh->do("update hostgroups set sysObjectId = '$sysId', sysDescr = '$sysDescr', versionTag = '$versiontag' where host = '$host'");
-    }
+    $dbh->do("update hostgroups set sysObjectId = '$sysId', sysDescr = '$sysDescr', versionTag = '$versiontag', sysUpTime = '$sysuptime' where host = '$host'");
 
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";
