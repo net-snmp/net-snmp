@@ -495,11 +495,13 @@ static struct module_compatability module_map[] = {
     {"RFC1213-MIB", "UDP-MIB", "udp", 3},
     {"RFC1213-MIB", "SNMPv2-SMI", "transmission", 0},
     {"RFC1213-MIB", "SNMPv2-MIB", "snmp", 4},
+    {"RFC1231-MIB", "TOKENRING-MIB", NULL, 0},
     {"RFC1271-MIB", "RMON-MIB", NULL, 0},
     {"RFC1286-MIB", "SOURCE-ROUTING-MIB", "dot1dSr", 7},
     {"RFC1286-MIB", "BRIDGE-MIB", NULL, 0},
     {"RFC1315-MIB", "FRAME-RELAY-DTE-MIB", NULL, 0},
     {"RFC1316-MIB", "CHARACTER-MIB", NULL, 0},
+    {"RFC1406-MIB", "DS1-MIB", NULL, 0},
     {"RFC-1213", "RFC1213-MIB", NULL, 0},
 };
 
