@@ -32,7 +32,6 @@ extern int
 netsnmp_access_interface_container_arch_load(netsnmp_container* container,
                                              u_int load_flags);
 
-
 /**---------------------------------------------------------------------*/
 /*
  * container functions
@@ -69,6 +68,12 @@ netsnmp_access_interface_container_init(u_int flags)
 }
 
 /**
+ * load interface information in specified container
+ *
+ * @param container empty container, or NULL to have one created for you
+ * @param load_flags flags to modify behaviour. Examples:
+ *                   NETSNMP_ACCESS_INTERFACE_INIT_ADDL_IDX_BY_NAME
+ *
  * @retval NULL  error
  * @retval !NULL pointer to container
  */
@@ -80,7 +85,7 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
     DEBUGMSGTL(("access:interface:container", "load\n"));
 
     if (NULL == container)
-        container = netsnmp_container_find("access_interface:table_container");
+        container = netsnmp_access_interface_container_init(load_flags);
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_interface\n");
         return NULL;
@@ -201,7 +206,6 @@ netsnmp_access_interface_entry_create(const char *name)
      * make some assumptions
      */
     entry->if_connector_present = 1;
-    entry->if_admin_status = IFADMINSTATUS_UP;
     entry->if_oper_status = IFOPERSTATUS_UP;
 
     entry->oid_index.len = 1;
@@ -213,7 +217,7 @@ netsnmp_access_interface_entry_create(const char *name)
      *  a) Using the configure overrides
      *  b) Via (architecture-specific) utility routines
      */
-    snmp_log(LOG_ERR, "netsnmp_access_interface_entry_info_init(entry);\n");
+    snmp_log(LOG_ERR, "netsnmp_access_interface_entry_create(entry);\n");
 
     return entry;
 }
@@ -231,12 +235,6 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
 
     if (NULL != entry->if_descr)
         free(entry->if_descr);
-
-    if (NULL != entry->if_alias)
-        free(entry->if_alias);
-
-    if (NULL != entry->if_old_alias)
-        free(entry->if_old_alias);
 
     if (NULL != entry->if_paddr)
         free(entry->if_paddr);
@@ -260,7 +258,7 @@ _access_interface_entry_compare_name(const void *lhs, const void *rhs)
 
 /**
  */
-void
+static void
 _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 {
     netsnmp_access_interface_entry_free(entry);
@@ -268,7 +266,7 @@ _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 
 /**
  */
-void
+static void
 _access_interface_entry_set_index(netsnmp_interface_entry *entry, const char *name)
 {
     if(NULL != name) {
@@ -284,4 +282,73 @@ _access_interface_entry_set_index(netsnmp_interface_entry *entry, const char *na
     }
     else
         entry->index = 0;
+}
+
+/**
+ * copy interface entry data
+ *
+ * @retval -2 : malloc failed
+ * @retval -1 : interfaces not the same
+ * @retval  0 : no error
+ */
+int
+netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
+                                    netsnmp_interface_entry * rhs)
+{
+    DEBUGMSGTL(("access:interface", "copy\n"));
+    
+    if ((NULL == lhs) || (NULL == rhs) ||
+        (0 != strncmp(lhs->if_name, rhs->if_name, strlen(rhs->if_name))))
+        return -1;
+
+    /*
+     * code doesn't take the possibility of dynamically changing
+     * flags into account.
+     */
+    netsnmp_assert(lhs->flags == rhs->flags);
+
+    /*
+     * copy stats
+     */
+    memcpy(&lhs->stats, &rhs->stats, sizeof(rhs->stats));
+    
+    /*
+     * update data
+     */
+    if((NULL != lhs->if_descr) && (NULL != rhs->if_descr) &&
+       (0 == strcmp(lhs->if_descr, rhs->if_descr)))
+        ;
+    else {
+        if (NULL != lhs->if_descr)
+            SNMP_FREE(lhs->if_descr);
+        if (rhs->if_descr) {
+            lhs->if_descr = strdup(rhs->if_descr);
+            if(NULL == lhs->if_descr)
+                return -2;
+        }
+    }
+    lhs->if_type = rhs->if_type;
+    lhs->if_speed = rhs->if_speed;
+    lhs->if_speed_high = rhs->if_speed_high;
+    lhs->if_mtu = rhs->if_mtu;
+    lhs->if_discontinuity = rhs->if_discontinuity;
+    lhs->if_oper_status = rhs->if_oper_status;
+    lhs->if_promiscuous = rhs->if_promiscuous;
+    lhs->if_connector_present = rhs->if_connector_present;
+    if(lhs->if_paddr_len == rhs->if_paddr_len) {
+        if(rhs->if_paddr_len)
+            memcpy(lhs->if_paddr,rhs->if_paddr,rhs->if_paddr_len);
+    } else {
+        if (NULL != lhs->if_paddr)
+            SNMP_FREE(lhs->if_paddr);
+        if (rhs->if_paddr) {
+            lhs->if_paddr = malloc(rhs->if_paddr_len);
+            if(NULL == lhs->if_paddr)
+                return -2;
+            memcpy(lhs->if_paddr,rhs->if_paddr,rhs->if_paddr_len);
+        }
+    }
+    lhs->if_paddr_len = rhs->if_paddr_len;
+    
+    return 0;
 }
