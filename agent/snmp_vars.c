@@ -302,8 +302,11 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     }
     *write_method = NULL;
     for (y = 0, tp = subtrees; y < (subtree_old_size()
+#ifdef USING_EXTENSIBLE_MODULE
+                                    + numrelocs
+#endif
 #ifdef USING_PASS_MODULE
-                                    + numrelocs + numpassthrus
+                                    + numpassthrus
 #endif
       ); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
