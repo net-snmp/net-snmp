@@ -1067,9 +1067,14 @@ main(int argc, char *argv[])
 	trap2_fmt_str = strdup(trap1_fmt_str_remember);
     }
 
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY)) {
+        /* just starting up to process specific configuration and then
+           shutting down immediately. */
+        running = 0;
+    }
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stderr */
-    if (dofork) {
+    if (dofork && running) {
       int fd;
 
       switch (fork()) {
