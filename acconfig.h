@@ -554,6 +554,10 @@
     available.   */
 #undef SNMP_TRANSPORT_UDP_DOMAIN
 
+/*  This is defined if support for the "callback" transport domain is
+    available.   */
+#undef SNMP_TRANSPORT_CALLBACK_DOMAIN
+
 /*  This is defined if support for the TCP/IP transport domain is
     available.  */
 #undef SNMP_TRANSPORT_TCP_DOMAIN
