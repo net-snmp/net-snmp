@@ -125,6 +125,7 @@ typedef long    fd_mask;
 char           *logfile = 0;
 int             Print = 0;
 int             Syslog = 0;
+int             SyslogTrap = 0;
 int             Event = 0;
 int             dropauth = 0;
 int             running = 1;
@@ -532,20 +533,23 @@ snmp_input(int op,
                     } else {
                         cp = (char *) oidbuf;
                     }
-                    snmp_log(LOG_WARNING, "%s: %s Trap (%s%s) Uptime: %s%s%s",
+                    if (! SyslogTrap) {
+						snmp_log(LOG_WARNING, "%s: %s Trap (%s%s) Uptime: %s%s%s",
                              inet_ntoa(*((struct in_addr *) pdu-> agent_addr)),
                              trap_description(pdu->trap_type), cp,
                              (otrunc ? " [TRUNCATED]" : ""),
                              uptime_string(pdu->time, buf), rbuf,
                              (trunc ? " [TRUNCATED]\n" : ""));
+					}
                     free(oidbuf);
                 } else {
-                    snmp_log(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s%s",
+                    if (! SyslogTrap) {
+						snmp_log(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s%s",
                              inet_ntoa(*((struct in_addr *) pdu->agent_addr)),
                              trap_description(pdu->trap_type),
-                             pdu->specific_type, 
-			     uptime_string(pdu->time, buf), rbuf,
+                             pdu->specific_type, uptime_string(pdu->time, buf), rbuf,
                              (trunc ? " [TRUNCATED]\n" : ""));
+					}
                 }
             }
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
@@ -661,13 +665,17 @@ snmp_input(int op,
                     tstr = transport->f_fmtaddr(transport,
                                              pdu->transport_data,
                                              pdu->transport_data_length);
-                    snmp_log(LOG_WARNING, "%s [%s]: Trap %s%s\n",
+                    if (! SyslogTrap) {
+						snmp_log(LOG_WARNING, "%s [%s]: Trap %s%s\n",
                              host ? host->h_name : tstr, tstr, rbuf,
                              (trunc ? "[TRUNCATED]" : ""));
+					}
                     free(tstr);
                 } else {
-                    snmp_log(LOG_WARNING, "<UNKNOWN>: Trap %s%s", rbuf,
+                    if (! SyslogTrap) {
+						snmp_log(LOG_WARNING, "<UNKNOWN>: Trap %s%s", rbuf,
                              (trunc ? "[TRUNCATED]\n" : ""));
+					}
                 }
             }
 
@@ -783,7 +791,8 @@ usage(void)
     fprintf(stderr,
             "  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
 #if HAVE_GETPID
-    fprintf(stderr, "  -u FILE\t\tstore process id in FILE\n");
+    fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
+	fprintf(stderr, "  -u FILE\t\tstore process id in FILE\n");
 #endif
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
     fprintf(stderr,
@@ -887,7 +896,7 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
 int
 main(int argc, char *argv[])
 {
-    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:vO:-:";
+    char            options[128] = "ac:CdD::efF:hHl:m:M:no:PqsS:tvO:-:";
     netsnmp_session *sess_list = NULL, *ss = NULL;
     netsnmp_transport *transport = NULL;
     int             arg, i = 0;
@@ -1116,6 +1125,11 @@ main(int argc, char *argv[])
         case 's':
             Syslog++;
             break;
+
+        case 't':
+            SyslogTrap++;
+            break;
+
 
 #if HAVE_GETPID
         case 'u':
