@@ -611,7 +611,7 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
 		      netsnmp_session *session,
 		      netsnmp_pdu *pdu)
 {
-  size_t ilen = *out_len, range_offset = 0, prefix_offset = 0;
+  size_t ilen = *out_len, prefix_offset = 0;
   netsnmp_variable_list *vp;
   int inc, i = 0;
   const int network_order = pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER;
@@ -719,7 +719,6 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
     *(*buf + *out_len) = (u_char)pdu->priority;
     (*out_len)++;
     *(*buf + *out_len) = (u_char)pdu->range_subid;
-    range_offset = *out_len;
     (*out_len)++;
     *(*buf + *out_len) = (u_char)0;
     (*out_len)++;
@@ -756,15 +755,6 @@ _agentx_realloc_build(u_char **buf, size_t *buf_len, size_t *out_len,
 	return 0;
       }
       DEBUGINDENTLESS();
-
-      /*  If the OID has been 'compacted', then tweak the packet's
-	  'range_subid' to reflect this.  */
-      if (*(*buf + prefix_offset) != 0) {
-	*(*buf + range_offset) -= 5;
-	DEBUGPRINTINDENT("dumpv_send");
-	DEBUGMSG(("dumpv_send", "  Range SubID tweaked:\t%d\n",
-		  *(*buf + prefix_offset)));
-      }
     }
     break;
 	    
@@ -1515,10 +1505,6 @@ agentx_parse(netsnmp_session *session, netsnmp_pdu *pdu, u_char *data, size_t le
                 }
 
 		if (pdu->range_subid) {
-		    if (*prefix_ptr) {
-			pdu->range_subid += 5;
-		    }
-
 		    range_bound = agentx_parse_int(bufp,
 				 pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
 		    bufp    += 4;
