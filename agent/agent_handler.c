@@ -113,7 +113,8 @@ netsnmp_create_handler(const char *name,
  *  access_method function, a registration location oid and the modes
  *  the handler supports. If modes == 0, then modes will automatically
  *  be set to the default value of only HANDLER_CAN_DEFAULT, which is
- *  by default read-only GET and GETNEXT requests.
+ *  by default read-only GET and GETNEXT requests. A hander which supports
+ *  sets but not row creation should set us a mode of HANDLER_CAN_SET_ONLY.
  *  @note This ends up calling netsnmp_create_handler(name, handler_access_method)
  *  @param name is the handler name and is copied then assigned to
  *              netsnmp_handler_registration->handlerName.
@@ -151,10 +152,10 @@ netsnmp_create_handler(const char *name,
  *  @see netsnmp_register_handler()
  */
 netsnmp_handler_registration *
-netsnmp_create_handler_registration(const char *name,
-                                    Netsnmp_Node_Handler *
-                                    handler_access_method, oid * reg_oid,
-                                    size_t reg_oid_len, int modes)
+netsnmp_handler_registration_create(const char *name,
+                                    netsnmp_mib_handler *handler,
+                                    oid * reg_oid, size_t reg_oid_len,
+                                    int modes)
 {
     netsnmp_handler_registration *the_reg;
     the_reg = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
@@ -166,13 +167,25 @@ netsnmp_create_handler_registration(const char *name,
     else
         the_reg->modes = HANDLER_CAN_DEFAULT;
 
-    the_reg->handler = netsnmp_create_handler(name, handler_access_method);
+    the_reg->handler = handler;
     if (name)
         the_reg->handlerName = strdup(name);
     memdup((u_char **) & the_reg->rootoid, (const u_char *) reg_oid,
            reg_oid_len * sizeof(oid));
     the_reg->rootoid_len = reg_oid_len;
     return the_reg;
+}
+
+netsnmp_handler_registration *
+netsnmp_create_handler_registration(const char *name,
+                                    Netsnmp_Node_Handler *
+                                    handler_access_method, oid * reg_oid,
+                                    size_t reg_oid_len, int modes)
+{
+    return
+        netsnmp_handler_registration_create(name,
+                                            netsnmp_create_handler(name, handler_access_method),
+                                            reg_oid, reg_oid_len, modes);
 }
 
 /** register a handler, as defined by the netsnmp_handler_registration pointer. */
@@ -210,6 +223,8 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo)
      */
     if (0 == reginfo->modes) {
         reginfo->modes = HANDLER_CAN_DEFAULT;
+        snmp_log(LOG_WARNING, "no registration modes specified for %s. "
+                 "Defaulting to %p\n", reginfo->handlerName, reginfo->modes);
     }
 
     /*
@@ -287,18 +302,23 @@ netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
                               netsnmp_mib_handler *handler,
                               const char *before_what)
 {
-    netsnmp_mib_handler *nexth, *prevh = NULL;
     if (handler == NULL || reginfo == NULL) {
         snmp_log(LOG_ERR, "netsnmp_inject_handler() called illegally\n");
         return SNMP_ERR_GENERR;
     }
     if (reginfo->handler == NULL) {
-        snmp_log(LOG_ERR, "no handler specified.");
-        return SNMP_ERR_GENERR;
+        DEBUGMSGTL(("handler:inject", "injecting %s\n", handler->handler_name));
     }
-    DEBUGMSGTL(("handler:inject", "injecting %s before %s\n",
-                handler->handler_name, reginfo->handler->handler_name));
+    else {
+        DEBUGMSGTL(("handler:inject", "injecting %s before %s\n",
+                    handler->handler_name, reginfo->handler->handler_name));
+    }
     if (before_what) {
+        netsnmp_mib_handler *nexth, *prevh = NULL;
+        if (reginfo->handler == NULL) {
+            snmp_log(LOG_ERR, "no handler to inject before\n");
+            return SNMP_ERR_GENERR;
+        }
         for(nexth = reginfo->handler; nexth;
             prevh = nexth, nexth = nexth->next) {
             if (strcmp(nexth->handler_name, before_what) == 0)
@@ -350,6 +370,7 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
         return SNMP_ERR_GENERR;
     }
 
+    do {
     nh = next_handler->access_method;
     if (!nh) {
         snmp_log(LOG_ERR, "no access method specified in handler %s.",
@@ -368,6 +389,21 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
 
     DEBUGMSGTL(("handler:returned", "handler %s returned %d\n",
                 next_handler->handler_name, ret));
+
+    if (! (next_handler->flags & MIB_HANDLER_AUTO_NEXT))
+        break;
+
+    /*
+     * did handler signal that it didn't want auto next this time around?
+     */
+    if(next_handler->flags & MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE) {
+        next_handler->flags &= ~MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        break;
+    }
+
+    next_handler = next_handler->next;
+
+    } while(next_handler);
 
     return ret;
 }
@@ -922,6 +958,10 @@ netsnmp_init_handler_conf(void)
     se_add_pair_to_slist("agent_mode", strdup("SET_FREE"), MODE_SET_FREE);
     se_add_pair_to_slist("agent_mode", strdup("SET_UNDO"), MODE_SET_UNDO);
 
+    /*
+     * xxx-rks: hmmm.. will this work for modes which are or'd together?
+     *          I'm betting not...
+     */
     se_add_pair_to_slist("handler_can_mode", strdup("GET/GETNEXT"),
                          HANDLER_CAN_GETANDGETNEXT);
     se_add_pair_to_slist("handler_can_mode", strdup("SET"),
