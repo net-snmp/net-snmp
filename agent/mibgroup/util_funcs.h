@@ -28,4 +28,9 @@ int parse_miboid (const char *, oid *);
 void string_append_int (char *, int);
 void wait_on_exec (struct extensible *);
 
+int marker_uptime( marker_t pm );
+int marker_tticks( marker_t pm );
+int timeval_uptime( struct timeval *tv );
+int timeval_tticks( struct timeval *tv );
+
 #endif /* _MIBGROUP_UTIL_FUNCS_H */
