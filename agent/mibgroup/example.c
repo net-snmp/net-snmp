@@ -10,41 +10,10 @@
    return types and various defines and structures. */
 #include "mibincl.h"
 
-/* for the nlist struct */
-#include <nlist.h>
-
 /* include our .h file */
 #include "example.h"
 
 int header_example __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
-
-	/*********************
-	 *
-	 *  Kernel & interface information,
-	 *   and internal forward declarations
-	 *
-	 *********************/
-
-/* if you have to read stuff out of the kernel using nlist, you can
-   define an nlist structure and load it in the init_example function.
-   We don't actually need one, but its here for an example. */
-
-static struct nlist example_nl[] = {
-#define N_EXAMPLESTAT    0
-#define N_MIN_EXAMPLE    1
-#define N_MAX_EXAMPLE    2
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_examplestat"},
-        { "_example_min"},
-        { "_example_max"},
-#else
-        { "examplestat"},
-        { "example_min"},
-        { "example_max"},
-#endif
-        { 0 },
-};
-
 
 	/*********************
 	 *
@@ -62,9 +31,9 @@ static struct nlist example_nl[] = {
 
 void	init_example( )
 {
-  /* call init_nlist to load the nlist structure defined above.  We
+  /* call auto_nlist to load the nlist symbols.  We
      actually don't need it, so its commented out. */
-  /* init_nlist( example_nl ); */
+  /* auto_nlist( "example_symbol" ); */
 }
 
 #define MATCH_FAILED	1

@@ -266,7 +266,9 @@ extern int kmem, mem, swap;
 #include <sys/file.h>
 #include <sys/vm.h>
 #include <machine/pte.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
 static struct nlist proc_nl[] = {
 	{ "_nproc" },
