@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include <net-snmp/struct.h>
+#include "struct.h"
 
 void            Exit(int);
 int             shell_command(struct extensible *);
