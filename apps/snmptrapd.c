@@ -706,12 +706,14 @@ int main(int argc, char *argv[])
 	    }
 	    break;
 	case 'P':
+            dofork = 0;
             snmp_enable_stderrlog();
 	    Print++;
 	    break;
 
         case 'o':
 	    Print++;
+            logfile = optarg;
             snmp_enable_filelog(optarg, 0);
             break;
             
@@ -805,7 +807,7 @@ int main(int argc, char *argv[])
 
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
-    if (!Print && dofork) {
+    if (dofork) {
       int fd, fdnum;
 
       switch (fork()) {
@@ -826,10 +828,6 @@ int main(int argc, char *argv[])
 		dup2(fd, STDOUT_FILENO);
 		dup2(fd, STDERR_FILENO);
 		close(fd);
-                /* Close all unnecessary file descriptors */
-		fdnum = getdtablesize();
-		for ( fd = (STDERR_FILENO + 1); fd < fdnum; fd++ )
-			close(fd);
 		break;
 
 	default:
