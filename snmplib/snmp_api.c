@@ -1762,8 +1762,12 @@ snmpv3_build(u_char **pkt, size_t *pkt_len, size_t *offset,
 	}
 	pdu->contextNameLen = session->contextNameLen;
       }
-      if (pdu->securityModel == SNMP_DEFAULT_SECMODEL)
+      if (pdu->securityModel == SNMP_DEFAULT_SECMODEL) {
           pdu->securityModel = session->securityModel;
+	  if (pdu->securityModel == SNMP_DEFAULT_SECMODEL) {
+	    pdu->securityModel = SNMP_SEC_MODEL_USM;
+	  }
+      }
       if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
 	if (session->securityNameLen == 0){
 	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
@@ -1910,71 +1914,6 @@ snmpv3_header_build(struct snmp_pdu *pdu, u_char *packet,
 }  /* end snmpv3_header_build() */
 
 #ifdef USE_REVERSE_ASNENCODING
-static u_char *
-snmpv3_header_rbuild(struct snmp_pdu *pdu, u_char *packet,
-                     size_t *out_length, size_t length, u_char **msg_hdr_e)
-{
-    u_char 			*cp = packet;
-    u_char			 msg_flags;
-    long			 max_size;
-    long			 sec_model;
-
-    /* msgSecurityModel */
-    sec_model = pdu->securityModel;
-    DEBUGDUMPHEADER("send", "msgSecurityModel");
-    cp = asn_rbuild_int(cp, out_length,
-		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-		       &sec_model, sizeof(sec_model));
-    DEBUGINDENTLESS();
-    if (cp == NULL) return NULL;
-
-
-    /* msgFlags */
-    snmpv3_calc_msg_flags(pdu->securityLevel, pdu->command, &msg_flags);
-    DEBUGDUMPHEADER("send", "msgFlags");
-    cp = asn_rbuild_string(cp, out_length,
-			  (u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-			  &msg_flags, sizeof(msg_flags));
-    DEBUGINDENTLESS();
-    if (cp == NULL) return NULL;
-
-
-    /* msgMaxSize */
-    max_size = SNMP_MAX_MSG_SIZE;
-    DEBUGDUMPHEADER("send", "msgMaxSize");
-    cp = asn_rbuild_int(cp, out_length,
-		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-		       &max_size, sizeof(max_size));
-    DEBUGINDENTLESS();
-    if (cp == NULL) return NULL;
-
-
-    /* msgID */
-    DEBUGDUMPHEADER("send", "msgID");
-    cp = asn_rbuild_int(cp, out_length,
-		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-		       &pdu->msgid, sizeof(pdu->msgid));
-    DEBUGINDENTLESS();
-    if (cp == NULL) return NULL;
-
-
-    /* Global data sequence */
-    cp = asn_rbuild_sequence(cp, out_length,
-			    (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                            packet - cp);
-    if (cp == NULL) return NULL;
-
-
-    /* store the version field - msgVersion */
-    DEBUGDUMPHEADER("send", "SNMP Version Number");
-    cp = asn_rbuild_int(cp, out_length,
-		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-		       (long *) &pdu->version, sizeof(pdu->version));
-    DEBUGINDENTLESS();
-    if (cp == NULL) return NULL;
-
-    return cp;
-}  /* end snmpv3_header_build() */
 
 static int
 snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
@@ -1988,7 +1927,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   /*  msgSecurityModel.  */
   sec_model = pdu->securityModel;
   DEBUGDUMPHEADER("send", "msgSecurityModel");
-  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &sec_model, sizeof(sec_model));
   DEBUGINDENTLESS();
@@ -1999,7 +1938,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   /*  msgFlags.  */
   snmpv3_calc_msg_flags(pdu->securityLevel, pdu->command, &msg_flags);
   DEBUGDUMPHEADER("send", "msgFlags");
-  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       &msg_flags, sizeof(msg_flags));
   DEBUGINDENTLESS();
@@ -2010,7 +1949,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   /*  msgMaxSize.  */
   max_size = SNMP_MAX_MSG_SIZE;
   DEBUGDUMPHEADER("send", "msgMaxSize");
-  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &max_size, sizeof(max_size));
   DEBUGINDENTLESS();
@@ -2020,7 +1959,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
   /*  msgID.  */
   DEBUGDUMPHEADER("send", "msgID");
-  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &pdu->msgid, sizeof(pdu->msgid));
   DEBUGINDENTLESS();
@@ -2029,7 +1968,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   }
 
   /*  Global data sequence.  */
-  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				   *offset - start_offset);
   if (rc == 0) {
@@ -2038,7 +1977,7 @@ snmpv3_header_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
   /*  Store the version field - msgVersion.  */
   DEBUGDUMPHEADER("send", "SNMP Version Number");
-  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 
+  rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 (long *)&pdu->version, sizeof(pdu->version));
   DEBUGINDENTLESS();
@@ -2085,39 +2024,6 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
 
 
 #ifdef USE_REVERSE_ASNENCODING
-static u_char *
-snmpv3_scopedPDU_header_rbuild(struct snmp_pdu *pdu,
-                               u_char *packet, size_t *out_length,
-                               size_t pdu_len)
-
-{
-  u_char *startp = packet, *pb = packet;
-
-  /* contextName */
-  DEBUGDUMPHEADER("send", "contextName");
-  pb = asn_rbuild_string(pb, out_length,
-                        (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                        (u_char *)pdu->contextName, pdu->contextNameLen);
-  DEBUGINDENTLESS();
-  if (pb == NULL) return NULL;
-
-
-  /* contextEngineID */
-  DEBUGDUMPHEADER("send", "contextEngineID");
-  pb = asn_rbuild_string(pb, out_length,
-                        (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                        pdu->contextEngineID, pdu->contextEngineIDLen);
-  DEBUGINDENTLESS();
-  if (pb == NULL) return NULL;
-
-  pb = asn_rbuild_sequence(pb, out_length,
-                          (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                          (startp - pb + pdu_len));
-
-  return pb;
-
-}  /* end snmpv3_scopedPDU_header_rbuild() */
-
 static int
 snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 				       size_t *offset, struct snmp_pdu *pdu)
@@ -2128,7 +2034,7 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 
   /*  contextName.  */
   DEBUGDUMPHEADER("send", "contextName");
-  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       (u_char *)pdu->contextName, pdu->contextNameLen);
   DEBUGINDENTLESS();
@@ -2138,7 +2044,7 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 
   /*  contextEngineID.  */
   DEBUGDUMPHEADER("send", "contextEngineID");
-  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       pdu->contextEngineID, pdu->contextEngineIDLen);
   DEBUGINDENTLESS();
@@ -2146,7 +2052,7 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
     return 0;
   }
 
-  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				   *offset - start_offset);
 
@@ -2155,106 +2061,6 @@ snmpv3_scopedPDU_header_realloc_rbuild(u_char **pkt, size_t *pkt_len,
 #endif /* USE_REVERSE_ASNENCODING */
 
 #ifdef USE_REVERSE_ASNENCODING
-/* returns 0 if success, -1 if fail, not 0 if SM build failure */
-int
-snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
-                     u_char *packet, size_t *out_length,
-                     u_char *pdu_data, size_t pdu_data_len)
-{
-    u_char	*global_data;
-    u_char	 header_buf[SNMP_MAX_MSG_V3_HDRS];
-    size_t	 header_buf_len = SNMP_MAX_MSG_V3_HDRS;
-    u_char	*cp = packet;
-    int      result;
-    size_t      tmp_len = *out_length;
-    struct snmp_secmod_def *sptr;
-
-    if (!out_length)
-        return -1;
-
-    global_data = packet;
-
-    /* 
-     * build a scopedPDU structure into the packet
-     */
-    DEBUGPRINTPDUTYPE("send", pdu->command);
-    if (pdu_data) {
-        if (pdu_data_len > tmp_len) {
-            return -1;
-        }
-        memcpy(cp - pdu_data_len, pdu_data, pdu_data_len);
-        cp -= pdu_data_len;
-        tmp_len -= pdu_data_len;
-    } else {
-        cp = snmp_pdu_rbuild(pdu, cp, &tmp_len);
-        if (cp == NULL) {
-            return -1;
-        }
-    }
-    
-    DEBUGDUMPSECTION("send", "ScopedPdu");
-    cp = snmpv3_scopedPDU_header_rbuild(pdu, cp, &tmp_len,
-                                        *out_length - tmp_len);
-    if (cp == NULL) {
-        return -1;
-    }
-
-    /* 
-     * build the headers for the packet, returned addr = start of secParams
-     */
-    global_data = snmpv3_header_rbuild(pdu, header_buf + header_buf_len,
-                                       &header_buf_len, 0, NULL);
-    if (global_data == NULL) {
-        return -1;
-    }
-
-    DEBUGINDENTADD(-4); /* return from Scoped PDU */
-
-    /* 
-     * call the security module to possibly encrypt and authenticate the
-     * message - the entire message to transmitted on the wire is returned
-     */
-
-    sptr = find_sec_mod(pdu->securityModel);
-    DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
-    if (sptr && sptr->encode_reverse) {
-        struct snmp_secmod_outgoing_params parms;
-        parms.msgProcModel = pdu->msgParseModel;
-        parms.globalData = global_data+1;
-        parms.globalDataLen = SNMP_MAX_MSG_V3_HDRS - header_buf_len;
-        parms.maxMsgSize = SNMP_MAX_MSG_SIZE;
-        parms.secModel = pdu->securityModel;
-        parms.secEngineID = pdu->securityEngineID;
-        parms.secEngineIDLen = pdu->securityEngineIDLen;
-        parms.secName = pdu->securityName;
-        parms.secNameLen = pdu->securityNameLen;
-        parms.secLevel = pdu->securityLevel;
-        parms.scopedPdu = cp+1;
-        parms.scopedPduLen = packet-cp;
-        parms.secStateRef = pdu->securityStateRef;
-        parms.wholeMsg = &packet;
-        parms.wholeMsgLen = out_length;
-        parms.session = session;
-        parms.pdu = pdu;
-        result =
-            (*sptr->encode_reverse)(&parms);
-    } else {
-        if (!sptr)
-            snmp_log(LOG_ERR, "no such security service available: %d\n",
-                     pdu->securityModel);
-        else if (!sptr->encode_reverse) {
-            snmp_log(LOG_ERR, "security service %d doesn't support reverse outgoing encoding.\n",
-                     pdu->securityModel);
-        }
-        result = -1;
-    }
-    
-    DEBUGINDENTLESS();
-    return result;
-
-}  /* end snmpv3_packet_rbuild() */
-
-
 /* returns 0 if success, -1 if fail, not 0 if SM build failure */
 int
 snmpv3_packet_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
@@ -2616,7 +2422,7 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
 	    }
 
             DEBUGDUMPHEADER("send", "Community String");
-            rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+            rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
 		       pdu->community, pdu->community_len);
             DEBUGINDENTLESS();
@@ -2629,7 +2435,7 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
             DEBUGDUMPHEADER("send", "SNMP Version Number");
 
             version = pdu->version;
-            rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+            rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 (long *)&version, sizeof(version));
             DEBUGINDENTLESS();
@@ -2643,7 +2449,7 @@ _snmp_build(u_char **pkt, size_t *pkt_len, size_t *offset,
             } else {
 	      DEBUGDUMPSECTION("send", "SNMPv2c Message");
 	    }
-            rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+            rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				      (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				      *offset - start_offset);
 
@@ -2879,176 +2685,6 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 }
 
 #ifdef USE_REVERSE_ASNENCODING
-
-/* on error, returns NULL (likely an encoding problem). */
-u_char *
-snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
-{
-#define VPCACHE_SIZE 50
-  struct variable_list *vpcache[VPCACHE_SIZE];
-  struct variable_list *vp, *tmpvp;
-  u_char *startcp = cp;
-  int i, wrapped=0, notdone, final;
-
-  DEBUGMSGTL(("snmp_pdu_rbuild","starting\n"));
-  for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp;
-      vp = vp->next_variable, i--) {
-      if (i < 0) {
-          wrapped = notdone = 1;
-          i = VPCACHE_SIZE-1;
-          DEBUGMSGTL(("snmp_pdu_rbuild","wrapped\n"));
-      }
-      vpcache[i] = vp;
-  }
-  final = i + 1;
-
-  do {
-      for(i = final; i < VPCACHE_SIZE; i++) {
-          vp = vpcache[i];
-          DEBUGDUMPSECTION("send", "VarBind");
-          cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
-                                  vp->val_len, (u_char *)vp->val.string,
-                                  out_length);
-          DEBUGINDENTLESS();
-          if (cp == NULL)
-              return NULL;
-      }
-      DEBUGINDENTLESS();
-      if (wrapped) {
-          notdone = 1;
-          for(i = 0; i < final; i++) {
-              vp = vpcache[i];
-              DEBUGDUMPSECTION("send", "VarBind");
-              cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
-                                      vp->val_len, (u_char *)vp->val.string,
-                                      out_length);
-              DEBUGINDENTLESS();
-              if (cp == NULL)
-                  return NULL;
-	  }
-          
-          if (final == 0)
-              tmpvp = vpcache[VPCACHE_SIZE-1];
-          else
-              tmpvp = vpcache[final-1];
-          wrapped = 0;
-          for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp && vp != tmpvp;
-              vp = vp->next_variable, i--) {
-              if (i < 0) {
-                  wrapped = 1;
-                  i = VPCACHE_SIZE-1;
-                  DEBUGMSGTL(("snmp_pdu_rbuild","wrapped\n"));
-              }
-              vpcache[i] = vp;
-          }
-          final = i + 1;
-      } else {
-          notdone = 0;
-      }
-  } while (notdone);
-
-  /* Save current location and build SEQUENCE tag and length placeholder
-       for variable-bindings sequence
-       (actual length will be inserted later) */
-  cp = asn_rbuild_sequence(cp, out_length,
-                           (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                           startcp - cp);
-
-  /* store fields in the PDU preceeding the variable-bindings sequence */
-  if (pdu->command != SNMP_MSG_TRAP){
-      /* PDU is not an SNMPv1 trap */
-
-      /* error index (getbulk max-repetitions) */
-      DEBUGDUMPHEADER("send", "error index");
-      cp = asn_rbuild_int(cp, out_length,
-                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                          &pdu->errindex, sizeof(pdu->errindex));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-      /* error status (getbulk non-repeaters) */
-      DEBUGDUMPHEADER("send", "error status");
-      cp = asn_rbuild_int(cp, out_length,
-                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                          &pdu->errstat, sizeof(pdu->errstat));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-
-      /* request id */
-      DEBUGDUMPHEADER("send", "request_id");
-      cp = asn_rbuild_int(cp, out_length,
-                          (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                          &pdu->reqid, sizeof(pdu->reqid));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-  } else {
-    /* an SNMPv1 trap PDU */
-
-      /* timestamp  */
-      DEBUGDUMPHEADER("send", "timestamp");
-      cp = asn_rbuild_unsigned_int(cp, out_length,
-                                  (u_char)(ASN_TIMETICKS | ASN_PRIMITIVE),
-                                  &pdu->time, sizeof(pdu->time));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-      /* specific trap */
-      DEBUGDUMPHEADER("send", "specific trap number");
-      cp = asn_rbuild_int(cp, out_length,
-                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                         (long *)&pdu->specific_type,
-                         sizeof(pdu->specific_type));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-      /* generic trap */
-      DEBUGDUMPHEADER("send", "generic trap number");
-      cp = asn_rbuild_int(cp, out_length,
-                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                         (long *)&pdu->trap_type, sizeof(pdu->trap_type));
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-
-      /* agent-addr */
-      DEBUGDUMPHEADER("send", "agent Address");
-      cp = asn_rbuild_string(cp, out_length,
-			     (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
-			     (u_char *)pdu->agent_addr, 4);
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-
-      /* enterprise */
-      DEBUGDUMPHEADER("send", "enterprise OBJID");
-      cp = asn_rbuild_objid(cp, out_length,
-                           (u_char)
-                           (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
-                           (oid *)pdu->enterprise, pdu->enterprise_length);
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-
-
-  }
-
-  /* build the PDU sequence */
-  cp = asn_rbuild_sequence(cp, out_length,
-                           (u_char)pdu->command,
-                           startcp - cp);
-
-  return cp;
-}
-
 /*  On error, returns 0 (likely an encoding problem).  */
 int
 snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset, 
@@ -3078,7 +2714,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
     for(i = final; i < VPCACHE_SIZE; i++) {
       vp = vpcache[i];
       DEBUGDUMPSECTION("send", "VarBind");
-      rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset,
+      rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset, 1,
 				      vp->name, &vp->name_length, vp->type,
 				      (u_char *)vp->val.string, vp->val_len);
       DEBUGINDENTLESS();
@@ -3093,7 +2729,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
       for(i = 0; i < final; i++) {
 	vp = vpcache[i];
 	DEBUGDUMPSECTION("send", "VarBind");
-	rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset,
+	rc = snmp_realloc_rbuild_var_op(pkt, pkt_len, offset, 1,
 					vp->name, &vp->name_length, vp->type,
 					(u_char *)vp->val.string, vp->val_len);
 	DEBUGINDENTLESS();
@@ -3127,7 +2763,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   /*  Save current location and build SEQUENCE tag and length placeholder for
       variable-bindings sequence (actual length will be inserted later).  */
 
-  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				   *offset - start_offset);
 
@@ -3135,7 +2771,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   if (pdu->command != SNMP_MSG_TRAP) {
     /*  Error index (getbulk max-repetitions).  */
     DEBUGDUMPHEADER("send", "error index");
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &pdu->errindex, sizeof(pdu->errindex));
     DEBUGINDENTLESS();
@@ -3145,7 +2781,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Error status (getbulk non-repeaters).  */
     DEBUGDUMPHEADER("send", "error status");
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &pdu->errstat, sizeof(pdu->errstat));
     DEBUGINDENTLESS();
@@ -3155,7 +2791,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Request ID.  */
     DEBUGDUMPHEADER("send", "request_id");
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 &pdu->reqid, sizeof(pdu->reqid));
     DEBUGINDENTLESS();
@@ -3167,7 +2803,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Timestamp.  */
     DEBUGDUMPHEADER("send", "timestamp");
-    rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset, 1,
 				       (u_char)(ASN_TIMETICKS | ASN_PRIMITIVE),
 				       &pdu->time, sizeof(pdu->time));
     DEBUGINDENTLESS();
@@ -3177,7 +2813,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Specific trap.  */
     DEBUGDUMPHEADER("send", "specific trap number");
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 (long *)&pdu->specific_type,
 			 sizeof(pdu->specific_type));
@@ -3188,7 +2824,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Generic trap.  */
     DEBUGDUMPHEADER("send", "generic trap number");
-    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, 1,
 			 (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 			 (long *)&pdu->trap_type, sizeof(pdu->trap_type));
     DEBUGINDENTLESS();
@@ -3198,7 +2834,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Agent-addr.  */
     DEBUGDUMPHEADER("send", "agent Address");
-    rc = asn_realloc_rbuild_string(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, 1,
 				   (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
 				   (u_char *)pdu->agent_addr, 4);
     DEBUGINDENTLESS();
@@ -3208,7 +2844,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
     /*  Enterprise.  */
     DEBUGDUMPHEADER("send", "enterprise OBJID");
-    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset,
+    rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, 1,
 		       (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
 		       (oid *)pdu->enterprise, pdu->enterprise_length);
     DEBUGINDENTLESS();
@@ -3218,7 +2854,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
   }
 
   /*  Build the PDU sequence.  */
-  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset,
+  rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, 1,
 				 (u_char)pdu->command, *offset - start_offset);
   return rc;
 }
