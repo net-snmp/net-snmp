@@ -40,6 +40,7 @@
 #include "snmp_vars.h"
 #include "var_struct.h"
 #include "agent_registry.h"
+#include "agent_index.h"
 #include "agent_trap.h"
 #include "mibII/sysORTable.h"
 #include "snmp_debug.h"
