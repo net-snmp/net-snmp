@@ -193,7 +193,7 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if ( range_subid ) {
 	snmp_pdu_add_variable( pdu, start, startlen,
-				ASN_OBJECT_ID, (u_char *)start, startlen);
+				ASN_OBJECT_ID, (u_char *)start, startlen*sizeof(oid));
 	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
     }
     else
@@ -237,7 +237,7 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if ( range_subid ) {
 	snmp_pdu_add_variable( pdu, start, startlen,
-				ASN_OBJECT_ID, (u_char *)start, startlen);
+				ASN_OBJECT_ID, (u_char *)start, startlen*sizeof(oid));
 	pdu->variables->val.objid[ range_subid-1 ] = range_ubound;
     }
     else
