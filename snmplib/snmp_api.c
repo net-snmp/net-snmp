@@ -266,8 +266,8 @@ char *snmp_detail = NULL;
 static int snmp_dump_packet = 0;
 
 void shift_array (u_char *, int, int);
-static int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
-static int snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
+int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
+static int _snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
 static void snmp_free_internal_pdu (struct snmp_pdu *);
 
 static void * snmp_sess_pointer (struct snmp_session *);
@@ -1022,7 +1022,7 @@ snmp_build(struct snmp_session *session,
  * are encountered, -1 is returned.  Otherwise, a 0 is returned.
  */
 static int
-snmp_parse(struct snmp_session *session,
+_snmp_parse(struct snmp_session *session,
 	   struct internal_snmp_pdu *pdu,
 	   u_char *data,
 	   int length)
@@ -1729,7 +1729,7 @@ snmp_free_internal_pdu(struct snmp_pdu *pdu)
 /*
  * Checks to see if any of the fd's set in the fdset belong to
  * snmp.  Each socket with it's fd set has a packet read from it
- * and snmp_parse is called on the packet received.  The resulting pdu
+ * and _snmp_parse is called on the packet received.  The resulting pdu
  * is passed to the callback routine for that session.  If the callback
  * routine returns successfully, the pdu and it's request are deleted.
  */
@@ -1787,7 +1787,7 @@ snmp_sess_read(void *sessp,
     pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
     memset (pdu, 0, sizeof(*pdu));
     pdu->address = from;
-    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
+    if (_snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
 	snmp_free_internal_pdu(pdu);
 	return;
     }
@@ -2376,3 +2376,96 @@ snmp_sess_session(void *sessp)
     if (slp == NULL) return(NULL);
     return (slp->session);
 }
+
+#ifdef CMU_COMPATIBLE
+
+/*
+ * snmp_parse - emulate CMU library's snmp_parse.
+ *
+ * Parse packet, storing results into PDU.
+ * Returns community string if success, NULL if fail.
+ * WARNING: may return a zero length community string.
+ *
+ * Note:
+ * Some CMU-aware apps call init_mib(), but do not
+ * initialize a session.
+ * Check Reqid to make sure that this module is initialized.
+ */
+
+u_char *
+snmp_parse (struct snmp_session *session,
+    struct snmp_pdu *pdu,
+    u_char *data,
+    int length)
+{
+    u_char *bufp = NULL;
+
+    if (Reqid == 0) {
+	snmp_sess_init(session); /* gimme a break! */
+    }
+
+    switch(pdu->version) {
+    case SNMP_VERSION_1:
+    case SNMP_VERSION_2c:
+    case SNMP_DEFAULT_VERSION:
+	    break;
+    default:
+	    return NULL;
+    }
+
+    if (_snmp_parse(session, (struct internal_snmp_pdu *)pdu,
+			    data, length) != SNMP_ERR_NOERROR){
+	return NULL;
+    }
+
+    /* Add a null to meet the caller's expectations. */
+
+    bufp = (u_char *)malloc(1+pdu->community_len);
+    if (bufp && pdu->community_len) {
+	memcpy(bufp, pdu->community, pdu->community_len);
+	bufp[pdu->community_len] = '\0';
+    }
+    return(bufp);
+}
+
+
+char *
+snmp_pdu_type(struct snmp_pdu *PDU)
+{
+  switch(PDU->command) {
+  case SNMP_MSG_GET:
+    return("GET");
+    break;
+  case SNMP_MSG_GETNEXT:
+    return("GETNEXT");
+    break;
+  case SNMP_MSG_RESPONSE:
+    return("RESPONSE");
+    break;
+  case SNMP_MSG_SET:
+    return("SET");
+    break;
+  case SNMP_MSG_GETBULK:
+    return("GETBULK");
+    break;
+  case SNMP_MSG_INFORM:
+    return("INFORM");
+    break;
+  case SNMP_MSG_TRAP2:
+    return("V2TRAP");
+    break;
+  case SNMP_MSG_REPORT:
+    return("REPORT");
+    break;
+    
+  case SNMP_MSG_TRAP:
+    return("V1TRAP");
+    break;
+  default:
+    return("Unknown");
+    break;
+  }
+}
+
+#endif /* CMU_COMPATIBLE */
+
