@@ -444,9 +444,10 @@ if test "x$with_shared" = "xyes"; then
       SHLIB_CFLAGS="-KPIC"
     fi
     SHLIB_EXTENSION="so"
-	SHLIB_VERSION=
+    SHLIB_VERSION=
     SHLIB_LD_CMD="ld -r -o"
     SHLIB_LDCONFIG_CMD=
+    SHLIB_LD_LIBS=
     CC_RUNTIME_ARG=
     RANLIB=":"
 
@@ -454,8 +455,9 @@ if test "x$with_shared" = "xyes"; then
     case $target_os in
 
     linux*)
-        SHLIB_LD_CMD='$(CC) $(CFLAGS) -o'
+        SHLIB_LD_CMD='$(CC) -shared $(CFLAGS) -o'
 	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -n $(libdir)'
+        SHLIB_LD_LIBS='$(LDFLAGS) $(LOCAL_LIBS) $(LIBS)'
 	;;
 
     irix*)
@@ -647,6 +649,7 @@ AC_SUBST(SHLIB_EXTENSION)
 AC_SUBST(SHLIB_VERSION)
 AC_SUBST(SHLIB_LDCONFIG_CMD)
 AC_SUBST(SHLIB_LD_CMD)
+AC_SUBST(SHLIB_LD_LIBS)
 if test "x$RANLIB" != "x:"; then
     AC_PROG_RANLIB
 fi
