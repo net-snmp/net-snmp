@@ -480,9 +480,14 @@ snmp_config_when(char *line, int when)
     cptr = strtok(buf, SNMP_CONFIG_DELIMETERS);
     if (cptr && cptr[0] == '[') {
         if (cptr[strlen(cptr) - 1] != ']') {
-            config_perror("no matching ']'");
+            snprintf(tmpbuf, sizeof(tmpbuf),
+                    "no matching ']' for type %s.",
+                    cptr + 1);
+            tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+            config_perror(tmpbuf);
             return SNMPERR_GENERR;
         }
+        cptr[strlen(cptr) - 1] = '\0';
         lptr = read_config_get_handlers(cptr + 1);
         if (lptr == NULL) {
             snprintf(tmpbuf,  sizeof(tmpbuf),
@@ -678,6 +683,14 @@ read_config(const char *filename,
         if ((cptr = skip_white(cptr))) {
             cptr = copy_nword(cptr, token, sizeof(token));
             if (token[0] == '[') {
+                if (token[strlen(token) - 1] != ']') {
+                    snprintf(tmpbuf, sizeof(tmpbuf),
+                            "no matching ']' for type %s.",
+                            &token[1]);
+                    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
+                    config_perror(tmpbuf);
+                    continue;
+                }
                 token[strlen(token) - 1] = '\0';
                 lptr = read_config_get_handlers(&token[1]);
                 if (lptr == NULL) {
