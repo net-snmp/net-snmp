@@ -20,7 +20,7 @@
 #
 #  NAME:  the name of the process to check for.  It must match
 #         exactly (ie, http will not find httpd processes).
-#  MAX:   the maxinum number allowed to be running.  Defaults to 0.
+#  MAX:   the maximum number allowed to be running.  Defaults to 0.
 #  MIN:   the minimum number to be running.  Defaults to 0.
 
 #
@@ -66,7 +66,7 @@ proc sendmail 10 1
 #
 #  Note that the errorFlag for mountd is set to 1 because one is not
 #  running (in this case an rpc.mountd is, but thats not good enough),
-#  and the ErrMessage tells you whats wrong.  The configuration
+#  and the ErrMessage tells you what's wrong.  The configuration
 #  imposed in the snmpd.conf file is also shown.  
 # 
 #  Special Case:  When the min and max numbers are both 0, it assumes
@@ -210,8 +210,8 @@ load 12 14 14
 # snmp version mib
 #
 
-# a convience mib.  It will inform you of the current ucd-snmp version
-# you are running.  Additionally, it has a couple setable values:
+# a convenience mib.  It will inform you of the current ucd-snmp version
+# you are running.  Additionally, it has a couple settable values:
 #
 # .EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE: 
 #       Set to 1: Clears the output cache. (the agent caches the
@@ -262,7 +262,7 @@ exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 # there.' output as the second line from our shell script.
 #
 # Note that you must alter the mib.txt file to be correct if you want
-# the .50.* outputs above to change to resonable text descriptions.
+# the .50.* outputs above to change to reasonable text descriptions.
 
 # Other ideas:
 # 
