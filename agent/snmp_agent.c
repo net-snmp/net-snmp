@@ -671,9 +671,6 @@ handle_next_pass(struct agent_snmp_session  *asp)
 					 req_p->cb_data );
 		    }
 		}
-		asp->pdu = snmp_clone_pdu( pdu );
-		asp->pdu->variables = pdu->variables;
-		pdu->variables = NULL;
 	    }
 	    else {
 	    	/* discard outstanding requests */
