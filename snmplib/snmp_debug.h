@@ -114,9 +114,11 @@ To print multiple pieces to a single line in one call, use:
   debug_is_token_registered(char *): returns SNMPERR_SUCCESS or SNMPERR_GENERR
                                      if a token has been registered or
                                      not (and debugging output is "on").
+  snmp_debug_init(void):             registers .conf handlers.
 */
 void debug_register_tokens(char *tokens);
 int debug_is_token_registered(const char *token);
+void snmp_debug_init(void);
 
 /* provided for backwards compatability.  Don't use these functions. */
 #ifdef STDC_HEADERS

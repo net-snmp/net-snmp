@@ -25,6 +25,7 @@
 #include "asn1.h"
 #include "mib.h"
 #include "snmp_api.h"
+#include "read_config.h"
 #include "snmp_debug.h"
 #include "snmp_impl.h"
 
@@ -64,6 +65,24 @@ DEBUGPOID(oid *theoid,
   char c_oid[SPRINT_MAX_LEN];
   sprint_objid(c_oid,theoid,len);
   DEBUGP(c_oid);
+}
+
+void debug_config_register_tokens(char *configtoken, char *tokens) {
+  debug_register_tokens(tokens);
+}
+
+void debug_config_turn_on_debugging(char *configtoken, char *line) {
+  snmp_set_do_debugging(atoi(line));
+}
+
+void
+snmp_debug_init(void) {
+  register_premib_handler("snmp","doDebugging",
+                          debug_config_turn_on_debugging, NULL,
+                          "(1|0)");
+  register_premib_handler("snmp","debugTokens",
+                          debug_config_register_tokens, NULL,
+                          "token[,token...]");
 }
 
 void debug_register_tokens(char *tokens) {
@@ -175,6 +194,7 @@ debugmsgtoken(va_alist)
   va_end(debugargs);
 }
   
+/* for speed, these shouldn't be in default_storage space */
 void
 snmp_set_do_debugging(int val)
 {
@@ -186,4 +206,3 @@ snmp_get_do_debugging (void)
 {
   return dodebug;
 }
-
