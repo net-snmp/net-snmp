@@ -636,6 +636,7 @@ static void UDP_Scan_Init(void)
 	pcb.inp_fport = htons (pcb.inp_fport);
 
 	nnew = (struct inpcb *) malloc (sizeof (struct inpcb));
+	if (nnew == NULL) break;
 	*nnew = pcb;
 	nnew->inp_next = 0;
 

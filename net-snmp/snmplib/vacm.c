@@ -123,15 +123,19 @@ vacm_createViewEntry(const char *viewName,
     struct vacm_viewEntry *vp, *lp, *op = NULL;
     int cmp;
 
-    vp = (struct vacm_viewEntry *)malloc(sizeof(struct vacm_viewEntry));
-    memset(vp, 0, sizeof(struct vacm_viewEntry));
+    vp = (struct vacm_viewEntry *)calloc(1, sizeof(struct vacm_viewEntry));
+    if (vp == NULL)
+        return NULL;
 
     vp->viewName[0] = strlen(viewName);
     strcpy(vp->viewName+1, viewName);
     memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
     vp->viewSubtreeLen = viewSubtreeLen;
-    vp->reserved = (struct vacm_viewEntry *)malloc(sizeof(struct vacm_viewEntry));
-    memset(vp->reserved, 0, sizeof(struct vacm_viewEntry));
+    vp->reserved = (struct vacm_viewEntry *)calloc(1, sizeof(struct vacm_viewEntry));
+    if (vp->reserved == NULL) {
+        free(vp);
+        return NULL;
+    }
 
     lp = viewList;
     while (lp) {
@@ -230,14 +234,18 @@ vacm_createGroupEntry(int securityModel,
     struct vacm_groupEntry *gp, *lg, *og;
     int cmp;
 
-    gp = (struct vacm_groupEntry *)malloc(sizeof(struct vacm_groupEntry));
-    memset(gp, 0, sizeof(struct vacm_groupEntry));
+    gp = (struct vacm_groupEntry *)calloc(1, sizeof(struct vacm_groupEntry));
+    if (gp == NULL)
+        return NULL;
 
     gp->securityModel = securityModel;
     gp->securityName[0] = strlen(securityName);
     strcpy(gp->securityName+1, securityName);
-    gp->reserved = (struct vacm_groupEntry *)malloc(sizeof(struct vacm_groupEntry));
-    memset(gp->reserved, 0, sizeof(struct vacm_groupEntry));
+    gp->reserved = (struct vacm_groupEntry *)calloc(1, sizeof(struct vacm_groupEntry));
+    if (gp->reserved == NULL) {
+        free(gp);
+        return NULL;
+    }
 
     lg = groupList;
     og = NULL;
@@ -338,8 +346,9 @@ vacm_createAccessEntry(const char *groupName,
     struct vacm_accessEntry *vp, *lp, *op = NULL;
     int cmp;
 
-    vp = (struct vacm_accessEntry *)malloc(sizeof(struct vacm_accessEntry));
-    memset(vp, 0, sizeof(struct vacm_accessEntry));
+    vp = (struct vacm_accessEntry *)calloc(1, sizeof(struct vacm_accessEntry));
+    if (vp == NULL)
+        return NULL;
 
     vp->securityModel = securityModel;
     vp->securityLevel = securityLevel;
@@ -347,8 +356,11 @@ vacm_createAccessEntry(const char *groupName,
     strcpy(vp->groupName+1, groupName);
     vp->contextPrefix[0] = strlen(contextPrefix);
     strcpy(vp->contextPrefix+1, contextPrefix);
-    vp->reserved = (struct vacm_accessEntry *)malloc(sizeof(struct vacm_accessEntry));
-    memset(vp->reserved, 0, sizeof(struct vacm_accessEntry));
+    vp->reserved = (struct vacm_accessEntry *)calloc(1, sizeof(struct vacm_accessEntry));
+    if (vp->reserved == NULL) {
+        free(vp);
+        return NULL;
+    }
 
     lp = accessList;
     while (lp) {

@@ -1048,6 +1048,7 @@ void TCP_Scan_Init (void)
 	pcb.uid = uid;
     
 	nnew = (struct inpcb *) malloc (sizeof (struct inpcb));
+	if (nnew == NULL) break;
 	*nnew = pcb;
 	nnew->INP_NEXT_SYMBOL = 0;
 

@@ -66,7 +66,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct timeval now;
 
-    sp = malloc( sizeof( struct snmp_session ));
+    sp = (struct snmp_session *)malloc( sizeof( struct snmp_session ));
     if ( sp == NULL ) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
 	return -1;
@@ -128,7 +128,6 @@ int
 register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
-    struct subtree *sub;
     char buf[32];
     oid ubound = 0;
 
