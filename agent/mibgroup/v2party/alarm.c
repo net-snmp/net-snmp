@@ -195,7 +195,7 @@ rmonGetValue(oid *srcParty,
 	return 7;
     }
     
-    *value = *(int *)var;
+    *value = *(long *)var;
     return 0;
 }
 
