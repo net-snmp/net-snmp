@@ -1,6 +1,7 @@
 use ExtUtils::MakeMaker;
 require 5;
 use Config;
+use Getopt::Long;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -116,7 +117,7 @@ WIN32
 	if ($opts->{'insource'} eq "true") {
 	    $mibdir = "../../mibs";
 	    $snmpd = "../../agent/snmpd";
-	    $snmptrapd = "../../agent/snmptrapd";
+	    $snmptrapd = "../../apps/snmptrapd";
 	} else {
 	    $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
 	    $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
