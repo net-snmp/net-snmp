@@ -179,7 +179,7 @@ int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
 }
 
 /*
- * asn_parse_int - pulls a long out of an ASN int type.
+ * asn_parse_int - pulls a long out of an int type.
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
  *   following the end of this object.
@@ -229,12 +229,12 @@ asn_parse_int(u_char *data,
     if (*bufp & 0x80)
 	value = -1; /* integer is negative */
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    DEBUGMSG(("dump_recv", "  ASN Integer:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -291,12 +291,12 @@ asn_parse_unsigned_int(u_char *data,
     if (*bufp & 0x80)
 	value = ~value; /* integer is negative */
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     while(asn_length--)
 	value = (value << 8) | *bufp++;
 
-    DEBUGMSG(("dump_recv", "  ASN UInteger:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -330,10 +330,13 @@ asn_build_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
-	static const char *errpre = "build int";
+    static const char *errpre = "build int";
     register long integer;
     register u_long mask;
-
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
+    
     if (intsize != sizeof (long)){
 	_asn_size_err(errpre, intsize, sizeof(long));
 	return NULL;
@@ -363,6 +366,8 @@ asn_build_int(u_char *data,
 	*data++ = (u_char)((integer & mask) >> (8 * (sizeof(long) - 1)));
 	integer <<= 8;
     }
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
     return data;
 }
 
@@ -398,6 +403,9 @@ asn_build_unsigned_int(u_char *data,
     register u_long integer;
     register u_long mask;
     int add_null_byte = 0;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
     if (intsize != sizeof (long)){
 	_asn_size_err(errpre, intsize, sizeof(long));
@@ -438,6 +446,8 @@ asn_build_unsigned_int(u_char *data,
 	*data++ = (u_char)((integer & mask) >> (8 * (sizeof(long) - 1)));
 	integer <<= 8;
     }
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2X)\n", *intp, *intp));
     return data;
 }
 
@@ -487,7 +497,7 @@ asn_parse_string(u_char *data,
 	return NULL;
     }
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     memmove(string, bufp, asn_length);
     if (*strlength > (int)asn_length)
@@ -495,10 +505,10 @@ asn_parse_string(u_char *data,
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
 
-    DEBUGIF("dump_recv") {
+    DEBUGIF("dumpv_recv") {
       char *buf = (char *)malloc(1+asn_length);
       sprint_asciistring(buf, string, asn_length);
-      DEBUGMSG(("dump_recv", "  ASN String:\t%s\n", buf));
+      DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
       free (buf);
     }
         
@@ -536,6 +546,9 @@ asn_build_string(u_char *data,
  * cmpdstring ::= 0x24 asnlength string {string}*
  * This code will never send a compound string.
  */
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check("build string", data, *datalength, strlength))
 	return NULL;
@@ -548,6 +561,13 @@ asn_build_string(u_char *data,
       }
     }
     *datalength -= strlength;
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap + strlength);
+    DEBUGIF("dumpv_send") {
+      char *buf = (char *)malloc(1+strlength);
+      sprint_asciistring(buf, string, strlength);
+      DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
+      free (buf);
+    }
     return data + strlength;
 }
 
@@ -587,20 +607,28 @@ asn_parse_header(u_char	*data,
     }
     *type = *bufp;
     bufp = asn_parse_length(bufp + 1, &asn_length);
+
+#ifdef DUMP_PRINT_HEADERS
+    DEBUGDUMPSETUP("recv", data, (bufp-data));
+    DEBUGMSG(("dumpv_recv", "  Header: 0x%.2X, len = %d (0x%X)\n", *data,
+              asn_length, asn_length));
+#else
+/*
+    DEBUGMSGHEXTLI(("recv",data,(bufp-data)));
+    DEBUGMSG(("dumpH_recv","\n"));
+*/
+#endif
+
     if (_asn_parse_length_check("parse header", bufp, data, asn_length, *datalength))
 	return NULL;
-
-    DEBUGDUMPSETUP("dump_recv", data, (bufp-data));
-    DEBUGMSG(("dump_recv", "  ASN Header: 0x%.2X, len = %d (0x%X)\n", *data,
-              asn_length, asn_length));
 
 #ifdef OPAQUE_SPECIAL_TYPES
 
     if ((*type == ASN_OPAQUE) &&
         (*bufp == ASN_OPAQUE_TAG1)) {
       DEBUGINDENTMORE();
-      DEBUGDUMPSETUP("dump_recv", data, 1);
-      DEBUGMSG(("dump_recv", "Opaque:\t%.2x\n", *bufp));
+      DEBUGDUMPSETUP("recv", data, 1);
+      DEBUGMSG(("dumpv_recv", "Opaque:\t%.2x\n", *bufp));
       DEBUGINDENTLESS();
 
       /* check if 64-but counter */
@@ -878,7 +906,7 @@ asn_parse_objid(u_char *data,
 
     *datalength -= (int)asn_length + (bufp - data);
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     /* Handle invalid object identifier encodings of the form 06 00 robustly */
     if (asn_length == 0)
@@ -930,9 +958,9 @@ asn_parse_objid(u_char *data,
 
     *objidlength = (int)(oidp - objid);
 
-    DEBUGMSG(("dump_recv", "  ASN ObjID: "));
-    DEBUGMSGOID(("dump_recv", objid, *objidlength));
-    DEBUGMSG(("dump_recv", "\n"));
+    DEBUGMSG(("dumpv_recv", "  ObjID: "));
+    DEBUGMSGOID(("dumpv_recv", objid, *objidlength));
+    DEBUGMSG(("dumpv_recv", "\n"));
     return bufp;
 }
 
@@ -973,6 +1001,9 @@ asn_build_objid(u_char *data,
     register u_long objid_val;
     u_long first_objid_val;
     register int i;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
     /* check if there are at least 2 sub-identifiers */
     if (objidlength == 0){
@@ -1064,6 +1095,10 @@ asn_build_objid(u_char *data,
 
     /* return the length and data ptr */
     *datalength -= asnlength;
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "  ObjID: "));
+    DEBUGMSGOID(("dumpv_send", objid, objidlength));
+    DEBUGMSG(("dumpv_send", "\n"));
     return data;
 }
 
@@ -1106,8 +1141,8 @@ asn_parse_null(u_char *data,
 
     *datalength -= (bufp - data);
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data);
-    DEBUGMSG(("dump_recv", "  ASN NULL\n"));
+    DEBUGDUMPSETUP("recv", data, bufp - data);
+    DEBUGMSG(("dumpv_recv", "  NULL\n"));
 
     return bufp + asn_length;
 }
@@ -1136,7 +1171,13 @@ asn_build_null(u_char *data,
 /*
  * ASN.1 null ::= 0x05 0x00
  */
-    return asn_build_header(data, datalength, type, 0);
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
+    data = asn_build_header(data, datalength, type, 0);
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "  NULL\n"));
+    return data;
 }
 
 /*
@@ -1185,9 +1226,10 @@ asn_parse_bitstring(u_char *data,
     if (_asn_bitstring_check(errpre, asn_length, *bufp))
 	return NULL;
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data);
-    DEBUGMSG(("dump_recv", "  ASN Bitstring: "));
-    DEBUGMSGHEX(("dump_recv", data, asn_length));
+    DEBUGDUMPSETUP("recv", data, bufp - data);
+    DEBUGMSG(("dumpv_recv", "  Bitstring: "));
+    DEBUGMSGHEX(("dumpv_recv", data, asn_length));
+    DEBUGMSG(("dumpv_recv", "\n"));
 
     memmove(string, bufp, asn_length);
     *strlength = (int)asn_length;
@@ -1234,6 +1276,10 @@ asn_build_bitstring(u_char *data,
 
     memmove(data, string, strlength);
     *datalength -= strlength;
+    DEBUGDUMPSETUP("send", data, strlength);
+    DEBUGMSG(("dumpv_send", "  Bitstring: "));
+    DEBUGMSGHEX(("dumpv_send", data, strlength));
+    DEBUGMSG(("dumpv_send", "\n"));
     return data + strlength;
 }
 
@@ -1281,7 +1327,7 @@ asn_parse_unsigned_int64(u_char *data,
     if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
         return NULL;
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data);
+    DEBUGDUMPSETUP("recv", data, bufp - data);
 #ifdef OPAQUE_SPECIAL_TYPES
 /* 64 bit counters as opaque */
     if ((*type == ASN_OPAQUE) &&
@@ -1289,7 +1335,7 @@ asn_parse_unsigned_int64(u_char *data,
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    ((*(bufp+1) == ASN_OPAQUE_COUNTER64) ||
              (*(bufp+1) == ASN_OPAQUE_U64))) {
-        DEBUGMSG(("dump_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
+        DEBUGMSG(("dumpv_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
 
 	/* change type to Counter64 or U64 */
         *type = *(bufp+1);
@@ -1319,9 +1365,10 @@ asn_parse_unsigned_int64(u_char *data,
     cp->low = low;
     cp->high = high;
 
-    DEBUGIF("dump_recv") {
+    DEBUGIF("dumpv_recv") {
       char i64buf[I64CHARSZ+1];
       printU64(i64buf, cp);
+      DEBUGMSG(("dumpv_recv", i64buf));
     }
 
     return bufp;
@@ -1360,6 +1407,9 @@ asn_build_unsigned_int64(u_char *data,
     register u_long mask, mask2;
     int add_null_byte = 0;
     size_t intsize;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
   if (countersize != sizeof(struct counter64)){
     _asn_size_err("build uint64", countersize, sizeof(struct counter64));
@@ -1442,6 +1492,12 @@ asn_build_unsigned_int64(u_char *data,
 	low <<= 8;
 	
     }
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGIF("dumpv_send") {
+      char i64buf[I64CHARSZ+1];
+      printU64(i64buf, cp);
+      DEBUGMSG(("dumpv_send", i64buf));
+    }
     return data;
 }
 
@@ -1480,12 +1536,12 @@ asn_parse_signed_int64(u_char *data,
   if (_asn_parse_length_check(errpre, bufp, data, asn_length, *datalength))
         return NULL;
 
-  DEBUGDUMPSETUP("dump_recv", data, bufp - data);
+  DEBUGDUMPSETUP("recv", data, bufp - data);
   if ((*type == ASN_OPAQUE) &&
       (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
       (*bufp == ASN_OPAQUE_TAG1) &&
        (*(bufp+1) == ASN_OPAQUE_I64)) {
-      DEBUGMSG(("dump_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
+      DEBUGMSG(("dumpv_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
     /* change type to Int64 */
     *type = *(bufp+1);
     /* value is encoded as special format */
@@ -1520,9 +1576,10 @@ asn_parse_signed_int64(u_char *data,
   cp->low = low;
   cp->high = high;
 
-  DEBUGIF("dump_recv") {
+  DEBUGIF("dumpv_recv") {
     char i64buf[I64CHARSZ+1];
     printI64(i64buf, cp);
+    DEBUGMSG(("dumpv_recv", i64buf));
   }
 
   return bufp;
@@ -1553,6 +1610,9 @@ asn_build_signed_int64(u_char *data,
     register u_int mask, mask2;
     u_long low, high;
     size_t intsize;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
   if (countersize != sizeof(struct counter64)){
     _asn_size_err("build int64", countersize, sizeof(struct counter64));
@@ -1596,6 +1656,12 @@ asn_build_signed_int64(u_char *data,
 	high = (high << 8)
 	    | ((low & mask) >> (8 * (sizeof(u_int) - 1)));
 	low <<= 8;
+    }
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGIF("dumpv_send") {
+      char i64buf[I64CHARSZ+1];
+      printU64(i64buf, cp);
+      DEBUGMSG(("dumpv_send", i64buf));
     }
     return data;
 }
@@ -1643,13 +1709,13 @@ asn_parse_float(u_char *data,
                   asn_length, *datalength))
         return NULL;
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 /* the float is encoded as an opaque */
     if ((*type == ASN_OPAQUE) &&
             (asn_length == ASN_OPAQUE_FLOAT_BER_LEN) &&
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    (*(bufp+1) == ASN_OPAQUE_FLOAT)) {
-      DEBUGMSG(("dump_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
+      DEBUGMSG(("dumpv_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
 
         /* value is encoded as special format */
 	bufp = asn_parse_length(bufp + 2, &asn_length);
@@ -1674,7 +1740,7 @@ asn_parse_float(u_char *data,
 
     *floatp =  fu.floatVal;
 
-    DEBUGMSG(("dump_recv", "%f",*floatp));
+    DEBUGMSG(("dumpv_recv", "Opaque float: %f",*floatp));
     return bufp;
 }
 
@@ -1709,6 +1775,9 @@ asn_build_float(u_char *data,
         int    intVal;
 	u_char c[sizeof(float)];
     } fu;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
     if (floatsize != sizeof (float)) {
 	_asn_size_err("build float", floatsize, sizeof(float));
@@ -1735,6 +1804,8 @@ asn_build_float(u_char *data,
     *datalength -= floatsize;
     memcpy(data, &fu.c[0], floatsize);
 
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "Opaque float: %f",*floatp));
     data += floatsize;
     return data;
 }
@@ -1775,13 +1846,13 @@ asn_parse_double(u_char *data,
                   asn_length, *datalength))
         return NULL;
 
-    DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
+    DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 /* the double is encoded as an opaque */
     if ((*type == ASN_OPAQUE) &&
             (asn_length == ASN_OPAQUE_DOUBLE_BER_LEN) &&
 	    (*bufp == ASN_OPAQUE_TAG1) &&
 	    (*(bufp+1) == ASN_OPAQUE_DOUBLE)) {
-      DEBUGMSG(("dump_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
+      DEBUGMSG(("dumpv_recv", "Opaque %.2x %.2x: ", *bufp, *(bufp+1)));
 
         /* value is encoded as special format */
 	bufp = asn_parse_length(bufp + 2, &asn_length);
@@ -1807,7 +1878,7 @@ asn_parse_double(u_char *data,
     fu.intVal[1] = tmp;
     	
     *doublep =  fu.doubleVal;
-    DEBUGMSG(("dump_recv", "%d",*doublep));
+    DEBUGMSG(("dumpv_recv", "%f",*doublep));
 
     return bufp;
 }
@@ -1834,6 +1905,9 @@ asn_build_double(u_char *data,
 	int    intVal[2];
 	u_char c[sizeof(double)];
     } fu;
+#ifndef SNMP_NO_DEBUGGING
+    u_char *initdatap = data;
+#endif
 
     if (doublesize != sizeof(double)){
 	_asn_size_err("build double", doublesize, sizeof(double));
@@ -1863,6 +1937,8 @@ asn_build_double(u_char *data,
     memcpy(data, &fu.c[0], doublesize);
 
     data += doublesize;
+    DEBUGDUMPSETUP("send", initdatap, data - initdatap);
+    DEBUGMSG(("dumpv_send", "Opaque double: %f", *doublep));
     return data;
 }
 

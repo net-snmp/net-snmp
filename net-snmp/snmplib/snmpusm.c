@@ -765,7 +765,6 @@ usm_generate_out_msg (
 						 * value (other then err).
 						 */
 
-
 	DEBUGMSGTL(("usm","USM processing has begun.\n"));
 
 	if (secStateRef != NULL)
@@ -1018,24 +1017,32 @@ usm_generate_out_msg (
 		(u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), seq_len);
 	
 	offSet = ptr_len - remaining;
+        DEBUGDUMPHEADER("send", "msgAuthoritativeEngineID");
 	asn_build_string (&ptr[offSet], &remaining,
 		(u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
 		theEngineID, theEngineIDLength);
+        DEBUGINDENTLESS();
 	
 	offSet = ptr_len - remaining;
+        DEBUGDUMPHEADER("send", "msgAuthoritativeEngineBoots");
 	asn_build_int (&ptr[offSet], &remaining,
 		(u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 		&boots_long, sizeof(long));
+        DEBUGINDENTLESS();
 	
 	offSet = ptr_len - remaining;
+        DEBUGDUMPHEADER("send", "msgAuthoritativeEngineTime");
 	asn_build_int (&ptr[offSet], &remaining,
 		(u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
 		&time_long, sizeof(long));
-	
+        DEBUGINDENTLESS();
+
 	offSet = ptr_len - remaining;
+        DEBUGDUMPHEADER("send", "msgUserName");
 	asn_build_string (&ptr[offSet], &remaining,
 		(u_char)(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
 		(u_char *)theName, theNameLength);
+        DEBUGINDENTLESS();
 
 
 	/*
@@ -1242,7 +1249,7 @@ usm_parse_security_parameters (
 	parse_ptr 	= value_ptr;
 	remaining_bytes = sequence_length;
 
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgAuthoritativeEngineID\n");
+        DEBUGDUMPHEADER("recv", "msgAuthoritativeEngineID");
 	if ( (next_ptr
 		= asn_parse_string (parse_ptr, &remaining_bytes, &type_value,
 			secEngineID, secEngineIDLen)) == NULL )
@@ -1262,7 +1269,7 @@ usm_parse_security_parameters (
 	 * Retrieve the engine boots, notice switch in the way next_ptr and
 	 * remaining_bytes are used (to accomodate the asn code).
 	 */
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgAuthoritativeEngineBoots\n");
+        DEBUGDUMPHEADER("recv", "msgAuthoritativeEngineBoots");
 	if ((next_ptr = asn_parse_int (next_ptr, &remaining_bytes, &type_value,
 		&boots_long, sizeof(long))) == NULL)
 	{
@@ -1283,16 +1290,16 @@ usm_parse_security_parameters (
 	/* 
 	 * Retrieve the time value.
 	 */
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgAuthoritativeEngineTime\n");
+        DEBUGDUMPHEADER("recv", "msgAuthoritativeEngineTime");
 	if ((next_ptr = asn_parse_int (next_ptr, &remaining_bytes, &type_value,
 		&time_long, sizeof(long))) == NULL)
 	{
 		/* RETURN parse error */ return -1;
 	}
+        DEBUGINDENTLESS();
 
 	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_INTEGER))
 	{
-		  DEBUGINDENTLESS();
                   /* RETURN parse error */ return -1;
 	}
 
@@ -1304,7 +1311,8 @@ usm_parse_security_parameters (
 	 */
 	origNameLen = *secNameLen;
 
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgUserName\n");
+
+        DEBUGDUMPHEADER("recv", "msgUserName");
 	if ( (next_ptr
 		= asn_parse_string (next_ptr, &remaining_bytes, &type_value,
 			(u_char *)secName, secNameLen)) == NULL )
@@ -1333,7 +1341,7 @@ usm_parse_security_parameters (
 	/* 
 	 * Retrieve the signature and blank it if there.
 	 */
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgAuthenticationParameters\n");
+        DEBUGDUMPHEADER("recv", "msgAuthenticationParameters");
 	if ( (next_ptr
 		= asn_parse_string (next_ptr, &remaining_bytes, &type_value,
 			signature, signature_length)) == NULL )
@@ -1360,7 +1368,7 @@ usm_parse_security_parameters (
 	 *
 	 * Note that the next ptr is where the data section starts.
 	 */
-        DEBUGDUMPHEADER("dump_recv", "Parsing msgPrivacyParameters\n");
+        DEBUGDUMPHEADER("recv", "msgPrivacyParameters");
 	if ( (*data_ptr
 		= asn_parse_string (next_ptr, &remaining_bytes, &type_value,
 			salt, salt_length)) == NULL )

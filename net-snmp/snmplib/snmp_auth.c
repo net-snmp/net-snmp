@@ -128,7 +128,7 @@ snmp_comstr_parse(u_char *data,
 
     /* First field is the version.
      */
-    DEBUGDUMPHEADER("dump_recv", "Parsing SNMP version\n");
+    DEBUGDUMPHEADER("recv", "SNMP version");
     data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
     DEBUGINDENTLESS();
     *version = ver;
@@ -138,7 +138,7 @@ snmp_comstr_parse(u_char *data,
     }
 
     /* second field is the community string for SNMPv1 & SNMPv2c */
-    DEBUGDUMPHEADER("dump_recv", "Parsing community string\n");
+    DEBUGDUMPHEADER("recv", "community string");
     data = asn_parse_string(data, length, &type, psid, slen);
     DEBUGINDENTLESS();
     if (data == NULL){

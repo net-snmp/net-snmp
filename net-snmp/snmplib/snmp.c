@@ -71,6 +71,7 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_logging.h"
+#include "snmp_debug.h"
 #include "mib.h"
 
 void
@@ -144,7 +145,9 @@ snmp_parse_var_op(u_char *data,
     	/* msg detail is set */
 	return NULL;
     }
+    DEBUGDUMPHEADER("recv","Name");
     data = asn_parse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len);
+    DEBUGINDENTLESS();
     if (data == NULL){
 	ERROR_MSG("No OID for variable");
 	return NULL;
@@ -205,13 +208,16 @@ snmp_build_var_op(u_char *data,
 
     headerLen = data - dataPtr;
     *listlength -= headerLen;
+    DEBUGDUMPHEADER("send","Name");
     data = asn_build_objid(data, listlength,
 	    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID),
 	    var_name, *var_name_len);
+    DEBUGINDENTLESS();
     if (data == NULL){
 	ERROR_MSG("Can't build OID for variable");
 	return NULL;
     }
+    DEBUGDUMPHEADER("send","Value");
     switch(var_val_type){
 	case ASN_INTEGER:
 	    data = asn_build_int(data, listlength, var_val_type,
@@ -275,6 +281,7 @@ snmp_build_var_op(u_char *data,
 	    ERROR_MSG("wrong type");
 	    return NULL;
     }
+    DEBUGINDENTLESS();
     if (data == NULL){
 	ERROR_MSG("Can't build value");
 	return NULL;
