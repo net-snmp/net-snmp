@@ -3513,18 +3513,11 @@ struct ifnet *Retifnet;
 {
         short i;
 
-	if (saveIndex != Index) {	/* Optimization! */
-	    Interface_Scan_Init();
-	    while (Interface_Scan_Next(&i, Name, Retifnet)) {
-		if (i == Index) break;
-	    }
-	    if (i != Index) return(-1);     /* Error, doesn't exist */
-	} else {
-	    if (Retifnet)
-		*Retifnet = saveifnet;
-	    if (Name)
-		strcpy(Name, saveName);
-	}
+        Interface_Scan_Init();
+        while (Interface_Scan_Next(&i, Name, Retifnet)) {
+          if (i == Index) break;
+        }
+        if (i != Index) return(-1);     /* Error, doesn't exist */
 	return(0);	/* DONE */
 }
 
