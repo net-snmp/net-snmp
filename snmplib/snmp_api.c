@@ -6120,7 +6120,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     int check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 	                                NETSNMP_DS_LIB_DONT_CHECK_RANGE);
   
-    if (check && tp->ranges) {
+    if (check && tp && tp->ranges) {
 	struct range_list *rp = tp->ranges;
 	while (rp) {
 	    if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -6339,6 +6339,8 @@ snmp_add_var(netsnmp_pdu *pdu,
     if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
         check = 0;
     }
+    if (!(tp && tp->hint))
+	do_hint = 0;
 
     if (tp && type == '=') {
         /*
@@ -6404,7 +6406,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 
-        if (!_check_range(tp, ltmp, &result, value))
+        if (check && !_check_range(tp, ltmp, &result, value))
             break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) & ltmp, sizeof(ltmp));
@@ -6508,8 +6510,8 @@ snmp_add_var(netsnmp_pdu *pdu,
             result = SNMPERR_VALUE;
             goto type_error;
         }
-	if ('s' == type && do_hint && tp->hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
-            if (_check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
+	if ('s' == type && do_hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
+            if (!check || _check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
                 snmp_pdu_add_variable(pdu, name, name_length,
                                       ASN_OCTET_STR, hintptr, itmp);
             }
@@ -6531,14 +6533,12 @@ snmp_add_var(netsnmp_pdu *pdu,
                 snmp_set_detail(value);
                 break;
             }
-            /* initialize itmp value so that range check below works */
-            itmp = value_len;
             buf_ptr = buf;
         } else if (type == 's') {
             buf_ptr = value;
             value_len = strlen(value);
         }
-        if (!_check_range(tp, value_len, &result, "Bad string length"))
+        if (check && !_check_range(tp, value_len, &result, "Bad string length"))
             break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);
