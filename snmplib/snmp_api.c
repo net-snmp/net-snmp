@@ -4207,6 +4207,13 @@ snmp_add_var(struct snmp_pdu *pdu,
 	else goto fail;
         break;
 
+      case 'c':
+        if (sscanf(value, "%lu", &ltmp) == 1)
+	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
+				  (u_char *) &ltmp, sizeof(ltmp));
+	else goto fail;
+        break;
+
       case 't':
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
