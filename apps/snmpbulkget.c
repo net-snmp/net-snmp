@@ -84,7 +84,7 @@ int max_repetitions = 100;
 int non_repeaters = 0;
 struct nameStruct {
   oid name[MAX_OID_LEN];
-  u_long name_len;
+  size_t name_len;
 } *name, *namep;
 int names;
 
