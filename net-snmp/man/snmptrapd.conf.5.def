@@ -61,7 +61,8 @@ The format used to print a SNMPv1 TRAP message. See
 for the layout characters available.
 .RE
 .IP "format2 format"
-The format used to print a SNMPv2 TRAP2 or INFORM message.
+The format used to print a SNMPv2 TRAP2 or INFORM message (note that
+the SNMPv3 protocol uses SNMPv2 style TRAPs and INFORMs).
 .SH NOTES
 .IP o
 The demon blocks on the executing traphandle commands.  (This should
