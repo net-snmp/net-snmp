@@ -1,9 +1,11 @@
 #include <config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -361,10 +363,12 @@ setPassPersist(int action,
         case ASN_OCTET_STR:
 	  itmp = sizeof(buf2);
           memcpy(buf2, var_val, var_val_len);
-          if (bin2asc(buf2, var_val_len) == (int)var_val_len)
-              sprintf(buf,"string %s",buf2);
+          if (var_val_len == 0)
+              sprintf(buf,"string \"\"");
+          else if (bin2asc(buf2, var_val_len) == (int)var_val_len)
+              sprintf(buf,"string \"%s\"",buf2);
           else
-              sprintf(buf,"octet %s",buf2);
+              sprintf(buf,"octet \"%s\"",buf2);
           break;
         case ASN_OBJECT_ID:
           sprint_mib_oid(buf2, (oid *)var_val, var_val_len);
@@ -534,6 +538,7 @@ void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
 
 static int write_persist_pipe(int iindex, const char *data)
 {
+#if HAVE_SIGNAL
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
 
@@ -570,7 +575,7 @@ static int write_persist_pipe(int iindex, const char *data)
     close_persist_pipe(iindex);
     return 0;
   }
-
+#endif /* HAVE_SIGNAL */
   return 1;
 }
 
@@ -595,7 +600,9 @@ static void close_persist_pipe(int iindex)
     persist_pipes[iindex].fdIn = -1;
   }
   if( persist_pipes[iindex].pid != -1 ) {
+#if HAVE_SYS_WAIT_H
     waitpid(persist_pipes[iindex].pid,0,0);
+#endif
     persist_pipes[iindex].pid = -1;
   }
 
