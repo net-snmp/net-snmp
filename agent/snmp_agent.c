@@ -512,6 +512,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
+      if ( strncmp(addr_string, "callback", 8) != 0 ) {
         if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
@@ -520,6 +521,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             free(addr_string);
             return 0;
         }
+      }
     } else {
         if (hosts_ctl("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
