@@ -1,3 +1,6 @@
-.libs
+.backup
+.merged
+.new
+.orig
 *.lo
 Makefile

@@ -1,4 +1,7 @@
-.*
+.backup
+.merged
+.new
+.orig
 *.lo
 *.deps
 *.conf
