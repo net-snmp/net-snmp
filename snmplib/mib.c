@@ -1152,11 +1152,12 @@ sprint_realloc_timeticks(u_char **buf, size_t *buf_len, size_t *out_len,
   }
 
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-      char str[16];
-      sprintf(str, "%lu", *(u_long *)var->val.integer);
+    char str[16];
+    sprintf(str, "%lu", *(u_long *)var->val.integer);
     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, (const u_char*)str)) {
       return 0;
     }
+    return 1;
   }
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
     char str[32];
