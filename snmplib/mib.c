@@ -710,10 +710,10 @@ sprint_counter64(buf, var, enums, hint, units)
 	sprintf(buf, "Counter64: ");
 	buf += strlen(buf);
     }
-    sprint_hexstring(buf, (char *)&var->val.counter64->high,
+    sprint_hexstring(buf, (u_char *)&var->val.counter64->high,
 		     sizeof(var->val.counter64->high));
     buf += strlen(buf);
-    sprint_hexstring(buf, (char *)&var->val.counter64->low,
+    sprint_hexstring(buf, (u_char *)&var->val.counter64->low,
 		     sizeof(var->val.counter64->low));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);

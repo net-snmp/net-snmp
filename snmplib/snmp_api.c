@@ -476,20 +476,20 @@ shift_array(begin, length, shift_amount)
     register int    length;
     int             shift_amount;
 {
-    register u_char     *old, *new;
+    register u_char     *old, *newer;
 
     if (shift_amount >= 0){
         old = begin + length - 1;
-        new = old + shift_amount;
+        newer = old + shift_amount;
 
         while(length--)
-            *new-- = *old--;
+            *newer-- = *old--;
     } else {
         old = begin;
-        new = begin + shift_amount;
+        newer = begin + shift_amount;
 
         while(length--)
-            *new++ = *old++;
+            *newer++ = *old++;
     }
 }
 
@@ -693,7 +693,7 @@ snmp_parse(session, pdu, data, length)
 	memmove(pdu->community, community, community_length);
 	if (session->authenticator){
 	    data = session->authenticator(data, &length,
-					  community, community_length);
+					  (char *) community, community_length);
 	    if (data == NULL)
 		return 0;
 	}
