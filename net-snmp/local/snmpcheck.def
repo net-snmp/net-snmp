@@ -1,0 +1,51 @@
+#!/usr/local/bin/perl
+
+$mibident=".2";
+$miberrflag=".100";
+$miberrmsg=".101";
+$mibheadsht=".1.3.6.1.4";
+$mibheadall="$mibheadsht.10";
+@miblist=(".1",".3",".6");
+$errlog="/net/tyfon/1/OV/log/ece-log";
+$andlog=0;
+$eraseline="                                                                           \r";
+
+if ($#ARGV != -1 && $ARGV[0] eq "-a") {
+    $andlog = 1;
+    shift(@ARGV);
+}
+
+if ($andlog || $#ARGV == -1) {
+    open(LOG,$errlog);
+    while (<LOG>) {
+	@fields = split;
+	@tmp = grep(/$fields[0]/,@ARGV);
+	if ($#tmp == -1 && $fields[1] ne "down") {
+	    @ARGV[$#ARGV + 1] = $fields[0];
+	}
+    }
+    close(LOG);
+}
+
+select(STDOUT);
+$| = 1;
+foreach $host ( @ARGV ) {
+    foreach $mibx ( @miblist ) {
+	$mibcheck="$mibheadall$mibx$miberrflag";
+	printf "%sChecking %s: %s\r", $eraseline,$host,$mibcheck;
+	open(OUT,"snmpwalk -v 1 $host public $mibcheck|");
+	while (<OUT>) {
+	    ($result) = /= ([0-9]+)/;
+	    if ($result > 0) {
+		($mibloc) = /\.([0-9]+) /;
+		$_ = `snmpget -v 1 $host public $mibheadall$mibx$mibident.$mibloc`;
+		($name) = /\"([^\"]*)\"/;
+		$_ = `snmpget -v 1 $host public $mibheadall$mibx$miberrmsg.$mibloc`;
+		($errmsg) = /\"([^\"]*)\"/;
+		printf("%s$host\t$name:\t$result -- $errmsg\n",$eraseline);
+	    }
+	}
+	close(OUT);
+    } 
+}
+printf("$eraseline");

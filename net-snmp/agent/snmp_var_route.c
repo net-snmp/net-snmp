@@ -63,11 +63,17 @@ static int rtsize=0, rtalloc=0;
 
 static struct nlist nl[] = {
 #define N_RTHOST       0
-	{ "_rthost" },
 #define N_RTNET        1
-	{ "_rtnet" },
 #define N_RTHASHSIZE	2
+#ifdef hpux
+	{ "rthost" },
+	{ "rtnet" },
+	{ "rthashsize" },
+#else 
+	{ "_rthost" },
+	{ "_rtnet" },
 	{ "_rthashsize" },
+#endif
 	0,
 };
 
@@ -199,11 +205,24 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 }
 
 init_routes(){
+int ret;
+#ifdef hpux
+  if (nlist("/hp-ux",nl)) {
+    ERROR("nlist");
+    exit(1);
+  }
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+    if (nl[ret].n_type == 0) {
+      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+    }
+  }
 
+#else
     nlist("/vmunix",nl);
+#endif
 }
 
-#if defined(mips)
+#if defined(mips) || defined(hpux)
 
 static Route_Scan_Reload()
 {
