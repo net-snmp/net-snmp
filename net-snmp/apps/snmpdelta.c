@@ -79,6 +79,7 @@
 #include "mib.h"
 #include "snmp.h"
 #include "system.h"
+#include "int64.h"
 #include "snmp_parse_args.h"
 
 #define MAX_ARGS 256
@@ -94,6 +95,7 @@ struct varInfo {
   size_t oidlen;
   char descriptor[64];
   u_int value;
+  struct counter64 c64value;
   float max;
   time_t time;
   int peak_count;
@@ -294,7 +296,7 @@ int main(int argc, char *argv[])
   time_t last_time = 0;
   time_t this_time;
   time_t delta_time;
-  int sum;
+  int sum; /* what the heck is this for, its never used? */
   char filename[128];
   struct timeval tv;
   struct tm tm;
@@ -410,6 +412,7 @@ int main(int argc, char *argv[])
       strcpy(vip->descriptor, SumFile);
     }
     vip->value = 0;
+    zeroU64(&vip->c64value);
     vip->time = 0;
     vip->max = 0;
     if (peaks){
@@ -483,8 +486,9 @@ int main(int argc, char *argv[])
 	      break;
 	    }
             if (vars->type == ASN_COUNTER64) {
-              u64Subtract(vars->val.counter64, vip->c64value, c64value);
-              value = *(vars->val.integer) - vip->value;
+              u64Subtract(vars->val.counter64, &vip->c64value, &c64value);
+              memcpy(&vip->c64value, &vars->val.counter64,
+                     sizeof(struct counter64));
             } else {
               value = *(vars->val.integer) - vip->value;
               vip->value = *(vars->val.integer);
@@ -502,8 +506,9 @@ int main(int argc, char *argv[])
 	  if (last_time == 0)
 	    continue;
 
-	  if (vip->oidlen)
-	    sum += value;
+	  if (vip->oidlen && vars->type != ASN_COUNTER64) {
+            sum += value;
+          }
 
 	  if (tableForm) {
 	    if (count == begin) sprintf(outstr, "%s", timestring+1);
@@ -513,13 +518,18 @@ int main(int argc, char *argv[])
 	    sprintf(outstr, "%s %s", timestring, vip->descriptor);
 
 	  if (deltat || tableForm){
-	    printvalue = ((float)value * 100) / delta_time;
-	    if (tableForm) sprintf(valueStr, "\t%.2f", printvalue);
-	    else sprintf(valueStr, " /sec: %.2f", printvalue);
+            if (vars->type == ASN_COUNTER64) {
+              fprintf(stderr, "time delta and table form not supported for counter64s\n");
+              exit(1);
+            } else {
+              printvalue = ((float)value * 100) / delta_time;
+              if (tableForm) sprintf(valueStr, "\t%.2f", printvalue);
+              else sprintf(valueStr, " /sec: %.2f", printvalue);
+            }
 	  } else {
 	    printvalue = (float)value;
-	    sprintf(valueStr, " /%d sec: %.0f",
-		    period, printvalue);
+	    sprintf(valueStr, " /%d sec: ", period);
+            printU64(valueStr+strlen(valueStr), &c64value);
 	  }
 
 	  if (!peaks){

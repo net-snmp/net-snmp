@@ -18,6 +18,7 @@ int isZeroU64 (U64 *);
 void printU64 (char *, U64 *);
 void printI64 (char *, U64 *);
 void read64 (U64 *, const char *);
+void u64Subtract(U64 *pu64one, U64 *pu64two, U64 *pu64out);
 
 #ifdef __cplusplus
 }
