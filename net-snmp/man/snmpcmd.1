@@ -28,7 +28,7 @@ snmpcmd
 [-h|-V]
 [-R]
 [-f|-s|-S] [-q]
-[-d] [-D]
+[-d] [-D[TOKEN,TOKEN,...]]
 [-m mibs] [-M mibdirs]
 [-r retries] [-t timeout]
 [-p port]
@@ -85,8 +85,12 @@ specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
 .IP "-d"
 request the application to dump all SNMP packets send and received
-.IP "-D"
-request debugging output
+.IP "-D[TOKEN,TOKEN,...]"
+request debugging output.  The optional comma separated TOKENs list
+specifies what type of debugging information you which to view.  Only
+debugging information about those TOKEN types will be shown to you.
+The special keyword "all" will display all debugging
+output. Specifying no TOKENs is the same as specifying "all".
 .IP "-r retries"
 specifies the number of retries to be used in the requests. The default
 is 5
