@@ -16,6 +16,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  Fixes:
     - Several AgentX (the subagent protocol) specific bugs have been fixed
+    - prevent denial of service attack from authenticated users
     - many many misc fixes
     - The perl agent module plugin should now work.
     - Many other perl module related fixes.
