@@ -26,7 +26,7 @@
  * $node ($node.syntax / $node.type)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redifinitions of the enum values.
+ * MIB, protect againt redefinitions of the enum values.
  */
 ##
 #ifndef ${m2c_de_pfx}_ENUMS
