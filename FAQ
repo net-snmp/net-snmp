@@ -360,10 +360,10 @@ How can I find out what other people are doing?
   To find out what the developers are doing, and to help them out, please
   read the PORTING file enclosed with the package.
 
-  There is also an net-snmp IRC channel set up on the openprojects.net
-  IRC chat servers (see http://www.openprojects.net/ for getting
-  started with irc).  Multiple core developers hang out there on a
-  regular basis.
+  There is also an net-snmp IRC channel set up on the freenode.net IRC
+  chat servers (you can use irc.freenode.net to connect and/or see
+  http://www.freenode.net/ for getting started with irc).  Multiple
+  core developers hang out there on a regular basis.
 
 
 
