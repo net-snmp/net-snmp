@@ -424,7 +424,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 
     if (  ip_stats_cache_marker &&
 	(!atime_ready( ip_stats_cache_marker, IP_STATS_CACHE_TIMEOUT*1000 )))
-#if !(defined(linux) || defined(solaris))
+#if !(defined(linux) || defined(solaris2))
 	return (( magic == IPFORWARDING ? forward :
 		( magic == IPDEFAULTTTL ? ttl     : 0 )));
 #else
@@ -507,7 +507,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
     if (auto_nlist(IPSTAT_SYMBOL, (char *)ipstat, sizeof (*ipstat)))
 	ret_value = 0;
 #endif
-#endif /* !(defined(linux) || defined(solaris)) */
+#endif /* !(defined(linux) || defined(solaris2)) */
 
     if ( ret_value == -1 ) {
 	free( ip_stats_cache_marker );
