@@ -388,6 +388,7 @@ EXPORTS
 	netsnmp_oid_stash_getnext_node
 	netsnmp_oid_stash_free
 	netsnmp_get_list_node
+	netsnmp_remove_list_node
 	netsnmp_remove_loghandler
 	netsnmp_register_loghandler
 	get_logh_head
@@ -402,3 +403,4 @@ EXPORTS
 	netsnmp_free
 	netsnmp_udp6_agent_config_tokens_register
 	init_usm_conf
+
