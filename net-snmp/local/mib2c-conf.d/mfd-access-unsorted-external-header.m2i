@@ -49,6 +49,10 @@ $example_start
  */
 typedef struct ${table}_loop_ctx_s {
 @if $m2c_include_examples == 1@
+    /*
+     * this example code is based on a data source that is a
+     * text file to be read and parsed.
+     */
     FILE *filep;
     int locked; 
     char line[MAX_LINE_SIZE];
