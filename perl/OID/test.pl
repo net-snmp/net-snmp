@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 22 };
+BEGIN { plan tests => 23 };
 use NetSNMP::OID;
 ok(1); # If we made it this far, we're ok.
 
@@ -62,3 +62,6 @@ ok($oid >= $oid3);
 ok(new NetSNMP::OID('system') < new NetSNMP::OID('interfaces'));
 ok(new NetSNMP::OID('interfaces') > new NetSNMP::OID('system'));
 ok(new NetSNMP::OID('sysORTable') > new NetSNMP::OID('system'));
+
+my @a = $oid->to_array();
+ok($a[0] == 1 && $a[1] == 3 && $a[2] == 6 && $a[3] == 1 && $#a == 3);

@@ -34,13 +34,15 @@ our @ISA = qw(Exporter DynaLoader);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-	
+	snmp_oid_compare
+        compare
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+	snmp_oid_compare
+        compare
 );
 our $VERSION = '0.01';
 
@@ -62,6 +64,11 @@ sub snmp_oid_compare($$) {
 sub compare($$) {
     my ($v1, $v2) = @_;
     snmp_oid_compare($v1, $v2);
+}
+
+sub to_array($) {
+    my $self = shift;
+    return $self->{oidptr}->to_array();
 }
 
 sub AUTOLOAD {
@@ -108,32 +115,46 @@ __END__
 
 =head1 NAME
 
-NetSNMP::OID - Perl extension for blah blah blah
+NetSNMP::OID - Perl extension for manipulating OIDs
 
 =head1 SYNOPSIS
 
   use NetSNMP::OID;
-  blah blah blah
+
+  my $oid = new NetSNMP::OID('sysContact.0');
+
+  if ($oid < new NetSNMP::OID('ifTable')) {
+      do_something();
+  }
+
+  my @numarray = $oid->to_array();
 
 =head1 DESCRIPTION
 
-Stub documentation for NetSNMP::OID, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+The NetSNMP::OID class is a simple wrapper around a C-based net-snmp
+oid.  The OID is internally stored as a C array of integers for speed
+purposes when doing comparisons, etc.  The standard logical expression
+operators (<, >, ==, ...) are overloaded such that lexographical
+comparisons may be done with them.
 
 =head2 EXPORT
 
-None by default.
-
+int snmp_oid_compare(oid1, oid2)
+int compare(oid1, oid2)
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+Wes Hardaker, E<lt>hardaker@users.sourceforge.netE<gt>
 
 =head1 SEE ALSO
 
-L<perl>.
+L<SNMP>, L<perl>.
+
+=head1 Copyright
+
+Copyright (c) 2002 Networks Associates Technology, Inc.  All
+Rights Reserved.  This program is free software; you can
+redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut

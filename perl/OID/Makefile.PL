@@ -16,6 +16,7 @@ sub InitMakeParams {
     my %Params = (
 		  'NAME'		=> 'NetSNMP::OID',
 		  'VERSION_FROM'	=> 'OID.pm', # finds $VERSION
+		  'PREREQ_PM'           => {'SNMP' => 5.0},
 		  );
 
     my $snmp_lib, $snmp_llib, $sep;
