@@ -25,10 +25,17 @@ extern          "C" {
 struct netsnmp_handler_registration_s;
 
 /*
- * per mib handler flags
+ * per mib handler flags.
+ * NOTE: The last 4 bits are reserved for the handler's own use.
  */
-#define MIB_HANDLER_AUTO_NEXT                   0x01
-#define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x02
+#define MIB_HANDLER_AUTO_NEXT                   0x0001
+#define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x0002
+
+#define MIB_HANDLER_CUSTOM4                     0x1000
+#define MIB_HANDLER_CUSTOM3                     0x2000
+#define MIB_HANDLER_CUSTOM2                     0x4000
+#define MIB_HANDLER_CUSTOM1                     0x8000
+
 
 /** @typedef struct netsnmp_mib_handler_s netsnmp_mib_handler
  * Typedefs the netsnmp_mib_handler_s struct into  netsnmp_mib_handler */
