@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/local/bin/perl 
 
 #defaults
 $hostname=`hostname`;
@@ -53,9 +53,9 @@ foreach $host ( @ARGV ) {
 		printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
 		system("snmpset $host $mibcheck$mibfix.$mibloc integer 1 > /dev/null 2>&1");
 		system("snmpset $host $mibclearcache integer 1 > /dev/null 2>&1");
-		printf("Sleeping\b\b\b\b\b\b\b\b\b");
+		printf("Sleeping\b\b\b\b\b\b\b\b");
 		sleep(2);
-		printf("Checking\b\b\b\b\b\b\b\b\b");
+		printf("Checking\b\b\b\b\b\b\b\b");
 		if (($succ = &check_mib($mibcheck,0)) != 0) {
 		    printf("*failed*  \n");
 		}
