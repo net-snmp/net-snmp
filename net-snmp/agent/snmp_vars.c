@@ -231,7 +231,7 @@ init_agent (const char *app)
 
   /* initialize agentx subagent if necessary. */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == 1)
+  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
       subagent_pre_init();
 #endif
 
