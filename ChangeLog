@@ -1,5 +1,102 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.1 -> V3.1.0.1
+
+whardake 26 Aug 96 10:36:08
+    - (NEWS) Typo, extra quotation mark.
+
+whardake 26 Aug 96 10:37:05
+    - (TODO) Extra mib parsing ideas added.
+
+whardake 26 Aug 96 10:37:36
+    - (ece-mib.def):  commas out of place.
+
+whardake 26 Aug 96 16:55:51
+    - (snmp_api.c): Fixed a gcc/FreeBSD optimization bug (stupid compiler)
+
+whardake 26 Aug 96 16:58:03
+    - (event.c, kernel.c, route_write.c): FreeBSD modifications
+
+whardake 27 Aug 96 08:46:43
+    - (extensible.c):  FreeBSD changes and use getloadavg if available.
+
+whardake 27 Aug 96 08:47:57
+    - (snmptrapd.c): Fix byte order problem (convert to network before sending).
+
+whardake 27 Aug 96 09:01:10
+    - (snmptrap.c):
+      - FreeBSD specific changes.
+      - more autoconf complete: paths to libraries and kernel location.
+
+whardake 27 Aug 96 09:38:33
+    - (snmp_var_route.c): FreeBSD specific changes.
+
+whardake 27 Aug 96 10:00:15
+    - (snmp_vars.c): More warped FreeBSD changes
+
+whardake 27 Aug 96 10:04:56
+    - (autoconf*):
+      - FreeBSD additions.
+      - New kernel location:  /kernel (ick).
+      - Log file default intelligently checks for /var/log and /usr/adm.
+      - Checks for getloadavg().
+
+whardake 29 Aug 96 14:42:20
+    - (extensible/*.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - cleaned up gcc warnings.
+      - fixed a spelling error.
+
+whardake 29 Aug 96 14:59:55
+    - (apps/*.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - set exit codes of 0 for all apps.
+      - Removed SVR4 #ifdefs.
+      - Greatly improved snmptrap.
+
+whardake 29 Aug 96 15:03:12
+    - (man/snmptrap.1):  added by Niels Baggesen <recnba@mediator.uni-c.dk>
+
+whardake 29 Aug 96 15:06:21
+    - (asn1.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - uchar(s) can't be less than 0.
+
+whardake 29 Aug 96 15:06:50
+    - (mib.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - prototypes for gcc warnings
+
+whardake 29 Aug 96 15:07:56
+    - (parse.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - save mib descriptions for snmptranslate and other apps that need it.
+
+whardake 29 Aug 96 15:08:28
+    - (snmp_api.c): Patch from Niels Baggesen <recnba@mediator.uni-c.dk>
+      - gcc warnings NULL -> 0
+
+whardake 29 Aug 96 15:58:10
+    - (snmpstatus.c): Patch from Trevor Bourget <tbourget@qualcomm.com>
+      - malloc sysdesc instead of assuming < 128 bytes.
+
+whardake 29 Aug 96 16:03:44
+    - (snmpwalk.c): Removed SVR4 ifdefs
+
+whardake 29 Aug 96 16:22:25
+    - (autoconf*, snmp_vars.c): Removed some solaris ifdefs.
+
+whardake 29 Aug 96 16:29:10
+    - Changed my email address to my new one.
+
+whardake 30 Aug 96 09:23:05
+    - (configure, configure.in):
+      - removed -Xs flag for gcc on solaris.
+      - logfile checks for existance of /var/log and /usr/adm.
+
+whardake 30 Aug 96 09:23:42
+    - (snmptrap.c): patch screwed up.
+
+whardake 30 Aug 96 09:24:31
+    - (apps/Makefile.in):  Added kernel_sunos5.o to snmptrap for getKstat.
+	
+-------------------------------------------------------------------------------
+
 Changes: V3.0.7.2 -> V3.1
 
 hardaker  3 May 96 14:34:03
