@@ -7,6 +7,8 @@
 
 #include "mibdefs.h"
 
+void init_vmstat(void);
+
 extern FindVarMethod var_extensible_vmstat;
 
 
