@@ -579,8 +579,13 @@ sub getcursor {
 #    coded special list.
 #
 sub mykeysort {
+    my $a = $displaytable::a;
+    my $b = $displaytable::b;
     my $mb = $SNMP::MIB{SNMP::translateObj($b)};
     my $ma = $SNMP::MIB{SNMP::translateObj($a)};
+
+    print STDERR "args:", join(",",@_),"\n";
+    print STDERR "compairing: $a, b, $ma, $mb, $ma->{subID}, $mb->{subID}\n";
 
     return $ucdsnmp::manager::myorder{$a} <=> $ucdsnmp::manager::myorder{$b} if ((defined($ucdsnmp::manager::myorder{$a}) || !defined($ma->{'subID'})) && (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'})));
     return 1 if (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'}));
@@ -664,7 +669,7 @@ sub showhost {
     my($tablelist);
     while (  $tablelist = $tblh->fetchrow_hashref ) {
 
-	displaytable($dbh, $tablelist->{'tablename'}, 
+	displaytable($dbh, $tablelist->{'tablename'},
 		     '-clauses', "where (host = '$host') order by oidindex",
 		     '-dontdisplaycol', "select * from userprefs where user = '$remuser' and groupname = '$group' and tablename = ? and columnname = ? and displayit = 'N'",
 		     '-sort', \&mykeysort,
