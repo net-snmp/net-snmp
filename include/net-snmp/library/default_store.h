@@ -76,6 +76,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_16BIT_IDS           31   /* restrict requestIDs, etc to 16-bit values */
 #define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32	/* don't save/load any persistant state */
 #define NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT   33	/* print a leading 0 on hex values <= 'f' */
+#define NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY 34	/* don't complain if not community is specified in the command arguments */
 
     /*
      * library integers 

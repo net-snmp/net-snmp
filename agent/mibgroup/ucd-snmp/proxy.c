@@ -52,6 +52,10 @@ proxyOptProc(int argc, char *const *argv, int opt)
                     config_perror("No context name passed to -Cn");
                 }
                 break;
+            case 'c':
+                netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY, 1);
+                break;
             default:
                 config_perror("unknown argument passed to -C");
                 break;
@@ -101,7 +105,12 @@ proxy_parse_config(const char *token, char *line)
 
     DEBUGMSGTL(("proxy_config", "parsing args: %d\n", argn));
     /* Call special parse_args that allows for no specified community string */
-    arg = snmp_proxy_parse_args(argn, argv, &session, "C:", proxyOptProc);
+    arg = snmp_parse_args(argn, argv, &session, "C:", proxyOptProc);
+
+    /* reset this in case we modified it */
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY, 0);
+    
     if (arg < 0) {
         config_perror("failed to parse proxy args");
         return;
