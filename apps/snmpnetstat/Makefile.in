@@ -65,7 +65,7 @@ makefileindepend: nosysdepend
 
 if.o: ../../config.h ../../mib_module_config.h 
 if.o:   ../../s/linux.h
-if.o: ../../s/generic.h ../../m/i686.h ../../m/i586.h ../../m/i386.h
+if.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 if.o:   main.h
 if.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 if.o: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
@@ -73,14 +73,14 @@ if.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h
 if.o: ../../snmplib/system.h netstat.h
 inet.o: ../../config.h ../../mib_module_config.h 
 inet.o:   ../../s/linux.h
-inet.o: ../../s/generic.h ../../m/i686.h ../../m/i586.h ../../m/i386.h
+inet.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 inet.o:   main.h
 inet.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
 inet.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
 inet.o: ./../../snmplib/mib.h ./../../snmplib/snmp.h netstat.h
 main.o: ../../config.h ../../mib_module_config.h 
 main.o:   ../../s/linux.h
-main.o: ../../s/generic.h ../../m/i686.h ../../m/i586.h ../../m/i386.h
+main.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 main.o:  ./../../snmplib/asn1.h ./../../snmplib/mib.h
 main.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 main.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
@@ -89,7 +89,7 @@ main.o: ./../../snmplib/view.h ./../../snmplib/acl.h ../../version.h
 main.o: netstat.h
 route.o: ../../config.h ../../mib_module_config.h 
 route.o:   ../../s/linux.h
-route.o: ../../s/generic.h ../../m/i686.h ../../m/i586.h ../../m/i386.h
+route.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 route.o:  main.h ./../../snmplib/asn1.h
 route.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h

@@ -97,8 +97,8 @@ makefileindepend: nosysdepend
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 snmp_parse_args.o: ../config.h ../mib_module_config.h
-snmp_parse_args.o:  ../s/linux.h ../s/generic.h
-snmp_parse_args.o: ../m/i686.h ../m/i586.h ../m/i386.h 
+snmp_parse_args.o:  ../s/linux.h ../s/sysv.h
+snmp_parse_args.o: ../s/generic.h ../m/generic.h 
 snmp_parse_args.o:  ./../snmplib/asn1.h
 snmp_parse_args.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmp_parse_args.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h
@@ -108,76 +108,75 @@ snmp_parse_args.o: ./../snmplib/acl.h snmp_parse_args.h ../version.h
 snmp_parse_args.o: ./../snmplib/system.h
 snmpbulkwalk.o: ../config.h ../mib_module_config.h 
 snmpbulkwalk.o:   ../s/linux.h
-snmpbulkwalk.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpbulkwalk.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpbulkwalk.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpbulkwalk.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h
 snmpbulkwalk.o: ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
 snmpbulkwalk.o: ./../snmplib/system.h snmp_parse_args.h
 snmpdelta.o: ../config.h ../mib_module_config.h 
 snmpdelta.o:   ../s/linux.h
-snmpdelta.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpdelta.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpdelta.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpdelta.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmpdelta.o: ./../snmplib/mib.h ./../snmplib/snmp.h snmp_parse_args.h
 snmpdelta.o: ./../snmplib/system.h
 snmpget.o: ../config.h ../mib_module_config.h 
 snmpget.o:   ../s/linux.h
-snmpget.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpget.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmpget.o:  ./../snmplib/asn1.h
 snmpget.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpget.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
 snmpget.o: ./../snmplib/system.h snmp_parse_args.h
 snmpgetnext.o: ../config.h ../mib_module_config.h 
 snmpgetnext.o:   ../s/linux.h
-snmpgetnext.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpgetnext.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpgetnext.o:  ./../snmplib/asn1.h
 snmpgetnext.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpgetnext.o: ./../snmplib/snmp_client.h ./../snmplib/snmp.h
 snmpgetnext.o: ./../snmplib/mib.h ./../snmplib/system.h snmp_parse_args.h
 snmpset.o: ../config.h ../mib_module_config.h 
 snmpset.o:   ../s/linux.h
-snmpset.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpset.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmpset.o:  ./../snmplib/asn1.h
 snmpset.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpset.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
-snmpset.o: ./../snmplib/system.h snmp_parse_args.h
+snmpset.o: ./../snmplib/system.h snmp_parse_args.h ./../snmplib/int64.h
 snmpstatus.o: ../config.h ../mib_module_config.h 
 snmpstatus.o:   ../s/linux.h
-snmpstatus.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpstatus.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmpstatus.o:  ./../snmplib/asn1.h
 snmpstatus.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmpstatus.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h
 snmpstatus.o: ./../snmplib/snmp.h ./../snmplib/system.h snmp_parse_args.h
 snmptable.o: ../config.h ../mib_module_config.h 
 snmptable.o:   ../s/linux.h
-snmptable.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmptable.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmptable.o:  ./../snmplib/asn1.h
 snmptable.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_client.h
 snmptable.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/snmp_impl.h
 snmptable.o: ./../snmplib/system.h ../apps/snmp_parse_args.h
 snmptest.o: ../config.h ../mib_module_config.h 
 snmptest.o:   ../s/linux.h
-snmptest.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmptest.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmptest.o:  ./../snmplib/asn1.h
 snmptest.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmptest.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/snmp_client.h
 snmptest.o: snmp_parse_args.h
 snmptranslate.o: ../config.h ../mib_module_config.h 
-snmptranslate.o: ../s/linux.h ../s/generic.h ../m/i686.h ../m/i586.h
-snmptranslate.o: ../m/i386.h 
+snmptranslate.o: ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 snmptranslate.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmptranslate.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmptranslate.o: ./../snmplib/parse.h ./../snmplib/mib.h ./../snmplib/snmp.h
 snmptrap.o: ../config.h ../mib_module_config.h 
 snmptrap.o:   ../s/linux.h
-snmptrap.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmptrap.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmptrap.o:  ./../snmplib/asn1.h
 snmptrap.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 snmptrap.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
 snmptrap.o: ./../snmplib/system.h snmp_parse_args.h
 snmptrapd.o: ../config.h ../mib_module_config.h 
 snmptrapd.o:   ../s/linux.h
-snmptrapd.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmptrapd.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmptrapd.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmptrapd.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
 snmptrapd.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/party.h
@@ -185,7 +184,7 @@ snmptrapd.o: ./../snmplib/context.h ./../snmplib/acl.h ./../snmplib/system.h
 snmptrapd.o: ../version.h
 snmpwalk.o: ../config.h ../mib_module_config.h 
 snmpwalk.o:   ../s/linux.h
-snmpwalk.o: ../s/generic.h ../m/i686.h ../m/i586.h ../m/i386.h
+snmpwalk.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmpwalk.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpwalk.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
 snmpwalk.o: ./../snmplib/snmp_impl.h ./../snmplib/system.h snmp_parse_args.h
