@@ -390,19 +390,18 @@ agentx_master_handler(netsnmp_mib_handler *handler,
          */
 
         if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
-            size_t          nlen = request->requestvb->name_length;
-            oid            *nptr = request->requestvb->name;
+            size_t nlen = request->requestvb->name_length;
+            oid   *nptr = request->requestvb->name;
 
-            if (snmp_oid_compare(nptr, nlen, request->subtree->start,
+            if (snmp_oid_compare(nptr, nlen, request->subtree->start_a,
                                  request->subtree->start_len) < 0) {
-                DEBUGMSGTL(("agentx/master",
-                            "inexact request for variable ("));
+                DEBUGMSGTL(("agentx/master","inexact request for variable ("));
                 DEBUGMSGOID(("agent/master", nptr, nlen));
                 DEBUGMSG(("agentx/master", ") preceeding region ("));
-                DEBUGMSGOID(("agent/master", request->subtree->start,
+                DEBUGMSGOID(("agent/master", request->subtree->start_a,
                              request->subtree->start_len));
                 DEBUGMSG(("agentx/master", ")\n"));
-                nptr = request->subtree->start;
+                nptr = request->subtree->start_a;
                 nlen = request->subtree->start_len;
                 request->inclusive = 1;
             }
