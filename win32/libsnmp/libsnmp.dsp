@@ -88,10 +88,6 @@ SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\getopt.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\snmplib\int64.c
 # End Source File
 # Begin Source File

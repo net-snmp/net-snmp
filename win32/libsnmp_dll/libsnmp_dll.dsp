@@ -17,8 +17,10 @@ CFG=libsnmp_dll - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libsnmp_dll - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "libsnmp_dll - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libsnmp_dll - Win32 Release" (based on\
+ "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libsnmp_dll - Win32 Debug" (based on\
+ "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -101,15 +103,15 @@ SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\int64.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\keytools.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\lcd_time.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\int64.c
 # End Source File
 # Begin Source File
 
