@@ -43,13 +43,14 @@ typedef struct netsnmp_ipaddress_s {
 
    oid      *ia_prefix_oid; /* NULL == 0.0 */
 
-   int       ia_flags;      /* ioctl flags */
+   int       ia_flags;      /* arch specific flags */
 
    u_char    ia_address_len;/* address len, 4 | 16 */
    u_char    ia_prefix_oid_len; /* 1-128 oids */
    u_char    ia_type;       /* 1-3 */
    u_char    ia_status;     /* IpAddressStatus (1-7) */
    u_char    ia_origin;     /* IpAddressOrigin (1-6) */
+   u_char    ia_storagetype; /* IpAddressStorageType (1-5) */
 
 } netsnmp_ipaddress_entry;
 
@@ -100,6 +101,22 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *old,
  * find entry in container
  */
 /** not yet */
+
+
+/*
+ * ipaddress flags
+ *   upper bits for internal use
+ *   lower bits indicate changed fields. see FLAG_IPADDRESS* definitions in
+ *         ipAddressTable_constants.h
+ */
+#define NETSNMP_ACCESS_IPADDRESS_CREATE     0x80000000
+#define NETSNMP_ACCESS_IPADDRESS_DESTROY    0x40000000
+#define NETSNMP_ACCESS_IPADDRESS_CHANGE     0x20000000
+
+/* 
+ * mask for change flag bits
+ */
+#define NETSNMP_ACCESS_IPADDRESS_RESERVED_BITS 0x0000001f
 
 /**---------------------------------------------------------------------*/
 
