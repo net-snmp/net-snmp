@@ -249,10 +249,10 @@ struct tok tokens[] = {
 };
 
 #define HASHSIZE        32
-#define BUCKET(x)       (x & 0x01F)
+#define BUCKET(x)       (x & (HASHSIZE-1))
 
 #define NHASHSIZE    128
-#define NBUCKET(x)   (x & 0x7F)
+#define NBUCKET(x)   (x & (NHASHSIZE-1))
 
 struct tok      *buckets[HASHSIZE];
 
@@ -290,8 +290,8 @@ static void build_translation_table __P((void));
 static void init_tree_roots __P((void));
 static int getoid __P((FILE *, struct subid *, int));
 static struct node *parse_objectid __P((FILE *, char *));
-static int get_tc __P((char *, struct enum_list **, char **));
-static int get_tc_index __P((char *));
+static int get_tc __P((char *, int, struct enum_list **, char **));
+static int get_tc_index __P((char *, int));
 static struct enum_list *parse_enumlist __P((FILE *));
 static struct node *parse_asntype __P((FILE *, char *, int *, char *));
 static struct node *parse_objecttype __P((FILE *, char *));
@@ -299,14 +299,17 @@ static struct node *parse_objectgroup __P((FILE *, char *));
 static struct node *parse_notificationDefinition __P((FILE *, char *));
 static struct node *parse_trapDefinition __P((FILE *, char *));
 static struct node *parse_compliance __P((FILE *, char *));
+static struct node *parse_moduleIdentity __P((FILE *, char *));
 static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
 
        int  which_module __P((char *));		/* used by 'mib.c' */
+struct tree *find_tree_node __P((char *, int));	/* used by mib.c */
 static char *module_name __P((int));
-static void  new_module  __P((char *));
+static void  new_module  __P((char *, char *));
 
 extern void  set_function __P((struct tree *));	/* from 'mib.c' */
+extern void init_mib __P((void));	/* from mib.c */
 
 static int
 name_hash( name )
@@ -680,7 +683,7 @@ find_tree_node( name, modid )
     char *name;
     int   modid;
 {
-    struct tree *tp, **headtp;
+    struct tree *tp, *headtp;
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
@@ -1830,6 +1833,8 @@ read_module (name )
 		 */
 	    init_node_hash( np );
 	    for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+		if (get_tc_index( mip->label, mip->modid ) != -1)
+		    continue;
 		tp = find_tree_node( mip->label, mip->modid );
 		if (!tp) {
 		    fprintf(stderr, "Did not find %s in module %s\n",
@@ -1844,7 +1849,7 @@ read_module (name )
 		 *   add them to the list of orphans
 		 */
 	    
-	    if (!orphan_nodes) return;
+	    if (!orphan_nodes) return tree_head;
 	    for ( np = orphan_nodes ; np->next ; np = np->next )
 		;	/* find the end of the orphan list */
 	    for (i = 0; i < NHASHSIZE; i++)
