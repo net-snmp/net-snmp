@@ -298,15 +298,17 @@ sub push_row {
     
     DEBUG("set: ", Dumper($vblist));
     $self->{'sess'} = $self->make_session() if (!$self->{'sess'});
-    if (!$self->{'sess'}->set($vblist)) {
+    if (!$self->{'sess'}) {
+	warn "couldn't create SNMP session";
+    } elsif (!$self->{'sess'}->set($vblist)) {
 	my $err = "$self->{process_table}: " . $self->{'sess'}->{ErrorStr};
 	if ($self->{'sess'}->{ErrorInd}) {
 	    $err = $err . " (at varbind #" 
 		. $self->{'sess'}->{ErrorInd}  . " = " ;
 	    my $dump = Data::Dumper->new([$vblist->[$self->{'sess'}->{ErrorInd} -1]]);
 	    $err .= $dump->Indent(0)->Terse(1)->Dump;
-	    warn $err;
 	}
+	warn $err;
     }
 }
 
