@@ -137,6 +137,7 @@ struct module_compatability {
 #define STATUS_OPTIONAL    24
 #define STATUS_OBSOLETE    25
 #define STATUS_DEPRECATED  39
+#define STATUS_CURRENT     57
 
 
 #define	ANON	"anonymous#"

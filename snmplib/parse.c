@@ -191,7 +191,6 @@ struct tok tokens[] = {
     { "MODULE-COMPLIANCE", sizeof ("MODULE-COMPLIANCE")-1, COMPLIANCE },
     { "DEFINITIONS", sizeof("DEFINITIONS")-1, DEFINITIONS},
     { "END", sizeof("END")-1, END},
-    { ";", sizeof(";")-1, SEMI},
     { "AUGMENTS", sizeof ("AUGMENTS")-1, AUGMENTS },
     { "not-accessible", sizeof ("not-accessible")-1, NOACCESS },
     { "write-only", sizeof ("write-only")-1, WRITEONLY },
@@ -239,20 +238,12 @@ struct tok tokens[] = {
     { "STATUS", sizeof ("STATUS")-1, STATUS },
     { "SYNTAX", sizeof ("SYNTAX")-1, SYNTAX },
     { "OBJECT-TYPE", sizeof ("OBJECT-TYPE")-1, OBJTYPE },
-    { "{", sizeof ("{")-1, LEFTBRACKET },
-    { "}", sizeof ("}")-1, RIGHTBRACKET },
-    { "::=", sizeof ("::=")-1, EQUALS },
-    { "(", sizeof ("(")-1, LEFTPAREN },
-    { ")", sizeof (")")-1, RIGHTPAREN },
-    { ",", sizeof (",")-1, COMMA },
     { "TRAP-TYPE", sizeof ("TRAP-TYPE")-1, TRAPTYPE },
     { "ENTERPRISE", sizeof ("ENTERPRISE")-1, ENTERPRISE },
     { "BEGIN", sizeof ("BEGIN")-1, BEGIN },
     { "IMPORTS", sizeof ("IMPORTS")-1, IMPORTS },
     { "EXPORTS", sizeof ("EXPORTS")-1, EXPORTS },
     { "accessible-for-notify", sizeof ("accessible-for-notify")-1, ACCNOTIFY },
-    { "|", sizeof ("|")-1, BAR },
-    { "..", sizeof ("..")-1, RANGE },
     { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
     { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
     { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
@@ -358,7 +349,6 @@ static void  new_module  __P((char *, char *));
 
 extern void  set_function __P((struct tree *));	/* from 'mib.c' */
 extern void init_mib __P((void));	/* from mib.c */
-static int read_module_internal __P((char *));
 
 void snmp_set_mib_warnings(warn)
     int warn;
@@ -421,7 +411,6 @@ init_mib_internals __P((void))
 		/* Relies on 'add_mibdir' having set up the modules */
 
 }
-
 
 static void
 init_node_hash(nodes)
@@ -1106,8 +1095,6 @@ getoid(fp, id,  length)
     }
     print_error ("Too long OID", token, type);
     return count;
-
-
 }
 
 /*
@@ -1370,12 +1357,12 @@ parse_asntype(fp, name, ntype, ntoken)
 
     type = get_token(fp, token,MAXTOKEN);
     if (type == SEQUENCE){
-      int level = 0;
+        int level = 0;
         while((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE){
             if (type == LEFTBRACKET){
-              level++;
-          }
-          else if (type == RIGHTBRACKET && --level == 0){
+                level++;
+            }
+            else if (type == RIGHTBRACKET && --level == 0){
                 *ntype = get_token(fp, ntoken,MAXTOKEN);
                 return NULL;
             }
@@ -1409,7 +1396,6 @@ parse_asntype(fp, name, ntype, ntoken)
         {
             type = get_tc(token, current_module, &ep, &tmp_hint);
         }
-
 
         /* textual convention */
         for(i = 0; i < MAXTC; i++){
@@ -1689,7 +1675,7 @@ parse_objecttype(fp, name)
  * Parses an OBJECT GROUP macro.
  * Returns 0 on error.
  *
- * Also parses object-identy, since they are similar (ignore STATUS).
+ * Also parses object-identity, since they are similar (ignore STATUS).
  *   - WJH 10/96
  */
 static struct node *
@@ -1707,7 +1693,7 @@ parse_objectgroup(fp, name)
     np->next = NULL;
     np->enums = NULL;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token,MAXTOKEN);
+    type = get_token(fp, token, MAXTOKEN);
     while (type != EQUALS && type != ENDOFFILE) {
       switch (type) {
         case DESCRIPTION:
@@ -1717,19 +1703,25 @@ parse_objectgroup(fp, name)
               free_node(np);
               return NULL;
           }
-#ifdef TEST2
-printf("Description== \"%.50s\"\n", quoted_string_buffer);
-#endif
           if (save_mib_descriptions) {
               np->description = Strdup (quoted_string_buffer);
           }
           break;
 
+	case REFERENCE:
+	  type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
+          if (type != QUOTESTRING) {
+              print_error("Bad REFERENCE", quoted_string_buffer, type);
+              free_node(np);
+              return NULL;
+          }
+	  break;
+	  
         default:
           /* NOTHING */
           break;
       }
-      type = get_token(fp, token,MAXTOKEN);
+      type = get_token(fp, token, MAXTOKEN);
     }
     nnp = parse_objectid (fp, name);
     if (nnp) {
@@ -2170,7 +2162,7 @@ read_module_internal (name )
     struct module *mp;
     struct module_import *mip;
     FILE *fp;
-    struct node *np;
+    struct node *np, *onp;
     struct tree *tp;
     int i;
 
@@ -2193,7 +2185,7 @@ read_module_internal (name )
 		/*
 		 * Parse the file
 		 */
-	    np = parse( fp, orphan_nodes );
+	    np = parse( fp, NULL );
 	    fclose(fp);
 #ifdef TEST
 	    printf("\nNodes for Module %s:\n", name);
@@ -2214,6 +2206,7 @@ read_module_internal (name )
 		 */
 	    init_node_hash( np );
 	    for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+		DEBUGP ("Processing import: %s\n", mip->label);
 		if (get_tc_index( mip->label, mip->modid ) != -1)
 		    continue;
 		tp = find_tree_node( mip->label, mip->modid );
@@ -2230,20 +2223,22 @@ read_module_internal (name )
 		 *   add them to the list of orphans
 		 */
 
-	    if (!orphan_nodes) return MODULE_LOADED_OK;
-	    for ( np = orphan_nodes ; np->next ; np = np->next )
+	    if (!np) return MODULE_LOADED_OK;
+	    for ( np = orphan_nodes ; np && np->next ; np = np->next )
 		;	/* find the end of the orphan list */
 	    for (i = 0; i < NHASHSIZE; i++)
 		if ( nbuckets[i] ) {
-		    if ( np )
-			np->next = nbuckets[i];
-		    else {
-			orphan_nodes = nbuckets[i];
-			np = orphan_nodes;
+		    if ( orphan_nodes )
+			onp = np->next = nbuckets[i];
+		    else
+			onp = orphan_nodes = nbuckets[i];
+		    nbuckets[i] = NULL;
+		    while (onp) {
+		        fprintf (stderr, "Unlinked OID in %s: { %s %s(%ld) }\n",
+				name, onp->parent, onp->label, onp->subid);
+			np = onp;
+			onp = onp->next;
 		    }
-		    nbuckets[i] = 0;
-		    for ( ; np->next ; np = np->next )
-			;
 		}
 
 	    return MODULE_LOADED_OK;
@@ -2497,7 +2492,7 @@ get_token(fp, token, maxtlen)
         return tok;
     }
 
-    *cp = 0;
+    *cp = '\0';
     ch = last;
     /* skip all white space */
     while(isspace(ch) && ch != EOF){
@@ -2505,12 +2500,13 @@ get_token(fp, token, maxtlen)
         if (ch == '\n')
             Line++;
     }
-    if (ch == EOF) {
+    *cp++ = ch; *cp = '\0';
+    switch (ch) {
+    case EOF:
         return ENDOFFILE;
-    } else if (ch == '"') {
+    case '"':
         return parseQuoteString(fp, token, maxtlen);
-    } else if (ch == '\'') {	/* binary or hex constant */
-	*cp++ = '\'';
+    case '\'':	/* binary or hex constant */
 	while ((ch = getc(fp)) != EOF && ch != '\'' && cp-token < maxtlen-2)
 	    *cp++ = ch;
 	if (ch == '\'') {
@@ -2543,92 +2539,93 @@ get_token(fp, token, maxtlen)
 	    return NUMBER;
 	}
 	else return LABEL;
-    }
-
-    /*
-     * Accumulate characters until end of token is found.  Then attempt to
-     * match this token as a reserved word.  If a match is found, return the
-     * type.  Else it is a label. Handle the RANGE token correctly.
-     */
-    do {
-        if (ch == '\n')
-            Line++;
+    case '(':
+	return LEFTPAREN;
+    case ')':
+	return RIGHTPAREN;
+    case '{':
+	return LEFTBRACKET;
+    case '}':
+	return RIGHTBRACKET;
+    case ';':
+	return SEMI;
+    case ',':
+	return COMMA;
+    case '|':
+	return BAR;
+    case '.':
 	ch_next = getc(fp);
-        if (isspace(ch) || ch == '(' || ch == ')' || ch == '{' || ch == '}' ||
-            ch == ',' || ch == ';' || ch == '|' || (ch == '.' && ch_next == '.')){
-	    if (ch == '.' && ch_next == '.' && *token == 0) {
-                hash += ch + ch_next;
-                if (cp-token < maxtlen-1)
-                    *cp++ = ch;
-                else too_long = 1;
-                if (cp-token < maxtlen-1)
-                    *cp++ = ch_next;
-                else too_long = 1;
-                last = ' ';
-            }
-	    else if (!isspace(ch) && *token == 0){
-	        ungetc (ch_next, fp);
-                hash += ch;
-                if (cp-token < maxtlen-1)
-                    *cp++ = ch;
-                else too_long = 1;
-                last = ' ';
-            } else {
-		ungetc (ch_next, fp);
-                last = ch;
-            }
-            *cp = '\0';
+	if (ch_next == '.') return RANGE;
+	ungetc(ch_next, fp);
+	return LABEL;
+    case ':':
+	ch_next = getc(fp);
+	if (ch_next != ':') {
+	    ungetc(ch_next, fp);
+	    return LABEL;
+	}
+	ch_next = getc(fp);
+	if (ch_next != '=') {
+	    ungetc(ch_next, fp);
+	    return LABEL;
+	}
+	return EQUALS;
+    case '-':
+	ch_next = getc(fp);
+	if (ch_next == '-') {
+	    ch = ' ';
+	    ch_next = getc(fp);
+	    while (ch_next != EOF && ch_next != '\n' &&
+		(ch != '-' || ch_next != '-')) {
+		ch = ch_next; ch_next = getc(fp);
+	    }
+	    if (ch_next == EOF) return ENDOFFILE;
+	    if (ch_next == '\n') Line++;
+	    return get_token (fp, token, maxtlen);
+	}
+	ungetc(ch_next, fp);
+    default:
+	/*
+	 * Accumulate characters until end of token is found.  Then attempt to
+	 * match this token as a reserved word.  If a match is found, return the
+	 * type.  Else it is a label.
+	 */
+	if (!(isalnum(ch) || ch == '-')) return LABEL;
+	hash += ch;
+  more:
+	while (isalnum((ch_next = getc(fp))) || ch_next == '-') {
+	    hash += ch_next;
+	    if (cp - token < maxtlen - 1) *cp++ = ch_next;
+	    else too_long = 1;
+	}
+	ungetc(ch_next, fp);
+	*cp = '\0';
 
-            if (too_long)
-                print_error("Warning: token too long", token, CONTINUE);
-            for (tp = buckets[BUCKET(hash)]; tp; tp = tp->next) {
-                if ((tp->hash == hash) && (strcmp(tp->name, token) == 0))
-                        break;
-            }
-            if (tp){
-                if (tp->token == CONTINUE)
-                    continue;
-                return (tp->token);
-            }
-
-            if (token[0] == '-' && token[1] == '-'){
-                /* strip comment */
-                if (ch != '\n'){
-                    while ((ch = getc(fp)) != EOF)
-                        if (ch == '\n'){
-                            Line++;
-                            break;
-                        }
-                }
-                if (ch == EOF)
-                    return ENDOFFILE;
-                last = ch;
-                return get_token(fp, token,maxtlen);
-            }
-            if ( token[0] == '-' ) {
-               for(cp = token+1; *cp; cp++)
-                  if (!isdigit(*cp))
-                      return LABEL;
-               return NUMBER;
-            }
-
-            for(cp = token; *cp; cp++)
-                if (!isdigit(*cp))
-                    return LABEL;
-            return NUMBER;
-        }
-	else {
-	    ungetc (ch_next, fp);
-            hash += ch;
-            if (cp-token < maxtlen-1)
-                *cp++ = ch;
-            else too_long = 1;
-            if (ch == '\n')
-                Line++;
-        }
-
-    } while ((ch = getc(fp)) != EOF);
-    return ENDOFFILE;
+	if (too_long)
+	    print_error("Warning: token too long", token, CONTINUE);
+	for (tp = buckets[BUCKET(hash)]; tp; tp = tp->next) {
+	    if ((tp->hash == hash) && (strcmp(tp->name, token) == 0))
+		break;
+	}
+	if (tp) {
+	    if (tp->token != CONTINUE) return (tp->token);
+	    while (isspace((ch_next = getc(fp))))
+		if (ch_next == '\n') Line++;
+	    if (ch_next == EOF) return ENDOFFILE;
+	    if (isalnum(ch_next)) {
+		*cp++ = ch_next;
+		hash += ch_next;
+		goto more;
+	    }
+	}
+	if (token[0] == '-' || isdigit(token[0])) {
+	   for(cp = token+1; *cp; cp++)
+	      if (!isdigit(*cp))
+		  return LABEL;
+	   return NUMBER;
+	}
+	return LABEL;
+    }
 }
 
 int
