@@ -375,8 +375,15 @@ usm_parse_create_usmUser(const char *token, char *line) {
       usm_free_user(newuser);
       return;
     }
-    newuser->privKeyLen =
-      sc_get_properlength(newuser->privProtocol, newuser->privProtocolLen);
+
+    ret = sc_get_properlength(newuser->authProtocol, newuser->authProtocolLen);
+    if (ret < 0) {
+      config_perror("Error getting proper key length for priv algorithm.");
+      usm_free_user(newuser);
+      return;
+    }
+    newuser->privKeyLen = ret;
+      
     newuser->privKey = (u_char *) malloc(newuser->privKeyLen);
     ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
                        newuser->engineID, newuser->engineIDLen,
