@@ -517,7 +517,7 @@ netsnmp_unix_getSecName(void *opaque, int olength,
         if ((community_len == strlen(c->community)) &&
 	    (memcmp(community, c->community, community_len) == 0) &&
             /* compare sockpath, if pathlen == 0, always match */ &&
-            (strlen(to->sun_path) == c->pathlen || c->pathlen == 0)
+            (strlen(to->sun_path) == c->pathlen || c->pathlen == 0) &&
             (memcmp(to->sun_path, c->sockpath, c->pathlen) == 0)	
             ) {
             DEBUGMSG(("netsnmp_unix_getSecName", "... SUCCESS\n"));
