@@ -682,30 +682,31 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     if (opaque == NULL || olength != sizeof(struct sockaddr_in) ||
         from->sin_family != AF_INET) {
         DEBUGMSGTL(("netsnmp_udp_getSecName",
-                    "no IPv4 source address in PDU?\n"));
+		    "no IPv4 source address in PDU?\n"));
         if (secName != NULL) {
             *secName = NULL;
         }
         return 1;
     }
 
-    ztcommunity = (char *) malloc(community_len + 1);
-    if (ztcommunity != NULL) {
-        memcpy(ztcommunity, community, community_len);
-        ztcommunity[community_len] = '\0';
+    DEBUGIF("netsnmp_udp_getSecName") {
+	ztcommunity = (char *)malloc(community_len + 1);
+	if (ztcommunity != NULL) {
+	    memcpy(ztcommunity, community, community_len);
+	    ztcommunity[community_len] = '\0';
+	}
+
+	DEBUGMSGTL(("netsnmp_udp_getSecName", "resolve <\"%s\", 0x%08x>\n",
+		    ztcommunity ? ztcommunity : "<malloc error>",
+		    from->sin_addr.s_addr));
     }
 
-    DEBUGMSGTL(("netsnmp_udp_getSecName", "resolve <\"%s\", 0x%08x>\n",
-                ztcommunity ? ztcommunity : "<malloc error>",
-                from->sin_addr.s_addr));
-
     for (c = com2SecList; c != NULL; c = c->next) {
-        DEBUGMSGTL(("netsnmp_udp_getSecName",
-                    "compare <\"%s\", 0x%08x/0x%08x>", c->community,
-                    c->network, c->mask));
-        if ((community_len == strlen(c->community))
-            && (memcmp(community, c->community, community_len) == 0)
-            && ((from->sin_addr.s_addr & c->mask) == c->network)) {
+        DEBUGMSGTL(("netsnmp_udp_getSecName","compare <\"%s\", 0x%08x/0x%08x>",
+		    c->community, c->network, c->mask));
+        if ((community_len == strlen(c->community)) &&
+	    (memcmp(community, c->community, community_len) == 0) &&
+            ((from->sin_addr.s_addr & c->mask) == c->network)) {
             DEBUGMSG(("netsnmp_udp_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
                 *secName = c->secName;
