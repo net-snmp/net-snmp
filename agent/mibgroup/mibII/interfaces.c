@@ -1357,14 +1357,28 @@ Interface_Scan_Init(void)
     struct ifreq    ifrq;
     struct ifnet  **ifnetaddr_ptr;
     FILE           *devin;
-    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
-    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     int             i, fd;
     conf_if_list   *if_ptr;
+#ifdef SCNuMAX
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
+    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    const char     *scan_line_2_2 =
+        "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+    const char     *scan_line_2_0 =
+        "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+#else
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
         "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
     const char     *scan_line_2_0 =
         "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
+#endif
     const char     *scan_line_to_use;
     struct timeval et;                              /* elapsed time */
 
