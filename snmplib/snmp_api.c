@@ -4844,14 +4844,14 @@ snmp_add_var(struct snmp_pdu *pdu,
 #endif /* OPAQUE_SPECIAL_TYPES */
 
     tp = get_tree(name, name_length, get_tree_head());
-    if (!tp || !tp->type) check = 0;
+    if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) check = 0;
 
     switch(type){
       case 'i':
         if (check && tp->type != TYPE_INTEGER && tp->type != TYPE_INTEGER32) {
-	    value = "Type of object is not INTEGER";
+	    value = "INTEGER";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (sscanf(value, "%ld", &ltmp) != 1) {
 	    ep = tp ? tp->enums : NULL;
@@ -4877,7 +4877,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    }
 	    if (!rp) {
 		result = SNMPERR_RANGE;
-		snmp_set_detail("Value out of range");
+		snmp_set_detail(value);
 		break;
 	    }
 	}
@@ -4887,9 +4887,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'u':
         if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
-	    value = "Type of object is not Unsigned32";
+	    value = "Unsigned32";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
@@ -4899,9 +4899,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case '3':
         if (check && tp->type != TYPE_UINTEGER) {
-	    value = "Type of object is not UInteger32";
+	    value = "UInteger32";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
@@ -4911,9 +4911,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'c':
         if (check && tp->type != TYPE_COUNTER) {
-	    value = "Type of object is not Counter32";
+	    value = "Counter32";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
@@ -4923,9 +4923,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 't':
         if (check && tp->type != TYPE_TIMETICKS) {
-	    value = "Type of object is not Timeticks";
+	    value = "Timeticks";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
@@ -4935,9 +4935,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'a':
         if (check && tp->type != TYPE_IPADDR) {
-	    value = "Type of object is not IpAddress";
+	    value = "IpAddress";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         ltmp = inet_addr(value);
         if (ltmp != (long)-1 || !strcmp(value,"255.255.255.255"))
@@ -4948,9 +4948,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'o':
         if (check && tp->type != TYPE_OBJID) {
-	    value = "Type of object is not OBJECT IDENTIFIER";
+	    value = "OBJECT IDENTIFIER";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         tint = sizeof(buf) / sizeof(oid);
         if (read_objid(value, (oid *)buf, &tint))
@@ -4963,9 +4963,9 @@ snmp_add_var(struct snmp_pdu *pdu,
       case 'x':
       case 'd':
         if (check && tp->type != TYPE_OCTETSTR) {
-	    value = "Type of object is not OCTET STRING";
+	    value = "OCTET STRING";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
         if (type == 'd'){
           ltmp = ascii_to_binary(value, buf);
@@ -5001,9 +5001,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'b':
         if (check && (tp->type != TYPE_OCTETSTR || !tp->enums)) {
-	    value = "Type of object is not BITS";
+	    value = "BITS";
 	    result = SNMPERR_VALUE;
-	    goto set_error;
+	    goto type_error;
 	}
 	tint = 0;
 	memset(buf, 0, sizeof buf);
@@ -5076,9 +5076,36 @@ snmp_add_var(struct snmp_pdu *pdu,
     SET_SNMP_ERROR(result);
     return result;
 
+type_error:
+    {   char error_msg[256];
+        char undef_msg[32];
+        const char *var_type;
+	switch (tp->type) {
+	case TYPE_OBJID:	var_type = "OBJECT IDENTIFIER"; break;
+	case TYPE_OCTETSTR:	var_type = "OCTET STRING"; break;
+	case TYPE_INTEGER:	var_type = "INTEGER"; break;
+	case TYPE_NETADDR:	var_type = "NetworkAddress"; break;
+	case TYPE_IPADDR:	var_type = "IpAddress"; break;
+	case TYPE_COUNTER:	var_type = "Counter32"; break;
+	case TYPE_GAUGE:	var_type = "Gauge32"; break;
+	case TYPE_TIMETICKS:	var_type = "Timeticks"; break;
+	case TYPE_OPAQUE:	var_type = "Opaque"; break;
+	case TYPE_NULL:		var_type = "Null"; break;
+	case TYPE_COUNTER64:	var_type = "Counter64"; break;
+	case TYPE_BITSTRING:	var_type = "BITS"; break;
+	case TYPE_NSAPADDRESS:	var_type = "NsapAddress"; break;
+	case TYPE_UINTEGER:	var_type = "UInteger"; break;
+      	case TYPE_UNSIGNED32:	var_type = "Unsigned32"; break;
+	case TYPE_INTEGER32:	var_type = "Integer32"; break;
+	default:	sprintf(undef_msg, "TYPE_%d", tp->type); var_type = undef_msg;
+	}
+	sprintf(error_msg, "Type of attribute is %s, not %s", var_type, value);
+	result = SNMPERR_VAR_TYPE;
+	snmp_set_detail(error_msg);
+	goto out;
+    }
 fail:
     result = SNMPERR_VALUE;
-set_error:
     snmp_set_detail(value);
 out:
     SET_SNMP_ERROR(result);
