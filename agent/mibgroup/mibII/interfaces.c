@@ -1551,6 +1551,10 @@ Interface_Scan_Init(void)
 #else
     unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
     unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    const char     *scan_line_2_2 =
+        "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
+    const char     *scan_line_2_0 =
+        "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
 #endif
     const char     *scan_line_to_use;
 
