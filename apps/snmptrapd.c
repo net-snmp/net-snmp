@@ -676,7 +676,8 @@ static void parse_trap1_fmt(const char *token, char *line)
 
 static void free_trap1_fmt(void)
 {
-    if (trap1_fmt_str != trap1_std_str) free ((char *)trap1_fmt_str);
+    if (trap1_fmt_str && trap1_fmt_str != trap1_std_str)
+        free ((char *)trap1_fmt_str);
     trap1_fmt_str = NULL;
 }
 
@@ -689,7 +690,8 @@ static void parse_trap2_fmt(const char *token, char *line)
 
 static void free_trap2_fmt(void)
 {
-    if (trap2_fmt_str != trap2_std_str) free ((char *)trap2_fmt_str);
+    if (trap2_fmt_str && trap2_fmt_str != trap2_std_str)
+        free ((char *)trap2_fmt_str);
     trap2_fmt_str = NULL;
 }
 
