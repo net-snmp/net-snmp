@@ -15,7 +15,18 @@ init_mib;
 $hostname = 'localhost';          # Host that serves the mSQL Database
 $dbname = 'snmp';                 # mySQL Database name
 $user = 'root';
+#$pass = "password";
+$redimage = "/graphics/1.gif";
+$greenimage = "/graphics/0.gif";
 #$verbose = 1;
+$tableparms = "border=3 ipad=3 bgcolor=#d0d0d0";
+
+# read in a configuration file if it exists at .FILE.conf.
+$conffile = "$0.conf";
+$conffile =~ s/(\\|\/)([^\\\/]*)$/$1.$2/;
+if (-f $conffile) {
+    do "$conffile";
+}
 
 $remuser = $ENV{'REMOTE_USER'};
 $remuser = "guest" if (!defined($remuser) || $remuser eq "");
@@ -36,13 +47,46 @@ if ($dispinfo = $query->param('displayinfo')) {
     exit;
 }
 
+if ($disptable = $query->param('displaytable')) {
+    displaytable($disptable);
+    exit;
+}
+
 $host = $query->param('host');
 $group = $query->param('group');
+
+if (defined($group) && defined($newhost = $query->param('newhost'))) {
+    if (isadmin()) {
+	if ($dbh->do("select * from hostgroups where host = '$newhost' and groupname = '$group'") eq "0E0") {
+	    $dbh->do("insert into hostgroups(host,groupname) values('$newhost','$group')") ;
+	} else {
+	    print "<b>ERROR: host $newhost already in $group</b>\n";
+	}
+	$query->delete('newhost');
+    }
+}
+
+if (defined($group) && defined($query->param('setupgroup')) && 
+    isadmin()) {
+    setupgroup($group);
+    exit;
+}
 
 if (!defined($group)) {
     @groups = getgroupsforuser($remuser);
     if ($#groups > 0) {
-	showgeneric("group",@groups);
+	displaytable('usergroups', 
+		     '-clauses', "where (user = '$remuser')",
+		     '-select', 'distinct groupname',
+		     '-printonly', ['groupname'],
+		     '-datalink', sub { my $q = $query->self_url;
+					my $key = shift;
+					my $h = shift;
+					return if ($key ne "groupname");
+					return addtoken($q,"group=$h");
+				    }
+		     );
+#	showgeneric("group",@groups);
 	$dbh->disconnect();
 	exit;
     } else {
@@ -51,21 +95,42 @@ if (!defined($group)) {
 }
 
 if (!defined($host)) {
-    @hosts = gethostsforgroup($group);
-    showgeneric("host",gethostsforgroup($group));
+    displaytable('hostgroups', 
+		 '-clauses', "where (groupname = '$group')",
+		 '-select', 'distinct host',
+		 '-datalink', sub { my $q = $query->self_url;
+				    my $key = shift;
+				    my $h = shift;
+				    return if ($key ne "host");
+				    return addtoken($q,"host=$h");
+				}
+		 );
+    if (isadmin()) {
+	addhostentryform();
+	my $q = $query->self_url;
+	$q =~ s/\?.*//;
+	print "<a href=\"" . addtoken($q,"group=$group&setupgroup=1") . "\">setup group $group</a>\n";
+    }
 } else {
     showhost($host);
 }
 $dbh->disconnect();
 
+# add a token to a url string.  Use either a ? or an & depending.
+sub addtoken {
+    my $url = shift;
+    my $token = shift;
+    return "$url&$token" if ($url =~ /\?/);
+    return "$url?$token";
+}
 
 # sort things by mib location, or hard coded order.
 sub mykeysort {
     $mb = $SNMP::MIB{SNMP::translateObj($b)};
     $ma = $SNMP::MIB{SNMP::translateObj($a)};
-    return $myorder{$a} <=> $myorder{$b} if (!defined($ma->{'subID'}) && !defined($mb->{'subID'}));
-    return 1 if (!defined($mb->{'subID'}));
-    return -1 if (!defined($ma->{'subID'}));
+    return $myorder{$a} <=> $myorder{$b} if ((defined($myorder{$a}) || !defined($ma->{'subID'})) && (defined($myorder{$b}) || !defined($mb->{'subID'})));
+    return 1 if (defined($myorder{$b}) || !defined($mb->{'subID'}));
+    return -1 if (defined($myorder{$a}) || !defined($ma->{'subID'}));
 
     $ma->{'subID'} <=> $mb->{'subID'};
 }
@@ -73,6 +138,7 @@ sub mykeysort {
 sub showhost {
     my $host = shift;
     # host header
+    print "<title>ucd-snmp manager report for host: $host</title>\n";
     print "<h3>host: $host</h3>\n";
 
     # get a list of tables we want to display
@@ -87,54 +153,134 @@ sub showhost {
     # table data
     while (  $tablelist = $tblh->fetchrow_hashref ) {
 
-	# get a list of data from the table we want to display
-	$cmd = "SELECT * FROM $tablelist->{'tablename'} where (host = '$host')";
-	print " $cmd\n" if ($verbose);
-	( $thetable = $dbh->prepare( $cmd ) )
-	    or die "\nnot ok: $DBI::errstr\n";
-	( $thetable->execute )
-	    or print( "\tnot ok: $DBI::errstr\n" );
-
-	# table header
-	$doheader = 1;
-	my @keys;
-	while( $data = $thetable->fetchrow_hashref ) {
-	    if ($doheader) {
-		@keys = (sort mykeysort keys(%$data));
-		print "<br><b><a href=\"" . $query->url . "?displayinfo=$tablelist->{'tablename'}\">$tablelist->{'tablename'}</a></b><br>\n";
-		print "<table border=3>\n<tr><td>";
-		foreach $l (@keys) {
-		    print "<a href=\"" . $query->url . "?displayinfo=$l\">" if (!exists($myorder{$l}));
-		    print "$l";
-		    print "</a>" if (!exists($myorder{$l}));
-		    print "</td><td>";
-		}
-		"</td></tr>\n";
-		$doheader = 0;
-	    }
-	    print "<tr><td>";
-	    foreach $key (@keys) {
-		print $data->{$key},"</td><td>";
-	    }
-	    print "</td></tr>\n";
-	}
-	print "</table>\n";
+	displaytable($tablelist->{'tablename'}, 
+		     '-clauses', "where (host = '$host') order by oidindex",
+		     '-sort', "mykeysort",
+		     '-dolink', \&linktodisplayinfo,
+		     '-beginhook', \&printredgreen);
     }
 
 }
+
+sub linktodisplayinfo {
+    return if (exists($myorder{$l}));
+    return $query->self_url . "&displayinfo=" . shift;
+}
+
+sub printredgreen {
+    my $tablename = shift;
+    my $data = shift;
+    my ($exprs, $expr, $img);
+
+    if (!defined($data)) {
+	#doing header;
+	print "<td></td>";
+	return;
+    }
+
+    $cmd = "SELECT * FROM errorexpressions where (tablename = '$tablename')";
+    print " $cmd\n" if ($verbose);
+    ( $exprs = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $exprs->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+    $img = $greenimage;
+    while($expr = $exprs->fetchrow_hashref) {
+	if ($dbh->do("select oidindex from $tablename where oidindex = '$data->{oidindex}' and $expr->{expression}") ne "0E0") {
+	    $img = $redimage;
+	}
+    }
+    print "<td><img src=$img></td>";
+}
+
+# genericly displays any sql table in existence.
+sub displaytable {
+    my $tablename = shift;
+    my %config = @_;
+    my $clauses = $config{'-clauses'};
+    my $sort = $config{'-sort'};
+    my $dolink = $config{'-dolink'};
+    my $datalink = $config{'-datalink'};
+    my $beginhook = $config{'-beginhook'};
+    my $selectwhat = $config{'-select'};
+    my $printonly = $config{'-printonly'};
+    $selectwhat = "*" if (!defined($selectwhat));
+    my ($thetable, $data, $ref);
+
+    # get a list of data from the table we want to display
+    $cmd = "SELECT $selectwhat FROM $tablename $clauses";
+    print STDERR " $cmd\n" if ($verbose);
+    ( $thetable = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $thetable->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+    # table header
+    my $doheader = 1;
+    my @keys;
+    while( $data = $thetable->fetchrow_hashref ) {
+	if ($doheader) {
+	    if (defined($sort)) {
+		@keys = (sort $sort keys(%$data));
+	    } else {
+		@keys = (sort keys(%$data));
+	    }
+	    if (!defined($config{'-notitle'})) {
+		print "<br><b>";
+		print "<a href=\"$ref\">" if (defined($dolink) && 
+					      defined($ref = &$dolink($tablename)));
+		print "$tablename";
+		print "</a>" if (defined($ref));
+		print "</b>\n";
+	    }
+	    print "<br>\n";
+	    print "<table $tableparms>\n<tr>";
+	    if (defined($beginhook)) {
+		&$beginhook($tablename);
+	    }
+	    foreach $l (@keys) {
+		print "<td>";
+		print "<a href=\"$ref\">" if (defined($dolink) && 
+					      defined($ref = &$dolink($l)));
+		print "$l";
+		print "</a>" if (defined($ref));
+		print "</td>";
+	    }
+	    "</tr>\n";
+	    $doheader = 0;
+	}
+
+	print "<tr>";
+	if (defined($beginhook)) {
+	    &$beginhook($tablename, $data);
+	}
+	print "<td>";
+	foreach $key (@keys) {
+	    print "<a href=\"$ref\">" if (defined($datalink) && 
+					  defined($ref = &$datalink($key, $data->{$key})));
+	    print $data->{$key};
+	    print "</a>" if (defined($ref));
+	    print "</td><td>";
+	}
+	print "</td></tr>\n";
+    }
+    print "</table>\n";
+}
+    
 
 sub makemibtable {
     my $dispinfo = shift;
     # display information about a data type in a table
     my $mib = $SNMP::MIB{SNMP::translateObj($dispinfo)};
-    print "<table border=3><tr><td>\n";
+    print "<table $tableparms><tr><td>\n";
     foreach $i (qw(label type access status units hint moduleID description enums)) {
 #    foreach $i (keys(%$mib)) {
 	next if (!defined($$mib{$i}) || $$mib{$i} eq "");
 	next if (ref($$mib{$i}) eq "HASH" && $#{keys(%{$$mib{$i}})} == -1);
 	print "<tr><td>$i</td><td>";
 	if (ref($$mib{$i}) eq "HASH") {
-	    print "<table border=3><tr><td>\n";
+	    print "<table $tableparms><tr><td>\n";
 	    foreach $j (sort { $$mib{$i}{$a} <=> $$mib{$i}{$b} } keys(%{$$mib{$i}})) {
 		print "<tr><td>$$mib{$i}{$j}</td><td>$j</td></tr>";
 	    }
@@ -150,6 +296,7 @@ sub makemibtable {
 sub showgeneric {
 #    my $label = shift;
     my ($label, @stuff) = @_;
+    print "<title>ucd-snmp manager</title><ul>\n";
     print "<h3>Selecet a $label:</h3><ul>\n";
     my $item;
     foreach $item (@stuff) {
@@ -184,4 +331,84 @@ sub gethostsforgroup {
 	push(@ret, $row->{'host'});
     }
     @ret;
+}
+
+sub addhostentryform {
+    print "<form method=\"get\" action=\"" . $query->self_url . "\">\n";
+    print "Add new host to group: <input type=\"text\" name=\"newhost\">";
+    print "<input type=\"hidden\" name=\"group\" value=\"$group\">";
+    print "</form>";
+}
+
+sub isadmin {
+    return 0 if (!defined($remuser) || !defined($group));
+    return 1 if ($dbh->do("select * from usergroups where user = '$remuser' and groupname = '$group' and isadmin = 'Y'") ne "0E0");
+    return 0;
+}
+
+sub displayconfigarray {
+    my $hosts = shift;
+    my $names = shift;
+    my %config = @_;
+
+    my $cmd;
+    if ($config{'-check'}) {
+	( $cmd = $dbh->prepare( $config{'-check'} ) )
+	    or die "\nnot ok: $DBI::errstr\n";
+    }
+
+    print "<table $tableparms>\n";
+    print "<tr><td></td>";
+    my ($i, $j);
+    foreach $j (@$names) {
+	print "<td>${$j}[0]</td>";
+    }
+    foreach $i (@$hosts) {
+	print "<tr><td>${$i}[0]</td>";
+	foreach $j (@$names) {
+	    my $checked = "checked" if (defined($cmd) && $cmd->execute(${$i}[0],${$j}[0]) ne "0E0");
+	    print "<td><input type=checkbox $checked value=y name=$config{prefix}${$i}[0]${$j}[0]></td>";
+	}
+	print "</tr>\n";
+    }	
+    print "</tr>";
+    print "</table>";
+}
+
+
+sub setupgroup {
+    my $group = shift;
+    
+    my ($hosts, $names) = gethostandgroups($group);
+
+    print "<form method=\"post\" action=\"" . $query->self_url . "\">\n";
+    print "<input type=hidden text=\"setupgroupsubmit\" value=\"y\">";
+    displayconfigarray($hosts, $names, 
+		       -check, "select * from hosttables where (host = ? and tablename = ?)");
+    print "<input type=hidden name=group value=\"$group\">\n";
+    print "<input type=submit value=submit name=\"setupsubmit\">\n";
+    print "</form>";
+}
+
+sub gethostandgroups {
+    my $group = shift;
+    my ($tbnms);
+
+    my $cmd = "SELECT distinct tablename FROM hosttables";
+    print " $cmd\n" if ($verbose);
+    ( $tbnms = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $tbnms->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+    my $names = $tbnms->fetchall_arrayref;
+    
+    $cmd = "SELECT distinct host FROM hostgroups where groupname = '$group'";
+    print " $cmd\n" if ($verbose);
+    ( $tbnms = $dbh->prepare( $cmd ) )
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $tbnms->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+
+    my $hosts = $tbnms->fetchall_arrayref;
+    return ($hosts, $names);
 }
