@@ -253,7 +253,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
             break;
           case OBJID:
             itmp = sizeof(objid);
-            asn_parse_objid(var_val,&tmplen,&var_val_type, &objid,&itmp);
+            asn_parse_objid(var_val,&tmplen,&var_val_type,objid,&itmp);
             sprint_mib_oid(buf2, objid, itmp);
             sprintf(buf,"objectid \"%s\"",buf2);
             break;
