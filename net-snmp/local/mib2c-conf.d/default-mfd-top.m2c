@@ -8,6 +8,7 @@
 ##
 @eval $mfd_readme_verbose = 1@
 @eval $m2c_data_transient = 2@ # TRANSIENT
+@eval $m2c_include_examples = 1@
 ########################################################################
 ## enum constants upper or lower case? (NODE_NAME vs node_name)
 @eval $m2c_const_lc = 0@
