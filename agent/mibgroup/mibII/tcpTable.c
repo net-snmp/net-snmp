@@ -694,6 +694,13 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 #else                           /* WIN32 */
 
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
+
+#if defined(freebsd4)
+    #define NS_ELEM struct xtcpcb
+#else
+    #define NS_ELEM struct xinpcb
+#endif
+
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -729,11 +736,11 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        nnew->state = StateMap[((struct xinpcb *) xig)->xt_tp.t_state];
+        nnew->state = StateMap[((NS_ELEM *) xig)->xt_tp.t_state];
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
-        memcpy(&(nnew->pcb), &(((struct xinpcb *) xig)->xt_inp),
+        memcpy(&(nnew->pcb), &(((NS_ELEM *) xig)->xt_inp),
                            sizeof(struct inpcb));
 
 	nnew->inp_next = tcp_head;
@@ -749,6 +756,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (sysctl)\n"));
     return -1;
 }
+#undef NS_ELEM
+
 #else		/* (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST)) */
 #ifdef PCB_TABLE
 int
