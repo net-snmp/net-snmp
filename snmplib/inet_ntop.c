@@ -28,17 +28,15 @@
   /*
    * Net-SNMP Win32 additions
    */
-#if HAVE_WINSOCK_H
+#if defined(HAVE_WINSOCK_H) || defined(cygwin)
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <errno.h>
 #include <stdio.h>
 #endif
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT
-#endif
-#ifndef INET6
-#define INET6
 #endif
   /*
    * End of Net-SNMP Win32 additions
