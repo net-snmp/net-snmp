@@ -199,7 +199,6 @@ static int anonymous = 0;
 #define CAPABILITIES 73
 #define MACRO       74
 #define IMPLIED     75
-#define SMI_TOK     76
 
 struct tok {
     const char *name;                 /* token name */
@@ -281,7 +280,6 @@ static struct tok tokens[] = {
     { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
     { "MACRO", sizeof ("MACRO")-1, MACRO },
     { "IMPLIED", sizeof ("IMPLIED")-1, IMPLIED },
-    { "SMI", sizeof ("SMI")-1, SMI_TOK },
     { NULL }
 };
 
@@ -373,7 +371,6 @@ static struct node *parse_capabilities(FILE *, char *);
 static struct node *parse_moduleIdentity (FILE *, char *);
 static struct node *parse_macro(FILE *, char *);
 static        void  parse_imports (FILE *);
-static        void  parse_SMItoken(FILE *);
 static struct node *parse (FILE *, struct node *);
 
 static int read_module_internal (const char *);
@@ -1276,8 +1273,9 @@ do_subtree(struct tree *root,
 		tbuckets[hash] = anon_tp;
 
 		/* unlink and destroy tp */
+		unlink_tbucket(tp);
 		unlink_tree(tp);
-		free_tree(tp);
+		free(tp);
             }
             else {
                 /* Uh?  One of these two should have been anonymous! */
@@ -2304,25 +2302,6 @@ parse_macro(FILE *fp,
 }
 
 /*
- * Parses an SMI definition
- * Expect and return a built-in.
- */
-static void
-parse_SMItoken(FILE *fp)
-{
-    register int type;
-    char token[MAXTOKEN];
-
-    type = get_token(fp, token, sizeof(token));
-
-    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
-	snmp_log(LOG_WARNING,
-		 "SMI %s parsed and ignored).\n", token);
-
-    return;
-}
-
-/*
  * Parses a module import clause
  *   loading any modules referenced
  */
@@ -2877,9 +2856,6 @@ parse(FILE *fp,
         case LABEL:
             break;
         case ENDOFFILE:
-            continue;
-        case SMI_TOK:
-            parse_SMItoken( fp );
             continue;
         default:
             print_error(token, "is a reserved word", type);
