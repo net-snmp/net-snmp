@@ -596,7 +596,7 @@ echo "configure:596: checking for mib modules to use" >&5
 
 mibdir="agent/mibgroup"
 module_list=""
-new_module_list="at interfaces snmp tcp icmp ip system udp proc versioninfo pass disk loadave extensible $with_mib_modules"
+new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible $with_mib_modules"
 
 if test ! -d agent; then
   mkdir agent
