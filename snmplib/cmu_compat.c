@@ -1,3 +1,4 @@
+#include <net-snmp/net-snmp-config.h>
 
 #ifdef CMU_COMPATIBLE
 
