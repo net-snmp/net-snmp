@@ -534,7 +534,7 @@ Init_HR_SWRun()
     nproc = pst_dyn.psd_activeprocs ;
     bytes = nproc*sizeof(struct pst_status);
 #endif
-    if ((proc_table=malloc(bytes)) == NULL ) {
+    if ((proc_table=(struct pst_status *) malloc(bytes)) == NULL ) {
 	current_proc_entry = nproc+1;
 	return;
     }
