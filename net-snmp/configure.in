@@ -352,8 +352,8 @@ AC_ARG_WITH(out_transports,
 #
 AC_ARG_WITH(transport,,    AC_MSG_ERROR([ Invalid option. Use --with-transports instead ])     )
 AC_ARG_WITH(out_transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-transports instead ]) )
-AC_ARG_WITH(modules,, AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])
-AC_ARG_WITH(out-modules,, AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ])
+AC_ARG_WITH(modules,, AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ]) )
+AC_ARG_WITH(out-modules,, AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
 #
 # security modules
 #
