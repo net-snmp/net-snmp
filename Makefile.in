@@ -123,7 +123,7 @@ $(srcdir)/configure: configure.in aclocal.m4
 # autoheader might not change include/net-snmp/net-snmp-config.h.in, so touch a stamp file.
 #
 $(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
-$(srcdir)/stamp-h.in: configure.in include/net-snmp/acconfig.h
+$(srcdir)/stamp-h.in: configure.in acconfig.h
 	cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER)
 	echo timestamp > ${srcdir}/stamp-h.in
 
