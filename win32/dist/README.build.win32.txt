@@ -96,8 +96,9 @@ Creating the Perl package
 
 8.  ren Bundle-NetSNMP.ppd Net-SNMP.ppd
 
-9.  Modify Net-SNMP.ppd to look like the following.  Do NOT change * lines in 
-    original.
+9.  Modify Net-SNMP.ppd to look like the following.  Change the 
+    VERSION="x,x,x,x" line to the correct values.  Do NOT change 
+    * lines in the original file.
 
 <SOFTPKG NAME="Net-SNMP" VERSION="5,1,1,0">
     <TITLE>Net-SNMP</TITLE>
@@ -218,12 +219,6 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
     Bold the commands listed in the SYNOPSIS section for snmpnetstat.
 
-    Remove any empty man files such as:
-
-    man3-netsnmp_Container_iterator.3.html
-    man3-netsnmp_scalar_group_group.3.html
-    man3-netsnmp_watcher.3.html
-
     You also need to remove the files from the project file 
     (win32/dist/htmlhelp/Net-SNMP.hhp) and the Table of Contents
     (win32/dist/htmlhelp/Net-SNMP.hhc).
@@ -327,21 +322,31 @@ Requirements
 3.  Create the following empty files:
 
     cd c:\usr
-    echo . > c:\usr\registeragent.bat c:\usr\
-    echo . > c:\usr\unregisteragent.bat c:\usr\
-    echo . > c:\usr\bin\snmpconf.bat c:\usr\
+    echo . > c:\usr\registeragent.bat
+    echo . > c:\usr\unregisteragent.bat
+    echo . > c:\usr\bin\snmpconf.bat
     echo . > c:\usr\etc\snmp\snmp.conf
 
-4.  Launch the 'Nullsoft Install System (NSIS 2.0)'
+4.  Edit the following variables in c:\usr\net-snmp.nsi:
 
-5.  Select 'MakeNSISW (compiler interface)'
+    PRODUCT_MAJ_VERSION
+    PRODUCT_MIN_VERSION
+    PRODUCT_REVISION
+    PRODUCT_EXE_VERSION
 
-6.  Click File - Load Script
+    PRODUCT_EXE_VERSION is usually 1 unless the binary package is
+    re-released.
 
-7.  Select c:\usr\net-snmp.nsi
+5.  Launch the 'Nullsoft Install System (NSIS 2.0)'
 
-8.  You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
+6.  Select 'MakeNSISW (compiler interface)'
+
+7.  Click File - Load Script
+
+8.  Select c:\usr\net-snmp.nsi
+
+9.  You should now have a c:\usr\Net-SNMP-x.x.x-x.exe binary installer 
     package
 
-9.  Test the package
+10.  Test the package
 
