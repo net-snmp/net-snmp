@@ -145,7 +145,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
     tbl_info = (netsnmp_table_registration_info *) handler->myvoid;
 
     if ((!handler->myvoid) || (!tbl_info->indexes)) {
-        snmp_log(LOG_INFO, "improperly registered table found\n");
+        snmp_log(LOG_ERR, "improperly registered table found\n");
+        snmp_log(LOG_ERR, "name: %s, table info: %p, indexes: %p\n",
+                 handler->handler_name, handler->myvoid, tbl_info->indexes);
 
         /*
          * XXX-rks: unregister table? 
@@ -741,17 +743,18 @@ netsnmp_closest_column(unsigned int current,
     if (valid_columns == NULL)
         return 0;
 
-    do {
+    for( ; (!done && valid_columns); valid_columns = valid_columns->next) {
 
         if (valid_columns->isRange) {
 
             if (current < valid_columns->details.range[0]) {
-                if (valid_columns->details.range[0] < closest) {
+                if ( (0 == closest) ||
+                     (valid_columns->details.range[0] < closest)) {
                     closest = valid_columns->details.range[0];
                 }
             } else if (current <= valid_columns->details.range[1]) {
                 closest = current;
-                done = 1;       /* can not get any closer! */
+                break;       /* can not get any closer! */
             }
 
         } /* range */
@@ -771,19 +774,15 @@ netsnmp_closest_column(unsigned int current,
                 if (current == valid_columns->details.list[idx]) {
                     closest = current;
                     done = 1;   /* can not get any closer! */
-                    break;      /* for */
+                    break;      /* inner for */
                 } else if (current < valid_columns->details.list[idx]) {
                     if (valid_columns->details.list[idx] < closest)
                         closest = valid_columns->details.list[idx];
                     break;      /* list should be sorted */
                 }
-            }                   /* for */
-
+            }                   /* inner for */
         }                       /* list */
-
-        valid_columns = valid_columns->next;
-
-    } while (!done && valid_columns);
+    }                           /* outer for */
 
     return closest;
 }
