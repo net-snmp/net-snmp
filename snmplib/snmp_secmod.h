@@ -24,7 +24,7 @@ struct snmp_secmod_outgoing_params {
    size_t  *secParamsLen;
    u_char **wholeMsg;
    size_t  *wholeMsgLen;
-   struct snmp_session *pdu;       /* IN - the pdu getting encoded            */
+   struct snmp_pdu *pdu;           /* IN - the pdu getting encoded            */
    struct snmp_session *session;   /* IN - session sending the message        */
 };
 
@@ -52,7 +52,7 @@ struct snmp_secmod_incoming_params {
    size_t  *maxSizeResponse;       /* OUT    - Max size of Response PDU.      */
    void   **secStateRef;           /* OUT    - Ref to security state.         */
    struct snmp_session *sess;      /* IN     - session which got the message  */
-   struct snmp_session *pdu;       /* IN     - the pdu getting parsed         */
+   struct snmp_pdu *pdu;           /* IN     - the pdu getting parsed         */
    u_char msg_flags;	           /* IN     - v3 Message flags.              */
 };
 
