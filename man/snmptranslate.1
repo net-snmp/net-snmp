@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRANSLATE 1 "18 Dec 1999"
+.TH SNMPTRANSLATE 1 "13 Apr 2000"
 .UC 4
 .SH NAME
 snmptranslate - translate SNMP objects into more useful information
@@ -71,6 +71,9 @@ dump a symbolic form of all objects
 .TP
 .B \-Tt
 dump a tree form of the loaded mibs (mostly useful for debugging)
+.TP
+.B \-w width
+specify width of -Tp output. Default is very large
 .SH EXAMPLES
 .PP
 .I snmptranslate -On -IR sysDescr
