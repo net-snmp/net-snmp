@@ -14,7 +14,7 @@ IMPORTS
     OBJECT-GROUP, NOTIFICATION-GROUP
 	FROM SNMPv2-CONF
 
-    DisplayString FROM SNMPv2-TC;
+    DisplayString, TruthValue FROM SNMPv2-TC;
 
 
 netSnmpAgentMIB MODULE-IDENTITY
@@ -42,6 +42,99 @@ nsCache                OBJECT IDENTIFIER ::= {netSnmpObjects 5}
 nsErrorHistory         OBJECT IDENTIFIER ::= {netSnmpObjects 6}
 nsConfiguration        OBJECT IDENTIFIER ::= {netSnmpObjects 7}
 nsTransactions         OBJECT IDENTIFIER ::= {netSnmpObjects 8}
+
+--
+--  Agent configuration
+--
+
+nsConfigDebug          OBJECT IDENTIFIER ::= {nsConfiguration 1}
+
+nsDebugEnabled         OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+      "Whether the agent is configured to generate debugging output"
+    DEFVAL { false }
+    ::= { nsConfigDebug 1 }
+
+nsDebugOutputAll       OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+      "Whether the agent is configured to display all debugging output
+       rather than filtering on individual debug tokens.  Nothing will
+       be generated unless nsDebugEnabled is also true(1)"
+    DEFVAL { false }
+    ::= { nsConfigDebug 2 }
+
+nsDebugDumpPdu        OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+      "Whether the agent is configured to display raw packet dumps.
+       This is unrelated to the nsDebugEnabled setting."
+    DEFVAL { false }
+    ::= { nsConfigDebug 3 }
+
+nsDebugTokenTable     OBJECT-TYPE
+    SYNTAX      SEQUENCE OF NsDebugTokenEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "A table of individual debug tokens, used to control the selection
+       of what debugging output should be produced.  This table is only
+       effective if nsDebugOutputAll is false(2), and nothing will
+       be generated unless nsDebugEnabled is also true(1)"
+    ::= { nsConfigDebug 4 }
+
+nsDebugTokenEntry     OBJECT-TYPE
+    SYNTAX      NsDebugTokenEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "A conceptual row within the debug token table."
+    ::= { nsDebugTokenTable 1 }
+
+NsDebugTokenEntry ::= SEQUENCE {
+    nsDebugTokenIndex   INTEGER,
+    nsDebugTokenPrefix  DisplayString,
+    nsDebugTokenEnabled TruthValue
+}
+
+nsDebugTokenIndex     OBJECT-TYPE
+    SYNTAX      INTEGER(0..128)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "An arbitrary index into the debug token table."
+    ::= { nsDebugTokenEntry 1 }
+
+nsDebugTokenPrefix    OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+      "A token prefix for which to generate the corresponding
+       debugging output.  Note that debug output will be generated
+       for all registered debug statements sharing this prefix
+       (rather than an exact match).  Nothing will be generated
+       unless both nsDebuggingEnabled and the corresponding
+       nsDebugTokenEnabled values are also true(1)."
+    ::= { nsDebugTokenEntry 2 }
+
+nsDebugTokenEnabled   OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "Whether to generate debug output for the corresponding debug
+       token prefix.  Nothing will be generated unless both
+       nsDebuggingEnabled and this instance are true(1)."
+    DEFVAL { false }
+    ::= { nsDebugTokenEntry 3 }
 
 --
 --  Monitoring outstanding "transactions"
@@ -213,6 +306,18 @@ nsModuleGroup  OBJECT-GROUP
 	"The objects relating to the list of MIB modules registered
 	 with the Net-SNMP agent."
     ::= { netSnmpGroups 2 }
+
+nsConfigGroups OBJECT IDENTIFIER ::= {netSnmpGroups 7}
+
+nsDebugGroup  OBJECT-GROUP
+    OBJECTS {
+        nsDebugEnabled, nsDebugOutputAll, nsDebugDumpPdu,
+        nsDebugTokenPrefix, nsDebugTokenEnabled
+    }
+    STATUS	current
+    DESCRIPTION
+	"The objects relating to debug configuration in the Net-SNMP agent."
+    ::= { netConfigGroups 1 }
 
 nsTransctionGroup  OBJECT-GROUP
     OBJECTS {
