@@ -112,12 +112,10 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 	}
 
         if (pplen < USM_LENGTH_P_MIN) {
-#ifdef SNMP_TESTING_CODE
-          snmp_log(LOG_WARNING, "Warning: passphrase chosen is below the length requiremnts of the USM.\n");
-#else
+          snmp_log(LOG_ERR,
+                   "Error: passphrase chosen is below the length requiremnts of the USM (min=%d).\n", USM_LENGTH_P_MIN);
           snmp_set_detail("Password length too short.");
           QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
-#endif
         }
 
 
