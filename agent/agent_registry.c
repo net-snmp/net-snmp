@@ -947,7 +947,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 			 *   default starting value for new indexes.
 			 */
 		        if ( (varbind->name_length+1) * sizeof(oid) <= 40 ) {
-			    for ( i = 0 ; i<varbind->name_length ; i++ )
+			    for ( i = 0 ; i < (int)varbind->name_length ; i++ )
 			        new_index->varbind.val.objid[i] = varbind->name[i];
 			    new_index->varbind.val.objid[varbind->name_length] = 1;
 			    new_index->varbind.val_len =
@@ -1037,7 +1037,7 @@ unregister_index_by_session(struct snmp_session *ss)
 int
 unregister_index(struct variable_list *varbind, int remember, struct snmp_session *ss)
 {
-    struct snmp_index *new_index, *idxptr, *idxptr2;
+    struct snmp_index *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
     int res, res2, i;
 
