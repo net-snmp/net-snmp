@@ -18,6 +18,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       form the DISMAN-EVENT-MIB.
 
  Fixes:
+    - AgentX no longer flagged as experimental
     - A few memory leak fixes for the table_iterator agent API.
     - Processed flag cleared before each pass of a set request
     - Remove snmpd pid file on exit

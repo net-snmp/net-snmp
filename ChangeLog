@@ -1,5 +1,328 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.7pre1 -> V5.0.7pre2
+
+2002-12-22 12:20  rstory
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend
+, agent/mibgroup/Makefile.depend, apps/Makefile.depend
+, apps/snmpnetstat/Makefile.depend,
+   snmplib/Makefile.depend:
+
+   make depend
+   
+2002-12-20 07:58  nba
+
+   * Makefile.in:
+
+   clean away net-snmp-config on make clean
+   
+2002-12-20 07:57  nba
+
+   * include/net-snmp/mib_api.h,
+   include/net-snmp/library/oid_stash.h, snmplib/oid_stash.c
+:
+
+   stash the oid_stash ...
+   
+2002-12-20 04:49  nba
+
+   * snmplib/snmp_api.c:
+
+   A patch from V4 that didn't make it ... allow list of numeric bits setting BITS
+   
+2002-12-20 02:50  hardaker
+
+   * include/net-snmp/library/oid_stash.h, snmplib/oid_stash.c
+:
+
+   add a global callback function for registering directly via a callback.
+   
+2002-12-20 02:35  hardaker
+
+   * include/net-snmp/utilities.h:
+
+   add callback.h
+   
+2002-12-20 02:22  hardaker
+
+   * snmplib/read_config.c:
+
+   fix persistent storage file renaming.  (snprintf change mistake)
+   
+2002-12-20 02:21  hardaker
+
+   * include/net-snmp/library/oid_stash.h, snmplib/oid_stash.c
+:
+
+   some new routines for saving oid stash data to persistent storage.
+     (not used anywhere in current production code)
+   
+2002-12-19 17:51  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   - watch for undefs passed in as a value to a SET clause.
+   - change BITS to a Octet String as it should be.
+     - on a side note, do you know that the Net-SNMP parser doesn't
+       distinguish between BITS and BIT STRING in it's list of types?  I
+       don't think it's possible to use both types in the code today
+       (which is fine, since BIT STRING is not used in SNMPv2 and beyond).
+   
+2002-12-19 17:49  hardaker
+
+   * perl/OID/OID.xs:
+
+   print a warning when you can't parse an OID (err, not ideal)
+   
+2002-12-19 17:48  hardaker
+
+   * perl/AnyData_SNMP/Storage.pm:
+
+   - misc bug fixes.
+   - skip SETing columns with no value passed in.
+   
+2002-12-19 14:43  nba
+
+   * agent/mibgroup/: examples/example.c, host/hr_network.c
+, host/hr_swinst.c:
+
+   Being a bit quick, eh, Dave ...
+   
+2002-12-19 11:14  dts12
+
+   * agent/mibgroup/mibII/: at.c (V4-2-patches.12), at.c:
+
+   Ensure the ifname buffer is big enough to read in a full-length name.
+   (From the SUSE "audit" patch)
+   
+2002-12-19 11:05  dts12
+
+   * agent/snmpd.c, agent/mibgroup/host/hr_print.c,
+   apps/encode_keychange.c, apps/snmptrapd_handlers.c, snmplib/mib.c
+   (V4-2-patches.[28,9,3,3,30]), agent/snmpd.c,
+   agent/mibgroup/host/hr_print.c, apps/encode_keychange.c
+, apps/snmptrapd_handlers.c, snmplib/mib.c:
+
+   Detect when memory allocations fail, and don't plough on regardless.
+   (Based on changes within the SUSE "audit" patch)
+   
+2002-12-19 10:07  dts12
+
+   * agent/agent_trap.c, agent/snmp_agent.c,
+   agent/mibgroup/util_funcs.c,
+   agent/mibgroup/examples/example.c,
+   agent/mibgroup/examples/ucdDemoPublic.c,
+   agent/mibgroup/host/hr_device.c,
+   agent/mibgroup/host/hr_disk.c,
+   agent/mibgroup/host/hr_filesys.c,
+   agent/mibgroup/host/hr_network.c,
+   agent/mibgroup/host/hr_storage.c,
+   agent/mibgroup/host/hr_swinst.c,
+   agent/mibgroup/host/hr_swrun.c,
+   agent/mibgroup/mibII/interfaces.c,
+   agent/mibgroup/mibII/mta_sendmail.c,
+   agent/mibgroup/mibII/system_mib.c,
+   agent/mibgroup/mibII/vacm_vars.c,
+   agent/mibgroup/mibII/var_route.c,
+   agent/mibgroup/target/snmpTargetAddrEntry.c,
+   agent/mibgroup/target/snmpTargetParamsEntry.c,
+   agent/mibgroup/ucd-snmp/disk.c,
+   agent/mibgroup/ucd-snmp/dlmod.c,
+   agent/mibgroup/ucd-snmp/errormib.c,
+   agent/mibgroup/ucd-snmp/extensible.c,
+   agent/mibgroup/ucd-snmp/pass.c,
+   agent/mibgroup/ucd-snmp/pass_persist.c,
+   agent/mibgroup/ucd-snmp/proc.c, apps/encode_keychange.c
+, apps/snmptrapd.c, apps/snmptrapd_handlers.c,
+   apps/snmpnetstat/inet.c, apps/snmpnetstat/inet6.c,
+   snmplib/asn1.c, snmplib/mib.c, snmplib/parse.c,
+   snmplib/read_config.c, snmplib/snmp_api.c,
+   snmplib/snmpv3.c, snmplib/vacm.c:
+
+   The Great SUSE 'sprintf' Hunt.....
+   
+2002-12-19 06:02  jbpn
+
+   * include/net-snmp/net-snmp-config.h.in:
+
+     - code with BSDi4
+   
+2002-12-19 05:50  jbpn
+
+   * snmplib/snmp_api.c:
+
+     - change a comment that doesn't take into account the transport stuff
+     - fix some particularly bad formatting in snmp_open_ex
+   
+2002-12-18 13:50  hardaker
+
+   * agent/mibgroup/agent/nsModuleTable.c:
+
+   remove mem-leak comment.  Out of date and was fixed
+   
+2002-12-18 13:47  hardaker
+
+   * agent/mibgroup/agentx/agentx_config.c, man/snmpd.conf.5.def
+:
+
+   delete experimental warning about agentx
+   
+2002-12-18 13:40  hardaker
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   fix bug#655488: descriptions of ssIORawReceived and ssRawInterrupts were reversed
+   
+2002-12-18 08:19  jbpn
+
+   * agent/snmpd.c:
+
+     - restart stderr logging on HUP (if -L was given on command line)
+   
+2002-12-17 19:33  rstory
+
+   * local/mib2c.array-user.conf:
+
+   remove ';' from define; if table has a storage type, check that it's not
+   read only before allowing sets
+   
+2002-12-17 19:26  rstory
+
+   * local/mib2c.array-persistent.conf:
+
+   never mind
+   
+2002-12-17 19:02  hardaker
+
+   * perl/OID/test.pl:
+
+   Don't check for prefixes in test.  They don't exist.  However, do set SNMPCONFPATH in test initialization to a bogus value
+   
+2002-12-17 18:58  hardaker
+
+   * perl/OID/OID.xs:
+
+   remove direct call to init_snmp().  This is already called by the .pm file
+   
+2002-12-17 10:22  rstory
+
+   * local/mib2c.array-persistent.conf:
+
+   persistence for array-tables
+   
+2002-12-17 10:07  rstory
+
+   * include/net-snmp/library/read_config.h,
+   snmplib/read_config.c:
+
+   add read_config_store_data_prefix; add ASN_TIMETICKS w/ASN_UNSIGNED cases
+   
+2002-12-17 09:44  rstory
+
+   * snmplib/snmpUDPDomain.c:
+
+   don't use SO_REUSE_ADDR so agent port can't be hijacked
+   
+2002-12-17 09:43  rstory
+
+   * net-snmp-config.in:
+
+   use local var for base agent libs; reorder base agent libs so static linking
+   works
+   
+2002-12-16 18:32  nba
+
+   * snmplib/scapi.c, agent/mibgroup/mibII/mta_sendmail.c,
+   agent/mibgroup/mibII/mta_sendmail.h:
+
+   Yet another compiler warning ...
+   
+2002-12-16 17:50  hardaker
+
+   * local/mib2c.iterate.conf:
+
+   remove bogus comment reference to table_dataset helper.
+   
+2002-12-16 17:42  nba
+
+   * agent/mibgroup/disman/mteEventNotificationTable.c,
+   agent/mibgroup/disman/mteEventTable.c,
+   agent/mibgroup/disman/mteEventTable.h,
+   agent/mibgroup/disman/mteTriggerTable.c,
+   agent/mibgroup/disman/mteTriggerTable.h, apps/snmptrapd.c
+, include/net-snmp/library/tools.h, snmplib/tools.c
+:
+
+   Spread some magic dust to quell compiler warnings (why isn't --enable-slient-libtool the default ...)
+   
+2002-12-16 11:44  jbpn
+
+   * agent/mibgroup/agentx/master.c:
+
+     - fix small memory leak (peername is copied by snmp_open_ex)
+   
+2002-12-16 11:31  jbpn
+
+   * snmplib/mib.c:
+
+     - fix small memory leak
+   
+2002-12-16 11:19  jbpn
+
+   * snmplib/parse.c:
+
+     - fix memory leak
+   
+2002-12-16 10:02  rstory
+
+   * snmplib/container.c:
+
+   remove redundant include (caused problems on Sun 5.7, reported by jbpn)
+   
+2002-12-16 08:22  rstory
+
+   * dist/nsb-functions:
+
+   configure w/out developer
+   
+2002-12-16 08:18  rstory
+
+   * configure, configure.in:
+
+   DEVFLAGS="" if not developer
+   
+2002-12-16 02:39  nba
+
+   * snmplib/: oid_stash.c, scapi.c, snmpAAL5PVCDomain.c
+, snmpIPXDomain.c, snmpTCPIPv6Domain.c,
+   snmpUDPIPv6Domain.c:
+
+   dmalloc support
+   
+2002-12-16 02:39  nba
+
+   * agent/mibgroup/mibII/ipAddr.c:
+
+   Possible leak of fd on error return
+   
+2002-12-14 10:22  rstory
+
+   * FAQ, README, sedscript.in, perl/SNMP/SNMP.pm
+, snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.7.pre1 )
+   
+2002-12-14 10:21  rstory
+
+   * ChangeLog, NEWS:
+
+   update for 5.0.7.pre1
+   
+
+
+-------------------------------------------------------------------------------
+
 Changes: V5.0.6 -> V5.0.7pre1
 
 2002-12-14 09:59  rstory
