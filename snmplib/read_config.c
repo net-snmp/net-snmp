@@ -498,7 +498,7 @@ read_config_store(const char *type, const char *line)
     DEBUGMSGTL(("read_config","storing: %s\n",line));
     fclose(fout);
   } else {
-    snmp_perror(type);
+    DEBUGMSGTL(("read_config","open failure"));
   }
 #endif
 }  /* end read_config_store() */

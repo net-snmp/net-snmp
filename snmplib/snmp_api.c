@@ -250,12 +250,17 @@ static const char * usmSecLevelName[] =
 struct session_list	*Sessions	 = NULL;
 long			 Reqid		 = 0;
 long			 Msgid		 = 0;
+int              snmp_errno  = 0;
 /*END MTCRITICAL_RESOURCE*/
 
 /*struct timeval Now;*/
 static unsigned short default_s_port = 0;	/* default SNMP service port */
-int snmp_errno = 0;
-char *snmp_detail = NULL;
+
+/*
+ * global error detail storage
+ */
+static char snmp_detail[192];
+static int  snmp_detail_f  = 0;
 
 /*
  * Prototypes.
@@ -310,45 +315,46 @@ int snmp_get_dump_packet (void)
     return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
 }
 
-int snmp_get_errno (void)
-{
-    return snmp_errno;
-}
-
 void
 snmp_perror(const char *prog_string)
 {
-  fprintf(stderr,"%s: %s\n",prog_string, snmp_api_errstring(snmp_errno));
+    const char *str;
+    int xerr;
+    xerr = snmp_errno; /*MTCRITICAL_RESOURCE*/
+    str = snmp_api_errstring(xerr);
+    fprintf(stderr,"%s: %s\n",prog_string, str);
 }
 
 void
 snmp_set_detail(const char *detail_string)
 {
-  if (snmp_detail != NULL) {
-    free(snmp_detail);
-    snmp_detail = NULL;
+  if (detail_string != NULL) {
+    strncpy((char *)&snmp_detail, detail_string, sizeof(snmp_detail));
+    snmp_detail[sizeof(snmp_detail)-1] = '\0';
+    snmp_detail_f = 1;
   }
-  if (detail_string != NULL)
-    snmp_detail = strdup(detail_string);
 }
 
+/* returns pointer to static data */
+/* results not guaranteed in multi-threaded use */
 const char *
 snmp_api_errstring(int snmp_errnumber)
 {
     const char *msg;
     static char msg_buf [256];
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
-	msg = api_errors[-snmp_errnumber];
+        msg = api_errors[-snmp_errnumber];
     } else {
-	msg = "Unknown Error";
+        msg = "Unknown Error";
     }
-    if (snmp_detail) {
-	sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
-        free(snmp_detail);
-        snmp_detail = NULL;  /* only return the detail once */
-	return msg_buf;
+    if (snmp_detail_f) {
+        sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
+        snmp_detail_f = 0;
     }
-    else return msg;
+    else
+        strcpy(msg_buf,msg);
+
+    return (msg_buf);
 }
 
 /*
@@ -549,8 +555,8 @@ snmp_open(struct snmp_session *session)
 }
 
 
-struct session_list *
-snmp_sess_copy( struct snmp_session *in_session)
+static struct session_list *
+_sess_copy( struct snmp_session *in_session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
@@ -560,18 +566,17 @@ snmp_sess_copy( struct snmp_session *in_session)
     oid *op;
     size_t i;
 
+    in_session->s_snmp_errno = 0;
+    in_session->s_errno = 0;
+
     /* Copy session structure and link into list */
     slp = (struct session_list *)calloc(1,sizeof(struct session_list));
     if (slp == NULL) { 
-      snmp_errno = SNMPERR_GENERR;
-      in_session->s_snmp_errno = SNMPERR_GENERR;
       return(NULL);
     }
 
     isp = (struct snmp_internal_session *)calloc(1,sizeof(struct snmp_internal_session));
     if (isp == NULL) { 
-      snmp_errno = SNMPERR_GENERR;
-      in_session->s_snmp_errno = SNMPERR_GENERR;
       snmp_sess_close(slp);
       return(NULL);
     }
@@ -580,8 +585,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     slp->internal->sd = -1; /* mark it not set */
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
     if (slp->session == NULL) {
-      snmp_errno = SNMPERR_GENERR;
-      in_session->s_snmp_errno = SNMPERR_GENERR;
       snmp_sess_close(slp);
       return(NULL);
     }
@@ -597,8 +600,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->peername != NULL){
 	cp = (char *)malloc(strlen(session->peername) + 1);
 	if (cp == NULL) {
-          snmp_errno = SNMPERR_GENERR;
-          in_session->s_snmp_errno = SNMPERR_GENERR;
           snmp_sess_close(slp);
           return(NULL);
         }
@@ -623,8 +624,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     }
 
     if (ucp == NULL) {
-      snmp_errno = SNMPERR_GENERR;
-      in_session->s_snmp_errno = SNMPERR_GENERR;
       snmp_sess_close(slp);
       return(NULL);
     }
@@ -636,8 +635,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->securityAuthProtoLen > 0) {
       ucp = (u_char*)malloc(session->securityAuthProtoLen * sizeof(oid));
       if (ucp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -656,8 +653,6 @@ snmp_sess_copy( struct snmp_session *in_session)
       op = (oid*)malloc((unsigned)session->securityPrivProtoLen *
 			   sizeof(oid));
       if (op == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -674,8 +669,6 @@ snmp_sess_copy( struct snmp_session *in_session)
       ucp = (u_char*)malloc((unsigned)session->securityEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -689,8 +682,6 @@ snmp_sess_copy( struct snmp_session *in_session)
       ucp = (u_char*)malloc((unsigned)session->contextEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -702,8 +693,6 @@ snmp_sess_copy( struct snmp_session *in_session)
       ucp = (u_char*)malloc((unsigned)session->securityEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -716,16 +705,12 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->contextName) {
       session->contextName = strdup(session->contextName);
       if (session->contextName == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
     } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_CONTEXT)) != NULL) {
       cp = strdup(cp);
       if (cp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -736,16 +721,12 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->securityName) {
       session->securityName = strdup(session->securityName);
       if (session->securityName == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
     } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_SECNAME)) != NULL) {
       cp = strdup(cp);
       if (cp == NULL) {
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
 	return(NULL);
       }
@@ -766,8 +747,6 @@ snmp_sess_copy( struct snmp_session *in_session)
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from authentication pass phrase.");
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
         return NULL;
       }
@@ -786,8 +765,6 @@ snmp_sess_copy( struct snmp_session *in_session)
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from privacy pass phrase.");
-	snmp_errno = SNMPERR_GENERR;
-	in_session->s_snmp_errno = SNMPERR_GENERR;
 	snmp_sess_close(slp);
         return NULL;
       }
@@ -796,8 +773,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
 	if (op == NULL) {
-	    snmp_errno = SNMPERR_GENERR;
-	    in_session->s_snmp_errno = SNMPERR_GENERR;
 	    snmp_sess_close(slp);
 	    return(NULL);
 	}
@@ -810,8 +785,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->dstPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
 	if (op == NULL) {
-	    snmp_errno = SNMPERR_GENERR;
-	    in_session->s_snmp_errno = SNMPERR_GENERR;
 	    snmp_sess_close(slp);
 	    return(NULL);
 	}
@@ -824,8 +797,6 @@ snmp_sess_copy( struct snmp_session *in_session)
     if (session->contextLen > 0){
 	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
 	if (op == NULL) {
-	    snmp_errno = SNMPERR_GENERR;
-	    in_session->s_snmp_errno = SNMPERR_GENERR;
 	    snmp_sess_close(slp);
 	    return(NULL);
 	}
@@ -843,6 +814,19 @@ snmp_sess_copy( struct snmp_session *in_session)
     return( slp );
 }
 
+struct session_list *
+snmp_sess_copy( struct snmp_session *pss)
+{
+    struct session_list * psl;
+    psl = _sess_copy(pss);
+    if ( !psl) {
+        if ( !pss->s_snmp_errno)
+	        pss->s_snmp_errno = SNMPERR_GENERR;
+	    SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return psl;
+}
+
 /*******************************************************************-o-******
  * snmp_sess_open
  *
@@ -855,8 +839,8 @@ snmp_sess_copy( struct snmp_session *in_session)
  *
  * The "spin-free" version of snmp_open.
  */
-void *
-snmp_sess_open(struct snmp_session *in_session)
+static void *
+_sess_open(struct snmp_session *in_session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
@@ -868,6 +852,9 @@ snmp_sess_open(struct snmp_session *in_session)
     struct snmp_pdu *pdu, *response;
     int status;
     size_t i, addr_size;
+
+    in_session->s_snmp_errno = 0;
+    in_session->s_errno = 0;
 
     if (Reqid == 0)
       init_snmp_session();
@@ -892,7 +879,6 @@ snmp_sess_open(struct snmp_session *in_session)
                 } else {
                     hp = gethostbyname(session->peername);
                     if (hp == NULL){
-                        snmp_errno = SNMPERR_BAD_ADDRESS;
                         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
                         in_session->s_errno = errno;
                         snmp_set_detail(session->peername);
@@ -950,7 +936,6 @@ snmp_sess_open(struct snmp_session *in_session)
     else
         sd = socket(isp->me.sa_family, SOCK_DGRAM, 0);
     if (sd < 0){
-	snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_snmp_errno = SNMPERR_NO_SOCKET;
 	in_session->s_errno = errno;
 	snmp_set_detail(strerror(errno));
@@ -978,7 +963,6 @@ snmp_sess_open(struct snmp_session *in_session)
 		/* Client Unix-domain stream sockets don't need to 'bind' */
 #endif
     if (bind(sd, (struct sockaddr *)&isp->me, addr_size) != 0){
-	snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	in_session->s_errno = errno;
 	snmp_set_detail(strerror(errno));
@@ -994,7 +978,6 @@ snmp_sess_open(struct snmp_session *in_session)
 
             if ( connect( sd, (struct sockaddr *)&(isp->addr),
                                sizeof(isp->addr)) != 0 ) {
-	        snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_errno = errno;
 	        snmp_set_detail(strerror(errno));
@@ -1004,7 +987,6 @@ snmp_sess_open(struct snmp_session *in_session)
         } else {				/* Server session */
 
             if ( listen( sd, SNMP_STREAM_QUEUE_LEN ) != 0 ) {
-	        snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_errno = errno;
 	        snmp_set_detail(strerror(errno));
@@ -1038,8 +1020,8 @@ snmp_sess_open(struct snmp_session *in_session)
 	default:
 	  DEBUGMSGTL(("snmp_sess_open",
                       "unable to connect with remote engine: %s (%d)\n",
-                      snmp_api_errstring(snmp_get_errno()),
-                      snmp_get_errno()));
+                      snmp_api_errstring(session->s_snmp_errno),
+                      session->s_snmp_errno));
 	  break;
 	}
 	if (slp->session->securityEngineIDLen == 0) {
@@ -1067,6 +1049,17 @@ snmp_sess_open(struct snmp_session *in_session)
 
     return (void *)slp;
 }  /* end snmp_sess_open() */
+
+void *
+snmp_sess_open(struct snmp_session *pss)
+{
+    void * pvoid;
+    pvoid = _sess_open(pss);
+    if ( !pvoid) {
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return pvoid;
+}
 
 
 
@@ -1262,7 +1255,6 @@ snmp_close(struct snmp_session *session)
     } /*END MTCRITICAL_RESOURCE*/
 
     if (slp == NULL){
-	snmp_errno = SNMPERR_BAD_SESSION;
 	return 0;
     }
     return snmp_sess_close((void *)slp);
@@ -1384,12 +1376,15 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
 static int
-snmpv3_build(struct snmp_session	*session,
+_snmpv3_build(struct snmp_session	*session,
              struct snmp_pdu	        *pdu,
              u_char	        	*packet,
              size_t			*out_length)
 {
   int ret;
+
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
 
 	/* do validation for PDU types */
   switch (pdu->command) {
@@ -1410,19 +1405,16 @@ snmpv3_build(struct snmp_session	*session,
 
 	case SNMP_MSG_GETBULK:
 	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
-	        snmp_errno = SNMPERR_BAD_REPETITIONS;
 	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
 	        return -1;
 	    }
 	    break;
 
 	case SNMP_MSG_TRAP:
-	    snmp_errno = SNMPERR_V1_IN_V2;
 	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
 	    return -1;
 	
 	default:
-	    snmp_errno = SNMPERR_UNKNOWN_PDU;
 	    session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
 	    return -1;
   }
@@ -1452,13 +1444,11 @@ snmpv3_build(struct snmp_session	*session,
 
       if (pdu->contextName == NULL) {
 	if (!session->contextName){
-	  snmp_errno = SNMPERR_BAD_CONTEXT;
 	  session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
 	  return -1;
 	}
 	pdu->contextName = strdup(session->contextName);
 	if (pdu->contextName == NULL) {
-	  snmp_errno = SNMPERR_GENERR;
 	  session->s_snmp_errno = SNMPERR_GENERR;
 	  return -1;
 	}
@@ -1467,13 +1457,11 @@ snmpv3_build(struct snmp_session	*session,
       pdu->securityModel = SNMP_SEC_MODEL_USM;
       if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
 	if (session->securityNameLen == 0){
-	  snmp_errno = SNMPERR_BAD_SEC_NAME;
 	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
 	  return -1;
 	}
 	pdu->securityName = strdup(session->securityName);
 	if (pdu->securityName == NULL) {
-	  snmp_errno = SNMPERR_GENERR;
 	  session->s_snmp_errno = SNMPERR_GENERR;
 	  return -1;
 	}
@@ -1481,7 +1469,6 @@ snmpv3_build(struct snmp_session	*session,
       }
       if (pdu->securityLevel == 0) {
 	if (session->securityLevel == 0) {
-	    snmp_errno = SNMPERR_BAD_SEC_LEVEL;
 	    session->s_snmp_errno = SNMPERR_BAD_SEC_LEVEL;
 	    return -1;
 	}
@@ -1495,10 +1482,29 @@ snmpv3_build(struct snmp_session	*session,
                   usmSecLevelName[pdu->securityLevel]));
 
   ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
-  session->s_snmp_errno = snmp_errno;
+  if (0 != ret) {
+      session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+  }
+
   return ret;
 
 }  /* end snmpv3_build() */
+
+static int
+snmpv3_build(struct snmp_session	*pss,
+             struct snmp_pdu	        *pdu,
+             u_char	        	*packet,
+             size_t			*out_length)
+{
+    int rc;
+    rc = _snmpv3_build(pss,pdu,packet,out_length);
+    if (rc) {
+        if ( !pss->s_snmp_errno)
+            pss->s_snmp_errno = snmp_errno;  /* snmpv3_packet_build rc */
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return rc;
+}
 
 
 
@@ -1623,7 +1629,7 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
 }  /* end snmpv3_scopedPDU_header_build() */
 
 
-
+/* returns 0 if success, -1 if fail */
 int
 snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 		    u_char *pdu_data, size_t pdu_data_len)
@@ -1633,11 +1639,9 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     u_char	 spdu_buf[SNMP_MAX_MSG_SIZE];
     size_t	 spdu_buf_len, spdu_len;
     u_char	*cp;
+    int      result;
 
-
-    snmp_errno  = SNMPERR_BAD_ASN1_BUILD;
     global_data = packet;
-
 
     /* 
      * build the headers for the packet, returned addr = start of secParams
@@ -1683,7 +1687,7 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
      * message - the entire message to transmitted on the wire is returned
      */
     cp = NULL; *out_length = SNMP_MAX_MSG_SIZE;
-    snmp_errno =
+    result =
      	usm_generate_out_msg(
 			SNMP_VERSION_3,		
 			global_data,		global_data_len,
@@ -1696,16 +1700,12 @@ snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 			pdu->securityStateRef,
 			sec_params,		&sec_params_len,
                         &cp,			out_length);
-    if (snmp_errno != 0)
+    if (result != 0)
       return -1;
-
-    snmp_errno = 0;
-
 
     return 0;
 
 }  /* end snmpv3_packet_build() */
-
 
 
 void
@@ -1762,8 +1762,8 @@ set_build( struct snmp_session *sp,
  * Returns the length of the completed packet in out_length.  If any errors
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
-int
-snmp_build(struct snmp_session *session,
+static int
+_snmp_build(struct snmp_session *session,
 	   struct snmp_pdu *pdu,
 	   u_char *packet,
 	   size_t *out_length)
@@ -1772,6 +1772,9 @@ snmp_build(struct snmp_session *session,
     u_char  *cp;
     size_t length;
     long version;
+
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
 
     if (pdu->version == SNMP_VERSION_3)
       return snmpv3_build(session, pdu, packet, out_length);
@@ -1798,7 +1801,6 @@ snmp_build(struct snmp_session *session,
 	case SNMP_MSG_INFORM:
             /* not supported in SNMPv1 and SNMPsec */
 	    if (pdu->version == SNMP_VERSION_1) {
-	            snmp_errno = SNMPERR_V2_IN_V1;
 	            session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	            return -1;
 	    }
@@ -1811,12 +1813,10 @@ snmp_build(struct snmp_session *session,
 	case SNMP_MSG_GETBULK:
             /* not supported in SNMPv1 and SNMPsec */
 	    if (pdu->version == SNMP_VERSION_1) {
-	            snmp_errno = SNMPERR_V2_IN_V1;
 	            session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	            return -1;
             }
 	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
-	        snmp_errno = SNMPERR_BAD_REPETITIONS;
 	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
 	        return -1;
 	    }
@@ -1825,7 +1825,6 @@ snmp_build(struct snmp_session *session,
 	case SNMP_MSG_TRAP:
             /* *only* supported in SNMPv1 and SNMPsec */
 	    if (pdu->version != SNMP_VERSION_1) {
-	            snmp_errno = SNMPERR_V1_IN_V2;
 	            session->s_snmp_errno = SNMPERR_V1_IN_V2;
 	            return -1;
             }
@@ -1845,13 +1844,9 @@ snmp_build(struct snmp_session *session,
 
 	case SNMP_MSG_REPORT:		/* SNMPv3 only */
 	default:
-            snmp_errno = SNMPERR_UNKNOWN_PDU;
             session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
             return -1;
     }
-
-    snmp_errno = SNMPERR_BAD_ASN1_BUILD;
-    session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
 
     /* save length */
     length = *out_length;
@@ -1867,7 +1862,6 @@ snmp_build(struct snmp_session *session,
 #ifdef NO_ZEROLENGTH_COMMUNITY
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
-		snmp_errno = SNMPERR_BAD_ADDRESS;
 		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
 		return -1;
 	    }
@@ -1929,7 +1923,6 @@ snmp_build(struct snmp_session *session,
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
     default:
-        snmp_errno = SNMPERR_BAD_VERSION;
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	return -1;
     }
@@ -1954,9 +1947,23 @@ snmp_build(struct snmp_session *session,
 	return -1;
     }
     *out_length = cp - packet;
-    snmp_errno = 0;
-    session->s_snmp_errno = 0;
     return 0;
+}
+
+int
+snmp_build(struct snmp_session *pss,
+	   struct snmp_pdu *pdu,
+	   u_char *packet,
+	   size_t *out_length)
+{
+    int rc;
+    rc = _snmp_build(pss,pdu,packet,out_length);
+    if (rc) {
+        if ( !pss->s_snmp_errno)
+            pss->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return rc;
 }
 
 u_char *
@@ -2423,27 +2430,18 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
  * are encountered, -1 is returned.  Otherwise, a 0 is returned.
  */
 static int
-snmp_parse(struct snmp_session *session,
+_snmp_parse(struct snmp_session *session,
 	   struct snmp_pdu *pdu,
 	   u_char *data,
-	   size_t length)
+	   size_t length,
+	   int action)
 {
-    u_char  type = 0;
     u_char community[COMMUNITY_MAX_LEN];
     size_t community_length = COMMUNITY_MAX_LEN;
     int result = -1;
-    int action = PARSE_PACKET;
 
-    if ( pdu == NULL ) {
-	action = DUMP_PACKET;
-	printf("\n");
-	pdu = (struct snmp_pdu *)malloc(sizeof( struct snmp_pdu ));
-	memset( pdu, 0, sizeof( struct snmp_pdu ));
-		/* XXX: memory leak */
-    }
-
-    snmp_errno = SNMPERR_BAD_PARSE;
-    session->s_snmp_errno = SNMPERR_BAD_PARSE;
+    session->s_snmp_errno = 0;
+    session->s_errno = 0;
 
     if (session->version != SNMP_DEFAULT_VERSION)
 	pdu->version = session->version;
@@ -2482,7 +2480,7 @@ snmp_parse(struct snmp_session *session,
 					  community,
                                           community_length);
 	    if (data == NULL)
-		return 0; /* COMMENT OR CHANGE YYXX not an error ? */
+		return -1;
 	}
 	result = snmp_pdu_dparse(pdu, data, &length, action);
         break;
@@ -2531,14 +2529,36 @@ snmp_parse(struct snmp_session *session,
         break;
     }
 
-    if ( action == DUMP_PACKET )
-	free( pdu );
     if (result == 0) {
-      snmp_errno = 0;
-      session->s_snmp_errno = 0;
       return 0;
     } 
     return -1;
+}
+
+static int
+snmp_parse(struct snmp_session *pss,
+	   struct snmp_pdu *pdu,
+	   u_char *data,
+	   size_t length)
+{
+    int rc;
+    int action = PARSE_PACKET;
+
+    if ( pdu == NULL ) {
+	    action = DUMP_PACKET;
+	    printf("\n");
+	    pdu = (struct snmp_pdu *)calloc(1,sizeof( struct snmp_pdu ));
+    }
+    rc = _snmp_parse(pss,pdu,data,length,action);
+    if (rc) {
+        if ( !pss->s_snmp_errno)
+            pss->s_snmp_errno = SNMPERR_BAD_PARSE;
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    if ( action == DUMP_PACKET )
+	    snmp_free_pdu( pdu );
+
+    return rc;
 }
 
 int
@@ -2557,7 +2577,6 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
   struct variable_list *vp = NULL;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   oid objid[MAX_OID_LEN];
-  char err[256];
 
   badtype = 0;
 
@@ -2619,7 +2638,6 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
     data = asn_dparse_int(data, length, &type, &pdu->reqid,
 			 sizeof(pdu->reqid), action);
     if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
       return -1;
     }
 
@@ -2627,7 +2645,6 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
     data = asn_dparse_int(data, length, &type, &pdu->errstat,
 			 sizeof(pdu->errstat), action);
     if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
       return -1;
     }
 
@@ -2635,7 +2652,6 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
     data = asn_dparse_int(data, length, &type, &pdu->errindex,
 			 sizeof(pdu->errindex), action);
     if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
       return -1;
     }
   }
@@ -2893,14 +2909,11 @@ snmp_async_send(struct snmp_session *session,
 		void *cb_data)
 {
     void *sessp = snmp_sess_pointer(session);
-
-    if (sessp == NULL) return 0;
-
     return snmp_sess_async_send(sessp, pdu, callback, cb_data);
 }
 
-int
-snmp_sess_async_send(void *sessp,
+static int
+_sess_async_send(void *sessp,
 		     struct snmp_pdu *pdu,
 		     snmp_callback callback,
 		     void *cb_data)
@@ -2912,7 +2925,7 @@ snmp_sess_async_send(void *sessp,
     size_t length = PACKET_LENGTH;
     struct request_list *rp;
     struct sockaddr_in *isp_addr;
-    struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
+    struct sockaddr_in *pduIp;
     struct timeval tv;
     int result, addr_size;
 
@@ -2920,12 +2933,17 @@ snmp_sess_async_send(void *sessp,
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
+    if (pdu == NULL) {
+        session->s_snmp_errno = 0; /* XX what error ? */
+        return 0;
+    }
+
+    pduIp = (struct sockaddr_in *)&(pdu->address);
     pdu->flags |= UCD_MSG_FLAG_EXPECT_RESPONSE;
 
     /* check/setup the version */
     if (pdu->version == SNMP_DEFAULT_VERSION) {
         if (session->version == SNMP_DEFAULT_VERSION) {
-	    snmp_errno = SNMPERR_BAD_VERSION;
 	    session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	    return 0;
         }
@@ -2934,7 +2952,6 @@ snmp_sess_async_send(void *sessp,
 	/* It's OK */
     } else if (pdu->version != session->version) {
       /* ENHANCE: we should support multi-lingual sessions */
-        snmp_errno = SNMPERR_BAD_VERSION;
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
         return 0;
     }
@@ -2944,7 +2961,6 @@ snmp_sess_async_send(void *sessp,
 	if (isp->addr.sa_family == AF_UNSPEC ||
 	   (isp->addr.sa_family == AF_INET &&
 	    isp_addr->sin_addr.s_addr == SNMP_DEFAULT_ADDRESS)){
-	        snmp_errno = SNMPERR_BAD_ADDRESS;
 	        session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
 	        return 0;
 	}
@@ -2979,7 +2995,6 @@ snmp_sess_async_send(void *sessp,
         result = sendto(isp->sd, (char *)packet, length, 0,
 	       (struct sockaddr *)&pdu->address, addr_size);
     if ( result < 0){
-	snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_snmp_errno = SNMPERR_BAD_SENDTO;
 	session->s_errno = errno;
 	return 0;
@@ -2992,7 +3007,6 @@ snmp_sess_async_send(void *sessp,
 	/* set up to expect a response */
 	rp = (struct request_list *)malloc(sizeof(struct request_list));
 	if (rp == NULL) {
-	    snmp_errno = SNMPERR_GENERR;
 	    session->s_snmp_errno = SNMPERR_GENERR;
 	    return 0;
 	}
@@ -3022,6 +3036,30 @@ snmp_sess_async_send(void *sessp,
     }
     return pdu->reqid;
 }
+
+int
+snmp_sess_async_send(void *sessp,
+		     struct snmp_pdu *pdu,
+		     snmp_callback callback,
+		     void *cb_data)
+{
+    int rc;
+
+    if (sessp == NULL){
+	snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
+	return(0);
+    }
+    rc = _sess_async_send(sessp,pdu,callback,cb_data);
+    if (rc == 0) {
+        struct session_list *psl;
+        struct snmp_session *pss;
+        psl = (struct session_list *)sessp;
+        pss = psl->session;
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return rc;
+}
+
 
 /*
  * Frees the variable and any malloc'd data associated with it.
@@ -3086,16 +3124,17 @@ snmp_read(fd_set *fdset)
     struct session_list *slp;
 
     for(slp = Sessions; slp; slp = slp->next){
-	    snmp_sess_read((void *)slp, fdset);
+        snmp_sess_read((void *)slp, fdset);
     }
 }
 
 /* Same as snmp_read, but works just one session. */
-void
-snmp_sess_read(void *sessp,
+/* returns 0 if success, -1 if fail */
+int
+_sess_read(void *sessp,
 	       fd_set *fdset)
 {
-    struct session_list *slp = (struct session_list*)sessp, *new_slp;
+    struct session_list *slp = (struct session_list *)sessp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
     u_char packet[PACKET_LENGTH];
@@ -3107,16 +3146,16 @@ snmp_sess_read(void *sessp,
     snmp_callback callback;
     void *magic;
     int ret;
-    int new_sd;
     int addrlen;
     int fromlength;
 
     if (!(FD_ISSET(slp->internal->sd, fdset)))
-        return;
+        return 0;
 
     sp = slp->session; isp = slp->internal;
     sp->s_snmp_errno = 0;
     sp->s_errno = 0;
+
     callback = sp->callback;
     magic = sp->callback_magic;
 
@@ -3126,18 +3165,22 @@ snmp_sess_read(void *sessp,
 		 * Accept the new stream based connection,
 		 * and create a new session for it.
 		 */
+            struct session_list *new_slp;
+            int new_sd;
+
             new_sd = accept(isp->sd, (struct sockaddr *)&(isp->addr), &addrlen);
             if ( new_sd == -1 ) {
-	        snmp_errno = SNMPERR_BAD_RECVFROM;
 	        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
 	        sp->s_errno = errno;
 	        snmp_set_detail(strerror(errno));
-	        return;
+	        return -1;
             }
 
             new_slp = snmp_sess_copy( sp );
             if ( new_slp == NULL )
-                return;
+                return -1;
+    { /*MTCRITICAL_RESOURCE*/
+	/* indirectly accesses the Sessions list */
             new_slp->next = slp->next;
             slp->next     = new_slp;
 
@@ -3149,6 +3192,7 @@ snmp_sess_read(void *sessp,
             isp->sd = new_sd;
             isp->addr.sa_family = isp->me.sa_family;
             sp->flags &= (~SNMP_FLAGS_LISTENING);
+    } /*END MTCRITICAL_RESOURCE*/
         }
         memcpy((u_char *)&from, (u_char *)&(isp->addr), sizeof( isp->addr ));
     }
@@ -3161,11 +3205,10 @@ snmp_sess_read(void *sessp,
         length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 		      (struct sockaddr *)&from, &fromlength);
     if (length == -1) {
-	snmp_errno = SNMPERR_BAD_RECVFROM;
 	sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
 	sp->s_errno = errno;
 	snmp_set_detail(strerror(errno));
-	return;
+	return -1;
     }
 
 		/* Remote end closed connection */
@@ -3176,7 +3219,7 @@ snmp_sess_read(void *sessp,
         if (( isp->me.sa_family == AF_UNIX ) &&
            !( sp->flags & SNMP_FLAGS_LISTENING ))
                   isp->me.sa_family = AF_UNSPEC;
-        return;
+        return -1;
     }
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
@@ -3190,7 +3233,7 @@ snmp_sess_read(void *sessp,
         printf("\n");
         if ( isp->hook_pre ) {
           if ( isp->hook_pre( sp, from ) == 0 )
-            return;
+            return -1;
         }
     }
 
@@ -3205,12 +3248,12 @@ snmp_sess_read(void *sessp,
     if ( isp->hook_post ) {
       if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
         snmp_free_pdu(pdu);
-        return;
+        return -1;
       }
     }
     if (ret != SNMP_ERR_NOERROR) {
 	snmp_free_pdu(pdu);
-	return;
+	return -1;
     }
 
     if (pdu->flags & UCD_MSG_FLAG_RESPONSE_PDU) {
@@ -3292,6 +3335,25 @@ snmp_sess_read(void *sessp,
       pdu->securityStateRef = NULL;
     }
     snmp_free_pdu(pdu);
+    return 0;
+}
+
+/* returns 0 if success, -1 if fail */
+int
+snmp_sess_read(void *sessp,
+	       fd_set *fdset)
+{
+    struct session_list *psl;
+    struct snmp_session *pss;
+    int rc;
+
+    rc = _sess_read(sessp, fdset);
+    psl = (struct session_list *)sessp;
+    pss = psl->session;
+    if (rc && pss->s_snmp_errno) {
+        SET_SNMP_ERROR(pss->s_snmp_errno);
+    }
+    return rc;
 }
 
 
@@ -3487,7 +3549,6 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     result = sendto(isp->sd, (char *)packet, length, 0,
 	     (struct sockaddr *)&rp->pdu->address, addr_size);
   if ( result < 0){
-    snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_errno = errno;
     snmp_set_detail(strerror(errno));
@@ -3626,21 +3687,9 @@ snmp_varlist_add_variable(struct variable_list **varlist,
     if (varlist == NULL)
       return NULL;
 
-    vtmp = (struct variable_list *)malloc(sizeof(struct variable_list));
-    if (vtmp == NULL)
+    vars = (struct variable_list *)malloc(sizeof(struct variable_list));
+    if (vars == NULL)
       return NULL;
-    
-    if (*varlist == NULL){
-      *varlist = vars = vtmp;
-    } else {
-      for(vars = *varlist;
-            vars->next_variable;
-            vars = vars->next_variable)
-        ;
-
-      vars->next_variable = vtmp;
-      vars = vars->next_variable;
-    }
 
     vars->next_variable = 0; vars->name = 0; vars->val.string = 0;
 
@@ -3705,7 +3754,6 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       
       default:
         snmp_set_detail("Internal error in type switching\n");
-        snmp_errno = SNMPERR_BAD_PARSE; /* XX SNMP_BAD_ENCODE */
         snmp_free_var(vars);
         return (0);
     }
@@ -3713,6 +3761,18 @@ snmp_varlist_add_variable(struct variable_list **varlist,
     if (name != NULL && snmp_set_var_objid(vars, name, name_length)) {
         snmp_free_var(vars);
         return (0);
+    }
+    
+    /* put only qualified variable onto varlist */
+    if (*varlist == NULL){
+      *varlist = vars;
+    } else {
+      for(vtmp = *varlist;
+            vtmp->next_variable;
+            vtmp = vtmp->next_variable)
+        ;
+
+      vtmp->next_variable = vars;
     }
 
 	return vars;
@@ -3768,6 +3828,7 @@ hex_to_binary(const char *str,
 /*
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.
+ * returns 0 if success, 1 if failure.
  */
 int
 snmp_add_var(struct snmp_pdu *pdu,
@@ -3801,7 +3862,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 		ep = ep->next;
 	    }
 	    if (!ep) {
-		snmp_errno = SNMPERR_BAD_NAME;
+		snmp_errno = SNMPERR_BAD_NAME; /*MTCRITICAL_RESOURCE*/
 		snmp_set_detail(value);
 		return 1;
 	    }
@@ -3813,7 +3874,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 		rp = rp->next;
 	    }
 	    if (!rp) {
-		snmp_errno = SNMPERR_RANGE;
+		snmp_errno = SNMPERR_RANGE; /*MTCRITICAL_RESOURCE*/
 		snmp_set_detail("Value out of range");
 		return 1;
 	    }
@@ -3842,8 +3903,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 
       case 'o':
         tint = sizeof(buf) / sizeof(oid);
-        read_objid(value, (oid *)buf, &tint);
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
+        if (read_objid(value, (oid *)buf, &tint))
+            snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);
         break;
 
@@ -3859,7 +3920,7 @@ snmp_add_var(struct snmp_pdu *pdu,
           tint = hex_to_binary(value, buf);
         }
         if (tint < 0) {
-          snmp_errno = SNMPERR_VALUE;
+          snmp_errno = SNMPERR_VALUE; /*MTCRITICAL_RESOURCE*/
           snmp_set_detail(value);
           return 1;
         }
@@ -3871,7 +3932,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 		rp = rp->next;
 	    }
 	    if (!rp) {
-		snmp_errno = SNMPERR_RANGE;
+		snmp_errno = SNMPERR_RANGE; /*MTCRITICAL_RESOURCE*/
 		snmp_set_detail("Length");
 		return 1;
 	    }
@@ -3932,7 +3993,7 @@ snmp_sess_pointer(struct snmp_session *session)
 	}
     }
     if (slp == NULL){
-	snmp_errno = SNMPERR_BAD_SESSION;
+	snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
 	return(NULL);
     }
     return((void *)slp);

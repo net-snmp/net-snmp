@@ -7,6 +7,11 @@
  * to obtain the library error codes.
  */
 
+#ifndef DONT_SHARE_ERROR_WITH_OTHER_THREADS
+#define SET_SNMP_ERROR(x) snmp_errno=(x)
+#else
+#define SET_SNMP_ERROR(x) 
+#endif
 
  
 #ifndef SNMP_API_H
@@ -555,7 +560,7 @@ void snmp_set_full_objid (int);
 int snmp_get_full_objid (void);
 void snmp_set_suffix_only (int);
 int snmp_get_suffix_only (void);
-int snmp_get_errno (void);
+
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
 u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
@@ -661,7 +666,7 @@ int    snmp_sess_async_send (void *, struct snmp_pdu *,
                                          snmp_callback, void *);
 int    snmp_sess_select_info (void *, int *, fd_set *,
                                          struct timeval *, int *);
-void   snmp_sess_read       (void *, fd_set *);
+int    snmp_sess_read       (void *, fd_set *);
 void   snmp_sess_timeout    (void *);
 int    snmp_sess_close      (void *);
 

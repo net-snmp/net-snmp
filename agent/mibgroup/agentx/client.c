@@ -71,14 +71,12 @@ agentx_synch_input(int op,
 	if (pdu->command == AGENTX_MSG_RESPONSE) {
 	    state->pdu		= snmp_clone_pdu(pdu);
 	    state->status	= STAT_SUCCESS;
-	    snmp_errno		= SNMPERR_SUCCESS;
 	    session->s_snmp_errno = SNMPERR_SUCCESS;
 	}
     }
     else if (op == TIMED_OUT){
 	state->pdu		= NULL;
 	state->status		= STAT_TIMEOUT;
-	snmp_errno		= SNMPERR_TIMEOUT;
 	session->s_snmp_errno	= SNMPERR_TIMEOUT;
     }
 
@@ -90,6 +88,7 @@ agentx_synch_input(int op,
 int
 agentx_synch_response( struct snmp_session *ss, struct snmp_pdu *pdu, struct snmp_pdu **response )
 {
+/*
     int result;
     void *saved_state;
     int (*saved_cback)(int, struct snmp_session *, int, struct snmp_pdu *, void *);
@@ -106,6 +105,8 @@ agentx_synch_response( struct snmp_session *ss, struct snmp_pdu *pdu, struct snm
     ss->callback_magic = saved_state;
 
     return result;
+*/
+    return snmp_synch_response_cb(ss, pdu, response, agentx_synch_input);
 }
 
 

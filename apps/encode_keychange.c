@@ -411,7 +411,7 @@ usage_to_file(FILE *ofp)
 // this defined for HPUX aCC because the aCC doesn't drop the
 // snmp_parse_args.c functionality if compile with -g, PKY
 
-void usage()
+void usage(void)
 {
     usage_to_file(stdout);    
 }
