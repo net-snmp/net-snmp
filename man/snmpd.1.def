@@ -32,12 +32,15 @@ option.
 .B -d
 Dump (in hexadecimal) the sent and received SNMP packets.
 .TP
-.B -D \fITOKEN[,...]
+.B -D\fI[TOKEN[,...]]
 Turn on debugging output for the given
 .IR "TOKEN" "(s)."
-Try
+Without any tokens specified, it defaults to printing all the tokens
+(which is equivalent to the keyword "ALL").
+You might want to try
 .IR ALL
-for extremely verbose output.
+for extremely verbose output.  Note: You can not put a space between
+the -D flag and the listed TOKENs.
 .TP
 .B -f
 Do not fork() from the calling shell.
