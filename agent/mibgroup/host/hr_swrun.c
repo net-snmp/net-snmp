@@ -86,6 +86,10 @@ void  End_HR_SWRun (void);
 int header_hrswrun (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 int header_hrswrunEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
+#ifdef dynix
+pid_t nextproc;
+static prpsinfo_t lowpsinfo, mypsinfo;
+#endif
 #ifdef cygwin
 static struct external_pinfo *curproc;
 static struct external_pinfo lowproc;
@@ -102,7 +106,9 @@ int *proc_table;
 #else
 struct proc *proc_table;
 #endif
+#ifndef dynix
 int current_proc_entry;
+#endif
 
 
 #define	HRSWRUN_OSINDEX		1
@@ -361,8 +367,12 @@ header_hrswrunEntry(struct variable *vp,
     for ( ;; ) {
         pid = Get_Next_HR_SWRun();
 #ifndef linux
+#ifndef dynix
         DEBUGMSG(("host/hr_swrun",
                   "(index %d (entry #%d) ....", pid, current_proc_entry));
+#else
+        DEBUGMSG(("host/hr_swrun", "pid %d; nextproc %d ....", pid, nextproc));
+#endif
 #endif
         if ( pid == -1 )
 	    break;
@@ -374,6 +384,8 @@ header_hrswrunEntry(struct variable *vp,
 	    LowPid = pid;
 #ifdef cygwin
 	    lowproc = *curproc;
+#elif  dynix
+	    memcpy(&lowpsinfo, &mypsinfo, sizeof(prpsinfo_t));
 #elif !defined(linux)
 	    LowProcIndex = current_proc_entry-1;
 #endif
@@ -511,6 +523,11 @@ var_hrswrun(struct variable *vp,
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
+#elif defined(dynix)
+	    sprintf(string, "%s", lowpsinfo.pr_fname);
+	    cp = strchr( string, ' ');
+	    if ( cp != NULL )
+		*cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
 	    if (proc_buf)
@@ -595,6 +612,12 @@ var_hrswrun(struct variable *vp,
 	    cp = strchr( string, ' ');
 	    if ( cp != NULL )
 		*cp = '\0';
+#elif defined(dynix)
+		/* Path not available - use argv[0] */
+	    sprintf(string, "%s", lowpsinfo.pr_psargs);
+	    cp = strchr( string, ' ');
+	    if ( cp != NULL )
+		*cp = '\0';
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
 	    if (proc_buf)
@@ -664,6 +687,14 @@ var_hrswrun(struct variable *vp,
 	case HRSWRUN_PARAMS:
 #ifdef HAVE_SYS_PSTAT_H
 	    cp = strchr( proc_buf.pst_cmd, ' ');
+	    if ( cp != NULL ) {
+		cp++;
+		sprintf(string, "%s", cp);
+	    }
+	    else
+		string[0] = '\0';
+#elif defined(dynix)
+	    cp = strchr( lowpsinfo.pr_psargs, ' ');
 	    if ( cp != NULL ) {
 		cp++;
 		sprintf(string, "%s", cp);
@@ -775,6 +806,8 @@ var_hrswrun(struct variable *vp,
 #else
 #if HAVE_KVM_GETPROCS
 	    switch ( proc_table[LowProcIndex].kp_proc.p_stat ) {
+#elif defined(dynix)
+	    switch ( lowpsinfo.pr_state ) {
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
 	    switch (proc_buf ? proc_buf->pr_lwp.pr_state : SIDL) {
@@ -856,6 +889,9 @@ var_hrswrun(struct variable *vp,
 				/*
 				 * Not convinced this is right, but....
 				 */
+#elif defined(dynix)
+	    long_return = lowpsinfo.pr_time.tv_sec * 100 +
+                          lowpsinfo.pr_time.tv_nsec/10000000;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
 	    long_return = proc_buf ? proc_buf->pr_time.tv_sec * 100 +
@@ -924,6 +960,8 @@ var_hrswrun(struct variable *vp,
 	case HRSWRUNPERF_MEM:
 #ifdef HAVE_SYS_PSTAT_H
 	    long_return = (proc_buf.pst_rssize << PGSHIFT)/1024;
+#elif defined(dynix)
+	    long_return = (lowpsinfo.pr_rssize * MMU_PAGESIZE)/1024;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
 	    long_return = proc_buf ? proc_buf->pr_rssize : 0;
@@ -1054,6 +1092,35 @@ void
 End_HR_SWRun(void)
 {
     cygwin_internal(CW_UNLOCK_PINFO);
+}
+
+#elif defined(dynix)
+
+void
+Init_HR_SWRun(void)
+{
+    nextproc = 0;
+}
+
+int
+Get_Next_HR_SWRun(void)
+{
+    getprpsinfo_t *select = 0;
+
+    DEBUGMSGTL(("host/hr_swrun::GetNextHR_SWRun", "nextproc == %d... &nextproc = %u\n", nextproc, &nextproc));
+    if ( (nextproc = getprpsinfo(nextproc, select, &mypsinfo)) < 0 ) {
+        return -1;
+    } else {
+        DEBUGMSGTL(("host/hr_swrun::GetNextHR_SWRun", "getprpsinfo returned %d\n", nextproc));
+        return mypsinfo.pr_pid;
+    }
+
+}
+
+void
+End_HR_SWRun (void)
+{
+    /* just a stub... because it's declared */
 }
 
 #else /* linux */
@@ -1196,7 +1263,7 @@ int count_processes (void)
 #if defined(hpux10) || HAVE_KVM_GETPROCS || defined(solaris2)
     total = nproc;
 #else
-#if !defined(linux) && !defined(cygwin)
+#if !defined(linux) && !defined(cygwin) && !defined(dynix)
     for ( i = 0 ; i<nproc ; ++i ) {
 	if ( proc_table[i].p_stat != 0 )
 #else

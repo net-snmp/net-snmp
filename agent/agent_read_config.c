@@ -51,7 +51,11 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #if HAVE_SYS_SOCKETVAR_H
+#ifndef dynix
 #include <sys/socketvar.h>
+#else
+#include <sys/param.h>
+#endif
 #endif
 #elif HAVE_WINSOCK_H
 #include <winsock.h>
