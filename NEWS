@@ -27,6 +27,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - Many more snmp.conf directives supported.
       (see the snmp.conf(5) manual page)
     - AgentX improvements.
+    - All of our distributed mibs have been updated to be SMIv2 compliant.
     - trap support in the agent has been cleaned up.
 
  Fixes:
