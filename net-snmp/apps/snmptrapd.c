@@ -315,6 +315,84 @@ event_input(vp)
     
 }
 
+void do_external(cmd, host, pdu)
+  char *cmd;
+  struct hostent *host;
+  struct snmp_pdu *pdu;
+{
+  struct variable_list tmpvar, *vars;
+  static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
+  static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
+  static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
+  static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
+  int fd[2];
+  int pid, result;
+  FILE *file;
+  char varbuf[2048];
+  int oldquick;
+  
+  DEBUGP("Running: %s\n", cmd);
+  oldquick = snmp_get_quick_print();
+  snmp_set_quick_print(1);
+  if (cmd) {
+    if (pipe(fd)) {
+      perror("pipe");
+    }
+    if ((pid = fork()) == 0) {
+      /* child */
+      close(0);
+      if (dup(fd[0]) != 0) {
+        perror("dup");
+      }
+      close(fd[1]);
+      close(fd[0]);
+      system(cmd);
+      exit(0);
+    } else if (pid > 0) {
+      file = fdopen(fd[1],"w");
+      fprintf(file,"%s\n%s\n",
+              host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
+              inet_ntoa(pdu->address.sin_addr));
+      if (pdu->command == SNMP_MSG_TRAP){
+        /* convert a v1 trap to a v2 variable binding list:
+           The uptime and trapOID go first in the list. */
+        tmpvar.val.integer = (long *) &pdu->time;
+        tmpvar.val_len = sizeof(pdu->time);
+        tmpvar.type = ASN_TIMETICKS;
+        sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
+        fprintf(file,"%s\n",varbuf);
+        tmpvar.type = ASN_OBJECT_ID;
+        trapoids[9] = pdu->trap_type+1;
+        tmpvar.val.objid = trapoids;
+        tmpvar.val_len = 10*sizeof(oid);
+        sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
+        fprintf(file,"%s\n",varbuf);
+      }
+      /* do the variables in the pdu */
+      for(vars = pdu->variables; vars; vars = vars->next_variable) {
+        sprint_variable(varbuf, vars->name, vars->name_length, vars);
+        fprintf(file,"%s\n",varbuf);
+      }
+      if (pdu->command == SNMP_MSG_TRAP){
+        /* convert a v1 trap to a v2 variable binding list:
+           The enterprise goes last. */
+        tmpvar.val.objid = pdu->enterprise;
+        tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
+        sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
+        fprintf(file,"%s\n",varbuf);
+      }
+      fclose(file);
+      close(fd[0]);
+      close(fd[1]);
+      if (waitpid(pid, &result,0) < 0) {
+        perror("waitpid");
+      }
+    } else {
+      perror("fork");
+    }
+  }
+  snmp_set_quick_print(oldquick);
+}
 
 int snmp_input(op, session, reqid, pdu, magic)
     int op;
@@ -337,6 +415,7 @@ int snmp_input(op, session, reqid, pdu, magic)
     static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
     static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
     static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
+    static oid snmptrapoid2[11] = {1,3,6,1,6,3,1,1,4,1,0};
     static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
     struct variable_list tmpvar;
     char *Command = NULL;
@@ -383,8 +462,10 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    	varbuf[varbufidx]='\0';
 
 	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
-			sprint_variable(varbuf+varbufidx, vars->name, vars->name_length, vars);
-			/* Update the length of the string with the new variable */
+			sprint_variable(varbuf+varbufidx, vars->name,
+                                        vars->name_length, vars);
+			/* Update the length of the string with the
+                           new variable */
 			varbufidx += strlen(varbuf+varbufidx);
 			/* And add a trailing , ... */
 	        	varbuf[varbufidx++]=',';
@@ -418,59 +499,8 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    }
             trapoids[9] = pdu->trap_type+1;
             Command = snmptrapd_get_traphandler(trapoids, 10);
-            DEBUGP("Running: %s", Command);
-            if (Command) {
-              if (pipe(fd)) {
-                perror("pipe");
-                return 1;
-              }
-              if ((pid = fork()) == 0) {
-                /* child */
-                close(0);
-                if (dup(fd[0]) != 0) {
-                  perror("dup");
-                  return 1;
-                }
-                close(fd[1]);
-                close(fd[0]);
-                system(Command);
-                exit(0);
-              } else if (pid > 0) {
-                file = fdopen(fd[1],"w");
-                fprintf(file,"%s\n%s\n",
-                        host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
-                        inet_ntoa(pdu->address.sin_addr));
-                tmpvar.val.integer = (long *) &pdu->time;
-                tmpvar.val_len = sizeof(pdu->time);
-                tmpvar.type = ASN_TIMETICKS;
-                sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
-                fprintf(file,"%s\n",varbuf);
-                tmpvar.type = ASN_OBJECT_ID;
-                trapoids[9] = pdu->trap_type+1;
-                tmpvar.val.objid = trapoids;
-                tmpvar.val_len = 10*sizeof(oid);
-                sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
-                fprintf(file,"%s\n",varbuf);
-		for(vars = pdu->variables; vars; vars = vars->next_variable) {
-                  sprint_variable(varbuf, vars->name, vars->name_length, vars);
-                  fprintf(file,"%s\n",varbuf);
-                }
-                tmpvar.val.objid = pdu->enterprise;
-                tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
-                sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
-                fprintf(file,"%s\n",varbuf);
-                fclose(file);
-                close(fd[0]);
-                close(fd[1]);
-                if (waitpid(pid, &result,0) < 0) {
-                  perror("waitpid");
-                  return 1;
-                }
-              } else {
-                perror("fork");
-                return 1;
-              }
-            }
+            if (Command)
+              do_external(Command, host, pdu);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM){
 	    host = gethostbyaddr ((char *)&pdu->address.sin_addr,
@@ -490,49 +520,16 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    if (Event) {
 		event_input(pdu->variables);
 	    }
-            for(i = 0, vars = pdu->variables; vars && i < 2;
-                vars = vars->next_variable, i++);
-            if (vars->type == ASN_OBJECT_ID) {
+            for(vars = pdu->variables;
+                vars &&
+                compare(vars->name, vars->name_length, snmptrapoid2,
+                         sizeof(snmptrapoid2)/sizeof(oid));
+                vars = vars->next_variable);
+            if (vars && vars->type == ASN_OBJECT_ID) {
               Command = snmptrapd_get_traphandler(vars->val.objid,
                                                   vars->val_len/sizeof(oid));
-              DEBUGP("Running: %s", Command);
-              if (Command) {
-                if (pipe(fd)) {
-                  perror("pipe");
-                  return 1;
-                }
-                if ((pid = fork()) == 0) {
-                  /* child */
-                  close(0);
-                  if (dup(fd[0]) != 0) {
-                    perror("dup");
-                    return 1;
-                  }
-                  close(fd[1]);
-                  close(fd[0]);
-                  system(Command);
-                  exit(0);
-                } else if (pid > 0) {
-                  file = fdopen(fd[1],"w");
-                  fprintf(file,"%s\n%s\n",
-                          host ? host->h_name : inet_ntoa(pdu->address.sin_addr),
-                          inet_ntoa(pdu->address.sin_addr));
-                  for(vars = pdu->variables; vars; vars = vars->next_variable) {
-                    sprint_variable(varbuf, vars->name, vars->name_length, vars);
-                    fprintf(file,"%s\n",varbuf);
-                  }
-                  fclose(file);
-                  close(fd[0]);
-                  close(fd[1]);
-                  if (waitpid(pid, &result,0) < 0) {
-                    perror("waitpid");
-                    return 1;
-                  }
-                } else {
-                  perror("fork");
-                  return 1;
-                }
-              }
+              if (Command)
+                do_external(Command, host, pdu);
             }
 	    if (pdu->command == SNMP_MSG_INFORM){
 		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_GET))){

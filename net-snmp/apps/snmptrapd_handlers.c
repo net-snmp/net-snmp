@@ -33,11 +33,17 @@ snmptrapd_get_traphandler(name, namelen)
   int namelen;
 {
   struct traphandle **ttmp;
+  DEBUGP("looking for trap handler for ");
+  DEBUGPOID(name,namelen);
+  DEBUGP("...\n");
   for(ttmp = &traphandlers;
-      *ttmp != NULL && !compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
-      ttmp = (*ttmp)->next);
-  if (ttmp == NULL)
+      *ttmp != NULL && compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
+      ttmp = &((*ttmp)->next));
+  if (*ttmp == NULL) {
+    DEBUGP("  Didn't find it.\n");
     return NULL;
+  }
+  DEBUGP("  Found it!\n");
   return (*ttmp)->exec;
 }
 
@@ -51,7 +57,7 @@ snmptrapd_traphandle(word, line)
   char *cptr;
 
   /* find the current one, if it exists */
-  for(ttmp = &traphandlers; *ttmp != NULL; ttmp = (*ttmp)->next);
+  for(ttmp = &traphandlers; *ttmp != NULL; ttmp = &((*ttmp)->next));
 
   if (*ttmp == NULL) {
     /* it doesn't, so allocate a new one. */
@@ -71,5 +77,8 @@ snmptrapd_traphandle(word, line)
   }
   cptr = skip_not_white(line);
   (*ttmp)->exec = strdup(cptr);
+  DEBUGP("registered handler for: ");
+  DEBUGPOID((*ttmp)->trap, (*ttmp)->traplen);
+  DEBUGP("\n");
 }
 
