@@ -657,7 +657,7 @@ AC_CHECK_LIB(rpm, rpmdbOpen,[
   LIBS="$LIBS -lrpm -ldb"
   dnl zlib is required for newer versions of rpm
   AC_CHECK_LIB(z, zlibVersion)
-],,-ldb)
+],,-ldb -lz)
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
