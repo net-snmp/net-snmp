@@ -112,8 +112,8 @@ vacm_save_view(struct vacm_viewEntry *view, const char *token,
                                       view->viewName[0] + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_objid(cptr, view->viewSubtree,
-                               view->viewSubtreeLen);
+        read_config_save_objid(cptr, view->viewSubtree+1,
+                                     view->viewSubtreeLen-1);
     *cptr++ = ' ';
     cptr = read_config_save_octet_string(cptr, (u_char *) view->viewMask,
                                          view->viewMaskLen);
