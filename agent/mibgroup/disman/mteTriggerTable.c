@@ -408,6 +408,12 @@ parse_simple_monitor(const char *token, char *line)
             */
            StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_THRESHOLD;
            break;
+        case 'i':
+           /*
+            * Single instance
+            */
+           StorageNew->mteTriggerValueIDWildcard = MTETRIGGERVALUEIDWILDCARD_FALSE;
+           break;
         case 'r':
             if (cp) {
                 cp = copy_nword(cp, buf, sizeof(buf));

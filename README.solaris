@@ -12,19 +12,20 @@ installing and using net-snmp on Solaris.
 5.  Creating snmpd.conf and testing
 6.  Creating your own binaries
 7.  Using Sun's SNMP daemon and net-snmp together
+8.  Monitoring disks, processes and execs (DISMAN-EVENT-MIB)
 
 Additional compilation issues:
 
-8.  Files descriptors and fopen
-9.  Perl
-10. sed and $PATH
-11. OpenSSL
-12. Wish list
+9.  Files descriptors and fopen
+10.  Perl
+11. sed and $PATH
+12. OpenSSL
+13. Wish list
 
 Other issues:
 
-13.  Known Bugs!!
-14.  Discussion and further information
+14.  Known Bugs!!
+15.  Discussion and further information
 
 ------------------------------------------------------------
 0.  Introducion
@@ -300,7 +301,7 @@ This is the official repository for binaries.
 To determine which binary you need, you will need several pieces of
 information.
 
--operating system version,
+-operating system version
 -hardware platform
 -net-snmp version desired
 
@@ -569,7 +570,108 @@ configurations.
 -- Bruce Shaw <Bruce.Shaw at shaw.ca> from notes by Stefan Radman and C Wells
 
 ------------------------------------------------------------
-8.  Files descriptors and fopen
+8.  Monitoring disks, processes and execs (DISMAN-EVENT-MIB)
+
+For a full explanation of using DISMAN-EVENT-MIB, see:
+
+http://www.net-snmp.org/man/snmpd.conf.html
+
+This discussion concerns its use on Solaris.
+
+There is a bug preventing the use of some of its functionality.  This
+discussion will document what is known to work and how to use it.
+
+The problem revolves around the use of monitors.  The...
+
+defaultMonitors yes
+
+token will NOT work for reasons discussed below.  I suspect that the
+notificationEvent tokens will not work for the same reason but this
+has not been tested.  Your mileage may vary.  Same with includeAllDisks.
+
+The documentation suggests using...
+
+monitor -o prNames -o prErrMessage "process table" prErrorFlag != 0
+
+to monitor all processes.  This will fail with ambiguous results.
+
+To monitor processes, put a separate monitor line for each process.
+
+For example:
+######
+proc smail
+proc mdlogd
+
+monitor -r 30 -i -o prNames.1 -o prErrMessage.1 "Process smail" prErrorFlag.1 !=0
+monitor -r 30 -i -o prNames.2 -o prErrMessage.2 "Process Solstice Disksuite SNMP trap" prErrorFlag.2 !=0
+
+To monitor disks, do the same.  An example:
+
+########
+# This example sends a trap if root has less than 10% available and /usr6 less t
+han 90%
+#
+disk / 10%
+disk /usr6 90%
+
+monitor -i -r 30 -o dskPath.1 -o dskErrorMsg.1 "root file system" dskErrorFlag.1 !=0
+monitor -i -r 30 -o dskPath.2 -o dskErrorMsg.2 "ORACLE file system" dskErrorFlag.2 != 0
+#########
+
+To implement an external program then monitor its results you need to set up your script.
+
+Here is a sample script.
+
+#!//usr/bin/ksh
+xstatus=0
+
+if [ $xstatus -eq 0 ];then
+echo success: $0
+else
+echo FAILURE: $0
+fi
+
+exit $xstatus
+###end of script tester##
+
+Place this script in /usr/local/src and make it executable.  Make copies called
+tester1, tester2 etc.
+and make them executable.
+
+Here is a sample snmpd.conf snippet that makes use of the exec feature:
+##############
+
+exec tester1 /usr/local/src/tester1
+exec tester2 /usr/local/src/tester2
+exec tester3 /usr/local/src/tester3
+exec tester4 /usr/local/src/tester4
+exec tester5 /usr/local/src/tester5
+
+monitor -i -r 60 -o extNames.1 -o extOutput.1 "status table 1" extResult.1 != 0
+monitor -i -r 60 -o extNames.2 -o extOutput.2 "status table 2" extResult.2 != 0
+monitor -i -r 60 -o extNames.3 -o extOutput.3 "status table 3" extResult.3 != 0
+monitor -i -r 60 -o extNames.4 -o extOutput.4 "status table 4" extResult.4 != 0
+monitor -i -r 60 -o extNames.5 -o extOutput.5 "status table 5" extResult.5 != 0
+##############
+
+While snmpd is running, go to /usr/local/src and modify one of the tester programs eg. tester1
+
+xstatus=1
+
+and save the file.  Sometime in the next 60 seconds, a trap will be generated.
+Change the value
+back to 0, then modify another file.
+
+If you are unsure of the correct row number within a specific table, do an snmpwalk eg.
+
+snmpwalk -v 2c -c public -m ALL localhost prNames
+
+The same methodology can presumably be used for fileName and laNames.  Your mileage may vary.
+
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>  with Allan McIntosh and Wes Hardaker
+------------------------------------------------------------
+9.  Files descriptors and fopen
 
 Solaris has a limitation on the number of file descriptors (255)
 available in stdio, so that fopen() fails if more than
@@ -639,7 +741,7 @@ portable package that solves this headache very neatly.
 -SEan <burke_sp@pacbell.net>
 
 ------------------------------------------------------------
-9.  Perl
+10.  Perl
 
 Net-snmp may be compiled with Perl support by adding the lines:
 
@@ -888,7 +990,7 @@ you will also need to ship the Perl which you created in /usr/local/net-snmp.
  -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-10.  sed and $PATH
+11.  sed and $PATH
 
 (note, if you have followed the recommendations for $PATH 
 above, this is not an issue -- Bruce Shaw <Bruce.Shaw at shaw.ca>)
@@ -903,7 +1005,7 @@ Putting /usr/bin ahead of /usr/xpg4/bin fixes this.
 Thanks to zach dot metzinger at removeme microtune dot com.
 
 ------------------------------------------------------------
-11.  OpenSSL
+12.  OpenSSL
 
 If compiling with OpenSSL (e.g. from sunsolve), it's possible that
 the agent won't successfully load the crypto library (typically
@@ -960,7 +1062,7 @@ Thanks to Dave Shield and Johannes Schmidt-Fischer
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-12.  Wish list
+13.  Wish list
 
 A.  Hardware specific monitoring eg. fan speeds, CPU temperatures, 
     doors open, lights on or off
@@ -969,8 +1071,9 @@ This involves accessing the libraries found in:
 
    /usr/platform/`uname -i`/include/sys
 
-for which there is no published API, or parsing prtdiag -v 
-and caching the results, which is messy and hard on resources.
+This will be available for net-snmp ver. 5.2 as an implementation of
+LM-SENSORS-MIB.
+
 
 B.  Code cleanup
 
@@ -987,7 +1090,7 @@ How to get ORACLE's SNMP functionality to work as a sub-agent.
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-13.  Known Bugs!!
+14.  Known Bugs!!
 
 A.  hrDeviceTable (HOST-RESOURCES-MIB)
 
@@ -996,28 +1099,25 @@ Hence, anything on controller c8 and above will be invisible.
 
 B.  hrPartitionTable (HOST-RESOURCES-MIB)
 
-At present, hrPartitionSize data is invalid.
+At present, hrPartitionSize data only works for regular ufs
+partitions eg. /dev/dsk/c0t0d0s0 that are mounted.  They
+are displayed in partition order rather than the order
+they are mounted.  Partitions mounted as mirrors, metastate
+database replicas, swap or members of a RAID display size 0.
 
 As a workaround, put entries for disks you are
 interested in in snmpd.conf and examine
-using UCD-SNMP-MIB.
+using UCD-SNMP-MIB.  See DISMAN-EVENT-MIB above.
 
-C.  hrPartitionTable (again)
+C.  DISMAN-EVENT-MIB
 
-Zero-byte and non-mounted partitions are displayed.
-
-D.  Solstice Disksuite partition mounts
-
-Within HOST-RESOURCES-MIB, Solstice disksuite
-parition mounts are displayed as raw mounts.  The
-correct mount information can be found in
-UCD-SNMP-MIB::dskDevice, but only for the
-partitions mentioned in snmpd.conf.
+Some of the functionality within DISMAN-EVENT-MIB does not
+work as advertised.  See long discussion under section 8 above.
 
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
 
 ------------------------------------------------------------
-14.  Discussion and further information
+15.  Discussion and further information
 
 For discussion or further information contact the coders and users
 lists at http://sourceforge.net/mail/?group_id=12694 .
