@@ -2035,9 +2035,8 @@ _snmp_build(struct snmp_session *session,
 	    pdu->community_len = session->community_len;
 	}
 #else /* !NO_ZEROLENGTH_COMMUNITY */
-	if (! (pdu->community_len != 0 &&
-	       pdu->command == SNMP_MSG_RESPONSE )) {
-	/* copy session community exactly to pdu community */
+	if (pdu->community_len == 0 && pdu->command != SNMP_MSG_RESPONSE) {
+	    /* copy session community exactly to pdu community */
 	    if (0 == session->community_len) {
 		SNMP_FREE(pdu->community); pdu->community = 0;
 	    }
@@ -2046,13 +2045,13 @@ _snmp_build(struct snmp_session *session,
 			    session->community_len);
 	    }
 	    else {
-	    SNMP_FREE(pdu->community);
-	    pdu->community = (u_char *)malloc(session->community_len);
-	    if (pdu->community == NULL) {
-	        session->s_snmp_errno = SNMPERR_MALLOC;
-	        return -1;
-	    }
-	    memmove(pdu->community, session->community,
+		SNMP_FREE(pdu->community);
+		pdu->community = (u_char *)malloc(session->community_len);
+		if (pdu->community == NULL) {
+		    session->s_snmp_errno = SNMPERR_MALLOC;
+		    return -1;
+		}
+		memmove(pdu->community, session->community,
                         session->community_len);
 	    }
 	    pdu->community_len = session->community_len;
