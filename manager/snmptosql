@@ -35,7 +35,6 @@ while ($#ARGV > -1) {
     $pass = shift if (/-p/);
     $verbose = 1 if (/-v/);
     $delete = 1 if (/-d/);
-    $debug = 1 if (/-D/);
     $doit = 0 if (/-n/);
 }
 
@@ -74,7 +73,7 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
     ( $tblh->execute )
 	or print( "\tnot ok: $DBI::errstr\n" );
 
-    while (  $tablelist = $tblh->fetchrow_hashref ) {
+nexthost:    while (  $tablelist = $tblh->fetchrow_hashref ) {
 	my $mib = $SNMP::MIB{SNMP::translateObj($tablelist->{'tablename'})};
 	die "mib node $tablelist->{'tablename'} doesn't exist" if (!$mib);
 	my $children = $$mib{'children'};
@@ -92,16 +91,31 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    new SNMP::Varbind([SNMP::translateObj($tablelist->{'tablename'})]);
 	my $void = SNMP::translateObj($tablelist->{'tablename'});
 	my $val = $sess->getnext($var);
+	print "init err: $sess->{'ErrorStr'}\n" if ($verbose);
+	if ($sess->{'ErrorStr'} =~ /Timeout/) {
+	    $dbh->do("insert into hosterrors(host, errormsg) values('$host','No response');");
+	    mailusers("$host not responding", "$host not responding",
+		      getoncallforhost($host));
+	    last nexthost;
+	}
 	$initlabel = "";
 	print " starting $tablelist->{tablename}\n" if ($verbose);
 	my %tbl_ids;
 	while (1) {
 	    my $varlabel = $var->[$SNMP::Varbind::tag_f];
 	    print "last $host " . SNMP::translateObj($varlabel) . ": $void\n" if ($verbose && SNMP::translateObj($varlabel) !~ /^$void/);
+
 	    last if (SNMP::translateObj($varlabel) !~ /^$void/);
 	    $varlabel = SNMP::translateObj($var->[$SNMP::Varbind::tag_f]) if ($varlabel =~ /^[\.0-9]+$/);
 	    $initlabel = $varlabel if ($initlabel eq "");
+
 	    my $val = $sess->getnext($var);
+	    if ($sess->{'ErrorStr'} =~ /Timeout/) {
+		$dbh->do("insert into hosterrors(host, errormsg) values('$host','No response');");
+		mailusers("$host not responding", "$host not responding",
+			  getoncallforhost($host));
+		last nexthost;
+	    }
 	    last if ($sess->{'ErrorStr'});
 	    my $id = $var->[$SNMP::Varbind::iid_f];
 	    print "$initlabel = $varlabel\n" if ($verbose);
@@ -152,13 +166,21 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	while ($row = $curs->fetchrow_hashref) {
 	    if (!defined($tbl_ids{$row->{oidindex}})) {
 		$dbh->do("delete from $tablelist->{tablename} where oidindex = '$row->{oidindex}'");
-		print "deleting: $host $tablelist->{tablename} $row->{oidindex}\n";
+		print "deleting: $host $tablelist->{tablename} $row->{oidindex}\n" if ($verbose);
 	    }
 	}
     } # table loop
+
+    if (isbadhost($host)) {
+	# let them out, they're no longer being bad.
+	$dbh->do("delete from hosterrors where host = '$host'");
+	mailusers("$host responding again", "$host responding again",
+		  getoncallforhost($host));
+    }
 } # host loop
 
 # disconnect
+$cursor->finish();
 $dbh->disconnect();
 
 sub setuptable {
@@ -172,7 +194,7 @@ sub setuptable {
     die "$mib has no chlidren" if (ref($children) ne "ARRAY");
     my ($cmd, $j);
 
-    print " creating table for $mibnode\n";
+    print " creating table for $mibnode\n" if ($verbose);
     if ($delete) {
 	$cmd = "drop table if exists $mib->{label}";
 	print "cmd: $cmd\n" if ($verbose);
@@ -193,43 +215,51 @@ sub setuptable {
 }
 
 sub getoncall {
-    my $group = shift;
+    my @groups = @_;
     my $cur = getcursor("select * from oncall where groupname = '$group'");
     my $row;
     my ($emails, @days, @hours, @two, $i);
     my %dayscon = qw(Sun 0 Mon 1 Tue 2 Wed 3 Thu 4 Fri 5 Sat 6);
     my @now = localtime(time());
     my %people;
+    my $group;
 
-  row: while (  $row = $cur->fetchrow_hashref ) {
-      @days = split(/,/,$row->{'days'});
-      foreach $i (@days) {
-	  @two = split(/-/,$i);
-	  if ($row->{'days'} eq "*" ||
-	      (defined($dayscon{$i}) && $dayscon{$i} == $now[6]) ||
-	      (defined($dayscon{$two[0]}) && defined($dayscon{$two[1]}) &&
-	       (($dayscon{$two[0]} <= $now[6] && 
-		 $dayscon{$two[1]} >= $now[6]) ||
-		(($dayscon{$two[0]} > $dayscon{$two[1]}) &&
-		 ($dayscon{$two[0]} <= $now[6] || 
-		  $dayscon{$two[1]} >= $now[6]))))) {
-	      # we hit a valid day range
-	      print "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
-		  if ($verbose);
-	      $people{$row->{'email'}} = $row->{'email'};
-	  } else {
-	      print "not hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
-		  if ($verbose);
-	  }	      
+    foreach $group (@groups) {
+      row: while (  $row = $cur->fetchrow_hashref ) {
+	  @days = split(/,/,$row->{'days'});
+	  foreach $i (@days) {
+	      @two = split(/-/,$i);
+	      if ($row->{'days'} eq "*" ||
+		  (defined($dayscon{$i}) && $dayscon{$i} == $now[6]) ||
+		  (defined($dayscon{$two[0]}) && defined($dayscon{$two[1]}) &&
+		   (($dayscon{$two[0]} <= $now[6] && 
+		     $dayscon{$two[1]} >= $now[6]) ||
+		    (($dayscon{$two[0]} > $dayscon{$two[1]}) &&
+		     ($dayscon{$two[0]} <= $now[6] || 
+		      $dayscon{$two[1]} >= $now[6]))))) {
+		  # we hit a valid day range
+		  print "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		      if ($verbose);
+		  $people{$row->{'email'}} = $row->{'email'};
+	      } else {
+		  print "not hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		      if ($verbose);
+	      }	      
+	  }
+      }
     }
-  }
-    return \%people;
+    return keys(%people);
+}
+
+sub getoncallforhost {
+    my $host = shift;
+    return getoncall(getgroupsforhost($host));
 }
 
 sub getcursor {
     my $cmd = shift;
     my $cursor;
-    print "cmd: $cmd\n" if ($debug);
+    print "cmd: $cmd\n" if ($verbose);
     ( $cursor = $dbh->prepare( $cmd ))
 	or die "\nnot ok: $DBI::errstr\n";
     ( $cursor->execute )
@@ -259,19 +289,56 @@ sub logerror {
     my ($host, $err, $field, $result) = @_;
     my $groups = getcursor("SELECT distinct groupname FROM hosttables where host = '$host'");
     my ($group, $person);
-    my %mailed;
     my $msg = (($err) ? "error" : "normal");
 		    
-    while( $group = $groups->fetchrow_hashref ) {
-	my $people = getoncall($group->{'groupname'});
-	foreach $person (keys(%$people)) {
-	    if (!defined($mailed{$person})) {
-		    open(I, "|/usr/bin/mailx -s \"SNMP: $msg: $host $field\" $person");
-		print I "$msg: $host: $field = $result\n";
-		close(I);
-		    print "mailing $person with $msg: $host: $field = $result\n";
-		$mailed{$person} = 1;
-	    }
-	}
+    my @people = getoncallforhost($host);
+    $msg = "$msg: $host\n";
+    $msg .= "$field = $result\n" if ($field || $result);
+    mailusers("SNMP: $msg: $host $field", $msg, @people);
+}
+
+sub mailusers {
+    my $subject = shift;
+    my $msg = shift;
+    @people = @_;
+    my $person;
+
+    foreach $person (@people) {
+	my ($subject, $msg) = @_;
+	open(I, "|/usr/bin/mailx -s \"$subject\" $person");
+	print I "$msg\n";
+	close(I);
+	print "mailing $person with $msg\n" if ($verbose);
     }
+}
+
+sub hosterror {
+    my $host = shift;
+    my $groups = getcursor("SELECT distinct groupname FROM hosttables where host = '$host'");
+    my ($group, $person);
+    my %mailed;
+
+    return if (isbadhost($host)); # only send out a message once.
+		    
+    $dbh->do("insert into hosterrors(host, errormsg) values('$host','No response');");
+    my @people = getoncallforhost($host);
+    mailusers("No Response from $host", "No Response from $host", @people);
+}
+
+sub isbadhost {
+    my $host = shift;
+    my $hosterr = getcursor("SELECT distinct host FROM hosterrors where host = '$host'");
+    if ($hosterr->fetchrow_hashref) {
+	return 1;
+    }
+    return 0;
+}
+
+sub getgroupsforhost {
+    my @retgroups;
+    my $groups = getcursor("SELECT distinct groupname FROM hosttables where host = '$host'");
+    while( $group = $groups->fetchrow_hashref ) {
+	push @retgroups,$group->{'groupname'};
+    }
+    @retgroups;
 }
