@@ -198,6 +198,189 @@ hardaker 31 Aug 98 16:10:25
 hardaker 31 Aug 98 16:10:50
     - (snmp_agent.c, snmp_impl.h): fix read/write checks.
 
+hardaker 31 Aug 98 13:03:02
+    - (interfaces.c): missing return on ifInErrors results.
+
+hardaker 31 Aug 98 13:32:43
+    - (snmptrapd.c): add a blank line to the end of the trapd output for parsing.
+
+hardaker 31 Aug 98 16:10:25
+    - (snmp_vars.c): in_a_view(): create new function, and use it.
+
+hardaker 31 Aug 98 16:10:50
+    - (snmp_agent.c, snmp_impl.h): fix read/write checks.
+
+hardaker 31 Aug 98 16:37:04
+    - (ChangeLog, NEWS): update for 3.5.1.
+
+hardaker 31 Aug 98 16:37:15
+    version tag ( 3.5.1.pre1 )
+
+hardaker  2 Sep 98 10:55:52
+    - (configure, configure.in, read_config.c, snmp2p.c, snmp_agent.c,
+      snmp_vars.c, snmpd.c, snmpd.h, util_funcs.c, interfaces.c, system.h,
+      tcp.c, smux.c, snmp_bgp.c, snmp_bgp.h, snmp_ospf.c, snmp_ospf.h,
+      snmp_rip2.c, snmp_rip2.h, extensible.c, loadave.c,
+      snmp_parse_args.c, snmpdelta.c, snmptranslate.c, snmptrap.c,
+      snmptrapd.c, inet.c, main.c, netstat.h, mib_api.3, snmp_api.3,
+      snmpd.1.def, freebsd.h, freebsd2.h, netbsd.h, asn1.h, mib.c,
+      parse.c, parse.h, snmp_api.c, snmp_api.h, snmp_client.c): Patch from
+      Niels Baggesen:
+      - prototypes, as usual (when is everybody starting to use -Wall
+        -Wstrict-prototypes ....)
+      - snmpd send an enterprise specific trap when it terminates
+      - possibility for sending v2c traps (or informs), via trap2sink directive
+      - fixes to snmplib and snmptrapd for bugs uncovered when snmpd sends
+        an INFORM instead of a TRAP
+      - -m and -M option for snmptrapd
+      - -D option for snmptranslate
+      - fixes to configure to correctly call ALL module init functions
+      - major rework of tcp.c, for netbsd. I hope this is OK now, I havent had
+        time to test it on all platforms yet - but till friday :-)
+      - snmpnetstat prints udp socket table
+      - some CMU_COMPATIBLE stuff
+      - man page fixes, with an include list that works!
+
+hardaker  2 Sep 98 10:58:10
+    - (tcp.c): Patch from Dave Shield:
+    -  Combine the two (almost) identical non-solaris cases
+    -  Add support for the missing Linux entries (InErrs/OutRsts)
+    -  Add support for the missing Solaris entry (OutRsts)
+
+hardaker  2 Sep 98 11:03:33
+    - (tcp.c): reverse Dave's changes since they conflict with Niels'.
+
+hardaker  2 Sep 98 12:19:03
+    - (extensible.c, proc.c): use correct name index for lookups on writes.
+
+hardaker  2 Sep 98 12:19:33
+    - (snmp_agent.c): check to make sure operation is not a SET when
+      returning an error code such as noSuchName.
+
+hardaker  2 Sep 98 14:04:42
+    - (configure, configure.in): don't include modules not requested even
+      if required by another module.
+
+hardaker  2 Sep 98 14:10:53
+    version tag ( 3.5.1.pre2 )
+
+hardaker  2 Sep 98 18:43:30
+    - (TODO): added security checks.
+
+nba  3 Sep 98 14:29:03
+    - (fixproc): added comment to test CVS.
+
+hardaker  4 Sep 98 10:09:47
+    - (interfaces.c): fix for sgi's.
+
+hardaker  4 Sep 98 14:14:19
+    - (configure, configure.in, Makefile.in, Makefile.in):
+      - fix to allow non-source directory builds.
+
+hardaker  7 Sep 98 10:10:05
+    - (loadave.c): Patch from Niels Baggesen:
+      - ifdef re-ordering fixes for alpha/linux.
+
+hardaker  7 Sep 98 10:47:00
+    - (proc.c): Patch from Michael Slifcak:
+      - solaris 2.6 fixes.
+
+hardaker  7 Sep 98 10:48:09
+    - (asn1.c): Patch from Michael Slifcak:
+      - Catch subidentifier correctly.
+
+hardaker  7 Sep 98 10:49:08
+    - (asn1.h): remove __P() definition.
+
+hardaker  7 Sep 98 10:49:53
+    - (mib.c): Patch from Michael Slifcak:
+      - malloc corrections for ENV vars..
+
+hardaker  7 Sep 98 10:51:22
+    - (parse.c): Patch from Michael Slifcak:
+      - protect against multiple init_mib_internal() calls.
+
+hardaker  7 Sep 98 10:53:11
+    - (system.c): Patch from Michael Slifcak:
+      - exit -> return on win32 system routines.
+
+hardaker  7 Sep 98 10:55:51
+    - (snmp_api.c): Patch from Michael Slifcak:
+      - NULL return by malloc protected.
+
+hardaker  7 Sep 98 12:17:36
+    - (snmpd.conf.5.def): Patch from Niels Baggesen:
+      - better description of the view mask.
+
+hardaker  7 Sep 98 12:27:42
+    - (memory_freebsd2.h, vmstat_freebsd2.h): created from memory.h and vmstat.h
+
+hardaker  7 Sep 98 12:27:42
+    file memory_freebsd2.h was initially added on branch Ext-3-5-patches.
+
+hardaker  7 Sep 98 12:27:42
+    file vmstat_freebsd2.h was initially added on branch Ext-3-5-patches.
+
+hardaker  7 Sep 98 12:47:37
+    - (parse.c): include snmp_api.h for snmp_get_do_debugging().
+
+hardaker  7 Sep 98 12:54:16
+    - (snmp_api.c): Patch from Michael Slifcak:
+      - check malloc calls more carefully.
+      - misc bug fixes.
+
+hardaker  7 Sep 98 13:15:26
+    - (Makefile.in): install config.h as $(includedir)/ucd-snmp-config.h.
+
+hardaker  7 Sep 98 13:21:18
+    - (memory.c, memory.h):
+      - MEMUSEDREAL -> MEMAVAILREAL (typedef renaming to match functionality).
+
+hardaker  7 Sep 98 14:06:21
+    - (tcp.c): back out Niels' changes since they broke other architectures.
+
+hardaker  7 Sep 98 14:19:24
+    - (Makefile.in(s)): make depends.
+
+hardaker  7 Sep 98 16:39:59
+    - (icmp.c, interfaces.c, ip.c, tcp.c): 64bit long return clean ups.
+
+marz  7 Sep 98 19:01:01
+    update headers for win32, add return to main
+
+marz  7 Sep 98 19:02:01
+    update headers for win32, add return to main,fix win32 compile error w/ non integralswitch case
+
+marz  7 Sep 98 19:03:33
+    update headers for win32, add return to main, resolve conflict w/ std lib log function
+
+marz  7 Sep 98 19:30:11
+    rename and static link debug targets, dll to bin dir, added snmptest, snmptrap, snmpdelta projects
+
+marz  7 Sep 98 19:42:35
+    file snmpdelta.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmpdelta.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptest.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptest.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptrap.dsp was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    file snmptrap.plg was initially added on branch Ext-3-5-patches.
+
+marz  7 Sep 98 19:42:35
+    rename and static link debug targets, dll to bin dir, added snmptest, snmptrap, snmpdelta projects
+
+hardaker  8 Sep 98 09:26:13
+    - (NEWS): update.
+
 -------------------------------------------------------------------------------
 
 Changes: V3.4 -> V3.5
