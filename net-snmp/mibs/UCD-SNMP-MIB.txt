@@ -458,7 +458,7 @@ dskIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Integer reference number (row number) for the disk mib."
-	::= { dskentry 1 }
+	::= { dskEntry 1 }
 	
 dskPath OBJECT-TYPE
      SYNTAX  DisplayString
@@ -466,7 +466,7 @@ dskPath OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path where the disk is mounted."
-     ::= { dskentry 2 } 
+     ::= { dskEntry 2 } 
 
 dskDevice OBJECT-TYPE
      SYNTAX  DisplayString
@@ -474,7 +474,7 @@ dskDevice OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path of the device for the partition"
-     ::= { dskentry 3 } 
+     ::= { dskEntry 3 } 
 
 dskMinimum OBJECT-TYPE
      SYNTAX  INTEGER
@@ -484,7 +484,7 @@ dskMinimum OBJECT-TYPE
           "Minimum space required on the disk (in kBytes) before the
           errors are triggered.  Either this or dskMinPercent is
           configured via the agent's snmpd.conf file."
-     ::= { dskentry 4 } 
+     ::= { dskEntry 4 } 
 
 dskMinPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -494,7 +494,7 @@ dskMinPercent OBJECT-TYPE
           "Percentage of minimum space required on the disk before the
           errors are triggered.  Either this or dskMinimum is
           configured via the agent's snmpd.conf file."
-     ::= { dskentry 5 } 
+     ::= { dskEntry 5 } 
 
 dskTotal OBJECT-TYPE
      SYNTAX  INTEGER
@@ -502,7 +502,7 @@ dskTotal OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Total size of the disk/partion (kbytes)"
-     ::= { dskentry 6 } 
+     ::= { dskEntry 6 } 
 
 dskAvail OBJECT-TYPE
      SYNTAX  INTEGER
@@ -510,7 +510,7 @@ dskAvail OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Available space on the disk"
-     ::= { dskentry 7 } 
+     ::= { dskEntry 7 } 
 
 dskUsed OBJECT-TYPE
      SYNTAX  INTEGER
@@ -518,7 +518,7 @@ dskUsed OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Used space on the disk"
-     ::= { dskentry 8 } 
+     ::= { dskEntry 8 } 
 
 dskPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -526,7 +526,7 @@ dskPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Percentage of space used on disk"
-     ::= { dskentry 9 } 
+     ::= { dskEntry 9 } 
 
 dskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
@@ -535,7 +535,7 @@ dskErrorFlag OBJECT-TYPE
      DESCRIPTION  
           "Error flag signaling that the disk or partition is under
           the minimum required space configured for it."
-     ::= { dskentry 100 } 
+     ::= { dskEntry 100 } 
      
 dskErrorMsg OBJECT-TYPE
      SYNTAX  DisplayString
@@ -544,7 +544,7 @@ dskErrorMsg OBJECT-TYPE
      DESCRIPTION  
           "A text description providing a warning and the space left
           on the disk."
-     ::= { dskentry 101 } 
+     ::= { dskEntry 101 } 
      
 LoadIndex ::= INTEGER
 
