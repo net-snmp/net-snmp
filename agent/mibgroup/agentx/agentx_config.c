@@ -64,8 +64,12 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     char *socket_perm, *dir_perm, *socket_user, *socket_group;
     int uid = -1;
     int gid = -1;
+#if HAVE_GETPWNAM && HAVE_PWD_H
     struct passwd *pwd;
+#endif
+#if HAVE_GETGRNAM && HAVE_GRP_H
     struct group  *grp;
+#endif
 
     DEBUGMSGTL(("agentx/config", "port permissions: %s\n", cptr));
     socket_perm = strtok(cptr, " \t");
@@ -88,10 +92,12 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     if (socket_user) {
         uid = atoi(socket_user);
         if ( uid == 0 ) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
             pwd = getpwnam( socket_user );
             if (pwd)
                 uid = pwd->pw_uid;
             else
+#endif
                 snmp_log(LOG_WARNING, "Can't identify AgentX socket user (%s).\n", socket_user);
         }
         if ( uid != 0 )
@@ -105,10 +111,12 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     if (socket_group) {
         gid = atoi(socket_group);
         if ( gid == 0 ) {
+#if HAVE_GETGRNAM && HAVE_GRP_H
             grp = getgrnam( socket_group );
             if (grp)
                 gid = grp->gr_gid;
             else
+#endif
                 snmp_log(LOG_WARNING, "Can't identify AgentX socket group (%s).\n", socket_group);
         }
         if ( gid != 0 )
