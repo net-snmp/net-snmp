@@ -290,7 +290,8 @@ getmem(unsigned long *memtotal, unsigned long *memfree, unsigned long *memshared
         if (b)
             sscanf(b, "MemShared: %lu", memshared);
         else {
-            snmp_log(LOG_ERR, "No MemShared line in /proc/meminfo\n");
+            DEBUGMSGTL(("ucd-snmp/memory",
+                        "No MemShared line in /proc/meminfo\n"));
             *memshared = 0;
         }
         b = strstr(buff, "Buffers: ");
