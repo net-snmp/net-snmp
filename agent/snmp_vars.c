@@ -271,6 +271,10 @@ init_agent (const char *app)
   snmp_udp_agent_config_tokens_register();
 #endif
 
+#ifdef NETSNMP_EMBEDDED_PERL
+  init_perl();
+#endif
+
   return r;
 }  /* end init_agent() */
 
