@@ -94,7 +94,7 @@ xdump(cp, length, prefix)
 	count += col;
     }
 
-}
+}  /* end xdump() */
 
 
 u_char *

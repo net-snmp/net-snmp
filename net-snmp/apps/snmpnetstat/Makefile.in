@@ -20,7 +20,7 @@ SRCS=	inet.c if.c main.c route.c
 OBJS=	inet.o if.o main.o route.o
 TARG= snmpnetstat
 
-CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
+CPPFLAGS=-I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@
 CC = @CC@ $(CPPFLAGS)
 
 USELIBS=../../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)

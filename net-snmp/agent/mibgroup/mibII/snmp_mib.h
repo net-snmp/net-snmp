@@ -10,33 +10,6 @@ struct variable;
 u_char	*var_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 int	write_snmp __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
-extern int snmp_inpkts;			/*  1 - current */
-extern int snmp_outpkts;		/*  2 - obsolete */
-extern int snmp_inbadversions;		/*  3 - current */
-extern int snmp_inbadcommunitynames;	/*  4 - current */
-extern int snmp_inbadcommunityuses;	/*  5 - current */
-extern int snmp_inasnparseerrors;	/*  6 - current */
-extern int snmp_intoobigs;		/*  8 - obsolete */
-extern int snmp_innosuchnames;		/*  9 - obsolete */
-extern int snmp_inbadvalues;		/* 10 - obsolete */
-extern int snmp_inreadonlys;		/* 11 - obsolete */
-extern int snmp_ingenerrs;		/* 12 - obsolete */
-extern int snmp_intotalreqvars;		/* 13 - obsolete */
-extern int snmp_intotalsetvars;		/* 14 - obsolete */
-extern int snmp_ingetrequests;		/* 15 - obsolete */
-extern int snmp_ingetnexts;		/* 16 - obsolete */
-extern int snmp_insetrequests;		/* 17 - obsolete */
-extern int snmp_ingetresponses;		/* 18 - obsolete */
-extern int snmp_intraps;		/* 19 - obsolete */
-extern int snmp_outtoobigs;		/* 20 - obsolete */
-extern int snmp_outnosuchnames;		/* 21 - obsolete */
-extern int snmp_outbadvalues;		/* 22 - obsolete */
-extern int snmp_outgenerrs;		/* 24 - obsolete */
-extern int snmp_outgetrequests;		/* 25 - obsolete */
-extern int snmp_outgetnexts;		/* 26 - obsolete */
-extern int snmp_outsetrequests;		/* 27 - obsolete */
-extern int snmp_outgetresponses;	/* 28 - obsolete */
-extern int snmp_outtraps;		/* 29 - obsolete */
 extern int snmp_enableauthentraps;	/* 30 - current */
 extern int snmp_silentdrops;		/* 31 - current */
 extern int snmp_proxydrops;		/* 32 - current */

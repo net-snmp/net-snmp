@@ -74,6 +74,7 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <signal.h>
 #include <errno.h>
 
 #include "asn1.h"
@@ -89,6 +90,11 @@ SOFTWARE.
 #include "version.h"
 #include "snmptrapd_handlers.h"
 #include "read_config.h"
+#include "snmpusm.h"
+#include "tools.h"
+#include "lcd_time.h"
+#include "transform_oids.h"
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif
@@ -159,6 +165,9 @@ struct snmp_pdu *snmp_clone_pdu2 __P((struct snmp_pdu *, int));
 void event_input __P((struct variable_list *));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
 void usage __P((void));
+
+void update_config __P((int a));
+
 
 char *
 trap_description(trap)
@@ -556,7 +565,8 @@ main(argc, argv)
     int	    argc;
     char    *argv[];
 {
-    struct snmp_session session, *ss;
+    struct snmp_session sess, *session = &sess, *ss;
+    struct usmUser *user, *userListPtr;
     int	arg;
     int count, numfds, block;
     fd_set fdset;
@@ -658,6 +668,11 @@ main(argc, argv)
 		           break;
 		    }
 		    break;
+                 case 'H':
+		   init_snmp("snmptrapd");
+                   fprintf(stderr, "Configuration directives understood:\n");
+                   read_config_print_usage("  ");
+                   exit(0);
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
@@ -672,14 +687,57 @@ main(argc, argv)
 	}
     }
 
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
-    init_mib();
-    read_configs();
     if (!Print) Syslog = 1;
+    
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
+    init_snmp("snmp");
 
     myaddr = get_myaddr();
     srclen = dstlen = contextlen = MAX_NAME_LEN;
+
     ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
+
+    /* Initialize the world. Create initial user */
+    usm_set_reportErrorOnUnknownID(1);
+    init_snmpv3("snmptrapd");	/* register the v3 handlers */
+
+    register_mib_handlers();/* snmplib .conf handlers */
+    read_premib_configs();	/* read pre-mib-reading .conf handlers */
+
+#ifdef TESTING
+    print_config_handlers();
+#endif
+
+    /* create the initial and template users */
+    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
+				   USM_LENGTH_OID_TRANSFORM,
+				   usmDESPrivProtocol,
+				   USM_LENGTH_OID_TRANSFORM);
+    userListPtr = usm_add_user(user);
+        
+    if (userListPtr == NULL) /* user already existed */
+      usm_free_user(user);
+
+#if 0
+    init_mib();		/* initialize the mib structures */
+#endif
+
+    update_config(0);	/* read in config files and register HUP */
+    init_usm_post_config();
+    init_snmpv3_post_config();
+
+
+#if 0
 
     sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
     if (read_party_database(ctmp) != 0){
@@ -694,6 +752,10 @@ main(argc, argv)
 	fprintf(stderr,
 		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);
     }
+
+#endif
+
+
 
     /* fork the process to the background if we are not printing to stdout */
     if (!Print && dofork) {
@@ -744,18 +806,26 @@ main(argc, argv)
     }
 
 
-    memset(&session, 0, sizeof(struct snmp_session));
-    session.peername = NULL;
-    session.version = SNMP_DEFAULT_VERSION;
-    session.srcPartyLen = 0;
-    session.dstPartyLen = 0;
-    session.retries = SNMP_DEFAULT_RETRIES;
-    session.timeout = SNMP_DEFAULT_TIMEOUT;
-    session.authenticator = NULL;
-    session.callback = snmp_input;
-    session.callback_magic = NULL;
-    session.local_port = local_port;
-    ss = snmp_open(&session);
+    memset(session, 0, sizeof(struct snmp_session));
+    session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
+    session->version = SNMP_DEFAULT_VERSION;
+
+    session->srcPartyLen = 0;
+    session->dstPartyLen = 0;
+    session->contextLen = 0; 
+
+    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+
+    session->retries = SNMP_DEFAULT_RETRIES;
+    session->timeout = SNMP_DEFAULT_TIMEOUT;
+     
+    session->local_port = local_port;
+
+    session->callback = snmp_input; 
+    session->callback_magic = NULL; 
+    session->authenticator = NULL;
+
+    session = snmp_open( session );
     if (ss == NULL){
         snmp_perror("snmptrapd");
         if (Syslog) {
@@ -802,6 +872,40 @@ init_syslog __P((void))
     openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
     syslog(LOG_INFO, "Starting snmptrapd");
 }
+
+
+/*
+ * Read the configuration files. Implemented as a signal handler so that
+ * receipt of SIGHUP will cause configuration to be re-read when the
+ * trap deamon is running detatched from the console.
+ *
+ */
+void update_config(a) 
+     int a;
+{
+#if 0  
+  if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
+#endif
+
+    read_configs();
+
+#if 0
+  }
+#endif
+  
+  /* read all optional config files */
+  /* last is -c from command line */
+  /* always read this one even if -C is present (ie both -c and -C) */
+
+#if 0
+  if (optconfigfile != NULL) {
+    read_config_with_type (optconfigfile, "snmptrapd");
+  } 
+#endif
+
+  signal(SIGHUP, update_config);
+}
+
 
 #ifndef HAVE_GETDTABLESIZE
 #include <sys/resource.h>

@@ -1,3 +1,7 @@
+/*
+ * view.c
+ */
+
 #include <config.h>
 
 #if STDC_HEADERS

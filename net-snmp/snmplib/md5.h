@@ -1,5 +1,3 @@
-#ifndef MD5_H
-#define MD5_H
 /* 
 ** **************************************************************************
 ** md5.h -- Header file for implementation of MD5 Message Digest Algorithm **
@@ -7,6 +5,10 @@
 ** (C) 1990 RSA Data Security, Inc.                                        **
 ** **************************************************************************
 */
+
+#ifndef MD5_H
+#define MD5_H
+
 
 /* MDstruct is the data structure for a message digest computation.
 */
@@ -44,7 +46,14 @@ extern void MDupdate __P((MDptr, unsigned char *, unsigned int));
 */
 extern void MDprint __P((MDptr));
 
+void MDchecksum(u_char *data, int len, u_char *mac, int maclen);
+int  MDsign(u_char *data, int len, u_char *mac, int maclen,
+            u_char *secret, int secretlen);
+void MDget(MDstruct *MD, u_char *buf, int buflen);
+
+
 /* 
 ** End of md5.h
 ****************************(cut)*****************************************/
 #endif /* MD5_H */
+
