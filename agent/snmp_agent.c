@@ -846,6 +846,21 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	    if ( asp->pdu->errindex > 100 )
 	        asp->pdu->errindex = 100;
     
+		    /*
+		     * If max-repetitions is 0, we shouldn't
+		     *   process the non-nonrepeaters at all
+		     *   so set up 'asp->end' accordingly
+		     */
+	    if ( asp->pdu->errindex == 0 ) {
+		asp->end   = asp->pdu->variables;
+		i = asp->pdu->errstat;
+		while ( --i > 0 ) 
+		    if ( asp->end )
+			asp->end = asp->end->next_variable;
+
+		asp->end->next_variable = NULL;		/* Possible Memory leak */
+	    }
+
 	    status = handle_next_pass( asp );	/* First pass */
 	    asp->mode = RESERVE2;
 	    if ( status != SNMP_ERR_NOERROR )
