@@ -135,9 +135,9 @@ sub initMib {
 # Pass a zero valued argument to get minimal mib tree initialzation
 # If non zero agrgument or no argument then full mib initialization
 
-# XXX: this function is no longer needed but kept for legacy.
-# support backwards compatibility better
-    return;
+  SNMP::init_snmp("perl");
+  return;
+
 
   if (defined $_[0] and $_[0] == 0) {
     SNMP::_init_mib_internals();
@@ -148,6 +148,7 @@ sub initMib {
 
 sub addMibDirs {
 # adds directories to search path when a module is requested to be loaded
+  SNMP::init_snmp("perl");
   foreach (@_) {
     SNMP::_add_mib_dir($_) or return undef;
   }
@@ -157,6 +158,7 @@ sub addMibDirs {
 sub addMibFiles {
 # adds mib definitions to currently loaded mib database from
 # file(s) supplied
+  SNMP::init_snmp("perl");
   foreach (@_) {
     SNMP::_read_mib($_) or return undef;
   }
@@ -167,6 +169,7 @@ sub loadModules {
 # adds mib module definitions to currently loaded mib database.
 # Modules will be searched from previously defined mib search dirs
 # Passing and arg of 'ALL' will cause all known modules to be loaded
+   SNMP::init_snmp("perl");
    foreach (@_) {
      SNMP::_read_module($_) or return undef;
    }
