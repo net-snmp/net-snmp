@@ -31,7 +31,7 @@ int             printer_detail_status(int);
 int             printer_errors(int);
 int             header_hrprint(struct variable *, oid *, size_t *, int,
                                size_t *, WriteMethod **);
-FILE           *run_lpstat(void);
+FILE           *run_lpstat(int *);
 
 
         /*********************
@@ -198,7 +198,7 @@ void
 Init_HR_Print(void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
-    int             i;
+    int             i, fd;
 #if HAVE_LPSTAT
     FILE           *p;
 #elif HAVE_CGETNEXT
@@ -217,7 +217,7 @@ Init_HR_Print(void)
     }
 
 #if HAVE_LPSTAT
-    if ((p = run_lpstat()) != NULL) {
+    if ((p = run_lpstat(&fd)) != NULL) {
         char            buf[BUFSIZ], ptr[BUFSIZ];
         while (fgets(buf, sizeof buf, p)) {
             sscanf(buf, "%*s %*s %[^:]", ptr);
@@ -261,6 +261,7 @@ Init_HR_Print(void)
         }
 #if HAVE_LPSTAT
         pclose(p);
+        close(fd);
 #elif HAVE_CGETNEXT
         cgetclose();
 #elif HAVE_PRINTCAP
@@ -335,16 +336,15 @@ printer_errors(int idx)
  * due to timeouts).
  */
 FILE           *
-run_lpstat(void)
+run_lpstat(int *fd)
 {
     struct extensible ex;
-    int             fd;
 
     memset(&ex, 0, sizeof(ex));
     strcpy(ex.command, LPSTAT_PATH " -v");
-    if ((fd = get_exec_output(&ex)) < 0)
+    if ((*fd = get_exec_output(&ex)) < 0)
         return NULL;
 
-    return fdopen(fd, "r");
+    return fdopen(*fd, "r");
 }
 #endif
