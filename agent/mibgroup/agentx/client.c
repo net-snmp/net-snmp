@@ -27,7 +27,7 @@
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
-#  include <sys/time.h>
+#  include <sys/time.h> 
 # else
 #  include <time.h>
 # endif
@@ -42,6 +42,7 @@
 #endif
 
 #include "asn1.h"
+#include "system.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"

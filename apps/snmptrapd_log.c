@@ -770,7 +770,7 @@ static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
   case SNMP_VERSION_2c:
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", Community ");
       cp = sprint_bfr;
-      for (i = 0; i < pdu->community_len; i++)
+      for (i = 0; i < (int)pdu->community_len; i++)
           if (isprint(pdu->community[i])) *cp++ = pdu->community[i];
 	  else *cp++ = '.';
       *cp = 0;
@@ -779,14 +779,14 @@ static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
   case SNMP_VERSION_3:
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", User ");
       cp = sprint_bfr;
-      for (i = 0; i < pdu->securityNameLen; i++)
+      for (i = 0; i < (int)pdu->securityNameLen; i++)
           if (isprint(pdu->securityName[i])) *cp++ = pdu->securityName[i];
 	  else *cp++ = '.';
       *cp = 0;
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", Context ");
       cp = sprint_bfr;
-      for (i = 0; i < pdu->contextNameLen; i++)
+      for (i = 0; i < (int)pdu->contextNameLen; i++)
           if (isprint(pdu->contextName[i])) *cp++ = pdu->contextName[i];
 	  else *cp++ = '.';
       *cp = 0;
