@@ -14,29 +14,23 @@
 @eval $m2c_gi_others = (count_indexes($table) - 1)@
 typedef struct ${table}_idx {
 
-    void *owner; /* object that is responsible for freeing this memory */
+        /** object that is responsible for freeing this memory */
+    void *owner;
 
 @foreach $node index@
 @    include m2c_setup_node.m2i@
-    /** $node.syntax = $node.perltype = $node.type */
-@    if $m2c_node_needlength == 0@
-   $m2c_decl   $node;
-@    else@
+##@    include details-node.m2i@
+        /** $node.syntax = $node.perltype = $node.type */
+@    if $m2c_node_needlength == 1@
 @        eval $m2c_gi_maxlen = (126 - $node.oidlength - $m2c_gi_others)@
 @        if $m2c_node_maxlen > $m2c_gi_maxlen@
 @            eval $m2c_node_maxlen = $m2c_gi_maxlen@
-    /** 128 - 1(entry) - 1(col) - $m2c_gi_others(other indexes) = $m2c_node_maxlen */
+        /** 128 - 1(entry) - 1(col) - $m2c_gi_others(other indexes) = $m2c_node_maxlen */
 @        end@
-   $m2c_decl   $node[$m2c_node_maxlen];
-   size_t      ${node}_len;
 @    end@ # needlength
+@    include node-storage.m2i@
 
 @end@ # foreach
-    /*
-     * TODO: add any data needed to allow you to locate this row again.
-     *       (e.g. keep a pointer to the row data)
-     */
-    $m2c_data_context *data; /* example */
 
 } ${table}_idx;
 
