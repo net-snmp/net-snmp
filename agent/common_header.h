@@ -185,3 +185,7 @@
 
 void init_nlist __P((struct nlist *));
 int compare __P((oid *, int, oid *, int));
+
+#if !defined(USING_ERRORMIB_MODULE)
+#define setPerrorstatus(x) perror(x)
+#endif

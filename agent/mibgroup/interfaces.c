@@ -11,7 +11,7 @@
 #include <sys/queue.h>
 #endif
 #include "interfaces.h"
-
+#include "util_funcs.h"
 
 	/*********************
 	 *

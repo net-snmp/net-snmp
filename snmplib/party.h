@@ -1,3 +1,6 @@
+#ifndef IN_PARTY_H
+#define IN_PARTY_H
+
 /*
     partyIdentity        Party,
     partyIndex           INTEGER,
@@ -131,3 +134,4 @@ party_createEntry __P((oid *partyID, int partyIDLen));
 
 void party_destroyEntry __P((oid *, int));
 int read_party_database __P((char *));
+#endif

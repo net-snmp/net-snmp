@@ -91,7 +91,11 @@
 #include "mibincl.h"
 #include "disk.h"
 #include "util_funcs.h"
+#if USING_ERRORMIB_MODULE
 #include "errormib.h"
+#else
+#define setPerrorstatus(x) perror(x)
+#endif
 
 int numdisks;
 struct diskpart disks[MAXDISKS];

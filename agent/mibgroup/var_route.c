@@ -124,6 +124,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
+#include "util_funcs.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -170,23 +171,6 @@ void	init_var_route( )
 
 
 extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
-
-void
-string_append_int (s, val)
-char *s;
-int val;
-{
-    char textVal[16];
-
-    if (val < 10) {
-	*s++ = '0' + val;
-	*s = '\0';
-	return;
-    }
-    sprintf (textVal, "%d", val);
-    strcpy(s, textVal);
-    return;
-}
 
 #ifndef solaris2
 
