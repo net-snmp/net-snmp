@@ -54,6 +54,9 @@
 
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
+@        if $m2c_node_skip_mapping == 0@
+    int ${node}_map($m2c_node_map_param);
+@        end@ # // skip mapping
     int ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref );
 @    end@ // nonindex
 
