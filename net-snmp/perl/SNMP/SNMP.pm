@@ -601,7 +601,7 @@ sub gettable {
     #
 
     my ($this, $root_oid, $options) = @_;
-    my ($textnode, $stopconds);
+    my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash);
 
     # translate the OID into numeric form if its not
     if ($root_oid !~ /^[\.0-9]+$/) {
@@ -628,24 +628,36 @@ sub gettable {
 	}
     }
 
-    my %result_hash;
-
     # create the initial walking info.
-    my $varbinds;
-	
     foreach my $c (@{$options->{'columns'}}) {
 	push @$varbinds, [$c];
 	push @$stopconds, $c;
     }
-    my $vbl = $varbinds;
+    $vbl = $varbinds;
 	
-    my $res = $this->getnext($vbl);
+    if (!$options->{'repeat'}) {
+	# experimentally determined maybe guess at a best repeat value
+	# 1000 bytes max (safe), 30 bytes average for encoding of the
+	# varbind (experimentally determined to be closer to
+	# 26.  Again, being safe.  Then devide by the number of
+	# varbinds.
+	$options->{'repeat'} = int(1000 / 36 / ($#$varbinds + 1));
+    }
+
+    if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
+	$res = $this->getbulk(0, $options->{'repeat'}, $vbl);
+    } else {
+	$res = $this->getnext($vbl);
+    }
+
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	print STDERR "ack: gettable1\n" && return
-	  if ($#$vbl != $#$stopconds);
+	print STDERR "ack: gettable results not appropriate\n" && return
+	  if ($#$vbl + 1 != ($#$stopconds + 1) * $options->{'repeat'});
 
 	$varbinds = [];
 	my $newstopconds;
+
+	my $lastsetstart = ($options->{'repeat'}-1) * ($#$stopconds+1);
 
 	for (my $i = 0; $i <= $#$vbl; $i++) {
 	    my $row_oid = SNMP::translateObj($vbl->[$i][0]);
@@ -654,7 +666,7 @@ sub gettable {
 	    my $row_value = $vbl->[$i][2];
 	    my $row_type = $vbl->[$i][3];
 
-	    if ($row_oid =~ /^$stopconds->[$i]/) {
+	    if ($row_oid =~ /^$stopconds->[$i % ($#$stopconds+1)]/) {
 
 		if ($row_type eq "OBJECTID") {
 
@@ -670,16 +682,26 @@ sub gettable {
 		$result_hash{$row_index}{$row_text} = $row_value;
 
 		# continue past this next time
-		push @$newstopconds, $stopconds->[$i];
-		push @$varbinds,$vbl->[$i];
+		if ($i >= $lastsetstart) {
+		    push @$newstopconds, $stopconds->[$i%($#$stopconds+1)];
+		    push @$varbinds,[$vbl->[$i][0],$vbl->[$i][1]];
+		}
 	    }
 	}
 	if ($#$newstopconds == -1) {
 	    last;
 	}
+	if ($#$varbinds == -1) {
+	    print "gettable ack.  shouldn't get here\n";
+	}
 	$vbl = $varbinds;
 	$stopconds = $newstopconds;
-	$res = $this->getnext($vbl);
+
+	if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
+	    $res = $this->getbulk(0, $options->{'repeat'}, $vbl);
+	} else {
+	    $res = $this->getnext($vbl);
+	}
     }
     return(\%result_hash);
 }
