@@ -23,55 +23,53 @@ TABLE OF CONTENTS
    What's the difference between SNMPv1, SNMPv2 and SNMPv3?
    What are all these different SNMPv2's anyway?
    Which versions of SNMP are supported in this package?
-   Where can I find more information?
+   Where can I find more information about network management?
    Is ucd-snmp year 2000 safe?
- AGENT
-   What MIBs are supported?
+ APPLICATIONS
    How do I add a MIB?
    How do I add a MIB to the tools?
-   How do I add a MIB to the agent?
-   How do I add functionality?
-   What traps are sent by the agent?
-   When I run the agent it runs and then quits without staying around. Why?
-   How can I stop other people getting at my agent?
-   I don't understand the new access control stuff - what does it mean?
- TECHNICAL
-   How do I write C code to integrate with the agent?
-   What ASN.1 parser is used?
-   How does the agent fetch the value of a variable from the system?
-   What is the Official Slogan of the ucd-snmp-coders list?
- PROBLEMS
-   How come ever since version 3.2 my mib files are no longer read?
-   What's this about a "party database", when I try to send a query?
-   What's this about "too many imported symbols"?
-   What about "Did not find 'removed' in module SNMPv2-SMI" and similar?
-   Why can't I see values in the UCDavis 'extensible' tree?
-   Why can't I see values in the UCDavis 'memory' tree on Solaris, or...?
    Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
    I've done that, and I still can't see the values. Why not?
    I've done that, and I'm *still* not getting anything back. Why not?
    I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
    Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
-   I'm not receiving any traps with 'snmptrapd'?
-   I'm sending traps using 'snmptrap', but they're not being received?
-   The agent is complaining about 'snmpd.conf'.  Where is this?
+   I can't load any of the mib files, and they seem to be missing
+       the first two characters of the filename.  What's happening?
+   I cannot set any variables in the MIB.
+   Variables seem to disappear when I try to set them.  Why?
+ AGENT
+   What MIBs are supported?
+   How do I add a MIB to the agent?
+   How do I add functionality?
+   How do I write C code to integrate with the agent?
+   What traps are sent by the agent?
+   When I run the agent it runs and then quits without staying around. Why?
+   How can I stop other people getting at my agent?
+   I don't understand the new access control stuff - what does it mean?
+   What ASN.1 parser is used?
+   How does the agent fetch the value of a variable from the system?
+   Why can't I see values in the UCDavis 'extensible' tree?
+   Why can't I see values in the UCDavis 'memory' tree on Solaris, or...?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
-   Or "sendto: permission denied" ?
-   I'm not seeing all the interfaces on my Solaris box
-   I'm using the Perl SNMP module, and get something about "bad free"?
-   I can't load any of the mib files, and they seem to be missing
-       the first two characters of the filename.  What's happening?
-   I'm trying to configure in an extra module and it's not found?
-   How do I compile with 'gcc' instead of 'cc'?
-   But gcc doesn't compile it successfully on my new Solaris system. Why not?
-   My Linux system can't find the include file "nlist.h" when compiling
-   I cannot set any variables in the MIB.
-   Variables seem to disappear when I try to set them.  Why?
+   The agent is complaining about 'snmpd.conf'.  Where is this?
    Sometimes I seem to get the wrong answers.  Why?
    The system uptime (sysUpTime) returned is wrong!
    The Host Resources information is wrong (and/or doesn't even compile)!
+   What is the Official Slogan of the ucd-snmp-coders list?
+ PERL
+   How do I install the Perl SNMP module?
+   Compiling this fails with "`MAX_NAME_LEN' undeclared"?
+   I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
+   I'm trying to use tkmib and it can't locate Tk.pm?
+ PROBLEMS
+   Why aren't my mib files read in any more?
+   I'm getting answers, but they're all numbers. Why?
+   How can I get more information about these MIB file problems?
+   What's this about "too many imported symbols"?
+   How do I compile with 'gcc' instead of 'cc'?
+   But gcc doesn't compile it successfully on my new Solaris system. Why not?
 
 
 GENERAL
@@ -103,7 +101,7 @@ WWW:
         http://ucd-snmp.ucdavis.edu
 
 FTP:
-  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
+  - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
 
@@ -118,10 +116,12 @@ What documentation is available?
 	PORTING
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
+	A guide for extending the agent
 
-      Most of this documentation is also available on our web page,
-        as well as mailing list acrchives:
-        http://ucd-snmp.ucdavis.edu
+      Most of this documentation (plus archives of the mailing lists)
+	 is also available on our web page:
+
+        	http://ucd-snmp.ucdavis.edu
 
 
 
@@ -130,6 +130,8 @@ Are there binaries available?
 
   - There are binaries for some systems available in the binaries
     directory on the ftp site.
+
+
 
 Where can I get the perl SNMP package?
 -------------------------------------
@@ -142,11 +144,15 @@ Where can I get the perl SNMP package?
   Consult the README file in the SNMP perl module distribution to find 
   out what version of the ucd-snmp library it needs to be linked against.
 
-  Tk.pm is a Perl package that needs to be installed before tkmib will run.
-  It's available on Perl CPAN.  Suggest using version after "Tk800.011".
+  See also the 'PERL' section later in this FAQ.
+
+
 
 What operating systems does it run on?
 -------------------------------------
+
+  Both the applications and the agent have been reported as running
+  (at least in part) on the following configurations:
 
 	* HP-UX 9.07, 9.05, 9.03, 9.01 on HPPA 1.1 systems
 	* HP-UX 10.20, 10.10, 10.01 on HPPA 1.1 systems
@@ -180,13 +186,12 @@ What happens if mine isn't listed?
 	If it doesn't work, let us know and we'll try to help.
   If the agent almost compiles, but certain files in the
 	agents/mibgroup director structure fail, you can try omitting
-	those modules by re-running configure with the flag
+	the relevant modules by re-running configure with the flag
 		--with-out-mib-modules="list"
 	You'll then need to re-compile.
 
 	Note that with release 3.5, the structure of the mibgroup directory
 	has changed, and this may affect how you specify this list.
-	(See the "extra config" question under 'PROBLEMS' below).
 
   Either way, try it and let us know how you get on (see below for how).
 	
@@ -254,7 +259,7 @@ How do I submit a patch or bug report?
 
 
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
------------------------------------------------
+-------------------------------------------------------
 What are all these different SNMPv2's anyway?
 --------------------------------------------
 
@@ -263,8 +268,8 @@ What are all these different SNMPv2's anyway?
   Very briefly, the original protocol and framework was described
   in RFCs 1155-1157, and is now known as SNMPv1.
 
-    Practical experience with this showed up various problems and
-  deficiencies wih this, and a revised framework was developed to
+    Practical experience showed up various problems and
+  deficiencies with this, and a revised framework was developed to
   try and address these.  This was described in RFCs 1441-1452, and
   is known as "SNMPv2 classic".
   The changes proposed include:
@@ -276,7 +281,7 @@ What are all these different SNMPv2's anyway?
 	* mechanisms for remote configuration
 
   Unfortunately, while many of these were generally accepted, there
-  was still some disagreement in these last two areas, security/admin
+  was some disagreement in these last two areas, security/admin
   and remote configuration.  This resulted in a number of variants and
   alternative proposals:
 
@@ -315,11 +320,13 @@ Which versions of SNMP are supported in this package?
   work on this has now begun.  Currently the agent supports the SNMPv3
   view-based access control model (RFC 2275).
     Support for the remaining aspects of SNMPv3 is expected to follow.
+  There is further information about the status of SNMPv3 support on
+  the project web page.
 
 
 
-Where can I find more information?
----------------------------------
+Where can I find more information about network management?
+----------------------------------------------------------
 
   There are a number of sites with network management information on
   the World Wide Web. Two of the most useful are
@@ -352,7 +359,255 @@ Is ucd-snmp year 2000 safe?
   year 1970 began.  Information stored this way is year 2000 safe, but
   is not year 2038 safe on 32 bit machines.
 
-  So:  yes, as long as your operating system is as well.
+  Note that the suite will use assorted system library routines, so is
+  clearly vulnerable to any year 2000 problems with these.
+
+  So:  yes, ucd-snmp is year 2000 safe, as long as your operating system is as well.
+
+
+
+
+
+APPLICATIONS
+============
+
+How do I add a MIB?
+------------------
+
+  This is actually two separate questions, depending on whether you
+  are referring to the tools, or the agent (or both).
+    See the next question or the next section respectively.
+
+
+
+How do I add a MIB to the tools?
+-------------------------------
+
+  The tools only really use the MIB files for translating between
+  numeric and textual forms for queries and responses.  They will
+  operate quite happily without any MIB files at all, as long as
+  you are prepared to work with numeric OIDs throughout.
+    The one exception to that is 'snmptable', which does require
+  the relevant MIB file to be loaded.
+
+  The tools look in a predefined directory (usually PREFIX/share/snmp/mibs)
+  and regard any file held there as defining a MIB module or modules.
+  Adding translation ability for a new MIB module is simply a
+  matter of placing a file defining the MIB in this directory, and
+  defining a suitable environment to tell the tools about it.
+    (See the first question under 'PROBLEMS' for more details).
+
+  The tools can then be used to communicate with any agent that
+  implements the relevant MIB modules.
+
+  The UCD agent, however, does not use these MIB text files at all, and
+  will work quite happily without them.  (Actually it needs to find the
+  main MIB file, though it doesn't do anything with it!).  The values
+  returned by the agent are simple numeric (or string) responses, and
+  the syntax and scope of the variables supported are hard-coded into
+  the implementation.  The MIB text files are only used to translate
+  these responses into more meaningful terms.
+
+
+
+Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
+-----------------------------------------------------------
+
+  Normally, the tools assume that any object ID specified is
+  a full path, starting from the 'mib-2' node of the overall
+  MIB tree.  So if you perform an 'snmpwalk' on an agent, without
+  specifying a starting point, it will return just the values in
+  the 'mib-2' tree.
+
+    If you wish to examine anything under the 'private.enterprises'
+  branch (or anywhere else in the MIB structure) you will need to
+  inform the tools appropriately.   There are two ways to do this:
+
+  First, you can give the full specification, starting from the root
+  of the tree - e.g:
+
+	.iso.org.dod.internet.private.enterprises.ucdavis
+
+  Note the initial dot - this is important!
+
+
+  Alternatively, you can define the environmental variable PREFIX,
+  to specify where to start looking for ( non-fully specified) objects.
+  This can be done by the command
+							(C shell family)
+	setenv PREFIX  .iso.org.dod.internet.private.enterprises.ucdavis
+  or
+							(Bourne shell family)
+	PREFIX=.iso.org.dod.internet.private.enterprises.ucdavis
+	export PREFIX
+
+  after which, the following example should work:
+
+	snmpwalk -v 1 localhost public processes
+
+
+
+I've done that, and I still can't see the values. Why not?
+---------------------------------------------------------
+
+    Another possibility is that there is a clash of names
+  somewhere within the MIB tree.  Try running the command
+  'snmptranslate -w zzz' which will inform you of any duplicates,
+  or other similar problem.
+
+    This should be less of a problem with the new parser, which
+  now handles duplicate identifier names, though inconsistent
+  case in labels (or different names) for the same node still
+  confuse the poor darling.
+
+
+
+I've done that, and I'm *still* not getting anything back. Why not?
+------------------------------------------------------------------
+
+  Another possibility is that the agent you are querying is simply not
+  responding.  Try contacting it with a "reliable" query.
+  A good test is to do an 'snmpwalk' on the 'system' sub-tree.
+
+    Or it may be that the agent just doesn't implement the MIB
+  module that you're interested in.  Or it does, but is falling over
+  (software with bugs in - shock horror!)
+    Try doing an 'snmpwalk' starting somewhere above the offending bit
+  of the MIB tree, and seeing how far it gets.
+
+
+
+I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
+------------------------------------------------------------------------
+
+  If a "general" snmpwalk shows the entry, but asking for it more
+  specifically gives a "sub-identifier not found:" error, then that's
+  probably a slightly different problem.
+
+    The tools assume that the object ID they are given is a full path
+  starting from 'mib-2' (or wherever you have set PREFIX to) - i.e.
+  including the intermediate names.
+  You can't simply give the final sub-identifier, and expect the tools
+  to find the relevant node.  (Well, you can, but you'll be disappointed).
+    You need to specify the intermediate sub-identifiers as well.
+
+    For example
+		snmpget myhost public sysUpTime.0
+                                                     will fail, while
+		snmpget myhost public system.sysUpTime.0
+                                                          will work.
+
+    If you are confident that the sub-identifier is unique within the
+  loaded MIB files, you can request direct "random access" using the
+  command flag '-R'.
+		snmpget myhost public -R sysUpTime.0
+  
+    If the sub-identifier is not unique, but you know which module it's
+  in, you can specify this explicitly:
+
+		snmpget myhost public -R RFC1213-MIB:sysUpTime.0
+
+  The behaviour with non-unique sub-identifiers if the module is not
+  specified is "implementation specific" 
+	 (i.e. we reserve the right to change it without warning!)
+
+
+
+Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
+--------------------------------------------------------------------------
+
+  This depends on which MIB modules are supported by the agent you are querying.
+
+  A tree is walked by repeatedly asking for "the next entry" until all the
+  values under that tree have been retrieved.  However, the agent has no idea
+  that this is what's happening - all it sees is a request for "the next entry
+  after X".
+
+  If the variable X happens to be the last entry in a tree, the agent will
+  provide the next variable supported (as requested) even though this will
+  be in a different subtree.  It's up to the querying tool to recognise that
+  this last result lies outside the area of interest, and simply discard it.
+
+  If the variable X happens to be the last entry supported, then the agent
+  doesn't have another variable to provide, so returns a suitable error.
+  The UCD tools report this with the message above.
+
+  But in either case, the actual information provided will be the same.
+
+
+
+I can't load any of the mib files, and they seem to be missing
+the first two characters of the filename.  What's happening?
+-----------------------------------------------------------
+
+  This is a problem experienced with Sun systems when the tools have
+  been compiled with a mixture of BSD and Solaris environments.
+  You'll need to re-configure and compile the tools, making sure that
+  '/usr/ucb' is not in your PATH (or at least comes at the end).
+
+
+
+I cannot set any variables in the MIB.
+-------------------------------------
+
+  There are three possible reasons for this:
+
+  The majority of MIB variables are "read-only" and cannot be changed.
+
+  Of those that can in principle be changed, only a few have been
+  implemented as such in this agent.  Currently, most (if not all)
+  of these are contained within the 'system' sub-tree, relating to
+  general contact information.
+    
+  With the distribution as shipped, the community name "private" must
+  be used to set these values, and this can only be done from the local
+  host (i.e. the same system that the agent is running on).
+    This can be changed using the access control commands, which appear
+  at the end of the example config file.  For example, to allow write
+  access to the 'system' group from the local subnet, with the community
+  string "sysadmin", follow the instructions at the end of this example file.
+
+    Note that the community string "public" can *not* be used to set variables.
+  
+
+
+Variables seem to disappear when I try to set them.  Why?
+--------------------------------------------------------
+
+  This is actually the same as the previous question - it just isn't
+  particularly obvious.  A typical example of this effect would be
+
+	$ snmpget localhost public system.sysLocation.0
+	system.sysLocation.0 = somewhere nearby
+
+	$ snmpset localhost public system.sysLocation.0 s "right here"
+	Error in packet.
+	Reason: (noSuchName) There is no such variable name in this MIB.
+	This name doesn't exist: system.sysLocation.0
+
+  This is due to the limitations of the available SNMPv1 error codes,
+  which are forced to cover a number of different possibilities.
+  What 'noSuchName' actually means is
+
+	"You can't do that to this variable"
+
+  That could be because the variable doesn't exist, it does exist but
+  you don't have access to it (but someone else may do), or it exists
+  but you can't perform that particular operation (i.e. changing it).
+
+  The error codes in SNMPv2 (various flavours) are rather more flexible
+  and informative:
+
+	$ snmpset -v 2c localhost public system.sysLocation.0 s "right here"
+        Error in packet.
+        Reason: notWritable
+
+  Note that this actually means "not writeable in this particular case",
+  rather than "not writeable under any circumstances".  It may well be
+  that a different invocation (such as using the community string "private")
+  might be successful.
+
+
 
 AGENT
 =====
@@ -374,45 +629,6 @@ What MIBs are supported?
 
 
 
-How do I add a MIB?
-------------------
-
-  This is actually two separate questions, depending on whether you
-  are referring to the tools, or the agent (or both).
-    See the next two questions.
-
-
-
-How do I add a MIB to the tools?
--------------------------------
-
-  The tools only really use the MIB files for translating between
-  numeric and textual forms for queries and responses.  They will
-  operate quite happily without any MIB files at all, as long as
-  you are prepared to work with numeric OIDs throughout.
-    The one exception to that is 'snmptable', which does require
-  the relevant MIB file to be loaded.
-
-  The tools look in a predefined directory (usually PREFIX/share/snmp/mibs)
-  and regard any file held there as defining a MIB module or modules.
-  Adding translation ability for a new MIB moule is simply a
-  matter of placing a file defining the MIB in this directory, and
-  defining a suitable environment to tell the tools about it.
-    (See the first question under 'PROBLEMS' for more details).
-
-  The tools can then be used to communicate with any agent that
-  implements the relevant MIB modules.
-
-  The UCD agent, however, does not use these MIB text files at all, and
-  will work quite happily without them.  (Actually it needs to find the
-  main MIB file, though it doesn't do anything with it!).  The values
-  returned by the agent are simple numeric (or string) responses, and
-  the syntax and scope of the variables supported are hard-coded into
-  the implementation.  The MIB text files are only used to translate
-  these responses into more meaningful terms.
-
-
-
 How do I add a MIB to the agent?
 -------------------------------
 How do I add functionality?
@@ -423,9 +639,9 @@ How do I add functionality?
   life were so simple).  In fact, the agent makes little or no use of
   these files, and will work quite happily without them.
   All the information about the syntax and scope of the variables supported
-  is hardwired into the iplementation of the agent.
+  is hardwired into the implementation of the agent.
 
-  There are three ways to add funcionality for a new MIB to the agent.
+  There are three ways to add functionality for a new MIB to the agent.
 
   Firstly, it is possible that the agent distribution already includes
   the desired functionality, but this has simply not been configured in
@@ -434,24 +650,50 @@ How do I add functionality?
   then recompiling the agent.
   Note that some functionality concerned with monitoring and managing
   unix hosts is included in the UCD extension modules, which are located
-  within the 'private' branch of the MIB tree.  See the third question
-  under PROBLEMS for more details of how to access these.
+  within the 'private' branch of the MIB tree.  This is covered in a later
+  question in this FAQ.
 
   Secondly, it is possible for the agent to run commands or shell scripts
-  in response to queries.  These can optain and report the necessary
+  in response to queries.  These can obtain and report the necessary
   information, or perform actions as required.
   Detailed information and examples are provided in the snmpd(1) and
   snmpd.conf(5) manual pages, and the EXAMPLE.conf file.
+  This is known as "pass-through" support.
 
   Thirdly, the agent itself can be extended to support additional MIB
   groups, by writing the necessary C code.  This is covered further in
-  the 'TECHNICAL' section below.
+  the next question.
 
     Note that there is effectively no difference between 'pass-through'
   MIB support, and modules implemented within the agent itself. Tools
   querying the agent will see a single MIB structure.
  
 
+
+How do I write C code to integrate with the agent?
+-------------------------------------------------
+
+  At the moment, the only technique for integrating external C code
+  with the agent (as opposed to using the 'pass-through' shell
+  extensibility mentioned above) is to implement it within the agent itself.
+
+  The implementation of the agent has recently been re-organised
+  to make it easier to incorporate new MIB groups.  The relevant code
+  is held in the directory 'agent/mibgroup', with one file (plus
+  header) per group in most cases.
+
+  The tool 'mib2c' can be used to generate most of the skeleton code
+  needed for implementing a new module.  Further information is available
+  in the README file in the mibgroup directory, the README file for
+  mib2c, and the Extensibility Guide, which describes this process in
+  in excruciating detail.  All these are shipped with the distribution,
+  and should be available via the project web page.
+  Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further advice.
+
+  Work is underway (or at least being discussed!) for implementing
+  proxy/multi-agent support using the AgentX (and SMUX) mechanisms.
+
+ 
 
 What traps are sent by the agent?
 --------------------------------
@@ -561,7 +803,7 @@ I don't understand the new access control stuff - what does it mean?
   always, a very good idea).
   
     The {mask} field is used to control which elements of the OID subtree
-  should be regarded as relevent when determining which view an OID is in.
+  should be regarded as relevant when determining which view an OID is in.
   Normally, the whole of the OID should be included, so you'll need a mask
   with as many bits set as there are OID elements.
     Thus, in the example config file,  ".1" (i.e. the whole dod tree) has
@@ -611,7 +853,7 @@ I don't understand the new access control stuff - what does it mean?
   full access (both GET and SET, as well as NOTIFY) to the whole of the
   MIB tree (or at least everything under .1, which covers most things!)
 
-     Note that the three occurances of "public", as community string,
+     Note that the three occurrences of "public", as community string,
   security name and group name, are three totally separate things.
   You can't use a community string in a security name field, or either
   of these as a group name (or vice versa), unless you set up suitable
@@ -620,30 +862,6 @@ I don't understand the new access control stuff - what does it mean?
 
   And here concludes our tour of the view-based access control mechanism.
   Phew!
-
-
-
-
-TECHNICAL
-=========
-
-How do I write C code to integrate with the agent?
--------------------------------------------------
-
-  At the moment, the only technique for integrating external C code
-  with the agent (as opposed to using the 'pass-through' shell
-  extensibility mentioned above) is to implement it within the agent itself.
-
-  The implementation of the agent has recently been re-organised
-  to make it easier to incorporate new MIB groups.  The relevant code
-  is held in the directory 'agent/mibgroup', with one file (plus
-  header) per group in most cases.  The README file in that directory
-  gives more information as to the structure of these files, and how
-  to add a new group. 
-  Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further advice.
-
-  Work is underway (or at least being discussed!) for implementing
-  proxy/multi-agent support using the AgentX (and SMUX) mechanisms.
 
 
 
@@ -669,138 +887,6 @@ How does the agent fetch the value of a variable from the system?
   (it would be hard to think of a less clean interface!), via ioctl()
   calls or similar system routines and these mechanisms are usually used
   in preference.
-
-
-
-What is the Official Slogan of the ucd-snmp-coders list?
--------------------------------------------------------
-
-  "The current implementation is non-obvious and may need to be improved."
-	(with thanks to Rohit Dube)
-
-
-
-PROBLEMS
-========
-
-Why aren't my mib files read in any more?
------------------------------------------
-
-  There are a number of possible reasons for this.
-  In summary:	a particular MIB file isn't being read in
-		none of the MIB files are found
-		there's an error in the MIB file
-
-  To expand on these in turn:
-
-  As from version 3.2, the parser has been re-written.  One effect of
-  this is that only a specified set of MIB modules are read in by
-  the tools by default.  This list can be set in a number of ways:
-
-    The tools have a default list compiled in, which can be set
-  using the configure option
-		--with-mibs="list"
-  and recompiling the tools.
-
-    The environmental variable 'MIBS' will be taken as a list of
-  module names (separated by colons) to be read in, instead of (or as
-  well as) the default list.  Note that any modules these rely on will
-  be read in automatically, without needing to be listed explicitly.
-
-    The environment variable 'MIBFILES' will be taken as a list of
-  filenames, containing MIB modules to be read in (in addition to those
-  included by 'MIBS' and/or the default list).  Again, any modules these
-  rely on will also be loaded in automatically.
-    The names listed in this variable can be anywhere in the filesystem,
-  though any implicitly loaded modules must be present in the standard
-  location(s). 
-
-    Finally, if the environmental variable 'MIBS' has the special
-  value "ALL", then the tools will load in every module present in
-  the module directory (or directories).
-
-
-    The location where the tools look for MIB module files is compiled
-  into the tools. This can also be set using the environmental
-  variable 'MIBDIRS', being a (colon-seperated) list of directories
-  containing MIB files. 
-
-  Note that from version 3.3 onwards, the default location has changed
-  (from /usr/local/lib/snmp/mibs to /usr/local/share/snmp/mibs).
-  This is in line with current standards regarding file system structure.
-
-
-  As from version 3.4, the parser is somewhat more strict about the
-  syntax of MIB files.  This may result in it rejecting previously
-  acceptable (though erroneous) MIB files.
-    Such problems ought to be reported by the application.  If things
-  seem to be failing silently, try running the command 'snmptranslate -W'
-  which will complain about anything anomalous.
-
-
-  See the 'mib_api(3)' man page for more details of MIB parsing.
-
-
-
-I'm getting answers, but they're all numbers. Why?
--------------------------------------------------
-
-  This is actually the same as the previous question.  Because the tools
-  no longer read in every MIB module they can find, it is quite possible
-  for results from an agent to refer to modules that have not been loaded
-  (particularly with GETNEXT requests, or when walking a tree).
-     The tools will report the answer quite correctly, but won't translate
-  identifiers and enumerations into readable strings.  To fix this, use
-  the environmental variables MIBS or MIBFILES to read in the relevant
-  module files.
-    This does assume you have these files installed properly.  There's not
-  a great deal we can do if you haven't.   Note that the default location
-  for these files has changed recently (see the previous question).
-
-
-
-What's this about a "party database", when I try to send a query?
-----------------------------------------------------------------
-
-  Previous releases of these tools sent SNMPv2 (classic) queries,
-  which relied on party configuration information being available.
-    With the current release, by default queries now use SNMPv2c,
-  which does not need any such party configuration.
-
-    In either case, it is possible to specify the use of SNMPv1
-  instead, by giving the application the option "-v 1".
-
-
-
-What's this about "too many imported symbols"?
----------------------------------------------
-
-  Any MIB file starts with an (optional) list of identifiers that
-  it "imports" from other files.  The parser implements this using
-  a fixed size buffer to hold the import information.
-    There are two circumstances in which this can result in the
-  error message shown above.
-
-    Firstly, if the MIB file refers to an unususally large number
-  of external identifiers.  Handling this case requires a (trivial)
-  patch to the parsing code.  Contact the coders list for advice.
-     (This is extremely rare - the only example that
-      we've come across is the Cabletron Trap MIB).
-
-    Much more common is a syntax error in the IMPORTS clause of the
-  MIB file in question.  In particular, check that this ends in a
-  semicolon, before going on to the main definition section.
-  
-
-
-What about "Did not find 'removed' in module SNMPv2-SMI" and similar?
-------------------------------------------------------------------
-
-  This means that you're using the most recent applications without
-  having installed the MIB files that come with them.  Remember to
-  run "make install".
-    (Alternatively you can just copy the MIB file 'SNMPv2-TC.txt'
-  from the current release into the active MIB file location).
 
 
 
@@ -830,152 +916,6 @@ Why can't I see values in the UCDavis 'memory' tree on Solaris, or...?
   bsdi3, and freebsd2 and is not compiled in on any other
   architectures.  If you want to help port it to other systems, let us 
   know.
-
-
-Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
------------------------------------------------------------
-
-  Normally, the tools assume that any object ID specified is
-  a full path, starting from the 'mib-2' node of the overall
-  MIB tree.  So if you perform an 'snmpwalk' on an agent, without
-  specifying a starting point, it will return just the values in
-  the 'mib-2' tree.
-
-    If you wsh to examine anything under the 'private.enterprises'
-  branch (or anywhere else in the MIB structure) you will need to
-  inform the tools appropriately.   There are two ways to do this:
-
-  First, you can give the full specification, starting from the root
-  of the tree - e.g:
-
-	.iso.org.dod.internet.private.enterprises.ucdavis
-
-  Note the initial dot - this is important!
-
-
-  Alternatively, you can define the environmental variable PREFIX,
-  to specify where to start looking for ( non-fully specified) objects.
-  This can be done by the command
-							(C shell family)
-	setenv PREFIX  .iso.org.dod.internet.private.enterprises.ucdavis
-  or
-							(Bourne shell family)
-	PREFIX=.iso.org.dod.internet.private.enterprises.ucdavis
-	export PREFIX
-
-  after which, the following example should work:
-
-	snmpwalk -v 1 localhost public processes
-
-
-
-I've done that, and I still can't see the values. Why not?
----------------------------------------------------------
-
-    Another possibility is that there is a clash of names
-  somewhere within the MIB tree.  Try running the command
-  'snmptranslate -w zzz' which will inform you of any duplicates,
-  or other similar problem.
-
-    This should be less of a problem with the new parser, which
-  now handles duplicate identifier names, though inconsistent
-  case in labels for the same node still confuse the poor darling.
-
-
-
-I've done that, and I'm *still* not getting anything back. Why not?
-------------------------------------------------------------------
-
-  Another possibility is that the agent you are querying is simply not
-  responding.  Try contacting it with a "reliable" query.
-  A good test is to do an 'snmpwalk' on the 'system' sub-tree.
-
-    Or it may be that the agent just doesn't implement the MIB
-  module that you're interested in.  Or it does, but is falling over
-  (software with bugs in - shock horror!)
-    Try doing an 'snmpwalk' starting somewhere above the offending bit
-  of the MIB tree, and seeing how far it gets.
-
-
-
-I've done that, but I'm *still* getting "sub-identifier not found:" Grrr!
-------------------------------------------------------------------------
-
-  If a "general" snmpwalk shows the entry, but asking for it more
-  specifically gives a "sub-identifier not found:" error, then that's
-  a slightly different problem.
-
-    The tools assume that the object ID they are given is a full path
-  starting from 'mib-2' (or wherever you have set PREFIX to).
-  You can't simply give the final sub-identifier, and expect the tools
-  to find the relevant node.  (Well, you can, but you'll be disappointed).
-    You need to specify the intermediate sub-identifiers as well.
-
-    For example
-		snmpget myhost public sysUpTime.0
-                                                     will fail, while
-		snmpget myhost public system.sysUpTime.0
-                                                          will work.
-
-    If you are confident that the sub-identifier is unique within the
-  loaded MIB files, you can request direct "random access" using the
-  command flag '-R'.
-		snmpget myhost public -R sysUpTime.0
-  
-    If the sub-identifier is not unique, but you know which module it's
-  in, you can specify this explicitly:
-
-		snmpget myhost public -R RFC1213-MIB:sysUpTime.0
-
-  The behaviour with non-unique sub-identifiers if the module is not
-  specified is "implementation specific" 
-	 (i.e. we reserve the right to change it!)
-
-
-
-Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
---------------------------------------------------------------------------
-
-  This depends on which MIB modules are supported by the agent you are querying.
-
-  A tree is walked by repeatedly asking for "the next entry" until all the
-  values under that tree have been retrieved.  However, the agent has no idea
-  that this is what's happening - all it sees is a request for "the next entry
-  after X".
-
-  If the variable X happens to be the last entry in a tree, the agent will
-  provide the next variable supported (as requested) even though this will
-  be in a different subtree.  It's up to the querying tool to recognise that
-  this last result lies outside the area of interest, and simply discard it.
-
-  If the variable X happens to be the last entry supported, then the agent
-  doesn't have another variable to provide, so returns a suitable error.
-  The UCD tools report this with the message above.
-
-  But in either case, the actual information provided will be the same.
-
-
-
-I'm not receiving any traps with 'snmptrapd'?
-I'm sending traps using 'snmptrap', but they're not being received?
-------------------------------------------------------------------
-
-  There was a problem with release 3.3, such that both these applications
-  used port 161 for traps (rather than the correct port 162).
-  This has now been fixed in release 3.4.
-    Both these applications (as with all others in the suite) can specify
-  a particular port to use, via the '-p' command line option.
-
-
-
-The agent is complaining about 'snmpd.conf'.  Where is this?
------------------------------------------------------------
-
-  It doesn't exist in the distribution as shipped.  You need to
-  create it to reflect your local requirement.
-    To get started, you can either just create this as an empty file,
-  or try copying the EXAMPLE.conf file which will use some of the UCD
-  extensions.  See the snmpd.conf(5) manual page for further details.
 
 
 
@@ -1022,167 +962,14 @@ How about "Can't open /dev/kmem"?
 
  
 
-Or "sendto: permission denied"?
-------------------------------
-
-  This was due to a minor problem in setting network addresses, which
-  has now been fixed.  If you are seeing this error, please install the
-  most recent version of the UCD snmp tools.
-
-
-
-I'm not seeing all the interfaces on my Solaris box
----------------------------------------------------
-
-  There's a fixed-sized buffer in the Solaris-specific interface handling
-  code.   While this is sufficient for most cases, systems with a large
-  number of interfaces may experience problems.
-    Prior to version 3.4, this limit was met with 30 or so interfaces,
-  and extra interfaces simply failed silently.  From version 3.4, this
-  limit has been raised by a factor of 10 (which ought to be enough for
-  any sensible configuration!), and reports if there are problems.
-    If you have a ridiculous number of interfaces you need to support,
-  contact the coders list for the (trivial) patch.
-
-
-  
-I'm using the Perl SNMP module, and get something about "bad free"?
-------------------------------------------------------------------
-
-  This problem has also been fixed in the most recent release of the
-  UCD SNMP tools.  In general, if you experience any problem like this,
-  try checking to see if there's a newer release first.
-    In particular, the recent changes in the way MIB files are parsed
-  requires Perl SNMP-1.8 or later.
-
-
-
-I can't load any of the mib files, and they seem to be missing
-the first two characters of the filename.  What's happening?
+The agent is complaining about 'snmpd.conf'.  Where is this?
 -----------------------------------------------------------
 
-  This is a problem experienced with Sun systems when the tools have
-  been compiled with a mixture of BSD and Solaris environments.
-  You'll need to re-configure and compile the tools, making sure that
-  '/usr/ucb' is not in your PATH (or at least comes at the end).
-
-
-
-I'm trying to configure in an extra module and it's not found - what's changed?
-------------------------------------------------------------------------------
-
-  Starting with release 3.5, the 'agent/mibgroup' directory has been
-  re-arranged (again).  The major MIB modules are now separate subdirectories
-  containing the relevant sub-module implementation files.  This change has
-  had a knock-on effect on how modules should be specified to the configure
-  command.
-    Including or excluding a full MIB module is done precisely as before,
-  e.g.
-		-with-mib-modules="host"
-
-  However, including or excluding individual module elements now needs to
-  specify the subdirectory (i.e. the enclosing module) as well
-  e.g.
-		-with-out-mib-modules="host/hr_system"
-
-
-
-How do I compile with 'gcc' instead of 'cc'?
--------------------------------------------
-
-  Set the environmental variable 'CC' to have the value 'gcc' before
-  running the configure script.
-
-
-
-But gcc doesn't compile it successfully on my new Solaris system. Why not?
--------------------------------------------------------------------------
-
-  Whenever you upgrade the operating system under Solaris, you need to
-  reinstall gcc, and run the 'fixincludes' script.  (This is probably
-  a sensible step to take when you upgrade any operating system).
-    Under Solaris 2.6, there is also a bug in the gcc 'fixinc.sv4' script.
-  This needs an additional line as follows:
-
-*** fixinc.svr4.cln     Thu Jun 15 22:03:29 1995
---- fixinc.svr4 Tue Nov 25 09:47:57 1997
-***************
-*** 191,191 ****
---- 191,192 ----
-          s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
-+         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
-
-
-
-My Linux system can't find the include file "nlist.h" when compiling
---------------------------------------------------------------------
-
-  The Linux implementation uses a different mechanism to retrieve the
-  necessary information, and doesn't need this header file at all.
-  Just delete that bit of code.
-    This has been fixed in version 3.4
-
-
-
-I cannot set any variables in the MIB.
--------------------------------------
-
-  There are three possible reasons for this:
-
-  The majority of MIB variables are "read-only" and cannot be changed.
-
-  Of those that can in principle be changed, only a few have been
-  implemented as such in this agent.  Currently, most (if not all)
-  of these are contained within the 'system' sub-tree, relating to
-  general contact information.
-    
-  With the distribution as shipped, the community name "private" must
-  be used to set these values, and this can only be done from the local
-  host (i.e. the same system that the agent is running on).
-    This can be changed using the access control commands, which appear
-  at the end of the example config file.  For example, to allow write
-  access to the 'system' group from the local subnet, with the community
-  string "sysadmin", follow the instructions at the end of this example file.
-
-    Note that the community string "public" can *not* be used to set variables.
-  
-
-
-Variables seem to disappear when I try to set them.  Why?
---------------------------------------------------------
-
-  This is actually the same as the previous question - it just isn't
-  particularly obvious.  A typical example of this effect would be
-
-	$ snmpget localhost public system.sysLocation.0
-	system.sysLocation.0 = somewhere nearby
-
-	$ snmpset localhost public system.sysLocation.0 s "right here"
-	Error in packet.
-	Reason: (noSuchName) There is no such variable name in this MIB.
-	This name doesn't exist: system.sysLocation.0
-
-  This is due to the limitations of the available SNMPv1 error codes,
-  which are forced to cover a number of different possibilities.
-  What 'noSuchName' actually means is
-
-	"You can't do that to this variable"
-
-  That could be because the variable doesn't exist, it does exist but
-  you don't have access to it (but someone else may do), or it exists
-  but you can't perform that particular operation (i.e. changing it).
-
-  The error codes in SNMPv2 (various flavours) are rather more flexible
-  and informative:
-
-	$ snmpset -v 2c localhost public system.sysLocation.0 s "right here"
-        Error in packet.
-        Reason: notWritable
-
-  Note that this actually means "not writeable in this particular case",
-  rather than "not writeable under any circumstances".  It may well be
-  that a different invocation (such as using the community string "private")
-  might be successful.
+  It doesn't exist in the distribution as shipped.  You need to
+  create it to reflect your local requirement.
+    To get started, you can either just create this as an empty file,
+  or try copying the EXAMPLE.conf file which will use some of the UCD
+  extensions.  See the snmpd.conf(5) manual page for further details.
 
 
 
@@ -1293,10 +1080,214 @@ The Host Resources information is wrong (and/or doesn't even compile)!
   implementation of this MIB is:
 
 	- HP-UX 9 & 10
-	- Solaris 2.5
-	- RedHat Linux 5
+	- Solaris 2.5 and above
+	- RedHat Linux 5 and above
 
   Though the hrDevice table in particular is somewhat sparse, even on these.
   If your system is not listed here, and you would like to help implement
   it, contact the coders list, and make a friend for life!
 
+
+
+What is the Official Slogan of the ucd-snmp-coders list?
+-------------------------------------------------------
+
+  "The current implementation is non-obvious and may need to be improved."
+	(with thanks to Rohit Dube)
+
+
+
+
+PERL
+====
+
+How do I install the Perl SNMP module?
+-------------------------------------
+
+  Assuming you have a reasonably new (and properly configured) perl system,
+  this should be simply:
+
+	perl Makefile.PL
+	    (press RETURN when prompted for host and community)
+	make
+	make test
+	make install  (probably as root)
+
+
+
+Compiling this fails with "`MAX_NAME_LEN' undeclared"?
+-----------------------------------------------------
+
+  This name is no longer used (from release 3.6 onwards), due to clashes with
+  system header files on some systems.  There should be a new version of the Perl
+  SNMP module out soon (probably 1.9) that handles this.
+    In the meantime, changing the file SNMP.xs (in the perl module) to replace
+  each occurrence of 'MAX_NAME_LEN' with 'MAX_OID_LEN' will work.
+
+
+
+I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
+------------------------------------------------------------
+
+  That's probably because the SNMP perl module hasn't been installed.
+  It's not part of the standard distribution, nor is it installed by
+  default in RedHat linux (for example).
+    You'll need to get it from CPAN, and install it yourself
+  (see the first question in this section).
+
+
+
+I'm trying to use tkmib and it can't locate Tk.pm?
+------------------------------------------------------------
+
+  Tk.pm is another Perl package that needs to be installed before tkmib will run.
+  It's also available on Perl CPAN.  We suggest using version "Tk800.011" or later.
+
+
+
+GENERAL PROBLEMS
+================
+
+Why aren't my mib files read in any more?
+-----------------------------------------
+
+  There are a number of possible reasons for this.
+  In summary:	a particular MIB file isn't being read in
+		none of the MIB files are found
+		there's an error in the MIB file
+
+  To expand on these in turn:
+
+  As from version 3.2, the parser has been re-written.  One effect of
+  this is that only a specified set of MIB modules are read in by
+  the tools by default.  This list can be set in a number of ways:
+
+    The tools have a default list compiled in, which can be set
+  using the configure option
+		--with-mibs="list"
+  and recompiling the tools.
+
+    The environmental variable 'MIBS' will be taken as a list of
+  module names (separated by colons) to be read in, instead of (or as
+  well as) the default list.  Note that any modules these rely on will
+  be read in automatically, without needing to be listed explicitly.
+
+    The environment variable 'MIBFILES' will be taken as a list of
+  filenames, containing MIB modules to be read in (instead of, or in
+  addition to those included by 'MIBS' and/or the default list).
+  Again, any modules these rely on will also be loaded in automatically.
+    The names listed in this variable can be anywhere in the filesystem,
+  though any implicitly loaded modules must be present in the standard
+  location(s). 
+
+    Finally, if the environmental variable 'MIBS' has the special
+  value "ALL", then the tools will load in every module present in
+  the module directory (or directories).
+
+  The command line options '-m' and '-M' can also be used to override
+  these variables.  This is described in the 'snmpcmd(1)' man page.
+
+
+    The location where the tools look for MIB module files is compiled
+  into the tools. This can also be set using the environmental
+  variable 'MIBDIRS', being a (colon-seperated) list of directories
+  containing MIB files. 
+
+  Note that from version 3.3 onwards, the default location has changed
+  (from /usr/local/lib/snmp/mibs to /usr/local/share/snmp/mibs).
+  This is in line with current standards regarding file system structure.
+
+
+  As from version 3.4, the parser is somewhat more strict about the
+  syntax of MIB files.  This may result in it rejecting previously
+  acceptable (though erroneous) MIB files.
+     See the next-but-one question for more help.
+
+  See the 'mib_api(3)' man page for more details of MIB parsing.
+
+
+
+I'm getting answers, but they're all numbers. Why?
+-------------------------------------------------
+
+  This is actually the same as the previous question.  Because the tools
+  no longer read in every MIB module they can find, it is quite possible
+  for results from an agent to refer to modules that have not been loaded
+  (particularly with GETNEXT requests, or when walking a tree).
+     The tools will report the answer quite correctly, but won't translate
+  identifiers and enumerations into readable strings.  To fix this, use
+  the environmental variables MIBS or MIBFILES to read in the relevant
+  module files.
+    This does assume you have these files installed properly.  There's not
+  a great deal we can do if you haven't.   Note that the default location
+  for these files has changed recently (see the previous question).
+
+
+
+How can I get more information about these MIB file problems?
+------------------------------------------------------------
+
+  The command 'snmptranslate' is used to translate between numeric
+  and symbolic forms of OIDs.  It uses the same routines as the
+  'active' commands, but does not rely on communicating successfully
+  with a network management agent.  As such, it is a useful tool
+  for identifying problems with reading in MIB files.
+
+    In particular, the following options may be useful in
+  identifying problems:
+	-w  warns about conflicting symbols
+	-W  prints warning about other problems as well
+		(in both cases, ignore the 'xmalloc' reports)
+	-p  prints a list of the entries that have been read in
+		(including the MIBs they belong to)
+	-T  provides sub-options for various views of these entries
+
+  See the 'snmptranslate(1)' man page for more details.
+
+
+
+What's this about "too many imported symbols"?
+---------------------------------------------
+
+  Any MIB file starts with an (optional) list of identifiers that
+  it "imports" from other files.  The parser implements this using
+  a fixed size buffer to hold the import information.
+    There are two circumstances in which this can result in the
+  error message shown above.
+
+    Firstly, if the MIB file refers to an unususally large number
+  of external identifiers.  Handling this case requires a (trivial)
+  patch to the parsing code.  Contact the coders list for advice.
+     (This is extremely rare - the only example that
+      we've come across is the Cabletron Trap MIB).
+
+    Much more common is a syntax error in the IMPORTS clause of the
+  MIB file in question.  In particular, check that this ends in a
+  semicolon, before going on to the main definition section.
+  
+
+
+How do I compile with 'gcc' instead of 'cc'?
+-------------------------------------------
+
+  Set the environmental variable 'CC' to have the value 'gcc' before
+  running the configure script.
+
+
+
+But gcc doesn't compile it successfully on my new Solaris system. Why not?
+-------------------------------------------------------------------------
+
+  Whenever you upgrade the operating system under Solaris, you need to
+  reinstall gcc, and run the 'fixincludes' script.  (This is probably
+  a sensible step to take when you upgrade any operating system).
+    Under Solaris 2.6, there is also a bug in the gcc 'fixinc.sv4' script.
+  This needs an additional line as follows:
+
+*** fixinc.svr4.cln     Thu Jun 15 22:03:29 1995
+--- fixinc.svr4 Tue Nov 25 09:47:57 1997
+***************
+*** 191,191 ****
+--- 191,192 ----
+          s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
++         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
