@@ -4,7 +4,7 @@
 
 top_builddir	= .
 
-SUBDIRS		= snmplib @MAINSUBS@ local
+SUBDIRS		= snmplib @MAINSUBS@
 TESTDIRS	= testing
 
 CPP		= @CPP@ 					        \
