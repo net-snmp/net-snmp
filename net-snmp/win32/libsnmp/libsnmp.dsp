@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x406
 # ADD RSC /l 0x406
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x406
 # ADD RSC /l 0xffffffff
 BSC32=bscmake.exe
@@ -80,6 +80,9 @@ LIB32=link.exe -lib
 
 # Name "libsnmp - Win32 Release"
 # Name "libsnmp - Win32 Debug"
+# Begin Group "Source Files"
+
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=..\..\snmplib\asn1.c
@@ -244,5 +247,162 @@ SOURCE=..\..\snmplib\ucd_compat.c
 
 SOURCE=..\..\snmplib\vacm.c
 # End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\asn1.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\callback.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\check_varbind.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\cmu_compat.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\container.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\data_list.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\default_store.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\getopt.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\int64.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\keytools.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\lcd_time.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\md5.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\mib.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\mt_support.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\oid_stash.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\parse.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\read_config.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\scapi.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp-tc.h"
+# End Source File
+# Begin Source File
+
+SOURCE="C:\Program Files\Microsoft SDK\include\Snmp.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_alarm.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_api.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_client.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_debug.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_enum.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_logging.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_parse_args.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_secmod.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmp_transport.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmpCallbackDomain.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmpTCPDomain.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmpUDPDomain.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmpusm.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\snmpv3.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\system.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\tools.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\ucd_compat.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\vacm.h"
+# End Source File
+# End Group
 # End Target
 # End Project
