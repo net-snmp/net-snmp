@@ -98,7 +98,6 @@
 ./baby_steps.lo: ../../include/net-snmp/agent/table_data.h
 ./baby_steps.lo: ../../include/net-snmp/agent/table_dataset.h
 ./baby_steps.lo: ../../include/net-snmp/agent/table_iterator.h
-./baby_steps.lo: ../../include/net-snmp/agent/table_array.h
 ./baby_steps.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./bulk_to_next.lo: ../../include/net-snmp/net-snmp-config.h
 ./bulk_to_next.lo: ../../include/net-snmp/system/linux.h
@@ -193,7 +192,6 @@
 ./bulk_to_next.lo: ../../include/net-snmp/agent/table_data.h
 ./bulk_to_next.lo: ../../include/net-snmp/agent/table_dataset.h
 ./bulk_to_next.lo: ../../include/net-snmp/agent/table_iterator.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/table_array.h
 ./bulk_to_next.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./cache_handler.lo: ../../include/net-snmp/net-snmp-config.h
 ./cache_handler.lo: ../../include/net-snmp/system/linux.h
@@ -288,7 +286,6 @@
 ./cache_handler.lo: ../../include/net-snmp/agent/table_data.h
 ./cache_handler.lo: ../../include/net-snmp/agent/table_dataset.h
 ./cache_handler.lo: ../../include/net-snmp/agent/table_iterator.h
-./cache_handler.lo: ../../include/net-snmp/agent/table_array.h
 ./cache_handler.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./debug_handler.lo: ../../include/net-snmp/net-snmp-config.h
 ./debug_handler.lo: ../../include/net-snmp/system/linux.h
@@ -383,7 +380,6 @@
 ./debug_handler.lo: ../../include/net-snmp/agent/table_data.h
 ./debug_handler.lo: ../../include/net-snmp/agent/table_dataset.h
 ./debug_handler.lo: ../../include/net-snmp/agent/table_iterator.h
-./debug_handler.lo: ../../include/net-snmp/agent/table_array.h
 ./debug_handler.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./instance.lo: ../../include/net-snmp/net-snmp-config.h
 ./instance.lo: ../../include/net-snmp/system/linux.h
@@ -478,7 +474,6 @@
 ./instance.lo: ../../include/net-snmp/agent/table_data.h
 ./instance.lo: ../../include/net-snmp/agent/table_dataset.h
 ./instance.lo: ../../include/net-snmp/agent/table_iterator.h
-./instance.lo: ../../include/net-snmp/agent/table_array.h
 ./instance.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./mode_end_call.lo: ../../include/net-snmp/net-snmp-config.h
 ./mode_end_call.lo: ../../include/net-snmp/system/linux.h
@@ -573,7 +568,6 @@
 ./mode_end_call.lo: ../../include/net-snmp/agent/table_data.h
 ./mode_end_call.lo: ../../include/net-snmp/agent/table_dataset.h
 ./mode_end_call.lo: ../../include/net-snmp/agent/table_iterator.h
-./mode_end_call.lo: ../../include/net-snmp/agent/table_array.h
 ./mode_end_call.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./multiplexer.lo: ../../include/net-snmp/net-snmp-config.h
 ./multiplexer.lo: ../../include/net-snmp/system/linux.h
@@ -668,7 +662,6 @@
 ./multiplexer.lo: ../../include/net-snmp/agent/table_data.h
 ./multiplexer.lo: ../../include/net-snmp/agent/table_dataset.h
 ./multiplexer.lo: ../../include/net-snmp/agent/table_iterator.h
-./multiplexer.lo: ../../include/net-snmp/agent/table_array.h
 ./multiplexer.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./null.lo: ../../include/net-snmp/net-snmp-config.h
 ./null.lo: ../../include/net-snmp/system/linux.h
@@ -762,7 +755,6 @@
 ./null.lo: ../../include/net-snmp/agent/table_data.h
 ./null.lo: ../../include/net-snmp/agent/table_dataset.h
 ./null.lo: ../../include/net-snmp/agent/table_iterator.h
-./null.lo: ../../include/net-snmp/agent/table_array.h
 ./null.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./old_api.lo: ../../include/net-snmp/net-snmp-config.h
 ./old_api.lo: ../../include/net-snmp/system/linux.h
@@ -857,7 +849,6 @@
 ./old_api.lo: ../../include/net-snmp/agent/table_data.h
 ./old_api.lo: ../../include/net-snmp/agent/table_dataset.h
 ./old_api.lo: ../../include/net-snmp/agent/table_iterator.h
-./old_api.lo: ../../include/net-snmp/agent/table_array.h
 ./old_api.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./old_api.lo: ../../include/net-snmp/agent/agent_callbacks.h
 ./read_only.lo: ../../include/net-snmp/net-snmp-config.h
@@ -953,7 +944,6 @@
 ./read_only.lo: ../../include/net-snmp/agent/table_data.h
 ./read_only.lo: ../../include/net-snmp/agent/table_dataset.h
 ./read_only.lo: ../../include/net-snmp/agent/table_iterator.h
-./read_only.lo: ../../include/net-snmp/agent/table_array.h
 ./read_only.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./row_merge.lo: ../../include/net-snmp/net-snmp-config.h
 ./row_merge.lo: ../../include/net-snmp/system/linux.h
@@ -1048,7 +1038,6 @@
 ./row_merge.lo: ../../include/net-snmp/agent/table_data.h
 ./row_merge.lo: ../../include/net-snmp/agent/table_dataset.h
 ./row_merge.lo: ../../include/net-snmp/agent/table_iterator.h
-./row_merge.lo: ../../include/net-snmp/agent/table_array.h
 ./row_merge.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./scalar.lo: ../../include/net-snmp/net-snmp-config.h
 ./scalar.lo: ../../include/net-snmp/system/linux.h
@@ -1143,7 +1132,6 @@
 ./scalar.lo: ../../include/net-snmp/agent/table_data.h
 ./scalar.lo: ../../include/net-snmp/agent/table_dataset.h
 ./scalar.lo: ../../include/net-snmp/agent/table_iterator.h
-./scalar.lo: ../../include/net-snmp/agent/table_array.h
 ./scalar.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./scalar_group.lo: ../../include/net-snmp/net-snmp-config.h
 ./scalar_group.lo: ../../include/net-snmp/system/linux.h
@@ -1238,7 +1226,6 @@
 ./scalar_group.lo: ../../include/net-snmp/agent/table_data.h
 ./scalar_group.lo: ../../include/net-snmp/agent/table_dataset.h
 ./scalar_group.lo: ../../include/net-snmp/agent/table_iterator.h
-./scalar_group.lo: ../../include/net-snmp/agent/table_array.h
 ./scalar_group.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./serialize.lo: ../../include/net-snmp/net-snmp-config.h
 ./serialize.lo: ../../include/net-snmp/system/linux.h
@@ -1333,7 +1320,6 @@
 ./serialize.lo: ../../include/net-snmp/agent/table_data.h
 ./serialize.lo: ../../include/net-snmp/agent/table_dataset.h
 ./serialize.lo: ../../include/net-snmp/agent/table_iterator.h
-./serialize.lo: ../../include/net-snmp/agent/table_array.h
 ./serialize.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./stash_cache.lo: ../../include/net-snmp/net-snmp-config.h
 ./stash_cache.lo: ../../include/net-snmp/system/linux.h
@@ -1428,7 +1414,6 @@
 ./stash_cache.lo: ../../include/net-snmp/agent/table_data.h
 ./stash_cache.lo: ../../include/net-snmp/agent/table_dataset.h
 ./stash_cache.lo: ../../include/net-snmp/agent/table_iterator.h
-./stash_cache.lo: ../../include/net-snmp/agent/table_array.h
 ./stash_cache.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./stash_cache.lo: ../../include/net-snmp/agent/stash_cache.h
 ./table_array.lo: ../../include/net-snmp/net-snmp-config.h
@@ -1524,8 +1509,8 @@
 ./table_array.lo: ../../include/net-snmp/agent/table_data.h
 ./table_array.lo: ../../include/net-snmp/agent/table_dataset.h
 ./table_array.lo: ../../include/net-snmp/agent/table_iterator.h
-./table_array.lo: ../../include/net-snmp/agent/table_array.h
 ./table_array.lo: ../../include/net-snmp/agent/mib_module_config.h
+./table_array.lo: ../../include/net-snmp/agent/table_array.h
 ./table.lo: ../../include/net-snmp/net-snmp-config.h
 ./table.lo: ../../include/net-snmp/system/linux.h
 ./table.lo: ../../include/net-snmp/system/sysv.h
@@ -1618,7 +1603,6 @@
 ./table.lo: ../../include/net-snmp/agent/table_data.h
 ./table.lo: ../../include/net-snmp/agent/table_dataset.h
 ./table.lo: ../../include/net-snmp/agent/table_iterator.h
-./table.lo: ../../include/net-snmp/agent/table_array.h
 ./table.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./table_data.lo: ../../include/net-snmp/net-snmp-config.h
 ./table_data.lo: ../../include/net-snmp/system/linux.h
@@ -1713,7 +1697,6 @@
 ./table_data.lo: ../../include/net-snmp/agent/table_data.h
 ./table_data.lo: ../../include/net-snmp/agent/table_dataset.h
 ./table_data.lo: ../../include/net-snmp/agent/table_iterator.h
-./table_data.lo: ../../include/net-snmp/agent/table_array.h
 ./table_data.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./table_dataset.lo: ../../include/net-snmp/net-snmp-config.h
 ./table_dataset.lo: ../../include/net-snmp/system/linux.h
@@ -1808,7 +1791,6 @@
 ./table_dataset.lo: ../../include/net-snmp/agent/table_data.h
 ./table_dataset.lo: ../../include/net-snmp/agent/table_dataset.h
 ./table_dataset.lo: ../../include/net-snmp/agent/table_iterator.h
-./table_dataset.lo: ../../include/net-snmp/agent/table_array.h
 ./table_dataset.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./table_iterator.lo: ../../include/net-snmp/net-snmp-config.h
 ./table_iterator.lo: ../../include/net-snmp/system/linux.h
@@ -1903,7 +1885,6 @@
 ./table_iterator.lo: ../../include/net-snmp/agent/table_data.h
 ./table_iterator.lo: ../../include/net-snmp/agent/table_dataset.h
 ./table_iterator.lo: ../../include/net-snmp/agent/table_iterator.h
-./table_iterator.lo: ../../include/net-snmp/agent/table_array.h
 ./table_iterator.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./table_iterator.lo: ../../include/net-snmp/agent/stash_cache.h
 ./watcher.lo: ../../include/net-snmp/net-snmp-config.h
@@ -1999,6 +1980,5 @@
 ./watcher.lo: ../../include/net-snmp/agent/table_data.h
 ./watcher.lo: ../../include/net-snmp/agent/table_dataset.h
 ./watcher.lo: ../../include/net-snmp/agent/table_iterator.h
-./watcher.lo: ../../include/net-snmp/agent/table_array.h
 ./watcher.lo: ../../include/net-snmp/agent/mib_module_config.h
 ./watcher.lo: ../../include/net-snmp/agent/watcher.h
