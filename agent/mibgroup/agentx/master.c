@@ -28,6 +28,8 @@
 #include "snmp_debug.h"
 #include "default_store.h"
 #include "ds_agent.h"
+#include "system.h"
+#include "snmp_logging.h"
 
 
 void init_master(void)
@@ -40,6 +42,10 @@ void init_master(void)
     DEBUGMSGTL(("agentx/master","initializing...\n"));
     snmp_sess_init( &sess );
     sess.version  = AGENTX_VERSION_1;
+    if (mkdirhier(AGENTX_SOCKET, AGENT_DIRECTORY_MODE, 1)) {
+        snmp_log(LOG_ERR, "Failed to create the directory for the agentX socket: %s\n",
+                 AGENTX_SOCKET);
+    }
     sess.peername = strdup(AGENTX_SOCKET);
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
 

@@ -104,9 +104,14 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "system.h"
+#include "snmp_logging.h"
 
 #define NUM_NETWORKS    32   /* max number of interfaces to check */
 
@@ -126,7 +131,6 @@ SOFTWARE.
 
 #	include <tchar.h>
 #	include <windows.h>
-#	include <sys/stat.h>
 
 
 /* The idea here is to read all the directory names into a string table
@@ -593,3 +597,37 @@ char *strcasestr(const char *haystack, const char *needle)
     return NULL;
 }
 #endif
+
+int
+mkdirhier(const char *pathname, mode_t mode, int skiplast) {
+    struct stat     sbuf;
+    char *ourcopy = strdup(pathname);
+    char *entry;
+    char buf[MAXPATHLEN];
+
+    entry = strtok( ourcopy, "/" );
+
+    buf[0] = '\0';
+    /* check to see if filename is a directory */
+    while ( entry ) {
+        strcat(buf,"/");
+        strcat(buf, entry);
+        entry = strtok( NULL, "/");
+        if (entry == NULL && skiplast)
+            break;
+        if (stat(buf, &sbuf) < 0) {
+            /* DNE, make it */
+            snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
+            mkdir(buf, mode);
+        } else {
+            /* exists, is it a file? */
+            if ((sbuf.st_mode & S_IFDIR) == 0) {
+                /* ack! can't make a directory on top of a file */
+                free(ourcopy);
+                return SNMPERR_GENERR;
+            }
+        }
+    }
+    free(ourcopy);
+    return SNMPERR_SUCCESS;
+}

@@ -114,6 +114,8 @@ int calculate_time_diff(struct timeval *, struct timeval *);
 char *strcasestr(const char *, const char *);
 #endif
 
+int mkdirhier(const char *pathname, mode_t mode, int skiplast);
+
 #ifdef __cplusplus
 }
 #endif
