@@ -22,7 +22,7 @@
 .TH SNMPTRAP 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmptrap, snmpinform - sends an SNMP trap to a manager
+snmptrap, snmpinform - sends an SNMP notification to a manager
 .SH SYNOPSIS
 .B snmptrap -v 1
 [COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID TYPE VALUE]...

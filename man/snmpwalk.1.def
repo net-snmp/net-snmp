@@ -22,7 +22,7 @@
 .TH SNMPWALK 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpwalk - communicates with a network entity using SNMP GETNEXT requests.
+snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests
 .SH SYNOPSIS
 .B snmpwalk
 [APPLICATION OPTIONS] [COMMON OPTIONS] [OID]
