@@ -480,6 +480,7 @@ init_snmp(const char *type)
   setlocale(LC_CTYPE, "");
 #endif
 
+  snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
   init_callbacks();
   snmp_init_statistics();
   register_mib_handlers();
