@@ -222,6 +222,10 @@ netsnmp_instance_ulong_handler(
                 /* nothing to do */
             break;
     }
+
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+
     return SNMP_ERR_NOERROR;
 }
 
@@ -251,6 +255,8 @@ netsnmp_instance_counter32_handler(
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
             return SNMP_ERR_NOERROR;
     }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     return SNMP_ERR_NOERROR;
 }
 
@@ -312,6 +318,8 @@ netsnmp_instance_long_handler(
                 /* nothing to do */
             break;
     }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     return SNMP_ERR_NOERROR;
 }
 
@@ -373,6 +381,8 @@ netsnmp_instance_int_handler(
                 /* nothing to do */
             break;
     }
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     return SNMP_ERR_NOERROR;
 }
 
