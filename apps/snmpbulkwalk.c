@@ -92,6 +92,7 @@ main(argc, argv)
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
     u_long destAddr;
+    char ctmp[300];
 
     init_mib();
     for(arg = 1; arg < argc; arg++){
@@ -134,19 +135,22 @@ main(argc, argv)
 	} else if (version == 1 && community == NULL){
 	    community = argv[arg]; 
 	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
-	    if (read_party_database("/etc/party.conf") > 0){
+            sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
+	    if (read_party_database(ctmp) > 0){
 		fprintf(stderr,
-			"Couldn't read party database from /etc/party.conf\n");
+			"Couldn't read party database from %s\n",ctmp);
 		exit(0);
 	    }
-            if (read_context_database("/etc/context.conf") > 0){
-                fprintf(stderr,
-                        "Couldn't read context database from /etc/context.conf\n");
-               exit(0);
-            }
-	    if (read_acl_database("/etc/acl.conf") > 0){
+            sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
+	    if (read_context_database(ctmp) > 0){
 		fprintf(stderr,
-			"Couldn't read access control database from /etc/acl.conf\n");
+			"Couldn't read context database from %s\n",ctmp);
+		exit(0);
+	    }
+            sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
+	    if (read_acl_database(ctmp) > 0){
+		fprintf(stderr,
+			"Couldn't read access control database from %s\n",ctmp);
 		exit(0);
 	    }
 	    if (!strcasecmp(argv[arg], "noauth")){
