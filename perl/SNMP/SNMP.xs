@@ -852,8 +852,8 @@ UINT:
 	vars->val.string = NULL;
 	ret = FAILURE;
     }
- 
-     return ret; 
+
+     return ret;
 }
 
 #define NO_RETRY_NOSUCH 0
@@ -2242,7 +2242,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu, *response;
+           struct snmp_pdu *pdu = NULL;
+           struct snmp_pdu *response;
            struct variable_list *vars;
            struct variable_list *last_vars;
            struct tree *tp;
@@ -2256,6 +2257,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            SV **err_ind_svp;
            int status = 0;
            int type;
+           int res;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
@@ -2289,8 +2291,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
                     if (oid_arr_len == 0) {
                        if (verbose)
-                        warn("error: SNMP::TrapSession::trap: unable to determine oid for object");
-                       continue;
+                        warn("error:trap: unable to determine oid for object");
+                       goto err;
                     }
 
                     if (type == TYPE_UNKNOWN) {
@@ -2298,8 +2300,8 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
                               __av_elem_pv(varbind, VARBIND_TYPE_F, NULL));
                       if (type == TYPE_UNKNOWN) {
                          if (verbose)
-                            warn("error: SNMP::TrapSession::trap: no type found for object");
-                         continue;
+                            warn("error:trap: no type found for object");
+                         goto err;
                       }
                     }
 
@@ -2315,25 +2317,33 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
                       }
                     }
 
-                    __add_var_val_str(pdu, oid_arr, oid_arr_len,
+                    res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvPV(*varbind_val_f,na):NULL),
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvCUR(*varbind_val_f):0),
                                   type);
+
+                    if(res == FAILURE) {
+                        if(verbose) warn("error:trap: adding varbind");
+                        goto err;
+                    }
+
                  } /* if var_ref is ok */
               } /* for all the vars */
               }
 
 	      pdu->enterprise = (oid *)malloc( MAX_OID_LEN * sizeof(oid));
-  	      if (__scan_num_objid(enterprise, pdu->enterprise,
-                                   &pdu->enterprise_length) != SUCCESS) {
-		  if (verbose) warn("invalid enterprise id: %s", enterprise);
+              tp = __tag2oid(enterprise,NULL, pdu->enterprise,
+                             &pdu->enterprise_length, NULL);
+  	      if (pdu->enterprise_length == 0) {
+		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
+                  goto err;
 	      }
               if (agent && strlen(agent)) {
                  SIN_ADDR(pdu->address).s_addr = __parse_address(agent);
                  if (SIN_ADDR(pdu->address).s_addr == -1 && verbose) {
-                    warn("invalid agent address: %s", agent);
+                    warn("error:trap:invalid agent address: %s", agent);
                     goto err;
                  }
               } else {
@@ -2345,13 +2355,12 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 
               if (snmp_send(ss, pdu) == 0) {
 	         snmp_free_pdu(pdu);
-                 snmp_perror("snmptrap");
               }
-              XPUSHs(sv_2mortal(newSViv(ss->s_snmp_errno)));
+              XPUSHs(sv_2mortal(newSVpv(ZERO_BUT_TRUE,0)));
            } else {
 err:
-              /* BUG!!! need to return an error value */
               XPUSHs(&sv_undef); /* no mem or bad args */
+              if (pdu) snmp_free_pdu(pdu);
            }
 	Safefree(oid_arr);
         }
@@ -2360,8 +2369,8 @@ err:
 int
 snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
         SV *	sess_ref
-        char *	uptime  
-        char *	trap_oid 
+        char *	uptime
+        char *	trap_oid
         SV *	varlist_ref
 	PPCODE:
 	{
@@ -2373,7 +2382,8 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 	   I32 varlist_ind;
 	   I32 varbind_len;
            SnmpSession *ss;
-           struct snmp_pdu *pdu, *response;
+           struct snmp_pdu *pdu = NULL;
+           struct snmp_pdu *response;
            struct variable_list *vars;
            struct variable_list *last_vars;
            struct tree *tp;
@@ -2414,15 +2424,15 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 				uptime, strlen(uptime), TYPE_TIMETICKS);
 
               if(res == FAILURE) {
-                if(verbose) warn("error:snmp_trapv2: unable to add sysUpTime.\n");
+                if(verbose) warn("error:trap v2: adding sysUpTime varbind");
 		goto err;
               }
 
-	      res = __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN, 
+	      res = __add_var_val_str(pdu, snmpTrapOID, SNMP_TRAP_OID_LEN,
 				trap_oid ,strlen(trap_oid) ,TYPE_OBJID);
 
               if(res == FAILURE) {
-                if(verbose) warn("error:snmp_trapv2: Invalid trap_oid.\n");
+                if(verbose) warn("error:trap v2: adding snmpTrapOID varbind");
 		goto err;
               }
 
@@ -2440,8 +2450,8 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
 
                     if (oid_arr_len == 0) {
                        if (verbose)
-                        warn("error: snmp_trapv2: unable to determine oid for object");
-                       continue;
+                        warn("error:trap v2: unable to determine oid for object");
+                       goto err;
                     }
 
                     if (type == TYPE_UNKNOWN) {
@@ -2449,8 +2459,8 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
                                  __av_elem_pv(varbind, VARBIND_TYPE_F, NULL));
                       if (type == TYPE_UNKNOWN) {
                          if (verbose)
-                            warn("error: snmp_trapv2: no type found for object");
-                         continue;
+                            warn("error:trap v2: no type found for object");
+                         goto err;
                       }
                     }
 
@@ -2466,28 +2476,31 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
                       }
                     }
 
-                    __add_var_val_str(pdu, oid_arr, oid_arr_len,
+                    res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvPV(*varbind_val_f,na):NULL),
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvCUR(*varbind_val_f):0),
                                   type);
+
+                    if(res == FAILURE) {
+                        if(verbose) warn("error:trap v2: adding varbind");
+                        goto err;
+                    }
+
                  } /* if var_ref is ok */
               } /* for all the vars */
 
-	
+
               if (snmp_send(ss, pdu) == 0) {
 	         snmp_free_pdu(pdu);
-                 snmp_perror("snmptrap");
               }
 
-              /*if (response) snmp_free_pdu(response); */
-
-              XPUSHs(sv_2mortal(newSViv(ss->s_snmp_errno)));
+              XPUSHs(sv_2mortal(newSVpv(ZERO_BUT_TRUE,0)));
            } else {
 err:
-              /* BUG!!! need to return an error value */
               XPUSHs(&sv_undef); /* no mem or bad args */
+              if (pdu) snmp_free_pdu(pdu);
            }
 	Safefree(oid_arr);
         }
