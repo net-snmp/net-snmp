@@ -64,8 +64,14 @@ free_agentx_request(struct request_list *req)
     if ( !req )
 	return;
 
+/*
+	Don't free this call-back data.
+	It contains information that needs to be persistent
+	across multi-pass requests (i.e. SET and GETBULK handling)
+
     if ( req->cb_data )
 	free ( req->cb_data );
+ */
 
      free ( req );
 }
