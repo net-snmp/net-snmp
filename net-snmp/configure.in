@@ -295,14 +295,13 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent gethostname gettimeofday select socket strtol)
+AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr memcpy memmove index bcopy signal sigset sigblock sighold)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
-AC_CHECK_FUNCS(gethostname uname)
 
 dnl check if compiler accepts void pointers
 AC_CACHE_CHECK(if $CC allows pointers to void,ac_cv_PTR_TO_VOID,
