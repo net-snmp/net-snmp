@@ -581,6 +581,7 @@ void snmp_timeout (void);
 
 #define RECEIVED_MESSAGE   1
 #define TIMED_OUT	   2
+#define SEND_FAILED	   3
 
 long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
