@@ -33,6 +33,7 @@ CLEAN :
 	-@erase "$(INTDIR)\stash_cache.obj"
 	-@erase "$(INTDIR)\table.obj"
 	-@erase "$(INTDIR)\table_array.obj"
+	-@erase "$(INTDIR)\table_container.obj"
 	-@erase "$(INTDIR)\table_data.obj"
 	-@erase "$(INTDIR)\table_dataset.obj"
 	-@erase "$(INTDIR)\table_iterator.obj"
@@ -106,6 +107,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\stash_cache.obj" \
 	"$(INTDIR)\table.obj" \
 	"$(INTDIR)\table_array.obj" \
+	"$(INTDIR)\table_container.obj" \
 	"$(INTDIR)\table_data.obj" \
 	"$(INTDIR)\table_dataset.obj" \
 	"$(INTDIR)\table_iterator.obj" \
@@ -140,6 +142,7 @@ CLEAN :
 	-@erase "$(INTDIR)\stash_cache.obj"
 	-@erase "$(INTDIR)\table.obj"
 	-@erase "$(INTDIR)\table_array.obj"
+	-@erase "$(INTDIR)\table_container.obj"
 	-@erase "$(INTDIR)\table_data.obj"
 	-@erase "$(INTDIR)\table_dataset.obj"
 	-@erase "$(INTDIR)\table_iterator.obj"
@@ -214,6 +217,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\stash_cache.obj" \
 	"$(INTDIR)\table.obj" \
 	"$(INTDIR)\table_array.obj" \
+	"$(INTDIR)\table_container.obj" \
 	"$(INTDIR)\table_data.obj" \
 	"$(INTDIR)\table_dataset.obj" \
 	"$(INTDIR)\table_iterator.obj" \
@@ -342,6 +346,12 @@ SOURCE=..\..\agent\helpers\table.c
 SOURCE=..\..\agent\helpers\table_array.c
 
 "$(INTDIR)\table_array.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\helpers\table_container.c
+
+"$(INTDIR)\table_container.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
