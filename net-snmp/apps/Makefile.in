@@ -12,11 +12,12 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 libdir = @libdir@
+datadir = @datadir@
 snmplibdir = $(datadir)/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmpset snmpgetnext snmptrap snmpstatus snmpdelta
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmpset snmpgetnext snmptrap snmpstatus snmpdelta snmptable
 SBINTARG= snmptrapd
 SUBDIRS=  snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
@@ -56,14 +57,17 @@ snmpget:    snmpget.o $(PARSEOBJS) $(USELIBS)
 snmpdelta:    snmpdelta.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpdelta.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
+snmptable:    snmptable.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmptable.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+
 snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd:    snmptrapd.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.o $(TRAPSPECIAL) $(USELIBS)
-	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) ${LDFLAGS} ${LIBS} 
+snmptrap:    snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmpset.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
