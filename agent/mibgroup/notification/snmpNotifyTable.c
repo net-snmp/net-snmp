@@ -170,7 +170,7 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata) {
     used by header_complex to index the data */
 
 
-  snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->snmpNotifyName, thedata->snmpNotifyNameLen); /* snmpNotifyName */
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, (char *) thedata->snmpNotifyName, thedata->snmpNotifyNameLen); /* snmpNotifyName */
 
 
 
@@ -635,14 +635,12 @@ write_snmpNotifyRowStatus(int      action,
             /* creation */
             vars = NULL;
 
-
-            snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0); /* snmpNotifyName */
-
-                    
+            snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, NULL, 0); /* snmpNotifyName */
 
             if (header_complex_parse_oid(&(name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid)+2]), newlen,
                                          vars) != SNMPERR_SUCCESS) {
               /* XXX: free, zero vars */
+              snmp_free_var(vars);
               return SNMP_ERR_INCONSISTENTNAME;
             }
             vp = vars;
@@ -663,7 +661,7 @@ write_snmpNotifyRowStatus(int      action,
             StorageNew->snmpNotifyTag = malloc(1); /* bogus pointer */
 
             StorageNew->snmpNotifyRowStatus = set_value;
-            /* XXX: free, zero vars, no longer needed? */
+            snmp_free_var(vars);
           }
           
 
