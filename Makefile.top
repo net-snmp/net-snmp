@@ -71,4 +71,4 @@ RANLIB		= :
 # libtool definitions
 .SUFFIXES: .c .o .lo
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
