@@ -742,6 +742,7 @@ static void Route_Scan_Reload()
 #else
         qsort_compare
 #endif
+    );
 }
 
 #else
