@@ -377,9 +377,6 @@ parse_simple_monitor(const char *token, char *line)
     StorageNew->mteTriggerBooleanStartup = MTETRIGGERBOOLEANSTARTUP_TRUE;
     StorageNew->mteTriggerThresholdStartup =
         MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING;
-    StorageNew->mteTriggerExistenceStartup = strdup(" ");
-    StorageNew->mteTriggerExistenceStartup[0] =
-        MTETRIGGEREXISTENCESTARTUP_PRESENT;
     /*
      * owner = snmpd.conf, why not? 
      */
@@ -437,12 +434,14 @@ parse_simple_monitor(const char *token, char *line)
             mte_add_object_to_table("snmpd.conf", buf, obuf, obufLen, 1);
 
             if (StorageNew->mteTriggerObjectsOwnerLen == 0) {
+                SNMP_FREE(StorageNew->mteTriggerObjectsOwner);
                 StorageNew->mteTriggerObjectsOwner = strdup("snmpd.conf");
                 StorageNew->mteTriggerObjectsOwnerLen =
                     strlen("snmpd.conf");
             }
 
             if (StorageNew->mteTriggerObjectsLen == 0) {
+                SNMP_FREE(StorageNew->mteTriggerObjects);
                 StorageNew->mteTriggerObjects = strdup(buf);
                 StorageNew->mteTriggerObjectsLen = strlen(buf);
             }
