@@ -187,8 +187,8 @@ netsnmp_register_mib_table_row(const char *moduleName,
         }
 
         r->priority = priority;
-        r->range_subid = 0;     // var_subid;
-        r->range_ubound = 0;    // range_ubound;
+        r->range_subid = 0;     /* var_subid; */
+        r->range_ubound = 0;    /* range_ubound; */
         r->timeout = timeout;
         r->modes = HANDLER_CAN_RWRITE;
 
