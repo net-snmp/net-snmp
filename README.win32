@@ -358,42 +358,84 @@ C:\net-snmp-5.1.1>
 *
 ***************************************************************************
 
-Prerequisites 
+ #### Preparation -- These are done one time ####
 
-b. Install ActivePerl in C:\Perl .   Unless you need the advanced features
-   of Perl 5.8, consider that Perl 5.6 is better supported in some circles.
+1. Open the Net-SNMP source, goto the win32 sub-directory
+1.1. Edit net-snmp/net-snmp-config.h and install-net-snmp.bat so that
+   the directories created by the .BAT file are the same as the ones
+   defined in the header file (DEFAULT_MIBDIRS, PERSISTENT_DIRECTORY,
+   SNMPSHAREPATH, and SNMPCONFPATH must be properly formed).
+   The nmakeperl.bat script must also point to the SNMPLIBPATH setting.
 
-1. Open the Net-SNMP source, goto the win32 sub-directory.
-   NOTE: Make sure that you did NOT previous build in this directory,
-   as for instance, for Cygwin or for Mingw.  The reason for this is to
-   avoid reading header files specific to those platforms, which would cause
-   MSVC to fail compiling the modules.
+1.2. Cd to the net-snmp subdirectory.  copy net-snmp-config.h
+     to static-config.h.  Copy net-snmp-config.h to dll-config.h.
+     Remove the line in dll-config.h that defines NETSNMP_NO_DLL
 
-2. Review the "Building with MS VC++" section of this document, then
-   make sure that nmakeperl.bat agrees with install-net-snmp.bat to
-   locate the ".lib" products from the MSVC build, which would be
-   deposited into the SNMPLIBPATH directory.
 
-   If the libraries are in their installed location, you may proceed
-   to step 5 in this procedure.
+ #### Build and install statically linked programs ####
 
-3. Build Net-SNMP using win32.dsw or win32sdk.dsw
-   Close the workspace and exit Visual Studio.
+2. Copy win32\net-snmp\static-config.h win32\net-snmp\net-snmp-config.h
+2.1. Using Visual Studio, open win32sdk.dsw (or win32.dsw).
+   MSVC++ .Net only:  Click 'Yes to All'
+   Click Build - Set Active Configuration (MSVC++ 6.0) and select Release
+     or
+   Click Build - Configuration Manager (MSVC++ .Net) and select Release for
+     the 'Active Solution Configuration'
+   Right Click 'libsnmp' and select Build
+   Click "Build->Batch Build...",
+   Enable all projects for Release then click "Rebuild (All)"
+   If there are no errors, then proceed to the next step.
 
-4. Open a command prompt window using "cmd.exe".
-   Go to the Net-SNMP source base directory.
-   Invoke win32\install-net-snmp to install the built programs.
+2.2. Using a command prompt window, cd to the source base directory.
+   Type:  win32\install-net-snmp to install the programs.
 
-5. Set the environment PATH to locate "nmake", "cl", and "link".
+2.3. Using Visual Studio, Click Build->"Batch Build..."
+   Click Clean to remove the programs from the build directories.
+   Click "File->Close Workspace" (MSVC++ 6.0)
+     or 
+   Click "File->Close Solution" (MSVC++ .Net)
+
+
+ #### Build and install dynamically linked libraries ####
+
+3. Copy win32\net-snmp\dll-config.h win32\net-snmp\net-snmp-config.h
+3.1. Using Visual Studio, open libsdll.dsw
+   MSVC++ .Net only:  Click 'Yes to All'
+   Click "Build->Batch Build...", 
+   Enable all projects for Rlease then click "Rebuild (All)"
+   The "locally defined symbol ... imported" warnings can be ignored.
+   If there are no errors, then proceed to the next step.
+
+3.2. Using a command prompt window, cd to the source base directory.
+   Type:  win32\install-net-snmp to install the programs.
+
+3.3. Using Visual Studio, Click Build->"Batch Build..."
+   Click Clean to remove the programs from the build directories.
+   Click "File->Close Workspace" (MSVC++ 6.0)
+     or 
+   Click "File->Close Solution" (MSVC++ .Net)
+
+
+ #### Build and test Perl SNMP modules ####
+
+4. Using a command prompt window, cd to the source base directory.
+
+4.1. Set the environment PATH to locate "nmake", "cl", and "link".
    Visual Studio installs a VCVARS32.BAT for this purpose.
 
-6. Invoke the nmakeperl.bat to build the Perl SNMP modules.
+4.2. Invoke win32\nmakeperl.bat to build the Perl SNMP modules.
    If you see errors, review the "nmake.out" file first.  If no errors there,
    then the modules built correctly, but the tests did not rigourously
    prove the mettle of the modules.  Review "nmaketest.out".  If the
    first three sections mostly pass, the modules are well formed.
 
-7. The final step is to invoke "nmake install".  If no errors occurred,
+NOTE: If the tests fail, there may be a perl application left hanging.
+  Use the Task Manager to remove any stale perl or snmp*.exe process,
+
+
+ #### Install Perl SNMP modules ####
+
+5. The final step is to invoke "nmake install".  If no errors occurred,
    then the SNMP modules are available for use by your Perl programs.
 
 
