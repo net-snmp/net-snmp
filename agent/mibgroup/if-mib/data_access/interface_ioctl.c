@@ -10,39 +10,36 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
+#include "if-mib/data_access/interface.h"
 
 #include <net/if.h>
 #include <sys/ioctl.h>
 
 /**
- * interface entry physaddr ioctl wrapper
+ * ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioct, or -1 to open/close one
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
- * @retval -1 : ioctl not available
- * @retval -2 : invalid parameters
- * @retval -3 : couldn't create socket
- * @retval -4 : malloc error
- * @retval -5 : ioctl call failed
+ * @retval -1 : invalid parameters
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl call failed
  */
 int
-netsnmp_access_interface_ioctl_physaddr_get(int fd,
-                                            netsnmp_interface_entry *ifentry)
+_ioctl_get(int fd, int which, struct ifreq *ifrq,
+           netsnmp_interface_entry *ifentry)
 {
-#ifndef SIOCGIFHWADDR
-    return -1;
-#else
-    struct ifreq    ifrq;
     int ourfd = -1, rc = 0;
+
+    DEBUGMSGTL(("verbose:access:interface:ioctl", "ioctl %d\n", which));
 
     /*
      * sanity checks
      */
     if((NULL == ifentry) || (NULL == ifentry->if_name)) {
         snmp_log(LOG_ERR, "invalid ifentry\n");
-        return -2;
+        return -1;
     }
 
     /*
@@ -52,9 +49,45 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
         fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
         if(ourfd < 0) {
             snmp_log(LOG_ERR,"couldn't create socket\n");
-            return -3;
+            return -2;
         }
     }
+
+    strncpy(ifrq->ifr_name, ifentry->if_name, sizeof(ifrq->ifr_name));
+    ifrq->ifr_name[ sizeof(ifrq->ifr_name)-1 ] = 0;
+    rc = ioctl(fd, which, ifrq);
+    if (rc < 0) {
+        snmp_log(LOG_ERR,"ioctl %d returned %d\n", which, rc);
+        rc = -3;
+    }
+
+    if(ourfd >= 0)
+        close(ourfd);
+
+    return rc;
+}
+
+#ifdef SIOCGIFHWADDR
+/**
+ * interface entry physaddr ioctl wrapper
+ *
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param ifentry : ifentry to update
+ *
+ * @retval  0 : success
+ * @retval -1 : invalid parameters
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl call failed
+ * @retval -4 : malloc error
+ */
+int
+netsnmp_access_interface_ioctl_physaddr_get(int fd,
+                                            netsnmp_interface_entry *ifentry)
+{
+    struct ifreq    ifrq;
+    int rc = 0;
+
+    DEBUGMSGTL(("access:interface:ioctl", "physaddr_get\n"));
 
     if(ifentry->if_paddr_len != 6) {
         SNMP_FREE(ifentry->if_paddr);
@@ -67,14 +100,10 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
     } else {
         ifentry->if_paddr_len = 6;
 
-        strncpy(ifrq.ifr_name, ifentry->if_name, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        rc = ioctl(fd, SIOCGIFHWADDR, &ifrq);
+        rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry);
         if (rc < 0) {
             memset(ifentry->if_paddr, (0), 6);
-            snmp_log(LOG_ERR, "bad rc %d from SIOCGIFHWADDR ioctl on %s\n",
-                     rc, ifrq.ifr_name);
-            rc = -5;
+            return rc; /* msg already logged */
         }
         else {
             memcpy(ifentry->if_paddr, ifrq.ifr_hwaddr.sa_data, 6);
@@ -135,64 +164,36 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
         }
     }
 
-    if(ourfd >= 0)
-        close(ourfd);
-
     return rc;
-#endif /* SIOCGIFHWADDR */
 }
+#endif /* SIOCGIFHWADDR */
 
+
+#ifdef SIOCGIFFLAGS
 /**
- * interface entry physaddr ioctl wrapper
+ * interface entry flags ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioct, or -1 to open/close one
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
- * @retval -1 : ioctl not available
- * @retval -2 : invalid parameters
- * @retval -3 : couldn't create socket
- * @retval -5 : ioctl call failed
+ * @retval -1 : invalid parameters
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl call failed
  */
 int
 netsnmp_access_interface_ioctl_flags_get(int fd,
                                          netsnmp_interface_entry *ifentry)
 {
-#ifndef SIOCGIFFLAGS
-    return -1;
-#else
     struct ifreq    ifrq;
-    int ourfd = -1, rc = 0;
+    int rc = 0;
 
-    /*
-     * sanity checks
-     */
-    if((NULL == ifentry) || (NULL == ifentry->if_name)) {
-        snmp_log(LOG_ERR, "invalid ifentry\n");
-        return -2;
-    }
+    DEBUGMSGTL(("access:interface:ioctl", "flags_get\n"));
 
-    ifentry->if_flags = 0;
-
-    /*
-     * create socket for ioctls
-     */
-    if(fd < 0) {
-        fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
-        if(ourfd < 0) {
-            snmp_log(LOG_ERR,"couldn't create socket\n");
-            return -3;
-        }
-    }
-
-    strncpy(ifrq.ifr_name, ifentry->if_name, sizeof(ifrq.ifr_name));
-    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-    rc = ioctl(fd, SIOCGIFFLAGS, &ifrq);
+    rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry);
     if (rc < 0) {
-        snmp_log(LOG_ERR, "bad rc %d from SIOCGIFFLAGS ioctl on %s\n",
-                 rc, ifrq.ifr_name);
         ifentry->flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
-        rc = -5;
+        return rc; /* msg already logged */
     }
     else {
         ifentry->flags |= NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
@@ -204,58 +205,109 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
             ifentry->if_admin_status = IFADMINSTATUS_DOWN;
     }
     
+    return rc;
+}
+
+/**
+ * interface entry flags ioctl wrapper
+ *
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param ifentry : ifentry to update
+ *
+ * @retval  0 : success
+ * @retval -1 : invalid parameters
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl get call failed
+ * @retval -4 : ioctl set call failed
+ */
+int
+netsnmp_access_interface_ioctl_flags_set(int fd,
+                                         netsnmp_interface_entry *ifentry,
+                                         unsigned int flags, int and_complement)
+{
+    struct ifreq    ifrq;
+    int ourfd = -1, rc = 0;
+
+    DEBUGMSGTL(("access:interface:ioctl", "flags_set\n"));
+
+    /*
+     * sanity checks
+     */
+    if((NULL == ifentry) || (NULL == ifentry->if_name)) {
+        snmp_log(LOG_ERR, "invalid ifentry\n");
+        return -1;
+    }
+
+    /*
+     * create socket for ioctls
+     */
+    if(fd < 0) {
+        fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
+        if(ourfd < 0) {
+            snmp_log(LOG_ERR,"couldn't create socket\n");
+            return -2;
+        }
+    }
+
+    strncpy(ifrq.ifr_name, ifentry->if_name, sizeof(ifrq.ifr_name));
+    ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+    rc = ioctl(fd, SIOCGIFFLAGS, &ifrq);
+    if(rc < 0) {
+        snmp_log(LOG_ERR,"error getting flags\n");
+        close(fd);
+        return -3;
+    }
+    if(0 == and_complement)
+        ifrq.ifr_flags |= flags;
+    else
+        ifrq.ifr_flags &= ~flags;
+    rc = ioctl(fd, SIOCSIFFLAGS, &ifrq);
+    if(rc < 0) {
+        close(fd);
+        snmp_log(LOG_ERR,"error setting flags\n");
+        ifentry->if_flags = 0;
+        return -4;
+    }
+
     if(ourfd >= 0)
         close(ourfd);
 
-    return rc;
-#endif /* SIOCGIFFLAGS */
+    ifentry->if_flags = ifrq.ifr_flags;
+
+    return 0;
 }
-
-#warning "xxx-rks: fix these ioctls"
-#ifdef NOT_YET
-
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        nnew->if_metric = ioctl(fd, SIOCGIFMETRIC, &ifrq) < 0
-            ? 0 : ifrq.ifr_metric;
-
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        if (ioctl(fd, SIOCGIFBRDADDR, &ifrq) < 0)
-            memset((char *) &ifentry->ifu_broadaddr, 0,
-                   sizeof(ifentry->ifu_broadaddr));
-        else
-            ifentry->ifu_broadaddr = ifrq.ifr_broadaddr;
-
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        if (ioctl(fd, SIOCGIFNETMASK, &ifrq) < 0)
-            memset((char *) &ifentry->ia_subnetmask, 0,
-                   sizeof(ifentry->ia_subnetmask));
-        else
-            ifentry->ia_subnetmask = ifrq.ifr_netmask;
+#endif /* SIOCGIFFLAGS */
 
 #ifdef SIOCGIFMTU
-        strncpy(ifrq.ifr_name, ifname, sizeof(ifrq.ifr_name));
-        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
-        ifentry->if_mtu = (ioctl(fd, SIOCGIFMTU, &ifrq) < 0)
-            ? 0 : ifrq.ifr_mtu;
-#else
-        ifentry->if_mtu = 0;
-#endif
+/**
+ * interface entry mtu ioctl wrapper
+ *
+ * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param ifentry : ifentry to update
+ *
+ * @retval  0 : success
+ * @retval -1 : invalid parameters
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl call failed
+ */
+int
+netsnmp_access_interface_ioctl_mtu_get(int fd,
+                                       netsnmp_interface_entry *ifentry)
+{
+    struct ifreq    ifrq;
+    int rc = 0;
 
-            /*
-             * do only guess if_type from name, if we could not read
-             * * it before from SIOCGIFHWADDR 
-             */
-            if (!ifentry->if_type)
-                ifentry->if_type = if_type_from_name(ifentry->if_name);
-            ifentry->if_speed = ifentry->if_type == 6 ? getIfSpeed(fd, ifrq) :
-                ifentry->if_type == 24 ? 10000000 :
-                ifentry->if_type == 9 ? 4000000 : 0;
-            /*Zero speed means link problem*/
-            if(ifentry->if_speed == 0 && ifentry->if_flags & IFF_UP){
-                ifentry->if_flags &= ~IFF_RUNNING;
-            }
-        }
-#endif
+    DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
+
+    rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry);
+    if (rc < 0) {
+        ifentry->if_mtu = 0;
+        return rc; /* msg already logged */
+    }
+    else {
+        ifentry->if_mtu = ifrq.ifr_mtu;
+    }
+
+    return rc;
+}
+#endif /* SIOCGIFMTU */
