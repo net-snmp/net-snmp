@@ -598,6 +598,7 @@ handle_var_list(struct agent_snmp_session  *asp)
 	return SNMP_ERR_NOERROR;
     }
 
+    statP = NULL;
     while (1) {
     
 	count++;
