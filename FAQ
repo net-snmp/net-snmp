@@ -1750,8 +1750,10 @@ How can I send a particular trap to selected destinations?
 
     The 5.0 agent introduces preliminary support for the
   snmpNotifyFilterTable which is designed to allow this sort of
-  selective trap direction.  Documentation on how to use this
-  facility will appear in due course.
+  selective trap direction, though this is not currently active.
+  (The tables are present, but the information is not consulted)
+  Documentation on how to use this facility will appear once the
+  functionality is working properly.
 
 
 
