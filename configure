@@ -696,7 +696,7 @@ fi
 # Check whether --enable-shared or --disable-shared was given.
 if test "${enable_shared+set}" = set; then
   enableval="$enable_shared"
-  with_shared="yes"
+  with_shared="$enable_shared"
 else
   with_shared="no"
 fi
