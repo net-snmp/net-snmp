@@ -85,7 +85,7 @@ snmptrapd_traphandle(const char *token, char *line)
     if ((*ttmp)->exec)
       free((*ttmp)->exec);
   }
-  cptr = copy_word(line, buf);
+  cptr = copy_nword(line, buf, sizeof(buf));
   if (!doingdefault) {
     (*ttmp)->traplen = MAX_OID_LEN;
     if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {

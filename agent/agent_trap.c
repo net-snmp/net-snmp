@@ -680,7 +680,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     /* create the argv[] like array */
     strcpy(argv[0] = args[0], "snmpd-trapsess"); /* bogus entry for getopt() */
     for(argn = 1; cptr && argn < MAX_ARGS;
-        cptr = copy_word(cptr, argv[argn] = args[argn++])) {
+        cptr = copy_nword(cptr, argv[argn] = args[argn++], SPRINT_MAX_LEN)) {
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
@@ -705,7 +705,7 @@ snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
     snmp_trapcommunity = malloc (strlen(cptr)+1);
-    copy_word(cptr, snmp_trapcommunity);
+    copy_nword(cptr, snmp_trapcommunity, strlen(cptr)+1);
 }
 
 void snmpd_free_trapcommunity (void)
