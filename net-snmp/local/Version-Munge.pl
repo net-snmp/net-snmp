@@ -37,6 +37,8 @@ my @exprs = (
 			    perl/default_store/default_store.pm
 			    perl/OID/OID.pm
 			    perl/ASN/ASN.pm
+			    perl/AnyData_SNMP/Storage.pm
+			    perl/AnyData_SNMP/Format.pm
 			   )]}
 	    );
 
