@@ -29,6 +29,9 @@
 # endif
 #endif
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
 #ifdef HAVE_WINSOCK_H
 #include <winsock.h>
@@ -68,6 +71,53 @@ typedef long ssize_t;
 #endif
 #endif
 
+    /*
+     * Try to ensure we have 32-bit (and hopefully 64-bit)
+     *    integer types available.
+     */
+#ifndef HAVE_INT32_T
+#if   SIZEOF_INT == 4
+typedef int int32_t
+#elif SIZEOF_LONG == 4
+typedef long int32_t
+#elif SIZEOF_SHORT == 4
+typedef short int32_t
+#else
+typedef int int32_t
+#define _INT32_IS_NOT_32BIT
+#endif
+#endif
+
+#ifndef HAVE_UINT32_T
+#ifdef HAVE_U_INT32_T
+typedef u_int32_t        uint32_t
+#else
+typedef unsigned int32_t uint32_t
+#endif
+#endif
+
+#ifndef HAVE_INT64_T
+#if SIZEOF_LONG == 8
+typedef long int64_t
+#elif SIZEOF_LONG_LONG == 8
+typedef long long int64_t
+#elif   SIZEOF_INT == 8
+typedef int int64_t
+#elif SIZEOF_LONG >= 8
+typedef long int64_t
+#define _INT64_IS_NOT_64BIT
+#else
+#define _NO_64BIT_TYPE 1
+#endif
+#endif
+
+#ifndef HAVE_UINT64_T
+#ifdef HAVE_U_INT64_T
+typedef u_int64_t        uint64_t
+#elif !defined(_NO_64BIT_TYPE)
+typedef unsigned int64_t uint64_t
+#endif
+#endif
 
     /*
      *  For the initial release, this will just refer to the

@@ -162,6 +162,24 @@
 
 @BOTTOM@
 
+/* define if you have type int32_t */
+#undef HAVE_INT32_T
+
+/* define if you have type uint32_t */
+#undef HAVE_UINT32_T
+
+/* define if you have type u_int32_t */
+#undef HAVE_U_INT32_T
+
+/* define if you have type int64_t */
+#undef HAVE_INT64_T
+
+/* define if you have type uint64_t */
+#undef HAVE_UINT64_T
+
+/* define if you have type u_int64_t */
+#undef HAVE_U_INT64_T
+
 /* define if you have getdevs() */
 #undef HAVE_GETDEVS
 

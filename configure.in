@@ -965,6 +965,13 @@ done
 AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
 AC_SUBST(SNMPCONFPATH)
 
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long long)
+AC_CHECK_TYPES([int32_t, uint32_t, u_int32_t])
+AC_CHECK_TYPES([int64_t, uint64_t, u_int64_t])
+
 # guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then
 	v6type=unknown
