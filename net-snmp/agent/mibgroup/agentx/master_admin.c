@@ -87,10 +87,21 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 	return -1;
     }
 
-    memcpy( sp, session, sizeof(struct snmp_session));    
+    memcpy(sp, session, sizeof(struct snmp_session));
     sp->sessid     = snmp_get_next_sessid();
     sp->version    = pdu->version;
     sp->timeout    = pdu->time;
+
+    /*  Be careful with fields: if these aren't zeroed, they will get free()d
+	more than once when the session is closed -- once in the main session,
+	and once in each subsession.  Basically, if it's not being used for
+	some AgentX-specific purpose, it ought to be zeroed here. */
+
+    sp->community        = NULL;
+    sp->peername         = NULL;
+    sp->contextEngineID  = NULL;
+    sp->contextName      = NULL;
+    sp->securityEngineID = NULL;
 
 	/*
 	 * This next bit utilises unused SNMPv3 fields
@@ -98,10 +109,9 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 	 * This really ought to use AgentX-specific fields,
 	 *   but it hardly seems worth it for a one-off use.
 	 *
-	 * But I'm willing to be persuaded otherwise....
-	 */
-    sp->securityAuthProto =
-	snmp_duplicate_objid(pdu->variables->name, pdu->variables->name_length);
+	 * But I'm willing to be persuaded otherwise....  */
+    sp->securityAuthProto = snmp_duplicate_objid(pdu->variables->name,
+						pdu->variables->name_length);
     sp->securityAuthProtoLen = pdu->variables->name_length;
     sp->securityName = strdup( pdu->variables->val.string );
     gettimeofday(&now, NULL);
@@ -122,11 +132,10 @@ close_agentx_session(struct snmp_session *session, int sessid)
     struct snmp_session *sp, *prev = NULL;
     
     DEBUGMSGTL(("agentx:close_agentx_session","close %p, %d\n", session, sessid));
-    if ( sessid == -1 ) {
+    if (session != NULL && sessid == -1) {
 	unregister_mibs_by_session( session );
 	unregister_index_by_session( session );
 	unregister_sysORTable_by_session( session );
-
 	return AGENTX_ERR_NOERROR;
     }
 
@@ -387,6 +396,18 @@ handle_master_agentx_packet(int operation,
     struct agent_snmp_session  *asp;
     struct timeval now;
     
+    if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+      DEBUGMSGTL(("agentx/master", "transport disconnect indication\n"));
+      /*  Shut this session down gracefully.  */
+      close_agentx_session(session, -1);
+      return 1;
+    } else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+      DEBUGMSGTL(("agentx/master", "unexpected callback op %d\n", operation));
+      return 1;
+    }
+
+    /*  Okay, it's a SNMP_CALLBACK_OP_RECEIVED_MESSAGE op.  */
+
     if ( magic )
         asp = (struct agent_snmp_session *)magic;
     else
