@@ -125,6 +125,8 @@ AC_ARG_WITH(out_mib_modules,
     smux:                  smux sub-agent support.
     misc/ipfwacc:          accounting rules IP firewall information.
                              (only under linux)
+    ipfwchains/ipfwchains: firewall chains under ipfw for linux.
+                             (see agent/mibgroup/ipfwchains/README)
     target:                Support for the TARGET-MIB.
     ucd-snmp/pass_persist: Persistent pass scripts that stay around.
                            Not currently included by default solely because
