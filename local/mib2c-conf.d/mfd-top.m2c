@@ -391,7 +391,29 @@ ${context}_post_request(${context}_registration * user_context, int rc)
     /*
      * TODO:511:o: Perform $context post-request actions.
      */
+@  if $m2c_table_settable@
+    /*
+     * check to set if any rows were changed.
+     */
+    if (${context}_dirty_get()) {
+        ${context}_dirty_set(0); /* clear table dirty flag */
 
+        /*
+         * check if request was successful. If so, this would be
+         * a good place to save data to its persistent store.
+         */
+        if (MFD_SUCCESS == rc) {
+            /*
+             * save changed rows, if you haven't already
+             */
+@     if $m2c_table_persistent@
+            snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                             NETSNMP_DS_LIB_APPTYPE));
+@     end@
+        }
+    }
+
+@   end@
     return MFD_SUCCESS;
 } /* ${context}_post_request */
 
