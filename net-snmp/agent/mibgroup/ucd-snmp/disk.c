@@ -145,7 +145,8 @@ struct variable2 extensible_disk_variables[] = {
    registering underneath */
 oid disk_variables_oid[] = { EXTENSIBLEMIB,DISKMIBNUM,1 };
 
-void init_disk(void){
+void init_disk(void)
+{
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/dis", extensible_disk_variables, variable2, \
                disk_variables_oid);
@@ -154,7 +155,8 @@ void init_disk(void){
                                 "path [ minspace | minpercent% ]");
 }
 
-void disk_free_config __P((void)) {
+void disk_free_config (void) 
+{
   int i;
   
   numdisks = 0;
@@ -166,9 +168,7 @@ void disk_free_config __P((void)) {
   }
 }
 
-void disk_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void disk_parse_config(char *word, char *cptr)
 {
 #if HAVE_GETMNTENT
 #if HAVE_SYS_MNTTAB_H
@@ -274,20 +274,24 @@ void disk_parse_config(word,cptr)
   config_perror("'disk' checks not supported on this architecture.");
 #endif
 }
+/*
+  var_extensible_disk(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
 
-unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_disk(struct variable *vp,
+				   oid *name,
+				   int *length,
+				   int exact,
+				   int *var_len,
+				   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   int percent, iserror, disknum=0;

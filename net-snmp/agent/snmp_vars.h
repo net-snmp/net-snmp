@@ -40,19 +40,19 @@ struct variable {
     char	    type;	    /* type of variable */
 /* See important comment in snmp_vars.c relating to acl */
     u_short	    acl;	    /* access control list for variable */
-    u_char	    *(*findVar)__P((struct variable *, oid *, int *, int, int *, int (**write_proc) __P((int, u_char *, u_char, int, u_char *, oid *,int)) ));  /* function that finds variable */
+    u_char	    *(*findVar)(struct variable *, oid *, int *, int, int *, int (**write_proc) (int, u_char *, u_char, int, u_char *, oid *,int) );  /* function that finds variable */
     u_char	    namelen;	    /* length of above */
     oid		    name[32];	    /* object identifier of variable */
 };
 
-int subtree_old_size __P((void));
-void sort_tree __P((void));
-struct subtree *find_subtree __P((oid *, int, struct subtree *));
-struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
-void register_mib __P((char *, struct variable *, int , int , oid *, int));
-void unregister_mib __P((oid *, int));
-struct subtree *unregister_mib_tree __P((oid *, int, struct subtree *));
-struct subtree *free_subtree __P((struct subtree *));
+int subtree_old_size (void);
+void sort_tree (void);
+struct subtree *find_subtree (oid *, int, struct subtree *);
+struct subtree *find_subtree_next (oid *, int, struct subtree *);
+void register_mib (char *, struct variable *, int , int , oid *, int);
+void unregister_mib (oid *, int);
+struct subtree *unregister_mib_tree (oid *, int, struct subtree *);
+struct subtree *free_subtree (struct subtree *);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 

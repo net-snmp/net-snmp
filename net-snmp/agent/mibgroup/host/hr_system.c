@@ -22,9 +22,9 @@
 #endif
 
 #ifdef UTMP_FILE
-void setutent __P((void));
-void endutent __P((void));
-struct utmp *getutent __P((void));
+void setutent (void);
+void endutent (void);
+struct utmp *getutent (void);
 #endif /* UTMP_FILE */
 
 
@@ -35,10 +35,10 @@ struct utmp *getutent __P((void));
 	 *
 	 *********************/
 
-static int get_load_dev __P((void));
-static int count_users __P((void));
-extern int count_processes __P((void));
-extern int header_hrsys __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+static int get_load_dev (void);
+static int count_users (void);
+extern int count_processes (void);
+extern int header_hrsys (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
 
 	/*********************
@@ -48,7 +48,7 @@ extern int header_hrsys __P((struct variable *,oid *, int *, int, int *, int (**
 	 *********************/
 
 
-void	init_hr_system( )
+void init_hr_system(void)
 {
 #ifdef NPROC_SYMBOL
   auto_nlist(NPROC_SYMBOL,0,0);
@@ -59,14 +59,24 @@ void	init_hr_system( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrsys(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+*/
+
 int
-header_hrsys(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrsys(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSYS_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -99,13 +109,12 @@ header_hrsys(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 u_char	*
-var_hrsys(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrsys(struct variable *vp,
+	  oid *name,
+	  int *length,
+	  int exact,
+	  int *var_len,
+	  int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
     static char string[100];
     time_t	now;
@@ -178,12 +187,12 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 		 *  Return the DeviceIndex corresponding
 		 *   to the boot device
 		 */
-static int get_load_dev()
+static int get_load_dev(void)
 {
      return (HRDEV_DISK<<HRDEV_TYPE_SHIFT);	/* XXX */
 }
 
-static int count_users()
+static int count_users(void)
 {
      int total=0;
      struct utmp *utmp_p;
@@ -204,13 +213,13 @@ static int count_users()
 static FILE *utmp_file;
 static struct utmp utmp_rec;
 
-void setutent __P((void))
+void setutent (void)
 {
 	if (utmp_file) fclose(utmp_file);
 	utmp_file = fopen(UTMP_FILE, "r");
 }
 
-void endutent __P((void))
+void endutent (void)
 {
 	if (utmp_file) {
 		fclose(utmp_file);
@@ -218,7 +227,7 @@ void endutent __P((void))
 	}
 }
 
-struct utmp *getutent __P((void))
+struct utmp *getutent (void)
 {
 	while (fread(&utmp_rec, sizeof(utmp_rec), 1, utmp_file) == 1)
 	    if (*utmp_rec.ut_name && *utmp_rec.ut_line)

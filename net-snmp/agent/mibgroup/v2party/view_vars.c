@@ -36,15 +36,11 @@
 
 #define VIEWCOMPLETE_MASK	0x3F /* all columns */
 
-struct viewEntry *view_rowCreate __P((int, oid *, int));
-void view_rowDelete __P((int, oid *, int));
-int in_view __P((oid *, int, int));
-
 
 struct viewEntry *
-view_rowCreate(viewIndex, viewSubtree, viewSubtreeLen)
-    oid *viewSubtree;
-    int viewIndex, viewSubtreeLen;
+view_rowCreate(int viewIndex,
+	       oid *viewSubtree,
+	       int viewSubtreeLen)
 {
     struct viewEntry *vp;
 
@@ -64,9 +60,9 @@ view_rowCreate(viewIndex, viewSubtree, viewSubtreeLen)
 }
 
 void
-view_rowDelete(viewIndex, viewSubtree, viewSubtreeLen)
-    oid *viewSubtree;
-    int viewIndex, viewSubtreeLen;
+view_rowDelete(int viewIndex, 
+	       oid *viewSubtree, 
+	       int viewSubtreeLen)
 {
     view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen);
 }
@@ -79,14 +75,13 @@ view_rowDelete(viewIndex, viewSubtree, viewSubtreeLen)
  * variable exists.
  */
 int
-write_view(action, var_val, var_val_type, var_val_len, statP, name, length)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      length;
+write_view(int action,
+	   u_char *var_val,
+	   u_char var_val_type,
+	   int var_val_len,
+	   u_char *statP,
+	   oid *name,
+	   int length)
 {
 #if 0
     struct viewEntry *vp, *rp;
@@ -207,13 +202,12 @@ write_view(action, var_val, var_val_type, var_val_len, statP, name, length)
 }
 
 u_char *
-var_view(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that points here */
-    register oid *name;      /* IN/OUT - input name requested, output name found */
-    register int *length;    /* IN/OUT - length of input and output oid's */
-    int          exact;      /* IN - TRUE if an exact match was requested. */
-    int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_view(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
     int newnamelen, lownamelen=0;
@@ -296,9 +290,7 @@ var_view(vp, name, length, exact, var_len, write_method)
 }
 
 int
-in_view(name, namelen, viewIndex)
-    oid *name;
-    int namelen, viewIndex;
+in_view(oid *name, int namelen, int viewIndex)
 {
     struct viewEntry *vwp, *savedvwp = NULL;
 

@@ -6,13 +6,13 @@
 
 config_require(ucd-snmp/extensible util_funcs)
 
-int setPassPersist __P((int, u_char *, u_char, int, u_char *,oid *, int));
-unsigned char *var_extensible_pass_persist __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+int setPassPersist (int, u_char *, u_char, int, u_char *,oid *, int);
+unsigned char *var_extensible_pass_persist (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 /* config file parsing routines */
-void pass_persist_free_config __P((void));
-void pass_persist_parse_config __P((char *, char *));
-int pass_persist_compare __P((void *, void *));
+void pass_persist_free_config (void);
+void pass_persist_parse_config (char *, char *);
+int pass_persist_compare (void *, void *);
 
 #include "mibdefs.h"
 

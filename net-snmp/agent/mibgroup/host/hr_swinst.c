@@ -59,8 +59,8 @@
 	 *
 	 *********************/
 
-int header_hrswinst __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
-int header_hrswInstEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int header_hrswinst (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrswInstEntry (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
        char *HRSW_directory = NULL;
 
@@ -77,13 +77,13 @@ extern char  HRSW_name[];
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-extern void  Init_HR_SWInst __P((void));
-extern int   Get_Next_HR_SWInst __P((void));
-extern void  End_HR_SWInst __P((void));
-extern void  Save_HR_SW_info __P((void));
+extern void  Init_HR_SWInst (void);
+extern int   Get_Next_HR_SWInst (void);
+extern void  End_HR_SWInst (void);
+extern void  Save_HR_SW_info (void);
 
 
-void	init_hr_swinst( )
+void init_hr_swinst(void)
 {
 	/* Read settings from config file,
 	    or take system-specific defaults */
@@ -118,14 +118,24 @@ void	init_hr_swinst( )
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrswinst(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+*/
+  
 int
-header_hrswinst(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrswinst(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSWINST_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -151,13 +161,12 @@ header_hrswinst(vp, name, length, exact, var_len, write_method)
 }
 
 int
-header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrswInstEntry(struct variable *vp,
+		     oid *name,
+		     int *length,
+		     int exact,
+		     int *var_len,
+		     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSWINST_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -226,13 +235,12 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
 
 
 u_char	*
-var_hrswinst(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrswinst(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
     int sw_idx=0;
     static char string[256];
@@ -368,7 +376,7 @@ static char HRSW_name[100];
 
 
 void
-Init_HR_SWInst __P((void))
+Init_HR_SWInst (void)
 {
     HRSW_index = 0;
 
@@ -392,7 +400,7 @@ Init_HR_SWInst __P((void))
 }
 
 int
-Get_Next_HR_SWInst __P((void))
+Get_Next_HR_SWInst (void)
 {
     if (HRSW_index == -1)
 	return -1;
@@ -421,7 +429,7 @@ Get_Next_HR_SWInst __P((void))
 }
 
 void
-Save_HR_SW_info __P((void))
+Save_HR_SW_info (void)
 {
 #ifndef HAVE_LIBRPM
     sprintf(  HRSW_name, de_p->d_name );
@@ -429,7 +437,7 @@ Save_HR_SW_info __P((void))
 }
 
 void
-End_HR_SWInst __P((void))
+End_HR_SWInst (void)
 {
 #ifdef HAVE_LIBRPM
     rpmdbClose(rpm_db);		/* or only on finishing ? */

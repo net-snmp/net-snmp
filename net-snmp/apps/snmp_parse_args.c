@@ -68,19 +68,17 @@
 
 int random_access = 0;
 
-void usage __P((void));
+void usage(void);
 
 void
-snmp_parse_args_usage(outf)
-  FILE *outf;
+snmp_parse_args_usage(FILE *outf)
 {
   fprintf(outf,
         "[-v 1|2c|2p] [-h] [-H] [-d] [-q] [-R] [-D[TOKEN,...]] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
-snmp_parse_args_descriptions(outf)
-  FILE *outf;
+snmp_parse_args_descriptions(FILE *outf)
 {
   fprintf(outf, "  -v 1|2c|2p\tspecifies snmp version to use.\n");
   fprintf(outf, "            \twhere 1 is SNMPv1, 2c is SNMPv2c, and 2p is SNMPv2-party\n");
@@ -106,10 +104,9 @@ snmp_parse_args_descriptions(outf)
 }
 
 int
-snmp_parse_args(argc, argv, session)
-  int argc;
-  char *argv[];
-  struct snmp_session *session;
+snmp_parse_args(int argc, 
+		char *argv[], 
+		struct snmp_session *session)
 {
   int arg;
   char *psz, *cp;
@@ -484,10 +481,9 @@ snmp_parse_args(argc, argv, session)
 }
 
 oid
-*snmp_parse_oid(argv,root,rootlen) 
-  char *argv;
-  oid *root;
-  int *rootlen;
+*snmp_parse_oid(char *argv,
+		oid *root,
+		int *rootlen)
 {
   if (random_access) {
     if (get_node(argv,root,rootlen)) {

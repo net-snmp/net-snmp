@@ -105,14 +105,12 @@
 	 *
 	 *********************/
 
-static int header_udp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-
 #ifndef solaris2
-static void UDP_Scan_Init __P((void));
-static int UDP_Scan_Next __P((struct inpcb *));
+static void UDP_Scan_Init (void);
+static int UDP_Scan_Next (struct inpcb *);
 #endif
 #ifdef linux
-static void linux_read_udp_stat __P((struct udp_mib *));
+static void linux_read_udp_stat (struct udp_mib *);
 #endif
 
 	/*********************
@@ -134,7 +132,7 @@ struct variable8 udp_variables[] = {
    registering underneath */
 oid udp_variables_oid[] = { 1,3,6,1,2,1,7 };
 
-void	init_udp( )
+void init_udp()
 {
 
   /* register ourselves with the agent to handle our mib tree */
@@ -152,14 +150,25 @@ void	init_udp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_udp(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_udp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_udp(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define UDP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -196,13 +205,12 @@ header_udp(vp, name, length, exact, var_len, write_method)
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
-var_udp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #ifdef linux
     static struct udp_mib udpstat;
@@ -291,13 +299,12 @@ var_udp(vp, name, length, exact, var_len, write_method)
 
 
 u_char *
-var_udp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct kna tcpipstats;
 
@@ -334,13 +341,12 @@ var_udp(vp, name, length, exact, var_len, write_method)
 #else /* hpux */
 
 u_char *
-var_udp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct udpstat udpstat;
     static	counter MIB_udpcounter[MIB_udpMAXCTR+1];
@@ -385,13 +391,12 @@ var_udp(vp, name, length, exact, var_len, write_method)
 
 
 u_char *
-var_udpEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udpEntry(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -456,13 +461,12 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 #else /* solaris2 - udp */
 
 u_char *
-var_udp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     mib2_udp_t udpstat;
     mib2_ip_t ipstat;
@@ -501,13 +505,12 @@ var_udp(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_udpEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_udpEntry(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     return NULL;
 }
@@ -527,7 +530,7 @@ static struct inpcb *udp_inpcb_list;
 #ifndef solaris2
 static struct inpcb udp_inpcb, *udp_prev;
 
-static void UDP_Scan_Init()
+static void UDP_Scan_Init(void)
 {
 #ifndef linux
     auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
@@ -602,8 +605,7 @@ static void UDP_Scan_Init()
 #endif /*linux */
 }
 
-static int UDP_Scan_Next(RetInPcb)
-struct inpcb *RetInPcb;
+static int UDP_Scan_Next(struct inpcb *RetInPcb)
 {
 	register struct inpcb *next;
 
@@ -640,8 +642,7 @@ struct inpcb *RetInPcb;
 #ifdef linux
 
 static void
-linux_read_udp_stat (udpstat)
-struct udp_mib *udpstat;
+linux_read_udp_stat (struct udp_mib *udpstat)
 {
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];

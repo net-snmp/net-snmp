@@ -13,8 +13,8 @@
 struct filestat fileTable[MAXFILE];
 int fileCount;
 	
-void init_file(void) {
-
+void init_file(void) 
+{
   struct variable2 file_table[] = {
     {FILE_INDEX,  ASN_INTEGER,   RONLY, var_file_table, 1, {1}},
     {FILE_NAME,   ASN_OCTET_STR, RONLY, var_file_table, 1, {2}},
@@ -41,9 +41,7 @@ void file_free_config(void)
     fileCount = 0;
 }
 
-void file_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void file_parse_config(char *word, char* cptr)
 {
     if (fileCount < MAXFILE)
     {
@@ -67,19 +65,12 @@ void updateFile(int index)
 
 /* OID functions */
 
-unsigned char *var_file_table(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_file_table(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   static long long_ret;
   static char error[256];

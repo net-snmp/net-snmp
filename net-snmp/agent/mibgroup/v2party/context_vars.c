@@ -51,13 +51,8 @@ static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
 
 #define CONTEXTCOMPLETE_MASK		0x03FF	/* all collumns */
 
-struct contextEntry *context_rowCreate __P((oid *, int));
-void context_rowDelete __P((oid *, int));
-
 struct contextEntry *
-context_rowCreate(contextID, contextIDLen)
-    oid *contextID;
-    int contextIDLen;
+context_rowCreate(oid *contextID, int contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -77,9 +72,7 @@ context_rowCreate(contextID, contextIDLen)
 }
 
 void
-context_rowDelete(contextID, contextIDLen)
-    oid *contextID;
-    int contextIDLen;
+context_rowDelete(oid *contextID, int contextIDLen)
 {
     context_destroyEntry(contextID, contextIDLen);
 }
@@ -92,14 +85,13 @@ context_rowDelete(contextID, contextIDLen)
  * variable exists.
  */
 int
-write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      length;
+write_context(int action,
+	      u_char *var_val,
+	      u_char var_val_type,
+	      int var_val_len,
+	      u_char *statP,
+	      oid *name,
+	      int length)
 {
 #if 0
     struct contextEntry *cp, *rp;
@@ -526,13 +518,12 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 }
 
 u_char *
-var_context(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that points here */
-    register oid *name;      /* IN/OUT - input name requested, output name found */
-    register int *length;    /* IN/OUT - length of input and output oid's */
-    int          exact;      /* IN - TRUE if an exact match was requested. */
-    int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int ));
+var_context(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
     int newnamelen, lownamelen=0;

@@ -38,8 +38,7 @@
 static kvm_t *kd;
 
 void
-init_kmem(file)
-    char *file;
+init_kmem(char *file)
 {
 #if HAVE_KVM_OPENFILES
     char err[4096];
@@ -65,10 +64,9 @@ init_kmem(file)
 
 
 int
-klookup(off, target, siz) 
-     unsigned long off;
-     char   *target;
-     int     siz;
+klookup(unsigned long off,
+	char   *target,
+	int     siz)
 {
     int result;
     result = kvm_read(kd, off, target, siz);
@@ -88,13 +86,12 @@ klookup(off, target, siz)
 
 #else /* HAVE_KVM_H */
 
-static off_t klseek __P((off_t));
-static int klread __P((char *, int));
+static off_t klseek (off_t);
+static int klread (char *, int);
 int swap, mem, kmem;
 
 void
-init_kmem(file)
-    char *file;
+init_kmem(char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
@@ -132,8 +129,7 @@ init_kmem(file)
  *  Seek into the kernel for a value.
  */
 static off_t
-klseek(base)
-     off_t base;
+klseek(off_t base)
 {
   return (lseek(kmem, (off_t)base, SEEK_SET));
 }
@@ -143,9 +139,8 @@ klseek(base)
  *  Read from the kernel 
  */
 static int
-klread(buf, buflen)
-    char *buf;
-    int buflen;
+klread(char *buf,
+       int buflen)
 {
   return (read(kmem, buf, buflen));
 }
@@ -163,10 +158,9 @@ klread(buf, buflen)
 
 
 int
-klookup(off, target, siz) 
-     unsigned long off;
-     char   *target;
-     int     siz;
+klookup(unsigned long off,
+	char   *target,
+	int     siz)
 {
   long retsiz;
 

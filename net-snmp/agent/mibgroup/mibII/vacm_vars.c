@@ -52,7 +52,8 @@
 #include "vacm.h"
 
 void
-init_vacm_vars __P((void)) {
+init_vacm_vars (void) 
+{
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,13};
@@ -117,8 +118,8 @@ init_vacm_vars __P((void)) {
 
 static struct vacm_securityEntry *securityFirst, *securityLast;
 
-void vacm_parse_security (word, param)
-    char *word, *param;
+void vacm_parse_security (char *word, 
+			  char *param)
 {
     char *name, *source, *community, *mask;
     char *cp;
@@ -187,7 +188,7 @@ void vacm_parse_security (word, param)
     }
 }
 
-void vacm_free_security __P((void))
+void vacm_free_security (void)
 {
     struct vacm_securityEntry *sp;
     while ((sp = securityFirst)) {
@@ -196,8 +197,8 @@ void vacm_free_security __P((void))
     }
 }
 
-void vacm_parse_group (word, param)
-    char *word, *param;
+void vacm_parse_group (char *word, 
+		       char *param)
 {
     char *group, *model, *security;
     int imodel;
@@ -235,13 +236,12 @@ void vacm_parse_group (word, param)
     free (gp->reserved);
 }
 
-void vacm_free_group __P((void))
+void vacm_free_group (void)
 {
     vacm_destroyAllGroupEntries();
 }
 
-void vacm_parse_access (word, param)
-    char *word, *param;
+void vacm_parse_access (char *word, char *param)
 {
     char *name, *context, *model, *level, *prefix, *read, *write, *notify;
     int imodel, ilevel;
@@ -284,13 +284,13 @@ void vacm_parse_access (word, param)
     free (ap->reserved);
 }
 
-void vacm_free_access __P((void))
+void vacm_free_access (void)
 {
     vacm_destroyAllAccessEntries();
 }
 
-void vacm_parse_view (word, param)
-    char *word, *param;
+void vacm_parse_view (char *word, 
+		      char *param)
 {
     char *name, *type, *subtree, *mask;
     int inclexcl;
@@ -345,15 +345,14 @@ void vacm_parse_view (word, param)
     free (vp->reserved);
 }
 
-void vacm_free_view __P((void))
+void vacm_free_view (void)
 {
     vacm_destroyAllViewEntries();
 }
 
-int vacm_in_view (pi, name, namelen)
-    struct packet_info *pi;
-    oid *name;
-    int namelen;
+int vacm_in_view (struct packet_info *pi,
+		  oid *name,
+		  int namelen)
 {
     struct vacm_securityEntry *sp = securityFirst;
     struct vacm_accessEntry *ap;
@@ -424,13 +423,12 @@ int vacm_in_view (pi, name, namelen)
     return 1;
 }
 
-u_char *var_vacm_sec2group(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid *name;
-    int *length;
-    int exact;
-    int *var_len;
-    int (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+u_char *var_vacm_sec2group(struct variable *vp,
+			   oid *name,
+			   int *length,
+			   int exact,
+			   int *var_len,
+			   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     struct vacm_groupEntry *gp;
     oid *groupSubtree;
@@ -505,13 +503,12 @@ u_char *var_vacm_sec2group(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
-u_char *var_vacm_access(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid *name;
-    int *length;
-    int exact;
-    int *var_len;
-    int (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+u_char *var_vacm_access(struct variable *vp,
+			oid *name,
+			int *length,
+			int exact,
+			int *var_len,
+			int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     struct vacm_accessEntry *gp;
     int secmodel;
@@ -649,13 +646,12 @@ u_char *var_vacm_access(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
-u_char *var_vacm_view(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid *name;
-    int *length;
-    int exact;
-    int *var_len;
-    int (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+u_char *var_vacm_view(struct variable *vp,
+		      oid *name,
+		      int *length,
+		      int exact,
+		      int *var_len,
+		      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     struct vacm_viewEntry *gp;
     char viewName[32];

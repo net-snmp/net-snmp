@@ -47,15 +47,15 @@ config_arch_require(solaris2, kernel_sunos5)
 
 #ifndef solaris2
 #ifndef linux
-extern int TCP_Count_Connections __P((void));
+extern int TCP_Count_Connections (void);
 #endif
-extern  void TCP_Scan_Init __P((void));
-extern  int TCP_Scan_Next __P((int *, struct inpcb *));
+extern  void TCP_Scan_Init (void);
+extern  int TCP_Scan_Next (int *, struct inpcb *);
 #endif
 
-extern void	init_tcp __P((void));
-extern u_char	*var_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char	*var_tcpEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_tcp (void);
+extern u_char	*var_tcp (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern u_char	*var_tcpEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 
 #define TCPRTOALGORITHM      1

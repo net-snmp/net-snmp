@@ -53,7 +53,7 @@ struct variable2 sysORTable_variables[] = {
 oid sysORTable_variables_oid[] = { 1,3,6,1,2,1,1,9,1 };
 
 void
-init_sysORTable() {
+init_sysORTable(void) {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);
 
@@ -67,13 +67,12 @@ init_sysORTable() {
 	 *********************/
 
 u_char	*
-var_sysORTable(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_sysORTable(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   struct timeval diff;
   int i;
@@ -128,10 +127,9 @@ var_sysORTable(vp, name, length, exact, var_len, write_method)
 }
 
 
-void register_sysORTable(oidin, oidlen, descr)
-  oid *oidin;
-  int oidlen;
-  char *descr;
+void register_sysORTable(oid *oidin,
+			 int oidlen,
+			 char *descr)
 {
   char c_oid[MAX_NAME_LEN];
   struct sysORTable **ptr=&table;

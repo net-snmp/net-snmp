@@ -9,12 +9,12 @@ config_require(util_funcs)
 
 extern char version_descr[];
 
-void init_system __P((void));
-u_char	*var_system __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+void init_system (void);
+u_char	*var_system (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 /* config file parsing routines */
-void system_parse_config_sysloc __P((char *, char *));
-void system_parse_config_syscon __P((char *, char *));
+void system_parse_config_sysloc (char *, char *);
+void system_parse_config_syscon (char *, char *);
 
 #define	VERSION_DESCR		1
 #define	VERSIONID		2

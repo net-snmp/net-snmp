@@ -101,14 +101,8 @@ struct varInfo {
   int spoiled;
 };
 
-int main __P((int, char **));
-int wait_for_peak_start __P((int period, int peak));
-void print_log __P((char *file, char *message));
-void sprint_descriptor __P((char *buffer, struct varInfo *vip));
-void processFileArgs __P((char *fileName));
-void wait_for_period __P((int period));
 
-void usage __P((void))
+void usage (void) 
 {
   fprintf(stderr, "Usage:\nsnmpdelta ");
   snmp_parse_args_usage(stderr);
@@ -127,9 +121,7 @@ void usage __P((void))
   fprintf(stderr, "  -L sumfile\tspecifies the sum file name\n");
 }
 
-int wait_for_peak_start(period, peak)
-int period;
-int peak;
+int wait_for_peak_start(int period, int peak)
 {
   struct timeval time, *tv = &time;
   struct tm tm;
@@ -157,9 +149,7 @@ int peak;
   return target;
 }
 
-void print_log(file, message)
-char *file;
-char *message;
+void print_log(char *file, char *message)
 {
   FILE *fp;
 
@@ -172,9 +162,8 @@ char *message;
   fclose(fp);
 }
 
-void sprint_descriptor(buffer, vip)
-char *buffer;
-struct varInfo *vip;
+void sprint_descriptor(char *buffer,
+		       struct varInfo *vip)
 {
   char buf[256], *cp;
 
@@ -197,8 +186,7 @@ struct varInfo *vip;
   strcpy(buffer, cp);
 }
 
-void processFileArgs(fileName)
-char *fileName;
+void processFileArgs(char *fileName)
 {
   FILE *fp;
   char buf[257], *cp;
@@ -232,8 +220,7 @@ char *fileName;
   return;
 }
 
-void wait_for_period(period)
-int period;
+void wait_for_period(int period)
 {
   struct timeval time, *tv = &time;
   struct tm tm;
@@ -286,9 +273,7 @@ int period;
 oid sysUpTimeOid[9] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
 int sysUpTimeLen = 9;
 
-int main(argc, argv)
-int argc;
-char **argv;
+int main(int argc, char *argv[])
 {
   struct snmp_session session, *ss;
   struct snmp_pdu *pdu, *response;

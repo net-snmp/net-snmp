@@ -1,3 +1,4 @@
+
 /*
  *  Host Resources MIB - partition device group implementation - hr_partition.c
  *
@@ -39,7 +40,7 @@ static char HRP_savedName[100];
 extern int   HRD_index;
 extern int   HRD_type_index;
 
-void  Save_HR_Partition __P((int, int));
+void  Save_HR_Partition (int, int);
 
 
 	/*********************
@@ -48,21 +49,32 @@ void  Save_HR_Partition __P((int, int));
 	 *
 	 *********************/
 
-void  Init_HR_Partition __P((void));
-int   Get_Next_HR_Partition __P((void));
-int header_hrpartition __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+void  Init_HR_Partition (void);
+int   Get_Next_HR_Partition (void);
+int header_hrpartition (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrpartition(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_hrpartition(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrpartition(struct variable *vp,
+		   oid *name,
+		   int *length,
+		   int exact,
+		   int *var_len,
+		   int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRPART_DISK_NAME_LENGTH		11
 #define HRPART_ENTRY_NAME_LENGTH	12
@@ -166,13 +178,12 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 
 
 u_char	*
-var_hrpartition(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrpartition(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
 {
     int  part_idx;
     static char string[100];
@@ -225,7 +236,7 @@ extern char disk_partition_first[];
 extern char disk_partition_last[];
 
 void
-Init_HR_Partition __P((void))
+Init_HR_Partition (void)
 {
    (void)Get_Next_HR_Disk();
 
@@ -233,7 +244,7 @@ Init_HR_Partition __P((void))
 }
 
 int
-Get_Next_HR_Partition __P((void))
+Get_Next_HR_Partition (void)
 {
     char string[100];
     int max_partitions;
@@ -269,9 +280,8 @@ Get_Next_HR_Partition __P((void))
 }
 
 void
-Save_HR_Partition( disk_idx, part_idx )
-   int disk_idx;
-   int part_idx;
+Save_HR_Partition(int disk_idx, 
+		  int part_idx)
 {
    HRP_savedDiskIndex = disk_idx;
    HRP_savedPartIndex = part_idx;

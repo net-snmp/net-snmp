@@ -53,6 +53,9 @@
  */
 
 #include "../../snmplib/system.h"
+#include "../../snmplib/asn1.h"
+#include "../../snmplib/snmp_api.h"
+
 #include "kernel_sunos5.h"
 
 /*-

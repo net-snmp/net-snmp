@@ -13,15 +13,15 @@
 #endif
 
 
-void  Init_HR_CPU __P((void));
-int   Get_Next_HR_CPU __P((void));
-char *describe_cpu __P((int));
+void  Init_HR_CPU (void);
+int   Get_Next_HR_CPU (void);
+char *describe_cpu (int);
 
-void  Init_HR_CoProc __P((void));
-int   Get_Next_HR_CoProc __P((void));
-char *describe_coproc __P((int));
+void  Init_HR_CoProc (void);
+int   Get_Next_HR_CoProc (void);
+char *describe_coproc (int);
 
-void	init_hr_other  __P((void))
+void init_hr_other (void)
 {
     init_device[ HRDEV_PROC ] = Init_HR_CPU;	
     next_device[ HRDEV_PROC ] = Get_Next_HR_CPU;
@@ -36,13 +36,13 @@ void	init_hr_other  __P((void))
 static int done_CPU;
 
 void
-Init_HR_CPU __P((void))
+Init_HR_CPU (void)
 {
    done_CPU = 0;
 }
 
 int
-Get_Next_HR_CPU __P((void))
+Get_Next_HR_CPU (void)
 {
 			/* Assumes a single CPU system
 				I think it's safe to assume at least one! */
@@ -55,8 +55,7 @@ Get_Next_HR_CPU __P((void))
 }
 
 char *
-describe_cpu( idx )
-   int idx;
+describe_cpu(int idx)
 {
 #ifdef _SC_CPU_VERSION
    int result;
@@ -91,13 +90,13 @@ describe_cpu( idx )
 static int done_coProc;
 
 void
-Init_HR_CoProc __P((void))
+Init_HR_CoProc (void)
 {
    done_coProc = 0;
 }
 
 int
-Get_Next_HR_CoProc __P((void))
+Get_Next_HR_CoProc (void)
 {
 			/* How to identify the presence of a co-processor ? */
 
@@ -111,8 +110,7 @@ Get_Next_HR_CoProc __P((void))
 
 
 char *
-describe_coproc( idx )
-    int idx;
+describe_coproc(int idx)
 {
     return("Guessing that there's a floating point co-processor");
 }

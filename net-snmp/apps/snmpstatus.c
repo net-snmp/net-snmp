@@ -96,11 +96,8 @@ int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
-int main __P((int, char **));
-char *uptime_string __P((u_long, char *));
 
-void
-usage __P((void))
+void usage(void)
 {
   fprintf(stderr,"Usage:\n  snmpstatus ");
   snmp_parse_args_usage(stderr);
@@ -108,9 +105,8 @@ usage __P((void))
   snmp_parse_args_descriptions(stderr);
 }
 
-char *uptime_string(timeticks, buf)
-    register u_long timeticks;
-    char *buf;
+char *uptime_string(u_long timeticks,
+		    char *buf)
 {
     int  seconds, minutes, hours, days;
 
@@ -134,10 +130,7 @@ char *uptime_string(timeticks, buf)
     return buf;
 }
 
-int
-main(argc, argv)
-    int   argc;
-    char  *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;

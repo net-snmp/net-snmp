@@ -5,8 +5,11 @@
 #ifndef _MIBGROUP_HRSWINST_H
 #define _MIBGROUP_HRSWINST_H
 
-extern void	init_hr_swinst __P((void));
-extern u_char	*var_hrswinst  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));;
+extern void	init_hr_swinst (void);
+extern u_char	*var_hrswinst  (struct variable *, oid *, int *, int, int *,
+				int (**write) (int, u_char *, u_char, int,
+					       u_char *, oid *, int));
+
 
 
 #define	HRSWINST_CHANGE		1

@@ -82,11 +82,11 @@
 
 
 #ifndef solaris2
-static void ARP_Scan_Init __P((void));
+static void ARP_Scan_Init (void);
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-static int ARP_Scan_Next __P((u_long *, char *, u_long *, u_short *));
+static int ARP_Scan_Next (u_long *, char *, u_long *, u_short *);
 #else
-static int ARP_Scan_Next __P((u_long *, char *, u_long *));
+static int ARP_Scan_Next (u_long *, char *, u_long *);
 #endif
 #endif
 
@@ -109,7 +109,7 @@ struct variable4 at_variables[] = {
    registering underneath */
 oid at_variables_oid[] = { 1,3,6,1,2,1,3,1,1 };
 
-void	init_at( )
+void init_at(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/at", at_variables, variable4, at_variables_oid);
@@ -117,14 +117,26 @@ void	init_at( )
 
 
 #ifndef solaris2
+
+/*
+  var_atEntry(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 u_char *
-var_atEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;	/* IN - pointer to variable entry that points here */
-    register oid	    *name;	/* IN/OUT - input name requested, output name found */
-    register int	    *length;	/* IN/OUT - length of input and output oid's */
-    int			    exact;	/* IN - TRUE if an exact match was requested. */
-    int			    *var_len;	/* OUT - length of variable or 0 if function returned. */
-    int			    (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_atEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     /*
      * Address Translation table object identifier is of form:
@@ -398,7 +410,7 @@ static struct arptab *at=0;
 #endif
 #endif /* CAN_USE_SYSCTL */
 
-static void ARP_Scan_Init __P((void))
+static void ARP_Scan_Init (void)
 {
 #ifndef CAN_USE_SYSCTL
 #ifndef linux
@@ -482,14 +494,10 @@ static void ARP_Scan_Init __P((void))
 }
 
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-static int ARP_Scan_Next(IPAddr, PhysAddr, ifType, ifIndex)
-u_short *ifIndex;
+static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType, u_short *ifIndex)
 #else
-static int ARP_Scan_Next(IPAddr, PhysAddr, ifType)
+static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 #endif
-u_long *IPAddr;
-char *PhysAddr;
-u_long *ifType;
 {
 #ifndef CAN_USE_SYSCTL
 #ifdef linux

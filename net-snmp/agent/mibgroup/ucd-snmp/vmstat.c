@@ -103,8 +103,8 @@
 #include "vmstat.h"
 #include "auto_nlist.h"
 
-void init_vmstat(void) {
-
+void init_vmstat(void)
+{
   struct variable2 extensible_vmstat_variables[] = {
     {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_vmstat,1,{MIBINDEX}},
     {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_vmstat, 1, {ERRORNAME }},
@@ -140,13 +140,10 @@ void init_vmstat(void) {
 #define BUFFSIZE 1024
 static char buff[BUFFSIZE];
 
-void getstat(unsigned *, unsigned *, unsigned *, unsigned long *,
-             unsigned *, unsigned *, unsigned *, unsigned *,
-             unsigned *, unsigned *, unsigned *);
-
 void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
              unsigned *pin, unsigned *pout, unsigned *sin, unsigned *sout,
-             unsigned *itot, unsigned *i1, unsigned *ct) {
+             unsigned *itot, unsigned *i1, unsigned *ct) 
+{
   static int stat;
 
   if ((stat=open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
@@ -177,7 +174,8 @@ enum vmstat_index { swapin = 0,    swapout,
 		    sysinterrupts, syscontext,
 		    cpuuser,       cpusystem, cpuidle };
 
-unsigned vmstat (int index) {
+unsigned vmstat (int index) 
+{
   unsigned int cpu_use[2], cpu_nic[2], cpu_sys[2];
   unsigned int duse,dsys,didl,div,divo2;
   unsigned long cpu_idl[2];
@@ -218,19 +216,12 @@ unsigned vmstat (int index) {
   }
 }
 
-unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_vmstat(struct variable *vp,
+				     oid *name,
+				     int *length,
+				     int exact,
+				     int *var_len,
+				     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   static long long_ret;

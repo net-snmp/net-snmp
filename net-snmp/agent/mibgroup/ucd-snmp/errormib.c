@@ -113,8 +113,7 @@ static int errorstatusprior=0;
 static char errorstring[STRMAX];
 
 void
-setPerrorstatus(to)
-  char *to;
+setPerrorstatus(char *to)
 {
   char buf[STRMAX];
   extern int errno;
@@ -125,9 +124,7 @@ setPerrorstatus(to)
 }
 
 void
-seterrorstatus(to,prior)
-  char *to;
-  int prior;
+seterrorstatus(char *to, int prior)
 {
   if (errorstatusprior <= prior ||
       (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
@@ -137,7 +134,8 @@ seterrorstatus(to,prior)
   }
 }
 
-void init_errormib(void) {
+void init_errormib(void) 
+{
 
   /* define the structure we're going to ask the agent to register our
      information at */
@@ -157,20 +155,23 @@ void init_errormib(void) {
                variable2, extensible_error_variables_oid);
 }
 
+/*
+  var_extensible_errors(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
   
-unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+*/
+unsigned char *var_extensible_errors(struct variable *vp,
+				     oid *name,
+				     int *length,
+				     int exact,
+				     int *var_len,
+				     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   static long long_ret;

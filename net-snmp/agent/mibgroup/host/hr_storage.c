@@ -109,14 +109,14 @@ extern struct mntent *HRFS_entry;
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-int Get_Next_HR_Store __P((void));
-void  Init_HR_Store __P((void));
-int header_hrstore __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
-int header_hrstoreEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int Get_Next_HR_Store (void);
+void  Init_HR_Store (void);
+int header_hrstore (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrstoreEntry (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
-int linux_mem __P((int, int));
+int linux_mem (int, int);
 
-void	init_hr_storeage __P((void))
+void init_hr_storeage (void)
 {
     auto_nlist(PHYSMEM_SYMBOL,0,0);
 #ifdef TOTAL_MEMORY_SYMBOL
@@ -128,14 +128,25 @@ void	init_hr_storeage __P((void))
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrstore(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_hrstore(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrstore(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSTORE_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -161,13 +172,12 @@ header_hrstore(vp, name, length, exact, var_len, write_method)
 }
 
 int
-header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrstoreEntry(struct variable *vp,
+		    oid *name,
+		    int *length,
+		    int exact,
+		    int *var_len,
+		    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSTORE_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -246,13 +256,12 @@ static char *hrs_descr[] = {
 
 
 u_char	*
-var_hrstore(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrstore(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
     int store_idx=0;
 #ifndef linux
@@ -479,7 +488,7 @@ static int FS_storage;
 static int HRS_index;
 
 void
-Init_HR_Store __P((void))
+Init_HR_Store (void)
 {
    HRS_index = -1;
    Init_HR_FileSys();
@@ -487,7 +496,7 @@ Init_HR_Store __P((void))
 }
 
 int
-Get_Next_HR_Store()
+Get_Next_HR_Store(void)
 {
 		/* File-based storage */
     long_return = -1;
@@ -512,9 +521,8 @@ Get_Next_HR_Store()
 
 #ifdef linux
 int
-linux_mem( mem_type, size_or_used )
-    int mem_type;
-    int size_or_used;
+linux_mem(int mem_type, 
+	  int size_or_used)
 {
     FILE *fp;
     char buf[100];

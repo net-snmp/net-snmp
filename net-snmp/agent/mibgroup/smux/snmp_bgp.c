@@ -59,13 +59,12 @@ static oid min_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 1, 0};
 extern u_char smux_type;
 
 u_char *
-var_bgp(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;
-	register oid        *name;
-	register int        *length;
-	int                 exact;
-	int                 *var_len;
-	int                 (**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_bgp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 	u_char *var;
 	int result;

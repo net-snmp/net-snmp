@@ -66,21 +66,21 @@
 	 *
 	 *********************/
 
-void  Init_HR_Disk __P((void));
-int   Get_Next_HR_Disk __P((void));
-void  Save_HR_Disk_General __P((void));
-void  Save_HR_Disk_Specific __P((void));
-int   Query_Disk __P((int));
-int   Is_It_Writeable __P((void));
-int   What_Type_Disk __P((void));
-int   Is_It_Removeable __P((void));
-char *describe_disk __P((int));
-int header_hrdisk __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
-void Add_HR_Disk_entry __P(( char*, char, char, char, char, char));
+void  Init_HR_Disk (void);
+int   Get_Next_HR_Disk (void);
+void  Save_HR_Disk_General (void);
+void  Save_HR_Disk_Specific (void);
+int   Query_Disk (int);
+int   Is_It_Writeable (void);
+int   What_Type_Disk (void);
+int   Is_It_Removeable (void);
+char *describe_disk (int);
+int header_hrdisk (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+void Add_HR_Disk_entry ( char*, char, char, char, char, char);
 
 
-       int HRD_type_index;
-       int HRD_index;
+int HRD_type_index;
+int HRD_index;
 static char HRD_savedModel[40];
 static long HRD_savedCapacity = 1044;
 static int  HRD_savedFlags;
@@ -116,7 +116,7 @@ static struct disklabel HRD_info;
 	 *********************/
 
 
-void	init_hr_disk( )
+void init_hr_disk(void)
 {
     int i;
 
@@ -158,14 +158,24 @@ void	init_hr_disk( )
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrdisk(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+*/
+
 int
-header_hrdisk(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrdisk(struct variable *vp,
+	      oid *name,
+	      int *length,
+	      int exact,
+	      int *var_len,
+	      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define HRDISK_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -231,13 +241,12 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
 
 
 u_char	*
-var_hrdisk(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrdisk(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int  disk_idx;
 
@@ -286,11 +295,12 @@ int HR_number_disk_types = 0;
 
 
 void
-Add_HR_Disk_entry ( dev_string, first_dev, last_dev, full_dev, first_partn, last_partn)
-    char *dev_string;
-    char first_dev, last_dev;
-    char full_dev;
-    char first_partn, last_partn;
+Add_HR_Disk_entry (char *dev_string,
+		   char first_dev, 
+		   char last_dev,
+		   char full_dev,
+		   char first_partn, 
+		   char last_partn)
 {
     disk_device_strings[ HR_number_disk_types ] = dev_string;
     disk_device_id[      HR_number_disk_types ] = first_dev;
@@ -320,14 +330,14 @@ Add_HR_Disk_entry ( dev_string, first_dev, last_dev, full_dev, first_partn, last
   
 
 void
-Init_HR_Disk __P((void))
+Init_HR_Disk(void)
 {
     HRD_type_index = 0;
     HRD_index = -1;
 }
 
 int
-Get_Next_HR_Disk __P((void))
+Get_Next_HR_Disk (void)
 {
     char string[100];
     int fd, result;
@@ -386,7 +396,7 @@ Get_Next_HR_Disk __P((void))
 }
 
 void
-Save_HR_Disk_Specific __P((void))
+Save_HR_Disk_Specific (void)
 {
 #ifdef DIOC_DESCRIBE
 	    HRD_savedIntf_type = HRD_info.intf_type; 
@@ -411,7 +421,7 @@ Save_HR_Disk_Specific __P((void))
 }
 
 void
-Save_HR_Disk_General __P((void))
+Save_HR_Disk_General (void)
 {
 #ifdef DIOC_DESCRIBE
     strcpy( HRD_savedModel,  HRD_info.model_num );   
@@ -428,8 +438,7 @@ Save_HR_Disk_General __P((void))
 }
 
 char *
-describe_disk( idx )
-    int idx;
+describe_disk(int idx)
 {
     if ( HRD_savedModel[0] == '\0' )
 	return( "some sort of disk");
@@ -439,8 +448,7 @@ describe_disk( idx )
 
 
 int
-Query_Disk( fd )
-    int fd;
+Query_Disk(int fd)
 {
     int result = -1;
 
@@ -470,7 +478,7 @@ Query_Disk( fd )
 
 
 int
-Is_It_Writeable()
+Is_It_Writeable(void)
 {
 #ifdef DIOC_DESCRIBE
     if (( HRD_savedFlags & WRITE_PROTECT_FLAG ) ||
@@ -487,7 +495,7 @@ Is_It_Writeable()
 }
 
 int
-What_Type_Disk()
+What_Type_Disk(void)
 {
 #ifdef DIOC_DESCRIBE
     switch ( HRD_savedDev_type ) {
@@ -550,7 +558,7 @@ What_Type_Disk()
 }
 
 int
-Is_It_Removeable()
+Is_It_Removeable(void)
 {
 #ifdef DIOC_DESCRIBE
     if (( HRD_savedIntf_type == PC_FDC_INTF   ) ||

@@ -68,7 +68,7 @@ SOFTWARE.
 
 #include "netstat.h"
 
-static char *inetname __P((struct in_addr));
+static char *inetname (struct in_addr);
 
 struct stat_table {
     int	    entry;  /* entry number in table */
@@ -204,8 +204,7 @@ char *tcpstates[] = {
  * protocol (currently only TCP).  For TCP, also give state of connection.
  */
 void
-protopr (name)
-    char *name;
+protopr (char *name)
 {
     struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
     struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
@@ -395,7 +394,7 @@ protopr (name)
  * Dump UDP statistics structure.
  */
 void
-udp_stats __P((void))
+udp_stats(void)
 {
     oid varname[MAX_NAME_LEN], *udpentry;
     int varname_len;
@@ -426,7 +425,7 @@ udp_stats __P((void))
  * Dump TCP statistics structure.
  */
 void
-tcp_stats __P((void))
+tcp_stats(void)
 {
     oid varname[MAX_NAME_LEN], *tcpentry;
     int varname_len;
@@ -457,7 +456,7 @@ tcp_stats __P((void))
  * Dump IP statistics structure.
  */
 void
-ip_stats __P((void))
+ip_stats(void)
 {
     oid varname[MAX_NAME_LEN], *ipentry;
     int varname_len;
@@ -488,7 +487,7 @@ ip_stats __P((void))
  * Dump ICMP statistics.
  */
 void
-icmp_stats __P((void))
+icmp_stats(void)
 {
     oid varname[MAX_NAME_LEN], *icmpentry;
     int varname_len;
@@ -558,10 +557,9 @@ icmp_stats __P((void))
  * If the nflag was specified, use numbers instead of names.
  */
 void
-inetprint(in, port, proto)
-	register struct in_addr *in;
-	u_short port; 
-	char *proto;
+inetprint(struct in_addr *in,
+	  u_short port,
+	  char *proto)
 {
 	struct servent *sp = 0;
 	char line[80], *cp;
@@ -585,8 +583,7 @@ inetprint(in, port, proto)
  * numeric value, otherwise try for symbolic name.
  */
 static char *
-inetname(in)
-	struct in_addr in;
+inetname(struct in_addr in)
 {
 	register char *cp;
 	static char line[50];

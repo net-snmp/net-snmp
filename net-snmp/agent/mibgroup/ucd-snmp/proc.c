@@ -44,12 +44,13 @@
 #include "mib_module_config.h"
 #include "../../../snmplib/system.h"
 
-struct myproc *get_proc_instance __P((struct myproc *,int));
+struct myproc *get_proc_instance (struct myproc *,int);
 struct myproc *procwatch = NULL;
 static struct extensible fixproc;
 int numprocs=0;
 
-void init_proc(void) {
+void init_proc(void) 
+{
 
 /* define the structure we're going to ask the agent to register our
    information at */
@@ -80,7 +81,8 @@ void init_proc(void) {
 /* Define snmpd.conf reading routines first.  They get called
    automatically by the invocation of a macro in the proc.h file. */
 
-void proc_free_config __P((void)) {
+void proc_free_config(void)  
+{
   struct myproc *ptmp, *ptmp2;
   
   for (ptmp = procwatch; ptmp != NULL;) {
@@ -92,9 +94,7 @@ void proc_free_config __P((void)) {
   numprocs = 0;
 }
 
-void proc_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void proc_parse_config(char *word, char* cptr)
 {
   /* skip past used ones */
   struct myproc **procp = &procwatch;
@@ -127,19 +127,12 @@ void proc_parse_config(word,cptr)
 
 /* The routine that handles everything */
 
-unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_proc(struct variable *vp,
+				   oid *name,
+				   int *length,
+				   int exact,
+				   int *var_len,
+				   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   struct myproc *proc;
@@ -210,14 +203,13 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
 }
 
 int
-fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+fixProcError(int action,
+	     u_char *var_val,
+	     u_char var_val_type,
+	     int var_val_len,
+	     u_char *statP,
+	     oid *name,
+	     int name_len)
 {
   
   struct myproc *proc;
@@ -241,9 +233,8 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_WRONGTYPE;
 }
 
-struct myproc *get_proc_instance(proc,inst)
-     int inst;
-     struct myproc *proc;
+struct myproc *get_proc_instance(struct myproc *proc,
+				 int inst)
 {
   int i;
   
@@ -266,8 +257,7 @@ static int nproc = 0;
 static int onproc = -1;
 static struct kinfo_proc *pbase = 0;
 
-int sh_count_procs(procname)
-  char *procname;
+int sh_count_procs(char *procname)
 {
   register int i,ret = 0;
   register struct kinfo_proc *pp;
@@ -297,9 +287,9 @@ int sh_count_procs(procname)
 
 #define	NPROCS		32		/* number of proces to read at once */
 
-static struct user *getuser __P((struct proc *));
-static int getword __P((off_t));
-static int getstruct __P((off_t, char *, off_t, int));
+static struct user *getuser (struct proc *);
+static int getword (off_t);
+static int getstruct (off_t, char *, off_t, int);
 
 extern int kmem, mem, swap;
 
@@ -323,8 +313,7 @@ static struct nlist proc_nl[] = {
 };
 
 int
-sh_count_procs(procname)
-	char	*procname;
+sh_count_procs(char *procname)
 {
 	int total, proc_active, nproc;
 	int thisproc = 0;
@@ -390,8 +379,7 @@ sh_count_procs(procname)
 	(read(file, (char *)(dst), (size)) != (size))
 
 static struct user *
-getuser(aproc)
-	struct proc *aproc;
+getuser(struct proc *aproc)
 {
 	static union {
 		struct user user;
@@ -445,8 +433,7 @@ getuser(aproc)
 }
 
 static int
-getword(loc)
-	off_t loc;
+getword(off_t loc)
 {
 	int val;
 
@@ -456,11 +443,10 @@ getword(loc)
 }
 
 static int
-getstruct(loc, name, dest, size)
-	off_t loc;
-	char *name;
-	off_t dest;
-	int size;
+getstruct(off_t loc,
+	  char *name,
+	  off_t dest,
+	  int size)
 {
 	if(SKRD(kmem,loc,dest,size))
 		return(0);
@@ -476,8 +462,7 @@ getstruct(loc, name, dest, size)
 #include <sys/proc.h>
 
 int
-sh_count_procs(procname)
-	char *procname;
+sh_count_procs(char *procname)
 {
 	static kvm_t *kd = NULL;
 	struct proc *p;
@@ -511,8 +496,7 @@ sh_count_procs(procname)
 	return(total);
 }
 #else
-int sh_count_procs(procname)
-     char *procname;
+int sh_count_procs(char *procname)
 {
   char line[STRMAX], *cptr;
   int ret=0, fd;
@@ -550,8 +534,7 @@ int sh_count_procs(procname)
 }
 #endif
 
-int get_ps_output(ex)
-  struct extensible *ex;
+int get_ps_output(struct extensible *ex)
 {
   int fd;
 
