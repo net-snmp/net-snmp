@@ -138,8 +138,8 @@ int reconfig = 0;
 
 const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n",
 	   *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
-const char *trap1_fmt_str = NULL,
-	   *trap2_fmt_str = NULL; /* how to format logging to stdout */
+char       *trap1_fmt_str = NULL,
+           *trap2_fmt_str = NULL; /* how to format logging to stdout */
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -510,7 +510,12 @@ int snmp_input(int op,
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
-	        (void) format_trap (out_bfr, SPRINT_MAX_LEN, trap2_fmt_str, pdu);
+	        if (trap2_fmt_str == NULL || trap2_fmt_str[0] == '\0')
+                    (void) format_trap (out_bfr, SPRINT_MAX_LEN,
+                                        trap2_std_str, pdu);
+                else
+                    (void) format_trap (out_bfr, SPRINT_MAX_LEN,
+                                        trap2_fmt_str, pdu);
                 snmp_log(LOG_INFO, out_bfr);
 	    }
 	    if (Syslog) {
@@ -584,7 +589,7 @@ static void parse_trap1_fmt(const char *token, char *line)
 static void free_trap1_fmt(void)
 {
     if (trap1_fmt_str != trap1_std_str) free ((char *)trap1_fmt_str);
-    trap1_fmt_str = trap1_std_str;
+    trap1_fmt_str = NULL;
 }
 
 
@@ -597,7 +602,7 @@ static void parse_trap2_fmt(const char *token, char *line)
 static void free_trap2_fmt(void)
 {
     if (trap2_fmt_str != trap2_std_str) free ((char *)trap2_fmt_str);
-    trap2_fmt_str = trap2_std_str;
+    trap2_fmt_str = NULL;
 }
 
 
