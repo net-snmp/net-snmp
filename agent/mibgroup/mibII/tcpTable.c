@@ -23,6 +23,9 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #include <net/if.h>
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>

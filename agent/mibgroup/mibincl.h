@@ -28,9 +28,6 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 #include "mib_module_config.h"
 
