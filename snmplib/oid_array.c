@@ -257,7 +257,7 @@ netsnmp_Remove_oid_data(oid_array a, void *key, void *save )
 }
 
 void
-netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each fe, void * context, int sort)
+netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each * fe, void * context, int sort)
 {
     int             i;
     oid_array_table *t = (oid_array_table *) a;

@@ -618,7 +618,7 @@ count_varbinds( netsnmp_variable_list *var_ptr )
 }
 
 int
-count_varbinds_of_type( netsnmp_variable_list *var_ptr, int type )
+count_varbinds_of_type( netsnmp_variable_list *var_ptr, u_char type )
 {
   int count = 0;
   
@@ -630,7 +630,7 @@ count_varbinds_of_type( netsnmp_variable_list *var_ptr, int type )
 }
 
 netsnmp_variable_list *
-find_varbind_of_type( netsnmp_variable_list *var_ptr, int type )
+find_varbind_of_type( netsnmp_variable_list *var_ptr, u_char type )
 {
   for (;  var_ptr != NULL && var_ptr->type != type ;
        var_ptr = var_ptr->next_variable );
@@ -677,7 +677,7 @@ snmp_set_var_value(netsnmp_variable_list *newvar,
 }
 
 void
-snmp_replace_var_types(netsnmp_variable_list *vbl, int old_type, int new_type) {
+snmp_replace_var_types(netsnmp_variable_list *vbl, u_char old_type, u_char new_type) {
     while(vbl) {
         if (vbl->type == old_type) {
             snmp_set_var_typed_value(vbl, new_type, NULL, 0);
@@ -687,7 +687,7 @@ snmp_replace_var_types(netsnmp_variable_list *vbl, int old_type, int new_type) {
 }
 
 void
-snmp_reset_var_types(netsnmp_variable_list *vbl, int new_type) {
+snmp_reset_var_types(netsnmp_variable_list *vbl, u_char new_type) {
     while(vbl) {
         snmp_set_var_typed_value(vbl, new_type, NULL, 0);
         vbl = vbl->next_variable;

@@ -32,7 +32,7 @@ void		netsnmp_udp_parse_security	(const char *token, char *param);
 
 int		netsnmp_udp_getSecName	(void *opaque, int olength,
 					 const char *community,
-					 int community_len, char **secname);
+					 size_t community_len, char **secname);
 
 /*  "Constructor" for transport domain object.  */
 

@@ -254,7 +254,7 @@ netsnmp_transport		*netsnmp_tcp_transport	(struct sockaddr_in *addr,
 
     /*  We should set SO_REUSEADDR too.  */
     
-    setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void*)&opt, sizeof(opt));
 
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {

@@ -5445,7 +5445,7 @@ snmp_add_var(netsnmp_pdu *pdu,
   int result = SNMPERR_SUCCESS;
   int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
   u_char *buf = NULL;
-  const char *buf_ptr = NULL;
+  u_char *buf_ptr = NULL;
   size_t buf_len = 0, value_len = 0, tint;
   long ltmp;
   struct tree *tp;
