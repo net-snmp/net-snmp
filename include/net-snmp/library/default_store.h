@@ -90,6 +90,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_PERSISTENT_DIR    8
 #define NETSNMP_DS_LIB_CONFIGURATION_DIR 9
 #define NETSNMP_DS_LIB_SECMODEL          10
+#define NETSNMP_DS_LIB_MIBDIRS           11
 
     /*
      * end storage definitions 
