@@ -310,7 +310,7 @@ and return the appropriate response through it's stdout.
 The first line of stdout should be the mib OID of the returning value.
 The second line should be the TYPE of value returned, where TYPE is
 one of the text strings:
-.B string, integer, objectid, timeticks, ipaddress, counter, 
+.B string, integer, unsigned, objectid, timeticks, ipaddress, counter, 
 or
 .B gauge.
 The third line of stdout should be the VALUE corresponding with the

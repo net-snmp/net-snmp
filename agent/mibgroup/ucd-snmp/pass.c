@@ -252,8 +252,13 @@ u_char *var_extensible_pass(struct variable *vp,
           return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"integer",7)) {
           *var_len = sizeof(long_ret);
-          long_ret = atoi(buf2);
+          long_ret = strtol(buf2, NULL, 10);
           vp->type = ASN_INTEGER;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"unsigned",7)) {
+          *var_len = sizeof(long_ret);
+          long_ret = strtoul(buf2, NULL, 10);
+          vp->type = ASN_UNSIGNED;
           return((unsigned char *) &long_ret);
         } else if (!strncasecmp(buf,"counter",7)) {
           *var_len = sizeof(long_ret);
