@@ -2517,32 +2517,75 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 }
 
 #ifdef USE_REVERSE_ASNENCODING
+
 /* on error, returns NULL (likely an encoding problem). */
 u_char *
 snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 {
-  struct variable_list *vp, *curvp;
+#define VPCACHE_SIZE 50
+  struct variable_list *vpcache[VPCACHE_SIZE];
+  struct variable_list *vp, *tmpvp;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
   size_t length;
   u_char *startcp = cp;
+  int i, wrapped=0, notdone, final;
 
-  /* Store variable-bindings */
-  DEBUGDUMPSECTION("send", "VarBindList");
-  curvp = NULL;
-  while (curvp != pdu->variables) {
-      for(vp = pdu->variables; vp && curvp != vp->next_variable;
-          vp = vp->next_variable);
-      
-      DEBUGDUMPSECTION("send", "VarBind");
-      cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
-                              vp->val_len, (u_char *)vp->val.string,
-                              out_length);
-      DEBUGINDENTLESS();
-      if (cp == NULL)
-          return NULL;
-      curvp = vp;
+  DEBUGMSGTL(("snmp_pdu_rbuild","starting\n"));
+  for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp;
+      vp = vp->next_variable, i--) {
+      if (i < 0) {
+          wrapped = notdone = 1;
+          i = VPCACHE_SIZE-1;
+          DEBUGMSGTL(("snmp_pdu_rbuild","wrapped\n"));
+      }
+      vpcache[i] = vp;
   }
-  DEBUGINDENTLESS();
+  final = i + 1;
+
+  do {
+      for(i = final; i < VPCACHE_SIZE; i++) {
+          vp = vpcache[i];
+          DEBUGDUMPSECTION("send", "VarBind");
+          cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
+                                  vp->val_len, (u_char *)vp->val.string,
+                                  out_length);
+          DEBUGINDENTLESS();
+          if (cp == NULL)
+              return NULL;
+      }
+      DEBUGINDENTLESS();
+      if (wrapped) {
+          notdone = 1;
+          for(i = 0; i < final; i++) {
+              vp = vpcache[i];
+              DEBUGDUMPSECTION("send", "VarBind");
+              cp = snmp_rbuild_var_op(cp, vp->name, &vp->name_length, vp->type,
+                                      vp->val_len, (u_char *)vp->val.string,
+                                      out_length);
+              DEBUGINDENTLESS();
+              if (cp == NULL)
+                  return NULL;
+          }
+          
+          if (final == 0)
+              tmpvp = vpcache[VPCACHE_SIZE-1];
+          else
+              tmpvp = vpcache[final-1];
+          wrapped = 0;
+          for(vp = pdu->variables, i = VPCACHE_SIZE-1; vp && vp != tmpvp;
+              vp = vp->next_variable, i--) {
+              if (i < 0) {
+                  wrapped = 1;
+                  i = VPCACHE_SIZE-1;
+                  DEBUGMSGTL(("snmp_pdu_rbuild","wrapped\n"));
+              }
+              vpcache[i] = vp;
+          }
+          final = i + 1;
+      } else {
+          notdone = 0;
+      }
+  } while (notdone);
 
   /* Save current location and build SEQUENCE tag and length placeholder
        for variable-bindings sequence
