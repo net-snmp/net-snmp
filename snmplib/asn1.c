@@ -383,7 +383,7 @@ asn_parse_string(u_char *data,
     DEBUGDUMPSETUP("dump_recv", data, bufp - data + asn_length);
 
     memmove(string, bufp, asn_length);
-    if (strlength > asn_length)
+    if (*strlength > (int)asn_length)
       string[asn_length] = 0;
     *strlength = (int)asn_length;
     *datalength -= (int)asn_length + (bufp - data);
@@ -1012,7 +1012,6 @@ asn_parse_bitstring(u_char *data,
  */
     register u_char *bufp = data;
     u_long	    asn_length;
-    int i;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -1121,7 +1120,6 @@ asn_parse_unsigned_int64(u_char *data,
     u_long	    asn_length;
     register u_long low = 0, high = 0;
     int intsize = 4;
-    int i;
     
     if (countersize != sizeof(struct counter64)){
 	ERROR_MSG("not right size");
@@ -1328,7 +1326,6 @@ asn_parse_signed_int64(u_char *data,
   u_long	    asn_length;
   register u_int low = 0, high = 0;
   int intsize = 4;
-  int i;
     
   if (countersize != sizeof(struct counter64)){
     ERROR_MSG("not right size");
@@ -1496,7 +1493,6 @@ asn_parse_float(u_char *data,
 	long   longVal;
 	u_char c[sizeof(float)];
     } fu;
-    int i;
 
     if (floatsize != sizeof(float)){
 	ERROR_MSG("not right size");
@@ -1633,8 +1629,7 @@ asn_parse_double(u_char *data,
         int    intVal[2];
 	u_char c[sizeof(double)];
     } fu;
-    int i;
-    
+  
 
     if (doublesize != sizeof(double)){
 	ERROR_MSG("not right size");
