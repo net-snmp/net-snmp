@@ -126,7 +126,7 @@ extern "C" {
 #define UNAMEPROG "/bin/uname"
 
 /* pattern for temporary file names */
-#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
+#define NETSNMP_TEMP_FILE_PATTERN INSTALL_BASE ## "/temp/snmpdXXXXXX"
 
 /* testing code sections. */
 /* #undef SNMP_TESTING_CODE */
