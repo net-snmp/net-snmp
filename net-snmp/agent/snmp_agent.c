@@ -890,6 +890,20 @@ init_master_agent(void)
     return 0;
 }
 
+void
+clear_nsap_list(void)
+{
+    DEBUGMSGTL(("clear_nsap_list", "clear the nsap list\n"));
+
+    while (agent_nsap_list != NULL)
+	netsnmp_deregister_agent_nsap(agent_nsap_list->handle);
+}
+
+void
+shutdown_master_agent(void)
+{
+    clear_nsap_list();
+}
 
 
 netsnmp_agent_session *

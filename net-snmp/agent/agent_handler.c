@@ -666,6 +666,12 @@ clone_handler(netsnmp_mib_handler *it)
 
 static netsnmp_data_list *handler_reg = NULL;
 
+void
+handler_free_callback(void *free)
+{
+    netsnmp_handler_free((netsnmp_mib_handler *)free);
+}
+
 /** registers a given handler by name so that it can be found easily later.
  */
 void
@@ -674,8 +680,18 @@ netsnmp_register_handler_by_name(const char *name,
 {
     netsnmp_add_list_data(&handler_reg,
                           netsnmp_create_data_list(name, (void *) handler,
-                                                   NULL));
+                                                   handler_free_callback));
     DEBUGMSGTL(("handler_registry", "registering helper %s\n", name));
+}
+
+/** clears the entire handler-registration list
+ */
+void
+netsnmp_clear_handler_list(void)
+{
+    DEBUGMSGTL(("agent_handler", "netsnmp_clear_handler_list() called\n"));
+    netsnmp_free_all_list_data(handler_reg);
+    handler_reg = NULL;
 }
 
 /** @internal

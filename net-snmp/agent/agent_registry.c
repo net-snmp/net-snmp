@@ -1420,9 +1420,13 @@ setup_tree(void)
 			   MASTER_AGENT);
 #endif
 
-    netsnmp_register_null(ccitt, 1);
-    netsnmp_register_null(iso, 1);
-    netsnmp_register_null(joint_ccitt_iso, 1);
+    /* 
+     * we need to have the oid's in the heap, that we can *free* it for every case, 
+     * thats the purpose of the duplicate_objid's
+     */
+    netsnmp_register_null(snmp_duplicate_objid(ccitt, 1), 1);
+    netsnmp_register_null(snmp_duplicate_objid(iso, 1), 1);
+    netsnmp_register_null(snmp_duplicate_objid(joint_ccitt_iso, 1), 1);
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 
@@ -1430,6 +1434,91 @@ setup_tree(void)
 #endif
 }
 
+int 
+remove_tree_entry (oid *name, size_t len) {
+
+    netsnmp_subtree *sub = NULL;
+
+    if ((sub = netsnmp_subtree_find(name, len, NULL, "")) == NULL) {
+	return MIB_NO_SUCH_REGISTRATION;
+    }
+
+    return unregister_mib_context(name, len, sub->priority,
+				  sub->range_subid, sub->range_ubound, "");
+
+}
+
+
+void
+shutdown_tree(void) {
+    oid ccitt[1]           = { 0 };
+    oid iso[1]             = { 1 };
+    oid joint_ccitt_iso[1] = { 2 };
+
+    DEBUGMSGTL(("agent_registry", "shut down tree\n"));
+
+    remove_tree_entry(joint_ccitt_iso, 1);
+    remove_tree_entry(iso, 1);
+    remove_tree_entry(ccitt, 1);
+
+}
+
+void
+clear_subtree (netsnmp_subtree *sub) {
+
+    if (sub == NULL)
+	return;
+
+    if (sub->children != NULL) {
+	clear_subtree(sub->children);
+    }
+
+    if (sub->next != NULL) {
+	clear_subtree(sub->next);
+    }
+
+    netsnmp_subtree_free(sub);
+
+}
+
+void
+clear_lookup_cache(void) {
+
+    lookup_cache_context *ptr = NULL, *next = NULL;
+
+    ptr = thecontextcache;
+    while (ptr) {
+	next = ptr->next;
+	SNMP_FREE(ptr->context);
+	SNMP_FREE(ptr);
+	ptr = next;
+    }
+    thecontextcache = NULL; /* !!! */
+}
+
+void
+clear_context(void) {
+
+    subtree_context_cache *ptr = NULL, *next = NULL;
+
+    DEBUGMSGTL(("agent_registry", "clear context\n"));
+
+    ptr = get_top_context_cache(); 
+    while (ptr) {
+	next = ptr->next;
+
+	if (ptr->first_subtree) {
+	    clear_subtree(ptr->first_subtree);
+	}
+
+	SNMP_FREE(ptr->context_name);
+        SNMP_FREE(ptr);
+
+	ptr = next;
+    }
+    context_subtrees = NULL; /* !!! */
+    clear_lookup_cache();
+}
 
 extern void     dump_idx_registry(void);
 void

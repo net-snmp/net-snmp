@@ -178,6 +178,28 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     return count;
 }
 
+void
+clear_callback(void)
+{
+    unsigned int i = 0, j = 0; 
+    struct snmp_gen_callback *scp = NULL, *next = NULL;
+
+    DEBUGMSGTL(("callback", "clear callback\n"));
+    for (i = 0; i < MAX_CALLBACK_IDS; i++) {
+	for (j = 0; j < MAX_CALLBACK_SUBIDS; j++) {
+	    scp = thecallbacks[i][j]; 
+	    while (scp != NULL) {
+		next = scp->next;
+		if (scp->sc_client_arg != NULL)
+		    SNMP_FREE(scp->sc_client_arg);
+		SNMP_FREE(scp);
+		scp = next;
+	    }
+	    thecallbacks[i][j] = NULL;
+	}
+    }
+}
+
 struct snmp_gen_callback *
 snmp_callback_list(int major, int minor)
 {

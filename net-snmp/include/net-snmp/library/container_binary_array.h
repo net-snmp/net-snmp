@@ -25,6 +25,11 @@ extern          "C" {
      */
     netsnmp_factory *     netsnmp_container_get_binary_array_factory(void);
 
+    int netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save);
+
+    void netsnmp_binary_array_release(netsnmp_container *c);
+
+
 #ifdef __cplusplus
 }
 #endif

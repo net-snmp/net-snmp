@@ -49,6 +49,8 @@ extern          "C" {
     const oid      *get_default_authtype(size_t *);
     const oid      *get_default_privtype(size_t *);
     void            snmpv3_set_engineBootsAndTime(int boots, int ttime);
+    int             free_engineID(int majorid, int minorid, void *serverarg,
+				  void *clientarg);
 
 #ifdef __cplusplus
 }

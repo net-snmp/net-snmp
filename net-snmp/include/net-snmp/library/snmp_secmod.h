@@ -135,6 +135,11 @@ struct snmp_secmod_def *find_sec_mod(int);
 int             unregister_sec_mod(int);        /* register a security service */
 void            init_secmod(void);
 
+/*
+ * clears the sec_mod list
+ */
+void            clear_sec_mod(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -978,6 +978,9 @@ main(int argc, char *argv[])
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown("snmpd");
+    shutdown_master_agent();
+    shutdown_agent();
+
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 				NETSNMP_DS_AGENT_LEAVE_PIDFILE) &&
 	(pid_file != NULL)) {
@@ -986,6 +989,10 @@ main(int argc, char *argv[])
 #ifdef WIN32
     agent_status = AGENT_STOPPED;
 #endif
+
+    SNMP_FREE(argvrestartname);
+    SNMP_FREE(argvrestart);
+    SNMP_FREE(argvrestartp);
     return 0;
 }                               /* End main() -- snmpd */
 

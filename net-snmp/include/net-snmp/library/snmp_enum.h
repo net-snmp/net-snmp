@@ -74,6 +74,7 @@ extern          "C" {
     int             se_add_pair_to_list(struct snmp_enum_list **list,
                                         char *label, int value);
 
+    void            clear_snmp_enum(void);
 
 #ifdef __cplusplus
 }

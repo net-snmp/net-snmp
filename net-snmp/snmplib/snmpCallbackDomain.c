@@ -503,3 +503,35 @@ netsnmp_callback_open(int attach_to,
             ((netsnmp_callback_info *) callback_tr->data)->callback_num;
     return callback_ss;
 }
+
+
+
+void
+netsnmp_clear_callback_list(void)
+{
+
+    netsnmp_transport_list *list = trlist, *next = NULL;
+    netsnmp_transport *tr = NULL;
+
+    DEBUGMSGTL(("callback_clear", "called netsnmp_callback_clear_list()\n"));
+    while (list != NULL) {
+	next = list->next;
+	tr = list->transport;
+
+	if (tr != NULL) {
+	    tr->f_close(tr);
+  	    netsnmp_transport_remove_from_list(&trlist, list->transport);
+	    netsnmp_transport_free(list->transport);
+	}
+	list = next;
+    }
+    trlist = NULL;
+
+}
+
+
+
+
+
+
+

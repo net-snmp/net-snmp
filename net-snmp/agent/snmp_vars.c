@@ -290,3 +290,20 @@ init_agent(const char *app)
 
 oid             nullOid[] = { 0, 0 };
 int             nullOidLen = sizeof(nullOid);
+
+void
+shutdown_agent(void) {
+
+    /* probably some of this can be called as shutdown callback */
+    shutdown_tree();
+    clear_context();
+    netsnmp_clear_callback_list();
+    netsnmp_clear_tdomain_list();
+    netsnmp_clear_handler_list();
+    netsnmp_clear_container();
+    clear_sec_mod();
+    clear_snmp_enum();
+    clear_callback();
+    clear_user_list();
+}
+

@@ -128,6 +128,7 @@ extern          "C" {
 
     void            dump_etimelist_entry(Enginetime e, int count);
     void            dump_etimelist(void);
+    void            free_enginetime(unsigned char *engineID, size_t engineID_len);
 
 #ifdef __cplusplus
 }
