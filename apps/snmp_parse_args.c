@@ -144,6 +144,7 @@ snmp_parse_args(int argc,
   char *Cpsz = NULL;
   u_char buf[BUF_SIZE];
   int bsize;
+  int tmp_port;
   char Opts[BUF_SIZE];
 
   /* initialize session to default values */
@@ -240,18 +241,19 @@ snmp_parse_args(int argc,
         break;
 
       case 'p':
-        session->remote_port = atoi(optarg);
-        if (session->remote_port == 0) {
-          fprintf(stderr,"Need port number after -p flag.\n");
+        tmp_port = atoi(optarg);
+        if ((tmp_port < 1) || (tmp_port > 65535)) {
+          fprintf(stderr,"Invalid port number after -p flag.\n");
           usage();
           exit(1);
         }
+        session->remote_port = (u_short)tmp_port;
         break;
 
       case 't':
         session->timeout = atoi(optarg) * 1000000L;
-        if (session->timeout == 0) {
-          fprintf(stderr,"Need time in seconds after -t flag.\n");
+        if (session->timeout < 0 || !isdigit(optarg[0])) {
+          fprintf(stderr,"Invalid timeout in seconds after -t flag.\n");
           usage();
           exit(1);
         }
@@ -259,8 +261,8 @@ snmp_parse_args(int argc,
 
       case 'r':
         session->retries = atoi(optarg);
-        if (session->retries == 0) {
-          fprintf(stderr,"Need number of retries after -r flag.\n");
+        if (session->retries < 0 || !isdigit(optarg[0])) {
+          fprintf(stderr,"Invalid number of retries after -r flag.\n");
           usage();
           exit(1);
         }
@@ -283,14 +285,14 @@ snmp_parse_args(int argc,
 	break;
 
       case 'Z':
-        session->engineBoots = (u_long)atol(optarg);
-        if (session->engineBoots == 0) {
+        session->engineBoots = strtoul(optarg, NULL, 10);
+        if (session->engineBoots == 0 || !isdigit(optarg[0])) {
           fprintf(stderr,"Need engine boots value after -Z flag.\n");
           usage();
           exit(1);
         }
         if ((++optind<argc) && isdigit(argv[optind][0]))
-          session->engineTime = (u_long)(atol(argv[optind]));
+          session->engineTime = strtoul(argv[optind], NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
