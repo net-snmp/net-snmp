@@ -287,7 +287,11 @@ int getswap(rettype)
   /* this is a real hack.  I need to get the hold info from swapinfo, but
      I can't figure out how to read it out of the kernel directly
      -- Wes */
+#ifndef hpux10
   strcpy(ex.command,"/etc/swapinfo -h");
+#else
+  strcpy(ex.command,"/etc/swapinfo -r");
+#endif
   if (fd = get_exec_output(&ex)) {
     file = fdopen(fd,"r");
     for (i=1;i <= 2 && fgets(ex.output,STRMAX,file) != NULL; i++);
