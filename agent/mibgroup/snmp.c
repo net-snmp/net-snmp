@@ -15,12 +15,6 @@
 	 *********************/
 
 
-static struct nlist snmp_nl[] = {
-	/* no kernel information needed */
-        { 0 },
-};
-
-
 int snmp_inpkts = 0;
 int snmp_outpkts = 0;
 int snmp_inbadversions = 0;

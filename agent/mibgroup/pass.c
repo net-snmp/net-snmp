@@ -18,6 +18,7 @@
 #include "mibincl.h"
 #include "pass.h"
 #include "extensible.h"
+#include "util_funcs.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;

@@ -7,7 +7,7 @@
 config_require(util_funcs read_config errormib)
 
 int fixProcError __P((int, u_char *, u_char, int, u_char *, oid *,int));
-extern u_char	*var_extensible_proc();
+unsigned char *var_extensible_proc __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 struct myproc *get_proc_instance __P((struct myproc*, int));
 int sh_count_procs __P((char *));
 int get_ps_output __P((struct extensible *));

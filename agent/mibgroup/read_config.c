@@ -38,6 +38,7 @@
 #include "mibincl.h"
 #include "read_config.h"
 #include "util_funcs.h"
+#include "extensible.h"
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 

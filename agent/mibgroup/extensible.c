@@ -78,6 +78,7 @@
 
 #include "mibincl.h"
 #include "extensible.h"
+#include "util_funcs.h"
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */

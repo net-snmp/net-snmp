@@ -5,6 +5,7 @@
 
 #include "../common_header.h"
 #include "ip.h"
+#include "interfaces.h"
 
 
 	/*********************

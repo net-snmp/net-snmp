@@ -47,9 +47,19 @@
 #endif
 #include <errno.h>
 #include <signal.h>
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#if STDC_HEADERS
+#include <string.h>
+#endif
+#endif
+#include <ctype.h>
 
 #include "mibincl.h"
 #include "util_funcs.h"
+#include "errormib.h"
+#include "read_config.h"
 
 #ifdef EXCACHETIME
 static long cachetime;

@@ -78,6 +78,8 @@
 
 #include "mibincl.h"
 #include "loadave.h"
+#include "util_funcs.h"
+#include "../kernel.h"
 
 #define  KNLookup(nl_which, buf, s)   (klookup((int) loadave_nl[nl_which].n_value, buf, s))
 

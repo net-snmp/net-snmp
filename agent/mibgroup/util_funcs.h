@@ -4,7 +4,7 @@
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H
 
-config_require(errormib)
+config_require(errormib read_config)
 
 void Exit __P((int));
 int shell_command __P((struct extensible *));
