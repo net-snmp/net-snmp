@@ -86,27 +86,19 @@ static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
 void
 snmp_parse_args_usage(FILE *outf)
 {
-  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-P <MIBOPTS>] [-O <OUTPUTOPTS>]");
-  fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>}");
+  fprintf(outf, "[options...] <hostname> {<community>}");
 }
 
 void
 snmp_parse_args_descriptions(FILE *outf)
 {
-  fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
-  fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
-  fprintf(outf, "  -D[TOKEN,...]\t\tturn on debugging output, optionally by the list of TOKENs.\n");
-  fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
-  fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
-  fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
-  fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
-  fprintf(outf, "\t\t\t(UDP or TCP).\n");
-  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
-  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
+  fprintf(outf, "  -v 1|2c|3\tspecifies snmp version to use.\n");
+  fprintf(outf, "  Version 1 or 2c specific\n");
+  fprintf(outf, "  -C <c>\tset the community name (v1 or v2c)\n");
+  fprintf(outf, "  Version 3 specific\n");
   fprintf(outf, "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
@@ -117,6 +109,19 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -A <P>\tauthentication protocol pass phrase.\n");
   fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
   fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
+  fprintf(outf, "  General communication options\n");
+  fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
+  fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
+  fprintf(outf, "\t\t\t(UDP or TCP).\n");
+  fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
+  fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
+  fprintf(outf, "  Debugging\n");
+  fprintf(outf, "  -d\t\tdump input/output packets.\n");
+  fprintf(outf, "  -D[TOKEN,...]\t\tturn on debugging output, optionally by the list of TOKENs.\n");
+  fprintf(outf, "  General options\n");
+  fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
+  fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
   fprintf(outf, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
@@ -128,21 +133,25 @@ snmp_parse_args_descriptions(FILE *outf)
 
 int
 snmp_parse_args(int argc, 
-		char *argv[], 
-		struct snmp_session *session)
+		char *const *argv, 
+		struct snmp_session *session, const char *localOpts, void(* proc)(int))
 {
   int arg;
   char *cp;
   char *Apsz = NULL;
   char *Xpsz = NULL;
+  char *Cpsz = NULL;
   u_char buf[BUF_SIZE];
   int bsize;
+  char Opts[BUF_SIZE];
 
   /* initialize session to default values */
   snmp_sess_init( session );
+  strcpy(Opts, "VhHm:M:fsSqO:P:D:dRv:p:r:t:C:Z:e:E:n:u:l:x:X:a:A:");
+  if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
-  while ((arg = getopt(argc, argv, "VhHm:M:fsSqO:P:D:dRv:p:r:t:Z:e:E:n:u:l:x:X:a:A:")) != EOF) {
+  while ((arg = getopt(argc, argv, Opts)) != EOF) {
     switch(arg){
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -268,6 +277,10 @@ snmp_parse_args(int argc,
           }
           break;
 
+      case 'C':
+	Cpsz = optarg;
+	break;
+
       case 'Z':
         session->engineBoots = (u_long)atol(optarg);
         if (session->engineBoots == 0) {
@@ -367,13 +380,14 @@ snmp_parse_args(int argc,
         Xpsz = optarg;
         break;
 
-      default:
-        /* This should be removed to support options in clients that
-           have more parameters than the defaults above! */
-        fprintf(stderr, "invalid option: -%c\n", arg);
+      case '?':
         usage();
         exit(1);
         break;
+
+      default:
+	proc(arg);
+	break;
     }
   }
 
@@ -421,14 +435,16 @@ snmp_parse_args(int argc,
   if ((session->version == SNMP_VERSION_1) ||
       (session->version == SNMP_VERSION_2c)) {
     /* v1 and v2c - so get community string */
-    if (optind == argc) {
-      fprintf(stderr,"No community name specified.\n");
-      usage();
-      exit(1);
+    if (!Cpsz) {
+      if (optind == argc) {
+        fprintf(stderr,"No community name specified.\n");
+        usage();
+        exit(1);
+      }
+      Cpsz = argv[optind++];
     }
-    session->community = (unsigned char *)argv[optind];
-    session->community_len = strlen((char *)argv[optind]);
-    optind++;
+    session->community = (unsigned char *)Cpsz;
+    session->community_len = strlen(Cpsz);
   }
   return optind;
 }

@@ -66,6 +66,8 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
+#include <getopt.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
@@ -104,51 +106,18 @@ void get_field_names (void);
 void get_table_entries( struct snmp_session *ss );
 void print_table (void);
 
-void usage(void)
+static void optProc(int opt)
 {
-  fprintf(stderr,"Usage:\n  snmptable ");
-  snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<special options]> [<objectID>]\n\n");
-  snmp_parse_args_descriptions(stderr);
-  fprintf(stderr,"\n<special options>\n");
-  fprintf(stderr,"  -w <W>        print table in parts of W characters width\n");
-  fprintf(stderr,"  -f <F>        print an F delimited table\n");
-  fprintf(stderr,"  -h            print only the table headings\n");
-  fprintf(stderr,"  -H            don't print the table headings\n");
-  fprintf(stderr,"  -b            brief field names\n");
-  fprintf(stderr,"  -x            print index value\n");
-  exit(1);
-}
-
-int main(int argc, char *argv[])
-{
-  struct snmp_session session, *ss;
-  int   arg;
-#ifdef _DEBUG_MALLOC_INC
-  unsigned long histid1, histid2, orig_size, current_size;
-#endif
-
-  setvbuf(stdout, NULL, _IOLBF, 1024);
-  snmp_set_quick_print(1);
-
-  /* get the common command line arguments */
-  arg = snmp_parse_args(argc, argv, &session);
-  snmp_set_suffix_only(0);
-  
-  for(; (arg < argc) && (argv[arg][0] == '-') ; arg++){
-      switch(argv[arg][1]){
+    switch (opt) {
     case 'w':
-      max_width = atoi(argv[++arg]);
+      max_width = atoi(optarg);
       if (max_width == 0) {
-	fprintf(stderr, "Bad -w option: %s\n", argv[++arg]);
+	fprintf(stderr, "Bad -w option: %s\n", optarg);
 	usage();
       }
       break;
     case 'f':
-      if (argv[arg][2])
-        field_separator = &argv[arg][2];
-      else
-        field_separator = argv[++arg];
+      field_separator = optarg;
       break;
     case 'h':
       headers_only = 1;
@@ -159,20 +128,42 @@ int main(int argc, char *argv[])
     case 'b':
       brief = 1;
       break;
-    case 'x':
+    case 'i':
       show_index = 1;
       break;
-    default:
-      usage();
     }
-  }
+}
+
+void usage(void)
+{
+  fprintf(stdout,"Usage: snmptable ");
+  snmp_parse_args_usage(stdout);
+  fprintf(stdout," <objectID>\n\n");
+  snmp_parse_args_descriptions(stdout);
+  fprintf(stdout,"  -w <W>\tprint table in parts of W characters width\n");
+  fprintf(stdout,"  -f <F>\tprint an F delimited table\n");
+  fprintf(stdout,"  -b\t\tbrief field names\n");
+  fprintf(stdout,"  -i\t\tprint index value\n");
+  exit(1);
+}
+
+int main(int argc, char *argv[])
+{
+  struct snmp_session session, *ss;
+
+  setvbuf(stdout, NULL, _IOLBF, 1024);
+  snmp_set_quick_print(1);
+
+  /* get the common command line arguments */
+  snmp_parse_args(argc, argv, &session, "w:f:hHbi", optProc);
+  snmp_set_suffix_only(0);
 
   /* get the initial object and subtree */
   /* specified on the command line */
-  if (arg+1 == argc) {
+  if (optind+1 == argc) {
     rootlen = MAX_OID_LEN;
-    if (!snmp_parse_oid(argv[arg], root, &rootlen)){
-      snmp_perror(argv[arg]);
+    if (!snmp_parse_oid(argv[optind], root, &rootlen)){
+      snmp_perror(argv[optind]);
       exit(1);
     }
     localdebug = snmp_get_dump_packet();
@@ -180,10 +171,6 @@ int main(int argc, char *argv[])
     fprintf(stderr,"Missing table name\n");
     usage();
   }
-
-#ifdef _DEBUG_MALLOC_INC
-  orig_size = malloc_inuse(&histid1);
-#endif
 
   get_field_names();
 
@@ -203,11 +190,6 @@ int main(int argc, char *argv[])
   SOCK_CLEANUP;
 
   print_table();
-
-#ifdef _DEBUG_MALLOC_INC
-  current_size = malloc_inuse(&histid2);
-  if (current_size != orig_size) malloc_list(2, histid1, histid2);
-#endif
 
   return 0;
 }
