@@ -1,3 +1,5 @@
+#ifndef NETSNMP_MULTIPLEXER_H
+#define NETSNMP_MULTIPLEXER_H
 /* The multiplexer helper */
 
 /** @name multiplexer
@@ -23,3 +25,4 @@ mib_handler *get_multiplexer_handler(mib_handler_methods *);
 
 NodeHandler multiplexer_helper_handler;
 
+#endif /* NETSNMP_MULTIPLEXER_H */
