@@ -33,7 +33,7 @@
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/system.h>
 
-#include "version.h"
+#include <net-snmp/version.h>
 
 void init_versioninfo(void) 
 {
@@ -92,7 +92,7 @@ u_char *var_extensible_version(struct variable *vp,
       long_ret = name[8];
       return((u_char *) (&long_ret));
     case VERTAG:
-      sprintf(errmsg,VersionInfo);
+      sprintf(errmsg,NetSnmpVersionInfo);
       *var_len = strlen(errmsg);
       return((u_char *) errmsg); 
     case VERDATE:
