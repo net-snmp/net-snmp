@@ -45,7 +45,7 @@ int
 ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
                            ${context}_rowreq_ctx *rowreq_ctx)
 {
-    int rc;
+    int rc = MFD_SUCCESS;
 
     DEBUGTRACE;
 
@@ -87,7 +87,7 @@ $example_start
     }
 $example_end
 
-    return MFD_SUCCESS;
+    return rc;
 }
 
 @end@ # row creation
