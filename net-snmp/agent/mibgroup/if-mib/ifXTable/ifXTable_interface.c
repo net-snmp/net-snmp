@@ -852,9 +852,7 @@ _ifXTable_check_column(ifXTable_rowreq_ctx * rowreq_ctx,
          * ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H 
          */
     case COLUMN_IFALIAS:
-        rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                            sizeof(rowreq_ctx->data.
-                                                   ifAlias));
+        rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
         if (SNMPERR_SUCCESS == rc) {
             /*
              * check that the value is in the defined range(s); inefficent
@@ -1258,4 +1256,13 @@ _ifXTable_container_init(ifXTable_interface_ctx * if_ctx)
     else {
         snmp_log(LOG_ERR, "error finding ifTable cache\n");
     }
+}
+
+/*
+ * allow direct access to container.
+ */
+netsnmp_container *
+_ifXTable_container_get(void)
+{
+    return ifXTable_if_ctx.container;
 }
