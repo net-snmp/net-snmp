@@ -415,7 +415,7 @@ void vacm_parse_view (const char *token,
     if (mask) {
 	int val;
 	i = 0;
-	for (mask = strtok(mask, "."); mask; mask = strtok(NULL, ":")) {
+	for (mask = strtok(mask, ".:"); mask; mask = strtok(NULL, ".:")) {
 	    if (i >= sizeof(viewMask)) {
 		config_perror("MASK too long");
 		return;
