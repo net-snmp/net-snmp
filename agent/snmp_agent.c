@@ -2992,18 +2992,21 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
          */
         switch (mode) {
         case MODE_GET:
+        case MODE_GETNEXT:
+        case MODE_GETBULK:
             request->requestvb->type = error_value;
             return SNMPERR_SUCCESS;
 
-        case MODE_GETNEXT:
-        case MODE_GETBULK:
             /*
-             * ignore these.  They're illegal to set by the
-             * client APIs for these modes 
-             */
+             * These are technically illegal to set by the
+             * client APIs for these modes.  But accepting
+             * them here allows the 'sparse_table' helper to
+             * provide some common table handling processing
+             *
             snmp_log(LOG_ERR, "Illegal error_value %d for mode %d ignored\n",
                      error_value, mode);
             return SNMPERR_VALUE;
+             */
 
         default:
             request->status = SNMP_ERR_NOSUCHNAME;      /* WWW: correct? */
