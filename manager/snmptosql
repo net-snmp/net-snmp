@@ -14,7 +14,7 @@ init_mib;
 $hostname = 'localhost';          # Host that serves the mSQL Database
 $dbname = 'snmp';                 # mySQL Database name
 $smtpserver = 'localhost';
-$smtpfrom   = 'UCD-SNMP Manager <wjhardaker\@ucdavis.edu>';
+$smtpfrom   = 'UCD-SNMP Manager <wjhardaker@ucdavis.edu>';
 $doit = 1;
 $somehosts = 0;
 
@@ -86,6 +86,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
     print "Sess ($host): $sess, ref=" . ref($sess). "\n" if ($verbose);
     if (ref ($sess) ne "SNMP::Session") {
 	print STDERR "ack: \$sess not a SNMP::Session for $host ($!)\n";
+	hosterror("$host");
 	next nexthost;
     }
 
@@ -339,17 +340,20 @@ sub mailusers {
     my $smtpsock = Net::SMTP->new($smtpserver);
 
     $smtpsock->mail($smtpfrom);
-    $smtpsock->to(@people);
+    my $error = $smtpsock->recipient(@people);
+    if (!$error) {
+	print STDERR "failed to send mail to ",join(",",@people),"\n";
+    }
     $smtpsock->data();
     $subject =~ s/\n//;
-    $smtpsock->datasend("To: ", join(", ",@people), "\n");
+    $smtpsock->datasend("To: " . join(", ",@people) . "\n");
     $smtpsock->datasend("From: $smtpfrom\n");
     $smtpsock->datasend("Subject: $subject\n");
     $smtpsock->datasend("\n");
     $smtpsock->datasend("$msg\n");
     $smtpsock->dataend();
     $smtpsock->quit;
-    print "mailing ",join(",",@people)," with $msg, $subject\n" if ($verbose);
+    print "mailed ",join(",",@people)," with $msg, $subject ($!)\n" if ($verbose);
 }
 
 sub hosterror {
