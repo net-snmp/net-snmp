@@ -602,39 +602,25 @@
 
 /*   proc PROCESSNAME [MAX] [MIN] */
 #define PROCMIBNUM 1
-#define USEPROCMIB
 
 /*   exec/shell NAME COMMAND      */
 #define SHELLMIBNUM 3
-#define USESHELLMIB
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
-#if defined(hpux9) || defined(bsdi2) || defined(linux) || defined(freebsd2)
-#define USEMEMMIB
-#endif
 
 /*   disk DISK MINSIZE            */
 #define DISKMIBNUM 6
-#if (HAVE_FSTAB_H || HAVE_SYS_STATVFS_H)
-#define USEDISKMIB
-#endif
 
 /*   load 1 5 15                  */
 #define LOADAVEMIBNUM 7
-#define USELOADAVEMIB
-
-/*   pass MIBOID command */
-#define USEPASSMIB
 
 /* which version are you using? This mibloc will tell you */
 #define VERSIONMIBNUM 100
-#define USEVERSIONMIB    
 
 /* Reports errors the agent runs into */
 /* (typically its "can't fork, no mem" problems) */
 #define ERRORMIBNUM 101
-#define USEERRORMIB    
 
 /* The sub id of EXENSIBLEMIB returned to queries of
    .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
@@ -655,6 +641,7 @@
 #define IRIXID 9
 #define LINUXID 10
 #define BSDIID 11
+#define OPENBSDID 12
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -689,6 +676,9 @@
 #endif
 #if defined(bsdi2) || defined(bsdi3)
 #define OSTYPE BSDIID
+#endif
+#ifdef openbsd2
+#define OSTYPE OPENBSDID
 #endif
 /* unknown */
 #ifndef OSTYPE
