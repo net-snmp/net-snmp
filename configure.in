@@ -499,7 +499,7 @@ if test "x$with_shared" = "xyes"; then
 
     freebsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
-	SHLIB_VERSION=.3.5
+	SHLIB_VERSION=.4
 	;;
 
     bsdi4*)
@@ -1452,6 +1452,22 @@ main() {
 
 if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(CAN_USE_SYSCTL)
+fi
+
+dnl
+dnl In FreeBSD 4.x, the TCP timer constants aren't.  They are defined
+dnl in terms of `hz', the kernel clock tick.  In this case,
+dnl we need to have a local variable `hz' in scope and set to a useful
+dnl value whenever we use one of these constants.
+dnl
+AC_CACHE_CHECK(whether TCP timers depend on \`hz',ac_cv_TCPTV_NEEDS_HZ,
+[AC_EGREP_CPP(hz,
+[#include <netinet/tcp_timer.h>
+TCPTV_SRTTDFLT
+], ac_cv_TCPTV_NEEDS_HZ=yes, ac_cv_TCPTV_NEEDS_HZ=no)])
+
+if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
+  AC_DEFINE(TCPTV_NEEDS_HZ)
 fi
 
 dnl

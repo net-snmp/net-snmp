@@ -2045,7 +2045,7 @@ if test "x$with_shared" = "xyes"; then
 
     freebsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
-	SHLIB_VERSION=.3.5
+	SHLIB_VERSION=.4
 	;;
 
     bsdi4*)
@@ -8512,10 +8512,43 @@ EOF
 
 fi
 
+echo $ac_n "checking whether TCP timers depend on \`hz'""... $ac_c" 1>&6
+echo "configure:8517: checking whether TCP timers depend on \`hz'" >&5
+if eval "test \"`echo '$''{'ac_cv_TCPTV_NEEDS_HZ'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 8522 "configure"
+#include "confdefs.h"
+#include <netinet/tcp_timer.h>
+TCPTV_SRTTDFLT
+
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "hz" >/dev/null 2>&1; then
+  rm -rf conftest*
+  ac_cv_TCPTV_NEEDS_HZ=yes
+else
+  rm -rf conftest*
+  ac_cv_TCPTV_NEEDS_HZ=no
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$ac_cv_TCPTV_NEEDS_HZ" 1>&6
+
+if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
+  cat >> confdefs.h <<\EOF
+#define TCPTV_NEEDS_HZ 1
+EOF
+
+fi
+
 
 if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 echo $ac_n "checking if you have run configure before""... $ac_c" 1>&6
-echo "configure:8519: checking if you have run configure before" >&5
+echo "configure:8552: checking if you have run configure before" >&5
 if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8570,7 +8603,7 @@ Configuration Files.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:8574: checking $MSG_CHECK" >&5
+echo "configure:8607: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8630,7 +8663,7 @@ available in the MIB-II tree.  This Can also be over-ridden using the
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:8634: checking $MSG_CHECK" >&5
+echo "configure:8667: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8696,7 +8729,7 @@ at the prompt below) the agent will use stdout and stderr instead.
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:8700: checking $MSG_CHECK" >&5
+echo "configure:8733: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8761,7 +8794,7 @@ data in the form of a configuration file.
 
 Location to write persistent information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:8765: checking $MSG_CHECK" >&5
+echo "configure:8798: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_PERSISTENT_DIRECTORY'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

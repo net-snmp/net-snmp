@@ -269,6 +269,13 @@ var_tcp(struct variable *vp,
 	WriteMethod **write_method)
 {
     static struct kna tcpipstats;
+#ifdef TCPTV_NEEDS_HZ
+    /*
+     * I don't know of any such system now, but maybe they'll figure
+     * it out some day.
+     */
+    int hz = 1000;
+#endif
 
     /*
      *	Allow for a kernel w/o TCP
@@ -301,14 +308,22 @@ var_tcp(struct variable *vp,
 		return (u_char *) &long_return;
 	    case TCPRTOMIN:
 #ifndef linux
+#ifdef TCPTV_NEEDS_HZ
+		long_return = TCPTV_MIN;
+#else
 		long_return = TCPTV_MIN / PR_SLOWHZ * 1000;
+#endif
 		return (u_char *) &long_return;
 #else
 		return (u_char *) &tcpstat.TcpRtoMin;
 #endif
 	    case TCPRTOMAX:
 #ifndef linux
+#ifdef TCPTV_NEEDS_HZ
+		long_return = TCPTV_REXMTMAX;
+#else
 		long_return = TCPTV_REXMTMAX / PR_SLOWHZ * 1000;
+#endif
 		return (u_char *) &long_return;
 #else
 		return (u_char *) &tcpstat.TcpRtoMax;
@@ -406,6 +421,9 @@ var_tcp(struct variable *vp,
 #ifdef hpux
     static	counter MIB_tcpcounter[MIB_tcpMAXCTR+1];
 #endif
+#ifdef TCPTV_NEEDS_HZ
+    int hz = 1000;
+#endif
 
     /*
      *	Allow for a kernel w/o TCP
@@ -460,14 +478,22 @@ var_tcp(struct variable *vp,
 		return (u_char *) &long_return;
 	    case TCPRTOMIN:
 #ifndef linux
+#ifdef TCPTV_NEEDS_HZ
+		long_return = TCPTV_MIN;
+#else
 		long_return = TCPTV_MIN / PR_SLOWHZ * 1000;
+#endif
 		return (u_char *) &long_return;
 #else
 		return (u_char *) &tcpstat.TcpRtoMin;
 #endif
 	    case TCPRTOMAX:
 #ifndef linux
+#ifdef TCPTV_NEEDS_HZ
+		long_return = TCPTV_REXMTMAX;
+#else
 		long_return = TCPTV_REXMTMAX / PR_SLOWHZ * 1000;
+#endif
 		return (u_char *) &long_return;
 #else
 		return (u_char *) &tcpstat.TcpRtoMax;
