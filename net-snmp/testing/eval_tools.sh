@@ -258,7 +258,7 @@ WAITFOR() {
 	else 
 	  SNMP_SLEEP=1
 	fi
-        while [ $sleeptime > 0 ] ; do
+        while [ $sleeptime -gt 0 ] ; do
 	  if [ "$2" = "" ] ; then
             CHECK "$@"
           else
