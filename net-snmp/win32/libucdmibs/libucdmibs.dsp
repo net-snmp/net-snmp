@@ -266,28 +266,86 @@ SOURCE=..\..\agent\mibgroup\target\target.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\client.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\master_request.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\protocol.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\agentx\subagent.c
+
+!IF  "$(CFG)" == "libucdmibs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libucdmibs - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\agent\agent_handler.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\header_complex.c

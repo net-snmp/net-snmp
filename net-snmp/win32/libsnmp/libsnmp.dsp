@@ -90,6 +90,10 @@ SOURCE=..\..\snmplib\callback.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\data_list.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
@@ -154,7 +158,31 @@ SOURCE=..\..\snmplib\snmp_debug.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_enum.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp_logging.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_secmod.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_transport.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpCallbackDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpTCPDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpUDPDomain.c
 # End Source File
 # Begin Source File
 
