@@ -558,16 +558,16 @@ fi
 
 
 
-# Check whether --with-out_mib_modules or --without-out_mib_modules was given.
-if test "${with_out_mib_modules+set}" = set; then
-  withval="$with_out_mib_modules"
-  CC=$with_cc
+# Check whether --with-cc or --without-cc was given.
+if test "${with_cc+set}" = set; then
+  withval="$with_cc"
+  export CC=$with_cc
 fi
 
-# Check whether --with-out_mib_modules or --without-out_mib_modules was given.
-if test "${with_out_mib_modules+set}" = set; then
-  withval="$with_out_mib_modules"
-  CFLAGS=$with_cflags
+# Check whether --with-cflags or --without-cflags was given.
+if test "${with_cflags+set}" = set; then
+  withval="$with_cflags"
+  export CFLAGS=$with_cflags
 fi
 
 # Check whether --enable-debugging or --disable-debugging was given.
