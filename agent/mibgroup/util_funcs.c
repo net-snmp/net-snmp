@@ -77,6 +77,9 @@
 #if HAVE_RAISE
 #define alarm raise
 #endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -113,17 +116,27 @@ make_tempfile(void)
     static char     name[32];
     int             fd = -1;
 
-    strcpy(name, "/tmp/snmpdXXXXXX");
+    strcpy(name, NETSNMP_TEMP_FILE_PATTERN);
 #ifdef HAVE_MKSTEMP
     fd = mkstemp(name);
 #else
-    if (mktemp(name))
+    if (mktemp(name)) {
+# ifndef WIN32        
         fd = open(name, O_CREAT | O_EXCL | O_WRONLY);
+# else
+        /*
+          Win32 needs _S_IREAD | _S_IWRITE to set permissions on file after closing
+         */
+        fd = _open(name, _O_CREAT, _S_IREAD | _S_IWRITE | _O_EXCL | _O_WRONLY);
+# endif
+    }
 #endif
     if (fd >= 0) {
         close(fd);
+        DEBUGMSGTL(("make_tempfile", "temp file created: %s\n", name));
         return name;
     }
+    snmp_log(LOG_ERR,"make_tempfile: error creating file %s\n", name);
     return NULL;
 }
 
