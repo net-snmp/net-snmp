@@ -79,7 +79,10 @@
 #include <syslog.h>
 #endif
 
-#include <net-snmp/tools.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -89,16 +92,12 @@
 #include "kernel_linux.h"
 #endif
 
-#include "mibincl.h"
-#include "util_funcs.h"
-#include <net-snmp/system.h>
-#include <net-snmp/agent/auto_nlist.h>
-
 #if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
 #endif /* MIB_IPCOUNTER_SYMBOL || hpux11 */
 
+#include "util_funcs.h"
 #include "ip.h"
 #include "ipAddr.h"
 #include "interfaces.h"

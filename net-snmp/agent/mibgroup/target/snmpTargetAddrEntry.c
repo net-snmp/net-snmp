@@ -18,11 +18,10 @@
 #include <winsock.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "snmpTargetAddrEntry.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp-tc.h>
 #include "util_funcs.h"
 
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 

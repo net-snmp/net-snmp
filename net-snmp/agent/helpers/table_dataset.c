@@ -6,12 +6,12 @@
 #include <strings.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
-#include <net-snmp/parse.h>
-#include <net-snmp/data_list.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

@@ -6,11 +6,11 @@
 #include <winsock.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/snmpv3.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
-#include <net-snmp/lcd_time.h>
-#include "../mibII/sysORTable.h"
+#include "mibII/sysORTable.h"
 #include "snmpEngine.h"
 
 struct variable2 snmpEngine_variables[] = {

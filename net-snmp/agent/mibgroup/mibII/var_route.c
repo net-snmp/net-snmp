@@ -164,7 +164,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NLIST_H
 #include <nlist.h>
 #endif
-#include <net-snmp/agent/auto_nlist.h>
+
 #if solaris2
 #include "kernel_sunos5.h"
 #endif
@@ -190,18 +190,15 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #define CACHE_TIME (120)	    /* Seconds */
 
-#include "mibincl.h"
-#include <net-snmp/system.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "ip.h"
-#include "../kernel.h"
+#include "kernel.h"
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-
-/* Write is supported only for Windows. Thats why route_write.h included under WIN32 */
-#ifdef WIN32
-#include "route_write.h"
-#endif
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -1664,9 +1661,11 @@ var_ipRouteEntry(struct variable *vp,
 
 #define CACHE_TIME (120)	    /* Seconds */
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "ip.h"
-#include "../kernel.h"
+#include "kernel.h"
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"

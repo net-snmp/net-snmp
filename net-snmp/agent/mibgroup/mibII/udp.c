@@ -84,7 +84,11 @@
 #include <inet/mib2.h>
 #endif
 
-#include <net-snmp/tools.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
+#include "util_funcs.h"
 
 #ifdef solaris2
 #include "kernel_sunos5.h"
@@ -100,15 +104,6 @@
 #define WIN32
 #include <windows.h>
 #endif
-
-#include "mibincl.h"
-#include "util_funcs.h"
-#include <net-snmp/system.h>
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/tools.h>
-
-#include <net-snmp/agent/auto_nlist.h>
 
 #ifdef hpux
 #include <sys/mib.h>

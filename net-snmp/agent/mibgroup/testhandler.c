@@ -6,12 +6,11 @@
 #include <strings.h>
 #endif
 
-#include "mibincl.h"
-#include "testhandler.h"
-#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
+#include "testhandler.h"
+
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/table_data.h>

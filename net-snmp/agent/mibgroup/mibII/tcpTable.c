@@ -85,7 +85,6 @@
 #include "kernel.h"
 #endif
 
-#include <net-snmp/system.h>
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
@@ -119,8 +118,9 @@
 #include <sys/tcpipstats.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
-#include "mibincl.h"
 
 #ifdef hpux
 #include <sys/mib.h>

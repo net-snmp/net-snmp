@@ -131,19 +131,18 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "struct.h"
 #include "disk.h"
 #include "util_funcs.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/agent/auto_nlist.h>
 #if USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
-#include <net-snmp/system.h>
 
 int numdisks;
 struct diskpart disks[MAXDISKS];

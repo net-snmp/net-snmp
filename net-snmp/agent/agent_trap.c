@@ -45,22 +45,9 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/system.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_parse_args.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/agent_trap.h>
-#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_callbacks.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_transport.h>
 
 #include <net-snmp/agent/mib_module_config.h>
 

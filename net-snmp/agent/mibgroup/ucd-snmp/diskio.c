@@ -12,18 +12,14 @@
 # endif
 #endif
 
-/* mibincl.h contains all the snmp specific headers to define the
-   return types and various defines and structures. */
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /* header_generic() comes from here */
 #include "util_funcs.h"
 
 /* include our .h file */
 #include "diskio.h"
-
-/* parse config file */
-#include <net-snmp/agent/agent_read_config.h>
 
 #define CACHE_TIMEOUT 10
 static time_t cache_time=0;

@@ -88,11 +88,12 @@
 #include <netinet/mib_kern.h>
 #endif	/* hpux11 */
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "at.h"
 #include "interfaces.h"
-#include <net-snmp/agent/auto_nlist.h>
-#include <net-snmp/system.h>
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO) && !defined(irix6)

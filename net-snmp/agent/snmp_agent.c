@@ -77,22 +77,13 @@ SOFTWARE.
 #endif
 
 #define SNMP_NEED_REQUEST_LIST
-#include "mibincl.h"
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include <net-snmp/agent/mib_module_config.h>
-
-#include <net-snmp/default_store.h>
-#include <net-snmp/system.h>
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/agent/snmp_agent.h>
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/vacm.h>
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"

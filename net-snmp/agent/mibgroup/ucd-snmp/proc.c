@@ -53,7 +53,9 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "struct.h"
 #include "proc.h"
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
@@ -62,9 +64,6 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "util_funcs.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/system.h>
 #include "kernel.h"
 
 static struct myproc *get_proc_instance (struct myproc *, oid);
