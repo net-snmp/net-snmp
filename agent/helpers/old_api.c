@@ -18,6 +18,10 @@
 
 #define MIB_CLIENTS_ARE_EVIL 1
 
+/* don't use these! */
+void set_current_agent_session(struct agent_snmp_session  *asp);
+struct agent_snmp_session  *get_current_agent_session(void);
+
 /** @defgroup old_api old_api: Calls mib module code written in the old style of code.
  *  @ingroup handler
  *  This is a backwards compatilibity module that allows code written
@@ -223,14 +227,12 @@ old_api_helper(mib_handler               *handler,
     struct variable	compat_var, *cvp = &compat_var;
     int exact = 1;
     int status;
-    int have_delegated = 0;
     
     struct variable *vp;
     WriteMethod *write_method = NULL;
     size_t len;
     u_char *access = NULL;
     old_api_cache *cacheptr;
-    AddVarMethod *add_method;
     struct agent_snmp_session  *oldasp = NULL;
 
     vp = (struct variable *) handler->myvoid;
