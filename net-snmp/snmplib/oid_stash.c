@@ -184,11 +184,12 @@ netsnmp_oid_stash_store_all(int majorID, int minorID,
     sinfo = clientarg;
     netsnmp_oid_stash_store(*(sinfo->root), sinfo->token, sinfo->dumpfn,
                             oidbase,0);
+    return SNMP_ERR_NOERROR;
 }
 
 void
 netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
-                        char *tokenname, NetSNMPStashDump *dumpfn,
+                        const char *tokenname, NetSNMPStashDump *dumpfn,
                         oid *curoid, size_t curoid_len) {
 
     char buf[SNMP_MAXBUF];
