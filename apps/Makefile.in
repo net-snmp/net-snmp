@@ -2,6 +2,19 @@
 # Makefile for snmpget, snmpwalk, snmpbulkwalk, snmptest, snmptranslate,
 # snmptrapd, snmptable, snmpset, snmpgetnext
 #
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+
+INSTALL = @INSTALL@
+
 TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	@LIBS@ $(USELIBS)
@@ -41,8 +54,13 @@ snmpgetnext:    snmpgetnext.o $(USELIBS)
 clean:
 	rm -f *.o ${TARG}
 
-install:
-	cp ${TARG} ../bin
+install: installdirs $(TARG)
+	for i in $(TARG) ; do \
+	$(INSTALL) $$i $(bindir) ; \
+	done
+
+installdirs:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
 
 depend: 
 	makedepend $(CPPFLAGS) *.c

@@ -729,6 +729,7 @@ void update_config()
 {
   extern struct subtree *subtrees;
   int i;
+  char configfile[300];
   
   free_config(&procwatch,&extens,&relocs);
   numprocs = numextens = numrelocs = 0;
@@ -743,10 +744,10 @@ void update_config()
     disks[i].minimumspace = -1;
   }
   /* read the config files */
-  read_config (CONFIGFILE,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-#ifdef CONFIGFILETWO
-  read_config (CONFIGFILETWO,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-#endif
+  sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 
   if (subtrees)
     free(subtrees);
