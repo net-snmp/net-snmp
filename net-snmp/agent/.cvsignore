@@ -1,9 +1,0 @@
-.gdb.auto.init
-.gdbinit
-.index
-Makefile
-mib.txt
-snmpd
-.libs
-*.lo
-*.la
