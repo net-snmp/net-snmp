@@ -3405,7 +3405,7 @@ _sess_read(void *sessp,
       return 0;
     }
 
-    if ((!isp->newpkt && !(FD_ISSET(isp->sd, fdset)))) {
+    if ((!isp->newpkt && (!fdset || !(FD_ISSET(isp->sd, fdset))))) {
       DEBUGMSGTL(("sess_read","not reading...\n"));
       return 0;
     }
@@ -3491,9 +3491,9 @@ _sess_read(void *sessp,
 
       if (isp->newpkt == 1) {
         /* move the old memory down, if we have saved data */
-        memmove(isp->packet, isp->packet+isp->proper_len, isp->proper_len);
-        isp->newpkt = 0;
         isp->packet_len -= isp->proper_len;
+        memmove(isp->packet, isp->packet+isp->proper_len, isp->packet_len);
+        isp->newpkt = 0;
         isp->proper_len = 0;
       }
 
@@ -3758,7 +3758,7 @@ snmp_sess_select_info(void *sessp,
 		      int *block)
 {
     struct session_list *slptest = (struct session_list *)sessp;
-    struct session_list *slp, *next=NULL, *prev=NULL;
+    struct session_list *slp, *next=NULL;
     struct snmp_internal_session *isp;
     struct request_list *rp;
     struct timeval now, earliest;
@@ -3774,6 +3774,8 @@ snmp_sess_select_info(void *sessp,
      */
     if (sessp) slp = slptest; else slp = Sessions;
     for(; slp; slp = next){
+	next = slp->next;
+
 	isp = slp->internal;
         if (!isp) {
           DEBUGMSGTL(("sess_select","select fail: closing...\n"));
@@ -3781,15 +3783,11 @@ snmp_sess_select_info(void *sessp,
         }
 
 	if (isp->sd == -1) {
-	    if (sessp == NULL) {
 		/* This session was marked for deletion */
-	    if ( prev == NULL )
-		Sessions = slp->next;
+	    if (sessp == NULL)
+		snmp_close(slp->session);
 	    else
-		prev->next = slp->next;
-	    next = slp->next;
-	    }
-	    snmp_sess_close( slp );
+		snmp_sess_close( slp );
 	    continue;
 	}
 	if ((isp->sd + 1) > *numfds)
@@ -3812,9 +3810,7 @@ snmp_sess_select_info(void *sessp,
           *block = 0;
         }
 	active++;
-	if (slp == slptest) break;
-	prev = slp;
-	next = slp->next;
+	if (sessp) break;	/* single session processing */
     }
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)) {
@@ -3910,7 +3906,11 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
 
   /* retransmit this pdu */
-  if (snmp_build(sp, rp->pdu, packet, &length) < 0){
+  if ( isp->hook_build )
+	result = isp->hook_build(sp, rp->pdu, packet, &length);
+  else
+	result = snmp_build(sp, rp->pdu, packet, &length);
+  if (result < 0){
     /* this should never happen */
     return -1;
   }
