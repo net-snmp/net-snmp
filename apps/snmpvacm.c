@@ -135,7 +135,6 @@ void
 access_oid(oid *it, size_t *len, const char *groupName, const char *prefix, int model, int level)
 {
   int i;
-  char c_oid[SPRINT_MAX_LEN];
   
   int itIndex = ACCESS_OID_LEN;
 
@@ -164,7 +163,6 @@ void
 sec2group_oid(oid *it, size_t *len, int model, const char *name)
 {
   int i;
-  char c_oid[SPRINT_MAX_LEN];
   
   int itIndex = SEC2GROUP_OID_LEN;
 
@@ -198,7 +196,7 @@ view_oid(oid *it, size_t *len, const char *viewName,char *viewSubtree)
   for(i=0; i < (int)strlen(viewName); i++)
     it[itIndex++] = viewName[i];
     
-  for(i=0; i < c_oid_length; i++)
+  for(i=0; i < (int)c_oid_length; i++)
     it[itIndex++] = c_oid[i];
 
  /* sprint_objid(c_oid, it, *len); */
@@ -249,7 +247,6 @@ main(int argc, char *argv[])
     size_t                name_length;
     size_t                name_length2 = ACCESS_OID_LEN;
     int                   status;
-    int                   rval;
     int                   command         = 0;
     long                  longvar;
     int 				  secModel,secLevel,contextMatch,val,i = 0; 
@@ -265,6 +262,7 @@ main(int argc, char *argv[])
         usage();
         exit(1);
     default:
+        break;
     }
 
     
