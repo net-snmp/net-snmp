@@ -371,11 +371,11 @@ getKstat(const char *statname, const char *varname, void *value)
 	DEBUGMSGTL(("kernel_sunos5", "value: %u\n", d->value.ui32));
 	break;
       case KSTAT_DATA_INT64:
-	*(Counter *)v = d->value.i64;
+	*(int64_t *)v = d->value.i64;
 	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.i64));
 	break;
       case KSTAT_DATA_UINT64:
-	*(Counter *)v = d->value.ui64;
+	*(uint64_t *)v = d->value.ui64;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ui64));
 	break;
 #else
