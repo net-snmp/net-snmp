@@ -180,6 +180,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
     char            line[256];
     netsnmp_route_entry *entry = NULL;
     char            name[16];
+    static int      log_open_err = 1;
 
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv6\n"));
@@ -190,9 +191,18 @@ _load_ipv6(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
-        snmp_log(LOG_ERR, "cannot open /proc/net/ipv6_route\n");
+        if (1 == log_open_err) {
+            snmp_log(LOG_ERR, "cannot open /proc/net/ipv6_route\n");
+            log_open_err = 0;
+        }
         return -2;
     }
+    /*
+     * if we turned off logging of open errors, turn it back on now that
+     * we have been able to open the file.
+     */
+    if (0 == log_open_err)
+        log_open_err = 1;
     fgets(line,sizeof(line),in); /* skip header */
     while (fgets(line, sizeof(line), in)) {
         char            c_name[9], c_dest[33], c_src[33], c_next[33];
@@ -341,7 +351,13 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
     if((0 != rc) || (load_flags & NETSNMP_ACCESS_ROUTE_LOAD_IPV4_ONLY))
         return rc;
 
+    /*
+     * load ipv6. ipv6 module might not be loaded,
+     * so ignore -2 err (file not found)
+     */
     rc = _load_ipv6(container, &count);
+    if (-2 == rc)
+        rc = 0;
 #endif
 
     return rc;
