@@ -35,7 +35,7 @@
 #include <dmalloc.h>
 #endif
 
-#include "../mibincl.h"
+#include "mibincl.h"
 #include "system.h"
 #include "../struct.h"
 #include "../util_funcs.h"
