@@ -611,8 +611,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	sn = NULL;
     }
 
-    if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN)
+    if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN) {
+	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: bad ctxt length %d\n",
+		    pdu->contextNameLen));
         return 6;
+    }
     /* NULL termination of the pdu field is ugly here.  Do in PDU parsing? */
     if (pdu->contextName)
         strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
@@ -623,6 +626,8 @@ int vacm_in_view (struct snmp_pdu *pdu,
     if (!find_first_subtree(contextNameIndex)) {
         /* rfc2575 section 3.2, step 1
            no such context here; return no such context error */
+	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: no such ctxt \"%s\"\n",
+		    contextNameIndex));
         return 6;
     }
 
@@ -689,7 +694,7 @@ u_char *var_vacm_sec2group(struct variable *vp,
     struct vacm_groupEntry *gp;
     oid *groupSubtree;
     int groupSubtreeLen;
-    int secmodel;
+    unsigned long secmodel;
     char secname[VACMSTRINGLEN], *cp;
 
     *write_method = NULL;
@@ -798,12 +803,11 @@ u_char *var_vacm_access(struct variable *vp,
 			WriteMethod **write_method)
 {
     struct vacm_accessEntry *gp;
-    int secmodel;
-    int seclevel;
+    unsigned long secmodel, seclevel;
     char groupName[VACMSTRINGLEN];
     char contextPrefix[VACMSTRINGLEN];
     oid *op;
-    int len;
+    unsigned long len;
     char *cp;
     int cmp;
 
@@ -813,8 +817,8 @@ u_char *var_vacm_access(struct variable *vp,
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
 	*length = vp->namelen;
     }
-	if (exact) 
-	{
+
+    if (exact) {
 	if (*length < 15) return NULL;
 
 	op = name+11;
@@ -845,15 +849,13 @@ u_char *var_vacm_access(struct variable *vp,
 	}
 
 	gp = vacm_getAccessEntry(groupName, contextPrefix, secmodel, seclevel);
-    }
-    else {
+    } else {
 	secmodel = seclevel = 0;
 	groupName[0] = 0;
 	contextPrefix[0] = 0;
 	op = name+11;
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    len = *op;
 	    if (len > VACM_MAX_STRING)
 	        return 0;
@@ -866,8 +868,7 @@ u_char *var_vacm_access(struct variable *vp,
 	    *cp = 0;
 	}
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    len = *op;
 	    if (len > VACM_MAX_STRING)
 	        return 0;
@@ -880,13 +881,11 @@ u_char *var_vacm_access(struct variable *vp,
 	    *cp = 0;
 	}
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    secmodel = *op++;
 	}
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    seclevel = *op++;
 	}
 	vacm_scanAccessInit();
@@ -1007,7 +1006,7 @@ u_char *var_vacm_view(struct variable *vp,
     oid subtree[MAX_OID_LEN];
     size_t subtreeLen = 0;
     oid *op, *op1;
-    int len;
+    unsigned long len;
     char *cp;
     int cmp,cmp2;
 
@@ -1050,13 +1049,11 @@ u_char *var_vacm_view(struct variable *vp,
 	if(gp)
 	    if(gp->viewSubtreeLen!=subtreeLen)
 		  gp=NULL;
-    }
-    else {
+    } else {
 	viewName[0] = 0;
 	op = name+12;
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    len = *op;
 	    if (len > VACM_MAX_STRING)
 	        return 0;
@@ -1069,8 +1066,7 @@ u_char *var_vacm_view(struct variable *vp,
 	    *cp = 0;
 	}
 	if (op >= name + *length) {
-	}
-	else {
+	} else {
 	    len = *op++;
 	    op1 = subtree;
 	    *op1++ = len;
@@ -1104,10 +1100,11 @@ u_char *var_vacm_view(struct variable *vp,
 
     if (!gp && !exact) return NULL;
 	
-	} else {
-	  if(header_generic(vp,name,length,exact,var_len,write_method))
-		return NULL;
-	} /*endif -- vp->magic != VACMVIEWSPINLOCK */
+    } else {
+	if(header_generic(vp,name,length,exact,var_len,write_method)) {
+	    return NULL;
+	}
+    } /*endif -- vp->magic != VACMVIEWSPINLOCK */
 
     switch (vp->magic) {
     case VACMVIEWSPINLOCK:
