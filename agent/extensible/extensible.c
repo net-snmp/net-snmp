@@ -869,6 +869,7 @@ init_extensible() {
   extmp.next = NULL;
   exec_command(&extmp);
   strcpy(version_descr,extmp.output);
+  version_descr[strlen(version_descr)-1] = NULL; /* chomp new line */
 
   strcpy(extmp.command,"/bin/uname -n");
   /* setup defaults */
@@ -876,6 +877,7 @@ init_extensible() {
   extmp.next = NULL;
   exec_command(&extmp);
   strcpy(sysName,extmp.output);
+  sysName[strlen(sysName)-1] = NULL; /* chomp new line */
 
   signal(SIGHUP,update_config);
 
