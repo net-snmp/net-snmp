@@ -8,13 +8,76 @@ use SNMP;
 use AutoLoader;
 use IO::File;
 
-$opts{'t'} = ! eval { require Text::FormatTable; };
-$ansicolor = eval { require Term::ANSIColor; };
-if ($ansicolor) {
-    $begin = $end = "*";
-#    $begin = Term::ANSIColor::color("red");
-#    $end = Term::ANSIColor::reset("white");
-} else {
+BEGIN {
+    $opts{'t'} = ! eval { require Text::FormatTable; };
+    $ansicolor = eval { require Term::ANSIColor; };
+}
+
+# override some of the functions to force our colorized semantics.
+# This is really ugly, but if you pass colorized strings directly to
+# Text::FormatTable then it calculates the string lengths incorrectly.
+# Children: don't try this at home.  We're trained professionals.
+if ($opts{'t'} == 0 && $ansicolor) {
+    eval {
+	package Text::FormatTable;
+
+	sub _l_box($$)
+	{
+	    my ($width, $text) = @_;
+	    my $lines = _wrap($width, $text);
+	    map { 
+		if (ref($text) eq "color_string") {
+		    $_ .= $text->color_it($_) . ' 'x($width-length($_));
+		} else {
+		    $_ .= ' 'x($width-length($_));
+		} 
+	    } @$lines;
+	    return $lines;
+	}
+
+	sub _r_box($$)
+	{
+	    my ($width, $text) = @_;
+	    my $lines = _wrap($width, $text);
+	    map { 
+		if (ref($text) eq "color_string") {
+		    $_ = ' 'x($width-length($_)) . $text->color_it($_);
+		} else {
+		    $_ = ' 'x($width-length($_)) . $_;
+		} 
+	    } @$lines;
+	    return $lines;
+	}
+
+        #
+	# colorized strings.
+	#
+	package color_string;
+
+	require Term::ANSIColor;
+
+	use overload
+	    '""' => \&string_it
+	;
+
+	sub string_it {
+	    return $_[0][1];
+	}
+
+	sub color_it {
+	    my $str = $_[1] || $_[0][1];
+	    return $_[0][0] . $str . $_[0][2];
+	}
+
+	sub new {
+	    my $this = [Term::ANSIColor::color($_[2]), $_[1],
+		      Term::ANSIColor::color('reset')];
+	    return bless($this, $_[0]);
+	}
+    }
+}
+
+if (!$ansicolor) {
     $begin = $end = "*";
 }
 
@@ -82,6 +145,7 @@ if ($#ARGV >= 0) {
     }
 }
 
+# load all configuration files we can find.
 sub load_rcs {
     if (-f "$ENV{'HOME'}/.snmp/netshrc") {
 	source_file("$ENV{'HOME'}/.snmp/netshrc");
@@ -95,6 +159,7 @@ sub load_rcs {
     }
 }
 
+# command definition for sourcing a particular file
 sub source_file {
     my $fh = new IO::File;
     if ($fh->open("<$_[0]")) {
@@ -115,6 +180,7 @@ sub source_file {
     }
 }
 
+# export data into an external file
 sub my_export {
     shift;
     if (!$insh) {
@@ -126,6 +192,7 @@ sub my_export {
     $insh->execute(@_);
 }
 
+# the main processing function.
 sub netsh {
     my $stmt = shift;
     chomp($stmt);      # remove trailing white space
@@ -296,7 +363,6 @@ sub netsh {
 	return;
     }
 
-    # we have an SQL statement.  process it.
     if ($stmt =~ /^watch\s+(.*)/) {
 	$running_watch = 1;
 	my $cmd = $1;
@@ -317,7 +383,6 @@ sub netsh {
 	$SIG{'INT'} = \&exit;
 	return;
     }
-
 
     # we have an SQL statement.  process it.
     if ($stmt =~ /^(select|insert|update|delete)/) {
@@ -345,7 +410,11 @@ sub netsh {
 			if ($older_data &&
 			    $row->[$count] ne
 			    $older_data->[$oldcount][$count]) {
-			    push @$newrow,"$begin$row->[$count]$end";
+			    if ($ansicolor) {
+				push @$newrow, new color_string($row->[$count],'red');
+			    } else {
+				push @$newrow,"$begin$row->[$count]$end";
+			    }
 			} else {
 			    push @$newrow,$row->[$count];
 			}
