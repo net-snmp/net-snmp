@@ -20,6 +20,20 @@ _ba_free_container_type(void *data, void *context);
 static int
 _ba_remove_with_free(netsnmp_container *container, const void *data);
 
+/* return top containers */
+netsnmp_container **
+netsnmp_get_top_containers(void)
+{
+    return &containers;
+}
+
+void
+netsnmp_release_if_top(netsnmp_container *cont)
+{
+    if (cont == containers) {
+        containers = NULL;
+    }
+}
 
 /*------------------------------------------------------------------
  */
