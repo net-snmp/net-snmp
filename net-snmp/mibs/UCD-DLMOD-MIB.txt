@@ -10,7 +10,7 @@ IMPORTS
     DisplayString				FROM SNMPv2-TC
     ucdExperimental				FROM UCD-SNMP-MIB;
 
-dlmod MODULE-IDENTITY
+ucdDlmodMIB MODULE-IDENTITY
     LAST-UPDATED "9912100000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
@@ -40,7 +40,7 @@ dlmodNextIndex OBJECT-TYPE
     DESCRIPTION
 	"The index number of next appropiate unassigned entry
 	 in the dlmodTable."
-    ::= { dlmod 1 }
+    ::= { ucdDlmodMIB 1 }
 
 dlmodTable OBJECT-TYPE 
     SYNTAX	SEQUENCE OF DlmodEntry
@@ -48,7 +48,7 @@ dlmodTable OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"A table of dlmodEntry."
-    ::= { dlmod 2 }
+    ::= { ucdDlmodMIB 2 }
 
 dlmodEntry OBJECT-TYPE
     SYNTAX	DlmodEntry
