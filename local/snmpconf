@@ -62,9 +62,6 @@ if (keys(%knownfiles)) {
     }
 }
 
-read_config("/usr/local/share/snmp/snmpd.conf", "snmpd.conf");
-#debug(Dumper(\%filetypes));
-
 if ($#ARGV >= 0) {
     #
     # loop through requested files.
@@ -303,9 +300,11 @@ sub output_files {
 	    }
 	    print O "\n\n\n";
 	}
-	print O "#\n# Unknown directives read in from other files\n#\n";
-	foreach my $unknown (@unknown) {
-	    print O $unknown,"\n";
+	if ($#unknown > -1) {
+	    print O "#\n# Unknown directives read in from other files\n#\n";
+	    foreach my $unknown (@unknown) {
+		print O $unknown,"\n";
+	    }
 	}
 	close(O);
     }
