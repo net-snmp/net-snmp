@@ -42,7 +42,7 @@
 @      eval $m2c_tmp="$m2c_tmp, $m2c_node_param_val"@
 @    end@ // for each index
 
-    int ${context}_init_data(${context}_registration_ptr ${context}_reg);
+    int ${context}_init_data(${context}_registration * ${context}_reg);
 
 @    include mfd-access-${m2c_table_access}-defines.m2i@
     int ${context}_row_prep( ${context}_rowreq_ctx *rowreq_ctx);
@@ -91,7 +91,7 @@
  * @retval MFD_ERROR   : unrecoverable error.
  */
 int
-${context}_init_data(${context}_registration_ptr ${context}_reg)
+${context}_init_data(${context}_registration * ${context}_reg)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_init_data","called\n"));
 
