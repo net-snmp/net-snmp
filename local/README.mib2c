@@ -89,7 +89,7 @@ command line, the script needs to be able to find your MIB so that it can
 read it in and generate template code.  Joe Marzot (gmarzot@nortelnetworks.com)
 tells us:
 --------------------------------------
-you should read (man mib_api). The defaultm behaviour for mib loading
+you should read (man mib_api). The default behaviour for mib loading
 from within the perl interface uses the environment variables described
 there. You can also override these and explicitly define mibdirs and
 load modules through the perl/SNMP api.
@@ -151,7 +151,7 @@ structure to be in OID lexical order if needed).
 WHAT TO DO WITH THE CODE THAT GETS GENERATED
 
 	You will need to edit your generated code to work with your
-hardware.  For instance, if your MIB is for a refridgerator, you will need
+hardware.  For instance, if your MIB is for a refrigerator, you will need
 to write the code that talks to the refridgerator (through the serial
 port, maybe?) in Fridge Protocol.
 
