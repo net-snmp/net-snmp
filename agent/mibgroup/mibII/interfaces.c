@@ -1080,6 +1080,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
       return (u_char *) &long_return;
     case IFINERRORS:
       long_return = (u_long)ifstat.ifInErrors;
+      return (u_char *) &long_return;
     case IFINUNKNOWNPROTOS:
       long_return = (u_long)ifstat.ifInUnknownProtos;
       return (u_char *) &long_return;
