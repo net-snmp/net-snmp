@@ -632,7 +632,14 @@ var_hrswrun(struct variable *vp,
 	    long_return = proc_buf->p_swrss;
 #endif
 #elif HAVE_KVM_GETPROCS
-	    long_return = proc_table[LowProcIndex].kp_eproc.e_xrssize;
+#ifdef freebsd3
+	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size/1024;
+#else
+	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +
+			  proc_table[LowProcIndex].kp_eproc.e_vm.vm_ssize +
+			  proc_table[LowProcIndex].kp_eproc.e_vm.vm_dsize;
+	    long_return = long_return * (getpagesize() / 1024);
+#endif
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
