@@ -57,6 +57,7 @@
 #include "default_store.h"
 #include "snmp_logging.h"
 #include "callback.h"
+#include "system.h"
 #define LOGLENGTH 1024
 
 static int do_syslogging=0;
