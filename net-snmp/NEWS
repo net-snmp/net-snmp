@@ -29,8 +29,9 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - experimental implementation of DisMan Remote Operations MIB groups
 
     mib2c:
-      - a number of new configuration templates:
-        - mib2c.iterate2.conf: a fuller iterator-based table config
+      - a number of new or updated configuration templates:
+        - mib2c.iterate.conf: the iterator-based table config
+            now produces fuller template code than before.
         - mib2c.table_data.conf and mib2c.container.conf:
             two new "internal-row" style configs
         - mib2c.mfd.conf: "MIBs for Dummies" (or MFD) - intended to
