@@ -72,7 +72,7 @@ static struct nlist hrswrun_nl[] = {
 extern struct proc *proc_table;
 static int LowProcIndex;
 
-#ifdef linux
+#ifndef linux
 static int current_proc_entry;
 #endif
 
@@ -357,6 +357,25 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    return (u_char *)&long_return;
 	case HRSWRUN_STATUS:
 #ifndef linux
+#ifdef hpux10
+	    switch ( proc_table[LowProcIndex].pst_stat ) {
+		case PS_STOP:
+	    		long_return = 3;	/* notRunnable */
+			break;
+		case PS_SLEEP:
+	    		long_return = 2;	/* runnable */
+			break;
+		case PS_RUN:
+	    		long_return = 1;	/* running */
+			break;
+		case PS_ZOMBIE:
+		case PS_IDLE:
+		case PS_OTHER:
+		default:
+	    		long_return = 4;	/* invalid */
+			break;
+	    }
+#else
 	    switch ( proc_table[LowProcIndex].p_stat ) {
 		case SSTOP:
 	    		long_return = 3;	/* notRunnable */
@@ -375,6 +394,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    		long_return = 4;	/* invalid */
 			break;
 	    }
+#endif
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
 	    fp = fopen( string, "r");
@@ -475,7 +495,12 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 
 #ifndef linux
 static int nproc;
+#ifndef hpux10
 struct proc *proc_table;
+#else
+struct pst_status *proc_table;
+struct pst_dynamic pst_dyn;
+#endif
 
 void
 Init_HR_SWRun()
@@ -483,15 +508,27 @@ Init_HR_SWRun()
     int proc_table_base;
     int bytes;
 
+#ifndef hpux10
     KNLookup(hrswrun_nl, N_NPROC, (char *)&nproc, sizeof(int));
     KNLookup(hrswrun_nl, N_PROC, (char *)&proc_table_base, sizeof(int));
     bytes = nproc*sizeof(struct proc);
+#else
+    pstat_getdynamic( &pst_dyn, sizeof( struct pst_dynamic ),
+			1, 0 );
+    nproc = pst_dyn.psd_activeprocs ;
+    bytes = nproc*sizeof(struct pst_status);
+#endif
     if ((proc_table=malloc(bytes)) == NULL ) {
 	current_proc_entry = nproc+1;
 	return;
     }
 
+#ifndef hpux10
     klookup( proc_table_base, (char *)proc_table, bytes);
+#else
+    pstat_getproc( proc_table, sizeof( struct pst_status ),
+			nproc, 0 );
+#endif
     current_proc_entry = 0;
 }
 
@@ -499,10 +536,14 @@ int
 Get_Next_HR_SWRun()
 {
     while ( current_proc_entry < nproc ) {
+#ifndef hpux10
 	if ( proc_table[current_proc_entry].p_stat != 0 )
 	    return proc_table[current_proc_entry++].p_pid;
 	else
 	    ++current_proc_entry;
+#else
+	    return proc_table[current_proc_entry++].pst_pid;
+#endif
 
     }
     End_HR_SWRun();
@@ -557,6 +598,9 @@ int count_processes ()
     int i, total=0;
 
     Init_HR_SWRun();
+#ifdef hpux10
+    total = nproc;
+#else
 #ifndef linux
     for ( i = 0 ; i<nproc ; ++i ) {
 	if ( proc_table[i].p_stat != 0 )
@@ -565,6 +609,7 @@ int count_processes ()
 #endif
 	    ++total;
     }
+#endif /* !hpux10 */
     End_HR_SWRun();
     return total;
 }

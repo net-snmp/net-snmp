@@ -754,7 +754,6 @@ static void Route_Scan_Reload()
 	static int Time_Of_Last_Reload=0;
 	struct timeval now;
 	int hashsize;
-	extern char *index(), *malloc();
 
 	gettimeofday(&now, (struct timezone *)0);
 	if (Time_Of_Last_Reload+CACHE_TIME > now.tv_sec)
