@@ -247,6 +247,7 @@ netsnmp_get_table_data_handler(netsnmp_table_data *table)
         netsnmp_create_handler(TABLE_DATA_NAME,
                                netsnmp_table_data_helper_handler);
     if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) table;
     }
     return ret;
@@ -484,23 +485,25 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         }
     }
 
-    if (valid_request) {
+    if (valid_request &&
+       (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK)) {
         /*
          * If this is a GetNext or GetBulk request, then we've identified
          *  the row that ought to include the appropriate next instance.
          *  Convert the request into a Get request, so that the lower-level
-         *  handlers don't need to worry about skipping on....
+         *  handlers don't need to worry about skipping on, and call these
+         *  handlers ourselves (so we can undo this again afterwards).
          */
         oldmode = reqinfo->mode;
-        if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
-            reqinfo->mode = MODE_GET;
-        }
+        reqinfo->mode = MODE_GET;
         result = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
         reqinfo->mode = oldmode;
+        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
         return result;
     }
     else
+        /* next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
 }
 
