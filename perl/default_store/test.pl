@@ -62,6 +62,7 @@ BEGIN { $| = 1;
                   "NETSNMP_DS_LIB_PERSISTENT_DIR"          => 8,
                   "NETSNMP_DS_LIB_CONFIGURATION_DIR"       => 9,
                   "NETSNMP_DS_LIB_SECMODEL"                => 10,
+                  "NETSNMP_DS_LIB_MIBDIRS"                 => 11,
 		  );
 
 	print "1.." . (scalar(keys(%tests)) + 10) . "\n"; 
