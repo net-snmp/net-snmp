@@ -221,7 +221,10 @@ Memory ::= SEQUENCE {
    memAvailRealTXT     INTEGER,
    memTotalFree       INTEGER,
    memMinimumSwap       INTEGER,
-   memSwapError       DisplayString
+   memSwapError       DisplayString,
+   memShared          INTEGER,
+   memBuffer          INTEGER,
+   memCached          INTEGER
 }
 memIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -319,6 +322,30 @@ memMinimumSwap OBJECT-TYPE
 		"Minimum amount of free swap.  Otherwise memErrorSwap
 		is set to 1 "
 	::= { memory 12 }
+
+memShared OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Shared Memory"
+	::= { memory 13 }
+
+memBuffer OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Buffered Memory"
+	::= { memory 14 }
+
+memCached OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Cached Memory"
+	::= { memory 15 }
 
 memSwapError OBJECT-TYPE
 	SYNTAX INTEGER
