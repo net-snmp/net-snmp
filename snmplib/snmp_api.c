@@ -1234,7 +1234,7 @@ create_user_from_session(struct snmp_session *session)
     }
 
     /* copy in the engineID */
-    if (memdup((void *)&user->engineID, session->securityEngineID,
+    if (memdup(&user->engineID, session->securityEngineID,
                session->securityEngineIDLen) != SNMPERR_SUCCESS) {
       usm_free_user(user);
       return SNMPERR_GENERR;
