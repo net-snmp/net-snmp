@@ -1979,17 +1979,14 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 {
     u_char	*global_data,		*sec_params;
     size_t	 global_data_len,	 sec_params_len;
-    u_char	*header_buf;
-    size_t	 header_buf_len, spdu_len;
+    u_char	 header_buf[SNMP_MAX_MSG_V3_HDRS];
+    size_t	 header_buf_len = SNMP_MAX_MSG_V3_HDRS, spdu_len;
     u_char	*cp = packet;
     int      result;
     size_t      tmp_len = *out_length;
 
     if (!out_length)
         return -1;
-
-    header_buf_len = *out_length;
-    if ((header_buf = malloc(header_buf_len)) == NULL) return -1;
 
     global_data = packet;
 
@@ -1998,8 +1995,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
      */
     DEBUGPRINTPDUTYPE("send", pdu->command);
     if (pdu_data) {
-        if (pdu_data_len > header_buf_len) {
-            free(header_buf);
+        if (pdu_data_len > tmp_len) {
             return -1;
         }
         memcpy(cp - pdu_data_len, pdu_data, pdu_data_len);
@@ -2008,7 +2004,6 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     } else {
         cp = snmp_pdu_rbuild(pdu, cp, &tmp_len);
         if (cp == NULL) {
-            free(header_buf);
             return -1;
         }
     }
@@ -2017,17 +2012,15 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     cp = snmpv3_scopedPDU_header_rbuild(pdu, cp, &tmp_len,
                                         *out_length - tmp_len);
     if (cp == NULL) {
-        free(header_buf);
         return -1;
     }
 
     /* 
      * build the headers for the packet, returned addr = start of secParams
      */
-    global_data = snmpv3_header_rbuild(pdu, header_buf + SNMP_MAX_MSG_SIZE,
+    global_data = snmpv3_header_rbuild(pdu, header_buf + header_buf_len,
                                        &header_buf_len, 0, NULL);
     if (global_data == NULL) {
-        free(header_buf);
         return -1;
     }
 
@@ -2041,7 +2034,7 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
     result =
      	usm_rgenerate_out_msg(
 			SNMP_VERSION_3,		
-			global_data+1, *out_length - header_buf_len,
+			global_data+1, SNMP_MAX_MSG_V3_HDRS - header_buf_len,
                         SNMP_MAX_MSG_SIZE,	
 			SNMP_SEC_MODEL_USM,
                         pdu->securityEngineID,	pdu->securityEngineIDLen,
@@ -2051,7 +2044,6 @@ snmpv3_packet_rbuild(struct snmp_pdu *pdu, u_char *packet, size_t *out_length,
 			pdu->securityStateRef,
                         packet, out_length);
     DEBUGINDENTLESS();
-    free(header_buf);
     return result;
 
 }  /* end snmpv3_packet_build() */
