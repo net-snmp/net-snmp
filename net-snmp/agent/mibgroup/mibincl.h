@@ -5,6 +5,12 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
