@@ -1488,8 +1488,9 @@ Interface_Scan_Init(void)
                      "/proc/net/dev data format error, line ==|%s|", line);
         }
 
-        *stats++ = 0;
+        *stats   = 0;
         strcpy(ifname_buf, ifstart);
+        *stats++ = ':';
         while (*stats == ' ')
             stats++;
 
