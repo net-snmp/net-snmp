@@ -183,8 +183,9 @@ set_row_column(table_row *row, unsigned int column, int type,
     return SNMPERR_SUCCESS;
 }
 
-/**
- * adds a new default row to a table_set.
+/** adds a new default row to a table_set.
+ * Arguments should be the table_set, column number, variable type and
+ * finally a 1 if it is allowed to be writable, or a 0 if not.
  * returns SNMPERR_SUCCESS or SNMPERR_FAILURE
  */
 int
@@ -526,4 +527,30 @@ inline void table_dataset_add_row(table_data_set *table, table_row *row)
     table_data_add_row(table->table, row);
 }
 
-    
+#if HAVE_STDARG_H
+int table_set_multi_add_default_row(table_data_set *tset, ...)
+#else
+void table_set_multi_add_default_row(va_dcl)
+  va_dcl
+#endif
+{
+  va_list debugargs;
+  unsigned int column;
+  int type, writable;
+#if HAVE_STDARG_H
+  va_start(debugargs,tset);
+#else
+  table_data_set *tset;
+  
+  va_start(debugargs);
+  tset = va_arg(debugargs, table_data_set *);
+#endif
+
+  while((column = va_arg(debugargs, unsigned int)) != 0) {
+      type = va_arg(debugargs, int);
+      writable = va_arg(debugargs, int);
+      table_set_add_default_row(tset, column, type, writable);
+  }
+
+  va_end(debugargs);
+}
