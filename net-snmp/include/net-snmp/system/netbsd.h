@@ -1,5 +1,7 @@
 #include "bsd.h"
 
+#include <sys/param.h>
+
 #define PCB_TABLE 1
 #undef TCP_SYMBOL
 #define TCP_SYMBOL "tcbtable"
@@ -21,6 +23,12 @@
 #undef INP_PREV_SYMBOL
 #define INP_PREV_SYMBOL inp_queue.cqe_prev
 #define HAVE_INPCBTABLE 1
+
+#if __NetBSD_Version__ >= 106300000       /* NetBSD 1.6ZD */            
+#undef IFADDR_SYMBOL
+#define IFADDR_SYMBOL "in_ifaddrhead"
+#undef TOTAL_MEMORY_SYMBOL
+#endif
 
 #define UTMP_FILE _PATH_UTMP
 
