@@ -11,6 +11,7 @@ config_arch_require(solaris2, kernel_sunos5)
 struct in_ifaddr;
 struct ifnet;
 
+int Interface_Scan_Get_Count(void);
 int Interface_Index_By_Name (char *, int);
 void Interface_Scan_Init (void);
 #if defined(linux) || defined(sunV3)

@@ -165,8 +165,6 @@
 
 extern struct timeval starttime;
 
-static int Interface_Scan_Get_Count (void);
-
 static void parse_interface_config(const char *, char *);
 static void free_interface_config(void);
 
@@ -518,7 +516,7 @@ Interface_Scan_By_Index (int iindex,
     }
 }
 
-static int
+int
 Interface_Scan_Get_Count (void)
 {
   u_char *cp;
@@ -1648,7 +1646,7 @@ static int Interface_Scan_By_Index(int Index,
 
 static int Interface_Count=0;
 
-static int Interface_Scan_Get_Count (void)
+int Interface_Scan_Get_Count (void)
 {
 
 	if (!Interface_Count) {
@@ -1755,7 +1753,7 @@ static int Interface_Get_Ether_By_Index(int Index,
 
 #else /* solaris2 */
 
-static int Interface_Scan_Get_Count (void)
+int Interface_Scan_Get_Count (void)
 {
 	int i, sd;
 
@@ -1974,7 +1972,7 @@ get_phys_address(int iindex, char **ap, int *len)
 	return -1;
 }
 
-static int
+int
 Interface_Scan_Get_Count (void)
 {
     static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
