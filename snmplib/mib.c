@@ -1017,7 +1017,7 @@ snmp_oid_toggle_options(char *options)
 {
     while(*options) {
         switch(*options++) {
-        case 'o':
+        case 'n':
             ds_set_boolean(DS_LIBRARY_ID,
                            DS_LIB_PRINT_NUMERIC_OIDS, 1);
             break;
@@ -1051,7 +1051,7 @@ snmp_oid_toggle_options(char *options)
 void snmp_oid_toggle_options_usage(const char *lead, FILE *outf)
 {
   fprintf(outf, "%sOIDOPTS values:\n", lead);
-  fprintf(outf, "%s    o: Print oids numerically.\n", lead);
+  fprintf(outf, "%s    n: Print oids numerically.\n", lead);
   fprintf(outf, "%s    e: Print enums numerically.\n", lead);
   fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
   fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
@@ -1862,7 +1862,24 @@ fprint_description(FILE *f,
 		   size_t objidlen)   /* number of subidentifiers */
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
+    struct tree *subtree = tree_head;
+    fprintf(f, "%s ::= OBJECT-TYPE\n", tp->label);
     print_tree_node(f, tp);
+    fprintf(f, "::= {");
+    while (objidlen > 1) {
+	for(; subtree; subtree = subtree->next_peer){
+	    if (*objid == subtree->subid){
+		if (strncmp( subtree->label, ANON, ANON_LEN))
+		    fprintf(f, " %s(%lu)", subtree->label, subtree->subid);
+		else
+		    fprintf(f, " %lu", subtree->subid);
+		break;
+	    }
+	}
+	objid++; objidlen--; subtree = subtree->child_list;
+	if (subtree == 0) break;
+    }
+    fprintf(f, " %lu }\n", *objid);
 }
 
 void
@@ -1874,7 +1891,7 @@ print_tree_node(FILE *f,
     int i;
     if (tp) {
 	module_name(tp->modid, str);
-	fprintf(f, "FROM %s", str);
+	fprintf(f, "  -- FROM\t%s", str);
 	for (i = 1; i < tp->number_modules; i++) {
 	    module_name(tp->module_list[i], str);
 	    fprintf(f, ", %s", str);
@@ -1906,7 +1923,7 @@ print_tree_node(FILE *f,
 	    cp = str;
 	}
 #endif /* SNMP_TESTING_CODE */
-	if (cp) fprintf(f, "SYNTAX\t%s", cp);
+	if (cp) fprintf(f, "  SYNTAX\t%s", cp);
 	if (tp->ranges) {
 	    struct range_list *rp = tp->ranges;
 	    int first = 1;
@@ -1933,8 +1950,8 @@ print_tree_node(FILE *f,
 	    fprintf(f," } ");
 	}
 	if (cp) fprintf(f, "\n");
-	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
-	if (tp->units) fprintf(f, "UNITS\t\"%s\"\n", tp->units);
+	if (tp->hint) fprintf(f, "  DISPLAY-HINT\t\"%s\"\n", tp->hint);
+	if (tp->units) fprintf(f, "  UNITS\t\"%s\"\n", tp->units);
 	switch (tp->access) {
 	case MIB_ACCESS_READONLY:	cp = "read-only"; break;
 	case MIB_ACCESS_READWRITE:	cp = "read-write"; break;
@@ -1945,7 +1962,7 @@ print_tree_node(FILE *f,
 	case 0:				cp = NULL; break;
 	default:			sprintf(str,"access_%d", tp->access); cp = str;
 	}
-	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
+	if (cp) fprintf(f, "  MAX-ACCESS\t%s\n", cp);
 	switch (tp->status) {
 	case MIB_STATUS_MANDATORY:	cp = "mandatory"; break;
 	case MIB_STATUS_OPTIONAL:	cp = "optional"; break;
@@ -1962,11 +1979,11 @@ print_tree_node(FILE *f,
 	    cp = str;
 	}
 #endif /* SNMP_TESTING_CODE */
-	if (cp) fprintf(f, "STATUS\t%s\n", cp);
+	if (cp) fprintf(f, "  STATUS\t%s\n", cp);
 	if (tp->indexes) {
             struct index_list *ip = tp->indexes;
             int first=1;
-            fprintf(f, "INDEXES\t");
+            fprintf(f, "  INDEXES\t");
             fprintf(f," { ");
 	    while (ip) {
 		if (first) first = 0;
@@ -1976,7 +1993,7 @@ print_tree_node(FILE *f,
 	    }
 	    fprintf(f," }\n");
 	}
-	if (tp->description) fprintf(f, "DESCRIPTION\t\"%s\"\n", tp->description);
+	if (tp->description) fprintf(f, "  DESCRIPTION\t\"%s\"\n", tp->description);
     }
     else
         fprintf(f, "No description\n");
