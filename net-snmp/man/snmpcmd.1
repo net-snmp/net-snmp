@@ -261,6 +261,9 @@ This modifies the output of index oids, to look more "program like".
 If you take an entry from the IPV6-MIB::ipv6RouteTable, it is indexed with
 an IPv6 address and two integers, and if you are used to IPv6 addresses
 you will know that decimal oids are not the preferred notation. Compare
+.IP -OT
+If hexadecimal code is printed, this will also print any printable
+characters after the hexadecimal codes.
 .br
 $ snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
 .br

@@ -96,6 +96,8 @@ Equivalent to -Ob
 Equivalent to -OE
 .IP "quickPrinting (1|yes|true|0|no|false)"
 Equivalent to -Oq
+.IP "printHexText (1|yes|true|0|no|false)"
+Equivalent to -OT
 .IP "suffixPrinting (0|1|2)"
 If the value is 1, its equivalent to -Os and if the value is 2 it's
 equivalent to -OS.
