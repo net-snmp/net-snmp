@@ -152,18 +152,13 @@ u_char *var_simple_proxy(struct variable *vp,
     static int ret_str_len = 0;
     static oid  objid[MAX_OID_LEN];
     struct simple_proxy *sp;
-    static u_char *ret = NULL;
+    u_char *ret = NULL;
     struct snmp_pdu *pdu, *response;
     int status;
     int ourlength;
     oid *ourname;
   
   
-    if (ret != NULL) {
-        if (ret != &nullstr_ret)
-            free(ret);
-        ret = NULL;
-    }
     DEBUGMSGTL(("proxy_var","--- entering: "));
     DEBUGMSGOID(("proxy_var", name, *length));
     DEBUGMSG(("proxy_var","\n"));
