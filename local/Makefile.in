@@ -15,6 +15,7 @@ INSTALL = @INSTALL@
 
 snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript snmpcheck.def > snmpcheck
+	chmod a+x snmpcheck
 
 clean:
 	rm -f snmpcheck
