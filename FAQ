@@ -117,6 +117,7 @@ TABLE OF CONTENTS
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
    I'm getting an error "autoheader: not found" - what's wrong?
+   What about a failed dependency on 'libcrypto'?  Where can I get that?
    Why is the project workspace empty under Visual C++?
    Why are packets requesting the same information larger with UC-Davis SNMP ?
    What ASN.1 parser is used?
@@ -2530,6 +2531,20 @@ I'm getting an error "autoheader: not found" - what's wrong?
 
     In both cases, this can be corrected by running the command
   "make -k touchit" before attempting to make the main package.
+
+
+
+What about a failed dependency on 'libcrypto'?  Where can I get that?
+--------------------------------------------------------------------
+
+    This is typically encountered when installing a Linux RPM of
+  the ucd-snmp package.  This library is part of the 'openssl'
+  suite, so simply install that RPM first, or download the source
+  from ftp://ftp.openssl.org and compile and install that.
+
+    When compiling {UCD,Net}-SNMP from source, the configure script
+  should detect that this library is not present, and use alternative
+  arrangements.
 
 
 
