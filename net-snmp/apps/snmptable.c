@@ -211,7 +211,8 @@ int main(int argc, char *argv[])
   snmp_close(ss);
   SOCK_CLEANUP;
 
-  print_table();
+  if (entries) print_table();
+  else printf("%s: No entries\n", table_name);
 
   return 0;
 }
