@@ -398,6 +398,9 @@ vacm_parse_view(const char *token, char *param)
         config_perror("TYPE must be included/excluded?");
         return;
     }
+    suboid_len = strlen(subtree)-1;
+    if (subtree[suboid_len] == '.')
+        subtree[suboid_len] = '\0';   /* stamp on a trailing . */
     suboid_len = MAX_OID_LEN;
     if (!snmp_parse_oid(subtree, suboid, &suboid_len)) {
         config_perror("bad SUBTREE object id");
@@ -815,6 +818,8 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
 
     if (sn == NULL) {
         snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
+        DEBUGMSGTL(("mibII/vacm_vars",
+                    "vacm_in_view: No security name found\n"));
         return 1;
     }
 
