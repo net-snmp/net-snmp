@@ -2889,7 +2889,7 @@ netsnmp_get_agent_uptime(void)
 
 
 
-inline void
+NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
 {
@@ -2902,7 +2902,7 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
     }
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
                             const char *name)
 {
@@ -2912,7 +2912,7 @@ netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
     return NULL;
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2920,7 +2920,7 @@ netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2928,7 +2928,7 @@ netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {

@@ -562,7 +562,7 @@ check_registered(unsigned int event, oid * o, int o_l,
 /**
  *@internal
  */
-inline void
+NETSNMP_INLINE void
 insert_ready(callback_placeholder * new_cbr)
 {
     callback_placeholder *current_cbr, *last_cbr;
