@@ -796,6 +796,8 @@
 
 #ifdef WIN32
 
+#define IN_UCD_SNMP_SOURCE 1
+
 int strcasecmp(const char *s1, const char *s2);
 
 #define ENV_SEPARATOR ";"
