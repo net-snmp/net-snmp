@@ -178,10 +178,14 @@ klookup(off, target, siz)
 #endif
     return (0);
   }
-  if ((retsiz = klread(target, siz)) != siz ) { 
-    fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
-    perror("klread");
-    ERROR_MSG("klread");
+  if ((retsiz = klread(target, siz)) != siz ) {
+    if (snmp_get_do_debugging()) {
+    /* these happen too often on too many architectures to print them
+       unless we're in debugging mode. People get very full log files. */
+      fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
+      perror("klread");
+      ERROR_MSG("klread");
+    }
 #ifdef EXIT_ON_BAD_KLREAD
     exit(1);
 #endif
