@@ -53,7 +53,17 @@ if [ $NSB_CONFIG_ALL -eq 2 ]; then
 fi
 
 if [ -z "$SRCD" ]; then
-   SRCD=$HOME/src/net-snmp-$VERSION
+   for x in . $HOME/src/net-snmp
+   do
+      if [ -f $x/configure ]; then
+         SRCD=$x
+         break
+      fi
+   done
+   if [ -z "$SRCD" ]; then
+      echo "Couldn't find a source directory. Please specify one for me."
+      usage
+   fi
 fi
 
 
