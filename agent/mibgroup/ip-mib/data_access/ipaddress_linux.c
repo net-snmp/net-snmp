@@ -212,7 +212,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
         else
             entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
 
-        // xxx-rks: what can we do with scope?
+        /* xxx-rks: what can we do with scope? */
 
         /*
          * add entry to container

@@ -424,7 +424,7 @@ extern          "C" {
 
 
 
-//#ifndef MFD_SUCCESS
+#ifndef MFD_SUCCESS
 #define MFD_SUCCESS              SNMP_ERR_NOERROR
 #define MFD_SKIP                 SNMP_NOSUCHINSTANCE
 #define MFD_ERROR                SNMP_ERR_GENERR
@@ -434,7 +434,7 @@ extern          "C" {
 #define MFD_CANNOT_CREATE_NOW    SNMP_ERR_INCONSISTENTNAME
 #define MFD_CANNOT_CREATE_EVER   SNMP_ERR_NOCREATION
 #define MFD_END_OF_DATA          SNMP_ENDOFMIBVIEW
-    //#endif
+#endif
 
 #ifdef __cplusplus
 };
