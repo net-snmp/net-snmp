@@ -9,6 +9,7 @@
 
 /* strings */
 #define DS_AGENT_PROGNAME 0        /* argv[0] */
+#define DS_AGENT_X_SOCKET 1        /* AF_UNIX or ip:port socket addr */
 
 /* integers */
 #define DS_AGENT_FLAGS    0       /* session.flags */
