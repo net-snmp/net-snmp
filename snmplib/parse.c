@@ -1096,9 +1096,12 @@ static void do_linkup(mp, np)
 
 	/*
 	 * If any nodes left over,
-	 *   add them to the list of orphans
+	 *   check that they're not the result of a "fully qualified"
+	 *   name, and then add them to the list of orphans
 	 */
 
+    if (!np) return;
+    do_subtree( tree_head, &np );
     if (!np) return;
     for ( np = orphan_nodes ; np && np->next ; np = np->next )
 	;	/* find the end of the orphan list */
