@@ -607,6 +607,13 @@ statp_loop:
 		    asp->pdu->errindex = count;
 		    return SNMP_ERR_NOSUCHNAME;
 		}
+		else if (asp->rw == WRITE) {
+		    asp->pdu->errstat =
+			( noSuchObject	? SNMP_ERR_NOTWRITABLE
+					: SNMP_ERR_NOCREATION ) ;
+		    asp->pdu->errindex = count;
+		    return asp->pdu->errstat;
+		}
 		else
 		    varbind_ptr->type = statType;
 	}
