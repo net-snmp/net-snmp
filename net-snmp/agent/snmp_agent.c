@@ -84,7 +84,7 @@ SOFTWARE.
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 
 #include <net-snmp/default_store.h>
 #include <net-snmp/system.h>

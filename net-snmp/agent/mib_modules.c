@@ -1,6 +1,6 @@
 /* wrapper to call all the mib module initialization functions */
 
-#include "mib_module_config.h"
+#include <net-snmp/agent/mib_module_config.h>
 #include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
 #include <string.h>

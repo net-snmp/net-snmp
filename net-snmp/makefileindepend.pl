@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 
 # Move dependencies from the Makefile to the Makefile.in file, saving
-# a backup in Makefile.in.bak.
+# a backup in Makefile.depend.bak.
 
-rename("Makefile.in","Makefile.in.bak");
-open(F,"Makefile.in.bak");
+rename("Makefile.depend","Makefile.depend.bak");
+open(F,"Makefile.depend.bak");
 open(G,"Makefile");
-open(O,">Makefile.in"); 
+open(O,">Makefile.depend"); 
 $_ = <F>;
 while(!/^\# DO NOT DELETE THIS LINE/) { 
     print O $_; 

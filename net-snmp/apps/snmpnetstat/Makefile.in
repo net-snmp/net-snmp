@@ -1,22 +1,13 @@
 #
-# Copyright (c) 1987 Regents of the University of California.
-# All rights reserved.
+# snmpnetstat Makefile
 #
-# Redistribution and use in source and binary forms are permitted
-# provided that the above copyright notice and this paragraph are
-# duplicated in all such forms and that any documentation,
-# advertising materials, and other materials related to such
-# distribution and use acknowledge that the software was developed
-# by the University of California, Berkeley.  The name of the
-# University may not be used to endorse or promote products derived
-# from this software without specific prior written permission.
-# THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-# WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-#
-#	@(#)Makefile	5.10 (Berkeley) 9/20/88
-#
+
 top_builddir=../..
+INSTALLBINPROGS=snmpnetstat
+
+#
+# build info
+#
 SRCS=	inet.c inet6.c if.c main.c route.c winstub.c
 OBJS=	inet.o inet6.o if.o main.o route.o winstub.o
 LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo
@@ -25,46 +16,10 @@ TARG= snmpnetstat$(EXEEXT)
 CPPFLAGS=-I../../include -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
 	@CPPFLAGS@
 
-#LOCAL_LIBS = -L../../snmplib
-LOCAL_LIBS =
-#LIBS=	 $(CC_RUNTIME_ARG) -lsnmp @LIBS@
-USELIBS= ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
-LIBS=	 ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
+USELIBS= ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+LIBS=	 ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 
-all: $(TARG)
+all: standardall
 
 snmpnetstat$(EXEEXT): ${LOBJS} ${USELIBS}
 	${LINK} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
-
-distclean: clean
-
-clean:
-	rm -f core *.o *.lo *.exe $(TARG) $(SBINTARG)
-	rm -rf .libs
-
-cleandir: clean
-	rm -f ${MAN} tags .depend
-
-lint: ${SRCS}
-	lint ${CFLAGS} ${SRCS}
-
-tags: ${SRCS}
-	ctags ${SRCS}
-
-installdirs:
-	@$(SHELL) $(srcdir)/../../mkinstalldirs $(snmplibdir) $(bindir)
-
-install: installdirs $(TARG)
-	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
-
-depend: 
-	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
-
-nosysdepend:
-	makedepend $(CPPFLAGS) -o.lo *.c
-	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
-
-makefileindepend: nosysdepend
-	perl $(top_srcdir)/makefileindepend.pl
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
