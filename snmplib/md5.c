@@ -36,10 +36,10 @@
 */
 #define TRUE  1
 #define FALSE 0
-#if defined(hpux) || defined(SYSV)
-#define LOWBYTEFIRST TRUE
-#else
+#if defined(hpux) || defined(SYSV) || defined(sun)
 #define LOWBYTEFIRST FALSE
+#else
+#define LOWBYTEFIRST TRUE
 #endif
 
 /* Compile-time includes 
