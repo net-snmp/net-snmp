@@ -822,6 +822,7 @@ snmp_store(const char *type)
  * @param type Label for the config file "type" used
  *
  * @return void
+ */
 void
 snmp_shutdown(const char *type)
 {
