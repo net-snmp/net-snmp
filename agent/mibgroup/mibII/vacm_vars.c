@@ -610,8 +610,14 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
     return 1;
   retval = vacm_in_view(view_parms->pdu, view_parms->name,
                         view_parms->namelen);
-  if (retval != 0)
+  if (retval != 0) {
+    if (view_parms->pdu->version == SNMP_VERSION_1 ||
+        view_parms->pdu->version == SNMP_VERSION_2c) {
+        snmp_increment_statistic( retval == 1 ? STAT_SNMPINBADCOMMUNITYNAMES:
+                                                STAT_SNMPINBADCOMMUNITYUSES);
+    }
     view_parms->errorcode = retval;
+  }
   return retval;
 }
 
