@@ -25,7 +25,7 @@ SOFTWARE.
 ******************************************************************/
 #include <sys/types.h>
 #include <sys/socket.h>
-#ifndef hpux
+#ifdef sun
 #include <sys/sockio.h>
 #endif
 #include <netinet/in.h>

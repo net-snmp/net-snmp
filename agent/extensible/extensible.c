@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <nlist.h>
 #include <machine/param.h>
@@ -8,9 +8,12 @@
 #include <sys/param.h>
 #ifdef hpux
 #include <sys/swap.h>
+#endif
+#if defined(hpux) || defined(ultrix)
 #include <sys/fs.h>
 #include <mtab.h>
-#else
+#endif
+#ifdef sun
 #include <fstab.h>
 #endif
 #include <sys/stat.h>
@@ -255,7 +258,7 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
-#ifdef hpux
+#if defined(hpux) || defined(ultrix)
 
 unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;

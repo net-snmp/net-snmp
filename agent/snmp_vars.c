@@ -662,7 +662,7 @@ struct subtree subtrees[] = {
   {{WESMIB, LOCKDMIBNUM}, 7, (struct variable *)wes_lockd_variables,
    sizeof(wes_lockd_variables)/sizeof(*wes_lockd_variables),
    sizeof(*wes_lockd_variables)},
-#ifdef hpux
+#if defined(hpux) || defined(ultrix)
   {{WESMIB, DISKMIBNUM}, 7, (struct variable *)wes_disk_variables,
    sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
    sizeof(*wes_disk_variables)},
