@@ -475,6 +475,7 @@ void		snmp_udp_parse_security		(const char *token,
   strcpy(e->community, community);
   e->network = network;
   e->mask = mask;
+  e->next = NULL;
   
   if (com2SecListLast != NULL) {
     com2SecListLast->next = e;
