@@ -2,6 +2,8 @@
 
 #define WESMIB 1,3,6,1,4,10,1
 
+u_char *var_wes_proc();
+
 struct variable2 wes_proc_variables[] = {
   {WESNAMES, STRING, RONLY, var_wes_proc, 1, {1}},
 };
@@ -49,6 +51,13 @@ u_char *var_wes_proc(vp, name, length, exact, var_len, write_method)
   }
 }
 
+int random()
+{
+  return(rand());
+}
 
-
-
+void srandom (seed)
+  unsigned int seed;
+{
+  srand(seed);
+}
