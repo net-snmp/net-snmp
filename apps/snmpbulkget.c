@@ -121,7 +121,11 @@ int main(int argc, char  *argv[])
     int  status;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, "B:", optProc);
+    if ((arg = snmp_parse_args(argc, argv, &session, "B:", optProc)) < 0) {
+        usage();
+        exit(1);
+    }
+    
     names = argc - arg;
     if (names < non_repeaters) {
       fprintf(stderr, "snmpbulkget: need more objects than <nonrep>\n");

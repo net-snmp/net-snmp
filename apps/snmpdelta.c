@@ -333,7 +333,11 @@ int main(int argc, char *argv[])
   int print = 1;
   int exit_code = 0;
     
-  arg = snmp_parse_args(argc, argv, &session, "C:", &optProc);
+  if ((arg = snmp_parse_args(argc, argv, &session, "C:", &optProc)) < 0) {
+      usage();
+      exit(1);
+  }
+  
   gateway = session.peername;
 
   /*

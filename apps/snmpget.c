@@ -126,7 +126,10 @@ int main(int argc, char *argv[])
     int status;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
+    if ((arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) < 0) { 
+        usage();
+        exit(1);
+    }
 
     if (arg >= argc) {
       fprintf(stderr, "Missing object name\n");
