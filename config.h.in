@@ -921,12 +921,12 @@
 /* Exec command to fix PROC problems */
 /* %s will be replaced by the process name in error */
 
-/* #define PROCFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s" */
+/* #define PROCFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
 
 /* Exec command to fix EXEC problems */
 /* %s will be replaced by the exec/script name in error */
 
-/* #define EXECFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s" */
+/* #define EXECFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */
 
 /* Should exec output Cashing be used (speeds up things greatly), and
    if so, After how many seconds should the cache re-newed?  Note:
