@@ -53,6 +53,7 @@ usage() if ($opts{'h'});
 
 @displayInfo=qw(type access status units hint moduleID enums indexes);
 @saveoptions = ('displayoidas', 'writecolor', 'graphtime', 'graphdelta');
+$writecolor = "blue";
 foreach $i (@displayInfo) {
     $displayInfoStates{$i} = 1;
 }
@@ -94,7 +95,6 @@ if (test_version(1,5,0,0)) {
 SNMP::initMib();
 $SNMP::verbose = 1;
 my $tmpbd = 1;
-$writecolor = "blue";
 
 $top = MainWindow->new();
 $top->title("tkmib");
@@ -230,7 +230,7 @@ my $sFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $sFrame->pack(-side => 'top', -fill => 'x');
 $sFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => 'OID: ', -relief => 'raised', -borderwidth => $tmpbd)
     ->pack(-side => 'left');
-$mibOID = $sFrame->Entry(-textvariable => \$OID, -relief => 'flat');
+$mibOID = $sFrame->Entry(-textvariable => \$OID, -relief => 'flat', -width => 40);
 $mibOID->pack(-side => 'left');
 $mibTextOID = $sFrame->Label(-pady => $tmpbd, -padx => $tmpbd, -text => '');
 $mibTextOID->pack(-side => 'right');
@@ -353,7 +353,7 @@ sub initTable {
     $output->destroy();
     $oFrame->packPropagate(0);
     $output = $oFrame->Table(-columns => shift, -width => 80, -height => 14,
-			     -fixedrows => 2, -fixedcolumns => 2);
+			     -fixedrows => 2, -fixedcolumns => 1);
     $output->pack(-side => 'top', -fill => 'both', -expand => 1);
 }
 
@@ -492,6 +492,7 @@ sub snmpwalk {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
+		 $val eq "ENDOFMIBVIEW" ||
 	         !is_in_subtree($oid, $var->tag . "." . $var->iid));
 	insertvar($var);
 	$top->update();
@@ -514,6 +515,7 @@ sub snmptable {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
+		 $val eq "ENDOFMIBVIEW" ||
 	         !is_in_subtree($oid, $var->tag . "." . $var->iid));
 	$newoid = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
 	insertvar($var);
