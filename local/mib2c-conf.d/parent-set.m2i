@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -8,15 +8,25 @@
 @end@
 ########################################################################
 ##
+##----------------------------------------------------------------------
+@if $m2c_table_row_creation == 1@
 /*
- * ${context}_create_context
+ * ${context}_validate_index
  *
  * Purpose: create new data context, if specified index is valid.
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ${context}_ctx
+ *        Pointer to the users context.
+ * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
+ * code on failure.
  */
 int
-${context}_create_context( ${context}_ctx *ctx )
+${context}_validate_index( netsnmp_mfd_registration *mfdr, ${context}_ctx *ctx )
 {
     int rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
@@ -47,20 +57,117 @@ $example_start
     }
 $example_end
 
-@if $m2c_data_allocate == 1@
-    /*
-     * allocate memory for the data context
-     */
-    ctx->data = ${context}_allocate_data();
-    if(NULL == ctx->data) {
-        /** msg already logged */
-        return SNMP_ERR_RESOURCEUNAVAILABLE;
-    }
-
-@end@
     return SNMP_ERR_NOERROR;
 }
 
+@end@ # row creation
+##----------------------------------------------------------------------
+@if $m2c_data_context ne "generated"@
+/**
+ * Setup up context with information needed to undo a set request.
+ *
+ * This function will be called before the individual node undo setup
+ * functions are called. If you need to do any undo setup that is not
+ * related to a specific column, you can do it here.
+ */
+int
+${context}_undo_setup( ${context}_ctx *ctx )
+{
+    int rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != ctx );
+
+    /*
+     * copy data to undo
+     */
+@if $m2c_data_context ne "generated"@
+$example_start
+@end@
+@    foreach $node nonindex@
+@        include m2c_setup_node.m2i@
+@        eval $m2c_ctx_lh = "$m2c_undo_item"@
+@        eval $m2c_ctx_rh = "$m2c_data_item"@
+@        include generic-ctx-copy.m2i@
+@    end@ # foreach nonindex
+@if $m2c_data_context ne "generated"@
+$example_end
+@end@
+
+    return SNMP_ERR_NOERROR;
+}
+@end@
+##----------------------------------------------------------------------
+/*
+ * ${context}_reversible_commit
+ *
+ * Purpose: perform commit actions that are reversible
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param requests A linked list of requests for this row
+ * @param ${context}_ctx
+ *        Pointer to the users context.
+ * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
+ */
+int
+${context}_reversible_commit( $mfd_base_params, ${context}_ctx *ctx )
+{
+    int rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != ctx );
+
+    /*
+     * TODO: commit any data that is not difficult to undo and/or
+     * is not service affecting.
+     */
+##$example_start
+##$example_end
+
+    return SNMP_ERR_NOERROR;
+}
+
+##----------------------------------------------------------------------
+/*
+ * ${context}_final_commit
+ *
+ * Purpose: perform remaining commit actions.
+ *
+ * At this point, you should have done everything you can to ensure that
+ * this commit will not fail.
+ *
+ * THERE IS NO ATTEMPT AT RECOVERY FOR ERRORS FROM THIS STATE!
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param requests A linked list of requests for this row
+ * @param ${context}_ctx
+ *        Pointer to the users context.
+ * @return SNMP_ERR_NOERROR on success, or appropriate SNMP_ERR_* error
+ */
+int
+${context}_final_commit( $mfd_base_params, ${context}_ctx *ctx )
+{
+    int rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != ctx );
+
+    /*
+     * TODO: commit any remaining data.
+     */
+##$example_start
+##$example_end
+
+    return SNMP_ERR_NOERROR;
+}
+
+@end@
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
