@@ -48,7 +48,7 @@ LDFLAGS		= @LDFLAGS@
 LIBTOOL		= @LIBTOOL@
 
 # Misc Compiling Stuff
-CC	        = @CC@ $(CPPFLAGS)
+CC	        = @CC@ $(CPPFLAGS) $(CFLAGS)
 # version number is prefixed by a 0 for a better shared library version number
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -rpath $(libdir) -release 0.$(VERSION) -o
 LIB_EXTENSION   = la
