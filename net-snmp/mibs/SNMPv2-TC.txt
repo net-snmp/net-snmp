@@ -1,7 +1,8 @@
 SNMPv2-TC DEFINITIONS ::= BEGIN
 
 IMPORTS
-    TimeTicks, ObjectSyntax
+    TimeTicks, mib-2
+-- ,ObjectSyntax   -- removed by Wes.
         FROM SNMPv2-SMI;
 
 DisplayString ::= TEXTUAL-CONVENTION
