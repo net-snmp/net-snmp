@@ -53,9 +53,9 @@ print STDERR $regitem,":",ref($regitem),"\n";
 print it(ref($regitem) eq "netsnmp_handler_registrationPtr", 5);
 
 while(1) {
-    print ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
+    print netsnmp_ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
     $agent->agent_check_and_process(1);
-    print ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
+    print netsnmp_ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
     print "got something\n";
 }
 exit;
