@@ -22,6 +22,7 @@ wesTests       OBJECT IDENTIFIER ::= { private 10 }
 -- memory         OBJECT IDENTIFIER ::= { wesTests 4 }
 -- lockd          OBJECT IDENTIFIER ::= { wesTests 5 }
 -- disk           OBJECT IDENTIFIER ::= { wesTests 6 }
+-- version        OBJECT IDENTIFIER ::= { wesTests 100 }
 miscTests      OBJECT IDENTIFIER ::= { wesTests 9 }
 
 Processes OBJECT-TYPE
@@ -439,5 +440,53 @@ diskErrorMsg OBJECT-TYPE
      DESCRIPTION  
           "A text description of what caused the error flag to be set."
      ::= { Disk 101 } 
+     
+Version	OBJECT-TYPE
+	SYNTAX version
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"ece-snmpd version info."
+	INDEX { versionIndex }
+	::= { wesTests 100 }
+
+version ::= SEQUENCE {
+   versionIndex   INTEGER,
+   versionDate  DisplayString,
+   versionCDate  DisplayString,
+   versionIdent  DisplayString
+}
+   
+versionIndex OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Index to mib (always 1)"
+     ::= { Version 1 } 
+
+versionDate OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Date string from RCS keyword"
+     ::= { Version 3 } 
+
+versionCDate OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Date string from ctime() "
+     ::= { Version 4 } 
+
+versionIdent OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Id string from RCS keyword"
+     ::= { Version 5 } 
 
 END
