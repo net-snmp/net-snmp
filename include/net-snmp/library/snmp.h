@@ -111,7 +111,7 @@ SOFTWARE.
     /*
      * PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 
      */
-#define SNMP_MSG_GET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0) /* a1=160 */
+#define SNMP_MSG_GET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0) /* a0=160 */
 #define SNMP_MSG_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1) /* a1=161 */
 #define SNMP_MSG_RESPONSE   (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x2) /* a2=162 */
 #define SNMP_MSG_SET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x3) /* a3=163 */
@@ -135,7 +135,9 @@ SOFTWARE.
 
     /*
      * internal modes that should never be used by the protocol for the
-     * pdu type. 
+     * pdu type.
+     *
+     * All modes < 128 are reserved for SET requests.
      */
 #define SNMP_MSG_INTERNAL_SET_BEGIN        -1
 #define SNMP_MSG_INTERNAL_SET_RESERVE1     0    /* these should match snmp.h */
@@ -146,7 +148,25 @@ SOFTWARE.
 #define SNMP_MSG_INTERNAL_SET_UNDO         5
 #define SNMP_MSG_INTERNAL_SET_MAX          6
 
-#define SNMP_MSG_INTERNAL_GET_STASH        10
+#define SNMP_MSG_INTERNAL_CHECK_VALUE           17
+#define SNMP_MSG_INTERNAL_ROW_CREATE            18
+#define SNMP_MSG_INTERNAL_UNDO_SETUP            19
+#define SNMP_MSG_INTERNAL_SET_VALUE             20
+#define SNMP_MSG_INTERNAL_CHECK_CONSISTENCY     21
+#define SNMP_MSG_INTERNAL_UNDO_SET              22
+#define SNMP_MSG_INTERNAL_COMMIT                23
+#define SNMP_MSG_INTERNAL_UNDO_COMMIT           24
+#define SNMP_MSG_INTERNAL_IRREVERSIBLE_COMMIT   25
+#define SNMP_MSG_INTERNAL_UNDO_CLEANUP          26
+
+    /*
+     * modes > 128 for non sets.
+     * Note that 160-168 overlap with SNMP ASN1 pdu types
+     */
+#define SNMP_MSG_INTERNAL_PRE_REQUEST           128
+#define SNMP_MSG_INTERNAL_OBJECT_LOOKUP         129
+#define SNMP_MSG_INTERNAL_POST_REQUEST          130
+#define SNMP_MSG_INTERNAL_GET_STASH             131
 
     /*
      * test for member of Confirmed Class i.e., reportable 
