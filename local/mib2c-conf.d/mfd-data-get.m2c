@@ -51,7 +51,7 @@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
 
-@    if $m2c_data_allocate == 1 && $m2c_data_context ne "generated"@
+@    if ($m2c_data_allocate == 1) && ("$m2c_data_context" ne "generated")@
 @        include generic-data-allocate.m2i@
 @    end@
 
