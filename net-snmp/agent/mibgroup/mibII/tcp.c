@@ -224,6 +224,9 @@ void init_tcp(void)
 #if freebsd4
   hz=sysconf(_SC_CLK_TCK); /* get ticks/s from system */
 #endif
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 

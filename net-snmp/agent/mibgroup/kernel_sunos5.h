@@ -73,8 +73,8 @@ typedef struct mibcache {
     size_t	cache_size;	/* Size of this cache table in bytes */
     void*	cache_addr;	/* Pointer to real cache memory */
     size_t	cache_length;	/* Useful length in bytes */
-    size_t	cache_ttl;	/* Time to live for this element in seconds */
-    time_t	cache_time;	/* Time stamp for this element */
+    size_t	cache_ttl;	/* Time this type of cache entry stays valid */
+    time_t	cache_time;	/* CURRENT time left for this cache entry */
     int		cache_flags;	/* Cache state */
     int		cache_last_found; /* Index of last cache element that was found */
     void*	cache_comp;	/* Compare routine used to set the cache */
@@ -134,7 +134,8 @@ typedef struct mib2_ifEntry {
 extern "C" {
 #endif
 #endif
-
+  void	init_kernel_sunos5(void);
+  
   int 	getKstat(const char *statname, const char *varname, void *value);
   int	getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
 		   req_e req_type, int (*comp)(void *, void *), void *arg);

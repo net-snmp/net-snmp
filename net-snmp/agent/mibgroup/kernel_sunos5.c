@@ -146,6 +146,49 @@ extern "C" {
 #endif
 #endif
 
+/*  I profiled snmpd using Quantify on a Solaris 7 box, and it turned out
+    that the calls to time() in getMibstat() were taking 18% of the total
+    execution time of snmpd when doing simple walks over the whole tree.  I
+    guess it must be difficult for Sun hardware to tell the time or
+    something ;-).  Anyway, this seemed like it was negating the point of
+    having the cache, so I have changed the code so that it runs a periodic
+    alarm to age the cache entries instead.  The meaning of the cache_ttl and
+   cache_time members has changed to support this.  cache_ttl is now the value
+   that cache_time gets reset to when we fetch a value from the kernel;
+   cache_time then ticks down to zero in steps of period (see below).  When it
+   reaches zero, the cache entry is no longer valid and we fetch a new one.
+   The effect of this is the same as the previous code, but more efficient
+   (because it's not calling time() for every variable fetched) when you are
+   walking the tables.  jbpn, 20020226.  */
+
+static void
+kernel_sunos5_cache_age(unsigned int reg, void *data)
+{
+  int i = 0, period = (int)data;
+  for (i = 0; i < MIBCACHE_SIZE; i++) {
+    DEBUGMSGTL(("kernel_sunos5", "cache[%d] time %ld ttl %d\n", i,
+		Mibcache[i].cache_time, Mibcache[i].cache_ttl));
+    if (Mibcache[i].cache_time < period) {
+      Mibcache[i].cache_time = 0;
+    } else {
+      Mibcache[i].cache_time -= period;
+   }
+  }
+}
+
+void init_kernel_sunos5(void)
+{
+  static int creg = 0;
+  const int period = 5;
+
+  if (creg == 0) {
+    creg = snmp_alarm_register(period, SA_REPEAT, kernel_sunos5_cache_age,
+			       (void*)period);
+    DEBUGMSGTL(("kernel_sunos5", "registered alarm %d with period %ds\n", 
+		creg, period));
+  }
+}
+
 /* Get various kernel statistics using undocumented Solaris kstat interface.
    We need it mainly for getting network interface statistics,
    although it is generic enough to be used for any purpose.
@@ -403,8 +446,10 @@ getMibstat(mibgroup_e grid,  void *resp, size_t entrysize,
     }
     if (req_type != GET_NEXT)
       cachep->cache_last_found = 0;
-    cache_valid = (time(NULL) - cachep->cache_time) > cachep->cache_ttl ? 0 : 1;
-    DEBUGMSGTL(("kernel_sunos5", "... cache_valid %d time %ld ttl %d now %ld\n",
+
+    cache_valid = (cachep->cache_time > 0);
+
+    DEBUGMSGTL(("kernel_sunos5","... cache_valid %d time %ld ttl %d now %ld\n",
                 cache_valid, cachep->cache_time, cachep->cache_ttl,
                 time (NULL)));
     if (cache_valid) {
@@ -441,7 +486,7 @@ getMibstat(mibgroup_e grid,  void *resp, size_t entrysize,
 	    rc = getmib(mibgr, mibtb, cachep->cache_addr, cachep->cache_size, entrysize,
 			req_type, &ep, &length, comp, arg);
 	if (rc >= 0) {		/* Cache has been filled up */
-	    cachep->cache_time = time(NULL);
+	    cachep->cache_time = cachep->cache_ttl;
 	    cachep->cache_length = length;
 	    if (rc == 1)	/* Found but there are more unread data */
 		cachep->cache_flags |= CACHE_MOREDATA;
@@ -515,7 +560,7 @@ init_mibcache_element(mibcache *cp)
 	return;
     if (cp->cache_size)
 	    cp->cache_addr = malloc(cp->cache_size);
-    cp->cache_time = time(NULL) - 100*cp->cache_ttl; /* In the past */
+    cp->cache_time = 0;
     cp->cache_comp = NULL;
     cp->cache_arg = NULL;
 }

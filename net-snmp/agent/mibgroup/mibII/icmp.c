@@ -166,6 +166,9 @@ void init_icmp(void)
 #ifdef ICMPSTAT_SYMBOL
     auto_nlist( ICMPSTAT_SYMBOL,0,0 );
 #endif
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 
