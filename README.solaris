@@ -141,3 +141,6 @@ cope with the size of the subsitution strings used in config.status.
 
 Putting /usr/bin ahead of /usr/ucb in the search path fixes this.
 
+/usr/xpg4/bin/sed is seen to segfault under Solaris 8 when running configure.
+Putting /usr/bin ahead of /usr/xpg4/bin fixes this.
+Thanks to zach dot metzinger at removeme microtune dot com.
