@@ -438,7 +438,7 @@ main(int argc, char *argv[])
                 case 'H':
                   init_snmpv3("snmpd");
                   init_mib_modules();
-                  init_agent();            /* register our .conf handlers */
+                  init_agent("snmpd");            /* register our .conf handlers */
                   init_snmp("snmpd");
                   fprintf(stderr, "Configuration directives understood:\n");
                   read_config_print_usage("  ");
@@ -527,7 +527,7 @@ main(int argc, char *argv[])
 #endif
 
     SOCK_STARTUP;
-    init_agent();		/* do what we need to do first. */
+    init_agent("snmpd");		/* do what we need to do first. */
     init_mib_modules();
     
 

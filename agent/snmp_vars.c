@@ -193,7 +193,7 @@ u_char		return_buf[256]; /* nee 64 */
 struct timeval	starttime;
 
 void
-init_agent (void)
+init_agent (const char *app)
 {
   /* get current time (ie, the time the agent started) */
   gettimeofday(&starttime, NULL);
@@ -211,7 +211,7 @@ init_agent (void)
 
   setup_tree();
 
-  init_agent_read_config();
+  init_agent_read_config(app);
 
 #ifdef TESTING
   auto_nlist_print_tree(-2, 0);

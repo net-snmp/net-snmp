@@ -94,6 +94,15 @@ register_premib_handler(const char *type,
   return (ltmp);
 }
 
+struct config_line *
+register_app_premib_handler(const char *token,
+			void (*parser) (const char *, char *),
+			void (*releaser) (void),
+			const char *help)
+{
+  return(register_premib_handler( NULL, token, parser, releaser, help ));
+}
+
 /*******************************************************************-o-******
  * register_config_handler
  *
@@ -107,7 +116,7 @@ register_premib_handler(const char *type,
  *	Pointer to a new config line entry  -OR-  NULL on error.
  */
 struct config_line *
-register_config_handler(const char *type,
+register_config_handler(const char *type_param,
 			const char *token,
 			void (*parser) (const char *, char *),
 			void (*releaser) (void),
@@ -115,6 +124,10 @@ register_config_handler(const char *type,
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
+  char *type = type_param;
+
+  if ( type == NULL )
+    type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
 
   /* 
    * Find type in current list  -OR-  create a new file type.
@@ -175,12 +188,25 @@ register_config_handler(const char *type,
 
 }  /* end register_config_handler() */
 
+struct config_line *
+register_app_config_handler(const char *token,
+			void (*parser) (const char *, char *),
+			void (*releaser) (void),
+			const char *help)
+{
+  return(register_config_handler( NULL, token, parser, releaser, help ));
+}
+
 void
-unregister_config_handler(const char *type, 
+unregister_config_handler(const char *type_param, 
 			  const char *token)
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp, *ltmp2;
+  char *type = type_param;
+
+  if ( type == NULL )
+    type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
 
   /* find type in current list */
   while (*ctmp != NULL && strcmp((*ctmp)->fileHeader,type)) {
@@ -215,6 +241,12 @@ unregister_config_handler(const char *type,
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
   }
+}
+
+void
+unregister_app_config_handler(const char *token)
+{
+  unregister_config_handler( NULL, token );
 }
 
 #ifdef TESTING
@@ -568,6 +600,12 @@ read_config_store(const char *type, const char *line)
 
 #endif
 }  /* end read_config_store() */
+
+void
+read_app_config_store(const char *line)
+{
+  read_config_store(ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE), line);
+}
 
 
 
