@@ -217,7 +217,7 @@ of the variable.
 does the same, but prints to the FILE pointer specified by the initial
 parameter.
 .br
-.B sprint_variable
+.B snprint_variable
 prints the same information into the buffer pointed to by
 .I buf
 which is of length
