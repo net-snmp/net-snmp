@@ -28,7 +28,9 @@ AC_AIX
 
 dnl system check
 AC_CANONICAL_SYSTEM
-CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[.-_].*//'`"
+changequote(, )
+CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[-._].*//'`"
+changequote([, ])
 
 AC_MSG_CHECKING(for additional cpp flags)
 dnl gcc extra CPPFLAGS
@@ -296,36 +298,30 @@ fi
 
 fi
 
-dnl Check tcpstat for
-AC_CACHE_CHECK(if struct tcpstat has a tcps_rcvmemdrop node, 
-	ac_cv_struct_tcpstat_tcps_rcvmemdrop,
-[
-AC_TRY_COMPILE([
+dnl Check tcpstat for tcpstat.tcp_rcvmemdrop
+AC_CHECK_STRUCT_FOR([
 #ifdef HAVE_NETINET_TCP_VAR_H
 #include<netinet/tcp_var.h>
 #endif
-],[
-struct tcpstat tcpstat;
-tcpstat.tcps_rcvmemdrop = 0;
-], ac_cv_struct_tcpstat_tcps_rcvmemdrop=yes,
-ac_cv_struct_tcpstat_tcps_rcvmemdrop=no)
-])
-
-if test "x$ac_cv_struct_tcpstat_tcps_rcvmemdrop" = "xyes"; then
-  AC_DEFINE(HAVE_TCPSTAT_TCPS_RCVMEMDROP)
-fi
+], tcpstat, tcp_rcvmemdrop)
 
 dnl Check ifnet entries using macro defined in aclocal.m4.
-AC_CHECK_IFNET_FOR(if_baudrate,IF_BAUDRATE)
-AC_CHECK_IFNET_FOR(if_type,IF_TYPE)
-AC_CHECK_IFNET_FOR(if_imcasts,IF_IMCASTS)
-AC_CHECK_IFNET_FOR(if_iqdrops,IF_IQDROPS)
-AC_CHECK_IFNET_FOR(if_noproto,IF_NOPROTO)
-AC_CHECK_IFNET_FOR(if_omcasts,IF_OMCASTS)
-AC_CHECK_IFNET_FOR(if_xname,IF_XNAME,no)
-AC_CHECK_IFNET_FOR(if_lastchange.tv_sec,IF_LASTCHANGE_TV_SEC)
-AC_CHECK_IFNET_FOR(if_obytes,IF_OBYTES)
-AC_CHECK_IFNET_FOR(if_ibytes,IF_IBYTES)
+AC_CHECK_IFNET_FOR(if_baudrate)
+AC_CHECK_IFNET_FOR(if_type)
+AC_CHECK_IFNET_FOR(if_imcasts)
+AC_CHECK_IFNET_FOR(if_iqdrops)
+AC_CHECK_IFNET_FOR(if_noproto)
+AC_CHECK_IFNET_FOR(if_omcasts)
+AC_CHECK_IFNET_FOR(if_xname,no)
+AC_CHECK_IFNET_FOR(if_lastchange.tv_sec)
+AC_CHECK_IFNET_FOR(if_obytes)
+AC_CHECK_IFNET_FOR(if_ibytes)
+
+AC_CHECK_STRUCT_FOR([
+#if HAVE_NETINET_UDP_VAR.H
+#include <netinet/udp_var.h>
+#endif
+],udpstat,udps_discard)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
