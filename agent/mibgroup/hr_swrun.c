@@ -69,10 +69,14 @@ static struct nlist hrswrun_nl[] = {
        void  Init_HR_SWRun();
        int   Get_Next_HR_SWRun();
        void  End_HR_SWRun();
-extern struct proc *proc_table;
 static int LowProcIndex;
 
 #ifndef linux
+#ifndef hpux10
+extern struct proc *proc_table;
+#else
+extern struct pst_status *proc_table;
+#endif
 static int current_proc_entry;
 #endif
 
