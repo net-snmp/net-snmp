@@ -17,8 +17,8 @@ CFLAGS = @CFLAGS@
 
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
-SUBDIRS = snmplib agent apps local ov
-INSTALLDIRS = $(SUBDIRS) man
+SUBDIRS = snmplib agent apps local ov man
+INSTALLDIRS = $(SUBDIRS)
 
 all:	mib.txt sedscript EXAMPLE.conf subdirs
 
