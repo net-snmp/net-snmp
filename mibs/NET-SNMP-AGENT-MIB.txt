@@ -23,7 +23,7 @@ netSnmpAgentMIB MODULE-IDENTITY
 
          email:     net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
-	 "Defines control and monitoring structures for the Net-SNMP agent.
+	 "Defines control and monitoring structures for the Net-SNMP agent."
     REVISION     "200202090000Z"
     DESCRIPTION
 	"First revision."
