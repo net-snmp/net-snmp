@@ -824,6 +824,9 @@ main(int argc, char *argv[])
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown("snmpd");
+    if (pid_file != NULL) {
+        unlink(pid_file);
+    }
 #ifdef WIN32
     agent_status = AGENT_STOPPED;
 #endif
