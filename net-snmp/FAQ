@@ -1,6 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD SNMP package
       =========================================================
-			 Author: Dave Shield
+		       FAQ Author: Dave Shield
+		ucd-snmp Project Author: Wes Hardaker
 		Email: ucd-snmp-coders@ece.ucdavis.edu
 
 TABLE OF CONTENTS
@@ -69,8 +70,7 @@ Where can I get it?
 ------------------
 
   - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
-
-	This file will always point to the latest revision.
+  - ftp://sunsite.cnlab-switch.ch/mirror/ucd-snmp/ucd-snmp.tar.gz
 
 
 What documentation is available?
@@ -103,7 +103,7 @@ What operating systems does it run on?
 	* Solaris 2.5, 2.4, 2.3 on Sun SPARC systems
 	* Solaris 2.5 on x86 systems
 	* SunOS 4.1.3, 4.1.3, 4.1.2 on Sun SPARC systems
-	* OSF 3.2 on DEC Alpha systems
+	* OSF 3.2, 4.0 on DEC Alpha systems
 	* NetBSD 1.2, 1.1, 1.0 on all? systems
 	* FreeBSD 2.x on all? systems
 	* BSDi 2.1 on all? systems
@@ -122,6 +122,10 @@ What happens if mine isn't listed?
 	around the BSD kernel.  If it seems to work correctly,
 	let us know so that we can update the list above.
 	If it doesn't work, let us know and we'll try to help.
+  If the agent almost compiles, but certain files in the
+        agent/mibgroup directory fail, you can try to compile without
+        those module files using the --with-out-mib-modules="list"
+        flag to configure (which you'll have to re-run).
   Either way, try it and let us know how you get on (see below for how).
 	
 
@@ -305,9 +309,10 @@ How do I add functionality?
     More general functionality can be added by providing a command
   (such as a shell script) to be run and report the necessary
   information, or perform the required actions. Detailed information
-  and examples are provided in the snmpd(1) manual page, or the
-  EXAMPLE.conf file.  Alternatively, the agent itself can be extended
-  to support additional MIB groups (see 'Technical' below).
+  and examples are provided in the snmpd(1) and snmpd.conf(5) manual
+  pages, or the EXAMPLE.conf file.  Alternatively, the agent itself
+  can be extended to support additional MIB groups (see 'Technical'
+  below).
 
     Note that there is effectively no difference between 'pass-through'
   MIB support, and modules implemented within the agent itself. Tools
@@ -415,7 +420,10 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 
   Alternatively, by defining the environmental variable PREFIX, the
   tools can be told to look for non-fully specified objects in
-  a different sub-tree.
+  a different sub-tree.  I.E.:
+
+	setenv PREFIX .iso.org.dod.internet.private.enterprises.ucdavis
+	/opt/snmp/bin/snmpwalk -v 1 localhost public processes
 
 
 I've done that, and I still can't see the values. Why not?
@@ -432,8 +440,8 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
   It doesn't exist in the distribution as shipped.  You need to
   create it to reflect your local requirement.
     To get started, you can either just create this as an empty file,
-  or try copying the EXAMPLE.conf file which will use some of the
-  UCD extensions. 
+  or try copying the EXAMPLE.conf file which will use some of the UCD
+  extensions.  See the snmpd.conf(5) manual page for further details.
 
 
 What does "klread:  bad address" mean?
@@ -546,8 +554,6 @@ Sometimes I seem to get the wrong answers.  Why?
 
 
   The following variables are simply not implemented according to specification
-
-	system.sysUpTime                machine uptime, rather than SNMP agent
 
 	tcp.tcpAttemptFails		} actually counting
 	tcp.tcpEstabResets		} something different
