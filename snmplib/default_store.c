@@ -144,6 +144,12 @@ netsnmp_ds_set_string(int storeid, int which, const char *value)
     DEBUGMSGTL(("netsnmp_ds_set_string", "Setting %d:%d = \"%s\"\n", storeid,
 		which, (value ? value : "(null)")));
 
+    /*
+     * is some silly person is calling us with our own pointer?
+     */
+    if (netsnmp_ds_strings[storeid][which] == value)
+        return SNMPERR_SUCCESS;
+    
     if (netsnmp_ds_strings[storeid][which] != NULL) {
         free(netsnmp_ds_strings[storeid][which]);
 	netsnmp_ds_strings[storeid][which] = NULL;
