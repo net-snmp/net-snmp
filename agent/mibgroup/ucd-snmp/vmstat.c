@@ -154,8 +154,8 @@ void getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 {
   int statfd;
   int first = 1;
-  char *buff = NULL;
-  int bsize = 0;
+  static char *buff = NULL;
+  static int bsize = 0;
 
   if ((statfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
     char* b;
