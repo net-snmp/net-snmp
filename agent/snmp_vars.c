@@ -1072,15 +1072,24 @@ oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
 
 u_long
 sysUpTime(){
+#ifndef solaris2
     struct timeval now, boottime;
     
-    if (KNLookup(N_BOOTTIME, (char *)&boottime, sizeof(boottime)) == NULL) {
+    if (KNLookup(N_BOOTTIME, (char *)&boottime, sizeof(boottime)) == 0) {
 	return(0);
     }
 
     gettimeofday(&now, (struct timezone *)0);
     return (u_long) ((now.tv_sec - boottime.tv_sec) * 100
 			    + (now.tv_usec - boottime.tv_usec) / 10000);
+#else
+    u_long lbolt;
+
+    if (getKstat ("system_misc", "lbolt", &lbolt) < 0)
+	return 0;
+    else
+	return lbolt;
+#endif
 }
 
 Export u_char *
@@ -1099,7 +1108,8 @@ var_hosttimetab(vp, name, length, exact, var_len, write_method)
                                                                         */
 {
         oid newname[MAX_NAME_LEN];
-        int result, zero = 0;
+        int result;
+	static int zero = 0;
 	int creationOrder;
 
         bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
@@ -1360,6 +1370,8 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 }
 
 
+#ifndef solaris2
+
 u_char *
 var_ifEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
@@ -1498,6 +1510,129 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
+#else
+
+static int
+IF_cmp(void *addr, void *ep)
+{
+    if (((mib2_ifEntry_t *)ep)->ifIndex == ((mib2_ifEntry_t *)addr)->ifIndex)
+	return (0);
+    else
+	return (1);
+}
+
+u_char *
+var_ifEntry(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;   /* IN - pointer to variable entry that point
+s here */
+    register oid        *name;      /* IN/OUT - input name requested, output nam
+e found */
+    register int        *length;    /* IN/OUT - length of input and output oid's
+ */
+    int                 exact;      /* IN - TRUE if an exact match was requested
+. */
+    int                 *var_len;   /* OUT - length of variable or 0 if function
+ returned. */
+    int                 (**write_method)(); /* OUT - pointer to function to set
+variable, otherwise 0 */
+{
+#define IF_NAME_LENGTH  10
+    oid                 newname[MAX_NAME_LEN];
+    int                 interface;
+    int                 result, count;
+    register char       *cp;
+    mib2_ifEntry_t      ifstat;
+ 
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    count = Interface_Scan_Get_Count();
+    for(interface = 1; interface <= count; interface++){
+        newname[IF_NAME_LENGTH] = (oid)interface;
+        result = compare(name, *length, newname, (int)vp->namelen + 1);
+        if ((exact && (result == 0)) || (!exact && (result < 0)))
+            break;
+    }
+    if (interface > count)
+        return NULL;
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *write_method = 0;
+    *var_len = sizeof(long);
+    if (getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
+                   GET_EXACT, &IF_cmp, &interface) != 0)
+      return NULL;
+    switch (vp->magic){
+    case IFINDEX:
+      long_return = ifstat.ifIndex;
+      return (u_char *) &long_return;
+    case IFDESCR:
+      *var_len = ifstat.ifDescr.o_length;
+      (void)memcpy(return_buf, ifstat.ifDescr.o_bytes, *var_len);
+      return(u_char *)return_buf;
+    case IFTYPE:
+      long_return = (u_long)ifstat.ifType;
+      return (u_char *) &long_return;
+    case IFMTU:
+      long_return = (u_long)ifstat.ifMtu;
+      return (u_char *) &long_return;
+    case IFSPEED:
+      long_return = (u_long)ifstat.ifSpeed;
+      return (u_char *) &long_return;
+    case IFPHYSADDRESS:
+      *var_len = ifstat.ifPhysAddress.o_length;
+      (void)memcpy(return_buf, ifstat.ifPhysAddress.o_bytes, *var_len);
+      return(u_char *)return_buf;
+    case IFADMINSTATUS:
+      long_return = (u_long)ifstat.ifAdminStatus;
+      return (u_char *) &long_return;
+    case IFOPERSTATUS:
+      long_return = (u_long)ifstat.ifOperStatus;
+      return (u_char *) &long_return;
+    case IFLASTCHANGE:
+      long_return = (u_long)ifstat.ifLastChange;
+      return (u_char *) &long_return;
+    case IFINOCTETS:
+      long_return = (u_long)ifstat.ifInOctets;
+      return (u_char *) &long_return;
+    case IFINUCASTPKTS:
+      long_return = (u_long)ifstat.ifInUcastPkts;
+      return (u_char *) &long_return;
+    case IFINNUCASTPKTS:
+      long_return = (u_long)ifstat.ifInNUcastPkts;
+      return (u_char *) &long_return;
+    case IFINDISCARDS:
+      long_return = (u_long)ifstat.ifInDiscards;
+      return (u_char *) &long_return;
+    case IFINERRORS:
+      long_return = (u_long)ifstat.ifInErrors;
+    case IFINUNKNOWNPROTOS:
+      long_return = (u_long)ifstat.ifInUnknownProtos;
+      return (u_char *) &long_return;
+    case IFOUTOCTETS:
+      long_return = (u_long)ifstat.ifOutOctets;
+      return (u_char *) &long_return;
+    case IFOUTUCASTPKTS:
+      long_return = (u_long)ifstat.ifOutUcastPkts;
+      return (u_char *) &long_return;
+    case IFOUTNUCASTPKTS:
+      long_return = (u_long)ifstat.ifOutNUcastPkts;
+      return (u_char *) &long_return;
+    case IFOUTDISCARDS:
+      long_return = (u_long)ifstat.ifOutDiscards;
+      return (u_char *) &long_return;
+    case IFOUTERRORS:
+      long_return = (u_long)ifstat.ifOutErrors;
+      return (u_char *) &long_return;
+     case IFOUTQLEN:
+      long_return = (u_long)ifstat.ifOutQLen;
+      return (u_char *) &long_return;
+    default:
+      ERROR("");
+    }
+    return NULL;
+}
+
+#endif /* solaris2 */
+
 /*
  * Read the ARP table
  */
@@ -1586,46 +1721,20 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 
 #else          /* solaris2 */
 
+typedef struct if_ip {
+  int ifIdx;
+  IpAddress ipAddr;
+} if_ip_t;
+
 static int
 AT_Cmp(void *addr, void *ep)
-{
-  if (((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress ==
-      *(IpAddress *)addr)
-    return (0);
-  else
-    return (1);
-}
-
-int
-Interface_Index_By_Name(Name, Len)
-char *Name;
-int Len;
-{
-	int i, sd, ret;
-	char buf[1024];
-	struct ifconf ifconf;
-	struct ifreq *ifrp;
-
-	if (Name == 0)
-	  return (0);
-	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	  return (0);
-	ifconf.ifc_buf = buf;
-	ifconf.ifc_len = 1024;
-	if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
-	  ret = 0;
-	  goto Return;
-	}
-	for (i = 1, ifrp = ifconf.ifc_req, ret = 0;
-	     (char *)ifrp < (char *)ifconf.ifc_buf + ifconf.ifc_len; i++, ifrp++)
-	  if (strncmp(Name, ifrp->ifr_name, Len) == 0) {
-	    ret = i;
-	    break;
-	  } else
-	    ret = 0;
-      Return:
-	close(sd);
-	return (ret);	/* DONE */
+{ mib2_ipNetToMediaEntry_t *mp = (mib2_ipNetToMediaEntry_t *) ep;
+  if (mp->ipNetToMediaNetAddress != ((if_ip_t *)addr)->ipAddr)
+    return 1;
+  else if (((if_ip_t*)addr)->ifIdx !=
+      Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length))
+	return 1;
+  else return 0;
 }
 
 u_char *
@@ -1646,7 +1755,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     oid		lowest[AT_NAME_LENGTH];
     oid		current[AT_NAME_LENGTH];
     char	PhysAddr[6], LowPhysAddr[6];
-    IpAddress	NextAddr;
+    if_ip_t	NextAddr;
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
@@ -1656,13 +1765,15 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
       bcopy((char *)name, (char *)lowest, AT_NAME_LENGTH * sizeof(oid));
-    for (NextAddr = (u_long)-1, req_type = GET_FIRST;
+    for (NextAddr.ipAddr = (u_long)-1, NextAddr.ifIdx = 255, req_type = GET_FIRST;
 	 ;
-	 NextAddr = entry.ipNetToMediaNetAddress, req_type = GET_NEXT) {
+	 NextAddr.ipAddr = entry.ipNetToMediaNetAddress,
+	 NextAddr.ifIdx = current [AT_IFINDEX_OFF],
+	 req_type = GET_NEXT) {
       if (getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
 		 req_type, &AT_Cmp, &NextAddr) != 0)
 		break;
-      	current[AT_IFINDEX_OFF] = 1;	/* IfIndex == 1 (ethernet) XXX */
+      	current[AT_IFINDEX_OFF] = Interface_Index_By_Name (entry.ipNetToMediaIfIndex.o_bytes, entry.ipNetToMediaIfIndex.o_length);
 	current[AT_IFINDEX_OFF+1] = 1;
         COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+AT_IPADDR_OFF);  
 	if (exact){
@@ -1673,10 +1784,13 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 		break;	/* no need to search further */
 	    }
 	} else {
-	  if ((compare(current, AT_NAME_LENGTH, name, *length) > 0)
-	      && (((NextAddr == (u_long)-1))
-		  || (compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)
+	  if (Lowentry.ipNetToMediaNetAddress == entry.ipNetToMediaNetAddress) break;
+	  if (compare(current, AT_NAME_LENGTH, name, *length) > 0
+	      && (NextAddr.ipAddr == (u_long)-1
+		  || compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)) {
+/*
 		  || (compare(name, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) == 0))){
+*/
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, and is not equal to it, save this one as the "next" one.
@@ -2903,6 +3017,7 @@ char *PhysAddr;
 	return(0);	    /* "EOF" */
 }
 
+#ifndef solaris2
 
 #ifndef sunV3
 static struct in_ifaddr savein_ifaddr;
@@ -3160,7 +3275,57 @@ u_char *EtherAddr;
 	return(0);	/* DONE */
 }
 
+#else /* solaris2 */
 
+static
+int Interface_Scan_Get_Count()
+{
+	int i, sd;
+
+	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	  return (0);
+	if (ioctl(sd, SIOCGIFNUM, &i) == -1) {
+	  close(sd);
+	  return (0);
+	} else {
+	  close(sd);
+	  return (i);
+	}
+}
+
+int
+Interface_Index_By_Name(Name, Len)
+char *Name;
+int Len;
+{
+	int i, sd, ret;
+	char buf[1024];
+	struct ifconf ifconf;
+	struct ifreq *ifrp;
+
+	if (Name == 0)
+	  return (0);
+	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	  return (0);
+	ifconf.ifc_buf = buf;
+	ifconf.ifc_len = 1024;
+	if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
+	  ret = 0;
+	  goto Return;
+	}
+	for (i = 1, ifrp = ifconf.ifc_req, ret = 0;
+	     (char *)ifrp < (char *)ifconf.ifc_buf + ifconf.ifc_len; i++, ifrp++)
+	  if (strncmp(Name, ifrp->ifr_name, Len) == 0) {
+	    ret = i;
+	    break;
+	  } else
+	    ret = 0;
+      Return:
+	close(sd);
+	return (ret);	/* DONE */
+}
+
+#endif /* solaris2 */
 
 #if defined(mips) || defined(ibm032) || defined(sunV3)
 
@@ -3210,7 +3375,7 @@ u_char *var_process(vp, name, length, exact, var_len, write_method)
       
         numread = MIN(count - slotindex, PROCBLOC);
         if (klookup(procp, (char *)procbuf,
-		    numread * sizeof(struct proc)) == NULL) {
+		    numread * sizeof(struct proc)) == 0) {
 	    return(NULL);
 	}
 	procp += sizeof(struct proc) * numread;
@@ -3415,7 +3580,7 @@ union {
 	pteaddr = &Usrptmap[btokmx(proc->p_stakbr)+proc->p_stakpt-1];
 #endif mips
 
-	if (klookup((long)pteaddr, (char *)&apte, sizeof(apte)) == NULL) {
+	if (klookup((long)pteaddr, (char *)&apte, sizeof(apte)) == 0) {
 	    ERROR("");
 	    return(0);
 	}
@@ -3451,7 +3616,7 @@ union {
 
 
 #ifdef mips
-	if (klookup((long)proc->p_addr, (char *)wpte, sizeof(wpte)) == NULL) {
+	if (klookup((long)proc->p_addr, (char *)wpte, sizeof(wpte)) == 0) {
 	    return(0);
 	}
 #endif mips
@@ -3461,7 +3626,7 @@ union {
 #ifdef sunV3
 
 	pteaddr = &Usrptmap[btokmx(proc->p_addr)];
-	if (klookup((long)pteaddr, (char *)&apte, sizeof(apte)) == NULL) {
+	if (klookup((long)pteaddr, (char *)&apte, sizeof(apte)) == 0) {
 	    return(0);
 	}
 	addr = (long)ctob(apte.pg_pfnum) + (((int)proc->p_addr)&PGOFSET);
