@@ -709,6 +709,7 @@ int main(int argc, char *argv[])
     if (userListPtr == NULL) /* user already existed */
       usm_free_user(user);
 
+    init_mib();
     update_config(0);	/* read in config files and register HUP */
 
 #if 0
