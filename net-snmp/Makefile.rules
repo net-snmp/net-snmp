@@ -53,8 +53,14 @@ installlocalheaders:
 		it="$(INSTALLHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$$i $(INSTALL_PREFIX)$(includedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
+			header_src=$(top_srcdir)/include/net-snmp/$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(includedir) ; \
+			header_name=$$i ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
@@ -62,8 +68,14 @@ installlocalheaders:
 		it="$(INSTALLBUILTHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $$i $(INSTALL_PREFIX)$(includedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
+			header_src=$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(includedir) ; \
+			header_name=`basename $$i` ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
@@ -71,8 +83,14 @@ installlocalheaders:
 		it="$(INCLUDESUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)" ; \
+			header_src=$(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
+			header_name=$$i ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
@@ -80,8 +98,14 @@ installlocalheaders:
 		it="$(INCLUDESUBDIRHEADERS2)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)" ; \
+			header_src=$(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
+			header_name=$$i ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
@@ -89,8 +113,14 @@ installlocalheaders:
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $$i $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)" ; \
+			header_src=$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
+			header_name=`basename $$i` ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 
@@ -100,8 +130,14 @@ installucdheaders:
 		it="$(INSTALLUCDHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(ucdincludedir) ; \
 	        for i in $$it ; do \
-			$(INSTALL_DATA) $(top_srcdir)/include/ucd-snmp/$$i $(INSTALL_PREFIX)$(ucdincludedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(ucdincludedir)" ; \
+			header_src=$(top_srcdir)/include/ucd-snmp/$$i ; \
+			header_dstdir=$(INSTALL_PREFIX)$(ucdincludedir) ; \
+			header_name=$$i ; \
+			header_dst=$$header_dstdir/$$header_name ; \
+			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+				echo "installing $$i in $$header_dstdir" ; \
+			fi; \
 	        done \
 	fi
 
