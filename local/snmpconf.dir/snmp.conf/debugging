@@ -9,7 +9,7 @@ question 1 Turn debugging on (0|1)
 validanswer 1 ^(0|1)$
 
 token debugTokens
-info  Debugging tokens specify which of the many lines of debugging
+info  Debugging tokens specify which lines of debugging
 info  output you'd actually like to see.  Each section of code is most
 info  likely instrumented with a particular "tag".  So, to see that tag you
 info  would specify it here.  Specifying a tag will match against all

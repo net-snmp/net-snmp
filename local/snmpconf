@@ -95,8 +95,8 @@ if (keys(%knownfiles)) {
 	}
 	Print("reading: ", join(",",@files),"\n");
     } else {
-	@files = display_menu(-head => "The following configuration files were found:\n",
-			      -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
+	@files = display_menu(-head => "The following installed configuration files were found:\n",
+			      -tail => "Would you like me to read them in?  Their content will be merged with the\noutput files created by this session.\n\nValid answer examples: \"all\", \"none\",\"3\",\"1,2,5\"\n",
 			      -multiple => 1,
 			      -question => 'Read in which',
 			      -defaultvalue => 'all',
@@ -133,11 +133,12 @@ if ($opts{'g'}) {
     # ask user to select file type to operate on.
     #
     while(1) {
-	my $line = display_menu(-head => "Select file to create:\n",
+	my $line = display_menu(-head => "I can create the following types of configuration files for you.\nSelect the file type you wish to create:\n(you can create more than one as you run this program)\n",
 				-question => 'Select File',
-				-otheranswers => ['quit', 'q'],
+				-otheranswers => ['quit'],
+				-mapanswers => { 'q' => 'quit' },
 				keys(%filetypes));
-	last if ($line eq "q" or $line eq "quit");
+	last if ($line eq "quit");
 	debug("file selected: $line\n");
 	build_file($term, $line, $filetypes{$line});
     }
@@ -177,27 +178,14 @@ foreach my $i (@didfiles) {
     }
 }
 
-$didfilesc = join(",",@didfiles);
-$didfiless = join(" ",@didfiles);
 if (!$opts{'p'} && !$opts{'i'} && !$opts{'I'}) {
     Print("\nThese files should be moved to /usr/local/share/snmp/ if you
-want them used by everyone on the system.  To do this automatically
-right now, you can run one of the following commands:
+want them used by everyone on the system.  In the future, if you add 
+the -i option to the command line I'll copy them there automatically for you.
 
-   mv $didfiless /usr/local/share/snmp/
-   $0 -R $didfilesc -f -i -a $didfiless
-
-Or, if you want them for your personal use, copy them to
-$ENV{HOME}/.snmp  To do this automatically
-right now, you can run the following command:
-
-   mv $didfiless $ENV{HOME}/.snmp/
-   $0 -R $didfilesc -f -p -a $didfiless
-
-FYI, if you specify -i or -p on the command line for future runs of
-$0, this will be done immediately after snmpconf finishes creating the
-files for you.
-
+Or, if you want them for your personal use only, copy them to
+$ENV{HOME}/.snmp .  In the future, if you add the -p option to the
+command line I'll copy them there automatically for you.
 ");
 }
 
@@ -254,13 +242,14 @@ sub build_file {
     $didfile{$filename} = 1;
     my (@lines);
     while(1) {
-	my $line = display_menu(-head => "Select configuration section for $filename to operate on:\n",
-				-otheranswers => ['finished','f'],
+	my $line = display_menu(-head => "The configuration information which can be put into $filename is divided\ninto sections.  Select a configuration section for $filename\nthat you wish to create:\n",
+				-otheranswers => ['finished'],
+				-mapanswers => { 'f' => 'finished' },
 				-question => "Select section",
 				-numeric => 1,
 				map { $_->{'title'}[0] } @$fileconf);
 
-	return @lines if ($line eq "finished" || $line eq "f");
+	return @lines if ($line eq "finished");
 	do_section($fileconf->[$line-1]);
     }
 }
@@ -277,15 +266,17 @@ sub do_section {
 	Print ("  ", join("\n  ",@{$confsect->{'description'}}),"\n");
 	my $line =
 	    display_menu(-head => "Select from:\n",
-			 -otheranswers => ['finished','f','list','l'],
+			 -otheranswers => ['finished','list'],
+			 -mapanswers => { 'f' => 'finished',
+					  'l' => 'list' },
 			 -question => 'Select section',
 			 -descriptions => [map { $confsect->{$_}{info}[0] } 
-					   keys(%{$confsect->{'thetokens'}})],
-			 keys(%{$confsect->{'thetokens'}}));
-	return @lines if ($line eq "finished" || $line eq "f");
-	if ($line eq "list" || $line eq "l") {
+					   @{$confsect->{'thetokens'}}],
+			 @{$confsect->{'thetokens'}});
+	return @lines if ($line eq "finished");
+	if ($line eq "list") {
 	    print "Lines defined for section \"$confsect->{title}[0]\" so far:\n";
-	    foreach my $i (keys(%{$confsect->{'thetokens'}})) {
+	    foreach my $i (@{$confsect->{'thetokens'}}) {
 		if ($#{$confsect->{$i}{'results'}} >= 0) {
 		    print "  ",join("\n  ",@{$confsect->{$i}{'results'}}),"\n";
 		}
@@ -412,6 +403,7 @@ sub read_config_group {
 #
 sub read_config_item {
     my $itemfile = shift;
+    my $itemcount;
     my $type = shift;
     my $fh = new IO::File($itemfile);
     return if (!defined($fh));
@@ -458,8 +450,10 @@ sub read_config_item {
 	} elsif ($token =~ /^token\s*$/) {
 	    $rest = lc($rest);
 	    $curtoken = $rest;
-	    $results{'thetokens'}{$curtoken} = 1;
-	    $results{$curtoken}{'defined'} = 1;
+	    if (! exists $results{$curtoken}{'defined'}) {
+		push @{$results{'thetokens'}}, $curtoken;
+		$results{$curtoken}{'defined'} = 1;
+	    }
 	    $tokenmap{$curtoken} = $results{$curtoken};
 	    debug("current token set to $token\n");
 	} else {
@@ -480,14 +474,14 @@ sub output_files {
 	next if (!$didfile{$ft});
 	my $outputf = $ft;
 	if (-f $outputf && !$opts{'f'}) {
-	    print "Error: $outputf already exists.  \n";
+	    print "\nError: An $outputf file already exists in this directory.\n\n";
 	    my $ans = get_answer($term,"'overwrite', 'skip', 'rename' or 'append'? ",valid_answers(qw(o overwrite r rename s skip a append)));
 	    next if ($ans =~ /^(s|skip)$/i);
 	    if ($ans =~ /^(a|append)/) {
 		$outputf = ">$outputf";
 	    } elsif ($ans =~ /^(r|rename)$/i) {
 		# default to rename for error conditions
-		$outputf = $term->readline("Save to what file name then (or 'skip')? ");
+		$outputf = $term->readline("Save to what new file name instead (or 'skip')? ");
 	    }
 	}
 	$didfile{$ft} = $outputf;
@@ -497,7 +491,7 @@ sub output_files {
 	print O "#\n#   - created by the snmpconf configuration program\n#\n";
 	foreach my $sect (@{$filetypes->{$ft}}) {
 	    my $secthelp = 0;
-	    foreach my $token (keys(%{$sect->{'thetokens'}})) {
+	    foreach my $token (@{$sect->{'thetokens'}}) {
 		if ($#{$sect->{$token}{'results'}} >= 0) {
 		    if ($secthelp++ == 0) {
 			print O "#" x 75,"\n# SECTION: ",
@@ -603,8 +597,10 @@ sub display_menu {
     print "\n" if (!defined($config{'-dense'}));
     if (defined($config{'-otheranswers'})) {
 	if (ref($config{'-otheranswers'}) eq 'ARRAY') {
-	    print "Other options: ", join(",",@{$config{'-otheranswers'}}),"\n";
+	    print "Other options: ", join(", ",
+					  @{$config{'-otheranswers'}}), "\n";
 	    push @answers, @{$config{'-otheranswers'}};
+	    push @answers, keys(%{$config{'-mapanswers'}});
 	} else {
 	    my $maxlen = 0;
 	    push @answers,keys(%{$config{'-otheranswers'}});
@@ -635,6 +631,9 @@ sub display_menu {
 	    $ans = get_answer($term, $config{'-question'},
 			      valid_answers($numexpr,@answers),
 			      $config{'-defaultvalue'});
+	    if ($config{'-mapanswers'}{$ans}) {
+		$ans = $config{'-mapanswers'}{$ans};
+	    }
 
 	    if ($ans =~ /^$numexpr$/) {
 		if ($config{'-multiple'}) {
