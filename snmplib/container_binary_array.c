@@ -122,21 +122,22 @@ binary_search(const void *val, netsnmp_container *c, int exact)
             len = half;
     }
 
-    if (exact) {
-        if ((first == t->count) ||
-            c->compare(t->data[first], val) != 0)
-            return -1;
-        return first;
-    }
-
-    /*
-     * GETNEXT search - if result == 0, we want the next item
-     */
-    if (result <= 0)
-        ++first;
-
     if (first >= t->count)
         return -1;
+
+    /* last compare wasn't against first, so get actual result */
+    result = c->compare(t->data[first], val);
+
+    if(result == 0) {
+        if (!exact) {
+            if (++first == t->count)
+               first = -1;
+        }
+    }
+    else {
+        if(exact)
+            first = -1;
+    }
 
     return first;
 }
@@ -555,3 +556,117 @@ netsnmp_container_get_binary_array_factory(void)
     
     return &f;
 }
+
+#ifdef NOT_YET
+void *
+netsnmp_binary_array_iterator_first(netsnmp_iterator *it)
+{
+    binary_array_table *t;
+
+    if(NULL == it) {
+        netsnmp_assert(NULL != it);
+        return NULL;
+    }
+    if(NULL == it->container) {
+        netsnmp_assert(NULL != it->container);
+        return NULL;
+    }
+    if(NULL == it->container->private) {
+        netsnmp_assert(NULL != it->container->private);
+        return NULL;
+    }
+    t = (binary_array_table*)(it->container->private);
+    
+    (int)(it->context) = 0;
+
+    if((int)(it->context) <= t->count)
+        return NULL;
+
+    return t->data[ (int)(it->context) ];
+}
+
+netsnmp_binary_array_iterator_next(netsnmp_iterator *it)
+{
+    if(NULL == it) {
+        netsnmp_assert(NULL != it);
+        return NULL;
+    }
+    if(NULL == it->container) {
+        netsnmp_assert(NULL != it->container);
+        return NULL;
+    }
+    if(NULL == it->container->private) {
+        netsnmp_assert(NULL != it->container->private);
+        return NULL;
+    }
+    t = (binary_array_table*)(it->container->private);
+
+    ++(int)(it->context);
+
+    if((int)(it->context) <= t->count)
+        return NULL;
+
+    return t->data[ (int)(it->context) ];
+   
+}
+
+void *
+netsnmp_binary_array_iterator_last(netsnmp_iterator *it)
+{
+    if(NULL == it) {
+        netsnmp_assert(NULL != it);
+        return NULL;
+    }
+    if(NULL == it->container) {
+        netsnmp_assert(NULL != it->container);
+        return NULL;
+    }
+    if(NULL == it->container->private) {
+        netsnmp_assert(NULL != it->container->private);
+        return NULL;
+    }
+    t = (binary_array_table*)(it->container->private);
+    
+    return t->data[ t->count - 1 ];
+}
+
+/*  void * */
+/*  netsnmp_binary_array_iterator_position(netsnmp_iterator *it) */
+/*  { */
+/*      if(NULL == it) { */
+/*          netsnmp_assert(NULL != it); */
+/*          return NULL; */
+/*      } */
+/*      if(NULL == it->container) { */
+/*          netsnmp_assert(NULL != it->container); */
+/*          return NULL; */
+/*      } */
+/*      if(NULL == it->container->private) { */
+/*          netsnmp_assert(NULL != it->container->private); */
+/*          return NULL; */
+/*      } */
+/*      t = (binary_array_table*)(it->container->private); */
+    
+/*  } */
+
+netsnmp_iterator *
+netsnmp_binary_array_get_iterator(netsnmp_container *c)
+{
+    netsnmp_iterator* it;
+
+    if(NULL == c)
+        return NULL;
+
+    it = SNMP_MALLOC_TYPEDEF(netsnmp_iterator);
+    if(NULL == it)
+        return NULL;
+
+    it->container = c;
+    (int)(it->context) = 0;
+
+    it->first = netsnmp_binary_array_iterator_first;
+    it->next = netsnmp_binary_array_iterator_next;
+    it->last = netsnmp_binary_array_iterator_last;
+    it->position = NULL;/*netsnmp_binary_array_iterator_position;*/
+}
+#endif
