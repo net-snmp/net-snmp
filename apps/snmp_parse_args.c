@@ -121,7 +121,6 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  General options\n");
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
-  fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
   fprintf(outf, "  -O <OUTOPTS>\tToggle various defaults controlling output display:\n");
