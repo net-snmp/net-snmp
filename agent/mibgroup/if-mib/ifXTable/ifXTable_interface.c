@@ -326,7 +326,7 @@ ifXTable_index_to_oid(netsnmp_index * oid_idx,
     err = build_oid_noalloc(oid_idx->oids, oid_idx->len, &oid_idx->len,
                             NULL, 0, &var_ifIndex);
     if (err)
-        snmp_log(LOG_ERR, "error %d converting index to oid\n");
+        snmp_log(LOG_ERR, "error %d converting index to oid\n", err);
 
     /*
      * parsing may have allocated memory. free it.
