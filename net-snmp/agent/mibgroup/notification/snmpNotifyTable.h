@@ -50,6 +50,7 @@ void   init_snmpNotifyTable(void);
 FindVarMethod var_snmpNotifyTable;
 void parse_snmpNotifyTable(const char *, char *);
 
+int snmpNotifyTable_add(struct snmpNotifyTable_data *thedata);
 
 WriteMethod write_snmpNotifyTag;
 WriteMethod write_snmpNotifyType;
