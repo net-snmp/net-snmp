@@ -138,7 +138,7 @@ agentx_open_session( struct snmp_session *ss )
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
-    snmp_add_var( pdu, version_sysoid, version_sysoid_len, 's', "UCD AgentX sub-agent");
+    snmp_add_var( pdu, version_sysoid, version_sysoid_len, 's', "Net-SNMP AgentX sub-agent");
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
 	return 0;
@@ -316,7 +316,7 @@ agentx_register_index( struct snmp_session *ss,
 		 *  Just send a single index request varbind.
 		 *  Although the AgentX protocol supports
 		 *    multiple index allocations in a single
-		 *    request, the model used in the UCD agent
+		 *    request, the model used in the net-snmp agent
 		 *    doesn't currently take advantage of this.
 		 *  I believe this is our prerogative - just as
 		 *    long as the master side Index request handler
