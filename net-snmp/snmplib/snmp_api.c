@@ -6143,8 +6143,8 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
 {
     netsnmp_variable_list *vars, *vtmp;
     int             largeval = 1;
-    long           *val_long = NULL;
-    int            *val_int  = NULL;
+    const long     *val_long = NULL;
+    const int      *val_int  = NULL;
 
     if (varlist == NULL)
         return NULL;
@@ -6179,11 +6179,11 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     case ASN_COUNTER:
         if (value) {
             if (vars->val_len == sizeof(int)) {
-                val_int = (int*) value;
+                val_int = (const int *) value;
                 *(vars->val.integer) = (long) *val_int;
             } else {
-                val_long = (long*) value;
-                *(vars->val.integer) = (long) *val_long;
+                val_long = (const long *) value;
+                *(vars->val.integer) = *val_long;
             }
         }
         vars->val_len = sizeof(long);

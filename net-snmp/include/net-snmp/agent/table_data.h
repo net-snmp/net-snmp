@@ -98,7 +98,7 @@ extern          "C" {
 
 
 #define netsnmp_table_data_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)
-#define netsnmp_table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
+#define netsnmp_table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (const u_char *) value, value_len)
 
 
     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
