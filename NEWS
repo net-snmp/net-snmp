@@ -1,11 +1,10 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.pre1 (alpha release)*
- NOTE WELL: this release is an alpha release and it's possible that
- things may change before the real release so don't become dependent
- on new features without first asking the developers if that
- particular area is fairly stable.
+*5.0.pre2 (beta release)*
+ NOTE WELL: this release is an beta release.  Please let us know
+ immediately about any bugs you find so we can fix them before the
+ real 5.0 releas.
  
  New:
     - Much of the agent internals were completely rewritten and sports
@@ -35,15 +34,25 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       features and fixes.
     - mib2c was completely rewritten and has a much improved
       configuration file specification.
-    - A new perl module "AnyData::SNMP" is available that implements a
-      perl DBI interface to map SQL commands to SNMP.  Included is a
-      "snmpsh" shell where SQL commands can be typed, aliases created,
-      etc.  See the perl/AnyData_SNMP/INSTALL file for details.
-    - Much of the code is getting documented with "doxygen" style
-      documentation.  Run "make docs" if you have doxygen installed.
     - A "net-snmp-config" script will get installed which can report
       how the various tools were built (which libraries they were
       linked against, etc).
+    - new perl specific configure options --with-perl-modules &
+      --enable-embedded-perl.  See ./configure --help for details.
+    - The beginnings of some new Perl modules (alpha level quality)
+      are in the perl directory, including:
+      - NetSNMP::agent which allows perl scripts to become net-snmp
+        master or subagents
+      - AnyData::SNMP is available that implements a perl DBI
+        interface to map SQL commands to SNMP.  Included is a "snmpsh"
+        shell where SQL commands can be typed, aliases created, etc.
+        See the perl/AnyData_SNMP/INSTALL file for details.
+
+    - Beginning (alpha level quality) support for embedding perl
+      subroutines directly within the net-snmp agent.
+    - Much of the code is getting documented with "doxygen" style
+      documentation.  Run "make docs" if you have doxygen installed.
+
 
 *4.2.3*
  New:
