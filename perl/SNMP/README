@@ -1,5 +1,5 @@
-	      The Perl5 'SNMP' Extension Module v3.1.0
-		      for the UCD SNMPv3 Library
+	      The Perl5 'SNMP' Extension Module v4.2.0
+		      for the Net-SNMP Library
 	       G.S. Marzot (gmarzot@nortelnetworks.com)
 
 Contents:
@@ -17,65 +17,76 @@ Contents:
 
 Introduction:
 
-This is a Perl5 extension module which provides a full featured SNMPv3
-protocol operation API. An interface to the MIB module parse-tree is
-also provided.  The SNMP module internals rely on the UCD SNMPv3
-library (ucd-snmp-4.1.0 libsnmp). For information on the UCD SNMP
-library see the documentation provided with the UCD SNMP distribution
-or the ucd-snmp project web page: http://ucd-snmp.ucdavis.edu
+This is the Perl5 'SNMP' extension module. The SNMP module provides a
+full featured, tri-lingual SNMP (SNMPv3, SNMPv2c, SNMPv1) API. The
+SNMP module also provides an interface to the SMI MIB parse-tree for
+run-time access to parsed MIB data.  The SNMP module internals rely on
+the Net-SNMP toolkit library (previously known as ucd-snmp). For
+information on the Net-SNMP library see the documentation provided
+with the Net-SNMP distribution or the project web page available on
+'Source Forge':
 
-(Note: In previous releases this module was compatible with both the
-UCD and CMU SNMP libraries. Starting with Perl5/SNMP-1.7 this module
-will *only* work with the UCD SNMP library due to dependence on new
-features)
+http://sourceforge.net/projects/net-snmp
 
 Availability:
 
-The most recent release of the Perl5 SNMP module can be found at the
-following FTP site (as well as the usual perl archives, CPAN):
+The most recent release of the Perl5 SNMP module can be found bundled
+with the latest Net-SNMP distibution available from:
+http://sourceforge.net/projects/net-snmp 
+
+(Note: The perl SNMP distribution obtained this way has the highest
+chance of being up to date and compatible with the Net-SNMP version
+with which it is bundled.)
+
+A seperately bundled package of the SNMP module can be obtained from CPAN.
+
+Development and older releases may be found at the following FTP site:
 ftp://ftp-east.baynetworks.com/netman/snmp/perl5
 
-The most recent release of the UCD SNMPv3 Libray can be found at:
-ftp://ucd-snmp.ucdavis.edu
+(Note: In previous releases this module was compatible with the CMU
+SNMP library. Starting with Perl5/SNMP-1.7 this module will *only*
+work with the Net-SNMP (aka ucd-snmp) library due to dependence on new
+features)
 
 Contact:
 	the following forums may be helpful:
 
 	comp.lang.perl.modules
-	ucd-snmp-coders@ucd-snmp.ucdavis.edu mail list
-	(see http://ucd-snmp.ucdavis.edu for subscription info)
+	net-snmp-coders@lists.sourceforge.net mail list
+	(see http://sourceforge.net/projects/net-snmp to subscribe)
         gmarzot@nortelnetworks.com (last resort)
 
 Supported Platforms:
-	Win9x/NT
 	Linux 1.2.x, 2.x
 	Solaris 2.x
 	Many other UNIX variants
+	Win9x/NT
 
 Release Notes:
 
-SNMP module version 3.1.0 is being developed against UCD SNMPv3
-ucd-snmp-4.1.0. see http://ucd-snmp.ucdavis.edu for details.
-Compatibility with earlier or later versions of ucd-snmp is not
-guaranteed due to the dynamic nature of open software development :).
+SNMP module version 4.2.0 is being developed against NET-SNMP-4.2.0
+see http://sourceforge.net/projects/net-snmp for details.
 
-the previous stable release is SNMP-1.8.2 and ucd-snmp-3.6.2.
+Compatibility with earlier or later versions of Net-SNMP or UCD-SNMP
+is not guaranteed due to the dynamic nature of open software
+development :).
+
+the previous stable release is SNMP-3.1.0 and ucd-snmp-4.1.2.
 
 Yes, I skipped some versions, do not be alarmed.
 
 KNOWN BUGS:
 
-the new quoted OCTETSTR instance identifiers returned by get_symbol
-are not compatible with the perl/SNMP module (__get_label_iid)
+(none?)
 
 Installation:
 
-Build and install the UCD SNMP package - see UCD SNMP README and
+Build and install the Net-SNMP package - see Net-SNMP README and
 INSTALL docs.
 
-Note: you should ensure that any previous ucd-snmp or cmu snmp
-installation is located so that the wrong libsnmp or headers are not
-used by mistake).
+(Note: you should ensure that any previous Net-SNMP, ucd-snmp or cmu
+snmp installation is located so that the wrong libsnmp or headers are
+not used by mistake).
 
 Unix:
 
@@ -86,8 +97,8 @@ make install
 
 Win32:
 
-This package only builds on NT as far as I know. Thes directions are fo VC++ 5.0-6.0 (I will be interested to here of success with cygwin).
-
+This package only builds on NT as far as I know. Thes directions are
+fo VC++ 5.0-6.0 (I will be interested to hear of success with cygwin).
 
 First  run vcvars32.bat
 
@@ -99,7 +110,7 @@ nmake test
 nmake install
 
 OpenSSL note: see the ucd-snmp/README.win32 to compile libsnmp with
-              libeay32 abd see that libeay.lib is in usr\lib
+              libeay32 and see that libeay.lib is in usr\lib
 
 for the older perl5.004_02 distribution by gsarathy
 
@@ -124,10 +135,10 @@ The primary class is SNMP::Session which encapsulates the persistent
 aspects of a connection between the management application and the
 managed agent. Internally the class is implemented as a blessed hash
 reference. This class supplies 'get', 'getnext', 'set', 'fget', and
-'fgetnext' method calls. The methods take a variety of input argument
-formats and support both synchronous and asynchronous operation through
-a polymorphic API (i.e., method behaviour varies dependent on args
-passed - see below).
+'fgetnext' and other method calls. The methods take a variety of input
+argument formats and support both synchronous and asynchronous
+operation through a polymorphic API (i.e., method behaviour varies
+dependent on args passed - see below).
 
 A description of the fields which can be specified when an
 SNMP::Session object is created follows:

@@ -34,6 +34,7 @@ sub InitMakeParams {
     }
     $prefix="${sep}usr${sep}local";
     GetOptions("prefix=s" => \$prefix);
+
     my $inc_path1 = "${prefix}${sep}include";
     my $inc_path2 = "${sep}usr${sep}include";
     my $lib_path1 = "${prefix}${sep}lib";

@@ -18,23 +18,18 @@ use SNMP;
 
 require "t/startagent.pl";
 
-use vars qw($agent_port $comm2c $agent_host);
+use vars qw($agent_port $comm2 $agent_host);
 
-$SNMP::debugging = 1;
+$SNMP::debugging = 0;
 $SNMP::verbose = 0;
 
 print "1..$num\n";
-
-my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
-my $oid = '.1.3.6.1.2.1.1.1';
-my $name = 'sysDescr';
-my $junk_name = 'fooDescr';
 
 ######################################################################
 # Fire up a session.
 $s1 = new SNMP::Session(
     'DestHost'   => $agent_host,
-    'Community'  => $comm2c,
+    'Community'  => $comm2,
     'RemotePort' => $agent_port,
     'Version'    => '2c',
     'UseNumeric' => 1,
@@ -53,6 +48,7 @@ $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
 
 $expect = scalar @$vars;
 @list = $s1->bulkwalk(2, 16, $vars);
+
 ok($s1->{ErrorNum} == 0);
 
 # Did we get back the list of references to returned values?
@@ -69,7 +65,8 @@ ok($list[0][0]->type eq "TICKS");		# Uptime should be in ticks.
 ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
 ok($list[1][0]->iid eq "0");			# system.ifNumber.0 IID.
 ok($list[1][0]->val =~ m/^\d+$/);		# Number is all numeric 
-ok($list[1][0]->type eq "INTEGER");		# Number should be integer.
+ok($list[1][0]->type eq "INTEGER32");		# Number should be integer.
+
 $ifaces = $list[1][0]->val;
 
 # Make sure we got an ifSpeed for each interface.  list[2] is ifSpeed repeater.
@@ -117,7 +114,7 @@ ok($list[0][0]->type eq "TICKS");		# Uptime should be in ticks.
 ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
 ok($list[1][0]->iid eq "0");			# system.ifNumber.0 IID.
 ok($list[1][0]->val =~ m/^\d+$/);		# Number is all numeric 
-ok($list[1][0]->type eq "INTEGER");		# Number should be integer.
+ok($list[1][0]->type eq "INTEGER32");		# Number should be integer.
 $ifaces = $list[1][0]->val;
 
 
@@ -144,7 +141,7 @@ ok(scalar @{$list[1]} == $ifaces);
 ok($list[0][0]->tag eq ".1.3.6.1.2.1.2.2.1.1");	# Should be system.ifIndex OID.
 ok($list[0][0]->iid eq "1");			# Instance should be 1.
 ok($list[0][0]->val =~ m/^\d+$/);		# Number is all numeric 
-ok($list[0][0]->type eq "INTEGER");		# Number should be an integer.
+ok($list[0][0]->type eq "INTEGER32");		# Number should be an integer.
 
 ok($list[1][0]->tag eq ".1.3.6.1.2.1.2.2.1.5");	# Should be system.ifSpeed OID.
 ok($list[1][0]->iid eq "1");			# Instance should be 1.
@@ -179,7 +176,7 @@ sub async_cb1 {
     ok($vbr->tag eq ".1.3.6.1.2.1.2.1");	# Should be system.ifNumber OID.
     ok($vbr->iid eq "0");			# system.ifNumber.0 IID.
     ok($vbr->val =~ m/^\d+$/);			# Number is all numeric 
-    ok($vbr->type eq "INTEGER");		# Number should be integer.
+    ok($vbr->type eq "INTEGER32");		# Number should be integer.
     $ifaces = $vbr->[2];
 
     # Test for reasonable values from the agent.

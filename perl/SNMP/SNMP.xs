@@ -14,7 +14,6 @@
 
 #include <sys/types.h>
 #include <arpa/inet.h>
-#include <assert.h>
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -151,7 +150,6 @@ static SV* __push_cb_args _((SV * sv, SV * esv));
 static int __call_callback _((SV * sv, int flags));
 static char* __av_elem_pv _((AV * av, I32 key, char *dflt));
 static u_int compute_match _((const char *, const char *));
-static struct tree * find_best_tree_node _((const char *, struct tree *, u_int *));
 
 #define USE_NUMERIC_OIDS 0x08
 #define NON_LEAF_NAME 0x04
@@ -783,47 +781,6 @@ const char *key;
 
    return MAX_BAD;
 }
-
-static struct tree *
-find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
-{
-   struct tree *tp, *best_so_far = NULL, *retptr;
-   u_int old_match = MAX_BAD, new_match = MAX_BAD;
-
-   if (!pattrn || !*pattrn)
-      return(NULL);
-
-   if (!tree_top)
-      tree_top = get_tree_head();
-
-   for (tp = tree_top; tp; tp = tp->next_peer) {
-      if (!tp->reported)
-         new_match = compute_match(tp->label, pattrn);
-      tp->reported = 1;
-
-      if (new_match < old_match) {
-         best_so_far = tp;
-	 old_match = new_match;
-      }
-      if (new_match == 0)
-	 break;
-      if (tp->child_list) {
-	 retptr = find_best_tree_node(pattrn, tp->child_list, &new_match);
-
-	 if (new_match < old_match) {
-	    best_so_far = retptr;
-	    old_match = new_match;
-	 }
-	 if (new_match == 0)
-	    break;
-      }
-   }
-
-   if (match)
-      *match = old_match;
-   return(best_so_far);
-}
-
 
 static struct tree *
 __tag2oid(tag, iid, oid_arr, oid_arr_len, type, best_guess)
@@ -2407,9 +2364,10 @@ Mib = 0;
 snmp_set_do_debugging(0); /* overrides lib dflt - silence init_mib_internals */
 snmp_set_quick_print(1);
 init_snmpv3("snmpapp");
-snmp_call_callbacks(0,0,NULL);
+snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,SNMP_CALLBACK_POST_READ_CONFIG,NULL);
+snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,NULL);
 ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-#init_mib_internals();
+
 
 double
 constant(name,arg)
@@ -2674,6 +2632,7 @@ snmp_read_mib(mib_file, force=0)
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (Mib == NULL) {
               if (verbose) warn("initializing MIB\n");
+              init_mib_internals();
               init_mib();
               if (Mib) {
                  if (verbose) warn("done\n");
@@ -3995,11 +3954,12 @@ err:
 
 
 int
-snmp_inform(sess_ref,uptime,trap_oid,varlist_ref)
+snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
         SV *	sess_ref
         char *	uptime
         char *	trap_oid
         SV *	varlist_ref
+        SV *	perl_callback
 	PPCODE:
 	{
            AV *varlist;
@@ -4120,11 +4080,32 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref)
               } /* for all the vars */
 
 
+              if (SvTRUE(perl_callback)) {
+                  xs_cb_data =
+                      (snmp_xs_cb_data*)malloc(sizeof(snmp_xs_cb_data));
+                 xs_cb_data->perl_cb = newSVsv(perl_callback);
+                 xs_cb_data->sess_ref = newRV_inc(SvRV(sess_ref));
+
+                 status = snmp_async_send(ss, pdu, __snmp_xs_cb,
+                                          (void*)xs_cb_data);
+                 if (status != 0) {
+                    XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
+                 } else {
+                    snmp_free_pdu(pdu);
+                    sv_catpv(*err_str_svp,
+                             (char*)snmp_api_errstring(ss->s_snmp_errno));
+                    sv_setiv(*err_num_svp, ss->s_snmp_errno);
+                    XPUSHs(&sv_undef);
+                 }
+		 goto done;
+              }
+fprintf(stderr, "inform before: status = %d, response = %lx\n", status, response);
+
 	      status = __send_sync_pdu(ss, pdu, &response,
 				       NO_RETRY_NOSUCH,
                                        *err_str_svp, *err_num_svp,
                                        *err_ind_svp);
-
+fprintf(stderr, "inform: status = %d, response = %lx\n", status, response);
               if (response) snmp_free_pdu(response);
 
               if (status) {
@@ -4137,6 +4118,7 @@ err:
               XPUSHs(&sv_undef); /* no mem or bad args */
               if (pdu) snmp_free_pdu(pdu);
            }
+done:
 	Safefree(oid_arr);
         }
 

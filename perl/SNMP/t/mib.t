@@ -20,53 +20,10 @@ SNMP::initMib();
 
 $SNMP::verbose = 0;
 
-#$n = 3;  # Number of tests to run
-$| = 1;
-#print "1..$n\n";
-#if ($n == 0) { exit 0; } else { $n = 1; }
-
-my $junk_oid = ".1.3.6.1.2.1.1.1.1.1.1";
-my $oid = '.1.3.6.1.2.1.1.1';
-my $name = 'sysDescr';
-my $junk_name = 'fooDescr';
+use vars qw($bad_oid);
+require "t/startagent.pl";
 my $mib_file = 't/mib.txt';
-my $junk_mib_file = 'mib.txt';
-my %access_list = ("ro" => "ReadOnly",
-	    "rw" => "ReadWrite",
-	    "na" => "NoAccess",
-	    "wo" => "WriteOnly",
-	    "n" => "Notify",
-	    "c" => "Create");
-
-my %status_list = ("m" => "Mandatory",
-		   "op" => "Optional",
-		   "ob" => "Obsolete",
-		   "d" => "Deprecated",
-		   "c" => "Current");
-
-my %type_list = ("oid" => "OBJECTID",
-		 "ostr" => "OCTETSTR",
-		 "int" => "INTEGER",
-		 "na" => "NETADDR",
-		 "ip" => "IPADDR",
-		 "c" => "COUNTER",
-		 "g" => "GAUGE",
-		 "tt" =>"TIMETICKS",
-		 "op" =>"OPAQUE",
-		 "ud" =>"undef");
-
-my %syntax_list = ("ds" => "DisplayString",
-		   "ts" => "TimeStamp",
-		   "int" => "INTEGER",
-		   "oid" => "OBJECT IDENTIFIER",
-		   "c32" => "Counter32",
-		   "c" => "COUNTER",
-		   "ti" => "TestAndIncr",
-		   "g" => "Gauge",
-		   "pa" => "PhysAddress",
-		   "tt" => "TimeTicks",
-		   "na" => "NETADDR",
-		   "ia" => "IPADDR");
+my $bad_mib_file = 'mib.txt';
 
 #############################  1  ######################################
 #check if
@@ -82,28 +39,24 @@ ok(defined($res));
 #############################  3  ######################################
 $res =  $SNMP::MIB{sysDescr}{access};
 #print("access is: $res\n");
-ok($access_list{"ro"} eq $res);
+ok($res eq 'ReadOnly');
 #print("\n");
 ##############################  4  ###################################
 $res =  $SNMP::MIB{sysLocation}{access};
 #$res =  $SNMP::MIB{sysORIndex}{access};
-#print("access is: $res\n");
-ok($access_list{"rw"} eq "$res");
-#print("\n");
+ok($res eq 'ReadWrite');
 ##############################  5  ###################################
 $res =  $SNMP::MIB{sysLocation}{type};
-#print("type is: $res\n");
-ok($type_list{"ostr"} eq $res);
-#print("\n");
+ok($res eq 'OCTETSTR');
 #############################  6  ####################################
 $res =  $SNMP::MIB{sysLocation}{status};
 #print("status is: $res\n");
-ok($status_list{"c"} eq $res);
+ok($res eq 'Current');
 #print("\n");
 #############################  7  #################################
 $res =  $SNMP::MIB{sysORTable}{access};
 #print("access is: $res\n");
-ok($access_list{"na"} eq $res);
+ok($res eq 'NoAccess');
 #print("\n");
 #############################  8  ###############################
 $res = $SNMP::MIB{sysLocation}{subID};
@@ -113,25 +66,21 @@ ok(defined($res));
 ############################  9  ##############################
 $res = $SNMP::MIB{sysLocation}{syntax};
 #print("syntax is: $res\n");
-ok($syntax_list{"ds"} eq $res);
+ok($res eq 'DisplayString');
 #print("\n");
 ############################  10  ###########################
 $res = $SNMP::MIB{ipAdEntAddr}{syntax};
-#print("syntax is: $res\n");
-ok($syntax_list{"ia"} eq $res);
+ok($res eq 'IPADDR');
 #print("\n");
 ##########################  11  ##########################
-
-## *****************  WEIRD **************
-
 $res = $SNMP::MIB{atNetAddress}{syntax};
 #print("syntax is: $res\n");
-ok($syntax_list{"ia"} eq $res);
+ok($res eq 'IPADDR');
 #print("\n");
 ########################   12  ###############################
 $res = $SNMP::MIB{ipReasmOKs}{syntax};
 #print("syntax is: $res\n");
-ok($syntax_list{"c"} eq $res);
+ok($res eq 'COUNTER');
 #print("\n");
 ######################   13  ##############################
 $res = $SNMP::MIB{sysDescr}{moduleID};
@@ -157,14 +106,8 @@ ok(ref($res) eq "ARRAY");
 #print("\n");
 ####################  17   #########################
 
-### ***************  SEE ***************
-
-#$res = $SNMP::MIB{sysDes}{lalalala};
-# the above was creating STORE problems. Should look into it.
-$res = $SNMP::MIB{sysDescr}{lalalala};
-#print("res is --> $res\n");
+$res = $SNMP::MIB{sysDescr}{badField};
 ok(!defined($res));
-#print("\n");
 
 
 ######################  18   #########################
@@ -185,7 +128,7 @@ ok($res =~ /^1x:/);
 #####################  20  #########################
 # Garbage names return Undef.
 
-my $type1 = SNMP::getType($junk_name);
+my $type1 = SNMP::getType($bad_name);
 ok(!defined($type1));
 #printf "%s %d\n", (!defined($type1)) ? "ok" :"not ok", $n++;
 
@@ -194,14 +137,12 @@ ok(!defined($type1));
 
 my $type2 = SNMP::getType($oid);
 ok($type2 =~ /OCTETSTR/);
-#printf "%s %d\n", ($type2 =~ /OCTETSTR/) ? "ok" :"not ok", $n++;
 
 ######################################################################
 # This tests that sysDescr returns a valid type.
 
 my $type3 = SNMP::getType($name);
 ok(defined($type3));
-#printf "%s %d\n", defined($type3) ? "ok" :"not ok", $n++;
 
 ######################################################################
 # Translation tests from Name -> oid -> Name
@@ -209,26 +150,23 @@ ok(defined($type3));
 # name -> OID
 $oid_tag = SNMP::translateObj($name);
 ok($oid eq $oid_tag);
-#printf "%s %d\n", ($oid eq $oid_tag) ? "ok" :"not ok", $n++;
 
 ######################################################################
 # bad name returns 'undef'
 
 $oid_tag = '';
-$oid_tag = SNMP::translateObj($junk_name);
+$oid_tag = SNMP::translateObj($bad_name);
 ok(!defined($oid_tag));
-#printf "%s %d\n", (!defined($oid_tag)) ? "ok" :"not ok", $n++;
 ######################################################################
 # OID -> name
 
 $name_tag = SNMP::translateObj($oid);
 ok($name eq $name_tag);
-#printf "%s %d\n", ($name eq $name_tag) ? "ok" :"not ok", $n++;
 
 ######################################################################
 # bad OID -> Name
 
-$name_tag = SNMP::translateObj($junk_oid);
+$name_tag = SNMP::translateObj($bad_oid);
 ok($name ne $name_tag);
 #printf "%s %d\n", ($name ne $name_tag) ? "ok" :"not ok", $n++;
 
@@ -240,10 +178,9 @@ ok($node);
 $ranges = $node->{ranges};
 ok($ranges and ref $ranges eq 'ARRAY');
 ok(@$ranges == 2);
-ok($$ranges[0][0] == 0);
-ok($$ranges[0][1] == 0);
-ok($$ranges[1][0] == 484);
-ok($$ranges[1][1] == 2147483647);
+ok($$ranges[0]{low} == 0);
+ok($$ranges[0]{high} == 0);
+ok($$ranges[1]{low} == 484);
+ok($$ranges[1]{high} == 2147483647);
 
-print "ranges = $ranges\n";
-
+snmptest_cleanup();
