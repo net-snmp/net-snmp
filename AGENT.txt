@@ -306,13 +306,11 @@ they should be included as a matter of course. These are as follows:
 
   #include <config.h>                   // local SNMP configuration details
   #include "mib_module_config.h"        // list of which modules are supported
-  #if STDC_HEADERS
-  #include <stdlib.h>
-  #include <string.h>
-  #else
   #if HAVE_STDLIB_H
   #include <stdlib.h>
   #endif
+  #if HAVE_STRING_H
+  #include <string.h>
   #endif
 
   #include <sys/types.h>
