@@ -48,6 +48,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
@@ -76,7 +79,7 @@
 #include <syslog.h>
 #endif
 
-
+#include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else

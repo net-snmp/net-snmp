@@ -33,6 +33,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 /* mibincl.h contains all the snmp specific headers to define the
    return types and various defines and structures. */

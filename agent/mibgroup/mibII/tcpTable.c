@@ -7,6 +7,11 @@
 #include <config.h>
 
 #include <unistd.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -24,6 +29,12 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
@@ -65,14 +76,6 @@
 #endif
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"

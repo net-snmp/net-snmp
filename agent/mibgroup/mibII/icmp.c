@@ -67,6 +67,7 @@
 #include <dmalloc.h>
 #endif
 
+#include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif

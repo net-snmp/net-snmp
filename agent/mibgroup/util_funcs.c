@@ -67,6 +67,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #if HAVE_BASETSD_H
 #include <basetsd.h>
 #define ssize_t SSIZE_T
@@ -77,7 +80,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "../../snmplib/system.h"
+#include "system.h"
 #if HAVE_LIMITS_H
 #include "limits.h"
 #endif
