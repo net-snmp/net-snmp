@@ -1038,9 +1038,6 @@ snmp_in_toggle_options(char *options)
 	case 'b':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS);
 	    break;
-	case 'f':
-	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_FIX_PDUS);
-	    break;
         default:
 	    return options-1;
 	}
@@ -1053,7 +1050,6 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%sINOPTS values:\n", lead);
   fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
   fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
-  fprintf(outf, "%s    f: Attempt to fix PDUs and resend them.\n", lead);
 }
 
 void
@@ -1083,18 +1079,16 @@ register_mib_handlers (void)
     ds_register_premib(ASN_BOOLEAN, "snmp","mibReplaceWithLatest",
                        DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
 
-    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericEnums",
+    ds_register_config(ASN_BOOLEAN, "snmp","printNumericEnums",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM);
-    ds_register_premib(ASN_BOOLEAN, "snmp","printNumericOids",
+    ds_register_config(ASN_BOOLEAN, "snmp","printNumericOids",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp","dontBreakdownOids",
+    ds_register_config(ASN_BOOLEAN, "snmp","dontBreakdownOids",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
-    ds_register_premib(ASN_BOOLEAN, "snmp","quickPrinting",
+    ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
-    ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
+    ds_register_config(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
-    ds_register_premib(ASN_BOOLEAN, "snmp","fixPdus",
-                       DS_LIBRARY_ID, DS_LIB_FIX_PDUS);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
