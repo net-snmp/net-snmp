@@ -1363,17 +1363,19 @@ reassign_requests(struct agent_snmp_session  *asp) {
 
     for(i = 0; i < asp->vbcount; i++) {
         if (asp->requests[i].requestvb->type == ASN_NULL) {
-            if(!add_varbind_to_cache(asp, asp->requests[i].index,
-                                     asp->requests[i].requestvb,
-                                     asp->requests[i].subtree->next))
+            if (!add_varbind_to_cache(asp, asp->requests[i].index,
+				      asp->requests[i].requestvb,
+				      asp->requests[i].subtree->next)) {
                 return SNMP_ERR_GENERR;
+	    }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /* re-add the same subtree */
             asp->requests[i].requestvb->type = ASN_NULL;
             if (!add_varbind_to_cache(asp, asp->requests[i].index,
                                       asp->requests[i].requestvb,
-                                      asp->requests[i].subtree))
+                                      asp->requests[i].subtree)) {
                 return SNMP_ERR_GENERR;
+	    }
         }
     }
 
@@ -1770,7 +1772,8 @@ handle_set(struct agent_snmp_session  *asp) {
 }
 
 int
-handle_set_loop(struct agent_snmp_session  *asp) {
+handle_set_loop(struct agent_snmp_session  *asp)
+{
     while(asp->mode != FINISHED_FAILURE && asp->mode != FINISHED_SUCCESS) {
         handle_set(asp);
         if (check_for_delegated(asp))
@@ -1835,10 +1838,13 @@ handle_pdu(struct agent_snmp_session  *asp)
             /* get the results */
             status = handle_var_requests(asp);
 
-            /* deal with unhandled results -> noSuchObject */
+            /*  Deal with unhandled results -> noSuchInstance (rather
+		than noSuchObject -- in that case, the type will
+		already have been set to noSuchObject when we realised
+		we couldn't find an appropriate tree).  */
             if (status == SNMP_ERR_NOERROR)
                 snmp_replace_var_types(asp->pdu->variables, ASN_NULL,
-                                       SNMP_NOSUCHOBJECT);
+                                       SNMP_NOSUCHINSTANCE);
             break;
 
         case SNMP_MSG_GETNEXT:
