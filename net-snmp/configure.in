@@ -1201,6 +1201,11 @@ fi
 
 AC_CHECK_STRUCT_FOR([
 #include <sys/types.h>
+#include <sys/signal.h>
+], sigaction, sa_sigaction, no)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
 #define KERNEL
 #define _KERNEL
 #include <sys/socket.h>
