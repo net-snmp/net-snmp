@@ -339,7 +339,7 @@ int main(int argc, char *argv[])
     else status = snmp_send(ss, pdu) == 0;
     if (status) {
         snmp_sess_perror(inform ? "snmpinform" : "snmptrap", ss);
-	snmp_free_pdu(pdu);
+	if (!inform) snmp_free_pdu(pdu);
     }
     else if (inform) snmp_free_pdu(response);
 
