@@ -491,10 +491,10 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
      */
     var = find_varbind_in_list( template_v2pdu->variables,
                                 agentaddr_oid, agentaddr_oid_len);
-    if (!var && template_v1pdu->agent_addr[0]
-             && template_v1pdu->agent_addr[1]
-             && template_v1pdu->agent_addr[2]
-             && template_v1pdu->agent_addr[3]) {
+    if (!var && (template_v1pdu->agent_addr[0]
+              || template_v1pdu->agent_addr[1]
+              || template_v1pdu->agent_addr[2]
+              || template_v1pdu->agent_addr[3])) {
         if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
                  agentaddr_oid, agentaddr_oid_len,
                  ASN_IPADDRESS,
@@ -542,6 +542,7 @@ netsnmp_send_traps(int trap, int specific,
     netsnmp_variable_list *vblist = NULL;
     netsnmp_variable_list *trap_vb;
     netsnmp_variable_list *var;
+    in_addr_t             *pdu_in_addr_t;
     u_long                 uptime;
     struct trap_sink *sink;
 
@@ -681,6 +682,11 @@ netsnmp_send_traps(int trap, int specific,
             return -1;
         }
     }
+    /*
+     * Ensure that the v1 trap PDU includes the local IP address
+     */
+     pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
+    *pdu_in_addr_t = get_myaddr();
 
 
     /*
