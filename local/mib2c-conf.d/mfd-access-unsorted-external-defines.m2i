@@ -305,7 +305,7 @@ _${context}_container_init(${context}_interface_ctx *if_ctx)
  * More Details
  * ------------
  *  If there is currently no data available, return MFD_END_OF_DATA.
- *  Otherwise, you should set rowreq_ctx_ref->rowreq_ctx and it's indexes.
+ *  Otherwise, you should set rowreq_ctx_ref->rowreq_ctx and its indexes.
  *
  *  rowreq_ctx_ref->rowreq_ctx will be NULL. You should allocate a new context
  *  for this loop. [Alternatively, you could allocate one in
