@@ -29,7 +29,7 @@ snmpcmd
 .br
 [-v (1 | 2c | 3) ]
 .br
-[-R] [-f|-s|-S] [-q[o][e]]
+[-R] [-f|-s|-S] [-O[o][e][b]]
 .br
 [-P [w] [W] [e] [c] [d] [u] [R] ]
 .br
@@ -96,15 +96,22 @@ request object identifiers with suffix and MIB name.
 .I interfaces.iftable.ifentry.ifindex.1
 will show up as
 .I IF-MIB:ifindex.1
-.IP "-q[FLAGS]"
+.IP "-q"
 request a "quick print" output format, that also is easier to
-parse for programs.  If FLAGS are present, the following flags modify
-the printing behaviour:
+parse for programs.
+.IP "-O[o][e][b]"
+The following flags modify the printing behaviour of the output:
 .RS
 .IP "o"
 Print oids numerically rather than translating them into text strings.
 .IP "e"
 Print enums as numeric values only, without their labels.
+.IP "b"
+Don't break OIDs into pieces.  When OIDs contain a index to a table,
+they are broken into the displayable pieces and shown to you.  For
+example the oid vacmSecurityModel.0.3.119.101.115 is nicely broken
+down by default and the string hidden in the oid is shown to you as
+vacmSecurityModel.0."wes"
 .RE
 .IP "-m mibs"
 specifies a colon separated list of MIB modules to load for this application.
