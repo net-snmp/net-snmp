@@ -341,7 +341,7 @@ sensor_load(void)
 /* *******  picld sensor procedures * */
 #ifdef HAVE_PICL_H
 
-static int
+static void
 process_individual_fan(picl_nodehdl_t childh, 
                      char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -354,8 +354,7 @@ process_individual_fan(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -380,7 +379,7 @@ process_individual_fan(picl_nodehdl_t childh,
         }
 } /*process individual fan*/
 
-static int
+static void
 process_temperature_sensor(picl_nodehdl_t childh,
                                char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -393,8 +392,7 @@ process_temperature_sensor(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -419,7 +417,7 @@ process_temperature_sensor(picl_nodehdl_t childh,
         }
 }  /* process temperature sensor */
 
-static int
+static void
 process_digital_sensor(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -432,8 +430,7 @@ process_digital_sensor(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -458,7 +455,7 @@ process_digital_sensor(picl_nodehdl_t childh,
         }
 }  /* process digital sensor */
 
-static int
+static void
 process_switch(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -467,7 +464,7 @@ process_switch(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *switch_settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
+    const char *switch_settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
                                     "DIAG","SECURE"};
     u_int value;
     u_int found = 0;
@@ -475,8 +472,7 @@ process_switch(picl_nodehdl_t childh,
     int typ = 3; /*other*/
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         picl_errno_t    error_code,ec2;
@@ -513,7 +509,7 @@ process_switch(picl_nodehdl_t childh,
         }
 } /*process switch*/
 
-static int
+static void
 process_led(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -522,7 +518,7 @@ process_led(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *led_settings[]={"OFF","ON","BLINK"};
+    const char *led_settings[]={"OFF","ON","BLINK"};
     u_int value;
     u_int found = 0;
     int max_led_posns = 3;
@@ -531,8 +527,7 @@ process_led(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
@@ -567,7 +562,7 @@ process_led(picl_nodehdl_t childh,
        }
 } 
 
-static int
+static void
 process_i2c(picl_nodehdl_t childh,
                    char propname[PICL_PROPNAMELEN_MAX])
 {
@@ -576,7 +571,7 @@ process_i2c(picl_nodehdl_t childh,
 
     char state[32];
     int st_cnt;
-    char *i2c_settings[]={"OK"};
+    const char *i2c_settings[]={"OK"};
     u_int value;
     u_int found = 0;
     int max_i2c_posns = 1;
@@ -585,8 +580,7 @@ process_i2c(picl_nodehdl_t childh,
     picl_errno_t    error_code,ec2;
 
     if (sensor_array[typ].n >= MAX_SENSORS){
-        DEBUGMSG(("ucd-snmp/lmSensors",
-            "There are too many sensors of type %d\n",typ));
+        snmp_log(LOG_ERR, "There are too many sensors of type %d\n",typ);
         }
     else{
         error_code = (picl_get_propinfo_by_name(childh,
