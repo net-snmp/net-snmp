@@ -3221,6 +3221,87 @@ print_subtree_oid_report_disable_suffix (void)
     print_subtree_oid_report_suffix = 0;
 }
 
+static char indent[256];
+
+static void print_mib_leaves(FILE *f, struct tree *tp)
+{ struct tree *ntp;
+  char *ip = indent+strlen(indent)-1;
+  char last = *ip;
+
+  *ip = '+';
+  if (tp->type == 0)
+    fprintf(f, "%s--%s(%d)\n", indent, tp->label, tp->subid);
+  else {
+    const char *acc, *typ;
+    switch (tp->access) {
+    case MIB_ACCESS_NOACCESS:	acc = "----"; break;
+    case MIB_ACCESS_READONLY:	acc = "-R--"; break;
+    case MIB_ACCESS_WRITEONLY:	acc = "--W-"; break;
+    case MIB_ACCESS_READWRITE:	acc = "-RW-"; break;
+    case MIB_ACCESS_NOTIFY:	acc = "---N"; break;
+    case MIB_ACCESS_CREATE:	acc = "CR--"; break;
+    default:			acc = "    "; break;
+    }
+    switch (tp->type) {
+    case TYPE_OBJID:		typ = "ObjID    "; break;
+    case TYPE_OCTETSTR:		typ = "String   "; break;
+    case TYPE_INTEGER:		typ = "Integer  "; break;
+    case TYPE_NETADDR:		typ = "NetAddr  "; break;
+    case TYPE_IPADDR:		typ = "IpAddr   "; break;
+    case TYPE_COUNTER:		typ = "Counter  "; break;
+    case TYPE_GAUGE:		typ = "Gauge    "; break;
+    case TYPE_TIMETICKS:	typ = "TimeTicks"; break;
+    case TYPE_OPAQUE:		typ = "Opaque   "; break;
+    case TYPE_NULL:		typ = "Null     "; break;
+    case TYPE_COUNTER64:	typ = "Counter64"; break;
+    case TYPE_BITSTRING:	typ = "BitString"; break;
+    case TYPE_NSAPADDRESS:	typ = "NsapAddr "; break;
+    case TYPE_UINTEGER:		typ = "UInteger "; break;
+    default:			typ = "         "; break;
+    }
+    if (tp->enums)		typ = "EnumVal  ";
+    fprintf(f, "%s-- %s %s %s(%d)\n", indent, acc, typ, tp->label, tp->subid);
+  }
+  *ip = last;
+  strcat(indent, "  |");
+
+  { int i, count = 0;
+    u_long previous = 0;
+    struct tree *lp;
+
+    for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) count++;
+
+    /* just make sure they come out sorted, even though they are not */
+
+    for (i = 1; i <= count; i++) {
+      u_long lowest = 1000000000;
+      struct tree *lp = NULL;
+
+      for (ntp = tp->child_list; ntp; ntp = ntp->next_peer) {
+	/* really previous should start out at -1, but it is unsigned ... */
+	if ((ntp->subid > previous || previous == ntp->subid && previous == 0)
+		&& ntp->subid < lowest) {
+	  lp = ntp;
+	  lowest = ntp->subid;
+	}
+      }
+      previous = lowest;
+      if (i == 1 || lp->type == 0) fprintf(f, "%s\n", indent);
+      if (i == count) ip[3] = ' ';
+      print_mib_leaves(f, lp);
+    }
+  }
+  ip[1] = 0;
+}
+
+void print_mib_tree(FILE *f, struct tree *tp)
+{
+  indent[0] = ' ';
+  indent[1] = 0;
+  print_mib_leaves(f, tp);
+}
+
+
 /*
  * Merge the parsed object identifier with the existing node.
  * If there is a problem with the identifier, release the existing node.
