@@ -73,9 +73,8 @@ void sort_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
 struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
-void register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
-void unregister_mib (oid *, size_t);
-struct subtree *unregister_mib_tree (oid *, size_t, struct subtree *);
+int register_mib (const char *, struct variable *, size_t , size_t , oid *, size_t);
+int unregister_mib (oid *, size_t);
 struct subtree *free_subtree (struct subtree *);
 void init_agent(void);
 int compare_tree (oid *, size_t, oid *, size_t);
@@ -90,7 +89,7 @@ int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
             (sizeof(theoid) *must* return the number of elements!) 
 */
 #define REGISTER_MIB(descr, var, vartype, theoid)                      \
-  register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
+  (void)register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
                sizeof(var)/sizeof(struct vartype),                     \
                theoid, sizeof(theoid)/sizeof(oid));
 
