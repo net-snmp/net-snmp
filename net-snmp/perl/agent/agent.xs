@@ -13,6 +13,13 @@ typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
 
+#define NETSNMP_NAMEBUF_LEN 128
+typedef struct netsnmp_oid_s {
+    unsigned int        *name;
+    unsigned int         len;
+    unsigned int         namebuf[ NETSNMP_NAMEBUF_LEN ];
+} netsnmp_oid;
+
 static int have_done_agent = 0;
 static int have_done_lib = 0;
 
@@ -324,19 +331,18 @@ nsahr_register(reginfo)
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_request_info PREFIX = nari_
 
-char *
-nari_getOID(me)
+netsnmp_oid *
+nari_getOIDptr(me)
         SV *me;
-    PREINIT:
-        u_char *oidbuf = NULL;
-        size_t ob_len = 0, oo_len = 0;
+        PREINIT:
         netsnmp_request_info *request;
-    CODE:
+        CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
-	sprint_realloc_objid(&oidbuf,&ob_len,&oo_len, 1,
-			     request->requestvb->name,
-                             request->requestvb->name_length);
-        RETVAL = oidbuf; /* mem leak */
+        RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        RETVAL->name = RETVAL->namebuf;
+        RETVAL->len = request->requestvb->name_length;
+        memcpy(RETVAL->name, request->requestvb->name,
+               request->requestvb->name_length * sizeof(oid));
     OUTPUT:
         RETVAL
 

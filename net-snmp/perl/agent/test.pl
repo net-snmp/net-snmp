@@ -12,6 +12,7 @@ use NetSNMP::agent (':all');
 use NetSNMP::default_store (':all');
 use NetSNMP::agent::default_store (':all');
 use NetSNMP::ASN (':all');
+use NetSNMP::OID;
 #use NetSNMP::agent (':all');
 use SNMP;
 $loaded = 1;
@@ -48,7 +49,8 @@ print it($agent, 3);
 
 $regitem = $agent->register("test_reg", ".1.3.6.1.8888", \&testsub);
 print it($regitem, 4);
-print it(ref($regitem) eq "handler_registrationPtr", 5);
+print STDERR $regitem,":",ref($regitem),"\n";
+print it(ref($regitem) eq "netsnmp_handler_registrationPtr", 5);
 
 while(1) {
     print ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
@@ -64,7 +66,6 @@ print ((ref($x) eq "handler_registrationPtr") ? "ok 2\n" : "not ok 2\n");
 print (($x->register() == 0) ? "ok 3\n" : "not ok 3\n");
 
 my $y = NetSNMP::agent::register_mib("me",\&testsub,".1.3.6.1.8888");
-
 while(1) {
   NetSNMP::agent::agent_check_and_process();
   print "got something\n";
@@ -72,15 +73,16 @@ while(1) {
 
 use Data::Dumper;
 sub testsub {
-    print "in perl handler sub\n";
-    print "  args: ", join(", ", @_), "\n";
-    print "  dumped args: ", Dumper(@_);
-    print "  request oid: ",$_[3]->getOID(),"\n";
-    print "  mode: ", $_[2]->getMode(),"\n";
+    print STDERR "in perl handler sub\n";
+    print STDERR "  args: ", join(", ", @_), "\n";
+    print STDERR "  dumped args: ", Dumper(@_);
+    $oid= $_[3]->getOID();
+    print STDERR "  request oid: ", ref($oid), " -> ", $oid, "\n";
+    print STDERR "  mode: ", $_[2]->getMode(),"\n";
     $_[3]->setOID(".1.3.6.1.8888.1");
     $_[3]->setValue(2, 42);
     $_[3]->setValue(ASN_INTEGER, 42);
-    print "  oid: ", $_[3]->getOID(),"\n";
-    print "  ref: ", ref($_[3]),"\n";
-    print "  val: ", $_[3]->getValue(),"\n";
+    print STDERR "  oid: ", $_[3]->getOID(),"\n";
+    print STDERR "  ref: ", ref($_[3]),"\n";
+    print STDERR "  val: ", $_[3]->getValue(),"\n";
 }
