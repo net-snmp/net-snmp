@@ -88,7 +88,7 @@ void usage(void)
   fprintf(stderr,
           "  \t\t    d: Print full details of the given OID.\n");
   fprintf(stderr,
-          "  \t\t    t: Print tree format symbol table.\n");
+          "  \t\t    p: Print tree format symbol table.\n");
   fprintf(stderr,
           "  \t\t    a: Print ascii format symbol table.\n");
   fprintf(stderr,
@@ -261,11 +261,20 @@ int main(int argc, char *argv[])
     }
     
     init_snmp("snmpapp");
-    if (print == 1 && current_name == NULL)
-        print_mib_tree (stdout, get_tree_head());
-    if (print == 2) print_ascii_dump (stdout);
-    if (print == 3) print_oid_report (stdout);
-    if (!current_name) exit (0);
+    if (current_name == NULL) {
+        switch (print) {
+        case 1:
+            print_mib_tree (stdout, get_tree_head());
+            break;
+        case 2:
+            print_ascii_dump (stdout);
+            break;
+        case 3:
+            print_oid_report (stdout);
+            break;
+        }
+        exit (0);
+    }
 
     name_length = MAX_OID_LEN;
     if (snmp_get_random_access()){
