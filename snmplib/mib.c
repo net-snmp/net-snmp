@@ -1,3 +1,9 @@
+/*
+ * mib.c
+ *
+ * Update: 1998-07-17 <jhy@gsu.edu>
+ * Added print_oid_report* functions.
+ */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -1791,3 +1797,58 @@ main(argc, argv)
 }
 
 #endif /* testing */
+
+void
+print_oid_report (fp)
+    FILE *fp;
+{
+    print_subtree_oid_report (fp, tree_head, 0);
+}
+
+void
+print_oid_report_enable_labeledoid __P((void))
+{
+    print_subtree_oid_report_enable_labeledoid ();
+}
+
+void
+print_oid_report_enable_oid __P((void))
+{
+    print_subtree_oid_report_enable_oid ();
+}
+
+void
+print_oid_report_enable_suffix __P((void))
+{
+    print_subtree_oid_report_enable_suffix ();
+}
+
+void
+print_oid_report_enable_symbolic __P((void))
+{
+    print_subtree_oid_report_enable_symbolic ();
+}
+
+void
+print_oid_report_disable_labeledoid __P((void))
+{
+    print_subtree_oid_report_disable_labeledoid ();
+}
+
+void
+print_oid_report_disable_oid __P((void))
+{
+     print_subtree_oid_report_disable_oid ();
+}
+
+void
+print_oid_report_disable_suffix __P((void))
+{
+    print_subtree_oid_report_disable_suffix ();
+}
+
+void
+print_oid_report_disable_symbolic __P((void))
+{
+     print_subtree_oid_report_disable_symbolic ();
+}
