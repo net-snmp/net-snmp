@@ -28,14 +28,14 @@ extern void     register_sysORTable __P((oid *, int, char *));
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 sysORLastChange_variables[] = {
-    { SYSORLASTCHANGE,   TIMETICKS, RONLY, var_sysORTable, 1, {1}},
+    { SYSORLASTCHANGE,   ASN_TIMETICKS, RONLY, var_sysORTable, 1, {1}},
 };
 
 struct variable2 sysORTable_variables[] = {
-    { SYSORTABLEINDEX,   INTEGER,   RONLY, var_sysORTable, 1, {1}},
-    { SYSORTABLEID,      OBJID,     RONLY, var_sysORTable, 1, {2}},
-    { SYSORTABLEDESCR,   STRING,    RONLY, var_sysORTable, 1, {3}},
-    { SYSORTABLEUPTIME,  TIMETICKS, RONLY, var_sysORTable, 1, {4}}
+    { SYSORTABLEINDEX,   ASN_INTEGER,       RONLY, var_sysORTable, 1, {1}},
+    { SYSORTABLEID,      ASN_OBJECT_ID,     RONLY, var_sysORTable, 1, {2}},
+    { SYSORTABLEDESCR,   ASN_OCTET_STR,     RONLY, var_sysORTable, 1, {3}},
+    { SYSORTABLEUPTIME,  ASN_TIMETICKS,     RONLY, var_sysORTable, 1, {4}}
 };
 
 config_load_mib(1.3.6.1.2.1.1.8, 8, sysORLastChange_variables)

@@ -35,22 +35,22 @@ config_parse_dot_conf("swap", memory_parse_config, memory_free_config);
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_mem_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_extensible_mem, 1, {ERRORNAME }},
-  {MEMTOTALSWAP, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAP}},
-  {MEMUSEDSWAP, INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAP}},
-  {MEMTOTALREAL, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREAL}},
-  {MEMUSEDREAL, INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREAL}},
-  {MEMTOTALSWAPTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAPTXT}},
-  {MEMUSEDSWAPTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAPTXT}},
-  {MEMTOTALREALTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREALTXT}},
-  {MEMUSEDREALTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREALTXT}},
-  {MEMTOTALFREE, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALFREE}},
-  {MEMSHARED, INTEGER, RONLY, var_extensible_mem, 1, {MEMSHARED}},
-  {MEMBUFFER, INTEGER, RONLY, var_extensible_mem, 1, {MEMBUFFER}},
-  {MEMCACHED, INTEGER, RONLY, var_extensible_mem, 1, {MEMCACHED}},
-  {ERRORFLAG, INTEGER, RONLY, var_extensible_mem, 1, {ERRORFLAG }},
-  {ERRORMSG, STRING, RONLY, var_extensible_mem, 1, {ERRORMSG }}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_mem, 1, {ERRORNAME }},
+  {MEMTOTALSWAP, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAP}},
+  {MEMUSEDSWAP, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAP}},
+  {MEMTOTALREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREAL}},
+  {MEMUSEDREAL, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREAL}},
+  {MEMTOTALSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALSWAPTXT}},
+  {MEMUSEDSWAPTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDSWAPTXT}},
+  {MEMTOTALREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREALTXT}},
+  {MEMUSEDREALTXT, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREALTXT}},
+  {MEMTOTALFREE, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALFREE}},
+  {MEMSHARED, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMSHARED}},
+  {MEMBUFFER, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMBUFFER}},
+  {MEMCACHED, ASN_INTEGER, RONLY, var_extensible_mem, 1, {MEMCACHED}},
+  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_mem, 1, {ERRORFLAG }},
+  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_mem, 1, {ERRORMSG }}
 };
 
 config_load_mib(EXTENSIBLEMIB.MEMMIBNUM, EXTENSIBLENUM+1, extensible_mem_variables)
