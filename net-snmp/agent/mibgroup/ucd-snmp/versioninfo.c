@@ -109,6 +109,8 @@ u_char *var_extensible_version(struct variable *vp,
     case VERCONFIG:
 #ifdef CONFIGURE_OPTIONS
       *var_len = strlen(config_opts);
+      if (*var_len > 1024)
+          *var_len = 1024; /* mib imposed restriction */
       return (u_char *) config_opts;
 #else
       sprintf(errmsg,"");
