@@ -193,6 +193,13 @@ CHECK() {	# <pattern_to_match>
 }
 
 
+CHECKTRAPD() {
+    oldjunkoutpufile=$junkoutputfile
+    junkoutputfile=$SNMP_SNMPTRAPD_LOG_FILE
+    CHECK $*
+    junkoutputfile=$oldjunkoutputfile
+}
+
 #------------------------------------ -o- 
 # Returns: Count of matched lines.
 #
@@ -214,7 +221,11 @@ CONFIGAGENT() {
 STARTAGENT() {
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "agent config: "
-	cat $SNMP_CONFIG_FILE
+        if [ -f $SNMP_CONFIG_FILE ]; then
+    	    cat $SNMP_CONFIG_FILE
+	else
+	    echo "[no config file]"
+	fi
     fi
     COMMANDARGS="$SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
     if test -f $SNMP_CONFIG_FILE; then
@@ -225,6 +236,30 @@ STARTAGENT() {
 	echo "running: snmpd $COMMANDARGS"
    fi
    snmpd $COMMANDARGS > $SNMP_SNMPD_LOG_FILE.stdout 2>&1
+
+    ## Give some agents time to settle ... A Better Way Will Be Found
+    if [ `uname -s` = "AIX" ]; then
+	sleep 4;
+    fi
+}
+
+STARTTRAPD() {
+    if [ $SNMP_VERBOSE -gt 1 ]; then
+	echo "trapd config: "
+        if [ -f $SNMPTRAPD_CONFIG_FILE ]; then
+    	    cat $SNMPTRAPD_CONFIG_FILE
+	else
+	    echo "[no config file]"
+	fi
+    fi
+    COMMANDARGS="-d $SNMP_SNMPTRAPD_PORT -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
+    if test -f $SNMPTRAPD_CONFIG_FILE; then
+      COMMANDARGS="$COMMANDARGS -C -c $SNMP_CONFIG_FILE"
+    fi
+   if [ $SNMP_VERBOSE -gt 0 ]; then
+	echo "running: snmptrapd $COMMANDARGS"
+   fi
+   snmptrapd $COMMANDARGS > $SNMP_SNMPTRAPD_LOG_FILE.stdout 2>&1
 
     ## Give some agents time to settle ... A Better Way Will Be Found
     if [ `uname -s` = "AIX" ]; then
@@ -246,6 +281,22 @@ STOPAGENT() {
 	echo "$seperator"
     fi
     rm $SNMP_SNMPD_PID_FILE
+}
+
+STOPTRAPD() {
+    if [ -f $SNMP_SNMPTRAPD_PID_FILE ]; then
+	kill `cat $SNMP_SNMPTRAPD_PID_FILE`
+	# XXX: kill -9 later (after sleep and ps grok?)?
+    fi
+    if [ $SNMP_VERBOSE -gt 1 ]; then
+	echo "snmptrapd Output:"
+	echo "$seperator [stdout]"
+	cat $SNMP_SNMPTRAPD_LOG_FILE.stdout
+	echo "$seperator [logfile]"
+	cat $SNMP_SNMPTRAPD_LOG_FILE
+	echo "$seperator"
+    fi
+    rm $SNMP_SNMPTRAPD_PID_FILE
 }
 
 FINISHED() {
