@@ -2360,12 +2360,12 @@ asn_rbuild_objid (u_char *data,
         for(i = objidlength; i > 2; i--) {
             tmpint = objid[i-1];
             if ((*datalength)-- < 1) return NULL;
-            *data-- = tmpint & 0x7f;
+            *data-- = (u_char)tmpint & 0x7f;
             tmpint >>= 7;
 
             while (tmpint > 0) {
                 if ((*datalength)-- < 1) return NULL;
-                *data-- = ((tmpint & 0x7f) | 0x80);
+                *data-- = (u_char)((tmpint & 0x7f) | 0x80);
                 tmpint >>= 7;
             }
         }
