@@ -20,18 +20,6 @@
 #define EADDRINUSE		WSAEADDRINUSE
 
 /*
- * Not sure if the checking is required but cygwin
- * does it this way.
- */
-#ifndef HAVE_SSIZE_T
-#if defined(__INT_MAX__) && __INT_MAX__ == 2147483647
-typedef int ssize_t;
-#else
-typedef long ssize_t;
-#endif
-#endif
-
-/*
  * File io stuff. Odd that this is not defined by MinGW.
  * Maybe there is an M$ish way to do it.
  */
