@@ -523,14 +523,24 @@ What_Type_Disk(void)
     switch ( HRD_savedCtrl_type ) {
 	case DKC_WDC2880:
 	case DKC_DSD5215:
+#ifdef DKC_XY450
 	case DKC_XY450:
+#endif
 	case DKC_ACB4000:
 	case DKC_MD21:
+#ifdef DKC_XD7053
 	case DKC_XD7053:
+#endif
 	case DKC_SCSI_CCS:
+#ifdef DKC_PANTHER
 	case DKC_PANTHER:
+#endif
+#ifdef DKC_CDC_9057
 	case DKC_CDC_9057:
+#endif
+#ifdef DKC_FJ_M1060
 	case DKC_FJ_M1060:
+#endif
 	case DKC_DIRECT:
 	case DKC_PCMCIA_ATA:
     		return(3);	/* Hard Disk */
