@@ -149,15 +149,10 @@ AC_ARG_ENABLE(reentrant,
                                   Currently an experimental setting.],
     with_res_locks="yes",with_res_locks="no")
 
-AC_ARG_WITH(root-access,
+AC_ARG_WITH(dummy-values,
 [
 Configuring the agent:
-  --without-root-access           The snmpd agent won't require root access to
-                                  run it.  The information it returns in the
-                                  mib-II tree may not be correct, however.])
-
-AC_ARG_WITH(dummy-values,
-[  --with-dummy-values             Provide 'placeholder' dummy values where
+  --with-dummy-values             Provide 'placeholder' dummy values where
                                   the necessary information is not available.
                                   This is technically not compliant with the
                                   SNMP specifications, but was how the agent
@@ -229,6 +224,7 @@ dnl Catch common mistakes in configure options
 dnl
 AC_ARG_WITH(mib_module,,    AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])     )
 AC_ARG_WITH(out_mib_module,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(out_root_access,,AC_MSG_ERROR([ Obsolete option. Use run-time -r option instead ]) )
 
 dnl
 dnl otherwise prompted information
@@ -238,11 +234,6 @@ AC_ARG_WITH(defaults,
 Miscellaneous:
   --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
-
-dnl Only define if specifically chosen as --without (ie, default to true). 
-if test "x$with_root_access" = "xno"; then
-  AC_DEFINE(NO_ROOT_ACCESS)
-fi
 
 dnl Define unless specifically suppressed (ie, option defaults to false). 
 if test "x$with_dummy_values" != "xyes"; then

@@ -182,9 +182,6 @@
 /* testing code sections. */
 #undef SNMP_TESTING_CODE 
 
-/* If you don't have root access don't exit upon kmem errors */
-#undef NO_ROOT_ACCESS
-
 /* If you don't want the agent to report on variables it doesn't have data for */
 #undef NO_DUMMY_VALUES
 
@@ -217,11 +214,11 @@
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
 
-/* Define if you have the getpid function.  */
-#undef HAVE_GETPID
-
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
+
+/* Define if you have the getpid function.  */
+#undef HAVE_GETPID
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY

@@ -312,10 +312,6 @@ main(int argc, char *argv[])
 	strcpy(logfile, LOGFILE);
 #endif
 
-#ifdef NO_ROOT_ACCESS
-        /* default to no */
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS, 1);
-#endif
 
 	/*
 	 * usage: snmpd
@@ -390,8 +386,8 @@ main(int argc, char *argv[])
                   break;
 
 		case 'r':
-                    ds_toggle_boolean(DS_APPLICATION_ID,
-                                      DS_AGENT_NO_ROOT_ACCESS);
+                    ds_set_boolean(DS_APPLICATION_ID,
+                                      DS_AGENT_NO_ROOT_ACCESS, 1);
 		    break;
 
                 case 'P':
