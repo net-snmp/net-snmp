@@ -15,7 +15,7 @@
 #include "mibincl.h"
 #include "extproto.h"
 
-char *VersionInfo="3.1.3.pre2";
+char *VersionInfo="3.1.3.pre3";
 
 int clear_cache();
 int update_hook();
