@@ -1,0 +1,19 @@
+ipfwchains-module
+-----------------
+This module is still being worked on.
+Future enhancements will include :
+* adding variables to zero the packet and byte counters
+* adding a variable to reorder the firewalling rules on
+  the firewall, to increase efficiency
+To compile this module into the agent :
+copy IPFWCHAINS-MIB.txt into /usr/local/share/snmp/mibs/
+./configure --with-mib-modules="ipfwchains/ipfwchains"
+
+to view the tables with snmptable, use a big time-out value, 
+or you won't get the complete table.
+
+Any suggestions or bugfixes are always welcome.
+
+Didier.Dhaenens@rug.ac.be 
+
+Atlantis, University of Ghent, Belgium
