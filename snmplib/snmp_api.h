@@ -332,8 +332,9 @@ extern void snmp_set_detail (const char *);
 #define SNMPERR_NULL_PDU		(-59)
 #define SNMPERR_NO_VARS			(-60)
 #define SNMPERR_VAR_TYPE		(-61)
+#define SNMPERR_MALLOC			(-62)
 
-#define SNMPERR_MAX			(-61)
+#define SNMPERR_MAX			(-62)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex

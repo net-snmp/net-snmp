@@ -255,6 +255,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "No PDU in snmp_send",		   /* SNMPERR_NULL_PDU */
     "Missing variables in PDU",		   /* SNMPERR_NO_VARS */
     "Bad variable type",		   /* SNMPERR_VAR_TYPE */
+    "Out of memory (malloc failure)",	   /* SNMPERR_MALLOC */
 };
 
 static const char * usmSecLevelName[] =
@@ -551,6 +552,8 @@ register_default_handlers(void) {
                      DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
   ds_register_config(ASN_INTEGER, "snmp","defaultPort",
                      DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
+  ds_register_config(ASN_OCTET_STR, "snmp","defCommunity",
+		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
 }
 
 
@@ -689,12 +692,14 @@ _sess_copy( struct snmp_session *in_session)
     /* Copy session structure and link into list */
     slp = (struct session_list *)calloc(1,sizeof(struct session_list));
     if (slp == NULL) { 
+      in_session->s_snmp_errno = SNMPERR_MALLOC;
       return(NULL);
     }
 
     isp = (struct snmp_internal_session *)calloc(1,sizeof(struct snmp_internal_session));
     if (isp == NULL) { 
       snmp_sess_close(slp);
+      in_session->s_snmp_errno = SNMPERR_MALLOC;
       return(NULL);
     }
 
@@ -703,6 +708,7 @@ _sess_copy( struct snmp_session *in_session)
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
     if (slp->session == NULL) {
       snmp_sess_close(slp);
+      in_session->s_snmp_errno = SNMPERR_MALLOC;
       return(NULL);
     }
     memmove(slp->session, in_session, sizeof(struct snmp_session));
@@ -718,6 +724,7 @@ _sess_copy( struct snmp_session *in_session)
 	cp = (char *)malloc(strlen(session->peername) + 1);
 	if (cp == NULL) {
           snmp_sess_close(slp);
+	  in_session->s_snmp_errno = SNMPERR_MALLOC;
           return(NULL);
         }
 	strcpy(cp, session->peername);
@@ -728,20 +735,29 @@ _sess_copy( struct snmp_session *in_session)
     if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
 	ucp = (u_char *)malloc(session->community_len);
 	if (ucp != NULL)
-          memmove(ucp, session->community, session->community_len);
+	    memmove(ucp, session->community, session->community_len);
     } else {
+	if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY)) != NULL) {
+	    session->community_len = strlen(cp);
+	    ucp = (u_char *)malloc(session->community_len);
+	    if (ucp)
+		memmove(ucp, cp, session->community_len);
+	}
+	else {
 #ifdef NO_ZEROLENGTH_COMMUNITY
-	session->community_len = strlen(DEFAULT_COMMUNITY);
-	ucp = (u_char *)malloc(session->community_len);
-	if (ucp)
-          memmove(ucp, DEFAULT_COMMUNITY, session->community_len);
+	    session->community_len = strlen(DEFAULT_COMMUNITY);
+	    ucp = (u_char *)malloc(session->community_len);
+	    if (ucp)
+		memmove(ucp, DEFAULT_COMMUNITY, session->community_len);
 #else
-	ucp = (u_char *)strdup("");
+	    ucp = (u_char *)strdup("");
 #endif
+	}
     }
 
     if (ucp == NULL) {
       snmp_sess_close(slp);
+      in_session->s_snmp_errno = SNMPERR_MALLOC;
       return(NULL);
     }
     session->community = ucp;	/* replace pointer with pointer to new data */
@@ -753,6 +769,7 @@ _sess_copy( struct snmp_session *in_session)
       ucp = (u_char*)malloc(session->securityAuthProtoLen * sizeof(oid));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
+	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, session->securityAuthProto,
@@ -769,6 +786,7 @@ _sess_copy( struct snmp_session *in_session)
 			   sizeof(oid));
       if (op == NULL) {
 	snmp_sess_close(slp);
+	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(op, session->securityPrivProto,
@@ -785,6 +803,7 @@ _sess_copy( struct snmp_session *in_session)
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
+	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, session->securityEngineID,
@@ -798,6 +817,7 @@ _sess_copy( struct snmp_session *in_session)
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
+	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, session->contextEngineID,
@@ -809,6 +829,7 @@ _sess_copy( struct snmp_session *in_session)
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
+	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
       memmove(ucp, session->securityEngineID,
@@ -2644,7 +2665,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 
   /* get the fields in the PDU preceeding the variable-bindings sequence */
   switch (pdu->command) {
-	case SNMP_MSG_TRAP:
+  case SNMP_MSG_TRAP:
     /* enterprise */
     pdu->enterprise_length = MAX_OID_LEN;
     data = asn_parse_objid(data, length, &type, objid,
@@ -2680,14 +2701,14 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     if (data == NULL)
       return -1;
 
-		break;
+    break;
 
-	case SNMP_MSG_RESPONSE:
-	case SNMP_MSG_REPORT:
-		pdu->flags |= UCD_MSG_FLAG_RESPONSE_PDU;
-		/* fallthrough */
+  case SNMP_MSG_RESPONSE:
+  case SNMP_MSG_REPORT:
+    pdu->flags |= UCD_MSG_FLAG_RESPONSE_PDU;
+    /* fallthrough */
 
-	default:
+  default:
     /* PDU is not an SNMPv1 TRAP */
 
     /* request id */
