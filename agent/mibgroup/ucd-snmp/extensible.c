@@ -287,7 +287,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   static struct extensible ex;
   FILE *file;
 
-  if ((exten = get_exten_instance(extens,name[9]))) {
+  if ((exten = get_exten_instance(extens,name[10]))) {
     if (var_val_type != ASN_INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
