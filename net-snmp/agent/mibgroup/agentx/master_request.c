@@ -83,7 +83,7 @@ handle_agentx_response( int operation,
 	}
 #ifdef STILL_TO_CODE
 	if ( !asp->exact && (vbp->type == ENDOFMIB || !in_view())) {
-	    // Add to "oustanding query" list
+	    /* Add to "oustanding query" list */
 	}
 	else
 #endif
