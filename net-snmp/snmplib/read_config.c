@@ -486,7 +486,9 @@ read_config_store(const char *type, const char *line)
 #ifdef PERSISTENT_DIRECTORY
   char file[512], *filep;
   FILE *fout;
+#ifdef PERSISTENT_MASK
   mode_t oldmask;
+#endif
 
   /* store configuration directives in the following order of preference:
      1. ENV variable SNMP_PERSISTENT_FILE
@@ -497,7 +499,9 @@ read_config_store(const char *type, const char *line)
     filep = file;
   }
   
+#ifdef PERSISTENT_MASK
   oldmask = umask(PERSISTENT_MASK);
+#endif
   if ((fout = fopen(filep, "a")) != NULL) {
     fprintf(fout,line);
     if (line[strlen(line)] != '\n')
@@ -507,7 +511,9 @@ read_config_store(const char *type, const char *line)
   } else {
     DEBUGMSGTL(("read_config","open failure"));
   }
+#ifdef PERSISTENT_MASK
   umask(oldmask);
+#endif
 
 #endif
 }  /* end read_config_store() */
