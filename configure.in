@@ -1688,7 +1688,7 @@ fi
 if test "x$useopenssl" != "xno" ; then
     authmodes="MD5 SHA1"
     if test "x$enable_privacy" != "xno" ; then
-        if test "x$ac_cv_header_openssl_aes_h" = "yes" ; then
+        if test "x$ac_cv_header_openssl_aes_h" = "xyes" ; then
             encrmodes="DES AES128 AES192 AES256"
 	else
 	    encrmodes="DES"
