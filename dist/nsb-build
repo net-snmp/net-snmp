@@ -37,7 +37,7 @@ fi
 
 VERSION=$1
 SRCD=$HOME/src/net-snmp-$VERSION
-BUILDD=$HOME/build/
+BUILDD=$HOME/build
 INSTALLD=$HOME/build/`nsb-sysname`/usr/local
 
 #      x)  x=$OPTARG ;;
@@ -71,6 +71,6 @@ fi
 
 ########################################################################
 ########################################################################
-fBUILDD=$BUILDD/`nsb-sysname`
+BUILDD=$BUILDD/`nsb-sysname`
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
 nsb-build $VERSION $SRCD $BUILDD $INSTALLD
