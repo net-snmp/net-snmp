@@ -849,31 +849,38 @@ snmp_sess_open(struct snmp_session *in_session)
 
 
     if ( isp->addr.sa_family == AF_UNSPEC ) {
-        isp->addr.sa_family = AF_INET;
-        isp_addr = (struct sockaddr_in *)&(isp->addr);
-        if (session->peername != SNMP_DEFAULT_PEERNAME){
-            if ((int)(addr = inet_addr(session->peername)) != -1){
-                memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
-            } else {
-                hp = gethostbyname(session->peername);
-                if (hp == NULL){
-                    snmp_errno = SNMPERR_BAD_ADDRESS;
-                    in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-                    in_session->s_errno = errno;
-                    snmp_set_detail(session->peername);
-                    snmp_sess_close(slp);
-                    return 0;
-                } else {
-                    memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
-                }
-            }
-            if (session->remote_port == SNMP_DEFAULT_REMPORT){
-                isp_addr->sin_port = default_s_port;
-            } else {
-                isp_addr->sin_port = htons(session->remote_port);
+        if ( session->peername && session->peername[0] == '/' ) {
+            isp->addr.sa_family = AF_UNIX;
+            if ( session->local_port == 0 ) {	/* 'remote' implies client */
+                strcpy( isp->addr.sa_data, session->peername);
             }
         } else {
-            isp_addr->sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
+            isp->addr.sa_family = AF_INET;
+            isp_addr = (struct sockaddr_in *)&(isp->addr);
+            if (session->peername != SNMP_DEFAULT_PEERNAME){
+                if ((int)(addr = inet_addr(session->peername)) != -1){
+                    memmove(&isp_addr->sin_addr, &addr, sizeof(isp_addr->sin_addr));
+                } else {
+                    hp = gethostbyname(session->peername);
+                    if (hp == NULL){
+                        snmp_errno = SNMPERR_BAD_ADDRESS;
+                        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+                        in_session->s_errno = errno;
+                        snmp_set_detail(session->peername);
+                        snmp_sess_close(slp);
+                        return 0;
+                    } else {
+                        memmove(&isp_addr->sin_addr, hp->h_addr, hp->h_length);
+                    }
+                }
+                if (session->remote_port == SNMP_DEFAULT_REMPORT){
+                    isp_addr->sin_port = default_s_port;
+                } else {
+                    isp_addr->sin_port = htons(session->remote_port);
+                }
+            } else {
+                isp_addr->sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
+            }
         }
     }
 
@@ -883,6 +890,20 @@ snmp_sess_open(struct snmp_session *in_session)
         meIp = (struct sockaddr_in*)&(isp->me);
         meIp->sin_addr.s_addr = INADDR_ANY;
         meIp->sin_port = htons(session->local_port);
+    }
+    else if ( isp->me.sa_family == AF_UNIX ) {
+        if ( session->local_port != 0 ) {	/* 'local' implies server */
+            strcpy( isp->me.sa_data, session->peername);
+        }
+        else {
+		/* Need a unique socket name */
+#ifndef UNIX_SOCKET_BASE_NAME
+#define UNIX_SOCKET_BASE_NAME  "/tmp/s."
+#endif
+            strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
+            strcat( isp->me.sa_data, "XXXXXX" );
+            mktemp( isp->me.sa_data );
+        }
     }
 
     /* Set up connections */
@@ -1100,10 +1121,12 @@ snmp_sess_close(void *sessp)
 	if (isp->sd != -1)
 	{
 #ifndef HAVE_CLOSESOCKET
-	close(isp->sd);
+	    close(isp->sd);
 #else
-	closesocket(isp->sd);
+	    closesocket(isp->sd);
 #endif
+            if ( isp->me.sa_family == AF_UNIX )
+                unlink( isp->me.sa_data );
 	}
 
 	/* Free each element in the input request list.  */
@@ -3021,6 +3044,7 @@ snmp_sess_read(void *sessp,
     callback = sp->callback;
     magic = sp->callback_magic;
     fromlength = sizeof from;
+    memset(&from, 0, sizeof(from));
     length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 		      &from, &fromlength);
     if (length == -1) {
