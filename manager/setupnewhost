@@ -33,11 +33,14 @@ die "no group specified" if (!defined($group));
 
 ( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
-$handle = $dbh->prepare("insert into hosttables(host, groupname, tablename, keephistory) values(?, '$group', ?, 0)");
+$hthandle = $dbh->prepare("insert into hosttables(host, groupname, tablename, keephistory) values(?, '$group', ?, 0)");
+$hghandle = $dbh->prepare("insert into hostgroups(host, groupname) values(?, '$group')");
 
 foreach $i (@ARGV) {
+    $hghandle->execute($i)
+	or die "\tConnect not ok: $DBI::errstr\n";
     foreach $j (@tables) {
-	$handle->execute($i, $j)
+	$hthandle->execute($i, $j)
 	    or die "\tConnect not ok: $DBI::errstr\n";
     }
 }
