@@ -1103,6 +1103,7 @@ changequote([, ])
 AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
 changequote(, )
 
+MODULECPP="$CPP -Iagent/mibgroup"
 AC_MSG_CHECKING(for and configuring mib modules pieces to use)
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
@@ -1122,7 +1123,7 @@ while test "x$new_module_list" != "x"; do
 	    fi
 	  done
 	fi
-	new_list="$new_list `grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`"
+	new_list="$new_list `$MODULECPP $srcdir/$mibdir/$i.h | grep config_require | sed 's/.*config_require(\(.*\)).*/\1/'`"
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
 	    do
@@ -1137,7 +1138,7 @@ while test "x$new_module_list" != "x"; do
 	    fi
 	  done
 	fi
-	new_mibs=`grep config_add_mib $srcdir/$mibdir/$i.h | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
+	new_mibs=`$MODULECPP $srcdir/$mibdir/$i.h | grep config_add_mib | sed 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
 		do
@@ -1176,10 +1177,10 @@ while test "x$new_module_list" != "x"; do
 	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
       fi
-      if grep config_load_mib $srcdir/$mibdir/$i.h > /dev/null 2>&1; then
+      if $MODULECPP $srcdir/$mibdir/$i.h | grep config_load_mib > /dev/null 2>&1; then
       	AC_MSG_WARN(mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.)
       fi
-      grep config_parse_dot_conf $srcdir/$mibdir/$i.h | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
+      $MODULECPP $srcdir/$mibdir/$i.h | grep config_parse_dot_conf | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/mib_module_config.h
