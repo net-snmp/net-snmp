@@ -162,19 +162,19 @@
    these: (See README for details) */
 
 /*   proc PROCESSNAME [MAX] [MIN] */
-#define PROCMIBNUM 11
+#define PROCMIBNUM 2
 
 /*   exec/shell NAME COMMAND      */
-#define SHELLMIBNUM 12
+#define SHELLMIBNUM 8
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
 
 /*   disk DISK MINSIZE            */
-#define DISKMIBNUM 13
+#define DISKMIBNUM 9
 
 /*   load 1 5 15                  */
-#define LOADAVEMIBNUM 14
+#define LOADAVEMIBNUM 10
 
 /* which version are you using? This mibloc will tell you */
 #define VERSIONMIBNUM 100
