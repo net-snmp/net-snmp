@@ -45,7 +45,6 @@ struct variable2 extensible_passthru_variables[] = {
   /* bogus entry.  Only some of it is actually used. */
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
-#define BUFMAX 4096
 
 /*  This is also called from pass_persist.c */
 int asc2bin(char *p)
@@ -68,7 +67,7 @@ int asc2bin(char *p)
 int bin2asc(char *p, size_t n)
 {
     int i, flag = 0;
-    char buffer[BUFMAX];
+    char buffer[SNMP_MAXBUF];
 
     for (i = 0; i < (int)n; i++) {
         buffer[i] = p[i];
@@ -176,7 +175,7 @@ u_char *var_extensible_pass(struct variable *vp,
   oid newname[MAX_OID_LEN];
   int i, j, rtest=0, fd, newlen, last;
   static long long_ret;
-  static char buf[BUFMAX], buf2[BUFMAX];
+  static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
   static oid  objid[MAX_OID_LEN];
   struct extensible *passthru;
   FILE *file;
@@ -310,7 +309,7 @@ setPass(int action,
   int i, j, rtest, last;
   struct extensible *passthru;
 
-  static char buf[BUFMAX], buf2[BUFMAX];
+  static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
   static long tmp;
   static unsigned long utmp;
   static size_t itmp;
