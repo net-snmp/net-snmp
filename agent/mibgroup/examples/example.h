@@ -13,7 +13,7 @@
 #ifndef _MIBGROUP_EXAMPLE_H
 #define _MIBGROUP_EXAMPLE_H
 
-config_require(util_funcs);
+config_require(util_funcs)
 
 /* Define all our functions using prototyping for ANSI compilers */
 /* These functions are then defined in the example.c file */

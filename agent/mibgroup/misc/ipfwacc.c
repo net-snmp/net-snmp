@@ -154,11 +154,11 @@ static void getnumeric(int skip)
     ret_val=ret_val*10+rule[i]-'0';
 }
 
-unsigned char * var_ipfwacc(struct variable *vp,
+u_char * var_ipfwacc(struct variable *vp,
 			    oid *name,
-			    int *length,
+			    size_t *length,
 			    int exact,
-			    int *var_len,
+			    size_t *var_len,
 			    WriteMethod **write_method)    
 {
   *write_method = 0;           /* assume it isnt writable for the time being */

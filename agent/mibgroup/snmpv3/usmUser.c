@@ -123,7 +123,7 @@ usm_parse_oid(oid *oidIndex, size_t oidLen,
   int i;
 
   /* first check the validity of the oid */
-  if (oidLen <= 0 || oidIndex < 0) {
+  if ((oidLen <= 0) || (oidIndex < 0)) {
     DEBUGMSGTL(("usmUser","parse_oid: null oid or zero length oid passed in\n"));
     return 1;
   }

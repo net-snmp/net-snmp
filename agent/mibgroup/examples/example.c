@@ -122,9 +122,9 @@ int example_init(void) {
 u_char	*
 var_example(struct variable *vp,
 	    oid *name,
-	    int *length,
+	    size_t *length,
 	    int exact,
-	    int *var_len,
+	    size_t *var_len,
 	    WriteMethod **write_method)
 {
   /* define any variables we might return as static! */
