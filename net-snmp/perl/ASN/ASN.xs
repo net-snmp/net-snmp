@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_impl.h>
 
