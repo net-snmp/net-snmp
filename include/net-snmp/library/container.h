@@ -151,8 +151,11 @@ extern "C" {
        netsnmp_container_rtn   *find_next;
 
        /*
-        * find all entries in the container which match the partial key
-        * returns allocated memory. user must free it when done.
+        * find all entries in the container which match the partial key.
+        * returns allocated memory (netsnmp_void_array). User is responsible
+        * for releasing this memory (free(array->array), free(array)).
+        * DO NOT FREE ELEMENTS OF THE ARRAY, because they are the same pointers
+        * stored in the container.
         */
        netsnmp_container_set            *get_subset;
 
@@ -239,7 +242,10 @@ extern "C" {
 #define CONTAINER_FIND(x,k)         (x)->find(x,k)
 #define CONTAINER_NEXT(x,k)         (x)->find_next(x,k)
 /*
- * GET_SUBSET returns allocated memory. user must free it when done.
+ * GET_SUBSET returns allocated memory (netsnmp_void_array). User is responsible
+ * for releasing this memory (free(array->array), free(array)).
+ * DO NOT FREE ELEMENTS OF THE ARRAY, because they are the same pointers
+ * stored in the container.
  */
 #define CONTAINER_GET_SUBSET(x,k)   (x)->get_subset(x,k)
 #define CONTAINER_SIZE(x)           (x)->get_size(x)
