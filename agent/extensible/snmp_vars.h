@@ -1,5 +1,6 @@
 u_char *var_wes_shell();
 u_char *var_wes_disk();
+u_char *var_wes_version();
 u_char *var_wes_hp();
 u_char *var_wes_lockd_test();
 
