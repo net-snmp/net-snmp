@@ -63,6 +63,21 @@ AC_ARG_ENABLE(silent-libtool,
 	LIBTOOLFLAGS=--silent)
 AC_SUBST(LIBTOOLFLAGS)
 
+AC_ARG_WITH(install-prefix,
+[  --with-install-prefix=PATH      Just for installing, prefix all 
+                                  directories with PATH.  This is known not
+                                  to work on some systems with shared
+                                  libraries (eg, HPUX)],
+      INSTALL_PREFIX="$withval")
+
+if test "x$INSTALL_PREFIX" = "xyes" ; then
+  AC_MSG_ERROR([--with-install-prefix requires an argument])
+fi
+if test "x$INSTALL_PREFIX" = "xno" ; then
+  INSTALL_PREFIX=""
+fi
+AC_SUBST(INSTALL_PREFIX)
+
 AC_ARG_ENABLE(mini_agent,
 [  --enable-mini-agent             Build a minimal agent.],
     mini_agent="yes",mini_agent="no")

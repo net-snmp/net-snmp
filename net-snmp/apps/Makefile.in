@@ -121,8 +121,8 @@ libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION): $(LLIBTRAPD_OBJS)
 	$(RANLIB) libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
 
 snmpinforminstall:
-	rm -f $(bindir)/snmpinform$(EXEEXT)
-	$(LN_S) snmptrap$(EXEEXT) $(bindir)/snmpinform$(EXEEXT)
+	rm -f $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
+	$(LN_S) snmptrap$(EXEEXT) $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
 
 snmpinformuninstall:
-	rm -f $(bindir)/snmpinform$(EXEEXT)
+	rm -f $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
