@@ -100,7 +100,7 @@ init_nsModuleTable(void)
     and return the put_index_data variable at the end of the function.
 */
 typedef struct context_tree_ptr_s {
-    struct subtree *tree;
+    netsnmp_subtree *tree;
     subtree_context_cache *context_ptr;
 } context_tree_ptr;
 
@@ -116,6 +116,9 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
     context_tree_ptr *ctree;
 
     ctree = SNMP_MALLOC_TYPEDEF(context_tree_ptr);
+
+    /*  THIS LEAKS MEMORY. ^^^^^^^^^^^^^^^^^^^^^^^^  */
+
     ctree->context_ptr = get_top_context_cache();
     ctree->tree = ctree->context_ptr->first_subtree;
 
@@ -128,7 +131,7 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
 
     vptr = vptr->next_variable;
     snmp_set_var_value(vptr,
-                       (u_char *) ctree->context_ptr->first_subtree->name,
+                       (u_char *)ctree->context_ptr->first_subtree->name_a,
                        ctree->context_ptr->first_subtree->namelen *
                        sizeof(oid));
 
@@ -175,7 +178,7 @@ nsModuleTable_get_next_data_point(void **my_loop_context,
                        strlen(ctree->context_ptr->context_name));
 
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) ctree->tree->name,
+    snmp_set_var_value(vptr, (u_char *) ctree->tree->name_a,
                        ctree->tree->namelen * sizeof(oid));
 
     ultmp = ctree->tree->priority;
@@ -196,7 +199,7 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
     netsnmp_variable_list *var;
-    struct subtree *tree;
+    netsnmp_subtree *tree;
     u_long          ultmp;
     u_char          modes[1];
 
@@ -218,8 +221,7 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
          * return data for the columns of the nsModuleTable table in
          * question 
          */
-        tree =
-            (struct subtree *) netsnmp_extract_iterator_context(request);
+        tree = (netsnmp_subtree *)netsnmp_extract_iterator_context(request);
         if (tree == NULL) {
             if (reqinfo->mode == MODE_GET) {
                 netsnmp_set_request_error(reqinfo, request,
@@ -259,13 +261,13 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
         case MODE_GET:
             switch (table_info->colnum) {
             case COLUMN_NSMODULENAME:
-                if (tree->reginfo->handlerName)
+		if (tree->reginfo->handlerName) {
                     snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                             tree->reginfo->handlerName,
-                                             strlen(tree->reginfo->
-                                                    handlerName));
-                else
+                                           tree->reginfo->handlerName,
+                                           strlen(tree->reginfo->handlerName));
+                } else {
                     snmp_set_var_typed_value(var, ASN_OCTET_STR, "", 0);
+		}
                 break;
 
             case COLUMN_NSMODULEMODES:
@@ -278,6 +280,7 @@ nsModuleTable_handler(netsnmp_mib_handler *handler,
                                        modes) << 5) | ((HANDLER_CAN_GETBULK
                                                         & tree->reginfo->
                                                         modes) << 3);
+		/*  yuck  */
                 snmp_set_var_typed_value(var, ASN_BIT_STR, modes, 1);
                 break;
 
