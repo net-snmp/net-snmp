@@ -10,6 +10,13 @@
 #include <dmalloc.h>
 #endif
 
+/*
+ * prototypes
+ */
+NETSNMP_INLINE void
+netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node);
+
+
 /** @defgroup data_list generic linked-list data handling with a string as a key.
  * @ingroup library
  * @{
@@ -66,9 +73,8 @@ netsnmp_create_data_list(const char *name, void *data,
     return node;
 }
 
-
 /** adds data to a datalist
- * \deprecated use netsnmp_data_list_add_node instead
+ * @note netsnmp_data_list_add_node is preferred
  * @param head a pointer to the head node of a data_list
  * @param node a node to stash in the data_list
  */
@@ -76,23 +82,7 @@ netsnmp_create_data_list(const char *name, void *data,
 NETSNMP_INLINE void
 netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
 {
-    netsnmp_data_list *ptr;
-    if (!*head) {
-        *head = node;
-        return;
-    }
-
-    /*
-     * xxx-rks: check for duplicate names? 
-     */
-    for (ptr = *head; ptr->next != NULL; ptr = ptr->next) {
-        /*
-         * noop 
-         */
-    }
-
-    if (ptr)                    /* should always be true */
-        ptr->next = node;
+    netsnmp_data_list_add_node(head, node);
 }
 
 /** adds data to a datalist
@@ -102,11 +92,38 @@ netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
 NETSNMP_INLINE void
 netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
 {
-    /*
-     * don't duplicate code. call depreciated function until it is
-     * removed (hah!). it's inline, so there should be no speed hit.
-     */
-    netsnmp_add_list_data(head, node);
+    netsnmp_data_list *ptr;
+
+    netsnmp_assert(NULL != head);
+    netsnmp_assert(NULL != node);
+    netsnmp_assert(NULL != node->name);
+
+    if (!*head) {
+        *head = node;
+        return;
+    }
+
+    DEBUGMSGTL(("data_list","adding key '%s'\n", node->name));
+    if (0 == strcmp(node->name, (*head)->name)) {
+        netsnmp_assert("list key" == "is unique"); /* always fail */
+        snmp_log(LOG_WARNING,
+                 "WARNING: adding duplicate key '%s' to data list\n",
+                 node->name);
+    }
+
+    for (ptr = *head; ptr->next != NULL; ptr = ptr->next) {
+        netsnmp_assert(NULL != ptr->name);
+        if (0 == strcmp(node->name, ptr->name)) {
+            netsnmp_assert("list key" == "is unique"); /* always fail */
+            snmp_log(LOG_WARNING,
+                     "WARNING: adding duplicate key '%s' to data list\n",
+                     node->name);
+        }
+    }
+
+    netsnmp_assert(NULL != ptr);
+    if (ptr)                    /* should always be true */
+        ptr->next = node;
 }
 
 /** adds data to a datalist
@@ -120,29 +137,13 @@ NETSNMP_INLINE netsnmp_data_list *
 netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
                            void *data, Netsnmp_Free_List_Data * beer)
 {
-    netsnmp_data_list *ptr;
     netsnmp_data_list *node = netsnmp_create_data_list(name, data, beer);
     if(NULL == node) {
-        snmp_log(LOG_ERR,"could not allocte memory for node.");
+        snmp_log(LOG_ERR,"could not allocate memory for node.");
         return NULL;
     }
     
-    if (!*head) {
-        *head = node;
-        return node;
-    }
-
-    /*
-     * xxx-rks: check for duplicate names? 
-     */
-    for (ptr = *head; ptr->next != NULL; ptr = ptr->next) {
-        /*
-         * noop 
-         */
-    }
-
-    if (ptr)                    /* should always be true */
-        ptr->next = node;
+    netsnmp_add_list_data(head, node);
 
     return node;
 }
