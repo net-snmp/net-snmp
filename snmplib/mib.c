@@ -242,8 +242,13 @@ void sprint_asciistring(char *buf,
 
     for(x = 0; x < (int)len; x++){
 	if (isprint(*cp)){
-	    if (*cp == '\\' || *cp == '"')
+	    if (*cp == '\\' || *cp == '"') {
+                if (++x >= len) {
+                    *buf = '\0';
+                    return;
+                }
 		*buf++ = '\\';
+            }
 	    *buf++ = *cp++;
 	} else {
 	    *buf++ = '.';
