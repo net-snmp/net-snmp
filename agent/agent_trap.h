@@ -1,6 +1,11 @@
 #ifndef AGENT_TRAP_H
 #define AGENT_TRAP_H
 
+struct agent_add_trap_args {
+   struct snmp_session *ss;
+   int confirm;
+};
+
 void send_easy_trap (int, int);
 void send_trap_pdu(struct snmp_pdu *);
 void send_v2trap ( struct variable_list *);
