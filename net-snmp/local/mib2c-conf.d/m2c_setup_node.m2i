@@ -120,8 +120,6 @@
 ##
 @  end@
 ##
-@eval $m2c_ctx_lh_sfx=""@
-@eval $m2c_ctx_rh_sfx=""@
 ########################################################################
 ## include user overrides
 ########################################################################
@@ -203,3 +201,59 @@
 @if "$m2c_data_context" eq "generated"@
 @   eval $m2c_nvv_sizeof = "$m2c_data_item$node"@
 @end@
+
+########################################################################
+@  ifconf default-node-${node}.m2d@
+@  else@
+@    push@
+@    open default-node-${node}.m2d@
+@    eval $m2c_conf_comment = "##"@
+@    eval $m2c_conf_comment_divider = "########################################################################"@
+$m2c_conf_comment_divider
+$m2c_conf_comment
+$m2c_conf_comment mib2c node setting for $node
+$m2c_conf_comment
+$m2c_conf_comment Remove the '##' comment delimeter to change settings
+$m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment Node declaration type? This is the C type to be used when
+$m2c_conf_comment declaring a variable to hold a value for this column. It
+$m2c_conf_comment is strongly recommended that you do not change this value.
+$m2c_conf_comment If you do, it is likely to break lots of generated code that
+$m2c_conf_comment you will have to fix.
+$m2c_conf_comment
+$m2c_conf_comment @eval $@m2c_decl = $m2c_decl@
+$m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment Generate/use mapping functions? Useful if the MIB defines
+$m2c_conf_comment a different format or enumerations than you data store uses.
+$m2c_conf_comment
+$m2c_conf_comment @eval $@m2c_node_skip_mapping = $m2c_node_skip_mapping@
+$m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment Need a length for the value? Most OCTET-STRING based values will
+$m2c_conf_comment need a length, most other types will not. Do not change this one
+$m2c_conf_comment unless you know what you are doing! You will almost certainly need
+$m2c_conf_comment to fix lots of generated code if you do.
+$m2c_conf_comment
+$m2c_conf_comment @eval $@m2c_node_needlength = $m2c_node_needlength@
+$m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment Skip get? Set this to 1 if you do not want to implement a value
+$m2c_conf_comment for this column.
+$m2c_conf_comment
+$m2c_conf_comment @eval $@m2c_node_skip_get = $m2c_node_skip_get@
+$m2c_conf_comment
+@      if $m2c_node_needlength == 1@
+$m2c_conf_comment_divider
+$m2c_conf_comment Allow realloc when data size exceeds length? If your data
+$m2c_conf_comment store for this node is a pointer allocated with one of the
+$m2c_conf_comment alloc family functions, you can set this to 1 to use realloc
+$m2c_conf_comment when a new value length exceeds the old lenght. If you are
+$m2c_conf_comment using a fixed size buffer, this value should be 0.
+$m2c_conf_comment
+$m2c_conf_comment @eval $@m2c_node_realloc = $m2c_node_realloc@
+@      end@
+@    close default-node-${node}.m2d@
+@    pop@
+@  end@
