@@ -48,6 +48,12 @@
 static struct snmp_gen_callback
                *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 
+/*
+ * extermely simplistic locking, just to find problems were the
+ * callback list is modified while being traversed. Not intended
+ * to do any real protection, or in any way imply that this code
+ * has been evaluated for use in a multi-threaded environment.
+ */
 static int _lock = 0;
 
 
@@ -289,7 +295,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     if(++_lock > 1) {
         snmp_log(LOG_WARNING,
                  "snmp_unregister_callback called while callbacks _locked\n");
-        //netsnmp_assert(1==_lock);
+        /** netsnmp_assert(1==_lock); * xxx-rks: this gets hit at shutdown. */
     }
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
