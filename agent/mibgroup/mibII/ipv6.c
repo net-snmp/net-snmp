@@ -1159,7 +1159,7 @@ var_udp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_laddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_lport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 
@@ -1229,7 +1229,7 @@ DEBUGP("var_udp6 new: %d %d %s %d\n", (int)vp->namelen, j, c_oid, exact);
 	return (u_char *)&long_return;
     case IPV6UDPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
@@ -1340,7 +1340,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_faddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_fport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcp6statemap[tcp6cb.t_state];
@@ -1423,7 +1423,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	return (u_char *)&long_return;
     case IPV6TCPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
@@ -1537,7 +1537,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_faddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_fport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcpstatemap[tcpcb.t_state];
@@ -1617,7 +1617,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	return (u_char *)&long_return;
     case IPV6TCPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
