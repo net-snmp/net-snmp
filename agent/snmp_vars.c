@@ -197,6 +197,9 @@ init_snmp __P((void))
   setup_tree();
 #include "mibgroup/mib_module_inits.h"
   init_read_config();
+#ifdef TESTING
+  auto_nlist_print_tree(-2,0);
+#endif
 }
 
 #ifdef CAN_USE_NLIST
