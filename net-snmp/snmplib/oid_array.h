@@ -60,7 +60,7 @@ extern          "C" {
      * since I didn't want to re-write qsort and such, your data
      * structure must start with this header. (Ok, not really, but
      * the first two elements of your data structure better be a
-     * pointer to the index oid and the lenght of the index!)
+     * pointer to the index oid and the length of the index!)
      */
     typedef struct oid_array_header_s {
         oid            *idx;
@@ -76,7 +76,7 @@ extern          "C" {
     typedef void    (ForEach) (oid_array_header *, void *context);
 
     /*
-     * compare to entries. Nothing fancy, just a wrapper around
+     * compare two entries. Nothing fancy, just a wrapper around
      * snmp_oid_compare.
      */
     int             array_compare(const void *lhs, const void *rhs);
@@ -110,6 +110,22 @@ extern          "C" {
      * and the re-add the entry.
      */
     void           *Get_oid_data(oid_array a, void *, int exact);
+
+    /*
+     * find entries in the array with the same index prefix
+     *
+     * Upon return, *len will contain the number of entries found.
+     *
+     * Note: caller is responsible for calling free() on the
+     * pointer returned by this function.
+     */
+    void          **Get_oid_data_subset(oid_array a, void *key, int * len);
+
+    /*
+     * find the number of entries in the array
+     *
+     */
+    int            Get_oid_data_count(oid_array a);
 
     /*
      * remove an entry
