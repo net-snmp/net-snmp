@@ -47,3 +47,11 @@
 @   eval $m2c_const_sfx = ""@        # or ";"
 @end@
 ##
+
+@eval $mfd_default_include_examples = 1@
+@eval $mfd_default_table_access = "unsorted-external"@
+@eval $mfd_default_data_context = "generated"@
+@eval $mfd_default_context_reg = "netsnmp_data_list *"@
+@eval $mfd_default_data_allocate = 0@
+@eval $mfd_default_data_init = 0@
+@eval $mfd_default_data_transient = 2@ # TRANSIENT
