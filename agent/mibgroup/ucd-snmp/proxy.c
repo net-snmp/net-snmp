@@ -243,8 +243,19 @@ proxy_handler(netsnmp_mib_handler *handler,
         pdu = snmp_pdu_create(SNMP_MSG_SET);
         break;
 
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_FREE:
+    case MODE_SET_ACTION:
+    case MODE_SET_UNDO:
+        /*
+         *  Nothing to do in this pass
+         */
+        return SNMP_ERR_NOERROR;
+
     default:
-        snmp_log(LOG_WARNING, "unsupported mode for proxy called\n");
+        snmp_log(LOG_WARNING, "unsupported mode for proxy called (%d)\n",
+                               reqinfo->mode);
         return SNMP_ERR_NOERROR;
     }
 
