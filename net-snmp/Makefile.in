@@ -37,6 +37,7 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 #
 # yes, order matters here.  default_store must occur before anything else
 PERLMODULES=default_store SNMP ASN OID agent
+PERLARGS=@PERLARGS@
 
 #
 # libtool
@@ -132,7 +133,7 @@ perlmakefiles:
 	@if test ! -f perl/Makefile; then \
 	  (dir=`pwd`; \
 	   cd perl ; \
-	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config") ; \
+	   perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config") $(PERLARGS) ; \
         fi
 
 perlinstall:
