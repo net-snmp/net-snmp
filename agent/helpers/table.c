@@ -92,7 +92,7 @@ inline netsnmp_table_request_info *
 netsnmp_extract_table_info(netsnmp_request_info * request)
 {
     return (netsnmp_table_request_info *)
-        netsnmp_request_netsnmp_get_list_data(request, TABLE_HANDLER_NAME);
+        netsnmp_request_get_list_data(request, TABLE_HANDLER_NAME);
 }
 
 /** extracts the registered netsnmp_table_registration_info object from a
@@ -147,7 +147,7 @@ table_helper_handler(netsnmp_mib_handler * handler,
      * at a time... those handlers should not save data by their handler_name
      * in the netsnmp_agent_request_info. 
      */
-    if (netsnmp_agent_netsnmp_get_list_data(reqinfo,handler->next->handler_name)) {
+    if (netsnmp_agent_get_list_data(reqinfo,handler->next->handler_name)) {
         if (MODE_IS_SET(reqinfo->mode)) {
             return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         } else {
@@ -255,10 +255,10 @@ table_helper_handler(netsnmp_mib_handler * handler,
         tbl_req_info->reg_info = tbl_info;
         tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
         tbl_req_info->number_indexes = 0;       /* none yet */
-        netsnmp_request_netsnmp_add_list_data(request,
-                              netsnmp_create_netsnmp_data_list(TABLE_HANDLER_NAME,
-                                               (void *) tbl_req_info,
-                                               table_data_free_func));
+        netsnmp_request_add_list_data(request,
+                                      netsnmp_create_data_list(TABLE_HANDLER_NAME,
+                                                               (void *) tbl_req_info,
+                                                               table_data_free_func));
 
         if (var->name_length > oid_column_pos) {
             if (var->name[oid_column_pos] < tbl_info->min_column) {
@@ -706,3 +706,30 @@ netsnmp_table_helper_add_indexes(va_alist)
 
   va_end(debugargs);
 }
+
+/** returns a row-wide place to store data in.
+    @todo This function will likely change to add free pointer functions. */
+netsnmp_oid_stash_node **
+netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
+                                      const u_char *storage_name) 
+{
+    netsnmp_oid_stash_node **stashp = NULL;
+    stashp = (netsnmp_oid_stash_node **)
+        netsnmp_agent_get_list_data(reqinfo, storage_name);
+
+    if (!stashp) {
+        /* hasn't be created yet.  we create it here. */
+        stashp = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node *);
+
+        if (!stashp)
+            return NULL; /* ack. out of mem */
+        
+        netsnmp_agent_add_list_data(reqinfo,
+                                    /* XXX: free: wrong */
+                                    netsnmp_create_data_list(storage_name,
+                                                             stashp,
+                                                             free));
+    }
+    return stashp;
+}
+

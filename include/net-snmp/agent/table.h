@@ -99,6 +99,9 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request, oid *prefix,
                     netsnmp_variable_list **outvar);
 
 netsnmp_table_request_info *netsnmp_extract_table_info(netsnmp_request_info *);
+netsnmp_oid_stash_node **
+netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
+                                      const u_char *storage_name);
 
 
 #define NETSNMP_ROWSTATUS_DECLARE long *rs = NULL; netsnmp_request_info *rsi = NULL

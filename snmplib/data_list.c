@@ -45,7 +45,7 @@ netsnmp_free_all_list_data(netsnmp_data_list *head)
 }
 
 inline netsnmp_data_list *
-netsnmp_create_netsnmp_data_list(const char *name, void *data,
+netsnmp_create_data_list(const char *name, void *data,
                          Netsnmp_Free_List_Data *beer)
 {
     netsnmp_data_list *node = SNMP_MALLOC_TYPEDEF(netsnmp_data_list);

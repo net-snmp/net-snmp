@@ -99,7 +99,7 @@ find_table_array_handler(netsnmp_handler_registration *reginfo)
 oid_array *
 netsnmp_extract_array_context(netsnmp_request_info *request) 
 {
-    return netsnmp_request_netsnmp_get_list_data(request, TABLE_ARRAY_NAME);
+    return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
 const netsnmp_oid_array_header*
@@ -682,7 +682,7 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
     /*
      * create and save structure for set info
      */
-    netsnmp_array_group_tbl = (oid_array)netsnmp_agent_netsnmp_get_list_data
+    netsnmp_array_group_tbl = (oid_array)netsnmp_agent_get_list_data
         (agtreq_info, handler_name);
     if(netsnmp_array_group_tbl == NULL) {
         netsnmp_data_list *tmp;
@@ -690,10 +690,10 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
 
         DEBUGMSGTL(("helper:table_array", "Grouping requests by oid\n"));
 
-        tmp = netsnmp_create_netsnmp_data_list(handler_name,
+        tmp = netsnmp_create_data_list(handler_name,
                                netsnmp_array_group_tbl,
                                release_netsnmp_array_groups);
-        netsnmp_agent_netsnmp_add_list_data(agtreq_info, tmp);
+        netsnmp_agent_add_list_data(agtreq_info, tmp);
         /*
          * group requests.
          */

@@ -312,7 +312,7 @@ void
 nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration *reginfo
     CODE:
-	snmp_netsnmp_handler_registration_free(reginfo);
+	netsnmp_handler_registration_free(reginfo);
 
 int
 nsahr_register(reginfo)

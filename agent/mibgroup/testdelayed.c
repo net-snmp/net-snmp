@@ -138,8 +138,8 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
                 netsnmp_free_delegated_cache(cache);
                 return;
             }
-            netsnmp_request_netsnmp_add_list_data(requests,
-                                  netsnmp_create_netsnmp_data_list(TESTDELAYED_SET_NAME,
+            netsnmp_request_add_list_data(requests,
+                                  netsnmp_create_data_list(TESTDELAYED_SET_NAME,
                                                    sleeptime_cache, free));
             break;
 
@@ -151,7 +151,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
             
         case MODE_SET_UNDO:
             sleeptime =
-                *((u_long *) netsnmp_request_netsnmp_get_list_data(requests,
+                *((u_long *) netsnmp_request_get_list_data(requests,
                                                    TESTDELAYED_SET_NAME));
             break;
             
