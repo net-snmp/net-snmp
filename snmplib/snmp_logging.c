@@ -99,13 +99,20 @@ snmp_disable_syslog(void) {
 void
 snmp_disable_filelog(void) {
   if (do_filelogging)
+  {
+    fputs("\n",logfile);
     fclose(logfile);
+  }
   do_filelogging=0;
 }
 
 
 void
 snmp_disable_stderrlog(void) {
+  if (do_stderrlogging)
+  {
+    fputs("\n",stderr);
+  }
   do_stderrlogging=0;
 }
 
