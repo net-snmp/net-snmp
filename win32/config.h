@@ -235,9 +235,6 @@
 /* Define if you have the strchr function.  */
 #define HAVE_STRCHR 1
 
-/* Define if you do not have strcasecmp */
-#define strcasecmp _stricmp
-
 /* use win32 strdup */
 #define strdup _strdup
 
@@ -798,11 +795,17 @@
 #endif
 
 #ifdef WIN32
+
+int strcasecmp(const char *s1, const char *s2);
+
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
+
 #else
+
 #define ENV_SEPARATOR ":"
 #define ENV_SEPARATOR_CHAR ':'
+
 #endif
 
 typedef int mode_t;
