@@ -109,6 +109,7 @@ close_agentx_session(struct snmp_session *session, int sessid)
         if ( sp->sessid == sessid ) {
 
 	    unregister_mibs_by_session( sp );
+	    unregister_index_by_session( sp );
 	    unregister_sysORTable_by_session( sp );
 	    if ( prev )
 	        prev->next = sp->next;
