@@ -132,6 +132,11 @@ sub initMib {
 # if Mib is already loaded this function does nothing
 # Pass a zero valued argument to get minimal mib tree initialzation
 # If non zero agrgument or no argument then full mib initialization
+
+# XXX: this function is no longer needed but kept for legacy.
+# support backwards compatibility better
+    return;
+
   if (defined $_[0] and $_[0] == 0) {
     SNMP::_init_mib_internals();
   } else {
