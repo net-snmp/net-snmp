@@ -100,9 +100,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#if HAVE_KVM_H
-#include <kvm.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
