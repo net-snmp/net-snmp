@@ -4,6 +4,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 *4.2.4*
  New:
     - badCommunityNames and badCommunityUses Counters supported.
+    - tcp_wrappers support for snmptrapd.
 
  Bug fixes:
     - A security issue involving the snmpnetstat command accepting
