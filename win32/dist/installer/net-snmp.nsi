@@ -296,7 +296,7 @@ Function CreateSnmpConf
   
   ; Set the conf path
   Push "SNMPCONFPATH"
-  Push "$R0/etc/snmp:$R0/snmp/persist"
+  Push "$R0/etc/snmp"
   Call WriteEnvStr
   
   Push "SNMPSHAREPATH"
