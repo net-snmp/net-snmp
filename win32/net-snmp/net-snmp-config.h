@@ -4,7 +4,7 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
-#define INSTALL_BASE "c:/Program Files/Net-SNMP"
+#define INSTALL_BASE "c:/usr"
 
 /* config.h:  a general config file */
 

@@ -9,7 +9,7 @@ REM The value for INSTALL_BASE in win32\net-snmp\net-snmp-config.h, and
 REM The value for INSTALL_BASE below **MUST** match
 
 REM Use backslashes to delimit sub-directories in path.
-set INSTALL_BASE="c:\Program Files\Net-SNMP"
+set INSTALL_BASE="c:\usr"
 
 if "%1" == "-?" goto help
 if "%1" == "/?" goto help

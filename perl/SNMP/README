@@ -228,7 +228,7 @@ Manual building / testing:
             library files from the installed Net-SNMP directory.  To specify the
             installed Net-SNMP directory, use:
 
-            perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=c:\Program Files\Net-SNMP
+            perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH="c:\usr"
 
             Note: -NET-SNMP-DEBUG has no effect while compiling against an 
                   installed copy of Net-SNMP.
@@ -236,7 +236,7 @@ Manual building / testing:
       Note: To include OpenSSL, see the net-snmp/README.win32 to compile 
             libsnmp with libeay32 and see that libeay.lib is in the lib folder,
             or in the lib folder of the installed Net-SNMP if using 
-            -NET-SNMP-PATH.  For example, c:\Program Files\Net-SNMP\lib
+            -NET-SNMP-PATH.  For example, c:\usr\lib
 
 Note:  'nmake test' will automatically start and stop the agent(snmpd) and trap 
        receiver (snmptrapd) while testing the SNMP module.  
