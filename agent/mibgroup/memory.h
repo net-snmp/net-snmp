@@ -27,7 +27,10 @@ config_parse_dot_conf("swap", memory_parse_config, memory_free_config);
 #define MEMUSEDREALTXT 10
 #define MEMTOTALFREE 11
 #define MEMSWAPMINIMUM 12
-#define MEMSWAPERROR 13
+#define MEMSHARED 13
+#define MEMBUFFER 14
+#define MEMCACHED 15
+#define MEMSWAPERROR 16
 
 #ifdef IN_SNMP_VARS_C
 
@@ -43,6 +46,9 @@ struct variable2 extensible_mem_variables[] = {
   {MEMTOTALREALTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALREALTXT}},
   {MEMUSEDREALTXT, INTEGER, RONLY, var_extensible_mem, 1, {MEMUSEDREALTXT}},
   {MEMTOTALFREE, INTEGER, RONLY, var_extensible_mem, 1, {MEMTOTALFREE}},
+  {MEMSHARED, INTEGER, RONLY, var_extensible_mem, 1, {MEMSHARED}},
+  {MEMBUFFER, INTEGER, RONLY, var_extensible_mem, 1, {MEMBUFFER}},
+  {MEMCACHED, INTEGER, RONLY, var_extensible_mem, 1, {MEMCACHED}},
   {ERRORFLAG, INTEGER, RONLY, var_extensible_mem, 1, {ERRORFLAG }},
   {ERRORMSG, STRING, RONLY, var_extensible_mem, 1, {ERRORMSG }}
 };
