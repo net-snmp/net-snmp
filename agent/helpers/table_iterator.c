@@ -83,12 +83,6 @@
 #include <dmalloc.h>
 #endif
 
-/*
- * doesn't work yet, but shouldn't be serialized (for efficiency) 
- */
-#undef NOT_SERIALIZED
-#define TABLE_ITERATOR_LAST_CONTEXT "ti_last_c"
-
 /** returns a netsnmp_mib_handler object for the table_iterator helper */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
@@ -128,24 +122,103 @@ netsnmp_extract_iterator_context(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
+#define TI_REQUEST_CACHE "ti_cache"
+
+typedef struct ti_cache_info_s {
+   oid best_match[MAX_OID_LEN];
+   size_t best_match_len;
+   void *data_context;
+   Netsnmp_Free_Data_Context *free_context;
+   netsnmp_iterator_info *iinfo;
+   netsnmp_variable_list *results;
+} ti_cache_info;
+
+static void
+netsnmp_free_ti_cache(void *it) {
+    ti_cache_info *beer = it;
+    if (beer->data_context && beer->free_context) {
+            (beer->free_context)(beer->data_context, beer->iinfo);
+    }
+    if (beer->results) {
+        snmp_free_varbind(beer->results);
+    }
+    free(beer);
+}
+
+/* caches information (in the request) we'll need at a later point in time */
+static ti_cache_info *
+netsnmp_iterator_remember(netsnmp_request_info *request,
+                          oid *oid_to_save,
+                          size_t oid_to_save_len,
+                          void *callback_data_context,
+                          void *callback_loop_context,
+                          netsnmp_iterator_info *iinfo)
+{
+    ti_cache_info *ti_info;
+
+    if (!request || !oid_to_save || oid_to_save_len > MAX_OID_LEN)
+        return NULL;
+
+    /* extract existing cached state */
+    ti_info = netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+
+    /* no existing cached state.  make a new one. */
+    if (!ti_info) {
+        ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+        netsnmp_request_add_list_data(request,
+                                      netsnmp_create_data_list
+                                      (TI_REQUEST_CACHE,
+                                       ti_info,
+                                       netsnmp_free_ti_cache));
+    }
+
+    /* free existing cache before replacing */
+    if (ti_info->data_context && ti_info->free_context)
+        (ti_info->free_context)(ti_info->data_context, iinfo);
+
+    /* maybe generate it from the loop context? */
+    if (iinfo->make_data_context && !callback_data_context) {
+        callback_data_context =
+            (iinfo->make_data_context)(callback_loop_context, iinfo);
+
+    }
+
+    /* save data as requested */
+    ti_info->data_context = callback_data_context;
+    ti_info->free_context = iinfo->free_data_context;
+    ti_info->best_match_len = oid_to_save_len;
+    ti_info->iinfo = iinfo;
+    if (oid_to_save_len)
+        memcpy(ti_info->best_match, oid_to_save, oid_to_save_len * sizeof(oid));
+
+    return ti_info;
+}    
+
 /** implements the table_iterator helper */
 int
 netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
-                                      netsnmp_handler_registration
-                                      *reginfo,
+                                      netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info *reqinfo,
                                       netsnmp_request_info *requests)
 {
 
     netsnmp_table_registration_info *tbl_info;
+    netsnmp_table_request_info *table_info = NULL;
     oid             coloid[MAX_OID_LEN];
     size_t          coloid_len;
     int             ret;
     static oid      myname[MAX_OID_LEN];
     static int      myname_len;
-    int             oldmode;
+    int             oldmode = 0;
     netsnmp_iterator_info *iinfo;
-
+    int notdone;
+    netsnmp_request_info *request;
+    netsnmp_variable_list *index_search = NULL;
+    netsnmp_variable_list *free_this_index_search = NULL;
+    void           *callback_loop_context = NULL;
+    void           *callback_data_context = NULL;
+    ti_cache_info *ti_info = NULL;
+    
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
         return SNMPERR_GENERR;
@@ -169,399 +242,260 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
+    /* preliminary analysis */
+    if (reqinfo->mode == MODE_GETNEXT) {
+        for(request = requests ; request; request = request->next) {
+            if (request->processed)
+                continue;
+            table_info = netsnmp_extract_table_info(request);
+            if (table_info->colnum < tbl_info->min_column - 1) {
+                /* XXX: optimize better than this */
+                /* for now, just increase to colnum-1 */
+                /* we need to jump to the lowest result of the min_column
+                   and take it, comparing to nothing from the request */
+                table_info->colnum = tbl_info->min_column - 1;
+            } else if (table_info->colnum > tbl_info->max_column) {
+                request->processed = 1;
+            }
+
+            ti_info =
+                netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+            if (!ti_info) {
+                ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
+                netsnmp_request_add_list_data(request,
+                                              netsnmp_create_data_list
+                                              (TI_REQUEST_CACHE,
+                                               ti_info,
+                                               netsnmp_free_ti_cache));
+            }
+
+            /* XXX: if no valid requests, don't even loop below */
+        }
+    }
+
     /*
-     * XXXWWW: deal with SET caching 
+     * collect all information for each needed row
      */
+    if (reqinfo->mode == MODE_GET ||
+        reqinfo->mode == MODE_GETNEXT ||
+        reqinfo->mode == MODE_SET_RESERVE1) {
+        notdone = 1;
+        while(notdone) {
+            notdone = 0;
 
-#ifdef NOT_SERIALIZED
-    while (requests)            /* XXX: currently only serialized */
-#endif
-    {
-        /*
-         * XXXWWW: optimize by reversing loops (look through data only once) 
-         */
-        netsnmp_variable_list *results = NULL;
-        netsnmp_variable_list *index_search = NULL;     /* WWW: move up? */
-        netsnmp_variable_list *free_this_index_search = NULL;
-        netsnmp_table_request_info *table_info =
-            netsnmp_extract_table_info(requests);
-        void           *callback_loop_context = NULL;
-        void           *callback_data_context = NULL;
-        void           *callback_data_keep = NULL;
+            /* find first data point */
+            if (!index_search) {
+                /* XXXWWW: does only using the first have ramifications? */
+                table_info = netsnmp_extract_table_info(requests);
+                index_search = snmp_clone_varbind(table_info->indexes);
+                free_this_index_search = index_search;
 
-        if (requests->processed != 0) {
-#ifdef NOT_SERIALIZED
-            continue;
-#else
-            return SNMP_ERR_NOERROR;
-#endif
-        }
+                /* setup, malloc search data: */
+                if (!index_search) {
+                    /*
+                     * hmmm....  invalid table? 
+                     */
+                    snmp_log(LOG_WARNING,
+                             "invalid index list or failed malloc for table %s\n",
+                             reginfo->handlerName);
+                    return SNMP_ERR_NOERROR;
+                }
+            }
 
-        if (reqinfo->mode != MODE_GET && reqinfo->mode != MODE_GETNEXT && reqinfo->mode != MODE_GETBULK &&      /* XXX */
-            reqinfo->mode != MODE_SET_RESERVE1) {
-            goto skip_processing;
-        }
-
-
-        if (table_info->colnum > tbl_info->max_column) {
-            requests->processed = 1;
-#ifdef NOT_SERIALIZED
-            break;
-#else
-            return SNMP_ERR_NOERROR;
-#endif
-        }
-
-        /*
-         * XXX: if loop through everything, these are never free'd
-         * since iterator returns NULL and thus we forget about
-         * these 
-         */
-
-        index_search = snmp_clone_varbind(table_info->indexes);
-        if (!index_search) {
-            /*
-             * hmmm....  invalid table? 
-             */
-            snmp_log(LOG_WARNING,
-                     "invalid index list or failed malloc for table %s\n",
-                     reginfo->handlerName);
-            return SNMP_ERR_NOERROR;
-        }
-
-        free_this_index_search = index_search;
-
-        /*
-         * below our minimum column? 
-         */
-        if (table_info->colnum < tbl_info->min_column) {
-            results =
+            index_search =
                 (iinfo->get_first_data_point) (&callback_loop_context,
                                                &callback_data_context,
                                                index_search, iinfo);
-            if (iinfo->free_loop_context) {
-                (iinfo->free_loop_context) (callback_loop_context, iinfo);
-		callback_loop_context = NULL;
-	    }
-            goto got_results;
-        }
 
-        /*
-         * XXX: do "only got some indexes" 
-         */
+            /* loop over each data point */
+            while(index_search) {
 
-        /*
-         * find the next legal result to return 
-         */
-        /*
-         * find the first node 
-         */
-        index_search =
-            (iinfo->get_first_data_point) (&callback_loop_context,
-                                           &callback_data_context,
-                                           index_search, iinfo);
-        /*
-         * table.entry.column node 
-         */
-        coloid[reginfo->rootoid_len + 1] = table_info->colnum;
+                /* remember to free this later */
+                free_this_index_search = index_search;
+            
+                /* compare against each request*/
+                for(request = requests ; request; request = request->next) {
+                    if (request->processed)
+                        continue;
 
-        switch (reqinfo->mode) {
-        case MODE_GETNEXT:
-        case MODE_GETBULK:     /* XXXWWW */
-            /*
-             * loop through all data and find next one 
-             */
-            while (index_search) {
-                /*
-                 * compare the node with previous results 
-                 */
-                if (netsnmp_check_getnext_reply
-                    (requests, coloid, coloid_len, index_search,
-                     &results)) {
-
-                    /*
-                     * result is our current choice, so keep a pointer to
-                     * the data that the lower handler wants us to
-                     * remember (possibly freeing the last known "good"
-                     * result data pointer) 
-                     */
-                    if (callback_data_keep && iinfo->free_data_context) {
-                        (iinfo->free_data_context) (callback_data_keep,
-                                                    iinfo);
-                        callback_data_keep = NULL;
-                    }
-                    if (iinfo->make_data_context && !callback_data_context) {
-                        callback_data_context =
-                            (iinfo->
-                             make_data_context) (callback_loop_context,
-                                                 iinfo);
-
-                    }
-                    callback_data_keep = callback_data_context;
-                    callback_data_context = NULL;
-                } else {
-                    if (callback_data_context && iinfo->free_data_context)
-                        (iinfo->free_data_context) (callback_data_context,
-                                                    iinfo);
-                    callback_data_context = NULL;
-                }
-
-                /*
-                 * get the next node in the data chain 
-                 */
-                index_search =
-                    (iinfo->get_next_data_point) (&callback_loop_context,
-                                                  &callback_data_context,
-                                                  index_search, iinfo);
-
-                if (!index_search && !results &&
-                    tbl_info->max_column > table_info->colnum) {
-                    /*
-                     * restart loop.  XXX: Should cache this better 
-                     */
-                    table_info->colnum++;
+                    table_info = netsnmp_extract_table_info(request);
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
-                    if (free_this_index_search != NULL)
-                        snmp_free_varbind(free_this_index_search);
-                    index_search = snmp_clone_varbind(table_info->indexes);
-		    free_this_index_search = index_search;
 
-                    if (callback_loop_context &&
-                        iinfo->free_loop_context_at_end) {
-                        (iinfo->free_loop_context_at_end)(callback_loop_context,
-                                                          iinfo);
-                        callback_loop_context = NULL;
+                    ti_info =
+                        netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+
+                    switch(reqinfo->mode) {
+                    case MODE_GET:
+                    case MODE_SET_RESERVE1:
+                        /* looking for exact matches */
+                        build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
+                                          coloid, coloid_len, index_search);
+                        if (snmp_oid_compare(myname, myname_len,
+                                             request->requestvb->name,
+                                             request->requestvb->name_length) == 0) {
+                            /* keep this */
+                            netsnmp_iterator_remember(request,
+                                                      myname, myname_len,
+                                                      callback_data_context,
+                                                      callback_loop_context, iinfo);
+                        } else {
+                            if (iinfo->free_data_context && callback_data_context) {
+                                (iinfo->free_data_context)(callback_data_context,
+                                                           iinfo);
+                            }
+                        }
+                        break;
+
+                    case MODE_GETNEXT:
+                        /* looking for "next" matches */
+                        coloid[reginfo->rootoid_len + 1] = table_info->colnum;
+                        if (netsnmp_check_getnext_reply
+                            (request, coloid, coloid_len, index_search,
+                             &ti_info->results)) {
+                            netsnmp_iterator_remember(request,
+                                                      ti_info->results->name,
+                                                      ti_info->results->name_length,
+                                                      callback_data_context,
+                                                      callback_loop_context, iinfo);
+                        
+                        } else {
+                            if (iinfo->free_data_context && callback_data_context) {
+                                (iinfo->free_data_context)(callback_data_context,
+                                                           iinfo);
+                            }
+                        }
+                        break;
+
+                    case MODE_SET_RESERVE2:
+                    case MODE_SET_FREE:
+                    case MODE_SET_UNDO:
+                    case MODE_SET_COMMIT:
+                        /* needed processing already done in RESERVE1 */
+                        break;
+
+                    default:
+                        snmp_log(LOG_ERR,
+                                 "table_iterator called with unsupported mode\n");
+                        break;  /* XXX return */
+                
                     }
-                    if (iinfo->free_loop_context && callback_loop_context) {
-                        (iinfo->free_loop_context) (callback_loop_context,
-                                                    iinfo);
-                        callback_loop_context = NULL;
-                    }
-                    if (callback_data_context && iinfo->free_data_context) {
-                        (iinfo->free_data_context) (callback_data_context,
-                                                    iinfo);
-                        callback_data_context = NULL;
-                    }
-                    
-                    index_search =
-                        (iinfo->
-                         get_first_data_point) (&callback_loop_context,
-                                                &callback_data_context,
-                                                index_search, iinfo);
-                }
-            }
-
-            break;
-
-        case MODE_GET:
-        case MODE_SET_RESERVE1:
-            /*
-             * loop through all data till exact results are found 
-             */
-
-            while (index_search) {
-                build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
-                                  coloid, coloid_len, index_search);
-                if (snmp_oid_compare(myname, myname_len,
-                                     requests->requestvb->name,
-                                     requests->requestvb->name_length) ==
-                    0) {
-                    /*
-                     * found the exact match, so we're done 
-                     */
-                    if (iinfo->make_data_context && !callback_data_context) {
-                        callback_data_context =
-                            (iinfo->
-                             make_data_context) (callback_loop_context,
-                                                 iinfo);
-
-                    }
-                    callback_data_keep = callback_data_context;
-                    callback_data_context = NULL;
-                    results = snmp_clone_varbind(index_search);
-                    snmp_set_var_objid(results, myname, myname_len);
-                    goto got_results;
-                } else {
-                    /*
-                     * free not-needed data context 
-                     */
-                    if (callback_data_context && iinfo->free_data_context) {
-                        (iinfo->free_data_context) (callback_data_context,
-                                                    iinfo);
-                        callback_data_context = NULL;
-                    }
-
                 }
 
-                /*
-                 * get the next node in the data chain 
-                 */
+                /* get the next search possibility */
+                if (iinfo->free_loop_context) {
+                    (iinfo->free_loop_context) (callback_loop_context, iinfo);
+                    callback_loop_context = NULL;
+                }
                 index_search =
                     (iinfo->get_next_data_point) (&callback_loop_context,
                                                   &callback_data_context,
                                                   index_search, iinfo);
             }
-            break;
 
-        default:
-            /*
-             * the rest of the set states have been dealt with already 
-             */
-            goto got_results;
-        }
-
-        /*
-         * XXX: free index_search? 
-         */
-        if (callback_loop_context && iinfo->free_loop_context) {
-            (iinfo->free_loop_context) (callback_loop_context, iinfo);
-            callback_loop_context = NULL;
-        }
-
-      got_results:             /* not milk */
-   
-       /*
-        * This free_data_context call is required in the event that your
-        * get_next_data_point method allocates new memory, even during the
-        * calls where it eventually returns a NULL
-        */
-        if (callback_data_context && iinfo->free_data_context) {
-               (iinfo->free_data_context) (callback_data_context,
-                                           iinfo);
-               callback_data_context = NULL;
-        }
-
-        if (!results && !MODE_IS_SET(reqinfo->mode)) {
-            /*
-             * no results found. 
-             */
-            /*
-             * XXX: check for at least one entry at the very top 
-             */
-#ifdef NOT_SERIALIZED
-            break;
-#else
+            /* free loop context before going on */
             if (callback_loop_context && iinfo->free_loop_context_at_end) {
                 (iinfo->free_loop_context_at_end) (callback_loop_context,
                                                    iinfo);
-		callback_loop_context = NULL;
-	    }
-            if (free_this_index_search != NULL) {
-                snmp_free_varbind(free_this_index_search);
+                callback_loop_context = NULL;
             }
-            return SNMP_ERR_NOERROR;
-#endif
-        }
 
-      skip_processing:
-        /*
-         * OK, here results should be a pointer to the data that we
-         * actually need to GET 
-         */
+            /* decide which (GETNEXT) requests are not yet filled */
+            if (reqinfo->mode == MODE_GETNEXT) {
+                for(request = requests ; request; request = request->next) {
+                    if (request->processed)
+                        continue;
+                    if (!ti_info->results) {
+                        if (table_info->colnum == tbl_info->max_column) {
+                            requests->processed = 1;
+                            break;
+                        } else {
+                            table_info->colnum++;
+                            notdone = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (reqinfo->mode == MODE_GET ||
+        reqinfo->mode == MODE_GETNEXT ||
+        reqinfo->mode == MODE_SET_RESERVE1) {
+        /* per request last minute processing */
+        for(request = requests ; request; request = request->next) {
+            if (request->processed)
+                continue;
+            ti_info =
+                netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+            table_info =
+                netsnmp_extract_table_info(request);
+
+            if (!ti_info)
+                continue;
+        
+            switch(reqinfo->mode) {
+
+            case MODE_GETNEXT:
+                snmp_set_var_objid(request->requestvb, ti_info->best_match,
+                                   ti_info->best_match_len);
+                snmp_free_varbind(table_info->indexes);
+                table_info->indexes = snmp_clone_varbind(ti_info->results);
+                /* FALL THROUGH */
+
+            case MODE_GET:
+            case MODE_SET_RESERVE1:
+                if (ti_info->data_context)
+                    /* we don't add a free pointer, since it's in the
+                       TI_REQUEST_CACHE instead */
+                    netsnmp_request_add_list_data(request,
+                                                  netsnmp_create_data_list
+                                                  (TABLE_ITERATOR_NAME,
+                                                   ti_info->data_context,
+                                                   NULL));
+                break;
+            
+            default:
+                break;
+            }
+        }
+            
+        /* we change all GETNEXT operations into GET operations.
+           why? because we're just so nice to the lower levels.
+           maybe someday they'll pay us for it.  doubtful though. */
         oldmode = reqinfo->mode;
-        if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {   /* XXX */
-            snmp_set_var_objid(requests->requestvb, results->name,
-                               results->name_length);
-            snmp_free_varbind(table_info->indexes);
-            table_info->indexes = snmp_clone_varbind(results);
+        if (reqinfo->mode == MODE_GETNEXT) {
             reqinfo->mode = MODE_GET;
         }
-        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK ||      /* XXX */
-            reqinfo->mode == MODE_SET_RESERVE1) {
-            /*
-             * first (or only) pass stuff 
-             */
-            /*
-             * let set requsets use previously constructed data 
-             */
-            snmp_free_varbind(results);
-            if (callback_data_keep)
-                netsnmp_request_add_list_data(requests,
-                                              netsnmp_create_data_list
-                                              (TABLE_ITERATOR_NAME,
-                                               callback_data_keep, NULL));
-            netsnmp_request_add_list_data(requests,
-                                          netsnmp_create_data_list
-                                          (TABLE_ITERATOR_LAST_CONTEXT,
-                                           callback_loop_context, NULL));
-        }
+    }
 
-        DEBUGMSGTL(("table_iterator", "doing mode: %s\n",
-                    se_find_label_in_slist("agent_mode", oldmode)));
-        ret =
-            netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
-        if (oldmode == MODE_GETNEXT || oldmode == MODE_GETBULK) {       /* XXX */
-            if (requests->requestvb->type == ASN_NULL ||
-                requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
+    /* Finally, we get to call the next handler below us.  Boy, wasn't
+       all that simple?  They better be glad they don't have to do it! */
+    DEBUGMSGTL(("table_iterator", "doing mode: %s\n",
+                se_find_label_in_slist("agent_mode", oldmode)));
+    ret =
+        netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+
+    /* reverse the previously saved mode if we were a getnext */
+    if (oldmode == MODE_GETNEXT) {
+        for(request = requests ; request; request = request->next) {
+            if (request->processed)
+                continue;
+            if (request->requestvb->type == ASN_NULL ||
+                request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
                  */
-                requests->requestvb->type = ASN_PRIV_RETRY;
-            }
-            reqinfo->mode = oldmode;
-        }
-
-        callback_data_keep =
-            netsnmp_request_get_list_data(requests, TABLE_ITERATOR_NAME);
-        callback_loop_context =
-            netsnmp_request_get_list_data(requests,
-                                          TABLE_ITERATOR_LAST_CONTEXT);
-
-        /* 
-         * This has to be done to prevent a memory leak. Notice that on
-         * SET_RESERVE1 we're assigning something to
-         * 'free_this_index_search' at the beginning of this handler (right
-         * above the line that says 'below our minimum column?'), 
-         * but we're not given a chance to free it below with the other 
-         * SET modes, hence our doing it here. 
-         */
-        if (reqinfo->mode == MODE_SET_RESERVE1) {
-            if (free_this_index_search) {
-                snmp_free_varbind(free_this_index_search);
-                free_this_index_search = NULL;
+                request->requestvb->type = ASN_PRIV_RETRY;
             }
         }
-        if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT ||
-            reqinfo->mode == MODE_GETBULK ||      /* XXX */
-            reqinfo->mode == MODE_SET_FREE ||
-            reqinfo->mode == MODE_SET_UNDO ||
-            reqinfo->mode == MODE_SET_COMMIT) {
-            if (callback_data_keep && iinfo->free_data_context) {
-                (iinfo->free_data_context) (callback_data_keep, iinfo);
-                callback_data_keep = NULL;
-            }
-
-            if (free_this_index_search) {
-                snmp_free_varbind(free_this_index_search);
-                free_this_index_search = NULL;
-            }
-#ifndef NOT_SERIALIZED
-            if (callback_loop_context && iinfo->free_loop_context_at_end) {
-                (iinfo->free_loop_context_at_end) (callback_loop_context,
-                                                   iinfo);
- 		callback_loop_context = NULL;
-            }
-#endif
-        }
-#ifdef NOT_SERIALIZED
-        return ret;
-#else
-        requests = requests->next;
-#endif
+        reqinfo->mode = oldmode;
     }
-#ifdef NOT_SERIALIZED
-    if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK ||  /* XXX */
-        reqinfo->mode == MODE_SET_FREE ||
-        reqinfo->mode == MODE_SET_UNDO ||
-        reqinfo->mode == MODE_SET_COMMIT) {
-        if (callback_loop_context && iinfo->free_loop_context_at_end) {
-            (iinfo->free_loop_context_at_end) (callback_loop_context,
-                                               iinfo);
-	    callback_loop_context = NULL;
-	}
-    }
-#endif
+
+    /* cleanup */
+    if (free_this_index_search)
+        snmp_free_varbind(free_this_index_search);
+
     return SNMP_ERR_NOERROR;
 }
 
