@@ -448,8 +448,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     }
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
-        if (hosts_ctl
-            ("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
+        if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
             snmp_log(deny_severity, "Connection from %s REFUSED\n",
@@ -458,8 +457,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             return 0;
         }
     } else {
-        if (hosts_ctl
-            ("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)) {
+        if (hosts_ctl("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
             addr_string = strdup("<UNKNOWN>");
         } else {
@@ -505,9 +503,9 @@ netsnmp_agent_check_packet(netsnmp_session * session,
             }
             if (i >= SNMP_ADDRCACHE_SIZE) {
                 /*
-                 * We didn't find a free slot to cache the address.  Perhaps we
-                 * should be using an LRU replacement policy here or something.  Oh
-                 * well.  
+                 * We didn't find a free slot to cache the address.  Perhaps
+                 * we should be using an LRU replacement policy here or
+                 * something.  Oh well.
                  */
                 DEBUGMSGTL(("netsnmp_agent_check_packet",
                             "cache overrun"));
@@ -552,8 +550,7 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
                 snmp_log(LOG_DEBUG, "  TRAP message\n");
                 break;
             case SNMP_MSG_GETBULK:
-                snmp_log(LOG_DEBUG,
-                         "  GETBULK message, non-rep=%d, max_rep=%d\n",
+                snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
                          pdu->errstat, pdu->errindex);
                 break;
             case SNMP_MSG_INFORM:
@@ -617,8 +614,9 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
         }
         return 1;
     }
-    return 0;                   /* XXX: does it matter what the return value is?  Yes: if we
-                                 * return 0, then the PDU is dumped.  */
+    return 0;                   /* XXX: does it matter what the return value
+                                 * is?  Yes: if we return 0, then the PDU is
+                                 * dumped.  */
 }
 
 
@@ -755,13 +753,12 @@ netsnmp_deregister_agent_nsap(int handle)
     if (main_session_deregistered) {
         if (agent_nsap_list != NULL) {
             DEBUGMSGTL(("snmp_agent",
-                        "WARNING: main_session pointer changed from %p to %p\n",
-                        main_session,
-                        snmp_sess_session(agent_nsap_list->s)));
+			"WARNING: main_session ptr changed from %p to %p\n",
+                        main_session, snmp_sess_session(agent_nsap_list->s)));
             main_session = snmp_sess_session(agent_nsap_list->s);
         } else {
             DEBUGMSGTL(("snmp_agent",
-                        "WARNING: main_session pointer changed from %p to NULL\n",
+			"WARNING: main_session ptr changed from %p to NULL\n",
                         main_session));
             main_session = NULL;
         }
@@ -772,16 +769,16 @@ netsnmp_deregister_agent_nsap(int handle)
 
 /*
  * 
- * This function has been modified to use the experimental netsnmp_register_agent_nsap
- * interface.  The major responsibility of this function now is to interpret a
- * string specified to the agent (via -p on the command line, or from a
- * configuration file) as a list of agent NSAPs on which to listen for SNMP
- * packets.  Typically, when you add a new transport domain "foo", you add
- * code here such that if the "foo" code is compiled into the agent
- * (SNMP_TRANSPORT_FOO_DOMAIN is defined), then a token of the form
- * "foo:bletch-3a0054ef%wob&wob" gets turned into the appropriate transport
- * descriptor.  netsnmp_register_agent_nsap is then called with that transport
- * descriptor and sets up a listening agent session on it.
+ * This function has been modified to use the experimental
+ * netsnmp_register_agent_nsap interface.  The major responsibility of this
+ * function now is to interpret a string specified to the agent (via -p on the
+ * command line, or from a configuration file) as a list of agent NSAPs on
+ * which to listen for SNMP packets.  Typically, when you add a new transport
+ * domain "foo", you add code here such that if the "foo" code is compiled
+ * into the agent (SNMP_TRANSPORT_FOO_DOMAIN is defined), then a token of the
+ * form "foo:bletch-3a0054ef%wob&wob" gets turned into the appropriate
+ * transport descriptor.  netsnmp_register_agent_nsap is then called with that
+ * transport descriptor and sets up a listening agent session on it.
  * 
  * Everything then works much as normal: the agent runs in an infinite loop
  * (in the snmpd.c/receive()routine), which calls snmp_read() when a request
@@ -1414,7 +1411,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
 netsnmp_request_info *
 netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                              netsnmp_variable_list * varbind_ptr,
-                             struct subtree *tp)
+                             netsnmp_subtree *tp)
 {
     netsnmp_request_info *request = NULL;
     int             cacheid;
@@ -1450,9 +1447,9 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
         }
     } else {
         DEBUGMSGTL(("snmp_agent", "tp->start "));
-        DEBUGMSGOID(("snmp_agent", tp->start, tp->start_len));
+        DEBUGMSGOID(("snmp_agent", tp->start_a, tp->start_len));
         DEBUGMSG(("snmp_agent", ", tp->end "));
-        DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
+        DEBUGMSGOID(("snmp_agent", tp->end_a, tp->end_len));
         DEBUGMSG(("snmp_agent", ", \n"));
 
         /*
@@ -1539,7 +1536,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
          */
         if (asp->pdu->command == SNMP_MSG_GETNEXT ||
             asp->pdu->command == SNMP_MSG_GETBULK) {
-            request->range_end = tp->end;
+            request->range_end = tp->end_a;
             request->range_end_len = tp->end_len;
         } else {
             request->range_end = NULL;
@@ -1607,7 +1604,7 @@ check_acm(netsnmp_agent_session *asp, u_char type)
 int
 netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
 {
-    struct subtree *tp;
+    netsnmp_subtree *tp;
     netsnmp_variable_list *varbind_ptr, *vbsave, *vbptr, **prevNext;
     int             view;
     int             vbcount = 0;
@@ -1724,8 +1721,8 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         /*
          * find the owning tree 
          */
-        tp = find_subtree(varbind_ptr->name, varbind_ptr->name_length,
-                          NULL, asp->pdu->contextName);
+        tp = netsnmp_subtree_find(varbind_ptr->name, varbind_ptr->name_length,
+				  NULL, asp->pdu->contextName);
 
         /*
          * check access control 
@@ -1755,9 +1752,8 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
              */
         }
         if (view == VACM_SUCCESS) {
-            request =
-                netsnmp_add_varbind_to_cache(asp, vbcount, varbind_ptr,
-                                             tp);
+            request = netsnmp_add_varbind_to_cache(asp, vbcount, varbind_ptr,
+						   tp);
             if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
                 request->repeat = bulkrep;
             }
@@ -1926,34 +1922,32 @@ handle_var_requests(netsnmp_agent_session *asp)
          */
         switch (asp->mode) {
         case MODE_SET_COMMIT:
-            retstatus =
-                netsnmp_check_requests_status(asp,
-                                              asp->treecache[i].
-                                              requests_begin,
-                                              SNMP_ERR_COMMITFAILED);
+            retstatus = netsnmp_check_requests_status(asp,
+						      asp->treecache[i].
+						      requests_begin,
+						      SNMP_ERR_COMMITFAILED);
             break;
 
         case MODE_SET_UNDO:
-            retstatus =
-                netsnmp_check_requests_status(asp,
-                                              asp->treecache[i].
-                                              requests_begin,
-                                              SNMP_ERR_UNDOFAILED);
+            retstatus = netsnmp_check_requests_status(asp,
+						      asp->treecache[i].
+						      requests_begin,
+						      SNMP_ERR_UNDOFAILED);
             break;
 
         default:
-            retstatus =
-                netsnmp_check_requests_status(asp,
-                                              asp->treecache[i].
-                                              requests_begin, 0);
+            retstatus = netsnmp_check_requests_status(asp,
+						      asp->treecache[i].
+						      requests_begin, 0);
             break;
         }
 
         /*
          * always take lowest varbind if possible 
          */
-        if (retstatus != SNMP_ERR_NOERROR)
+        if (retstatus != SNMP_ERR_NOERROR) {
             status = retstatus;
+	}
 
         /*
          * other things we know less about (no index) 
@@ -2395,9 +2389,9 @@ handle_set(netsnmp_agent_session *asp)
         status = handle_var_requests(asp);
         DEBUGMSGTL(("agent_set", "did set mode = %d, status = %d\n",
                     asp->mode, status));
-        if ((status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR)
-            || status == SNMP_ERR_COMMITFAILED
-            || status == SNMP_ERR_UNDOFAILED) {
+        if ((status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR) ||
+	    status == SNMP_ERR_COMMITFAILED || 
+	    status == SNMP_ERR_UNDOFAILED) {
             asp->status = status;
         }
     }
@@ -2409,10 +2403,12 @@ handle_set_loop(netsnmp_agent_session *asp)
 {
     while (asp->mode != FINISHED_FAILURE && asp->mode != FINISHED_SUCCESS) {
         handle_set(asp);
-        if (netsnmp_check_for_delegated(asp))
+        if (netsnmp_check_for_delegated(asp)) {
             return SNMP_ERR_NOERROR;
-        if (asp->pdu->flags & UCD_MSG_FLAG_ONE_PASS_ONLY)
+	}
+        if (asp->pdu->flags & UCD_MSG_FLAG_ONE_PASS_ONLY) {
             return asp->status;
+	}
     }
     return asp->status;
 }
@@ -2784,7 +2780,6 @@ netsnmp_timeval_uptime(struct timeval * tv)
 u_long
 netsnmp_get_agent_uptime(void)
 {
-
     struct timeval  now;
     gettimeofday(&now, NULL);
 
@@ -2798,10 +2793,11 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
 {
     if (ari) {
-        if (ari->agent_data)
+	if (ari->agent_data) {
             netsnmp_add_list_data(&ari->agent_data, node);
-        else
+        } else {
             ari->agent_data = node;
+	}
     }
 }
 
@@ -2809,31 +2805,35 @@ inline void    *
 netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
                             const char *name)
 {
-    if (ari)
+    if (ari) {
         return netsnmp_get_list_data(ari->agent_data, name);
+    }
     return NULL;
 }
 
 inline void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
-    if (ari)
+    if (ari) {
         netsnmp_free_list_data(ari->agent_data);
+    }
 }
 
 inline void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 {
-    if (ari)
+    if (ari) {
         netsnmp_free_all_list_data(ari->agent_data);
+    }
 }
 
 inline void
 netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {
-        if (ari->agent_data)
+        if (ari->agent_data) {
             netsnmp_free_all_list_data(ari->agent_data);
+	}
         free(ari);
     }
 }
