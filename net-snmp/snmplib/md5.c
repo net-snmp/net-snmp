@@ -302,11 +302,14 @@ MDupdate(MDptr MDp,
 */
     else /* partial block -- must be last block so finish up */
     { /* Find out how many bytes and residual bits there are */
+        int copycount;
 	byte = count >> 3;
 	bit =  count & 7;
+	copycount = byte; if (bit) copycount++;
 	/* Copy X into XX since we need to modify it */
-	for (i=0;i<=byte;i++)   XX[i] = X[i];
-	for (i=byte+1;i<64;i++) XX[i] = 0;
+	memset(XX,0,sizeof(XX));
+	memcpy(XX,X,copycount);
+
 	/* Add padding '1' bit and low-order zeros in last byte */
 	mask = ((unsigned long)1) << (7 - bit);
 	XX[byte] = (XX[byte] | mask) & ~( mask - 1);
