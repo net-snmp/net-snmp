@@ -169,6 +169,9 @@ _register_extend( oid *base, size_t len )
 
 void init_extend( void )
 {
+    snmpd_register_config_handler("extend",    extend_parse_config, NULL, NULL);
+    snmpd_register_config_handler("extend-sh", extend_parse_config, NULL, NULL);
+    snmpd_register_config_handler("extendfix", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("exec2", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("sh2",   extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("execFix2", extend_parse_config, NULL, NULL);
@@ -387,10 +390,12 @@ extend_parse_config(const char *token, char *cptr)
     cptr = copy_nword(cptr, exec_command, sizeof(exec_command));
     /* XXX - check 'exec_command' exists & is executable */
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
-    if (!strcmp( token, "sh"  ) ||
+    if (!strcmp( token, "sh"        ) ||
+        !strcmp( token, "extend-sh" ) ||
         !strcmp( token, "sh2" ))
         flags |= NS_EXTEND_FLAGS_SHELL;
-    if (!strcmp( token, "execFix"  ) ||
+    if (!strcmp( token, "execFix"   ) ||
+        !strcmp( token, "extendfix" ) ||
         !strcmp( token, "execFix2" )) {
         strcat( exec_name, "Fix" );
         flags |= NS_EXTEND_FLAGS_WRITEABLE;
