@@ -99,3 +99,9 @@ OTHER PROBLEMS
   
    It's a hack, but symlink nsb-functions and nsb-package to your local
    bin directory ($HOME/bin).  I'm trying to think of a better solution.
+
+* "gcc: snmp_version.lo: No such file or directory"
+
+   This is a good indication that you have previously build in your
+   source directory. 'make distclean' in your source directory, or
+   check out a fresh new version from CVS.
