@@ -4898,11 +4898,11 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
       return 0;
   }
 
-  if ((pktbuf = malloc(256)) == NULL) {
+  if ((pktbuf = malloc(2048)) == NULL) {
     DEBUGMSGTL(("sess_resend", "couldn't malloc initial packet buffer\n"));
     return 0;
   } else {
-    pktbuf_len = 256;
+    pktbuf_len = 2048;
   }
 
   if (incr_retries) {
