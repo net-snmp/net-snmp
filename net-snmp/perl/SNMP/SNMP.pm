@@ -458,6 +458,12 @@ sub new {
 		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
+
+       $this->{AuthMasterKey} ||= '';
+       $this->{PrivMasterKey} ||= '';
+       $this->{AuthLocalizedKey} ||= '';
+       $this->{PrivLocalizedKey} ||= '';
+
        $this->{PrivProto} ||= 'DEFAULT';  # defaults to hte library's default
        $this->{PrivPass} ||=
        NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
@@ -482,7 +488,15 @@ sub new {
 						$this->{PrivPass},
 						$this->{EngineBoots},
 						$this->{EngineTime},
-						);
+						$this->{AuthMasterKey},
+						length($this->{AuthMasterKey}),
+						$this->{PrivMasterKey},
+						length($this->{PrivMasterKey}),
+						$this->{AuthLocalizedKey},
+						length($this->{AuthLocalizedKey}),
+						$this->{PrivLocalizedKey},
+						length($this->{PrivLocalizedKey}),
+					       );
    }
    unless ($this->{SessPtr}) {
        warn("unable to create session") if $SNMP::verbose;
@@ -588,7 +602,7 @@ sub get {
 }
 
 
-
+$have_netsnmp_oid = eval { require NetSNMP::OID; };
 sub gettable {
 
     #
@@ -601,7 +615,7 @@ sub gettable {
     #
 
     my ($this, $root_oid, $options) = @_;
-    my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash);
+    my ($textnode, $stopconds, $varbinds, $vbl, $res, %result_hash, $repeat);
 
     # translate the OID into numeric form if its not
     if ($root_oid !~ /^[\.0-9]+$/) {
@@ -614,50 +628,59 @@ sub gettable {
     # bail if we don't have a valid oid.
     return if (!$root_oid);
 
+    # deficed if we're going to parse indexes
+    my $parse_indexes = (defined($options->{'noindexes'})) ? 
+      0 : $have_netsnmp_oid;
+
     # get the list of columns we should look at.
+    my @columns;
     if (!$options->{'columns'}) {
 	if ($textnode) {
+	    # calculate the list of accessible columns that aren't indexes
 	    my $children = $SNMP::MIB{$textnode}{'children'}[0]{'children'};
 	    foreach my $c (@$children) {
-		push @{$options->{'columns'}},
+		push @columns,
 		  $root_oid . ".1." . $c->{'subID'};
 	    }
 	} else {
-	    print STDERR "XXX: TODO: allow for gettable calls when the mib isn't loaded";
-	    return;
+	    # XXX: requires specification in numeric...  ack.!
+	    @columns = @{$options->{'columns'}};
 	}
     }
 
     # create the initial walking info.
-    foreach my $c (@{$options->{'columns'}}) {
+    foreach my $c (@columns) {
 	push @$varbinds, [$c];
 	push @$stopconds, $c;
     }
     $vbl = $varbinds;
 	
-    if (!$options->{'repeat'}) {
+    my $repeatcount;
+    if ($options->{'repeat'}) {
+	$repeatcount = $options->{'repeat'};
+    } else {
 	# experimentally determined maybe guess at a best repeat value
 	# 1000 bytes max (safe), 30 bytes average for encoding of the
 	# varbind (experimentally determined to be closer to
 	# 26.  Again, being safe.  Then devide by the number of
 	# varbinds.
-	$options->{'repeat'} = int(1000 / 36 / ($#$varbinds + 1));
+	$repeatcount = int(1000 / 36 / ($#$varbinds + 1));
     }
 
     if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
-	$res = $this->getbulk(0, $options->{'repeat'}, $vbl);
+	$res = $this->getbulk(0, $repeatcount, $vbl);
     } else {
 	$res = $this->getnext($vbl);
     }
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
 	print STDERR "ack: gettable results not appropriate\n" && return
-	  if ($#$vbl + 1 != ($#$stopconds + 1) * $options->{'repeat'});
+	  if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount);
 
 	$varbinds = [];
 	my $newstopconds;
 
-	my $lastsetstart = ($options->{'repeat'}-1) * ($#$stopconds+1);
+	my $lastsetstart = ($repeatcount-1) * ($#$stopconds+1);
 
 	for (my $i = 0; $i <= $#$vbl; $i++) {
 	    my $row_oid = SNMP::translateObj($vbl->[$i][0]);
@@ -698,11 +721,36 @@ sub gettable {
 	$stopconds = $newstopconds;
 
 	if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
-	    $res = $this->getbulk(0, $options->{'repeat'}, $vbl);
+	    $res = $this->getbulk(0, $repeatcount, $vbl);
 	} else {
 	    $res = $this->getnext($vbl);
 	}
     }
+
+    # calculate indexes
+    if ($parse_indexes) {
+	my @indexes = @{$SNMP::MIB{$textnode}{'children'}[0]{'indexes'}};
+	my $i;
+	foreach my $trow (keys(%result_hash)) {
+	    my $noid = new NetSNMP::OID($columns[0] . "." . $trow);
+	    if (!$noid) {
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB OID\n";
+		next;
+	    }
+	    my $nindexes = $noid->get_indexes();
+	    if (!$nindexes || ref($nindexes) ne 'ARRAY' ||
+		$#indexes != $#$nindexes) {
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: $noid => " . ref($nindexes) . " $#indexes\n";
+		print STDERR "***** ERROR parsing $columns[0].$trow MIB indexes: " . ref($nindexes) . " $#indexes $#$nindexes\n";
+		next;
+	    }
+
+	    for ($i = 0; $i <= $#indexes; $i++) {
+		$result_hash{$trow}{$indexes[$i]} = $nindexes->[$i];
+	    }
+	}
+    }
+
     return(\%result_hash);
 }
 
@@ -1331,11 +1379,22 @@ default <none>, authentication passphrase
 
 =item PrivProto
 
-default 'DES', privacy protocol [DES] (v3)
+default 'DES', privacy protocol [DES, AES] (v3)
 
 =item PrivPass
 
 default <none>, privacy passphrase (v3)
+
+=item authMasterKey
+
+=item privMasterKey
+
+=item authLocalizedKey
+
+=item privLocalizedKey
+
+Directly specified SNMPv3 USM user keys (used if you want to specify
+the keys instead of deriving them from a password as above).
 
 =item VarFormats
 

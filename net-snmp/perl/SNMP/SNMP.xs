@@ -2635,7 +2635,7 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
         RETVAL
 
 SnmpSession *
-snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_eng_id, context_eng_id, context, auth_proto, auth_pass, priv_proto, priv_pass, eng_boots, eng_time)
+snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_eng_id, context_eng_id, context, auth_proto, auth_pass, priv_proto, priv_pass, eng_boots, eng_time, auth_master_key, auth_master_key_len, priv_master_key, priv_master_key_len, auth_localized_key, auth_localized_key_len, priv_localized_key, priv_localized_key_len)
         int	version
         char *	peer
         int	retries
@@ -2651,6 +2651,14 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         char *  priv_pass
 	int     eng_boots
 	int     eng_time
+        char *  auth_master_key
+        size_t  auth_master_key_len
+        char *  priv_master_key
+        size_t  priv_master_key_len
+        char *  auth_localized_key
+        size_t  auth_localized_key_len
+        char *  priv_localized_key
+        size_t  priv_localized_key_len
 	CODE:
 	{
 /*             u_char sec_eng_id_buf[ENG_ID_BUF_SIZE]; */
@@ -2710,16 +2718,31 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
               goto end;
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHNOPRIV) {
-              session.securityAuthKeyLen = USM_AUTH_KU_LEN;
-              if (generate_Ku(session.securityAuthProto,
-                              session.securityAuthProtoLen,
-                              (u_char *)auth_pass, strlen(auth_pass),
-                              session.securityAuthKey,
-                              &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
-                 if (verbose)
-                    warn("error:snmp_new_v3_session:Error generating Ku from authentication password.\n");
-                 goto end;
-              }
+               if (auth_localized_key_len) {
+                   memdup(&session.securityAuthLocalKey,
+                          auth_localized_key,
+                          auth_localized_key_len);
+                   session.securityAuthLocalKeyLen = auth_localized_key_len;
+               } else if (auth_master_key_len) {
+                   session.securityAuthKeyLen =
+                       SNMP_MIN(auth_master_key_len,
+                                sizeof(session.securityAuthKey));
+                   memcpy(session.securityAuthKey, auth_master_key,
+                          session.securityAuthKeyLen);
+               } else {
+                   if (strlen(auth_pass) > 0) {
+                       session.securityAuthKeyLen = USM_AUTH_KU_LEN;
+                       if (generate_Ku(session.securityAuthProto,
+                                       session.securityAuthProtoLen,
+                                       (u_char *)auth_pass, strlen(auth_pass),
+                                       session.securityAuthKey,
+                                       &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+                           if (verbose)
+                               warn("error:snmp_new_v3_session:Error generating Ku from authentication password.\n");
+                           goto end;
+                       }
+                   }
+               }
            }
            if (!strcmp(priv_proto, "DES")) {
               session.securityPrivProto =
@@ -2742,15 +2765,28 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
               goto end;
            }
            if (session.securityLevel >= SNMP_SEC_LEVEL_AUTHPRIV) {
-             session.securityPrivKeyLen = USM_PRIV_KU_LEN;
-              if (generate_Ku(session.securityAuthProto,
-                              session.securityAuthProtoLen,
-                              (u_char *)priv_pass, strlen(priv_pass),
-                              session.securityPrivKey,
-                              &session.securityPrivKeyLen) != SNMPERR_SUCCESS) {
-                 if (verbose)
-                    warn("error:snmp_new_v3_session:Error generating Ku from privacy pass phrase.\n");
-                 goto end;
+               if (priv_localized_key_len) {
+                   memdup(&session.securityPrivLocalKey,
+                          priv_localized_key,
+                          priv_localized_key_len);
+                   session.securityPrivLocalKeyLen = priv_localized_key_len;
+               } else if (priv_master_key_len) {
+                   session.securityPrivKeyLen =
+                       SNMP_MIN(auth_master_key_len,
+                                sizeof(session.securityPrivKey));
+                   memcpy(session.securityPrivKey, priv_master_key,
+                          session.securityPrivKeyLen);
+               } else {
+                   session.securityPrivKeyLen = USM_PRIV_KU_LEN;
+                   if (generate_Ku(session.securityAuthProto,
+                                   session.securityAuthProtoLen,
+                                   (u_char *)priv_pass, strlen(priv_pass),
+                                   session.securityPrivKey,
+                                   &session.securityPrivKeyLen) != SNMPERR_SUCCESS) {
+                       if (verbose)
+                           warn("error:snmp_new_v3_session:Error generating Ku from privacy pass phrase.\n");
+                       goto end;
+                   }
                }
             }
 
