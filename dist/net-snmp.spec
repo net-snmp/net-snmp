@@ -68,20 +68,19 @@ protocol.  Both client and agent support modules are provided.
 %endif
 
 %prep
+%if %{embedded_perl} == 1 && %{perl_modules} == 0
+echo "'-with embedded_perl' requires '-with perl_modules'"
+exit 1
+%endif
 %setup -q
 
 %build
-CONFIG="--enable-shared"
-%if %{perl_modules}
-CONFIG="$CONFIG --with-perl-modules='PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor'"
-%endif
-%if %{embedded_perl}
-CONFIG="$CONFIG --enable-embedded-perl"
-%endif
 %configure --with-defaults --with-sys-contact="Unknown" \
 	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
-	$CONFIG \
+	--enable-shared \
+	%{?_with_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"} \
+	%{?_with_embedded_perl: --enable-embedded-perl} \
 	--with-cflags="$RPM_OPT_FLAGS"
 
 make
