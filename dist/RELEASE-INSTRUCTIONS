@@ -30,6 +30,13 @@ TESTING:
   0) run "cvs update" to catch everyones commits.  (I've forgotten this
      step before.)
 
+  0b) run configure with as many modules as can be compiled on your
+      machine to make sure there are no compile errors in any of the
+      modules.  I frequently find some in the lesser developer-used
+      modules, like Rmon, etc.  Something like:
+
+      ./configure  '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX' --enable-embedded-perl --enable-shared
+
   1) Change the libtool version information in Makefile.top.  This may
      could be automated in the future, but libtool doesn't like you to
      match your project version with the library version so they have
@@ -47,9 +54,9 @@ TESTING:
      about improper numbering before you make the release and not
      after you've uploaded the tar ball :-/
 
-  2) Log into as many machines as you can and run "make test".  You
-     should get perfect results.  If you don't, try running just those
-     tests again with a slower sleep time (use the -S flag to
+  2) Log into as many machines types as you can and run "make test".
+     You should get perfect results.  If you don't, try running just
+     those tests again with a slower sleep time (use the -S flag to
      testing/RUNTESTS).
 
   3) "make install" -- make sure it works.
@@ -127,8 +134,13 @@ RELEASING:
      [if you did this before above, do it again if you made any
      changes to the CVS tree since creating the last revision]
 
-       cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
+       cvs2cl -b -r -f ChangeLog.add --no-wrap -S
        perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
+
+     Note that if you're on a branch, add the -f option to cvs2cl
+     like:
+
+       cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
 
      Edit the ChangeLog file and insert the appropriate portion of the
      ChangeLog.reallyadd file.  You can usually find the point where
@@ -177,6 +189,11 @@ RELEASING:
      however.
 
   9) Upload the file to the sourceforge server:
+
+     note: it's really hard to replace files on the file server with
+     the exact same name as the previous file.  So, this should be the
+     last step!  No turning back!  From here on out, we must rev the
+     version number!
 
      0) upload the tar ball to ftp://upload.sf.net/incoming/
      a) go to the admin section of the net-snmp project home page
@@ -246,10 +263,27 @@ CLEANING UP
   1) remove any official patches that apply to old releases?
      (we need to set a policy about whether to do this)
 
+  2) delete any pre-release files from the download page using the
+     admin interface
+
+  3) remove older-binaries for older releases if you updated with newer
+     binaries (don't remove any until there are newer ones for an 
+     architecture available)
+
 ***************************************************************************
 UPDATING WEB PAGE DOCUMENTS
+
+  0) before doing any of this, make sure you have permissions set up
+     properly on the web server so that files created become
+     group-writable!!!
 
   1) NEWS at the top of the webpage is auto-extracted from the NEWS
      submissions on SF.  Don't worry about it.
 
   2) TBD
+
+  3) some files (warning, assumes a htdocs/ -> net-snmp/htdocs link):
+     foreach i (NEWS ChangeLog README* COPYING)
+       scp $i www.net-snmp.org:htdocs/$i.txt
+     end
+
