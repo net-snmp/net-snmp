@@ -28,7 +28,6 @@
 #include <net-snmp/agent/auto_nlist.h>
 #include "autonlist.h"
 #include "kernel.h"
-#include "../snmplib/system.h"
 
 #include <net-snmp/asn1.h>
 #include <net-snmp/snmp_api.h>
