@@ -661,6 +661,9 @@
 /* Define if you have the <sys/un.h> header file.  */
 #undef HAVE_SYS_UN_H
 
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
+
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
 
@@ -807,6 +810,15 @@
 
 /* udpstat.udps_discard */
 #undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORT
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORTBCAST
+
+/* udpstat.udps_discard */
+#undef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
 
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
