@@ -222,8 +222,8 @@ RELEASING:
      historical], and remove-files):
 
         a) changes version numbers in important files.  Hopefully it
-           didn't miss anything.
-           propriate order
+           didn't miss anything.  Watch the diff outputs scroll by to
+           make sure it didn't mess up.
         b) Runs cvs tag
         c) Runs cvs export
         d) Removes some non-distributed files.  It also touches the
