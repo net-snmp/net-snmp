@@ -84,7 +84,6 @@ SOFTWARE.
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "party.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -296,6 +295,9 @@ main(argc, argv)
     int name_length;
     int	arg;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
+#ifdef _DEBUG_MALLOC_INC
+    unsigned long histid1, histid2, orig_size, current_size;
+#endif
 
     /*
      * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
@@ -306,9 +308,12 @@ main(argc, argv)
     session.callback_magic = NULL;
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_perror("snmptrap: Couldn't open snmp");
+        snmp_perror("snmptrap");
 	exit(1);
     }
+#ifdef _DEBUG_MALLOC_INC
+    orig_size = malloc_inuse(&histid1);
+#endif
 
     if (session.version == SNMP_VERSION_1) {
 	pdu = snmp_pdu_create(TRP_REQ_MSG);
@@ -408,8 +413,14 @@ main(argc, argv)
     }
 
     if (snmp_send(ss, pdu)== 0){
-        snmp_perror("snmptrap: snmp_send error");
+        snmp_perror("snmptrap");
     }
+    snmp_free_pdu(pdu);
+
+#ifdef _DEBUG_MALLOC_INC
+    current_size = malloc_inuse(&histid2);
+    if (current_size != orig_size) malloc_list(2, histid1, histid2);
+#endif
     snmp_close(ss);
     exit (0);
 }
