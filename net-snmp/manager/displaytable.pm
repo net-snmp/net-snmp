@@ -206,7 +206,9 @@ sub displaytable {
 	    } else {
 		@keys = (sort keys(%$data));
 	    }
-	    if (!defined($config{'-notitle'})) {
+	    if (defined($config{'-title'})) {
+		print "<br><b>$config{'-title'}</b>\n";
+	    } elsif (!defined($config{'-notitle'})) {
 		print "<br><b>";
 		print "<a href=\"$ref\">" if (defined($dolink) && 
 					      defined($ref = &$dolink($tablename)));
