@@ -84,6 +84,13 @@ LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo agent_registry.lo\
 AGENTOBJS=snmpd.o
 LAGENTOBJS=snmpd.lo
 
+#
+# Define OBJS and LOBJS for clean target (just this directory)
+#
+OBJS		= $(LIBAGENTOBJS)  $(AGENTOBJS)  mib_modules.o  auto_nlist.o
+LOBJS		= $(LLIBAGENTOBJS) $(LAGENTOBJS) mib_modules.lo auto_nlist.lo
+
+
 all: standardall
 
 #
