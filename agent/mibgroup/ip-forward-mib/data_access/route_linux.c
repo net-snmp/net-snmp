@@ -14,6 +14,25 @@
 #include "ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_constants.h"
 
 static int
+_type_from_flags(unsigned int flags)
+{
+    /*
+     *  RTF_GATEWAY RTF_UP RTF_DYNAMIC RTF_CACHE
+     *  RTF_MODIFIED RTF_EXPIRES RTF_NONEXTHOP
+     *  RTF_DYNAMIC RTF_LOCAL RTF_PREFIX_RT
+     *
+     * xxx: can we distinguish between reject & blackhole?
+     */
+    if (flags & RTF_UP) {
+        if (flags & RTF_GATEWAY)
+            return INETCIDRROUTETYPE_REMOTE;
+        else /*if (flags & RTF_LOCAL) */
+            return INETCIDRROUTETYPE_LOCAL;
+    } else 
+        return 0; /* route not up */
+
+}
+static int
 _load_ipv4(netsnmp_container* container, u_long *index )
 {
     FILE           *in;
@@ -78,7 +97,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
 
         entry->if_index = se_find_value_in_slist("interfaces", name);
         if(SE_DNE == entry->if_index) {
-            snmp_log(LOG_ERR,"unknown interface '%s' in /proc/net/route\n",
+            snmp_log(LOG_ERR,"unknown interface in /proc/net/route ('%s')\n",
                      name);
             netsnmp_access_route_entry_free(entry);
             continue;
@@ -98,37 +117,47 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          */
         entry->rt_dest_type = INETADDRESSTYPE_IPV4;
         entry->rt_dest_len = 4;
-        dest = htonl(dest);
         memcpy(entry->rt_dest, &dest, 4);
 
         entry->rt_nexthop_type = INETADDRESSTYPE_IPV4;
         entry->rt_nexthop_len = 4;
-        nexthop = htonl(nexthop);
         memcpy(entry->rt_nexthop, &nexthop, 4);
 
         /*
          * count bits in mask
          */
-        while (0x80000000 & mask) {
+        while (0x1 & mask) {
             ++entry->rt_pfx_len;
-            mask = mask << 1;
+            mask = mask >> 1;
         }
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
-        /** policy info ?? */
+        /*
+    inetCidrRoutePolicy OBJECT-TYPE 
+        SYNTAX     OBJECT IDENTIFIER 
+        MAX-ACCESS not-accessible 
+        STATUS     current 
+        DESCRIPTION 
+               "This object is an opaque object without any defined 
+                semantics.  Its purpose is to serve as an additional 
+                index which may delineate between multiple entries to 
+                the same destination.  The value { 0 0 } shall be used 
+                as the default value for this object."
+        */
+        /*
+         * on linux, default routes all look alike, and would have the same
+         * indexed based on dest and next hop. So we use our arbitrary index
+         * as the policy, to distinguise between them.
+         */
+        entry->rt_policy = &entry->ns_rt_index;
+        entry->rt_policy_len = 1;
+        entry->flags |= NETSNMP_ROUTE_ENTRY_POLICY_STATIC;
 #endif
 
         /*
          * get protocol and type from flags
          */
-        if (flags & RTF_UP) {
-            if (flags & RTF_GATEWAY) {
-                entry->rt_type = INETCIDRROUTETYPE_REMOTE;
-            } else {
-                entry->rt_type = INETCIDRROUTETYPE_LOCAL;
-            }
-        } else 
-            entry->rt_type = INETCIDRROUTETYPE_REJECT;
+        entry->rt_type = _type_from_flags(flags);
         
         entry->rt_proto = (flags & RTF_DYNAMIC)
             ? IANAIPROUTEPROTOCOL_ICMP : IANAIPROUTEPROTOCOL_LOCAL;
@@ -147,11 +176,139 @@ _load_ipv4(netsnmp_container* container, u_long *index )
 static int
 _load_ipv6(netsnmp_container* container, u_long *index )
 {
+    FILE           *in;
+    char            line[256];
+    netsnmp_route_entry *entry = NULL;
+    char            name[16];
+
     DEBUGMSGTL(("access:route:container",
                 "route_container_arch_load ipv6\n"));
 
     netsnmp_assert(NULL != container);
 
+    /*
+     * fetch routes from the proc file-system:
+     */
+    if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
+        snmp_log(LOG_ERR, "cannot open /proc/net/ipv6_route\n");
+        return -2;
+    }
+    fgets(line,sizeof(line),in); /* skip header */
+    while (fgets(line, sizeof(line), in)) {
+        char            c_name[9], c_dest[33], c_src[33], c_next[33];
+        int             rc;
+        unsigned int    dest_pfx, flags;
+        size_t          buf_len, buf_offset;
+        u_char          *temp_uchar_ptr;
+
+        entry = netsnmp_access_route_entry_create();
+
+        /*
+         * based on /usr/src/linux/net/ipv6/route.c, kernel 2.6.7:
+         *
+         * [        Dest addr /         plen ]
+         * fe80000000000000025056fffec00008 80 \
+         *
+         * [ (?subtree) : src addr/plen : 0/0]
+         * 00000000000000000000000000000000 00 \
+         *
+         * [        next hop              ][ metric ][ref ctn][ use   ]
+         * 00000000000000000000000000000000 00000000 00000000 00000000 \
+         *
+         * [ flags ][dev name]
+         * 80200001       lo
+         */
+        rc = sscanf(line, "%32s %2x %32s %*x %32s %x %*x %*x %x %8s\n",
+                    c_dest, &dest_pfx, c_src, /*src_pfx,*/ c_next,
+                    &entry->rt_metric1, /** ref,*/ /* use, */ &flags, c_name);
+        DEBUGMSGTL(("9:access:route:container", "line |%s|\n", line));
+        if (7 != rc) {
+            snmp_log(LOG_ERR,
+                     "/proc/net/ipv6_route data format error (%d!=8), "
+                     "line ==|%s|", rc, line);
+            continue;
+        }
+
+        /*
+         * temporary null terminated name
+         */
+        c_name[ sizeof(c_name)-1 ] = 0;
+        entry->if_index = se_find_value_in_slist("interfaces", c_name);
+        if(SE_DNE == entry->if_index) {
+            snmp_log(LOG_ERR,"unknown interface in /proc/net/ipv6_route "
+                     "('%s')\n", name);
+            netsnmp_access_route_entry_free(entry);
+            continue;
+        }
+        /*
+         * arbitrary index
+         */
+        entry->ns_rt_index = ++(*index);
+
+#ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
+        /** entry->rt_mask = mask; */ /* IPv4 only */
+        /** entry->rt_tos = XXX; */
+        /** rt info ?? */
+#endif
+        /*
+         * convert hex addresses to binary
+         */
+        entry->rt_dest_type = INETADDRESSTYPE_IPV6;
+        entry->rt_dest_len = 16;
+        buf_len = sizeof(entry->rt_dest);
+        buf_offset = 0;
+        temp_uchar_ptr = entry->rt_dest;
+        netsnmp_hex_to_binary(&temp_uchar_ptr, &buf_len, &buf_offset, 0,
+                              c_dest, NULL);
+
+        entry->rt_nexthop_type = INETADDRESSTYPE_IPV6;
+        entry->rt_nexthop_len = 16;
+        buf_len = sizeof(entry->rt_nexthop);
+        buf_offset = 0;
+        temp_uchar_ptr = entry->rt_nexthop;
+        netsnmp_hex_to_binary(&temp_uchar_ptr, &buf_len, &buf_offset, 0,
+                              c_next, NULL);
+
+        entry->rt_pfx_len = dest_pfx;
+
+#ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
+        /*
+    inetCidrRoutePolicy OBJECT-TYPE 
+        SYNTAX     OBJECT IDENTIFIER 
+        MAX-ACCESS not-accessible 
+        STATUS     current 
+        DESCRIPTION 
+               "This object is an opaque object without any defined 
+                semantics.  Its purpose is to serve as an additional 
+                index which may delineate between multiple entries to 
+                the same destination.  The value { 0 0 } shall be used 
+                as the default value for this object."
+        */
+        /*
+         * on linux, default routes all look alike, and would have the same
+         * indexed based on dest and next hop. So we use our arbitrary index
+         * as the policy, to distinguise between them.
+         */
+        entry->rt_policy = &entry->ns_rt_index;
+        entry->rt_policy_len = 1;
+        entry->flags |= NETSNMP_ROUTE_ENTRY_POLICY_STATIC;
+#endif
+
+        /*
+         * get protocol and type from flags
+         */
+        entry->rt_type = _type_from_flags(flags);
+        
+        entry->rt_proto = (flags & RTF_DYNAMIC)
+            ? IANAIPROUTEPROTOCOL_ICMP : IANAIPROUTEPROTOCOL_LOCAL;
+
+        /*
+         * insert into container
+         */
+        CONTAINER_INSERT(container, entry);
+    }
+
+    fclose(in);
     return 0;
 }
 #endif
