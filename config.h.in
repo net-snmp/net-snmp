@@ -116,6 +116,9 @@
 #undef STRUCT_IFNET_HAS_IF_OMCASTS
 #undef STRUCT_IFNET_HAS_IF_XNAME
 
+/* tcpstat.tcps_rcvmemdrop */
+#undef HAVE_TCPSTAT_TCPS_RCVMEMDROP
+
 #ifdef DODEBUG
 #define DEBUGP(x) fprintf(stderr,x);
 #define DEBUGP1(x,y) fprintf(stderr,x,y);
@@ -336,6 +339,9 @@
 
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
+
+/* Define if you have the <sys/vfs.h> header file.  */
+#undef HAVE_SYS_VFS_H
 
 /* Define if you have the <sys/vm.h> header file.  */
 #undef HAVE_SYS_VM_H

@@ -70,6 +70,9 @@
 #undef STRUCT_IFNET_HAS_IF_OMCASTS
 #undef STRUCT_IFNET_HAS_IF_XNAME
 
+/* tcpstat.tcps_rcvmemdrop */
+#undef HAVE_TCPSTAT_TCPS_RCVMEMDROP
+
 @BOTTOM@
 
 /* mib pointer to the top of the extensible tree.  This has been

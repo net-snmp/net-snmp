@@ -1809,7 +1809,7 @@ EOF
 
 fi
 
-for ac_hdr in strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h
+for ac_hdr in strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -3193,6 +3193,48 @@ fi
 
 fi
 
+echo $ac_n "checking if struct tcpstat has a tcps_rcvmemdrop node""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_struct_tcpstat_tcps_rcvmemdrop'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+cat > conftest.$ac_ext <<EOF
+#line 3203 "configure"
+#include "confdefs.h"
+
+#ifdef HAVE_NETINET_TCP_VAR_H
+#include<netinet/tcp_var.h>
+#endif
+
+int main() { return 0; }
+int t() {
+
+struct tcpstat tcpstat;
+tcpstat.tcps_rcvmemdrop = 0;
+
+; return 0; }
+EOF
+if { (eval echo configure:3218: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_cv_struct_tcpstat_tcps_rcvmemdrop=yes
+else
+  rm -rf conftest*
+  ac_cv_struct_tcpstat_tcps_rcvmemdrop=no
+fi
+rm -f conftest*
+
+
+fi
+
+echo "$ac_t""$ac_cv_struct_tcpstat_tcps_rcvmemdrop" 1>&6
+
+if test "x$ac_cv_struct_tcpstat_tcps_rcvmemdrop" = "xyes"; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_TCPSTAT_TCPS_RCVMEMDROP 1
+EOF
+
+fi
+
 
 echo $ac_n "checking for ifnet.if_baudrate""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_BAUDRATE'+set}'`\" = set"; then
@@ -3205,7 +3247,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3209 "configure"
+#line 3251 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3220,7 +3262,7 @@ dergel.if_baudrate $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3224: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3266: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_BAUDRATE=yes
 else
@@ -3254,7 +3296,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3258 "configure"
+#line 3300 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3269,7 +3311,7 @@ dergel.if_type $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3273: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3315: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_TYPE=yes
 else
@@ -3303,7 +3345,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3307 "configure"
+#line 3349 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3318,7 +3360,7 @@ dergel.if_imcasts $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3322: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3364: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_IMCASTS=yes
 else
@@ -3352,7 +3394,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3356 "configure"
+#line 3398 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3367,7 +3409,7 @@ dergel.if_iqdrops $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3371: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3413: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_IQDROPS=yes
 else
@@ -3401,7 +3443,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3405 "configure"
+#line 3447 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3416,7 +3458,7 @@ dergel.if_noproto $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3420: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3462: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_NOPROTO=yes
 else
@@ -3450,7 +3492,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3454 "configure"
+#line 3496 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3465,7 +3507,7 @@ dergel.if_omcasts $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3469: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3511: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_OMCASTS=yes
 else
@@ -3499,7 +3541,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3503 "configure"
+#line 3545 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3514,7 +3556,7 @@ dergel.if_xname $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3518: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3560: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_XNAME=yes
 else
@@ -3548,7 +3590,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3552 "configure"
+#line 3594 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3563,7 +3605,7 @@ dergel.if_lastchange.tv_sec $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3567: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3609: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_LASTCHANGE_TV_SEC=yes
 else
