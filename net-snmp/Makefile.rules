@@ -51,7 +51,7 @@ installheaders: installlocalheaders @installucdheaders@ installsubdirheaders
 
 installlocalheaders:
 	@if test "$(INSTALLHEADERS)" != "" ; then \
-		echo creating directory $(includedir) ; \
+		echo creating directory $(INSTALL_PREFIX)$(includedir) ; \
 		it="$(INSTALLHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
 		for i in $$it ; do \
@@ -60,7 +60,7 @@ installlocalheaders:
 		done \
 	fi
 	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
-		echo creating directory $(includedir) ; \
+		echo creating directory $(INSTALL_PREFIX)$(includedir) ; \
 		it="$(INSTALLBUILTHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
 		for i in $$it ; do \
@@ -69,7 +69,7 @@ installlocalheaders:
 		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
-		echo creating directory $(includedir)/$(INCLUDESUBDIR) ; \
+		echo creating directory $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
 		it="$(INCLUDESUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
 		for i in $$it ; do \
@@ -78,7 +78,7 @@ installlocalheaders:
 		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
-		echo creating directory $(includedir)/$(INCLUDESUBDIR2) ; \
+		echo creating directory $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
 		it="$(INCLUDESUBDIRHEADERS2)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
 		for i in $$it ; do \
@@ -87,7 +87,7 @@ installlocalheaders:
 		done \
 	fi
 	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
-		echo creating directory $(includedir)/$(INSTALLBUILTSUBDIR) ; \
+		echo creating directory $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
 		for i in $$it ; do \
@@ -98,7 +98,7 @@ installlocalheaders:
 
 installucdheaders:
 	@if test "$(INSTALLUCDHEADERS)" != "" ; then \
-		echo creating directory $(ucdincludedir) ; \
+		echo creating directory $(INSTALL_PREFIX)$(ucdincludedir) ; \
 		it="$(INSTALLUCDHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(ucdincludedir) ; \
 		for i in $$it ; do \
