@@ -131,9 +131,11 @@ nsCacheStatus   OBJECT-TYPE
 
 --
 --  Agent configuration
+--    Debug and logging output
 --
 
 nsConfigDebug          OBJECT IDENTIFIER ::= {nsConfiguration 1}
+nsConfigLogging        OBJECT IDENTIFIER ::= {nsConfiguration 2}
 
 nsDebugEnabled         OBJECT-TYPE
     SYNTAX      TruthValue
@@ -215,6 +217,109 @@ nsDebugTokenStatus   OBJECT-TYPE
        notInService(2) indefinitely - i.e. the meaning of 'abnormally
        long' (see RFC 2579, RowStatus) for this table is infinite."
     ::= { nsDebugTokenEntry 4 }
+
+--
+-- Logging configuration
+--
+
+nsLoggingTable     OBJECT-TYPE
+    SYNTAX      SEQUENCE OF NsLoggingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "A table of individual logging output destinations, used to control
+       where various levels of output from the agent should be directed."
+    ::= { nsConfigLogging 1 }
+
+nsLoggingEntry     OBJECT-TYPE
+    SYNTAX      NsLoggingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "A conceptual row within the logging table."
+    INDEX       { nsLogLevel, IMPLIED nsLogToken }
+    ::= { nsLoggingTable 1 }
+
+NsLoggingEntry ::= SEQUENCE {
+    nsLogLevel          INTEGER,
+    nsLogToken          DisplayString,
+    nsLogType           INTEGER,
+    nsLogMaxLevel       INTEGER,
+    nsLogStatus         RowStatus
+}
+
+nsLogLevel    OBJECT-TYPE
+    SYNTAX      INTEGER {
+		     emergency(0),
+		     alert    (1),
+		     critical (2),
+		     error    (3),
+		     warning  (4),
+		     notice   (5),
+		     info     (6),
+		     debug    (7)
+                }
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "The (minimum) priority level for which this logging entry
+       should be applied."
+    ::= { nsLoggingEntry 1 }
+
+nsLogToken    OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "A token for which to generate logging entries.
+       Depending on the style of logging, this may either
+       be simply an arbitrary token, or may have some
+       particular meaning (such as the filename to log to)."
+    ::= { nsLoggingEntry 2 }
+
+nsLogType     OBJECT-TYPE
+    SYNTAX      INTEGER {
+		     stdout   (1),
+		     stderr   (2),
+		     file     (3),
+		     syslog   (4),
+		     callback (5)
+                }
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+      "The type of logging for this entry."
+    ::= { nsLoggingEntry 3 }
+
+nsLogMaxLevel OBJECT-TYPE
+    SYNTAX      INTEGER {
+		     emergency(0),
+		     alert    (1),
+		     critical (2),
+		     error    (3),
+		     warning  (4),
+		     notice   (5),
+		     info     (6),
+		     debug    (7)
+                }
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+      "The maximum priority level for which this logging entry
+       should be applied."
+    DEFVAL      { emergency(0) }
+    ::= { nsLoggingEntry 4 }
+
+nsLogStatus   OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+      "Whether to generate logging output for this entry.
+       Note that is valid for an instance to be left with the value
+       notInService(2) indefinitely - i.e. the meaning of 'abnormally
+       long' (see RFC 2579, RowStatus) for this table is infinite."
+    ::= { nsLoggingEntry 5 }
 
 --
 --  Monitoring outstanding "transactions"
@@ -408,6 +513,15 @@ nsDebugGroup  OBJECT-GROUP
     DESCRIPTION
 	"The objects relating to debug configuration in the Net-SNMP agent."
     ::= { nsConfigGroups 1 }
+
+nsLoggingGroup  OBJECT-GROUP
+    OBJECTS {
+        nsLogType, nsLogMaxLevel, nsLogStatus
+    }
+    STATUS	current
+    DESCRIPTION
+	"The objects relating to logging configuration in the Net-SNMP agent."
+    ::= { nsConfigGroups 2 }
 
 nsTransctionGroup  OBJECT-GROUP
     OBJECTS {
