@@ -131,7 +131,7 @@ uptimeString(u_long timeticks,
     int	centisecs, seconds, minutes, hours, days;
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-	sprintf(buf,"%ld",timeticks);
+	sprintf(buf,"%lu",timeticks);
 	return buf;
     }
 

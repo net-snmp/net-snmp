@@ -428,9 +428,9 @@ static void handle_time_fmt (char * bfr,
 
   /* handle output in Unix time format */
   if (fmt_cmd == CHR_CUR_TIME)
-    sprintf (safe_bfr, "%ld", (long) time_val);
+    sprintf (safe_bfr, "%lu", time_val);
   else if (fmt_cmd == CHR_UP_TIME && !options->alt_format)
-    sprintf (safe_bfr, "%ld", (long) time_val);
+    sprintf (safe_bfr, "%lu", time_val);
   else if (fmt_cmd == CHR_UP_TIME) {
     int centisecs, seconds, minutes, hours, days;
 
