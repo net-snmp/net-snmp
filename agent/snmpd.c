@@ -546,16 +546,6 @@ static void usage(char *prog)
 RETSIGTYPE
 SnmpdShutDown(int a)
 {
-  /* We've received a sigTERM.  Shutdown by calling mib-module
-     functions and sending out a shutdown trap. */
-  snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
-  snmp_shutdown("snmpd");
-
-#include "mib_module_shutdown.h"
-
-  DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
-  SnmpTrapNodeDown();
-  DEBUGMSGTL(("snmpd", "Bye...\n"));
   running = 0;
 }
 
@@ -1008,6 +998,17 @@ receive(void)
 	    }
 	}  /* endif -- now>sched */
     }  /* endwhile */
+
+    /* We've received a sigTERM.  Shutdown by calling mib-module
+       functions and sending out a shutdown trap. */
+    snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
+    snmp_shutdown("snmpd");
+
+  #include "mib_module_shutdown.h"
+
+    DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
+    SnmpTrapNodeDown();
+    DEBUGMSGTL(("snmpd", "Bye...\n"));
 
     return 0;
 
