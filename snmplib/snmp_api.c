@@ -3865,20 +3865,22 @@ _sess_async_send(void *sessp,
     }
   }
 
-  if ((pktbuf = malloc(256)) == NULL) {
+  if (pdu == NULL) {
+    session->s_snmp_errno = SNMPERR_NULL_PDU;
+    return 0;
+  }
+
+  if ((pktbuf = malloc(2048)) == NULL) {
     DEBUGMSGTL(("sess_async_send", "couldn't malloc initial packet buffer\n"));
+    session->s_snmp_errno = SNMPERR_MALLOC;
     return 0;
   } else {
-    pktbuf_len = 256;
+    pktbuf_len = 2048;
   }
 
   session->s_snmp_errno = 0;
   session->s_errno = 0;
 
-  if (pdu == NULL) {
-    session->s_snmp_errno = SNMPERR_NULL_PDU;
-    return 0;
-  }
 #if TEMPORARILY_DISABLED
   /*
    *  NULL variable are allowed in certain PDU types.
@@ -3913,6 +3915,7 @@ _sess_async_send(void *sessp,
   if (pdu->version == SNMP_DEFAULT_VERSION) {
     if (session->version == SNMP_DEFAULT_VERSION) {
       session->s_snmp_errno = SNMPERR_BAD_VERSION;
+      free(pktbuf);
       return 0;
     }
     pdu->version = session->version;
@@ -3921,6 +3924,7 @@ _sess_async_send(void *sessp,
   } else if (pdu->version != session->version) {
     /*  ENHANCE: we should support multi-lingual sessions  */
     session->s_snmp_errno = SNMPERR_BAD_VERSION;
+    free(pktbuf);
     return 0;
   }
 
@@ -3995,13 +3999,13 @@ _sess_async_send(void *sessp,
 			     &(pdu->transport_data),
 			     &(pdu->transport_data_length));
 
+  free(pktbuf);
+
   if (result < 0) {
     session->s_snmp_errno = SNMPERR_BAD_SENDTO;
     session->s_errno = errno;
     return 0;
   }
-
-  free(pktbuf);
 
   reqid = pdu->reqid;
 
@@ -4179,12 +4183,14 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
 
   if (isp->hook_pre) {
     if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
+      DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
       return -1;
     }
   }
 
   pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
   if (pdu == NULL) {
+    DEBUGMSGTL(("sess_process_packet", "can't malloc space for PDU\n"));
     return -1;
   }
 
@@ -4202,8 +4208,13 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
     ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
+  if (ret != SNMP_ERR_NOERROR) {
+    DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
+  }
+
   if (isp->hook_post) {
     if (isp->hook_post(sp, pdu, ret) == 0) {
+      DEBUGMSGTL(("sess_process_packet", "post-parse fail\n"));
       snmp_free_pdu(pdu);
       return -1;
     }
