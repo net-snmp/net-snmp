@@ -19,6 +19,9 @@
  * Includes of standard ANSI C header files 
  */
 
+#ifdef DODEBUG
+#include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -776,7 +779,6 @@ Name_cmp(void *ifrp, void *ep)
 #endif
 
 #ifdef _GETKSTAT_TEST
-#include <stdio.h>
 
 void
 main (int argc, char **argv)
@@ -799,7 +801,6 @@ main (int argc, char **argv)
 #endif /*_GETKSTAT_TEST */
 
 #ifdef _GETMIBSTAT_TEST
-#include <stdio.h>
 
 int
 ip20comp(void *ifname, void *ipp)
@@ -863,14 +864,14 @@ main (int argc, char **argv)
 		  req_type, ip20comp, argv[1]); 
 
   if (rc == 0)
-    fprintf(stdout, "mtu = %d\n", ipp->ipAdEntInfo.ae_mtu);
+    fprintf(stdout, "mtu = %ld\n", ipp->ipAdEntInfo.ae_mtu);
   else
     fprintf(stderr, "rc =%d\n", rc);
 
   while ((rc = getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
 			  req_type, &ARP_Cmp_Addr, &LastAddr)) == 0) {
     LastAddr = ep->ipNetToMediaNetAddress;
-    fprintf(stdout, "Ipaddr = %X\n", (u_long)LastAddr);
+    fprintf(stdout, "Ipaddr = %lX\n", (u_long)LastAddr);
     req_type = GET_NEXT;
   }
 

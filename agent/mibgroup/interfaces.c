@@ -1073,10 +1073,10 @@ u_char *EtherAddr;
 	struct arpcom {
 	  char ac_enaddr[6];
 	} arpcom;
-#ifndef linux
+#if defined(netbsd1) || defined(bsdi2)
         struct sockaddr_dl sadl;
-      struct ifaddr ifaddr;
-      u_long ifaddraddr;
+        struct ifaddr ifaddr;
+        u_long ifaddraddr;
 #endif
 #endif
 

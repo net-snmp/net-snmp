@@ -821,7 +821,7 @@ static void Route_Scan_Reload()
 	 *  Sort it!
 	 */
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
-	      (int (*)(const void *, const void *))qsort_compare);
+	      qsort_compare);
 }
 #else
 #ifdef linux

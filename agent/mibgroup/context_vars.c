@@ -1,5 +1,11 @@
 #include <config.h>
 
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -28,7 +34,7 @@ static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
 static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
-				&& !bcmp((char *)(o1), (char *)(o2), \
+				&& !memcmp((char *)(o1), (char *)(o2), \
 					 (l1)*sizeof(oid)))
 
 #define CONTEXTIDENTITY_MASK		0x0001
@@ -94,6 +100,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
    oid      *name;
    int      length;
 {
+#if 0
     struct contextEntry *cp, *rp;
     int var, indexlen, len;
     oid *index;
@@ -104,7 +111,6 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
     struct viewEntry *vp;
     u_long myaddr;
     
-#if 0
     if (length < 13)  /* maybe this should be 15 to guarantee oidlength >= 2 */
 	return SNMP_ERR_NOCREATION;  
     var = name[11];
@@ -124,7 +130,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	 * contextIndex is automatically defval'd by context_createEntry().
          */
 	rp->contextTDomain = DOMAINSNMPUDP;
-	bzero((char *)rp->contextTAddress, 6);
+	memset((char *)rp->contextTAddress, 0, 6);
 	rp->contextTAddressLen = 6;
 	rp->contextMaxMessageSize = 484;
 	rp->contextLocal = 2; /* FALSE */
@@ -151,7 +157,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	       to have overlayed data after the code above has executed.
 	      */
 	    cp->contextTDomain = rp->contextTDomain;
-	    bcopy(rp->contextTAddress, cp->contextTAddress, rp->contextTAddressLen);
+	    memcpy(cp->contextTAddress, rp->contextTAddress, rp->contextTAddressLen);
 	    cp->contextTAddressLen = rp->contextTAddressLen;
 	    cp->contextMaxMessageSize = rp->contextMaxMessageSize;
 	    cp->contextLocal = rp->contextLocal;
@@ -217,7 +223,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->contextBitMask |= CONTEXTTADDRESS_MASK;
 	} else if (action == COMMIT){
 	    cp->contextTAddressLen = rp->contextTAddressLen;
-	    bcopy(rp->contextTAddress, cp->contextTAddress, cp->contextTAddressLen);
+	    memcpy(cp->contextTAddress, rp->contextTAddress, cp->contextTAddressLen);
 	}
 	break;
       case CONTEXTMAXMESSAGESIZE:
@@ -232,7 +238,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	} else if (action == RESERVE2){
 	    myaddr = get_myaddr();
 	    if ((rp->contextTDomain == DOMAINSNMPUDP)
-		&& !bcmp((char *)&myaddr, rp->contextTAddress, 4)){
+		&& !memcmp((char *)&myaddr, rp->contextTAddress, 4)){
 		/* context is local */
 		/* 1500 should be constant in snmp_impl.h */
 		if (rp->contextMaxMessageSize > 1500)
@@ -254,7 +260,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	} else if (action == RESERVE2){
 	    myaddr = get_myaddr();
 	    if (val == 1 && (rp->contextTDomain == DOMAINSNMPUDP)
-		&& bcmp((char *)&myaddr, rp->contextTAddress, 4)){
+		&& memcmp((char *)&myaddr, rp->contextTAddress, 4)){
 		/* this is an attempt to set this context local with a
 		   remote IP address */
 		    return SNMP_ERR_INCONSISTENTVALUE;
@@ -334,8 +340,8 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->contextBitMask |= CONTEXTAUTHPUBLIC_MASK;
 	} else if (action == COMMIT){
 	    cp->contextAuthPublicLen = rp->contextAuthPublicLen;
-	    bcopy((char *)rp->contextAuthPublic,
-		  (char *)cp->contextAuthPublic, cp->contextAuthPublicLen);
+	    memcpy(cp->contextAuthPublic, rp->contextAuthPublic,
+		  cp->contextAuthPublicLen);
 	}
 	break;
       case CONTEXTAUTHLIFETIME:
@@ -410,8 +416,8 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 		return SNMP_ERR_WRONGLENGTH;
 	    rp->contextBitMask |= CONTEXTPRIVPUBLIC_MASK;
 	} else if (action == COMMIT){
-	    bcopy((char *)rp->contextPrivPublic, (char *)cp->contextPrivPublic,
-		  rp->contextPrivPublicLen);
+	    memcpy(cp->contextPrivPublic,
+		  rp->contextPrivPublic, rp->contextPrivPublicLen);
 	    cp->contextPrivPublicLen = rp->contextPrivPublicLen;
 	}
 	break;
@@ -467,10 +473,10 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    do {
 		for(; ap; ap = acl_scanNext()){
 		    if ((ap->aclTargetLen == cp->contextIdentityLen
-			 && !bcmp(ap->aclTarget, cp->contextIdentity,
+			 && !memcmp(ap->aclTarget, cp->contextIdentity,
 				  ap->aclTargetLen * sizeof(oid)))
 			|| (ap->aclSubjectLen == cp->contextIdentityLen
-			    && !bcmp(ap->aclSubject, cp->contextIdentity,
+			    && !memcmp(ap->aclSubject, cp->contextIdentity,
 				     ap->aclSubjectLen * sizeof(oid)))){
 			acl_destroyEntry(ap->aclTarget, ap->aclTargetLen,
 					 ap->aclSubject, ap->aclSubjectLen);
@@ -488,7 +494,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    do {
 		for(; vp; vp = view_scanNext()){
 		    if (vp->viewContextLen == cp->contextIdentityLen
-			&& !bcmp(vp->viewContext, cp->contextIdentity,
+			&& !memcmp(vp->viewContext, cp->contextIdentity,
 				 vp->viewContextLen * sizeof(oid))){
 			view_destroyEntry(vp->viewContext, vp->viewContextLen,
 					  vp->viewSubtree, vp->viewSubtreeLen);
@@ -531,7 +537,6 @@ var_context(vp, name, length, exact, var_len, write_method)
     int newnamelen, lownamelen;
     struct contextEntry *cp, *lowcp = NULL;
     u_long mask;
-    struct timeval now;
 /*
  * This routine handles requests for variables of the form:
 
@@ -543,10 +548,10 @@ var_context(vp, name, length, exact, var_len, write_method)
  */
 
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     if (exact){
         if (*length < 13 ||
-	    bcmp((char *)name, (char *)vp->name, 11 * sizeof(oid)))
+	    memcmp((char *)name, (char *)vp->name, 11 * sizeof(oid)))
 	    return NULL;
     	*write_method = write_context;
         cp = context_getEntry(name + 12, *length - 12);
@@ -560,8 +565,8 @@ var_context(vp, name, length, exact, var_len, write_method)
       for(cp = context_scanNext(); cp; cp = context_scanNext()){
 	if (!(cp->contextBitMask & mask))
 	    continue;
-	bcopy((char *)cp->contextIdentity, (char *)(newname + 12),
-	      cp->contextIdentityLen * sizeof(oid));
+	memcpy((newname + 12),
+	      cp->contextIdentity, cp->contextIdentityLen * sizeof(oid));
 	newnamelen = 12 + cp->contextIdentityLen;
 	if ((compare(newname, newnamelen, name, *length) > 0) &&
 	    (!lowcp || compare(newname, newnamelen,
@@ -570,7 +575,7 @@ var_context(vp, name, length, exact, var_len, write_method)
 	     * if new one is greater than input and closer to input than
 	     * previous lowest, save this one as the "next" one.
 	     */
-	    bcopy((char *)newname, (char *)lowname, newnamelen * sizeof(oid));
+	    memcpy(lowname, newname, newnamelen * sizeof(oid));
 	    lownamelen = newnamelen;
 	    lowcp = cp;
 	}
@@ -578,7 +583,7 @@ var_context(vp, name, length, exact, var_len, write_method)
       if (lowcp == NULL)
 	  return NULL;
       cp = lowcp;
-      bcopy((char *)lowname, (char *)name, lownamelen * sizeof(oid));
+      memcpy(name, lowname, lownamelen * sizeof(oid));
       *length = lownamelen;
     }
 
@@ -608,11 +613,11 @@ var_context(vp, name, length, exact, var_len, write_method)
 	}
       case CONTEXTDSTPARTYINDEX:
 	*var_len = 8;
-	bzero(return_buf, 8);
+	memset(return_buf, 0, 8);
 	return (u_char *)return_buf;
       case CONTEXTSRCPARTYINDEX:
 	*var_len = 8;
-	bzero(return_buf, 8);
+	memset(return_buf, 0, 8);
 	return (u_char *)return_buf;
       case CONTEXTPROXYCONTEXT:
         *var_len = cp->contextProxyContextLen * sizeof(oid);

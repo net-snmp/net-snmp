@@ -21,7 +21,7 @@
 #include "acl_vars.h"
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
-				&& !bcmp((char *)(o1), (char *)(o2), \
+				&& !memcmp((char *)(o1), (char *)(o2), \
 					 (l1)*sizeof(oid)))
 
 #define ACLTARGET_MASK		0x01
@@ -77,7 +77,7 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
    oid      *name;
    int      length;
 {
-    struct aclEntry *ap, *rp;
+    struct aclEntry *ap, *rp = NULL;
     int var, targetlen, subjectlen;
     oid *target, *subject;
     long val;
@@ -219,10 +219,10 @@ var_acl(vp, name, length, exact, var_len, write_method)
  */
 
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     if (exact){
         if (*length != 15 ||
-	    bcmp((char *)name, (char *)vp->name, 12 * sizeof(oid)))
+	    memcmp((char *)name, (char *)vp->name, 12 * sizeof(oid)))
 	    return NULL;
 	target = name[12];
 	subject = name[13];
@@ -251,7 +251,7 @@ var_acl(vp, name, length, exact, var_len, write_method)
 	     * if new one is greater than input and closer to input than
 	     * previous lowest, save this one as the "next" one.
 	     */
-	    bcopy((char *)newname, (char *)lowname, newnamelen * sizeof(oid));
+	    memcpy(lowname, newname, newnamelen * sizeof(oid));
 	    lownamelen = newnamelen;
 	    lowap = ap;
 	}
@@ -259,7 +259,7 @@ var_acl(vp, name, length, exact, var_len, write_method)
       if (lowap == NULL)
 	  return NULL;
       ap = lowap;
-      bcopy((char *)lowname, (char *)name, lownamelen * sizeof(oid));
+      memcpy(name, lowname, lownamelen * sizeof(oid));
       *length = lownamelen;
     }
 

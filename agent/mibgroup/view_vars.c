@@ -20,7 +20,7 @@
 #include "view_vars.h"
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
-				&& !bcmp((char *)(o1), (char *)(o2), \
+				&& !memcmp((char *)(o1), (char *)(o2), \
 					 (l1)*sizeof(oid)))
 
 #define VIEWINDEX_MASK		0x01
@@ -136,7 +136,7 @@ write_view(action, var_val, var_val_type, var_val_len, statP, name, length)
 	       to have overlayed data after the code above has executed.
 	      */
 	    vp->viewMaskLen = rp->viewMaskLen;
-	    bcopy(rp->viewMask, vp->viewMask, rp->viewMaskLen);
+	    memcpy(vp->viewMask, rp->viewMask, rp->viewMaskLen);
 	    vp->viewStatus = rp->viewStatus;
 	    vp->viewBitMask = rp->viewBitMask;
 	}
@@ -165,7 +165,7 @@ write_view(action, var_val, var_val_type, var_val_len, statP, name, length)
             rp->viewBitMask |= VIEWMASK_MASK;
         } else if (action == COMMIT){
             vp->viewMaskLen = rp->viewMaskLen;
-            bcopy(rp->viewMask, vp->viewMask, vp->viewMaskLen);
+            memcpy(vp->viewMask, rp->viewMask, vp->viewMaskLen);
         }
 	break;
       case VIEWSTATUS:
@@ -227,10 +227,10 @@ var_view(vp, name, length, exact, var_len, write_method)
  * at name[13].
  */
     mask = 1 << (vp->magic - 1);
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     if (exact){
         if (*length < 14 ||
-	    bcmp((char *)name, (char *)vp->name, 12 * sizeof(oid)))
+	    memcmp((char *)name, (char *)vp->name, 12 * sizeof(oid)))
 	    return NULL;
 	viewIndex = name[12];
 	viewSubtreeLen = *length - 13;
@@ -251,8 +251,7 @@ var_view(vp, name, length, exact, var_len, write_method)
 	    continue;
 	np = newname + 12;
 	*np++ = vwp->viewIndex;
-	bcopy((char *)vwp->viewSubtree, (char *)np,
-	      vwp->viewSubtreeLen * sizeof(oid));
+	memcpy(np, vwp->viewSubtree, vwp->viewSubtreeLen * sizeof(oid));
 	newnamelen = 13 + vwp->viewSubtreeLen;
 	if ((compare(newname, newnamelen, name, *length) > 0) &&
 	    (!lowvwp || compare(newname, newnamelen,
@@ -261,7 +260,7 @@ var_view(vp, name, length, exact, var_len, write_method)
 	     * if new one is greater than input and closer to input than
 	     * previous lowest, save this one as the "next" one.
 	     */
-	    bcopy((char *)newname, (char *)lowname, newnamelen * sizeof(oid));
+	    memcpy(lowname, newname, newnamelen * sizeof(oid));
 	    lownamelen = newnamelen;
 	    lowvwp = vwp;
 	}
@@ -269,7 +268,7 @@ var_view(vp, name, length, exact, var_len, write_method)
       if (lowvwp == NULL)
 	  return NULL;
       vwp = lowvwp;
-      bcopy((char *)lowname, (char *)name, lownamelen * sizeof(oid));
+      memcpy(name, lowname, lownamelen * sizeof(oid));
       *length = lownamelen;
     }
 
@@ -304,7 +303,7 @@ in_view(name, namelen, viewIndex)
 	if (vwp->viewIndex != viewIndex || vwp->viewStatus != VIEWACTIVE)
 	    continue;
 	if (vwp->viewSubtreeLen > namelen
-	    || bcmp(vwp->viewSubtree, name, vwp->viewSubtreeLen * sizeof(oid)))
+	    || memcmp(vwp->viewSubtree, name, vwp->viewSubtreeLen * sizeof(oid)))
 	    continue;
 	/* no wildcards here yet */
 	if (!savedvwp){
