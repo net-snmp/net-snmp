@@ -83,7 +83,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   newuser->engineID = snmpv3_generate_engineID(&newuser->engineIDLen);
 
   if (!cp)
-    return; /* no authentication or privacy type */
+    goto add; /* no authentication or privacy type */
 
   /* READ: Authentication Type */
   if (strncmp(cp, "MD5", 3) == 0) {
@@ -130,7 +130,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   }
 
   if (!cp)
-    return; /* no privacy type (which is legal) */
+    goto add; /* no privacy type (which is legal) */
   
   /* READ: Privacy Type */
   if (strncmp(cp, "DES", 3) == 0) {
@@ -171,6 +171,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
       return;
     }
   }
+add:
   usm_add_user(newuser);
   DEBUGMSGTL(("usmUser","created a new user %s\n", newuser->secName));
 }
