@@ -99,7 +99,7 @@ struct variable2 snmpTargetAddrEntry_variables[] = {
 };
 
 /* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.15.1.2.1, 10, snmpTargetAddrEntry_variables)
+config_load_mib(1.3.6.1.6.3.12.1.2.1, 10, snmpTargetAddrEntry_variables)
 
 #endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_SNMPTARGETADDRENTRY_H */
