@@ -74,7 +74,6 @@ PERFORMANCE OF THIS SOFTWARE.
     struct nlist;
 
     extern long     long_return;
-    extern uint32_t ipaddr_return;
     extern u_char   return_buf[];
 
     extern oid      nullOid[];

@@ -219,7 +219,6 @@ extern netsnmp_subtree *subtrees;
  */
 
 long            long_return;
-uint32_t	ipaddr_return;
 #ifndef ibm032
 u_char          return_buf[258];
 #else
