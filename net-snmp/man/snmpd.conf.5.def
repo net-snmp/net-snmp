@@ -199,9 +199,9 @@ An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "FILES"
-PREFIX/lib/snmpd.conf
+PREFIX/lib/snmp/snmpd.conf
 .br
-PREFIX/lib/snmpd.local.conf
+PREFIX/lib/snmp/snmpd.local.conf
 .SH "SEE ALSO"
 snmpd(1), EXAMPLE.conf.
 .\" Local Variables:
