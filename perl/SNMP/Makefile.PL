@@ -132,8 +132,8 @@ WIN32
 	    prompt("Unable to locate \"snmptrapd\". Please enter the path: ",
 		   $snmpd_path1);
 
-#	$snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
-#        $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
+        $snmpd =~ s/($sep)?(snmpd)?$/${sep}snmpd/;
+        $snmptrapd =~ s/($sep)?(snmptrapd)?$/${sep}snmptrapd/;
 
 	print H "SNMPD => $snmpd\n";
 	print H "SNMPTRAPD => $snmptrapd\n";
