@@ -32,10 +32,14 @@
 #	interactively pick tests to run.
 #	options arguments to pick tests to run.
 #
+#
+# Variables:  (* = exported)
+#  *SNMP_BASEDIR:  	  the source base directory for tests
+#  *SNMP_UPDIR:  	  directory above where the test binaries live (-D option)
 
 # Usage mess.  (No, it works.)
 #
-USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS]"
+USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS] [-D bindir]"
 
 usage() { 
     echo; 
@@ -47,10 +51,9 @@ usage() {
 }
 
 # defaults
+SNMP_BASEDIR=`dirname $0` ; export SNMP_BASEDIR
+SNMP_UPDIR=`dirname $0`/..
 interactive=no
-
-# HACK ATTACK! this works for subdirs NOT in the source path!
-PATH=.:$PATH ; export PATH
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -74,6 +77,10 @@ while [ -n "$1" ]; do
 	    SNMP_SAVE_TMPDIR="yes"
 	    export SNMP_SAVE_TMPDIR
 	    ;;
+	-D)
+	    shift
+	    SNMP_UPDIR="$1"
+	    ;;
 	-T)
 	    shift
 	    test_nums="$1"
@@ -93,16 +100,22 @@ while [ -n "$1" ]; do
     shift
 done
 
+
+# Fix path starting from this script's base.
+PATH=`pwd`:${SNMP_BASEDIR}:$PATH
+
 #
 # Source the testing configuration file
 #
-. ./TESTCONF.sh
+. TESTCONF.sh
 
 # Hack: the above created a directory, now we have to nuke it and
 # forget about it...  All for the convenience of the test writer.
 rmdir $SNMP_TMPDIR
 unset SNMP_TMPDIR
 export SNMP_TMPDIR
+
+PATH=${SNMP_TESTDIR}:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
 
 #
 # Switch to the testing directory, for ease of the client test packages.
@@ -143,7 +156,7 @@ if [ "x$do_tests" = "x" ]; then
 		num=`expr $num + 1`
 		if [ "x$interactive" != "xyes" -a "x$test_nums" = "x" ]; then
 		    echo -n "$num:  "
-		    ../eval_onescript.sh $testfile
+		    eval_onescript.sh $testfile
 		fi
 		all_tests="$all_tests $num"
 		all_files="$all_files $testfile"
@@ -197,7 +210,7 @@ for testfile in $do_tests; do
 	export SNMP_HEADERONLY
 
         echo -n "$num:  "
-	../eval_onescript.sh $testfile
+	eval_onescript.sh $testfile
 
 	unset SNMP_HEADERONLY
 	export SNMP_HEADERONLY
@@ -211,7 +224,7 @@ for testfile in $do_tests; do
   
     if [ "x$dothisone" = "xyes" ]; then
 	echo -n "  $num:  "
-	../eval_onescript.sh $testfile
+	eval_onescript.sh $testfile
 	if [ $? = 0 ]; then
 	    success_count=`expr $success_count + 1`
 	else

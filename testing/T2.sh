@@ -5,7 +5,7 @@
 # FIX  Short description.
 #
 
-. ./eval_tools.sh
+. eval_tools.sh
 
 HEADER a short description of your test
 
