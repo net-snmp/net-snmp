@@ -2273,7 +2273,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
     u_char         *data_ptr;
     u_char         *value_ptr;
     u_char          type_value;
-    u_char         *end_of_overhead;
+    u_char         *end_of_overhead = NULL;
     int             error;
     int             i, rc = 0;
     struct usmStateReference **secStateRef =
