@@ -68,7 +68,7 @@
                  * But only define it under FreeBSD, since it
                  *   breaks other systems (notable AIX)
                  */
-#if defined (freebsd4) || defined(freebsd5)
+#if defined (freebsd4)
 int  hz = 1000;
 #endif
 
