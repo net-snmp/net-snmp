@@ -7,27 +7,40 @@
 # file.
 #
 
+CC=gcc
+
 CFLAGS=-I/usr/local/include -g
 
 OBJS1=snmpdemoapp.o
 OBJS2=ustMain.o ustScalarSet.o
 OBJS3=asyncapp.o
 TARGETS=ustMain snmpdemoapp asyncdemo
+
+# if ucd-snmp was compiled with openssl support
+CRYPTO=-L/usr/local/ssl/lib -lcrypto
+
 # for Solaris
 #SYSLIBS=-lsocket -lnsl -lkstat
 # for BSD
 #SYSLIBS=-lkvm
 
+# shared library flags (assumes gcc)
+DLFLAGS=-fPIC -shared
+
 all: $(TARGETS)
 
 snmpdemoapp: $(OBJS1)
-	cc -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS)
+	$(CC) -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS)
 
 asyncapp: $(OBJS3)
-	cc -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS)
+	$(CC) -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS)
 
 ustMain: $(OBJS2)
-	cc -o ustMain $(OBJS2) -lucdagent -lucdmibs -lsnmp $(SYSLIBS)
+	$(CC) -o ustMain $(OBJS2) -lucdagent -lucdmibs -lsnmp $(SYSLIBS) $(CRYPTO)
 
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)
+
+ustScalarSet.so: ustScalarSet.c Makefile
+	$(CC) $(CFLAGS) $(DLFLAGS) -c -o ustScalarSet.o ustScalarSet.c
+	$(CC) $(CFLAGS) $(DLFLAGS) -o ustScalarSet.so ustScalarSet.o

@@ -60,6 +60,12 @@ struct variable2 ustScalarSet_variables[] = {
 };
 /*    (L = length of the oidsuffix) */
 
+/* deinit call for supporting dynamic shared object loading/unloading */
+void deinit_ustScalarSet(void) {
+    DEBUGMSGTL(("ustScalarSet","unloading\n"));
+    unregister_mib(ustScalarSet_variables_oid,
+                   sizeof(ustScalarSet_variables_oid)/sizeof(oid));
+}
 
 /*
  * init_ustScalarSet():
@@ -67,6 +73,7 @@ struct variable2 ustScalarSet_variables[] = {
  *   At a minimum, registration of your variables should take place here.
  */
 void init_ustScalarSet(void) {
+  DEBUGMSGTL(("ustScalarSet","initializing\n"));
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ustScalarSet", ustScalarSet_variables, variable2,
