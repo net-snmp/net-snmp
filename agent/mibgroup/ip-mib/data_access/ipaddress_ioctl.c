@@ -185,7 +185,7 @@ _get_interface_count(int sd, struct ifconf * ifc)
 {
     int lastlen = 0, i;
 
-    assert(NULL != ifc);
+    netsnmp_assert(NULL != ifc);
 
     /*
      * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
