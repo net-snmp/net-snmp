@@ -13,6 +13,8 @@ require Exporter;
 require DynaLoader;
 require AutoLoader;
 
+use NetSNMP::default_store (':all');
+
 @SNMP::ISA = qw(Exporter AutoLoader DynaLoader);
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -380,8 +382,14 @@ sub new {
    $this->{ErrorStr} = ''; # if methods return undef check for expln.
    $this->{ErrorNum} = 0;  # contains SNMP error return
 
-   # v1 or v2, defaults to v1
-   $this->{Version} ||= 1;
+   $this->{Version} ||= 
+     NetSNMP::default_store::ds_get_int(NetSNMP::default_store::DS_LIBRARY_ID, 
+				      NetSNMP::default_store::DS_LIB_SNMPVERSION) ||
+					SNMP::SNMP_DEFAULT_VERSION;
+   if ($this->{Version} eq 128) {
+       # special handling of the bogus v1 definition.
+       $this->{Version} = 1;
+   }
 
    # allow override of local SNMP port
    $this->{LocalPort} ||= 0;
@@ -390,7 +398,8 @@ sub new {
    $this->{DestHost} ||= 'localhost';
 
    # community defaults to public
-   $this->{Community} ||= 'public';
+   $this->{Community} ||= NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+				        NetSNMP::default_store::DS_LIB_COMMUNITY()) || 'public';
 
    # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
    $this->{Retries} = SNMP::SNMP_DEFAULT_RETRIES() unless defined($this->{Retries});
@@ -415,17 +424,35 @@ sub new {
 					     $this->{Timeout},
 					     );
    } elsif ($this->{Version} eq '3' ) {
-       $this->{SecName} ||= 'initial';
-       $this->{SecLevel} ||= 'noAuthNoPriv';
-       $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}}
-          if $this->{SecLevel} !~ /^\d+$/;
+       $this->{SecName} ||= 
+	   NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		         NetSNMP::default_store::DS_LIB_SECNAME()) || 
+			   'initial';
+       if (!$this->{SecLevel}) {
+	   $this->{SecLevel} = 
+	       NetSNMP::default_store::ds_get_int(NetSNMP::default_store::DS_LIBRARY_ID(), 
+			  NetSNMP::default_store::DS_LIB_SECLEVEL()) || 
+			      $SNMP::V3_SEC_LEVEL_MAP{'noAuthNoPriv'};
+       } elsif ($this->{SecLevel} !~ /^\d+$/) {
+	   $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}};
+       }
        $this->{SecEngineId} ||= '';
        $this->{ContextEngineId} ||= $this->{SecEngineId};
-       $this->{Context} ||= '';
-       $this->{AuthProto} ||= 'MD5';
-       $this->{AuthPass} ||= '';
-       $this->{PrivProto} ||= 'DES';
-       $this->{PrivPass} ||= '';
+       $this->{Context} ||= 
+	   NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		         NetSNMP::default_store::DS_LIB_CONTEXT()) || '';
+       $this->{AuthProto} ||= 'MD5'; # defaults XXX
+       $this->{AuthPass} ||=
+       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::DS_LIB_AUTHPASSPHRASE()) ||
+       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::DS_LIB_PASSPHRASE()) || '';
+       $this->{PrivProto} ||= 'DES';  # defaults XXX
+       $this->{PrivPass} ||=
+       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::DS_LIB_PRIVPASSPHRASE()) ||
+       NetSNMP::default_store::ds_get_string(NetSNMP::default_store::DS_LIBRARY_ID(), 
+		     NetSNMP::default_store::DS_LIB_PASSPHRASE()) || '';
        $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
        $this->{EngineTime} = 0 if not defined $this->{EngineTime};
 
