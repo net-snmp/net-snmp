@@ -75,6 +75,10 @@ AC_ARG_WITH(openssl,
     tryopenssl=$withval
     if test "x$withval" = "xyes"; then
       AC_ADD_SEARCH_PATH(/usr/local/ssl)
+      tryopenssl=yes
+    elif test "x$withval" = "xno"; then
+      with_openssl="no"
+      tryopenssl=no
     elif test -d "$withval"; then
       AC_ADD_SEARCH_PATH($withval)
       tryopenssl=yes
@@ -971,7 +975,9 @@ AC_CHECK_LIB(kvm, kvm_read)
 dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 dnl Check for security related functions
-AC_CHECK_LIB(crypto, EVP_md5)
+if test "x$with_openssl" != "xno"; then
+    AC_CHECK_LIB(crypto, EVP_md5)
+fi
 
 dnl Checks for header files.
 AC_HEADER_STDC
