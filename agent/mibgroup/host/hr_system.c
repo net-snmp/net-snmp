@@ -38,6 +38,10 @@
 #endif
 #endif
 
+#ifdef solaris2
+#include <sys/var.h>
+#endif
+
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
@@ -157,7 +161,7 @@ var_hrsys(struct variable *vp,
 {
     static char string[100];
     time_t	now;
-#ifndef NR_TASKS
+#if !defined(NR_TASKS) && !defined(solaris2)
     int		nproc = 0;
 #endif
 #ifdef linux
@@ -166,6 +170,9 @@ var_hrsys(struct variable *vp,
 #if CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     int buf_size;
+#endif
+#ifdef solaris2
+    struct var v;
 #endif
 
     if (header_hrsys(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -218,6 +225,9 @@ var_hrsys(struct variable *vp,
 #elif defined(NPROC_SYMBOL)
 	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
+#elif defined(solaris2)
+	    getKstatRaw("unix", "var", sizeof v, &v);
+	    long_return = v.v_proc;
 #else
 #if NO_DUMMY_VALUES
 	    return NULL;
