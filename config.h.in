@@ -8,7 +8,7 @@
 
 /* default list of mibs to load */
 
-#define DEFAULT_MIBS "SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:SNMPv2-CONF:UCD-SNMP-MIB"
+#define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
 
 /* default location to look for mibs to load */
 
