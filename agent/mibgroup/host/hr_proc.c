@@ -155,9 +155,6 @@ var_hrproc(struct variable *vp,
             *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	case HRPROC_LOAD:
-#if NO_DUMMY_VALUES
-	    return NULL;
-#endif
 	    long_return = avenrun[0] * 100;	/* 1 minute average */
 	    if ( long_return > 100 )
 		long_return=100;
