@@ -162,27 +162,6 @@ extern struct mnttab *HRFS_entry;
 /* fake block size */
 #define FAKED_BLOCK_SIZE 512
 
-/* linux-compatible values for fs type */
-#define MSDOS_SUPER_MAGIC     0x4d44
-#define NTFS_SUPER_MAGIC      0x5346544E
-
-/* Define the statfs structure for Windows. */
-struct win_statfs {
-   long    f_type;     /* type of filesystem */
-   long    f_bsize;    /* optimal transfer block size */
-   long    f_blocks;   /* total data blocks in file system */
-   long    f_bfree;    /* free blocks in fs */
-   long    f_bavail;   /* free blocks avail to non-superuser */
-   long    f_files;    /* total file nodes in file system */
-   long    f_ffree;    /* free file nodes in fs */
-   long    f_fsid;     /* file system id */
-   long    f_namelen;  /* maximum length of filenames */
-   long    f_spare[6]; /* spare for later */
-   char	   f_driveletter[6];
-};
-
-static int win_statfs (const char *path, struct win_statfs *buf);
-
 extern struct win_statfs *HRFS_entry;
 #define HRFS_statfs	win_statfs
 #define HRFS_mount	f_driveletter
