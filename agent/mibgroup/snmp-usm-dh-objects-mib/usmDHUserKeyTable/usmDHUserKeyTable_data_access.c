@@ -185,8 +185,10 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
     for(; usmuser; usmuser = usmuser->next) {
         /*
          * TODO:352:M: |   |-> set indexes in new usmDHUserKeyTable rowreq context.
+         * data context will be set from the param (unless NULL,
+         *      in which case a new data context will be allocated)
          */
-        rowreq_ctx = usmDHUserKeyTable_allocate_rowreq_ctx();
+        rowreq_ctx = usmDHUserKeyTable_allocate_rowreq_ctx(usmuser);
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation failed\n");
             return MFD_RESOURCE_UNAVAILABLE;
@@ -208,7 +210,6 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
          * TODO:352:r: |   |-> populate usmDHUserKeyTable data context.
          * Populate data context here. (optionally, delay until row prep)
          */
-        rowreq_ctx->data = usmuser;
 
         /*
          * insert into table container
@@ -233,8 +234,12 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+ *
  */
 void
 usmDHUserKeyTable_cache_free(netsnmp_container * container)
