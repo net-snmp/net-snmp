@@ -28,8 +28,9 @@ INCLUDESUBDIRHEADERS=README \
 	asn1.h \
 	callback.h \
 	container.h \
+	container_binary_array.h \
+	factory.h \
 	data_list.h \
-	oid_array.h \
 	default_store.h \
 	int64.h \
 	keytools.h \
@@ -110,41 +111,19 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_debug.c tools.c  snmp_logging.c			\
 	snmpv3.c lcd_time.c keytools.c		                \
 	scapi.c callback.c default_store.c snmp_alarm.c		\
-	data_list.c oid_array.c oid_stash.c			\
-	mt_support.c snmp_enum.c snmp-tc.c			\
+	data_list.c oid_stash.c factory.c			\
+	mt_support.c snmp_enum.c snmp-tc.c 			\
 	snprintf.c strtol.c strtoul.c				\
-	snmp_transport.c @transport_src_list@                   \
-	snmp_secmod.c @security_src_list@ snmp_version.c	\
-	check_varbind.c container.c \
+	snmp_transport.c                                        \
+	@transport_src_list@ \
+	snmp_secmod.c snmp_version.c                            \
+	@security_src_list@ \
+	check_varbind.c container.c container_binary_array.c	\
 	cmu_compat.c ucd_compat.c
 
-OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
-	snmp_auth.o asn1.o md5.o snmp_parse_args.o	  	\
-	system.o vacm.o int64.o read_config.o 		  	\
-	snmp_debug.o tools.o  snmp_logging.o	   	  	\
-	snmpv3.o lcd_time.o keytools.o	  	                \
-	scapi.o callback.o default_store.o snmp_alarm.o	  	\
-	data_list.o oid_array.o	oid_stash.o			\
-	mt_support.o snmp_enum.o snmp-tc.o			\
-	snprintf.o strtol.o strtoul.o				\
-	snmp_transport.o @transport_obj_list@                   \
-	snmp_secmod.o @security_obj_list@ snmp_version.o	\
-	check_varbind.o container.o \
-	cmu_compat.o ucd_compat.o
+OBJS=	$(CSRCS:.c=.o)
 
-LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
-	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
-	system.lo vacm.lo int64.lo read_config.lo 		\
-	snmp_debug.lo tools.lo  snmp_logging.lo	   	  	\
-	snmpv3.lo lcd_time.lo keytools.lo	  	        \
-	scapi.lo callback.lo default_store.lo snmp_alarm.lo	\
-	data_list.lo oid_array.lo oid_stash.lo			\
-	mt_support.lo snmp_enum.lo snmp-tc.lo			\
-	snprintf.lo strtol.lo strtoul.lo			\
-	snmp_transport.lo @transport_lobj_list@                 \
-        snmp_secmod.lo @security_lobj_list@ snmp_version.lo	\
-	check_varbind.lo container.lo \
-	cmu_compat.lo ucd_compat.lo
+LOBJS=	$(CSRCS:.c=.lo)
 
 # just in case someone wants to remove libtool, change this to OBJS.
 TOBJS=$(LOBJS)
@@ -163,9 +142,22 @@ libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
 	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS}
 	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
+#how to build dependencies
+%.d : %.c
+	@echo "Generating makefile $@ ..."
+	@set -e; $(CC) -M $(COPTS) $(ALLFLAGS) $(CXXFLAGS) $< \
+	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
+	[ -s $@ ] || rm -f $@
 
 #
 # internal test objects
 #
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse
+
+#
+# dependencies
+#
+ifeq ($(AUTO_DEPEND),y)
+include $(SOURCES:.c=.d)
+endif
