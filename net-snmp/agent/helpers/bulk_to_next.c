@@ -19,7 +19,7 @@
  *  The only purpose of this handler is to convert a GETBULK request
  *  to a GETNEXT request.  It is inserted into handler chains where
  *  the handler has not set the HANDLER_CAN_GETBULK flag.
- *  @ingroup handler
+ *  @ingroup utilities
  *  @{
  */
 

@@ -21,7 +21,7 @@
 
 /** @defgroup watcher watcher: watch a specified variable and process
  *   it as an instance or scalar object
- *  @ingroup handler
+ *  @ingroup leaf
  *  @{
  */
 netsnmp_mib_handler *

@@ -20,7 +20,7 @@
 #endif
 
 /** @defgroup scalar_group_group scalar_group: process groups of scalars.
- *  @ingroup handler
+ *  @ingroup leaf
  *  @{
  */
 netsnmp_mib_handler *

@@ -33,7 +33,7 @@
  *
  *  and then run snmpwalk on the "system" group.
  *
- *  @ingroup handler
+ *  @ingroup utilities
  *  @{
  */
 
