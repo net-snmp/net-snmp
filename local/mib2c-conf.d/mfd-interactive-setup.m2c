@@ -15,6 +15,7 @@
 @eval $m2c_temp_data_allocate = 0@
 @eval $m2c_temp_undo_embed = 0@
 @eval $m2c_temp_data_init = 0@
+@eval $m2c_temp_persistent = $m2c_temp_writable@
 @eval $m2c_temp_table_access = "$mfd_default_table_access"@
 @eval $m2c_temp_data_transient = $mfd_default_data_transient@
 @eval $m2c_temp_include_examples = $mfd_default_include_examples@
@@ -52,10 +53,29 @@ code for writeable columns, or restrict the table to read-only?
 @        eval $m2c_temp_writable = 0@
 @        eval $m2c_temp_create = 0@
 @        eval $m2c_temp_dependencies = 0@
+@        eval $m2c_temp_persistent = 0@
 @      end@
 
 
 @    end@ # writable
+## ---------------------------------------------------
+@    if $m2c_temp_persistent == 1@
+@        eval $m2c_temp_persistent = 0@
+Since your table is writable, do you want to generate code to save and
+restore rows in the Net-SNMP persistent store? You should only use this
+option if the agent 'owns' the data, and doesn't get the data from an
+external source.
+
+  1) do not generate persistent store code [DEFAULT]
+  2) generate persistent store code
+
+@      prompt $ans Select your choice : @
+@      if $ans == 2@
+@        eval $m2c_temp_persistent = 1@
+@      end@
+
+
+@    end@ # persistent
 ## ---------------------------------------------------
 @    if $m2c_temp_dependencies == 1@
 Writable tables sometimes have dependencies beteen columns
@@ -242,6 +262,12 @@ $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_comment
 $m2c_conf_maybe_comment @eval $@m2c_table_dependencies = $m2c_temp_dependencies@
+$m2c_conf_comment
+$m2c_conf_comment_divider
+$m2c_conf_comment
+$m2c_conf_comment
+$m2c_conf_comment
+$m2c_conf_maybe_comment @eval $@m2c_table_persistent = $m2c_temp_persistent@
 $m2c_conf_comment
 $m2c_conf_comment_divider
 $m2c_conf_comment
