@@ -827,7 +827,7 @@ init_mib __P((void))
 
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
-        strcpy(path, "RFC1213-MIB");
+        strcpy(path, DEFAULT_MIBS);
 	env_var = path;
     }
     entry = strtok( env_var, ":" );
