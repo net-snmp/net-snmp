@@ -12,7 +12,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-const oid netsnmp_ucdSnmpAal5PvcDomain[9];  /* = { UCDAVIS_MIB, 251, 3 }; */
+extern oid netsnmp_ucdSnmpAal5PvcDomain[];  /* = { UCDAVIS_MIB, 251, 3 }; */
 
 netsnmp_transport		*netsnmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 						 int local);
