@@ -1058,6 +1058,7 @@ dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_FUNCS(dlopen)
 
 dnl Check for security related functions
 if test "x$tryopenssl" != "xno"; then
@@ -1273,8 +1274,6 @@ AC_CHECK_FUNCS(tcgetattr)
 AC_CHECK_FUNCS(if_nameindex if_freenameindex)
 dnl solaris checks
 AC_CHECK_FUNCS(getpagesize)
-dnl DYNAMIC MODULE SUPPORT
-AC_CHECK_FUNCS(dlopen)
 AC_CHECK_FUNCS(mkstemp)
 AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 
