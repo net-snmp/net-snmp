@@ -26,11 +26,6 @@ typedef struct netsnmp_oid_s {
 
 static int have_done_agent = 0;
 static int have_done_lib = 0;
-#ifdef USE_LIBWRAP
-/* tcpwrappers is an insanely stupid package to implement things this way */
-int             allow_severity = LOG_INFO;
-int             deny_severity = LOG_WARNING;
-#endif
 
 static int
 not_here(char *s)
