@@ -157,7 +157,7 @@ u_char		return_buf[256]; /* nee 64 */
 
 
 void
-init_snmp __P((void))
+init_agent __P((void))
 {
 #ifdef CAN_USE_NLIST
   init_kmem("/dev/kmem"); 
