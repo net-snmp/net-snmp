@@ -123,7 +123,7 @@ void usage (void)
 
 int wait_for_peak_start(int period, int peak)
 {
-  struct timeval time, *tv = &time;
+  struct timeval m_time, *tv = &m_time;
   struct tm tm;
   time_t SecondsAtNextHour;
   int target = 0;
@@ -222,7 +222,7 @@ void processFileArgs(char *fileName)
 
 void wait_for_period(int period)
 {
-  struct timeval time, *tv = &time;
+  struct timeval m_time, *tv = &m_time;
   struct tm tm;
   int count;
   static int target = 0;
