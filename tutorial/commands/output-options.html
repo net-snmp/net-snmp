@@ -33,6 +33,7 @@ Usage: snmpget [options...] <hostname> {<community>} [<objectID> ...]
 		      n: Print oids numerically.
 		      e: Print enums numerically.
 		      E: Escape quotes in string indices.
+		      X: Extended index format.
 		      b: Dont break oid indexes down.
 		      q: Quick print for easier parsing.
 		      f: Print full oids on output.
@@ -44,7 +45,6 @@ Usage: snmpget [options...] <hostname> {<community>} [<objectID> ...]
 </pre>
     <p>
       Here are brief examples of all the above options in use:
-    <ul>
       <li> -On
 	<p>  This flag controls whether or not you want to display
 	the results using numerical order to textual OIDs:
@@ -55,6 +55,7 @@ system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
 % <b>snmpgetnext -v 2c -On ucd-snmp.ucdavis.edu demopublic sysObjectID</b>
 .1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.2021.250.6
 </ul>
+</pre>
       <li> -Oe
 	<p> Similarly, this flag controls whether you want to display
 	enumerated lists numerically or with textual translations
@@ -128,6 +129,38 @@ usmUserEntry OBJECT-TYPE
 .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange."........."."MD5User" = ""
 </ul>
 </pre>
+<li>-OX
+	<p>A more elaborate output for index values is -OX. This format is
+	output-only - no provision has been made to accept it on input.
+	<p>Especially the IPv6 mibs return values that can be very difficult to
+	read, and is very different from the ways you normally see the values
+	involved.
+	<p>Consider for instance the IPV6-MIB:ipv6RouteTable
+<pre><ul>
+$ <b>snmptranslate -Td IPV6-MIB::ipv6RouteEntry</b>
+.1.3.6.1.2.1.55.1.11.1
+ipv6RouteEntry OBJECT-TYPE
+  -- FROM	IPV6-MIB
+  MAX-ACCESS	not-accessible
+  STATUS	current
+  INDEX		{ ipv6RouteDest, ipv6RoutePfxLength, ipv6RouteIndex }
+  DESCRIPTION	"A routing entry."
+::= { iso(1) org(3) dod(6) internet(1) mgmt(2) mib-2(1) ipv6MIB(55) ipv6MIBObjects(1) ipv6RouteTable(11) 1 }
+</ul></pre>
+i.e. the index is an IPv6 address and two integers. So requesting
+<pre><ul>
+$ <b>snmpgetnext -OS host IPV6-MIB::ipv6RouteTable</b>
+IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = 2
+</ul></pre>
+is not easily read. But how about
+<pre><ul>
+$ <b>snmpgetnext -OSX host IPV6-MIB::ipv6RouteTable</b>
+IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
+</ul></pre>
+	It looks a lot nicer. The format puts square brackets around each index,
+	and uses DISPLAY-HINT information and string conversions to format
+	each index.
+    <p>
       <li> -Os, -OS, and -Of
     <p>
       Shorting the output of those really long OIDs is also possible,
@@ -135,6 +168,7 @@ usmUserEntry OBJECT-TYPE
       with the MIB name that the node came from):
 <pre>
 <ul>
+<p>
 % <b>snmpget -v 2c ucd-snmp.ucdavis.edu demopublic sysUpTime.0 ucdDemoUserList.0</b>
 system.sysUpTime.0 = Timeticks: (586910990) 67 days, 22:18:29.90
 enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
@@ -158,8 +192,16 @@ UCD-DEMO-MIB::ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADES
 .iso.org.dod.internet.private.enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
 </ul>
 </pre>
+	<li>-Ov
+	<P>  The -Ov flag outputs only the value, but not variable name
+<pre>
+<ul>
+% <b>snmpget -Ov -v 2c ucd-snmp.ucdavis.edu demopublic sysObjectID.0</b>
+OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
+</ul>
+</pre>
 	<li>-Oq
-	<P>  Finally,  the -Oq flag" allows us to print everything as
+	<P>  Finally,  the -Oq flag allows us to print everything as
 	quick as possible in a fashion that is easily parsible by
 	things like scripting languages:
 <pre>
@@ -182,7 +224,14 @@ system.sysObjectID.0 enterprises.ucdavis.ucdSnmpAgent.hpux10
 sysObjectID.0 hpux10
 </ul>
 </pre>
-
+	<p>For shell scripts, the -Oqv option is useful. It only returns the
+	value of the attribute, which is useful for instance in (using sh/ksh/bash
+	syntax)
+<pre>
+<ul>
+% <b>interfaces=`snmpget -Oqv -v 2c ucd-snmp.ucdavis.edu demopublic ifNumber.0`</b>
+</ul>
+</pre>
 
     <hr>
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
