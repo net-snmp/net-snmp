@@ -1,8 +1,6 @@
 /*
  *  Template MIB group interface - example.h
  *
- *  This file is essentially a copy of wombat.h and then modified.
- *
  *  This mib is essentially duplicating the passtest script in the
  *  local directory, used by the EXAMPLE.conf file in the top level
  *  source directory.
