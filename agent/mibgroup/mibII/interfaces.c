@@ -199,6 +199,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/data_access/interface.h>
 
 #include "interfaces.h"
 #include "struct.h"
@@ -266,10 +267,6 @@ init_interfaces(void)
     REGISTER_SYSOR_ENTRY(interfaces_module_oid,
                          "The MIB module to describe generic objects for network interface sub-layers");
 
-    snmpd_register_config_handler("interface", parse_interface_config,
-                                  free_interface_config,
-                                  "name type speed");
-
 #ifndef USE_SYSCTL_IFLIST
 #if HAVE_NET_IF_MIB_H
     init_interfaces_setup();
@@ -317,80 +314,9 @@ if_type_from_name(const char *pcch)
 #endif
 
 
-static conf_if_list *conf_list;
 #ifdef linux
 static struct ifnet *ifnetaddr_list;
 #endif
-
-static void
-parse_interface_config(const char *token, char *cptr)
-{
-    conf_if_list   *if_ptr, *if_new;
-    char           *name, *type, *speed, *ecp;
-
-    name = strtok(cptr, " \t");
-    if (!name) {
-        config_perror("Missing NAME parameter");
-        return;
-    }
-    type = strtok(NULL, " \t");
-    if (!type) {
-        config_perror("Missing TYPE parameter");
-        return;
-    }
-    speed = strtok(NULL, " \t");
-    if (!speed) {
-        config_perror("Missing SPEED parameter");
-        return;
-    }
-    if_ptr = conf_list;
-    while (if_ptr)
-        if (strcmp(if_ptr->name, name))
-            if_ptr = if_ptr->next;
-        else
-            break;
-    if (if_ptr)
-        config_pwarn("Duplicate interface specification");
-    if_new = (conf_if_list *) malloc(sizeof(conf_if_list));
-    if (!if_new) {
-        config_perror("Out of memory");
-        return;
-    }
-    if_new->speed = strtoul(speed, &ecp, 0);
-    if (*ecp) {
-        config_perror("Bad SPEED value");
-        free(if_new);
-        return;
-    }
-    if_new->type = strtol(type, &ecp, 0);
-    if (*ecp || if_new->type < 0) {
-        config_perror("Bad TYPE");
-        free(if_new);
-        return;
-    }
-    if_new->name = strdup(name);
-    if (!if_new->name) {
-        config_perror("Out of memory");
-        free(if_new);
-        return;
-    }
-    if_new->next = conf_list;
-    conf_list = if_new;
-}
-
-static void
-free_interface_config(void)
-{
-    conf_if_list   *if_ptr = conf_list, *if_next;
-    while (if_ptr) {
-        if_next = if_ptr->next;
-        free(if_ptr->name);
-        free(if_ptr);
-        if_ptr = if_next;
-    }
-    conf_list = NULL;
-}
-
 
 
 /*
@@ -807,7 +733,7 @@ var_ifEntry(struct variable *vp,
     static struct in_ifaddr in_ifaddr;
     static char     Name[16];
     char           *cp;
-    conf_if_list   *if_ptr = conf_list;
+    conf_if_list   *if_ptr;
 #if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
     struct timeval  now;
 #endif
@@ -818,8 +744,7 @@ var_ifEntry(struct variable *vp,
         return NULL;
 
     Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
-    while (if_ptr && strcmp(Name, if_ptr->name))
-        if_ptr = if_ptr->next;
+    if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
 
     switch (vp->magic) {
     case IFINDEX:
@@ -1415,89 +1340,12 @@ static int      saveIndex = 0;
 * Determines network interface speed. It is system specific. Only linux
 * realization is made. 
 */
-unsigned int getIfSpeed(int fd, struct ifreq ifr){
-	unsigned int retspeed = 10000000;
+unsigned int getIfSpeed(int fd, struct ifreq ifr)
+{
 #ifdef linux
-/* the code is based on mii-diag utility by Donald Becker
-* see ftp://ftp.scyld.com/pub/diag/mii-diag.c
-*/
-	ushort *data = (ushort *)(&ifr.ifr_data);
-	unsigned phy_id;
-	unsigned char new_ioctl_nums = 0;
-	int mii_reg, i;
-	ushort mii_val[32];
-	ushort bmcr, bmsr, nway_advert, lkpar;
-	const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
-/* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
-
-
-	data[0] = 0;
-
-	if (ioctl(fd, 0x8947, &ifr) >= 0) {
-		new_ioctl_nums = 1;
-	} else if (ioctl(fd, SIOCDEVPRIVATE, &ifr) >= 0) {
-		new_ioctl_nums = 0;
-	} else {
-		DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIPHY on %s failed\n", ifr.ifr_name));
-		return retspeed;
-	}
-/* Begin getting mii register values */
-	phy_id = data[0];
-	for (mii_reg = 0; mii_reg < 8; mii_reg++){
-		data[0] = phy_id;
-		data[1] = mii_reg;
-		if(ioctl(fd, new_ioctl_nums ? 0x8948 : SIOCDEVPRIVATE+1, &ifr) <0){
-			DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIREG on %s failed\n", ifr.ifr_name));
-		}
-		mii_val[mii_reg] = data[3];		
-	}
-/*Parsing of mii values*/
-/*Invalid basic mode control register*/
-	if (mii_val[0] == 0xffff  ||  mii_val[1] == 0x0000) {
-		DEBUGMSGTL(("mibII/interfaces", "No MII transceiver present!.\n"));
-		return retspeed;
-	}
-	/* Descriptive rename. */
-	bmcr = mii_val[0]; 	  /*basic mode control register*/
-	bmsr = mii_val[1]; 	  /* basic mode status register*/
-	nway_advert = mii_val[4]; /* autonegotiation advertisement*/
-	lkpar = mii_val[5]; 	  /*link partner ability*/
-	
-/*Check for link existence, returns 0 if link is absent*/
-	if ((bmsr & 0x0016) != 0x0004){
-		DEBUGMSGTL(("mibII/interfaces", "No link...\n"));
-		retspeed = 0;
-		return retspeed;
-	}
-	
-	if(!(bmcr & 0x1000) ){
-		DEBUGMSGTL(("mibII/interfaces", "Auto-negotiation disabled.\n"));
-		retspeed = bmcr & 0x2000 ? 100000000 : 10000000;
-		return retspeed;
-	}
-/* Link partner got our advertised abilities */	
-	if (lkpar & 0x4000) {
-		int negotiated = nway_advert & lkpar & 0x3e0;
-		int max_capability = 0;
-		/* Scan for the highest negotiated capability, highest priority
-		   (100baseTx-FDX) to lowest (10baseT-HDX). */
-		int media_priority[] = {8, 9, 7, 6, 5}; 	/* media_names[i-5] */
-		for (i = 0; media_priority[i]; i++){
-			if (negotiated & (1 << media_priority[i])) {
-				max_capability = media_priority[i];
-				break;
-			}
-		}
-		if (max_capability)
-			retspeed = media_speeds[max_capability - 5];
-		else
-			DEBUGMSGTL(("mibII/interfaces", "No common media type was autonegotiated!\n"));
-	}else if(lkpar & 0x00A0){
-		retspeed = (lkpar & 0x0080) ? 100000000 : 10000000;
-	}
-	return retspeed;
+    return netsnmp_access_interface_linux_get_if_speed(fd, ifr.ifr_name);
 #else /*!linux*/			   
-	return retspeed;
+    return 10000000;
 #endif 
 }
 
@@ -1788,10 +1636,7 @@ Interface_Scan_Init(void)
         nnew->if_mtu = 0;
 #endif
 
-        for (if_ptr = conf_list; if_ptr; if_ptr = if_ptr->next)
-            if (!strcmp(if_ptr->name, ifname))
-                break;
-
+        if_ptr = netsnmp_access_interface_entry_overrides_get(ifname);
         if (if_ptr) {
             nnew->if_type = if_ptr->type;
             nnew->if_speed = if_ptr->speed;
@@ -2727,7 +2572,6 @@ var_ifEntry(struct variable * vp,
 {
     int             ifIndex;
     static char     Name[16];
-    conf_if_list   *if_ptr = conf_list;
     static MIB_IFROW ifRow;
 
     ifIndex =
