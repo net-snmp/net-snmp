@@ -623,6 +623,33 @@ register_default_handlers(void) {
 		     DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE );
 }
 
+void
+init_snmp_enums(void) 
+{
+    se_add_pair_to_slist("asntypes", strdup("integer"), ASN_INTEGER);
+    se_add_pair_to_slist("asntypes", strdup("counter"), ASN_COUNTER);
+    se_add_pair_to_slist("asntypes", strdup("gauge"), ASN_GAUGE);
+    se_add_pair_to_slist("asntypes", strdup("timeticks"), ASN_TIMETICKS);
+    se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_UINTEGER);
+    se_add_pair_to_slist("asntypes", strdup("counter64"), ASN_COUNTER64);
+    se_add_pair_to_slist("asntypes", strdup("octet_str"), ASN_OCTET_STR);
+    se_add_pair_to_slist("asntypes", strdup("ipaddress"), ASN_IPADDRESS);
+    se_add_pair_to_slist("asntypes", strdup("opaque"), ASN_OPAQUE);
+    se_add_pair_to_slist("asntypes", strdup("nsap"), ASN_NSAP);
+    se_add_pair_to_slist("asntypes", strdup("object_id"), ASN_OBJECT_ID);
+    se_add_pair_to_slist("asntypes", strdup("null"), ASN_NULL);
+    se_add_pair_to_slist("asntypes", strdup("bit_str"), ASN_BIT_STR);
+#ifdef OPAQUE_SPECIAL_TYPES
+    se_add_pair_to_slist("asntypes", strdup("opaque_counter64"),
+                         ASN_OPAQUE_COUNTER64);
+    se_add_pair_to_slist("asntypes", strdup("opaque_u64"), ASN_OPAQUE_U64);
+    se_add_pair_to_slist("asntypes", strdup("opaque_float"), ASN_OPAQUE_FLOAT);
+    se_add_pair_to_slist("asntypes", strdup("opaque_double"), ASN_OPAQUE_DOUBLE);
+    se_add_pair_to_slist("asntypes", strdup("opaque_i64"), ASN_OPAQUE_I64);
+#endif
+}
+
+
 
 /*******************************************************************-o-******
  * init_snmp
@@ -663,6 +690,7 @@ init_snmp(const char *type)
   register_default_handlers();
   init_snmpv3(type);
   init_snmp_alarm();
+  init_snmp_enums();
 
   read_premib_configs();
   init_mib();
