@@ -510,17 +510,20 @@ snmp_sess_open(struct snmp_session *in_session)
 	session->peername = (char *)cp;
     }
 
-#ifdef NO_ZEROLENGTH_COMMUNITY
     /* Fill in defaults if necessary */
     if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
 	cp = (u_char *)malloc((unsigned)session->community_len);
 	if (cp)
 	memmove(cp, session->community, session->community_len);
     } else {
+#ifdef NO_ZEROLENGTH_COMMUNITY
 	session->community_len = strlen(DEFAULT_COMMUNITY);
 	cp = (u_char *)malloc((unsigned)session->community_len);
 	if (cp)
 	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
+#else
+	cp = strdup("");
+#endif
     }
 
     if (cp == NULL) {
@@ -531,7 +534,6 @@ snmp_sess_open(struct snmp_session *in_session)
     }
 
     session->community = cp;	/* replace pointer with pointer to new data */
-#endif /* NO_ZEROLENGTH_COMMUNITY */
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
