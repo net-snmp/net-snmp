@@ -470,12 +470,13 @@ read_config_files (int when)
     /* read the config files */
     if ((envconfpath = getenv("SNMPCONFPATH")) == NULL) {
       homepath=getenv("HOME");
-      sprintf(defaultPath,"%s:%s:%s%s%s%s:%s",SNMPCONFPATH,
-              SNMPSHAREPATH,SNMPLIBPATH,
-              ((homepath == NULL) ? "" : ":"),
+      sprintf(defaultPath,"%s%c%s%c%s%s%s%s%c%s",
+	      SNMPCONFPATH, ENV_SEPARATOR_CHAR,
+              SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
+              ((homepath == NULL) ? "" : ENV_SEPARATOR),
               ((homepath == NULL) ? "" : homepath),
               ((homepath == NULL) ? "" : "/.snmp"),
-              PERSISTENT_DIRECTORY);
+              ENV_SEPARATOR_CHAR, PERSISTENT_DIRECTORY);
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
