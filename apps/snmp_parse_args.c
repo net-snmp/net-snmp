@@ -159,8 +159,6 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  session->authenticator = NULL;
-  session->peername = NULL;
 
   /* get the options */
   for(arg = 1; (arg < argc) && (argv[arg][0] == '-'); arg++){
