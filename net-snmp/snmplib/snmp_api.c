@@ -6055,6 +6055,32 @@ netsnmp_oid_is_subtree(const oid * in_name1,
     return 0;
 }
 
+/** Given two OIDs, determine the common prefix to them both.
+ * @param in_name1 A pointer to the first oid.
+ * @param len1     Length of the first oid.
+ * @param in_name2 A pointer to the second oid.
+ * @param len2     Length of the second oid.
+ * @return length of largest common index of commonality.  1 = first, 0 if none *         or -1 on error.
+ */
+int
+netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
+                        const oid * in_name2, size_t len2)
+{
+    int i;
+    size_t min_size;
+
+    if (!in_name1 || !in_name2)
+        return -1;
+
+    min_size = SNMP_MIN(len1, len2);
+    for(i = 0; i < min_size; i++) {
+        if (in_name1[i] != in_name2[i])
+            return i + 1;
+    }
+    return 0;
+}
+        
+
 /*
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.
