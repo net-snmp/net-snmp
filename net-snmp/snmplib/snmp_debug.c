@@ -188,11 +188,24 @@ debugmsg(va_alist)
 }
 
 void
-debugmsg_oid(const char *token, oid *theoid, size_t len) {
-  char c_oid[SPRINT_MAX_LEN];
-  
-  sprint_objid(c_oid, theoid, len);
-  debugmsg(token, c_oid);
+debugmsg_oid(const char *token, oid *theoid, size_t len)
+{
+  u_char *buf = NULL;
+  size_t buf_len = 0, out_len = 0;
+
+  if (sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid, len)) {
+    if (buf != NULL) {
+      debugmsg(token, "%s", buf);
+    }
+  } else {
+    if (buf != NULL) {	
+      debugmsg(token, "%s [TRUNCATED]", buf);
+    }
+  }
+
+  if (buf != NULL) {
+    free(buf);
+  }
 }
 
 void
