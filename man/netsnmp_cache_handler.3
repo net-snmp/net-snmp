@@ -1,0 +1,89 @@
+.TH "cache_handler: Maintains a cache of data for use by lower level handlers." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+cache_handler: Maintains a cache of data for use by lower level handlers. \- This helper checks to see whether the data has been loaded 'recently' (according to the timeout for that particular cache) and calls the registered 'load_cache' routine if necessary. 
+More...
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_cache_handler\fP (int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook, oid *rootoid, int rootoid_len)"
+.br
+.RI "\fIreturns a cache handler that can be injected into a given handler chain.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_cache_handler\fP (netsnmp_handler_registration *reginfo, int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook)"
+.br
+.RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a cache handler at the same time for you.\fP"
+.ti -1c
+.RI "netsnmp_cache * \fBnetsnmp_extract_cache_info\fP (netsnmp_agent_request_info *reqinfo)"
+.br
+.RI "\fIExtract the cache information for a given request.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_is_cache_valid\fP (netsnmp_agent_request_info *reqinfo)"
+.br
+.RI "\fIIs the cache valid for a given request?\fP"
+.ti -1c
+.RI "int \fBnetsnmp_cache_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
+.br
+.RI "\fIImplements the cache handler.\fP"
+.ti -1c
+.RI "void \fBrelease_cached_resources\fP (unsigned int regNo, void *clientargs)"
+.br
+.RI "\fIrun regularly to automatically release cached resources.\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+This helper checks to see whether the data has been loaded 'recently' (according to the timeout for that particular cache) and calls the registered 'load_cache' routine if necessary.
+.PP
+The lower handlers can then work with this local cached data. 
+.SH "FUNCTION DOCUMENTATION"
+.PP 
+.SS "int netsnmp_cache_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
+.PP
+Implements the cache handler.
+.PP
+Definition at line 107 of file cache_handler.c.
+.PP
+References atime_newMarker(), atime_ready(), atime_setMarker(), netsnmp_call_next_handler(), netsnmp_create_data_list(), and release_cached_resources().
+.PP
+Referenced by netsnmp_get_cache_handler().
+.SS "netsnmp_cache* netsnmp_extract_cache_info (netsnmp_agent_request_info * reqinfo)"
+.PP
+Extract the cache information for a given request.
+.PP
+Definition at line 92 of file cache_handler.c.
+.PP
+Referenced by netsnmp_is_cache_valid().
+.SS "netsnmp_mib_handler* netsnmp_get_cache_handler (int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook, oid * rootoid, int rootoid_len)"
+.PP
+returns a cache handler that can be injected into a given handler chain.
+.PP
+Definition at line 39 of file cache_handler.c.
+.PP
+References netsnmp_cache_helper_handler(), netsnmp_create_handler(), and SNMP_MALLOC_TYPEDEF.
+.PP
+Referenced by netsnmp_register_cache_handler().
+.SS "int netsnmp_is_cache_valid (netsnmp_agent_request_info * reqinfo)"
+.PP
+Is the cache valid for a given request?
+.PP
+Definition at line 99 of file cache_handler.c.
+.PP
+References netsnmp_extract_cache_info().
+.SS "int netsnmp_register_cache_handler (netsnmp_handler_registration * reginfo, int timeout, NetsnmpCacheLoad * load_hook, NetsnmpCacheFree * free_hook)"
+.PP
+functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a cache handler at the same time for you.
+.PP
+Definition at line 78 of file cache_handler.c.
+.PP
+References netsnmp_get_cache_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().
+.SS "void release_cached_resources (unsigned int regNo, void * clientargs)"
+.PP
+run regularly to automatically release cached resources.
+.PP
+Definition at line 206 of file cache_handler.c.
+.PP
+References atime_ready(), and release_cached_resources().
+.PP
+Referenced by netsnmp_cache_helper_handler(), and release_cached_resources().

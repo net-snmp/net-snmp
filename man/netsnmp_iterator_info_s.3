@@ -1,0 +1,34 @@
+.TH "iterator_info_s" 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+iterator_info_s \- Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner. 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "void * \fBuser_ctx\fP"
+.br
+.RI "\fIThis can be used by client handlers to store any information they need.\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner.
+.PP
+The iterator_info typedef can be used instead of directly calling this struct if you would prefer. 
+.PP
+Definition at line 43 of file container_iterator.c.
+.SH "FIELD DOCUMENTATION"
+.PP 
+.SS "void* iterator_info_s::user_ctx"
+.PP
+This can be used by client handlers to store any information they need.
+.PP
+Definition at line 73 of file container_iterator.c.
+
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
