@@ -142,7 +142,9 @@ struct trap_sink {
     struct snmp_session ses;
     struct snmp_session *sesp;
     struct trap_sink *next;
-} *sinks = NULL;
+};
+struct trap_sink *sinks = NULL;
+struct trap_sink *v2sinks = NULL;
 
 #define ADDRCACHE 10
 
@@ -213,6 +215,32 @@ int create_v1_trap_session (sink, com)
     return 0;
 }
 
+int create_v2c_trap_session (sink, com)
+    char *sink, *com;
+{
+    struct trap_sink *new_sink =
+      (struct trap_sink *) malloc (sizeof (*new_sink));
+
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
+    memset (&new_sink->ses, 0, sizeof (struct snmp_session));
+    new_sink->ses.peername = strdup(sink);
+    new_sink->ses.version = SNMP_VERSION_2c;
+    if (com) {
+        new_sink->ses.community = (u_char *)strdup (com);
+        new_sink->ses.community_len = strlen (com);
+    }
+    new_sink->ses.remote_port = SNMP_TRAP_PORT;
+    new_sink->sesp = snmp_open (&new_sink->ses);
+    if (new_sink->sesp) {
+	new_sink->next = v2sinks;
+	v2sinks = new_sink;
+	return 1;
+    }
+    snmp_perror("snmpd");
+    free(new_sink);
+    return 0;
+}
+
 static void free_v1_trap_session (sp)
     struct trap_sink *sp;
 {
@@ -224,6 +252,16 @@ static void free_v1_trap_session (sp)
 void snmpd_free_trapsinks __P((void))
 {
     struct trap_sink *sp = sinks;
+    while (sp) {
+	sinks = sinks->next;
+	switch (sp->ses.version) {
+	case SNMP_VERSION_1:
+	    free_v1_trap_session(sp);
+	    break;
+	}
+	sp = sinks;
+    }
+    sp = v2sinks;
     while (sp) {
 	sinks = sinks->next;
 	switch (sp->ses.version) {
@@ -266,6 +304,33 @@ send_v1_trap (ss, trap, specific)
 #ifdef USING_MIBII_SNMP_MIB_MODULE       
     snmp_outtraps++;
 #endif
+}
+
+oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
+oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+
+void
+send_trap_pdu(pdu)
+  struct snmp_pdu *pdu;
+{
+  struct timeval now, diff;
+  struct snmp_pdu *mypdu;
+  struct variable_list *trap_vars;
+  
+  struct trap_sink *sink = v2sinks;
+
+  if ((snmp_enableauthentraps == 1) && sink != NULL) {
+    while (sink) {
+      mypdu = snmp_clone_pdu(pdu);
+      if (snmp_send(sink->sesp, pdu) == 0) {
+        snmp_perror ("snmpd: send_trap_pdu");
+      }
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
+      snmp_outtraps++;
+#endif
+      sink = sink->next;
+    }
+  }
 }
 
 void
@@ -766,6 +831,10 @@ void snmpd_parse_config_trapsink(word, cptr)
     char tmpbuf[1024];
   
     if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
+	config_perror(tmpbuf);
+    }
+    if (create_v2c_trap_session(cptr, snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
 	config_perror(tmpbuf);
     }
