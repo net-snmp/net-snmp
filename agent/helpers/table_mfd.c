@@ -242,6 +242,11 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
             rc = _mfd_data_find(handler, reginfo, requests, &tmp_pdu_ctx);
         else
             rc = _mfd_data_lookup(handler, reginfo, requests, &tmp_pdu_ctx);
+        /*
+         * for row creation, the data lookup won't find the mfd_data, but
+         * won't return an error. For this case, check that there is a
+         * row_creation callback..
+         */
         if((NULL == tmp_pdu_ctx.mfd_data) && (SNMP_ERR_NOERROR == rc)) {
             /*
              * no data only ok for a set
@@ -288,7 +293,7 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_BSTEP_ROW_CREATE:
-        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        netsnmp_assert(NULL != pdu_ctx);
         if( (NULL == pdu_ctx->mfd_data) && mfdr->row_creation ) {
             (*mfdr->row_creation)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
