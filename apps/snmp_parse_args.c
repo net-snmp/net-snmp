@@ -531,10 +531,6 @@ snmp_parse_args(int argc,
     session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
   }
 
-  /* make our engineID something other than what the localhost might
-   * be using, otherwise the automatic v3 time-synchronization won't work */
-  setup_engineID(NULL, "a bogus text string");
-
   /* make master key from pass phrases */
   if (Apsz) {
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
