@@ -218,7 +218,9 @@ tar:
 	${srcdir}/agent/mibgroup/versiontag $(VERSION) tar
 
 tarclean:
-	${srcdir}/agent/mibgroup/versiontag Ext clean
+	@if test -x ${srcdir}/agent/mibgroup/versiontag ; then \
+	  ${srcdir}/agent/mibgroup/versiontag Ext clean ; \
+	fi
 
 commentcheck:
 	grep // `find $(srcdir) -name \*.\[ch\]` | grep -v http | grep -v /win32/
