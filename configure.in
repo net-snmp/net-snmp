@@ -21,7 +21,7 @@ CFLAGS="$CFLAGS -D`echo $target_os | sed 's/\..*//'`"
 
 dnl Solaris specialties
 case "$target_os" in
-solaris2*) CPPFLAGS="$CPPFLAGS -I/usr/ucbinclude -I/usr/include" ; LDFLAGS="-L/usr/ucblib $LDFLAGS" ;;
+  solaris2*) CPPFLAGS="$CPPFLAGS -I/usr/ucbinclude -I/usr/include" ; LDFLAGS="-L/usr/ucblib -R/usr/ucblib $LDFLAGS" ;;
 esac
 
 dnl Set SNMPLIBPATH
@@ -112,7 +112,7 @@ dnl if libucb does not define bzero and I am solaris, add -DSVR4 to CFLAGS
 case "$target_os" in
   solaris2*) 
   if test "X$HAVE_LIBUCB" = "X"; then
-    CFLAGS = "$CFLAGS -DSVR4"
+    CFLAGS="$CFLAGS -DSVR4"
   fi ;;
 esac
 

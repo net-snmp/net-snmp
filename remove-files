@@ -7,6 +7,6 @@ fi
 
 cd $DIR
 
-touch stamp-h.in stamp-h
+touch stamp-h.in stamp-h configure
 rm -f local/*.conf
 rm -f remove-files
