@@ -203,7 +203,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     /* ok, we have a pdu from the net. Modify as needed */
 
     DEBUGMSGTL(("agentx/subagent","handling agentx request....\n"));
-    pdu->version = agentx_callback_sess->version;
+    pdu->version = AGENTX_VERSION_1;
     pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
 
     switch(pdu->command) {
