@@ -191,7 +191,7 @@ int             Facility = LOG_DAEMON;
 int             agent_status = AGENT_STOPPED;
 LPTSTR          app_name = _T("Net-SNMP Agent");     /* Application Name */
 #else
-char           *app_name = "snmpd";
+const char     *app_name = "snmpd";
 #endif
 
 extern char   **argvrestartp;
