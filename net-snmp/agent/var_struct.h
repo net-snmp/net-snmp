@@ -9,12 +9,18 @@
  * 1.2
  * 1.2.0
  */
+
+#define UCD_REGISTRY_OID_MAX_LEN	16
+
 struct subtree {
-    oid			name[16];	/* objid prefix of registered subtree */
+    oid			name[UCD_REGISTRY_OID_MAX_LEN];
+					/* objid prefix of registered subtree */
     u_char 		namelen;	/* number of subid's in name above */
-    oid			start[16];	/* objid of start of covered range */
+    oid			start[UCD_REGISTRY_OID_MAX_LEN];
+					/* objid of start of covered range */
     u_char 		start_len;	/* number of subid's in start name */
-    oid			end[16];	/* objid of end of covered range */
+    oid			end[UCD_REGISTRY_OID_MAX_LEN];
+					/* objid of end of covered range */
     u_char 		end_len;	/* number of subid's in end name */
     struct variable	*variables;   /* pointer to variables array */
     int			variables_len;	/* number of entries in above array */
