@@ -37,7 +37,7 @@ date_n_time ( when, length )
 		/*
 		 * Null time
 		 */
-    if ( *when == 0 || *when == (time_t)-1 ) {
+    if ( when == NULL || *when == 0 || *when == (time_t)-1 ) {
 	string[0] =  0;
 	string[1] =  0;
 	string[2] =  1;

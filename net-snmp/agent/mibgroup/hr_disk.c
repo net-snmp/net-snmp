@@ -8,11 +8,9 @@
 #include "host_res.h"
 #include "hr_disk.h"
 
-#if HAVE_KVM_OPENFILES
 #include <fcntl.h>
 #if HAVE_KVM_H
 #include <kvm.h>
-#endif
 #endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
@@ -32,6 +30,9 @@
 #if HAVE_SYS_DISKIO_H	/* HP-UX only ? */
 #include <sys/diskio.h>
 #endif
+#ifdef HAVE_LINUX_HDREG_H
+#include <linux/hdreg.h>
+#endif
 
 #define HRD_MONOTONICALLY_INCREASING
 
@@ -48,15 +49,23 @@ void  Save_HR_Disk();
 char *describe_disk();
 
 
+       int HRD_type_index;
        int HRD_index;
+static char HRD_savedModel[40];
+static long HRD_savedCapacity = 1044;
+static int  HRD_savedFlags;
+
 #ifdef HAVE_SYS_DISKIO_H
 static disk_describe_type HRD_info;
 static capacity_type      HRD_cap;
 
-static char HRD_savedModel[16];
 static int  HRD_savedIntf_type;
 static int  HRD_savedDev_type;
-static int  HRD_savedFlags;
+#endif
+
+#ifdef HAVE_LINUX_HDREG_H
+static struct hd_driveid HRD_info;
+
 static long HRD_savedCapacity;
 #endif
 
@@ -77,6 +86,8 @@ void	init_hr_disk( )
 #endif
 
     device_descr[ HRDEV_DISK ] = &describe_disk;	
+    HRD_savedModel[0] = '\0';
+    HRD_savedCapacity = 0;
 }
 
 #define MATCH_FAILED	-1
@@ -120,6 +131,10 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
 	    HRD_savedFlags = HRD_info.flags;
 	    HRD_savedCapacity = HRD_cap.lba;
 #endif
+#ifdef HAVE_LINUX_HDREG_H
+	    HRD_savedCapacity = HRD_info.lba_capacity / 2 ;
+	    HRD_savedFlags = HRD_info.config;
+#endif
             break;
 	}
 	if ((!exact && (result < 0)) &&
@@ -130,6 +145,10 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
 	    HRD_savedDev_type = HRD_info.dev_type;
 	    HRD_savedFlags = HRD_info.flags;
 	    HRD_savedCapacity = HRD_cap.lba;
+#endif
+#ifdef HAVE_LINUX_HDREG_H
+	    HRD_savedCapacity = HRD_info.lba_capacity / 2 ;
+	    HRD_savedFlags = HRD_info.config;
 #endif
 #ifdef HRD_MONOTONICALLY_INCREASING
 	    break;
@@ -224,15 +243,17 @@ var_hrdisk(vp, name, length, exact, var_len, write_method)
 		( HRD_savedDev_type  == CDROM_DEV_TYPE ))
 		    long_return = 1;	/* true */
 	    else
+#else
+#ifdef HAVE_LINUX_HDREG_H
+	    if ( HRD_savedFlags & 0x80 )
+		    long_return = 1;	/* true */
+	    else
+#endif
 #endif
 		    long_return = 2;	/* false */
 	    return (u_char *)&long_return;
 	case HRDISK_CAPACITY:
-#ifdef HAVE_SYS_DISKIO_H
 	    long_return = HRD_savedCapacity;
-#else
-	    long_return = 1044;		/* XXX */
-#endif
 	    return (u_char *)&long_return;
 	default:
 	    ERROR_MSG("");
@@ -248,69 +269,124 @@ var_hrdisk(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 
-static DIR* dp;
+#ifdef linux
+			/* To hold sprintf-style strings for disk devices */ 
+char *disk_device_strings[ ] =
+    {
+	"/dev/hd%c",		/* IDE    drives */
+	"/dev/sd%c",		/* SCSI   drives */
+	"/dev/fd%c"		/* Floppy drives */
+    };
+#define NUMBER_DISK_TYPES	3
+#define MAX_DISKS_PER_TYPE	7	/* SCSI disks */
+#define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */
+
+    char disk_device_id[ ] =
+	{ 'a', 'a', '0' };		/* Initial setting for the incremental part */
+#else
+#ifdef hpux
+			/* To hold sprintf-style strings for disk devices */ 
+char *disk_device_strings[ ] =
+    {
+	"/dev/rdsk/c201d%ds0"		/* SCSI   drives */
+    };
+#define NUMBER_DISK_TYPES	1
+#define MAX_DISKS_PER_TYPE	7
+#define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */
+    int  disk_device_id[ ] =
+	{ 0 };				/* Initial setting for the incremental part */
+#else
+			/* To hold sprintf-style strings for disk devices */ 
+char *disk_device_strings[ ] =
+    {
+	NULL
+    }
+#define NUMBER_DISK_TYPES	0
+#define MAX_DISKS_PER_TYPE	7
+#define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */
+
+    int  disk_device_id[ ] =
+	{ 0 };
+
+#endif
+#endif
+
+  
 
 void
 Init_HR_Disk()
 {
-    HRD_index = -1;
-    closedir(dp);
-				/* Ick!
-				 *   Not all disks will be under /dev/rdsk
-				 *
-				 *   We really need to walk through kernel
-				 *    device structures, but the documentation
-				 *    for that is abysmal (as in nonexistent)!
-				 *
-				 *   This is a start, but too slow to be useable
-				 */
-    dp = opendir("/dev/rdsk/");
+    HRD_type_index = 0;
+    HRD_index = 0;
 }
 
 int
 Get_Next_HR_Disk()
 {
-    struct dirent *de_p;
     char string[100];
     int fd, result;
 
-#ifdef HAVE_SYS_DISKIO_H	/* and dodgy even then! */
-#ifdef DTS_ABYSMALLY_SLOW
-    while (( de_p = readdir( dp )) != NULL ) {
-	if ( de_p->d_name[0] == '.' )
-	    continue;
-	sprintf(string, "/dev/rdsk/%s", de_p->d_name);
-#else
-			/*
-			 * I know this is unacceptable site-specific,
-			 *    but scanning the whole directory was soooo
-			 *    slow, that the agent simply couldn't keep up!
-			 *
-			 * Regard this as a 'prooof of concept' (with the
-			 *    emphasis on "concept" rather than "proof"!)
-			 */
-    while ( ++HRD_index < 7 ) {
-	sprintf(string, "/dev/rdsk/%s%d%s", "c201d", HRD_index, "s0");
-#endif /* SLOW! */
+    while ( HRD_type_index < NUMBER_DISK_TYPES ) {
 
-	fd = open( string, O_RDONLY  );
+	while ( HRD_index < MAX_DISKS_PER_TYPE ) {
+		/* Construct the device name in "string" */
+	    sprintf(string, disk_device_strings[ HRD_type_index ], 
+			    disk_device_id[ HRD_type_index ] + HRD_index );
 
-	if (fd != -1 ) {
-	    result = ioctl( fd, DIOC_DESCRIBE, &HRD_info );
-	    if ( result != -1 )
-	        result = ioctl( fd, DIOC_CAPACITY, &HRD_cap );
-	    close(fd);
-	    if ( result != -1 ) {
-		return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index );
-	    }
-	}
-    }
-#else	/* !HAVE_SYS_DISKIO_H */
-    while ( ++HRD_index < 7 ) {
-	return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index );
-    }
+#ifdef DODEBUG
+	    printf ("Get_Next_HR_Disk: %s (%d/%d)\n",
+		string, HRD_type_index, HRD_index );
 #endif
-    closedir(dp);
+	
+#ifdef HAVE_SYS_DISKIO_H
+	    fd = open( string, O_RDONLY  );
+	    if (fd != -1 ) {
+		result = ioctl( fd, DIOC_DESCRIBE, &HRD_info );
+		if ( result != -1 )
+	            result = ioctl( fd, DIOC_CAPACITY, &HRD_cap );
+		close(fd);
+		if ( result != -1 ) {
+		    return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) +
+			    (HRD_type_index << HRDISK_TYPE_SHIFT ) +
+			     HRD_index++ );
+		}
+	    }
+#else
+
+#ifdef linux
+			/*
+			 *  On my linux box, attempting to open the
+			 *   (nonexistant) device /dev/fd1 results in
+			 *   a significant pause, followed by a series
+			 *   of kernel error messages.
+			 *  Hardwire an assumption of one floppy disk
+			 */
+	    if ( HRD_type_index == 2 && HRD_index > 0 )
+		break;
+#endif  /* linux floppy */
+	    fd = open( string, O_RDONLY  );
+	    if (fd != -1 ) {
+#ifdef linux
+	    	    if ( HRD_type_index == 0 )
+			result = ioctl( fd, HDIO_GET_IDENTITY, &HRD_info );
+		    else
+#else
+		        result = 0;
+#endif
+		    close(fd);
+		    if ( result != -1 ) {
+		        return ((HRDEV_DISK << HRDEV_TYPE_SHIFT) +
+			    (HRD_type_index << HRDISK_TYPE_SHIFT ) +
+			     HRD_index++ );
+		   }
+	    }
+#endif  /* SYS_DISKIO */
+
+	    HRD_index++;
+	}
+	HRD_type_index++;
+	HRD_index = 0;
+    }
     return -1;
 }
 
@@ -321,15 +397,17 @@ Save_HR_Disk( idx )
 #ifdef HAVE_SYS_DISKIO_H
     strcpy( HRD_savedModel,  HRD_info.model_num );   
 #endif
+#ifdef HAVE_LINUX_HDREG_H
+    strcpy( HRD_savedModel,  HRD_info.model );   
+#endif
 }
 
 char *
 describe_disk( idx )
     int idx;
 {
-#ifdef HAVE_SYS_DISKIO_H
-    return( HRD_savedModel );
-#else
-   return( "some sort of disk");
-#endif
+    if ( HRD_savedModel[0] == '\0' )
+	return( "some sort of disk");
+    else
+	return( HRD_savedModel );
 }
