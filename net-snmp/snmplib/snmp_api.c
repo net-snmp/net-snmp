@@ -165,7 +165,7 @@ struct internal_variable_list {
 #endif /* OPAQUE_SPECIAL_TYPES */
     } val;
     int     val_len;
-    oid name_loc[MAX_NAME_LEN];
+    oid name_loc[MAX_OID_LEN];
     u_char buf[32];
     int usedBuf;
 };
@@ -199,9 +199,9 @@ struct internal_snmp_pdu {
     u_long  time;       /* Uptime */
 
     struct variable_list *variables;
-    oid srcPartyBuf[MAX_NAME_LEN];
-    oid dstPartyBuf[MAX_NAME_LEN];
-    oid contextBuf[MAX_NAME_LEN];
+    oid srcPartyBuf[MAX_OID_LEN];
+    oid dstPartyBuf[MAX_OID_LEN];
+    oid contextBuf[MAX_OID_LEN];
     /* XXX do community later */
     
 };
@@ -345,7 +345,7 @@ snmp_error(struct snmp_session *psess,
 	   int *p_snmp_errno,
 	   char **p_str)
 {
-    char buf[512];
+    char buf[SPRINT_MAX_LEN];
     int snmp_errnumber;
 
     if (p_errno) *p_errno = psess->s_errno;
@@ -1037,7 +1037,7 @@ snmp_parse(struct snmp_session *session,
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
-    oid objid[MAX_NAME_LEN];
+    oid objid[MAX_OID_LEN];
     char err[256];
 
     badtype = 0;
@@ -1103,9 +1103,9 @@ snmp_parse(struct snmp_session *session,
 	pdu->srcParty = pdu->srcPartyBuf;
 	pdu->dstParty = pdu->dstPartyBuf;
 	pdu->context  = pdu->contextBuf;
-        pdu->srcPartyLen = MAX_NAME_LEN;
-        pdu->dstPartyLen = MAX_NAME_LEN;
-        pdu->contextLen  = MAX_NAME_LEN;
+        pdu->srcPartyLen = MAX_OID_LEN;
+        pdu->dstPartyLen = MAX_OID_LEN;
+        pdu->contextLen  = MAX_OID_LEN;
 
 	/* authenticates message and returns length if valid */
 	data = snmp_party_parse(data, &length, pi,
@@ -1166,7 +1166,7 @@ snmp_parse(struct snmp_session *session,
         /* an SNMPv1 trap PDU */
 
         /* enterprise */
-	pdu->enterprise_length = MAX_NAME_LEN;
+	pdu->enterprise_length = MAX_OID_LEN;
 	data = asn_parse_objid(data, &length, &type, objid,
 			       &pdu->enterprise_length);
 	if (data == NULL)
@@ -1220,7 +1220,7 @@ snmp_parse(struct snmp_session *session,
 
 	vp->next_variable = NULL;
 	vp->val.string = NULL;
-	vp->name_length = MAX_NAME_LEN;
+	vp->name_length = MAX_OID_LEN;
 	vp->name = vp->name_loc;
 	vp->usedBuf = FALSE;
 	data = snmp_parse_var_op(data, vp->name, &vp->name_length, &vp->type,
@@ -1302,7 +1302,7 @@ snmp_parse(struct snmp_session *session,
 				 &vp->val_len);
 		break;
 	    case ASN_OBJECT_ID:
-		vp->val_len = MAX_NAME_LEN;
+		vp->val_len = MAX_OID_LEN;
 		asn_parse_objid(var_val, &len, &vp->type, objid, &vp->val_len);
 		vp->val_len *= sizeof(oid);
 		vp->val.objid = (oid *)malloc((unsigned)vp->val_len);
@@ -2242,7 +2242,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     char type,
 	     char *value)
 {
-    u_char buf[2048];
+    u_char buf[SPRINT_MAX_LEN];
     int tint;
     long ltmp;
 #ifdef OPAQUE_SPECIAL_TYPES
