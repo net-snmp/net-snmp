@@ -30,7 +30,7 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o read_config.o auto_nlist.o
+AGENTOBJS=snmpd.o snmp2p.o kernel.o snmp_agent.o snmp_vars.o view_parse.o read_config.o auto_nlist.o
 
 snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.$(SHLIB_EXTENSION)
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
