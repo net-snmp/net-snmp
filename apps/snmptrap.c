@@ -70,17 +70,8 @@ SOFTWARE.
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#include <net-snmp/getopt.h>
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/system.h>
-#include <net-snmp/snmp_parse_args.h>
-#include <net-snmp/snmpv3.h>
+#include <net-snmp/net-snmp-includes.h>
 
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};

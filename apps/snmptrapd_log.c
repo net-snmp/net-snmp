@@ -86,18 +86,7 @@ SOFTWARE.
 #include <fcntl.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/tools.h>
-
-#include <net-snmp/snmp_transport.h>
-#include <net-snmp/snmpUDPDomain.h>
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include <net-snmp/snmpTCPDomain.h>
-#endif
+#include <net-snmp/net-snmp-includes.h>
 #include "snmptrapd_log.h"
 
 
