@@ -68,7 +68,7 @@ SOFTWARE.
 #include <net-snmp/default_store.h>
 #include <net-snmp/system.h>
 
-#include "version.h"
+#include <net-snmp/version.h>
 
 int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 	    snmp_set_do_debugging(1);
 	    break;
         case 'V':
-            fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+            fprintf(stderr,"NET-SNMP version: %s\n", netsnmp_get_version());
             exit(0);
             break;
 	case 'P':

@@ -99,7 +99,7 @@ SOFTWARE.
 #include <net-snmp/mib.h>
 #include <net-snmp/snmp.h>
 #include <net-snmp/system.h>
-#include "version.h"
+#include <net-snmp/version.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 #include <net-snmp/read_config.h>
@@ -679,7 +679,7 @@ void usage(void)
 {
     fprintf(stderr,"Usage: snmptrapd [OPTIONS] [ADDRESSES]\n");
 //"[-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
-    fprintf(stderr, "\n\tVersion:  %s\n",VersionInfo);
+    fprintf(stderr, "\n\tNET-SNMP Version:  %s\n", netsnmp_get_version());
     fprintf(stderr, "\tWeb:      http://www.net-snmp.org/\n");
     fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
     fprintf(stderr, "\n");
@@ -711,7 +711,7 @@ void usage(void)
 static void
 version(void)
 {
-    printf("\nVersion:           %s\n",VersionInfo);
+    printf("\nNET-SNMP Version:  %s\n",netsnmp_get_version());
     printf("Web:               http://www.net-snmp.org/\n");
     printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
     exit(0);
@@ -1095,7 +1095,8 @@ main(int argc, char *argv[])
 
     if (Syslog) {
 	    snmp_enable_syslog_ident("snmptrapd");
-	    snmp_log(LOG_INFO, "Starting snmptrapd %s\n", VersionInfo);
+	    snmp_log(LOG_INFO, "Starting snmptrapd %s\n",
+                     netsnmp_get_version());
     }
     if (Print) {
 	struct tm *tm;
@@ -1103,10 +1104,10 @@ main(int argc, char *argv[])
 	time (&timer);
 	tm = localtime (&timer);
         snmp_log(LOG_INFO,
-                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
+                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Started.\n",
                  tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
                  tm->tm_hour, tm->tm_min, tm->tm_sec,
-                 VersionInfo);
+                 netsnmp_get_version());
     }
 
     SOCK_STARTUP;
@@ -1167,10 +1168,10 @@ main(int argc, char *argv[])
 		time_t timer;
 		time (&timer);
 		tm = localtime (&timer);
-		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Reconfigured.\n",
+		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Reconfigured.\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-		       VersionInfo);
+		       netsnmp_get_version());
 	    }
 	    if (Syslog)
 		snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
@@ -1215,10 +1216,10 @@ main(int argc, char *argv[])
 	time_t timer;
 	time (&timer);
 	tm = localtime (&timer);
-	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Stopped.\n",
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Stopped.\n",
 	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
-	       VersionInfo);
+	       netsnmp_get_version());
     }
     if (Syslog) {
 	snmp_log(LOG_INFO, "Stopping snmptrapd");
