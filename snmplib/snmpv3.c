@@ -416,6 +416,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
   size_t ret;
+  int    ret2;
 
   newuser = usm_create_user();
 
@@ -426,12 +427,13 @@ usm_parse_create_usmUser(const char *token, char *line) {
   if (strcmp(buf,"-e") == 0) {
       /* get the specified engineid from the line */
       cp = copy_word(cp, buf);
-      newuser->engineIDLen = hex_to_binary(buf, (u_char *)buf2);
-      if (newuser->engineIDLen <= 0) {
+      ret2 = hex_to_binary(buf, (u_char *)buf2);
+      if (ret2 <= 0) {
           usm_free_user(newuser);
           config_perror("invalid EngineID argument to -e");
           return;
       }
+      newuser->engineIDLen = ret2;
       memdup(&newuser->engineID, (u_char *)buf2, newuser->engineIDLen);
       cp = copy_word(cp, buf);
   } else {
