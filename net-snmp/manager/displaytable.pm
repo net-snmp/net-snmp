@@ -196,23 +196,39 @@ sub displaytable {
 	    or die "\nnot ok: $DBI::errstr\n";
     }
     
-    # editable setup
+    # editable/markable setup
     my $edited = 0;
     my $editable = 0;
-    my (@editkeys, @valuekeys, $uph);
-    my %edithash;
-    if (defined($config{'-CGI'}) &&  ref($config{'-CGI'}) eq "CGI"
-	&& defined($config{'-editable'}) && 
-	ref($config{'-editable'}) eq ARRAY) {
+    my (@indexkeys, @valuekeys, $uph, %indexhash);
+    if (defined($config{'-CGI'}) &&  ref($config{'-CGI'}) eq "CGI" &&
+	defined($config{'-editable'}) && ref($config{'-indexes'}) eq ARRAY) {
 	$editable = 1;
+    }
+
+    if (defined($config{'-CGI'}) &&  ref($config{'-CGI'}) eq "CGI" &&
+	(defined($config{'-mark'}) || defined($config{'-onmarked'})) && 
+	ref($config{'-indexes'}) eq ARRAY) {
+	$markable = 1;
+    }
+
+    if (defined($config{'-CGI'}) && ref($config{'-CGI'}) eq "CGI") {
 	$q = $config{'-CGI'};
-	if ($q->param('edited_' . toalpha($tablename))) {
-	    $edited = 1;
-	}
-	@editkeys = @{$config{'-editable'}};
-	foreach my $kk (@editkeys) {
-	    $edithash{$kk} = 1;
-#	    print "edithash $kk<br>\n";
+    }
+
+    if ($q->param('edited_' . toalpha($tablename))) {
+	$edited = 1;
+    }
+	
+
+    if (($editable || $markable)) {
+	if (ref($config{'-indexes'}) eq ARRAY) {
+	    @indexkeys = @{$config{'-indexes'}};
+	    foreach my $kk (@indexkeys) {
+		$indexhash{$kk} = 1;
+	    }
+	} else {
+	    $editable = $markable = 0;
+	    print STDERR "displaytable error: no -indexes option specified\n";
 	}
     }
 
@@ -221,7 +237,7 @@ sub displaytable {
     my @keys;
     my $rowcount = 0;
     $thetable->execute();
-    if ($editable) {
+    if ($editable || $markable) {
 	print "<input type=hidden name=\"edited_" . toalpha($tablename) . "\" value=1>\n";
     }
 
@@ -229,12 +245,12 @@ sub displaytable {
 	$rowcount++;
 	if ($edited && !defined($uph)) {
 	    foreach my $kk (keys(%$data)) {
-		push (@valuekeys, $kk) if (!defined($edithash{$kk}));
+		push (@valuekeys, $kk) if (!defined($indexhash{$kk}));
 	    }
 	    my $cmd = "update $tablename set " . 
 		join(" = ?, ",@valuekeys) . 
 		    " = ? where " . 
-			join(" = ? and ",@editkeys) .
+			join(" = ? and ",@indexkeys) .
 			    " = ?";
 	    $uph = $dbh->prepare($cmd);
 #	    print "setting up: $cmd<br>\n";
@@ -277,6 +293,10 @@ sub displaytable {
 		&$beginhook($dbh, $tablename);
 	    }
 	    if (!$config{'-noheaders'}) {
+		if ($markable) {
+		    my $ukey = to_unique_key($key, $data, @indexkeys);
+		    print "<td>Mark</td>\n";
+		}
 		foreach $l (@keys) {
 		    if (!defined($prefs) || 
 			$prefs->execute($tablename, $l) eq "0E0") {
@@ -312,19 +332,31 @@ sub displaytable {
 	    &$beginhook($dbh, $tablename, $data);
 	}
 	if ($edited) {
-	    my $ret = $uph->execute(getquery($q, $data, \@editkeys, @valuekeys), 
-				    getvalues($data, @editkeys));
+	    my $ret = $uph->execute(getquery($q, $data, \@indexkeys, @valuekeys), 
+				    getvalues($data, @indexkeys));
+	    foreach my $x (@indexkeys) {
+		next if (defined($indexhash{$x}));
+		$data->{$x} = $q->param(to_unique_key($x, $data, @indexkeys));
+	    }
 #	    print "ret: $ret, $DBI::errstr<br>\n";
 	}
+	if ($markable) {
+	    my $ukey = to_unique_key("mark", $data, @indexkeys);
+	    print "<td><input type=checkbox value=Y name=\"$ukey\"" .
+		(($q->param($ukey) eq "Y") ? " checked" : "") . "></td>\n";
+	    if ($q->param($ukey) eq "Y" && $config{'-onmarked'}) {
+		&{$config{'-onmarked'}}($dbh, $tablename, $data);
+	    }
+	}
+	    
 	foreach $key (@keys) {
 	    if (!defined($prefs) || 
 		$prefs->execute($tablename, $key) eq "0E0") {
 		print "<td>";
 		print "<a href=\"$ref\">" if (defined($datalink) && 
 					      defined($ref = &$datalink($key, $data->{$key})));
-		if (!$edited && $editable && !defined($edithash{$key})) {
-		    my $ukey = to_unique_key($key, $data, 
-					     @{$config{'-editable'}});
+		if ($editable && !defined($indexhash{$key})) {
+		    my $ukey = to_unique_key($key, $data, @indexkeys);
 		    print "<input type=text name=\"$ukey\" value=\"$data->{$key}\">";
 		} else {
 		    if ($config{'-printer'}) {
@@ -519,7 +551,9 @@ the appropriate translation.  Essentially uses:
 
 to translate everything.
 
-=item -editable => [qw(INDEX_COLUMNS)]
+=item -editable => 1
+
+=item -indexes   => [qw(INDEX_COLUMNS)]
 
 =item -CGI      => CGI_REFERENCE
 
@@ -532,6 +566,22 @@ back to the same displaytable clause for the edits to be committed to
 the database.  CGI_REFERENCE should be a reference to the CGI object
 used to query web parameters from ($CGI_REFERENCE = new CGI);
 
+=item -mark     => 1
+
+=item -indexes  => [qw(INDEX_COLUMNS)]
+
+=item -CGI      => CGI_REFERENCE
+
+=item -onmarked => \&FUNC
+
+When the first three of these are specified, the left hand most column
+will be a check box that allows users to mark the row for future work.
+
+FUNC($dbh, TABLENAME, DATA) will be called for each marked entry when
+a submission data has been processed.  $DATA is a hash reference to
+the rows dataset.  See -editable above for more information.
+
+-onmarked => \&FUNC implies -mark => 1.
 
 =back
 

@@ -18,7 +18,8 @@ $ucdsnmp::manager::user = 'root';
 $ucdsnmp::manager::redimage = "/graphics/red.gif";
 $ucdsnmp::manager::greenimage = "/graphics/green.gif";
 #$ucdsnmp::manager::verbose = 1;
-$ucdsnmp::manager::tableparms = "border=3 ipad=3 bgcolor=#d0d0d0";
+$ucdsnmp::manager::tableparms  = "border=1 bgcolor=\"#c0c0e0\"";
+$ucdsnmp::manager::headerparms = "border=1 bgcolor=\"#b0e0b0\"";
 
 # init the snmp library
 $SNMP::save_descriptions=1;
@@ -33,7 +34,7 @@ sub handler {
     # get info from handler
     my $hostname = $r->dir_config('hostname') || $ucdsnmp::manager::hostname;
     my $dbname = $r->dir_config('dbname') || $ucdsnmp::manager::dbname;
-    my $user = $r->dir_config('user') || $ucdsnmp::manager::user;
+    my $sqluser = $r->dir_config('user') || $ucdsnmp::manager::user;
     my $pass = $r->dir_config('pass') || $ucdsnmp::manager::pass;
     my $verbose = $r->dir_config('verbose') || $ucdsnmp::manager::verbose;
 
@@ -49,7 +50,7 @@ $remuser = "guest" if (!defined($remuser) || $remuser eq "");
 #===========================================================================
 # Connect to the mSQL database with the appropriate driver
 #===========================================================================
-($dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
+($dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $sqluser, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
 #===========================================================================
@@ -107,7 +108,7 @@ if ((param('displaygraph') || param('dograph')) && param('table')) {
 	print "<table>\n";
 	print "<tr align=top><th></th><th>Select indexes<br>to graph</th></tr>\n";
 
-	my $handle = getcursor($dbh, "SELECT distinct(oidindex) FROM $table where host = '$host'");
+	my $handle = getcursor($dbh, "SELECT sql_small_result distinct(oidindex) FROM $table where host = '$host'");
 	my @cols;
 	while (  $row = $handle->fetchrow_hashref ) {
 	    print "<tr><td>$row->{oidindex}</td><td><input type=checkbox value=1 name=" . 'graph_' . displaytable::to_unique_key($row->{'oidindex'}) . "></td></tr>\n";
@@ -239,6 +240,33 @@ if (param('displayinfo')) {
 my $host = param('host');
 my $group = param('group');
 
+#===========================================================================
+# Editable user information
+#===========================================================================
+
+if (param('setuponcall')) {
+    print "<title>oncall schedule for user: $remuser</title>\n";
+    print "<h2>oncall schedule for user: $remuser</h2>\n";
+    print "<p>Please select your oncall schedule and mailing addresses for your groups below:";
+    if (!isexpert($remuser)) {
+	print "<ul>\n";
+        print "<li>Values for the days/hours fields can be comma seperated lists of hours/days/ranges.  EG: hours: 7-18,0-4.\n";
+	print "</ul>\n";
+    }
+    print "<form method=post><input type=hidden name=setuponcall value=1>\n";
+    displaytable($dbh, 'oncall',
+    '-clauses',"where user = '$remuser' order by groupname",
+    '-select','id, user, groupname, email, pager, days, hours',
+    '-selectorder', 1,
+    '-notitle', 1,
+    '-editable', 1,
+    '-indexes', ['id','user','groupname'],
+    '-CGI', $CGI::Q
+    );
+    print "<input type=submit value=\"submit changes\">\n";
+    print "</form>\n";
+    return Exit($dbh, $group);
+}
 
 #===========================================================================
 # show the list of groups a user belongs to.
@@ -247,7 +275,7 @@ if (!defined($group)) {
     my @groups = getgroupsforuser($dbh, $remuser);
     print "<title>ucd-snmp Group List</title>\n";
     print "<h2>Host groupings you may access:</h2>\n";
-    if (!isexpert($user)) {
+    if (!isexpert($remuser)) {
 	print "<ul>\n";
 	print "<li>Click on a group to operate or view the hosts in that group.\n";
 	print "<li>Click on a red status light below to list the problems found.\n";
@@ -389,7 +417,7 @@ if (defined($host) && defined(param('summarizehost'))) {
 if (!defined($host)) {
     print "<title>ucd-snmp Host $host</title>\n";
     print "<h2>Hosts in the group \"$group\":</h2>\n";
-    if (!isexpert($user)) {
+    if (!isexpert($remuser)) {
 	print "<ul>\n";
 	if (isadmin($dbh, $remuser, $group)) {
 	    my $q = self_url();
@@ -434,11 +462,14 @@ if (!defined($host)) {
     return Exit($dbh, $group);
 }
 
+#===========================================================================
+# setup the host's history records
+#===========================================================================
 if (param('setuphost')) {
     print "<title>ucd-snmp history setup for host: $host</title>\n";
     print "<h2>ucd-snmp history setup for the host: \"$host\"</h2>\n";
     print "<p>Enter the number of days to keep the data for a given table for the host \"$host\":\n";
-    if (!isexpert($user)) {
+    if (!isexpert($remuser)) {
 	print "<ul>\n";
         print "<li>Numbers must be greater than or equal to 1 to enable history logging.\n";
 	print "</ul>\n";
@@ -449,7 +480,8 @@ if (param('setuphost')) {
     '-select','groupname, host, tablename, keephistory',
     '-selectorder', 1,
     '-notitle', 1,
-    '-editable', ['groupname','host','tablename'],
+    '-editable', 1,
+    '-indexes', ['groupname','host','tablename'],
     '-CGI', $CGI::Q
     );
     print "<input type=submit value=\"submit changes\">\n";
@@ -540,7 +572,7 @@ sub summarizeerrors {
 			 print "<td><img src=\"$ucdsnmp::manager::redimage\"></td>\n";
 		     }});
 
-    my $tabletop = "<br><table $ucdsnmp::manager::tableparms><tr><td><b>Host</b></td><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+    my $tabletop = "<br><table $ucdsnmp::manager::tableparms><tr $ucdsnmp::manager::headerparms><th><b>Host</b></th><th><b>Table</b></th><th><b>Description</b></th></tr>\n";
     my $donetop = 0;
     my $cursor = 
 	getcursor($dbh, "SELECT * FROM hosttables $clause");
@@ -638,7 +670,7 @@ sub showhost {
     # host header
     print "<title>ucd-snmp manager report for host: $host</title>\n";
     print "<h2>Monitored information for the host $host</h2>\n";
-    if (!isexpert($user)) {
+    if (!isexpert($remuser)) {
 	print "<ul>\n";
 	print "<li>Click on a column name for information about the data in that column.\n";
 	print "<li>Click on a column name or table name for information about the data in the table.\n";
@@ -806,17 +838,17 @@ sub isexpert {
 
 #is remuser a admin?
 sub isadmin {
-    my ($dbh, $user, $group) = @_;
-    return 0 if (!defined($user) || !defined($group));
-    return 1 if ($dbh->do("select * from usergroups where user = '$user' and groupname = '$group' and isadmin = 'Y'") ne "0E0");
+    my ($dbh, $remuser, $group) = @_;
+    return 0 if (!defined($remuser) || !defined($group));
+    return 1 if ($dbh->do("select * from usergroups where user = '$remuser' and groupname = '$group' and isadmin = 'Y'") ne "0E0");
     return 0;
 }
 
 #is user a member of this group?
 sub isuser {
-    my ($dbh, $user, $group) = @_;
-    return 0 if (!defined($user) || !defined($group));
-    return 1 if ($dbh->do("select * from usergroups where user = '$user' and groupname = '$group'") ne "0E0");
+    my ($dbh, $remuser, $group) = @_;
+    return 0 if (!defined($remuser) || !defined($group));
+    return 1 if ($dbh->do("select * from usergroups where user = '$remuser' and groupname = '$group'") ne "0E0");
     return 0;
 }
 
@@ -836,7 +868,6 @@ sub displayconfigarray {
 	    or die "\nnot ok: $DBI::errstr\n";
     }
 
-    print "check: $config{'-check'}<br>\n";
     print "<table $ucdsnmp::manager::tableparms>\n";
     print "<tr><td></td>";
     my ($i, $j);
@@ -853,7 +884,6 @@ sub displayconfigarray {
 	    my $nj = $j;
 	    $nj = $j->[0] if ($config{'-arrayrefs'} || $config{'-arrayref2'});
 	    my $checked = "checked" if (defined($cmd) && $cmd->execute($ni,$nj) ne "0E0");
-	    print "check: $ni, $nj: $checked<br>\n";
 	    print "<td><input type=checkbox $checked value=y name=" . $config{prefix} . $ni . $nj . "></td>\n";
 	}
 	print "</tr>\n";
@@ -985,6 +1015,7 @@ sub Exit {
     print "<hr>\n";
     print "<a href=\"$tq\">[TOP]</a>\n";
     print "<a href=\"$tq?userprefs=1&group=$group\">[display options]</a>\n";
+    print "<a href=\"$tq?setuponcall=1\">[setup oncall schedule]</a>\n";
     if (defined($group)) {
 	print "<a href=\"$tq?group=$group\">[group: $group]</a>\n";
 	print "<a href=\"$tq?group=$group&summarizegroup=1\">[summarize errors]</a>\n";
@@ -999,7 +1030,7 @@ sub Exit {
 # checkbuttons for each table.
 #
 sub setupuserpreferences {
-    my ($dbh, $user, $group) = @_;
+    my ($dbh, $remuser, $group) = @_;
     my $tables = getarrays($dbh, 'hosttables', 
 			   "-select", 'distinct tablename',
 			   "-clauses", "where groupname = '$group'");
@@ -1012,7 +1043,7 @@ sub setupuserpreferences {
 	my $sth = $dbh->prepare("select * from ${$i}[0] where 1 = 0");
 	$sth->execute();
 	displayconfigarray($dbh, [${$i}[0]], $sth->{NAME},
-			   -check, "select * from userprefs where (tablename = ? and columnname = ? and user = '$user' and groupname = '$group' and displayit = 'N')");
+			   -check, "select * from userprefs where (tablename = ? and columnname = ? and user = '$remuser' and groupname = '$group' and displayit = 'N')");
     print "<br>\n";
     }
     print "<input type=hidden name=group value=\"$group\">\n";
