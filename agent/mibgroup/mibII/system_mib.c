@@ -347,19 +347,19 @@ writeSystem(int action,
     int count;
 
     switch((char)name[7]){
-      case 1:
+      case VERSION_DESCR:
         buf    = version_descr;
         oldbuf = oldversion_descr;
         break;
-      case 4:
+      case SYSCONTACT:
         buf    = sysContact;
         oldbuf = oldsysContact;
         break;
-      case 5:
+      case SYSTEMNAME:
         buf    = sysName;
         oldbuf = oldsysName;
         break;
-      case 6:
+      case SYSLOCATION:
         buf    = sysLocation;
         oldbuf = oldsysLocation;
         break;
