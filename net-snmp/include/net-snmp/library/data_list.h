@@ -16,7 +16,6 @@ extern "C" {
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/tools.h>
 
-
 typedef void (Free_List_Data)(void *);
 
 typedef struct data_list_s {
@@ -33,6 +32,8 @@ void add_list_data(data_list **head, data_list *node);
 void *get_list_data(data_list *head, const char *node);
 void free_list_data(data_list *head);  /* single */
 void free_all_list_data(data_list *head); /* multiple */
+int remove_list_node(data_list **realhead, const char *name);
+inline void *get_list_node(data_list *head, const char *name);
     
 
 #ifdef __cplusplus
