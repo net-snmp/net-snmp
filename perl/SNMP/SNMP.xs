@@ -1155,7 +1155,7 @@ void *cb_data;
   int sprintval_flag = USE_BASIC;
   struct snmp_pdu *reply_pdu;
   int old_numeric, old_printfull;
-  snmp_transport *transport = NULL;
+  netsnmp_transport *transport = NULL;
 
   SV* cb = ((struct snmp_xs_cb_data*)cb_data)->perl_cb;
   SV* sess_ref = ((struct snmp_xs_cb_data*)cb_data)->sess_ref;

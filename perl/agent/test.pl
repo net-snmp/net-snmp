@@ -79,7 +79,7 @@ sub testsub {
     print "  mode: ", $_[2]->getMode(),"\n";
     $_[3]->setOID(".1.3.6.1.8888.1");
     $_[3]->setValue(2, 42);
-#    $_[3]->setValue(ASN_INTEGER, 42);
+    $_[3]->setValue(ASN_INTEGER, 42);
     print "  oid: ", $_[3]->getOID(),"\n";
     print "  ref: ", ref($_[3]),"\n";
     print "  val: ", $_[3]->getValue(),"\n";
