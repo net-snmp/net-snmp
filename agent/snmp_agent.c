@@ -888,9 +888,7 @@ statp_loop:
 			    return SNMP_ERR_GENERR;
 			}
 	    		saved->write_method = write_method;
-	    		saved->statP = (u_char *)malloc((statLen)?statLen:1);
-			if ( saved->statP && statP )
-			    memcpy( saved->statP, statP, statLen );
+	    		saved->statP        = statP;
 	    		saved->statType     = statType;
 	    		saved->statLen      = statLen;
 	    		saved->acl          = acl;
