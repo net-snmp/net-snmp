@@ -970,8 +970,12 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     int rc;
-    
-    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * failed row create in early stages has no rowreq_ctx
+     */
+    if (NULL == rowreq_ctx)
+        return MFD_SUCCESS;
 
     /*
      * call user cleanup
