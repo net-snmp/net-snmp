@@ -970,7 +970,7 @@ fileMax	OBJECT-TYPE
 	::= { fileEntry 4 }
 
 fileMax		OBJECT-TYPE
-		SYNTAX		TruthValue
+		SYNTAX		INTEGER
 		MAX-ACCESS	read-only
 		STATUS		current
 		DESCRIPTION	"Limit exceeded flag"
