@@ -160,7 +160,7 @@ PrefixList      mib_prefixes[] = {
  *
  * @param timeticks    The timeticks to convert.
  * @param buf          Buffer to write to, has to be at 
- *                     least 64 Bytes large.
+ *                     least 40 Bytes large.
  *       
  * @return The buffer.
  */
@@ -1126,7 +1126,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
                          const struct enum_list *enums,
                          const char *hint, const char *units)
 {
-    char            timebuf[32];
+    char            timebuf[40];
 
     if ((var->type != ASN_TIMETICKS) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
@@ -5226,7 +5226,7 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
  *
  * @param timeticks    The timeticks to convert.
  * @param buf          Buffer to write to, has to be at 
- *                     least 64 Bytes large.
+ *                     least 40 Bytes large.
  *       
  * @return The buffer
  *
@@ -5235,15 +5235,12 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
 char           *
 uptime_string(u_long timeticks, char *buf)
 {
-    char            tbuf[64];
-    char           *cp;
-    uptimeString(timeticks, tbuf);
-    cp = strrchr(tbuf, '.');
+    uptimeString(timeticks, buf);
 #ifdef CMU_COMPATIBLE
+    char *cp = strrchr(buf, '.');
     if (cp)
         *cp = '\0';
 #endif
-    strlcpy(buf, tbuf, sizeof(buf));
     return buf;
 }
 
