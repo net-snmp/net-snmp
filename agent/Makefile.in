@@ -44,7 +44,7 @@ INSTALLHEADERS=agent_read_config.h agent_registry.h agent_index.h agent_trap.h \
 	mibgroup/util_funcs.h mibgroup/mibincl.h mibgroup/header_complex.h \
 	ucd-snmp-agent-includes.h mibgroup/struct.h
 
-all: subdirs snmpd libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
+all: subdirs snmpd$(EXEEXT) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 
 subdirs:
@@ -62,7 +62,7 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd:	${LAGENTOBJS} $(USELIBS) $(LIBTARG)
+snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(LIBTARG)
 	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
