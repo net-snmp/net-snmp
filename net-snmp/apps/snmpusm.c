@@ -472,6 +472,18 @@ main(int argc, char *argv[])
         } else {
           fprintf(stderr, "Error in packet.\nReason: %s\n",
                   snmp_errstring(response->errstat));
+	  if (response->errindex != 0) {
+	    int count;
+	    struct variable_list *vars;
+	    fprintf(stderr, "Failed object: ");
+	    for (count = 1, vars = response->variables;
+	         vars && count != response->errindex;
+		 vars = vars->next_variable, count++)
+	     /*EMPTY*/;
+	    if (vars)
+	      fprint_objid(stderr, vars->name, vars->name_length);
+	    fprintf(stderr, "\n");
+	  }
         }
       }
     } else if (status == STAT_TIMEOUT){
