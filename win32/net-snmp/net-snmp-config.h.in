@@ -63,7 +63,7 @@ extern "C" {
 #endif /* ! USE_OPENSSL */
 
 /* add in recent CMU library extensions (not complete) */
-#define CMU_COMPATIBLE 1
+#undef CMU_COMPATIBLE
 
 /* add in recent resource lock functions (not complete) */
 #undef _REENTRANT
