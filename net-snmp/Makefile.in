@@ -255,7 +255,7 @@ version:
 	  echo "you need to supply a VERSION string."; \
 	  exit 2; \
 	fi
-	${srcdir}/agent/mibgroup/versiontag $(VERSION) reverse
+	perl local/Version-Munge.pl -T $(VERSION) -M -V -D -C
 
 tag:
 	@if test "x$(VERSION)" = "x"; then \
