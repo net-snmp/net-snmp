@@ -934,9 +934,11 @@ netsnmp_table_index_find_next_row(netsnmp_container *c,
     /*
      * no indexes, or below our minimum column? then use first row.
      */
-    if((tblreq->number_indexes == 0) ||
-       (tblreq->colnum < tblreq->reg_info->min_column)) {
+    if(tblreq->colnum < tblreq->reg_info->min_column) {
         tblreq->colnum = tblreq->reg_info->min_column;
+        tblreq->number_indexes = 0;
+    }
+    if(tblreq->number_indexes == 0) {
         row = CONTAINER_FIRST(c);
     } else {
         netsnmp_index index;
