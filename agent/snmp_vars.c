@@ -82,6 +82,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "party.h"
 #include "context.h"
 
+#ifndef  MIN
+#define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
+#endif
+
 int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
@@ -175,7 +179,7 @@ init_nlist(nl)
 	  DEBUGP("nlist err:  %s not found\n",nl[ret].n_name);
       } else {
 	  DEBUGP("nlist: %s 0x%X\n", nl[ret].n_name,
-                 (unsigned int)nl[ret].n_value);
+		  (unsigned int)nl[ret].n_value);
       }
   }
 #endif
@@ -190,15 +194,9 @@ init_snmp __P((void))
   init_kmem("/dev/kmem"); 
 #endif
 
-  subtree_size = subtree_old_size();
-  subtree_malloc_size = subtree_old_size();
-
-  subtrees = (struct subtree *)
-    malloc ((subtree_old_size())*sizeof(struct subtree));
-  memmove(subtrees, subtrees_old, subtree_old_size()*sizeof(struct subtree));
-  init_read_config();
-  sort_tree();
+  setup_tree();
 #include "mibgroup/mib_module_inits.h"
+  init_read_config();
 }
 
 #ifndef linux
@@ -290,6 +288,9 @@ Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
 #endif
 
+struct subtree *subtrees;   /* this is now set up in
+                                      read_config.c */
+
 struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
@@ -302,53 +303,10 @@ int subtree_old_size __P((void)) {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
 }
 
-void
-sort_tree __P((void)) {
-  qsort(subtrees, subtree_size, sizeof(struct subtree),
-#ifdef __STDC__
-        (int (*)(const void *, const void *)) tree_compare
-#else
-        tree_compare
-#endif
-    );
-}
-
-/* register_subtree(struct subtree *) */
-int
-register_subtree(stp)
-  struct subtree *stp;
-{
-
-  struct subtree *ptr;
-  char buf[1024];
-  sprint_objid (buf, stp->name, stp->namelen);
- 
-  subtree_size++;
-  if (subtree_malloc_size < subtree_size) {
-    subtree_malloc_size = subtree_malloc_size*2;
-    subtrees = (struct subtree *) realloc(subtrees, subtree_malloc_size*
-                                          sizeof(struct subtree));
-    if (subtrees == 0) {
-#ifdef USING_ERRORMIB
-      setPerrorstatus("malloc failed");
-#else
-      perror("malloc");
-#endif
-      return -1;
-    }
-  }
-  ptr = subtrees;
-  ptr += (subtree_size-1);
-  memcpy(ptr,stp,sizeof(struct subtree));
-  sort_tree();
-  DEBUGP("registered mib slot %d:  %s\n", subtree_size, buf);
-  return subtree_size;
-}
-
 /* register_mib(char *moduleName, struct variable *, int varsize,
                 int numvars, oid mibloc, int mibloclen)
  */
-int
+void
 register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   char *moduleName;
   struct variable *var;
@@ -357,15 +315,16 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   oid *mibloc;
   int mibloclen;
 {
-  struct subtree subtree;
-  memcpy(subtree.name, mibloc, mibloclen*sizeof(oid));
-  memcpy(subtree.label, moduleName, strlen(moduleName)+1);
-  subtree.namelen = (u_char) mibloclen;
-  subtree.variables = (struct variable *) malloc(varsize*numvars);
-  memcpy(subtree.variables, var, numvars*varsize);
-  subtree.variables_len = numvars;
-  subtree.variables_width = varsize;
-  return register_subtree(&subtree);
+  struct subtree *subtree;
+  subtree = (struct subtree *) malloc(sizeof(struct subtree));
+  memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
+  memcpy(subtree->label, moduleName, strlen(moduleName)+1);
+  subtree->namelen = (u_char) mibloclen;
+  subtree->variables = (struct variable *) malloc(varsize*numvars);
+  memcpy(subtree->variables, var, numvars*varsize);
+  subtree->variables_len = numvars;
+  subtree->variables_width = varsize;
+  load_subtree(subtree);
 }
 
 /* unregister_mib(oid mibloc, int mibloclen)
@@ -399,6 +358,8 @@ unregister_mib(mibloc, mibloclen)
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
+ * Now uses 'search_subtree' (recursively) and 'search_subtree_vars'
+ * to do most of the work
  *
  * If an exact match for the variable name exists, it is returned.  If not,
  * and exact is false, the next variable lexicographically after the
@@ -406,9 +367,12 @@ unregister_mib(mibloc, mibloclen)
  *
  * If no appropriate variable can be found, NULL is returned.
  */
+static  int 		found;
+
 u_char	*
-getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
+search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	   noSuchObject)
+    struct subtree *tp;
     oid		*name;	    /* IN - name of var, OUT - name matched */
     int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
     u_char	*type;	    /* OUT - type of matched variable */
@@ -419,40 +383,19 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     struct packet_info *pi; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {
-    register struct subtree	*tp;
     register struct variable *vp;
     struct variable	compat_var, *cvp = &compat_var;
     register int	x;
-    int			y;
+    struct subtree	*y;
     register u_char	*access = NULL;
-    int			result, treeresult;
+    int			result;
     oid 		*suffix;
     int			suffixlen;
-    int 		found = FALSE;
-    oid			save[MAX_NAME_LEN];
-    int			savelen = 0;
-#ifdef USING_PASS_MODULE
-    extern int numrelocs, numpassthrus;
-#endif
 
-    if (!exact){
-	memcpy(save, name, *namelen * sizeof(oid));
-	savelen = *namelen;
-    }
-    *write_method = NULL;
-    for (y = 0, tp = subtrees; y < (subtree_old_size()
-#ifdef USING_EXTENSIBLE_MODULE
-                                    + numrelocs
-#endif
-#ifdef USING_PASS_MODULE
-                                    + numpassthrus
-#endif
-      ); tp++, y++){
-	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
-	/* if exact and treeresult == 0
-	   if next  and treeresult <= 0 */
-	if (treeresult == 0 || (!exact && treeresult < 0)){
-	    result = treeresult;
+	    if ( tp->variables == NULL )
+		return NULL;
+
+	    result = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	    suffixlen = *namelen - tp->namelen;
 	    suffix = name + tp->namelen;
 	    /* the following is part of the setup for the compatability
@@ -531,16 +474,216 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		    return NULL;
 		}
 	    }
-	    if (access != NULL)
-		break;
-	}
+	    if (access != NULL) {
+	        *type = cvp->type;
+		*acl = cvp->acl;
+		return access;
+	    }
+	    return NULL;
+}
+
+u_char	*
+search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
+	   noSuchObject)
+    struct subtree *sub_tp;
+    oid		*name;	    /* IN - name of var, OUT - name matched */
+    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+    u_char	*type;	    /* OUT - type of matched variable */
+    int		*len;	    /* OUT - length of matched variable */
+    u_short	*acl;	    /* OUT - access control list */
+    int		exact;	    /* IN - TRUE if exact match wanted */
+    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    struct packet_info *pi; /* IN - relevant auth info re PDU */
+    int		*noSuchObject;
+{
+    struct subtree *tp;
+
+    u_char *this_return, *child_return;
+    oid     this_name[MAX_NAME_LEN];
+    oid     child_name[MAX_NAME_LEN];
+    int     this_namelen, child_namelen;
+    u_char  this_type,    child_type;
+    int     this_len,     child_len,    compare_len;
+    u_short this_acl,     child_acl;
+    int     this_NoObj,   child_NoObj;
+    int     **this_write __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     **child_write __P((int, u_char *, u_char, int, u_char *, oid *, int));
+ 
+
+    if ( sub_tp == NULL )
+	return NULL;
+
+    tp = sub_tp->children;
+
+		/*
+		 * Consider the simple cases first:
+		 */
+			/* No children, so use local info only */
+    if ( tp == NULL )
+	return( search_subtree_vars( sub_tp, name, namelen,
+		type, len, acl, exact, write_method, pi, noSuchObject));
+
+    while ( tp != NULL ) {
+	compare_len = MIN( tp->namelen, *namelen );
+	if ( compare(tp->name, compare_len, name, compare_len) >= 0 )
+	    break;
+	tp = tp->next;
     }
-    if (y == (subtree_old_size()
-#ifdef USING_PASS_MODULE
-              + numrelocs + numpassthrus
-#endif
-      )) {
-	if (!access && !exact){
+
+			/* No relevant children, so as above */
+    if ( tp == NULL )
+	return( search_subtree_vars( sub_tp, name, namelen,
+		type, len, acl, exact, write_method, pi, noSuchObject));
+
+			/* No local info, so children or nothing */
+    if ( sub_tp->variables == NULL ) {
+	while ( tp != NULL ) {
+	    child_return = search_subtree( tp, name, namelen,
+			type, len, acl, exact, write_method, pi, noSuchObject);
+	    if ( child_return != NULL )
+		return child_return;
+	    else
+		tp = tp->next;
+	}
+	return NULL;	/* Nothing left */
+    }
+
+
+		/*
+		 *   This leaves the situation where both
+		 * the current node, and children could
+		 * potentially answer the query.
+		 *   We need to ask both, and compare answers.
+		 */
+
+			/* First set up copies of the name requested,
+				so one query doesn't affect the other */
+	memcpy(this_name, name, *namelen * sizeof(oid));
+	this_namelen = *namelen;
+	memcpy(child_name, name, *namelen * sizeof(oid));
+	child_namelen = *namelen;
+
+			/* Ask the current node */
+	this_return = search_subtree_vars( sub_tp,
+		this_name, &this_namelen,
+		&this_type, &this_len, &this_acl, exact,
+		write_method, pi, &this_NoObj);
+
+			/* This answer is the best we'll get, so use it */
+	if ( this_return != NULL &&
+	     ( exact ||
+	       compare( this_name, this_namelen, tp->name, tp->namelen) < 0 )) {
+		*namelen = this_namelen;
+		memcpy(name, this_name, *namelen * sizeof(oid));
+		*type = this_type;
+		*len  = this_len;
+		*acl  = this_acl;
+	/*	*write_method = *this_write;	*/
+		*noSuchObject = this_NoObj;
+		return this_return;
+	}
+
+			/* Ask the children until we get an answer */
+	child_return=NULL;
+	while ( child_return == NULL ) {
+	    child_return = search_subtree( tp,
+		child_name, &child_namelen,
+		&child_type, &child_len, &child_acl, exact,
+		write_method, pi, &child_NoObj);
+	    tp = tp->next;
+
+			/* Only one possibly relevant subtree */
+	    if ( exact || tp == NULL  ||
+			/* or 'this' answer is better than remaining children */
+		( this_return != NULL && child_return == NULL &&
+		  compare( tp->name, tp->namelen, this_name, this_namelen) > 0 ))
+			break;
+	}
+
+			/* If one answer is still NULL, use the other .. */
+	if ( this_return == NULL && child_return == NULL ) {
+		return NULL;
+	}
+	else if ( this_return == NULL ) {
+		*namelen = child_namelen;
+		memcpy(name, child_name, *namelen * sizeof(oid));
+		*type = child_type;
+		*len  = child_len;
+		*acl  = child_acl;
+	/*	*write_method = child_write;	*/
+		*noSuchObject = child_NoObj;
+		return child_return;
+	}
+	else if ( child_return == NULL ) {
+		*namelen = this_namelen;
+		memcpy(name, this_name, *namelen * sizeof(oid));
+		*type = this_type;
+		*len  = this_len;
+		*acl  = this_acl;
+	/*	*write_method = this_write;	*/
+		*noSuchObject = this_NoObj;
+		return this_return;
+	}
+			/* else use the minimum of the two (non-NULL) answers */
+	else
+	if ( compare( this_name, this_namelen,
+		      child_name, child_namelen) > 0 ) {
+		*namelen = child_namelen;
+		memcpy(name, child_name, *namelen * sizeof(oid));
+		*type = child_type;
+		*len  = child_len;
+		*acl  = child_acl;
+	/*	*write_method = child_write;	*/
+		*noSuchObject = child_NoObj;
+		return child_return;
+	}
+	else {
+		*namelen = this_namelen;
+		memcpy(name, this_name, *namelen * sizeof(oid));
+		*type = this_type;
+		*len  = this_len;
+		*acl  = this_acl;
+	/*	*write_method = this_write;	*/
+		*noSuchObject = this_NoObj;
+		return this_return;
+	}
+}
+
+u_char	*
+getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
+	   noSuchObject)
+    oid		*name;	    /* IN - name of var, OUT - name matched */
+    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+    u_char	*type;	    /* OUT - type of matched variable */
+    int		*len;	    /* OUT - length of matched variable */
+    u_short	*acl;	    /* OUT - access control list */
+    int		exact;	    /* IN - TRUE if exact match wanted */
+    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    struct packet_info *pi; /* IN - relevant auth info re PDU */
+    int		*noSuchObject;
+{
+    register struct subtree	*tp;
+    oid			save[MAX_NAME_LEN];
+    int			savelen = 0;
+    u_char              result_type;
+    u_short             result_acl;
+    u_char              *search_return;
+
+    found = FALSE;
+
+    if (!exact){
+	memcpy(save, name, *namelen * sizeof(oid));
+	savelen = *namelen;
+    }
+    *write_method = NULL;
+    for (tp = subtrees; tp != NULL ; tp = tp->next ) {
+	search_return = search_subtree( tp, name, namelen, &result_type,
+		len, &result_acl, exact, write_method, pi, noSuchObject);
+	if ( search_return != NULL )
+	    break;
+    }
+    if ( tp == NULL ) {
+	if (!search_return && !exact){
 	    memcpy(name, save, savelen * sizeof(oid));
 	    *namelen = savelen;
 	}
@@ -550,10 +693,9 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 	    *noSuchObject = TRUE;
         return NULL;
     }
-    /* vp now points to the approprate struct */
-    *type = cvp->type;
-    *acl = cvp->acl;
-    return access;
+    *type = result_type;
+    *acl =  result_acl;
+    return search_return;
 }
 
 /*
@@ -628,4 +770,33 @@ compare_tree(name1, len1, name2, len2)
 	return -1;  /* name1 shorter, so it is "less" */
     /* name1 matches name2 for length of name2, or they are equal */
     return 0;
+}
+
+struct subtree *find_subtree_next(name, len, subtree) {
+  struct subtree *myptr;
+  myptr = find_subtree(name,len,subtree);
+  if (myptr == NULL)
+    return myptr;
+  if (myptr->children)
+    return myptr->children;
+  return myptr->next;
+}
+
+struct subtree *find_subtree(name, len, subtree)
+  oid *name;
+  int len;
+  struct subtree *subtree;
+{
+  struct subtree *myptr;
+   char c_oid[MAX_NAME_LEN];
+
+   sprint_objid (c_oid, name, len);
+   DEBUGP("searching for %s\n", c_oid);
+  for(myptr = subtree; myptr != NULL; myptr = myptr->next) {
+    sprint_objid (c_oid, myptr->name, myptr->namelen);
+    DEBUGP(" checking %s\n", c_oid);
+    if (compare(name, len, myptr->name, myptr->namelen) == 0)
+      return myptr;
+  }
+  return NULL;
 }

@@ -3,7 +3,9 @@
 /*
  * The subtree structure contains a subtree prefix which applies to
  * all variables in the associated variable list.
- * No subtree may be a subtree of another subtree in this list.  i.e.:
+ *
+ * By converting to a tree of subtree structures, entries can
+ * now be subtrees of another subtree in the structure. i.e:
  * 1.2
  * 1.2.0
  */
@@ -14,6 +16,8 @@ struct subtree {
     int			variables_len;	/* number of entries in above array */
     int			variables_width; /* sizeof each variable entry */
     char                label[256];     /* calling module's label */
+    struct subtree      *next;		/* List of 'sibling' subtrees */
+    struct subtree      *children;	/* List of 'child' subtrees */
 };
 
 /*
