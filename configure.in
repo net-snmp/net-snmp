@@ -874,6 +874,16 @@ security_init_file="snmplib/snmpsm_init.h"
 new_with_security=`echo $with_security_modules | sed 's/,/ /g;'`
 new_with_out_security=`echo $with_out_security_modules | sed 's/,/ /g;'`
 
+if test ! -d include; then
+  mkdir include
+fi
+if test ! -d include/net-snmp; then
+  mkdir include/net-snmp
+fi
+if test ! -d include/ucd-snmp; then
+  mkdir include/ucd-snmp
+fi
+
 if test ! -d snmplib; then
   mkdir snmplib
 fi
