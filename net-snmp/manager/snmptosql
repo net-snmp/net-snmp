@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use lib '/afs/dcas.ucdavis.edu/pkg/common/perl_modules';
 use getValues;
