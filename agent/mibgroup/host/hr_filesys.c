@@ -64,7 +64,7 @@ struct mnttab *HRFS_entry = &HRFS_entry_struct;
 #define	HRFS_statfs	statvfs
 
 #elif defined(HAVE_GETFSSTAT)
-static struct statfs *fsstats;
+static struct statfs *fsstats = 0;
 static int fscount;
 struct statfs *HRFS_entry;
 #define HRFS_statfs	statfs
@@ -359,6 +359,9 @@ Init_HR_FileSys (void)
 {
 #if HAVE_GETFSSTAT
     fscount = getfsstat(NULL, 0, MNT_NOWAIT);
+    if (fsstats)
+      free((char *)fsstats);
+    fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
     HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
@@ -440,7 +443,8 @@ void
 End_HR_FileSys (void)
 {
 #ifdef HAVE_GETFSSTAT
-    free(fsstats);
+    if (fsstats)
+      free((char *)fsstats);
     fsstats = NULL;
 #else
     if ( fp != NULL )
