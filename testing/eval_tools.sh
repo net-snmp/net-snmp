@@ -224,7 +224,7 @@ STARTAGENT() {
    if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: snmpd $COMMANDARGS"
    fi
-   snmpd $COMMANDARGS
+   snmpd $COMMANDARGS > $SNMP_SNMPD_LOG_FILE.stdout 2>&1
 
     ## Give some agents time to settle ... A Better Way Will Be Found
     if [ `uname -s` = "AIX" ]; then
@@ -239,7 +239,9 @@ STOPAGENT() {
     fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
-	echo "$seperator"
+	echo "$seperator [stdout]"
+	cat $SNMP_SNMPD_LOG_FILE.stdout
+	echo "$seperator [logfile]"
 	cat $SNMP_SNMPD_LOG_FILE
 	echo "$seperator"
     fi
