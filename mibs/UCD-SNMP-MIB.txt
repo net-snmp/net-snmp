@@ -41,7 +41,7 @@ IMPORTS
 	DisplayString
 	    FROM RFC1213-MIB
 	TruthValue
-	    FROM SNMPV2-TC
+	    FROM SNMPv2-TC
 	TRAP-TYPE
 	    FROM RFC-1215;
 
@@ -677,6 +677,14 @@ versionIdent OBJECT-TYPE
      DESCRIPTION  
           "Id string from RCS keyword"
      ::= { version 5 } 
+
+versionConfigureOptions OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Options passed to the configure script when this agent was built."
+     ::= { version 6 } 
 
 versionClearCache OBJECT-TYPE
      SYNTAX  INTEGER
