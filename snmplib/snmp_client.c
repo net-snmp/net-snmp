@@ -238,7 +238,7 @@ snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
  * Will reset destination pointer if source pointer is NULL.
  * Returns 0 if successful, 1 if memory allocation fails.
  */
-static int
+int
 snmp_clone_mem(void ** dstPtr, void * srcPtr, unsigned len)
 {
     *dstPtr = 0;
@@ -303,6 +303,8 @@ locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
 
     var = pdu->variables;
     oldvar = 0; ii = 0; copied = 0;
+    if (pdu->flags & UCD_MSG_FLAG_FORCE_PDU_COPY)
+	copied = 1;	/* We're interested in 'empty' responses too */
     while (var) {
         /* errindex starts from 1. If drop_err, skip the errored variable */
         if (drop_err && (++ii == pdu->errindex)) {
