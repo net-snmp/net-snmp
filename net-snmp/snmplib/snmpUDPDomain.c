@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <errno.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -166,7 +167,7 @@ snmp_transport		*snmp_udp_transport	(struct sockaddr_in *addr,
 						 int local)
 {
   snmp_transport *t = NULL;
-  int rc = 0;
+  int rc = 0, udpbuf = (1 << 17);
   char *string = NULL;
 
   if (addr == NULL || addr->sin_family != AF_INET) {
@@ -202,11 +203,30 @@ snmp_transport		*snmp_udp_transport	(struct sockaddr_in *addr,
     setsockopt(t->sock, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
   }
 #endif/*SO_BSDCOMPAT*/
-  
+
+  /*  Try to set the send and receive buffers to a reasonably large value, so
+      that we can send and receive big PDUs (defaults to 8192 bytes (!) on
+      Solaris, for instance).  Don't worry too much about errors -- just
+      plough on regardless.  */
+
+#ifdef  SO_SNDBUF
+  if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, &udpbuf, sizeof(int)) != 0) {
+    DEBUGMSGTL(("snmp_udp", "couldn't set SO_SNDBUF to %d bytes: %s\n",
+		udpbuf, strerror(errno)));
+  }
+#endif/*SO_SNDBUF*/
+
+#ifdef  SO_RCVBUF
+  if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, &udpbuf, sizeof(int)) != 0) {
+    DEBUGMSGTL(("snmp_udp", "couldn't set SO_RCVBUF to %d bytes: %s\n",
+		udpbuf, strerror(errno)));
+  }
+#endif/*SO_RCVBUF*/
+
   if (local) {
-    /*  This session is inteneded as a server, so we must bind on to the given 
-	IP address (which may include an interface address, or could be
-	INADDR_ANY, but will include a port number.  */
+    /*  This session is inteneded as a server, so we must bind on to the given
+	IP address, which may include an interface address, or could be
+	INADDR_ANY, but certainly includes a port number.  */
     
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {
