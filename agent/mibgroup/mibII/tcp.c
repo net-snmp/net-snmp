@@ -739,7 +739,7 @@ var_tcpEntry(struct variable *vp,
 	if ((snmp_oid_compare(newname, TCP_CONN_LENGTH, name, *length) > 0) &&
 	    ((Nextentry.tcpConnLocalAddress == (u_long)-1)
 	     || (snmp_oid_compare(newname, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) < 0)
-	     || (snmp_oid_compare(name, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) == 0))){
+	     || (snmp_oid_compare(name, *length, lowest, TCP_CONN_LENGTH) == 0))){
 
 	  /* if new one is greater than input and closer to input than
 	   * previous lowest, and is not equal to it, save this one as the "next" one.
