@@ -553,6 +553,8 @@ register_default_handlers(void) {
                      DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
   ds_register_config(ASN_OCTET_STR, "snmp","defCommunity",
 		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
+  ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
+                     DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
 }
 
 
