@@ -7,8 +7,8 @@ AC_MSG_CACHE_INIT()
 dnl
 dnl save the configure arguments
 dnl
-AC_DEFINE_UNQUOTED(CONFIGURE_OPTIONS,"$ac_configure_args")
-CONFIGURE_OPTIONS="$ac_configure_args"
+AC_DEFINE_UNQUOTED(CONFIGURE_OPTIONS,"\"$ac_configure_args\"")
+CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
 dnl
