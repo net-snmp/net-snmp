@@ -587,10 +587,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	      return 1;
 	    }
 	  }
+	} else {
+	  /*  Map other <community, transport-address> pairs to security names
+	      here.  For now just let non-IPv4 transport always succeed.  */
+	  return 0;
 	}
-	
-	/*  Map other <community, transport-address> pairs to security names
-	    here.  */
 
 	if (sn == NULL) {
 	  snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
