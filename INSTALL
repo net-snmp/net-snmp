@@ -23,9 +23,9 @@ QUICK INSTRUCTIONS
      (--prefix=PATH will change the default /usr/local installation path.)
      (see "Compilers and Options" on changing the complier to use)
 
-  2) Optionally edit config.h
-     (due to prompting done by the configure script, this is rarely
-     necessary.)
+  2) Optionally edit include/net-snmp/net-snmp-config.h
+     (due to prompting done by the configure script, this is very rarely
+      necessary.)
 
   3) make
 
