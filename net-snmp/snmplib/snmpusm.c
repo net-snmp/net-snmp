@@ -1213,13 +1213,10 @@ usm_parse_security_parameters (
 	/* 
 	 * Eat the first octet header.
 	 */
-	if ((value_ptr = asn_parse_header (parse_ptr, &octet_string_length,
-		&type_value)) == NULL)
-	{
-		/* RETURN parse error */ return -1;
-	}
-
-	if (type_value != (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR))
+	if ((value_ptr = asn_parse_sequence (parse_ptr, &octet_string_length,
+		&type_value,
+		(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
+		"usm first octet")) == NULL)
 	{
 		/* RETURN parse error */ return -1;
 	}
@@ -1231,13 +1228,10 @@ usm_parse_security_parameters (
 	parse_ptr 	= value_ptr;
 	sequence_length = octet_string_length;
 
-	if ((value_ptr = asn_parse_header (parse_ptr, &sequence_length,
-		&type_value)) == NULL)
-	{
-		/* RETURN parse error */ return -1;
-	}
-
-	if (type_value != (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR))
+	if ((value_ptr = asn_parse_sequence (parse_ptr, &sequence_length,
+		&type_value,
+		(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+		"usm sequence")) == NULL)
 	{
 		/* RETURN parse error */ return -1;
 	}
@@ -1843,27 +1837,13 @@ usm_process_in_msg (
 	{
 		remaining = wholeMsgLen - (data_ptr - wholeMsg);
 
-		if ((value_ptr = asn_parse_header (data_ptr, &remaining,
-			&type_value)) == NULL)
+		if ((value_ptr = asn_parse_sequence (data_ptr, &remaining,
+			&type_value,
+			(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
+			"encrypted sPDU")) == NULL)
 		{
 			DEBUGMSGTL(("usm","%s\n",
 				"Failed while parsing encrypted sPDU."));
-			if (snmp_increment_statistic
-						(STAT_SNMPINASNPARSEERRS)==0)
-			{
-				DEBUGMSGTL(("usm","%s\n",
-					"Failed increment statistic."));
-			}
-			return USM_ERR_PARSE_ERROR;
-		}
-	
-		if ( type_value != (u_char)
-				(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR) )
-		{
-			DEBUGMSGTL(("usm","%s\n",
-				"Failed while parsing encrypted sPDU, "
-				"wrong type."));
-
 			if (snmp_increment_statistic
 						(STAT_SNMPINASNPARSEERRS)==0)
 			{
