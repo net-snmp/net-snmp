@@ -101,7 +101,7 @@ init_ifTable(void)
     }
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
     table_info->min_column = COLUMN_IFNAME;
-    table_info->max_column = COLUMN_IFDISCONTINUITYTIME;
+    table_info->max_column = COLUMN_IFCOUNTERDISCONTINUITYTIME;
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
     if (!iinfo) {
         return;
@@ -557,7 +557,7 @@ ifXTable_handler(netsnmp_mib_handler          *handler,
                                                   (entry->if_alias ?
                                             strlen(entry->if_alias):0));
                 break;
-            case COLUMN_IFDISCONTINUITYTIME:
+            case COLUMN_IFCOUNTERDISCONTINUITYTIME:
                 if ( entry->flags & NETSNMP_IF_FLAGS_HAS_DISCONTINUITY )
 	            snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                          (u_char *)&entry->if_discontinuity,
