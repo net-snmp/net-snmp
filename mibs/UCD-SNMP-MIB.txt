@@ -566,7 +566,8 @@ Version ::= SEQUENCE {
    versionCDate  DisplayString,
    versionIdent  DisplayString,
    versionClearCache  INTEGER,
-   versionUpdateConfig  INTEGER
+   versionUpdateConfig  INTEGER,
+   versionDoDebugging  INTEGER
 }
    
 versionIndex OBJECT-TYPE
@@ -632,6 +633,14 @@ versionRestartAgent OBJECT-TYPE
      DESCRIPTION  
           "Set to 1 to restart the agent."
      ::= { version 12 } 
+
+versionDoDebugging OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-write
+     STATUS  mandatory
+     DESCRIPTION  
+          "Set to 1 to turn debugging statements on in the agent."
+     ::= { version 20 } 
 
 snmperrs OBJECT-TYPE
 	SYNTAX Snmperrs
