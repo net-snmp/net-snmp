@@ -79,6 +79,7 @@ SOFTWARE.
 #include "snmp_parse_args.h"
 #include "snmp_debug.h"
 #include "tools.h"
+#include "getopt.h"
 
 int failures=0;
 
@@ -199,7 +200,6 @@ int main(int argc, char *argv[])
     size_t base_length;
     int status;
     struct variable_list *saved = NULL, **vlpp = &saved, *vlp = saved, *vlp2;
-    int running;
     int count = 0;
     
     /* get the common command line arguments */
