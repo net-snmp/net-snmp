@@ -668,7 +668,7 @@ netsnmp_register_mib(const char *moduleName,
 	}
     }
 
-    if (perform_callback) {
+    if (res == MIB_REGISTERED_OK && perform_callback) {
         reg_parms.name = mibloc;
         reg_parms.namelen = mibloclen;
         reg_parms.priority = priority;
@@ -677,12 +677,6 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
         reg_parms.contextName = context;
-
-        /*
-         * Should this really be called if the registration hasn't actually 
-         * succeeded?  
-         */
-
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
     }
