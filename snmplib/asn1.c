@@ -2269,7 +2269,8 @@ asn_rbuild_objid (u_char *data,
  * lastbyte ::= 0 7bitvalue
  */
     register oid *op = objid;
-    register int i, tmpint;
+    register int i;
+    register unsigned int tmpint;
     u_char *initdatap = data;
     const char *errpre = "build objid";
 
