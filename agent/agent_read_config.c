@@ -64,10 +64,10 @@ void init_agent_read_config (void)
                           "1 | 2\t\t(1 = enable, 2 = disable)");
   register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
-                          "host");
+                          "host [community]");
   register_config_handler("snmpd","trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
-                          "host");
+                          "host [community]");
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,

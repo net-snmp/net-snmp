@@ -923,9 +923,12 @@ void snmpd_parse_config_trapsink(char *token,
 				 char *cptr)
 {
     char tmpbuf[1024];
+    char *sp, *cp;
   
     if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
-    if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+    sp = strtok(cptr, " \t\n");
+    cp = strtok(NULL, " \t\n");
+    if (create_v1_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
 	config_perror(tmpbuf);
     }
@@ -935,9 +938,12 @@ void snmpd_parse_config_trap2sink(char *token,
 				  char *cptr)
 {
     char tmpbuf[1024];
+    char *sp, *cp;
   
     if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
-    if (create_v2_trap_session(cptr, snmp_trapcommunity) == 0) {
+    sp = strtok(cptr, " \t\n");
+    cp = strtok(NULL, " \t\n");
+    if (create_v2_trap_session(sp, cp ? cp : snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
 	config_perror(tmpbuf);
     }
