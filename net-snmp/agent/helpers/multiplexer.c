@@ -70,30 +70,22 @@ netsnmp_multiplexer_helper_handler(netsnmp_mib_handler *handler,
     methods = (netsnmp_mib_handler_methods *) handler->myvoid;
 
     switch (reqinfo->mode) {
+    case MODE_GETBULK:
+        handler = methods->getbulk_handler;
+        if (handler)
+            break;
+        /* Deliberate fallthrough to use GetNext handler */
+    case MODE_GETNEXT:
+        handler = methods->getnext_handler;
+        if (handler)
+            break;
+        /* Deliberate fallthrough to use Get handler */
     case MODE_GET:
         handler = methods->get_handler;
         if (!handler) {
             netsnmp_set_all_requests_error(reqinfo, requests,
                                            SNMP_NOSUCHOBJECT);
         }
-        break;
-
-    case MODE_GETNEXT:
-        handler = methods->getnext_handler;
-        if (!handler)           /* fallback to get handler */
-            handler = methods->get_handler;
-        break;
-
-    case MODE_GETBULK:
-        /*
-         * XXX: this needs to do better getbulk -> getnext
-         * handling (probably via a separate helper) 
-         */
-        handler = methods->getbulk_handler;
-        if (!handler)           /* fallback to getnext handler */
-            handler = methods->getnext_handler;
-        if (!handler)           /* fallback to getnext handler */
-            handler = methods->get_handler;
         break;
 
     case MODE_SET_RESERVE1:
