@@ -106,6 +106,7 @@ struct agent_snmp_session {
    tree_cache *treecache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
+   int vbcount;
 };
 
 /*  Address cache handling functions.  */

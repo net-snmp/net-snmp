@@ -747,6 +747,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     if ( asp->end != NULL )
 	while ( asp->end->next_variable != NULL )
 	    asp->end = asp->end->next_variable;
+    asp->vbcount = count_varbinds(asp->start);
 
     return asp;
 }
@@ -1164,7 +1165,7 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
 
     if (asp->treecache == NULL &&
         asp->treecache_len == 0) {
-        asp->treecache_len = 16;
+        asp->treecache_len = SNMP_MAX(1+asp->vbcount/4,16);
         asp->treecache = calloc(asp->treecache_len, sizeof(tree_cache));
         if (asp->treecache == NULL)
             return SNMP_ERR_GENERR;
