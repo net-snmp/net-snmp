@@ -109,6 +109,9 @@ sure to end it in -1.*/
 #define LOADAVEMIBNUM 7
 #define USELOADAVEMIB
 
+/*   pass MIBOID command */
+#define USEPASSMIB
+
 /* which version are you using? This mibloc will tell you */
 #define VERSIONMIBNUM 100
 #define USEVERSIONMIB    

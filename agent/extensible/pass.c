@@ -1,0 +1,260 @@
+#include <config.h>
+
+#include "mibincl.h"
+#include "mibdefs.h"
+
+#ifdef USEPASSMIB
+
+struct extensible *passthrus=NULL;
+int numpassthrus=0;
+
+unsigned char *var_extensible_pass();
+struct extensible *get_exten_instance();
+int setPass();
+
+/* the relocatable extensible commands variables */
+struct variable2 extensible_passthru_variables[] = {
+  /* bogus entry.  Only some of it is actually used. */
+  {MIBINDEX, INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
+};
+
+unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, j, rtest=0, fd, newlen;
+  register int interface;
+  struct myproc *proc;
+  static long long_ret;
+  static char buf[300], buf2[300];
+  static oid  objid[30];
+  struct extensible *passthru;
+  char arg1[3];
+  FILE *file;
+
+  DEBUGP("passthru:  ");
+  print_mib_oid(name,*length);
+  DEBUGP1("\tlength:  %d\n",*length);
+  DEBUGP1("checking on %d\n",numpassthrus)
+  long_ret = *length;
+  for(i=1; i<= numpassthrus; i++) {
+    passthru = get_exten_instance(passthrus,i);
+    for(j=0,rtest=0; j < passthru->miblen && !rtest; j++) {
+      if (name[j] != passthru->miboid[j]) {
+        if (name[j] < passthru->miboid[j])
+          rtest = -1;
+        else
+          rtest = 1;
+      }
+    }
+    print_mib_oid(passthru->miboid,passthru->miblen);
+    DEBUGP1(" (%d)",passthru->miblen);
+    DEBUGP1(": %d\n",rtest);
+    if ((exact && rtest == 0 && *length >= passthru->miblen) ||
+        (!exact && rtest <= 0)) {
+      /* setup args */
+      sprint_mib_oid(buf, name, *length);
+      if (exact)
+        sprintf(passthru->command,"%s -g %s",passthru->name,buf);
+      else
+        sprintf(passthru->command,"%s -n %s",passthru->name,buf);
+      DEBUGP1("pass-running:  %s\n",passthru->command);
+      /* valid call.  Exec and get output */
+      if (fd = get_exec_output(passthru)) {
+        file = fdopen(fd,"r");
+        if (fgets(buf,STRMAX,file) == NULL) {
+          *var_len = NULL;
+          fclose(file);
+          close(fd);
+          return(NULL);
+        }
+        DEBUGP1("pass:  %s\n",buf);
+        newlen = parse_miboid(buf,newname);
+        print_mib_oid(newname,newlen);
+        DEBUGP1(" (%d)\n",newlen);
+
+        /* its good, so copy onto name/length */
+        bcopy((char *) newname, (char *)name, (int)newlen * sizeof (oid));
+        *length = newlen;
+
+        /* set up return pointer for setable stuff */
+        *write_method = setPass;
+
+        if (newlen == 0 || fgets(buf,STRMAX,file) == NULL
+            || fgets(buf2,STRMAX,file) == NULL) {
+          *var_len = NULL;
+          fclose(file);
+          close(fd);
+          return(NULL);
+        }
+        fclose(file);
+        close(fd);
+        DEBUGP1("buf:  %s\n",buf);
+        DEBUGP1("buf2: %s\n",buf2);
+        /* buf contains the return type, and buf2 contains the data */
+        if (!strncasecmp(buf,"string",6)) {
+          DEBUGP("parsed as: string\n");
+          buf2[strlen(buf2)-1] = NULL;  /* zap the linefeed */
+          *var_len = strlen(buf2);
+          vp->type = STRING;
+          return(buf2);
+        } else if (!strncasecmp(buf,"integer",7)) {
+          DEBUGP("parsed as: int\n");
+          *var_len = sizeof(long_ret);
+          long_ret = atoi(buf2);
+          vp->type = INTEGER;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"counter",7)) {
+          DEBUGP("parsed as: counter\n");
+          *var_len = sizeof(long_ret);
+          long_ret = atoi(buf2);
+          vp->type = COUNTER;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"gauge",5)) {
+          DEBUGP("parsed as: gauge\n");
+          *var_len = sizeof(long_ret);
+          long_ret = atoi(buf2);
+          vp->type = GAUGE;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"objectid",8)) {
+          DEBUGP("parsed as: objectid\n");
+          newlen = parse_miboid(buf2,objid);
+          *var_len = newlen*sizeof(oid);
+          vp->type = OBJID;
+          return((unsigned char *) objid);
+        } else if (!strncasecmp(buf,"timetick",8)) {
+          DEBUGP("parsed as: timetick\n");
+          *var_len = sizeof(long_ret);
+          long_ret = atoi(buf2);
+          vp->type = TIMETICKS;
+          return((unsigned char *) &long_ret);
+        } else if (!strncasecmp(buf,"ipaddress",9)) {
+          DEBUGP("parsed as: ipaddress\n");
+          newlen = parse_miboid(buf2,objid);
+          if (newlen != 4) {
+            fprintf(stderr,"invalid ipaddress returned:  %s\n",buf2);
+            *var_len = NULL;
+            return(NULL);
+          }
+          long_ret = (objid[0] << (8*3)) + (objid[1] << (8*2)) +
+            (objid[2] << 8) + objid[3];
+          *var_len = sizeof(long_ret);
+          vp->type = IPADDRESS;
+          return((unsigned char *) &long_ret);
+        }
+      }
+      *var_len = NULL;
+      return(NULL);
+    }
+  }
+  DEBUGP("failed to find anything\n");
+  if (var_len)
+    *var_len = NULL;
+  *write_method = NULL;
+  return(NULL);
+}
+
+setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
+   int      action;
+   u_char   *var_val;
+   u_char   var_val_type;
+   int      var_val_len;
+   u_char   *statP;
+   oid      *name;
+   int      name_len;
+{
+  int i, j, rtest, tmplen=1000;
+  char cmdline[300];
+  struct extensible *passthru;
+
+  static char buf[300], buf2[300];
+  static long tmp;
+  static unsigned long utmp;
+  static int itmp;
+  static oid objid[30];
+  
+  if (action == COMMIT) {
+    for(i=1; i<= numpassthrus; i++) {
+      passthru = get_exten_instance(passthrus,i);
+      for(j=0,rtest=0; j < passthru->miblen && !rtest; j++) {
+        if (name[j] != passthru->miboid[j]) {
+          if (name[j] < passthru->miboid[j])
+            rtest = -1;
+          else
+            rtest = 1;
+        }
+      }
+      print_mib_oid(passthru->miboid,passthru->miblen);
+      DEBUGP1(" (%d)",passthru->miblen);
+      DEBUGP1(": %d\n",rtest);
+      if (rtest == 0 && name_len >= passthru->miblen) {
+        /* setup args */
+        sprint_mib_oid(buf, name, name_len);
+        sprintf(passthru->command,"%s -s %s ",passthru->name,buf);
+        switch(var_val_type) {
+          case INTEGER:
+          case COUNTER:
+          case GAUGE:
+          case TIMETICKS:
+            asn_parse_int(var_val,&tmplen,&var_val_type, &tmp,
+                          sizeof(tmp));
+            switch (var_val_type) {
+              case INTEGER:
+                sprintf(buf,"integer %d",tmp);
+                break;
+              case COUNTER:
+                sprintf(buf,"counter %d",tmp);
+                break;
+              case GAUGE:
+                sprintf(buf,"gauge %d",tmp);
+                break;
+              case TIMETICKS:
+                sprintf(buf,"timeticks %d",tmp);
+                break;
+            }
+            break;
+          case IPADDRESS:
+            asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
+                          sizeof(utmp));
+            sprintf(buf,"ipaddress %d.%d.%d.%d",
+                    ((utmp & 0xff000000) >> (8*3)),
+                    ((utmp & 0xff0000) >> (8*2)),
+                    ((utmp & 0xff00) >> (8)),
+                    ((utmp & 0xff)));
+            break;
+          case STRING:
+            itmp = sizeof(buf);
+            bzero(buf2,itmp);
+            asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
+            sprintf(buf,"string %s",buf2);
+            break;
+          case OBJID:
+            itmp = sizeof(objid);
+            asn_parse_objid(var_val,&tmplen,&var_val_type, &objid,&itmp);
+            sprint_mib_oid(buf2, objid, itmp);
+            sprintf(buf,"objectid \"%s\"",buf2);
+            break;
+        }
+        strcat(passthru->command,buf);
+        DEBUGP1("pass-running:  %s\n",passthru->command);
+        exec_command(passthru);
+        return SNMP_ERR_NOERROR;
+      }
+    }
+    return SNMP_ERR_WRONGTYPE;
+  }
+}
+  
+#endif  /* USEPASSMIB */

@@ -876,14 +876,14 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int 		found = FALSE;
     oid			save[MAX_NAME_LEN];
     int			savelen;
-    extern numrelocs;
+    extern int numrelocs, numpassthrus;
 
     if (!exact){
 	bcopy(name, save, *namelen * sizeof(oid));
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs); tp++, y++){
+    for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs + numpassthrus); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treerresult == 0
 	   if next  and treeresult <= 0 */
@@ -901,17 +901,21 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		vp =(struct variable *)((char *)vp +tp->variables_width), x++){
 		/* if exact and ALWAYS
 		   if next  and result >= 0 */
-		if (exact || result >= 0){
+                /* and if vp->namelen != 0   -- Wes */
+		if (vp->namelen && (exact || result >= 0)){
 		    result = compare_tree(suffix, suffixlen, vp->name,
 				     (int)vp->namelen);
 		}
 		/* if exact and result == 0
 		   if next  and result <= 0 */
-		if ((!exact && (result <= 0)) || (exact && (result == 0))){
+                /* or if vp->namelen == 0    -- Wes */
+		if ((!exact && (result <= 0)) || (exact && (result == 0)) ||
+                  vp->namelen == 0) {
 		    /* builds an old (long) style variable structure to retain
 		       compatability with var_* functions written previously.
 		     */
-		    bcopy((char *)vp->name, (char *)(cvp->name + tp->namelen),
+                  if (vp->namelen)
+                    bcopy((char *)vp->name, (char *)(cvp->name + tp->namelen),
 			  vp->namelen * sizeof(oid));
 		    cvp->namelen = tp->namelen + vp->namelen;
 		    cvp->type = vp->type;
@@ -951,8 +955,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		}
 		/* if exact and result <= 0 */
 		if (exact && (result  <= 0)){
-	            *type = vp->type;
-		    *acl = vp->acl;
+	            *type = cvp->type;
+		    *acl = cvp->acl;
 		    if (found)
 			*noSuchObject = FALSE;
 		    else
@@ -964,7 +968,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		break;
 	}
     }
-    if (y == (subtree_old_size() + numrelocs)) {
+    if (y == (subtree_old_size() + numrelocs + numpassthrus)) {
 	if (!access && !exact){
 	    bcopy(save, name, savelen * sizeof(oid));
 	    *namelen = savelen;
@@ -976,8 +980,8 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
         return NULL;
     }
     /* vp now points to the approprate struct */
-    *type = vp->type;
-    *acl = vp->acl;
+    *type = cvp->type;
+    *acl = cvp->acl;
     return access;
 }
 
