@@ -3265,7 +3265,10 @@ _sess_async_send(void *sessp,
 	rp->callback = callback;
 	rp->cb_data = cb_data;
 	rp->retries = 0;
-	rp->timeout = session->timeout;
+	if ( pdu->flags & UCD_MSG_FLAG_PDU_TIMEOUT )
+	    rp->timeout = pdu->time * 1000000L;
+	else
+	    rp->timeout = session->timeout;
 	rp->time = tv;
 	tv.tv_usec += rp->timeout;
 	tv.tv_sec += tv.tv_usec / 1000000L;

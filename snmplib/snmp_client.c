@@ -118,6 +118,7 @@ snmp_pdu_create(int command)
     pduIp->sin_addr.s_addr       = SNMP_DEFAULT_ADDRESS;
     pdu->securityNameLen	 = 0;
     pdu->contextNameLen		 = 0;
+    pdu->time			 = 0;
     pdu->reqid                   = snmp_get_next_reqid();
     pdu->msgid                   = snmp_get_next_msgid();
     }

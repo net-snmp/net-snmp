@@ -209,6 +209,7 @@ SOFTWARE.
 #define UCD_MSG_FLAG_EXPECT_RESPONSE         0x200
 #define UCD_MSG_FLAG_FORCE_PDU_COPY          0x400
 #define UCD_MSG_FLAG_ALWAYS_IN_VIEW          0x800
+#define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000
 
 /* view status */
 #define SNMP_VIEW_INCLUDED		1
