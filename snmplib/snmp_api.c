@@ -3990,7 +3990,7 @@ _sess_read(void *sessp,
             int new_sd;
 
             addrlen = sizeof(struct sockaddr);
-            new_sd = accept(isp->sd, (struct sockaddr *)&(isp->addr), (int *)&addrlen);
+            new_sd = accept(isp->sd, (struct sockaddr *)&(isp->addr), &addrlen);
             if ( new_sd == -1 ) {
 	        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
 	        sp->s_errno = errno;
@@ -4028,7 +4028,7 @@ _sess_read(void *sessp,
         length = recv(isp->sd, (char *)packet, PACKET_LENGTH, 0);
     } else {
         length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
-		      (struct sockaddr *)&from, (int *)&fromlength);
+		      (struct sockaddr *)&from, &fromlength);
         if (from.sa_family == AF_UNSPEC)
             from.sa_family = AF_INET; /* bad bad bad OS, no bone! */
     }
