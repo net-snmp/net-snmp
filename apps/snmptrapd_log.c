@@ -1570,12 +1570,13 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
                  *    (a bit of a hack, but it should work!)
                  */
                 size_t i, j;
+		char *sep = separator;
                 i = sizeof(separator);
                 j = 0;
                 memset(separator, 0, i);
                 next_chr = format_str[++fmt_idx];
                 if (!realloc_handle_backslash
-                    ((u_char **)&separator, &i, &j, 0, next_chr)) {
+                    ((u_char **)&sep, &i, &j, 0, next_chr)) {
                     return 0;
                 }
             } else {
