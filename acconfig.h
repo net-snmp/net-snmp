@@ -638,7 +638,7 @@
  *
  * NOT like this:
  *
- *    static NETSNMP_INLINE function(int parm) { return parm -1; } // WRONG!
+ *    static NETSNMP_INLINE function(int parm) { return parm -1; }
  *
  */
 #define NETSNMP_INLINE inline
