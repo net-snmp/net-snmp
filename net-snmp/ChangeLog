@@ -1,3 +1,91 @@
+Changes:  V3.0.5 -> V3.0.6
+
+hardaker 24 Jan 96 16:31:20
+    - Returning EXTENSIBLEDOTMIB.AGENTID as the new objectid
+
+hardaker 24 Jan 96 16:33:08
+    - Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>
+      - fixes -p PORT command line option to actually use the requested port.
+      - fixes the -l LOGFILE command line option to actually use it.
+
+hardaker 24 Jan 96 16:36:51
+    - (Makefile, config.h, ece-mib.*, sedscript.in)
+      - changed the way mib.txt is built
+        - split the command into two parts to build a ece-mib.txt as well
+      - added a new ObjectID addition to ece-mib.txt
+      - DEFMAXLOADAVE -> DREMOVEMEEFMAXLOADAVE
+
+hardaker 26 Jan 96 08:25:08
+    - The Solaris 2.5 kernel has moved to /kernel/genunix
+      - Thanks goes to pommier@volnay.stortek.com (Vincent Pommier (Toulouse))
+
+hardaker  9 Feb 96 17:05:00
+    - Better OpenView support
+      - Returns different sysObjectID's for each architecture
+      - Added a 'ov' directory for OpenView support files
+        - currently contains necessary files to support a UCD bitmap file
+          for hosts using the ucd-snmp agent.  See the ov/README file for details.
+
+hardaker 12 Feb 96 14:28:27
+    - (acconfig.h, config.hin, agent/extensible/misc.c)
+      - The agent now sets an alarm to restart rather than doing at the
+        snmpset time to return a value to the snmpset request.
+
+hardaker 16 Feb 96 16:32:41
+    - (acconfig.h,config.h.in, agent/snmp_agent.c, agent/extensible/read_config.c)
+      - .conf file addition:  "community N STRING" to change community names
+
+hardaker 21 Feb 96 16:12:39
+    - (Makefile.in, sedscript.in, man/Makefile.in, man/snmpd.conf.5.def)
+      - Added the beginnings of a snmpd.conf manual page.
+
+hardaker 21 Feb 96 16:15:36
+    - (apps/Makefile.in, apps/snmptrap.c)
+      - Added apps/snmptrap
+        - code taken from 2.0.1 and submitted to me by francus@metsny.delphi.com.
+        - I have yet to test it.
+
+hardaker  6 Mar 96 09:09:15
+    - (agent/snmpd.c) Added O_TRUNC to the logfile open() call.
+
+hardaker  6 Mar 96 10:06:24
+    - (agent/extensible/read_config.c) small bugs fixed
+      - disk entries with no size specified caused seg-faults.
+      - better type checking on MIB for 'exec MIB' entries.
+      - more error messages added.
+
+hardaker  6 Mar 96 16:38:16
+    - (ece-mib.def)
+      - Changed capitalization schemes to be mosy compliant.
+      - Made the memory mib SYNTAX point to the Memory sequence like it should.
+
+hardaker  6 Mar 96 16:58:11
+    - (snmplib/mib.c) printed values for timeticks are no longer negative.
+
+hardaker  8 Mar 96 10:31:34
+    - (snmplib/snmp_client.c) Check if variable content is NULL before using.
+
+hardaker  8 Mar 96 16:56:08
+    - (agent/extensible/exec.c)
+       - relocatable exec's failed to close the cache file.
+
+hardaker 11 Mar 96 13:37:25
+    - (snmp_var_route.c, snmp_vars.c, extensible.c): commented out nlist warnings.
+
+hardaker 11 Mar 96 15:17:26
+    - (man/{Makefile.in,snmpd.1.def,snmpd.conf.5.def},versiontag,sedscript.in):
+      - cleaned up documentation more and added the version number to the trailers.
+
+hardaker 11 Mar 96 15:17:57
+    - (README): cleaned up, re-arranged, shortened (sections moved to man/* docs).
+
+hardaker 11 Mar 96 15:40:17
+
+    - (README): more clean up and added reference to the ucd-snmp mailing list.
+
+
+-------------------------------------------------------------------------------
+
 Changes since V3.0.4
 
 hardaker 19 Jan 96 17:31:16

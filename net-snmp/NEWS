@@ -1,6 +1,25 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.0.6*
+
+  Features:
+    - snmpV1 community names can be set in the configuration files now!
+    - new app:  apps/snmptrap, as requested by many, many people.
+    - New man page (rough still):  snmpd.conf.5.
+    - Returns new values for system.sysObjectID for each supported OS.
+    - Better OpenView support for changing the icons & etc.  See ov/README.
+
+  Bug fixes.
+    - -p PORT -l LOGFILE now work as advertised.
+    - printed values of timeticks are no longer negative.
+    - Correctly finds the Solaris 2.5 kernel.
+    - the restart-agent mib entry now sets an 1 second alarm to
+      restart so it can return a proper snmp response first.
+    - Truncates existing logfiles.
+    - nlist warnings removed.
+    - more...  (see the ChangeLog)
+
 *3.0.5*
 
   Bug fixes:
