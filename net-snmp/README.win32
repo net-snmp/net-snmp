@@ -237,26 +237,17 @@ library debug option is set to 'Program Database' or "/Zi".
 Building
 --------
 
-Because snmptrapd builds only using win32.dsw, and since the library
-projects are exactly the same from the workspaces' point of view,
-start by building from the win32.dsw workspace.
+The win32sdk.dsw workspace will build the agent that provides mib-II objects
+for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
+workspace requires the Platform SDK to be installed.
+Use the win32.dsw workspace if you don't have or don't need these features.
 
-1. Open win32.dsw.  Click "Build->Batch Build..."  
+1. Open win32.dsw or win32sdk.dsw.  Click "Build->Batch Build..."  
 2. Set Release and/or Debug in 'Project configurations' to suit.
 3. Click "ReBuild All".
 4. When building is done, View the Output window, clip and
    save to a text file if there is some information to share.
 5. Click "File->Close Workspace".
-
-
-Skip the next five steps if you did not install the Platform SDK.
-
-6. Open win32sdk.dsw.  Click "Build->Batch Build..."
-7. Set Release and/or Debug in 'Project configurations' to suit.
-8. Set netsnmpmibssdk, snmpdsdk, then Click "Build".
-9. When building is done, View the Output window, clip and
-   save to a text file if there is some information to share.
-10.Click "File->Close Workspace".
 
 
 ***************************************************************************
