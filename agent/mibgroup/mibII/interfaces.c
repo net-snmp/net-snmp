@@ -1303,6 +1303,7 @@ Interface_Scan_Init (void)
 	else {
 	  memcpy (nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, 6);
 
+#ifdef ARPHRD_LOOPBACK
 	  switch (ifrq.ifr_hwaddr.sa_family) {
 	  case ARPHRD_TUNNEL:
 	  case ARPHRD_TUNNEL6:
@@ -1320,6 +1321,7 @@ Interface_Scan_Init (void)
 	      nnew->if_type = 24; break; /* softwareLoopback */
           /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
 	  }
+#endif
 	}
 	
 	strcpy (ifrq.ifr_name, ifname);
