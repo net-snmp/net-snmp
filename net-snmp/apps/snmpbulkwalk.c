@@ -106,7 +106,10 @@ int main(int argc, char  *argv[])
     int  reps = 1000;
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
+    if ((arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) < 0) {
+        usage();
+        exit(1);
+    }
 
     /* get the initial object and subtree */
     if (arg < argc) {

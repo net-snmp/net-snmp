@@ -165,7 +165,10 @@ int main(int argc, char *argv[])
                        DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
 
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
+    if ((arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) < 0) { 
+        usage();
+        exit(1);
+    }
 
     /* get the initial object and subtree */
     if (arg < argc) {
