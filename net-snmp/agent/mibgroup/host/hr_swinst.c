@@ -44,7 +44,6 @@
 #include <rpm/rpmlib.h>
 #include <rpm/header.h>
 #include <fcntl.h>
-#endif
 
 #ifdef HAVE_RPMGETPATH
 #include <rpm/rpmmacro.h>
@@ -52,6 +51,7 @@
 
 #ifdef HAVE_RPM_RPMDB_H
 #include <rpm/rpmdb.h>
+#endif
 #endif
 
 #if HAVE_STRING_H
