@@ -36,11 +36,12 @@ netsnmp_get_new_stash_cache(void)
     return cinfo;
 }
 
-/** returns a stash_cache handler that can be injected into a given
- *  handler chain.
+/** returns a single stash_cache handler that can be injected into a given
+ *  handler chain, but *only* if that handler chain explicitly supports
+ *  stash cache processing.
  */
 netsnmp_mib_handler *
-netsnmp_get_stash_cache_handler(void)
+netsnmp_get_bare_stash_cache_handler(void)
 {
     netsnmp_mib_handler *handler;
     netsnmp_stash_cache_info *cinfo;
@@ -57,6 +58,19 @@ netsnmp_get_stash_cache_handler(void)
 
     handler->myvoid = cinfo;
 
+    return handler;
+}
+
+/** returns a stash_cache handler sub-chain that can be injected into a given
+ *  (arbitrary) handler chain.
+ */
+netsnmp_mib_handler *
+netsnmp_get_stash_cache_handler(void)
+{
+    netsnmp_mib_handler *handler = netsnmp_get_bare_stash_cache_handler();
+    if (handler) {
+        handler->next = netsnmp_get_stash_to_next_handler();
+    }
     return handler;
 }
 
@@ -81,19 +95,6 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
     netsnmp_variable_list *cdata;
     netsnmp_request_info *request;
     int ret;
-
-    if ( !reginfo->modes & HANDLER_CAN_STASH ) {
-        /*
-         * Insert a 'stash_to_next' helper into the chain
-         * so that it will be the next thing to be called
-         */
-        h = netsnmp_get_stash_to_next_handler();
-        h->next       = handler->next;
-        handler->next = h;
-        h->next->prev = h;
-        h->prev       = handler;
-        reginfo->modes |= HANDLER_CAN_STASH;
-    }
 
     DEBUGMSGTL(("helper:stash_cache", "Got request\n"));
 
