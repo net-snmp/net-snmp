@@ -116,7 +116,7 @@ static void dump_var (
     temp_var.type = statType;
     temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
-    sprint_variable (buf, var_name, var_name_len, &temp_var);
+    snprint_variable (buf, sizeof(buf), var_name, var_name_len, &temp_var);
     snmp_log(LOG_INFO, "    >> %s\n", buf);
 }
 

@@ -219,7 +219,7 @@ handle_agentx_response( int operation,
 		DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
 		DEBUGMSG(("agentx/master","\n"));
 		if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
-		    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
+		    snprint_variable (buf, sizeof(buf), vbp->name, vbp->name_length, vbp);
 		    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 		}
 	    }

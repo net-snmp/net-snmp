@@ -236,7 +236,8 @@ u_char *var_simple_proxy(struct variable *vp,
 
                     DEBUGIF("proxy_var") {
                         char buf[SPRINT_MAX_LEN];
-                        sprint_variable(buf, var->name, var->name_length, var);
+                        snprint_variable(buf, sizeof(buf),
+                                         var->name, var->name_length, var);
                         DEBUGMSGTL(("proxy_var","success: %s\n", buf));
                     }
               
@@ -289,7 +290,7 @@ u_char *var_simple_proxy(struct variable *vp,
 
                     DEBUGIF("proxy_var") {
                         char buf[SPRINT_MAX_LEN];
-                        sprint_variable(buf, name, *length, var);
+                        snprint_variable(buf, sizeof(buf), name, *length, var);
                         DEBUGMSGTL(("proxy_var","returning: %s\n", buf));
                     }
                 }

@@ -1115,7 +1115,8 @@ snmp_check_parse( struct snmp_session *session,
 	    for ( var_ptr = pdu->variables ;
 	        var_ptr != NULL ; var_ptr=var_ptr->next_variable )
 	    {
-                sprint_objid (c_oid, var_ptr->name, var_ptr->name_length);
+                snprint_objid (c_oid, sizeof(c_oid),
+                               var_ptr->name, var_ptr->name_length);
                 snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
 	    }
 	}

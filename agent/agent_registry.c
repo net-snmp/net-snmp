@@ -789,8 +789,10 @@ void dump_registry( void )
     char end_oid[SPRINT_MAX_LEN];
 
     for( myptr = subtrees ; myptr != NULL; myptr = myptr->next) {
-	sprint_objid(start_oid, myptr->start, myptr->start_len);
-	sprint_objid(end_oid, myptr->end, myptr->end_len);
+	snprint_objid(start_oid, sizeof(start_oid),
+                     myptr->start, myptr->start_len);
+	snprint_objid(end_oid, sizeof(end_oid),
+                     myptr->end, myptr->end_len);
 	printf("%c %s - %s %c\n",
 		( myptr->variables ? ' ' : '(' ),
 		  start_oid, end_oid,

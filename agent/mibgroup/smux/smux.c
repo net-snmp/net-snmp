@@ -677,7 +677,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 		*fail = TRUE;
 		return((ptr += *len));
 	}
-	sprint_objid(oid_print, oid_name, oid_name_len);
+	snprint_objid(oid_print, sizeof(oid_print), oid_name, oid_name_len);
 
         if (snmp_get_do_debugging()) {
 	    DEBUGMSGTL (("smux","[smux_open_process] smux peer: %s\n", oid_print)); 
@@ -1477,7 +1477,7 @@ smux_peer_cleanup(int sd)
 		if (Auths[i]->sa_active_fd == sd) {
 		  	char oid_name[128];
 			Auths[i]->sa_active_fd = -1;
-			sprint_objid(oid_name, Auths[i]->sa_oid, Auths[i]->sa_oid_len);
+			snprint_objid(oid_name, sizeof(oid_print), Auths[i]->sa_oid, Auths[i]->sa_oid_len);
 			snmp_log(LOG_INFO, "peer disconnected: %s\n", oid_name);
 		}
 	}
