@@ -96,6 +96,14 @@ SOURCE=..\..\snmplib\context_parse.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\keytools.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\lcd_time.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\hpux.c
 # End Source File
 # Begin Source File
@@ -128,6 +136,10 @@ SOURCE=..\..\snmplib\read_config.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\scapi.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp.c
 # End Source File
 # Begin Source File
@@ -148,7 +160,19 @@ SOURCE=..\..\snmplib\snmp_debug.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpusm.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpv3.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\system.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\tools.c
 # End Source File
 # Begin Source File
 

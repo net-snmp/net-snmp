@@ -72,7 +72,6 @@
 #	include <sys/socket.h>
 #	include <net/if.h>
 #	include <netdb.h>
-#endif
 
 #if HAVE_NETINET_IN_H /* */
 #	include <netinet/in.h>
@@ -81,6 +80,8 @@
 #	include <netinet/ip.h>
 #	include <sys/socket.h>
 #endif
+
+#endif /* !HAVE_WINSOCK_H */
 
 #if HAVE_ARPA_INET_H /* */
 #	include <arpa/inet.h>

@@ -124,7 +124,7 @@ static void md5Digest (u_char *, int, u_char *);
  * Parameters:
  *	*data		(I)   Message.
  *	*length		(I/O) Bytes left in message.
- *	*sid		(O)   Community string.
+ *	*psid		(O)   Community string.
  *	*slen		(O)   Length of community string.
  *	*version	(O)   Message version.
  *      
@@ -190,7 +190,7 @@ snmp_comstr_parse(u_char *data,
  * Parameters:
  *	*data
  *	*length
- *	*sid
+ *	*psid
  *	*slen
  *	*version
  *	 messagelen
@@ -212,7 +212,7 @@ snmp_comstr_parse(u_char *data,
 u_char *
 snmp_comstr_build(	u_char	*data,
 			int	*length,
-			u_char	*sid,
+			u_char	*psid,
 			int	*slen,
 			int	*version,
 			int	messagelen)
@@ -248,7 +248,7 @@ snmp_comstr_build(	u_char	*data,
      */
     data = asn_build_string(data, length,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-            sid, *slen);
+            psid, *slen);
     if (data == NULL){
         ERROR_MSG("buildstring");
         return NULL;

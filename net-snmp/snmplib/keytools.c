@@ -233,7 +233,7 @@ EM(-1); /* */
           QUITFUN(SNMPERR_GENERR, generate_kul_quit);
        
 
-	if ((*kul_len < properlength) || (ku_len < properlength) ) {
+	if (((int)*kul_len < properlength) || ((int)ku_len < properlength) ) {
 		QUITFUN(SNMPERR_GENERR, generate_kul_quit);
 	}
 
@@ -349,7 +349,7 @@ EM(-1); /* */
 		QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
 	}
 
-	properlength = SNMP_MIN(oldkey_len, properlength);
+	properlength = SNMP_MIN((int)oldkey_len, properlength);
 
 	/*
 	 * Use the old key and some random bytes to encode the new key
@@ -372,7 +372,7 @@ EM(-1); /* */
 #endif /* SNMP_TESTING_CODE */
 		rval = sc_random(kcstring, &nbytes);
 		QUITFUN(rval, encode_keychange_quit);
-		if (nbytes != properlength) {
+		if ((int)nbytes != properlength) {
 			QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
 		}
 #ifdef SNMP_TESTING_CODE
@@ -393,7 +393,7 @@ EM(-1); /* */
 
 	kcstring += properlength;
 	nbytes    = 0;
-	while (nbytes++ < properlength) {
+	while ((int)(nbytes++) < properlength) {
 		*kcstring++ = *kcstring ^ *newkey++;
 	}
 
@@ -510,7 +510,7 @@ EM(-1); /* */
         memcpy(newkey, tmp_buf, properlength);
 	bufp   = kcstring+properlength;
 	nbytes = 0;
-	while (nbytes++ < properlength) {
+	while ((int)(nbytes++) < properlength) {
 		*newkey++ = *newkey ^ *bufp++;
 	}
 

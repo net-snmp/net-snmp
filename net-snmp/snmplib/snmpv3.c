@@ -6,7 +6,11 @@
 
 #include <stdio.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -45,6 +49,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "read_config.h"
+#include "lcd_time.h"
 #include "scapi.h"
 #include "tools.h"
 #include "debug.h"
@@ -457,24 +462,24 @@ void
 init_snmpv3_post_config(void) {
 
   int engineIDLen;
-  u_char *engineID;
+  u_char *c_engineID;
 
-  engineID = snmpv3_generate_engineID(&engineIDLen);
+  c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
   /* if our engineID has changed at all, the boots record must be set to 1 */
   if (engineIDLen != oldEngineIDLength ||
-      oldEngineID == NULL || engineID == NULL ||
-      memcmp(oldEngineID, engineID, engineIDLen) != 0) {
+      oldEngineID == NULL || c_engineID == NULL ||
+      memcmp(oldEngineID, c_engineID, engineIDLen) != 0) {
     engineBoots = 1;
   }
 
   /* set our local engineTime in the LCD timing cache */
-  set_enginetime(engineID, engineIDLen, 
+  set_enginetime(c_engineID, engineIDLen, 
                  snmpv3_local_snmpEngineBoots(), 
                  snmpv3_local_snmpEngineTime(),
                  TRUE);
 
-  free(engineID);
+  free(c_engineID);
 }
 
 /*******************************************************************-o-******
@@ -487,18 +492,18 @@ void
 shutdown_snmpv3(char *type)
 {
   char line[SNMP_MAXBUF_SMALL];
-  char engineID[SNMP_MAXBUF_SMALL];
+  char c_engineID[SNMP_MAXBUF_SMALL];
   int  engineIDLen;
 
   sprintf(line, "engineBoots %d", engineBoots);
   read_config_store(type, line);
 
-  engineIDLen = snmpv3_get_engineID(engineID, SNMP_MAXBUF_SMALL);
+  engineIDLen = snmpv3_get_engineID(c_engineID, SNMP_MAXBUF_SMALL);
 
   if (engineIDLen) {
     /* store the engineID used for this run */
     sprintf(line, "oldEngineID ");
-    read_config_save_octet_string(line+strlen(line), engineID,
+    read_config_save_octet_string(line+strlen(line), c_engineID,
                                   engineIDLen);
     read_config_store(type, line);
   }

@@ -27,7 +27,7 @@ static Enginetime etimelist[ETIMELIST_SIZE];
  *	*engineID
  *	 engineID_len
  *	*engineboot
- *	*enginetime
+ *	*engine_time
  *      
  * Returns:
  *	SNMPERR_SUCCESS		Success -- when a record for engineID is found.
@@ -35,7 +35,7 @@ static Enginetime etimelist[ETIMELIST_SIZE];
  *
  *
  * Lookup engineID and return the recorded values for the
- * <enginetime, engineboot> tuple adjusted to reflect the estimated time
+ * <engine_time, engineboot> tuple adjusted to reflect the estimated time
  * at the engine in question.
  *
  * Special case: if engineID is NULL or if engineID_len is 0 then
@@ -49,7 +49,7 @@ int
 get_enginetime(	u_char	*engineID,	
 		u_int	 engineID_len,
 		u_int	*engineboot,
-		u_int	*enginetime,
+		u_int	*engine_time,
 		u_int   authenticated)
 {
 	int		rval	 = SNMPERR_SUCCESS;
@@ -62,16 +62,16 @@ EM(-1); /* */
 	/*
 	 * Sanity check.
 	 */
-	if ( !enginetime || !engineboot ) {
+	if ( !engine_time || !engineboot ) {
 		QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
 	}
 
 
 	/*
-	 * Compute estimated current enginetime tuple at engineID if
+	 * Compute estimated current engine_time tuple at engineID if
 	 * a record is cached for it.
 	 */
-	*enginetime = *engineboot = 0;
+	*engine_time = *engineboot = 0;
 
 	if ( !engineID || (engineID_len<=0) ) {
 		QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
@@ -84,7 +84,7 @@ EM(-1); /* */
 #ifdef LCD_TIME_SYNC_OPT
         if (!authenticated || e->authenticatedFlag) {
 #endif	
-	*enginetime = e->engineTime;
+	*engine_time = e->engineTime;
 	*engineboot = e->engineBoot;
 
 	timediff = time(NULL) - e->lastReceivedEngineTime;
@@ -92,8 +92,8 @@ EM(-1); /* */
         }
 #endif	
 
-	if ( timediff > (ENGINETIME_MAX - *enginetime) ) {
-		*enginetime = (timediff - (ENGINETIME_MAX - *enginetime));
+	if ( timediff > (int)(ENGINETIME_MAX - *engine_time) ) {
+		*engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
 
 		/* FIX -- move this check up... should not change anything
 		 * if engineboot is already locked.  ???
@@ -103,7 +103,7 @@ EM(-1); /* */
 		}
 
 	} else {
-		*enginetime += timediff;
+		*engine_time += timediff;
 	}
 
 
@@ -122,14 +122,14 @@ get_enginetime_quit:
  *	*engineID
  *	 engineID_len
  *	 engineboot
- *	 enginetime
+ *	 engine_time
  *      
  * Returns:
  *	SNMPERR_SUCCESS		Success.
  *	SNMPERR_GENERR		Otherwise.
  *
  *
- * Lookup engineID and store the given <enginetime, engineboot> tuple
+ * Lookup engineID and store the given <engine_time, engineboot> tuple
  * and then stamp the record with a consistent source of local time.
  * If the engineID record does not exist, create one.
  *
@@ -142,7 +142,7 @@ int
 set_enginetime(	u_char	*engineID,
 		u_int	 engineID_len,
 		u_int	 engineboot,
-		u_int  	 enginetime,
+		u_int  	 engine_time,
 		u_int    authenticated)
 {
 	int		rval = SNMPERR_SUCCESS,
@@ -161,7 +161,7 @@ EM(-1); /* */
 
 
 	/*
-	 * Store the given <enginetime, engineboot> tuple in the record
+	 * Store the given <engine_time, engineboot> tuple in the record
 	 * for engineID.  Create a new record if necessary.
 	 */
 	if ( !(e = search_enginetime_list(engineID, engineID_len)) )
@@ -187,7 +187,7 @@ EM(-1); /* */
 #else
 	if (authenticated) {
 #endif
-	  e->engineTime		  = enginetime;
+	  e->engineTime		  = engine_time;
 	  e->engineBoot		  = engineboot;
 	  e->lastReceivedEngineTime = time(NULL);
         }

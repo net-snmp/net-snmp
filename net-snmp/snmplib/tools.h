@@ -112,9 +112,5 @@ int	hex_to_binary2 (char *input, u_long len, char **output);
 void	dump_chunk (char *title, char *buf, int size);
 char   *dump_snmpEngineID (u_char *buf, u_int *buflen);
 
-int	snmp_ttyecho(const int fd, const int echo);
-char   *snmp_getpassphrase(char *prompt, int visible);
-
-
 #endif /* _TOOLS_H */
 
