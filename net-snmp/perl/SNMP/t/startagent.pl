@@ -13,7 +13,7 @@ $auth_pass = 'test_pass_auth';
 $priv_pass = 'test_pass_priv';
 
 # don't use any .conf files other than those specified.
-$ENV{'SNMPCONFPATH'} = "bogus";
+$ENV{'SNMPCONFPATH'} |= "bogus";
 
 # erroneous input to test failure cases
 $bad_comm = 'BAD_COMMUNITY';
