@@ -2462,7 +2462,7 @@ snmpv3_parse(
 			       pdu->securityName, &pdu->securityNameLen,
 			       &cp,
 			       &pdu_buf_len, &max_size_response,
-			       &pdu->securityStateRef);
+			       &pdu->securityStateRef, msg_flags);
   DEBUGINDENTLESS();
 
   if (ret_val != SNMPERR_SUCCESS) {
