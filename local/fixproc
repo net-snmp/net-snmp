@@ -109,7 +109,7 @@ sub do_fix
       	# return code is number divided by 256
       $error_code = (system "$tmpfile") / 256;
       system "rm $tmpfile";
-      return ($fix_failed_error) if ($error_code != 0);
+      return ($cannot_fix_error) if ($error_code != 0);
         # sleep needed here?
       return &do_exist ($proc);
     }
