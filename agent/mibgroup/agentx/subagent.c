@@ -182,6 +182,8 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
 struct snmp_session *agentx_session;
 
+#ifdef notused
+
 void
 init_subagent( void )
 {
@@ -202,7 +204,13 @@ init_subagent( void )
     session->local_port = 0;	/* client */
     session->callback = handle_agentx_packet;
     session->authenticator = NULL;
-    agentx_session = snmp_open( session );
+    agentx_session = snmp_open( &sess );
+
+    if ( agentx_session == NULL ) {
+	snmp_sess_perror("init_subagent", &sess);
+	exit(1);
+    }
+
     set_parse( agentx_session, agentx_parse );
     set_build( agentx_session, agentx_build );
 
@@ -212,3 +220,7 @@ init_subagent( void )
 	exit(1);
     }
 }
+
+#endif /* notused */
+
+

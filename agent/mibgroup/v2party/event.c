@@ -1031,7 +1031,7 @@ eventNotifyUpdateSession(struct eventNotifyEntry *np)
     np->ss = snmp_open(&session);
     /* no need to check for error, there nothing to do about it anyway */
     if (!np->ss)
-	snmp_log(LOG_ERR,"cannot create session in eventNotifyUpdateSession\n");
+	snmp_sess_perror("eventNotifyUpdateSession", &session);
 }
 
 /*

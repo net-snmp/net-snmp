@@ -136,7 +136,7 @@ rmonGetValue(oid *srcParty,
 	    session.callback_magic = (void *)state;
 	    alarm->ss = snmp_open(&session);
 	    if (!alarm->ss) {
-		snmp_log(LOG_ERR,"cannot create session in rmonGetValue\n");
+		snmp_sess_perror("rmonGetValue", &session);
 		return 3;
 	    }
 	}

@@ -71,7 +71,7 @@ int addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
     s = socket(AF_INET, SOCK_RAW, 0);
     if (s<0) {
-        perror("socket");
+        log_perror("socket");
 	return 0;
     }
     
@@ -113,7 +113,7 @@ int delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
     s = socket(AF_INET, SOCK_RAW, 0);
     if (s<0) {
-        perror("socket");
+        log_perror("socket");
 	return 0;
     }
     
@@ -426,7 +426,7 @@ write_rte(
 		if (rp->rt_type == 2) {  /* invalid, so delete from kernel */
 
 		    if (delRoute(rp->rt_dst, rp->rt_nextIR, rp->rt_ifix , rp->old_flags ) < 0) {
-			perror("delRoute");
+			log_perror("delRoute");
 		    }
 
 		} else {
@@ -435,7 +435,7 @@ write_rte(
 		    
 		    if (oldty != 2) {   /* was the old entry valid ?  */
 			if (delRoute(rp->old_dst, rp->old_nextIR, rp->old_ifix , rp->old_flags ) < 0) {
-			    perror("delRoute");
+			    log_perror("delRoute");
 			}
 		    }
 
@@ -444,7 +444,7 @@ write_rte(
 		    flags = (rp->rt_type == 4 ? RTF_GATEWAY : 0);
 
 		    if (addRoute(rp->rt_dst, rp->rt_nextIR, rp->rt_ifix , flags) < 0) {
-			perror("addRoute");
+			log_perror("addRoute");
 		    }
 
 		    delCacheRTE( rp->rt_type );

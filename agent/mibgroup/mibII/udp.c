@@ -319,7 +319,7 @@ var_udp(struct variable *vp,
 	return NULL;
 
     if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
-	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+	log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
     }
 #define udpstat tcpipstats.udpstat
 

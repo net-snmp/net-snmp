@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
     SOCK_STARTUP;
     Session = snmp_open(&session);
     if (Session == NULL){
-        snmp_perror("snmpnetstat: Couldn't open snmp");
+        snmp_sess_perror("snmpnetstat", &session);
         SOCK_CLEANUP;
 	exit(1);
     }

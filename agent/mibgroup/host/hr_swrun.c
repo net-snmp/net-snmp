@@ -718,7 +718,7 @@ Init_HR_SWRun (void)
     nproc = 0;
 
     if (auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int)) == 0) {
-        perror("Init_HR_SWRun-auto_nlist NPROC");
+        log_perror("Init_HR_SWRun-auto_nlist NPROC");
         return;
     }
     bytes = nproc*sizeof(struct proc);
@@ -726,19 +726,19 @@ Init_HR_SWRun (void)
     if (proc_table) free((char *)proc_table);
     if ((proc_table=(struct proc *) malloc(bytes)) == NULL ) {
         nproc = 0;
-        perror("Init_HR_SWRun-malloc");
+        log_perror("Init_HR_SWRun-malloc");
         return;
     }
 
     {   int proc_table_base;
         if (auto_nlist(PROC_SYMBOL, (char *)&proc_table_base, sizeof(proc_table_base)) == 0) {
             nproc = 0;
-            perror("Init_HR_SWRun-auto_nlist PROC");
+            log_perror("Init_HR_SWRun-auto_nlist PROC");
             return;
         }
         if (klookup( proc_table_base, (char *)proc_table, bytes) == 0) {
             nproc = 0;
-            perror("Init_HR_SWRun-klookup");
+            log_perror("Init_HR_SWRun-klookup");
             return;
         }
     }

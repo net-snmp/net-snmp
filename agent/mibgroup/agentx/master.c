@@ -33,6 +33,7 @@ get_agentx_transID( int reqID, snmp_ipaddr *address )
     return reqID;	/* It'll do for now */
 }
 
+#ifdef notused
 
 void init_master(void)
 {
@@ -48,24 +49,27 @@ void init_master(void)
 
     session->local_port = 1;         /* server */
     session->callback = handle_master_agentx_packet;
-    session = snmp_open( session );
+    session = snmp_open( &sess );
 
     if ( session == NULL && sess.s_errno == EADDRINUSE ) {
 		/*
 		 * Could be a left-over socket (now deleted)
 		 * Try again
 		 */
-	session = &sess;
-        session = snmp_open( session );
+        session = snmp_open( &sess );
     }
 
-    if ( session == NULL )
-	return;
+    if ( session == NULL ) {
+	snmp_sess_perror("init_master", &sess);
+	/*return;*/
+	exit(1);
+    }
 
     set_parse( session, agentx_parse );
     set_build( session, agentx_build );
 }
 
+#endif /* notused */
 
 u_char *
 agentx_var(struct variable *vp,

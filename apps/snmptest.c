@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_sess_perror("snmptest", ss);
+        snmp_sess_perror("snmptest", &session);
         SOCK_CLEANUP;
 	exit(1);
     }

@@ -507,7 +507,7 @@ getvarbyname(struct snmp_session *sp,
 	}
     }
     else if (status != STAT_TIMEOUT)
-        snmp_perror("snmpnetstat");
+        snmp_sess_perror("snmpnetstat", sp);
     if (response)
 	snmp_free_pdu(response);
     return var;

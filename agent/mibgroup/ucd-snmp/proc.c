@@ -37,7 +37,7 @@
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
-#define setPerrorstatus(x) perror(x)
+#define setPerrorstatus(x) log_perror(x)
 #endif
 #include "util_funcs.h"
 #include "read_config.h"
