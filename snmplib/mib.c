@@ -1257,7 +1257,8 @@ int read_objid(const char *input,
     }
     if ((ret = parse_subtree(root, input, output, out_len)) <= 0)
     {
-	SET_SNMP_ERROR(ret);
+	int errc = (ret ? ret : SNMPERR_UNKNOWN_OBJID);
+	SET_SNMP_ERROR(errc);
 	return (0);
     }
     *out_len = ret;
@@ -1899,10 +1900,10 @@ get_node(const char *name,
 	 oid *objid,
 	 size_t *objidlen)
 {
-    char *cp;
+    int res;
 
     if (( cp=strchr(name, ':')) == NULL )
-	return( get_module_node( name, "ANY", objid, objidlen ));
+	res = get_module_node( name, "ANY", objid, objidlen );
     else {
 	char *module;
 	int res;
@@ -1918,8 +1919,12 @@ get_node(const char *name,
 			/* 'cp' and 'name' *do* go that way round! */
 	res = get_module_node( cp, module, objid, objidlen );
 	free(module);
-	return res;
     }
+    if (res == 0) {
+	SET_SNMP_ERROR(SNMPERR_UNKNOWN_OBJID);
+    }
+
+    return res;
 }
 
 #ifdef testing
