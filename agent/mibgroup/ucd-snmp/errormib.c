@@ -119,7 +119,6 @@ void
 setPerrorstatus(char *to)
 {
   char buf[STRMAX];
-  extern int errno;
   
   sprintf(buf,"%s:  %s",to,strerror(errno));
   perror(to);
