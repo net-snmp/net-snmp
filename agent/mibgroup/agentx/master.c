@@ -393,7 +393,7 @@ agentx_got_response(int operation,
              * there is no way to fix the problem 
              */
             snmp_log(LOG_ERR,
-                     "response to agentx request illegal.  We're screwed.\n");
+                     "response to agentx request illegal.  bailing out.\n");
             netsnmp_set_request_error(cache->reqinfo, requests,
                                       SNMP_ERR_GENERR);
         }
