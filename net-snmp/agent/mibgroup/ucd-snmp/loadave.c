@@ -79,6 +79,9 @@
 #endif
 #define statvfs statfs
 #endif
+#if HAVE_VM_VM_H
+#include <vm/vm.h>
+#endif
 #if HAVE_VM_SWAP_PAGER_H
 #include <vm/swap_pager.h>
 #endif

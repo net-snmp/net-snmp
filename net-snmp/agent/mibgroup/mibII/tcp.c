@@ -141,6 +141,9 @@
 #ifdef linux
 static void linux_read_tcp_stat (struct tcp_mib *);
 #endif
+#ifdef freebsd4
+static unsigned int hz;
+#endif
 
 	/*********************
 	 *
@@ -191,7 +194,9 @@ void init_tcp(void)
 #ifdef TCP_SYMBOL
   auto_nlist( TCP_SYMBOL,0,0 );
 #endif
-
+#if freebsd4
+  hz=sysconf(_SC_CLK_TCK); /* get ticks/s from system */
+#endif
 }
 
 /*
