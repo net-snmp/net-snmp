@@ -175,7 +175,7 @@ void proc_parse_config(char *token, char* cptr)
 
 /* The routine that handles everything */
 
-const u_char *var_extensible_proc(struct variable *vp,
+u_char *var_extensible_proc(struct variable *vp,
 				   oid *name,
 				   size_t *length,
 				   int exact,

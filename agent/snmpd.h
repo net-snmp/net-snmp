@@ -11,7 +11,7 @@ extern void init_snmp2p (u_short);
 extern void open_ports_snmp2p (void);
 extern void send_trap_pdu (struct snmp_pdu *);
 extern void send_easy_trap (int, int);
-extern const u_char *getStatPtr (oid *, size_t *, u_char *, size_t *,
+extern u_char *getStatPtr (oid *, size_t *, u_char *, size_t *,
 	u_short *, int, WriteMethod **write_method, struct snmp_pdu *, int *);
 void init_agent (void);
 

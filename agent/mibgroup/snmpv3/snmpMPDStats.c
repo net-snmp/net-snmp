@@ -25,7 +25,7 @@ void init_snmpMPDStats(void) {
 #endif
 }
 
-const u_char *
+u_char *
 var_snmpMPDStats(
     struct variable *vp,
     oid     *name,

@@ -236,7 +236,7 @@ header_tcp(struct variable *vp,
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
-const u_char *
+u_char *
 var_tcp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -361,7 +361,7 @@ var_tcp(struct variable *vp,
 
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
-const u_char *
+u_char *
 var_tcp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -511,7 +511,7 @@ var_tcp(struct variable *vp,
 
 #endif /* not HAVE_SYS_TCPIPSTATS_H */
 
-const u_char *
+u_char *
 var_tcpEntry(struct variable *vp,
 	     oid *name,
 	     size_t *length,
@@ -621,7 +621,7 @@ TCP_Cmp(void *addr, void *ep)
     return (1);
 }
 
-const u_char *
+u_char *
 var_tcp(struct variable *vp,
 	oid *name,
 	size_t *length,
@@ -690,7 +690,7 @@ var_tcp(struct variable *vp,
 }
 
 
-const u_char *
+u_char *
 var_tcpEntry(struct variable *vp,
 	     oid *name,
 	     size_t *length,

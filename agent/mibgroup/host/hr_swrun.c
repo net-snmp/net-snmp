@@ -221,7 +221,7 @@ DEBUGMSG(("host/hr_swrun", "\n"));
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrswrun(struct variable *vp,
 	    oid *name,
 	    size_t *length,

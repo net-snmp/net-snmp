@@ -750,7 +750,7 @@ main(int argc, char *argv[])
         perror("fopen");
         exit(1);
       }
-      fprintf(PID, "%d\n", getpid());
+      fprintf(PID, "%d\n", (int)getpid());
       fclose(PID);
     }
 

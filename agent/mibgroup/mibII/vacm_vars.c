@@ -512,7 +512,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 }  /* end vacm_in_view() */
 
 
-const u_char *var_vacm_sec2group(struct variable *vp,
+u_char *var_vacm_sec2group(struct variable *vp,
 			   oid *name,
 			   size_t *length,
 			   int exact,
@@ -592,7 +592,7 @@ const u_char *var_vacm_sec2group(struct variable *vp,
     return NULL;
 }
 
-const u_char *var_vacm_access(struct variable *vp,
+u_char *var_vacm_access(struct variable *vp,
 			oid *name,
 			size_t *length,
 			int exact,
@@ -735,7 +735,7 @@ const u_char *var_vacm_access(struct variable *vp,
     return NULL;
 }
 
-const u_char *var_vacm_view(struct variable *vp,
+u_char *var_vacm_view(struct variable *vp,
 		      oid *name,
 		      size_t *length,
 		      int exact,

@@ -294,7 +294,7 @@ void disk_parse_config(char *token, char *cptr)
   
 */
 
-const u_char *var_extensible_disk(struct variable *vp,
+u_char *var_extensible_disk(struct variable *vp,
 				   oid *name,
 				   size_t *length,
 				   int exact,

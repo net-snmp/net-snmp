@@ -97,10 +97,10 @@ PERFORMANCE OF THIS SOFTWARE.
 
 extern struct subtree subtrees_old[];
 
-static const u_char *search_subtree_vars (struct subtree *, oid *, size_t *,
+static u_char *search_subtree_vars (struct subtree *, oid *, size_t *,
 	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
 	struct snmp_pdu *, int *);
-static const u_char *search_subtree (struct subtree *, oid *, size_t *,
+static u_char *search_subtree (struct subtree *, oid *, size_t *,
 	u_char *, size_t *, u_short *, int, WriteMethod **write_method,
 	struct snmp_pdu *, int *);
 
@@ -409,7 +409,7 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
  */
 static  int 		found;
 
-static const u_char *
+static u_char *
 search_subtree_vars(struct subtree *tp,
 		    oid *name,    /* IN - name of var, OUT - name matched */
 		    size_t *namelen, /* IN -number of sub-ids in name,
@@ -425,7 +425,7 @@ search_subtree_vars(struct subtree *tp,
     register struct variable *vp;
     struct variable	compat_var, *cvp = &compat_var;
     register int	x;
-    const u_char	*access = NULL;
+    u_char		*access = NULL;
     int			result;
     oid 		*suffix;
     size_t		suffixlen;
@@ -519,7 +519,7 @@ search_subtree_vars(struct subtree *tp,
    noSuchObject
 */
 
-static const u_char *
+static u_char *
 search_subtree(
       struct subtree *sub_tp,
     oid		*name,	    /* IN - name of var, OUT - name matched */
@@ -535,7 +535,7 @@ search_subtree(
 {
     struct subtree *tp;
 
-    const u_char *this_return, *child_return;
+    u_char *this_return, *child_return;
     oid     this_name[MAX_OID_LEN];
     oid     child_name[MAX_OID_LEN];
     size_t  this_namelen, child_namelen;
@@ -700,7 +700,7 @@ search_subtree(
    noSuchObject
 */
 
-const u_char *
+u_char *
 getStatPtr(
     oid		*name,	    /* IN - name of var, OUT - name matched */
     size_t	*namelen,   /* IN -number of sub-ids in name,
@@ -718,7 +718,7 @@ getStatPtr(
     size_t		savelen = 0;
     u_char              result_type;
     u_short             result_acl;
-    const u_char        *search_return=NULL;
+    u_char        *search_return=NULL;
 
     found = FALSE;
 

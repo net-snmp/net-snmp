@@ -253,7 +253,7 @@ header_ip(struct variable *vp,
 #ifndef linux
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
-const u_char *
+u_char *
 var_ip(struct variable *vp,
        oid *name,
        size_t *length,
@@ -415,7 +415,7 @@ var_ip(struct variable *vp,
 
 #else /* HAVE_SYS_TCPIPSTATS_H */
 
-const u_char *
+u_char *
 var_ip(struct variable *vp,
        oid *name,
        size_t *length,
@@ -549,7 +549,7 @@ var_ip(struct variable *vp,
 
 #else /* linux */    
 
-const u_char *
+u_char *
 var_ip(struct variable *vp,
        oid *name,
        size_t *length,
@@ -615,7 +615,7 @@ static int Address_Scan_Next (short *, struct in_ifaddr *);
   
 */
 
-const u_char *
+u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
 		size_t *length,
@@ -798,7 +798,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 #else /* solaris2 */
 
-const u_char *
+u_char *
 var_ip(struct variable *vp,
 		oid *name,
 		size_t *length,
@@ -894,7 +894,7 @@ IP_Cmp(void *addr, void *ep)
     return (1);
 }
 
-const u_char *
+u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
 		size_t *length,
@@ -1067,7 +1067,7 @@ header_ip(struct variable *vp,
     return(MATCH_SUCCEEDED);
 }
 
-const u_char *
+u_char *
 var_ip(struct variable *vp,
        oid *name,
        size_t *length,
@@ -1317,7 +1317,7 @@ loop:
 	goto loop;
 }
 
-const u_char *
+u_char *
 var_ipAddrEntry(struct variable *vp,
 		oid *name,
 		size_t *length,

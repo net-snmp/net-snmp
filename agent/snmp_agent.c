@@ -352,7 +352,7 @@ handle_var_list(struct agent_snmp_session  *asp)
 {
     struct variable_list *varbind_ptr;
     u_char  statType;
-    const u_char *statP;
+    u_char *statP;
     size_t  statLen;
     u_short acl;
     WriteMethod *write_method;
@@ -426,7 +426,7 @@ statp_loop:
             /* dump verbose info */
 	    if (verbose && statP)
 	        dump_var(varbind_ptr->name, varbind_ptr->name_length,
-				statType, (void *)statP, statLen);
+				statType, statP, statLen);
 
 		/*  FINALLY we can act on SET requests ....*/
 	    if ( rw == WRITE ) {
@@ -434,7 +434,7 @@ statp_loop:
 		    statType = (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
-                                               varbind_ptr->val_len, (u_char *)statP,
+                                               varbind_ptr->val_len, statP,
                                                varbind_ptr->name,
                                                varbind_ptr->name_length);
                     if (statType != SNMP_ERR_NOERROR) {
@@ -457,12 +457,12 @@ statp_loop:
                     /* actually do the set if necessary */
                     if (asp->mode == COMMIT)
                         setVariable(varbind_ptr->val.string, varbind_ptr->type,
-                                    varbind_ptr->val_len, (u_char *)statP, statLen);
+                                    varbind_ptr->val_len, statP, statLen);
                 }
 	    }
 		/* ... or save the results from assorted GETs */
 	    else {
-		     snmp_set_var_value(varbind_ptr, (char*)statP, statLen);
+		     snmp_set_var_value(varbind_ptr, statP, statLen);
 		     varbind_ptr->type = statType;
 	    }
 	}

@@ -41,7 +41,7 @@ typedef int (WriteMethod)(int action,
         size_t   length);
 
 /* Function pointer called by the master agent for mib information retrieval */
-typedef const u_char *(FindVarMethod)(struct variable *vp,
+typedef u_char *(FindVarMethod)(struct variable *vp,
         oid     *name,
         size_t  *length,
         int      exact,

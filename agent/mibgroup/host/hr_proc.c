@@ -124,7 +124,7 @@ header_hrproc(struct variable *vp,
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrproc(struct variable *vp,
 	   oid *name,
 	   size_t *length,

@@ -192,7 +192,7 @@ write_acl(int action,
     return SNMP_ERR_NOERROR;
 }
 
-const u_char *
+u_char *
 var_acl(struct variable *vp,
 	oid *name,
 	size_t *length,

@@ -103,7 +103,7 @@ header_hrsys(struct variable *vp,
 	 *
 	 *********************/
 
-const u_char *
+u_char *
 var_hrsys(struct variable *vp,
 	  oid *name,
 	  size_t *length,

@@ -294,7 +294,7 @@ AT_Cmp(void *addr, void *ep)
   return ret;
 }
 
-const u_char *
+u_char *
 var_atEntry(struct variable *vp,
 	    oid *name,
 	    size_t *length,
