@@ -403,7 +403,7 @@ snmp_synch_setup(session)
     session->callback_magic = (void *)&snmp_synch_state;
 }
 
-char	*error_string[18] = {
+char	*error_string[19] = {
     "(noError) No Error",
     "(tooBig) Response message would have been too large.",
     "(noSuchName) There is no such variable name in this MIB.",
