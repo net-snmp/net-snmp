@@ -20,7 +20,7 @@
 
 #include "mibgroup/snmpv2_vars.h"
 
-#include "acl.h"
+#include "acl_vars.h"
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
 				&& !bcmp((char *)(o1), (char *)(o2), \

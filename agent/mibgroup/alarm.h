@@ -1,3 +1,13 @@
+/*
+ *  Template MIB group interface - alarm.h
+ *
+ */
+#ifndef _MIBGROUP_ALARM_H
+#define _MIBGROUP_ALARM_H
+
+#define SNMPV2ALARMNEXTINDEX	SNMPV2M2M, 1, 1, 1
+#define SNMPV2ALARMENTRY	SNMPV2M2M, 1, 1, 2, 1
+
 /* include file for alarm module */
 
 struct snmp_session;
@@ -74,3 +84,29 @@ struct alarmEntry {
 ** implementation.  It's here because it's convenient.
 */
 #define ALARMTABREALVALUEMASK			0x10000000
+
+#ifdef IN_SNMP_VARS_C
+
+struct variable2 alarmnextindex_variables[] = {
+    {ALARMNEXTINDEX, INTEGER, RONLY, var_alarmnextindex, 1, {0}}
+};
+
+struct variable2 alarm_variables[] = {
+    {ALARMTABVARIABLE, OBJID, RWRITE, var_alarmtab, 1, {2 }},
+    {ALARMTABINTERVAL, INTEGER, RWRITE, var_alarmtab, 1, {3 }},
+    {ALARMTABSAMPLETYPE, INTEGER, RWRITE, var_alarmtab, 1, {4 }},
+    {ALARMTABVALUE, INTEGER, RONLY, var_alarmtab, 1, {5 }},
+    {ALARMTABSTARTUPALARM, INTEGER, RWRITE, var_alarmtab, 1, {6 }},
+    {ALARMTABRISINGTHRESH, INTEGER, RWRITE, var_alarmtab, 1, {7 }},
+    {ALARMTABFALLINGTHRESH, INTEGER, RWRITE, var_alarmtab, 1, {8 }},
+    {ALARMTABRISINGINDEX, INTEGER, RWRITE, var_alarmtab, 1, {9}},
+    {ALARMTABFALLINGINDEX, INTEGER, RWRITE, var_alarmtab, 1, {10 }},
+    {ALARMTABUNAVAILABLEINDEX, INTEGER, RWRITE, var_alarmtab, 1, {11 }},
+    {ALARMTABSTATUS, INTEGER, RWRITE, var_alarmtab, 1, {12 }}
+};
+
+config_load_mib( SNMPV2ALARMNEXTINDEX, 10, alarmnextindex_variables)
+config_load_mib( SNMPV2ALARMENTRY, 11, alarm_variables)
+
+#endif
+#endif /* _MIBGROUP_ALARM_H */

@@ -17,7 +17,7 @@
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 
-#include "view.h"
+#include "view_vars.h"
 
 #include "mibgroup/snmpv2_vars.h"
 

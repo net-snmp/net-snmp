@@ -47,8 +47,10 @@ getmibstat: getmibstat.o
 getmibstat.o: kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DKDEBUG -c $? 
 
-snmpd:	snmpd.o kernel.o snmp_agent.o snmp_vars.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o kernel_sunos5.o ${MIBOBJS} ../snmplib/libsnmp.a
-	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o kernel_sunos5.o ${MIBOBJS} ${LDFLAGS} ${LIBS}  
+AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o kernel_sunos5.o 
+
+snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.a
+	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:
 	rm -f *.o ${TARG}
