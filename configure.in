@@ -73,6 +73,48 @@ PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
 CFLAGS="$CFLAGS -D$PARTIALTARGETOS"
 changequote([, ])
 
+dnl
+dnl check for special includes and pick one
+dnl
+
+AC_MSG_CHECKING(for system include file)
+changequote(, )
+filebase=$target_os
+while test "x$filebase" != "x$last" -a ! -f s/$filebase.h
+do
+    last=$filebase
+    filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
+done
+
+if test "x$filebase" = "x$last"; then
+    filebase="generic"
+fi
+ac_cv_SYSTEM_INCLUDE_FILE="s/$filebase.h"
+
+changequote([, ])
+AC_MSG_RESULT($ac_cv_SYSTEM_INCLUDE_FILE)
+AC_DEFINE_UNQUOTED(SYSTEM_INCLUDE_FILE, "$ac_cv_SYSTEM_INCLUDE_FILE")
+
+dnl second part, the CPU type.
+
+AC_MSG_CHECKING(for machine-type include file)
+changequote(, )
+filebase=$target_cpu
+while test "x$filebase" != "x$last" -a ! -f m/$filebase.h
+do
+    last=$filebase
+    filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
+done
+
+if test "x$filebase" = "x$last"; then
+    filebase="generic"
+fi
+ac_cv_MACHINE_INCLUDE_FILE="m/$filebase.h"
+AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
+
+changequote([, ])
+AC_DEFINE_UNQUOTED(MACHINE_INCLUDE_FILE, "$ac_cv_MACHINE_INCLUDE_FILE")
+
 AC_PATH_PROG(CCPATH,$CC)
 dnl watch out for /usr/ucb/cc on solaris, it doesn't work with this package.
 case $target_os in
@@ -224,7 +266,6 @@ AC_SUBST(SHLIB_EXTENSION)
 AC_SUBST(SHLIB_LDCONFIG_CMD)
 AC_SUBST(SHLIB_LD_CMD)
 AC_PROG_RANLIB
-
 
 dnl
 dnl Do hairy agent module processing.
