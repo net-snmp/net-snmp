@@ -400,7 +400,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 
   oid newname[30];
   int disknum=0;
-#if HAVE_FSTAB_H
+#if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
   double totalblks, free, used, avail, availblks;
 #endif
   static long long_ret;

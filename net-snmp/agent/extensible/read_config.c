@@ -183,7 +183,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 #if HAVE_SETMNTENT
               mntfp = setmntent(ETC_MNTTAB, "r");
 	      disk[*numdisks].device[0] = NULL;
-              while (mntent = getmntent (mntfp))
+              while ((mntent = getmntent (mntfp)))
 		if (strcmp (disk[*numdisks].path, mntent->mnt_dir) == 0) {
                   copy_word (mntent->mnt_fsname, disk[*numdisks].device);
                   DEBUGP1("Disk:  %s\n",mntent->mnt_fsname);
