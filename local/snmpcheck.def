@@ -39,6 +39,7 @@ $loglevel = 1;
 $logwindowatstart = 0;
 $numloglevels = 5;
 $dontstart = 0;
+$raiseonnew = 1;
 #
 #  Mib Package:  Each mib has a mib number attached and can check/fix itself;
 #
@@ -213,8 +214,10 @@ sub new{
 				     -background => '#E0C9C9',
 				     -command => [\&selectme,$self]);
 	$self->{'Desc'}->pack(-fill => "x",-expand => 1,-side=>"left"); # 
-	$tmp->toplevel->deiconify();
-	$tmp->toplevel->raise();
+	if ($::raiseonnew) {
+	    $tmp->toplevel->deiconify();
+	    $tmp->toplevel->raise();
+	}
 	::addToLog("problem found:  $self->{'Host'}\t$self->{'ErrName'}\t$self->{'ErrMsg'}",2);
     }
     bless $self;
@@ -617,16 +620,8 @@ if ($#ARGV != -1) {
 # If necessary check the ece-log file for problems
 #
 
-if ($andlog || $#ARGV == -1) {
-    open(LOG,$errlog);
-    while (<LOG>) {
-	@fields = split;
-	@tmp = grep(/$fields[0]/,@ARGV);
-	if ($#tmp == -1) { #  && $fields[1] ne "down") {
-	    $ARGV[$#ARGV + 1] = $fields[0];
-	}
-    }
-    close(LOG);
+if (($andlog || $#ARGV == -1) && !$dontstart) {
+    &scanlog();
 }
 
 #
@@ -705,8 +700,11 @@ if ($display) {
     $RescanPrefsBut->checkbutton(-label =>"Checks Hosts",
 			       -variable =>\$AutoCheckHosts);
     $RescanWhenHidden = 1;
-    $RescanPrefsBut->checkbutton(-label =>"Only When Hidden ",
+    $RescanPrefsBut->checkbutton(-label =>"Only When Hidden",
 			       -variable =>\$RescanWhenHidden);
+
+    $RescanPrefsBut->checkbutton(-label =>"Pop forward with new",
+			       -variable =>\$raiseonnew);
 
     $PrefsMenuBut->cascade(-label => "Log Verbosity");
     $LogVerbBut = $PrefsMenu->Menu();
@@ -978,11 +976,12 @@ sub quit {
 }
 
 sub scanlog {
-    open(LOG,$errlog);
+    my (@fields, @tmp);
+    open(LOG,$::errlog);
     while (<LOG>) {
 	@fields = split;
 	@tmp = grep(/$fields[0]/,@ARGV);
-	if ($#tmp == -1 && !exists $chost->{$fields[0]}) {
+	if ($#tmp == -1 && !exists $::chost->{$fields[0]}) {
 	    newHost($fields[0]);
 	}
     }
