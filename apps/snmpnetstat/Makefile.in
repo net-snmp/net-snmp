@@ -37,7 +37,8 @@ snmpnetstat: ${LOBJS} ${USELIBS}
 distclean: clean
 
 clean:
-	rm -f ${LOBJS} core snmpnetstat
+	rm -f *.o *.lo $(TARG) $(SBINTARG) core
+	rm -rf .libs
 
 cleandir: clean
 	rm -f ${MAN} tags .depend
