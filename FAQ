@@ -92,6 +92,9 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 
+      Most of this documentation is also available on our web page,
+        as well as mailing list acrchives:
+        http://www.ece.ucdavis.edu/ucd-snmp
 
 Are there binaries available?
 ----------------------------
