@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -241,7 +241,7 @@ ASN_OBJECT_ID
 the next token in the configuration line. NULL if none left or if an unknown type. 
 .RE
 .PP
-Definition at line 1715 of file read_config.c.
+Definition at line 1722 of file read_config.c.
 .PP
 Referenced by netsnmp_read_data_callback().
 .SS "void read_config_store (const char * type, const char * line)"
@@ -260,9 +260,9 @@ read_config_store intended for use by applications to store permenant configurat
 void 
 .RE
 .PP
-Definition at line 1178 of file read_config.c.
+Definition at line 1181 of file read_config.c.
 .PP
-References snmp_log().
+References netsnmp_getenv(), and snmp_log().
 .PP
 Referenced by netsnmp_oid_stash_store(), and netsnmp_save_all_data().
 .SS "char* read_config_store_data (int type, char * storeto, void * dataptr, size_t * len)"
@@ -299,7 +299,7 @@ ASN_OBJECT_ID
 character pointer to the end of the line. NULL if an unknown type. 
 .RE
 .PP
-Definition at line 1843 of file read_config.c.
+Definition at line 1850 of file read_config.c.
 .SS "struct config_line* register_config_handler (const char * type_param, const char * token, void(* parser)(const char *, char *), void(* releaser)(void), const char * help)"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files. Allows a module writer use/register multiple configuration files based off of the type parameter. A module writer may want to set up multiple configuration files to separate out related tasks/variables or just for management of where to put tokens as the module or modules get more complex in regard to handling token registrations.
@@ -339,6 +339,6 @@ uregister_config_handler un-registers handlers given a specific type_param and t
 void 
 .RE
 .PP
-Definition at line 300 of file read_config.c.
+Definition at line 301 of file read_config.c.
 .PP
 References SNMP_FREE.

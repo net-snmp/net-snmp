@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -200,6 +200,10 @@ Memory Utility Routines \-
 .ti -1c
 .RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
 .br
+.ti -1c
+.RI "char * \fBnetsnmp_getenv\fP (const char *name)"
+.br
+.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
 .in -1c
 .SH "Define Documentation"
 .PP 
@@ -241,7 +245,7 @@ Definition at line 108 of file tools.h.
 .PP
 Frees a pointer only if it is !NULL and sets its value to NULL. Definition at line 54 of file tools.h.
 .PP
-Referenced by build_oid_segment(), fprint_description(), fprint_objid(), fprint_variable(), init_mib(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_all_list_data(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_register_old_api(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), read_objid(), shutdown_mib(), snmp_unregister_callback(), and unregister_config_handler().
+Referenced by build_oid_segment(), fprint_description(), fprint_objid(), fprint_variable(), init_mib(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_all_list_data(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_getenv(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_register_old_api(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), read_objid(), shutdown_mib(), snmp_unregister_callback(), and unregister_config_handler().
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. Definition at line 65 of file tools.h.
@@ -251,7 +255,7 @@ Referenced by snmp_alarm_register(), and snmp_alarm_register_hr().
 .PP
 Mallocs memory of sizeof(t), zeros it and returns a pointer to it. Definition at line 69 of file tools.h.
 .PP
-Referenced by netsnmp_cache_create(), netsnmp_container_table_handler_get(), netsnmp_create_data_list(), netsnmp_create_delegated_cache(), netsnmp_create_handler(), netsnmp_create_table_data(), netsnmp_create_table_data_row(), netsnmp_create_table_data_set(), netsnmp_handler_registration_create(), netsnmp_mark_row_column_writable(), netsnmp_mode_end_call_add_mode_callback(), netsnmp_oid_stash_create_sized_node(), netsnmp_old_api_helper(), netsnmp_register_auto_data_table(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_save_list(), netsnmp_register_table_data_set(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), and table_helper_handler().
+Referenced by netsnmp_baby_steps_handler_get(), netsnmp_cache_create(), netsnmp_container_table_handler_get(), netsnmp_create_data_list(), netsnmp_create_delegated_cache(), netsnmp_create_handler(), netsnmp_create_table_data(), netsnmp_create_table_data_row(), netsnmp_create_table_data_set(), netsnmp_handler_registration_create(), netsnmp_mark_row_column_writable(), netsnmp_mode_end_call_add_mode_callback(), netsnmp_oid_stash_create_sized_node(), netsnmp_old_api_helper(), netsnmp_register_auto_data_table(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_save_list(), netsnmp_register_table_data_set(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), and table_helper_handler().
 .SS "#define SNMP_MAX(a, b)   ((a) > (b) ? (a) : (b))"
 .PP
 Computers the maximum of a and b. Definition at line 86 of file tools.h.
@@ -385,6 +389,13 @@ SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.
 Definition at line 234 of file tools.c.
 .PP
 Referenced by netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_register_old_api(), netsnmp_set_row_column(), netsnmp_table_data_clone_row(), netsnmp_table_data_set_clone_row(), and netsnmp_table_set_add_default_row().
+.SS "char* netsnmp_getenv (const char * name)"
+.PP
+Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU-SNMP or HKLM-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable. Definition at line 923 of file tools.c.
+.PP
+References SNMP_FREE.
+.PP
+Referenced by init_mib(), netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), and read_config_store().
 .SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const char * hex, const char * delim)"
 .PP
 convert an ASCII hex string (with specified delimiters) to binary \fBParameters:\fP

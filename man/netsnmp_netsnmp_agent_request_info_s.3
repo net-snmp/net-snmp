@@ -1,4 +1,4 @@
-.TH "netsnmp_agent_request_info_s" 3 "2 Sep 2004" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_agent_request_info_s" 3 "15 Oct 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -15,12 +15,6 @@ netsnmp_agent_request_info_s \- The agent transaction request structure.
 .in +1c
 .ti -1c
 .RI "int \fBmode\fP"
-.br
-.ti -1c
-.RI "int \fBnext_mode_ok\fP"
-.br
-.ti -1c
-.RI "int \fBnext_mode_fail\fP"
 .br
 .ti -1c
 .RI "netsnmp_agent_session_s * \fBasp\fP"
@@ -44,7 +38,7 @@ Definition at line 162 of file snmp_agent.h.
 .PP 
 .SS "struct netsnmp_agent_session_s* \fBnetsnmp_agent_request_info_s::asp\fP"
 .PP
-pdu contains authinfo, eg Definition at line 168 of file snmp_agent.h.
+pdu contains authinfo, eg Definition at line 166 of file snmp_agent.h.
 .PP
 Referenced by netsnmp_create_delegated_cache(), and netsnmp_old_api_helper().
 
