@@ -16,9 +16,9 @@ snmplibdir = $(prefix)/lib/snmp
 INSTALL = @INSTALL@
 
 TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap snmpstatus
-SUBDIRS=   snmpnetstat
+SUBDIRS=  snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
-LIBS=	@LIBS@ $(USELIBS)
+LIBS=	  $(USELIBS) @LIBS@
 
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
