@@ -73,17 +73,21 @@ init_vacm_vars (void)
 #define PRIVRW	(SNMPV2ANY | 0x5000)
 
   struct variable2 vacm_sec2group[] = {
+    /*
     {SECURITYMODEL, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {1}},
     {SECURITYNAME, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {2}},
+    */
     {SECURITYGROUP, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {3}},
     {SECURITYSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
     {SECURITYSTATUS, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
   };
 
   struct variable2 vacm_access[] = {
+    /*
     {ACCESSPREFIX, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {1}},
     {ACCESSMODEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {2}},
     {ACCESSLEVEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {3}},
+    */
     {ACCESSMATCH, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {4}},
     {ACCESSREAD, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {5}},
     {ACCESSWRITE, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {6}},
@@ -93,8 +97,10 @@ init_vacm_vars (void)
   };
 
   struct variable2 vacm_view[] = {
+    /*
     {VIEWNAME, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {1}},
     {VIEWSUBTREE, ASN_OBJECT_ID, PRIVRW, var_vacm_view, 1, {2}},
+    */
     {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {3}},
     {VIEWTYPE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {4}},
     {VIEWSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {5}},
@@ -116,7 +122,7 @@ init_vacm_vars (void)
   snmpd_register_config_handler("com2sec", vacm_parse_security,
                                 vacm_free_security,"name source community");
   snmpd_register_config_handler("group", vacm_parse_group, vacm_free_group,
-                                "name v1|v2c|usm|any security");
+                                "name v1|v2c|usm security");
   snmpd_register_config_handler("access", vacm_parse_access, vacm_free_access,
                             "name context model level prefx read write notify");
   snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
@@ -226,6 +232,14 @@ void vacm_parse_security (const char *token,
 	config_perror("source/mask mismatch");
 	return;
     }
+    if (strlen(name)+1 > sizeof(se.securityName)) {
+    	config_perror("security name too long");
+	return;
+    }
+    if (strlen(community)+1 > sizeof(se.community)) {
+    	config_perror("community name too long");
+	return;
+    }
     strcpy(se.securityName, name);
     strcpy(se.community, community);
     sp = (struct vacm_securityEntry *)malloc (sizeof *sp);
@@ -271,12 +285,19 @@ void vacm_parse_group (const char *token,
 	config_perror("missing SECURITY parameter");
 	return;
     }
-    if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
-    else if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
+    if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
     else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
+    else if (strcasecmp(model, "any") == 0) {
+	config_perror("bad security model (v1, v2c, usm) - installing anyway");
+	imodel = SNMP_SEC_MODEL_ANY;
+    }
     else {
-	config_perror("bad security model");
+	config_perror("bad security model (v1, v2c, usm)");
+	return;
+    }
+    if (strlen(security)+1 > sizeof(gp->groupName)) {
+    	config_perror("security name too long");
 	return;
     }
     gp = vacm_createGroupEntry(imodel, security);
@@ -295,7 +316,7 @@ void vacm_free_group (void)
 void vacm_parse_access (const char *token, char *param)
 {
     char *name, *context, *model, *level, *prefix, *readView, *writeView, *notify;
-    int imodel, ilevel;
+    int imodel, ilevel, iprefix;
     struct vacm_accessEntry *ap;
 
     name = strtok(param, " \t\n");
@@ -344,7 +365,7 @@ void vacm_parse_access (const char *token, char *param)
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
     else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else {
-	config_perror("bad security model");
+	config_perror("bad security model (any, v1, v2c, usm)");
 	return;
     }
     if (strcasecmp(level, "noauth") == 0) ilevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -354,13 +375,36 @@ void vacm_parse_access (const char *token, char *param)
     else if (strcasecmp(level, "priv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
     else if (strcasecmp(level, "authpriv") == 0) ilevel = SNMP_SEC_LEVEL_AUTHPRIV;
     else {
-	config_perror("bad security level");
+	config_perror("bad security level (noauthnopriv, authnopriv, authpriv)");
+	return;
+    }
+    if (strcmp(prefix,"exact") == 0) iprefix = 1;
+    else if (strcmp(prefix,"prefix") == 0) iprefix = 2;
+    else if (strcmp(prefix,"0") == 0) {
+	config_perror("bad prefix match parameter (exact, prefix) - installing anyway");
+	iprefix = 1;
+    }
+    else {
+	config_perror("bad prefix match parameter (exact, prefix)");
+	return;
+    }
+    if (strlen(readView)+1 > sizeof(ap->readView)) {
+    	config_perror("readView too long");
+	return;
+    }
+    if (strlen(writeView)+1 > sizeof(ap->writeView)) {
+    	config_perror("writeView too long");
+	return;
+    }
+    if (strlen(notify)+1 > sizeof(ap->notifyView)) {
+    	config_perror("notifyView too long");
 	return;
     }
     ap = vacm_createAccessEntry (name, context, imodel, ilevel);
     strcpy(ap->readView, readView);
     strcpy(ap->writeView, writeView);
     strcpy(ap->notifyView, notify);
+    ap->contextMatch = iprefix;
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
     free (ap->reserved);
@@ -453,15 +497,9 @@ void vacm_parse_simple(const char *token, char *confline) {
   char viewname[SPRINT_MAX_LEN];
   char addressname[SPRINT_MAX_LEN];
   const char *rw = "none";
+  const char *model = "any";
   char *cp;
   static int num = 0;
-  char com2sec[] = "com2sec";
-  char group[] = "group";
-  char view[] = "view";
-  char access[] = "access";
-  char any[] = "any";
-  char usm[] = "usm";
-  char *model = any;
   char secname[SPRINT_MAX_LEN];
   char authtype[SPRINT_MAX_LEN];
 
@@ -475,7 +513,7 @@ void vacm_parse_simple(const char *token, char *confline) {
     else
       strcpy(authtype, "auth");
     DEBUGMSGTL((token, "setting auth type: \"%s\"\n",authtype));
-    model = usm;
+    model = "usm";
   } else {
     /* source address */
     if (cp && *cp) {
@@ -502,31 +540,34 @@ void vacm_parse_simple(const char *token, char *confline) {
     /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
     sprintf(secname, "anonymousSecName%03d", num);
     sprintf(line,"%s %s %s", secname, addressname, community);
-    DEBUGMSGTL((token,"passing: %s %s\n", com2sec, line));
-    vacm_parse_security(com2sec,line);
+    DEBUGMSGTL((token,"passing: %s %s\n", "com2sec", line));
+    vacm_parse_security("com2sec",line);
   } else {
     strcpy(secname, community);
   }
 
   /* sec->group mapping */
   /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-  sprintf(line,"anonymousGroupName%03d any %s", num, secname);
-  DEBUGMSGTL((token,"passing: %s %s\n", group, line));
-  vacm_parse_group(group,line);
+  sprintf(line,"anonymousGroupName%03d v1 %s", num, secname);
+  DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+  vacm_parse_group("group",line);
+  sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
+  DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+  vacm_parse_group("group",line);
 
   /* view definition */
   /* view    anonymousViewNUM       included OID */
   sprintf(viewname,"anonymousView%03d",num);
   sprintf(line,"%s included %s", viewname, theoid);
-  DEBUGMSGTL((token,"passing: %s %s\n", view, line));
-  vacm_parse_view(view,line);
+  DEBUGMSGTL((token,"passing: %s %s\n", "view", line));
+  vacm_parse_view("view",line);
 
   /* map everything together */
-  /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE 0 anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
-  sprintf(line, "anonymousGroupName%03d  \"\" %s %s 0 %s %s %s", num,
+  /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE exact anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
+  sprintf(line, "anonymousGroupName%03d  \"\" %s %s exact %s %s %s", num,
           model, authtype, viewname, rw, rw);
   DEBUGMSGTL((token,"passing: %s %s\n", access, line));
-  vacm_parse_access(access,line);
+  vacm_parse_access("access",line);
   num++;
 }
 
@@ -537,10 +578,10 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
   int retval;
   
   if (view_parms == NULL)
-    return 0;
+    return 1;
   retval = vacm_in_view(view_parms->pdu, view_parms->name,
                         view_parms->namelen);
-  if (retval != 1)
+  if (retval != 0)
     view_parms->errorcode = retval;
   return retval;
 }
@@ -555,8 +596,12 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *	 namelen
  *      
  * Returns:
- *	1	On success.
- *	0	Otherwise.
+ *	0	On success.
+ *	1	Missing security name.
+ *	2	Missing group
+ *	3	Missing access
+ *	4	Missing view
+ *	5	Not in view
  *
  * Debug output listed as follows:
  *	<securityName> <groupName> <viewName> <viewType>
@@ -597,9 +642,9 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	    case SNMP_MSG_GET:
 	    case SNMP_MSG_GETNEXT:
 	    case SNMP_MSG_GETBULK:
-		return 1;
-	    default:
 		return 0;
+	    default:
+		return 1;
 	    }
 	}
 	while (sp) {
@@ -612,7 +657,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 		break;
 	    sp = sp->next;
 	}
-	if (sp == NULL) return 0;
+	if (sp == NULL) return 1;
 	sn = sp->securityName;
     } else if (pdu->securityModel == SNMP_SEC_MODEL_USM) {
       DEBUGMSG (("mibII/vacm_vars",
@@ -623,16 +668,16 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	sn = NULL;
     }
 
-    if (sn == NULL) return 0;
+    if (sn == NULL) return 1;
     DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: sn=%s", sn));
 
     gp = vacm_getGroupEntry(pdu->securityModel, sn);
-    if (gp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+    if (gp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 2; }
     DEBUGMSG (("mibII/vacm_vars", ", gn=%s", gp->groupName));
 
     ap = vacm_getAccessEntry(gp->groupName, "", pdu->securityModel,
                              pdu->securityLevel);
-    if (ap == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+    if (ap == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 3; }
 
     switch (pdu->command) {
       case SNMP_MSG_GET:
@@ -655,12 +700,12 @@ int vacm_in_view (struct snmp_pdu *pdu,
     DEBUGMSG (("mibII/vacm_vars", ", vn=%s", vn));
 
     vp = vacm_getViewEntry (vn, name, namelen);
-    if (vp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 0; }
+    if (vp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 4; }
     DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
 
-    if (vp->viewType == SNMP_VIEW_EXCLUDED) return 0;
+    if (vp->viewType == SNMP_VIEW_EXCLUDED) return 5;
 
-    return 1;
+    return 0;
 
 }  /* end vacm_in_view() */
 
