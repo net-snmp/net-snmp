@@ -79,6 +79,7 @@ SOFTWARE.
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "default_store.h"
+#include "snmp_logging.h"
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
@@ -130,7 +131,7 @@ uptimeString(u_long timeticks,
     int	centisecs, seconds, minutes, hours, days;
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
-	sprintf(buf,"%ld",timeticks);
+	sprintf(buf,"%lu",timeticks);
 	return buf;
     }
 
@@ -166,23 +167,63 @@ uptimeString(u_long timeticks,
 
 
 
+/* prints character pointed to if in human-readable ASCII range,
+	otherwise prints a blank space */
+static void sprint_char(char *buf, const u_char ch)
+{
+	if (isprint(ch))
+	{
+		sprintf(buf, "%c", (int)ch);
+	}
+	else
+	{
+		sprintf(buf, ".");
+	}
+}
+
+
 void sprint_hexstring(char *buf,
                       const u_char *cp,
                       size_t len)
 {
-
+	const u_char *tp;
+	size_t lenleft;
+	
     for(; len >= 16; len -= 16){
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
 	cp += 8;
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
-	if (len > 16) { *buf++ = '\n'; *buf = 0; }
 	cp += 8;
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
+	{
+		sprintf(buf, "  [");
+		buf += strlen(buf);
+		for (tp = cp - 16; tp < cp; tp ++)
+		{
+			sprint_char(buf++, *tp);
+		}
+		sprintf(buf, "]");
+		buf += strlen(buf);
+	}
+	if (len > 16) { *buf++ = '\n'; *buf = 0; }
     }
+    lenleft = len;
     for(; len > 0; len--){
 	sprintf(buf, "%02X ", *cp++);
 	buf += strlen(buf);
+    }
+	if ((lenleft > 0) && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
+	{
+		sprintf(buf, " [");
+		buf += strlen(buf);
+		for (tp = cp - lenleft; tp < cp; tp ++)
+		{
+			sprint_char(buf++, *tp);
+		}
+		sprintf(buf, "]");
+		buf += strlen(buf);
     }
     *buf = '\0';
 }
@@ -958,6 +999,14 @@ handle_mibs_conf(const char *token,
 {
     char *ctmp;
 
+    if (strcmp(line,"\"\"") == 0) {
+        ctmp = strdup("");
+        if (confmibs)
+            free(confmibs);
+        confmibs = ctmp;
+        DEBUGMSGTL(("read_config:initmib", "using mibs: \"\"\n"));
+        return;
+    }
     if (confmibs) {
         ctmp = (char *)malloc(strlen(confmibs) + strlen(line) + 1);
         if (*line == '+')
@@ -1017,6 +1066,9 @@ snmp_out_toggle_options(char *options)
         case 'S':
 	    snmp_set_suffix_only(2);
 	    break;
+	     case 'T':
+	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+	     break;
         default:
 	    return options-1;
 	}
@@ -1038,6 +1090,7 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
   fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
   fprintf(outf, "%s    v: Print Print values only (not OID = value).\n", lead);
+  fprintf(outf, "%s    T: Print human-readable text along with hex strings.\n", lead);
 }
 
 char *
@@ -1112,6 +1165,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
     ds_register_premib(ASN_BOOLEAN, "snmp","extendedIndex",
 		       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+    ds_register_premib(ASN_BOOLEAN, "snmp","printHexText",
+		       DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
 }
 
 void
@@ -1123,6 +1178,7 @@ init_mib (void)
     char *new_mibdirs, *homepath, *cp_home;
 
     if (Mib) return;
+    init_mib_internals();
 
     /* Initialise the MIB directory/ies */
 
@@ -1281,7 +1337,10 @@ shutdown_mib (void)
     }
     tree_head = NULL;
     Mib = NULL;
-    free(Prefix); Prefix = NULL;
+    if (Prefix != NULL && Prefix != &Standard_Prefix[0])
+	free(Prefix);
+    if (Prefix)
+	Prefix = NULL;
 }
 
 void
@@ -1671,6 +1730,8 @@ _get_symbol(oid *objid,
         return NULL;
 
     for(; subtree; subtree = subtree->next_peer){
+	while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	    subtree = subtree->next_peer;
 	if (*objid == subtree->subid){
 	    if (subtree->indexes)
 		in_dices = subtree->indexes;
@@ -1723,7 +1784,7 @@ _get_symbol(oid *objid,
 	case TYPE_OCTETSTR:
 	    if (extended_index && tp->hint) {
 	    	struct variable_list var;
-		char buffer[1024];
+		u_char buffer[1024];
 		int i;
 		memset(&var, 0, sizeof var);
 		if (in_dices->isimplied) {
@@ -1744,7 +1805,7 @@ _get_symbol(oid *objid,
 		}
 		if (numids > objidlen)
 		    goto finish_it;
-		for (i = 0; i < numids; i++) buffer[i] = objid[i];
+		for (i = 0; i < (int)numids; i++) buffer[i] = (u_char)objid[i];
 		var.type = ASN_OCTET_STR;
 		var.val.string = buffer;
 		var.val_len = numids;
@@ -1891,6 +1952,8 @@ get_tree(oid *objid,
     return NULL;
 
 found:
+    while (subtree->next_peer && subtree->next_peer->subid == *objid)
+	subtree = subtree->next_peer;
     if (objidlen > 1)
         return_tree = get_tree(objid + 1, objidlen - 1, subtree->child_list);
     if (return_tree != NULL)
@@ -1938,6 +2001,8 @@ fprint_description(FILE *f,
     while (objidlen > 1) {
 	for(; subtree; subtree = subtree->next_peer){
 	    if (*objid == subtree->subid){
+		while (subtree->next_peer && subtree->next_peer->subid == *objid)
+		    subtree = subtree->next_peer;
 		if (strncmp( subtree->label, ANON, ANON_LEN))
 		    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
 		else
@@ -2229,6 +2294,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
     char *fcp, *ecp, *cp2 = NULL;
     char doingquote;
     int len = -1, pos = -1;
+    int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
 
     while (cp && tp && tp->child_list) {
 	fcp = cp;
@@ -2248,6 +2314,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    if (!tp2) goto bad_id;
 	    subid = tp2->subid;
 	}
+	if (tp2)
+	    while (tp2->next_peer && tp2->next_peer->subid == subid)
+	    	tp2 = tp2->next_peer;
 	if (*objidlen >= maxlen) goto bad_id;
 	objid[ *objidlen ] = subid;
 	(*objidlen)++;
@@ -2278,6 +2347,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	case TYPE_INTEGER32:
 	case TYPE_UINTEGER:
 	case TYPE_UNSIGNED32:
+	case TYPE_TIMETICKS:
 	    /* Isolate the next entry */
 	    cp2 = strchr( cp, '.' );
 	    if (cp2) *cp2++ = '\0';
@@ -2294,7 +2364,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		}
 		else goto bad_id;
 	    }
-	    if (tp->ranges) {
+	    if (check && tp->ranges) {
 		struct range_list *rp = tp->ranges;
 		int ok = 0;
 		while (!ok && rp)
@@ -2312,6 +2382,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
 		objid[*objidlen] = strtoul(cp, &ecp, 0);
 		if (*ecp) goto bad_id;
+		if (check && objid[*objidlen] > 255) goto bad_id;
 		(*objidlen)++;
 		cp = cp2;
 	    }
@@ -2376,7 +2447,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		    fcp = cp; cp2 = strchr(cp, '.'); if (cp2) *cp2++ = 0;
 		    objid[*objidlen] = strtoul(cp, &ecp, 0);
 		    if (*ecp) goto bad_id;
-		    if (objid[*objidlen] < 0 || objid[*objidlen] > 255)
+		    if (check && objid[*objidlen] > 255)
 		        goto bad_id;
 		    (*objidlen)++;
 		    len--;
@@ -2385,10 +2456,16 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    }
 	    break;
 	case TYPE_OBJID:
+	    in_dices = NULL;
+	    break;
+	default:
+	    snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
+	    	     tp->type, in_dices->ilabel, cp);
+	    in_dices = NULL;
 	    break;
 	}
 	cp = cp2;
-	in_dices = in_dices->next;
+	if (in_dices) in_dices = in_dices->next;
     }
 
     while (cp) {
@@ -2735,6 +2812,37 @@ char *uptime_string(u_long timeticks, char *buf)
 #endif
     strcpy(buf, tbuf);
     return buf;
+}
+
+oid
+*snmp_parse_oid(const char *argv,
+		oid *root,
+		size_t *rootlen)
+{
+  size_t savlen = *rootlen;
+  if (snmp_get_random_access() || strchr(argv, ':')) {
+    if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+    if (get_wild_node(argv,root,rootlen)) {
+      return root;
+    }
+  } else {
+    if (read_objid(argv,root,rootlen)) {
+      return root;
+    }
+    *rootlen = savlen;
+    if (get_node(argv,root,rootlen)) {
+      return root;
+    }
+    *rootlen = savlen;
+    DEBUGMSGTL(("parse_oid","wildly parsing\n"));
+    if (get_wild_node(argv,root,rootlen)) {
+      return root;
+    }
+  }
+  return NULL;
 }
 
 #ifdef CMU_COMPATIBLE

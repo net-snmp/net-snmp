@@ -119,6 +119,8 @@ static int pageshift;           /* log base 2 of the pagesize */
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
+static FindVarMethod var_extensible_mem;
+
 void init_memory(void)
 {
 #ifndef linux
@@ -370,6 +372,7 @@ int getswap(int rettype)
   return 0;
 }
 
+static
 unsigned char *var_extensible_mem(struct variable *vp,
 				  oid *name,
 				  size_t *length,

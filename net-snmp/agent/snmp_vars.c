@@ -60,6 +60,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
 #elif HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
