@@ -86,7 +86,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                             continue;
                         }
 
-                        if (targaddrs->storageType != ST_PERMANENT &&
+                        if (targaddrs->storageType != ST_READONLY &&
                             targaddrs->sess &&
                             param->updateTime >=
                             targaddrs->sessionCreationTime) {
