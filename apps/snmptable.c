@@ -781,6 +781,7 @@ get_table_entries(netsnmp_session * ss)
                 running = 0;
                 if (response->errstat == SNMP_ERR_NOSUCHNAME) {
                     printf("End of MIB\n");
+                    end_of_table = 1;
                 } else {
                     fprintf(stderr, "Error in packet.\nReason: %s\n",
                             snmp_errstring(response->errstat));
