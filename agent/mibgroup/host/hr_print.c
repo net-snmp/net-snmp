@@ -187,9 +187,11 @@ Init_HR_Print (void)
 {
 #if HAVE_LPSTAT || HAVE_CGETNEXT || HAVE_PRINTCAP
     int i;
-#if HAVE_CGETNEXT
+#if HAVE_LPSTAT
+    FILE *p;
+#elif HAVE_CGETNEXT
     const char *caps[] = {"/etc/printcap", NULL};
-#elif HAVE_LPSTAT || HAVE_PRINTCAP
+#elif HAVE_PRINTCAP
     FILE *p;
 #endif
 
