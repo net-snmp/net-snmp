@@ -340,8 +340,8 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
          */
         if (ret != SNMP_ERR_NOERROR) {
             // break;
-            snmp_log(LOG_WARNING, "bad rc from next handler in row_merge\n",
-                     ret);
+            snmp_log(LOG_WARNING,
+                     "bad rc (%d) from next handler in row_merge\n", ret);
             if (SNMP_ERR_NOERROR == final_rc)
                 final_rc = ret;
         }
