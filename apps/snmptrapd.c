@@ -600,6 +600,7 @@ int snmp_input(int op,
 		reply->address = pdu->address;
 		if (!snmp_send(session, reply)){
                     snmp_sess_perror("snmptrapd: Couldn't respond to inform pdu", session);
+		    snmp_free_pdu(reply);
 		}
 	    }
 	}
