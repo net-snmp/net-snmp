@@ -17,6 +17,9 @@
 #if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
+#if HAVE_VM_VM_PARAM_H
+#include <vm/vm_param.h>
+#endif
 #else
 #if HAVE_SYS_VMPARAM_H
 #include <sys/vmparam.h>
@@ -32,8 +35,21 @@
 #endif
 #endif /* vm/vm.h */
 #endif /* sys/vm.h */
-#ifdef HAVE_SYS_MBUF_H
+#if HAVE_SYS_POOL_H
+#define __POOL_EXPOSE
+#include <sys/pool.h>
+#endif
+#if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
+#endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#if defined(CTL_HW) && defined(HW_PAGESIZE)
+#define USE_SYSCTL
+#endif
+#if defined(CTL_VM) && defined(VM_METER)
+#define USE_SYSCTL_VM
+#endif
 #endif
 
 #include "host_res.h"
@@ -52,12 +68,6 @@
 #endif
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
-#endif
-#ifdef HAVE_SYS_MBUF_H
-#include <sys/mbuf.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
 #endif
 #ifdef HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
@@ -103,6 +113,10 @@ extern struct mntent *HRFS_entry;
 
 #endif
 
+#ifndef linux
+static int physmem, pagesize;
+#endif
+
 	/*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -137,13 +151,42 @@ struct variable4 hrstore_variables[] = {
 oid hrstore_variables_oid[] = { 1,3,6,1,2,1,25,2 };
 
 
-void init_hr_storeage (void)
+void init_hr_storage (void)
 {
-    auto_nlist(PHYSMEM_SYMBOL,0,0);
+#ifdef USE_SYSCTL
+    int mib [2];
+    size_t len;
+#endif
+
+#ifdef USE_SYSCTL
+    mib[0] = CTL_HW;
+    mib[1] = HW_PHYSMEM;
+    len = sizeof(physmem);
+    if (sysctl(mib, 2, &physmem, &len, NULL, 0) == -1) perror("sysctl: physmem");
+    mib[1] = HW_PAGESIZE;
+    len = sizeof(pagesize);
+    if (sysctl(mib, 2, &pagesize, &len, NULL, 0) == -1) perror("sysctl: pagesize");
+    printf ("physmem = %d, pagesize = %d\n", physmem, pagesize);
+    physmem /= pagesize;
+    printf ("physmem = %d, pagesize = %d\n", physmem, pagesize);
+#else	/* USE_SYSCTL */
+    auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (physmem));
+#ifdef PGSHIFT
+    pagesize = 1 << PGSHIFT;
+#elif defined(PAGE_SHIFT)
+    pagesize = 1 << PAGE_SHIFT;
+#elif defined(PAGE_SIZE)
+    pagesize = PAGE_SIZE;
+#else
+    pagesize = PAGESIZE;
+#endif
+#endif	/* USE_SYSCTL */
 #ifdef TOTAL_MEMORY_SYMBOL
     auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
 #endif
+#ifdef MBSTAT_SYMBOL
     auto_nlist(MBSTAT_SYMBOL,0,0);
+#endif
 
     REGISTER_MIB("host/hr_storage", hrstore_variables, variable4, hrstore_variables_oid);
 }
@@ -285,25 +328,25 @@ var_hrstore(struct variable *vp,
 {
     int store_idx=0;
 #ifndef linux
-    int physmem;
 #ifndef solaris2
-#ifdef TOTAL_MEMORY_SYMBOL
+#if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
     struct vmtotal memory_totals;
 #endif
+#if HAVE_SYS_POOL_H
+    struct pool mbpool, mclpool;
+    int i;
+#endif
     struct mbstat  mbstat;
-#endif
-#else
+#endif	/* solaris2 */
+#else	/* linux */
     struct stat  kc_buf;
-#endif
+#endif	/* linux */
     static char string[100];
     struct HRFS_statfs stat_buf;
 
     if ( vp->magic == HRSTORE_MEMSIZE ) {
         if (header_hrstore(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	    return NULL;
-#ifndef linux
-	auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem, sizeof (int));
-#endif
     }
     else {
         
@@ -319,12 +362,23 @@ var_hrstore(struct variable *vp,
 	else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
-#ifdef TOTAL_MEMORY_SYMBOL
+#ifdef USE_SYSCTL_VM
+			{   int mib[2];
+			    size_t len = sizeof(memory_totals);
+			    mib[0] = CTL_VM;
+			    mib[1] = VM_METER;
+			    sysctl(mib, 2, &memory_totals, &len, NULL, 0);
+			}
+#elif defined(TOTAL_MEMORY_SYMBOL)
 			auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&memory_totals, sizeof (struct vmtotal));
 #endif
 			break;
 		case HRS_TYPE_MBUF:
-			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (struct mbstat));
+#if HAVE_SYS_POOL_H
+			auto_nlist(MBPOOL_SYMBOL, (char *)&mbpool, sizeof(mbpool));
+			auto_nlist(MCLPOOL_SYMBOL, (char *)&mclpool, sizeof(mclpool));
+#endif
+			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (mbstat));
 			break;
 		default:
 			break;
@@ -337,15 +391,7 @@ var_hrstore(struct variable *vp,
     switch (vp->magic){
 	case HRSTORE_MEMSIZE:
 #ifndef linux
-#ifdef PGSHIFT
-	    long_return = physmem << PGSHIFT;
-#elif defined(PAGE_SHIFT)
-	    long_return = physmem << PAGE_SHIFT;
-#elif defined(PAGE_SIZE)
-	    long_return = physmem * PAGE_SIZE;
-#else
-	    long_return = physmem * PAGESIZE;
-#endif
+	    long_return = physmem * pagesize;
 #else
 	    stat("/proc/kcore", &kc_buf);
 	    long_return = kc_buf.st_size/1024;	/* 4K too large ? */
@@ -391,7 +437,9 @@ var_hrstore(struct variable *vp,
 	    else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
-#ifdef NBPG
+#ifdef USE_SYSCTL
+			long_return = pagesize;
+#elif defined(NBPG)
 			long_return = NBPG;
 #else
 			long_return = 1024;	/* Report in Kb */
@@ -417,7 +465,7 @@ var_hrstore(struct variable *vp,
 		long_return = stat_buf.f_blocks;
 	    else switch ( store_idx ) {
 #if !defined(linux) && !defined(solaris2)
-#ifdef TOTAL_MEMORY_SYMBOL
+#if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_rm;
 			break;
@@ -428,13 +476,19 @@ var_hrstore(struct variable *vp,
 		case HRS_TYPE_MEM:
 			auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem,
                                    sizeof (int));
-			long_return = physmem * PAGE_SIZE / 1024;
+			long_return = physmem * pagesize / 1024;
 			break;
 		case HRS_TYPE_SWAP:
 			break;
 #endif
 		case HRS_TYPE_MBUF:
+#if HAVE_SYS_POOL_H
+			long_return = 0;
+			for (i = 0; i < sizeof(mbstat.m_mtypes)/sizeof(mbstat.m_mtypes[0]); i++)
+			    long_return += mbstat.m_mtypes[i];
+#else
 			long_return = mbstat.m_mbufs;
+#endif
 			break;
 #else	/* linux */
 #ifdef linux
@@ -457,7 +511,7 @@ var_hrstore(struct variable *vp,
 		long_return = (stat_buf.f_blocks - stat_buf.f_bfree);
 	    else switch ( store_idx ) {
 #if !defined(linux) && !defined(solaris2)
-#ifdef TOTAL_MEMORY_SYMBOL
+#if defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
 		case HRS_TYPE_MEM:
 			long_return = memory_totals.t_arm;
 			break;
@@ -466,7 +520,12 @@ var_hrstore(struct variable *vp,
 			break;
 #endif
 		case HRS_TYPE_MBUF:
+#if HAVE_SYS_POOL_H
+			long_return = (mbpool.pr_nget - mbpool.pr_nput)*mbpool.pr_size
+				+ (mclpool.pr_nget - mclpool.pr_nput)*mclpool.pr_size;
+#else
 			long_return = mbstat.m_clusters - mbstat.m_clfree;	/* unlikely, but... */
+#endif
 			break;
 #else	/* linux */
 #ifdef linux

@@ -10,6 +10,9 @@
 #undef NPROC_SYMBOL
 #undef PROC_SYMBOL
 
+#define MBPOOL_SYMBOL	"mbpool"
+#define MCLPOOL_SYMBOL	"mclpool"
+
 /* inp_next symbol */
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_queue.cqe_next
