@@ -33,9 +33,7 @@ static int      example1 = 42;  /* default value */
 
 /*
  * our initialization routine, automatically called by the agent 
- */
-/*
- * (to get called, the function name must match init_FILENAME() 
+ * (to get called, the function name must match init_FILENAME())
  */
 void
 init_scalar_int(void)
