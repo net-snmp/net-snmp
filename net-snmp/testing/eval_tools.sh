@@ -348,9 +348,13 @@ STARTPROG() {
     if [ "x$PORT_SPEC" != "x" ]; then
         COMMAND="$COMMAND $PORT_SPEC"
     fi
-    echo $COMMAND >> $SNMP_TMPDIR/invoked
-    $COMMAND > $LOG_FILE.stdout 2>&1
-
+    if [ "x$OSTYPE" = "xmsys" ]; then
+      echo $COMMAND \& >> $SNMP_TMPDIR/invoked
+      $COMMAND > $LOG_FILE.stdout 2>&1 &
+    else
+      echo $COMMAND >> $SNMP_TMPDIR/invoked
+      $COMMAND > $LOG_FILE.stdout 2>&1
+    fi
     DELAY
 }
 
@@ -396,7 +400,11 @@ STARTTRAPD() {
 #    master agent and sub agent.
 STOPPROG() {
     if [ -f $1 ]; then
-	COMMAND="kill -TERM `cat $1`"
+        if [ "x$OSTYPE" = "xmsys" ]; then
+          COMMAND="kill.exe `cat $1`"
+        else
+          COMMAND="kill -TERM `cat $1`"
+        fi
 	echo $COMMAND >> $SNMP_TMPDIR/invoked
 
 	DELAY
@@ -457,7 +465,11 @@ FINISHED() {
 	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
-	    COMMAND="kill -9 $pid"
+            if [ "x$OSTYPE" = "xmsys" ]; then
+              COMMAND="kill -9 $pid"
+            else
+              COMMAND="kill.exe $pid"
+            fi
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1
