@@ -474,6 +474,7 @@ var_extensible_relocatable(struct variable *vp,
     struct extensible *exten = 0;
     static long     long_ret;
     static char     errmsg[STRMAX];
+    char            *cp, *cp1;
     struct variable myvp;
     oid             tname[MAX_OID_LEN];
 
@@ -534,7 +535,32 @@ var_extensible_relocatable(struct variable *vp,
 	else
             exten->result = run_shell_command(exten->command, NULL,
                                               exten->output, &len);
-        strncpy(errmsg, exten->output, sizeof(errmsg));
+
+        /*
+         *  Pick the output string apart into individual lines,
+         *  and extract the one being asked for....
+         */
+        cp1 = exten->output;
+        for (i = 1; i != (int) name[*length - 1]; i++) {
+            cp = strchr(cp1, '\n');
+            if (!cp) {
+	        *var_len = 0;
+	        /* wait_on_exec(exten);		??? */
+	        return NULL;
+	    }
+	    cp1 = ++cp;
+	}
+        /*
+         *  ... and quit if we've run off the end of the output
+         */
+        if (!*cp1) {
+            *var_len = 0;
+	    return NULL;
+	}
+        cp = strchr(cp1, '\n');
+        if (cp)
+            *cp = 0;
+        strncpy(errmsg, cp1, sizeof(errmsg));
         errmsg[ sizeof(errmsg)-1 ] = 0;
         *var_len = strlen(errmsg);
         if (errmsg[*var_len - 1] == '\n')
