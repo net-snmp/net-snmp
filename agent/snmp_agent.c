@@ -535,6 +535,16 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
 	    	count_varbinds( asp->pdu ));
 	}
+	else {
+		/*
+		 * Use a copy of the original request
+		 *   to report failures.
+		 */
+	    i=asp->pdu->errindex;
+	    snmp_free_pdu( asp->pdu );
+	    asp->pdu = snmp_clone_pdu( pdu );
+	    asp->pdu->errindex=i;
+	}
 	asp->pdu->command = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat = status;
 	snmp_send( asp->session, asp->pdu );
