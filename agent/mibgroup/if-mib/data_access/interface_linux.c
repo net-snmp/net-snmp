@@ -278,9 +278,14 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 {IANAIFTYPE_ETHERNETCSMACD, "eth"},
                 {IANAIFTYPE_ETHERNETCSMACD, "vmnet"},
                 {IANAIFTYPE_ISO88025TOKENRING, "tr"},
+                {IANAIFTYPE_FASTETHER, "feth"},
+                {IANAIFTYPE_GIGABITETHERNET,"gig"},
                 {IANAIFTYPE_PPP, "ppp"},
                 {IANAIFTYPE_SLIP, "sl"},
                 {IANAIFTYPE_TUNNEL, "sit"},
+                {IANAIFTYPE_BASICISDN, "ippp"},
+                {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
+                {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
                 {0, 0}                  /* end of list */
             };
 
@@ -298,9 +303,13 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 entry->type = IANAIFTYPE_OTHER;
         }
 
-        if (entry->type == IANAIFTYPE_ETHERNETCSMACD)
+        if (IANAIFTYPE_ETHERNETCSMACD == entry->type)
             entry->speed =
                 netsnmp_arch_interface_get_if_speed(fd, entry->name);
+#ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
+        else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
+            entry->speed = _get_bonded_if_speed(entry)
+#endif
         else
             netsnmp_access_interface_entry_guess_speed(entry);
 
