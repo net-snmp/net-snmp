@@ -84,6 +84,9 @@
 /* udpstat.udps_discard */
 #undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
 
+/* arphd.at_next */
+#undef STRUCT_ARPHD_HAS_AT_NEXT
+
 @BOTTOM@
 
 /* mib pointer to the top of the extensible tree.  This has been
