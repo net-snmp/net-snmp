@@ -133,7 +133,12 @@ PrefixList mib_prefixes[] = {
 	{ NULL, 0 }  /* end of list */
 };
 
-static int quick_print = 0;
+/* expose quick_print for backward compatible use only */
+#ifndef CMU_COMPATIBLE
+static
+#endif
+     int quick_print = 0;
+
 static int full_objid = 0;
 static int suffix_only = 0;
 
@@ -1229,7 +1234,6 @@ int read_objid(const char *input,
 	       size_t *out_len)   /* number of subid's in "output" */
 {
     struct tree *root = tree_head;
-    oid *op = output;
     char buf[SPRINT_MAX_LEN];
     int ret;
 
