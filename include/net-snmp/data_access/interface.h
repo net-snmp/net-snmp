@@ -31,6 +31,38 @@ NETSNMP_CPP_WRAP_START  /* no semi-colon */
 #define NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE		0x100
 #define NETSNMP_INTERFACE_FLAGS_HAS_DISCONTINUITY	0x200
 
+/*************************************************************
+ * constants for enums for the MIB node
+ * ifAdminStatus (INTEGER / ASN_INTEGER)
+ *
+ * since a Textual Convention may be referenced more than once in a
+ * MIB, protect againt redifinitions of the enum values.
+ */
+#ifndef ifAdminStatus_ENUMS
+#define ifAdminStatus_ENUMS
+
+#define IFADMINSTATUS_UP  1
+#define IFADMINSTATUS_DOWN  2
+#define IFADMINSTATUS_TESTING  3
+
+#endif                          /* ifAdminStatus_ENUMS */
+
+/*************************************************************
+ * constants for enums for the MIB node
+ * ifOperStatus (INTEGER / ASN_INTEGER)
+ *
+ * since a Textual Convention may be referenced more than once in a
+ * MIB, protect againt redifinitions of the enum values.
+ */
+#ifndef ifOperStatus_ENUMS
+#define ifOperStatus_ENUMS
+
+#define IFOPERSTATUS_UP  1
+#define IFOPERSTATUS_DOWN  2
+#define IFOPERSTATUS_TESTING  3
+
+#endif                          /* ifOperStatus_ENUMS */
+
 /**---------------------------------------------------------------------*/
 /*
  * structure definitions
