@@ -167,6 +167,7 @@ agent_party_init(myaddr, dest_port, view)
     char *view;
 {
     u_int addr;
+    unsigned char *adp;
     u_short port;
     oid partyid1[64];
     int partyidlen1;
@@ -225,10 +226,11 @@ agent_party_init(myaddr, dest_port, view)
 		".1.3.6.1.6.3.3.1.3.128.2.35.55.1");
 	return -1;
     }
-    partyid1[9] =  (myaddr & 0xFF000000) >> 24;
-    partyid1[10] = (myaddr & 0x00FF0000) >> 16;
-    partyid1[11] = (myaddr & 0x0000FF00) >> 8;
-    partyid1[12] = (myaddr & 0x000000FF);
+    adp = (unsigned char *)&myaddr;
+    partyid1[9] =  adp[0];
+    partyid1[10] = adp[1];
+    partyid1[11] = adp[2];
+    partyid1[12] = adp[3];
     partyid1[13] = 1;
     pp1 = party_getEntry(partyid1, partyidlen1);
     if (pp1){
@@ -245,10 +247,10 @@ agent_party_init(myaddr, dest_port, view)
 	party_destroyEntry(partyid1, partyidlen1);
 	return -1;
     }
-    partyid2[9] =  (myaddr & 0xFF000000) >> 24;
-    partyid2[10] = (myaddr & 0x00FF0000) >> 16;
-    partyid2[11] = (myaddr & 0x0000FF00) >> 8;
-    partyid2[12] = (myaddr & 0x000000FF);
+    partyid2[9] =  adp[0];
+    partyid2[10] = adp[1];
+    partyid2[11] = adp[2];
+    partyid2[12] = adp[3];
     partyid2[13] = 2;
     pp2 = party_getEntry(partyid2, partyidlen2);
     if (pp2){
@@ -267,10 +269,10 @@ agent_party_init(myaddr, dest_port, view)
 	party_destroyEntry(partyid2, partyidlen2);
 	return -1;
     }
-    contextid[9] =  (myaddr & 0xFF000000) >> 24;
-    contextid[10] = (myaddr & 0x00FF0000) >> 16;
-    contextid[11] = (myaddr & 0x0000FF00) >> 8;
-    contextid[12] = (myaddr & 0x000000FF);
+    contextid[9] =  adp[0];
+    contextid[10] = adp[1];
+    contextid[11] = adp[2];
+    contextid[12] = adp[3];
     contextid[13] = 1;
     cxp = context_getEntry(contextid, contextidlen);
     if (cxp){
