@@ -29,8 +29,11 @@ check_build_dir()
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+includedir=@includedir@
+libdir=@libdir@
 NSC_LDFLAGS="@LDFLAGS@"
-NSC_LIBDIR=-L@libdir@
+NSC_INCLUDEDIR=${includedir}
+NSC_LIBDIR=-L${libdir}
 NSC_LIBS="@LIBS@"
 NSC_AGENTLIBS="@AGENTLIBS@ @WRAPLIBS@"
 NSC_PREFIX=$prefix
@@ -49,7 +52,26 @@ fi
 if test "x$1" = "x"; then
   usage="yes"
 else
+  while test "x$done" = "x" -a "x$1" != "x" -a "x$usage" != "xyes"; do
+  case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+  esac
+
   case $1 in
+    --prefix=*)
+      prefix=$optarg
+      NSC_PREFIX=${prefix}
+      NSC_INCLUDEDIR=${prefix}/include
+      NSC_LIBDIR=-L${prefix}/lib
+      ;;
+
+    --exec-prefix=*)
+      exec_prefix=$optarg
+      NSC_EXEC_PREFIX=${exec_prefix}
+      NSC_LIBDIR=-L${exec_prefix}/lib
+      ;;
+
     --debug-tokens|--deb*|--dbg*)
       echo "find $NSC_SRCDIR -name \"*.c\" -print | xargs grep DEBUGMSGT | grep \\\" | cut -f 2 -d\\\" | sort -u"
       if test "x$NSC_SRCDIR" != "xNET-SNMP-SOURCE-DIR" ; then
@@ -67,10 +89,10 @@ else
       ;;
     #################################################### compile
     --base-cflags)
-      echo @CFLAGS@ @CPPFLAGS@ -I@includedir@
+      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
       ;;
     --cflags|--cf*)
-      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I@includedir@
+      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR}
       ;;
     --srcdir)
       echo $NSC_SRCDIR
@@ -152,6 +174,7 @@ else
     --exec-prefix)
       echo $NSC_EXEC_PREFIX
       ;;
+    ####################################################
     --create-snmpv3-user)
       if @PSCMD@ | egrep ' snmpd *$' > /dev/null 2>&1 ; then
          echo "Apparently at least one snmpd demon is already running."
@@ -268,6 +291,7 @@ else
       echo $line >> $outfile
       ;;
 
+    ####################################################
     --compile-subagent)
       shift
       while test "x$done" = "x" -a "x$1" != "x" ; do
@@ -421,7 +445,7 @@ EOF
         echo "Ack.  Can't create $tmpfile."
 	exit 1
       fi
-      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles $NSC_LDFLAGS -L$NSC_EXEC_PREFIX/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp $NSC_AGENTLIBS $ldflags"
+      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS -L$NSC_EXEC_PREFIX/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then
@@ -440,6 +464,8 @@ EOF
       usage="yes"
       ;;
   esac
+  shift
+  done
 fi
 
 if test "x$usage" = "xyes"; then
