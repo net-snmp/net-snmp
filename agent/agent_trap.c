@@ -45,6 +45,7 @@
 #include "system.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmp_parse_args.h"
 
 struct trap_sink {
     struct snmp_session	*sesp;
@@ -506,6 +507,59 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
 	sprintf(tmpbuf,"cannot create informsink: %s", cptr);
 	config_perror(tmpbuf);
     }
+}
+
+/* this must be standardized somewhere, right? */
+#define MAX_ARGS 128
+
+static int traptype;
+
+static void trapOptProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'i':
+                        traptype = SNMP_MSG_INFORM;
+                        break;
+                    default:
+                        config_perror("unknown argument passed to -C");
+                        break;
+                }
+            }
+            break;
+    }
+}
+
+
+void
+snmpd_parse_config_trapsess(const char *word, char *cptr) {
+    char args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
+    int argn, arg;
+    struct snmp_session session, *ss;
+
+    /* inform or trap?  default to trap */
+    traptype = SNMP_MSG_TRAP2;
+
+    /* create the argv[] like array */
+    strcpy(args[0], "snmpd-proxy"); /* bogus entry for getopt() */
+    for(argn = 1; cptr && argn < MAX_ARGS;
+        cptr = copy_word(cptr, argv[argn] = args[argn++])) {
+    }
+
+    arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+
+    ss = snmp_open (&session);
+
+    if (ss) {
+	add_trap_session( ss, (ss->version == SNMP_VERSION_1) ? SNMP_MSG_TRAP : traptype, ss->version);
+        return;
+    }
+
+    /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    snmp_sess_perror("snmpd: snmpd_parse_config_trapsess():", &session);
+    return;
 }
 
 void
