@@ -34,6 +34,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #else
