@@ -6,6 +6,10 @@
 /* This should always be included first before anything else */
 #include <config.h>
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 /* minimal include directives */
 #include "mibincl.h"
 #include "util_funcs.h"
