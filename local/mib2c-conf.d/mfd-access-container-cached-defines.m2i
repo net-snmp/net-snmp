@@ -315,7 +315,7 @@ $example_end
  *
  * @note
  *  The MFD helper will take care of releasing all the row contexts.
-@   if ($m2c_data_allocate == 1)@
+@   if ($m2c_data_allocate == 1) && ($m2c_data_transient == 0)@
  *  If you did not pass a data context pointer when allocating
  *  the rowreq context, the one that was allocated will be deleted.
  *  If you did pass one in, it will not be deleted and that memory
