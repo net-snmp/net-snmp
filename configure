@@ -2358,7 +2358,7 @@ EOF
 
 fi
 
-for ac_hdr in strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h
+for ac_hdr in strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/vfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h sys/mntent.h kstat.h utsname.h sys/utsname.h sys/cdefs.h getopt.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6

@@ -388,10 +388,15 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 			break;
 		case 0:
 		case SSLEEP:
+#ifdef SWAIT
 		case SWAIT:
+#endif
 	    		long_return = 2;	/* runnable */
 			break;
 		case SRUN:
+#ifdef SONPROC
+		case SONPROC:
+#endif
 	    		long_return = 1;	/* running */
 			break;
 		case SIDL:
@@ -440,10 +445,15 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 				/*
 				 * Not convinced this is right, but....
 				 */
+#ifdef solaris2
+	    long_return = proc_table[LowProcIndex].p_utime*100 +
+	    		  proc_table[LowProcIndex].p_stime*100;
+#else
 	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
 	    		  proc_table[LowProcIndex].p_stime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_stime.tv_usec/10000;
+#endif
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
 	    fp = fopen( string, "r");
