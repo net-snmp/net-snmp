@@ -673,9 +673,10 @@ How do I add functionality?
 How do I write C code to integrate with the agent?
 -------------------------------------------------
 
-  At the moment, the only technique for integrating external C code
-  with the agent (as opposed to using the 'pass-through' shell
-  extensibility mentioned above) is to implement it within the agent itself.
+  At the moment, there are two methods for integrating external C code
+  within the agent.  The first is to implement it within the agent
+  itself.  The second is to write a second application which can speak 
+  the SMUX protocol, not covered here (see agent/mibgroup/README.smux).
 
   The implementation of the agent has recently been re-organised
   to make it easier to incorporate new MIB groups.  The relevant code
@@ -691,9 +692,12 @@ How do I write C code to integrate with the agent?
   Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further advice.
 
   Work is underway (or at least being discussed!) for implementing
-  proxy/multi-agent support using the AgentX (and SMUX) mechanisms.
+  proxy/multi-agent support using the AgentX mechanisms.
 
- 
+  Also, please read the AGENT file in the source directory, which is a 
+  much more complete description.
+
+
 
 What traps are sent by the agent?
 --------------------------------
