@@ -488,7 +488,6 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     struct ifnet     rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
 #endif
-#ifdef linux
     /** 
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
@@ -496,7 +495,6 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     if (rtsize <= 1)
       Save_Valid = 0;
     else
-#endif
     /*
      *	OPTIMIZATION:
      *
