@@ -1104,6 +1104,7 @@ int main(int argc, char *argv[])
 
     snmp_close(ss);
     snmp_shutdown("snmptrapd");
+    snmp_disable_log();
     SOCK_CLEANUP;
     return 0;
 }
