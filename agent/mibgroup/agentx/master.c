@@ -13,11 +13,11 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp.h"
-#include "agentx.h"
 
 #include "snmp_vars.h"
 #include "var_struct.h"
 #include "snmpd.h"
+#include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 #include "agentx/master_request.h"
 
