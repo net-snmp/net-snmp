@@ -172,6 +172,7 @@ static void optProc(int argc, char *const *argv, int opt)
             break;
           }
        }
+       break;
     case 'w':
       max_width = atoi(optarg);
       if (max_width == 0) {
@@ -210,7 +211,7 @@ int main(int argc, char *argv[])
   snmp_set_quick_print(1);
 
   /* get the common command line arguments */
-  snmp_parse_args(argc, argv, &session, "w:f:C:bi", optProc);
+  snmp_parse_args(argc, argv, &session, "w:C:bi", optProc);
 
   /* get the initial object and subtree */
   /* specified on the command line */
