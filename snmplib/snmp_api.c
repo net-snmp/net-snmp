@@ -4005,6 +4005,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       return NULL;
 
     vars->next_variable = 0; vars->name = 0; vars->val.string = 0;
+    vars->data = 0;
 
     /* use built-in storage for smaller values */
     if (len <= sizeof(vars->buf)) {

@@ -392,6 +392,7 @@ struct variable_list {
     size_t	    val_len;
     oid name_loc[MAX_OID_LEN];  /* 90 percentile < 24. */
     u_char buf[40];             /* 90 percentile < 40. */
+    void *data;			/* (Opaque) hook for additional data */
 };
 
 
