@@ -567,6 +567,17 @@ if test "x$embed_perl" = "xyes"; then
     fi
 fi
 
+dnl AIX has problems with shared libs
+case $target_os in
+    aix*)
+        AC_MSG_CHECKING([whether using AIX and if we should disable shared libraries])
+	AC_MSG_RESULT([yes])
+	enable_shared=no
+        ;;
+    *)
+        ;;
+esac
+
 AC_PROG_CC
 AC_PROG_CPP
 AC_AIX
@@ -1616,6 +1627,20 @@ AC_CHECK_HEADERS(pkginfo.h,
     AC_CHECK_LIB(adm, pkginfo, AC_DEFINE(HAVE_PKGINFO)
     LIBS="${LIBS} -ladm"
     AGENTLIBS="${AGENTLIBS} -ladm"))
+dnl AIX perfstat library, needed for CPU/memory statistics
+case $target_os in
+    aix*)
+        AC_CHECK_HEADERS(libperfstat.h,
+            AC_CHECK_LIB(perfstat, perfstat_cpu_total, AC_DEFINE(HAVE_PERFSTAT)
+            AGENTLIBS="${AGENTLIBS} -lperfstat"), AC_MSG_ERROR([
+
+*** To monitor CPU/memory values in AIX you need to install
+*** libperfstat which can be found in bos.perf
+]))
+        ;;
+    *)
+        ;;
+esac
 # WIN32
 AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
 AC_CHECK_HEADERS(io.h)
