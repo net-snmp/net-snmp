@@ -91,7 +91,7 @@
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
 #endif
 #if HAVE_FSTAB_H

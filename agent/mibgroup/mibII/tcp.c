@@ -73,13 +73,11 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdlib.h>
-#else
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #endif
 #ifdef solaris2
 #include "kernel_sunos5.h"

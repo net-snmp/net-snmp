@@ -1,12 +1,10 @@
 #include "mib_module_config.h"        /* list of which modules are supported */
 #include <config.h>                   /* local SNMP configuration details*/
-#if STDC_HEADERS
-#include <stdlib.h>
+#if HAVE_STRING_H
 #include <string.h>
-#else 
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #endif
 
 #include <sys/types.h>

@@ -13,13 +13,11 @@
 #include <stdlib.h>
 #endif
 #include <ctype.h>
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdlib.h>
-#else
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #endif
 
 #include "host_res.h"
