@@ -70,6 +70,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars_m2m.h"
 
 /* #include "common_header.h" */
+#include "mibgroup/struct.h"
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
 #include "mib_module_config.h"
