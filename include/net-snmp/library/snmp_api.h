@@ -632,17 +632,17 @@ struct variable_list {
                                            size_t * length);
     void            snmp_store(const char *type);
     void            snmp_shutdown(const char *type);
-    netsnmp_variable_list *snmp_pdu_add_variable(netsnmp_pdu *, oid *,
+    netsnmp_variable_list *snmp_pdu_add_variable(netsnmp_pdu *, const oid *,
                                                  size_t, u_char, const u_char *,
                                                  size_t);
     netsnmp_variable_list *snmp_varlist_add_variable(netsnmp_variable_list
                                                      ** varlist,
-                                                     oid * name,
+                                                     const oid * name,
                                                      size_t name_length,
                                                      u_char type,
                                                      const u_char * value,
                                                      size_t len);
-    int             snmp_add_var(netsnmp_pdu *, oid *, size_t, char,
+    int             snmp_add_var(netsnmp_pdu *, const oid *, size_t, char,
                                  const char *);
     oid            *snmp_duplicate_objid(const oid * objToCopy, size_t);
     u_int           snmp_increment_statistic(int which);
