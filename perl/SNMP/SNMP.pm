@@ -1118,6 +1118,7 @@ my %node_elements =
      defaultValue => 0, # returns default value
      description => 0, # returns DESCRIPTION ($SNMP::save_descriptions must
                     # be set prior to MIB initialization/parsing
+     augments => 0, # textual identifier of augmented object
     );
 
 # sub TIEHASH - implemented in SNMP.xs
