@@ -36,8 +36,8 @@
 #include <net-snmp/library/mt_support.h>
 /*  #include <net-snmp/library/snmp_locking.h>  */
 #include <net-snmp/library/snmp_alarm.h>
-#include <net-snmp/library/data_list.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/library/data_list.h>
 #include <net-snmp/library/oid_stash.h>
 #include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_impl.h>
