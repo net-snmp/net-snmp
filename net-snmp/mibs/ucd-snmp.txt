@@ -56,9 +56,9 @@ Processes ::= SEQUENCE {
    processMin    INTEGER,
    processMax    INTEGER,
    processCount  INTEGER,
-   processError  INTEGER,
+   processErrorFlag  INTEGER,
    processErrMessage  DisplayString,
-   processErrorFix  INTEGER
+   processErrFix  INTEGER
 }
 
 processIndex OBJECT-TYPE
@@ -489,7 +489,7 @@ Loadaves ::= SEQUENCE {
    loadaveNames  DisplayString,
    loadaveLoad   DisplayString,
    loadaveConfig DisplayString,
-   loadaveError  INTEGER,
+   loadaveErrorFlag  INTEGER,
    loadaveErrMessage  DisplayString
 }
 
@@ -638,7 +638,7 @@ snmperrs OBJECT-TYPE
 Snmperrs ::= SEQUENCE {
    snmperrIndex  INTEGER,
    snmperrNames  DisplayString,
-   snmperrError  INTEGER,
+   snmperrErrorFlag  INTEGER,
    snmperrErrMessage  DisplayString
 }
 
