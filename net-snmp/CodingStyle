@@ -1,0 +1,35 @@
+We've adopted the following indent style:
+
+   indent -orig -nbc -bap
+
+If possible, please run all new code submitted to the project through
+the above command.  However, if sending a patch, please do *not* send
+a patch that reformats the entire file.  Just the new sections of code
+should be in the above style to make it easier for us to dissect what
+you did in your patch.
+
+Briefly, here's a description of the style:
+
+	Blank lines:
+		after procedures
+		not (forced) after blocks of declarations or block comments
+		multiple declarations not split onto separate lines
+
+	Comments:
+		Block comments indented 4 spaces from surrounding code
+		Start/End on separate lines
+		Solid '*' on the left of block comments
+		"One-line" comments start in column 33
+
+	Bracing/Indent/etc:
+		K&R-style bracing (including "cuddle-else")
+		'case' statements in line with 'switch'
+		No space between procedure name and opening parenthesis
+		variable declarations lined up, and start in column 16
+		Procedure return type on a separate line to the procedure name
+		Four character basic and continuation line indent
+		Continuation paramters lined up with opening parenthesis
+
+The discussion about coding style on the net-snmp-coders mailing list
+can be found at the following web address:
+  http://www.geocrawler.com/mail/thread.php3?subject=design+proposal+-+coding+style&list=6845
