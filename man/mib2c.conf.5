@@ -167,15 +167,19 @@ node's ASN_XXX type (Net-SNMP specific #define)
 .IP "$var.decl"
 C data type (char, u_long, ...)
 .IP "$var.readable"
-1 if it's readable, 0 if not
+1 if an object is readable, 0 if not
 .IP "$var.settable"
-1 if it's writable, 0 if not
+1 if an object is writable, 0 if not
+.IP "$var.creatable"
+1 if a column object can be created as part of a new row, 0 if not
 .IP "$var.noaccess"
 1 if not-accessible, 0 if not
 .IP "$var.accessible"
 1 if accessible, 0 if not
-.IP "$var.hasdefval"
-1 if a DEFVAL was defined, 0 if not
+.IP "$var.rowstatus"
+1 if an object is a RowStatus object, 0 if not
+'settable', 'creatable' and 'rowstatus' can also be used with table variables
+to indicate whether it contains writable, creatable or RowStatus column objects
 .IP "$var.hasdefval"
 returns 1 if var has a DEFVAL clause
 .IP "$var.defval"
