@@ -7,6 +7,9 @@
 
 config_require(ucd-snmp/loadave)
 
+#ifdef solaris2
+extern void kstat_CPU(void);
+#endif
 extern void     init_hr_proc(void);
 extern FindVarMethod var_hrproc;
 
