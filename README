@@ -1,23 +1,11 @@
-		      ucd-snmp Version: 4.2.3
-
                       ****************************
                       ***       IMPORTANT      ***
                       ****************************
 
-  The ucd-snmp project has now moved from UCDavis, and is now based
-  at SourceForge (www.sourceforge.net), under the new name 'net-snmp'.
-  The 4.2 line is the last release line that will use the ucd-snmp name.
-  4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
-  All further developments will be released under the net-snmp name.
-
-  The 4.2.1 release is intended as a 'bug-fix' update to the earlier 4.2
-  code, and there are no significant changes to the APIs in this release.
-
-  It is very likely that there will be changes made to the APIs at some
-  point in the near future.   While every effort will be made to ensure
-  that net-snmp remains backwardly compatible with existing ucd-snmp based
-  code as much as possible, this cannot be guaranteed 100% completely.
-
+ NOTE WELL: this release is an alpha release and it's possible that
+ things may change before the real release so don't become dependent
+ on new features without first asking the developers if that
+ particular area is fairly stable.
 
 DISCLAIMER
 
@@ -25,13 +13,6 @@ DISCLAIMER
   performance as a direct or indirect result of the use of this
   software.  This software is provided "as is" without express or
   implied warranty.
-
-  Despite the name, this software package has no connection with the
-  University of California, or the University of California at Davis.
-  These bodies also assume no responsibility for damage or loss of
-  system performance as a direct or indirect result of the use of this
-  software.
-
 
 TABLE OF CONTENTS
 
