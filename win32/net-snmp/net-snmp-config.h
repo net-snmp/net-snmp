@@ -1,4 +1,6 @@
 /* config.h:  a general config file */
+#ifndef NET_SNMP_CONFIG_H
+#define NET_SNMP_CONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -887,3 +889,4 @@ typedef unsigned short mode_t;
 #endif
 
 #define inline
+#endif /* NET_SNMP_CONFIG_H */
