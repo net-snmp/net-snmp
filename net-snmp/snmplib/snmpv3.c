@@ -25,6 +25,7 @@
 #else
 #include <strings.h>
 #endif
+#include <ctype.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -173,6 +174,134 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
   }
   DEBUGMSGTL(("snmpv3","default secLevel set to: %s = %d\n", cptr,
               ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL)));
+}
+
+
+int
+snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz)
+{
+   char *cp = optarg;
+   optarg++;
+   if (*optarg == '=') {
+       optarg++;
+   }
+
+   switch (*cp) {
+
+      case 'Z':
+        session->engineBoots = strtoul(optarg, NULL, 10);
+        if (session->engineBoots == 0 || !isdigit(optarg[0])) {
+          fprintf(stderr,"Need engine boots value after -3Z flag.\n");
+          return(-1);
+        }
+        cp = strchr(optarg,',');
+        if (cp && *(++cp) && isdigit(*cp))
+          session->engineTime = strtoul(cp, NULL, 10);
+        else {
+          fprintf(stderr,"Need engine time value after -3Z flag.\n");
+          return(-1);
+        }
+        break;
+
+      case 'e': {
+	size_t ebuf_len = 32, eout_len = 0;
+	u_char *ebuf = (u_char *)malloc(ebuf_len);
+	
+	if (ebuf == NULL) {
+	  fprintf(stderr, "malloc failure processing -3e flag.\n");
+	  return(-1);
+	}
+	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
+          fprintf(stderr, "Bad engine ID value after -3e flag.\n");
+	  free(ebuf);
+          return(-1);
+	}
+	session->securityEngineID = ebuf;
+	session->securityEngineIDLen = eout_len;
+        break;
+      }
+
+      case 'E': {
+	size_t ebuf_len = 32, eout_len = 0;
+	u_char *ebuf = (u_char *)malloc(ebuf_len);
+	
+	if (ebuf == NULL) {
+	  fprintf(stderr, "malloc failure processing -3E flag.\n");
+	  return(-1);
+	}
+	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
+          fprintf(stderr, "Bad engine ID value after -3E flag.\n");
+	  free(ebuf);
+          return(-1);
+	}
+	session->contextEngineID = ebuf;
+	session->contextEngineIDLen = eout_len;
+        break;
+      }
+
+      case 'n':
+	session->contextName = optarg;
+	session->contextNameLen = strlen(optarg);
+        break;
+
+      case 'u':
+	session->securityName = optarg;
+	session->securityNameLen = strlen(optarg);
+        break;
+
+      case 'l':
+        if (!strcasecmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
+            !strcasecmp(optarg,"nanp")) {
+          session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+        } else if (!strcasecmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
+            !strcasecmp(optarg,"anp")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        } else if (!strcasecmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
+            !strcasecmp(optarg,"ap")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+        } else {
+          fprintf(stderr,"Invalid security level specified after -3l flag: %s\n", optarg);
+          return(-1);
+        }
+
+        break;
+
+      case 'a':
+        if (!strcasecmp(optarg,"MD5")) {
+          session->securityAuthProto = usmHMACMD5AuthProtocol;
+          session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
+        } else if (!strcasecmp(optarg,"SHA")) {
+          session->securityAuthProto = usmHMACSHA1AuthProtocol;
+          session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+        } else {
+          fprintf(stderr,"Invalid authentication protocol specified after -3a flag: %s\n", optarg);
+          return(-1);
+        }
+        break;
+
+      case 'x':
+        if (!strcasecmp(optarg,"DES")) {
+          session->securityPrivProto = usmDESPrivProtocol;
+          session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+        } else {
+          fprintf(stderr,"Invalid privacy protocol specified after -3x flag: %s\n", optarg);
+          return(-1);
+        }
+        break;
+
+      case 'A':
+	*Apsz = optarg;
+	break;
+
+      case 'X':
+        *Xpsz = optarg;
+        break;
+
+      default:
+        fprintf(stderr,"Unknown SNMPv3 option passed to -3: %c.\n", *cp);
+        return -1;
+   }
+   return 0;
 }
 
 /*******************************************************************-o-******
