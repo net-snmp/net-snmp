@@ -2,7 +2,9 @@
  * Contributed by Ragnar Kjørstad, ucd@ragnark.vestdata.no 1999-06-26 */
 
 #include "config.h"
+#if HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,6 +16,8 @@
 #include <varargs.h>
 #endif
 
+#include "snmp_logging.h"
+
 int do_syslogging=0;
 int do_filelogging=0;
 int do_stderrlogging=0;
@@ -22,8 +26,10 @@ FILE *logfile;
 
 void
 disable_syslog(void) {
-  if (do_syslogging) 
+  if (do_syslogging)
+#ifndef WIN32
     closelog();
+#endif
   do_syslogging=0;
 }
 
@@ -55,8 +61,10 @@ void
 enable_syslog(void) 
 {
   disable_syslog();
+#ifndef WIN32
   openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
   do_syslogging=1;
+#endif
 }
 
 
@@ -81,7 +89,9 @@ void
 vlog_syslog (int priority, const char *format, va_list ap) 
 {
   if (do_syslogging) {
+#ifndef WIN32
     syslog(priority, format, ap);
+#endif
   }
 }
 
@@ -104,7 +114,7 @@ log_syslog (int priority, va_alist)
 #endif
 
   vlog_syslog(priority, format, ap);
-  va_end(ar);
+  va_end(ap);
 }
 
 
@@ -147,7 +157,7 @@ log_filelog (int priority, va_alist)
 #endif
   vlog_filelog(priority, format, ap);
 
-  va_end(ar);
+  va_end(ap);
 } 
 
 
@@ -180,7 +190,7 @@ log_stderrlog (int priority, va_alist)
 #endif
   vlog_stderrlog(priority, format, ap);
    
-  va_end(ar);
+  va_end(ap);
 }
 
 
@@ -215,19 +225,19 @@ snmp_log (int priority, va_alist)
 
 
 void
-log_perror_syslog(char *s)
+log_perror_syslog(const char *s)
 {
   log_syslog(LOG_ERR, "System error - check logfile (if any) for details");
 }
 
 void
-log_perror_filelog(char *s)
+log_perror_filelog(const char *s)
 {
   log_filelog(LOG_ERR, "System error - detail error reporting not implemented");
 }
 
 void
-log_perror_stderrlog(char *s)
+log_perror_stderrlog(const char *s)
 {
   log_stderrlog(LOG_ERR, "System error: ");
   perror(s);
@@ -235,7 +245,7 @@ log_perror_stderrlog(char *s)
 
 
 void
-log_perror(char *s)
+log_perror(const char *s)
 {
   log_perror_syslog(s);
   log_perror_filelog(s);

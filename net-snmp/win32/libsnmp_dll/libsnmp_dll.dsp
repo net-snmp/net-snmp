@@ -163,6 +163,10 @@ SOURCE=..\..\snmplib\snmp_debug.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_logging.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpusm.c
 # End Source File
 # Begin Source File
