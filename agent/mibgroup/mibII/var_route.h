@@ -19,7 +19,7 @@ config_require(mibII/ip util_funcs)
 
      extern FindVarMethod var_ipRouteEntry;
 
-#ifndef hpux11
+#if !defined(hpux11) && !defined(solaris2)
      RTENTRY **netsnmp_get_routes(size_t *out_numroutes);
 #endif
 
