@@ -60,7 +60,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #define rt_unit rt_refcnt	       /* Reuse this field for device # */
-#if defined(osf3) || defined(netbsd1)
+#if defined(osf3) || defined(netbsd1) || defined(freebsd2)
 #define rt_dst rt_nodes->rn_key
 #endif
 #else
@@ -94,15 +94,15 @@ PERFORMANCE OF THIS SOFTWARE.
 static	    Route_Scan_Reload();
 
 static RTENTRY **rthead=0;
-static int rtsize=0, rtalloc=0;
+static int rtsize=0, rtallocate=0;
 
 #define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
-#define N_RTHOST       0
-#define N_RTNET        1
+#define N_RTHOST	0
+#define N_RTNET		1
 #define N_RTHASHSIZE	2
-#define N_RTTABLES 3
+#define N_RTTABLES	3
 #if defined(hpux) || defined(solaris2)
 	{ "rthost" },
 	{ "rtnet" },
@@ -112,7 +112,11 @@ static struct nlist nl[] = {
 	{ "_rthost" },
 	{ "_rtnet" },
 	{ "_rthashsize" },
+#ifdef freebsd2
+	{ "_rt_tables" },
+#else
 	{ "_rt_table" },
+#endif
 #endif
 	0,
 };
@@ -120,6 +124,18 @@ static struct nlist nl[] = {
 extern write_rte();
 
 #ifndef solaris2
+
+#ifdef freebsd2
+struct sockaddr_in klgetsatmp;
+
+struct sockaddr_in *
+klgetsa(struct sockaddr_in *dst)
+{
+    klookup(dst, &klgetsatmp, sizeof klgetsatmp);
+    return(&ksgetsatmp);    
+}
+#endif
+
 u_char *
 var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
@@ -139,7 +155,9 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     static oid saveName[14], Current[14];
     u_char *cp;
     oid *op;
-
+#ifdef freebsd2
+    struct sockaddr_in *sa;
+#endif
 
     /*
      *	OPTIMIZATION:
@@ -154,7 +172,8 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	name[9] = 0;
 	Save_Valid = (compare(name, *length, saveName, saveNameLen) == 0);
 	name[9] = temp;
-    } else Save_Valid = 0;
+    } else
+	Save_Valid = 0;
 
     if (Save_Valid) {
 	register int temp=name[9];    /* Fix up 'lowest' found entry */
@@ -178,7 +197,12 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
         Route_Scan_Reload();
 #endif
 	for(RtIndex=0; RtIndex < rtsize; RtIndex++) {
+#ifdef freebsd2
+	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
+	    cp = (u_char *) &(sa->sin_addr.s_addr);
+#else
 	    cp = (u_char *)&(((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->sin_addr.s_addr);
+#endif
 	    op = Current + 10;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
@@ -189,7 +213,8 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    if ((exact && (result == 0)) || (!exact && (result < 0)))
 		break;
 	}
-	if (RtIndex >= rtsize) return(NULL);
+	if (RtIndex >= rtsize)
+	    return(NULL);
 	/*
 	 *  Save in the 'cache'
 	 */
@@ -208,11 +233,14 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     *write_method = write_rte;
     *var_len = sizeof(long_return);
 
-
-
     switch(vp->magic){
 	case IPROUTEDEST:
+#ifdef freebsd2
+	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
+	    return(u_char *) &(sa->sin_addr.s_addr);
+#else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
+#endif
 	case IPROUTEIFINDEX:
 	    long_return = (u_long)rthead[RtIndex]->rt_unit;
 	    return (u_char *)&long_return;
@@ -229,6 +257,10 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
+#ifdef freebsd2
+	    sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
+	    return(u_char *) &(sa->sin_addr.s_addr);
+#endif
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
 	case IPROUTETYPE:
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
@@ -422,7 +454,7 @@ struct radix_node *pt;
     }
     /* get the route */
     klookup(pt, (char *) &rt, sizeof (RTENTRY));
-
+      
     if (rt.rt_ifp != 0) {
       klookup( rt.rt_ifp, (char *)&ifnet, sizeof (ifnet));
       klookup( ifnet.if_name, name, 16);
@@ -436,20 +468,30 @@ struct radix_node *pt;
         if (strcmp(name, temp) == 0) break;
       }
     }
-    /* check for space and malloc */
-    if (rtsize >= rtalloc) {
-      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
-      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
+      
+#ifdef freebsd2
+    if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
+        && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO))
+      {
+#endif
+        /* check for space and malloc */
+        if (rtsize >= rtallocate) {
+          rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
+          bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
+          
+          rtallocate *= 2;
+        }
+        if (!rthead[rtsize])
+          rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+        /*
+         *	Add this to the database
+         */
+        bcopy((char *) &rt, (char *)rthead[rtsize], sizeof(RTENTRY));
+        rtsize++;
+#ifdef freebsd2
+      }
+#endif
 
-      rtalloc *= 2;
-    }
-    if (!rthead[rtsize])
-      rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
-    /*
-     *	Add this to the database
-     */
-    bcopy((char *) &rt, (char *)rthead[rtsize], sizeof(RTENTRY));
-    rtsize++;
     if (node.rn_dupedkey)
       load_rtentries(node.rn_dupedkey);
   }
@@ -465,7 +507,7 @@ static Route_Scan_Reload()
   struct radix_node_head head, *rt_table[AF_MAX+1];
 #endif
   struct ifnet ifnet;
-  int i, table, qsort_compare();
+  int i, table;
   register char *cp;
   char name[16], temp[16];
   static int Time_Of_Last_Reload=0;
@@ -487,7 +529,7 @@ static Route_Scan_Reload()
       return;
     }
     bzero((char *)rthead, 100 * sizeof(RTENTRY *));
-    rtalloc = 100;
+    rtallocate = 100;
   }
 
   /* reset the routing table size to zero -- was a CMU memory leak */
@@ -495,6 +537,10 @@ static Route_Scan_Reload()
 
 #ifdef RTENTRY_4_4 
 /* rtentry is a BSD 4.4 compat */
+
+#ifndef AF_UNSPEC
+#define AF_UNSPEC AF_INET 
+#endif
 
   KNLookup(N_RTTABLES, (char *) rt_table, sizeof(rt_table));
   if (rt_table[AF_UNSPEC]) {
@@ -540,11 +586,11 @@ static Route_Scan_Reload()
         /*
          *	Allocate a block to hold it and add it to the database
          */
-        if (rtsize >= rtalloc) {
-          rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
-          bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
+        if (rtsize >= rtallocate) {
+          rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
+          bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
 
-          rtalloc *= 2;
+          rtallocate *= 2;
         }
         if (!rthead[rtsize])
           rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
@@ -561,7 +607,7 @@ static Route_Scan_Reload()
   /*
    *  Sort it!
    */
-  qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
+  qsort((char *) rthead, rtsize, sizeof(rthead[0]), qsort_compare);
 }
 
 #else
@@ -573,7 +619,7 @@ static Route_Scan_Reload()
 	register struct mbuf *m;
 	struct ifnet ifnet;
 	RTENTRY *rt;
-	int i, table, qsort_compare();
+	int i, table;
 	register char *cp;
 	char name[16], temp[16];
 	static int Time_Of_Last_Reload=0;
@@ -596,7 +642,7 @@ static Route_Scan_Reload()
 		return;
 	    }
           bzero((char *)rthead, 100 * sizeof(RTENTRY *));
-          rtalloc = 100;
+          rtallocate = 100;
 	}
 
         /* reset the routing table size to zero -- was a CMU memory leak */
@@ -641,11 +687,11 @@ static Route_Scan_Reload()
 		    /*
 		     *	Allocate a block to hold it and add it to the database
 		     */
-		    if (rtsize >= rtalloc) {
-                      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
+		    if (rtsize >= rtallocate) {
+                      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
+                      bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
 
-			rtalloc *= 2;
+			rtallocate *= 2;
 		    }
 		    if (!rthead[rtsize])
                       rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
@@ -677,8 +723,13 @@ static Route_Scan_Reload()
 static int qsort_compare(r1,r2)
 RTENTRY **r1, **r2;
 {
+#ifdef freebsd2
+	register u_long dst1 = ntohl(klgetsa((*r1)->rt_dst)->sin_addr.s_addr);
+	register u_long dst2 = ntohl(klgetsa((*r2)->rt_dst)->sin_addr.s_addr);
+#else
 	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
 	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);
+#endif
 
 	/*
 	 *	Do the comparison
@@ -687,15 +738,3 @@ RTENTRY **r1, **r2;
 	if (dst1 > dst2) return(1);
 	return(-1);
 }
-
-
-
-
-
-
-
-
-
-
-
-
