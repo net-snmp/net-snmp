@@ -2041,18 +2041,28 @@ _snmp_build(struct snmp_session *session,
             return -1;
         h0e = cp;
 
+        if (pdu->version == SNMP_VERSION_1)
+            DEBUGDUMPSECTION("send", "SNMPv1 Message");
+        else
+            DEBUGDUMPSECTION("send", "SNMPv2c Message");
+        
         /* store the version field */
+        DEBUGDUMPHEADER("send", "SNMP Version Number");
+
         version = pdu->version;
         cp = asn_build_int(cp, out_length,
                     (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
                     (long *) &version, sizeof(version));
+        DEBUGINDENTLESS();
         if (cp == NULL)
             return -1;
 
         /* store the community string */
+        DEBUGDUMPHEADER("send", "Community String");
         cp = asn_build_string(cp, out_length,
                     (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
                     pdu->community, pdu->community_len);
+        DEBUGINDENTLESS();
         if (cp == NULL)
             return -1;
         break;
@@ -2067,7 +2077,9 @@ _snmp_build(struct snmp_session *session,
     }
 
     h1 = cp;
+    DEBUGDUMPSECTION("send", "PDU");
     cp = snmp_pdu_build(pdu, cp, out_length);
+    DEBUGINDENTADD(-4); /* return from entire v1/v2c message */
     if (cp == NULL)
 	return -1;
 
