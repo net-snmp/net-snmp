@@ -317,6 +317,7 @@ char **argv;
   int begin, end, last_end;
   int varbindsPerPacket = 60;
   int print = 1;
+  int exit_code = 0;
     
   arg = snmp_parse_args(argc, argv, &session);
   gateway = session.peername;
@@ -596,7 +597,10 @@ char **argv;
 	      varbindsPerPacket--;
 	  }
 	  if (varbindsPerPacket <= 0)
-	    exit(5);
+	  {
+	    exit_code = 5;
+	    break;
+	  }
 	  end = last_end;
 	  continue;
 	} else if (response->errstat == SNMP_ERR_NOSUCHNAME){
@@ -608,13 +612,15 @@ char **argv;
 	  if (vars)
 	    fprint_objid(stderr, vars->name, vars->name_length);
 	  fprintf(stderr, "\n");
-	  SOCK_CLEANUP;
-	  exit(1);
+/* Don't exit when OIDs from file are not found on agent
+	  exit_code = 1;
+	  break;
+*/
 	} else {
 	  fprintf(stderr, "Error in packet: %s\n",
 		  snmp_errstring(response->errstat));
-	  SOCK_CLEANUP;
-	  exit(1);
+	  exit_code = 1;
+	  break;
 	}
 	if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
 	  goto retry;
@@ -638,5 +644,5 @@ char **argv;
   }
   snmp_close(ss);
   SOCK_CLEANUP;
-  return(0);
+  return(exit_code);
 }
