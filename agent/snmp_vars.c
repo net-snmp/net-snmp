@@ -2172,9 +2172,8 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     short                   interface;
 #ifndef sunV3
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
-#else
+#endif
     static struct ifnet ifnet, lowin_ifnet;
-#endif sunV3
 
     /* fill in object part of name for current (less sizeof instance part) */
 
@@ -2509,7 +2508,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     *var_len = sizeof(long); /* all following variables are sizeof long */
 
     /*
-     *	Get the UDP statistics from the kernel...
+     *        Get the ICMP statistics from the kernel...
      */
 
     KNLookup( N_ICMPSTAT, (char *)&icmpstat, sizeof (icmpstat));
@@ -2736,7 +2735,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default length */
     /*
-     *	Get the IP statistics from the kernel...
+     *        Get the UDP statistics from the kernel...
      */
 
     KNLookup( N_UDPSTAT, (char *)&udpstat, sizeof (udpstat));
