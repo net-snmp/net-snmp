@@ -46,26 +46,80 @@ $(prefix)/lib/snmp
 
 Optional features to pass to configure for ucd-snmp:
 
-  --enable-debugging              Outputs extra debugging information.
-  --with-defaults                 Use defaults for prompted values.
-  --without-root-access           Agent won't require root access.
-  --with-sys-contact="who@where"  Default system contact.
-                                    (Default: LOGIN@DOMAINNAME)
-  --with-sys-location="location"  Default system location.
-                                    (Default: Unknown)
-  --with-logfile="location"       Default log file location.
-  --with-security="TYPE"          Default security type to enforce.
-                                    (Default: SNMPV1).
-  --with-mibdirs="dir1:dir2"     Default directories to look for mibs.
-                                    (Default: PREFIX/share/snmp/mibs)
-  --with-mibs="item1:item2"      Default mib IDs to load.
-                                    (Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:
-                                           SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB)
-  --with-mibfiles="file1:file2"   Default mib files to load.
-                                    (Default:  none.  uses IDs above instead.)
-  --with-mib-modules="list"       Compile with additional mib modules.
-  --with-out-mib-modules="list"   Compile without these mib modules.
-  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.
+  Compiler Options:
+    --with-cc=CC                    use CC to compile (default=gcc).
+    --with-cflags=CFLAGS            use CFLAGS as compile time arguments.
+    --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.
+    --enable-shared                 Compile, use, and install shared libraries.
+    --enable-debugging              Outputs extra debugging information at all
+				    times.  Normally, you should not
+				    enable this, but instead use the
+				    -D flag of the commands, which
+				    toggles debbuging output at
+				    runtime.
+    --disable-debugging             Disallows debugging code to be built in.
+				    This might provide some speed benefits.
+  
+  Configuring the SNMP library (and the applications that use it):
+    --enable-mib-eol-comments       Treat "--" as a mib comment terminated only
+				    by an end of line condition.
+    --without-opaque-special-types  Don't use special opaque encodings.
+				    SNMP normally can not handle
+				    floating numbers, nor large 64 bit
+				    integers well.  By default, the
+				    ucd-snmp package compiles in
+				    support for these extra datatypes
+				    (in a legal way)
+    --with-mibdirs="dir1:dir2:"     Default directories to look for mibs.
+				      (Default: DATADIR/snmp/mibs)
+    --with-mibs="item1:item2:"      Default mib IDs to read.
+				      (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
+						SNMPv2-MIB:RFC1213-MIB:
+						UCD-SNMP-MIB)
+    --with-mibfiles="file1:file2"   Default mib files to load.
+				      (Default:  none.  uses IDs above instead.)
+  
+  Configuring the agent:
+    --without-root-access           The snmpd agent won't require root access to
+				    run it.  The information it returns in the
+				    mib-II tree may not be correct, however.
+    --with-sys-contact="who@where"  Default system contact.
+				      (Default: LOGIN@DOMAINNAME)
+    --with-sys-location="location"  Default system location.
+				      (Default: Unknown)
+    --with-logfile="location"       Default log file location for snmpd.
+    --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.
+    --with-mib-modules="item1 ..."  Compile with additional mib modules
+				      (Space separated list).
+    --with-out-mib-modules="list"   Compile without these mib modules.
+  
+    Default mib modules compiled into the agent (which can be removed):
+    
+      mibII:                 support for the mib-II tree.
+      ucd_snmp:              ucd-snmp specific extensions.
+      v2party:               support for the snmpv2 party mibs.
+  
+    Optional mib modules that can be built into the agent include:
+      host:                  host resources mib support.
+			       (alpha level code for linux, hpux, solaris)
+      smux:                  smux sub-agent support.
+      misc/ipfwacc:          accounting rules IP firewall information.
+			       (only under linux)
+      ipfwchains/ipfwchains: firewall chains under ipfw for linux.
+			       (see agent/mibgroup/ipfwchains/README)
+      target:                Support for the TARGET-MIB.
+      ucd-snmp/pass_persist: Persistent pass scripts that stay around.
+			     Not currently included by default solely because
+			     it needs more testing.
+  
+    Optional modules for C coders to look at and/or include as
+    extension examples:
+    
+      examples/example:      example C code extension.
+      examples/wombat:       template file similar to example.
+  
+  Miscellaneous:
+    --with-defaults                 Use defaults for prompted values.
 
 To get a list of mib modules that you can build with, run configure
 with the --help argument.

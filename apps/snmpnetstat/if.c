@@ -262,7 +262,7 @@ intpr(int interval)
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
-			if ((i = strlen(cur_if->name)) > max_name) max_name = i;
+			if ((i = strlen(cur_if->name)+1) > max_name) max_name = i;
 			break;
 		    case IFOPERSTATUS:
 			cur_if->operstatus = *var->val.integer; break;
@@ -271,22 +271,18 @@ intpr(int interval)
 
 		snmp_free_pdu (response);
 
-		cur_if->name[6] = '\0';
-                cp = (char *) strchr(cur_if->name, ' ');
-                if ( cp != NULL )
-                  *cp = '\0';
 		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
 		}
 		if (cur_if->operstatus != MIB_IFSTATUS_UP) {
-			cp = (char *) strchr(cur_if->name, '\0');
+			cp = strchr(cur_if->name, '\0');
 			*cp++ = '*';
 			*cp = '\0';
 		}
 	}
 
-	printf("%*.*s %-5.5s %*.*s %*.*s %8.8s %5.5s %8.8s %5.5s %5.5s",
+	printf("%*.*s %5.5s %*.*s %*.*s %9.9s %5.5s %9.9s %5.5s %5.5s",
 		-max_name, max_name, "Name", "Mtu",
 		-max_route, max_route, "Network",
 		-max_ip, max_ip, "Address", "Ipkts", "Ierrs",
@@ -297,7 +293,7 @@ intpr(int interval)
 		printf("%-*.*s %5d ", max_name, max_name, cur_if->name, cur_if->mtu);
 		printf("%-*.*s ", max_route, max_route, cur_if->route);
 		printf("%-*.*s ", max_ip, max_ip, cur_if->ip);
-		printf("%8d %5d %8d %5d %5d",
+		printf("%9d %5d %9d %5d %5d",
 		    cur_if->ipkts, cur_if->ierrs,
 		    cur_if->opkts, cur_if->oerrs,
 		    cur_if->outqueue);
@@ -440,7 +436,7 @@ intpro(int interval)
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
-			if ((i = strlen(cur_if->name)) > max_name) max_name = i;
+			if ((i = strlen(cur_if->name)+1) > max_name) max_name = i;
 			break;
 		    case IFOPERSTATUS:
 			cur_if->operstatus = *var->val.integer; break;
@@ -449,10 +445,6 @@ intpro(int interval)
 
 		snmp_free_pdu (response);
 
-		cur_if->name[6] = '\0';
-                cp = (char *) strchr(cur_if->name, ' ');
-                if ( cp != NULL )
-                  *cp = '\0';
 		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;

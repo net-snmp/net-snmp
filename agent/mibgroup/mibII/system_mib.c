@@ -7,6 +7,11 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include "../mibincl.h"
 
 #ifdef HAVE_SYS_TIME_H

@@ -492,7 +492,7 @@ static int open_persist_pipe(int iindex, char *command)
   /* Send test packet always so we can self-catch */
   {
     char buf[STRMAX];
-    /* Should catch SIGPIPE around this call! */	/* XXX */
+    /* Should catch SIGPIPE around this call! */
     if( ! write_persist_pipe( iindex, "PING\n" ) ) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error writing PING\n"));
       close_persist_pipe(iindex);

@@ -5,6 +5,11 @@
 
 #include <config.h>
 #include <sys/types.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

@@ -10,6 +10,11 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <ctype.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "mibincl.h"
 #include "snmpTargetParamsEntry.h"

@@ -490,9 +490,6 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     return MATCH_FAILED;
   }
 
-/*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
-         vp->namelen,*length,name[*length-1]); */	/* XXX */
-
   memset(newname, 0, sizeof(newname));
 
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
