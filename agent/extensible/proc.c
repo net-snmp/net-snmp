@@ -55,9 +55,10 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
         return ((u_char *) (& long_ret));
       case ERRORFLAG:
         long_ret = sh_count_procs(proc->name);
-        if ((proc->min && long_ret < proc->min) || 
+        if (long_ret >= 0 &&
+            ((proc->min && long_ret < proc->min) || 
             (proc->max && long_ret > proc->max) ||
-            (proc->min == 0 && proc->max == 0 && long_ret < 1)) {
+            (proc->min == 0 && proc->max == 0 && long_ret < 1))) {
           long_ret = 1;
         }
         else {
@@ -66,7 +67,9 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
         return ((u_char *) (& long_ret));
       case ERRORMSG:
         long_ret = sh_count_procs(proc->name);
-        if (proc->min && long_ret < proc->min) {
+        if (long_ret < 0) {
+          errmsg[0] = NULL;   /* catch out of mem errors return 0 count */
+        } else if (proc->min && long_ret < proc->min) {
           sprintf(errmsg,"Too few %s running (# = %d)",
                   proc->name, long_ret);
         }

@@ -557,6 +557,71 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 
 #endif
 
+#ifdef ERRORMIBNUM
+
+static time_t errorstatustime=0;
+static char errorstring[STRMAX];
+
+seterrorstatus(to)
+  char *to;
+{
+  errorstatustime = time(NULL);
+  strcpy(errorstring,to);
+}
+  
+unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0;
+  register int interface;
+  struct myproc *proc;
+  long long_ret;
+  char errmsg[300];
+
+
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+    return(NULL);
+
+  errmsg[0] = NULL;
+  
+  switch (vp->magic) {
+    case MIBINDEX:
+      long_ret = newname[*length - 1];
+      return((u_char *) (&long_ret));
+    case ERRORNAME:
+      strcpy(errmsg,"snmp");
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg);
+    case ERRORFLAG:
+      long_ret = (ERRORTIMELENGTH >= time(NULL)-errorstatustime) ? 1 : 0;
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      if ((ERRORTIMELENGTH >= time(NULL)-errorstatustime) ? 1 : 0) 
+        strcpy(errmsg,errorstring);
+      else
+        errmsg[0] = NULL;
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg);
+  }
+  return NULL;
+}
+
+#endif
+
+
 int update_config()
 {
   int i;

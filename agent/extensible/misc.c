@@ -63,10 +63,12 @@ int sh_count_procs(procname)
   char line[STRMAX], *cptr;
   int ret=0, fd;
   FILE *file;
+#ifndef EXCACHETIME
 #ifdef hpux
   int status;
 #else
   union wait status;
+#endif
 #endif
   struct extensible ex;
   
@@ -79,6 +81,12 @@ int sh_count_procs(procname)
       copy_word(cptr,line);
       if (!strcmp(line,procname)) ret++;
     }
+#ifdef ERRORMIBNUM
+  if (ftell(file) < 2) {
+    seterrorstatus("process list unreasonable short (mem?)");
+    ret = -1;
+  }
+#endif
   fclose(file);
   close(fd);
 #ifndef EXCACHETIME
