@@ -6,6 +6,8 @@
 
 static char *VersionInfo="Ext2-4";
 
+int clear_cache();
+
 unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -58,6 +60,10 @@ unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
       sprintf(errmsg,"$Id$");
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
+    case VERCLEARCACHE:
+      *write_method = clear_cache;
+      long_ret = 0;
+      return((u_char *) long_ret);
   }      
   return NULL;
 }
