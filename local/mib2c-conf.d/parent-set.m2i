@@ -175,10 +175,10 @@ $example_start
          * return MFD_NOT_NOW.
          */
         if(0) {
-            return MFD_NOT_EVER;
+            return MFD_CANNOT_CREATE_EVER;
         }
         else {
-            return MFD_NOT_NOW;
+            return MFD_CANNOT_CREATE_NOW;
         }
     }
 $example_end
@@ -262,6 +262,15 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
  * At this point, you should have done everything you can to ensure that
  * this commit will not fail.
  *
+ * Should you need different behavior depending on which columns were
+ * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set. The definitions for the FLAG_* bits can be found in
+@if $m2c_create_fewer_files != 1@
+ * ${context}_oids.h.
+@else@
+ * ${context}.h.
+@end@
+ *
  * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
  *
@@ -290,6 +299,15 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 
 /**
  * undo commit new values.
+ *
+ * Should you need different behavior depending on which columns were
+ * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set. The definitions for the FLAG_* bits can be found in
+@if $m2c_create_fewer_files != 1@
+ * ${context}_oids.h.
+@else@
+ * ${context}.h.
+@end@
  *
  * @param ${context}_rowreq_ctx
  *        Pointer to the users context.

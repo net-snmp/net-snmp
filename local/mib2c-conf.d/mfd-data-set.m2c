@@ -123,6 +123,8 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 @        if $m2c_node_skip_mapping != 1@
 @            include generic-value-map-func.m2i@
 @        end@
+
+@        if $m2c_table_row_creation == 1@
 /**
  * check validity of ${node} external index portion
  *
@@ -148,8 +150,10 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
       return MFD_SUCCESS;
 }
 
+@        end@ # m2c_table_row_creation
 @    end@ # foreach externalindex
 ########################################################################
+@  if $m2c_table_row_creation == 1@
 @    foreach $node internalindex@
 @        include m2c_setup_node.m2i@
 @        if $m2c_report_progress == 1@
@@ -182,6 +186,7 @@ ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
 }
 
 @    end@ # foreach internalindex
+@  end@ # m2c_table_row_creation
 ########################################################################
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
