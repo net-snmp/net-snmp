@@ -202,11 +202,6 @@ setup_users(int majorid, int minorid, void *serverarg, void *clientarg) {
     if (userListPtr == NULL) /* user already existed */
       usm_free_user(user);
 
-    /* get current time (ie, the time the agent started) */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
-
     return SNMPERR_SUCCESS;
 }
 
@@ -217,6 +212,11 @@ init_agent (void)
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                          SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                          setup_users, NULL);
+
+  /* get current time (ie, the time the agent started) */
+  gettimeofday(&starttime, NULL);
+  starttime.tv_sec--;
+  starttime.tv_usec += 1000000L;
 
   usm_set_reportErrorOnUnknownID(1);
 
