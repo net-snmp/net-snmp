@@ -600,7 +600,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
 	seqBegin = wholeMsg;
 
-	wholeMsg = asn_rbuild_string(wholeMsg, parms->wholeMsgLen,
+	wholeMsg = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
+                                     parms->wholeMsgOffset, 1,
 				     (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					       ASN_OCTET_STR),
 				     encrypted_data, encrypted_length);
@@ -638,7 +639,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
     seqBegin = wholeMsg;
 
-    wholeMsg = asn_rbuild_int(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
+                              parms->wholeMsgOffset, 1,
 			       (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					    ASN_INTEGER),
 			       (long *) &zero, sizeof(zero));
@@ -649,7 +651,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	goto error;
     }
 
-    wholeMsg = asn_rbuild_string(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
+                                 parms->wholeMsgOffset, 1,
 				  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					    ASN_OCTET_STR),
 				  (u_char *) outdata.data, outdata.length);
@@ -717,7 +720,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 
     cksum_pointer = wholeMsg + 1; 
 
-    wholeMsg = asn_rbuild_header(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
+                                 parms->wholeMsgOffset, 1,
 				  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					    ASN_OCTET_STR), pdu_checksum.length);
 
@@ -727,7 +731,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	goto error;
     }
 
-    wholeMsg = asn_rbuild_int(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
+                              parms->wholeMsgOffset, 1,
 			       (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					 ASN_OCTET_STR), (long *) &cksumtype,
 					 sizeof(cksumtype));
@@ -738,7 +743,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	goto error;
     }
 
-    wholeMsg = asn_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+                                   parms->wholeMsgOffset, 1,
 				   (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				   seqBegin - wholeMsg);
 
@@ -748,7 +754,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
 	goto error;
     }
 
-    wholeMsg = asn_rbuild_header(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
+                                 parms->wholeMsgOffset, 1,
 				 (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
 					   ASN_OCTET_STR), seqBegin - wholeMsg);
 
@@ -775,7 +782,8 @@ ksm_rgenerate_out_msg (struct snmp_secmod_outgoing_params *parms)
     *parms->wholeMsgLen -= parms->globalDataLen;
     memcpy(wholeMsg + 1, parms->globalData, parms->globalDataLen);
 
-    wholeMsg = asn_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+    wholeMsg = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+                                   parms->wholeMsgOffset, 1,
 				   (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
 				   endp - wholeMsg);
 
