@@ -26,30 +26,5 @@ config_add_mib(SNMP-FRAMEWORK-MIB)
 extern void   init_snmpEngine (void);
 extern FindVarMethod var_snmpEngine;
 
-
-/* Only load this structure when this .h file is called in the snmp_vars.c 
-   file in tha agent subdirectory of the source tree */
-
-#ifdef IN_SNMP_VARS_C
-
-/* this variable defines function callbacks and type return information 
-   for the snmpEngine mib */
-
-struct variable2 snmpEngine_variables[] = {
-  { SNMPENGINEID        , ASN_OCTET_STR  , RONLY , var_snmpEngine, 1, { 1 } },
-#ifdef SNMP_TESTING_CODE 
-  { SNMPENGINEBOOTS     , ASN_INTEGER    , RWRITE, var_snmpEngine, 1, { 2 } },
-  { SNMPENGINETIME      , ASN_INTEGER    , RWRITE, var_snmpEngine, 1, { 3 } },
-#else /* !SNMP_TESTING_CODE */ 
-  { SNMPENGINEBOOTS     , ASN_INTEGER    , RONLY , var_snmpEngine, 1, { 2 } },
-  { SNMPENGINETIME      , ASN_INTEGER    , RONLY , var_snmpEngine, 1, { 3 } },
-#endif /* SNMP_TESTING_CODE */
-  { SNMPENGINEMAXMESSAGESIZE, ASN_INTEGER, RONLY , var_snmpEngine, 1, { 4 } },
-};
-
-/* now load this mib into the agents mib table */
-config_load_mib(1.3.6.1.6.3.10.2.1, 9, snmpEngine_variables)
-
-#endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_SNMPENGINE_H */
 
