@@ -288,7 +288,7 @@ extern "C" {
      * *only* the first container, call the function f for each item.
      * After calling this function, all containers should be empty.
      */
-    int CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_func *f,
+    void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
                         void *c);
     /*
      * free all containers
