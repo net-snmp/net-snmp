@@ -44,6 +44,10 @@ shift
 
 :nodebug
 
+REM make sure script runs from above the win32 directory
+cd win32 > NUL: 2>&1
+cd .. > NUL: 2>&1
+
 echo Installing %progVer% versions
 
 echo Remember to run this script from the base of the source directory.
