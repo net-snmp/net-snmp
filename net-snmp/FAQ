@@ -138,7 +138,7 @@ WWW:
   Download:
     - http://download.sourceforge.net/net-snmp/
   Web page:
-    - http://net-snmp.sourceforge.net/
+    - http://www.netsnmp.org/
   Project page:
     - http://sourceforge.net/projects/net-snmp/
 
@@ -161,12 +161,12 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://net-snmp.sourceforge.net/tutorial/
+	A Tutorial at http://www.netsnmp.org/tutorial/
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
 
-        	http://net-snmp.sourceforge.net/
+        	http://www.netsnmp.org/
 
 
 
@@ -780,7 +780,7 @@ How do I send traps and notifications?
   CODING sections.
 
   You should also read the snmptrap tutorial at
-  http://net-snmp.sourceforge.net/tutorial/commands/snmptrap.html
+  http://www.netsnmp.org/tutorial/commands/snmptrap.html
   which will help you understand everything you need to know about traps.
 
 
@@ -811,7 +811,7 @@ How do I handle traps and notifications?
   of mapping SNMPv1 traps to SNMPv2 OIDs.
 
     There's a tutorial with more details on the web site
-    (http://net-snmp.sourceforge.net/tutorial/commands/snmptrap.html).
+    (http://www.netsnmp.org/tutorial/commands/snmptrap.html).
   
 
 
@@ -1204,7 +1204,7 @@ How can I get more information about these MIB file problems?
   See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details.
 
   (see the
-  http://net-snmp.sourceforge.net/tutorial/commands/snmptranslate.html
+  http://www.netsnmp.org/tutorial/commands/snmptranslate.html
   web page as well)
 
 What's this about "too many imported symbols"?
