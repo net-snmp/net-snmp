@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <stdio.h>
 #include <sys/types.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>
@@ -32,6 +33,7 @@
 #include "scapi.h"
 #include "keytools.h"
 #include "tools.h"
+#include "snmp_debug.h"
 
 #include "transform_oids.h"
 
