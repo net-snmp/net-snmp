@@ -266,6 +266,8 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   int percent, iserror, disknum=0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
   double totalblks, free, used, avail, availblks;
+#else
+  static long avail;
 #endif
   static long long_ret;
   static char errmsg[300];
@@ -330,10 +332,17 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   vfs.f_bfree  = vfs.f_spare[1];
   vfs.f_bavail = vfs.f_spare[2];
 #endif
-  percent = vfs.f_bavail <= 0 ? 100 : (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
-	    (double) (vfs.f_blocks - (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
-  iserror = (disks[disknum].minimumspace >= 0 ? vfs.f_bavail < disks[disknum].minimumspace :
-	    100-percent <= disks[disknum].minpercent) ? 1 : 0;
+  percent = vfs.f_bavail <= 0 ? 100 :
+    (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
+           (double) (vfs.f_blocks - (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
+  avail = vfs.f_bavail;
+#ifdef STRUCT_STATVFS_HAS_F_FRSIZE
+  if (vfs.f_frsize > 255)
+    avail = avail * (vfs.f_frsize / 1024);
+#endif
+  iserror = (disks[disknum].minimumspace >= 0 ?
+             avail < disks[disknum].minimumspace :
+             100-percent <= disks[disknum].minpercent) ? 1 : 0;
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = vfs.f_blocks;
@@ -343,12 +352,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 #endif
       return((u_char *) (&long_ret));
     case DISKAVAIL:
-      long_ret = vfs.f_bavail;
-#ifdef STRUCT_STATVFS_HAS_F_FRSIZE
-      if (vfs.f_frsize > 255)
-        long_ret = long_ret * (vfs.f_frsize / 1024);
-#endif
-      return((u_char *) (&long_ret));
+      return((u_char *) (&avail));
     case DISKUSED:
       long_ret = (vfs.f_blocks - vfs.f_bfree);
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
@@ -366,7 +370,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       if (iserror)
 	if (disks[disknum].minimumspace >= 0)
 	  sprintf(errmsg,"%s: less than %d free (= %d)",disks[disknum].path,
-                  disks[disknum].minimumspace, (int) vfs.f_bavail);
+                  disks[disknum].minimumspace, (int) avail);
 	else
 	  sprintf(errmsg,"%s: less than %d%% free (= %d%%)",disks[disknum].path,
 		  disks[disknum].minpercent, percent);
