@@ -42,6 +42,11 @@ extern          "C" {
         */
         void             *magic;
 
+       /*
+        * hint from the cache helper
+        */
+       void              *cache_hint;
+
         /*
 	 * For SNMP-management of the data caches
 	 */
@@ -96,6 +101,9 @@ extern          "C" {
 #define NETSNMP_CACHE_DONT_AUTO_RELEASE                     0x0008
 #define NETSNMP_CACHE_PRELOAD                               0x0010
 #define NETSNMP_CACHE_AUTO_RELOAD                           0x0020
+
+#define NETSNMP_CACHE_HINT_HANDLER_ARGS                     0x1000
+
 
 #ifdef __cplusplus
 };
