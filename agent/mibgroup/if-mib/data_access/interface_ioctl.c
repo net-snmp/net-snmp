@@ -361,7 +361,6 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 }
 #endif /* SIOCGIFMTU */
 
-#ifdef SIOCGIFINDEX
 /**
  * interface entry ifIndex ioctl wrapper
  *
@@ -372,17 +371,20 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
  * @retval !0 : ifIndex
  */
 oid
-netsnmp_access_interface_ioctl_ifindex_get(const char *name)
+netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
 {
+#ifndef SIOCGIFINDEX
+    return 0;
+#else
     struct ifreq    ifrq;
     int rc = 0;
 
     DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
 
-    rc = _ioctl_get(-1, SIOCGIFINDEX, &ifrq, name);
+    rc = _ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0)
         return 0;
 
     return ifrq.ifr_ifindex;
+#endif /* SIOCGIFINDEX */
 }
-#endif /* SIOCGIFMTU */
