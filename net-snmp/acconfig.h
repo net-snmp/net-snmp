@@ -445,6 +445,11 @@
 #endif
 #endif
 
+/* fake strtoul if we didn't find it. */
+#ifndef HAVE_STRTOUL
+#define strtoul(x,y,z) atoi(x)
+#endif /* HAVE_STRTOUL */
+
 /* define signal if DNE */
 
 #ifndef HAVE_SIGNAL
