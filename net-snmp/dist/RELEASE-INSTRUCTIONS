@@ -280,6 +280,9 @@ RELEASING:
      problems and another release is coming shortly, don't announce
      to the mailing list and announce the next one instead.  In the
      announcement include the NEWS snippet since the last release.
+
+  12) bug Wes to update the freshmeat entries and the open source
+      developers web page entries. 
       
 
 ***************************************************************************
