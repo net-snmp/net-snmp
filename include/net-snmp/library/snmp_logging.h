@@ -93,7 +93,7 @@ extern          "C" {
         int	priority;
         int	pri_max;
         int	type;
-	char   *token;		/* Also used for filename */
+	const char *token;		/* Also used for filename */
 
 	NetsnmpLogHandler	*handler;
 
@@ -104,11 +104,11 @@ extern          "C" {
     };
 
 netsnmp_log_handler *netsnmp_register_loghandler( int type, int pri );
-netsnmp_log_handler *netsnmp_find_loghandler( char *token );
+netsnmp_log_handler *netsnmp_find_loghandler( const char *token );
 int netsnmp_add_loghandler(    netsnmp_log_handler *logh );
 int netsnmp_remove_loghandler( netsnmp_log_handler *logh );
-int netsnmp_enable_loghandler( char *token );
-int netsnmp_disable_loghandler(char *token );
+int netsnmp_enable_loghandler( const char *token );
+int netsnmp_disable_loghandler( const char *token );
 #ifdef __cplusplus
 }
 #endif
