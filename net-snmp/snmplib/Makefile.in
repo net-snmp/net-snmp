@@ -24,7 +24,7 @@ INSTALLHEADERS=\
 	definitions.h
 
 INCLUDESUBDIR=library
-INCLUDESUBDIRHEADERS=\
+INCLUDESUBDIRHEADERS=README \
 	asn1.h \
 	callback.h \
 	data_list.h \
