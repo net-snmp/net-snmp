@@ -8,6 +8,8 @@
 use Test;
 BEGIN { plan tests => 36 ; $ENV{'SNMPCONFPATH'} = 'nopath'};
 use NetSNMP::OID;
+use Data::Dumper;
+
 ok(1); # If we made it this far, we're ok.
 
 #########################
@@ -102,3 +104,12 @@ ok(ref($oid) ne "NetSNMP::OID");
 
 ok($oidstr->length() == 15);
 
+my $newtest = new NetSNMP::OID ("nsModuleName.5.109.121.99.116.120.2.1.3.14");
+
+my $arrayback = $newtest->get_indexes();
+
+ok($#$arrayback == 2 &&
+    $arrayback->[0] eq 'myctx' &&
+    $arrayback->[1] eq '.1.3' &&
+    $arrayback->[2] eq '14'
+  );
