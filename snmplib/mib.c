@@ -2020,7 +2020,7 @@ snprint_objid(char *buf, size_t buf_len,
 }
 
 void
-print_objid(oid *objid,
+print_objid(const oid *objid,
 	    size_t objidlen)	/* number of subidentifiers */
 {
   fprint_objid(stdout, objid, objidlen);
@@ -2028,7 +2028,7 @@ print_objid(oid *objid,
 
 void
 fprint_objid(FILE *f,
-	     oid *objid,
+	     const oid *objid,
 	     size_t objidlen)	/* number of subidentifiers */
 {
   u_char *buf = NULL;
@@ -2202,7 +2202,7 @@ snprint_value(char *buf, size_t buf_len,
 }
 
 void
-print_value(oid *objid,
+print_value(const oid *objid,
 	    size_t objidlen,
 	    struct variable_list *variable)
 {
@@ -2211,7 +2211,7 @@ print_value(oid *objid,
 
 void
 fprint_value(FILE *f,
-	     oid *objid,
+	     const oid *objid,
 	     size_t objidlen,
 	     struct variable_list *variable)
 {
@@ -2955,7 +2955,7 @@ finish_it:
  * Clone of get_symbol that doesn't take a buffer argument
  */
 struct tree *
-get_tree(oid *objid,
+get_tree(const oid *objid,
 	 size_t objidlen,
 	 struct tree *subtree)
 {
