@@ -78,6 +78,7 @@ SOFTWARE.
 #include "system.h"
 #include "tools.h"
 #include "snmp_parse_args.h"
+#include "default_store.h"
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 size_t	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
@@ -185,11 +186,13 @@ retry:
         }
 
         /* retry if the errored variable was successfully removed */
-        pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
-        snmp_free_pdu(response);
-	response = NULL;
-        if (pdu != NULL)
-          goto retry;
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_FIX_PDUS)) {
+            pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
+            snmp_free_pdu(response);
+            response = NULL;
+            if (pdu != NULL)
+                goto retry;
+        }
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr,"Timeout: No Response from %s\n", session.peername);
