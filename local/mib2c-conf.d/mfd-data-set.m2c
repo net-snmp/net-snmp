@@ -73,7 +73,7 @@ int ${context}_check_dependencies(${context}_ctx *ctx);
 ########################################################################
 ##
 ########################################################################
-##@    if $m2c_data_allocate eq "yes" && $m2c_data_context ne "generated"@
+##@    if "$m2c_data_allocate" eq "yes" && "$m2c_data_context" ne "generated"@
 @        include parent-set.m2i@
 ##@    end@
 ########################################################################
@@ -103,8 +103,8 @@ ${table}_${node}_check_index( ${context}_ctx *ctx )
 @end@
 
     /*
-     * TODO: check that index value is legal
-     *
+     * TODO:
+     * check that index value is legal
      */
 
     /* if everything looks ok, return MFD_SUCCESS */
@@ -137,8 +137,8 @@ ${node}_check_index( ${context}_ctx *ctx )
 @end@
 
     /*
-     * TODO: check that index value is legal
-     *
+     * TODO:
+     * check that index value is legal
      */
 
     /* if everything looks ok, return MFD_SUCCESS */
