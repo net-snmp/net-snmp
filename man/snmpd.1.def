@@ -59,9 +59,9 @@ option.
 checks for the existance of and parses the following files:
 .RS
 .TP 6
-.B PREFIX/lib/snmp/snmpd.conf
+.B LIBDIR/snmp/snmpd.conf
 .TP
-.B PREFIX/lib/snmp/snmpd.local.conf
+.B LIBDIR/snmp/snmpd.local.conf
 Configures the agent.  See snmpd.conf(5) for details.  These files are
 optional and are only used to configure the extensible portions of the
 agent, the values of the community strings, and the optional trap
@@ -70,28 +70,28 @@ default) is allowed read-only access and the second ("private" by
 default) is allowed write access as well.  The 3-5th community strings
 are read-only as well.
 .IP
-In addition to these two configuration files in PREFIX/lib/snmp, the
+In addition to these two configuration files in LIBDIR/snmp, the
 agent will read any files with the names snmpd.conf and
 snmpd.local.conf in a colon sepereated path specified in the
 SNMPCONFPATH environmental variable.
 .TP
-.B PREFIX/lib/snmp/mib.txt
+.B LIBDIR/snmp/mib.txt
 Defines the mib it should use.
 The location of this
 .B mib.txt 
 file may by overridden at run time be setting the enviornmental variable
 .B MIBFILE.
 .TP 
-.B PREFIX/lib/snmp/mibs/
+.B LIBDIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or decend into
 subdirectories.
 .B 
 .TP
-.B PREFIX/lib/snmp/party.conf
+.B LIBDIR/snmp/party.conf
 Defines the classic SNMP V2 parties.
 .TP
-.B PREFIX/lib/snmp/view.conf
+.B LIBDIR/snmp/view.conf
 Defines which parties defined in the 
 .B party.conf
 have access to the
@@ -99,29 +99,29 @@ mibs in the
 .B mib.txt
 file.
 .TP
-.B PREFIX/lib/snmp/context.conf
+.B LIBDIR/snmp/context.conf
 Maps names to numerical view contexts.
 .TP
-.B PREFIX/lib/snmp/acl.conf
+.B LIBDIR/snmp/acl.conf
 Defines the classic SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
 See the associated manual pages for information on the content of
 these files.
 .SH FILES
-PREFIX/lib/snmpd.conf
+LIBDIR/snmpd.conf
 .br
-PREFIX/lib/snmpd.local.conf
+LIBDIR/snmpd.local.conf
 .br
-PREFIX/lib/snmp/snmpd.conf
+LIBDIR/snmp/snmpd.conf
 .br
-PREFIX/lib/snmp/party.conf
+LIBDIR/snmp/party.conf
 .br
-PREFIX/lib/snmp/view.conf
+LIBDIR/snmp/view.conf
 .br
-PREFIX/lib/snmp/context.conf
+LIBDIR/snmp/context.conf
 .br
-PREFIX/lib/snmp/acl.conf
+LIBDIR/snmp/acl.conf
 .SH SEE ALSO
 (in recomended reading order)
 .PP

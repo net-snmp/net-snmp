@@ -13,7 +13,7 @@ AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file locati
 AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce.
                                     (Default: SNMPV1).],ac_cv_user_prompt_GLOBALSECURITY="$with_security")
 AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
-                                    (Default: PREFIX/lib/snmp/mibs)],[DEFAULT_MIBDIRS="$with_mibdirs"
+                                    (Default: LIBDIR/snmp/mibs)],[DEFAULT_MIBDIRS="$with_mibdirs"
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")
 ])
 AC_ARG_WITH(mibs,[  --with-mibs=\"item1:item2:\"      Default mib IDs to load.
@@ -99,13 +99,11 @@ AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
 dnl Set SNMPLIBPATH and SNMPPATH
+SNMPLIBPATH="$libdir/snmp"
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$libdir/snmp")
 if test "x$prefix" = "xNONE"; then
-SNMPLIBPATH="$ac_default_prefix/lib/snmp"
-AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
 AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
 else
-SNMPLIBPATH="$prefix/lib/snmp"
-AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
 AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
 fi
 
