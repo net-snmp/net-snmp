@@ -136,10 +136,10 @@ read_context_database(char *filename)
 		    return -1;
 		}
 	    view = atoi(buf1);
-	    if (!strcasecmp(entity, "Null"))
+	    if (!strcasecmp((char*)entity, "Null"))
 		entityLen = 0;
 	    else
-		entityLen = strlen(entity);
+		entityLen = strlen((char*)entity);
 	    if (!strcasecmp(buf3, "currentTime"))
 		time = CURRENTTIME;
 	    else if (!strcasecmp(buf3, "restartTime"))

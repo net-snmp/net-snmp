@@ -728,12 +728,11 @@ sprint_null(char *buf,
 }
 
 static void
-sprint_bitstring(buf, var, enums, hint, units)
-    char *buf;
-    struct variable_list *var;
-    struct enum_list	    *enums;
-    char *hint;
-    char *units;
+sprint_bitstring(char *buf,
+		 struct variable_list *var,
+		 struct enum_list *enums,
+		 char *hint,
+		 char *units)
 {
     int len, bit;
     u_char *cp;
@@ -1098,7 +1097,7 @@ init_mib (void)
     if (!prefix)
         prefix = Standard_Prefix;
 
-    Prefix = malloc(strlen(prefix)+2);
+    Prefix = (char*)malloc(strlen(prefix)+2);
     strcpy(Prefix, prefix);
     
     /* remove trailing dot */
@@ -1577,20 +1576,20 @@ print_tree_node(FILE *f,
     char str[32];
     if (tp) {
 	switch (tp->type) {
-	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
-	case TYPE_OCTETSTR:	cp = "OCTET STRING"; break;
-	case TYPE_INTEGER:	cp = "INTEGER"; break;
-	case TYPE_NETADDR:	cp = "NetworkAddress"; break;
-	case TYPE_IPADDR:	cp = "IpAddress"; break;
-	case TYPE_COUNTER:	cp = "Counter"; break;
-	case TYPE_GAUGE:	cp = "Gauge"; break;
-	case TYPE_TIMETICKS:	cp = "TimeTicks"; break;
-	case TYPE_OPAQUE:	cp = "Opaque"; break;
-	case TYPE_NULL:		cp = "NULL"; break;
-	case TYPE_COUNTER64:	cp = "Counter64"; break;
-	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
-	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
-	case TYPE_UINTEGER:	cp = "UInteger32"; break;
+	case TYPE_OBJID:	cp = (char*)"OBJECT IDENTIFIER"; break;
+	case TYPE_OCTETSTR:	cp = (char*)"OCTET STRING"; break;
+	case TYPE_INTEGER:	cp = (char*)"INTEGER"; break;
+	case TYPE_NETADDR:	cp = (char*)"NetworkAddress"; break;
+	case TYPE_IPADDR:	cp = (char*)"IpAddress"; break;
+	case TYPE_COUNTER:	cp = (char*)"Counter"; break;
+	case TYPE_GAUGE:	cp = (char*)"Gauge"; break;
+	case TYPE_TIMETICKS:	cp = (char*)"TimeTicks"; break;
+	case TYPE_OPAQUE:	cp = (char*)"Opaque"; break;
+	case TYPE_NULL:		cp = (char*)"NULL"; break;
+	case TYPE_COUNTER64:	cp = (char*)"Counter64"; break;
+	case TYPE_BITSTRING:	cp = (char*)"BIT STRING"; break;
+	case TYPE_NSAPADDRESS:	cp = (char*)"NsapAddress"; break;
+	case TYPE_UINTEGER:	cp = (char*)"UInteger32"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"type_%d", tp->type); cp = str;
 	}
@@ -1598,22 +1597,22 @@ print_tree_node(FILE *f,
 	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
 	if (tp->units) fprintf(f, "UNITS\t\"%s\"\n", tp->units);
 	switch (tp->access) {
-	case MIB_ACCESS_READONLY:	cp = "read-only"; break;
-	case MIB_ACCESS_READWRITE:	cp = "read-write"; break;
-	case MIB_ACCESS_WRITEONLY:	cp = "write-only"; break;
-	case MIB_ACCESS_NOACCESS:	cp = "not-accessible"; break;
-	case MIB_ACCESS_NOTIFY:	cp = "accessible-for-notify"; break;
-	case MIB_ACCESS_CREATE:	cp = "read-create"; break;
+	case MIB_ACCESS_READONLY:	cp = (char*)"read-only"; break;
+	case MIB_ACCESS_READWRITE:	cp = (char*)"read-write"; break;
+	case MIB_ACCESS_WRITEONLY:	cp = (char*)"write-only"; break;
+	case MIB_ACCESS_NOACCESS:	cp = (char*)"not-accessible"; break;
+	case MIB_ACCESS_NOTIFY:	cp = (char*)"accessible-for-notify"; break;
+	case MIB_ACCESS_CREATE:	cp = (char*)"read-create"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"access_%d", tp->access); cp = str;
 	}
 	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
 	switch (tp->status) {
-	case MIB_STATUS_MANDATORY:	cp = "mandatory"; break;
-	case MIB_STATUS_OPTIONAL:	cp = "optional"; break;
-	case MIB_STATUS_OBSOLETE:	cp = "obsolete"; break;
-	case MIB_STATUS_DEPRECATED:	cp = "deprecated"; break;
-	case MIB_STATUS_CURRENT:	cp = "current"; break;
+	case MIB_STATUS_MANDATORY:	cp = (char*)"mandatory"; break;
+	case MIB_STATUS_OPTIONAL:	cp = (char*)"optional"; break;
+	case MIB_STATUS_OBSOLETE:	cp = (char*)"obsolete"; break;
+	case MIB_STATUS_DEPRECATED:	cp = (char*)"deprecated"; break;
+	case MIB_STATUS_CURRENT:	cp = (char*)"current"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"status_%d", tp->status); cp = str;
 	}
@@ -1728,7 +1727,7 @@ get_node(char *name,
 		 *  requested name is of the form
 		 *	"module:subidentifier"
 		 */
-	module = malloc(cp-name+1);
+	module = (char*)malloc(cp-name+1);
 	memcpy(module,name,cp-name);
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */

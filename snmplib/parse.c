@@ -92,7 +92,7 @@ SOFTWARE.
  * subidentifier, or a textual string label, or both.
  * The subid is -1 if not present, and label is NULL if not present.
  */
-struct subid {
+struct subid_s {
     int subid;
     int modid;
     char *label;
@@ -330,10 +330,10 @@ static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
 static int current_module = 0;
 static int     max_module = 0;
 
-static print_subtree_oid_report_labeledoid = 0;
-static print_subtree_oid_report_oid = 0;
-static print_subtree_oid_report_symbolic = 0;
-static print_subtree_oid_report_suffix = 0;
+static int print_subtree_oid_report_labeledoid = 0;
+static int print_subtree_oid_report_oid = 0;
+static int print_subtree_oid_report_symbolic = 0;
+static int print_subtree_oid_report_suffix = 0;
 
 static void do_subtree (struct tree *, struct node **);
 static void do_linkup (struct module *, struct node *);
@@ -1240,7 +1240,7 @@ static void do_linkup(struct module *mp,
  */
 static int
 getoid(FILE *fp,
-       struct subid *id, /* an array of subids */
+       struct subid_s *id, /* an array of subids */
        int length)  /* the length of the array */
 {
     register int count;
@@ -1319,9 +1319,9 @@ parse_objectid(FILE *fp,
 	       char *name)
 {
     register int count;
-    register struct subid *op, *nop;
+    register struct subid_s *op, *nop;
     int length;
-    struct subid loid[32];
+    struct subid_s loid[32];
     struct node *np, *root = NULL, *oldnp = NULL;
     struct tree *tp;
 

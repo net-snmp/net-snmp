@@ -346,7 +346,7 @@ void read_config_print_usage(char *lead)
   struct config_line *ltmp;
 
   if (lead == NULL)
-    lead = "";
+    lead = (char*)"";
 
   for(ctmp = config_files; ctmp != NULL; ctmp = ctmp->next) {
     fprintf(stderr, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
@@ -470,7 +470,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, int *len) {
   *len = atoi(readfrom);
   
   if (*len > 0 &&
-      (objid == NULL || (*objid = malloc(*len * sizeof(oid))) == NULL))
+      (objid == NULL || (*objid = (oid*)malloc(*len * sizeof(oid))) == NULL))
     return NULL;
 
   readfrom = skip_token(readfrom);
