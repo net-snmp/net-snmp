@@ -553,7 +553,7 @@ int header_simple_table(struct variable *vp, oid *name, size_t *length,
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
     *length = vp->namelen+1;
-  } else if (*length > vp->namelen+1) {  /* exact case checked earlier */
+  } else if (((int)*length) > (int)vp->namelen+1) {  /* exact case checked earlier */
     *length = vp->namelen+1;
     memmove(newname, name, (*length) * sizeof(oid));
     newname[*length-1] = name[*length-1] + 1;
