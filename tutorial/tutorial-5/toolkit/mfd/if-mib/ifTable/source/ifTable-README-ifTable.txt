@@ -120,7 +120,7 @@ ifTable README
     Syntax: @eval 0 = 1@
 
 
-    m2c_table_access (currently 'unsorted-external')
+    m2c_table_access (currently 'container-cached')
     ------------------------------------------------------------------
     This variable determines which data interface will be use to generate
     code for looking up data for a given index. The default is the
@@ -187,227 +187,12 @@ File: ifTable_data_access.[c|h]
   FUNC : ifTable_indexes_set
 
   
-  unsorted-external summary
-  -------------------------
-    The unsorted-external data access code is for cases when you data is
-    kept UNSORTED and EXTERNAL to the agent/sub-agent.
+  container-cached summary
+  ------------------------
+    The container-cached data access code is for cases when you want to
+    cache your data in the agent/sub-agent.
 
-    This code was generated based on the following assumptions or settings:
-
-    1) The raw data for this table is UNSORTED.
-
-       UNSORTED data is data that is not kept in the same order as the way
-       SNMP expects the index(es) for the table to be kept. [It could very
-       well be sorted in some other order, but for the purpose of SNMP, the
-       order is incorrect.]  If you're not sure if your data is sorted
-       in an SNMP compliant way, its likely not.
-
-       Because the raw data is unsorted, to satisfy a particular request, the
-       entire data set must be examined to find the apropriate index. This
-       is done via a simple loop. The MFD handler will call your get_first
-       function and the call the get_next function repeatedly, until it
-       returns SNMPERR_NO_VARS.
-
-    2) The raw data for this table is EXTERNAL.
-
-       EXTERNAL data is data that is owned by some other process,
-       device, file or mechanism.  The agent must use some interface to
-       read or modify the data.  An external process may modify the data
-       without the agent's knowledge. For example, the Net-SNMP agent
-       implements the interface table (ifTable), which reports on
-       network interfaces. The host operating system owns this data, and
-       Net-SNMP must use system calls to report or manipulate the data.
-       Examples of external data include data stored in kernel space, in
-       files, in another non-memory shared process, and data stored in
-       devices.
-
-    3) The raw data for this table is TRANSIENT.
-
-       TRANSIENT data is data that may be overwritten by another funtion
-       or process. For example, many OS functions return data in a
-       static buffer that will be reused the next time the function is
-       called.  Because of this, we will assume that you will copy the
-       raw data retrieved from these other sources to a generated
-       structure for use within the Net-SNMP agent.  (Don't worry, we'll
-       help you)
-
-
-  The unsorted external data access code works by calling a few simple
-  functions to get the index value for each row. Once the agent determines
-  which row is needed to process an incoming request, another function
-  is called to retrieve the data for that row.
-
-  A simplified version of the pseudo-code looks like this:
-
-     ifTable_loop_init_context(loop)
-     ifTable_loop_get_first(loop,data)
-     while( no_error ) {
-        if( best_match(data, key)
-           ifTable_loop_save_position(loop,pos);
-        ifTable_loop_get_next(loop,data)
-     }
-     ifTable_loop_get_data(pos,data)
-     ifTable_loop_cleanup_context(loop)
-
-  We will talk about each individual step below.
-
-
-  Defining context for the loop
-  -----------------------------
-    TODO : typedef ifTable_loop_context
-    WHERE: ifTable_data_access.h
-
-    Since the actual loop is in the MFD handler, a loop contex parameter
-    is provided to help you keep track of where you are in between calls
-    to functions that you wrote and the master MFD handler calls. The
-    structure of this context is user defineable, and is defined in the
-    file ifTable_data_access.h.
-
-    E.G., if your data is stored in a linked list, the obvious thing you
-    want to know from one function call to the next is your current
-    position in the linked list.  Thus the easiest context to use is a
-    pointer within the linked list.  For an array, the current index to
-    that array would be easiest.
-
-    The funtion calls are actually passed a reference to the loop
-    context, to allow the loop context to be allocated memory. Here are
-    some simple examples definitions for various data formats. These
-    definitions are used in examples later on.
-
-      Linked list
-      -----------
-          typedef list_node ifTable_loop_context;
-
-      Array
-      -----
-          typedef integer ifTable_loop_context;
-
-      File
-      ----
-          typedef struct ifTable_loop_context_s {
-               char *      file_name;
-               FILE *      f;
-               char        line[128];
-          } ifTable_loop_context;
-
-
-  Initialization
-  --------------
-    TODO : Initialization
-    FUNC : ifTable_loop_init_data
-    WHERE: ifTable_data_access.c
-
-    The ifTable_loop_init_data function will be called during startup to
-    allow for any initialization needed for the data access routines.
-
-
-  Preparing for the loop
-  ----------------------
-    TODO : initialize loop context
-    FUNC : ifTable_loop_init_context
-    WHERE: ifTable_data_access.c
-
-    This function will be called before the start of a new itertion over
-    the data. The loop context that is initialized here will be passed to
-    ifTable_loop_get_first and ifTable_loop_get_next.
-  
-    Set the loop context variable ref->loop_ctx so that the iteration
-    functions (get_first and get_next) can locate the apropriate data
-    context.
-
-    The primary purpose of the loop_init_context call  is to initialize
-    the loop context data (ref). Here are some simple examples, based on the
-    earlier example loop contexts.
-
-      Linked list
-      -----------
-          ref->loop_ctx = my_table_head_ptr;
-
-      Array
-      -----
-          /* instead of actually allocating memory, just use the pointer */
-          /* as an integer */
-          (integer)(ref->loop_ctx) = 0;
-
-      File
-      ----
-          ref->loop_ctx = SNMP_MALLOC_TYPEDEF(ifTable_loop_context);
-          /* error checking here */
-          ref->loop_ctx->file_name = (char*) reg->mfd_user_ctx;
-          ref->loop_ctx->f = fopen( ref->loop_ctx->file_name, "r+" );
-
-
-  The Loop
-  --------
-    TODO : return raw data
-    FUNC : ifTable_loop_get_first
-    WHERE: ifTable_data_access.c
-
-    This function is called to return set the index(es) for the first
-    ifTable_data in the data set.
-
-    Note that during the loop, the only important thing is the indexes.
-    If access to your data is cheap/fast (e.g. you have a pointer to a
-    structure in memory), it would make sense to update the data here.
-    If, however, the accessing the data invovles more work (e.g. parsing
-    some other existing data, or peforming calculations to derive the data),
-    then you should limit yourslef to setting the indexes. Extracting the
-    can be put off until the desired row is found See the notes on
-    ifTable_loop_get_data().
-
-    Note that this function does not correspond to a SNMP GET pdu, and
-    you should return data items in whatever order they are already in.
-    (In fact, if your data is already ordered in the same order as the
-    SNMP indexes, you shouldn't be using the unsorted-access code).
-  
-    This function should update the table index (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
-    values for the raw data (rowreq_ctx_ref->rowreq_ctx->data).
-
-      Linked list
-      -----------
-          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx;
-
-      Array
-      -----
-          /* assuming registration has array of pointers */
-          rowreq_ctx_ref->rowreq_ctx->data = reg->mfd_user_ctx[(integer)(ref->loop_ctx)];
-
-      File
-      ----
-          fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
-                loop_ctx_ref->loop_ctx->f);
-          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx->line;
-
-
-    TODO : return raw data
-    FUNC : ifTable_loop_get_next
-    WHERE: ifTable_data_access.c
-
-    This function returns the next data item in the data set. The same
-    caveat applies here as did above. The indexes are the important parts
-    during loop processing.
-
-    Note that this function does not correspond to a SNMP GET-NEXT pdu, and
-    you should return data items in whatever order they are already in.
-    (In fact, if your data is already ordered in the same order as the
-    SNMP indexes, you shouldn't be using the unsorted-access code).
-
-      Linked list
-      -----------
-          loop_ctx_ref->loop_ctx = loop_ctx_ref->loop_ctx->next;
-          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx;
-
-      Array
-      -----
-          ++((integer)(ref->loop_ctx));
-          /* assuming registration has array of pointers */
-          rowreq_ctx_ref->rowreq_ctx->data = reg->mfd_user_ctx[(integer)(ref->loop_ctx)];
-
-      File
-      ----
-          fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
-                loop_ctx_ref->loop_ctx->f);
-          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx->line;
+    ... to be continued...
 
 
   Updating the Index
@@ -421,63 +206,6 @@ File: ifTable_data_access.[c|h]
 
     This function should update the table index values (found in
     tbl_idx) for the given raw data.
-
-
-  Saving a position in the loop
-  -----------------------------
-    TODO : Saving a position in the loop
-    FUNC : ifTable_loop_save_position
-    WHERE: ifTable_data_access.c
-
-    During loop iteration, the iterator keeps track of the row that
-    is the current best match. This function is called when the
-    current row is a better match than any previous row.
-  
-    You should save any information you need to be able to locate this row
-    again from the current loop context to a new loop context.
-  
-    At the end of the loop, when the best match has been found, the saved
-    loop context will be used to get the data for the row by calling
-    ifTable_loop_get_data().
-  
-    Since your data is transient, you need to make a copy of it before
-    the iterator moves on to the next row.
-
-
-  Returning Data For an Index
-  ---------------------------
-    TODO : copy transient raw data to generated structure
-    FUNC : ifTable_loop_get_data
-    WHERE: ifTable_data_access.c
-
-    At the end of the loop, when the best match has been found, the saved
-    loop context will be used to get the data for the row by calling
-    ifTable_loop_get_data().
-
-
-  Cleaning up after the loop
-  --------------------------
-    TODO : release any allocated memory
-    FUNC : ifTable_loop_cleanup_context
-    WHERE: ifTable_data_access.c
-
-    This function will be called once the loop iteration has completed
-    to release any memory allocated for loop reference.
-    The purpose of the loop_cleanup_context call is to release any memory
-    allocated for the loop context data. Here are some simple examples, based
-    on the earlier example loop contexts.
-
-      Linked list
-      -----------
-          /* nothing to do */
-
-      Array
-      -----
-          /* nothing to do */
-
-      File
-      ----
-          free(ref->loop_ctx);
 
 
 
@@ -743,6 +471,13 @@ ifTable Reference
  * ifIndex is subid 1 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.1
+ * Description:
+A unique value, greater than zero, for each interface.  It
+            is recommended that values are assigned contiguously
+            starting from 1.  The value for each interface sub-layer
+            must remain constant at least from one re-initialization of
+            the entity's network management system to the next re-
+            initialization.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -760,6 +495,11 @@ ifTable Reference
  * ifDescr is subid 2 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.2
+ * Description:
+A textual string containing information about the
+            interface.  This string should include the name of the
+            manufacturer, the product name and the version of the
+            interface hardware/software.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -778,13 +518,18 @@ ifTable Reference
  * ifType is subid 3 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.3
+ * Description:
+The type of interface.  Additional values for ifType are
+            assigned by the Internet Assigned Numbers Authority (IANA),
+            through updating the syntax of the IANAifType textual
+            convention.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  1      hasdefval 0
  *   readable   1     iscolumn 1     ranges 0      hashint   0
  *   settable   0
  *
- * Enum range: 146/256. Values:  other(1), regular1822(2), hdh1822(3), ddnX25(4), rfc877x25(5), ethernetCsmacd(6), iso88023Csmacd(7), iso88024TokenBus(8), iso88025TokenRing(9), iso88026Man(10), starLan(11), proteon10Mbit(12), proteon80Mbit(13), hyperchannel(14), fddi(15), lapb(16), sdlc(17), ds1(18), e1(19), basicISDN(20), primaryISDN(21), propPointToPointSerial(22), ppp(23), softwareLoopback(24), eon(25), ethernet3Mbit(26), nsip(27), slip(28), ultra(29), ds3(30), sip(31), frameRelay(32), rs232(33), para(34), arcnet(35), arcnetPlus(36), atm(37), miox25(38), sonet(39), x25ple(40), iso88022llc(41), localTalk(42), smdsDxi(43), frameRelayService(44), v35(45), hssi(46), hippi(47), modem(48), aal5(49), sonetPath(50), sonetVT(51), smdsIcip(52), propVirtual(53), propMultiplexor(54), ieee80212(55), fibreChannel(56), hippiInterface(57), frameRelayInterconnect(58), aflane8023(59), aflane8025(60), cctEmul(61), fastEther(62), isdn(63), v11(64), v36(65), g703at64k(66), g703at2mb(67), qllc(68), fastEtherFX(69), channel(70), ieee80211(71), ibm370parChan(72), escon(73), dlsw(74), isdns(75), isdnu(76), lapd(77), ipSwitch(78), rsrb(79), atmLogical(80), ds0(81), ds0Bundle(82), bsc(83), async(84), cnr(85), iso88025Dtr(86), eplrs(87), arap(88), propCnls(89), hostPad(90), termPad(91), frameRelayMPI(92), x213(93), adsl(94), radsl(95), sdsl(96), vdsl(97), iso88025CRFPInt(98), myrinet(99), voiceEM(100), voiceFXO(101), voiceFXS(102), voiceEncap(103), voiceOverIp(104), atmDxi(105), atmFuni(106), atmIma(107), pppMultilinkBundle(108), ipOverCdlc(109), ipOverClaw(110), stackToStack(111), virtualIpAddress(112), mpc(113), ipOverAtm(114), iso88025Fiber(115), tdlc(116), gigabitEthernet(117), hdlc(118), lapf(119), v37(120), x25mlp(121), x25huntGroup(122), trasnpHdlc(123), interleave(124), fast(125), ip(126), docsCableMaclayer(127), docsCableDownstream(128), docsCableUpstream(129), a12MppSwitch(130), tunnel(131), coffee(132), ces(133), atmSubInterface(134), l2vlan(135), l3ipvlan(136), l3ipxvlan(137), digitalPowerline(138), mediaMailOverIp(139), dtm(140), dcn(141), ipForward(142), msdsl(143), ieee1394(144), if-gsn(145), dvbRccMacLayer(146), dvbRccDownstream(147), dvbRccUpstream(148), atmVirtual(149), mplsTunnel(150), srp(151), voiceOverAtm(152), voiceOverFrameRelay(153), idsl(154), compositeLink(155), ss7SigLink(156), propWirelessP2P(157), frForward(158), rfc1483(159), usb(160), ieee8023adLag(161), bgppolicyaccounting(162), frf16MfrBundle(163), h323Gatekeeper(164), h323Proxy(165), mpls(166), mfSigLink(167), hdsl2(168), shdsl(169), ds1FDL(170), pos(171), dvbAsiIn(172), dvbAsiOut(173), plc(174), nfas(175), tr008(176), gr303RDT(177), gr303IDT(178), isup(179), propDocsWirelessMaclayer(180), propDocsWirelessDownstream(181), propDocsWirelessUpstream(182), hiperlan2(183), propBWAp2Mp(184), sonetOverheadChannel(185), digitalWrapperOverheadChannel(186), aal2(187), radioMAC(188), atmRadio(189), imt(190), mvl(191), reachDSL(192), frDlciEndPt(193), atmVciEndPt(194), opticalChannel(195), opticalTransport(196), propAtm(197), voiceOverCable(198), infiniband(199), teLink(200), q2931(201), virtualTg(202), sipTg(203), sipSig(204), docsCableUpstreamChannel(205), econet(206), pon155(207), pon622(208), bridge(209), linegroup(210), voiceEMFGD(211), voiceFGDEANA(212), voiceDID(213), mpegTransport(214), sixToFour(215), gtp(216), pdnEtherLoop1(217), pdnEtherLoop2(218), opticalChannelGroup(219), homepna(220), gfp(221)
+ * Enum range: 146/256. Values:  other(1), regular1822(2), hdh1822(3), ddnX25(4), rfc877x25(5), ethernetCsmacd(6), iso88023Csmacd(7), iso88024TokenBus(8), iso88025TokenRing(9), iso88026Man(10), starLan(11), proteon10Mbit(12), proteon80Mbit(13), hyperchannel(14), fddi(15), lapb(16), sdlc(17), ds1(18), e1(19), basicISDN(20), primaryISDN(21), propPointToPointSerial(22), ppp(23), softwareLoopback(24), eon(25), ethernet3Mbit(26), nsip(27), slip(28), ultra(29), ds3(30), sip(31), frameRelay(32), rs232(33), para(34), arcnet(35), arcnetPlus(36), atm(37), miox25(38), sonet(39), x25ple(40), iso88022llc(41), localTalk(42), smdsDxi(43), frameRelayService(44), v35(45), hssi(46), hippi(47), modem(48), aal5(49), sonetPath(50), sonetVT(51), smdsIcip(52), propVirtual(53), propMultiplexor(54), ieee80212(55), fibreChannel(56), hippiInterface(57), frameRelayInterconnect(58), aflane8023(59), aflane8025(60), cctEmul(61), fastEther(62), isdn(63), v11(64), v36(65), g703at64k(66), g703at2mb(67), qllc(68), fastEtherFX(69), channel(70), ieee80211(71), ibm370parChan(72), escon(73), dlsw(74), isdns(75), isdnu(76), lapd(77), ipSwitch(78), rsrb(79), atmLogical(80), ds0(81), ds0Bundle(82), bsc(83), async(84), cnr(85), iso88025Dtr(86), eplrs(87), arap(88), propCnls(89), hostPad(90), termPad(91), frameRelayMPI(92), x213(93), adsl(94), radsl(95), sdsl(96), vdsl(97), iso88025CRFPInt(98), myrinet(99), voiceEM(100), voiceFXO(101), voiceFXS(102), voiceEncap(103), voiceOverIp(104), atmDxi(105), atmFuni(106), atmIma(107), pppMultilinkBundle(108), ipOverCdlc(109), ipOverClaw(110), stackToStack(111), virtualIpAddress(112), mpc(113), ipOverAtm(114), iso88025Fiber(115), tdlc(116), gigabitEthernet(117), hdlc(118), lapf(119), v37(120), x25mlp(121), x25huntGroup(122), trasnpHdlc(123), interleave(124), fast(125), ip(126), docsCableMaclayer(127), docsCableDownstream(128), docsCableUpstream(129), a12MppSwitch(130), tunnel(131), coffee(132), ces(133), atmSubInterface(134), l2vlan(135), l3ipvlan(136), l3ipxvlan(137), digitalPowerline(138), mediaMailOverIp(139), dtm(140), dcn(141), ipForward(142), msdsl(143), ieee1394(144), if_gsn(145), dvbRccMacLayer(146), dvbRccDownstream(147), dvbRccUpstream(148), atmVirtual(149), mplsTunnel(150), srp(151), voiceOverAtm(152), voiceOverFrameRelay(153), idsl(154), compositeLink(155), ss7SigLink(156), propWirelessP2P(157), frForward(158), rfc1483(159), usb(160), ieee8023adLag(161), bgppolicyaccounting(162), frf16MfrBundle(163), h323Gatekeeper(164), h323Proxy(165), mpls(166), mfSigLink(167), hdsl2(168), shdsl(169), ds1FDL(170), pos(171), dvbAsiIn(172), dvbAsiOut(173), plc(174), nfas(175), tr008(176), gr303RDT(177), gr303IDT(178), isup(179), propDocsWirelessMaclayer(180), propDocsWirelessDownstream(181), propDocsWirelessUpstream(182), hiperlan2(183), propBWAp2Mp(184), sonetOverheadChannel(185), digitalWrapperOverheadChannel(186), aal2(187), radioMAC(188), atmRadio(189), imt(190), mvl(191), reachDSL(192), frDlciEndPt(193), atmVciEndPt(194), opticalChannel(195), opticalTransport(196), propAtm(197), voiceOverCable(198), infiniband(199), teLink(200), q2931(201), virtualTg(202), sipTg(203), sipSig(204), docsCableUpstreamChannel(205), econet(206), pon155(207), pon622(208), bridge(209), linegroup(210), voiceEMFGD(211), voiceFGDEANA(212), voiceDID(213), mpegTransport(214), sixToFour(215), gtp(216), pdnEtherLoop1(217), pdnEtherLoop2(218), opticalChannelGroup(219), homepna(220), gfp(221)
  *
  * It's syntax is IANAifType (based on perltype INTEGER)
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
@@ -794,6 +539,12 @@ ifTable Reference
  * ifMtu is subid 4 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.4
+ * Description:
+The size of the largest packet which can be sent/received
+            on the interface, specified in octets.  For interfaces that
+            are used for transmitting network datagrams, this is the
+            size of the largest network datagram that can be sent on the
+            interface.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -809,6 +560,16 @@ ifTable Reference
  * ifSpeed is subid 5 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.5
+ * Description:
+An estimate of the interface's current bandwidth in bits
+            per second.  For interfaces which do not vary in bandwidth
+            or for those where no accurate estimation can be made, this
+            object should contain the nominal bandwidth.  If the
+            bandwidth of the interface is greater than the maximum value
+            reportable by this object then this object should report its
+            maximum value (4,294,967,295) and ifHighSpeed must be used
+            to report the interace's speed.  For a sub-layer which has
+            no concept of bandwidth, this object should be zero.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -824,6 +585,14 @@ ifTable Reference
  * ifPhysAddress is subid 6 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.6
+ * Description:
+The interface's address at its protocol sub-layer.  For
+            example, for an 802.x interface, this object normally
+            contains a MAC address.  The interface's media-specific MIB
+            must define the bit and byte ordering and the format of the
+            value of this object.  For interfaces which do not have such
+            an address (e.g., a serial line), this object should contain
+            an octet string of zero length.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -841,6 +610,15 @@ ifTable Reference
  * ifAdminStatus is subid 7 of ifEntry.
  * It's status is Current, and it's access level is ReadWrite.
  * OID: .1.3.6.1.2.1.2.2.1.7
+ * Description:
+The desired state of the interface.  The testing(3) state
+            indicates that no operational packets can be passed.  When a
+            managed system initializes, all interfaces start with
+            ifAdminStatus in the down(2) state.  As a result of either
+            explicit management action or per configuration information
+            retained by the managed system, ifAdminStatus is then
+            changed to either the up(1) or testing(3) states (or remains
+            in the down(2) state).
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  1      hasdefval 0
@@ -857,6 +635,20 @@ ifTable Reference
  * ifOperStatus is subid 8 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.8
+ * Description:
+The current operational state of the interface.  The
+            testing(3) state indicates that no operational packets can
+            be passed.  If ifAdminStatus is down(2) then ifOperStatus
+            should be down(2).  If ifAdminStatus is changed to up(1)
+            then ifOperStatus should change to up(1) if the interface is
+            ready to transmit and receive network traffic; it should
+            change to dormant(5) if the interface is waiting for
+            external actions (such as a serial line waiting for an
+            incoming connection); it should remain in the down(2) state
+            if and only if there is a fault that prevents it from going
+            to the up(1) state; it should remain in the notPresent(6)
+            state if the interface has missing (typically, hardware)
+            components.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  1      hasdefval 0
@@ -873,6 +665,12 @@ ifTable Reference
  * ifLastChange is subid 9 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.9
+ * Description:
+The value of sysUpTime at the time the interface entered
+            its current operational state.  If the current state was
+            entered prior to the last re-initialization of the local
+            network management subsystem, then this object contains a
+            zero value.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -888,6 +686,14 @@ ifTable Reference
  * ifInOctets is subid 10 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.10
+ * Description:
+The total number of octets received on the interface,
+            including framing characters.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -903,6 +709,15 @@ ifTable Reference
  * ifInUcastPkts is subid 11 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.11
+ * Description:
+The number of packets, delivered by this sub-layer to a
+            higher (sub-)layer, which were not addressed to a multicast
+            or broadcast address at this sub-layer.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -918,6 +733,18 @@ ifTable Reference
  * ifInNUcastPkts is subid 12 of ifEntry.
  * It's status is Deprecated, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.12
+ * Description:
+The number of packets, delivered by this sub-layer to a
+            higher (sub-)layer, which were addressed to a multicast or
+            broadcast address at this sub-layer.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
+
+            This object is deprecated in favour of ifInMulticastPkts and
+            ifInBroadcastPkts.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -933,6 +760,18 @@ ifTable Reference
  * ifInDiscards is subid 13 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.13
+ * Description:
+The number of inbound packets which were chosen to be
+            discarded even though no errors had been detected to prevent
+
+            their being deliverable to a higher-layer protocol.  One
+            possible reason for discarding such a packet could be to
+            free up buffer space.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -948,6 +787,18 @@ ifTable Reference
  * ifInErrors is subid 14 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.14
+ * Description:
+For packet-oriented interfaces, the number of inbound
+            packets that contained errors preventing them from being
+            deliverable to a higher-layer protocol.  For character-
+            oriented or fixed-length interfaces, the number of inbound
+            transmission units that contained errors preventing them
+            from being deliverable to a higher-layer protocol.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -963,6 +814,21 @@ ifTable Reference
  * ifInUnknownProtos is subid 15 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.15
+ * Description:
+For packet-oriented interfaces, the number of packets
+            received via the interface which were discarded because of
+            an unknown or unsupported protocol.  For character-oriented
+            or fixed-length interfaces that support protocol
+            multiplexing the number of transmission units received via
+            the interface which were discarded because of an unknown or
+            unsupported protocol.  For any interface that does not
+            support protocol multiplexing, this counter will always be
+            0.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -978,6 +844,14 @@ ifTable Reference
  * ifOutOctets is subid 16 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.16
+ * Description:
+The total number of octets transmitted out of the
+            interface, including framing characters.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -993,6 +867,16 @@ ifTable Reference
  * ifOutUcastPkts is subid 17 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.17
+ * Description:
+The total number of packets that higher-level protocols
+            requested be transmitted, and which were not addressed to a
+            multicast or broadcast address at this sub-layer, including
+            those that were discarded or not sent.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -1008,6 +892,19 @@ ifTable Reference
  * ifOutNUcastPkts is subid 18 of ifEntry.
  * It's status is Deprecated, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.18
+ * Description:
+The total number of packets that higher-level protocols
+            requested be transmitted, and which were addressed to a
+            multicast or broadcast address at this sub-layer, including
+            those that were discarded or not sent.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
+
+            This object is deprecated in favour of ifOutMulticastPkts
+            and ifOutBroadcastPkts.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -1023,6 +920,16 @@ ifTable Reference
  * ifOutDiscards is subid 19 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.19
+ * Description:
+The number of outbound packets which were chosen to be
+            discarded even though no errors had been detected to prevent
+            their being transmitted.  One possible reason for discarding
+            such a packet could be to free up buffer space.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -1038,6 +945,17 @@ ifTable Reference
  * ifOutErrors is subid 20 of ifEntry.
  * It's status is Current, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.20
+ * Description:
+For packet-oriented interfaces, the number of outbound
+            packets that could not be transmitted because of errors.
+            For character-oriented or fixed-length interfaces, the
+            number of outbound transmission units that could not be
+            transmitted because of errors.
+
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            ifCounterDiscontinuityTime.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -1053,6 +971,8 @@ ifTable Reference
  * ifOutQLen is subid 21 of ifEntry.
  * It's status is Deprecated, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.21
+ * Description:
+The length of the output packet queue (in packets).
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0
@@ -1068,6 +988,18 @@ ifTable Reference
  * ifSpecific is subid 22 of ifEntry.
  * It's status is Deprecated, and it's access level is ReadOnly.
  * OID: .1.3.6.1.2.1.2.2.1.22
+ * Description:
+A reference to MIB definitions specific to the particular
+            media being used to realize the interface.  It is
+
+            recommended that this value point to an instance of a MIB
+            object in the media-specific MIB, i.e., that this object
+            have the semantics associated with the InstancePointer
+            textual convention defined in RFC 2579.  In fact, it is
+            recommended that the media-specific MIB specify what value
+            ifSpecific should/can take for values of ifType.  If no MIB
+            definitions specific to the particular media are available,
+            the value should be set to the OBJECT IDENTIFIER { 0 0 }.
  *
  * Attributes:
  *   accessible 1     isscalar 0     enums  0      hasdefval 0

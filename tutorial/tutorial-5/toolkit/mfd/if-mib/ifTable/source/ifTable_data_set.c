@@ -119,42 +119,10 @@
 int
 ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx)
 {
-    int             rc = MFD_SUCCESS;
-    int             save_flags;
-
-    DEBUGMSGTL(("verbose:ifTable_commit", "called\n"));
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert(NULL != rowreq_ctx);
-
     /*
-     * save flags, then clear until we actually do something
+     * set not implemented
      */
-    save_flags = rowreq_ctx->set_flags;
-    rowreq_ctx->set_flags = 0;
-
-    /*
-     * TODO:
-     * commit data
-     */
-    if (save_flags & FLAG_IFADMINSTATUS) {
-        save_flags &= ~FLAG_IFADMINSTATUS;      /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IFADMINSTATUS;
-        }
-    }
-
-    if (save_flags) {
-        snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
-                 save_flags);
-        return MFD_ERROR;
-    }
-
-    return rc;
+    return MFD_ERROR;
 }
 
 /**
