@@ -181,6 +181,15 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
   }
 
   if (local) {
+    t->local = malloc(12);
+    if (t->local == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(&(t->local[00]), (u_char *)&(addr->sipx_network), 4);
+    memcpy(&(t->local[04]), (u_char *)&(addr->sipx_node),    6);
+    memcpy(&(t->local[10]), (u_char *)&(addr->sipx_port),    2);
+
     /*  This session is inteneded as a server, so we must bind on to the given
 	address (which may include a particular network and/or node address,
 	but definitely includes a port number).  */
@@ -194,6 +203,14 @@ snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
     t->data = NULL;
     t->data_length = 0;
   } else {
+    t->remote = malloc(12);
+    if (t->remote == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(&(t->remote[00]), (u_char *)&(addr->sipx_network), 4);
+    memcpy(&(t->remote[04]), (u_char *)&(addr->sipx_node),    6);
+    memcpy(&(t->remote[10]), (u_char *)&(addr->sipx_port),    2);
     /*  This is a client session.  Save the address in the transport-specific
 	data pointer for later use by snmp_ipx_send.  */
 

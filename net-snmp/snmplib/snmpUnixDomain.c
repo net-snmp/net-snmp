@@ -249,6 +249,14 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
   t->flags = SNMP_TRANSPORT_FLAG_STREAM;
 
   if (local) {
+    t->local = malloc(strlen(addr->sun_path));
+    if (t->local == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->local, addr->sun_path, strlen(addr->sun_path));
+    t->local_length = strlen(addr->sun_path);
+
     /*  This session is inteneded as a server, so we must bind to the given
 	path (unlinking it first, to avoid errors).  */
 
@@ -284,6 +292,13 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
     }
 
   } else {
+    t->remote = malloc(strlen(addr->sun_path));
+    if (t->remote == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->remote, addr->sun_path, strlen(addr->sun_path));
+    t->remote_length = strlen(addr->sun_path);
     rc = connect(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr_un));
     if (rc != 0) {
       DEBUGMSGTL(("snmp_unix_transport",
