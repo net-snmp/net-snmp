@@ -1,0 +1,178 @@
+Here is a maybe complete list of what I do to make releases.  Much of
+it's history dates back to the very beginnings of the projects.  As an
+example, the release tag format (Ext-VERSION-NUMBERS-HERE) dates back
+to the fact that the very first releases I did were modifications to
+the CMU code to make the agent "extensible", and hence the beginning
+tag name.
+   -- Wes 2002-08
+
+**** IMPORTANT NOTES:
+  - Don't *ever* release a second tar ball under the same name as the
+    first.  It's much much much better to release another version
+    instead, since you don't have to figure out from the bug reports
+    that a user really grabbed the first snapshot instead of the
+    second when they complain about version "XXX" not working.
+  - It's entirely possible I haven't converted all the
+    auto-done stuff into stuff which is auto-doable by other people.  I
+    think I have, but check the results of everything!
+  - Almost all version numbers in the various places are automatically
+    incremented.  The ones that are not are noted below.
+  - Much of the automation is done using the agent/mibroup/versiontag
+    script which was originally written to support 3 different methods
+    of making releases, but only one is used now.  It pulls the
+    "Ext-VERSION-NUMBERS-HERE" tag apart and runs things based on the
+    information.  It probably needs to be rewritten.  Probably in perl.
+
+Testing:
+
+  0) run "cvs update" to catch everyones commits.  (I've forgotten this
+     step before.)
+
+  1) Change the libtool version information in Makefile.top.  This may
+     could be automated in the future, but libtool doesn't like you to
+     match your project version with the library version so they have
+     cases where the version numbers can't match.  I've looked into
+     hacking libtool, and decided against it.  Follow the notes beyond
+     the 3 variables:
+
+       LIBCURRENT  = 5
+       LIBREVISION = 3
+       LIBAGE      = 0
+     
+     Functionally, it should match the release number
+     LIBCURRENT.LIBAGE.LIBREVISION.  Do this now, so that when you run
+     make in a second to test things you can spot libtool yelling
+     about improper numbering before you make the release and not
+     after you've uploaded the tar ball :-/
+
+  2) Log into as many machines as you can and run "make test".  You
+     should get perfect results.  If you don't, try running just those
+     tests again with a slower sleep time (use the -S flag to
+     testing/RUNTESTS).
+
+  3) "make install" -- make sure it works.
+
+  4) ideally, run make in the tutorial directories to make sure they
+     compile properly after running "make install".
+
+Releasing:
+
+  0) run "cvs update" to catch everyones commits.  I've forgotten this
+     before.
+
+  1) First, create the appropriate NEWS file segments.  I usually do
+     this by making a preliminary ChangeLog addition file (see the step
+     below for doing this).
+
+  2) update the README file, if needed.
+
+  2b) "make commentcheck"
+
+     This will basically run a "grep" on all the sources for //.  It
+     ignores things with "http:" in it as well as "/win32/".  Make
+     sure there are no // comments in the main code body.
+
+  3) Update Makefile dependencies:
+
+        a) First, run configure using an appropriate module set.
+           Don't do what I do all the time and accidentally include
+           modules that don't exist in the source tree.  I suggest:
+
+           ./configure  '--with-mib-modules=host examples examples/example testhandler smux Rmon disman/event-mib' '--with-transports=UDPIPv6 TCPIPv6 IPX'
+
+
+	b) run "make distdepend"
+
+           This runs a complicated series of scripts to update all the
+           various Makefile.depend files sprinkled in the directories.
+           These files are generated from the makedepend program, but
+           are then stripped of non-local header files (ie, it removes
+           all /usr/include/, ... references).  This makes the
+           dependencies package-local.  This is sort of ugly, but
+           still better than forcing the user to run "make depend"
+           themselves (which they can still do if they want a more
+           complete dependency list).  (and you can't assume they have
+           makedepend around).
+
+        c) cvs commit -m "make depend" `find . -name Makefile.depend`
+
+        Note: The Makefile.depend is loaded by configure into the real
+        Makefile when configure is run.
+
+  4) Make sure all changes are checked in:
+
+       cvs update
+       cvs update
+
+     (yes, twice) search for lines beginning with 'M' to make sure you
+     don't have outstanding important changes.
+
+  5) Update the ChangeLog file
+
+       cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
+       perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
+
+     Edit the ChangeLog file and insert the appropriate portion of the
+     ChangeLog.reallyadd file.  You can usually find the point where
+     the last release starts in the file by searching for "version tag".
+
+     Please keep the line of dashes at the top of the file, as it
+     makes it easier to copy during the next release.
+
+     If using emacs, I suggest switching from changelog-mode to
+     text-mode.
+
+        cvs commit -m "update for release X" ChangeLog
+
+  6) make the tarball:
+
+        make dist VERSION=Ext-5-0-3 CVSUSER=hardaker
+
+     This will make 5.0.3.  Basically, take the version number you
+     want to produce and change the '.'s to '-'s.  Ext-8-1-3-pre1 will
+     produce a net-snmp-8.1.3.pre1.tar.gz file in the current
+     directory.
+
+     This step does the following, much of it is a result of 2
+     scripts: (agent/mibgroup/versiontag [location is purely
+     historical], and remove-files):
+
+        a) changes version numbers in important files.  Hopefully it
+           didn't miss anything.
+           propriate order
+        b) Runs cvs tag
+        c) Runs cvs export
+        d) Removes some non-distributed files.  It also touches the
+           configure files in the correct order so autoconf isn't
+           auto-run by people who have extracted the tar file.
+        d) Runs tar xzf ...
+
+  7) At this point the sources are tagged.  If you need to make any
+     changes, do so *before* you publish the tar ball to the web site.
+     You'll likely need to move the tag using "cvs -F tag Ext-VERSION file.c".
+     Then, you'll have to re-extract the code and tar it up.  You can
+     do this by just running "make tar VERSION=Ext-5-0-3 CVSUSER=hardaker".
+     (which is just like "make dist" above without first tagging things).
+
+  8) It's worth doing a round of testing directly with the tarred
+     sources just to be sure.  I often haven't had time at this point,
+     however.
+
+  9) Upload the file to the sourceforge server:
+
+     0) upload the tar ball to ftp://upload.sf.net/incoming/
+     a) go to the admin section of the net-snmp project home page
+     b) click on "Edit/Release Files"
+     c) click on "[Add Release]" for net-snmp
+     d) Create a release like "5.0.3 sources"
+     e) Click on the "Edit this release" button to add files to it.
+     f) Do something similar to release binary files under "5.0.3
+        binaries", for example.
+
+     WARNING:  The "Quick release file" mechanism, which is generally
+     cool and saves steps *only* works if the release doesn't exist
+     yet.  IE, don't use it twice to add two binary packages to "5.0.3
+     binaries" for instance.  It will screw things up (I learned this
+     the hard way).  You can do the first one using the Quick release
+     mechanism, but the second has to be done using the "edit this
+     release" button.
