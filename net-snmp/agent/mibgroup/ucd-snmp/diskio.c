@@ -51,6 +51,11 @@ static int      cache_disknr = -1;
 #if defined (freebsd4) || defined(freebsd5)
 #include <sys/dkstat.h>
 #include <devstat.h>
+#ifdef linux
+#define MAX_DISKS 20
+#include <assert.h>
+#endif /* linux */
+
 #endif                          /* freebsd */
 
 #if defined (darwin)
@@ -388,6 +393,150 @@ getstats(void)
     /* Gross hack to include device numbers in the device name array */
     for (i = 0; i < ndisk; i++) {
       char *cp = stat->dinfo->devices[i].device_name;
+
+
+#ifdef linux
+typedef struct linux_diskio
+{
+    int major;
+    int  minor;
+    long  blocks;
+    char name[256];
+    long  rio;
+    long  rmerge;
+    long  rsect;
+    long     ruse;
+    long wio;
+    long  wmerge;
+    long  wsect;
+    long  wuse;
+    long  running;
+    long  use;
+    long  aveq;
+} linux_diskio;
+
+typedef struct linux_diskio_header
+{
+    linux_diskio* indices;
+    int length;
+} linux_diskio_header;
+
+linux_diskio_header head;
+int inited=0;
+
+
+int getstats(void)
+{
+	FILE* parts;
+	int x = 0;
+  time_t now;
+
+  now = time(NULL);
+  if (cache_time + CACHE_TIMEOUT > now) {
+    return 0;
+  }
+
+	// remove the indicies and repopulate
+	if (head.indices)
+		free(head.indices);
+
+
+	head.indices = (struct linux_diskio*)malloc(
+		sizeof(struct linux_diskio[MAX_DISKS]));
+	head.length  = 0;
+
+	memset(head.indices, (sizeof(linux_diskio) * MAX_DISKS), 0);
+
+
+	parts = fopen("/proc/partitions", "r");
+	assert(parts!=NULL);
+
+	while (42)
+	{
+		/*
+		first few fscanfs are garbage we don't care about. skip it.
+		Probably a better way to do this, but I cheaped out on ya :).
+		*/
+		if (x < 2)
+		{
+			char buffer[1024];
+			fgets(buffer, sizeof(buffer), parts);
+		} else {
+			
+			linux_diskio* pTemp = &head.indices[head.length];
+
+			if ((feof(parts) != 0) || head.length >= MAX_DISKS)
+				break;
+
+			fscanf (parts, "%d %d %d %s %d %d %d %d %d %d %d %d %d %d %d\n",
+				&pTemp->major,
+				&pTemp->minor, &pTemp->blocks, &pTemp->name, &pTemp->rio,
+				&pTemp->rmerge, &pTemp->rsect, &pTemp->ruse, &pTemp->wio,
+				&pTemp->wmerge, &pTemp->wsect, &pTemp->wuse, &pTemp->running,
+				&pTemp->use, &pTemp->aveq);
+
+			head.length++;
+		}
+		x++;
+	}
+
+
+	fclose(parts);
+  cache_time = now;
+  return(0);
+}
+
+u_char *
+var_diskio(struct variable * vp,
+	   oid * name,
+	   size_t * length,
+	   int exact,
+	   size_t * var_len,
+	   WriteMethod ** write_method)
+{
+  unsigned int indx;
+  static long long_ret;
+
+	if (getstats()==1) {
+		return(NULL);
+	}
+
+ if (header_simple_table(vp, name, length, exact, var_len, write_method, head.length))
+    {
+	return NULL;
+    }
+
+  indx = (unsigned int) (name[*length - 1] - 1);
+
+  if (indx >= head.length)
+    return NULL;
+
+  switch (vp->magic) {
+    case DISKIO_INDEX:
+      long_ret = (long) indx+1;
+      return (u_char *) &long_ret;
+    case DISKIO_DEVICE:
+      *var_len = strlen(head.indices[indx].name);
+      return (u_char *) head.indices[indx].name;
+    case DISKIO_NREAD:
+      long_ret = (signed long) head.indices[indx].rio;
+      return (u_char *) & long_ret;
+    case DISKIO_NWRITTEN:
+      long_ret = (signed long) head.indices[indx].wio;
+      return (u_char *) & long_ret;
+    case DISKIO_READS:
+      long_ret = (signed long) head.indices[indx].ruse;
+      return (u_char *) & long_ret;
+    case DISKIO_WRITES:
+      long_ret = (signed long) head.indices[indx].wuse;
+      return (u_char *) & long_ret;
+
+    default:
+      ERROR_MSG("diskio.c: don't know how to handle this request.");
+  }
+  return NULL;
+}
+#endif  /* linux */
       int len = strlen(cp);
       if (len > DEVSTAT_NAME_LEN - 3)
         len -= 3;
