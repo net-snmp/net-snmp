@@ -32,10 +32,10 @@ char sysContact[128] = SYS_CONTACT;
 char sysName[128] = SYS_NAME;
 char sysLocation[128] = SYS_LOC;
 
-oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
-int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
+extern oid version_id[];
+extern int version_id_len;
 
-struct timeval starttime;
+extern struct timeval starttime;
 
 int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
@@ -118,10 +118,6 @@ void init_system()
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
 
-  gettimeofday(&starttime, NULL);
-  starttime.tv_sec--;
-  starttime.tv_usec += 1000000L;
-
 }
 
 #define MATCH_FAILED	1
@@ -187,7 +183,7 @@ var_system(vp, name, length, exact, var_len, write_method)
             *write_method = writeVersion;
             return (u_char *)version_descr;
         case VERSIONID:
-            *var_len = sizeof(version_id);
+            *var_len = version_id_len*sizeof(version_id[0]);
             return (u_char *)version_id;
         case UPTIME:
             gettimeofday(&now, NULL);

@@ -421,35 +421,6 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   return(1);
 }
 
-/* skip all white spaces and return 1 if found something either end of
-   line or a comment character */
-char *skip_white(ptr)
-  char *ptr;
-{
-
-  if (ptr == NULL) return (NULL);
-  while (*ptr != 0 && isspace(*ptr)) ptr++;
-  if (*ptr == 0 || *ptr == '#') return (NULL);
-  return (ptr);
-}
-
-char *skip_not_white(ptr)
-  char *ptr;
-{
-  
-  if (ptr == NULL) return (NULL);
-  while (*ptr != 0 && !isspace(*ptr)) ptr++;
-  if (*ptr == 0 || *ptr == '#') return (NULL);
-  return (ptr);
-}
-
-void copy_word(from, to)
-     char *from, *to;
-{
-  while (*from != 0 && !isspace(*from)) *(to++) = *(from++);
-  *to = 0;
-}
-
 char *find_field(ptr,field)
      char *ptr;
      int field;

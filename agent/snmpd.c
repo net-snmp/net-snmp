@@ -101,17 +101,20 @@ typedef long    fd_mask;
 #include "mibgroup/snmp_mib.h"
 #include "snmp_client.h"
 #include "snmpd.h"
-#include "mibgroup/read_config.h"
+#include "read_config.h"
 #include "mibgroup/util_funcs.h"
 
 extern int  errno;
 extern char *version_descr;
 extern oid version_id[];
 extern int version_id_len;
-extern struct timeval starttime;
+struct timeval starttime;
 int log_addresses = 0;
 int verbose = 0;
 int snmp_dump_packet;
+
+oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
+int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
 
 struct addrCache {
     u_long addr;
@@ -495,14 +498,12 @@ send_easy_trap (trap)
 {
     struct trap_sink *sink = sinks;
 
-#ifdef USING_READ_CONFIG_MODULE
     if ((snmp_enableauthentraps == 1 || trap != 4) && sink != NULL) {
 	while (sink) {
 	    send_v1_trap (sink->sesp, trap, 0);
 	    sink = sink->next;
 	}
     }
-#endif
 }
   
 char *reverse_bytes(buf,num)
@@ -523,10 +524,8 @@ char *argvrestartname;
 
 #include "version.h"
 
-#ifdef USING_READ_CONFIG_MODULE
 extern char *optconfigfile;
 extern char dontReadConfigFiles;
-#endif
 
 void usage(prog)
 char *prog;
@@ -574,10 +573,8 @@ main(argc, argv)
     char *cptr, **argvptr;
 
     logfile[0] = 0;
-#ifdef USING_READ_CONFIG_MODULE
     optconfigfile = NULL;
     dontReadConfigFiles = 0;
-#endif
     
 #ifdef LOGFILE
     strcpy(logfile,LOGFILE);
@@ -590,16 +587,10 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
                 case 'c':
-#ifdef USING_READ_CONFIG_MODULE
                     optconfigfile = strdup(argv[++arg]);
-#else
-                    arg++;
-#endif
                     break;
                 case 'C':
-#ifdef USING_READ_CONFIG_MODULE
                     dontReadConfigFiles = 1;
-#endif
                     break;
 		case 'd':
 		    snmp_dump_packet++;
@@ -773,6 +764,11 @@ main(argc, argv)
     }
     printf("\n");
     fflush(stdout);
+
+    /* get current time (ie, the time the agent started) */
+    gettimeofday(&starttime, NULL);
+    starttime.tv_sec--;
+    starttime.tv_usec += 1000000L;
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0);

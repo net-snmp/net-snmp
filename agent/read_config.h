@@ -11,13 +11,16 @@ struct config_line {
    void (*free_func) __P((void));
 };
 
-config_require(util_funcs extensible)
-
 void init_read_config __P((void));
 int read_config __P((char *));
 void free_config __P((void));
 RETSIGTYPE update_config __P((int));
 int pass_compare __P((void *, void *));
 void config_perror __P((char *));
+char *skip_white __P((char *));
+char *skip_not_white __P((char *));
+void copy_word __P((char *, char *));
+int tree_compare __P((const void *, const void *));
+void setup_tree __P((void));
 
 #endif /* _MIBGROUP_READ_CONFIG_H */
