@@ -500,14 +500,14 @@ vacm_parse_simple(const char *token, char *confline)
          * com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
         sprintf(secname, "anonymousSecName%03d", num);
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec", line));
         netsnmp_udp_parse_security("com2sec", line);
 
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
@@ -539,7 +539,7 @@ vacm_parse_simple(const char *token, char *confline)
          * com2sec6 anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
         sprintf(secname, "anonymousSecName%03d", num);
-        snprintf(line, sizeof(line), "%s %s %s",
+        snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2sec6", line));
