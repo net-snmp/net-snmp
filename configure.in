@@ -1173,8 +1173,8 @@ changequote([,]), [#include <sys/types.h>
 #endif], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])dnl
 
 AC_MSG_RESULT($ac_cv_type_socklen_t)
-if test $ac_cv_type_socklen_t = no; then
-  AC_DEFINE(socklen_t, u_int)
+if test $ac_cv_type_socklen_t = yes; then
+  AC_DEFINE(HAVE_SOCKLEN_T)
 fi
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
@@ -1194,7 +1194,7 @@ changequote([,]), [#include <sys/types.h>
 
 AC_MSG_RESULT($ac_cv_type_in_addr_t)
 if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int)
+  AC_DEFINE(HAVE_IN_ADDR_T);
 fi
 
 dnl Check ps args

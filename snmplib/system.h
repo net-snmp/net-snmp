@@ -29,6 +29,15 @@ SOFTWARE.
 /*
  * Definitions for the system dependent library file
  */
+#ifndef HAVE_SOCKLEN_T
+typedef u_int socklen_t
+#endif
+
+#ifndef HAVE_IN_ADDR_T
+typedef u_int socklen_t
+#endif
+
+
 #ifdef WIN32
 
 /* structure of a directory entry */
