@@ -416,6 +416,8 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 			   exact, &write_method, pi, &noSuchObject);
 	if (pi->version != SNMP_VERSION_2 && statP == NULL
 	    && (pi->pdutype != SET_REQ_MSG || !write_method)){
+            print_mib_oid(var_name,var_name_len);
+            printf(" -- ");
 ERROR("Mib Doesn't exist");
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
