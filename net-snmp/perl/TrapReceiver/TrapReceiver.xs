@@ -9,7 +9,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <perl_snmptrapd.h>
+#include "perl_snmptrapd.h"
 
 #include "const-c.inc"
 
