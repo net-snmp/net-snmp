@@ -100,12 +100,13 @@ typedef long    fd_mask;
 #include "snmpd.h"
 
 extern int  errno;
-int snmp_dump_packet = 0;
 extern char *version_descr;
 extern oid version_id[];
 extern int version_id_len;
+extern struct timeval starttime;
 int log_addresses = 0;
 int verbose = 0;
+int snmp_dump_packet;
 
 struct addrCache {
     u_long addr;
@@ -126,7 +127,7 @@ int receive __P((int *, int));
 int snmp_read_packet __P((int));
 char *sprintf_stamp __P((time_t *));
 int agent_party_init __P((u_int, u_short, char *));
-struct snmp_session *create_v1_trap_session __P((struct snmp_session*, char *, char *));
+int create_v1_trap_session __P((char *, char *));
 void send_v1_trap __P((struct snmp_session *, int, int));
 char *reverse_bytes __P((char *, int));
 void usage __P((char *));
@@ -413,33 +414,52 @@ agent_party_init(myaddr, dest_port, view)
     return 0; /* SUCCESS */
 }
 
-static struct snmp_session trap_session, *trap_sesp = NULL;
+struct trap_sink {
+    struct snmp_session ses;
+    struct snmp_session *sesp;
+    struct trap_sink *next;
+} *sinks = NULL;
 
-struct snmp_session *create_v1_trap_session (ses, sink, com)
-    struct snmp_session *ses;
+int create_v1_trap_session (sink, com)
     char *sink, *com;
 {
-    struct snmp_session *sesp;
-    memset (ses, 0, sizeof (struct snmp_session));
-    ses->peername = sink;
-    ses->version = SNMP_VERSION_1;
+    struct trap_sink *new_sink = malloc (sizeof (*new_sink));
+
+    memset (&new_sink->ses, 0, sizeof (struct snmp_session));
+    new_sink->ses.peername = strdup(sink);
+    new_sink->ses.version = SNMP_VERSION_1;
     if (com) {
-        ses->community = strdup (com);
-        ses->community_len = strlen (com);
+        new_sink->ses.community = strdup (com);
+        new_sink->ses.community_len = strlen (com);
     }
-    ses->retries = SNMP_DEFAULT_RETRIES;
-    ses->timeout = SNMP_DEFAULT_TIMEOUT;
-    ses->callback = NULL;
-    ses->remote_port = SNMP_TRAP_PORT;
-    sesp = snmp_open (ses);
-    return sesp;
+    new_sink->ses.remote_port = SNMP_TRAP_PORT;
+    new_sink->sesp = snmp_open (&new_sink->ses);
+    if (new_sink->sesp) {
+	new_sink->next = sinks;
+	sinks = new_sink;
+	return 1;
+    }
+    free(new_sink);
+    return 0;
 }
 
 void
 send_v1_trap (ss, trap, specific)
     struct snmp_session *ss;
     int trap, specific;
-{   struct snmp_pdu *pdu;
+{
+    struct snmp_pdu *pdu;
+    struct timeval now, diff;
+
+    gettimeofday(&now, NULL);
+    now.tv_sec--;
+    now.tv_usec += 1000000L;
+    diff.tv_sec = now.tv_sec - starttime.tv_sec;
+    diff.tv_usec = now.tv_usec - starttime.tv_usec;
+    if (diff.tv_usec > 1000000L){
+	diff.tv_usec -= 1000000L;
+	diff.tv_sec++;
+    }
 
     pdu = snmp_pdu_create (TRP_REQ_MSG);
     pdu->enterprise = version_id;
@@ -447,7 +467,7 @@ send_v1_trap (ss, trap, specific)
     pdu->agent_addr.sin_addr.s_addr = get_myaddr();
     pdu->trap_type = trap;
     pdu->specific_type = specific;
-    pdu->time = get_uptime();
+    pdu->time = diff.tv_sec * 100 + diff.tv_usec / 10000;
     if (snmp_send (ss, pdu) == 0) {
         fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
     }
@@ -458,18 +478,13 @@ void
 send_easy_trap (trap)
       int trap;
 {
-    if ((snmp_enableauthentraps == 1 || trap != 4) && snmp_trapsink != NULL) {
-        if (trap_sesp == NULL) {
-	    trap_sesp = create_v1_trap_session (&trap_session, snmp_trapsink,
-	                                     snmp_trapcommunity);
-	    if (trap_sesp == NULL) {
-		fprintf (stderr, "snmpd: cannot open SNMP session to %s\n",
-                         snmp_trapsink);
-		snmp_enableauthentraps = 2;
-		return;
-	    }
+    struct trap_sink *sink = sinks;
+
+    if ((snmp_enableauthentraps == 1 || trap != 4) && sink != NULL) {
+	while (sink) {
+	    send_v1_trap (sink->sesp, trap, 0);
+	    sink = sink->next;
 	}
-	send_v1_trap (trap_sesp, trap, 0);
     }
 }
   
