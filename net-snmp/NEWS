@@ -1,6 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.3*
+ New:
+   snmptrapd:
+     - allow a non-default AgentX socket
+
 *5.2*
  New:
     For the security parnoid (like Wes):
