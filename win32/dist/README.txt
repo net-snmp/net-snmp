@@ -158,7 +158,7 @@ CONFIGURATION
 
   To run snmpconf, use the following command line:
 
-     snmpconf -I
+     snmpconf -i
 
 
 BUILD INFORMATION
