@@ -358,9 +358,10 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
     }
     /* Error if bad errindex or if target PDU has no variables copied */
     if ((drop_err && (ii < pdu->errindex))
-#if 0
-        || copied == 0 /* null variables are allowed for v3 engineid
-                          probes, so clone it anyway. -- Wes */
+#if TEMPORARILY_DISABLED
+		/* SNMPv3 engineID probes are allowed to be empty.
+		   See the comment in snmp_api.c for further details */
+        || copied == 0
 #endif
       ) {
         snmp_free_pdu(newpdu); return 0;

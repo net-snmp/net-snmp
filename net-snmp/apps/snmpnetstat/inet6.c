@@ -88,7 +88,13 @@ struct stat_table {
     char    description[80];
 };
 
-#if 0
+#if DEBUGGING_INFORMATION
+	/*
+	 * The following tables provide useful debugging information.
+	 * This isn't normally needed or easily accessible,
+	 *   but could potentially be very useful.
+	 * Rather than delete it totally, it's commented out
+	 */
 static oid oid_ipstats[] = {1, 3, 6, 1, 2, 1, 4, 0, 0};
 struct stat_table ip_stattab[] = {
     {3, "%d total datagram%s received"},
@@ -430,7 +436,13 @@ validUShortAssign( unsigned short * pushort, int ival, const char * errstr)
 }
 
 
-#if 0
+#if DEBUGGING_INFORMATION
+	/*
+	 * The following routines print out useful debugging information.
+	 * This isn't normally needed or easily accessible,
+	 *   but could potentially be very useful.
+	 * Rather than delete it totally, it's commented out
+	 */
 /*
  * Dump UDP statistics structure.
  */
