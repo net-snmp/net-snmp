@@ -558,6 +558,8 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
 {
     if (handler != NULL) {
         if (handler->next != NULL) {
+            /** make sure we aren't pointing to ourselves.  */
+            netsnmp_assert(handler != handler->next); /* bugs caught: 1 */
             netsnmp_handler_free(handler->next);
             handler->next = NULL;
         }
