@@ -162,12 +162,15 @@ THANKS
 
 CLOSING
 
-  Have fun,
-  I love patches.   Send some to me!
+  I love patches.   Send some to me!  But before you do, please see
+  the 'PORTING' file for information on helping me out with the
+  process of integrating your patches.
 
   Also, I'm interested if anyone actually uses/likes/hates/whatever this
   package...  Mail me a note and let me know what you think of it!
 
-Wes Hardaker
-Wesley.Hardaker@sphys.unil.ch
+  Have fun,
+
+    Wes Hardaker
+    Wesley.Hardaker@sphys.unil.ch
 
