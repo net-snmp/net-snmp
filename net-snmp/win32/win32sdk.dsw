@@ -99,27 +99,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmpd"=".\snmpd\snmpd.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libucdmibs
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libagent
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libhelpers
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "snmpdelta"=".\snmpdelta\snmpdelta.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -133,6 +112,18 @@ Package=<4>
 ###############################################################################
 
 Project: "snmpdf"=".\snmpdf\snmpdf.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "snmpdsdk"=".\snmpdsdk\snmpd.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
