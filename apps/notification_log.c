@@ -413,6 +413,7 @@ init_notification_log(void)
     /*
      * static variables 
      */
+#ifdef USING_AGENTX_SUBAGENT_MODULE
     netsnmp_register_read_only_counter32_instance
         ("nlmStatsGlobalNotificationsLogged",
          my_nlmStatsGlobalNotificationsLogged_oid,
@@ -450,6 +451,7 @@ init_notification_log(void)
      */
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "dontRetainLogs",
 			   NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_APP_DONT_LOG);
+#endif /* USING_AGENTX_SUBAGENT_MODULE */
 }
 
 u_long          default_num = 0;
