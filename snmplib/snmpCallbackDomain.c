@@ -71,6 +71,22 @@ find_transport_from_callback_num(int num)
     return NULL;
 }
 
+static void
+callback_debug_pdu(const char *ourstring, netsnmp_pdu *pdu) 
+{
+    netsnmp_variable_list *vb;
+    int i = 1;
+    DEBUGMSGTL((ourstring,
+                "PDU: command = %d, errstat = %d, errindex = %d\n",
+                pdu->command, pdu->errstat, pdu->errindex));
+    for(vb = pdu->variables; vb; vb = vb->next_variable) {
+        DEBUGMSGTL((ourstring, "  var %d:",
+                    i++));
+        DEBUGMSGVAR((ourstring,vb));
+        DEBUGMSG((ourstring,"\n"));
+    }
+}
+
 void
 callback_push_queue(int num, netsnmp_callback_pass *item) 
 {
@@ -86,6 +102,9 @@ callback_push_queue(int num, netsnmp_callback_pass *item)
         newitem->prev = ptr;
     } else {
         thequeue = newitem;
+    }
+    DEBUGIF("dump_send_callback_transport") {
+        callback_debug_pdu("dump_send_callback_transport", item->pdu);
     }
 }
 
@@ -107,6 +126,9 @@ callback_pop_queue(int num)
             }
             cp = ptr->item;
             free(ptr);
+            DEBUGIF("dump_recv_callback_transport") {
+                callback_debug_pdu("dump_recv_callback_transport", cp->pdu);
+            }
             return cp;
         }
     }
