@@ -1,0 +1,102 @@
+#!/bin/bash
+########################################################################
+########################################################################
+
+usage()
+{
+   echo "Usage: $0  [-c] [-d]"
+   echo "   -s : skip configure step"
+   echo "   -d : dirty build (don't make distclean)"
+   exit 1
+}
+
+if [ ! -f nsb-functions ];then
+   echo "Cannot find nsb-functions"
+   exit 1
+fi
+
+source nsb-functions
+
+########################################################################
+########################################################################
+
+#      x)  x=$OPTARG ;;
+while getopts sd opt
+do
+    case "$opt" in
+      s)  NSB_SKIP_CONFIG=1 ;;
+      d)  NSB_CLEAN=0 ;;
+      \?)# unknown flag
+        usage;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+if [ $NSB_CLEAN -eq 1 ]; then
+   if [ $NSB_SKIP_CONFIG -eq 1 ]; then
+      echo "A clean build also requires configuration (-d and -c"
+      echo "cannot both be specified)."
+      usage
+   fi
+fi
+
+########################################################################
+########################################################################
+
+nsb-build net-snmp-5.0.3 /usr/src/net-snmp /usr/local/build
+
+exit
+
+########################################################################
+########################################################################
+
+#PATH=/usr/local/bin:/usr/ccs/bin:/usr/bin:/bin
+#export PATH
+#
+# Always configure.
+# some changes need to refresh the configuration.
+CSTRICT=
+CSTRICT="-Wwrite-strings -Wno-unused -Wno-char-subscripts"
+PEDAN="-pedantic"
+PEDAN=
+CFLAGS="-g -O2 -Wall -Wshadow -Wstrict-prototypes \
+               -Wpointer-arith -Wcast-qual -Wcast-align $CSTRICT $PEDAN"
+export CFLAGS
+
+if [ ! -f ./config.h ] ; then
+	rm -f ucd-snmp-config.h  # insurance
+	CC=gcc ../configure > config.out 2>&1  \
+ 	 \
+ 	--enable-reentrant \
+ 	--with-out-mib-modules="mibII" \
+ 	--with-mib-modules="agentx host smux target examples/ucdDemoPublic examples/example mibII/system_mib mibII/vacm_vars mibII/snmp_mib mibII/sysORTable" \
+ 	--with-defaults
+fi
+
+#vi config.h
+#vi agent/Makefile
+#
+
+if [ "X"$1 != "Xno" ] ; then
+  ## Enable the next line if autoconf or autoheader aren't working.
+  make -k touchit
+  ## Clean up previous attempts; Remove old installs
+  nohup make clean
+  rm -fr usr
+fi
+
+rm -f nohup.out
+#
+## full build with install. usr subdir will be available to package
+nohup make test #install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local
+#
+# check for errors, but not in system headers
+egrep "" nohup.out > allerrs
+egrep -v "^/usr" allerrs > nerrs
+#
+# show any errors. if user sees prompt, the build/install didn't find errors.
+egrep -v "warn" nerrs
+#
+# do optional verification of installation.
+# check recent install adds
+#
