@@ -127,9 +127,11 @@ nsb-config-dist()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure --with-sys-location=Unknown \
+      --disable-developer \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    $ngc_src/configure --with-sys-location=Unknown \
+      --disable-developer \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules="$NSB_FINAL_MODULES"
    ngc_rc=$?
@@ -188,10 +190,12 @@ nsb-config-all()
    # inside of single quotes, so use double quotes
    #
    echo $ngc_src/configure  --with-defaults \
+      --disable-developer \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
        $NSB_PERL --enable-shared --with-libwrap
    $ngc_src/configure  --with-defaults \
+      --disable-developer \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
       $NSB_PERL --enable-shared --with-libwrap
