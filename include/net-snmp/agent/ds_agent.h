@@ -14,6 +14,7 @@
 #define NETSNMP_DS_AGENT_QUIT_IMMEDIATELY 4     /* 1 to never start the agent */
 #define NETSNMP_DS_AGENT_DISABLE_PERL   5       /* 1 to never start the agent */
 #define NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS 6 /* 1 = !see !connect msgs */
+#define NETSNMP_DS_AGENT_LEAVE_PIDFILE  7       /* 1 = leave PID file on exit */
 /*
  * strings 
  */
