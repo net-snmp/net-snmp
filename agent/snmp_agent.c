@@ -76,6 +76,7 @@ SOFTWARE.
 #include "mib_module_config.h"
 
 #include "default_store.h"
+#include "system.h"
 #include "ds_agent.h"
 #include "snmp_agent.h"
 
@@ -734,7 +735,6 @@ handle_one_var(struct agent_snmp_session  *asp, struct variable_list *varbind_pt
     AddVarMethod *add_method;
     int	    noSuchObject = TRUE;
     int     view;
-    int     status;
     oid	    save[MAX_OID_LEN];
     size_t  savelen = 0;
     
