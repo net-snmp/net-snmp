@@ -496,19 +496,19 @@ void snmp_set_mib_parse_label(int save)
 
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf) {
   fprintf(outf, "%sMIBOPTS values:\n", lead);
-  fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
-          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))?"dis":""));
   fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
           lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM))?"":"dis"));
   fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
           lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))?"don't ":""));
   fprintf(outf, "%s    e: Disable mib errors of MIB symbols conflicts\n",
           lead);
+  fprintf(outf, "%s    R: Replace MIB symbols from latest module\n",
+          lead);
+  fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
+          lead, ((ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_PARSE_LABEL))?"dis":""));
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
-          lead);
-  fprintf(outf, "%s    R: Replace MIB symbols from latest module\n",
           lead);
 }
 
