@@ -1703,7 +1703,7 @@ agentx_check_packet(u_char *packet, size_t packet_len) {
     return 0; /* minimum header length == 20 */
 
   return agentx_parse_int(packet+16,
-                          *(packet+2) & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                          *(packet+2) & AGENTX_FLAGS_NETWORK_BYTE_ORDER) + 20;
 }
 
   
