@@ -218,6 +218,14 @@ CONFIGAGENT() {
     echo $* >> $SNMP_CONFIG_FILE
 }
 
+CONFIGTRAPD() {
+    if [ "x$SNMPTRAPD_CONFIG_FILE" = "x" ]; then
+	echo "$0: failed because var: SNMPTRAPD_CONFIG_FILE wasn't set"
+	exit 1;
+    fi
+    echo $* >> $SNMPTRAPD_CONFIG_FILE
+}
+
 STARTAGENT() {
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "agent config: "
@@ -254,7 +262,7 @@ STARTTRAPD() {
     fi
     COMMANDARGS="-d $SNMP_SNMPTRAPD_PORT -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
     if test -f $SNMPTRAPD_CONFIG_FILE; then
-      COMMANDARGS="$COMMANDARGS -C -c $SNMP_CONFIG_FILE"
+      COMMANDARGS="$COMMANDARGS -C -c $SNMPTRAPD_CONFIG_FILE"
     fi
    if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: snmptrapd $COMMANDARGS"
