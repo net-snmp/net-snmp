@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  *  Host Resources MIB - Running Software group implementation - hr_swrun.c
  *      (also includes Running Software Performance group )
@@ -20,6 +31,7 @@
 #endif
 #if HAVE_SYS_USER_H
 #ifdef solaris2
+#include <libgen.h>
 #define _KMEMUSER
 #endif
 #include <sys/user.h>
@@ -551,10 +563,14 @@ var_hrswrun(struct variable * vp,
             *cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-        if (proc_buf)
-            strncpy(string, proc_buf->pr_fname, sizeof(string));
-        else
+        if (proc_buf) { 
+            char *pos=strchr(proc_buf->pr_psargs,' ');
+            if (pos != NULL) *pos = '\0';
+            strlcpy(string, basename(proc_buf->pr_psargs),sizeof(string));
+            if (pos != NULL) *pos=' ';
+        } else {
             strcpy(string, "<exited>");
+        }
         string[ sizeof(string)-1 ] = 0;
 #else
         strncpy(string, proc_buf->p_user.u_comm, sizeof(string));
