@@ -109,7 +109,7 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     return MFD_SUCCESS;
 }
 
-@end@
+@end@ // ne generated
 ##----------------------------------------------------------------------
 /*
  * ${context}_commit
@@ -145,7 +145,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     return MFD_SUCCESS;
 }
 
-@end@
+
 @if $m2c_irreversible_commit == 1@
 ##----------------------------------------------------------------------
 /*
@@ -181,7 +181,7 @@ ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx)
     return MFD_SUCCESS;
 }
 
-@end@
+@end@ // irreversable commit
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
