@@ -25,7 +25,7 @@ INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
 INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
 INSTALLBINSCRIPTS=net-snmp-config
-INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h agent_module_config.h
+INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 
 #
 # other install rules.
