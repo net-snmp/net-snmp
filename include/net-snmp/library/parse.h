@@ -222,6 +222,7 @@ SOFTWARE.
     void            print_ascii_dump_tree(FILE *, struct tree *, int);
     struct tree    *find_tree_node(const char *, int);
     const char     *get_tc_descriptor(int);
+    const char     *get_tc_description(int);
     struct tree    *find_best_tree_node(const char *, struct tree *,
                                         u_int *);
     /*
