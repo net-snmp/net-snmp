@@ -292,6 +292,7 @@ search_subtree_vars(struct subtree *tp,
 	     */
 	    memcpy(cvp->name, tp->name, tp->namelen * sizeof(oid));
 
+	    *noSuchObject = TRUE;	/* In case of null variables_len */
 	    for(x = 0, vp = tp->variables; x < tp->variables_len;
 		vp =(struct variable *)((char *)vp +tp->variables_width), x++){
 		/* if exact and ALWAYS
