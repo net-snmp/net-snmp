@@ -255,7 +255,7 @@ vmstat(int iindex)
     double          druse, drnic, drsys, dridl;
     unsigned int    pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
     unsigned int    inter[2], ticks[2], ctxt[2];
-    unsigned int    hz;
+    unsigned int    hertz;
 
     getstat(cpu_use, cpu_nic, cpu_sys, cpu_idl,
             pgpgin, pgpgout, pswpin, pswpout, inter, ticks, ctxt);
@@ -263,7 +263,7 @@ vmstat(int iindex)
     dsys = *(cpu_sys);
     didl = (*(cpu_idl));
     ddiv = (duse + dsys + didl);
-    hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
+    hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
     divo2 = ddiv / 2;
     druse = *(cpu_use);
     drnic = *(cpu_nic);
@@ -272,17 +272,17 @@ vmstat(int iindex)
 
     switch (iindex) {
     case swapin:
-        return (*(pswpin) * 4 * hz + divo2) / ddiv;
+        return (*(pswpin)  * 4 * hertz + divo2) / ddiv;
     case swapout:
-        return (*(pswpout) * 4 * hz + divo2) / ddiv;
+        return (*(pswpout) * 4 * hertz + divo2) / ddiv;
     case iosent:
-        return (*(pgpgin) * hz + divo2) / ddiv;
+        return (*(pgpgin)      * hertz + divo2) / ddiv;
     case ioreceive:
-        return (*(pgpgout) * hz + divo2) / ddiv;
+        return (*(pgpgout)     * hertz + divo2) / ddiv;
     case sysinterrupts:
-        return (*(inter) * hz + divo2) / ddiv;
+        return (*(inter)       * hertz + divo2) / ddiv;
     case syscontext:
-        return (*(ctxt) * hz + divo2) / ddiv;
+        return (*(ctxt)        * hertz + divo2) / ddiv;
     case cpuuser:
         return (100 * duse / ddiv);
     case cpusystem:
