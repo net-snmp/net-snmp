@@ -1040,6 +1040,8 @@ main(int argc, char *argv[])
 	    }
 	    break;
 #endif
+            break;
+                
 	case 'v':
 	    version();
             exit(0);
@@ -1089,6 +1091,9 @@ main(int argc, char *argv[])
         ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
     }
 #endif
+
+    /* don't fail if we can't do agentx (ie, socket not there, or not root) */
+    ds_toggle_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS);
 
     /* initialize the agent library */
     init_agent("snmptrapd");
