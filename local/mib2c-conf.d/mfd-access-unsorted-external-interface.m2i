@@ -8,20 +8,37 @@
 @end@
 ########################################################################
 ##
-/*
- *
+/**
+ * @internal
+ * convert the index component stored in the context to an oid
  */
 static int
-${table}_index2oid(netsnmp_mfd_registration *reg,
+_${table}_index2oid(netsnmp_mfd_registration *mfd_reg,
                    ${table}_ref_loop *loop_ref,
                    ${table}_ref_ctx *ctx_ref)
 {
+    /** xxx-rks: do this w/out varbind clone/free? */
+    static netsnmp_variable_list *idx_vars = NULL;
+
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-@    eval $mfd_temp = "loop_ref->itc->idx_vars"@
+    if(NULL == idx_vars) {
+        idx_vars = snmp_clone_varbind(mfd_reg->table_info->indexes);
+        if(NULL == idx_vars)
+            return SNMPERR_GENERR;
+    }
+    else {
+        /*
+         * free memory from last time
+         */
+        snmp_reset_var_buffers( idx_vars );
+    }
+
+
+@    eval $mfd_temp = "idx_vars"@
 @    foreach $node index@
 @        include m2c_setup_node.m2i@
-        /** $node.syntax = $node.perltype = $node.type */
+        /* $m2c_node_summary */
 @        if $m2c_node_needlength == 1@
     snmp_set_var_value($mfd_temp, (u_char*)&ctx_ref->ctx->tbl_idx.$node,
                        ctx_ref->ctx->tbl_idx.${node}_len);
@@ -33,57 +50,86 @@ ${table}_index2oid(netsnmp_mfd_registration *reg,
 @        eval $mfd_temp = "${mfd_temp}->next_variable"@
 @    end@ # for each column
 
-    build_oid_noalloc(ctx_ref->ctx->oid_tmp, MAX_OID_LEN,
+    return build_oid_noalloc(ctx_ref->ctx->oid_tmp, MAX_OID_LEN,
                       &ctx_ref->ctx->oid_idx.len,
-                      NULL, 0, loop_ref->itc->idx_vars);
-
-    return SNMPERR_SUCCESS;
+                      NULL, 0, idx_vars);
 }
 
-/*
- *
+/**
+ * @internal
+ * wrapper around user get_first to setup the index oid
  */
 static int
-${table}_get_first_wrapper(netsnmp_mfd_registration * reg,
+_${table}_get_first_wrapper($mfd_aue_param_decl,
                            ${table}_ref_loop * loop_ref,
                            ${table}_ref_ctx * ctx_ref)
 {
     int rc;
     DEBUGMSGT(("${name}:trace", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_get_first(reg, loop_ref, ctx_ref);
+    rc = ${table}_get_first(mrc, loop_ref, ctx_ref);
 
     /*
      * convert index to OID
      */
     if(SNMPERR_SUCCESS == rc )
-        rc = ${table}_index2oid(reg, loop_ref, ctx_ref);
+        rc = _${table}_index2oid(mrc->mfd_reg, loop_ref, ctx_ref);
 
     return rc;
 }
 
-/*
- *
+/**
+ * @internal
+ * wrapper around user get_next to setup the index oid
  */
 static int
-${table}_get_next_wrapper(netsnmp_mfd_registration * reg,
+_${table}_get_next_wrapper($mfd_aue_param_decl,
                           ${table}_ref_loop * loop_ref,
                           ${table}_ref_ctx * ctx_ref)
 {
     int rc;
     DEBUGMSGT(("${name}:trace", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_get_next(reg, loop_ref, ctx_ref);
+    rc = ${table}_get_next(mrc, loop_ref, ctx_ref);
 
     /*
      * convert index to OID
      */
     if(SNMPERR_SUCCESS == rc )
-        rc = ${table}_index2oid(reg, loop_ref, ctx_ref);
+        rc = _${table}_index2oid(mrc->mfd_reg, loop_ref, ctx_ref);
 
     return rc;
 }
 
+/**
+ * @internal
+ * get data wrapper to allocate context for the user
+ */
+static int
+_${table}_get_data_wrapper($mfd_aue_param_decl,
+                           ${table}_ref_loop * loop_ref,
+                           ${table}_ref_ctx * ctx_ref)
+{
+    ${table}_ctx *orig_ctx = ctx_ref->ctx;
+    int rc;
+
+    DEBUGMSGT(("${name}:trace", ">%s\n", __FUNCTION__));
+
+    /*
+     * create a new context
+     */
+    netsnmp_assert(NULL == ctx_ref->ctx);
+    ctx_ref->ctx = _${table}_allocate_ctx(mrc->mfd_reg);
+    if(NULL == ctx_ref->ctx)
+        return SNMPERR_GENERR;
+
+    return ${table}_get_data(mrc, loop_ref, ctx_ref);
+}
+
+/**
+ * @internal
+ * initialize the iterator container with functions or wrappers
+ */
 netsnmp_container *
 ${table}_container_init(netsnmp_mfd_registration *reg)
 {
@@ -96,11 +142,11 @@ ${table}_container_init(netsnmp_mfd_registration *reg)
         /** compare */
         NULL,
         /** get_first */
-        (Netsnmp_Iterator_Loop_Key*)${table}_get_first_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${table}_get_first_wrapper,
         /** get_next */
-        (Netsnmp_Iterator_Loop_Key*)${table}_get_next_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${table}_get_next_wrapper,
         /** get_data */
-        (Netsnmp_Iterator_Loop_Data*)${table}_get_data,
+        (Netsnmp_Iterator_Loop_Data*)_${table}_get_data_wrapper,
         /** save_pos */
         (Netsnmp_Iterator_Ctx_Dup*)${table}_save_position,
         /** init_loop_ctx */
