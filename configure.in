@@ -1317,32 +1317,31 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
       AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
       CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
-dnl two variants of bzip2 need checking.
-AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
-   AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
+  dnl two variants of bzip2 need checking.
+  AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
+     AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
 
-dnl two variants of db1 need checking.
-AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
-   AC_CHECK_LIB(db, dbopen, [_rpmlibs="-ldb $_rpmlibs"])
-)
+  dnl two variants of db1 need checking.
+  AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
+     AC_CHECK_LIB(db, dbopen, [_rpmlibs="-ldb $_rpmlibs"]))
 
-dnl two variants of db3 need checking.
-AC_CHECK_LIB(db-3.1, db_create, [_rpmlibs="-ldb-3.1 $_rpmlibs"],
-  AC_CHECK_LIB(db-3.0, db_create, [_rpmlibs="-ldb-3.0 $_rpmlibs"])
-)
+  dnl two variants of db3 need checking.
+  AC_CHECK_LIB(db-3.1, db_create, [_rpmlibs="-ldb-3.1 $_rpmlibs"],
+    AC_CHECK_LIB(db-3.0, db_create, [_rpmlibs="-ldb-3.0 $_rpmlibs"]))
   
-dnl rpm-3.0.5 and later needs popt.
-AC_CHECK_LIB(popt, poptParseArgvString, [_rpmlibs="-lpopt $_rpmlibs"])
+  dnl rpm-3.0.5 and later needs popt.
+  AC_CHECK_LIB(popt, poptParseArgvString, [_rpmlibs="-lpopt $_rpmlibs"])
   
-dnl rpm-4.0.x needs rpmio.
-AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
+  dnl rpm-4.0.x needs rpmio.
+  AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
   
-dnl now check for rpm using the appropriate libraries.
-AC_CHECK_LIB(rpm, rpmdbOpen,[
-  AC_DEFINE(HAVE_LIBRPM)
-  LIBS="-lrpm $_rpmlibs $LIBS"
-  CFLAGS="$CFLAGS -I/usr/include/rpm"
-],,$_rpmlibs)
+  dnl now check for rpm using the appropriate libraries.
+  AC_CHECK_LIB(rpm, rpmdbOpen,[
+    AC_DEFINE(HAVE_LIBRPM)
+    LIBS="-lrpm $_rpmlibs $LIBS"
+    CFLAGS="$CFLAGS -I/usr/include/rpm"
+  ],,$_rpmlibs)
+fi
   
 dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
