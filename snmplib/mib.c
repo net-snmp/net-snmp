@@ -80,11 +80,6 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
 
-static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
-					   size_t *out_len, int allow_realloc, 
-					   int *buf_overflow,
-					   const oid *objid, size_t objidlen);
-
 static char *uptimeString (u_long, char *);
 
 static struct tree *_get_realloc_symbol(const oid *objid, size_t objidlen,
@@ -765,8 +760,10 @@ sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
     }
   }
 
-  _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc, &buf_overflow,
-			(oid *)(var->val.objid), var->val_len/sizeof(oid));
+  netsnmp_sprint_realloc_objid_tree(buf, buf_len, out_len, allow_realloc,
+                                    &buf_overflow,
+                                    (oid *)(var->val.objid),
+                                    var->val_len/sizeof(oid));
 
   if (buf_overflow) {
     return 0;
@@ -1893,10 +1890,11 @@ int read_objid(const char *input,
     return 1;
 }
 
-static struct tree *
-_sprint_realloc_objid(u_char **buf, size_t *buf_len,
-		      size_t *out_len, int allow_realloc, int *buf_overflow,
-		      const oid *objid, size_t objidlen)
+struct tree *
+netsnmp_sprint_realloc_objid_tree(u_char **buf, size_t *buf_len,
+                                  size_t *out_len, int allow_realloc,
+                                  int *buf_overflow,
+                                  const oid *objid, size_t objidlen)
 {
   u_char *tbuf = NULL, *cp = NULL;
   size_t tbuf_len = 256, tout_len = 0;
@@ -1999,7 +1997,7 @@ sprint_realloc_objid(u_char **buf, size_t *buf_len,
 {
   int buf_overflow = 0;
 
-  _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc, &buf_overflow,
+  netsnmp_sprint_realloc_objid_tree(buf, buf_len, out_len, allow_realloc, &buf_overflow,
 			objid, objidlen);
   return !buf_overflow;
 }
@@ -2038,7 +2036,7 @@ fprint_objid(FILE *f,
     fprintf(f, "[TRUNCATED]\n");
     return;
   } else {
-    _sprint_realloc_objid(&buf, &buf_len, &out_len, 1, &buf_overflow,
+    netsnmp_sprint_realloc_objid_tree(&buf, &buf_len, &out_len, 1, &buf_overflow,
 			  objid, objidlen);
     if (buf_overflow) {
       fprintf(f, "%s [TRUNCATED]\n", buf);
@@ -2059,7 +2057,7 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
     struct tree *subtree = tree_head;
     int buf_overflow = 0;
 
-    subtree = _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc,
+    subtree = netsnmp_sprint_realloc_objid_tree(buf, buf_len, out_len, allow_realloc,
 				    &buf_overflow, objid, objidlen); 
     
     if (buf_overflow) {
@@ -2820,12 +2818,12 @@ _get_realloc_symbol(const oid *objid, size_t objidlen,
 		goto finish_it;
 	    if (extended_index) {
 	      if (in_dices->isimplied) {
-		if (!*buf_overflow && !_sprint_realloc_objid(buf, buf_len,
+		if (!*buf_overflow && !netsnmp_sprint_realloc_objid_tree(buf, buf_len,
 			out_len, allow_realloc, buf_overflow, objid, numids)) {
 		  *buf_overflow = 1;
 		}
 	      } else {
-		if (!*buf_overflow && !_sprint_realloc_objid(buf, buf_len,
+		if (!*buf_overflow && !netsnmp_sprint_realloc_objid_tree(buf, buf_len,
 		    out_len, allow_realloc, buf_overflow, objid+1, numids-1)) {
 		  *buf_overflow = 1;
 		}
