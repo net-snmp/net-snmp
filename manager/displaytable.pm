@@ -1,10 +1,10 @@
-
 # displaytable(TABLENAME, CONFIG...):
 #
 #   stolen from sqltohtml in the ucd-snmp package
 #
 
 package displaytable;
+use POSIX (isprint);
 
 BEGIN {
     use Exporter ();
@@ -112,10 +112,8 @@ sub displaygraph {
     my @pngdata;
 
     if (defined($config{'-createdata'})) {
-	print STDERR "calling\n";
 	&{$config{'-createdata'}}(\@pngdata, \@xdata, \%data);
     } else {
-	print STDERR "not calling\n";
 	push @pngdata, \@xdata;
 
 	my @datakeys = keys(%data);
@@ -170,6 +168,7 @@ sub displaytable {
     my $dolink = $config{'-dolink'};
     my $datalink = $config{'-datalink'};
     my $beginhook = $config{'-beginhook'};
+    my $modifiedhook = $config{'-modifiedhook'};
     my $endhook = $config{'-endhook'};
     my $selectwhat = $config{'-select'};
 #    my $printonly = $config{'-printonly'};
@@ -199,6 +198,7 @@ sub displaytable {
     # editable/markable setup
     my $edited = 0;
     my $editable = 0;
+    my $markable = 0;
     my (@indexkeys, @valuekeys, $uph, %indexhash, $q);
     if (defined($config{'-editable'})) {
 	$editable = 1;
@@ -242,7 +242,7 @@ sub displaytable {
 	$rowcount++;
 	if ($edited && $editable && !defined($uph)) {
 	    foreach my $kk (keys(%$data)) {
-		push (@valuekeys, $kk) if (!defined($indexhash{$kk}));
+		push (@valuekeys, maybe_from_hex($kk)) if (!defined($indexhash{$kk}));
 	    }
 	    my $cmd = "update $tablename set " . 
 		join(" = ?, ",@valuekeys) . 
@@ -250,7 +250,7 @@ sub displaytable {
 			join(" = ? and ",@indexkeys) .
 			    " = ?";
 	    $uph = $dbh->prepare($cmd);
-#	    print "setting up: $cmd<br>\n";
+#	    print STDERR "setting up: $cmd<br>\n";
 	}
 	if ($doheader) {
 	    if ($config{'-selectorder'} && 
@@ -329,8 +329,19 @@ sub displaytable {
 	    &$beginhook($dbh, $tablename, $data);
 	}
 	if ($edited && $editable) {
+	    my @indexvalues = getvalues($data, @indexkeys);
+	    if ($modifiedhook) {
+		foreach my $valkey (@valuekeys) {
+		    my ($value) = getquery($q, $data, \@indexkeys, $valkey);
+		    if ($value ne $data->{$valkey}) {
+			&$modifiedhook($dbh, $tablename, $valkey, 
+				       $data, @indexvalues);
+		    }
+		}
+	    }
+		    
 	    my $ret = $uph->execute(getquery($q, $data, \@indexkeys, @valuekeys), 
-				    getvalues($data, @indexkeys));
+				    @indexvalues);
 	    foreach my $x (@indexkeys) {
 		next if (defined($indexhash{$x}));
 		$data->{$x} = $q->param(to_unique_key($x, $data, @indexkeys));
@@ -354,7 +365,16 @@ sub displaytable {
 					      defined($ref = &$datalink($key, $data->{$key})));
 		if ($editable && !defined($indexhash{$key})) {
 		    my $ukey = to_unique_key($key, $data, @indexkeys);
-		    print "<input type=text name=\"$ukey\" value=\"$data->{$key}\">";
+		    my $sz;
+		    if ($config{'-sizehash'}) {
+			$sz = "size=" . $config{'-sizehash'}{$key};
+		    }
+		    if (!$sz && $config{'-inputsize'}) {
+			$sz = "size=" . $config{'-inputsize'};
+		    }
+		    print STDERR "size $key: $sz from $config{'-sizehash'}{$key} / $config{'-inputsize'}\n";
+		    print "<input type=text name=\"$ukey\" value=\"" . 
+			maybe_to_hex($data->{$key}) . "\" $sz>";
 		} else {
 		    if ($config{'-printer'}) {
 			&{$config{'-printer'}}($key, $data->{$key}, $data);
@@ -406,7 +426,7 @@ sub getvalues {
     my $hash = shift;
     my @ret;
     foreach my $i (@_) {
-	push @ret, $hash->{$i};
+	push @ret, maybe_from_hex($hash->{$i});
     }
     return @ret;
 }
@@ -417,10 +437,28 @@ sub getquery {
     my $keys = shift;
     my @ret;
     foreach my $i (@_) {
-	push @ret, $q->param(to_unique_key($i, $data, @$keys));
+	push @ret, maybe_from_hex($q->param(to_unique_key($i, $data, @$keys)));
     }
     return @ret;
 }
+
+sub maybe_to_hex {
+    my $str = shift;
+    if (!isprint($str)) {
+	$str = "0x" . (unpack("H*", $str))[0];
+    }
+    $str =~ s/\"/&quot;/g;
+    return $str;
+}
+
+sub maybe_from_hex {
+    my $str = shift;
+    if (substr($str,0,2) eq "0x") {
+	($str) = pack("H*", substr($str,2));
+    }
+    return $str;
+}
+
 1;
 __END__
 =head1 NAME
