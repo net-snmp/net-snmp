@@ -48,36 +48,6 @@ ucd-snmp/proxy.lo: ./../../snmplib/tools.h ./../agent_trap.h
 ucd-snmp/proxy.lo: ./../../snmplib/callback.h ucd-snmp/proxy.h
 ucd-snmp/proxy.lo: ./../../snmplib/snmp_client.h
 ucd-snmp/proxy.lo: ./../../snmplib/snmp_parse_args.h ./../../snmplib/system.h
-sitNtTest1Objs.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-sitNtTest1Objs.lo: ../../s/generic.h ../../m/generic.h 
-sitNtTest1Objs.lo:  ./../../snmplib/getopt.h
-sitNtTest1Objs.lo: mibincl.h 
-sitNtTest1Objs.lo:  ../../mib_module_config.h
-sitNtTest1Objs.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-sitNtTest1Objs.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-sitNtTest1Objs.lo: ./../agent_registry.h ./../agent_read_config.h
-sitNtTest1Objs.lo: ./../var_struct.h ./../../snmplib/snmp.h
-sitNtTest1Objs.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-sitNtTest1Objs.lo: ./../../snmplib/snmp_logging.h 
-sitNtTest1Objs.lo:  ./../../snmplib/read_config.h
-sitNtTest1Objs.lo: ./../../snmplib/tools.h ./../agent_trap.h
-sitNtTest1Objs.lo: ./../../snmplib/callback.h ./../../snmplib/int64.h
-sitNtTest1Objs.lo: sitNtTest1Objs.h
-ucd-snmp/dlmod.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/dlmod.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/dlmod.lo:  ./../../snmplib/getopt.h
-ucd-snmp/dlmod.lo:  mibincl.h 
-ucd-snmp/dlmod.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/dlmod.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/dlmod.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/dlmod.lo:  ./../../snmplib/read_config.h
-ucd-snmp/dlmod.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/dlmod.lo: ./../../snmplib/callback.h struct.h util_funcs.h
-ucd-snmp/dlmod.lo: ucd-snmp/dlmod.h
 mibII/mta_sendmail.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 mibII/mta_sendmail.lo: ../../s/generic.h ../../m/generic.h mibincl.h
 mibII/mta_sendmail.lo:  ../../mib_module_config.h
@@ -421,6 +391,21 @@ ucd-snmp/file.lo:  ./../../snmplib/read_config.h
 ucd-snmp/file.lo: ./../../snmplib/tools.h ./../agent_trap.h
 ucd-snmp/file.lo: ./../../snmplib/callback.h struct.h util_funcs.h
 ucd-snmp/file.lo: ucd-snmp/file.h mibdefs.h util_funcs.h
+ucd-snmp/dlmod.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
+ucd-snmp/dlmod.lo: ../../s/generic.h ../../m/generic.h 
+ucd-snmp/dlmod.lo:  ./../../snmplib/getopt.h
+ucd-snmp/dlmod.lo:  mibincl.h 
+ucd-snmp/dlmod.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
+ucd-snmp/dlmod.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
+ucd-snmp/dlmod.lo: ./../snmp_vars.h ./../agent_registry.h
+ucd-snmp/dlmod.lo: ./../agent_read_config.h ./../var_struct.h
+ucd-snmp/dlmod.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
+ucd-snmp/dlmod.lo: ./../../snmplib/snmp_debug.h
+ucd-snmp/dlmod.lo: ./../../snmplib/snmp_logging.h 
+ucd-snmp/dlmod.lo:  ./../../snmplib/read_config.h
+ucd-snmp/dlmod.lo: ./../../snmplib/tools.h ./../agent_trap.h
+ucd-snmp/dlmod.lo: ./../../snmplib/callback.h struct.h util_funcs.h
+ucd-snmp/dlmod.lo: ucd-snmp/dlmod.h
 snmpv3/snmpEngine.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 snmpv3/snmpEngine.lo: ../../s/generic.h ../../m/generic.h mibincl.h
 snmpv3/snmpEngine.lo:  ../../mib_module_config.h
@@ -545,20 +530,6 @@ notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/callback.h
 notification/snmpNotifyFilterProfileTable.lo: header_complex.h
 notification/snmpNotifyFilterProfileTable.lo: notification/snmpNotifyFilterProfileTable.h
 notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp-tc.h
-util_funcs.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-util_funcs.lo: ../../s/generic.h ../../m/generic.h 
-util_funcs.lo: ./../../snmplib/getopt.h 
-util_funcs.lo:  mibincl.h 
-util_funcs.lo:  ../../mib_module_config.h
-util_funcs.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-util_funcs.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-util_funcs.lo: ./../agent_registry.h ./../agent_read_config.h
-util_funcs.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-util_funcs.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-util_funcs.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-util_funcs.lo: ./../agent_trap.h ./../../snmplib/callback.h struct.h
-util_funcs.lo: util_funcs.h ../../snmplib/system.h ucd-snmp/errormib.h
-util_funcs.lo: mibdefs.h
 host/hr_system.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 host/hr_system.lo: ../../s/generic.h ../../m/generic.h mibincl.h
 host/hr_system.lo:  ../../mib_module_config.h
@@ -727,6 +698,20 @@ agentx/subagent.lo: ./../ds_agent.h ./../../snmplib/callback.h
 agentx/subagent.lo: ./../agent_callbacks.h ./../agent_trap.h
 agentx/subagent.lo: ./../../snmplib/snmp_debug.h ../../mib_module_config.h
 agentx/subagent.lo: mibII/sysORTable.h ./../../snmplib/system.h
+util_funcs.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
+util_funcs.lo: ../../s/generic.h ../../m/generic.h 
+util_funcs.lo: ./../../snmplib/getopt.h 
+util_funcs.lo:  mibincl.h 
+util_funcs.lo:  ../../mib_module_config.h
+util_funcs.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
+util_funcs.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
+util_funcs.lo: ./../agent_registry.h ./../agent_read_config.h
+util_funcs.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
+util_funcs.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
+util_funcs.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
+util_funcs.lo: ./../agent_trap.h ./../../snmplib/callback.h struct.h
+util_funcs.lo: util_funcs.h ../../snmplib/system.h ucd-snmp/errormib.h
+util_funcs.lo: mibdefs.h
 mibII/kernel_linux.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
 mibII/kernel_linux.lo: ../../s/generic.h ../../m/generic.h mibincl.h
 mibII/kernel_linux.lo:  ../../mib_module_config.h
