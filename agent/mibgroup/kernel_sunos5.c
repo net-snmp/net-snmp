@@ -758,8 +758,13 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifType = 1;
 	ifp->ifSpeed = 0;
 	if (getKstat(ifrp->ifr_name, "ifspeed", &ifp->ifSpeed) == 0 && ifp->ifSpeed != 0) {
-            ifp->ifSpeed *= 1000000;
+	    /* check for SunOS patch with half implemented ifSpeed */
+            if (ifp->ifSpeed < 10000)
+		ifp->ifSpeed *= 1000000;
         }
+	else if (getKstat(ifrp->ifr_name, "ifSpeed", &ifp->ifSpeed) == 0) {
+	    /* this is good */
+	}
 	switch (ifrp->ifr_name[0]) {
 	case 'l': /* le / lo / lane (ATM LAN Emulation) */
 	    if (ifrp->ifr_name[1] == 'o') {
