@@ -999,7 +999,7 @@ do_subtree(root, nodes)
 			 * The new node is anonymous,
 			 *  so merge it with the existing one.
 			 */
-                merge_anon_children( tp, anon_tp );
+                merge_anon_children( anon_tp, tp );
             }
             else if (!strncmp( anon_tp->label, ANON, ANON_LEN)) {
 			/*
