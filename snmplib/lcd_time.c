@@ -374,6 +374,7 @@ hash_engineID_quit:
 
 
 
+#ifdef SNMP_TESTING_CODE
 /*******************************************************************-o-******
  * dump_etimelist_entry
  *
@@ -422,7 +423,6 @@ dump_etimelist_entry(Enginetime e, int count)
 
 
 
-#ifdef SNMP_TESTING_CODE
 /*******************************************************************-o-******
  * dump_etimelist
  */
