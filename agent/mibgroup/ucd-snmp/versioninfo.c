@@ -100,7 +100,7 @@ u_char *var_extensible_version(struct variable *vp,
       curtime = time(NULL);
       cptr = ctime(&curtime);
       sprintf(errmsg,cptr);
-      *var_len = strlen(errmsg);
+      *var_len = strlen(errmsg)-1;
       return((u_char *) errmsg);
     case VERIDENT:
       sprintf(errmsg,"$Id$");
