@@ -8,14 +8,21 @@
 @end@
 ########################################################################
 ##
-    /** TODO: update typedef to correct pointer type.
-     * (or add @eval $@m2c_data_context = "TYPE"@ and regenerate code) */
-@    eval $m2c_data_context = "struct ${context}_data_s"@
+/***********************************************************************
+ * data context
+ */
+@if $m2c_data_allocate == 1@
+@   eval $gdc_tmp = "*";
+@else@
+@   eval $gdc_tmp = "";
+@end@
+##
+@if "$m2c_data_context" eq "generated"@
 /*
  * This structure contains storage for all the columns defined in the
  * $context.
  */
-struct ${context}_data_s {
+typedef struct ${context}_data_s {
     
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
@@ -28,7 +35,14 @@ struct ${context}_data_s {
 @        end@
     
 @    end@ # foreach nonindex
-};
+} $gdc_tmp ${context}_data;
+@elsif "$m2c_data_context" eq "unknown"@
+    /** TODO: update typedef to correct pointer type.
+     * (or add @eval $@m2c_data_context = "TYPE"@ and regenerate code) */
+typedef void * ${context}_data;
+@else@
+typedef $m2c_data_context $gdc_tmp ${context}_data;
+@end@
 
 ##
 ########################################################################
