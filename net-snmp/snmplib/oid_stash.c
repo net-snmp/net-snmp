@@ -9,11 +9,7 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/types.h>
-#include <net-snmp/utilities.h>
-
-#include <net-snmp/library/snmp_api.h>
-#include <net-snmp/library/oid_stash.h>
+#include <net-snmp/net-snmp-includes.h>
 
 /*
  * xxx-rks: when you have some spare time:
@@ -174,6 +170,42 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
     if (ret)
         return ret->thedata;
     return NULL;
+}
+
+void
+netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
+                        char *tokenname, NetSNMPStashDump *dumpfn,
+                        oid *curoid, size_t curoid_len) {
+
+    char buf[SNMP_MAXBUF];
+    netsnmp_oid_stash_node *tmpp;
+    char *cp;
+    char *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                          NETSNMP_DS_LIB_APPTYPE);
+    int i;
+    
+    if (!tokenname || !root || !curoid || !dumpfn)
+        return;
+
+    for (i = 0; i < root->children_size; i++) {
+        if (root->children[i]) {
+            for (tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
+                curoid[curoid_len] = tmpp->value;
+                if (tmpp->thedata) {
+                    snprintf(buf, sizeof(buf), "%s ", tokenname);
+                    cp = read_config_save_objid(buf+strlen(buf), curoid,
+                                                curoid_len+1);
+                    *cp++ = ' ';
+                    *cp = '\0';
+                    if ((*dumpfn)(cp, sizeof(buf) - strlen(buf),
+                                  tmpp->thedata, tmpp))
+                        read_config_store(appname, buf);
+                }
+                netsnmp_oid_stash_store(tmpp, tokenname, dumpfn,
+                                        curoid, curoid_len+1);
+            }
+        }
+    }
 }
 
 void
