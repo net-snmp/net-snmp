@@ -961,6 +961,7 @@ AC_ARG_WITH(libwrap,
   int deny_severity  = 0;
   ],[hosts_access((void *)0)],
 		AC_MSG_RESULT(yes)
+		AC_DEFINE(USE_LIBWRAP)
 		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 		WRAPLIBS="$WRAPLIBS -lwrap", AC_MSG_RESULT(no)),
 	    CPPFLAGS=${_cppflags}),
