@@ -21,6 +21,16 @@
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 #ifdef STDC_HEADERS
 #include <stdarg.h>
@@ -36,6 +46,24 @@ static int do_filelogging=0;
 static int do_stderrlogging=1;
 static FILE *logfile;
 
+
+static char *
+sprintf_stamp (time_t *now)
+{
+    time_t Now;
+    struct tm *tm;
+    static char sbuf [32];
+
+    if (now == NULL) {
+	now = &Now;
+	time (now);
+    }
+    tm = localtime (now);
+    sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
+	    tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+    return sbuf;
+}
 
 void
 snmp_disable_syslog(void) {
@@ -115,7 +143,7 @@ void
 snmp_log_filelog (int priority, const char *string)
 {
   if (do_filelogging) {
-    fputs(string, logfile);
+    fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
   }
 }
 
@@ -124,7 +152,7 @@ void
 snmp_log_stderrlog (int priority, const char *string)
 {
   if (do_stderrlogging) {
-    fputs(string, stderr);
+    fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
   }
 }
 
