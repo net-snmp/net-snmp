@@ -65,7 +65,7 @@ nsb-get-config()
 
 nsb-sysname()
 {
-   echo `uname -mrs | tr ' ' _`
+   echo `uname -mrs | tr ' /' _`
 }
 
 nsb-zip()
