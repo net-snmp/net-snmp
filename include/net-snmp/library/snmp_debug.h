@@ -197,7 +197,7 @@ extern          "C" {
 #define DEBUGMSGTL(x)
 #define DEBUGMSGOID(x)
 #define DEBUGMSGVAR(x)
-#deinfe DEBUGMSGOIDRANGE(x)
+#define DEBUGMSGOIDRANGE(x)
 #define DEBUGMSGHEX(x)
 #define DEBUGIF(x)        if(0)
 #define DEBUGDUMP(t,b,l,p)
