@@ -58,11 +58,6 @@ makefileindepend: nosysdepend
 
 T.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 T.o: ../s/generic.h ../m/generic.h 
-deftest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-deftest.o: ../s/generic.h ../m/generic.h 
-deftest.o:  ./../snmplib/asn1.h
-deftest.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_debug.h
-deftest.o: ./../snmplib/default_store.h
 etimetest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 etimetest.o: ../s/generic.h ../m/generic.h 
 etimetest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
