@@ -14,6 +14,9 @@ CC		= @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
+test:
+	./RUNTESTS -a
+
 #
 # FIX	Ick, get rid of the direct reference to libsnmp.a...
 #

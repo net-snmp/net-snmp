@@ -35,7 +35,7 @@
 
 # Usage mess.  (No, it works.)
 #
-USAGE="Usage: `basename $0` [-h]"
+USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS]"
 
 usage() { echo; echo $USAGE; cat <<BLIK | sed 's/^#//' | sed '1d' | $PAGER
 $USAGE_LONG
@@ -56,6 +56,26 @@ while [ -n "$1" ]; do
 	-i)
 	    interactive="yes"
 	    ;;
+	-v)
+	    SNMP_VERBOSE=1
+	    export SNMP_VERBOSE
+	    ;;
+	-V)
+	    SNMP_VERBOSE=2
+	    export SNMP_VERBOSE
+	    ;;
+	-s)
+	    SNMP_SAVE_TMPDIR="yes"
+	    export SNMP_SAVE_TMPDIR
+	    ;;
+	-T)
+	    shift
+	    test_nums="$1"
+	    ;;
+	-a)
+	    test_nums="all"
+	    ;;
+
     esac
 
     shift
@@ -108,8 +128,8 @@ if [ "x$do_tests" = "x" ]; then
 
 	    # Do the rest
 	    *)
-		if [ "x$interactive" != "xyes" ]; then
-		    num=`expr $num + 1`
+		num=`expr $num + 1`
+		if [ "x$interactive" != "xyes" -a "x$test_nums" = "x" ]; then
 		    echo -n "$num:  "
 		    ../eval_onescript.sh $testfile
 		fi
@@ -125,13 +145,31 @@ if [ "x$do_tests" = "x" ]; then
     # TODO: allow user to interactively pick the list of tests to run.
     #
 
-    #read inp
-    #if [ "x$inp" = "x" ]; then
-	do_tests="$all_files"
-    #else
-    #    set $inp
-    #    
-    #fi
+    if [ "x$interactive" != "xyes" ]; then
+	if [ "x$test_nums" = "x" ]; then
+	    echo -n "Enter test numbers [all]: "
+	    read inp
+	else
+	    if [ "x$test_nums" = "xall" ]; then
+		inp=""
+	    else
+		inp="$test_nums"
+	    fi
+	fi
+	if [ "x$inp" = "x" ]; then
+	    do_tests="$all_files"
+	else
+	    a=1
+	    set $all_files
+	    while [ $a -le $num ]; do
+		if echo " $inp " | grep " $a " > /dev/null; then
+		    do_tests="$do_tests $1"
+		fi
+		shift
+		a=`expr $a + 1`
+	    done
+	fi
+    fi
 
     #echo Starting: Running tests $do_tests
 fi
@@ -139,7 +177,7 @@ fi
 #
 # Run the tests
 #
-num=0
+num=1
 for testfile in $do_tests; do
     dothisone="yes";
     if [ "x$interactive" = "xyes" ]; then
