@@ -239,15 +239,29 @@ proxy_handler(netsnmp_mib_handler *handler,
         pdu = snmp_pdu_create(reqinfo->mode);
         break;
 
-    case MODE_SET_COMMIT:
+    case MODE_SET_ACTION:
         pdu = snmp_pdu_create(SNMP_MSG_SET);
         break;
+
+    case MODE_SET_UNDO:
+        /*
+         *  If we set successfully (status == NOERROR),
+         *     we can't back out again, so need to report the fact.
+         *  If we failed to set successfully, then we're fine.
+         */
+        for (request = requests; request; request=request->next) {
+            if (request->status == SNMP_ERR_NOERROR) {
+                netsnmp_set_request_error(reqinfo, requests,
+                                          SNMP_ERR_UNDOFAILED);
+                return SNMP_ERR_UNDOFAILED;
+	    }
+	}
+        return SNMP_ERR_NOERROR;
 
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_FREE:
-    case MODE_SET_ACTION:
-    case MODE_SET_UNDO:
+    case MODE_SET_COMMIT:
         /*
          *  Nothing to do in this pass
          */
