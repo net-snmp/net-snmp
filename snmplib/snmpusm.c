@@ -2348,6 +2348,8 @@ usm_process_in_msg (
 				DEBUGMSGTL(("usm","%s\n",
 					"Failed increment statistic."));
 			}
+			usm_free_usmStateReference(*secStateRef);
+			*secStateRef = NULL;
 			return SNMPERR_USM_PARSEERROR;
 		}
 
