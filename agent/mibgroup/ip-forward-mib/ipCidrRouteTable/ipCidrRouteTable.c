@@ -979,8 +979,7 @@ ipCidrRouteStatus_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * update, replace or delete, if needed.
      */
-#warning "xxx-rks: ipcidrroutestatus rowstatus"
-//    (*ipCidrRouteStatus_ptr) = rowreq_ctx->data->row_status;
+    (*ipCidrRouteStatus_ptr) = rowreq_ctx->ipCidrRouteStatus;
 
     return MFD_SUCCESS;
 }
