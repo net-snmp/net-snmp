@@ -11,7 +11,7 @@ TARG		= snmpget snmpgetnext snmpset snmpusm			\
 
 SBINTARG	= snmptrapd
 SUBDIRS		= snmpnetstat
-TRAPSPECIAL	= @trap_list_o@
+#TRAPSPECIAL	= @trap_list_o@
 
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LOCAL_LIBS	= -L../snmplib 
