@@ -1814,3 +1814,32 @@ print_oid_report_disable_symbolic (void)
 {
      print_subtree_oid_report_disable_symbolic ();
 }
+
+#ifdef CMU_COMPATIBLE
+
+/*
+ * Convert timeticks to hours, minutes, seconds string.
+ * Don't show centiseconds.
+ */
+char *uptime_string(u_long timeticks, char *buf)
+{
+    char tbuf[64];
+    char * cp;
+    uptimeString(timeticks, tbuf);
+    cp = strrchr(tbuf, '.'); if (cp) *cp = '\0';
+    strcpy(buf, tbuf);
+    return buf; 
+}
+
+int mib_TxtToOid(char *Buf, oid **OidP, int *LenP)
+{
+    return read_objid(Buf, *OidP, LenP);
+}
+
+int mib_OidToTxt(oid *O, int OidLen, char *Buf, int BufLen)
+{
+    sprint_objid(Buf, O, OidLen);
+    return 1;
+}
+
+#endif /* CMU_COMPATIBLE */
