@@ -199,7 +199,7 @@ void init_vmstat_solaris2(void)
 #ifndef HAVE_GETPAGESIZE
 /* Returns the pagesize */
 /* Normally this is in libc, but not on Solaris 2.4 */
-long getpagesize()
+int getpagesize(void)
 {
   return (sysconf(_SC_PAGESIZE));
 }
