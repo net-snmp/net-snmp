@@ -1509,6 +1509,8 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                     netsnmp_acm_check_subtree(asp->pdu,
                                               tp->start_a, prefix_len);
             }
+            else
+                break;
         }
     }
     if (tp == NULL) {
@@ -1847,8 +1849,6 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             if (request && asp->pdu->command == SNMP_MSG_GETBULK) {
                 request->repeat = bulkrep;
             }
-            if (!request)
-                return SNMP_ERR_GENERR;
         }
 
         prevNext = &(varbind_ptr->next_variable);
@@ -1895,8 +1895,8 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].subtree->next)) {
                 if (old_treecache != NULL) {
                     free(old_treecache);
+                    old_treecache = NULL;
                 }
-                return SNMP_ERR_GENERR;
             }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /*
@@ -1908,8 +1908,8 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
                                               asp->requests[i].subtree)) {
                 if (old_treecache != NULL) {
                     free(old_treecache);
+                    old_treecache = NULL;
                 }
-                return SNMP_ERR_GENERR;
             }
         }
     }
