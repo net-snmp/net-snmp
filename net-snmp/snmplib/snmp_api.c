@@ -866,7 +866,7 @@ _sess_open(struct snmp_session *in_session)
                 strcpy( isp->addr.sa_data, session->peername);
             }
 #else /* AF_UNIX */
-            fprintf(stderr,"%s:%d: _sess_open invalid session name %s- unix sockets not supported  \n",
+            snmp_log(LOG_ERR,"%s:%d: _sess_open invalid session name %s- unix sockets not supported  \n",
                     __FILE__,__LINE__,
                     session->peername);
             return(NULL);
@@ -892,7 +892,7 @@ _sess_open(struct snmp_session *in_session)
                     }
 
 #else /* HAVE_GETHOSTBYNAME */
-                    fprintf(stderr,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
+                    snmp_log(LOG_ERR,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
                             __FILE__,__LINE__,
                             session->peername);
                     return(0);
