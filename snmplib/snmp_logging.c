@@ -87,9 +87,6 @@ static int      do_log_callback = 0;
 static FILE    *logfile;
 */
 static int      newline = 1;
-#ifdef WIN32
-static HANDLE   eventlog_h;
-#endif
 
 #ifndef HAVE_VSNPRINTF
                 /*
@@ -191,10 +188,14 @@ decode_priority( char *optarg, int *pri_max )
         case 'D': 
             pri_low = LOG_DEBUG;
             break;
+	default:
+	    fprintf(stderr, "invalid priority: %c\n",*optarg);
+	    return -1;
     }
 
     if (pri_max && *(optarg+1)=='-') {
         *pri_max = decode_priority( optarg+2, NULL );
+	if (*pri_max == -1) return -1;
     }
     return pri_low;
 }
@@ -229,7 +230,7 @@ decode_facility( char *optarg )
     case '7':
         return LOG_LOCAL7;
     default:
-        fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
+        fprintf(stderr, "invalid syslog facility: %c\n",*optarg);
         return -1;
     }
 }
@@ -291,6 +292,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'E':
         priority = decode_priority( optarg, &pri_max );
+	if (priority == -1) return -1;
         if (inc_optind)
             optind++;
         /* Fallthrough */
@@ -298,7 +300,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
         if (logh) {
             logh->pri_max = pri_max;
-            logh->token   = "stderr";
+            logh->token   = strdup("stderr");
 	}
         break;
 
@@ -307,6 +309,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'O':
         priority = decode_priority( optarg, &pri_max );
+	if (priority == -1) return -1;
         if (inc_optind)
             optind++;
         /* Fallthrough */
@@ -314,7 +317,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
         if (logh) {
             logh->pri_max = pri_max;
-            logh->token   = "stdout";
+            logh->token   = strdup("stdout");
             logh->imagic  = 1;	    /* stdout, not stderr */
 	}
         break;
@@ -324,6 +327,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'F':
         priority = decode_priority( optarg, &pri_max );
+	if (priority == -1) return -1;
         optarg = argv[++optind];
         /* Fallthrough */
     case 'f':
@@ -345,6 +349,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      */
     case 'S':
         priority = decode_priority( optarg, &pri_max );
+	if (priority == -1) return -1;
         optarg = argv[++optind];
         /* Fallthrough */
     case 's':
@@ -356,11 +361,11 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         }
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_SYSLOG, priority);
         if (logh) {
+	    int facility  = decode_facility(optarg);
+	    if (facility == -1) return -1;
             logh->pri_max = pri_max;
-            logh->token   = strdup(DEFAULT_LOG_ID);	/*  ident string  */
-#ifndef WIN32
-            logh->imagic  = decode_facility(optarg);
-#endif
+            logh->token   = NULL;
+            logh->magic   = (void *)facility;
 	}
         break;
 
@@ -555,7 +560,9 @@ snmp_enable_syslog_ident(const char *ident, const int facility)
                                            LOG_DEBUG );
         if (logh) {
             logh->magic    = (void*)eventlog_h;
-            logh->token    = strdup("syslog");
+            logh->token    = strdup(ident);
+            logh->imagic   = enable;	/* syslog open */
+            logh->enabled  = enable;
         }
     }
 }
@@ -596,17 +603,14 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 
     if (logfilename) {
         logh = netsnmp_find_loghandler( logfilename );
-        if (logh)
-            netsnmp_enable_filelog(logh, dont_zero_log);
-	else {
+        if (!logh) {
             logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_FILE,
                                                LOG_DEBUG );
-            if (logh) {
+            if (logh)
                 logh->token = strdup(logfilename);
-                logh->magic = (void*)fopen(logfilename,
-                                           (dont_zero_log ? "a" : "w" ));
-	    }
-        }
+	}
+	if (logh)
+	    netsnmp_enable_filelog(logh, dont_zero_log);
     } else {
         for (logh = logh_head; logh; logh = logh->next)
             if (logh->type == NETSNMP_LOGHANDLER_FILE)
@@ -745,6 +749,7 @@ netsnmp_register_loghandler( int type, int priority )
 
     case NETSNMP_LOGHANDLER_FILE:
         logh->handler = log_handler_file;
+	logh->imagic  = 1;
         break;
     case NETSNMP_LOGHANDLER_SYSLOG:
         logh->handler = log_handler_syslog;
@@ -817,12 +822,13 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
 
     if (logh->imagic)
        printf(         "%s%s", sbuf, string);
     else
        fprintf(stderr, "%s%s", sbuf, string);
+
+    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
 
     return 1;
 }
@@ -832,9 +838,9 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
 int
 log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 {
-    char            sbuf[40];
     WORD            etype;
     LPCTSTR         event_msg[2];
+    HANDLE	    eventlog_h = logh->magic;
 
         /*
          **  EVENT TYPES:
@@ -900,6 +906,10 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
     if (!(logh->imagic)) {
         const char *ident    = logh->token;
         int   facility = (int)logh->magic;
+	if (!ident)
+	    ident = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+		                          NETSNMP_DS_LIB_APPTYPE);
+
         openlog(ident, LOG_CONS | LOG_PID, facility);
         logh->imagic = 1;
     }
@@ -915,13 +925,17 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
     FILE           *fhandle;
     char            sbuf[40];
 
+    /*
+     * We use imagick to save information about whether the next output
+     * will start a new line, and thus might need a timestamp
+     */
+
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-                               NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
+                               NETSNMP_DS_LIB_LOG_TIMESTAMP) && logh->imagic) {
         sprintf_stamp(NULL, sbuf);
     } else {
         strcpy(sbuf, "");
     }
-    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
 
     /*
      * If we haven't already opened the file, then do so.
@@ -938,7 +952,8 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
         logh->magic = (void*)fhandle;
     }
     fprintf(fhandle, "%s%s", sbuf, string);
-fflush(fhandle);
+    fflush(fhandle);
+    logh->imagic = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
     return 1;
 }
 
