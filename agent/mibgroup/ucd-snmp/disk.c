@@ -572,6 +572,7 @@ var_extensible_disk(struct variable *vp,
 #endif
     static long     long_ret;
     static char     errmsg[300];
+    float           multiplier;
 
 #if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
@@ -616,10 +617,11 @@ var_extensible_disk(struct variable *vp,
     }
 #if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
-    if (statvfs(disks[disknum].path, &fsd) == -1) {
+    if (statvfs(disks[disknum].path, &fsd) == -1)
 #else
-    if (statvfs(disks[disknum].path, &vfs) == -1) {
+    if (statvfs(disks[disknum].path, &vfs) == -1)
 #endif
+    {
         snmp_log(LOG_ERR, "Couldn't open device %s\n",
                  disks[disknum].device);
         setPerrorstatus("statvfs dev/disk");
@@ -640,11 +642,12 @@ var_extensible_disk(struct variable *vp,
         (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
                (double) (vfs.f_blocks -
                          (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
-    avail = vfs.f_bavail * (vfs.f_bsize / 1024);
+    multiplier = vfs.f_bsize / 1024;
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
     if (vfs.f_frsize > 255)
-        avail = vfs.f_bavail * (vfs.f_frsize / 1024);
+        multiplier = vfs.f_frsize / 1024;
 #endif
+    avail = (long)(vfs.f_bavail * multiplier);
     iserror = (disks[disknum].minimumspace >= 0 ?
                avail < disks[disknum].minimumspace :
                100 - percent <= disks[disknum].minpercent) ? 1 : 0;
@@ -662,21 +665,12 @@ var_extensible_disk(struct variable *vp,
 #endif /* defined(STRUCT_STATVFS_HAS_F_FILES) */ 
     switch (vp->magic) {
     case DISKTOTAL:
-        long_ret = vfs.f_blocks * (vfs.f_bsize / 1024);
-#ifdef STRUCT_STATVFS_HAS_F_FRSIZE
-        if (vfs.f_frsize > 255)
-            long_ret = vfs.f_blocks * (vfs.f_frsize / 1024);
-#endif
+        long_ret = (long)(vfs.f_blocks * multiplier);
         return ((u_char *) (&long_ret));
     case DISKAVAIL:
         return ((u_char *) (&avail));
     case DISKUSED:
-        long_ret = (vfs.f_blocks - vfs.f_bfree) * (vfs.f_bsize / 1024);
-#ifdef STRUCT_STATVFS_HAS_F_FRSIZE
-        if (vfs.f_frsize > 255)
-            long_ret =
-                (vfs.f_blocks - vfs.f_bfree) * (vfs.f_frsize / 1024);
-#endif
+        long_ret = (long)((vfs.f_blocks - vfs.f_bfree) * multiplier);
         return ((u_char *) (&long_ret));
     case DISKPERCENT:
         long_ret = percent;
@@ -736,20 +730,20 @@ var_extensible_disk(struct variable *vp,
     percent =
         availblks ==
         0 ? 100 : (int) ((double) used / (double) totalblks * 100.0 + 0.5);
+    multiplier = filesys.fs_fsize / 1024;
     iserror =
-        (disks[disknum].minimumspace >=
-         0 ? avail * filesys.fs_fsize / 1024 <
-         disks[disknum].minimumspace : 100 - percent <=
-         disks[disknum].minpercent) ? 1 : 0;
+        (disks[disknum].minimumspace >= 0
+            ? avail * multiplier < disks[disknum].minimumspace
+            : 100 - percent <= disks[disknum].minpercent) ? 1 : 0;
     switch (vp->magic) {
     case DISKTOTAL:
-        long_ret = (totalblks * filesys.fs_fsize / 1024);
+        long_ret = (long)(totalblks * multiplier);
         return ((u_char *) (&long_ret));
     case DISKAVAIL:
-        long_ret = avail * filesys.fs_fsize / 1024;
+        long_ret = (long)(avail * multiplier);
         return ((u_char *) (&long_ret));
     case DISKUSED:
-        long_ret = used * filesys.fs_fsize / 1024;
+        long_ret = (long)(used * multiplier);
         return ((u_char *) (&long_ret));
     case DISKPERCENT:
         long_ret = percent;
