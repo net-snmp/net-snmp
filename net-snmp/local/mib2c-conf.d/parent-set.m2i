@@ -35,17 +35,24 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
     netsnmp_assert( NULL != ctx );
 
     /*
-     * TODO: Validate incoming index
+     * TODO:
+     * Validate incoming index
+     *
      * Check that the values specified in the incoming index are valid
      * values.
      */
 $example_start
-    /** TODO: no row creation for you till you update this code */
+    /*
+     * TODO:
+     * update this code or row creation won't work
+     */
     if(1) {
         snmp_log(LOG_WARNING,"invalid index for a new row in the "
                  "${table} table.\n");
         /*
-         * TODO: determine failure type.
+         * TODO:
+         * determine failure type.
+         *
          * If the index could not ever be created, SNMP_ERR_NOCREATION.
          * If the index can not be created under the  present circumstances
          * (even though it could be created under other circumstances),
@@ -65,7 +72,7 @@ $example_end
 
 @end@ # row creation
 ##----------------------------------------------------------------------
-@if $m2c_data_context ne "generated"@
+@if "$m2c_data_context" ne "generated"@
 /**
  * Setup up context with information needed to undo a set request.
  *
@@ -127,7 +134,8 @@ ${context}_commit( ${context}_ctx *ctx )
     netsnmp_assert( NULL != ctx );
 
     /*
-     * TODO: commit your data
+     * TODO:
+     * commit data
      */
 ##$example_start
 ##$example_end
@@ -162,7 +170,8 @@ ${context}_irreversible_commit( ${context}_ctx *ctx )
     netsnmp_assert( NULL != ctx );
 
     /*
-     * TODO: commit your data here
+     * TODO:
+     * commit data here
      */
 ##$example_start
 ##$example_end
