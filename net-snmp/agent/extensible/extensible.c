@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "../../snmplib/asn1.h"
 #include "../../snmplib/snmp_impl.h"
 #include "../snmp_vars.h"
@@ -208,6 +209,13 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   return NULL;
 }
 
+int update_config()
+{
+  free_config(&procwatch,&extens);
+  read_config (DEFPROCFILE,&procwatch,&numprocs,&extens,&numextens);
+  signal(SIGHUP,update_config);
+}
+
 extern char version_descr[];
 init_wes() {
   struct extensible extmp;
@@ -223,4 +231,6 @@ init_wes() {
   /* set default values of system stuff */
   exec_command(&extmp);
   strcpy(version_descr,extmp.output);
+  signal(SIGHUP,update_config);
 }
+
