@@ -3565,8 +3565,8 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 *value > item->mteTriggerThresholdFalling)
                 new_last_state->lastthreshold = MTE_THRESHOLD_HIGH;
             else if (lastthresh == MTE_THRESHOLD_HIGH &&
-                     *value <= item->mteTriggerThresholdRising &&
-                     *value < item->mteTriggerThresholdFalling)
+                     *value < item->mteTriggerThresholdRising &&
+                     *value <= item->mteTriggerThresholdFalling)
                 new_last_state->lastthreshold = MTE_THRESHOLD_LOW;
             else if (lastthresh == MTE_THRESHOLD_BEGIN) {
                 if (*value >= item->mteTriggerThresholdRising)
