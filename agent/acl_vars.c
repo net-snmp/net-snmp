@@ -16,6 +16,7 @@
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
+#include "party.h"
 
 #include "mibgroup/snmpv2_vars.h"
 
@@ -83,6 +84,7 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
     oid *target, *subject;
     long val;
     int bigsize = 1000;
+    struct partyEntry *tg, *su;
 
 /*
  * This routine handles requests for variables of the form:
@@ -107,12 +109,16 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
     /* XXX are these length checks necessary?  If not, take them out of
        here and party_vars.c */
 
-    ap = acl_getEntry(target, targetlen, subject, subjectlen);
+    tg = party_getEntry(target, targetlen);
+    su = party_getEntry(subject, subjectlen);
+    if (su == NULL || tg == NULL)
+      return SNMP_ERR_NOCREATION;
+    
+    ap = acl_getEntry(tg->partyIndex, su->partyIndex, 1);
     if (ap)
 	rp = ap->reserved;
     if (action == RESERVE1 && !ap){
-	if ((ap = acl_rowCreate(target, targetlen,
-				subject, subjectlen)) == NULL)
+	if ((ap = acl_rowCreate(tg->partyIndex, su->partyIndex, 1)) == NULL)
 	    return SNMP_ERR_RESOURCEUNAVAILABLE;
 	rp = ap->reserved;
 	/* create default vals here in reserve area */
@@ -136,7 +142,7 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
 	}
     } else if (action == FREE){
 	if (ap && ap->aclStatus == ACLNONEXISTENT){
-	    acl_rowDelete(target, targetlen, subject, subjectlen);
+	    acl_rowDelete(tg->partyIndex, su->partyIndex, 1);
 	    ap = rp = NULL;
 	}
 	if (ap)	/* satisfy postcondition for bitMask */
