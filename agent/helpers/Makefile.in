@@ -16,6 +16,7 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
         debug_handler.h \
         old_api.h \
         read_only.h \
+        row_merge.h \
         serialize.h \
         set_helper.h \
         table_data.h \
@@ -44,6 +45,7 @@ OBJS =  all_helpers.o \
 	null.o \
 	debug_handler.o \
 	old_api.o \
+	row_merge.o \
 	serialize.o \
 	table_array.o \
 	table_iterator.o \
@@ -62,6 +64,7 @@ LOBJS = all_helpers.lo \
 	null.lo \
 	debug_handler.lo \
 	old_api.lo \
+	row_merge.lo \
 	serialize.lo \
 	table_array.lo \
 	table_iterator.lo \
@@ -80,6 +83,7 @@ SRCS =  all_helpers.c \
 	null.c \
 	debug_handler.c \
 	old_api.c \
+	row_merge.c \
 	serialize.c \
 	table_array.c \
 	table_iterator.c \
