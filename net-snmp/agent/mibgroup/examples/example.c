@@ -16,7 +16,11 @@
 
 /* needed by util_funcs.h */
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -26,6 +30,9 @@
 # endif
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 /* mibincl.h contains all the snmp specific headers to define the
    return types and various defines and structures. */

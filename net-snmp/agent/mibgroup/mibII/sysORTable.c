@@ -2,6 +2,7 @@
  *  Template MIB group implementation - sysORTable.c
  *
  */
+#include "mib_module_config.h"
 
 #include <config.h>
 #if HAVE_STDLIB_H
@@ -9,7 +10,11 @@
 #endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -24,15 +29,19 @@
 #include <strings.h>
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
 
 #include "../mibincl.h"
 #include "system.h"
-#include "sysORTable.h"
 #include "../struct.h"
 #include "../util_funcs.h"
+#include "sysORTable.h"
 #include "../../snmpd.h"
 #include "default_store.h"
 #include "ds_agent.h"
@@ -114,7 +123,7 @@ var_sysORTable(struct variable *vp,
     return NULL;
 
   DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- "));
-  for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];
+  for(i = 1, ptr=table; ptr != NULL && i < (int)name[*length-1];
       ptr = ptr->next, i++) {
     DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));
   }

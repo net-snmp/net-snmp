@@ -409,8 +409,8 @@ setPass(int action,
 
 int pass_compare(const void *a, const void *b)
 {
-  const struct extensible **ap, **bp;
-  ap = (const struct extensible **) a;
-  bp = (const struct extensible **) b;
+  const struct extensible * const *ap, * const *bp;
+  ap = (const struct extensible * const *) a;
+  bp = (const struct extensible * const *) b;
   return snmp_oid_compare((*ap)->miboid,(*ap)->miblen,(*bp)->miboid,(*bp)->miblen);
 }

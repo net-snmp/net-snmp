@@ -3,20 +3,25 @@ the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
 ----
-Status as of 1-August-1999 for Win32 platforms
+Status as of 1-Feb-2000 for Win32 platforms
 
-NOTE: The daemon applications snmpd and snmptrapd are not
-build-able with MSVC++.  These are the only exceptions, however.
-
-All applications, including those just mentioned, build
-using the Cygwin environment under NT.  The NT machine
-where the applications run from does NOT need to have
-CygWin installed.
+All applications build with MSVC++ and Cygwin.
 
 The applications build and run fine.  The agent builds and runs,
 but there is no support for MIB-II, which means no
 interface or route information can be had from this agent.
 
+When an interface to the NT registry is built (volunteers needed!),
+then the agent will need to be developed to obtain more useful
+system information.
+
+Note: The agent cannot be built as an extensible SNMP agent that
+will work with Microsoft's agent.
+
+Neither snmpd nor snmptrapd register as NT services.
+
+Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
+a program that is available from Microsoft or ACE#COMM.
 
 ----
 The remainder of this guide has the following sections :
@@ -244,7 +249,7 @@ rm -f ucd-snmp-config.h  # insurance
 CC=gcc ../configure --with-sys-contact="System Administrator" \
                     --with-sys-location="Location" \
     --with-out-mib-modules="mibII" \
-    --with-mib-modules="smux target examples/example examples/wombat dummy/dummy mibII/system_mib mibII/vacm_vars" \
+    --with-mib-modules="smux target examples/example examples/ucdDemoPublic mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars" \
                     --with-defaults
 fi
 
