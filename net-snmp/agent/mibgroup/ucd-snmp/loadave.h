@@ -17,5 +17,7 @@ void loadave_free_config (void);
 
 #define LOADAVE 3
 #define LOADMAXVAL 4
+#define LOADAVEINT 5
+#define LOADAVEFLOAT 6
 
 #endif /* _MIBGROUP_LOADAVE_H */

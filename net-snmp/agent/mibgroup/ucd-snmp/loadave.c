@@ -123,6 +123,10 @@ void init_loadave(void)
     {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
     {LOADAVE, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADAVE}},
     {LOADMAXVAL, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {LOADMAXVAL}},
+    {LOADAVEINT, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {LOADAVEINT}},
+#ifdef OPAQUE_SPECIAL_TYPES
+    {LOADAVEFLOAT, ASN_OPAQUE_FLOAT, RONLY, var_extensible_loadave, 1, {LOADAVEFLOAT}},
+#endif
     {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_loadave, 1, {ERRORFLAG}},
     {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_loadave, 1, {ERRORMSG}}
   };
@@ -171,6 +175,7 @@ unsigned char *var_extensible_loadave(struct variable *vp,
 {
 
   static long long_ret;
+  static float float_ret;
   static char errmsg[300];
 #ifdef HAVE_SYS_FIXPOINT_H
   fix favenrun[3];
@@ -227,6 +232,15 @@ unsigned char *var_extensible_loadave(struct variable *vp,
       sprintf(errmsg,"%.2f",maxload[name[*length-1]-1]);
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
+    case LOADAVEINT:
+      long_ret = (u_long) (avenrun[name[*length-1]-1]*100);
+      return((u_char *) (&long_ret));
+#ifdef OPAQUE_SPECIAL_TYPES
+    case LOADAVEFLOAT:
+      float_ret = avenrun[name[*length-1]-1];
+      *var_len = sizeof(float_ret);
+      return((u_char *) (&float_ret));
+#endif
     case ERRORFLAG:
       long_ret = (maxload[name[*length-1]-1] != 0 &&
                   avenrun[name[*length-1]-1] >= maxload[name[*length-1]-1]) ? 1 : 0;
