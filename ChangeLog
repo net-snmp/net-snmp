@@ -80,6 +80,19 @@ hardaker 16 Oct 95 15:02:01
     - (INSTALL) added better instructions to the INSTALL file.
     - (README) minor wording changes
 
+hardaker 16 Oct 95 16:21:43
+    - (snmpd.c) was still looking in /etc for two .conf files.
+
+hardaker 16 Oct 95 16:43:12
+    - (apps) all apps were still looking in /etc/ for .conf files
+
+hardaker 17 Oct 95 16:58:32
+    version tag ( 3.0.3 ) of versioninfo.c
+
+hardaker 17 Oct 95 17:00:22
+    - ChangeLog update
+
+
 -------------------------------------------------------------------------------
 
 Changes since V3.0.2
