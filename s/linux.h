@@ -9,11 +9,9 @@
 #define MNTTYPE_PROC "proc"
 #endif
 
-/* for 2.0 kernels */
+#ifdef PROC_NET_DEV_HAS_COMPRESSED
+/* linux 2.2 and above */
+#define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d"
+#else
 #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d"
-
-/* for 2.1 kernels */
-/* #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %*d %*d %d" */
-
-/* for 2.2 kernels? */
-/* #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d" */
+#endif
