@@ -55,7 +55,7 @@ snmp_set_full_objid(int x) {
 
 int
 snmp_get_full_objid(void) {
-    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
+    return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 }
  
 void
