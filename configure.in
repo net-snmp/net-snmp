@@ -1428,8 +1428,8 @@ AC_ARG_WITH(libwrap,
 	    AC_MSG_RESULT([yes])
 	    AC_DEFINE(USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-	    WRAPLIBS="$WRAPLIBS -lwrap",
-
+	    WRAPLIBS="$WRAPLIBS -lwrap"],
+        [
 	    AC_MSG_RESULT([no])
 	    # Linux RedHat 6.1 won't link libwrap without libnsl
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
@@ -1446,8 +1446,8 @@ AC_ARG_WITH(libwrap,
 			WRAPLIBS="$WRAPLIBS -lwrap -lnsl",
 
 			AC_MSG_RESULT(no)
-			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))
-	    CPPFLAGS=${_cppflags}])
+			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))])
+    CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi
