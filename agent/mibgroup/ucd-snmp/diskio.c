@@ -496,7 +496,7 @@ int getstats(void)
     return 0;
   }
 
-	// remove the indicies and repopulate
+        /* remove the indicies and repopulate */
 	if (head.indices)
 		free(head.indices);
 
