@@ -332,7 +332,7 @@ header_interfaces(struct variable *vp,
   *write_method = 0;
   *var_len = sizeof(long);	/* default to 'long' results */
   return MATCH_SUCCEEDED;
-};
+}
 
 u_char *
 var_interfaces(struct variable *vp,
@@ -398,9 +398,9 @@ Interface_Scan_By_Index (int iindex,
                 if (a == NULL)
                   return NULL;
 		strncpy (if_name,
-			 ((struct sockaddr_in *) a)->sin_zero,
-			 ((u_char *) a)[5]);
-		if_name[((u_char *) a)[5]] = 0;
+			 ((const struct sockaddr_in *) a)->sin_zero,
+			 ((const u_char *) a)[5]);
+		if_name[((const u_char *) a)[5]] = 0;
 		*if_msg = *ifp;
 		++have_ifinfo;
 	      }
