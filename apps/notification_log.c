@@ -46,7 +46,7 @@ check_log_size(void)
         row = row->next) {
         DEBUGMSGTL(("notification_log", "deleting a log entry\n"));
         tmprow = deleterow->next;
-        netsnmp_table_dataset_delete_row(nlmLogTable, deleterow);
+        netsnmp_table_dataset_remove_and_delete_row(nlmLogTable, deleterow);
         deleterow = tmprow;
         num_deleted++;
         /* XXX: delete vars from it's table */
