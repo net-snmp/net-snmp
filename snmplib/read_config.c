@@ -296,8 +296,154 @@ void read_config_with_type(const char *filename,
   if (ctmp)
     read_config(filename, ctmp, EITHER_CONFIG);
   else
-    DEBUGMSGTL(("read_config", "read_config: I have no registrations for type:%s,file:%s\n",
+    DEBUGMSGTL(("read_config",
+                "read_config: I have no registrations for type:%s,file:%s\n",
            type, filename));
+}
+
+
+struct config_line *
+read_config_find_handler(struct config_line *line_handlers, const char *token) {
+    struct config_line *lptr;
+
+    for(lptr = line_handlers; lptr != NULL; lptr = lptr->next) {
+        if (!strcasecmp(token, lptr->config_token)) {
+            return lptr;
+        }
+    }
+    return NULL;
+}
+
+
+/* searches a config_line linked list for a match */
+int
+run_config_handler(struct config_line *lptr,
+                   const char *token,
+                   char *cptr, int when) {
+    char tmpbuf[STRINGMAX];
+    lptr = read_config_find_handler(lptr, token);
+    if (lptr != NULL) {
+        if (when == EITHER_CONFIG || lptr->config_time == when) {
+            DEBUGMSGTL(("read_config","Found a parser.  Calling it: %s / %s\n",
+                        token, cptr));
+            (*(lptr->parse_line))(token,cptr);
+        }
+    } else if (when != PREMIB_CONFIG &&
+               !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
+        sprintf(tmpbuf,"Unknown token: %s.", token);
+        config_pwarn(tmpbuf);
+        return SNMPERR_GENERR;
+    }
+    return SNMPERR_SUCCESS;
+}
+
+/* takens an arbitrary string and tries to intepret it based on the
+   known configruation handlers for all registered types.  May produce
+   inconsistent results when multiple tokens of the same name are
+   registered under different file types. */ 
+
+/* we allow = delimeters here */
+#define SNMP_CONFIG_DELIMETERS " \t="
+
+int
+snmp_config_when(char *line, int when) {
+    char *cptr, buf[STRINGMAX], tmpbuf[STRINGMAX];
+    struct config_line *lptr = NULL;
+    struct config_files *ctmp = config_files;
+
+    if (line == NULL) {
+        config_perror("snmp_config() called with a null string.");
+        return SNMPERR_GENERR;
+    }
+
+    strncpy(buf, line, STRINGMAX);
+    buf[STRINGMAX-1] = '\0';
+    cptr = strtok(buf, SNMP_CONFIG_DELIMETERS);
+    if (cptr && cptr[0] == '[') {
+        if (cptr[strlen(cptr)-1] != ']') {
+            config_perror("no matching ']'");
+            return SNMPERR_GENERR;
+        }
+        lptr = read_config_get_handlers(cptr+1);
+        if (lptr == NULL) {
+            sprintf(tmpbuf,"No handlers regestered for type %s.", cptr+1);
+            config_perror(tmpbuf);
+            return SNMPERR_GENERR;
+        }
+        cptr = strtok(NULL, SNMP_CONFIG_DELIMETERS);
+        lptr = read_config_find_handler(lptr, cptr);
+    } else {
+        /* we have to find a token */
+        for(;ctmp != NULL && lptr == NULL; ctmp = ctmp->next)
+            lptr = read_config_find_handler(ctmp->start, cptr);
+    }
+    if (lptr == NULL &&
+        ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
+        sprintf(tmpbuf,"Unknown token: %s.", cptr);
+        config_pwarn(tmpbuf);
+        return SNMPERR_GENERR;
+    }
+
+    /* use the original string instead since strtok messed up the original */
+    line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
+    
+    return(run_config_handler(lptr, cptr, line, EITHER_CONFIG));
+}
+
+int
+snmp_config(char *line) {
+    return snmp_config_when(line, EITHER_CONFIG);
+}
+
+void
+snmp_config_remember_in_list(char *line, struct read_config_memory **mem) {
+    if (mem == NULL)
+        return;
+
+    while (*mem != NULL)
+        mem = &((*mem)->next);
+
+    *mem = SNMP_MALLOC_STRUCT(read_config_memory);
+    if (line)
+        (*mem)->line = strdup(line);
+}
+
+void
+snmp_config_process_memory_list(struct read_config_memory *mem, int when) {
+    while(mem) {
+        DEBUGMSGTL(("read_config","processing memory: %s\n",mem->line));
+        snmp_config_when(mem->line, when);
+        mem = mem->next;
+    }
+}
+
+void
+snmp_config_remember_free_list(struct read_config_memory *mem) {
+    struct read_config_memory *tmpmem;
+    while(mem) {
+        SNMP_FREE(mem->line);
+        tmpmem = mem->next;
+        free(mem);
+        mem = tmpmem;
+    }
+}
+
+/* default storage location implementation */
+static struct read_config_memory *memorylist = NULL;
+
+void
+snmp_config_remember(char *line) {
+    snmp_config_remember_in_list(line, &memorylist);
+}
+
+void
+snmp_config_process_memories(void) {
+    snmp_config_process_memory_list(memorylist, EITHER_CONFIG);
+}
+
+void
+snmp_config_process_memories_when(int when) {
+    snmp_config_process_memory_list(memorylist, when);
 }
 
 /*******************************************************************-o-******
@@ -327,7 +473,7 @@ void read_config(const char *filename,
   FILE *ifile;
   char line[STRINGMAX], token[STRINGMAX], tmpbuf[STRINGMAX];
   char *cptr;
-  int i, done;
+  int i;
   struct config_line *lptr;
 
   linecount = 0;
@@ -394,23 +540,9 @@ void read_config(const char *filename,
             sprintf(tmpbuf,"Blank line following %s token.", token);
             config_perror(tmpbuf);
           } else {
-              
-            for(done=0; lptr != NULL && !done;
-                lptr = lptr->next) {
-              if (!strcasecmp(token,lptr->config_token)) {
-                if (when == EITHER_CONFIG || lptr->config_time == when) {
-                    DEBUGMSGTL(("read_config", "%s:%d Parsing: %s\n",
-                                filename, linecount, line));
-                    (*(lptr->parse_line))(token,cptr);
-                }
-                done = 1;
-              }
-            }
-            if (!done && when != PREMIB_CONFIG &&
-                !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
-              sprintf(tmpbuf,"Unknown token: %s.", token);
-              config_pwarn(tmpbuf);
-            }
+            DEBUGMSGTL(("read_config", "%s:%d examining: %s\n",
+                       filename, linecount, line));
+            run_config_handler(lptr, token, cptr, when);
           }
 	}
     }
@@ -459,6 +591,8 @@ read_configs (void)
       }
   }
 
+  snmp_config_process_memories_when(NORMAL_CONFIG);
+
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
 }
@@ -470,6 +604,8 @@ read_premib_configs (void)
 
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
     read_config_files(PREMIB_CONFIG);
+
+  snmp_config_process_memories_when(PREMIB_CONFIG);
 
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                       SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
