@@ -51,7 +51,8 @@ bulk_to_next_helper(
 
             /* update the varbinds for the next request series */
             for(request = requests; request; request = request->next) {
-                if (request->repeat && request->requestvb->type != ASN_NULL &&
+                if (request->repeat > 0 && 
+		    request->requestvb->type != ASN_NULL &&
                     request->requestvb->type != ASN_PRIV_RETRY) {
                     request->repeat--;
                     snmp_set_var_objid(request->requestvb->next_variable,
