@@ -306,9 +306,14 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
         table_info = netsnmp_extract_table_info(request);
         if (!table_info)
             continue;           /* ack */
-        netsnmp_request_add_list_data(request,
+        switch (reqinfo->mode) {
+        case MODE_GET:
+        case MODE_GETNEXT:
+        case MODE_SET_RESERVE1:
+            netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list(
                                           TABLE_DATA_TABLE, table, NULL));
+        }
 
         /*
          * find the row in question 
