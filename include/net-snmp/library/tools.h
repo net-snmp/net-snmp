@@ -150,7 +150,7 @@ extern          "C" {
     int             snmp_strcat(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 const u_char * s);
-    char           *netsnmp_strdup_and_null(u_char * from,
+    char           *netsnmp_strdup_and_null(const u_char * from,
                                             size_t from_len);
 
     void            dump_chunk(const char *debugtoken, const char *title,

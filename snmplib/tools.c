@@ -224,7 +224,7 @@ memdup(u_char ** to, const u_char * from, size_t size)
  *  new buffer and null terminates it as well (new buffer MAY be one
  *  byte longer to account for this */
 char           *
-netsnmp_strdup_and_null(u_char * from, size_t from_len)
+netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 {
     u_char         *ret;
 
