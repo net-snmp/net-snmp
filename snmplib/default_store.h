@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 #define DS_MAX_IDS 3
-#define DS_MAX_SUBIDS 20
+#define DS_MAX_SUBIDS 32    /* needs to be a multiple of 8 */
 
 /* begin storage definitions */
 /* These definitions correspond with the "storid" argument to the API */
@@ -34,6 +34,8 @@ extern "C" {
 #define DS_LIB_QUICK_PRINT         13 /* print very brief output for parsing */
 #define DS_LIB_RANDOM_ACCESS	   14 /* random access to oid labels */
 #define DS_LIB_REGEX_ACCESS	   15 /* regex matching to oid labels */
+#define DS_LIB_DONT_CHECK_RANGE    16 /* don't check values for ranges on send*/
+#define DS_LIB_NO_TOKEN_WARNINGS   17 /* no warn about unknown config tokens */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0

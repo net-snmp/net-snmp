@@ -10,7 +10,7 @@
 config_require(util_funcs)
 
 /* add the mib we implement to the list of default mibs to load */
-config_add_mib(IPFWACC-MIB)
+config_add_mib(UCD-IPFWACC-MIB)
 
 /* Magic number definitions: */
 

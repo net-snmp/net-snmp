@@ -1,5 +1,8 @@
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #if TIME_WITH_SYS_TIME

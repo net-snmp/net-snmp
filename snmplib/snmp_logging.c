@@ -53,11 +53,13 @@
 #include "asn1.h"
 #include "default_store.h"
 #include "snmp_logging.h"
+#include "callback.h"
 #define LOGLENGTH 1024
 
 static int do_syslogging=0;
 static int do_filelogging=0;
 static int do_stderrlogging=1;
+static int do_log_callback=0;
 static int newline = 1;
 static FILE *logfile;
 
@@ -69,7 +71,8 @@ init_snmp_logging(void) {
 
 int
 snmp_get_do_logging(void) {
-  return (do_syslogging || do_filelogging || do_stderrlogging);
+  return (do_syslogging || do_filelogging || do_stderrlogging ||
+          do_log_callback);
 }
 
 
@@ -122,6 +125,7 @@ snmp_disable_log(void) {
   snmp_disable_syslog();
   snmp_disable_filelog();
   snmp_disable_stderrlog();
+  snmp_disable_calllog();
 }
 
 
@@ -157,15 +161,34 @@ snmp_enable_stderrlog(void) {
 
 
 void
+snmp_enable_calllog(void) {
+  do_log_callback = 1;
+}
+
+
+void
+snmp_disable_calllog(void) {
+  do_log_callback = 0;
+}
+
+
+void
 snmp_log_string (int priority, const char *string)
 {
     char sbuf[40];
+    struct snmp_log_message slm;
 
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
     syslog(priority, string);
   }
 #endif
+
+  if (do_log_callback) {
+      slm.priority = priority;
+      slm.msg = string;
+      snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
+  }
 
   if (do_filelogging || do_stderrlogging) {
 

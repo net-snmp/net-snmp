@@ -74,8 +74,21 @@
 #include <netinet/in_var.h>
 #endif
 #include <netinet/ip.h>
+#ifdef INET6
+#if HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#ifdef INET6
+#if HAVE_NETINET6_IP6_VAR_H
+#include <netinet6/ip6_var.h>
+#endif
 #endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
@@ -94,16 +107,6 @@
 #endif
 #if HAVE_IOCTLS_H
 #include <ioctls.h>
-#endif
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
 #endif
 
 #if HAVE_DMALLOC_H

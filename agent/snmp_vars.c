@@ -72,6 +72,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
+#ifdef INET6
+#if HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -80,6 +85,14 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#ifdef INET6
+#if HAVE_NETINET6_IP6_VAR_H
+#include <netinet6/ip6_var.h>
+#endif
 #endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
@@ -218,7 +231,7 @@ init_agent (const char *app)
 
   /* initialize agentx subagent if necessary. */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == 1)
+  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
       subagent_pre_init();
 #endif
 

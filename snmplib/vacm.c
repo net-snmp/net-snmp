@@ -62,13 +62,16 @@ vacm_getViewEntry(const char *viewName,
 		  size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
-    char view[32];
-    int found;
+    char view[VACMSTRINGLEN];
+    int found, glen;
 
-    view[0] = strlen(viewName);
+    glen = (int)strlen(viewName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
+    view[0] = glen;
     strcpy(view+1, viewName);
     for(vp = viewList; vp; vp = vp->next){
-        if (!strcmp(view, vp->viewName)
+        if (!memcmp(view, vp->viewName,glen+1)
 	    && viewSubtreeLen >= vp->viewSubtreeLen) {
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
@@ -121,25 +124,28 @@ vacm_createViewEntry(const char *viewName,
 		     size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lp, *op = NULL;
-    int cmp;
+    int cmp, glen;
 
+    glen = (int)strlen(viewName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
     vp = (struct vacm_viewEntry *)calloc(1, sizeof(struct vacm_viewEntry));
     if (vp == NULL)
         return NULL;
-
-    vp->viewName[0] = strlen(viewName);
-    strcpy(vp->viewName+1, viewName);
-    memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
-    vp->viewSubtreeLen = viewSubtreeLen;
     vp->reserved = (struct vacm_viewEntry *)calloc(1, sizeof(struct vacm_viewEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;
     }
 
+    vp->viewName[0] = glen;
+    strcpy(vp->viewName+1, viewName);
+    memcpy(vp->viewSubtree, viewSubtree, viewSubtreeLen * sizeof(oid));
+    vp->viewSubtreeLen = viewSubtreeLen;
+
     lp = viewList;
     while (lp) {
-	cmp = strcmp(lp->viewName, vp->viewName);
+	cmp = memcmp(lp->viewName, vp->viewName, glen+1);
 	if (cmp > 0) break;
 	if (cmp < 0) goto next;
 	
@@ -160,7 +166,7 @@ vacm_destroyViewEntry(const char *viewName,
 {
     struct vacm_viewEntry *vp, *lastvp = NULL;
 
-    if (viewList && !strcmp(viewList->viewName, viewName)
+    if (viewList && !strcmp(viewList->viewName+1, viewName)
 	&& viewList->viewSubtreeLen == viewSubtreeLen
 	&& !memcmp((char *)viewList->viewSubtree, (char *)viewSubtree,
 		 viewSubtreeLen * sizeof(oid))){
@@ -168,7 +174,7 @@ vacm_destroyViewEntry(const char *viewName,
 	viewList = viewList->next;
     } else {
 	for (vp = viewList; vp; vp = vp->next){
-	    if (!strcmp(vp->viewName, viewName)
+	    if (!strcmp(vp->viewName+1, viewName)
 		&& vp->viewSubtreeLen  == viewSubtreeLen 
 		&& !memcmp((char *)vp->viewSubtree, (char *)viewSubtree,
 			 viewSubtreeLen * sizeof(oid)))
@@ -200,14 +206,18 @@ vacm_getGroupEntry(int securityModel,
 		   const char *securityName)
 {
     struct vacm_groupEntry *vp;
-    char secname[32];
+    char secname[VACMSTRINGLEN];
+    int glen;
 
-    secname[0] = strlen(securityName);
+    glen = (int)strlen(securityName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
+    secname[0] = glen;
     strcpy(secname+1, securityName);
 
     for (vp = groupList; vp; vp = vp->next) {
 	if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
-	    && !strcmp(vp->securityName, secname))
+	    && !memcmp(vp->securityName, secname,glen+1))
 	return vp;
     }
     return NULL;
@@ -232,27 +242,30 @@ vacm_createGroupEntry(int securityModel,
 		      const char *securityName)
 {
     struct vacm_groupEntry *gp, *lg, *og;
-    int cmp;
+    int cmp, glen;
 
+    glen = (int)strlen(securityName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
     gp = (struct vacm_groupEntry *)calloc(1, sizeof(struct vacm_groupEntry));
     if (gp == NULL)
         return NULL;
-
-    gp->securityModel = securityModel;
-    gp->securityName[0] = strlen(securityName);
-    strcpy(gp->securityName+1, securityName);
     gp->reserved = (struct vacm_groupEntry *)calloc(1, sizeof(struct vacm_groupEntry));
     if (gp->reserved == NULL) {
         free(gp);
         return NULL;
     }
 
+    gp->securityModel = securityModel;
+    gp->securityName[0] = glen;
+    strcpy(gp->securityName+1, securityName);
+
     lg = groupList;
     og = NULL;
     while (lg) {
 	if (lg->securityModel > securityModel) break;
 	if (lg->securityModel == securityModel && 
-	    (cmp = strcmp(lg->securityName, gp->securityName)) > 0) break;
+	    (cmp = memcmp(lg->securityName, gp->securityName, glen+1)) > 0) break;
 	/* if (lg->securityModel == securityModel && cmp == 0) abort(); */
 	og = lg; lg = lg->next;
     }
@@ -269,13 +282,13 @@ vacm_destroyGroupEntry(int securityModel,
     struct vacm_groupEntry *vp, *lastvp = NULL;
 
     if (groupList && groupList->securityModel == securityModel
-	&& !strcmp(groupList->securityName, securityName)) {
+	&& !strcmp(groupList->securityName+1, securityName)) {
 	vp = groupList;
 	groupList = groupList->next;
     } else {
 	for (vp = groupList; vp; vp = vp->next){
 	    if (vp->securityModel == securityModel
-		&& !strcmp(vp->securityName, securityName))
+		&& !strcmp(vp->securityName+1, securityName))
 		break;
 	    lastvp = vp;
 	}
@@ -306,18 +319,26 @@ vacm_getAccessEntry(const char *groupName,
 		    int securityLevel)
 {
     struct vacm_accessEntry *vp;
-    char group[32];
-    char context[32];
+    char group[VACMSTRINGLEN];
+    char context[VACMSTRINGLEN];
+    int glen, clen;
 
-    group[0] = strlen(groupName);
+    glen = (int)strlen(groupName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
+    clen = (int)strlen(contextPrefix);
+    if (clen < 0 || clen >= VACM_MAX_STRING)
+        return NULL;
+
+    group[0] = glen;
     strcpy(group+1, groupName);
-    context[0] = strlen(contextPrefix);
+    context[0] = clen;
     strcpy(context+1, contextPrefix);
     for(vp = accessList; vp; vp = vp->next){
         if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
 	    && securityLevel >= vp->securityLevel
-	    && !strcmp(vp->groupName, group)
-	    && !strcmp(vp->contextPrefix, context))
+	    && !memcmp(vp->groupName, group, glen+1)
+	    && !memcmp(vp->contextPrefix, context, clen+1))
 	  return vp;
     }
     return NULL;
@@ -344,30 +365,36 @@ vacm_createAccessEntry(const char *groupName,
 		       int securityLevel)
 {
     struct vacm_accessEntry *vp, *lp, *op = NULL;
-    int cmp;
+    int cmp, glen, clen;
 
+    glen = (int)strlen(groupName);
+    if (glen < 0 || glen >= VACM_MAX_STRING)
+        return NULL;
+    clen = (int)strlen(contextPrefix);
+    if (clen < 0 || clen >= VACM_MAX_STRING)
+        return NULL;
     vp = (struct vacm_accessEntry *)calloc(1, sizeof(struct vacm_accessEntry));
     if (vp == NULL)
         return NULL;
-
-    vp->securityModel = securityModel;
-    vp->securityLevel = securityLevel;
-    vp->groupName[0] = strlen(groupName);
-    strcpy(vp->groupName+1, groupName);
-    vp->contextPrefix[0] = strlen(contextPrefix);
-    strcpy(vp->contextPrefix+1, contextPrefix);
     vp->reserved = (struct vacm_accessEntry *)calloc(1, sizeof(struct vacm_accessEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;
     }
 
+    vp->securityModel = securityModel;
+    vp->securityLevel = securityLevel;
+    vp->groupName[0] = glen;
+    strcpy(vp->groupName+1, groupName);
+    vp->contextPrefix[0] = clen;
+    strcpy(vp->contextPrefix+1, contextPrefix);
+
     lp = accessList;
     while (lp) {
-	cmp = strcmp(lp->groupName, vp->groupName);
+	cmp = memcmp(lp->groupName, vp->groupName, glen+1);
 	if (cmp > 0) break;
 	if (cmp < 0) goto next;
-	cmp = strcmp(lp->contextPrefix, vp->contextPrefix);
+	cmp = memcmp(lp->contextPrefix, vp->contextPrefix, clen+1);
 	if (cmp > 0) break;
 	if (cmp < 0) goto next;
 	if (lp->securityModel > securityModel) break;
@@ -393,16 +420,16 @@ vacm_destroyAccessEntry(const char *groupName,
 
     if (accessList && accessList->securityModel == securityModel
 	&& accessList->securityModel == securityModel
-	&& !strcmp(accessList->groupName, groupName)
-	&& !strcmp(accessList->contextPrefix, contextPrefix)) {
+	&& !strcmp(accessList->groupName+1, groupName)
+	&& !strcmp(accessList->contextPrefix+1, contextPrefix)) {
 	vp = accessList;
 	accessList = accessList->next;
     } else {
 	for (vp = accessList; vp; vp = vp->next){
 	    if (vp->securityModel == securityModel
 		&& vp->securityLevel == securityLevel
-		&& !strcmp(vp->groupName, groupName)
-		&& !strcmp(vp->contextPrefix, contextPrefix))
+		&& !strcmp(vp->groupName+1, groupName)
+		&& !strcmp(vp->contextPrefix+1, contextPrefix))
 		break;
 	    lastvp = vp;
 	}

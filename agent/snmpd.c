@@ -532,9 +532,11 @@ main(int argc, char *argv[])
     /* start library */
     init_snmp("snmpd");
 
-    init_master_agent( dest_port,
+    ret = init_master_agent( dest_port,
                        snmp_check_packet,
                        snmp_check_parse );
+	if( ret != 0 )
+		Exit(1); /* Exit logs exit val for us */
 
 #ifdef SIGTERM
     signal(SIGTERM, SnmpdShutDown);

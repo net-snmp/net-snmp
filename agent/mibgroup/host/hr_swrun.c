@@ -13,13 +13,6 @@
 #include <unistd.h>
 #endif
 
-#include "host_res.h"
-#include "hr_swrun.h"
-#include "auto_nlist.h"
-#if solaris2
-#include "kernel_sunos5.h"
-#endif
-
 #include <sys/param.h>
 #include <ctype.h>
 #if HAVE_SYS_PSTAT_H
@@ -67,6 +60,14 @@
 
 #include <stdio.h>
 
+#include "host_res.h"
+#include "hr_swrun.h"
+#include "auto_nlist.h"
+#include "kernel.h"
+#if solaris2
+#include "kernel_sunos5.h"
+#endif
+
 	/*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -86,10 +87,8 @@ struct pst_status *proc_table;
 struct pst_dynamic pst_dyn;
 #elif HAVE_KVM_GETPROCS
 struct kinfo_proc *proc_table;
-static kvm_t *kd;
 #elif defined(solaris2)
 int *proc_table;
-static kvm_t *kd;
 #else
 struct proc *proc_table;
 #endif
@@ -327,8 +326,6 @@ var_hrswrun(struct variable *vp,
 	if (read(procfd, proc_buf, sizeof(*proc_buf)) != sizeof(*proc_buf)) abort();
 	close(procfd);
 #else
-	if (kd == NULL)
-	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
 	if (kd == NULL) return NULL;
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
 #endif
@@ -632,7 +629,14 @@ var_hrswrun(struct variable *vp,
 	    long_return = proc_buf->p_swrss;
 #endif
 #elif HAVE_KVM_GETPROCS
-	    long_return = proc_table[LowProcIndex].kp_eproc.e_xrssize;
+#ifdef freebsd3
+	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size/1024;
+#else
+	    long_return = proc_table[LowProcIndex].kp_eproc.e_vm.vm_tsize +
+			  proc_table[LowProcIndex].kp_eproc.e_vm.vm_ssize +
+			  proc_table[LowProcIndex].kp_eproc.e_vm.vm_dsize;
+	    long_return = long_return * (getpagesize() / 1024);
+#endif
 #elif defined(linux)
 	    sprintf( string, "/proc/%d/stat", pid );
 	    if ((fp = fopen( string, "r")) == NULL) return NULL;
@@ -708,8 +712,6 @@ Init_HR_SWRun (void)
 	DIR *f;
 	struct dirent *dp;
 #if _SLASH_PROC_METHOD_ == 0
-	if (kd == NULL)
-	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "hr_swrun");
 	if (kd == NULL) {
 	    current_proc_entry = nproc+1;
 	    return;
@@ -724,8 +726,6 @@ Init_HR_SWRun (void)
     }
 #elif HAVE_KVM_GETPROCS
     {
-	if (kd == NULL)
-	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
 	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else

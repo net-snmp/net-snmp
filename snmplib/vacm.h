@@ -34,18 +34,21 @@ extern "C" {
 #define VIEWSTORAGE	5
 #define VIEWSTATUS	6
 
+#define VACM_MAX_STRING 32
+#define VACMSTRINGLEN   34  /* VACM_MAX_STRING + 2 */
+
 struct vacm_securityEntry {
-    char	securityName[33];
+    char	securityName[VACMSTRINGLEN];
     snmp_ipaddr	sourceIp;
     snmp_ipaddr	sourceMask;
-    char	community[33];
+    char	community[VACMSTRINGLEN];
     struct vacm_securityEntry *next;
 };
 
 struct vacm_groupEntry {
     int		securityModel;
-    char	securityName[33];
-    char	groupName[33];
+    char	securityName[VACMSTRINGLEN];
+    char	groupName[VACMSTRINGLEN];
     int		storageType;
     int		status;
 
@@ -55,14 +58,14 @@ struct vacm_groupEntry {
 };
 
 struct vacm_accessEntry {
-    char	groupName[33];
-    char	contextPrefix[33];
+    char	groupName[VACMSTRINGLEN];
+    char	contextPrefix[VACMSTRINGLEN];
     int		securityModel;
     int		securityLevel;
     int 	contextMatch;
-    char	readView[33];
-    char	writeView[33];
-    char	notifyView[33];
+    char	readView[VACMSTRINGLEN];
+    char	writeView[VACMSTRINGLEN];
+    char	notifyView[VACMSTRINGLEN];
     int		storageType;
     int		status;
 
@@ -72,10 +75,10 @@ struct vacm_accessEntry {
 };
 
 struct vacm_viewEntry {
-    char	viewName[33];
+    char	viewName[VACMSTRINGLEN];
     oid		viewSubtree[MAX_OID_LEN];
     size_t	viewSubtreeLen;
-    u_char	viewMask[33];
+    u_char	viewMask[VACMSTRINGLEN];
     size_t	viewMaskLen;
     int		viewType;
     int		viewStorageType;

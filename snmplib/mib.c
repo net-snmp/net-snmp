@@ -877,6 +877,9 @@ sprint_by_type(char *buf,
 	case ASN_OCTET_STR:
 	    sprint_octet_string(buf, var, enums, hint, units);
 	    break;
+	case ASN_BIT_STR:
+	    sprint_bitstring(buf, var, enums, hint, units);
+	    break;
 	case ASN_OPAQUE:
 	    sprint_opaque(buf, var, enums, hint, units);
 	    break;

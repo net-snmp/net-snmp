@@ -184,7 +184,7 @@ agent_check_and_process(int block) {
 		for Index Allocation use initially. */
 struct snmp_session *main_session;
 
-void
+int
 init_master_agent(int dest_port, 
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
                   int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
@@ -192,7 +192,7 @@ init_master_agent(int dest_port,
     struct snmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
-	return;
+	return 0; /* no error if ! MASTER_AGENT */
 
     DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
 
@@ -211,9 +211,10 @@ init_master_agent(int dest_port,
     if ( session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("init_master_agent", &sess);
-	exit(1);
+		return 1;
     }
     main_session = session;
+	return 0;
 }
 
 struct agent_snmp_session  *
@@ -276,7 +277,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     if ((status = check_access(pdu)) != 0) {
         /* access control setup is incorrect */
-       send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+	send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
         if (asp->pdu->version != SNMP_VERSION_1 && asp->pdu->version != SNMP_VERSION_2c) {
             asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
             asp->pdu->command = SNMP_MSG_RESPONSE;
@@ -471,9 +472,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	free( asp );
 	return 0;
     }
-	
-    
-	
+
     if ( asp->outstanding_requests != NULL ) {
 	asp->status = status;
 	asp->next = agent_session_list;
@@ -485,12 +484,12 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		(asp->pdu->command == SNMP_MSG_SET ?
 			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
 	    	count_varbinds( asp->pdu ));
+	    asp->pdu->command = SNMP_MSG_RESPONSE;
+	    asp->pdu->errstat = status;
+	    snmp_send( asp->session, asp->pdu );
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	    snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
 	}
-	asp->pdu->command = SNMP_MSG_RESPONSE;
-	asp->pdu->errstat = status;
-	snmp_send( asp->session, asp->pdu );
-	snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
 	free( asp );
     }
 
@@ -614,6 +613,7 @@ statp_loop:
 	    }
 	    asp->pdu->errstat = statType;
 	    asp->pdu->errindex = count;
+	    send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 	    return statType;
         }
 	else {

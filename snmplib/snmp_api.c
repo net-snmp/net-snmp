@@ -295,7 +295,7 @@ static int  snmp_detail_f  = 0;
  * Prototypes.
  */
 int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
-static int snmp_parse (struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
+static int snmp_parse (void *, struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
 static void * snmp_sess_pointer (struct snmp_session *);
 
 static void snmpv3_calc_msg_flags (int, int, u_char *);
@@ -382,7 +382,7 @@ void
 snmp_set_detail(const char *detail_string)
 {
   if (detail_string != NULL) {
-    strncpy((char *)&snmp_detail, detail_string, sizeof(snmp_detail));
+    strncpy((char *)snmp_detail, detail_string, sizeof(snmp_detail));
     snmp_detail[sizeof(snmp_detail)-1] = '\0';
     snmp_detail_f = 1;
   }
@@ -553,6 +553,10 @@ register_default_handlers(void) {
                      DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
   ds_register_config(ASN_OCTET_STR, "snmp","defCommunity",
 		     DS_LIBRARY_ID, DS_LIB_COMMUNITY);
+  ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
+                     DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
+  ds_register_config(ASN_OCTET_STR, "snmp","noRangeCheck",
+		     DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE );
 }
 
 
@@ -1130,7 +1134,7 @@ _sess_open(struct snmp_session *in_session)
         if ( session->local_port == 0 ) {	/* Client session */
 
             if ( connect( sd, (struct sockaddr *)&(isp->addr),
-                               sizeof(isp->addr)) != 0 ) {
+                               snmp_socket_length(isp->addr.sa_family)) != 0 ) {
 	        in_session->s_snmp_errno = SNMPERR_BAD_LOCPORT;
 	        in_session->s_errno = errno;
 	        snmp_set_detail(strerror(errno));
@@ -2537,7 +2541,8 @@ snmpv3_get_report_type(struct snmp_pdu *pdu)
  * Otherwise, a 0 is returned.
  */
 static int
-_snmp_parse(struct snmp_session *session,
+_snmp_parse(void * sessp,
+	   struct snmp_session *session,
 	   struct snmp_pdu *pdu,
 	   u_char *data,
 	   size_t length)
@@ -2616,6 +2621,10 @@ _snmp_parse(struct snmp_session *session,
                    snmp_api_errstring(result)));
 
       if (result) {
+	if (!sessp)
+	  session->s_snmp_errno = result;
+	else
+
 	/* handle reportable errors */
 	switch (result) {
 	case SNMPERR_USM_UNKNOWNENGINEID:
@@ -2633,7 +2642,7 @@ _snmp_parse(struct snmp_session *session,
 	    pdu2 = snmp_clone_pdu(pdu);
 	    pdu->flags = pdu2->flags = flags;
 	    snmpv3_make_report(pdu2, result);
-	    snmp_send(session, pdu2);
+	    snmp_sess_send(sessp, pdu2);
 	  }
 	  break;
 	default:
@@ -2662,14 +2671,15 @@ _snmp_parse(struct snmp_session *session,
 }
 
 static int
-snmp_parse(struct snmp_session *pss,
+snmp_parse(void *sessp,
+	   struct snmp_session *pss,
 	   struct snmp_pdu *pdu,
 	   u_char *data,
 	   size_t length)
 {
     int rc;
 
-    rc = _snmp_parse(pss,pdu,data,length);
+    rc = _snmp_parse(sessp,pss,pdu,data,length);
     if (rc) {
         if ( !pss->s_snmp_errno)
             pss->s_snmp_errno = SNMPERR_BAD_PARSE;
@@ -3499,7 +3509,7 @@ _sess_read(void *sessp,
     if ( isp->hook_parse )
       ret = isp->hook_parse(sp, pdu, packetptr, length);
     else
-      ret = snmp_parse(sp, pdu, packetptr, length);
+      ret = snmp_parse(sessp, sp, pdu, packetptr, length);
     if ( isp->hook_post ) {
       if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
         snmp_free_pdu(pdu);
@@ -4184,7 +4194,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 		break;
 	    }
 	}
-	if (tp && tp->ranges) {
+
+	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -4203,6 +4214,13 @@ snmp_add_var(struct snmp_pdu *pdu,
       case 'u':
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
+				  (u_char *) &ltmp, sizeof(ltmp));
+	else goto fail;
+        break;
+
+      case 'c':
+        if (sscanf(value, "%lu", &ltmp) == 1)
+	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
         break;
@@ -4246,7 +4264,7 @@ snmp_add_var(struct snmp_pdu *pdu,
           break;
         }
 	tp = get_tree(name, name_length, get_tree_head());
-	if (tp && tp->ranges) {
+	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -4422,7 +4440,7 @@ cmu_snmp_parse (struct snmp_session *session,
 	    return NULL;
     }
 #ifndef NO_INTERNAL_VARLIST
-    if (snmp_parse(session, pdu, data, length) != SNMP_ERR_NOERROR){
+    if (snmp_parse( 0, session, pdu, data, length) != SNMP_ERR_NOERROR){
 	return NULL;
     }
 #else
@@ -4437,7 +4455,7 @@ struct snmp_pdu *snmp_2clone_pdu(struct snmp_pdu *from_pdu, struct snmp_pdu *to_
 
     struct snmp_pdu *ipdu;
     ipdu = snmp_clone_pdu(pdu);
-    if (snmp_parse(session, ipdu, data, length) != SNMP_ERR_NOERROR){
+    if (snmp_parse( 0, session, ipdu, data, length) != SNMP_ERR_NOERROR){
 	snmp_free_internal_pdu(ipdu);
 	return NULL;
     }

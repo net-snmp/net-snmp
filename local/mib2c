@@ -1,5 +1,5 @@
-#!/usr/local/bin/perl
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 #
 # Description: 

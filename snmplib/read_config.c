@@ -362,7 +362,8 @@ void read_config(const char *filename,
                 done = 1;
               }
             }
-            if (!done && when != PREMIB_CONFIG) {
+            if (!done && when != PREMIB_CONFIG &&
+                !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
               sprintf(tmpbuf,"Unknown token: %s.", token);
               config_pwarn(tmpbuf);
             }

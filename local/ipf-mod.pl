@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -s
+#!/usr/bin/perl -s
 ##
 ## IP Filter UCD-SNMP pass module
 ##

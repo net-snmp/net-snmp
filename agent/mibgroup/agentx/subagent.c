@@ -400,7 +400,6 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
   }
   agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
   snmp_close(thesession);
-  free(thesession);
   DEBUGMSGTL(("agentx/subagent","shut down finished.\n"));
   return 1;
 }

@@ -211,7 +211,8 @@ int main(int argc, char *argv[])
   snmp_close(ss);
   SOCK_CLEANUP;
 
-  print_table();
+  if (entries) print_table();
+  else printf("%s: No entries\n", table_name);
 
   return 0;
 }
@@ -289,6 +290,9 @@ void get_field_names( char* tblname )
   else
     root[rootlen++] = 1;
 
+  sprint_objid(string_buf, root, rootlen-1);
+  table_name = strdup(string_buf);
+
   fields = 0;
   while (going) {
     fields++;
@@ -330,16 +334,16 @@ void get_field_names( char* tblname )
   name_p = strrchr(string_buf, '.');
   if (!name_p) name_p = strrchr(string_buf, ':');
   if (name_p) *name_p = 0;
-  table_name = strdup(string_buf);
-  if (brief) {
+  if (brief && fields > 1) {
     char *f1, *f2;
-    int common = 128;
+    int common = strlen(column[0].label);
     int field;
     for (field = 1; field < fields; field++) {
       f1 = column[field-1].label;
       f2 = column[field].label;
       while (*f1++ == *f2++ && *f1) ;
-      if (f2 - column[field].label < common) common = f2 - column[field].label - 1;
+      if (f2 - column[field].label < common)
+	common = f2 - column[field].label - 1;
     }
     if (common) {
       for (field = 0; field < fields; field++) {
@@ -426,8 +430,19 @@ void get_table_entries( struct snmp_session *ss )
 	    memcpy(name, vars->name, name_length*sizeof(oid));
 	    sprint_objid(string_buf, vars->name, vars->name_length); 
 	    i = vars->name_length - rootlen + 1;
-	    name_p = string_buf + strlen(table_name)+1;
 	    if (localdebug || show_index ) {
+	      switch (snmp_get_suffix_only()) {
+	      case 2:
+		name_p = strrchr(string_buf, ':');
+		break;
+	      case 1:
+		name_p = string_buf;
+		break;
+	      case 0:
+	        name_p = string_buf + strlen(table_name)+1;
+		name_p = strchr(name_p, '.')+1;
+		break;
+	      }
 	      name_p = strchr(name_p, '.')+1;
 	    }
 	    if (localdebug) printf("Index: %s\n", name_p);
