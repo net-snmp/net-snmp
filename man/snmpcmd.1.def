@@ -105,7 +105,7 @@ This overrides the environment variable MIBDIRS.
 Set the destination contextName used for SNMPv3 messages.  The default
 contextName is the empty string "".
 .TP
-.BI -O " nEebqfsSvXT"
+.BI -O " nEebqQfsSvXT"
 Specifies output printing options. See 
 .B OUTPUT OPTIONS
 below.
@@ -326,6 +326,12 @@ system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 Removes the equal sign and type information:
 .br
 system.sysUpTime.0 1:15:09:27.63
+.TP
+.TP
+.B -OQ
+Removes the equal sign and type information:
+.br
+system.sysUpTime.0 = 1:15:09:27.63
 .TP
 .B -Of
 Gives you the complete OID:
