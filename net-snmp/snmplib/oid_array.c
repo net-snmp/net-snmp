@@ -121,7 +121,7 @@ binary_search(netsnmp_oid_array_header *val, oid_array_table * t,
 }
 
 oid_array
-netsnmp_Initialise_oid_array(int size)
+netsnmp_initialize_oid_array(int size)
 {
     oid_array_table *t;
 
@@ -139,13 +139,13 @@ netsnmp_Initialise_oid_array(int size)
 }
 
 void
-netsnmp_Release_oid_array(oid_array a)
+netsnmp_release_oid_array(oid_array a)
 {
     free(a);
 }
 
 int
-netsnmp_Get_oid_data_count(oid_array a)
+netsnmp_get_oid_data_count(oid_array a)
 {
     oid_array_table *t = (oid_array_table *) a;
 
@@ -156,7 +156,7 @@ netsnmp_Get_oid_data_count(oid_array a)
 }
 
 void           *
-netsnmp_Get_oid_data(oid_array a, void *key, int exact)
+netsnmp_get_oid_data(oid_array a, void *key, int exact)
 {
     oid_array_table *t = (oid_array_table *) a;
     int             index = 0;
@@ -185,7 +185,7 @@ netsnmp_Get_oid_data(oid_array a, void *key, int exact)
 }
 
 int
-netsnmp_Replace_oid_data(oid_array a, void *entry)
+netsnmp_replace_oid_data(oid_array a, void *entry)
 {
     oid_array_table *t = (oid_array_table *) a;
     void           *new_data;
@@ -217,7 +217,7 @@ netsnmp_Replace_oid_data(oid_array a, void *entry)
 }
 
 int
-netsnmp_Remove_oid_data(oid_array a, void *key, void *save)
+netsnmp_remove_oid_data(oid_array a, void *key, void *save)
 {
     oid_array_table *t = (oid_array_table *) a;
     void           *new_data, *old_data;
@@ -264,7 +264,7 @@ netsnmp_Remove_oid_data(oid_array a, void *key, void *save)
 }
 
 void
-netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each * fe,
+netsnmp_for_each_oid_data(oid_array a, Netsnmp_For_Each * fe,
                           void *context, int sort)
 {
     int             i;
@@ -278,7 +278,7 @@ netsnmp_For_each_oid_data(oid_array a, Netsnmp_For_Each * fe,
 }
 
 int
-netsnmp_Add_oid_data(oid_array a, void *entry)
+netsnmp_add_oid_data(oid_array a, void *entry)
 {
     oid_array_table *table = (oid_array_table *) a;
     int             new_max;
@@ -317,7 +317,7 @@ netsnmp_Add_oid_data(oid_array a, void *entry)
 }
 
 void           *
-netsnmp_Retrieve_oid_array(oid_array t, int *max_idx, int sort)
+netsnmp_retrieve_oid_array(oid_array t, int *max_idx, int sort)
 {
     oid_array_table *table = (oid_array_table *) t;
 
@@ -383,7 +383,7 @@ binary_search_for_start(netsnmp_oid_array_header *val, oid_array_table * t)
 }
 
 void          **
-netsnmp_Get_oid_data_subset(oid_array a, void *key, int *len)
+netsnmp_get_oid_data_subset(oid_array a, void *key, int *len)
 {
     oid_array_table *t = (oid_array_table *) a;
     void          **subset;
