@@ -45,6 +45,8 @@ $debug=0;
 $quiet=0;
 $nostats = 0;
 $noindent = 0;
+$currentline = 0;
+$currentlevel = -1;
 %assignments;
 %outputs;
 
@@ -137,15 +139,8 @@ $vars{'oid'} = $oid;
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
 
-my $defaults = "";
-if (-f "default-$configfile") {
-  $defaults = "default-$configfile";
-} elsif (-f "$ENV{MIB2C_DIR}/default-$configfile") {
-  $defaults = "$ENV{MIB2C_DIR}/default-$configfile";
-} elsif (-f "/usr/local/share/snmp/default-$configfile") {
-  $defaults = "/usr/local/share/snmp/default-$configfile";
-}
-if ( "$defaults" ne "" ) {
+my $defaults = find_conf("default-$configfile",1);
+if (-f "$defaults" ) {
   $fh = open_conf($defaults);
   process();
   $fh->close;
@@ -157,7 +152,7 @@ if ($#theassignments != -1) {
     $vars{$var} = $assignments{$var};
   }
 }
-
+$configfile = find_conf($configfile,0);
 $fh = open_conf($configfile);
 process();
 $fh->close;
@@ -285,23 +280,31 @@ sub process_vars {
 #      evaluates expression, and if expression is true processes
 #      contained part until appropriate @end@ is reached.
 sub skippart {
-    my $endcount = shift;
-    if ( "$endcount" == "" ) {
-      $endcount = 1;
-    }
-    while(<$fh>) {
-      print "SHIFT($endcount):$_" if ($debug);
+  my $endcount = 1;
+  my $arg = shift;
+  my $rtnelse = 0;
+  while ($arg =~ s/-(\w+)\s*//) {
+    $rtnelse = 1 if ($1 eq "else");
+  }
+  while(<$fh>) {
+    $currentline++;
+    $_ = process_vars($_) if ($debug);
+    print "$currentfile.$currentline.S$endcount.$rtnelse:$_" if ($debug);
 	if (/\@\s*end\@/) {
-	    return if ($endcount == 1);
+	    return "end" if ($endcount == 1);
 	    $endcount--;
 	}
-	if (/\@\s*else\@/) {
-	    return process() if ($endcount == 1);
+	elsif (/\@\s*else\@/) {
+	    return "else" if (($endcount == 1) && ($rtnelse == 1));
 	}
-	if (/\@\s*(foreach|if)/) {
+	elsif (/\@\s*elsif\s+([^\@]+)\@/) {
+	    return "else" if (($endcount == 1) && ($rtnelse == 1) && (eval(process_vars($1))));
+	}
+	elsif (/\@\s*(foreach|if)/) {
 	    $endcount++;
 	}
     }
+  return "eof"
 }
 
 sub close_file {
@@ -339,16 +342,56 @@ sub open_file {
   $written{$name} = '1';
 }
 
-sub process {
-    while(<$fh>) {
+sub process_file {
+  my ($file, $missingok) = (@_);
+  my $oldfh = $fh;
+  my $oldfile = $currentfile;
+  my $oldline = $currentline;
+  # keep old copy of @vars and just build on it.
+  my %oldvars = %vars;
 
-	if (/^\s*\#\#/) {
-	    # noop, it's a comment
-	} elsif (/\@\s*exit\@/) {
-	    die "exiting at conf file ($currentfile) request\n";
-	} elsif (/\@\s*else\@/) {
-	    return skippart();
-	} elsif (/\@\s*open\s+([^\@]+)\@/) {
+  $file = find_conf($file,$missingok);
+  return if (! $file);
+
+  $fh = open_conf($file);
+  $currentline = 0;
+  process();
+  $fh->close();
+
+  $fh = $oldfh;
+  $currentfile = $oldfile;
+  $currentline = $oldline;
+
+  # don't keep values in replaced vars.  Revert to ours.
+  %vars = %oldvars;
+}
+
+sub process {
+  my $arg = shift;
+  my $elseok = 0;
+  while ($arg =~ s/-(\w+)\s*//) {
+    $elseok = 1 if ($1 eq "elseok");
+  }
+
+  $currentlevel++;
+    while(<$fh>) {
+      $currentline++;
+      if ($debug) {
+#        my $line = process_vars($_);
+#        chop $line;
+        print "$currentfile.$currentline.P$currentlevel.$elseok:$_";
+      }
+
+        next if (/^\s*\#\#/); #                            noop, it's a comment
+        if (! /^\s*\@.*\@/ ) { #                                          output
+          my $line = process_vars($_);
+          foreach $file (values(%outputs)) {
+            print $file "$line";
+          }
+	} ####################################################################
+        elsif (/\@\s*exit\@/) { #                                         EXIT
+	    die "exiting at conf file ($currentfile:$currentline) request\n";
+	} elsif (/\@\s*open\s+([^\@]+)\@/) { #                            OPEN
 	    my $arg = $1;
 	    my ($multiple) = (0);
 	    while ($arg =~ s/-(\w+)\s+//) {
@@ -356,10 +399,10 @@ sub process {
 	    }
 	    my $spec = process_vars($arg);
             open_file($multiple, $spec);
-	} elsif (/\@\s+close\s+([^\@]+)\@/) {
+	} elsif (/\@\s*close\s+([^\@]+)\@/) { #                          CLOSE
 	    my $spec = process_vars($1);
             close_file($spec);
-	} elsif (/\@\s*append\s+([^\@]+)\@/) {
+	} elsif (/\@\s*append\s+([^\@]+)\@/) { #                        APPEND
 	    my $arg = $1;
 	    my ($multiple) = (0);
 	    while ($arg =~ s/-(\w+)\s+//) {
@@ -368,7 +411,7 @@ sub process {
 	    my $spec = process_vars($arg);
             $spec=">$spec";
             open_file($multiple,$spec);
-	} elsif (/\@\s*run (.*)\@/) {
+	} elsif (/\@\s*run (.*)\@/) { #                                    RUN
 	    my $arg = $1;
 	    my ($again) = (0);
 	    while ($arg =~ s/-(\w+)\s+//) {
@@ -379,51 +422,71 @@ sub process {
 	    }
 	    next if (!$again && $ranalready{$arg});
 	    $ranalready{$arg} = 1;
-	    my $oldfh = $fh;
 	    my %oldout = %outputs;
             my %emptyarray;
             %outputs = %emptyoutputs;
-	    my %oldvars = %vars;
-	    # keep old copy of @vars and just build on it.
-	    $fh = open_conf($arg);
-#	    $out = undef;
-	    process();
-	    $fh->close();
-	    $fh = $oldfh;
+            process_file($arg);
 	    %outputs = %oldout;
-	    # don't keep values in replaced vars.  Revert to ours.
-	    %vars = %oldvars;
-	} elsif (/\@\s*include (.*)\@/) {
-	    my $oldfh = $fh;
-	    my %oldvars = %vars;
-	    # keep old copy of @vars and just build on it.
-	    $fh = open_conf($1);
-	    process();
-	    $fh->close();
-	    $fh = $oldfh;
-	    # don't keep values in replaced vars.  Revert to ours.
-	    %vars = %oldvars;
-	} elsif (/\@\s*end\@/) {
-	    return;
-	} elsif (/\@\s*if\s+([^@]*)\@/) {
-	    if (eval(process_vars($1))) {
-		process();
-	    } else {
-		skippart();
+	} elsif (/\@\s*include (.*)\@/) { #                            INCLUDE
+	    my $arg = $1;
+	    my ($missingok) = (0);
+	    while ($arg =~ s/-(\w+)\s+//) {
+		$missingok = 1 if ($1 eq 'ifexists');
 	    }
-	} elsif (/\@\s*eval\s+\$(\w+)\s*=\s*([^\@]*)/) {
+            process_file($arg,$missingok);
+	} elsif (/\@\s*if([a-z]*)\s+([^@]+)\@/) { #                         IF
+          my ($type,$arg,$ok) = ($1,$2,0);
+          # check condition based on type
+          if (! $type) {
+            $ok = eval(process_vars($arg));
+          } elsif ($type eq conf) {
+            my $file = find_conf($arg,1); # missingok
+            $ok = (-f $file);
+          } else {
+            die "unknown if modifier ($type)\n";
+          }
+          my $rtn;
+          # act on condition
+          if ($ok) {
+            $rtn = process("-elseok");
+          } else {
+            $rtn = skippart("-else");
+            $rtn = process("-elseok") if ($rtn eq "else");
+          }
+          if ($rtn eq "break") {
+            skippart();
+            $currentlevel--;
+            return "end";
+          }
+	} elsif (/\@\s*els(e|if).*\@/) { #                         ELSE/ELSEIF
+	    die "unexpected else or elsif\n" if ($elseok != 1);
+	    skippart();
+            $currentlevel--;
+            return "else";
+	} elsif (/\@\s+skipif\s+([^@]*)\@/) { #                         SKIPIF
+          if (eval(process_vars($1))) {
+            skippart();
+            $currentlevel--;
+            return "skipif";
+          }
+	} elsif (/\@\s*break\s*\@/) { #                                  BREAK
+          skippart();
+          $currentlevel--;
+          return "break";
+	} elsif (/\@\s*end\@/) { #                                         END
+          $currentlevel--;
+          return "end";
+	} elsif (/\@\s*eval\s+\$(\w+)\s*=\s*([^\@]*)/) { #                EVAL
 	    my ($v, $e) = ($1, $2);
 #	    print STDERR "eval: $e\n";
 	    my $e = process_vars($e);
 	    $vars{$v} = eval($e);
 #	    warn "$@" if (!defined($vars{$v}));
-	} elsif (/\@\s*perleval\s*(.*)\@/) {
+	} elsif (/\@\s*perleval\s*(.*)\@/) { #                        PERLEVAL
 	    print STDERR "perleval: $1\n";
 	    my $res = eval($1);
 	    warn "$@" if ($res);
-	} elsif (/\@\s+skip\s*([^@]*)\@/) {
-          return skippart($1);
-	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) {
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) { #      SCALARS
 	    my $var = $1;
 	    my $startpos = $fh->tell();
 	    my $scalar;
@@ -566,7 +629,7 @@ sub process {
 	    } else {
 		skippart();
 	    }
-	} elsif (/\@\s*prompt\s+\$(\S+)\s*(.*)\@/) {
+	} elsif (/\@\s*prompt\s+\$(\S+)\s*(.*)\@/) { #                  PROMPT
 	    my ($var, $prompt) = ($1, $2);
 	    if (!$term) {
 		my $haveit = eval { require Term::ReadLine };
@@ -577,7 +640,7 @@ sub process {
 	    if ($term) {
 		$vars{$var} = $term->readline(process_vars($prompt));
 	    }
-	} elsif (/\@\s*print\s+([^@]*)\@/) {
+	} elsif (/\@\s*print\s+([^@]*)\@/) { #                           PRINT
           my $line = process_vars($1);
           print "$line\n";
 	} else {
@@ -585,11 +648,12 @@ sub process {
           foreach $file (values(%outputs)) {
             print $file "$line";
           }
-	    if (/\@.*\@/) {
-		warn "The configuration file contained a line with a @@ pair in it which may be a configuration token line mib2c couldn't recognize ($_).";
-	    }
+          chop $_;
+          warn "$currentfile:$currentline contained a @@ pair in it which may be a configuration token line mib2c couldn't recognize.\n";
+          warn "$currentfile:$currentline [$_]\n";
 	}
     }
+  $currentlevel--;
 }
 
 sub setup_data {
@@ -639,22 +703,30 @@ sub max {
     return $_[1];
 }
 
+sub find_conf {
+  my ($configfile, $missingok) = (@_);
+
+  return $configfile if (-f "$configfile");
+  return "$ENV{MIB2C_DIR}/$configfile" if (-f "$ENV{MIB2C_DIR}/$configfile");
+  return "/usr/local/share/snmp/$configfile" if (-f "/usr/local/share/snmp/$configfile");
+
+  return if ($missingok);
+
+  print STDERR "Can't find a configuration file called $configfile\n";
+  print STDERR "I looked in ., $ENV{MIB2C_DIR} and /usr/local/share/snmp\n";
+  exit;
+}
+
 sub open_conf {
     my $configfile = shift;
-    $currentfile = $configfile;
 # process .conf file
-    my $fh = new IO::File;
-    if (-f "$configfile") {
-	$fh->open("$configfile");
-    } elsif (-f "$ENV{MIB2C_DIR}/$configfile") {
-	$fh->open("$ENV{MIB2C_DIR}/$configfile");
-    } elsif (-f "/usr/local/share/snmp/$configfile") {
-	$fh->open("/usr/local/share/snmp/$configfile");
-    } else {
+    if (! -f "$configfile") {
 	print STDERR "Can't find a configuration file called $configfile\n";
-	print STDERR "I looked in ., $ENV{MIB2C_DIR} and /usr/local/share/snmp\n";
 	exit;
     }
+    $currentfile = $configfile;
+    my $fh = new IO::File;
+    $fh->open("$configfile");
     return $fh;
 }
 
