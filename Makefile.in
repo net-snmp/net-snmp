@@ -190,6 +190,8 @@ touchit:
 
 Makefile: Makefile.in config.status Makefile.rules Makefile.top
 	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because the following file(s) changed:"; \
+	    echo "  $?"; \
 	    ./config.status; \
 	else \
 	    echo "WARNING: not running config.status"; \
@@ -207,6 +209,8 @@ $(srcdir)/stamp-h.in: configure.in acconfig.h
 include/net-snmp/net-snmp-config.h: stamp-h
 stamp-h: include/net-snmp/net-snmp-config.h.in config.status
 	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because the following file(s) changed:"; \
+	    echo "  $?"; \
 	    ./config.status; \
 	    echo timestamp > stamp-h; \
 	else \
@@ -224,6 +228,7 @@ $(srcdir)/configure: configure.in aclocal.m4
 
 config.status: configure
 	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because $? changed"; \
 	    ./config.status --recheck; \
 	else \
 	    echo "WARNING: not running config.status --recheck"; \
