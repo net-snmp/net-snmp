@@ -66,7 +66,7 @@ netsnmp_oid_stash_create_sized_node(size_t mysize)
  * Assumes you want the default OID_STASH_CHILDREN_SIZE hash size for the node.
  * @return NULL on error, otherwise the newly allocated node
  */
-inline netsnmp_oid_stash_node *
+NETSNMP_INLINE netsnmp_oid_stash_node *
 netsnmp_oid_stash_create_node(void)
 {
     return netsnmp_oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);
