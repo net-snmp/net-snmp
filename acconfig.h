@@ -156,6 +156,9 @@
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
 
+/* Does struct sigaction have a sa_sigaction field? */
+#undef STRUCT_SIGACTION_HAS_SA_SIGACTION
+
 /* Does struct sockaddr have a sa_len field? */
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
 
