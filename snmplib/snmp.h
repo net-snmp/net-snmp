@@ -223,9 +223,9 @@ SOFTWARE.
 #define REPORT_RSP_MSG	    SNMP_MSG_REPORT
 #endif /* CMU_COMPATIBLE */
 
-void xdump __P((u_char *, int, char *));
-u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,
-                               u_char **, int *));
-u_char *snmp_build_var_op __P((u_char *, oid *, int *, u_char, int, u_char *,
-                               int *));
+void xdump (u_char *, int, char *);
+u_char *snmp_parse_var_op (u_char *, oid *, int *, u_char *, int *,
+                               u_char **, int *);
+u_char *snmp_build_var_op (u_char *, oid *, int *, u_char, int, u_char *,
+                               int *);
 #endif /* SNMP_H */

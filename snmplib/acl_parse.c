@@ -49,12 +49,9 @@
 #define TRUE 1
 #define FALSE 0
 
-static void error_exit __P((char *, int, char *));
-
-static void error_exit(str, linenumber, filename)
-    char *str;
-    int linenumber;
-    char *filename;
+static void error_exit(char *str,
+		       int linenumber,
+		       char *filename)
 {
   char tmpbuf[1024];
   snmp_errno = SNMPERR_BAD_ACL;
@@ -63,8 +60,7 @@ static void error_exit(str, linenumber, filename)
 }
 
 int
-read_acl_database(filename)
-    char *filename;
+read_acl_database(char *filename)
 {
     FILE *fp;
     char buf[256], buf1[256], buf2[256], buf3[256], buf4[256];

@@ -41,9 +41,9 @@ static struct viewEntry *List = NULL, *ScanPtr = NULL;
 
 
 struct viewEntry *
-view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
-    oid *viewSubtree;
-    int viewIndex, viewSubtreeLen;
+view_getEntry(int viewIndex, 
+	      oid *viewSubtree,	      
+	      int viewSubtreeLen)
 {
     struct viewEntry *vp;
 
@@ -58,13 +58,13 @@ view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
 }
 
 void
-view_scanInit()
+view_scanInit(void)
 {
     ScanPtr = List;
 }
 
 struct viewEntry *
-view_scanNext()
+view_scanNext(void)
 {
     struct viewEntry *returnval = ScanPtr;
     if (ScanPtr) ScanPtr = ScanPtr->next;
@@ -72,9 +72,9 @@ view_scanNext()
 }
 
 struct viewEntry *
-view_createEntry(viewIndex, viewSubtree, viewSubtreeLen)
-    oid *viewSubtree;
-    int viewIndex, viewSubtreeLen;
+view_createEntry(int viewIndex, 
+		 oid *viewSubtree,
+		 int viewSubtreeLen)
 {
     struct viewEntry *vp;
 
@@ -93,9 +93,9 @@ view_createEntry(viewIndex, viewSubtree, viewSubtreeLen)
 }
 
 void
-view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
-    oid *viewSubtree;
-    int viewIndex, viewSubtreeLen;
+view_destroyEntry(int viewIndex,
+		  oid *viewSubtree,		  
+		  int viewSubtreeLen)
 {
     struct viewEntry *vp, *lastvp = NULL;
 

@@ -42,18 +42,19 @@ struct synch_state {
     struct snmp_pdu *pdu;
 };
 
-struct variable_list* snmp_add_null_var __P((struct snmp_pdu *, oid *, int));
-struct snmp_pdu	*snmp_pdu_create __P((int));
-struct snmp_pdu *snmp_fix_pdu __P((struct snmp_pdu *, int));
-struct snmp_pdu *snmp_clone_pdu __P((struct snmp_pdu *));
-char *snmp_errstring __P((int));
-void snmp_synch_reset __P((struct snmp_session *));
-void snmp_synch_setup __P((struct snmp_session *));
-int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
-int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));
+struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, int);
+struct snmp_pdu	*snmp_pdu_create (int);
+struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
+struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
+char *snmp_errstring (int);
+void snmp_synch_reset (struct snmp_session *);
+void snmp_synch_setup (struct snmp_session *);
+int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
+
+int ms_party_init (in_addr_t, oid *, int *, oid *, int *, oid *, int *);
 
 /* single session API - see snmp_api.h for full details */
-int    snmp_sess_synch_response __P((void *, struct snmp_pdu *, struct snmp_pdu **));
+int snmp_sess_synch_response (void *, struct snmp_pdu *, struct snmp_pdu **);
  
 #endif /* SNMP_CLIENT_H */
 

@@ -92,7 +92,7 @@ SOFTWARE.
 #include "int64.h"
 #include "read_config.h"
 
-static void init_snmp_session __P((void));
+static void init_snmp_session (void);
 
 #define PACKET_LENGTH	8000
 
@@ -214,33 +214,35 @@ struct session_list {
     struct snmp_internal_session *internal;
 };
 
+
+
 static char *api_errors[-SNMPERR_MAX+1] = {
-    "No error",
-    "Generic error",
-    "Invalid local port",
-    "Unknown host",
-    "Unknown session",
-    "Too long",
-    "No socket",
-    "Cannot send V2 PDU on V1 session",
-    "Cannot send V1 PDU on V2 session",
-    "Bad value for non-repeaters",
-    "Bad value for max-repetitions",
-    "Error building ASN.1 representation",
-    "Failure in sendto",
-    "Bad parse of ASN.1 type",
-    "Bad version specified",
-    "Bad source party specified",
-    "Bad destination party specified",
-    "Bad context specified",
-    "Bad community specified",
-    "Cannot send noAuth/desPriv",
-    "Bad ACL definition",
-    "Bad Party definition",
-    "Session abort failure",
-    "Unknown PDU type",
-    "Timeout",
-    "Failure in recvfrom",
+    (char*)"No error",
+    (char*)"Generic error",
+    (char*)"Invalid local port",
+    (char*)"Unknown host",
+    (char*)"Unknown session",
+    (char*)"Too long",
+    (char*)"No socket",
+    (char*)"Cannot send V2 PDU on V1 session",
+    (char*)"Cannot send V1 PDU on V2 session",
+    (char*)"Bad value for non-repeaters",
+    (char*)"Bad value for max-repetitions",
+    (char*)"Error building ASN.1 representation",
+    (char*)"Failure in sendto",
+    (char*)"Bad parse of ASN.1 type",
+    (char*)"Bad version specified",
+    (char*)"Bad source party specified",
+    (char*)"Bad destination party specified",
+    (char*)"Bad context specified",
+    (char*)"Bad community specified",
+    (char*)"Cannot send noAuth/desPriv",
+    (char*)"Bad ACL definition",
+    (char*)"Bad Party definition",
+    (char*)"Session abort failure",
+    (char*)"Unknown PDU type",
+    (char*)"Timeout",
+    (char*)"Failure in recvfrom",
 };
 
 /*
@@ -262,17 +264,16 @@ char *snmp_detail = NULL;
 
 static int snmp_dump_packet = 0;
 
-static void free_request_list __P((struct request_list *));
-void shift_array __P((u_char *, int, int));
-static int snmp_build __P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
-static int snmp_parse __P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
-static void snmp_free_internal_pdu __P((struct snmp_pdu *));
+static void free_request_list (struct request_list *);
+void shift_array (u_char *, int, int);
+static int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
+static int snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
+static void snmp_free_internal_pdu (struct snmp_pdu *);
 
-static void * snmp_sess_pointer __P((struct snmp_session *));
+static void * snmp_sess_pointer (struct snmp_session *);
 
 #ifndef HAVE_STRERROR
-char *strerror(err)
-int err;
+char *strerror(int err)
 {
   extern char *sys_errlist[];
   extern int sys_nerr;
@@ -282,32 +283,29 @@ int err;
 }
 #endif
 
-void snmp_set_dump_packet(val)
-    int val;
+void snmp_set_dump_packet(int val)
 {
     snmp_dump_packet = val;
 }
 
-int snmp_get_dump_packet __P((void))
+int snmp_get_dump_packet (void)
 {
     return snmp_dump_packet;
 }
 
-int snmp_get_errno __P((void))
+int snmp_get_errno (void)
 {
     return snmp_errno;
 }
 
 void
-snmp_perror(prog_string)
-  char *prog_string;
+snmp_perror(char *prog_string)
 {
   fprintf(stderr,"%s: %s\n",prog_string, snmp_api_errstring(snmp_errno));
 }
 
 void
-snmp_set_detail(detail_string)
-  char *detail_string;
+snmp_set_detail(char *detail_string)
 {
   if (snmp_detail != NULL) {
     free(snmp_detail);
@@ -318,15 +316,14 @@ snmp_set_detail(detail_string)
 }
 
 char *
-snmp_api_errstring(snmp_errnumber)
-    int	snmp_errnumber;
+snmp_api_errstring(int snmp_errnumber)
 {
     char *msg;
     static char msg_buf [256];
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
 	msg = api_errors[-snmp_errnumber];
     } else {
-	msg = "Unknown Error";
+	msg = (char*)"Unknown Error";
     }
     if (snmp_detail) {
 	sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
@@ -343,11 +340,10 @@ snmp_api_errstring(snmp_errnumber)
  * Caller must free the string returned after use.
  */
 void
-snmp_error(psess, p_errno, p_snmp_errno, p_str)
-    struct snmp_session *psess;
-    int * p_errno;
-    int * p_snmp_errno;
-    char ** p_str;
+snmp_error(struct snmp_session *psess,
+	   int *p_errno,
+	   int *p_snmp_errno,
+	   char **p_str)
 {
     char buf[512];
     int snmp_errnumber;
@@ -373,11 +369,10 @@ snmp_error(psess, p_errno, p_snmp_errno, p_str)
  * snmp_sess_error - same as snmp_error for single session API use.
  */
 void
-snmp_sess_error(sessp, p_errno, p_snmp_errno, p_str)
-    void * sessp;
-    int * p_errno;
-    int * p_snmp_errno;
-    char ** p_str;
+snmp_sess_error(void *sessp,
+		int *p_errno,
+		int *p_snmp_errno,
+		char **p_str)
 {
     struct session_list *slp = (struct session_list*)sessp;
 
@@ -392,7 +387,7 @@ snmp_sess_error(sessp, p_errno, p_snmp_errno, p_str)
  * SNMP over AppleTalk or IPX is not currently supported.
  */
 static void
-init_snmp_session __P((void))
+init_snmp_session (void)
 {
     struct servent *servp;
     struct timeval tv;
@@ -423,8 +418,7 @@ init_snmp_session __P((void))
  * No MIB file processing is done via this call.
  */
 void
-snmp_sess_init(session)
-    struct snmp_session * session;
+snmp_sess_init(struct snmp_session *session)
 {
 extern int init_mib_internals();
 
@@ -448,7 +442,7 @@ extern int init_mib_internals();
 static int done_init = 0;  /* prevent double init's */
 
 void
-init_snmp __P((void)) {
+init_snmp (void) {
   if (done_init)
     return;
   done_init = 1;
@@ -473,8 +467,7 @@ init_snmp __P((void)) {
  * and snmp_errno is set to the appropriate error code.
  */
 struct snmp_session *
-snmp_open(session)
-    struct snmp_session *session;
+snmp_open(struct snmp_session *session)
 {
     struct session_list *slp;
     slp = (struct session_list *)snmp_sess_open(session);
@@ -489,8 +482,7 @@ snmp_open(session)
 
 /* The "spin-free" version of snmp_open */
 void *
-snmp_sess_open(in_session)
-    struct snmp_session *in_session;
+snmp_sess_open(struct snmp_session *in_session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
@@ -689,8 +681,7 @@ snmp_sess_open(in_session)
  * Free each element in the input request list.
  */
 static void
-free_request_list(rp)
-    struct request_list *rp;
+free_request_list(struct request_list *rp)
 {
     struct request_list *orp;
 
@@ -703,8 +694,7 @@ free_request_list(rp)
 }
 
 static void
-_snmp_free(cp)
-    char * cp;
+_snmp_free(char * cp)
 {
     if (cp)
 	free(cp);
@@ -716,8 +706,7 @@ _snmp_free(cp)
  * the session.  Returns 0 on error, 1 otherwise.
  */
 int
-snmp_sess_close(sessp)
-    void *sessp;
+snmp_sess_close(void *sessp)
 {
     struct session_list *slp = (struct session_list *)sessp;
 
@@ -749,8 +738,7 @@ snmp_sess_close(sessp)
 }
 
 int 
-snmp_close(session)
-    struct snmp_session *session;
+snmp_close(struct snmp_session *session)
 {
     struct session_list *slp = NULL, *oslp = NULL;
 
@@ -779,10 +767,9 @@ snmp_close(session)
 
 #ifdef notused
 void
-shift_array(begin, length, shift_amount)
-    u_char          *begin;
-    register int    length;
-    int             shift_amount;
+shift_array(u_char *begin,
+	    int length,
+	    int shift_amount)
 {
     register u_char     *old, *newer;
 
@@ -809,11 +796,11 @@ shift_array(begin, length, shift_amount)
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
 static int
-snmp_build(session, pdu, packet, out_length)
-    struct snmp_session	*session;
-    struct snmp_pdu	*pdu;
-    register u_char	*packet;
-    int			*out_length;
+
+snmp_build(struct snmp_session *session,
+	   struct snmp_pdu *pdu,
+	   u_char *packet,
+	   int *out_length)
 {
     u_char *h0, *h0e=NULL, *h1, *h1e, *h2, *h2e;
     register u_char  *cp;
@@ -1031,11 +1018,10 @@ snmp_build(session, pdu, packet, out_length)
  * are encountered, -1 is returned.  Otherwise, a 0 is returned.
  */
 static int
-snmp_parse(session, pdu, data, length)
-    struct snmp_session *session;
-    struct internal_snmp_pdu *pdu;
-    u_char  *data;
-    int	    length;
+snmp_parse(struct snmp_session *session,
+	   struct internal_snmp_pdu *pdu,
+	   u_char *data,
+	   int length)
 {
     u_char  msg_type;
     u_char  type;
@@ -1343,17 +1329,15 @@ snmp_parse(session, pdu, data, length)
  * The pdu is freed by snmp_send() unless a failure occured.
  */
 int
-snmp_send(session, pdu)
-    struct snmp_session *session;
-    struct snmp_pdu	*pdu;
+snmp_send(struct snmp_session *session,
+	  struct snmp_pdu *pdu)
 {
   return snmp_async_send(session, pdu, NULL, NULL);
 }
 
 int
-snmp_sess_send(sessp, pdu)
-    void	        *sessp;
-    struct snmp_pdu	*pdu;
+snmp_sess_send(void *sessp,
+	       struct snmp_pdu *pdu)
 {
   return snmp_sess_async_send(sessp, pdu, NULL, NULL);
 }
@@ -1375,11 +1359,10 @@ snmp_sess_send(sessp, pdu)
  * The pdu is freed by snmp_send() unless a failure occured.
  */
 int
-snmp_async_send(session, pdu, callback, cb_data)
-    struct snmp_session *session;
-    struct snmp_pdu	*pdu;
-    snmp_callback	callback;
-    void	        *cb_data;
+snmp_async_send(struct snmp_session *session,
+		struct snmp_pdu	*pdu,
+		snmp_callback callback,
+		void *cb_data)
 {
     void *sessp = snmp_sess_pointer(session);
 
@@ -1389,11 +1372,10 @@ snmp_async_send(session, pdu, callback, cb_data)
 }
 
 int
-snmp_sess_async_send(sessp, pdu, callback, cb_data)
-    void	        *sessp;
-    struct snmp_pdu	*pdu;
-    snmp_callback	callback;
-    void	        *cb_data;
+snmp_sess_async_send(void *sessp,
+		     struct snmp_pdu *pdu,
+		     snmp_callback callback,
+		     void *cb_data)
 {
     struct session_list *slp = (struct session_list *)sessp;
     struct snmp_session *session;
@@ -1652,13 +1634,13 @@ snmp_sess_async_send(sessp, pdu, callback, cb_data)
  * Frees the variable and any malloc'd data associated with it.
  */
 void
-snmp_free_var(var)
-    struct variable_list *var;
+snmp_free_var(struct variable_list *var)
 {
     if (!var) return;
 
     if (var->name) free((char *)var->name);
     if (var->val.string) free((char *)var->val.string);
+
     free((char *)var);
 }
 
@@ -1666,8 +1648,7 @@ snmp_free_var(var)
  * Frees the pdu and any malloc'd data associated with it.
  */
 void
-snmp_free_pdu(pdu)
-    struct snmp_pdu *pdu;
+snmp_free_pdu(struct snmp_pdu *pdu)
 {
     struct variable_list *vp, *ovp;
 
@@ -1696,8 +1677,7 @@ snmp_free_pdu(pdu)
  * Frees the pdu and any malloc'd data associated with it.
  */
 static void
-snmp_free_internal_pdu(pdu)
-    struct snmp_pdu *pdu;
+snmp_free_internal_pdu(struct snmp_pdu *pdu)
 {
     struct internal_variable_list *vp, *ovp;
 
@@ -1724,8 +1704,7 @@ snmp_free_internal_pdu(pdu)
  * routine returns successfully, the pdu and it's request are deleted.
  */
 void
-snmp_read(fdset)
-    fd_set  *fdset;
+snmp_read(fd_set *fdset)
 {
     struct session_list *slp;
 
@@ -1736,9 +1715,8 @@ snmp_read(fdset)
 
 /* Same as snmp_read, but works just one session. */
 void
-snmp_sess_read(sessp, fdset)
-    void *sessp;
-    fd_set  *fdset;
+snmp_sess_read(void *sessp,
+	       fd_set *fdset)
 {
     struct session_list *slp = (struct session_list*)sessp;
     struct snmp_session *sp;
@@ -1852,26 +1830,25 @@ snmp_sess_read(sessp, fdset)
  */
 
 int
-snmp_select_info(numfds, fdset, timeout, block)
-    int	    *numfds;
-    fd_set  *fdset;
-    struct timeval *timeout;
-    int	    *block; /* input:  set to 1 if input timeout value is undefined  */
-                    /*         set to 0 if input timeout value is defined    */
-                    /* output: set to 1 if output timeout value is undefined */
-                    /*         set to 0 if output rimeout vlaue id defined   */
+snmp_select_info(int *numfds,
+		 fd_set *fdset,
+		 struct timeval *timeout,
+		 int *block)
+    /* input:  set to 1 if input timeout value is undefined  */
+    /*         set to 0 if input timeout value is defined    */
+    /* output: set to 1 if output timeout value is undefined */
+    /*         set to 0 if output rimeout vlaue id defined   */
 {
     return snmp_sess_select_info((void *)0, numfds, fdset, timeout, block);
 }
 
 /* Same as snmp_select_info, but works just one session. */
 int
-snmp_sess_select_info(sessp, numfds, fdset, timeout, block)
-    void    *sessp;
-    int	    *numfds;
-    fd_set  *fdset;
-    struct timeval *timeout;
-    int	    *block;
+snmp_sess_select_info(void *sessp,
+		      int *numfds,
+		      fd_set *fdset,
+		      struct timeval *timeout,
+		      int *block)
 {
     struct session_list *slptest = (struct session_list *)sessp;
     struct session_list *slp;
@@ -1955,7 +1932,7 @@ snmp_sess_select_info(sessp, numfds, fdset, timeout, block)
  *  callback for the session is used to alert the user of the timeout.
  */
 void
-snmp_timeout __P((void))
+snmp_timeout (void)
 {
     struct session_list *slp;
 
@@ -1965,8 +1942,7 @@ snmp_timeout __P((void))
 }
 
 void
-snmp_sess_timeout(sessp)
-    void       *sessp;
+snmp_sess_timeout(void *sessp)
 {
     struct session_list *slp = (struct session_list*)sessp;
     struct snmp_session *sp;
@@ -2061,10 +2037,10 @@ snmp_sess_timeout(sessp)
 #define DEBUG_TOKEN_DELIMITER ","
 #define DEBUG_ALWAYS_TOKEN "all"
 
-static int dodebug = DODEBUG;
-int  debug_num_tokens=0;
-char *debug_tokens[MAX_DEBUG_TOKENS];
-int  debug_print_everything=0;
+static int   dodebug = DODEBUG;
+static int   debug_num_tokens=0;
+static char *debug_tokens[MAX_DEBUG_TOKENS];
+static int   debug_print_everything=0;
 
 void
 #ifdef STDC_HEADERS
@@ -2091,9 +2067,8 @@ DEBUGP(va_alist)
 }
 
 void
-DEBUGPOID(theoid, len)
-  oid *theoid;
-  int len;
+DEBUGPOID(oid *theoid,
+	  int len)
 {
   char c_oid[MAX_NAME_LEN];
   sprint_objid(c_oid,theoid,len);
@@ -2205,25 +2180,24 @@ debugmsgtoken(va_alist)
 }
   
 void
-snmp_set_do_debugging(val)
-  int val;
+snmp_set_do_debugging(int val)
 {
   dodebug = val;
 }
 
 int
-snmp_get_do_debugging __P((void))
+snmp_get_do_debugging (void)
 {
   return dodebug;
 }
 
 int
-snmp_oid_compare(name1, len1, name2, len2)
-    register oid	    *name1, *name2;
-    register int	    len1, len2;
+snmp_oid_compare(oid *name1, 
+		 int len1,
+		 oid *name2, 
+		 int len2)
 {
-    register int    len;
-
+    register int len;
     /* len = minimum of len1 and len2 */
     if (len1 < len2)
 	len = len1;
@@ -2249,13 +2223,12 @@ snmp_oid_compare(name1, len1, name2, len2)
  * variables for this pdu.
  */
 void
-snmp_pdu_add_variable(pdu, name, name_length, type, value, len)
-    struct snmp_pdu *pdu;
-    oid *name;
-    int name_length;
-    u_char type;
-    u_char *value;
-    int len;
+snmp_pdu_add_variable(struct snmp_pdu *pdu,
+		      oid *name,
+		      int name_length,
+		      u_char type,
+		      u_char *value,
+		      int len)
 {
     struct variable_list *vars;
 
@@ -2332,9 +2305,8 @@ snmp_pdu_add_variable(pdu, name, name_length, type, value, len)
 }
 
 int
-ascii_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
+ascii_to_binary(u_char *cp,
+		u_char *bufp)
 {
     int  subidentifier;
     u_char *bp = bufp;
@@ -2361,9 +2333,8 @@ ascii_to_binary(cp, bufp)
 }
 
 int
-hex_to_binary(cp, bufp)
-    u_char  *cp;
-    u_char *bufp;
+hex_to_binary(u_char *cp,
+	      u_char *bufp)
 {
     int  subidentifier;
     u_char *bp = bufp;
@@ -2394,11 +2365,11 @@ hex_to_binary(cp, bufp)
  * variables for this pdu.
  */
 int
-snmp_add_var(pdu, name, name_length, type, value)
-    struct snmp_pdu *pdu;
-    oid *name;
-    int name_length;
-    char type, *value;
+snmp_add_var(struct snmp_pdu *pdu,
+	     oid *name,
+	     int name_length,
+	     char type,
+	     char *value)
 {
     char buf[2048];
     int tint;
@@ -2502,8 +2473,7 @@ snmp_add_var(pdu, name, name_length, type, value)
  * which guarantee action will occur ONLY for this given session.
  */
 void *
-snmp_sess_pointer(session)
-    struct snmp_session *session;
+snmp_sess_pointer(struct snmp_session *session)
 {
     struct session_list *slp;
 
@@ -2524,8 +2494,7 @@ snmp_sess_pointer(session)
  * returns NULL or pointer to session.
  */
 struct snmp_session *
-snmp_sess_session(sessp)
-    void *sessp;
+snmp_sess_session(void *sessp)
 {
     struct session_list *slp = (struct session_list *)sessp;
     if (slp == NULL) return(NULL);

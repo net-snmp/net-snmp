@@ -42,9 +42,8 @@ static int NextIndex = 1;
 
 
 struct contextEntry *
-context_getEntry(contextID, contextIDLen)
-    oid *contextID;
-    int contextIDLen;
+context_getEntry(oid *contextID,
+		 int contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -74,13 +73,13 @@ context_getEntry(contextID, contextIDLen)
 }
 
 void
-context_scanInit __P((void))
+context_scanInit (void)
 {
   ScanPtr = List;
 }
 
 struct contextEntry *
-context_scanNext __P((void))
+context_scanNext (void)
 {
     struct contextEntry *returnval;
 
@@ -91,9 +90,8 @@ context_scanNext __P((void))
 }
 
 struct contextEntry *
-context_createEntry(contextID, contextIDLen)
-    oid *contextID;
-    int contextIDLen;
+context_createEntry(oid *contextID,
+		    int contextIDLen)
 {
     struct contextEntry *cp;
 
@@ -113,9 +111,8 @@ context_createEntry(contextID, contextIDLen)
 }
 
 void
-context_destroyEntry(contextID, contextIDLen)
-    oid *contextID;
-    int contextIDLen;
+context_destroyEntry(oid *contextID,
+		     int contextIDLen)
 {
     struct contextEntry *cp, *lastcp = NULL;
 

@@ -79,8 +79,8 @@ struct snmp_session {
     u_short remote_port;/* UDP port number of peer. */
     u_short local_port; /* My UDP port number, 0 for default, picked randomly */
     /* Authentication function or NULL if null authentication is used */
-    u_char    *(*authenticator) __P((u_char *, int *, char *, int));
-    int	    (*callback) __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+    u_char    *(*authenticator) (u_char *, int *, char *, int);
+    int	    (*callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
    	/* Function to interpret incoming data */
     /* Pointer to data that the callback function may consider important */
     void    *callback_magic;
@@ -96,7 +96,7 @@ struct snmp_session {
     int     s_snmp_errno;   /* copy of library errno */
 };
 
-typedef int (*snmp_callback) __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+typedef int (*snmp_callback) (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 
 /*
  * Set fields in session and pdu to the following to get a default or unconfigured value.
@@ -114,9 +114,9 @@ typedef int (*snmp_callback) __P((int, struct snmp_session *, int, struct snmp_p
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
 
-extern char *snmp_api_errstring __P((int));
-extern void snmp_perror __P((char *));
-extern void snmp_set_detail __P((char *));
+extern char *snmp_api_errstring (int);
+extern void snmp_perror (char *);
+extern void snmp_set_detail (char *);
 #define SNMP_DETAIL_SIZE        512
 
 /* Error return values */
@@ -182,7 +182,7 @@ struct variable_list {
  * the pointer passed to snmp_open()).  On any error, NULL is returned
  * and snmp_errno is set to the appropriate error code.
  */
-struct snmp_session *snmp_open __P((struct snmp_session *));
+struct snmp_session *snmp_open (struct snmp_session *);
 
 /*
  * int snmp_close(session)
@@ -192,7 +192,7 @@ struct snmp_session *snmp_open __P((struct snmp_session *));
  * dequeues any pending requests, and closes any sockets allocated for
  * the session.  Returns 0 on error, 1 otherwise.
  */
-int snmp_close __P((struct snmp_session *));
+int snmp_close (struct snmp_session *);
 
 
 /*
@@ -208,7 +208,7 @@ int snmp_close __P((struct snmp_session *));
  * On any error, 0 is returned.
  * The pdu is freed by snmp_send() unless a failure occured.
  */
-int snmp_send __P((struct snmp_session *, struct snmp_pdu *));
+int snmp_send (struct snmp_session *, struct snmp_pdu *);
 
 /*
  * int snmp_async_send(session, pdu, callback, cb_data)
@@ -226,8 +226,8 @@ int snmp_send __P((struct snmp_session *, struct snmp_pdu *));
  * On any error, 0 is returned.
  * The pdu is freed by snmp_send() unless a failure occured.
  */
-int snmp_async_send __P((struct snmp_session *, struct snmp_pdu *, 
-                         snmp_callback, void *));
+int snmp_async_send (struct snmp_session *, struct snmp_pdu *, 
+                         snmp_callback, void *);
 
 /*
  * void snmp_read(fdset)
@@ -239,7 +239,7 @@ int snmp_async_send __P((struct snmp_session *, struct snmp_pdu *,
  * is passed to the callback routine for that session.  If the callback
  * routine returns successfully, the pdu and it's request are deleted.
  */
-void snmp_read __P((fd_set *));
+void snmp_read (fd_set *);
 
 
 /*
@@ -249,9 +249,9 @@ void snmp_read __P((fd_set *));
  * 
  * Frees the pdu and any malloc'd data associated with it.
  */
-void snmp_free_pdu __P((struct snmp_pdu *));
+void snmp_free_pdu (struct snmp_pdu *);
 
-void snmp_free_var __P((struct variable_list *));
+void snmp_free_var (struct variable_list *);
 
 /*
  * int snmp_select_info(numfds, fdset, timeout, block)
@@ -279,7 +279,7 @@ void snmp_free_var __P((struct variable_list *));
  *
  * snmp_select_info returns the number of open sockets.  (i.e. The number of sessions open)
  */
-int snmp_select_info __P((int *, fd_set *, struct timeval *, int *));
+int snmp_select_info (int *, fd_set *, struct timeval *, int *);
 
 /*
  * void snmp_timeout();
@@ -292,7 +292,8 @@ int snmp_select_info __P((int *, fd_set *, struct timeval *, int *));
  * resent.  If there are no more retries available, the callback for the session
  * is used to alert the user of the timeout.
  */
-void snmp_timeout __P((void));
+
+void snmp_timeout (void);
 
 
 /*
@@ -327,34 +328,28 @@ void snmp_timeout __P((void));
 #define TIMED_OUT	   2
 
 
-void snmp_set_dump_packet __P((int));
-int snmp_get_dump_packet __P((void));
-void snmp_set_quick_print __P((int));
-int snmp_get_quick_print __P((void));
-void snmp_set_full_objid __P((int));
-int snmp_get_full_objid __P((void));
-void snmp_set_suffix_only __P((int));
-int snmp_get_suffix_only __P((void));
-int snmp_get_errno __P((void));
-void snmp_set_do_debugging __P((int));
-int snmp_get_do_debugging __P((void));
-int snmp_oid_compare __P((oid *, int, oid *, int));
-void init_snmp __P((void));
-void snmp_pdu_add_variable __P((struct snmp_pdu *, oid *, int, u_char, u_char *, int));
-int hex_to_binary __P((u_char *, u_char *));
-int ascii_to_binary __P((u_char *, u_char *));
-int snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
-#ifdef STDC_HEADERS
-void DEBUGP __P((const char *, ...));
+void snmp_set_dump_packet (int);
+int snmp_get_dump_packet (void);
+void snmp_set_quick_print (int);
+int snmp_get_quick_print (void);
+void snmp_set_full_objid (int);
+int snmp_get_full_objid (void);
+void snmp_set_suffix_only (int);
+int snmp_get_suffix_only (void);
+int snmp_get_errno (void);
+void snmp_set_do_debugging (int);
+int snmp_get_do_debugging (void);
+int snmp_oid_compare (oid *, int, oid *, int);
+void init_snmp (void);
+void snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
+int hex_to_binary (u_char *, u_char *);
+int ascii_to_binary (u_char *, u_char *);
+int snmp_add_var (struct snmp_pdu *, oid*, int, char, char *);
+void DEBUGP(const char *, ...);
 void debugmsg(const char *token, const char *format, ...);
 void debugmsgtoken(const char *token, const char *format, ...);
-#else
-void DEBUGP __P((va_alist));
-void debugmsg(va_alist);
-void debugmsgtoken(va_alist);
-#endif
 void debugmsg_oid(char *token, oid *theoid, int len);
-void DEBUGPOID __P((oid *, int));
+void DEBUGPOID(oid *, int);
 
 #define DEBUGMSG(x)    debugmsg x;
 #define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
@@ -377,7 +372,7 @@ extern int quick_print;
  * Inputs :  address of errno, address of snmp_errno, address of string
  * Caller must free the string returned after use.
  */
-void snmp_error __P((struct snmp_session *, int *, int *, char **));
+void snmp_error (struct snmp_session *, int *, int *, char **);
 
 /*
  * single session API.
@@ -419,22 +414,22 @@ void snmp_error __P((struct snmp_session *, int *, int *, char **));
  *  4. Replace snmp_send(ss,pdu) with snmp_sess_send(sessp,pdu)
  */
 
-void   snmp_sess_init       __P((struct snmp_session *));
-void * snmp_sess_open       __P((struct snmp_session *));
-struct snmp_session * snmp_sess_session    __P((void *));
+void   snmp_sess_init       (struct snmp_session *);
+void * snmp_sess_open       (struct snmp_session *);
+struct snmp_session * snmp_sess_session    (void *);
 
 /* use return value from snmp_sess_open as void * parameter */
 
-int    snmp_sess_send       __P((void *, struct snmp_pdu *));
-int    snmp_sess_async_send __P((void *, struct snmp_pdu *,
-                                         snmp_callback, void *));
-int    snmp_sess_select_info __P((void *, int *, fd_set *,
-                                         struct timeval *, int *));
-void   snmp_sess_read       __P((void *, fd_set *));
-void   snmp_sess_timeout    __P((void *));
-int    snmp_sess_close      __P((void *));
+int    snmp_sess_send       (void *, struct snmp_pdu *);
+int    snmp_sess_async_send (void *, struct snmp_pdu *,
+                                         snmp_callback, void *);
+int    snmp_sess_select_info (void *, int *, fd_set *,
+                                         struct timeval *, int *);
+void   snmp_sess_read       (void *, fd_set *);
+void   snmp_sess_timeout    (void *);
+int    snmp_sess_close      (void *);
 
-void   snmp_sess_error      __P((void *, int *, int *, char **));
+void   snmp_sess_error      (void *, int *, int *, char **);
 
 /* end single session API */
  
