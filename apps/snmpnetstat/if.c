@@ -117,7 +117,7 @@ intpr(interval)
 	    cfg_nnets = *var->val.integer;
 	else
 	    return;
-	memset (&curifip, 0, sizeof (curifip));
+	memset (curifip, 0, sizeof (curifip));
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
 
