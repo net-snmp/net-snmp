@@ -19,7 +19,7 @@ usage()
    echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
    echo ""
    echo " -x : configure extra features for pre-release testing"
-   echo " -C : don't source $HOME/.nsb-nightly"
+   echo " -C : don't source $HOME/.snmp/nsb-nightly"
    echo ""
    echo " -h : host to upload results to"
    echo " -p : path to upload results to"
@@ -100,7 +100,7 @@ else
 fi
 RC=$?
 if [ ! -z $NSB_SCP_HOST ]; then
-   nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/`nsb-sysname`
+   nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
 fi
 echo "Finish: `date`"
 echo -n "Result: "

@@ -3,6 +3,16 @@
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
 
+#----------------------------------------------------------------------
+#
+# source user config
+if [ -f $HOME/.snmp/nsb-rc ]; then
+   source $HOME/.snmp/nsb-rc
+fi
+
+
+#----------------------------------------------------------------------
+#
 nsb-sysname()
 {
    echo `uname -mrs | tr ' /' '__'`
@@ -28,6 +38,7 @@ NSB_SKIP_CONFIG=${NSB_SKIP_CONFIG:=0}
 NSB_SKIP_BUILD=${NSB_SKIP_BUILD:=0}
 NSB_SKIP_TEST=${NSB_SKIP_TEST:=0}
 NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
+NSB_ERR_CTX_LINES=${NSB_ERR_CTX_LINES:=25}
 NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
 NSB_EXTRA_TRANSPORTS=""
 NSB_DIST_MODULES="host disman/event-mib smux"
@@ -300,7 +311,7 @@ nsb-make()
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
       grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
-      cat nsb-make-$target-errs2.$NSB_DATE >&2
+      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
@@ -311,21 +322,6 @@ nsb-make()
 
 nsb-default-paths()
 {
-   #
-   # System specific additions
-   #
-   case `uname -s` in
-
-   Darwin)
-      # the version of apple's gcc on the sf cf munges -E output in
-      # a way that breaks mib config_require, so use cpp..
-      export CPP=${CPP:=cpp}
-      ;;
-
-   *)
-      ;;
-   esac
-
    if [ -z "$NSB_VERSION" ]; then
       NSB_VERSION="unknown-version"
    fi
@@ -334,9 +330,9 @@ nsb-default-paths()
    fi
    if [ -z "$NSB_BUILD_DIR" ]; then
       NSB_BUILD_DIR=$HOME/build/$NSB_VERSION
-   fi
-   if [ ! -z "$NSB_SUFFIX" ]; then
-      NSB_BUILD_DIR=$NSB_BUILD_DIR/$NSB_SUFFIX
+      if [ ! -z "$NSB_SUFFIX" ]; then
+         NSB_BUILD_DIR=$NSB_BUILD_DIR/$NSB_SUFFIX
+      fi
    fi
    if [ -z "$NSB_INSTALL_DIR" ]; then
       NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
