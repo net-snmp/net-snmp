@@ -222,7 +222,8 @@ init_agent(const char *app)
     /*
      * we handle alarm signals ourselves in the select loop 
      */
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
 
 #ifdef CAN_USE_NLIST
     init_kmem("/dev/kmem");
@@ -254,7 +255,8 @@ init_agent(const char *app)
      * initialize agentx subagent if necessary. 
      */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
         r = subagent_pre_init();
         init_subagent();
     }

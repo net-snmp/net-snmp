@@ -171,8 +171,10 @@ register_index(netsnmp_variable_list * varbind, int flags,
     DEBUGMSG(("register_index", "for session %08p\n", ss));
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(TESTING)
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
         return (agentx_register_index(ss, varbind, flags));
+    }
 #endif
     /*
      * Look for the requested OID entry 
@@ -496,8 +498,10 @@ unregister_index(netsnmp_variable_list * varbind, int remember,
     int             res, res2, i;
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(TESTING)
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
         return (agentx_unregister_index(ss, varbind));
+    }
 #endif
     /*
      * Look for the requested OID entry 
