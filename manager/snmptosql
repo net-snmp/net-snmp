@@ -109,7 +109,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
     my $versiontag = $sess->get('versionTag.0');
 
     if ($sysDescr eq "" || $sysId eq "" || $versiontag eq "") {
-	hosterror("$host");
+	hosterror("$host","Problem collecting basic info");
 	next;
     }
 
@@ -416,15 +416,16 @@ sub mailusers {
 
 sub hosterror {
     my $host = shift;
+    my $error = shift || "No response";
     my $groups = getcursor("SELECT distinct groupname FROM hosttables where host = '$host'");
     my ($group, $person);
     my %mailed;
 
     return if (isbadhost($host)); # only send out a message once.
 		    
-    $dbh->do("insert into hosterrors(host, errormsg) values('$host','No response');");
+    $dbh->do("insert into hosterrors(host, errormsg) values('$host','$error');");
     my @people = getoncallforhost($host);
-    mailusers("No Response from $host", "No Response from $host", @people);
+    mailusers("No Response from $host", "$host: $error", @people);
 }
 
 sub isbadhost {
