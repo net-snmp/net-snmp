@@ -27,3 +27,7 @@ validanswer 4 ^(0|1)$
 validanswer 7 ^(0|1)$
 line eval $1*1 + $2*2 + $3*4 + $4*8 + $7*64
 
+group system_setup
+single syslocation
+single syscontact
+single sysservices Do you want to properly set the value of the sysServices.0 OID?

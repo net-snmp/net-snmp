@@ -64,3 +64,9 @@ info #
 info The results are reported in the fileTable section of the UCD-SNMP-MIB tree
 question 1 Enter the path to the file you wish to monitor
 question 2 Enter the maximum size allowable for $1
+
+group monitoring_services
+multiple proc Do you want to configure the agents ability to monitor processes?
+multiple disk Do you want to configure the agents ability to monitor disk space?
+multiple load Do you want to configure the agents ability to monitor load average?
+multiple file Do you want to configure the agents ability to file sizes?
