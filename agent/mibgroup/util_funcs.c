@@ -264,6 +264,78 @@ int get_exec_output(ex)
 #endif
 }
 
+int get_exec_pipes(cmd, fdIn, fdOut, pid)
+  char *cmd;
+  int *fdIn, *fdOut, *pid;
+{
+  int fd[2][2],i, cnt;
+  char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
+  /* Setup our pipes */
+  if (pipe(fd[0]) || pipe(fd[1]))
+    {
+      setPerrorstatus("pipe");
+      return 0;
+    }
+  if ((*pid = fork()) == 0)   /* First handle for the child */
+    {
+      close(0);
+      if (dup(fd[0][0]) != 0)
+        {
+          setPerrorstatus("dup");
+          return 0;
+        }
+      close(1);
+      if (dup(fd[1][1]) != 1)
+        {
+          setPerrorstatus("dup");
+          return 0;
+        }
+      close(fd[0][0]);
+      close(fd[0][1]);
+      close(fd[1][0]);
+      close(fd[1][1]);
+      for(cnt=1,cptr1 = cmd, cptr2 = argvs; *cptr1 != 0;
+          cptr2++, cptr1++) {
+        *cptr2 = *cptr1;
+        if (*cptr1 == ' ') {
+          *(cptr2++) = 0;
+          cptr1 = skip_white(cptr1);
+          *cptr2 = *cptr1;
+          if (*cptr1 != 0) cnt++;
+        }
+      }
+      *cptr2 = 0;
+      *(cptr2+1) = 0;
+      argv = (char **) malloc((cnt+2) * sizeof(char *));
+      aptr = argv;
+      *(aptr++) = argvs;
+      for (cptr2 = argvs, i=1; i != cnt; cptr2++)
+        if (*cptr2 == 0) {
+          *(aptr++) = cptr2 + 1;
+          i++;
+        }
+      while (*cptr2 != 0) cptr2++;
+      *(aptr++) = NULL;
+      copy_word(cmd,ctmp);
+      execv(ctmp,argv);
+      perror("execv");
+      exit(1);
+    }
+  else
+    {
+      close(fd[0][0]);
+      close(fd[1][1]);
+      if (*pid < 0) {
+        close(fd[0][1]);
+        close(fd[1][0]);
+        setPerrorstatus("fork");
+        return 0;
+      }
+      *fdIn = fd[1][0];
+      *fdOut = fd[0][1];
+      return(1); /* We are returning 0 for error... */
+    }
+}
 int
 clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
