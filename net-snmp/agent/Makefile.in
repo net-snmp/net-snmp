@@ -79,7 +79,6 @@ read_config.o: @module_list_h@
 
 agent_read_config.o: ../config.h ../mib_module_config.h ../s/linux.h
 agent_read_config.o: ../s/sysv.h ../s/generic.h ../m/generic.h
-agent_read_config.o:   m2m.h
 agent_read_config.o: ./mibgroup/mibincl.h ./../snmplib/asn1.h
 agent_read_config.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
 agent_read_config.o: ./snmp_vars.h ./agent_read_config.h ./var_struct.h
@@ -90,7 +89,7 @@ agent_read_config.o: ./../snmplib/snmpusm.h mibgroup/struct.h
 agent_read_config.o: ./../snmplib/read_config.h agent_read_config.h
 agent_read_config.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 agent_read_config.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-agent_read_config.o: mibgroup/host.h mibgroup/target.h
+agent_read_config.o: mibgroup/host.h mibgroup/target.h mibgroup/agentx.h
 agent_read_config.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_read_config.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 agent_read_config.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -117,10 +116,11 @@ agent_read_config.o: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
 agent_read_config.o: mibgroup/host/hr_utils.h
 agent_read_config.o: mibgroup/target/snmpTargetAddrEntry.h
 agent_read_config.o: mibgroup/target/snmpTargetParamsEntry.h
-agent_read_config.o: mibgroup/agentx/master.h mibgroup/util_funcs.h
-agent_read_config.o: mibgroup/struct.h mibgroup/mibII/var_route.h
-agent_read_config.o: mibgroup/mibII/route_write.h mibgroup/agentx/protocol.h
-agent_read_config.o: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+agent_read_config.o: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
+agent_read_config.o: mibgroup/util_funcs.h mibgroup/struct.h
+agent_read_config.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+agent_read_config.o: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+agent_read_config.o: mibgroup/agentx/master_admin.h
 agent_read_config.o: mibgroup/agentx/master_request.h ./../snmplib/callback.h
 agent_read_config.o: snmp_agent.h snmpd.h ../snmplib/system.h
 agent_read_config.o: ./../snmplib/snmp_debug.h mibgroup/mib_module_dot_conf.h
@@ -133,10 +133,10 @@ agent_registry.o: ./agent_read_config.h ./var_struct.h ./../snmplib/snmp.h
 agent_registry.o: ./../snmplib/mib.h ./../snmplib/snmp_debug.h
 agent_registry.o: ./../snmplib/snmp_logging.h 
 agent_registry.o:  ./../snmplib/read_config.h
-agent_registry.o: ./../snmplib/tools.h m2m.h snmpd.h
-agent_registry.o: mibgroup/struct.h mibgroup/mib_module_includes.h
-agent_registry.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-agent_registry.o: mibgroup/host.h mibgroup/target.h
+agent_registry.o: ./../snmplib/tools.h snmpd.h mibgroup/struct.h
+agent_registry.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
+agent_registry.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
+agent_registry.o: mibgroup/target.h mibgroup/agentx.h
 agent_registry.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_registry.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 agent_registry.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -161,16 +161,19 @@ agent_registry.o: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
 agent_registry.o: mibgroup/host/hr_utils.h
 agent_registry.o: mibgroup/target/snmpTargetAddrEntry.h
 agent_registry.o: mibgroup/target/snmpTargetParamsEntry.h
-agent_registry.o: mibgroup/agentx/master.h mibgroup/util_funcs.h
-agent_registry.o: mibgroup/struct.h mibgroup/mibII/var_route.h
-agent_registry.o: mibgroup/mibII/route_write.h mibgroup/agentx/protocol.h
-agent_registry.o: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+agent_registry.o: mibgroup/agentx/master.h mibgroup/agentx/subagent.h
+agent_registry.o: mibgroup/util_funcs.h mibgroup/struct.h
+agent_registry.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
+agent_registry.o: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
+agent_registry.o: mibgroup/agentx/master_admin.h
 agent_registry.o: mibgroup/agentx/master_request.h
-agent_registry.o: mibgroup/mib_module_loads.h
+agent_registry.o: ./mibgroup/agentx/subagent.h mibgroup/mib_module_loads.h
 auto_nlist.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 auto_nlist.o: ../s/generic.h ../m/generic.h
+history.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+history.o: ../s/generic.h ../m/generic.h 
 history.o:  ./../snmplib/asn1.h history.h
-history.o: ./../snmplib/snmp_logging.h
+history.o: ./../snmplib/snmp_logging.h 
 kernel.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 kernel.o: ../s/generic.h ../m/generic.h
 snmp_agent.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
@@ -191,15 +194,14 @@ snmp_vars.o: ./../snmplib/snmp_impl.h ./snmp_vars.h ./agent_read_config.h
 snmp_vars.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h
 snmp_vars.o: ./../snmplib/snmp_debug.h ./../snmplib/snmp_logging.h
 snmp_vars.o: ./../snmplib/read_config.h ./../snmplib/tools.h
-snmp_vars.o: ./../snmplib/snmpv3.h ./../snmplib/snmpusm.h m2m.h
-snmp_vars.o: ../snmplib/system.h kernel.h snmp_vars.h
-snmp_vars.o: mibgroup/struct.h mibgroup/mib_module_includes.h
-snmp_vars.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
-snmp_vars.o: mibgroup/host.h mibgroup/target.h
-snmp_vars.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
-snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
-snmp_vars.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
-snmp_vars.o: mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
+snmp_vars.o: ./../snmplib/snmpv3.h ./../snmplib/snmpusm.h ../snmplib/system.h
+snmp_vars.o: kernel.h snmp_vars.h mibgroup/struct.h
+snmp_vars.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
+snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
+snmp_vars.o: mibgroup/target.h mibgroup/agentx.h mibgroup/mibII/system_mib.h
+snmp_vars.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
+snmp_vars.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
+snmp_vars.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
 snmp_vars.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
 snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/udp.h
 snmp_vars.o: mibgroup/mibII/vacm_vars.h mibgroup/ucd-snmp/memory.h
@@ -219,12 +221,13 @@ snmp_vars.o: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
 snmp_vars.o: mibgroup/host/hr_swinst.h mibgroup/host/hr_utils.h
 snmp_vars.o: mibgroup/target/snmpTargetAddrEntry.h
 snmp_vars.o: mibgroup/target/snmpTargetParamsEntry.h mibgroup/agentx/master.h
-snmp_vars.o: mibgroup/util_funcs.h mibgroup/struct.h
-snmp_vars.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-snmp_vars.o: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
-snmp_vars.o: mibgroup/agentx/master_admin.h mibgroup/agentx/master_request.h
-snmp_vars.o: ./../snmplib/read_config.h agent_read_config.h agent_registry.h
-snmp_vars.o: snmpd.h mibgroup/mib_module_inits.h
+snmp_vars.o: mibgroup/agentx/subagent.h mibgroup/util_funcs.h
+snmp_vars.o: mibgroup/struct.h mibgroup/mibII/var_route.h
+snmp_vars.o: mibgroup/mibII/route_write.h mibgroup/agentx/protocol.h
+snmp_vars.o: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+snmp_vars.o: mibgroup/agentx/master_request.h ./../snmplib/read_config.h
+snmp_vars.o: agent_read_config.h agent_registry.h snmpd.h
+snmp_vars.o: mibgroup/mib_module_inits.h
 snmpd.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 snmpd.o: ../s/generic.h ../m/generic.h 
 snmpd.o:  ./../snmplib/asn1.h
@@ -241,7 +244,7 @@ snmpd.o: ../snmplib/snmp_logging.h
 snmpd.o:  ../version.h
 snmpd.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmpd.o: mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h mibgroup/host.h
-snmpd.o: mibgroup/target.h mibgroup/mibII/system_mib.h
+snmpd.o: mibgroup/target.h mibgroup/agentx.h mibgroup/mibII/system_mib.h
 snmpd.o: mibgroup/mibII/sysORTable.h mibgroup/mibII/at.h
 snmpd.o: mibgroup/mibII/interfaces.h mibgroup/mibII/snmp_mib.h
 snmpd.o: mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h mibgroup/mibII/ip.h
@@ -263,7 +266,7 @@ snmpd.o: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
 snmpd.o: mibgroup/host/hr_swinst.h mibgroup/host/hr_utils.h
 snmpd.o: mibgroup/target/snmpTargetAddrEntry.h
 snmpd.o: mibgroup/target/snmpTargetParamsEntry.h mibgroup/agentx/master.h
-snmpd.o: mibgroup/mibII/var_route.h mibgroup/mibII/route_write.h
-snmpd.o: mibgroup/agentx/protocol.h mibgroup/agentx/client.h
-snmpd.o: mibgroup/agentx/master_admin.h mibgroup/agentx/master_request.h
-snmpd.o: ./mibgroup/mib_module_shutdown.h
+snmpd.o: mibgroup/agentx/subagent.h mibgroup/mibII/var_route.h
+snmpd.o: mibgroup/mibII/route_write.h mibgroup/agentx/protocol.h
+snmpd.o: mibgroup/agentx/client.h mibgroup/agentx/master_admin.h
+snmpd.o: mibgroup/agentx/master_request.h ./mibgroup/mib_module_shutdown.h
