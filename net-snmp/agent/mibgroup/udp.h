@@ -30,7 +30,7 @@ struct variable8 udp_variables[] = {
     {UDPLOCALPORT, INTEGER, RONLY, var_udpEntry, 3, {5, 1, 2}}
 };
 
-config_load_mib({MIB.7}, 7,udp_variables)
+config_load_mib(MIB.7, 7,udp_variables)
 #endif
 
 #endif /* _MIBGROUP_UDP_H */

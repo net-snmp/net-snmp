@@ -62,7 +62,7 @@ struct variable13 tcp_variables[] = {
     {TCPOUTRSTS, COUNTER, RONLY, var_tcp, 1, {15}}
 };
 
-config_load_mib({MIB.6}, 7, tcp_variables)
+config_load_mib(MIB.6, 7, tcp_variables)
 #endif
 
 #endif /* _MIBGROUP_TCP_H */

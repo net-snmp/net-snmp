@@ -106,7 +106,7 @@ struct variable2 snmp_variables[] = {
     {SNMPOUTTRAPS, COUNTER, RONLY, var_snmp, 1, {29}},
     {SNMPENABLEAUTHENTRAPS, INTEGER, RWRITE, var_snmp, 1, {30}}
 };
-config_load_mib({MIB.11}, 7, snmp_variables)
+config_load_mib(MIB.11, 7, snmp_variables)
 #endif
 
 #endif /* _MIBGROUP_SNMP_H */
