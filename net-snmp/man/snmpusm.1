@@ -63,16 +63,16 @@ a real user that you grant administrative privileges to (like the user
 .PP
 Note: passwords (passphrases really) must be 8 characters minimum in
 length.
-.IP "snmpusm -v 3 -u initial -n none -l authNoPriv -a MD5 -A setup_password localhost create wes initial"
+.IP "snmpusm -v 3 -u initial -n "" -l authNoPriv -a MD5 -A setup_password localhost create wes initial"
 Creates a new user, here named "wes" using the user "initial" to do
 it.  "wes" is cloned from "initial" in the process, so he inherits
 that users password ("setup_password").
-.IP "snmpusm -v 3 -u wes -n none -l authNoPriv -a MD5 -A setup_password localhost passwd -setup_password new_passphrase"
+.IP "snmpusm -v 3 -u wes -n "" -l authNoPriv -a MD5 -A setup_password localhost passwd -setup_password new_passphrase"
 After creating the user "wes" with the same password as the
 "initial" user, we need to change his passphrase for him.  The above
 command changed it from "setup_password", which was inherited from
 the initial user, to "new_passphrase".
-.IP "snmpget -v 3 -u wes -n none -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0"
+.IP "snmpget -v 3 -u wes -n "" -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0"
 If the above commands were successful, this command should have
 properly performed an authenticated snmpv3 GET request to the agent.
 .PP
