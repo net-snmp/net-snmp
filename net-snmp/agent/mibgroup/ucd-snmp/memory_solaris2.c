@@ -36,7 +36,7 @@ kstat_ctl_t *kc;
 kstat_t *ksp1, *ksp2;
 kstat_named_t *kn, *kn2;
 
-void init_memory_solaris2()
+void init_memory_solaris2(void)
 {
 
   struct variable2 extensible_mem_variables[] = {
