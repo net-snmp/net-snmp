@@ -10,6 +10,7 @@ void            init_versioninfo(void);
 extern FindVarMethod var_extensible_version;
 extern WriteMethod update_hook;
 extern WriteMethod debugging_hook;
+extern WriteMethod save_persistent;
 
 #include "mibdefs.h"
 
@@ -24,6 +25,7 @@ extern WriteMethod debugging_hook;
 #define VERCLEARCACHE 10
 #define VERUPDATECONFIG 11
 #define VERRESTARTAGENT 12
+#define VERSAVEPERSISTENT 13
 #define VERDEBUGGING 20
 
 config_require(util_funcs)

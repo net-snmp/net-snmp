@@ -820,6 +820,14 @@ versionRestartAgent OBJECT-TYPE
 	"Set to 1 to restart the agent."
     ::= { version 12 } 
 
+versionSavePersistentData OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION  
+	"Set to 1 to force the agent to save it's persistent data immediately."
+    ::= { version 13 } 
+
 versionDoDebugging OBJECT-TYPE
     SYNTAX	Integer32
     MAX-ACCESS	read-write
