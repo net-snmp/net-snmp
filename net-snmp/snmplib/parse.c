@@ -4732,7 +4732,7 @@ add_mibdir(const char *dirname)
         return (count);
     }
     else
-        snmp_log(LOG_ERR,"cannot open MIB directory %s\n", dirname);
+        DEBUGMSGTL(("parse-mibs","cannot open MIB directory %s\n", dirname));
 
     return (-1);
 }
