@@ -18,33 +18,6 @@
  * SOFTWARE.
  ******************************************************************/
 
-/*
- * $Log$
- * Revision 5.0  2002/04/20 07:30:01  hardaker
- * cvs file version number change
- *
- * Revision 1.2  2002/04/20 07:07:36  hardaker
- * White space, oh glorious white space.
- * How great our though?
- * The code is fine.
- * We agree on functionality easily.
- * What really troubles us?
- * Something we can't see.
- * Something between the code.
- * We bow down to your magnificence,
- * For you are everywhere,
- * Between everything.
- * Pretty nothingness you are.
- *
- * Revision 1.1  2001/05/09 19:36:13  slif
- * Include Alex Rozin's Rmon.
- *
- * Revision 1.1.2.1  2001/04/16 14:47:29  alex
- * Rmon1 : first edition (only history group and rows api);
- * ethernet statistics are emulated by random values.
- *
- */
-
 #ifndef _row_api_h_included__
 #define _row_api_h_included__
 
