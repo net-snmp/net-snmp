@@ -386,7 +386,7 @@ AC_ARG_WITH(out_mib_modules,
     ipfwchains/ipfwchains  firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
     ucd-snmp/diskio        Table of io-devices and how much data they have
-                           read/written.  (only tested on Solaris)
+                           read/written.  (only tested on Solaris, Linux)
     tunnel                 Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
