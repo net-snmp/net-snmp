@@ -753,7 +753,7 @@ netsnmp_register_loghandler( int type, int priority )
         logh->handler = log_handler_callback;
         break;
     default:
-        free(logh->handler);
+        free(logh);
         return NULL;
     }
     logh->priority = priority;
