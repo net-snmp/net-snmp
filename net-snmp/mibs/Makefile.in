@@ -67,3 +67,10 @@ mibsuninstall: installdirs
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(mibdir)
+
+htmldir:
+	@if test ! -d html ; then \
+		mkdir html ; \
+	fi
+	rm -f html/index.html
+	perl makehtml.pl $(MIBS) > html/index.html
