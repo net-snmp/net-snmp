@@ -273,30 +273,27 @@ var_usmUser(
         indexOid = usm_generate_OID(vp->name, vp->namelen, nptr, &len);
         result = snmp_oid_compare(name, *length, indexOid, len);
         DEBUGMSGTL(("usmUser", "Checking user: %s - ", nptr->name));
-        for(i = 0; i < nptr->engineIDLen; i++)
+        for(i = 0; i < nptr->engineIDLen; i++) {
           DEBUGMSG(("usmUser", " %x",nptr->engineID[i]));
+        }
         DEBUGMSG(("usmUser"," - %d \n  -> OID: ", result));
         DEBUGMSGOID(("usmUser", indexOid, len));
         DEBUGMSG(("usmUser","\n"));
+
+        free(indexOid);
+
         if (exact) {
           if (result == 0) {
-            free(indexOid);
             uptr = nptr;
-            continue;
           }
         } else {
           if (result == 0) {
             /* found an exact match.  Need the next one for !exact */
-            free(indexOid);
             uptr = nptr->next;
-            continue;
           } else if (result == 1) {
-            free(indexOid);
             uptr = nptr;
-            continue;
           }
         }
-        free(indexOid);
       }
     }  /* endif -- name <= vp->name */
 
@@ -309,13 +306,14 @@ var_usmUser(
       *length = len;
       memmove(name, indexOid, len*sizeof(oid));
       DEBUGMSGTL(("usmUser", "Found user: %s - ", uptr->name));
-      for(i = 0; i < uptr->engineIDLen; i++)
+      for(i = 0; i < uptr->engineIDLen; i++) {
         DEBUGMSG(("usmUser", " %x",uptr->engineID[i]));
+      }
       DEBUGMSG(("usmUser","\n  -> OID: "));
       DEBUGMSGOID(("usmUser", indexOid, len));
       DEBUGMSG(("usmUser","\n"));
-    } else {
-      indexOid = NULL;
+
+      free(indexOid);
     }
   } else {
     if (header_generic(vp,name,length,exact,var_len,write_method))
