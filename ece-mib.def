@@ -1,0 +1,421 @@
+SNMP-WTEST DEFINITIONS ::= BEGIN
+
+--
+--  Hewlett-Packard definitons for unix agents 
+--  @(#) hp-unix $Date$ $Revision$
+--
+
+IMPORTS
+        private, NetworkAddress, IpAddress, Counter, Gauge,
+		TimeTicks
+            FROM RFC1155-SMI
+	OBJECT-TYPE 				
+	    FROM RFC-1212
+	DisplayString 				
+	    FROM RFC1213-MIB;
+
+private	       OBJECT IDENTIFIER ::= { internet 4 }
+wesTests       OBJECT IDENTIFIER ::= { private 10 }
+-- processes      OBJECT IDENTIFIER ::= { wesTests 1 }
+-- pstat_-T       OBJECT IDENTIFIER ::= { wesTests 2 }
+-- extensible     OBJECT IDENTIFIER ::= { wesTests 3 }
+-- memory         OBJECT IDENTIFIER ::= { wesTests 4 }
+-- lockd          OBJECT IDENTIFIER ::= { wesTests 5 }
+-- disk           OBJECT IDENTIFIER ::= { wesTests 6 }
+miscTests      OBJECT IDENTIFIER ::= { wesTests 9 }
+
+Processes OBJECT-TYPE
+	SYNTAX processes
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A set of information on running DEC daemons."
+	INDEX { processIndex }
+	::= { wesTests 1 }
+
+
+processes ::= SEQUENCE {
+   processIndex  INTEGER,
+   processNames  DisplayString,
+   processMin    INTEGER,
+   processMax    INTEGER,
+   processCount  INTEGER,
+   processError  INTEGER,
+   processErrMessage  DisplayString
+}
+
+processIndex OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for each observed process."
+	::= { Processes 1 }
+
+processNames OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The list of process names we're Counting."
+	::= { Processes 2 }
+
+processMin OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The minimum number of processes that should be
+		running.  An error flag is generated if the number of
+		running processes is < the minimum."
+	::= { Processes 3 }
+
+processMax OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The maximum number of processes that should be
+		running.  An error flag is generated if the number of
+		running processes is > the maximum."
+	::= { Processes 4 }
+
+processCount OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of current processes running with the name
+		in question."
+	::= { Processes 5 }
+
+processErrorFlag OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"A Error flag to indicate trouble with a process.  It
+		goes to 1 if there is an error, 0 if no error."
+	::= { Processes 6 }
+
+processErrMessage OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"An error message describing the problem (if one exists)."
+	::= { Processes 7 }
+
+Extensible OBJECT-TYPE
+	SYNTAX extensible
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Extensible commands returning output and result codes."
+	INDEX { extensibleIndex }
+	::= { wesTests 3 }
+
+extensible ::= SEQUENCE {
+   extensibleIndex   INTEGER,
+   extensibleNames   DisplayString,
+   extensibleCommand DisplayString,
+   extensibleResult  INTEGER,
+   extensibleOutput  DisplayString
+}
+
+extensibleIndex OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for extensible calls."
+	::= { Extensible 1 }
+
+extensibleNames OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Short, one name descriptions of the extensible commands."
+	::= { Extensible 2 }
+
+extensibleCommand OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The command line to be executed."
+	::= { Extensible 3 }
+
+extensibleResult OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The result code from the executed command."
+	::= { Extensible 6 }
+
+extensibleOutput OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The output of the extensible command (top line only)."
+	::= { Extensible 7 }
+
+Memory OBJECT-TYPE
+	SYNTAX extensible
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Miscellanous stuff -- memory."
+	::= { wesTests 4 }
+
+memory ::= SEQUENCE {
+   memTotalSwap     INTEGER,
+   memUsedSwap     INTEGER,
+   memTotalReal     INTEGER,
+   memUsedReal     INTEGER,
+   memTotalSwapTXT     INTEGER,
+   memUsedSwapTXT     INTEGER,
+   memTotalRealTXT     INTEGER,
+   memUsedRealTXT     INTEGER,
+   memTotalFree       INTEGER,
+   memMinimumSwap       INTEGER,
+   memSwapError       INTEGER
+}
+
+memTotalSwap OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Swap Size."
+	::= { Memory 1 }
+
+memAvailSwap OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Available Swap Space."
+	::= { Memory 2 }
+
+memTotalReal OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Real/Physical Memory Size."
+	::= { Memory 3 }
+
+memAvailReal OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Available Real/Physical Memory Space."
+	::= { Memory 4 }
+
+memTotalSwapTXT OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total VM used by text."
+	::= { Memory 5 }
+
+memAvailSwapTXT OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Active VM used by text."
+	::= { Memory 6 }
+
+memTotalRealTXT OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Real/Physical Memory Size used by txt."
+	::= { Memory 7 }
+
+memAvailRealTXT OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Active Real/Physical Memory Space used by txt."
+	::= { Memory 8 }
+
+memTotalFree OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Total Available Memory"
+	::= { Memory 9 }
+
+memMinimumSwap OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Minimum amount of free swap.  Otherwise memErrorSwap
+		is set to 1 "
+	::= { Memory 10 }
+
+memSwapError OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Error flag.  1 indicates very little swap space left"
+	::= { Memory 11 }
+
+
+Lockd OBJECT-TYPE
+	SYNTAX lockd
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Tests the functionality of the rpc.lockd/rpc.statd pair."
+	INDEX { lockdIndex }
+	::= { wesTests 5 }
+
+lockd ::= SEQUENCE {
+   lockdIndex   INTEGER,
+   lockdError  INTEGER,
+   lockdErrorMsg  DisplayString
+}
+
+lockdIndex OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for lockd calls."
+	::= { Lockd 1 }
+
+lockdError OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Error Flag.  > 0 indicates error"
+	::= { Lockd 6 }
+
+lockdErrorMsg OBJECT-TYPE
+	SYNTAX DisplayString (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Error message if something is wrong"
+	::= { Lockd 7 }
+
+wesTestsRnd OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"A Random Number (0-9) Generator link."
+	::= { miscTests 1 }
+
+fileTable OBJECT-TYPE
+	SYNTAX FileTable
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Pstat information on the decs."
+	::= { pstat_-T 1 }
+
+
+FileTable ::= SEQUENCE {
+   FileMax      INTEGER,
+   FileUsed     INTEGER,
+   FileAvail    INTEGER,
+   FilePercent  INTEGER
+}
+
+FileMax OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Maximum File Table Size ."
+	::= { fileTable 1 }
+
+FileUsed OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Current File Table Size ."
+	::= { fileTable 2 }
+
+FileAvail OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Available File Table Size ."
+	::= { fileTable 3 }
+
+FilePercent OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Percentage of Used File Table ."
+	::= { fileTable 4 }
+
+procTable OBJECT-TYPE
+	SYNTAX ProcTable
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Pstat information on the decs."
+	::= { pstat_-T 2 }
+
+
+ProcTable ::= SEQUENCE {
+   ProcMax      INTEGER,
+   ProcUsed     INTEGER,
+   ProcAvail    INTEGER,
+   ProcPercent  INTEGER
+}
+
+ProcMax OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Maximum Proc Table Size ."
+	::= { procTable 1 }
+
+ProcUsed OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Current Proc Table Size ."
+	::= { procTable 2 }
+
+ProcAvail OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Available Proc Table Size ."
+	::= { procTable 3 }
+
+ProcPercent OBJECT-TYPE
+	SYNTAX INTEGER (SIZE (0..4294967295))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Percentage of Used Proc Table ."
+	::= { procTable 4 }
+
+END
