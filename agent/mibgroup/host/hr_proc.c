@@ -12,6 +12,7 @@
 #else
 #include <strings.h>
 #endif
+#include <ctype.h>
 
 #include "host_res.h"
 #include "hr_proc.h"
@@ -240,6 +241,48 @@ describe_proc(int idx)
         return ("An electronic chip with an HP label");
 
     }
+#elif linux
+    char tmpbuf[BUFSIZ];
+    static char descr_buf[BUFSIZ];
+    char *cp;
+    FILE *fp;
+
+    fp = fopen("/proc/cpuinfo", "r");
+    if (!fp)
+        return ("An electronic chip that makes the computer work.");
+
+
+    while (fgets(tmpbuf, BUFSIZ, fp)) {
+        if ( !strncmp( tmpbuf, "vendor_id", 9)) {
+	    /* Stomp on trailing newline... */
+            cp = &tmpbuf[strlen(tmpbuf)-1];
+	    *cp = 0;
+	    /* ... and then extract the value */
+            cp = index( tmpbuf, ':');
+	    cp++;
+	    while ( cp && isspace(*cp))
+	        cp++;
+	    snprintf( descr_buf, BUFSIZ, "%s: ", cp);
+        }
+        if ( !strncmp( tmpbuf, "model name", 10)) {
+	    /* Stomp on trailing newline... */
+            cp = &tmpbuf[strlen(tmpbuf)-1];
+	    *cp = 0;
+	    /* ... and then extract the value */
+            cp = index( tmpbuf, ':');
+	    cp++;
+	    while ( cp && isspace(*cp))
+	        cp++;
+	    strncat( descr_buf, cp, BUFSIZ-strlen(descr_buf));
+	    /*
+	     * Hardwired assumption of just one processor
+	     */
+	    fclose(fp);
+	    break;
+        }
+    }
+    return (descr_buf);
+
 #else
     return ("An electronic chip that makes the computer work.");
 #endif
