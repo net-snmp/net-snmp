@@ -17,10 +17,7 @@
 
 #if defined (INET6)
 #include <linux/types.h>
-#ifndef __KERNEL__
 #include <asm/types.h>
-#include <asm/byteorder.h>
-#endif
 #include <linux/rtnetlink.h>
 #endif
 
