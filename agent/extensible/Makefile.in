@@ -2,8 +2,13 @@
 # May need an ANSI compiler for extensible.c depending on whether or
 # not SECURITYEXCEPTIONS is defined in config.h 
 
-CC = gcc
+# HPUX compliers (and most others)
+CC = cc
 CFLAGS=-g
+
+# gcc compilers (recomended)
+#CC = gcc
+#CFLAGS=-g
 
 OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
 SRCS = misc.c read_config.c extensible.c hpmibs.c proc.c exec.c versioninfo.c 
@@ -12,6 +17,9 @@ all: $(OBJS)
 
 TAGS: $(SRCS)
 	etags *.c *.h
+
+clean:
+	rm -f *.o
 
 extensible.o: ../../config.h extensible.c struct.h mibdefs.h mibincl.h
 hpmibs.o: ../../config.h struct.h hpmibs.c mibdefs.h mibincl.h
