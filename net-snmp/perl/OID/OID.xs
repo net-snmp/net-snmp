@@ -44,7 +44,8 @@ nso_newarrayptr(oid *name, size_t name_len)
 MODULE = NetSNMP::OID		PACKAGE = NetSNMP::OID		PREFIX=nso_
 
 netsnmp_oid *
-nso_newptr(char *initstring)
+nso_newptr(initstring)
+    char *initstring
     CODE:
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
