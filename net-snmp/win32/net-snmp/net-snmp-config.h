@@ -958,18 +958,10 @@ typedef unsigned short mode_t;
 #define NETSNMP_INLINE extern inline
 #define NETSNMP_STATIC_INLINE static inline
 
-/*
- * For win32, don't define inline for the DLL verison of the library,
- * as it has been reported to cause problems.
- */
-#ifdef NETSNMP_DLL
-#define NETSNMP_ENABLE_INLINE 0
-#else
 #define NETSNMP_ENABLE_INLINE 1
-#endif
 
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
-#   define NETSNMP_USE_INLINE
+#   define NETSNMP_USE_INLINE 1
 #else
 #   undef  NETSNMP_INLINE
 #   define NETSNMP_INLINE 
