@@ -18,8 +18,11 @@ snmpcmd.1
 snmpconf.1
 snmpd.8
 snmpd.conf.5
+snmpdelta.1
+snmpdf.1
 snmpget.1
 snmpgetnext.1
+snmpnetstat.1
 snmpset.1
 snmpstatus.1
 snmptable.1
