@@ -151,7 +151,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 
 #ifndef solaris2
-static void Route_Scan_Reload __UCD_P((void));
+static void Route_Scan_Reload __P((void));
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
 #endif
@@ -189,7 +189,7 @@ void	init_var_route( )
 }
 
 
-extern int write_rte __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 #ifndef solaris2
 
@@ -216,7 +216,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     register int	*length;    /* IN/OUT - length of input and output strings */
     int			exact;	    /* IN - TRUE if an exact match was requested. */
     int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * object identifier is of form:
@@ -437,7 +437,7 @@ register oid	*name;	    /* IN/OUT - input name requested, output name found */
 register int	*length;    /* IN/OUT - length of input and output strings */
 int		exact;	    /* IN - TRUE if an exact match was requested. */
 int		*var_len;   /* OUT - length of variable or 0 if function returned. */
-int		(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   /*
    * object identifier is of form:
@@ -540,7 +540,7 @@ int		(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)
 #endif /* solaris2 - var_IProute */
 
 #ifndef solaris2
-static int qsort_compare __UCD_P((RTENTRY **, RTENTRY **));
+static int qsort_compare __P((RTENTRY **, RTENTRY **));
 #endif
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
@@ -841,7 +841,7 @@ static void Route_Scan_Reload()
 }
 #else
 #ifdef linux
-static void Route_Scan_Reload __UCD_P((void))
+static void Route_Scan_Reload __P((void))
 {
 	FILE *in;
 	char line [256];

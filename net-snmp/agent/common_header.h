@@ -185,8 +185,8 @@
 #define OBJID                   ASN_OBJECT_ID
 #endif /* hpux */
 
-void init_nlist __UCD_P((struct nlist *));
-int compare __UCD_P((oid *, int, oid *, int));
+void init_nlist __P((struct nlist *));
+int compare __P((oid *, int, oid *, int));
 
 #if !defined(USING_ERRORMIB_MODULE)
 #define setPerrorstatus(x) perror(x)

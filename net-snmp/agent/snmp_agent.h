@@ -3,6 +3,6 @@
 #define SNMP_AGENT_H
 
 /* config file parsing routines */
-void snmp_agent_parse_config __UCD_P((char *, char *));
+void snmp_agent_parse_config __P((char *, char *));
 
 #endif

@@ -43,12 +43,12 @@ struct viewEntry {
     struct viewEntry *next;
 };
 
-int read_view_database __UCD_P((char *));
+int read_view_database __P((char *));
 
-void view_destroyEntry __UCD_P((int, oid *, int));
+void view_destroyEntry __P((int, oid *, int));
 
 struct viewEntry *
-view_getEntry __UCD_P((int, oid*, int));
+view_getEntry __P((int, oid*, int));
 /*
  * Returns a pointer to the viewEntry with the
  * same viewParty and viewSubtree
@@ -56,7 +56,7 @@ view_getEntry __UCD_P((int, oid*, int));
  */
 
 void
-view_scanInit __UCD_P((void));
+view_scanInit __P((void));
 /*
  * Initialized the scan routines so that they will begin at the
  * beginning of the list of viewEntries.
@@ -65,7 +65,7 @@ view_scanInit __UCD_P((void));
 
 
 struct viewEntry *
-view_scanNext __UCD_P((void));
+view_scanNext __P((void));
 /*
  * Returns a pointer to the next viewEntry.
  * These entries are returned in no particular order,
@@ -76,7 +76,7 @@ view_scanNext __UCD_P((void));
  */
 
 struct viewEntry *
-view_createEntry __UCD_P((int, oid *, int));
+view_createEntry __P((int, oid *, int));
 /*
  * Creates a viewEntry with the given index
  * and returns a pointer to it.

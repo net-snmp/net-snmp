@@ -136,7 +136,7 @@ void loadave_parse_config(word,cptr)
   }
 }
 
-void loadave_free_config __UCD_P((void)) {
+void loadave_free_config __P((void)) {
   int i;
   
   for (i=0; i<=2;i++)
@@ -155,7 +155,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 

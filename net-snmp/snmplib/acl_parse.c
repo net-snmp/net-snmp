@@ -45,7 +45,7 @@
 #define TRUE 1
 #define FALSE 0
 
-static void error_exit __UCD_P((char *, int, char *));
+static void error_exit __P((char *, int, char *));
 
 static void error_exit(str, linenumber, filename)
     char *str;

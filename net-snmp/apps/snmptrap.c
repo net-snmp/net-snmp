@@ -87,12 +87,12 @@ SOFTWARE.
 #include "version.h"
 
 extern int  errno;
-int main __UCD_P((int, char **));
-int ascii_to_binary __UCD_P((u_char *, u_char *));
-int hex_to_binary __UCD_P((u_char *, u_char *));
-int snmp_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-u_long parse_address __UCD_P((char *));
-void snmp_add_var __UCD_P((struct snmp_pdu *, oid *, int, char, char *));
+int main __P((int, char **));
+int ascii_to_binary __P((u_char *, u_char *));
+int hex_to_binary __P((u_char *, u_char *));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+u_long parse_address __P((char *));
+void snmp_add_var __P((struct snmp_pdu *, oid *, int, char, char *));
 
 #define NUM_NETWORKS	16   /* max number of interfaces to check */
 
@@ -102,7 +102,7 @@ oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
 oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
 void
-usage __UCD_P((void))
+usage __P((void))
 {
     fprintf(stderr, "usage:\n");
     fprintf(stderr, "snmptrap -v 1 manager community enterprise-oid agent trap-type specific-type uptime [ var ]...\n");

@@ -90,19 +90,19 @@ static u_char debug_can[] = {
 };
 
 
-u_char *smux_snmp_process __UCD_P((int, oid *, int *, int *));
+u_char *smux_snmp_process __P((int, oid *, int *, int *));
 int init_smux();
 
-static u_char *smux_open_process __UCD_P((u_char *, int *));
-static u_char *smux_rreq_process __UCD_P((int, u_char *, int *));
-static u_char *smux_sout_process __UCD_P((u_char *, int *));
-static u_char *smux_close_process __UCD_P((int, u_char *, int *));
-static u_char *smux_parse __UCD_P((u_char *, oid *, int *, int *));
-static u_char *smux_parse_var __UCD_P((u_char *, int *, oid *, int *, int *));
-static int smux_build __UCD_P((u_char, u_long, oid *, int *, u_char *, int *));
+static u_char *smux_open_process __P((u_char *, int *));
+static u_char *smux_rreq_process __P((int, u_char *, int *));
+static u_char *smux_sout_process __P((u_char *, int *));
+static u_char *smux_close_process __P((int, u_char *, int *));
+static u_char *smux_parse __P((u_char *, oid *, int *, int *));
+static u_char *smux_parse_var __P((u_char *, int *, oid *, int *, int *));
+static int smux_build __P((u_char, u_long, oid *, int *, u_char *, int *));
 
 int 
-init_smux __UCD_P((void))
+init_smux __P((void))
 {
 	struct sockaddr_in lo_socket;
 	int one = 1;

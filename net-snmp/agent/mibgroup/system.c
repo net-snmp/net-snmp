@@ -37,9 +37,9 @@ extern int version_id_len;
 
 extern struct timeval starttime;
 
-int writeVersion __UCD_P((int, u_char *,u_char, int, u_char *,oid*, int));
-int writeSystem __UCD_P((int, u_char *,u_char, int, u_char *,oid*, int));
-int header_system __UCD_P((struct variable *,oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
+int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
+int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 
 /* snmpd.conf config parsing */
@@ -130,7 +130,7 @@ header_system(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __UCD_P((int, u_char *,u_char, int, u_char *,oid*, int));
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define SYSTEM_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -169,7 +169,7 @@ var_system(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __UCD_P((int, u_char *,u_char, int, u_char *,oid*, int));
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 
   struct timeval now, diff;

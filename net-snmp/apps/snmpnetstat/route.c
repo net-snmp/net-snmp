@@ -67,8 +67,8 @@ SOFTWARE.
 
 #include "netstat.h"
 
-static u_long forgemask __UCD_P((u_long));
-static void domask __UCD_P((char *, u_long, u_long));
+static u_long forgemask __P((u_long));
+static void domask __P((char *, u_long, u_long));
 
 struct route_entry {
     oid	    instance[4];
@@ -434,7 +434,7 @@ netname(in, mask)
  * Print routing statistics
  */
 void
-rt_stats __UCD_P((void))
+rt_stats __P((void))
 {
 	struct variable_list *var;
 

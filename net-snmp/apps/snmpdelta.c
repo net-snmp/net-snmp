@@ -94,14 +94,14 @@ struct varInfo {
   int spoiled;
 };
 
-int main __UCD_P((int, char **));
-int wait_for_peak_start __UCD_P((int period, int peak));
-void log __UCD_P((char *file, char *message));
-void sprint_descriptor __UCD_P((char *buffer, struct varInfo *vip));
-void processFileArgs __UCD_P((char *fileName));
-void wait_for_period __UCD_P((int period));
+int main __P((int, char **));
+int wait_for_peak_start __P((int period, int peak));
+void log __P((char *file, char *message));
+void sprint_descriptor __P((char *buffer, struct varInfo *vip));
+void processFileArgs __P((char *fileName));
+void wait_for_period __P((int period));
 
-void usage __UCD_P((void))
+void usage __P((void))
 {
   fprintf(stderr, "Usage:\nsnmpdelta ");
   snmp_parse_args_usage(stderr);
