@@ -1,3 +1,6 @@
+/*
+ * system.c
+ */
 /***********************************************************
         Copyright 1992 by Carnegie Mellon University
 
@@ -24,12 +27,15 @@ SOFTWARE.
  */
 #include <config.h>
 #include <stdio.h>
+
 #if HAVE_UNISTD_H
-#include <unistd.h>
+#	include <unistd.h>
 #endif
+
 #if HAVE_STDLIB_H
-#include <stdlib.h>
+#	include <stdlib.h>
 #endif
+
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -44,33 +50,42 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+
 #include <sys/types.h>
+
 #if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#	include <netinet/in.h>
 #endif
+
 #if HAVE_WINSOCK_H
-#include <winsock.h>
+#	include <winsock.h>
 #else
-#include <sys/socket.h>
-#include <net/if.h>
+#	include <sys/socket.h>
+#	include <net/if.h>
 #endif
+
 #if HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
+#	include <sys/sockio.h>
 #endif
+
 #if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+#	include <sys/ioctl.h>
 #endif
+
 #ifndef WIN32
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
+#	ifdef HAVE_NLIST_H
+#	include <nlist.h>
+#	endif
 #endif
-#endif
+
 #if HAVE_SYS_FILE_H
-#include <sys/file.h>
+#	include <sys/file.h>
 #endif
+
 #if HAVE_KSTAT_H
-#include <kstat.h>
+#	include <kstat.h>
 #endif
+
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -91,18 +106,24 @@ SOFTWARE.
 #define NUM_NETWORKS    32   /* max number of interfaces to check */
 
 #ifndef IFF_LOOPBACK
-#define IFF_LOOPBACK 0
+#	define IFF_LOOPBACK 0
 #endif
+
 #define LOOPBACK    0x7f000001
 
+
+
 /* ********************************************* */
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#define WIN32IO_IS_STDIO
-#include <tchar.h>
-#include <windows.h>
-#include <sys/stat.h>
-#define PATHLEN 1024
+#ifdef							WIN32
+#	define WIN32_LEAN_AND_MEAN
+#	define WIN32IO_IS_STDIO
+#	define PATHLEN	1024
+
+#	include <tchar.h>
+#	include <windows.h>
+#	include <sys/stat.h>
+
+
 /* The idea here is to read all the directory names into a string table
  * (separated by nulls) and when one of the other dir functions is called
  * return the pointer to the current file name.
@@ -256,7 +277,7 @@ int gettimeofday(struct timeval *tv,
     tv->tv_sec = timebuffer.time;
     return(0);
 }
-#endif
+#endif	/* !HAVE_GETTIMEOFDAY */
 
 in_addr_t get_myaddr(void)
 {
@@ -332,7 +353,12 @@ void winsock_cleanup (void)
    WSACleanup();
 }
 
-#else
+#else							/* WIN32 */
+
+/*
+ * XXX	What if we have multiple addresses?
+ * XXX	Could it be computed once then cached?
+ */
 in_addr_t get_myaddr (void)
 {
     int sd;
@@ -382,7 +408,7 @@ long get_uptime (void)
 {
 #if defined(bsdlike) && !defined(solaris2) && !defined(linux)
     struct timeval boottime, now, diff;
-#ifndef CAN_USE_SYSCTL
+#ifndef						CAN_USE_SYSCTL
     int kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
@@ -404,7 +430,7 @@ long get_uptime (void)
     lseek(kmem, (long)nl[0].n_value, L_SET);
     read(kmem, &boottime, sizeof(boottime));
     close(kmem);
-#else /* CAN_USE_SYSCTL */
+#else						/* CAN_USE_SYSCTL */
     int                 mib[2];
     size_t              len;
 
@@ -414,7 +440,7 @@ long get_uptime (void)
     len = sizeof(boottime);
 
     sysctl(mib, 2, &boottime, &len, NULL, NULL);
-#endif /* CAN_USE_SYSCTL */
+#endif						/* CAN_USE_SYSCTL */
 
     gettimeofday(&now,(struct timezone *)0);
 
@@ -458,7 +484,6 @@ long get_uptime (void)
    }
    return uptim;
 #endif /* linux */
-
    return (0); /* not implemented */
 }
 #endif
@@ -496,3 +521,20 @@ int setenv(char *name,
     return ret;
 }
 #endif /* HAVE_SETENV */
+
+int
+calculate_time_diff(struct timeval *now, struct timeval *then)
+{
+  struct timeval tmp, diff;
+  memcpy(&tmp, now, sizeof(struct timeval));
+  tmp.tv_sec--;
+  tmp.tv_usec += 1000000L;
+  diff.tv_sec = tmp.tv_sec - then->tv_sec;
+  diff.tv_usec = tmp.tv_usec - then->tv_usec;
+  if (diff.tv_usec > 1000000L){
+    diff.tv_usec -= 1000000L;
+    diff.tv_sec++;
+  }
+  return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+}
+

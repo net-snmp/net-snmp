@@ -18,11 +18,12 @@ void vacm_parse_group (char *, char *);
 void vacm_parse_access (char *, char *);
 void vacm_parse_view (char *, char *);
 
-int vacm_in_view (struct packet_info *, oid *, int);
+int vacm_in_view (struct snmp_pdu *, oid *, int);
 
 extern FindVarMethod var_vacm_sec2group;
 extern FindVarMethod var_vacm_access;
 extern FindVarMethod var_vacm_view;
+
 
 #define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 13
 #define OID_VACMMIBOBJECTS	OID_SNMPVACMMIB, 1

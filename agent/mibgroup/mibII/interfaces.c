@@ -1689,6 +1689,13 @@ Interface_Index_By_Name(char *Name,
 #include <net/if_mib.h>
 #include <net/route.h>
 
+static int header_interfaces(struct variable *, oid *, int *, int, int *,
+                             WriteMethod **write);
+static int header_ifEntry(struct variable *, oid *, int *, int, int *,
+                             WriteMethod **write);
+u_char	*var_ifEntry(struct variable *, oid *, int *, int, int *, 
+                             WriteMethod **write);
+
 static	char *physaddrbuf;
 static	int nphysaddrs;
 struct	sockaddr_dl **physaddrs;

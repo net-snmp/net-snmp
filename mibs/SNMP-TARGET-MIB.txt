@@ -67,7 +67,7 @@ snmpTargetMIB MODULE-IDENTITY
    REVISION        "9707140000Z"
    DESCRIPTION
        "The initial revision."
-   ::= { snmpModules 15 }
+   ::= { snmpModules 12 }
 
 snmpTargetObjects       OBJECT IDENTIFIER ::= { snmpTargetMIB 1 }
 snmpTargetConformance   OBJECT IDENTIFIER ::= { snmpTargetMIB 3 }

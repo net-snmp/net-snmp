@@ -359,7 +359,7 @@ fixExecError(int action,
   
   struct extensible *exten;
   long tmp=0;
-  int tmplen=1000, fd;
+  int fd;
   static struct extensible ex;
   FILE *file;
 
@@ -368,7 +368,7 @@ fixExecError(int action,
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
-    asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+    tmp = *((long *) var_val);
     if ((tmp == 1) && (action == COMMIT) && (exten->fixcmd[0] != 0)) {
       sprintf(ex.command, exten->fixcmd);
       if ((fd = get_exec_output(&ex))) {
