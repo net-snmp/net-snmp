@@ -519,7 +519,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	{
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
-	else if ( ptlen >= *ctlen) { 
+	else if ( ptlen > *ctlen) { 
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
 	}
 
@@ -556,14 +556,15 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 
 /* now calculate the padding needed */
 	pad = pad_size - (ptlen % pad_size);
+	plast = (int) ptlen - (pad_size - pad);
+        if (pad == pad_size) pad = 0;
 	if (ptlen + pad > *ctlen) { 
 		QUITFUN(SNMPERR_GENERR, sc_encrypt_quit); /* not enough space */
 	}
-	memset(pad_block, 0, sizeof(pad_block));
-	plast = (int) ptlen - (pad_size - pad);
-	if (pad > 0)  /* copy data into pad block if needed */
+	if (pad > 0) { /* copy data into pad block if needed */
 		memcpy( pad_block, plaintext + plast, pad_size - pad);
-	memset(&pad_block[pad_size-pad], pad, pad); /* filling in padblock */
+                memset(&pad_block[pad_size-pad], pad, pad); /* filling in padblock */
+        }
 
 	memset(my_iv, 0, sizeof(my_iv));
 
@@ -575,10 +576,14 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		/* encrypt the data */
 		des_ncbc_encrypt(plaintext, ciphertext, plast, key_sch, 
 				 (des_cblock *) my_iv, DES_ENCRYPT);
-		/* then encrypt the pad block */
-                des_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
-                                 key_sch, (des_cblock *)my_iv, DES_ENCRYPT);
-		*ctlen = plast + pad_size;
+                if (pad > 0) {
+                    /* then encrypt the pad block */
+                    des_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
+                                     key_sch, (des_cblock *)my_iv, DES_ENCRYPT);
+                    *ctlen = plast + pad_size;
+                } else {
+                    *ctlen = plast;
+                }
 	}
 sc_encrypt_quit:
 	/* clear memory just in case */
