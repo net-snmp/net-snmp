@@ -101,9 +101,21 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
     saved_requests = (netsnmp_request_info**)calloc(count+1, sizeof(netsnmp_request_info*));
     saved_status   =                  (char*)calloc(count,   sizeof(char));
 
+    /*
+     * set up saved requests, and set any processed requests to done
+     */
     i = 0;
-    for (request = requests; request; request = request->next, i++)
+    for (request = requests; request; request = request->next, i++) {
+        if (request->processed) {
+            saved_status[i] = ROW_MERGE_DONE;
+            DEBUGMSGTL(("helper:row_merge", "  skipping processed oid: "));
+            DEBUGMSGOID(("helper:row_merge", request->requestvb->name,
+                         request->requestvb->name_length));
+            DEBUGMSG(("helper:row_merge", "\n"));
+        }
         saved_requests[i] = request;
+    }
+
     /*
      * Note that saved_requests[count] is valid
      *    (because of the 'count+1' in the calloc above),
