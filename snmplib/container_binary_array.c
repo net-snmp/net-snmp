@@ -100,8 +100,8 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     size_t             len = t->count;
     size_t             half;
     size_t             middle;
-    size_t             result = 0;
     size_t             first = 0;
+    int                result = 0;
 
     if (!len)
         return -1;
@@ -355,8 +355,8 @@ binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
     size_t             len = t->count;
     size_t             half;
     size_t             middle;
-    size_t             result = 0;
     size_t             first = 0;
+    int                result = 0;
 
     if (!len)
         return -1;
