@@ -484,10 +484,16 @@ snmp_error(struct snmp_session *psess,
     }
     buf[255] = '\0';
 
-    /* append a useful system errno interpretation. */
-    if (psess->s_errno)
+    /*
+     * append a useful system errno interpretation. 
+     */
+    if (psess->s_errno) {
+        const char* error = strerror(psess->s_errno);
+        if(error == NULL)
+            error = "Unknown Error";
         snprintf (&buf[strlen(buf)], 256-strlen(buf),
-                 " (%s)", strerror(psess->s_errno));
+                 " (%s)", error);
+    }
     buf[255] = '\0';
     *p_str = strdup(buf);
 }
