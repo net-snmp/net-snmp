@@ -40,7 +40,6 @@
 ./agent_handler.lo: ../include/net-snmp/mib_api.h
 ./agent_handler.lo: ../include/net-snmp/library/mib.h
 ./agent_handler.lo: ../include/net-snmp/library/parse.h
-./agent_handler.lo: ../include/net-snmp/library/oid_array.h
 ./agent_handler.lo: ../include/net-snmp/varbind_api.h
 ./agent_handler.lo: ../include/net-snmp/config_api.h
 ./agent_handler.lo: ../include/net-snmp/library/read_config.h
@@ -122,7 +121,6 @@
 ./agent_index.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./agent_index.lo: ../include/net-snmp/library/mib.h
 ./agent_index.lo: ../include/net-snmp/library/parse.h
-./agent_index.lo: ../include/net-snmp/library/oid_array.h
 ./agent_index.lo: ../include/net-snmp/varbind_api.h
 ./agent_index.lo: ../include/net-snmp/config_api.h
 ./agent_index.lo: ../include/net-snmp/library/read_config.h
@@ -262,7 +260,6 @@
 ./agent_read_config.lo: ../include/net-snmp/mib_api.h
 ./agent_read_config.lo: ../include/net-snmp/library/mib.h
 ./agent_read_config.lo: ../include/net-snmp/library/parse.h
-./agent_read_config.lo: ../include/net-snmp/library/oid_array.h
 ./agent_read_config.lo: ../include/net-snmp/varbind_api.h
 ./agent_read_config.lo: ../include/net-snmp/config_api.h
 ./agent_read_config.lo: ../include/net-snmp/library/read_config.h
@@ -415,7 +412,6 @@
 ./agent_registry.lo: ../include/net-snmp/mib_api.h
 ./agent_registry.lo: ../include/net-snmp/library/mib.h
 ./agent_registry.lo: ../include/net-snmp/library/parse.h
-./agent_registry.lo: ../include/net-snmp/library/oid_array.h
 ./agent_registry.lo: ../include/net-snmp/varbind_api.h
 ./agent_registry.lo: ../include/net-snmp/config_api.h
 ./agent_registry.lo: ../include/net-snmp/library/read_config.h
@@ -557,7 +553,6 @@
 ./agent_trap.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./agent_trap.lo: ../include/net-snmp/library/mib.h
 ./agent_trap.lo: ../include/net-snmp/library/parse.h
-./agent_trap.lo: ../include/net-snmp/library/oid_array.h
 ./agent_trap.lo: ../include/net-snmp/varbind_api.h
 ./agent_trap.lo: ../include/net-snmp/config_api.h
 ./agent_trap.lo: ../include/net-snmp/library/read_config.h
@@ -630,7 +625,6 @@
 ./mib_modules.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./mib_modules.lo: ../include/net-snmp/library/mib.h
 ./mib_modules.lo: ../include/net-snmp/library/parse.h
-./mib_modules.lo: ../include/net-snmp/library/oid_array.h
 ./mib_modules.lo: ../include/net-snmp/varbind_api.h
 ./mib_modules.lo: ../include/net-snmp/config_api.h
 ./mib_modules.lo: ../include/net-snmp/library/read_config.h
@@ -768,7 +762,6 @@
 ./object_monitor.lo: ../include/net-snmp/mib_api.h
 ./object_monitor.lo: ../include/net-snmp/library/mib.h
 ./object_monitor.lo: ../include/net-snmp/library/parse.h
-./object_monitor.lo: ../include/net-snmp/library/oid_array.h
 ./object_monitor.lo: ../include/net-snmp/varbind_api.h
 ./object_monitor.lo: ../include/net-snmp/config_api.h
 ./object_monitor.lo: ../include/net-snmp/library/read_config.h
@@ -851,7 +844,6 @@
 ./snmp_agent.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmp_agent.lo: ../include/net-snmp/library/mib.h
 ./snmp_agent.lo: ../include/net-snmp/library/parse.h
-./snmp_agent.lo: ../include/net-snmp/library/oid_array.h
 ./snmp_agent.lo: ../include/net-snmp/varbind_api.h
 ./snmp_agent.lo: ../include/net-snmp/config_api.h
 ./snmp_agent.lo: ../include/net-snmp/library/read_config.h
@@ -933,7 +925,6 @@
 ./snmpd.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpd.lo: ../include/net-snmp/library/mib.h
 ./snmpd.lo: ../include/net-snmp/library/parse.h
-./snmpd.lo: ../include/net-snmp/library/oid_array.h
 ./snmpd.lo: ../include/net-snmp/varbind_api.h
 ./snmpd.lo: ../include/net-snmp/config_api.h
 ./snmpd.lo: ../include/net-snmp/library/read_config.h
@@ -1067,7 +1058,6 @@
 ./snmp_perl.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmp_perl.lo: ../include/net-snmp/library/mib.h
 ./snmp_perl.lo: ../include/net-snmp/library/parse.h
-./snmp_perl.lo: ../include/net-snmp/library/oid_array.h
 ./snmp_perl.lo: ../include/net-snmp/varbind_api.h
 ./snmp_perl.lo: ../include/net-snmp/config_api.h
 ./snmp_perl.lo: ../include/net-snmp/library/read_config.h
@@ -1148,7 +1138,6 @@
 ./snmp_vars.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmp_vars.lo: ../include/net-snmp/library/mib.h
 ./snmp_vars.lo: ../include/net-snmp/library/parse.h
-./snmp_vars.lo: ../include/net-snmp/library/oid_array.h
 ./snmp_vars.lo: ../include/net-snmp/varbind_api.h
 ./snmp_vars.lo: ../include/net-snmp/config_api.h
 ./snmp_vars.lo: ../include/net-snmp/library/read_config.h
