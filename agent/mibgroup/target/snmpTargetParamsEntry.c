@@ -127,6 +127,9 @@ void snmpTargetParamTable_addToList(
   prev_struct->next = newEntry;
 }  /* snmpTargeParamTable_addToList  */
 
+void snmpTargetParamTable_add(struct targetParamTable_struct *newEntry) {
+    snmpTargetParamTable_addToList(newEntry, &aPTable);
+}
 
 /* snmpTargetParamTable_remFromList removes a targetParamTable_struct 
    from the list passed in */

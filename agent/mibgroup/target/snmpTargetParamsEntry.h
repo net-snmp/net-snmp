@@ -44,6 +44,8 @@ struct targetParamTable_struct {
 
 /* utility functions */
 struct targetParamTable_struct *get_paramEntry(char *name);
+void snmpTargetParamTable_add(struct targetParamTable_struct *newEntry);
+struct targetParamTable_struct *snmpTargetParamTable_create(void);
 
 /* function definitions */
 

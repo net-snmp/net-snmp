@@ -6,6 +6,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -50,6 +53,19 @@
 #include "agent_trap.h"
 #include "callback.h"
 #include "agent_callbacks.h"
+#include "tools.h"
+#include "snmp_logging.h"
+
+#include "mib_module_config.h"
+
+#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
+#include "snmp_vars.h"
+#include "snmp-tc.h"
+#include "target/snmpTargetAddrEntry.h"
+#include "target/snmpTargetParamsEntry.h"
+#include "notification/snmpNotifyTable.h"
+#endif
+
 
 struct trap_sink {
     struct snmp_session	*sesp;
@@ -117,16 +133,123 @@ static void free_trap_session (struct trap_sink *sp)
 
 int add_trap_session( struct snmp_session *ss, int pdutype, int version )
 {
-    struct trap_sink *new_sink =
-      (struct trap_sink *) malloc (sizeof (*new_sink));
-    if ( new_sink == NULL )
-	return 0;
+    struct trap_sink *new_sink;
+    
+#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
+#define MAX_ENTRIES 1024
+    struct targetAddrTable_struct *ptr;
+    struct targetParamTable_struct *pptr;
+    struct snmpNotifyTable_data *nptr;
+    int i;
+    char buf[SNMP_MAXBUF_SMALL];
+    oid udpdomain[] = { 1,3,6,1,6,1,1 };
+    int udpdomainlen = sizeof(udpdomain)/sizeof(oid);
+    in_addr_t addr;
+#ifdef HAVE_GETHOSTBYNAME
+    struct hostent *hp;
+#endif
 
-    new_sink->sesp    = ss;
-    new_sink->pdutype = pdutype;
-    new_sink->version = version;
-    new_sink->next    = sinks;
-    sinks = new_sink;
+    if (!ss)
+        return (0);
+
+    if (ss->version != SNMP_VERSION_1) {
+        
+        for(i=0; i < MAX_ENTRIES; i++) {
+            sprintf(buf, "internal%d", i);
+            if (get_addrForName(buf) == NULL && get_paramEntry(buf) == NULL)
+                break;
+        }
+        if (i == MAX_ENTRIES) {
+            snmp_sess_close(ss);
+            return(0);
+        }
+
+        /* address */
+        ptr = snmpTargetAddrTable_create();
+        ptr->name = strdup(buf);
+        memcpy(ptr->tDomain, udpdomain, udpdomainlen*sizeof(oid));
+        ptr->tDomainLen = udpdomainlen;
+
+#ifdef HAVE_GETHOSTBYNAME
+        hp = gethostbyname(ss->peername);
+        if (hp == NULL){
+            snmp_log(LOG_ERR,"failed to look up hostname: %s\n", ss->peername);
+            snmp_sess_close(ss);
+            return (0);
+        }
+        /* XXX: fix for other domain types */
+        ptr->tAddressLen = hp->h_length + 2;
+        ptr->tAddress = malloc(ptr->tAddressLen);
+        memmove(ptr->tAddress, hp->h_addr, hp->h_length);
+        DEBUGMSGTL(("port",":%d\n",ss->remote_port));
+        ptr->tAddress[hp->h_length] = (ss->remote_port & 0xff00) >> 8;
+        ptr->tAddress[hp->h_length+1] = (ss->remote_port & 0xff);
+        DEBUGMSGTL(("port",":%d %d %d\n",ptr->tAddress[hp->h_length],
+                    ptr->tAddress[hp->h_length+1],
+                    (ptr->tAddress[hp->h_length])*256 +
+                    (ptr->tAddress[hp->h_length+1])));
+
+#else /* HAVE_GETHOSTBYNAME */
+        snmp_log(LOG_ERR,"%s:%d: _sess_open do not have get host by name - cannot resolve %s \n",
+                 __FILE__,__LINE__,
+                 ss->peername);
+        return(0);
+#endif /* HAVE_GETHOSTBYNAME */
+        ptr->timeout = ss->timeout/1000;
+        ptr->retryCount = ss->retries;
+        ptr->tagList = strdup(ptr->name);
+        ptr->params = strdup(ptr->name);
+        ptr->storageType = ST_READONLY;
+        ptr->rowStatus = RS_ACTIVE;
+        ptr->sess = ss;
+        DEBUGMSGTL(("trapsess", "adding to trap table\n"));
+        snmpTargetAddrTable_add(ptr);
+
+        /* param */
+        pptr = snmpTargetParamTable_create();
+        pptr->paramName = strdup(buf);
+        pptr->mpModel = ss->version;
+        if (ss->version == SNMP_VERSION_3) {
+            pptr->secModel = ss->securityModel;
+            pptr->secLevel = ss->securityLevel;
+            memdup((void *) &pptr->secName, (void *) ss->securityName,
+                   ss->securityNameLen);
+        } else {
+            pptr->secModel = ss->version;
+            pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
+            memdup((void *) &pptr->secName, (void *) ss->community,
+                   ss->community_len);
+        }
+        pptr->storageType = ST_READONLY;
+        pptr->rowStatus = RS_ACTIVE;
+        snmpTargetParamTable_add(pptr);
+            
+        /* notify table */
+        nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+        nptr->snmpNotifyName = strdup(buf);
+        nptr->snmpNotifyNameLen = strlen(buf);
+        nptr->snmpNotifyTag = strdup(buf);
+        nptr->snmpNotifyTagLen = strlen(buf);
+        nptr->snmpNotifyType = (pdutype == SNMP_MSG_TRAP2) ?
+            SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
+        nptr->snmpNotifyStorageType = ST_READONLY;
+        nptr->snmpNotifyRowStatus = RS_ACTIVE;
+
+        snmpNotifyTable_add(nptr);
+    } else {
+#endif
+        new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
+        if ( new_sink == NULL )
+            return 0;
+
+        new_sink->sesp    = ss;
+        new_sink->pdutype = pdutype;
+        new_sink->version = version;
+        new_sink->next    = sinks;
+        sinks = new_sink;
+#ifdef USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
+    }
+#endif
     return 1;
 }
 
@@ -606,7 +729,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     traptype = SNMP_MSG_TRAP2;
 
     /* create the argv[] like array */
-    strcpy(args[0], "snmpd-proxy"); /* bogus entry for getopt() */
+    strcpy(argv[0] = args[0], "snmpd-trapsess"); /* bogus entry for getopt() */
     for(argn = 1; cptr && argn < MAX_ARGS;
         cptr = copy_word(cptr, argv[argn] = args[argn++])) {
     }
@@ -615,14 +738,17 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
 
     ss = snmp_open (&session);
 
-    if (ss) {
-	add_trap_session( ss, (ss->version == SNMP_VERSION_1) ? SNMP_MSG_TRAP : traptype, ss->version);
+    if (!ss) {
+        config_perror("snmpd: failed to parse this line");
+        snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
     }
-
-    /* diagnose snmp_open errors with the input struct snmp_session pointer */
-    snmp_sess_perror("snmpd: snmpd_parse_config_trapsess():", &session);
-    return;
+    
+    if (ss->version == SNMP_VERSION_1) {
+	add_trap_session(ss, SNMP_MSG_TRAP, SNMP_VERSION_1);
+    } else {
+        add_trap_session( ss, traptype, ss->version);
+    }
 }
 
 void

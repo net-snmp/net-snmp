@@ -49,7 +49,6 @@ struct targetAddrTable_struct {
   int    retryCount;
   char  *tagList;
   char  *params;
-  int    spinLock;
   int    storageType;
   int    rowStatus;
   struct targetAddrTable_struct *next;
@@ -65,6 +64,9 @@ int           store_snmpTargetAddrEntry(int majorID, int minorID,
 FindVarMethod var_snmpTargetAddrEntry;
 
 struct targetAddrTable_struct *get_addrTable(void);
+struct targetAddrTable_struct *get_addrForName(char *name);
+struct targetAddrTable_struct *snmpTargetAddrTable_create(void);
+void snmpTargetAddrTable_add(struct targetAddrTable_struct *newEntry);
 
 void snmpd_parse_config_targetAddr(const char *, char *);
 

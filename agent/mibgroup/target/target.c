@@ -13,6 +13,7 @@
 #include "snmpTargetAddrEntry.h"
 #include "snmpTargetParamsEntry.h"
 #include "target.h"
+#include "snmp-tc.h"
 
 #define MAX_TAGS 128
 
@@ -85,7 +86,8 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
                             continue;
                         }
 
-                        if (param->updateTime >=
+                        if (targaddrs->storageType != ST_PERMANENT &&
+                            param->updateTime >=
                             targaddrs->sessionCreationTime) {
                             /* parameters have changed, nuke the old session */
                             snmp_close(targaddrs->sess);
