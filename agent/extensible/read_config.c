@@ -13,7 +13,7 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
-#if HAVE_SYS_GETMNTENT_H
+#if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
 #include <math.h>
