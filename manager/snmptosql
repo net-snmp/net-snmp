@@ -60,6 +60,28 @@ init_mib;
 ( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
+#
+# delete history rows every so often.
+#
+my %count = getValues($dbh, 'setup', 'deletecount');
+
+if (!defined($count{'max'})) {
+    # default is to delete history rows once an hour.
+    $dbh->do("insert into setup values('deletecount','max','6')");
+    $count{'max'} = 6;
+}
+
+if (!defined($count{'current'})) {
+    $dbh->do("insert into setup values('deletecount','current','0')");
+} else {
+    $count{'current'}++;
+    if ($count{'max'} <= $count{'current'}) {
+	$count{'current'} = 0;
+	$deletehist = 1;
+    }
+    $dbh->do("update setup set valcol = $count{'current'} where lookup = 'deletecount' and varcol = 'current'");
+}
+
 #===========================================================================
 # Get host records from database and process
 
@@ -233,7 +255,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	} # snmp loop
 
 	# delete the data beyond the number of days requested.
-	if ($tablelist->{'keephistory'} > 0) {
+	if ($deletehist && $tablelist->{'keephistory'} > 0) {
 	    $dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp() - unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	}
 

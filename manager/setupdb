@@ -102,6 +102,12 @@ DO("CREATE TABLE errorexpressions (
   PRIMARY KEY (id)
 )");
 
+DO("CREATE TABLE setup (
+  lookup varchar(64),
+  varcol varchar(128),
+  valcol varchar(128)
+)");
+
 DO("CREATE TABLE authgroup (
   id int(11) DEFAULT '0' NOT NULL auto_increment,
   lookup varchar(64),
