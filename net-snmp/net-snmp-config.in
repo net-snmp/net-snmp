@@ -75,50 +75,49 @@ else
       Xalgorithm="DES"
       token=rwuser
       shift
-      if test "x$1" != "x" ; then
-          arg=$1
-          shift
-      fi
-      while test "x$done" = "x" -a "x$arg" != "x" ; do
-	case $arg in
+      while test "x$done" = "x" -a "x$1" != "x" ; do
+	case $1 in
 	    -A)
+		shift
 		Aalgorithm=$1
 		shift
 		;;
 	    -X)
+		shift
 		Xalgorithm=$1
 		shift
 		;;
 	    -a)
+		shift
 		apassphrase=$1
 		shift
 		;;
 	    -x)
+		shift
 		xpassphrase=$1
 		shift
 		;;
 	    -ro)
 	        token="rouser"
+		shift
 		;;
  	    -*)
-		echo "unknown suboption to --create-snmpv3-user: $arg"
+		echo "unknown suboption to --create-snmpv3-user: $1"
 		exit 1
 		;;
 	    *)
 	        done=1
 		;;
 	esac
-	if test "x$done" = "x" ; then
-          arg=$1
-          shift
-	fi
       done
       
-      user=$arg
-      if test "x$user" = "x" ; then
+      if test "x$1" = "x" ; then
           prompt=yes
 	  echo "Enter a SNMPv3 user name to create: "
 	  read user
+      else
+          user=$1
+          shift
       fi
       if test "x$user" = "x" ; then
           echo "You must specify a user name"
