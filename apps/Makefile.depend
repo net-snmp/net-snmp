@@ -365,7 +365,7 @@
 ./snmpdf.lo: ../include/net-snmp/system/sysv.h
 ./snmpdf.lo: ../include/net-snmp/system/generic.h
 ./snmpdf.lo: ../include/net-snmp/machine/generic.h 
-./snmpdf.lo: ../include/net-snmp/net-snmp-includes.h
+./snmpdf.lo:  ../include/net-snmp/net-snmp-includes.h
 ./snmpdf.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
 ./snmpdf.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpdf.lo: ../include/net-snmp/library/asn1.h
@@ -428,8 +428,8 @@
 ./snmpget.lo: ../include/net-snmp/system/sysv.h
 ./snmpget.lo: ../include/net-snmp/system/generic.h
 ./snmpget.lo: ../include/net-snmp/machine/generic.h 
-./snmpget.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
-./snmpget.lo: ../include/net-snmp/definitions.h
+./snmpget.lo:  ../include/net-snmp/utilities.h
+./snmpget.lo: ../include/net-snmp/types.h ../include/net-snmp/definitions.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpget.lo: ../include/net-snmp/library/asn1.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1109,6 +1109,7 @@
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_mfd.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_array.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/mib_module_config.h
+./snmptrapd_handlers.lo: ../agent/mibgroup/utilities/execute.h
 ./snmptrapd_handlers.lo: snmptrapd_handlers.h snmptrapd_log.h
 ./snmptrapd_log.lo: ../include/net-snmp/net-snmp-config.h
 ./snmptrapd_log.lo: ../include/net-snmp/system/linux.h
@@ -1513,7 +1514,7 @@
 ./snmpnetstat/main.lo: ../include/net-snmp/system/sysv.h
 ./snmpnetstat/main.lo: ../include/net-snmp/system/generic.h
 ./snmpnetstat/main.lo: ../include/net-snmp/machine/generic.h
-./snmpnetstat/main.lo:  ../include/net-snmp/utilities.h
+./snmpnetstat/main.lo: ../include/net-snmp/utilities.h
 ./snmpnetstat/main.lo: ../include/net-snmp/types.h 
 ./snmpnetstat/main.lo: ../include/net-snmp/definitions.h
 ./snmpnetstat/main.lo: ../include/net-snmp/library/snmp_api.h

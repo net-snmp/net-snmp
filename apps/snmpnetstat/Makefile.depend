@@ -75,7 +75,7 @@
 ./inet.lo: ../../include/net-snmp/system/sysv.h
 ./inet.lo: ../../include/net-snmp/system/generic.h
 ./inet.lo: ../../include/net-snmp/machine/generic.h 
-./inet.lo:   main.h
+./inet.lo:  main.h
 ./inet.lo: ../../include/net-snmp/net-snmp-includes.h 
 ./inet.lo: ../../include/net-snmp/definitions.h
 ./inet.lo: ../../include/net-snmp/types.h
@@ -206,7 +206,7 @@
 ./route.lo: ../../include/net-snmp/system/sysv.h
 ./route.lo: ../../include/net-snmp/system/generic.h
 ./route.lo: ../../include/net-snmp/machine/generic.h 
-./route.lo:   main.h
+./route.lo:  main.h
 ./route.lo: ../../include/net-snmp/net-snmp-includes.h
 ./route.lo:  ../../include/net-snmp/definitions.h
 ./route.lo: ../../include/net-snmp/types.h

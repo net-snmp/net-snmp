@@ -3520,7 +3520,7 @@
 ./host/hr_print.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_print.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_print.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_print.lo: host_res.h  
+./host/hr_print.lo:  host_res.h
 ./host/hr_print.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_print.lo: ../../include/net-snmp/definitions.h
 ./host/hr_print.lo: ../../include/net-snmp/types.h
@@ -3746,7 +3746,7 @@
 ./host/hr_swinst.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_swinst.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_swinst.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_swinst.lo: host_res.h 
+./host/hr_swinst.lo:  host_res.h
 ./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_swinst.lo: ../../include/net-snmp/definitions.h
 ./host/hr_swinst.lo: ../../include/net-snmp/types.h
@@ -4091,7 +4091,7 @@
 ./mibII/icmp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/icmp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/icmp.lo: ./mibII/mibII_common.h 
-./mibII/icmp.lo:  ./../kernel.h
+./mibII/icmp.lo: ./../kernel.h 
 ./mibII/icmp.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/icmp.lo: ../../include/net-snmp/definitions.h
 ./mibII/icmp.lo: ../../include/net-snmp/types.h
@@ -4394,7 +4394,7 @@
 ./mibII/ip.lo: ../../include/net-snmp/system/generic.h
 ./mibII/ip.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/ip.lo: ./mibII/mibII_common.h 
-./mibII/ip.lo:  ./../kernel.h
+./mibII/ip.lo: ./../kernel.h  
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/ip.lo: ../../include/net-snmp/definitions.h
 ./mibII/ip.lo: ../../include/net-snmp/types.h
@@ -5561,7 +5561,7 @@
 ./mibII/tcp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/tcp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/tcp.lo: ./mibII/mibII_common.h 
-./mibII/tcp.lo:  ./../kernel.h
+./mibII/tcp.lo: ./../kernel.h  
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/tcp.lo: ../../include/net-snmp/definitions.h
 ./mibII/tcp.lo: ../../include/net-snmp/types.h
@@ -5764,7 +5764,7 @@
 ./mibII/udp.lo: ../../include/net-snmp/system/generic.h
 ./mibII/udp.lo: ../../include/net-snmp/machine/generic.h
 ./mibII/udp.lo: ./mibII/mibII_common.h 
-./mibII/udp.lo:  ./../kernel.h
+./mibII/udp.lo: ./../kernel.h 
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
 ./mibII/udp.lo: ../../include/net-snmp/definitions.h
 ./mibII/udp.lo: ../../include/net-snmp/types.h
@@ -9321,8 +9321,7 @@
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_mfd.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/table_array.h
 ./ucd-snmp/lmSensors.lo: ../../include/net-snmp/agent/mib_module_config.h
-./ucd-snmp/lmSensors.lo: util_funcs.h struct.h 
-./ucd-snmp/lmSensors.lo: ./ucd-snmp/lmSensors.h
+./ucd-snmp/lmSensors.lo: util_funcs.h struct.h ./ucd-snmp/lmSensors.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/net-snmp-config.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/linux.h
 ./ucd-snmp/loadave.lo: ../../include/net-snmp/system/sysv.h
