@@ -36,6 +36,9 @@
 #ifdef HAVE_PKGLOCS_H
 #include <pkglocs.h>
 #endif
+#ifdef HAVE_PKGINFO_H
+#include <pkginfo.h>
+#endif
 
 #ifdef HAVE_LIBRPM
 #include <rpm/rpmlib.h>
@@ -383,9 +386,28 @@ var_hrswinst(struct variable *vp,
 	    ret = (u_char *) nullOid;
 	    break;
 	case HRSWINST_TYPE:
-	    long_return = 1;	/* unknown */
-	    ret = (u_char *) &long_return;
-	    break;
+	{
+#ifdef HAVE_PKGINFO
+	  /* at least on solaris2 this works */
+	  char *catg = pkgparam(swi->swi_name, "CATEGORY");
+
+	  if (catg == NULL) {
+	    long_return = 1;  /*  unknown  */
+	  } else {
+	    if (strstr(catg, "system") != NULL) {
+	      long_return = 2;  /*  operatingSystem  */
+	    } else if (strstr(catg, "application") != NULL) {
+	      long_return = 4;  /*  applcation  */
+	    } else {
+	      long_return = 1;  /*  unknown  */
+	    }
+	  }
+#else
+	  long_return = 1;	/* unknown */
+#endif
+	  ret = (u_char *) &long_return;
+	}
+	break;
 	case HRSWINST_DATE:
 	{
 #ifdef HAVE_LIBRPM
