@@ -404,7 +404,7 @@ int flag;
 	  break;
 
         case ASN_COUNTER64:
-          printI64(buf,(struct counter64 *)var->val.counter64);
+          printU64(buf,(struct counter64 *)var->val.counter64);
           len = strlen(buf);
           break;
 
