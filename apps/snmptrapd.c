@@ -131,7 +131,8 @@ int             dropauth = 0;
 int             running = 1;
 int             reconfig = 0;
 u_long          num_received = 0;
-char            default_port[] = "udp:162";
+char            ddefault_port[] = "udp:162";	/* Default default port */
+char           *default_port = ddefault_port;
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -387,6 +388,30 @@ snmptrapd_close_sessions(netsnmp_session * sess_list)
     }
 }
 
+void
+parse_trapd_address(const char *token, char *cptr)
+{
+    char buf[BUFSIZ];
+    cptr = copy_nword(cptr, buf, sizeof(buf));
+
+    if (default_port == ddefault_port) {
+        default_port = strdup(buf);
+    } else {
+        strcat( buf, "," );
+        strcat( buf, default_port );
+        free(default_port);
+        default_port = strdup(buf);
+    }
+}
+
+void
+free_trapd_address(void)
+{
+    if (default_port != ddefault_port) {
+        free(default_port);
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -415,6 +440,8 @@ main(int argc, char *argv[])
                            "username (MD5|SHA) passphrase [DES [passphrase]]");
     register_config_handler("snmptrapd", "usmUser",
                             usm_parse_config_usmUser, NULL, NULL);
+    register_config_handler("snmptrapd", "snmptrapdaddr",
+                            parse_trapd_address, free_trapd_address, NULL);
 
     /*
      * we need to be called back later 
@@ -675,8 +702,6 @@ main(int argc, char *argv[])
                 }
             }
         }
-    } else {
-        listen_ports = default_port;
     }
 
     /*
@@ -831,7 +856,10 @@ main(int argc, char *argv[])
 
     SOCK_STARTUP;
 
-    cp = listen_ports;
+    if (listen_ports)
+        cp = listen_ports;
+    else
+        cp = default_port;
 
     while (cp != NULL) {
         char *sep = strchr(cp, ',');
