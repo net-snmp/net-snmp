@@ -3,21 +3,6 @@
 #
 
 TARG=	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-ALLHEADERS=\
-	asn1.h \
-	callback.h \
-	default_store.h \
-	int64.h \
-	libsnmp.h \
-	md5.h \
-	mib.h \
-	parse.h \
-	snmp.h \
-	snmp_api.h \
-	snmp_client.h \
-	snmp_impl.h \
-	system.h \
-	vacm.h
 
 #all but md5.h, vacm.h, libsnmp.h, and read_config.h are copied to the installed
 #include directory
@@ -28,13 +13,16 @@ INSTALLHEADERS=\
 	int64.h \
 	mib.h \
 	parse.h \
+	read_config.h \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
 	snmp_client.h \
 	snmp_debug.h \
 	snmp_impl.h \
+	snmp_logging.h \
 	system.h \
+	tools.h \
 	ucd-snmp-includes.h
 
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
