@@ -579,7 +579,7 @@ This gives the following code fragment:
     int
     header_generic(vp, name, length, exact, var_len, write_method)
     {
-        oid newname[MAX_NAME_LEN];
+        oid newname[MAX_OID_LEN];
 
         memcpy((char *)newname, (char *)vp->name,
                         (int)vp->namelen * sizeof(oid));
