@@ -5,6 +5,7 @@ SHELL		= /bin/sh
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
 VPATH		= @srcdir@
+VERSION		= @VERSION@
 @SET_MAKE@
 
 #
@@ -48,7 +49,8 @@ LIBTOOL		= @LIBTOOL@
 
 # Misc Compiling Stuff
 CC	        = @CC@ $(CPPFLAGS)
-LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -o
+# version number is prefixed by a 0 for a better shared library version number
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -rpath $(libdir) -release 0.$(VERSION) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) -n --mode=finish $(libdir)
