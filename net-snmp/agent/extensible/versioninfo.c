@@ -72,15 +72,15 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
     case VERCLEARCACHE:
       *write_method = clear_cache;
       long_ret = 0;
-      return((u_char *) long_ret);
+      return((u_char *) &long_ret);
     case VERUPDATECONFIG:
       *write_method = update_hook;
       long_ret = 0;
-      return((u_char *) long_ret);
+      return((u_char *) &long_ret);
     case VERRESTARTAGENT:
       *write_method = restart_hook;
       long_ret = 0;
-      return((u_char *) long_ret);
+      return((u_char *) &long_ret);
   }      
   return NULL;
 }

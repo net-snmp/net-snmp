@@ -55,7 +55,8 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
           exec_command(exten);
         else
           shell_command(exten);
-        return((u_char *) (&exten->result));
+        long_ret = exten->result;
+        return((u_char *) (&long_ret));
       case ERRORMSG:   /* first line of text returned from the process */
         if (exten->type == EXECPROC)
           exec_command(exten);
@@ -182,7 +183,8 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
         exec_command(exten);
       else
         shell_command(exten);
-      return((u_char *) (&exten->result));
+      long_ret = exten->result;
+      return((u_char *) (&long_ret));
     case ERRORMSG:   /* first line of text returned from the process */
       if (exten->type == EXECPROC) {
         if (fd = get_exec_output(exten)){
