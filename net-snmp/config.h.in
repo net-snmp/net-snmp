@@ -474,6 +474,9 @@
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define if you have the <sys/loadavg.h> header file.  */
+#undef HAVE_SYS_LOADAVG_H
+
 /* Define if you have the <sys/mbuf.h> header file.  */
 #undef HAVE_SYS_MBUF_H
 
