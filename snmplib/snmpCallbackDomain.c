@@ -129,7 +129,7 @@ callback_pop_queue(int num)
                 ptr->next->prev = ptr->prev;
             }
             cp = ptr->item;
-            free(ptr);
+            SNMP_FREE(ptr);
             DEBUGIF("dump_recv_callback_transport") {
                 callback_debug_pdu("dump_recv_callback_transport",
                                    cp->pdu);
@@ -223,7 +223,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
     callback_hack  *ch = (callback_hack *) * opaque;
     netsnmp_pdu    *pdu = ch->pdu;
     *opaque = ch->orig_transport_data;
-    free(ch);
+    SNMP_FREE(ch);
 
     DEBUGMSGTL(("transport_callback", "hook_send enter\n"));
 
@@ -270,7 +270,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
          * we don't need the transport data any more 
          */
         if (*opaque) {
-            free(*opaque);
+            SNMP_FREE(*opaque);
             *opaque = NULL;
         }
     } else {
@@ -282,7 +282,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
          * we don't need the transport data any more 
          */
         if (*opaque) {
-            free(*opaque);
+            SNMP_FREE(*opaque);
             *opaque = NULL;
         }
         other_side = find_transport_from_callback_num(from);
@@ -372,8 +372,8 @@ netsnmp_callback_transport(int to)
     t->sock = mydata->pipefds[0];
 
     if (rc) {
-        free(mydata);
-        free(t);
+        SNMP_FREE(mydata);
+        SNMP_FREE(t);
         return NULL;
     }
 
@@ -455,7 +455,7 @@ netsnmp_callback_create_pdu(netsnmp_transport *transport,
     pdu->transport_data_length = olength;
     if (opaque)                 /* if created, we're the server */
         *((int *) opaque) = cp->return_transport_num;
-    free(cp);
+    SNMP_FREE(cp);
     return pdu;
 }
 

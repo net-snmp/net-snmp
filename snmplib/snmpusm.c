@@ -1491,7 +1491,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                                iv) == -1) {
                 DEBUGMSGTL(("usm", "Can't set AES iv.\n"));
                 usm_free_usmStateReference(secStateRef);
-                free(ciphertext);
+                SNMP_FREE(ciphertext);
                 return SNMPERR_USM_GENERICERROR;
             }
         } else if (ISTRANSFORM(thePrivProtocol, DESPriv)) {
@@ -1505,7 +1505,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                                              iv) == -1)) {
                 DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
                 usm_free_usmStateReference(secStateRef);
-                free(ciphertext);
+                SNMP_FREE(ciphertext);
                 return SNMPERR_USM_GENERICERROR;
             }
 #ifdef HAVE_AES
@@ -1525,7 +1525,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                        ciphertext, &ciphertextlen) != SNMP_ERR_NOERROR) {
             DEBUGMSGTL(("usm", "DES-CBC error.\n"));
             usm_free_usmStateReference(secStateRef);
-            free(ciphertext);
+            SNMP_FREE(ciphertext);
             return SNMPERR_USM_ENCRYPTIONERROR;
         }
 
@@ -1552,7 +1552,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
 #endif
 
         DEBUGMSGTL(("usm", "Encryption successful.\n"));
-        free(ciphertext);
+        SNMP_FREE(ciphertext);
     } else {
         /*
          * theSecLevel != SNMP_SEC_LEVEL_AUTHPRIV  
@@ -3566,7 +3566,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
          * (destroy and) free the old key 
          */
         memset(*key, 0, *keyLen);
-        free(*key);
+        SNMP_FREE(*key);
     }
 
     if (type == 0) {

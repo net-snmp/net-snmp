@@ -404,7 +404,7 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
             handler->next = NULL;
         }
         SNMP_FREE(handler->handler_name);
-        free(handler);
+        SNMP_FREE(handler);
     }
 }
 
@@ -427,7 +427,7 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
         if (handler->handler_name != NULL) {
             h->handler_name = strdup(handler->handler_name);
             if (h->handler_name == NULL) {
-                free(h);
+                SNMP_FREE(h);
                 return NULL;
             }
         }
@@ -436,9 +436,9 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
             h->next = netsnmp_handler_dup(handler->next);
             if (h->next == NULL) {
                 if (h->handler_name) {
-                    free(h->handler_name);
+                    SNMP_FREE(h->handler_name);
                 }
-                free(h);
+                SNMP_FREE(h);
                 return NULL;
             }
             h->next->prev = h;
@@ -458,7 +458,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
         SNMP_FREE(reginfo->handlerName);
         SNMP_FREE(reginfo->contextName);
         SNMP_FREE(reginfo->rootoid);
-        free(reginfo);
+        SNMP_FREE(reginfo);
     }
 }
 
@@ -570,7 +570,7 @@ netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
      * right now, no extra data is there that needs to be freed 
      */
     if (dcache)
-        free(dcache);
+        SNMP_FREE(dcache);
 
     return;
 }

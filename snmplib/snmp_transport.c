@@ -149,16 +149,17 @@ netsnmp_transport_copy(netsnmp_transport *t)
 void
 netsnmp_transport_free(netsnmp_transport *t)
 {
+
     if (t->local != NULL) {
-        free(t->local);
+        SNMP_FREE(t->local);
     }
     if (t->remote != NULL) {
-        free(t->remote);
+        SNMP_FREE(t->remote);
     }
     if (t->data != NULL) {
-        free(t->data);
+        SNMP_FREE(t->data);
     }
-    free(t);
+    SNMP_FREE(t);
 }
 
 
@@ -346,7 +347,7 @@ netsnmp_tdomain_transport(const char *string, int local,
                 DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n",
                             spec));
                 t = d->f_create_from_tstring(addr, local);
-                free(mystring);
+                SNMP_FREE(mystring);
                 return t;
             }
         }
@@ -378,7 +379,7 @@ netsnmp_tdomain_transport(const char *string, int local,
                 DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n",
                             spec));
                 t = d->f_create_from_tstring(addr, local);
-                free(mystring);
+                SNMP_FREE(mystring);
                 return t;
             }
         }
@@ -386,7 +387,7 @@ netsnmp_tdomain_transport(const char *string, int local,
 
     snmp_log(LOG_ERR, "No support for requested transport domain \"%s\"\n",
              spec);
-    free(mystring);
+    SNMP_FREE(mystring);
     return NULL;
 }
 
@@ -459,7 +460,7 @@ netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
     else
         *transport_list = ptr->next;
 
-    free(ptr);
+    SNMP_FREE(ptr);
 
     return 0;
 }

@@ -224,9 +224,9 @@ unregister_config_handler(const char *type_param, const char *token)
          * found it at the top of the list 
          */
         ltmp2 = (*ltmp)->next;
-        free((*ltmp)->config_token);
+        SNMP_FREE((*ltmp)->config_token);
         SNMP_FREE((*ltmp)->help);
-        free(*ltmp);
+        SNMP_FREE(*ltmp);
         (*ctmp)->start = ltmp2;
         return;
     }
@@ -235,10 +235,10 @@ unregister_config_handler(const char *type_param, const char *token)
         ltmp = &((*ltmp)->next);
     }
     if ((*ltmp)->next != NULL) {
-        free((*ltmp)->next->config_token);
+        SNMP_FREE((*ltmp)->next->config_token);
         SNMP_FREE((*ltmp)->next->help);
         ltmp2 = (*ltmp)->next->next;
-        free((*ltmp)->next);
+        SNMP_FREE((*ltmp)->next);
         (*ltmp)->next = ltmp2;
     }
 }
@@ -265,9 +265,9 @@ unregister_all_config_handlers()
             unregister_config_handler(ctmp->fileHeader,
                                       ltmp->config_token);
         }
-        free(ctmp->fileHeader);
+        SNMP_FREE(ctmp->fileHeader);
         save = ctmp->next;
-        free(ctmp);
+        SNMP_FREE(ctmp);
         ctmp = save;
         config_files = save;
     }
@@ -470,7 +470,7 @@ netsnmp_config_remember_free_list(struct read_config_memory **mem)
     while (*mem) {
         SNMP_FREE((*mem)->line);
         tmpmem = (*mem)->next;
-        free(*mem);
+        SNMP_FREE(*mem);
         *mem = NULL;
         mem = &tmpmem;
     }
@@ -927,7 +927,7 @@ read_config_files(int when)
             read_config(configfile, ltmp, when);
             cptr2 = ++cptr1;
         }
-        free(envconfpath);
+        SNMP_FREE(envconfpath);
     }
 
     if (config_errors) {
