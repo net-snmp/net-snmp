@@ -7,13 +7,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -100,7 +100,7 @@ typedef long	fd_mask;
 
 #define PARTY_MIB_BASE	".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 
-extern int errno;
+_CRTIMP extern int errno;
 struct synch_state snmp_synch_state;
 
 int
@@ -453,7 +453,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     struct aclEntry *ap;
     int oneIndex, twoIndex, cxindex;
 
-    
+
     if (!read_objid(PARTY_MIB_BASE, dst, dstlen)){
 	snmp_errno = SNMPERR_GENERR;
 	snmp_set_detail(PARTY_MIB_BASE);
@@ -469,7 +469,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     pp1 = party_getEntry(dst, *dstlen);
     if (!pp1){
 	pp1 = party_createEntry(dst, *dstlen);
-	
+
 	rp = pp1->reserved;
 	strcpy(pp1->partyName, "noAuthAgent");
 	pp1->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
@@ -511,7 +511,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     pp2 = party_getEntry(src, *srclen);
     if (!pp2){
 	pp2 = party_createEntry(src, *srclen);
-	
+
 	rp = pp2->reserved;
 	strcpy(pp2->partyName, "noAuthMS");
 	pp2->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;

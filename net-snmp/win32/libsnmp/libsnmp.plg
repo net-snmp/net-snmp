@@ -1,5 +1,5 @@
 --------------------Configuration: libsnmp - Win32 Debug--------------------
-Begining build with project "H:\Archive\ucd-snmp-3.3pre3-new\win32\libsnmp\libsnmp.dsp", at root.
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\libsnmp\libsnmp.dsp", at root.
 Active configuration is Win32 (x86) Static Library (based on Win32 (x86) Static Library)
 
 Project's tools are:
@@ -9,7 +9,27 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "D:\TEMP\RSP4E.tmp" with contents </nologo /out:"..\lib\snmp.lib" 
+Creating temp file "C:\WINDOWS\TEMP\RSP7241.TMP" with contents </nologo /MLd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\acl.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\acl_parse.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\asn1.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\context.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\context_parse.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\hpux.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\md5.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\mib.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\parse.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\party.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\party_parse.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\snmp.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\snmp_api.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\snmp_auth.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\snmp_client.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\system.c"
+"C:\usr\local\builds\ucd-snmp-3.3.pre8\snmplib\view.c"
+>
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7241.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP7242.TMP" with contents </nologo /out:"..\lib\snmp.lib" 
 ".\Debug\acl.obj"
 ".\Debug\acl_parse.obj"
 ".\Debug\asn1.obj"
@@ -27,7 +47,25 @@ Creating temp file "D:\TEMP\RSP4E.tmp" with contents </nologo /out:"..\lib\snmp.
 ".\Debug\snmp_client.obj"
 ".\Debug\system.obj"
 ".\Debug\view.obj">
-Creating command line "link.exe -lib @D:\TEMP\RSP4E.tmp" 
+Creating command line "link.exe -lib @C:\WINDOWS\TEMP\RSP7242.TMP" 
+Compiling...
+acl.c
+acl_parse.c
+asn1.c
+context.c
+context_parse.c
+hpux.c
+md5.c
+mib.c
+parse.c
+party.c
+party_parse.c
+snmp.c
+snmp_api.c
+snmp_auth.c
+snmp_client.c
+system.c
+view.c
 Creating library...
 
 
