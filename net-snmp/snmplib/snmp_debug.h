@@ -78,6 +78,8 @@ To print multiple pieces to a single line in one call, use:
 */
 
 #ifndef SNMP_NO_DEBUGGING  /* make sure we're wanted */
+#if COMMENT
+{ Previous version for comparison only
 #define DEBUGMSG(x)    debugmsg x
 #define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
@@ -109,6 +111,75 @@ To print multiple pieces to a single line in one call, use:
         DEBUGMSGHEXTLI((token, buf, len)); \
         DEBUGMSG   ((token, "\n")); \
         DEBUGPRINTINDENT(token)
+}
+#endif /* COMMENT */
+
+/*
+ * define two macros : one macro with, one without,
+ *                     a test if debugging is enabled.
+ * 
+ * Generally, use the macro with _DBG_IF_
+ */
+
+/******************* Start private macros ************************/
+#define _DBG_IF_            snmp_get_do_debugging()
+#define DEBUGIF(x)         if (_DBG_IF_ && debug_is_token_registered(x) == SNMPERR_SUCCESS)
+
+#define __DBGMSGT(x)     debugmsgtoken x,  debugmsg x
+
+#ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
+                                 __FILE__,__LINE__))
+#else
+#define __DBGTRACE       __DBGMSGT(("trace"," %s, %d\n", __FILE__,__LINE__))
+#endif
+
+#define __DBGMSGL(x)     __DBGTRACE, debugmsg x
+#define __DBGMSGTL(x)    __DBGTRACE, debugmsgtoken x, debugmsg x
+#define __DBGMSGOID(x)     debugmsg_oid x
+#define __DBGMSGHEX(x)     debugmsg_hex x
+#define __DBGMSGHEXTLI(x)  debugmsg_hextli x
+#define __DBGINDENT()      debug_indent()
+#define __DBGINDENTADD(x)  debug_indent_add(x)
+#define __DBGINDENTMORE()  debug_indent_add(2)
+#define __DBGINDENTLESS()  debug_indent_add(-2)
+#define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%s", __DBGINDENT()))
+
+#define __DBGDUMPHEADER(token,x) \
+        __DBGPRINTINDENT(token), \
+        debugmsg(token,x), \
+        __DBGINDENTMORE()
+
+#define __DBGDUMPSETUP(token,buf,len) \
+        __DBGMSGHEXTLI((token,buf,len)), \
+        debugmsg(token,"\n"), \
+        __DBGPRINTINDENT(token)
+
+/******************* End   private macros ************************/
+/*****************************************************************/
+
+/*****************************************************************/
+/********************Start public  macros ************************/
+
+#define DEBUGMSG(x)        (_DBG_IF_ ? debugmsg x :0)
+#define DEBUGMSGT(x)       (_DBG_IF_ ? __DBGMSGT(x) :0)
+#define DEBUGTRACE         (_DBG_IF_ ? __DBGTRACE :0)
+#define DEBUGMSGL(x)       (_DBG_IF_ ? __DBGMSGL(x) :0)
+#define DEBUGMSGTL(x)      (_DBG_IF_ ? __DBGMSGTL(x) :0)
+#define DEBUGMSGOID(x)     (_DBG_IF_ ? __DBGMSGOID(x) :0)
+#define DEBUGMSGHEX(x)     (_DBG_IF_ ? __DBGMSGHEX(x) :0)
+#define DEBUGMSGHEXTLI(x)  (_DBG_IF_ ? __DBGMSGHEXTLI(x) :0)
+#define DEBUGINDENT()      (_DBG_IF_ ? __DBGINDENT() :0)
+#define DEBUGINDENTADD(x)  (_DBG_IF_ ? __DBGINDENTADD(x) :0)
+#define DEBUGINDENTMORE()  (_DBG_IF_ ? __DBGINDENTMORE() :0)
+#define DEBUGINDENTLESS()  (_DBG_IF_ ? __DBGINDENTLESS() :0)
+#define DEBUGPRINTINDENT(token) (_DBG_IF_ ? __DBGPRINTINDENT(token) :0)
+
+
+#define DEBUGDUMPHEADER(token,x) (_DBG_IF_ ? __DBGDUMPHEADER(token,x) :0)
+
+#define DEBUGDUMPSETUP(token,buf,len) \
+                                 (_DBG_IF_ ? __DBGDUMPSETUP(token,buf,len) :0)
 
 #else /* SNMP_NO_DEBUGGING := enable streamlining of the code */
 
@@ -117,15 +188,18 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGTRACE
 #define DEBUGMSGL(x)
 #define DEBUGMSGTL(x)
-#define DEBUGL(x)
 #define DEBUGMSGOID(x)
 #define DEBUGMSGHEX(x)
 #define DEBUGIF(x)        if(0)
-#define DEBUGDUMP(t, b, l, p)
+#define DEBUGDUMP(t,b,l,p)
 #define DEBUGINDENT()
 #define DEBUGINDENTMORE()
 #define DEBUGINDENTLESS()
 #define DEBUGINDENTADD(x)
+#define DEBUGMSGHEXTLI(x)
+#define DEBUGPRINTINDENT(token)
+#define DEBUGDUMPHEADER(token,x)
+#define DEBUGDUMPSETUP(token, buf, len)
 
 #endif
 
