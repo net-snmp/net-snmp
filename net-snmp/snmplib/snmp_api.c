@@ -693,8 +693,7 @@ free_request_list(rp)
     while(rp){
 	orp = rp;
 	rp = rp->next_request;
-	if (orp->pdu != NULL)
-	    snmp_free_pdu(orp->pdu);
+	snmp_free_pdu(orp->pdu);
 	free((char *)orp);
     }
 }
@@ -1652,6 +1651,8 @@ void
 snmp_free_var(var)
     struct variable_list *var;
 {
+    if (!var) return;
+
     if (var->name) free((char *)var->name);
     if (var->val.string) free((char *)var->val.string);
     free((char *)var);
@@ -1665,6 +1666,8 @@ snmp_free_pdu(pdu)
     struct snmp_pdu *pdu;
 {
     struct variable_list *vp, *ovp;
+
+    if (!pdu) return;
 
     vp = pdu->variables;
     while(vp){
@@ -1693,6 +1696,8 @@ snmp_free_internal_pdu(pdu)
     struct snmp_pdu *pdu;
 {
     struct internal_variable_list *vp, *ovp;
+
+    if (!pdu) return;
 
     vp = (struct internal_variable_list *)pdu->variables;
     while(vp){
