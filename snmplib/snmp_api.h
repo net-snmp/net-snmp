@@ -83,7 +83,7 @@ struct snmp_pdu {
     long    trap_type;	/* trap type */
     long    specific_type;  /* specific type */
     u_long  time;	/* Uptime */
-    u_char  reportableFlag;
+    u_char  flags;
     void * securityStateRef;
 
     struct variable_list *variables;
