@@ -859,6 +859,9 @@ if test "x$PARTIALTARGETOS" = "xcygwin"; then
 else
   transport_default_list="UDP TCP Unix Callback"
 fi
+if test "x$enable_ipv6" = "xyes"; then
+  transport_default_list="UDPIPv6 TCPIPv6 $transport_default_list"
+fi
 for i in $transport_default_list; do
   if echo " $new_with_transport_list " | grep " $i " >/dev/null; then
     :
