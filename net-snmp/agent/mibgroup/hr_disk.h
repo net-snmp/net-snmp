@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRDISK_H
 #define _MIBGROUP_HRDISK_H
 
-extern void	init_hrdisk();
+extern void	init_hr_disk();
 extern u_char	*var_hrdisk();
 
 

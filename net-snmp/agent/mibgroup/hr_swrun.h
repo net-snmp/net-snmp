@@ -6,7 +6,7 @@
 #ifndef _MIBGROUP_HRSWRUN_H
 #define _MIBGROUP_HRSWRUN_H
 
-extern void	init_hrswrun();
+extern void	init_hr_swrun();
 extern u_char	*var_hrswrun();
 
 

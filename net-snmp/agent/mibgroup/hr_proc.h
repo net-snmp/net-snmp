@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRPROC_H
 #define _MIBGROUP_HRPROC_H
 
-extern void	init_hrproc();
+extern void	init_hr_proc();
 extern u_char	*var_hrproc();
 
 

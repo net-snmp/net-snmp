@@ -5,7 +5,7 @@
 #ifndef _MIBGROUP_HRFSYS_H
 #define _MIBGROUP_HRFSYS_H
 
-extern void	init_hrfilesys();
+extern void	init_hr_filesys();
 extern u_char	*var_hrfilesys();
 
 extern int   	Get_FSIndex();
