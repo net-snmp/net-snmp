@@ -14,6 +14,12 @@
 #include "util_funcs.h"
 
 
+/*
+ * use unadvertised function to get cache head. You really should not
+ * do this, since the internal storage mechanism might change.
+ */
+extern netsnmp_cache *netsnmp_cache_get_head(void);
+
 
 /*
  * OIDs for the cacheging control scalar objects
@@ -112,7 +118,9 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    extern long cache_default_timeout;
+    long cache_default_timeout =
+        netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_CACHE_TIMEOUT);
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -143,7 +151,9 @@ handle_nsCacheTimeout(netsnmp_mib_handler *handler,
         break;
 
     case MODE_SET_COMMIT:
-        cache_default_timeout = *requests->requestvb->val.integer;
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_CACHE_TIMEOUT,
+                           *requests->requestvb->val.integer);
         break;
     }
 
@@ -157,14 +167,14 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    extern long caching_enabled;
     long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
 
     case MODE_GET:
-	enabled =  (caching_enabled
+	enabled =  (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                           NETSNMP_DS_AGENT_NO_CACHING)
                        ? NSCACHE_STATUS_ENABLED    /* Actually True/False */
                        : NSCACHE_STATUS_DISABLED );
 	for (request = requests; request; request=request->next) {
@@ -195,7 +205,8 @@ handle_nsCacheEnabled(netsnmp_mib_handler *handler,
         enabled = *requests->requestvb->val.integer;
 	if (enabled == NSCACHE_STATUS_DISABLED)
 	    enabled = 0;
-	caching_enabled = enabled;
+	netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_NO_CACHING, enabled);
         break;
     }
 
@@ -212,7 +223,7 @@ get_first_cache_entry(void **loop_context, void **data_context,
                       netsnmp_variable_list *index,
                       netsnmp_iterator_info *data)
 {
-    extern netsnmp_cache  *cache_head;
+    netsnmp_cache  *cache_head = netsnmp_cache_get_head();
 
     if ( !cache_head )
         return NULL;
