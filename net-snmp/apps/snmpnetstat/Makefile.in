@@ -23,8 +23,8 @@ TARG= snmpnetstat
 CPPFLAGS=@CPPFLAGS@ -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib
 CC = @CC@ $(CPPFLAGS)
 
-USELIBS=../../snmplib/libsnmp.$(LIB_EXTENSION)
-LIBS=	 -L../../snmplib $(LD_RUNTIME_ARG) -lsnmp @LIBS@
+USELIBS=../../snmplib/libsnmp.$(SHLIB_EXTENSION)
+LIBS=	 -L../../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 all: $(TARG)
 
