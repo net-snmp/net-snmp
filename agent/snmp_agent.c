@@ -183,6 +183,7 @@ init_master_agent(int dest_port,
     sess.local_port = dest_port;
     sess.callback = handle_snmp_packet;
     sess.authenticator = NULL;
+    sess.flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
     session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0 );
 
     if ( session == NULL ) {
