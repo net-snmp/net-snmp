@@ -21,10 +21,6 @@
 # undef NETSNMP_TMP_NDEBUG
 #endif
 
-#ifdef HAVE_SEARCH_H
-#include <search.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -178,7 +174,7 @@ netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
     if ((cb->can_set &&
          ((NULL==cb->duplicate_row) || (NULL==cb->delete_row) ||
          (NULL==cb->row_copy)) ) ||
-        (cb->tree && (NULL==cb->row_compare))) {
+        (cb->idx2 && (NULL==cb->row_compare))) {
         snmp_log(LOG_ERR, "table_array registration with incomplete "
                  "callback structure.\n");
         return SNMPERR_GENERR;
@@ -769,20 +765,16 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
             if (!ag->new_row) {
                 /** remove deleted row */
                 netsnmp_remove_oid_data(ag->table, ag->old_row, NULL);
-#ifdef HAVE_SEARCH_H
-                if (context->tad->cb->tree)
-                    tdelete(ag->old_row,context->tad->cb->tree,
-                            context->tad->cb->row_compare);
-#endif /* HAVE_SEARCH_H */
+                if (context->tad->cb->idx2)
+                    context->tad->cb->idx2->remove_data(context->tad->cb->idx2,
+                                                        ag->old_row);
             }
         } else {
             /** insert new row */
             netsnmp_add_oid_data(ag->table, ag->new_row);
-#ifdef HAVE_SEARCH_H
-            if (context->tad->cb->tree)
-                tsearch(ag->new_row,context->tad->cb->tree,
-                        context->tad->cb->row_compare);
-#endif /* HAVE_SEARCH_H */
+            if (context->tad->cb->idx2)
+                context->tad->cb->idx2->insert_data(context->tad->cb->idx2,
+                                                    ag->new_row);
         }
 
         netsnmp_add_oid_data(context->tad->changing, ag->new_row);
@@ -842,11 +834,9 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
                  * insert old_row
                  */
                 netsnmp_add_oid_data(ag->table, ag->old_row);
-#ifdef HAVE_SEARCH_H
-                if (context->tad->cb->tree)
-                    tsearch(ag->old_row,context->tad->cb->tree,
-                            context->tad->cb->row_compare);
-#endif /* HAVE_SEARCH_H */
+                if (context->tad->cb->idx2)
+                    context->tad->cb->idx2->insert_data(context->tad->cb->idx2,
+                                                        ag->old_row);
             }
         } else {
             /*
@@ -854,11 +844,9 @@ process_set_group(netsnmp_oid_array_header *o, void *c)
              */
             assert(ag->new_row != NULL);
             netsnmp_remove_oid_data(ag->table, ag->new_row, NULL);
-#ifdef HAVE_SEARCH_H
-            if (context->tad->cb->tree)
-                tdelete(ag->new_row,context->tad->cb->tree,
-                        context->tad->cb->row_compare);
-#endif /* HAVE_SEARCH_H */
+            if (context->tad->cb->idx2)
+                context->tad->cb->idx2->remove_data(context->tad->cb->idx2,
+                                                    ag->new_row);
         }
         netsnmp_remove_oid_data(context->tad->changing, ag->new_row, NULL);
 
