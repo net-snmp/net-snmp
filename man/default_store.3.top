@@ -1,23 +1,43 @@
-.TH DEFAULT_STORE 3 "27 Oct 1999" VVERSIONINFO "Net-SNMP"
+.TH DEFAULT_STORE 3 "25 Jun 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 default_store \- generic storage of global data.
 .SH SYNOPSIS
-.nf
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/config_api.h>
+.B #include <net-snmp/net-snmp-config.h>
+.br
+.B #include <net-snmp/config_api.h>
 
-int ds_set_boolean(int storeid, int which, int value);
-int ds_get_boolean(int storeid, int which);
-int ds_set_int(int storeid, int which, int value);
-int ds_get_int(int storeid, int which);
-int ds_set_string(int storeid, int which, const char *value);
-char *ds_get_string(int storeid, int which);
-int ds_register_config(u_char type, const char *ftype, const char *token,
-                       int storeid, int which);
-int ds_register_premib(u_char type, const char *ftype, const char *token,
-                       int storeid, int which);
-void ds_shutdown(void);
+.BI "int netsnmp_ds_set_boolean(int " store ", int " which ", int " val ");"
+.br
+.BI "int netsnmp_ds_get_boolean(int " store ", int " which ");"
+.br
+.BI "int netsnmp_ds_set_int(int " store ", int " which ", int " val ");"
+.br
+.BI "int netsnmp_ds_get_int(int " store ", int " which ");"
+.br
+.BI "int netsnmp_ds_set_string(int " store ", int " which ", "
+.br
+.BI "                          const char *" val ");"
+.br
+.BI "char *netsnmp_ds_get_string(int " store ", int " which ");"
+.br
+.BI "int netsnmp_ds_register_config(u_char " type ", "
+.br
+.BI "                               const char *" ftype ","
+.br
+.BI "                               const char *" token ","
+.br
+.BI "                               int " store ", int " which ");"
+.br
+.BI "int netsnmp_ds_register_premib(u_char " type ", "
+.br
+.BI "                               const char *" ftype ","
+.br
+.BI "                               const char *" token ","
+.br
+.BI "                               int " store ", int " which ");"
+.br
+.BI "void netsnmp_ds_shutdown(void);"
 .fi
 .SH DESCRIPTION
 The purpose of the default storage is three-fold:
@@ -50,9 +70,15 @@ You can think of these storage spaces as being 3 arrays, something
 like bool_storage[storeid][which], int_storage[storeid][which], and
 string_storage[storeid][which].  The data is then accessed through the 
 functions defined below.  For data you wish to store, you should use a 
-storeid of DS_APPLICATION_ID.
+.I store
+parameter of
+.BR NETSNMP_DS_APPLICATION_ID .
 .PP
-The storage space used by the library is defined in the
-default_store.h file, which currently contains the following defines:
+The storage space used by the library (for which the 
+.I store
+parameter is
+.BR NETSNMP_DS_LIBRARY_ID )
+is defined in the default_store.h file, which currently contains the 
+following defines: 
 .PP
 .nf

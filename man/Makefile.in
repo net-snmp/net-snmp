@@ -134,7 +134,7 @@ snmptrapd.8: snmptrapd.8.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > snmptrapd.8
 
 default_store.3.h: $(srcdir)/../include/net-snmp/library/default_store.h
-	awk '{ if ($$0 == "/* begin storage definitions */") { p = 1 } else if ($$0 == "/* end storage definitions */") { p = 0 } else if (p) { print $$0}}' < $(srcdir)/../include/net-snmp/library/default_store.h > default_store.3.h
+	awk '{ if ($$0 == "     * begin storage definitions ") { p = 1 } else if ($$0 == "     * end storage definitions ") { p = 0 } else if (p) { print $$0}}' < $(srcdir)/../include/net-snmp/library/default_store.h > default_store.3.h
 
 default_store.3: $(srcdir)/default_store.3.top default_store.3.h $(srcdir)/default_store.3.bot
 	$(SED) -f ../sedscript < $(srcdir)/default_store.3.top > default_store.3
