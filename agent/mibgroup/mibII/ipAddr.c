@@ -79,6 +79,9 @@
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 
 #if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
 #include <sys/mib.h>
@@ -128,12 +131,17 @@
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 
-#if defined(freebsd2) || defined(hpux11)
+#if defined(freebsd2) || defined(hpux11) || defined(linux)
 static void     Address_Scan_Init(void);
 #ifdef freebsd2
 static int      Address_Scan_Next(short *, struct in_ifaddr *);
 #else
+#ifdef linux
+static struct ifconf ifc;
+static int      Address_Scan_Next(short *, struct ifnet *);
+#else
 static int      Address_Scan_Next(short *, mib_ipAdEnt *);
+#endif
 #endif
 #endif
 
@@ -186,14 +194,14 @@ var_ipAddrEntry(struct variable *vp,
     memcpy((char *) current, (char *) vp->name,
            (int) vp->namelen * sizeof(oid));
 
-#if !defined(freebsd2) && !defined(hpux11)
+#if !defined(freebsd2) && !defined(hpux11) && !defined(linux)
     Interface_Scan_Init();
 #else
     Address_Scan_Init();
 #endif
     for (;;) {
 
-#if !defined(freebsd2) && !defined(hpux11)
+#if !defined(freebsd2) && !defined(hpux11) && !defined(linux)
         if (Interface_Scan_Next(&interface, NULL, &ifnet, &in_ifaddr) == 0)
             break;
 #ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
@@ -201,9 +209,14 @@ var_ipAddrEntry(struct variable *vp,
             continue;           /* No address found for interface */
 #endif
 #else                           /* !freebsd2 && !hpux11 */
+#if defined(linux)
+        if (Address_Scan_Next(&interface, &ifnet) == 0)
+            break;
+#else
         if (Address_Scan_Next(&interface, &in_ifaddr) == 0)
             break;
-#endif                          /* !freebsd2 && !hpux11 */
+#endif
+#endif                          /* !freebsd2 && !hpux11 && !linux */
 
 #ifdef hpux11
         cp = (u_char *) & in_ifaddr.Addr;
@@ -251,6 +264,10 @@ var_ipAddrEntry(struct variable *vp,
             }
         }
     }
+
+#if defined(linux)
+    free(ifc.ifc_buf);
+#endif
 
     if (!lowinterface)
         return (NULL);
@@ -449,7 +466,115 @@ Address_Scan_Next(Index, Retin_ifaddr)
     return (0);
 }
 
-#endif                          /* hpux11 */
+#elif defined(linux)
+static struct ifreq *ifr;
+static int ifr_counter;
+
+static void
+Address_Scan_Init(void)
+{
+    int num_interfaces = 0;
+    int fd;
+
+    // get info about all interfaces
+
+    ifc.ifc_len = 0;
+    ifc.ifc_buf = NULL;
+    ifr_counter = 0;
+
+    do
+    {
+	num_interfaces += 16;
+
+	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
+	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
+	
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
+	    return;
+	}
+	
+	if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
+	{
+	    ifr=NULL;
+	    return;
+	}
+    }
+    while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
+    
+    ifr = ifc.ifc_req;
+    close(fd);
+}
+
+/*
+ * NB: Index is the number of the corresponding interface, not of the address 
+ */
+static int
+Address_Scan_Next(Index, Retifnet)
+    short          *Index;
+    struct ifnet   *Retifnet;
+
+{
+    struct ifnet   ifnet_store;
+    int fd;
+    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+	DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Next\n"));
+	return(0);
+    }
+
+    while (ifr) {
+	
+	ifnet_store.if_addr = ifr->ifr_addr;
+
+        if (Retifnet)
+	{
+	    Retifnet->if_addr = ifr->ifr_addr;
+	    
+	    if (ioctl(fd, SIOCGIFBRDADDR, ifr) < 0)
+	    {
+		memset((char *) &Retifnet->ifu_broadaddr, 0, sizeof(Retifnet->ifu_broadaddr));
+	    }
+	    else
+		Retifnet->ifu_broadaddr = ifr->ifr_broadaddr;
+
+	    ifr->ifr_addr = Retifnet->if_addr;
+	    if (ioctl(fd, SIOCGIFNETMASK, ifr) < 0)
+	    {
+		memset((char *) &Retifnet->ia_subnetmask, 0, sizeof(Retifnet->ia_subnetmask));
+	    }
+	    else
+		Retifnet->ia_subnetmask = ifr->ifr_netmask;
+
+	}
+
+        if (Index)
+	{
+	    ifr->ifr_addr = ifnet_store.if_addr;
+	    if (ioctl(fd, SIOCGIFINDEX, ifr) < 0)
+	    {
+	        *Index = -1;
+	    }
+	    else
+        	*Index = ifr->ifr_ifindex;
+	}
+	
+	ifr++;
+	ifr_counter+=sizeof(struct ifreq);
+	if (ifr_counter >= ifc.ifc_len)
+	{
+	    ifr = NULL;	// beyond the end
+	}
+
+        close(fd);
+        return (1);             /* DONE */
+    }
+    close(fd);
+    return (0);                 /* EOF */
+}
+
+#endif                          /* freebsd,hpux11,linux */
 
 #else                           /* solaris2 */
 
