@@ -118,6 +118,7 @@ snmp_parse_args_descriptions(FILE *outf)
   snmp_out_toggle_options_usage("\t\t  ", outf);
   fprintf(outf, "  -I <INOPTS>\tToggle various defaults controlling input parsing:\n");
   snmp_in_toggle_options_usage("\t\t  ", outf);
+  fprintf(outf, "Note that the <hostname> parameter can include transport and port information\n");
   fflush(outf);
 }
 
@@ -138,7 +139,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:");
+  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:");
 #ifndef DEPRECATED_CLI_OPTIONS
   strcat(Opts, "fsSqR");
 #endif
@@ -251,6 +252,18 @@ snmp_parse_args(int argc,
           fprintf(stderr,"Invalid version specified after -v flag: %s\n", optarg);
           return(-1);
         }
+        break;
+
+      case 'p':
+	fprintf(stderr, "Warning: -p option is no longer used - ");
+	fprintf(stderr, "specify the remote host as HOST:PORT\n");
+        return(-1);
+        break;
+
+      case 'T':
+	fprintf(stderr, "Warning: -T option is no longer used - ");
+	fprintf(stderr, "specify the remote host as TRANSPORT:HOST\n");
+        return(-1);
         break;
 
       case 't':
