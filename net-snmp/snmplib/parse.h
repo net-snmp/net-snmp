@@ -196,6 +196,7 @@ void print_subtree (FILE *, struct tree *, int);
 void print_ascii_dump_tree (FILE *, struct tree *, int);
 struct tree *find_tree_node (const char *, int);
 const char *get_tc_descriptor (int);
+struct tree *find_best_tree_node(const char *, struct tree *, u_int *);
  /* backwards compatability */
 struct tree *find_node (const char *, struct tree*);
 struct module *find_module (int);

@@ -57,6 +57,7 @@ struct ds_read_config {
    
 int ds_set_boolean(int storeid, int which, int value);
 int ds_get_boolean(int storeid, int which);
+int ds_toggle_boolean(int storeid, int which);
 int ds_set_int(int storeid, int which, int value);
 int ds_get_int(int storeid, int which);
 int ds_set_string(int storeid, int which, const char *value);

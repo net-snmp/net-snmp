@@ -1814,7 +1814,7 @@ fprint_description(FILE *f,
 		   size_t objidlen)   /* number of subidentifiers */
 {
     struct tree *tp = get_tree(objid, objidlen, tree_head);
-	print_tree_node(f, tp);
+    print_tree_node(f, tp);
 }
 
 void
@@ -1823,7 +1823,15 @@ print_tree_node(FILE *f,
 {
     const char *cp;
     char str[32];
+    int i;
     if (tp) {
+	module_name(tp->modid, str);
+	fprintf(f, "FROM %s", str);
+	for (i = 1; i < tp->number_modules; i++) {
+	    module_name(tp->module_list[i], str);
+	    fprintf(f, ", %s", str);
+	}
+	fprintf(f, "\n");
 	switch (tp->type) {
 	case TYPE_OBJID:	cp = "OBJECT IDENTIFIER"; break;
 	case TYPE_OCTETSTR:	cp = "OCTET STRING"; break;
