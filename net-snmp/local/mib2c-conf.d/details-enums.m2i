@@ -21,10 +21,11 @@
 ##@    if $m2c_const_lc == 0@
 ##@        eval $m2c_de_pfx = uc($m2c_de_pfx)@
 ##@    end@
-@    if $node.syntax ne $node.perltype@
+@    if ("$node.perltype" eq "INTEGER") && ($node.enums == 1)@
+##@    if $node.syntax ne $node.perltype@
 #ifndef ${m2c_de_pfx}_ENUMS
 #define ${m2c_de_pfx}_ENUMS
-@    end@
+##@    end@
 @    foreach $e $v enum@
 @        eval $m2c_ename = "${m2c_de_pfx}_${e}"@
 @        if $m2c_const_lc == 0@
@@ -36,30 +37,11 @@ $m2c_const_dcl $m2c_ename $m2c_const_del (1 << (31-$v)) $m2c_const_sfx
 $m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
 @        end@
 @    end@ # for each
-@    if $node.syntax ne $node.perltype@
+##@    if $node.syntax ne $node.perltype@
 #endif /* $node.syntax_ENUMS */
 @    end@
-@    if "$node.perltype" eq "BITS"@
 
-/*
- * These macros can be used if there is a simple, direct way to determine
- * if this bit defined for the MIB object is set for the data in your ctx.
- * Return 1 if the bit should be set, or 0 if it should not be set.
- */
-@        foreach $e $v enum@
-@            eval $m2c_ename = "${m2c_const_pfx}$node.uc_$e.uc"@
-@            if $m2c_const_lc == 0@
-@                eval $m2c_ename = uc($m2c_ename)@
-@            end@
-/*
- * TODO: IS_SET_$m2c_ename
- */
-#define IS_SET_$m2c_ename(${node}_ctx_ptr) \
-        (${node}_ctx_ptr != NULL)
-
-@        end@ # for each
-@    end@ # ne BITS
-@    if $node.syntax ne $node.perltype@
+@    if ($node.enums == 1) || ($node.syntax ne $node.perltype)@
     /*
      * TODO: value mapping
      * If the values for your data type don't exactly match the
