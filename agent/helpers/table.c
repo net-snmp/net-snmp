@@ -11,9 +11,9 @@
 #endif
 #include <assert.h>
 
-#include "mibincl.h"
-#include <net-snmp/tools.h>
-#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include <net-snmp/agent/table.h>
 
 #if HAVE_DMALLOC_H

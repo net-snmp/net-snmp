@@ -29,11 +29,7 @@
 #include "autonlist.h"
 #include "kernel.h"
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/default_store.h>
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/ds_agent.h>
 
 struct autonlist *nlists = 0;

@@ -33,16 +33,11 @@
 #include <kstat.h>
 #include <sys/sysinfo.h>
 
-/* UCD-SNMP config details */
-#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
-/* Includes needed for all modules */
 #include "mibdefs.h"
-#include "mibincl.h"
-
-/* Utility functions for UCD-SNMP */
 #include "util_funcs.h"
-#include <net-snmp/snmp_alarm.h>
 
 /* Header file for this module */
 #include "vmstat.h"

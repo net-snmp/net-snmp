@@ -119,11 +119,13 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "struct.h"
 #include "errormib.h"
 #include "util_funcs.h"
-#include <net-snmp/agent/auto_nlist.h>
 
 static time_t errorstatustime=0;
 static int errorstatusprior=0;

@@ -27,12 +27,11 @@
 #include <string.h>
 #endif
 
-#include "mibincl.h"
-#include "struct.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "../util_funcs.h"
+#include "struct.h"
 #include "file.h"
-#include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 
 #if HAVE_DMALLOC_H

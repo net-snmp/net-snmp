@@ -14,15 +14,9 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/asn1.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmpd.h"
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/agent/mib_module_config.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/agent_read_config.h>
 #include "agentx/agentx_config.h"
 
 #ifdef USING_AGENTX_MASTER_MODULE

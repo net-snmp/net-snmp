@@ -36,11 +36,12 @@
 #include <limits.h>
 
 
-#include "mibincl.h"
-#include "util_funcs.h"
-
-#include "vmstat.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+
+#include "util_funcs.h"
+#include "vmstat.h"
 
 /* CPU percentage */
 #define CPU_PRC         100

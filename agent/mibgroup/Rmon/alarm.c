@@ -22,6 +22,11 @@
    for the ucd-snmp snmpd agent.
  *
  * $Log$
+ * Revision 1.5  2002/02/08 15:45:09  dts12
+ * Use the new 'net-snmp-includes' single-include header files,
+ * in place of the (uninstalled) 'mibincl.h'.
+ *   Wheeeee......
+ *
  * Revision 1.4  2002/02/05 17:54:16  hardaker
  * Patch from Harrie Hazewinkel to move the oidtree_compare function to
  * the main library.
@@ -48,7 +53,9 @@
 #include <unistd.h>
 
 #include <net-snmp/net-snmp-config.h>
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "util_funcs.h"
 
 #include "alarm.h"
@@ -56,7 +63,6 @@
 /* Implementation headers */
 #include "agutil_api.h"
 #include "row_api.h"
-#include <net-snmp/snmp_alarm.h>
 
 /* File scope definitions section */
 

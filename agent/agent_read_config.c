@@ -95,27 +95,17 @@
 #include <grp.h>
 #endif
 
-#include "mibincl.h"
-#include <net-snmp/snmp_secmod.h>
-#include <net-snmp/snmpusm.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "mibgroup/struct.h"
-#include <net-snmp/read_config.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_trap.h>
 #include "snmpd.h"
-#include <net-snmp/system.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_alarm.h>
 #include <net-snmp/agent/agent_callbacks.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
-#include "net-snmp/agent/table.h"
-#include "net-snmp/agent/table_iterator.h"
-#include "net-snmp/agent/table_data.h"
-#include "net-snmp/agent/table_dataset.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
+#include <net-snmp/agent/table_data.h>
+#include <net-snmp/agent/table_dataset.h>
 #include "mib_module_includes.h"
 
 char dontReadConfigFiles;

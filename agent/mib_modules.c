@@ -39,31 +39,14 @@
 #include <dmalloc.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/system.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/mib.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "m2m.h"
-#include <net-snmp/agent/snmp_agent.h>
-#include <net-snmp/agent/agent_handler.h>
-#include <net-snmp/agent/snmp_vars.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/snmpv3.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/snmp_secmod.h>
 
 #include "mibgroup/struct.h"
 #include <net-snmp/agent/mib_modules.h>
-#include "net-snmp/agent/table.h"
-#include "net-snmp/agent/table_iterator.h"
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_iterator.h>
 #include "mib_module_includes.h"
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "mibgroup/agentx/subagent.h"

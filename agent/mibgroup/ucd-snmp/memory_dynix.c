@@ -12,12 +12,12 @@
 #  endif
 #endif
 
-#include "mibincl.h"                  /* Standard set of SNMP includes*/
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
+
 #include "util_funcs.h"               /* utility function declarations*/
-#include "read_config.h"              /* if the module uses run-time*/
-                                        /*      configuration controls*/
-#include "auto_nlist.h"               /* if the module needs to read*/
-                                       /*      kernel data structures*/
 #include "memory.h"                     /* the module-specific header*/
 #include "memory_dynix.h"                     /* the module-specific header*/
 

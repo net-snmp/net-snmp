@@ -66,21 +66,12 @@
 #include <sys/ioctl.h>
 #endif
 
-#include <net-snmp/system.h>
-#include <net-snmp/asn1.h>
-#include "mibincl.h"
-#include <net-snmp/mib.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/snmp_impl.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
 #include "smux.h"
-#include <net-snmp/agent/var_struct.h>
 #include "util_funcs.h"
 #include "mibdefs.h"
-#include <net-snmp/default_store.h>
-#include <net-snmp/agent/ds_agent.h>
 #include "snmpd.h"
 
 long smux_long;

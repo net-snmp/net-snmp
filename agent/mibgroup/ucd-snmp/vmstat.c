@@ -99,12 +99,14 @@
 # endif
 #endif
 
-#include "mibincl.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
+
 #include "mibdefs.h"
 #include "struct.h"
 #include "util_funcs.h"
 #include "vmstat.h"
-#include <net-snmp/agent/auto_nlist.h>
 
 static FindVarMethod var_extensible_vmstat;
 

@@ -6,12 +6,10 @@
 #include <strings.h>
 #endif
 
-#include "mibincl.h"
-#include "target_counters.h"
-#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
+#include "target_counters.h"
 #include <net-snmp/agent/instance.h>
 
 static oid unavailable_context_oid[] = {1,3,6,1,6,3,12,1,4,0};

@@ -59,21 +59,10 @@
 #include <linux/if_tunnel.h>
 #include <linux/if_arp.h>
 
-#include "config.h"
-#include <net-snmp/snmp_alarm.h>
-#include <net-snmp/callback.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/agent/snmp_vars.h>
-#include <net-snmp/agent/var_struct.h>
-#include <net-snmp/agent/agent_read_config.h>
-#include <net-snmp/tools.h>
-#include "util_funcs.h"
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "util_funcs.h"
 #include "tunnel.h"
 
 #ifndef MIN
