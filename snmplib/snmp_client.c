@@ -98,9 +98,6 @@ typedef long	fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
-#define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
-#define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
-
 /* Prototype definitions */
 static int snmp_synch_input(int op, struct snmp_session *session, int reqid,
                                 struct snmp_pdu *pdu, void *magic);
