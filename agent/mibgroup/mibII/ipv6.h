@@ -13,7 +13,7 @@ config_arch_require(solaris2, kernel_sunos5)
 #include "var_route.h"
 #include "route_write.h"
 
-extern void	init_ipv6 __P((void));
+extern void	init_ipv6 (void);
 extern FindVarMethod var_ipv6;
 extern FindVarMethod var_ifv6Entry;
 extern FindVarMethod var_icmpv6Entry;
