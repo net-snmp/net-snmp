@@ -235,6 +235,11 @@ init_agent(const char *app)
     auto_nlist_print_tree(-2, 0);
 #endif
 
+#ifndef WIN32
+	/*
+	 * the pipe call creates fds that select chokes on, so
+	 * disable callbacks on WIN32 until a fix can be found
+	 */
     /*
      * always register a callback transport for internal use 
      */
@@ -244,6 +249,7 @@ init_agent(const char *app)
     if (callback_master_sess)
         callback_master_num = callback_master_sess->local_port;
     else
+#endif
         callback_master_num = -1;
 
     netsnmp_init_helpers();
