@@ -461,7 +461,7 @@ write_$name(int      action,
 
 	case RESERVE2:
 	  size = sizeof($variableTypes{$type}{variable});
-	  if ($variableTypes{$type}{parser}(var_val, &bigsize, &var_val_type, $variableTypes{$type}{variablePtr}, size)
+	  if ($variableTypes{$type}{parser}(var_val, &bigsize, &var_val_type, $variableTypes{$type}{variablePtr}, &size)
 			== NULL )
 	      return SNMP_ERR_WRONGENCODING;	/* Probably not the correct error */
 
