@@ -100,8 +100,47 @@ extern int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**
 	 *********************/
 
 
+/* define the structure we're going to ask the agent to register our
+   information at */
+struct variable2 icmp_variables[] = {
+    {ICMPINMSGS, ASN_COUNTER, RONLY, var_icmp, 1, {1}},
+    {ICMPINERRORS, ASN_COUNTER, RONLY, var_icmp, 1, {2}},
+    {ICMPINDESTUNREACHS, ASN_COUNTER, RONLY, var_icmp, 1, {3}},
+    {ICMPINTIMEEXCDS, ASN_COUNTER, RONLY, var_icmp, 1, {4}},
+    {ICMPINPARMPROBS, ASN_COUNTER, RONLY, var_icmp, 1, {5}},
+    {ICMPINSRCQUENCHS, ASN_COUNTER, RONLY, var_icmp, 1, {6}},
+    {ICMPINREDIRECTS, ASN_COUNTER, RONLY, var_icmp, 1, {7}},
+    {ICMPINECHOS, ASN_COUNTER, RONLY, var_icmp, 1, {8}},
+    {ICMPINECHOREPS, ASN_COUNTER, RONLY, var_icmp, 1, {9}},
+    {ICMPINTIMESTAMPS, ASN_COUNTER, RONLY, var_icmp, 1, {10}},
+    {ICMPINTIMESTAMPREPS, ASN_COUNTER, RONLY, var_icmp, 1, {11}},
+    {ICMPINADDRMASKS, ASN_COUNTER, RONLY, var_icmp, 1, {12}},
+    {ICMPINADDRMASKREPS, ASN_COUNTER, RONLY, var_icmp, 1, {13}},
+    {ICMPOUTMSGS, ASN_COUNTER, RONLY, var_icmp, 1, {14}},
+    {ICMPOUTERRORS, ASN_COUNTER, RONLY, var_icmp, 1, {15}},
+    {ICMPOUTDESTUNREACHS, ASN_COUNTER, RONLY, var_icmp, 1, {16}},
+    {ICMPOUTTIMEEXCDS, ASN_COUNTER, RONLY, var_icmp, 1, {17}},
+    {ICMPOUTPARMPROBS, ASN_COUNTER, RONLY, var_icmp, 1, {18}},
+    {ICMPOUTSRCQUENCHS, ASN_COUNTER, RONLY, var_icmp, 1, {19}},
+    {ICMPOUTREDIRECTS, ASN_COUNTER, RONLY, var_icmp, 1, {20}},
+    {ICMPOUTECHOS, ASN_COUNTER, RONLY, var_icmp, 1, {21}},
+    {ICMPOUTECHOREPS, ASN_COUNTER, RONLY, var_icmp, 1, {22}},
+    {ICMPOUTTIMESTAMPS, ASN_COUNTER, RONLY, var_icmp, 1, {23}},
+    {ICMPOUTTIMESTAMPREPS, ASN_COUNTER, RONLY, var_icmp, 1, {24}},
+    {ICMPOUTADDRMASKS, ASN_COUNTER, RONLY, var_icmp, 1, {25}},
+    {ICMPOUTADDRMASKREPS, ASN_COUNTER, RONLY, var_icmp, 1, {26}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid icmp_variables_oid[] = { 1,3,6,1,2,1,5 };
+
 void	init_icmp( )
 {
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/icmp", icmp_variables, variable2, icmp_variables_oid);
+
 #ifdef ICMPSTAT_SYMBOL
     auto_nlist( ICMPSTAT_SYMBOL,0,0 );
 #endif

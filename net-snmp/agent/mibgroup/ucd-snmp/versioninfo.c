@@ -25,6 +25,34 @@
 
 #include "version.h"
 
+void init_versioninfo(void) {
+
+/* define the structure we're going to ask the agent to register our
+   information at */
+  struct variable2 extensible_version_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
+    {VERTAG, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERTAG}},
+    {VERDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERDATE}},
+    {VERCDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCDATE}},
+    {VERIDENT, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERIDENT}},
+    {VERCONFIG, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCONFIG}},
+    {VERCLEARCACHE, ASN_INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
+    {VERUPDATECONFIG, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
+    {VERRESTARTAGENT, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
+    {VERDEBUGGING, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERDEBUGGING}}
+  };
+
+  /* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid version_variables_oid[] = { EXTENSIBLEMIB,VERSIONMIBNUM };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd-snmp/versioninfo", extensible_version_variables, \
+               variable2, version_variables_oid);
+  
+}
+
+
 unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */

@@ -48,6 +48,12 @@ struct variable2 extensible_passthru_variables[] = {
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
 
+void init_pass(void) {
+  snmpd_register_config_handler("pass", pass_parse_config,
+                                pass_free_config,"miboid command");
+}
+
+
 void pass_parse_config(word,cptr)
   char *word;
   char *cptr;

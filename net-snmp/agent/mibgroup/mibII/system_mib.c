@@ -12,7 +12,6 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-/* #include "../common_header.h" */
 
 #include <ctype.h>
 #if HAVE_UTSNAME_H
@@ -26,7 +25,7 @@
 #include <netinet/in.h>
 #endif
 
-#include "system.h"
+#include "system_mib.h"
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "read_config.h"
@@ -92,8 +91,25 @@ void system_parse_config_syscon(word, cptr)
 	 *
 	 *********************/
 
-void init_system()
+/* define the structure we're going to ask the agent to register our
+   information at */
+struct variable2 system_variables[] = {
+    {VERSION_DESCR, ASN_OCTET_STR, RWRITE, var_system, 1, {1}},
+    {VERSIONID, ASN_OBJECT_ID, RONLY, var_system, 1, {2}},
+    {UPTIME, ASN_TIMETICKS, RONLY, var_system, 1, {3}},
+    {SYSCONTACT, ASN_OCTET_STR, RWRITE, var_system, 1, {4}},
+    {SYSTEMNAME, ASN_OCTET_STR, RWRITE, var_system, 1, {5}},
+    {SYSLOCATION, ASN_OCTET_STR, RWRITE, var_system, 1, {6}},
+    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}},
+    {SYSORLASTCHANGE, ASN_TIMETICKS, RONLY, var_system, 1, {8}}
+};
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid system_variables_oid[] = { 1,3,6,1,2,1,1 };
+
+void init_system_mib()
 {
+
 #ifdef HAVE_UNAME
   struct utsname utsname;
 
@@ -128,6 +144,16 @@ void init_system()
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/system", system_variables, variable2, \
+               system_variables_oid);
+  
+  /* register our config handlers */
+  snmpd_register_config_handler("syslocation", system_parse_config_sysloc,
+                                NULL, "location");
+  snmpd_register_config_handler("syscontact", system_parse_config_syscon,
+                                NULL,"contact-name");
 
 }
 

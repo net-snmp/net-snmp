@@ -49,10 +49,68 @@
 #include "sysORTable.h"
 #endif
 
+#include "vacm.h"
+
 void
 init_vacm_vars __P((void)) {
+
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,13};
+#endif
+  
+#define PRIVRW	(SNMPV2ANY | 0x5000)
+
+  struct variable2 vacm_sec2group[] = {
+    {SECURITYMODEL, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {1}},
+    {SECURITYNAME, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {2}},
+    {SECURITYGROUP, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {3}},
+    {SECURITYSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
+    {SECURITYSTATUS, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
+  };
+
+  struct variable2 vacm_access[] = {
+    {ACCESSPREFIX, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {1}},
+    {ACCESSMODEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {2}},
+    {ACCESSLEVEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {3}},
+    {ACCESSMATCH, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {4}},
+    {ACCESSREAD, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {5}},
+    {ACCESSWRITE, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {6}},
+    {ACCESSNOTIFY, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {7}},
+    {ACCESSSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {8}},
+    {ACCESSSTATUS, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {9}},
+  };
+
+  struct variable2 vacm_view[] = {
+    {VIEWNAME, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {1}},
+    {VIEWSUBTREE, ASN_OBJECT_ID, PRIVRW, var_vacm_view, 1, {2}},
+    {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {3}},
+    {VIEWTYPE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {4}},
+    {VIEWSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {5}},
+    {VIEWSTATUS, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {6}},
+  };
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+  oid vacm_sec2group_oid[] = { OID_VACMGROUPENTRY };
+  oid vacm_access_oid[] = { OID_VACMACCESSENTRY};
+  oid vacm_view_oid[] = { OID_VACMVIEWENTRY };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/vacm:sec2group", vacm_sec2group, variable2, \
+               vacm_sec2group_oid);
+  REGISTER_MIB("mibII/vacm:access", vacm_access, variable2, vacm_access_oid);
+  REGISTER_MIB("mibII/vacm:view", vacm_view, variable2, vacm_view_oid);
+
+  snmpd_register_config_handler("com2sec", vacm_parse_security,
+                                vacm_free_security,"name source community");
+  snmpd_register_config_handler("group", vacm_parse_group, vacm_free_group,
+                                "name v1|v2c|usm|any security");
+  snmpd_register_config_handler("access", vacm_parse_access, vacm_free_access,
+                            "name context model level prefx read write notify");
+  snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
+                                "name type subtree [mask]");
+
+#ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,7,"View-based Access Control Model for SNMP.");
 #endif
 }

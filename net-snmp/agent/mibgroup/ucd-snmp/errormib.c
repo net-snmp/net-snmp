@@ -136,6 +136,27 @@ seterrorstatus(to,prior)
     errorstatustime = time(NULL);
   }
 }
+
+void init_errormib(void) {
+
+  /* define the structure we're going to ask the agent to register our
+     information at */
+  struct variable2 extensible_error_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_errors, 1, {ERRORNAME}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_errors, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_errors, 1, {ERRORMSG}}
+  };
+
+  /* Define the OID pointer to the top of the mib tree that we're
+     registering underneath */
+  oid extensible_error_variables_oid[] = { EXTENSIBLEMIB,ERRORMIBNUM };
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("ucd_snmp/errormib", extensible_error_variables, \
+               variable2, extensible_error_variables_oid);
+}
+
   
 unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;

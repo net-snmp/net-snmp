@@ -97,9 +97,22 @@ static int ARP_Scan_Next __P((u_long *, char *, u_long *));
 	 *
 	 *********************/
 
+/* define the structure we're going to ask the agent to register our
+   information at */
+struct variable4 at_variables[] = {
+    {ATIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 1, {1}},
+    {ATPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
+    {ATNETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid at_variables_oid[] = { 1,3,6,1,2,1,3,1,1 };
 
 void	init_at( )
 {
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/at", at_variables, variable4, at_variables_oid);
 }
 
 

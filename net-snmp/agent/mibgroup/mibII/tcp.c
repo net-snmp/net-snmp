@@ -135,9 +135,44 @@ static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**w
 	 *
 	 *********************/
 
+struct variable13 tcp_variables[] = {
+    {TCPRTOALGORITHM, ASN_INTEGER, RONLY, var_tcp, 1, {1}},
+    {TCPRTOMIN, ASN_INTEGER, RONLY, var_tcp, 1, {2}},
+#ifndef sunV3
+    {TCPRTOMAX, ASN_INTEGER, RONLY, var_tcp, 1, {3}},
+#endif
+    {TCPMAXCONN, ASN_INTEGER, RONLY, var_tcp, 1, {4}},
+#ifndef sunV3
+    {TCPACTIVEOPENS, ASN_COUNTER, RONLY, var_tcp, 1, {5}},
+    {TCPPASSIVEOPENS, ASN_COUNTER, RONLY, var_tcp, 1, {6}},
+    {TCPATTEMPTFAILS, ASN_COUNTER, RONLY, var_tcp, 1, {7}},
+    {TCPESTABRESETS, ASN_COUNTER, RONLY, var_tcp, 1, {8}},
+#endif
+    {  TCPCURRESTAB, ASN_GAUGE, RONLY, var_tcp, 1, {9}},
+#ifndef sunV3
+    {TCPINSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {10}},
+    {TCPOUTSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {11} },
+    {TCPRETRANSSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {12}},
+#endif
+    {TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 1}},
+    {TCPCONNLOCALADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 2}},
+    {TCPCONNLOCALPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 3}},
+    {TCPCONNREMADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 4}},
+    {TCPCONNREMPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 5}},
+    {TCPINERRS, ASN_COUNTER, RONLY, var_tcp, 1, {14}},
+    {TCPOUTRSTS, ASN_COUNTER, RONLY, var_tcp, 1, {15}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid tcp_variables_oid[] = { 1,3,6,1,2,1,6 };
 
 void	init_tcp( )
 {
+
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/tcp", tcp_variables, variable13, tcp_variables_oid);
+
 #ifdef TCPSTAT_SYMBOL
   auto_nlist( TCPSTAT_SYMBOL,0,0 );
 #endif

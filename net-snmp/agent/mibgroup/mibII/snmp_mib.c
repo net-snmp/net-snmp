@@ -62,6 +62,48 @@ static int header_snmp __P((struct variable *, oid *, int *, int, int *, int (**
 	 *
 	 *********************/
 
+/* define the structure we're going to ask the agent to register our
+   information at */
+struct variable2 snmp_variables[] = {
+    {SNMPINPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {1}},
+    {SNMPOUTPKTS, ASN_COUNTER, RONLY, var_snmp, 1, {2}},
+    {SNMPINBADVERSIONS, ASN_COUNTER, RONLY, var_snmp, 1, {3}},
+    {SNMPINBADCOMMUNITYNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {4}},
+    {SNMPINBADCOMMUNITYUSES, ASN_COUNTER, RONLY, var_snmp, 1, {5}},
+    {SNMPINASNPARSEERRORS, ASN_COUNTER, RONLY, var_snmp, 1, {6}},
+    {SNMPINTOOBIGS, ASN_COUNTER, RONLY, var_snmp, 1, {8}},
+    {SNMPINNOSUCHNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {9}},
+    {SNMPINBADVALUES, ASN_COUNTER, RONLY, var_snmp, 1, {10}},
+    {SNMPINREADONLYS, ASN_COUNTER, RONLY, var_snmp, 1, {11}},
+    {SNMPINGENERRS, ASN_COUNTER, RONLY, var_snmp, 1, {12}},
+    {SNMPINTOTALREQVARS, ASN_COUNTER, RONLY, var_snmp, 1, {13}},
+    {SNMPINTOTALSETVARS, ASN_COUNTER, RONLY, var_snmp, 1, {14}},
+    {SNMPINGETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {15}},
+    {SNMPINGETNEXTS, ASN_COUNTER, RONLY, var_snmp, 1, {16}},
+    {SNMPINSETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {17}},
+    {SNMPINGETRESPONSES, ASN_COUNTER, RONLY, var_snmp, 1, {18}},
+    {SNMPINTRAPS, ASN_COUNTER, RONLY, var_snmp, 1, {19}},
+    {SNMPOUTTOOBIGS, ASN_COUNTER, RONLY, var_snmp, 1, {20}},
+    {SNMPOUTNOSUCHNAMES, ASN_COUNTER, RONLY, var_snmp, 1, {21}},
+    {SNMPOUTBADVALUES, ASN_COUNTER, RONLY, var_snmp, 1, {22}},
+    {SNMPOUTGENERRS, ASN_COUNTER, RONLY, var_snmp, 1, {24}},
+    {SNMPOUTGETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {25}},
+    {SNMPOUTGETNEXTS, ASN_COUNTER, RONLY, var_snmp, 1, {26}},
+    {SNMPOUTSETREQUESTS, ASN_COUNTER, RONLY, var_snmp, 1, {27}},
+    {SNMPOUTGETRESPONSES, ASN_COUNTER, RONLY, var_snmp, 1, {28}},
+    {SNMPOUTTRAPS, ASN_COUNTER, RONLY, var_snmp, 1, {29}},
+    {SNMPENABLEAUTHENTRAPS, ASN_INTEGER, RWRITE, var_snmp, 1, {30}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid snmp_variables_oid[] = { 1,3,6,1,2,1,11 };
+
+void
+init_snmp_mib() {
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/snmp", snmp_variables, variable2, snmp_variables_oid);
+}
 
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0

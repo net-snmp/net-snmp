@@ -58,6 +58,11 @@ struct variable2 extensible_persist_passthru_variables[] = {
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass_persist, 0, {MIBINDEX}},
 };
 
+void init_pass_persist(void) {
+  snmpd_register_config_handler("pass_persist", pass_persist_parse_config,
+                                pass_persist_free_config,"miboid program");
+}
+
 void pass_persist_parse_config(word,cptr)
   char *word;
   char *cptr;

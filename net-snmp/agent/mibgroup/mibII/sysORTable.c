@@ -39,8 +39,24 @@ struct timeval sysOR_lastchange;
 static struct sysORTable *table=NULL;
 static int numEntries=0;
 
+/* define the structure we're going to ask the agent to register our
+   information at */
+struct variable2 sysORTable_variables[] = {
+    { SYSORTABLEINDEX,   ASN_INTEGER,       RONLY, var_sysORTable, 1, {1}},
+    { SYSORTABLEID,      ASN_OBJECT_ID,     RONLY, var_sysORTable, 1, {2}},
+    { SYSORTABLEDESCR,   ASN_OCTET_STR,     RONLY, var_sysORTable, 1, {3}},
+    { SYSORTABLEUPTIME,  ASN_TIMETICKS,     RONLY, var_sysORTable, 1, {4}}
+};
+
+/* Define the OID pointer to the top of the mib tree that we're
+   registering underneath */
+oid sysORTable_variables_oid[] = { 1,3,6,1,2,1,1,9,1 };
+
 void
 init_sysORTable() {
+  /* register ourselves with the agent to handle our mib tree */
+  REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);
+
   gettimeofday(&sysOR_lastchange, NULL);
 }
 

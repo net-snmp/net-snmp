@@ -25,16 +25,4 @@ extern void     register_sysORTable __P((oid *, int, char *));
 #define	SYSORTABLEDESCR		        3
 #define	SYSORTABLEUPTIME	        4
 
-#ifdef IN_SNMP_VARS_C
-
-struct variable2 sysORTable_variables[] = {
-    { SYSORTABLEINDEX,   ASN_INTEGER,       RONLY, var_sysORTable, 1, {1}},
-    { SYSORTABLEID,      ASN_OBJECT_ID,     RONLY, var_sysORTable, 1, {2}},
-    { SYSORTABLEDESCR,   ASN_OCTET_STR,     RONLY, var_sysORTable, 1, {3}},
-    { SYSORTABLEUPTIME,  ASN_TIMETICKS,     RONLY, var_sysORTable, 1, {4}}
-};
-
-config_load_mib(1.3.6.1.2.1.1.9.1, 9, sysORTable_variables)
-
-#endif
 #endif /* _MIBGROUP_SYSORTABLE_H */

@@ -245,6 +245,8 @@ snmpd_register_config_handler(token, parser, releaser, help)
   void (*releaser) __P((void));
   char *help;
 {
+  DEBUGMSGTL(("snmpd_register_config_handler",
+              "registering .conf token for \"%s\"\n", token));
   register_config_handler("snmpd", token, parser, releaser, help);
 }
 
