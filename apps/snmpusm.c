@@ -217,8 +217,8 @@ main(int argc, char *argv[])
                           newkul[SNMP_MAXBUF_SMALL],
                           keychange[SNMP_MAXBUF_SMALL];
 
-    *authKeyChange   = authKeyOid;
-    *privKeyChange   = privKeyOid;
+    authKeyChange   = authKeyOid;
+    privKeyChange   = privKeyOid;
                          
     /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
