@@ -296,6 +296,9 @@ var_tcp(struct variable *vp,
 #endif
 	    case TCPMAXCONN:
 #ifndef linux
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = -1;
 		return (u_char *) &long_return;
 #else
@@ -311,6 +314,9 @@ var_tcp(struct variable *vp,
 #ifdef hpux
 		long_return = MIB_tcpcounter[7];
 #else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = tcpstat.tcps_conndrops;	/* XXX */
 #endif
 		return (u_char *) &long_return;
@@ -318,6 +324,9 @@ var_tcp(struct variable *vp,
 #ifdef hpux
 		long_return = MIB_tcpcounter[8];
 #else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = tcpstat.tcps_drops;	/* XXX */
 #endif
 		return (u_char *) &long_return;
@@ -446,6 +455,9 @@ var_tcp(struct variable *vp,
 #endif
 	    case TCPMAXCONN:
 #ifndef linux
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = -1;
 		return (u_char *) &long_return;
 #else
@@ -461,6 +473,9 @@ var_tcp(struct variable *vp,
 #ifdef hpux
 		long_return = MIB_tcpcounter[7];
 #else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = tcpstat.tcps_conndrops;	/* XXX */
 #endif
 		return (u_char *) &long_return;
@@ -468,6 +483,9 @@ var_tcp(struct variable *vp,
 #ifdef hpux
 		long_return = MIB_tcpcounter[8];
 #else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = tcpstat.tcps_drops;	/* XXX */
 #endif
 		return (u_char *) &long_return;

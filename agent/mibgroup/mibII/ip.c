@@ -290,6 +290,9 @@ var_ip(struct variable *vp,
 		long_return = 2;	    /* HOST    */
 	    }
 #else /* sparc */
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif /* sparc */
 
@@ -300,7 +303,11 @@ var_ip(struct variable *vp,
 	     */
 	    if (!auto_nlist(TCP_TTL_SYMBOL, (char *) &long_return,
                             sizeof(long_return)))
+#ifdef NO_DUMMY_VALUES
+	      return NULL;
+#else
               long_return = 60;	    /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
           long_return = ipstat.ips_total;
@@ -322,6 +329,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[7];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -329,6 +339,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[8];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -344,6 +357,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[10];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -351,6 +367,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[11];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -369,6 +388,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[15];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = ipstat.ips_fragments;		/* XXX */
 		/*
 		 * NB: This is the count of fragments received, rather than
@@ -385,6 +407,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[17];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -392,6 +417,9 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[18];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
@@ -399,10 +427,16 @@ var_ip(struct variable *vp,
 #ifdef MIB_IPCOUNTER_SYMBOL
 	    long_return = MIB_ipcounter[19];
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #endif
 	    return (u_char *) &long_return;
 	case IPROUTEDISCARDS:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 	    return (u_char *) &long_return;
 	default:
@@ -478,7 +512,11 @@ var_ip(struct variable *vp,
 	     */
 	    if (!auto_nlist(TCP_TTL_SYMBOL,(char *) &long_return,
                             sizeof(long_return)))
+#ifdef NO_DUMMY_VALUES
+	      return NULL;
+#else
               long_return = 60;	    /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IPINRECEIVES:
           long_return = ipstat.ips_total;
@@ -529,6 +567,9 @@ var_ip(struct variable *vp,
 	      - (ipstat.ips_fragdropped + ipstat.ips_fragtimeout);
 	    return (u_char *) &long_return;
 	case IPFRAGFAILS:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 	    return (u_char *) &long_return;
 	case IPFRAGCREATES:
@@ -733,6 +774,9 @@ var_ipAddrEntry(struct variable *vp,
 #endif
 	    return(u_char *) &long_return;	   
 	case IPADREASMMAX:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = -1;
 	    return(u_char *) &long_return;
 	default:
@@ -1100,6 +1144,9 @@ var_ip(struct variable *vp,
 		return (u_char *) &long_return;
 
 	case IPINDISCARDS:
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = 0;
 		return (u_char *) &long_return;
 
@@ -1148,6 +1195,9 @@ var_ip(struct variable *vp,
 		return (u_char *) &long_return;
 
 	case IPROUTEDISCARDS:
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = 0;
 		return (u_char *) &long_return;
 
@@ -1360,6 +1410,9 @@ var_ipAddrEntry(struct variable *vp,
 		return (u_char *)&long_return;	   
 
 	case IPADREASMMAX:
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = -1;
 		return (u_char *)&long_return;
 

@@ -234,7 +234,11 @@ var_hrdevice(struct variable *vp,
 	    if ( device_descr[ type ] != NULL )
         	strcpy(string, ((*device_descr[type])(dev_idx)) );
 	    else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#else
 	        sprintf(string, "a black box of some sort");
+#endif
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRDEV_ID:
@@ -249,13 +253,21 @@ var_hrdevice(struct variable *vp,
 	    if ( device_status[ type ] != NULL )
         	long_return = ((*device_status[type])(dev_idx));
 	    else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#else
 	        long_return = 2;	/* Assume running */
+#endif
 	    return (u_char *)&long_return;
 	case HRDEV_ERRORS:
 	    if ( device_errors[ type ] != NULL )
         	long_return = (*device_errors[type])(dev_idx);
 	    else
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#else
 	        long_return = 0;	/* Assume OK */
+#endif
 	    return (u_char *)&long_return;
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrdevice\n", vp->magic));

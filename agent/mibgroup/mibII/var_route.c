@@ -338,15 +338,27 @@ var_ipRouteEntry(struct variable *vp,
     long_return = (rtp->rtm_flags & RTF_UP) ? 1 : 0;
     return (u_char *)&long_return;
   case IPROUTEMETRIC2:
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = -1;
     return (u_char *)&long_return;
   case IPROUTEMETRIC3:
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = -1;
     return (u_char *)&long_return;
   case IPROUTEMETRIC4:
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = -1;
     return (u_char *)&long_return;
   case IPROUTEMETRIC5:
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = -1;
     return (u_char *)&long_return;
   case IPROUTENEXTHOP:
@@ -363,6 +375,9 @@ var_ipRouteEntry(struct variable *vp,
       ? 2 : (rtp->rtm_flags & RTF_DYNAMIC) ? 4 : 1;
     return (u_char *)&long_return;
   case IPROUTEAGE:
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = 0;
     return (u_char *)&long_return;
   case IPROUTEMASK:
@@ -610,15 +625,27 @@ var_ipRouteEntry(struct variable *vp,
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 1 : 0;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC2:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC3:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC4:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTEMETRIC5:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = -1;
 	    return (u_char *)&long_return;
 	case IPROUTENEXTHOP:
@@ -639,12 +666,18 @@ var_ipRouteEntry(struct variable *vp,
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_DYNAMIC) ? 4 : 2;
 	    return (u_char *)&long_return;
 	case IPROUTEAGE:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 	    return (u_char *)&long_return;
 	case IPROUTEMASK:
 #if NEED_KLGETSA
 		/* XXX - Almost certainly not right
 		    but I don't have a suitable system to test this on */
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 0;
 #else /*  NEED_KLGETSA */
   #ifndef linux
@@ -1572,6 +1605,9 @@ var_ipRouteEntry(struct variable *vp,
 		return (u_char *)&long_return;
 
 	case IPROUTEAGE:
+#ifdef NO_DUMMY_VALUES
+		return NULL;
+#endif
 		long_return = 0;
 		return (u_char *)&long_return;
 
