@@ -92,3 +92,10 @@ can to skip the test step to get to the install step:
 
    $ nsb-package -p -d -c -t Ext-5-0-3
 
+
+OTHER PROBLEMS
+--------------
+* "Cannot find nsb-functions"
+  
+   It's a hack, but symlink nsb-functions and nsb-package to your local
+   bin directory ($HOME/bin).  I'm trying to think of a better solution.
