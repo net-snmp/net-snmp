@@ -1,6 +1,10 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.6.1*
+ Fixes:
+    - Minor last second fixes mostly.
+
 *3.6*
  New:
     - All of the services for ucd-snmp have moved from the sites in
