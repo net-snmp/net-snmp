@@ -13,11 +13,15 @@ fi
 
 dnl overflow problems with hpux's sh
 
-if test `arch` = "hppa" -a -x /bin/ksh; then
+if test "`arch`" = "hppa" -a -x /bin/ksh; then
   (typeset) >/dev/null 2>&1
   if test $? != 0; then
     echo feeding configure to /bin/ksh to avoid hpux /bin/sh problems
-    /bin/ksh $0 "$@"
+    if test "x$1" = "x"; then
+      /bin/ksh $0
+    else
+      /bin/ksh $0 "$@"
+    fi
   fi
 fi
 
@@ -31,7 +35,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PATH_PROG(PSPROG,ps)
-AC_PATH_PROG(UNAMEPROG,uname)
+AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 AC_CHECK_PROGS(SED,sed gsed)
 
@@ -420,7 +424,7 @@ else
 fi
 ])
 
-ME=`whoami`
+ME=`$WHOAMI`
 if test -f /etc/resolv.conf; then
   LOC=`cat /etc/resolv.conf | grep '^domain' | tail -1 | awk '{print $NF}'`
 else
