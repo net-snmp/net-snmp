@@ -357,7 +357,7 @@ When you have the daemon running either with the script above or running:
 test the daemon's functionality by typing:
 
    snmpget -v 1 -c whatever localhost sysUpTime.0
-   snmpwalk -v 2c -c whatever -m ALL localhost .1.3 | more
+   snmpwalk -v 2c -c whatever -m ALL -t 100 localhost .1.3 | more
 
 and paging through the results.  
 
@@ -530,10 +530,14 @@ which is Sun's daemon talking, and:
 
 which is net-snmp talking.  It is acting as a sub-agent through Sun's daemon.
 
-In my experience, Sun's SNMP system is extremely fragile and prone to
-crashes and unexplained outages unless treated with respect and kid gloves.
-It appears to react badly to any extensive snmpwalk-ing or any incorrect
-use of community strings (eg. a query by "public" instead of what you're using.)
+Now try:
+
+   snmpwalk -v 2c -c whatever -m ALL -t 100 localhost .1.3
+
+and you should see the two daemons working together.
+
+It appears to react badly to any extensive snmpwalk-ing or any incorrect use
+of community strings (eg. a query by "public" instead of what you're using.)
 
 If it does bomb, you will need to discover any stray snmpd daemons by typing:
 
