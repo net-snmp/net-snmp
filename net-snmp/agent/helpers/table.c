@@ -267,7 +267,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
         /*
          * if it is not in range, then mark it in the request list 
          * because we can't process it. If the request is not a GETNEXT 
-         * then set the error to ERR_NOSUCHNAME so nobody else wastes time
+         * then set the error to NOSUCHOBJECT so nobody else wastes time
          * trying to process it.  
          */
         if (out_of_range) {
@@ -275,9 +275,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
             DEBUGMSGOID(("helper:table", var->name, var->name_length));
             DEBUGMSG(("helper:table", "\n"));
 
+            /*
+             *  Reject requests of the form 'myTable.N'   (N != 1)
+             */
             if (reqinfo->mode != MODE_GETNEXT) {
                 table_helper_cleanup(reqinfo, request,
-                                     SNMP_ERR_NOSUCHNAME);
+                                     SNMP_NOSUCHOBJECT);
             }
             continue;
         }
@@ -324,9 +327,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 DEBUGMSGOID(("helper:table", var->name, var->name_length));
                 DEBUGMSG(("helper:table", "\n"));
 
+                /*
+                 *  Reject requests of the form 'myEntry.N'   (invalid N)
+                 */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, request,
-                                         SNMP_ERR_NOSUCHNAME);
+                                         SNMP_NOSUCHOBJECT);
                 }
                 continue;
             }
@@ -364,8 +370,10 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * oid is NOT long enough to contain index info, and this is
              * NOT a GETNEXT, so we can't do anything with it.
+             *
+             * Reject requests of the form 'myTable' or 'myEntry'
              */
-            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
+            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
             continue;
         } else {
             /*
@@ -408,10 +416,12 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
                 /*
                  * no sense in trying anymore if this is a GET/SET. 
+                 *
+                 * Reject requests of the form 'myObject'   (no instance)
                  */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, requests,
-                                         SNMP_ERR_NOSUCHNAME /* ??? */);
+                                         SNMP_NOSUCHINSTANCE);
                     cleaned_up = 1;
                 }
                 tmp_len = 0;
