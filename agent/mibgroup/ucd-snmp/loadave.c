@@ -114,9 +114,6 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#if HAVE_KVM_H
-#include <kvm.h>
-#endif
 
 #include "mibincl.h"
 #include "struct.h"
