@@ -4,8 +4,11 @@
 ## $Id$
 ########################################################################
 @if $m2c_create_fewer_files != 1@
-@   run generic-table-oids.m2c@
-@   run generic-table-enums.m2c@
+@   foreach $table table@
+@      include m2c_setup_table.m2i@
+@      run generic-table-oids.m2c@
+@      run generic-table-enums.m2c@
+@   end@ # table
 ########################################################################
 @else@
 @   eval $hack = "Id"@
