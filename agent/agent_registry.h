@@ -38,17 +38,20 @@ struct register_parameters {
 #define ANY_STRING_INDEX		NULL
 #define ANY_OID_INDEX			NULL
 
-#define	INDEX_ERR_WRONG_TYPE		-1
-#define	INDEX_ERR_NOT_ALLOCATED		-2
-#define	INDEX_ERR_WRONG_SESSION		-3
+#define	INDEX_ERR_GENERR		-1
+#define	INDEX_ERR_WRONG_TYPE		-2
+#define	INDEX_ERR_NOT_ALLOCATED		-3
+#define	INDEX_ERR_WRONG_SESSION		-4
 
-struct variable_list* register_string_index( oid *, size_t, char *);
-struct variable_list* register_int_index( oid *, size_t, int);
+char*                 register_string_index( oid *, size_t, char *);
+int                   register_int_index( oid *, size_t, int);
 struct variable_list* register_oid_index( oid *, size_t, oid *, size_t);
 struct variable_list* register_index( struct variable_list *, int, struct snmp_session*);
-int release_index( struct variable_list *);
-int remove_index( struct variable_list *, struct snmp_session*);
-int unregister_index(struct variable_list *, int, struct snmp_session *);
+
+int  release_index( struct variable_list *);
+int  remove_index( struct variable_list *, struct snmp_session*);
+void unregister_index_by_session(struct snmp_session *);
+int  unregister_index(struct variable_list *, int, struct snmp_session *);
 
 void setup_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);
