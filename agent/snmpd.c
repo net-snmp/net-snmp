@@ -696,10 +696,19 @@ main(int argc, char *argv[])
      * Initialize the world.  Detach from the shell.  Create initial user.  
      */
 #if HAVE_FORK
-    if (!dont_fork && fork() != 0 &&
-        !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-				NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
-        exit(0);
+    if (!dont_fork) {
+        if (fork() != 0) {
+            /* parent */
+            if(!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+                                       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
+                exit(0);
+            }
+#ifdef HAVE_SETSID
+        } else {
+            /* child */
+            setsid();
+#endif
+        }
     }
 #endif
 
