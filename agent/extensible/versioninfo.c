@@ -8,6 +8,7 @@ static char *VersionInfo="Ext-3-0";
 
 int clear_cache();
 int update_hook();
+int restart_hook();
 
 unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -64,6 +65,10 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
       return((u_char *) long_ret);
     case VERUPDATECONFIG:
       *write_method = update_hook;
+      long_ret = 0;
+      return((u_char *) long_ret);
+    case VERRESTARTAGENT:
+      *write_method = restart_hook;
       long_ret = 0;
       return((u_char *) long_ret);
   }      

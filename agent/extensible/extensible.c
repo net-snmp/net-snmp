@@ -582,6 +582,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #ifdef ERRORMIBNUM
 
 static time_t errorstatustime=0;
+static int errorstatusprior=0;
 static char errorstring[STRMAX];
 
 setPerrorstatus(to)
@@ -593,14 +594,19 @@ setPerrorstatus(to)
   
   sprintf(buf,"%s:  %s",to,sys_errlist[errno]);
   perror(to);
-  seterrorstatus(buf);
+  seterrorstatus(buf,5);
 }
 
-seterrorstatus(to)
+seterrorstatus(to,prior)
   char *to;
+  int prior;
 {
-  errorstatustime = time(NULL);
-  strcpy(errorstring,to);
+  if (errorstatusprior <= prior ||
+      (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {
+    strcpy(errorstring,to);
+    errorstatusprior = prior;
+    errorstatustime = time(NULL);
+  }
 }
   
 unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_method)
