@@ -390,9 +390,11 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
     /*
      * below our minimum column? then use first row.
      */
-    if((tblreq_info->number_indexes == 0) ||
-       (tblreq_info->colnum < tad->tblreg_info->min_column)) {
+    if(tblreq_info->colnum < tad->tblreg_info->min_column) {
         tblreq_info->colnum = tad->tblreg_info->min_column;
+        tblreq_info->number_indexes = 0;
+    }
+    if(tblreq_info->number_indexes == 0) {
         row = CONTAINER_FIRST(tad->table);
     } else {
         index.oids = tblreq_info->index_oid;
