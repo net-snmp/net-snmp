@@ -25,6 +25,7 @@ while ($#ARGV > -1) {
     $pass = shift if (/-p/);
     $verbose = 1 if (/-v/);
     $delete = 1 if (/-d/);
+    $debug = 1 if (/-D/);
     $doit = 0 if (/-n/);
 }
 
@@ -36,11 +37,7 @@ while ($#ARGV > -1) {
 #===========================================================================
 # Get host records from database and process
 
-( $cursor = $dbh->prepare( "SELECT distinct host FROM hosttables" ) )
-    or die "\nnot ok: $DBI::errstr\n";
-( $cursor->execute )
-    or print( "\tnot ok: $DBI::errstr\n" );
-
+$cursor = getcursor("SELECT distinct host FROM hosttables");
 while (  $hostrow = $cursor->fetchrow_hashref ) {
 
     #set up the session
@@ -49,11 +46,11 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
     my $x = $dbh->prepare("select community from hosts where name = '$host'");
     my $y = $x->execute();
     my $comm = "public";
-    print "$host...$y\n";
+    print "$host...$y\n" if ($verbose);
     if (defined($y) && "$y" ne "0E0") {
 	$comm =  ${$x->fetchrow_hashref}{'community'};
     }
-    print STDERR "$host: $comm\n";
+    print STDERR "$host: $comm\n" if ($verbose);
     my $sess = new SNMP::Session (  DestHost => $host, Community => $comm, Timeout => 5000000 );
 
     # get a list of tables we want to store
@@ -76,7 +73,6 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	} else {
 	    $dbh->do("select * from $tablelist->{tablename}")
 		or setuptable($tablelist->{tablename});
-	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host' )");
 	}
 	
 	$var = 
@@ -91,6 +87,7 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    my $val = $sess->getnext($var);
 	    last if ($sess->{'ErrorStr'});
 	    my $id = $var->[$SNMP::Varbind::iid_f];
+	    print "$initlabel = $varlabel\n" if ($verbose);
 	    last if ($varlabel ne $initlabel);
 	    my %vals;
 	    foreach $c (@$children) {
@@ -101,6 +98,12 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 		$vals{$label} = $val;
 	    }
 	    my $cmd;
+
+	    # check to see if the error previously existed and then
+	    # delete the old entry.
+	    my $olderr =
+		checkrowforerrors($tablelist->{'tablename'}, $host, $id);
+	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host'  and oidindex = '$id')");
 	    $res = $dbh->do("select * from $tablelist->{'tablename'} where ( host = '$host' and oidindex = '$id')");
 	    print "  result: $res/$\n" if ($verbose);
 	    if ($res ne "0E0" && $tablelist->{'keephistory'} != 1) {
@@ -119,6 +122,12 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    $dbh->do("$cmd")
 		or die "\nnot ok: $DBI::errstr\n" if ($doit);
 
+	    my $newerr = 
+		checkrowforerrors($tablelist->{'tablename'}, $host, $id);
+	    if ($newerr->{retval} != $olderr->{retval}) {
+		 logerror($host, $newerr->{retval}, $newerr->{errfield}, 
+			  $newerr->{errvalue});
+	     }
 	} # snmp loop
     } # table loop
 } # host loop
@@ -155,4 +164,85 @@ sub setuptable {
     $dbh->do("$cmd")
 	or die "\nnot ok: $DBI::errstr\n" if ($doit);
 
+}
+
+sub getoncall {
+    my $group = shift;
+    my $cur = getcursor("select * from oncall where groupname = '$group'");
+    my $row;
+    my ($emails, @days, @hours, @two, $i);
+    my %dayscon = qw(Sun 0 Mon 1 Tue 2 Wed 3 Thu 4 Fri 5 Sat 6);
+    my @now = localtime(time());
+    my %people;
+
+  row: while (  $row = $cur->fetchrow_hashref ) {
+      @days = split(/,/,$row->{'days'});
+      foreach $i (@days) {
+	  @two = split(/-/,$i);
+	  if ((defined($dayscon{$i}) && $dayscon{$i} == $now[6]) ||
+	      (defined($dayscon{$two[0]}) && defined($dayscon{$two[1]}) &&
+	       (($dayscon{$two[0]} <= $now[6] && $dayscon{$two[1]} >= $now[6]) ||
+		(($dayscon{$two[0]} > $dayscon{$two[1]}) &&
+		 ($dayscon{$two[0]} <= $now[6] || $dayscon{$two[1]} >= $now[6]))))) {
+	      # we hit a valid day range
+	      print "    hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		  if ($verbose);
+	      $people{$row->{'email'}} = $row->{'email'};
+	  } else {
+	      print "not hit it $row->{'email'} $now[6]\t($i)\t$row->{'days'}\n"
+		  if ($verbose);
+	  }	      
+    }
+  }
+    return \%people;
+}
+
+sub getcursor {
+    my $cmd = shift;
+    my $cursor;
+    print "cmd: $cmd\n" if ($debug);
+    ( $cursor = $dbh->prepare( $cmd ))
+	or die "\nnot ok: $DBI::errstr\n";
+    ( $cursor->execute )
+	or print( "\tnot ok: $DBI::errstr\n" );
+    return $cursor;
+}
+
+sub checkrowforerrors {
+    my ($table, $host, $id) = @_;
+    my $exprs = getcursor("SELECT * FROM errorexpressions where (tablename = '$table')");
+    my $expr;
+    my $error;
+
+    while (  $expr = $exprs->fetchrow_hashref ) {
+	my $errors = getcursor("select * from $table where $expr->{expression} and host = '$host' and oidindex = '$id'");
+	while (  $error = $errors->fetchrow_hashref ) {
+	    print "$host: $expr->{returnfield} = $error->{$expr->{returnfield}}\n" if ($verbose);
+	    return {'retval', 1,
+		    'errfield', $expr->{'returnfield'},
+		    'errvalue', $error->{$expr->{'returnfield'}}};
+	}
+    }
+    return {'retval', 0};
+}
+
+sub logerror {
+    my ($host, $err, $field, $result) = @_;
+    my $groups = getcursor("SELECT distinct groupname FROM hosttables where host = '$host'");
+    my ($group, $person);
+    my %mailed;
+    my $msg = (($err) ? "error" : "normal");
+		    
+    while( $group = $groups->fetchrow_hashref ) {
+	my $people = getoncall($group->{'groupname'});
+	foreach $person (keys(%$people)) {
+	    if (!defined($mailed{$person})) {
+		    open(I, "|/usr/bin/mailx -s \"SNMP: $msg: $host $field\" $person");
+		print I "$msg: $host: $field = $result\n";
+		close(I);
+		    print "mailing $person with $msg: $host: $field = $result\n";
+		$mailed{$person} = 1;
+	    }
+	}
+    }
 }
