@@ -560,7 +560,10 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   struct view_parameters view_parms;
   view_parms.pdu = pdu;
   view_parms.name = name;
-  view_parms.namelen = *namelen;
+  if (namelen)
+      view_parms.namelen = *namelen;
+  else
+      view_parms.namelen = 0;
   view_parms.errorcode = 0;
 
   if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
@@ -580,7 +583,31 @@ in_a_view(oid		  *name,      /* IN - name of var, OUT - name matched */
   return 1;
 }
 
+/* in_a_view: determines if a given snmp_pdu is ever going to be allowed to do
+   anynthing or if it's not going to ever be authenticated. */
+int
+check_access(struct snmp_pdu *pdu)      /* IN - pdu being checked */
+{
+  struct view_parameters view_parms;
+  view_parms.pdu = pdu;
+  view_parms.name = 0;
+  view_parms.namelen = 0;
+  view_parms.errorcode = 0;
 
+  if (pdu->flags & UCD_MSG_FLAG_ALWAYS_IN_VIEW)
+    return 0;		/* Enable bypassing of view-based access control */
+
+  switch (pdu->version) {
+  case SNMP_VERSION_1:
+  case SNMP_VERSION_2c:
+  case SNMP_VERSION_3:
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+                        SNMPD_CALLBACK_ACM_CHECK_INITIAL,
+                        &view_parms);
+    return view_parms.errorcode;
+  }
+  return 1;
+}
 
 /* lexicographical compare two object identifiers.
  * Returns -1 if name1 < name2,
