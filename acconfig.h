@@ -441,6 +441,14 @@
 #define UCDAVIS_DOT_MIB		1.3.6.1.4.1.2021
 #define UCDAVIS_DOT_MIB_LENGTH	7
 
+/* this is the location of the net-snmp mib tree.  It shouldn't be
+   changed, as the places it is used are expected to be constant
+   values or are directly tied to the UCD-SNMP-MIB. */
+#define NETSNMP_OID		8072
+#define NETSNMP_MIB		1,3,6,1,4,1,8072
+#define NETSNMP_DOT_MIB		1.3.6.1.4.1.8072
+#define NETSNMP_DOT_MIB_LENGTH	7
+
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
 #define ERRORTIMELENGTH 600 
 
