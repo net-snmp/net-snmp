@@ -468,8 +468,6 @@ init_snmp(const char *type)
 {
   static int	done_init = 0;	/* To prevent double init's. */
 
-  init_callbacks();
-
   if (done_init) {
     return;
   }
@@ -480,6 +478,7 @@ init_snmp(const char *type)
   setlocale(LC_CTYPE, "");
 #endif
 
+  init_callbacks();
   snmp_init_statistics();
   register_mib_handlers();
   init_snmpv3(type);
@@ -2897,7 +2896,7 @@ snmp_sess_async_send(void *sessp,
 	pdu->contextNameLen = session->contextNameLen;
       }
       pdu->securityModel = SNMP_SEC_MODEL_USM;
-      if (pdu->securityNameLen < 0) {
+      if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
 	if (session->securityNameLen == 0){
 	  snmp_errno = SNMPERR_BAD_SEC_NAME;
 	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
