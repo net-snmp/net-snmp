@@ -183,7 +183,7 @@ setup_engineID(u_char **eidp, const char *text)
   u_char	  buf[SNMP_MAXBUF_SMALL];
   struct hostent *hent;
 #endif
-  u_char	 *bufp = NULL;
+  u_char     *bufp = NULL;
   size_t	  len;
  
 
@@ -196,7 +196,7 @@ setup_engineID(u_char **eidp, const char *text)
   } else {
     len = 5 + 4;		/* 5 leading bytes + four byte IPv4 address */
 #ifdef HAVE_GETHOSTNAME
-    gethostname((char *)buf, SNMP_MAXBUF_SMALL);
+    gethostname((char *)buf, sizeof(buf));
     hent = gethostbyname((char *)buf);
 #ifdef AF_INET6
     if (hent && hent->h_addrtype == AF_INET6)
@@ -227,8 +227,8 @@ setup_engineID(u_char **eidp, const char *text)
 
   } else {
     bufp[4] = 1;
-#ifdef HAVE_GETHOSTBYNAME
-    gethostname((char *)buf, SNMP_MAXBUF_SMALL);
+#ifdef HAVE_GETHOSTNAME
+    gethostname((char *)buf, sizeof(buf));
     hent = gethostbyname((char *)buf);
 
     if (hent && hent->h_addrtype == AF_INET) {
@@ -247,14 +247,14 @@ setup_engineID(u_char **eidp, const char *text)
       bufp[7] = 0;
       bufp[8] = 1;
     }
-#else /* HAVE_GETHOSTBYNAME */
+#else /* HAVE_GETHOSTNAME */
     /* Unknown address type.  Default to 127.0.0.1. */
     
     bufp[5] = 127;
     bufp[6] = 0;
     bufp[7] = 0;
     bufp[8] = 1;
-#endif /* HAVE_GETHOSTBYNAME */
+#endif /* HAVE_GETHOSTNAME */
     
   }  /* endif -- text (2) */
 
