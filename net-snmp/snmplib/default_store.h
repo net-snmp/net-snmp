@@ -64,6 +64,7 @@ extern "C" {
 struct ds_read_config {
    u_char type;
    char  *token;
+   char  *ftype;
    int    storeid;
    int    which;
    struct ds_read_config *next;
@@ -82,6 +83,7 @@ int ds_register_config(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
 int ds_register_premib(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
+void ds_shutdown(void);
 
 #ifdef __cplusplus
 }

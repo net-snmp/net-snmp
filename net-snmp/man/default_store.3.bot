@@ -22,6 +22,9 @@ into the int_storage[storeid][which] slot.
 .IP "int ds_get_int(int storeid, int which)"
 Returns the integer which has been stored in the
 int_storage[storeid][which] slot.
+.IP "void ds_shutdown(void)"
+Reclaims memory used to hold information gathered by
+ds_register_config and ds_register_premib.
 .IP "ds_register_config(u_char type, const char *ftype, const char *token, int storeid, int which)"
 This token registers a configuration file directive and attaches it to 
 a default storage type and slot.  Specifically,

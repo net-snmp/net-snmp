@@ -7,6 +7,7 @@ read_module, read_mib, read_all_mibs,
 read_objid, read_module_node,
 get_module_node, read_objid
 snmp_set_mib_warnings, snmp_set_save_descriptions,
+shutdown_mib,
 print_mib,
 print_variable, print_value, print_objid, print_description - mib_api functions
 .SH SYNOPSIS
@@ -33,6 +34,8 @@ print_variable, print_value, print_objid, print_description - mib_api functions
 .B "struct tree *read_mib( char *filename )
 .br
 .B "struct tree *read_all_mibs( void )
+.PP
+.B "void shutdown_mib( void )
 .PP
 .B "void print_mib( FILE *fp)
 .PP
@@ -177,6 +180,15 @@ If the module name is specified as "ANY", then this routine will assume
 that the descriptor given is unique within the tree, and will return the
 matching entry.  If this assumption is invalid, then the behaviour
 as to which variable is returned is implementation dependent.
+
+.I shutdown_mib
+will clear the information that was gathered by 
+.IR read_module ,
+.IR add_mibdir , and
+.IR add_module_replacement.
+It is strongly recommended that one does not invoke
+.IR shutdown_mib
+while there are SNMP sessions being actively managed.
 
 .I print_mib
 will print out a representation of the currently active MIB tree to

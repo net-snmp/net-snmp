@@ -235,6 +235,7 @@ ds_register_config(u_char type, const char *ftype, const char *token,
   }
 
   drsp->type = type;
+  drsp->ftype = strdup(ftype);
   drsp->token = strdup(token);
   drsp->storeid = storeid;
   drsp->which = which;
@@ -275,6 +276,7 @@ ds_register_premib(u_char type, const char *ftype, const char *token,
   }
 
   drsp->type = type;
+  drsp->ftype = strdup(ftype);
   drsp->token = strdup(token);
   drsp->storeid = storeid;
   drsp->which = which;
@@ -296,3 +298,27 @@ ds_register_premib(u_char type, const char *ftype, const char *token,
   return SNMPERR_SUCCESS;
 }
 
+void
+ds_shutdown() {
+  struct ds_read_config *drsp;
+  int i, j;
+
+  for (drsp = ds_configs; drsp; drsp = ds_configs) {
+    ds_configs = drsp->next;
+
+    unregister_config_handler(drsp->ftype, drsp->token);
+    free (drsp->ftype);
+    free (drsp->token);
+    free (drsp);
+
+  }
+
+  for (i = 0; i < DS_MAX_IDS; i++) {
+    for (j = 0; j < DS_MAX_SUBIDS; j++) {
+      if (ds_strings[i][j] != NULL) {
+        free(ds_strings[i][j]);
+        ds_strings[i][j] = NULL;
+      }
+    }
+  }
+}
