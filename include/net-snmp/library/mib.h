@@ -122,6 +122,9 @@ SOFTWARE.
     void            shutdown_mib(void);
     void            print_description(oid *, size_t, int);
     void            fprint_description(FILE *, oid *, size_t, int);
+    int             snprint_description(char *, size_t, oid *, size_t, int);
+    int             sprint_realloc_description(u_char **, size_t *, size_t *,
+                                               int, oid *, size_t, int);
     int             get_module_node(const char *, const char *, oid *,
                                     size_t *);
     int             get_wild_node(const char *, oid *, size_t *);
