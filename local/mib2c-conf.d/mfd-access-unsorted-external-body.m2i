@@ -154,6 +154,11 @@ $example_end
  *  can be put off until the desired row is found See the notes on
  *  ${table}_get_data().
  *
+ *  Note that this function does not correspond to a SNMP GET pdu, and
+ *  you should return data items in whatever order they are already in.
+ *  (In fact, if your data is already ordered in the same order as the
+ *  SNMP indexes, you shouldn't be using the unsorted-access code).
+ *
  *  This function should update the table index (ctx_ref->ctx->tbl_idx)
  *  values for the raw data (ctx_ref->ctx->data).
  *
@@ -213,6 +218,11 @@ $example_end
  *  This function returns the next data item in the data set. The same
  *  caveat applies here as did above. The indexes are the important parts
  *  during loop processing.
+ *
+ *  Note that this function does not correspond to a SNMP GET-NEXT pdu, and
+ *  you should return data items in whatever order they are already in.
+ *  (In fact, if your data is already ordered in the same order as the
+ *  SNMP indexes, you shouldn't be using the unsorted-access code).
  *
  * More Details
  * ------------
