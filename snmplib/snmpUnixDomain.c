@@ -94,8 +94,7 @@ char	       *snmp_unix_fmtaddr	(snmp_transport *t,
 int		snmp_unix_recv	(snmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength) 
 {
-  int rc = -1, fromlen = sizeof(struct sockaddr_un);
-  struct sockaddr *from;
+  int rc = -1;
 
   *opaque  = NULL;
   *olength = 0;
