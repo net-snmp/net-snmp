@@ -147,7 +147,7 @@ update_hook(int action,
   }
   tmp = *((long *) var_val);
   if (tmp == 1 && action == COMMIT) {
-    update_config(0);
+    update_config();
   } 
   return SNMP_ERR_NOERROR;
 }

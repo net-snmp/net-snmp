@@ -6,7 +6,7 @@
 #define _AGENT_READ_CONFIG_H
 
 void init_agent_read_config (void);
-RETSIGTYPE update_config (int);
+void update_config (void);
 struct subtree;
 void snmpd_register_config_handler (const char *,
                                     void (*parser)(char *, char *),
