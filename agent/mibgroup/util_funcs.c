@@ -168,6 +168,7 @@ int get_exec_output(struct extensible *ex)
   int fd[2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef EXCACHETIME
+  char cachefile[STRMAX];
   char cache[MAXCACHESIZE];
   ssize_t cachebytes;
   long curtime;
@@ -178,6 +179,7 @@ int get_exec_output(struct extensible *ex)
 #endif
 
 #ifdef EXCACHETIME
+  sprintf(cachefile, "%s/%s", PERSISTENT_DIRECTORY,CACHEFILE);
   curtime = time(NULL);
   if (curtime > (cachetime + EXCACHETIME) ||
       strcmp(ex->command, lastcmd) != 0) {
@@ -252,9 +254,9 @@ int get_exec_output(struct extensible *ex)
           return 0;
         }
 #ifdef EXCACHETIME
-        unlink(CACHEFILE);
+        unlink(cachefile);
 	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
-        if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
+        if ((cfd = open(cachefile,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus("open");
           cachetime = 0;
           return 0;
@@ -302,7 +304,7 @@ int get_exec_output(struct extensible *ex)
   else {
       ex->result = lastresult;
   }
-  if ((cfd = open(CACHEFILE,O_RDONLY)) < 0) {
+  if ((cfd = open(cachefile,O_RDONLY)) < 0) {
     setPerrorstatus("open");
     return 0;
   }
