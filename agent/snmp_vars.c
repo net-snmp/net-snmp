@@ -97,6 +97,18 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
+/* mib clients are passed a pointer to a oid buffer.  Some mib clients
+ * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
+ * before they determine if they really need to send results back out
+ * using it.  If the master agent determined that the client was not the
+ * right one to talk with, it will use the same oid buffer to pass to the
+ * rest of the clients, which may not longer be valid.  This should be
+ * fixed in all clients rather than the master.  However, its not a
+ * particularily easy bug to track down so this saves debugging time at
+ * the expense of a few memcpy's.
+ */
+#define MIB_CLIENTS_ARE_EVIL
+ 
 extern struct subtree *subtrees;
 int subtree_size;
 int subtree_malloc_size;
@@ -218,6 +230,10 @@ search_subtree_vars(struct subtree *tp,
     int			result;
     oid 		*suffix;
     size_t		suffixlen;
+#ifdef MIB_CLIENTS_ARE_EVIL
+    oid			save[MAX_OID_LEN];
+    size_t		savelen = 0;
+#endif
 
 	    if ( tp->variables == NULL )
 		return NULL;
@@ -256,8 +272,18 @@ search_subtree_vars(struct subtree *tp,
 		    cvp->acl = vp->acl;
 		    cvp->findVar = vp->findVar;
                     *write_method = NULL;
+#ifdef MIB_CLIENTS_ARE_EVIL
+                    memcpy(save, name, *namelen);
+                    savelen = *namelen;
+#endif
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 						  len, write_method);
+#ifdef MIB_CLIENTS_ARE_EVIL
+                    if (access == NULL) {
+                      memcpy(name, save, savelen);
+                      *namelen = savelen;
+                    }
+#endif
 		    if (*write_method)
 			*acl = cvp->acl;
                     /* check for permission to view this part of the OID tree */
