@@ -264,13 +264,12 @@ usage(char *prog)
     printf("  -D\t\t\tturn on debugging output\n");
     printf("  -f\t\t\tdo not fork from the shell\n");
 #if HAVE_UNISTD_H
-    printf
-        ("  -g GID\t\tchange to this numeric gid after opening\n\t\t\t  transport endpoints\n");
+    printf("  -g GID\t\tchange to this numeric gid after opening\n"
+	   "\t\t\t  transport endpoints\n");
 #endif
     printf("  -h, --help\t\tdisplay this usage message\n");
     printf("  -H\t\t\tdisplay configuration file directives understood\n");
-    printf
-        ("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
+    printf("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
     printf("\t\t\t  (run snmpd with -Dmib_init for a list)\n");
     printf("  -l FILE\t\tprint warnings/messages to FILE\n");
 #ifdef LOGFILE
@@ -281,20 +280,18 @@ usage(char *prog)
     printf("  -L\t\t\tprint warnings/messages to stdout/err\n");
     printf("  -P FILE\t\tstore process id in FILE\n");
     printf("  -q\t\t\tprint information in a more parsable format\n");
-    printf
-        ("  -r\t\t\tdo not exit if files only accessible to root\n\t\t\t  cannot be opened\n");
+    printf("  -r\t\t\tdo not exit if files only accessible to root\n"
+	   "\t\t\t  cannot be opened\n");
 #ifdef WIN32
     printf("  -register\t\tregister as a Windows service\n");
     printf("  \t\t\t  (followed by the startup parameter list)\n");
-    printf
-        ("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
+    printf("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
 #endif
     printf("  -s\t\t\tlog warnings/messages to syslog\n");
     printf("  -S d|i|0-7\t\tset syslog facility to LOG_DAEMON (d), LOG_INFO (i)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_DAEMON)\n");
-    printf("  -s\t\t\tlog warnings/messages to syslog\n");
 #if HAVE_UNISTD_H
-    printf
-        ("  -u UID\t\tchange to this uid (numeric or textual) after\n\t\t\t  opening transport endpoints\n");
+    printf("  -u UID\t\tchange to this uid (numeric or textual) after\n"
+	   "\t\t\t  opening transport endpoints\n");
 #endif
 #ifdef WIN32
     printf("  -unregister\t\tunregister as a Windows service\n");
@@ -305,8 +302,8 @@ usage(char *prog)
     printf("  -x ADDRESS\t\tuse ADDRESS as AgentX address\n");
 #endif
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    printf
-        ("  -X\t\t\trun as an AgentX subagent rather than as an\n\t\t\t  SNMP master agent\n");
+    printf("  -X\t\t\trun as an AgentX subagent rather than as an\n"
+	   "\t\t\t  SNMP master agent\n");
 #endif
 
     printf("\n");
