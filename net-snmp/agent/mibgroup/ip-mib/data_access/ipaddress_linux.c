@@ -13,17 +13,19 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
-static int _get_interface_count(int sd, struct ifconf * ifc);
-static void _print_flags(short flags);
+#include "ipaddress_ioctl.h"
 
 /**
+ *
+ * @retval  0 no errors
+ * @retval !0 errors
  */
 int
 netsnmp_access_ipaddress_container_arch_load(netsnmp_container *container)
 {
     int rc = 0, idx_offset = 0;
 
-    rc = netsnmp_access_ipaddress_container_ioctl_load_v4(container, idx_offset);
+    rc = _netsnmp_access_ipaddress_container_ioctl_load_v4(container, idx_offset);
     if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER;
         netsnmp_access_ipaddress_container_free(container, flags);
@@ -31,7 +33,7 @@ netsnmp_access_ipaddress_container_arch_load(netsnmp_container *container)
     }
 
 #if defined (INET6)
-    idx_offset += rc;
+    idx_offset = rc;
 
     rc = _load_v6(container, idx_offset);
     if(rc < 0) {
@@ -57,27 +59,18 @@ _load_v6(netsnmp_container *container, int idx_offset)
 {
     FILE           *in;
     char            line[80], addr[33], if_name[9];
-#define PROCFILE "/proc/net/if_inet6"
-
-#define IPV6_ADDR_ANY           0x0000U
-#define IPV6_ADDR_LOOPBACK      0x0010U
-#define IPV6_ADDR_LINKLOCAL     0x0020U
-#define IPV6_ADDR_SITELOCAL     0x0040U
-#define IPV6_ADDR_COMPATv4      0x0080U
-    
-    u_char *buf;
-    int if_index, pfx_len, scope, flags, rc, in_len, out_len;
+    u_char          *buf;
+    int             if_index, pfx_len, scope, flags, rc, in_len, out_len;
     netsnmp_ipaddress_entry *entry;
     
     assert(NULL != container);
 
+#define PROCFILE "/proc/net/if_inet6"
     if (!(in = fopen(PROCFILE, "r"))) {
         snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
         return -2;
     }
 
-    snmp_log(LOG_ERR,"\n\n*** proc belongs in ipaddress_linux.c, not ioctl ***\n\n\n");
-    
     /*
      * address index prefix_len scope status if_name
      */
@@ -117,7 +110,20 @@ _load_v6(netsnmp_container *container, int idx_offset)
 
         entry->ns_ia_index = ++idx_offset;
 
+        /*
+         */
+#ifndef NETSNMP_USE_IOCTL_IFINDEX
+        /*
+         * there is an iotcl to get an ifindex, but I'm not sure that
+         * it has the correct characteristics required to be the actual
+         * ifIndex for the mib, so we'll use the netsnmp interface method
+         * (which is based on the interface name).
+         */
+        entry->if_index = netsnmp_access_interface_index_find(ifrp->ifr_name);
+#else
         entry->if_index = if_index;
+#endif
+
         entry->ia_flags = flags;
 
         entry->ia_type = 1; /* assume unicast? */
@@ -140,6 +146,9 @@ _load_v6(netsnmp_container *container, int idx_offset)
         CONTAINER_INSERT(container, entry);
     }
 
-    return rc;
+    if(rc<0)
+        return rc;
+
+    return idx_offset;
 }
 #endif
