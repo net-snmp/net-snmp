@@ -87,6 +87,12 @@ size_t          snmptrap_oid_len;
 size_t          snmptrapenterprise_oid_len;
 size_t          sysuptime_oid_len;
 
+#define SNMPV2_COMM_OBJS_PREFIX	SNMP_OID_SNMPMODULES,18,1
+oid             agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
+oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
+size_t          agentaddr_oid_len;
+size_t          community_oid_len;
+
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
 #define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
@@ -117,11 +123,13 @@ char           *snmp_trapcommunity = NULL;
 void
 init_traps(void)
 {
-    enterprisetrap_len = OID_LENGTH(objid_enterprisetrap);
+    enterprisetrap_len  = OID_LENGTH(objid_enterprisetrap);
     trap_version_id_len = OID_LENGTH(trap_version_id);
-    snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
+    snmptrap_oid_len    = OID_LENGTH(snmptrap_oid);
     snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-    sysuptime_oid_len = OID_LENGTH(sysuptime_oid);
+    sysuptime_oid_len   = OID_LENGTH(sysuptime_oid);
+    agentaddr_oid_len   = OID_LENGTH(agentaddr_oid);
+    community_oid_len   = OID_LENGTH(community_oid);
 }
 
 static void
@@ -315,6 +323,90 @@ convert_v2_to_v1(netsnmp_variable_list * vars, netsnmp_pdu *template_pdu)
      *    Remove uptime/trapOID varbinds from 'vars' list
      */
 
+}
+
+netsnmp_variable_list *
+convert_v1_to_v2(netsnmp_pdu *pdu)
+{
+    netsnmp_variable_list
+        *uptime_var     = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+    netsnmp_variable_list
+        *snmptrap_var   = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+    netsnmp_variable_list
+        *agentaddr_var  = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+    netsnmp_variable_list
+        *community_var  = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+    netsnmp_variable_list
+        *enterprise_var = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+    netsnmp_variable_list *v2_vars, *vptr;
+    oid enttrapoid[MAX_OID_LEN];
+    int enttrap_len;
+
+    if (!pdu)
+        return NULL;
+
+    v2_vars = snmp_clone_varbind( pdu->variables );
+
+    /*
+     * Variables to be added to the beginning of the list
+     */
+    snmp_set_var_objid( uptime_var, sysuptime_oid, sysuptime_oid_len );
+    snmp_set_var_typed_value( uptime_var, ASN_TIMETICKS,
+                              (char*)&pdu->time, sizeof(pdu->time));
+
+    snmp_set_var_objid( snmptrap_var, snmptrap_oid, snmptrap_oid_len );
+    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+        enttrap_len = pdu->enterprise_length;
+        memcpy(enttrapoid, pdu->enterprise, enttrap_len * sizeof(oid));
+	if (enttrapoid[enttrap_len - 1] != 0)
+	    enttrapoid[enttrap_len++] = 0;
+	enttrapoid[enttrap_len++] = pdu->specific_type;
+        snmp_set_var_typed_value( snmptrap_var, ASN_OBJECT_ID,
+                                  (char*)enttrapoid, enttrap_len * sizeof(oid));
+    } else {
+        snmp_set_var_typed_value( snmptrap_var, ASN_OBJECT_ID,
+                                  (char*)cold_start_oid,
+                                  sizeof(cold_start_oid));
+	snmptrap_var->name[9] = pdu->trap_type+1;
+    }
+
+    /*
+     * Variables to be added to the end of the list
+     */
+    snmp_set_var_objid( agentaddr_var, agentaddr_oid,
+                                       agentaddr_oid_len );
+    snmp_set_var_typed_value( agentaddr_var, ASN_IPADDRESS,
+                              (char*)pdu->agent_addr, 4);
+
+    snmp_set_var_objid( community_var, community_oid,
+                                       community_oid_len );
+    snmp_set_var_typed_value( community_var, ASN_OCTET_STR,
+                              pdu->community, pdu->community_len);
+
+    snmp_set_var_objid( enterprise_var, snmptrapenterprise_oid,
+                                        snmptrapenterprise_oid_len );
+    snmp_set_var_typed_value( enterprise_var, ASN_OBJECT_ID,
+                              (char*)pdu->enterprise,
+                              pdu->enterprise_length * sizeof(oid) );
+
+    /*
+     * Link everything together and return this list
+     */
+    uptime_var->next_variable   = snmptrap_var;
+    snmptrap_var->next_variable = v2_vars;
+    if (v2_vars) {
+        for (vptr = v2_vars; vptr->next_variable == NULL;
+                             vptr = vptr->next_variable )
+            ;
+    } else {
+        vptr = snmptrap_var;
+    }
+    /* XXX - only if not already present */
+    vptr->next_variable = agentaddr_var;
+    agentaddr_var->next_variable = community_var;
+    community_var->next_variable = enterprise_var;
+
+    return uptime_var;
 }
 
 void
