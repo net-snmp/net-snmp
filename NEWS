@@ -1,6 +1,23 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.0.4*
+
+  Mainly a bug fix release:
+    - fixed another 32/64 bit problem:  returned exit codes on alphas
+      were incorrect.
+    - many system errors (e.g., no mem) were causing the agent to
+      return error flags when it really was clueless.  
+    - found a memory leak in the CMU routing table implementation.
+    - More configure cleanups, mostly for Solaris.
+    - snmp_open calls getservbyname only once now, at the request of Gary
+      Hayward <gah@dirac.bellcore.com>.  Mainly for Perl users.
+
+  local/snmpcheck has drastically improved, and now requires Tk-b8.
+
+  You can now mung with all sorts of numbers in config.h and the
+  mib.txt file will be mostly built from it if you change my defaults.
+
 *3.0.3*
 
   *** default location for .conf and mib.txt files moved to
