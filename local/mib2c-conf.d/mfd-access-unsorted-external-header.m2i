@@ -47,7 +47,7 @@ $example_start
  *  definitions are used in examples later on.
  *
  */
-typedef struct ${table}_loop_ctx_s {
+typedef struct ${table}_loop_context_s {
 @if $m2c_include_examples == 1@
     /*
      * this example code is based on a data source that is a
@@ -58,7 +58,7 @@ typedef struct ${table}_loop_ctx_s {
     char line[MAX_LINE_SIZE];
     ${table}_ctx *ctx; /* temp context */
 @end@
-} ${table}_loop_ctx;
+} ${table}_loop_context;
 $example_end
 
 /*
@@ -67,20 +67,20 @@ $example_end
  * NOTE: DO NOT ADD ITEMS TO THIS STRUCTURE!
  */
 typedef struct ${table}_ref_loop_s {
-    ${table}_loop_ctx *itr_ctx;
+    ${table}_loop_context *itr_ctx;
 } ${table}_ref_loop;
 
-int ${table}_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+int ${table}_loop_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                     ${table}_ref_ctx *ctx_ref);
-int ${table}_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+int ${table}_loop_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                         ${table}_ref_ctx *ctx_ref);
-int ${table}_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+int ${table}_loop_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                         ${table}_ref_ctx *ctx_ref);
-int ${table}_save_position($mfd_aue_param_decl,
+int ${table}_loop_save_position($mfd_aue_param_decl,
                        ${table}_ref_loop *loop_ref,
                        ${table}_ref_loop *loop_save, int reuse);
-int ${table}_cleanup_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref);
-int ${table}_init_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref);
+int ${table}_loop_cleanup_context( $mfd_aue_param_decl, ${table}_ref_loop *ref);
+int ${table}_loop_init_context( $mfd_aue_param_decl, ${table}_ref_loop *ref);
 
 ##
 ########################################################################

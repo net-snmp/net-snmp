@@ -83,7 +83,7 @@ typedef struct ${context}_ctx_s {
     netsnmp_index        oid_idx;
     oid                  oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
     
-    ${context}_idx              tbl_idx;
+    ${context}_mib_index        tbl_idx;
     
     ${context}_data             data;
 @   if $m2c_table_settable@

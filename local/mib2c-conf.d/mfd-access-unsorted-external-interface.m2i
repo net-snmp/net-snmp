@@ -9,66 +9,20 @@
 ########################################################################
 @include mfd-access-unsorted-external-setup.m2i@
 ##
-/**
- * @internal
- * convert the index component stored in the context to an oid
- */
-static int
-_${table}_index2oid($mfd_aue_wrap_param_decl,
-                   ${table}_ref_loop *loop_ref,
-                   ${table}_ref_ctx *ctx_ref)
-{
-    /** xxx-rks: do this w/out varbind clone/free? */
-    static netsnmp_variable_list *idx_vars = NULL;
-
-    DEBUGMSGT(("mfd:table:trace:${name}",">%s\n",__FUNCTION__));
-
-    if(NULL == idx_vars) {
-        idx_vars = snmp_clone_varbind($mfd_aue_wrap_param->tbl_inf.indexes);
-        if(NULL == idx_vars)
-            return SNMPERR_GENERR;
-    }
-    else {
-        /*
-         * free memory from last time
-         */
-        snmp_reset_var_buffers( idx_vars );
-    }
-
-
-@    eval $mfd_temp = "idx_vars"@
-@    foreach $node index@
-@        include m2c_setup_node.m2i@
-        /* $m2c_node_summary */
-@        if $m2c_node_needlength == 1@
-    snmp_set_var_value($mfd_temp, (u_char*)&ctx_ref->ctx->tbl_idx.$node,
-                       ctx_ref->ctx->tbl_idx.${node}_len);
-@        else@
-    snmp_set_var_value($mfd_temp, (u_char*)&ctx_ref->ctx->tbl_idx.$node,
-                       sizeof(ctx_ref->ctx->tbl_idx.$node));
-@        end@
-
-@        eval $mfd_temp = "${mfd_temp}->next_variable"@
-@    end@ # for each column
-
-    return build_oid_noalloc(ctx_ref->ctx->oid_tmp, MAX_OID_LEN,
-                      &ctx_ref->ctx->oid_idx.len,
-                      NULL, 0, idx_vars);
-}
 
 /**
  * @internal
- * wrapper around init_loop_ctx
+ * wrapper around init_context
  */
 static int
-_${table}_init_loop_ctx( $mfd_aue_wrap_param_decl,
+_${table}_loop_init_context( $mfd_aue_wrap_param_decl,
                         ${table}_ref_loop *ref)
 {
    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
    netsnmp_assert(NULL != $mfd_aue_wrap_param);
    
-   return ${table}_init_loop_ctx($mfd_aue_wrap_param->user_ctx, ref);
+   return ${table}_loop_init_context($mfd_aue_wrap_param->user_ctx, ref);
 }
 
 /**
@@ -76,12 +30,12 @@ _${table}_init_loop_ctx( $mfd_aue_wrap_param_decl,
  * wrapper around clean up a loop reference
  */
 static int
-_${table}_cleanup_loop_ctx( $mfd_aue_wrap_param_decl,
+_${table}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
                             ${table}_ref_loop *ref)
 {
    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-   return ${table}_cleanup_loop_ctx($mfd_aue_wrap_param->user_ctx, ref);
+   return ${table}_loop_cleanup_context($mfd_aue_wrap_param->user_ctx, ref);
 }
 
 /**
@@ -89,12 +43,12 @@ _${table}_cleanup_loop_ctx( $mfd_aue_wrap_param_decl,
  * wrapper around save position
  */
 static int
-_${table}_save_position( $mfd_aue_wrap_param_decl, ${table}_ref_loop *ref,
+_${table}_loop_save_position( $mfd_aue_wrap_param_decl, ${table}_ref_loop *ref,
                          ${table}_ref_loop *ref_copy, int reuse)
 {
    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-   return ${table}_save_position($mfd_aue_wrap_param->user_ctx, ref,
+   return ${table}_loop_save_position($mfd_aue_wrap_param->user_ctx, ref,
                                  ref_copy, reuse);
 }
 
@@ -103,20 +57,20 @@ _${table}_save_position( $mfd_aue_wrap_param_decl, ${table}_ref_loop *ref,
  * wrapper around user get_first to setup the index oid
  */
 static int
-_${table}_get_first_wrapper($mfd_aue_wrap_param_decl,
+_${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
                            ${table}_ref_loop * loop_ref,
                            ${table}_ref_ctx * ctx_ref)
 {
     int rc;
     DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_get_first($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
+    rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
 
     /*
      * convert index to OID
      */
     if(SNMPERR_SUCCESS == rc )
-        rc = _${table}_index2oid($mfd_aue_wrap_param, loop_ref, ctx_ref);
+        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,&ctx_ref->ctx->tbl_idx);
 
     return rc;
 }
@@ -126,20 +80,20 @@ _${table}_get_first_wrapper($mfd_aue_wrap_param_decl,
  * wrapper around user get_next to setup the index oid
  */
 static int
-_${table}_get_next_wrapper($mfd_aue_wrap_param_decl,
+_${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
                           ${table}_ref_loop * loop_ref,
                           ${table}_ref_ctx * ctx_ref)
 {
     int rc;
     DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-    rc = ${table}_get_next($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
+    rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
 
     /*
      * convert index to OID
      */
     if(SNMPERR_SUCCESS == rc )
-        rc = _${table}_index2oid($mfd_aue_wrap_param, loop_ref, ctx_ref);
+        rc = ${table}_index_to_oid(&ctx_ref->ctx->oid_idx,&ctx_ref->ctx->tbl_idx);
 
     return rc;
 }
@@ -149,7 +103,7 @@ _${table}_get_next_wrapper($mfd_aue_wrap_param_decl,
  * get data wrapper to allocate context for the user
  */
 static int
-_${table}_get_data_wrapper($mfd_aue_wrap_param_decl,
+_${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
                            ${table}_ref_loop * loop_ref,
                            ${table}_ref_ctx * ctx_ref)
 {
@@ -158,7 +112,7 @@ _${table}_get_data_wrapper($mfd_aue_wrap_param_decl,
 
     DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
 
-    return ${table}_get_data($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
+    return ${table}_loop_get_data($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
 }
 
 /**
@@ -177,17 +131,17 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
         /** compare */
         NULL,
         /** get_first */
-        (Netsnmp_Iterator_Loop_Key*)_${table}_get_first_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${table}_loop_get_first_wrapper,
         /** get_next */
-        (Netsnmp_Iterator_Loop_Key*)_${table}_get_next_wrapper,
+        (Netsnmp_Iterator_Loop_Key*)_${table}_loop_get_next_wrapper,
         /** get_data */
-        (Netsnmp_Iterator_Loop_Data*)_${table}_get_data_wrapper,
+        (Netsnmp_Iterator_Loop_Data*)_${table}_loop_get_data_wrapper,
         /** save_pos */
-        (Netsnmp_Iterator_Ctx_Dup*)_${table}_save_position,
-        /** init_loop_ctx */
-        (Netsnmp_Iterator_Ctx*)_${table}_init_loop_ctx,
-        /** cleanup_loop_ctx */
-        (Netsnmp_Iterator_Ctx*)_${table}_cleanup_loop_ctx,
+        (Netsnmp_Iterator_Ctx_Dup*)_${table}_loop_save_position,
+        /** init_context */
+        (Netsnmp_Iterator_Ctx*)_${table}_loop_init_context,
+        /** cleanup_context */
+        (Netsnmp_Iterator_Ctx*)_${table}_loop_cleanup_context,
         /** free_user_ctx */
         NULL,
         /** sorted */
