@@ -98,7 +98,7 @@ struct subid_s {
     char *label;
 };
 
-#define MAXTC   256
+#define MAXTC   1024
 struct tc {     /* textual conventions */
     int type;
     int modid;
@@ -111,6 +111,7 @@ int Line = 1;
 char *File;
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
+static int mib_errors = 1;
 static int anonymous = 0;
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
 static int mib_comment_term = 1; /* 0=strict, 1=EOL terminated */
@@ -300,6 +301,7 @@ struct module_compatability module_map[] = {
 	{ (char*)"RFC1271-MIB",	(char*)"RMON-MIB",	NULL,	0},
 	{ (char*)"RFC1286-MIB",	(char*)"SOURCE-ROUTING-MIB",	(char*)"dot1dSr", 7},
 	{ (char*)"RFC1286-MIB",	(char*)"BRIDGE-MIB",	NULL,	0},
+	{ (char*)"RFC1315-MIB",	(char*)"FRAME-RELAY-DTE-MIB",	NULL,	0},
 	{ (char*)"RFC1316-MIB",	(char*)"CHARACTER-MIB", NULL,	0},
 };
 #define MODULE_NOT_FOUND	0
@@ -349,13 +351,13 @@ static void print_error (char *, char *, int);
 #ifndef xmalloc
 static void *xmalloc (size_t);
 #endif
-static void xmalloc_stats (FILE *);
 #ifndef xstrdup
 static char *xstrdup (char *);
 #endif
 static void free_tree (struct tree *);
 static void free_node (struct node *);
 #ifdef TEST
+static void xmalloc_stats (FILE *);
 static void print_nodes (FILE *, struct node *);
 #endif
 static void build_translation_table (void);
@@ -388,6 +390,11 @@ static void print_parent_oid (FILE *, struct tree *);
 static void print_parent_label (FILE *, struct tree *);
 static struct node *merge_parse_objectid (struct node *, FILE *, char *);
 
+void snmp_set_mib_errors(int err)
+{
+    mib_errors = err;
+}
+
 void snmp_set_mib_warnings(int warn)
 {
     mib_warnings = warn;
@@ -413,9 +420,11 @@ void snmp_mib_toggle_options_usage(char *lead, FILE *outf) {
   fprintf(outf, "%s    u: %sallow the usage of underlines in mib symbols.\n",
           lead, ((mib_parse_label)?"dis":""));
   fprintf(outf, "%s    c: %sallow the usage of \"--\" to terminate comments.\n",
-          lead, ((mib_comment_term)?"dis":""));
+          lead, ((mib_comment_term)?"":"dis"));
   fprintf(outf, "%s    d: %ssave the descriptions of the mib objects.\n",
           lead, ((save_mib_descriptions)?"don't ":""));
+  fprintf(outf, "%s    e: Disable mib errors of MIB symbols conflicts\n",
+          lead);
   fprintf(outf, "%s    w: Enable mib warnings of MIB symbols conflicts\n",
           lead);
   fprintf(outf, "%s    W: Enable detailed warnings of MIB symbols conflicts\n",
@@ -432,6 +441,10 @@ char *snmp_mib_toggle_options(char *options) {
 
         case 'c':
           mib_comment_term = !mib_comment_term;
+          break;
+           
+        case 'e':
+          mib_errors = !mib_errors;
           break;
            
         case 'w':
@@ -595,12 +608,14 @@ static void *xcalloc (size_t cnt,
     return ss;
 }
 
+#ifdef TEST
 static void xmalloc_stats(FILE *fp)
 {
 #ifndef xmalloc
     fprintf (fp, "xmalloc: %ld calls, %ld bytes, %ld errors\n", xmalloc_calls, xmalloc_bytes, xmalloc_errors);
 #endif
 }
+#endif
 
 static struct node *
 alloc_node(int modid)
@@ -968,9 +983,9 @@ merge_anon_children(struct tree *tp1,
                 }
 		else if ( !label_compare( child1->label, child2->label) ) {
 	            if (mib_warnings)
-		        fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
+		        fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
 			        tp2->label, child1->subid,
-                                child1->label, child2->label);
+                                child1->label, child2->label, File);
                     continue;
                 }
                 else {
@@ -1081,8 +1096,8 @@ do_subtree(struct tree *root,
                 anon_tp = tp;	/* Need to merge these two trees later */
             }
 	    else if (mib_warnings)
-		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
-			root->label, np->subid, tp->label, np->label);
+		fprintf (stderr, "Warning: %s.%ld is both %s and %s (%s)\n",
+			root->label, np->subid, tp->label, np->label, File);
 	}
         tp = (struct tree *) xcalloc(1, sizeof(struct tree));
         if (tp == NULL) return;
@@ -1143,8 +1158,8 @@ do_subtree(struct tree *root,
             else {
                 /* Uh?  One of these two should have been anonymous! */
 	        if (mib_warnings)
-		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s\n",
-			tp->label, anon_tp->label);
+		    fprintf (stderr, "Warning: expected anonymous node (either %s or %s) in %s\n",
+			tp->label, anon_tp->label, File);
             }
 		/*
 		 * The new node is no longer needed
@@ -1196,8 +1211,9 @@ static void do_linkup(struct module *mp,
 	    continue;
 	tp = find_tree_node( mip->label, mip->modid );
 	if (!tp) {
-	    fprintf(stderr, "Did not find '%s' in module %s\n",
-		mip->label, module_name(mip->modid, modbuf));
+	    if (mip->modid != -1)
+		fprintf(stderr, "Did not find '%s' in module %s (%s)\n",
+			mip->label, module_name(mip->modid, modbuf), File);
 	    continue;
 	}
 	do_subtree( tp, &np );
@@ -1223,8 +1239,9 @@ static void do_linkup(struct module *mp,
 		onp = orphan_nodes = nbuckets[i];
 	    nbuckets[i] = NULL;
 	    while (onp) {
-		fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
-			mp->name, onp->label, onp->parent, onp->subid);
+		if (mib_warnings)
+		    fprintf (stderr, "Unlinked OID in %s: %s ::= { %s %ld }\n",
+			    mp->name, onp->label, onp->parent, onp->subid);
 		np = onp;
 		onp = onp->next;
 	    }
@@ -1387,7 +1404,7 @@ parse_objectid(FILE *fp,
                 np->subid = nop->subid;
             else
                 print_error("Warning: This entry is pretty silly",
-                                np->label, CONTINUE);
+			    np->label, CONTINUE);
 
             /* set up next entry */
             if (oldnp) oldnp->next = np;
@@ -2252,16 +2269,21 @@ read_module_replacements(char *name)
     struct module_compatability *mcp;
 
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !label_compare( mcp->old_module, name )) {
-	if (mib_warnings)
-	    fprintf (stderr, "Loading replacement module %s\n", mcp->new_module);
-	(void)read_module( mcp->new_module );
-      }
+	if ( !label_compare( mcp->old_module, name )) {
+	    if (mib_warnings)
+		fprintf (stderr, "Loading replacement module %s for %s (%s)\n",
+			mcp->new_module, name, File);
+	    (void)read_module( mcp->new_module );
+	    return;
+	}
     }
+    if (mib_errors) 
+	print_error("Cannot find module", name, CONTINUE);
+
 }
 
 static void
-read_import_replacements(char *new_module_name,
+read_import_replacements(char *old_module_name,
 			 char *node_identifier)
 {
     struct module_compatability *mcp;
@@ -2270,7 +2292,7 @@ read_import_replacements(char *new_module_name,
 	 * Look for matches first
 	 */
     for ( mcp=module_map_head ; mcp; mcp=mcp->next ) {
-      if ( !label_compare( mcp->old_module, new_module_name )) {
+      if ( !label_compare( mcp->old_module, old_module_name )) {
 
 	if (	/* exact match */
 	  	  ( mcp->tag_len==0 &&
@@ -2282,8 +2304,8 @@ read_import_replacements(char *new_module_name,
 	   ) {
 
 	    if (mib_warnings)
-	        fprintf (stderr, "Loading replacement module %s (for %s)\n",
-			mcp->new_module, node_identifier);
+	        fprintf (stderr, "Importing %s from replacement module %s instead of %s (%s)\n",
+			node_identifier, mcp->new_module, old_module_name, File);
 	    (void)read_module( mcp->new_module );
 	    return;	/* finished! */
         }
@@ -2293,7 +2315,7 @@ read_import_replacements(char *new_module_name,
 	/*
 	 * If no exact match, load everything relevant
 	 */
-    read_module_replacements( new_module_name );
+    read_module_replacements( old_module_name );
 }
 
 
@@ -2333,8 +2355,8 @@ read_module_internal (char *name)
 	    return MODULE_LOADED_OK;
 	}
 
-    if (mib_warnings)
-      fprintf(stderr, "Module %s not found\n", name);
+    if (mib_warnings > 1)
+	fprintf(stderr, "Module %s not found\n", name);
     return MODULE_NOT_FOUND;
 }
 
@@ -2408,8 +2430,9 @@ new_module (char *name,
 	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
 			/* Not the same file */
 	    if (label_compare(mp->file, file)) {
-                fprintf(stderr, "Warning: Module %s in both %s and %s\n",
-			name, mp->file, file);
+		if (mib_warnings)
+		    fprintf(stderr, "Warning: Module %s in both %s and %s\n",
+			    name, mp->file, file);
 
 			/* Use the new one in preference */
 		free(mp->file);
@@ -2485,7 +2508,9 @@ parse(FILE *fp,
 		np = root = NULL;
 	    }
             state = BETWEEN_MIBS;
+#ifdef TEST
             if (mib_warnings) xmalloc_stats (stderr);
+#endif
             continue;
         case IMPORTS:
             parse_imports( fp );
