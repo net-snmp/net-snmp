@@ -276,7 +276,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     if ((status = check_access(pdu)) != 0) {
         /* access control setup is incorrect */
-        if (asp->pdu->version != SNMP_VERSION_1) {
+       send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+        if (asp->pdu->version != SNMP_VERSION_1 && asp->pdu->version != SNMP_VERSION_2c) {
             asp->pdu->errstat = SNMP_ERR_AUTHORIZATIONERROR;
             asp->pdu->command = SNMP_MSG_RESPONSE;
             snmp_increment_statistic(STAT_SNMPOUTPKTS);
