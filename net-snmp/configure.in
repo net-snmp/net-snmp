@@ -846,28 +846,6 @@ AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv vsnprintf)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(rpmGetPath)
 
-dnl
-dnl Check for /dev/random as well
-dnl
-
-AC_CACHE_CHECK(if /dev/random exists,ac_cv_HAVE_DEV_RANDOM,
-[ac_cv_HAVE_DEV_RANDOM="no"
-dnl First determine if test expects a -f or a -c (character device (SYSV))
-
-if test -c /dev/null; then
-  CFLAG="-c"
-elif test -f /dev/null; then
-  CFLAG="-f"
-else
-  dnl fall back
-  CFLAG="-f"
-fi
-if test -f $i -o $CFLAG /dev/random; then
-  ac_cv_HAVE_DEV_RANDOM="yes"
-  AC_DEFINE(HAVE_DEV_RANDOM)
-fi
-])
-
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist)
 dnl BSDi2 functions differ

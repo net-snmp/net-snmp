@@ -188,9 +188,6 @@
 /* define if your compiler (processor) defines __FUNCTION__ for you */
 #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 
-/* define if you have /dev/random */
-#undef HAVE_DEV_RANDOM
-
 /* KMT is not very portable and requires these typedefs to be in
    existance to use their header files */
 #undef u_int8_t
