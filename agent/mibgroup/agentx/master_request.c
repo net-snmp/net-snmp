@@ -46,7 +46,7 @@
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
 
-#define MAX_VARS	16
+#define MAX_VARS	64
 
 struct ax_variable_list {
     struct agent_snmp_session	*asp;
