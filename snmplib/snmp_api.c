@@ -6536,7 +6536,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf_ptr = value;
             value_len = strlen(value);
         }
-        if (!_check_range(tp, itmp, &result, "Bad string length"))
+        if (!_check_range(tp, value_len, &result, "Bad string length"))
             break;
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);
