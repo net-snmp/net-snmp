@@ -133,7 +133,7 @@ netsnmp_monitor_init(void)
     callback_pending_list = NULL;
     callback_ready_list = NULL;
 
-    monitored_objects = netsnmp_initialize_oid_array(sizeof(void));
+    monitored_objects = netsnmp_initialize_oid_array(sizeof(void*));
     if (NULL != monitored_objects)
         need_init = 0;
 
