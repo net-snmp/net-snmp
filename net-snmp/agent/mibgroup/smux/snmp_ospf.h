@@ -7,7 +7,8 @@
 
 config_require(smux/smux)
 
-extern u_char	*var_ospf();
+u_char  *var_ospf __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+
 
 #define ospfRouterId		0
 #define ospfAdminStat		1

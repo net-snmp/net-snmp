@@ -1,18 +1,18 @@
---------------------Configuration: snmptranslate - Win32 Debug--------------------
-Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\snmptranslate\snmptranslate.dsp", at root.
+--------------------Configuration: snmptranslate - Win32 Release--------------------
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.5.1.pre2\win32\snmptranslate\snmptranslate.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
-			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmptranslate.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
-			"Win32 Resource Compiler" with flags "/l 0x409 /d "_DEBUG" "
-			"Browser Database Maker" with flags "/nologo /o"Debug/snmptranslate.bsc" "
-			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmptranslate.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmptranslate.exe" /pdbtype:sept /libpath:"../lib" "
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmptranslate.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Release/snmptranslate.bsc" "
+			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmptranslate.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmptranslate.exe" /libpath:"..\lib" "
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSP50C1.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmptranslate.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmptranslate.exe" /pdbtype:sept /libpath:"../lib" 
-".\Debug\snmptranslate.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSP50C1.TMP" 
+Creating temp file "c:\windows\TEMP\RSP1234.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmptranslate.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmptranslate.exe" /libpath:"..\lib" 
+".\Release\snmptranslate.obj">
+Creating command line "link.exe @c:\windows\TEMP\RSP1234.TMP" 
 Linking...
 
 

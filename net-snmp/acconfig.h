@@ -24,6 +24,13 @@
 
 @TOP@
 
+/* comment the next line if you are compiling with libsnmp.h 
+   and are not using the UC-Davis SNMP library. */
+#define UCD_SNMP_LIBRARY 1
+
+/* comment the next line if you do not want SNMPv2 party-based auth. */
+#define USE_V2PARTY_PROTOCOL 1
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE "s/generic.h"
 
@@ -369,6 +376,12 @@
 
 /* define if you have librpm and libdb */
 #undef HAVE_LIBRPM
+
+/* define if you have gethostbyname */
+#undef HAVE_GETHOSTBYNAME
+
+/* define if you have getservbyname */
+#undef HAVE_GETSERVBYNAME
 
 /* Watch out for compilers that don't handle void properly. */
 #undef void

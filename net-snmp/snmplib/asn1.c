@@ -433,7 +433,7 @@ asn_parse_header(data, datalength, type)
       if (bufp == NULL)
         return NULL;
       header_len = bufp - data;
-      if (header_len + asn_length > *datalength){
+      if ((header_len + (int)asn_length) > *datalength){
         ERROR_MSG("asn length too long");
         return NULL;
       }
@@ -528,6 +528,7 @@ asn_parse_length(data, length)
 	    ERROR_MSG("we can't support data lengths that long");
 	    return NULL;
 	}
+	*length = 0;  /* protect against short lengths */
 	memmove(length, data + 1, (int)lengthbyte);
 	*length = ntohl(*length);
 	*length >>= (8 * ((sizeof(int)) - lengthbyte));
@@ -654,9 +655,12 @@ asn_parse_objid(data, datalength, type, objid, objidlength)
         } else if (subidentifier < 80) {
             objid[0] = 1;
             objid[1] = subidentifier - 40;
-        } else {
+        } else if (subidentifier < 120) {
             objid[0] = 2;
             objid[1] = subidentifier - 80;
+        } else {
+	    objid[1] = (subidentifier % 40);
+	    objid[0] = ((subidentifier - objid[1]) / 40);
         }
     }
 
@@ -982,7 +986,7 @@ asn_parse_unsigned_int64(data, datalength, type, cp, countersize)
 	bufp = asn_parse_length(bufp + 2, &asn_length);
         if (bufp == NULL)
             return NULL;
-        if (asn_length + (bufp - data) > *datalength){
+        if ((int)(asn_length + (bufp - data)) > *datalength){
             ERROR_MSG("overflow of message");
             return NULL;
         }
@@ -1159,7 +1163,7 @@ asn_parse_signed_int64(data, datalength, type, cp, countersize)
     bufp = asn_parse_length(bufp + 2, &asn_length);
     if (bufp == NULL)
       return NULL;
-    if (asn_length + (bufp - data) > *datalength){
+    if ((int)(asn_length + (bufp - data)) > *datalength){
       ERROR_MSG("overflow of message");
       return NULL;
     }
@@ -1287,7 +1291,7 @@ asn_parse_float(data, datalength, type, floatp, floatsize)
 	ERROR_MSG("bad length");
 	return NULL;
     }
-    if (asn_length + (bufp - data) > *datalength){
+    if ((int)(asn_length + (bufp - data)) > *datalength){
 	ERROR_MSG("overflow of message");
 	return NULL;
     }
@@ -1300,7 +1304,7 @@ asn_parse_float(data, datalength, type, floatp, floatsize)
 	bufp = asn_parse_length(bufp + 2, &asn_length);
         if (bufp == NULL)
             return NULL;
-        if (asn_length + (bufp - data) > *datalength){
+        if ((int)(asn_length + (bufp - data)) > *datalength){
             ERROR_MSG("overflow of message");
             return NULL;
         }
@@ -1406,7 +1410,7 @@ asn_parse_double(data, datalength, type, doublep, doublesize)
 	ERROR_MSG("bad length");
 	return NULL;
     }
-    if (asn_length + (bufp - data) > *datalength){
+    if ((int)(asn_length + (bufp - data)) > *datalength){
 	ERROR_MSG("overflow of message");
 	return NULL;
     }
@@ -1419,7 +1423,7 @@ asn_parse_double(data, datalength, type, doublep, doublesize)
 	bufp = asn_parse_length(bufp + 2, &asn_length);
         if (bufp == NULL)
             return NULL;
-        if (asn_length + (bufp - data) > *datalength){
+        if ((int)(asn_length + (bufp - data)) > *datalength){
             ERROR_MSG("overflow of message");
             return NULL;
         }

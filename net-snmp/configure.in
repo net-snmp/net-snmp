@@ -2,8 +2,9 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
-AC_ARG_WITH(cc,[  --with-cc=CC                    use CC to compile .],export CC=$with_cc)
-AC_ARG_WITH(cflags,[  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],export CFLAGS=$with_cflags)
+AC_ARG_WITH(cc,[  --with-cc=CC                    use CC to compile .],[CC=$with_cc;export CC])
+AC_ARG_WITH(cflags,[  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],[CFLAGS=$with_cflags; export CFLAGS])
+AC_ARG_WITH(ldflags,[  --with-ldflags=LDFLAGS          use LDFLAGS as linking time arguments.],[LIBS=$with_ldflags; export LIBS])
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_ENABLE(shared,[  --enable-shared                 Compile and install shared libraries.],with_shared="yes",with_shared="no")
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
@@ -28,8 +29,10 @@ AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without
 
 AC_ARG_WITH(libwrap,
 [  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
-    if test -d "$withval"; then
+    if test "x$withval" != "x" -a -d "$withval"; then
         LIBS="-L$withval -lwrap $LIBS"
+    elif test "x$withval" eq "xyes"; then
+	LIBS="-lwrap $LIBS"
     else
         LIBS="$withval $LIBS"
     fi
@@ -96,7 +99,7 @@ dnl
 AC_MSG_CHECKING(for system include file)
 changequote(, )
 filebase=$target_os
-while test "x$filebase" != "x$last" -a ! -f s/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/s/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -119,7 +122,7 @@ dnl second part, the CPU type.
 AC_MSG_CHECKING(for machine-type include file)
 changequote(, )
 filebase=$target_cpu
-while test "x$filebase" != "x$last" -a ! -f m/$filebase.h
+while test "x$filebase" != "x$last" -a ! -f $srcdir/m/$filebase.h
 do
     last=$filebase
     filebase=`echo $filebase | sed 's/[-._][^-._]*$//'`
@@ -376,11 +379,9 @@ while test "x$new_module_list" != "x"; do
 	    do
 	    if test ! -f $srcdir/$mibdir/$j.h; then
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
-	    fi
-	    if echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
+	    elif echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
 	      AC_MSG_WARN(mib module "$i" requires module "$j" but you told me to compile without it)
-	    fi
-	    if echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
+	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
 	    else
 	      new_list_two="$new_list_two $j"
@@ -404,8 +405,15 @@ while test "x$new_module_list" != "x"; do
       module_list_h="$module_list_h mibgroup/$i.h"
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
-	if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
-	    echo "  init_$i();" >> $mibdir/mib_module_inits.h
+        mnm=`echo $i | sed 's/.*\///;s/\.c$//;'`
+	if grep init_$mnm $srcdir/$mibdir/$i.c > /dev/null; then
+	    echo "  init_$mnm();" >> $mibdir/mib_module_inits.h
+	fi
+      fi
+      if test "x`echo $i | sed 's/\///g;'`" != "x$i"; then
+	mnd=`echo $i | sed 's/\/[^/]*$//;'`
+	if test ! -d ./$mibdir/$mnd; then
+	    module_directories="$module_directories ./$mibdir/$mnd"
 	fi
       fi
       grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3),"'$i'"},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
@@ -420,8 +428,6 @@ while test "x$new_module_list" != "x"; do
   new_module_list="$new_list_two"
   new_list_two=""
 done
-
-
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
@@ -432,6 +438,11 @@ AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
 AC_SUBST(trap_list_o)
 
+AC_MSG_RESULT(.)
+AC_MSG_CHECKING(if directories neeed to be created)
+for i in $module_directories; do
+  $srcdir/mkinstalldirs $i
+done
 AC_MSG_RESULT(.)
 
 AC_MSG_CHECKING(default mib files to read)
@@ -520,8 +531,20 @@ dnl Checks for libraries.
 dnl AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(elf, nlist)
 AC_CHECK_LIB(m, asin)
-AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_LIB(socket, getservbyname)
+dnl On some platforms (Irix) libnsl and libsocket should not be used.
+AC_CHECK_FUNCS(gethostbyname getservbyname)
+if test "x$ac_cv_func_gethostbyname" != "xyes"; then
+       AC_CHECK_LIB(nsl, gethostbyname)
+       if test "x$ac_cv_lib_nsl_gethostbyname" = "yes"; then
+	    AC_DEFINE(HAVE_GETHOSTBYNAME)
+       fi
+fi
+if test "x$ac_cv_func_getservbyname" != "xyes"; then
+       AC_CHECK_LIB(socket, getservbyname)
+       if test "x$ac_cv_lib_socket_getservbyname" = "yes"; then
+	    AC_DEFINE(HAVE_GETSERVBYNAME)
+       fi
+fi
 dnl AC_CHECK_LIB(ucb, bzero)
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)

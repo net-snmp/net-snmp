@@ -27,6 +27,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
 
 #include "mibincl.h"
 #include "struct.h"

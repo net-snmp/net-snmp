@@ -109,6 +109,15 @@ read_config.o: mibgroup/host/hr_utils.h mibgroup/util_funcs.h
 read_config.o: mibgroup/struct.h mibgroup/mibII/var_route.h
 read_config.o: mibgroup/mibII/route_write.h ./snmp_agent.h ./snmpd.h
 read_config.o: ./../snmplib/system.h mibgroup/mib_module_dot_conf.h
+snmp2p.o: ../config.h ../mib_module_config.h 
+snmp2p.o:   ../s/linux.h
+snmp2p.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
+snmp2p.o:   ./../snmplib/asn1.h
+snmp2p.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmp2p.o: ./../snmplib/system.h ./../snmplib/snmp.h m2m.h
+snmp2p.o: ./../snmplib/party.h mibgroup/v2party/alarm.h
+snmp2p.o: mibgroup/v2party/event.h ./../snmplib/view.h ./../snmplib/context.h
+snmp2p.o: ./../snmplib/acl.h ./../snmplib/mib.h snmpd.h
 snmp_agent.o: ../config.h ../mib_module_config.h 
 snmp_agent.o:   ../s/linux.h
 snmp_agent.o: ../s/sysv.h ../s/generic.h ../m/generic.h
@@ -159,13 +168,11 @@ snmpd.o: ../config.h ../mib_module_config.h
 snmpd.o:   ../s/linux.h
 snmpd.o: ../s/sysv.h ../s/generic.h ../m/generic.h 
 snmpd.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
-snmpd.o: ./../snmplib/system.h ./../snmplib/snmp.h m2m.h ./../snmplib/party.h
-snmpd.o: mibgroup/v2party/alarm.h ./mibgroup/v2party/event.h
-snmpd.o: ./../snmplib/view.h ./../snmplib/context.h ./../snmplib/acl.h
-snmpd.o: ./../snmplib/mib.h mibgroup/mibII/snmp_mib.h
-snmpd.o: ./../snmplib/snmp_client.h snmpd.h ./var_struct.h read_config.h
-snmpd.o: mibgroup/struct.h mibgroup/util_funcs.h mibgroup/struct.h
-snmpd.o: ../version.h
+snmpd.o: ./../snmplib/system.h ./../snmplib/snmp.h ./../snmplib/mib.h m2m.h
+snmpd.o: mibgroup/v2party/alarm.h mibgroup/v2party/event.h
+snmpd.o: mibgroup/mibII/snmp_mib.h ./../snmplib/snmp_client.h snmpd.h
+snmpd.o: ./var_struct.h read_config.h mibgroup/struct.h mibgroup/util_funcs.h
+snmpd.o: mibgroup/struct.h ../version.h
 view_parse.o: ../config.h ../mib_module_config.h 
 view_parse.o:   ../s/linux.h
 view_parse.o: ../s/sysv.h ../s/generic.h ../m/generic.h 

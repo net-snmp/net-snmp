@@ -295,7 +295,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   disknum = name[*length - 1] - 1;
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = disknum;
+      long_ret = disknum+1;
       return((u_char *) (&long_ret));
     case ERRORNAME:       /* DISKPATH */
       *var_len = strlen(disks[disknum].path);
@@ -339,21 +339,21 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = vfs.f_blocks;
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
       if (vfs.f_frsize > 255)
-        long_ret = long_ret * vfs.f_frsize / 1024;
+        long_ret = long_ret * (vfs.f_frsize / 1024);
 #endif
       return((u_char *) (&long_ret));
     case DISKAVAIL:
       long_ret = vfs.f_bavail;
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
       if (vfs.f_frsize > 255)
-        long_ret = long_ret * vfs.f_frsize / 1024;
+        long_ret = long_ret * (vfs.f_frsize / 1024);
 #endif
       return((u_char *) (&long_ret));
     case DISKUSED:
       long_ret = (vfs.f_blocks - vfs.f_bfree);
 #ifdef STRUCT_STATVFS_HAS_F_FRSIZE
       if (vfs.f_frsize > 255)
-        long_ret = long_ret * vfs.f_frsize / 1024;
+        long_ret = long_ret * (vfs.f_frsize / 1024);
 #endif
       return((u_char *) (&long_ret));
     case DISKPERCENT:

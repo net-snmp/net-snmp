@@ -118,10 +118,6 @@ int allow_severity = LOG_INFO;
 int deny_severity = LOG_WARNING;
 #endif
 
-extern int  errno;
-extern char *version_descr;
-extern oid version_id[];
-extern int version_id_len;
 struct timeval starttime;
 int log_addresses = 0;
 int verbose = 0;
@@ -149,23 +145,21 @@ struct trap_sink {
 static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
-extern void init_snmp __P((void));
-extern void init_snmp2p __P((u_short));
-extern int agent_party_init __P((in_addr_t, u_short, char *));
-extern void open_ports_snmp2p __P((void));
-int open_port __P(( u_short ));
-int receive __P((int *, int));
+static int receive __P((int *, int));
 int snmp_read_packet __P((int));
-char *sprintf_stamp __P((time_t *));
-int create_v1_trap_session __P((char *, char *));
-static void free_v1_trap_session __P((struct trap_sink *sp));
-void send_v1_trap __P((struct snmp_session *, int, int));
-void usage __P((char *));
-int main __P((int, char **));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-RETSIGTYPE SnmpTrapNodeDown __P((int));
+static char *sprintf_stamp __P((time_t *));
+static int create_v1_trap_session __P((char *, char *));
+static int create_v2_trap_session __P((char *, char *));
+static void free_v1_trap_session __P((struct trap_sink *sp));
+static void free_v2_trap_session __P((struct trap_sink *sp));
+static void send_v1_trap __P((struct snmp_session *, int, int));
+static void send_v2_trap __P((struct snmp_session *, int, int, int));
+static void usage __P((char *));
+int main __P((int, char **));
+static RETSIGTYPE SnmpTrapNodeDown __P((int));
 
-char *sprintf_stamp (now)
+static char *sprintf_stamp (now)
     time_t *now;
 {
     time_t Now;
@@ -187,7 +181,7 @@ char *sprintf_stamp (now)
 int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
 char *snmp_trapcommunity = NULL;
 
-int create_v1_trap_session (sink, com)
+static int create_v1_trap_session (sink, com)
     char *sink, *com;
 {
     struct trap_sink *new_sink =
@@ -221,6 +215,40 @@ static void free_v1_trap_session (sp)
     free (sp);
 }
 
+static int create_v2_trap_session (sink, com)
+    char *sink, *com;
+{
+    struct trap_sink *new_sink =
+      (struct trap_sink *) malloc (sizeof (*new_sink));
+
+    if (!snmp_trapcommunity) snmp_trapcommunity = strdup("public");
+    memset (&new_sink->ses, 0, sizeof (struct snmp_session));
+    new_sink->ses.peername = strdup(sink);
+    new_sink->ses.version = SNMP_VERSION_2c;
+    if (com) {
+        new_sink->ses.community = (u_char *)strdup (com);
+        new_sink->ses.community_len = strlen (com);
+    }
+    new_sink->ses.remote_port = SNMP_TRAP_PORT;
+    new_sink->sesp = snmp_open (&new_sink->ses);
+    if (new_sink->sesp) {
+	new_sink->next = sinks;
+	sinks = new_sink;
+	return 1;
+    }
+    snmp_perror("snmpd");
+    free(new_sink);
+    return 0;
+}
+
+static void free_v2_trap_session (sp)
+    struct trap_sink *sp;
+{
+    snmp_close(sp->sesp);
+    if (sp->ses.community) free(sp->ses.community);
+    free (sp);
+}
+
 void snmpd_free_trapsinks __P((void))
 {
     struct trap_sink *sp = sinks;
@@ -230,13 +258,18 @@ void snmpd_free_trapsinks __P((void))
 	case SNMP_VERSION_1:
 	    free_v1_trap_session(sp);
 	    break;
+	case SNMP_VERSION_2c:
+	    free_v2_trap_session(sp);
+	    break;
 	}
 	sp = sinks;
     }
 }
 
-void
-send_v1_trap (ss, trap, specific)
+static oid objid_enterprisetrap[] = {EXTENSIBLEMIB,251,0,0};
+static int length_enterprisetrap = sizeof(objid_enterprisetrap)/sizeof(objid_enterprisetrap[0]);
+
+static void send_v1_trap (ss, trap, specific)
     struct snmp_session *ss;
     int trap, specific;
 {
@@ -254,29 +287,110 @@ send_v1_trap (ss, trap, specific)
     }
 
     pdu = snmp_pdu_create (SNMP_MSG_TRAP);
-    pdu->enterprise = version_id;
-    pdu->enterprise_length = version_id_len;
+    if (trap == 6) {
+	pdu->enterprise = objid_enterprisetrap;
+	pdu->enterprise_length = length_enterprisetrap-2;
+    }
+    else { 
+	pdu->enterprise = version_id;
+	pdu->enterprise_length = version_id_len;
+    }
     pdu->agent_addr.sin_addr.s_addr = get_myaddr();
     pdu->trap_type = trap;
     pdu->specific_type = specific;
     pdu->time = diff.tv_sec * 100 + diff.tv_usec / 10000;
     if (snmp_send (ss, pdu) == 0) {
-        snmp_perror ("snmpd: send_trap");
+        snmp_perror ("snmpd: send_v1_trap");
     }
 #ifdef USING_MIBII_SNMP_MIB_MODULE       
     snmp_outtraps++;
 #endif
 }
 
-void
-send_easy_trap (trap)
-      int trap;
+static void send_v2_trap (ss, trap, specific, type)
+    struct snmp_session *ss;
+    int trap, specific, type;
+{
+    struct snmp_pdu *pdu;
+    struct variable_list *var;
+    struct timeval now, diff;
+    static oid objid_sysuptime[] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
+    static oid objid_snmptrap[] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
+    static oid objid_trapoid[] = {1, 3, 6, 1, 6, 3, 1, 1, 5, 1};
+
+    gettimeofday(&now, NULL);
+    now.tv_sec--;
+    now.tv_usec += 1000000L;
+    diff.tv_sec = now.tv_sec - starttime.tv_sec;
+    diff.tv_usec = now.tv_usec - starttime.tv_usec;
+    if (diff.tv_usec > 1000000L){
+	diff.tv_usec -= 1000000L;
+	diff.tv_sec++;
+    }
+
+    pdu = snmp_pdu_create (type);
+
+    pdu->variables = var = (struct variable_list *)malloc(sizeof(struct variable_list));
+    var->next_variable = NULL;
+    var->name = (oid *)malloc(sizeof(objid_sysuptime));
+    memcpy (var->name, objid_sysuptime, sizeof(objid_sysuptime));
+    var->name_length = sizeof(objid_sysuptime)/sizeof(objid_sysuptime[0]);
+    var->type = ASN_TIMETICKS;
+    var->val.integer = (long *)malloc(sizeof(long));
+    *var->val.integer = diff.tv_sec*100 + diff.tv_usec/10000;
+    var->val_len = sizeof(long);
+
+    var->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
+    var = var->next_variable;
+    var->next_variable = NULL;
+    if (trap == 6) {
+	objid_enterprisetrap[length_enterprisetrap-1] = specific;
+	var->name = (oid *)malloc(sizeof(objid_snmptrap));
+	var->name_length = length_enterprisetrap;
+	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
+	var->type = ASN_OBJECT_ID;
+	var->val.objid = (oid *)malloc(sizeof(objid_enterprisetrap));
+	var->val_len = sizeof(objid_enterprisetrap);
+	memcpy(var->val.objid, objid_enterprisetrap, sizeof(objid_enterprisetrap));
+    }
+    else {
+	objid_trapoid[9] = trap+1;
+	var->name = (oid *)malloc(sizeof(objid_snmptrap));
+	var->name_length = sizeof(objid_snmptrap)/sizeof(objid_snmptrap[0]);
+	memcpy(var->name, objid_snmptrap, sizeof(objid_snmptrap));
+	var->type = ASN_OBJECT_ID;
+	var->val.objid = (oid *)malloc(sizeof(objid_trapoid));
+	var->val_len = sizeof(objid_trapoid);
+	memcpy(var->val.objid, objid_trapoid, sizeof(objid_trapoid));
+    }
+
+    if (snmp_send (ss, pdu) == 0) {
+        snmp_perror ("snmpd: send_v2_trap");
+    }
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
+    snmp_outtraps++;
+#endif
+}
+
+void send_easy_trap (trap, specific)
+    int trap;
+    int specific;
 {
     struct trap_sink *sink = sinks;
 
     if ((snmp_enableauthentraps == 1 || trap != 4) && sink != NULL) {
 	while (sink) {
-	    send_v1_trap (sink->sesp, trap, 0);
+	    switch (sink->ses.version) {
+	    case SNMP_VERSION_1:
+		send_v1_trap (sink->sesp, trap, specific);
+		break;
+	    case SNMP_VERSION_2c:
+		send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_TRAP2);
+		/*
+		send_v2_trap (sink->sesp, trap, specific, SNMP_MSG_INFORM);
+		*/
+		break;
+	    }
 	    sink = sink->next;
 	}
     }
@@ -303,7 +417,7 @@ char *argvrestartname;
 extern char *optconfigfile;
 extern char dontReadConfigFiles;
 
-void usage(prog)
+static void usage(prog)
 char *prog;
 {
   printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
@@ -333,12 +447,12 @@ char *prog;
   exit(1);
 }
 
-RETSIGTYPE
+static RETSIGTYPE
 SnmpTrapNodeDown(a)
   int a;
 {
-  send_easy_trap (2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
-  exit(1);
+    send_easy_trap (6, 2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
+    exit(1);
 }
 
 #define NUM_SOCKETS     32
@@ -354,7 +468,7 @@ main(argc, argv)
     int	arg,i;
     int ret;
     u_short dest_port = 161;
-    int dont_fork=0;
+    int dont_fork = 0;
     char logfile[300];
     char *cptr, **argvptr;
 
@@ -469,8 +583,8 @@ main(argc, argv)
     printf ("%s UCD-SNMP version %s\n", sprintf_stamp (NULL), VersionInfo);
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
-    init_snmp();
     init_mib();
+    init_snmp();
     init_snmp2p( dest_port );
     
     printf("Opening port(s): "); 
@@ -487,9 +601,9 @@ main(argc, argv)
     starttime.tv_usec += 1000000L;
 
     /* send coldstart trap via snmptrap(1) if possible */
-    send_easy_trap (0);
+    send_easy_trap (0, 0);
     signal(SIGTERM, SnmpTrapNodeDown);
-    signal(SIGSTOP, SnmpTrapNodeDown);
+    signal(SIGINT, SnmpTrapNodeDown);
 
     memset(addrCache, 0, sizeof(addrCache));
     receive(sdlist, sdlen);
@@ -538,7 +652,7 @@ open_port ( dest_port )
 #define TIMETICK         500000L
 #define ONE_SEC         1000000L
 
-int
+static int
 receive(sdlist, sdlen)
     int sdlist[];
     int sdlen;
@@ -618,7 +732,7 @@ receive(sdlist, sdlen)
 		int count;
 		
 		lastAddrAge = 0;
-              for(count = 0; count < ADDRCACHE; count++){
+		for(count = 0; count < ADDRCACHE; count++){
 		    if (addrCache[count].status == OLD)
 			addrCache[count].status = UNUSED;
 		    if (addrCache[count].status == USED)
@@ -677,7 +791,7 @@ snmp_read_packet(sd)
 		&& from.sin_addr.s_addr == addrCache[count].addr)
 		break;
 	}
-	if (count >= ADDRCACHE){
+	if (count >= ADDRCACHE || verbose){
 	    printf("%s Received SNMP packet(s) from %s\n",
 		   sprintf_stamp(NULL), inet_ntoa(from.sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
@@ -767,6 +881,18 @@ void snmpd_parse_config_trapsink(word, cptr)
   
     if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
 	sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
+	config_perror(tmpbuf);
+    }
+}
+
+void snmpd_parse_config_trap2sink(word, cptr)
+    char *word;
+    char *cptr;
+{
+    char tmpbuf[1024];
+  
+    if (create_v2_trap_session(cptr, snmp_trapcommunity) == 0) {
+	sprintf(tmpbuf,"cannot create trap2sink: %s", cptr);
 	config_perror(tmpbuf);
     }
 }

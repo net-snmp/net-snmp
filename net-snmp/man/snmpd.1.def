@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p port] [-f] [-l logfile] [-L] [-c file] [-C]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -15,6 +15,8 @@ requested opperation(s) and returns the information to the sender.
 .SH OPTIONS
 .RS
 .TP 6
+.B -v
+Print version information for the agent, and exit.
 .B -a
 Dumps the addresses the agent corresponds with to stderr or logfile.
 .TP
@@ -74,16 +76,9 @@ are read-only as well.
 .IP
 In addition to these two configuration files in DATADIR/snmp, the
 agent will read any files with the names snmpd.conf and
-snmpd.local.conf in a colon sepereated path specified in the
+snmpd.local.conf in a colon separated path specified in the
 SNMPCONFPATH environmental variable.
 .TP
-.B DATADIR/snmp/mib.txt
-Defines the mib it should use.
-The location of this
-.B mib.txt 
-file may by overridden at run time be setting the enviornmental variable
-.B MIBFILE.
-.TP 
 .B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or decend into
@@ -96,10 +91,7 @@ Defines the classic SNMP V2 parties.
 .B DATADIR/snmp/view.conf
 Defines which parties defined in the 
 .B party.conf
-have access to the
-mibs in the
-.B mib.txt
-file.
+have access to which parts of the mib.
 .TP
 .B DATADIR/snmp/context.conf
 Maps names to numerical view contexts.
@@ -111,10 +103,6 @@ Defines the classic SNMP V2 action types usable by two communicating parties.
 See the associated manual pages for information on the content of
 these files.
 .SH FILES
-DATADIR/snmpd.conf
-.br
-DATADIR/snmpd.local.conf
-.br
 DATADIR/snmp/snmpd.conf
 .br
 DATADIR/snmp/party.conf

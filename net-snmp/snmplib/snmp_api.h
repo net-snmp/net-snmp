@@ -1,3 +1,7 @@
+ 
+#ifndef SNMP_API_H
+#define SNMP_API_H
+
 /***********************************************************
 	Copyright 1989 by Carnegie Mellon University
 
@@ -21,10 +25,16 @@ SOFTWARE.
 ******************************************************************/
 /*
  * snmp_api.h - API for access to snmp.
+ *
+ * Caution: when using this library in a multi-threaded application,
+ * the values of global variables "snmp_errno" and "snmp_detail"
+ * cannot be reliably determined.  Suggest using snmp_error()
+ * to obtain the library error codes.
  */
 
 struct variable_list;
 struct timeval;
+struct synch_state;
 
 typedef struct sockaddr_in  snmp_ipaddr;
 
@@ -80,6 +90,9 @@ struct snmp_session {
     int	    dstPartyLen;
     oid	    *context;
     int	    contextLen;
+    struct synch_state * snmp_synch_state;
+    int     s_errno;        /* copy of system errno */
+    int     s_snmp_errno;   /* copy of library errno */
 };
 
 typedef int (*snmp_callback) __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
@@ -130,7 +143,8 @@ extern void snmp_set_detail __P((char *));
 #define SNMPERR_ABORT		(-22)
 #define SNMPERR_UNKNOWN_PDU	(-23)
 #define SNMPERR_TIMEOUT 	(-24)
-#define SNMPERR_MAX		(-24)
+#define SNMPERR_BAD_RECVFROM 	(-25)
+#define SNMPERR_MAX		(-25)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
@@ -322,3 +336,77 @@ int snmp_get_suffix_only __P((void));
 int snmp_get_errno __P((void));
 void snmp_set_do_debugging __P((int));
 int snmp_get_do_debugging __P((void));
+
+#ifdef CMU_COMPATIBLE
+extern int snmp_dump_packet;
+extern int quick_print;
+#endif
+
+/*
+ * snmp_error - return error data
+ * Inputs :  address of errno, address of snmp_errno, address of string
+ * Caller must free the string returned after use.
+ */
+void snmp_error __P((struct snmp_session *, int *, int *, char **));
+
+/*
+ * single session API.
+ *
+ * These functions perform similar actions as snmp_XX functions,
+ * but operate on a single session only.
+ *
+ * Synopsis:
+
+	void * sessp;
+	struct snmp_session session, *ss;
+	struct snmp_pdu *pdu, *response;
+
+	snmp_sess_init(&session);
+	session.retries = ...
+	session.remote_port = ...
+	snmp_synch_setup(&session);
+	sessp = snmp_sess_open(&session);
+	ss = snmp_sess_session(sessp);
+	if (ss == NULL)
+		exit(1);
+	...
+	if (ss->community) free(ss->community);
+	ss->community = strdup(gateway);
+	ss->community_len = strlen(gateway);
+	...
+	snmp_sess_synch_response(sessp, pdu, &response);
+	...
+	snmp_synch_reset(&session);
+	snmp_sess_close(sessp);
+
+ * See also:
+ * snmp_sess_synch_response, in snmp_client.h.
+
+ * Notes:
+ *  1. Invoke snmp_sess_session after snmp_sess_open.
+ *  2. snmp_sess_session return value is an opaque pointer.
+ *  3. Do NOT free memory returned by snmp_sess_session.
+ *  4. Replace snmp_send(ss,pdu) with snmp_sess_send(sessp,pdu)
+ */
+
+void   snmp_sess_init       __P((struct snmp_session *));
+void * snmp_sess_open       __P((struct snmp_session *));
+struct snmp_session * snmp_sess_session    __P((void *));
+
+/* use return value from snmp_sess_open as void * parameter */
+
+int    snmp_sess_send       __P((void *, struct snmp_pdu *));
+int    snmp_sess_async_send __P((void *, struct snmp_pdu *,
+                                         snmp_callback, void *));
+int    snmp_sess_select_info __P((void *, int *, fd_set *,
+                                         struct timeval *, int *));
+void   snmp_sess_read       __P((void *));
+void   snmp_sess_timeout    __P((void *));
+int    snmp_sess_close      __P((void *));
+
+void   snmp_sess_error      __P((void *, int *, int *, char **));
+
+/* end single session API */
+ 
+#endif /* SNMP_API_H */
+

@@ -158,8 +158,7 @@ opendir(char *filename)
     p->start = (char*)malloc(idx * sizeof(char));
     /* New(1304, p->start, idx, char);*/
     if(p->start == NULL) {
-	fprintf(stderr,"opendir: malloc failed!\n");
-	exit(1);
+	return NULL;
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -181,8 +180,7 @@ opendir(char *filename)
 			idx+len+1 * sizeof(char));
 	/* Renew(p->start, idx+len+1, char);*/
 	if(p->start == NULL) {
-	    fprintf(stderr,"opendir: malloc failed!\n");
-		exit(1);
+	    return NULL;
 	}
 	strcpy(&p->start[idx], FindData.cFileName);
 /*	if (downcase) 
@@ -237,7 +235,7 @@ closedir(DIR *dirp)
     return 1;
 }
 
-
+#ifndef HAVE_GETTIMEOFDAY
 
 int gettimeofday(tv, tz)
 struct timeval *tv;
@@ -250,7 +248,7 @@ struct timezone *tz;
     tv->tv_sec = timebuffer.time;
     return(1);
 }
-
+#endif
 
 in_addr_t get_myaddr()
 {
@@ -374,7 +372,7 @@ in_addr_t get_myaddr __P((void))
  */
 long get_uptime __P((void))
 {
-#ifdef bsdlike
+#if defined(bsdlike) && !defined(solaris2) && !defined(linux)
     struct timeval boottime, now, diff;
 #ifndef CAN_USE_SYSCTL
     int kmem;
@@ -487,7 +485,6 @@ int setenv(name, value, overwrite)
     if (cp == NULL) return -1;
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
-    free(cp);
     return ret;
 }
 #endif /* HAVE_SETENV */

@@ -85,11 +85,11 @@
 #define hh(A,B,C,D,i,s,lp)   A = rot((A + h(B,C,D) + X[i] + lp),s) + B
 #define ii(A,B,C,D,i,s,lp)   A = rot((A + i_(B,C,D) + X[i] + lp),s) + B
 
-#ifdef __STDC__
+#ifdef STDC_HEADERS
 #define Uns(num) num##U
 #else
 #define Uns(num) num
-#endif /* __STDC__ */
+#endif /* STDC_HEADERS */
 
 void MDreverse __P((unsigned int *));
 static void MDblock __P((MDptr, unsigned int *));
@@ -259,7 +259,7 @@ unsigned int count;
   */
   if (count == 0 && MDp->done) return;
   /* check to see if MD is already done and report error */
-  if (MDp->done) { printf("\nError: MDupdate MD already done."); return; }
+  if (MDp->done) { fprintf(stderr,"\nError: MDupdate MD already done."); return; }
   /* Add count to MDp->count */
   tmp = count;
   p = MDp->count;
@@ -274,7 +274,7 @@ unsigned int count;
       MDblock(MDp,(unsigned int *)X);
     }
   else if (count > 512) /* Check for count too large */
-    { printf("\nError: MDupdate called with illegal count value %d.",count);
+    { fprintf(stderr,"\nError: MDupdate called with illegal count value %d.",count);
       return;
     }
   else /* partial block -- must be last block so finish up */

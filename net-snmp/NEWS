@@ -1,18 +1,33 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.5.1*
+
+ Fixes:
+    - Many bug fixes submitted by users and the ucd-snmp-coders.
+    - v2party support in the agent has been fixed.
+    - The UCD-SNMP-MIB is SMICng compliant and should work under HP OV better.
+    - Most sections of the mibII tree are 64bit clean.
+
+ Copyright:
+    - Simplification.
+
 *3.5*
 
  New:
     - agent/mibgroup directory reorganized hierarchically.
-    - use of dynamicly loadable modules now possible.
-    - new modules: misc/ipfwacc.
+      - this may break the agent compilation with some compilers.
     - floats, doubles, counter64s, int64s, uint64s support via opaque types.
+    - new modules: misc/ipfwacc.
+    - use of dynamicly loadable modules now possible, but not fully supported.
+    - New application command line flags:  -s, -S, -m MIBS, -M MIBDIRS.
+    - new configure options: --with-cc=CC and --with-cflags=CFLAGS
 
  Fixes:
     - Solaris core dumps.
     - Fixes for NetBSD 1.3.
     - The apps work again on 64bit machines.
+    - misc other bug fixes.
 
  Ports:
     - host resources module should work on more platforms: NetBSD,

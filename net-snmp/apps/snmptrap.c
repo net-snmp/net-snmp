@@ -25,8 +25,7 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
-#include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if HAVE_UNISTD_H
@@ -41,11 +40,12 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -57,33 +57,22 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#include <netdb.h>
 #include <stdio.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
+#include <netdb.h>
 #endif
-#if HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
-#include <sys/file.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 
 #include "asn1.h"
 #include "snmp_api.h"
-#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+#include "snmp_impl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -290,10 +279,11 @@ main(argc, argv)
     char    *argv[];
 {
     struct snmp_session session, *ss;
-    struct snmp_pdu *pdu;
+    struct snmp_pdu *pdu, *response;
     oid name[MAX_NAME_LEN];
     int name_length;
     int	arg;
+    int status, inform = 0;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
@@ -307,7 +297,8 @@ main(argc, argv)
     session.callback = snmp_input;
     session.callback_magic = NULL;
     if (session.remote_port == SNMP_DEFAULT_REMPORT)
-      session.remote_port = SNMP_TRAP_PORT;
+	session.remote_port = SNMP_TRAP_PORT;
+    snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrap");
@@ -378,8 +369,14 @@ main(argc, argv)
     else {
 	long sysuptime;
 	char csysuptime [20];
+	char *prognam;
 
-	pdu = snmp_pdu_create(SNMP_MSG_TRAP2);
+	prognam = strrchr(argv[0], '/');
+	if (prognam) prognam++;
+	else prognam = argv[0];
+
+	if (strcmp(prognam, "snmpinform") == 0) inform = 1;
+	pdu = snmp_pdu_create(inform ? SNMP_MSG_INFORM : SNMP_MSG_TRAP2);
 	if (arg == argc) {
 	    fprintf(stderr, "Missing up-time parameter\n");
 	    usage();
@@ -414,8 +411,10 @@ main(argc, argv)
 	snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
     }
 
-    if (snmp_send(ss, pdu)== 0){
-        snmp_perror("snmptrap");
+    if (inform) status = snmp_synch_response(ss, pdu, &response);
+    else status = snmp_send(ss, pdu) == 0;
+    if (status) {
+        snmp_perror(inform ? "snmpinform" : "snmptrap");
     }
     snmp_free_pdu(pdu);
 
@@ -424,5 +423,5 @@ main(argc, argv)
     if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
     snmp_close(ss);
-    exit (0);
+    return (0);
 }
