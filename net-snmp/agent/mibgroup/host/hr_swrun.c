@@ -238,10 +238,13 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
     char buf[256];
     int i;
 #endif
-    char *cp, *cp1;
+    char *cp;
+#ifdef solaris2
     static time_t when = 0;
     time_t now;
     static int oldpid = -1;
+    char *cp1;
+#endif
 
     if ( vp->magic == HRSWRUN_OSINDEX ) {
         if (header_hrswrun(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )

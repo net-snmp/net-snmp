@@ -11,5 +11,6 @@ void zeroU64 __P((U64 *));
 int isZeroU64 __P((U64 *));
 char *printU64 __P((U64 *));
 char *printI64 __P((U64 *));
+void read64 __P((U64 *, char *));
 
 #endif
