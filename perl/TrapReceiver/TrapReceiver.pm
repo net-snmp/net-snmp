@@ -241,7 +241,7 @@ http://www.Net-SNMP.org/
 
 =head1 AUTHOR
 
-W. Hardaker, E<lt>hardaker@users.sourceforge.net<gt>
+W. Hardaker, E<lt>hardaker@users.sourceforge.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
