@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-foreach $i (qw(snmplib/Makefile agent/Makefile agent/mibgroup/Makefile apps/Makefile)) {
+foreach $i (qw(snmplib/Makefile agent/Makefile agent/mibgroup/Makefile apps/Makefile apps/snmpnetstat/Makefile)) {
     print STDERR "processing $i... ";
     open(IN,"$i");
     while ($_ = <IN>,!/^# DO NOT DELETE THIS LINE/) { }
