@@ -50,7 +50,7 @@ EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
 docs: doxygen.conf
-	doxygen doxygen.conf
+	srcdir=$(srcdir) doxygen doxygen.conf
 
 net-snmp-config-x:
 	chmod a+x net-snmp-config
