@@ -1,8 +1,8 @@
-RFCHOST =	ftp.nordu.net	# ftp.ietf.org
+RFCHOST =	ftp://ftp.nordu.net	# ftp.ietf.org
 RFCDIR =	rfc
 
-IANAHOST =	ftp.iana.org
-IANADIR =	mib/iana.mib
+IANAHOST =	http://www.iana.org
+IANADIR =	assignments
 
 ALLDIR =	/usr/local/share/snmp/rfc.orig
 
@@ -73,7 +73,7 @@ SMUX-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1227 SMUX-MIB
 
 DISMAN-SCHEDULE-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2591
+	./mibfetch $(RFCHOST) $(RFCDIR) 3231
 
 DISMAN-SCRIPT-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3165
@@ -88,19 +88,19 @@ HCNUM-TC.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2856
 
 INET-ADDRESS-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2851
+	./mibfetch $(RFCHOST) $(RFCDIR) 3291
 
 EtherLike-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2665
 
 IANAifType-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianaiftype.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianaiftype-mib
 
 IANA-LANGUAGE-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianalanguage.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianalanguage-mib
 
 IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianaaddressfamilynumbers.mib
+	./mibfetch -x $(IANAHOST) $(IANADIR) ianaaddressfamilynumbers-mib
 
 IP-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2011
@@ -150,7 +150,7 @@ ianamibs:	ianalist
 		do \
 		  if [ "$$file" != "#" ]; \
 		  then \
-		    ./mibfetch -d $(ALLDIR) $(IANAHOST) $(IANADIR) $$file $$mibs; \
+		    ./mibfetch -d $(ALLDIR) -x $(IANAHOST) $(IANADIR) $$file $$mibs; \
 		  fi; \
 		done
 
