@@ -26,6 +26,11 @@
  * SOFTWARE.
  * *****************************************************************
  */
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -432,6 +437,7 @@ main(int argc, char *argv[])
     char           *cptr, **argvptr;
     char           *pid_file = NULL;
 #if HAVE_GETPID
+    int fd;
     FILE           *PID;
 #endif
 
@@ -887,16 +893,29 @@ main(int argc, char *argv[])
 
 #if HAVE_GETPID
     if (pid_file != NULL) {
-        if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror(pid_file);
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
-            }
-        } else {
-            fprintf(PID, "%d\n", (int) getpid());
-            fclose(PID);
-        }
+	    /*
+	     * unlink the pid_file, if it exists, prior to open.  Without
+	     * doing this the open will fail if the user specified pid_file
+	     * already exists.
+	     */
+	    unlink(pid_file);
+	    fd = open(pid_file, O_CREAT | O_EXCL | O_WRONLY, 0600);
+	    if (fd == -1) {
+		    snmp_log_perror(pid_file);
+		    if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+			    exit(1);
+		    }
+	    } else {
+		    if ((PID = fdopen(fd, "w")) == NULL) {
+			    snmp_log_perror(pid_file);
+			    exit(1);
+		    } else {
+			    fprintf(PID, "%d\n", (int) getpid());
+			    fclose(PID);
+		    }
+		    close(fd);
+	    }
     }
 #endif
 

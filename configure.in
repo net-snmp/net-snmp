@@ -1,3 +1,10 @@
+dnl
+dnl Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+dnl Use is subject to license terms specified in the COPYING file
+dnl distributed with the Net-SNMP package.
+dnl
+
+dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
@@ -1734,7 +1741,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul)
+AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol strtoul strlcpy)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
 AC_CHECK_FUNCS(sigaction)

@@ -28,6 +28,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -5232,7 +5237,7 @@ uptime_string(u_long timeticks, char *buf)
     if (cp)
         *cp = '\0';
 #endif
-    strcpy(buf, tbuf);
+    strlcpy(buf, tbuf, sizeof(buf));
     return buf;
 }
 
