@@ -10,10 +10,10 @@
 
 #include "mibincl.h"
 #include "snmp_transport.h"
-#include "helpers/instance.h"
-#include "helpers/table.h"
-#include "helpers/table_data.h"
-#include "helpers/table_dataset.h"
+#include <net-snmp/agent/instance.h>
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_data.h>
+#include <net-snmp/agent/table_dataset.h>
 #include "notification_log.h"
 
 extern u_long num_received;
