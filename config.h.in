@@ -260,6 +260,9 @@
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
 
+/* Define if you have the <sys/proc.h> header file.  */
+#undef HAVE_SYS_PROC_H
+
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
@@ -274,6 +277,9 @@
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
+
+/* Define if you have the <sys/user.h> header file.  */
+#undef HAVE_SYS_USER_H
 
 /* Define if you have the <sys/vm.h> header file.  */
 #undef HAVE_SYS_VM_H
@@ -398,7 +404,7 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
-#define NETBSD1ID 8
+#define FREEBSD2ID 8
 #define UNKNOWNID 255
 
 #ifdef hpux9
