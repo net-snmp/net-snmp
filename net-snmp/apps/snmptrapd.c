@@ -128,6 +128,7 @@ typedef long	fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
+char *logfile = 0;
 int Print = 0;
 int Syslog = 0;
 int Event = 0;
@@ -453,7 +454,7 @@ int snmp_input(int op,
 	            (void) format_plain_trap (out_bfr, SPRINT_MAX_LEN, pdu);
 	        else
 		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, log_fmt_str, pdu);
-	        printf ("%s", out_bfr);
+                snmp_log(LOG_INFO, out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
@@ -510,7 +511,7 @@ int snmp_input(int op,
 				    SPRINT_MAX_LEN, 
 				    "%.4y-%.2m-%.2d %.2h:%.2n:%.2s %h [%i]:\n%v\n",
 				    pdu);
-	        printf ("%s", out_bfr);
+                snmp_log(LOG_INFO, out_bfr);
 	    }
 	    if (Syslog) {
 	    	varbufidx=0;
@@ -661,7 +662,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:CF:T:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -705,8 +706,15 @@ int main(int argc, char *argv[])
 	    }
 	    break;
 	case 'P':
+            snmp_enable_stderrlog();
 	    Print++;
 	    break;
+
+        case 'o':
+	    Print++;
+            snmp_enable_filelog(optarg, 0);
+            break;
+            
 	case 'e':
 	    Event++;
 	    break;
@@ -849,10 +857,11 @@ int main(int argc, char *argv[])
 	time_t timer;
 	time (&timer);
 	tm = localtime (&timer);
-	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
-	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-	       tm->tm_hour, tm->tm_min, tm->tm_sec,
-	       VersionInfo);
+        snmp_log(LOG_INFO,
+                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
+                 tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+                 tm->tm_hour, tm->tm_min, tm->tm_sec,
+                 VersionInfo);
     }
 
 
