@@ -186,10 +186,10 @@ int
 handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
-    struct agent_set_info      *asi;
-    int (*mycallback)(int operation, struct snmp_session *session, int reqid,
-                      struct snmp_pdu *pdu, void *magic);
-    void *retmagic;
+    struct agent_set_info *asi = NULL;
+    snmp_callback mycallback;
+    struct snmp_pdu *internal_pdu = NULL;
+    void *retmagic = NULL;
 
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
       int period = ds_get_int(DS_APPLICATION_ID,DS_AGENT_AGENTX_PING_INTERVAL);
@@ -294,7 +294,13 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
             return 0;
     }
     /* submit the pdu to the internal handler */
-    snmp_async_send(agentx_callback_sess, pdu, mycallback, retmagic);
+
+    /*  We have to clone the PDU here, because when we return from this
+	callback, sess_process_packet will free(pdu), but this call also
+	free()s its argument PDU.  */
+    
+    internal_pdu = snmp_clone_pdu(pdu);
+    snmp_async_send(agentx_callback_sess, internal_pdu, mycallback, retmagic);
     return 1;
 }
 
@@ -302,14 +308,12 @@ int
 handle_subagent_response(int op, struct snmp_session *session, int reqid,
                          struct snmp_pdu *pdu, void *magic) 
 {
-    struct snmp_session *retsess;
-    
+    struct snmp_session *retsess = (struct snmp_session *)magic;
+
     if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
       return 1;
     }
 
-    retsess = (struct snmp_session *) magic;
-    
     pdu = snmp_clone_pdu(pdu);
     DEBUGMSGTL(("agentx/subagent","handling agentx subagent response....\n"));
 
