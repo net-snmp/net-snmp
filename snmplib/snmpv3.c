@@ -833,11 +833,11 @@ void
 version_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"1") == 0) {
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_1);
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_1); /* bogus value */
   } else if (strcasecmp(cptr,"2c") == 0) {
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_2c);
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_2c);
   } else if (strcmp(cptr,"3") == 0) {
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_3);
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_3);
   } else {
     config_perror("Unknown version specification");
     return;
