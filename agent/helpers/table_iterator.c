@@ -369,6 +369,13 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                       ti_info->results->name_length,
                                                       callback_data_context,
                                                       callback_loop_context, iinfo);
+                            /*
+                             *  If we've been told that the rows are sorted,
+                             *   then the first valid one we find
+                             *   must be the right one.
+                             */
+                            if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)
+                                request_count--;
                         
                         } else {
                             if (iinfo->free_data_context && callback_data_context) {
