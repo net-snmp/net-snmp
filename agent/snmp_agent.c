@@ -269,6 +269,9 @@ get_set_cache(netsnmp_agent_session *asp)
 
     for (ptr = Sets; ptr != NULL; ptr = ptr->next) {
         if (ptr->sess == asp->session && ptr->transID == asp->pdu->transid) {
+            /*
+             * remove this item from list
+             */
             if (prev)
                 prev->next = ptr->next;
             else
@@ -282,20 +285,22 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache_num = ptr->treecache_num;
             asp->requests = ptr->requests;
             asp->vbcount = ptr->vbcount;
-#ifdef OLD_STUFF
-            if (!asp->reqinfo) {
-                asp->reqinfo =
-                    SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
-                if (asp->reqinfo) {
-                    asp->reqinfo->asp = asp;
-                    asp->reqinfo->agent_data = ptr->agent_data;
-                }
-            }
-#else
+
             netsnmp_assert(NULL != asp->reqinfo);
-            netsnmp_assert(asp->reqinfo->asp == asp);
-            netsnmp_assert(asp->reqinfo->agent_data == ptr->agent_data);
-#endif
+            asp->reqinfo->asp = asp;
+            asp->reqinfo->agent_data = ptr->agent_data;
+            
+            /*
+             * update request reqinfo, if it's out of date.
+             * yyy-rks: investigate when/why sometimes they match,
+             * sometimes they don't.
+             */
+            if(asp->requests->agent_req_info != asp->reqinfo) {
+                netsnmp_request_info *tmp = asp->requests;
+                for(; tmp; tmp = tmp->next)
+                    tmp->agent_req_info = asp->reqinfo;
+            }
+
             SNMP_FREE(ptr);
             return SNMP_ERR_NOERROR;
         }
@@ -2132,7 +2137,7 @@ netsnmp_check_requests_error(netsnmp_request_info *requests)
     /*
      * find any errors marked in the requests 
      */
-    while (requests) {
+    for (;requests;requests = requests->next) {
         if (requests->status != SNMP_ERR_NOERROR)
             return requests->status;
     }
@@ -3057,8 +3062,8 @@ netsnmp_request_set_error_all( netsnmp_request_info *requests, int error)
     for(; requests ; requests = requests->next) {
 
         /** paranoid sanity checks */
-        netsnmp_assert(NULL != request->agent_req_info->mode);
-        netsnmp_assert(mode == request->agent_req_info->mode);
+        netsnmp_assert(NULL != requests->agent_req_info);
+        netsnmp_assert(mode == requests->agent_req_info->mode);
 
         /*
          * set error for this request. Log any errors, save the last
