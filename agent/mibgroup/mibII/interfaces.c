@@ -148,6 +148,7 @@
 
 #include "system.h"
 #include "snmp_logging.h"
+#include "read_config.h"
 
 #if HAVE_OSRELDATE_H
 #include <osreldate.h>
@@ -156,14 +157,19 @@
 #include <sys/sysctl.h>
 #endif
 #include "interfaces.h"
-#include "../struct.h"
-#include "../util_funcs.h"
+#include "struct.h"
+#include "util_funcs.h"
 #include "auto_nlist.h"
 #include "sysORTable.h"
 
 extern struct timeval starttime;
 
 static int Interface_Scan_Get_Count (void);
+
+#ifdef linux
+static void parse_interface_config(const char *, char *);
+static void free_interface_config(void);
+#endif
 
 struct variable4 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
@@ -204,6 +210,11 @@ void init_interfaces(void)
   REGISTER_SYSOR_ENTRY(interfaces_module_oid,
 	"The MIB module to describe generic objects for network interface sub-layers");
   
+#ifdef linux
+  snmpd_register_config_handler("interface", parse_interface_config,
+    				free_interface_config, "name type speed");
+#endif
+
 #ifndef USE_SYSCTL_IFLIST
 #if HAVE_NET_IF_MIB_H
   init_interfaces_setup();
@@ -644,12 +655,78 @@ static int Interface_Get_Ether_By_Index (int, u_char *);
 typedef struct _conf_if_list {
     char *name;
     int type;
-    int speed;
+    u_long speed;
     struct _conf_if_list *next;
 } conf_if_list;
 
-conf_if_list *if_list;
-struct ifnet *ifnetaddr_list;
+static conf_if_list *if_list;
+static struct ifnet *ifnetaddr_list;
+
+static void parse_interface_config(const char *token, char *cptr)
+{
+    conf_if_list *if_ptr, *if_new;
+    char *name, *type, *speed, *ecp;
+
+    name = strtok(cptr, " \t");
+    if (!name) {
+	config_perror("Missing NAME parameter");
+	return;
+    }
+    type = strtok(NULL, " \t");
+    if (!type) {
+	config_perror("Missing TYPE parameter");
+	return;
+    }
+    speed = strtok(NULL, " \t");
+    if (!speed) {
+	config_perror("Missing SPEED parameter");
+	return;
+    }
+    if_ptr = if_list;
+    while (if_ptr)
+	if (strcmp(if_ptr->name, name)) if_ptr = if_ptr->next;
+	else break;
+    if (if_ptr)
+	config_pwarn("Duplicate interface specification");
+    if_new = (conf_if_list *)malloc(sizeof(conf_if_list));
+    if (!if_new) {
+	config_perror("Out of memory");
+	return;
+    }
+    if_new->speed = strtoul(speed, &ecp, 0);
+    if (*ecp) {
+	config_perror("Bad SPEED value");
+	free(if_new);
+	return;
+    }
+    if_new->type = strtol(type, &ecp, 0);
+    if (*ecp || if_new->type < 0) {
+	config_perror("Bad TYPE");
+	free(if_new);
+	return;
+    }
+    if_new->name = strdup(name);
+    if (!if_new->name) {
+	config_perror("Out of memory");
+	free(if_new);
+	return;
+    }
+    if_new->next = if_list;
+    if_list = if_new;
+}
+
+static void free_interface_config(void)
+{
+    conf_if_list *if_ptr = if_list, *if_next;
+    while (if_ptr) {
+	if_next = if_ptr->next;
+	free(if_ptr->name);
+	free(if_ptr);
+	if_ptr = if_next;
+    }
+    if_list = NULL;
+}
+
 #endif /* linux */
 
 
@@ -1156,13 +1233,12 @@ void
 Interface_Scan_Init (void)
 {
 #ifdef linux
-    char line [256], fullname [64], ifname_buf [64], *ifname, *ptr;
+    char line [256], ifname_buf [64], *ifname, *ptr;
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
     unsigned long rec_pkt, rec_oct, rec_err, snd_pkt, snd_oct, snd_err, coll;
     int i, fd;
-    extern conf_if_list *if_list;
     conf_if_list *if_ptr;
     const char *scan_line_2_2="%lu %lu %lu %*lu %*lu %*lu %*lu %*lu %lu %lu %lu %*lu %*lu %lu";
     const char *scan_line_2_0="%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
@@ -1339,7 +1415,7 @@ Interface_Scan_Init (void)
 #endif
 
 	for (if_ptr = if_list; if_ptr; if_ptr = if_ptr->next)
-	    if (! strcmp (if_ptr->name, fullname))
+	    if (! strcmp (if_ptr->name, ifname))
 	      break;
 
 	if (if_ptr) {

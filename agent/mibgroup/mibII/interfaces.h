@@ -61,7 +61,7 @@ struct ifnet {
 	char    if_hwaddr [6];		/* ethernet address */
 	int	if_type;		/* interface type: 1=generic,
 					   28=slip, ether=6, loopback=24 */
-	int	if_speed;		/* interface speed: in bits/sec */
+	u_long	if_speed;		/* interface speed: in bits/sec */
 
 	struct sockaddr if_addr;	/* interface's address */
 	struct sockaddr ifu_broadaddr;	/* broadcast address */
