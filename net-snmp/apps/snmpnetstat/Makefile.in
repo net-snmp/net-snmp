@@ -16,25 +16,28 @@
 #
 #	@(#)Makefile	5.10 (Berkeley) 9/20/88
 #
+top_builddir=../..
 SRCS=	inet.c inet6.c if.c main.c route.c winstub.c
 OBJS=	inet.o inet6.o if.o main.o route.o winstub.o
+LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo
 TARG= snmpnetstat
 
 CPPFLAGS=-I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@
-CC = @CC@ $(CPPFLAGS)
 
-LOCAL_LIBS = -L../../snmplib
-LIBS=	 $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+#LOCAL_LIBS = -L../../snmplib
+LOCAL_LIBS =
+#LIBS=	 $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+LIBS=	 ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 
 all: $(TARG)
 
-snmpnetstat: ${OBJS} ${USELIBS}
-	${CC} -o $@ ${OBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
+snmpnetstat: ${LOBJS} ${USELIBS}
+	${LIBTOOL} ${CC} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
 
 distclean: clean
 
 clean:
-	rm -f ${OBJS} core snmpnetstat
+	rm -f ${LOBJS} core snmpnetstat
 
 cleandir: clean
 	rm -f ${MAN} tags .depend

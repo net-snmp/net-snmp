@@ -19,3 +19,5 @@ sedscript
 targets
 ucd-snmp-config.h
 ucd-snmp.txt
+*.made
+libtool

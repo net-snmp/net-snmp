@@ -2,7 +2,10 @@
 # Makefile for snmplib
 #
 
+top_builddir	= ..
+
 TARG=	libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+CLEANTARG = libsnmp.a
 
 #all but md5.h, vacm.h, libsnmp.h, and read_config.h are copied to the installed
 #include directory
@@ -37,33 +40,44 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	scapi.c callback.c default_store.c snmp_alarm.c	mt_support.c
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
-	snmp_auth.o asn1.o md5.o 				\
-	system.o vacm.o int64.o read_config.o 			\
-	snmp_debug.o tools.o  snmp_logging.o			\
-	snmpv3.o snmpusm.o lcd_time.o keytools.o		\
-	scapi.o callback.o default_store.o snmp_alarm.o	mt_support.o
+	snmp_auth.o asn1.o md5.o 			  	\
+	system.o vacm.o int64.o read_config.o 		  	\
+	snmp_debug.o tools.o  snmp_logging.o	   	  	\
+	snmpv3.o snmpusm.o lcd_time.o keytools.o	  	\
+	scapi.o callback.o default_store.o snmp_alarm.o	  	\
+	mt_support.o
 
-CFLAGS	 = @CFLAGS@ @LIB_CFLAGS@
+LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
+	snmp_auth.lo asn1.lo md5.lo 				\
+	system.lo vacm.lo int64.lo read_config.lo 		\
+	snmp_debug.lo tools.lo  snmp_logging.lo	   	  	\
+	snmpv3.lo snmpusm.lo lcd_time.lo keytools.lo	  	\
+	scapi.lo callback.lo default_store.lo snmp_alarm.lo	\
+	mt_support.lo
+
+# just in case someone wants to remove libtool, change this to OBJS.
+TOBJS=$(LOBJS)
+
+CFLAGS	 = @CFLAGS@
 CPPFLAGS = -I. -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
-CC	 = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
-libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${OBJS}
-	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${OBJS}
+libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
+	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS}
 	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(libdir) $(includedir)
 
 install:	$(TARG) installdirs
-	@for i in $(TARG) ; do $(INSTALL) $$i $(libdir) ; $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
+	@for i in $(TARG) ; do $(INSTALL) $$i $(libdir) ; done
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 	$(LIB_LDCONFIG_CMD)
 
 ../lib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):	libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 	cp libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ../lib
-	@RANLIB@ ../lib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) $(LIB_LD_LIBS)
+	$(RANLIB) ../lib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) $(LIB_LD_LIBS)
 
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse
@@ -72,8 +86,8 @@ lint:
 	lint -nhx $(CSRCS)
 
 clean:
-	rm -f ${OBJS} ${TARG}
-	rm -f ../lib/${TARG}
+	rm -f ${OBJS} ${LOBJS} ${TARG} ${CLEANTARG}
+	rm -rf .libs
 
 depend: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c

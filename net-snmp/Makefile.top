@@ -30,10 +30,13 @@ persistentdir	= @PERSISTENT_DIRECTORY@
 #
 # Programs
 #
-INSTALL		= @INSTALL@
+INSTALL		= $(LIBTOOL) --mode=install @INSTALL@
 SED		= @SED@
-RANLIB		= @RANLIB@
 LN_S		= @LN_S@
+#AUTOCONF	= @AUTOCONF@
+#AUTOHEADER	= @AUTOHEADER@
+AUTOCONF	= autoconf
+AUTOHEADER	= autoheader
 
 #
 # Compiler arguments
@@ -41,20 +44,18 @@ LN_S		= @LN_S@
 CFLAGS		= @CFLAGS@
 EXTRACPPFLAGS	= @EXTRACPPFLAGS@
 LDFLAGS		= @LDFLAGS@ 
+LIBTOOL		= @LIBTOOL@
 
-#
-# Shared library commands (or not)
-#
-LIB_EXTENSION		= @LIB_EXTENSION@
-LIB_LD_CMD		= @LIB_LD_CMD@
-LIB_LDCONFIG_CMD	= @LIB_LDCONFIG_CMD@
-LIB_CFLAGS		= @LIB_CFLAGS@
-SHLIB_CFLAGS		= @SHLIB_CFLAGS@
-SHLIB_EXTENSION		= @SHLIB_EXTENSION@
-SHLIB_VERSION		= @SHLIB_VERSION@
-SHLIB_LDCONFIG_CMD	= @SHLIB_LDCONFIG_CMD@
-SHLIB_LD_CMD		= @SHLIB_LD_CMD@
-SHLIB_LD_LIBS		= @SHLIB_LD_LIBS@
-SHLIB_CC_RUNTIME_ARG	= @SHLIB_CC_RUNTIME_ARG@
-CC_RUNTIME_ARG		= @CC_RUNTIME_ARG@
-RANLIB			= @RANLIB@
+# Misc Compiling Stuff
+CC	        = @CC@ $(CPPFLAGS)
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -o
+LIB_EXTENSION   = la
+LIB_VERSION     =
+LIB_LDCONFIG_CMD = $(LIBTOOL) -n --mode=finish $(libdir)
+# RANLIB 	= @RANLIB@
+RANLIB		= :
+
+# libtool definitions
+.SUFFIXES: .c .o .lo
+.c.lo:
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $<

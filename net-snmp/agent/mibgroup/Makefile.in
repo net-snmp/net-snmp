@@ -1,7 +1,7 @@
+top_builddir=../..
 
 CPPFLAGS=-I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
 	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I.. @CPPFLAGS@ $(LIB_CFLAGS)
-CC = @CC@
 
 # Need a special .c -> .o definition here to make sure we place the
 # object files in the sub directory.
@@ -10,15 +10,17 @@ CC = @CC@
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 OBJS = @module_list_o@
+LOBJS = @module_list_lo@
 SRCS = @module_list_c@
 
-all: $(OBJS)
+all: $(LOBJS)
 
 TAGS: $(SRCS)
 	etags *.c *.h
 
 clean:
-	rm -f ${OBJS}
+	rm -f ${LOBJS} ${OBJS}
+	rm -rf .libs */.libs
 
 depend: 
 	makedepend $(CPPFLAGS) $(SRCS)

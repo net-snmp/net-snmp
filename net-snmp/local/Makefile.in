@@ -1,3 +1,5 @@
+top_builddir=..
+
 SCRIPTS=snmpcheck tkmib
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made rsnmp.made

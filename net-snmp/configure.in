@@ -24,10 +24,6 @@ AC_ARG_WITH(ldflags,
 [  --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.],
     [LIBS=$with_ldflags; export LIBS])
 
-AC_ARG_ENABLE(shared,
-[  --enable-shared                 Compile, use, and install shared libraries.],
-    with_shared="yes",with_shared="no")
-
 AC_ARG_ENABLE(mini_agent,
 [  --enable-mini-agent             Build a minimal agent.],
     mini_agent="yes",mini_agent="no")
@@ -271,6 +267,11 @@ else
   echo "no"
 fi
 
+dnl libtool stuff for shared/static libraries.
+AC_LIBTOOL_DLOPEN
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
@@ -281,6 +282,17 @@ AC_PATH_PROG(PSPROG,ps)
 AC_PATH_PROG(PERLPROG,perl)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_CHECK_PROGS(SED,sed gsed)
+AC_CHECK_PROG(AUTOCONF, autoconf)
+AC_CHECK_PROG(AUTOHEADER, autoheader)
+if test "x$test ac_cv_prog_AUTOCONF" = "x"; then
+	AUTOCONF=":"
+	AC_SUBST(AUTOCONF)
+fi
+if test "x$test ac_cv_prog_AUTOHEADER" = "x"; then
+	AUTOHEADER=":"
+	AC_SUBST(AUTOHEADER)
+fi
+
 AC_PATH_PROG(UNAMEPROG,uname)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
@@ -451,132 +463,6 @@ while test "x$tmpset" != "x$SNMPCONFPATH"; do
 done
 AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
 
-dnl
-dnl Figure out shared libraries extensions.
-dnl
-
-if test "x$with_shared" = "xyes"; then
-    if test "x$GCC" = "xyes"; then
-	SHLIB_CFLAGS="-fPIC -shared"
-    else
-	SHLIB_CFLAGS="-KPIC"
-    fi
-    SHLIB_EXTENSION="so"
-    SHLIB_VERSION=
-    SHLIB_LD_CMD="ld -r -o"
-    SHLIB_LDCONFIG_CMD=
-    SHLIB_LD_LIBS=
-    SHLIB_CC_RUNTIME_ARG=
-    SHLIB_RANLIB=":"
-
-    case $target_os in
-
-    linux*)
-	SHLIB_LD_CMD='$(CC) -shared $(CFLAGS) -o'
-	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -n $(libdir)'
-	SHLIB_LD_LIBS='$(LDFLAGS) $(LOCAL_LIBS) $(LIBS)'
-	LDFLAGS="$LDFLAGS -rdynamic"
-	;;
-
-    irix*)
-	SHLIB_LD_CMD="ld -shared -o"
-	SHLIB_CC_RUNTIME_ARG="-Wl,-rpath -Wl,$libdir"
-	if test "x$GCC" != "xyes"; then
-	    SHLIB_CFLAGS="-KPIC"
-	fi
-	;;
-
-    netbsd*|openbsd*)
-	AC_MSG_CHECKING(if this is ELF system)
-	AC_EGREP_CPP(yes, [dnl
-#ifdef __ELF__
-yes
-#endif], [dnl
-		AC_MSG_RESULT([yes])
-		SHLIB_LD_CMD="ld -Bshareable -o"
-		CC_RUNTIME_ARG="-R$libdir"
-		SHLIB_LDCONFIG_CMD=
-	], [dnl
-		AC_MSG_RESULT([no])
-		SHLIB_LD_CMD="ld -Bshareable -o"
-		CC_RUNTIME_ARG="-R$libdir"
-		SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -m $(libdir)'
-	])
-	;;
-
-    hpux*)
-	SHLIB_EXTENSION="sl"
-	if test "x$GCC" != "xyes"; then
-	    SHLIB_CFLAGS="+Z"
-	fi
-	SHLIB_CC_RUNTIME_ARG="-Wl,+b,$libdir"
-	SHLIB_LD_CMD="ld -b -o"
-	;;
-
-    osf*)
-	SHLIB_CC_RUNTIME_ARG="-rpath $libdir"
-	SHLIB_LD_CMD="ld -shared -expect_unresolved \"*\" -o"
-	if test "x$GCC" != "xyes"; then
-	    SHLIB_CFLAGS=""
-	fi
-	;;
-	
-    aix*)
-	;;
-
-    sysv4*)
-	SHLIB_CC_RUNTIME_ARG="-R$libdir"
-	;;
-
-    sunos*)
-    if test "x$GCC" != "xyes"; then
-	    SHLIB_CFLAGS="-PIC"
-	fi
-	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/usr/etc" ldconfig $(libdir)'
-	;;
-
-    solaris*)
-	SHLIB_LD_CMD="ld -G -o"
-	SHLIB_CC_RUNTIME_ARG="-R$libdir"
-	;;
-
-    freebsd*)
-	SHLIB_LD_CMD="ld -Bshareable -o"
-	SHLIB_VERSION=.4
-	;;
-
-    bsdi4*)
-	SHLIB_LD_CMD="ld -Bshareable -o"
-	;;
-
-    *)
-	AC_MSG_ERROR([
-	  *** shared libraries aren't supported for architecture $target_os
-	])
-	;;
-
-    esac
-
-    LIB_EXTENSION="$SHLIB_EXTENSION"
-    LIB_VERSION="$SHLIB_VERSION"
-    LIB_LD_CMD="$SHLIB_LD_CMD"
-    LIB_LD_LIBS="$SHLIB_LD_LIBS"
-    LIB_LDCONFIG_CMD="$SHLIB_LDCONFIG_CMD"
-    LIB_CFLAGS="$SHLIB_CFLAGS"
-    CC_RUNTIME_ARG="$SHLIB_CC_RUNTIME_ARG"
-    RANLIB="$SHLIB_RANLIB"
-else
-    LIB_EXTENSION="a"
-    LIB_VERSION=
-    LIB_LD_CMD="ar cr"
-    LIB_LD_LIBS=
-    LIB_CFLAGS=
-    LIB_LDCONFIG_CMD=":"
-    CC_RUNTIME_ARG=
-    RANLIB=":"
-fi
-
-
 dnl guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then
 	v6type=unknown
@@ -718,26 +604,6 @@ else
 	AC_MSG_RESULT(no)
 fi
 
-AC_SUBST(CC_RUNTIME_ARG)
-AC_SUBST(LIB_CFLAGS)
-AC_SUBST(LIB_EXTENSION)
-AC_SUBST(LIB_VERSION)
-AC_SUBST(LIB_LDCONFIG_CMD)
-AC_SUBST(LIB_LD_CMD)
-AC_SUBST(LIB_LD_LIBS)
-AC_SUBST(SHLIB_CC_RUNTIME_ARG)
-AC_SUBST(SHLIB_CFLAGS)
-AC_SUBST(SHLIB_EXTENSION)
-AC_SUBST(SHLIB_VERSION)
-AC_SUBST(SHLIB_LDCONFIG_CMD)
-AC_SUBST(SHLIB_LD_CMD)
-AC_SUBST(SHLIB_LD_LIBS)
-if test "x$RANLIB" != "x:"; then
-    AC_PROG_RANLIB
-fi
-AC_MSG_CHECKING(for how to build the library)
-AC_MSG_RESULT([EXTENSION=$LIB_EXTENSION, VERSION=$LIB_VERSION, LD=$LIB_LD_CMD, LDCONFIG=$LIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$LIB_CFLAGS $CC_RUNTIME_ARG])
-
 dnl
 dnl Do hairy agent module processing.
 dnl
@@ -878,13 +744,17 @@ while test "x$new_module_list" != "x"; do
   new_list_two=""
 done
 module_list_o=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.o /g'`
+module_list_lo=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.lo /g'`
 module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
+mibgroup_list_lo=`echo " $module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
 changequote([, ])
 AC_SUBST(module_list_c)
 AC_SUBST(module_list_h)
 AC_SUBST(module_list_o)
+AC_SUBST(module_list_lo)
 AC_SUBST(mibgroup_list_o)
+AC_SUBST(mibgroup_list_lo)
 AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
