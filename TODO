@@ -1,14 +1,24 @@
 TODO list for the ucd-snmp-coders:
 
-  snmpv2c support.
-  split agent/snmp_vars.c in to manageable pieces.
-  merge similar apps/* code into one file linked by all apps.
-  continue to add and improve manual pages/documentation.
-  more snmpset'able variables.
-  should be able to set the fix script line in the .conf files per type.
-  complete linux port.
-  create prototypes for functions.
-  run-time configurable access restrictions for mib tree sections.
+  Snmpv2c support.
+  Split agent/snmp_vars.c in to manageable pieces.
+  Merge similar apps/* code into one file linked by all apps.
+  Continue to add and improve manual pages/documentation.
+  More snmpset'able variables.
+  Should be able to set the fix script line in the .conf files per type.
+  Complete linux port.
+  Create prototypes for functions.
+  Run-time configurable access restrictions for mib tree sections.
+  Implement IP routing table manipulation using sysctl() on systems that
+    support the route socket (BSD 4.4 and IRIX >=6.2)
+  Implement new IP forwarding table MIB (RFC 2096), at least on systems
+    that have classless routing tables internally
+  Implement IP/UDP/TCP statistics on IRIX 6.2 and later using
+    sysmp(MP_SAGET,MPSA_TCPIPSTAT,...) and <sys/tcpipstats.h>
+  Follow the evolution of the Interfaces Group MIB
+    (draft-ietf-ifmib-mib-05.txt) and implement what can be
+    implemented.
+  Make read_objid and sprint_objid agree on which shorthands they accept.
 
 Other Ideas:
   Make the mib parser figure out which of the above files it needs to
