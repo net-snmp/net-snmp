@@ -49,16 +49,19 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <net/route.h>
+#include <netinet/ip.h>
 #include <netinet/in_pcb.h>
 #include <netinet/if_ether.h>
 #include <netinet/in_systm.h>
 #ifndef sunV3
 #include <netinet/in_var.h>
 #endif
-#include <netinet/ip.h>
 #include <netinet/ip_var.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_timer.h>
+#ifdef __alpha
+#include <netinet/tcpip.h>
+#endif
 #include <netinet/tcp_var.h>
 #include <netinet/tcp_fsm.h>
 #include <netinet/udp.h>
@@ -524,11 +527,13 @@ struct variable2 udp_variables[] = {
 
 #ifndef hpux
 #ifndef sparc
+#ifndef __alpha
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
     {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
+#endif
 #endif
 #endif
 
@@ -2416,7 +2421,7 @@ u_char *EtherAddr;
 
 
 
-#if defined(mips) || defined(ibm032) || defined(sunV3) || defined(hpuxx)
+#if defined(mips) || defined(ibm032) || defined(sunV3)
 
 
 /*

@@ -40,7 +40,11 @@ u_short  flags;
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
+#ifdef __alpha
+    struct ortentry  route;
+#else
     struct rtentry  route;
+#endif
     int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
@@ -81,7 +85,11 @@ u_short  flags;
     struct sockaddr_in     dst;
     struct sockaddr_in     gateway;
     int                    s;
+#ifdef __alpha
+    struct ortentry  route;
+#else
     struct rtentry  route;
+#endif
     int  ret;
 
     s = socket(AF_INET, SOCK_RAW, 0);
