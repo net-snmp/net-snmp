@@ -244,12 +244,9 @@ netsnmp_access_interface_entry_create(const char *name)
      * make some assumptions
      */
     entry->if_connector_present = 1;
-    entry->if_oper_status = IFOPERSTATUS_UP;
 
     entry->oid_index.len = 1;
     entry->oid_index.oids = (oid *) & entry->index;
-
-    snmp_log(LOG_ERR, "netsnmp_access_interface_entry_create(entry);\n");
 
     return entry;
 }
