@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <ctype.h>
 #include <errno.h>
 
 #if HAVE_STRING_H
@@ -27,6 +26,9 @@
 #endif
 #if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
 #endif
 
 #include "asn1.h"
@@ -254,7 +256,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(t->local, addr.sin6_addr.s6_addr, 16);
+    memcpy(t->local, addr->sin6_addr.s6_addr, 16);
     t->local[16] = (addr->sin6_port & 0xff00) >> 8;
     t->local[17] = (addr->sin6_port & 0x00ff) >> 0;
     t->local_length = 18;
@@ -288,7 +290,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 
     rc = listen(t->sock, SNMP_STREAM_QUEUE_LEN);
     if (rc != 0) {
-      snmp_tcp_close(t);
+      snmp_tcp6_close(t);
       snmp_transport_free(t);
       return NULL;
     }
@@ -299,7 +301,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
       snmp_transport_free(t);
       return NULL;
     }
-    memcpy(t->remote, addr.sin6_addr.s6_addr, 16);
+    memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
     t->remote[16] = (addr->sin6_port & 0xff00) >> 8;
     t->remote[17] = (addr->sin6_port & 0x00ff) >> 0;
     t->remote_length = 18;
@@ -312,7 +314,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
     rc = connect(t->sock, (struct sockaddr *)addr,sizeof(struct sockaddr_in6));
 
     if (rc < 0) {
-      snmp_tcp_close(t);
+      snmp_tcp6_close(t);
       snmp_transport_free(t);
       return NULL;
     }
