@@ -24,6 +24,7 @@ void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
 void debugmsg_oid(const char *token, const oid *theoid, size_t len);
+void debugmsg_var(const char *token, struct variable_list *var);
 void debugmsg_oidrange(const char *token, const oid *theoid, size_t len,
 		       size_t var_subid, oid range_ubound);
 void debugmsg_hex(const char *token, u_char *thedata, size_t len);
@@ -104,6 +105,7 @@ To print multiple pieces to a single line in one call, use:
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
 #define __DBGMSGTL(x)    __DBGTRACE, debugmsgtoken x, debugmsg x
 #define __DBGMSGOID(x)     debugmsg_oid x
+#define __DBGMSGVAR(x)     debugmsg_var x
 #define __DBGMSGOIDRANGE(x) debugmsg_oidrange x
 #define __DBGMSGHEX(x)     debugmsg_hex x
 #define __DBGMSGHEXTLI(x)  debugmsg_hextli x
@@ -155,6 +157,7 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
 #define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
 #define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
+#define DEBUGMSGVAR(x)     do {if (_DBG_IF_) {__DBGMSGVAR(x);} }while(0)
 #define DEBUGMSGOIDRANGE(x) do {if (_DBG_IF_) {__DBGMSGOIDRANGE(x);} }while(0)
 #define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
 #define DEBUGMSGHEXTLI(x)  do {if (_DBG_IF_) {__DBGMSGHEXTLI(x);} }while(0)
