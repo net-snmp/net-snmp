@@ -310,6 +310,17 @@ ${table} README
     Syntax: @eval $@m2c_include_examples = 0@
 
 
+    m2c_data_transient (currently '$m2c_data_transient')
+    ------------------------------------------------------------------
+    This variable determines how the generated example code deals with the
+    data during data lookup. See the table readme file for details on how
+    the current table access method interprets this value. In general,
+    a value of 0 indicates persistent data, 1 indicates semi-transient and
+    2 indicates transient data.
+
+    Syntax: @eval $@m2c_data_transient = 0@
+
+
  Index(es) for the ${table} table
   ------------------------------------------------------------
   The index(es) for the ${table} table are:
@@ -341,7 +352,14 @@ File: ${name}_data_access.[c|h]
   it's raw format.  These functions are used to locate the row for a
   particular request.
 
-@    include mfd-access-${m2c_table_access}-readme.m2i@
+  Set index context
+  -----------------
+  TODO : Set MIB index values
+  FUNC : ${context}_indexes_set
+
+  
+@    eval $m2c_processing_type = 'r'@
+@    include mfd-access-${m2c_table_access}-defines.m2i@
 
 
 File: ${name}_enums.h
@@ -372,8 +390,35 @@ File: ${name}_data_get.c
 
 @    end@
 
+@    foreach $node index@
+@        include m2c_setup_node.m2i@
+@        if ($m2c_skip_mapping == 0)@
+  Map native data to MIB format
+  -----------------------------
+  TODO : convert data from it's native format to the format required by the MIB
+  FUNC : ${node}_map
+
+  This function should map between the native format of the node data to
+  the format or values required by the MIB. For example, a C boolean value
+  for a MIB node with the TruthValue syntax needs to map the value C
+  false(0) to TruthValue false(2).
+
+@        end@ #// skip mapping
+@    end@ // foreach index
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
+@        if ($m2c_skip_mapping == 0)@
+  Map native data to MIB format
+  -----------------------------
+  TODO : convert data from it's native format to the format required by the MIB
+  FUNC : ${node}_map
+
+  This function should map between the native format of the node data to
+  the format or values required by the MIB. For example, a C boolean value
+  for a MIB node with the TruthValue syntax needs to map the value C
+  false(0) to TruthValue false(2).
+
+@        end@ #// skip mapping
   Get data for column
   -------------------
   TODO : retrieve column data from raw data
@@ -487,7 +532,7 @@ File: ${name}_data_set.c
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
 @        if $node.settable == 0@
-@            break@ # skip to next column
+@            next@ # skip to next column
 @        end@
   Check value for column
   ----------------------
@@ -527,7 +572,7 @@ File: ${name}_data_set.c
   If an error occurs after a column has been set, this function will be called
   to undo the set and restore the previous state.
 
-@   end@ # nonindex
+@    end@ # nonindex
 
 
   Commit changes
