@@ -23,6 +23,7 @@
 
 #include "../snmplib/asn1.h"
 #include "../snmplib/snmp_api.h"
+#include "../snmplib/snmp_debug.h"
 
 struct autonlist *nlists = 0;
 static void init_nlist (struct nlist *);

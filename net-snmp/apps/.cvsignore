@@ -1,3 +1,4 @@
+.gdb.auto.init
 .gdbinit
 Makefile
 snmpbulkwalk

@@ -40,7 +40,8 @@
 #include "mib_module_config.h"
 #include "../snmp_agent.h"
 #include "../snmpd.h"
-#include "../../snmplib/system.h"
+#include "../snmplib/system.h"
+#include "../snmplib/snmp_debug.h"
 
 char dontReadConfigFiles;
 char *optconfigfile;

@@ -89,6 +89,8 @@ SOFTWARE.
 #include "version.h"
 #include "snmptrapd_handlers.h"
 #include "read_config.h"
+#include "snmp_debug.h"
+
 #ifndef BSD4_3
 #define BSD4_2
 #endif
