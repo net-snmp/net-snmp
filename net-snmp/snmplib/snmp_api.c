@@ -1521,6 +1521,9 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
   rpdu = rp->pdu;
   if (rp->request_id != pdu->reqid || rpdu->reqid != pdu->reqid) return 0;
   if (rpdu->version != pdu->version) return 0;
+  if (rpdu->securityModel != pdu->securityModel) return 0;
+  if (rpdu->securityLevel != pdu->securityLevel) return 0;
+
   if (rpdu->contextEngineIDLen != pdu->contextEngineIDLen || 
       memcmp(rpdu->contextEngineID, pdu->contextEngineID, 
 	     pdu->contextEngineIDLen))
@@ -1535,8 +1538,6 @@ snmpv3_verify_msg(struct request_list *rp, struct snmp_pdu *pdu)
   if (rpdu->securityNameLen != pdu->securityNameLen || 
       memcmp(rpdu->securityName, pdu->securityName, pdu->securityNameLen)) 
     return 0;
-  if (rpdu->securityModel != pdu->securityModel) return 0;
-  if (rpdu->securityLevel != pdu->securityLevel) return 0;
   return 1;
 }
 
@@ -3080,10 +3081,8 @@ _sess_async_send(void *sessp,
     struct snmp_internal_session *isp;
     u_char  packet[PACKET_LENGTH];
     size_t length = PACKET_LENGTH;
-    struct request_list *rp;
     struct sockaddr_in *isp_addr;
     struct sockaddr_in *pduIp;
-    struct timeval tv;
     int result, addr_size;
     long reqid;
 
@@ -3187,19 +3186,33 @@ _sess_async_send(void *sessp,
 
     reqid = pdu->reqid;
 
-    /* check if should get a response */
+    /* add to pending requests list if expect a response */
     if (pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE) {
-        gettimeofday(&tv, (struct timezone *)0);
+        struct request_list *rp;
+        struct timeval tv;
 
-	/* set up to expect a response */
-	rp = (struct request_list *)malloc(sizeof(struct request_list));
+	rp = (struct request_list *)calloc( 1, sizeof(struct request_list));
 	if (rp == NULL) {
 	    session->s_snmp_errno = SNMPERR_GENERR;
 	    return 0;
 	}
-	memset(rp, 0, sizeof(struct request_list));
-	/* XX isp needs lock iff multiple threads can handle this session */
-	snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  /* XX lock should be per session ! */
+
+	gettimeofday(&tv, (struct timezone *)0);
+	rp->pdu = pdu;
+	rp->request_id = pdu->reqid;
+	rp->message_id = pdu->msgid;
+	rp->callback = callback;
+	rp->cb_data = cb_data;
+	rp->retries = 0;
+	rp->timeout = session->timeout;
+	rp->time = tv;
+	tv.tv_usec += rp->timeout;
+	tv.tv_sec += tv.tv_usec / 1000000L;
+	tv.tv_usec %= 1000000L;
+	rp->expire = tv;
+
+	/* XX lock should be per session ! */
+      snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
 	if (isp->requestsEnd){
 	    rp->next_request = isp->requestsEnd->next_request;
 	    isp->requestsEnd->next_request = rp;
@@ -3209,19 +3222,7 @@ _sess_async_send(void *sessp,
 	    isp->requests = rp;
 	    isp->requestsEnd = rp;
 	}
-	snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); /* XX lock should be per session ! */
-	rp->pdu = pdu;
-	rp->request_id = pdu->reqid;
-	rp->message_id = pdu->msgid;
-        rp->callback = callback;
-        rp->cb_data = cb_data;
-	rp->retries = 0;
-	rp->timeout = session->timeout;
-	rp->time = tv;
-	tv.tv_usec += rp->timeout;
-	tv.tv_sec += tv.tv_usec / 1000000L;
-	tv.tv_usec %= 1000000L;
-	rp->expire = tv;
+      snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
     }
     else
         snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU */
@@ -3334,8 +3335,6 @@ _sess_read(void *sessp,
     size_t length = 0;
     struct snmp_pdu *pdu;
     struct request_list *rp, *orp = NULL;
-    snmp_callback callback;
-    void *magic;
     int ret;
     int addrlen;
     int fromlength;
@@ -3353,9 +3352,6 @@ _sess_read(void *sessp,
     
     sp->s_snmp_errno = 0;
     sp->s_errno = 0;
-
-    callback = sp->callback;
-    magic = sp->callback_magic;
 
     if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET ) {
         if ( sp->flags & SNMP_FLAGS_LISTENING ) {
@@ -3554,6 +3550,8 @@ _sess_read(void *sessp,
         pdu->securityStateRef = NULL;
       }
       for(rp = isp->requests; rp; orp = rp, rp = rp->next_request) {
+        snmp_callback callback;
+        void *magic;
         if (pdu->version == SNMP_VERSION_3) {
           /* msgId must match for V3 messages */
           if (rp->message_id != pdu->msgid) continue;
@@ -3563,11 +3561,12 @@ _sess_read(void *sessp,
         } else {
           if (rp->request_id != pdu->reqid) continue;
         }
-        callback = sp->callback;
-        magic = sp->callback_magic;
         if (rp->callback) {
           callback = rp->callback;
           magic = rp->cb_data;
+        } else {
+          callback = sp->callback;
+          magic = sp->callback_magic;
         }
 
         /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock should be per session ! */
@@ -3601,7 +3600,6 @@ _sess_read(void *sessp,
           }
           /* successful, so delete request */
           if (isp->requests == rp){
-            /* first in list */
             isp->requests = rp->next_request;
             if (isp->requestsEnd == rp)
               isp->requestsEnd = NULL;
@@ -3837,7 +3835,6 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   struct timeval tv;
   struct snmp_session *sp;
   struct snmp_internal_session *isp;
-  struct sockaddr_in *pduIp;
   struct timeval now;
   int result, addr_size;
 
@@ -3857,8 +3854,9 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     /* this should never happen */
     return -1;
   }
-  pduIp = (struct sockaddr_in *)&(rp->pdu->address);
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
+    struct sockaddr_in *pduIp;
+    pduIp = (struct sockaddr_in *)&(rp->pdu->address);
     snmp_log(LOG_DEBUG, "\nResending %d bytes to %s:%hu\n", length,
 	   inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
     xdump(packet, length, "");
@@ -3920,16 +3918,17 @@ snmp_sess_timeout(void *sessp)
         if ((timercmp(&rp->expire, &now, <))){
     	/* this timer has expired */
     	if (rp->retries >= sp->retries){
-	    callback = sp->callback;
-	    magic = sp->callback_magic;
-	    if (rp->callback) {
+            if (rp->callback) {
               callback = rp->callback;
-	      magic = rp->cb_data;
-	    }
+              magic = rp->cb_data;
+            } else {
+              callback = sp->callback;
+              magic = sp->callback_magic;
+            }
     	    /* No more chances, delete this entry */
     	    if (callback)
 		callback(TIMED_OUT, sp, rp->pdu->reqid, rp->pdu, magic);
-    	    if (orp == NULL){
+    	    if (isp->requests == rp){
     		isp->requests = rp->next_request;
     		if (isp->requestsEnd == rp)
     		    isp->requestsEnd = NULL;
