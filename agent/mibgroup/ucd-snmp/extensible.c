@@ -379,7 +379,6 @@ fixExecError(int action,
         file = fdopen(fd,"r");
         while (fgets(ex.output,STRMAX,file) != NULL);
         fclose(file);
-        close(fd);
         wait_on_exec(&ex);
       }
     }
@@ -468,13 +467,11 @@ u_char *var_extensible_relocatable(struct variable *vp,
             if (fgets(errmsg,sizeof(errmsg),file) == NULL) {
               *var_len = 0;
               fclose(file);
-              close(fd);
               wait_on_exec(exten);
               return(NULL);
             }
           }
           fclose(file);
-          close(fd);
           wait_on_exec(exten);
         } else
           errmsg[0] = 0;

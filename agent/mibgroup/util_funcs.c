@@ -113,13 +113,11 @@ int exec_command(struct extensible *ex)
   FILE *file;
   
   if ((fd = get_exec_output(ex))) {
-    
     file = fdopen(fd,"r");
     if (fgets(ex->output,STRMAX,file) == NULL) {
       ex->output[0] = 0;
     }
     fclose(file);
-    close(fd);
     wait_on_exec(ex);
   } else {
     ex->output[0] = 0;
