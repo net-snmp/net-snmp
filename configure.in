@@ -5,7 +5,8 @@ AC_CONFIG_HEADER(config.h)
 AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_WITH(defaults,[  --with-defaults         Use defaults for prompted values.],defaults="yes",defaults="no")
 AC_ARG_WITH(root-access,[  --without-root-access   The agent does not exit if it can not open /dev/kmem.])
-AC_ARG_WITH(mib_modules,[  --with-mib-modules="list"  Compile with additional mib modules.],defaults="yes",defaults="no")
+AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"      Compile with additional mib modules.])
+AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"  Compile without these mib modules.])
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
 if test "x$with_root_access" = "xno"; then
@@ -56,37 +57,43 @@ done
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
-    if test -f $srcdir/$mibdir/$i.h -a -f $srcdir/$mibdir/$i.c; then
-      new_list=`grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`
-      if test "x$new_list" != "x"; then
-	for j in $new_list
-	  do
-	  if test ! -f $srcdir/$mibdir/$j.h -o ! -f $srcdir/$mibdir/$j.c; then
-	    AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
-	  fi
-	  
-	  if echo "$module_list $new_list_two $new_module_list" | grep $j > /dev/null; then
-	    :
-	  else
-	    new_list_two="$new_list_two $j"
-	  fi
-	done
-      fi
+    if echo $with_out_mib_modules | grep $i > /dev/null; then
+      :
     else
-      AC_MSG_ERROR(module files $i.h or $i.c could not be found in $srcdir/$mibdir)
+      if test -f $srcdir/$mibdir/$i.h -a -f $srcdir/$mibdir/$i.c; then
+	new_list=`grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`
+	if test "x$new_list" != "x"; then
+	  for j in $new_list
+	    do
+	    if test ! -f $srcdir/$mibdir/$j.h -o ! -f $srcdir/$mibdir/$j.c; then
+	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
+	    fi
+	    if echo $with_out_mib_modules | grep $j > /dev/null; then
+	      AC_MSG_ERROR(mib module "$i" requires module "$j" but you told me to compile without it)
+	    fi
+	    if echo "$module_list $new_list_two $new_module_list" | grep $j > /dev/null; then
+	      :
+	    else
+	      new_list_two="$new_list_two $j"
+	    fi
+	  done
+	fi
+      else
+	AC_MSG_ERROR(module files $i.h or $i.c could not be found in $srcdir/$mibdir)
+      fi
+      module_list="$module_list $i"
+      echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
+      if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
+	echo "  init_$i();" >> $mibdir/mib_module_inits.h
+      fi
+      dnl    grep config_load_mib $srcdir/$mibdir/$i.h | sed 's/config_load_mib/mib_define/' >> $mibdir/mib_module_loads.h
+      grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3)},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
+      sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
+      echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h
+      echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
+      echo " " >> mib_module_config.h
+      echo $ac_n " $i$ac_c"
     fi
-    module_list="$module_list $i"
-    echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
-    if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
-      echo "  init_$i();" >> $mibdir/mib_module_inits.h
-    fi
-    dnl    grep config_load_mib $srcdir/$mibdir/$i.h | sed 's/config_load_mib/mib_define/' >> $mibdir/mib_module_loads.h
-    grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3)},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
-    sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
-    echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h
-    echo "#define USING_${sym}_MODULE 1" >> mib_module_config.h
-    echo " " >> mib_module_config.h
-    echo $ac_n " $i$ac_c"
   done
   new_module_list="$new_list_two"
   new_list_two=""
