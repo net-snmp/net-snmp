@@ -70,10 +70,10 @@ restrictions.
 .IP "defSecurityLevel noAuthNoPriv|authNoPriv|authPriv"
 The snmpv3 default security level to use.
 .IP "showMibErrors   (1|yes|true|0|no|false)"
-Weather or not to display textual mib parsing errors when commands are
+Whether or not to display textual mib parsing errors when commands are
 run.
 .IP "strictCommentTerm (1|yes|true|0|no|false)"
-Weather or not mibs that are parsed should be strict about comment
+Whether or not mibs that are parsed should be strict about comment
 termination.  "--" terminates a comment if this is true.  Many
 distributed mibs have broken comments in them, hence this option.
 .IP "mibAllowUnderline (1|yes|true|0|no|false)"
@@ -81,26 +81,26 @@ Allow underline characters in mibs (illegal).
 .IP "mibWarningLevel integerValue"
 The minimum warning level of the warnings printed by the mib parser.
 .IP "logTimestamp      (1|yes|true|0|no|false)"
-Weather the commands should log timestamps with their error/message
+Whether the commands should log timestamps with their error/message
 logging or not.  Note that output will not look as pretty with
 timestamps if the source code that is doing the logging does
 incremental logging of messages that are not line buffered before
 being passed to the logging routines.
 .IP "printNumericEnums (1|yes|true|0|no|false)"
-Equivelent to -Oe
+Equivalent to -Oe
 .IP "printNumericOids (1|yes|true|0|no|false)"
-Equivelent to -On
+Equivalent to -On
 .IP "dontBreakdownOids (1|yes|true|0|no|false)"
-Equivelent to -Ob
+Equivalent to -Ob
 .IP "quickPrinting (1|yes|true|0|no|false)"
-Equivelent to -Oq
+Equivalent to -Oq
 .IP "suffixPrinting (0|1|2)"
-If the value is 1, its equivelent to -Os and if the value is 2 it's
-equivelent to -OS.
+If the value is 1, its equivalent to -Os and if the value is 2 it's
+equivalent to -OS.
 .IP "dumpPacket      (1|yes|true|0|no|false)"
-Weather the commands should dump packets by default.
+Whether the commands should dump packets by default.
 .IP "doDebugging (1|0)"
-Turns on debugging for all aplications run if set to 1.
+Turns on debugging for all applications run if set to 1.
 .IP "debugTokens token[,token...]"
 The debugging tokens that should be printed.  See the
 .I snmpcmd(1)

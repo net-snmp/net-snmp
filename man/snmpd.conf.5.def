@@ -273,7 +273,7 @@ trap when it starts up. If enabled, it also sends traps on
 authentication failures.  Multiple \fItrapsink\fR lines may be specified
 to specify multiple destinations.
 Use \fItrap2sink\fR to send SNMPv2 traps.
-If COMMUNITY is not specified, the string from a preceeding \fItrapcommunity\fR
+If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
 directive will be used.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
