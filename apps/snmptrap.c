@@ -68,7 +68,9 @@ SOFTWARE.
 #include <sys/sockio.h>
 #endif
 #include <sys/file.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
