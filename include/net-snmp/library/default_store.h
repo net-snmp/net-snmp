@@ -95,15 +95,6 @@ extern          "C" {
      * end storage definitions 
      */
 
-    typedef struct netsnmp_ds_read_config_s {
-        u_char          type;
-        char           *token;
-        char           *ftype;
-        int             storeid;
-        int             which;
-        struct ds_read_config *next;
-    } netsnmp_ds_read_config;
-
     int             netsnmp_ds_set_boolean(int storeid, int which, int value);
     int             netsnmp_ds_get_boolean(int storeid, int which);
     int             netsnmp_ds_toggle_boolean(int storeid, int which);
