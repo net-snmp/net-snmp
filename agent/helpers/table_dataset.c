@@ -495,7 +495,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             }
         }
 
-      topsearch:
         data =
             netsnmp_table_data_set_find_column(data, table_info->colnum);
 
