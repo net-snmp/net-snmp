@@ -347,6 +347,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     /*
      * if we successfully commited this row, set the dirty flag.
      * this is checked in _post_request...
+     */
     if (MFD_SUCCESS == rc) {
         ${context}_dirty_set( 1 ); /* set table dirty flag */
     }
