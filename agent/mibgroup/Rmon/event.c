@@ -502,7 +502,8 @@ create_explanaition(CRTL_ENTRY_T * evptr, u_char is_rising,
     register char  *tmp;
 
 
-    sprint_objid(c_oid, alarmed_var, alarmed_var_length);
+    snprint_objid(c_oid, sizeof(c_oid)-1, alarmed_var, alarmed_var_length);
+    c_oid[sizeof(c_oid)-1] = '\0';
     for (pch = c_oid;;) {
         tmp = strchr(pch, '.');
         if (!tmp)
