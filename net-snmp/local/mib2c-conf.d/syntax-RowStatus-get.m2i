@@ -26,7 +26,7 @@
 
         /* `active', which indicates that the conceptual row is
               available for use by the managed device */
-    case INTERNAL_$node.uc_ACTIVE:
+    case INTERNAL_$context.uc_$node.uc_ACTIVE:
         $m2c_node_lh = ROWSTATUS_ACTIVE;
         break;
 
@@ -36,7 +36,7 @@
                  no implication regarding the internal consistency of
                  the row, availability of resources, or consistency with
                  the current state of the managed device */
-    case INTERNAL_$node.uc_NOTINSERVICE:
+    case INTERNAL_$context.uc_$node.uc_NOTINSERVICE:
         $m2c_node_lh = ROWSTATUS_NOTINSERVICE;
         break;
 
@@ -45,7 +45,7 @@
                  necessary in order to be available for use by the
                  managed device (i.e., one or more required columns in
                  the conceptual row have not been instanciated) */
-    case INTERNAL_$node.uc_NOTREADY:
+    case INTERNAL_$context.uc_$node.uc_NOTREADY:
         $m2c_node_lh = ROWSTATUS_NOTREADY;
         break;
 

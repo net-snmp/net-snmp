@@ -75,7 +75,7 @@ ${node}_map($m2c_node_map_param)
     switch(raw_$m2c_node_param_val_name) {
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
-        case INTERNAL_$m2c_iname:
+        case INTERNAL_$context.uc_$m2c_iname:
              *mib_$m2c_node_param_ref_name = $m2c_ename;
              break;
 

@@ -31,7 +31,7 @@ $example_start
     $m2c_node_lh = 0;
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
-    if ($m2c_ctx_rh & INTERNAL_$m2c_iname) {
+    if ($m2c_ctx_rh & INTERNAL_$context.uc_$m2c_iname) {
         $m2c_node_lh |= $m2c_ename;
     }
 @    end@ # for each
