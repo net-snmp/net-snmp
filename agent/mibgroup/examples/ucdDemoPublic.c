@@ -6,6 +6,7 @@
 #include "snmpv3.h"
 #include "snmpusm.h"
 #include "agent_read_config.h"
+#include "util_funcs.h"
 #include "ucdDemoPublic.h"
 
 #define MYMAX 1024
@@ -47,9 +48,9 @@ unsigned char *
 var_ucdDemoPublic(
     struct variable *vp,
     oid     *name,
-    int     *length,
+    size_t  *length,
     int     exact,
-    int     *var_len,
+    size_t  *var_len,
     WriteMethod **write_method)
 {
 
@@ -100,10 +101,10 @@ write_ucdDemoResetKeys(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long long_ret;
@@ -146,10 +147,10 @@ write_ucdDemoPublicString(
    int      action,
    u_char   *var_val,
    u_char   var_val_type,
-   int      var_val_len,
+   size_t   var_val_len,
    u_char   *statP,
    oid      *name,
-   int      name_len)
+   size_t   name_len)
 {
   /* variables we may use later */
   static long long_ret;
