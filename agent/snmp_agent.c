@@ -721,7 +721,7 @@ statp_loop:
 			}
 	    		saved->write_method = write_method;
 	    		saved->statP        = (u_char *)malloc(statLen);
-			if ( saved->statP )
+			if ( saved->statP && statP )
 			    memcpy( saved->statP, statP, statLen );
 	    		saved->statType     = statType;
 	    		saved->statLen      = statLen;
