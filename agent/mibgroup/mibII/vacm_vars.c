@@ -697,7 +697,25 @@ u_char *var_vacm_sec2group(struct variable *vp,
     unsigned long secmodel;
     char secname[VACMSTRINGLEN], *cp;
 
-    *write_method = NULL;
+    /*  Set up write_method first, in case we return NULL before getting to
+	the switch (vp->magic) below.  In some of these cases, we still want
+	to call the appropriate write_method, if only to have it return the
+	appropriate error.  */
+
+    switch (vp->magic) {
+    case SECURITYGROUP:
+	*write_method = write_vacmGroupName;
+	break;
+    case SECURITYSTORAGE:
+	  *write_method = write_vacmSecurityToGroupStorageType;
+	  break;
+    case SECURITYSTATUS:
+	  *write_method = write_vacmSecurityToGroupStatus;
+	  break;
+    default:
+	*write_method = NULL;
+    }
+
     if (memcmp(name, vp->name, sizeof(oid)*vp->namelen) != 0) {
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
 	*length = vp->namelen;
@@ -719,8 +737,7 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	*cp = 0;
 
 	gp = vacm_getGroupEntry(secmodel, secname);
-    }
-    else {
+    } else {
 	secmodel = *length > 11 ? name[11] : 0;
 	groupSubtree = name+12;
 	groupSubtreeLen = *length - 12;
@@ -749,48 +766,33 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	}
     }
 
-    if (!gp && !exact) return NULL;
+    if (gp == NULL) {
+	return NULL;
+    }
 
-    *var_len =sizeof(long_return);
+    *var_len = sizeof(long_return);
     switch (vp->magic) {
     case SECURITYMODEL:
-	  if(gp)
-	  {
 	long_return = gp->securityModel;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+
     case SECURITYNAME:
-	  if(gp)
-	  {
 	*var_len = gp->securityName[0];
 	return (u_char *)&gp->securityName[1];
-	  }
-	  return NULL;
+
     case SECURITYGROUP:
-	  *write_method = write_vacmGroupName;
-	  if(gp)
-	  {
 	*var_len = strlen(gp->groupName);
 	return (u_char *)gp->groupName;
-	  }
-	  return NULL;
+
     case SECURITYSTORAGE:
-	  *write_method = write_vacmSecurityToGroupStorageType;
-	  if(gp)
-	  {
 	long_return = gp->storageType;
 	return (u_char *)&long_return;
-	  }
-	  return NULL;
+    
     case SECURITYSTATUS:
-	  *write_method = write_vacmSecurityToGroupStatus;
-	  if(gp)
-	  {
 	long_return = gp->status;
 	return (u_char *)&long_return;
-    }
-    return NULL;
+
+    default:
     }
     return NULL;
 }
@@ -811,7 +813,33 @@ u_char *var_vacm_access(struct variable *vp,
     char *cp;
     int cmp;
 
-    *write_method = NULL;
+    /*  Set up write_method first, in case we return NULL before getting to
+	the switch (vp->magic) below.  In some of these cases, we still want
+	to call the appropriate write_method, if only to have it return the
+	appropriate error.  */
+
+    switch (vp->magic) {
+    case ACCESSMATCH:
+	  *write_method = write_vacmAccessContextMatch;
+	  break;
+    case ACCESSREAD:
+	  *write_method = write_vacmAccessReadViewName;
+	  break;
+    case ACCESSWRITE:
+	  *write_method = write_vacmAccessWriteViewName;
+	  break;
+    case ACCESSNOTIFY:
+	  *write_method = write_vacmAccessNotifyViewName;
+	  break;
+    case ACCESSSTORAGE:
+	  *write_method = write_vacmAccessStorageType;
+	  break;
+    case ACCESSSTATUS:
+	  *write_method = write_vacmAccessStatus;
+	  break;
+    default:
+	*write_method = NULL;
+    }
     
     if (memcmp(name, vp->name, sizeof(oid)*vp->namelen) != 0) {
 	memcpy(name, vp->name, sizeof(oid)*vp->namelen);
@@ -924,7 +952,6 @@ u_char *var_vacm_access(struct variable *vp,
     *var_len =sizeof(long_return);
     switch (vp->magic) {
     case ACCESSMATCH:
-	  *write_method = write_vacmAccessContextMatch;
 	  if(gp)
 	  {
 	long_return = gp->contextMatch;
@@ -953,7 +980,6 @@ u_char *var_vacm_access(struct variable *vp,
 	  }
 	  return NULL;
     case ACCESSREAD:
-	  *write_method = write_vacmAccessReadViewName;
 	  if(gp)
 	  {
 	*var_len = strlen(gp->readView);
@@ -961,7 +987,6 @@ u_char *var_vacm_access(struct variable *vp,
 	  }
 	  return NULL;
     case ACCESSWRITE:
-	  *write_method = write_vacmAccessWriteViewName;
 	  if(gp)
 	  {
 	*var_len = strlen(gp->writeView);
@@ -969,7 +994,6 @@ u_char *var_vacm_access(struct variable *vp,
 	  }
 	  return NULL;
     case ACCESSNOTIFY:
-	  *write_method = write_vacmAccessNotifyViewName;
 	  if(gp)
 	  {
 	*var_len = strlen(gp->notifyView);
@@ -977,7 +1001,6 @@ u_char *var_vacm_access(struct variable *vp,
 	  }
 	  return NULL;
     case ACCESSSTORAGE:
-	  *write_method = write_vacmAccessStorageType;
 	  if(gp)
 	  {
 	long_return = gp->storageType;
@@ -985,7 +1008,6 @@ u_char *var_vacm_access(struct variable *vp,
 	  }
 	  return NULL;
     case ACCESSSTATUS:
-	  *write_method = write_vacmAccessStatus;
 	  if(gp)
 	  {
 	long_return = gp->status;
@@ -1263,29 +1285,41 @@ write_vacmGroupName(int      action,
             oid      *name,
             size_t   name_len)
 {
-    /* variables we may use later */
-  static unsigned char string[SNMP_MAXBUF];
+    static unsigned char string[VACMSTRINGLEN];
+    struct vacm_groupEntry *geptr;
 
-  struct vacm_groupEntry *geptr;
-
-  if (var_val_type != ASN_OCTET_STR){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmGroupName not ASN_OCTET_STR\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(string)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmGroupName: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT) {
-    /* don't allow creations here */
-    if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
-      return SNMP_ERR_NOSUCHNAME;
+    DEBUGMSGTL(("mibII/vacm_vars", "name action %d\n", action));
+    if (action == RESERVE1) {
+	if (var_val_type != ASN_OCTET_STR) {
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"write to vacmGroupName not ASN_OCTET_STR\n"));
+	    return SNMP_ERR_WRONGTYPE;
+	}
+	if (var_val_len < 1 || var_val_len > 32) {
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"write_vacmGroupName: bad length %d\n", var_val_len));
+	    return SNMP_ERR_WRONGLENGTH;
+	}
+    } else if (action == RESERVE2) {
+	if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
+	    DEBUGMSGTL(("mibII/vacm_vars", "name RES2 geptr NULL\n"));
+	    return SNMP_ERR_INCONSISTENTNAME;
+	} else {
+	    DEBUGMSGTL(("mibII/vacm_vars", "name RES2 %p\n",geptr));
+	    memcpy(string, geptr->groupName, VACMSTRINGLEN);
+	    memcpy(geptr->groupName, var_val, var_val_len);
+	    geptr->groupName[var_val_len] = 0;
+	    if (geptr->status == RS_NOTREADY) {
+		geptr->status = RS_NOTINSERVICE;
+	    }
+	}
+    } else if (action == FREE) {
+	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
+	if ((geptr = sec2group_parse_groupEntry(name, name_len)) != NULL) {
+	    memcpy(geptr->groupName, string, VACMSTRINGLEN);
+	}
     }
-    memcpy(geptr->groupName, var_val, var_val_len);
-    geptr->groupName[var_val_len] = 0;
-  }
-  
-  return SNMP_ERR_NOERROR;
+    return SNMP_ERR_NOERROR;
 }
 
 int
@@ -1301,6 +1335,7 @@ write_vacmSecurityToGroupStorageType(int      action,
   static long long_ret;
   struct vacm_groupEntry *geptr;
   
+  DEBUGMSGTL(("mibII/vacm_vars", "type action %d\n", action));
   if (var_val_type != ASN_INTEGER){
       DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
@@ -1337,78 +1372,138 @@ write_vacmSecurityToGroupStatus(int      action,
 {
 
   /* variables we may use later */
-  static long long_ret;
-  int model;
-  char *newName;
-  size_t nameLen;
-  struct vacm_groupEntry *geptr;
+    long long_ret = *((long *)var_val);
+    int model;
+    char *newName;
+    size_t nameLen;
+    struct vacm_groupEntry *geptr;
 
-  if (var_val_type != ASN_INTEGER){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > sizeof(long_ret)){
-      DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  if (action == COMMIT){
-    long_ret = *((long *) var_val);
+    DEBUGMSGTL(("mibII/vacm_vars", " status action %d\n", action));
 
-    /* ditch illegal values now */
-    /* notReady can not be used, but the return error code is not mentioned */
-    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
-      return SNMP_ERR_INCONSISTENTVALUE;
+    if (action == RESERVE1) {
+	if (var_val_type != ASN_INTEGER){
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"write to vacmSecurityToGroupStatus not ASN_INTEGER\n"));
+	    return SNMP_ERR_WRONGTYPE;
+	}
+	if (var_val_len != sizeof(long_ret)){
+	    DEBUGMSGTL(("mibII/vacm_vars",
+			"write to vacmSecurityToGroupStatus: bad length\n"));
+	    return SNMP_ERR_WRONGLENGTH;
+	}
+	if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
+	    return SNMP_ERR_WRONGVALUE;
+	}
+
+	/*  See if we can parse the oid for model/name first.  */
+
+	if (sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+				name_len-SEC2GROUP_MIB_LENGTH,
+				&model, (u_char **)&newName, &nameLen)) {
+	    return SNMP_ERR_INCONSISTENTNAME;
+	}
     
-    /* see if we can parse the oid for model/name first */
-    if (sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH], name_len-SEC2GROUP_MIB_LENGTH,
-                      &model, (u_char **)&newName, &nameLen))
-      return SNMP_ERR_INCONSISTENTNAME;
+	if (model < 1 || nameLen < 1 || nameLen > 32 ) {
+	    free(newName);
+	    return SNMP_ERR_NOCREATION;
+	}
 
-    /* Now see if a group already exists with these index values */
-    geptr = vacm_getGroupEntry(model, newName);
+	/*  Now see if a group already exists with these index values.  */
+	geptr = vacm_getGroupEntry(model, newName);
 
+	DEBUGMSGTL(("mibII/vacm_vars", "RESERVE1 geptr %p long_ret %d\n",
+		    geptr, long_ret));
 
-    if (geptr) {			/* If so, we set the appropriate value... */
-      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-        return SNMP_ERR_INCONSISTENTVALUE;
-      }
-      if (long_ret == RS_DESTROY) {
-        vacm_destroyGroupEntry(model,newName);        
-      } else {
-        geptr->status = long_ret;
-      }
-      free(newName);
-    } else {			/* ...else we create a new group entry */
-      /* check for a valid status column set */
-      if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
-        free(newName);
-        return SNMP_ERR_INCONSISTENTVALUE;
-      }
-      if (long_ret == RS_DESTROY) {
-        /* destroying a non-existent row is actually legal */
-        free(newName);
-        return SNMP_ERR_NOERROR;
-      }
+	if (geptr != NULL) {
+	    if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+		free(newName);
+		return SNMP_ERR_INCONSISTENTVALUE;
+	    }
+	} else {
+	    if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+		free(newName);
+		return SNMP_ERR_INCONSISTENTVALUE;
+	    }
+	    if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
 
-      /* generate a new group entry */
-      if ((geptr = vacm_createGroupEntry(model,newName)) == NULL) {
-        free(newName);
-        return SNMP_ERR_GENERR;
-      }
+		/*  Generate a new group entry.  */
+		if ((geptr = vacm_createGroupEntry(model, newName)) == NULL) {
+		    free(newName);
+		    return SNMP_ERR_GENERR;
+		}
 
-	  /*set default storage type*/
-	  geptr->storageType = ST_NONVOLATILE;
+		DEBUGMSGTL(("mibII/vacm_vars", "row created %p\n", geptr));
 
-      /* set the status of the row based on the request */
-      if (long_ret == RS_CREATEANDGO)
-        geptr->status = RS_ACTIVE;
-      else if (long_ret == RS_CREATEANDWAIT)
-        geptr->status = RS_NOTINSERVICE;
+		/*  Set defaults.  */
+		geptr->storageType = ST_NONVOLATILE;
+		geptr->status = RS_NOTREADY;
+	    }
+	}
+	free(newName);
+    } else if (action == ACTION) {
+	sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+			    name_len-SEC2GROUP_MIB_LENGTH,
+			    &model, (u_char **)&newName, &nameLen);
 
-    }  /* endif -- uptr */
-  }  /* endif -- action==COMMIT */
+	geptr = vacm_getGroupEntry(model, newName);
 
-  return SNMP_ERR_NOERROR;
+	DEBUGMSGTL(("mibII/vacm_vars", "ACTION geptr %p long_ret %d\n",
+		    geptr, long_ret));
+
+	if (geptr != NULL) {
+	    if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
+		/* Check that all the mandatory objects have been set by now,
+		   otherwise return inconsistentValue.  */
+		DEBUGMSGTL(("mibII/vacm_vars",
+			    "vacmSecurityToGroupStatus check mandatory\n"));
+		if (geptr->groupName[0] == 0) {
+		    free(newName);
+		    return SNMP_ERR_INCONSISTENTVALUE;
+		}
+		geptr->status = RS_ACTIVE;
+	    } else if (long_ret == RS_CREATEANDWAIT) {
+		if (geptr->groupName[0] != 0) {
+		    geptr->status = RS_NOTINSERVICE;
+		}
+	    } else if (long_ret == RS_NOTINSERVICE) {
+		if (geptr->status == RS_ACTIVE) {
+		    geptr->status = RS_NOTINSERVICE;
+		} else if (geptr->status == RS_NOTREADY) {
+		    free(newName);
+		    return SNMP_ERR_INCONSISTENTVALUE;
+		}
+	    }
+	}
+	free(newName);
+    } else if (action == COMMIT) {
+	sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+			    name_len-SEC2GROUP_MIB_LENGTH,
+			    &model, (u_char **)&newName, &nameLen);
+
+	geptr = vacm_getGroupEntry(model, newName);
+
+	if (geptr != NULL) {
+	    if (long_ret == RS_DESTROY) {
+		vacm_destroyGroupEntry(model, newName);        
+	    }
+	}
+	free(newName);
+    } else if (action == UNDO) {
+	if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	    sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+				name_len-SEC2GROUP_MIB_LENGTH,
+				&model, (u_char **)&newName, &nameLen);
+
+	    geptr = vacm_getGroupEntry(model, newName);
+
+	    if (geptr != NULL) {
+		vacm_destroyGroupEntry(model, newName);        
+	    }
+	    free(newName);
+	}
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 oid *
@@ -1559,29 +1654,59 @@ write_vacmAccessStatus(int      action,
       DEBUGMSGTL(("mibII/vacm_vars","write to vacmSecurityToGroupStatus: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  if (action == COMMIT){
+  if (action == RESERVE1) {
+      long_ret = *((long *) var_val);
+      /* ditch illegal values now */
+      /* notReady can not be used, but the return error code is not
+	 mentioned */
+      if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6) {
+	  return SNMP_ERR_INCONSISTENTVALUE;
+      }
+    
+      /*  See if we can parse the oid for model/name first.  */
+      if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
+			   name_len-ACCESS_MIB_LENGTH,
+			   (u_char **)&newGroupName, &groupNameLen,
+			   (u_char **)&newContextPrefix, &contextPrefixLen,
+			   &model, &level)) {
+	  DEBUGMSGTL(("mibII/vacm_vars", "access_parse_oid failure\n"));
+	  return SNMP_ERR_INCONSISTENTNAME;
+      }
+      
+      DEBUGMSGTL(("mibII/vacm_vars", "groupnamelen %d cplen %d\n", groupNameLen, contextPrefixLen));
+
+      if (groupNameLen < 1 || groupNameLen > 32 || contextPrefixLen > 32) {
+	  free(newGroupName);
+	  free(newContextPrefix);
+	  return SNMP_ERR_NOCREATION;
+      }
+      
+      /*  Now see if a group already exists with these index values.  */
+      aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+      free(newGroupName);
+      free(newContextPrefix);
+      if (aptr) {
+	  if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+      } else {
+	  if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
+	      return SNMP_ERR_INCONSISTENTVALUE;
+	  }
+      }
+  } else if (action == COMMIT) {
     long_ret = *((long *) var_val);
 
-    /* ditch illegal values now */
-    /* notReady can not be used, but the return error code is not mentioned */
-    if (long_ret == RS_NOTREADY || long_ret < 1 || long_ret > 6)
-      return SNMP_ERR_INCONSISTENTVALUE;
-    
-    /* see if we can parse the oid for model/name first */
-    if (access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
-                      (u_char **)&newGroupName, &groupNameLen,
-                      (u_char **)&newContextPrefix, &contextPrefixLen,
-                      &model,&level))
-      return SNMP_ERR_INCONSISTENTNAME;
+    access_parse_oid(&name[ACCESS_MIB_LENGTH], name_len-ACCESS_MIB_LENGTH,
+		     (u_char **)&newGroupName, &groupNameLen,
+		     (u_char **)&newContextPrefix, &contextPrefixLen,
+		     &model,&level);
 
     /* Now see if a group already exists with these index values */
     aptr = vacm_getAccessEntry(newGroupName,newContextPrefix,model,level);
 
 
     if (aptr) {			/* If so, we set the appropriate value... */
-      if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-        return SNMP_ERR_INCONSISTENTVALUE;
-      }
       if (long_ret == RS_DESTROY) {
         vacm_destroyAccessEntry(newGroupName,newContextPrefix,model,level);
       } else {
@@ -1591,11 +1716,6 @@ write_vacmAccessStatus(int      action,
       free(newContextPrefix);
     } else {			/* ...else we create a new group entry */
       /* check for a valid status column set */
-      if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
-        free(newGroupName);
-        free(newContextPrefix);
-        return SNMP_ERR_INCONSISTENTVALUE;
-      }
       if (long_ret == RS_DESTROY) {
         /* destroying a non-existent row is actually legal */
         free(newGroupName);
