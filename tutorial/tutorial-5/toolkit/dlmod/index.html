@@ -81,7 +81,7 @@ href="../mib_module/ustScalarSet.c">ustScalarSet.c</a> file.
       running this command you need to recompile the net-snmp agent
       without the ustScalarSet mib module compiled in directly):
 	<p><ul>
-	  <li> % <b>snmpget  localhost Net-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	  <li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 	<p><pre>
 ustSSSimpleString.0 = No Such Object available on this agent
 	    </pre>	</ul><p>
@@ -136,7 +136,7 @@ SNMP table: dlmodTable
 	</ul>
       <li> If everything above was done correctly, then the following
 	command should work and will access the shared object's data:
-	<p><ul><li> % <b>snmpget  localhost Net-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	<p><ul><li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
 <p><pre>
 ustSSSimpleString.0 = "Hello World"
 </pre><p>
