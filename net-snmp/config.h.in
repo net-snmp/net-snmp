@@ -1,6 +1,9 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 /* config.h:  a general config file */
 
+/* Our assigned enterprise number */
+#define ENTERPRISE_NUMBER 2021
+
 /* don't change these values! */
 #define SNMPV1      0xAAAA       /* readable by anyone */
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
@@ -26,6 +29,13 @@
 /* comment the next line if you are compiling with libsnmp.h 
    and are not using the UC-Davis SNMP library. */
 #define UCD_SNMP_LIBRARY 1
+
+/* define if you want to compile support for both authentication and
+   privacy support. */
+#undef SCAPI_AUTHPRIV
+
+/* define if you are using the v2party MD5 code */
+#undef USE_INTERNAL_MD5
 
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
@@ -113,10 +123,10 @@
 
 #undef LOGFILE
 
-/* PERSISTENTFILE: If defined, the agent is capabile of saving
-   persisant information to this file in the form of configuration
-   lines */
-#define PERSISTENTFILE "/var/snmp/snmpd.persistant.conf"
+/* PERSISTENTDIR: If defined, the library is capabile of saving
+   persisant information to this directory in the form of configuration
+   lines: PERSISTENTDIR/NAME.persistent.conf */
+#define PERSISTENTDIR "/var/snmp"
 
 /* default system contact */
 #undef SYS_CONTACT
@@ -244,6 +254,9 @@
 /* Define if you have the strtol function.  */
 #undef HAVE_STRTOL
 
+/* Define if you have the tcgetattr function.  */
+#undef HAVE_TCGETATTR
+
 /* Define if you have the uname function.  */
 #undef HAVE_UNAME
 
@@ -276,6 +289,12 @@
 
 /* Define if you have the <ioctls.h> header file.  */
 #undef HAVE_IOCTLS_H
+
+/* Define if you have the <kmt.h> header file.  */
+#undef HAVE_KMT_H
+
+/* Define if you have the <kmt_algs.h> header file.  */
+#undef HAVE_KMT_ALGS_H
 
 /* Define if you have the <kstat.h> header file.  */
 #undef HAVE_KSTAT_H
@@ -538,8 +557,14 @@
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
 
+/* Define if you have the crypto library (-lcrypto).  */
+#undef HAVE_LIBCRYPTO
+
 /* Define if you have the elf library (-lelf).  */
 #undef HAVE_LIBELF
+
+/* Define if you have the kmt library (-lkmt).  */
+#undef HAVE_LIBKMT
 
 /* Define if you have the kstat library (-lkstat).  */
 #undef HAVE_LIBKSTAT
@@ -628,6 +653,9 @@
 
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
+
+/* define if you have /dev/random */
+#undef HAVE_DEV_RANDOM
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the

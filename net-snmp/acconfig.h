@@ -1,5 +1,8 @@
 /* config.h:  a general config file */
 
+/* Our assigned enterprise number */
+#define ENTERPRISE_NUMBER 2021
+
 /* don't change these values! */
 #define SNMPV1      0xAAAA       /* readable by anyone */
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
@@ -25,6 +28,13 @@
 /* comment the next line if you are compiling with libsnmp.h 
    and are not using the UC-Davis SNMP library. */
 #define UCD_SNMP_LIBRARY 1
+
+/* define if you want to compile support for both authentication and
+   privacy support. */
+#undef SCAPI_AUTHPRIV
+
+/* define if you are using the v2party MD5 code */
+#undef USE_INTERNAL_MD5
 
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
@@ -52,10 +62,10 @@
 
 #undef LOGFILE
 
-/* PERSISTENTFILE: If defined, the agent is capabile of saving
-   persisant information to this file in the form of configuration
-   lines */
-#define PERSISTENTFILE "/var/snmp/snmpd.persistant.conf"
+/* PERSISTENTDIR: If defined, the library is capabile of saving
+   persisant information to this directory in the form of configuration
+   lines: PERSISTENTDIR/NAME.persistent.conf */
+#define PERSISTENTDIR "/var/snmp"
 
 /* configuration files.  I rdist the first one and leave machine
    specific stuff in the second one */
@@ -164,6 +174,9 @@
 
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
+
+/* define if you have /dev/random */
+#undef HAVE_DEV_RANDOM
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the

@@ -1,7 +1,3 @@
- 
-#ifndef SNMP_CLIENT_H
-#define SNMP_CLIENT_H
-
 /*
  * snmp_client.h
  */
@@ -26,6 +22,10 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+ 
+#ifndef SNMP_CLIENT_H
+#define SNMP_CLIENT_H
+
 
 struct snmp_pdu;
 struct snmp_session;
@@ -51,7 +51,6 @@ void snmp_synch_reset __P((struct snmp_session *));
 void snmp_synch_setup __P((struct snmp_session *));
 int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
 int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));
-
 /* single session API - see snmp_api.h for full details */
 int    snmp_sess_synch_response __P((void *, struct snmp_pdu *, struct snmp_pdu **));
  

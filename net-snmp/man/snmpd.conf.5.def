@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 1 "21 Feb 1996"
+.TH SNMPD.CONF 1 "2 Dec 1998"
 .ds )H U.C. Davis, ECE Dept.
 .ds ]W VVERSIONINFO
 .UC 4
@@ -187,6 +187,84 @@ com2sec	public	default	public
 group	public	any	public
 view 	all	.1
 access	public	""	any	noauth	all	none	none
+.SH SNMPv3 CONFIGURATION
+.PP
+.IP "engineID STRING"
+The snmpd agent needs to be configured with an engineID to be able to
+respond to SNMPv3 messages.  With this configuration file line, the
+engineID will be configured from STRING.  The default value of the
+engineID is configured with the first IP address found for the
+hostname of the machine.
+.IP "userSetAuthPass     secname engineIDLen engineID pass"
+.IP "userSetPrivPass     secname engineIDLen engineID pass "
+.IP "userSetAuthKey      secname engineIDLen engineID KuLen Ku"
+.IP "userSetPrivKey      secname engineIDLen engineID KuLen Ku "
+.IP "userSetAuthLocalKey secname engineIDLen engineID KulLen Kul"
+.IP "userSetPrivLocalKey secname engineIDLen engineID KulLen Kul "
+These lines configure a given users authorization and privacy keys.
+The secname should be the security name of the user in question (EG:
+initial) and the engineIDLen and engineID should be the length in
+bytes and the engineID in hex of the engineID that the user is
+registered under.  "pass" is a passphrase that is converted into a key
+and then localized to the engineID.  "Ku" is a key that is then taken
+and localized.  And finally "Kul" can be used to specify an already
+localized key.
+.IP "Initial and Template Users"
+It is recommended that you use the userSetAuthPass and userSetPrivPass
+tokens above to configure your initial and template users.  The agent
+comes preconfigured with the following users, but they are not usable
+for auth/priv communication without appropriately configured keys:
+.IP "user initial"
+.nf
+   usmUserEngineID         localEngineID
+   usmUserName             "initial"
+   usmUserSecurityName     "initial"
+   usmUserCloneFrom        ZeroDotZero
+   usmUserAuthProtocol     usmHMACMD5AuthProtocol
+   usmUserAuthKeyChange    ""
+   usmUserOwnAuthKeyChange ""
+   usmUserPrivProtocol     usmDESPrivProtocol
+   usmUserPrivKeyChange    ""
+   usmUserOwnPrivKeyChange ""
+   usmUserPublic           ""
+   usmUserStorageType      permanent
+   usmUserStatus           active
+.IP "user templateMD5"
+.nf
+   usmUserEngineID         localEngineID         
+   usmUserName             "templateMD5"         
+   usmUserSecurityName     "templateMD5"         
+   usmUserCloneFrom        ZeroDotZero           
+   usmUserAuthProtocol     usmHMACMD5AuthProtocol
+   usmUserAuthKeyChange    ""                    
+   usmUserOwnAuthKeyChange ""                    
+   usmUserPrivProtocol     usmDESPrivProtocol    
+   usmUserPrivKeyChange    ""                    
+   usmUserOwnPrivKeyChange ""                    
+   usmUserPublic           ""                    
+   usmUserStorageType      permanent             
+   usmUserStatus           active                
+.IP "user templateSHA"
+.nf
+   usmUserEngineID         localEngineID
+   usmUserName             "templateSHA"
+   usmUserSecurityName     "templateSHA"
+   usmUserCloneFrom        ZeroDotZero
+   usmUserAuthProtocol     usmHMACSHAAuthProtocol
+   usmUserAuthKeyChange    ""
+   usmUserOwnAuthKeyChange ""
+   usmUserPrivProtocol     usmDESPrivProtocol
+   usmUserPrivKeyChange    ""
+   usmUserOwnPrivKeyChange ""
+   usmUserPublic           ""
+   usmUserStorageType      permanent
+   usmUserStatus           active
+.IP
+The above template users can be used to clone new users from, and the
+new users will then inherit their keys and authentication types.  Note
+that you can not set the cloneFrom value for a user more than once.
+Nothing will happen the second time.
+.IP
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"

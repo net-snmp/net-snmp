@@ -1,9 +1,11 @@
 .gdbinit
 Makefile
+encode_keychange
 snmpbulkwalk
 snmpdelta
 snmpget
 snmpgetnext
+snmppass
 snmpset
 snmpstatus
 snmptable

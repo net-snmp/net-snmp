@@ -1,3 +1,7 @@
+/*
+ * m2m.h
+ */
+
 struct get_req_state {
     int type;
     void *info;

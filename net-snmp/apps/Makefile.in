@@ -1,22 +1,30 @@
 #
 # Makefile for snmpget, snmpwalk, snmpbulkwalk, snmptest, snmptranslate,
-# snmptrapd, snmptable, snmpset, snmpgetnext
+# snmptrapd, snmptable, snmpset, snmpgetnext, and other utilities.
 #
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmpset snmpgetnext snmptrap snmpstatus snmpdelta snmptable
-SBINTARG= snmptrapd
-SUBDIRS=  snmpnetstat
-TRAPSPECIAL=@trap_list_o@
+TARG		= snmpget snmpgetnext snmpset snmppass			\
+			snmpwalk snmpbulkwalk snmptable			\
+			snmptrap					\
+			snmptranslate snmpstatus snmpdelta snmptest	\
+			encode_keychange
 
-USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LIBS=	 -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+SBINTARG	= snmptrapd
+SUBDIRS		= snmpnetstat
+TRAPSPECIAL	= @trap_list_o@
 
-PARSEOBJS=snmp_parse_args.o
+USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+LOCAL_LIBS	= -L../snmplib 
+LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
-CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
-CC = @CC@ $(CPPFLAGS)
+PARSEOBJS	= snmp_parse_args.o
+
+CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib @CPPFLAGS@
+CC		= @CC@ $(CPPFLAGS)
+
 
 all: $(TARG) $(SBINTARG) subdirs
+
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -24,46 +32,54 @@ subdirs:
 	done
 
 snmpwalk:    snmpwalk.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpwalk.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpwalk.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpbulkwalk:    snmpbulkwalk.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpbulkwalk.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpbulkwalk.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptranslate:    snmptranslate.o $(USELIBS)
-	${CC} -o $@ snmptranslate.o ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmptranslate.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpstatus:    snmpstatus.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpstatus.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpstatus.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpget:    snmpget.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpget.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpget.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpdelta:    snmpdelta.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpdelta.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpdelta.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptable:    snmptable.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptable.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmptable.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmptest.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd:    snmptrapd.o snmptrapd_handlers.o $(USELIBS)
-	${CC} -o $@ snmptrapd.o snmptrapd_handlers.o ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmptrapd.o snmptrapd_handlers.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrap:    snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpset.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpset.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmppass:    snmppass.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmppass.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpgetnext:    snmpgetnext.o $(PARSEOBJS) $(USELIBS)
-	${CC} -o $@ snmpgetnext.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
+	${CC} -o $@ snmpgetnext.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+encode_keychange:    encode_keychange.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ encode_keychange.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
 
 clean:
 	rm -f *.o $(TARG) $(SBINTARG)
 	for i in $(SUBDIRS) ; do \
 	( cd $$i ; $(MAKE) clean ) ; \
 	done
+
 
 install: installdirs subdirs $(TARG)
 	for i in $(SUBDIRS) ; do \
@@ -74,6 +90,7 @@ install: installdirs subdirs $(TARG)
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
+
 
 dependlocal: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c
@@ -189,3 +206,4 @@ snmpwalk.o: ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpwalk.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
 snmpwalk.o: ./../snmplib/snmp_client.h ./../snmplib/mib.h ./../snmplib/snmp.h
 snmpwalk.o: ./../snmplib/snmp_impl.h ./../snmplib/system.h snmp_parse_args.h
+encode_keychange.o: ./../snmplib/tools.h

@@ -1,3 +1,7 @@
+/*
+ * memory_freebsd2.c
+ */
+
 #include <config.h>
 
 
@@ -32,6 +36,7 @@
 
 #include "mibincl.h"
 #include "util_funcs.h"
+#include "auto_nlist.h"
 
 #include "memory.h"
 
@@ -73,7 +78,7 @@ void getSwap()
 
   strcpy(ext.command, "/usr/sbin/swapinfo -k");
 
-  if (fd = get_exec_output(&ext)) 
+  if ( (fd = get_exec_output(&ext)) )
   {
       file = fdopen(fd,"r");
 
@@ -264,7 +269,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 	return((u_char *) (&long_ret));
     case ERRORMSG:
 	if (swapFree < minimumswap)
-	    sprintf(errmsg,"Running out of swap space (%d)", swapFree);
+	    sprintf(errmsg,"Running out of swap space (%ld)", swapFree);
 	else
 	    errmsg[0] = 0;
 	*var_len = strlen(errmsg);
