@@ -515,7 +515,7 @@
 #undef SYS_CDEFS_DEFINES___P
 
 /* define rtentry to ortentry on SYSV machines (alphas) */
-#define RTENTRY rtentry;
+#undef RTENTRY
 
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
