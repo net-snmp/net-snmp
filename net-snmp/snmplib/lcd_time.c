@@ -144,6 +144,10 @@ get_enginetime(	u_char	*engineID,
 		*engine_time += timediff;
 	}
 
+        DEBUGMSGTL(("lcd_get_enginetime", "engineID "));
+        DEBUGMSGHEX(("lcd_get_enginetime", engineID, engineID_len));
+        DEBUGMSG(("lcd_get_enginetime", ": boots=%d, time=%d\n", *engineboot,
+                  *engine_time));
 
 get_enginetime_quit:
 	return rval;
@@ -231,6 +235,10 @@ set_enginetime(	u_char	*engineID,
 
 	e = NULL;	/* Indicates a successful update. */
 
+        DEBUGMSGTL(("lcd_set_enginetime", "engineID "));
+        DEBUGMSGHEX(("lcd_set_enginetime", engineID, engineID_len));
+        DEBUGMSG(("lcd_set_enginetime", ": boots=%d, time=%d\n", engineboot,
+                  engine_time));
 
 set_enginetime_quit:
 	SNMP_FREE(e);
