@@ -18,8 +18,6 @@
 #include "snmp_vars.h"
 #include "party.h"
 
-#include "mibgroup/snmpv2_vars.h"
-
 #include "acl_vars.h"
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
