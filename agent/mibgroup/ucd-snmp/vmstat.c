@@ -403,9 +403,9 @@ vmstat(int iindex)
     case cpurawsoft:
 	return cpu_softirq;
     case rawiosent:
-	return pgpgin*2;
-    case rawioreceive:
 	return pgpgout*2;
+    case rawioreceive:
+	return pgpgin*2;
     case rawswapin:
 	return pswpin;
     case rawswapout:
