@@ -58,13 +58,43 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 
+#include "version.h"
+
 int main __P((int, char **));
 
 void
 usage __P((void))
 {
   fprintf(stderr,
-	  "usage: snmptranslate [-h] [-n] [-d] [-R] [-w|-W] [-f|-s|-S] [-p] [-m <MIBS>] [-M <MIDDIRS>] objectID\n");
+	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+  fprintf(stderr,
+          "  -V\t\tPrint snmptranslate version then exit.\n");
+  fprintf(stderr,
+          "  -p\t\tPrint MIB symbol table report.\n");
+  fprintf(stderr,
+          "  -a\t\tPrint MIB ascii symbol table.\n");
+  fprintf(stderr,
+          "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(stderr,
+          "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
+  fprintf(stderr,
+          "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
+  fprintf(stderr,
+          "  -W\t\tEnable detailed warnings of MIB symbol conflicts.\n");
+  fprintf(stderr,
+          "  -R\t\tUse \"random access\" to access objectID.\n");
+  fprintf(stderr,
+          "  -r\t\tUse \"random access\" to access objectID. (Obsolete, -R preferred)\n");
+  fprintf(stderr,
+          "  -n\t\tDisplay OID in symbolic form for objectID.\n");
+  fprintf(stderr,
+          "  -d\t\tDisplay detailed information for objectID.\n");
+  fprintf(stderr,
+          "  -f\t\tDisplay full OID for objectID.\n");
+  fprintf(stderr,
+          "  -s\t\tDisplay last symbolic part of OID for objectID.\n");
+  fprintf(stderr,
+          "  -S\t\tDisplay MIB and last symbolic part of OID for objectID.\n");
   exit(1);
 }
 
@@ -146,6 +176,10 @@ main(argc, argv)
                   usage();
                   exit(1);
                 }
+                break;
+              case 'V':
+                fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                exit(0);
                 break;
 
 	      default:
