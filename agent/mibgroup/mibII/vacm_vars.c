@@ -244,7 +244,7 @@ void vacm_free_group (void)
 
 void vacm_parse_access (char *token, char *param)
 {
-    char *name, *context, *model, *level, *prefix, *pread, *pwrite, *notify;
+    char *name, *context, *model, *level, *prefix, *readView, *writeView, *notify;
     int imodel, ilevel;
     struct vacm_accessEntry *ap;
 
@@ -253,8 +253,8 @@ void vacm_parse_access (char *token, char *param)
     model = strtok(NULL, " \t\n");
     level = strtok(NULL, " \t\n");
     prefix = strtok(NULL, " \t\n");
-    pread = strtok(NULL, " \t\n");
-    pwrite = strtok(NULL, " \t\n");
+    readView = strtok(NULL, " \t\n");
+    writeView = strtok(NULL, " \t\n");
     notify = strtok(NULL, " \t\n");
     if (strcmp(context, "\"\"") == 0) *context = 0;
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
@@ -277,8 +277,8 @@ void vacm_parse_access (char *token, char *param)
 	return;
     }
     ap = vacm_createAccessEntry (name, context, imodel, ilevel);
-    strcpy(ap->readView, pread);
-    strcpy(ap->writeView, pwrite);
+    strcpy(ap->readView, readView);
+    strcpy(ap->writeView, writeView);
     strcpy(ap->notifyView, notify);
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;

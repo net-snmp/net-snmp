@@ -7,7 +7,19 @@
  ***************************************************************************/
 
 #include <config.h>
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include "mibincl.h"
+#include "util_funcs.h"
 #include "ipfwacc.h"
 
 /* According to the 2.0.33 Linux kernel, assuming we use ipv4 any line from
@@ -48,7 +60,7 @@ static unsigned char rule[IPFWRULELEN]; /*Buffer for reading a line from
 
 static int readrule(unsigned int number)
 { 
-  int i,retval;
+  int i;
   FILE* f= fopen("/proc/net/ip_acct","rt");
 
   if (!f)
@@ -98,7 +110,7 @@ static inline void atoip (int pos)
 
 /* This function parses the flags field from the line in the buffer */
 
-static unsigned long int getflags ()
+static unsigned long int getflags (void)
 { 
   unsigned long int flags; 
   int i=37; /* position in the rule */
