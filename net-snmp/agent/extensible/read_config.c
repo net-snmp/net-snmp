@@ -73,9 +73,11 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   struct mntent *mntent;
 #endif
   FILE *mntfp;
-#elif HAVE_FSTAB_H
+#else
+#if HAVE_FSTAB_H
   struct fstab *fstab;
   struct stat stat1, stat2;
+#endif
 #endif
   struct extensible **pptmp;
   
@@ -220,13 +222,15 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 		*numdisks += 1;
 	      }
 #endif /* HAVE_SETMNTENT */
-#elif HAVE_FSTAB_H
+#else
+#if HAVE_FSTAB_H
               stat(disk[*numdisks].path,&stat1);
               setfsent();
               if (fstab = getfsfile(disk[*numdisks].path)) {
                 copy_word(fstab->fs_spec,disk[*numdisks].device);
                 *numdisks += 1;
               }
+#endif
 #endif
               else {
                 fprintf(stderr,"Error:  couldn't find device for disk %s\n",
