@@ -502,7 +502,12 @@ netsnmp_extract_table_row(netsnmp_request_info *request)
 void           *
 netsnmp_extract_table_row_data(netsnmp_request_info *request)
 {
-    return (netsnmp_extract_table_row(request))->data;
+    netsnmp_table_row *row;
+    row = (netsnmp_table_row *) netsnmp_extract_table_row(request);
+    if (row)
+        return row->data;
+    else
+        return NULL;
 }
 
 /** builds a result given a row, a varbind to set and the data */
