@@ -2689,8 +2689,11 @@ parse_compliance(FILE *fp,
 	print_error("Bad DESCRIPTION", quoted_string_buffer, type);
 	goto skip;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
-	np->description = strdup (quoted_string_buffer);
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
+	if (np->description == NULL) {
+	    np->description = strdup(quoted_string_buffer);
+	}
+    }
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
 	type = get_token(fp, quoted_string_buffer, MAXTOKEN);
@@ -2783,7 +2786,9 @@ parse_compliance(FILE *fp,
 		goto skip;
 	    }
             if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
-                np->description = strdup (token);
+		if (np->description == NULL) {
+		    np->description = strdup(token);		    
+		}
 	    }
 	    type = get_token(fp, token, MAXTOKEN);
 	}
@@ -2841,8 +2846,9 @@ parse_capabilities(FILE *fp,
 	print_error("Bad DESCRIPTION", token, type);
 	goto skip;
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS))
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS)) {
 	np->description = strdup (token);
+    }
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
 	type = get_token(fp, token, MAXTOKEN);
