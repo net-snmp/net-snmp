@@ -31,10 +31,19 @@ netsnmp_arch_interface_init(void)
      */
 }
 
+/*
+ * find the ifIndex for an interface name
+ * NOTE: The Linux version is not efficient for large numbers of calls.
+ *   consider using netsnmp_access_interface_ioctl_ifindex_get()
+ *   for loops which need to look up a lot of indexes.
+ *
+ * @retval 0 : no index found
+ * @retval >0: ifIndex for interface
+ */
 oid
 netsnmp_arch_interface_index_find(const char *name)
 {
-    return netsnmp_access_interface_ioctl_ifindex_get(name);
+    return netsnmp_access_interface_ioctl_ifindex_get(-1, name);
 }
 
 
