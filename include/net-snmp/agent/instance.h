@@ -1,6 +1,12 @@
 /*
  * testhandler.h 
  */
+#ifndef NETSNMP_INSTANCE_H
+#define NETSNMP_INSTANCE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * The instance helper is designed to simplify the task of adding simple
@@ -72,3 +78,9 @@ Netsnmp_Node_Handler netsnmp_instance_ulong_handler;
 Netsnmp_Node_Handler netsnmp_instance_long_handler;
 Netsnmp_Node_Handler netsnmp_instance_int_handler;
 Netsnmp_Node_Handler netsnmp_instance_counter32_handler;
+
+#ifdef __cplusplus
+};
+#endif
+
+#endif /** NETSNMP_INSTANCE_H */
