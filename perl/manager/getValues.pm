@@ -6,6 +6,7 @@
 #           tablename => indexname,
 #           ...)
 
+package NetSNMP::manager::getValues;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK=(getValues);

@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
-use lib '/afs/dcas.ucdavis.edu/pkg/common/perl_modules';
-use getValues;
+use NetSNMP::manager::getValues qw(getValues);
 use SNMP;
 use DBI;
 use Net::SMTP;
@@ -13,7 +12,7 @@ use Net::SMTP;
 $hostname = 'localhost';          # Host that serves the mSQL Database
 $dbname = 'snmp';                 # mySQL Database name
 $smtpserver = 'localhost';
-$smtpfrom   = 'UCD-SNMP Manager <wjhardaker@ucdavis.edu>';
+$smtpfrom   = 'Net-SNMP Manager <wjhardaker@ucdavis.edu>';	# <===  CHANGE ME  ========
 $doit = 1;
 $somehosts = 0;
 

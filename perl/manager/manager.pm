@@ -1,42 +1,42 @@
 #!/usr/local/bin/perl
 
-package netsnmp::manager;
+package NetSNMP::manager;
 
 use strict ();
 use Apache::Constants qw(:common);
 use CGI qw(:standard delete_all);
 use SNMP ();
 use DBI ();
-use lib ("/afs/dcas.ucdavis.edu/pkg/common/perl_modules");
-use displaytable qw(displaytable displaygraph);
+use NetSNMP::manager::displaytable qw(displaytable displaygraph);
 
 # globals
-$ucdsnmp::manager::hostname = 'localhost';          # Host that serves the mSQL Database
-$ucdsnmp::manager::dbname = 'snmp';                 # mySQL Database name
-$ucdsnmp::manager::user = 'root';
-# $ucdsnmp::manager::pass = "password";
-$ucdsnmp::manager::redimage = "/graphics/red.gif";
-$ucdsnmp::manager::greenimage = "/graphics/green.gif";
-#$ucdsnmp::manager::verbose = 1;
-$ucdsnmp::manager::tableparms  = "border=1 bgcolor=\"#c0c0e0\"";
-$ucdsnmp::manager::headerparms = "border=1 bgcolor=\"#b0e0b0\"";
+$NetSNMP::manager::hostname = 'localhost';          # Host that serves the mSQL Database
+$NetSNMP::manager::dbname = 'snmp';                 # mySQL Database name
+$NetSNMP::manager::user = 'root';
+# $NetSNMP::manager::pass = "password";
+$NetSNMP::manager::imagebase = "/home/hardaker/src/snmp/manager";	# <=== CHANGE ME ====
+$NetSNMP::manager::redimage = "/graphics/red.gif";
+$NetSNMP::manager::greenimage = "/graphics/green.gif";
+#$NetSNMP::manager::verbose = 1;
+$NetSNMP::manager::tableparms  = "border=1 bgcolor=\"#c0c0e0\"";
+$NetSNMP::manager::headerparms = "border=1 bgcolor=\"#b0e0b0\"";
 
 # init the snmp library
 $SNMP::save_descriptions=1;
 #SNMP::init_mib();
 
-%ucdsnmp::manager::myorder = qw(id 0 oidindex 1 host 2 updated 3);
+%NetSNMP::manager::myorder = qw(id 0 oidindex 1 host 2 updated 3);
 
 sub handler {
     my $r = shift;
     Apache->request($r);
 
     # get info from handler
-    my $hostname = $r->dir_config('hostname') || $ucdsnmp::manager::hostname;
-    my $dbname = $r->dir_config('dbname') || $ucdsnmp::manager::dbname;
-    my $sqluser = $r->dir_config('user') || $ucdsnmp::manager::user;
-    my $pass = $r->dir_config('pass') || $ucdsnmp::manager::pass;
-    my $verbose = $r->dir_config('verbose') || $ucdsnmp::manager::verbose;
+    my $hostname = $r->dir_config('hostname') || $NetSNMP::manager::hostname;
+    my $dbname = $r->dir_config('dbname') || $NetSNMP::manager::dbname;
+    my $sqluser = $r->dir_config('user') || $NetSNMP::manager::user;
+    my $pass = $r->dir_config('pass') || $NetSNMP::manager::pass;
+    my $verbose = $r->dir_config('verbose') || $NetSNMP::manager::verbose;
 
 #===========================================================================
 #  Global defines
@@ -62,12 +62,12 @@ if (my $group = param('groupstat')) {
     my $cur = getcursor($dbh, "select host from usergroups as ug, hostgroups as hg where ug.groupname = '$group' and hg.groupname = '$group' and user = '$remuser'");
     while (my $row = $cur->fetchrow_hashref ) {
 	if (checkhost($dbh, $group, $row->{'host'})) {
-	    open(I,"/home/hardaker/src/snmp/manager/red.gif");
+	    open(I, "$NetSNMP::manager::imagebase$NetSNMP::manager::redimage");
 	    while(read(I, $_, 4096)) { print; }
 	    close(I);
 	}
     }
-    open(I,"/home/hardaker/src/snmp/manager/green.gif");
+    open(I, "$NetSNMP::manager::imagebase$NetSNMP::manager::greenimage");
     while(read(I, $_, 4096)) { print; }
     close(I);
     return OK();
@@ -273,7 +273,7 @@ if (param('setuponcall')) {
 #===========================================================================
 if (!defined($group)) {
     my @groups = getgroupsforuser($dbh, $remuser);
-    print "<title>ucd-snmp Group List</title>\n";
+    print "<title>Net-SNMP Group List</title>\n";
     print "<h2>Host groupings you may access:</h2>\n";
     if (!isexpert($remuser)) {
 	print "<ul>\n";
@@ -307,18 +307,18 @@ if (!defined($group)) {
 			 while (  $row = $cur->fetchrow_hashref ) {
 			     if (checkhost($dbh, $data->{'groupname'}, 
 					   $row->{'host'})) {
-				 print "<td><a href=\"" . addtoken($q,"group=$data->{groupname}&summarizegroup=1") . "\"><img border=0 src=$ucdsnmp::manager::redimage></a></td>\n";
+				 print "<td><a href=\"" . addtoken($q,"group=$data->{groupname}&summarizegroup=1") . "\"><img border=0 src=$NetSNMP::manager::redimage></a></td>\n";
 				 return;
 			     }
 			 }
-			 print "<td><img src=$ucdsnmp::manager::greenimage></td>\n";
+			 print "<td><img src=$NetSNMP::manager::greenimage></td>\n";
 		     }
 		     );
 	$dbh->disconnect();
 	return Exit($dbh,  $group);
     } else {
 	if ($#groups == -1) {
-	    print "You are not configured to use the ucd-snmp-manager, please contact your system administrator.";
+	    print "You are not configured to use the Net-SNMP-manager, please contact your system administrator.";
 	    return Exit($dbh,  $group);
 	}
 	$group = $groups[0];
@@ -415,7 +415,7 @@ if (defined($host) && defined(param('summarizehost'))) {
 # display a list of hosts in a group
 #===========================================================================
 if (!defined($host)) {
-    print "<title>ucd-snmp Host $host</title>\n";
+    print "<title>Net-SNMP Host $host</title>\n";
     print "<h2>Hosts in the group \"$group\":</h2>\n";
     if (!isexpert($remuser)) {
 	print "<ul>\n";
@@ -447,9 +447,9 @@ if (!defined($host)) {
 			 return;
 		     }
 		     if (checkhost($dbh, $group, $data->{'host'})) {
-			 print "<td><a href=\"" . addtoken($q,"group=$group&summarizehost=1&host=$data->{host}") . "\"><img border=0 src=$ucdsnmp::manager::redimage></a></td>\n";
+			 print "<td><a href=\"" . addtoken($q,"group=$group&summarizehost=1&host=$data->{host}") . "\"><img border=0 src=$NetSNMP::manager::redimage></a></td>\n";
 		     } else {
-			 print "<td><img src=$ucdsnmp::manager::greenimage></td>\n";
+			 print "<td><img src=$NetSNMP::manager::greenimage></td>\n";
 		     }
 		 }
 		 );
@@ -466,8 +466,8 @@ if (!defined($host)) {
 # setup the host's history records
 #===========================================================================
 if (param('setuphost')) {
-    print "<title>ucd-snmp history setup for host: $host</title>\n";
-    print "<h2>ucd-snmp history setup for the host: \"$host\"</h2>\n";
+    print "<title>Net-SNMP history setup for host: $host</title>\n";
+    print "<h2>Net-SNMP history setup for the host: \"$host\"</h2>\n";
     print "<p>Enter the number of days to keep the data for a given table for the host \"$host\":\n";
     if (!isexpert($remuser)) {
 	print "<ul>\n";
@@ -569,10 +569,10 @@ sub summarizeerrors {
 			 #doing header;
 			 print "<td></td>";
 		     } else {
-			 print "<td><img src=\"$ucdsnmp::manager::redimage\"></td>\n";
+			 print "<td><img src=\"$NetSNMP::manager::redimage\"></td>\n";
 		     }});
 
-    my $tabletop = "<br><table $ucdsnmp::manager::tableparms><tr $ucdsnmp::manager::headerparms><th><b>Host</b></th><th><b>Table</b></th><th><b>Description</b></th></tr>\n";
+    my $tabletop = "<br><table $NetSNMP::manager::tableparms><tr $NetSNMP::manager::headerparms><th><b>Host</b></th><th><b>Table</b></th><th><b>Description</b></th></tr>\n";
     my $donetop = 0;
     my $cursor = 
 	getcursor($dbh, "SELECT * FROM hosttables $clause");
@@ -619,9 +619,9 @@ sub mykeysort {
     my $mb = $SNMP::MIB{SNMP::translateObj($b)};
     my $ma = $SNMP::MIB{SNMP::translateObj($a)};
 
-    return $ucdsnmp::manager::myorder{$a} <=> $ucdsnmp::manager::myorder{$b} if ((defined($ucdsnmp::manager::myorder{$a}) || !defined($ma->{'subID'})) && (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'})));
-    return 1 if (defined($ucdsnmp::manager::myorder{$b}) || !defined($mb->{'subID'}));
-    return -1 if (defined($ucdsnmp::manager::myorder{$a}) || !defined($ma->{'subID'}));
+    return $NetSNMP::manager::myorder{$a} <=> $NetSNMP::manager::myorder{$b} if ((defined($NetSNMP::manager::myorder{$a}) || !defined($ma->{'subID'})) && (defined($NetSNMP::manager::myorder{$b}) || !defined($mb->{'subID'})));
+    return 1 if (defined($NetSNMP::manager::myorder{$b}) || !defined($mb->{'subID'}));
+    return -1 if (defined($NetSNMP::manager::myorder{$a}) || !defined($ma->{'subID'}));
 
     $ma->{'subID'} <=> $mb->{'subID'};
 }
@@ -668,7 +668,7 @@ sub showhost {
     my $q = self_url();
     $q =~ s/\?.*//;
     # host header
-    print "<title>ucd-snmp manager report for host: $host</title>\n";
+    print "<title>Net-SNMP manager report for host: $host</title>\n";
     print "<h2>Monitored information for the host $host</h2>\n";
     if (!isexpert($remuser)) {
 	print "<ul>\n";
@@ -690,7 +690,7 @@ sub showhost {
 			     #doing header;
 			     print "<td></td>";
 			 } else {
-			     print "<td><img src=\"$ucdsnmp::manager::redimage\"></td>\n";
+			     print "<td><img src=\"$NetSNMP::manager::redimage\"></td>\n";
 			 }});
     }
 
@@ -725,7 +725,7 @@ sub showhost {
 #    mib node.
 #
 sub linktodisplayinfo {
-    return if (exists($ucdsnmp::manager::myorder{shift}));
+    return if (exists($NetSNMP::manager::myorder{shift}));
     return self_url() . "&displayinfo=" . shift;
 }
 
@@ -749,16 +749,16 @@ sub printredgreen {
     }
 
     my $cmd = "SELECT * FROM errorexpressions where (tablename = '$tablename')";
-    print " $cmd\n" if ($ucdsnmp::manager::verbose);
+    print " $cmd\n" if ($NetSNMP::manager::verbose);
     ( $exprs = $dbh->prepare( $cmd ) )
 	or die "\nnot ok: $DBI::errstr\n";
     ( $exprs->execute )
 	or print( "\tnot ok: $DBI::errstr\n" );
 
-    $img = $ucdsnmp::manager::greenimage;
+    $img = $NetSNMP::manager::greenimage;
     while($expr = $exprs->fetchrow_hashref) {
 	if ($dbh->do("select oidindex from $tablename where host = '$data->{host}' and oidindex = '$data->{oidindex}' and $expr->{expression}") ne "0E0") {
-	    $img = $ucdsnmp::manager::redimage;
+	    $img = $NetSNMP::manager::redimage;
 	}
     }
     print "<td><img src=$img></td>";
@@ -771,14 +771,14 @@ sub makemibtable {
     my $dispinfo = shift;
     # display information about a data type in a table
     my $mib = $SNMP::MIB{SNMP::translateObj($dispinfo)};
-    print "<table $ucdsnmp::manager::tableparms><tr><td>\n";
+    print "<table $NetSNMP::manager::tableparms><tr><td>\n";
     foreach my $i (qw(label type access status units hint moduleID description enums)) {
 #    foreach my $i (keys(%$mib)) {
 	next if (!defined($$mib{$i}) || $$mib{$i} eq "");
 	next if (ref($$mib{$i}) eq "HASH" && $#{keys(%{$$mib{$i}})} == -1);
 	print "<tr><td>$i</td><td>";
 	if (ref($$mib{$i}) eq "HASH") {
-	    print "<table $ucdsnmp::manager::tableparms><tr><td>\n";
+	    print "<table $NetSNMP::manager::tableparms><tr><td>\n";
 	    foreach my $j (sort { $$mib{$i}{$a} <=> $$mib{$i}{$b} } keys(%{$$mib{$i}})) {
  		print "<tr><td>$$mib{$i}{$j}</td><td>$j</td></tr>";
 	    }
@@ -868,7 +868,7 @@ sub displayconfigarray {
 	    or die "\nnot ok: $DBI::errstr\n";
     }
 
-    print "<table $ucdsnmp::manager::tableparms>\n";
+    print "<table $NetSNMP::manager::tableparms>\n";
     print "<tr><td></td>";
     my ($i, $j);
     foreach $j (@$names) {

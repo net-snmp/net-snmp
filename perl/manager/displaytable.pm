@@ -3,7 +3,7 @@
 #   stolen from sqltohtml in the ucd-snmp package
 #
 
-package displaytable;
+package NetSNMP::manager::displaytable;
 use POSIX (isprint);
 
 BEGIN {
