@@ -61,6 +61,8 @@
 #include "snmpd.h"
 #include "system.h"
 #include "snmp_debug.h"
+#include "default_store.h"
+#include "ds_agent.h"
 #include "mibgroup/mib_module_includes.h"
 
 char dontReadConfigFiles;
@@ -72,15 +74,17 @@ void init_agent_read_config (void)
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
 
-  register_config_handler("snmpd","trapsink",
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
+      register_config_handler("snmpd","trapsink",
                           snmpd_parse_config_trapsink, snmpd_free_trapsinks,
                           "host [community]");
-  register_config_handler("snmpd","trap2sink",
+      register_config_handler("snmpd","trap2sink",
                           snmpd_parse_config_trap2sink, NULL,
                           "host [community]");
-  register_config_handler("snmpd","informsink",
+      register_config_handler("snmpd","informsink",
                           snmpd_parse_config_informsink, NULL,
                           "host [community]");
+  }
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
                           snmpd_free_trapcommunity,
