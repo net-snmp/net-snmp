@@ -6,23 +6,20 @@
 extern "C" {
 #endif
 
-/* The table iterator helper is designed to simplify the task of
-   writing a table handler for the net-snmp agent when the data being
-   accessed is not in an oid sorted form and must be accessed
-   externally.  Functionally, it is a specialized version of the more
-   generic table helper but easies the burden of GETNEXT processing by
-   manually looping through all the data indexes retrieved through
-   function calls which should be supplied by the module that wishes
-   help.  The module the table_iterator helps should, afterwards,
-   never be called for the case of "MODE_GETNEXT" and only for the GET
-   and SET related modes instead.
- */
+typedef struct iterator_info_s {
+   FirstDataPoint  *get_first_data_point;
+   NextDataPoint   *get_next_data_point;
+   FreeLoopContext *free_loop_context;
+   FreeDataContext *free_data_context;
 
+   table_registration_info *table_reginfo;
+} iterator_info;
+     
 #define TABLE_ITERATOR_NAME "table_iterator"
 
-mib_handler *get_table_iterator_handler(table_registration_info *tabreq);
+mib_handler *get_table_iterator_handler(iterator_info *iinfo);
 int register_table_iterator(handler_registration *reginfo,
-                            table_registration_info *tabreq);
+                            iterator_info *iinfo);
 
 void *extract_iterator_context(request_info *);
 
