@@ -46,60 +46,11 @@ SOFTWARE.
 
 struct variable_list;
 struct timeval;
-
-
-	/*
-	 * Mimic size and alignment of 'struct sockaddr_storage' (see RFC 2553)
-	 * But retain field names of traditional 'struct sockaddr'
-	 */
-
-#define _UCD_SS_MAXSIZE   92		/* <= sizeof( sockaddr_un ) */
-#define _UCD_SS_ALIGNSIZE (sizeof (long))
-
-#define _UCD_SS_PAD1SIZE  (_UCD_SS_ALIGNSIZE - sizeof( unsigned short ))
-#define _UCD_SS_PAD2SIZE  (_UCD_SS_MAXSIZE - \
-		(sizeof( unsigned short ) + _UCD_SS_PAD1SIZE + _UCD_SS_ALIGNSIZE ))
-
-typedef struct {
-
-#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
-	/*
-	 * Certain systems (notably Irix 6.x) have a non-traditional
-	 *   socket structure, and #define the traditional field names.
-	 * This local definition should reproduce this structure, and still
-	 *    be large enough to handle any necessary Unix domain addresses.
-	 */
-  union {
-   struct {
-#ifdef _HAVE_SA_LEN
-    unsigned char	sa_len2;
-    unsigned char	sa_family2;
-#else
-    unsigned short	sa_family2;
-#endif
-    char		sa_data2[ _UCD_SS_PAD1SIZE ];
-   } sa_generic;
-    long		sa_align;
-    char		sa_pad2[ _UCD_SS_PAD2SIZE ];
-  } sa_union;
-
-#else
-
-#ifdef STRUCT_SOCKADDR_HAS_SA_LEN
-    unsigned char	sa_len;
-    unsigned char	sa_family;
-#else
-    unsigned short	sa_family;
-#endif
-    char		sa_data[ _UCD_SS_PAD1SIZE ];
-    long		sa_align;
-    char		sa_pad2[ _UCD_SS_PAD2SIZE ];
-#endif
-
-} snmp_ipaddr;
+struct _snmp_transport;
 
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
+
 
 struct snmp_pdu {
 
@@ -122,7 +73,16 @@ struct snmp_pdu {
     int	    securityLevel;  /* noAuthNoPriv, authNoPriv, authPriv */
     int	    msgParseModel;
 
-    snmp_ipaddr  address;	/* Address of peer or trap destination */
+    /*  Transport-specific opaque data.  This replaces the IP-centric address
+	field.  */
+
+    void  *transport_data;
+    int    transport_data_length;
+
+    /*  The actual transport domain.  This SHOULD NOT BE FREE()D.  */
+
+    oid	  *tDomain;
+    size_t tDomainLen;
 
     struct variable_list *variables;
 
@@ -140,7 +100,7 @@ struct snmp_pdu {
     size_t  enterprise_length;
     long    trap_type;		/* trap type */
     long    specific_type;	/* specific type */
-    snmp_ipaddr	agent_addr;
+    unsigned char agent_addr[4];	/* This is ONLY used for v1 TRAPs  */
 
 	/*
 	 * SNMPv3 fields
@@ -417,6 +377,7 @@ struct variable_list {
     oid name_loc[MAX_OID_LEN];  /* 90 percentile < 24. */
     u_char buf[40];             /* 90 percentile < 40. */
     void *data;			/* (Opaque) hook for additional data */
+    void (*dataFreeHook)(void *);	/* callback to free above */
     int  index;
 };
 
@@ -638,14 +599,21 @@ u_int snmp_get_statistic(int which);
 void  snmp_init_statistics(void);
 int create_user_from_session(struct snmp_session *session);
 
-/* extended open */
+/*  Extended open; fpre_parse has changed.  */
+
 struct snmp_session *snmp_open_ex (struct snmp_session *,
-  int (*fpre_parse) (struct snmp_session *, snmp_ipaddr),
-  int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
-  int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
-  int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
-  int (*fcheck) (u_char *, size_t)
-);
+				   int (*fpre_parse) (struct snmp_session *,
+						      struct _snmp_transport *,
+						      void *, int),
+				   int (*fparse)     (struct snmp_session *,
+						      struct snmp_pdu *,
+						      u_char *, size_t),
+				   int (*fpost_parse)(struct snmp_session *,
+						      struct snmp_pdu *, int),
+				   int (*fbuild)     (struct snmp_session *,
+						      struct snmp_pdu *,
+						      u_char *, size_t *),
+				   int (*fcheck)     (u_char *, size_t));
 
 /* provided for backwards compatability.  Don't use these functions.
    See snmp_debug.h and snmp_debug.c instead.
@@ -712,7 +680,52 @@ void snmp_error (struct snmp_session *, int *, int *, char **);
 
 void   snmp_sess_init       (struct snmp_session *);
 void * snmp_sess_open       (struct snmp_session *);
+void * snmp_sess_pointer    (struct snmp_session *);
 struct snmp_session * snmp_sess_session    (void *);
+
+/*  Return the snmp_transport structure associated with the given opaque
+    pointer.  */
+
+struct _snmp_transport	*snmp_sess_transport	(void *);
+void			 snmp_sess_transport_set(void *,
+						 struct _snmp_transport *);
+
+/*  EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
+
+    snmp_sess_add_ex, snmp_sess_add, snmp_add 
+
+    Analogous to snmp_open family of functions, but taking an snmp_transport
+    pointer as an extra argument.  Unlike snmp_open et al. it doesn't attempt
+    to interpret the in_session->peername as a transport endpoint specifier,
+    but instead uses the supplied transport.				JBPN
+
+*/
+
+void	*snmp_sess_add_ex(struct snmp_session *, struct _snmp_transport *,
+			  int (*fpre_parse) (struct snmp_session *,
+					     struct _snmp_transport *, void *,
+					     int),
+			  int (*fparse) (struct snmp_session *, struct
+					 snmp_pdu *, u_char *, size_t), 
+			  int (*fpost_parse) (struct snmp_session *, struct
+					      snmp_pdu *, int), 
+			  int (*fbuild) (struct snmp_session *, struct
+					 snmp_pdu *, u_char *, size_t *), 
+			  int (*fcheck) (u_char *, size_t));
+
+void   *snmp_sess_add	(struct snmp_session *, struct _snmp_transport *,
+			 int (*fpre_parse) (struct snmp_session *,
+					    struct _snmp_transport *,
+					    void *, int),
+			 int (*fpost_parse) (struct snmp_session *,
+					     struct snmp_pdu *, int));
+
+struct snmp_session *snmp_add(struct snmp_session *, struct _snmp_transport *,
+			      int (*fpre_parse) (struct snmp_session *,
+						 struct _snmp_transport *,
+						 void *, int),
+			      int (*fpost_parse) (struct snmp_session *,
+						  struct snmp_pdu *, int));
 
 /* use return value from snmp_sess_open as void * parameter */
 

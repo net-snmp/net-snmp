@@ -210,6 +210,40 @@ dnl This can't be within AC_ARG_WITH.  I don't want to read autoconf m4
 dnl to find out why.
 AC_SUBST(WRAPLIBS)
 
+AC_ARG_WITH(transports,
+[  --with-transports=\"t1 t2 ...\"   Compile in the given SNMP transport
+                                    modules (space separated list).])
+AC_ARG_WITH(out_transports,
+[  --with-out-transports=\"t1 ...\"  Exclude listed SNMP transports
+                                    (space separated list).
+
+  Available SNMP transport modules are:
+
+        UDP                       support for SNMP over UDP/IP.  This
+                                    transport is always compiled in.
+        TCP                       support for SNMP over TCP/IP.  This
+                                    transport is compiled in by default, but
+                                    may be ommitted.
+        Unix                      support for SNMP over Unix domain
+                                    protocols.  This transport is compiled in
+                                    by default except on Win32 platforms, and
+                                    may be omitted.
+        AAL5PVC                   support for SNMP over AAL5 PVCs.  This
+                                    transport is presently only available for
+                                    Linux, is never compiled in by default
+                                    and may be omitted.
+        IPX                       support for SNMP over IPX per RFC 1420.
+                                    This transport is presently only available
+                                    for Linux, is never compiled in by default
+                                    and may be omitted.
+])
+
+dnl
+dnl Catch common mistakes in transport options
+dnl
+AC_ARG_WITH(transport,,    AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])     )
+AC_ARG_WITH(out_transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+
 AC_ARG_WITH(mib_modules,
 [  --with-mib-modules=\"item1 ...\"  Compile with additional mib modules
                                     (Space separated list).])
@@ -654,6 +688,77 @@ else
 fi
 
 dnl
+dnl Do transport module processing.
+dnl
+AC_MSG_CHECKING(for and configuring transport modules to use)
+transport_src_list=""
+transport_def_list=""
+transport_result_list=""
+transport_add_list=""
+new_with_transport_list=`echo $with_transports | sed 's/,/ /g;'`
+new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
+dnl
+dnl Add the default transports to the list
+dnl
+for i in UDP TCP Unix; do
+  if echo " $new_with_transport_list " | grep " $i " >/dev/null; then
+    :
+  else
+    transport_add_list="$i $transport_add_list"
+  fi
+done
+new_transport_list="$transport_add_list $new_with_transport_list"
+
+for i in $new_transport_list; do
+  if echo " $new_with_out_transport_list " | grep " $i " >/dev/null; then
+    if test "x$i" = "xUDP"; then
+      echo
+      AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
+    fi
+  else
+    if test "x$i" = "xAAL5PVC"; then
+      if test "x$PARTIALTARGETOS" != "xlinux"; then
+        echo
+        AC_MSG_ERROR(AAL5 PVC support unavailable for this platform (Linux only))
+      fi
+    fi
+    if test "x$i" = "xIPX"; then
+      if test "x$PARTIALTARGETOS" != "xlinux"; then
+        echo
+        AC_MSG_ERROR(IPX support unavailable for this platform (Linux only))
+      fi
+    fi
+    if test "x$i" = "xUnix"; then
+      if test "x$PARTIALTARGETOS" = "cygwin"; then
+        echo
+        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+      fi
+    fi
+    transport_src="snmp"$i"Domain.c"
+    rel_transport_src="snmplib/"$transport_src
+    if test -f $rel_transport_src; then
+      transport_result_list="$transport_result_list $i"
+      transport_src_list="$transport_src $transport_src_list"
+      transport_def=`echo $i | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+      transport_def_list="SNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
+    else
+      echo
+      AC_MSG_ERROR(Cannot find file $transport_src to support SNMP transport domain $i.)
+    fi
+  fi
+done
+transport_obj_list=`echo " $transport_src_list " | sed 's/\.c/\.o/g'`
+transport_lobj_list=`echo " $transport_src_list " | sed 's/\.c/\.lo/g'`
+AC_SUBST(transport_src_list)
+AC_SUBST(transport_obj_list)
+AC_SUBST(transport_lobj_list)
+for i in $transport_def_list; do
+  AC_DEFINE_UNQUOTED($i)
+done
+AC_MSG_RESULT($transport_result_list.)
+
+
+dnl
 dnl Do hairy agent module processing.
 dnl
 changequote(, )
@@ -1061,7 +1166,7 @@ AC_CHECK_HEADERS(stdarg.h string.h fcntl.h limits.h sys/file.h sys/ioctl.h syslo
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_mib.h net/if_types.h net/if_var.h sys/queue.h osreldate.h sys/disklabel.h machine/types.h sys/socketvar.h)
 dnl Linux
-AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h)
+AC_CHECK_HEADERS(sys/conf.h netinet/in_systm.h netinet/tcp.h netinet/udp.h netinet/in_var.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h nlist.h ioctls.h asm/page.h netipx/ipx.h)
 dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h sys/pool.h)
 dnl BSDi2 headers
@@ -1224,6 +1329,8 @@ dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_FUNCS(dlopen)
 AC_CHECK_FUNCS(mkstemp)
 AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid)
+dnl High resolution alarm support
+AC_CHECK_FUNCS(setitimer)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,

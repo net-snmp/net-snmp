@@ -80,6 +80,7 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 #include "default_store.h"
+#include "snmp_transport.h"
 
 int command = SNMP_MSG_GET;
 
@@ -99,6 +100,7 @@ int main(int argc, char *argv[])
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
     struct sockaddr_in *respIp;
     struct variable_list *vars, *vp;
+    snmp_transport *transport = NULL;
     int	ret;
     int	    status, count;
     char	input[128];
@@ -221,8 +223,16 @@ int main(int argc, char *argv[])
 			printf("Received SNMPv2 Trap Request ");
 			break;
 		    }
-		    respIp = (struct sockaddr_in *)&(response->address);
-		    printf("from %s\n", inet_ntoa(respIp->sin_addr));
+		    transport = snmp_sess_transport(snmp_sess_pointer(ss));
+		    if (transport != NULL && transport->f_fmtaddr != NULL) {
+		      char *s =
+			transport->f_fmtaddr(transport,
+					     response->transport_data,
+					     response->transport_data_length);
+		      printf("from %s\n", s);
+		    } else {
+		      printf("from <UNKNOWN>\n");
+		    }
 		    printf("requestid 0x%lX errstat 0x%lX errindex 0x%lX\n",
 			   response->reqid, response->errstat,
 			   response->errindex);

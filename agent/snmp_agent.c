@@ -28,6 +28,7 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#include <limits.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -80,17 +81,57 @@ SOFTWARE.
 #include "system.h"
 #include "ds_agent.h"
 #include "snmp_agent.h"
+#include "snmp_alarm.h"
 
+#include "snmp_transport.h"
+#include "snmpUDPDomain.h"
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+#include "snmpUnixDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#include "snmpTCPDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+#include "snmpAAL5PVCDomain.h"
+#endif
+#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+#include "snmpIPXDomain.h"
+#endif
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
 #endif
 
-static int snmp_vars_inc;
+#define SNMP_ADDRCACHE_SIZE 10
 
+struct addrCache {
+  char *addr;
+  enum { SNMP_ADDRCACHE_UNUSED = 0,
+	 SNMP_ADDRCACHE_USED   = 1,
+	 SNMP_ADDRCACHE_OLD    = 2 } status;
+};
+
+static struct addrCache	addrCache[SNMP_ADDRCACHE_SIZE];
+int lastAddrAge = 0;
+int log_addresses = 0;
+
+
+
+typedef struct _agent_nsap {
+  int			handle;
+  snmp_transport       *t;
+  void		       *s;	/*  Opaque internal session pointer.  */
+  struct _agent_nsap   *next;
+} agent_nsap;
+
+static	agent_nsap		*agent_nsap_list = NULL;
+static int snmp_vars_inc;
 static struct agent_snmp_session *agent_session_list = NULL;
 
 
 static void dump_var(oid *, size_t, int, void *, size_t);
+int snmp_check_packet(struct snmp_session*, struct _snmp_transport *,
+		      void *, int);
+int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
 
 static void dump_var (
     oid *var_name,
@@ -165,117 +206,494 @@ agent_check_and_process(int block) {
 }
 
 
-/*
- * The session is created using the "traditional API" routine snmp_open()
- * so is linked into the global library Sessions list.  It also opens a
- * socket that listens for incoming requests.
- * 
- *   The agent runs in an infinite loop (in the 'receive()' routine),
- * which calls snmp_read() when such a request is received on this socket.
- * This routine then traverses the library 'Sessions' list to identify the
- * relevant session and eventually invokes '_sess_read'.
- *   This then processes the incoming packet, calling the pre_parse, parse,
- * post_parse and callback routines in turn.
+
+/*  Set up the address cache.  */
+void snmp_addrcache_initialise(void)
+{
+  int i = 0;
+  
+  for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+    addrCache[i].addr = NULL;
+    addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
+  }
+}
+
+
+
+/*  Age the entries in the address cache.  */
+
+void snmp_addrcache_age(void)
+{
+  int i = 0;
+  
+  lastAddrAge = 0;
+  for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+    if (addrCache[i].status == SNMP_ADDRCACHE_OLD) {
+      addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
+      if (addrCache[i].addr != NULL) {
+	free(addrCache[i].addr);
+	addrCache[i].addr = NULL;
+      }
+    }
+    if (addrCache[i].status == SNMP_ADDRCACHE_USED) {
+      addrCache[i].status = SNMP_ADDRCACHE_OLD;
+    }
+  }
+}
+
+/*******************************************************************-o-******
+ * snmp_check_packet
+ *
+ * Parameters:
+ *	session, transport, transport_data, transport_data_length
+ *      
+ * Returns:
+ *	1	On success.
+ *	0	On error.
+ *
+ * Handler for all incoming messages (a.k.a. packets) for the agent.  If using
+ * the libwrap utility, log the connection and deny/allow the access. Print
+ * output when appropriate, and increment the incoming counter.
+ *
  */
 
-	/* Global access to the primary session structure for this agent.
-		for Index Allocation use initially. */
-struct snmp_session *main_session;
-
 int
-init_master_agent(int dest_port, 
-                  int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
-                  int (*post_parse) (struct snmp_session *, struct snmp_pdu *,int))
+snmp_check_packet(struct snmp_session *session, snmp_transport *transport,
+		  void *transport_data, int transport_data_length)
 {
-    struct snmp_session sess, *session;
-    char *cptr, *cptr2;
-    char buf[SPRINT_MAX_LEN];
-    int flags;
+  char *addr_string = NULL;
+  int i = 0;
 
-    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
-	return 0; /* no error if ! MASTER_AGENT */
+  /*
+   * Log the message and/or dump the message.
+   * Optionally cache the network address of the sender.
+   */
 
-    /* has something been specified before? */
-    cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
-                      
-    /* set the specification string up */
-    if (cptr && dest_port)
-        /* append to the older specification string */
-        sprintf(buf,"%d,%s", dest_port, cptr);
-    else if (cptr)
-        sprintf(buf,"%s",cptr);
-    else
-        sprintf(buf,"%d",SNMP_PORT);
+  if (transport != NULL && transport->f_fmtaddr != NULL) {
+    /*  Okay I do know how to format this address for logging.  */
+    addr_string = transport->f_fmtaddr(transport, transport_data,
+				       transport_data_length);
+    /*  Don't forget to free() it.  */
+  } else {
+    /*  Don't know how to format the address for logging.  */
+    addr_string = strdup("<UNKNOWN>");
+  }
 
-    DEBUGMSGTL(("snmpd_ports","final port spec: %s\n", buf));
-    cptr = strtok(buf, ",");
-    while(cptr) {
-        /* XXX: surely, this creates memory leaks */
-        /* specification format: [transport:]port[@interface/address],... */
-        DEBUGMSGTL(("snmpd_open","installing master agent on port %s\n", cptr));
-
-        flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
-
-        /* transport type */
-        if ((cptr2 = strchr(cptr, ':'))) {
-            if (strncasecmp(cptr,"tcp",3) == 0)
-                flags |= SNMP_FLAGS_STREAM_SOCKET;
-            else if (strncasecmp(cptr,"udp",3) == 0)
-                flags ^= SNMP_FLAGS_STREAM_SOCKET; /* fix */
-            else {
-                snmp_log(LOG_ERR, "illegal port transport %s\n", buf);
-                return 1;
-            }
-            cptr = cptr2+1;
-        }
-
-        /* null? */
-        if (!cptr || !(*cptr)) {
-            snmp_log(LOG_ERR, "improper port specification\n");
-            return 1;
-        }
-
-        dest_port = strtol(cptr, &cptr2, 0);
-
-        if (dest_port <= 0 || (*cptr2 && *cptr2 != '@')) {
-            /* XXX: add getservbyname lookups */
-            snmp_log(LOG_ERR, "improper port specification %s\n", cptr);
-            return 1;
-        }
-
-        memset(&sess, 0, sizeof(sess));
-        snmp_sess_init( &sess );
-    
-        sess.version = SNMP_DEFAULT_VERSION;
-        /* XXX: add interface binding (ie, eth0) */
-        if (cptr2 && *cptr2 == '@' && *(cptr2+1))
-            sess.peername = strdup(cptr2+1);
-        else
-            sess.peername = SNMP_DEFAULT_PEERNAME;
-        
-        sess.community_len = SNMP_DEFAULT_COMMUNITY_LEN;
-     
-        sess.local_port = dest_port;
-        sess.callback = handle_snmp_packet;
-        sess.authenticator = NULL;
-        sess.flags = flags;
-        sess.isAuthoritative = SNMP_SESS_AUTHORITATIVE;
-        session = snmp_open_ex( &sess, pre_parse, 0, post_parse, 0, 0 );
-
-        if ( session == NULL ) {
-            /* diagnose snmp_open errors with the input struct
-               snmp_session pointer */
-            snmp_sess_perror("init_master_agent", &sess);
-            return 1;
-        }
-        if (!main_session)
-            main_session = session;
-
-        /* next */
-        cptr = strtok(NULL, ",");
+#ifdef  USE_LIBWRAP
+  if (hosts_ctl("snmpd", addr_string, addr_string, STRING_UNKNOWN)) {
+    snmp_log(allow_severity, "Connection from %s\n", addr_string);
+  } else {
+    snmp_log(deny_severity, "Connection from %s REFUSED\n", addr_string);
+    if (addr_string != NULL) {
+      free(addr_string);
     }
     return 0;
+  }
+#endif/*USE_LIBWRAP*/
+
+  snmp_increment_statistic(STAT_SNMPINPKTS);
+
+  if (log_addresses || ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
+    
+    for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+      if ((addrCache[i].status != SNMP_ADDRCACHE_UNUSED) &&
+	  (strcmp(addrCache[i].addr, addr_string) == 0)) {
+	break;
+      }
+    }
+
+    if (i >= SNMP_ADDRCACHE_SIZE ||
+	ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)){
+      /*  Address wasn't in the cache, so log the packet...  */
+      snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n", addr_string);
+      /*  ...and try to cache the address.  */
+      for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+	if (addrCache[i].status == SNMP_ADDRCACHE_UNUSED) {
+	  if (addrCache[i].addr != NULL) {
+	    free(addrCache[i].addr);
+	  }
+	  addrCache[i].addr   = addr_string;
+	  addrCache[i].status = SNMP_ADDRCACHE_USED;
+	  break;
+	}
+      }
+      if (i >= SNMP_ADDRCACHE_SIZE) {
+	/*  We didn't find a free slot to cache the address.  Perhaps we
+	    should be using an LRU replacement policy here or something.  Oh
+	    well.  */
+	DEBUGMSGTL(("snmp_check_packet", "cache overrun"));
+      }
+    } else {
+      addrCache[i].status = SNMP_ADDRCACHE_USED;
+    }
+  }
+
+  if (addr_string != NULL) {
+    free(addr_string);
+    addr_string = NULL;
+  }
+  return 1;
 }
+
+
+int snmp_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
+		     int result)
+{
+  if (result == 0) {
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
+	snmp_get_do_logging()) {
+      char c_oid[SPRINT_MAX_LEN];
+      struct variable_list *var_ptr;
+	    
+      switch (pdu->command) {
+      case SNMP_MSG_GET:
+	snmp_log(LOG_DEBUG, "  GET message\n"); break;
+      case SNMP_MSG_GETNEXT:
+	snmp_log(LOG_DEBUG, "  GETNEXT message\n"); break;
+      case SNMP_MSG_RESPONSE:
+	snmp_log(LOG_DEBUG, "  RESPONSE message\n"); break;
+      case SNMP_MSG_SET:
+	snmp_log(LOG_DEBUG, "  SET message\n"); break;
+      case SNMP_MSG_TRAP:
+	snmp_log(LOG_DEBUG, "  TRAP message\n"); break;
+      case SNMP_MSG_GETBULK:
+	snmp_log(LOG_DEBUG, "  GETBULK message, non-rep=%d, max_rep=%d\n",
+		 pdu->errstat, pdu->errindex); break;
+      case SNMP_MSG_INFORM:
+	snmp_log(LOG_DEBUG, "  INFORM message\n"); break;
+      case SNMP_MSG_TRAP2:
+	snmp_log(LOG_DEBUG, "  TRAP2 message\n"); break;
+      case SNMP_MSG_REPORT:
+	snmp_log(LOG_DEBUG, "  REPORT message\n"); break;
+      }
+	     
+      for (var_ptr = pdu->variables; var_ptr != NULL;
+	   var_ptr=var_ptr->next_variable) {
+	sprint_objid (c_oid, var_ptr->name, var_ptr->name_length);
+	snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
+      }
+    }
+    return 1;
+  }
+  return 0; /* XXX: does it matter what the return value is?  Yes: if we
+	       return 0, then the PDU is dumped.  */
+}
+
+
+/* Global access to the primary session structure for this agent.
+   for Index Allocation use initially. */
+
+/*  I don't understand what this is for at the moment.  AFAICS as long as it
+    gets set and points at a session, that's fine.  ???  */
+
+struct snmp_session *main_session = NULL;
+
+
+
+/*  Set up an agent session on the given transport.  Return a handle
+    which may later be used to de-register this transport.  A return
+    value of -1 indicates an error.  */
+
+int	register_agent_nsap	(snmp_transport *t)
+{
+  struct snmp_session *s, *sp = NULL;
+  agent_nsap *a = NULL, *n = NULL, **prevNext = &agent_nsap_list;
+  int handle = 0;
+  void *isp = NULL;
+
+  if (t == NULL) {
+    return -1;
+  }
+
+  DEBUGMSGTL(("register_agent_nsap", "fd %d\n", t->sock));
+
+  n = (agent_nsap *)malloc(sizeof(agent_nsap));
+  if (n == NULL) {
+    return -1;
+  }
+  s = (struct snmp_session *)malloc(sizeof(struct snmp_session));
+  if (s == NULL) {
+    free(n);
+    return -1;
+  }
+  memset(s, 0, sizeof(struct snmp_session));
+  snmp_sess_init(s);
+
+  /*  Set up the session appropriately for an agent.  */
+
+  s->version         = SNMP_DEFAULT_VERSION;
+  s->callback        = handle_snmp_packet;
+  s->authenticator   = NULL;
+  s->flags           = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
+  s->isAuthoritative = SNMP_SESS_AUTHORITATIVE;
+
+  sp  = snmp_add(s, t, snmp_check_packet, snmp_check_parse);
+  if (sp == NULL) {
+    free(s);
+    free(n);
+    return -1;
+  }
+
+  isp = snmp_sess_pointer(sp);
+  if (isp == NULL) {	/*  over-cautious  */
+    free(s);
+    free(n);
+    return -1;
+  }
+
+  n->s    = isp;
+  n->t    = t;
+
+  if (main_session == NULL) {
+    main_session = snmp_sess_session(isp);
+  }
+
+  for (a = agent_nsap_list; a != NULL && handle+1 >= a->handle; a = a->next) {
+    handle = a->handle;
+    prevNext = &(a->next);
+  }
+
+  if (handle < INT_MAX) {
+    n->handle = handle + 1;
+    n->next   = a;
+    *prevNext = n;
+    free(s);
+    return n->handle;
+  } else {
+    free(s);
+    free(n);
+    return -1;
+  }
+}
+
+
+
+void	deregister_agent_nsap	(int handle)
+{
+  agent_nsap *a = NULL, **prevNext = &agent_nsap_list;
+  int main_session_deregistered = 0;
+
+  DEBUGMSGTL(("deregister_agent_nsap", "handle %d\n", handle));
+
+  for (a = agent_nsap_list; a != NULL && a->handle < handle; a = a->next) {
+    prevNext = &(a->next);
+  }
+
+  if (a != NULL && a->handle == handle) {
+    *prevNext = a->next;
+    if (main_session == snmp_sess_session(a->s)) {
+      main_session_deregistered = 1;
+    }
+    snmp_close(snmp_sess_session(a->s));
+    /*  The above free()s the transport and session pointers.  */
+    free(a);
+  }
+
+  /*  If we've deregistered the session that main_session used to point to,
+      then make it point to another one, or in the last resort, make it equal
+      to NULL.  Basically this shouldn't ever happen in normal operation
+      because main_session starts off pointing at the first session added by
+      init_master_agent(), which then discards the handle.  */
+
+  if (main_session_deregistered) {
+    if (agent_nsap_list != NULL) {
+      DEBUGMSGTL(("snmp_agent",
+		  "WARNING: main_session pointer changed from %p to %p\n",
+		  main_session, snmp_sess_session(agent_nsap_list->s)));
+      main_session = snmp_sess_session(agent_nsap_list->s);
+    } else {
+      DEBUGMSGTL(("snmp_agent",
+		  "WARNING: main_session pointer changed from %p to NULL\n",
+		  main_session));
+      main_session = NULL;
+    }
+  }
+}
+
+
+
+/* 
+
+   This function has been modified to use the experimental register_agent_nsap
+   interface.  The major responsibility of this function now is to interpret a
+   string specified to the agent (via -p on the command line, or from a
+   configuration file) as a list of agent NSAPs on which to listen for SNMP
+   packets.  Typically, when you add a new transport domain "foo", you add
+   code here such that if the "foo" code is compiled into the agent
+   (SNMP_TRANSPORT_FOO_DOMAIN is defined), then a token of the form
+   "foo:bletch-3a0054ef%wob&wob" gets turned into the appropriate transport
+   descriptor.  register_agent_nsap is then called with that transport
+   descriptor and sets up a listening agent session on it.
+
+   Everything then works much as normal: the agent runs in an infinite loop
+   (in the snmpd.c/receive()routine), which calls snmp_read() when a request
+   is readable on any of the given transports.  This routine then traverses
+   the library 'Sessions' list to identify the relevant session and eventually
+   invokes '_sess_read'.  This then processes the incoming packet, calling the
+   pre_parse, parse, post_parse and callback routines in turn.
+
+   JBPN 20001117
+*/
+
+int
+init_master_agent(void)
+{
+  struct snmp_session sess, *session;
+  snmp_transport *transport;
+  char *cptr, *cptr2;
+  char buf[SPRINT_MAX_LEN];
+  int flags;
+
+  if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
+    DEBUGMSGTL(("snmp_agent", "init_master_agent; not master agent\n"));
+    return 0; /*  No error if ! MASTER_AGENT  */
+  }
+
+  /*  Have specific agent ports been specified?  */
+  cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+
+  if (cptr) {
+    sprintf(buf, "%s", cptr);
+  } else {
+    /*  No, so just specify the default port.  */
+    if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS) &
+	SNMP_FLAGS_STREAM_SOCKET) {
+      sprintf(buf, "tcp:%d", SNMP_PORT);
+    } else {
+      sprintf(buf, "udp:%d", SNMP_PORT);
+    }
+  }
+
+  DEBUGMSGTL(("snmp_agent", "final port spec: %s\n", buf));
+  cptr = strtok(buf, ",");
+  while (cptr) {
+    /*  Specification format: 
+	
+	NONE:			  (a pseudo-transport)
+	UDP:[address:]port        (also default if no transport is specified)
+	TCP:[address:]port	  (if supported)
+	Unix:pathname		  (if supported)
+	AAL5PVC:itf.vpi.vci 	  (if supported)
+        IPX:[network]:node[/port] (if supported)
+
+    */
+
+    DEBUGMSGTL(("snmp_agent", "installing master agent on port %s\n", cptr));
+
+    if (!cptr || !(*cptr)) {
+      snmp_log(LOG_ERR, "improper port specification\n");
+      return 1;
+    }
+
+    /*  Transport type specifier?  */
+
+    if ((cptr2 = strchr(cptr, ':')) != NULL) {
+      if (strncasecmp(cptr, "none", 4) == 0) {
+	DEBUGMSGTL(("snmp_agent",
+		 "init_master_agent; pseudo-transport \"none\" requested\n"));
+	return 0;
+      } else if (strncasecmp(cptr, "tcp", 3) == 0) {
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+	struct sockaddr_in addr;
+	if (snmp_sockaddr_in(&addr, cptr2+1, 0)) {
+	  transport = snmp_tcp_transport(&addr, 1);
+	} else {
+	  snmp_log(LOG_ERR,
+		   "Badly formatted IP address (should be [a.b.c.d:]p)\n");
+	  return 1;
+	}
+#else
+	snmp_log(LOG_ERR, "No support for requested TCP domain\n");
+	return 1;
+#endif
+      } else if (strncasecmp(cptr, "ipx", 3) == 0) {
+#ifdef SNMP_TRANSPORT_IPX_DOMAIN
+	struct sockaddr_ipx addr;
+	if (snmp_sockaddr_ipx(&addr, cptr2+1)) {
+	  transport = snmp_ipx_transport(&addr, 1);
+	} else {
+	  snmp_log(LOG_ERR,
+	       "Badly formatted IPX address (should be [net]:node[/port])\n");
+	  return 1;
+	}
+#else
+	snmp_log(LOG_ERR, "No support for requested IPX domain\n");
+#endif
+      } else if (strncasecmp(cptr, "aal5pvc", 7) == 0) {
+#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+	struct sockaddr_atmpvc addr;
+	if (sscanf(cptr2+1, "%d.%d.%d", &(addr.sap_addr.itf),
+		   &(addr.sap_addr.vpi), &(addr.sap_addr.vci))==3) {
+	  addr.sap_family = AF_ATMPVC;
+	  transport = snmp_aal5pvc_transport(&addr, 1);
+	} else {
+	  snmp_log(LOG_ERR,
+		 "Badly formatted AAL5 PVC address (should be itf.vpi.vci)\n");
+	  return 1;
+	}
+#else
+	snmp_log(LOG_ERR, "No support for requested AAL5 PVC domain\n");
+	return 1;
+#endif
+      } else if (strncasecmp(cptr, "unix", 4) == 0) {
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+	struct sockaddr_un addr;
+	addr.sun_family = AF_UNIX;
+	strncpy(addr.sun_path, cptr2+1, 
+		sizeof(addr) - (size_t) (((struct sockaddr_un *)0)->sun_path));
+	transport = snmp_unix_transport(&addr, 1);
+#else
+	snmp_log(LOG_ERR, "No support for requested Unix domain\n");
+	return 1;
+#endif
+      } else if (strncasecmp(cptr, "udp", 3) == 0) {
+	struct sockaddr_in addr;
+	if (snmp_sockaddr_in(&addr, cptr2+1, 0)) {
+	  transport = snmp_udp_transport(&addr, 1);
+	} else {
+	  snmp_log(LOG_ERR,
+		   "Badly formatted IP address (should be [a.b.c.d:]p)\n");
+	  return 1;
+	}
+      } else {
+	snmp_log(LOG_ERR, "Unknown transport domain \"%s\"\n", cptr);
+	return 1;
+      }
+    } else {
+      /*  No transport type specifier; default to UDP.  */
+      struct sockaddr_in addr;
+      if (snmp_sockaddr_in(&addr, cptr, 0)) {
+	transport = snmp_udp_transport(&addr, 1);
+      } else {
+	snmp_log(LOG_ERR,
+		 "Badly formatted IP address (should be [a.b.c.d:]p)\n");
+	return 1;
+      }
+    }
+
+    if (transport == NULL) {
+      snmp_log(LOG_ERR, "Error opening specified transport \"%s\"\n", cptr);
+      return 1;
+    }
+
+    if (register_agent_nsap(transport) < 0) {
+      snmp_log(LOG_ERR,
+	     "Error registering specified transport \"%s\" as an agent NSAP\n",
+	       cptr);
+      return 1;
+    } else {
+      DEBUGMSGTL(("snmp_agent",
+		  "init_master_agent; \"%s\" registered as an agent NSAP\n",
+		  cptr));
+    }
+
+    /*  Next transport please...  */
+    cptr = strtok(NULL, ",");
+  }
+  return 0;
+}
+
+
 
 struct agent_snmp_session  *
 init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )

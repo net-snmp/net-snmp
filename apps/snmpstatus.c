@@ -81,6 +81,7 @@ SOFTWARE.
 #include "tools.h"
 #include "snmp_parse_args.h"
 #include "default_store.h"
+#include "snmp_transport.h"
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 size_t	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
     struct snmp_pdu *pdu, *response;
     struct sockaddr_in *respIp;
     struct variable_list *vars;
+    snmp_transport *transport = NULL;
     char *sysdescr = NULL;
     u_long uptime = 0;
     int status;
@@ -233,9 +235,16 @@ retry:
       exit(2);
     }
 
-    respIp = (struct sockaddr_in *)&(response->address);
-    printf("[%s]=>[%s] Up: %s\n", inet_ntoa(respIp->sin_addr),
-            sysdescr, uptime_string(uptime, buf));
+    transport = snmp_sess_transport(snmp_sess_pointer(ss));
+    if (transport != NULL && transport->f_fmtaddr != NULL) {
+      char *s = transport->f_fmtaddr(transport,
+				     response->transport_data,
+				     response->transport_data_length);
+      printf("[%s]=>[%s] Up: %s\n", s, sysdescr, uptime_string(uptime, buf));
+    } else {
+      printf("[<UNKNOWN>]=>[%s] Up: %s\n", sysdescr,
+	     uptime_string(uptime, buf));
+    }
 
     if (response)
       snmp_free_pdu(response);

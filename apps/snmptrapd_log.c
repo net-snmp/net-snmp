@@ -93,6 +93,11 @@ SOFTWARE.
 #include "snmp.h"
 #include "tools.h"
 
+#include "snmp_transport.h"
+#include "snmpUDPDomain.h"
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+#include "snmpTCPDomain.h"
+#endif
 #include "snmptrapd_log.h"
 
 
@@ -525,7 +530,8 @@ static void handle_ip_fmt (char * bfr,
 			   unsigned long * tail,
 			   unsigned long len,
 			   options_type * options,
-			   struct snmp_pdu * pdu)
+			   struct snmp_pdu * pdu,
+			   snmp_transport *transport)
 
      /*
       * Function:
@@ -534,46 +540,90 @@ static void handle_ip_fmt (char * bfr,
       * the buffer's length limit.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
-      *    options - options governing how to write the field
-      *    pdu     - information about this trap 
+      *    bfr       - append the results to this buffer
+      *    tail      - index of one character beyond last buffer element
+      *    len       - length of the buffer
+      *    options   - options governing how to write the field
+      *    pdu       - information about this trap 
+      *    transport - the transport descriptor
       */
 {
-  struct sockaddr_in * ip_addr;       /* IP address to output */
+  struct in_addr      *agent_inaddr = (struct in_addr *)pdu->agent_addr;
   struct hostent *     host;          /* corresponding host name */
   char                 safe_bfr[200]; /* temporary string-building buffer */
   char                 fmt_cmd = options->cmd; /* what we're formatting */
 
-  /* figure out which IP address to write */
-  if (is_agent_cmd (fmt_cmd))
-    ip_addr = (struct sockaddr_in *) &(pdu->agent_addr);
-  else
-    ip_addr = (struct sockaddr_in *) &(pdu->address);
+  /*  Decide exactly what to output.  */
+  switch (fmt_cmd) {
+  case CHR_AGENT_IP:
+    /*  Write a numerical address.  */
+    sprintf(safe_bfr, "%s", inet_ntoa(*agent_inaddr));
+    break;
 
-  /* decide exactly what to output */
-  switch (fmt_cmd)
-    {
-    /* write an IP address */
-    case CHR_AGENT_IP:
-    case CHR_PDU_IP:
-      sprintf (safe_bfr, "%s", inet_ntoa (ip_addr->sin_addr));
-      break;
+  case CHR_AGENT_NAME:
+    /*  Try to resolve the agent_addr field as a hostname; fall back
+	to numerical address.  */
+    host = gethostbyaddr(pdu->agent_addr, 4, AF_INET);
+    if (host != NULL) {
+      sprintf(safe_bfr, "%s", host->h_name);
+    } else {
+      sprintf(safe_bfr, "%s", inet_ntoa(*agent_inaddr));
+    }
+    break;
 
-    /* write a host name */
-    case CHR_AGENT_NAME:
+  case CHR_PDU_IP:
+    /*  Write the numerical transport information.  */
+    if (transport != NULL && transport->f_fmtaddr != NULL) {
+      char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+					pdu->transport_data_length);
+      sprintf(safe_bfr, "%s", tstr);
+      free(tstr);
+    } else {
+      sprintf(safe_bfr, "<UNKNOWN>");
+    }
+    break;
+
+    /*  Write a host name.  */
     case CHR_PDU_NAME:
-      host = gethostbyaddr ((char *) &(ip_addr->sin_addr),
-			    sizeof (ip_addr->sin_addr),
-			    AF_INET);
-      if (host != (struct hostent *) NULL)
-	sprintf (safe_bfr, "%s", host->h_name);
-      else
-	sprintf (safe_bfr, "%s", inet_ntoa (ip_addr->sin_addr));
+      /*  Right, apparently a name lookup is wanted.  This is only reasonable
+	  for the UDP and TCP transport domains (we don't want to try to be
+	  too clever here).  */
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
+      if (transport != NULL && (transport->domain == snmpUDPDomain ||
+				transport->domain == snmpTCPDomain)) {
+#else
+      if (transport != NULL && transport->domain == snmpUDPDomain) {
+#endif
+	/*  This is kind of bletcherous -- it breaks the opacity of
+	    transport_data but never mind -- the alternative is a lot of
+	    munging strings from f_fmtaddr.  */
+	struct sockaddr_in *addr = (struct sockaddr_in *)pdu->transport_data;
+	if (addr != NULL &&
+	    pdu->transport_data_length == sizeof(struct sockaddr_in)) {
+	  host = gethostbyaddr((char *)&(addr->sin_addr),
+			       sizeof(struct in_addr), AF_INET);
+	  if (host != NULL) {
+	    sprintf(safe_bfr, "%s", host->h_name);
+	  } else {
+	    sprintf(safe_bfr, "%s", inet_ntoa(addr->sin_addr));
+	  }
+	} else {
+	  sprintf(safe_bfr, "<UNKNOWN>");
+	}
+      } else if (transport != NULL && transport->f_fmtaddr != NULL) {
+	/*  Some other domain for which we do not know how to do a name
+	    lookup.  Fall back to the formatted transport address.  */
+	char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+					  pdu->transport_data_length);
+	sprintf(safe_bfr, "%s", tstr);
+	free(tstr);
+      } else {
+	/*  We are kind of stuck!  */
+	sprintf(safe_bfr, "<UNKNOWN>");
+      }
       break;
-
-    /* don't know how to handle this command - write the character itself */
+      
+      /* don't know how to handle this command - write the character itself */
     default:
       sprintf (safe_bfr, "%c", fmt_cmd);
     }
@@ -734,18 +784,20 @@ static void dispatch_format_cmd (char * bfr,
 				 unsigned long * tail,
 				 unsigned long len,
 				 options_type * options,
-				 struct snmp_pdu * pdu)
+				 struct snmp_pdu * pdu,
+				 snmp_transport *transport)
 
      /*
       * Function:
       *     Dispatch a format command to the appropriate command handler.
       *
       * Input Parameters:
-      *    bfr     - append the results to this buffer
-      *    tail    - index of one character beyond last buffer element
-      *    len     - length of the buffer
-      *    options - options governing how to write the field
-      *    pdu     - information about this trap 
+      *    bfr       - append the results to this buffer
+      *    tail      - index of one character beyond last buffer element
+      *    len       - length of the buffer
+      *    options   - options governing how to write the field
+      *    pdu       - information about this trap
+      *    transport - the transport descriptor
       */
 {
   char fmt_cmd = options->cmd;          /* for speed */
@@ -754,7 +806,7 @@ static void dispatch_format_cmd (char * bfr,
   if (is_cur_time_cmd (fmt_cmd) || is_up_time_cmd (fmt_cmd))
     handle_time_fmt (bfr, tail, len, options, pdu);
   else if (is_agent_cmd (fmt_cmd) || is_pdu_ip_cmd (fmt_cmd))
-    handle_ip_fmt (bfr, tail, len, options, pdu);
+    handle_ip_fmt (bfr, tail, len, options, pdu, transport);
   else if (is_trap_cmd (fmt_cmd))
     handle_trap_fmt (bfr, tail, len, options, pdu);
   else if (fmt_cmd == CHR_PDU_ENT)
@@ -839,7 +891,8 @@ static void handle_backslash (char * bfr,
 
 unsigned long format_plain_trap (char * bfr,
 				 unsigned long len,
-				 struct snmp_pdu * pdu)
+				 struct snmp_pdu * pdu,
+				 snmp_transport *transport)
 
      /*
       * Function:
@@ -848,9 +901,10 @@ unsigned long format_plain_trap (char * bfr,
       * routine returns the number of characters that it puts into the buffer.
       *
       * Input Parameters:
-      *    bfr - where to put the formatted trap info
-      *    len - how many bytes of buffer space are available
-      *    pdu - the pdu information
+      *    bfr       - where to put the formatted trap info
+      *    len       - how many bytes of buffer space are available
+      *    pdu       - the pdu information
+      *    transport - the transport descriptor
       */
 {
   time_t                 now;                   /* the current time */
@@ -858,8 +912,7 @@ unsigned long format_plain_trap (char * bfr,
   char                   sprint_bfr[SPRINT_MAX_LEN]; /* holds sprint strings */
   char                   safe_bfr[200];         /* holds other strings */
   unsigned long          tail = 0;              /* points to end of buffer */
-  struct sockaddr_in *   agent_ip;              /* agent's IP info */
-  struct sockaddr_in *   pdu_ip;                /* PDU's IP info */
+  struct in_addr	*agent_inaddr = (struct in_addr *)pdu->agent_addr;
   struct hostent *       host;                  /* host name */
   oid                    trap_oid[MAX_OID_LEN]; /* holds obj ID for trap */
   unsigned long          trap_oid_len;          /* length of object ID */
@@ -887,33 +940,24 @@ unsigned long format_plain_trap (char * bfr,
 	   now_parsed->tm_sec);
   str_append (bfr, &tail, len, safe_bfr);
 
-  /* get info about the sender */
-  agent_ip = (struct sockaddr_in *) &(pdu->agent_addr);
-  host = gethostbyaddr ((char *) &(agent_ip->sin_addr),
-			sizeof (agent_ip->sin_addr),
-			AF_INET);
-  if (host != (struct hostent *) NULL)
-    str_append (bfr, &tail, len, host->h_name);
-  else
-    str_append (bfr, &tail, len, inet_ntoa (agent_ip->sin_addr));
-  str_append (bfr, &tail, len, " [");
-  str_append (bfr, &tail, len, inet_ntoa (agent_ip->sin_addr));
-  str_append (bfr, &tail, len, "] ");
+  /*  Get info about the sender.  */
+  host = gethostbyaddr(pdu->agent_addr, 4, AF_INET);
+  if (host != (struct hostent *)NULL) {
+    str_append(bfr, &tail, len, host->h_name);
+  } else {
+    str_append(bfr, &tail, len, inet_ntoa(*agent_inaddr));
+  }
+  str_append(bfr, &tail, len, " [");
+  str_append(bfr, &tail, len, inet_ntoa(*agent_inaddr));
+  str_append(bfr, &tail, len, "] ");
 
-  /* append PDU IP info if necessary */
-  pdu_ip = (struct sockaddr_in *) &(pdu->address);
-  if (agent_ip->sin_addr.s_addr != pdu_ip->sin_addr.s_addr) {
-    str_append (bfr, &tail, len, "(via ");
-    host = gethostbyaddr ((char *) &(pdu_ip->sin_addr),
-			  sizeof (pdu_ip->sin_addr),
-			  AF_INET);
-    if (host != (struct hostent *) NULL)
-      str_append (bfr, &tail, len, host->h_name);
-    else
-      str_append (bfr, &tail, len, inet_ntoa (pdu_ip->sin_addr));
-    str_append (bfr, &tail, len, " [");
-    str_append (bfr, &tail, len, inet_ntoa (pdu_ip->sin_addr));
-    str_append (bfr, &tail, len, "]) ");
+  /*  Append PDU transport info.  */
+  if (transport != NULL && transport->f_fmtaddr != NULL) {
+    char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
+				      pdu->transport_data_length);
+    str_append(bfr, &tail, len, "(via ");
+    str_append(bfr, &tail, len, tstr);
+    free(tstr);
   }
 
   /* append enterprise information and end the line */
@@ -985,7 +1029,8 @@ unsigned long format_plain_trap (char * bfr,
 unsigned long format_trap (char * bfr,
 			   unsigned long len,
 			   const char * format_str,
-			   struct snmp_pdu * pdu)
+			   struct snmp_pdu * pdu,
+			   snmp_transport *transport)
 
      /*
       * Function:
@@ -998,6 +1043,7 @@ unsigned long format_trap (char * bfr,
       *    len        - how many bytes of buffer space are available
       *    format_str - specifies how to format the trap info
       *    pdu        - the pdu information
+      *    transport  - the transport descriptor
       */
 {
   unsigned long    tail = 0;             /* points to the end of the buffer */
@@ -1061,7 +1107,7 @@ unsigned long format_trap (char * bfr,
 	}
 	else if (is_fmt_cmd (next_chr)) {
 	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
+	  dispatch_format_cmd (bfr, &tail, len, &options, pdu, transport);
 	  state = PARSE_NORMAL;
 	}
 	else {
@@ -1084,7 +1130,7 @@ unsigned long format_trap (char * bfr,
 	  state = PARSE_GET_PRECISION;
 	else if (is_fmt_cmd (next_chr)) {
 	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
+	  dispatch_format_cmd (bfr, &tail, len, &options, pdu, transport);
 	  state = PARSE_NORMAL;
 	}
 	else {
@@ -1109,7 +1155,7 @@ unsigned long format_trap (char * bfr,
 	}
 	else if (is_fmt_cmd (next_chr)) {
 	  options.cmd = next_chr;
-	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
+	  dispatch_format_cmd (bfr, &tail, len, &options, pdu, transport);
 	  state = PARSE_NORMAL;
 	}
 	else {

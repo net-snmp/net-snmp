@@ -38,14 +38,6 @@ extern "C" {
 #define VACM_MAX_STRING 32
 #define VACMSTRINGLEN   34  /* VACM_MAX_STRING + 2 */
 
-struct vacm_securityEntry {
-    char	securityName[VACMSTRINGLEN];
-    snmp_ipaddr	sourceIp;
-    snmp_ipaddr	sourceMask;
-    char	community[VACMSTRINGLEN];
-    struct vacm_securityEntry *next;
-};
-
 struct vacm_groupEntry {
     int		securityModel;
     char	securityName[VACMSTRINGLEN];

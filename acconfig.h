@@ -480,6 +480,29 @@
 #undef LPSTAT_PATH
 #undef HAVE_PRINTCAP
 
+/*  Pluggable transports.  */
+
+/*  This is defined if support for the UDP/IP transport domain is
+    available.   */
+#undef SNMP_TRANSPORT_UDP_DOMAIN
+
+/*  This is defined if support for the TCP/IP transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_TCP_DOMAIN
+
+/*  This is defined if support for the Unix transport domain
+    (a.k.a. "local IPC") is available.  */
+#undef SNMP_TRANSPORT_UNIX_DOMAIN
+
+/*  This is defined if support for the AAL5 PVC transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_AAL5PVC_DOMAIN
+
+/*  This is defined if support for the IPX transport domain is
+    available.  */
+#undef SNMP_TRANSPORT_IPX_DOMAIN
+
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)

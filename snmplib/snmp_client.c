@@ -106,16 +106,15 @@ struct snmp_pdu *
 snmp_pdu_create(int command)
 {
     struct snmp_pdu *pdu;
-    struct sockaddr_in *pduIp;
 
     pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
     if (pdu) {
-    pduIp = (struct sockaddr_in *)&(pdu->address);
     pdu->version		 = SNMP_DEFAULT_VERSION;
     pdu->command		 = command;
     pdu->errstat		 = SNMP_DEFAULT_ERRSTAT;
     pdu->errindex		 = SNMP_DEFAULT_ERRINDEX;
-    pduIp->sin_addr.s_addr       = SNMP_DEFAULT_ADDRESS;
+    pdu->transport_data		 = NULL;
+    pdu->transport_data_length	 = 0;
     pdu->securityNameLen	 = 0;
     pdu->contextNameLen		 = 0;
     pdu->time			 = 0;
@@ -197,7 +196,7 @@ snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
 
     memmove(newvar, var, sizeof(struct variable_list));
     newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
-    newvar->data = 0; newvar->index = 0;
+    newvar->data = 0; newvar->dataFreeHook = 0; newvar->index = 0;
 
     /*
      * Clone the object identifier and the value.
@@ -276,23 +275,25 @@ _clone_pdu_header(struct snmp_pdu *pdu)
     newpdu->variables = 0; newpdu->enterprise = 0; newpdu->community = 0;
     newpdu->securityEngineID = 0; newpdu->securityName = 0;
     newpdu->contextEngineID  = 0; newpdu->contextName  = 0;
+    newpdu->transport_data   = 0;
 
     /* copy buffers individually. If any copy fails, all are freed. */
-    if ( snmp_clone_mem((void **)&newpdu->enterprise, pdu->enterprise,
-                                    sizeof(oid)*pdu->enterprise_length)
-     ||  snmp_clone_mem((void **)&newpdu->community, pdu->community,
-                                    pdu->community_len)
-     ||  snmp_clone_mem((void **)&newpdu->contextEngineID, pdu->contextEngineID,
-                                    pdu->contextEngineIDLen)
-     ||  snmp_clone_mem((void **)&newpdu->securityEngineID, pdu->securityEngineID,
-                                    pdu->securityEngineIDLen)
-     ||  snmp_clone_mem((void **)&newpdu->contextName, pdu->contextName,
-                                    pdu->contextNameLen)
-     ||  snmp_clone_mem((void **)&newpdu->securityName, pdu->securityName,
-                                    pdu->securityNameLen)
-       )
-    {
-        snmp_free_pdu(newpdu); return 0;
+    if (snmp_clone_mem((void **)&newpdu->enterprise, pdu->enterprise,
+		       sizeof(oid)*pdu->enterprise_length) ||
+	snmp_clone_mem((void **)&newpdu->community, pdu->community,
+		       pdu->community_len) ||
+	snmp_clone_mem((void **)&newpdu->contextEngineID, pdu->contextEngineID,
+		       pdu->contextEngineIDLen) ||
+      snmp_clone_mem((void **)&newpdu->securityEngineID, pdu->securityEngineID,
+		     pdu->securityEngineIDLen) ||
+	snmp_clone_mem((void **)&newpdu->contextName, pdu->contextName,
+		       pdu->contextNameLen) ||
+	snmp_clone_mem((void **)&newpdu->securityName, pdu->securityName,
+		       pdu->securityNameLen) ||
+	snmp_clone_mem((void **)&newpdu->transport_data, pdu->transport_data,
+		       pdu->transport_data_length)) {
+      snmp_free_pdu(newpdu);
+      return 0;
     }
     return newpdu;
 }
