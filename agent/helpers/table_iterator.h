@@ -6,23 +6,26 @@
 extern "C" {
 #endif
 
+struct iterator_info_s;
+    
 typedef struct variable_list * (FirstDataPoint)(void **loop_context,
                                                 void **data_context,
                                                 struct variable_list *,
-                                                void *myvoid);
+                                                struct iterator_info_s *);
 typedef struct variable_list * (NextDataPoint)(void **loop_context,
                                                void **data_context,
                                                struct variable_list *,
-                                               void *myvoid);
-typedef void (FreeLoopContext)(void *, void *myvoid);
-typedef void (FreeDataContext)(void *, void *myvoid);
+                                               struct iterator_info_s *);
+typedef void (FreeLoopContext)(void *, struct iterator_info_s *);
+typedef void (FreeDataContext)(void *, struct iterator_info_s *);
 
 typedef struct iterator_info_s {
    FirstDataPoint  *get_first_data_point;
    NextDataPoint   *get_next_data_point;
    FreeLoopContext *free_loop_context;
    FreeDataContext *free_data_context;
-
+   FreeLoopContext *free_loop_context_at_end;
+   
    void *myvoid;
 
    table_registration_info *table_reginfo;

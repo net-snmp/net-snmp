@@ -25,7 +25,7 @@ static oid vacm_context_oid[] = {1,3,6,1,6,3,16,1,1};
  */
 struct variable_list *
 get_first_context(void **my_loop_context, void **my_data_context,
-                  struct variable_list *put_data, void *myvoid) {
+                  struct variable_list *put_data, iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
     context_ptr = get_top_context_cache();
 
@@ -48,7 +48,7 @@ struct variable_list *
 get_next_context(void **my_loop_context,
                  void **my_data_context,
                  struct variable_list *put_data,
-                 void *myvoid) {
+                 iterator_info *iinfo) {
     subtree_context_cache *context_ptr;
 
     if (!my_loop_context || !*my_loop_context)
