@@ -8,6 +8,10 @@
 #ifndef _MIBGROUP_SNMPTARGETADDRENTRY_H
 #define _MIBGROUP_SNMPTARGETADDRENTRY_H
 
+/* we use header_generic and checkmib from the util_funcs module */
+
+config_require(util_funcs)
+
 /* Magic number definitions: */
 
 #define   SNMPTARGETADDRTDOMAIN      1
@@ -42,8 +46,8 @@ struct targetAddrTable_struct {
   int    spinLock;
   int    storageType;
   int    rowStatus;
-  struct targetAddrTable_struct *next; };
-
+  struct targetAddrTable_struct *next;
+};
 
 /* function definitions */
 
