@@ -1123,6 +1123,8 @@ int
 Get_Next_HR_SWRun(void)
 {
     int             pid;
+    if (procdir == NULL)
+      return -1;
     procentry_p = readdir(procdir);
 
     if (procentry_p == NULL)
