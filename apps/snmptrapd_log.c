@@ -736,8 +736,8 @@ static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
   			   struct snmp_pdu *pdu)
 {
 #define LCL_SAFE_LEN 200
-  char                   sprint_bfr[SPRINT_MAX_LEN]; /* string-building bfr */
-  char                   safe_bfr[LCL_SAFE_LEN]; /* string-building bfr */
+  char                   sprint_bfr[SPRINT_MAX_LEN] = { 0 };
+  char                   safe_bfr[LCL_SAFE_LEN] = { 0 };
   unsigned long          safe_tail = 0;             /* end of safe buffer */
   char *                 cp;
   int                    i;
@@ -770,9 +770,13 @@ static void handle_wrap_fmt(char *bfr, unsigned long *tail, unsigned long len,
   case SNMP_VERSION_2c:
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, ", Community ");
       cp = sprint_bfr;
-      for (i = 0; i < (int)pdu->community_len; i++)
-          if (isprint(pdu->community[i])) *cp++ = pdu->community[i];
-	  else *cp++ = '.';
+      for (i = 0; i < (int)pdu->community_len; i++) {
+	if (isprint(pdu->community[i])) {
+	  *cp++ = pdu->community[i];
+	} else {
+	  *cp++ = '.';
+	}
+      }
       *cp = 0;
       str_append(safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
       break;
