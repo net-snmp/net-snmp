@@ -119,16 +119,21 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
     static time_t time_old;
     static time_t time_diff;
 
-#ifdef KERN_CP_TIME
+#if defined(KERN_CP_TIME)
     static u_int64_t cpu_old[CPUSTATES];
     static u_int64_t cpu_new[CPUSTATES];
     static u_int64_t cpu_diff[CPUSTATES];
     static u_int64_t cpu_total;
+#elif defined(KERN_CPTIME)
+    static long cpu_old[CPUSTATES];
+    static long cpu_new[CPUSTATES];
+    static long cpu_diff[CPUSTATES];
+    static long cpu_total;
 #else
     static long cpu_old[CPUSTATES];
-    long cpu_new[CPUSTATES];
-    long cpu_diff[CPUSTATES];
-    long cpu_total;
+    static long cpu_new[CPUSTATES];
+    static long cpu_diff[CPUSTATES];
+    static long cpu_total;
 #endif
     long cpu_sum;
     double cpu_prc;
@@ -150,6 +155,12 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
     {
 #ifdef KERN_CP_TIME
         int mib[2] = { CTL_KERN, KERN_CP_TIME };
+	int ssize = sizeof(cpu_new);
+
+	if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
+	    memset(cpu_new, 0, sizeof(cpu_new));
+#elif defined(KERN_CPTIME)
+        int mib[2] = { CTL_KERN, KERN_CPTIME };
 	int ssize = sizeof(cpu_new);
 
 	if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
