@@ -1109,6 +1109,8 @@ unsigned long format_trap (char * bfr,
 	}
 	else if (is_fmt_cmd (next_chr)) {
 	  options.cmd = next_chr;
+	  if (options.width < options.precision)
+	    options.width = options.precision;
 	  dispatch_format_cmd (bfr, &tail, len, &options, pdu);
 	  state = PARSE_NORMAL;
 	}
