@@ -41,7 +41,7 @@ my @exprs = (
 	     { type => 'docs',
 	       expr => 'Version: [\.0-9a-zA-Z]+' =>
 	       repl => 'Version: $VERSION', 
-	       files => [qw(README FAQ)]},
+	       files => [qw(README FAQ dist/net-snmp.spec)]},
 
 	     # sed files
 	     { type => 'sed',
