@@ -275,6 +275,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    while ( isspace( *cp ))
 		++cp;
 	    strcpy( string, cp );
+            fclose(fp);
 #else
 	    sprintf(string, "process name");
 #endif
@@ -297,6 +298,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    fp = fopen( string, "r");
 	    fgets( buf, 100, fp );	/* argv[0] '\0' argv[1] '\0' .... */
 	    strcpy( string, buf );
+            fclose(fp);
 #else
 	    sprintf(string, "/bin/wombat");
 #endif
@@ -338,6 +340,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 		++cp;
 	    ++cp;
 	    strcpy( string, cp );
+            fclose(fp);
 #else
 	    sprintf(string, "-h -q -v");
 #endif
@@ -399,6 +402,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	    		long_return = 4;	/* invalid */
 			break;
 	    }
+            fclose(fp);
 #endif
 	    return (u_char *)&long_return;
 
@@ -431,6 +435,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 		++cp;
 	    ++cp;
 	    long_return += atoi( cp );		/* + stime */
+            fclose(fp);
 #endif
 #endif
 	    return (u_char *)&long_return;
@@ -449,6 +454,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 	        ++cp;
 	    }
 	    long_return = atoi( cp );		/* rss */
+            fclose(fp);
 #else
 	    long_return = 16*1024;	/* XXX - 16M! */
 #endif

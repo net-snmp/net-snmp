@@ -482,6 +482,7 @@ linux_mem( mem_type, size_or_used )
 	}
     }
 
+    fclose(fp);
     return ( size_or_used == HRSTORE_SIZE ? size : used )/1024;
 
 }
