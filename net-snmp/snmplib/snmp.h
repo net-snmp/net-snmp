@@ -117,6 +117,16 @@ SOFTWARE.
 /* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
 #define SNMP_MSG_REPORT	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8)
 
+/* internal modes that should never be used by the protocol for the
+   pdu type. */
+#define SNMP_MSG_INTERNAL_SET_BEGIN        -1
+#define SNMP_MSG_INTERNAL_SET_RESERVE1     0 /* these should match snmp.h */
+#define SNMP_MSG_INTERNAL_SET_RESERVE2     1
+#define SNMP_MSG_INTERNAL_SET_ACTION       2
+#define SNMP_MSG_INTERNAL_SET_COMMIT       3
+#define SNMP_MSG_INTERNAL_SET_FREE         4
+#define SNMP_MSG_INTERNAL_SET_UNDO         5
+
 /* test for member of Confirmed Class i.e., reportable */
 #define SNMP_CMD_CONFIRMED(c) (c == SNMP_MSG_INFORM || c == SNMP_MSG_GETBULK ||\
                                c == SNMP_MSG_GETNEXT || c == SNMP_MSG_GET || \
@@ -176,6 +186,7 @@ SOFTWARE.
 #define SNMP_ROW_DESTROY		6
 
 /* row storage values */
+#define SNMP_STORAGE_NONE  0
 #define SNMP_STORAGE_OTHER		1
 #define SNMP_STORAGE_VOLATILE		2
 #define SNMP_STORAGE_NONVOLATILE	3
@@ -210,6 +221,7 @@ SOFTWARE.
 #define UCD_MSG_FLAG_FORCE_PDU_COPY          0x400
 #define UCD_MSG_FLAG_ALWAYS_IN_VIEW          0x800
 #define UCD_MSG_FLAG_PDU_TIMEOUT            0x1000
+#define UCD_MSG_FLAG_ONE_PASS_ONLY          0x2000
 
 /* view status */
 #define SNMP_VIEW_INCLUDED		1
