@@ -37,12 +37,14 @@ SOFTWARE.
 ******************************************************************/
 
 
+#ifndef MAX_SUBID	/* temporary - duplicate definition protection */
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long	oid;
 #define MAX_SUBID   0xFFFFFFFF
 #else
 typedef u_char	oid;
 #define MAX_SUBID   0xFF
+#endif
 #endif
 
 #define MIN_OID_LEN	    2
