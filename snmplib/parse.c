@@ -561,10 +561,10 @@ print_error(const char *string,
     errenousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        snmp_log(LOG_ERR, "%s(EOF): At line %d in %s\n", string, Line,
+        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, Line,
                 File);
-    else if (token)
-        snmp_log(LOG_ERR, "%s(%s): At line %d in %s\n", string, token,
+    else if (token && *token)
+        snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", string, token,
                 Line, File);
     else
         snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
@@ -1356,14 +1356,18 @@ getoid(FILE *fp,
             } else {
                 continue;
             }
-        } else {
+        } else if (type == NUMBER) {
             /* this entry  has just an integer sub-identifier */
             id->subid = atoi(token);
         }
+	else {
+	    print_error("Expected label or number", token, type);
+	    return 0;
+	}
         type = get_token(fp, token, MAXTOKEN);
     }
     print_error ("Too long OID", token, type);
-    return count;
+    return 0;
 }
 
 /*
