@@ -62,7 +62,6 @@ int read_config(filename)
   curfilename = filename;
   
   if ((ifile = fopen(filename,"r")) == NULL) {
-    fprintf(stderr, "snmpd: couldn't open %s for reading\n",filename);
     return(1);
   }
 
@@ -87,7 +86,7 @@ int read_config(filename)
                 i += sizeof(config_handlers);
               }
             }
-            if (i >= sizeof(config_handlers)) {
+            if (i < sizeof(config_handlers)) {
               sprintf(tmpbuf,"Unknown token:  %s.", word);
               config_perror(tmpbuf);
             }
