@@ -2724,7 +2724,7 @@ parse_capabilities(FILE *fp,
 		    goto skip;
 		}
 		do {
-		    get_token(fp, token, MAXTOKEN);
+		    type = get_token(fp, token, MAXTOKEN);
 		} while (type != RIGHTBRACKET && type != ENDOFFILE);
 		if (type != RIGHTBRACKET) {
 		    print_error("Missing \"}\" after DEFVAL", token, type);
@@ -3861,7 +3861,7 @@ add_mibdir(const char *dirname)
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
 	    DEBUGMSGTL(("parse-mibs", "The index is good\n"));
 	    if ((ip = fopen(token, "r")) != NULL) {
-		while (fscanf(ip, "%s %s\n", token, tmpstr) == 2) {
+		while (fscanf(ip, "%s %[^\n]\n", token, tmpstr) == 2) {
 		    sprintf(tmpstr1, "%s/%s", dirname, tmpstr);
 		    new_module(token, tmpstr1);
 		    count++;
