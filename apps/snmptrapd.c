@@ -108,7 +108,6 @@ SOFTWARE.
 #include "lcd_time.h"
 #include "transform_oids.h"
 #include "snmpv3.h"
-#include "snmp_alarm.h"
 #include "default_store.h"
 
 #define DS_APP_NUMERIC_IP  1
