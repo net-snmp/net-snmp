@@ -610,7 +610,9 @@ _init_snmp(void)
     Reqid = 1;
 
     snmp_res_init();            /* initialize the mt locking structures */
+#ifndef DISABLE_MIB_LOADING
     init_mib_internals();
+#endif /* DISABLE_MIB_LOADING */
     netsnmp_tdomain_init();
 
     gettimeofday(&tv, (struct timezone *) 0);
@@ -788,7 +790,9 @@ init_snmp(const char *type)
     init_snmp_enums();
 
     read_premib_configs();
+#ifndef DISABLE_MIB_LOADING
     init_mib();
+#endif /* DISABLE_MIB_LOADING */
 
     read_configs();
 
@@ -820,7 +824,9 @@ snmp_shutdown(const char *type)
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN, NULL);
     snmp_alarm_unregister_all();
     snmp_close_sessions();
+#ifndef DISABLE_MIB_LOADING
     shutdown_mib();
+#endif /* DISABLE_MIB_LOADING */
     unregister_all_config_handlers();
     netsnmp_ds_shutdown();
 }
@@ -6317,17 +6323,19 @@ snmp_add_var(netsnmp_pdu *pdu,
     const char     *cp;
     char           *ecp, *vp;
     int             result = SNMPERR_SUCCESS;
+#ifndef DISABLE_MIB_LOADING
     int             check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     int             do_hint = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					     NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     u_char         *hintptr;
+    struct tree    *tp;
+#endif /* DISABLE_MIB_LOADING */
     u_char         *buf = NULL;
     const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
     long            ltmp;
     int             itmp;
-    struct tree    *tp;
     struct enum_list *ep;
 #ifdef OPAQUE_SPECIAL_TYPES
     double          dtmp;
@@ -6335,6 +6343,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     struct counter64 c64tmp;
 #endif                          /* OPAQUE_SPECIAL_TYPES */
 
+#ifndef DISABLE_MIB_LOADING
     tp = get_tree(name, name_length, get_tree_head());
     if (!tp || !tp->type || tp->type > TYPE_SIMPLE_LAST) {
         check = 0;
@@ -6376,19 +6385,23 @@ snmp_add_var(netsnmp_pdu *pdu,
             break;
         }
     }
+#endif /* DISABLE_MIB_LOADING */
 
     switch (type) {
     case 'i':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_INTEGER
             && tp->type != TYPE_INTEGER32) {
             value = "INTEGER";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         if (!*value)
             goto fail;
         ltmp = strtol(value, &ecp, 10);
         if (*ecp) {
+#ifndef DISABLE_MIB_LOADING
             ep = tp ? tp->enums : NULL;
             while (ep) {
                 if (strcmp(value, ep->label) == 0) {
@@ -6398,24 +6411,31 @@ snmp_add_var(netsnmp_pdu *pdu,
                 ep = ep->next;
             }
             if (!ep) {
+#endif /* DISABLE_MIB_LOADING */
                 result = SNMPERR_BAD_NAME;
                 snmp_set_detail(value);
                 break;
+#ifndef DISABLE_MIB_LOADING
             }
+#endif /* DISABLE_MIB_LOADING */
         }
 
+#ifndef DISABLE_MIB_LOADING
         if (!_check_range(tp, ltmp, &result, value))
             break;
+#endif /* DISABLE_MIB_LOADING */
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) & ltmp, sizeof(ltmp));
         break;
 
     case 'u':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
             value = "Unsigned32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
@@ -6425,11 +6445,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case '3':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_UINTEGER) {
             value = "UInteger32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
@@ -6439,11 +6461,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'c':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_COUNTER) {
             value = "Counter32";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
@@ -6453,11 +6477,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 't':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_TIMETICKS) {
             value = "Timeticks";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
@@ -6467,11 +6493,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'a':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_IPADDR) {
             value = "IpAddress";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         ltmp = inet_addr(value);
         if (ltmp != (long) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
@@ -6481,11 +6509,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'o':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_OBJID) {
             value = "OBJECT IDENTIFIER";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         if ((buf = malloc(sizeof(oid) * MAX_OID_LEN)) == NULL) {
             result = SNMPERR_MALLOC;
         } else {
@@ -6503,6 +6533,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 's':
     case 'x':
     case 'd':
+#ifndef DISABLE_MIB_LOADING
         if (check && tp->type != TYPE_OCTETSTR && tp->type != TYPE_BITSTRING) {
             value = "OCTET STRING";
             result = SNMPERR_VALUE;
@@ -6517,6 +6548,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             hintptr = buf;
             break;
         }
+#endif /* DISABLE_MIB_LOADING */
         if (type == 'd') {
             if (!snmp_decimal_to_binary
                 (&buf, &buf_len, &value_len, 1, value)) {
@@ -6536,8 +6568,10 @@ snmp_add_var(netsnmp_pdu *pdu,
             buf_ptr = value;
             value_len = strlen(value);
         }
+#ifndef DISABLE_MIB_LOADING
         if (!_check_range(tp, value_len, &result, "Bad string length"))
             break;
+#endif /* DISABLE_MIB_LOADING */
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
                               buf_ptr, value_len);
         break;
@@ -6547,11 +6581,13 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'b':
+#ifndef DISABLE_MIB_LOADING
         if (check && (tp->type != TYPE_BITSTRING || !tp->enums)) {
             value = "BITS";
             result = SNMPERR_VALUE;
             goto type_error;
         }
+#endif /* DISABLE_MIB_LOADING */
         tint = 0;
         if ((buf = (u_char *) malloc(256)) == NULL) {
             result = SNMPERR_MALLOC;
@@ -6561,11 +6597,13 @@ snmp_add_var(netsnmp_pdu *pdu,
             memset(buf, 0, buf_len);
         }
 
+#ifndef DISABLE_MIB_LOADING
         for (ep = tp ? tp->enums : NULL; ep; ep = ep->next) {
             if (ep->value / 8 >= (int) tint) {
                 tint = ep->value / 8 + 1;
             }
         }
+#endif /* DISABLE_MIB_LOADING */
 
 	vp = strdup(value);
 	for (cp = strtok(vp, " ,\t"); cp; cp = strtok(NULL, " ,\t")) {
@@ -6573,6 +6611,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 
             ltmp = strtoul(cp, &ecp, 0);
             if (*ecp != 0) {
+#ifndef DISABLE_MIB_LOADING
                 for (ep = tp ? tp->enums : NULL; ep != NULL; ep = ep->next) {
                     if (strncmp(ep->label, cp, strlen(ep->label)) == 0) {
                         break;
@@ -6581,12 +6620,15 @@ snmp_add_var(netsnmp_pdu *pdu,
                 if (ep != NULL) {
                     ltmp = ep->value;
                 } else {
+#endif /* DISABLE_MIB_LOADING */
                     result = SNMPERR_BAD_NAME;
                     snmp_set_detail(cp);
                     free(buf);
 		    free(vp);
                     goto out;
+#ifndef DISABLE_MIB_LOADING
                 }
+#endif /* DISABLE_MIB_LOADING */
             }
 
             ix = ltmp / 8;
@@ -6655,6 +6697,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     SET_SNMP_ERROR(result);
     return result;
 
+#ifndef DISABLE_MIB_LOADING
   type_error:
     {
         char            error_msg[256];
@@ -6720,6 +6763,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         snmp_set_detail(error_msg);
         goto out;
     }
+#endif /* DISABLE_MIB_LOADING */
   fail:
     result = SNMPERR_VALUE;
     snmp_set_detail(value);

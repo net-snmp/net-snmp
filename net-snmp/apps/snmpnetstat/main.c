@@ -174,7 +174,9 @@ main(int argc, char *argv[])
     int             version = SNMP_DEFAULT_VERSION;
     int             arg;
 
+#ifndef DISABLE_MIB_LOADING
     init_mib();
+#endif /* DISABLE_MIB_LOADING */
     /*
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
      * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...

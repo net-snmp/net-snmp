@@ -156,6 +156,9 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
+/* Define if mib loading and parsing code should not be included */
+#undef DISABLE_MIB_LOADING
+
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #undef HAVE_AES_CFB128_ENCRYPT
 

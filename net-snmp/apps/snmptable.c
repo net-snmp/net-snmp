@@ -357,9 +357,12 @@ get_field_names(char *tblname)
 {
     u_char         *buf = NULL, *name_p = NULL;
     size_t          buf_len = 0, out_len = 0;
+#ifndef DISABLE_MIB_LOADING
     struct tree    *tbl = NULL;
+#endif /* DISABLE_MIB_LOADING */
     int             going = 1;
 
+#ifndef DISABLE_MIB_LOADING
     tbl = find_tree_node(tblname, -1);
     if (tbl) {
         tbl = tbl->child_list;
@@ -370,6 +373,7 @@ get_field_names(char *tblname)
             root[rootlen++] = 1;
         }
     }
+#endif /* DISABLE_MIB_LOADING */
 
     if (sprint_realloc_objid
         (&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
@@ -384,6 +388,7 @@ get_field_names(char *tblname)
     fields = 0;
     while (going) {
         fields++;
+#ifndef DISABLE_MIB_LOADING
         if (tbl) {
             if (tbl->access == MIB_ACCESS_NOACCESS) {
                 fields--;
@@ -398,8 +403,11 @@ get_field_names(char *tblname)
             if (!tbl)
                 going = 0;
         } else {
+#endif /* DISABLE_MIB_LOADING */
             root[rootlen] = fields;
+#ifndef DISABLE_MIB_LOADING
         }
+#endif /* DISABLE_MIB_LOADING */
         out_len = 0;
         if (sprint_realloc_objid
             (&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {

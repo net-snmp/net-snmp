@@ -159,6 +159,36 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
     return tmpp;
 }
 
+netsnmp_oid_stash_node *
+netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
+                               oid * lookup, size_t lookup_len)
+{
+    netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
+    unsigned int    i;
+
+    if (!root)
+        return NULL;
+    tmpp = NULL;
+    for (curnode = root, i = 0; i < lookup_len; i++) {
+        tmpp = curnode->children[lookup[i] % curnode->children_size];
+        if (!tmpp) {
+            return NULL;
+        } else {
+            for (loopp = tmpp; loopp; loopp = loopp->next_sibling) {
+                if (loopp->value == lookup[i])
+                    break;
+            }
+            if (loopp) {
+                tmpp = loopp;
+            } else {
+                return NULL;
+            }
+        }
+        curnode = tmpp;
+    }
+    return tmpp;
+}
+
 /** returns a data pointer associated with a given OID.
  */
 void           *

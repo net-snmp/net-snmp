@@ -16,6 +16,8 @@ extern          "C" {
      * functions found below.
      */
 
+    void netsnmp_init_table_dataset(void);
+
 #define TABLE_DATA_SET_NAME "netsnmp_table_data_set"
 
     /*

@@ -57,16 +57,16 @@ AC_ARG_ENABLE(mini_agent,
 [  --enable-mini-agent             Build a minimal agent.],
     mini_agent="yes",mini_agent="no")
 
-AC_ARG_ENABLE(applications,
-[  --disable-applications          Do not build the apps (snmpget, ...).])
-if test "x$enable_applications" != "xno"; then
-   MAINSUBS="$MAINSUBS apps"
-fi
-
 AC_ARG_ENABLE(agent,
 [  --disable-agent                 Do not build the agent (snmpd).])
 if test "x$enable_agent" != "xno"; then
    MAINSUBS="$MAINSUBS agent"
+fi
+
+AC_ARG_ENABLE(applications,
+[  --disable-applications          Do not build the apps (snmpget, ...).])
+if test "x$enable_applications" != "xno"; then
+   MAINSUBS="$MAINSUBS apps"
 fi
 
 AC_ARG_ENABLE(manuals,
@@ -87,11 +87,17 @@ if test "x$enable_mibs" != "xno"; then
    MAINSUBS="$MAINSUBS mibs"
 fi
 
-
 AC_SUBST(MAINSUBS)
 AC_MSG_CHECKING([what to build and install])
 AC_MSG_RESULT([$MAINSUBS])
 
+AC_ARG_ENABLE(mib-loading,
+[  --disable-mib-loading            Do not include code that parses and 
+                                   manipulates the mib files.])
+if test "x$enable_mib_loading" = "xno"; then
+  AC_DEFINE([DISABLE_MIB_LOADING], 1, 
+            [Define if mib loading and parsing code should not be included])
+fi
 
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
