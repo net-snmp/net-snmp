@@ -61,12 +61,24 @@ netsnmp_mib_handler *
 netsnmp_baby_steps_handler_get(u_long modes)
 {
     netsnmp_mib_handler *mh;
+    netsnmp_baby_steps_modes *md;
 
     mh = netsnmp_create_handler("baby_steps", _baby_steps_helper);
     if(!mh)
         return NULL;
 
-    mh->myvoid = (void*)modes;
+    md = SNMP_MALLOC_TYPEDEF(netsnmp_baby_steps_modes);
+    if (NULL == md) {
+        snmp_log(LOG_ERR,"malloc failed in netsnmp_baby_steps_handler_get\n");
+        netsnmp_handler_free(mh);
+        mh = NULL;
+    }
+    else {
+        mh->myvoid = md;
+        if (0 == modes)
+            modes = BABY_STEP_ALL;
+        md->registered = modes;
+    }
 
     /*
      * don't set MIB_HANDLER_AUTO_NEXT, since we need to call lower
@@ -83,14 +95,28 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *reqinfo,
                          netsnmp_request_info *requests)
 {
+    netsnmp_baby_steps_modes *bs_modes;
     int save_mode, i, rc = SNMP_ERR_NOERROR;
     u_short *mode_map_ptr;
     
-    DEBUGMSGTL(("helper:baby_steps", "Got request, mode %d\n", reqinfo->mode));
+    DEBUGMSGTL(("baby_steps", "Got request, mode %s\n",
+                se_find_label_in_slist("agent_mode",reqinfo->mode)));
+
+    bs_modes = handler->myvoid;
+    netsnmp_assert(NULL != bs_modes);
 
     switch (reqinfo->mode) {
 
     case MODE_SET_RESERVE1:
+        /*
+         * clear completed modes
+         * xxx-rks: this will break for pdus with set requests to different
+         * rows in the same table when the handler is set up to use the row
+         * merge helper as well (or if requests are serialized).
+         */
+        bs_modes->completed = 0;
+        /** fall through */
+
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:
@@ -100,6 +126,11 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         break;
             
     default:
+        /*
+         * clear completed modes
+         */
+        bs_modes->completed = 0;
+
         mode_map_ptr = get_mode_map;
     }
 
@@ -183,11 +214,28 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         if(mode_map_ptr[i] == BABY_STEP_NONE)
             break;
 
+        DEBUGMSGTL(("baby_steps", " baby step mode %s\n",
+                    se_find_label_in_slist("babystep_mode",mode_map_ptr[i])));
+
         /*
          * skip modes the handler didn't register for
-        if(!(mode_map_ptr[i] & (u_long)handler->myvoid))
-            continue;
          */
+        if(!(mode_map_ptr[i] & bs_modes->registered)) {
+            DEBUGMSGTL(("baby_steps",
+                        "   skipping mode (not registered)\n"));
+            continue;
+        }
+
+        /*
+         * skip undo commit if commit wasn't hit
+         */
+        if((MODE_SET_UNDO == save_mode) &&
+           (MODE_BSTEP_UNDO_COMMIT== mode_map_ptr[i]) &&
+           !(MODE_BSTEP_COMMIT & bs_modes->completed)) {
+            DEBUGMSGTL(("baby_steps",
+                        "   skipping commit undo (no previous commit)\n"));
+            continue;
+        }
         
         /*
          * call handlers for baby step
@@ -204,21 +252,30 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
             else
                 reqinfo->next_mode_ok = mode_map_ptr[i+1];
         }
+        bs_modes->completed |= reqinfo->mode;
         rc = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                        requests);
 
         /*
          * check for error calling handler (unlikely, but...)
          */
-        if(rc)
+        if(rc) {
+            DEBUGMSGTL(("baby_steps", "   ERROR:handler error\n"));
             break;
+        }
 
         /*
-         * check for errors in any of the requests
+         * check for errors in any of the requests for reserve1,
+         * reserve2 and action. (there is no recovery from errors
+         * in commit, free or undo.)
          */
-        rc = netsnmp_check_requests_error(requests);
-        if(rc)
-            break;
+        if (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT) {
+            rc = netsnmp_check_requests_error(requests);
+            if(rc) {
+                DEBUGMSGTL(("baby_steps", "   ERROR:request error\n"));
+                break;
+            }
+        }
     }
 
     /*
@@ -283,8 +340,8 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
     netsnmp_assert((handler!=NULL) && (reginfo!=NULL) && (reqinfo!=NULL) &&
                    (requests!=NULL));
 
-    DEBUGMSGT(("helper:baby_steps_access_multiplexer",
-               "baby_steps_access_multiplexer; mode %d\n", reqinfo->mode));
+    DEBUGMSGT(("baby_steps_access_multiplexer", "mode %s\n",
+               se_find_label_in_slist("babystep_mode",reqinfo->mode)));
 
     access_methods = (netsnmp_baby_steps_access_methods *)handler->myvoid;
     if(!access_methods) {
@@ -378,6 +435,12 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
         handler->myvoid = access_methods->my_access_void;
         rc = (*method)(handler, reginfo, reqinfo, requests);
         handler->myvoid = temp_void;
+    }
+    else {
+        rc = SNMP_ERR_GENERR;
+        snmp_log(LOG_ERR,"baby steps multiplexer handler called for a mode "
+                 "with no handler\n");
+        netsnmp_assert(NULL != method);
     }
 
     /*
