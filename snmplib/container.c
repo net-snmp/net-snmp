@@ -159,6 +159,63 @@ netsnmp_container_add_index(netsnmp_container *primary,
 
 /*------------------------------------------------------------------
  */
+int CONTAINER_INSERT(netsnmp_container *x, const void *k)
+{
+    int rc;
+
+    rc = x->insert(x,k);
+    if (NULL != x->next) {
+        netsnmp_container *tmp = x->next;
+        int                rc2;
+        while(tmp) {
+            rc2 = tmp->insert(tmp,k);
+            if (rc)
+                snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc2);
+            tmp = tmp->next;
+        }
+    }
+    return rc;
+}
+
+int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
+{
+    if (NULL != x->next) {
+        netsnmp_container *tmp = x->next;
+        int                rc;
+        while(tmp->next)
+            tmp = tmp->next;
+        while(tmp) {
+            rc = tmp->remove(tmp,k);
+            if (rc)
+                snmp_log(LOG_ERR,"error on subcontainer remove (%d)", rc);
+            tmp = tmp->prev;
+        }
+    }
+    return x->remove(x,k);
+}
+
+int CONTAINER_FREE(netsnmp_container *x)
+{
+
+    if (NULL != x->next) {
+        netsnmp_container *tmp = x->next;
+        int                rc;
+        while(tmp->next)
+            tmp = tmp->next;
+        while(tmp) {
+            rc = tmp->free(tmp);
+            if (rc)
+                snmp_log(LOG_ERR,"error on subcontainer free (%d)", rc);
+            tmp = tmp->prev;
+        }
+    }
+    return x->free(x);
+}
+
+
+
+/*------------------------------------------------------------------
+ */
 void
 netsnmp_init_container(netsnmp_container         *c,
                        netsnmp_container_rc      *init,
