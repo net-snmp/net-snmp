@@ -229,6 +229,10 @@ ipAddressTable_cache_load(netsnmp_container * container)
         netsnmp_container *tmp_container = (netsnmp_container *)tmp_ptr[1];
         ipAddressTable_rowreq_ctx *tmp_ctx;
 
+        /*
+         * this works because the tmp_container is a linked list,
+         * which can be used like a stack...
+         */
         while( CONTAINER_SIZE(tmp_container) ) {
             /*
              * get from delete list
