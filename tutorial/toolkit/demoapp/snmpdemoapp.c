@@ -22,6 +22,7 @@ int main(int argc, char ** argv)
 
     struct variable_list *vars;
     int status;
+    int count=1;
 
     /*
      * Initialize the SNMP library
@@ -124,7 +125,6 @@ int main(int argc, char ** argv)
 
       /* manipuate the information ourselves */
       for(vars = response->variables; vars; vars = vars->next_variable) {
-        int count=1;
         if (vars->type == ASN_OCTET_STR) {
 	  char *sp = (char *)malloc(1 + vars->val_len);
 	  memcpy(sp, vars->val.string, vars->val_len);
