@@ -7,19 +7,20 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
     - Much of the agent internals were completely rewritten and sports
       a new module API to make your life easier.  See the
-      agent/mibgroup/testhandler.c file for example code that makes
+      agent/mibgroup/examples directory for example code that makes
       use of some of the new functionality.
       (Also see http://www.net-snmp.org/tutorial/new-agent/ which has
       some incomplete documentation)
+    - The agent sports embedded perl, see the perl details further below.
     - The agent supports multiple SNMPv3 contexts and mib modules can
       now register themselves under different contexts.  (see the -n
       option in the snmpcmd manual page for details on specifying
       context strings in requests)
     - The proxy code has been completely rewritten and now supports
       the use of SNMPv3 contexts to help select which proxied host you
-      wish to talk to.
+      wish to talk to.  See the snmpd.conf manual page.
     - All the tools take --configToken=value options now.  (see -H
-      output from any command for what configTokens it accepts)      
+      output from any command for what configTokens it accepts)
     - All the tools can speak over many different transport layers
       now, including UDP/TCP (ipv4 and ipv6), AAL5pvc, and IPX.  See
       ./configure --help for details on enabling them.
@@ -27,16 +28,18 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       removed.  Use hostname strings like "tcp:localhost:9999"
       instead.  See the snmpcmd manual page for details.
     - snmptrapd now acts as an agentx subagent and implements portions
-      of the NOTIFICATION-LOG-MIB.
+      of the NOTIFICATION-LOG-MIB to allow captured traps and informs
+      to be queried.
+    - A "net-snmp-config" script will get installed which can report
+      how the various tools were built (which libraries they were
+      linked against, etc).  It will also help you do other things as
+      well, like setting up snmpv3.  Run net-snmp-config --help for details.
     - kerberos authenticated and encrypted SNMPv3 is now possible.
       See ./configure --help for details on enabling the ksm security module.
     - The AgentX subagent protocol implementation has many new
       features and fixes.
     - mib2c was completely rewritten and has a much improved
       configuration file specification.
-    - A "net-snmp-config" script will get installed which can report
-      how the various tools were built (which libraries they were
-      linked against, etc).
     - Much of the code is getting documented with "doxygen" style
       documentation.  Run "make docs" if you have doxygen installed.
     - some RMON support is available.
