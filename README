@@ -1,56 +1,147 @@
-This package contains a port of the cmu snmp v2.1.2.1 package for
-hp-ux 700 series 9.0.5 OS computers.  Note that version 2.1.2.1 did
-NOT work out of the box.  I had to hack snmplib/parse.c to get it to
-correctly read the mib.txt file without seg-faulting.  Having now
-looked at the code in parse.c, I fail to see how it worked under
-2.1.2.  Actually, it would probably work fine providing you either had
-a zero length mib.txt file and/or had no DESCRIPTION fields in it.
-Below is my short change log:
+DISCLAIMER
 
-hardaker 14 Dec 94 15:43:23
-    Initial CMU snmp code, version 2.1.2
+  This is an alpha release because I haven't tested everything yet.  I
+  use this software on over 150 hosts to monitor our systems.  Because
+  we use HP-OpenView as our manager, I haven't tested snmpv2 at all
+  (HP-OV only uses v1).  
 
-hardaker 14 Dec 94 16:55:13
-    HP-UX port of the CMU code
+  Also, "snmpwalk .1" will not work like it should for my mibs.  I've
+  been too lazy to fix this, but its on the top of my list now.
 
-hardaker 14 Dec 94 17:02:37
-    Added hpux.c (random/srandom interfaces)
+  Don't forget to use different community names for your mibs!  They
+  are all set to public in this package!
 
-hardaker  8 Mar 95 16:09:02
-    New release of CMU's 2.1.2.1 code:
-      -- See README for specific details
-      -- snmpset,snmpgetnext added
-      -- -q flag added "quick print"
-      -- bug fixes
-      -- Man pages updated
+INTRO
 
-hardaker  9 Mar 95 13:22:29
-    CMU 2.1.2 -> 2.1.2.1 Merge.
+  This package contains a port and modified code of the CMU snmp agent.
+  It has been modified to to add extensiblity quickly and easily.  It is
+  far from the best and most configurable systems, but hey, its free.
+  
+  We use this here to monitor known system problems before they take the
+  machine over.  A good example is mountd on the dec5000s tend to fork
+  themselves crazy and eventually fill up the process table.  On our
+  hps, amd sometimes stops working, vue hangs and fails to start X, this
+  type of thing.  We use HP-OpenView to poll the enclosed agent every
+  half an hour looking for these problems.  The problems are then logged
+  in a file, which the programmers monitor using xlbiff.  I don't know
+  how useful this package will be to the outside world, but I thought
+  I'd let you decide that for yourself.
+  
+DESIGN
 
-hardaker 10 Mar 95 13:19:22
-    #include <socketio.h> is not needed on HPUX
+  Each mib that we use has the following conventions:  Under each mib
+  in the extensible section, there are a number of tables that are
+  built into every mib:
 
-hardaker 10 Mar 95 13:30:21
-  Major hacking to parse() to work at all.
-    -- Now I don't unstand why it ever successfully parsed the mib.txt file.
-    -- get_token was constantly called to read DESCRIPTION strings into
-       a char array of either 64 (MAXTOKEN) or 4096 (MAXQUOTESTR) in
-       length.  MANY of the DESCRIPTION strings are longer than this.
-    -- Hacked parseQuotedString to make sure returned are strings < MAXQUOTESTR
+  .1    INDEX -- A unique numeral for each entry
+  .2    NAME  -- unique name 
+  .100  FLAG  -- In most cases a 1 or a 0 indicating an error.
+                 For extensible shell/exec functions, the exit status
+		 of the process.
+  .101  MESG  -- A message describing the problem or the first line of
+                 the output of the shell/exec.
+  .102  FIX   -- A setable entry to fix the given problem using a
+                 shell script or whatever that knows how to fix things.
 
-hardaker 10 Mar 95 13:34:30
-    Added /etc as another path to search when looking for mib.txt
+  Now, lets take the process check mib (defined in config.h).  Under this
+  mib there is the following set of additional mib tables:
 
-hardaker 13 Mar 95 16:20:58
-    2.1.2.1 port to hp-ux.
+  .3    MIN   -- straight from the config file
+  .4    MAX   -- ditto
+  .5    NUM   -- the actual number found running
 
-I personally use a modified version of this code with limited
-extensibility supported, which I will release if enough people bug me
-and once it evolves into a more usable form.
+  The exec entries that define their own mibs use the standard
+  extensions defined above.
 
-I know it compiles and works, but I haven't quiet tested everything.
-If you find something which breaks, you can either fix it and send me
-a patch or tell me and I'll attempt to fix it myself.
+SUPPORTED ARCHITECTURES
+
+  I'm using it on three architectures:  
+     hp700s/hpux9.0.5
+        -- I develop here...  Its the architucture best supported in
+	   this package.  I haven't implemented everything on the
+	   sun/dec architectures.  
+
+     sun4/4.1.4               (note:  NOT SOLARIS) (note: no disk/swap/load)
+     Dec5000/Ultrix 4.2                            (note: no swap)
+
+INSTALLATION
+
+  Edit config.h in this directory to taste.  Its fairly well
+  documented. 
+
+  make
+
+MAN PAGES/DOCUMENTATION
+
+  Write them for me, would ya?  All you get is this file!
+
+CONFIGURATION
+
+  By default, it looks for two files when it starts up, both of which
+  are defined in config.h.  This file contains different types of
+  arguments:
+
+--
+
+  proc PROCESSNAME [MAX] [MIN]
+  e.g.:  proc ntalkd 4 0
+
+  This checks the process list for PROCESSNAME, and reports an error
+  if not found or less than MIN are found or more than MAX are found.
+
+--
+
+  swap SIZE
+  e.g.:  swap 16000
+
+  Reports an error if less than SIZE swap space is available.
+
+--
+
+  disk MOUNTLOC SIZE
+  e.g.:  disk / 10000
+
+  Generates an error if MOUNTLOC has less than SIZE bytes of space.
+
+--
+
+  load ONE FIVE FIFTEEN
+  e.g.:  load 12 14 14
+  
+  Generates an error if the loadaverage of a machine grows beyond
+  these numbers.  Useful if your machine stops receiving mail beyond a
+  given load average.
+
+--
+
+  exec [MIB] NAME COMMAND
+  shell [MIB] NAME COMMAND
+  e.g.:  exec test /bin/sh /script/to/check/something
+  e.g.:  exec .1.3.6.4.1000.10 top /usr/local/bin/top
+
+  Execs the script and reports the exit status and one line output for
+  the defualt mib specified in config.h.  If a mib is given, it uses
+  that location in the mib tree instead and you can snmpwalk the
+  output for *all* the lines of output.
+
+  e.g.:  "snmpwalk -v 1 machine public .1.3.6.4.1000.10.101" will get you the
+         "top" output from the machine.
+
+--
+
+MISC
+
+  the "local" directory has some scripts I use a lot.  
+    -- trapnotif -- called from OV upon detection of an error
+    -- snmpcheck -- pre-pre-alpha of a perl5.001/Tkb4 script to fix problems
+    -- rsnmp     -- snmpwalks known mibs (so you don't have to
+                    remember them)
+    -- fixproc   -- the perl script we use to fix things remotely.
+
+CLOSING
+
+Have fun,
+I love having patches sent to me!
                                                                 _____
 			        			       / ___ \
 Wes Hardaker		             		       	      / /   \/
