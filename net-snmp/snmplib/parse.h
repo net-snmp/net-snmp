@@ -167,17 +167,19 @@ struct module_compatability {
 #define TYPE_COUNTER64      11
 #define TYPE_BITSTRING      12
 #define TYPE_NSAPADDRESS    13
-#define TYPE_UINTEGER       14
+#define TYPE_UINTEGER32     14
+#define TYPE_UNSIGNED32     15
+#define TYPE_INTEGER32      16
 
-#define TYPE_SIMPLE_LAST    14
+#define TYPE_SIMPLE_LAST    16
 
-#define TYPE_TRAPTYPE	    15
-#define TYPE_NOTIFTYPE      16
-#define TYPE_OBJGROUP	    17
-#define TYPE_NOTIFGROUP	    18
-#define TYPE_MODID	    19
-#define TYPE_AGENTCAP       20
-#define TYPE_MODCOMP        21
+#define TYPE_TRAPTYPE	    20
+#define TYPE_NOTIFTYPE      21
+#define TYPE_OBJGROUP	    22
+#define TYPE_NOTIFGROUP	    23
+#define TYPE_MODID	    24
+#define TYPE_AGENTCAP       25
+#define TYPE_MODCOMP        26
 
 #define MIB_ACCESS_READONLY    18
 #define MIB_ACCESS_READWRITE   19

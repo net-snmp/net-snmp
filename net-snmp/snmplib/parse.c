@@ -135,7 +135,6 @@ struct objgroup {
 #define OBJID       (4 | SYNTAX_MASK)
 #define OCTETSTR    (5 | SYNTAX_MASK)
 #define INTEGER     (6 | SYNTAX_MASK)
-#define INTEGER32   INTEGER
 #define NETADDR     (7 | SYNTAX_MASK)
 #define IPADDR      (8 | SYNTAX_MASK)
 #define COUNTER     (9 | SYNTAX_MASK)
@@ -232,6 +231,8 @@ struct objgroup {
 #define OBJNAME		(101 | SYNTAX_MASK)
 #define NOTIFNAME	(102 | SYNTAX_MASK)
 #define VARIABLES	103
+#define UNSIGNED32	(104 | SYNTAX_MASK)
+#define INTEGER32	(105 | SYNTAX_MASK)
 /* Beware of reaching SYNTAX_MASK (0x80) */
 
 struct tok {
@@ -274,7 +275,7 @@ static struct tok tokens[] = {
     { "NetworkAddress", sizeof ("NetworkAddress")-1, NETADDR },
     { "Gauge", sizeof ("Gauge")-1, GAUGE },
     { "Gauge32", sizeof ("Gauge32")-1, GAUGE },
-    { "Unsigned32", sizeof ("Unsigned32")-1, GAUGE },
+    { "Unsigned32", sizeof ("Unsigned32")-1, UNSIGNED32 },
     { "read-write", sizeof ("read-write")-1, READWRITE },
     { "read-create", sizeof ("read-create")-1, READCREATE },
     { "OCTETSTRING", sizeof ("OCTETSTRING")-1, OCTETSTR },
@@ -898,8 +899,14 @@ build_translation_table()
             case NSAPADDRESS:
                 translation_table[count] = TYPE_NSAPADDRESS;
                 break;
+            case INTEGER32:
+                translation_table[count] = TYPE_INTEGER32;
+                break;
             case UINTEGER32:
-                translation_table[count] = TYPE_UINTEGER;
+                translation_table[count] = TYPE_UINTEGER32;
+                break;
+            case UNSIGNED32:
+                translation_table[count] = TYPE_UNSIGNED32;
                 break;
 	    case TRAPTYPE:
 		translation_table[count] = TYPE_TRAPTYPE;
@@ -2062,7 +2069,9 @@ parse_objecttype(FILE *fp,
             }
             break;
         case INTEGER:
+        case INTEGER32:
         case UINTEGER32:
+	case UNSIGNED32:
         case COUNTER:
         case GAUGE:
         case BITSTRING:
@@ -2482,7 +2491,9 @@ static int eat_syntax(FILE *fp, char *token, int maxtoken)
     nexttype = get_token(fp, nexttoken, MAXTOKEN);
     switch(type){
     case INTEGER:
+    case INTEGER32:
     case UINTEGER32:
+    case UNSIGNED32:
     case COUNTER:
     case GAUGE:
     case BITSTRING:
@@ -3656,8 +3667,10 @@ parse(FILE *fp,
                 type = get_token(fp, token, MAXTOKEN);
             continue;
         case LABEL:
+	case INTEGER:
 	case INTEGER32:
 	case UINTEGER32:
+	case UNSIGNED32:
 	case COUNTER:
 	case COUNTER64:
 	case GAUGE:
@@ -4496,7 +4509,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
     case TYPE_OCTETSTR:		typ = "String   "; size = 1; break;
     case TYPE_INTEGER:
 		if (tp->enums)	typ = "EnumVal  ";
-		else		typ = "Integer  "; break;
+		else		typ = "INTEGER  "; break;
     case TYPE_NETADDR:		typ = "NetAddr  "; break;
     case TYPE_IPADDR:		typ = "IpAddr   "; break;
     case TYPE_COUNTER:		typ = "Counter  "; break;
@@ -4507,7 +4520,9 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
     case TYPE_COUNTER64:	typ = "Counter64"; break;
     case TYPE_BITSTRING:	typ = "BitString"; break;
     case TYPE_NSAPADDRESS:	typ = "NsapAddr "; break;
-    case TYPE_UINTEGER:		typ = "UInteger "; break;
+    case TYPE_UNSIGNED32:	typ = "Unsigned "; break;
+    case TYPE_UINTEGER32:	typ = "UInteger "; break;
+    case TYPE_INTEGER32:	typ = "Integer "; break;
     default:			typ = "         "; break;
     }
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
