@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -9,11 +9,13 @@
 ########################################################################
 ##
 @if "$m2c_context_name" ne "$table"@
-@    print Processing table $table@
+@    print | +-> Processing table $table@
 @    eval $m2c_context_name = $table@
 @    eval $context = $table@
+@    eval $m2c_context_item = "ctx->"@
 @    eval $m2c_table_writable = table_is_writable($table)@
 @    eval $m2c_table_dependencies = $m2c_table_writable@
+@    eval $m2c_table_row_creation = 1@
 @    eval $m2c_context_reg = ""@
 @    eval $m2c_data_context = "generated"@ [generated|NAME]
 @    eval $m2c_data_allocate = 0@
@@ -25,10 +27,12 @@
 ##
 @    if $m2c_data_allocate == 1@
 @        eval $m2c_data_refdcl = "*"@
-@        eval $m2c_data_item = "data->"@
+@        eval $m2c_data_item = "${m2c_context_item}data->"@
+@        eval $m2c_undo_item = "${m2c_context_item}undo->"@
 @    else@
 @        eval $m2c_data_refdcl = ""@
-@        eval $m2c_data_item = "data."@
+@        eval $m2c_data_item = "${m2c_context_item}data."@
+@        eval $m2c_undo_item = "${m2c_context_item}undo."@
 @    end@
 @end@
 @eval $m2c_node_name = ""@
