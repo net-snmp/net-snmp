@@ -147,7 +147,9 @@ header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
     for ( ;; ) {
         pid = Get_Next_HR_SWRun();
 #ifdef DODEBUG
-printf ("(index %d (entry #%d) ....", pid, current_proc_entry);
+#ifndef linux
+        printf ("(index %d (entry #%d) ....", pid, current_proc_entry);
+#endif
 #endif
         if ( pid == -1 )
 	    break;
