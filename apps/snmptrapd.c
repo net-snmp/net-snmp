@@ -977,7 +977,7 @@ int main(int argc, char *argv[])
     session->authenticator = NULL;
     sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
 
-    ss = snmp_sess_add(session, transport, NULL, NULL);
+    ss = snmp_add(session, transport, NULL, NULL);
     if (ss == NULL){
         snmp_sess_perror("snmptrapd", session);
         if (Syslog) {
