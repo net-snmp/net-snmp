@@ -179,7 +179,7 @@ int
 register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
-    char buf[32];
+    char buf[128];
     oid ubound = 0;
     u_long flags = 0;
     handler_registration *reg;
@@ -190,7 +190,8 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    sprintf(buf, "AgentX subagent %ld", sp->sessid );
+    sprintf(buf, "AgentX subagent %ld, session %08x, subsession %08x",
+	    sp->sessid, session, sp);
     		 /*
 		* TODO: registration timeout
 		*	registration context
