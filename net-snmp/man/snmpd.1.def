@@ -5,9 +5,9 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets
 .SH SYNOPSIS
-.C "snmpd [-a] [-d] [-q] [-p port] [-f] [-l file] [-L]"
+.B "snmpd [-a] [-d] [-q] [-p port] [-f] [-l file] [-L]"
 .SH DESCRIPTION
-.C snmpd
+.B snmpd
 is a SNMP agent which binds to a port and awaits requests from
 SNMP management software.  Upon receiving a request, it processes the
 request, collects the requested information and/or performs the
@@ -15,66 +15,66 @@ requested opperation(s) and returns the information to the sender.
 .SH OPTIONS
 .RS
 .TP 6
-.C -a
+.B -a
 Dumps the addresses the agent corresponds with to stderr or logfile.
 .TP
-.C -d
+.B -d
 Dumps the sent and received UDP packets to stderr or logfile.
 .TP 
-.C -q
+.B -q
 Print prettier output for easier automated parsing.
 .TP
-.C -p port
+.B -p port
 Opens on 
 .I port
 instead of the default SNMP agent port, 161.
 .TP
-.C -f
+.B -f
 Don't fork() from the calling shell.
 .TP
-.C -l file
+.B -l file
 Log's all output from the agent (including stdout/err) to 
 .I file.
 Defaults to a compiled option.
 .TP
-.C -L
+.B -L
 Don't open a log file; use stdout/err instead.
 .RE
 .SH CONFIGURATION FILES
 .PP
-.C snmpd
+.B snmpd
 checks for the existance of and parses the following files:
 .RS
 .TP 6
-.C PREFIX/lib/snmp/snmpd.conf
+.B PREFIX/lib/snmp/snmpd.conf
 .TP
-.C PREFIX/lib/snmp/snmpd.local.conf
+.B PREFIX/lib/snmp/snmpd.local.conf
 Configures the agent.  See snmpd.conf(5) for details.  These files
 are optional and are only used to configure the extensible portions of
 the agent.
 .TP
-.C PREFIX/lib/snmp/mib.txt
+.B PREFIX/lib/snmp/mib.txt
 Defines the mib it should use.
 The location of the
-.C mib.txt 
+.B mib.txt 
 file may by overridden at run time be setting the enviornmental variable
-.C MIBFILE.
+.B MIBFILE.
 .TP
-.C PREFIX/lib/snmp/party.conf
+.B PREFIX/lib/snmp/party.conf
 Defines the SNMP V2 parties.
 .TP
-.C PREFIX/lib/snmp/view.conf
+.B PREFIX/lib/snmp/view.conf
 Defines which parties defined in the 
-.C party.conf
+.B party.conf
 have access to the
 mibs in the
-.C mib.txt
+.B mib.txt
 file.
 .TP
-.C PREFIX/lib/snmp/context.conf
+.B PREFIX/lib/snmp/context.conf
 Maps names to numerical view contexts.
 .TP
-.C PREFIX/lib/snmp/acl.conf
+.B PREFIX/lib/snmp/acl.conf
 Defines the SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
