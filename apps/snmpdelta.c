@@ -515,7 +515,7 @@ main(int argc, char *argv[])
 
                 vars = response->variables;
                 if (deltat) {
-                    if (!vars) {
+                    if (!vars || !vars->val.integer) {
                         fprintf(stderr, "Missing variable in reply\n");
                         continue;
                     } else {
@@ -530,7 +530,7 @@ main(int argc, char *argv[])
                     vip = varinfo + count;
 
                     if (vip->oidlen) {
-                        if (!vars) {
+                        if (!vars || !vars->val.integer) {
                             fprintf(stderr, "Missing variable in reply\n");
                             break;
                         }
