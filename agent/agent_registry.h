@@ -14,9 +14,19 @@ struct view_parameters {
 struct register_parameters {
    oid    *name;
    size_t  namelen;
+   int     priority;
 };
 
+#define MIB_REGISTERED_OK		 0
+#define MIB_DUPLICATE_REGISTRATION	-1
+#define MIB_REGISTRATION_FAILED		-2
+
+#define MIB_UNREGISTERED_OK		 0
+#define MIB_NO_SUCH_REGISTRATION	-1
+#define MIB_UNREGISTRATION_FAILED	-2
+
 void setup_tree (void);
-int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, u_char);
+int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, int);
+int unregister_mib_priority (oid *, size_t, int);
 
 #endif /* AGENT_REGISTRY_H */
