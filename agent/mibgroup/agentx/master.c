@@ -141,7 +141,7 @@ void real_init_master(void)
 
     if ( session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
-	snmp_sess_perror("init_master", &sess);
+	snmp_sess_perror("real_init_master", &sess);
 	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
 	    exit(1);
     }
