@@ -1,18 +1,9 @@
-u_char *var_extensible_shell();
 u_char *var_extensible_relocatable();
-#if HAVE_FSTAB_H || HAVE_STATVFS_H
-u_char *var_extensible_disk();
-#endif
-u_char *var_extensible_version();
-u_char *var_extensible_hp();
-u_char *var_extensible_lockd_test();
-u_char *var_extensible_loadave();
-u_char *var_extensible_proc();
-u_char *var_extensible_mem();
-u_char *var_extensible_errors();
 
 #ifdef USEPROCMIB
 /* the variable that stores the process watching mib info */
+u_char *var_extensible_proc();
+
 struct variable2 extensible_proc_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
@@ -27,6 +18,8 @@ struct variable2 extensible_proc_variables[] = {
 
 #ifdef USESHELLMIB
 /* the extensible commands variables */
+u_char *var_extensible_shell();
+
 struct variable2 extensible_extensible_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
@@ -39,6 +32,8 @@ struct variable2 extensible_extensible_variables[] = {
 
 #ifdef USELOCKDMIB
 /* the lockd test variables */
+u_char *var_extensible_lockd_test();
+
 struct variable2 extensible_lockd_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_lockd_test, 1, {MIBINDEX}},
     {ERRORFLAG, INTEGER, RONLY, var_extensible_lockd_test, 1, {ERRORFLAG}},
@@ -47,6 +42,8 @@ struct variable2 extensible_lockd_variables[] = {
 #endif
 
 #ifdef USEMEMMIB
+u_char *var_extensible_mem();
+
 struct variable2 extensible_mem_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_mem, 1, {ERRORNAME }},
@@ -64,7 +61,9 @@ struct variable2 extensible_mem_variables[] = {
 };
 #endif
 
-#if defined(USEDISKMIB) && (HAVE_FSTAB_H || HAVE_STATVFS_H)
+#ifdef USEDISKMIB
+u_char *var_extensible_disk();
+
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
@@ -80,6 +79,8 @@ struct variable2 extensible_disk_variables[] = {
 #endif
 
 #ifdef USEVERSIONMIB
+u_char *var_extensible_version();
+
 struct variable2 extensible_version_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
   {VERTAG, STRING, RONLY, var_extensible_version, 1, {VERTAG}},
@@ -93,6 +94,8 @@ struct variable2 extensible_version_variables[] = {
 #endif
 
 #ifdef USELOADAVEMIB
+u_char *var_extensible_loadave();
+
 struct variable2 extensible_loadave_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
@@ -104,6 +107,8 @@ struct variable2 extensible_loadave_variables[] = {
 #endif
 
 #ifdef USEERRORMIB
+u_char *var_extensible_errors();
+
 struct variable2 extensible_error_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_errors, 1, {ERRORNAME}},
@@ -114,6 +119,8 @@ struct variable2 extensible_error_variables[] = {
 
 /* mimics part of the hpux tree */
 #ifdef hpux  
+u_char *var_extensible_hp();
+
 struct variable2 extensible_hp_variables[] = {
   {HPCONF, INTEGER, RWRITE, var_extensible_hp, 1, {HPCONF}},
   {HPRECONFIG, INTEGER, RWRITE, var_extensible_hp, 1, {HPRECONFIG}},
