@@ -1,0 +1,80 @@
+.TH SNMPD 1 "9 Sep 1995"
+.ds )H U.C. Davis, ECE Dept.
+.ds ]W V3.0.1
+.UC 4
+.SH NAME
+snmpd - daemon to respond to SNMP request packets
+.SH SYNOPSIS
+.C snmpd [-a] [-d] [-q] [-p port] [-f] [-l file] [-L]
+.SH DESCRIPTION
+.C snmpd
+is a SNMP agent which binds to a port and awaits requests from
+SNMP management software.  Upon receiving a request, it processes the
+request, collects the requested information and/or performs the
+requested opperation(s) and returns the information to the sender.
+.SH OPTIONS
+.RS
+.TP 6
+.C -a
+Dumps the addresses the agent corresponds with to stderr or logfile.
+.TP
+.C -d
+Dumps the sent and received UDP packets to stderr or logfile.
+.TP 
+.C -q
+Print prettier output for easier automated parsing.
+.TP
+.C -p port
+Opens on 
+.I port
+instead of the default SNMP agent port, 161.
+.TP
+.C -f
+Don't fork() from the calling shell.
+.TP
+.C -l file
+Log's all output from the agent (including stdout/err) to 
+.I file.
+Defaults to a compiled option.
+.TP
+.C -L
+Don't open a log file; use stdout/err instead.
+.RE
+.SH CONFIGURATION FILES
+.PP
+.C snmpd
+checks for the existance of and parses the following files:
+.RS
+.TP 6
+.C /etc/snmpd.conf
+Configures the agent.
+.TP
+.C /etc/mib.txt
+Defines the mib it should use.
+.TP
+.C /etc/party.conf
+Defines the SNMP V2 parties.
+.TP
+.C /etc/view.conf
+Defines which parties defined in
+.C /etc/party.conf
+have access to which mibs defined in
+.C /etc/mib.txt.
+.TP
+.C /etc/context.conf
+Maps names to numerical view contexts.
+.TP
+.C /etc/acl.conf
+Defines the SNMP V2 action types usable by two communicating parties.
+.RE
+.PP
+See the associated manual pages for information on the content of
+these files.
+.SH SEE ALSO
+(in recomended reading order)
+.PP
+party.conf(5),
+view.conf(5),
+context.conf(5),
+acl.conf(5),
+snmpd.conf(5).
