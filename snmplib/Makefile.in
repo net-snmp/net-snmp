@@ -33,6 +33,7 @@ INCLUDESUBDIRHEADERS=README \
 	int64.h \
 	keytools.h \
 	mib.h \
+	md5.h \
 	parse.h \
 	read_config.h \
 	scapi.h \
