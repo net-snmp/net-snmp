@@ -186,6 +186,9 @@ tag:
 tar:
 	agent/mibgroup/versiontag $(VERSION) tar
 
+commentcheck:
+	grep // `find . -name \*.\[ch\]` | grep -v http
+
 dist: version tag tar
 
 FAQ.html:
