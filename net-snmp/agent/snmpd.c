@@ -131,7 +131,7 @@ oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
 int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
 
 struct addrCache {
-    u_long addr;
+    in_addr_t addr;
     int status;
 #define UNUSED	0
 #define USED	1
@@ -150,7 +150,7 @@ static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
 extern void init_snmp __P((void));
-extern void init_snmp2p __P((u_char));
+extern void init_snmp2p __P((u_short));
 extern int agent_party_init __P((in_addr_t, u_short, char *));
 extern void open_ports_snmp2p __P((void));
 int open_port __P(( u_short ));
@@ -343,6 +343,7 @@ SnmpTrapNodeDown(a)
 
 #define NUM_SOCKETS     32
 static int sdlist[NUM_SOCKETS], sdlen = 0;
+static int portlist[NUM_SOCKETS];
 int (*sd_handlers[NUM_SOCKETS])__P((int));
 
 int
@@ -499,7 +500,7 @@ int
 open_port ( dest_port )
      u_short dest_port;
 {
-    int sd, portlist[NUM_SOCKETS], index;
+    int sd, index;
     struct sockaddr_in	me;
         
         for(index = 0; index < sdlen; index++)
@@ -520,7 +521,7 @@ open_port ( dest_port )
 	/* already in network byte order (I think) */
 	me.sin_port = htons(dest_port);
 	if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-	    fprintf(stderr,"bind/%d: ", ntohs(me.sin_port));
+	    fprintf(stderr,"bind: udp/%d: ", ntohs(me.sin_port));
 	    perror(NULL);
 	    return -2;
 	}

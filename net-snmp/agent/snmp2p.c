@@ -74,6 +74,7 @@ SOFTWARE.
 #include "context.h"
 #include "acl.h"
 #include "mib.h"
+#include "snmpd.h"
 
 #include "snmpd.h"
 
@@ -93,7 +94,7 @@ agent_party_init(myaddr, dest_port, view)
     u_short dest_port;
     char *view;
 {
-    u_int addr;
+    in_addr_t addr;
     unsigned char *adp;
     u_short port;
     oid partyid1[64];
@@ -346,7 +347,7 @@ agent_party_init(myaddr, dest_port, view)
 
 void
 init_snmp2p( dest_port )
-    u_char dest_port;
+    u_short dest_port;
 {
     in_addr_t myaddr;
     char miscfile[300];
