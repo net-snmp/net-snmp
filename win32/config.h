@@ -113,6 +113,8 @@ extern "C" {
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+#define SNMP_NEED_REQUEST_LIST
+
 #define SNMPDLMODPATH "/USR/LIB/DLMOD"
 #define SNMPLIBPATH "/USR/LIB"
 #define SNMPSHAREPATH "/USR/SHARE/SNMP"
