@@ -25,7 +25,7 @@ hardaker 20 Nov 95 16:09:37
     - (all autoconf built files) Updated everything to autoconf 2.5
 
 hardaker 20 Nov 95 16:10:49
-    - (trapnotif) Logs no-responce errors.
+    - (trapnotif) Logs no-response errors.
     - (trapnotif) Better string checking (quotes all variables now)
 
 hardaker  1 Dec 95 16:20:13
