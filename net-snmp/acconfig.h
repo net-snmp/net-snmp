@@ -237,7 +237,7 @@
                              execs.  Because of sleep(1)s, this will also
                              be time to wait (in seconds) for exec to finish */
 
-#define SNMPBLOCK 0       /* Set to 1 if you want snmpgets to block and never
+#define SNMPBLOCK 1       /* Set to 1 if you want snmpgets to block and never
                              timeout.  Original CMU code had this
                              hardcoded into the code as = 1 */
 
