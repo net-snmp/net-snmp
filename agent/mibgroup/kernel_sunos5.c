@@ -160,7 +160,7 @@ extern "C" {
 
 
 int
-getKstat(char *statname, char *varname, void *value)
+getKstat(const char *statname, const char *varname, void *value)
 {
   kstat_ctl_t	*ksc;
   kstat_t	*ks, *kstat_data;

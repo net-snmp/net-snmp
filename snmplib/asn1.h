@@ -138,7 +138,7 @@ u_char	*asn_build_int (u_char *, int *, u_char, long *, int);
 u_char	*asn_parse_unsigned_int (u_char *, int *, u_char *, u_long *, int);
 u_char	*asn_build_unsigned_int (u_char *, int *, u_char, u_long *, int);
 u_char	*asn_parse_string (u_char *, int *, u_char *, u_char *, int *);
-u_char	*asn_build_string (u_char *, int *, u_char, u_char *, int);
+u_char	*asn_build_string (u_char *, int *, u_char, const u_char *, int);
 u_char	*asn_parse_header (u_char *, int *, u_char *);
 u_char	*asn_build_header (u_char *, int *, u_char, int);
 u_char	*asn_build_sequence (u_char *, int *, u_char, int);

@@ -393,7 +393,7 @@ u_char *
 asn_build_string(u_char *data,
 		 int *datalength,
 		 u_char	type,
-		 u_char *string,
+		 const u_char *string,
 		 int strlength)
 {
 /*

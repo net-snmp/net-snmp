@@ -19,7 +19,7 @@ void debugmsgtoken(const char *token, const char *format, ...);
 void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
-void debugmsg_oid(char *token, oid *theoid, int len);
+void debugmsg_oid(const char *token, oid *theoid, int len);
 
 /* Use these macros instead of the functions above to allow them to be
    re-defined at compile time to NOP for speed optimization.

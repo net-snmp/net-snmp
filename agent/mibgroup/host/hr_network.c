@@ -21,7 +21,7 @@ void  Init_HR_Network (void);
 int   Get_Next_HR_Network (void);
 void  Save_HR_Network_Info (void);
 
-char *describe_networkIF (int);
+const char *describe_networkIF (int);
 int   network_status (int);
 int   network_errors (int);
 int header_hrnet (struct variable *,oid *, int *, int, int *, WriteMethod **);
@@ -202,7 +202,7 @@ Save_HR_Network_Info (void)
 }
 
 
-char *
+const char *
 describe_networkIF(int idx)
 {
     static char string[100];

@@ -174,9 +174,9 @@ struct request_list {
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
 
-extern char *snmp_api_errstring (int);
-extern void snmp_perror (char *);
-extern void snmp_set_detail (char *);
+extern const char *snmp_api_errstring (int);
+extern void snmp_perror (const char *);
+extern void snmp_set_detail (const char *);
 
 #define SNMP_MAX_MSG_SIZE          1472 /* ethernet MTU minus IP/UDP header */
 #define SNMP_MAX_ENG_SIZE          32
@@ -259,8 +259,15 @@ extern void snmp_set_detail (char *);
 #define SNMPERR_USM_UNKNOWNENGINEID		(-48)
 #define SNMPERR_USM_NOTINTIMEWINDOW		(-49)
 #define SNMPERR_USM_DECRYPTIONERROR		(-50)
+#define SNMPERR_NOMIB			(-51)
+#define SNMPERR_RANGE			(-52)
+#define SNMPERR_MAX_SUBID		(-53)
+#define SNMPERR_BAD_SUBID		(-54)
+#define SNMPERR_LONG_OID		(-55)
+#define SNMPERR_BAD_NAME		(-56)
+#define SNMPERR_VALUE			(-57)
 
-#define SNMPERR_MAX			(-50)
+#define SNMPERR_MAX			(-57)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
@@ -467,7 +474,7 @@ void snmp_set_suffix_only (int);
 int snmp_get_suffix_only (void);
 int snmp_get_errno (void);
 int snmp_oid_compare (const oid *, int, const oid *, int);
-void init_snmp (char *);
+void init_snmp (const char *);
 u_char * snmp_pdu_build (struct snmp_pdu *, u_char *, int *);
 int snmpv3_parse(struct snmp_pdu *, u_char *, int *, u_char  **);
 int snmpv3_packet_build(struct snmp_pdu *pdu, u_char *packet, int *out_length, u_char *pdu_data, int pdu_data_len);
@@ -478,7 +485,7 @@ u_char* snmpv3_scopedPDU_parse(struct snmp_pdu *pdu, u_char *cp, int *length);
 void set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp_ipaddr) );
 /*void set_pre_parse(struct snmp_session *, int* (struct snmp_session *, snmp_ipaddr);*/
 void set_post_parse (struct snmp_session *, int (*hook) (struct snmp_session *, struct snmp_pdu *,int));
-void snmp_shutdown(char *type);
+void snmp_shutdown(const char *type);
 struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, int, u_char, u_char *, int);
 struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist, oid *name, int name_length, u_char type, u_char *value, int len);
 int hex_to_binary (u_char *, u_char *);

@@ -132,7 +132,7 @@ struct vacm_groupEntry *vacm_scanGroupNext (void);
 void vacm_destroyAccessEntry (char *, char *, int, int);
 void vacm_destroyAllAccessEntries (void);
 struct vacm_accessEntry * vacm_createAccessEntry (char *, char *, int, int);
-struct vacm_accessEntry *vacm_getAccessEntry (char *, char *, int, int);
+struct vacm_accessEntry *vacm_getAccessEntry (const char *, const char *, int, int);
 void vacm_scanAccessInit (void);
 struct vacm_accessEntry *vacm_scanAccessNext (void);
 

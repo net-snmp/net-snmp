@@ -126,7 +126,7 @@ var_sysORTable(struct variable *vp,
 
 void register_sysORTable(oid *oidin,
 			 int oidlen,
-			 char *descr)
+			 const char *descr)
 {
   char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table;

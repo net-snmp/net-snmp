@@ -38,7 +38,7 @@
 static kvm_t *kd;
 
 void
-init_kmem(char *file)
+init_kmem(const char *file)
 {
 #if HAVE_KVM_OPENFILES
     char err[4096];
@@ -91,7 +91,7 @@ static int klread (char *, int);
 int swap, mem, kmem;
 
 void
-init_kmem(char *file)
+init_kmem(const char *file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){

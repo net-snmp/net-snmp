@@ -852,7 +852,7 @@ snmp_party_build(u_char *data,
 	data = asn_build_string(data, length, (u_char)(ASN_UNIVERSAL
 						       | ASN_PRIMITIVE
 						       | ASN_OCTET_STR),
-				(u_char *)"", 0);
+				(const u_char *)"", 0);
 	if (data == NULL){
 	    ERROR_MSG("build_string");
 	    return NULL;

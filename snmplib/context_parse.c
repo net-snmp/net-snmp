@@ -57,9 +57,9 @@
 #define VIEW_STATE	2
 #define PROXY_STATE  	3
 
-static void error_exit(char *str,
+static void error_exit(const char *str,
 		       int linenumber,
-		       char *filename)
+		       const char *filename)
 {
   char tmpbuf[SPRINT_MAX_LEN];
   snmp_errno = SNMPERR_BAD_CONTEXT;

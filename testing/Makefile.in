@@ -34,16 +34,11 @@ clean:
 	rm -f *.o core *.core $(TARG) 
 
 
-<<<<<<< Makefile.in
-install: installdirs subdirs $(TARG)
-	for i in $(SUBDIRS) ; do		\
-		( cd $$i ; $(MAKE) install ) ;	\
-	done
-=======
 install: installdirs $(TARG)
->>>>>>> 1.1.6.2
-	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
-	@for i in ; do $(INSTALL) $$i $(sbindir) ; echo "install:  installed $$i in $(sbindir)" ; done
+	@for i in $(TARG) ; \
+		do $(INSTALL) $$i $(bindir) ; \
+		echo "install:  installed $$i in $(bindir)" ; \
+	done
 
 
 installdirs:

@@ -491,7 +491,7 @@ long get_uptime (void)
 
 #ifndef HAVE_STRDUP
 char *
-strdup(char *src)
+strdup(const char *src)
 {
     int len;
     char *dst;
@@ -505,8 +505,8 @@ strdup(char *src)
 #endif	/* HAVE_STRDUP */
 
 #ifndef HAVE_SETENV
-int setenv(char *name,
-	   char *value,
+int setenv(const char *name,
+	   const char *value,
 	   int overwrite)
 {
     char *cp;

@@ -125,6 +125,7 @@ typedef long    fd_mask;
 
 #include "version.h"
 
+#include "mib_module_includes.h"
 
 /*
  * Globals.
@@ -209,8 +210,8 @@ int		(*sd_handlers[NUM_SOCKETS]) (int);
 int snmp_read_packet (int);
 int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 static char *sprintf_stamp (time_t *);
-static int create_v1_trap_session (char *, char *);
-static int create_v2_trap_session (char *, char *);
+static int create_v1_trap_session (const char *, const char *);
+static int create_v2_trap_session (const char *, const char *);
 static void free_v1_trap_session (struct trap_sink *sp);
 static void free_v2_trap_session (struct trap_sink *sp);
 static void send_v1_trap (struct snmp_session *, int, int);
@@ -241,8 +242,8 @@ sprintf_stamp (time_t *now)
 }
 
 
-static int create_v1_trap_session (char *sink, 
-				   char *com)
+static int create_v1_trap_session (const char *sink, 
+				   const char *com)
 {
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
@@ -274,8 +275,8 @@ static void free_v1_trap_session (struct trap_sink *sp)
     free (sp);
 }
 
-static int create_v2_trap_session (char *sink, 
-				   char *com)
+static int create_v2_trap_session (const char *sink, 
+				   const char *com)
 {
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));

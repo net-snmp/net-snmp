@@ -81,10 +81,10 @@ void DEBUGP (va_alist);
 #endif
 
 #ifndef HAVE_STRDUP
-char *strdup (char *);
+char *strdup (const char *);
 #endif
 #ifndef HAVE_SETENV
-int setenv (char *, char *, int);
+int setenv (const char *, const char *, int);
 #endif
 
 #if TIME_WITH_SYS_TIME	

@@ -109,14 +109,14 @@ char copyright[] =
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
 	u_char	pr_wanted;		/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks) (char *);	/* control blocks printing routine */
+	void	(*pr_cblocks) (const char *);	/* control blocks printing routine */
 	void	(*pr_stats) (void);	/* statistics printing routine */
-	char	*pr_name;		/* well-known name */
+	const char	*pr_name;	/* well-known name */
 } protox[] = {
-	{ 0,	protopr,    tcp_stats,	(char*)"tcp" },
-	{ 0,	protopr,    udp_stats,	(char*)"udp" },
-	{ 0,	0,	    ip_stats,	(char*)"ip" },
-	{ 0,	0,	    icmp_stats,	(char*)"icmp" },
+	{ 0,	protopr,    tcp_stats,	"tcp" },
+	{ 0,	protopr,    udp_stats,	"udp" },
+	{ 0,	0,	    ip_stats,	"ip" },
+	{ 0,	0,	    icmp_stats,	"icmp" },
 	{ 0,	0,	    0,		0 }
 };
 
@@ -497,18 +497,18 @@ int main(int argc, char *argv[])
     exit(0);
 }
 
-char *
+const char *
 plural(int n)
 {
 
-	return (n != 1 ? (char *)"s" : (char *)"");
+	return (n != 1 ? "s" : "");
 }
 
 /*
  * Find the protox for the given "well-known" name.
  */
 struct protox * 
-knownname(char *name)
+knownname(const char *name)
 {
 	struct protox *tp;
 	
@@ -522,7 +522,7 @@ knownname(char *name)
  * Find the protox corresponding to name.
  */
 struct protox *
-name2protox(char *name)
+name2protox(const char *name)
 {
 	struct protox *tp;
 	char **alias;			/* alias from p->aliases */

@@ -116,7 +116,7 @@ static int errorstatusprior=0;
 static char errorstring[STRMAX];
 
 void
-setPerrorstatus(char *to)
+setPerrorstatus(const char *to)
 {
   char buf[STRMAX];
   
@@ -126,7 +126,7 @@ setPerrorstatus(char *to)
 }
 
 void
-seterrorstatus(char *to, int prior)
+seterrorstatus(const char *to, int prior)
 {
   if (errorstatusprior <= prior ||
       (ERRORTIMELENGTH < (time(NULL) - errorstatustime))) {

@@ -87,6 +87,7 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_client.h"
 #include "snmp_impl.h"
+#include "parse.h"
 #include "party.h"
 #include "mib.h"
 #include "context.h"
@@ -156,61 +157,68 @@ struct session_list {
 
 
 
-static char *api_errors[-SNMPERR_MAX+1] = {
-    (char*)"No error",                            /* SNMPERR_SUCCESS */         
-    (char*)"Generic error",                       /* SNMPERR_GENERR */          
-    (char*)"Invalid local port",                  /* SNMPERR_BAD_LOCPORT */     
-    (char*)"Unknown host",                        /* SNMPERR_BAD_ADDRESS */     
-    (char*)"Unknown session",                     /* SNMPERR_BAD_SESSION */     
-    (char*)"Too long",                            /* SNMPERR_TOO_LONG */        
-    (char*)"No socket",                           /* SNMPERR_NO_SOCKET */       
-    (char*)"Cannot send V2 PDU on V1 session",    /* SNMPERR_V2_IN_V1 */        
-    (char*)"Cannot send V1 PDU on V2 session",    /* SNMPERR_V1_IN_V2 */        
-    (char*)"Bad value for non-repeaters",         /* SNMPERR_BAD_REPEATERS */   
-    (char*)"Bad value for max-repetitions",       /* SNMPERR_BAD_REPETITIONS */ 
-    (char*)"Error building ASN.1 representation", /* SNMPERR_BAD_ASN1_BUILD */  
-    (char*)"Failure in sendto",                   /* SNMPERR_BAD_SENDTO */      
-    (char*)"Bad parse of ASN.1 type",             /* SNMPERR_BAD_PARSE */       
-    (char*)"Bad version specified",               /* SNMPERR_BAD_VERSION */     
-    (char*)"Bad source party specified",          /* SNMPERR_BAD_SRC_PARTY */   
-    (char*)"Bad destination party specified",     /* SNMPERR_BAD_DST_PARTY */   
-    (char*)"Bad context specified",               /* SNMPERR_BAD_CONTEXT */     
-    (char*)"Bad community specified",             /* SNMPERR_BAD_COMMUNITY */   
-    (char*)"Cannot send noAuth/desPriv",          /* SNMPERR_NOAUTH_DESPRIV */  
-    (char*)"Bad ACL definition",                  /* SNMPERR_BAD_ACL */         
-    (char*)"Bad Party definition",                /* SNMPERR_BAD_PARTY */       
-    (char*)"Session abort failure",               /* SNMPERR_ABORT */           
-    (char*)"Unknown PDU type",                    /* SNMPERR_UNKNOWN_PDU */     
-    (char*)"Timeout",                             /* SNMPERR_TIMEOUT */         
-    (char*)"Failure in recvfrom",                 /* SNMPERR_BAD_RECVFROM */
-    (char*)"Unable to determine contextEngineID", /* SNMPERR_BAD_ENG_ID */
-    (char*)"Unable to determine securityName",	  /* SNMPERR_BAD_SEC_NAME */
-    (char*)"Unable to determine securityLevel",	  /* SNMPERR_BAD_SEC_LEVEL  */
-    (char*)"ASN.1 parse error in message",        /* SNMPERR_ASN_PARSE_ERR */
-    (char*)"Unknown security model in message",   /* SNMPERR_UNKNOWN_SEC_MODEL */
-    (char*)"Invalid message (e.g. msgFlags)",     /* SNMPERR_INVALID_MSG */
-    (char*)"Unknown engine ID",                   /* SNMPERR_UNKNOWN_ENG_ID */
-    (char*)"Unknown user name",                   /* SNMPERR_UNKNOWN_USER_NAME */
-    (char*)"Unsupported security level",          /* SNMPERR_UNSUPPORTED_SEC_LEVEL */
-    (char*)"Authentication failure",              /* SNMPERR_AUTHENTICATION_FAILURE */
-    (char*)"Not in time window",                  /* SNMPERR_NOT_IN_TIME_WINDOW */
-    (char*)"Decryption error",                    /* SNMPERR_DECRYPTION_ERR */
-    (char*)"SCAPI general failure",		  /* SNMPERR_SC_GENERAL_FAILURE */
-    (char*)"SCAPI sub-system not configured",	  /* SNMPERR_SC_NOT_CONFIGURED */
-    (char*)"Key tools not available",		  /* SNMPERR_KT_NOT_AVAILABLE */
-    (char*)"Unknown Report message",	          /* SNMPERR_UNKNOWN_REPORT */
-    (char*)"USM generic error",	                  /* SNMPERR_USM_GENERICERROR */
-    (char*)"USM unknown security name",           /* SNMPERR_USM_UNKNOWNSECURITYNAME */
-    (char*)"USM unsupported security level",      /* SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL */
-    (char*)"USM encryption error",	          /* SNMPERR_USM_ENCRYPTIONERROR */
-    (char*)"USM authentication failure",          /* SNMPERR_USM_AUTHENTICATIONFAILURE */
-    (char*)"USM parse error",		          /* SNMPERR_USM_PARSEERROR */
-    (char*)"USM unknown engineID",	          /* SNMPERR_USM_UNKNOWNENGINEID */
-    (char*)"USM not in time window",	          /* SNMPERR_USM_NOTINTIMEWINDOW */
-    (char*)"USM decryption error",	          /* SNMPERR_USM_DECRYPTIONERROR */
+static const char *api_errors[-SNMPERR_MAX+1] = {
+    "No error",                            /* SNMPERR_SUCCESS */
+    "Generic error",                       /* SNMPERR_GENERR */
+    "Invalid local port",                  /* SNMPERR_BAD_LOCPORT */
+    "Unknown host",                        /* SNMPERR_BAD_ADDRESS */
+    "Unknown session",                     /* SNMPERR_BAD_SESSION */
+    "Too long",                            /* SNMPERR_TOO_LONG */
+    "No socket",                           /* SNMPERR_NO_SOCKET */
+    "Cannot send V2 PDU on V1 session",    /* SNMPERR_V2_IN_V1 */
+    "Cannot send V1 PDU on V2 session",    /* SNMPERR_V1_IN_V2 */
+    "Bad value for non-repeaters",         /* SNMPERR_BAD_REPEATERS */
+    "Bad value for max-repetitions",       /* SNMPERR_BAD_REPETITIONS */
+    "Error building ASN.1 representation", /* SNMPERR_BAD_ASN1_BUILD */
+    "Failure in sendto",                   /* SNMPERR_BAD_SENDTO */
+    "Bad parse of ASN.1 type",             /* SNMPERR_BAD_PARSE */
+    "Bad version specified",               /* SNMPERR_BAD_VERSION */
+    "Bad source party specified",          /* SNMPERR_BAD_SRC_PARTY */
+    "Bad destination party specified",     /* SNMPERR_BAD_DST_PARTY */
+    "Bad context specified",               /* SNMPERR_BAD_CONTEXT */
+    "Bad community specified",             /* SNMPERR_BAD_COMMUNITY */
+    "Cannot send noAuth/desPriv",          /* SNMPERR_NOAUTH_DESPRIV */
+    "Bad ACL definition",                  /* SNMPERR_BAD_ACL */
+    "Bad Party definition",                /* SNMPERR_BAD_PARTY */
+    "Session abort failure",               /* SNMPERR_ABORT */
+    "Unknown PDU type",                    /* SNMPERR_UNKNOWN_PDU */
+    "Timeout",                             /* SNMPERR_TIMEOUT */
+    "Failure in recvfrom",                 /* SNMPERR_BAD_RECVFROM */
+    "Unable to determine contextEngineID", /* SNMPERR_BAD_ENG_ID */
+    "Unable to determine securityName",    /* SNMPERR_BAD_SEC_NAME */
+    "Unable to determine securityLevel",   /* SNMPERR_BAD_SEC_LEVEL  */
+    "ASN.1 parse error in message",        /* SNMPERR_ASN_PARSE_ERR */
+    "Unknown security model in message",   /* SNMPERR_UNKNOWN_SEC_MODEL */
+    "Invalid message (e.g. msgFlags)",     /* SNMPERR_INVALID_MSG */
+    "Unknown engine ID",                   /* SNMPERR_UNKNOWN_ENG_ID */
+    "Unknown user name",                   /* SNMPERR_UNKNOWN_USER_NAME */
+    "Unsupported security level",          /* SNMPERR_UNSUPPORTED_SEC_LEVEL */
+    "Authentication failure",              /* SNMPERR_AUTHENTICATION_FAILURE */
+    "Not in time window",                  /* SNMPERR_NOT_IN_TIME_WINDOW */
+    "Decryption error",                    /* SNMPERR_DECRYPTION_ERR */
+    "SCAPI general failure",		   /* SNMPERR_SC_GENERAL_FAILURE */
+    "SCAPI sub-system not configured",	   /* SNMPERR_SC_NOT_CONFIGURED */
+    "Key tools not available",		   /* SNMPERR_KT_NOT_AVAILABLE */
+    "Unknown Report message",	           /* SNMPERR_UNKNOWN_REPORT */
+    "USM generic error",	           /* SNMPERR_USM_GENERICERROR */
+    "USM unknown security name",           /* SNMPERR_USM_UNKNOWNSECURITYNAME */
+    "USM unsupported security level",      /* SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL */
+    "USM encryption error",	           /* SNMPERR_USM_ENCRYPTIONERROR */
+    "USM authentication failure",          /* SNMPERR_USM_AUTHENTICATIONFAILURE */
+    "USM parse error",		           /* SNMPERR_USM_PARSEERROR */
+    "USM unknown engineID",	           /* SNMPERR_USM_UNKNOWNENGINEID */
+    "USM not in time window",	           /* SNMPERR_USM_NOTINTIMEWINDOW */
+    "USM decryption error",	           /* SNMPERR_USM_DECRYPTIONERROR */
+    "MIB not initialized",		   /* SNMPERR_NOMIB */
+    "Value out of range",		   /* SNMPERR_RANGE */
+    "Sub-id out of range",		   /* SNMPERR_MAX_SUBID */
+    "Bad sub-id in object identifier",	   /* SNMPERR_BAD_SUBID */
+    "Object identifier too long",	   /* SNMPERR_LONG_OID */
+    "Bad value name",			   /* SNMPERR_BAD_NAME */
+    "Value out of range"		   /* SNMPERR_VALUE */
 };
 
-static char * usmSecLevelName[] =
+static const char * usmSecLevelName[] =
 	{
 		"BAD_SEC_LEVEL",
 		"noAuthNoPriv",
@@ -258,9 +266,9 @@ static int snmp_resend_request (struct session_list *slp,
 				int incr_retries);
 
 #ifndef HAVE_STRERROR
-char *strerror(int err)
+const char *strerror(int err)
 {
-  extern char *sys_errlist[];
+  extern const char *sys_errlist[];
   extern int sys_nerr;
 
   if (err < 0 || err >= sys_nerr) return "Unknown error";
@@ -298,31 +306,31 @@ int snmp_get_errno (void)
 }
 
 void
-snmp_perror(char *prog_string)
+snmp_perror(const char *prog_string)
 {
   fprintf(stderr,"%s: %s\n",prog_string, snmp_api_errstring(snmp_errno));
 }
 
 void
-snmp_set_detail(char *detail_string)
+snmp_set_detail(const char *detail_string)
 {
   if (snmp_detail != NULL) {
     free(snmp_detail);
     snmp_detail = NULL;
   }
   if (detail_string != NULL)
-    snmp_detail = (char *)strdup(detail_string);
+    snmp_detail = strdup(detail_string);
 }
 
-char *
+const char *
 snmp_api_errstring(int snmp_errnumber)
 {
-    char *msg;
+    const char *msg;
     static char msg_buf [256];
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
 	msg = api_errors[-snmp_errnumber];
     } else {
-	msg = (char*)"Unknown Error";
+	msg = "Unknown Error";
     }
     if (snmp_detail) {
 	sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
@@ -363,7 +371,7 @@ snmp_error(struct snmp_session *psess,
     /* append a useful system errno interpretation. */
     if (psess->s_errno)
         sprintf (&buf[strlen(buf)], " (%s)", strerror(psess->s_errno));
-    *p_str = (char *)strdup(buf);
+    *p_str = strdup(buf);
 }
 
 /*
@@ -423,8 +431,6 @@ init_snmp_session (void)
 void
 snmp_sess_init(struct snmp_session *session)
 {
-extern int init_mib_internals(void);
-
     init_snmp_session();
     init_mib_internals();
 
@@ -450,7 +456,7 @@ extern int init_mib_internals(void);
  * mib module parsing in the correct order.
  */
 void
-init_snmp(char *type)
+init_snmp(const char *type)
 {
   static int	done_init = 0;	/* To prevent double init's. */
 
@@ -479,7 +485,7 @@ init_snmp(char *type)
 
 }  /* end init_snmp() */
 
-/* snmp_shutdown(char *type):
+/* snmp_shutdown(const char *type):
 
    Parameters:
         *type   Label for the config file "type" used by calling entity.
@@ -488,7 +494,7 @@ init_snmp(char *type)
    persistent data, clean up, etc...
 */
 void
-snmp_shutdown(char *type) {
+snmp_shutdown(const char *type) {
   snmp_clean_persistent(type);
   shutdown_snmpv3(type);
 }
@@ -2809,9 +2815,9 @@ snmp_sess_async_send(void *sessp,
       }
       DEBUGMSGTL(("snmp_build",
                   "Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
-                  ((session->securityName) ? session->securityName :
-                   ((pdu->securityName) ? pdu->securityName : 
-                    (unsigned char *)"ERROR: undefined")),
+                  ((session->securityName) ? (char *)session->securityName :
+                   ((pdu->securityName) ? (char *)pdu->securityName : 
+                    "ERROR: undefined")),
                   usmSecLevelName[pdu->securityLevel]));
       break;
 
@@ -3553,6 +3559,9 @@ snmp_add_var(struct snmp_pdu *pdu,
     u_char buf[SPRINT_MAX_LEN];
     int tint;
     long ltmp;
+    struct tree *tp;
+    struct enum_list *ep;
+    struct range_list *rp;
 #ifdef OPAQUE_SPECIAL_TYPES
     double dtmp;
     float ftmp;
@@ -3561,7 +3570,34 @@ snmp_add_var(struct snmp_pdu *pdu,
 
     switch(type){
       case 'i':
-        ltmp = atol(value);
+	tp = get_tree(name, name_length, get_tree_head());
+        if (sscanf(value, "%ld", &ltmp) != 1) {
+	    ep = tp ? tp->enums : NULL;
+	    while (ep) {
+		if (strcmp(value, ep->label) == 0) {
+		    ltmp = ep->value;
+		    break;
+		}
+		ep = ep->next;
+	    }
+	    if (!ep) {
+		snmp_errno = SNMPERR_BAD_NAME;
+		snmp_set_detail(value);
+		return 1;
+	    }
+	}
+	if (tp && tp->ranges) {
+	    rp = tp->ranges;
+	    while (rp) {
+		if (rp->low <= ltmp && ltmp <= rp->high) break;
+		rp = rp->next;
+	    }
+	    if (!rp) {
+		snmp_errno = SNMPERR_RANGE;
+		snmp_set_detail("Value out of range");
+		return 1;
+	    }
+	}
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
                               (u_char *) &ltmp, sizeof(ltmp));
         break;
@@ -3603,10 +3639,23 @@ snmp_add_var(struct snmp_pdu *pdu,
           tint = hex_to_binary((u_char *)value, buf);
         }
         if (tint < 0) {
-          sprintf((char*)buf, "Bad value: %s\n", value);
-          snmp_set_detail((char*)buf);
+          snmp_errno = SNMPERR_VALUE;
+          snmp_set_detail((char*)value);
           return 1;
         }
+	tp = get_tree(name, name_length, get_tree_head());
+	if (tp && tp->ranges) {
+	    rp = tp->ranges;
+	    while (rp) {
+		if (rp->low <= tint && tint <= rp->high) break;
+		rp = rp->next;
+	    }
+	    if (!rp) {
+		snmp_errno = SNMPERR_RANGE;
+		snmp_set_detail("Length");
+		return 1;
+	    }
+	}
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
         break;
 
@@ -3641,7 +3690,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 #endif /* OPAQUE_SPECIAL_TYPES */
 
       default:
-        snmp_set_detail("Internal error in type switching\n");
+        snmp_set_detail("Internal error in type switching");
         return 1;
     }
     return 0;

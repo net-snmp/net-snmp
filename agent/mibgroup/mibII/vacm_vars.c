@@ -122,10 +122,12 @@ static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 void vacm_parse_security (char *token, 
 			  char *param)
 {
-    char *name, *source, *community, *mask;
+    char *name, *source, *community;
+    const char *mask;
     char *cp;
     struct vacm_securityEntry *sp, se;
     int maskLength, maskBit;
+    char null[] = "";
 
     memset (&se, 0 , sizeof se);
     name = strtok(param, "\t\n ");
@@ -144,7 +146,7 @@ void vacm_parse_security (char *token,
 	return;
     }
     cp = strchr(source, '/');
-    if (cp == NULL) cp = "";
+    if (cp == NULL) cp = null;
     else *cp++ = 0;
     mask = cp;
     if (strcmp("default", source) == 0 || strcmp("0.0.0.0", source) == 0) {

@@ -94,7 +94,7 @@ getuptime(void )
 	time_t uptime;
 
 	if (boottime == 0)
-		auto_nlist(BOOTTIME_SYMBOL, &boottime, sizeof (boottime));
+		auto_nlist(BOOTTIME_SYMBOL, (char *)&boottime, sizeof (boottime));
 
 	time(&now);
 	uptime = now - boottime;
@@ -155,7 +155,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 
 	/* Memory info */
 	mem_old = mem_new;
-	auto_nlist(SUM_SYMBOL, &mem_new, sizeof(mem_new));
+	auto_nlist(SUM_SYMBOL, (char *)&mem_new, sizeof(mem_new));
     }
 
 /* Rate macro */
