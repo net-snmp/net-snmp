@@ -699,7 +699,11 @@ subagent_open_master_session(void)
         return -1;
     }
 
-    if (agentx_open_session(main_session) < 0) {
+    /*
+     * I don't know why 1 is success instead of the usual 0 = noerr, 
+     * but that's what the function returns.
+     */
+    if (1 != agentx_open_session(main_session)) {
         snmp_close(main_session);
         main_session = NULL;
         return -1;
@@ -884,6 +888,7 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) ss);
         snmp_close(main_session);
+        register_mib_detach();
         main_session = NULL;
         agentx_reopen_session(0, NULL);
     } else {
