@@ -6860,17 +6860,3 @@ snmp_init_statistics(void)
 {
     memset(statistics, 0, sizeof(statistics));
 }
-
-int snmp_get_fd_for_session(struct snmp_session *sessp) 
-{
-    struct session_list *slp; 
- 
-    slp = (struct session_list *) snmp_sess_pointer(sessp); 
- 
-    if (slp == NULL || slp->internal == NULL) { 
-        snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/ 
-        return 0; 
-    } 
- 
-    return slp->internal->sd;
-}
