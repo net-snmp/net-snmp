@@ -16,7 +16,7 @@
 @eval $m2c_temp_undo_embed = 0@
 @eval $m2c_temp_data_init = 0@
 @eval $m2c_temp_table_access = "$mfd_default_table_access"@
-@eval $m2c_temp_data_transient = $mfd_default_data_transient + 1@
+@eval $m2c_temp_data_transient = $mfd_default_data_transient@
 @eval $m2c_temp_include_examples = $mfd_default_include_examples@
 @eval $m2c_conf_maybe_comment = "##"@
 ##
