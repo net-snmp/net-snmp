@@ -1,16 +1,14 @@
 top_builddir=..
 
 SCRIPTS=snmpcheck tkmib
+PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl rsnmp
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made rsnmp.made
 PERLPROG=@PERLPROG@
 
-all:
-	@if test "x$(PERLPROG)" != "x"; then \
-	  $(MAKE) $(SCRIPTSMADEFORPERL); \
-	fi
+all: $(SCRIPTSMADEFORPERL)
 
-snmpcheck: snmpcheck.def ../sedscript
+snmpcheck: $(srcdir)/snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
 	chmod a+x snmpcheck
 
@@ -18,46 +16,51 @@ clean:
 	rm -f snmpcheck $(SCRIPTSMADEFORPERL)
 
 snmpcheck.made: snmpcheck
-	touch snmpcheck.made
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' snmpcheck
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/snmpcheck > snmpcheck.made; \
+	else \
+	  touch snmpcheck.made; \
+        fi
 
-tkmib.made: tkmib
-	touch tkmib.made
-	@if test ! -f tkmib; then\
-	  cp ${srcdir}/tkmib .; \
-	fi
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' tkmib
+tkmib.made: $(srcdir)/tkmib
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/tkmib > tkmib.made; \
+	else \
+	  touch tkmib.made; \
+        fi
 
-mib2c.made: mib2c
-	touch mib2c.made
-	@if test ! -f mib2c; then\
-	  cp ${srcdir}/mib2c .; \
-	fi
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' mib2c
+mib2c.made: $(srcdir)/mib2c
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/mib2c > mib2c.made; \
+	else \
+	  touch mib2c.made; \
+        fi
 
-ipf-mod.pl.made: ipf-mod.pl
-	touch ipf-mod.pl.made
-	@if test ! -f ipf-mod.pl; then\
-	  cp ${srcdir}/ipf-mod.pl .; \
-	fi
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' ipf-mod.pl
 
-fixproc.made: fixproc
-	touch fixproc.made
-	@if test ! -f fixproc; then\
-	  cp ${srcdir}/fixproc .; \
-	fi
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' fixproc
+ipf-mod.pl.made: $(srcdir)/ipf-mod.pl
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/ipf-mod.pl > ipf-mod.pl.made; \
+	else \
+	  touch ipf-mod.pl.made; \
+        fi
 
-rsnmp.made: rsnmp
-	touch rsnmp.made
-	@if test ! -f rsnmp; then\
-	  cp ${srcdir}/rsnmp .; \
-	fi
-	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' rsnmp
+fixproc.made: $(srcdir)/fixproc
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/fixproc > fixproc.made; \
+	else \
+	  touch fixproc.made; \
+        fi
+
+rsnmp.made: $(srcdir)/rsnmp
+	if test "x$(PERLPROG)" != "x"; then \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/rsnmp > rsnmp.made; \
+	else \
+	  touch rsnmp.made; \
+        fi
+
 
 install:
 	@if test "x$(PERLPROG)" != "x"; then \
-	  for i in $(SCRIPTS) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done \
+	  for i in $(SCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done \
 	fi
 
