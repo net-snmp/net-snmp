@@ -144,7 +144,7 @@ ifTable_allocate_data(void)
      * allocate memory for the context
      */
     /** this might not be right for netsnmp_ifentry */
-    ifTable_data   *rtn = netsnmp_dal_ifentry_create(NULL);
+    ifTable_data   *rtn = netsnmp_access_interface_entry_create(NULL);
 
     DEBUGTRACE;
 
@@ -169,7 +169,7 @@ ifTable_release_data(ifTable_data * data)
     /*
      * release memory for the context
      */
-    netsnmp_dal_ifentry_free(data);
+    netsnmp_access_interface_entry_free(data);
 }
 
 
@@ -197,7 +197,7 @@ ifTable_indexes_set_tbl_idx(ifTable_mib_index * tbl_idx, long ifIndex)
      * ifIndex(1)/INTEGER/ASN_INTEGER/long(long)//l/A/w/e/r/d/h 
      */
     /** no mapping */
-    /** WARNING: this code might not work for netsnmp_ifentry */
+    /** WARNING: this code might not work for netsnmp_interface_entry */
     /*
      * TODO:
      * update, replace or delete, if needed.
