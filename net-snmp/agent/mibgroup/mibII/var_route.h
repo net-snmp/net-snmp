@@ -19,4 +19,8 @@ config_require(mibII/ip util_funcs)
 
      extern FindVarMethod var_ipRouteEntry;
 
+#ifndef hpux11
+     RTENTRY **netsnmp_get_routes(size_t *out_numroutes);
+#endif
+
 #endif                          /* _MIBGROUP_VAR_ROUTE_H */
