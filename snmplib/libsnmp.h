@@ -95,13 +95,6 @@ extern "C" {
 #include <ucd-snmp/int64.h>
 #include <ucd-snmp/version.h>
 
-#ifdef USE_V2PARTY_PROTOCOL
-#include <ucd-snmp/party.h>
-#include <ucd-snmp/context.h>
-#include <ucd-snmp/view.h>
-#include <ucd-snmp/acl.h>
-#endif /* USE_V2PARTY_PROTOCOL */
-
 #define Version version  /* struct snmp_session member */
 
 #define SMI_NOSUCHOBJECT      SNMP_NOSUCHOBJECT
@@ -142,7 +135,6 @@ extern "C" {
 #include <snmp/snmp_compat.h>
 
 /* Load UC-Davis differential */
-#undef USE_V2PARTY_PROTOCOL
 
 #define SNMP_MSG_GET GET_REQ_MSG
 #define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG

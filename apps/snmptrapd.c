@@ -83,9 +83,6 @@ SOFTWARE.
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "party.h"
-#include "context.h"
-#include "acl.h"
 #include "system.h"
 #include "version.h"
 #include "snmptrapd_handlers.h"
@@ -97,6 +94,7 @@ SOFTWARE.
 #include "transform_oids.h"
 #include "snmpv3.h"
 #include "callback.h"
+#include "snmp_alarm.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -710,26 +708,6 @@ int main(int argc, char *argv[])
 
     init_mib();
     update_config(0);	/* read in config files and register HUP */
-
-#if 0
-
-    sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);
-    if (read_party_database(ctmp) != 0){
-	fprintf(stderr, "Warning: Couldn't read v2party database from %s\n",ctmp);
-    }
-    sprintf(ctmp,"%s/context.conf",SNMPSHAREPATH);
-    if (read_context_database(ctmp) != 0){
-	fprintf(stderr, "Warning: Couldn't read v2party's context database from %s\n",ctmp);
-    }
-    sprintf(ctmp,"%s/acl.conf",SNMPSHAREPATH);
-    if (read_acl_database(ctmp) != 0){
-	fprintf(stderr,
-		"Warning: Couldn't read v2party's access control database from %s\n",ctmp);
-    }
-
-#endif
-
-
 
     /* fork the process to the background if we are not printing to stdout */
     if (!Print && dofork) {

@@ -44,8 +44,7 @@ SOFTWARE.
 /* SNMP versions */
 /* There currently exists the following SNMP versions.
  * (Note that only SNMPv1 is in widespread usage, and this code supports
- *  only SNMPv1, SNMPv2p, and SNMPv2c. Placeholders have been added to
- *  support SNMPv3, when it is published.
+ *  only SNMPv1, SNMPv2c, and SNMPv3.
  *
  *  SNMPv1 - (full) the original version, defined by RFC 1157
  *  SNMPsec - (historic) the first attempt to add strong security

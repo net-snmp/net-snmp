@@ -474,7 +474,7 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
-new_module_list="mibII ucd_snmp v2party snmpv3mibs $with_mib_modules"
+new_module_list="mibII ucd_snmp snmpv3mibs $with_mib_modules"
 trap_list_o=""
 
 case $target_os in
