@@ -34,6 +34,9 @@ int             create_trap_session(char *, u_short, char *, int, int);
 int             add_trap_session(netsnmp_session *, int, int, int);
 int             remove_trap_session(netsnmp_session *);
 
+void                   convert_v2_to_v1(netsnmp_variable_list *, netsnmp_pdu *);
+netsnmp_variable_list *convert_v1_to_v2(netsnmp_pdu *);
+
 #ifdef __cplusplus
 }
 #endif
