@@ -523,7 +523,11 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
   tor->PRIM_type = T_OPTMGMT_REQ;
   tor->OPT_offset = sizeof(struct T_optmgmt_req);
   tor->OPT_length = sizeof(struct opthdr);
-  tor->MGMT_flags = MI_T_CURRENT;
+#ifdef MI_T_CURRENT
+  tor->MGMT_flags = MI_T_CURRENT;	/* Solaris < 2.6 */
+#else
+  tor->MGMT_flags = T_CURRENT;		/* Solaris 2.6 */
+#endif
   req = (struct opthdr *) (tor + 1);
   req->level = groupname;
   req->name = subgroupname;
