@@ -238,7 +238,8 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
      * 'Compact' internet OIDs 
      */
     if (name_len >= 5 && (name[0] == 1 && name[1] == 3 &&
-                          name[2] == 6 && name[3] == 1)) {
+                          name[2] == 6 && name[3] == 1 &&
+                          name[4] > 0 && name[4] < 256)) {
         prefix = name[4];
         name += 5;
         name_len -= 5;
