@@ -12,7 +12,7 @@
 #include "snmp_api.h"
 #include "snmp_debug.h"
 
-static struct snmp_callback *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
+static struct snmp_gen_callback *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
 
 /* the chicken. or the egg.  You pick. */
 void
@@ -24,7 +24,7 @@ int
 snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
                        void *arg) {
 
-  struct snmp_callback *scp;
+  struct snmp_gen_callback *scp;
   
   if (major > MAX_CALLBACK_IDS || minor > MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
@@ -35,11 +35,11 @@ snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
     for(scp = thecallbacks[major][minor]; scp->next != NULL; scp = scp->next);
 
     /* mallocate a new entry */
-    scp->next = SNMP_MALLOC_STRUCT(snmp_callback);
+    scp->next = SNMP_MALLOC_STRUCT(snmp_gen_callback);
     scp = scp->next;
   } else {
     /* mallocate a new entry */
-    scp = SNMP_MALLOC_STRUCT(snmp_callback);
+    scp = SNMP_MALLOC_STRUCT(snmp_gen_callback);
 
     /* make the new node the head */
     thecallbacks[major][minor] = scp;
@@ -59,7 +59,7 @@ snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
 
 int
 snmp_call_callbacks(int major, int minor, void *caller_arg) {
-  struct snmp_callback *scp;
+  struct snmp_gen_callback *scp;
 
   if (major > MAX_CALLBACK_IDS || minor > MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
