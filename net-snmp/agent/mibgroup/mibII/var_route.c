@@ -1308,19 +1308,12 @@ static int qsort_compare(RTENTRY **r1,
 
 #define CACHE_TIME (120)	    /* Seconds */
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "mib.h"
-#include "snmp.h"
-#include "../snmp_vars.h"
+#include "mibincl.h"
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "snmp_logging.h"
-#include "snmp_debug.h"
 
 static TAILQ_HEAD(, snmprt) rthead;
 static char *rtbuf;
