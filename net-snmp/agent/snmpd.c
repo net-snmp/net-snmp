@@ -438,7 +438,7 @@ static void usage(char *prog)
   printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
   printf("\n\tVersion:  %s\n",VersionInfo);
   printf("\tAuthor:   Wes Hardaker\n");
-  printf("\tEmail:    ucd-snmp-coders@ece.ucdavis.edu\n");
+  printf("\tEmail:    ucd-snmp-coders@ucd-snmp.ucdavis.edu\n");
   printf("\n-h\t\tThis usage message.\n");
   printf("-H\t\tDisplay configuration file directives understood.\n");
   printf("-v\t\tVersion information.\n");
@@ -576,14 +576,14 @@ main(int argc, char *argv[])
                 case 'v':
                     printf("\nUCD-snmp version:  %s\n",VersionInfo);
                     printf("Author:            Wes Hardaker\n");
-                    printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
+                    printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
                     exit (0);
                 case '-':
                   switch(argv[arg][2]){
                     case 'v': 
                       printf("\nUCD-snmp version:  %s\n",VersionInfo);
                       printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
+                      printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
                       exit (0);
                     case 'h':
                       usage(argv[0]);
