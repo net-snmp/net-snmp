@@ -215,28 +215,271 @@ NetSNMP::agent - Perl extension for the net-snmp agent.
 =head1 SYNOPSIS
 
   use NetSNMP::agent;
-  my $agent = new NetSNMP::agent('Name' -> 'my_agent_name');
-  $agent->register("a_name", ".1.3.6.1.2.1", \&myhandler);
-  $agent->main_loop();
 
-    --- or, within the net-snmp snmpd.conf file: ---
+  my $agent = new NetSNMP::agent('Name' => 'my_agent_name');
 
-  perl $agent->register("a_name", ".1.3.6.1.2.1", \&myhandler);
 
 =head1 DESCRIPTION
 
 This module implements a snmp agent and/or can be embedded within the
 net-snmp agent.
 
+The agent may be registered as a sub-agent, or an embedded agent.
+
+=head1 EXAMPLES
+
+=head2 Sub-agent example
+
+    	use NetSNMP::agent (':all');
+	sub myhandler {
+	    my ($handler, $registration_info, $request_info, $requests) = @_;
+	    my $request;
+
+	    for($request = $requests; $request; $request = $request->next()) {
+		my $oid = $request->getOID();
+		if ($request_info->getMode() == MODE_SET_ACTION) {
+		    # ...
+		    $request->setError($request_info, SNMP_ERR_NOTWRITABLE);
+		}
+	    }
+
+	}
+
+	my $agent = new NetSNMP::agent(
+    				'Name' => "my_agent_name",
+    				'AgentX' => 1
+    				);
+	}
+
+    	$agent->register("my_agent_name", ".1.3.6.1.2.1", \&myhandler);
+
+	my $running = 1;
+	while($running) {
+    		$agent->agent_check_and_process(1);
+	}
+
+	$agent->shutdown();
+
+
+=head2 Embedded agent example
+
+	use NetSNMP::agent;
+	my $agent;
+
+	sub myhandler {
+	    my ($handler, $registration_info, $request_info, $requests) = @_;
+	    # ...
+	}
+
+	$agent = new NetSNMP::agent(
+    				'Name' => 'my_agent_name'
+    				);
+
+    	$agent->register("my_agent_name", ".1.3.6.1.2.1", \&myhandler);
+
+	$agent->main_loop();
+
+
+=head1 CONSTRUCTOR
+
+    new ( OPTIONS )
+	This is the constructor for a new NetSNMP::agent object.
+
+    Possible options are:
+
+    	Name	- Name of the agent (optional, defaults to "perl")
+    	AgentX	- Make us a sub-agent (0 = false, 1 = true)
+    	Ports	- Ports this agent will listen on (FIXME: example? format?)
+
+    Example:
+
+	$agent = new NetSNMP::agent(
+    				 'Name' => 'my_agent_name',
+    				 'AgentX' => 1
+    				 );
+
+
+=head1 METHODS
+
+    register ( )
+    	Registers the callback handler with given OID.
+
+    	$agent->register();
+
+	FIXME: how are errors returned?
+
+    agent_check_and_process ( BLOCKING )
+    	Run one iteration of the main loop.
+
+    	BLOCKING - Blocking or non-blocking call. 1 = true, 0 = false.
+
+    	$agent->agent_check_and_process(1);
+
+    main_loop ()
+    	Runs the agent in a loop. Does not return.
+
+    shutdown ()
+	Shuts down the sub-agent.
+
+	$agent->shutdown();
+
+    next ()
+    	Returns the next request or undef if there is no next request.
+
+    	$request = $request->next();
+
+    getMode ()
+    	Returns the mode of the request. See the MODES section for list of valid modes.
+
+	$mode = $request->getMode();
+
+    getOID ()
+	Returns the oid of the request.
+
+	$oid = $request->getOID();
+
+    getRootOID ()
+    	FIXME ???
+
+    	$root_oid = $request->getRootOID();
+
+    getOIDptr ()
+    	FIXME ???
+
+    	$oid_ptr = $request->getOIDptr();
+
+    getDelegated ()
+	FIXME ???
+
+	$delegated = $request->getDelegated();
+
+    getValue ()
+	Returns the value of the request. Used for example when setting values.
+
+    	$value = $request->getValue();
+
+    	FIXME: how to get the type of the value? Is it even available?
+
+    getProcessed ()
+    	FIXME ???
+
+    	$processed = $request->getProcessed();
+
+    getStatus ()
+	FIXME ???
+
+	$status = $request->getStatus();
+
+    getRepeat ()
+	FIXME ???
+
+    	$repeat = $request->getRepeat();
+
+    setOid ( OID )
+	Set the oid for request. Used for example when walking through list of OIDs.
+
+	$request->setOID($next_oid);
+
+    setProcessed ( PROCESSED )
+	FIXME ???
+
+	PROCESSED - 0 = false, 1 = true
+
+	$request->setProcessed(1);
+
+    setDelegated ( DELEGATED )
+    	FIXME ???
+
+    	DELEGATED - 0 = false, 1 = true
+
+    	$request->setDelegated(1);
+
+    setValue ( TYPE, DATA )
+	Sets the data to be returned to the daemon.
+
+    	Returns 1 on success, 0 on error.
+
+    	TYPE - Type of the data. See NetSNMP::ASN for valid types.
+    	DATA - The data to return.
+
+	$ret = $request->setValue(ASN_OCTET_STR, "test");
+
+    setRepeat ( REPEAT )
+	FIXME ???
+
+	REPEAT -  repeat count FIXME
+
+	$request->setRepeat(5);
+
+    setError ( REQUEST_INFO, ERROR_CODE )
+	Sets the given error code for the request. See the ERROR CODES section for list of valid codes.
+
+    	$request->setError($request_info, SNMP_ERR_NOTWRITABLE);
+
+=head1 CALLBACKS
+
+    handler ( HANDLER, REGISTRATION_INFO, REQUEST_INFO, REQUESTS )
+
+    	The handler is called with the following parameters:
+
+	HANDLER 		- FIXME
+    	REGISTRATION_INFO 	- what are the correct meanings of these?
+    	REQUEST_INFO		-
+    	REQUESTS		-
+
+    Example handler:
+
+	sub myhandler {
+	    my ($handler, $registration_info, $request_info, $requests) = @_;
+	    # ...
+	}
+
+
+=head1 MODES
+
+	MODE_GET
+	MODE_GETBULK
+	MODE_GETNEXT
+	MODE_SET_ACTION
+	MODE_SET_BEGIN
+	MODE_SET_COMMIT
+	MODE_SET_FREE
+	MODE_SET_RESERVE1
+	MODE_SET_RESERVE2
+	MODE_SET_UNDO
+
+=head1 ERROR CODES
+
+	SNMP_ERR_NOERROR
+	SNMP_ERR_TOOBIG
+	SNMP_ERR_NOSUCHNAME
+	SNMP_ERR_BADVALUE
+	SNMP_ERR_READONLY
+	SNMP_ERR_GENERR
+	SNMP_ERR_NOACCESS
+	SNMP_ERR_WRONGTYPE
+	SNMP_ERR_WRONGLENGTH
+	SNMP_ERR_WRONGENCODING
+	SNMP_ERR_WRONGVALUE
+	SNMP_ERR_NOCREATION
+	SNMP_ERR_INCONSISTENTVALUE
+	SNMP_ERR_RESOURCEUNAVAILABLE
+	SNMP_ERR_COMMITFAILED
+	SNMP_ERR_UNDOFAILED
+	SNMP_ERR_AUTHORIZATIONERROR
+	SNMP_ERR_NOTWRITABLE
+
 =head1 AUTHOR
 
 Please mail the net-snmp-users@lists.sourceforge.net mailing list for
 help, questions or comments about this module.
 
-Wes Hardaker, hardaker@users.sourceforge.net
+Module written by Wes Hardaker <hardaker@users.sourceforge.net>
+
+Documentation written by Toni Willberg <toniw@iki.fi>
 
 =head1 SEE ALSO
 
-perl(1).
+NetSNMP::OID(3), NetSNMP::ASN(3), perl(1).
 
 =cut
