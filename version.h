@@ -1,1 +1,1 @@
-static const char *VersionInfo="4.0.pre7";
+static const char *VersionInfo="4.0";
