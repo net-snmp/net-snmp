@@ -61,7 +61,18 @@ oid sysORTable_variables_oid[] = { 1,3,6,1,2,1,1,9,1 };
 void
 init_sysORTable(void) {
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+  if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT )
+	(void)register_mib_priority("mibII/sysORTable", sysORTable_variables,
+		sizeof(struct variable2),
+		sizeof(sysORTable_variables)/sizeof(struct variable2),
+		sysORTable_variables_oid,
+		sizeof(sysORTable_variables_oid)/sizeof(oid),
+		1);
+  else
+#endif
+    REGISTER_MIB("mibII/sysORTable", sysORTable_variables, variable2, sysORTable_variables_oid);
 
   gettimeofday(&sysOR_lastchange, NULL);
 }
