@@ -172,6 +172,8 @@ Memory OBJECT-TYPE
 	::= { wesTests 4 }
 
 memory ::= SEQUENCE {
+   memIndex        INTEGER,
+   memErrorName    DisplayString,
    memTotalSwap     INTEGER,
    memUsedSwap     INTEGER,
    memTotalReal     INTEGER,
@@ -182,8 +184,23 @@ memory ::= SEQUENCE {
    memUsedRealTXT     INTEGER,
    memTotalFree       INTEGER,
    memMinimumSwap       INTEGER,
-   memSwapError       INTEGER
+   memSwapError       DisplayString
 }
+memIndex OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Generic Index "
+     ::= { Memory 1 } 
+
+memErrorName OBJECT-TYPE
+     SYNTAX  DisplayString
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Bogus Name ("swap") for consistancy."
+     ::= { Memory 2 } 
 
 memTotalSwap OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -191,7 +208,7 @@ memTotalSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Swap Size."
-	::= { Memory 1 }
+	::= { Memory 3 }
 
 memAvailSwap OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -199,7 +216,7 @@ memAvailSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Swap Space."
-	::= { Memory 2 }
+	::= { Memory 4 }
 
 memTotalReal OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -207,7 +224,7 @@ memTotalReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size."
-	::= { Memory 3 }
+	::= { Memory 5 }
 
 memAvailReal OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -215,7 +232,7 @@ memAvailReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Real/Physical Memory Space."
-	::= { Memory 4 }
+	::= { Memory 6 }
 
 memTotalSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -223,7 +240,7 @@ memTotalSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total VM used by text."
-	::= { Memory 5 }
+	::= { Memory 7 }
 
 memAvailSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -231,7 +248,7 @@ memAvailSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active VM used by text."
-	::= { Memory 6 }
+	::= { Memory 8 }
 
 memTotalRealTXT OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -239,7 +256,7 @@ memTotalRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size used by txt."
-	::= { Memory 7 }
+	::= { Memory 9 }
 
 memAvailRealTXT OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -247,7 +264,7 @@ memAvailRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active Real/Physical Memory Space used by txt."
-	::= { Memory 8 }
+	::= { Memory 10 }
 
 memTotalFree OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -255,7 +272,7 @@ memTotalFree OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Available Memory"
-	::= { Memory 9 }
+	::= { Memory 11 }
 
 memMinimumSwap OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
@@ -264,7 +281,7 @@ memMinimumSwap OBJECT-TYPE
 	DESCRIPTION
 		"Minimum amount of free swap.  Otherwise memErrorSwap
 		is set to 1 "
-	::= { Memory 10 }
+	::= { Memory 12 }
 
 memSwapError OBJECT-TYPE
 	SYNTAX INTEGER (SIZE (0..4294967295))
