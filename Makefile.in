@@ -41,7 +41,7 @@ PERLMODULES=default_store SNMP ASN OID agent
 #
 # targets
 #
-all:    sedscript EXAMPLE.conf standardall net-snmp-config-x @PERLTARGS@ 
+all:    sedscript EXAMPLE.conf standardall @PERLTARGS@ 
 
 start-flag:
 	@touch build-in-progress-flag
@@ -78,10 +78,6 @@ mancp:
 	@for i in docs/man/man3/* ; do \
 	     cp $$i man/netsnmp_`basename $$i` ; \
 	done
-
-net-snmp-config-x: net-snmp-config
-	chmod a+x net-snmp-config
-	touch net-snmp-config-x
 
 #
 # extra install rules
@@ -161,7 +157,7 @@ makefileclean:
 configclean: makefileclean
 	rm -f config.cache config.status config.log \
 		libtool include/net-snmp/net-snmp-config.h \
-		net-snmp-config net-snmp-config-x configure-summary
+		net-snmp-config configure-summary
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		snmplib/snmpsm_init.h                   \
