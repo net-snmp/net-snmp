@@ -702,6 +702,7 @@ snmp_read_packet(sd)
 	       inet_ntoa(from.sin_addr));
 	xdump(packet, length, "");
 	printf("\n\n");
+        fflush(stdout);
     } else if (log_addresses){
 	int count;
 	
@@ -732,6 +733,7 @@ snmp_read_packet(sd)
 		   inet_ntoa(from.sin_addr));
 	    xdump(outpacket, out_length, "");
 	    printf("\n\n");
+            fflush(stdout);
 	}
 	if (sendto(sd, (char *)outpacket, out_length, 0,
 		   (struct sockaddr *)&from,
