@@ -69,7 +69,7 @@ void pass_parse_config(word,cptr)
   strcpy((*ppass)->name, (*ppass)->command);
   (*ppass)->next = NULL;
 
-  register_mib((struct variable *) extensible_passthru_variables,
+  register_mib("pass", (struct variable *) extensible_passthru_variables,
                sizeof(struct variable2),
                1, (*ppass)->miboid, (*ppass)->miblen);
 

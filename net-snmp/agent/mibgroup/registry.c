@@ -124,6 +124,9 @@ var_registry(vp, name, length, exact, var_len, write_method)
 	case REGISTRYINDEX:
 	    long_return = index+1;
 	    return (u_char *)&long_return;
+        case REGISTRYNAME:
+            *var_len = strlen(subtrees[index].label);
+            return (u_char *) subtrees[index].label;
         case REGISTRYOID:
             *var_len = sizeof(oid)*(subtrees[index].namelen);
             return (u_char *) subtrees[index].name;

@@ -1741,7 +1741,7 @@ while test "x$new_module_list" != "x"; do
 	    echo "  init_$i();" >> $mibdir/mib_module_inits.h
 	fi
       fi
-      grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3)},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
+      grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3),"'$i'"},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
       grep config_parse_dot_conf $srcdir/$mibdir/$i.h | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{\1, \2, \3},@' >> $mibdir/mib_module_dot_conf.h
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       echo "/* Define if compiling with the ${i} module files.  */" >> mib_module_config.h

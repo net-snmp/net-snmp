@@ -172,7 +172,7 @@ void extensible_parse_config(word,cptr)
     (*pptmp)->next = NULL;
   }
   if ((*pptmp)->miblen > 0) {
-    register_mib((struct variable *) extensible_relocatable_variables,
+    register_mib(word, (struct variable *) extensible_relocatable_variables,
                  sizeof(struct variable2),
                  6, (*pptmp)->miboid, (*pptmp)->miblen);
   }

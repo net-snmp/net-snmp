@@ -728,6 +728,8 @@ MREntry ::=
     SEQUENCE {
         mrIndex
             MRIndex,
+	mrModuleName
+            DisplayString,
 	mrObjID
             OBJECT IDENTIFIER
     }	    
@@ -741,11 +743,19 @@ mrIndex OBJECT-TYPE
 	the agent's mibRegisteryTable"
     ::= { mrEntry  1 }
 
+mrModuleName OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+	"The module name that registered this OID."
+    ::= { mrEntry  2 }
+
 mrObjID OBJECT-TYPE
     SYNTAX     OBJECT IDENTIFIER
     MAX-ACCESS read-only
     STATUS     current
     DESCRIPTION
 	"The OID registered with the agent by a particular mib module."
-    ::= { mrEntry  2 }
+    ::= { mrEntry  3 }
 

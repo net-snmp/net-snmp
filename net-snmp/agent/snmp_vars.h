@@ -49,5 +49,6 @@ int KNLookup __P((struct nlist *, int, char *, int));
 int compare __P((oid *, int, oid *, int));
 int subtree_old_size __P((void));
 void init_nlist __P((struct nlist *));
-int register_mib __P((struct variable *, int , int , oid *, int));
+int register_mib __P((char *, struct variable *, int , int , oid *, int));
 int unregister_mib __P((oid *, int));
+void sort_tree __P((void));
