@@ -96,12 +96,11 @@ header_dummy(vp, name, length, exact, var_len, write_method)
 #define DUMMY_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
-    char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_dummy: %s %d\n", c_oid, exact);
-#endif
+    /* just do trace and token print */
+    DEBUGMSGTL(("dummy/dummy:var_dummy", ""));
+    DEBUGMSGOID(("dummy/dummy:var_dummy", name, *length));
+    DEBUGMSG(("dummy/dummy:var_dummy", " %d\n", exact));
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[DUMMY_NAME_LENGTH] = 0;

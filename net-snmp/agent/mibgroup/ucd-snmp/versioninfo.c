@@ -51,7 +51,7 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, name, *length);
-    DEBUGP ("versionMib: %s %d\n", c_oid, exact);
+    DEBUGMSGTL(("ucd-snmp/versioninfo", "versionMib: %s %d\n", c_oid, exact));
   }
 
   if (header_generic(vp,name,length,exact,var_len,write_method))

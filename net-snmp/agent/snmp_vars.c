@@ -279,7 +279,7 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
 
   if (snmp_get_do_debugging()) {
     sprint_objid(c_oid, mibloc, mibloclen);
-    DEBUGP ("registering \"%s\" at %s\n", moduleName, c_oid);
+    DEBUGMSGTL(("snmp_vars", "registering \"%s\" at %s\n", moduleName, c_oid));
   }
     
   memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));

@@ -73,7 +73,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("var_hrpartition: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_partition", "var_hrpartition: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -139,7 +139,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowPartIndex == -1 ) {
-        DEBUGP("... index out of range\n");
+        DEBUGMSGTL(("host/hr_partition", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -152,7 +152,7 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("... get partition stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_partition", "... get partition stats %s\n", c_oid));
     }
     return LowPartIndex;
 }
@@ -249,8 +249,9 @@ Get_Next_HR_Partition __P((void))
 	sprintf(string, disk_device_strings[  HRD_type_index ],
 			disk_device_id[       HRD_type_index ] + HRD_index,
 			disk_partition_first[ HRD_type_index ] + HRP_index );
-	DEBUGP("Get_Next_HR_Partition: %s (%d/%d:%d)\n",
-		string, HRD_type_index, HRD_index, HRP_index );
+	DEBUGMSGTL(("host/hr_partition",
+                    "Get_Next_HR_Partition: %s (%d/%d:%d)\n",
+                    string, HRD_type_index, HRD_index, HRP_index ));
 
 	fd=open( string, O_RDONLY  );
 	if (fd != -1 ) {

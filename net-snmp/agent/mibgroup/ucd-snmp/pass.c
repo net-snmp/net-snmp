@@ -181,7 +181,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         sprintf(passthru->command,"%s -g %s",passthru->name,buf);
       else
         sprintf(passthru->command,"%s -n %s",passthru->name,buf);
-      DEBUGP("pass-running:  %s\n",passthru->command);
+      DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",passthru->command));
       /* valid call.  Exec and get output */
       if ((fd = get_exec_output(passthru))) {
         file = fdopen(fd,"r");
@@ -353,7 +353,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
           break;
       }
       strcat(passthru->command,buf);
-      DEBUGP("pass-running:  %s\n",passthru->command);
+      DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",passthru->command));
       exec_command(passthru);
       if (!strncasecmp(passthru->output,"not-writable",11)) {
         return SNMP_ERR_NOTWRITABLE;
@@ -365,7 +365,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   if (snmp_get_do_debugging()) {
     sprint_mib_oid(buf2,name,name_len);
-    DEBUGP("pass-notfound:  %s\n",buf2);
+    DEBUGMSGTL(("ucd-snmp/pass", "pass-notfound:  %s\n",buf2));
   }
   return SNMP_ERR_NOSUCHNAME;
 }

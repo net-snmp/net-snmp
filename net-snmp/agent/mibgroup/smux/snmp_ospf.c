@@ -73,7 +73,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, name, *length);
-          DEBUGP("[var_ospf] var len %d, oid requested Len %d-%s\n",*var_len, *length,c_oid);
+          DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid requested Len %d-%s\n",*var_len, *length,c_oid));
         }
         
 	/* 
@@ -101,7 +101,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 		         sizeof(max_ospf_mib)/sizeof(u_int));
 
 	if (result >= 0) {
-                DEBUGP("Over shot\n");
+                DEBUGMSGTL(("smux/snmp_ospf", "Over shot\n"));
 		return NULL;
 	}
 
@@ -109,8 +109,9 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 	result = snmp_oid_compare(name, *length, min_ospf_mib, 
 			 sizeof(min_ospf_mib)/sizeof(u_int));
 	if (exact && (result < 0)) {
-                DEBUGP("Exact but doesn't match length %d, size %d\n",
-			*length, sizeof(min_ospf_mib));
+                DEBUGMSGTL(("smux/snmp_ospf",
+                            "Exact but doesn't match length %d, size %d\n",
+                            *length, sizeof(min_ospf_mib)));
 		return NULL;
 	}
 
@@ -124,7 +125,7 @@ var_ospf(vp, name, length, exact, var_len, write_method)
 
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, name, *length);
-          DEBUGP("[var_ospf] var len %d, oid obtained Len %d-%s\n",*var_len, *length,c_oid);
+          DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid obtained Len %d-%s\n",*var_len, *length,c_oid));
         }
 
 	vp->type = smux_type;

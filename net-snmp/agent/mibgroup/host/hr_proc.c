@@ -62,7 +62,7 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrproc: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_proc", "var_hrproc: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -91,7 +91,7 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("host/hr_proc", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -102,7 +102,7 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("... get proc stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_proc", "... get proc stats %s\n", c_oid));
     }
     return LowIndex;
 }

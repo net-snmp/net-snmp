@@ -174,7 +174,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: %s %d\n", c_oid, exact));
     }
     
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -187,7 +187,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 	    break;
     }
     if (interface > count) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
         return MATCH_FAILED;
     }
 
@@ -198,7 +198,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     *var_len = sizeof(long);	/* default to 'long' results */
 
     sprint_objid (c_oid, name, *length);
-    DEBUGP ("... get I/F stats %s\n", c_oid);
+    DEBUGMSGTL(("mibII/interfaces", "... get I/F stats %s\n", c_oid));
 
     return interface;
 };
@@ -219,7 +219,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, name, *length);
-    DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
+    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: %s %d\n", c_oid, exact));
   }
 
   memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -287,7 +287,7 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
        cp += ifp->ifm_msglen)
     {
       ifp = (struct if_msghdr *)cp;
-      DEBUGP("ifm_type = %d, ifm_index = %d\n", ifp->ifm_type, ifp->ifm_index);
+      DEBUGMSGTL(("mibII/interfaces", "ifm_type = %d, ifm_index = %d\n", ifp->ifm_type, ifp->ifm_index));
 
       switch (ifp->ifm_type)
 	{
@@ -336,7 +336,7 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
 	  }
 	  break;
 	default:
-	  DEBUGP ("routing socket: unknown message type %d\n", ifp->ifm_type);
+	  DEBUGMSGTL(("mibII/interfaces", "routing socket: unknown message type %d\n", ifp->ifm_type));
 	}
     }
   if (have_ifinfo && have_addr)
@@ -576,7 +576,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/interfaces", "var_interfaces: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -611,7 +611,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -624,7 +624,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 	    break;
     }
     if (interface > count) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
         return MATCH_FAILED;
     }
 
@@ -636,7 +636,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("... get I/F stats %s\n", c_oid);
+      DEBUGMSGTL(("mibII/interfaces", "... get I/F stats %s\n", c_oid));
     }
 
     return interface;
@@ -1019,8 +1019,8 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 static int
 IF_cmp(void *addr, void *ep)
 {
-    DEBUGP ("... IF_cmp %d %d\n", 
-    ((mib2_ifEntry_t *)ep)->ifIndex, ((mib2_ifEntry_t *)addr)->ifIndex);
+    DEBUGMSGTL(("mibII/interfaces", "... IF_cmp %d %d\n", 
+    ((mib2_ifEntry_t *)ep)->ifIndex, ((mib2_ifEntry_t *)addr)->ifIndex));
     if (((mib2_ifEntry_t *)ep)->ifIndex == ((mib2_ifEntry_t *)addr)->ifIndex)
 	return (0);
     else
@@ -1046,7 +1046,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 
     if (getMibstat(MIB_INTERFACES, &ifstat, sizeof(mib2_ifEntry_t),
                    GET_EXACT, &IF_cmp, &interface) != 0) {
-      DEBUGP ("... no mib stats\n");
+      DEBUGMSGTL(("mibII/interfaces", "... no mib stats\n"));
       return NULL;
     }
     switch (vp->magic){
@@ -1283,13 +1283,13 @@ Interface_Scan_Init __P((void))
 
       if (snmp_get_do_debugging()) {
         { struct ifnet *x = ifnetaddr;
-        printf ("* see: known interfaces:");
+        DEBUGMSGTL(("mibII/interfaces", "* see: known interfaces:"));
         while (x)
           {
-            printf (" %s", x->if_name);
+            DEBUGMSG(("mibII/interfaces", " %s", x->if_name));
             x = x->if_next;
           }
-        printf ("\n");
+        DEBUGMSG(("mibII/interfaces", "\n"));
         } /* XXX */
       }
 
@@ -1767,12 +1767,10 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
-    char c_oid[1024];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_interfaces: %s %d\n", c_oid, exact);
-#endif
+    DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
+    DEBUGMSGOID(("mibII/interfaces", name, *length));
+    DEBUGMSG(("mibII/interfaces", " %d\n", exact));
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;

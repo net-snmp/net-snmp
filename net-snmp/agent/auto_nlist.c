@@ -65,7 +65,7 @@ auto_nlist_value(string)
       fprintf(stderr, "nlist err: neither %s nor _%s found.\n", string, string);
       return( -1 );
     } else {
-      DEBUGP("nlist:  found symbol %s at %x.\n", it->symbol, it->nl[0].n_value);
+      DEBUGMSGTL(("auto_nlist", "nlist:  found symbol %s at %x.\n", it->symbol, it->nl[0].n_value));
       return( it->nl[0].n_value );
     }
   }
@@ -127,10 +127,10 @@ init_nlist(nl)
 	nl[ret].n_type = 1;
 #endif
       if (nl[ret].n_type == 0) {
-	  DEBUGP("nlist err:  %s not found\n",nl[ret].n_name);
+	  DEBUGMSGTL(("auto_nlist", "nlist err:  %s not found\n",nl[ret].n_name));
       } else {
-	  DEBUGP("nlist: %s 0x%X\n", nl[ret].n_name,
-		  (unsigned int)nl[ret].n_value);
+	  DEBUGMSGTL(("auto_nlist", "nlist: %s 0x%X\n", nl[ret].n_name,
+                      (unsigned int)nl[ret].n_value));
       }
   }
 #endif
@@ -168,7 +168,7 @@ auto_nlist_print_tree(indent, ptr)
     if (ptr == 0)
       return;
     sprintf(buf,"%%%ds\n",indent);
-/*    DEBUGP("buf: %s\n",buf); */
+/*    DEBUGMSGTL(("auto_nlist", "buf: %s\n",buf)); */
     fprintf(stderr, buf, ptr->symbol);
     auto_nlist_print_tree(indent+2,ptr->left);
     auto_nlist_print_tree(indent+2,ptr->right);
