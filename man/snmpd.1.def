@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -90,6 +90,14 @@ option.
 .B -r
 Don't require root access to run the demon.  Specifically, don't exit
 when you can't open files like /dev/kmem, etc...
+.TP
+.B -I [-]module_list
+This option specifies which modules you do (or do not) want to be
+initialized when the agent starts up.  If the module_list is preceded
+with a '-', it will indicate the modules that you do not want to start
+up rather than a definitive list of those that you do want to start.  To get a list of compiled modules, run the agent with the arguments
+.I "-Dmib_init -H"
+(assumes you have debugging support compiled in).
 .RE
 .SH CONFIGURATION FILES
 .PP
