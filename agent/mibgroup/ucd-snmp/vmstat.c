@@ -166,7 +166,7 @@ void getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
     while (read(statfd, buff, bsize) == bsize) {
 	bsize += 256;
 	buff = realloc(buff, bsize);
-	snmp_log(LOG_INFO, "/proc/stat buffer increased to %d\n", bsize);
+	DEBUGMSGTL(("vmstat", "/proc/stat buffer increased to %d\n", bsize));
 	close(statfd);
 	statfd = open(VMSTAT_FILE, O_RDONLY, 0);
     }
