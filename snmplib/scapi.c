@@ -884,12 +884,6 @@ sc_internal_kmtlookup(	u_int 	 transform,
 		}
 	}
 
-	if (ISDF(KMTDUMP1) && *kmtkeylist) {
-		fprintf(stdout, "\n");
-		kmt_dump_keylist(*kmtkeylist, "In sc_internal_kmtlookup()");
-	}
-
-
         free_zero(keyname, keyname_len);
 
 	return rval;
