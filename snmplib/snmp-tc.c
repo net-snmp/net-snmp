@@ -175,7 +175,7 @@ ctime_to_timet(char *string)
  * blatantly lifted from opensmp 
  */
 char
-check_rowstatus_transition(int oldValue, int newValue, int storage_type)
+check_rowstatus_transition(int oldValue, int newValue)
 {
     /*
      * From the SNMPv2-TC MIB:
@@ -359,6 +359,7 @@ check_storage_transition(int oldValue, int newValue)
     case SNMP_STORAGE_READONLY:
         return SNMP_ERR_INCONSISTENTVALUE;
 
+    case SNMP_STORAGE_NONE:
     case SNMP_STORAGE_OTHER:
     case SNMP_STORAGE_VOLATILE:
     case SNMP_STORAGE_NONVOLATILE:
