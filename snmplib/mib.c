@@ -1069,19 +1069,23 @@ init_mib (void)
     free(env_var);
     
     env_var = getenv("MIBFILES");
-    if ( env_var == NULL ) {
-#ifdef DEFAULT_MIBFILES
+    if ( env_var != NULL ) {
 	if (*env_var == '+') {
-        entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
-        sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+#ifdef DEFAULT_MIBFILES
+	    entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
+	    sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
                 env_var+1);
-        env_var = entry;
-	} else {
-	    env_var = strdup(DEFAULT_MIBFILES);
-	}
+	    env_var = entry;
+#else
+	    env_var = strdup(env_var+1);
 #endif
+	} else {
+	    env_var = strdup(env_var);
+	}
     } else {
-	env_var = strdup(env_var);
+#ifdef DEFAULT_MIBFILES
+	env_var = strdup(DEFAULT_MIBFILES);
+#endif
     }
     
     if ( env_var != 0 ) {

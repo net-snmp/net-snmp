@@ -46,7 +46,7 @@ snmpUsmMIB MODULE-IDENTITY
     DESCRIPTION  "The management information definitions for the
                   SNMP User-based Security Model.
                  "
-    ::= { snmpModules 12 }
+    ::= { snmpModules 15 }
 
 -- Administrative assignments ****************************************
 

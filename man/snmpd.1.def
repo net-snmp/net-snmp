@@ -28,6 +28,7 @@ Dumps the sent and received UDP packets to stderr or logfile.
 .TP 
 .B -q
 Print simpler output for easier automated parsing.
+.TP
 .B -D
 Turn on debugging output
 .TP

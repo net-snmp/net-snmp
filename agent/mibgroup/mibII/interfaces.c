@@ -1193,7 +1193,7 @@ void
 Interface_Scan_Init (void)
 {
 #ifdef linux
-    char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
+    char line [256], fullname [64], ifname_buf [64], *ifname, *ptr;
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
@@ -1246,8 +1246,8 @@ Interface_Scan_Init (void)
        should read from.  This should be done in a better way by
        actually looking for the field names we want.  But thats too
        much work for today.  -- Wes */
-    fgets(line, 256, devin);
-    fgets(line, 256, devin);
+    fgets(line, sizeof(line), devin);
+    fgets(line, sizeof(line), devin);
     if (strstr(line, "compressed")) {
       scan_line_to_use = scan_line_2_2;
       DEBUGMSGTL(("mibII/interfaces", "using linux 2.2 kernel /proc/net/dev\n"));
@@ -1257,7 +1257,7 @@ Interface_Scan_Init (void)
     }
     
       
-    while (fgets (line, 256, devin))
+    while (fgets (line, sizeof(line), devin))
       {
 	struct ifnet *nnew;
 
@@ -1497,7 +1497,7 @@ int Interface_Scan_Next(short *Index,
 }
 
 
-#endif sunV3
+#endif /* sunV3 */
 
 static int Interface_Scan_By_Index(int Index,
 				   char *Name,
