@@ -1,5 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <stdlib.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -178,7 +179,6 @@ instance_counter32_handler(
     request_info              *requests) {
 
     u_long *it = (u_long *) handler->myvoid;
-    u_long *it_save;
     
     DEBUGMSGTL(("instance_ulong_handler", "Got request:  %d\n", reqinfo->mode));
 
