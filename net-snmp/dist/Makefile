@@ -83,7 +83,12 @@ $(GZIP_TAR):
 # stripping of binaries, but still retain the compression of
 # manual pages.
 #
-PERLOPTS=--with perl_modules=$(WITH_PERL) --with embedded_perl=$(EMBED_PERL)
+ifeq ($(WITH_PERL),1)
+PERLOPTS = --with perl_modules
+endif
+ifeq ($(EMBED_PERL),1)
+PERLOPTS += --with embedded_perl
+endif
 
 RPM_OPTS := \
     --define='_topdir $(PWD)/rpm' \
