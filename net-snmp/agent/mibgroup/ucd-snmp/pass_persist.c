@@ -556,12 +556,12 @@ open_persist_pipe(int iindex, char *command)
      */
     if (persist_pipes[iindex].pid == -1) {
         int             fdIn, fdOut, pid;
-        get_exec_pipes(command, &fdIn, &fdOut, &pid);
 
         /*
          * Did we fail? 
          */
-        if (pid == -1) {
+        if ((0 == get_exec_pipes(command, &fdIn, &fdOut, &pid)) ||
+            (pid == -1)) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "open_persist_pipe: pid == -1\n"));
             recurse = 0;
