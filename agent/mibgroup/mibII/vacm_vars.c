@@ -614,7 +614,11 @@ int vacm_in_view (struct snmp_pdu *pdu,
     if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN)
         return 6;
     /* NULL termination of the pdu field is ugly here.  Do in PDU parsing? */
-    strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
+    if (pdu->contextName)
+        strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
+    else
+        contextNameIndex[0] = '\0';
+    
     contextNameIndex[pdu->contextNameLen] = '\0';
     if (!find_first_subtree(contextNameIndex)) {
         /* rfc2575 section 3.2, step 1
