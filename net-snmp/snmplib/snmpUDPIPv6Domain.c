@@ -141,8 +141,8 @@ int		snmp_udp6_send	(snmp_transport *t, void *buf, int size,
 int		snmp_udp6_close	(snmp_transport *t)
 {
   int rc = 0;
-  DEBUGMSGTL(("snmp_udp6_close", "close fd %d\n", t->sock));
-  if (t->sock >= 0) {
+  if (t != NULL && t->sock >= 0) {
+    DEBUGMSGTL(("snmp_udp6_close", "close fd %d\n", t->sock));
 #ifndef HAVE_CLOSESOCKET
     rc = close(t->sock);
 #else
@@ -232,6 +232,15 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
       snmp_transport_free(t);
       return NULL;
     }
+    t->local = malloc(18);
+    if (t->local == NULL) {
+      snmp_udp6_close(t);
+      snmp_transport_free(t);
+    }
+    memcpy(t->local, addr.sin6_addr.s6_addr, 16);
+    t->local[16] = (addr->sin6_port & 0xff00) >> 8;
+    t->local[17] = (addr->sin6_port & 0x00ff) >> 0;
+    t->local_length = 18;
     t->data = NULL;
     t->data_length = 0;
   } else {
@@ -245,6 +254,16 @@ snmp_transport		*snmp_udp6_transport	(struct sockaddr_in6 *addr,
     }
     memcpy(t->data, addr, sizeof(struct sockaddr_in6));
     t->data_length = sizeof(struct sockaddr_in6);
+    t->remote = malloc(18);
+    if (t->remote == NULL) {
+      snmp_udp6_close(t);
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->remote, addr.sin6_addr.s6_addr, 16);
+    t->remote[16] = (addr->sin6_port & 0xff00) >> 8;
+    t->remote[17] = (addr->sin6_port & 0x00ff) >> 0;
+    t->remote_length = 18;
   }
 
   /*  16-bit length field, 8 byte UDP header, 40 byte IPv6 header.  */
