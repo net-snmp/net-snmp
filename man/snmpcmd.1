@@ -278,6 +278,11 @@ Output only the variable value, not the OID:
 snmpget -c public -Ov localhost ip.ipForwarding.0
 .br
 forwarding(1)
+.IP -Ot
+Output timeticks values as raw numbers.
+.br
+$ snmpget -Ot -c public localhost system.sysUpTime.0
+system.sysUpTime.0 = 206996857
 .PP
 Note that most of these options can be turned on or off by default by
 tuning the snmp.conf file.  See the snmp.conf(5) manual page for
