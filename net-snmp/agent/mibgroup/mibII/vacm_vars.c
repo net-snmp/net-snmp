@@ -34,6 +34,9 @@
 #include "agent_read_config.h"
 #include "../../../snmplib/system.h"
 #include "vacm.h"
+#include "callback.h"
+#include "agent_registry.h"
+#include "agent_callbacks.h"
 #include "vacm_vars.h"
 #include "../../mib_module_config.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE
@@ -49,8 +52,6 @@
 #endif
 #include "sysORTable.h"
 #endif
-
-#include "vacm.h"
 
 void
 init_vacm_vars (void) 
@@ -115,6 +116,10 @@ init_vacm_vars (void)
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
 #endif
+
+  /* register ourselves to handle access control */
+  snmp_register_callback(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_ACM_CHECK,
+                         vacm_in_view_callback, NULL);
 }
 
 static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
@@ -422,6 +427,21 @@ void vacm_parse_view (char *token,
 void vacm_free_view (void)
 {
     vacm_destroyAllViewEntries();
+}
+
+int
+vacm_in_view_callback(int majorID, int minorID, void *serverarg,
+                      void *clientarg) {
+  struct view_parameters *view_parms = (struct view_parameters *) serverarg;
+  int retval;
+  
+  if (view_parms == NULL)
+    return 0;
+  retval = vacm_in_view(view_parms->pdu, view_parms->name,
+                        view_parms->namelen);
+  if (retval != 1)
+    view_parms->errorcode = retval;
+  return retval;
 }
 
 

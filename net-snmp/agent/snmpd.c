@@ -106,9 +106,6 @@ typedef long    fd_mask;
 #include "snmp_alarm.h"
 #include "default_store.h"
 #include "mib_module_config.h"
-#ifdef USING_SNMPV3_USMUSER_MODULE 
-#include "mibgroup/snmpv3/usmUser.h"
-#endif
 
 #include "snmp_client.h"
 #include "snmpd.h"

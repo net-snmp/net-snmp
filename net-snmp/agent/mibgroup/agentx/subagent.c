@@ -29,6 +29,8 @@
 #include "default_store.h"
 #include "ds_agent.h"
 #include "callback.h"
+#include "agent_registry.h"
+#include "agent_callbacks.h"
 #include "snmp_debug.h"
 
 
@@ -196,11 +198,22 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 }
 
 
-
-
-
-
 struct snmp_session *agentx_session;
+
+int
+agentx_registration_callback(int majorID, int minorID, void *serverarg,
+                         void *clientarg) {
+  struct register_parameters *reg_parms =
+    (struct register_parameters *) serverarg;
+  struct snmp_session *agentx_ss =
+    (struct snmp_session *) clientarg;
+
+  if (minorID == SNMPD_CALLBACK_REGISTER_OID)
+    agentx_register(agentx_ss, reg_parms->name, reg_parms->namelen);
+  else
+    agentx_unregister(agentx_ss, reg_parms->name, reg_parms->namelen);
+}
+
 
 static int
 subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
@@ -255,6 +268,12 @@ init_subagent( void )
     }
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
                            subagent_shutdown, agentx_session);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REGISTER_OID,
+                           agentx_registration_callback, agentx_session);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREGISTER_OID,
+                           agentx_registration_callback, agentx_session);
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
 
