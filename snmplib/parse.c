@@ -1765,6 +1765,7 @@ read_mib(filename)
     if (fp == NULL)
         return NULL;
     strcpy(File,filename);
+    DEBUGP1("Parsing %s...",filename);
     nodes = parse(fp, nodes);
     if (!nodes){
         fprintf(stderr, "Mib table is bad.  Exiting\n");
@@ -1790,6 +1791,7 @@ read_mib(filename)
                         perror(tmpstr);
                         exit(1);
                     }
+                    DEBUGP1("Parsing %s...",tmpstr);
                     Line = 1;
                     strcpy(File,tmpstr);
                     nodes = parse(fp, nodes);
