@@ -640,7 +640,7 @@ Init_HR_SWRun (void)
 			nproc, 0 );
 
 #elif defined(solaris2)
-    if (!getKstatInt("system_misc", "nproc", &nproc)) {
+    if (!getKstatInt("unix", "system_misc", "nproc", &nproc)) {
     	current_proc_entry = nproc+1;
 	return;
     }
