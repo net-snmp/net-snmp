@@ -10,7 +10,7 @@
 ##
     /*
      * TODO:
-     * get actual address type from ${context}_ctx.
+     * get actual address type from ${context}_rowreq_ctx->data.
      */
     int  addressType = -1;
 

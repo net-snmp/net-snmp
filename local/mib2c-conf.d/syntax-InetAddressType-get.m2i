@@ -10,7 +10,7 @@
 ##
 @include generic-get-decl.m2i@
 @include generic-ctx-get.m2i@
-   /* the ${context}_ctx pointer should be pointer to the data you 
+   /* the ${context}_rowreq_ctx->data pointer should be pointer to the data you
       supplied during the data lookup, so you should know how to
       determine the InetAddressType from this pointer. */
 

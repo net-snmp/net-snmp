@@ -17,7 +17,7 @@
  *
  * @param ${context}_reg
  *        Pointer to the user registration data
- * @param ${context}_ctx
+ * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
  * @return MFD_SUCCESS   : success
  *         MFD_BAD_VALUE : index not valid
@@ -25,14 +25,14 @@
  */
 int
 ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
-                           ${context}_ctx *ctx )
+                           ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc;
 
     DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
+    netsnmp_assert( NULL != rowreq_ctx );
 
     /*
      * TODO:
@@ -89,21 +89,21 @@ $example_end
  * memory for a string), you should do that setup in the node's undo_setup
  * function, so it won't be done unless it is necessary.
  *
- * @param ctx
- *        Pointer to the table context (${context}_ctx)
+ * @param rowreq_ctx
+ *        Pointer to the table context (${context}_rowreq_ctx)
  *
  * @return MFD_SUCCESS : success
  *         MFD_ERROR   : error. set will fail.
  */
 int
-${context}_undo_setup( ${context}_ctx *ctx )
+${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc;
 
     DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
+    netsnmp_assert( NULL != rowreq_ctx );
 
 
     return MFD_SUCCESS;
@@ -119,21 +119,21 @@ ${context}_undo_setup( ${context}_ctx *ctx )
  * At this point, you should have done everything you can to ensure that
  * this commit will not fail.
  *
- * @param ${context}_ctx
+ * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
  *
  * @return MFD_SUCCESS : success
  *         MFD_ERROR   : error
  */
 int
-${context}_commit( ${context}_ctx *ctx )
+${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc;
 
     DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
+    netsnmp_assert( NULL != rowreq_ctx );
 
     /*
      * TODO:
@@ -155,21 +155,21 @@ ${context}_commit( ${context}_ctx *ctx )
  *
  * THERE IS NO ATTEMPT AT RECOVERY FOR ERRORS FROM THIS STATE!
  *
- * @param ${context}_ctx
+ * @param ${context}_rowreq_ctx
  *        Pointer to the users context.
  *
  * @return MFD_SUCCESS : success
  *         MFD_ERROR   : other error
  */
 int
-${context}_irreversible_commit( ${context}_ctx *ctx )
+${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx)
 {
     int rc;
 
     DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
+    netsnmp_assert( NULL != rowreq_ctx );
 
     /*
      * TODO:

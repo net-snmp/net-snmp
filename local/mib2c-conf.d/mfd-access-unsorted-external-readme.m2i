@@ -167,7 +167,7 @@
     the data. The loop context that is initialized here will be passed to
     ${table}_loop_get_first and ${table}_loop_get_next.
   
-    Set the loop context variable ref->itr_ctx so that the iteration
+    Set the loop context variable ref->loop_ctx so that the iteration
     functions (get_first and get_next) can locate the apropriate data
     context.
 ##
@@ -180,20 +180,20 @@
 
       Linked list
       -----------
-          ref->itr_ctx = my_table_head_ptr;
+          ref->loop_ctx = my_table_head_ptr;
 
       Array
       -----
           /* instead of actually allocating memory, just use the pointer */
           /* as an integer */
-          (integer)(ref->itr_ctx) = 0;
+          (integer)(ref->loop_ctx) = 0;
 
       File
       ----
-          ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
+          ref->loop_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
           /* error checking here */
-          ref->itr_ctx->file_name = (char*) reg->mfd_user_ctx;
-          ref->itr_ctx->f = fopen( ref->itr_ctx->file_name, "r+" );
+          ref->loop_ctx->file_name = (char*) reg->mfd_user_ctx;
+          ref->loop_ctx->f = fopen( ref->loop_ctx->file_name, "r+" );
 
   @end@
 
@@ -227,26 +227,26 @@
     (In fact, if your data is already ordered in the same order as the
     SNMP indexes, you shouldn't be using the unsorted-access code).
   
-    This function should update the table index (ctx_ref->ctx->tbl_idx)
-    values for the raw data (ctx_ref->ctx->data).
+    This function should update the table index (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+    values for the raw data (rowreq_ctx_ref->rowreq_ctx->data).
 ##
 ## end sync
 ##
 
       Linked list
       -----------
-          ctx_ref->ctx->data = loop_ref->itr_ctx;
+          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx;
 
       Array
       -----
           /* assuming registration has array of pointers */
-          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itr_ctx)];
+          rowreq_ctx_ref->rowreq_ctx->data = reg->mfd_user_ctx[(integer)(ref->loop_ctx)];
 
       File
       ----
-          fgets(loop_ref->itr_ctx->line, sizeof(loop_ref->itr_ctx->line),
-                loop_ref->itr_ctx->f);
-          ctx_ref->ctx->data = loop_ref->itr_ctx->line;
+          fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+                loop_ctx_ref->loop_ctx->f);
+          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx->line;
 
     @end@
 
@@ -274,20 +274,20 @@
 
       Linked list
       -----------
-          loop_ref->itr_ctx = loop_ref->itr_ctx->next;
-          ctx_ref->ctx->data = loop_ref->itr_ctx;
+          loop_ctx_ref->loop_ctx = loop_ctx_ref->loop_ctx->next;
+          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx;
 
       Array
       -----
-          ++((integer)(ref->itr_ctx));
+          ++((integer)(ref->loop_ctx));
           /* assuming registration has array of pointers */
-          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itr_ctx)];
+          rowreq_ctx_ref->rowreq_ctx->data = reg->mfd_user_ctx[(integer)(ref->loop_ctx)];
 
       File
       ----
-          fgets(loop_ref->itr_ctx->line, sizeof(loop_ref->itr_ctx->line),
-                loop_ref->itr_ctx->f);
-          ctx_ref->ctx->data = loop_ref->itr_ctx->line;
+          fgets(loop_ctx_ref->loop_ctx->line, sizeof(loop_ctx_ref->loop_ctx->line),
+                loop_ctx_ref->loop_ctx->f);
+          rowreq_ctx_ref->rowreq_ctx->data = loop_ctx_ref->loop_ctx->line;
 
     @end@
 
@@ -299,8 +299,8 @@
     WHERE: ${table}_data_access.c
 
     @if $mfd_readme_verbose == 1@
-    This function should update the table index (ctx_ref->ctx->tbl_idx)
-    values for the given raw data (ctx_ref->ctx->data).
+    This function should update the table index (rowreq_ctx_ref->rowreq_ctx->tbl_idx)
+    values for the given raw data (rowreq_ctx_ref->rowreq_ctx->data).
 
     @end@
 
@@ -392,7 +392,7 @@
 
       File
       ----
-          free(ref->itr_ctx);
+          free(ref->loop_ctx);
 
     @end@
 
