@@ -127,7 +127,7 @@ dnl AC_CHECK_LIB(tk, main)
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
-AC_CHECK_LIB(kvm, kvm_physaddr)
+AC_CHECK_LIB(kvm, kvm_read)
 dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 
@@ -140,6 +140,8 @@ dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h)
 dnl Linux (lame) doesn't have these
 AC_CHECK_HEADERS(sys/conf.h netinet/in_var.h netinet/in_pcb.h netinet/if_ether.h netinet/ip_var.h netinet/tcp_timer.h netinet/tcp_var.h netinet/tcp_fsm.h netinet/udp_var.h netinet/icmp_var.h sys/protosw.h)
+dnl NetBSD required headers
+AC_CHECK_HEADERS(arpa/inet.h kvm.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
@@ -175,6 +177,7 @@ AC_CHECK_FUNCS(setmntent gethostname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr memcpy memmove index bcopy signal sigset sigblock sighold)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
+AC_CHECK_FUNCS(kvm_openfiles)
 
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
@@ -263,6 +266,16 @@ if test "x$ac_cv_struct_rtentry_rt_next" = "xyes"; then
 fi
 
 fi
+
+dnl Check ifnet entries using macro defined in aclocal.m4.
+AC_CHECK_IFNET_FOR(if_baudrate,IF_BAUDRATE)
+AC_CHECK_IFNET_FOR(if_type,IF_TYPE)
+AC_CHECK_IFNET_FOR(if_imcasts,IF_IMCASTS)
+AC_CHECK_IFNET_FOR(if_iqdrops,IF_IQDROPS)
+AC_CHECK_IFNET_FOR(if_noproto,IF_NOPROTO)
+AC_CHECK_IFNET_FOR(if_omcasts,IF_OMCASTS)
+AC_CHECK_IFNET_FOR(if_xname,IF_XNAME,no)
+AC_CHECK_IFNET_FOR(if_lastchange.tv_sec,IF_LASTCHANGE_TV_SEC)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
