@@ -23,8 +23,6 @@
 
 #include "context_vars.h"
 
-#include "mibgroup/snmpv2_vars.h"
-
 static oid currentTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 1};
 static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
 static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
