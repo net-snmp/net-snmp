@@ -34,6 +34,9 @@
 #include <net/if_var.h>
 #endif
 #if HAVE_NETINET_IN_VAR_H
+#ifdef HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #include <netinet/in_var.h>
 #endif
 
