@@ -4894,7 +4894,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case '3':
-        if (check && tp->type != TYPE_UINTEGER32) {
+        if (check && tp->type != TYPE_UINTEGER) {
 	    value = "Type of object is not UInteger32";
 	    result = SNMPERR_VALUE;
 	    goto set_error;

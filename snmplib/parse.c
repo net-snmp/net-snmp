@@ -903,7 +903,7 @@ build_translation_table()
                 translation_table[count] = TYPE_INTEGER32;
                 break;
             case UINTEGER32:
-                translation_table[count] = TYPE_UINTEGER32;
+                translation_table[count] = TYPE_UINTEGER;
                 break;
             case UNSIGNED32:
                 translation_table[count] = TYPE_UNSIGNED32;
@@ -4539,8 +4539,8 @@ static void print_mib_leaves(FILE *f, struct tree *tp, int width)
     case TYPE_BITSTRING:	typ = "BitString"; break;
     case TYPE_NSAPADDRESS:	typ = "NsapAddr "; break;
     case TYPE_UNSIGNED32:	typ = "Unsigned "; break;
-    case TYPE_UINTEGER32:	typ = "UInteger "; break;
-    case TYPE_INTEGER32:	typ = "Integer "; break;
+    case TYPE_UINTEGER:		typ = "UInteger "; break;
+    case TYPE_INTEGER32:	typ = "Integer32"; break;
     default:			typ = "         "; break;
     }
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
