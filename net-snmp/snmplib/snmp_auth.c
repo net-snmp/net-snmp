@@ -184,11 +184,11 @@ int		    	pass;
     }
     if (type == (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR)){
 	/* noAuth */	    
-	pi->version = SNMP_VERSION_2;
+	pi->version = SNMP_VERSION_2_HISTORIC;
 	
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)){
 	/* AuthInformation */
-	pi->version = SNMP_VERSION_2;
+	pi->version = SNMP_VERSION_2_HISTORIC;
 	ismd5 = 1;
 
 	digestStart = data;
@@ -264,7 +264,7 @@ int		    	pass;
      * first time called for this packet.
      */
     if (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT
-	&& pi->version != SNMP_VERSION_2)
+	&& pi->version != SNMP_VERSION_2_HISTORIC)
 	return NULL;
     if ((pass & FIRST_PASS) && (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT)){
 	/* RFC1446, Pg 18, 3.2.1 */
@@ -278,7 +278,7 @@ int		    	pass;
 	dstp->partyAuthClock = now.tv_sec - dstp->tv.tv_sec;
 	/* RFC1446, Pg 18, 3.2.3 */
 	if (authSrcTimeStamp + srcp->partyAuthLifetime < srcp->partyAuthClock){
-	    ERROR("Late message");
+          ERROR("Late message");
 	    /* snmpStatsNotInLifetimes */
 	    return NULL;
 	}

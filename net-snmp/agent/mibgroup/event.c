@@ -1022,7 +1022,7 @@ eventNotifyUpdateSession(np)
     np->magic = state;
     bzero((char *)&session, sizeof(struct snmp_session));
     session.peername = SNMP_DEFAULT_PEERNAME;
-    session.version = SNMP_VERSION_2;
+    session.version = SNMP_VERSION_2_HISTORIC;
     session.srcParty = np->srcParty;
     session.srcPartyLen = np->srcPartyLen;
     session.dstParty = np->dstParty;

@@ -25,6 +25,8 @@ CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
 LDFLAGS=@LDFLAGS@
 
+PARSEOBJS=snmp_parse_args.o
+
 CC = @CC@ $(CPPFLAGS)
 
 all: $(TARG) subdirs
@@ -34,23 +36,23 @@ subdirs:
         ( cd $$i ; $(MAKE) ) ; \
 	done
 
-snmpwalk:    snmpwalk.o $(USELIBS)
-	${CC} -o $@ snmpwalk.o ${LDFLAGS} ${LIBS} 
+snmpwalk:    snmpwalk.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpwalk.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-snmpbulkwalk:    snmpbulkwalk.o $(USELIBS)
-	${CC} -o $@ snmpbulkwalk.o ${LDFLAGS} ${LIBS} 
+snmpbulkwalk:    snmpbulkwalk.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpbulkwalk.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 snmptranslate:    snmptranslate.o $(USELIBS)
 	${CC} -o $@ snmptranslate.o ${LDFLAGS} ${LIBS} 
 
-snmpstatus:    snmpstatus.o $(USELIBS)
-	${CC} -o $@ snmpstatus.o ${LDFLAGS} ${LIBS} 
+snmpstatus:    snmpstatus.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpstatus.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-snmpget:    snmpget.o $(USELIBS)
-	${CC} -o $@ snmpget.o ${LDFLAGS} ${LIBS} 
+snmpget:    snmpget.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpget.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-snmptest:    snmptest.o $(USELIBS)
-	${CC} -o $@ snmptest.o ${LDFLAGS} ${LIBS} 
+snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmptest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd:    snmptrapd.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
@@ -58,11 +60,11 @@ snmptrapd:    snmptrapd.o $(USELIBS)
 snmptrap:    snmptrap.o $(TRAPSPECIAL) $(USELIBS)
 	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) ${LDFLAGS} ${LIBS} 
 
-snmpset:    snmpset.o $(USELIBS)
-	${CC} -o $@ snmpset.o ${LDFLAGS} ${LIBS} 
+snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpset.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
-snmpgetnext:    snmpgetnext.o $(USELIBS)
-	${CC} -o $@ snmpgetnext.o ${LDFLAGS} ${LIBS} 
+snmpgetnext:    snmpgetnext.o $(PARSEOBJS) $(USELIBS)
+	${CC} -o $@ snmpgetnext.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 clean:
 	rm -f *.o ${TARG}
