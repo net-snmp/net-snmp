@@ -500,6 +500,7 @@ main(argc, argv)
       dup(1);
       close(0);
     }
+    setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     if (!dont_fork && fork() != 0)   /* detach from shell */
       exit(0);
     init_snmp();

@@ -15,7 +15,8 @@ snmplibdir = $(prefix)/lib/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap snmpstatus
+SUBDIRS=   snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	@LIBS@ $(USELIBS)
 
@@ -25,7 +26,12 @@ LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)
 
-all: $(TARG)
+all: $(TARG) subdirs
+
+subdirs:
+	for i in $(SUBDIRS) ; do \
+        ( cd $$i ; $(MAKE) ) \
+	done
 
 snmpwalk:    snmpwalk.o $(USELIBS)
 	${CC} -o $@ snmpwalk.o ${LDFLAGS} ${LIBS} 
@@ -35,6 +41,9 @@ snmpbulkwalk:    snmpbulkwalk.o $(USELIBS)
 
 snmptranslate:    snmptranslate.o $(USELIBS)
 	${CC} -o $@ snmptranslate.o ${LDFLAGS} ${LIBS} 
+
+snmpstatus:    snmpstatus.o $(USELIBS)
+	${CC} -o $@ snmpstatus.o ${LDFLAGS} ${LIBS} 
 
 snmpget:    snmpget.o $(USELIBS)
 	${CC} -o $@ snmpget.o ${LDFLAGS} ${LIBS} 
@@ -57,7 +66,10 @@ snmpgetnext:    snmpgetnext.o $(USELIBS)
 clean:
 	rm -f *.o ${TARG}
 
-install: installdirs $(TARG)
+install: installdirs subdirs $(TARG)
+	for i in $(SUBDIRS) ; do \
+        ( cd $$i ; $(MAKE) install ) \
+	done
 	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
 
 installdirs:

@@ -16,21 +16,38 @@
 #
 #	@(#)Makefile	5.10 (Berkeley) 9/20/88
 #
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+snmplibdir = $(prefix)/lib/snmp
+
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I../.. -I../../snmplib
 LDFLAGS=@LDFLAGS@
 
+INSTALL = @INSTALL@
+
 CC = @CC@ $(CPPFLAGS)
 
 LIBS=	-lsnmp @LIBS@
-LDFLAGS=@LDFLAGS@ -L../../lib
+LDFLAGS=@LDFLAGS@ -L../../snmplib
+USELIBS=../../snmplib/libsnmp.a
 SRCS=	inet.c if.c main.c route.c 
 OBJS=	inet.o if.o main.o route.o
+TARG= snmpnetstat
 
-all: snmpnetstat
+all: $(TARG)
 
-snmpnetstat: ${OBJS}
+snmpnetstat: ${OBJS} ${USELIBS}
 	${CC} -o $@ ${CFLAGS} ${OBJS} ${LDFLAGS} ${LIBS}
+
+distclean: clean
 
 clean:
 	rm -f ${OBJS} core snmpnetstat
@@ -38,14 +55,39 @@ clean:
 cleandir: clean
 	rm -f ${MAN} tags .depend
 
-depend: ${SRCS}
-	mkdep ${CFLAGS} ${SRCS}
-
 lint: ${SRCS}
 	lint ${CFLAGS} ${SRCS}
 
 tags: ${SRCS}
 	ctags ${SRCS}
 
-install:
-	cp snmpnetstat ../../bin
+installdirs:
+	@$(SHELL) $(srcdir)/../../mkinstalldirs $(snmplibdir) $(bindir)
+
+install: installdirs $(TARG)
+	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
+
+depend: 
+	makedepend $(CPPFLAGS) *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+if.o: ../../config.h ../../agent/extensible/struct.h 
+if.o:  main.h ../../snmplib/asn1.h
+if.o: ../../snmplib/snmp.h ../../snmplib/snmp_impl.h ../../snmplib/snmp_api.h
+if.o: ../../snmplib/snmp_client.h ../../snmplib/mib.h
+inet.o: ../../config.h ../../agent/extensible/struct.h 
+inet.o:  main.h ../../snmplib/asn1.h ../../snmplib/snmp.h
+inet.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_api.h
+inet.o: ../../snmplib/snmp_client.h ../../snmplib/mib.h
+main.o: ../../config.h ../../agent/extensible/struct.h
+main.o:  ../../snmplib/asn1.h
+main.o: ../../snmplib/snmp.h ../../snmplib/snmp_api.h
+main.o: ../../snmplib/snmp_impl.h ../../snmplib/party.h
+main.o: ../../snmplib/context.h ../../snmplib/view.h ../../snmplib/acl.h
+route.o: ../../config.h ../../agent/extensible/struct.h 
+route.o:   main.h
+route.o: ../../snmplib/asn1.h ../../snmplib/snmp.h ../../snmplib/snmp_impl.h
+route.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
+route.o: ../../snmplib/mib.h
