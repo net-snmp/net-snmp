@@ -16,8 +16,8 @@ CC=gcc
 
 @if "$mfd_netsnmp_dir" ne ""@
 
-# Assuming we're linking against the Net-SNMP source tree and not an
-# installed package.
+# Assuming we're linking against a Net-SNMP build tree (which may or
+# may not be the same as the source tree) and not an installed package.
 
 # Note: to do this we REQUIRE gnu-make.
 
@@ -79,7 +79,9 @@ clean:
 
 @if "$mfd_netsnmp_dir" ne ""@
 
-$(SRCS:.c=.deps): ${name}_Makefile
+${name}.deps ${name}_subagent.deps ${name}_interface.deps: ${name}_Makefile
+${name}_data_access.deps ${name}_data_get.deps:            ${name}_Makefile
+${name}_data_set.deps:                                     ${name}_Makefile
 
 %.deps : %.c
 	@echo "Generating makefile $@ ..."
@@ -94,6 +96,7 @@ include ${name}_data_access.deps
 include ${name}_data_get.deps
 include ${name}_data_set.deps
 @end@
+
 
 @end@
 ########################################################################
