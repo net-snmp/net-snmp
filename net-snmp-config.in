@@ -33,9 +33,10 @@ NSC_LDFLAGS="@LDFLAGS@"
 NSC_LIBDIR=-L@libdir@
 NSC_LIBS="@LIBS@"
 NSC_AGENTLIBS="@AGENTLIBS@"
-NSC_PREFIX=@prefix@
-NSC_EXEC_PREFIX=@exec_prefix@
+NSC_PREFIX=$prefix
+NSC_EXEC_PREFIX=$exec_prefix
 NSC_SRCDIR=@srcdir@
+NSC_INCDIR=${NSC_PREFIX}/include
 NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
 NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
 NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
@@ -49,26 +50,26 @@ if test "x$1" = "x"; then
   usage="yes"
 else
   case $1 in
-    --debug-tokens)
+    --debug-tokens|--deb*|--dbg*)
       echo "find $NSC_SRCDIR -name \"*.c\" -print | xargs grep DEBUGMSGT | grep \\\" | cut -f 2 -d\\\" | sort -u"
       if test "x$NSC_SRCDIR" != "xNET-SNMP-SOURCE-DIR" ; then
         /usr/bin/find $NSC_SRCDIR -name "*.c" -print | xargs grep DEBUGMSGT | grep \" | cut -f 2 -d\" | sort -u
       fi
       ;;
-    --indent-options)
-      echo "indent -orig -nbc -bap -nut -nfca `(cd NET-SNMP-INCLUDE-DIR; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
+    --indent-options|--in*)
+      echo "indent -orig -nbc -bap -nut -nfca `(cd $NSC_INCDIR/net-snmp; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
       ;;
-    --configure-options)
+    --configure-options|--con*)
       echo @CONFIGURE_OPTIONS@
       ;;
-    --snmpd-module-list)
+    --snmpd-module-list|--mod*)
       echo @MODULE_LIST@
       ;;
     #################################################### compile
     --base-cflags)
       echo @CFLAGS@ @CPPFLAGS@ -I@includedir@
       ;;
-    --cflags)
+    --cflags|--cf*)
       echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I@includedir@
       ;;
     --srcdir)
@@ -78,7 +79,7 @@ else
     --lib-dir)
       echo $NSC_LIBDIR
       ;;
-    --ldflags)
+    --ldflags|--ld*)
       echo $NSC_LDFLAGS
       ;;
     --build-lib-dirs)
@@ -139,13 +140,13 @@ else
       echo $NSC_LDFLAGS $NSC_AGENTLIBS
       ;;
     ####################################################
-    --version)
+    --version|--ver*)
       echo @VERSION@
       ;;
     --help)
       usage="yes"
       ;;
-    --prefix)
+    --prefix|--pre*)
       echo $NSC_PREFIX
       ;;
     --exec-prefix)
