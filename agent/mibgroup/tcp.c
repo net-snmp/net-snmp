@@ -93,9 +93,6 @@
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
 #endif
-#if HAVE_NETINET_TCPIP_H
-#include <netinet/tcpip.h>
-#endif
 #if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
@@ -141,7 +138,10 @@ void	init_tcp( )
 #ifdef TCPSTAT_SYMBOL
   auto_nlist( TCPSTAT_SYMBOL,0,0 );
 #endif
+#ifdef TCP_SYMBOL
   auto_nlist( TCP_SYMBOL,0,0 );
+#endif
+
 }
 
 #define MATCH_FAILED	1
