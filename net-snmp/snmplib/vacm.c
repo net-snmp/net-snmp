@@ -94,7 +94,7 @@ vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
             }
 	}
     }
-    DEBUGTL(("vacm:getView", ", %s", (vpret)?"found":"none"));
+    DEBUGMSGTL(("vacm:getView", ", %s", (vpret)?"found":"none"));
     return vpret;
 }
 
