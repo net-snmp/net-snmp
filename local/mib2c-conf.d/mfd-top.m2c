@@ -112,6 +112,7 @@ typedef struct ${context}_rowreq_ctx_s {
     ${context}_data            $mfd_tmp data;
 @   if $m2c_table_settable@
     ${context}_undo_data       $mfd_tmp undo;
+    unsigned int                set_flags;
 @   end@
 
     /** implementor's context pointer provided during registration */

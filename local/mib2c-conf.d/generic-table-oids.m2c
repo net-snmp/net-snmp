@@ -44,6 +44,24 @@
 #define $context.uc_MIN_COL		$minn
 #define $context.uc_MAX_COL		$maxn
 
+@   if $m2c_table_settable@
+    /* change flags for writable columns */
+    @eval $gto_flag_idx = 0@
+    @foreach $node column@
+        @if $node.settable == 1@
+#define FLAG_$node.uc       (0x1 << $gto_flag_idx)
+           @eval $gto_flag_idx = $gto_flag_idx + 1@
+        @end@
+    @end@ # column
+
+#define FLAG_MAX_$context.uc $gto_flag_idx
+
+    @if $gto_flag_idx > 31@
+    @   print ERROR: more then 32 settable columns not supported yet.@
+    @   exit@
+    @end@
+    
+@   end@ # settable
 @if $m2c_create_fewer_files != 1@
 @eval $m2c_save = "$name"@
 @eval $name = "${m2c_save}_oids"@

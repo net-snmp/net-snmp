@@ -945,6 +945,12 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
          ${context}_release_data(rowreq_ctx->undo);
 
 @end@
+
+    /*
+     * clear set flags
+     */
+    rowreq_ctx->set_flags = 0;
+
     return rc;
 }
 
@@ -983,6 +989,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
             break;
         }
 @         end@
+        rowreq_ctx->set_flags |= FLAG_$node.uc;
         rc = ${node}_set(rowreq_ctx, $m2c_node_var_val );
         break;
  @      end@ # settable
@@ -1011,6 +1018,7 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
 
     netsnmp_assert(NULL != rowreq_ctx);
     
+    rowreq_ctx->set_flags = 0;
     for(;requests; requests = requests->next) {
         /*
          * set column data
