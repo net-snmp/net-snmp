@@ -1361,10 +1361,11 @@ int read_objid(const char *input,
     else {
     /* get past leading '.', append '.' to Prefix. */
 	if (*Prefix == '.')
-	    strcpy(buf, Prefix+1);
-	else
+	    strcpy(buf, Prefix);
+	else if (*Prefix != 0 ) {
             strcpy(buf, Prefix);
-	strcat(buf, ".");
+	    strcat(buf, ".");
+	}
 	strcat(buf, input);
 	input = buf;
     }
