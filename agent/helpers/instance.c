@@ -432,7 +432,7 @@ netsnmp_instance_helper_handler(
             break;
             
         case MODE_GETNEXT:
-            if (cmp < 0) {
+            if (cmp < 0 || (cmp == 0 && requests->inclusive)) {
                 reqinfo->mode = MODE_GET;
                 snmp_set_var_objid(requests->requestvb, reginfo->rootoid,
                                    reginfo->rootoid_len);
