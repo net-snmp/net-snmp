@@ -31,6 +31,7 @@ sub InitMakeParams {
     } else {
 	$Params{'LIBS'}    = `net-snmp-config --libs`;
 	$Params{'CCFLAGS'} = `net-snmp-config --cflags`;
+	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
 	$prefix            = `net-snmp-config --prefix`;
 	chomp($prefix);
 	$sep = '/';
