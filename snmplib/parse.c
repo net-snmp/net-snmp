@@ -2176,6 +2176,13 @@ get_token(fp, token,maxtlen)
                 last = ch;
                 return get_token(fp, token,maxtlen);
             }
+            if ( token[0] == '-' ) {
+               for(cp = token+1; *cp; cp++)
+                  if (!isdigit(*cp))
+                      return LABEL;
+               return NUMBER;
+            } 
+
             for(cp = token; *cp; cp++)
                 if (!isdigit(*cp))
                     return LABEL;
