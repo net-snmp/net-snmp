@@ -1765,12 +1765,17 @@ handle_set(struct agent_snmp_session  *asp) {
             case MODE_SET_COMMIT:
                 if (asp->status != SNMP_ERR_NOERROR) {
                     asp->mode = FINISHED_FAILURE;
+                    asp->status = SNMP_ERR_COMMITFAILED;
                 } else {
                     asp->mode = FINISHED_SUCCESS;
 		}
                 break;
 
             case MODE_SET_UNDO:
+                if (asp->status != SNMP_ERR_NOERROR) {
+                    asp->status = SNMP_ERR_UNDOFAILED;
+                    asp->index = 0;
+                }
                 asp->mode = FINISHED_FAILURE;
                 break;
 
