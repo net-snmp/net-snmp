@@ -6,6 +6,7 @@
 #define _MIBGROUP_SYSORTABLE_H
 
 config_require(util_funcs)
+config_require(mibII/system_mib)
 
      struct sysORTable {
          char           *OR_descr;
