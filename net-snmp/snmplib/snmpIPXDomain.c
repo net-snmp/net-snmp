@@ -338,7 +338,7 @@ int			snmp_sockaddr_ipx	(struct sockaddr_ipx *addr,
 
 
 
-snmp_transport	*snmp_ipx_create		(const char *string, int local)
+snmp_transport	*snmp_ipx_create_tstring	(const char *string, int local)
 {
   struct sockaddr_ipx addr;
 
@@ -351,13 +351,32 @@ snmp_transport	*snmp_ipx_create		(const char *string, int local)
 
 
 
+snmp_transport	*snmp_ipx_create_ostring	(const u_char *o, size_t o_len,
+						 int local)
+{
+  struct sockaddr_ipx addr;
+
+  if (o_len == 12) {
+    addr.sipx_family = AF_IPX;
+    memcpy((u_char *)&(addr.sipx_network), &(o[00]), 4);
+    memcpy((u_char *)&(addr.sipx_node),    &(o[04]), 6);
+    memcpy((u_char *)&(addr.sipx_port),    &(o[10]), 2);
+    return snmp_ipx_transport(&addr, local);
+  }
+  return NULL;
+}
+
+
+
 void		snmp_ipx_ctor			(void)
 {
   ipxDomain.name        = snmpIPXDomain;
   ipxDomain.name_length = sizeof(snmpIPXDomain)/sizeof(oid);
-  ipxDomain.f_create	= snmp_ipx_create;
   ipxDomain.prefix	= calloc(2, sizeof(char *));
   ipxDomain.prefix[0] 	= "ipx";
+
+  ipxDomain.f_create_from_tstring = snmp_ipx_create_tstring;
+  ipxDomain.f_create_from_ostring = snmp_ipx_create_ostring;
 
   snmp_tdomain_register(&ipxDomain);
 }

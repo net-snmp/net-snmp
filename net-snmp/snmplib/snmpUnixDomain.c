@@ -331,7 +331,7 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
   return t;
 }
 
-snmp_transport	*snmp_unix_create		(const char *string, int local)
+snmp_transport	*snmp_unix_create_tstring	(const char *string, int local)
 {
   struct sockaddr_un addr;
 
@@ -348,13 +348,37 @@ snmp_transport	*snmp_unix_create		(const char *string, int local)
   }
 }
 
+
+
+snmp_transport	*snmp_unix_create_ostring	(const u_char *o, size_t o_len,
+						 int local)
+{
+  struct sockaddr_un addr;
+
+  if (o_len > 0 && o_len < (sizeof(addr.sun_path) - 1)) {
+    addr.sun_family = AF_UNIX;
+    memset(addr.sun_path, 0, sizeof(addr.sun_path));
+    strncpy(addr.sun_path, o, o_len);
+    return snmp_unix_transport(&addr, local);
+  } else {
+    if (o_len > 0) {
+      snmp_log(LOG_ERR, "Path too long for Unix domain transport\n");
+    }
+  }
+  return NULL;
+}
+
+
+
 void		snmp_unix_ctor			(void)
 {
   unixDomain.name        = ucdSnmpUnixDomain;
   unixDomain.name_length = sizeof(ucdSnmpUnixDomain)/sizeof(oid);
-  unixDomain.f_create    = snmp_unix_create;
   unixDomain.prefix      = calloc(2, sizeof(char *));
   unixDomain.prefix[0]   = "unix";
+
+  unixDomain.f_create_from_tstring = snmp_unix_create_tstring;
+  unixDomain.f_create_from_ostring = snmp_unix_create_ostring;
 
   snmp_tdomain_register(&unixDomain);
 }
