@@ -27,9 +27,21 @@
 #define $context.uc_OID              $context.commaoid
     @eval $minv = 0xffffffff@
     @eval $maxv = 0@
+    @eval $gto_flag_req = ""@
     @foreach $node column@
 #define COLUMN_$node.uc		$node.subid
         @if $node.accessible == 1@
+           @if ($node.settable == 1) || ($m2c_table_sparse == 1)@
+#define FLAG_$node.uc       (0x1 << (COLUMN_$node.uc - 1))
+
+           @end@
+           @if ($m2c_table_row_creation == 1) && ($node.settable == 1) && ("x$node.defval" eq "x")@
+              @if "x$gto_flag_req" eq "x"@
+                 @eval $gto_flag_req = "FLAG_$node.uc"@
+              @else@
+                 @eval $gto_flag_req = "$gto_flag_req | FLAG_$node.uc"@
+              @end@
+           @end@
           @if $node.subid < $minv@
              @eval $minv = $node.subid@
              @eval $minn = "COLUMN_$node.uc"@
@@ -43,30 +55,19 @@
 
 #define $context.uc_MIN_COL		$minn
 #define $context.uc_MAX_COL		$maxn
+##
+## column_set_flags and column_exist_flags are unsigned ints, to 32 is
+## the limit. Could try something with a 'long long' to see if that
+## can get us to 64, or do something like FD_SET, which would let us
+## be pretty unlimited.
+##
+    @if $maxn > 31@
+    @   print ERROR: more than 32 columns not supported yet.@
+    @   exit@
+    @end@
+    
 
-@   if $m2c_table_settable@
-    /*
-     * change flags for writable columns
-     */
-    @eval $gto_flag_idx = 0@
-    @eval $gto_flag_req = ""@
-    @foreach $node column@
-        @if $node.settable == 1@
-#define FLAG_$node.uc       (0x1 << $gto_flag_idx)
-           @eval $gto_flag_idx = $gto_flag_idx + 1@
-           @if ($m2c_table_row_creation == 1) && ("x$node.defval" eq "x")@
-              @if "x$gto_flag_req" eq "x"@
-                 @eval $gto_flag_req = "FLAG_$node.uc"@
-              @else@
-                 @eval $gto_flag_req = "$gto_flag_req | FLAG_$node.uc"@
-              @end@
-           @end@
-        @end@
-    @end@ # column
-
-#define FLAG_MAX_$context.uc $gto_flag_idx
-
-    @if $m2c_table_row_creation == 1@
+@   if $m2c_table_settable && $m2c_table_row_creation@
       @if "x$gto_flag_req" ne "x"@
     /*
      * TODO:405:r: Review $context.uc_REQUIRED_COLS macro.
@@ -76,12 +77,6 @@
 #define $context.uc_REQUIRED_COLS ($gto_flag_req)
     
       @end@
-    @end@
-    @if $gto_flag_idx > 31@
-    @   print ERROR: more then 32 settable columns not supported yet.@
-    @   exit@
-    @end@
-    
 @   end@ # settable
 @if $m2c_create_fewer_files != 1@
 @eval $m2c_save = "$name"@
