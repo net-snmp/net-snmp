@@ -160,7 +160,7 @@ var_hrsys(struct variable *vp,
 	    fgets( string, sizeof(string), fp);
 	    fclose(fp);
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    sprintf(string, "ask Dave");	/* XXX */
@@ -174,7 +174,7 @@ var_hrsys(struct variable *vp,
 #if USING_HOST_HR_SWRUN_MODULE
 	    long_return = count_processes();
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;
@@ -188,7 +188,7 @@ var_hrsys(struct variable *vp,
 	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
 #else
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 	    return NULL;
 #endif
 	    long_return = 0;

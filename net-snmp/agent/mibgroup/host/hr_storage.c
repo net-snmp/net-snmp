@@ -453,7 +453,7 @@ var_hrstore(struct variable *vp,
 #endif
 			break;
 		default:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 			return NULL;
 #endif
 			long_return = 1024;	/* As likely as any! */
@@ -499,7 +499,7 @@ var_hrstore(struct variable *vp,
 #endif
 #endif
 		default:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 			return NULL;
 #endif
 			long_return = 1024;
@@ -536,7 +536,7 @@ var_hrstore(struct variable *vp,
 #endif
 #endif
 		default:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 			return NULL;
 #endif
 			long_return = 1024;
@@ -549,7 +549,7 @@ var_hrstore(struct variable *vp,
 	    else switch ( store_idx ) {
 		case HRS_TYPE_MEM:
 		case HRS_TYPE_SWAP:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 			return NULL;
 #endif
 			long_return = 0;
@@ -560,7 +560,7 @@ var_hrstore(struct variable *vp,
 			break;
 #endif
 		default:
-#ifdef NO_DUMMY_VALUES
+#if NO_DUMMY_VALUES
 			return NULL;
 #endif
 			long_return = 0;
