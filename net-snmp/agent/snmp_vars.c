@@ -320,7 +320,7 @@ search_subtree_vars(struct subtree *tp,
 				(access==NULL) ? "(null)" : "something" ));
 #if MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
-		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0)) {
+		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0) {
 			DEBUGMSGTL(("snmp_vars", "evil_client: "));
 			DEBUGMSGOID(("snmp_vars", save, savelen));
 			DEBUGMSG(("snmp_vars"," =>"));
