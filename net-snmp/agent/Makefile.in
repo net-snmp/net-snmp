@@ -8,8 +8,7 @@ LOCAL_LIBS	= -L../snmplib
 LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
-			-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup	\
-			@CPPFLAGS@
+		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
 CC		= @CC@ $(CPPFLAGS)
 
