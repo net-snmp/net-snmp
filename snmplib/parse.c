@@ -4594,6 +4594,12 @@ add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
     }
 }
 
+/* For Win32 platforms, the directory does not maintain a last modification
+ * date that we can compare with the modification date of the .index file.
+ * Therefore there is no way to know whether any .index file is valid.
+ * This is the reason for the #if !(defined(WIN32) || defined(cygwin))
+ * in the add_mibdir function
+ */
 int
 add_mibdir(const char *dirname)
 {
