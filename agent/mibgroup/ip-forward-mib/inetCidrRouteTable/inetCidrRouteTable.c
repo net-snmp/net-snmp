@@ -146,7 +146,7 @@ inetCidrRouteTable_allocate_data(void)
      */
     /** this might not be right for netsnmp_route_entry */
     inetCidrRouteTable_data *rtn =
-        SNMP_MALLOC_TYPEDEF(netsnmp_route_entry);
+        netsnmp_access_route_entry_create();
 
     DEBUGTRACE;
 
@@ -171,7 +171,7 @@ inetCidrRouteTable_release_data(inetCidrRouteTable_data * data)
     /*
      * release memory for the context
      */
-    free(data);
+    netsnmp_access_route_entry_free(data);
 }
 
 
