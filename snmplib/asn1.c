@@ -961,12 +961,9 @@ asn_parse_objid(u_char *data,
         } else if (subidentifier < 80) {
             objid[0] = 1;
             objid[1] = subidentifier - 40;
-        } else if (subidentifier < 120) {
+        } else {
             objid[0] = 2;
             objid[1] = subidentifier - 80;
-        } else {
-	    objid[1] = (subidentifier % 40);
-	    objid[0] = ((subidentifier - objid[1]) / 40);
         }
     }
 
@@ -1024,6 +1021,9 @@ asn_build_objid(u_char *data,
         /* there are not, so make OID have two with value of zero */
         objid_val = 0;
 	objidlength = 2;
+    } else if ( op[0] > 2 ) {
+        ERROR_MSG("build objid: bad first subidentifier");
+        return NULL;
     } else if (objidlength == 1){
         /* encode the first value */
 	objid_val = (op[0] * 40);
@@ -1031,7 +1031,8 @@ asn_build_objid(u_char *data,
 	op++;
     } else {
         /* combine the first two values */
-	if ( op[1] > 40 ) {
+	if (( op[1] > 40 ) &&
+	    ( op[0] < 2 )) {
 	    ERROR_MSG("build objid: bad second subidentifier");
 	    return NULL;
 	}
@@ -1065,7 +1066,7 @@ asn_build_objid(u_char *data,
         i++;
         if (i >= (int)objidlength)
             break;
-        objid_val = *op++;
+        objid_val = *op++;	/* XXX - doesn't handle 2.X (X > 40) */
     } 
 
     /* store the ASN.1 tag and length */
@@ -2311,6 +2312,9 @@ asn_rbuild_objid (u_char *data,
         *data-- = 0;
         *data-- = 0;
         *datalength -= 2;
+    } else if ( op[0] > 2 ) {
+        ERROR_MSG("build objid: bad first subidentifier");
+        return NULL;
     } else if (objidlength == 1) {
         /* encode the first value */
         if ((*datalength)-- < 1) return NULL;
@@ -2330,12 +2334,21 @@ asn_rbuild_objid (u_char *data,
         }
 
         /* combine the first two values */
-	if ( op[1] > 40 ) {
+	if (( op[1] > 40 ) &&
+	    ( op[0] < 2 )) {
 	    ERROR_MSG("build objid: bad second subidentifier");
 	    return NULL;
 	}
+        tmpint = (op[0] * 40) + op[1];
         if ((*datalength)-- < 1) return NULL;
-	*data-- = (u_char)((op[0] * 40) + op[1]);
+        *data-- = tmpint & 0x7f;
+        tmpint >>= 7;
+
+        while (tmpint > 0) {
+            if ((*datalength)-- < 1) return NULL;
+            *data-- = ((tmpint & 0x7f) | 0x80);
+            tmpint >>= 7;
+        }
     }
     
     tmpint = initdatap-data;
