@@ -49,7 +49,9 @@
 
 /* nlist symbols */
 #define SUM_SYMBOL      "cnt"
+#ifndef openbsd2
 #define BUFSPACE_SYMBOL "bufspace"
+#endif
 
 /* Default swap warning limit (kb) */
 #define DEFAULTMINIMUMSWAP 16000
@@ -232,7 +234,9 @@ unsigned char *var_extensible_mem(struct variable *vp,
     size_t phys_mem_size = sizeof(phys_mem);
     int phys_mem_mib[] = { CTL_HW, HW_USERMEM };
 
+#ifdef BUFSPACE_SYMBOL
     long bufspace;
+#endif
  
     if (header_generic(vp,name,length,exact,var_len,write_method))
 	return(NULL);
@@ -248,8 +252,10 @@ unsigned char *var_extensible_mem(struct variable *vp,
     /* Physical memory */
     sysctl(phys_mem_mib, 2, &phys_mem, &phys_mem_size, NULL, 0);
 
+#ifdef BUFSPACE_SYMBOL
     /* Buffer space */
     auto_nlist(BUFSPACE_SYMBOL, (char *)&bufspace, sizeof (bufspace));
+#endif
 
     long_ret = 0;  /* set to 0 as default */
 
@@ -300,13 +306,13 @@ unsigned char *var_extensible_mem(struct variable *vp,
 			total.t_rmshr + 
 			total.t_armshr);
 	return((u_char *) (&long_ret));
+#ifdef BUFSPACE_SYMBOL
     case MEMBUFFER:
 	long_ret = bufspace >> 10;
 	return((u_char *) (&long_ret));
+#endif
+#ifndef openbsd2
     case MEMCACHED:
-#ifdef openbsd2
-	return NULL;
-#else
 	long_ret = ptok(mem.v_cache_count);
 	return((u_char *) (&long_ret));
 #endif
