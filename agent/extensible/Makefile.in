@@ -1,0 +1,6 @@
+CC = cc -g
+
+OBJS = misc.o read_config.o wes.o
+SRCS:=$(subst .o,.c,$(OBJS))
+
+all: $(OBJS)
