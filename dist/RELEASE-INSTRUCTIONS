@@ -240,8 +240,14 @@ RELEASING:
 
   8) Sign the packages:
 
+     Non wes:
      $ md5sum net-snmp-5.0.3.tar.gz > net-snmp-5.0.3.tar.gz.md5
-     $ gpg -a --detach-sign net-snmp-5.0.3.tar.gz
+
+     wes:
+     $ gpg -u net-snmp-admin -a --detach-sign net-snmp-5.0.3.tar.gz
+
+     (to get Wes to sign them, send him the binaries and the md5 sum.
+      Preferably call him as well (IE, Robert) to verify on the phone)
 
   9) It's worth doing a round of testing directly with the tarred
      sources just to be sure.  I often haven't had time at this point,
@@ -315,8 +321,9 @@ CREATING BINARY DISTRIBUTIONS
   6) upload and release, like you did for the source code but with a
      different package name for binaries (5.0.3 binaries).
 
-  7) RPMS:
+  7) RPMS [do this in main line even if its for a patch branch]:
      $ cd dist
+     $ cp ../net-snmp-5.0.8.tar.gz rpm/SOURCES
      $ make VERSION=5.0.8 RELEASE=1 WITH_PERL=1
      
      This should put multiple binary rpm files in:
