@@ -1,8 +1,10 @@
 #!/bin/sh
 
+VERSION=`echo $1 | sed 's/Ext-*//g;s/-/./g;'`
+
 if [ $2 = "add" ]; then
 #  cd agent/extensible/	
-  perl -p -i.bak -e 's/VersionInfo="(.*)"/VersionInfo="'$1'"/;' versioninfo.c
+  perl -p -i.bak -e 's/VersionInfo="(.*)"/VersionInfo="'$VERSION'"/;' versioninfo.c
   cvs commit -m "version tag of versioninfo.c" versioninfo.c
 fi
 
