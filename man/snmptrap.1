@@ -19,14 +19,16 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAP 1 "13 Aug 1999"
+.TH SNMPTRAP 1 "24 Mar 2000"
 .UC 4
 .SH NAME
-snmptrap - sends an SNMP trap to a manager
+snmptrap, snmpinform - sends an SNMP trap to a manager
 .SH SYNOPSIS
 snmptrap -v 1 [common arguments] enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
 .PP
 snmptrap -v [2c|3] [common arguments] uptime trap-oid [objectID type value]...
+.PP
+snmpinform -v [2c|3] [common arguments] uptime trap-oid [objectID type value]...
 .SH DESCRIPTION
 Snmptrap is an SNMP application that uses the TRAP Request to send
 information to a network manager.  One or more fully qualified
@@ -34,6 +36,12 @@ object identifiers can be given as arguments on the command line.  A type
 and a value must accompany each object
 identifier.  Each variable name is given in the format specified in
 .IR variables (5).
+.PP
+When invoked as
+.I snmpinform
+it sends an INFORM-PDU, expecting a response from the trap receiver,
+retransmitting if required.
+Otherwise it sends an TRAP-PDU or TRAP2-PDU.
 .PP
 If any of the required version 1 parameters, 
 .IR enterprise-oid ,
