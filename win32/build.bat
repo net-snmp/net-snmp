@@ -13,4 +13,5 @@ cd win32 > NUL: 2>&1
 perl build.pl
 
 set SNMPCONFPATH=saveXXSNMPCONFPATH
+set saveXXSNMPCONFPATH=
 
