@@ -13,6 +13,9 @@
      */
 #include <stdio.h>
 #include <sys/types.h>
+#if HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
