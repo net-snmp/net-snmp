@@ -18,6 +18,7 @@
 
 # SNMP
 my $havesnmp = eval {require SNMP;};
+my $havenetsnmpoid = eval {require NetSNMP::OID;};
 
 if (!$havesnmp) {
     print "
@@ -33,6 +34,9 @@ See the README file there for instructions.
 
 if ($havesnmp) {
     eval { import SNMP; }
+}
+if ($havenetsnmp) {
+    eval { import NetSNMP::OID; }
 }
 use FileHandle;
 
@@ -623,6 +627,11 @@ sub process {
 	    if ($#thekeys == -1) {
 	      skippart();
 	    } else {
+	      if ($havenetsnmpoid) {
+		  @thekeys = sort {
+				    new NetSNMP::OID($a) <=> 
+				      new NetSNMP::OID($b) } @thekeys;
+	      }
 	      foreach $scalar (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
@@ -644,6 +653,11 @@ sub process {
 	    if ($#thekeys == -1) {
 	      skippart();
 	    } else {
+	      if ($havenetsnmpoid) {
+		  @thekeys = sort {
+				    new NetSNMP::OID($a) <=> 
+				      new NetSNMP::OID($b) } @thekeys;
+	      }
 	      foreach $notify (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
@@ -682,6 +696,11 @@ sub process {
 	    if ($#thekeys == -1) {
 	      skippart();
 	    } else {
+	      if ($havenetsnmpoid) {
+		  @thekeys = sort {
+				    new NetSNMP::OID($a) <=> 
+				      new NetSNMP::OID($b) } @thekeys;
+	      }
 	      foreach $table (@thekeys) {
 		$fh->seek($startpos, 0); # go to top of section.
 		my $oldvar = $vars{$var};
