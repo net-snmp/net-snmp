@@ -4407,7 +4407,8 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'a':
-        if ((ltmp = inet_addr(value)) != (long)-1)
+        ltmp = inet_addr(value);
+        if ( (ltmp != (long)-1) || (0 == strcmp(value,"255.255.255.255")) )
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
 				  (u_char *) &ltmp, sizeof(long));
 	else goto fail;
