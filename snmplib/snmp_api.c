@@ -3142,13 +3142,26 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
 }
 
 /*
- * Sends the input pdu on the session after calling snmp_build to create
- * a serialized packet.  If necessary, set some of the pdu data from the
- * session defaults.  Add a request corresponding to this pdu to the list
- * of outstanding requests on this session, then send the pdu.
- * Returns the request id of the generated packet if applicable, otherwise 1.
- * On any error, 0 is returned.
- * The pdu is freed by snmp_send() unless a failure occured.
+ * These functions send PDUs using an active session:
+ * snmp_send             - traditional API, no callback
+ * snmp_async_send       - traditional API, with callback
+ * snmp_sess_send        - single session API, no callback
+ * snmp_sess_async_send  - single session API, with callback
+ *
+ * Call snmp_build to create a serialized packet (the pdu).
+ * If necessary, set some of the pdu data from the
+ * session defaults.
+ * If there is an expected response for this PDU,
+ * queue a corresponding request on the list
+ * of outstanding requests for this session,
+ * and store the callback vectors in the request.
+ *
+ * Send the pdu to the target identified by this session.
+ * Return on success:
+ *   The request id of the pdu is returned, and the pdu is freed.
+ * Return on failure:
+ *   Zero (0) is returned.
+ *   The caller must call snmp_free_pdu if 0 is returned.
  */
 int
 snmp_send(struct snmp_session *session,
@@ -3164,22 +3177,6 @@ snmp_sess_send(void *sessp,
   return snmp_sess_async_send(sessp, pdu, NULL, NULL);
 }
 
-/*
- * int snmp_async_send(session, pdu, callback, cb_data)
- *     struct snmp_session *session;
- *     struct snmp_pdu	*pdu;
- *     snmp_callback callback;
- *     void   *cb_data;
- *
- * Sends the input pdu on the session after calling snmp_build to create
- * a serialized packet.  If necessary, set some of the pdu data from the
- * session defaults.  Add a request corresponding to this pdu to the list
- * of outstanding requests on this session and store callback and data,
- * then send the pdu.
- * Returns the request id of the generated packet if applicable, otherwise 0.
- * On any error, 0 is returned.
- * The pdu is freed by snmp_send() unless a failure occurred.
- */
 int
 snmp_async_send(struct snmp_session *session,
 		struct snmp_pdu	*pdu,
@@ -3347,8 +3344,11 @@ _sess_async_send(void *sessp,
 	}
       snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
     }
-    else
-        snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU */
+    else {
+       if (reqid) {
+           snmp_free_pdu(pdu);  /* free v1 or v2 TRAP PDU iff no error */
+       }
+    }
 
     return reqid;
 }
