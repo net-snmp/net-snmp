@@ -314,6 +314,8 @@ sub process_vars {
       $it =~ s/\$(\w+)\.(settable)/(table_is_writable($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(creatable)/(table_has_create($SNMP::MIB{$vars{$1}}{label}))/eg;
       $it =~ s/\$(\w+)\.(rowstatus)/(table_has_rowstatus($SNMP::MIB{$vars{$1}}{label}))/eg;
+      $it =~ s/\$(\w+)\.(lastchange)/(table_has_lastchange($SNMP::MIB{$vars{$1}}{label}))/eg;
+      $it =~ s/\$(\w+)\.(storagetype)/(table_has_storagetype($SNMP::MIB{$vars{$1}}{label}))/eg;
     }
     $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
     $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg;
@@ -420,7 +422,9 @@ sub process_vars {
 #     See below for a full-blown export to perl.
 #   @perleval STUFF@
 #     evaluates STUFF directly in perl.  Note that all mib2c variables
-#     interpereted within .conf files are in $vars{NAME}.
+#     interpereted within .conf files are in $vars{NAME} and that
+#     a warning will be printed if STUFF does not return 0. (adding a
+#     'return 0;' at the end of STUFF is a workaround.
 #   @startperl@
 #   @endperl@
 #     treats everything between these tags as perl code, and evaluates it.
@@ -430,9 +434,20 @@ sub process_vars {
 #     end for the current foreach clause.
 #   @if expression@
 #     evaluates expression, and if expression is true processes
-#     contained part until appropriate @end@ is reached.  If an @else@
-#     clause is found, it will be evaluated instead if expression
-#     isn't true.
+#     contained part until appropriate @end@ is reached.  If the
+#     expression is false, the next @elsif expression@ expression
+#     (if it exists) will be evaluated, until an expression is
+#     true. If no such expression exists and an @else@
+#     clause is found, it will be evaluated.
+#   @ifconf file@
+#     If the specified file can be found in the conf file search path,
+#     and if found processes contained part until an appropriate @end@ is
+#     found. As with a regular @if expression@, @elsif expression@ and
+#     @else@ can be used.
+#   @ifdir dir@
+#     If the specified directory exists, process contained part until an
+#     appropriate @end@ is found. As with a regular @if expression@,
+#     @elsif expression@ and @else@ can be used.
 #   @define NAME@
 #   @enddefine@
 #     Memorizes "stuff" between the define and enddefine tags for
@@ -731,6 +746,8 @@ sub process {
           } elsif ($type eq conf) {
             my $file = find_conf(process_vars($arg),1); # missingok
             $ok = (-f $file);
+          } elsif ($type eq dir) {
+            $ok = (-d $arg);
           } else {
             m2c_die "unknown if modifier ($type)\n";
           }
@@ -1073,6 +1090,7 @@ sub find_conf {
   my ($configfile, $missingok) = (@_);
 
   foreach my $d (@search_dirs, @def_search_dirs) {
+#      print STDERR "using $d/$configfile" if (-f "$d/$configfile");
       return "$d/$configfile" if (-f "$d/$configfile");
   }
   return $configfile if (-f "$configfile");
@@ -1145,6 +1163,33 @@ sub table_has_rowstatus {
     my $result = 0;
     foreach $column (@{$tables{$table}{'column'}}) {
       if($SNMP::MIB{$column}{syntax} =~ /(RowStatus)/) {
+        $result = 1;
+        last;
+      }
+    }
+    return $result;
+}
+
+sub table_has_lastchange {
+    my $table = shift;
+    my $column;
+    my $result = 0;
+    foreach $column (@{$tables{$table}{'column'}}) {
+      if(($SNMP::MIB{$column}{syntax} =~ /(TimeStamp)/) &&
+         ($SNMP::MIB{$column}{label} =~ /(LastChange)/)) {
+        $result = 1;
+        last;
+      }
+    }
+    return $result;
+}
+
+sub table_has_storagetype {
+    my $table = shift;
+    my $column;
+    my $result = 0;
+    foreach $column (@{$tables{$table}{'column'}}) {
+      if($SNMP::MIB{$column}{syntax} =~ /(StorageType)/) {
         $result = 1;
         last;
       }
