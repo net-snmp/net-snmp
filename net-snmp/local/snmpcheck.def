@@ -40,6 +40,7 @@ $logwindowatstart = 0;
 $numloglevels = 5;
 $dontstart = 0;
 $raiseonnew = 1;
+
 #
 #  Mib Package:  Each mib has a mib number attached and can check/fix itself;
 #
