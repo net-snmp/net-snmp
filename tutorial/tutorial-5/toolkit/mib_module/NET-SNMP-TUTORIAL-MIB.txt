@@ -88,10 +88,11 @@ nstAgentPluginObject OBJECT-TYPE
 --       |
 --       +-nstMIBObjects(1)
 --       | |
---       | +-nstScalarSet(1)
+--       | +-nstAgentModules(1)
 --       |    |
---       |    +- -RW- String    nstSSSimpleString(1)
---       |    +- -R-  TimeTicks nstSSSecondsSinceChanged(2)
+--       |    +- -RW- Integer32 nstAgentModuleObject(1)
+--       |    +- -RW- Integer32 nstAgentSubagentObject(2)
+--       |    +- -RW- Integer32 nstAgentPluginObject(3)
 --       |
 --       +-nstMIBConformance(2)
 
