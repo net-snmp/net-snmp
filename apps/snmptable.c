@@ -219,6 +219,19 @@ void usage(void)
   exit(1);
 }
 
+void
+reverse_fields(void)
+{
+  struct column tmp;
+  int i;
+
+  for (i = 0; i < fields / 2; i++) {
+    memcpy(&tmp, &(column[i]), sizeof(struct column));
+    memcpy(&(column[i]), &(column[fields - 1 - i]), sizeof(struct column));
+    memcpy(&(column[fields - 1 - i]), &tmp, sizeof(struct column));
+  }
+}
+
 int main(int argc, char *argv[])
 {
   struct snmp_session session, *ss;
@@ -268,6 +281,7 @@ int main(int argc, char *argv[])
     tblname = NULL;
 
   get_field_names( tblname );
+  reverse_fields();
 
   /* open an SNMP session */
   SOCK_STARTUP;
@@ -383,6 +397,9 @@ void get_field_names( char* tblname )
       if (tbl->access == MIB_ACCESS_NOACCESS) {
 	fields--;
 	tbl = tbl->next_peer;
+	if (!tbl) {
+	  going = 0;
+	}
 	continue;
       }
       root[ rootlen ] = tbl->subid;
