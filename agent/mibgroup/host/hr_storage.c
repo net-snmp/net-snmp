@@ -148,7 +148,12 @@ extern struct mntent *HRFS_entry;
 
 #endif
 
-static int physmem, pagesize;
+#ifdef _SC_PHYS_PAGES
+static long physmem;
+#else
+static int physmem;
+#endif
+static int pagesize;
 
 	/*********************
 	 *
