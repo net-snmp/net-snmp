@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef HAVE_REGEX_H
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -523,3 +525,5 @@ var_logmatch_table(struct variable *vp,
 
     return NULL;
 }
+
+#endif /* HAVE_REGEX */
