@@ -829,6 +829,7 @@ merge_anon_children( tp1, tp2 )
 		if ( !strncmp( child1->label, ANON, ANON_LEN)) {
                     merge_anon_children( child1, child2 );
 
+                    child1->child_list = NULL;
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
                     free_tree( previous );
