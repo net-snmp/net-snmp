@@ -782,8 +782,6 @@ int main(int argc, char *argv[])
     if (!Print) Syslog = 1;
 
     /* Initialize the world. Create initial user */
-    usm_set_reportErrorOnUnknownID(1);
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, "snmptrapd");
     init_snmp("snmptrapd");
 
 #ifndef WIN32

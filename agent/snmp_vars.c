@@ -215,8 +215,6 @@ init_agent (const char *app)
   /* we handle alarm signals ourselves in the select loop */
   ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
 
-  usm_set_reportErrorOnUnknownID(1);
-
 #ifdef CAN_USE_NLIST
   init_kmem("/dev/kmem");
 #endif
