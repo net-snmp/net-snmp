@@ -131,10 +131,10 @@ agentx_open_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
     extern oid version_id[];
-    extern oid version_id_len;
+    extern int version_id_len;
 
     DEBUGMSGTL(("agentx/subagent","opening session \n"));
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_OPEN);
@@ -163,7 +163,7 @@ agentx_close_session( struct snmp_session *ss, int why )
     struct snmp_pdu *pdu, *response;
     DEBUGMSGTL(("agentx/subagent","closing session\n"));
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_CLOSE);
@@ -188,7 +188,7 @@ agentx_register( struct snmp_session *ss, oid start[], size_t startlen,
     DEBUGMSGTL(("agentx/subagent","registering: "));
     DEBUGMSGOID(("agentx/subagent", start, startlen));
     DEBUGMSG(("agentx/subagent","\n"));
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_REGISTER);
@@ -229,7 +229,7 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     DEBUGMSGTL(("agentx/subagent","unregistering: "));
@@ -270,7 +270,7 @@ agentx_register_index( struct snmp_session *ss,
     struct snmp_pdu *pdu, *response;
     struct variable_list *varbind2;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return NULL;
 
 		/*
@@ -345,7 +345,7 @@ agentx_unregister_index( struct snmp_session *ss,
     struct snmp_pdu *pdu, *response;
     struct variable_list *varbind2;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return -1;
 
 		/*
@@ -393,7 +393,7 @@ agentx_add_agentcaps( struct snmp_session *ss,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_ADD_AGENT_CAPS);
@@ -421,7 +421,7 @@ agentx_remove_agentcaps( struct snmp_session *ss,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_REMOVE_AGENT_CAPS);
@@ -448,7 +448,7 @@ agentx_send_ping( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss==NULL || ! IS_AGENTX_VERSION( ss->version ))
 	return 0;
 
     pdu = snmp_pdu_create(AGENTX_MSG_PING);
