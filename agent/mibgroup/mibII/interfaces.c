@@ -316,7 +316,7 @@ typedef struct _conf_if_list {
     struct _conf_if_list *next;
 } conf_if_list;
 
-static conf_if_list *conf_list = NULL;
+static conf_if_list *conf_list;
 #ifdef linux
 static struct ifnet *ifnetaddr_list;
 #endif
@@ -1448,12 +1448,11 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr){
 * see ftp://ftp.scyld.com/pub/diag/mii-diag.c
 */
 	ushort *data = (ushort *)(&ifr.ifr_data);
-	unsigned int *data32 = (unsigned int *)(&ifr.ifr_data);
 	unsigned phy_id;
 	unsigned char new_ioctl_nums = 0;
 	int mii_reg, i;
 	ushort mii_val[32];
-	ushort bmcr, bmsr, new_bmsr, nway_advert, lkpar;
+	ushort bmcr, bmsr, nway_advert, lkpar;
 	const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
 /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
 
@@ -1535,14 +1534,24 @@ Interface_Scan_Init(void)
     struct ifreq    ifrq;
     struct ifnet  **ifnetaddr_ptr;
     FILE           *devin;
-    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
-    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
     int             i, fd;
     conf_if_list   *if_ptr;
+#ifdef SCNuMAX
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop;
+    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
-        "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
+        "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
     const char     *scan_line_2_0 =
-        "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
+        "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+#else
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+#endif
     const char     *scan_line_to_use;
 
 #endif
