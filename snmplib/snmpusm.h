@@ -23,24 +23,6 @@ extern "C" {
 #define USM_TIME_WINDOW			150
 
 
-
-/*
- * USM message processing error codes. USM_ERR_* form used in snmpusm.c;
- * SNMPERR_USM_* form is defined in the snmp_api.h file.
- */
-#define USM_ERR_NO_ERROR		   SNMPERR_SUCCESS
-#define USM_ERR_GENERIC_ERROR		   SNMPERR_USM_GENERICERROR
-#define USM_ERR_UNKNOWN_SECURITY_NAME	   SNMPERR_USM_UNKNOWNSECURITYNAME
-#define USM_ERR_UNSUPPORTED_SECURITY_LEVEL SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL
-#define USM_ERR_ENCRYPTION_ERROR	   SNMPERR_USM_ENCRYPTIONERROR
-#define USM_ERR_AUTHENTICATION_FAILURE	   SNMPERR_USM_AUTHENTICATIONFAILURE
-#define USM_ERR_PARSE_ERROR		   SNMPERR_USM_PARSEERROR
-#define USM_ERR_UNKNOWN_ENGINE_ID	   SNMPERR_USM_UNKNOWNENGINEID
-#define USM_ERR_NOT_IN_TIME_WINDOW	   SNMPERR_USM_NOTINTIMEWINDOW
-#define USM_ERR_DECRYPTION_ERROR	   SNMPERR_USM_DECRYPTIONERROR
-
-
-
 /*
  * Structures.
  */
@@ -170,9 +152,6 @@ int	usm_check_and_update_timeliness (
 		u_int   boots_uint,
 		u_int   time_uint,
 		int    *error);
-
-void usm_set_reportErrorOnUnknownID (int value);
-void usm_free_usmStateReference (void *old);
 
 int usm_generate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
 			      char *,  size_t, int, u_char *, size_t, void *,
