@@ -385,6 +385,7 @@ snmp_synch_response(ss, pdu, response)
 		}
 	    /* FALLTHRU */
 	    default:
+		snmp_free_pdu(pdu);
 		*response = NULL;
 		return STAT_ERROR;
 	}
