@@ -1,3 +1,4 @@
+# define to include perl support
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
 Version: %version
@@ -10,6 +11,9 @@ Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
+%if %{with_perl}
+Requires: perl
+%endif
 %description
 
 Net-SNMP provides tools and libraries relating to the Simple Network
@@ -18,6 +22,10 @@ tools to request or set information from SNMP agents, tools to
 generate and handle SNMP traps, etc.  Using SNMP you can check the
 status of a network of computers, routers, switches, servers, ... to
 evaluate the state of your network.
+
+%if %{with_perl}
+This package includes embedded perl support within the agent
+%endif
 
 %package devel
 Group: Development/Libraries
@@ -29,18 +37,41 @@ Obsoletes: cmu-snmp-devel ucd-snmp-devel
 The net-snmp-devel package contains headers and libraries which are
 useful for building SNMP applications, agents, and sub-agents.
 
+%if %{with_perl}
+%package perlmods
+Group: System Environment/Libraries
+Summary: The perl modules provided with Net-SNMP
+Requires: net-snmp = %{version}, perl
+
+%description perlmods
+Net-SNMP provides a number of perl modules useful when using the SNMP
+protocol.  Both client and agent support modules are provided, along
+with embedded perl support within the agent.
+%endif
+
 %prep
 %setup -q
 
-
 %build
 %configure --with-defaults --with-sys-contact="Unknown" \
-	--with-mib-modules="host disman/event-mib"      \
+	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared					\
+%if %{with_perl}
+	--enable-embedded-perl                          \
+%endif
 	--with-cflags="$RPM_OPT_FLAGS"
 
+# don't create the perl specific makefile using the normal auto-done method
+%if %{with_perl}
+echo "bogus:" > perl/Makefile
+%endif
 make
+%if %{with_perl}
+rm -f perl/Makefile
+(cd perl && CFLAGS="$RPM_OPT_FLAGS" perl Makefile.PL PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $RPM_BUILD_ROOT/net-snmp-config")
+make perlmodules
+%endif
 
 %install
 # ----------------------------------------------------------------------
@@ -53,7 +84,19 @@ rm -rf $RPM_BUILD_ROOT
 # Remove 'snmpinform' from the temporary directory because it is a
 # symbolic link, which cannot be handled by the rpm installation process.
 %__rm -f $RPM_BUILD_ROOT%{_prefix}/bin/snmpinform
-install -m 755 net-snmp.init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
+# install the init script
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
+
+%if %{with_perl}
+# unneeded perl stuff
+rm -rf $RPM_BUILD_ROOT/auto/Bundle
+rm -f $RPM_BUILD_ROOT/perllocal.pod
+rm -rf $RPM_BUILD_ROOT/Bundle
+
+# store a copy of installed perl stuff.  It's too comlpex to predict
+(xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
+%endif
 
 %post
 # ----------------------------------------------------------------------
@@ -93,18 +136,19 @@ rm -rf $RPM_BUILD_ROOT
 %doc README README.agentx README.hpux11 README.krb5
 %doc README.snmpv3 README.solaris README.thread README.win32
 	 
-%dir %{_datadir}/snmp/
-
 #%config(noreplace) /etc/net-snmp/snmpd.conf
 	 
-%{_datadir}/snmp/snmpconf-data
+#%{_datadir}/snmp/snmpconf-data
+%{_datadir}/snmp
 
 %{_bindir}
 %{_sbindir}
 %{_mandir}/man1/*
+%{_mandir}/man3/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
 /usr/lib/*.so*
+/etc/rc.d/init.d/snmpd
 
 %files devel
 %defattr(-,root,root)
@@ -112,12 +156,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}
 %{_libdir}/*.a
 %{_libdir}/*.la
-%{_mandir}/man3/*
+
+%if %{with_perl}
+%files -f net-snmp-perl-files perlmods
+%defattr(-,root,root)
+/usr/man/man3/
+%endif
 
 %verifyscript
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Mon Sep 01 2003 Wes Hardaker <hardaker@users.sourceforge.net>
+- added perl support
+
 * Wed Oct 09 2002 Wes Hardaker <hardaker@users.sourceforge.net>
 - Incorperated most of Mark Harig's better version of the rpm spec and Makefile
 
