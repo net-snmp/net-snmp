@@ -3533,7 +3533,7 @@ find_module(int mid)
 static char leave_indent[256];
 static int leave_was_simple;
 
-static void print_mib_leaves(FILE *f, struct tree *tp)
+static void print_mib_leaves(FILE *f, struct tree *tp, int width)
 { struct tree *ntp;
   char *ip = leave_indent+strlen(leave_indent)-1;
   char last_ipch = *ip;
@@ -3556,7 +3556,9 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     switch (tp->type) {
     case TYPE_OBJID:		typ = "ObjID    "; break;
     case TYPE_OCTETSTR:		typ = "String   "; size = 1; break;
-    case TYPE_INTEGER:		typ = "Integer  "; break;
+    case TYPE_INTEGER:
+		if (tp->enums)	typ = "EnumVal  ";
+		else		typ = "Integer  "; break;
     case TYPE_NETADDR:		typ = "NetAddr  "; break;
     case TYPE_IPADDR:		typ = "IpAddr   "; break;
     case TYPE_COUNTER:		typ = "Counter  "; break;
@@ -3570,7 +3572,6 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     case TYPE_UINTEGER:		typ = "UInteger "; break;
     default:			typ = "         "; break;
     }
-    if (tp->enums)		typ = "EnumVal  ";
     fprintf(f, "%s-- %s %s %s(%ld)\n", leave_indent, acc, typ, tp->label, tp->subid);
     *ip = last_ipch;
     if (tp->tc_index >= 0)
@@ -3578,10 +3579,19 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 	      tclist[tp->tc_index].descriptor);
     if (tp->enums) {
       struct enum_list *ep = tp->enums;
+      int cpos = 0, cmax = width - strlen(leave_indent) - 16;
       fprintf(f, "%s        Values: ", leave_indent);
       while (ep) {
+	char buf[80];
+	int bufw;
 	if (ep != tp->enums) fprintf(f, ", ");
-	fprintf(f, "%s(%d)", ep->label, ep->value);
+	sprintf(buf, "%s(%d)", ep->label, ep->value);
+	cpos += (bufw = strlen(buf) + 2);
+	if (cpos >= cmax) {
+	  fprintf(f, "\n%s                ", leave_indent);
+	  cpos = bufw;
+	}
+	fprintf(f, "%s", buf);
 	ep = ep->next;
       }
       fprintf(f, "\n");
@@ -3625,7 +3635,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
 	if (!leave_was_simple || lp->tp->type == 0)
 	  fprintf(f, "%s\n", leave_indent);
 	if (i == count) ip[3] = ' ';
-	print_mib_leaves(f, lp->tp);
+	print_mib_leaves(f, lp->tp, width);
       }
       free(leaves);
       leave_was_simple = 0;
@@ -3634,12 +3644,12 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
   ip[1] = 0;
 }
 
-void print_mib_tree(FILE *f, struct tree *tp)
+void print_mib_tree(FILE *f, struct tree *tp, int width)
 {
   leave_indent[0] = ' ';
   leave_indent[1] = 0;
   leave_was_simple = 1;
-  print_mib_leaves(f, tp);
+  print_mib_leaves(f, tp, width);
 }
 
 
