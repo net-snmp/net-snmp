@@ -9533,7 +9533,7 @@ echo "$as_me: error: IPX support unavailable for this platform (Linux only)" >&2
         { { echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
 echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
    { (exit 1); exit 1; }; }
-      elif test "x$PARTIALTARGETOS" = "xcygwin"; then
+      elif test "x$PARTIALTARGETOS" = "xmingw32"; then
         echo
         { { echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
 echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
