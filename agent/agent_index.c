@@ -139,7 +139,23 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 {
     struct snmp_index *new_index, *idxptr, *idxptr2;
     struct snmp_index *prev_oid_ptr, *prev_idx_ptr;
+    size_t buf_len = 0, out_len = 0;
+    u_char *buf = NULL;
     int res, res2, i;
+
+    if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
+				varbind->name, varbind->name_length,
+				varbind)) {
+      DEBUGMSGTL(("register_index", "%s for session %08p\n", buf, ss));
+    } else {
+      DEBUGMSGTL(("register_index", "%s [TRUNCATED] for session %08p\n",
+		  buf, ss));
+    }
+    if (buf != NULL) {
+      free(buf);
+      buf = NULL;
+    }
+
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(TESTING)
     if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == SUB_AGENT )
@@ -180,8 +196,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		    return idxptr2->varbind;
 		}
 	    }
-	}
-	else {
+	} else {
             for(idxptr2 = idxptr ; idxptr2 != NULL;
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
 	        switch ( varbind->type ) {
@@ -203,8 +218,12 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	        if ( res2 <= 0 )
 		    break;
 	    }
-	    if ( res2 == 0 )
-		return NULL;			/* duplicate value */
+	    if (res2 == 0) {
+		if (idxptr2->session != NULL) {
+		    /*  No good: the index is in used by another subagent.  */
+		    return NULL;
+		}
+	    }
 	}
     }
 
@@ -504,28 +523,22 @@ void dump_idx_registry( void )
         for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
 	    switch( idxptr2->varbind->type ) {
 		case ASN_INTEGER:
-		    printf("    %c %ld %c\n",
-			( idxptr2->session ? ' ' : '(' ),
-			  *idxptr2->varbind->val.integer,
-			( idxptr2->session ? ' ' : ')' ));
+		    printf("    %ld for session %08p\n",
+			   *idxptr2->varbind->val.integer, idxptr2->session);
 		    break;
 		case ASN_OCTET_STR:
-		    printf("    %c %s %c\n",
-			( idxptr2->session ? ' ' : '(' ),
-			  idxptr2->varbind->val.string,
-			( idxptr2->session ? ' ' : ')' ));
+		    printf("    \"%s\" for session %08p\n",
+			   idxptr2->varbind->val.string, idxptr2->session);
 		    break;
 		case ASN_OBJECT_ID:
 		    sprint_objid(end_oid, idxptr2->varbind->val.objid,
 				idxptr2->varbind->val_len/sizeof(oid));
-		    printf("    %c %s %c\n",
-			( idxptr2->session ? ' ' : '(' ),
-			  end_oid,
-			( idxptr2->session ? ' ' : ')' ));
+		    printf("    %s for session %08p\n",
+			   end_oid, idxptr2->session);
 		    break;
 		default:
-		    printf("unsupported type (%d)\n",
-				idxptr2->varbind->type);
+		    printf("unsupported type (%d/0x%02x)\n",
+			   idxptr2->varbind->type, idxptr2->varbind->type);
 	    }
 	}
     }
