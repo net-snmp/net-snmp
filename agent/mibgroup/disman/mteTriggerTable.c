@@ -12,6 +12,9 @@
 #else
 #include <strings.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 
 /* minimal include directives */
@@ -52,6 +55,9 @@ oid mteHotContextName[]   = { 1,3,6,1,2,1,88,2,1,3 };
 oid mteHotOID[]   	  = { 1,3,6,1,2,1,88,2,1,4 };
 oid mteHotValue[] 	  = { 1,3,6,1,2,1,88,2,1,5 };
 oid mteFailedReason[]     = { 1,3,6,1,2,1,88,2,1,6 };
+
+/*  For discontinuity checking.  */
+oid sysUpTimeInstance[]   = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
 
 oid mteTriggerTable_variables_oid[] = { 1,3,6,1,2,1,88,1,2,2 };
 
@@ -175,8 +181,12 @@ create_mteTriggerTable_data(void) {
     StorageNew->mteTriggerObjects = strdup("");
     StorageNew->mteTriggerEnabled = 
         MTETRIGGERENABLED_FALSE;
-    StorageNew->mteTriggerDeltaDiscontinuityIDWildcard = 
-        MTETRIGGERDELTADISCONTINUITYIDWILDCARD_FALSE;
+    memdup((unsigned char **)&(StorageNew->mteTriggerDeltaDiscontinuityID),
+	   (unsigned char *)sysUpTimeInstance,
+	   sizeof(sysUpTimeInstance));
+    StorageNew->mteTriggerDeltaDiscontinuityIDLen = sizeof(sysUpTimeInstance) /
+                                                                 sizeof(oid);
+    StorageNew->mteTriggerDeltaDiscontinuityIDWildcard = TV_FALSE;
     StorageNew->mteTriggerDeltaDiscontinuityIDType =
         MTETRIGGERDELTADISCONTINUITYIDTYPE_TIMETICKS;
     StorageNew->mteTriggerExistenceTest = strdup("");
@@ -213,6 +223,8 @@ create_mteTriggerTable_data(void) {
     StorageNew->mteTriggerThresholdDeltaFallingEventOwner = strdup("");
     StorageNew->mteTriggerThresholdDeltaFallingEvent = strdup("");
     StorageNew->lastboolresult = -1;
+    StorageNew->prevDiscoTicks = 0;
+    StorageNew->prevUptimeTicks = 0;
     return StorageNew;
 }
 
@@ -1660,8 +1672,9 @@ write_mteTriggerEntryStatus(int      action,
 
             if (StorageTmp->mteTriggerEntryStatus == RS_ACTIVE &&
                 set_value != RS_DESTROY) {
-                /* "Once made active an entry may not be modified except to
-                   delete it." */
+                /*  "Once made active an entry may not be modified except to 
+		    delete it."  XXX: doesn't this in fact apply to ALL
+		    columns of the table and not just this one?  */
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
           }
@@ -1988,8 +2001,10 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
         
     if (item->mteTriggerTargetTagLen == 0) {
         asp = init_agent_snmp_session(NULL, pdu);
-        if (!asp)
+        if (!asp) {
+	  /*  Should free PDU here to be consistent  */
             return NULL;
+	}
         
         if (pdu->command == SNMP_MSG_GETNEXT) {
             /* why can't handle next pass do this for me? */
@@ -2023,7 +2038,7 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
     sprint_variable(buf, response->variables->name,
                     response->variables->name_length,
                     response->variables);
-    DEBUGMSGTL(("mteTriggerTable","got a variables: %s\n", buf));
+    DEBUGMSGTL(("mteTriggerTable","got a variable: %s\n", buf));
     snmp_free_pdu(pdu);
     return response;
 }
@@ -2055,6 +2070,106 @@ int mte_is_integer_type(unsigned char type)
 
 
 
+/*  Return 0 if the discontinuity object was checked and no discontinuity has
+    occurred, 1 if the discontinuity object was checked and a discontinuity
+    has occurred or -1 if the discontinuity object is not accessible.  */
+
+int
+mte_discontinuity_occurred(struct mteTriggerTable_data *item)
+{
+  struct snmp_pdu *pdu = NULL, *response = NULL;
+  unsigned long discoTicks = 0;  /*  cool var name  */
+
+  if (item->mteTriggerValueIDWildcard == TV_TRUE) {
+    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+  } else {
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+  }
+
+  if (item->mteTriggerDeltaDiscontinuityIDLen == 0 ||
+      (item->mteTriggerDeltaDiscontinuityIDLen == 2 &&
+       item->mteTriggerDeltaDiscontinuityID[0] == 0 && 
+       item->mteTriggerDeltaDiscontinuityID[1] == 0)) {
+    DEBUGMSGTL(("mte_disco", "discoID is either zero-length or 0.0\n"));
+  } else {
+    snmp_add_null_var(pdu, item->mteTriggerDeltaDiscontinuityID,
+		      item->mteTriggerDeltaDiscontinuityIDLen);
+    response = mte_get_response(item, pdu);
+    if (response == NULL) {
+      /*  XXX:  send a mteTriggerFailure notification with the appropriate
+	  error code here.  */
+      /*  "If the object identified is not accessible the sample attempt is in 
+	  error, with the error code as from an SNMP request."  */
+      DEBUGMSGTL(("mte_disco", "failure (auth?) getting discoID\n"));
+      return -1;
+    } else {
+      if (item->mteTriggerDeltaDiscontinuityIDType ==
+	  MTETRIGGERDELTADISCONTINUITYIDTYPE_TIMETICKS ||
+	  item->mteTriggerDeltaDiscontinuityIDType ==
+	  MTETRIGGERDELTADISCONTINUITYIDTYPE_TIMESTAMP) {
+	if (response->errstat == SNMPERR_SUCCESS) {
+	  if (response->variables != NULL &&
+	      response->variables->type == ASN_TIMETICKS) {
+	    DEBUGMSGTL(("mte_disco", "got ASN_TIMETICKS-valued variable\n"));
+	    discoTicks = *((unsigned long *)response->variables->val.integer);
+	    if (item->prevDiscoTicks != 0) {
+	      if (discoTicks != item->prevDiscoTicks) {
+		/*  Danger Will Robinson: there has been a discontinuity!  */
+		DEBUGMSGTL(("mte_disco", "a discontinuity has occurred\n"));
+		item->prevDiscoTicks = discoTicks;
+		snmp_free_pdu(response);
+		return 1;
+	      }
+	    }
+	    item->prevDiscoTicks = discoTicks;
+	  } else {
+	    /*  XXX: send a mteTriggerFailure notification with the
+		appropriate error code here.  */
+	    if (response->variables != NULL &&
+		(response->variables->type == SNMP_NOSUCHOBJECT ||
+		 response->variables->type == SNMP_NOSUCHINSTANCE ||
+		 response->variables->type == SNMP_ENDOFMIBVIEW)) {
+	      /*  noSuchName I guess.  */
+	    } else {
+	      /*  badType.  */
+	    }
+	    DEBUGMSGTL(("mte_disco", "failure getting discoID\n"));
+	    snmp_free_pdu(response);
+	    return -1;
+	  }
+	} else {
+	  /*  XXX: send a mteTriggerFailure notification with the appropriate
+	      error code (just use response->errstat) here.  */
+	  DEBUGMSGTL(("mte_disco", "failure getting discoID\n"));
+	  snmp_free_pdu(response);
+	  return -1;
+	}
+      } else {
+	/*  Don't handle dateAndTime type queries yet.  */
+	DEBUGMSGTL(("mte_disco", "dateAndTime query UNIMPLEMENTED\n"));
+      }
+      snmp_free_pdu(response);
+    }
+  }
+
+  /*  "...if this object does not point to sysUpTime discontinuity checking
+      MUST still check sysUpTime for an overall discontinuity."  */
+  if (snmp_oid_compare(item->mteTriggerDeltaDiscontinuityID,
+		       item->mteTriggerDeltaDiscontinuityIDLen,
+		       sysUpTimeInstance,
+		       sizeof(sysUpTimeInstance)/sizeof(oid)) != 0) {
+    DEBUGMSGTL(("mte_disco", "discoID != sysUpTimeInstance\n"));
+    /*  At the moment we only support checking the local system so there's no
+	point doing anything extra here.  */
+  }
+
+  /*  Well if we got all the way to here, then there has been neither a
+      discontinuity nor an error.  */
+  DEBUGMSGTL(("mte_disco", "no discontinuity\n"));
+  return 0;
+}
+
+
 void
 mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
@@ -2062,7 +2177,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
         (struct mteTriggerTable_data *) clientarg;
     struct snmp_pdu *pdu = NULL, *response = NULL;
     char buf[SPRINT_MAX_LEN];
-    int msg_type = SNMP_MSG_GET;
+    int msg_type = SNMP_MSG_GET, disco;
 
     oid *next_oid;
     size_t next_oid_len;
@@ -2080,7 +2195,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
     
     next_oid = item->mteTriggerValueID;
     next_oid_len = item->mteTriggerValueIDLen;
-    if (item->mteTriggerValueIDWildcard == MTETRIGGERVALUEIDWILDCARD_TRUE)
+    if (item->mteTriggerValueIDWildcard == TV_TRUE)
         msg_type = SNMP_MSG_GETNEXT;
 
     item->hc_storage_old = item->hc_storage;
@@ -2092,14 +2207,15 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
         if (!response)
             break; /* XXX: proper failure */
     
-        if (item->mteTriggerValueIDWildcard == MTETRIGGERVALUEIDWILDCARD_TRUE &&
+        if (item->mteTriggerValueIDWildcard == TV_TRUE &&
             ((response->variables->type >= SNMP_NOSUCHOBJECT &&
               response->variables->type <= SNMP_ENDOFMIBVIEW) ||
              snmp_oid_compare(item->mteTriggerValueID,
                               item->mteTriggerValueIDLen,
                               response->variables->name,
                               item->mteTriggerValueIDLen) != 0)) {
-            DEBUGMSGTL(("mteTriggerTable","DONE, last varbind processed\n", buf));
+            DEBUGMSGTL(("mteTriggerTable", "DONE, last varbind processed\n"));
+	    snmp_free_pdu(response);
             break;
         }
 
@@ -2120,7 +2236,11 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
 			next_oid, next_oid_len, &failure,
 			NULL, NULL, "failure: bad type");
 	  snmp_free_pdu(response);
-	  continue;
+	  /*  RFC2981, p.15: "If the value syntax of those objects
+	      [returned by a getNext-style match] is not usable, that
+	      results in a `badType' error THAT TERMINATES THE SCAN."
+	      (my emphasis).  */
+	  break;
 	}
 
         /*  Clone the value.  XXX: What happens if it's an unsigned type? Or a
@@ -2187,15 +2307,27 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
             }
         }
 
-        /*  Deal with boolean tests.  XXX: this doesn't appear to handle
-	    sampleType = delta(2) cases?  */
+        /*  Deal with boolean tests.  */
         if ((item->mteTriggerTest[0] & MTETRIGGERTEST_BOOLEAN) && 
 	    ((item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_ABSOLUTEVALUE
 	      && value) ||
 	     (item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_DELTAVALUE
 	      && value && old_value))) {
 	    if (item->mteTriggerSampleType==MTETRIGGERSAMPLETYPE_DELTAVALUE) {
-	        x = *((long *)value) - *((long *)old_value);
+	        /*  XXX: Must check the discontinuity OID here.  */
+	        disco = mte_discontinuity_occurred(item);
+		if (disco == -1) {
+		  /*  An error notification has already been sent; just bail
+		      out now.  */
+		  /*  XXX: should save values here?  */
+		  return;
+		} else if (disco == 1) {
+		  /*  A discontinuity has occurred; the right thing to do here
+                      depends on the exact type.  FOR NOW, assume long.  */
+		  x = *((long *)value) + (INT_MAX - *((long *)old_value));
+		} else {
+		  x = *((long *)value) - *((long *)old_value);
+		}
 	    } else {
 	        x = *((long *)value);
 	    }       
@@ -2253,7 +2385,8 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                         item->mteTriggerBooleanValue, boolresult));
         }
 
-        /* deal with threshold tests */
+        /*  Deal with threshold tests.  XXX: doesn't handle "delta-type"
+	    sampling.  */
         if ((item->mteTriggerTest[0] & MTETRIGGERTEST_THRESHOLD) &&
 	    ((item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_ABSOLUTEVALUE
 	      && value) ||
@@ -2329,7 +2462,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
 	/*  We are now done with the response PDU.  */
 	snmp_free_pdu(response);
-    } while (item->mteTriggerValueIDWildcard == MTETRIGGERVALUEIDWILDCARD_TRUE);
+    } while (item->mteTriggerValueIDWildcard == TV_TRUE);
 
     /* loop through old values for DNE cases */
     if (item->mteTriggerExistenceTest[0] &
