@@ -62,29 +62,29 @@ struct snmp_secmod_incoming_params {
  */
 
 /* free's a given security module's data; called at unregistration time */
-typedef int (SecmodInitSess)(struct snmp_session *);
+typedef int (SecmodSessionCallback)(struct snmp_session *);
+typedef int (SecmodPduCallback) (struct snmp_pdu *);
 typedef int (SecmodOutMsg)(struct snmp_secmod_outgoing_params *);
 typedef int (SecmodInMsg)(struct snmp_secmod_incoming_params *);
 typedef void (SecmodFreeState) (void *);
-typedef void (FreePdu) (struct snmp_pdu *);
-typedef void (FreeSession) (struct snmp_session *);
 
 /*
  * definition of a security module
  */
 struct snmp_secmod_def {
    /* maniplation functions */
-   SecmodInitSess  *init_sess_secmod;
+   SecmodSessionCallback *init_sess_secmod;   /* called in snmp_sess_open() */
 
    /* encoding routines */
-   SecmodOutMsg    *reverse_encode_out; /* encode packet back to front */
-   SecmodOutMsg    *forward_encode_out; /* encode packet forward */
-   SecmodInMsg     *decode_in;          /* decode & validate incoming */
+   SecmodOutMsg          *reverse_encode_out; /* encode packet back to front */
+   SecmodOutMsg          *forward_encode_out; /* encode packet forward */
+   SecmodInMsg           *decode_in;          /* decode & validate incoming */
 
    /* clean up routines */
-   SecmodFreeState *free_state_ref;     /* frees pdu->securityStateRef */
-   FreePdu         *free_pdu;           /* called during free_pdu() */
-   FreeSession     *free_session;       /* called during snmp_sess_close() */
+   SecmodPduCallback     *pdu_timeout;        /* called when request timesout */
+   SecmodFreeState       *free_state_ref;     /* frees pdu->securityStateRef */
+   SecmodPduCallback     *free_pdu;           /* called during free_pdu() */
+   SecmodSessionCallback *free_session;       /* called during snmp_sess_close() */
 };
 
 
