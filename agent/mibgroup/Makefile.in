@@ -46,25 +46,6 @@ v2party.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
 v2party.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
 v2party.o: ../../snmplib/snmp.h ../../snmplib/mib.h
 v2party.o: ../../snmplib/snmp_debug.h mibII/sysORTable.h
-ucd_attackHist.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
-ucd_attackHist.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-ucd_attackHist.o:  mibincl.h 
-ucd_attackHist.o:  ../../snmplib/asn1.h
-ucd_attackHist.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-ucd_attackHist.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-ucd_attackHist.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h util_funcs.h
-ucd_attackHist.o: struct.h host/hr_utils.h ../../snmplib/system.h
-ucd_attackHist.o: ./../../snmplib/snmp_client.h ucd_attackHist.h ./../snmpd.h
-ucd_attackHist.o: ./../../snmplib/read_config.h
-ucd_zoneWatch.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
-ucd_zoneWatch.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-ucd_zoneWatch.o:  mibincl.h 
-ucd_zoneWatch.o:  ../../snmplib/asn1.h
-ucd_zoneWatch.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-ucd_zoneWatch.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-ucd_zoneWatch.o: ../../snmplib/mib.h ../../snmplib/snmp_debug.h util_funcs.h
-ucd_zoneWatch.o: struct.h host/hr_utils.h ../../snmplib/system.h
-ucd_zoneWatch.o: ./../../snmplib/snmp_client.h ucd_zoneWatch.h ./../snmpd.h
 mibII/system_mib.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 mibII/system_mib.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/system_mib.o:  
