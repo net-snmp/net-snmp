@@ -18,15 +18,10 @@
 #include "snmp_vars.h"
 #include "system.h"
 
-#include "party.h"
 #include "acl.h"
 #include "view.h"
 
-int write_party __P((int, u_char *, u_char, int, u_char *, oid *, int));
-u_char *var_party __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-
-struct partyEntry *party_rowCreate __P((oid *, int));
-void party_rowDelete __P((oid *, int));
+#include "party_vars.h"
 
 oid snmpUdpDomain[] = {1, 3, 6, 1, 6, 1, 1};
 /* no others defined yet */

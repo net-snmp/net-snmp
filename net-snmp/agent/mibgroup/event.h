@@ -1,5 +1,8 @@
 /* include file for event module */
 
+#ifndef _MIBGROUP_EVENT_H
+#define _MIBGROUP_EVENT_H
+
 struct variable;
 struct timeval;
 
@@ -77,3 +80,47 @@ struct eventNotifyEntry {
 #define EVENTNOTIFYTABSTATUSMASK	    	0x00000008
 
 #define EVENTNOTIFYTABCOMPLETEMASK		0x0000000F
+
+#define SNMPV2EVENTNEXTINDEX	SNMPV2M2M, 1, 2, 1
+#define SNMPV2EVENTENTRY	SNMPV2M2M, 1, 2, 2, 1
+#define SNMPV2EVENTNOTIFYMININT	SNMPV2M2M, 1, 2, 3
+#define SNMPV2EVENTNOTIFYMAXRET	SNMPV2M2M, 1, 2, 4
+#define SNMPV2EVENTNOTIFYENTRY	SNMPV2M2M, 1, 2, 5, 1
+
+#ifdef IN_SNMP_VARS_C
+
+struct variable2 eventnextindex_variables[] = {
+    {EVENTNEXTINDEX, INTEGER, RONLY, var_eventnextindex, 1, {0}}
+};
+
+struct variable2 eventtab_variables[] = {
+        {EVENTTABID, OBJID, RWRITE, var_eventtab, 1, {2 }},
+        {EVENTTABDESCRIPTION, STRING, RWRITE, var_eventtab, 1, {3 }},
+        {EVENTTABEVENTS, COUNTER, RONLY, var_eventtab, 1, {4 }},
+        {EVENTTABLASTTIMESENT, TIMETICKS, RONLY, var_eventtab, 1, {5 }},
+        {EVENTTABSTATUS, INTEGER, RWRITE, var_eventtab, 1, {6 }}
+};
+
+struct variable2 eventmininterval_variables[] = {
+    {EVENTMININTERVAL, INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
+};
+
+struct variable2 eventmaxretrans_variables[] = {
+    {EVENTMAXRETRANS, INTEGER, RONLY, var_eventnotifyvars, 1, {0}}
+};
+
+struct variable2 eventnotifytab_variables[] = {
+        {EVENTNOTIFYTABINTERVAL, INTEGER, RWRITE, var_eventnotifytab, 1, {1 }},
+        {EVENTNOTIFYTABRETRANSMISSIONS, INTEGER, RWRITE, var_eventnotifytab, 1, {2 }},
+        {EVENTNOTIFYTABLIFETIME, INTEGER, RWRITE, var_eventnotifytab, 1, {3 }},
+        {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
+};
+
+config_load_mib( SNMPV2EVENTNEXTINDEX, 10, eventnextindex_variables)
+config_load_mib( SNMPV2EVENTENTRY, 11, eventtab_variables)
+config_load_mib( SNMPV2EVENTNOTIFYMININT, 10, eventmininterval_variables)
+config_load_mib( SNMPV2EVENTNOTIFYMAXRET, 10, eventmaxretrans_variables)
+config_load_mib( SNMPV2EVENTNOTIFYENTRY, 11, eventnotifytab_variables)
+
+#endif
+#endif /* _MIBGROUP_ALARM_H */

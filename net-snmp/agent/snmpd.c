@@ -87,7 +87,9 @@ typedef long    fd_mask;
 #include "snmp.h"
 #include "m2m.h"
 #include "party.h"
-#include "alarm.h"
+#ifdef USING_ALARM_MODULE
+#include "mibgroup/alarm.h"
+#endif
 #include "event.h"
 #include "view.h"
 #include "context.h"
