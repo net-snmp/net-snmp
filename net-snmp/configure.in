@@ -1121,6 +1121,16 @@ AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip
 dnl OpenSSL
 AC_CHECK_HEADERS(openssl/hmac.h openssl/evp.h)
 
+dnl Printing
+AC_PATH_PROG(LPSTAT_PATH,lpstat)
+if test x$LPSTAT_PATH != x; then
+    AC_DEFINE_UNQUOTED(LPSTAT_PATH,"$LPSTAT_PATH")
+    AC_DEFINE(HAVE_LPSTAT)
+fi
+AC_CHECK_FUNCS(cgetnext)
+if test -r /etc/printcap; then
+    AC_DEFINE(HAVE_PRINTCAP)
+fi
 
 AC_MSG_CHECKING(for authentication support)
 if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
