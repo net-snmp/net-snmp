@@ -330,6 +330,37 @@ SnmpTrapNodeDown(void)
      */
 }
 
+static void
+setup_log(int restart, int dont_zero, int stderr_log, int syslog_log, 
+	  char *logfile)
+{
+    static char logfile_s[PATH_MAX + 1] = { 0 };
+    static int dont_zero_s  = 0;
+    static int stderr_log_s = 0;
+    static int syslog_log_s = 0;
+
+    if (restart == 0) {
+	if (logfile != NULL) {
+	    strncpy(logfile_s, logfile, PATH_MAX);
+	}
+	dont_zero_s  = dont_zero;
+	stderr_log_s = stderr_log;
+	syslog_log_s = syslog_log;
+    }
+
+    if (!stderr_log_s) {
+	snmp_disable_stderrlog();
+    }
+
+    if (logfile_s[0]) {
+	snmp_enable_filelog(logfile_s, dont_zero_s);
+    }
+
+    if (syslog_log_s) {
+	snmp_enable_syslog();
+    }
+}
+
 /*******************************************************************-o-******
  * main - Non Windows
  * SnmpDeamonMain - Windows to support windows serivce
@@ -624,12 +655,7 @@ main(int argc, char *argv[])
 					  NETSNMP_DS_AGENT_PORTS)));
     }
 
-    /*
-     * Honor selection of standard error output.  
-     */
-    if (!stderr_log) {
-        snmp_disable_stderrlog();
-    }
+    setup_log(0, dont_zero_log, stderr_log, syslog_log, logfile);
 
     /*
      * Initialize a argv set to the current for restarting the agent.   
@@ -663,20 +689,6 @@ main(int argc, char *argv[])
     *cptr = 0;
     *argvptr = NULL;
 
-    /*
-     * Open the logfile if necessary.  
-     */
-
-    /*
-     * Should open logfile and/or syslog based on arguments.  
-     */
-    if (logfile[0]) {
-        snmp_enable_filelog(logfile, dont_zero_log);
-    }
-
-    if (syslog_log) {
-        snmp_enable_syslog();
-    }
 #ifdef BUFSIZ
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 #endif
@@ -853,6 +865,12 @@ receive(void)
         if (reconfig) {
             reconfig = 0;
             snmp_log(LOG_INFO, "Reconfiguring daemon\n");
+	    /*  Stop and restart logging.  This allows logfiles to be
+		rotated etc.  */
+	    snmp_disable_log();
+	    setup_log(1, 0, 0, 0, NULL);
+	    snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
+		     netsnmp_get_version());
             update_config();
             send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
         }
