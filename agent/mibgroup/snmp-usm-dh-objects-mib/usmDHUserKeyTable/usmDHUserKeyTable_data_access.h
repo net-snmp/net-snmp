@@ -30,9 +30,11 @@ extern          "C" {
  **********************************************************************/
     /*
      * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
-     * It's status is Current.
+     * Its status is Current.
      * OID: .1.3.6.1.3.101.1.1.2, length: 9
      */
+
+
 
 
     int            
@@ -70,5 +72,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* USMDHUSERKEYTABLE_DATA_ACCESS_H */

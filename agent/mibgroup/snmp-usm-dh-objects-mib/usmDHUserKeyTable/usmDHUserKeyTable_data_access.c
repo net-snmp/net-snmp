@@ -35,7 +35,7 @@
  **********************************************************************/
 /*
  * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
- * It's status is Current.
+ * Its status is Current.
  * OID: .1.3.6.1.3.101.1.1.2, length: 9
  */
 
@@ -174,11 +174,13 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
     /*
      * temporary storage for index values
      */
+
     /*
      * usmUserEngineID(1)/SnmpEngineID/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
      */
     char            usmUserEngineID[32];
     size_t          usmUserEngineID_len;
+
     /*
      * usmUserName(2)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/H
      */
@@ -240,18 +242,22 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
          * TRANSIENT or semi-TRANSIENT data:
          * copy data or save any info needed to do it in row_prep.
          */
+
         /*
          * TODO: setup/save data for usmDHUserAuthKeyChange
          * usmDHUserAuthKeyChange(1)/DHKeyChange/ASN_OCTET_STR/char(char)//L/A/W/e/r/d/h
          */
+
         /*
          * TODO: setup/save data for usmDHUserOwnAuthKeyChange
          * usmDHUserOwnAuthKeyChange(2)/DHKeyChange/ASN_OCTET_STR/char(char)//L/A/W/e/r/d/h
          */
+
         /*
          * TODO: setup/save data for usmDHUserPrivKeyChange
          * usmDHUserPrivKeyChange(3)/DHKeyChange/ASN_OCTET_STR/char(char)//L/A/W/e/r/d/h
          */
+
         /*
          * TODO: setup/save data for usmDHUserOwnPrivKeyChange
          * usmDHUserOwnPrivKeyChange(4)/DHKeyChange/ASN_OCTET_STR/char(char)//L/A/W/e/r/d/h
