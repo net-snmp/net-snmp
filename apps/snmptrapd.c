@@ -282,10 +282,12 @@ void do_external(char *cmd,
 #ifndef WIN32
   struct variable_list tmpvar, *vars;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
-  static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
-  static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
-  static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
-  static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
+  static oid trapoids[] = {1,3,6,1,6,3,1,1,5,0};
+  static oid snmpsysuptime[] = {1,3,6,1,2,1,1,3,0};
+  static oid snmptrapoid[] = {1,3,6,1,6,3,1,1,4,1,0};
+  static oid snmptrapent[] = {1,3,6,1,6,3,1,1,4,3,0};
+  static oid snmptrapaddr[] = {1,3,6,1,6,3,18,1,3,0};
+  static oid snmptrapcom[] = {1,3,6,1,6,3,18,1,4,0};
   oid enttrapoid[MAX_OID_LEN];
   int enttraplen = pdu->enterprise_length;
   int fd[2];
@@ -322,7 +324,7 @@ void do_external(char *cmd,
         tmpvar.val.integer = (long *) &pdu->time;
         tmpvar.val_len = sizeof(pdu->time);
         tmpvar.type = ASN_TIMETICKS;
-        sprint_variable(varbuf, snmpsysuptime, 8, &tmpvar);
+        sprint_variable(varbuf, snmpsysuptime, sizeof(snmpsysuptime)/sizeof(snmpsysuptime[0]), &tmpvar);
         fprintf(file,"%s\n",varbuf);
         tmpvar.type = ASN_OBJECT_ID;
 	if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
@@ -337,7 +339,7 @@ void do_external(char *cmd,
 	  tmpvar.val.objid = trapoids;
 	  tmpvar.val_len = 10*sizeof(oid);
 	}
-        sprint_variable(varbuf, snmptrapoid, 10, &tmpvar);
+        sprint_variable(varbuf, snmptrapoid, sizeof(snmptrapoid)/sizeof(snmptrapoid[0]), &tmpvar);
         fprintf(file,"%s\n",varbuf);
       }
       /* do the variables in the pdu */
@@ -348,9 +350,20 @@ void do_external(char *cmd,
       if (pdu->command == SNMP_MSG_TRAP){
         /* convert a v1 trap to a v2 variable binding list:
            The enterprise goes last. */
+        tmpvar.val.string = (u_char *)&((struct sockaddr_in*)&pdu->agent_addr)->sin_addr.s_addr;
+        tmpvar.val_len = 4;
+	tmpvar.type = ASN_IPADDRESS;
+        sprint_variable(varbuf, snmptrapaddr, sizeof(snmptrapaddr)/sizeof(snmptrapaddr[0]), &tmpvar);
+        fprintf(file,"%s\n",varbuf);
+        tmpvar.val.string = pdu->community;
+        tmpvar.val_len = pdu->community_len;
+	tmpvar.type = ASN_OCTET_STR;
+        sprint_variable(varbuf, snmptrapcom, sizeof(snmptrapcom)/sizeof(snmptrapcom[0]), &tmpvar);
+        fprintf(file,"%s\n",varbuf);
         tmpvar.val.objid = pdu->enterprise;
         tmpvar.val_len = pdu->enterprise_length*sizeof(oid);
-        sprint_variable(varbuf, snmptrapent, 10, &tmpvar);
+	tmpvar.type = ASN_OBJECT_ID;
+        sprint_variable(varbuf, snmptrapent, sizeof(snmptrapent)/sizeof(snmptrapent[0]), &tmpvar);
         fprintf(file,"%s\n",varbuf);
       }
       fclose(file);
@@ -496,6 +509,30 @@ int snmp_input(int op,
 		    print_variable(vars->name, vars->name_length, vars);
 		}
 		printf("\n");
+	    }
+	    if (Syslog) {
+	    	varbufidx=0;
+	    	varbuf[varbufidx]='\0';
+
+	    	for(vars = pdu->variables; vars; vars = vars->next_variable) {
+		    sprint_variable(varbuf+varbufidx, vars->name,
+				    vars->name_length, vars);
+		    /* Update the length of the string with the
+		       new variable */
+		    varbufidx += strlen(varbuf+varbufidx);
+		    /* And add a trailing , ... */
+		    varbuf[varbufidx++]=',';
+		    varbuf[varbufidx++]=' ';
+		    varbuf[varbufidx]='\0';
+	    	}
+	    	if ( varbufidx ) {
+		    varbufidx -= 2; varbuf[varbufidx]='\0';
+	    	}
+		host = gethostbyaddr ((char *)&pduIp->sin_addr,
+				      sizeof (pduIp->sin_addr), AF_INET);
+		syslog(LOG_WARNING, "%s [%s]: Trap %s",
+		       host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+		       inet_ntoa(pduIp->sin_addr), varbuf);
 	    }
 	    if (Event) {
 		event_input(pdu->variables);
