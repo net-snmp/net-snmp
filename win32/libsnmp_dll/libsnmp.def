@@ -130,7 +130,7 @@ EXPORTS
 	ascii_to_binary
 	hex_to_binary
 	get_tc_descriptor
-	setenv
+	snmp_setenv
 	find_module
 	snmp_async_send
 	snmp_error
