@@ -646,7 +646,12 @@ int vacm_in_view (struct snmp_pdu *pdu,
     if (vp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 4; }
     DEBUGMSG(("mibII/vacm_vars", ", vt=%d\n", vp->viewType));
 
-    if (vp->viewType == SNMP_VIEW_EXCLUDED) return 5;
+    if (vp->viewType == SNMP_VIEW_EXCLUDED) {
+      if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
+	snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYUSES);
+      }
+      return 5;
+    }
 
     return 0;
 
