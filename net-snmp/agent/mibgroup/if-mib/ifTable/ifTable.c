@@ -330,8 +330,10 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
      * if ifDescr is NULL, use the ifName
      */
     if (NULL == rowreq_ctx->data.ifDescr)
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         tmp_descr = rowreq_ctx->data.ifName;
     else
+#endif
         tmp_descr = rowreq_ctx->data.ifDescr;
     tmp_len = strlen(tmp_descr);
 
