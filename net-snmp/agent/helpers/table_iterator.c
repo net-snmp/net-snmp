@@ -136,10 +136,10 @@ table_iterator_helper_handler(
             results = (iinfo->get_first_data_point)(&callback_loop_context,
                                                     &callback_data_context,
                                                     index_search,
-                                                    iinfo->myvoid);
+                                                    iinfo);
             if (iinfo->free_loop_context)
                 (iinfo->free_loop_context)(callback_loop_context,
-                                           iinfo->myvoid);
+                                           iinfo);
             goto got_results;
         }
 
@@ -155,7 +155,7 @@ table_iterator_helper_handler(
         index_search = (iinfo->get_first_data_point)(&callback_loop_context,
                                                      &callback_data_context,
                                                      index_search,
-                                                     iinfo->myvoid);
+                                                     iinfo);
 
         /* table.entry.column node */
         coloid[reginfo->rootoid_len+1] = table_info->colnum;
@@ -176,14 +176,14 @@ table_iterator_helper_handler(
                         if (callback_data_keep &&
                             iinfo->free_data_context) {
                             (iinfo->free_data_context)(callback_data_keep,
-                                                       iinfo->myvoid);
+                                                       iinfo);
                         }
                         callback_data_keep = callback_data_context;
 
                     } else {
                         if (callback_data_context && iinfo->free_data_context)
                             (iinfo->free_data_context)(callback_data_context,
-                                                       iinfo->myvoid);
+                                                       iinfo);
                     }
 
                     /* get the next node in the data chain */
@@ -191,7 +191,7 @@ table_iterator_helper_handler(
                         (iinfo->get_next_data_point)(&callback_loop_context,
                                                      &callback_data_context,
                                                      index_search,
-                                                     iinfo->myvoid);
+                                                     iinfo);
 
                     if (!index_search && !results &&
                         tbl_info->max_column > table_info->colnum) {
@@ -204,7 +204,7 @@ table_iterator_helper_handler(
                             (iinfo->get_first_data_point)(&callback_loop_context,
                                                           &callback_data_context,
                                                           index_search,
-                                                          iinfo->myvoid);
+                                                          iinfo);
                     }
                 }
 
@@ -228,7 +228,7 @@ table_iterator_helper_handler(
                         /* free not-needed data context */
                         if (callback_data_context && iinfo->free_data_context)
                             (iinfo->free_data_context)(callback_data_context,
-                                                       iinfo->myvoid);
+                                                       iinfo);
                     }
                     
                     /* get the next node in the data chain */
@@ -236,14 +236,14 @@ table_iterator_helper_handler(
                         (iinfo->get_next_data_point)(&callback_loop_context,
                                                      &callback_data_context,
                                                      index_search,
-                                                     iinfo->myvoid);
+                                                     iinfo);
                 }
         }
         
         /* XXX: free index_search? */
         if (callback_loop_context && iinfo->free_loop_context)
             (iinfo->free_loop_context)(callback_loop_context,
-                                       iinfo->myvoid);
+                                       iinfo);
 
       got_results: /* not milk */
         
@@ -253,6 +253,9 @@ table_iterator_helper_handler(
 #ifdef NOT_SERIALIZED
             break;
 #else
+            if (callback_loop_context && iinfo->free_loop_context_at_end)
+                (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+                
             return SNMP_ERR_NOERROR;
 #endif
         }
@@ -265,21 +268,34 @@ table_iterator_helper_handler(
         oldmode = reqinfo->mode;
         if (oldmode == MODE_GETNEXT)
             reqinfo->mode = MODE_GET;
+
         request_add_list_data(requests, create_data_list(TABLE_ITERATOR_NAME, callback_data_keep, NULL));
         ret = call_next_handler(handler, reginfo, reqinfo, requests);
-        if (oldmode == MODE_GETNEXT)
+        if (oldmode == MODE_GETNEXT) {
+            if (requests->requestvb->type == ASN_NULL) {
+                /* get next skipped this value for this column, we
+                   need to keep searching forward */
+                requests->requestvb->type = ASN_PRIV_RETRY;
+            }
             reqinfo->mode = oldmode;
+        }
 
         if (callback_data_keep && iinfo->free_data_context)
             (iinfo->free_data_context)(callback_data_keep,
-                                       iinfo->myvoid);
+                                       iinfo);
         
 #ifdef NOT_SERIALIZED
+        if (callback_loop_context && iinfo->free_loop_context_at_end)
+            (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
         return ret;
 #else
         requests = requests->next;
 #endif
         }
+#ifdef NOT_SERIALIZED
+    if (callback_loop_context && iinfo->free_loop_context_at_end)
+        (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
+#endif
     return SNMP_ERR_NOERROR;
 }
 
