@@ -49,6 +49,6 @@ extern void   unregister_sysORTable_by_session (struct snmp_session *);
 
 #else
 #define REGISTER_SYSOR_ENTRY(x,y)
-#define REGISTER_SYSOR_TABLE(x,y)
+#define REGISTER_SYSOR_TABLE(x,y,z)
 #endif /* USING_MIBII_SYSORTABLE_MODULE */
 #endif /* _MIBGROUP_SYSORTABLE_H */
