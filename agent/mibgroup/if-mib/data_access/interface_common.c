@@ -18,6 +18,7 @@
  */
 static netsnmp_conf_if_list *conf_list = NULL;
 static int need_wrap_check = -1;
+static int _access_interface_init = 0;
 
 /*
  * local static prototypes
@@ -37,6 +38,7 @@ static void _free_interface_config(void);
  * These shouldn't be called by the general public, so they aren't in
  * the header file.
  */
+#ifdef NETSNMP_ACCESS_INTERFACE_NOARCH
 extern void netsnmp_arch_interface_init(void);
 extern int
 netsnmp_arch_interface_container_load(netsnmp_container* container,
@@ -45,7 +47,7 @@ extern int
 netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
                               int ifAdminStatus);
 extern int netsnmp_arch_interface_index_find(const char*name);
-
+#endif
 
 
 /**---------------------------------------------------------------------*/
@@ -53,23 +55,37 @@ extern int netsnmp_arch_interface_index_find(const char*name);
  * initialization
  */
 void
-netsnmp_access_interface_init(void)
+init_interface_common(void)
 {
-    netsnmp_container * ifcontainer;
-
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
                                   "name type speed");
+}
+
+
+void
+netsnmp_access_interface_init(void)
+{
+    netsnmp_assert(0 == _access_interface_init); /* who is calling twice? */
+
+    if (1 == _access_interface_init)
+        return;
+
+    _access_interface_init = 1;
 
 #ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
-    netsnmp_arch_interface_init();
+    {
+        netsnmp_container * ifcontainer;
 
-    /*
-     * load once to set up ifIndexes
-     */
-    ifcontainer = netsnmp_access_interface_container_load(NULL, 0);
-    if(NULL != ifcontainer)
-        netsnmp_access_interface_container_free(ifcontainer, 0);
+        netsnmp_arch_interface_init();
+        
+        /*
+         * load once to set up ifIndexes
+         */
+        ifcontainer = netsnmp_access_interface_container_load(NULL, 0);
+        if(NULL != ifcontainer)
+            netsnmp_access_interface_container_free(ifcontainer, 0);
+    }
 #endif
 }
 
@@ -126,6 +142,7 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
     int rc;
 
     DEBUGMSGTL(("access:interface:container", "load\n"));
+    netsnmp_assert(1 == _access_interface_init);
 
     if (NULL == container)
         container = netsnmp_access_interface_container_init(load_flags);
@@ -179,6 +196,7 @@ netsnmp_access_interface_entry_get_by_index(netsnmp_container *container, oid in
     netsnmp_index   tmp;
 
     DEBUGMSGTL(("access:interface:entry", "by_index\n"));
+    netsnmp_assert(1 == _access_interface_init);
 
     if (NULL == container) {
         snmp_log(LOG_ERR,
@@ -201,6 +219,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
     netsnmp_interface_entry tmp;
 
     DEBUGMSGTL(("access:interface:entry", "by_name\n"));
+    netsnmp_assert(1 == _access_interface_init);
 
     if (NULL == container) {
         snmp_log(LOG_ERR,
@@ -224,7 +243,14 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
 oid
 netsnmp_access_interface_index_find(const char *name)
 {
+    DEBUGMSGTL(("access:interface:find", "index\n"));
+    netsnmp_assert(1 == _access_interface_init);
+
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
     return netsnmp_arch_interface_index_find(name);
+#else
+    return netsnmp_access_interface_ioctl_ifindex_get(-1, name);
+#endif
 }
 
 /**
@@ -233,6 +259,9 @@ netsnmp_access_interface_index_find(const char *name)
 const char *
 netsnmp_access_interface_name_find(oid index)
 {
+    DEBUGMSGTL(("access:interface:find", "name\n"));
+    netsnmp_assert(1 == _access_interface_init);
+
     return se_find_label_in_slist("interfaces", index);
 }
 
@@ -245,6 +274,7 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
         SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
 
     DEBUGMSGTL(("access:interface:entry", "create\n"));
+    netsnmp_assert(1 == _access_interface_init);
 
     if(NULL == entry)
         return NULL;
@@ -256,7 +286,7 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
      * get if index, and save name for reverse lookup
      */
     if (0 == if_index)
-        entry->index = netsnmp_arch_interface_index_find(name);
+        entry->index = netsnmp_access_interface_index_find(name);
     else
         entry->index = if_index;
     _access_interface_entry_save_name(name, entry->index);
@@ -551,6 +581,7 @@ netsnmp_access_interface_entry_overrides_get(const char * name)
 {
     netsnmp_conf_if_list * if_ptr;
 
+    netsnmp_assert(1 == _access_interface_init);
     if(NULL == name)
         return NULL;
 
@@ -566,6 +597,7 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
 {
     netsnmp_conf_if_list * if_ptr;
 
+    netsnmp_assert(1 == _access_interface_init);
     if (NULL == entry)
         return;
 
