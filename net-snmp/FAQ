@@ -2455,6 +2455,10 @@ How do I configure SNMPv3 users?
   This will create the new user.  See the access control entries above
   for how to use this, and the file 'README.snmpv3' for more details.
 
+    Note that simply having a 'rouser' or 'rwuser' line does *not*
+  automatically create the corresponding user.  You will need the
+  above 'createUser' line (or an equivalent 'usmUser') as well.
+
 
 
 The 'createUser' line disappears when I start the agent.  Why?
