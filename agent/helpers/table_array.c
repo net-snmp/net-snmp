@@ -360,7 +360,7 @@ release_netsnmp_request_groups(void *vp)
     CONTAINER_FREE(c);
 }
 
-inline netsnmp_index *
+netsnmp_index *
 find_next_row(netsnmp_table_request_info *tblreq_info,
               table_container_data * tad)
 {
@@ -402,7 +402,7 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
     return row;
 }
 
-inline void
+void
 build_new_oid(netsnmp_handler_registration *reginfo,
               netsnmp_table_request_info *tblreq_info,
               netsnmp_index *row, netsnmp_request_info *current)
@@ -439,7 +439,7 @@ build_new_oid(netsnmp_handler_registration *reginfo,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-inline int
+int
 process_get_requests(netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
@@ -542,7 +542,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-inline
+
 void
 group_requests(netsnmp_agent_request_info *agtreq_info,
                netsnmp_request_info *requests,
@@ -807,7 +807,6 @@ process_set_group(netsnmp_index *o, void *c)
                                                
 }
 
-inline
 int
 process_set_requests(netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
