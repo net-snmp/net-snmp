@@ -535,14 +535,16 @@ long snmp_get_next_msgid(void);
 long snmp_get_next_reqid(void);
 long snmp_get_next_sessid(void);
 long snmp_get_next_transid(void);
-void snmp_set_dump_packet (int);
-int snmp_get_dump_packet (void);
-void snmp_set_quick_print (int);
-int snmp_get_quick_print (void);
-void snmp_set_full_objid (int);
-int snmp_get_full_objid (void);
-void snmp_set_suffix_only (int);
-int snmp_get_suffix_only (void);
+/* provide for backwards compatibility */
+#define snmp_set_dump_packet(x) ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET, x)
+#define snmp_get_dump_packet() (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET))
+#define snmp_set_quick_print(x) ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, x);
+#define snmp_get_quick_print() (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
+#define snmp_set_suffix_only(x) ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, x);
+#define snmp_get_suffix_only() (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY))
+#define snmp_set_full_objid(x) ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, x);
+#define snmp_get_full_objid() (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY));
+
 
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
 void init_snmp (const char *);
