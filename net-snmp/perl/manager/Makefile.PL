@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'netsnmp::manager',
     'VERSION'	        => '', # finds $VERSION
-    'PREREQ_PM'		=> {SNMP => 4.0,
+    'PREREQ_PM'		=> {# SNMP => 4.0,
 			    DBI => 0,
 			    CGI => 0}, # e.g., Module::Name => 1.1
     'PM'                => { 
