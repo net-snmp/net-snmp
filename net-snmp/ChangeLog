@@ -1,5 +1,195 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.1.1 -> V3.1.2
+
+whardake 17 Oct 96 07:02:58
+    version tag ( 3.1.1.BSDI )
+
+whardake 30 Oct 96 13:47:21
+    - (PORTING,README): Add a new PORTING file to reference autoconf plee.
+
+whardake 30 Oct 96 13:49:09
+    - (config*, ece-mib.def):
+      - Change extensible mib location to ucdavis enterprise mib: 2021.
+      - Remove associated prompting from configure script and etc.
+
+whardake 31 Oct 96 17:06:16
+    - (read_config.c): numdisks was being incremented before last usage.
+
+whardake  1 Nov 96 08:54:11
+    - (asn1.c): Patch from Simon Leinen  <simon@switch.ch>:
+      - asn_build_unsigned_int, asn_build_unsigned_int64:
+        - Don't try to strip FFs from the high end of unsigned values.
+        - Skip the stripping code entirely if we have to add a null byte.
+
+whardake  4 Nov 96 09:30:46
+    - (config*, snmp_vars.c, extensible.c):  More include checks for linux.
+
+whardake  4 Nov 96 10:08:49
+    - (config*): Check for nlist in -lmld (irix).
+
+whardake  7 Nov 96 09:16:45
+    - NetBSD 3.1.0.1 branch merge.
+
+whardake  7 Nov 96 09:24:23
+    - Niels 3.1.1 branch merge.
+
+whardake  7 Nov 96 09:35:52
+    - BSDi2 3.1.1 branch merge.
+
+whardake  7 Nov 96 09:57:16
+    - (versiontag): Only tag release versions (Ext*).
+
+whardake  7 Nov 96 14:16:00
+    - (configure.in, configure): Changed default SNMPV2AUTH to SNMPV1.
+
+whardake  7 Nov 96 14:16:39
+    - (snmp_var_route.c): ifdef's around strings.h.
+
+whardake  7 Nov 96 14:17:17
+    - (snmp_vars.c): ifdef typos.
+
+whardake  7 Nov 96 14:19:33
+    - (mib.c): typecast for sprint_objid().
+
+whardake  8 Nov 96 17:03:47
+    - (Makefile.in): Created a 'touchit' to touch config files properly.
+
+whardake  8 Nov 96 17:06:46
+    - (Makefile.in): Fixed 'touchit'.
+
+whardake 14 Nov 96 15:14:50
+    - (extensible.c): Use statfs if statvfs is unavailable.
+
+whardake 14 Nov 96 15:16:22
+    - (snmp_vars.c):
+      - #ifdef typo.
+      - prototype for Interface_Scan_Init().
+      - Check for existance of tcpstat.tcps_rcvmemdrop before using.
+
+whardake 14 Nov 96 15:17:36
+    - (config*):
+      - Check for existance of tcpstat.tcps_rcvmemdrop.
+      - Check for sys/vfs.h.
+
+whardake 14 Nov 96 15:24:24
+    - (snmptrap.c, inet.c, route.c): typecasting warning fixes.
+
+whardake 15 Nov 96 16:43:33
+    - (config*, extensible.c): Make uname calls work correctly.
+
+whardake 15 Nov 96 16:44:11
+    - (parse.c):  Add back in "reading mib..." debugging statments.
+
+whardake 22 Nov 96 08:18:29
+    - (snmp_vars.c): Trash interface caching.
+
+whardake 22 Nov 96 09:06:10
+    - (snmp_vars.c): Merge from FreeBSD2-3-1-1.
+      - Add checks for ifnet.[io]bytes.
+
+whardake 22 Nov 96 09:14:22
+    - (config*): Add checks for ifnet.[io]bytes.
+
+whardake 22 Nov 96 11:35:29
+    - (agent/extensible/*.c, new: extproto.h):  Removed all -Wall warnings!
+
+whardake 22 Nov 96 14:38:05
+    - (config*, install-sh, mkinstalldirs): Upgraded to autoconf 2.11.
+
+whardake 22 Nov 96 15:10:36
+    - (extensible.c, read_config.c): removed more -Wall warnings.
+
+whardake 24 Nov 96 16:25:07
+    - (kernel.c, config*, INSTALL):  New configure switch:  --without-root-access.
+      - The agent doesn't exit if it can't open /dev/kmem.
+
+whardake 24 Nov 96 16:45:27
+    version tag ( 3.1.2.pre1 )
+
+whardake 25 Nov 96 08:44:03
+    - ({agent,apps}/Makefile.in): Put libsnmp.a in front of -l libs.
+
+whardake 25 Nov 96 09:15:57
+    - (config*, snmp_impl.h): Moved void -> char define to a configure test.
+
+whardake 27 Nov 96 08:02:06
+    - (snmp_vars.c): Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+      - Change comments to reflect what its actually looking at.
+      - Remove ifdef around ifnet declarations.
+
+whardake 27 Nov 96 08:03:47
+    - (extensible.c): Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+      - Remove return(0) on void init_extensible().
+
+whardake 27 Nov 96 08:06:04
+    - (configure, configure.in): Default sysloc UCDavis -> Unknown.
+
+whardake 27 Nov 96 08:21:20
+    - (INSTALL): Typo:  3.1.3 -> 3.0.3.
+
+whardake 27 Nov 96 08:21:34
+    - (README): Update.
+
+whardake 27 Nov 96 08:34:12
+    - (if.c): Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+      - Watch out for interface names with ' ' in them.
+      - Reset signal on BSD signal implementations.
+
+whardake 27 Nov 96 08:45:46
+    - (if.c): Reset signal on all types of signal implementations.
+
+whardake 27 Nov 96 08:56:44
+    - (configure.in, configure): Truncate system names beyond [-_].*.
+
+whardake  2 Dec 96 08:55:49
+    - (snmp_vars.c): Patch from Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+      - ifPhysAddr - in Interface_Get_Ether_By_Index, HP-UX has the same
+            EtherAddr strucure as MIPS.
+    
+      - ipAdEntIfIndex - in var_ipAddrEntry, there is a false match on
+            the loopback interface, giving the wrong answer of the first
+            interface index.
+    
+      - udpInErrors - in var_udp, the count of UDP errors omits discarded
+            packets.  Some systems (i.e. HP-UX) have extended the udpstat
+            structure to include these.  I'v tweaked this analogous to a
+            similar addition in the tcpstat structure.
+    
+      - tcpConnState - HP-UX has added an extra state into the list, which
+            throws the rest of them out.
+
+whardake  3 Dec 96 10:04:02
+    - (config*, snmp_vars.c):
+      - Wrote AC_CHECK_STRUCT_FOR and use it.
+      - Make AC_CHECK_IFNET_FOR use above.
+      - Changequote '[]' -> '' around sed expression with []s (-Dostype).
+
+whardake  3 Dec 96 10:05:17
+    - (md5.c): Put 'U'nsigned marker at end of constants to remove gcc warns.
+
+whardake  3 Dec 96 11:04:33
+    - (snmp_vars.c): From Dave Shield <D.T.Shield@csc.liv.ac.uk>:
+      - Fix arp table for hpux.
+    - (config*): Check for arphd.at_next and use in above.
+
+whardake  3 Dec 96 11:14:43
+    - (EXAMPLE.conf.def, passtest): Move passtest to ucdavis subtree.
+
+whardake  3 Dec 96 14:51:24
+    - (ece-mib.def): Used -> Avail in memory sequence.
+
+whardake  4 Dec 96 09:16:09
+    - (asn1.c, parse.c, snmp_api.c, snmp_client.c):
+      - Patch from Niels Baggesen <Niels.Baggesen@uni-c.dk>:
+        - Parser fixes for multiple nodes.
+        - memmove/copy deletes.
+
+whardake  4 Dec 96 09:49:38
+    - (PORTING, README):  Update for release 3.1.2.
+
+-------------------------------------------------------------------------------
+
 Changes: V3.1.0.1 -> V3.1.1
 
 whardake 11 Sep 96 08:49:14
