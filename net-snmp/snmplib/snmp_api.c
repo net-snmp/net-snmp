@@ -122,21 +122,7 @@ SOFTWARE.
 #include "mt_support.h"
 #include "snmp-tc.h"
 #include "snmp_parse_args.h"
-
 #include "snmp_transport.h"
-#include "snmpUDPDomain.h"
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-#include "snmpUnixDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include "snmpTCPDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-#include "snmpAAL5PVCDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include "snmpIPXDomain.h"
-#endif
 
 static void _init_snmp (void);
 

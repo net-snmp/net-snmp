@@ -88,21 +88,8 @@ SOFTWARE.
 #include "ds_agent.h"
 #include "snmp_agent.h"
 #include "snmp_alarm.h"
-
 #include "snmp_transport.h"
-#include "snmpUDPDomain.h"
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
-#include "snmpUnixDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-#include "snmpTCPDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
-#include "snmpAAL5PVCDomain.h"
-#endif
-#ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include "snmpIPXDomain.h"
-#endif
+
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
 #endif
@@ -571,7 +558,7 @@ int
 init_master_agent(void)
 {
   snmp_transport *transport;
-  char *cptr, *cptr2;
+  char *cptr;
   char buf[SPRINT_MAX_LEN];
 
   if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
