@@ -238,3 +238,20 @@ void setup_tree __P((void))
   /* No longer necessary to sort the mib tree - this is inherent in
      the construction of the subtree structure */
 }
+
+void
+snmpd_register_config_handler(token, parser, releaser)
+  char *token;
+  void (*parser) __P((char *, char *));
+  void (*releaser) __P((void));
+{
+  register_config_handler("snmpd",token,parser,releaser);
+}
+
+void
+unregister_config_handler(token)
+  char *token
+{
+  unregister_config_handler("snmpd",token);
+}
+
