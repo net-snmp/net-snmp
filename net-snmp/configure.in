@@ -300,23 +300,25 @@ AC_ARG_WITH(out_mib_modules,
   Default mib modules compiled into the agent (which can be removed):
   
     mibII:                 support for the mib-II tree.
-    snmpv3:                support for the snmpv3 mib modules.
-    ucd_snmp:              ucd-snmp specific extensions.
+    snmpv3mibs:            support for the snmpv3 mib modules.
+    ucd_snmp:              UCD-SNMP-MIB specific extensions.
+    agent_mibs:            NET-SNMP-AGENT-MIB extensions
     agentx:                (see below)
     notification:          mibs supporting specification of trap destinations.
+    target:                Support for the SNMP WGs TARGET-MIB.
 
   Optional mib modules that can be built into the agent include:
     host:                  host resources mib support.
                              (beta level code for linux, hpux, solaris, bsdi)
+    disman/event-mib:      support for the DISMAN-EVENT-MIB (beta)
+                             (supports self monitoring and notification 
+                              delivery when error conditions are found)
     smux:                  smux support to allow subagents to attach to snmpd.
     misc/ipfwacc:          accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains: firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
     ucd-snmp/diskio:       Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
-    target:                Support for the SNMP WGs TARGET-MIB.
-                           (note: this is required for the notification mib 
-			   above, and hence is usually included).
     tunnel:                Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
@@ -413,6 +415,19 @@ AC_ARG_WITH(defaults,
 Miscellaneous:
   --with-defaults          Use defaults for prompted values.],
     defaults="yes",defaults="no")
+
+AC_ARG_ENABLE(ucd-snmp-compatibility,
+[--ucd-snmp-compatibility        Install ucd-snmp look-alike headers and libs.],
+    ucd_compat=yes)
+dnl
+dnl setup install targets
+dnl
+if test "x$ucd_compat" = "xyes" ; then	
+  installucdheaders=installucdheaders
+  installucdlibs=installucdlibs
+fi
+AC_SUBST(installucdheaders)
+AC_SUBST(installucdlibs)
 
 dnl Only define if specifically chosen as --without (i.e., default to true). 
 if test "x$with_root_access" = "xno"; then
@@ -992,7 +1007,7 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification agentx agent_mibs $new_with_mib_modules"
+new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx agent_mibs $new_with_mib_modules"
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 
 if test "x$mini_agent" = "xyes"; then
