@@ -42,6 +42,11 @@ TABLE OF CONTENTS
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
+   Or "sendto: permission denied" ?
+   I'm using the Perl SNMP module, and get something about "bad free"?
+   I can't load any of the mib files, and they seem to be missing
+       the first two characters of the filename.  What's happening?
+   How do I compile with 'gcc' instead of 'cc'?
    I cannot set any variables in the MIB.
    Sometimes I seem to get the wrong answers.  Why?
 
@@ -123,9 +128,10 @@ What happens if mine isn't listed?
 	let us know so that we can update the list above.
 	If it doesn't work, let us know and we'll try to help.
   If the agent almost compiles, but certain files in the
-        agent/mibgroup directory fail, you can try to compile without
-        those module files using the --with-out-mib-modules="list"
-        flag to configure (which you'll have to re-run).
+	agents/mibgroup directory fail, you can try re-running
+	confugure with the flag
+		--with-out-mib-modules="list"
+	to omit particular modules. You'll then need to re-compile.
   Either way, try it and let us know how you get on (see below for how).
 	
 
@@ -223,11 +229,13 @@ What are all these different SNMPv2's anyway?
 	SNMPv2*		} limitations of SNMPv1 administration
 			} These are both super-sets of SNMPv2c
 
-	SNMP-NG		The most recent (and on-going) attempt to reach
-			agreement between the proponents of usec and v2star
-			The eventual result of this process will probably
-			be regarded as a new version of SNMP
-			(perhaps SNMPv3 but don't quote me on that!)
+			
+	SNMP-NG		The most recent attempt to reach agreement between
+			the proponents of usec and v2star.
+
+	SNMPv3		The formal successor to SNMP-NG, aiming to produce
+			Proposed Standards for the next generation of core
+			SNMP functions over the next twelve months.
 
 
 Which SNMPv2 is supported in this package?
@@ -238,7 +246,7 @@ Which SNMPv2 is supported in this package?
   developed.
   This is now regarded as "historic", and it is hoped to move to
   SNMPv2c as soon as possible.
-  When an agreed standard for SNMPv3 (by whatever name) finally emerges,
+  When an agreed standard for SNMPv3 finally emerges,
   we would hope to include support for that.
 
 
@@ -322,9 +330,14 @@ How do I add functionality?
 What traps are sent by the agent?
 --------------------------------
 
-  The agent will send a 'coldStart(0)' trap when it first starts up,
-  and 'authenticationFailure(4)' traps when it receives SNMPv1 requests
-  using a community name that is not recognised.
+  The agent will send a 'coldStart(0)' trap when it first starts up.
+  The destination to send the trap to, and the community name to use,
+  are set by putting entries in the snmpd.conf file for 'trapsink'
+  and 'trapcommunity' - note that both are required.
+    The agent can also be configured to send 'authenticationFailure(4)'
+  traps when it receives SNMPv1 requests using a community name that is
+  not recognised.  This is done with the snmpd.conf entry 'authtrapsenable 1'.
+    
 
 
 When I run the agent it runs and then quits without staying around. Why?
@@ -420,10 +433,18 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 
   Alternatively, by defining the environmental variable PREFIX, the
   tools can be told to look for non-fully specified objects in
-  a different sub-tree.  I.E.:
+  a different sub-tree.  This can be done by the command
 
-	setenv PREFIX .iso.org.dod.internet.private.enterprises.ucdavis
-	/opt/snmp/bin/snmpwalk -v 1 localhost public processes
+							(C shell family)
+	setenv PREFIX  .iso.org.dod.internet.private.enterprises.ucdavis
+  or
+							(Bourne shell family)
+	PREFIX=.iso.org.dod.internet.private.enterprises.ucdavis
+	export PREFIX
+
+  after which, the following example should work:
+
+	snmpwalk -v 1 localhost public processes
 
 
 I've done that, and I still can't see the values. Why not?
@@ -435,7 +456,7 @@ somewhere within the MIB tree.  Try running the command
 
 
 The agent is complaining about 'snmpd.conf'.  Where is this?
-----------------------------------------------------------
+-----------------------------------------------------------
 
   It doesn't exist in the distribution as shipped.  You need to
   create it to reflect your local requirement.
@@ -484,19 +505,55 @@ How about "Can't open /dev/kmem"?
   (or suitable GID if appropriate)
  
 
+Or "sendto: permission denied"?
+------------------------------
+
+  This was due to a minor problem in setting network addresses, which
+  has now been fixed.  If you are seeing this error, please install the
+  most recent version of the UCD snmp tools.
+
+
+I'm using the Perl SNMP module, and get something about "bad free"?
+------------------------------------------------------------------
+
+  This problem has also been fixed in the most recent release of the
+  UCD SNMP tools.  In general, if you experience any problem like this,
+  try checking to see if there's a newer release first.
+
+
+I can't load any of the mib files, and they seem to be missing
+the first two characters of the filename.  What's happening?
+-----------------------------------------------------------
+
+  This is a problem experienced with Sun systems when the tools have
+  been compiled with a mixture of BSD and Solaris environments.
+  You'll need to re-configure and compile the tools, making sure that
+  '/usr/ucb' is not in your PATH (or at least comes at the end).
+
+
+How do I compile with 'gcc' instead of 'cc'?
+-------------------------------------------
+
+  Set the environmental variable 'CC' to have the value 'gcc' before
+  running the configure script.
+
+
 I cannot set any variables in the MIB.
 -------------------------------------
 
-  There are relatively few variables in the standard MIB tree that
-  are writable, mostly regarding the status of various elements of the
-  system.  Few of these are currently setable in the agent.
+  There are three possible reasons for this:
 
-  The main variables that can be changed are purely those within the
-  'system' group, relating to general contact information.
-    Note also that the 'public' community cannot be used to set values.
-  As shipped, the community name 'private' should be used, although this
-  can be changed in the snmpd.conf file by specifing a new community name
-  for slot 2.
+  The majority of MIB variables are "read-only" and cannot be changed.
+
+  Of those that can legitimately be set, many of them have not been
+  implemented in the agent - most of those that can are contained within
+  the 'system' sub-tree, relating to general contact information.
+    
+  With the distribution as shipped, the community name "private" must
+  be used to set these values.  This can be changed by setting the
+  second community string (via the snmpd.conf entry "community 2 newstring").
+  Note that the community string "public" can *not* be used to set
+  variables.
   
 
 Sometimes I seem to get the wrong answers.  Why?
