@@ -123,7 +123,7 @@
 #endif
 
 #include <net-snmp/utilities.h>
-#include <net-snmp/logging_api.h>
+#include <net-snmp/output_api.h>
 
 #if solaris2
 #include "kernel_sunos5.h"
