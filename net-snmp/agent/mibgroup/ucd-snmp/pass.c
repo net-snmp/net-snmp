@@ -313,7 +313,7 @@ setPass(int action,
   static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
   static long tmp;
   static unsigned long utmp;
-  static size_t itmp;
+  size_t itmp;
   static oid objid[MAX_OID_LEN];
   
   for(i=1; i<= numpassthrus; i++) {
@@ -369,10 +369,9 @@ setPass(int action,
                   (int) ((utmp & 0xff)));
           break;
         case ASN_OCTET_STR:
-          itmp = sizeof(buf);
+          itmp = sizeof(buf2);
           memset(buf2,(0),itmp);
           memcpy(buf2, var_val, var_val_len);
-          buf2[var_val_len] = 0;
           if (bin2asc(buf2, itmp) == (int)itmp)
               sprintf(buf,"string %s",buf2);
           else
