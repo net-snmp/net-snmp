@@ -369,7 +369,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   struct usmUser *newuser;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
-  int ret;
+  u_long ret;
 
   newuser = usm_create_user();
 
@@ -379,7 +379,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   newuser->name = strdup(buf);
 
   newuser->engineID = snmpv3_generate_engineID(&ret);
-  if ( ret < 0 ) {
+  if ( ret == 0 ) {
     usm_free_user(newuser);
     return;
   }
@@ -731,12 +731,12 @@ int
 init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                         void *clientarg) {
 
-  int engineIDLen;
+  u_long engineIDLen;
   u_char *c_engineID;
 
   c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-  if ( engineIDLen < 0 ) {
+  if ( engineIDLen == 0 ) {
     /* Somethine went wrong - help! */
     return SNMPERR_GENERR;
   }
@@ -811,14 +811,14 @@ snmpv3_local_snmpEngineBoots(void)
  * Store engineID in buf; return the length.
  *
  */
-int
+u_long
 snmpv3_get_engineID(u_char *buf, size_t buflen)
 {
   /*
    * Sanity check.
    */
   if ( !buf || (buflen < engineIDLength) ) {
-    return SNMPERR_GENERR;
+    return 0;
   }
 
   memcpy(buf,engineID,engineIDLength);
@@ -876,7 +876,7 @@ snmpv3_clone_engineID(u_char **dest, size_t* destlen, u_char*src, size_t srclen)
  * 'length' is set to the length of engineID  -OR-  < 0 on failure.
  */
 u_char *
-snmpv3_generate_engineID(int *length)
+snmpv3_generate_engineID(u_long *length)
 {
   u_char *newID;
   newID = (u_char *) malloc(engineIDLength);
@@ -885,7 +885,7 @@ snmpv3_generate_engineID(int *length)
     *length = snmpv3_get_engineID(newID, engineIDLength);
   }
 
-  if (*length < 0) {
+  if (*length == 0) {
     SNMP_FREE(newID);
     newID = NULL;
   }

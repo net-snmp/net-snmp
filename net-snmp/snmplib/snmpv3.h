@@ -34,8 +34,8 @@ int     snmpv3_store(int majorID, int minorID, void *serverarg,
                      void *clientarg);
 u_long  snmpv3_local_snmpEngineBoots(void);
 int     snmpv3_clone_engineID(u_char **, size_t* , u_char*, size_t);
-int     snmpv3_get_engineID(u_char *buf, size_t buflen);
-u_char *snmpv3_generate_engineID(int *);
+u_long  snmpv3_get_engineID(u_char *buf, size_t buflen);
+u_char *snmpv3_generate_engineID(u_long *);
 u_long  snmpv3_local_snmpEngineTime(void);
 int     get_default_secLevel(void);
 oid    *get_default_authtype(size_t *);
