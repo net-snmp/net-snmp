@@ -139,8 +139,8 @@ NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowr
 @end@
 
 @   end@ # writable
-@   if ("$m2c_data_context" eq "generated") && (($m2c_undo_embed == 0)) || ($m2c_data_allocate == 1)@
-static ${context}_data *${context}_allocate_data(void);
+@   if ("$m2c_data_context" eq "generated") && (($m2c_undo_embed == 0) || ($m2c_data_allocate == 1))@
+${context}_data *${context}_allocate_data(void);
 
 @   end@
 /**
