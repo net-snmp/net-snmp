@@ -109,7 +109,8 @@ struct variable2 example_variables[] = {
     { EXAMPLETIMETICKS, ASN_TIMETICKS, RONLY, var_example, 1, {3}},
     { EXAMPLEIPADDRESS, ASN_IPADDRESS, RONLY, var_example, 1, {4}},
     { EXAMPLECOUNTER,   ASN_COUNTER,   RONLY, var_example, 1, {5}},
-    { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}}
+    { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}},
+    { EXAMPLETRIGGERTRAP, ASN_INTEGER, RWRITE, var_example, 1, {7}}
   };
 
     /*
@@ -363,6 +364,16 @@ var_example(struct variable *vp,
       long_ret = 42;	/* Do we detect a theme running through these answers? */
       return (u_char *) &long_ret;
 
+    case EXAMPLETRIGGERTRAP:
+		/*
+		 * This object is essentially "write-only".
+		 * It only exists to trigger the sending of a trap.
+		 * Reading it will always return 0.
+		 */
+      long_ret = 0;
+      *write_method = write_exampletrap;
+      return (u_char *) &long_ret;
+      
     default:
 		/*
 		 *  This will only be triggered if there's a problem with
@@ -467,6 +478,75 @@ write_exampleint(int	action,
 			 *
 			 *  In this case, there's nothing to do.
 			 */
+	    break;
+
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+int
+write_exampletrap(int	action,
+		 u_char	*var_val,
+		 u_char	var_val_type,
+		 size_t	var_val_len,
+		 u_char	*statP,
+		 oid	*name,
+		 size_t	name_len)
+{
+    long intval;
+
+    switch ( action ) {
+	case RESERVE1:
+			/*
+			 *  The only acceptable value is the integer 1
+			 */
+	    if (var_val_type != ASN_INTEGER ) {
+		DEBUGMSGTL(("example", "%x not integer type", var_val_type));
+		return SNMP_ERR_WRONGTYPE;
+	    }
+	    if (var_val_len > sizeof(long)) {
+		DEBUGMSGTL(("example", "wrong length %x", var_val_len));
+		return SNMP_ERR_WRONGLENGTH;
+	    }
+
+	    intval = *((long *) var_val);
+	    if  ( intval != 1 ) {
+		DEBUGMSGTL(("example", "wrong value %x", intval));
+		return SNMP_ERR_WRONGVALUE;
+	    }
+	    break;
+
+	case RESERVE2:
+			/* No resources are required.... */
+	    break;
+
+	case FREE:
+			/* ... so no resources need be freed */
+	    break;
+
+	case ACTION:
+			/*
+			 *  Having triggered the sending of a trap,
+			 *   it would be impossible to revoke this,
+			 *   so we can't actually invoke the action here.
+			 */
+	    break;
+
+	case UNDO:
+			/*  We haven't done anything yet,
+				so there's nothing to undo */
+	    break;
+
+	case COMMIT:
+			/*
+			 *  Everything else worked, so it's now safe
+			 *   to trigger the trap.
+			 *  Note that this is *only* acceptable since
+			 *   the trap sending routines are "failsafe".
+			 *  (In fact, they can fail, but they return no
+			 *   indication of this, which is the next best thing!)
+			 */
+	    send_easy_trap( SNMP_TRAP_ENTERPRISESPECIFIC, 3 );
 	    break;
 
     }

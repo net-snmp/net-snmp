@@ -25,6 +25,7 @@ config_require(util_funcs)
 extern void		init_example(void);
 extern FindVarMethod	var_example;
 extern WriteMethod	write_exampleint;
+extern WriteMethod	write_exampletrap;
 
 
     /*
@@ -49,5 +50,6 @@ extern WriteMethod	write_exampleint;
 #define	EXAMPLEIPADDRESS        4
 #define EXAMPLECOUNTER		5  
 #define	EXAMPLEGAUGE            6
+#define	EXAMPLETRIGGERTRAP      7
 
 #endif /* _MIBGROUP_EXAMPLE_H */
