@@ -118,6 +118,9 @@ Duplicate requests
 	Currently these are processed afresh each time.
 	They should probably be either dropped or use cached replies
 
+Security
+	Go through the library and apps and check all arrays and
+	buffers for overruns. There are a lot of unchecked ones.
 
 ===================
 
