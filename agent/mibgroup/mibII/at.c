@@ -522,7 +522,7 @@ static void ARP_Scan_Init (void)
 	int i, n = 0;
         char line [128];
 	int za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
-        char ifname[20];
+        char ifname[21];
 
 	if (!in) {
 	 snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
