@@ -137,7 +137,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
-void memory_parse_config(char *word, char *cptr)
+void memory_parse_config(char *token, char *cptr)
 {
   minimumswap = atoi(cptr);
 }

@@ -440,8 +440,8 @@ int snmpTargetAddr_addRowStatus(entry, cptr)
 }  /* snmpTargetAddr_addRowStatus  */
 
 
-void snmpd_parse_config_targetAddr(word, char_ptr)
-     char *word, *char_ptr;
+void snmpd_parse_config_targetAddr(token, char_ptr)
+     char *token, *char_ptr;
 {
   char  *cptr = char_ptr, *tcptr, buff[1024];
   struct targetAddrTable_struct *newEntry;
