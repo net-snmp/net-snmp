@@ -101,6 +101,13 @@ init_subagent(void)
     }
 }
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+void
+netsnmp_enable_subagent(void) {
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE,
+                           SUB_AGENT);
+}
+#endif /* USING_AGENTX_SUBAGENT_MODULE */
 
 struct agent_netsnmp_set_info *
 save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
