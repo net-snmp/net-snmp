@@ -33,6 +33,7 @@ extern          "C" {
         int             flags;  /* not currently used */
         int             store_indexes;
         netsnmp_table_row *first_row;
+        netsnmp_table_row *last_row;
     } netsnmp_table_data;
 
     netsnmp_mib_handler *netsnmp_get_table_data_handler(netsnmp_table_data
