@@ -1030,10 +1030,13 @@ write_snmpTargetParamsRowStatus(
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetParamsRowStatus */
 
-
-
-
-
-
-
+struct targetParamTable_struct *get_paramEntry(char *name) {
+    static struct targetParamTable_struct *ptr;
+    for(ptr = aPTable; ptr; ptr = ptr->next) {
+        if (strcmp(ptr->paramName, name) == 0) {
+            return ptr;
+        }
+    }
+    return NULL;
+}
 
