@@ -345,7 +345,7 @@ dnl
 AC_ARG_WITH(enterprise-oid,
 [Enterprise OIDs:  (warning: this should be used with caution.)
 
-  --with-enterprise-oid              The enterprise OID assigned to the
+  --with-enterprise-oid              The enterprise number assigned to the
                                      vendor by IANA.  See
                                      http://www.iana.org/cgi-bin/enterprise.pl
                                      to get one, though using the default is
@@ -363,14 +363,15 @@ AC_ARG_WITH(enterprise-oid,
 
 AC_ARG_WITH(enterprise-sysoid,
 [
-  --with-enterprise-sysoid           The sysObjectID of the system group
-                                     (default .1.6.1.4.1.8072... = 
+  --with-enterprise-sysoid           The base OID for the sysObjectID
+                                     of the system group
+                                     (default .1.6.3.1.4.1.8072... = 
                                       "enterprise.net-snmp...")],[
-  sys_oid=`echo "$withval" | sed 's/\./\,/g'`
+  sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
-  sys_dot_oid="$withval"
+  sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB, $sys_dot_oid)
-  sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0)'`
+  sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0) }'`
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT($withval)
 ],[
@@ -381,12 +382,12 @@ AC_ARG_WITH(enterprise-notification-oid,
 [
   --with-enterprise-notification-oid The OID used for the root of
 				     enterprise specific notifications.
-                                     (default 2021 = "enterprise.ucdavis.251")],[
-  notification_oid=`echo "$withval" | sed 's/\./\,/g'`
+                                     (default .1.6.3.1.4.1.8072 = "enterprise.net-snmp")],[
+  notification_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_MIB, $notification_oid)
-  notification_dot_oid="$withval"
+  notification_dot_oid=`echo "$withval" | sed 's/^\.//'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB, $notification_dot_oid)
-  notificationoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0)'`
+  notificationoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0) }'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB_LENGTH, $notificationoid_len)
   AC_MSG_RESULT($withval)
 ],[
