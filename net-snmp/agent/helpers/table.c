@@ -559,7 +559,7 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                      netsnmp_agent_request_info *reqinfo,
                      netsnmp_request_info *requests)
 {
-    int             status;
+    int             status = SNMP_ERR_NOERROR;
     netsnmp_request_info *request;
     oid             coloid[MAX_OID_LEN];
     netsnmp_table_request_info *table_info;
@@ -580,15 +580,17 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
                  * so we need to try with the next column (if any)
                  */
                 table_info = netsnmp_extract_table_info(request);
-
-                memcpy(coloid, reginfo->rootoid,
-                               reginfo->rootoid_len * sizeof(oid));
-                coloid[reginfo->rootoid_len]   = 1;   /* table.entry node */
-                coloid[reginfo->rootoid_len+1] = ++table_info->colnum;
-                snmp_set_var_objid(request->requestvb,
-                                   coloid, reginfo->rootoid_len + 2);
-
-                request->requestvb->type = ASN_PRIV_RETRY;
+                table_info->colnum = netsnmp_table_next_column(table_info);
+                if (0 != table_info->colnum) {
+                    memcpy(coloid, reginfo->rootoid,
+                           reginfo->rootoid_len * sizeof(oid));
+                    coloid[reginfo->rootoid_len]   = 1;   /* table.entry node */
+                    coloid[reginfo->rootoid_len+1] = table_info->colnum;
+                    snmp_set_var_objid(request->requestvb,
+                                       coloid, reginfo->rootoid_len + 2);
+                    
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
             }
         }
     }
@@ -923,6 +925,33 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
     return stashp;
 }
 
+/*
+ * advance the table info colnum to the next column, or 0 if there are no more
+ *
+ * @return new column, or 0 if there are no more
+ */
+unsigned int
+netsnmp_table_next_column(netsnmp_table_request_info *table_info)
+{
+    if (NULL == table_info)
+        return 0;
+
+    /*
+     * try and validate next column
+     */
+    if (table_info->reg_info->valid_columns)
+        return netsnmp_closest_column(table_info->colnum + 1,
+                                      table_info->reg_info->valid_columns);
+    
+    /*
+     * can't validate. assume 1..max_column are valid
+     */
+    if (table_info->colnum < table_info->reg_info->max_column)
+        return table_info->colnum + 1;
+    
+    return 0; /* out of range */
+}
+
 netsnmp_index *
 netsnmp_table_index_find_next_row(netsnmp_container *c,
                                   netsnmp_table_request_info *tblreq)
@@ -952,17 +981,10 @@ netsnmp_table_index_find_next_row(netsnmp_container *c,
          * we don't have a row, but we might be at the end of a
          * column, so try the next column.
          */
-        if (!row) {
-            ++tblreq->colnum;
-            if (tblreq->reg_info->valid_columns) {
-                tblreq->colnum = netsnmp_closest_column
-                    (tblreq->colnum,tblreq->reg_info->valid_columns);
-            } else if (tblreq->colnum > tblreq->reg_info->max_column)
-                tblreq->colnum = 0;
-
-            if (tblreq->colnum != 0)
-                row = CONTAINER_FIRST(c);
-        }
+        if ((NULL == row) &&
+            (0 != (tblreq->colnum = netsnmp_table_next_column(tblreq))))
+            row = CONTAINER_FIRST(c);
+        
     }
 
     return row;
