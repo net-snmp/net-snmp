@@ -92,6 +92,7 @@ snmp_parse_args_usage(FILE *outf)
 void
 snmp_parse_args_descriptions(FILE *outf)
 {
+  fprintf(outf,"UCD-snmp version: %s\n", VersionInfo);
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
@@ -117,9 +118,9 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf, "  Debugging\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -D[TOKEN,...]\tturn on debugging output, optionally by the list of TOKENs.\n");
+  fprintf(outf, "  -D all | <TOKEN[,TOKEN,...]> \tturn on debugging output for the specified TOKENs.\n");
   fprintf(outf, "  General options\n");
-  fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
+  fprintf(outf, "  -m all | <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);

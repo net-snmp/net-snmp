@@ -120,7 +120,7 @@ void debug_register_tokens(char *tokens) {
   cp = strtok(newp, DEBUG_TOKEN_DELIMITER);
   while(cp) {
     if (strlen(cp) < MAX_DEBUG_TOKEN_LEN) {
-      if (strcmp(DEBUG_ALWAYS_TOKEN, cp) == 0)
+      if (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0)
         debug_print_everything = 1;
       else if (debug_num_tokens < MAX_DEBUG_TOKENS)
         debug_tokens[debug_num_tokens++] = strdup(cp);
