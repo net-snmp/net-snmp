@@ -41,7 +41,7 @@
 int (*kmt_hash) (
 	const int	  mode,		void  	 **context,
 	const u_int8_t	 *data,		const int  data_len,     
-	u_int8_t	**digest,	int	  *digest_len);
+	u_int8_t	**digest,	size_t	  *digest_len);
 
 /*******************************************************************-o-******
  * generate_Ku
