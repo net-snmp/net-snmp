@@ -262,6 +262,9 @@ extern          "C" {
 #define IANAIFTYPE_OPTICALCHANNELGROUP  219
 #define IANAIFTYPE_HOMEPNA  220
 #define IANAIFTYPE_GFP  221
+#define IANAIFTYPE_CISCOISLVLAN  222
+#define IANAIFTYPE_ACTELISMETALOOP  223
+#define IANAIFTYPE_FCIPLINK  224
 
 
 #endif                          /* IANAIFTYPE_ENUMS */
@@ -270,6 +273,7 @@ extern          "C" {
      * TODO:
      * value mapping (see notes at top of file)
      */
+#define INTERNAL_IFTYPE_OTHER  1
 #define INTERNAL_IANAIFTYPE_ETHERNETCSMACD  ARPHRD_ETHER
 #define INTERNAL_IANAIFTYPE_FDDI  ARPHRD_FDDI
 #define INTERNAL_IANAIFTYPE_PPP  ARPHRD_PPP
