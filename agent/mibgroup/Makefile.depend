@@ -20,7 +20,6 @@
 ./header_complex.lo: ../../include/net-snmp/library/tools.h
 ./header_complex.lo: ../../include/net-snmp/library/int64.h
 ./header_complex.lo: ../../include/net-snmp/library/mt_support.h
-./header_complex.lo: ../../include/net-snmp/library/snmp_locking.h
 ./header_complex.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./header_complex.lo: ../../include/net-snmp/library/data_list.h
 ./header_complex.lo: ../../include/net-snmp/library/oid_stash.h
@@ -32,9 +31,6 @@
 ./header_complex.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./header_complex.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./header_complex.lo: ../../include/net-snmp/library/ucd_compat.h
 ./header_complex.lo: ../../include/net-snmp/pdu_api.h
 ./header_complex.lo: ../../include/net-snmp/mib_api.h
@@ -108,7 +104,6 @@
 ./testhandler.lo: ../../include/net-snmp/library/tools.h
 ./testhandler.lo: ../../include/net-snmp/library/int64.h
 ./testhandler.lo: ../../include/net-snmp/library/mt_support.h
-./testhandler.lo: ../../include/net-snmp/library/snmp_locking.h
 ./testhandler.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./testhandler.lo: ../../include/net-snmp/library/data_list.h
 ./testhandler.lo: ../../include/net-snmp/library/oid_stash.h
@@ -120,9 +115,6 @@
 ./testhandler.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./testhandler.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./testhandler.lo: ../../include/net-snmp/library/ucd_compat.h
 ./testhandler.lo: ../../include/net-snmp/pdu_api.h
 ./testhandler.lo: ../../include/net-snmp/mib_api.h
@@ -191,7 +183,6 @@
 ./util_funcs.lo: ../../include/net-snmp/library/tools.h
 ./util_funcs.lo: ../../include/net-snmp/library/int64.h
 ./util_funcs.lo: ../../include/net-snmp/library/mt_support.h
-./util_funcs.lo: ../../include/net-snmp/library/snmp_locking.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmp_alarm.h
 ./util_funcs.lo: ../../include/net-snmp/library/data_list.h
 ./util_funcs.lo: ../../include/net-snmp/library/oid_stash.h
@@ -203,9 +194,6 @@
 ./util_funcs.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/snmpTCPDomain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
-./util_funcs.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./util_funcs.lo: ../../include/net-snmp/library/ucd_compat.h
 ./util_funcs.lo: ../../include/net-snmp/pdu_api.h
 ./util_funcs.lo: ../../include/net-snmp/mib_api.h

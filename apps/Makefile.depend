@@ -20,7 +20,6 @@
 ./encode_keychange.lo: ../include/net-snmp/library/tools.h
 ./encode_keychange.lo: ../include/net-snmp/library/int64.h
 ./encode_keychange.lo: ../include/net-snmp/library/mt_support.h
-./encode_keychange.lo: ../include/net-snmp/library/snmp_locking.h
 ./encode_keychange.lo: ../include/net-snmp/library/snmp_alarm.h
 ./encode_keychange.lo: ../include/net-snmp/library/data_list.h
 ./encode_keychange.lo: ../include/net-snmp/library/oid_stash.h
@@ -32,9 +31,6 @@
 ./encode_keychange.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./encode_keychange.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./encode_keychange.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./encode_keychange.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./encode_keychange.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./encode_keychange.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./encode_keychange.lo: ../include/net-snmp/library/ucd_compat.h
 ./encode_keychange.lo: ../include/net-snmp/pdu_api.h
 ./encode_keychange.lo: ../include/net-snmp/mib_api.h
@@ -79,7 +75,6 @@
 ./notification_log.lo: ../include/net-snmp/library/tools.h
 ./notification_log.lo: ../include/net-snmp/library/int64.h
 ./notification_log.lo: ../include/net-snmp/library/mt_support.h
-./notification_log.lo: ../include/net-snmp/library/snmp_locking.h
 ./notification_log.lo: ../include/net-snmp/library/snmp_alarm.h
 ./notification_log.lo: ../include/net-snmp/library/data_list.h
 ./notification_log.lo: ../include/net-snmp/library/oid_stash.h
@@ -91,9 +86,6 @@
 ./notification_log.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./notification_log.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./notification_log.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./notification_log.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./notification_log.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./notification_log.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./notification_log.lo: ../include/net-snmp/library/ucd_compat.h
 ./notification_log.lo: ../include/net-snmp/pdu_api.h
 ./notification_log.lo: ../include/net-snmp/mib_api.h
@@ -161,7 +153,6 @@
 ./snmpbulkget.lo: ../include/net-snmp/library/tools.h
 ./snmpbulkget.lo: ../include/net-snmp/library/int64.h
 ./snmpbulkget.lo: ../include/net-snmp/library/mt_support.h
-./snmpbulkget.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpbulkget.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpbulkget.lo: ../include/net-snmp/library/data_list.h
 ./snmpbulkget.lo: ../include/net-snmp/library/oid_stash.h
@@ -174,9 +165,6 @@
 ./snmpbulkget.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpbulkget.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpbulkget.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpbulkget.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpbulkget.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpbulkget.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpbulkget.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpbulkget.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpbulkget.lo: ../include/net-snmp/library/mib.h
@@ -220,7 +208,6 @@
 ./snmpbulkwalk.lo: ../include/net-snmp/library/tools.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/int64.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/mt_support.h
-./snmpbulkwalk.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/data_list.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/oid_stash.h
@@ -232,9 +219,6 @@
 ./snmpbulkwalk.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpbulkwalk.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpbulkwalk.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpbulkwalk.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpbulkwalk.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpbulkwalk.lo: ../include/net-snmp/pdu_api.h
 ./snmpbulkwalk.lo: ../include/net-snmp/mib_api.h
@@ -278,7 +262,6 @@
 ./snmpdelta.lo: ../include/net-snmp/library/tools.h
 ./snmpdelta.lo: ../include/net-snmp/library/int64.h
 ./snmpdelta.lo: ../include/net-snmp/library/mt_support.h
-./snmpdelta.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpdelta.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpdelta.lo: ../include/net-snmp/library/data_list.h
 ./snmpdelta.lo: ../include/net-snmp/library/oid_stash.h
@@ -290,9 +273,6 @@
 ./snmpdelta.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpdelta.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpdelta.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpdelta.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpdelta.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpdelta.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpdelta.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpdelta.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpdelta.lo: ../include/net-snmp/library/mib.h
@@ -335,7 +315,6 @@
 ./snmpdf.lo: ../include/net-snmp/library/tools.h
 ./snmpdf.lo: ../include/net-snmp/library/int64.h
 ./snmpdf.lo: ../include/net-snmp/library/mt_support.h
-./snmpdf.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpdf.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpdf.lo: ../include/net-snmp/library/data_list.h
 ./snmpdf.lo: ../include/net-snmp/library/oid_stash.h
@@ -346,9 +325,6 @@
 ./snmpdf.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpdf.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpdf.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpdf.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpdf.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpdf.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpdf.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpdf.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpdf.lo: ../include/net-snmp/library/mib.h
@@ -390,7 +366,6 @@
 ./snmpget.lo: ../include/net-snmp/library/tools.h
 ./snmpget.lo: ../include/net-snmp/library/int64.h
 ./snmpget.lo: ../include/net-snmp/library/mt_support.h
-./snmpget.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpget.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpget.lo: ../include/net-snmp/library/data_list.h
 ./snmpget.lo: ../include/net-snmp/library/oid_stash.h
@@ -403,9 +378,6 @@
 ./snmpget.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpget.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpget.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpget.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpget.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpget.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpget.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpget.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpget.lo: ../include/net-snmp/library/mib.h
@@ -449,7 +421,6 @@
 ./snmpgetnext.lo: ../include/net-snmp/library/tools.h
 ./snmpgetnext.lo: ../include/net-snmp/library/int64.h
 ./snmpgetnext.lo: ../include/net-snmp/library/mt_support.h
-./snmpgetnext.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpgetnext.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpgetnext.lo: ../include/net-snmp/library/data_list.h
 ./snmpgetnext.lo: ../include/net-snmp/library/oid_stash.h
@@ -461,9 +432,6 @@
 ./snmpgetnext.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpgetnext.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpgetnext.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpgetnext.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpgetnext.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpgetnext.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpgetnext.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpgetnext.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpgetnext.lo: ../include/net-snmp/library/mib.h
@@ -506,7 +474,6 @@
 ./snmpset.lo: ../include/net-snmp/library/tools.h
 ./snmpset.lo: ../include/net-snmp/library/int64.h
 ./snmpset.lo: ../include/net-snmp/library/mt_support.h
-./snmpset.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpset.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpset.lo: ../include/net-snmp/library/data_list.h
 ./snmpset.lo: ../include/net-snmp/library/oid_stash.h
@@ -517,9 +484,6 @@
 ./snmpset.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpset.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpset.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpset.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpset.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpset.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpset.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpset.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpset.lo: ../include/net-snmp/library/mib.h
@@ -561,7 +525,6 @@
 ./snmpstatus.lo: ../include/net-snmp/library/tools.h
 ./snmpstatus.lo: ../include/net-snmp/library/int64.h
 ./snmpstatus.lo: ../include/net-snmp/library/mt_support.h
-./snmpstatus.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpstatus.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpstatus.lo: ../include/net-snmp/library/data_list.h
 ./snmpstatus.lo: ../include/net-snmp/library/oid_stash.h
@@ -574,9 +537,6 @@
 ./snmpstatus.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpstatus.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpstatus.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpstatus.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpstatus.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpstatus.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpstatus.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpstatus.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpstatus.lo: ../include/net-snmp/library/mib.h
@@ -619,7 +579,6 @@
 ./snmptable.lo: ../include/net-snmp/library/tools.h
 ./snmptable.lo: ../include/net-snmp/library/int64.h
 ./snmptable.lo: ../include/net-snmp/library/mt_support.h
-./snmptable.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptable.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptable.lo: ../include/net-snmp/library/data_list.h
 ./snmptable.lo: ../include/net-snmp/library/oid_stash.h
@@ -631,9 +590,6 @@
 ./snmptable.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmptable.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmptable.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmptable.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmptable.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmptable.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmptable.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmptable.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmptable.lo: ../include/net-snmp/library/mib.h
@@ -676,7 +632,6 @@
 ./snmptest.lo: ../include/net-snmp/library/tools.h
 ./snmptest.lo: ../include/net-snmp/library/int64.h
 ./snmptest.lo: ../include/net-snmp/library/mt_support.h
-./snmptest.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptest.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptest.lo: ../include/net-snmp/library/data_list.h
 ./snmptest.lo: ../include/net-snmp/library/oid_stash.h
@@ -688,9 +643,6 @@
 ./snmptest.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmptest.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmptest.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmptest.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmptest.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmptest.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmptest.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmptest.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmptest.lo: ../include/net-snmp/library/mib.h
@@ -733,7 +685,6 @@
 ./snmptranslate.lo: ../include/net-snmp/library/tools.h
 ./snmptranslate.lo: ../include/net-snmp/library/int64.h
 ./snmptranslate.lo: ../include/net-snmp/library/mt_support.h
-./snmptranslate.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptranslate.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptranslate.lo: ../include/net-snmp/library/data_list.h
 ./snmptranslate.lo: ../include/net-snmp/library/oid_stash.h
@@ -770,7 +721,6 @@
 ./snmptrap.lo: ../include/net-snmp/library/tools.h
 ./snmptrap.lo: ../include/net-snmp/library/int64.h
 ./snmptrap.lo: ../include/net-snmp/library/mt_support.h
-./snmptrap.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptrap.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptrap.lo: ../include/net-snmp/library/data_list.h
 ./snmptrap.lo: ../include/net-snmp/library/oid_stash.h
@@ -782,9 +732,6 @@
 ./snmptrap.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmptrap.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmptrap.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmptrap.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmptrap.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmptrap.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmptrap.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmptrap.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmptrap.lo: ../include/net-snmp/library/mib.h
@@ -827,7 +774,6 @@
 ./snmptrapd.lo: ../include/net-snmp/library/tools.h
 ./snmptrapd.lo: ../include/net-snmp/library/int64.h
 ./snmptrapd.lo: ../include/net-snmp/library/mt_support.h
-./snmptrapd.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptrapd.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptrapd.lo: ../include/net-snmp/library/data_list.h
 ./snmptrapd.lo: ../include/net-snmp/library/oid_stash.h
@@ -839,9 +785,6 @@
 ./snmptrapd.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmptrapd.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmptrapd.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmptrapd.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmptrapd.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmptrapd.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmptrapd.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmptrapd.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmptrapd.lo: ../include/net-snmp/library/mib.h
@@ -922,7 +865,6 @@
 ./snmptrapd_handlers.lo: ../include/net-snmp/library/tools.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/library/int64.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/library/mt_support.h
-./snmptrapd_handlers.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/library/data_list.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/version.h
@@ -946,7 +888,6 @@
 ./snmptrapd_log.lo: ../include/net-snmp/library/tools.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/int64.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/mt_support.h
-./snmptrapd_log.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/data_list.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/oid_stash.h
@@ -958,9 +899,6 @@
 ./snmptrapd_log.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmptrapd_log.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmptrapd_log.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmptrapd_log.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmptrapd_log.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmptrapd_log.lo: ../include/net-snmp/pdu_api.h
 ./snmptrapd_log.lo: ../include/net-snmp/mib_api.h
@@ -1004,7 +942,6 @@
 ./snmpusm.lo: ../include/net-snmp/library/tools.h
 ./snmpusm.lo: ../include/net-snmp/library/int64.h
 ./snmpusm.lo: ../include/net-snmp/library/mt_support.h
-./snmpusm.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpusm.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpusm.lo: ../include/net-snmp/library/data_list.h
 ./snmpusm.lo: ../include/net-snmp/library/oid_stash.h
@@ -1015,9 +952,6 @@
 ./snmpusm.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpusm.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpusm.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpusm.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpusm.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpusm.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpusm.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpusm.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpusm.lo: ../include/net-snmp/library/mib.h
@@ -1060,7 +994,6 @@
 ./snmpvacm.lo: ../include/net-snmp/library/tools.h
 ./snmpvacm.lo: ../include/net-snmp/library/int64.h
 ./snmpvacm.lo: ../include/net-snmp/library/mt_support.h
-./snmpvacm.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpvacm.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpvacm.lo: ../include/net-snmp/library/data_list.h
 ./snmpvacm.lo: ../include/net-snmp/library/oid_stash.h
@@ -1072,9 +1005,6 @@
 ./snmpvacm.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpvacm.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpvacm.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpvacm.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpvacm.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpvacm.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpvacm.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpvacm.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpvacm.lo: ../include/net-snmp/library/mib.h
@@ -1117,7 +1047,6 @@
 ./snmpwalk.lo: ../include/net-snmp/library/tools.h
 ./snmpwalk.lo: ../include/net-snmp/library/int64.h
 ./snmpwalk.lo: ../include/net-snmp/library/mt_support.h
-./snmpwalk.lo: ../include/net-snmp/library/snmp_locking.h
 ./snmpwalk.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmpwalk.lo: ../include/net-snmp/library/data_list.h
 ./snmpwalk.lo: ../include/net-snmp/library/oid_stash.h
@@ -1129,9 +1058,6 @@
 ./snmpwalk.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./snmpwalk.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmpwalk.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./snmpwalk.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./snmpwalk.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./snmpwalk.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmpwalk.lo: ../include/net-snmp/library/ucd_compat.h
 ./snmpwalk.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./snmpwalk.lo: ../include/net-snmp/library/mib.h
