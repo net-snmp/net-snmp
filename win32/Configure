@@ -55,7 +55,7 @@ if (($linktype ne "static") && ($linktype ne "dynamic")) {
 }
 
 if ($prefix eq "") {
-  $prefix = "c:/Program Files/Net-SNMP";
+  $prefix = "c:/usr";
 }
 
 # Make sure prefix only contains forward slashes
