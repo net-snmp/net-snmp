@@ -190,6 +190,27 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 UCD-SNMP NEWS:
 
+*4.2.6*
+ Big fixes:
+    - Fixes to the Tunnel mib.
+    - Deprecated the non-raw objects in the system stats MIB portion.
+    - Testing harness fixes.
+    - Network file system improvements fro the hrStorageTable. 
+    - fixed snmptable.
+    - fixed the memory table (again) locking to 2^31 in value.
+    - Misc documentation fixes and clean-ups.
+    - Many other misc fixes.
+
+*4.2.5*
+ Bug fixes:
+    - The perl module actually works.  Sorry about that.
+    - don't overwrite the PID of an already-running snmpd with the PID
+      of an abortive snmpd.
+    - a 64 bit architecture socket fix
+    - smux authentication fixed for multiple connected sessions.
+    - dynamic module support testing in the configure
+    - memory values > 32bits are now reported as a maxed out 32bit number
+
 *4.2.4*
  New:
     - badCommunityNames and badCommunityUses Counters supported.
