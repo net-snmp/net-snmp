@@ -282,16 +282,13 @@ snmp_fix_pdu(struct snmp_pdu *pdu,
 
 
 /*
+ * snmp_clone_pdu
  * Creates (allocates and copies) a clone of the input PDU.
  */
 struct snmp_pdu *
-snmp_clone_pdu(struct snmp_pdu *pdu)
+snmp_2clone_pdu(struct snmp_pdu *pdu, struct snmp_pdu *newpdu)
 {
     struct variable_list *var, *newvar, *oldvar;
-    struct snmp_pdu *newpdu;
-
-    /* clone the pdu */
-    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     memmove(newpdu, pdu, sizeof(struct snmp_pdu));
     newpdu->variables = 0;
     var = pdu->variables;
@@ -340,6 +337,17 @@ snmp_clone_pdu(struct snmp_pdu *pdu)
 	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
     }
     return newpdu;
+}
+
+struct snmp_pdu *
+snmp_clone_pdu(struct snmp_pdu *pdu)
+{
+    struct snmp_pdu *newpdu;
+    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+    if (newpdu)
+        snmp_2clone_pdu(pdu, newpdu);
+
+    return (newpdu);
 }
 
 

@@ -170,41 +170,6 @@ struct internal_variable_list {
     int usedBuf;
 };
 
-struct internal_snmp_pdu {
-    int     version;
-
-    snmp_ipaddr  address;    /* Address of peer */
-    oid     *srcParty;
-    int     srcPartyLen;
-    oid     *dstParty;
-    int     dstPartyLen;
-    oid     *context;
-    int     contextLen;
-
-    u_char  *community; /* community for outgoing requests. */
-    int     community_len;  /* Length of community name. */
-
-    int     command;    /* Type of this PDU */
-
-    long  reqid;        /* Request id */
-    long  errstat;      /* Error status (non_repeaters in GetBulk) */
-    long  errindex;     /* Error index (max_repetitions in GetBulk) */
-
-    /* Trap information */
-    oid     *enterprise;/* System OID */
-    int     enterprise_length;
-    snmp_ipaddr  agent_addr; /* address of object generating trap */
-    long     trap_type;  /* trap type */
-    long     specific_type;  /* specific type */
-    u_long  time;       /* Uptime */
-
-    struct variable_list *variables;
-    oid srcPartyBuf[MAX_OID_LEN];
-    oid dstPartyBuf[MAX_OID_LEN];
-    oid contextBuf[MAX_OID_LEN];
-    /* XXX do community later */
-    
-};
 
 /*
  * The list of active/open sessions.
@@ -267,7 +232,7 @@ static int snmp_dump_packet = 0;
 
 void shift_array (u_char *, int, int);
 int snmp_build (struct snmp_session *, struct snmp_pdu *, u_char *, int *);
-static int snmp_parse (struct snmp_session *, struct internal_snmp_pdu *, u_char *, int);
+static int snmp_parse (struct snmp_session *, struct snmp_pdu *, u_char *, int);
 static void snmp_free_internal_pdu (struct snmp_pdu *);
 
 static void * snmp_sess_pointer (struct snmp_session *);
@@ -799,8 +764,7 @@ shift_array(u_char *begin,
  * Returns the length of the completed packet in out_length.  If any errors
  * occur, -1 is returned.  If all goes well, 0 is returned.
  */
-static int
-
+int
 snmp_build(struct snmp_session *session,
 	   struct snmp_pdu *pdu,
 	   u_char *packet,
@@ -1023,7 +987,7 @@ snmp_build(struct snmp_session *session,
  */
 static int
 snmp_parse(struct snmp_session *session,
-	   struct internal_snmp_pdu *pdu,
+	   struct snmp_pdu *pdu,
 	   u_char *data,
 	   int length)
 {
@@ -1099,9 +1063,9 @@ snmp_parse(struct snmp_session *session,
 	    return -1;
 
         /* authenticate the message and possibly decrypt it */
-	pdu->srcParty = pdu->srcPartyBuf;
-	pdu->dstParty = pdu->dstPartyBuf;
-	pdu->context  = pdu->contextBuf;
+	pdu->srcParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
+	pdu->dstParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
+	pdu->context  = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
         pdu->srcPartyLen = MAX_OID_LEN;
         pdu->dstPartyLen = MAX_OID_LEN;
         pdu->contextLen  = MAX_OID_LEN;
@@ -1721,15 +1685,14 @@ snmp_free_internal_pdu(struct snmp_pdu *pdu)
 	vp = (struct internal_variable_list *)vp->next_variable;
 	free(ovp);
     }
-    if (pdu->enterprise) free(pdu->enterprise);
-    if (pdu->community) free(pdu->community);
-    free((char *)pdu);
+    pdu->variables = 0;
+    snmp_free_pdu(pdu);
 }
 
 /*
  * Checks to see if any of the fd's set in the fdset belong to
  * snmp.  Each socket with it's fd set has a packet read from it
- * and _snmp_parse is called on the packet received.  The resulting pdu
+ * and snmp_parse is called on the packet received.  The resulting pdu
  * is passed to the callback routine for that session.  If the callback
  * routine returns successfully, the pdu and it's request are deleted.
  */
@@ -1784,10 +1747,10 @@ snmp_sess_read(void *sessp,
                 printf("\n");
     }
 
-    pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
+    pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     memset (pdu, 0, sizeof(*pdu));
     pdu->address = from;
-    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
+    if (snmp_parse(sp, pdu, packet, length) != SNMP_ERR_NOERROR){
 	snmp_free_internal_pdu(pdu);
 	return;
     }
@@ -2379,56 +2342,6 @@ snmp_sess_session(void *sessp)
 
 #ifdef CMU_COMPATIBLE
 
-/*
- * snmp_parse - emulate CMU library's snmp_parse.
- *
- * Parse packet, storing results into PDU.
- * Returns community string if success, NULL if fail.
- * WARNING: may return a zero length community string.
- *
- * Note:
- * Some CMU-aware apps call init_mib(), but do not
- * initialize a session.
- * Check Reqid to make sure that this module is initialized.
- */
-
-u_char *
-snmp_parse (struct snmp_session *session,
-    struct snmp_pdu *pdu,
-    u_char *data,
-    int length)
-{
-    u_char *bufp = NULL;
-
-    if (Reqid == 0) {
-	snmp_sess_init(session); /* gimme a break! */
-    }
-
-    switch(pdu->version) {
-    case SNMP_VERSION_1:
-    case SNMP_VERSION_2c:
-    case SNMP_DEFAULT_VERSION:
-	    break;
-    default:
-	    return NULL;
-    }
-
-    if (_snmp_parse(session, (struct internal_snmp_pdu *)pdu,
-			    data, length) != SNMP_ERR_NOERROR){
-	return NULL;
-    }
-
-    /* Add a null to meet the caller's expectations. */
-
-    bufp = (u_char *)malloc(1+pdu->community_len);
-    if (bufp && pdu->community_len) {
-	memcpy(bufp, pdu->community, pdu->community_len);
-	bufp[pdu->community_len] = '\0';
-    }
-    return(bufp);
-}
-
-
 char *
 snmp_pdu_type(struct snmp_pdu *PDU)
 {
@@ -2466,6 +2379,75 @@ snmp_pdu_type(struct snmp_pdu *PDU)
     break;
   }
 }
+
+/*
+ * cmu_snmp_parse - emulate CMU library's snmp_parse.
+ *
+ * Parse packet, storing results into PDU.
+ * Returns community string if success, NULL if fail.
+ * WARNING: may return a zero length community string.
+ *
+ * Note:
+ * Some CMU-aware apps call init_mib(), but do not
+ * initialize a session.
+ * Check Reqid to make sure that this module is initialized.
+ */
+
+u_char *
+cmu_snmp_parse (struct snmp_session *session,
+    struct snmp_pdu *pdu,
+    u_char *data,
+    int length)
+{
+    u_char *bufp = NULL;
+
+    if (Reqid == 0) {
+	snmp_sess_init(session); /* gimme a break! */
+    }
+
+    switch(pdu->version) {
+    case SNMP_VERSION_1:
+    case SNMP_VERSION_2c:
+    case SNMP_DEFAULT_VERSION:
+	    break;
+    default:
+	    return NULL;
+    }
+#if NO_INTERNAL_VARLIST
+    if (snmp_parse(session, pdu, data, length) != SNMP_ERR_NOERROR){
+	return NULL;
+    }
+#else
+/*
+ * while there are two versions of variable_list:
+ * use an internal variable list for snmp_parse;
+ * clone the result.
+ */
+if (1) {
+struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
+struct snmp_pdu *snmp_2clone_pdu(struct snmp_pdu *from_pdu, struct snmp_pdu *to_pdu);
+
+    struct snmp_pdu *ipdu;
+    ipdu = snmp_clone_pdu(pdu);
+    if (snmp_parse(session, ipdu, data, length) != SNMP_ERR_NOERROR){
+	snmp_free_internal_pdu(ipdu);
+	return NULL;
+    }
+    pdu = snmp_2clone_pdu(ipdu, pdu);
+    snmp_free_internal_pdu(ipdu);
+}
+#endif /* NO_INTERNAL_VAR_LIST */
+
+    /* Add a null to meet the caller's expectations. */
+
+    bufp = (u_char *)malloc(1+pdu->community_len);
+    if (bufp && pdu->community_len) {
+	memcpy(bufp, pdu->community, pdu->community_len);
+	bufp[pdu->community_len] = '\0';
+    }
+    return(bufp);
+}
+
 
 #endif /* CMU_COMPATIBLE */
 

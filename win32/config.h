@@ -28,6 +28,9 @@
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
 
+/* add in recent CMU library extensions (not complete) */
+#undef CMU_COMPATIBLE
+
 /* should "--" comments in mibs be a comment till the end of the line
    or also until another "--", the latter being the technically
    correct. */
