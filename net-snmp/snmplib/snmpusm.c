@@ -2471,10 +2471,10 @@ init_usm(void) {
   /* register ourselves as a security service */
   def = SNMP_MALLOC_STRUCT(snmp_secmod_def);
   /* XXX: def->init_sess_secmod move stuff from snmp_api.c */
-  def->reverse_encode_out = usm_secmod_rgenerate_out_msg;
-  def->forward_encode_out = usm_secmod_generate_out_msg;
-  def->decode_in = usm_secmod_process_in_msg;
-  def->free_state_ref = usm_free_usmStateReference;
+  def->encode_reverse = usm_secmod_rgenerate_out_msg;
+  def->encode_forward = usm_secmod_generate_out_msg;
+  def->decode = usm_secmod_process_in_msg;
+  def->pdu_free_state_ref = usm_free_usmStateReference;
   register_sec_mod(USM_SEC_MODEL_NUMBER, "usm", def);
 
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,

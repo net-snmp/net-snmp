@@ -27,6 +27,8 @@
 
 static struct snmp_secmod_list *registered_services = NULL;
 
+static SNMPCallback set_default_secmod;
+
 void
 init_secmod(void) {
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SESSION_INIT,
@@ -109,7 +111,7 @@ find_sec_mod(int secmod) {
     return NULL;
 }
 
-int
+static int
 set_default_secmod(int major, int minor, void *serverarg, void *clientarg) {
     struct snmp_session *sess = (struct snmp_session *) serverarg;
     char *cptr;
