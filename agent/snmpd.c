@@ -696,7 +696,7 @@ receive(void)
 
 	for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
 	    if (external_signal_scheduled[i]) {
-		external_signal_scheduled[i] = 0;
+		external_signal_scheduled[i]--;
 		external_signal_handler[i](i);
 	    }
 	}

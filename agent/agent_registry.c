@@ -1491,29 +1491,25 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
 
 void agent_SIGCHLD_handler(void)
 {
-#if STRUCT_SIGACTION_HAS_SA_SIGACTION
-  external_signal_scheduled[SIGCLD] = 1;
-#endif
+  external_signal_scheduled[SIGCHLD]++;
 }
 
 int register_signal(int sig, void (*func)(int))
 {
 
     switch (sig) {
-#if defined(SIGCLD)
-    case SIGCLD:
+#if defined(SIGCHLD)
+    case SIGCHLD:
   #if HAVE_SIGNAL
-	signal(SIGCLD, (void *)agent_SIGCHLD_handler);
+	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
   #else
-  #if STRUCT_SIGACTION_HAS_SA_SIGACTION
 	{
 		static struct sigaction act;
 		act.sa_handler = agent_SIGCHLD_handler;
 		sigemptyset(&act.sa_mask);
 		act.sa_flags = 0;
-		sigaction(SIGCLD, &act, NULL);
+		sigaction(SIGCHLD, &act, NULL);
 	}
-  #endif
   #endif
 	break;
 #endif
@@ -1524,7 +1520,8 @@ int register_signal(int sig, void (*func)(int))
     }
 
     external_signal_handler[sig] = func;
-
+    external_signal_scheduled[sig] = 0;
+    
     DEBUGMSGTL(("register_signal", "registered signal %d\n", sig));
     return SIG_REGISTERED_OK;
 }
