@@ -288,10 +288,6 @@ int main(int argc, char *argv[])
     }
     else if (inform) snmp_free_pdu(response);
 
-#ifdef _DEBUG_MALLOC_INC
-    current_size = malloc_inuse(&histid2);
-    if (current_size != orig_size) malloc_list(2, histid1, histid2);
-#endif
     snmp_close(ss);
     SOCK_CLEANUP;
     return (0);
