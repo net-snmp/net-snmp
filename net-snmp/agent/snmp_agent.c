@@ -28,7 +28,9 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
