@@ -1263,32 +1263,39 @@ AC_ARG_WITH(libwrap,
     fi
 
     _libs=${LIBS}
-    AC_CHECK_HEADER(tcpd.h,
-	LIBS="$LIBS -lwrap"
+    AC_CHECK_HEADER(tcpd.h, ,
+	    AC_MSG_ERROR(Asked to use libwrap but I couldn't find tcpd.h.))
+
+    LIBS="$LIBS -lwrap"
 	AC_MSG_CHECKING(for TCP wrappers library -lwrap)
 	AC_TRY_LINK([#include <tcpd.h>
-  int allow_severity = 0;
-  int deny_severity  = 0;
-  ],[hosts_access((void *)0)],
+		     int allow_severity = 0;
+		     int deny_severity  = 0;
+		    ],[hosts_access((void *)0)],
+
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
 	    WRAPLIBS="$WRAPLIBS -lwrap",
+
 	    AC_MSG_RESULT(no)
 	    dnl Linux RedHat 6.1 won't link libwrap without libnsl
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
 		AC_CHECK_LIB(nsl, yp_get_default_domain))
 	    AC_MSG_CHECKING(for TCP wrappers library -lwrap linked with -lnsl)
 	    AC_TRY_LINK([#include <tcpd.h>
-  int allow_severity = 0;
-  int deny_severity  = 0;
-  ],[hosts_access((void *)0)],
-		AC_MSG_RESULT(yes)
-		AC_DEFINE(USE_LIBWRAP)
-		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-		WRAPLIBS="$WRAPLIBS -lwrap -lnsl", AC_MSG_RESULT(no)),
-	    CPPFLAGS=${_cppflags}),
-	CPPFLAGS=${_cppflags})
+		         int allow_severity = 0;
+	                 int deny_severity  = 0;
+	 		],[hosts_access((void *)0)],
+
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(USE_LIBWRAP)
+			test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
+			WRAPLIBS="$WRAPLIBS -lwrap -lnsl",
+
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))
+	    CPPFLAGS=${_cppflags})
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi

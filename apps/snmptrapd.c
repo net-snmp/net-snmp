@@ -97,6 +97,13 @@ SOFTWARE.
 #include <net-snmp/agent/snmp_vars.h>
 #include "notification_log.h"
 
+#if USE_LIBWRAP
+#include <tcpd.h>
+
+int allow_severity	 = LOG_INFO;
+int deny_severity	 = LOG_WARNING;
+#endif
+
 #define DS_APP_NUMERIC_IP  8 /* must not conflict with agent's DS booleans */
 
 #ifndef BSD4_3
@@ -706,6 +713,37 @@ RETSIGTYPE hup_handler(int sig)
 }
 #endif
 
+static
+int pre_parse(struct snmp_session *session, snmp_transport *transport,
+	      void *transport_data, int transport_data_length)
+{
+#if USE_LIBWRAP
+  char *addr_string = NULL;
+
+  if (transport != NULL && transport->f_fmtaddr != NULL) {
+    /*  Okay I do know how to format this address for logging.  */
+    addr_string = transport->f_fmtaddr(transport, transport_data,
+				       transport_data_length);
+    /*  Don't forget to free() it.  */
+  }
+  
+  if (addr_string != NULL) {
+    if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
+		  addr_string, STRING_UNKNOWN) == 0) {
+      free(addr_string);
+      return 0;
+    }
+    free(addr_string);
+  } else {
+    if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
+		  STRING_UNKNOWN, STRING_UNKNOWN) == 0) {
+      return 0;
+    }
+  }
+#endif /*  USE_LIBWRAP  */
+  return 1;
+}
+
 static struct snmp_session *
 snmptrapd_add_session(snmp_transport *t)
 {
@@ -722,7 +760,7 @@ snmptrapd_add_session(snmp_transport *t)
   session->authenticator = NULL;
   sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
   
-  rc = snmp_add(session, t, NULL, NULL);
+  rc = snmp_add(session, t, pre_parse, NULL);
   if (rc == NULL) {
     snmp_sess_perror("snmptrapd", session);
   }
