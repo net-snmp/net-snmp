@@ -5,9 +5,6 @@ RFCDIR =	rfc
 IANAHOST =	http://www.iana.org
 IANADIR =	assignments
 
-PATCH =		patch
-# PATCH =		gpatch	# Solaris
-
 PREFIX =	/usr/local
 ALLDIR =	$(PREFIX)/share/snmp/rfc.orig
 INSTDIR =	$(PREFIX)/share/snmp/rfc
@@ -40,7 +37,10 @@ rfc:	allmibs
 	rm -fr $(INSTDIR)
 	mkdir $(INSTDIR)
 	cp $(ALLDIR)/* $(INSTDIR)
-	$(PATCH) -d $(INSTDIR) < rfcmibs.diff
+	if test `uname` = SunOS ; \
+	then gpatch -d $(INSTDIR) < rfcmibs.diff; \
+	else patch -d $(INSTDIR) < rfcmibs.diff; \
+	fi
 	rm -f $(INSTDIR)/*orig
 
 clean:
