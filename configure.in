@@ -75,6 +75,19 @@ AC_ARG_WITH(efence,
 [  --with-efence                   Look for and use libefence (malloc).],
       use_efence="$withval")
 
+tryrsaref=no
+AC_ARG_WITH(rsaref,
+[  --with-rsaref=PATH              Look for librsaref in PATH/lib.],
+    if test "x$withval" = "xyes"; then
+      tryrsaref=yes
+    elif test "x$withval" = "xno"; then
+      tryrsaref=no
+    elif test -d "$withval"; then
+      AC_ADD_SEARCH_PATH($withval)
+      tryrsaref=yes
+    fi,
+)
+
 tryopenssl=defaultyes
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
@@ -1011,8 +1024,14 @@ dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
+
 dnl Check for security related functions
 if test "x$tryopenssl" != "xno"; then
+    if test "x$tryrsaref" != "xno"; then
+         AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
+         AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
+    fi
+
     AC_CHECK_LIB(crypto, EVP_md5)
 fi
 
