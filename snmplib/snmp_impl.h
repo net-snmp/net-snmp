@@ -90,11 +90,10 @@ struct packet_info {
 #define ACTION	    3
 #define FREE        4
 
-/* See important comment in snmp_vars.c relating to a change
-   in the way the access control word is interpreted */
-#define RONLY	0xAAAA	/* read access for everyone */
-#define RWRITE	0xFABB	/* add write access for community private */
-                        /* & write access for V2 GLOBAL stuff -- Wes */
+/* Access control statements for the agent */
+#define RONLY	0x1	/* read access only */
+#define RWRITE	0x2	/* read and write access (must have 0x2 bit set) */
+
 #define NOACCESS 0x0000	/* no access for anybody */
 
 /* defined types (from the SMI, RFC 1157) */
