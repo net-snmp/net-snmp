@@ -29,6 +29,8 @@ install:	$(TARG)
 	cp libsnmp.a ../lib
 	@RANLIB@ ../lib/libsnmp.a
 
+parse:  mib.o parse.c
+	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse
 
 lint:
 	lint -nhx $(CSRCS)

@@ -51,7 +51,7 @@ SOFTWARE.
 #include "parse.h"
 
 /* A quoted string value-- too long for a general "token" */
-char *quoted_string_buffer;
+char quoted_string_buffer[MAXQUOTESTR];
 
 /*
  * This is one element of an object identifier with either an integer
@@ -60,12 +60,14 @@ char *quoted_string_buffer;
  */
 struct subid {
     int subid;
+    int modid;
     char *label;
 };
 
 #define MAXTC   256
 struct tc {     /* textual conventions */
     int type;
+    int modid;
     char *descriptor;
     char *hint;
     struct enum_list *enums;
@@ -155,6 +157,7 @@ int mib_warnings = 0;
 #define RANGE       69
 #define CONVENTION  70
 #define DISPLAYHINT 71
+#define FROM        72
 
 struct tok {
     char *name;                 /* token name */
@@ -234,27 +237,45 @@ struct tok tokens[] = {
     { "ENTERPRISE", sizeof ("ENTERPRISE")-1, ENTERPRISE },
     { "BEGIN", sizeof ("BEGIN")-1, BEGIN },
     { "IMPORTS", sizeof ("IMPORTS")-1, IMPORTS },
-    { "EXPORTS", sizeof ("EXPORTS")-1, IMPORTS },
+    { "EXPORTS", sizeof ("EXPORTS")-1, EXPORTS },
     { "accessible-for-notify", sizeof ("accessible-for-notify")-1, ACCNOTIFY },
     { "|", sizeof ("|")-1, BAR },
     { "..", sizeof ("..")-1, RANGE },
     { "TEXTUAL-CONVENTION", sizeof ("TEXTUAL-CONVENTION")-1, CONVENTION },
     { "NOTIFICATION-GROUP", sizeof ("NOTIFICATION-GROUP")-1, NOTIFTYPE },
     { "DISPLAY-HINT", sizeof ("DISPLAY-HINT")-1, DISPLAYHINT },
+    { "FROM", sizeof ("FROM")-1, FROM },
     { NULL }
 };
 
 #define HASHSIZE        32
 #define BUCKET(x)       (x & 0x01F)
 
+#define NHASHSIZE    128
+#define NBUCKET(x)   (x & 0x7F)
+
 struct tok      *buckets[HASHSIZE];
+
+struct node *nbuckets[NHASHSIZE];
+struct tree *tbuckets[NHASHSIZE];
+struct node *orphan_nodes = NULL;
+struct module *module_head = NULL;
+struct tree   *tree_head = NULL;
+
+#define	NUMBER_OF_ROOT_NODES	3
+static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
+
+static int current_module = 0;
+static int     max_module = 0;
 
 static void do_subtree __P((struct tree *, struct node **));
 static int get_token __P((FILE *, char *,int));
+static char last = ' ';
 static void unget_token __P((int));
 static int parseQuoteString __P((FILE *, char *, int));
 static int tossObjectIdentifier __P((FILE *));
-static void hash_init __P((void));
+       void init_mib_internals __P((void));	/* called from 'mib.c' */
+static int  name_hash __P((char *));
 static void init_node_hash __P((struct node *));
 static void print_error __P((char *, char *, int));
 static void *Malloc __P((unsigned));
@@ -266,7 +287,7 @@ static void free_node __P((struct node *));
 static void print_nodes __P((FILE *, struct node *));
 #endif
 static void build_translation_table __P((void));
-static struct tree *build_tree __P((struct node *));
+static void init_tree_roots __P((void));
 static int getoid __P((FILE *, struct subid *, int));
 static struct node *parse_objectid __P((FILE *, char *));
 static int get_tc __P((char *, struct enum_list **, char **));
@@ -278,49 +299,70 @@ static struct node *parse_objectgroup __P((FILE *, char *));
 static struct node *parse_notificationDefinition __P((FILE *, char *));
 static struct node *parse_trapDefinition __P((FILE *, char *));
 static struct node *parse_compliance __P((FILE *, char *));
-static struct node *parse_moduleIdentity __P((FILE *, char *));
+static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
 
-static void
-hash_init __P((void))
+       int  which_module __P((char *));		/* used by 'mib.c' */
+static char *module_name __P((int));
+static void  new_module  __P((char *));
+
+extern void  set_function __P((struct tree *));	/* from 'mib.c' */
+
+static int
+name_hash( name )
+    char *name;
+{
+    int hash = 0;
+    char *cp;
+
+    for(cp = name; *cp; cp++)
+        hash += *cp;
+    return(hash);
+}
+    
+void
+init_mib_internals __P((void))
 {
     register struct tok *tp;
-    register char       *cp;
-    register int        h;
     register int        b;
 
+	/*
+	 * Set up hash list of pre-defined tokens
+	 */
     memset(buckets, 0, sizeof(buckets));
     for (tp = tokens; tp->name; tp++) {
-        for (h = 0, cp = tp->name; *cp; cp++)
-            h += *cp;
-        tp->hash = h;
-        b = BUCKET(h);
+        tp->hash = name_hash( tp->name );
+        b = BUCKET(tp->hash);
         if (buckets[b])
             tp->next = buckets[b]; /* BUG ??? */
         buckets[b] = tp;
     }
+
+	/*
+	 * Initialise other internal structures
+	 */
+    memset(nbuckets, 0, sizeof(nbuckets));
+    memset(tbuckets, 0, sizeof(tbuckets));
+    memset(tclist, 0, MAXTC * sizeof(struct tc));
+    build_translation_table();
+    init_tree_roots();	/* Set up initial roots */
+		/* Relies on 'add_mibdir' having set up the modules */
+
 }
 
-#define NHASHSIZE    128
-#define NBUCKET(x)   (x & 0x7F)
-struct node *nbuckets[NHASHSIZE];
 
 static void
 init_node_hash(nodes)
      struct node *nodes;
 {
      register struct node *np, *nextp;
-     register char *cp;
      register int hash;
 
-     memset(nbuckets, 0, sizeof(nbuckets));
      for(np = nodes; np;){
          nextp = np->next;
-         hash = 0;
-         for(cp = np->parent; *cp; cp++)
-             hash += *cp;
-         np->next = nbuckets[NBUCKET(hash)];
-         nbuckets[NBUCKET(hash)] = np;
+         hash = NBUCKET(name_hash(np->parent));
+         np->next = nbuckets[hash];
+         nbuckets[hash] = np;
          np = nextp;
      }
 }
@@ -459,6 +501,10 @@ print_nodes(fp, root)
                 fprintf(fp, "    %s(%d)\n", ep->label, ep->value);
             }
         }
+        if (np->hint)
+            fprintf(fp, "  Hint: %s\n", np->hint);
+        if (np->units)
+            fprintf(fp, "  Units: %s\n", np->units);
     }
 }
 #endif
@@ -479,8 +525,12 @@ print_subtree(f, tree, count)
     for(tp = tree->child_list; tp; tp = tp->next_peer){
         for(i = 0; i < count; i++)
             fprintf(f, "  ");
-        fprintf(f, "%s(%ld) type=%d tc=%d\n",
-                tp->label, tp->subid, tp->type, tp->tc_index);
+        fprintf(f, "%s(%ld) type=%d",
+                tp->label, tp->subid, tp->type);
+        if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
+        if (tp->hint) fprintf(f, " hint=%s", tp->hint);
+        if (tp->units) fprintf(f, " units=%s", tp->units);
+	fprintf(f, "\n");
     }
     for(tp = tree->child_list; tp; tp = tp->next_peer){
         if (tp->child_list)
@@ -545,17 +595,18 @@ build_translation_table(){
     }
 }
 
-static struct tree *
-build_tree(nodes)
-    struct node *nodes;
+static void
+init_tree_roots()
 {
-    struct node *np;
     struct tree *tp, *lasttp;
-    int bucket, nodes_left = 0;
+    int  base_modid;
+    int  hash;
 
-    build_translation_table();
-    /* grow tree from this root node */
-    init_node_hash(nodes);
+    base_modid = which_module("SNMPv2-SMI");
+    if (base_modid == -1 )
+        base_modid = which_module("RFC1155-SMI");
+    if (base_modid == -1 )
+        base_modid = which_module("RFC1213-MIB");
 
     /* build root node */
     tp = Malloc(sizeof(struct tree));
@@ -565,13 +616,18 @@ build_tree(nodes)
     tp->enums = NULL;
     tp->hint = NULL;
     tp->label = Strdup("joint-iso-ccitt");
+    tp->modid = base_modid;
     tp->subid = 2;
     tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
-    /* XXX nodes isn't needed in do_subtree() ??? */
-    do_subtree(tp, &nodes);
+    set_function(tp);		/* from mib.c */
+    hash = NBUCKET(name_hash(tp->label));
+    tp->next = tbuckets[hash];
+    tbuckets[hash] = tp;
     lasttp = tp;
+    root_imports[0].label = Strdup( tp->label );
+    root_imports[0].modid = base_modid;
 
     /* build root node */
     tp = Malloc(sizeof(struct tree));
@@ -581,13 +637,18 @@ build_tree(nodes)
     tp->enums = NULL;
     tp->hint = NULL;
     tp->label = Strdup("ccitt");
+    tp->modid = base_modid;
     tp->subid = 0;
     tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
-    /* XXX nodes isn't needed in do_subtree() ??? */
-    do_subtree(tp, &nodes);
+    set_function(tp);		/* from mib.c */
+    hash = NBUCKET(name_hash(tp->label));
+    tp->next = tbuckets[hash];
+    tbuckets[hash] = tp;
     lasttp = tp;
+    root_imports[1].label = Strdup( tp->label );
+    root_imports[1].modid = base_modid;
 
     /* build root node */
     tp = Malloc(sizeof(struct tree));
@@ -596,35 +657,41 @@ build_tree(nodes)
     tp->child_list = NULL;
     tp->enums = NULL;
     tp->hint = NULL;
+    tp->modid = base_modid;
     tp->label = Strdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
     tp->type = 0;
     tp->description = NULL;
-    /* XXX nodes isn't needed in do_subtree() ??? */
-    do_subtree(tp, &nodes);
+    set_function(tp);		/* from mib.c */
+    hash = NBUCKET(name_hash(tp->label));
+    tp->next = tbuckets[hash];
+    tbuckets[hash] = tp;
+    root_imports[2].label = Strdup( tp->label );
+    root_imports[2].modid = base_modid;
 
-    if (mib_warnings) Malloc_stats (stderr);
+    tree_head = tp;
 
-    /* If any nodes are left, the tree is probably inconsistent */
-    for(bucket = 0; bucket < NHASHSIZE; bucket++){
-        if (nbuckets[bucket]){
-            nodes_left = 1;
-            break;
-        }
-    }
-    if (nodes_left){
-        fprintf(stderr, "The mib description doesn't seem to be consistent.\n");
-        fprintf(stderr, "Some nodes couldn't be linked under the \"iso\" tree.\n");
-        fprintf(stderr, "these nodes are left:\n");
-        for(bucket = 0; bucket < NHASHSIZE; bucket++){
-            for(np = nbuckets[bucket]; np; np = np->next)
-                fprintf(stderr, "%s ::= { %s %ld } (%d)\n", np->label,
-                        np->parent, np->subid, np->type);
-        }
-    }
-    return tp;
 }
+
+
+struct tree *
+find_tree_node( name, modid )
+    char *name;
+    int   modid;
+{
+    struct tree *tp, **headtp;
+
+    headtp = tbuckets[NBUCKET(name_hash(name))];
+    for ( tp = headtp ; tp ; tp=tp->next ) {
+        if ( !strcmp(tp->label, name) && 
+		((tp->modid == modid) || (modid == -1)))
+            return(tp);
+    }
+
+    return(NULL);
+}
+
 
 /*
  * Find all the children of root in the list of nodes.  Link them into the
@@ -638,33 +705,16 @@ do_subtree(root, nodes)
     register struct tree *tp;
     register struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
-    char *cp;
     int hash;
 
     tp = root;
-    hash = 0;
-    for(cp = tp->label; *cp; cp++)
-        hash += *cp;
-    headp = &nbuckets[NBUCKET(hash)];
+    headp = &nbuckets[NBUCKET(name_hash(tp->label))];
     /*
      * Search each of the nodes for one whose parent is root, and
      * move each into a separate list.
      */
     for(np = *headp; np; np = np->next){
-        if ((*tp->label != *np->parent) || strcmp(tp->label, np->parent)){
-            if ((*tp->label == *np->label) && !strcmp(tp->label, np->label)){
-                /* if there is another node with the same label, assume that
-                 * any children after this point in the list belong to the other node.
-                 * This adds some scoping to the table and allows vendors to
-                 * reuse names such as "ip".
-                 */
-                if (mib_warnings)
-                    fprintf(stderr, "Warning: duplicate label: %s.%s¹n",
-                            np->parent, np->label);
-                break;
-            }
-            oldnp = np;
-        } else {
+        if ( !strcmp(tp->label, np->parent)){
             /* take this node out of the node list */
             if (oldnp == NULL){
                 *headp = np->next;  /* fix root of node list */
@@ -675,6 +725,10 @@ do_subtree(root, nodes)
             else child_list = np;
             childp = np;
         }
+        else {
+	    oldnp = np;
+        }
+
     }
     if (childp) childp->next = NULL;
     /*
@@ -686,8 +740,10 @@ do_subtree(root, nodes)
             if (tp->subid == np->subid) break;
             else tp = tp->next_peer;
         if (tp) {
-	    if (strcmp (tp->label, np->label) == 0)
+	    if (strcmp (tp->label, np->label) == 0) {
+		do_subtree(tp, nodes);
 		continue;
+            }
 	    if (mib_warnings)
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			root->label, np->subid, tp->label, np->label);
@@ -697,6 +753,7 @@ do_subtree(root, nodes)
         tp->child_list = NULL;
         tp->label = np->label;
         np->label = NULL;
+        tp->modid = np->modid;
         tp->subid = np->subid;
         tp->tc_index = np->tc_index;
         tp->type = translation_table[np->type];
@@ -708,8 +765,12 @@ do_subtree(root, nodes)
 	np->units = NULL;
         tp->description = np->description; /* steals memory from np */
         np->description = NULL; /* so we don't free it later */
+        set_function(tp);	/* from mib.c */
         tp->next_peer = root->child_list;
         root->child_list = tp;
+        hash = NBUCKET(name_hash(tp->label));
+        tp->next = tbuckets[hash];
+        tbuckets[hash] = tp;
 /*      if (tp->type == TYPE_OTHER) */
             do_subtree(tp, nodes);      /* recurse on this child if it isn't
                                            an end node */
@@ -749,6 +810,7 @@ getoid(fp, id,  length)
     type = get_token(fp, token,MAXTOKEN);
     for(count = 0; count < length; count++, id++){
         id->label = NULL;
+        id->modid = current_module;
         id->subid = -1;
         if (type == RIGHTBRACKET){
             return count;
@@ -818,6 +880,7 @@ parse_objectid(fp, name)
                 np->parent = Strdup (op->label);
                 if (nop->label)
                     np->label = Strdup (nop->label);
+                np->modid = nop->modid;
                 if (nop->subid != -1)
                     np->subid = nop->subid;
                 np->tc_index = -1;
@@ -842,6 +905,7 @@ parse_objectid(fp, name)
             if (op->label){
                 np->parent = Strdup (op->label);
                 np->label = Strdup (name);
+                np->modid = nop->modid;
                 if (nop->subid != -1)
                     np->subid = nop->subid;
                 else
@@ -874,18 +938,40 @@ parse_objectid(fp, name)
 }
 
 static int
-get_tc(descriptor, ep, hint)
+get_tc(descriptor, modid, ep, hint)
     char *descriptor;
+    int modid;
     struct enum_list **ep;
     char **hint;
 {
     int i;
     struct tc *tcp;
+    struct module *mp;
+    struct module_import *mip;
+
+	/*
+	 * Check that the descriptor isn't imported
+	 *  by searching the import list
+	 */
+
+    for ( mp = module_head ; mp ; mp = mp->next )
+         if ( mp->modid == modid )
+             break;
+    if ( mp )
+         for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+             if ( !strcmp( mip->label, descriptor )) {
+				/* Found it - so amend the module ID */
+                  modid = mip->modid;
+                  break;
+             }
+         }
+
 
     for(i = 0, tcp = tclist; i < MAXTC; i++, tcp++){
         if (tcp->type == 0)
             break;
-        if (!strcmp(descriptor, tcp->descriptor)){
+        if (!strcmp(descriptor, tcp->descriptor) &&
+		((modid == tcp->modid) || (modid==-1))){
             *ep = tcp->enums;
 	    *hint = tcp->hint;
             return tcp->type;
@@ -898,15 +984,37 @@ get_tc(descriptor, ep, hint)
    return -1 if not found
  */
 static int
-get_tc_index(descriptor)
+get_tc_index(descriptor, modid)
     char *descriptor;
+    int modid;
 {
     int i;
+    struct module *mp;
+    struct module_import *mip;
+
+	/*
+	 * Check that the descriptor isn't imported
+	 *  by searching the import list
+	 */
+
+    for ( mp = module_head ; mp ; mp = mp->next )
+         if ( mp->modid == modid )
+             break;
+    if ( mp )
+         for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+             if ( !strcmp( mip->label, descriptor )) {
+				/* Found it - so amend the module ID */
+                  modid = mip->modid;
+                  break;
+             }
+         }
+
 
     for(i = 0; i < MAXTC; i++){
       if (tclist[i].type == 0)
           break;
-      if (!strcmp(descriptor, tclist[i].descriptor)){
+      if (!strcmp(descriptor, tclist[i].descriptor) &&
+		((modid == tclist[i].modid) || (modid==-1))){
           return i;
       }
     }
@@ -1018,7 +1126,7 @@ parse_asntype(fp, name, ntype, ntoken)
 
         if (type == LABEL)
         {
-            type = get_tc(token, &ep, &tmp_hint);
+            type = get_tc(token, current_module, &ep, &tmp_hint);
         }
         
         
@@ -1033,6 +1141,7 @@ parse_asntype(fp, name, ntype, ntoken)
             return NULL;
         }
         tcp = &tclist[i];
+        tcp->modid = current_module;
         tcp->descriptor = Strdup(name);
         tcp->hint = hint;
         if (!(type & SYNTAX_MASK)){
@@ -1093,12 +1202,12 @@ parse_objecttype(fp, name)
     np->description = NULL;        /* default to an empty description */
     type = get_token(fp, token, MAXTOKEN);
     if (type == LABEL){
-        tctype = get_tc(token, &np->enums, &np->hint);
+        tctype = get_tc(token, current_module, &np->enums, &np->hint);
         if (tctype == LABEL && mib_warnings > 1){
             print_error("Warning: No known translation for type", token, type);
         }
         type = tctype;
-        np->tc_index = get_tc_index(token); /* store TC for later reference */
+        np->tc_index = get_tc_index(token, current_module); /* store TC for later reference */
     }
     np->type = type;
     nexttype = get_token(fp, nexttoken,MAXTOKEN);
@@ -1113,6 +1222,7 @@ parse_objecttype(fp, name)
         case UINTEGER32:
         case COUNTER:
         case GAUGE:
+        case LABEL:
             if (nexttype == LEFTBRACKET) {
                 /* if there is an enumeration list, parse it */
                 np->enums = parse_enumlist(fp);
@@ -1185,7 +1295,6 @@ parse_objecttype(fp, name)
         case TIMETICKS:
         case OPAQUE:
         case NUL:
-        case LABEL:
         case NSAPADDRESS:
         case COUNTER64:
             break;
@@ -1284,6 +1393,7 @@ parse_objecttype(fp, name)
         np->label = nnp->label;
         np->parent = nnp->parent;
         np->next = nnp->next;
+        np->modid = nnp->modid;
         np->subid = nnp->subid;
         free(nnp);
     }
@@ -1342,6 +1452,7 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
     np->parent = nnp->parent;
     np->label = nnp->label;
     np->next = nnp->next;
+    np->modid = nnp->modid;
     np->subid = nnp->subid;
     free(nnp);
     return np;
@@ -1394,6 +1505,7 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
     np->parent = nnp->parent;
     np->label = nnp->label;
     np->next = nnp->next;
+    np->modid = nnp->modid;
     np->subid = nnp->subid;
     free(nnp);
     return np;
@@ -1498,6 +1610,7 @@ parse_compliance(fp, name)
     np->parent = nnp->parent;
     np->label = nnp->label;
     np->next = nnp->next;
+    np->modid = nnp->modid;
     np->subid = nnp->subid;
     free(nnp);
     return np;
@@ -1539,6 +1652,261 @@ parse_moduleIdentity(fp, name)
 
 
 /*
+ * Parses a module import clause
+ *   loading any modules referenced
+ */
+static void
+parse_imports(fp)
+    register FILE *fp;
+{
+    register int type;
+    char token[MAXTOKEN];
+#define MAX_IMPORTS	32
+    struct module_import import_list[MAX_IMPORTS];
+    int this_module, old_current_module;
+    char old_last;
+    char *old_File;
+    int old_line;
+    struct module *mp;
+
+    int import_count=0;		/* Total number of imported descriptors */
+    int i=0;			/* index of first import from each module */
+
+    type = get_token(fp, token, MAXTOKEN);
+
+		/*
+		 * Parse the IMPORTS clause
+		 */
+    while (type != SEMI && type != ENDOFFILE) {
+	if (type == LABEL ) {
+	    if (import_count == MAX_IMPORTS ) {
+		print_error("Too many imported symbols", token, type);
+		exit(1);
+	    }
+	    import_list[import_count++].label = Strdup(token);
+	}
+	else if ( type == FROM ) {
+	    type = get_token(fp, token, MAXTOKEN);
+            if ( import_count == i ) {	/* All imports are handled internally */
+	       type = get_token(fp, token, MAXTOKEN);
+               continue;
+            }
+	    this_module = which_module(token);
+
+	    for ( ; i<import_count ; ++i)
+		import_list[i].modid = this_module;
+
+	    old_current_module = current_module;	/* Save state */
+	    old_last = last;
+            old_File = Strdup( File );
+	    old_line = Line;
+	    current_module = this_module;
+	    last = ' ';
+
+		/*
+		 * Recursively read any pre-requisite modules
+		 */
+	    (void) read_module(token);
+
+	    current_module = old_current_module;	/* Restore state */
+	    last = old_last;
+	    strcpy (File, old_File);
+            free( old_File );
+	    Line = old_line;
+	}
+	type = get_token(fp, token, MAXTOKEN);
+    }
+
+		/*
+		 * Save the import information
+		 *   in the global module table
+		 */
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( mp->modid == current_module) {
+	    mp->imports = Malloc(import_count*sizeof(struct module_import));
+	    for ( i=0 ; i<import_count ; ++i ) {
+		mp->imports[i].label = import_list[i].label;
+		mp->imports[i].modid = import_list[i].modid;
+	    }
+	    mp->no_imports = import_count;
+	    return;
+	}
+
+	/*
+	 * Shouldn't get this far
+	 */
+    print_error("Cannot find module", module_name(current_module), CONTINUE);
+    exit(1);
+}
+
+
+
+/*
+ * MIB module handling routines
+ */
+int
+which_module(name)
+    char *name;
+{
+    struct module *mp;
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( !strcmp(mp->name, name))
+	    return(mp->modid);
+
+    DEBUGP1("Module %s not found\n", name);
+    return(-1);
+}
+
+static char *
+module_name ( modid )
+    int modid;
+{
+    struct module *mp;
+    char *cp;
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( mp->modid == modid )
+	    return(mp->name);
+
+    DEBUGP1("Module %d not found\n", modid);
+    cp = Malloc(10);	/* copes with 1e8 modules! */
+    sprintf(cp, "#%d", modid);
+    return(cp);
+}
+
+/*
+ *  Read in the named module
+ *	Returns the root of the whole tree
+ *	(by analogy with 'read_mib')
+ */
+struct tree *
+read_module (name )
+    char *name;
+{
+    struct module *mp;
+    struct module_import *mip;
+    FILE *fp;
+    struct node *np;
+    struct tree *tp;
+    int i;
+
+    if ( tree_head == NULL )
+	init_mib();
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( !strcmp(mp->name, name)) {
+	    if ( mp->no_imports != -1 ) {
+		DEBUGP1("Module %s already loaded\n", name);
+		return tree_head;
+	    }
+	    if ((fp = fopen(mp->file, "r")) == NULL) {
+		perror(mp->file);
+		return tree_head;
+	    }
+	    mp->no_imports=0;		/* Note that we've read the file */
+	    strcpy(File, mp->file);
+	    Line = 1;
+		/*
+		 * Parse the file
+		 */
+	    np = parse( fp, orphan_nodes );
+#ifdef TEST
+	    printf("\nNodes for Module %s:\n", name);
+	    print_nodes( stdout, np );
+#endif
+
+		/*
+		 * All modules implicitly import
+		 *   the roots of the tree
+		 */
+	    if ( mp->no_imports == 0 ) {
+		mp->no_imports = NUMBER_OF_ROOT_NODES;
+		mp->imports = root_imports;
+	    }
+
+		/*
+		 * Build the tree
+		 */
+	    init_node_hash( np );
+	    for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
+		tp = find_tree_node( mip->label, mip->modid );
+		if (!tp) {
+		    fprintf(stderr, "Did not find %s in module %s\n",
+			mip->label, module_name(mip->modid));
+		    continue;
+		}
+		do_subtree( tp, &np );
+	    }
+
+		/*
+		 * If any nodes left over,
+		 *   add them to the list of orphans
+		 */
+	    
+	    if (!orphan_nodes) return;
+	    for ( np = orphan_nodes ; np->next ; np = np->next )
+		;	/* find the end of the orphan list */
+	    for (i = 0; i < NHASHSIZE; i++)
+		if ( nbuckets[i] ) {
+		    if ( np )
+			np->next = nbuckets[i];
+		    else {
+			orphan_nodes = nbuckets[i];
+			np = orphan_nodes;
+		    }
+		    nbuckets[i] = 0;
+		    for ( ; np->next ; np = np->next )
+			;
+		}
+
+	    return tree_head;
+	}
+
+    fprintf(stderr, "Module %s not found\n", name);
+    return tree_head;
+}
+
+
+static void
+new_module (name , file)
+    char *name;
+    char *file;
+{
+    struct module *mp;
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( !strcmp(mp->name, name)) {
+	    DEBUGP1("Module %s already noted\n",name);
+			/* Not the same file */
+	    if ( strcmp(mp->file, file)) {
+                fprintf(stderr, "Warning: Module %s in both %s and %s\n",
+			name, mp->file, file);
+
+			/* Use the new one in preference */
+		free(mp->file);
+                mp->file = Strdup(file);
+            }
+	    return;
+	}
+
+	/* Add this module to the list */
+    mp = Malloc(sizeof(struct module));
+    mp->name = Strdup(name);
+    mp->file = Strdup(file);
+    mp->imports = NULL;
+    mp->no_imports = -1;	/* Not yet loaded */
+    mp->modid = max_module;
+    ++max_module;
+
+    mp->next = module_head;	/* Or add to the *end* of the list? */
+    module_head = mp;
+}
+
+
+
+
+/*
  * Parses a mib file and returns a linked list of nodes found in the file.
  * Returns NULL on error.
  */
@@ -1564,14 +1932,6 @@ parse(fp, root)
         /* now find end of chain */
         while(np->next)
             np = np->next;
-    } else {
-        hash_init();
-        memset(tclist, 0, MAXTC * sizeof(struct tc));
-    }
-    quoted_string_buffer = Malloc(MAXQUOTESTR);  /* free this later */
-    if (quoted_string_buffer == NULL) {
-        print_error ("Out of memory", NULL, CONTINUE);
-        return NULL;
     }
 
     while (type != ENDOFFILE){
@@ -1588,8 +1948,7 @@ parse(fp, root)
             if (mib_warnings) Malloc_stats (stderr);
             continue;
         case IMPORTS:
-            while (type != SEMI && type != ENDOFFILE)
-                type = get_token(fp, token, MAXTOKEN);
+            parse_imports( fp );
             continue;
         case EXPORTS:
             while (type != SEMI && type != ENDOFFILE)
@@ -1627,6 +1986,7 @@ parse(fp, root)
             }
             state = IN_MIB;
             if (mib_warnings) fprintf (stderr, "Parsing MIB: %s\n", name);
+            current_module = which_module( name );
             while ((type = get_token (fp, token, MAXTOKEN)) != ENDOFFILE)
                 if (type == BEGIN) break;
             break;
@@ -1700,8 +2060,6 @@ parse(fp, root)
             while (np->next) np = np->next;
         }
     }
-    free (quoted_string_buffer);
-    quoted_string_buffer = NULL;
     return root;
 }
 
@@ -1727,7 +2085,6 @@ get_token(fp, token,maxtlen)
     register char *token;
     int maxtlen;
 {
-    static char last = ' ';
     register int ch, ch_next;
     register char *cp = token;
     register int hash = 0;
@@ -1833,68 +2190,87 @@ get_token(fp, token,maxtlen)
     return ENDOFFILE;
 }
 
-#ifndef TEST
-struct tree *
-read_mib(filename)
-    char *filename;
+int
+add_mibdir( dirname )
+    char *dirname;
 {
     FILE *fp;
-    struct node *nodes = NULL;
-    struct tree *tree;
     DIR *dir, *dir2;
     struct dirent *file;
+    char token[MAXTOKEN];
     char tmpstr[300];
-    char *libpath;
+    int count = 0;
 
-    fp = fopen(filename, "r");
-    if (fp == NULL)
-        return NULL;
-    strcpy(File,filename);
-    DEBUGP1("Parsing %s...",filename);
-    nodes = parse(fp, nodes);
-    if (!nodes){
-        fprintf(stderr, "Mib table is bad.  Exiting\n");
-        exit(1);
-    }
-    fclose(fp);
-    DEBUGP("Done\n");
-
-    libpath = getenv("SNMPLIBPATH");
-    if (!libpath) libpath = SNMPLIBPATH;
-    sprintf(tmpstr,"%s/mibs", libpath);
-    if ((dir = opendir(tmpstr))) {
+    if ((dir = opendir(dirname))) {
         while ((file = readdir(dir))) {
             /* Only parse file names not beginning with a '.' */
             if (file->d_name != NULL && file->d_name[0] != '.') {
-                sprintf(tmpstr, "%s/mibs/%s", libpath, file->d_name);
+                sprintf(tmpstr, "%s/%s", dirname, file->d_name);
                 if ((dir2 = opendir(tmpstr))) {
                     /* file is a directory, don't read it */
                     closedir(dir2);
                 } else {
-                    /* parse it */
+                    /* which module is this */
                     if ((fp = fopen(tmpstr, "r")) == NULL) {
                         perror(tmpstr);
 			continue;
                     }
-                    DEBUGP1("Parsing %s...",tmpstr);
+                    DEBUGP1("Adding %s...",tmpstr);
                     Line = 1;
                     strcpy(File,tmpstr);
-                    nodes = parse(fp, nodes);
-                    if (nodes == NULL) {
-                        fprintf(stderr, "Mib table is bad.  Exiting\n");
-                        exit(1);
-                    }
+                    get_token( fp, token, MAXTOKEN);
+                    new_module(token, tmpstr);
+                    count++;
                     DEBUGP("done\n");
                     fclose (fp);
                 }
             }
         }
         closedir(dir);
+        return(count);
     }
-    tree = build_tree(nodes);
-    return tree;
+    return(-1);
 }
-#endif
+
+
+/*
+ * Returns the root of the whole tree
+ *   (for backwards compatability)
+ */
+struct tree *
+read_mib(filename)
+    char *filename;
+{
+    FILE *fp;
+    char token[MAXTOKEN];
+
+    fp = fopen(filename, "r");
+    if (fp == NULL)
+        return NULL;
+    Line = 1;
+    strcpy(File,filename);
+    DEBUGP1("Parsing %s...",filename);
+    get_token( fp, token, MAXTOKEN);
+    fclose(fp);
+    new_module(token, filename);
+    (void) read_module(token);
+    DEBUGP("Done\n");
+
+    return tree_head;
+}
+
+
+struct tree *
+read_all_mibs()
+{
+    struct module *mp;
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( mp->no_imports == -1 )
+            read_module( mp->name );
+
+    return tree_head;
+}
 
 
 #ifdef TEST
@@ -1902,34 +2278,21 @@ main(argc, argv)
     int argc;
     char *argv[];
 {
-    FILE *fp;
-    struct node *nodes;
-    struct tree *tp = NULL;
+    int i;
 
-    if (argc == 2) strcpy (File, argv [1]);
-    else strcpy (File, "mib.txt");
+    init_mib();
 
-    fp = fopen(File, "r");
-    if (fp == NULL){
-        perror(File);
-        return 1;
-    }
-    nodes = parse(fp, NULL);
+    if ( argc == 1 )
+	(void) read_all_mibs();
+    else
+	for ( i=1 ; i<argc ; i++ )
+	    read_mib( argv[i] );
 
-    if (nodes != NULL)
-    {
-        print_nodes(stdout, nodes);
-        tp = build_tree(nodes);
-        print_subtree(stdout, tp, 0);
-    }
-
-    free_tree(tp);
-
-    fclose(fp);
+    print_subtree( stdout, tree_head, 0 );
+    free_tree( tree_head );
 
     return 0;
 }
-
 #endif /* TEST */
 
 static int

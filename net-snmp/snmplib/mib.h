@@ -265,4 +265,5 @@ void sprint_value __P((char *, oid *, int, struct variable_list *));
 void print_objid __P((oid *, int));
 char *sprint_objid __P((char *, oid *, int));
 void print_description __P((oid *, int));
+int get_module_node __P((char *, char *, oid *, int *));
 int get_node __P((char *, oid *, int *));
