@@ -259,7 +259,7 @@ void
 event_input(struct variable_list *vp)
 {
     int eventid;
-    oid variable[MAX_NAME_LEN];
+    oid variable[MAX_OID_LEN];
     int variablelen;
     u_long destip;
     int sampletype;
@@ -318,7 +318,7 @@ void do_external(char *cmd,
   int fd[2];
   int pid, result;
   FILE *file;
-  char varbuf[2048];
+  char varbuf[SPRINT_MAX_LEN];
   int oldquick;
   
   DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
@@ -391,13 +391,13 @@ int snmp_input(int op,
 	       void *magic)
 {
     struct variable_list *vars;
-    char buf[64], oid_buf [512];
+    char buf[64], oid_buf [SPRINT_MAX_LEN];
     struct snmp_pdu *reply;
     struct tm *tm;
     time_t timer;
     struct hostent *host;
     int varbufidx;
-    char varbuf[2048];
+    char varbuf[SPRINT_MAX_LEN];
     static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
     static oid snmptrapoid2[11] = {1,3,6,1,6,3,1,1,4,1,0};
     struct variable_list tmpvar;
@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
     fd_set fdset;
     struct timeval timeout, *tvp;
     in_addr_t myaddr;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
+    oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
     int srclen, dstlen, contextlen;
     int local_port = SNMP_TRAP_PORT;
     char ctmp[300];
@@ -664,7 +664,7 @@ int main(int argc, char *argv[])
     if (!Print) Syslog = 1;
 
     myaddr = get_myaddr();
-    srclen = dstlen = contextlen = MAX_NAME_LEN;
+    srclen = dstlen = contextlen = MAX_OID_LEN;
     ms_party_init(myaddr, src, &srclen, dst, &dstlen, context, &contextlen);
 
     sprintf(ctmp,"%s/party.conf",SNMPSHAREPATH);

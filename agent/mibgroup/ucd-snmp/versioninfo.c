@@ -66,7 +66,7 @@ unsigned char *var_extensible_version(struct variable *vp,
   static char errmsg[300];
   char *cptr;
   time_t curtime;
-  char c_oid[MAX_NAME_LEN];
+  char c_oid[SPRINT_MAX_LEN];
 #ifdef CONFIGURE_OPTIONS
   static char *config_opts = CONFIGURE_OPTIONS;
 #endif

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 {
     int	arg, count;
     char *current_name = NULL;
-    oid name[MAX_NAME_LEN];
+    oid name[MAX_OID_LEN];
     int name_length;
     int tosymbolic = 0;
     int description = 0;
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     if (print == 3) print_oid_report (stdout);
     if (!current_name) exit (0);
 
-    name_length = MAX_NAME_LEN;
+    name_length = MAX_OID_LEN;
     if (random_access){
 	if (!get_node(current_name, name, &name_length)){
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);

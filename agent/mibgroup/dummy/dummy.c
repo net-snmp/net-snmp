@@ -122,7 +122,7 @@ header_dummy(struct variable *vp,
 	     WriteMethod **write_method) 
 {
 #define DUMMY_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
 
     /* just do trace and token print */

@@ -216,10 +216,10 @@ header_ifEntry(struct variable *vp,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     register int	interface;
     int result, count;
-    char c_oid[1024];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -274,9 +274,9 @@ header_interfaces(struct variable *vp,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
-  oid newname[MAX_NAME_LEN];
+  oid newname[MAX_OID_LEN];
   int result;
-  char c_oid[1024];
+  char c_oid[SPRINT_MAX_LEN];
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, name, *length);
@@ -626,9 +626,9 @@ header_interfaces(struct variable *vp,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[1024];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -659,10 +659,10 @@ header_ifEntry(struct variable *vp,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     register int	interface;
     int result, count;
-    char c_oid[1024];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -1799,7 +1799,7 @@ header_interfaces(struct variable *vp,
 		  WriteMethod **write_method)
 {
 #define INTERFACES_NAME_LENGTH	8
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
 
     DEBUGMSGTL(("mibII/interfaces", "var_interfaces: "));
@@ -1831,14 +1831,14 @@ header_ifEntry(struct variable *vp,
 	       WriteMethod **write_method)
 {
 #define IFENTRY_NAME_LENGTH	10
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     register int	interface;
     int result, count;
     static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC, 
 				IFMIB_SYSTEM, IFMIB_IFCOUNT };
     size_t len;
 #ifdef DODEBUG
-    char c_oid[1024];
+    char c_oid[SPRINT_MAX_LEN];
 
     sprint_objid (c_oid, name, *length);
     printf ("var_ifEntry: %s %d\n", c_oid, exact);

@@ -844,7 +844,7 @@ write_eventtab(int action,
     int size;
     long int_value;
     u_char string_value[MAX_OWNER_STR_LEN];
-    oid id_value[MAX_NAME_LEN];
+    oid id_value[MAX_OID_LEN];
     int buffersize = 1000;
     
     /* .1.3.6.1.6.3.2.1.2.2.1.6.1  */
@@ -1000,7 +1000,7 @@ eventNotifyUpdateSession(struct eventNotifyEntry *np)
     ((u_char *)&destAddr)[3] = (u_char)np->context[12];
 
     np->srcPartyLen
-        = np->dstPartyLen = np->contextLen= MAX_NAME_LEN;
+        = np->dstPartyLen = np->contextLen= MAX_OID_LEN;
     ms_party_init(destAddr, np->srcParty, &(np->srcPartyLen),
                   np->dstParty, &(np->dstPartyLen),
                     np->context, &(np->contextLen));
@@ -1249,7 +1249,7 @@ var_eventtab(struct variable *vp,
 	     int *var_len,
 	     WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
     int mask;
     struct eventEntry *event;
@@ -1350,7 +1350,7 @@ var_eventnotifytab(struct variable *vp,
 		   int *var_len,
 		   WriteMethod **write_method)
 {
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
     int mask;
     struct eventNotifyEntry *event;

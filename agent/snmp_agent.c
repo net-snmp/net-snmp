@@ -87,7 +87,7 @@ static void dump_var (oid *var_name,
 		      void *statP,
 		      int statLen)
 {
-    char buf [2560];
+    char buf [SPRINT_MAX_LEN];
     struct variable_list temp_var;
 
     temp_var.type = statType;
@@ -503,7 +503,7 @@ parse_var_op_list(u_char *data,
 		  int action)
 {
     u_char  type;
-    oid	    var_name[MAX_NAME_LEN];
+    oid	    var_name[MAX_OID_LEN];
     int	    var_name_len, var_val_len;
     u_char  var_val_type, *var_val, statType;
     register u_char *statP;
@@ -514,6 +514,7 @@ parse_var_op_list(u_char *data,
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     int	    noSuchObject;
+    char c_oid[SPRINT_MAX_LEN];
 
     if (pi->pdutype == SNMP_MSG_SET)
 	rw = WRITE;
@@ -545,16 +546,15 @@ parse_var_op_list(u_char *data,
     *index = 1;
     while((int)length > 0){
 	/* parse the name, value pair */
-	var_name_len = MAX_NAME_LEN;
+	var_name_len = MAX_OID_LEN;
 	data = snmp_parse_var_op(data, var_name, &var_name_len, &var_val_type,
 				 &var_val_len, &var_val, (int *)&length);
 	if (data == NULL)
 	    return PARSE_ERROR;
 
 	if (verbose && action == RESERVE1) {
-	    char buf [256];
-	    sprint_objid (buf, var_name, var_name_len);
-	    fprintf (stdout, "    -- %s\n", buf);
+	    sprint_objid (c_oid, var_name, var_name_len);
+	    fprintf (stdout, "    -- %s\n", c_oid);
 	}
 
 	/* now attempt to retrieve the variable on the local entity */
@@ -563,11 +563,10 @@ parse_var_op_list(u_char *data,
 	if (statP == NULL && pi->pdutype != SNMP_MSG_SET) {
 	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
 	    else {
-		char buf [1024];
-		sprint_objid(buf, var_name, var_name_len);
+		sprint_objid(c_oid, var_name, var_name_len);
 		DEBUGMSGTL(("snmp_agent",
                             "%s(%s) --  OID Doesn't exist or access is denied\n",
-                            exact ? "GET" : "GETNEXT", buf));
+                            exact ? "GET" : "GETNEXT", c_oid));
 	    }
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
@@ -669,7 +668,7 @@ parse_var_op_list(u_char *data,
 }
 
 struct repeater {
-    oid	name[MAX_NAME_LEN];
+    oid	name[MAX_OID_LEN];
     int length;
 } repeaterList[10];
 
@@ -694,7 +693,7 @@ bulk_var_op_list(u_char *data,
 		 struct packet_info *pi)
 {
     u_char  type;
-    oid	    var_name[MAX_NAME_LEN];
+    oid	    var_name[MAX_OID_LEN];
     int	    var_name_len, var_val_len;
     u_char  var_val_type, *var_val, statType;
     register u_char *statP;
@@ -709,6 +708,7 @@ bulk_var_op_list(u_char *data,
     int	    noSuchObject, useful;
     int repeaterIndex, repeaterCount;
     struct repeater *rl;
+    char c_oid[SPRINT_MAX_LEN];
 
     if (non_repeaters < 0)
 	non_repeaters = 0;
@@ -743,16 +743,15 @@ bulk_var_op_list(u_char *data,
     while((int)length > 0 && non_repeaters > 0){
 	/* parse the name, value pair */
 	
-	var_name_len = MAX_NAME_LEN;
+	var_name_len = MAX_OID_LEN;
 	data = snmp_parse_var_op(data, var_name, &var_name_len, &var_val_type,
 				 &var_val_len, &var_val, (int *)&length);
 	if (data == NULL)
 	    return PARSE_ERROR;
 
 	if (verbose) {
-	    char buf [256];
-	    sprint_objid (buf, var_name, var_name_len);
-	    fprintf (stdout, "    non-rep -- %s\n", buf);
+	    sprint_objid (c_oid, var_name, var_name_len);
+	    fprintf (stdout, "    non-rep -- %s\n", c_oid);
 	}
 
 	/* now attempt to retrieve the variable on the local entity */
@@ -788,7 +787,7 @@ bulk_var_op_list(u_char *data,
     useful = FALSE;
     while((int)length > 0){
 	/* parse the name, value pair */
-	rl->length = MAX_NAME_LEN;
+	rl->length = MAX_OID_LEN;
 	data = snmp_parse_var_op(data, rl->name, &rl->length,
 				 &var_val_type, &var_val_len, &var_val,
 				 (int *)&length);
@@ -796,9 +795,8 @@ bulk_var_op_list(u_char *data,
 	    return PARSE_ERROR;
 
 	if (verbose) {
-	    char buf [256];
-	    sprint_objid (buf, rl->name, rl->length);
-	    fprintf (stdout, "    rep -- %s\n", buf);
+	    sprint_objid (c_oid, rl->name, rl->length);
+	    fprintf (stdout, "    rep -- %s\n", c_oid);
 	}
 
 	/* now attempt to retrieve the variable on the local entity */
@@ -842,7 +840,7 @@ bulk_var_op_list(u_char *data,
 	while((repeaterIndex++ < repeaterCount) > 0 && !full){
 	    /* parse the name, value pair */
 #if 0
-	    var_name_len = MAX_NAME_LEN;
+	    var_name_len = MAX_OID_LEN;
 	    data = snmp_parse_var_op(data, var_name, &var_name_len,
 				     &var_val_type, &var_val_len, &var_val,
 				     (int *)&length);

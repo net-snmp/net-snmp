@@ -382,7 +382,7 @@ smux_rreq_process(int sd,
 	oid oid_name[MAX_OID_LEN];
 	int oid_name_len;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
@@ -429,7 +429,7 @@ smux_snmp_process(int exact,
 	u_char  result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
 	
 	/* 
 	 * XXX Check if Gated is currently handling this oid.
@@ -550,7 +550,7 @@ smux_parse_var(u_char *varbind,
 	int len;
 	u_char *ptr;
 	u_char type;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
         
 	ptr = varbind;
 	len = *varbindlength;
