@@ -65,7 +65,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #ifdef HAVE_SYS_DMAP_H
 #include <sys/dmap.h>
 #endif
-#if HAVE_MACHINE_PTE_H
+#if defined(HAVE_MACHINE_PTE_H) && (!defined(bsdi2))
 #include <machine/pte.h>
 #endif
 #if HAVE_XTI_H
@@ -3168,6 +3168,10 @@ struct inpcb *RetInPcb;
 	return(1);	/* "OK" */
 }
 
+#ifdef bsdi2
+#define freebsd2
+#endif
+
 #ifdef freebsd2
 static char *lim, *rtnext;
 static char *at = 0;
@@ -3259,6 +3263,9 @@ char *PhysAddr;
 #endif /* freebsd2 */
 	return(0);	    /* "EOF" */
 }
+#ifdef bsdi2
+#undef freebsd2
+#endif
 
 #ifndef solaris2
 

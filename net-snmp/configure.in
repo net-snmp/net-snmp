@@ -6,7 +6,7 @@ AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging infor
 AC_ARG_WITH(defaults,[  --with-defaults         Use defaults for prompted values.],defaults="yes",defaults="no")
 
 dnl Checks for programs.
-AC_CHECK_PROGS(CC,cc gcc c89,cc)
+AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
@@ -14,6 +14,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PATH_PROG(PSPROG,ps)
+AC_PATH_PROG(UNAMEPROG,uname)
 AC_CHECK_PROGS(SED,sed gsed)
 
 AC_AIX
@@ -53,7 +54,7 @@ dnl
 
 AC_CACHE_CHECK(for location of sytem kernel,ac_cv_KERNEL_LOC,
 [ac_cv_KERNEL_LOC="unknown"
-for i in /vmunix /hp-ux /stand/vmunix /kernel/unix /kernel/genunix /netbsd /unix /kernel
+for i in /vmunix /hp-ux /stand/vmunix /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd
   do
   if test -f $i; then
     ac_cv_KERNEL_LOC="$i"
@@ -136,6 +137,8 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(strings.h fcntl.h limits.h sys/file.h sys/ioctl.h syslog.h unistd.h netinet/tcpip.h netinet/in.h sys/dmap.h machine/pte.h xti.h sys/sockio.h fstab.h sys/fs.h mtab.h ufs/fs.h ufs/ffs/fs.h sys/fixpoint.h machine/param.h sys/vm.h vm/vm.h sys/vmmeter.h sys/vmparam.h sys/vmmac.h sys/vmsystm.h sys/mbuf.h sys/time.h sys/swap.h inet/mib2.h sys/statvfs.h sys/mnttab.h sys/user.h sys/proc.h sys/select.h mntent.h)
 dnl FreeBSD required headers
 AC_CHECK_HEADERS(malloc.h sys/param.h net/if_dl.h sys/sysctl.h stdlib.h net/if_types.h)
+dnl BSDi2 headers
+AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
@@ -171,6 +174,8 @@ AC_CHECK_FUNCS(setmntent gethostname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr memcpy memmove index bcopy signal sigset sigblock sighold)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
+dnl BSDi2 functions differ
+AC_CHECK_FUNCS(statvfs statfs)
 
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,

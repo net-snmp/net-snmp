@@ -12,7 +12,9 @@
 #include <machine/param.h>
 #endif
 #if HAVE_SYS_VMMETER_H
+#ifndef bsdi2
 #include <sys/vmmeter.h>
+#endif
 #endif
 #include <sys/conf.h>
 #include <sys/param.h>
@@ -36,6 +38,21 @@
 #endif
 #if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
+#endif
+#if !defined(HAVE_STATVFS) && defined(HAVE_STATFS)
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+#define statvfs statfs
+#endif
+#if HAVE_VM_SWAP_PAGER_H
+#include <vm/swap_pager.h>
 #endif
 #if HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
@@ -178,9 +195,16 @@ int nswapfs=10;            /* taken from <machine/space.h> */
 int getswap(rettype)
   int rettype;
 {
-
   int spaceleft=0, spacetotal=0, i, fd;
 
+#ifdef bsdi2
+  struct swapstats swapst;
+  size_t size = sizeof(swapst);
+  static int mib[] = { CTL_VM, VM_SWAPSTATS };
+  if (sysctl(mib, 2, &swapst, &size, NULL, 0) < 0) return (0);
+  spaceleft = swapst.swap_free / 2;
+  spacetotal = swapst.swap_total / 2;	
+#else
   struct swdevt swdevt[100];
   struct fswdevt fswdevt[100];
   FILE *file;
@@ -221,6 +245,7 @@ int getswap(rettype)
   } else {
     return(NULL);
   }
+#endif
   switch
     (rettype) {
     case SWAPGETLEFT:
@@ -256,9 +281,18 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
+#ifdef bsdi2
+    /* sum memory statistics */
+    {
+	size_t size = sizeof(total);
+	static int mib[] = { CTL_VM, VM_TOTAL };
+	if (sysctl(mib, 2, &total, &size, NULL, 0) < 0) return (0);
+    }
+#else
   if (KNLookup(NL_TOTAL, (int *)&total, sizeof(total)) == NULL) {
     return(0);
   }
+#endif
   switch (vp->magic) {
     case MIBINDEX:
       long_ret = 1;
@@ -277,25 +311,42 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
       long_ret = minimumswap;
       return((u_char *) (&long_ret));
     case MEMTOTALREAL:
+#ifdef bsdi2
+      {	
+	size_t size = sizeof(long_ret);
+	static int mib[] = { CTL_HW, HW_PHYSMEM };
+	if (sysctl(mib, 2, &long_ret, &size, NULL, 0) < 0) 
+	  long_ret = 0; else long_ret = long_ret / 1024;
+      }	
+#else
       /* long_ret = pagetok((int) total.t_rm); */
       if(KNLookup(NL_PHYSMEM,(int *) &result,sizeof(result)) == NULL)
         return(0);
       long_ret = result*1000;
+#endif
       return((u_char *) (&long_ret));
     case MEMUSEDREAL:
       long_ret = pagetok((int) total.t_arm);
       return((u_char *) (&long_ret));
     case MEMTOTALSWAPTXT:
+#ifndef bsdi2
       long_ret = pagetok(total.t_vmtxt);
+#endif
       return((u_char *) (&long_ret));
     case MEMUSEDSWAPTXT:
+#ifndef bsdi2
       long_ret = pagetok(total.t_avmtxt);
+#endif
       return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
+#ifndef bsdi2
       long_ret = pagetok(total.t_rmtxt);
+#endif
       return((u_char *) (&long_ret));
     case MEMUSEDREALTXT:
+#ifndef bsdi2
       long_ret = pagetok(total.t_armtxt);
+#endif
       return((u_char *) (&long_ret));
     case MEMTOTALFREE:
       long_ret = pagetok(total.t_free);
@@ -345,7 +396,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   static long long_ret;
   static char errmsg[300];
 
-#if HAVE_SYS_STATVFS_H
+#if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
   struct statvfs vfs;
 #else
 #if HAVE_FSTAB_H
@@ -375,7 +426,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = disks[disknum].minimumspace;
       return((u_char *) (&long_ret));
   }
-#if HAVE_SYS_STATVFS_H
+#if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
   if (statvfs (disks[disknum].path, &vfs) == -1) {
     fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
     setPerrorstatus("statvfs dev/disk");
@@ -873,7 +924,7 @@ init_extensible() {
   update_config(0);
   
   /* set default values of system stuff */
-  strcpy(extmp.command,"/bin/uname -a");
+  strcpy(extmp.command,"UNAMEPROG -a");
   /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
@@ -881,7 +932,7 @@ init_extensible() {
   strcpy(version_descr,extmp.output);
   version_descr[strlen(version_descr)-1] = NULL; /* chomp new line */
 
-  strcpy(extmp.command,"/bin/uname -n");
+  strcpy(extmp.command,"UNAMEPROG -n");
   /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
@@ -904,13 +955,14 @@ init_extensible() {
   }
 
 #ifdef USEMEMMIB
+#ifndef bsdi2
   if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
       == NULL)
     return(0);
   if (KNLookup(NL_NSWAPFS,(int *) &nswapfs, sizeof(nswapfs))
       == NULL)
     return(0);
-
+#endif
   pagesize = 1 << PGSHIFT;
   pageshift = 0;
   while (pagesize > 1) {

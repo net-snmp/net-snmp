@@ -37,14 +37,12 @@
 #include <string.h>
 #endif
 
-
-
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2)
+#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #define rt_dst rt_nodes->rn_key
 #endif
 
@@ -134,7 +132,7 @@ u_short  flags;
 }
 
 
-#if defined(osf3) || defined(netbsd1) || defined(freebsd2)
+#if defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
 #undef rt_dst
 #endif
 

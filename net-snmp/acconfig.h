@@ -105,7 +105,7 @@
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
-#ifdef hpux9
+#if defined(hpux9) || defined(bsdi2)
 #define USEMEMMIB
 #endif
 
