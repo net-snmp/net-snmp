@@ -26,7 +26,7 @@
 V2.  You can make this list of pairs as long as you want, just make
 sure to end it in -1.*/
 
-#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1
+#define SECURITYEXCEPTIONS {100,SNMPV1,-1} /* the ErrorFlag is V1 */
 
 /* additional note:  if SECURITYEXCEPTIONS is defined, you must use an
                      ANSI compiler (gcc) for agent/extensible/extensible.c */
