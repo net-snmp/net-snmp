@@ -303,6 +303,97 @@ unsigned int count;
     }
 }
 
+/* MDchecksum(data, len, MD5): do a checksum on an arbirtrary amount of data */
+void
+MDchecksum(u_char *data, int len, u_char *mac, int maclen) {
+  MDstruct md;
+  MDstruct *MD = &md;
+  
+  MDbegin(MD);
+  while (len >= 64) {
+    MDupdate(MD, data, 64*8);
+    data += 64;
+    len -= 64;
+  }
+  MDupdate(MD, data, len*8);
+
+  /* copy the checksum to the outgoing data (all of it that is requested). */
+  MDget(MD, mac, maclen);
+}
+
+
+/* MDsign(data, len, MD5): do a checksum on an arbirtrary amount
+   of data, and prepended with a secret in the standard fashion */
+int
+MDsign(u_char *data, int len, u_char *mac, int maclen,
+       u_char *secret, int secretlen) {
+#define HASHKEYLEN 64
+
+  MDstruct MD;
+  u_char   K1[HASHKEYLEN];
+  u_char   K2[HASHKEYLEN];
+  u_char   extendedAuthKey[HASHKEYLEN];
+  u_char   buf[HASHKEYLEN];
+  int      i;
+  u_char  *cp;
+
+  memset(K1,0,HASHKEYLEN);
+  memset(K2,0,HASHKEYLEN);
+  memset(buf,0,HASHKEYLEN);
+  memset(extendedAuthKey,0,HASHKEYLEN);
+
+  if (secretlen != 16 || secret == NULL || mac == NULL || data == NULL ||
+    len <= 0 || maclen <= 0) {
+/*    DEBUGPL(("MD5 signing not properly initialized")); */
+    return -1;
+  }
+  
+  memset(extendedAuthKey, 0, HASHKEYLEN);
+  memcpy(extendedAuthKey, secret, secretlen);
+  for(i = 0; i < HASHKEYLEN; i++) {
+    K1[i] = extendedAuthKey[i] ^ 0x36;
+    K2[i] = extendedAuthKey[i] ^ 0x5c;
+  }
+
+  MDbegin(&MD);
+  MDupdate(&MD, K1, HASHKEYLEN*8);
+
+  i = len;
+  cp = data;
+  while (i >= 64) {
+    MDupdate(&MD, cp, 64*8);
+    cp += 64;
+    i -= 64;
+  }
+  MDupdate(&MD, cp, i*8);
+
+  MDget(&MD, buf, HASHKEYLEN);
+
+  MDbegin(&MD);
+  MDupdate(&MD, K2, HASHKEYLEN*8);
+  MDupdate(&MD, buf, 16*8);
+  
+  /* copy the sign checksum to the outgoing pointer */
+  MDget(&MD, mac, maclen);
+
+  memset(buf, 0, HASHKEYLEN);
+  memset(K1, 0, HASHKEYLEN);
+  memset(K2, 0, HASHKEYLEN);
+  memset(extendedAuthKey, 0, HASHKEYLEN);
+
+  return 0;
+}
+
+void
+MDget(MDstruct *MD, u_char *buf, int buflen) {
+  int i, j;
+  
+  /* copy the checksum to the outgoing data (all of it that is requested). */
+  for(i=0; i < 4 && i*4 < buflen; i++)
+    for(j=0; j < 4 && i*4+j < buflen; j++)
+      buf[i*4+j] = (MD->buffer[i] >> j*8) & 0xff;
+}
+
 /* 
 ** End of md5.c
 ****************************(cut)*****************************************/

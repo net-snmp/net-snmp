@@ -1,4 +1,6 @@
 /*
+ * vacm.c
+ *
  * SNMPv3 View-based Access Control Model
  */
 
@@ -56,8 +58,9 @@ vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
     oid *viewSubtree;
     int viewSubtreeLen;
 {
-    struct vacm_viewEntry *vp;
+    struct vacm_viewEntry *vp, *vpret = NULL;
     char view[32];
+    int found;
 
     view[0] = strlen(viewName);
     strcpy(view+1, viewName);
@@ -66,10 +69,11 @@ vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
 	    && viewSubtreeLen >= vp->viewSubtreeLen) {
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
-	    for (oidpos = 0; oidpos < vp->viewSubtreeLen; oidpos++) {
+            found = 1;
+	    for (oidpos = 0; found && oidpos < vp->viewSubtreeLen; oidpos++) {
 		if ((vp->viewMask[maskpos] & mask) != 0) {
 		    if (viewSubtree[oidpos] != vp->viewSubtree[oidpos])
-			return NULL;
+                        found = 0;
 		}
 		if (mask == 1) {
 		    mask = 0x80;
@@ -77,10 +81,21 @@ vacm_getViewEntry(viewName, viewSubtree, viewSubtreeLen)
 		}
 		else mask >>= 1;
 	    }
-	    return vp;
+            if (found) {
+              /* match successful, keep this node if its longer than
+                 the previous or (equal and legigraphically greater
+                 than the previous). */
+              if (vpret == NULL || vp->viewSubtreeLen > vpret->viewSubtreeLen ||
+                  (vp->viewSubtreeLen == vpret->viewSubtreeLen &&
+                   snmp_oid_compare(vp->viewSubtree, vp->viewSubtreeLen,
+                                    vpret->viewSubtree,
+                                    vpret->viewSubtreeLen) > 0))
+                vpret = vp;
+            }
 	}
     }
-    return NULL;
+    DEBUGP(", %s", (vpret)?"found":"none");
+    return vpret;
 }
 
 void
@@ -293,7 +308,7 @@ vacm_getAccessEntry(groupName, contextPrefix, securityModel, securityLevel)
     strcpy(context+1, contextPrefix);
     for(vp = accessList; vp; vp = vp->next){
         if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
-	    && securityLevel == vp->securityLevel
+	    && securityLevel >= vp->securityLevel
 	    && !strcmp(vp->groupName, group)
 	    && !strcmp(vp->contextPrefix, context))
 	  return vp;

@@ -1,3 +1,7 @@
+/*
+ * util_funcs.c
+ */
+
 #include <config.h>
 
 #include <stdio.h>
@@ -218,6 +222,7 @@ int get_exec_output(ex)
         }
 #ifdef EXCACHETIME
         unlink(CACHEFILE);
+	/* XXX  Use SNMP_FILEMODE_CLOSED instead of 644? */
         if ((cfd = open(CACHEFILE,O_WRONLY|O_TRUNC|O_CREAT,0644)) < 0) {
           setPerrorstatus("open");
           cachetime = 0;
@@ -441,7 +446,39 @@ sprint_mib_oid(buf,name,len)
   }
 }
 
-int checkmib(vp,name,length,exact,var_len,write_method,max)
+
+
+
+/*******************************************************************-o-******
+ * checkmib
+ *
+ * Parameters:
+ *	  *vp		 Variable data.
+ *	  *name		 Fully instantiated OID name.
+ *	  *length	 Length of name.
+ *	   exact	 TRUE if an exact match is desired.
+ *	  *var_len	 Hook for size of returned data type.
+ *	(**write_method) Hook for write method (UNUSED).
+ *	   max
+ *      
+ * Returns:
+ *	1	If name matches vp->name (accounting for 'exact') and is
+ *			not greater in length than 'max'.
+ *	0	Otherwise.
+ *
+ *
+ * Compare 'name' to vp->name for the best match or an exact match (if
+ *	requested).  Also check that 'name' is not longer than 'max' if
+ *	max is greater-than/equal 0.
+ * Store a successful match in 'name', and increment the OID instance if
+ *	the match was not exact.  
+ *
+ * 'name' and 'length' are undefined upon failure.
+ *
+ * XXX	Worth rewriting?
+ */
+int
+checkmib(vp,name,length,exact,var_len,write_method,max)
     register struct variable *vp;
     register oid	*name;
     register int	*length;
@@ -450,8 +487,13 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
     int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
     int                 max;
 {
-  int i, rtest;
-#define MAX_NEWNAME_LEN 100
+#define MAX_NEWNAME_LEN	256
+
+  int	i,
+	rtest;	/* Set to:	-1	If name < vp->name,
+	 	 *		1	If name > vp->name,
+		 *		0	Otherwise.
+		 */
   oid newname[MAX_NEWNAME_LEN];
 
   for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
@@ -469,9 +511,12 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
 	*var_len = 0;
     return 0;
   }
+
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
-         vp->namelen,*length,name[*length-1]); */
+         vp->namelen,*length,name[*length-1]); */	/* XXX */
+
   memset((char *) newname,(0),MAX_NEWNAME_LEN*sizeof(oid));
+
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
@@ -490,6 +535,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
       *var_len = 0;
     return 0;
   }
+
   memmove(name, newname, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
@@ -501,6 +547,24 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*******************************************************************-o-******
+ * generic_header
+ *
+ * Parameters:
+ *	  *vp	   (I)     Pointer to variable entry that points here.
+ *	  *name	   (I/O)   Input name requested, output name found.
+ *	  *length  (I/O)   Length of input and output oid's.
+ *	   exact   (I)     TRUE if an exact match was requested.
+ *	  *var_len (O)     Length of variable or 0 if function returned.
+ *	(**write_method)   Hook to name a write method (UNUSED).
+ *      
+ * Returns:
+ *	MATCH_SUCCEEDED	If vp->name matches name (accounting for exact bit).
+ *	MATCH_FAILED	Otherwise,
+ *
+ *
+ * Check whether variable (vp) matches name.
+ */
 int
 header_generic(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
@@ -531,7 +595,9 @@ header_generic(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
-}
+}  /* end header_generic() */
+
+
 
 char *find_field(ptr,field)
      char *ptr;
@@ -596,21 +662,4 @@ int val;
     sprintf (textVal, "%d", val);
     strcpy(s, textVal);
     return;
-}
-
-int
-calculate_time_diff(t1, t2)
-  struct timeval t1, t2;
-{
-  struct timeval tmp, diff;
-  memcpy(&tmp, &t1, sizeof(struct timeval));
-  tmp.tv_sec--;
-  tmp.tv_usec += 1000000L;
-  diff.tv_sec = tmp.tv_sec - t2.tv_sec;
-  diff.tv_usec = tmp.tv_usec - t2.tv_usec;
-  if (diff.tv_usec > 1000000L){
-    diff.tv_usec -= 1000000L;
-    diff.tv_sec++;
-  }
-  return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
 }

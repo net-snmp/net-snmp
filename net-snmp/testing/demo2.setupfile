@@ -1,0 +1,66 @@
+#
+# snmpd.conf
+#
+# (Copied from demo2.setupfile.)
+#
+
+
+# Setup the engineID using a string to initialize it:
+#
+# Format:
+#   engineID STRING
+
+    engineID testit
+
+# Set the passwords for the initial and template users to our
+# chosen default ("my_passphrase").  The engineID settings must
+# be that for the string chosen by the line above.  The example
+# below uses:
+#
+#     12 800007e50474657374697400
+#
+# as the engineID.  The 12 is the length of the hex string in
+# bytes. (warning: this could change in format in the future to
+# remove the length requirement).
+#
+# Format:
+#   userSetAuthPass  USER        LEN EID                      PASSPHRASE
+#                  
+    userSetAuthPass  initial     12  800007e50474657374697400 my_passphrase
+    userSetPrivPass  initial     12  800007e50474657374697400 my_passphrase
+    userSetAuthPass  templateMD5 12  800007e50474657374697400 my_passphrase
+    userSetPrivPass  templateMD5 12  800007e50474657374697400 my_passphrase
+    userSetAuthPass  templateSHA 12  800007e50474657374697400 my_passphrase
+    userSetPrivPass  templateSHA 12  800007e50474657374697400 my_passphrase
+
+# Add the users we're going to need into a group ("local").
+#   (this is documented in the snmpd.conf(5) manual page)
+#
+# Format:
+#   group NAME  MODEL  SECNAME
+#
+    group local any    initial
+    group local any    templateMD5
+    group local any    templateSHA
+    group local any    dolphin
+    group local any    shark
+    group local any    shark2
+    group local any    stingray
+    group local any    stingray2
+    group local any    whale
+
+# Create a view "all" that includes the entire mib tree (.1...)
+#   (this is documented in the snmpd.conf(5) manual page)
+#
+# Format:
+#   view NAME  TYPE      SUBTREE  [MASK]
+#
+    view all   included  .1       80
+
+# Give the "local" group r/w access to all of the "all" view above.
+#   (this is documented in the snmpd.conf(5) manual page)
+#
+# Format:
+#   access GROUP CONTEXT MODEL LEVEL  PREFIX READ WRITE NOTIFY
+#                               
+    access local ""      any   noauth 0      all  all   all

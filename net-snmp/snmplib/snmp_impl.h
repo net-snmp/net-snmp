@@ -78,6 +78,9 @@ struct packet_info {
     struct partyEntry *srcp, *dstp;
     struct contextEntry *cxp;
 
+   /* SNMPv3 parameters */
+    u_char      *securityName;
+
     u_char	*packet_end;
 };
 

@@ -19,21 +19,22 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "13 June 1998"
+.TH SNMPCMD 1 "04 December 1998"
 .UC 4
 .SH NAME
 snmpcmd - commmands to communicate with a network entity using SNMP Requests.
 .SH SYNOPSIS
 snmpcmd
 [-h|-V]
-[-R]
-[-f|-s|-S] [-q]
 [-d] [-D]
+[-v (1 | 2c | 2p | 3) ]
+[-R] [-f|-s|-S] [-q]
 [-m mibs] [-M mibdirs]
-[-r retries] [-t timeout]
-[-p port]
-[-v [ 1 | 2c | 2p ] ]
+[-r retries] [-t timeout] [-p port]
 [-c srcclock dstclock]
+[-e engineid] [-T boots time] [-n contextname]
+[-l seclevel] [-u secname]
+[-a authproto] [-A authpasswd] [-x privproto] [-X privpasswd]
 agent [community | srcparty dstparty context | noauth]
 commandparams
 .SH DESCRIPTION
@@ -55,6 +56,14 @@ are specified after the common part specified here.
 prints the applications help message
 .IP "-V"
 prints the applications version string
+.IP "-d"
+request the application to dump all SNMP packets send and received
+.IP "-D"
+request debugging output
+.IP "-v 1 | 2c | 2p | 3"
+specifies the protocol version to use: 1 (RFC 1155-1157), 2c (RFC 1901-1908),
+2p (RFC 1441-1452), or 3 (RFC 2271-2274)
+The default is -v 1
 .IP "-R"
 requests random access to the MIB symbol table. See RANDOM ACCESS MIB below.
 .IP "-f"
@@ -83,10 +92,6 @@ This overrides the environment variable MIBS.
 .IP "-M mibdirs"
 specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
-.IP "-d"
-request the application to dump all SNMP packets send and received
-.IP "-D"
-request debugging output
 .IP "-r retries"
 specifies the number of retries to be used in the requests. The default
 is 5
@@ -95,12 +100,35 @@ specifies the timeout between retries. The default is 1
 .IP "-p port"
 specifies the port to communicate with at the agent. The default is 161,
 except for snmptrap, which defaults to 162.
-.IP "-v 1 | 2c | 2p"
-specifies the protocol version to use: 1 (RFC 1155-1157), 2c (RFC 1901-1908)
-or 2p (RFC 1441-1452).
-The default is -v 1
 .IP "-c srcclock dstclock"
 sets the clock values to be used for authenticated SNMP v2p messages
+.IP "-e engineid"
+sets the authoritative engineID used for SNMP v3 Request messages.
+This is the engineID of the agent (e.g., 800000020109840301). (will be
+discovered if not supplied)
+.IP "-T boots time"
+sets the engineBoots and engineTime used for authenticated SNMP v3 messages.
+This will initialize the local notion of the agents boots/time with an
+authenticated value stored in the LCD. (will be discovered if not supplied)
+.IP "-n contextname"
+sets the destination contextName used for SNMP v3 messages. Default 
+contextName is and empty string ""
+.IP "-l seclevel"
+sets the securityLevel used for SNMP v3 messages 
+(noAuthNoPriv|authNoPriv|authPriv). Appropriate pass phrase(s) must provided
+when using any level higher than noAuthNoPriv.
+.IP "-u secname"
+sets the securityName used for authenticated SNMP v3 messages
+.IP "-a authproto"
+sets the authentication protocol used for authenticated SNMP v3 messages.
+(MD5|SHA)
+.IP "-A authpasswd"
+sets the authentication pass phrase used for authenticated SNMP v3 messages
+.IP "-x privproto"
+sets the privacy protocol used for encrypted SNMP v3 messages.
+(DES)
+.IP "-X privpasswd"
+sets the privacy pass phrase used for encrypted SNMP v3 messages
 .PP
 The
 .I hostname

@@ -65,6 +65,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "mibincl.h"
+#include "snmpv3.h"
+#include "snmpusm.h"
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
 #include "../snmplib/system.h"
@@ -164,16 +166,19 @@ void
 init_agent __P((void))
 {
 #ifdef CAN_USE_NLIST
-  init_kmem("/dev/kmem"); 
+	init_kmem("/dev/kmem");
 #endif
 
-  setup_tree();
+	setup_tree();
+
 #include "mibgroup/mib_module_inits.h"
-  init_agent_read_config();
+
+	init_agent_read_config();
+
 #ifdef TESTING
-  auto_nlist_print_tree(-2,0);
+	auto_nlist_print_tree(-2, 0);
 #endif
-}
+}  /* end init_agent() */
 
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3

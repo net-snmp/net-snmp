@@ -54,7 +54,6 @@ int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
-
 /* snmpd.conf config parsing */
 
 void system_parse_config_sysloc(word, cptr)
@@ -84,7 +83,6 @@ void system_parse_config_syscon(word, cptr)
     config_perror(tmpbuf);
   }
 }
-
 
 	/*********************
 	 *
@@ -203,15 +201,7 @@ var_system(vp, name, length, exact, var_len, write_method)
             return (u_char *)version_id;
         case UPTIME:
             gettimeofday(&now, NULL);
-            now.tv_sec--;
-            now.tv_usec += 1000000L;
-            diff.tv_sec = now.tv_sec - starttime.tv_sec;
-            diff.tv_usec = now.tv_usec - starttime.tv_usec;
-            if (diff.tv_usec > 1000000L){
-                diff.tv_usec -= 1000000L;
-                diff.tv_sec++;
-            }
-            long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+            long_return = calculate_time_diff(&now, &starttime);
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
