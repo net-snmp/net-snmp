@@ -101,7 +101,7 @@ do_diff()
     # p     Show which C function each change is in.
     # d     smaller changes
     #    --exclude='*Makefile' 
-    diff -crp -C 5 \
+    diff -cp -C 5 \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.#*' \
         --exclude='*.o' --exclude='*.lo' --exclude='*.a' --exclude='*.la' \
@@ -168,7 +168,7 @@ gen_code()
 {
     files=`ls default-* 2>/dev/null `
     if [ ! -z "$files" ]; then
-       mv $files curr/ 
+       cp $files curr/ 
     fi
 
     safecd curr
