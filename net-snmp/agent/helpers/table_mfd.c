@@ -44,15 +44,17 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
 /*
  * Modes
  */
-static netsnmp_request_group *
+static int
 _mfd_data_lookup(netsnmp_mib_handler *handler,
                  netsnmp_handler_registration *reginfo,
-                 netsnmp_request_info *requests);
+                 netsnmp_request_info *requests,
+                 mfd_pdu_context * pdu_ctx);
 
-static netsnmp_request_group *
+static int
 _mfd_data_find(netsnmp_mib_handler *handler,
                netsnmp_handler_registration *reginfo,
-               netsnmp_request_info *requests);
+               netsnmp_request_info *requests,
+               mfd_pdu_context * pdu_ctx);
 
 /*
  * Utilities
@@ -67,19 +69,25 @@ _mfd_group(netsnmp_handler_registration *reginfo, netsnmp_index *row,
  * Registration
  *
  */
-/** register specified callbacks for the specified table/oid. If the
-    group_rows parameter is set, the row related callbacks will be
-    called once for each unique row index. Otherwise, each callback
-    will be called only once, for all objects.
-*/
+/**
+ * register a MIBs For Dummies table.
+ *
+ * @param mfdr        : mfd registration
+ * @param name        : table/handler name
+ * @param handler     : user handler to be called after the
+ *                      mfd handler (usually NULL)
+ * @param reg_oid     : OID to register at
+ * @param reg_oid_len : length of OID
+ * @param modes       : modes for the handler
+ */
 int
-netsnmp_mfd_register_table(netsnmp_handler_registration *reginfo,
-                           netsnmp_table_registration_info *tabreg,
-                           netsnmp_container *container,
-                           netsnmp_mfd_registration *mfdr)
+netsnmp_mfd_register_table(netsnmp_mfd_registration *mfdr, const char *name,
+                           Netsnmp_Node_Handler * handler,
+                           oid * reg_oid, size_t reg_oid_len, int user_modes)
 {
     netsnmp_mib_handler *mfd_handler;
-    u_long modes = 0;
+    netsnmp_handler_registration *reginfo;
+    u_long mfd_modes = 0;
         
     DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
 
@@ -87,73 +95,75 @@ netsnmp_mfd_register_table(netsnmp_handler_registration *reginfo,
         snmp_log(LOG_ERR, "table_mfd registration with no callbacks\n" );
         return SNMPERR_GENERR;
     }
-    
+
 #if 0
     /*
      * check for required callbacks
      */
-    if ((!mfdr->cbsm.data_lookup) ||(!mfdr->cbsm.get_values) ||
-        ((reginfo->modes & HANDLER_CAN_RWRITE) &&
-         ((!mfdr->cbsm.set_values) ||(!mfdr->cbsm.final_commit) ||
-          (!mfdr->cbsm.object_syntax_checks)))) {
+    if ((!mfdr->object_lookup) ||(!mfdr->get_values) ||
+        ((reg_info->user_modes & HANDLER_CAN_RWRITE) &&
+         ((!mfdr->set_values) ||(!mfdr->commit) ||
+          (!mfdr->object_syntax_checks)))) {
         snmp_log(LOG_ERR, "table_mfd registration with incomplete "
                  "callback structure.\n");
         return SNMPERR_GENERR;
     }
 #endif
-    if (NULL==container)
-        container = netsnmp_container_find("table_mfd");
-    if (NULL==container->compare)
-        container->compare = netsnmp_compare_netsnmp_index;
-    if (NULL==container->ncompare)
-        container->ncompare = netsnmp_ncompare_netsnmp_index;
-
-    mfdr->container = container;
+    if (NULL==mfdr->container)
+        mfdr->container = netsnmp_container_find("table_mfd");
+    if (NULL==mfdr->container->compare)
+        mfdr->container->compare = netsnmp_compare_netsnmp_index;
+    if (NULL==mfdr->container->ncompare)
+        mfdr->container->ncompare = netsnmp_ncompare_netsnmp_index;
 
     /*
-     * create handler and inject if
+     * create handler
      */
+    reginfo = 
+        netsnmp_create_handler_registration(name, handler,
+                                            reg_oid, reg_oid_len, user_modes);
+    
+
     mfd_handler = netsnmp_create_handler(TABLE_MFD_NAME,
                                          netsnmp_mfd_helper_handler);
     mfd_handler->myvoid = mfdr;
-    mfdr->table_info = tabreg;
     netsnmp_inject_handler(reginfo, mfd_handler);
 
     /*
-     * set up modes for baby steps handler, create it and inject it
+     * set up mfd_modes for baby steps handler, create it and inject it
      */
-    if( mfdr->cbsm.data_lookup )
-        modes |= BABY_STEP_DATA_LOOKUP;
-    if( mfdr->cbsm.set_values )
-        modes |= BABY_STEP_SET_VALUES;
-    if( mfdr->cbsm.final_commit )
-        modes |= BABY_STEP_FINAL_COMMIT;
-    if( mfdr->cbsm.object_syntax_checks )
-        modes |= BABY_STEP_CHECK_OBJECT;
+    if( mfdr->object_lookup )
+        mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+    if( mfdr->set_values )
+        mfd_modes |= BABY_STEP_SET_VALUES;
+    if( mfdr->irreversible_commit )
+        mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
+    if( mfdr->object_syntax_checks )
+        mfd_modes |= BABY_STEP_CHECK_OBJECT;
 
-    if( mfdr->cbse.pre_request )
-        modes |= BABY_STEP_PRE_REQUEST;
-    if( mfdr->cbse.post_request )
-        modes |= BABY_STEP_POST_REQUEST;
+    if( mfdr->pre_request )
+        mfd_modes |= BABY_STEP_PRE_REQUEST;
+    if( mfdr->post_request )
+        mfd_modes |= BABY_STEP_POST_REQUEST;
     
-    if( mfdr->cbse.undo_setup )
-        modes |= BABY_STEP_UNDO_SETUP;
-    if( mfdr->cbse.undo_cleanup )
-        modes |= BABY_STEP_UNDO_CLEANUP;
-    if( mfdr->cbse.undo_sets )
-        modes |= BABY_STEP_UNDO_SETS;
+    if( mfdr->undo_setup )
+        mfd_modes |= BABY_STEP_UNDO_SETUP;
+    if( mfdr->undo_cleanup )
+        mfd_modes |= BABY_STEP_UNDO_CLEANUP;
+    if( mfdr->undo_sets )
+        mfd_modes |= BABY_STEP_UNDO_SETS;
     
-    if( mfdr->cbse.row_creation )
-        modes |= BABY_STEP_ROW_CREATE;
-    if( mfdr->cbse.consistency_checks )
-        modes |= BABY_STEP_CHECK_CONSISTENCY;
-    if( mfdr->cbse.undoable_commit )
-        modes |= BABY_STEP_UNDOABLE_COMMIT;
-    if( mfdr->cbse.undo_commit )
-        modes |= BABY_STEP_UNDO_COMMIT;
+    if( mfdr->row_creation )
+        mfd_modes |= BABY_STEP_ROW_CREATE;
+    if( mfdr->consistency_checks )
+        mfd_modes |= BABY_STEP_CHECK_CONSISTENCY;
+    if( mfdr->commit )
+        mfd_modes |= BABY_STEP_COMMIT;
+    if( mfdr->undo_commit )
+        mfd_modes |= BABY_STEP_UNDO_COMMIT;
     
     netsnmp_inject_handler(reginfo,
-                           netsnmp_get_baby_steps_handler(modes));
+                           netsnmp_get_baby_steps_handler(mfd_modes));
 
     /*
      * inject row_merge helper with prefix rootoid_len + 2 (entry.col)
@@ -164,7 +174,7 @@ netsnmp_mfd_register_table(netsnmp_handler_registration *reginfo,
     /*
      * register as a table
      */
-    return netsnmp_register_table(reginfo, tabreg);
+    return netsnmp_register_table(reginfo, mfdr->table_info);
 }
 
 /**********************************************************************
@@ -179,7 +189,7 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
                            netsnmp_request_info *requests)
 {
     netsnmp_mfd_registration *mfdr;
-    void *row  = NULL;
+    mfd_pdu_context           tmp_pdu_ctx, *pdu_ctx;
     
     /** call handlers should enforce these */
     netsnmp_assert((handler!=NULL) && (reginfo!=NULL) && (reqinfo!=NULL) &&
@@ -197,121 +207,157 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
     /*
      * see if we've already got the row. 
      */
-    if( MODE_IS_SET(reqinfo->mode))
-        row = netsnmp_get_list_data(&requests->parent_data, "table_mfd_row");
+    if( (reqinfo->mode != MODE_BSTEP_OBJECT_LOOKUP) &&
+        (reqinfo->mode != MODE_BSTEP_PRE_REQUEST) &&
+        (reqinfo->mode != MODE_BSTEP_POST_REQUEST) ) {
+        pdu_ctx = netsnmp_get_list_data(requests->parent_data, "mfd_pdu_ctx");
+        if((NULL == pdu_ctx) && (reqinfo->mode != MODE_BSTEP_CHECK_VALUE) &&
+           (reqinfo->mode != MODE_BSTEP_ROW_CREATE)) {
+            snmp_log(LOG_ERR,"pdu context not found.\n");
+            return SNMP_ERR_GENERR;
+        }
+        pdu_ctx->request_mode = reqinfo->mode;
+        pdu_ctx->next_mode_ok = reqinfo->next_mode_ok;
+    }
 
     switch(reqinfo->mode) {
         
-    case SNMP_MSG_GET:
-        row = _mfd_data_lookup(handler, reginfo, requests);
-        if( row && mfdr->cbsm.get_values )
-            (*mfdr->cbsm.get_values)(mfdr, requests, row);
+    case MODE_BSTEP_PRE_REQUEST:
+        if( mfdr->pre_request ) {
+            tmp_pdu_ctx.mfd_user_ctx = mfdr->mfd_user_ctx;
+            tmp_pdu_ctx.next_mode_ok = reqinfo->next_mode_ok;
+            tmp_pdu_ctx.request_mode = reqinfo->mode;
+            tmp_pdu_ctx.mfd_data_list = requests->parent_data;
+            (*mfdr->pre_request)(&tmp_pdu_ctx,
+                                 requests->parent_data, (u_long)reqinfo);
+        }
         break;
         
-    case SNMP_MSG_GETNEXT:
-        row = _mfd_data_find(handler, reginfo, requests);
-        if( row && mfdr->cbsm.get_values )
-            (*mfdr->cbsm.get_values)(mfdr, requests, row);
-        break;
-        
-    case BABY_STEP_PRE_REQUEST:
-        if( mfdr->cbse.pre_request )
-            (*mfdr->cbse.pre_request)(mfdr, (u_long)reqinfo);
-        break;
-        
-    case BABY_STEP_DATA_LOOKUP:
+    case MODE_BSTEP_OBJECT_LOOKUP: {
+            int rc;
         /*
          * get the row and save it in the first request
          */
-        row = _mfd_data_lookup(handler, reginfo, requests);
-        netsnmp_data_list_add_data(&requests->parent_data, "table_mfd_row", row,
-                                   (Netsnmp_Free_List_Data*)mfdr->container->release );
+        if(MODE_GETNEXT == reqinfo->next_mode_ok)
+            rc = _mfd_data_find(handler, reginfo, requests, &tmp_pdu_ctx);
+        else
+            rc = _mfd_data_lookup(handler, reginfo, requests, &tmp_pdu_ctx);
+        if((NULL == tmp_pdu_ctx.mfd_data) && (SNMP_ERR_NOERROR == rc)) {
+            /*
+             * no data only ok for a set
+             */
+            if(reqinfo->next_mode_ok != MODE_BSTEP_CHECK_VALUE)
+                rc = SNMP_ERR_NOSUCHNAME; /* xxx-rks: scalars? */
+            else if (NULL == mfdr->row_creation)
+                rc = SNMP_ERR_NOCREATION;
+        }
+        if(rc) {
+            netsnmp_request_set_error_all(requests, rc);
+            break;
+        }
+        pdu_ctx = SNMP_MALLOC_TYPEDEF(mfd_pdu_context);
+        if(NULL == pdu_ctx) {
+            snmp_log(LOG_ERR,"could not allocate request group\n");
+            netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+            return SNMP_ERR_GENERR;
+        }
+        pdu_ctx->mfd_user_ctx = mfdr->mfd_user_ctx;
+        pdu_ctx->request_mode = reqinfo->mode;
+        pdu_ctx->next_mode_ok = reqinfo->next_mode_ok;
+        pdu_ctx->mfd_data_list = requests->parent_data;
+        pdu_ctx->mfd_data = tmp_pdu_ctx.mfd_data;
+        netsnmp_data_list_add_data(&requests->parent_data, "mfd_pdu_ctx",
+                                   pdu_ctx, NULL );
+        if( mfdr->object_lookup ) {
+            (*mfdr->object_lookup)(pdu_ctx, requests, pdu_ctx->mfd_data);
+        }
+    }
+        break;
+
+    case SNMP_MSG_GET:
+    case SNMP_MSG_GETNEXT:
+        if( pdu_ctx->mfd_data && mfdr->get_values )
+            (*mfdr->get_values)(pdu_ctx, requests, pdu_ctx->mfd_data);
+        break;
         
-        break;
-
-    case BABY_STEP_CHECK_OBJECT:
-        if( mfdr->cbsm.object_syntax_checks ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbsm.object_syntax_checks)(mfdr, requests, row);
+    case MODE_BSTEP_CHECK_VALUE:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->object_syntax_checks ) {
+            (*mfdr->object_syntax_checks)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_ROW_CREATE:
-        if( mfdr->cbse.row_creation ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.row_creation)(mfdr, requests, row);
+    case MODE_BSTEP_ROW_CREATE:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( (NULL == pdu_ctx->mfd_data) && mfdr->row_creation ) {
+            (*mfdr->row_creation)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_UNDO_SETUP:
-        if( mfdr->cbse.undo_setup ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.undo_setup)(mfdr, requests, row);
+    case MODE_BSTEP_UNDO_SETUP:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->undo_setup ) {
+            (*mfdr->undo_setup)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_SET_VALUES:
-        if( mfdr->cbsm.set_values ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbsm.set_values)(mfdr, requests, row);
+    case MODE_BSTEP_SET_VALUE:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->set_values ) {
+            (*mfdr->set_values)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_CHECK_CONSISTENCY:
-        if( mfdr->cbse.consistency_checks ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.consistency_checks)(mfdr, requests, row);
+    case MODE_BSTEP_CHECK_CONSISTENCY:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->consistency_checks ) {
+            (*mfdr->consistency_checks)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_UNDO_SETS:
-        if( mfdr->cbse.undo_sets ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.undo_sets)(mfdr, requests, row);
+    case MODE_BSTEP_UNDO_SET:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->undo_sets ) {
+            (*mfdr->undo_sets)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_UNDOABLE_COMMIT:
-        if( mfdr->cbse.undoable_commit ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.undoable_commit)(mfdr, requests, row);
+    case MODE_BSTEP_COMMIT:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->commit ) {
+            (*mfdr->commit)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_UNDO_COMMIT:
-        if( mfdr->cbse.undo_commit ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.undo_commit)(mfdr, requests, row);
+    case MODE_BSTEP_UNDO_COMMIT:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->undo_commit ) {
+            (*mfdr->undo_commit)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_FINAL_COMMIT:
-        if( mfdr->cbsm.final_commit ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbsm.final_commit)(mfdr, requests, row);
+    case MODE_BSTEP_IRREVERSIBLE_COMMIT:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->irreversible_commit ) {
+            (*mfdr->irreversible_commit)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }
         break;
 
-    case BABY_STEP_UNDO_CLEANUP:
-        if( mfdr->cbse.undo_cleanup ) {
-            row = netsnmp_get_list_data(requests->parent_data,
-                                        "table_mfd_row" );
-            (*mfdr->cbse.undo_cleanup)(mfdr, requests, row);
+    case MODE_BSTEP_UNDO_CLEANUP:
+        netsnmp_assert((NULL != pdu_ctx) && (NULL != pdu_ctx->mfd_data));
+        if( mfdr->undo_cleanup ) {
+            (*mfdr->undo_cleanup)(pdu_ctx, requests, pdu_ctx->mfd_data);
         }            
         break;
         
-    case BABY_STEP_POST_REQUEST:
-        if( mfdr->cbse.post_request )
-            (*mfdr->cbse.post_request)(mfdr, (u_long)reqinfo);
+    case MODE_BSTEP_POST_REQUEST:
+        if( mfdr->post_request ) {
+            tmp_pdu_ctx.mfd_user_ctx = mfdr->mfd_user_ctx;
+            tmp_pdu_ctx.request_mode = reqinfo->mode;
+            tmp_pdu_ctx.mfd_data_list = requests->parent_data;
+            (*mfdr->post_request)(&tmp_pdu_ctx,
+                                  requests->parent_data, (u_long)reqinfo);
+        }
         break;
 
     default:
@@ -322,8 +368,11 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
     /*
      * call any lower handlers
      */
-    return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
-;
+    if((NULL != handler->next) &&
+       (NULL != handler->next->access_method))
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+
+    return SNMP_ERR_NOERROR;
 }
 
 /**********************************************************************
@@ -331,15 +380,15 @@ netsnmp_mfd_helper_handler(netsnmp_mib_handler *handler,
  * Implement modes
  *
  */
-static netsnmp_request_group *
+static int
 _mfd_data_lookup(netsnmp_mib_handler *handler,
                  netsnmp_handler_registration *reginfo,
-                 netsnmp_request_info *requests)
+                 netsnmp_request_info *requests,
+                 mfd_pdu_context * pdu_ctx)
 {
     netsnmp_mfd_registration *mfdr;
     netsnmp_table_request_info *tblreq_info;
     netsnmp_index index;
-    void *row;
     
     DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
 
@@ -349,28 +398,28 @@ _mfd_data_lookup(netsnmp_mib_handler *handler,
     mfdr = (netsnmp_mfd_registration *)handler->myvoid;
     tblreq_info = netsnmp_extract_table_info(requests);
     if(NULL == tblreq_info)
-        return NULL;
+        return SNMP_ERR_GENERR;
     
     index.oids = tblreq_info->index_oid;
     index.len = tblreq_info->index_oid_len;
-    row = CONTAINER_FIND(mfdr->container, &index);
-    if(NULL == row) 
-        return NULL;
+    pdu_ctx->mfd_data = CONTAINER_FIND(mfdr->container, &index);
+    if(NULL == pdu_ctx->mfd_data) 
+        return SNMP_ERR_NOSUCHNAME;
 
-    return _mfd_group(reginfo, row, requests);
+    return SNMP_ERR_NOERROR;
 }
 
 /*
  * xxx-rks: this needs updates to handle sparse tables
  */
-static netsnmp_request_group *
+static int
 _mfd_data_find(netsnmp_mib_handler *handler,
                netsnmp_handler_registration *reginfo,
-               netsnmp_request_info *requests)
+               netsnmp_request_info *requests,
+               mfd_pdu_context * pdu_ctx)
 {
     netsnmp_mfd_registration *mfdr;
     netsnmp_table_request_info *tblreq_info;
-    void *row;
     
     DEBUGMSGT(("mfd",">%s\n",__FUNCTION__));
 
@@ -380,11 +429,11 @@ _mfd_data_find(netsnmp_mib_handler *handler,
     mfdr = (netsnmp_mfd_registration *)handler->myvoid;
     tblreq_info = netsnmp_extract_table_info(requests);
     if(NULL == tblreq_info)
-        return NULL;
+        return SNMP_ERR_GENERR;
 
-    row = netsnmp_table_index_find_next_row(mfdr->container, tblreq_info);
+    pdu_ctx->mfd_data = netsnmp_table_index_find_next_row(mfdr->container, tblreq_info);
 
-    return _mfd_group(reginfo, row, requests);
+    return SNMP_ERR_NOERROR;
 }
 
 /**********************************************************************
