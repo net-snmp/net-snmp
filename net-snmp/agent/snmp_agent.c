@@ -333,6 +333,9 @@ _reorder_getbulk(netsnmp_agent_session *asp)
     int             all_eoMib;
     netsnmp_variable_list *prev = NULL;
             
+    if (asp->vbcount == 0)  /* Nothing to do! */
+        return;
+
     if (asp->pdu->errstat < asp->vbcount) {
         n = asp->pdu->errstat;
     } else {
