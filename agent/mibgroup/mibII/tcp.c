@@ -74,7 +74,7 @@
 			 * other system may not even need it at all
 			 * But it doesn't do any harm to define it globally
 			 */
-int  hz = 1000;
+int  hertz = 1000;
 
         /*********************
 	 *
@@ -124,7 +124,7 @@ init_tcp(void)
     auto_nlist(TCP_SYMBOL, 0, 0);
 #endif
 #if freebsd4
-    hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
+    hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
