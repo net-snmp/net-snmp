@@ -113,13 +113,13 @@ ok(!defined($res));
 ######################  18   #########################
 $res = $SNMP::MIB{sysDescr}{hint};
 #print("res is --> $res\n");
-ok($res =~ /^255a/);
+ok(defined($res) && $res =~ /^255a/);
 #print("\n");
 ######################  19   #########################
 
 $res = $SNMP::MIB{ifPhysAddress}{hint};
 #print("res is --> $res\n");
-ok($res =~ /^1x:/);
+ok(defined($res) && $res =~ /^1x:/);
 #print("\n");
 
 
@@ -136,7 +136,7 @@ ok(!defined($type1));
 # getType() supports numeric OIDs now
 
 my $type2 = SNMP::getType($oid);
-ok($type2 =~ /OCTETSTR/);
+ok(defined($type2) && $type2 =~ /OCTETSTR/);
 
 ######################################################################
 # This tests that sysDescr returns a valid type.
