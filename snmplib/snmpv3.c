@@ -566,7 +566,7 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
   }
 
   /* if our engineID has changed at all, the boots record must be set to 1 */
-  if (engineIDLen != oldEngineIDLength ||
+  if (engineIDLen != (int)oldEngineIDLength ||
       oldEngineID == NULL || c_engineID == NULL ||
       memcmp(oldEngineID, c_engineID, engineIDLen) != 0) {
     engineBoots = 1;
