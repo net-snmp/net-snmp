@@ -818,10 +818,10 @@ char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
   char *cp;
 
   /* is everything easily printable */
-  for(i=0, cp=str; i < len && cp &&
+  for(i=0, cp=str; i < (int)len && cp &&
           (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
 
-  if (len != 0 && i == len) {
+  if (len != 0 && i == (int)len) {
       sprintf(saveto, "\"%s\"", str);
       saveto += strlen(saveto);
   } else {
