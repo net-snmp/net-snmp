@@ -940,15 +940,22 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 		    snmp_free_varbind(asp->pdu->variables);
 		    asp->pdu->variables=NULL;
 		    asp->start=NULL;
-		}
-		else {
-		    asp->end   = asp->pdu->variables;
+		} else {
+		    asp->end = asp->pdu->variables;
 		    i = asp->pdu->errstat;
-		    while ( --i > 0 ) 
-			if ( asp->end )
+		    while ( --i > 0 ) {
+			if ( asp->end ) {
 			    asp->end = asp->end->next_variable;
-		    snmp_free_varbind(asp->end->next_variable);
-		    asp->end->next_variable = NULL;
+			}
+		    }
+		    
+		    /*  Note that there may be zero varbinds in the
+			request, so asp->end could be NULL here.  */
+
+		    if (asp->end) {
+			snmp_free_varbind(asp->end->next_variable);
+			asp->end->next_variable = NULL;
+		    }
 		}
 	    }
 
