@@ -194,7 +194,7 @@ init_master_agent(int dest_port,
     struct snmp_session sess, *session;
     char *cptr, *cptr2;
     char buf[SPRINT_MAX_LEN];
-    int flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
+    int flags;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return 0; /* no error if ! MASTER_AGENT */
@@ -217,6 +217,8 @@ init_master_agent(int dest_port,
         /* XXX: surely, this creates memory leaks */
         /* specification format: [transport:]port[@interface/address],... */
         DEBUGMSGTL(("snmpd_open","installing master agent on port %s\n", cptr));
+
+        flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
 
         /* transport type */
         if ((cptr2 = strchr(cptr, ':'))) {
