@@ -45,6 +45,7 @@
 #include "snmp.h"
 #include "snmp_client.h"
 #include "snmp_debug.h"
+#include "mib.h"
 
 #include "agentx/protocol.h"
 
