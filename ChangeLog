@@ -1,7 +1,38 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.0.7 -> V5.0.8.pre2
+Changes: V5.0.7 -> V5.0.8
 
+2003-03-17 17:33  rstory
+
+   * NEWS, man/netsnmp_handler.3,
+   man/netsnmp_table.3, man/netsnmp_table_data.3:
+
+   update for 5.0.8
+   
+2003-03-17 17:20  rstory
+
+   * sedscript.in, snmplib/snmp_version.c, FAQ
+, README, perl/SNMP/SNMP.pm:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.8 )
+   
+2003-03-14 14:55  rstory
+
+   * FAQ, README, sedscript.in,
+   agent/Makefile.depend, agent/helpers/Makefile.depend
+, agent/mibgroup/Makefile.depend,
+   apps/Makefile.depend, apps/snmpnetstat/Makefile.depend
+, perl/SNMP/SNMP.pm, snmplib/Makefile.depend
+, snmplib/snmp_version.c:
+
+   update for 5.0.8.pre2
+   
+2003-03-14 14:40  rstory
+
+   * ChangeLog, NEWS:
+
+   update for 5.0.8.pre2
+   
 2003-03-14 13:53  rstory
 
    * man/: netsnmp_table.3, netsnmp_table_dataset.3
