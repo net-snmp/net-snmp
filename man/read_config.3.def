@@ -1,4 +1,4 @@
-.TH MIB_API 3 "02 Mar 1999"
+.TH READ_CONFIG 3 "02 Mar 1999"
 .UC 5
 .SH NAME
 register_config_handler, register_premib_handler
