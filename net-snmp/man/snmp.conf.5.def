@@ -47,6 +47,9 @@ environment variable.
 .IP "persistentDir directory"
 The directory where snmpd and snmptrapd stores their persistent data
 files.
+.IP "tempFilePattern pattern"
+The file pattern used by snmptrapd to create temporary files.  Example:
+/tmp/snmpdXXXXXX.  Used by mkstemp() and mktemp() functions.
 .IP "defaultPort port"
 The default port number that all SNMP applications and daemons should use.
 .IP "defVersion (1|2c|3)"

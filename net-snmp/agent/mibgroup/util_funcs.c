@@ -122,7 +122,7 @@ make_tempfile(void)
     static char     name[32];
     int             fd = -1;
 
-    strcpy(name, NETSNMP_TEMP_FILE_PATTERN);
+    strcpy(name, get_temp_file_pattern());
 #ifdef HAVE_MKSTEMP
     fd = mkstemp(name);
 #else
