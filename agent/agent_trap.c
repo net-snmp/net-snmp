@@ -197,6 +197,7 @@ void send_enterprise_trap_vars (int trap,
     long uptime;
     struct sockaddr_in *pduIp;
     struct trap_sink *sink;
+    oid temp_oid[MAX_OID_LEN];
     
 		/*
 		 * Initialise SNMPv2 required variables
@@ -314,11 +315,14 @@ void send_enterprise_trap_vars (int trap,
 		break;
 
 	case SNMP_TRAP_ENTERPRISESPECIFIC:
-		snmp_set_var_value( &snmptrap_var,
+		memcpy( &temp_oid,
 				    (char *)enterprise,
+				    (enterprise_length)*sizeof(oid));
+		temp_oid[ enterprise_length   ] = 0;
+		temp_oid[ enterprise_length+1 ] = specific;
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)&temp_oid,
 				    (enterprise_length+2)*sizeof(oid));
-		snmptrap_var.val.objid[ enterprise_length   ] = 0;
-		snmptrap_var.val.objid[ enterprise_length+1 ] = specific;
 		snmptrap_var.next_variable  = vars;
 		last_var = NULL;	/* Don't need version info */
 		break;
