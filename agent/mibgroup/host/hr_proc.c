@@ -57,7 +57,7 @@ static char proc_description[96]; /* buffer to hold description of current cpu*/
 extern void kstat_CPU(void);
 int proc_status(int);
 #else
-#define MAX_NUM_HRPROC  10
+#define MAX_NUM_HRPROC  32
 char proc_descriptions[MAX_NUM_HRPROC][BUFSIZ];
 #endif  /*solaris 2*/
 
