@@ -492,7 +492,7 @@ var_hrstore(struct variable *vp,
 	    }
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrstore\n", vp->magic));
     }
     return NULL;
 }

@@ -308,7 +308,7 @@ var_icmp(struct variable *vp,
           long_return = icmpstat.icps_outhist[ICMP_MASKREPLY];
           return (u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_icmp\n", vp->magic));
     }
 
     return NULL;
@@ -432,7 +432,7 @@ var_icmp(struct variable *vp,
           long_return = icmpstat.icps_outhist[ICMP_MASKREPLY];
           return (u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_icmp\n", vp->magic));
     }
 
     return NULL;
@@ -486,7 +486,7 @@ var_icmp(struct variable *vp,
     case ICMPOUTADDRMASKREPS: return (u_char *) &icmpstat.IcmpOutAddrMaskReps;
 
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_icmp\n", vp->magic));
     }
     return NULL;
 
@@ -594,7 +594,7 @@ var_icmp(struct variable *vp,
       		long_return = icmpstat.icmpOutAddrMaskReps;
       		break;
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_icmp\n", vp->magic));
                 return(NULL);
     }
     return ((u_char *) &long_return);

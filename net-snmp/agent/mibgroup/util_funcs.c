@@ -83,7 +83,6 @@ void
 Exit(int var)
 {
   snmp_log(LOG_ERR, "Server Exiting with code %d\n",var);
-  fclose (stderr);
   exit(var);
 }
 

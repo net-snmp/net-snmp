@@ -61,7 +61,6 @@ init_dlmod (void)
     }
 #if 1
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
-    fflush(stderr);
 #endif
 }
 

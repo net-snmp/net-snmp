@@ -609,7 +609,7 @@ var_party(struct variable *vp,
 	    *var_len = sizeof(snmpUdpDomain);
 	    return (u_char *)snmpUdpDomain;
 	} else {
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown partyDomain %d in var_party\n", pp->partyTDomai));
 	    return NULL;
 	}
       case PARTYTADDRESS:
@@ -627,7 +627,7 @@ var_party(struct variable *vp,
 	    *var_len = sizeof(noAuth);
 	    return (u_char *)noAuth;
 	} else {
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown partyAuthProtocol %d in var_party\n", pp->partyAuthProtocol));
 	    return NULL;
 	}
       case PARTYAUTHCLOCK:
@@ -671,7 +671,7 @@ var_party(struct variable *vp,
 	}
 	return (u_char *)&pp->partyStatus;
       default:
-            ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_party\n", vp->magic));
     }
     return NULL;
 }

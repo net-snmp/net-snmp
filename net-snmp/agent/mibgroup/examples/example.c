@@ -185,7 +185,7 @@ var_example(struct variable *vp,
       return (u_char *) &long_ret;
 
     default:
-      ERROR_MSG("example.c: don't know how to handle this request.");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in examples/var_example\n", vp->magic));
   }
   /* if we fall to here, fail by returning NULL */
   return NULL;

@@ -444,7 +444,7 @@ var_usmUser(
       return NULL;
 
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_usmUser\n", vp->magic));
   }
   return 0;
 

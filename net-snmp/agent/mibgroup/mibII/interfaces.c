@@ -134,6 +134,7 @@
 /* #include "../common_header.h" */
 
 #include "../../../snmplib/system.h"
+#include "snmp_logging.h"
 
 #ifdef HAVE_OSRELDATE_H
 #include <osreldate.h>
@@ -350,7 +351,7 @@ var_interfaces(struct variable *vp,
       long_return = Interface_Scan_Get_Count ();
       return (u_char *)&long_return;
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
     }
   return NULL;
 }
@@ -487,7 +488,7 @@ Interface_Scan_Init (void)
   if (sysctl (name, sizeof(name)/sizeof(int),
 	      0, &size, 0, 0) == -1)
     {
-      ERROR_MSG("sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_IFLIST,0)\n");
+      snmp_log(LOG_ERR,"sysctl size fail\n");
     }
   else
     {
@@ -500,7 +501,7 @@ Interface_Scan_Init (void)
 	    }
 	  if ((if_list = malloc (size)) == 0)
 	    {
-	      ERROR_MSG("out of memory allocating route table\n");
+	      snmp_log(LOG_ERR,"out of memory allocating route table\n");
 	    }
 	  if_list_size = size;
 	}
@@ -511,7 +512,7 @@ Interface_Scan_Init (void)
       if (sysctl (name, sizeof (name) / sizeof (int),
 		  if_list, &size, 0, 0) == -1)
 	{
-	  ERROR_MSG("sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_IFLIST,0)\n");
+	  snmp_log(LOG_ERR,"sysctl get fail\n");
 	}
       if_list_end = if_list + size;
     }
@@ -758,7 +759,7 @@ var_interfaces(struct variable *vp,
 	    long_return = Interface_Scan_Get_Count();
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
     }
     return NULL;
 }
@@ -937,7 +938,7 @@ var_ifEntry(struct variable *vp,
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
     }
     return NULL;
 }
@@ -1097,7 +1098,7 @@ var_ifEntry(struct variable *vp,
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
     }
     return NULL;
 }
@@ -1204,7 +1205,7 @@ var_ifEntry(struct variable *vp,
       long_return = (u_long)ifstat.ifOutQLen;
       return (u_char *) &long_return;
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
     }
     return NULL;
 }
@@ -1264,7 +1265,7 @@ Interface_Scan_Init (void)
 
     if ((fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
       {
-	ERROR_MSG("cannot open inet/dgram socket - continuing...\n");
+	DEBUGMSGTL(("snmpd", "socket open failure in Interface_Scan_Init\n"));
 	return; /** exit (1); **/
       }
 
@@ -1276,7 +1277,7 @@ Interface_Scan_Init (void)
     if (! (devin = fopen ("/proc/net/dev", "r")))
       {
 	close (fd);
-	ERROR_MSG("cannot open /proc/net/dev - continuing...\n");
+	snmp_log(LOG_ERR,"cannot open /proc/net/dev - continuing...\n");
 	return; /** exit (1); **/
       }
 
@@ -1968,7 +1969,7 @@ var_interfaces(struct variable *vp,
 	    long_return = count;
 	    return (u_char *)&long_return;
     default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n", vp->magic));
     }
     return NULL;
 }
@@ -2087,7 +2088,7 @@ var_ifEntry(struct variable *vp,
 		*var_len = nullOidLen;
 		return (u_char *) nullOid;
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ifEntry\n", vp->magic));
 	}
 	return NULL;
 }

@@ -186,7 +186,8 @@ u_char * var_ipfwchains(
                 *var_len = strlen (string_value);
                 return (u_char *)string_value;
 	default:
-	    ERROR_MSG("Oops...\n");
+	    DEBUGMSGTL(("ipfwchains", "unknown sub-id %d in var_ipfwchains\n", vp->magic));
+	    break;
     }
     return NULL;
 }
@@ -396,7 +397,7 @@ u_char * var_ipfwrules(
                 *var_len = strlen(string_value);
                 return (u_char *)string_value;
         default:
-            ERROR_MSG("Oops...\n");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipfwrules\n", vp->magic));
     }
     return NULL;
 }             

@@ -380,7 +380,7 @@ var_ipRouteEntry(struct variable *vp,
     *var_len = nullOidLen;
     return (u_char *) nullOid;
   default:
-    ERROR_MSG("");
+    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
   }
   return NULL;
 }
@@ -671,7 +671,7 @@ var_ipRouteEntry(struct variable *vp,
 	    *var_len = nullOidLen;
 	    return (u_char *)nullOid;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
    }
    return NULL;
 }
@@ -804,7 +804,7 @@ var_ipRouteEntry(struct variable *vp,
     long_return = Lowentry.ipRouteMask;
     return (u_char *)&long_return;
   default:
-    ERROR_MSG("");
+    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
   };
   return NULL;
 }
@@ -926,7 +926,7 @@ static void Route_Scan_Reload (void)
   if (!rthead) {
     rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
     if (!rthead) {
-      ERROR_MSG("malloc");
+      snmp_log(LOG_ERR,"route table malloc fail\n");
       return;
     }
     memset((char *)rthead,(0), 100 * sizeof(RTENTRY *));
@@ -1042,7 +1042,7 @@ static void Route_Scan_Reload (void)
 	if (!rthead) {
           rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
           if (!rthead) {
-		ERROR_MSG("malloc");
+		snmp_log(LOG_ERR,"route table malloc fail\n");
 		return;
 	    }
           memset((char *)rthead,(0), 100 * sizeof(RTENTRY *));
@@ -1143,7 +1143,7 @@ static void Route_Scan_Reload (void)
 	if (! rthead) {
 	    rthead = (struct rtentry **) calloc(100, sizeof(struct rtentry *));
 	    if (! rthead) {
-		ERROR_MSG("malloc");
+		snmp_log(LOG_ERR,"route table malloc fail\n");
 		return;
 	    }
 	    rtallocate = 100;
@@ -1583,7 +1583,7 @@ var_ipRouteEntry(struct variable *vp,
 		*var_len = nullOidLen;
 		return (u_char *)nullOid;
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n", vp->magic));
 	}
 	return NULL;
 }
@@ -1660,7 +1660,7 @@ get_in_address (const void * ap, int addresses, int wanted)
 
   if (a->sin_family != AF_INET)
     {
-      ERROR_MSG("AF_INET sockaddr expected");
+      DEBUGMSGTL(("snmpd", "unknown socket family %d [AF_INET expected] in var_ipRouteEntry.\n", a->sin_family));
     }
   return &a->sin_addr;
 }

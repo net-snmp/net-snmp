@@ -174,7 +174,7 @@ var_wombat(struct variable *vp,
 	    long_return = 1;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_wombat\n", vp->magic));
     }
     return NULL;
 }

@@ -163,7 +163,7 @@ var_hrproc(struct variable *vp,
 		long_return=100;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrproc\n", vp->magic));
     }
     return NULL;
 }

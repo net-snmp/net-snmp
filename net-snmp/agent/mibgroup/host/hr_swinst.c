@@ -382,7 +382,7 @@ var_hrswinst(struct variable *vp,
 #endif
 	}   break;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrswinst\n", vp->magic));
 	    ret = NULL;
 	    break;
     }

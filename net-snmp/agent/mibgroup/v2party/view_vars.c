@@ -285,7 +285,7 @@ var_view(struct variable *vp,
       case VIEWSTATUS:
 	return (u_char *)&vwp->viewStatus;
       default:
-            ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_view\n", vp->magic));
     }
     return NULL;
 }

@@ -6,6 +6,7 @@
 
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -23,9 +24,11 @@
 
 #define SNMP_NEED_REQUEST_LIST
 #include "asn1.h"
+#include "mib.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"
+#include "snmp_debug.h"
 #include "snmp.h"
 
 #include "agentx/protocol.h"
@@ -76,7 +79,7 @@ handle_agentx_response( int operation,
 
 	if ( verbose ) {
 	    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
-	    fprintf(stdout, "    >> %s\n", buf);
+	    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 	}
 #ifdef STILL_TO_CODE
 	if ( !asp->exact && (vbp->type == ENDOFMIB || !in_view())) {

@@ -159,7 +159,7 @@ var_hrnet(struct variable *vp,
 	    long_return = net_idx & ((1<<HRDEV_TYPE_SHIFT)-1);
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrnet\n", vp->magic));
     }
     return NULL;
 }

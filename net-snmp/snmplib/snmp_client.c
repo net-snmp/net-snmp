@@ -349,10 +349,6 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
      || (0 == pdu->variables)
      || (pdu->errindex <= 0))
     {
-#if 0
-        DEBUGP("Fix PDU ? command 0x%x errstat %d errindex %d vars %x \n",
-                pdu->command, pdu->errstat, pdu->errindex, pdu->variables);
-#endif
             return 0; /* pre-condition tests fail */
     }
 

@@ -136,7 +136,7 @@ rmonGetValue(oid *srcParty,
 	    session.callback_magic = (void *)state;
 	    alarm->ss = snmp_open(&session);
 	    if (!alarm->ss) {
-		ERROR_MSG("");
+		snmp_log(LOG_ERR,"cannot create session in rmonGetValue\n");
 		return 3;
 	    }
 	}
@@ -1084,7 +1084,7 @@ var_alarmnextindex(struct variable *vp,
       case ALARMNEXTINDEX:
 	return (u_char *)&alarmNextIndex;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_alarmnextindex\n", vp->magic));
     }
 
     return NULL;
@@ -1167,7 +1167,7 @@ var_alarmtab(struct variable *vp,
 	}
 	return (u_char *)&alarm->status;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_alarmtab\n", vp->magic));
     }
     
     return NULL;
