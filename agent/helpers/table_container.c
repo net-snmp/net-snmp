@@ -1,0 +1,467 @@
+/*
+ * table_container.c
+ * $Id$
+ */
+
+#include <net-snmp/net-snmp-config.h>
+
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/table.h>
+#include <net-snmp/agent/table_container.h>
+#include <net-snmp/library/container.h>
+#include <net-snmp/library/snmp_assert.h>
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
+/*
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_RESERVE1     0 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_RESERVE2     1 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_ACTION       2 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_COMMIT       3 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_FREE         4 
+ * snmp.h:#define SNMP_MSG_INTERNAL_SET_UNDO         5 
+ */
+
+/*
+ * PRIVATE structure for holding important info for each table.
+ */
+typedef struct container_table_data_s {
+
+   /** registration info for the table */
+    netsnmp_table_registration_info *tblreg_info;
+
+   /** container for the table rows */
+   netsnmp_container          *table;
+
+    /*
+     * mutex_type                lock;
+     */
+
+   /** do we want to group rows with the same index
+    * together when calling callbacks? */
+    char            group_rows;
+
+   /* what type of key do we want? */
+   char            key_type;
+
+} container_table_data;
+
+static int
+_container_table_handler(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *agtreq_info,
+                         netsnmp_request_info *requests);
+
+/** @defgroup table_container table_container: Helps you implement a table when data can be found via a netsnmp_container.
+ *  @ingroup table
+ *
+ *  The table_container handler is used (automatically) in conjuntion
+ *  with the @link table table@endlink handler.
+ *
+ *  This handler will use the index information provided by
+ *  the @link table @endlink handler to find the row needed to process
+ *  the request.
+ *
+ *  The container must use one of 3 key types. It is the sub-handler's
+ *  responsibility to ensure that the container and key type match (unless
+ *  neither is specified, in which case a default will be used.)
+ *
+ *  The current key types are:
+ *
+ *    TABLE_CONTAINER_KEY_NETSNMP_INDEX
+ *        The container should do comparisons based on a key that may be cast
+ *        to a netsnmp index (netsnmp_index *). This index contains only the
+ *        index portion of the OID, not the entire OID.
+ *
+ *    TABLE_CONTAINER_KEY_VARBIND_INDEX
+ *        The container should do comparisons based on a key that may be cast
+ *        to a netsnmp variable list (netsnmp_variable_list *). This variable
+ *        list will contain one varbind for each index component.
+ *
+ *    TABLE_CONTAINER_KEY_VARBIND_RAW    (NOTE: unimplemented)
+ *        While not yet implemented, future plans include passing the request
+ *        varbind with the full OID to a container.
+ *
+ *  If a key type is not specified at registration time, the default ket type
+ *  of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used. If a container is
+ *  provided, or the handler name is aliased to a container type, the container
+ *  must use a netsnmp index.
+ *
+ *  If no container is provided, a lookup will be made based on the
+ *  sub-handler's name, or if that isn't found, "table_container". The 
+ *  table_container key type will be netsnmp_index.
+ *
+ *  The container must, at a minimum, implement find and find_next. If a NULL
+ *  key is passed to the container, it must return the first item, if any.
+ *  All containers provided by net-snmp fulfil this requirement.
+ *
+ *  This handler will only register to process 'data lookup' modes. In
+ *  traditional net-snmp modes, that is any GET-like mode (GET, GET-NEXT,
+ *  GET-BULK) or the first phase of a SET (RESERVE1). In the new baby-steps
+ *  mode, DATA_LOOKUP is it's own mode, and is a pre-cursor to other modes.
+ *
+ *  When called, the handler will call the appropriate container method
+ *  with the appropriate key type. If a row was not found, the result depends
+ *  on the mode.
+ *
+ *  GET Processing
+ *    An exact match must be found. If one is not, the error NOSUCHINSTANCE
+ *    is set.
+ *
+ *  GET-NEXT / GET-BULK
+ *    If no row is found, the column number will be increased (using any
+ *    valid_columns structure that may have been provided), and the first row
+ *    will be retrieved. If no first row is found, the processed flag will be
+ *    set, so that the sub-handler can skip any processing related to the
+ *    request. The agent will notice this unsatisfied request, and attempt to
+ *    pass it to the next appropriate handler.
+ *
+ *  SET
+ *    If the hander did not register with the HANDLER_CAN_NOT_CREATE flag
+ *    set in the registration modes, it is assumed that this is a row
+ *    creation request and a NULL row is added to the request's data list.
+ *    The sub-handler is responsbile for dealing with any row creation
+ *    contraints and inserting any newly created rows into the container
+ *    and the request's data list.
+ *
+ *  If a row is found, it will be inserted into
+ *  the request's data list. The sub-handler may retrieve it by calling
+ *      netsnmp_container_table_extract_context(request); *
+ *  NOTE NOTE NOTE:
+ *
+ *  This helper and it's API are still being tested and are subject to change.
+ *
+ * @{
+ */
+
+/**********************************************************************
+ **********************************************************************
+ *                                                                    *
+ *                                                                    *
+ * PUBLIC Registration functions                                      *
+ *                                                                    *
+ *                                                                    *
+ **********************************************************************
+ **********************************************************************/
+/** register specified callbacks for the specified table/oid. If the
+    group_rows parameter is set, the row related callbacks will be
+    called once for each unique row index. Otherwise, each callback
+    will be called only once, for all objects.
+*/
+int
+netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
+                                 netsnmp_table_registration_info *tabreg,
+                                 netsnmp_container *container,
+                                 char key_type, char group_rows)
+{
+    netsnmp_mib_handler *handler;
+    container_table_data *tad;
+
+    if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
+        snmp_log(LOG_ERR, "bad param in netsnmp_container_table_register\n");
+        return SNMPERR_GENERR;
+    }
+
+    tad = SNMP_MALLOC_TYPEDEF(container_table_data);
+    handler = netsnmp_create_handler(TABLE_CONTAINER_NAME,
+                                     _container_table_handler);
+    if((NULL == tad) || (NULL == handler)) {
+        if(tad) free(tad); /* SNMP_FREE wasted on locals */
+        if(handler) free(handler); /* SNMP_FREE wasted on locals */
+        snmp_log(LOG_ERR,
+                 "malloc failure in netsnmp_container_table_register\n");
+        return SNMPERR_GENERR;
+    }
+
+    tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
+    tad->group_rows = group_rows; /* not implemented yet. use row_merge */
+    if(key_type)
+        tad->key_type = key_type;
+    else
+        tad->key_type = CONTAINER_KEY_NETSNMP_INDEX;
+
+    if (NULL==container) {
+        container = netsnmp_container_find(reginfo->handlerName);
+        if(NULL == container)
+            container = netsnmp_container_find("table_container");
+    }
+    tad->table = container;
+
+    if (NULL==container->compare)
+        container->compare = netsnmp_compare_netsnmp_index;
+    if (NULL==container->ncompare)
+        container->ncompare = netsnmp_ncompare_netsnmp_index;
+
+    handler->myvoid = (void*)tad;
+    handler->flags |= MIB_HANDLER_AUTO_NEXT;
+    netsnmp_inject_handler(reginfo, handler);
+
+    return netsnmp_register_table(reginfo, tabreg);
+}
+
+/** @} */
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**********************************************************************
+ **********************************************************************
+ *                                                                    *
+ *                                                                    *
+ * DATA LOOKUP functions                                              *
+ *                                                                    *
+ *                                                                    *
+ **********************************************************************
+ **********************************************************************/
+NETSNMP_STATIC_INLINE void
+_set_key( container_table_data * tad, netsnmp_request_info *request,
+          netsnmp_table_request_info *tblreq_info,
+          void **key, netsnmp_index *index )
+{
+    if (CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
+        index->oids = tblreq_info->index_oid;
+        index->len = tblreq_info->index_oid_len;
+        *key = index;
+    }
+    else if (CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
+        *key = tblreq_info->indexes;
+    }
+#if 0
+    else if (CONTAINER_KEY_VARBIND_RAW == tad->key_type) {
+        *key = request->requestvb;
+    }
+#endif
+    else
+        *key = NULL;
+}
+
+NETSNMP_STATIC_INLINE void *
+_find_next_row(netsnmp_container *c,
+               netsnmp_table_request_info *tblreq,
+               void * key)
+{
+    void *row = NULL;
+
+    if (!c || !tblreq || !tblreq->reg_info || !key) {
+        snmp_log(LOG_ERR,"_find_next_row param error\n");
+        return NULL;
+    }
+
+    /*
+     * no indexes, or below our minimum column? then use first row.
+     */
+    if(tblreq->colnum < tblreq->reg_info->min_column) {
+        snmp_log(LOG_ERR, "WHY IS COLNUM < MIN_COLUMN???\n");
+        netsnmp_assert(0);
+        abort();
+    }
+    /*
+    if((tblreq->number_indexes == 0) ||
+       (tblreq->colnum < tblreq->reg_info->min_column)) {
+    */
+    if(tblreq->number_indexes == 0) {
+        row = CONTAINER_FIRST(c);
+    } else {
+        row = CONTAINER_NEXT(c, key);
+
+        /*
+         * we don't have a row, but we might be at the end of a
+         * column, so try the next column.
+         */
+        if ((NULL == row) &&
+            (0 != (tblreq->colnum = netsnmp_table_next_column(tblreq))))
+            row = CONTAINER_FIRST(c);
+        
+    }
+
+    return row;
+}
+
+NETSNMP_STATIC_INLINE void
+_data_lookup(netsnmp_handler_registration *reginfo,
+            netsnmp_agent_request_info *agtreq_info,
+            netsnmp_request_info *request, container_table_data * tad)
+{
+    netsnmp_index *row = NULL;
+    netsnmp_table_request_info *tblreq_info;
+    netsnmp_variable_list *var;
+    netsnmp_index index;
+    void *key;
+
+    var = request->requestvb;
+
+    DEBUGIF("table_container") {
+        DEBUGMSGTL(("table_container", "  data_lookup oid:"));
+        DEBUGMSGOID(("table_container", var->name, var->name_length));
+        DEBUGMSG(("table_container", "\n"));
+    }
+
+    /*
+     * Get pointer to the table information for this request. This
+     * information was saved by table_helper_handler.
+     */
+    tblreq_info = netsnmp_extract_table_info(request);
+    /** the table_helper_handler should enforce column boundaries. */
+    netsnmp_assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
+    
+    if ((agtreq_info->mode == MODE_GETNEXT) ||
+        (agtreq_info->mode == MODE_GETBULK)) {
+        /*
+         * find the row. This will automatically move to the next
+         * column, if necessary.
+         */
+        _set_key( tad, request, tblreq_info, &key, &index );
+        row = _find_next_row(tad->table, tblreq_info, key);
+        if (row) {
+            /*
+             * update indexes in tblreq_info (index & varbind),
+             * then update request varbind oid
+             */
+            if(CONTAINER_KEY_NETSNMP_INDEX == tad->key_type) {
+                tblreq_info->index_oid_len = row->len;
+                memcpy(tblreq_info->index_oid, row->oids,
+                       row->len * sizeof(oid));
+                netsnmp_update_variable_list_from_index(tblreq_info);
+            }
+            else if (CONTAINER_KEY_VARBIND_INDEX == tad->key_type) {
+                netsnmp_update_indexes_from_variable_list(tblreq_info);
+            }
+
+            if (CONTAINER_KEY_VARBIND_RAW != tad->key_type) {
+                netsnmp_table_build_oid_from_index(reginfo, request,
+                                                   tblreq_info);
+            }
+        }
+        else {
+            /*
+             * no results found. Flag the request so lower handlers will
+             * ignore it, but it is not an error - getnext will move
+             * on to another handler to process this request.
+             */
+            request->processed = 1;
+            DEBUGMSGTL(("table_container", "no row found\n"));
+        }
+    } /** GETNEXT/GETBULK */
+    else {
+
+        _set_key( tad, request, tblreq_info, &key, &index );
+        row = CONTAINER_FIND(tad->table, key);
+        if ((NULL == row) &&
+            ((agtreq_info->mode != MODE_SET_RESERVE1) || /* get */
+             (reginfo->modes & HANDLER_CAN_NOT_CREATE))) { /* no create */
+            /*
+             * not results found. For a get, that is an error
+             */
+            DEBUGMSGTL(("table_container", "no row found\n"));
+            netsnmp_set_request_error(agtreq_info, request,
+                                      SNMP_NOSUCHINSTANCE);
+        }
+    } /** GET/SET */
+    
+    /*
+     * save the data in the request
+     */
+    if (NULL != row)
+        netsnmp_request_add_list_data(request,
+                                      netsnmp_create_data_list
+                                      (TABLE_CONTAINER_NAME,
+                                       row, NULL));
+}
+
+/**********************************************************************
+ **********************************************************************
+ *                                                                    *
+ *                                                                    *
+ * netsnmp_table_container_helper_handler()                           *
+ *                                                                    *
+ *                                                                    *
+ **********************************************************************
+ **********************************************************************/
+static int
+_container_table_handler(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *agtreq_info,
+                         netsnmp_request_info *requests)
+{
+    int             rc = SNMP_ERR_NOERROR;
+    int             oldmode;
+    netsnmp_request_info *request;
+    container_table_data *tad;
+
+    /** sanity checks */
+    netsnmp_assert((NULL != handler) && (NULL != handler->myvoid));
+    netsnmp_assert((NULL != reginfo) && (NULL != agtreq_info));
+
+    DEBUGMSGTL(("table_container", "Mode %s, Got request:\n",
+                se_find_label_in_slist("agent_mode",agtreq_info->mode)));
+
+    /*
+     * First off, get our pointer from the handler. This
+     * lets us get to the table registration information we
+     * saved in get_table_container_handler(), as well as the
+     * container where the actual table data is stored.
+     */
+    tad = (container_table_data *)handler->myvoid;
+
+    /*
+     * only do data lookup for first pass
+     *
+     * xxx-rks: this should really be handled up one level. we should
+     * be able to say what modes we want to be called for during table
+     * registration.
+     */
+    oldmode = agtreq_info->mode;
+    if(MODE_IS_GET(oldmode) || (MODE_SET_RESERVE1 == oldmode)) {
+        /*
+         * Loop through each of the requests, and
+         * try to find the appropriate row from the container.
+         */
+        for (request = requests; request; request = request->next) {
+            /*
+             * skip anything that doesn't need processing.
+             */
+            if (requests->processed != 0) {
+                DEBUGMSGTL(("table_container", "already processed\n"));
+                continue;
+            }
+            
+            /*
+             * find data for this request
+             */
+            _data_lookup(reginfo, agtreq_info, requests, tad);
+
+        } /** for ( ... requests ... ) */
+    }
+    
+    /*
+     * send GET instead of GETNEXT to sub-handlers
+     * xxx-rks: again, this should be handled further up.
+     */
+    if ((oldmode == MODE_GETNEXT) && (handler->next)) {
+        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        agtreq_info->mode = MODE_GET;
+            
+        /*
+         * Now we've done our processing. call handler below us
+         */
+        rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info, requests);
+        if (rc != SNMP_ERR_NOERROR) {
+            DEBUGMSGTL(("table_container", "next handler returned %d\n", rc));
+        }
+
+        /* reverse the previously saved mode if we were a getnext */
+        agtreq_info->mode = oldmode;
+    }    
+
+    return rc;
+}
+#endif /** DOXYGEN_SHOULD_SKIP_THIS */
