@@ -54,6 +54,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
