@@ -7485,7 +7485,7 @@ if { (eval echo configure:7481: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && t
 EOF
 
 		test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-		WRAPLIBS="$WRAPLIBS -lwrap"
+		WRAPLIBS="$WRAPLIBS -lwrap -lnsl"
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
