@@ -117,6 +117,9 @@ struct tree {
     struct varbind_list *varbinds;
     char *hint;
     char *units;
+    int (*printomat)(u_char **, size_t *, size_t *, int,
+		     struct variable_list *, struct enum_list *,
+		     const char *, const char *);
     void (*printer) (char *, struct variable_list *, struct enum_list *,
                          const char *, const char *);	/* Value printing function */
     char *description;    	/* description (a quoted string) */
