@@ -88,6 +88,7 @@ main (int argc, char **argv) {
   }
 
   if (optind < argc) {
+      int i;
       /*
        * There are optional transport addresses on the command line.  
        */
