@@ -249,6 +249,7 @@ void vacm_parse_group (char *token,
     gp->storageType = SNMP_STORAGE_PERMANENT;
     gp->status = SNMP_ROW_ACTIVE;
     free (gp->reserved);
+    gp->reserved = NULL;
 }
 
 void vacm_free_group (void)
@@ -329,6 +330,7 @@ void vacm_parse_access (char *token, char *param)
     ap->storageType = SNMP_STORAGE_PERMANENT;
     ap->status = SNMP_ROW_ACTIVE;
     free (ap->reserved);
+    ap->reserved = NULL;
 }
 
 void vacm_free_access (void)
@@ -402,6 +404,7 @@ void vacm_parse_view (char *token,
     vp->viewStorageType = SNMP_STORAGE_PERMANENT;
     vp->viewStatus = SNMP_ROW_ACTIVE;
     free (vp->reserved);
+    vp->reserved = NULL;
 }
 
 void vacm_free_view (void)
