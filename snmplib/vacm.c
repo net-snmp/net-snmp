@@ -255,8 +255,9 @@ vacm_parse_config_group(const char *token, char *line)
 
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,
-	      oid *viewSubtree,
-		  size_t viewSubtreeLen)
+		  oid *viewSubtree,
+		  size_t viewSubtreeLen,
+		  int ignoreMask)
 {
     struct vacm_viewEntry *vp, *vpret = NULL;
     char view[VACMSTRINGLEN];
@@ -273,17 +274,20 @@ vacm_getViewEntry(const char *viewName,
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
             found = 1;
-	    for (oidpos = 0; found && oidpos < (int)vp->viewSubtreeLen-1;
-                 oidpos++) {
-		if ((vp->viewMask[maskpos] & mask) != 0) {
-		    if (viewSubtree[oidpos] != vp->viewSubtree[oidpos+1])
-                        found = 0;
+
+	    if (!ignoreMask) {
+		for (oidpos = 0; found && oidpos < (int)vp->viewSubtreeLen-1;
+		     oidpos++) {
+		    if ((vp->viewMask[maskpos] & mask) != 0) {
+			if (viewSubtree[oidpos] != vp->viewSubtree[oidpos+1])
+			    found = 0;
+		    }
+		    if (mask == 1) {
+			mask = 0x80;
+			maskpos++;
+		    }
+		    else mask >>= 1;
 		}
-		if (mask == 1) {
-		    mask = 0x80;
-		    maskpos++;
-		}
-		else mask >>= 1;
 	    }
             if (found) {
               /* match successful, keep this node if its longer than
