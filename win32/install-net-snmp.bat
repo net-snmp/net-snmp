@@ -20,6 +20,14 @@ mkdir %INSTALL_BASE%\bin > NUL:
 mkdir %INSTALL_BASE%\conf > NUL:
 mkdir %INSTALL_BASE%\lib > NUL:
 mkdir %INSTALL_BASE%\mibs > NUL:
+mkdir %INSTALL_BASE%\share > NUL:
+mkdir %INSTALL_BASE%\share\snmp > NUL:
+mkdir %INSTALL_BASE%\share\snmp\snmpconf-data > NUL:
+mkdir %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data > NUL:
+mkdir %INSTALL_BASE%\share\snmp\snmpconf-data\snmpd-data > NUL:
+mkdir %INSTALL_BASE%\share\snmp\snmpconf-data\snmptrapd-data > NUL:
+mkdir %INSTALL_BASE%\snmp > NUL:
+mkdir %INSTALL_BASE%\snmp\persist > NUL:
 mkdir %INSTALL_BASE%\include > NUL:
 mkdir %INSTALL_BASE%\include\net-snmp > NUL:
 mkdir %INSTALL_BASE%\include\ucd-snmp > NUL:
@@ -29,6 +37,12 @@ Copy mibs\*.txt %INSTALL_BASE%\mibs > NUL:
 
 echo Copying compiled programs to %INSTALL_BASE%\bin
 Copy win32\bin\*.exe %INSTALL_BASE%\bin > NUL:
+Copy local\snmpconf %INSTALL_BASE%\bin > NUL:
+
+echo Copying snmpconf files to %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data
+Copy local\snmpconf.dir\snmp-data\*.* %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data > NUL:
+Copy local\snmpconf.dir\snmpd-data\*.* %INSTALL_BASE%\share\snmp\snmpconf-data\snmpd-data > NUL:
+Copy local\snmpconf.dir\snmptrapd-data\*.* %INSTALL_BASE%\share\snmp\snmpconf-data\snmptrapd-data > NUL:
 
 REM
 REM Copy the remaining files used only to develop
