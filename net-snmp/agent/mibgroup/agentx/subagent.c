@@ -638,12 +638,15 @@ subagent_pre_init( void )
 	return 0;
     }
 
-    if (subagent_open_master_session() != 0) {
-	if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL) > 0) {
-	    agentx_reopen_session(0, NULL);
-	}
-        return -1;
-    }
+	/* if a valid ping interval has been defined, call agentx_reopen_session
+	 * to try to connect to master or setup a ping alarm if it couldn't
+	 * succeed */
+	if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL) > 0)
+		agentx_reopen_session(0, NULL);
+	else	/* if no ping interval was set up, just try to connect once */
+		subagent_open_master_session();
+	if (!main_session)
+		return -1;
 
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
     
