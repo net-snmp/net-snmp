@@ -98,9 +98,6 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
