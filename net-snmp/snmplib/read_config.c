@@ -339,12 +339,20 @@ run_config_handler(struct config_line *lptr,
                    const char *token, char *cptr, int when)
 {
     char            tmpbuf[STRINGMAX];
+    char           *cp;
     lptr = read_config_find_handler(lptr, token);
     if (lptr != NULL) {
         if (when == EITHER_CONFIG || lptr->config_time == when) {
             DEBUGMSGTL(("read_config",
                         "Found a parser.  Calling it: %s / %s\n", token,
                         cptr));
+            /*
+             * Stomp on any trailing whitespace
+             */
+            cp = &(cptr[strlen(cptr)-1]);
+            while (isspace(*cp)) {
+                *(cp--) = '\0';
+            }
             (*(lptr->parse_line)) (token, cptr);
         }
     } else if (when != PREMIB_CONFIG && 
