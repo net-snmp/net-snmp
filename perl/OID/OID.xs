@@ -312,13 +312,19 @@ nsop_get_indexes(oid1)
                     return;             /* xxx mem leak */
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
+                
                 if (vbdata.type == (u_char) -1)
                     return; /* XXX: not good.  half populated stack? */
+
+                if (index->isimplied)
+                    vbdata.type |= ASN_PRIVATE;
                 /* possible memory leak: vbdata.data should be freed later */
                 if (parse_one_oid_index(&oidp, &oidp_len, &vbdata, 0)
                     != SNMPERR_SUCCESS)
                     return;
                 out_len = 0;
+                if (index->isimplied)
+                    vbdata.type ^= ASN_PRIVATE;
                 __snprint_value (buf, buf_len, &vbdata, indexnode,
                                  vbdata.type, 0);
 /*
