@@ -4,23 +4,60 @@
 *
 ***************************************************************************
 
-This guide describes building with Microsoft C++ and with
-the gcc compiler from Cygwin.  As developers build with
+This guide describes building with Microsoft Visuall C++ and
+with the gcc compiler from Cygwin.  As developers build with
 other Win32 environments, their notes will be included here.
 
 
 The remainder of this guide has the following sections :
 
+Visual C++ Overview
 Status as of 18-Sep-2002 for Win32 platforms
-Status as of 5-Nov-2001 for Win32 platforms
+Status as of  5-Nov-2001 for Win32 platforms
 Installing Platform SDK
 Building with MS VC++
 Building with OpenSSL with MS VC++
 Installing from MS VC++ build
-Building with Cygwin
 Extending the Agent with MS VC++
+Building with Cygwin
 Notes on SET support for WIN32 ports
 Acknowledgements
+
+
+***************************************************************************
+*
+* Visual C++ Overview
+*
+***************************************************************************
+
+There are two Win32 workspaces ('win32.dsw' and 'win32sdk.dsw'), containing
+more or less the same set of projects.  The former is for developers who
+have not installed the Platform SDK from Microsoft's MSDN SDK Update site.
+The latter is for those who have.   This only affects building the agent.
+
+There are two core development libraries ('libsnmp' and 'libsnmp_dll'),
+together with a number of utility projects for the individual executable
+commands ('snmpget', 'snmpwalk', etc...).  All of these projects require
+the .lib created by ONE of the libsnmp projects, but neither libsnmp project
+is a dependency of the utility projects.  This is done intentionally so
+that you can choose which version of the applications you want to compile.
+For dynamically linked applications (significantly smaller build size), first
+compile the libsnmp_dll project and THEN compile any of the utility projects.
+Keep in mind that the dll created by the 'libsnmp_dll' project must be located
+in the current working directory
+
+The agent requires (one of) these core libraries, plus the other three
+library projects ('libagent', libhelpers' and either 'netsnmpmibs' or
+'netsnmpmibssdk' depending on which workspace is being used) together
+with the main agent project (either 'snmpd' or 'snmpdsdk').  However, there
+may be some problems with using the dynamic core library ('libsnmp_dll') with
+the agent.  It's probably safer to use the static library for this project,
+and add all the relevant projects as dependencies in the workspace.
+
+The final application project is the trap handler 'snmptrapd'.  This also
+requires two of the agent libraries ('libagent' and 'libhelpers') as well
+as the core development library ('libsnmp' or 'libsnmp_dll') and the
+'snmptrapd' project itself.
 
 
 ***************************************************************************
@@ -115,11 +152,10 @@ The full agent should now compile successfully.
 *
 ***************************************************************************
 
-The win32 directory contains a Microsoft VC++ (6.0) workspace and
-project files to build both static and DLL versions of the UCD SNMP
-library and the applications. Until recently it is known to build with
-VC++ 5.0 too, unfortunately none of the developers have this version around
-anymore.
+The win32 directory contains two Microsoft VC++ workspaces and project
+files to build both static and DLL versions of the library and the
+applications. Until recently it is known to build with VC++ 5.0 too,
+unfortunately none of the developers have this version around anymore.
 
 Building with earlier compiler versions has not been attempted.  Success
 stories are welcomed.
@@ -140,7 +176,7 @@ library versions that work :
   1) libsnmp Debug ;  and 2) libsnmp_dll Release
 
 [Actaully, I'm not sure that is true anymore. I have had success with
-both libsnmp Debug and Release, and no luch with libsnmp_dll.]
+both libsnmp Debug and Release, and no luck with libsnmp_dll.]
 
 The projects are arranged so that ALL of the usable products,
 the .lib, .dll, and .exe files, are written to the win32\bin
@@ -195,7 +231,7 @@ are checked. Rebuild All.
 To build both Debug and Release versions:
 Click Build->Batch Build.  Check all versions.  Uncheck
 "libsnmp Release" and "libsnmp_dll Debug" versions only.
-Then click Release All.
+Then click Rebuild All.
 
 
 ***************************************************************************
@@ -268,6 +304,32 @@ archive of the \usr hierarchy.
 
 ***************************************************************************
 *
+* Extending the Agent with MS VC++
+*
+***************************************************************************
+
+Assuming that the MIB compiler generated the my.h and my.c files for the
+custom MIB "my", the following changes are required to extend the agent
+using VC++:
+
+   - Add the my.h and my.c files to your 'netsnmpmibs' project in VC++.
+   - Next edit the '<sourcedir>\win32\mib_module_includes.h' file to
+     add an include to your .h file.
+
+        #include "mibgroup/my.h"
+
+   - Next edit the '<sourcedir>\win32\mib_module_inits.h' file to add
+     code to call your initialize function.
+
+        if (should_init("my")) init_my();
+
+
+That's all that is needed. Now go ahead and compile the 'netsnmpmibs'
+and 'snmpd' project. And things should work just fine.
+
+
+***************************************************************************
+*
 * Building with Cygwin
 *
 ***************************************************************************
@@ -294,28 +356,11 @@ www.microsoft.com.  See above for details.
 
 ***************************************************************************
 *
-* Extending the Agent with MS VC++
+* Extending the Agent with Cygwin
 *
 ***************************************************************************
 
-Assuming that the MIB compiler generated the my.h and my.c files for the
-custom MIB "my", the following changes are required to extend the agent
-using VC++:
-
-   - Add the my.h and my.c files to your 'netsnmpmibs' project in VC++.
-   - Next edit the '<sourcedir>\win32\mib_module_includes.h' file to
-     add an include to your .h file.
-
-        #include "mibgroup/my.h"
-
-   - Next edit the '<sourcedir>\win32\mib_module_inits.h' file to add
-     code to call your initialize function.
-
-        if (should_init("my")) init_my();
-
-
-That's all that is needed. Now go ahead and compile the 'netsnmpmibs'
-and 'snmpd' project. And things should work just fine.
+[To Be Provided]
 
 
 ***************************************************************************
@@ -445,8 +490,4 @@ the Win32 platform ports.  If you have, and your name is not here,
 please accept our apologies, and tell us so we can add your name.
 
 David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
-Robert Story, Suvrit Sra, Mike Slifcak.
-
-A very special thank you goes to Latha Prabhu who contributed the complete
-MIB-II support, including write support. This has put the Windows port
-in the top support class for net-snmp.
+Robert Story, Suvrit Sra, Mike Slifcak, Latha Prabhu and Nikolai Devereaux.
