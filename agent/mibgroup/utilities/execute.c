@@ -107,9 +107,11 @@ run_shell_command( char *command, char *input,
         int         len = 0;
         fd = open(ofname, O_RDONLY);
         if(fd >= 0)
-            len  = read( fd, output, *out_len );
+            len  = read( fd, output, *out_len-1 );
 	*out_len = len;
-	close(fd);
+	if (len >= 0) output[len] = 0;
+	else output[0] = 0;
+	if (fd >= 0) close(fd);
         unlink(ofname);
     }
     if ( input ) {
@@ -245,17 +247,19 @@ run_exec_command( char *command, char *input,
 	   write(ipipe[1], input, strlen(input));
 	   close(ipipe[1]);	/* or flush? */
         }
+	else close(ipipe[1]);
         if (waitpid(pid, &result, 0) < 0 ) {
             snmp_log_perror("waitpid");
             return -1;
         }
         if (output) {
-            len = read( opipe[0], output, *out_len );
+            len = read( opipe[0], output, *out_len-1 );
+	    if (len >= 0) output[len] = 0;
+	    else output[0] = 0;
 	    *out_len = len;
         }
-	close(ipipe[1]);
 	close(opipe[0]);
-	return 0;
+	return WEXITSTATUS(result);
 
     } else {
         /*
