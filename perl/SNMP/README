@@ -103,9 +103,17 @@ nmake
 nmake test
 nmake install
 
-Note: 'make test' requires that an agent is running to which you have
-read/write access. For the UCD SNMP agent (snmpd) this will involve
-setting up the snmpd.conf file with read-write access for the community chosen during the 'perl Makefile.PL' step ('private' by default).
+Win32 Testing Note: 
+
+'nmake test' requires that an agent(snmpd) and trap receiver
+(snmptrapd) are running. Before running 'nmake test' start these
+servers using the config file provided (t/snmpd.conf) and indicate the
+host and port in t/snmpd.cmd by editting the following lines
+appropriately:
+
+HOST => 
+AGENT_PORT => 
+TRAP_PORT =>
 
 Operational Description:
 
