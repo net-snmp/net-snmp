@@ -229,7 +229,7 @@ __libraries_init(char *appname)
         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
 	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                              NETSNMP_OID_OUTPUT_FULL);
+                                              NETSNMP_OID_OUTPUT_SUFFIX);
         SOCK_STARTUP;
     
     }
@@ -3193,6 +3193,13 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
                   SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
@@ -3251,11 +3258,9 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
               }
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
-	      if (getlabel_flag & USE_NUMERIC_OIDS) {
 	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     old_format);
-	      }
 
               if (response) snmp_free_pdu(response);
 
@@ -3400,6 +3405,13 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
                   SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
@@ -3458,11 +3470,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
               }
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
-	      if (getlabel_flag & USE_NUMERIC_OIDS) {
 	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     old_format);
-	      }
 
               if (response) snmp_free_pdu(response);
 
@@ -3618,6 +3628,13 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
 
 	      if(response && response->variables) {
               for(vars = response->variables;
@@ -3667,11 +3684,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      }
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
-	      if (getlabel_flag & USE_NUMERIC_OIDS) {
 	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     old_format);
-	      }
 
               if (response) snmp_free_pdu(response);
 
