@@ -27,6 +27,9 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
+/* Define if you have the getmntent function.  */
+#undef HAVE_GETMNTENT
+
 /* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
 #undef HAVE_SYS_WAIT_H
 
@@ -137,9 +140,6 @@
 /* Define if you have the getloadavg function.  */
 #undef HAVE_GETLOADAVG
 
-/* Define if you have the getmntent function.  */
-#undef HAVE_GETMNTENT
-
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
@@ -163,6 +163,9 @@
 
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
+
+/* Define if you have the setmntent function.  */
+#undef HAVE_SETMNTENT
 
 /* Define if you have the sigblock function.  */
 #undef HAVE_SIGBLOCK
