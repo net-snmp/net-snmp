@@ -31,11 +31,10 @@
    netsnmp_assert( NULL != $m2c_node_param_name );
 @end@
 
-@   if ($m2c_get_use_temp == 1) && ($m2c_node_needlength == 1)@
+@if ($m2c_get_use_temp == 1) && ($m2c_node_needlength == 1)@
     temp_$node = (* $m2c_node_param_name);
     $m2c_node_lhs = (* ${node}_len_ptr);
 
-@   end@
 @end@
 ##
 ########################################################################
