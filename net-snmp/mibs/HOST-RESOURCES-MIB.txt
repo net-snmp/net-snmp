@@ -4,7 +4,7 @@ IMPORTS
     Gauge, Counter, TimeTicks
         FROM RFC1155-SMI
     mib-2, DisplayString
-        FROM SNMPv2-SMI
+        FROM RFC1213-MIB
     OBJECT-TYPE
         FROM RFC-1212;
 
