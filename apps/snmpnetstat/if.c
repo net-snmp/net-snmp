@@ -445,6 +445,7 @@ intpro(int interval)
 		    cur_if->ooctets);
 		putchar('\n');
 	}
+	free(if_table);
 }
 
 #define	MAXIF	128
