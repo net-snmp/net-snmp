@@ -55,12 +55,10 @@ clean:
 	rm -f *.o ${TARG}
 
 install: installdirs $(TARG)
-	for i in $(TARG) ; do \
-	$(INSTALL) $$i $(bindir) ; \
-	done
+	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
 
 installdirs:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
 
 depend: 
 	makedepend $(CPPFLAGS) *.c
