@@ -293,6 +293,9 @@
 /* Define if you have the <sys/fs.h> header file.  */
 #undef HAVE_SYS_FS_H
 
+/* Define if you have the <sys/hashing.h> header file.  */
+#undef HAVE_SYS_HASHING_H
+
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
@@ -331,6 +334,9 @@
 
 /* Define if you have the <sys/sysctl.h> header file.  */
 #undef HAVE_SYS_SYSCTL_H
+
+/* Define if you have the <sys/tcpipstats.h> header file.  */
+#undef HAVE_SYS_TCPIPSTATS_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
@@ -418,6 +424,15 @@
 
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
+
+/* ifaddr.ifa_next */
+#undef STRUCT_IFADDR_HAS_IFA_NEXT
+
+/* ifnet.if_mtu */
+#undef STRUCT_IFNET_IF_MTU
+
+/* ifnet needs to have _KERNEL defined */
+#undef IFNET_NEEDS_KERNEL
 
 /* sysctl works to get boottime, etc... */
 #undef CAN_USE_SYSCTL
