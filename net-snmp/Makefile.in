@@ -80,7 +80,10 @@ test: all testdirs
 
 testdirs:
 	for i in $(TESTDIRS) ; do	\
-        ( cd $$i ; $(MAKE) ) ;		\
+           ( cd $$i ; $(MAKE) ) ;		\
+           if test $$? != 0 ; then \
+              exit 1 ; \
+           fi  \
 	done
 
 distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
@@ -97,16 +100,25 @@ perlmodules:
 		(cd perl/$$i ; perl Makefile.PL -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" INST_LIB=../blib/lib INST_ARCHLIB=../blib/arch) ; \
 	   fi ; \
 	   (cd perl/$$i ; $(MAKE)) ; \
+           if test $$? != 0 ; then \
+              exit 1 ; \
+           fi  \
 	done
 
 perlinstall:
 	@for i in $(PERLMODULES); do \
 	   (cd perl/$$i ; $(MAKE) install) ; \
+           if test $$? != 0 ; then \
+              exit 1 ; \
+           fi  \
 	done
 
 perlclean:
 	@for i in $(PERLMODULES); do \
-	 ( cd perl/$$i ; $(MAKE) clean ) ; \
+	   ( cd perl/$$i ; $(MAKE) clean ) ; \
+           if test $$? != 0 ; then \
+              exit 1 ; \
+           fi  \
 	done
 
 #

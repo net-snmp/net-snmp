@@ -95,6 +95,9 @@ installsubdirheaders:
 		for i in $$it ; do       \
 			echo "making installheaders in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) installheaders) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -146,6 +149,9 @@ installsubdirlibs:
 		for i in $$it ; do       \
 			echo "making installlibs in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) installlibs) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -172,6 +178,9 @@ installsubdirbin:
 		for i in $$it ; do       \
 			echo "making installbin in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) installbin) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -198,6 +207,9 @@ installsubdirsbin:
 		for i in $$it ; do       \
 			echo "making installsbin in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) installsbin) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -210,6 +222,9 @@ installsubdirs:
 		for i in $$it ; do       \
 			echo "making install in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) install) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -226,6 +241,9 @@ cleansubdirs:
 		for i in $$it ; do       \
 			echo "making clean in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) clean) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -258,6 +276,9 @@ dependdirs:
 		for i in $$it ; do       \
 			echo "making depend in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) depend) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -267,6 +288,9 @@ nosysdependdirs:
 		for i in $$it ; do       \
 			echo "making nosysdepend in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) nosysdepend) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
@@ -276,6 +300,9 @@ distdependdirs:
 		for i in $$it ; do       \
 			echo "making distdepend in `pwd`/$$i"; \
 	                ( cd $$i ; $(MAKE) distdepend) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
 	        done \
 	fi
 
