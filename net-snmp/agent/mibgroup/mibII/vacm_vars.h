@@ -17,6 +17,7 @@ void vacm_parse_security (char *, char *);
 void vacm_parse_group (char *, char *);
 void vacm_parse_access (char *, char *);
 void vacm_parse_view (char *, char *);
+void vacm_parse_simple (char *, char *);
 
 SNMPCallback vacm_in_view_callback;
 

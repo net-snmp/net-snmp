@@ -116,6 +116,10 @@ init_vacm_vars (void)
                             "name context model level prefx read write notify");
   snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
                                 "name type subtree [mask]");
+  snmpd_register_config_handler("rwcommunity", vacm_parse_simple,
+                                NULL,"community [default|hostname|network/bits] [oid]");
+  snmpd_register_config_handler("rocommunity", vacm_parse_simple,
+                                NULL,"community [default|hostname|network/bits] [oid]");
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   register_sysORTable(reg,10,"View-based Access Control Model for SNMP.");
@@ -431,6 +435,55 @@ void vacm_parse_view (char *token,
 void vacm_free_view (void)
 {
     vacm_destroyAllViewEntries();
+}
+
+void vacm_parse_simple(char *token, char *confline) {
+  char line[SPRINT_MAX_LEN];
+  char community[COMMUNITY_MAX_LEN];
+  char theoid[SPRINT_MAX_LEN];
+  char viewname[SPRINT_MAX_LEN];
+  char addressname[SPRINT_MAX_LEN];
+  char *rw = "none";
+  char *cp;
+  static int num = 0;
+
+  cp = copy_word(confline, community);
+  if (cp && *cp) {
+    cp = copy_word(cp, addressname);
+  } else {
+    strcpy(addressname, "default");
+  }
+  if (cp && *cp) {
+    cp = copy_word(cp, theoid);
+  } else {
+    strcpy(theoid, ".1");
+  }
+
+  if (strcmp(token,"rwcommunity") == 0)
+    rw = viewname;
+
+  /* com2sec mapping */
+  /* com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY */
+  sprintf(line,"anonymousSecName%03d %s %s", num, addressname, community);
+  vacm_parse_security("com2sec",line);
+
+  /* sec->group mapping */
+  /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
+  sprintf(line,"anonymousGroupName%03d any anonymousSecName%03d", num, num);
+  vacm_parse_group("group",line);
+
+  /* view definition */
+  /* view    anonymousViewNUM       included OID */
+  sprintf(viewname,"anonymousView%03d",num);
+  sprintf(line,"%s included %s", viewname, theoid);
+  vacm_parse_view("view",line);
+
+  /* map everything together */
+  /* access  anonymousGroupNameNUM  "" any noauth 0 anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
+  sprintf(line, "anonymousGroupName%03d  \"\" any noauth 0 %s %s %s", num,
+          viewname, rw, rw);
+  vacm_parse_access("access",line);
+  num++;
 }
 
 int
