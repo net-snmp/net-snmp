@@ -1,4 +1,4 @@
-.TH "serialize: Calls sub handlers one request at a time." 3 "5 Oct 2002" "net-snmp" \" -*- nroff -*-
+.TH "serialize: Calls sub handlers one request at a time." 3 "14 Dec 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -36,9 +36,6 @@ This is useful for handlers that don't want to iterate through the request lists
 returns a serialize handler that can be injected into a given handler chain.
 .PP
 Definition at line 34 of file serialize.c.
-.PP
-Referenced by netsnmp_init_serialize(), and netsnmp_register_serialize().
-.PP
 .SS "void netsnmp_init_serialize (void)"
 .PP
 initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use.

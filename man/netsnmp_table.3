@@ -1,4 +1,4 @@
-.TH "table: Helps you implement a table." 3 "5 Oct 2002" "net-snmp" \" -*- nroff -*-
+.TH "table: Helps you implement a table." 3 "14 Dec 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,9 +8,9 @@ More...
 
 .in +1c
 .ti -1c
-.RI "\fBtable_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.\fP"
+.RI "\fBtable_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.\fP"
 .br
-.RI "\fIFunctionally, it is a specialized version of the more generic table helper but easies the burden of GETNEXT processing by manually looping through all the data indexes retrieved through function calls which should be supplied by the module that wishes help.\fP"
+.RI "\fIThe table_array handler is used (automatically) in conjuntion with the \fBtable\fP handler.\fP"
 .PP
 .in +1c
 
@@ -22,9 +22,9 @@ More...
 .in +1c
 
 .ti -1c
-.RI "\fBtable_array: Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.\fP"
+.RI "\fBtable_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.\fP"
 .br
-.RI "\fIThe table_array handler is used (automatically) in conjuntion with the table handler.\fP"
+.RI "\fIFunctionally, it is a specialized version of the more generic table helper but easies the burden of GETNEXT processing by manually looping through all the data indexes retrieved through function calls which should be supplied by the module that wishes help.\fP"
 .PP
 
 .in -1c
@@ -91,7 +91,7 @@ checks the original request against the current data being passed in if its grea
 .PP
 returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
-Definition at line 630 of file table.c.
+Definition at line 654 of file table.c.
 .SS "netsnmp_table_request_info* netsnmp_extract_table_info (netsnmp_request_info * request)\fC [inline]\fP"
 .PP
 extracts the processed table information from a given request.
@@ -99,17 +99,11 @@ extracts the processed table information from a given request.
 call this from subhandlers on a request to extract the processed netsnmp_request_info information. The resulting information includes the index values and the column number. 
 .PP
 Definition at line 94 of file table.c.
-.PP
-Referenced by netsnmp_set_data_cache(), netsnmp_table_data_helper_handler(), and netsnmp_table_data_set_helper_handler().
-.PP
 .SS "netsnmp_table_registration_info* netsnmp_find_table_registration_info (netsnmp_handler_registration * reginfo)"
 .PP
 extracts the registered netsnmp_table_registration_info object from a netsnmp_handler_registration object.
 .PP
 Definition at line 103 of file table.c.
-.PP
-Referenced by netsnmp_table_data_helper_handler().
-.PP
 .SS "netsnmp_mib_handler* netsnmp_get_table_handler (netsnmp_table_registration_info * tabreq)"
 .PP
 Given a netsnmp_table_registration_info object, creates a table handler.
@@ -117,47 +111,38 @@ Given a netsnmp_table_registration_info object, creates a table handler.
 You can use this table handler by injecting it into a calling chain. When the handler gets called, it'll do processing and store it's information into the request->parent_data structure. 
 .PP
 Definition at line 58 of file table.c.
-.PP
-Referenced by netsnmp_register_table().
-.PP
 .SS "int netsnmp_register_table (netsnmp_handler_registration * reginfo, netsnmp_table_registration_info * tabreq)"
 .PP
 creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler\fP() to register the table into the agent.
 .PP
 Definition at line 81 of file table.c.
-.PP
-Referenced by netsnmp_register_table_data(), and netsnmp_table_container_register().
-.PP
 .SS "int netsnmp_table_build_oid (netsnmp_handler_registration * reginfo, netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info)"
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object.
 .PP
-Definition at line 548 of file table.c.
-.PP
-Referenced by netsnmp_table_build_result().
-.PP
+Definition at line 572 of file table.c.
 .SS "int netsnmp_table_build_oid_from_index (netsnmp_handler_registration * reginfo, netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info)"
 .PP
 Builds an oid from index information.
 .PP
-Definition at line 574 of file table.c.
+Definition at line 598 of file table.c.
 .SS "int netsnmp_table_build_result (netsnmp_handler_registration * reginfo, netsnmp_request_info * reqinfo, netsnmp_table_request_info * table_info, u_char type, u_char * result, size_t result_len)"
 .PP
 Builds the result to be returned to the agent given the table information.
 .PP
 Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind. 
 .PP
-Definition at line 515 of file table.c.
+Definition at line 539 of file table.c.
 .SS "int netsnmp_update_indexes_from_variable_list (netsnmp_table_request_info * tri)"
 .PP
 builds an oid given a set of indexes.
 .PP
-Definition at line 612 of file table.c.
+Definition at line 636 of file table.c.
 .SS "int netsnmp_update_variable_list_from_index (netsnmp_table_request_info * tri)"
 .PP
 parses an OID into table indexses.
 .PP
-Definition at line 601 of file table.c.
+Definition at line 625 of file table.c.
 .SS "int table_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the table helper handler.
