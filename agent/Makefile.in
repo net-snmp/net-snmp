@@ -90,7 +90,7 @@ agent_read_config.o: mibgroup/struct.h ./../snmplib/read_config.h
 agent_read_config.o: agent_read_config.h ./mibgroup/mib_module_includes.h
 agent_read_config.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/v2party.h
 agent_read_config.o: mibgroup/snmpv3mibs.h mibgroup/host.h
-agent_read_config.o: mibgroup/disman/script-mib.h mibgroup/target.h
+agent_read_config.o: mibgroup/target.h
 agent_read_config.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 agent_read_config.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 agent_read_config.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -119,8 +119,7 @@ agent_read_config.o: mibgroup/host/hr_proc.h mibgroup/host/hr_network.h
 agent_read_config.o: mibgroup/host/hr_print.h mibgroup/host/hr_disk.h
 agent_read_config.o: mibgroup/host/hr_partition.h mibgroup/host/hr_filesys.h
 agent_read_config.o: mibgroup/host/hr_swrun.h mibgroup/host/hr_swinst.h
-agent_read_config.o: mibgroup/host/hr_utils.h mibgroup/disman/smLangTable.h
-agent_read_config.o: mibgroup/disman/smScriptEntry.h
+agent_read_config.o: mibgroup/host/hr_utils.h 
 agent_read_config.o: mibgroup/target/snmpTargetAddrEntry.h
 agent_read_config.o: mibgroup/target/snmpTargetParamsEntry.h
 agent_read_config.o: mibgroup/util_funcs.h mibgroup/struct.h
@@ -163,7 +162,7 @@ snmp_vars.o: ./../snmplib/snmpusm.h m2m.h snmp_vars_m2m.h ../snmplib/system.h
 snmp_vars.o: kernel.h snmp_vars.h mibgroup/struct.h
 snmp_vars.o: mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmp_vars.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/snmpv3mibs.h
-snmp_vars.o: mibgroup/host.h mibgroup/disman/script-mib.h mibgroup/target.h
+snmp_vars.o: mibgroup/host.h mibgroup/target.h
 snmp_vars.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 snmp_vars.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 snmp_vars.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h
@@ -190,7 +189,6 @@ snmp_vars.o: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 snmp_vars.o: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 snmp_vars.o: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
 snmp_vars.o: mibgroup/host/hr_swinst.h mibgroup/host/hr_utils.h
-snmp_vars.o: mibgroup/disman/smLangTable.h mibgroup/disman/smScriptEntry.h
 snmp_vars.o: mibgroup/target/snmpTargetAddrEntry.h
 snmp_vars.o: mibgroup/target/snmpTargetParamsEntry.h mibgroup/util_funcs.h
 snmp_vars.o: mibgroup/struct.h mibgroup/mibII/var_route.h
@@ -211,7 +209,7 @@ snmpd.o: ./../snmplib/tools.h ./../snmplib/lcd_time.h
 snmpd.o: ./../snmplib/transform_oids.h snmp_agent.h ../version.h
 snmpd.o: ./mibgroup/mib_module_includes.h mibgroup/mibII.h
 snmpd.o: mibgroup/ucd_snmp.h mibgroup/v2party.h mibgroup/snmpv3mibs.h
-snmpd.o: mibgroup/host.h mibgroup/disman/script-mib.h mibgroup/target.h
+snmpd.o: mibgroup/host.h mibgroup/target.h
 snmpd.o: mibgroup/mibII/system_mib.h mibgroup/mibII/sysORTable.h
 snmpd.o: mibgroup/mibII/at.h mibgroup/mibII/interfaces.h
 snmpd.o: mibgroup/mibII/snmp_mib.h mibgroup/mibII/tcp.h mibgroup/mibII/icmp.h
@@ -236,7 +234,6 @@ snmpd.o: mibgroup/host/hr_network.h mibgroup/host/hr_print.h
 snmpd.o: mibgroup/host/hr_disk.h mibgroup/host/hr_partition.h
 snmpd.o: mibgroup/host/hr_filesys.h mibgroup/host/hr_swrun.h
 snmpd.o: mibgroup/host/hr_swinst.h mibgroup/host/hr_utils.h
-snmpd.o: mibgroup/disman/smLangTable.h mibgroup/disman/smScriptEntry.h
 snmpd.o: mibgroup/target/snmpTargetAddrEntry.h
 snmpd.o: mibgroup/target/snmpTargetParamsEntry.h mibgroup/mibII/var_route.h
 snmpd.o: mibgroup/mibII/route_write.h mibgroup/header_complex.h

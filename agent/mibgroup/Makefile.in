@@ -1324,51 +1324,6 @@ host/hr_utils.o:  ./../../snmplib/mib.h
 host/hr_utils.o: ./../snmp_vars.h ./../var_struct.h ../../snmplib/system.h
 host/hr_utils.o:  ./../../snmplib/snmp_debug.h
 host/hr_utils.o:  host/hr_utils.h
-disman/smLangTable.o: ../../config.h ../../mib_module_config.h
-disman/smLangTable.o: ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-disman/smLangTable.o: ../../m/generic.h 
-disman/smLangTable.o:  
-disman/smLangTable.o: 
-disman/smLangTable.o: 
-disman/smLangTable.o: mibincl.h  
-disman/smLangTable.o:  
-disman/smLangTable.o: 
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  
-disman/smLangTable.o:  ../../snmplib/asn1.h
-disman/smLangTable.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-disman/smLangTable.o: ../snmp_vars.h ../agent_read_config.h ../var_struct.h
-disman/smLangTable.o: ../../snmplib/snmp.h ../../snmplib/mib.h
-disman/smLangTable.o: ../../snmplib/snmp_debug.h ../../snmplib/read_config.h
-disman/smLangTable.o: ../../snmplib/tools.h ./../../snmplib/read_config.h
-disman/smLangTable.o: header_complex.h disman/smLangTable.h
-disman/smScriptEntry.o: ../../config.h ../../mib_module_config.h
-disman/smScriptEntry.o: ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-disman/smScriptEntry.o: ../../m/generic.h mibincl.h 
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o: 
-disman/smScriptEntry.o: 
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  
-disman/smScriptEntry.o:  ../../snmplib/asn1.h
-disman/smScriptEntry.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-disman/smScriptEntry.o: ../snmp_vars.h ../agent_read_config.h ../var_struct.h
-disman/smScriptEntry.o: ../../snmplib/snmp.h ../../snmplib/mib.h
-disman/smScriptEntry.o: ../../snmplib/snmp_debug.h
-disman/smScriptEntry.o: ../../snmplib/read_config.h ../../snmplib/tools.h
-disman/smScriptEntry.o: header_complex.h disman/smScriptTable.h
 target/snmpTargetAddrEntry.o: ../../config.h ../../mib_module_config.h
 target/snmpTargetAddrEntry.o: ../../s/linux.h ../../s/sysv.h
 target/snmpTargetAddrEntry.o: ../../s/generic.h ../../m/generic.h
