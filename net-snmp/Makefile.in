@@ -88,7 +88,8 @@ testdirs:
 
 distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
 
-OTHERCLEANTARGETS="EXAMPLE.conf sedscript perlclean"
+OTHERCLEANTARGETS=EXAMPLE.conf sedscript
+OTHERCLEANTODOS=perlclean
 
 #
 # perl specific build rules
