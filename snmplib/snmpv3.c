@@ -354,7 +354,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         u_char *tmpp = session->securityAuthKey;
         if (!snmp_hex_to_binary(&tmpp, &bufSize,
                                 &session->securityAuthKeyLen, 0, optarg)) {
-            fprintf(stderr, "Bad key value after -3k flag.\n");
+            fprintf(stderr, "Bad key value after -3m flag.\n");
             return (-1);
         }
         break;
@@ -365,7 +365,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         u_char *tmpp = session->securityPrivKey;
         if (!snmp_hex_to_binary(&tmpp, &bufSize,
              &session->securityPrivKeyLen, 0, optarg)) {
-            fprintf(stderr, "Bad key value after -3k flag.\n");
+            fprintf(stderr, "Bad key value after -3M flag.\n");
             return (-1);
         }
         break;
