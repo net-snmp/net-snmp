@@ -40,10 +40,8 @@
  * OID: .1.3.6.1.2.1.4.24.4, length: 9
  */
 
-#ifndef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE
 static void _snarf_route_entry(netsnmp_route_entry *route_entry,
                                netsnmp_container * container);
-#endif
 
 /**
  * initialization for ipCidrRouteTable data access
@@ -161,10 +159,9 @@ ipCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
 int
 ipCidrRouteTable_cache_load(netsnmp_container * container)
 {
-#ifndef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE
     netsnmp_container * route_container =
         netsnmp_access_route_container_load(NULL,
-                                            NETSNMP_ACCESS_ROUTE_INIT_NOFLAGS);
+                                            NETSNMP_ACCESS_ROUTE_LOAD_IPV4_ONLY);
 
     DEBUGTRACE;
 
@@ -183,14 +180,8 @@ ipCidrRouteTable_cache_load(netsnmp_container * container)
                                         NETSNMP_ACCESS_ROUTE_FREE_DONT_CLEAR );
 
     return MFD_SUCCESS;
-#else
-    snmp_log(LOG_ERR, "why was ipCidrRouteTable_cache_load called when "
-             "USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE is defined?\n");
-    netsnmp_assert(0);
-#endif /* USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE */
 }
 
-#ifndef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE
 /**
  * check entry for update
  *
@@ -213,8 +204,9 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
     rowreq_ctx = ipCidrRouteTable_allocate_rowreq_ctx(route_entry);
     if( (NULL != rowreq_ctx) &&
         (MFD_SUCCESS == ipCidrRouteTable_indexes_set
-         (rowreq_ctx,route_entry->rt_dest, route_entry->rt_mask,
-          route_entry->rt_tos, route_entry->rt_nexthop))) {
+         (rowreq_ctx,*((u_long*)route_entry->rt_dest),
+          route_entry->rt_mask, route_entry->rt_tos,
+          *((u_long*)route_entry->rt_nexthop)))) {
         CONTAINER_INSERT(container, rowreq_ctx);
     }
     else {
@@ -227,7 +219,7 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
             netsnmp_access_route_entry_free(route_entry);
     }
 }
-#endif /* USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE */
+
 
 /**
  * cache clean up

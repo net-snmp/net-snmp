@@ -1609,20 +1609,6 @@ _ipCidrRouteTable_container_init(ipCidrRouteTable_interface_ctx * if_ctx)
     /*
      * set up the cache
      */
-#ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_MODULE
-#error sharing test
-    /*
-     * special case: sharing a cache.
-     */
-    if_ctx->cache = netsnmp_cache_find_by_oid(&inetCidrRouteTable_oid,
-                                              inetCidrRouteTable_oid_size);
-    if (NULL != if_ctx->cache) {
-        if_ctx->container = (netsnmp_container*)if_ctx->cache->magic;
-        return;
-    }
-
-    snmp_log(LOG_ERR, "error finding cache for inetCidrRouteTable, using new one\n");
-#endif
     if_ctx->cache = netsnmp_cache_create(30,    /* timeout in seconds */
                                          _cache_load, _cache_free,
                                          ipCidrRouteTable_oid,
