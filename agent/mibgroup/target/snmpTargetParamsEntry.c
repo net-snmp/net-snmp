@@ -607,8 +607,7 @@ write_snmpTargetParamsMPModel(
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   /* spec check range */
   if (long_ret < 0) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : MP Model out of range\n"));
@@ -669,8 +668,7 @@ write_snmpTargetParamsSecurityModel(
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityModel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   /* spec check range */
   if (long_ret <= 0)  {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecModel : Security Model out of range\n"));
@@ -735,8 +733,8 @@ write_snmpTargetParamsSecurityName(
   }
 
   /* spec check, 0-255, this means EMPTY STRINGS ALLOWED! */
-  size = sizeof(string);
-  asn_parse_string(var_val, &bigsize, &var_val_type, string, &size);
+  size = var_val_len;
+  memcpy(string, var_val, var_val_len);
   if (size > 255 || size < 0) {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : bad length\n"));
     return SNMP_ERR_WRONGLENGTH;
@@ -800,8 +798,7 @@ write_snmpTargetParamsSecurityLevel(
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   /* spec check, no spec check, but noAuthNoPriv is 1 so... */
   if (long_ret <= 0 )  {
     DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargeParamsSecurityLevel: security level is not noAuthNoPriv(1) or higher\n"));
@@ -863,8 +860,7 @@ write_snmpTargetParamsStorageType(
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsStorageType: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
   
   if ( (long_ret != SNMP_STORAGE_OTHER) && (long_ret != SNMP_STORAGE_VOLATILE) &&
        (long_ret != SNMP_STORAGE_NONVOLATILE) )  {
@@ -957,8 +953,7 @@ write_snmpTargetParamsRowStatus(
       DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsRowStatus: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
-  size = sizeof(long_ret);
-  asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
+  long_ret = *((long *) var_val);
 
   /* search for struct in linked list */
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSROWSTATUSCOLUMN;
