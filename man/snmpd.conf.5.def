@@ -157,15 +157,15 @@ group mygroup v2c        mynet
 group local   any        local
 group public  any        public
 
-#              context sec.model sec.level prefix read   write notify
-access mygroup ""      any       noauth    0      mib2   none  none
-access public  ""      any       noauth    0      system none  none
-access local   ""      any       noauth    0      all    all   all
-
 #           incl/excl subtree                          mask
 view all    included  .1                               80
 view system included  system                           fe
 view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
+
+#              context sec.model sec.level prefix read   write notify
+access mygroup ""      any       noauth    0      mib2   none  none
+access public  ""      any       noauth    0      system none  none
+access local   ""      any       noauth    0      all    all   all
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"
