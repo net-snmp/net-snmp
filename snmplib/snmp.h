@@ -154,8 +154,8 @@ SOFTWARE.
 #define SNMP_TRAP_EGPNEIGHBORLOSS	(5)
 #define SNMP_TRAP_ENTERPRISESPECIFIC	(6)
 
-void xdump __UCD_P((u_char *, int, char *));
-u_char *snmp_parse_var_op __UCD_P((u_char *, oid *, int *, u_char *, int *,
+void xdump __P((u_char *, int, char *));
+u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,
                                u_char **, int *));
-u_char *snmp_build_var_op __UCD_P((u_char *, oid *, int *, u_char, int, u_char *,
+u_char *snmp_build_var_op __P((u_char *, oid *, int *, u_char, int, u_char *,
                                int *));

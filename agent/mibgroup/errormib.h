@@ -6,9 +6,9 @@
 
 config_require(util_funcs)
 
-void setPerrorstatus __UCD_P((char *));
-void seterrorstatus __UCD_P((char *, int));
-unsigned char *var_extensible_errors __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+void setPerrorstatus __P((char *));
+void seterrorstatus __P((char *, int));
+unsigned char *var_extensible_errors __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #include "mibdefs.h"
 

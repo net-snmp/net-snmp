@@ -104,7 +104,7 @@ extern int errno;
 struct synch_state snmp_synch_state;
 
 int
-snmp_synch_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+snmp_synch_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
 
 struct snmp_pdu *
 snmp_pdu_create(command)

@@ -24,7 +24,7 @@ struct config_line config_handlers[] = {
   {"trapcommunity", snmpd_parse_config_trapcommunity, NULL}
 };
 
-void init_read_config __UCD_P((void))
+void init_read_config __P((void))
 {
   
   update_config(0);
@@ -83,7 +83,7 @@ int read_config(filename)
 }
 
 void
-free_config __UCD_P((void))
+free_config __P((void))
 {
   int i;
 
@@ -225,7 +225,7 @@ int tree_compare(a, b)
   return compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
-void setup_tree __UCD_P((void))
+void setup_tree __P((void))
 {
   extern struct subtree *subtrees,subtrees_old[];
   struct subtree *sb;

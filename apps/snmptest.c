@@ -73,17 +73,17 @@ SOFTWARE.
 #include "acl.h"
 #include "snmp_parse_args.h"
 
-int main __UCD_P((int, char **));
-int ascii_to_binary __UCD_P((u_char *, u_char *));
-int hex_to_binary __UCD_P((u_char *, u_char *));
+int main __P((int, char **));
+int ascii_to_binary __P((u_char *, u_char *));
+int hex_to_binary __P((u_char *, u_char *));
 
 extern int  errno;
 int command = GET_REQ_MSG;
 
-int input_variable __UCD_P((struct variable_list *));
+int input_variable __P((struct variable_list *));
 
 void
-usage __UCD_P((void))
+usage __P((void))
 {
   fprintf(stderr,"Usage:\n  snmptest ");
   snmp_parse_args_usage(stderr);

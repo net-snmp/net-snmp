@@ -26,8 +26,8 @@
 #define NULL 0
 #endif
 
-off_t klseek __UCD_P((off_t));
-int klread __UCD_P((char *, int));
+off_t klseek __P((off_t));
+int klread __P((char *, int));
 
 int swap, mem, kmem;
 

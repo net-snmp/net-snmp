@@ -6,12 +6,12 @@
 
 config_require(util_funcs)
 
-void	init_loadave __UCD_P((void));
-unsigned char *var_extensible_loadave __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+void	init_loadave __P((void));
+unsigned char *var_extensible_loadave __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 /* config file parsing routines */
-void loadave_parse_config __UCD_P((char *, char *));
-void loadave_free_config __UCD_P((void));
+void loadave_parse_config __P((char *, char *));
+void loadave_free_config __P((void));
 config_parse_dot_conf("load", loadave_parse_config, loadave_free_config);
 
 #include "mibdefs.h"

@@ -9,3 +9,4 @@ snmptranslate
 snmptrap
 snmptrapd
 snmpwalk
+snmpdelta

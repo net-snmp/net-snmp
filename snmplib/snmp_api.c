@@ -232,11 +232,11 @@ struct internal_variable_list *SavedVars = NULL;
 
 static int snmp_dump_packet = 0;
 
-static void free_request_list __UCD_P((struct request_list *));
-void shift_array __UCD_P((u_char *, int, int));
-static int snmp_build __UCD_P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
-static int snmp_parse __UCD_P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
-static void snmp_free_internal_pdu __UCD_P((struct snmp_pdu *));
+static void free_request_list __P((struct request_list *));
+void shift_array __P((u_char *, int, int));
+static int snmp_build __P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
+static int snmp_parse __P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
+static void snmp_free_internal_pdu __P((struct snmp_pdu *));
 
 #ifndef HAVE_STRERROR
 char *strerror(err)
@@ -256,7 +256,7 @@ void snmp_set_dump_packet(val)
     snmp_dump_packet = val;
 }
 
-int snmp_get_dump_packet __UCD_P((void))
+int snmp_get_dump_packet __P((void))
 {
     return snmp_dump_packet;
 }
@@ -305,7 +305,7 @@ snmp_api_errstring(snmp_errnumber)
  * Gets initial request ID for all transactions.
  */
 static void
-init_snmp __UCD_P((void))
+init_snmp __P((void))
 {
     struct timeval tv;
 
@@ -1555,7 +1555,7 @@ snmp_select_info(numfds, fdset, timeout, block)
  *  callback for the session is used to alert the user of the timeout.
  */
 void
-snmp_timeout __UCD_P((void))
+snmp_timeout __P((void))
 {
     struct session_list *slp;
     struct snmp_session *sp;

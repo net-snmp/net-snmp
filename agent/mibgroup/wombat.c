@@ -59,7 +59,7 @@ void wombat_parse_config(word,line)
    and resets all values to defaults.  It called just before the agent
    re-reads all the .conf files. */
 
-void wombat_free_config __UCD_P((void)) {
+void wombat_free_config __P((void)) {
 }
 
 

@@ -72,29 +72,29 @@
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;
 static long eventNextIndex = 1;
-static int write_eventtab __UCD_P((int, u_char *, u_char, int, u_char *, oid *,int));
-static int write_eventnotifytab __UCD_P((int, u_char *, u_char, int, u_char *, oid *,int));
-static struct eventNotifyEntry *eventNotifyNewRow __UCD_P((int, oid *, int));
-static struct eventNotifyEntry *eventNotifyGetRow __UCD_P((int, oid *, int));
-static void eventCommitRow __UCD_P((struct eventEntry *));
-static void eventNotifyCommitRow __UCD_P((struct eventNotifyEntry *));
-static void eventAlarmFillInVars __UCD_P((struct variable_list *,
+static int write_eventtab __P((int, u_char *, u_char, int, u_char *, oid *,int));
+static int write_eventnotifytab __P((int, u_char *, u_char, int, u_char *, oid *,int));
+static struct eventNotifyEntry *eventNotifyNewRow __P((int, oid *, int));
+static struct eventNotifyEntry *eventNotifyGetRow __P((int, oid *, int));
+static void eventCommitRow __P((struct eventEntry *));
+static void eventNotifyCommitRow __P((struct eventNotifyEntry *));
+static void eventAlarmFillInVars __P((struct variable_list *,
 	struct alarmEntry *, int));
-static void eventSendTrap __UCD_P((struct eventEntry *, int, void *));
-static struct eventEntry *eventGetRow __UCD_P((int));
-static struct eventEntry *eventNewRow __UCD_P((int));
-static void eventUnavailFillInVars __UCD_P((struct variable_list *,
+static void eventSendTrap __P((struct eventEntry *, int, void *));
+static struct eventEntry *eventGetRow __P((int));
+static struct eventEntry *eventNewRow __P((int));
+static void eventUnavailFillInVars __P((struct variable_list *,
 	struct alarmEntry *));
-void eventNotifyUpdateSession __UCD_P((struct eventNotifyEntry *));
-static void eventNotifyInsertRow __UCD_P((struct eventNotifyEntry *));
-static void eventFreeShadow __UCD_P((struct eventEntry *));
-static void eventNotifyFreeShadow __UCD_P((struct eventNotifyEntry *));
-static void eventDeleteRow __UCD_P((struct eventEntry *));
-static void eventNotifyDeleteRow __UCD_P((struct eventNotifyEntry *));
-static int eventShadowRow __UCD_P((struct eventEntry *));
-void time_subtract __UCD_P((struct timeval *, struct timeval *, struct timeval *));
-static void eventInsertRow __UCD_P((struct eventEntry *));
-static int eventNotifyShadowRow __UCD_P((struct eventNotifyEntry *));
+void eventNotifyUpdateSession __P((struct eventNotifyEntry *));
+static void eventNotifyInsertRow __P((struct eventNotifyEntry *));
+static void eventFreeShadow __P((struct eventEntry *));
+static void eventNotifyFreeShadow __P((struct eventNotifyEntry *));
+static void eventDeleteRow __P((struct eventEntry *));
+static void eventNotifyDeleteRow __P((struct eventNotifyEntry *));
+static int eventShadowRow __P((struct eventEntry *));
+void time_subtract __P((struct timeval *, struct timeval *, struct timeval *));
+static void eventInsertRow __P((struct eventEntry *));
+static int eventNotifyShadowRow __P((struct eventNotifyEntry *));
 
 #define MIN_INTERVAL	1	/* one second */
 #define MAX_RETRANSMISSIONS	20
@@ -1031,7 +1031,7 @@ eventNotifyUpdateSession(np)
 {
     struct snmp_session session;
     struct get_req_state *state;
-    extern int snmp_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
     u_long destAddr;
 
     if (np->status != ENTRY_ACTIVE)
@@ -1267,7 +1267,7 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1302,7 +1302,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -1374,7 +1374,7 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1413,7 +1413,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;

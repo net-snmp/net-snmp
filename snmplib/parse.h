@@ -77,7 +77,7 @@ struct tree {
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     char *hint;
     char *units;
-    void (*printer) __UCD_P((char *, struct variable_list *, struct enum_list *,
+    void (*printer) __P((char *, struct variable_list *, struct enum_list *,
                          char *, char *));	/* Value printing function */
     char *description;          /* description (a quoted string) */
 };
@@ -142,10 +142,10 @@ struct module_compatability {
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
 
-struct tree *read_module __UCD_P((char *));
-struct tree *read_mib __UCD_P((char *));
-struct tree *read_all_mibs __UCD_P((void));
-int  add_mibdir __UCD_P((char *));
-void add_module_replacement __UCD_P(( char *, char *, char *, int));
-void print_subtree __UCD_P((FILE *, struct tree *, int));
-void print_ascii_dump_tree __UCD_P((FILE *, struct tree *, int));
+struct tree *read_module __P((char *));
+struct tree *read_mib __P((char *));
+struct tree *read_all_mibs __P((void));
+int  add_mibdir __P((char *));
+void add_module_replacement __P(( char *, char *, char *, int));
+void print_subtree __P((FILE *, struct tree *, int));
+void print_ascii_dump_tree __P((FILE *, struct tree *, int));

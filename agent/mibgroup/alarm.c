@@ -69,21 +69,21 @@ SOFTWARE.
 
 static struct alarmEntry *alarmTab = NULL;
 static long alarmNextIndex = 1;
-static int write_alarmtab __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
-static int rmonGetValue __UCD_P((oid *, int, oid *, int, oid *, int, oid *, int,
+static int write_alarmtab __P((int, u_char *, u_char, int, u_char *, oid *, int));
+static int rmonGetValue __P((oid *, int, oid *, int, oid *, int, oid *, int,
 	long *, struct alarmEntry *));
-static void cmutimeradd __UCD_P((struct timeval *, struct timeval *, struct timeval *));
-static void alarmInsertRow __UCD_P((struct alarmEntry *));
-static void alarmFreeShadow __UCD_P((struct alarmEntry *));
-static void alarmDeleteRow __UCD_P((struct alarmEntry *));
-static int alarmShadowRow __UCD_P((struct alarmEntry *));
-static struct alarmEntry *alarmGetRow __UCD_P((oid *, int, int));
-static struct alarmEntry *alarmGetRowByIndex __UCD_P((int));
-static struct alarmEntry *alarmNewRow __UCD_P((oid *, int, int));
-static void alarmCommitRow __UCD_P((struct alarmEntry *));
-static void alarmProcessValue __UCD_P((struct alarmEntry *, long, long));
-static void alarmUpdateDelta __UCD_P((struct alarmEntry *, long));
-static void alarmUpdateAbs __UCD_P((struct alarmEntry *, long));
+static void cmutimeradd __P((struct timeval *, struct timeval *, struct timeval *));
+static void alarmInsertRow __P((struct alarmEntry *));
+static void alarmFreeShadow __P((struct alarmEntry *));
+static void alarmDeleteRow __P((struct alarmEntry *));
+static int alarmShadowRow __P((struct alarmEntry *));
+static struct alarmEntry *alarmGetRow __P((oid *, int, int));
+static struct alarmEntry *alarmGetRowByIndex __P((int));
+static struct alarmEntry *alarmNewRow __P((oid *, int, int));
+static void alarmCommitRow __P((struct alarmEntry *));
+static void alarmProcessValue __P((struct alarmEntry *, long, long));
+static void alarmUpdateDelta __P((struct alarmEntry *, long));
+static void alarmUpdateAbs __P((struct alarmEntry *, long));
 
 /* retrieve the given variable from the MIB.  Returns 0 on success,
 ** 1 if the request was asynchronously transmitted to another host,
@@ -104,7 +104,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     u_char type;
     int len;
     u_short acl;
-    int (*writeFunc) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int (*writeFunc) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
@@ -115,7 +115,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     struct variable_list *varList;
     u_long addr;
     struct get_req_state *state;
-    extern int snmp_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
     
     /* whether it's local or non-local, I have to know about the
        parties and context */
@@ -1086,7 +1086,7 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int result;
 
@@ -1121,7 +1121,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
     register int *length;	/* IN/OUT - length of input and output oid's */
     int exact;		/* IN - TRUE if an exact match was requested. */
     int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *,oid *, int));
+    int	(**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
 {
     oid newname[MAX_NAME_LEN];
     int result;

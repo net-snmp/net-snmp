@@ -100,20 +100,20 @@ typedef long	fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
-int main __UCD_P((int, char **));
+int main __P((int, char **));
 extern int  errno;
 int Print = 0;
 int Event = 0;
 int Syslog = 0;
 struct timeval Now;
 
-void init_syslog __UCD_P((void));
-char *trap_description __UCD_P((int));
-char *uptime_string __UCD_P((u_long, char *));
-struct snmp_pdu *snmp_clone_pdu2 __UCD_P((struct snmp_pdu *, int));
-void event_input __UCD_P((struct variable_list *));
-int snmp_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-void usage __UCD_P((void));
+void init_syslog __P((void));
+char *trap_description __P((int));
+char *uptime_string __P((u_long, char *));
+struct snmp_pdu *snmp_clone_pdu2 __P((struct snmp_pdu *, int));
+void event_input __P((struct variable_list *));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+void usage __P((void));
 
 char *
 trap_description(trap)
@@ -356,7 +356,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 }
 
 
-void usage __UCD_P((void))
+void usage __P((void))
 {
     fprintf(stderr,"Usage: snmptrapd [-v 1] [-V] [-q] [-P #] [-p] [-s] [-e] [-d]\n");
 }
@@ -520,7 +520,7 @@ main(argc, argv)
 }
 
 void
-init_syslog __UCD_P((void))
+init_syslog __P((void))
 {
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.

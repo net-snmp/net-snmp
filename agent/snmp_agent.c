@@ -61,16 +61,16 @@ SOFTWARE.
 #include "snmp_agent.h"
 #include "read_config.h"
 
-static int create_identical __UCD_P((u_char *, u_char *, int, long, long, struct packet_info *));
-static int parse_var_op_list __UCD_P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
-static int snmp_access __UCD_P((u_short, int, int));
+static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
+static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
+static int snmp_access __P((u_short, int, int));
 static int snmp_vars_inc;
-static int get_community __UCD_P((u_char *, int));
-static int bulk_var_op_list __UCD_P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
-static int create_toobig __UCD_P((u_char *, int, long, struct packet_info *));
-static int goodValue __UCD_P((u_char, int, u_char, int));
-static void setVariable __UCD_P((u_char *, u_char, int, u_char *, int));
-static void dump_var __UCD_P((oid *, int, int, void *, int));
+static int get_community __P((u_char *, int));
+static int bulk_var_op_list __P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
+static int create_toobig __P((u_char *, int, long, struct packet_info *));
+static int goodValue __P((u_char, int, u_char, int));
+static void setVariable __P((u_char *, u_char, int, u_char *, int));
+static void dump_var __P((oid *, int, int, void *, int));
 
 
 char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
@@ -519,7 +519,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     int	    statLen;
     u_short acl;
     int	    rw, exact, err;
-    int	    (*write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     int	    noSuchObject;
@@ -712,7 +712,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
     register u_char *statP;
     int	    statLen;
     u_short acl;
-    int	    (*write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     u_char  *repeaterStart, *out_data_save;

@@ -255,20 +255,20 @@ struct	mib_egpNeighEntry {
 
 struct variable_list;
 
-void print_mib __UCD_P((FILE *));
-void print_ascii_dump __UCD_P((FILE *));
-int read_objid __UCD_P((char *, oid *, int *));
-void init_mib __UCD_P((void));
-void print_variable __UCD_P((oid *, int, struct variable_list *));
-void fprint_variable __UCD_P((FILE *, oid *, int, struct variable_list *));
-void sprint_variable __UCD_P((char *, oid *, int, struct variable_list *));
-void print_value __UCD_P((oid *, int, struct variable_list *));
-void fprint_value __UCD_P((FILE *, oid *, int, struct variable_list *));
-void sprint_value __UCD_P((char *, oid *, int, struct variable_list *));
-void print_objid __UCD_P((oid *, int));
-void fprint_objid __UCD_P((FILE *, oid *, int));
-char *sprint_objid __UCD_P((char *, oid *, int));
-void print_description __UCD_P((oid *, int));
-void fprint_description __UCD_P((FILE *, oid *, int));
-int get_module_node __UCD_P((char *, char *, oid *, int *));
-int get_node __UCD_P((char *, oid *, int *));
+void print_mib __P((FILE *));
+void print_ascii_dump __P((FILE *));
+int read_objid __P((char *, oid *, int *));
+void init_mib __P((void));
+void print_variable __P((oid *, int, struct variable_list *));
+void fprint_variable __P((FILE *, oid *, int, struct variable_list *));
+void sprint_variable __P((char *, oid *, int, struct variable_list *));
+void print_value __P((oid *, int, struct variable_list *));
+void fprint_value __P((FILE *, oid *, int, struct variable_list *));
+void sprint_value __P((char *, oid *, int, struct variable_list *));
+void print_objid __P((oid *, int));
+void fprint_objid __P((FILE *, oid *, int));
+char *sprint_objid __P((char *, oid *, int));
+void print_description __P((oid *, int));
+void fprint_description __P((FILE *, oid *, int));
+int get_module_node __P((char *, char *, oid *, int *));
+int get_node __P((char *, oid *, int *));

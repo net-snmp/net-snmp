@@ -66,8 +66,8 @@ SOFTWARE.
 #define	YES	1
 #define	NO	0
 
-static void sidewaysintpr __UCD_P((unsigned int));
-RETSIGTYPE catchalarm __UCD_P((int));
+static void sidewaysintpr __P((unsigned int));
+RETSIGTYPE catchalarm __P((int));
 
 static oid oid_ifname[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};

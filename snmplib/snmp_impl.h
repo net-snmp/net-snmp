@@ -143,13 +143,13 @@ extern char *snmp_detail;
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_comstr_parse __UCD_P((u_char *, int *, u_char *, int *, long *));
-u_char	*snmp_comstr_build __UCD_P((u_char *, int *, u_char *, int *, int *, int));
+u_char	*snmp_comstr_parse __P((u_char *, int *, u_char *, int *, long *));
+u_char	*snmp_comstr_build __P((u_char *, int *, u_char *, int *, int *, int));
 
-u_char	*snmp_party_parse __UCD_P((u_char *, int *, struct packet_info *,
+u_char	*snmp_party_parse __P((u_char *, int *, struct packet_info *,
                                  oid *, int *, oid *, int *, oid *, int *, int));
-u_char	*snmp_party_build __UCD_P((u_char *, int *, struct packet_info *, int,
+u_char	*snmp_party_build __P((u_char *, int *, struct packet_info *, int,
                                  oid *, int, oid *, int, oid *, int, int *, int));
 
 
-int has_access __UCD_P((u_char, int, int, int));
+int has_access __P((u_char, int, int, int));

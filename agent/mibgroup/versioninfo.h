@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_VERSIONINFO_H
 #define _MIBGROUP_VERSIONINFO_H
 
-unsigned char *var_extensible_version __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-int update_hook __UCD_P((int, u_char *, u_char, int, u_char *, oid *,int));
+unsigned char *var_extensible_version __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+int update_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
 
 #include "mibdefs.h"
 

@@ -27,10 +27,10 @@ PERFORMANCE OF THIS SOFTWARE.
 
 struct nlist;
 
-int KNLookup __UCD_P((struct nlist *, int, char *, int));
-int compare __UCD_P((oid *, int, oid *, int));
-int subtree_old_size __UCD_P((void));
-void init_nlist __UCD_P((struct nlist *));
+int KNLookup __P((struct nlist *, int, char *, int));
+int compare __P((oid *, int, oid *, int));
+int subtree_old_size __P((void));
+void init_nlist __P((struct nlist *));
 
 extern long long_return;
 extern u_char return_buf[];
@@ -45,7 +45,7 @@ struct variable {
     char	    type;	    /* type of variable */
 /* See important comment in snmp_vars.c relating to acl */
     u_short	    acl;	    /* access control list for variable */
-    u_char	    *(*findVar)__UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *,int)) ));  /* function that finds variable */
+    u_char	    *(*findVar)__P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *,int)) ));  /* function that finds variable */
     u_char	    namelen;	    /* length of above */
     oid		    name[32];	    /* object identifier of variable */
 };

@@ -350,6 +350,20 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
 
+AC_MSG_CHECKING([for __P in sys/cdefs.h])
+AC_CACHE_VAL(cv_sys_cdefs_h_has_P,
+[ AC_EGREP_CPP(xxxyesxxx,
+[
+#include <sys/cdefs.h>
+#ifdef __P
+xxxyesxxx
+#endif
+], cv_sys_cdefs_h_has_P=yes, cv_sys_cdefs_h_has_P=no)])
+AC_MSG_RESULT($cv_sys_cdefs_h_has_P)
+if test $cv_sys_cdefs_h_has_P = yes; then
+  AC_DEFINE(SYS_CDEFS_DEFINES___P)
+fi
+
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
 AC_MSG_CHECKING(for in_addr_t)
 AC_CACHE_VAL(ac_cv_type_$1,

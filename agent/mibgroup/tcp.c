@@ -39,10 +39,10 @@ static struct nlist tcp_nl[] = {
 #endif
 
 #ifdef linux
-static void linux_read_tcp_stat __UCD_P((struct tcp_mib *));
+static void linux_read_tcp_stat __P((struct tcp_mib *));
 #endif
 
-static int header_tcp __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -68,7 +68,7 @@ header_tcp(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define TCP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -108,7 +108,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct tcpstat tcpstat;
 #ifdef hpux
@@ -238,7 +238,7 @@ var_tcpEntry(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -347,7 +347,7 @@ oid     *name;
 int     *length;
 int     exact;
 int     *var_len;
-int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   mib2_tcp_t tcpstat;
   mib2_ip_t ipstat;
@@ -417,7 +417,7 @@ oid     *name;
 int     *length;
 int     exact;
 int     *var_len;
-int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
   u_char *cp;
@@ -556,7 +556,7 @@ struct tcp_mib *tcpstat;
  *	Print INTERNET connections
  */
 
-int TCP_Count_Connections __UCD_P((void))
+int TCP_Count_Connections __P((void))
 {
 	int Established;
 	struct inpcb cb;
@@ -620,7 +620,7 @@ static struct inpcb tcp_inpcb, *tcp_prev;
 static struct inpcb *inpcb_list;
 #endif
 
-void TCP_Scan_Init __UCD_P((void))
+void TCP_Scan_Init __P((void))
 {
 #ifndef linux
     KNLookup(tcp_nl, N_TCB, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
