@@ -411,7 +411,7 @@ setPass(int action,
         rtest = snmp_oid_min_compare(name, name_len,
                                      passthru->miboid, passthru->miblen);
         if (rtest <= 0) {
-            if (action != COMMIT)
+            if (action != ACTION)
                 return SNMP_ERR_NOERROR;
             /*
              * setup args 
