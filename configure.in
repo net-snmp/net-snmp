@@ -1627,11 +1627,15 @@ else
 	AC_MSG_RESULT(Internal MD5 Support)
     else
         authmodes="MD5 SHA1"
-	if test $ac_cv_header_openssl_aes_h = "yes" ; then
-	    encrmodes="DES AES128 AES192 AES256"
-	else
-	    encrmodes="DES"
-	fi
+        if test "x$enable_privacy" != "xno" ; then
+	    if test $ac_cv_header_openssl_aes_h = "yes" ; then
+	        encrmodes="DES AES128 AES192 AES256"
+	    else
+	        encrmodes="DES"
+	    fi
+        else
+	    encrmodes="[disabled]"
+        fi
 	AC_DEFINE(USE_OPENSSL)
 	AC_MSG_RESULT(OpenSSL Support)
     fi
