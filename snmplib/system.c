@@ -202,7 +202,7 @@ opendir(const char *filename)
 /*  if(downcase)
  *	strlwr(p->start);
  */
-    p->nfiles++;
+    p->nfiles = 0;
 
     /* loop finding all the files that match the wildcard
      * (which should be all of them in this directory!).
