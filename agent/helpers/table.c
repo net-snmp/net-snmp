@@ -488,7 +488,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
             continue;
         }
-        netsnmp_assert(request->status == SNMP_NOERROR);
+        netsnmp_assert(request->status == SNMP_ERR_NOERROR);
         
         ++need_processing;
 
