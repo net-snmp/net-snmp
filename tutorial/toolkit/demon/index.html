@@ -93,7 +93,7 @@ cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -ls
       Then run snmpwalk to ensure that the current running demon is
       missing the code we've just built and that it doesn't exist:
       <pre>
-% <b>snmpwalk localhost democommunity ucdavis.13</b>
+% <b>snmpwalk localhost democommunity ucdavis.13.4242</b>
       </pre>
     <p>
       Then run the application we just built:
@@ -104,7 +104,7 @@ cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -ls
       That should attach to the running agent and make it now respond
       to our same query above, but with results this time:
       <pre>
-% <b>snmpwalk localhost democommunity ucdavis.13</b>
+% <b>snmpwalk localhost democommunity ucdavis.13.4242</b>
       </pre>
     <hr>
     <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
