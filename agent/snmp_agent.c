@@ -1651,7 +1651,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         status = asp->status;
     }
 
-    if ((access_ret = check_access(pdu)) != 0) {
+    if ((access_ret = check_access(asp->pdu)) != 0) {
         if (access_ret == VACM_NOSUCHCONTEXT) {
             /*
              * rfc2573 section 3.2, step 5 says that we increment the
