@@ -1,0 +1,41 @@
+/*
+ *  vmstat mib groups
+ *  Header file for vmstat_solaris2 module for UCD-SNMP
+ *  Jochen Kmietsch <jochen.kmietsch@gmx.de>
+ *  Version 0.1 initial release Dec 1999 (snapshot 19991222215300)
+ *  see vmstat_solaris.c for more comments
+ */
+
+/* Prevent accidental double inclusions */
+#ifndef _MIBGROUP_VMSTAT_H
+#define _MIBGROUP_VMSTAT_H
+
+/* Includes needed for all modules */
+#include "../mibdefs.h"
+#include "../mibincl.h"
+
+/* Defines for vp magic numbers */
+#define SWAPIN 3
+#define SWAPOUT 4
+#define IOSENT 5
+#define IORECEIVE 6
+#define SYSINTERRUPTS 7
+#define SYSCONTEXT 8
+#define CPUUSER 9
+#define CPUSYSTEM 10
+#define CPUIDLE 11
+#define CPUERROR 16
+
+/* MIB wants CPU_SYSTEM which is sysinfo CPU_KERNEL + CPU_WAIT */
+#define CPU_SYSTEM 4
+
+/* Directive to include utility module */
+config_require(util_funcs)
+
+/* Declared in vmstat_solaris2.c, from prototype */
+extern void init_vmstat_solaris2(void);
+
+/* Declared in snmp_vars.h */
+extern FindVarMethod var_extensible_vmstat; 
+
+#endif /* _MIBGROUP_VMSTAT_H */
