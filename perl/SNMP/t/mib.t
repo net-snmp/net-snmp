@@ -16,6 +16,8 @@ use Test;
 BEGIN {plan tests => 33}
 use SNMP;
 
+print STDERR "Ignore errors in tests 6, 11, 18-19 and 21\n"
+
 SNMP::initMib();
 
 $SNMP::verbose = 0;
