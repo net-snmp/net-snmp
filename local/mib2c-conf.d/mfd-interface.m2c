@@ -118,7 +118,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     static oid ${table}_oid[] = { $table.uc_OID };
     netsnmp_mfd_registration *mfd_reg;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
 
     /*************************************************
@@ -157,7 +157,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
      */
     mfd_reg = SNMP_MALLOC_TYPEDEF(netsnmp_mfd_registration);
     if (!mfd_reg) {
-        snmp_log(LOG_ERR, "malloc failed in %s\n", __FUNCTION__);
+        snmp_log(LOG_ERR, "malloc failed in _${table}_initialize_interface\n");
         return; /** Serious error. */
     }
     
@@ -253,7 +253,7 @@ ${table}_allocate_ctx(void)
 {
     ${table}_ctx *ctx = SNMP_MALLOC_TYPEDEF(${table}_ctx);
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     if(NULL == ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
@@ -291,7 +291,7 @@ ctx->${context}_reg = ${context}_if_ctx.user_ctx;
 void
 ${table}_release_ctx(${table}_ctx *ctx)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
     
@@ -326,7 +326,7 @@ static int
 _mfd_${table}_pre_request( ${context}_interface_ctx *if_ctx,
                        netsnmp_data_list *data_list, u_long id)
 {
-   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != if_ctx);
     
@@ -341,7 +341,7 @@ static int
 _mfd_${table}_post_request( ${context}_interface_ctx *if_ctx,
                         netsnmp_data_list *data_list, u_long id)
 {
-   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != if_ctx);
     
@@ -357,6 +357,8 @@ _mfd_${context}_object_lookup( $mfd_base_params, ${table}_ctx * ctx)
 {
     int rc = MFD_SUCCESS;
     
+    DEBUGTRACE;
+
     /*
      * get our context from mfd
      */
@@ -443,7 +445,8 @@ _${context}_get_column( ${context}_ctx *ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGT(("${name}:trace",">%s column %d\n",__FUNCTION__, column));
+    DEBUGTRACE;
+
 
     netsnmp_assert(NULL != ctx);
 
@@ -499,7 +502,7 @@ _mfd_${table}_get_values($mfd_base_params, ${table}_ctx * ctx)
     void                      (*dataFreeHook)(void *);
     int                        rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
     
@@ -579,7 +582,7 @@ _${context}_check_column( ${context}_ctx *ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
 
@@ -613,7 +616,7 @@ _${context}_check_column( ${context}_ctx *ctx,
 
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
- snmp_log(LOG_ERR, "unknown column in %s\n", __FUNCTION__);
+        snmp_log(LOG_ERR, "unknown column in _${context}_check_column\n");
     }
 
     return rc;
@@ -626,7 +629,7 @@ _mfd_${context}_check_objects($mfd_base_params, ${table}_ctx * ctx)
     netsnmp_table_request_info * tri;
     int                          rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
     
@@ -658,7 +661,7 @@ _${context}_check_indexes(${table}_ctx * ctx)
     netsnmp_table_request_info * tri;
     int                          rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
 
@@ -714,7 +717,7 @@ _${context}_check_indexes(${table}_ctx * ctx)
 NETSNMP_STATIC_INLINE int
 _mfd_${context}_check_dependencies($mfd_base_params, ${table}_ctx * ctx)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
 
@@ -737,7 +740,7 @@ ${context}_undo_setup( ${context}_ctx *ctx )
 {
     int rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
@@ -799,7 +802,7 @@ _${context}_set_column( ${context}_ctx *ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
 
@@ -828,7 +831,7 @@ _mfd_${table}_set_values($mfd_base_params, ${table}_ctx * ctx)
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
     
@@ -878,7 +881,7 @@ _${context}_undo_column( ${context}_ctx *ctx,
 {
     int rc = SNMPERR_SUCCESS;
     
-    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
 
@@ -907,7 +910,7 @@ _mfd_${context}_undo_values($mfd_base_params, ${table}_ctx * ctx)
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     netsnmp_assert(NULL != ctx);
     

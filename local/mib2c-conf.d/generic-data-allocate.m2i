@@ -27,7 +27,7 @@ $example_start
 $example_end
 @end@
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     if(NULL == rtn) {
         snmp_log(LOG_ERR, "unable to malloc memory for new "
@@ -45,7 +45,7 @@ $example_end
 void
 ${context}_release_data(${table}_data *data)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /*
      * release memory for the context
