@@ -356,14 +356,12 @@ sub new {
 
    # allow override of remote SNMP port
    $this->{RemotePort} ||= 161;
-   print("port is:$this->{RemotePort}\n");
 
    # destination host defaults to localhost
    $this->{DestHost} ||= 'localhost';
 
    # community defaults to public
    $this->{Community} ||= 'public';
-   print("com is:$this->{Community}\n");
 
    # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
    $this->{Retries} = SNMP::SNMP_DEFAULT_RETRIES() unless defined($this->{Retries});
