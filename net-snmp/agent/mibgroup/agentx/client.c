@@ -88,24 +88,6 @@ agentx_synch_input(int op,
 int
 agentx_synch_response( struct snmp_session *ss, struct snmp_pdu *pdu, struct snmp_pdu **response )
 {
-/*
-    int result;
-    void *saved_state;
-    int (*saved_cback)(int, struct snmp_session *, int, struct snmp_pdu *, void *);
-
-    saved_state = ss->callback_magic;
-    saved_cback = ss->callback;
-    snmp_synch_setup( ss );
-    ss->callback = agentx_synch_input;
-
-    result = snmp_synch_response(ss, pdu, response);
-
-    snmp_synch_reset( ss );
-    ss->callback       = saved_cback;
-    ss->callback_magic = saved_state;
-
-    return result;
-*/
     return snmp_synch_response_cb(ss, pdu, response, agentx_synch_input);
 }
 
