@@ -41,8 +41,8 @@
  *  handler chain.
  */
 netsnmp_mib_handler *
-get_debug_handler(void) {
-    return netsnmp_create_handler("debug", debug_helper);
+netsnmp_get_debug_handler(void) {
+    return netsnmp_create_handler("debug", netsnmp_debug_helper);
 }
 
 /** @internal debug print variables in a chain */
@@ -77,7 +77,7 @@ debug_print_requests(netsnmp_request_info              *requests)
 
 /** @internal Implements the debug handler */
 int
-debug_helper(
+netsnmp_debug_helper(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
@@ -141,7 +141,7 @@ debug_helper(
  *  use.
  */
 void
-init_debug_helper(void) 
+init_netsnmp_debug_helper(void) 
 {
-    netsnmp_register_handler_by_name("debug", get_debug_handler());
+    netsnmp_register_handler_by_name("debug", netsnmp_get_debug_handler());
 }

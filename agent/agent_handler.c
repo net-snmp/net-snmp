@@ -144,7 +144,7 @@ netsnmp_register_handler(netsnmp_handler_registration *reginfo) {
 
     /* for handlers that can't GETBULK, force a conversion handler on them */
     if (!(reginfo->modes & HANDLER_CAN_GETBULK)) {
-        netsnmp_inject_handler(reginfo, get_bulk_to_next_handler());
+        netsnmp_inject_handler(reginfo, netsnmp_get_bulk_to_next_handler());
     }
 
     return register_mib_context2(reginfo->handler->handler_name,

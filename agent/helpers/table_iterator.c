@@ -35,9 +35,9 @@
 
 /** returns a netsnmp_mib_handler object for the table_iterator helper */
 netsnmp_mib_handler *
-get_table_iterator_handler(iterator_info *iinfo) {
+netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo) {
     netsnmp_mib_handler *me=
-        netsnmp_create_handler(TABLE_ITERATOR_NAME, table_iterator_helper_handler);
+        netsnmp_create_handler(TABLE_ITERATOR_NAME, netsnmp_table_iterator_helper_handler);
 
     if (!me || !iinfo)
         return NULL;
@@ -49,40 +49,40 @@ get_table_iterator_handler(iterator_info *iinfo) {
     
 /** registers a table after attaching it to a table_iterator helper */
 int
-register_table_iterator(netsnmp_handler_registration *reginfo,
-                        iterator_info *iinfo) {
-    netsnmp_inject_handler(reginfo, get_table_iterator_handler(iinfo));
+netsnmp_netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
+                        netsnmp_iterator_info *iinfo) {
+    netsnmp_inject_handler(reginfo, netsnmp_get_table_iterator_handler(iinfo));
 #ifndef NOT_SERIALIZED
-    netsnmp_inject_handler(reginfo, get_serialize_handler());
+    netsnmp_inject_handler(reginfo, netsnmp_get_serialize_handler());
 #endif
-    return register_table(reginfo, iinfo->table_reginfo);
+    return netsnmp_register_table(reginfo, iinfo->table_reginfo);
 }
 
 /** extracts the table_iterator specific data from a request */
 inline void *
-extract_iterator_context(netsnmp_request_info *request) 
+netsnmp_extract_iterator_context(netsnmp_request_info *request) 
 {
     return netsnmp_request_netsnmp_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
 /** implements the table_iterator helper */
 int
-table_iterator_helper_handler(
+netsnmp_table_iterator_helper_handler(
     netsnmp_mib_handler               *handler,
     netsnmp_handler_registration      *reginfo,
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests) {
   
-    table_registration_info   *tbl_info;
+    netsnmp_table_registration_info   *tbl_info;
     oid coloid[MAX_OID_LEN];
     size_t coloid_len;
     int ret;
     static oid myname[MAX_OID_LEN];
     static int myname_len;
     int oldmode;
-    iterator_info *iinfo;
+    netsnmp_iterator_info *iinfo;
     
-    iinfo = (iterator_info *) handler->myvoid;
+    iinfo = (netsnmp_iterator_info *) handler->myvoid;
     tbl_info = iinfo->table_reginfo;
 
     /* copy in the table registration oid for later use */
@@ -107,8 +107,8 @@ table_iterator_helper_handler(
         struct variable_list *results = NULL;
         struct variable_list *index_search = NULL; /* WWW: move up? */
         struct variable_list *free_this_index_search = NULL;
-        table_netsnmp_request_info *table_info =
-            extract_table_info(requests);
+        netsnmp_table_request_info *table_info =
+            netsnmp_extract_table_info(requests);
         void *callback_loop_context = NULL;
         void *callback_data_context = NULL;
         void *callback_data_keep = NULL;
@@ -175,7 +175,7 @@ table_iterator_helper_handler(
                 /* loop through all data and find next one */
                 while(index_search) {
                     /* compare the node with previous results */
-                    if (check_getnext_reply(requests, coloid, coloid_len,
+                    if (netsnmp_check_getnext_reply(requests, coloid, coloid_len,
                                             index_search, &results)) {
 
                         /* result is our current choice, so keep a pointer to

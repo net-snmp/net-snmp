@@ -237,7 +237,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 
     if (pdu->range_subid != 0) {
 	oid ubound = pdu->variables->val.objid[pdu->range_subid-1];
-	rc = unregister_mib_table_row(pdu->variables->name,
+	rc = unregister_mib_netsnmp_table_row(pdu->variables->name,
 				      pdu->variables->name_length,
 				      pdu->priority, pdu->range_subid, ubound,
 				      (char *)pdu->community);

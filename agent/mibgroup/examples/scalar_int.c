@@ -54,7 +54,7 @@ init_scalar_int(void)
        (even though the details of doing this are handled for you),
        you could change the NULL pointer below to a valid handler
        function. */
-    register_int_instance("my example int variable",
+    netsnmp_register_int_instance("my example int variable",
                           my_registration_oid,
                           OID_LENGTH(my_registration_oid),
                           &example1, NULL);

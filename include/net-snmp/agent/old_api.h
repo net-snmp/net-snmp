@@ -3,7 +3,7 @@
 
 #define OLD_API_NAME "old_api"
 
-typedef struct old_api_info_s {
+typedef struct netsnmp_old_api_info_s {
    struct variable *var;
    size_t varsize;
    size_t numvars;
@@ -11,14 +11,14 @@ typedef struct old_api_info_s {
    /* old stuff */
    struct snmp_session *ss;
    int flags;
-} old_api_info;
+} netsnmp_old_api_info;
 
 typedef struct old_opi_cache_s {
    u_char *data;
    WriteMethod *write_method;
-} old_api_cache;
+} netsnmp_old_api_cache;
 
-int register_old_api(const char *moduleName,
+int netsnmp_register_old_api(const char *moduleName,
                      struct variable *var,
                      size_t varsize,
                      size_t numvars,
@@ -31,9 +31,9 @@ int register_old_api(const char *moduleName,
                      const char *context,
                      int timeout,
                      int flags);
-Netsnmp_Node_Handler old_api_helper;
+Netsnmp_Node_Handler netsnmp_old_api_helper;
 
 /* really shouldn't be used */
-netsnmp_agent_session  *get_current_agent_session(void);
+netsnmp_agent_session  *netsnmp_get_current_agent_session(void);
 
 #endif /* OLD_API_H */

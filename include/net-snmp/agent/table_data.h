@@ -15,57 +15,57 @@ extern "C" {
 
 #define TABLE_DATA_NAME "table_data"
 
-typedef struct table_row_s {
+typedef struct netsnmp_table_row_s {
    struct variable_list *indexes; /* warning: not stored permanently */
    oid *index_oid;
    size_t index_oid_len;
    void *data;                    /* the data to store */
 
-   struct table_row_s *next, *prev; /* if used in a list */
-} table_row;
+   struct netsnmp_table_row_s *next, *prev; /* if used in a list */
+} netsnmp_table_row;
 
 typedef struct table_data_s {
    struct variable_list *indexes_template; /* containing only types */
    char *name;                    /* if !NULL, it's registered globally */
    int flags;                     /* not currently used */
-   table_row *first_row;
+   netsnmp_table_row *first_row;
 } table_data;
 
-netsnmp_mib_handler *get_table_data_handler(table_data *table);
-void table_data_generate_index_oid(table_row *row);
-int table_data_add_row(table_data *table, table_row *row);
-int table_data_remove_row(table_data *table, table_row *row);
+netsnmp_mib_handler *netsnmp_netsnmp_get_table_data_handler(table_data *table);
+void netsnmp_table_data_generate_index_oid(netsnmp_table_row *row);
+int netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row);
+int netsnmp_table_data_remove_row(table_data *table, netsnmp_table_row *row);
   
-table_row *table_data_get(table_data *table, struct variable_list *indexes);
+netsnmp_table_row *netsnmp_table_data_get(table_data *table, struct variable_list *indexes);
     
-table_row *table_data_get_from_oid(table_data *table,
+netsnmp_table_row *netsnmp_netsnmp_table_data_get_from_oid(table_data *table,
                                     oid *searchfor, size_t searchfor_len);
 
-int register_table_data(netsnmp_handler_registration *reginfo, table_data *table,
-                        table_registration_info *table_info);
-int register_read_only_table_data(netsnmp_handler_registration *reginfo,
+int netsnmp_netsnmp_register_table_data(netsnmp_handler_registration *reginfo, table_data *table,
+                        netsnmp_table_registration_info *table_info);
+int netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
                                   table_data *table,
-                                  table_registration_info *table_info);
+                                  netsnmp_table_registration_info *table_info);
 
-table_row *extract_table_row(netsnmp_request_info *);
-void *extract_table_row_data(netsnmp_request_info *);
-table_data *create_table_data(const char *name);
-table_row *create_table_data_row(void);
+netsnmp_table_row *netsnmp_extract_netsnmp_table_row(netsnmp_request_info *);
+void *netsnmp_netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *);
+table_data *netsnmp_create_table_data(const char *name);
+netsnmp_table_row *netsnmp_netsnmp_create_table_data_row(void);
 
-int table_data_build_result(netsnmp_handler_registration *reginfo,
+int netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
                             netsnmp_agent_request_info   *reqinfo,
                             netsnmp_request_info *request,
-                            table_row *row,
+                            netsnmp_table_row *row,
                             int column,
                             u_char type,
                             u_char *result_data, size_t result_data_len);
 
 
-#define table_data_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)
-#define table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
+#define netsnmp_table_data_add_index(thetable, type) snmp_varlist_add_variable(&thetable->indexes_template, NULL, 0, type, NULL, 0)
+#define netsnmp_netsnmp_table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
 
 
-Netsnmp_Node_Handler table_data_helper_handler;
+Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
 
 #ifdef __cplusplus
 };
