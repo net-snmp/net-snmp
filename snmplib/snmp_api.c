@@ -1959,7 +1959,7 @@ snmp_pdu_build (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 {
   u_char *h1, *h1e, *h2, *h2e;
   struct variable_list *vp;
-  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
   size_t length;
 
   length = *out_length;
@@ -2567,7 +2567,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   size_t   len;
   size_t   four;
   struct variable_list *vp = NULL;
-  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
+  struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->agent_addr);
   oid objid[MAX_OID_LEN];
 
   badtype = 0;
@@ -2596,6 +2596,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 
     /* agent-addr */
     four = 4;
+    pduIp->sin_family = AF_INET;
     data = asn_parse_string(data, length, &type,
 			    (u_char *)&pduIp->sin_addr.s_addr,
 			    &four);

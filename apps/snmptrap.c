@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
     if (session.version == SNMP_VERSION_1) {
 	pdu = snmp_pdu_create(SNMP_MSG_TRAP);
-	pduIp = (struct sockaddr_in *)&(pdu->address);
+	pduIp = (struct sockaddr_in *)&pdu->agent_addr;
 	if (arg == argc) {
 	    fprintf(stderr, "No enterprise oid\n");
 	    usage();
@@ -189,8 +189,11 @@ int main(int argc, char *argv[])
 	    exit (1);
 	}
 	agent = argv [arg];
+	pduIp->sin_family = AF_INET;
 	if (agent != NULL && strlen (agent) != 0)
 	    pduIp->sin_addr.s_addr = parse_address(agent);
+	else
+	    pduIp->sin_addr.s_addr = get_myaddr();
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing generic-trap parameter\n");
 	    usage ();

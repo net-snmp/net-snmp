@@ -407,8 +407,9 @@ int snmp_input(int op,
 	if (pdu->command == SNMP_MSG_TRAP){
 	    oid trapOid[MAX_OID_LEN];
 	    int trapOidLen = pdu->enterprise_length;
-	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
-				  sizeof (pduIp->sin_addr), AF_INET);
+	    struct sockaddr_in *agentIp = (struct sockaddr_in *)&pdu->agent_addr;
+	    host = gethostbyaddr ((char *)&agentIp->sin_addr,
+				  sizeof (agentIp->sin_addr), AF_INET);
 	    if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
 		if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
@@ -417,11 +418,19 @@ int snmp_input(int op,
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 		time (&timer);
 		tm = localtime (&timer);
-                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
+                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] ",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(pduIp->sin_addr),
-                       inet_ntoa(pduIp->sin_addr),
+                       host ? host->h_name : inet_ntoa(agentIp->sin_addr),
+                       inet_ntoa(agentIp->sin_addr));
+		if (agentIp->sin_addr.s_addr != pduIp->sin_addr.s_addr) {
+		    host = gethostbyaddr ((char *)&pduIp->sin_addr,
+					  sizeof (pduIp->sin_addr), AF_INET);
+		    printf("(via %s [%s]) ",
+			    host ? host->h_name : inet_ntoa(pduIp->sin_addr),
+			    inet_ntoa(pduIp->sin_addr));
+		}
+		printf(" %s:\n",
  		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
 		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
 		    sprint_objid(oid_buf, trapOid, trapOidLen);
@@ -467,12 +476,12 @@ int snmp_input(int op,
 		    if (cp) cp++;
 		    else cp = oid_buf;
 		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
-                           inet_ntoa(pduIp->sin_addr),
+                           inet_ntoa(agentIp->sin_addr),
                            trap_description(pdu->trap_type), cp,
                            uptime_string(pdu->time, buf), varbuf);
 		} else {
 		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
-                           inet_ntoa(pduIp->sin_addr),
+                           inet_ntoa(agentIp->sin_addr),
                            trap_description(pdu->trap_type), pdu->specific_type,
                            uptime_string(pdu->time, buf), varbuf);
 		}
@@ -839,6 +848,7 @@ int main(int argc, char *argv[])
 	    case -1:
 	        snmp_log_perror("select");
 		running = 0;
+		break;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);
 		running = 0;
