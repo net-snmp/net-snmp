@@ -721,7 +721,7 @@ handle_drive(io_registry_entry_t drive, struct drivestats * dstat)
 	number = (CFNumberRef)CFDictionaryGetValue(properties,
 					    CFSTR(kIOBSDUnitKey));
 
-	// Collect stats and if succesful store them with the name and unitnumber */
+	/* Collect stats and if succesful store them with the name and unitnumber */
 	if (!collect_drive_stats(parent, dstat->stats)) {
 
 	    CFStringGetCString(name, dstat->name, MAXDRIVENAME, CFStringGetSystemEncoding());
