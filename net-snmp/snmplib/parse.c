@@ -289,6 +289,7 @@ static void print_nodes __P((FILE *, struct node *));
 #endif
 static void build_translation_table __P((void));
 static void init_tree_roots __P((void));
+static void merge_anon_children __P((struct tree *, struct tree *));
 static int getoid __P((FILE *, struct subid *, int));
 static struct node *parse_objectid __P((FILE *, char *));
 static int get_tc __P((char *, int, struct enum_list **, char **));
@@ -718,7 +719,7 @@ merge_anon_children( tp1, tp2 )
 
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    free_node( previous );
+                    free_tree( previous );
                     break;
                 }
 
@@ -729,7 +730,7 @@ merge_anon_children( tp1, tp2 )
                          previous->next_peer = child2->next_peer;
                     else
                          tp2->child_list = child2->next_peer;
-                    free_node(child2);
+                    free_tree(child2);
 
                     previous = child1;		/* Move 'child1' to 'tp2' */
                     child1 = child1->next_peer;
@@ -763,7 +764,7 @@ merge_anon_children( tp1, tp2 )
 
                     previous = child1;		/* Finished with 'child1' */
                     child1 = child1->next_peer;
-                    free_node( previous );
+                    free_tree( previous );
                     break;
                 }
             }
@@ -903,7 +904,7 @@ do_subtree(root, nodes)
 		 */
             root->child_list = tp->next_peer;
             tbuckets[hash] = tp->next;
-            free_node( tp );
+            free_tree( tp );
             anon_tp = NULL;
         }
     }
@@ -958,8 +959,9 @@ getoid(fp, id,  length)
                 type = get_token(fp, token,MAXTOKEN);
                 if (type == NUMBER){
                     id->subid = atoi(token);
-                    if ((type = get_token(fp, token,MAXTOKEN)) != RIGHTPAREN){
-                        print_error("Expected a closing bracket", token, type);
+                    if ((type = get_token(fp, token, MAXTOKEN)) != RIGHTPAREN){
+                        print_error("Expected a closing parenthesis",
+                                    token, type);
                         return 0;
                     }
                 } else {
@@ -1597,12 +1599,15 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
       type = get_token(fp, token,MAXTOKEN);
     }
     nnp = parse_objectid (fp, name);
-    np->parent = nnp->parent;
-    np->label = nnp->label;
-    np->next = nnp->next;
-    np->modid = nnp->modid;
-    np->subid = nnp->subid;
-    free(nnp);
+    if (nnp) {
+	np->parent = nnp->parent;
+	np->label = nnp->label;
+	np->next = nnp->next;
+	np->modid = nnp->modid;
+	np->subid = nnp->subid;
+	free(nnp);
+    }
+    else np = NULL;
     return np;
 }
 
@@ -1650,12 +1655,15 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
       type = get_token(fp, token,MAXTOKEN);
     }
     nnp = parse_objectid (fp, name);
-    np->parent = nnp->parent;
-    np->label = nnp->label;
-    np->next = nnp->next;
-    np->modid = nnp->modid;
-    np->subid = nnp->subid;
-    free(nnp);
+    if (nnp) {
+	np->parent = nnp->parent;
+	np->label = nnp->label;
+	np->next = nnp->next;
+	np->modid = nnp->modid;
+	np->subid = nnp->subid;
+	free(nnp);
+    }
+    else np = NULL;
     return np;
 }
 
@@ -1755,12 +1763,15 @@ parse_compliance(fp, name)
     while (type != EQUALS && type != ENDOFFILE)
         type = get_token(fp, quoted_string_buffer,MAXQUOTESTR);
     nnp = parse_objectid (fp, name);
-    np->parent = nnp->parent;
-    np->label = nnp->label;
-    np->next = nnp->next;
-    np->modid = nnp->modid;
-    np->subid = nnp->subid;
-    free(nnp);
+    if (nnp) {
+	np->parent = nnp->parent;
+	np->label = nnp->label;
+	np->next = nnp->next;
+	np->modid = nnp->modid;
+	np->subid = nnp->subid;
+	free(nnp);
+    }
+    else np = NULL;
     return np;
 }
 
@@ -1790,11 +1801,14 @@ parse_moduleIdentity(fp, name)
         type = get_token(fp, token, MAXTOKEN);
     }
     nnp = parse_objectid(fp, name);
-    np->parent = nnp->parent;
-    np->label = nnp->label;
-    np->subid = nnp->subid;
-    np->next = nnp->next;
-    free (nnp);
+    if (nnp) {
+	np->parent = nnp->parent;
+	np->label = nnp->label;
+	np->subid = nnp->subid;
+	np->next = nnp->next;
+	free (nnp);
+    }
+    else np = NULL;
     return np;
 }
 
