@@ -36,7 +36,11 @@ void snmp_enable_syslog(void);
 void snmp_enable_filelog(const char *logfilename, int dont_zero_log);
 void snmp_enable_stderrlog(void);
 
+#if HAVE_STDARG_H
 int snmp_log(int priority, const char *format, ...);
+#else
+int snmp_log (va_alist);
+#endif
 int snmp_vlog(int priority, const char *format, va_list ap);
    /*  0 - successful message formatting */
    /* -1 - Could not format log-string */
