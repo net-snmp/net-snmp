@@ -10,9 +10,6 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -107,6 +104,7 @@
 #include "struct.h"
 #include "errormib.h"
 #include "util_funcs.h"
+#include "auto_nlist.h"
 
 static time_t errorstatustime=0;
 static int errorstatusprior=0;

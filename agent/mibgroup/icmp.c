@@ -41,9 +41,7 @@
 
 #include "mibincl.h"
 #include "snmp_api.h"
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
+#include "auto_nlist.h"
 
 #ifdef hpux
 #undef OBJID
@@ -65,19 +63,6 @@
 	 *
 	 *********************/
 
-#if !defined(linux) && !defined(HAVE_SYS_TCPIPSTATS_H)
-static struct nlist icmp_nl[] = {
-#define N_ICMPSTAT	0
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-	{ "_icmpstat"},
-#else
-        { "icmpstat"},
-#endif
-        { 0 },
-};
-#endif
-
-
 #ifdef linux
 static void
 linux_read_icmp_stat __P((struct icmp_mib *));
@@ -94,8 +79,8 @@ extern int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**
 
 void	init_icmp( )
 {
-#if !defined(linux) && !defined(HAVE_SYS_TCPIPSTATS_H)
-    init_nlist( icmp_nl );
+#if !defined(HAVE_SYS_TCPIPSTATS_H)
+    auto_nlist( ICMPSTAT_SYMBOL,0,0 );
 #endif
 }
 
@@ -257,7 +242,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     /*
      *        Get the ICMP statistics from the kernel...
      */
-    KNLookup(icmp_nl, N_ICMPSTAT, (char *)&icmpstat, sizeof (icmpstat));
+    auto_nlist(ICMPSTAT_SYMBOL, (char *)&icmpstat, sizeof (icmpstat));
 
     switch (vp->magic){
 	case ICMPINMSGS:

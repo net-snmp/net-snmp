@@ -41,9 +41,7 @@
 
 #include "mibincl.h"
 #include "snmp_api.h"
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
+#include "auto_nlist.h"
 
 #ifdef MIB_IPCOUNTER_SYMBOL
 #undef OBJID

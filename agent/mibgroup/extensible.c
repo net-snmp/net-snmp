@@ -20,9 +20,6 @@
 # endif
 #endif
 #include <signal.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
 #endif
@@ -100,6 +97,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
+#include "auto_nlist.h"
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */

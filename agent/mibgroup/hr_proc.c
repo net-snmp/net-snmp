@@ -4,13 +4,10 @@
  */
 
 #include <config.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 
 #include "host_res.h"
 #include "hr_proc.h"
-
+#include "auto_nlist.h"
 
 #define HRPROC_MONOTONICALLY_INCREASING
 
@@ -23,18 +20,6 @@
 
 extern void  Init_HR_Proc();
 extern int   Get_Next_HR_Proc();
-
-#ifndef linux
-static struct nlist hrproc_nl[] = {
-#define N_AVENRUN     0
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_avenrun"},
-#else
-        { "avenrun"},
-#endif
-	{ 0 }
-};
-#endif
 
 	/*********************
 	 *
@@ -51,9 +36,7 @@ void	init_hr_proc( )
     dev_idx_inc[ HRDEV_PROC ] = 1;
 #endif
 
-#ifndef linux
-    init_nlist( hrproc_nl );
-#endif
+    auto_nlist( LOADAVE_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	-1
@@ -153,7 +136,7 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 	return NULL;
 
 #ifndef linux
-    if ( KNLookup(hrproc_nl, N_AVENRUN, (char*) avenrun, sizeof(avenrun)) == 0 )
+    auto_nlist(LOADAVE_SYMBOL, (char*) avenrun, sizeof(avenrun)) == 0 )
 	return NULL;
 #endif
 

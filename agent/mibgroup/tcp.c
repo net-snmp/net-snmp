@@ -89,9 +89,7 @@
 
 
 #include "mibincl.h"
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
+#include "auto_nlist.h"
 
 #ifdef hpux
 #undef OBJID
@@ -112,29 +110,6 @@
 	 *
 	 *********************/
 
-#ifndef linux
-static struct nlist tcp_nl[] = {
-#define N_TCPSTAT	0
-#define N_TCB		1
-#define N_HP_TCPMIB	2
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-	{ "_tcpstat" },
-#ifdef netbsd1
-	{ "_tcbtable" },
-#else
-	{ "_tcb" },
-#endif
-#else
-	{ "tcpstat" },
-	{ "tcb" },
-#ifdef hpux
-	{ "MIB_tcpcounter" },
-#endif
-#endif
-        { 0 },
-};
-#endif
-
 #ifdef linux
 static void linux_read_tcp_stat __P((struct tcp_mib *));
 #endif
@@ -150,9 +125,8 @@ static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**w
 
 void	init_tcp( )
 {
-#ifndef linux
-    init_nlist( tcp_nl );
-#endif
+  auto_nlist( TCPSTAT_SYMBOL,0,0 );
+  auto_nlist( TCP_SYMBOL,0,0 );
 }
 
 #define MATCH_FAILED	1
@@ -351,10 +325,10 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	 */
 
 #ifndef linux
-	KNLookup(tcp_nl, N_TCPSTAT, (char *)&tcpstat, sizeof (tcpstat));
-#ifdef hpux
-	KNLookup(tcp_nl, N_HP_TCPMIB, (char *)&MIB_tcpcounter,
-	    (MIB_tcpMAXCTR+1)*sizeof (counter));
+	auto_nlist(TCPSTAT_SYMBOL, (char *)&tcpstat, sizeof (tcpstat));
+#ifdef MIB_TCPCOUNTER_SYMBOL
+	auto_nlist(TCPMIB_SYMBOL, (char *)&MIB_tcpcounter,
+                   (MIB_tcpMAXCTR+1)*sizeof (counter));
 #endif
 #else /* linux */
 	linux_read_tcp_stat (&tcpstat);
@@ -792,7 +766,7 @@ Again:	/*
 	 */
 	Established = 0;
 
-	KNLookup(tcp_nl, N_TCB, (char *)&cb, sizeof(struct inpcb));
+	auto_nlist(TCB_SYMBOL, (char *)&cb, sizeof(struct inpcb));
 	inpcb = cb;
 #if !(defined(freebsd2) || defined(netbsd1))
 	prev = (struct inpcb *) tcp_nl[N_TCB].n_value;
@@ -846,7 +820,7 @@ static struct inpcb *inpcb_list;
 void TCP_Scan_Init __P((void))
 {
 #ifndef linux
-    KNLookup(tcp_nl, N_TCB, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
+    auto_nlist(TCB_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1))
     tcp_prev = (struct inpcb *) tcp_nl[N_TCB].n_value;
 #endif
