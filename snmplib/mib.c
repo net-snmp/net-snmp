@@ -1279,10 +1279,10 @@ parse_subtree(struct tree *subtree,
 	      oid *output,
 	      size_t *out_len)   /* number of subid's */
 {
-    char buf[SPRINT_MAX_LEN], *to = buf;
+    char buf[SPRINT_MAX_LEN], *to = buf, *cp;
     u_long subid = 0;
     struct tree *tp;
-    int ret;
+    int ret, len;
 
     /*
      * No empty strings.  Can happen if there is a trailing '.' or two '.'s
@@ -1292,7 +1292,48 @@ parse_subtree(struct tree *subtree,
 	(*input == '.'))
 	return (0);
 
-    if (isdigit(*input)) {
+    if (*input == '"' || *input == '\'') {
+      /*
+       * This is a string that should be converted into an OID
+       *  Note:  assumes variable length index is required, and prepends
+       *         the string length.
+       */
+      if ((cp = strchr(input+1, *input)) == NULL) {
+        /* error.  Should be a matching quote somewhere. */
+        return (0);
+      }
+      
+      /* is there room enough for the string in question plus its length */
+      len = cp-input-1;
+      if ((int)*out_len <= len){
+	return (SNMPERR_LONG_OID);
+      }
+
+      /* copy everything in */
+      if (*input++ == '"') {
+        /* add the length for " quoted objects */
+        *output++ = len++;
+      }
+
+      *out_len -= len;
+      while (input < cp) {
+        *output++ = *input++;
+      }
+
+      /* Now, we assume that nothing beyond this exists in the parse
+         tree, which should always be true (or else we have a really wacked
+         mib designer somewhere. */
+      input = cp + 1; /* past  the quote */
+
+      if (*input != '.')
+	return (len);
+
+      ret = parse_subtree(NULL, ++input, output, out_len);
+      if (ret <= 0)
+	return (ret);
+      return ret+len;
+
+    } else if (isdigit(*input)) {
 	/*
 	 * Read the number, then try to find it in the subtree.
 	 */
