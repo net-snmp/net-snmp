@@ -134,7 +134,7 @@ if [ $TYPE = "err" ];   then
   
   # The problem is an error
   
-  ERROR=`snmpget -t 5 -r 3 $FULLHOST $MIBERRFLAG | sed 's/^.*: *//'`
+  ERROR=`snmpget -t 5 -r 3 $FULLHOST $MIBERRMSG | sed 's/^.*: *//'`
   if [ "$ERROR" = "" ]; then
     ERROR="Error MSG disappeared."
     total_log
@@ -151,6 +151,9 @@ else
   
 fi
 
+# Log event
+
+echo "`date`\t$1|$2|$3|$4" >> /1/OV/log/trapnotif.log
 
 #
 # Generate a mail message to 'prog'
