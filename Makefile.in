@@ -62,7 +62,7 @@ distclean: clean configclean
 
 configclean:
 	rm -f config.cache config.status config.log
-	rm -f snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile
+	rm -f snmplib/Makefile Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile
 
 configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf

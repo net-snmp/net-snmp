@@ -152,10 +152,6 @@ AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(socket, getservbyname)
 dnl AC_CHECK_LIB(ucb, bzero)
 
-dnl Replace `main' with a function in -ltcl:
-dnl AC_CHECK_LIB(tcl, main)
-dnl Replace `main' with a function in -ltk:
-dnl AC_CHECK_LIB(tk, main)
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
@@ -530,7 +526,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 What type of security to use],SNMPV1)
 
-AC_OUTPUT(Makefile snmplib/Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile man/Makefile ov/Makefile, echo timestamp > stamp-h)
+AC_OUTPUT(Makefile snmplib/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile local/Makefile man/Makefile ov/Makefile, echo timestamp > stamp-h)
 
 dnl Local Variables:
 dnl mode: sh
