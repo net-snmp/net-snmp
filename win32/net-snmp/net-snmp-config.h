@@ -886,9 +886,49 @@ typedef unsigned short mode_t;
 #define USE_REVERSE_ASNENCODING       1
 #define DEFAULT_ASNENCODING_DIRECTION 1 /* 1 = reverse, 0 = forwards */
 
+/*
+ * this must be before the system/machine includes, to allow them to
+ * override and turn off inlining. To do so, they should do the
+ * following:
+ *
+ *    #undef NETSNMP_ENABLE_INLINE
+ *    #define NETSNMP_ENABLE_INLINE 0
+ *
+ * A user having problems with their compiler can also turn off
+ * the use of inline by defining NETSNMP_NO_INLINE via their cflags:
+ *
+ *    -DNETSNMP_NO_INLINE
+ *
+ * Header and source files should only test against NETSNMP_USE_INLINE:
+ *
+ *   #ifdef NETSNMP_USE_INLINE
+ *   NETSNMP_INLINE function(int parm) { return parm -1; }
+ *   #endif
+ *
+ * Functions which should be static, regardless of whether or not inline
+ * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
+ * like so:
+ *
+ *    NETSNMP_STATIC_INLINE function(int parm) { return parm -1; }
+ *
+ * NOT like this:
+ *
+ *    static NETSNMP_INLINE function(int parm) { return parm -1; } // WRONG!
+ *
+ */
+#define NETSNMP_INLINE inline
+#define NETSNMP_STATIC_INLINE static inline
+#define NETSNMP_ENABLE_INLINE 1
+
+#if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
+#   define NETSNMP_USE_INLINE
+#else
+#   define NETSNMP_INLINE 
+#   define NETSNMP_STATIC_INLINE static
+#endif
+
 #ifdef __cplusplus
 }
 #endif
 
-#define inline
 #endif /* NET_SNMP_CONFIG_H */
