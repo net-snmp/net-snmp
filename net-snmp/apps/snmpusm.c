@@ -64,6 +64,9 @@
 #include "tools.h"
 #include "keytools.h"
 #include "snmp-tc.h"
+#include "transform_oids.h"
+#include "snmpv3.h"
+#include "default_store.h"
 
 int main (int, char **);
 
@@ -96,6 +99,11 @@ static oid  authKeyOid[MAX_OID_LEN]          = {1,3,6,1,6,3,15,1,2,2,1,6},
             usmUserStatus[MAX_OID_LEN]       = {1,3,6,1,6,3,15,1,2,2,1,13}
 ;
                            
+static
+oid *authKeyChange   = authKeyOid,
+    *privKeyChange   = privKeyOid;
+int doauthkey       = 0,
+    doprivkey       = 0;
 
 void
 usage (void)
@@ -108,9 +116,7 @@ usage (void)
   fprintf(stderr, "  create    USER [CLONEFROM]\n");
   fprintf(stderr, "  delete    USER\n");
   fprintf(stderr, "  cloneFrom USER FROM\n");
-  fprintf(stderr, "  passwd    [-O old_passphrase] [-N new_passphrase] [-o] [-a] [-x]\n");
-  fprintf(stderr, "\t\t-N NEWPASS:\tuse NEWPASS as the new passphrase.\n");
-  fprintf(stderr, "\t\t-O OLDPASS:\tuse OLDPASS as the old passphrase.\n");
+  fprintf(stderr, "  passwd    old_passphrase new_passphrase [-o] [-a] [-x]\n");
   fprintf(stderr, "\t\t-o\t\tUse the ownKeyChange objects.\n");
   fprintf(stderr, "\t\t-x\t\tChange the privacy key.\n");
   fprintf(stderr, "\t\t-a\t\tChange the authentication key.\n");
@@ -138,6 +144,36 @@ setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
   sprint_objid(buf, it, *len);
 }
 
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'o':
+                        authKeyChange   = ownAuthKeyOid;
+                        privKeyChange   = ownPrivKeyOid;
+                        break;
+
+                    case 'a':
+                        doauthkey = 1;
+                        break;
+
+                    case 'x':
+                        doprivkey = 1;
+                        break;
+
+                    default:
+                        fprintf(stderr,
+                                "Unknown flag passed to -C: %c\n", *optarg);
+                        usage();
+                        exit(1);
+                }
+            }
+            break;
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -162,9 +198,7 @@ main(int argc, char *argv[])
     size_t                name_length2 = USM_OID_LEN;
     int                   status;
     int                   rval;
-    int                   doauthkey       = 0,
-                          doprivkey       = 0,
-                          command         = 0;
+    int                   command         = 0;
     long                  longvar;
                          
     oid                  *authKeyChange   = authKeyOid,
@@ -185,7 +219,7 @@ main(int argc, char *argv[])
                           keychange[SNMP_MAXBUF_SMALL];
                          
     /* get the common command line arguments */
-    arg = snmp_parse_args(argc, argv, &session, NULL, NULL);
+    arg = snmp_parse_args(argc, argv, &session, "C:", optProc);
 
     SOCK_STARTUP;
 
@@ -216,49 +250,9 @@ main(int argc, char *argv[])
        *       change a SHA user's key.
        */
       command = CMD_PASSWD;
-      for(arg++; arg < argc; arg++) {
-
-        if (*argv[arg] != '-') {
-          fprintf(stderr, "not an argument: %s\n", argv[arg]);
-          usage();
-          exit(1);
-        }
-
-        switch(argv[arg][1]) {
-          case 'N':
-            if (argv[arg][2] != 0)
-              newpass = &argv[arg][2];
-            else
-              newpass = argv[++arg];
-            break;
-
-          case 'O':
-            if (argv[arg][2] != 0)
-              oldpass = &argv[arg][2];
-            else
-              oldpass = argv[++arg];
-            break;
-
-          case 'o':
-            authKeyChange   = ownAuthKeyOid;
-            privKeyChange   = ownPrivKeyOid;
-            break;
-
-          case 'a':
-            doauthkey = 1;
-            break;
-
-          case 'x':
-            doprivkey = 1;
-            break;
-
-          default:
-            fprintf(stderr, "Unknown switch: %c\n", *argv[arg]);
-            usage();
-            exit(1);
-        }
-      }
-
+      oldpass = argv[++arg];
+      newpass = argv[++arg];
+      
       if (doprivkey == 0 && doauthkey == 0)
         doprivkey = doauthkey = 1;
     
@@ -274,13 +268,31 @@ main(int argc, char *argv[])
         exit(1);
       }
 
+      /* do we have a securityName?  If not, copy the default */
+      if (session.securityName == NULL) {
+          session.securityName =
+              strdup(ds_get_string(DS_LIBRARY_ID, DS_LIB_SECNAME));
+      }
+
       /* the old Ku is in the session, but we need the new one */
+      if (session.securityAuthProto == NULL) {
+          /* get .conf set default */
+          session.securityAuthProto =
+              get_default_authtype(&session.securityAuthProtoLen);
+      }
+      if (session.securityAuthProto == NULL) {
+          /* assume MD5 */
+          session.securityAuthProto = usmHMACMD5AuthProtocol;
+          session.securityAuthProtoLen =
+              sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+      }
       rval = generate_Ku(session.securityAuthProto,
                          session.securityAuthProtoLen,
                          (u_char *)newpass, strlen(newpass),
                          newKu, &newKu_len);
 
       if (rval != SNMPERR_SUCCESS) {
+        snmp_perror("snmpgetnext");
         fprintf(stderr, "generating the old Ku failed\n");
         exit(1);
       }
@@ -330,7 +342,6 @@ main(int argc, char *argv[])
         usage();
         exit(1);
       }
-
 
       /* add the keychange string to the outgoing packet */
       if (doauthkey) {
