@@ -308,8 +308,6 @@ steps to build using build.bat:
 
     Select option to set / toggle:
 
-
-
 5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
 
@@ -348,6 +346,10 @@ steps to build using build.bat:
     See perlmake.out for Perl test results
     
     Done!
+
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
 
 Manual build using Configure / nmake
@@ -667,6 +669,10 @@ components to an install directory named in the INSTALL_BASE variable.
 
     snmptranslate -IR -Td linkDown
 
+8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
+
 
 ***************************************************************************
 *
@@ -956,6 +962,10 @@ but this regular expression support has since been incorporated
 into the main Cygwin package, and it is no longer necessary to
 include it separately.
 
+If the folder that Net-SNMP was installed to is ever changed, modify the 
+system environment variables or registry keys as explained in the 
+'Configuration_Overview.html' file located in win32/dist/htmlhelp.
+
 
 ***************************************************************************
 *
@@ -1013,6 +1023,10 @@ builds under MinGW with MSyS is available at:
 
 6.  Type "make install" to install the package.
 
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+    system environment variables or registry keys as explained in the 
+    'Configuration_Overview.html' file located in win32/dist/htmlhelp.
+
 
 ***************************************************************************
 *
@@ -1055,7 +1069,7 @@ Follow these steps to install OpenSSL:
 
 Online documentation is available from the Net-SNMP home page at:
 
-http://www.net-snmp.org/#Documentation
+http://www.net-snmp.org/docs/
 
 All configuration files should be placed in the INSTALL_BASE\etc\snmp folder.
 The INSTALL_BASE folder is defined in the win32\net-snmp\net-snmp-config.h
@@ -1074,6 +1088,10 @@ path to the snmpconf Perl script.  For example:
 You can now run snmpconf using the standard command line such as:
 
   snmpconf -i
+
+For detailed information on using environment variables and the registry to 
+configure Net-SNMP, see the 'Configuration_Overview.html' file in 
+win32/dist/htmlhelp.
 
 
 ***************************************************************************
@@ -1129,22 +1147,20 @@ the -h switch:
 Notes: -H will display all available snmpd.conf, snmptrapd.conf and snmp.conf
        configuration file options, not the command line options.
 
-       Like all Net-SNMP applications, snmpd and snmptrapd will read the 
-       system environment variables SNMPCONFPATH, SNMPSHAREPATH etc even when
-       run as a service.  Due to a limitation in the Windows SCM, if any system
-       environment variables are changed, the system will need to be rebooted 
-       to allow the services to access the changed environment variables (see 
-       Microsoft knowledge base article 821761).  Therefore, if the location 
-       of the various configuration files is different than what was selected 
-       during compilation, a reboot will be required after setting the environment
-       variables, otherwise the services may fail to start.
-
-       If Net-SNMP was installed from a .exe binary release and was installed 
-       in a non default directory, a reboot will be required to allow the
-       services to access the SNMPCONFPATH and SNMPSHAREPATH variables.  
-       If the system is not rebooted, the services may fail to start and they 
-       will not be able to locate any configuration or MIB files.
-     
+       Like all Net-SNMP applications, snmpd and snmptrapd will use the 
+       SNMPCONFPATH and SNMPSHAREPATH environment variables when run as a 
+       service.  The registry is the recommended method for defining these 
+       variables due to a limitation in the Windows Service Control Manager 
+       (SCM).  When running as a service, if any system environment variables
+       are changed, the system will need to be rebooted to allow the services 
+       to access the changed environment variables (see Microsoft knowledge 
+       base article  821761).  Therefore, when running snmpd or snmptrapd as 
+       a service, if SNMPCONFPATH or SNMPSHAREPATH is changed, a reboot will 
+       be required after setting the environment variables, otherwise the 
+       services may fail to start.  Using the registry to store the environment 
+       variables eliminates this problem.  See the 'Configuration_Overview.html'
+       file in win32/dist/htmlhelp for more information on using the registry.
+    
 
 Unregistering the services
 --------------------------
