@@ -17,6 +17,9 @@
 #if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
+#if HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
