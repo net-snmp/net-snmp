@@ -210,6 +210,9 @@ int get_exec_output(ex)
       }
 #ifdef CACHETIME
   }
+  else {
+      ex->result = lastresult;
+  }
   if ((cfd = open(CACHEFILE,O_RDONLY)) < 0) {
     perror("open");
     return(NULL);
