@@ -93,7 +93,8 @@ struct packet_info {
 /* See important comment in snmp_vars.c relating to a change
    in the way the access control word is interpreted */
 #define RONLY	0xAAAA	/* read access for everyone */
-#define RWRITE	0xAABB	/* add write access for community private */
+#define RWRITE	0xFABB	/* add write access for community private */
+                        /* & write access for V2 GLOBAL stuff -- Wes */
 #define NOACCESS 0x0000	/* no access for anybody */
 
 #define INTEGER	    ASN_INTEGER
