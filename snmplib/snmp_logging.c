@@ -3,6 +3,11 @@
 
 #include "config.h"
 #include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -11,19 +16,14 @@
 #include <syslog.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef STDC_HEADERS
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_logging.h"
-#include "tools.h"
+#define LOGLENGTH 1024
 
 int do_syslogging=0;
 int do_filelogging=0;
@@ -63,7 +63,6 @@ disable_log(void) {
 }
 
 
-
 void 
 enable_syslog(void) 
 {
@@ -92,127 +91,46 @@ enable_stderrlog(void) {
   do_stderrlogging=1;
 }
 
+
 void
-vlog_syslog (int priority, const char *format, va_list ap) 
+log_syslog (int priority, const char *format)
 {
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    char xbuf[SPRINT_MAX_LEN];
-/* HP-UX 9 and Solaris 2.5.1 do not have this *
-    vsnprintf(xbuf, sizeof(xbuf), format, ap);
-*/
-    vsprintf(xbuf, format, ap);
-    syslog(priority, xbuf);
+    syslog(priority, format);
   }
 #endif
 }
 
-void
-#ifdef STDC_HEADERS
-log_syslog (int priority, const char *format, ...)
-#else
-log_syslog (int priority, va_alist)
-  va_dcl
-#endif
-{
-  va_list ap;
-
-#ifdef STDC_HEADERS
-  va_start(ap, format);
-#else
-  const char *format;
-  va_start(ap);
-  format = va_arg(ap, const char *);
-#endif
-
-  vlog_syslog(priority, format, ap);
-  va_end(ap);
-}
-
 
 void
-vlog_toFILE(FILE *file, int priority, const char *format, va_list ap)
+log_filelog (int priority, const char *format)
 {
-  /* fprintf(file, "log: %d: ", priority); */
-  /* vfprintf(file, format[0]=='\n'?format+1:format, ap); */
-  vfprintf(file, format, ap);
-  /*  Making sure error-message ends with a newline:
-      if (format[strlen(format)-1]!='\n')
-        fprintf(file, "\n"); */
-}
-
-
-void
-vlog_filelog (int priority, const char *format, va_list ap)
-{
+  /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_filelogging) {
-    vlog_toFILE(logfile, priority, format, ap);
+    fprintf(logfile, format);
   }
 }
 
 
 void
-#ifdef STDC_HEADERS
-log_filelog (int priority, const char *format, ...)
-#else
-log_filelog (int priority, va_alist)
-  va_dcl
-#endif
+log_stderrlog (int priority, const char *format)
 {
-  va_list ap;
-
-#ifdef STDC_HEADERS
-  va_start(ap, format);
-#else
-  const char *format;
-  va_start(ap);
-  format = va_arg(ap, const char *);
-#endif
-  vlog_filelog(priority, format, ap);
-
-  va_end(ap);
-} 
-
-
-void
-vlog_stderrlog (int priority, const char *format, va_list ap)
-{
+  /* priority not used, so Quiet compiler! */ priority = 0;
   if (do_stderrlogging) {
-    vlog_toFILE(stderr, priority, format, ap);
+    fprintf(stderr, format);
   }
 }
-
-
-
-void
-#ifdef STDC_HEADERS
-log_stderrlog (int priority, const char *format, ...)
-#else
-log_stderrlog (int priority, va_alist)
-  va_dcl
-#endif
-{
-  va_list ap;
-
-#ifdef STDC_HEADERS
-  va_start(ap, format);
-#else
-  const char *format;
-  va_start(ap);
-  format = va_arg(ap, const char *);
-#endif
-  vlog_stderrlog(priority, format, ap);
-   
-  va_end(ap);
-}
-
 
 void
 vlog (int priority, const char *format, va_list ap)
 {
-  vlog_syslog(priority, format, ap);
-  vlog_filelog(priority, format, ap);
-  vlog_stderrlog(priority, format, ap);
+  char string[LOGLENGTH];
+
+  vsprintf(string, format, ap);
+  log_syslog(priority, string);
+  log_filelog(priority, string);
+  log_stderrlog(priority, string);
 }
 
 
@@ -243,26 +161,16 @@ snmp_log (int priority, va_alist)
 void
 log_perror(const char *s)
 {
-    char zbuf[SNMP_MAXBUF_SMALL];
-    int sav_errno = errno;
+  char sbuf[LOGLENGTH];
+  char *serr = strerror(errno);
 
-    if (s && *s)
-        sprintf(zbuf, "%s: %s\n", s, strerror(sav_errno));
-    else
-        sprintf(zbuf, "%s\n", strerror(sav_errno));
+  if (s && *s)
+    sprintf(sbuf, "%s: %s\n", s, serr);
+  else
+    sprintf(sbuf, "%s\n", serr);
 
-    if (do_filelogging) {
-        fprintf(logfile, zbuf);
-        fflush(logfile);
-    }
-#if HAVE_SYSLOG_H
-    if (do_syslogging) {
-        syslog(LOG_ERR, zbuf);
-    }
-#endif
-    if (do_stderrlogging) {
-        fprintf(stderr, zbuf);
-        fflush(stderr);
-    }
+  log_syslog(LOG_ERR, sbuf);
+  log_filelog(LOG_ERR, sbuf);
+  log_stderrlog(LOG_ERR, sbuf);
 }
 
