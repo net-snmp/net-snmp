@@ -1340,7 +1340,11 @@ static int      saveIndex = 0;
 unsigned int getIfSpeed(int fd, struct ifreq ifr)
 {
 #ifdef linux
-    return netsnmp_access_interface_linux_get_if_speed(fd, ifr.ifr_name);
+    /** temporary expose internal until this module can be re-written */
+    extern unsigned int
+        netsnmp_arch_interface_get_if_speed(int fd, const char *name);
+
+    return netsnmp_arch_interface_get_if_speed(fd, ifr.ifr_name);
 #else /*!linux*/			   
     return 10000000;
 #endif 
