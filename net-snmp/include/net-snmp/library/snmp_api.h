@@ -202,6 +202,8 @@ struct snmp_session {
     char           *peername;
     /** UDP port number of peer. */
     u_short         remote_port;
+    /** My Domain name or dotted IP address, 0 for default */
+    char           *localname;
     /** My UDP port number, 0 for default, picked randomly */
     u_short         local_port;     
     /**

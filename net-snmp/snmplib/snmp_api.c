@@ -1351,6 +1351,7 @@ _sess_open(netsnmp_session * in_session)
 {
     struct session_list *slp;
     netsnmp_session *session;
+    char            *clientaddr_save = NULL;
 
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
@@ -1363,6 +1364,13 @@ _sess_open(netsnmp_session * in_session)
     session = slp->session;
     slp->transport = NULL;
 
+    if (NULL != session->localname) {
+        clientaddr_save = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                NETSNMP_DS_LIB_CLIENT_ADDR);
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_CLIENT_ADDR, session->localname);
+    }
+
     if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
         slp->transport = netsnmp_tdomain_transport(session->peername,
                                                    session->local_port,
@@ -1372,6 +1380,10 @@ _sess_open(netsnmp_session * in_session)
                                                    session->local_port,
                                                    "udp");
     }
+
+    if (NULL != session->localname)
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
 
     if (slp->transport == NULL) {
         DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
