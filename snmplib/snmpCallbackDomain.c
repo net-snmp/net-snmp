@@ -397,7 +397,7 @@ snmp_callback_open(int attach_to,
     callback_sess.remote_port = 0;
     callback_sess.retries = 0;
     callback_sess.timeout = 30000000;
-    callback_sess.version         = SNMP_VERSION_2c; /* (mostly) bogus */
+    callback_sess.version = SNMP_DEFAULT_VERSION; /* (mostly) bogus */
     callback_ss = snmp_add_full(&callback_sess, callback_tr,
                                 fpre_parse,
                                 snmp_callback_hook_parse, fpost_parse,
