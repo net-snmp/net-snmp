@@ -127,7 +127,9 @@ void	init_udp( )
 #ifdef UDPSTAT_SYMBOL
   auto_nlist( UDPSTAT_SYMBOL,0,0 );
 #endif
+#ifdef UDB_SYMBOL
   auto_nlist( UDB_SYMBOL,0,0 );
+#endif
 }
 
 

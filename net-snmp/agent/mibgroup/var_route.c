@@ -430,10 +430,18 @@ static void Route_Scan_Reload __P((void))
 
 void	init_var_route( )
 {
+#ifdef RTTABLES_SYMBOL
   auto_nlist(RTTABLES_SYMBOL,0,0);
+#endif
+#ifdef RTHASHSIZE_SYMBOL
   auto_nlist(RTHASHSIZE_SYMBOL,0,0);
+#endif
+#ifdef RTHOST_SYMBOL
   auto_nlist(RTHOST_SYMBOL,0,0);
+#endif
+#ifdef RTNET_SYMBOL
   auto_nlist(RTNET_SYMBOL,0,0);
+#endif
 }
 
 #ifndef solaris2
