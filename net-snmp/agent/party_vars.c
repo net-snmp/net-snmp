@@ -610,7 +610,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	}
       case PARTYAUTHCLOCK:
 	gettimeofday(&now, (struct timezone *)0);
-	(u_long)long_return = now.tv_sec - pp->tv.tv_sec;
+	long_return = (u_long) now.tv_sec - pp->tv.tv_sec;
 	return (u_char *)&long_return;
       case PARTYAUTHPRIVATE:
 	*var_len = 0;  /* zero length return value */

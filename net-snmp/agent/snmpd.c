@@ -403,7 +403,7 @@ main(argc, argv)
 	}
     }
 
-    printf("Opening port(s): ");
+    printf("Opening port(s): "); 
     fflush(stdout);
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
@@ -418,7 +418,7 @@ main(argc, argv)
 		break;
 	if (index < sdlen)  /* found a hit before the end of the list */
 	    continue;
-	printf("%u ", dest_port);
+	printf("%u ", dest_port); 
 	fflush(stdout);
 	/* Set up connections */
 	sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -436,6 +436,7 @@ main(argc, argv)
 	}
 	sdlist[sdlen] = sd;
 	portlist[sdlen] = dest_port;
+        fcntl(sd,F_SETFD,1);           /* close on exec */
 	if (++sdlen == 32){
 	    printf("No more sockets... ignoring rest of file\n");
 	    break;
