@@ -473,7 +473,8 @@ version ::= SEQUENCE {
    versionTag  DisplayString,
    versionDate  DisplayString,
    versionCDate  DisplayString,
-   versionIdent  DisplayString
+   versionIdent  DisplayString,
+   versionClearCache  INTEGER
 }
    
 versionIndex OBJECT-TYPE
@@ -515,5 +516,13 @@ versionIdent OBJECT-TYPE
      DESCRIPTION  
           "Id string from RCS keyword"
      ::= { Version 5 } 
+
+versionClearCache OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Set to 1 to clear the exec cache, if enabled"
+     ::= { Version 10 } 
 
 END
