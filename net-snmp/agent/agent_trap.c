@@ -64,8 +64,8 @@ extern struct timeval	starttime;
 
 oid objid_enterprisetrap[] = { NOTIFICATION_MIB };
 oid trap_version_id[]	   = { SYSTEM_MIB };
-int enterprisetrap_len     = OID_LENGTH( objid_enterprisetrap );
-int trap_version_id_len    = OID_LENGTH( trap_version_id );
+int enterprisetrap_len;
+int trap_version_id_len;
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 oid  cold_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	/* SNMPv2-MIB */
@@ -79,9 +79,9 @@ oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
 oid  sysuptime_oid[] 	      =	{ SNMP_OID_MIB2,1,3,0 };
-size_t  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
-size_t  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-size_t  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
+size_t  snmptrap_oid_len;
+size_t  snmptrapenterprise_oid_len;
+size_t  sysuptime_oid_len;
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
@@ -107,6 +107,15 @@ static void send_v2_trap (struct snmp_session *, int, int, int);
 	 * Trap session handling
 	 *
 	 *******************/
+
+void init_traps( void )
+{
+    enterprisetrap_len     = OID_LENGTH( objid_enterprisetrap );
+    trap_version_id_len    = OID_LENGTH( trap_version_id );
+    snmptrap_oid_len           = OID_LENGTH(snmptrap_oid);
+    snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+    sysuptime_oid_len 	       = OID_LENGTH(sysuptime_oid);
+}
 
 static void free_trap_session (struct trap_sink *sp)
 {

@@ -326,7 +326,7 @@ char *snmp_out_toggle_options(char *);
 void snmp_out_toggle_options_usage(const char *, FILE *);
 char *snmp_in_toggle_options(char *);
 void snmp_in_toggle_options_usage(const char *, FILE *);
-int mib_to_asn_type(int mib_type);
+u_char mib_to_asn_type(int mib_type);
 
 
 int netsnmp_str2oid( const char * S, oid * O, int L );

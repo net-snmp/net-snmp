@@ -380,7 +380,7 @@ read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 #endif
 
 #ifdef WIN32
-    ret_vanue = GetUdpStatistics(udpstat);
+    ret_value = GetUdpStatistics(udpstat);
 #endif
 
 #ifdef solaris2

@@ -783,6 +783,7 @@ u_char *var_vacm_sec2group(struct variable *vp,
 	return (u_char *)&long_return;
 
     default:
+	break;
     }
     return NULL;
 }

@@ -143,7 +143,7 @@ handle_long_opt(const char *myoptarg)
 }
 
 extern int snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz,
-               int argc, char **argv);
+               int argc, char *const *argv);
 int
 snmp_parse_args(int argc, 
 		char *const *argv, 
