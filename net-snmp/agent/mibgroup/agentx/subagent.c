@@ -46,6 +46,7 @@
 #include "agent_callbacks.h"
 #include "agent_trap.h"
 #include "snmp_debug.h"
+#include "mib_module_config.h"
 #include "mibII/sysORTable.h"
 #include "system.h"
 
