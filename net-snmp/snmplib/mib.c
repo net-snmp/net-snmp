@@ -1252,6 +1252,7 @@ init_mib (void)
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
     /* XX error check ? */
     if (tree_top) {
+        tree_top->label = strdup("(top");
         tree_top->child_list = tree_head;
     }
 }
@@ -1260,7 +1261,10 @@ void
 shutdown_mib (void)
 {
     unload_all_mibs();
-    free(tree_top); tree_top = NULL;
+    if (tree_top) {
+        if (tree_top->label) free(tree_top->label);
+	free(tree_top); tree_top = NULL;
+    }
     tree_head = NULL;
     Mib = NULL;
     free(Prefix); Prefix = NULL;
@@ -2390,7 +2394,7 @@ bad_id:
     {   char buf[256];
 	if (in_dices) sprintf(buf, "Index: %s, %s, %d %d",
 				in_dices->ilabel, fcp, pos, len);
-	else if (tp) sprintf(buf, "Node: %s, %s", tp->label, fcp);
+	else if (tp) sprintf(buf, "Node: %s -> %s", tp->label, fcp);
 	else sprintf(buf, "%s", fcp);
 
 	snmp_set_detail(buf);
