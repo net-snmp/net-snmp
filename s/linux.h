@@ -16,4 +16,4 @@
 /* #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %*d %*d %d" */
 
 /* for 2.2 kernels? */
-/* #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d"
+/* #define LINUX_INTERFACE_SCAN_LINE "%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d" */
