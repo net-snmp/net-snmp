@@ -56,7 +56,8 @@ void init_master(void)
 
     sess.local_port = 1;         /* server */
     sess.callback = handle_master_agentx_packet;
-    session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build );
+    session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
+                            agentx_check_packet );
 
     if ( session == NULL && sess.s_errno == EADDRINUSE ) {
 		/*

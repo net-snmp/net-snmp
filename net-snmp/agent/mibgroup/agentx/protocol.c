@@ -1680,3 +1680,30 @@ main ()
 }
 #endif
 
+/* returns the proper length of an incoming agentx packet. */
+/*
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    |   h.version   |    h.type     |    h.flags    |  <reserved>   |
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    |                          h.sessionID                          |
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    |                        h.transactionID                        |
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    |                          h.packetID                           |
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    |                        h.payload_length                       |
+ *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *    20 bytes in header
+ */
+
+int
+agentx_check_packet(u_char *packet, size_t packet_len) {
+
+  if (packet_len < 20)
+    return 0; /* minimum header length == 20 */
+
+  return agentx_parse_int(packet+16,
+                          *(packet+2) & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+}
+
+  

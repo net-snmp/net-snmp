@@ -434,7 +434,8 @@ subagent_pre_init( void )
     sess.local_port = 0;	/* client */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
-    agentx_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build );
+    agentx_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
+                                   agentx_check_packet );
 
     if ( agentx_session == NULL ) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
