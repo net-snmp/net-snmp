@@ -27,7 +27,7 @@ typedef struct ${context}_data_s {
    $m2c_decl   $node;
 @        else@
    $m2c_decl   $node[$m2c_node_maxlen];
-   size_t      ${node}_len;
+size_t      ${node}_len; /* # of $m2c_decl elements, not bytes */
 @        end@
     
 @    end@ # foreach nonindex

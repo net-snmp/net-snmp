@@ -456,10 +456,15 @@ _${context}_get_column( ${context}_ctx *ctx,
     case COLUMN_$node.uc:
     var->type = $node.type;
 @         if $m2c_node_needlength == 1@
-        if (var->val_len < ctx->tbl_idx.${node}_len) {
-           var->val.string = malloc(ctx->tbl_idx.${node}_len);
+    /*
+     * NOTE: val_len is in bytes, ${node}_len might not be
+     */
+        if (var->val_len < (ctx->tbl_idx.${node}_len *
+                            sizeof(ctx->tbl_idx.${node}[0]))) {
+           var->val.string = malloc(ctx->tbl_idx.${node}_len *
+                                    sizeof(ctx->tbl_idx.${node}[0]));
         }
-        var->val_len = ctx->tbl_idx.${node}_len;
+        var->val_len = ctx->tbl_idx.${node}_len * sizeof(ctx->tbl_idx.${node}[0]);
         memcpy( var->val.string, ctx->tbl_idx.$node, var->val_len );
 @         else@
         (*var->val.integer) = ctx->tbl_idx.$node;
