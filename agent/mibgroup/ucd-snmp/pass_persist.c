@@ -137,9 +137,9 @@ void pass_persist_free_config (void)
 
 unsigned char *var_extensible_pass_persist(struct variable *vp,
 					   oid *name,
-					   int *length,
+					   size_t *length,
 					   int exact,
-					   int *var_len,
+					   size_t *var_len,
 					   WriteMethod **write_method)
 {
 
@@ -279,10 +279,10 @@ int
 setPassPersist(int action,
 	       u_char *var_val,
 	       u_char var_val_type,
-	       int var_val_len,
+	       size_t var_val_len,
 	       u_char *statP,
 	       oid *name,
-	       int name_len)
+	       size_t name_len)
 {
   int i, j, rtest, tmplen=1000, last;
   struct extensible *persistpassthru;
