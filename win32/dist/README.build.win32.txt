@@ -19,7 +19,7 @@ There are four sections:
 
   Compiling HTMLHelp file
 
-  Combining the binaries, HTMLHelp and README files
+  Combining the binaries and HTMLHelp files
 
   Bulding a NullSoft installer package
 
@@ -70,6 +70,7 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
     
     7. Quiet build (logged): enabled
     8. Debug mode:           disabled
+    9. IPv6 transports:      disabled
 
 Note:  c:/usr must be used for 5.1.x.
        c:/Program Files/Net-SNMP must be used for 5.2+
@@ -123,16 +124,13 @@ Creating the Perl package
 
 12. Copy files:
 
-    copy (source dir)\COPYING "c:\usr\docs"
-    copy (source dir)\win32\dist\doc\README.txt "c:\usr"
-    copy (source dir)\win32\dist\scripts\net-snmp-perl-test.pl "c:\usr\bin"
+    cd (source dir)
+    copy COPYING "c:\usr\docs"
+    copy win32\dist\README.txt "c:\usr"
+    copy win32\dist\scripts\net-snmp-perl-test.pl "c:\usr\bin"
 
-    copy (source dir)\perl\Net-SNMP.ppd "c:\usr\Perl"
-    copy (source dir)\perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
-
-13. Rename c:\usr\bin\snmpconf to snmpconf.pl
-
-14. Create .ZIP file of c:\usr for archiving
+    copy perl\Net-SNMP.ppd "c:\usr\Perl"
+    copy perl\Net-SNMP.tar.gz "c:\usr\Perl\x86"
 
 
 Compiling HTMLHelp file
@@ -207,17 +205,18 @@ Note:  A temporary location of /tmp/net-snmp is used.
 
 9.  Run each script to generate the .html files:
 
-    ./mandir2html
-    ./readme2html
-    ./poddir2html
+    perl mandir2html
+    perl readme2html
+    perl poddir2html
 
     Note:  There will be many warnings from tidy which can be ignored.
 
-10. Verify each converted file to ensure all the links are correct.  In some
-    instances, URLs may be split across two lines such as the Variables link
-    at the bottom of man8-snmptrapd.8.html.
+10. Verify each converted file to ensure all the links are correct.  The files
+    are located in /tmp/net-snmp/html by default.  In some instances, URLs may be 
+    split across two lines such as the Variables link at the bottom of 
+    man8-snmptrapd.8.html.
 
-    Bold the listed commands in snmpnetstat.
+    Bold the commands listed in the SYNOPSIS section for snmpnetstat.
 
     Remove any empty man files such as:
 
@@ -225,14 +224,17 @@ Note:  A temporary location of /tmp/net-snmp is used.
     man3-netsnmp_scalar_group_group.3.html
     man3-netsnmp_watcher.3.html
 
-    You also need to remove the files from the project file (Net-SNMP.hhp).
+    You also need to remove the files from the project file 
+    (win32/dist/htmlhelp/Net-SNMP.hhp) and the Table of Contents
+    (win32/dist/htmlhelp/Net-SNMP.hhc).
 
-11. If new man pages are added or removed, the Table of Contents (toc.hhc) and
+11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
 
 12. Convert EXAMPLE.conf.win32 to html:
 
-    ./txt2html ../../EXAMPLE.conf.win32 | tidy > /tmp/net-snmp/html/EXAMPLE.conf.win32.html
+    cd (source dir)/win32/dist/scripts
+    perl txt2html ../../EXAMPLE.conf.win32 | tidy > /tmp/net-snmp/html/EXAMPLE.conf.win32.html
     
 
 Build Net-SNMP.chm
@@ -242,21 +244,22 @@ Note:  The following steps are completed using Windows.
 
 Note:  A temporary location of c:\temp\net-snmp is used.
 
-1.  Transfer /tmp/net-snmp/html from Linux to c:\temp\net-snmp
+1.  Transfer /tmp/net-snmp/html from Linux to c:\temp\net-snmp\html
 
-2.  Copy the following files to c:\temp\net-snmp:
+2.  Copy the following files to c:\temp\net-snmp\html:
 
-    (source dir)\win32\dist\htmlhelp\Configuration Overview.html
-    (source dir)\win32\dist\htmlhelp\Developer FAQ.html
-    (source dir)\win32\dist\htmlhelp\FAQ.html
-    (source dir)\win32\dist\htmlhelp\Help Caveats.html
-    (source dir)\win32\dist\htmlhelp\Introduction.html
-    (source dir)\win32\dist\htmlhelp\Net-SNMP.hhc
-    (source dir)\win32\dist\htmlhelp\Net-SNMP.hhp
-    (source dir)\win32\dist\htmlhelp\net-snmp-4.2-800.jpg
-    (source dir)\win32\dist\htmlhelp\snmp.conf.win32.html
-    (source dir)\win32\dist\htmlhelp\snmpd.conf.win32.html
-    (source dir)\win32\dist\htmlhelp\snmptrapd.conf.win32.html
+    cd (source dir)
+    copy "win32\dist\htmlhelp\Configuration Overview.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Developer FAQ.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\FAQ.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Help Caveats.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Introduction.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Net-SNMP.hhc" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Net-SNMP.hhp" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\net-snmp-4.2-800.jpg" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\snmp.conf.win32.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\snmpd.conf.win32.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\snmptrapd.conf.win32.html" c:\temp\net-snmp\html\
 
 3.  New configuration options may be available in the new release of
     Net-SNMP, so the *.conf.win32.html files should be updated.
@@ -265,40 +268,39 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     snmptrapd using:
 
     cd win32\bin (folder of *Windows* compiled Net-SNMP)
-    snmptrapd -H 2> c:\temp\snmptrapd.options
-    snmpd -H 2> c:\temp\snmpd.options
+    snmptrapd -H 2> c:\temp\net-snmp\html\snmptrapd.options
+    snmpd -H 2> c:\temp\net-snmp\html\snmpd.options
 
     Update these files using an HTML editor (Mozilla etc):
 
-    c:\temp\net-snmp\snmp.conf.win32.html
-    c:\temp\net-snmp\snmpd.conf.win32.html
-    c:\temp\net-snmp\snmptrapd.conf.win32.html
+    c:\temp\net-snmp\html\snmp.conf.win32.html
+    c:\temp\net-snmp\html\snmpd.conf.win32.html
+    c:\temp\net-snmp\html\snmptrapd.conf.win32.html
  
     Only add the relevent section to each file from the .options files
     created above, ensure the font is set to fixed width.
 
-4.  Update the Build Information in README.txt 
+4.  Run HTML Workshop
 
-5.  Run HTML Workshop
+5.  Open c:\temp\net-snmp\html\Net-SNMP.hhp
 
-6.  Open Net-SNMP.hhp
+6.  Click File - Compile
 
-7.  Click File - Compile and click Compile
+7.  Select 'C:\temp\net-snmp\html\Net-SNMP.hhp' as the filename
 
-8.  You should now have a c:\temp\Net-SNMP.chm file.
+8.  Click Compile
+
+9.  You should now have a c:\temp\net-snmp\html\Net-SNMP.chm file.
 
 
-Combining the binaries, HTMLHelp and README files
-=================================================
+Combining the binaries and HTMLHelp files
+=========================================
 
-1.  Copy the following files to c:\usr:
+1.  Copy the HTML Help file to c:\usr\docs:
 
-    (source dir)\win32\dist\README.txt
+    copy c:\temp\Net-SNMP\html\Net-SNMP.chm c:\usr\docs\
 
-2.  Copy the following files to c:\usr\docs:
-
-    (source dir)\COPYING
-    c:\temp\Net-SNMP\Net-SNMP.chm
+2.  Create a .zip file of c:\usr for archive purposes.
 
 
 Bulding a NullSoft installer package
@@ -317,7 +319,6 @@ Requirements
 
 3.  You should now have a c:\temp\Net-SNMP-x.x.x-1.exe binary installer 
     package
-
 
 
 
