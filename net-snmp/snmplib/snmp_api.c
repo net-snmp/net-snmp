@@ -111,7 +111,7 @@ oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
  */
 struct snmp_internal_session {
     int	    sd;		/* socket descriptor for this connection */
-    ipaddr  addr;	/* address of connected peer */
+    snmp_ipaddr  addr;	/* address of connected peer */
     struct request_list *requests;/* Info about outstanding requests */
     struct request_list *requestsEnd; /* ptr to end of list */
 };
@@ -151,7 +151,7 @@ struct internal_variable_list {
 struct internal_snmp_pdu {
     int     version;
 
-    ipaddr  address;    /* Address of peer */
+    snmp_ipaddr  address;    /* Address of peer */
     oid     *srcParty;
     int     srcPartyLen;
     oid     *dstParty;
@@ -171,7 +171,7 @@ struct internal_snmp_pdu {
     /* Trap information */
     oid     *enterprise;/* System OID */
     int     enterprise_length;
-    ipaddr  agent_addr; /* address of object generating trap */
+    snmp_ipaddr  agent_addr; /* address of object generating trap */
     int     trap_type;  /* trap type */
     int     specific_type;  /* specific type */
     u_long  time;       /* Uptime */
