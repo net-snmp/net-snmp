@@ -690,7 +690,7 @@ parse_mteTriggerTable(const char *token, char *line) {
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityLevel, &tmpint);
       line = read_config_read_data(ASN_OBJECT_ID, line, &tmpoid, &tmpint);
       if (!netsnmp_tdomain_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
-				&StorageTmp->pdu_tDomainLen)) {
+                                   &StorageTmp->pdu_tDomainLen)) {
 	config_perror("unsupported transport domain for mteTriggerEntry");
 	return;
       }
@@ -2202,12 +2202,17 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu) {
         
         status = snmp_synch_response(mte_callback_sess, pdu, &response);
 
-        if (status != SNMP_ERR_NOERROR) {
+        if (status != SNMP_ERR_NOERROR ||
+            response->errstat != SNMP_ERR_NOERROR) {
             /* xxx */
             char *errstr;
             snmp_error(mte_callback_sess, 0, 0, &errstr);
-            DEBUGMSGTL(("mteTriggerTable","Error received: %s, %d\n", errstr,
-                        pdu->version));
+            DEBUGMSGTL(("mteTriggerTable",
+                        "Error received: status=%d, sess_error=%s, pduerr=%d/%s, pdu version=%d\n",
+                        status, errstr,
+                        response->errstat,
+                        snmp_api_errstring(response->errstat),
+                        response->version));
             if (errstr)
                 free(errstr);
             return NULL; /* XXX: proper failure, trap sent, etc */
