@@ -29,10 +29,10 @@ INTRO
   perfect.  Then we saw the price.  Too much for an educational
   facility (it was ~$1000/host but is now closer to $200/host).  
 
-  We opted for the third route: modifying the CMU code to do the things
-  we wanted.  This gives the added benefit of being free and identical
-  on all the platforms we wanted it to run on.  This package is a
-  result of that effort.
+  We opted for the third route: modifying the CMU code to do the
+  things we wanted.  This gives the added benefit of being free and
+  would be identical on all the architectures we wished to support.
+  This package is a result of that effort.
 
   We use this agent here to monitor known system problems before they
   take the machine over.  The agent can be easily configured to
@@ -51,6 +51,7 @@ INTRO
 SUPPORTED ARCHITECTURES
 
   I'm using it on these architectures:  
+
      hppa1.1-hp-hpux9.05
         -- I develop here...  Its the architecture best supported in
 	   this package.  It is the only architecture that supports
@@ -133,6 +134,7 @@ DESIGN
 MAN PAGES/DOCUMENTATION
 
   Write them for me, would ya?  All you get is this file!
+  (they're coming...  V3.1 at the latest)
 
 CONFIGURATION
 
@@ -148,7 +150,7 @@ CONFIGURATION
   This checks the process list for PROCESSNAME, and reports an error
   if not found or less than MIN are found or more than MAX are found.
 
-  e.g.:  snmpwalk -v 1 host public EXTENSIBLEMIB.PROCMIBNUM.100
+  e.g.:  snmpwalk -v 1 host public local.processes.100
          -- reports errors on the host (flags:  1 if err, 0 if none).
          -- this will work for all enclosed mibs, not just "proc".
 

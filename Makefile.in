@@ -29,10 +29,10 @@ install:    subdirs installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) \
 	done
-	$(INSTALL) mib.txt $(smplibdir)
+	@$(INSTALL) mib.txt $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
 
 installdirs:
-	$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir)
+	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir)
 
 
 apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd: makeall
