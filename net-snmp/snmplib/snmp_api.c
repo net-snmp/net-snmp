@@ -5259,7 +5259,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	  }
 	  free(lvalue);
 	}
-	snmp_pdu_add_variable(pdu, name, name_length, ASN_BIT_STR,
+	snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
 	  		      buf, tint);
 	break;
 
