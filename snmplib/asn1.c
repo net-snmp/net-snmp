@@ -585,7 +585,7 @@ asn_parse_length(u_char  *data,
 	*length = 0;  /* protect against short lengths */
 	memmove(length, data + 1, (int)lengthbyte);
 	*length = ntohl(*length);
-	*length >>= (8 * ((sizeof(int)) - lengthbyte));
+	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
 	return data + lengthbyte + 1;
     } else { /* short asnlength */
 	*length = (long)lengthbyte;

@@ -262,14 +262,18 @@ getKstat(char *statname, char *varname, void *value)
 	*(ulong_t *)v = d->value.ul;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ul));
 	break;
+#if KSTAT_DATA_LONGLONG != KSTAT_DATA_LONG
       case KSTAT_DATA_LONGLONG:
 	*(longlong_t *)v = d->value.ll;
 	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", (long)d->value.ll));
 	break;
+#endif
+#if KSTAT_DATA_ULONGLONG != KSTAT_DATA_ULONG
       case KSTAT_DATA_ULONGLONG:
 	*(u_longlong_t *)v = d->value.ull;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", (unsigned long)d->value.ul));
 	break;
+#endif
       case KSTAT_DATA_FLOAT:
 	*(float *)v = d->value.f;
 	DEBUGMSGTL(("kernel_sunos5", "value: %f\n", d->value.f));
@@ -279,6 +283,8 @@ getKstat(char *statname, char *varname, void *value)
         DEBUGMSGTL(("kernel_sunos5", "value: %f\n", d->value.d));
 	break;
       default:
+	fprintf(stderr, "Unknown type in kstat data: %s %s %d\n",
+		statname, varname, d->data_type);
 	ret = -3;
 	goto Return;		/* Invalid data type */
       }
