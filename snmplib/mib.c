@@ -4031,6 +4031,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
     if (*buf != NULL) {
         *(*buf + *out_len - 1) = '\0';  /* remove trailing dot */
+        *out_len = *out_len - 1;
     }
     return NULL;
 }
