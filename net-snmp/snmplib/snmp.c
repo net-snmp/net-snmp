@@ -74,6 +74,21 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/mib.h>
 
+/** @mainpage Net-SNMP Coding Documentation
+ * @section Introduction
+  
+   This is the Net-SNMP coding and API reference documentation.  It is
+   incomplete, but when combined with the manual page set and
+   tutorials forms a pretty comprehensive starting point.
+
+   @section Starting out
+
+   The best places to start learning are the @e Net-SNMP @e tutorial
+   (http://www.Net-SNMP.org/tutorial-5/) and the @e Modules and @e
+   Examples sections of this document.
+
+*/
+
 void
 xdump(const u_char * cp, size_t length, const char *prefix)
 {
