@@ -37,6 +37,7 @@ INCLUDESUBDIRHEADERS=agent_read_config.h \
 	agent_callbacks.h
 
 INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
+			  ../include/net-snmp/agent/agent_module_config.h \
 			mibgroup/mib_module_includes.h
 INSTALLBUILTSUBDIR=agent
 
