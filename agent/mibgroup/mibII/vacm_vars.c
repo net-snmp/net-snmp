@@ -73,21 +73,12 @@ init_vacm_vars (void)
 #define PRIVRW	(SNMPV2ANY | 0x5000)
 
   struct variable2 vacm_sec2group[] = {
-    /*
-    {SECURITYMODEL, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {1}},
-    {SECURITYNAME, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {2}},
-    */
     {SECURITYGROUP, ASN_OCTET_STR, PRIVRW, var_vacm_sec2group, 1, {3}},
     {SECURITYSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {4}},
     {SECURITYSTATUS, ASN_INTEGER, PRIVRW, var_vacm_sec2group, 1, {5}},
   };
 
   struct variable2 vacm_access[] = {
-    /*
-    {ACCESSPREFIX, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {1}},
-    {ACCESSMODEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {2}},
-    {ACCESSLEVEL, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {3}},
-    */
     {ACCESSMATCH, ASN_INTEGER, PRIVRW, var_vacm_access, 1, {4}},
     {ACCESSREAD, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {5}},
     {ACCESSWRITE, ASN_OCTET_STR, PRIVRW, var_vacm_access, 1, {6}},
@@ -97,10 +88,6 @@ init_vacm_vars (void)
   };
 
   struct variable2 vacm_view[] = {
-    /*
-    {VIEWNAME, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {1}},
-    {VIEWSUBTREE, ASN_OBJECT_ID, PRIVRW, var_vacm_view, 1, {2}},
-    */
     {VIEWMASK, ASN_OCTET_STR, PRIVRW, var_vacm_view, 1, {3}},
     {VIEWTYPE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {4}},
     {VIEWSTORAGE, ASN_INTEGER, PRIVRW, var_vacm_view, 1, {5}},
