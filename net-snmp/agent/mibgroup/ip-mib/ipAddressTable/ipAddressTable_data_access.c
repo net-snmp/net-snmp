@@ -347,14 +347,6 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
      * handle data that isn't part of the data_access ipaddress structure
      */
     rowreq_ctx->ipAddressRowStatus = ROWSTATUS_ACTIVE;
-    /*
-     * xxx-rks: until we can figure out where an address came from,
-     * we really have no idea why kind of storage type it has. so
-     * we'll advertise it as volatile, so we aren't promising that
-     * it will survive a reboot.
-     */
-    rowreq_ctx->ipAddressStorageType = STORAGETYPE_VOLATILE;
-
 }
 
 /**

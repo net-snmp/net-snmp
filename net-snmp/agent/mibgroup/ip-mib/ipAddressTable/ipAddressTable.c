@@ -17,6 +17,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <net-snmp/data_access/interface.h>
+
 /*
  * include our parent header 
  */
@@ -889,7 +891,7 @@ ipAddressStorageType_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ipAddressStorageType_val_ptr ) from rowreq_ctx->data->
      */
-    (* ipAddressStorageType_val_ptr ) = rowreq_ctx->ipAddressStorageType;
+    (* ipAddressStorageType_val_ptr ) = rowreq_ctx->data->ia_storagetype;
 
     return MFD_SUCCESS;
 }
@@ -1010,18 +1012,11 @@ ipAddressTable_validate_index(ipAddressTable_registration_ptr
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
      * Validate incoming index(es)
+     *
+     * or not... we'll just let
      */
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    /*
-     * TODO:
-     * update this code or row creation won't work
-     */
-    if (1) {
+    if ((4 != rowreq_ctx->tbl_idx.ipAddressAddr_len)) {
         snmp_log(LOG_WARNING, "invalid index for a new row in the "
                  "ipAddressTable table.\n");
         /*
@@ -1039,10 +1034,13 @@ ipAddressTable_validate_index(ipAddressTable_registration_ptr
             return MFD_CANNOT_CREATE_NOW;
         }
     }
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
+    else {
+        rowreq_ctx->data->ia_address[0] = rowreq_ctx->tbl_idx.ipAddressAddr[0];
+        rowreq_ctx->data->ia_address[1] = rowreq_ctx->tbl_idx.ipAddressAddr[1];
+        rowreq_ctx->data->ia_address[2] = rowreq_ctx->tbl_idx.ipAddressAddr[2];
+        rowreq_ctx->data->ia_address[3] = rowreq_ctx->tbl_idx.ipAddressAddr[3];
+        rowreq_ctx->data->ia_address_len = 4;
+    }
 
     return rc;
 }
@@ -1077,6 +1075,20 @@ ipAddressTable_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /** we should have a non-NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
+    /*
+     * check for storage types that don't allow modification.
+     * probably should try and do this earlier (and we could, by
+     * adding code to the interface file), but this ought to suffice.
+     */
+    if (STORAGETYPE_READONLY == rowreq_ctx->data->ia_storagetype) {
+        DEBUGMSGTL(("ipAddressTable", "can't change readonly row\n"));
+        return MFD_NOT_VALID_EVER;
+    }
+
+    /*
+     * save last changed
+     */
+    rowreq_ctx->ipAddressLastChanged_undo = rowreq_ctx->ipAddressLastChanged;
 
     return rc;
 }
@@ -1119,7 +1131,7 @@ ipAddressTable_undo_cleanup(ipAddressTable_rowreq_ctx * rowreq_ctx)
  * this commit will not fail.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * ipAddressTable.h.
  *
@@ -1143,77 +1155,58 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /*
      * save flags, then clear until we actually do something
      */
-    save_flags = rowreq_ctx->set_flags;
-    rowreq_ctx->set_flags = 0;
+    save_flags = rowreq_ctx->column_set_flags;
+    rowreq_ctx->column_set_flags = 0;
 
     /*
      * TODO:
      * commit data
      */
-#if 1
-#warning ipAddressTable commit
-#else
-    if (save_flags & FLAG_IPADDRESSIFINDEX) {
-        save_flags &= ~FLAG_IPADDRESSIFINDEX;   /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IPADDRESSIFINDEX;
-        }
-    }
 
-    if (save_flags & FLAG_IPADDRESSTYPE) {
-        save_flags &= ~FLAG_IPADDRESSTYPE;      /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IPADDRESSTYPE;
-        }
-    }
+    /*
+     * pass everything to data access
+     */
 
-    if (save_flags & FLAG_IPADDRESSSTATUS) {
-        save_flags &= ~FLAG_IPADDRESSSTATUS;    /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IPADDRESSSTATUS;
-        }
-    }
+    /*
+     * let data access know what columns are set
+     */
+    rowreq_ctx->data->flags = save_flags;
 
     if (save_flags & FLAG_IPADDRESSROWSTATUS) {
         save_flags &= ~FLAG_IPADDRESSROWSTATUS; /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IPADDRESSROWSTATUS;
+
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            netsnmp_assert(ROWSTATUS_CREATEANDGO == 
+                           rowreq_ctx->ipAddressRowStatus);
+            rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CREATE;
+            rowreq_ctx->ipAddressCreated = netsnmp_get_agent_uptime();
         }
+        else if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
+            rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_DELETE;
+        }
+        else
+            rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
+    }
+    else
+        rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CHANGE;
+
+    /*
+     * do it
+     */
+    rc = netsnmp_access_ipaddress_entry_set(rowreq_ctx->data);
+    if (rc) {
+        DEBUGMSGTL(("ipAddressTable",
+                    "bad rc %d from IP address data access\n", rc));
+        rc = MFD_ERROR;
+    }
+    else {
+        rowreq_ctx->ipAddressLastChanged = netsnmp_get_agent_uptime();
+        /*
+         * set flag, in case we need to undo
+         */
+        rowreq_ctx->column_set_flags |= save_flags;
     }
 
-    if (save_flags & FLAG_IPADDRESSSTORAGETYPE) {
-        save_flags &= ~FLAG_IPADDRESSSTORAGETYPE;       /* clear */
-        rc = TODO_commit_colum(...);
-        if (rc == TODO_success_code) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_IPADDRESSSTORAGETYPE;
-        }
-    }
-
-    if (save_flags) {
-        snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
-                 save_flags);
-        return MFD_ERROR;
-    }
-#endif
     return rc;
 }
 
@@ -1221,7 +1214,7 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
  * undo commit new values.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * ipAddressTable.h.
  *
@@ -1245,6 +1238,9 @@ ipAddressTable_undo_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * TODO:
      * undo commit data
      */
+#warning "ipAddressTable undo commit"
+
+    rowreq_ctx->ipAddressLastChanged = rowreq_ctx->ipAddressLastChanged_undo;
 
     return rc;
 }
@@ -1293,6 +1289,16 @@ ipAddressAddrType_check_index(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * check that index value in the table context (rowreq_ctx)
      * for ipAddressAddrType is legal
      */
+    switch (rowreq_ctx->tbl_idx.ipAddressAddrType) {
+
+        case INETADDRESSTYPE_IPV4:
+        case INETADDRESSTYPE_IPV6:
+            break;
+
+        default:
+            DEBUGMSGT(("ipAddressTable", "illegal addr type\n"));
+            return MFD_ERROR;
+    }
 
     /*
      * if everything looks ok, return MFD_SUCCESS 
@@ -1349,10 +1355,30 @@ ipAddressAddr_check_index(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
      * check that index value in the table context (rowreq_ctx)
      * for ipAddressAddr is legal
      */
+
+    switch (rowreq_ctx->tbl_idx.ipAddressAddrType) {
+
+        case INETADDRESSTYPE_IPV4:
+            if (4 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
+                DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
+                return MFD_ERROR;
+            }
+            break;
+
+        case INETADDRESSTYPE_IPV6:
+            /** xxx-rks: allow 20? */
+            if (16 != rowreq_ctx->tbl_idx.ipAddressAddr_len) {
+                DEBUGMSGT(("ipAddressTable", "bad addr len\n"));
+                return MFD_ERROR;
+            }
+            break;
+
+        default:
+            return MFD_ERROR;
+    }
 
     /*
      * if everything looks ok, return MFD_SUCCESS 
@@ -1440,9 +1466,33 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
+     * if the new value is the same as the old, accept it.
+     */
+    if (ipAddressIfIndex_val == rowreq_ctx->data->if_index)
+        return MFD_SUCCESS;
+
+    /*
      * TODO:
      * check that new value is legal
      */
+    /*
+     * currently don't support moving addresses between interfaces, so
+     * if this isn't a new row, return error.
+     */
+    if (! (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED)) {
+        DEBUGMSGT(("ipAddressTable",
+                   "changing ifIndex value not supported\n"));
+        return MFD_NOT_VALID_EVER;
+    }
+
+    /*
+     * find name for ifIndex
+     */
+    if (NULL == netsnmp_access_interface_name_find(ipAddressIfIndex_val)) {
+        DEBUGMSGT(("ipAddressTable", "cant find name for index %d\n",
+                   ipAddressIfIndex_val));
+        return MFD_NOT_VALID_NOW;
+    }
 
     /*
      * if everything looks ok, return 0 
@@ -1479,11 +1529,9 @@ ipAddressIfIndex_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressIfIndex data
      * copy ipAddressIfIndex data
-     *  from rowreq_ctx->data->ipAddressIfIndex to rowreq_ctx->undo->ipAddressIfIndex
      */
-
+     rowreq_ctx->undo->if_index = rowreq_ctx->data->if_index;
 
     return MFD_SUCCESS;
 }
@@ -1501,7 +1549,6 @@ int
 ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
                      long ipAddressIfIndex_val)
 {
-
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressIfIndex_set",
                 "called\n"));
 
@@ -1509,18 +1556,11 @@ ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /*
-     * TODO:
      * set ipAddressIfIndex value in rowreq_ctx->data->
      */
+    rowreq_ctx->data->if_index = ipAddressIfIndex_val;
 
-    return MFD_NOT_WRITABLE;
+    return MFD_SUCCESS;
 }
 
 /**
@@ -1539,12 +1579,10 @@ ipAddressIfIndex_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressIfIndex data
      * copy ipAddressIfIndex data
-     *  from rowreq_ctx->undo->ipAddressIfIndex to rowreq_ctx->data->ipAddressIfIndex
      */
-
-
+    rowreq_ctx->data->if_index = rowreq_ctx->undo->if_index;
+    
     return MFD_SUCCESS;
 }
 
@@ -1626,9 +1664,12 @@ ipAddressType_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
      * check that new value is legal
+     *
+     * no support for anything but unicast yet
      */
+    if (ipAddressType_val != IPADDRESSTYPE_UNICAST)
+        return MFD_NOT_VALID_EVER;
 
     /*
      * if everything looks ok, return 0 
@@ -1665,11 +1706,9 @@ ipAddressType_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressType data
      * copy ipAddressType data
-     *  from rowreq_ctx->data->ipAddressType to rowreq_ctx->undo->ipAddressType
      */
-
+     rowreq_ctx->undo->ia_type = rowreq_ctx->data->ia_type;
 
     return MFD_SUCCESS;
 }
@@ -1693,46 +1732,10 @@ ipAddressType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
-    return MFD_NOT_WRITABLE;
     /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    switch (ipAddressType_val) {
-    case IPADDRESSTYPE_UNICAST:
-        ipAddressType_val = INTERNAL_IPADDRESSTYPE_UNICAST;
-        break;
-
-    case IPADDRESSTYPE_ANYCAST:
-        ipAddressType_val = INTERNAL_IPADDRESSTYPE_ANYCAST;
-        break;
-
-    case IPADDRESSTYPE_BROADCAST:
-        ipAddressType_val = INTERNAL_IPADDRESSTYPE_BROADCAST;
-        break;
-
-    default:
-        snmp_log(LOG_ERR,
-                 "couldn't reverse map value %d for ipAddressType\n",
-                 ipAddressType_val);
-        return SNMP_ERR_GENERR;
-    }
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
-
-    /*
-     * TODO:
      * set ipAddressType value in rowreq_ctx->data->
      */
+     rowreq_ctx->data->ia_type = ipAddressType_val;
 
     return MFD_SUCCESS;
 }
@@ -1752,11 +1755,9 @@ ipAddressType_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressType data
      * copy ipAddressType data
-     *  from rowreq_ctx->undo->ipAddressType to rowreq_ctx->data->ipAddressType
      */
-
+     rowreq_ctx->data->ia_type = rowreq_ctx->undo->ia_type;
 
     return MFD_SUCCESS;
 }
@@ -1845,7 +1846,11 @@ ipAddressStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /*
      * TODO:
      * check that new value is legal
+     *
+     * nothing but preferred supported yet
      */
+    if (IPADDRESSSTATUSTC_PREFERRED != ipAddressStatus_val)
+        return MFD_NOT_VALID_EVER;
 
     /*
      * if everything looks ok, return 0 
@@ -1882,11 +1887,9 @@ ipAddressStatus_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressStatus data
      * copy ipAddressStatus data
-     *  from rowreq_ctx->data->ipAddressStatus to rowreq_ctx->undo->ipAddressStatus
      */
-
+    rowreq_ctx->undo->ia_status = rowreq_ctx->data->ia_status;
 
     return MFD_SUCCESS;
 }
@@ -1910,58 +1913,11 @@ ipAddressStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
-    return MFD_NOT_WRITABLE;
-    /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    switch (ipAddressStatus_val) {
-    case IPADDRESSSTATUSTC_PREFERRED:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_PREFERRED;
-        break;
-
-    case IPADDRESSSTATUSTC_INVALID:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_INVALID;
-        break;
-
-    case IPADDRESSSTATUSTC_INACCESSIBLE:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_INACCESSIBLE;
-        break;
-
-    case IPADDRESSSTATUSTC_UNKNOWN:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_UNKNOWN;
-        break;
-
-    case IPADDRESSSTATUSTC_TENTATIVE:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_TENTATIVE;
-        break;
-
-    case IPADDRESSSTATUSTC_DUPLICATE:
-        ipAddressStatus_val = INTERNAL_IPADDRESSSTATUS_DUPLICATE;
-        break;
-
-    default:
-        snmp_log(LOG_ERR,
-                 "couldn't reverse map value %d for ipAddressStatus\n",
-                 ipAddressStatus_val);
-        return SNMP_ERR_GENERR;
-    }
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
-
     /*
      * TODO:
      * set ipAddressStatus value in rowreq_ctx->data->
      */
+    rowreq_ctx->data->ia_status = ipAddressStatus_val;
 
     return MFD_SUCCESS;
 }
@@ -1982,11 +1938,9 @@ ipAddressStatus_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressStatus data
      * copy ipAddressStatus data
-     *  from rowreq_ctx->undo->ipAddressStatus to rowreq_ctx->data->ipAddressStatus
      */
-
+    rowreq_ctx->data->ia_status = rowreq_ctx->undo->ia_status;
 
     return MFD_SUCCESS;
 }
@@ -2071,6 +2025,8 @@ int
 ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                u_long ipAddressRowStatus_val)
 {
+    int rc;
+
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressRowStatus_check_value",
                 "called\n"));
 
@@ -2080,7 +2036,19 @@ ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /*
      * TODO:
      * check that new value is legal
+     *
+     * don't support createAndWait
+     * check for valid RowStatus transition (old, new)
      */
+    if (ROWSTATUS_CREATEANDWAIT == ipAddressRowStatus_val) {
+        DEBUGMSGTL(("ipAddressTable", "createAndWait not supported\n"));
+        return MFD_NOT_VALID_EVER;
+    }
+
+    rc = check_rowstatus_transition(rowreq_ctx->ipAddressRowStatus,
+                                    ipAddressRowStatus_val);
+    if (MFD_SUCCESS != rc )
+        return rc;
 
     /*
      * if everything looks ok, return 0 
@@ -2117,11 +2085,9 @@ ipAddressRowStatus_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressRowStatus data
      * copy ipAddressRowStatus data
-     *  from rowreq_ctx->data->ipAddressRowStatus to rowreq_ctx->undo->ipAddressRowStatus
      */
-
+    rowreq_ctx->ipAddressRowStatus_undo = rowreq_ctx->ipAddressRowStatus;
 
     return MFD_SUCCESS;
 }
@@ -2146,58 +2112,10 @@ ipAddressRowStatus_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
-    return MFD_NOT_WRITABLE;
     /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    switch (ipAddressRowStatus_val) {
-    case ROWSTATUS_ACTIVE:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_ACTIVE;
-        break;
-
-    case ROWSTATUS_NOTINSERVICE:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_NOTINSERVICE;
-        break;
-
-    case ROWSTATUS_NOTREADY:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_NOTREADY;
-        break;
-
-    case ROWSTATUS_CREATEANDGO:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_CREATEANDGO;
-        break;
-
-    case ROWSTATUS_CREATEANDWAIT:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_CREATEANDWAIT;
-        break;
-
-    case ROWSTATUS_DESTROY:
-        ipAddressRowStatus_val = INTERNAL_IPADDRESSROWSTATUS_DESTROY;
-        break;
-
-    default:
-        snmp_log(LOG_ERR,
-                 "couldn't reverse map value %d for ipAddressRowStatus\n",
-                 ipAddressRowStatus_val);
-        return SNMP_ERR_GENERR;
-    }
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
-
-    /*
-     * TODO:
      * set ipAddressRowStatus value in rowreq_ctx->data->
      */
+    rowreq_ctx->ipAddressRowStatus = ipAddressRowStatus_val;
 
     return MFD_SUCCESS;
 }
@@ -2218,11 +2136,9 @@ ipAddressRowStatus_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressRowStatus data
      * copy ipAddressRowStatus data
-     *  from rowreq_ctx->undo->ipAddressRowStatus to rowreq_ctx->data->ipAddressRowStatus
      */
-
+    rowreq_ctx->ipAddressRowStatus = rowreq_ctx->ipAddressRowStatus_undo;
 
     return MFD_SUCCESS;
 }
@@ -2299,6 +2215,8 @@ int
 ipAddressStorageType_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                  u_long ipAddressStorageType_val)
 {
+    int rc;
+
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressStorageType_check_value",
                 "called\n"));
 
@@ -2306,9 +2224,31 @@ ipAddressStorageType_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
-     * check that new value is legal
+     * since I don't know how the various operating systems
+     * deal with ip addresses, and whether or not changes will
+     * be saved on reboot, so don't allow rows to be set to anything
+     * but volatile. I'd prefer other, but since the default for
+     * new rows, per the mib, is volatile...
+     *
+     * If some industrious soul would like
+     * non-volaltile support, the first would need to 
+     *   add it in  the data access code for their os
+     *   define a flag bit for volatile/permanent/readonly
+     *   set the bit in data access
+     *   copy the bit to a new var in the rowreq_ctx (see _add_new_entry)
+     *        with a default of volatile (for os' w/out nonvolatile support)
+     *   update this code to use new flag
      */
+    if (STORAGETYPE_VOLATILE != ipAddressStorageType_val)
+        return MFD_NOT_VALID_EVER;
+
+    /*
+     * check for valid StorageType transition (old, new)
+     */
+    rc = check_storage_transition(rowreq_ctx->data->ia_storagetype,
+                                  ipAddressStorageType_val);
+    if (MFD_SUCCESS != rc )
+        return rc;
 
     /*
      * if everything looks ok, return 0 
@@ -2345,11 +2285,9 @@ ipAddressStorageType_undo_setup(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressStorageType data
      * copy ipAddressStorageType data
-     *  from rowreq_ctx->data->ipAddressStorageType to rowreq_ctx->undo->ipAddressStorageType
      */
-
+    rowreq_ctx->undo->ia_storagetype = rowreq_ctx->data->ia_storagetype;
 
     return MFD_SUCCESS;
 }
@@ -2374,55 +2312,10 @@ ipAddressStorageType_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 
-    return MFD_NOT_WRITABLE;
     /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
+     * set ipAddressStorageType value
      */
-    /*
-     ***************************************************
-     ***             START EXAMPLE CODE              ***
-     ***---------------------------------------------***/
-    switch (ipAddressStorageType_val) {
-    case STORAGETYPE_OTHER:
-        ipAddressStorageType_val = INTERNAL_IPADDRESSSTORAGETYPE_OTHER;
-        break;
-
-    case STORAGETYPE_VOLATILE:
-        ipAddressStorageType_val = INTERNAL_IPADDRESSSTORAGETYPE_VOLATILE;
-        break;
-
-    case STORAGETYPE_NONVOLATILE:
-        ipAddressStorageType_val =
-            INTERNAL_IPADDRESSSTORAGETYPE_NONVOLATILE;
-        break;
-
-    case STORAGETYPE_PERMANENT:
-        ipAddressStorageType_val = INTERNAL_IPADDRESSSTORAGETYPE_PERMANENT;
-        break;
-
-    case STORAGETYPE_READONLY:
-        ipAddressStorageType_val = INTERNAL_IPADDRESSSTORAGETYPE_READONLY;
-        break;
-
-    default:
-        snmp_log(LOG_ERR,
-                 "couldn't reverse map value %d for ipAddressStorageType\n",
-                 ipAddressStorageType_val);
-        return SNMP_ERR_GENERR;
-    }
-    /*
-     ***---------------------------------------------***
-     ***              END  EXAMPLE CODE              ***
-     ***************************************************/
-
-    /*
-     * TODO:
-     * set ipAddressStorageType value in rowreq_ctx->data->
-     */
+    rowreq_ctx->data->ia_storagetype = ipAddressStorageType_val;
 
     return MFD_SUCCESS;
 }
@@ -2443,11 +2336,9 @@ ipAddressStorageType_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO: copy ipAddressStorageType data
      * copy ipAddressStorageType data
-     *  from rowreq_ctx->undo->ipAddressStorageType to rowreq_ctx->data->ipAddressStorageType
      */
-
+    rowreq_ctx->data->ia_storagetype = rowreq_ctx->undo->ia_storagetype;
 
     return MFD_SUCCESS;
 }
@@ -2456,7 +2347,7 @@ ipAddressStorageType_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
  * check dependencies
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * ipAddressTable.h.
  *
@@ -2468,7 +2359,7 @@ ipAddressStorageType_undo(ipAddressTable_rowreq_ctx * rowreq_ctx)
 int
 ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx * rowreq_ctx)
 {
-    int             rc = SNMP_ERR_NOERROR;
+    int             rc = MFD_SUCCESS;
 
     netsnmp_assert(NULL != rowreq_ctx);
 
@@ -2482,23 +2373,57 @@ ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * For example, two columns allocating a percentage of something
      * should add up to 100%.
      */
-    /*
-     * check for valid RowStatus transition (old, new)
-     */
-#if 1
-#warning ipAddressRowStatus in check dependencies
-#else
-    rc = check_rowstatus_transition(rowreq_ctx->undo->ipAddressRowStatus,
-                                    rowreq_ctx->data->ipAddressRowStatus);
 
     /*
-     * check for valid StorageType transition (old, new)
+     * check RowStatus dependencies
      */
-    rc = check_storagetype_transition(rowreq_ctx->undo->
-                                      ipAddressStorageType,
-                                      rowreq_ctx->data->
-                                      ipAddressStorageType);
-#endif
+    if (rowreq_ctx->column_set_flags & FLAG_IPADDRESSROWSTATUS) {
+        /*
+         * row creation requirements
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            netsnmp_assert(ROWSTATUS_CREATEANDGO == 
+                           rowreq_ctx->ipAddressRowStatus);
+            
+            if (rowreq_ctx->column_set_flags != IPADDRESS_REQUIRED_COLS) {
+                DEBUGMSGTL(("ipAddressTable",
+                            "required columns missing (%p!=%p)\n",
+                            rowreq_ctx->column_set_flags,
+                            IPADDRESS_REQUIRED_COLS));
+                return MFD_CANNOT_CREATE_NOW;
+            }
+        }
+        else {
+            /*
+             * row change requirements
+             */
+            /*
+             * don't allow a destroy if any other value was changed, since
+             * that might call data access routines with bad info.
+             *
+             * yyy-rks: should we require the row be notInService before it
+             * can be destroyed?
+             */
+            if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
+                if (rowreq_ctx->column_set_flags & ~FLAG_IPADDRESSROWSTATUS) {
+                    DEBUGMSGTL(("ipAddressTable",
+                                "destroy must be only varbind for row\n"));
+                    return MFD_NOT_VALID_NOW;
+                }
+            }
+        }
+    }
+    else {
+        /*
+         * must have row status to create a row
+         */
+        if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
+            DEBUGMSGTL(("ipAddressTable",
+                        "must use RowStatus to create rows\n"));
+            return MFD_CANNOT_CREATE_NOW;
+        }
+    }
+
     return rc;
 }
 
