@@ -924,10 +924,10 @@ void *Retrieve_Table_Data( mib_table_t t, int* max_idx)
 extern struct timeval starttime;
 
 		/* Return the value of 'sysUpTime' at the given marker */
-int
+u_long
 marker_uptime( marker_t pm )
 {
-    int res;
+    u_long res;
     marker_t start = (marker_t)&starttime;
 
     res = atime_diff( start, pm );
@@ -935,10 +935,10 @@ marker_uptime( marker_t pm )
 }
 
 		/* Return the number of timeTicks since the given marker */
-int
+u_long
 marker_tticks( marker_t pm )
 {
-    int res;
+    u_long res;
     marker_t now = atime_newMarker();
 
     res = atime_diff( pm, now );
@@ -947,12 +947,12 @@ marker_tticks( marker_t pm )
 }
 
 			/* struct timeval equivalents of these */
-int timeval_uptime( struct timeval *tv )
+u_long timeval_uptime( struct timeval *tv )
 {
     return marker_uptime((marker_t)tv);
 }
 
-int timeval_tticks( struct timeval *tv )
+u_long timeval_tticks( struct timeval *tv )
 {
     return marker_tticks((marker_t)tv);
 }

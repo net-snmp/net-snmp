@@ -141,8 +141,8 @@ char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
 typedef void * marker_t;
 marker_t atime_newMarker(void);
 void atime_setMarker(marker_t pm);
-long atime_diff( marker_t first, marker_t second );
-int atime_ready( marker_t pm, int deltaT);
+u_long atime_diff( marker_t first, marker_t second );
+u_long atime_ready( marker_t pm, u_long deltaT);
 
 #ifdef __cplusplus
 }

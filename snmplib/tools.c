@@ -608,7 +608,7 @@ void atime_setMarker(marker_t pm)
 /*
  * Returns the difference (in msec) between the two markers
  */
-long atime_diff( marker_t first, marker_t second )
+u_long atime_diff( marker_t first, marker_t second )
 {
     struct timeval *tv1, *tv2, diff;
 
@@ -625,10 +625,10 @@ long atime_diff( marker_t first, marker_t second )
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
-int atime_ready( marker_t pm, int deltaT)
+u_long atime_ready( marker_t pm, u_long deltaT)
 {
   marker_t now;
-  long diff;
+  u_long diff;
   if (! pm) return 0;
 
   now = atime_newMarker();
