@@ -769,11 +769,15 @@ sub inform {
 # $sess->inform(uptime => 1234,
 #             oid => 'coldStart',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
-#                                                          # always last
+#                                                          # then callback
+                                                           # always last
 
 
    my $this = shift;
-   my $vars = pop if ref($_[$#_]); # last arg may be varbind or varlist
+   my $vars;
+   my $cb;
+   $cb = pop if ref($_[$#_]) eq 'CODE'; # last arg may be code
+   $vars = pop if ref($_[$#_]); # varbind or varlist
    my %param = @_;
    my ($varbind_list_ref, @res);
 
@@ -788,8 +792,9 @@ sub inform {
 
    my $trap_oid = $param{oid} || $param{trapoid};
    my $uptime = $param{uptime} || SNMP::_sys_uptime();
+
    if($this->{Version} eq '3') {
-     @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref);
+     @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref, $cb);
    } else {
      warn("error:inform: This version doesn't support the command\n");
    }

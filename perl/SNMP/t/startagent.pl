@@ -1,10 +1,29 @@
-
+# common parameters used in SNMP::Session creation and tests
 $agent_host = 'localhost';
 $agent_port = 7000;
 $trap_port = 8000;
 $comm = 'v1_private';
-$comm2 = 'v2_private';
+$comm2 = 'v2c_private';
 $comm3 = 'v3_private';
+$sec_name = 'v3_user';
+$oid = '.1.3.6.1.2.1.1.1';
+$name = 'sysDescr';
+$auth_pass = 'test_pass_auth';
+$priv_pass = 'test_pass_priv';
+
+
+
+# erroneous input to test failure cases
+$bad_comm = 'BAD_COMMUNITY';
+$bad_name = "badName";
+$bad_oid = ".1.3.6.1.2.1.1.1.1.1.1";
+$bad_host = 'bad.host.here';
+$bad_port = '9999999';
+$bad_auth_pass = 'bad_auth_pass';
+$bad_priv_pass = 'bad_priv_pass';
+$bad_sec_name = 'bad_sec_name';
+$bad_version = 7;
+
 local $snmpd_cmd;
 local $snmptrapd_cmd;
 my $line;
