@@ -30,6 +30,8 @@ static int   debug_num_tokens=0;
 static char *debug_tokens[MAX_DEBUG_TOKENS];
 static int   debug_print_everything=0;
 
+#define SNMP_DEBUG_BUFSIZ 4096
+
 void
 #ifdef STDC_HEADERS
 DEBUGP(const char *first, ...)
@@ -58,7 +60,7 @@ void
 DEBUGPOID(oid *theoid,
 	  int len)
 {
-  char c_oid[MAX_NAME_LEN];
+  char c_oid[SNMP_DEBUG_BUFSIZ];
   sprint_objid(c_oid,theoid,len);
   DEBUGP(c_oid);
 }
@@ -142,7 +144,7 @@ debugmsg(va_alist)
 
 void
 debugmsg_oid(char *token, oid *theoid, int len) {
-  char c_oid[MAX_NAME_LEN];
+  char c_oid[SNMP_DEBUG_BUFSIZ];
   
   sprint_objid(c_oid, theoid, len);
   debugmsg(token, c_oid);
@@ -156,15 +158,21 @@ debugmsgtoken(va_alist)
   va_dcl
 #endif
 {
+  va_list debugargs;
+
 #ifndef STDC_HEADERS
   const char *token;
   va_list debugargs;
 
   va_start(debugargs);
   token = va_arg(debugargs, const char *);
+#else
+  va_start(debugargs,format);
 #endif
 
   debugmsg(token, "%s: ", token);
+
+  va_end(debugargs);
 }
   
 void
