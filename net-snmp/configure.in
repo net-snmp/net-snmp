@@ -300,6 +300,12 @@ AC_AIX
 
 AC_C_CONST
 
+dnl get version number.
+AC_MSG_CHECKING(for ucd-snmp version number)
+VERSION=`cat $srcdir/version.h | sed 's/";//;s/.*"//;s/pre/0./;'`
+AC_SUBST(VERSION)
+AC_MSG_RESULT($VERSION)
+
 AC_MSG_CHECKING(for developer flags)
 if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
   dnl turn on the developer flag when taken from a CVS checkout (not a release)

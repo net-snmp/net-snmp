@@ -55,8 +55,8 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd:	${AGENTOBJS} $(USELIBS) $(LIBTARG)
-	$(LIBTOOL) ${CC} $(CFLAGS) -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
+snmpd:	${LAGENTOBJS} $(USELIBS) $(LIBTARG)
+	$(LIBTOOL) ${CC} $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
 libucdagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
@@ -68,7 +68,8 @@ libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(RANLIB) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 clean:
-	rm -f ${LMIBOBJS} ${LAGENTOBJS} ${MIBOBJS} ${AGENTOBJS} \
+	rm -f ${LMIBOBJS} ${LAGENTOBJS} ${LLIBAGENTOBJS} ${MIBOBJS} \
+		${LIBAGENTOBJS} ${AGENTOBJS} \
 		${TARG} ${LIBTARG} ${CLEANTARG}
 	rm -rf .libs
 	cd mibgroup; $(MAKE) clean
