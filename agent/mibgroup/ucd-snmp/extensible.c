@@ -420,7 +420,7 @@ fixExecError(int action,
         tmp = *((long *) var_val);
         if ((tmp == 1) && (action == COMMIT) && (exten->fixcmd[0] != 0)) {
             sprintf(ex.command, exten->fixcmd);
-            if ((fd = get_exec_output(&ex))) {
+            if ((fd = get_exec_output(&ex)) != -1) {
                 file = fdopen(fd, "r");
                 while (fgets(ex.output, sizeof(ex.output), file) != NULL);
                 fclose(file);
@@ -515,7 +515,7 @@ var_extensible_relocatable(struct variable *vp,
         return ((u_char *) (&long_ret));
     case ERRORMSG:             /* first line of text returned from the process */
         if (exten->type == EXECPROC) {
-            if ((fd = get_exec_output(exten))) {
+            if ((fd = get_exec_output(exten)) != -1) {
                 file = fdopen(fd, "r");
                 for (i = 0; i != (int) name[*length - 1]; i++) {
                     if (fgets(errmsg, sizeof(errmsg), file) == NULL) {

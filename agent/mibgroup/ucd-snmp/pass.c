@@ -280,7 +280,7 @@ var_extensible_pass(struct variable *vp,
             /*
              * valid call.  Exec and get output 
              */
-            if ((fd = get_exec_output(passthru))) {
+            if ((fd = get_exec_output(passthru)) != -1) {
                 file = fdopen(fd, "r");
                 if (fgets(buf, sizeof(buf), file) == NULL) {
                     /*
