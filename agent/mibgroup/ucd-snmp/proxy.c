@@ -224,6 +224,12 @@ init_proxy(void)
                                   "[snmpcmd args] host oid [remoteoid]");
 }
 
+void
+shutdown_proxy(void)
+{
+    proxy_free_config();
+}
+
 int
 proxy_handler(netsnmp_mib_handler *handler,
               netsnmp_handler_registration *reginfo,
