@@ -222,7 +222,6 @@ static void usage(char *prog)
 #endif
 	printf("\n");
 	printf("\n\tVersion:  %s\n",VersionInfo);
-	printf("\tAuthor:   Wes Hardaker\n");
 	printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
 	printf("\n-h\t\tThis usage message.\n");
 	printf("-H\t\tDisplay configuration file directives understood.\n");
@@ -529,15 +528,13 @@ main(int argc, char *argv[])
                   exit(0);
                 case 'v':
                   printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                  printf("Author:            Wes Hardaker\n");
-                  printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+                  printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
                   exit (0);
                 case '-':
                   switch(argv[arg][2]){
                     case 'v': 
                       printf("\nUCD-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            Wes Hardaker\n");
-                      printf("Email:             ucd-snmp-coders@ucd-snmp.ucdavis.edu\n\n");
+                      printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
                       exit (0);
                     case 'h':
                       usage(argv[0]);
@@ -626,6 +623,10 @@ main(int argc, char *argv[])
       snmp_disable_stderrlog();
     }
 
+#if defined(SIGPIPE) && defined(SIG_IGN)
+    signal(SIGPIPE, SIG_IGN);  /* 'Inline' failure of wayward readers */
+#endif
+
     SOCK_STARTUP;
     init_agent("snmpd");		/* do what we need to do first. */
     init_mib_modules();
@@ -651,9 +652,6 @@ main(int argc, char *argv[])
 #endif
 #ifdef SIGUSR1
     signal(SIGUSR1, SnmpdDump);
-#endif
-#ifdef SIGPIPE
-    signal(SIGPIPE, SIG_IGN);	/* 'Inline' failure of wayward readers */
 #endif
 
     /* store persistent data immediately in case we crash later */
