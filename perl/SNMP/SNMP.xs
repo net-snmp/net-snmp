@@ -227,8 +227,8 @@ __libraries_init(char *appname)
         snmp_set_quick_print(1);
         init_snmp(appname);
     
-        ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-        ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
         SOCK_STARTUP;
     
@@ -1242,15 +1242,15 @@ void *cb_data;
       ** library-wide globals, and have to be set/restored for each
       ** session.
       */
-      old_numeric = ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-      old_printfull = ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
+      old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
+      old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
       if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
          getlabel_flag |= USE_NUMERIC_OIDS;
-         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
+         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
       }
       if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
          getlabel_flag |= USE_LONG_NAMES;
-         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
       }
 
       sv_bless(varlist_ref, gv_stashpv("SNMP::VarList",0));
@@ -1287,8 +1287,8 @@ void *cb_data;
       } /* for */
 
       /* Reset the library's behavior for numeric/symbolic OID's. */
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, old_numeric );
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, old_printfull);
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, old_numeric );
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, old_printfull);
 
       } /* case SNMP_MSG_RESPONSE */
       break;
@@ -1850,12 +1850,12 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    ** library-wide globals, and have to be set/restored for each
    ** session.
    */
-   old_numeric   = ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-   old_printfull = ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
+   old_numeric   = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
+   old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
    if (context->getlabel_f & USE_NUMERIC_OIDS) {
       DBPRT(2,( "Using numeric oid's\n"));
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
    }
 
    /* Parse through the list of variables returned, adding each return to
@@ -2145,8 +2145,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 
    /* Reset the library's behavior for numeric/symbolic OID's. */
    if (context->getlabel_f & USE_NUMERIC_OIDS) {
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, old_numeric);
-      ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, old_printfull);
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, old_numeric);
+      netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, old_printfull);
    }
 
    return pix;
@@ -3252,16 +3252,16 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	      ** library-wide globals, and have to be set/restored for each
 	      ** session.
 	      */
-	      old_numeric = ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+	      old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 						    NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-	      old_printfull = ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+	      old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 						    NETSNMP_DS_LIB_PRINT_FULL_OID);
 
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_NUMERIC_OIDS;
 
-	         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-		 ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
+		 netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
 	      }
 
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
@@ -3311,9 +3311,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
 	      if (getlabel_flag & USE_NUMERIC_OIDS) {
-	         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
+	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
 								 old_numeric );
-	         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
+	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
 								 old_printfull);
 	      }
 
@@ -3459,15 +3459,15 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      ** library-wide globals, and have to be set/restored for each
 	      ** session.
 	      */
-	      old_numeric = ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+	      old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 						  NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-	      old_printfull = ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+	      old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 						  NETSNMP_DS_LIB_PRINT_FULL_OID);
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_NUMERIC_OIDS;
 
-	         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-	         ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
+	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
 	      }
 
 	      if(response && response->variables) {
@@ -3519,9 +3519,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
 	      if (getlabel_flag & USE_NUMERIC_OIDS) {
-	          ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
+	          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
 							      old_numeric );
-	          ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
+	          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
 							      old_printfull);
 	      }
 
@@ -4416,7 +4416,7 @@ snmp_set_replace_newer(val)
 	int val
 	CODE:
 	{
-	   ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
+	   netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
 	}
 
 void
