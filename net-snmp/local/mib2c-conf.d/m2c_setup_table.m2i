@@ -20,6 +20,7 @@
 @    eval $m2c_context_reg = ""@
 @    eval $m2c_data_context = "generated"@ [generated|NAME]
 @    eval $m2c_data_allocate = 0@
+@    eval $m2c_data_init = 0@
 @    eval $m2c_table_access = "unsorted-external"@
 ##
 ##   allow for user override
