@@ -12,6 +12,7 @@ unsigned char *var_extensible_pass_persist __P((struct variable *, oid *, int *,
 /* config file parsing routines */
 void pass_persist_free_config __P((void));
 void pass_persist_parse_config __P((char *, char *));
+int pass_persist_compare __P((void *, void *));
 config_parse_dot_conf("pass_persist", pass_persist_parse_config, pass_persist_free_config)
 
 #include "mibdefs.h"
