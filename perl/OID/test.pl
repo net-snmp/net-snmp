@@ -97,5 +97,8 @@ ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.999"));
 $oidstr = $oidmore + (new NetSNMP::OID(".1.3.6.1"));
 ok($oidstr == new NetSNMP::OID("directory.2.3.8.9.10.11.1.3.6.1"));
 
+$oid = new NetSNMP::OID("nosuchoidexists");
+ok(ref($oid) ne "NetSNMP::OID");
+
 ok($oidstr->length() == 15);
 

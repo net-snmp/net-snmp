@@ -51,7 +51,8 @@ nso_newptr(initstring)
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
         if (!snmp_parse_oid(initstring, (oid *) RETVAL->name, &RETVAL->len)) {
-            /* XXX: errr */
+            RETVAL->len = 0;
+            RETVAL = NULL;
         }
     OUTPUT:
         RETVAL
@@ -93,9 +94,15 @@ nsop_to_string(oid1)
     PREINIT:
         static char mystr[SNMP_MAXBUF];
     CODE:
-        snprint_objid(mystr, sizeof(mystr),
-                      (oid *) oid1->name, oid1->len);
-        RETVAL = mystr;
+        {
+            if (oid1->len == 0)
+                snprintf(mystr, sizeof(mystr), "Illegal OID");
+            else
+                snprint_objid(mystr, sizeof(mystr),
+                              (oid *) oid1->name, oid1->len);
+            RETVAL = mystr;
+        }
+                
     OUTPUT:
         RETVAL
 
