@@ -23,9 +23,12 @@ Each group consists of two files:
 		function for retrieving this variable's value.
 	- a call to 'config_load_mib', identifying the location of
 		this MIB group within the general MIB structure.
+	- a call to 'config_require' to identify any other files
+		that are required by the implementation of this group.
+		(optional)
 
-	(these last two are only visible within the 'glue' file
-	 'snmp_vars.c', but are declared here for maintainability)
+    (these last three are only visible within the 'glue' file 'snmp_vars.c'
+	(if at all), but are declared here for ease of maintainance)
 
 
 
@@ -63,6 +66,10 @@ and edit them as follows:
 		update the 'config_load_mib' call with the appropriate
 		    location within the global MIB structure, and
 		    its length (note that 'MIB' has length 6)
+		provide a suitable 'config_require' call if this
+		    code uses routines from any other files within
+		    the 'mibgroup' directory (such as 'util_funcs.c')
+
 
 
 	wombat.c:
