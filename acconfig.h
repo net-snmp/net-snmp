@@ -177,6 +177,9 @@
 /* Does struct sockaddr have a sa_family2 field? */
 #undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 
+/* Does struct in6_addr have a s6_un.sa6_ladd field? */
+#undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR
+
 /* rtentry structure tests */
 #undef RTENTRY_RT_NEXT
 #undef STRUCT_RTENTRY_HAS_RT_DST
@@ -342,7 +345,7 @@
 #ifdef solaris2
 #define OSTYPE SOLARISID
 #endif
-#if defined(osf3) || defined(osf4)
+#if defined(osf3) || defined(osf4) || defined(osf5)
 #define OSTYPE OSFID
 #endif
 #ifdef ultrix4

@@ -88,7 +88,7 @@
 #include <arpa/inet.h>
 #endif
 
-#if defined(osf4) || defined(aix4) || defined(hpux10)
+#if defined(osf4) || defined(osf5) || defined(aix4) || defined(hpux10)
 /*
  * these are undefed to remove a stupid warning on osf compilers
  * because they get redefined with a slightly different notation of the
