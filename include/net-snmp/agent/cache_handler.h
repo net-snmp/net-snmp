@@ -51,8 +51,8 @@ extern          "C" {
                                       netsnmp_agent_request_info * reqinfo,
                                       const char *name);
     netsnmp_cache  *
-       netsnmp_cache_extract_from_reqinfo(netsnmp_agent_request_info * reqinfo,
-                                          const char *name);
+       netsnmp_cache_reqinfo_extract(netsnmp_agent_request_info * reqinfo,
+                                     const char *name);
     netsnmp_cache* netsnmp_extract_cache_info(netsnmp_agent_request_info *);
 
     int            netsnmp_cache_check_and_reload(netsnmp_cache * cache);
