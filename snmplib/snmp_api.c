@@ -269,13 +269,13 @@ char *strerror(int err)
 #endif
 
 long
-snmp_get_next_reqid __P((void))
+snmp_get_next_reqid (void)
 {
   return ++Reqid; /*MTCRITICAL_RESOURCE*/
 }
 
 long
-snmp_get_next_msgid __P((void))
+snmp_get_next_msgid (void)
 {
   return ++Msgid; /*MTCRITICAL_RESOURCE*/
 }

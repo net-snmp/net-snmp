@@ -185,6 +185,8 @@ void snmp_set_mib_comment_term (int);
 void snmp_set_mib_parse_label (int);
 char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(char *lead, FILE *outf);
+void print_mib(FILE *);
+void print_mib_tree(FILE *, struct tree *);
 void print_subtree_oid_report (FILE *, struct tree *, int);
 void print_subtree_oid_report_enable_labeledoid (void);
 void print_subtree_oid_report_enable_oid (void);
