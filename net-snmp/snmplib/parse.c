@@ -4607,10 +4607,10 @@ add_mibdir(const char *dirname)
     DIR            *dir, *dir2;
     const char     *oldFile = File;
     struct dirent  *file;
-    char            token[MAXTOKEN];
     char            tmpstr[300];
     int             count = 0;
 #if !(defined(WIN32) || defined(cygwin))
+    char            token[MAXTOKEN];
     char space;
     char newline;
     struct stat     dir_stat, idx_stat;
