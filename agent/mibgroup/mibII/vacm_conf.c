@@ -804,7 +804,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
      * NULL termination of the pdu field is ugly here.  Do in PDU parsing? 
      */
     if (pdu->contextName)
-        strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
+        strncpy(contextNameIndex+1, pdu->contextName, pdu->contextNameLen);
     else
         contextNameIndex[0] = '\0';
 
