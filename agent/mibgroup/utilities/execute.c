@@ -58,11 +58,11 @@ run_shell_command( char *command, char *input,
 
         if (output) {
             ofname = make_tempfile();
-            snprintf( shellline, sizeof(shellline), "%s < %s > %s",
+            snprintf( shellline, sizeof(shellline), "(%s) < %s > %s",
                       command, ifname, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "%s < %s",
+            snprintf( shellline, sizeof(shellline), "(%s) < %s",
                       command, ifname );
             *out_len = 0;
         }
@@ -70,7 +70,7 @@ run_shell_command( char *command, char *input,
         ifname = NULL;   /* Just to shut the compiler up! */
         if (output) {
             ofname = make_tempfile();
-            snprintf( shellline, sizeof(shellline), "%s > %s",
+            snprintf( shellline, sizeof(shellline), "(%s) > %s",
                       command, ofname );
         } else {
             ofname = NULL;   /* Just to shut the compiler up! */
