@@ -8,6 +8,7 @@
  *  Version 0.1 initial release (Dec 1999)
  *  Version 0.2 added support for multiprocessor machines (Jan 2000)
  *  Version 0.3 some reliability enhancements and compile time fixes (Feb 2000)
+ *  Version 0.4 portability issue and raw cpu value support (Jun 2000)
  *
  */
 
@@ -138,6 +139,9 @@ void init_vmstat_solaris2(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+    {CPURAWUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
     /* Future use: */
     /*
       {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -182,7 +186,7 @@ void init_vmstat_solaris2(void)
   cpu_state_old = (ulong (*)[CPU_STATES]) calloc(num_cpu, sizeof(*cpu_state_old));
   /* Since MIB wants CPU_SYSTEM, see getCPU */
   cpu_perc = (float (*)[CPU_STATES+1]) calloc(num_cpu, sizeof(*cpu_perc));
-  
+
   /* Check whether we got all the memory we wanted, otherwise fail */
   if ((swapin == NULL) || (swapout == NULL) || (blocks_read == NULL) ||
       (blocks_write == NULL) || (interrupts == NULL) || (context_sw == NULL) ||
@@ -195,15 +199,6 @@ void init_vmstat_solaris2(void)
     }
   
 } /* init_vmstat_solaris2 ends here */
-
-#ifndef HAVE_GETPAGESIZE
-/* Returns the pagesize */
-/* Normally this is in libc, but not on Solaris 2.4 */
-int getpagesize(void)
-{
-  return (sysconf(_SC_PAGESIZE));
-}
-#endif
 
 /* Data collection function getMisc starts here */
 /* Get data from kernel and returns misc data / sec */
@@ -364,8 +359,10 @@ long getMisc(int what)
 
       /* swapin and swapout are in pages, MIB wants kB/s, we sleep(1) so we just need to get kB */
       /* getpagesize() returns pagesize in bytes */
-      swapin_avg = swapin_avg * (getpagesize() / 1024);
-      swapout_avg = swapout_avg * (getpagesize() / 1024);
+      /* decided to use sysconf(_SC_PAGESIZE) instead to get around an #ifndef (I don't like those) */
+      /* that was needed b/c some old Solaris versions don't have getpagesize() */
+      swapin_avg = swapin_avg * (sysconf(_SC_PAGESIZE) / 1024);
+      swapout_avg = swapout_avg * (sysconf(_SC_PAGESIZE) / 1024);
 
       /* Then divide by number of CPUs, discarding fractions */
       swapin_avg /= num_cpu;
@@ -402,6 +399,9 @@ long getMisc(int what)
 
 /* getCPU: get percentages for CPU utilisation */
 /* state: CPU_IDLE, CPU_USER, CPU_KERNEL + CPU_WAIT = CPU_SYSTEM -> 0, 1, 4 */
+/* In version 0.4, the raw values were added: */
+/* CPURAWUSER, CPURAWSYSTEM, CPURAWIDLE -> 50, 52, 53 */
+/* In the next release the argument passing will get a rewrite... Planned for 0.5 */
 long getCPU(int state)
 {
   
@@ -418,6 +418,7 @@ long getCPU(int state)
   /* This array holds the averaged percentages for all CPU on this machine.  Thus it's declared */
   /* static so we can reuse it if it's new enough. */
   static float cpu_perc_avg[CPU_STATES+1];
+  static ulong cpu_raw[CPU_STATES+1];
 
   /* From time.h, get seconds since start of UNIX time... */
   time_t timestamp_new;
@@ -495,6 +496,11 @@ long getCPU(int state)
       /* We have to start over again */
       cpu_num = 0;
       
+      /* Proper initialization is important... */
+      for (i=0 ; i < CPU_STATES+1 ; i++)
+	{
+	  cpu_raw[i] = 0;
+	}
 
       /* Look thru all the cpu slots on the machine whether they holds a CPU */
       /* and if so, get the data from that CPU */
@@ -526,12 +532,12 @@ long getCPU(int state)
 	      /* Reset CPU activity counter */
 	      cpu_sum[cpu_num] = 0;
 	      
-	      
 	      /* Get new CPU data */
 	      for (i=0 ; i < CPU_STATES ; i++)
 		{
 		  cpu_state[cpu_num][i] = cs.cpu_sysinfo.cpu[i] - cpu_state_old[cpu_num][i];
 		  cpu_sum[cpu_num] += cpu_state[cpu_num][i];
+		  cpu_raw[i] += cs.cpu_sysinfo.cpu[i];
 		}
 	      
 	      /* Calculate percentage values for CPU utilisation */
@@ -550,9 +556,10 @@ long getCPU(int state)
 	    } /* end else */
 	} /* end for */
 
-      /* Calculate avarages here FIXME */
+      /* Calculate avarages */
       /* First sum up all values */
       /* Calculate percentage values for CPU utilisation */
+      /* Sum the CPU_SYSTEM value */
       for (i=0 ; i < CPU_STATES ; i++)
 	{
 	  /* Reset counter */
@@ -562,15 +569,38 @@ long getCPU(int state)
 	      cpu_perc_avg[i] += cpu_perc[cpu_num][i];
 	    } /* end for */
 	  cpu_perc_avg[i] /= (float) num_cpu;
+	  /* For the raw vaules, we just need to divide the sums by the number of CPUs */
+	  cpu_raw[i] /= num_cpu;
 	} /* end for */
       
       cpu_perc_avg[CPU_SYSTEM] = cpu_perc_avg[CPU_KERNEL] + cpu_perc_avg[CPU_WAIT];
       
+      /* Little bit of a hack but since the change of the counter matters, this is ok :) */
+      cpu_raw[CPU_SYSTEM] = (cpu_raw[CPU_KERNEL] + cpu_raw[CPU_WAIT]);
+      
     } /* end if (timestamp_new > (timestamp_old_2 + 1)) */
   
-  /* Returns the requested percentage value, dropping fractions b/c casting to long */
-  return((long) cpu_perc_avg[state]);
-  
+  /* Returns the requested percentage values, dropping fractions b/c casting to long, */
+  /* and the raw values.  Missing is CPURAWNICE.  Planned for 0.5 */
+
+  switch (state)
+    {
+    case CPU_IDLE:
+      return((long) cpu_perc_avg[CPU_IDLE]);
+    case CPU_USER:
+      return((long) cpu_perc_avg[CPU_USER]);
+    case CPU_SYSTEM:
+      return((long) cpu_perc_avg[CPU_SYSTEM]);
+    case CPURAWIDLE:
+      return((long) cpu_raw[CPU_IDLE]);
+    case CPURAWUSER:
+      return((long) cpu_raw[CPU_USER]);
+    case CPURAWSYSTEM:
+      return((long) cpu_raw[CPU_SYSTEM]);
+    default:
+      snmp_log(LOG_ERR,"vmstat_solaris2 (getCPU): No data found.\n");
+      return(-1);
+    } /* end switch */
 } /* end function getCPU */
 
 
@@ -631,6 +661,21 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
   case CPUIDLE:
     long_ret = getCPU(CPU_IDLE);
     return((u_char *) (&long_ret));
+  case CPURAWUSER:
+    long_ret = getCPU(CPURAWUSER);
+    return((u_char *) (&long_ret));
+    /* Has to wait for the next release... Planned for version 0.5 */
+    /* 
+       case CPURAWNICE:
+       long_ret = getCPU(CPURAWNICE);
+       return((u_char *) (&long_ret)); 
+       */
+  case CPURAWSYSTEM:
+    long_ret = getCPU(CPURAWSYSTEM);
+    return((u_char *) (&long_ret));
+  case CPURAWIDLE:
+    long_ret = getCPU(CPURAWIDLE);
+    return((u_char *) (&long_ret));    
     /* reserved for future use */
     /*
       case ERRORFLAG:
@@ -638,7 +683,6 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
       case ERRORMSG:
       return((u_char *) (&long_ret));
       */
-    
   default:
     snmp_log(LOG_ERR,"vmstat_solaris2: Error in request, no match found.\n");
   }

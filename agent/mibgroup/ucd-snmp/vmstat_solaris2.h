@@ -6,6 +6,7 @@
  *  Version 0.1 initial release (Dec 1999)
  *  Version 0.2 added support for multiprocessor machines (Jan 2000)
  *  Version 0.3 some reliability enhancements and compile time fixes (Feb 2000)
+ *  Version 0.4 portability issue and raw cpu value support (Jun 2000)
  *
  */
 
@@ -27,6 +28,10 @@ config_arch_require(solaris2, kernel_sunos5)
 #define CPUSYSTEM 10
 #define CPUIDLE 11
 #define CPUERROR 16
+#define CPURAWUSER 50
+#define CPURAWNICE 51
+#define CPURAWSYSTEM 52
+#define CPURAWIDLE 53
 
 /* MIB wants CPU_SYSTEM which is sysinfo CPU_KERNEL + CPU_WAIT */
 #define CPU_SYSTEM 4 
