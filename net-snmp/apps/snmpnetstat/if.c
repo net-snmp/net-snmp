@@ -33,25 +33,36 @@ SOFTWARE.
 
 #include <config.h>
 
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <sys/types.h>
-#include <sys/socket.h>
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
 #include <stdio.h>
 #include <signal.h>
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
+#include <sys/socket.h>
+#include <netdb.h>
+#endif
 
 #include "main.h"
 #include "asn1.h"
@@ -69,7 +80,6 @@ SOFTWARE.
 #define	NO	0
 
 static void sidewaysintpr(unsigned int);
-RETSIGTYPE catchalarm(int);
 
 static oid oid_ifname[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
@@ -252,7 +262,7 @@ intpr(int interval)
                 cp = (char *) strchr(cur_if->name, ' ');
                 if ( cp != NULL )
                   *cp = '\0';
-		if (interface != NULL && strcmp(cur_if->name, interface) != 0) {
+		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
 		}
@@ -414,7 +424,7 @@ intpro(int interval)
                 cp = (char *) strchr(cur_if->name, ' ');
                 if ( cp != NULL )
                   *cp = '\0';
-		if (interface != NULL && strcmp(cur_if->name, interface) != 0) {
+		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
 		}
@@ -450,6 +460,74 @@ struct	iftot {
 u_char	signalled;			/* set if alarm goes off "early" */
 
 /*
+ * timerSet sets or resets the timer to fire in "interval" seconds.
+ * timerPause waits only if the timer has not fired.
+ * timing precision is not considered important.
+ */
+
+#ifdef WIN32
+static int sav_int;
+static time_t timezup;
+static void
+timerSet(int interval_seconds)
+{
+    sav_int = interval_seconds;
+	timezup = time(0) + interval_seconds;
+}
+/* you can do better than this ! */
+static void
+timerPause()
+{
+	time_t now;
+	while (time(&now) < timezup)
+		Sleep(400);
+}
+
+#else
+
+/*
+ * Called if an interval expires before sidewaysintpr has completed a loop.
+ * Sets a flag to not wait for the alarm.
+ */
+RETSIGTYPE
+catchalarm(int sig)
+{
+	signalled = YES;
+}
+
+static void
+timerSet(int interval_seconds)
+{
+#ifdef HAVE_SIGSET
+	(void)sigset(SIGALRM, catchalarm);
+#else
+	(void)signal(SIGALRM, catchalarm);
+#endif
+	signalled = NO;
+	(void)alarm(interval_seconds);
+}
+
+static void
+timerPause(void)
+{
+#ifdef HAVE_SIGHOLD
+	sighold(SIGALRM);
+	if (! signalled) {
+		sigpause(SIGALRM);
+	}
+#else
+	int oldmask;
+	oldmask = sigblock(sigmask(SIGALRM));
+	if (! signalled) {
+		sigpause(0);
+	}
+	sigsetmask(oldmask);
+#endif
+}
+
+#endif /* !WIN32 */
+
+/*
  * Print a running summary of interface statistics.
  * Repeat display every interval seconds, showing statistics
  * collected over that interval.  Assumes that interval is non-zero.
@@ -461,9 +539,6 @@ sidewaysintpr(unsigned int interval)
 	register struct iftot *ip, *total;
 	register int line;
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
-#ifndef HAVE_SIGHOLD
-	int oldmask;
-#endif
 	struct variable_list *var;
 	oid varname[MAX_OID_LEN], *instance, *ifentry;
 	int varname_len;
@@ -495,7 +570,7 @@ sidewaysintpr(unsigned int interval)
                 cp = (char *) strchr(ip->ift_name, ' ');
                 if ( cp != NULL )
                   *cp = '\0';
-		if (interface && strcmp(ip->ift_name + 1, interface) == 0)
+		if (intrface && strcmp(ip->ift_name + 1, intrface) == 0)
 			interesting = ip;
 		ip->ift_name[15] = '\0';
 		cp = (char *) strchr(ip->ift_name, '\0');
@@ -506,13 +581,8 @@ sidewaysintpr(unsigned int interval)
 	}
 	lastif = ip;
 
-#ifdef HAVE_SIGSET
-	(void)sigset(SIGALRM, catchalarm);
-#else
-	(void)signal(SIGALRM, catchalarm);
-#endif
-	signalled = NO;
-	(void)alarm(interval);
+	timerSet(interval);
+
 banner:
 	printf("    input   %-6.6s    output       ", interesting->ift_name);
 	if (lastif - iftot > 0)
@@ -612,38 +682,13 @@ loop:
 	putchar('\n');
 	fflush(stdout);
 	line++;
-#ifdef HAVE_SIGHOLD
-	sighold(SIGALRM);
-	if (! signalled) {
-		sigpause(SIGALRM);
-	}
-#else
-	oldmask = sigblock(sigmask(SIGALRM));
-	if (! signalled) {
-		sigpause(0);
-	}
-	sigsetmask(oldmask);
-#endif
-/* reset signal as many OSs require this, and the rest shouldn't be hurt */
-#ifdef HAVE_SIGSET
-	(void)sigset(SIGALRM, catchalarm);
-#else
-	(void)signal(SIGALRM, catchalarm);
-#endif
-	signalled = NO;
-	(void)alarm(interval);
+
+	timerPause();
+	timerSet(interval);
+
 	if (line == 21)
 		goto banner;
 	goto loop;
 	/*NOTREACHED*/
 }
 
-/*
- * Called if an interval expires before sidewaysintpr has completed a loop.
- * Sets a flag to not wait for the alarm.
- */
-RETSIGTYPE
-catchalarm(int sig)
-{
-	signalled = YES;
-}

@@ -33,17 +33,24 @@ SOFTWARE.
 
 #include <config.h>
 
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <stdio.h>
 #include <ctype.h>
 
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
-#include <sys/socket.h>
+#endif
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -56,7 +63,14 @@ SOFTWARE.
 #endif
 #define	LOOPBACKNET 127
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#include "winstub.h"
+#else
+#include <sys/socket.h>
 #include <netdb.h>
+#endif
+
 #include "main.h"
 #include "asn1.h"
 #include "snmp.h"
@@ -75,8 +89,8 @@ struct route_entry {
     int	    set_mask;
     struct in_addr  gateway;
     int	    set_gateway;
-    int	    interface;
-    int	    set_interface;
+    int	    ifNumber;
+    int	    set_ifNumber;
     int	    type;
     int	    set_type;
     int	    proto;
@@ -142,7 +156,7 @@ routepr(void)
 	    request = NULL;
 	    rp->set_destination = 0;
 	    rp->set_mask = 0;
-	    rp->set_interface = 0;
+	    rp->set_ifNumber = 0;
 	    rp->set_gateway = 0;
 	    rp->set_type = 0;
 	    rp->set_proto = 0;
@@ -187,8 +201,8 @@ routepr(void)
 			rp->set_mask = 1;
 			break;
 		    case RTIFINDEX:
-			rp->interface = *vp->val.integer;
-			rp->set_interface = 1;
+			rp->ifNumber = *vp->val.integer;
+			rp->set_ifNumber = 1;
 			break;
 		    case RTNEXTHOP:
                       memmove(&rp->gateway, vp->val.string, sizeof(u_long));
@@ -206,7 +220,7 @@ routepr(void)
 	    }
 	    snmp_free_pdu(response);
 	    if (!(rp->set_destination && rp->set_gateway
-		&& rp->set_type && rp->set_interface)){
+		&& rp->set_type && rp->set_ifNumber)){
 		    if (request)
 			snmp_free_pdu(request);
 		    request = NULL;
@@ -230,13 +244,13 @@ routepr(void)
 		*flags++ = 'D';	/* redirect */
 	    *flags = '\0';
 	    printf("%-6.6s ", name);
-	    get_ifname(rp->ifname, rp->interface);
+	    get_ifname(rp->ifname, rp->ifNumber);
 	    ch = rp->ifname[strlen(rp->ifname) - 1];
 	    ch = '5';   /* force the if statement */
 	    if (isdigit(ch))
 		printf(" %.32s\n", rp->ifname);
 	    else
-		printf(" %.32s%d\n", rp->ifname, rp->interface);
+		printf(" %.32s%d\n", rp->ifname, rp->ifNumber);
 
 	}
 }
@@ -348,7 +362,7 @@ routename(struct in_addr in)
                       if ((cp = (char *) strchr(hp->h_name, '.')) &&
 			    !strcmp(cp + 1, domain))
 				*cp = 0;
-			cp = hp->h_name;
+			cp = (char *)hp->h_name;
 		}
 	}
 	if (cp)

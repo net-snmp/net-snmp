@@ -39,21 +39,46 @@ char copyright[] =
  All rights reserved.\n";
 #endif /* not lint */
 
-#ifdef STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <sys/types.h>
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
-
-#include <sys/socket.h>
-#include <sys/time.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#include "winstub.h"
+#else
+#include <sys/socket.h>
 #include <netdb.h>
+#endif
 
 #include <ctype.h>
 #include <errno.h>
@@ -77,6 +102,7 @@ char copyright[] =
 #include "acl.h"
 #include "version.h"
 #include "snmp_debug.h"
+#include "system.h"
 
 #include "netstat.h"
 
@@ -101,7 +127,7 @@ int	nflag;
 int	rflag;
 int	sflag;
 int	interval;
-char	*interface;
+char	*intrface;
 
 struct snmp_session *Session;
 int print_errors = 0;
@@ -137,7 +163,7 @@ int main(int argc, char *argv[])
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
 #endif
-    
+
     init_mib();
     /*
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
@@ -233,12 +259,12 @@ int main(int argc, char *argv[])
 
 	      case 'I':
 		iflag++;
-		if (*(interface = argv[arg] + 2) == 0) {
+		if (*(intrface = argv[arg] + 2) == 0) {
 		  if (++arg == argc) {
 		      usage();
 		      exit(1);
 		  }
-		  if ((interface = argv[arg]) == 0)
+		  if ((intrface = argv[arg]) == 0)
 		    break;
 		}
 		break;
@@ -398,6 +424,7 @@ int main(int argc, char *argv[])
         session.contextLen = contextlen;
     }
 
+    SOCK_STARTUP;
     session.retries = SNMP_DEFAULT_RETRIES;
     session.timeout = SNMP_DEFAULT_TIMEOUT;
     session.authenticator = NULL;
@@ -405,6 +432,7 @@ int main(int argc, char *argv[])
     Session = snmp_open(&session);
     if (Session == NULL){
         snmp_perror("snmpnetstat: Couldn't open snmp");
+        SOCK_CLEANUP;
 	exit(1);
     }
 
@@ -435,7 +463,8 @@ int main(int argc, char *argv[])
     }
     
     if (iflag || rflag || oflag)
-	exit(0);
+	;
+    else {
 
     while ((p = getprotoent())) {
 	for (tp = protox; tp->pr_name; tp++)
@@ -450,6 +479,8 @@ int main(int argc, char *argv[])
 	    if (tp->pr_cblocks)
 		(*tp->pr_cblocks)(tp->pr_name);
     }
+    } /* ! iflag, rflag, oflag */
+
     endprotoent();
     endservent();
     endnetent();
@@ -462,6 +493,7 @@ int main(int argc, char *argv[])
     if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
 
+    SOCK_CLEANUP;
     exit(0);
 }
 
@@ -469,7 +501,7 @@ char *
 plural(int n)
 {
 
-	return (n != 1 ? (char*)"s" : (char*)"");
+	return (n != 1 ? (char *)"s" : (char *)"");
 }
 
 /*
@@ -507,7 +539,7 @@ name2protox(char *name)
 	while ((p = getprotoent())) {
 		/* assert: name not same as p->name */
 		for (alias = p->p_aliases; *alias; alias++)
-			if (strcmp(name, *alias) == 0) {
+			if (strcasecmp(name, *alias) == 0) {
 				endprotoent();
 				return(knownname(p->p_name));
 			}
