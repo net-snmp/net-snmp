@@ -37,11 +37,11 @@
 /* define if you are using the MD5 code */
 #undef USE_INTERNAL_MD5
 
-/* comment the next line if you do not want SNMPv2 party-based auth. */
-#define USE_V2PARTY_PROTOCOL 1
-
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
+
+/* add in recent resource lock functions (not complete) */
+#undef _REENTRANT
 
 /* should "--" comments in mibs be a comment till the end of the line
    or also until another "--", the latter being the technically
