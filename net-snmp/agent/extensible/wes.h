@@ -23,11 +23,9 @@
    After how many seconds should the cache re-newed?
    Note:  Don't define CASHETIME to disable cashing completely */
 
-#ifdef hpux
 #define EXCACHETIME 30
 #define CACHEFILE "/tmp/.snmp-exec-cache"
 #define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
-#endif
 
 unsigned char *var_wes_proc();
 unsigned char *var_wes_mem();
