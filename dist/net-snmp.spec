@@ -8,6 +8,7 @@ Copyright: BSDish
 Group: System Environment/Daemons
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
 Patch0: net-snmp-5.0.9-with-perl.patch
+Patch1: net-snmp-5.0.9-use-numeric.patch
 Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
@@ -82,13 +83,13 @@ rm -rf $RPM_BUILD_ROOT
 %__rm -f $RPM_BUILD_ROOT%{_prefix}/bin/snmpinform
 # install the init script
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+perl -p -e 's@/usr/local/share/snmp/@/etc/snmp/@g;s@usr/local@usr@g' dist/snmpd-init.d
 install -m 755 dist/snmpd-init.d $RPM_BUILD_ROOT/etc/rc.d/init.d/snmpd
 
 %if %{with_perl}
 # unneeded perl stuff
-rm -rf $RPM_BUILD_ROOT/auto/Bundle
-rm -f $RPM_BUILD_ROOT/perllocal.pod
-rm -rf $RPM_BUILD_ROOT/Bundle
+find $RPM_BUILD_ROOT/usr/lib/perl5/ -name Bundle -type d | xargs rm -rf
+find $RPM_BUILD_ROOT/usr/lib/perl5/ -name perllocal.pod | xargs rm -f
 
 # store a copy of installed perl stuff.  It's too comlpex to predict
 (xxdir=`pwd` && cd $RPM_BUILD_ROOT && find usr/lib/perl5 -type f | sed 's/^/\//' > $xxdir/net-snmp-perl-files)
@@ -140,7 +141,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}
 %{_sbindir}
 %{_mandir}/man1/*
-%{_mandir}/man3/*
+# don't include perl man pages, which start with caps
+%{_mandir}/man3/[^A-Z]*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
 /usr/lib/*.so*
@@ -156,13 +158,18 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with_perl}
 %files -f net-snmp-perl-files perlmods
 %defattr(-,root,root)
-/usr/man/man3/
+%{_mandir}/man3/*::*
+%{_mandir}/man3/SNMP*
 %endif
 
 %verifyscript
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Fri Sep 26 2003 Wes Hardaker <hardaker@users.sourceforge.net>
+- fix perl's UseNumeric
+- fix init.d script for non-/usr/local installation
+
 * Fri Sep 12 2003 Wes Hardaker <hardaker@users.sourceforge.net>
 - fixes for 5.0.9's perl support
 
