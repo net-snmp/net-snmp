@@ -59,19 +59,20 @@ struct ax_variable_list {
 };
 
 void
-free_agentx_request(struct request_list *req)
+free_agentx_request(struct request_list *req, int free_cback)
 {
     if ( !req )
 	return;
 
-/*
-	Don't free this call-back data.
-	It contains information that needs to be persistent
-	across multi-pass requests (i.e. SET and GETBULK handling)
+    /*
+     *	Only free this call-back data when request processing has
+     *	completed.  Multi-pass requests (i.e. SET and GETBULK handling)
+     *	use this to store information that needs to be persistent
+     *	from one pass to the next.
+     */
 
-    if ( req->cb_data )
+    if ( req->cb_data && free_cback )
 	free ( req->cb_data );
- */
 
      free ( req );
 }
@@ -89,11 +90,13 @@ free_agentx_varlist(struct ax_variable_list *vlist)
 	/*
 	 * Remove the specified request from
 	 *  the list of outstanding requests
+	 *  and return it, for later disposal
 	 */
-int
+struct request_list *
 remove_outstanding_request( struct agent_snmp_session *asp, int reqid )
 {
     struct request_list     *req, *prev;
+
     for (req = asp->outstanding_requests, prev=NULL ;
 			req != NULL ;
 			prev = req , req = req->next_request ) {
@@ -102,11 +105,11 @@ remove_outstanding_request( struct agent_snmp_session *asp, int reqid )
 		prev->next_request = req->next_request;
 	    else
 		asp->outstanding_requests = req->next_request;
-	    free_agentx_request( req );
-	    return 0;
+
+	    return req;
 	}
     }
-    return 1;
+    return NULL;
 }
 
 	/*
@@ -124,12 +127,13 @@ handle_agentx_response( int operation,
     struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
     struct snmp_session *ax_session;
-    struct request_list *req;
+    struct request_list *req, *oldreq;
+    int  free_cback = 1;
     int i, type, index;
     struct subtree          *retry_sub;
     char buf[SPRINT_MAX_LEN];
 
-    remove_outstanding_request( asp, pdu->reqid );
+    oldreq = remove_outstanding_request( asp, pdu->reqid );
 
     switch(operation) {
 	case TIMED_OUT:
@@ -241,26 +245,47 @@ handle_agentx_response( int operation,
 
 	/*
 	 *  If we're in the middle of a SET,
-	 *	then update the state machine
+	 *	the state machine will have been updated on the
+	 *	(mistaken) assumption that the request succeeded.
+	 *  In fact the lack of an error from the 'agentx_var()'
+	 *	routine  simply meant that the delegation succeeded. 
+	 *
+	 *  If the subagent reports that the request failed,
+	 *	we need to tweak the mode to reflect this.
 	 */
     if (asp->pdu->command == SNMP_MSG_SET) {
 	switch( asp->mode ) {
-	    case RESERVE2:
-		if ( asp->status == SNMP_ERR_NOERROR )
-			asp->mode = ACTION;
-		else
+
+	    case ACTION:	/* I.e. a 'successful' RESERVE2 pass */
+		if ( asp->status != SNMP_ERR_NOERROR )
 			asp->mode = FREE;
 		break;
-	    case ACTION:
+
+	    case COMMIT:	/* I.e. a 'successful' ACTION pass */
 		if ( asp->status != SNMP_ERR_NOERROR )
 			asp->mode = UNDO;
 		break;
-	    case COMMIT:
-		if ( asp->status != SNMP_ERR_NOERROR )
-			asp->mode = FREE;
+
+	    case FREE:
+		asp->mode = FINISHED_FAILURE;
+		break;
+
+	    case FINISHED_SUCCESS:	/* I.e. a 'successful' COMMIT pass */
+		if ( asp->status != SNMP_ERR_NOERROR ) {
+			asp->mode = FINISHED_FAILURE;
+			asp->status = SNMP_ERR_COMMITFAILED;
+		}
+		break;
+
+	    case FINISHED_FAILURE:	/* I.e. a 'successful' UNDO pass */
+		if ( asp->status != SNMP_ERR_NOERROR ) {
+			asp->mode = FINISHED_FAILURE;
+			asp->status = SNMP_ERR_UNDOFAILED;
+		}
 		break;
 	}
     }
+
 
     if ( asp->outstanding_requests ) {
 		/*
@@ -277,6 +302,19 @@ handle_agentx_response( int operation,
     }
 
 finish:
+			 /*
+			  * Free the old request, but if we
+			  * haven't completed a multi-pass request,
+			  * then don't free the callback data
+			  */
+    if ( oldreq ) {
+	if ( oldreq->pdu && oldreq->pdu->command == SNMP_MSG_SET &&
+		(( asp->mode == ACTION ) ||
+		 ( asp->mode == COMMIT )))
+	    free_cback = 0;
+	free_agentx_request( oldreq, free_cback );
+    }
+
     DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
     return handle_snmp_packet(operation, session, reqid, asp->pdu, (void*)asp);
 }
@@ -329,7 +367,7 @@ get_agentx_request(struct agent_snmp_session *asp,
     vlist = (struct ax_variable_list *)calloc( 1, new_size);
     pdu   = snmp_pdu_create( 0 );
     if ( req == NULL || pdu == NULL || vlist == NULL ) {
-	free_agentx_request( req );
+	free_agentx_request( req, 1 );
 	snmp_free_pdu(       pdu );
 	free_agentx_varlist( vlist );
 	return NULL;
@@ -380,7 +418,7 @@ get_agentx_request(struct agent_snmp_session *asp,
 		break;
 	default:
                 DEBUGMSGTL(("agentx/master","-> unknown\n"));
-		free_agentx_request( req );
+		free_agentx_request( req, 1 );
 		snmp_free_pdu(       pdu );
 		free_agentx_varlist( vlist );
 		return NULL;
