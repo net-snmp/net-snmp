@@ -654,6 +654,12 @@ sub gettable {
 		  $root_oid . ".1." . $c->{'subID'}
 		    if (!$indexes{$c->{'label'}});
 	    }
+	    if ($#columns == -1) {
+		# some tables are only indexes, and we need to walk at
+		# least one column.  We pick the last.
+		push @columns, $root_oid . ".1." .
+		  $children->[$#$children]{'subID'};
+	    }
 	}
     } else {
 	# XXX: requires specification in numeric OID...  ack.!
