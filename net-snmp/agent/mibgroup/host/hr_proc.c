@@ -34,6 +34,16 @@ int header_hrproc (struct variable *,oid *, size_t *, int, size_t *,  WriteMetho
 	 *********************/
 
 
+#define	HRPROC_ID		1
+#define	HRPROC_LOAD		2
+
+struct variable4 hrproc_variables[] = {
+    { HRPROC_ID,      ASN_OBJECT_ID, RONLY, var_hrproc, 2, {1,1}},
+    { HRPROC_LOAD,      ASN_INTEGER, RONLY, var_hrproc, 2, {1,2}}
+};
+oid hrproc_variables_oid[] = { 1,3,6,1,2,1,25,3,3 };
+
+
 void init_hr_proc(void)
 {
     init_device[ HRDEV_PROC ] = Init_HR_Proc;	
@@ -41,6 +51,8 @@ void init_hr_proc(void)
 #ifdef HRPROC_MONOTONICALLY_INCREASING
     dev_idx_inc[ HRDEV_PROC ] = 1;
 #endif
+
+    REGISTER_MIB("host/hr_proc", hrproc_variables, variable4, hrproc_variables_oid);
 }
 
 /*

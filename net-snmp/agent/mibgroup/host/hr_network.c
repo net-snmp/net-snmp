@@ -34,6 +34,13 @@ int header_hrnet (struct variable *,oid *, size_t *, int, size_t *, WriteMethod 
 	 *
 	 *********************/
 
+#define	HRNET_IFINDEX		1
+
+struct variable4 hrnet_variables[] = {
+    { HRNET_IFINDEX,   ASN_INTEGER, RONLY, var_hrnet, 2, {1,1}}
+};
+oid hrnet_variables_oid[] = { 1,3,6,1,2,1,25,3,4 };
+
 
 void init_hr_network(void)
 {
@@ -47,6 +54,8 @@ void init_hr_network(void)
     device_descr[ HRDEV_NETWORK ] = describe_networkIF;
     device_status[ HRDEV_NETWORK ] = network_status;
     device_errors[ HRDEV_NETWORK ] = network_errors;
+
+    REGISTER_MIB("host/hr_network", hrnet_variables, variable4, hrnet_variables_oid);
 }
 
 /*
