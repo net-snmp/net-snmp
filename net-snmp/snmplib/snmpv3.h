@@ -11,9 +11,18 @@ extern "C" {
 
 #define MAX_ENGINEID_LENGTH 128
 
+#define ENGINEID_TYPE_IPV4 1
+#define ENGINEID_TYPE_IPV6 2
+#define ENGINEID_TYPE_MACADDR 3
+#define ENGINEID_TYPE_TEXT 4
+
+#define	DEFAULT_NIC "eth0"
+
 int     setup_engineID(u_char **eidp, const char *text);
 void    engineID_conf(const char *word, char *cptr);
 void    engineBoots_conf(const char *, char *);
+void	engineIDType_conf(const char *, char *);
+void	engineIDNic_conf(const char *, char *);
 void    snmpv3_authtype_conf(const char *word, char *cptr);
 void    snmpv3_privtype_conf(const char *word, char *cptr);
 void	usm_parse_create_usmUser(const char *token, char *line);
@@ -32,6 +41,7 @@ int     get_default_secLevel(void);
 oid    *get_default_authtype(size_t *);
 oid    *get_default_privtype(size_t *);
 void    snmpv3_set_engineBootsAndTime(int boots, int ttime); 
+static int getLinuxNicHwAddress(const char * networkDevice, char * addressOut);
 
 #ifdef __cplusplus
 }
