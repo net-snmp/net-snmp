@@ -21,10 +21,10 @@
 #include "interface_ioctl.h"
 
 unsigned int
-netsnmp_access_interface_linux_get_if_speed(int fd, const char *name);
+netsnmp_arch_interface_get_if_speed(int fd, const char *name);
 
 void
-netsnmp_access_interface_arch_init(void)
+netsnmp_arch_interface_init(void)
 {
     /*
      * nothing to do
@@ -40,8 +40,8 @@ netsnmp_access_interface_arch_init(void)
  * @retval -3 could not create entry (probably malloc)
  */
 int
-netsnmp_access_interface_container_arch_load(netsnmp_container* container,
-                                             u_int load_flags)
+netsnmp_arch_interface_container_load(netsnmp_container* container,
+                                      u_int load_flags)
 {
     FILE           *devin;
     char            line[256];
@@ -81,7 +81,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
                 load_flags));
 
     if (NULL == container) {
-        snmp_log(LOG_ERR, "no container specified/found for access_interface_\n");
+        snmp_log(LOG_ERR, "no container specified/found for interface\n");
         return -1;
     }
 
@@ -299,8 +299,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 
         if (entry->type == IANAIFTYPE_ETHERNETCSMACD)
             entry->speed =
-                netsnmp_access_interface_linux_get_if_speed(fd,
-                                                            entry->name);
+                netsnmp_arch_interface_get_if_speed(fd, entry->name);
         else
             netsnmp_access_interface_entry_guess_speed(entry);
 
@@ -345,7 +344,7 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
     if(IFADMINSTATUS_UP == ifAdminStatus_val)
         and_complement = 0; /* |= */
     else
-        and_complement = 1; /* &= */
+        and_complement = 1; /* &= ~ */
 
     return netsnmp_access_interface_ioctl_flags_set(-1, entry,
                                                     IFF_UP, and_complement);
@@ -356,7 +355,7 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
  * Determines network interface speed.
  */
 unsigned int
-netsnmp_access_interface_linux_get_if_speed(int fd, const char *name)
+netsnmp_arch_interface_get_if_speed(int fd, const char *name)
 {
     unsigned int retspeed = 10000000;
     struct ifreq ifr;
