@@ -559,6 +559,8 @@ snmpTagValid(const char *tag, const size_t tagLen)
     return 1;
 }
 
+static struct snmpNotifyTable_data *StorageNew;
+
 int
 write_snmpNotifyTag(int action,
                     u_char * var_val,
@@ -576,13 +578,15 @@ write_snmpNotifyTag(int action,
 
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyTag entering action=%d...  \n", action));
-    if ((StorageTmp = (struct snmpNotifyTable_data *)
+    if (action != RESERVE1 &&
+        (StorageTmp = (struct snmpNotifyTable_data *)
          header_complex((struct header_complex_index *)
                         snmpNotifyTableStorage, NULL,
                         &name[sizeof(snmpNotifyTable_variables_oid) /
                               sizeof(oid) + 3 - 1], &newlen, 1, NULL,
                         NULL)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;     /* remove if you support creation here */
+        if ((StorageTmp = StorageNew) == NULL)
+            return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
     }
 
 
@@ -665,13 +669,15 @@ write_snmpNotifyType(int action,
 
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyType entering action=%d...  \n", action));
-    if ((StorageTmp = (struct snmpNotifyTable_data *)
+    if (action != RESERVE1 &&
+        (StorageTmp = (struct snmpNotifyTable_data *)
          header_complex((struct header_complex_index *)
                         snmpNotifyTableStorage, NULL,
                         &name[sizeof(snmpNotifyTable_variables_oid) /
                               sizeof(oid) + 3 - 1], &newlen, 1, NULL,
                         NULL)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+        if ((StorageTmp = StorageNew) == NULL)
+            return SNMP_ERR_NOSUCHNAME;
     }
 
     switch (action) {
@@ -723,13 +729,15 @@ write_snmpNotifyStorageType(int action,
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyStorageType entering action=%d...  \n",
                 action));
-    if ((StorageTmp = (struct snmpNotifyTable_data *)
+    if (action != RESERVE1 &&
+        (StorageTmp = (struct snmpNotifyTable_data *)
          header_complex((struct header_complex_index *)
                         snmpNotifyTableStorage, NULL,
                         &name[sizeof(snmpNotifyTable_variables_oid) /
                               sizeof(oid) + 3 - 1], &newlen, 1, NULL,
                         NULL)) == NULL) {
-        return SNMP_ERR_NOSUCHNAME;
+        if ((StorageTmp = StorageNew) == NULL)
+            return SNMP_ERR_NOSUCHNAME;
     }
 
 
@@ -761,9 +769,6 @@ write_snmpNotifyStorageType(int action,
 
 
 
-
-
-
 int
 write_snmpNotifyRowStatus(int action,
                           u_char * var_val,
@@ -772,7 +777,7 @@ write_snmpNotifyRowStatus(int action,
                           u_char * statP, oid * name, size_t name_len)
 {
     struct snmpNotifyTable_data *StorageTmp = NULL;
-    static struct snmpNotifyTable_data *StorageNew, *StorageDel;
+    static struct snmpNotifyTable_data *StorageDel;
     size_t          newlen =
         name_len - (sizeof(snmpNotifyTable_variables_oid) / sizeof(oid) +
                     3 - 1);
@@ -827,9 +832,7 @@ write_snmpNotifyRowStatus(int action,
              * XXX: interaction with row storage type needed 
              */
         }
-        break;
 
-    case RESERVE2:
         /*
          * memory reseveration, final preparation... 
          */
@@ -883,6 +886,9 @@ write_snmpNotifyRowStatus(int action,
             StorageNew->snmpNotifyRowStatus = set_value;
             snmp_free_var(vars);
         }
+        break;
+
+    case RESERVE2:
         break;
 
     case FREE:
