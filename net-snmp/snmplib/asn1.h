@@ -36,6 +36,7 @@ typedef u_char	oid;
 #define MAX_SUBID   0xFF
 #endif
 
+#define MIN_OID_LEN	    2
 #define MAX_OID_LEN	    128	/* max subid's in an oid */
 
 #define ASN_BOOLEAN	    (0x01)
