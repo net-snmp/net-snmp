@@ -3467,6 +3467,7 @@ usm_read_user(char *line)
 {
     struct usmUser *user;
     size_t          len;
+    size_t expected_privKeyLen = 0;
 
     user = usm_create_user();
     if (user == NULL)
@@ -3512,6 +3513,22 @@ usm_read_user(char *line)
                                   &user->privProtocolLen);
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
+#ifndef DISABLE_DES
+    if (ISTRANSFORM(user->privProtocol, DESPriv)) {
+        /* DES uses a 128 bit key, 64 bits of which is a salt */
+        expected_privKeyLen = 16;
+    }
+#endif
+#ifdef HAVE_AES
+    if (ISTRANSFORM(user->privProtocol, AESPriv)) {
+        expected_privKeyLen = 16;
+    }
+#endif
+    /* For backwards compatibility */
+    if (user->privKeyLen > expected_privKeyLen) {
+	  user->privKeyLen = expected_privKeyLen;
+    }
+
     line = read_config_read_octet_string(line, &user->userPublicString,
                                          &len);
     return user;
