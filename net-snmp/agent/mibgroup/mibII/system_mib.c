@@ -49,6 +49,7 @@
 #include "agent_read_config.h"
 #include "system.h"
 #include "sysORTable.h"
+#include "default_store.h"
 
 
 	/*********************
@@ -74,6 +75,8 @@ char oldsysLocation[   SYS_STRING_LEN ];
 int sysServices=72;
 int sysServicesConfiged=0;
 
+static int sysContactSet = 0, sysLocationSet = 0, sysNameSet = 0;
+
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
@@ -83,42 +86,127 @@ int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod 
 	 *
 	 *********************/
 
-void system_parse_config_sysloc(const char *token, 
-				char *cptr)
+void system_parse_config_sysloc(const char *token, char *cptr)
 {
   char tmpbuf[1024];
+
+  if (strlen(cptr) >= sizeof(sysLocation)) {
+      snprintf(tmpbuf, 1024,"syslocation token too long (must be < %d):\n\t%s",
+	       sizeof(sysLocation), cptr);
+      config_perror(tmpbuf);
+  }
+
+  if (strcmp(token, "psyslocation") == 0) {
+      if (sysLocationSet < 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- the sysLocation
+	      is already configured read-only.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysLocation.0\n");
+	  return;
+      } else {
+	  sysLocationSet++;
+      }
+  } else {
+      if (sysContactSet > 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- we already read a
+	      persistent value of sysLocation, which we should ignore in
+	      favour of this one.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysLocation.0\n");
+	  /*  Fall through and copy in this value.  */
+      }      
+      sysLocationSet = -1;
+  }
+  
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysLocation[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysLocation)) {
+      strcpy(sysLocation,cptr);
+  } 
+}
+
+void system_parse_config_syscon(const char *token, char *cptr)
+{
+  char tmpbuf[1024];
+
+  if (strlen(cptr) >= sizeof(sysContact)) {
+      snprintf(tmpbuf, 1024,"syscontact token too long (must be < %d):\n\t%s",
+	       sizeof(sysContact), cptr);
+      config_perror(tmpbuf);
+  }
+
+  if (strcmp(token, "psyscontact") == 0) {
+      if (sysContactSet < 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- the sysContact
+	      is already configured read-only.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysContact.0\n");
+	  return;
+      } else {
+	  sysContactSet++;
+      }
+  } else {
+      if (sysContactSet > 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- we already read a
+	      persistent value of sysContact, which we should ignore in favour
+	      of this one.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysContact.0\n");
+	  /*  Fall through and copy in this value.  */
+      }
+      sysContactSet = -1;
+  }
   
   if (strcmp(cptr,"\"\"") == 0) {
       sysContact[0] = '\0';
-  } else if (strlen(cptr) < sizeof(sysLocation)) {
-    strcpy(sysLocation,cptr);
-  } else {
-    sprintf(tmpbuf, "syslocation token too long (must be < %d):\n\t%s",
-		 sizeof(sysLocation), cptr);
-    config_perror(tmpbuf);
+  } else if (strlen(cptr) < sizeof(sysContact)) {
+      strcpy(sysContact,cptr);
+  } 
+}
+
+void system_parse_config_sysname(const char *token, char *cptr)
+{
+  char tmpbuf[1024];
+
+  if (strlen(cptr) >= sizeof(sysName)) {
+      snprintf(tmpbuf, 1024,"sysname token too long (must be < %d):\n\t%s",
+	       sizeof(sysName), cptr);
+      config_perror(tmpbuf);
   }
+
+  if (strcmp(token, "psysname") == 0) {
+      if (sysNameSet < 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- the sysName
+	      is already configured read-only.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysName.0\n");
+	  return;
+      } else {
+	  sysNameSet++;
+      }
+  } else {
+       if (sysNameSet > 0) {
+	  /*  This is bogus (and shouldn't happen anyway) -- we already read a
+	      persistent value of sysName, which we should ignore in favour
+	      of this one.  */
+	  snmp_log(LOG_WARNING,
+		   "ignoring attempted override of read-only sysName.0\n");
+	  /*  Fall through and copy in this value.  */
+      }     
+      sysNameSet = -1;
+  }
+  
+  if (strcmp(cptr,"\"\"") == 0) {
+      sysName[0] = '\0';
+  } else if (strlen(cptr) < sizeof(sysName)) {
+      strcpy(sysName,cptr);
+  } 
 }
 
 void system_parse_config_sysServices(const char *token, char *cptr)
 {
   sysServices = atoi(cptr);
   sysServicesConfiged = 1;
-}
-
-void system_parse_config_syscon(const char *token, 
-				char *cptr)
-{
-  char tmpbuf[1024];
-
-  if (strcmp(cptr,"\"\"") == 0) {
-      sysContact[0] = '\0';
-  } else if (strlen(cptr) < sizeof(sysContact)) {
-    strcpy(sysContact,cptr);
-  } else {
-    sprintf(tmpbuf, "syscontact token too long (must be < %d):\n\t%s",
-                 sizeof(sysContact), cptr);
-    config_perror(tmpbuf);
-  }
 }
 
 
@@ -146,6 +234,27 @@ oid system_variables_oid[] = { SNMP_OID_MIB2,1 };
 oid system_module_oid[]    = { SNMP_OID_SNMPMODULES,1 };
 int system_module_oid_len  = sizeof( system_module_oid ) / sizeof( oid );
 int system_module_count    = 0;
+
+static int
+system_store(int a, int b, void *c, void *d)
+{
+  char line[SNMP_MAXBUF_SMALL];
+
+  if (sysLocationSet > 0) {
+      snprintf(line, SNMP_MAXBUF_SMALL, "psyslocation %s", sysLocation);
+      snmpd_store_config(line);
+  }
+  if (sysContactSet > 0) {
+      snprintf(line, SNMP_MAXBUF_SMALL, "psyscontact %s", sysContact);
+      snmpd_store_config(line);
+  }
+  if (sysNameSet > 0) {
+      snprintf(line, SNMP_MAXBUF_SMALL, "psysname %s", sysName);
+      snmpd_store_config(line);
+  }
+
+  return 0;
+}
 
 void init_system_mib(void)
 {
@@ -201,13 +310,25 @@ void init_system_mib(void)
 	REGISTER_SYSOR_ENTRY( system_module_oid,
 		"The MIB module for SNMPv2 entities");
   
+  sysContactSet = sysLocationSet = sysNameSet = 0;
+
   /* register our config handlers */
   snmpd_register_config_handler("syslocation", system_parse_config_sysloc,
                                 NULL, "location");
   snmpd_register_config_handler("syscontact", system_parse_config_syscon,
                                 NULL,"contact-name");
+  snmpd_register_config_handler("sysname", system_parse_config_sysname,
+                                NULL,"node-name");
+  snmpd_register_config_handler("psyslocation", system_parse_config_sysloc,
+                                NULL, NULL);
+  snmpd_register_config_handler("psyscontact", system_parse_config_syscon,
+                                NULL, NULL);
+  snmpd_register_config_handler("psysname", system_parse_config_sysname,
+                                NULL, NULL);
   snmpd_register_config_handler("sysservices", system_parse_config_sysServices,
                                 NULL,"NUMBER");
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+			 system_store, NULL);
 
 }
 
@@ -293,7 +414,7 @@ writeSystem(int action,
 {
     u_char *cp;
     char *buf = NULL, *oldbuf = NULL;
-    int count;
+    int count, *setvar = NULL;
 
     switch((char)name[7]){
       case VERSION_DESCR:
@@ -303,20 +424,23 @@ writeSystem(int action,
       case SYSCONTACT:
         buf    = sysContact;
         oldbuf = oldsysContact;
+	setvar = &sysContactSet;
         break;
       case SYSTEMNAME:
         buf    = sysName;
         oldbuf = oldsysName;
+	setvar = &sysNameSet;
         break;
       case SYSLOCATION:
         buf    = sysLocation;
         oldbuf = oldsysLocation;
+	setvar = &sysLocationSet;
         break;
       default:
 	return SNMP_ERR_GENERR;		/* ??? */
     }
 
-    switch ( action ) {
+    switch (action) {
 	case RESERVE1:		/* Check values for acceptability */
 	    if (var_val_type != ASN_OCTET_STR){
                 snmp_log(LOG_ERR, "not string\n");
@@ -332,6 +456,10 @@ writeSystem(int action,
                     snmp_log(LOG_ERR, "not print %x\n", *cp);
 		    return SNMP_ERR_WRONGVALUE;
 		}
+	    }
+	    if (setvar != NULL && *setvar < 0) {
+		/*  The object is set in a read-only configuration file.  */
+		return SNMP_ERR_NOTWRITABLE;
 	    }
 	    break;
 
@@ -354,8 +482,15 @@ writeSystem(int action,
 	    oldbuf[0] = 0;
 	    break;
 
-	case COMMIT:		/* Confirm the SET, performing any irreversible actions,
-					and free resources */
+	case COMMIT:
+	    if (setvar != NULL) {
+		*setvar = 1;
+	    }
+	    snmp_save_persistent(ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE));
+	    (void)snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+				      SNMP_CALLBACK_STORE_DATA, NULL);
+	    snmp_clean_persistent(ds_get_string(DS_LIBRARY_ID,DS_LIB_APPTYPE));
+
 	case FREE:		/* Free any resources allocated */
 
 		/* No resources have been allocated, but "empty" the 'oldbuf' */
