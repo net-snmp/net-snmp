@@ -3993,7 +3993,7 @@ else
 fi
 done
 
-for ac_func in signal sigset sigblock sighold strerror
+for ac_func in signal sigset sigblock sighold strerror setenv
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:4000: checking for $ac_func" >&5

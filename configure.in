@@ -626,7 +626,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
 AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
-AC_CHECK_FUNCS(signal sigset sigblock sighold strerror)
+AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist)
