@@ -36,7 +36,11 @@
 */
 #define TRUE  1
 #define FALSE 0
-#define LOWBYTEFIRST FALSE 
+#if defined(hpux) || defined(SYSV)
+#define LOWBYTEFIRST TRUE
+#else
+#define LOWBYTEFIRST FALSE
+#endif
 
 /* Compile-time includes 
 */
@@ -96,6 +100,8 @@ MDptr MDp;
   for (i=0;i<4;i++)
     for (j=0;j<32;j=j+8)
       printf("%02x",(MDp->buffer[i]>>j) & 0xFF);
+  printf("\n");
+  fflush(stdout);
 }
 
 /* MDbegin(MDp)
