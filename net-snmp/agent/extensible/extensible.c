@@ -57,7 +57,10 @@ unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
       return NULL;
     }
 
-    if (!exact) newname[8] = name[8] + 1;
+    if (!exact)
+      newname[8] = name[8] + 1;
+    else
+      newname[8] = name[8];
   }  
   bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
   *write_method = 0;
@@ -155,7 +158,10 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
       }
     }
 /*    printf("\nrtest:  %d, name[8]:  %d, num:  %d, exact:  %d\n",rtest,name[8],numextens,exact); */
-    if (!exact) newname[8] = name[8] + 1;
+    if (exact)
+      newname[8] = name[8];
+    else
+      newname[8] = name[8] + 1;
     if (rtest || newname[8] > numextens)
       return NULL;
 
