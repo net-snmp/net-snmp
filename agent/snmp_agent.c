@@ -225,8 +225,8 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     struct variable_list *var_ptr, *var_ptr2;
 
     if ( magic == NULL ) {
-	asp = init_agent_snmp_session( session, pdu );
-    status = SNMP_ERR_NOERROR;
+	asp = init_agent_snmp_session( session, snmp_clone_pdu(pdu) );
+	status = SNMP_ERR_NOERROR;
     }
     else {
 	asp = (struct agent_snmp_session *)magic;

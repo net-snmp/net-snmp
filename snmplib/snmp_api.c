@@ -111,10 +111,10 @@ SOFTWARE.
 #include "snmp_alarm.h"
 #include "snmp_logging.h"
 #include "default_store.h"
-
 #include "mt_support.h"
 
 static void _init_snmp (void);
+
 #include "transform_oids.h"
 #ifndef timercmp
 #define	timercmp(tvp, uvp, cmp) \
@@ -2553,8 +2553,13 @@ _snmp_parse(struct snmp_session *session,
           if (SNMP_CMD_CONFIRMED(pdu->command) ||
 	      (pdu->command == 0 && 
               (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT ))) {
-	    snmpv3_make_report(pdu, result);
-	    snmp_send(session, pdu);
+	    struct snmp_pdu *pdu2;
+	    int flags = pdu->flags;
+	    pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
+	    pdu2 = snmp_clone_pdu(pdu);
+	    pdu->flags = pdu2->flags = flags;
+	    snmpv3_make_report(pdu2, result);
+	    snmp_send(session, pdu2);
 	  }
 	  break;
 	default:

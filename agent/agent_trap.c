@@ -101,6 +101,7 @@ static int create_v1_trap_session (const char *sink,
 static void free_v1_trap_session (struct trap_sink *sp)
 {
     snmp_close(sp->sesp);
+    free(sp->ses.peername);
     if (sp->ses.community) free(sp->ses.community);
     free (sp);
 }
@@ -133,6 +134,7 @@ static int create_v2_trap_session (const char *sink,
 static void free_v2_trap_session (struct trap_sink *sp)
 {
     snmp_close(sp->sesp);
+    free(sp->ses.peername);
     if (sp->ses.community) free(sp->ses.community);
     free (sp);
 }
@@ -150,6 +152,7 @@ void snmpd_free_trapsinks (void)
 	    free_v2_trap_session(sp);
 	    break;
 	}
+	free(sp);
 	sp = sinks;
     }
 }
@@ -379,7 +382,7 @@ void
 snmpd_parse_config_trapcommunity(char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
-    snmp_trapcommunity = malloc (strlen(cptr));
+    snmp_trapcommunity = malloc (strlen(cptr)+1);
     copy_word(cptr, snmp_trapcommunity);
 }
 
