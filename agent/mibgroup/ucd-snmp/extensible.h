@@ -13,7 +13,7 @@ config_require(util_funcs)
      extern FindVarMethod var_extensible_shell;
      extern WriteMethod fixExecError;
      extern FindVarMethod var_extensible_relocatable;
-     struct subtree *find_extensible(struct subtree *, oid *, size_t, int);
+     netsnmp_subtree *find_extensible(netsnmp_subtree *, oid *, size_t, int);
 
 /*
  * config file parsing routines 
