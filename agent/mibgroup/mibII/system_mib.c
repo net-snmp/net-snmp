@@ -81,6 +81,10 @@ static int sysContactSet = 0, sysLocationSet = 0, sysNameSet = 0;
 WriteMethod writeSystem;
 int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 
+#ifdef WIN32
+void getSysDescr();
+#endif
+
 	/*********************
 	 *
 	 *  snmpd.conf config parsing
@@ -279,7 +283,11 @@ void init_system_mib(void)
   strncpy(version_descr,extmp.output, sizeof(version_descr));
   version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
 #else
+#if WIN32
+  getSysDescr();
+#else
   strcpy(version_descr, "unknown" );
+#endif /* WIN32 */
 #endif
 #endif
 
@@ -507,3 +515,77 @@ writeSystem(int action,
 	 *
 	 *********************/
 
+#ifdef WIN32
+void
+getSysDescr(void)
+{
+    OSVERSIONINFOEX osvi;
+    BOOL bOsVersionInfoEx;
+
+    /* Try calling GetVersionEx using the OSVERSIONINFOEX structure.
+     * If that fails, try using the OSVERSIONINFO structure.
+     */
+
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+    if (!(bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *)&osvi))) {
+	/* If OSVERSIONINFOEX doesn't work, try OSVERSIONINFO. */
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	if (!GetVersionEx((OSVERSIONINFO *)&osvi)) {
+ 	    return;
+	}
+    }
+    sprintf(version_descr, "Software:");
+
+    switch (osvi.dwPlatformId) {
+
+    case VER_PLATFORM_WIN32_NT:
+	if (osvi.dwMajorVersion <= 4) {
+	    sprintf(version_descr, "%s %s", version_descr, 
+		    "Microsoft Windows NT ");
+	} else if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) {
+	    sprintf(version_descr, "%s %s", version_descr,
+		    "Microsoft Windows 2000");
+	} else if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
+	    sprintf(version_descr, "%s %s", version_descr, "Whistler ");
+	}
+
+	/*  Display version, service pack (if any), and build number.  */
+	sprintf(version_descr, "%s Version %d.%d %s (Build %d)",
+		version_descr,
+		osvi.dwMajorVersion,
+		osvi.dwMinorVersion,
+		osvi.szCSDVersion,
+		osvi.dwBuildNumber & 0xFFFF);
+	break;
+
+    case VER_PLATFORM_WIN32_WINDOWS:
+	if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0) {
+	    sprintf(version_descr, "%s %s", version_descr, 
+		    "Microsoft Windows 95");
+	    if (osvi.szCSDVersion[1] == 'C') {
+		sprintf(version_descr, "%s %s", version_descr, "OSR2");
+	    }
+	} 
+	
+	if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10) {
+	    sprintf(version_descr, "%s %s", version_descr,
+		    "Microsoft Windows 98");
+	    if (osvi.szCSDVersion[1] == 'A') {
+		sprintf(version_descr, "%s %s", version_descr, "SE");
+	    }
+	} 
+	
+	if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90) {
+	    sprintf(version_descr, "%s %s", version_descr, 
+		    "Microsoft Windows Me");
+	} 
+	break;
+	
+    case VER_PLATFORM_WIN32s:
+	sprintf(version_descr, "%s %s", version_descr, "Microsoft Win32s");
+	break;
+    }
+}
+#endif
