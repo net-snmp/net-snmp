@@ -118,7 +118,6 @@ extern          "C" {
     /*
      * indexes
      */
-
     int             ifName_get(ifXTable_rowreq_ctx * rowreq_ctx,
                                char **ifName_val_ptr_ptr,
                                size_t *ifName_val_ptr_len_ptr);
@@ -160,27 +159,15 @@ extern          "C" {
                                              rowreq_ctx,
                                              U64 *
                                              ifHCOutBroadcastPkts_val_ptr);
-    int             ifLinkUpDownTrapEnable_map(u_long *
-                                               mib_ifLinkUpDownTrapEnable_val_ptr,
-                                               u_long
-                                               raw_ifLinkUpDownTrapEnable_val);
     int             ifLinkUpDownTrapEnable_get(ifXTable_rowreq_ctx *
                                                rowreq_ctx,
                                                u_long *
                                                ifLinkUpDownTrapEnable_val_ptr);
     int             ifHighSpeed_get(ifXTable_rowreq_ctx * rowreq_ctx,
                                     u_long * ifHighSpeed_val_ptr);
-    int             ifPromiscuousMode_map(u_long *
-                                          mib_ifPromiscuousMode_val_ptr,
-                                          u_long
-                                          raw_ifPromiscuousMode_val);
     int             ifPromiscuousMode_get(ifXTable_rowreq_ctx * rowreq_ctx,
                                           u_long *
                                           ifPromiscuousMode_val_ptr);
-    int             ifConnectorPresent_map(u_long *
-                                           mib_ifConnectorPresent_val_ptr,
-                                           u_long
-                                           raw_ifConnectorPresent_val);
     int             ifConnectorPresent_get(ifXTable_rowreq_ctx *
                                            rowreq_ctx,
                                            u_long *

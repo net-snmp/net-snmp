@@ -405,12 +405,9 @@ extern          "C" {
     /*
      * indexes
      */
-
     int             ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx,
                                 char **ifDescr_val_ptr_ptr,
                                 size_t *ifDescr_val_ptr_len_ptr);
-    int             ifType_map(u_long * mib_ifType_val_ptr,
-                               u_long raw_ifType_val);
     int             ifType_get(ifTable_rowreq_ctx * rowreq_ctx,
                                u_long * ifType_val_ptr);
     int             ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx,
@@ -421,12 +418,8 @@ extern          "C" {
                                       char **ifPhysAddress_val_ptr_ptr,
                                       size_t
                                       *ifPhysAddress_val_ptr_len_ptr);
-    int             ifAdminStatus_map(u_long * mib_ifAdminStatus_val_ptr,
-                                      u_long raw_ifAdminStatus_val);
     int             ifAdminStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
                                       u_long * ifAdminStatus_val_ptr);
-    int             ifOperStatus_map(u_long * mib_ifOperStatus_val_ptr,
-                                     u_long raw_ifOperStatus_val);
     int             ifOperStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
                                      u_long * ifOperStatus_val_ptr);
     int             ifLastChange_get(ifTable_rowreq_ctx * rowreq_ctx,
