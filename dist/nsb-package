@@ -8,13 +8,16 @@
 
 usage()
 {
-   echo "Usage: $0  [-c] [-d] [-P] [-s SRCD] [-b BUILDD] [-i INSTALLD] VERSION"
+   echo "Usage: $0  [params] VERSION"
+   echo ""
+   echo "  params: [-c] [-d] [-P] [-s NSB_SRC_DIR] [-b BUILDD] [-i NSB_INSTALL_DIR]"
+   echo "          [-h host] [-p path]"
    echo ""
    echo " VERSION    : relase number (eg 5.0.3)"
-   echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
+   echo " -s NSB_SRC_DIRIR  : soure directory [$HOME/src/net-snmp-VERSION]"
    echo " -b BUILDD  : build directory [$HOME/build/]"
    echo "              NOTE-platform will be appended to build directory"
-   echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
+   echo " -i NSB_INSTALL_DIR: install directory [$HOME/build/\$PLATFORM/usr/local]"
    echo ""
    echo " -x : configure extra features for pre-release testing"
    echo " -c : skip configure"
@@ -24,6 +27,9 @@ usage()
    echo " -r : remove build dir (rm -fR) before build"
    echo " -R : remove build dir (rm -fR) after successful build"
    echo " -t : skip 'make test'"
+   echo ""
+   echo " -h : host to upload results to"
+   echo " -p : path to upload results to"
    exit 1
 }
 
@@ -40,6 +46,7 @@ if [ -f $EXE_PATH/nsb-functions ];then
    source $EXE_PATH/nsb-functions
 elif [ -f $HOME/bin/nsb-functions ]; then
    source $HOME/bin/nsb-functions
+   EXE_PATH=$HOME/bin
 elif [ -f nsb-functions ];then
    source nsb-functions
 else
@@ -54,18 +61,20 @@ fi
 REMOVE_SUCCESS=0
 
 #      x)  x=$OPTARG ;;
-while getopts b:cdi:mPrRs:tx opt
+while getopts b:cdh:i:mPp:rRs:tx opt
 do
     case "$opt" in
-      b)  BUILDD=$OPTARG ;;
+      b)  NSB_BUILD_DIR=$OPTARG ;;
       c)  NSB_SKIP_CONFIG=1 ;;
       d)  NSB_CLEAN=0 ;;
-      i)  INSTALLD=$OPTARG ;;
+      h)  NSB_SCP_HOST=$OPTARG ;;
+      i)  NSB_INSTALL_DIR=$OPTARG ;;
       m)  NSB_SKIP_BUILD=1 ;;
       P)  NSB_PROMPT=1 ;;
+      p)  NSB_SCP_DEST=$OPTARG ;;
       r)  NSB_CLEAN=2 ;;
       R)  REMOVE_SUCCESS=1 ;;
-      s)  SRCD=$OPTARG ;;
+      s)  NSB_SRC_DIR=$OPTARG ;;
       t)  NSB_SKIP_TEST=1 ;;
       x)  NSB_CONFIG_ALL=1;;
       \?)# unknown flag
@@ -88,28 +97,29 @@ if [ $NSB_CLEAN -eq 1 ]; then
 fi
 
 VERSION=$1
-if [ -z "$SRCD" ]; then
-   SRCD=$HOME/src/net-snmp-$VERSION
-fi
-if [ -z "$BUILDD" ]; then
-   BUILDD=$HOME/build
-fi
-if [ $SRCD != $BUILDD ];then
-    BUILDD=$BUILDD/$VERSION-`nsb-sysname`
-fi
-if [ -z "$INSTALLD" ]; then
-   INSTALLD=$BUILDD/usr/local
+
+nsb-default-paths
+
+if [ $NSB_SRC_DIR != $NSB_BUILD_DIR ];then
+   NSB_BUILD_DIR=$NSB_BUILD_DIR/$VERSION-`nsb-sysname`
 fi
 
 
 ########################################################################
 ########################################################################
-nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
-nsb-build $VERSION $SRCD $BUILDD $INSTALLD $NSB_CONFIG_ALL
+nsb-prompt "press enter to build $NSB_SRC_DIR in $NSB_BUILD_DIR, and install in $NSB_INSTALL_DIR"
+nsb-build $VERSION $NSB_SRC_DIR $NSB_BUILD_DIR $NSB_INSTALL_DIR $NSB_CONFIG_ALL
 rc=$?
+if [ ! -z $NSB_SCP_HOST ]; then
+   nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$VERSION-`nsb-sysname`
+fi
 if [ $rc -eq 0 ] && [ $REMOVE_SUCCESS -eq 1 ];then
-    nsb-prompt "press enter to remove $BUILDD"
-    /bin/rm -fR $BUILDD > /dev/null 2>&1
+    nsb-prompt "press enter to remove $NSB_BUILD_DIR"
+    if [ "x$NSB_BUILD_DIR" = "/" ]; then
+       nsb-abort "Not running rm -fR from /"
+    fi
+    /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
 fi
 
+nsb-prompt "press enter to exit with rc $RC"
 exit $rc
