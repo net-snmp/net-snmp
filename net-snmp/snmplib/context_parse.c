@@ -38,7 +38,7 @@
 #define VIEW_STATE	2
 #define PROXY_STATE  	3
 
-static error_exit(str, linenumber, filename)
+static void error_exit(str, linenumber, filename)
     char *str;
     int linenumber;
     char *filename;
@@ -54,8 +54,8 @@ read_context_database(filename)
     FILE *fp;
     char buf[256], buf1[256], buf2[256], buf3[256];
     char *cp;
-    int blank, nonhex;
-    int linenumber = 0, chars = 0, clock_pos;
+    int blank;
+    int linenumber = 0, chars = 0;
     int state = IDENTITY_STATE;
     oid contextid[64];
     int contextidlen;

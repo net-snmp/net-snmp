@@ -37,7 +37,7 @@ view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
     return NULL;
 }
 
-int
+void
 view_scanInit()
 {
   ScanPtr = List;
@@ -76,6 +76,7 @@ view_createEntry(viewIndex, viewSubtree, viewSubtreeLen)
     return vp;
 }
 
+void
 view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
     oid *viewSubtree;
     int viewIndex, viewSubtreeLen;

@@ -71,7 +71,7 @@ context_getEntry(contextID, contextIDLen)
     return NULL;
 }
 
-int
+void
 context_scanInit()
 {
   ScanPtr = List;
@@ -123,6 +123,7 @@ context_createEntry(contextID, contextIDLen)
     return cp;
 }
 
+void
 context_destroyEntry(contextID, contextIDLen)
     oid *contextID;
     int contextIDLen;

@@ -68,7 +68,7 @@ party_getEntry(partyID, partyIDLen)
     return NULL;
 }
 
-int
+void
 party_scanInit()
 {
   ScanPtr = List;

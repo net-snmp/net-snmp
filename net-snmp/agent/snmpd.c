@@ -551,7 +551,7 @@ main(argc, argv)
 		    snmp_dump_packet++;
 		    break;
 		case 'q':
-		    quick_print++;
+		    snmp_set_quick_print(1);
 		    break;
                 case 'p':
                     port_flag++;

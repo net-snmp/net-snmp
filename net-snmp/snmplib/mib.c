@@ -47,12 +47,61 @@ SOFTWARE.
 #include "parse.h"
 
 static void sprint_by_type();
+static char *uptimeString();
+static void sprint_hexstring();
+static void sprint_asciistring();
+static void sprint_octet_string();
+static void sprint_opaque();
+static void sprint_object_identifier();
+static void sprint_timeticks();
+static void sprint_integer();
+static void sprint_uinteger();
+static void sprint_gauge();
+static void sprint_counter();
+static void sprint_networkaddress();
+static void sprint_ipaddress();
+static void sprint_null();
+static void sprint_bitstring();
+static void sprint_nsapaddress();
+static void sprint_counter64();
+static void sprint_unknowntype();
+static void sprint_badtype();
+static void sprint_by_type();
+#ifdef notdef
+static void sprint_unsigned_short();
+static struct tree *find_rfc1213_mib();
+#endif
 static parse_subtree();
 static void set_functions();
 static int lc_cmp ();
 char *sprint_objid();
-  
-int quick_print = 0;
+
+static int quick_print = 0;
+void snmp_set_quick_print(int val)
+{
+    quick_print = val;
+}
+int snmp_get_quick_print(void)
+{
+    return quick_print;
+}
+
+int read_rawobjid();
+struct tree *get_symbol();
+void init_mib();
+int read_objid();
+int read_objid();
+void print_objid();
+void print_variable();
+void sprint_variable();
+void sprint_value();
+void print_value();
+struct tree * get_symbol();
+struct tree * get_tree();
+char *get_description();
+void print_description();
+struct tree * find_node();
+int get_node();
 
 static char *
 uptimeString(timeticks, buf)
@@ -307,11 +356,11 @@ sprint_integer(buf, var, enums)
 	    break;
 	}
     if (enum_string == NULL)
-	sprintf(buf, "%ld", *var->val.integer);
+	sprintf(buf, "%ld", (long)(*var->val.integer));
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
     else
-	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
+	sprintf(buf, "%s(%ld)", enum_string, (long)(*var->val.integer));
 }
 
 static void
@@ -334,11 +383,11 @@ sprint_uinteger(buf, var, enums)
 	    break;
 	}
     if (enum_string == NULL)
-	sprintf(buf, "%ld", *var->val.integer);
+	sprintf(buf, "%ld", (long)(*var->val.integer));
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
     else
-	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
+	sprintf(buf, "%s(%ld)", enum_string, (long)(*var->val.integer));
 }
 
 static void
@@ -418,6 +467,7 @@ sprint_ipaddress(buf, var, enums)
 	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
 }
 
+#ifdef notdef
 static void
 sprint_unsigned_short(buf, var, enums)
     char *buf;
@@ -435,6 +485,7 @@ sprint_unsigned_short(buf, var, enums)
     else
 	sprintf(buf, "INT: %lu", *var->val.integer);
 }
+#endif
 
 static void
 sprint_null(buf, var, enums)
@@ -759,6 +810,7 @@ main(argc, argv)
 #endif /* testing */
 
 
+#ifdef notdef
 static struct tree *
 find_rfc1213_mib(root)
     struct tree *root;
@@ -779,6 +831,7 @@ find_rfc1213_mib(root)
     }
     return root;
 }
+#endif
 
 int read_objid(input, output, out_len)
     char *input;
