@@ -1,0 +1,176 @@
+#!/bin/sh
+#
+# RUNTESTS [-h]...
+#
+# RETURNS:	Number of failed tests.
+#
+# CALLS: eval_oneprogram.sh [-h][-lk] <program>
+#
+# SOURCES: TESTCONF.sh
+#
+#
+
+								USAGE_LONG='
+#
+# HOW TO ENTER A NEW TEST
+#
+# Copy the template file (T2.sh) XXX to the tests directory, and have
+# the file begin with a 'T'.  All files in the tests directory
+# begining with a 'T' are assumed to be a test.  See the file for
+# further instructions
+#
+# HOW TESTS ARE RUN AND EVALUATED
+#
+# ...
+# 
+'
+
+#
+# Suggested improvement(s):
+#	Run a given test against a running agent.
+#	Display errors
+#	interactively pick tests to run.
+#	options arguments to pick tests to run.
+#
+
+# Usage mess.  (No, it works.)
+#
+USAGE="Usage: `basename $0` [-h]"
+
+usage() { echo; echo $USAGE; cat <<BLIK | sed 's/^#//' | sed '1d' | $PAGER
+$USAGE_LONG
+BLIK
+exit 0
+}
+
+# defaults
+interative=no
+
+while [ -n "$1" ]; do
+    case "$1" in
+	-h)
+	    usage
+	    exit
+	    ;;
+
+	-i)
+	    interactive="yes"
+	    ;;
+    esac
+
+    shift
+done
+
+#
+# Source the testing configuration file
+#
+. TESTCONF.sh
+
+# Hack: the above created a directory, now we have to nuke it and
+# forget about it...  All for the convenience of the test writer.
+rmdir $SNMP_TMPDIR
+unset SNMP_TMPDIR
+export SNMP_TMPDIR
+
+#
+# Switch to the testing directory, for ease of the client test packages.
+#
+cd $SNMP_TESTDIR
+
+#------------------------------------ -o- 
+# Globals.
+#
+PROGRAM=
+ARGUMENTS="$*"
+
+TMPFILE=$SNMP_TMPDIR/eval_suite.sh$$
+
+testname=
+
+success_count=0
+failed_count=0
+
+if [ "x$do_tests" = "x" ]; then
+    #
+    # List the tests in question
+    #
+    SNMP_HEADERONLY=yes
+    export SNMP_HEADERONLY
+    num=0
+    for testfile in T*; do
+
+	case $testfile in
+	    # Skip backup files, and the like.
+	    *~)     ;;
+	    *.bak)  ;;
+	    *.orig) ;;
+	    *.rej)  ;;
+
+	    # Do the rest
+	    *)
+		if [ "x$interactive" != "xyes" ]; then
+		    num=`expr $num + 1`
+		    echo -n "$num:  "
+		    ../eval_onescript.sh $testfile
+		fi
+		all_tests="$all_tests $num"
+		all_files="$all_files $testfile"
+		;;
+	esac
+    done
+    unset SNMP_HEADERONLY
+    export SNMP_HEADERONLY
+
+    #
+    # TODO: allow user to interactively pick the list of tests to run.
+    #
+
+    #read inp
+    #if [ "x$inp" = "x" ]; then
+	do_tests="$all_files"
+    #else
+    #    set $inp
+    #    
+    #fi
+
+    #echo Starting: Running tests $do_tests
+fi
+
+#
+# Run the tests
+#
+num=0
+for testfile in $do_tests; do
+    dothisone="yes";
+    if [ "x$interactive" = "xyes" ]; then
+	SNMP_HEADERONLY=yes
+	export SNMP_HEADERONLY
+
+        echo -n "$num:  "
+	../eval_onescript.sh $testfile
+
+	unset SNMP_HEADERONLY
+	export SNMP_HEADERONLY
+
+	echo -n "  Run test #$num (y/n) [y]? "
+	read inp
+	if [ "x$inp" = "xn" ]; then
+	    dothisone=no
+	fi
+    fi
+  
+    if [ "x$dothisone" = "xyes" ]; then
+	echo -n "  $num:  "
+	../eval_onescript.sh $testfile
+	if [ $? = 0 ]; then
+	    success_count=`expr $success_count + 1`
+	else
+	    failed_count=`expr $failed_count + 1`
+	fi
+    fi
+    num=`expr $num + 1`
+done
+
+echo Summary: $success_count / `expr $failed_count + $success_count` succeeded.
+
+exit $failed_count
