@@ -224,7 +224,7 @@ void disk_parse_config(word,cptr)
     else {
       sprintf(tmpbuf, "Couldn't find device for disk %s",
               disks[numdisks].path);
-      config_perror(tmpbuf);
+      config_pwarn(tmpbuf);
       disks[numdisks].minimumspace = -1;
       disks[numdisks].minpercent = -1;
       disks[numdisks].path[0] = 0;
