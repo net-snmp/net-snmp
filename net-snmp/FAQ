@@ -684,12 +684,13 @@ How do I write C code to integrate with the agent?
   header) per group in most cases.
 
   The tool 'mib2c' can be used to generate most of the skeleton code
-  needed for implementing a new module.  Further information is available
-  in the README file in the mibgroup directory, the README file for
-  mib2c, and the Extensibility Guide, which describes this process in
-  in excruciating detail.  All these are shipped with the distribution,
-  and should be available via the project web page.
-  Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further advice.
+  needed for implementing a new module.  Further information is
+  available in the AGENT.txt and in the README file in the mibgroup
+  directory, the README file for mib2c, which describes this process
+  in in excruciating detail.  All these are shipped with the
+  distribution, and should be available via the project web page.
+  Contact the list 'ucd-snmp-coders@ucd-snmp.ucdavis.edu' for further
+  advice.
 
   Work is underway (or at least being discussed!) for implementing
   proxy/multi-agent support using the AgentX mechanisms.
