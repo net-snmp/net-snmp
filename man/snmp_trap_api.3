@@ -1,4 +1,4 @@
-.TH SNMP_TRAP_API 3 "9 Dec 1999"
+.TH SNMP_TRAP_API 3 "6 Feb 2002""
 .UC 5
 .SH NAME
 snmp_trap_api \- sending a trap or notification from a UCD-SNMP MIB module
@@ -13,7 +13,7 @@ void send_v2trap ( struct variable_list *vars );
 .PP
 .SH DESCRIPTION
 These three routines may be used to send traps from a MIB module
-within the UCD SNMP agent.
+within the UCD SNMP agent (including an AgentX subagent).
 .PP
 .I Send_easy_trap
 sends an SNMPv1 trap (or the SNMPv2 equivalent) to the
