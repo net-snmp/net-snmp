@@ -6,6 +6,10 @@ require Tk::HList;
 $host = 'localhost';
 $community = 'public';
 
+$graphtime=5;
+$graphdelta=1;
+@graphcolors=qw(blue red green yellow purple);
+
 @displayInfo=qw(type access status units hint enums moduleID);
 
 use Tk;
@@ -61,6 +65,7 @@ $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
 $commEntry = $bFrame->Entry(-textvariable => \$community, -width => 12);
 $commEntry->pack(-side => 'left');
+$bFrame->Button(-text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
 $bFrame->Button(-text => 'table', -command => \&snmptable)->pack(-side => 'right');
 $bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
 $bFrame->Button(-text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
@@ -97,7 +102,7 @@ sub snmpsetup {
 }
 
 sub initText {
-    if (ref($output) eq "Tk::Frame") {
+    if (ref($output) eq "Tk::Frame" && defined($$output{'_#text'})) {
 	$output->delete('0.0','end');
     } else {
 	$output->destroy();
@@ -111,6 +116,13 @@ sub initTable {
     $oFrame->packPropagate(0);
     $output = $oFrame->Table(-columns => shift, -width => 80, -height => 14,
 			     -fixedrows => 2, -fixedcolumns => 2);
+    $output->pack(-side => 'top', -fill => 'both', -expand => 1);
+}
+
+sub initCanvas {
+    $output->destroy();
+    $oFrame->packPropagate(0);
+    $output = $oFrame->Scrolled(qw(Canvas -width 80c -height 14c));
     $output->pack(-side => 'top', -fill => 'both', -expand => 1);
 }
 
@@ -179,12 +191,9 @@ sub snmptable {
 	}
 	if (!grep(/$2/,@index)) {
 	    push @index,$2;
-	    print "index:  $var->[$SNMP::Varbind::iid_f]\n";
 	}
 	$tb{$2}{$1} = $var->val;
     }
-    $oFrame->Scrolled(qw(Text -width 80 -height 14));
-    $output->pack(-side => 'top', -fill => 'both', -expand => 1);
     initTable($#tags+1);
     for(my $k=0;$k <= $#tags;$k++) {
 	$output->put(1,$k+2,$tags[$k]);
@@ -198,6 +207,72 @@ sub snmptable {
 	    $output->put($i+2,$k+2,$tb{$index[$i]}{$tags[$k]});
 	}
     }
+    $status->configure(-text => "");
+}
+
+sub snmpgraph {
+    ($graphoid, $graphsess, my $graphvar) = snmpsetup();
+    $top->update();
+    %graphtb = ();
+    @graphvars = ();
+    initCanvas();
+    $gcount=0;
+    $max=-1;
+    $min=2**32-1;
+    updateGraph();
+    $output->repeat($graphtime*1000, \&updateGraph);
+}
+
+sub updateGraph() {
+    $status->configure(-text => "collecting data:  $host $community $graphoid");
+    my $oid = $graphoid;
+    my $tag = SNMP::translateObj($graphoid,0);
+    my $var = new SNMP::Varbind([$tag]);
+    $graphsess->{ErrorStr} = "";    
+    while (!$graphsess->{ErrorStr}) {
+	my $val = $graphsess->getnext($var);
+	last if ($graphsess->{ErrorStr} ||
+		 !defined($var->tag) ||
+	         SNMP::translateObj($var->tag) !~ /^\.$oid/);
+	my $newoid = SNMP::translateObj("$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]");
+	$top->update();
+	$newoid =~ /$oid\.([0-9\.]+)$/;
+	if (defined($1)) {
+	    if (!grep(/$1/,@graphvars)) {
+		push @graphvars,$1;
+		print "index:  $1\n";
+	    }
+	    if ($graphdelta) {
+		if ($gcount > 0) {
+		    $graphtb{$1}[$gcount-1] = $var->val - $prev{$1};
+		}
+		$prev{$1} = $var->val;
+	    } else {
+		$graphtb{$1}[$gcount] = $var->val;
+	    }
+	    $max = $graphtb{$1}[$#{$graphtb{$1}}] 
+		if ($#{$graphtb{$1}} >= 0 &&
+		    $graphtb{$1}[$#{$graphtb{$1}}] > $max);
+	    $min = $graphtb{$1}[$#{$graphtb{$1}}] 
+		if ($#{$graphtb{$1}} >= 0 &&
+		    $graphtb{$1}[$#{$graphtb{$1}}] < $min);
+	}
+    }
+    if ($gcount > 1) {
+	$output->delete('all');
+	my $canvas = $$output{'SubWidget'}{'canvas'};
+	my $h=$canvas->cget(-height);
+	foreach $i (@graphvars) {
+	    my @a = ();
+	    for(my $j=0; $j <= $#{$graphtb{$i}}; $j++) {
+		$a[$j*2] = $j;
+		$a[$j*2+1] = $h-(($h-3)*($graphtb{$i}[$j]-$min))/($max-$min)-3;
+	    }
+	    $output->createLine(@a, -fill => $graphcolors[$i%$#graphcolors]);
+	}
+    }
+    $gcount++;
+    $status->configure(-text => "sleeping for $graphtime seconds");
 }
 
 sub addMibOID {
