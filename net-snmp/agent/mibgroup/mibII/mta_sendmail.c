@@ -2,6 +2,12 @@
  *  MTA-MIB implementation for sendmail - mibII/mta_sendmail.c
  *  Christoph Mammitzsch <Christoph.Mammitzsch@tu-clausthal.de>
  *
+ * todo: put queue directory into description?
+ *
+ *  13.02.2002:
+ *    - support sendmail 8.12 queue groups
+ *
+ *
  *  05.04.2000:
  *
  *    - supports sendmail 8.10.0 statistics files now
@@ -116,20 +122,23 @@ static oid mta_variables_oid[] = { 1,3,6,1,2,1,28 };
 #define   NEEDS         (NEEDS_STATS | NEEDS_DIR)
 
 /* symbolic names for the magic values */
-#define   MTARECEIVEDMESSAGES           3 | NEEDS_STATS
-#define   MTASTOREDMESSAGES             4 | NEEDS_DIR
-#define   MTATRANSMITTEDMESSAGES        5 | NEEDS_STATS
-#define   MTARECEIVEDVOLUME             6 | NEEDS_STATS
-#define   MTASTOREDVOLUME               7 | NEEDS_DIR
-#define   MTATRANSMITTEDVOLUME          8 | NEEDS_STATS
-
-#define   MTAGROUPRECEIVEDMESSAGES     19 | NEEDS_STATS
-#define   MTAGROUPREJECTEDMESSAGES     20 | NEEDS_STATS
-#define   MTAGROUPTRANSMITTEDMESSAGES  22 | NEEDS_STATS
-#define   MTAGROUPRECEIVEDVOLUME       23 | NEEDS_STATS
-#define   MTAGROUPTRANSMITTEDVOLUME    25 | NEEDS_STATS
-#define   MTAGROUPNAME                 43
-#define   MTAGROUPHIERARCHY            49
+enum {
+    MTARECEIVEDMESSAGES =           3 | NEEDS_STATS,
+    MTASTOREDMESSAGES =             4 | NEEDS_DIR,
+    MTATRANSMITTEDMESSAGES =        5 | NEEDS_STATS,
+    MTARECEIVEDVOLUME =             6 | NEEDS_STATS,
+    MTASTOREDVOLUME =               7 | NEEDS_DIR,
+    MTATRANSMITTEDVOLUME =          8 | NEEDS_STATS,
+    MTAGROUPSTOREDMESSAGES =       17 | NEEDS_DIR,
+    MTAGROUPSTOREDVOLUME =         18 | NEEDS_DIR,
+    MTAGROUPRECEIVEDMESSAGES =     19 | NEEDS_STATS,
+    MTAGROUPREJECTEDMESSAGES =     20 | NEEDS_STATS,
+    MTAGROUPTRANSMITTEDMESSAGES =  22 | NEEDS_STATS,
+    MTAGROUPRECEIVEDVOLUME =       23 | NEEDS_STATS,
+    MTAGROUPTRANSMITTEDVOLUME =    25 | NEEDS_STATS,
+    MTAGROUPNAME =                 43,
+    MTAGROUPHIERARCHY =            49,
+};
 
 /* structure that tells the agent, which function returns what values */
 static struct variable4 mta_variables[] = {
@@ -142,8 +151,10 @@ static struct variable4 mta_variables[] = {
 
   { MTAGROUPRECEIVEDMESSAGES   , ASN_COUNTER  , RONLY, var_mtaGroupEntry, 3, { 2, 1,  2 } },
   { MTAGROUPREJECTEDMESSAGES   , ASN_COUNTER  , RONLY, var_mtaGroupEntry, 3, { 2, 1,  3 } },
+  { MTAGROUPSTOREDMESSAGES     , ASN_GAUGE    , RONLY, var_mtaGroupEntry, 3, { 2, 1,  4 } },
   { MTAGROUPTRANSMITTEDMESSAGES, ASN_COUNTER  , RONLY, var_mtaGroupEntry, 3, { 2, 1,  5 } },
   { MTAGROUPRECEIVEDVOLUME     , ASN_COUNTER  , RONLY, var_mtaGroupEntry, 3, { 2, 1,  6 } },
+  { MTAGROUPSTOREDVOLUME       , ASN_GAUGE    , RONLY, var_mtaGroupEntry, 3, { 2, 1,  7 } },
   { MTAGROUPTRANSMITTEDVOLUME  , ASN_COUNTER  , RONLY, var_mtaGroupEntry, 3, { 2, 1,  8 } },
   { MTAGROUPNAME               , ASN_OCTET_STR, RONLY, var_mtaGroupEntry, 3, { 2, 1, 25 } },
   { MTAGROUPHIERARCHY          , ASN_INTEGER  , RONLY, var_mtaGroupEntry, 3, { 2, 1, 31 } },
@@ -166,6 +177,7 @@ static struct variable4 mta_variables[] = {
 /* important constants */
 #define FILENAMELEN     200   /* maximum length for filenames */
 #define MAXMAILERS       25   /* maximum number of mailers (copied from the sendmail sources) */
+#define MAXQUEUEGROUPS   50   /* maximum # of queue groups (copied from sendmail) */
 #define MNAMELEN         20   /* maximum length of mailernames (copied from the sendmail sources) */
 #define STAT_VERSION_8_9  2   /* version of sendmail V8.9.x statistics files (copied from the sendmail sources) */
 #define STAT_VERSION_8_10 3   /* version of sendmail V8.10.x statistics files (copied from the sendmail sources) */
@@ -216,13 +228,31 @@ struct statisticsV8_8
 };
 /**/
 
+/* queue groups (strictly a sendmail 8.12+ thing */
+struct QDir {
+    char dir[FILENAMELEN+1];
+    struct QDir *next;
+};
+
+struct QGrp {
+    char *name;			/* name of queuegroup */
+
+    time_t last;		/* last time we counted */
+    int count;			/* # of files */
+    int size;			/* size of files */
+
+    struct QDir *dirs;		/* directories in queue group */
+};
+
 /** "static variables" */
+
+/* a list of all the queue groups, NULL terminated */
+static struct QGrp qgrps[MAXQUEUEGROUPS];
+static int nqgrps = 0;
 
 static char sendmailst_fn[FILENAMELEN+1];         /* name of statistics file */
 static int  sendmailst_fh = -1;                   /* filehandle for statistics file */
 static char sendmailcf_fn[FILENAMELEN+1];         /* name of sendmails config file */
-static char mqueue_dn[FILENAMELEN+1];             /* name of the queue directory */
-static DIR *mqueue_dp = NULL;                     /* directoryhandle for the queue directory */
 static char mailernames[MAXMAILERS][MNAMELEN+1];  /* array of mailer names */
 static int  mailers = MAXMAILERS;                 /* number of mailer names in array */
 
@@ -237,9 +267,6 @@ static long   *stat_nd;   /* pointer to stat_nd array within the statistics stru
 static int    stats_size; /* size of statistics structure */
 static long   stats[sizeof (struct statisticsV8_10) / sizeof (long) + 1]; /* buffer for statistics structure */
 static time_t lastreadstats;        /* time stats file has been read */
-static long   mqueue_count;         /* number of messages in queue */
-static long   mqueue_size;          /* total size of messages in queue */
-static time_t lastreaddir;          /* time queue directory has been read */
 static long   applindex = 1;        /* ApplIndex value for OIDs */
 static long   stat_cache_time = 5;  /* time (in seconds) to wait before reading stats file again */
 static long   dir_cache_time = 10;  /* time (in seconds) to wait before scanning queue directoy again */
@@ -415,12 +442,160 @@ static void open_sendmailst(BOOL config)
 
 /**/
 
+static void count_queuegroup(struct QGrp *qg)
+{
+    struct QDir *d;
+    char cwd[200];
+    time_t current_time = time(NULL);
+   
+    if (current_time <= (qg->last + dir_cache_time)) {
+	return;
+    }
+
+    if(getcwd(cwd, sizeof cwd) == NULL) {
+        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:count_queuegroup: could not get current working directory\n");
+	return;
+    }
+
+    qg->count = 0;
+    qg->size = 0;
+
+    for (d = qg->dirs; d != NULL; d = d->next) {
+	DIR *dp;
+	struct dirent *dirp;
+	struct stat filestat;
+
+	if (chdir(d->dir) != 0) continue;
+	dp = opendir(".");
+	if (dp == NULL) continue;
+	while ((dirp = readdir(dp)) != NULL) {
+	    if (dirp->d_name[0] == 'd' && dirp->d_name[1] == 'f') {
+		if (stat(dirp->d_name, &filestat) == 0) {
+		    qg->size += (filestat.st_size + 999) / 1000;
+		}
+	    } else if (dirp->d_name[0] == 'q' && dirp->d_name[1] == 'f') {
+		qg->count++;
+	    }
+	}
+	closedir(dp);
+    }
+
+    qg->last = current_time;
+
+    chdir(cwd);
+}
+
+/** static void add_queuegroup(const char *name, const char *path)
+ *
+ * Description:
+ *
+ *   Adds a queuegroup of 'name' with root path 'path' to the static
+ *   list of queue groups.  if 'path' ends in a *, we expand it out to
+ *   all matching subdirs.  also look for 'qf' subdirectories.
+ *
+ * Parameters:
+ *
+ *   qgname: name of the queuegroup discovered
+ *   path: path of queuegroup discovered
+ */
+static void add_queuegroup(const char *name, char *path)
+{
+    char parentdir[FILENAMELEN];
+    char *p;
+    struct QDir *new = NULL;
+    struct QDir *subdir = NULL;
+    DIR *dp;
+    struct dirent *dirp;
+
+    if (nqgrps == MAXQUEUEGROUPS) {
+	/* xxx error */
+	return;
+    }
+
+    if (strlen(path) > FILENAMELEN - 10) {
+	/* xxx error */
+	return;
+    }
+
+    p = path + strlen(path) - 1;
+    if (*p == '*') {	/* multiple queue dirs */
+	/* remove * */
+	*p = '\0';
+
+	strcpy(parentdir, path);
+	/* remove last directory component from parentdir */
+	for (p = parentdir + strlen(parentdir) - 1; p >= parentdir; p--) {
+	    if (*p == '/') {
+		*p = '\0';
+		break;
+	    }
+	}
+
+	if (p < parentdir) {
+	    /* no trailing / ?!? */
+	    
+	    /* xxx error */
+	    return;
+	}
+	p++;
+
+	/* p is now the prefix we need to match */
+	if ((dp = opendir(parentdir)) == NULL) {
+	    /* xxx can't open parentdir */
+	    return;
+	}
+
+	while ((dirp = readdir(dp)) != NULL) {
+	    if (!strncmp(dirp->d_name, p, strlen(p)) &&
+		dirp->d_name[0] != '.') {
+		/* match, add it to the list */
+
+		/* single queue directory */
+		subdir = (struct QDir *) malloc(sizeof(struct QDir));
+		snprintf(subdir->dir, FILENAMELEN-5, "%s/%s", parentdir, 
+			 dirp->d_name);
+		subdir->next = new;
+		new = subdir;
+	    }
+	}
+
+	closedir(dp);
+    } else {
+	/* single queue directory */
+	new = (struct QDir *) malloc(sizeof(struct QDir));
+	strcpy(new->dir, path);
+	new->next = NULL;
+    }
+
+    /* check 'new' for /qf directories */
+    for (subdir = new; subdir != NULL; subdir = subdir->next) {
+	char qf[FILENAMELEN+1];
+
+	snprintf(qf, FILENAMELEN, "%s/qf", subdir->dir);
+	if ((dp = opendir(qf)) != NULL) {
+	    /* it exists ! */
+	    strcpy(subdir->dir, qf);
+	    closedir(dp);
+	}
+    }
+
+    /* we now have the list of directories in 'new'; create the queuegroup
+       object */
+    qgrps[nqgrps].name = strdup(name);
+    qgrps[nqgrps].last = 0;
+    qgrps[nqgrps].count = 0;
+    qgrps[nqgrps].size = 0;
+    qgrps[nqgrps].dirs = new;
+
+    nqgrps++;
+}
+
 /** static BOOL read_sendmailcf(BOOL config)
  *
  *  Description:
  *
  *    Tries to open the file named in sendmailcf_fn and to get the names of
- *    the mailers, the status file and the mailqueue directory.
+ *    the mailers, the status file and the mailqueue directories.
  *
  *  Parameters:
  *
@@ -439,10 +614,10 @@ static BOOL read_sendmailcf(BOOL config)
   FILE *sendmailcf_fp;
   char line[500];
   char *filename;
+  char *qgname, *p, *q;
   int  linenr;
   int  linelen;
   int  found_sendmailst = FALSE;
-  int  found_mqueue     = FALSE;
   int  i;
 
 
@@ -458,6 +633,8 @@ static BOOL read_sendmailcf(BOOL config)
   strcpy(mailernames[1],"*file*");
   strcpy(mailernames[2],"*include*");
   mailers=3;
+
+  /* reset queuegroups */
 
   linenr = 1;
   while (fgets(line, sizeof line, sendmailcf_fp) != NULL)
@@ -517,75 +694,53 @@ static BOOL read_sendmailcf(BOOL config)
        break;
 
       case 'O':
-
-        switch (line[1])
-        {
-
+        switch (line[1]) {
           case ' ':
-
-            if (strncasecmp(line + 2, "StatusFile", 10) == 0)
-            {
+	    /* long option */
+            if (strncasecmp(line + 2, "StatusFile", 10) == 0) {
               filename = line + 12;
-            }
-            else if (strncasecmp(line + 2, "QueueDirectory", 14) == 0)
-            {
+            } else if (strncasecmp(line + 2, "QueueDirectory", 14) == 0) {
               filename = line + 16;
-            }
-            else
-            {
+            } else {
+		/* not an option we care about */
               break;
             }
 
-            if (*filename != ' ' && *filename != '=')
-            {
-              break;
-            }
+	    /* make sure it's the end of the option */
+            if (*filename != ' ' && *filename != '=') break;
 
-            while (*filename == ' ')
-            {
-              filename++;
-            }
+	    /* skip WS */
+            while (*filename == ' ') filename++;
 
-            if (*filename != '=')
-            {
+	    /* must be O <option> = <file> */
+            if (*filename++ != '=') {
               print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d in config file \"%s\" ist missing an '='\n", linenr, sendmailcf_fn);
               break;
             }
 
-            filename++;
-            while (*filename == ' ')
-            {
-              filename++;
-            }
+	    /* skip WS */
+            while (*filename == ' ') filename++;
 
-            if (strlen(filename) > FILENAMELEN)
-            {
+            if (strlen(filename) > FILENAMELEN) {
               print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
 
-            if (strncasecmp(line + 2, "StatusFile", 10) == 0)
-            {
-
+            if (strncasecmp(line + 2, "StatusFile", 10) == 0) {
               strcpy(sendmailst_fn, filename);
               found_sendmailst = TRUE;
               DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found statatistics file \"%s\"\n", sendmailst_fn));
             }
-            else if (strncasecmp(line + 2, "QueueDirectory", 14) == 0)
-            {
-              strcpy(mqueue_dn, filename);
-              found_mqueue = TRUE;
-              DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailqueue directory \"%s\"\n", mqueue_dn));
+            else if (strncasecmp(line + 2, "QueueDirectory", 14) == 0) {
+		add_queuegroup("mqueue", filename);
             } else {
               print_error(LOG_CRIT, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "This shouldn't happen.\n");
+		abort();
             }
-
            break;
 
           case 'S':
-
-            if (strlen(line+2) > FILENAMELEN)
-            {
+            if (strlen(line+2) > FILENAMELEN) {
               print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
@@ -595,17 +750,57 @@ static BOOL read_sendmailcf(BOOL config)
            break;
 
           case 'Q':
-
-            if (strlen(line+2) > FILENAMELEN)
-            {
+            if (strlen(line+2) > FILENAMELEN) {
               print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a filename that's too long\n", linenr, sendmailcf_fn);
               break;
             }
-            strcpy(mqueue_dn, line+2);
-            found_mqueue = TRUE;
-            DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf","found mailqueue directory \"%s\"\n", mqueue_dn));
+
+	    add_queuegroup("mqueue", line + 2);
+	    break;
+        }
+	break;
+
+    case 'Q':
+	/* found a queue group */
+	p = qgname = line + 1;
+	while (*p && *p != ',') {
+	    p++;
+	}
+	if (*p == '\0') {
+	    print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a weird queuegroup\n", linenr, sendmailcf_fn);
            break;
         }
+
+	/* look for the directory */
+	filename = NULL;
+	*p++ = '\0';
+	while (*p != '\0') {
+	    /* skip WS */
+            while (*p && *p == ' ') p++;
+
+	    if (*p == 'P') {		/* found path */
+		while (*p && *p != '=') p++;
+		if (*p++ != '=') {
+		    print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a weird queuegroup\n", linenr, sendmailcf_fn);
+		    break;
+		}
+		filename = p;
+		
+		/* find next ',', turn into \0 */
+		while (*p && *p != ',') p++;
+		*p = '\0';
+	    }
+
+	    /* skip to next , */
+	    while (*p && *p != ',') p++;
+	}
+
+	/* we found a directory */
+	if (filename) {
+	    add_queuegroup(qgname, filename);
+	} else {
+	    print_error(LOG_WARNING, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "line %d config file \"%s\" contains a weird queuegroup: no directory\n", linenr, sendmailcf_fn);
+	}
 
       break;
     }
@@ -623,26 +818,8 @@ static BOOL read_sendmailcf(BOOL config)
     mailernames[i][0] = '\0';
   }
 
-  if (found_sendmailst)
-  {
+  if (found_sendmailst) {
     open_sendmailst(config);
-  }
-
-  if (found_mqueue)
-  {
-    if (mqueue_dp)
-    {
-      while (closedir(mqueue_dp) == -1 && errno == EINTR)
-      {
-        /* do nothing */
-      }
-
-    }
-    mqueue_dp = opendir(mqueue_dn);
-    if (mqueue_dp == NULL)
-    {
-      print_error(LOG_ERR, config, FALSE, "mibII/mta_sendmail.c:read_sendmailcf", "could not open mailqueue directory \"%s\" mentioned in config file \"%s\"\n", mqueue_dn, sendmailcf_fn);
-    }
   }
 
   return TRUE;
@@ -726,27 +903,8 @@ static void mta_sendmail_parse_config(const char *token, char *line)
     {
       line++;
     }
-    copy_nword(line, mqueue_dn, sizeof(mqueue_dn));
+    add_queuegroup("mqueue", line);
 
-    if (mqueue_dp != NULL)
-    {
-      while (closedir(mqueue_dp) == -1 && errno == EINTR)
-      {
-        /* do nothing */
-      }
-    }
-
-    mqueue_dp = opendir(mqueue_dn);
-
-    if (mqueue_dp == NULL)
-    {
-      char str[FILENAMELEN+50];
-      sprintf (str, "could not open mailqueue directory \"%s\"", mqueue_dn);
-      config_perror(str);
-      return;
-    }
-
-    DEBUGMSGTL(("mibII/mta_sendmail.c:mta_sendmail_parse_config", "opened mailqueue directory \"%s\"\n", mqueue_dn));
     return;
   }
   else if (strcasecmp(token,"sendmail_index") == 0)
@@ -844,11 +1002,6 @@ void init_mta_sendmail(void)
     }
   }
 
-  if (mqueue_dp == NULL)
-  {
-    strcpy(mqueue_dn, "/var/spool/mqueue");
-    mqueue_dp = opendir(mqueue_dn);
-  }
 }
 /**/
 
@@ -882,7 +1035,8 @@ var_mtaEntry(struct variable *vp,
   auto   int    i;
   auto   int    result;
   auto   time_t current_time;
-
+  int global_count = 0;
+  int global_size = 0;
 
   if (exact)
   {
@@ -944,54 +1098,14 @@ var_mtaEntry(struct variable *vp,
     }
   }
 
-  if (vp->magic & NEEDS_DIR)
-  {
-    if (mqueue_dp == NULL) return NULL;
-    current_time = time(NULL);
-    if (current_time == (time_t) -1 || current_time > lastreaddir + dir_cache_time)
-    {
-      struct dirent *dirptr;
-      struct stat    filestat;
-      char   cwd[200];
-      if(getcwd(cwd, sizeof cwd) == NULL)
-      {
-        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not get current working directory\n");
-        return NULL;
-      }
-      if(chdir(mqueue_dn) != 0)
-      {
-        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not enter mailqueue directory \"%s\"\n", mqueue_dn);
-        return NULL;
-      }
-      rewinddir(mqueue_dp);
-      mqueue_count = 0;
-      mqueue_size = 0;
-      while ((dirptr = readdir(mqueue_dp)) != NULL)
-      {
-        if(dirptr->d_name[0] == 'd' && dirptr->d_name[1] == 'f')
-        {
-          if(stat(dirptr->d_name, &filestat) == 0)
-          {
-            mqueue_size += (filestat.st_size + 999) / 1000; /* That's how sendmail calculates it's statistics too */
-            mqueue_count++;
-          } else {
-            snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not get size of file \"%s\" in directory \"%s\"\n", dirptr->d_name, mqueue_dn);
-            if (chdir(cwd) != 0)
-            {
-              snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not go back to directory \"%s\"  where I just came from\n", mqueue_dn);
-            }
-            return NULL;
-          }
-        }
-      }
-      if (chdir(cwd) != 0)
-      {
-        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaEntry: could not go back to directory \"%s\"  where I just came from\n", mqueue_dn);
-      }
-      if (current_time != (time_t) -1)
-      {
-        lastreaddir = current_time;
-      }
+  if (vp->magic & NEEDS_DIR) {
+      global_count = 0;
+      global_size = 0;
+      /* count all queue group messages */
+      for (i = 0; i < nqgrps; i++) {
+	  count_queuegroup(&qgrps[i]);
+	  global_count += qgrps[i].count;
+	  global_size += qgrps[i].size;
     }
   }
 
@@ -1008,7 +1122,7 @@ var_mtaEntry(struct variable *vp,
 
     case MTASTOREDMESSAGES:
 
-        long_ret = mqueue_count;
+        long_ret = global_count;
         return (unsigned char *) &long_ret;
 
     case MTATRANSMITTEDMESSAGES:
@@ -1031,7 +1145,7 @@ var_mtaEntry(struct variable *vp,
 
     case MTASTOREDVOLUME:
 
-        long_ret = mqueue_size;
+        long_ret = global_size;
         return (unsigned char *) &long_ret;
 
     case MTATRANSMITTEDVOLUME:
@@ -1074,49 +1188,44 @@ var_mtaGroupEntry(struct variable *vp,
             size_t  *var_len,
             WriteMethod **write_method)
 {
-
-
   static long   long_ret;
   auto   long   row;
   auto   int    result;
   auto   time_t current_time;
 
 
-  if (exact)
-  {
-    if (*length != vp->namelen + 2)
-    {
+  if (exact) {
+      if (*length != vp->namelen + 2) {
       return NULL;
     }
     result = snmp_oid_compare(name, *length - 2, vp->name, vp->namelen);
     if (result != 0 || name[*length - 2] != applindex ||
-        name[*length - 1] <= 0 || name[*length - 1] > mailers)
-    {
+	  name[*length - 1] <= 0 || name[*length - 1] > mailers + nqgrps) {
       return NULL;
     }
   } else {
-    if (*length < vp->namelen)
-    {
+      if (*length < vp->namelen) {
       result = -1;
     } else {
       result = snmp_oid_compare(name, vp->namelen, vp->name, vp->namelen);
     }
-    if (result > 0) /* OID prefix too large */
-    {
+
+      if (result > 0) {
+	  /* OID prefix too large */
       return NULL;
     }
-    if (result == 0) /* OID prefix matches exactly,... */
-    {
-      if (*length > vp->namelen && name[vp->namelen] > applindex) /* ... but ApplIndex too large */
-      {
+      
+      if (result == 0) {
+	  /* OID prefix matches exactly,... */
+	  if (*length > vp->namelen && name[vp->namelen] > applindex) {
+	      /* ... but ApplIndex too large */
         return NULL;
       }
-      if (*length > vp->namelen && name[vp->namelen] == applindex) /* ... ApplIndex ok,... */
-      {
-        if (*length > vp->namelen + 1 && name[vp->namelen + 1] >= 1)
-        {
-          if (name[vp->namelen + 1] >= mailers) /* ... but mailernr too large */
-          {
+	  if (*length > vp->namelen && name[vp->namelen] == applindex) {
+	      /* ... ApplIndex ok,... */
+	      if (*length > vp->namelen + 1 && name[vp->namelen + 1] >= 1) {
+		  if (name[vp->namelen + 1] >= mailers + nqgrps) {
+		      /* ... but mailernr too large */
             return NULL;
           } else {
             name[vp->namelen + 1] ++ ;
@@ -1139,24 +1248,20 @@ var_mtaGroupEntry(struct variable *vp,
   *write_method = 0;
   *var_len = sizeof(long);    /* default to 'long' results */
 
-  if (vp->magic & NEEDS_STATS)
-  {
+  if (vp->magic & NEEDS_STATS) {
     if (sendmailst_fh == -1) return NULL;
      current_time = time(NULL);
-    if (current_time == (time_t) -1 || current_time > lastreadstats + stat_cache_time)
-    {
-      if (lseek(sendmailst_fh, 0, SEEK_SET) == -1)
-      {
+      if (current_time == (time_t) -1 || 
+	  current_time > lastreadstats + stat_cache_time) {
+	  if (lseek(sendmailst_fh, 0, SEEK_SET) == -1) {
         snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaGroupEntry: could not rewind to beginning of file \"%s\"\n", sendmailst_fn);
         return NULL;
       }
-      if (read(sendmailst_fh, (void *)&stats, stats_size) != stats_size)
-      {
+	  if (read(sendmailst_fh, (void *)&stats, stats_size) != stats_size) {
         snmp_log(LOG_ERR, "mibII/mta_sendmail.c:var_mtaGroupEntry: could not read statistics file \"%s\"\n", sendmailst_fn);
         return NULL;
       }
-      if (current_time != (time_t) -1)
-      {
+	  if (current_time != (time_t) -1) {
         lastreadstats = current_time;
       }
     }
@@ -1164,15 +1269,21 @@ var_mtaGroupEntry(struct variable *vp,
 
   row = name[*length - 1] - 1;
 
-  switch(vp->magic) {
+  /* if this is a mailer but we're asking for queue-group only info, 
+     bump there */
+  if (!exact && row < mailers && (vp->magic == MTAGROUPSTOREDMESSAGES ||
+				  vp->magic == MTAGROUPSTOREDVOLUME)) {
+      row = mailers;
+      name[*length - 1] = row + 1;
+  }
 
+  if (row < mailers) {
+      switch(vp->magic) {
     case MTAGROUPRECEIVEDMESSAGES:
-        
         long_ret = (long) stat_nf[row];
         return (unsigned char *) &long_ret;
 
     case MTAGROUPREJECTEDMESSAGES:
-
         if (stat_nr != NULL && stat_nd != NULL)
         {
           long_ret = (long) (stat_nr[row] + stat_nd[row]); /* Number of rejected plus number of discarded messages */
@@ -1182,32 +1293,54 @@ var_mtaGroupEntry(struct variable *vp,
         }
 
     case MTAGROUPTRANSMITTEDMESSAGES:
-        
         long_ret = (long) stat_nt[row];
         return (unsigned char *) &long_ret;
 
     case MTAGROUPRECEIVEDVOLUME:
-        
         long_ret = (long) stat_bf[row];
         return (unsigned char *) &long_ret;
 
     case MTAGROUPTRANSMITTEDVOLUME:
-        
         long_ret = (long) stat_bt[row];
         return (unsigned char *) &long_ret;
 
     case MTAGROUPNAME:
-
         *var_len=strlen(mailernames[row]);
         return (unsigned char *) (*var_len > 0 ? mailernames[row] : NULL);
 
     case MTAGROUPHIERARCHY:
-
         long_ret = (long) -1;
         return (unsigned char *) &long_ret;
 
     default:
-        snmp_log(LOG_ERR, "mibII/mta_sendmail.c:mtaGroupEntry: unknown magic value\n");
+	  return NULL;
+      }
+  } else {
+      /* this is the queue group part of the table */
+      row -= mailers;
+      switch(vp->magic) {
+      case MTAGROUPSTOREDMESSAGES:
+	  count_queuegroup(&qgrps[row]);
+	  long_ret = (long) qgrps[row].count;
+	  return (unsigned char *) &long_ret;
+      
+      case MTAGROUPSTOREDVOLUME:
+	  count_queuegroup(&qgrps[row]);
+	  long_ret = (long) qgrps[row].size;
+	  return (unsigned char *) &long_ret;
+
+      case MTAGROUPNAME:
+	  *var_len = strlen(qgrps[row].name);
+	  return (unsigned char *) (*var_len > 0 ? qgrps[row].name : NULL);
+
+      case MTAGROUPHIERARCHY:
+	  long_ret = (long) -2;
+	  return (unsigned char *) &long_ret;
+
+      default:
+	  return NULL;
+      }
+
   }
   return NULL;
 }
