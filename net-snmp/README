@@ -66,6 +66,7 @@ SUPPORTED ARCHITECTURES
   works for you so I can add them to the above list.
 
 AVAILABILITY
+  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.README
   ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.tar.gz
 
   This file will always point to the latest revision.  If you see
