@@ -53,15 +53,15 @@ all: standardall
 
 mibsinstall: installdirs
 	@for i in $(MIBS) ; do \
-		$(INSTALL_DATA) $(srcdir)/$$i $(mibdir) ; \
-		echo "install: installed $$i in $(mibdir)" ; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_PREFIX)$(mibdir) ; \
+		echo "install: installed $$i in $(INSTALL_PREFIX)$(mibdir)" ; \
 	done
 
 mibsuninstall: installdirs
 	@for i in $(MIBS) ; do \
-		rm -f $(mibdir)/$$i ; \
-		echo "removed $$i from $(mibdir)" ; \
+		rm -f $(INSTALL_PREFIX)$(mibdir)/$$i ; \
+		echo "removed $$i from $(INSTALL_PREFIX)$(mibdir)" ; \
 	done
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(mibdir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(mibdir)
