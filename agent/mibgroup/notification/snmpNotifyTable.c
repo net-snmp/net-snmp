@@ -727,7 +727,8 @@ write_snmpNotifyRowStatus(int      action,
 
         case RESERVE2:
           /* memory reseveration, final preparation... */
-          if (StorageTmp == NULL) {
+          if (StorageTmp == NULL &&
+              (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
             /* creation */
             vars = NULL;
 
@@ -742,24 +743,22 @@ write_snmpNotifyRowStatus(int      action,
             vp = vars;
 
 
-            if (set_value != RS_DESTROY) {
-                StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-                memdup((u_char **) &(StorageNew->snmpNotifyName), 
-                       vp->val.string,
-                       vp->val_len);
-                StorageNew->snmpNotifyNameLen = vp->val_len;
-                vp = vp->next_variable;
+            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+            memdup((u_char **) &(StorageNew->snmpNotifyName), 
+                   vp->val.string,
+                   vp->val_len);
+            StorageNew->snmpNotifyNameLen = vp->val_len;
+            vp = vp->next_variable;
 
 
-                /* default values */
-                StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
-                StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
-                StorageNew->snmpNotifyTagLen = 0;
-                StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
+            /* default values */
+            StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
+            StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
+            StorageNew->snmpNotifyTagLen = 0;
+            StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
 
-                StorageNew->snmpNotifyRowStatus = set_value;
-                snmp_free_var(vars);
-            }
+            StorageNew->snmpNotifyRowStatus = set_value;
+            snmp_free_var(vars);
           }
           
 
@@ -783,7 +782,9 @@ write_snmpNotifyRowStatus(int      action,
              the UNDO case */
              
 
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL&&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so add it */
                if (StorageNew != NULL)
                  snmpNotifyTable_add(StorageNew);
@@ -810,7 +811,9 @@ write_snmpNotifyRowStatus(int      action,
 
         case UNDO:
              /* Back out any changes made in the ACTION case */
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL &&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyTableStorage,
@@ -822,7 +825,7 @@ write_snmpNotifyRowStatus(int      action,
              } else if (StorageDel != NULL) {
                /* row deletion, so add it again */
                snmpNotifyTable_add(StorageDel);
-             } else {
+             } else if (set_value != RS_DESTROY) {
                StorageTmp->snmpNotifyRowStatus = old_value;
              }
           break;

@@ -466,7 +466,8 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
 
         case RESERVE2:
           /* memory reseveration, final preparation... */
-          if (StorageTmp == NULL) {
+          if (StorageTmp == NULL &&
+              (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
             /* creation */
             vars = NULL;
 
@@ -477,18 +478,16 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
               return SNMP_ERR_INCONSISTENTNAME;
             }
 
-            if (set_value != RS_DESTROY) {
-                StorageNew =
-                    SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-                memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
-                       vars->val.string,
-                       vars->val_len);
-                StorageNew->snmpTargetParamsNameLen = vars->val_len;
-                StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
+            StorageNew =
+                SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
+            memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
+                   vars->val.string,
+                   vars->val_len);
+            StorageNew->snmpTargetParamsNameLen = vars->val_len;
+            StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
 
-                StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
-                snmp_free_var(vars);
-            }
+            StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
+            snmp_free_var(vars);
           }
           
 
@@ -512,7 +511,9 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
              the UNDO case */
              
 
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL&&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so add it */
                if (StorageNew != NULL)
                  snmpNotifyFilterProfileTable_add(StorageNew);
@@ -540,7 +541,9 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
 
         case UNDO:
              /* Back out any changes made in the ACTION case */
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL &&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
@@ -552,7 +555,8 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
              } else if (StorageDel != NULL) {
                /* row deletion, so add it again */
                snmpNotifyFilterProfileTable_add(StorageDel);
-             } else {
+               StorageDel = NULL;
+             } else if (set_value != RS_DESTROY) {
                StorageTmp->snmpNotifyFilterProfileRowStatus = old_value;
              }
           break;
