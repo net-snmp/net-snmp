@@ -314,11 +314,6 @@ sub snmpsetup {
     my $oid = $OID;
     my $tag = SNMP::translateObj($oid);
     my $sess = new SNMP::Session(DestHost => $host, %session_opts);
-    print "session_opts:\n";
-    foreach $i (keys(%session_opts)) {
-	print "  $i => $session_opts{$i}\n";
-    }
-    print "\n";
     my $var = new SNMP::Varbind([$oid]);
     if (!defined($var)) {
 	print "ack:  $@ $SNMP::ErrorStr $!\n";
@@ -326,7 +321,6 @@ sub snmpsetup {
     stop(0);
     initText();
     $oid = "." . $oid if ($oid !~ /^\./);
-    print "oid: $oid\n";
     return ($oid, $sess, $var);
 }
 
@@ -483,7 +477,7 @@ sub snmpwalk {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
-	         SNMP::translateObj($var->tag) !~ /^$oid$/);
+	         !is_in_subtree($oid, $var->tag . "." . $var->iid));
 	insertvar($var);
 	$top->update();
     }
@@ -505,7 +499,7 @@ sub snmptable {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
-	         SNMP::translateObj($var->tag) !~ /^$oid/);
+	         !is_in_subtree($oid, $var->tag . "." . $var->iid));
 	$newoid = "$var->[$SNMP::Varbind::tag_f].$var->[$SNMP::Varbind::iid_f]";
 	insertvar($var);
 	$top->update();
@@ -908,7 +902,7 @@ sub save_options {
 	return;
     }
     umask $umask;
-    print "saving to $opts{C}\n";
+    $status->configure(-text => "saving options to $opts{C}");
     foreach $i (keys(%session_opts)) {
 	print O '$session_opts{\'' . $i . '\'} = "' . $session_opts{$i} . "\";\n";
     }
@@ -920,4 +914,16 @@ sub save_options {
     }
     print O '$graphtime = ' . $graphtime . ";\n";
     close(O);
+}
+
+# returns 1 if $oid2 is below $oid1 in the hierarchy
+sub is_in_subtree {
+    my ($oid1, $oid2) = @_;
+    # get pure numeric
+    $oid1 = SNMP::translateObj($oid1) if ($oid1 !~ /^[\d\.]*$/);
+    $oid2 = SNMP::translateObj($oid2) if ($oid2 !~ /^[\d\.]*$/);
+
+    # has more on it or is exactly the same
+    return 1 if ($oid2 =~ /^$oid1\./ || $oid2 =~ /^$oid1$/);
+    return 0;
 }
