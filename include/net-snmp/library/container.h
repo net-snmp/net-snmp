@@ -309,7 +309,7 @@ extern "C" {
             while(tmp) {
                 rc = tmp->cfree(tmp);
                 if (rc)
-                    snmp_log(LOG_ERR,"error on subcontainer free (%d)", rc);
+                    snmp_log(LOG_ERR,"error on subcontainer cfree (%d)", rc);
                 tmp = tmp->prev;
             }
         }
