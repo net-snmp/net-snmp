@@ -9,8 +9,6 @@ extern "C" {
  *
  */
 
-/* default priority as specified by 2257 */
-#define DEFAULT_MIB_PRIORITY 255
 
 int agentx_open_session( struct snmp_session *);
 int agentx_close_session( struct snmp_session *, int);
