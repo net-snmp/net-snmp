@@ -117,16 +117,20 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
   DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
 
   cache = (netsnmp_cache *)handler->myvoid;
+  if (!caching_enabled || !cache || !cache->enabled) {
+      DEBUGMSGTL(("helper:cache_handler", "caching disabled, "
+                  "cache not found or cache is disabled"));
+      goto done;
+  }
+
   switch (reqinfo->mode) {
 
   case MODE_GET:
   case MODE_GETNEXT:
   case MODE_GETBULK:
     /*
-     * If caching is active, and the cache is out-of-date (or invalid),
      * call the load hook, and update the cache timestamp.
      */
-    if (caching_enabled && cache && cache->enabled) {
         cache_timeout = cache->timeout;
         if (cache_timeout == 0)
             cache_timeout = cache_default_timeout;
@@ -166,9 +170,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
         netsnmp_agent_add_list_data(reqinfo,
                                     netsnmp_create_data_list(CACHE_NAME,
                                                              cache, NULL));
-    } else {
-        DEBUGMSG(("helper:cache_handler", " skipped\n"));
-    }
+        break;
 
   /*
    * A (successful) SET request wouldn't typically trigger a reload of
@@ -182,7 +184,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
   case MODE_SET_UNDO:
     break;
   case MODE_SET_COMMIT:
-    if (cache && cache->valid /* && some flag ? */) {
+    if (cache->valid /* && some flag ? */) {
         cache->free_cache(cache, cache->magic);
         cache->valid = 0;
     }
