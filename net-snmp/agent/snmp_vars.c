@@ -38,7 +38,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/user.h>
 #include <sys/proc.h>
 #include <sys/types.h>
-#include <machine/pte.h>
+/*
+  #include <machine/pte.h>
+  */
 #include <sys/vm.h>
 #include <netinet/in.h>
 #include <syslog.h>
@@ -102,53 +104,76 @@ extern char *Lookup_Device_Annotation();
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 
-static struct nlist nl[] = {
-
 #define N_IPSTAT	0
-	{ "_ipstat"},
 #define N_IPFORWARDING	1
-	{ "_ipforwarding" },
 #define N_TCP_TTL	2
-	{ "_tcp_ttl"},
 #define N_UDPSTAT	3
-	{ "_udpstat" },
 #define N_IN_INTERFACES 4
-	{ "_in_interfaces" },
 #define N_ICMPSTAT	5
-	{ "_icmpstat" },
 #define N_IFNET		6
-	{ "_ifnet" },
 #define N_TCPSTAT	7
-	{ "_tcpstat" },
 #define N_TCB		8
-	{ "_tcb" },
 #define N_ARPTAB_SIZE	9
-	{ "_arptab_size" },
 #define N_ARPTAB        10
-	{ "_arptab" },
 #define N_IN_IFADDR     11
-	{ "_in_ifaddr" },
 #define N_BOOTTIME	12
-	{ "_boottime" },
 #define N_PROC		13
-	{ "_proc" },
 #define N_NPROC		14
-	{ "_nproc" },
 #define N_DMMIN		15
-	{ "_dmmin" },
 #define N_DMMAX		16
-	{ "_dmmax" },
 #define N_NSWAP		17
-	{ "_nswap" },
 #define N_USRPTMAP	18
- 	{ "_Usrptmap" },
 #define N_USRPT		19
+
+static struct nlist nl[] = {
+#ifndef hpux
+	{ "_ipstat"},  
+	{ "_ipforwarding" },
+	{ "_tcp_ttl"},
+	{ "_udpstat" },
+	{ "_in_interfaces" },
+	{ "_icmpstat" },
+	{ "_ifnet" },
+	{ "_tcpstat" },
+	{ "_tcb" },
+	{ "arptab_size" }, 
+	{ "arptab" },      
+	{ "_in_ifaddr" },
+	{ "_boottime" },
+	{ "_proc" },
+	{ "_nproc" },
+	{ "_dmmin" },
+	{ "_dmmax" },
+	{ "_nswap" },
+ 	{ "_Usrptmap" },
 	{ "_usrpt" },
+#else
+	{ "ipstat"},  
+	{ "ipforwarding" },
+	{ "tcpDefaultTTL"},
+	{ "udpstat" },
+	{ "in_interfaces" },
+	{ "icmpstat" },
+	{ "ifnet" },
+	{ "tcpstat" },
+	{ "tcb" },
+	{ "arptab_nb" }, 
+	{ "arphd" },      
+	{ "in_ifaddr" },
+	{ "boottime" },
+	{ "proc" },
+	{ "nproc" },
+	{ "dmmin" },
+	{ "dmmax" },
+	{ "nswap" },
+        { "mpid" },
+        { "hz"},
+#endif
 #ifdef ibm032
 #define N_USERSIZE	20
 	{ "_userSIZE" },
 #endif
-	0,
+	{ 0 },
 };
 
 /*
@@ -203,16 +228,29 @@ static struct nlist nl[] = {
 
 long		long_return;
 #ifndef ibm032
-u_char		return_buf[CLSIZE*NBPG];  
+u_char		return_buf[258];  
 #else
 u_char		return_buf[256]; /* nee 64 */
 #endif
  
 init_snmp()
 {
-	nlist("/vmunix",nl);
-	init_kmem("/dev/kmem");
-	init_routes();
+  int ret;
+#ifdef hpux
+  if ((ret = nlist("/hp-ux",nl)) == -1) {
+    ERROR("nlist");
+    exit(1);
+  }
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+    if (nl[ret].n_type == 0) {
+      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+    }
+  }
+#else
+  nlist("/vmunix",nl);
+#endif
+  init_kmem("/dev/kmem"); 
+  init_routes();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -289,63 +327,7 @@ Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
 
 
-/*
- * The subtree structure contains a subtree prefix which applies to
- * all variables in the associated variable list.
- * No subtree may be a subtree of another subtree in this list.  i.e.:
- * 1.2
- * 1.2.0
- */
-struct subtree {
-    oid			name[16];	/* objid prefix of subtree */
-    u_char 		namelen;	/* number of subid's in name above */
-    struct variable	*variables;   /* pointer to variables array */
-    int			variables_len;	/* number of entries in above array */
-    int			variables_width; /* sizeof each variable entry */
-};
-
-/*
- * This is a new variable structure that doesn't have as much memory
- * tied up in the object identifier.  It's elements have also been re-arranged
- * so that the name field can be variable length.  Any number of these
- * structures can be created with lengths tailor made to a particular
- * application.  The first 5 elements of the structure must remain constant.
- */
-struct variable2 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[2];       /* object identifier of variable */
-};
-
-struct variable4 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[4];       /* object identifier of variable */
-};
-
-struct variable7 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[7];       /* object identifier of variable */
-};
-
-struct variable13 {
-    u_char          magic;          /* passed to function as a hint */
-    char            type;           /* type of variable */
-    u_short         acl;            /* access control list for variable */
-    u_char          *(*findVar)();  /* function that finds variable */
-    u_char          namelen;        /* length of name below */
-    oid             name[13];       /* object identifier of variable */
-};
+#include "var_struct.h"
 
 /*
  * ##############################################################
@@ -522,12 +504,14 @@ struct variable2 udp_variables[] = {
     {UDPOUTDATAGRAMS, COUNTER, RONLY, var_udp, 1, {4}}
 };
 
+#ifndef hpux
 #ifndef sparc
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
-    {PROCESSID, INTEGER, RONLY, var_proces, 1, {2}},
+    {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
+#endif
 #endif
 
 /*
@@ -931,14 +915,21 @@ compare_tree(name1, len1, name2, len2)
 }
 
 
+#ifdef hpux
+char version_descr[128] = "HP-UX";
+#else
+char version_descr[128] = "Unknown";
+#endif
 
-char version_descr[128] = "Unix 4.3BSD";
 char sysContact[128] = "Unknown";
 char sysName[128] = "Unknown";
 char sysLocation[128] = "Unknown";
 
-
+#ifdef hpux
+oid version_id[] = {1, 3, 6, 1, 4, 1, 11, 2, 3, 2, 5};
+#else
 oid version_id[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
+#endif
 
 u_long
 sysUpTime(){
@@ -1012,8 +1003,9 @@ var_hosttimetab(vp, name, length, exact, var_len, write_method)
 
         switch (vp->magic) {
                 case HOSTTIMETABADDRESS:
-                        *var_len = sizeof(struct ether_addr);
-                        return (u_char *) "RMONRULES";
+/*                  *var_len = sizeof(struct ether_addr); */
+                  *var_len = 6*sizeof(u_char);
+                  return (u_char *) "RMONRULES";
                 case HOSTTIMETABCREATIONORDER:
 			long_return = creationOrder;
 			return (u_char *) &long_return;
@@ -1064,7 +1056,7 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof(version_id);
 	    return (u_char *)version_id;
 	case UPTIME:
-	    (u_long)long_return = sysUpTime();
+	    long_return = (u_long)  sysUpTime();
 	    return (u_char *)&long_return;
 	case IFNUMBER:
 	    long_return = Interface_Scan_Get_Count();
@@ -1303,7 +1295,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
-	    (u_long)long_return = 1;	/* OTHER */
+	    long_return = (u_long)  1;	/* OTHER */
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 #if 0
@@ -1329,30 +1321,30 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = 0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINOCTETS:
-	    (u_long)long_return = ifnet.if_ipackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINUCASTPKTS:
-	    (u_long)long_return = ifnet.if_ipackets;
+	    long_return = (u_long)  ifnet.if_ipackets;
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFINERRORS:
 	    return (u_char *) &ifnet.if_ierrors;
 	case IFINUNKNOWNPROTOS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTOCTETS:
-	    (u_long)long_return = ifnet.if_opackets * 308; /* XXX */
+	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTUCASTPKTS:
-	    (u_long)long_return = ifnet.if_opackets;
+	    long_return = (u_long)  ifnet.if_opackets;
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
-	    (u_long)long_return = 0; /* XXX */
+	    long_return = (u_long)  0; /* XXX */
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
 	    return (u_char *) &ifnet.if_snd.ifq_drops;
@@ -1463,7 +1455,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 {
     static struct ipstat ipstat;
     oid newname[MAX_NAME_LEN];
-    int result;
+    int result, i;
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[8] = 0;
@@ -2345,7 +2337,7 @@ u_char *EtherAddr;
 
 
 
-#if defined(mips) || defined(ibm032) || defined(sunV3)
+#if defined(mips) || defined(ibm032) || defined(sunV3) || defined(hpuxx)
 
 
 /*
@@ -2356,8 +2348,7 @@ u_char *EtherAddr;
 struct proc procbuf[PROCBLOC];
 
 
-u_char *
-var_process(vp, name, length, exact, var_len, write_method)
+u_char *var_process(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
     register oid	*name;	    /* IN/OUT - input name requested, output name found */
     register int	*length;    /* IN/OUT - length of input and output oid's */
