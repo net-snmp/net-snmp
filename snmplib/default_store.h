@@ -14,11 +14,12 @@ extern "C" {
 #define DS_TOKEN_ID       2
 
 /* library booleans */
-#define DS_LIB_MIB_ERRORS       0
-#define DS_LIB_SAVE_MIB_DESCRS  1
-#define DS_LIB_MIB_COMMENT_TERM 2
-#define DS_LIB_MIB_PARSE_LABEL  3
-#define DS_LIB_DUMP_PACKET      4
+#define DS_LIB_MIB_ERRORS          0
+#define DS_LIB_SAVE_MIB_DESCRS     1
+#define DS_LIB_MIB_COMMENT_TERM    2
+#define DS_LIB_MIB_PARSE_LABEL     3
+#define DS_LIB_DUMP_PACKET         4
+#define DS_LIB_DONT_LOG_TIMESTAMP  5
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
