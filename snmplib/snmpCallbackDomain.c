@@ -184,6 +184,10 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
         return -1;
     
     cp->pdu = snmp_clone_pdu(pdu);
+    if (cp->pdu->transport_data) {
+        /* not needed and not properly freed later */
+        SNMP_FREE(cp->pdu->transport_data);
+    }
 
     if (cp->pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE)
         cp->pdu->flags ^= UCD_MSG_FLAG_EXPECT_RESPONSE;
@@ -200,9 +204,15 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
 
         write(((callback_info *) other_side->data)->pipefds[1]," ",1);
         callback_push_queue(mystuff->linkedto, cp);
+        /* we don't need the transport data any more */
+        if (*opaque)
+            free(*opaque);
     } else {
         /* we're the server, send it to the person that sent us the request */
         from = **((int **) opaque);
+        /* we don't need the transport data any more */
+        if (*opaque)
+            free(*opaque);
         other_side = find_transport_from_callback_num(from);
         if (!other_side)
             return -1;
