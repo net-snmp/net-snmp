@@ -115,7 +115,7 @@ SOFTWARE.
      * from snmp.c 
      */
     extern u_char   sid[];      /* size SID_MAX_LEN */
-    extern int      snmp_errno;
+    NETSNMP_IMPORT int      snmp_errno;
 
 
     /*
