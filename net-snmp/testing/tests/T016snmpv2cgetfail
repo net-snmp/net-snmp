@@ -21,6 +21,6 @@ CAPTURE "snmpget $SNMP_FLAGS -v 2c localhost notavalidcommunity system.sysUpTime
 
 STOPAGENT
 
-CHECK "Timeout: No Response from"
+CHECK "No Such Instance currently exists"
 
 FINISHED
