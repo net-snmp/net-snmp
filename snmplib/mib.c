@@ -1210,6 +1210,13 @@ set_function(struct tree *subtree)
 	}
 }
 
+/*
+ * Read an object identifier from input string into internal OID form.
+ * Returns 1 if successful.
+ * If an error occurs, this function returns 0 and MAY set snmp_errno.
+ * snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing.
+ * This can make multi-threaded use a tiny bit more robust.
+ */
 int read_objid(const char *input,
 	       oid *output,
 	       size_t *out_len)   /* number of subid's in "output" */
@@ -1217,7 +1224,6 @@ int read_objid(const char *input,
     struct tree *root = tree_head;
     oid *op = output;
     char buf[SPRINT_MAX_LEN];
-
 
     if (*input == '.')
 	input++;
@@ -1233,19 +1239,29 @@ int read_objid(const char *input,
     }
 
     if (root == NULL){
-	snmp_errno = SNMPERR_NOMIB; /*MTCRITICAL_RESOURCE*/
+	SET_SNMP_ERROR(SNMPERR_NOMIB);
 	*out_len = 0;
 	return(0);
     }
     if ((*out_len =
-	 parse_subtree(root, input, output, out_len)) == 0)
+	 parse_subtree(root, input, output, out_len)) <= 0)
+    {
+	SET_SNMP_ERROR(*out_len);
 	return (0);
+    }
     *out_len += output - op;
 
     return (1);
 }
 
 
+/*
+ * RECURSIVE helper function for read_objid
+ * Returns:
+ * < 0  the SNMPERR_ errorcode
+ * = 0  input string is empty.
+ * > 0  the number of sub-identifiers found in the input string.
+ */ 
 static int
 parse_subtree(struct tree *subtree,
 	      const char *input,
@@ -1302,30 +1318,28 @@ parse_subtree(struct tree *subtree,
 	 * If we didn't find the entry, punt...
 	 */
 	if (tp == NULL) {
-	    snmp_errno = SNMPERR_BAD_SUBID; /*MTCRITICAL_RESOURCE*/
 	    snmp_set_detail(buf);
-	    return (0);
+	    return (SNMPERR_BAD_SUBID);
 	}
     }
 
 found:
     if(subid > (u_long)MAX_SUBID){
-	snmp_errno = SNMPERR_MAX_SUBID; /*MTCRITICAL_RESOURCE*/
 	snmp_set_detail(buf);
-	return (0);
+	return (SNMPERR_MAX_SUBID);
     }
 
     if ((*out_len)-- <= 0){
-	snmp_errno = SNMPERR_LONG_OID; /*MTCRITICAL_RESOURCE*/
-	return (0);
+	return (SNMPERR_LONG_OID);
     }
     *output++ = subid;
 
     if (*input != '.')
 	return (1);
-    if ((*out_len =
-	 parse_subtree(tp ? tp->child_list : NULL, ++input, output, out_len)) == 0)
-	return (0);
+    *out_len = parse_subtree(tp ? tp->child_list : NULL,
+                             ++input, output, out_len);
+    if (*out_len <= 0)
+	return (*out_len);
     return (++*out_len);
 }
 
