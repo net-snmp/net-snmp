@@ -116,6 +116,7 @@
 #include "mibincl.h"
 
 #ifdef solaris2
+# include <errno.h>
 #include "kernel_sunos5.h"
 #else
 #include "kernel.h"
@@ -1761,31 +1762,63 @@ int
 Interface_Index_By_Name(char *Name, 
 			int Len)
 {
-	int i, sd, ret;
-	char buf[1024];
-	struct ifconf ifconf;
-	struct ifreq *ifrp;
+	int i, sd, lastlen = 0, interfaces = 0;
+	struct ifconf ifc;
+	struct ifreq *ifrp = NULL;
+	char *buf = NULL;
 
-	if (Name == 0)
-	  return (0);
-	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	  return (0);
-	ifconf.ifc_buf = buf;
-	ifconf.ifc_len = sizeof(buf);
-	if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
-	  ret = 0;
-	  goto Return;
+	if (Name == 0) {
+	  return 0;
 	}
-	for (i = 1, ifrp = ifconf.ifc_req, ret = 0;
-	     (char *)ifrp < (char *)ifconf.ifc_buf + ifconf.ifc_len; i++, ifrp++)
-	  if (strncmp(Name, ifrp->ifr_name, Len) == 0) {
-	    ret = i;
-	    break;
-	  } else
-	    ret = 0;
-      Return:
+	if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	  return 0;
+	}
+
+	/*  Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
+	    on some platforms; see W. R. Stevens, ``Unix Network Programming
+	    Volume I'', p.435.  */
+
+	for (i = 8; ; i += 8) {
+	  buf = calloc(i, sizeof(struct ifreq));
+	  if (buf == NULL) {
+	    close(sd);
+	    return 0;
+	  }
+	  ifc.ifc_len = i * sizeof(struct ifreq);
+	  ifc.ifc_buf = (caddr_t)buf;
+
+	  if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0) {
+	    if (errno != EINVAL || lastlen != 0) {
+	      /*  Something has gone genuinely wrong.  */
+	      free(buf);
+	      close(sd);
+	      return 0;
+	    }
+	    /*  Otherwise, it could just be that the buffer is too small.  */
+	  } else {
+	    if (ifc.ifc_len == lastlen) {
+	      /*  The length is the same as the last time; we're done.  */
+	      break;
+	    }
+	    lastlen = ifc.ifc_len;
+	  }
+	  free(buf);
+	}
+
+	ifrp = ifc.ifc_req;
+	interfaces = (ifc.ifc_len / sizeof(struct ifreq)) + 1;
+
+	for (i = 1; i < interfaces; i++, ifrp++) {
+	  if (strncmp(ifrp->ifr_name, Name, Len) == 0) {
+	    free(buf);
+	    close(sd);
+	    return i;
+	  }
+	}
+
+	free(buf);
 	close(sd);
-	return (ret);	/* DONE */
+	return 0;
 }
 
 #endif /* solaris2 */
