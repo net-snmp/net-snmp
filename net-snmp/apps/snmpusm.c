@@ -175,6 +175,7 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
      */
 }
 
+#ifdef HAVE_OPENSSL_DH_H
 int
 get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                size_t outkey_len,
@@ -234,6 +235,7 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* HAVE_OPENSSL_DH_H */
 
 static void
 optProc(int argc, char *const *argv, int opt)
