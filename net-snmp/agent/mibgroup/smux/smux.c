@@ -82,19 +82,16 @@ struct counter64 smux_counter64;
 oid smux_objid[MAX_OID_LEN];
 u_char smux_str[SMUXMAXSTRLEN];
 
-#ifdef USING_SD_HANDLERS
-extern int sdlist[];
-extern int sdlen;
-extern int (*sd_handlers[])(int);
-#endif
+extern int smux_listen_sd;
 
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
 
-int 		init_smux (void);
+void 		init_smux (void);
 static u_char	*smux_open_process (int, u_char *, size_t *, int *);
 static u_char	*smux_rreq_process (int, u_char *, size_t *);
 static u_char	*smux_close_process (int, u_char *, size_t *);
+static u_char	*smux_trap_process (u_char *, size_t *);
 static u_char	*smux_parse (u_char *, oid *, size_t *, size_t *, u_char *);
 static u_char	*smux_parse_var (u_char *, size_t *, oid *, size_t *, size_t *, u_char *);
 static void 	smux_send_close (int, int);
@@ -119,11 +116,62 @@ static int nauths, npeers = 0;
 
 struct variable2 smux_variables[] = {
   /* bogus entry, as in pass.c */
-  {MIBINDEX, ASN_INTEGER, RWRITE, var_smux, 0, {MIBINDEX}},
+  {MIBINDEX, ASN_PRIV_DELEGATED, RWRITE, var_smux, 0, {MIBINDEX}},
 };
 
+
+/* needed for traps */
+extern int enterprisetrap_len;
+extern int xversion_id_len;
+extern int  snmptrap_oid_len;
+extern int  snmptrapenterprise_oid_len;
+extern int  sysuptime_oid_len;
+
+#define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
+
+oid objid_enterprisetrap2[] = { EXTENSIBLEMIB, 251, 0, 0 };
+oid xversion_id2[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
+// int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
+// int xversion_id_len     = OID_LENGTH( xversion_id );
+
+#define SNMPV2_TRAPS_PREFIX	1,3,6,1,6,3,1,1,5
+oid  cold_start_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	
+oid  warm_start_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 2 };	
+oid  link_down_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 3 };	
+oid  link_up_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 4 };	
+oid  auth_fail_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 5 };	
+oid  egp_xxx_oid2[] =		{ SNMPV2_TRAPS_PREFIX, 99 };
+
+#define SNMPV2_TRAP_OBJS_PREFIX	1,3,6,1,6,3,1,1,4
+oid  snmptrap_oid2[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1 };
+oid  snmptrapenterprise_oid2[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3 };
+oid  sysuptime_oid2[] 	      =	{ 1,3,6,1,2,1,1,3,0 };
+// int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
+// int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+// int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
+
+#define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
+#define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
+
+extern struct timeval starttime; 
+extern struct trap_sink *sinks;
+extern int snmp_enableauthentraps;
+/* defines are in snmpd.c reproduced here */
+
+/* structure defined in agent_trap.c */
+struct trap_sink {
+    struct snmp_session	*sesp;
+    struct trap_sink	*next;
+    int			pdutype;
+    int			version;
+};
+
+
+/* end -- needed for traps */
+
+
 void
-smux_parse_peer_auth(const char *token, char *cptr)
+smux_parse_peer_auth(char *token, char *cptr)
 {
 	smux_peer_auth *aptr;
 
@@ -174,20 +222,19 @@ smux_free_peer_auth(void)
 	}
 }
 
-int 
+void
 init_smux(void)
 {
 
 	struct sockaddr_in lo_socket;
-	int smux_sd;
 	int one = 1;
 
         snmpd_register_config_handler("smuxpeer", smux_parse_peer_auth,
                                       smux_free_peer_auth,
                                       "OID-IDENTITY PASSWORD");
-
 	/* Reqid */
 	smux_reqid = 0;
+	smux_listen_sd = -1;
 
 	/* Receive timeout */
 	smux_rcv_timeout.tv_sec = 0;
@@ -198,38 +245,37 @@ init_smux(void)
 	lo_socket.sin_family = AF_INET;
 	lo_socket.sin_port = htons((u_short) SMUXPORT);
 
-	if ((smux_sd = socket (AF_INET, SOCK_STREAM, 0)) <  0) {
+	if ((smux_listen_sd = socket (AF_INET, SOCK_STREAM, 0)) <  0) {
 		snmp_log_perror("[init_smux] socket failed");
-		return SMUXNOTOK;
+		return;
 	}
-	if (bind (smux_sd, (struct sockaddr *) &lo_socket, 
+
+	if (bind (smux_listen_sd, (struct sockaddr *) &lo_socket, 
 	    sizeof (lo_socket)) < 0) {
 		snmp_log_perror("[init_smux] bind failed");
-		close(smux_sd);
-		return SMUXNOTOK;
+		close(smux_listen_sd);
+		smux_listen_sd = -1;
+		return;
 	}
 
-	if (setsockopt (smux_sd, SOL_SOCKET, SO_KEEPALIVE, (char *)&one, 
+#ifdef	SO_KEEPALIVE
+	if (setsockopt (smux_listen_sd, SOL_SOCKET, SO_KEEPALIVE, (char *)&one, 
 			sizeof (one)) < 0) {
 		snmp_log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed");
-		close(smux_sd);
-		return SMUXNOTOK;
+		close(smux_listen_sd);
+		smux_listen_sd = -1;
+		return;
 	}
-	if(listen(smux_sd, SOMAXCONN) == -1) {
+#endif 	/* SO_KEEPALIVE */
+
+	if(listen(smux_listen_sd, SOMAXCONN) == -1) {
 		snmp_log_perror("[init_smux] listen failed");
-		close(smux_sd);
-		return SMUXNOTOK;
+		close(smux_listen_sd);
+		smux_listen_sd = -1;
+		return;
 	}
-#ifdef USING_SD_HANDLERS
-	sdlist[sdlen] = smux_sd;
-	sd_handlers[sdlen++] = smux_accept;
 
-	DEBUGMSGTL(("smux_init","sdlen in smux_init: %d\n", sdlen));
-#endif
-	DEBUGMSGTL(("smux_init", "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
-		 ntohs(lo_socket.sin_port)));
-
-	return SMUXOK;
+	DEBUGMSGTL(("smux_init", "[smux_init] done; smux listen sd is %d, smux port is %d\n", smux_listen_sd, ntohs(lo_socket.sin_port)));
 }
 
 u_char *
@@ -253,7 +299,7 @@ var_smux(struct variable *vp,
 	}
 	if (rptr == NULL)
 		return NULL;
-	else if (exact && (*length <= rptr->sr_name_len))
+	else if (exact && (*length < rptr->sr_name_len))
 		return NULL;
 
 	*write_method = var_smux_write; 
@@ -276,7 +322,6 @@ var_smux(struct variable *vp,
 	}
 }
 
-
 int 
 var_smux_write(
 	int action,
@@ -288,11 +333,12 @@ var_smux_write(
 	size_t name_len)
 {
 	smux_reg *rptr;
-	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[6], type;
+	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
 	int reterr;
 	size_t len, var_len, datalen, name_length;
 	long reqid, errsts, erridx;
 	u_char var_type, *dataptr;
+	long lval;
 
 	DEBUGMSGTL (("smux","[var_smux_write] entering var_smux_write\n"));
 
@@ -319,80 +365,22 @@ var_smux_write(
 
 		switch (var_val_type) {
 		case ASN_INTEGER:
-			datalen = sizeof(long);
-			if ((ptr = asn_parse_int(var_val, &var_len,
-			    &var_type, &smux_long,
-			    datalen)) == NULL ) {
-				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_int failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			dataptr = (u_char *)&smux_long;
-			break;
 		case ASN_OCTET_STR:
-			if (((ptr = asn_parse_header(var_val, &var_len,
-			    &var_type)) == NULL) ||
-			    (var_type != (u_char)ASN_OCTET_STR)) {
-				DEBUGMSGTL (("smux", "[var_smux_write] asn_parse_header for octet string failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			datalen = var_len;
-			dataptr = ptr;
-			break;
 		case ASN_COUNTER:
 		case ASN_GAUGE:
 		case ASN_TIMETICKS:
 		case ASN_UINTEGER:
-			datalen = sizeof(u_long);
-			if ((ptr = asn_parse_unsigned_int(var_val,
-			    &var_len, &var_type, (u_long *)&smux_ulong,
-			    datalen)) == NULL) {
-				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			dataptr = (u_char *)&smux_ulong;
 		case ASN_COUNTER64:
-			datalen = sizeof(smux_counter64);
-			if ((ptr = asn_parse_unsigned_int64(var_val,
-			    &var_len, &var_type, &smux_counter64,
-			    datalen)) == NULL ) {
-				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			dataptr = (u_char *)&smux_counter64;
-			break;
 		case ASN_IPADDRESS:
-			if (((ptr = asn_parse_header(var_val, 
-			    &var_len, &var_type)) == NULL) ||
-			    (var_type != (u_char)ASN_IPADDRESS)) {
-				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			datalen = var_len;
-			memcpy((u_char *)&(smux_sa.sin_addr.s_addr),
-			    ptr, datalen);
-			dataptr = (u_char *)&(smux_sa.sin_addr.s_addr);
-			break;
 		case ASN_OPAQUE:
 		case ASN_NSAP:
 		case ASN_OBJECT_ID:
-			datalen = MAX_OID_LEN;
-			if ((ptr = asn_parse_objid(var_val, &var_len,
-			    &var_type, smux_objid,
-			    &datalen)) == NULL ) {
-				DEBUGMSGTL (("smux","[var_smux_write] asn_parse_unsigned_int failed\n"));
-				return SNMP_ERR_GENERR;
-			}
-			dataptr = (u_char *)smux_objid;
-			break;
 		case ASN_BIT_STR:
-			datalen = SMUXMAXSTRLEN;
-			ptr = asn_parse_bitstring(var_val,
-			    &var_len, &var_type,
-			    smux_str, &datalen);
-			dataptr = (u_char *)smux_str;
+			datalen = var_val_len;
+			dataptr = var_val;
 			break;
 		case SNMP_NOSUCHOBJECT:
-    	        case SNMP_NOSUCHINSTANCE:
+        case SNMP_NOSUCHINSTANCE:
 		case SNMP_ENDOFMIBVIEW:
 		case ASN_NULL:
 		default:
@@ -403,11 +391,10 @@ var_smux_write(
 
 		if ((smux_build((u_char)SMUX_SET, smux_reqid,
 		    name, &name_length, var_val_type, dataptr, 
-		    datalen, buf, &len)) != SMUXOK) {
+		    datalen, buf, &len)) < 0) {
 			DEBUGMSGTL (("smux","[var_smux_write] smux build failed\n"));
 			return SNMP_ERR_GENERR;
 		}
-
 
 		if (send(rptr->sr_fd, buf, len, 0) < 0) {
 			DEBUGMSGTL (("smux","[var_smux_write] send failed\n"));
@@ -445,49 +432,35 @@ var_smux_write(
 			return SNMP_ERR_GENERR;
 
 		reterr = SNMP_ERR_NOERROR;
-
 		break;	/* case Action == RESERVE1 */
 
 	case RESERVE2:
 		DEBUGMSGTL (("smux","[var_smux_write] entering RESERVE2\n"));
 		reterr = SNMP_ERR_NOERROR;
 		break;	/* case Action == RESERVE2 */
+
 	case FREE:
-		DEBUGMSGTL (("smux","[var_smux_write] entering FREE - sending RollBack \n"));
-		ptr = sout;
-		var_len = 6;
-		if ((ptr = asn_build_sequence(ptr, &var_len,
-		    (u_char)SMUX_SOUT, 2)) == NULL) {
-			DEBUGMSGTL (("smux","[var_smux_write] asn_build_sequence failure\n"));
-			return SNMP_ERR_GENERR;
-		}
-		*(ptr++) = (u_char)1;		/* length */
-		*ptr = (u_char)1;			/* rollback */
-		if ((send(rptr->sr_fd, sout, 6, 0)) < 0) {
-			DEBUGMSGTL (("smux","[var_smux_write] send rollback failed\n"));
-			reterr = SNMP_ERR_GENERR;
-		} else
-			reterr = SNMP_ERR_NOERROR;
-		break;	/* case Action == FREE */
 	case COMMIT:
-		DEBUGMSGTL (("smux","[var_smux_write] entering COMMIT - sending SOUT\n"));
-
 		ptr = sout;
-		var_len = 6;
-		if ((ptr = asn_build_sequence(ptr, &var_len,
-		    (u_char)SMUX_SOUT, 2)) == NULL) {
-			DEBUGMSGTL (("smux","[var_smux_write] asn_build_sequence failure\n"));
-			return SNMP_ERR_GENERR;
+		*(ptr++) = (u_char)SMUX_SOUT;
+		*(ptr++) = (u_char)1;
+		if (action==FREE) {
+			*ptr = (u_char)1;	/* rollback */
+			DEBUGMSGTL (("smux","[var_smux_write] entering FREE - sending RollBack \n"));
 		}
-		*(ptr++) = (u_char)1; 	/* length */
-		*ptr = (u_char)0;	/* commit */
+		else {
+			*ptr = (u_char)0;	/* commit */
+			DEBUGMSGTL (("smux","[var_smux_write] entering FREE - sending Commit \n"));
+		}
 
-		if ((send(rptr->sr_fd, sout, 6, 0)) < 0) {
-			DEBUGMSGTL (("smux","[var_smux_write] send commit failed\n"));
-			reterr = SNMP_ERR_GENERR;
-		} else 
-			reterr = SNMP_ERR_NOERROR;
+		if ((send(rptr->sr_fd, sout, 3, 0)) < 0) {
+			DEBUGMSGTL (("smux","[var_smux_write] send rollback/commit failed\n"));
+			return SNMP_ERR_GENERR;
+		} 
+
+		reterr = SNMP_ERR_NOERROR;
 		break;	/* case Action == COMMIT */
+
 	default:
 		break;
 	}
@@ -514,19 +487,19 @@ smux_accept(int sd)
 	errno = 0;
 	if((fd = accept(sd, (struct sockaddr *)&in_socket, &alen)) < 0) {
 		snmp_log_perror("[smux_accept] accept failed");
-		return SMUXNOTOK;
+		return -1;
 	} else {
 	 snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
 		if (npeers + 1 == SMUXMAXPEERS) {
 			DEBUGMSGTL (("smux","[smux_accept] denied peer on fd %d, limit reached", fd));
 			close(sd);
-			return SMUXNOTOK;
+			return -1;
 		}
 		/* now block for an OpenPDU */
 		if ((len = recv(fd, (char *)data, SMUXMAXPKTSIZE, 0)) <= 0) {
 			DEBUGMSGTL (("smux","[smux_accept] peer on fd %d died or timed out\n", fd));
 			close(fd);
-			return SMUXNOTOK;
+			return -1;
 		}
 		/* try to authorize him */
 		ptr = data;
@@ -534,19 +507,19 @@ smux_accept(int sd)
 			smux_send_close(fd, SMUXC_PACKETFORMAT);
 			close(fd);
 			DEBUGMSGTL (("smux","[smux_accept] peer on %d sent bad open"));
-			return SMUXNOTOK;
+			return -1;
 		} else if (type != (u_char)SMUX_OPEN) {
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			close(fd);
 			DEBUGMSGTL (("smux","[smux_accept] peer on %d did not send open: (%d)\n", type));
-			return SMUXNOTOK;
+			return -1;
 		}
 		ptr = smux_open_process(fd, ptr, &len, &fail);
 		if (fail) {
 			smux_send_close(fd, SMUXC_AUTHENTICATIONFAILURE);
 			close(fd);
 			DEBUGMSGTL (("smux","[smux_accept] peer on %d failed authentication\n", fd));
-			return SMUXNOTOK;
+			return -1;
 		}
 
 		/* he's OK */
@@ -556,17 +529,10 @@ smux_accept(int sd)
                         snmp_log_perror("smux/setsockopt");
                 }
 #endif
-
 		npeers++;
-#ifdef USING_SD_HANDLERS
-		sdlist[sdlen] = fd;
-		sd_handlers[sdlen++] = smux_process;
-
-		DEBUGMSGTL (("smux","[smux_accept] fd %d, sdlen %d\n", fd, sdlen));
-#endif
+		DEBUGMSGTL (("smux","[smux_accept] fd %d\n", fd));
 	}
-
-	return SMUXOK;
+	return fd;
 }
 
 int
@@ -583,12 +549,12 @@ smux_process(int fd)
 		 */
 		DEBUGMSGTL (("smux","[smux_process] peer on fd %d died or timed out\n", fd));
 		smux_peer_cleanup(fd);
-		return SMUXNOTOK; /* return value ignored */
+		return -1;
 	}
 
 	DEBUGMSGTL (("smux","[smux_process] Processing %d bytes\n", length));
 
-	error = SMUXOK;
+	error = 0;
 
 	ptr = data;
 	len = length;
@@ -601,33 +567,43 @@ smux_process(int fd)
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			DEBUGMSGTL (("smux","[smux_process] peer on fd %d sent duplicate open?\n", fd));
 			smux_peer_cleanup(fd);
+			error = -1;
 			break;
 		case SMUX_CLOSE:
 			ptr = smux_close_process(fd, ptr, &len);
 			smux_peer_cleanup(fd);
+			error = -1;
 			break;
 		case SMUX_RREQ:
 			ptr = smux_rreq_process(fd, ptr, &len);
 			break;
 		case SMUX_RRSP:
-			error = SMUXNOTOK;
+			error = -1;
 			ptr = NULL;
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			smux_peer_cleanup(fd);
 			DEBUGMSGTL (("smux","[smux_process] peer on fd %d sent RRSP!\n", fd));
 			break;
 		case SMUX_SOUT:
-			error = SMUXNOTOK;
+			error = -1;
 			ptr = NULL;
 			smux_send_close(fd, SMUXC_PROTOCOLERROR);
 			smux_peer_cleanup(fd);
 			DEBUGMSGTL (("smux","This shouldn't have happened!\n"));
 			break;
+		case SMUX_TRAP:
+			/* just log it.. don't handle traps yet */
+			snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
+			ptr = smux_trap_process(ptr, &len);
+			// watch out for close on top of this...should return correct end
+			// debug this...
+			ptr = NULL;
+			break;
 		default:
 			smux_send_close(fd, SMUXC_PACKETFORMAT);
 			smux_peer_cleanup(fd);
-                        DEBUGMSGTL (("smux","[smux_process] Wrong type %d\n", (int)type));
-			error = SMUXNOTOK;
+            DEBUGMSGTL (("smux","[smux_process] Wrong type %d\n", (int)type));
+			error = -1;
 			break;
 		}
 	}
@@ -664,7 +640,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer:")); 
-          for (i=0; i < (int)oid_name_len; i++) 
+          for (i=0; i<oid_name_len; i++) 
             DEBUGMSG (("smux",".%d", oid_name[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -680,7 +656,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer descr:")); 
-          for (i=0; i < (int)string_len; i++) 
+          for (i=0; i<string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -696,7 +672,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer passwd:")); 
-          for (i=0; i < (int)string_len; i++) 
+          for (i=0; i<string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -705,7 +681,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	if(!smux_auth_peer(oid_name, oid_name_len, string, fd)) {
 		if(snmp_get_do_debugging()) {
 		    DEBUGMSGTL (("smux","[smux_open_process] peer authentication failed for oid\n"));
-		    for (i = 0; i < (int)oid_name_len; i++) 
+		    for (i = 0; i < oid_name_len; i++) 
 			DEBUGMSG (("smux","\t.%d", oid_name[i]));
 		    DEBUGMSG (("smux"," password %s\n", string));
 		}
@@ -849,9 +825,9 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		 * belong to him.  XXX for now, ignore it.
 		 */
 		return ptr;
-	}
 
-	if (operation == SMUX_REGOP_REGISTER) {
+	} else if ((operation == SMUX_REGOP_REGISTER_RO) ||
+	    (operation == SMUX_REGOP_REGISTER_RW)) {
 		if (priority < -1) {
 			DEBUGMSGTL (("smux","[smux_rreq_process] peer fd %d invalid priority", sd, priority));
 			return NULL;
@@ -863,7 +839,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		nrptr->sr_priority = priority;
 		nrptr->sr_name_len = oid_name_len;
 		nrptr->sr_fd = sd;
-		for(i = 0; i < (int)oid_name_len; i++)
+		for(i = 0; i < oid_name_len; i++)
 			nrptr->sr_name[i] = oid_name[i];
 
 		/* See if this tree matches or scopes any of the
@@ -922,13 +898,13 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		    smux_variables, sizeof(struct variable2),
 		    1, nrptr->sr_name, nrptr->sr_name_len);
 done:
-		if (smux_send_rrsp(sd, nrptr->sr_priority)) 
+		if (smux_send_rrsp(sd, nrptr->sr_priority) < 0) 
 			DEBUGMSGTL (("smux","[smux_rreq_process]  send failed\n"));
 		return ptr;
+	} else {
+		DEBUGMSGTL (("smux","[smux_rreq_process] unknown operation\n"));
+		return NULL;
 	}
-
-	DEBUGMSGTL (("smux","[smux_rreq_process] unknown operation\n"));
-	return NULL;
 }
 
 static void
@@ -1075,7 +1051,7 @@ smux_snmp_process(int exact,
 		type = SMUX_GETNEXT;
 
 	if (smux_build(type, smux_reqid, objid, len, 0, NULL, 
-	    *len, packet, &length) != SMUXOK) {
+	    *len, packet, &length) < 0) {
 	 snmp_log(LOG_NOTICE, "[smux_snmp_process]: smux_build failed\n");
 		return NULL;
 	}
@@ -1350,7 +1326,7 @@ smux_build(u_char type,
 
 	*length = ptr - packet;
 
-	return SMUXOK;
+	return 0;
 }
 
 static void
@@ -1390,18 +1366,6 @@ smux_peer_cleanup(int sd)
 			free(rptr);
 		}
 	}
-#ifdef USING_SD_HANDLERS
-	/* XXX stop paying attention to his socket */
-	for (i = 0; i < sdlen; i++) {
-		if (sdlist[i] == sd) {
-			for (; i < (sdlen-1); i++) {
-				sdlist[i] = sdlist[i+1];
-				sd_handlers[i] = sd_handlers[i+1];
-			}
-		}
-	}
-	sdlen--;
-#endif
 
 	/* decrement the peer count */
 	npeers--;
@@ -1430,9 +1394,422 @@ smux_send_rrsp(int sd, int pri)
 	for(i = 0; i < 4; i++, mask >>= 8)
 		*(++ptr) = (u_char)(pri & mask);
 
-	if((send(sd, (char *)outdata, 6, 0)) < 0)
-		return SMUXNOTOK;
+	return (send(sd, (char *)outdata, 6, 0));
+}
+
+
+void send_trap_vars2 (int trap, 
+		     int specific,
+			 oid *sa_enterpriseoid,
+			 int sa_enterpriseoid_len,
+		     struct variable_list *vars)
+{
+    struct variable_list uptime_var, snmptrap_var, enterprise_var;
+    struct variable_list *v2_vars, *last_var=NULL;
+    struct snmp_pdu	*template_pdu, *pdu;
+    struct timeval	 now;
+    int uptime;
+    struct sockaddr_in *pduIp;
+    struct trap_sink *sink;
+
+	int i, datoidlen;
+	char * datptr = NULL;
+	oid * tmpptr;
+    
+		/*
+		 * Initialise SNMPv2 required variables
+		 */
+    gettimeofday(&now, NULL);
+    uptime = calculate_time_diff(&now, &starttime);
+    memset (&uptime_var, 0, sizeof (struct variable_list));
+    snmp_set_var_objid( &uptime_var, sysuptime_oid2, OID_LENGTH(sysuptime_oid2));
+    snmp_set_var_value( &uptime_var, (char *)&uptime, sizeof(uptime) );
+    uptime_var.type           = ASN_TIMETICKS;
+    uptime_var.next_variable  = &snmptrap_var;
+
+    memset (&snmptrap_var, 0, sizeof (struct variable_list));
+    snmp_set_var_objid( &snmptrap_var, snmptrap_oid2, OID_LENGTH(snmptrap_oid2));
+	/* value set later .... */
+    snmptrap_var.type           = ASN_OBJECT_ID;
+    if ( vars )
+	snmptrap_var.next_variable  = vars;
+    else
+	snmptrap_var.next_variable  = &enterprise_var;
+
+			/* find end of provided varbind list,
+			   ready to append the enterprise info if necessary */
+    last_var = vars;
+    while ( last_var && last_var->next_variable )
+	last_var = last_var->next_variable;
+
+    memset (&enterprise_var, 0, sizeof (struct variable_list));
+    snmp_set_var_objid( &enterprise_var,
+		 snmptrapenterprise_oid2, OID_LENGTH(snmptrapenterprise_oid2));
+    snmp_set_var_value( &enterprise_var, (char *)xversion_id2, sizeof(xversion_id2));
+    enterprise_var.type           = ASN_OBJECT_ID;
+    enterprise_var.next_variable  = NULL;
+
+    v2_vars = &uptime_var;
+
+		/*
+		 *  Create a template PDU, ready for sending
+		 */
+    template_pdu = (struct snmp_pdu *)snmp_pdu_create( SNMP_MSG_TRAP );
+    if ( template_pdu == NULL )
+	return;
+    template_pdu->trap_type     = trap;
+    template_pdu->specific_type = specific;
+
+	/* cannot point enterprise id to global and call free_pdu later */
+    template_pdu->enterprise    = xversion_id2;
+    template_pdu->enterprise_length = OID_LENGTH(xversion_id2);
+//
+	/* allocate size of enterprise oid */
+	datoidlen = (template_pdu->enterprise_length * sizeof(oid));
+	template_pdu->enterprise = (oid *)malloc(datoidlen);
+	tmpptr = (oid *)template_pdu->enterprise;
+	memset(tmpptr, 0, datoidlen);
+	for (i=0; i<template_pdu->enterprise_length; i++) {
+		*tmpptr = xversion_id2[i];
+		tmpptr++;
+	}
+//
+
+    template_pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
+    pduIp = (struct sockaddr_in *)&template_pdu->agent_addr;
+    pduIp->sin_family		 = AF_INET;
+    pduIp->sin_addr.s_addr	 = get_myaddr();
+    template_pdu->time		 	 = uptime;
+
+		/*
+		 *  Now use the parameters to determine
+		 *    which v2 variables are needed,
+		 *    and what values they should take.
+		 */
+    switch ( trap ) {
+	case -1:	/*
+			 *	SNMPv2 only
+			 *  Check to see whether the variables provided
+			 *    are sufficient for SNMPv2 notifications
+			 */
+		if (vars && snmp_oid_compare(vars->name, vars->name_length,
+				sysuptime_oid2, OID_LENGTH(sysuptime_oid2)) == 0 )
+			v2_vars = vars;
+		else
+		if (vars && snmp_oid_compare(vars->name, vars->name_length,
+				snmptrap_oid2, OID_LENGTH(snmptrap_oid2)) == 0 )
+			uptime_var.next_variable = vars;
+		else {
+			/* Hmmm... we don't seem to have a value - oops! */
+			snmptrap_var.next_variable = vars;
+		}
+		last_var = NULL;	/* Don't need enterprise info */
+		break;
+
+			/* "Standard" SNMPv1 traps */
+
+	case SNMP_TRAP_COLDSTART:
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)cold_start_oid2,
+				    sizeof(cold_start_oid2));
+		break;
+	case SNMP_TRAP_WARMSTART:
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)warm_start_oid2,
+				    sizeof(warm_start_oid2));
+		break;
+	case SNMP_TRAP_LINKDOWN:
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)link_down_oid2,
+				    sizeof(link_down_oid2));
+		break;
+	case SNMP_TRAP_LINKUP:
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)link_up_oid2,
+				    sizeof(link_up_oid2));
+		break;
+	case SNMP_TRAP_AUTHFAIL:
+		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED)
+		    return;
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)auth_fail_oid2,
+				    sizeof(auth_fail_oid2));
+		break;
+	case SNMP_TRAP_EGPNEIGHBORLOSS:
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)egp_xxx_oid2,
+				    sizeof(egp_xxx_oid2));
+		break;
+
+	case SNMP_TRAP_ENTERPRISESPECIFIC:
+		/* Point to the ucdTrap subtree instead */
+		/*
+		template_pdu->enterprise        = objid_enterprisetrap;
+		template_pdu->enterprise_length = enterprisetrap_len -2;
+		snmp_set_var_value( &snmptrap_var,
+				    (char *)objid_enterprisetrap,
+				    sizeof(objid_enterprisetrap));
+		*/
+		/* in case of sub-agent delivering enterprise trap oid 
+		   for enterprise specific */
+
+		datoidlen = (sa_enterpriseoid_len * sizeof(oid)) + (2 * sizeof(oid));
+		/* printf("sizeof(oid) = %d | Enterprise oid len = %d | Malloc count %d\n", sizeof(oid), sa_enterpriseoid_len, datoidlen); */
+
+		/* allocate size of enterprise oid + 2 */
+		datptr = (char *)malloc(datoidlen);
+		tmpptr = (oid *)datptr;
+		memset(datptr, 0, datoidlen);
+		for (i=0; i<sa_enterpriseoid_len; i++) {
+			*tmpptr = sa_enterpriseoid[i];
+			tmpptr++;
+		}
+
+		/* free what was created earlier before re-assignment */
+		free(template_pdu->enterprise);
+		template_pdu->enterprise        = (oid *)datptr;
+		template_pdu->enterprise_length = sa_enterpriseoid_len;
+		
+		snmp_set_var_value( &snmptrap_var,
+				    datptr,
+				    sa_enterpriseoid_len+2);
+		
+		snmptrap_var.val.objid[ (sa_enterpriseoid_len+2)-1 ] = specific;
+		snmptrap_var.next_variable  = vars;
+		last_var = NULL;	/* Don't need version info */
+		break;
+    }
+    
+
+		/*
+		 *  Now loop through the list of trap sinks,
+		 *   sending an appropriately formatted PDU to each
+		 */
+    for ( sink = sinks ; sink ; sink=sink->next ) {
+	if ( sink->version == SNMP_VERSION_1 && trap == -1 )
+		continue;	/* Skip v1 sinks for v2 only traps */
+	template_pdu->version = sink->version;
+	template_pdu->command = sink->pdutype;
+	if ( sink->version != SNMP_VERSION_1 ) {
+	    template_pdu->variables = v2_vars;
+	    if ( last_var )
+		last_var->next_variable = &enterprise_var;
+	}
 	else
-		return SMUXOK;
+	    template_pdu->variables = vars;
+
+	pdu = (struct snmp_pdu *)snmp_clone_pdu( template_pdu );
+	pdu->sessid = sink->sesp->sessid;	/* AgentX only ? */
+	if ( snmp_send( sink->sesp, pdu) == 0 ) {
+            snmp_sess_perror ("snmpd: send_trap", sink->sesp);
+	    snmp_free_pdu( pdu );
+	}
+	else {
+	    snmp_increment_statistic(STAT_SNMPOUTTRAPS);
+	    snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	}
+
+	if ( sink->version != SNMP_VERSION_1 && last_var )
+	    last_var->next_variable = NULL;
+    }
+		
+	/* snmp_free_pdu(pdu); */
+	snmp_free_pdu(template_pdu);
+
+}
+
+
+static u_char *
+smux_trap_process(u_char *rsp, size_t *len)
+{
+	oid sa_enterpriseoid[MAX_OID_LEN], var_name[MAX_OID_LEN];
+	size_t oid_name_len, datalen, var_name_len, var_val_len, aloksize, maxlen;
+	int result, sa_enterpriseoid_len;
+	u_char vartype, *ptr, *var_val;
+
+	long trap, specific;
+	u_long timestamp;
+
+	struct variable_list *snmptrap_head, *snmptrap_ptr, *snmptrap_tmp;
+	snmptrap_head = NULL;
+	snmptrap_ptr = NULL;
+
+	ptr = rsp;
+
+	/* parse the sub-agent enterprise oid */
+	datalen = MAX_OID_LEN;
+	if ((ptr = asn_parse_objid(ptr, len, 
+			&vartype, (oid *)&sa_enterpriseoid, 
+			&sa_enterpriseoid_len)) == NULL ) {
+			DEBUGMSGTL (("smux","[smux_trap_process] asn_parse_objid failed\n"));
+			return NULL;
+	}
+
+	/* parse the agent-addr ipAddress */
+	datalen = SMUXMAXSTRLEN;
+	if (((ptr = asn_parse_string(ptr, len,
+		    &vartype, smux_str, 
+		    &datalen)) == NULL) ||
+		    (vartype != (u_char)ASN_IPADDRESS)) {
+			DEBUGMSGTL (("smux", "[smux_trap_process] asn_parse_string failed\n"));
+			return NULL;
+	}
+
+	/* parse the generic trap int */
+	datalen = sizeof(long);
+	if ((ptr = asn_parse_int(ptr, len,
+			&vartype, &trap,
+			datalen)) == NULL ) {
+			DEBUGMSGTL (("smux","[smux_trap_process] asn_parse_int generic failed\n"));
+			return NULL;
+	}
+
+	/* parse the specific trap int */
+	datalen = sizeof(long);
+	if ((ptr = asn_parse_int(ptr, len,
+			 &vartype, &specific,
+			 datalen)) == NULL ) {
+			 DEBUGMSGTL (("smux","[smux_trap_process] asn_parse_int specific failed\n"));
+			 return NULL;
+	}
+
+	/* parse the timeticks timestamp */
+	datalen = sizeof(u_long);
+	if (((ptr = asn_parse_unsigned_int(ptr, len,
+				&vartype, (u_long *)&timestamp,
+			    datalen)) == NULL) ||
+				(vartype != (u_char)ASN_TIMETICKS)) {
+				DEBUGMSGTL (("smux","[smux_trap_process] asn_parse_unsigned_int (timestamp) failed\n"));
+				return NULL;
+	}
+
+
+	/* parse out the overall sequence */
+	ptr = asn_parse_header(ptr, len, &vartype);
+	if (ptr == NULL || vartype != (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
+		return NULL;
+	}
+
+	/* parse the variable bindings */
+	do {
+
+		/* get the objid and the asn1 coded value */
+		var_name_len = MAX_OID_LEN;
+		ptr = snmp_parse_var_op(ptr, var_name, &var_name_len, &vartype,
+					&var_val_len, (u_char **)&var_val, len);
+
+		if (ptr==NULL) {
+			return NULL;
+		}
+
+		maxlen = SMUXMAXPKTSIZE;
+		switch((short)vartype){
+			case ASN_INTEGER:
+				var_val_len = sizeof(long);
+				asn_parse_int(var_val, &maxlen, &vartype,
+					      (long *)&smux_long, var_val_len);
+				var_val = (u_char *)&smux_long;
+				break;
+		    case ASN_COUNTER:
+		    case ASN_GAUGE:
+		    case ASN_TIMETICKS:
+		    case ASN_UINTEGER:
+				var_val_len = sizeof(u_long);
+				asn_parse_unsigned_int(var_val, &maxlen, &vartype,
+					      (u_long *)&smux_ulong, var_val_len);
+				var_val = (u_char *)&smux_ulong;
+				break;
+		    case ASN_COUNTER64:
+				var_val_len = sizeof(smux_counter64);
+				asn_parse_unsigned_int64(var_val, &maxlen, &vartype,
+							 (struct counter64 *)&smux_counter64,
+							 var_val_len);
+				var_val = (u_char *)&smux_counter64;
+				break;
+		    case ASN_IPADDRESS:
+				var_val_len = 4;
+				/* 
+				 * consume the tag and length, but just copy here
+				 * because we know it is an ip address
+				 */
+				if ((var_val = asn_parse_header(var_val, &maxlen, &vartype)) == NULL)
+					return NULL;
+				memcpy((u_char *)&(smux_sa.sin_addr.s_addr), var_val,
+				      var_val_len);
+				var_val = (u_char *)&(smux_sa.sin_addr.s_addr);
+				break;
+		    case ASN_OCTET_STR:
+				/* XXX */
+				if (len == 0)
+					return NULL;
+				var_val_len = SMUXMAXSTRLEN;
+				asn_parse_string(var_val, &maxlen, &vartype,
+						 smux_str, &var_val_len);
+				var_val = smux_str;
+				break;
+		    case ASN_OPAQUE:
+		    case ASN_NSAP:
+		    case ASN_OBJECT_ID:
+				var_val_len = MAX_OID_LEN;
+				asn_parse_objid(var_val, &maxlen, &vartype, 
+						smux_objid, &var_val_len);
+				var_val = (u_char *)smux_objid;
+				break;
+	        case SNMP_NOSUCHOBJECT:
+	        case SNMP_NOSUCHINSTANCE:
+            case SNMP_ENDOFMIBVIEW:
+		    case ASN_NULL:
+	    		var_val = NULL;
+				break;
+		    case ASN_BIT_STR:
+			/* XXX */
+				if (len == 0)
+					return NULL;
+				var_val_len = SMUXMAXSTRLEN;
+				asn_parse_bitstring(var_val, &maxlen, &vartype,
+						 smux_str, &var_val_len);
+				var_val = (u_char *)smux_str;
+				break;
+		    default:
+				 snmp_log(LOG_ERR, "bad type returned (%x)\n", vartype);
+				var_val = NULL;
+				break;
+			}
+
+		snmptrap_tmp = (struct variable_list *)malloc(sizeof(struct variable_list));
+		if (snmptrap_tmp == NULL)
+		  return NULL;
+		memset(snmptrap_tmp, 0, sizeof(struct variable_list));
+		if (snmptrap_head == NULL) {
+			snmptrap_head = snmptrap_tmp;
+			snmptrap_ptr = snmptrap_head;
+		}
+		else {
+			snmptrap_ptr->next_variable = snmptrap_tmp;
+			snmptrap_ptr = snmptrap_ptr->next_variable;
+		}
+
+		snmp_set_var_objid(snmptrap_ptr, var_name, var_name_len);
+		snmp_set_var_value(snmptrap_ptr, (char *)var_val, var_val_len);
+		snmptrap_ptr->type = vartype;
+		snmptrap_ptr->next_variable = NULL;
+
+	} while ((ptr!=NULL)&&(*len));
+
+
+	/* send the traps */
+	send_trap_vars2(trap, specific, (oid *)&sa_enterpriseoid, sa_enterpriseoid_len, snmptrap_head);
+
+	/* free trap variables */
+	/* send_trap_vars is freeing the variables
+	while (snmptrap_head) {
+		snmptrap_tmp = snmptrap_head->next_variable;
+		free(snmptrap_head);
+		snmptrap_head = snmptrap_tmp;
+	}
+	*/
+
+	return ptr;
+
 }
 

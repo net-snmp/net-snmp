@@ -3,12 +3,6 @@
  * Rewritten by Nick Amato <naamato@merit.net>.
  */
 
-#define NOTINIT  0
-#define INIT     1
-
-#define SMUXOK      0
-#define SMUXNOTOK   -1
-
 #define SMUXPORT 199
 
 #define SMUXMAXPKTSIZE 1500
@@ -25,6 +19,7 @@
 #define SMUX_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)
 #define SMUX_GETRSP     (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)
 #define SMUX_SET	(ASN_CONTEXT | ASN_CONSTRUCTOR | 3)
+#define SMUX_TRAP	(ASN_CONTEXT | ASN_CONSTRUCTOR | 4)
 
 #define SMUXC_GOINGDOWN                    0
 #define SMUXC_UNSUPPORTEDVERSION           1
@@ -36,8 +31,9 @@
 #define SMUX_MAX_PEERS          10
 #define SMUX_MAX_PRIORITY       2147483647
 
-#define SMUX_REGOP_DELETE       0
-#define SMUX_REGOP_REGISTER     1
+#define SMUX_REGOP_DELETE		0
+#define SMUX_REGOP_REGISTER_RO		1
+#define SMUX_REGOP_REGISTER_RW		2
 
 /* 
  * Authorized peers read from the config file
@@ -60,9 +56,9 @@ typedef struct _smux_reg {
 	struct _smux_reg *sr_next;      /* next one                     */
 } smux_reg;
 
-extern int init_smux (void);
+extern void init_smux (void);
 extern int smux_accept (int);
 extern u_char *smux_snmp_process (int, oid *, size_t *, size_t *, u_char *, int);
 extern int smux_process (int);
-extern void smux_parse_peer_auth (const char *, char *);
+extern void smux_parse_peer_auth (char *, char *);
 extern void smux_free_peer_auth (void);
