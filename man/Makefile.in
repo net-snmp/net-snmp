@@ -4,16 +4,6 @@
 top_builddir=..
 
 #
-#  Yes - I know these header files have nothing to do with the MIBs, but we need a
-#    couple of spare 'INCLUDESUBDIR' definitions to get these files installed properly.
-#  We can tidy this up and do it cleanly later.
-#
-
-INCLUDESUBDIR=machine
-INCLUDESUBDIRHEADERS=generic.h
-
-
-#
 # install stuff
 #
 
@@ -22,7 +12,7 @@ OTHERINSTALL=maninstall
 # local stuff
 #
 
-MAN1  =  snmpnetstat.1 snmpdelta.1 snmpinform.1 snmpdf.1
+MAN1  = snmpnetstat.1 snmpdelta.1 snmpinform.1 snmpdf.1
 MAN1G = snmpbulkget.1 snmpcmd.1 snmpd.1 snmpget.1 snmpset.1 snmpwalk.1 \
 	snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmptranslate.1 snmptrap.1 \
 	snmpusm.1 snmptable.1 snmpstatus.1 snmpconf.1
@@ -141,13 +131,11 @@ default_store.3: $(srcdir)/default_store.3.top default_store.3.h $(srcdir)/defau
 	$(SED) -f ../sedscript < $(srcdir)/default_store.3.top > default_store.3
 	cat default_store.3.h $(srcdir)/default_store.3.bot >> default_store.3
 
-maninstall:  installdirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
-	@$(INSTALL) $(MAN1) $(man1dir)
-	@for i in $(MAN1) ; do echo "install:  installed $$i in $(man1dir)" ; done
+maninstall:  maninstalldirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
+	@for i in $(MAN1) ; do $(INSTALL) $(srcdir)/$$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
 	@$(INSTALL) $(MAN1G) $(man1dir)
 	@for i in $(MAN1G) ; do echo "install:  installed $$i in $(man1dir)" ; done
-	@$(INSTALL) $(MAN3) $(man3dir)
-	@for i in $(MAN3) ; do echo "install:  installed $$i in $(man3dir)" ; done
+	@for i in $(MAN3) ; do $(INSTALL) $(srcdir)/$$i $(man3dir) ; echo "install:  installed $$i in $(man3dir)" ; done
 	@$(INSTALL) $(MAN3G) $(man3dir)
 	@for i in $(MAN3G) ; do echo "install:  installed $$i in $(man3dir)" ; done
 	@$(INSTALL) $(MAN5G) $(man5dir)
@@ -155,7 +143,7 @@ maninstall:  installdirs $(MAN1) $(MAN1G) $(MAN3) $(MAN5G) $(MAN8)
 	@$(INSTALL) $(MAN8G) $(man8dir)
 	@for i in $(MAN8G) ; do echo "install:  installed $$i in $(man8dir)" ; done
 
-installdirs:
+maninstalldirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
 
 
