@@ -29,6 +29,10 @@ SOFTWARE.
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <errno.h>
+#ifdef hpux
+/* needed for htonl funcs */
+#include <netinet/in.h>
+#endif
 
 #include "asn1.h"
 #include "snmp.h"
@@ -39,6 +43,8 @@ SOFTWARE.
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+
+#include "../config.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -423,7 +429,7 @@ snmp_synch_response(ss, pdu, response)
     while(state->waiting){
 	numfds = 0;
 	FD_ZERO(&fdset);
-	block = 1;
+	block = SNMPBLOCK;
 	tvp = &timeout;
 	timerclear(tvp);
 	snmp_select_info(&numfds, &fdset, tvp, &block);

@@ -416,16 +416,18 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 			   exact, &write_method, pi, &noSuchObject);
 	if (pi->version != SNMP_VERSION_2 && statP == NULL
 	    && (pi->pdutype != SET_REQ_MSG || !write_method)){
-ERROR("");
-	    return SNMP_ERR_NOSUCHNAME;
+            print_mib_oid(var_name,var_name_len);
+            printf(" -- ");
+ERROR("Mib Doesn't exist");
+	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
 	if (pi->pdutype == SET_REQ_MSG && pi->version != SNMP_VERSION_2
 	    && !snmp_access(acl, pi->community_id, rw)){
-ERROR("");
-	    return SNMP_ERR_NOSUCHNAME;
+ERROR("read-only? (ignoring)");
+/*	    return SNMP_ERR_NOSUCHNAME; */
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
 	    && !snmp_access(acl, pi->community_id, rw)){

@@ -1,0 +1,65 @@
+Changes since 3-0A1:
+
+hardaker  2 Jun 95 16:23:46
+    - version update
+
+hardaker  5 Jun 95 12:44:46
+    - agent/extensible/Makefile:
+        --  no longer requires GNU make
+        --  etags no longer run by default
+    
+    - SunOS additions:
+        -- loadaverage checking MIB enabled
+        -- disk checking MIB enabled
+
+hardaker  9 Jun 95 10:21:07
+    - Added a SNMPBLOCK option to the config.h file.  Supposedily setting
+      this to zero (now the default) will allow snmp requests to time out.
+      Haven't tested it throughly.
+        -- Contributed by Sanjai Narain <narain@thumper.bellcore.com>
+
+hardaker  9 Jun 95 10:21:51
+    - Correctly ordered the mib table list.
+      --  Need to write a dynamic checker/re-orderer.
+
+hardaker  9 Jun 95 10:23:35
+    - Correct usage for snmpwalk is now possible.  IE, snmpwalk target
+      .1.3.6.1 will now browse the entire tree.
+      -- Still fails on relocatable extensible mibs and will until I
+         write a dynamic tree builder.
+
+hardaker  9 Jun 95 14:08:15
+    - Changed test -x to test -f in snmplib/Makefile.  Not all OSes
+      (ie ultrix) handle this.
+
+hardaker 12 Jun 95 10:35:38
+    - local/trapnotif:
+      -- uses snmpv2 now (correctly)
+
+hardaker 12 Jun 95 10:37:46
+    - Reports all errors through the error mib now instead of through perror().
+    - Cleaned up error handling.  Shouldn't handle errors nicely if system
+      errors occur when scanning an extensible mib.
+
+hardaker 14 Jun 95 11:24:20
+    agent:
+    - Mib table is now qsorted at run time and the extensible variables are
+      sorted in at this time.  This brings the agent up to correct
+      SNMPwalk/getnext protocols.  You can now walk the entire tree
+      including the extensible sections and it won't stop.
+      * This has an added bonus of checking the mib table
+        (agent/snmp_vars.c) for correct order.  I have added things to the
+        wrong location too many times and caused the agent to function
+        incorrectly.  Major win.
+
+hardaker 14 Jun 95 12:56:49
+    - Cleaned up/Added more documentation to config.h
+    - GLOBALSECURITY now uses the left most four bits in the MIB acl.
+      This is more compatible with the CMU code than using the left most
+      2, which was done previously.
+
+
+hardaker 14 Jun 95 13:43:38
+    - Added more documentation to the README file.
+    - Created a mailing list to handle announcements
+      (ucd-snmp-announce@ece.ucdavis.edu)
