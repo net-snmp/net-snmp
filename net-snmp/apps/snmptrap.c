@@ -71,18 +71,32 @@ int	snmp_dump_packet = 0;
 #define NUM_NETWORKS	16   /* max number of interfaces to check */
 
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
-oid objid_sysdescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
-
+oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};
+oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
+oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 struct nlist nl[] = {
     { "_boottime" },
     { "" }
 };
 
-usage(){
-	printf("usage: snmptrap gateway srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]\n");
+void
+usage()
+{
+    fprintf(stderr, "usage:\n");
+    fprintf(stderr, "snmptrap -v 1 manager community enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
+    fprintf(stderr, "or\n");
+    fprintf(stderr, "snmptrap [-v 2] gateway srcParty dstParty [ var ] ...\n");
+    exit (1);
 }
 
-int snmp_input(){
+int snmp_input(operation, session, reqid, pdu, magic)
+int operation;
+struct snmp_session *session;
+int reqid;
+struct snmp_pdu *pdu;
+void *magic;
+{
+  return 1;
 }
 
 #ifndef IFF_LOOPBACK
@@ -129,6 +143,7 @@ get_myaddr(){
     close(sd);
     return 0;
 }
+#ifndef solaris2
 
 /*
  * Returns uptime in centiseconds(!).
@@ -177,6 +192,14 @@ long uptime()
 	diff.tv_sec++;
     }
     return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+#else
+    u_long lbolt;
+
+    if (getKstat ("system_misc", "lbolt", &lbolt) < 0)
+	return 0;
+    else
+	return lbolt;
+#endif
 }
 
 u_long parse_address(address)
@@ -192,6 +215,152 @@ u_long parse_address(address)
     if (hp == NULL){
 	fprintf(stderr, "unknown host: %s\n", address);
 	return 0;
+
+/*
+ * Add a variable with the requested name to the end of the list of
+ * variables for this pdu.
+ */
+void
+snmp_add_var(pdu, name, name_length, type, value)
+    struct snmp_pdu *pdu;
+    oid *name;
+    int name_length;
+    char type, *value;
+{
+    struct variable_list *vars;
+    char buf[2048];
+
+    if (pdu->variables == NULL){
+	pdu->variables = vars =
+	    (struct variable_list *)malloc(sizeof(struct variable_list));
+    } else {
+	for(vars = pdu->variables;
+	    vars->next_variable;
+	    vars = vars->next_variable)
+	    /*EXIT*/;
+	vars->next_variable =
+	    (struct variable_list *)malloc(sizeof(struct variable_list));
+	vars = vars->next_variable;
+    }
+
+    vars->next_variable = NULL;
+    vars->name = (oid *)malloc(name_length * sizeof(oid));
+    memmove(vars->name, name, name_length * sizeof(oid));
+    vars->name_length = name_length;
+
+    switch((type = tolower (type))){
+	case 'i':
+	    vars->type = INTEGER;
+	    vars->val.integer = (long *)malloc(sizeof(long));
+	    *(vars->val.integer) = atoi(value);
+	    vars->val_len = sizeof(long);
+	    break;
+	case 's':
+	case 'x':
+	case 'd':
+	    vars->type = STRING;
+	    if (type == 'd'){
+		vars->val_len = ascii_to_binary((u_char *)value, buf);
+	    } else if (type == 's'){
+		strcpy(buf, value);
+		vars->val_len = strlen(buf);
+	    } else if (type == 'x'){
+		vars->val_len = hex_to_binary((u_char *)value, buf);
+	    }
+	    vars->val.string = (u_char *)malloc(vars->val_len);
+	    memmove(vars->val.string, buf, vars->val_len);
+	    break;
+	case 'n':
+	    vars->type = NULLOBJ;
+	    vars->val_len = 0;
+	    vars->val.string = NULL;
+	    break;
+	case 'o':
+	    vars->type = OBJID;
+	    vars->val_len = MAX_NAME_LEN;
+	    read_objid(value, (oid *)buf, &vars->val_len);
+	    vars->val_len *= sizeof(oid);
+	    vars->val.objid = (oid *)malloc(vars->val_len);
+	    memmove(vars->val.objid, buf, vars->val_len);
+	    break;
+	case 't':
+	    vars->type = TIMETICKS;
+	    vars->val.integer = (long *)malloc(sizeof(long));
+	    *(vars->val.integer) = atoi(value);
+	    vars->val_len = sizeof(long);
+	    break;
+	case 'a':
+	    vars->type = IPADDRESS;
+	    vars->val.integer = (long *)malloc(sizeof(long));
+	    *(vars->val.integer) = inet_addr(value);
+	    vars->val_len = sizeof(long);
+	    break;
+	default:
+	    fprintf(stderr, "Internal error in type switching: %c\n", type);
+	    exit(-1);
+    }
+}
+
+int
+ascii_to_binary(cp, bufp)
+    u_char  *cp;
+    u_char *bufp;
+{
+    int	subidentifier;
+    u_char *bp = bufp;
+
+    for(; *cp != '\0'; cp++){
+	if (isspace(*cp) || *cp == '.')
+	    continue;
+	if (!isdigit(*cp)){
+	    fprintf(stderr, "Input error\n");
+	    return -1;
+	}
+	subidentifier = atoi(cp);
+	if (subidentifier > 255){
+	    fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
+		    subidentifier);
+	    return -1;
+	}
+	*bp++ = (u_char)subidentifier;
+	while(isdigit(*cp))
+	    cp++;
+	cp--;
+    }
+    return bp - bufp;
+}
+
+int
+hex_to_binary(cp, bufp)
+    u_char  *cp;
+    u_char *bufp;
+{
+    int	subidentifier;
+    u_char *bp = bufp;
+
+    for(; *cp != '\0'; cp++){
+	if (isspace(*cp))
+	    continue;
+	if (!isxdigit(*cp)){
+	    fprintf(stderr, "Input error\n");
+	    return -1;
+	}
+	sscanf((char *)cp, "%x", &subidentifier);
+	if (subidentifier > 255){
+	    fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
+		    subidentifier);
+	    return -1;
+	}
+	*bp++ = (u_char)subidentifier;
+	while(isxdigit(*cp))
+	    cp++;
+	cp--;
+    }
+    return bp - bufp;
+}
+
+
+int
     } else {
 	bcopy((char *)hp->h_addr, (char *)&saddr.sin_addr, hp->h_length);
 	return saddr.sin_addr.s_addr;
@@ -206,7 +375,10 @@ main(argc, argv)
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;
     struct variable_list *vars;
+    oid name[MAX_NAME_LEN];
+    int name_length;
     int	arg;
+    int dest_port = SNMP_TRAP_PORT;
     char *gateway = NULL;
     char *community = NULL;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
@@ -229,20 +401,28 @@ main(argc, argv)
 		case 'd':
 		    snmp_dump_packet++;
 		    break;
+		case 'p':
+		    dest_port = atoi (argv[++arg]);
+		    break;
 		case 'v':
 		    version = atoi(argv[++arg]);
+		    if (version < 1 || version > 2) {
+			fprintf (stderr, "invalid version: %s\n", argv [arg]);
+			usage ();
+		    }
 		    break;
 		default:
-		    printf("invalid option: -%c\n", argv[arg][1]);
+		    fprintf(stderr, "invalid option: -%c\n", argv[arg][1]);
+		    usage ();
 		    break;
 	    }
 	    continue;
 	}
 	if (gateway == NULL){
 	    gateway = argv[arg];
-	} else if (version == 0 && community == NULL){
+	} else if (version == 1 && community == NULL){
 	    community = argv[arg];
-	} else if ((version == 1 || version == 2) && srclen == 0){
+	} else if (version == 2 && srclen == 0){
 	    sprintf(ctmp, "%s/party.conf", SNMPLIBPATH);
 	    if (!read_party_database(ctmp)){
 		fprintf(stderr,
@@ -260,13 +440,12 @@ main(argc, argv)
 	    if (!pp){
 		srclen = MAX_NAME_LEN;
 		if (!read_objid(argv[arg], src, &srclen)){
-		    printf("Invalid source party: %s\n", argv[arg]);
+		    fprintf(stderr, "Invalid source party: %s\n", argv[arg]);
 		    srclen = 0;
 		    usage();
-		    exit(1);
 		}
 	    }
-	} else if ((version == 1 || version == 2) && dstlen == 0){
+	} else if (version == 2 && dstlen == 0){
 	    dstlen = MAX_NAME_LEN;
 	    party_scanInit();
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
@@ -278,36 +457,29 @@ main(argc, argv)
 	    }
 	    if (!pp){
 		if (!read_objid(argv[arg], dst, &dstlen)){
-		    printf("Invalid destination party: %s\n", argv[arg]);
+		    fprintf(stderr, "Invalid destination party: %s\n", argv[arg]);
 		    dstlen = 0;
-		    usage();
-		    exit(1);
+		    usage ();
 		}
 	    }
 	} else if (trap == NULL){
 	    trap = argv[arg];
-	} else if (specific == NULL){
-	    specific = argv[arg];
-	} else {
-	    description = argv[arg];
+	    break;
 	}
     }
 
-    if (!(version == 0 && gateway && community && trap && specific
-	  && description)
-	&& !((version == 1 || version == 2) && gateway &&
-	     srclen && dstlen && trap && specific && description)){
-	usage();
-	exit(1);
+    if (trap == NULL) {
+	usage ();
     }
 
-    bzero((char *)&session, sizeof(struct snmp_session));
+    memset (&session, 0, sizeof(struct snmp_session));
     session.peername = gateway;
-    session.version = version;
-    if (version == 0){
-	session.community = (u_char *)community;
-	session.community_len = strlen((char *)community);
+    if (version == 1 ){
+	session.version = SNMP_VERSION_1;
+	session.community = community;
+	session.community_len = strlen(community);
     } else if (version == 1 || version == 2){
+	session.version = SNMP_VERSION_2;
         session.srcParty = src;
         session.srcPartyLen = srclen;
         session.dstParty = dst;
@@ -318,37 +490,97 @@ main(argc, argv)
     session.authenticator = NULL;
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    session.remote_port = SNMP_TRAP_PORT;
+    session.remote_port = dest_port;
     ss = snmp_open(&session);
     if (ss == NULL){
-	printf("Couldn't open snmp\n");
+	fprintf(stderr, "Couldn't open snmp\n");
 	exit(-1);
     }
 
-    pdu = snmp_pdu_create(TRP_REQ_MSG);
-    pdu->enterprise = (oid *)malloc(sizeof(objid_enterprise));
-    bcopy((char *)objid_enterprise, (char *)pdu->enterprise, sizeof(objid_enterprise));
-    pdu->enterprise_length = sizeof(objid_enterprise) / sizeof(oid);
-    if (agent != NULL)
-	pdu->agent_addr.sin_addr.s_addr = parse_address(agent);
-    else
-	pdu->agent_addr.sin_addr.s_addr = get_myaddr();
-    pdu->trap_type = atoi(trap);
-    pdu->specific_type = atoi(specific);
-    pdu->time = uptime();
+    if (version == 1) {
+	pdu = snmp_pdu_create(TRP_REQ_MSG);
+	if (*trap == 0) {
+	    memcpy(pdu->enterprise, objid_enterprise, sizeof(objid_enterprise)/sizeof (oid));
+	    pdu->enterprise_length = name_length;
+	}
+	else {
+	    name_length = MAX_NAME_LEN;
+	    if (!read_objid (trap, name, &name_length)) {
+		fprintf (stderr, "invalid interprise id: %s\n", trap);
+		usage ();
+	    }
+	    pdu->enterprise = (oid *)malloc(name_length * sizeof(oid));
+	    memcpy(pdu->enterprise, name, name_length * sizeof(oid));
+	    pdu->enterprise_length = name_length;
+	}
+	if (++arg >= argc) {
+	    fprintf (stderr, "Missing agent parameter\n");
+	    usage ();
+	}
+	agent = argv [arg];
+	if (agent != NULL && strlen (agent) != 0)
+	    pdu->agent_addr.sin_addr.s_addr = parse_address(agent);
+	else
+	    pdu->agent_addr.sin_addr.s_addr = get_myaddr();
+	if (++arg == argc) {
+	    fprintf (stderr, "Missing generic-trap parameter\n");
+	    usage ();
+	}
+	trap = argv [arg];
+	pdu->trap_type = atoi(trap);
+	if (++arg == argc) {
+	    fprintf (stderr, "Missing specific-trap parameter\n");
+	    usage ();
+	}
+	specific = argv [arg];
+	pdu->specific_type = atoi(specific);
+	if (++arg == argc) {
+	    fprintf (stderr, "Missing uptime parameter\n");
+	    usage ();
+	}
+	description = argv [arg];
+	if (description == NULL || *description == 0)
+	    pdu->time = uptime();
+	else
+	    pdu->time = atol (description);
+	arg++;
+    }
+    else {
+	long sysuptime;
+	char csysuptime [20];
 
-    pdu->variables = vars = (struct variable_list *)malloc(sizeof(struct variable_list));
-    vars->next_variable = NULL;
-    vars->name = (oid *)malloc(sizeof(objid_sysdescr));
-    bcopy((char *)objid_sysdescr, (char *)vars->name, sizeof(objid_sysdescr));
-    vars->name_length = sizeof(objid_sysdescr) / sizeof(oid);
-    vars->type = ASN_OCTET_STR;
-    vars->val.string = (u_char *)malloc(strlen(description) + 1);
-    strcpy((char *)vars->val.string, description);
-    vars->val_len = strlen(description);
+	pdu = snmp_pdu_create(TRP2_REQ_MSG);
+	if (*trap == 0) {
+	    sysuptime = uptime ();
+	    sprintf (csysuptime, "%ld", sysuptime);
+	    trap = csysuptime;
+	}
+	snmp_add_var (pdu, objid_sysuptime, sizeof (objid_sysuptime)/sizeof(oid),
+		      't', trap);
+	if (++arg == argc) {
+	    fprintf (stderr, "Missing trap-oid parameter\n");
+	    usage ();
+	}
+	snmp_add_var (pdu, objid_snmptrap, sizeof (objid_snmptrap)/sizeof(oid),
+		      'o', argv [arg]);
+	arg++;
+    }
+
+    while (arg < argc) {
+      arg += 3;
+      if (arg > argc) break;
+      name_length = MAX_NAME_LEN;
+      if (!read_objid (argv [arg-3], name, &name_length)) {
+	  fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
+	  continue;
+      }
+
+      snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
+    }
 
     if (snmp_send(ss, pdu)== 0){
-	printf("error\n");
+	fprintf(stderr, "error: %d\n", snmp_errno);
     }
     snmp_close(ss);
+    exit (0);
 }

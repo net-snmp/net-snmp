@@ -392,6 +392,7 @@ main(argc, argv)
 	    snmp_free_pdu(response);
     }
     snmp_close(ss);
+    exit (0);
 }
 
 
