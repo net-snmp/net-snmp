@@ -22,7 +22,7 @@ TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bi
 SUBDIRS = snmplib agent apps local ov man
 INSTALLDIRS = $(SUBDIRS)
 
-all:	mib.txt ucd-snmp.txt sedscript EXAMPLE.conf subdirs
+all:	sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' | egrep '^s/' > sedscript
@@ -97,12 +97,6 @@ Makefile: Makefile.in config.status
 
 config.status: configure
 	./config.status --recheck
-
-mib.txt: mibII.txt
-	cp $(srcdir)/mibII.txt mib.txt
-
-ucd-snmp.txt: ece-mib.def sedscript
-	$(SED) -f sedscript $(srcdir)/ece-mib.def > ucd-snmp.txt
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
