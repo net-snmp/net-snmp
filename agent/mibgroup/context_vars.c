@@ -31,7 +31,6 @@
 
 static oid currentTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 1};
 static oid restartTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 2};
-static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
 
 #define OIDCMP(l1, l2, o1, o2) (((l1) == (l2)) \
 				&& !memcmp((char *)(o1), (char *)(o2), \
@@ -534,7 +533,7 @@ var_context(vp, name, length, exact, var_len, write_method)
     int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int ));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
-    int newnamelen, lownamelen;
+    int newnamelen, lownamelen=0;
     struct contextEntry *cp, *lowcp = NULL;
     u_long mask;
 /*

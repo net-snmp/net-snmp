@@ -60,6 +60,8 @@
 #include <string.h>
 #endif
 
+#include "../../snmplib/system.h"
+
 #define HRSTORE_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -222,7 +224,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method)();
 {
-    int store_idx;
+    int store_idx=0;
 #ifndef linux
     int physmem;
 #ifndef solaris2

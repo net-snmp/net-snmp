@@ -315,7 +315,9 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 {
 
   oid newname[30];
+#ifndef linux
   int result;
+#endif
   static long long_ret;
   static char errmsg[300];
 #ifndef linux

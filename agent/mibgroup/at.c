@@ -124,7 +124,7 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 #if defined(freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2)
     u_short		    ifIndex, lowIfIndex;
 #endif/* (freebsd2) || defined(netbsd1) || defined(hpux) || defined(bsdi2) */
-    u_long		    ifType, lowIfType;
+    u_long		    ifType, lowIfType=0;
 
     int                     oid_length;
 

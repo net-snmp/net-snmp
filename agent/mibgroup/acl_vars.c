@@ -203,7 +203,7 @@ var_acl(vp, name, length, exact, var_len, write_method)
     int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
-    int newnamelen, lownamelen;
+    int newnamelen, lownamelen=0;
     struct aclEntry *ap, *lowap = NULL;
     u_long mask;
     int target, subject, resources;

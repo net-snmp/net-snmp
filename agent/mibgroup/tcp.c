@@ -4,12 +4,9 @@
  *
  */
 
-#include "mib_module_config.h"
 
 #include <config.h>
-#if STDC_HEADERS
-#include <stdlib.h>
-#endif
+#include "mib_module_config.h"
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -34,9 +31,6 @@
 #if HAVE_SYS_SYSMP_H
 #include <sys/sysmp.h>
 #endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -51,6 +45,9 @@
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #if HAVE_NETINET_IP_VAR_H
@@ -62,11 +59,20 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#if STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#endif
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
+#include "mibincl.h"
 #include "../../snmplib/system.h"
-
+#include "../../snmplib/snmp_api.h"
 
 #if defined(osf4) || defined(aix4) || defined(hpux10)
 /* these are undefed to remove a stupid warning on osf compilers
@@ -89,9 +95,6 @@
 #include <sys/tcpipstats.h>
 #endif
 
-
-
-#include "mibincl.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -674,7 +677,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
     }
     if (Found == 0)
       return(NULL);
-    bcopy((char *)lowest, (char *)name,
+    memcpy((char *)name, (char *)lowest,
 	  ((int)vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF) * sizeof(oid));
     *length = vp->namelen + TCP_CONN_LENGTH - TCP_LOCADDR_OFF;
     *write_method = 0;
@@ -724,7 +727,7 @@ struct tcp_mib *tcpstat;
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];
 
-  bzero ((char *) tcpstat, sizeof (*tcpstat));
+  memset ((char *) tcpstat, (0), sizeof (*tcpstat));
 
   if (! in)
     return;

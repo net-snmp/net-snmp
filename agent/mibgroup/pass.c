@@ -25,7 +25,8 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "snmp_api.h"
+#include "../../snmplib/snmp_api.h"
+#include "../../snmplib/system.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;
@@ -326,7 +327,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
           break;
         case STRING:
           itmp = sizeof(buf);
-          bzero(buf2,itmp);
+          memset(buf2,(0),itmp);
           asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
           sprintf(buf,"string %s",buf2);
           break;

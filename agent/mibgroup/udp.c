@@ -7,7 +7,12 @@
 
 #include <config.h>
 #if STDC_HEADERS
+#include <string.h>
 #include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -626,7 +631,7 @@ struct udp_mib *udpstat;
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];
 
-  bzero ((char *) udpstat, sizeof (*udpstat));
+  memset ((char *) udpstat,(0), sizeof (*udpstat));
 
   if (! in)
     return;

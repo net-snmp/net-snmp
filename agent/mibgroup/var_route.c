@@ -927,7 +927,7 @@ struct radix_node *pt;
         /* check for space and malloc */
         if (rtsize >= rtallocate) {
           rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
-          bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
+          memset((char *) &rthead[rtallocate],(0), rtallocate * sizeof(RTENTRY *));
           
           rtallocate *= 2;
         }
@@ -980,7 +980,7 @@ static void Route_Scan_Reload()
       ERROR_MSG("malloc");
       return;
     }
-    bzero((char *)rthead, 100 * sizeof(RTENTRY *));
+    memset((char *)rthead,(0), 100 * sizeof(RTENTRY *));
     rtallocate = 100;
   }
 
@@ -1038,7 +1038,7 @@ static void Route_Scan_Reload()
          */
         if (rtsize >= rtallocate) {
           rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
-          bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
+          memset((char *) &rthead[rtallocate],(0), rtallocate * sizeof(RTENTRY *));
 
           rtallocate *= 2;
         }
@@ -1096,7 +1096,7 @@ static void Route_Scan_Reload()
 		ERROR_MSG("malloc");
 		return;
 	    }
-          bzero((char *)rthead, 100 * sizeof(RTENTRY *));
+          memset((char *)rthead,(0), 100 * sizeof(RTENTRY *));
           rtallocate = 100;
 	}
 
@@ -1144,7 +1144,7 @@ static void Route_Scan_Reload()
 		     */
 		    if (rtsize >= rtallocate) {
                       rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtallocate * sizeof(RTENTRY *));
-                      bzero((char *) &rthead[rtallocate], rtallocate * sizeof(RTENTRY *));
+                      memset((char *) &rthead[rtallocate],(0), rtallocate * sizeof(RTENTRY *));
 
 			rtallocate *= 2;
 		    }
@@ -1220,7 +1220,7 @@ static void Route_Scan_Reload __P((void))
 	    unsigned use;
 	    
 	    rt = &rtent;
-	    bzero ((char *) rt, sizeof(*rt));
+	    memset ((char *) rt,(0), sizeof(*rt));
 	    rt->rt_dev = rtent_name;
 
 	    /*
