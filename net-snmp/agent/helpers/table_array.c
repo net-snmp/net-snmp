@@ -24,23 +24,11 @@
 
 /*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_RESERVE1     0 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_RESERVE2     1 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_ACTION       2 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_COMMIT       3 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_FREE         4 
- */
-/*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_UNDO         5 
  */
 
@@ -540,7 +528,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             /*
              * * if data was found, make sure it has the column we want
              */
-/* #warning "xxx-rks: add suport for sparse tables" */
+/* xxx-rks: add suport for sparse tables */
 
             /*
              * build new oid
@@ -692,7 +680,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
 static void
 process_set_group(netsnmp_oid_array_header *o, void *c)
 {
-/* #warning "should we continue processing after an error??" */
+    /* xxx-rks: should we continue processing after an error?? */
     set_context    *context = (set_context *) c;
     netsnmp_array_group *ag = (netsnmp_array_group *) o;
 
