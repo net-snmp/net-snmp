@@ -542,18 +542,25 @@ void vacm_parse_simple(const char *token, char *confline) {
     sprintf(line,"%s %s %s", secname, addressname, community);
     DEBUGMSGTL((token,"passing: %s %s\n", "com2sec", line));
     vacm_parse_security("com2sec",line);
+
+    /* sec->group mapping */
+    /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
+    sprintf(line,"anonymousGroupName%03d v1 %s", num, secname);
+    DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+    vacm_parse_group("group",line);
+    sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
+    DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+    vacm_parse_group("group",line);
   } else {
     strcpy(secname, community);
+
+    /* sec->group mapping */
+    /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
+    sprintf(line,"anonymousGroupName%03d usm %s", num, secname);
+    DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
+    vacm_parse_group("group",line);
   }
 
-  /* sec->group mapping */
-  /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-  sprintf(line,"anonymousGroupName%03d v1 %s", num, secname);
-  DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
-  vacm_parse_group("group",line);
-  sprintf(line,"anonymousGroupName%03d v2c %s", num, secname);
-  DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
-  vacm_parse_group("group",line);
 
   /* view definition */
   /* view    anonymousViewNUM       included OID */
