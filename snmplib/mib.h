@@ -263,6 +263,7 @@ struct variable_list;
 void print_mib __P((FILE *));
 void print_ascii_dump __P((FILE *));
 int read_objid __P((char *, oid *, int *));
+void register_mib_handlers __P((void));
 void init_mib __P((void));
 void print_variable __P((oid *, int, struct variable_list *));
 void fprint_variable __P((FILE *, oid *, int, struct variable_list *));

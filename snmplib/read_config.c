@@ -1,40 +1,63 @@
 #include <config.h>
 
-#include <sys/types.h>
 #include <stdio.h>
-#if STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#else
+#include <ctype.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
 #endif
-#include <signal.h>
-#include <ctype.h>
-#include <errno.h>
-
-#include <sys/time.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <sys/types.h>
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <sys/socket.h>
-#if HAVE_NET_ROUTE_H
-#include <net/route.h>
+#include <netdb.h>
 #endif
-#if HAVE_NETINET_IN_PCB_H
-#include <netinet/in_pcb.h>
-#endif
-#if HAVE_INET_MIB2_H
-#include <inet/mib2.h>
+#include <errno.h>
+#ifdef STDC_HEADERS
+#include <stdarg.h>
+#else
+#include <varargs.h>
 #endif
 
-#include "system.h"
-#include "parse.h"
+
 #include "asn1.h"
 #include "mib.h"
+#include "parse.h"
+#include "system.h"
 #include "snmp_api.h"
 
 #include "read_config.h"
@@ -54,6 +77,7 @@ register_premib_handler(type, token, parser, releaser)
   ltmp = register_config_handler(type, token, parser, releaser);
   if (ltmp != NULL)
     ltmp->config_time = PREMIB_CONFIG;
+  return (ltmp);
 }
 
 struct config_line *
