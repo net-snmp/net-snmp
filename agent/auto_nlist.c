@@ -29,7 +29,7 @@ struct autonlist *nlists = 0;
 static void init_nlist (struct nlist *);
 
 long
-auto_nlist_value(char *string)
+auto_nlist_value(const char *string)
 {
   struct autonlist **ptr, *it=0;
   int cmp;
@@ -77,7 +77,7 @@ auto_nlist_value(char *string)
 }
 
 int
-auto_nlist(char *string,
+auto_nlist(const char *string,
 	   char *var,
 	   int size)
 {

@@ -88,7 +88,7 @@ SOFTWARE.
 static int
 agent_party_init(in_addr_t myaddr,
 		 u_short dest_port,
-		 char *view)
+		 const char *view)
 {
     in_addr_t addr;
     unsigned char *adp;

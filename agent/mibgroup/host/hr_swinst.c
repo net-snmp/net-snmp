@@ -61,7 +61,7 @@
 int header_hrswinst (struct variable *,oid *, int *, int, int *, WriteMethod **);
 int header_hrswInstEntry (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
-       char *HRSW_directory = NULL;
+const  char *HRSW_directory = NULL;
 
 extern struct timeval starttime;
 

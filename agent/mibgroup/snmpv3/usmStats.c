@@ -15,6 +15,7 @@
 #endif
 
 #include "mibincl.h"
+#include "util_funcs.h"
 #include "../mibII/sysORTable.h"
 #include "usmStats.h"
 

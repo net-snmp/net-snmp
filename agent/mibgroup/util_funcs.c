@@ -623,7 +623,7 @@ char *find_field(char *ptr,
   return(NULL);
 }
 
-int parse_miboid(char *buf,
+int parse_miboid(const char *buf,
 		 oid *oidout)
 {
   int i;

@@ -32,7 +32,7 @@
 #define TRUE 1
 #define FALSE 0
 
-static void error_exit(char *str,
+static void error_exit(const char *str,
 		       int linenumber,
 		       char *filename)
 {

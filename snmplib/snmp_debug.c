@@ -144,7 +144,7 @@ debugmsg(va_alist)
 }
 
 void
-debugmsg_oid(char *token, oid *theoid, int len) {
+debugmsg_oid(const char *token, oid *theoid, int len) {
   char c_oid[SPRINT_MAX_LEN];
   
   sprint_objid(c_oid, theoid, len);

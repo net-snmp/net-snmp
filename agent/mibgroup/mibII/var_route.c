@@ -1607,7 +1607,7 @@ init_var_route(void)
 const struct sockaddr *
 get_address (const void * _ap, int addresses, int wanted)
 {
-  const struct sockaddr *ap = (struct sockaddr *) _ap;
+  const struct sockaddr *ap = (const struct sockaddr *) _ap;
   int iindex;
   int bitmask;
 
@@ -1648,7 +1648,7 @@ get_address (const void * _ap, int addresses, int wanted)
 	    }
 	  while (length % sizeof (long) != 0)
 	    ++length;
-	  ap = (struct sockaddr *) ((char *) ap + length);
+	  ap = (const struct sockaddr *) ((const char *) ap + length);
 	}
     }
   return 0;
@@ -1664,9 +1664,9 @@ get_address (const void * _ap, int addresses, int wanted)
 const struct in_addr *
 get_in_address (const void * ap, int addresses, int wanted)
 {
-  struct sockaddr_in * a;
+  const struct sockaddr_in * a;
 
-  a = (struct sockaddr_in *) get_address (ap, addresses, wanted);
+  a =  (const struct sockaddr_in *)get_address (ap, addresses, wanted);
   if (a == NULL)
     return NULL;
 

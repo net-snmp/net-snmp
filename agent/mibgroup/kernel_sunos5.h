@@ -12,6 +12,8 @@
  *
  */
 
+#include <inet/mib2.h>
+
 #define	COPY_IPADDR(fp, from, tp, to) 					\
 	fp = from;							\
 	tp = to;							\
@@ -135,7 +137,7 @@ extern "C" {
 #endif
 #endif
 
-  int 	getKstat(char *statname, char *varname, void *value);
+  int 	getKstat(const char *statname, const char *varname, void *value);
   int	getMibstat(mibgroup_e grid, void *resp, int entrysize,
 		   req_e req_type, int (*comp)(void *, void *), void *arg);
   int	Get_everything(void *, void *);

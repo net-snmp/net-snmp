@@ -73,9 +73,9 @@ int   Query_Disk (int);
 int   Is_It_Writeable (void);
 int   What_Type_Disk (void);
 int   Is_It_Removeable (void);
-char *describe_disk (int);
+const char *describe_disk (int);
 int header_hrdisk (struct variable *,oid *, int *, int, int *, WriteMethod **);
-void Add_HR_Disk_entry (char *, char, char, char, char, char);
+void Add_HR_Disk_entry (const char *, char, char, char, char, char);
 
 int HRD_type_index;
 int HRD_index;
@@ -280,7 +280,7 @@ var_hrdisk(struct variable *vp,
 #define MAX_DISKS_PER_TYPE	7	/* SCSI disks - not a hard limit */
 #define	HRDISK_TYPE_SHIFT	3	/* log2 MAX_DISKS_PER_TYPE+1 */
 
-char *disk_device_strings[ MAX_NUMBER_DISK_TYPES ];
+const char *disk_device_strings[ MAX_NUMBER_DISK_TYPES ];
 char disk_device_id[   MAX_NUMBER_DISK_TYPES ];
 char disk_device_last[ MAX_NUMBER_DISK_TYPES ];
 char disk_device_full[ MAX_NUMBER_DISK_TYPES ];
@@ -290,7 +290,7 @@ int HR_number_disk_types = 0;
 
 
 void
-Add_HR_Disk_entry (char *dev_string,
+Add_HR_Disk_entry (const char *dev_string,
 		   char first_dev, 
 		   char last_dev,
 		   char full_dev,
@@ -432,7 +432,7 @@ Save_HR_Disk_General (void)
 #endif
 }
 
-char *
+const char *
 describe_disk(int idx)
 {
     if ( HRD_savedModel[0] == '\0' )

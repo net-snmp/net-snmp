@@ -44,11 +44,19 @@ struct enum_list {
 };
 
 /*
+ * A linked list of ranges
+ */
+struct range_list {
+    struct range_list *next;
+    int low, high;
+};
+
+/*
  * A linked list of nodes.
  */
 struct node {
     struct node *next;
-    char *label;                /* This node's (unique) textual name */
+    char *label;          	/* This node's (unique) textual name */
     u_long  subid;              /* This node's integer subidentifier */
     int     modid;              /* The module containing this node */
     char *parent;               /* The parent's textual name */
@@ -57,9 +65,10 @@ struct node {
     int access;
     int status;
     struct enum_list *enums;    /* (optional) list of enumerated integers */
+    struct range_list *ranges;
     char *hint;
     char *units;
-    char *description;          /* description (a quoted string) */
+    char *description;    	/* description (a quoted string) */
 };
 
 /*
@@ -70,7 +79,7 @@ struct tree {
     struct tree *next_peer;     /* Next node in list of peers */
     struct tree *next;          /* Next node in hashed list of names */
     struct tree *parent;
-    char *label;                /* This node's textual name */
+    char *label;          	/* This node's textual name */
     u_long subid;               /* This node's integer subidentifier */
     int     modid;              /* The module containing this node */
     int     number_modules;
@@ -80,11 +89,12 @@ struct tree {
     int access;			/* This nodes access */
     int status;			/* This nodes status */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
+    struct range_list *ranges;
     char *hint;
     char *units;
     void (*printer) (char *, struct variable_list *, struct enum_list *,
-                         char *, char *);	/* Value printing function */
-    char *description;          /* description (a quoted string) */
+                         const char *, const char *);	/* Value printing function */
+    char *description;    	/* description (a quoted string) */
     int  reported;              /* 1=report started in print_subtree... */
 };
 
@@ -95,6 +105,7 @@ struct module_import {
     char *label;                /* The descriptor being imported */
     int   modid;                /* The module imported from */
 };
+
 struct module {
     char *name;                 /* This module's name */
     char *file;                 /* The file containing the module */
@@ -106,11 +117,11 @@ struct module {
 };
 
 struct module_compatability {
-    char *old_module;
-    char *new_module;
-    char *tag;		/* NULL implies unconditional replacement,
+    const char *old_module;
+    const char *new_module;
+    const char *tag;		/* NULL implies unconditional replacement,
 				otherwise node identifier or prefix */
-    int   tag_len;	/* 0 implies exact match (or unconditional) */
+    int   tag_len;		/* 0 implies exact match (or unconditional) */
     struct module_compatability *next;	/* linked list */
 };
 
@@ -162,20 +173,20 @@ struct module_compatability {
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)
 
-struct tree *read_module (char *);
-struct tree *read_mib (char *);
+struct tree *read_module (const char *);
+struct tree *read_mib (const char *);
 struct tree *read_all_mibs (void);
 void init_mib_internals (void);
-int  add_mibdir (char *);
-void add_module_replacement ( char *, char *, char *, int);
-int  which_module (char *);
+int  add_mibdir (const char *);
+void add_module_replacement (const char *, const char *, const char *, int);
+int  which_module (const char *);
 char *module_name (int, char *);
 void print_subtree (FILE *, struct tree *, int);
 void print_ascii_dump_tree (FILE *, struct tree *, int);
-struct tree *find_tree_node (char *, int);
-char *get_tc_descriptor (int);
+struct tree *find_tree_node (const char *, int);
+const char *get_tc_descriptor (int);
  /* backwards compatability */
-struct tree *find_node (char *, struct tree*);
+struct tree *find_node (const char *, struct tree*);
 struct module *find_module (int);
 void adopt_orphans (void);
 void snmp_set_mib_warnings (int);
@@ -184,7 +195,7 @@ void snmp_set_save_descriptions (int);
 void snmp_set_mib_comment_term (int);
 void snmp_set_mib_parse_label (int);
 char *snmp_mib_toggle_options(char *options);
-void snmp_mib_toggle_options_usage(char *lead, FILE *outf);
+void snmp_mib_toggle_options_usage(const char *lead, FILE *outf);
 void print_mib(FILE *);
 void print_mib_tree(FILE *, struct tree *);
 void print_subtree_oid_report (FILE *, struct tree *, int);

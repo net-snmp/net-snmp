@@ -1,10 +1,5 @@
-<<<<<<< snmpd.conf.5.def
-.TH SNMPD.CONF 1 "21 Feb 1996"
-.ds )H U.C. Davis
-=======
-.TH SNMPD.CONF 1 "2 Dec 1998"
+.TH SNMPD.CONF 5 "2 Dec 1998"
 .ds )H U.C. Davis, ECE Dept.
->>>>>>> 1.18.6.2
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
@@ -121,6 +116,17 @@ unspecified, they default to a value of DEFMAXLOADAVE.
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
+.SH SMUX SUB-AGENTS
+To enable and SMUX based sub-agent, such as
+.IR gated ,
+use the
+.I smuxpeer
+configuration entry
+.IP "smuxpeer OID PASS"
+For 
+.I gated
+a sensible entry might be
+.IP .1.3.6.1.4.1.4.1.3 secret
 .SH ACCESS CONTROL
 snmpd supports the View-Based Access Control Model (vacm)
 as defined in RFC 2275.

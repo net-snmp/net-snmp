@@ -2054,7 +2054,7 @@ usm_get_user_from_list(char *engineID, int engineIDLen,
                        char *name, struct usmUser *puserList, int use_default)
 {
   struct usmUser *ptr;
-  char *noName = "";
+  char noName[] = "";
   if (name == NULL)
     name = noName;
   for (ptr = puserList; ptr != NULL; ptr = ptr->next) {
@@ -2358,7 +2358,7 @@ usm_create_user(void)
    USM document.
 */
 struct usmUser *
-usm_create_initial_user(char *name, oid *authProtocol, int authProtocolLen,
+usm_create_initial_user(const char *name, oid *authProtocol, int authProtocolLen,
                         oid *privProtocol, int privProtocolLen)
 {
   struct usmUser *newUser  = usm_create_user();
@@ -2404,14 +2404,14 @@ usm_create_initial_user(char *name, oid *authProtocol, int authProtocolLen,
 
 /* usm_save_users(): saves a list of users to the persistent cache */
 void
-usm_save_users(char *token, char *type)
+usm_save_users(const char *token, const char *type)
 {
   usm_save_users_from_list(userList, token, type);
 }
 
 void
-usm_save_users_from_list(struct usmUser *puserList, char *token,
-                              char *type)
+usm_save_users_from_list(struct usmUser *puserList, const char *token,
+                         const char *type)
 {
   struct usmUser *uptr;
   for (uptr = puserList; uptr != NULL; uptr = uptr->next) {
@@ -2422,7 +2422,7 @@ usm_save_users_from_list(struct usmUser *puserList, char *token,
 
 /* usm_save_user(): saves a user to the persistent cache */
 void
-usm_save_user(struct usmUser *user, char *token, char *type)
+usm_save_user(struct usmUser *user, const char *token, const char *type)
 {
   char line[4096];
   char *cptr;

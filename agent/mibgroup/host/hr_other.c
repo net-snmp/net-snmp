@@ -15,11 +15,11 @@
 
 void  Init_HR_CPU (void);
 int   Get_Next_HR_CPU (void);
-char *describe_cpu (int);
+const char *describe_cpu (int);
 
 void  Init_HR_CoProc (void);
 int   Get_Next_HR_CoProc (void);
-char *describe_coproc (int);
+const char *describe_coproc (int);
 
 void init_hr_other (void)
 {
@@ -54,7 +54,7 @@ Get_Next_HR_CPU (void)
         return -1;
 }
 
-char *
+const char *
 describe_cpu(int idx)
 {
 #ifdef _SC_CPU_VERSION
@@ -109,7 +109,7 @@ Get_Next_HR_CoProc (void)
 }
 
 
-char *
+const char *
 describe_coproc(int idx)
 {
     return("Guessing that there's a floating point co-processor");

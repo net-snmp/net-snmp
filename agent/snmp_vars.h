@@ -72,12 +72,13 @@ int subtree_old_size (void);
 void sort_tree (void);
 struct subtree *find_subtree (oid *, int, struct subtree *);
 struct subtree *find_subtree_next (oid *, int, struct subtree *);
-void register_mib (char *, struct variable *, int , int , oid *, int);
+void register_mib (const char *, struct variable *, int , int , oid *, int);
 void unregister_mib (oid *, int);
 struct subtree *unregister_mib_tree (oid *, int, struct subtree *);
 struct subtree *free_subtree (struct subtree *);
 void init_agent(void);
 int compare_tree (oid *, int, oid *, int);
+int in_a_view(oid *, int *, struct snmp_pdu *, int);
 
 /* REGISTER_MIB(): This macro simply loads register_mib with less pain:
 
@@ -98,13 +99,3 @@ int compare_tree (oid *, int, oid *, int);
 #define MATCH_SUCCEEDED	0
 
 #endif /* _SNMP_VARS_H_ */
-
-int subtree_old_size (void);
-void sort_tree (void);
-struct subtree *find_subtree (oid *, int, struct subtree *);
-struct subtree *find_subtree_next (oid *, int, struct subtree *);
-void register_mib (char *, struct variable *, int , int , oid *, int);
-void unregister_mib (oid *, int);
-struct subtree *unregister_mib_tree (oid *, int, struct subtree *);
-struct subtree *free_subtree (struct subtree *);
-int in_a_view(oid *, int *, struct snmp_pdu *, int);

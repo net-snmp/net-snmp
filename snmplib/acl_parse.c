@@ -49,9 +49,9 @@
 #define TRUE 1
 #define FALSE 0
 
-static void error_exit(char *str,
+static void error_exit(const char *str,
 		       int linenumber,
-		       char *filename)
+		       const char *filename)
 {
   char tmpbuf[SPRINT_MAX_LEN];
   snmp_errno = SNMPERR_BAD_ACL;

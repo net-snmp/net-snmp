@@ -33,35 +33,35 @@ struct config_line {
    char                  *help;
 };
 
-void read_config (char *, struct config_line *, int);
+void read_config (const char *, struct config_line *, int);
 void read_configs (void);
 void read_premib_configs (void);
 void read_config_files (int);
 void free_config (void);
-void config_perror (char *);
-void config_pwarn (char *);
+void config_perror (const char *);
+void config_pwarn (const char *);
 char *skip_white (char *);
 char *skip_not_white (char *);
 char *skip_token(char *);
 char *copy_word (char *, char *);
-void read_config_with_type (char *, char *);
-struct config_line *register_config_handler (char *, char *,
+void read_config_with_type (const char *, const char *);
+struct config_line *register_config_handler (const char *, const char *,
                                              void (*parser)(char *, char *),
                                              void (*releaser) (void),
-                                             char *);
-struct config_line *register_premib_handler (char *, char *,
+                                             const char *);
+struct config_line *register_premib_handler (const char *, const char *,
                                              void (*parser)(char *, char *),
                                              void (*releaser) (void),
-                                             char *);
-void unregister_config_handler (char *, char *);
-void read_config_print_usage(char *lead);
+                                             const char *);
+void unregister_config_handler (const char *, const char *);
+void read_config_print_usage(const char *lead);
 char *read_config_save_octet_string(char *saveto, u_char *str, int len);
 char *read_config_read_octet_string(char *readfrom, u_char **str, int *len);
 char *read_config_read_objid(char *readfrom, oid **objid, int *len);
 char *read_config_save_objid(char *saveto, oid *objid, int len);
 char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len);
 char *read_config_store_data(int type, char *storeto, void *dataptr, int *len);
-void  read_config_store(char *type, char *line);
-void  snmp_clean_persistent(char *type);
+void  read_config_store(const char *type, const char *line);
+void  snmp_clean_persistent(const char *type);
 
 #endif /* READ_CONFIG_H */

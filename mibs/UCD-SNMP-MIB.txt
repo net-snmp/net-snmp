@@ -130,7 +130,7 @@ Float ::= TEXTUAL-CONVENTION
 -- Process table checks
 --
 
-PrIndex ::= INTEGER (0..6535)
+PrIndex ::= INTEGER (0..65535)
 
 procTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF PrEntry
@@ -248,7 +248,7 @@ prErrFixCmd OBJECT-TYPE
 		set to 1."
 	::= { prEntry 103 }
 
-ExtIndex ::= INTEGER (0..6535)
+ExtIndex ::= INTEGER (0..65535)
 
 extTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF ExtEntry
@@ -484,7 +484,7 @@ memSwapErrorMsg OBJECT-TYPE
           "Error message describing the Error Flag condition"
      ::= { memory 101 } 
 
-DiskIndex ::= INTEGER (0..6535)
+DiskIndex ::= INTEGER (0..65535)
 
 diskTable	OBJECT-TYPE
 	SYNTAX SEQUENCE OF DskEntry

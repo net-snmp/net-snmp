@@ -412,7 +412,7 @@ oldengineID_conf(char *word, char *cptr)
  * Initialize SNMP Crypto API (SCAPI).
  */
 void
-init_snmpv3(char *type) {
+init_snmpv3(const char *type) {
   gettimeofday(&snmpv3starttime, NULL);
   setup_engineID(NULL, NULL);
   /* handle engineID setup before everything else which may depend on it */
@@ -489,7 +489,7 @@ init_snmpv3_post_config(void) {
  *	*type
  */
 void
-shutdown_snmpv3(char *type)
+shutdown_snmpv3(const char *type)
 {
   char line[SNMP_MAXBUF_SMALL];
   char c_engineID[SNMP_MAXBUF_SMALL];

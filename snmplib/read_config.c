@@ -76,11 +76,11 @@ int config_errors;
 struct config_files *config_files = NULL;
 
 struct config_line *
-register_premib_handler(char *type,
-			char *token,
+register_premib_handler(const char *type,
+			const char *token,
 			void (*parser) (char *, char *),
 			void (*releaser) (void),
-			char *help)
+			const char *help)
 {
   struct config_line *ltmp;
   ltmp = register_config_handler(type, token, parser, releaser, help);
@@ -102,11 +102,11 @@ register_premib_handler(char *type,
  *	Pointer to a new config line entry  -OR-  NULL on error.
  */
 struct config_line *
-register_config_handler(char *type,
-			char *token,
+register_config_handler(const char *type,
+			const char *token,
 			void (*parser) (char *, char *),
 			void (*releaser) (void),
-			char *help)
+			const char *help)
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
@@ -171,8 +171,8 @@ register_config_handler(char *type,
 }  /* end register_config_handler() */
 
 void
-unregister_config_handler(char *type, 
-			  char *token)
+unregister_config_handler(const char *type, 
+			  const char *token)
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp, *ltmp2;
@@ -227,10 +227,10 @@ void print_config_handlers (void)
 #endif
 
 int linecount;
-char *curfilename;
+const char *curfilename;
 
-void read_config_with_type(char *filename, 
-			   char *type)
+void read_config_with_type(const char *filename, 
+			   const char *type)
 {
   struct config_files *ctmp = config_files;
   for(;ctmp != NULL && strcmp(ctmp->fileHeader,type); ctmp = ctmp->next);
@@ -260,7 +260,7 @@ void read_config_with_type(char *filename,
  * For each match, check that <when> is the designated time for the
  * <line_handler> function to be executed before processing the line.
  */
-void read_config(char *filename,
+void read_config(const char *filename,
 		 struct config_line *line_handler,
 		 int when)
 {
@@ -433,13 +433,13 @@ read_config_files (int when)
   }
 }
 
-void read_config_print_usage(char *lead)
+void read_config_print_usage(const char *lead)
 {
   struct config_files *ctmp = config_files;
   struct config_line *ltmp;
 
   if (lead == NULL)
-    lead = (char*)"";
+    lead = "";
 
   for(ctmp = config_files; ctmp != NULL; ctmp = ctmp->next) {
     fprintf(stderr, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
@@ -468,7 +468,7 @@ void read_config_print_usage(char *lead)
  *
  */
 void
-read_config_store(char *type, char *line)
+read_config_store(const char *type, const char *line)
 {
 #ifdef PERSISTENT_DIRECTORY
   char file[512], *filep;
@@ -516,7 +516,7 @@ read_config_store(char *type, char *line)
  *	will be stored here.
  */
 void
-snmp_clean_persistent(char *type)
+snmp_clean_persistent(const char *type)
 {
   char file[512], fileold[512];
   struct stat statbuf;
@@ -534,13 +534,13 @@ snmp_clean_persistent(char *type)
 
 /* config_perror: prints a warning string associated with a file and
    line number of a .conf file and increments the error count. */
-void config_perror(char *string)
+void config_perror(const char *string)
 {
   config_pwarn(string);
   config_errors++;
 }
 
-void config_pwarn(char *string)
+void config_pwarn(const char *string)
 {
   fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
 }
