@@ -1,5 +1,7 @@
 #include <config.h>
 
+#include <stdio.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -139,6 +141,9 @@ void disk_parse_config(word,cptr)
 #endif
 #endif
   char tmpbuf[1024];
+#if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
+  int i;
+#endif
 
 #if HAVE_FSTAB_H || HAVE_GETMNTENT
   if (numdisks == MAXDISKS) {
