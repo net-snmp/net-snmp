@@ -107,7 +107,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "agent_read_config.h"
 #include "mib_module_config.h"
 #include "agent_registry.h"
-#include "agent_registry.h"
 #include "transform_oids.h"
 #include "callback.h"
 #include "snmp_alarm.h"
@@ -384,7 +383,7 @@ getStatPtr(
     size_t		savelen = 0;
     u_char              result_type;
     u_short             result_acl;
-    u_char        *search_return=NULL;
+    u_char        	*search_return=NULL;
     char		c_oid[SPRINT_MAX_LEN];
 
     found = FALSE;
