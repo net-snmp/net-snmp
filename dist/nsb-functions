@@ -7,6 +7,9 @@
 #
 # Utility vars
 #
+NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
+NSB_SRC_DIR=${NSB_SRC_DIR:=""}
+NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
 NSB_QUIET=0
 NSB_PROMPT=0
 NSB_CLEAN=1
@@ -222,6 +225,18 @@ nsb-zip()
    fi
 }
 
+nsb-upload()
+{
+   nsb-flow upload 
+   build_dir=$1
+   target=$2
+   dir=$PWD
+   cd $build_dir
+   /usr/bin/scp config.log configure-summary nsb-make-all.* \
+                 $target
+   cd $dir
+}
+
 nsb-make()
 {
    nsb-flow make $1
@@ -273,7 +288,8 @@ nsb-make()
          > nsb-make-$target-errs.$DATE
    if [ -s nsb-make-$target-errs.$DATE ]; then
       nsb-prompt "press enter to view errors"
-      cat nsb-make-$target-errs.$DATE >&2
+      grep ':' $nsb_make_OUTPUT >&2
+#      cat nsb-make-$target-allerrs.$DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
@@ -282,10 +298,23 @@ nsb-make()
    fi
 }
 
+nsb-default-paths()
+{
+   if [ -z "$NSB_SRC_DIR" ]; then
+      NSB_SRC_DIR=$HOME/src/net-snmp-$VERSION
+   fi
+   if [ -z "$NSB_BUILD_DIR" ]; then
+      NSB_BUILD_DIR=$HOME/build
+   fi
+   if [ -z "$NSB_INSTALL_DIR" ]; then
+      NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
+   fi
+}
+
 nsb-build()
 {
    if [ $# -lt 5 ]; then
-      nsb-abort "usage: $0 release src_dir build_directory dest_dir config_all_flag"
+      nsb-abort "usage: $0 release src_dir build_directory dest_dir config_all_flag ($@)"
    fi
 
    nsb_config_all=0
@@ -316,6 +345,9 @@ nsb-build()
    if [ $NSB_CLEAN -gt 0 ]; then
       nsb-info "Cleaning up..."
       if [ $NSB_CLEAN -eq 2 ];then
+        if [ "x$PWD" = "/" ]; then
+           nsb-abort "Not runninf rm -fR from /"
+        fi
         nsb-info "rm -fR * .[a-zA-Z]* 2>&1 > /dev/null"
         rm -fR * .[a-zA-Z]* 2>&1 > /dev/null
       else
