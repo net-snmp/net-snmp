@@ -156,8 +156,11 @@ agentx_build_oid(u_char *bufp, size_t *out_length, int inc,
 	 name_len -= 5;
     }
     
-    if ( *out_length < 4 + 4*name_len )
+    if (*out_length < 4 + 4*name_len) {
+	DEBUGMSGTL(("agentx_build_oid", "*out_length %d, need %d\n",
+		    *out_length, (4 + 4*name_len)));
         return NULL;
+    }
 
     *bufp = (u_char)name_len;	bufp++;
     *bufp = (u_char)prefix;	bufp++;
@@ -293,9 +296,10 @@ u_char*
 agentx_build_varbind(u_char *bufp, size_t *out_length,
 	struct variable_list *vp, int network_byte_order)
 {
-    if ( *out_length < 4 )
+    if (*out_length < 4) {
+	DEBUGMSGTL(("agentx_build_varbind", "error 1\n"));
     	return NULL;
-	
+    }
 
     DEBUGDUMPHEADER("send", "VarBind");
     DEBUGDUMPHEADER("send", "type");
@@ -318,88 +322,99 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
     DEBUGDUMPHEADER("send", "name");
     bufp = agentx_build_oid( bufp, out_length, 0,
 	    		vp->name, vp->name_length, network_byte_order);
-    if ( bufp == NULL )
+    if (bufp == NULL) {
+	DEBUGMSGTL(("agentx_build_varbind", "error 2\n"));
     	return NULL;
+    }
     DEBUGINDENTLESS();
 
     DEBUGDUMPHEADER("send", "value");
-    switch ( (short)vp->type ) {
+    switch ((short)vp->type) {
     
-  	case ASN_INTEGER:
-	case ASN_COUNTER:
-	case ASN_GAUGE:
-	case ASN_TIMETICKS:
-		if ( *out_length < 4 )
-		    return NULL;
-		agentx_build_int( bufp, *(vp->val.integer), network_byte_order);
-		bufp        += 4;
-		*out_length -= 4;
-		break;
+    case ASN_INTEGER:
+    case ASN_COUNTER:
+    case ASN_GAUGE:
+    case ASN_TIMETICKS:
+    case ASN_PRIV_EXCL_RANGE:
+    case ASN_PRIV_INCL_RANGE:
+	if (*out_length < 4) {
+	    return NULL;
+	}
+	agentx_build_int(bufp, *(vp->val.integer), network_byte_order);
+	bufp        += 4;
+	*out_length -= 4;
+	break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
-	case ASN_OPAQUE_FLOAT:
-		DEBUGDUMPHEADER("send", "Build Opaque Float");
-		DEBUGPRINTINDENT("dumpv_send");
-		DEBUGMSG(("dumpv_send", "  Float:\t%f\n", *(vp->val.floatVal)));
-		bufp = agentx_build_float( bufp, out_length,
-	    		*(vp->val.floatVal), network_byte_order);
-		DEBUGINDENTLESS();
-		break;
+    case ASN_OPAQUE_FLOAT:
+	DEBUGDUMPHEADER("send", "Build Opaque Float");
+	DEBUGPRINTINDENT("dumpv_send");
+	DEBUGMSG(("dumpv_send", "  Float:\t%f\n", *(vp->val.floatVal)));
+	bufp = agentx_build_float(bufp, out_length, *(vp->val.floatVal),
+				  network_byte_order);
+	DEBUGINDENTLESS();
+	break;
 
-	case ASN_OPAQUE_DOUBLE:
-		DEBUGDUMPHEADER("send", "Build Opaque Double");
-		DEBUGPRINTINDENT("dumpv_send");
-		DEBUGMSG(("dumpv_send", "  Double:\t%lf\n", *(vp->val.doubleVal)));
-		bufp = agentx_build_double( bufp, out_length,
-	    		*(vp->val.doubleVal), network_byte_order);
-		DEBUGINDENTLESS();
-		break;
+    case ASN_OPAQUE_DOUBLE:
+	DEBUGDUMPHEADER("send", "Build Opaque Double");
+	DEBUGPRINTINDENT("dumpv_send");
+	DEBUGMSG(("dumpv_send",  "  Double:\t%lf\n", *(vp->val.doubleVal)));
+	bufp = agentx_build_double(bufp, out_length, *(vp->val.doubleVal),
+				   network_byte_order);
+	DEBUGINDENTLESS();
+	break;
 
-	case ASN_OPAQUE_I64:
-	case ASN_OPAQUE_U64:
-	case ASN_OPAQUE_COUNTER64:
-		/* XXX - ToDo - encode as raw OPAQUE for now */
+    case ASN_OPAQUE_I64:
+    case ASN_OPAQUE_U64:
+    case ASN_OPAQUE_COUNTER64:
+	/* XXX - ToDo - encode as raw OPAQUE for now */
 #endif
 
-	case ASN_OCTET_STR:
-	case ASN_IPADDRESS:
-	case ASN_OPAQUE:
-		bufp = agentx_build_string( bufp, out_length,
-	    		vp->val.string, vp->val_len, network_byte_order);
-		break;
+    case ASN_OCTET_STR:
+    case ASN_IPADDRESS:
+    case ASN_OPAQUE:
+	bufp = agentx_build_string(bufp, out_length, vp->val.string,
+				   vp->val_len, network_byte_order);
+	break;
 
-	case ASN_OBJECT_ID:
-		bufp = agentx_build_oid( bufp, out_length, 0,
-	    		vp->val.objid, vp->val_len/4, network_byte_order);
-		break;
+    case ASN_OBJECT_ID:
+	bufp = agentx_build_oid(bufp, out_length, 0, vp->val.objid,
+				vp->val_len/4, network_byte_order);
+	break;
 
-	case ASN_COUNTER64:
-		if ( *out_length < 8 )
-		    return NULL;
-		if ( network_byte_order ) {
-		    DEBUGDUMPHEADER("send", "Build Counter64 (high, low)");
-		    agentx_build_int( bufp, vp->val.counter64->high, network_byte_order);
-		    agentx_build_int( bufp+4, vp->val.counter64->low,  network_byte_order);
-		    DEBUGINDENTLESS();
-		}
-		else {
-		    DEBUGDUMPHEADER("send", "Build Counter64 (low, high)");
-		    agentx_build_int( bufp, vp->val.counter64->low,  network_byte_order);
-		    agentx_build_int( bufp+4, vp->val.counter64->high, network_byte_order);
-		    DEBUGINDENTLESS();
-		}
-		bufp        += 8;
-		*out_length -= 8;
-		break;
+    case ASN_COUNTER64:
+	if (*out_length < 8) {
+	    return NULL;
+	}
+	if (network_byte_order) {
+	    DEBUGDUMPHEADER("send", "Build Counter64 (high, low)");
+	    agentx_build_int(bufp, vp->val.counter64->high,
+			     network_byte_order);
+	    agentx_build_int(bufp+4, vp->val.counter64->low,
+			     network_byte_order);
+	    DEBUGINDENTLESS();
+	} else {
+	    DEBUGDUMPHEADER("send", "Build Counter64 (low, high)");
+	    agentx_build_int(bufp, vp->val.counter64->low,
+			     network_byte_order);
+	    agentx_build_int(bufp+4, vp->val.counter64->high,
+			     network_byte_order);
+	    DEBUGINDENTLESS();
+	}
+	bufp        += 8;
+	*out_length -= 8;
+	break;
 
-   	case ASN_NULL:
-	case SNMP_NOSUCHOBJECT:
-	case SNMP_NOSUCHINSTANCE:
-	case SNMP_ENDOFMIBVIEW:
-		break;
+    case ASN_NULL:
+    case SNMP_NOSUCHOBJECT:
+    case SNMP_NOSUCHINSTANCE:
+    case SNMP_ENDOFMIBVIEW:
+	break;
 
-	default:
-		return NULL;
+    default:
+	DEBUGMSGTL(("agentx_build_varbind", "unknown type %d (0x%02x)\n",
+		    vp->type, vp->type));
+	return NULL;
     }
     DEBUGINDENTLESS();
     DEBUGINDENTLESS();
@@ -671,8 +686,10 @@ _agentx_build(struct snmp_session        *session,
 	    for (vp = pdu->variables; vp ; vp=vp->next_variable ) {
 		bufp = agentx_build_varbind( bufp, out_length, vp,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
-	    	if ( bufp == NULL )
-	    	    return -1;
+	    	if (bufp == NULL) {
+		  DEBUGMSGTL(("agentx_build", "error building varbind\n"));
+		  return -1;
+		}
 	    }
 	    DEBUGINDENTLESS();
 	    break;
@@ -721,8 +738,9 @@ _agentx_build(struct snmp_session        *session,
 		  (ignoring the 20-byte header)
 		  and return the full length of the packet */
      agentx_build_int( packet+16, (bufp-packet)-20,
-				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
      *out_length = bufp-packet;
+     DEBUGMSGTL(("agentx_build", "packet built okay\n"));
      return 0;
 }
 
@@ -998,81 +1016,80 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
 		  u_char *data_buf, size_t *data_len,
 		  u_int network_byte_order)
 {
-     u_char *bufp = data;
-     u_int   int_val;
-     struct counter64 *c64 = (struct counter64 *)data_buf;
+    u_char *bufp = data;
+    u_int   int_val;
+    struct counter64 *c64 = (struct counter64 *)data_buf;
      
-     DEBUGDUMPHEADER("recv", "VarBind:");
-     DEBUGDUMPHEADER("recv", "Byte Order");
-     *type = agentx_parse_short( bufp, network_byte_order );
-     DEBUGINDENTLESS();
-     bufp    += 4;
-     *length -= 4;
+    DEBUGDUMPHEADER("recv", "VarBind:");
+    DEBUGDUMPHEADER("recv", "Byte Order");
+    *type = agentx_parse_short(bufp, network_byte_order);
+    DEBUGINDENTLESS();
+    bufp    += 4;
+    *length -= 4;
      
-     bufp = agentx_parse_oid( bufp, length, NULL,
-     			oid_buf, oid_len, network_byte_order );
-     if ( bufp == NULL ) {
-            DEBUGINDENTLESS();
-	    return NULL;
+    bufp = agentx_parse_oid(bufp, length, NULL, oid_buf, oid_len,
+			    network_byte_order);
+     if (bufp == NULL) {
+	 DEBUGINDENTLESS();
+	 return NULL;
      }
 
-     switch ( *type ) {
-	case ASN_INTEGER:
-	case ASN_COUNTER:
-	case ASN_GAUGE:
-	case ASN_TIMETICKS:
-
-		int_val = agentx_parse_int( bufp, network_byte_order );
-		memmove( data_buf, &int_val, 4);
-		*data_len = 4;
-		bufp    += 4;
-		*length -= 4;
-		break;
+     switch (*type) {
+     case ASN_INTEGER:
+     case ASN_COUNTER:
+     case ASN_GAUGE:
+     case ASN_TIMETICKS:
+     case ASN_PRIV_EXCL_RANGE:
+     case ASN_PRIV_INCL_RANGE:
+	 int_val = agentx_parse_int(bufp, network_byte_order);
+	 memmove(data_buf, &int_val, 4);
+	 *data_len = 4;
+	 bufp     += 4;
+	 *length  -= 4;
+	 break;
 		
-	case ASN_OCTET_STR:
-	case ASN_IPADDRESS:
+     case ASN_OCTET_STR:
+     case ASN_IPADDRESS:
+	 bufp = agentx_parse_string(bufp, length, data_buf, data_len,
+				    network_byte_order);
+	 break;
 
-		bufp = agentx_parse_string( bufp, length,
-			data_buf, data_len, network_byte_order );
-		break;
+     case ASN_OPAQUE:
+	 bufp = agentx_parse_opaque(bufp, length, type, data_buf, data_len,
+				    network_byte_order);
+	 break;
+		
+     case ASN_OBJECT_ID:
+	 bufp = agentx_parse_oid(bufp, length, NULL, (oid *)data_buf, data_len,
+				 network_byte_order);
+	 *data_len *= 4;
+	 /* 'agentx_parse_oid()' returns the number of sub_ids */
+	 break;
+		
+     case ASN_COUNTER64:
+	 if (network_byte_order) {
+	     c64->high = agentx_parse_int(bufp,   network_byte_order);
+	     c64->low  = agentx_parse_int(bufp+4, network_byte_order);
+	 } else {
+	     c64->low  = agentx_parse_int(bufp,   network_byte_order);
+	     c64->high = agentx_parse_int(bufp+4, network_byte_order);
+	 }
+	 *data_len = 8;
+	 bufp     += 8;
+	 *length  -= 8;
+	 break;
+		
+     case ASN_NULL:
+     case SNMP_NOSUCHOBJECT:
+     case SNMP_NOSUCHINSTANCE:
+     case SNMP_ENDOFMIBVIEW:
+	 /*  No data associated with these types. */
+	 *data_len = 0;
+	 break;
 
-	case ASN_OPAQUE:
-
-		bufp = agentx_parse_opaque( bufp, length, type,
-			data_buf, data_len, network_byte_order );
-		break;
-		
-	case ASN_OBJECT_ID:
-		bufp = agentx_parse_oid( bufp, length, NULL,
-			(oid *)data_buf, data_len, network_byte_order );	
-		*data_len *= 4;
-			/* 'agentx_parse_oid()' returns the number of sub_ids */
-		break;
-		
-	case ASN_COUNTER64:
-		if ( network_byte_order ) {
-		    c64->high = agentx_parse_int( bufp,   network_byte_order );
-		    c64->low  = agentx_parse_int( bufp+4, network_byte_order );
-		}
-		else {
-		    c64->low  = agentx_parse_int( bufp,   network_byte_order );
-		    c64->high = agentx_parse_int( bufp+4, network_byte_order );
-		}
-		*data_len = 8;
-		bufp    += 8;
-		*length -= 8;
-		break;
-		
-	case ASN_NULL:
-	case SNMP_NOSUCHOBJECT:
-	case SNMP_NOSUCHINSTANCE:
-	case SNMP_ENDOFMIBVIEW:
-		/* No data associated with these types */
-		*data_len = 0;
-		break;
-	default:
-                DEBUGINDENTLESS();
-		return NULL;
+     default:
+	 DEBUGINDENTLESS();
+	 return NULL;
      }
      DEBUGINDENTLESS();
      return bufp;
