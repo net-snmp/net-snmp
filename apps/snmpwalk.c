@@ -78,6 +78,7 @@ SOFTWARE.
 #include "system.h"
 #include "default_store.h"
 #include "snmp_parse_args.h"
+#include "getopt.h"
 
 #define DS_WALK_INCLUDE_REQUESTED 1
 #define DS_WALK_PRINT_STATISTICS  2
