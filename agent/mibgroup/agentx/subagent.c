@@ -63,6 +63,12 @@ int handle_subagent_response(int op, struct snmp_session *session, int reqid,
 int handle_subagent_set_response(int op, struct snmp_session *session,
                                  int reqid, struct snmp_pdu *pdu, void *magic);
 
+typedef struct _net_snmpsubagent_magic_s {
+    int original_command;
+    struct snmp_session  *session;
+    struct variable_list *ovars;
+} ns_subagent_magic;
+
 struct agent_set_info {
     int			  transID;
     int			  mode;
@@ -172,6 +178,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     snmp_callback mycallback;
     struct snmp_pdu *internal_pdu = NULL;
     void *retmagic = NULL;
+    ns_subagent_magic *smagic = NULL;
 
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
       int period = ds_get_int(DS_APPLICATION_ID,DS_AGENT_AGENTX_PING_INTERVAL);
@@ -206,75 +213,101 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     pdu->version = AGENTX_VERSION_1;
     pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
 
-    switch(pdu->command) {
-        case AGENTX_MSG_GET:
-            DEBUGMSGTL(("agentx/subagent","  -> get\n"));
-            pdu->command = SNMP_MSG_GET;
-            mycallback = handle_subagent_response;
-            retmagic = session;
-            break;
-
-        case AGENTX_MSG_GETNEXT:
-            DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
-            pdu->command = SNMP_MSG_GETNEXT;
-            mycallback = handle_subagent_response;
-            retmagic = session;
-            break;
-
-        case AGENTX_MSG_GETBULK:
-            /* WWWXXX */
-            DEBUGMSGTL(("agentx/subagent","  -> getbulk\n"));
-            pdu->command = SNMP_MSG_GETBULK;
-            mycallback = handle_subagent_response;
-            retmagic = session;
-            break;
-            
-        case AGENTX_MSG_RESPONSE:
-            DEBUGMSGTL(("agentx/subagent","  -> response\n"));
-            return 1;
-
-        case AGENTX_MSG_TESTSET:
-            /* XXXWWW we have to map this twice to both RESERVE1 and RESERVE2 */
-            DEBUGMSGTL(("agentx/subagent","  -> testset\n"));
-            asi = save_set_vars( session, pdu );
-            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE1;
-            mycallback = handle_subagent_set_response;
-            retmagic = asi;
-            break;
-            
-        case AGENTX_MSG_COMMITSET:
-            DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
-            asi = restore_set_vars( session, pdu );
-            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_ACTION;
-            mycallback = handle_subagent_set_response;
-            retmagic = asi;
-            break;
-
-        case AGENTX_MSG_CLEANUPSET:
-            DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
-            asi = restore_set_vars( session, pdu );
-            if (asi->mode == AGENTX_MSG_TESTSET) {
-                asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_FREE;
-            } else {
-                asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_COMMIT;
-            }
-            mycallback = handle_subagent_set_response;
-            retmagic = asi;
-            break;
-
-        case AGENTX_MSG_UNDOSET:
-            DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
-            asi = restore_set_vars( session, pdu );
-            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;
-            mycallback = handle_subagent_set_response;
-            retmagic = asi;
-            break;
-
-        default:
-            DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n",
-                        pdu->command ));
-            return 0;
+    if (pdu->command == AGENTX_MSG_GET || pdu->command == AGENTX_MSG_GETNEXT ||
+	pdu->command == AGENTX_MSG_GETBULK) {
+	smagic = (ns_subagent_magic *)calloc(1, sizeof(ns_subagent_magic));
+	if (smagic == NULL) {
+	    DEBUGMSGTL(("agentx/subagent", "couldn't malloc() smagic\n"));
+	    return 1;
+	}
+	smagic->original_command = pdu->command;
+	smagic->session = session;
+	smagic->ovars = NULL;
+	retmagic = (void *)smagic;
     }
+
+    switch (pdu->command) {
+    case AGENTX_MSG_GET:
+	DEBUGMSGTL(("agentx/subagent","  -> get\n"));
+	pdu->command = SNMP_MSG_GET;
+	mycallback = handle_subagent_response;
+	break;
+
+    case AGENTX_MSG_GETNEXT:
+	DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
+	pdu->command = SNMP_MSG_GETNEXT;
+	    
+	/*  We have to save a copy of the original variable list here because
+	    if the master agent has requested scoping for some of the varbinds
+	    that information is stored there.  */
+
+	smagic->ovars = snmp_clone_varbind(pdu->variables);
+	DEBUGMSGTL(("agentx/subagent", "saved variables\n"));
+	mycallback = handle_subagent_response;
+	break;
+
+    case AGENTX_MSG_GETBULK:
+	/* WWWXXX */
+	DEBUGMSGTL(("agentx/subagent","  -> getbulk\n"));
+	pdu->command = SNMP_MSG_GETBULK;
+
+	/*  We have to save a copy of the original variable list here because
+	    if the master agent has requested scoping for some of the varbinds
+	    that information is stored there.  */
+
+	smagic->ovars = snmp_clone_varbind(pdu->variables);
+	DEBUGMSGTL(("agentx/subagent", "saved variables at %p\n", 
+		    smagic->ovars));
+	mycallback = handle_subagent_response;
+	break;
+            
+    case AGENTX_MSG_RESPONSE:
+	DEBUGMSGTL(("agentx/subagent","  -> response\n"));
+	return 1;
+
+    case AGENTX_MSG_TESTSET:
+	/* XXXWWW we have to map this twice to both RESERVE1 and RESERVE2 */
+	DEBUGMSGTL(("agentx/subagent","  -> testset\n"));
+	asi = save_set_vars(session, pdu);
+	asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE1;
+	mycallback = handle_subagent_set_response;
+	retmagic = asi;
+	break;
+            
+    case AGENTX_MSG_COMMITSET:
+	DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
+	asi = restore_set_vars( session, pdu );
+	asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_ACTION;
+	mycallback = handle_subagent_set_response;
+	retmagic = asi;
+	break;
+
+    case AGENTX_MSG_CLEANUPSET:
+	DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
+	asi = restore_set_vars(session, pdu);
+	if (asi->mode == AGENTX_MSG_TESTSET) {
+	    asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_FREE;
+	} else {
+	    asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_COMMIT;
+	}
+	mycallback = handle_subagent_set_response;
+	retmagic = asi;
+	break;
+
+    case AGENTX_MSG_UNDOSET:
+	DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
+	asi = restore_set_vars(session, pdu);
+	asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;
+	mycallback = handle_subagent_set_response;
+	retmagic = asi;
+	break;
+
+    default:
+	DEBUGMSGTL(("agentx/subagent","  -> unknown command %d (%02x)\n",
+		    pdu->command, pdu->command));
+	return 0;
+    }
+
     /* submit the pdu to the internal handler */
 
     /*  We have to clone the PDU here, because when we return from this
@@ -290,27 +323,71 @@ int
 handle_subagent_response(int op, struct snmp_session *session, int reqid,
                          struct snmp_pdu *pdu, void *magic) 
 {
-    struct snmp_session *retsess = (struct snmp_session *)magic;
+    ns_subagent_magic *smagic = (ns_subagent_magic *)magic;
+    struct variable_list *u = NULL, *v = NULL;
+    int rc = 0;
 
     if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
       return 1;
     }
 
     pdu = snmp_clone_pdu(pdu);
-    DEBUGMSGTL(("agentx/subagent","handling agentx subagent response....\n"));
+    DEBUGMSGTL(("agentx/subagent",
+		"handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)\n",
+		pdu->command, smagic->original_command));
 
     if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
         pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
-        pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT)
-        free_set_vars(retsess, pdu);
+        pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT) {
+	free_set_vars(smagic->session, pdu);
+    }
+
+    if (smagic->original_command == AGENTX_MSG_GETNEXT) {
+	DEBUGMSGTL(("agentx/subgaent", "do getNext scope processing %p %p\n",
+		    smagic->ovars, pdu->variables));
+	for (u = smagic->ovars, v = pdu->variables; u != NULL && v != NULL;
+	     u = u->next_variable, v = v->next_variable) {
+	    if (snmp_oid_compare(u->val.objid, u->val_len/sizeof(oid),
+				 nullOid, nullOidLen) != 0) {
+		/*  The master agent requested scoping for this variable.  */
+		DEBUGMSGTL(("agentx/subagent", "result "));
+		DEBUGMSGOID(("agentx/subagent", v->name, v->name_length));
+		DEBUGMSG(("agentx/subagent", " scope to "));
+		DEBUGMSGOID(("agentx/subagent",
+			     u->val.objid, u->val_len/sizeof(oid)));
+		DEBUGMSG(("agentx/subagent", " result %d\n", rc));
+
+		if (rc >= 0) {
+		    /*  The varbind is out of scope.  From RFC2741, p. 66: "If
+			the subagent cannot locate an appropriate variable,
+			v.name is set to the starting OID, and the VarBind is
+			set to `endOfMibView'".  */
+		    snmp_set_var_objid(v, u->name, u->name_length);
+		    snmp_set_var_typed_value(v, SNMP_ENDOFMIBVIEW, 0, 0);
+		    DEBUGMSGTL(("agentx/subagent",
+				"scope violation -- return endOfMibView\n"));
+		}
+	    } else {
+		DEBUGMSGTL(("agentx/subagent", "unscoped var\n"));
+	    }
+	}
+    }
     
+    /*  XXXJBPN: similar for GETBULK but the varbinds can get re-ordered I
+	think which makes it er more difficult.  */
+    
+    if (smagic->ovars != NULL) {
+	snmp_free_varbind(smagic->ovars);
+    }
+
     pdu->command = AGENTX_MSG_RESPONSE;
-    pdu->version = retsess->version;
+    pdu->version = smagic->session->version;
     
-    if (!snmp_send(retsess, pdu)) {
+    if (!snmp_send(smagic->session, pdu)) {
         snmp_free_pdu(pdu);
     }
     DEBUGMSGTL(("agentx/subagent","  FINISHED\n"));
+    free(smagic);
     return 1;
 }
 
