@@ -54,24 +54,28 @@ array_qsort(void **data, int first, int last, netsnmp_container_compare *f)
     do {
         while ( ((*f)(data[i], mid) < 0) && (i < last))
             ++i;
-        while ( ((*f)(data[j], mid) >= 0) && (j > first))
+        while ( ((*f)(mid, data[j]) < 0) && (j > first))
             --j;
 
-        if(i <= j) {
+        if(i < j) {
             tmp = data[i];
             data[i] = data[j];
             data[j] = tmp;
             ++i;
             --j;
         }
+        else if (i == j) {
+            ++i;
+            --j;
+            break;
+        }
     } while(i <= j);
 
-    if (first < j)
+    if (j > first)
         array_qsort(data, first, j, f);
     
     if (i < last)
         array_qsort(data, i, last, f);
-                 
 }
 
 static int
@@ -118,15 +122,22 @@ binary_search(const void *val, netsnmp_container *c, int exact)
             first = middle;
             ++first;
             len = len - half - 1;
-        } else
+        } else {
+            if(result == 0) {
+                first = middle;
+                break;
+            }
             len = half;
+        }
     }
 
     if (first >= t->count)
         return -1;
 
-    /* last compare wasn't against first, so get actual result */
-    result = c->compare(t->data[first], val);
+    if(first != middle) {
+        /* last compare wasn't against first, so get actual result */
+        result = c->compare(t->data[first], val);
+    }
 
     if(result == 0) {
         if (!exact) {
@@ -444,27 +455,18 @@ _ba_find_next(netsnmp_container *container, const void *data)
 static int
 _ba_insert(netsnmp_container *container, const void *data)
 {
-    if (container->next)
-        CONTAINER_INSERT(container->next, data);
-    
     return netsnmp_binary_array_insert(container, data);
 }
 
 static int
 _ba_remove(netsnmp_container *container, const void *data)
 {
-    if (container->next)
-        CONTAINER_REMOVE(container->next, data);
-    
     return netsnmp_binary_array_remove(container,data, NULL);
 }
 
 static int
 _ba_free(netsnmp_container *container)
 {
-    if (container->next)
-        CONTAINER_FREE(container->next);
-    
     netsnmp_binary_array_release(container);
     return 0;
 }
