@@ -290,6 +290,8 @@ dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h)
 dnl BSDi2 headers
 AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h ufs/ufs/dinode.h)
+dnl BSDi3 headers
+AC_CHECK_HEADERS(sys/stat.h sys/vnode.h ufs/ufs/quota.h ufs/ufs/inode.h)
 dnl irix headers
 AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h)
 dnl from smux stuff
