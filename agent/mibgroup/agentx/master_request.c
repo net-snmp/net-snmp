@@ -509,7 +509,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
 			   (u_char*)sub->end, sub->end_len*sizeof(oid));
     }
-    if ( sub->timeout > request->pdu->time ) {
+    if ( sub->timeout > (int)request->pdu->time ) {
 	request->pdu->time = sub->timeout;
 	request->pdu->flags |= UCD_MSG_FLAG_PDU_TIMEOUT;
     }
