@@ -261,10 +261,14 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         strcat(passthru->command,buf);
         DEBUGP1("pass-running:  %s\n",passthru->command);
         exec_command(passthru);
+        if (!strncasecmp(passthru->output,"not-writable",12)) {
+          return SNMP_ERR_NOTWRITABLE;
+        } else if (!strncasecmp(passthru->output,"wrong-type",10)) {
+          return SNMP_ERR_WRONGTYPE;
+        }
         return SNMP_ERR_NOERROR;
       }
     }
-    return SNMP_ERR_WRONGTYPE;
   }
 }
   
