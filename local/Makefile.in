@@ -16,5 +16,8 @@ INSTALL = @INSTALL@
 snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript snmpcheck.def > snmpcheck
 
+clean:
+	rm -f snmpcheck
+
 install:
 	@$(INSTALL) snmpcheck $(bindir) ; echo "install:  installed snmpcheck in $(bindir)"
