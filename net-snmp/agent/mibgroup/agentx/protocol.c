@@ -55,13 +55,13 @@ void
 agentx_build_int(u_char *bufp, u_int value, int network_byte_order)
 {
     if ( network_byte_order ) {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	value = ntohl( value );
 #endif
 	memmove( bufp, &value, 4);
     }
     else {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	memmove( bufp, &value, 4);
 #else
 	*bufp = (u_char)value & 0xff;	value >>=8;	bufp++;
@@ -77,13 +77,13 @@ agentx_build_short(u_char *bufp, int in_value, int network_byte_order)
 {
     u_short value = (u_short)in_value;
     if ( network_byte_order ) {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	value = ntohs( value );
 #endif
 	memmove( bufp, &value, 2);
     }
     else {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	memmove( bufp, &value, 2);
 #else
 	*bufp = (u_char)value & 0xff;	value >>=8;	bufp++;
@@ -497,12 +497,12 @@ agentx_parse_int(u_char *data, u_int network_byte_order)
     DEBUGDUMPSETUP("dump_recv", data, 4);
     if ( network_byte_order ) {
 	memmove( &value, data, 4);
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	value = ntohl( value );
 #endif
     }
     else {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	memmove( &value, data, 4);
 #else
 		/* The equivalent of the 'ntohl()' macro,
@@ -526,12 +526,12 @@ agentx_parse_short(u_char *data, u_int network_byte_order)
 
     if ( network_byte_order ) {
 	memmove( &value, data, 2);
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	value = ntohs( value );
 #endif
     }
     else {
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIGENDIAN
 	memmove( &value, data, 2);
 #else
 		/* The equivalent of the 'ntohs()' macro,
