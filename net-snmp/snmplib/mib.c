@@ -264,7 +264,7 @@ _sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
                        int allow_realloc, const u_char * cp, size_t line_len)
 {
     const u_char   *tp;
-    u_char         *cp2 = cp;
+    const u_char   *cp2 = cp;
     size_t          lenleft = line_len;
 
     /*
