@@ -557,6 +557,12 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     && snmp_strcat(buf, buf_len, out_len, allow_realloc,
                                    (const u_char *) units));
         }
+        if ((*out_len >= *buf_len) &&
+            !(allow_realloc && snmp_realloc(buf, buf_len))) {
+            return 0;
+        }
+        *(*buf + *out_len) = '\0';
+
         return 1;
     }
 
