@@ -103,7 +103,7 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
                 reginfo->handlerName));
     DEBUGMSGTL(("helper:debug", "    Context:     %s\n",
                 (NULL == reginfo->contextName)
-                ? "NULL" : reginfo->contextName);
+                ? "NULL" : reginfo->contextName));
     DEBUGMSGTL(("helper:debug", "    Base OID:    "));
     DEBUGMSGOID(("helper:debug", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:debug", "\n"));
