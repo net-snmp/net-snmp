@@ -32,6 +32,56 @@ else
   echo "no"
 fi
 
+dnl Checks for programs.
+AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PATH_PROG(PSPROG,ps)
+AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
+AC_CHECK_PROGS(SED,sed gsed)
+AC_PATH_PROG(UNAMEPROG,uname)
+AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
+
+AC_AIX
+
+dnl system check
+AC_CANONICAL_SYSTEM
+changequote(, )
+CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[-._].*//'`"
+changequote([, ])
+
+AC_MSG_CHECKING(for additional cpp flags)
+dnl gcc extra CPPFLAGS
+if test "x$GCC" = "xyes" -a "x$CPP" = "x$CC -E"; then
+  dnl extra cpp flags for gnu c compiler to allow .in file extensions.
+  EXTRACPPFLAGS="-x c"
+else
+  EXTRACPPFLAGS=""
+fi
+dnl Solaris extra cpp flags.
+if test "x$GCC" != "xyes"; then
+  case $target_os in
+    solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
+  esac
+fi
+
+AC_SUBST(EXTRACPPFLAGS)
+AC_MSG_RESULT($EXTRACPPFLAGS)
+
+dnl Set SNMPLIBPATH and SNMPPATH
+if test "x$prefix" = "xNONE"; then
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
+AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
+else
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
+AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
+fi
+
+
 dnl
 dnl Do hairy agent module processing.
 dnl
@@ -40,7 +90,13 @@ AC_MSG_CHECKING(for mib modules to use)
 
 mibdir="agent/mibgroup"
 module_list=""
-new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible $with_mib_modules"
+new_module_list="at interfaces snmp_mib tcp icmp ip system udp proc versioninfo pass disk loadave extensible acl_vars party_vars view_vars context_vars alarm event $with_mib_modules"
+
+case $target_os in
+  solaris*) new_module_list="$new_module_list kernel_sunos5" ;;
+  hpux*) new_module_list="$new_module_list hpux memory" ;;
+  bsdi*) new_module_list="$new_module_list memory" ;;
+esac
 
 dnl Create include file list for snmp_vars.h to use.
 if test ! -d agent; then
@@ -108,55 +164,6 @@ AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
 
 AC_MSG_RESULT(.)
-
-dnl Checks for programs.
-AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
-AC_PROG_CC
-AC_PROG_CPP
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
-AC_PROG_RANLIB
-AC_PATH_PROG(PSPROG,ps)
-AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
-AC_CHECK_PROGS(SED,sed gsed)
-AC_PATH_PROG(UNAMEPROG,uname)
-AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
-
-AC_AIX
-
-dnl system check
-AC_CANONICAL_SYSTEM
-changequote(, )
-CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[-._].*//'`"
-changequote([, ])
-
-AC_MSG_CHECKING(for additional cpp flags)
-dnl gcc extra CPPFLAGS
-if test "x$GCC" = "xyes" -a "x$CPP" = "x$CC -E"; then
-  dnl extra cpp flags for gnu c compiler to allow .in file extensions.
-  EXTRACPPFLAGS="-x c"
-else
-  EXTRACPPFLAGS=""
-fi
-dnl Solaris extra cpp flags.
-if test "x$GCC" != "xyes"; then
-  case $target_os in
-    solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
-  esac
-fi
-
-AC_SUBST(EXTRACPPFLAGS)
-AC_MSG_RESULT($EXTRACPPFLAGS)
-
-dnl Set SNMPLIBPATH and SNMPPATH
-if test "x$prefix" = "xNONE"; then
-AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
-AC_DEFINE_UNQUOTED(SNMPPATH,"$ac_default_prefix")
-else
-AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
-AC_DEFINE_UNQUOTED(SNMPPATH,"$prefix")
-fi
 
 dnl
 dnl Check for kernel location
