@@ -8,7 +8,7 @@ extern "C" {
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>

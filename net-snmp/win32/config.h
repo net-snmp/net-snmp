@@ -674,6 +674,12 @@
 
 
 
+/* Define if you have the <stdarg.h> header file.  */
+
+#define HAVE_STDARG_H 1
+
+
+
 /* Define if you have the <stdlib.h> header file.  */
 
 #define HAVE_STDLIB_H 1

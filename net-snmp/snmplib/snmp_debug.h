@@ -16,7 +16,7 @@ extern "C" {
 
 /* These functions should not be used, if at all possible.  Instead, use
    the macros below. */
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 void debugmsg(const char *token, const char *format, ...);
 void debugmsgtoken(const char *token, const char *format, ...);
 #else
@@ -192,7 +192,7 @@ int debug_is_token_registered(const char *token);
 void snmp_debug_init(void);
 
 /* provided for backwards compatability.  Don't use these functions. */
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 void DEBUGP (const char *, ...);
 #else
 void DEBUGP (va_alist);

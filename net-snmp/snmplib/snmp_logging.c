@@ -36,7 +36,7 @@
 # endif
 #endif
 
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -240,7 +240,7 @@ snmp_vlog (int priority, const char *format, va_list ap)
 
 
 int
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 snmp_log (int priority, const char *format, ...)
 #else
 snmp_log (int priority, va_alist)
@@ -249,7 +249,7 @@ snmp_log (int priority, va_alist)
 {
   va_list ap;
   int ret;
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
   va_start(ap, format);
 #else
   const char *format;

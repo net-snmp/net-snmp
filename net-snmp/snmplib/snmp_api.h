@@ -581,7 +581,7 @@ struct snmp_session *snmp_open_ex (struct snmp_session *,
 /* provided for backwards compatability.  Don't use these functions.
    See snmp_debug.h and snmp_debug.c instead.
 */
-#ifdef STDC_HEADERS
+#if HAVE_STDARG_H
 void DEBUGP (const char *, ...);
 #else
 void DEBUGP (va_alist);
