@@ -19,13 +19,18 @@ USER
 USER CLONEFROM-USER
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Co] [-Ca] [-Cx]
+[COMMON OPTIONS] [-Ca] [-Cx]
 .B passwd
-OLD-PASSPHRASE NEW-PASSPHRASE
+OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 .br
 .B snmpusm
-[COMMON OPTIONS] [-Co] [-Ca] [-Cx]
-.B changekey
+[COMMON OPTIONS] <-Ca | -Cx> -Ck
+.B passwd
+OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]
+.br
+.B snmpusm
+[COMMON OPTIONS] [-Ca] [-Cx]
+.B changekey [USER]
 
 .SH DESCRIPTION
 .B snmpusm
@@ -35,6 +40,18 @@ User-based Security Module (USM) table.  The user needs
 write access to the usmUserTable MIB table.  This tool can be
 used to create, delete, clone, and change the passphrase of users
 configured on a running SNMP agent.
+
+.SH OPTIONS
+.TP
+.BI -Ca
+Change the authentication key.
+.TP
+.BI -Cx
+Change the privacy key.
+.TP
+.BI -Ck
+Use old localized key instead of old passphrase.  When this option
+is used, either the -Ca or -Cx (but not both) option must also be used.
 
 .SH CREATING USERS
 .PP
@@ -110,20 +127,22 @@ user's old passphrase as well as the new one.
 This uses the command
 .IP
 .B snmpusm
-passwd OLD-PASSPHRASE NEW-PASSPHRASE
+[-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
 
 .PP
 After cloning a new user entry from the appropriate template,
 you should immediately change the new user's passphrase.
 
 .PP
-This command will only change the passphrase of the (SNMPv3) user
-issuing the command.  It is not possible to change the passphrases
-for other user entries, even given suitable write access.
+If USER is not specified, this command will change the passphrase
+of the (SNMPv3) user issuing the command.  If the -Ca or -Cx options
+are specified, then only the authentication or privacy keys are changed.  If
+these options are not specified, then both the authentication and privacy keys
+are changed.
 
 .IP
 .B snmpusm
-changekey
+[-Ca] [-Cx] changekey [USER]
 
 .PP
 This command changes the key in a perfect-forward-secrecy compliant
@@ -131,13 +150,29 @@ way through a diffie-helman exchange.  The remote agent must support
 the SNMP-USM-DH-OBJECTS-MIB for this command to work.  The resulting
 keys are printed to the console and may be then set in future command
 invocations using the --defAuthLocalizedKey and --defPrivLocalizedKey
-or in your snmp.conf file using the defAuthLocalizedKey and
+options or in your snmp.conf file using the defAuthLocalizedKey and
 defPrivLocalizedKey keywords.
 
 .PP
 Note that since these keys are randomly generated based on a
 diffie helman exchange, they are no longer derived from a more easily
 typed password.  They are, however, much more secure.
+
+.PP
+To change from a localized key back to a password, the following variant
+of the 
+.B passwd
+sub-command is used:
+
+.IP
+.B snmpusm
+<-Ca | -Cx> -Ck passwd OLD-LOCALIZED-KEY NEW-PASSPHRASE [USER]
+
+.PP
+Either the -Ca or the -Cx option must be specified.  The OLD-LOCALIZED-KEY
+parameter is the localized key that was printed out by the
+.B changekey
+sub-command.
 
 .SH EXAMPLES
 .PP
