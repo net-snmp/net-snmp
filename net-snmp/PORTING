@@ -76,5 +76,9 @@ existance).  I'd be far less happy to get patches ignoring the above
 request.  If you simple can't abide by this, please send the patches
 anyway, but it'll just take me longer to get them applied.
 
+Mail the patches to ucd-snmp-coders@ece.ucdavis.edu.  Please include
+what version of the ucd-snmp package it was applied to and state the
+arcitectures you have tested it on.
+
 Thanks a lot for the consideration,
 Wes
