@@ -11,18 +11,6 @@
 
 #undef SNMPLIBPATH
 
-/* mib pointer to the top of the extensible tree point this to the
- location in the tree your company/organization has been allocated.
- If you don't have an official one (like me), just make one up that
- doesn't overlap with other mibs you are using on the system */
-
-/* location of the extensible mib tree */
-#define EXTENSIBLEMIB 1,3,6,1,4,10
-/* location of the extensible mib tree */
-#define EXTENSIBLEDOTMIB 1.3.6.1.4.10
-/* count the above numbers */
-#define EXTENSIBLENUM 6
-
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
 
@@ -73,6 +61,17 @@
 #undef DODEBUG
 
 @BOTTOM@
+
+/* mib pointer to the top of the extensible tree.  This has been
+ assigned to UCDavis by the iana group.  Optionally, point this to the
+ location in the tree your company/organization has been allocated. */
+
+/* location of the extensible mib tree */
+#define EXTENSIBLEMIB 1,3,6,1,4,1,2021
+/* location of the extensible mib tree */
+#define EXTENSIBLEDOTMIB 1.3.6.1.4.1.2021
+/* count the above numbers */
+#define EXTENSIBLENUM 7
 
 /* If defined, the snmplib library will store contents of the
    DESCRIPTION field in the mib.txt file.  Since none of the

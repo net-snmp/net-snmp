@@ -2948,7 +2948,9 @@ MSG_CHECK=`echo "
 *** System Contact Information:
 
 	Describes who should be contacted about the host the agent is
-running on.  This information is available in the MIB-II tree.
+running on.  This information is available in the MIB-II tree.  This
+Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
+Configuration Files.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
@@ -2963,7 +2965,9 @@ echo $ac_n "
 *** System Contact Information:
 
 	Describes who should be contacted about the host the agent is
-running on.  This information is available in the MIB-II tree.
+running on.  This information is available in the MIB-II tree.  This
+Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
+Configuration Files.
 
 System Contact Information ($ME@$LOC): $ac_c"
 read tmpinput
@@ -3004,7 +3008,8 @@ MSG_CHECK=`echo "
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.
+available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
+\"syslocation\" Syntax In The Agent'S Configuration Files.
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
@@ -3019,7 +3024,8 @@ echo $ac_n "
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.
+available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
+\"syslocation\" Syntax In The Agent'S Configuration Files.
 
 System Location (UCDavis Electrical Engineering Departement): $ac_c"
 read tmpinput
@@ -3068,7 +3074,7 @@ MSG_CHECK=`echo "
 	Enter the default location for the snmpd agent to dump
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
-(Note: This value can be over-ridden using the command line)
+(Note: This value can be over-ridden using the command line options.)
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
@@ -3085,7 +3091,7 @@ echo $ac_n "
 	Enter the default location for the snmpd agent to dump
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
-(Note: This value can be over-ridden using the command line)
+(Note: This value can be over-ridden using the command line options.)
 
 Location to write logfile ($defaultlog): $ac_c"
 read tmpinput
@@ -3120,57 +3126,6 @@ EOF
 fi
 
 
-echo $ac_n "checking Default Extensible Mib location""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'ac_cv_user_prompt_EXTENSIBLEMIB'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  
-
-if test "x$defaults" = "xno"; then
-echo $ac_n "
-
-*** Default Extensible Mib Location:
-
-	You need to pick a MIB location that will be the top of the
-extensible portion of the agent.  This should be the ASN identity
-assigned to your institution.  
-
-	If you don't have one:, make one up or use the default below.  
-
-Default Extensible Mib location (.1.3.6.1.4.10): $ac_c"
-read tmpinput
-if test "$tmpinput" = "" -a ".1.3.6.1.4.10" != ""; then
-  tmpinput=".1.3.6.1.4.10"
-fi
-eval EXTENSIBLEMIB=\"$tmpinput\"
-else
-tmpinput=".1.3.6.1.4.10"
-eval EXTENSIBLEMIB=\"$tmpinput\"
-fi
-
-
-
-ac_cv_user_prompt_EXTENSIBLEDOTMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//'`
-ac_cv_user_prompt_EXTENSIBLEMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//;s/\./,/g'`
-echo $ac_n "setting Default Mib location...  $ac_c"
-
-cat >> confdefs.h <<EOF
-#define EXTENSIBLEMIB $ac_cv_user_prompt_EXTENSIBLEMIB
-EOF
-
-cat >> confdefs.h <<EOF
-#define EXTENSIBLEDOTMIB $ac_cv_user_prompt_EXTENSIBLEDOTMIB
-EOF
-
-EXTENSIBLECOUNT=`echo $ac_cv_user_prompt_EXTENSIBLEMIB | sed -e 's/\,/ /g' | wc -w`
-cat >> confdefs.h <<EOF
-#define EXTENSIBLENUM $EXTENSIBLECOUNT
-EOF
-
-
-fi
-
-echo "$ac_t""$ac_cv_user_prompt_EXTENSIBLEMIB" 1>&6 
 
 MSG_CHECK=`echo "
 

@@ -299,7 +299,9 @@ AC_PROMPT_USER(SYS_CONTACT,[
 *** System Contact Information:
 
 	Describes who should be contacted about the host the agent is
-running on.  This information is available in the MIB-II tree.
+running on.  This information is available in the MIB-II tree.  This
+Can Also Be Over-Ridden Using The \"syscontact\" Syntax In The Agent'S
+Configuration Files.
 
 System Contact Information],$ME@$LOC,1)
 
@@ -308,7 +310,8 @@ AC_PROMPT_USER(SYS_LOC,[
 *** System Location:
 
 	Describes the location of the system.  This information is
-available in the MIB-II tree.
+available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
+\"syslocation\" Syntax In The Agent'S Configuration Files.
 
 System Location],UCDavis Electrical Engineering Departement,1)
 
@@ -325,33 +328,9 @@ AC_PROMPT_USER(LOGFILE,[
 	Enter the default location for the snmpd agent to dump
 information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
-(Note: This value can be over-ridden using the command line)
+(Note: This value can be over-ridden using the command line options.)
 
 Location to write logfile],$defaultlog,1)
-
-AC_CACHE_CHECK(Default Extensible Mib location, ac_cv_user_prompt_EXTENSIBLEMIB,
-[
-AC_PROMPT_USER_NO_DEFINE(EXTENSIBLEMIB,[
-
-*** Default Extensible Mib Location:
-
-	You need to pick a MIB location that will be the top of the
-extensible portion of the agent.  This should be the ASN identity
-assigned to your institution.  
-
-	If you don't have one:, make one up or use the default below.  
-
-Default Extensible Mib location],.1.3.6.1.4.10)
-
-ac_cv_user_prompt_EXTENSIBLEDOTMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//'`
-ac_cv_user_prompt_EXTENSIBLEMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//;s/\./,/g'`
-echo $ac_n "setting Default Mib location...  $ac_c"
-
-AC_DEFINE_UNQUOTED(EXTENSIBLEMIB,$ac_cv_user_prompt_EXTENSIBLEMIB)
-AC_DEFINE_UNQUOTED(EXTENSIBLEDOTMIB,$ac_cv_user_prompt_EXTENSIBLEDOTMIB)
-EXTENSIBLECOUNT=`echo $ac_cv_user_prompt_EXTENSIBLEMIB | sed -e 's/\,/ /g' | wc -w`
-AC_DEFINE_UNQUOTED(EXTENSIBLENUM,$EXTENSIBLECOUNT)
-]) dnl
 
 AC_PROMPT_USER(GLOBALSECURITY,[
 
