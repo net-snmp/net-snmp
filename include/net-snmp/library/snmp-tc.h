@@ -11,8 +11,8 @@ extern          "C" {
 
     int
     netsnmp_dateandtime_set_buf_from_vars(u_char *buf, size_t *bufsize,
-                                          u_short y, u_char m, u_char d,
-                                          u_char h, u_char m, u_char s,
+                                          u_short y, u_char mon, u_char d,
+                                          u_char h, u_char min, u_char s,
                                           u_char deci_seconds,
                                           int utc_offset_direction,
                                           u_char utc_offset_hours,
