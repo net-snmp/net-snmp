@@ -26,18 +26,18 @@ SNMP::initMib();
 #
 # internal conversion tables
 #
-%typeToVar = qw(OctetStr string Objid objid Integer long_ret NetAddr objid 
-		Ipaddr string Counter long_ret Gauge long_ret Timeticks long_ret
-		UInteger long_ret Opaque string Counter64 c64);
+%typeToVar = qw(OCTETSTR string OBJECTID objid INTEGER long_ret NETADDR objid 
+		IPADDR string COUNTER long_ret GAUGE long_ret TICKS long_ret
+		UINTEGER long_ret OPAQUE string COUNTER64 c64);
 
-%typeToPtr = qw(OctetStr string Objid objid Integer &long_ret NetAddr objid 
-		Ipaddr string Counter &long_ret Gauge &long_ret 
-		Timeticks &long_ret UInteger &long_ret Opaque string 
-		Counter64 &c64);
+%typeToPtr = qw(OCTETSTR string OBJECTID objid INTEGER &long_ret NETADDR objid 
+		IPADDR string COUNTER &long_ret GAUGE &long_ret 
+		TICKS &long_ret UINTEGER &long_ret OPAQUE string 
+		COUNTER64 &c64);
 
-%typeToParser = qw(OctetStr string Objid objid Integer int NetAddr objid 
-		Ipaddr string Counter int Gauge int Timeticks int
-		UInteger unsigned_int Opaque string Counter64 unsigned_int64);
+%typeToParser = qw(OCTETSTR string OBJECTID objid INTEGER int NETADDR objid 
+		IPADDR string COUNTER int GAUGE int TICKS int
+		UINTEGER unsigned_int OPAQUE string COUNTER64 unsigned_int64);
 
 $varInits =
 "  /* variables we may use later */
@@ -69,11 +69,11 @@ $varInits =
       *var_len = strlen(string);
       return (unsigned char *) string;\n");
 
-%typeToASN = qw(OctetStr ASN_OCTET_STR Objid ASN_OBJECT_ID Integer ASN_INTEGER
-		NetAddr ASN_OBJECT_ID Ipaddr ASN_IPADDRESS Counter ASN_COUNTER
-		Gauge ASN_GAUGE Timeticks ASN_TIMETICKS
-		UInteger ASN_UINTEGER Opaque ASN_OPAQUE 
-		Counter64 ASN_COUNTER64);
+%typeToASN = qw(OCTETSTR ASN_OCTET_STR OBJECTID ASN_OBJECT_ID INTEGER ASN_INTEGER
+		NETADDR ASN_OBJECT_ID IPADDR ASN_IPADDRESS COUNTER ASN_COUNTER
+		GAUGE ASN_GAUGE TICKS ASN_TIMETICKS
+		UINTEGER ASN_UINTEGER OPAQUE ASN_OPAQUE 
+		COUNTER64 ASN_COUNTER64);
 
 %accessToUCD = qw(ReadOnly RONLY ReadWrite RWRITE 
 		  WriteOnly RWRITE Create RWRITE);
