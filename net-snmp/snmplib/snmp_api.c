@@ -4225,7 +4225,7 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
   struct snmp_pdu *pdu;
   struct request_list *rp, *orp = NULL;
   struct snmp_secmod_def *sptr;
-  int ret = 0;
+  int ret = 0, handled = 0;
   
   DEBUGMSGTL(("sess_process_packet", "session %p fd %d pkt %p length %d\n",
 	      sessp, transport->sock, packetptr, length));
@@ -4275,12 +4275,27 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
   if (isp->hook_post) {
     if (isp->hook_post(sp, pdu, ret) == 0) {
       DEBUGMSGTL(("sess_process_packet", "post-parse fail\n"));
-      snmp_free_pdu(pdu);
-      return -1;
+      ret = SNMPERR_ASN_PARSE_ERR;
     }
   }
 
   if (ret != SNMP_ERR_NOERROR) {
+    /*  Call USM to free any securityStateRef supplied with the message.  */
+    if (pdu->securityStateRef != NULL) {
+      sptr = find_sec_mod(pdu->securityModel);
+      if (sptr != NULL) {
+	if (sptr->pdu_free_state_ref != NULL) {
+	  (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
+	} else {
+	  snmp_log(LOG_ERR, "Security Model %d can't free state references\n",
+		   pdu->securityModel);
+	}
+      } else {
+	snmp_log(LOG_ERR, "Can't find security model to free ptr: %d\n",
+		 pdu->securityModel);
+      }
+      pdu->securityStateRef = NULL;
+    }
     snmp_free_pdu(pdu);
     return -1;
   }
@@ -4331,6 +4346,7 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
 	callback = sp->callback;
 	magic    = sp->callback_magic;
       }
+      handled = 1;
 
       /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);  ?* XX lock
 	 should be per session ! */
@@ -4399,8 +4415,9 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
   } else {
     if (sp->callback) {
       /* MTR snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION); */
+      handled = 1;
       sp->callback(SNMP_CALLBACK_OP_RECEIVED_MESSAGE,
-		   sp, pdu->reqid, pdu,sp->callback_magic);
+		   sp, pdu->reqid, pdu, sp->callback_magic);
       /* MTR snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION); */
     }	
   }
@@ -4420,6 +4437,11 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
 	       pdu->securityModel);
     }
     pdu->securityStateRef = NULL;
+  }
+
+  if (!handled) {
+    snmp_increment_statistic(STAT_SNMPUNKNOWNPDUHANDLERS);
+    DEBUGMSGTL(("sess_process_packet", "unhandled PDU\n"));
   }
 
   snmp_free_pdu(pdu);
