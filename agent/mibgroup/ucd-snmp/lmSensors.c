@@ -257,16 +257,16 @@ _sensor_load(clock_t t)
     const sensors_chip_name *chip;
     const sensors_feature_data *data;
     int             chip_nr = 0;
-    int             a = 0;
-    int             b = 0;
 
     int             i;
     for (i = 0; i < N_TYPES; i++)
         sensor_array[i].n = 0;
 
     while (chip = sensors_get_detected_chips(&chip_nr)) {
+	int             a = 0;
+	int             b = 0;
         while (data = sensors_get_all_features(*chip, &a, &b)) {
-            char           *label;
+            char           *label = NULL;
             double          val;
 
             if ((data->mode & SENSORS_MODE_R) &&
@@ -303,6 +303,10 @@ _sensor_load(clock_t t)
                             array->sensor[array->n].value));
                 array->n++;
             }
+	    if (label) {
+		free(label);
+		label = NULL;
+	    }
         }
     }
 
