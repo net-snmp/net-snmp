@@ -1,21 +1,9 @@
 NOTE NOTE NOTE: this module depends on a modified version of the
-DBD::AnyData module.  The DBD_AnyData.patch file should be applied to version
-0.5 of the DBD::AnyData module.  This patch won't be needed in the future when
-that modules supports the needed features of the patch.  This is
-planned for the future of the DBD::AnyData model, but will probably be
-done in a different way.  In other words, *don't* apply this patch to
-0.6 or higher of the DBD::AnyData model but instead convince the
-author of this module to update to the newer DBD::AnyData API instead.
-You'll probably never have to do this.
+DBD::AnyData module.  Do not get the original version from Jeff
+Zucker.  He and I are working together to resolve the extra features I
+need, but we haven't quite merged yet.  
 
 *** This is currently alpha level code!!! ***
-
-Jeff Zucker's original (unpatched) AnyData perl modules can be found
-at http://www.vpservices.com/jeff/programs/AnyData/ .  However, do not
-use the modules from this site as they won't work with the software in
-this directory.  (Use the download sites in step 1 below instead.)  It
-is a good source for documentation about the AnyData modules.
-  
 
 Install steps:
   0) INSTALL the DBI perl module (run: perl -MCPAN -e "install DBI")
@@ -47,6 +35,8 @@ To use it:
     ifconfig eth0
 
 
-
-
-
+[Jeff Zucker's original (unpatched) AnyData perl modules can be found
+ at http://www.vpservices.com/jeff/programs/AnyData/ .  However, do not
+ use the modules from this site as they won't work with the software in
+ this directory.  (Use the download sites in step 1 below instead.)  It
+ is a good source for documentation about the AnyData modules.]
