@@ -69,7 +69,7 @@ struct vacm_accessEntry {
 
 struct vacm_viewEntry {
     char	viewName[32];
-    oid		viewSubtree[32];
+    oid		viewSubtree[MAX_OID_LEN];
     int		viewSubtreeLen;
     u_char	viewMask[32];
     int		viewMaskLen;

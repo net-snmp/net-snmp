@@ -108,7 +108,7 @@ write_ucdDemoResetKeys(
   /* variables we may use later */
   static long long_ret;
   static unsigned char string[1500];
-  static oid objid[30];
+  static oid objid[MAX_OID_LEN];
   static struct counter64 c64;
   int size, bigsize=1000;
   unsigned char *engineID;
@@ -154,7 +154,7 @@ write_ucdDemoPublicString(
   /* variables we may use later */
   static long long_ret;
   static unsigned char string[1500];
-  static oid objid[30];
+  static oid objid[MAX_OID_LEN];
   static struct counter64 c64;
   int size, bigsize=1000;
 

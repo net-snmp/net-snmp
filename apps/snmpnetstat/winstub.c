@@ -125,7 +125,7 @@ getprotoent (void)
 	if (!p_fp) p_fp = fopen(p_fn, "r");
 
 	if (!p_fp) return 0;
-	while(fgets(&lbuf[0], sizeof(lbuf)-1, p_fp))
+	while(fgets(lbuf, sizeof(lbuf), p_fp))
 	{
 		linecnt++;
 		cp = lbuf;

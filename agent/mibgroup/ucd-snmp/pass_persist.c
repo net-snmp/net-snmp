@@ -154,11 +154,11 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
 					   WriteMethod **write_method)
 {
 
-  oid newname[30];
+  oid newname[MAX_OID_LEN];
   int i, j, rtest=0, newlen, last;
   static long long_ret;
-  static char buf[300], buf2[300];
-  static oid  objid[30];
+  static char buf[STRMAX], buf2[STRMAX];
+  static oid  objid[MAX_OID_LEN];
   struct extensible *persistpassthru;
   FILE *file;
 
@@ -205,7 +205,7 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
 
       /* valid call.  Exec and get output */
       if ((file = persist_pipes[i].fIn)) {
-        if (fgets(buf,STRMAX,file) == NULL) {
+        if (fgets(buf,sizeof(buf),file) == NULL) {
           *var_len = 0;
           close_persist_pipe(i);
           return(NULL);
@@ -224,8 +224,8 @@ unsigned char *var_extensible_pass_persist(struct variable *vp,
         /* set up return pointer for setable stuff */
         *write_method = setPassPersist;
 
-        if (newlen == 0 || fgets(buf,STRMAX,file) == NULL
-            || fgets(buf2,STRMAX,file) == NULL) {
+        if (newlen == 0 || fgets(buf,sizeof(buf),file) == NULL
+            || fgets(buf2,sizeof(buf2),file) == NULL) {
           *var_len = 0;
           close_persist_pipe(i);
           return(NULL);
@@ -298,11 +298,11 @@ setPassPersist(int action,
   int i, j, rtest, tmplen=1000, last;
   struct extensible *persistpassthru;
 
-  static char buf[300], buf2[300];
+  static char buf[STRMAX], buf2[STRMAX];
   static long tmp;
   static unsigned long utmp;
   static int itmp;
-  static oid objid[30];
+  static oid objid[MAX_OID_LEN];
 
   /* Make sure that our basic pipe structure is malloced */
   init_persist_pipes();
@@ -383,7 +383,7 @@ setPassPersist(int action,
         return SNMP_ERR_NOTWRITABLE;
       }
 
-      if (fgets(buf,STRMAX,persist_pipes[i].fIn) == NULL) {
+      if (fgets(buf,sizeof(buf),persist_pipes[i].fIn) == NULL) {
         close_persist_pipe(i);
         return SNMP_ERR_NOTWRITABLE;
       }
@@ -505,7 +505,7 @@ static int open_persist_pipe(int iindex, char *command)
       recurse = 0;
       return 0;
     }
-    if (fgets(buf,STRMAX-1,persist_pipes[iindex].fIn) == NULL) {
+    if (fgets(buf,sizeof(buf),persist_pipes[iindex].fIn) == NULL) {
       DEBUGMSGTL(("ucd-snmp/pass_persist", "open_persist_pipe: Error reading for PONG\n"));
       close_persist_pipe(iindex);
       recurse = 0;

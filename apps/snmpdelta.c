@@ -189,15 +189,15 @@ void sprint_descriptor(char *buffer,
 void processFileArgs(char *fileName)
 {
   FILE *fp;
-  char buf[257], *cp;
+  char buf[260], *cp;
   int blank, linenumber = 0;
 
   fp = fopen(fileName, "r");
   if (fp == NULL)
     return;
-  while (fgets(buf, 256, fp)){
+  while (fgets(buf, sizeof(buf), fp)){
     linenumber++;
-    if (strlen(buf) > 256){
+    if (strlen(buf) > (sizeof(buf)-2)){
       fprintf(stderr, "Line too long on line %d of %s\n",
 	      linenumber, fileName);
       exit(1);

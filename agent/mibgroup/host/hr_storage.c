@@ -527,7 +527,7 @@ linux_mem(int mem_type,
     if ((fp = fopen( "/proc/meminfo", "r")) == NULL )
 	return -1;
 
-    while ( fgets( buf, 100, fp ) != NULL ) {
+    while ( fgets( buf, sizeof(buf), fp ) != NULL ) {
 	if (( !strncmp( buf, "Mem:", 4 ) && mem_type == HRS_TYPE_MEM ) ||
 	    ( !strncmp( buf, "Swap:", 5 ) && mem_type == HRS_TYPE_SWAP )) {
 		sscanf( buf, "%*s %d %d", &size, &used );

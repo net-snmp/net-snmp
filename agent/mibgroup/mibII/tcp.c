@@ -803,7 +803,7 @@ linux_read_tcp_stat (struct tcp_mib *tcpstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (12 == sscanf (line, "Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 	&tcpstat->TcpRtoAlgorithm, &tcpstat->TcpRtoMin, &tcpstat->TcpRtoMax, 
@@ -936,7 +936,7 @@ void TCP_Scan_Init (void)
 
     pp = &inpcb_list;
     
-    while (line == fgets (line, 256, in))
+    while (line == fgets (line, sizeof(line), in))
       {
 	struct inpcb pcb, *nnew;
 	static int linux_states [12] = { 0, 4, 2, 3, 6, 9, 10, 0, 5, 8, 1, 7 };

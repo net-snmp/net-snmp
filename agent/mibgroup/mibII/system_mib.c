@@ -61,10 +61,11 @@ void system_parse_config_sysloc(char *token,
 {
   char tmpbuf[1024];
   
-  if (strlen(cptr) < 128) {
+  if (strlen(cptr) < sizeof(sysLocation)) {
     strcpy(sysLocation,cptr);
   } else {
-    sprintf(tmpbuf, "syslocation token too long (must be < 128):\n\t%s", cptr);
+    sprintf(tmpbuf, "syslocation token too long (must be < %d):\n\t%s",
+		 sizeof(sysLocation), cptr);
     config_perror(tmpbuf);
   }
 }
@@ -74,10 +75,11 @@ void system_parse_config_syscon(char *token,
 {
   char tmpbuf[1024];
 
-  if (strlen(cptr) < 128) {
+  if (strlen(cptr) < sizeof(sysContact)) {
     strcpy(sysContact,cptr);
   } else {
-    sprintf(tmpbuf, "syscontact token too long (must be < 128):\n\t%s", cptr);
+    sprintf(tmpbuf, "syscontact token too long (must be < %d):\n\t%s",
+                 sizeof(sysContact), cptr);
     config_perror(tmpbuf);
   }
 }
@@ -123,22 +125,22 @@ void init_system_mib(void)
   extmp.type = EXECPROC;
   extmp.next = NULL;
   exec_command(&extmp);
-  strncpy(version_descr,extmp.output, 128);
+  strncpy(version_descr,extmp.output, sizeof(version_descr));
   version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
 #endif
 
 #ifdef HAVE_GETHOSTNAME
-  gethostname(sysName,128);
+  gethostname(sysName,sizeof(sysName));
 #else
 #ifdef HAVE_UNAME
-  strncpy(sysName,utsName.nodename,128);
+  strncpy(sysName,utsName.nodename,sizeof(sysName));
 #else
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
   extmp.next = NULL;
   exec_command(&extmp);
-  strncpy(sysName,extmp.output, 128);
+  strncpy(sysName,extmp.output, sizeof(sysName));
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */

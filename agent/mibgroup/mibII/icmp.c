@@ -626,7 +626,7 @@ linux_read_icmp_stat (struct icmp_mib *icmpstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (26 == sscanf (line,
 "Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",

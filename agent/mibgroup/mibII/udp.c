@@ -576,7 +576,7 @@ static void UDP_Scan_Init(void)
 
     pp = &udp_inpcb_list;
     
-    while (line == fgets (line, 256, in))
+    while (line == fgets (line, sizeof(line), in))
       {
 	struct inpcb pcb, *nnew;
 	unsigned int state, lport;
@@ -653,7 +653,7 @@ linux_read_udp_stat (struct udp_mib *udpstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (4 == sscanf (line, "Udp: %lu %lu %lu %lu\n",
 			&udpstat->UdpInDatagrams, &udpstat->UdpNoPorts,

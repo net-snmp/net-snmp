@@ -396,7 +396,7 @@ snmp_party_parse(u_char *data,
 		 int *contextLength,
 		 int pass)
 {
-    int			 dstParty2Length = 64,
+    int			 dstParty2Length = MAX_OID_LEN,
    			 authMsgLen,
 			 authMsgInternalLen;
     int			 authDigestLen;
@@ -410,7 +410,7 @@ snmp_party_parse(u_char *data,
     u_char		*authMsg,
 			*digestStart = NULL,
 			*digestEnd   = NULL;
-    oid			 dstParty2[64];
+    oid			 dstParty2[MAX_OID_LEN];
 
     u_long		 authSrcTimeStamp, authDstTimeStamp;
 

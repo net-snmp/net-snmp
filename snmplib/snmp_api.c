@@ -2402,7 +2402,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, int *length) {
       case ASN_IPADDRESS:
       case ASN_OPAQUE:
       case ASN_NSAP:
-        if (vp->val_len < 32){
+        if (vp->val_len < sizeof(vp->buf)){
           vp->val.string = (u_char *)vp->buf;
           vp->usedBuf = TRUE;
         } else {
