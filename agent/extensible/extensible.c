@@ -34,7 +34,7 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
-#if HAVE_STATVFS_H
+#if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
 #if HAVE_SYS_FIXPOINT_H
@@ -320,7 +320,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
-#if defined(USEDISKMIB) && (HAVE_FSTAB_H || HAVE_STATVFS_H)
+#if defined(USEDISKMIB)
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -345,6 +345,9 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   static long long_ret;
   static char errmsg[300];
 
+#if HAVE_SYS_STATVFS_H
+  struct statvfs vfs;
+#else
 #if HAVE_FSTAB_H
   int file;
   union {
@@ -353,10 +356,8 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   } sb;
 #define filesys sb.iu_fs
 #endif
-#if HAVE_STATVFS_H
-  struct statvfs vfs;
 #endif
-
+  
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numdisks))
     return(NULL);
   disknum = newname[*length - 1] - 1;
@@ -374,6 +375,40 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = disks[disknum].minimumspace;
       return((u_char *) (&long_ret));
   }
+#if HAVE_SYS_STATVFS_H
+  if (statvfs (disks[disknum].path, &vfs) == -1) {
+    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
+    setPerrorstatus("statvfs dev/disk");
+    return NULL;
+  }
+  switch (vp->magic) {
+    case DISKTOTAL:
+      long_ret = vfs.f_blocks;
+      return((u_char *) (&long_ret));
+    case DISKAVAIL:
+      long_ret = vfs.f_bavail;
+      return((u_char *) (&long_ret));
+    case DISKUSED:
+      long_ret = vfs.f_blocks - vfs.f_bfree;
+      return((u_char *) (&long_ret));
+    case DISKPERCENT:
+      long_ret = (int) (vfs.f_bavail <= 0 ? 100 :
+                        ((double) (vfs.f_blocks - vfs.f_bavail) / (double) vfs.f_blocks) * 100);
+      return ((u_char *) (&long_ret));
+    case ERRORFLAG:
+      long_ret = (vfs.f_bavail < disks[disknum].minimumspace)
+        ? 1 : 0;
+      return((u_char *) (&long_ret));
+    case ERRORMSG:
+      if (vfs.f_bavail < disks[disknum].minimumspace) 
+        sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+                disks[disknum].minimumspace, vfs.f_bavail);
+      else
+        errmsg[0] = NULL;
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+  }
+#else
 #if HAVE_FSTAB_H
   /* read the disk information */
   if ((file = open(disks[disknum].device,0)) < 0) {
@@ -423,39 +458,6 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       return((u_char *) (errmsg));
   }
 #endif
-#if HAVE_STATVFS_H
-  if (statvfs (disks[disknum].device, &vfs) == -1) {
-    fprintf(stderr,"Couldn't open device %s\n",disks[disknum].device);
-    setPerrorstatus("statvfs dev/disk");
-    return NULL;
-  }
-  switch (vp->magic) {
-    case DISKTOTAL:
-      long_ret = vfs.f_blocks;
-      return((u_char *) (&long_ret));
-    case DISKAVAIL:
-      long_ret = vfs.f_bavail;
-      return((u_char *) (&long_ret));
-    case DISKUSED:
-      long_ret = vfs.f_blocks - vfs.f_bfree;
-      return((u_char *) (&long_ret));
-    case DISKPERCENT:
-      long_ret = (int) (vfs.f_bavail <= 0 ? 100 :
-                        ((double) (vfs.f_blocks - vfs.f_bavail) / (double) vfs.f_blocks) * 100);
-      return ((u_char *) (&long_ret));
-    case ERRORFLAG:
-      long_ret = (vfs.f_bavail < disks[disknum].minimumspace)
-        ? 1 : 0;
-      return((u_char *) (&long_ret));
-    case ERRORMSG:
-      if (vfs.f_bavail < disks[disknum].minimumspace) 
-        sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
-                disks[disknum].minimumspace, vfs.f_bavail);
-      else
-        errmsg[0] = NULL;
-      *var_len = strlen(errmsg);
-      return((u_char *) (errmsg));
-  }
 #endif
 }
 
