@@ -6363,11 +6363,11 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-if test "x$test ac_cv_prog_AUTOCONF" = "x"; then
+if test "x$ac_cv_prog_AUTOCONF" = "x"; then
 	AUTOCONF=":"
 	
 fi
-if test "x$test ac_cv_prog_AUTOHEADER" = "x"; then
+if test "x$ac_cv_prog_AUTOHEADER" = "x"; then
 	AUTOHEADER=":"
 	
 fi
