@@ -311,8 +311,9 @@ register_mib_context(const char *moduleName,
   struct register_parameters reg_parms;
   
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
-  if ( subtree == NULL )
+  if (subtree == NULL) {
     return MIB_REGISTRATION_FAILED;
+  }
   memset(subtree, 0, sizeof(struct subtree));
 
   DEBUGMSGTL(("register_mib", "registering \"%s\" at ", moduleName));
@@ -330,8 +331,12 @@ register_mib_context(const char *moduleName,
   subtree->end[ mibloclen-1 ]++;	/* XXX - or use 'variables' info ? */
   subtree->end_len = (u_char) mibloclen;
   memcpy(subtree->label, moduleName, strlen(moduleName)+1);
-  if ( var ) {
+  if (var) {
     subtree->variables = (struct variable *) malloc(varsize*numvars);
+    if (subtree->variables == NULL) {
+      free(subtree);
+      return MIB_REGISTRATION_FAILED;
+    }
     memcpy(subtree->variables, var, numvars*varsize);
     subtree->variables_len = numvars;
     subtree->variables_width = varsize;
@@ -341,6 +346,7 @@ register_mib_context(const char *moduleName,
   subtree->range_subid = range_subid;
   subtree->range_ubound = range_subid;
   subtree->session = ss;
+  subtree->flags = (u_char)flags;  /* used to identify instance oids */
   res = load_subtree(subtree);
 
 	/*
@@ -349,18 +355,37 @@ register_mib_context(const char *moduleName,
 	 *   for the rest of the range
 	 */
   if (( res == MIB_REGISTERED_OK ) && ( range_subid != 0 )) {
-    for ( i = mibloc[range_subid-1] +1 ; i < (int)range_ubound ; i++ ) {
+    for ( i = mibloc[range_subid-1] +1 ; i <= (int)range_ubound ; i++ ) {
 	sub2 = (struct subtree *) malloc(sizeof(struct subtree));
-	if ( sub2 == NULL ) {
-	    unregister_mib_context( mibloc, mibloclen, priority,
-				  range_subid, range_ubound, context);
+
+	if (sub2 == NULL) {
+	    unregister_mib_context(mibloc, mibloclen, priority,
+				   range_subid, range_ubound, context);
 	    return MIB_REGISTRATION_FAILED;
 	}
-	memcpy( sub2, subtree, sizeof(struct subtree));
+
+	memcpy(sub2, subtree, sizeof(struct subtree));
+
+	/*  Note: have to deep-copy sub2->variables, otherwise it will
+	    be free()d more than once.  This is kind of inefficient.  */
+	
+	if (subtree->variables != NULL) {
+	  sub2->variables = (struct variable *)malloc(varsize * numvars);
+	  if (sub2->variables == NULL) {
+	    free(sub2);
+	    unregister_mib_context(mibloc, mibloclen, priority,
+				   range_subid, range_ubound, context);
+	    return MIB_REGISTRATION_FAILED;
+	  }
+
+	  memcpy(sub2->variables, var, numvars * varsize);
+	}
+	
+	sub2->name[range_subid-1] = i;
 	sub2->start[range_subid-1] = i;
 	sub2->end[  range_subid-1] = i;		/* XXX - ???? */
 	res = load_subtree(sub2);
-	if ( res != MIB_REGISTERED_OK ) {
+	if (res != MIB_REGISTERED_OK) {
 	    unregister_mib_context( mibloc, mibloclen, priority,
 				  range_subid, range_ubound, context);
 	    return MIB_REGISTRATION_FAILED;
@@ -377,6 +402,7 @@ register_mib_context(const char *moduleName,
   reg_parms.range_subid  = range_subid;
   reg_parms.range_ubound = range_ubound;
   reg_parms.timeout = timeout;
+  reg_parms.flags = (u_char)flags;
 
   /*  Should this really be called if the registration hasn't actually 
       succeeded?  */
@@ -459,6 +485,94 @@ register_mib(const char *moduleName,
 				mibloc, mibloclen, DEFAULT_MIB_PRIORITY );
 }
 
+
+int 
+register_mib_table_row(const char *moduleName,
+                       struct variable *var,
+                       size_t varsize,
+                       size_t numvars,
+                       oid *mibloc,
+                       size_t mibloclen,
+                       int priority,
+                       int var_subid,
+                       struct snmp_session *ss,
+                       const char *context,
+                       int timeout,
+                       int flags)
+{
+  struct subtree *subtree;
+  struct register_parameters reg_parms;
+  int rc, x;
+  u_char *v;
+
+  for(x = 0; x < numvars; x++) {
+
+    /* 
+     * allocate a subtree for the mib registration
+     */
+    subtree = (struct subtree *) malloc(sizeof(struct subtree));
+    if (subtree == NULL) {
+      unregister_mib_context(mibloc, mibloclen, priority, 
+                             var_subid, numvars, context);
+      return MIB_REGISTRATION_FAILED;
+    }
+
+    /* 
+     * fill in subtree
+     */
+    memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
+    subtree->name[var_subid - 1] += x;
+    subtree->namelen = (u_char) mibloclen;
+
+    memcpy(subtree->start, mibloc, mibloclen*sizeof(oid));
+    subtree->start[var_subid - 1] += x;
+    subtree->start_len = (u_char) mibloclen;
+
+    memcpy(subtree->end, mibloc, mibloclen*sizeof(oid));
+    subtree->end[var_subid - 1] += x;
+    subtree->end[mibloclen - 1]++;
+    subtree->end_len = (u_char) mibloclen;
+
+    memcpy(subtree->label, moduleName, strlen(moduleName)+1);
+
+    if (var) {
+      v = (u_char *)var + (x*varsize);
+      subtree->variables = (struct variable *) malloc(varsize);
+      memcpy(subtree->variables, v, varsize);
+      subtree->variables_len = 1;
+      subtree->variables_width = varsize;
+    }
+
+    subtree->priority = priority;
+    subtree->timeout  = timeout;
+    subtree->range_subid = var_subid;
+    subtree->session = ss;
+    subtree->flags = (u_char)flags;
+
+    /*
+     * load the subtree
+     */
+    rc = load_subtree(subtree);
+    if ((rc != MIB_REGISTERED_OK)) {
+      unregister_mib_context(mibloc, mibloclen, priority, 
+                             var_subid, numvars, context);
+      return rc;
+    }
+  }
+
+  /*
+   * fill out registration parameters
+   */
+  reg_parms.name = mibloc;
+  reg_parms.namelen = mibloclen;
+  reg_parms.priority = priority;
+  reg_parms.flags = (u_char)flags;
+  reg_parms.range_subid  = var_subid;
+  reg_parms.range_ubound = (mibloc[var_subid-1] + numvars - 1);
+  reg_parms.timeout = timeout;
+  rc = snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, 1, &reg_parms);
+  return rc;
+}
 
 void
 unload_subtree( struct subtree *sub, struct subtree *prev)
@@ -597,11 +711,15 @@ struct subtree *
 free_subtree(struct subtree *st)
 {
   struct subtree *ret = NULL;
-  if ((snmp_oid_compare(st->name, st->namelen, st->start, st->start_len) == 0)
-       && (st->variables != NULL))
+
+  if (st->variables != NULL &&
+      snmp_oid_compare(st->name, st->namelen, st->start, st->start_len) == 0) {
     free(st->variables);
-  if (st->next != NULL)
+    st->variables = NULL;
+  }
+  if (st->next != NULL) {
     ret = st->next;
+  }
   free(st);
   return ret;
 }
