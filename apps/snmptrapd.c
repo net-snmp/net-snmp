@@ -619,6 +619,7 @@ void usage(void)
   -q        Quick print mib display\n\
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
   -p <port> Local port to listen from\n\
+  -T TCP|UDP Listen to traffic on the TCP or UDP transport.
   -P        Print to standard output\n\
   -F \"...\" Use custom format for logging to standard output\n\
   -u PIDFILE create PIDFILE with process id\n\
@@ -818,7 +819,7 @@ int main(int argc, char *argv[])
         case 'C':
             ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
             break;
-
+            
         case 'n':
             ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
             break;
