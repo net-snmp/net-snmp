@@ -54,7 +54,7 @@ typedef struct netsnmp_ipstats_s {
 
 
 # ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_IPSTATS_H */

@@ -71,7 +71,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPCIDRROUTETABLE_INTERFACE_H */

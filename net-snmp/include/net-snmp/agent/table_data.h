@@ -107,7 +107,7 @@ extern          "C" {
     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_DATA_HANDLER_H_ */

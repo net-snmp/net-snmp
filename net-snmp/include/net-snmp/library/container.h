@@ -491,7 +491,7 @@ extern "C" {
     
     
 #ifdef  __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_CONTAINER_H */

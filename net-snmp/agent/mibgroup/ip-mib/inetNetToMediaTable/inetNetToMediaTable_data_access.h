@@ -55,7 +55,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* INETNETTOMEDIATABLE_DATA_ACCESS_H */

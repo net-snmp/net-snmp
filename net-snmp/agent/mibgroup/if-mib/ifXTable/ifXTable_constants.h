@@ -141,7 +141,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IFXTABLE_OIDS_H */

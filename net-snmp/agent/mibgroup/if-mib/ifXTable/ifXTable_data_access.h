@@ -43,7 +43,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IFXTABLE_DATA_ACCESS_H */

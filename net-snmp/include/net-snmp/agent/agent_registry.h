@@ -198,7 +198,7 @@ int             netsnmp_register_mib(const char *, struct variable *,
 				     int);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* AGENT_REGISTRY_H */

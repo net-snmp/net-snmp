@@ -127,7 +127,7 @@ void netsnmp_access_arp_entry_free(netsnmp_arp_entry * entry);
 /**---------------------------------------------------------------------*/
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_ARP_H */

@@ -171,7 +171,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPCIDRROUTETABLE_OIDS_H */

@@ -10,7 +10,7 @@
 ##
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* $name.uc_H */
