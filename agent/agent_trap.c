@@ -97,16 +97,26 @@ static void send_v2_trap (struct snmp_session *, int, int, int);
 	 * Trap session handling
 	 *
 	 *******************/
+int add_trap_session( struct snmp_session *ss, int pdutype, int version )
+{
+    struct trap_sink *new_sink =
+      (struct trap_sink *) malloc (sizeof (*new_sink));
+    if ( new_sink == NULL )
+	return 0;
+
+    new_sink->sesp    = ss;
+    new_sink->pdutype = pdutype;
+    new_sink->version = version;
+    new_sink->next    = sinks;
+    sinks = new_sink;
+    return 1;
+}
 
 int create_trap_session (char *sink, 
 				char *com,
 				int version, int pdutype)
 {
-    struct snmp_session	 session;
-    struct trap_sink *new_sink =
-      (struct trap_sink *) malloc (sizeof (*new_sink));
-    if ( new_sink == NULL )
-	return 0;
+    struct snmp_session	 session, *sesp;
 
     memset (&session, 0, sizeof (struct snmp_session));
     session.peername = sink;
@@ -116,19 +126,14 @@ int create_trap_session (char *sink,
         session.community_len = strlen (com);
     }
     session.remote_port = SNMP_TRAP_PORT;
-    new_sink->sesp = snmp_open (&session);
+    sesp = snmp_open (&session);
 
-    if (new_sink->sesp) {
-	new_sink->pdutype = pdutype;
-	new_sink->version = version;
-	new_sink->next    = sinks;
-	sinks = new_sink;
-	return 1;
+    if (sesp) {
+	return( add_trap_session( sesp, pdutype, version ));
     }
 
     /* diagnose snmp_open errors with the input struct snmp_session pointer */
     snmp_sess_perror("snmpd: create_trap_session", &session);
-    free(new_sink);
     return 0;
 }
 
@@ -329,6 +334,7 @@ void send_trap_vars (int trap,
 	    template_pdu->variables = vars;
 
 	pdu = snmp_clone_pdu( template_pdu );
+	pdu->sessid = sink->sesp->sessid;	/* AgentX only ? */
 	if ( snmp_send( sink->sesp, pdu) == 0 ) {
             snmp_sess_perror ("snmpd: send_trap", sink->sesp);
 	    snmp_free_pdu( pdu );
