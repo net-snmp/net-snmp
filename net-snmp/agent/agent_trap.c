@@ -135,7 +135,7 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
         SNMPERR_SUCCESS) {
         /* something else wants to handle notification registrations */
         struct agent_add_trap_args args;
-        DEBUGMSGTL(("add_trap_session","adding callback trap sink\n"));
+        DEBUGMSGTL(("trap", "adding callback trap sink\n"));
         args.ss = ss;
         args.confirm = confirm;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
@@ -145,7 +145,7 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
         /* no other support exists, handle it ourselves. */
         struct trap_sink *new_sink;
     
-        DEBUGMSGTL(("add_trap_session","adding internal trap sink\n"));
+        DEBUGMSGTL(("trap", "adding internal trap sink\n"));
         new_sink = (struct trap_sink *) malloc (sizeof (*new_sink));
         if ( new_sink == NULL )
             return 0;
@@ -159,8 +159,10 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int confirm, int ver
     return 1;
 }
 
-int remove_trap_session( struct snmp_session *ss ) {
+int remove_trap_session( struct snmp_session *ss )
+{
     struct trap_sink *sp = sinks, *prev = 0;
+
     while (sp) {
         if (sp->sesp == ss) {
             if (prev) {
@@ -168,7 +170,13 @@ int remove_trap_session( struct snmp_session *ss ) {
             } else {
                 sinks = sp->next;
             }
-            free_trap_session(sp);
+	    /*  I don't believe you *really* want to close the session here;
+		it may still be in use for other purposes.  In particular this
+		is awkward for AgentX, since we want to call this function
+		from the session's callback.  Let's just free the trapsink
+		data structure.  [jbpn]  */
+            /*  free_trap_session(sp);  */
+	    free(sp);
             return 1;
         }
         prev = sp;
@@ -495,7 +503,7 @@ void send_trap_to_sess(struct snmp_session *sess,
     if (!sess || !template_pdu)
         return;
 
-    DEBUGMSGTL(("send_trap_to_sess","sending trap type=%d, version=%d\n",
+    DEBUGMSGTL(("trap", "sending trap type=%d, version=%d\n",
                 template_pdu->command, sess->version));
     
     if (sess->version == SNMP_VERSION_1 &&
