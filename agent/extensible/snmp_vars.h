@@ -11,7 +11,7 @@ u_char *var_extensible_proc();
 u_char *var_extensible_mem();
 u_char *var_extensible_errors();
 
-#ifdef PROCMIBNUM
+#ifdef USEPROCMIB
 /* the variable that stores the process watching mib info */
 struct variable2 extensible_proc_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
@@ -25,7 +25,7 @@ struct variable2 extensible_proc_variables[] = {
 };
 #endif
 
-#ifdef SHELLMIBNUM
+#ifdef USESHELLMIB
 /* the extensible commands variables */
 struct variable2 extensible_extensible_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
@@ -37,7 +37,7 @@ struct variable2 extensible_extensible_variables[] = {
 };
 #endif
 
-#ifdef LOCKDMIBNUM
+#ifdef USELOCKDMIB
 /* the lockd test variables */
 struct variable2 extensible_lockd_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_lockd_test, 1, {MIBINDEX}},
@@ -46,7 +46,7 @@ struct variable2 extensible_lockd_variables[] = {
 };
 #endif
 
-#ifdef MEMMIBNUM
+#ifdef USEMEMMIB
 struct variable2 extensible_mem_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_mem, 1, {ERRORNAME }},
@@ -64,7 +64,7 @@ struct variable2 extensible_mem_variables[] = {
 };
 #endif
 
-#if DISKMIBNUM && HAVE_FSTAB_H
+#if defined(USEDISKMIB) && HAVE_FSTAB_H
 struct variable2 extensible_disk_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
@@ -79,7 +79,7 @@ struct variable2 extensible_disk_variables[] = {
 };
 #endif
 
-#ifdef VERSIONMIBNUM
+#ifdef USEVERSIONMIB
 struct variable2 extensible_version_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
   {VERTAG, STRING, RONLY, var_extensible_version, 1, {VERTAG}},
@@ -92,7 +92,7 @@ struct variable2 extensible_version_variables[] = {
 };
 #endif
 
-#ifdef LOADAVEMIBNUM
+#ifdef USELOADAVEMIB
 struct variable2 extensible_loadave_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_loadave, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_loadave, 1, {ERRORNAME}},
@@ -103,7 +103,7 @@ struct variable2 extensible_loadave_variables[] = {
 };
 #endif
 
-#ifdef ERRORMIBNUM
+#ifdef USEERRORMIB
 struct variable2 extensible_error_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_extensible_errors, 1, {MIBINDEX}},
   {ERRORNAME, STRING, RONLY, var_extensible_errors, 1, {ERRORNAME}},
