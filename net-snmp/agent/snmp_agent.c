@@ -1345,17 +1345,34 @@ handle_var_list(struct agent_snmp_session  *asp)
     while (1) {
 	count++;
 	asp->index = count;
-	status = handle_one_var(asp, varbind_ptr);
 
-	if ( status != SNMP_ERR_NOERROR ) {
+	if (varbind_ptr->type == ASN_PRIV_INCL_RANGE) {
+	  DEBUGMSGTL(("snmp_agent", "inclusive range for "));
+	  DEBUGMSGOID(("snmp_agent", varbind_ptr->name, varbind_ptr->name_length));
+	  DEBUGMSG(("snmp_agent", " (exact %d)\n", asp->exact));
+	  asp->exact = 1;
+	  status = handle_one_var(asp, varbind_ptr);
+	  asp->exact = 0;
+	  if (status == SNMP_ERR_NOERROR) {
+	    DEBUGMSGTL(("snmp_agent", "exact get did the trick\n"));
+	  } else {
+	    status = handle_one_var(asp, varbind_ptr);
+	  }
+	} else {
+	  status = handle_one_var(asp, varbind_ptr);
+	}
+
+	if (status != SNMP_ERR_NOERROR) {
 	    return status;
 	}
 
-	if ( varbind_ptr == asp->end )
+	if (varbind_ptr == asp->end) {
 	     break;
+	}
 	varbind_ptr = varbind_ptr->next_variable;
-	if ( asp->mode == RESERVE1 )
+	if (asp->mode == RESERVE1) {
 	    snmp_vars_inc++;
+	}
    }
 
    return SNMP_ERR_NOERROR;

@@ -345,11 +345,10 @@ search_subtree_vars(struct subtree *tp,
 		    DEBUGMSG(("snmp_vars"," ...\n"));
 
 		    if (snmp_oid_compare(name, *namelen,
-					 tp->start, tp->start_len) < 0) {
+		                          tp->start, tp->start_len) == 0 && 
+			!exact && (tp->flags & FULLY_QUALIFIED_INSTANCE)) {
 			DEBUGMSGTL(("snmp_vars", "aieee!\n"));
-			/*  This probably arises for subagents.  */
-			memcpy(name, tp->start, tp->start_len*sizeof(oid));
-			*namelen = tp->start_len;
+			return NULL;
 		    }
 
 		gaga:
