@@ -1,7 +1,7 @@
 SNMPv2-CONF DEFINITIONS ::= BEGIN
 
-IMPORTS ObjectName, NotificationName, ObjectSyntax
-                                               FROM SNMPv2-SMI;
+-- IMPORTS ObjectName, NotificationName, ObjectSyntax
+--                                                FROM SNMPv2-SMI;
 
 -- definitions for conformance groups
 
