@@ -12,33 +12,36 @@
 @else@
 CC=gcc
 
+@if "$mfd_netsnmp_dir" ne ""@
+
+# Assuming we're linking against the Net-SNMP source tree and not an
+# installed package.
+
+# Note: to do this we REQUIRE gnu-make.
+
 NETSNMPDIR=$mfd_netsnmp_dir
+NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
 
-   #
-   # if a specific path was specified for net-snmp, use it. otherwise
-   # assume net-snmp-confg will be found in $PATH
-   #
-   ifneq ($(NETSNMPDIR),)
-      NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
+NETSNMPBASECFLAGS=`$(NETSNMPCONFIG) --base-cflags`
+NETSNMPINCLUDES=`$(NETSNMPCONFIG) --build-includes $(NETSNMPDIR)`
+# base flags after build/src include, in case it has /usr/local/include
+NETSNMPCFLAGS=$(NETSNMPINCLUDES) $(NETSNMPBASECFLAGS)
 
-      NETSNMPBASECFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
-      NETSNMPINCLUDES := $(shell $(NETSNMPCONFIG) --build-includes $(NETSNMPDIR))
-      # base flags after build/src include, in case it has /usr/local/include
-      NETSNMPCFLAGS := $(NETSNMPINCLUDES) $(NETSNMPBASECFLAGS)
+NETSNMPBASELIBS=`$(NETSNMPCONFIG) --base-agent-libs`
+NETSNMPEXTLIBS=`$(NETSNMPCONFIG) --external-agent-libs`
+NETSNMPLIBDIRS=`$(NETSNMPCONFIG) --build-lib-dirs $(NETSNMPDIR)`
+NETSNMPLIBDEPS=`$(NETSNMPCONFIG) --build-lib-deps $(NETSNMPDIR)`
+LIB_DEPS=$(NETSNMPLIBDEPS)
+LIBS=$(NETSNMPLIBDIRS) -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEXTLIBS)
 
-      NETSNMPBASELIBS := $(shell $(NETSNMPCONFIG) --base-agent-libs)
-      NETSNMPEXTLIBS := $(shell $(NETSNMPCONFIG) --external-agent-libs)
-      NETSNMPLIBDIRS := $(shell $(NETSNMPCONFIG) --build-lib-dirs $(NETSNMPDIR))
-      NETSNMPLIBDEPS := $(shell $(NETSNMPCONFIG) --build-lib-deps $(NETSNMPDIR))
-      LIB_DEPS += $(NETSNMPLIBDEPS)
-      LIBS += $(NETSNMPLIBDIRS)
-      LIBS += -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEXTLIBS)
-   else
-      NETSNMPCONFIG=/usr/local/bin/net-snmp-config
-      NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
-      NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
-      LIBS += $(NETSNMPLIBS)
-   endif
+@else@
+
+NETSNMPCONFIG=net-snmp-config
+NETSNMPCFLAGS=`$(NETSNMPCONFIG) --base-cflags`
+NETSNMPLIBS=`$(NETSNMPCONFIG) --agent-libs`
+LIBS=$(NETSNMPLIBS)
+
+@end@
 
 CFLAGS=-I. $(NETSNMPCFLAGS)
 
@@ -49,31 +52,32 @@ SRCS = ${name}.c \
 	${name}_data_get.c \
 	${name}_data_set.c
 
-OBJS = $(SRCS:.c=.o)
+OBJS =  ${name}.o \
+	${name}_subagent.o \
+	${name}_interface.o \
+	${name}_data_access.o \
+	${name}_data_get.o \
+	${name}_data_set.o
 
 TARGETS=${name}
 
 .SUFFIXES:
 .SUFFIXES: .c .o .deps
 
-# if ucd-snmp was compiled with openssl support
-#CRYPTO=-L/usr/local/ssl/lib -lcrypto
-
-
-# shared library flags (assumes gcc)
-DLFLAGS=-fPIC -shared
 
 all: $(TARGETS)
 
 $(TARGETS): $(LIB_DEPS)
-
-$(SRCS:.c=.deps): ${name}_Makefile
 
 ${name}: $(OBJS) ${name}_Makefile
 	$(CC) -o ${name} $(OBJS) $(LIBS)
 
 clean:
 	rm $(OBJS) $(TARGETS)
+
+@if "$mfd_netsnmp_dir" ne ""@
+
+$(SRCS:.c=.deps): ${name}_Makefile
 
 %.deps : %.c
 	@echo "Generating makefile $@ ..."
@@ -82,6 +86,7 @@ clean:
 	[ -s $@ ] || $(RM) $(RMFLAGS) $@
 
 include $(SRCS:.c=.deps)
+@end@
 
 @end@
 ########################################################################
