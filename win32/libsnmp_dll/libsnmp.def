@@ -365,7 +365,6 @@ EXPORTS
 	snmp_log_options
 	netsnmp_clear_callback_list
 	netsnmp_clear_tdomain_list
-	netsnmp_clear_container
 	clear_sec_mod
 	clear_snmp_enum
 	clear_callback
@@ -379,4 +378,10 @@ EXPORTS
 	tree_head               DATA
 	snmp_errno              DATA
 ;	NetSnmpVersionInfo      DATA
+	netsnmp_daemonize
+	snmp_log_options_usage
+	netsnmp_container_free_list
+	netsnmp_oid_stash_getnext_node
+	netsnmp_oid_stash_free
+	netsnmp_get_list_node
 
