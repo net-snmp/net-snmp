@@ -52,7 +52,7 @@
 extern          "C" {
 #endif
 
-#include "asn1.h"
+#include <net-snmp/library/asn1.h>
 
     typedef void   *oid_array;
 

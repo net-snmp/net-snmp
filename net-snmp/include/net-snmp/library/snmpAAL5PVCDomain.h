@@ -9,8 +9,8 @@
 
 #include <atm.h>
 
-#include "snmp_transport.h"
-#include "asn1.h"
+#include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/asn1.h>
 
 const oid ucdSnmpAal5PvcDomain[9];  /* = { UCDAVIS_MIB, 251, 3 }; */
 

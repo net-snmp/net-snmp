@@ -1,404 +1,387 @@
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-./bulk_to_next.lo: ../../include/net-snmp/net-snmp-config.h
-./bulk_to_next.lo: ../../include/net-snmp/system/linux.h
-./bulk_to_next.lo: ../../include/net-snmp/system/sysv.h
-./bulk_to_next.lo: ../../include/net-snmp/system/generic.h
-./bulk_to_next.lo: ../../include/net-snmp/machine/generic.h
-./bulk_to_next.lo: ./../mibgroup/mibincl.h 
-./bulk_to_next.lo: ../../include/net-snmp/asn1.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_api.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_impl.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_client.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/snmp_vars.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/agent_registry.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/snmp_agent.h
-./bulk_to_next.lo: ../../include/net-snmp/tools.h
-./bulk_to_next.lo: ../../include/net-snmp/data_list.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_impl.h
-./bulk_to_next.lo: ../../include/net-snmp/tools.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/agent_read_config.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/agent_handler.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/agent_registry.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/var_struct.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_debug.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_logging.h
-./bulk_to_next.lo: ../../include/net-snmp/snmp_alarm.h
-./bulk_to_next.lo: ../../include/net-snmp/read_config.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/agent_trap.h
-./bulk_to_next.lo: ../../include/net-snmp/callback.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/snmp_agent.h
-./bulk_to_next.lo: ../../include/net-snmp/agent/bulk_to_next.h
-./debug_handler.lo: ../../include/net-snmp/net-snmp-config.h
-./debug_handler.lo: ../../include/net-snmp/system/linux.h
-./debug_handler.lo: ../../include/net-snmp/system/sysv.h
-./debug_handler.lo: ../../include/net-snmp/system/generic.h
-./debug_handler.lo: ../../include/net-snmp/machine/generic.h
-./debug_handler.lo: ./../mibgroup/mibincl.h 
-./debug_handler.lo: ../../include/net-snmp/asn1.h
-./debug_handler.lo: ../../include/net-snmp/snmp_api.h
-./debug_handler.lo: ../../include/net-snmp/snmp_impl.h
-./debug_handler.lo: ../../include/net-snmp/snmp_client.h
-./debug_handler.lo: ../../include/net-snmp/agent/snmp_vars.h
-./debug_handler.lo: ../../include/net-snmp/agent/agent_registry.h
-./debug_handler.lo: ../../include/net-snmp/agent/snmp_agent.h
-./debug_handler.lo: ../../include/net-snmp/tools.h
-./debug_handler.lo: ../../include/net-snmp/data_list.h
-./debug_handler.lo: ../../include/net-snmp/snmp_impl.h
-./debug_handler.lo: ../../include/net-snmp/tools.h
-./debug_handler.lo: ../../include/net-snmp/agent/agent_read_config.h
-./debug_handler.lo: ../../include/net-snmp/agent/agent_handler.h
-./debug_handler.lo: ../../include/net-snmp/agent/agent_registry.h
-./debug_handler.lo: ../../include/net-snmp/agent/var_struct.h
-./debug_handler.lo: ../../include/net-snmp/snmp.h
-./debug_handler.lo: ../../include/net-snmp/mib.h
-./debug_handler.lo: ../../include/net-snmp/snmp_debug.h
-./debug_handler.lo: ../../include/net-snmp/snmp_logging.h
-./debug_handler.lo: ../../include/net-snmp/snmp_alarm.h
-./debug_handler.lo: ../../include/net-snmp/read_config.h
-./debug_handler.lo: ../../include/net-snmp/agent/agent_trap.h
-./debug_handler.lo: ../../include/net-snmp/callback.h
-./debug_handler.lo: ../../include/net-snmp/agent/snmp_agent.h
-./debug_handler.lo: ../../include/net-snmp/agent/debug_handler.h
-./instance.lo: ../../include/net-snmp/net-snmp-config.h
-./instance.lo: ../../include/net-snmp/system/linux.h
-./instance.lo: ../../include/net-snmp/system/sysv.h
-./instance.lo: ../../include/net-snmp/system/generic.h
-./instance.lo: ../../include/net-snmp/machine/generic.h 
-./instance.lo: ./../mibgroup/mibincl.h 
-./instance.lo: ../../include/net-snmp/asn1.h
-./instance.lo: ../../include/net-snmp/snmp_api.h
-./instance.lo: ../../include/net-snmp/snmp_impl.h
-./instance.lo: ../../include/net-snmp/snmp_client.h
-./instance.lo: ../../include/net-snmp/agent/snmp_vars.h
-./instance.lo: ../../include/net-snmp/agent/agent_registry.h
-./instance.lo: ../../include/net-snmp/agent/snmp_agent.h
-./instance.lo: ../../include/net-snmp/tools.h
-./instance.lo: ../../include/net-snmp/data_list.h
-./instance.lo: ../../include/net-snmp/snmp_impl.h
-./instance.lo: ../../include/net-snmp/tools.h
-./instance.lo: ../../include/net-snmp/agent/agent_read_config.h
-./instance.lo: ../../include/net-snmp/agent/agent_handler.h
-./instance.lo: ../../include/net-snmp/agent/agent_registry.h
-./instance.lo: ../../include/net-snmp/agent/var_struct.h
-./instance.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./instance.lo: ../../include/net-snmp/snmp_debug.h
-./instance.lo: ../../include/net-snmp/snmp_logging.h 
-./instance.lo:  ../../include/net-snmp/snmp_alarm.h
-./instance.lo: ../../include/net-snmp/read_config.h
-./instance.lo: ../../include/net-snmp/agent/agent_trap.h
-./instance.lo: ../../include/net-snmp/callback.h
-./instance.lo: ../../include/net-snmp/agent/snmp_agent.h
-./instance.lo: ../../include/net-snmp/agent/instance.h
-./instance.lo: ../../include/net-snmp/agent/serialize.h
-./instance.lo: ../../include/net-snmp/agent/read_only.h
-./multiplexer.lo: ../../include/net-snmp/net-snmp-config.h
-./multiplexer.lo: ../../include/net-snmp/system/linux.h
-./multiplexer.lo: ../../include/net-snmp/system/sysv.h
-./multiplexer.lo: ../../include/net-snmp/system/generic.h
-./multiplexer.lo: ../../include/net-snmp/machine/generic.h
-./multiplexer.lo:  ./../mibgroup/mibincl.h
-./multiplexer.lo: ../../include/net-snmp/asn1.h
-./multiplexer.lo: ../../include/net-snmp/snmp_api.h
-./multiplexer.lo: ../../include/net-snmp/snmp_impl.h
-./multiplexer.lo: ../../include/net-snmp/snmp_client.h
-./multiplexer.lo: ../../include/net-snmp/agent/snmp_vars.h
-./multiplexer.lo: ../../include/net-snmp/agent/agent_registry.h
-./multiplexer.lo: ../../include/net-snmp/agent/snmp_agent.h
-./multiplexer.lo: ../../include/net-snmp/tools.h
-./multiplexer.lo: ../../include/net-snmp/data_list.h
-./multiplexer.lo: ../../include/net-snmp/snmp_impl.h
-./multiplexer.lo: ../../include/net-snmp/tools.h
-./multiplexer.lo: ../../include/net-snmp/agent/agent_read_config.h
-./multiplexer.lo: ../../include/net-snmp/agent/agent_handler.h
-./multiplexer.lo: ../../include/net-snmp/agent/agent_registry.h
-./multiplexer.lo: ../../include/net-snmp/agent/var_struct.h
-./multiplexer.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./multiplexer.lo: ../../include/net-snmp/snmp_debug.h
-./multiplexer.lo: ../../include/net-snmp/snmp_logging.h 
-./multiplexer.lo: ../../include/net-snmp/snmp_alarm.h
-./multiplexer.lo: ../../include/net-snmp/read_config.h
-./multiplexer.lo: ../../include/net-snmp/agent/agent_trap.h
-./multiplexer.lo: ../../include/net-snmp/callback.h
-./multiplexer.lo: ../../include/net-snmp/agent/snmp_agent.h
-./multiplexer.lo: ../../include/net-snmp/agent/multiplexer.h
-./null.lo: ../../include/net-snmp/net-snmp-config.h
-./null.lo: ../../include/net-snmp/system/linux.h
-./null.lo: ../../include/net-snmp/system/sysv.h
-./null.lo: ../../include/net-snmp/system/generic.h
-./null.lo: ../../include/net-snmp/machine/generic.h 
-./null.lo: ./../mibgroup/mibincl.h 
-./null.lo:  ../../include/net-snmp/asn1.h
-./null.lo: ../../include/net-snmp/snmp_api.h
-./null.lo: ../../include/net-snmp/snmp_impl.h
-./null.lo: ../../include/net-snmp/snmp_client.h
-./null.lo: ../../include/net-snmp/agent/snmp_vars.h
-./null.lo: ../../include/net-snmp/agent/agent_registry.h
-./null.lo: ../../include/net-snmp/agent/snmp_agent.h
-./null.lo: ../../include/net-snmp/tools.h ../../include/net-snmp/data_list.h
-./null.lo: ../../include/net-snmp/snmp_impl.h ../../include/net-snmp/tools.h
-./null.lo: ../../include/net-snmp/agent/agent_read_config.h
-./null.lo: ../../include/net-snmp/agent/agent_handler.h
-./null.lo: ../../include/net-snmp/agent/agent_registry.h
-./null.lo: ../../include/net-snmp/agent/var_struct.h
-./null.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./null.lo: ../../include/net-snmp/snmp_debug.h
-./null.lo: ../../include/net-snmp/snmp_logging.h 
-./null.lo:  ../../include/net-snmp/snmp_alarm.h
-./null.lo: ../../include/net-snmp/read_config.h
-./null.lo: ../../include/net-snmp/agent/agent_trap.h
-./null.lo: ../../include/net-snmp/callback.h
-./null.lo: ../../include/net-snmp/agent/snmp_agent.h
-./null.lo: ../../include/net-snmp/agent/null.h
-./old_api.lo: ../../include/net-snmp/net-snmp-config.h
-./old_api.lo: ../../include/net-snmp/system/linux.h
-./old_api.lo: ../../include/net-snmp/system/sysv.h
-./old_api.lo: ../../include/net-snmp/system/generic.h
-./old_api.lo: ../../include/net-snmp/machine/generic.h 
-./old_api.lo: ./../mibgroup/mibincl.h 
-./old_api.lo:  ../../include/net-snmp/asn1.h
-./old_api.lo: ../../include/net-snmp/snmp_api.h
-./old_api.lo: ../../include/net-snmp/snmp_impl.h
-./old_api.lo: ../../include/net-snmp/snmp_client.h
-./old_api.lo: ../../include/net-snmp/agent/snmp_vars.h
-./old_api.lo: ../../include/net-snmp/agent/agent_registry.h
-./old_api.lo: ../../include/net-snmp/agent/snmp_agent.h
-./old_api.lo: ../../include/net-snmp/tools.h
-./old_api.lo: ../../include/net-snmp/data_list.h
-./old_api.lo: ../../include/net-snmp/snmp_impl.h
-./old_api.lo: ../../include/net-snmp/tools.h
-./old_api.lo: ../../include/net-snmp/agent/agent_read_config.h
-./old_api.lo: ../../include/net-snmp/agent/agent_handler.h
-./old_api.lo: ../../include/net-snmp/agent/agent_registry.h
-./old_api.lo: ../../include/net-snmp/agent/var_struct.h
-./old_api.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./old_api.lo: ../../include/net-snmp/snmp_debug.h
-./old_api.lo: ../../include/net-snmp/snmp_logging.h 
-./old_api.lo:  ../../include/net-snmp/snmp_alarm.h
-./old_api.lo: ../../include/net-snmp/read_config.h
-./old_api.lo: ../../include/net-snmp/agent/agent_trap.h
-./old_api.lo: ../../include/net-snmp/callback.h
-./old_api.lo: ../../include/net-snmp/agent/snmp_agent.h
-./old_api.lo: ../../include/net-snmp/agent/old_api.h
-./old_api.lo: ../../include/net-snmp/agent/agent_callbacks.h
-./read_only.lo: ../../include/net-snmp/net-snmp-config.h
-./read_only.lo: ../../include/net-snmp/system/linux.h
-./read_only.lo: ../../include/net-snmp/system/sysv.h
-./read_only.lo: ../../include/net-snmp/system/generic.h
-./read_only.lo: ../../include/net-snmp/machine/generic.h
-./read_only.lo: ./../mibgroup/mibincl.h 
-./read_only.lo: ../../include/net-snmp/asn1.h
-./read_only.lo: ../../include/net-snmp/snmp_api.h
-./read_only.lo: ../../include/net-snmp/snmp_impl.h
-./read_only.lo: ../../include/net-snmp/snmp_client.h
-./read_only.lo: ../../include/net-snmp/agent/snmp_vars.h
-./read_only.lo: ../../include/net-snmp/agent/agent_registry.h
-./read_only.lo: ../../include/net-snmp/agent/snmp_agent.h
-./read_only.lo: ../../include/net-snmp/tools.h
-./read_only.lo: ../../include/net-snmp/data_list.h
-./read_only.lo: ../../include/net-snmp/snmp_impl.h
-./read_only.lo: ../../include/net-snmp/tools.h
-./read_only.lo: ../../include/net-snmp/agent/agent_read_config.h
-./read_only.lo: ../../include/net-snmp/agent/agent_handler.h
-./read_only.lo: ../../include/net-snmp/agent/agent_registry.h
-./read_only.lo: ../../include/net-snmp/agent/var_struct.h
-./read_only.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./read_only.lo: ../../include/net-snmp/snmp_debug.h
-./read_only.lo: ../../include/net-snmp/snmp_logging.h 
-./read_only.lo:  ../../include/net-snmp/snmp_alarm.h
-./read_only.lo: ../../include/net-snmp/read_config.h
-./read_only.lo: ../../include/net-snmp/agent/agent_trap.h
-./read_only.lo: ../../include/net-snmp/callback.h
-./read_only.lo: ../../include/net-snmp/agent/snmp_agent.h
-./read_only.lo: ../../include/net-snmp/agent/read_only.h
-./serialize.lo: ../../include/net-snmp/net-snmp-config.h
-./serialize.lo: ../../include/net-snmp/system/linux.h
-./serialize.lo: ../../include/net-snmp/system/sysv.h
-./serialize.lo: ../../include/net-snmp/system/generic.h
-./serialize.lo: ../../include/net-snmp/machine/generic.h
-./serialize.lo: ./../mibgroup/mibincl.h 
-./serialize.lo: ../../include/net-snmp/asn1.h
-./serialize.lo: ../../include/net-snmp/snmp_api.h
-./serialize.lo: ../../include/net-snmp/snmp_impl.h
-./serialize.lo: ../../include/net-snmp/snmp_client.h
-./serialize.lo: ../../include/net-snmp/agent/snmp_vars.h
-./serialize.lo: ../../include/net-snmp/agent/agent_registry.h
-./serialize.lo: ../../include/net-snmp/agent/snmp_agent.h
-./serialize.lo: ../../include/net-snmp/tools.h
-./serialize.lo: ../../include/net-snmp/data_list.h
-./serialize.lo: ../../include/net-snmp/snmp_impl.h
-./serialize.lo: ../../include/net-snmp/tools.h
-./serialize.lo: ../../include/net-snmp/agent/agent_read_config.h
-./serialize.lo: ../../include/net-snmp/agent/agent_handler.h
-./serialize.lo: ../../include/net-snmp/agent/agent_registry.h
-./serialize.lo: ../../include/net-snmp/agent/var_struct.h
-./serialize.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./serialize.lo: ../../include/net-snmp/snmp_debug.h
-./serialize.lo: ../../include/net-snmp/snmp_logging.h 
-./serialize.lo:  ../../include/net-snmp/snmp_alarm.h
-./serialize.lo: ../../include/net-snmp/read_config.h
-./serialize.lo: ../../include/net-snmp/agent/agent_trap.h
-./serialize.lo: ../../include/net-snmp/callback.h
-./serialize.lo: ../../include/net-snmp/agent/snmp_agent.h
-./serialize.lo: ../../include/net-snmp/agent/serialize.h
-./table_array.lo: ../../include/net-snmp/net-snmp-config.h
-./table_array.lo: ../../include/net-snmp/system/linux.h
-./table_array.lo: ../../include/net-snmp/system/sysv.h
-./table_array.lo: ../../include/net-snmp/system/generic.h
-./table_array.lo: ../../include/net-snmp/machine/generic.h
-./table_array.lo:  ./../mibgroup/mibincl.h
-./table_array.lo: ../../include/net-snmp/asn1.h
-./table_array.lo: ../../include/net-snmp/snmp_api.h
-./table_array.lo: ../../include/net-snmp/snmp_impl.h
-./table_array.lo: ../../include/net-snmp/snmp_client.h
-./table_array.lo: ../../include/net-snmp/agent/snmp_vars.h
-./table_array.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_array.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_array.lo: ../../include/net-snmp/tools.h
-./table_array.lo: ../../include/net-snmp/data_list.h
-./table_array.lo: ../../include/net-snmp/snmp_impl.h
-./table_array.lo: ../../include/net-snmp/tools.h
-./table_array.lo: ../../include/net-snmp/agent/agent_read_config.h
-./table_array.lo: ../../include/net-snmp/agent/agent_handler.h
-./table_array.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_array.lo: ../../include/net-snmp/agent/var_struct.h
-./table_array.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./table_array.lo: ../../include/net-snmp/snmp_debug.h
-./table_array.lo: ../../include/net-snmp/snmp_logging.h 
-./table_array.lo: ../../include/net-snmp/snmp_alarm.h
-./table_array.lo: ../../include/net-snmp/read_config.h
-./table_array.lo: ../../include/net-snmp/agent/agent_trap.h
-./table_array.lo: ../../include/net-snmp/callback.h
-./table_array.lo: ../../include/net-snmp/oid_array.h
-./table_array.lo: ../../include/net-snmp/asn1.h
-./table_array.lo: ../../include/net-snmp/snmp-tc.h
-./table_array.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_array.lo: ../../include/net-snmp/agent/table.h
-./table_array.lo: ../../include/net-snmp/agent/table_array.h
-./table_array.lo: ../../include/net-snmp/agent/table.h
-./table.lo: ../../include/net-snmp/net-snmp-config.h
-./table.lo: ../../include/net-snmp/system/linux.h
-./table.lo: ../../include/net-snmp/system/sysv.h
-./table.lo: ../../include/net-snmp/system/generic.h
-./table.lo: ../../include/net-snmp/machine/generic.h 
-./table.lo:  ./../mibgroup/mibincl.h
-./table.lo:  ../../include/net-snmp/asn1.h
-./table.lo: ../../include/net-snmp/snmp_api.h
-./table.lo: ../../include/net-snmp/snmp_impl.h
-./table.lo: ../../include/net-snmp/snmp_client.h
-./table.lo: ../../include/net-snmp/agent/snmp_vars.h
-./table.lo: ../../include/net-snmp/agent/agent_registry.h
-./table.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table.lo: ../../include/net-snmp/tools.h ../../include/net-snmp/data_list.h
-./table.lo: ../../include/net-snmp/snmp_impl.h ../../include/net-snmp/tools.h
-./table.lo: ../../include/net-snmp/agent/agent_read_config.h
-./table.lo: ../../include/net-snmp/agent/agent_handler.h
-./table.lo: ../../include/net-snmp/agent/agent_registry.h
-./table.lo: ../../include/net-snmp/agent/var_struct.h
-./table.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./table.lo: ../../include/net-snmp/snmp_debug.h
-./table.lo: ../../include/net-snmp/snmp_logging.h 
-./table.lo:  ../../include/net-snmp/snmp_alarm.h
-./table.lo: ../../include/net-snmp/read_config.h
-./table.lo: ../../include/net-snmp/agent/agent_trap.h
-./table.lo: ../../include/net-snmp/callback.h
-./table.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table.lo: ../../include/net-snmp/agent/table.h
-./table_data.lo: ../../include/net-snmp/net-snmp-config.h
-./table_data.lo: ../../include/net-snmp/system/linux.h
-./table_data.lo: ../../include/net-snmp/system/sysv.h
-./table_data.lo: ../../include/net-snmp/system/generic.h
-./table_data.lo: ../../include/net-snmp/machine/generic.h
-./table_data.lo: ./../mibgroup/mibincl.h 
-./table_data.lo: ../../include/net-snmp/asn1.h
-./table_data.lo: ../../include/net-snmp/snmp_api.h
-./table_data.lo: ../../include/net-snmp/snmp_impl.h
-./table_data.lo: ../../include/net-snmp/snmp_client.h
-./table_data.lo: ../../include/net-snmp/agent/snmp_vars.h
-./table_data.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_data.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_data.lo: ../../include/net-snmp/tools.h
-./table_data.lo: ../../include/net-snmp/data_list.h
-./table_data.lo: ../../include/net-snmp/snmp_impl.h
-./table_data.lo: ../../include/net-snmp/tools.h
-./table_data.lo: ../../include/net-snmp/agent/agent_read_config.h
-./table_data.lo: ../../include/net-snmp/agent/agent_handler.h
-./table_data.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_data.lo: ../../include/net-snmp/agent/var_struct.h
-./table_data.lo: ../../include/net-snmp/snmp.h ../../include/net-snmp/mib.h
-./table_data.lo: ../../include/net-snmp/snmp_debug.h
-./table_data.lo: ../../include/net-snmp/snmp_logging.h 
-./table_data.lo: ../../include/net-snmp/snmp_alarm.h
-./table_data.lo: ../../include/net-snmp/read_config.h
-./table_data.lo: ../../include/net-snmp/agent/agent_trap.h
-./table_data.lo: ../../include/net-snmp/callback.h
-./table_data.lo: ../../include/net-snmp/agent/table.h
-./table_data.lo: ../../include/net-snmp/agent/table_data.h
-./table_data.lo: ../../include/net-snmp/agent/read_only.h
-./table_dataset.lo: ../../include/net-snmp/net-snmp-config.h
-./table_dataset.lo: ../../include/net-snmp/system/linux.h
-./table_dataset.lo: ../../include/net-snmp/system/sysv.h
-./table_dataset.lo: ../../include/net-snmp/system/generic.h
-./table_dataset.lo: ../../include/net-snmp/machine/generic.h
-./table_dataset.lo: ./../mibgroup/mibincl.h 
-./table_dataset.lo: ../../include/net-snmp/asn1.h
-./table_dataset.lo: ../../include/net-snmp/snmp_api.h
-./table_dataset.lo: ../../include/net-snmp/snmp_impl.h
-./table_dataset.lo: ../../include/net-snmp/snmp_client.h
-./table_dataset.lo: ../../include/net-snmp/agent/snmp_vars.h
-./table_dataset.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_dataset.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_dataset.lo: ../../include/net-snmp/tools.h
-./table_dataset.lo: ../../include/net-snmp/data_list.h
-./table_dataset.lo: ../../include/net-snmp/snmp_impl.h
-./table_dataset.lo: ../../include/net-snmp/tools.h
-./table_dataset.lo: ../../include/net-snmp/agent/agent_read_config.h
-./table_dataset.lo: ../../include/net-snmp/agent/agent_handler.h
-./table_dataset.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_dataset.lo: ../../include/net-snmp/agent/var_struct.h
-./table_dataset.lo: ../../include/net-snmp/snmp.h
-./table_dataset.lo: ../../include/net-snmp/mib.h
-./table_dataset.lo: ../../include/net-snmp/snmp_debug.h
-./table_dataset.lo: ../../include/net-snmp/snmp_logging.h
-./table_dataset.lo: ../../include/net-snmp/snmp_alarm.h
-./table_dataset.lo: ../../include/net-snmp/read_config.h
-./table_dataset.lo: ../../include/net-snmp/agent/agent_trap.h
-./table_dataset.lo: ../../include/net-snmp/callback.h
-./table_dataset.lo: ../../include/net-snmp/agent/table.h
-./table_dataset.lo: ../../include/net-snmp/agent/table_data.h
-./table_dataset.lo: ../../include/net-snmp/agent/table_dataset.h
-./table_dataset.lo: ../../include/net-snmp/parse.h
-./table_iterator.lo: ../../include/net-snmp/net-snmp-config.h
-./table_iterator.lo: ../../include/net-snmp/system/linux.h
-./table_iterator.lo: ../../include/net-snmp/system/sysv.h
-./table_iterator.lo: ../../include/net-snmp/system/generic.h
-./table_iterator.lo: ../../include/net-snmp/machine/generic.h
-./table_iterator.lo: ./../mibgroup/mibincl.h 
-./table_iterator.lo: ../../include/net-snmp/asn1.h
-./table_iterator.lo: ../../include/net-snmp/snmp_api.h
-./table_iterator.lo: ../../include/net-snmp/snmp_impl.h
-./table_iterator.lo: ../../include/net-snmp/snmp_client.h
-./table_iterator.lo: ../../include/net-snmp/agent/snmp_vars.h
-./table_iterator.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_iterator.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_iterator.lo: ../../include/net-snmp/tools.h
-./table_iterator.lo: ../../include/net-snmp/data_list.h
-./table_iterator.lo: ../../include/net-snmp/snmp_impl.h
-./table_iterator.lo: ../../include/net-snmp/tools.h
-./table_iterator.lo: ../../include/net-snmp/agent/agent_read_config.h
-./table_iterator.lo: ../../include/net-snmp/agent/agent_handler.h
-./table_iterator.lo: ../../include/net-snmp/agent/agent_registry.h
-./table_iterator.lo: ../../include/net-snmp/agent/var_struct.h
-./table_iterator.lo: ../../include/net-snmp/snmp.h
-./table_iterator.lo: ../../include/net-snmp/mib.h
-./table_iterator.lo: ../../include/net-snmp/snmp_debug.h
-./table_iterator.lo: ../../include/net-snmp/snmp_logging.h
-./table_iterator.lo: ../../include/net-snmp/snmp_alarm.h
-./table_iterator.lo: ../../include/net-snmp/read_config.h
-./table_iterator.lo: ../../include/net-snmp/agent/agent_trap.h
-./table_iterator.lo: ../../include/net-snmp/callback.h
-./table_iterator.lo: ../../include/net-snmp/agent/snmp_agent.h
-./table_iterator.lo: ../../include/net-snmp/agent/table.h
-./table_iterator.lo: ../../include/net-snmp/agent/serialize.h
-./table_iterator.lo: ../../include/net-snmp/agent/table_iterator.h
+
+./all_helpers.o: all_helpers.c
+./bulk_to_next.o: bulk_to_next.c /usr/include/alloca.h
+./bulk_to_next.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+./bulk_to_next.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./bulk_to_next.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./bulk_to_next.o: /usr/include/bits/posix1_lim.h
+./bulk_to_next.o: /usr/include/bits/posix2_lim.h
+./bulk_to_next.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./bulk_to_next.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./bulk_to_next.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./bulk_to_next.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./bulk_to_next.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./bulk_to_next.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+./bulk_to_next.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
+./bulk_to_next.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
+./bulk_to_next.o: /usr/include/features.h /usr/include/_G_config.h
+./bulk_to_next.o: /usr/include/gconv.h /usr/include/gnu/stubs.h
+./bulk_to_next.o: /usr/include/libio.h /usr/include/limits.h
+./bulk_to_next.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
+./bulk_to_next.o: /usr/include/stdint.h /usr/include/stdio.h
+./bulk_to_next.o: /usr/include/stdlib.h /usr/include/string.h
+./bulk_to_next.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./bulk_to_next.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./bulk_to_next.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./bulk_to_next.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./bulk_to_next.o: /usr/include/sys/uio.h /usr/include/sys/un.h
+./bulk_to_next.o: /usr/include/time.h /usr/include/wchar.h
+./bulk_to_next.o: /usr/include/xlocale.h
+./bulk_to_next.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./bulk_to_next.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./bulk_to_next.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./bulk_to_next.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./debug_handler.o: debug_handler.c /usr/include/alloca.h
+./debug_handler.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+./debug_handler.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./debug_handler.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./debug_handler.o: /usr/include/bits/posix1_lim.h
+./debug_handler.o: /usr/include/bits/posix2_lim.h
+./debug_handler.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./debug_handler.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./debug_handler.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./debug_handler.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./debug_handler.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./debug_handler.o: /usr/include/bits/waitflags.h
+./debug_handler.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./debug_handler.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./debug_handler.o: /usr/include/endian.h /usr/include/features.h
+./debug_handler.o: /usr/include/_G_config.h /usr/include/gconv.h
+./debug_handler.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./debug_handler.o: /usr/include/limits.h /usr/include/linux/limits.h
+./debug_handler.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./debug_handler.o: /usr/include/stdio.h /usr/include/stdlib.h
+./debug_handler.o: /usr/include/string.h /usr/include/sys/cdefs.h
+./debug_handler.o: /usr/include/syslog.h /usr/include/sys/select.h
+./debug_handler.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
+./debug_handler.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
+./debug_handler.o: /usr/include/sys/types.h /usr/include/sys/uio.h
+./debug_handler.o: /usr/include/sys/un.h /usr/include/time.h
+./debug_handler.o: /usr/include/wchar.h /usr/include/xlocale.h
+./debug_handler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./debug_handler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./debug_handler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./debug_handler.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./instance.o: instance.c /usr/include/alloca.h /usr/include/asm/socket.h
+./instance.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./instance.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./instance.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./instance.o: /usr/include/bits/posix2_lim.h /usr/include/bits/pthreadtypes.h
+./instance.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+./instance.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+./instance.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+./instance.o: /usr/include/bits/time.h /usr/include/bits/types.h
+./instance.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
+./instance.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./instance.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./instance.o: /usr/include/endian.h /usr/include/features.h
+./instance.o: /usr/include/_G_config.h /usr/include/gconv.h
+./instance.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./instance.o: /usr/include/limits.h /usr/include/linux/limits.h
+./instance.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./instance.o: /usr/include/stdio.h /usr/include/stdlib.h /usr/include/string.h
+./instance.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./instance.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./instance.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./instance.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./instance.o: /usr/include/sys/uio.h /usr/include/sys/un.h /usr/include/time.h
+./instance.o: /usr/include/wchar.h /usr/include/xlocale.h
+./instance.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./instance.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./instance.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./instance.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./multiplexer.o: multiplexer.c /usr/include/alloca.h /usr/include/asm/socket.h
+./multiplexer.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./multiplexer.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./multiplexer.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./multiplexer.o: /usr/include/bits/posix2_lim.h
+./multiplexer.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./multiplexer.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./multiplexer.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./multiplexer.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./multiplexer.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./multiplexer.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+./multiplexer.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
+./multiplexer.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
+./multiplexer.o: /usr/include/features.h /usr/include/_G_config.h
+./multiplexer.o: /usr/include/gconv.h /usr/include/gnu/stubs.h
+./multiplexer.o: /usr/include/libio.h /usr/include/limits.h
+./multiplexer.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
+./multiplexer.o: /usr/include/stdint.h /usr/include/stdio.h
+./multiplexer.o: /usr/include/stdlib.h /usr/include/string.h
+./multiplexer.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./multiplexer.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./multiplexer.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./multiplexer.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./multiplexer.o: /usr/include/sys/uio.h /usr/include/sys/un.h
+./multiplexer.o: /usr/include/time.h /usr/include/wchar.h
+./multiplexer.o: /usr/include/xlocale.h
+./multiplexer.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./multiplexer.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./multiplexer.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./multiplexer.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./null.o: null.c /usr/include/alloca.h /usr/include/asm/socket.h
+./null.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./null.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./null.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./null.o: /usr/include/bits/posix2_lim.h /usr/include/bits/pthreadtypes.h
+./null.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+./null.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+./null.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+./null.o: /usr/include/bits/time.h /usr/include/bits/types.h
+./null.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
+./null.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./null.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./null.o: /usr/include/endian.h /usr/include/features.h
+./null.o: /usr/include/_G_config.h /usr/include/gconv.h
+./null.o: /usr/include/gnu/stubs.h /usr/include/libio.h /usr/include/limits.h
+./null.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
+./null.o: /usr/include/stdint.h /usr/include/stdio.h /usr/include/stdlib.h
+./null.o: /usr/include/string.h /usr/include/sys/cdefs.h /usr/include/syslog.h
+./null.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./null.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./null.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./null.o: /usr/include/sys/uio.h /usr/include/sys/un.h /usr/include/time.h
+./null.o: /usr/include/wchar.h /usr/include/xlocale.h
+./null.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./null.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./null.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./null.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./old_api.o: old_api.c /usr/include/alloca.h /usr/include/asm/socket.h
+./old_api.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./old_api.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./old_api.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./old_api.o: /usr/include/bits/posix2_lim.h /usr/include/bits/pthreadtypes.h
+./old_api.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+./old_api.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+./old_api.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+./old_api.o: /usr/include/bits/time.h /usr/include/bits/types.h
+./old_api.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
+./old_api.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./old_api.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./old_api.o: /usr/include/endian.h /usr/include/features.h
+./old_api.o: /usr/include/_G_config.h /usr/include/gconv.h
+./old_api.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./old_api.o: /usr/include/limits.h /usr/include/linux/limits.h
+./old_api.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./old_api.o: /usr/include/stdio.h /usr/include/stdlib.h /usr/include/string.h
+./old_api.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./old_api.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./old_api.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./old_api.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./old_api.o: /usr/include/sys/uio.h /usr/include/sys/un.h /usr/include/time.h
+./old_api.o: /usr/include/wchar.h /usr/include/xlocale.h
+./old_api.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./old_api.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./old_api.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./old_api.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./read_only.o: read_only.c /usr/include/alloca.h /usr/include/asm/socket.h
+./read_only.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./read_only.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./read_only.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./read_only.o: /usr/include/bits/posix2_lim.h /usr/include/bits/pthreadtypes.h
+./read_only.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+./read_only.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+./read_only.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+./read_only.o: /usr/include/bits/time.h /usr/include/bits/types.h
+./read_only.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
+./read_only.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./read_only.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./read_only.o: /usr/include/endian.h /usr/include/features.h
+./read_only.o: /usr/include/_G_config.h /usr/include/gconv.h
+./read_only.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./read_only.o: /usr/include/limits.h /usr/include/linux/limits.h
+./read_only.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./read_only.o: /usr/include/stdio.h /usr/include/stdlib.h
+./read_only.o: /usr/include/string.h /usr/include/sys/cdefs.h
+./read_only.o: /usr/include/syslog.h /usr/include/sys/select.h
+./read_only.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
+./read_only.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
+./read_only.o: /usr/include/sys/types.h /usr/include/sys/uio.h
+./read_only.o: /usr/include/sys/un.h /usr/include/time.h /usr/include/wchar.h
+./read_only.o: /usr/include/xlocale.h
+./read_only.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./read_only.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./read_only.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./read_only.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./serialize.o: serialize.c /usr/include/alloca.h /usr/include/asm/socket.h
+./serialize.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./serialize.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./serialize.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./serialize.o: /usr/include/bits/posix2_lim.h /usr/include/bits/pthreadtypes.h
+./serialize.o: /usr/include/bits/sched.h /usr/include/bits/select.h
+./serialize.o: /usr/include/bits/sigset.h /usr/include/bits/sockaddr.h
+./serialize.o: /usr/include/bits/socket.h /usr/include/bits/stdio_lim.h
+./serialize.o: /usr/include/bits/time.h /usr/include/bits/types.h
+./serialize.o: /usr/include/bits/uio.h /usr/include/bits/waitflags.h
+./serialize.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./serialize.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./serialize.o: /usr/include/endian.h /usr/include/features.h
+./serialize.o: /usr/include/_G_config.h /usr/include/gconv.h
+./serialize.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./serialize.o: /usr/include/limits.h /usr/include/linux/limits.h
+./serialize.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./serialize.o: /usr/include/stdio.h /usr/include/stdlib.h
+./serialize.o: /usr/include/string.h /usr/include/sys/cdefs.h
+./serialize.o: /usr/include/syslog.h /usr/include/sys/select.h
+./serialize.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
+./serialize.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
+./serialize.o: /usr/include/sys/types.h /usr/include/sys/uio.h
+./serialize.o: /usr/include/sys/un.h /usr/include/time.h /usr/include/wchar.h
+./serialize.o: /usr/include/xlocale.h
+./serialize.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./serialize.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./serialize.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./serialize.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./table_array.o: table_array.c /usr/include/alloca.h /usr/include/asm/socket.h
+./table_array.o: /usr/include/asm/sockios.h /usr/include/assert.h
+./table_array.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./table_array.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./table_array.o: /usr/include/bits/posix1_lim.h /usr/include/bits/posix2_lim.h
+./table_array.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./table_array.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./table_array.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./table_array.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./table_array.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./table_array.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+./table_array.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
+./table_array.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
+./table_array.o: /usr/include/features.h /usr/include/_G_config.h
+./table_array.o: /usr/include/gconv.h /usr/include/gnu/stubs.h
+./table_array.o: /usr/include/libio.h /usr/include/limits.h
+./table_array.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
+./table_array.o: /usr/include/stdint.h /usr/include/stdio.h
+./table_array.o: /usr/include/stdlib.h /usr/include/string.h
+./table_array.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./table_array.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./table_array.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./table_array.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./table_array.o: /usr/include/sys/uio.h /usr/include/sys/un.h
+./table_array.o: /usr/include/time.h /usr/include/wchar.h
+./table_array.o: /usr/include/xlocale.h
+./table_array.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./table_array.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./table_array.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./table_array.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./table_data.o: table_data.c /usr/include/alloca.h /usr/include/asm/socket.h
+./table_data.o: /usr/include/asm/sockios.h /usr/include/bits/byteswap.h
+./table_data.o: /usr/include/bits/endian.h /usr/include/bits/in.h
+./table_data.o: /usr/include/bits/local_lim.h /usr/include/bits/posix1_lim.h
+./table_data.o: /usr/include/bits/posix2_lim.h
+./table_data.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./table_data.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./table_data.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./table_data.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./table_data.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./table_data.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+./table_data.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
+./table_data.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
+./table_data.o: /usr/include/features.h /usr/include/_G_config.h
+./table_data.o: /usr/include/gconv.h /usr/include/gnu/stubs.h
+./table_data.o: /usr/include/libio.h /usr/include/limits.h
+./table_data.o: /usr/include/linux/limits.h /usr/include/netinet/in.h
+./table_data.o: /usr/include/stdint.h /usr/include/stdio.h
+./table_data.o: /usr/include/stdlib.h /usr/include/string.h
+./table_data.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./table_data.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./table_data.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./table_data.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./table_data.o: /usr/include/sys/uio.h /usr/include/sys/un.h
+./table_data.o: /usr/include/time.h /usr/include/wchar.h
+./table_data.o: /usr/include/xlocale.h
+./table_data.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./table_data.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./table_data.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./table_data.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./table_dataset.o: table_dataset.c /usr/include/alloca.h
+./table_dataset.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+./table_dataset.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./table_dataset.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./table_dataset.o: /usr/include/bits/posix1_lim.h
+./table_dataset.o: /usr/include/bits/posix2_lim.h
+./table_dataset.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./table_dataset.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./table_dataset.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./table_dataset.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./table_dataset.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./table_dataset.o: /usr/include/bits/waitflags.h
+./table_dataset.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./table_dataset.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./table_dataset.o: /usr/include/endian.h /usr/include/features.h
+./table_dataset.o: /usr/include/_G_config.h /usr/include/gconv.h
+./table_dataset.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./table_dataset.o: /usr/include/limits.h /usr/include/linux/limits.h
+./table_dataset.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./table_dataset.o: /usr/include/stdio.h /usr/include/stdlib.h
+./table_dataset.o: /usr/include/string.h /usr/include/sys/cdefs.h
+./table_dataset.o: /usr/include/syslog.h /usr/include/sys/select.h
+./table_dataset.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
+./table_dataset.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
+./table_dataset.o: /usr/include/sys/types.h /usr/include/sys/uio.h
+./table_dataset.o: /usr/include/sys/un.h /usr/include/time.h
+./table_dataset.o: /usr/include/wchar.h /usr/include/xlocale.h
+./table_dataset.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./table_dataset.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./table_dataset.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./table_dataset.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./table_iterator.o: table_iterator.c /usr/include/alloca.h
+./table_iterator.o: /usr/include/asm/socket.h /usr/include/asm/sockios.h
+./table_iterator.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./table_iterator.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./table_iterator.o: /usr/include/bits/posix1_lim.h
+./table_iterator.o: /usr/include/bits/posix2_lim.h
+./table_iterator.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./table_iterator.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./table_iterator.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./table_iterator.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./table_iterator.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./table_iterator.o: /usr/include/bits/waitflags.h
+./table_iterator.o: /usr/include/bits/waitstatus.h /usr/include/bits/wchar.h
+./table_iterator.o: /usr/include/bits/wordsize.h /usr/include/bits/xopen_lim.h
+./table_iterator.o: /usr/include/endian.h /usr/include/features.h
+./table_iterator.o: /usr/include/_G_config.h /usr/include/gconv.h
+./table_iterator.o: /usr/include/gnu/stubs.h /usr/include/libio.h
+./table_iterator.o: /usr/include/limits.h /usr/include/linux/limits.h
+./table_iterator.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./table_iterator.o: /usr/include/stdio.h /usr/include/stdlib.h
+./table_iterator.o: /usr/include/string.h /usr/include/sys/cdefs.h
+./table_iterator.o: /usr/include/syslog.h /usr/include/sys/select.h
+./table_iterator.o: /usr/include/sys/socket.h /usr/include/sys/syslog.h
+./table_iterator.o: /usr/include/sys/sysmacros.h /usr/include/sys/time.h
+./table_iterator.o: /usr/include/sys/types.h /usr/include/sys/uio.h
+./table_iterator.o: /usr/include/sys/un.h /usr/include/time.h
+./table_iterator.o: /usr/include/wchar.h /usr/include/xlocale.h
+./table_iterator.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./table_iterator.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./table_iterator.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./table_iterator.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h
+./table.o: table.c /usr/include/alloca.h /usr/include/asm/socket.h
+./table.o: /usr/include/asm/sockios.h /usr/include/assert.h
+./table.o: /usr/include/bits/byteswap.h /usr/include/bits/endian.h
+./table.o: /usr/include/bits/in.h /usr/include/bits/local_lim.h
+./table.o: /usr/include/bits/posix1_lim.h /usr/include/bits/posix2_lim.h
+./table.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h
+./table.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+./table.o: /usr/include/bits/sockaddr.h /usr/include/bits/socket.h
+./table.o: /usr/include/bits/stdio_lim.h /usr/include/bits/time.h
+./table.o: /usr/include/bits/types.h /usr/include/bits/uio.h
+./table.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
+./table.o: /usr/include/bits/wchar.h /usr/include/bits/wordsize.h
+./table.o: /usr/include/bits/xopen_lim.h /usr/include/endian.h
+./table.o: /usr/include/features.h /usr/include/_G_config.h
+./table.o: /usr/include/gconv.h /usr/include/gnu/stubs.h /usr/include/libio.h
+./table.o: /usr/include/limits.h /usr/include/linux/limits.h
+./table.o: /usr/include/netinet/in.h /usr/include/stdint.h
+./table.o: /usr/include/stdio.h /usr/include/stdlib.h /usr/include/string.h
+./table.o: /usr/include/sys/cdefs.h /usr/include/syslog.h
+./table.o: /usr/include/sys/select.h /usr/include/sys/socket.h
+./table.o: /usr/include/sys/syslog.h /usr/include/sys/sysmacros.h
+./table.o: /usr/include/sys/time.h /usr/include/sys/types.h
+./table.o: /usr/include/sys/uio.h /usr/include/sys/un.h /usr/include/time.h
+./table.o: /usr/include/wchar.h /usr/include/xlocale.h
+./table.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/limits.h
+./table.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h
+./table.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h
+./table.o: /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/syslimits.h

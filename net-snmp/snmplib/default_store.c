@@ -27,7 +27,7 @@
 #include <net-snmp/types.h>	
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
-#include <net-snmp/default_store.h>	/* for "internal" definitions */
+#include <net-snmp/library/default_store.h>	/* for "internal" definitions */
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/snmp_api.h>
