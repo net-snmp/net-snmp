@@ -284,9 +284,8 @@ struct variable_list {
 #endif /* OPAQUE_SPECIAL_TYPES */
     } val;
     int	    val_len;
-    oid name_loc[MAX_OID_LEN];
-    u_char buf[32];
-    int usedBuf;
+    oid name_loc[MAX_OID_LEN];  /* 90 percentile < 24. */
+    u_char buf[40];             /* 90 percentile < 40. */
 };
 
 
@@ -374,7 +373,6 @@ void snmp_free_pdu (struct snmp_pdu *);
 
 void snmp_free_var (struct variable_list *);
 
-void snmp_free(void *);
 void snmp_free_varbind(struct variable_list *var);
 
 /*

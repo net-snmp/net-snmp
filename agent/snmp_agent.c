@@ -462,13 +462,8 @@ statp_loop:
 	    }
 		/* ... or save the results from assorted GETs */
 	    else {
+		     snmp_set_var_value(varbind_ptr, (char*)statP, statLen);
 		     varbind_ptr->type = statType;
-		     varbind_ptr->val_len  = statLen;
-                     if (varbind_ptr->val.string != NULL &&
-                         !varbind_ptr->usedBuf)
-                       free( varbind_ptr->val.string );
-		     varbind_ptr->val.string    = malloc( statLen );
-		     memcpy((char*)varbind_ptr->val.string, (char*)statP, statLen);
 	    }
 	}
 	

@@ -111,9 +111,8 @@ snmp_pdu_create(int command)
 {
     struct snmp_pdu *pdu;
 
-    pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-    memset(pdu, 0, sizeof(struct snmp_pdu));
-
+    pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
+    if (pdu) {
     pdu->version		 = SNMP_DEFAULT_VERSION;
     pdu->command		 = command;
     pdu->errstat		 = SNMP_DEFAULT_ERRSTAT;
@@ -121,6 +120,7 @@ snmp_pdu_create(int command)
     pdu->address.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
     pdu->securityNameLen	 = -1;
     pdu->contextNameLen		 = -1;
+    }
 
     return pdu;
 
@@ -135,29 +135,7 @@ struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu,
 					oid *name, 
 					int name_length)
 {
-    struct variable_list *vars;
-    int itmp;
-
-    if (pdu->variables == NULL){
-	pdu->variables = vars = (struct variable_list *)malloc(sizeof(struct variable_list));
-    } else {
-	for(vars = pdu->variables; vars->next_variable; vars = vars->next_variable)
-	    /*EXIT*/;
-        itmp = sizeof(struct variable_list);
-	vars->next_variable = (struct variable_list *)malloc(itmp);
-	vars = vars->next_variable;
-    }
-
-    vars->next_variable = NULL;
-    vars->name = (oid *)malloc(name_length * sizeof(oid));
-    memcpy(vars->name, name, name_length * sizeof(oid));
-    vars->name_length = name_length;
-    vars->type = ASN_NULL;
-    vars->val.string = NULL;
-    vars->val_len = 0;
-
-    return vars;
-
+    return snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
 }  /* end snmp_add_null_var() */
 
 
@@ -205,6 +183,155 @@ snmp_synch_input(int op,
 }  /* end snmp_synch_input() */
 
 
+/*
+ * Clone an SNMP variable data structure.
+ * Sets pointers to structure private storage, or
+ * allocates larger object identifiers and values as needed.
+ *
+ * Caller must make list association for cloned variable.
+ *
+ * Returns 0 if successful.
+ */
+int
+snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
+{
+    if (!newvar || !var) return 1;
+
+    memmove(newvar, var, sizeof(struct variable_list));
+    newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
+
+    /*
+     * Clone the object identifier and the value.
+     * Allocate memory iff original will not fit into local storage.
+     */
+    if (snmp_set_var_objid(newvar, var->name, var->name_length))
+        return 1;
+
+    /* need a pointer and a length to copy a string value. */
+    if (var->val.string && var->val_len) {
+      if (var->val.string != &var->buf[0]){
+        if (var->val_len <= sizeof(var->buf))
+            newvar->val.string = newvar->buf;
+        else {
+            newvar->val.string = (u_char *)malloc(var->val_len);
+            if (!newvar->val.string) return 1;
+        }
+        memmove(newvar->val.string, var->val.string, var->val_len);
+      }
+      else { /* fix the pointer to new local store */
+        newvar->val.string = newvar->buf;
+      }
+    }
+    else {
+        newvar->val.string = 0; newvar->val_len = 0;
+    }
+
+    return 0;
+}
+
+
+/*
+ * Possibly make a copy of source memory buffer.
+ * Will reset destination pointer if source pointer is NULL.
+ * Returns 0 if successful, 1 if memory allocation fails.
+ */
+static int
+snmp_clone_mem(void ** dstPtr, void * srcPtr, unsigned len)
+{
+    *dstPtr = 0;
+    if (srcPtr){
+        *dstPtr = malloc(len);
+        if (! *dstPtr){
+            return 1;
+        }
+        memmove(*dstPtr, srcPtr, len);
+    }
+    return 0;
+}
+
+
+/*
+ * Creates (allocates and copies) a clone of the input PDU.
+ * If drop_err is set, drop any variable associated with errindex.
+ *
+ * Returns cloned PDU if successful, or 0 if failure.
+ */
+static
+struct snmp_pdu *
+locl_clone_pdu(struct snmp_pdu *pdu, int drop_err)
+{
+    struct variable_list *var, *newvar, *oldvar;
+    struct snmp_pdu *newpdu;
+    int ii, copied;
+
+    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+    if (!newpdu) return 0;
+    memmove(newpdu, pdu, sizeof(struct snmp_pdu));
+
+    /* reset copied pointers if copy fails */
+    newpdu->variables = 0; newpdu->enterprise = 0; newpdu->community = 0;
+    newpdu->srcParty  = 0; newpdu->dstParty   = 0; newpdu->context   = 0;
+    newpdu->securityEngineID = 0; newpdu->securityName = 0;
+    newpdu->contextEngineID  = 0; newpdu->contextName  = 0;
+
+    /* copy buffers individually. If any copy fails, all are freed. */
+    if ( snmp_clone_mem((void **)&newpdu->enterprise, pdu->enterprise,
+                                    sizeof(oid)*pdu->enterprise_length)
+     ||  snmp_clone_mem((void **)&newpdu->community, pdu->community,
+                                    pdu->community_len)
+     ||  snmp_clone_mem((void **)&newpdu->contextEngineID, pdu->contextEngineID,
+                                    pdu->contextEngineIDLen)
+     ||  snmp_clone_mem((void **)&newpdu->securityEngineID, pdu->securityEngineID,
+                                    pdu->securityEngineIDLen)
+     ||  snmp_clone_mem((void **)&newpdu->contextName, pdu->contextName,
+                                    pdu->contextNameLen)
+     ||  snmp_clone_mem((void **)&newpdu->securityName, pdu->securityName,
+                                    pdu->securityNameLen)
+     ||  snmp_clone_mem((void **)&newpdu->srcParty, pdu->srcParty,
+                                    sizeof(oid)*pdu->srcPartyLen)
+     ||  snmp_clone_mem((void **)&newpdu->dstParty, pdu->dstParty,
+                                    sizeof(oid)*pdu->dstPartyLen)
+     ||  snmp_clone_mem((void **)&newpdu->context, pdu->context,
+                                    sizeof(oid)*pdu->contextLen)
+       )
+    {
+        snmp_free_pdu(newpdu); return 0;
+    }
+
+    var = pdu->variables;
+    oldvar = 0; ii = 0; copied = 0;
+    while (var) {
+        /* errindex starts from 1. If drop_err, skip the errored variable */
+        if (drop_err && (++ii == pdu->errindex)) {
+            var = var->next_variable; continue;
+        }
+
+        /* clone the next variable. Cleanup if alloc fails */
+        newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+        if (snmp_clone_var(var, newvar)){
+            if (newvar) free((char *)newvar);
+            snmp_free_pdu(newpdu); return 0;
+        }
+        copied++;
+
+        /* add cloned variable to new PDU */
+        if (0 == newpdu->variables) newpdu->variables = newvar;
+        if (oldvar) oldvar->next_variable = newvar;
+        oldvar = newvar;
+
+        var = var->next_variable;
+    }
+    if ((drop_err && (ii < pdu->errindex)) || copied == 0){
+        snmp_free_pdu(newpdu); return 0;
+    }
+    return newpdu;
+}
+
+struct snmp_pdu *
+snmp_clone_pdu(struct snmp_pdu *pdu)
+{
+    return locl_clone_pdu(pdu, 0); /* copies all variables */
+}
 
 /*
  * If there was an error in the input pdu, creates a clone of the pdu
@@ -213,188 +340,99 @@ snmp_synch_input(int op,
  * errindex are set to default values.
  * If the error status didn't indicate an error, the error index didn't
  * indicate a variable, the pdu wasn't a get response message, or there
- * would be no remaining variables, this function will return NULL.
+ * would be no remaining variables, this function will return 0.
  * If everything was successful, a pointer to the fixed cloned pdu will
  * be returned.
  */
 struct snmp_pdu *
-snmp_fix_pdu(struct snmp_pdu *pdu,
-	     int command)
+snmp_fix_pdu(struct snmp_pdu *pdu, int command)
 {
-    struct variable_list *var, *newvar;
     struct snmp_pdu *newpdu;
-    int varindex, copied = 0;
 
-    if (pdu->command != SNMP_MSG_RESPONSE || pdu->errstat == SNMP_ERR_NOERROR || pdu->errindex <= 0)
-	return NULL;
-    /* clone the pdu */
-    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-    memmove(newpdu, pdu, sizeof(struct snmp_pdu));
-    newpdu->variables = 0;
+    if ((pdu->command != SNMP_MSG_RESPONSE)
+     || (pdu->errstat == SNMP_ERR_NOERROR)
+     || (0 == pdu->variables)
+     || (pdu->errindex <= 0))
+    {
+#if 0
+        DEBUGP("Fix PDU ? command 0x%x errstat %d errindex %d vars %x \n",
+                pdu->command, pdu->errstat, pdu->errindex, pdu->variables);
+#endif
+            return 0; /* pre-condition tests fail */
+    }
+
+    newpdu = locl_clone_pdu(pdu, 1); /* copies all except errored variable */
+    if (!newpdu)
+        return 0;
+    if (!newpdu->variables) {
+        snmp_free_pdu(newpdu);
+        return 0; /* no variables. "should not happen" */
+    }
     newpdu->command = command;
     newpdu->reqid = SNMP_DEFAULT_REQID;
     newpdu->errstat = SNMP_DEFAULT_ERRSTAT;
     newpdu->errindex = SNMP_DEFAULT_ERRINDEX;
-    if (pdu->enterprise){
-	newpdu->enterprise = (oid *)malloc(sizeof(oid)*pdu->enterprise_length);
-	memmove(newpdu->enterprise, pdu->enterprise, sizeof(oid)*pdu->enterprise_length);
-    }
-    if (pdu->community){
-	newpdu->community = (u_char *)malloc(pdu->community_len);
-	memmove(newpdu->community, pdu->community, pdu->community_len);
-    }
-   if (pdu->srcParty){
-	newpdu->srcParty = (oid *)malloc(sizeof(oid)*pdu->srcPartyLen);
-	memmove(newpdu->srcParty, pdu->srcParty, sizeof(oid)*pdu->srcPartyLen);
-    }
-    if (pdu->dstParty){
-	newpdu->dstParty = (oid *)malloc(sizeof(oid)*pdu->dstPartyLen);
-	memmove(newpdu->dstParty, pdu->dstParty, sizeof(oid)*pdu->dstPartyLen);
-    }
-    if (pdu->context){
-	newpdu->context = (oid *)malloc(sizeof(oid)*pdu->contextLen);
-	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
-    }
-    var = pdu->variables;
-    varindex = 1;
-    if (pdu->errindex == varindex){	/* skip first variable */
-      if (var == NULL)
-        return NULL;
-      var = var->next_variable;
-      varindex++;
-    }
-    if (var != NULL){
-	newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
-	memmove(newvar, var, sizeof(struct variable_list));
-	if (var->name != NULL){
-	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-	    memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	}
-	if (var->val.string != NULL){
-	    newvar->val.string = (u_char *)malloc(var->val_len);
-	    memmove(newvar->val.string, var->val.string, var->val_len);
-	}
-	newvar->next_variable = 0;
-	copied++;
 
-	while(var->next_variable){
-	    var = var->next_variable;
-	    if (++varindex == pdu->errindex)
-		continue;
-	    newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
-	    newvar = newvar->next_variable;
-	    memmove(newvar, var, sizeof(struct variable_list));
-	    if (var->name != NULL){
-		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-		memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	    }
-	    if (var->val.string != NULL){
-		newvar->val.string = (u_char *)malloc(var->val_len);
-		memmove(newvar->val.string, var->val.string, var->val_len);
-	    }
-	    newvar->next_variable = 0;
-	    copied++;
-	}
-    }
-    if (varindex < pdu->errindex || copied == 0){
-	snmp_free_pdu(newpdu);
-	return NULL;
-    }
     return newpdu;
 }
-
 
 /*
- * snmp_clone_pdu
- * Creates (allocates and copies) a clone of the input PDU.
+ * Add object identifier name to SNMP variable.
+ * If the name is large, additional memory is allocated.
+ * Returns 0 if successful.
  */
-struct snmp_pdu *
-snmp_2clone_pdu(struct snmp_pdu *pdu, struct snmp_pdu *newpdu)
-{
-    struct variable_list *var, *newvar, *oldvar;
-    memmove(newpdu, pdu, sizeof(struct snmp_pdu));
-    newpdu->variables = 0;
-    var = pdu->variables;
-    oldvar = 0;
-    while (var) {
-	newvar =
-	    (struct variable_list *)malloc(sizeof(struct variable_list));
-	memmove(newvar, var, sizeof(struct variable_list));
-	if (var->name != NULL){
-	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
-	    memmove(newvar->name, var->name, var->name_length * sizeof(oid));
-	}
-	/* need a pointer and a length to copy a string value. */
-	if ((var->val.string != NULL) && (var->val_len)) {
-	    newvar->val.string = (u_char *)malloc(var->val_len);
-	    memmove(newvar->val.string, var->val.string, var->val_len);
-	}
-	else {
-	    newvar->val.string = NULL; newvar->val_len = 0;
-	}
 
-	if (0 == newpdu->variables) newpdu->variables = newvar;
-	if (oldvar) oldvar->next_variable = newvar;
-	oldvar = newvar;
-	oldvar->next_variable = 0;
-	var = var->next_variable;
+int
+snmp_set_var_objid (struct variable_list *vp,
+                    const oid *objid, int name_length)
+{
+    int len = sizeof(oid) * name_length;
+
+    /* use built-in storage for smaller values */
+    if (len <= sizeof(vp->name_loc)) {
+        vp->name = vp->name_loc;
     }
-    if (pdu->enterprise){
-	newpdu->enterprise = (oid *)malloc(sizeof(oid)*pdu->enterprise_length);
-	memmove(newpdu->enterprise, pdu->enterprise, sizeof(oid)*pdu->enterprise_length);
+    else {
+        vp->name = (oid *)malloc(len);
+        if (!vp->name) return 1;
     }
-    if (pdu->community){
-	newpdu->community = (u_char *)malloc(pdu->community_len);
-	memmove(newpdu->community, pdu->community, pdu->community_len);
-    }
-    if (pdu->contextEngineID){
-	newpdu->contextEngineID = (u_char *)malloc(pdu->contextEngineIDLen);
-	newpdu->contextEngineIDLen = pdu->contextEngineIDLen;
-	memmove(newpdu->contextEngineID, pdu->contextEngineID,
-                pdu->contextEngineIDLen);
-    }
-    if (pdu->securityEngineID){
-	newpdu->securityEngineID = (u_char *)malloc(pdu->securityEngineIDLen);
-	newpdu->securityEngineIDLen = pdu->securityEngineIDLen;
-	memmove(newpdu->securityEngineID, pdu->securityEngineID,
-                pdu->securityEngineIDLen);
-    }
-    if (pdu->contextName){
-	newpdu->contextName = (u_char *)malloc(pdu->contextNameLen);
-	newpdu->contextNameLen = pdu->contextNameLen;
-	memmove(newpdu->contextName, pdu->contextName,
-                pdu->contextNameLen);
-    }
-    if (pdu->securityName){
-	newpdu->securityName = (u_char *)malloc(pdu->securityNameLen);
-	newpdu->securityNameLen = pdu->securityNameLen;
-	memmove(newpdu->securityName, pdu->securityName,
-                pdu->securityNameLen);
-    }
-    if (pdu->srcParty){
-	newpdu->srcParty = (oid *)malloc(sizeof(oid)*pdu->srcPartyLen);
-	memmove(newpdu->srcParty, pdu->srcParty, sizeof(oid)*pdu->srcPartyLen);
-    }
-    if (pdu->dstParty){
-	newpdu->dstParty = (oid *)malloc(sizeof(oid)*pdu->dstPartyLen);
-	memmove(newpdu->dstParty, pdu->dstParty, sizeof(oid)*pdu->dstPartyLen);
-    }
-    if (pdu->context){
-	newpdu->context = (oid *)malloc(sizeof(oid)*pdu->contextLen);
-	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
-    }
-    return newpdu;
+    memmove(vp->name, objid, len);
+    vp->name_length = name_length;
+    return 0;
 }
 
-struct snmp_pdu *
-snmp_clone_pdu(struct snmp_pdu *pdu)
-{
-    struct snmp_pdu *newpdu;
-    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
-    if (newpdu)
-        snmp_2clone_pdu(pdu, newpdu);
+/*
+ * Add some value to SNMP variable.
+ * If the value is large, additional memory is allocated.
+ * Returns 0 if successful.
+ */
 
-    return (newpdu);
+int
+snmp_set_var_value(struct variable_list *newvar,
+                    char *val_str, int val_len)
+{
+    if (newvar->val.string &&
+        newvar->val.string != newvar->buf)
+    {
+        free(newvar->val.string);
+    }
+
+    newvar->val.string = 0; newvar->val_len = 0;
+
+    /* need a pointer and a length to copy a string value. */
+    if (val_str && val_len)
+    {
+        if (val_len <= sizeof(newvar->buf))
+            newvar->val.string = newvar->buf;
+        else {
+            newvar->val.string = (u_char *)malloc(val_len);
+            if (!newvar->val.string) return 1;
+        }
+        memmove(newvar->val.string, val_str, val_len);
+        newvar->val_len = val_len;
+    }
+
+    return 0;
 }
 
 
@@ -527,9 +565,7 @@ void snmp_synch_reset(struct snmp_session *session)
 void
 snmp_synch_setup(struct snmp_session *session)
 {
-    struct synch_state *rp = (struct synch_state *)malloc(sizeof(struct synch_state));
-    rp->waiting = 0;
-    rp->pdu = NULL;
+    struct synch_state *rp = (struct synch_state *)calloc(1,sizeof(struct synch_state));
     session->snmp_synch_state = rp;
 
     session->callback = snmp_synch_input;
