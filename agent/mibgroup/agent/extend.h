@@ -15,11 +15,13 @@ typedef struct netsnmp_extend_s {
 
     int      flags;
     netsnmp_cache *cache;
+    struct netsnmp_extend_s *next;
 } netsnmp_extend;
 
 void                 init_extend(void);
 Netsnmp_Node_Handler handle_nsExtendConfigTable;
 Netsnmp_Node_Handler handle_nsExtendOutput1Table;
+Netsnmp_Node_Handler handle_nsExtendOutput2Table;
 void                 extend_parse_config(const char*, char*);
 
 #define COLUMN_EXTCFG_COMMAND	2
@@ -42,6 +44,7 @@ void                 extend_parse_config(const char*, char*);
 #define COLUMN_EXTOUT1_LAST_COLUMN	COLUMN_EXTOUT1_RESULT
 
 #define COLUMN_EXTOUT2_OUTLINE	2
+#define COLUMN_EXTOUT2_FIRST_COLUMN	COLUMN_EXTOUT2_OUTLINE
 #define COLUMN_EXTOUT2_LAST_COLUMN	COLUMN_EXTOUT2_OUTLINE
 
 #define NS_EXTEND_FLAGS_ACTIVE      0x01
