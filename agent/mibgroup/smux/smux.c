@@ -210,6 +210,7 @@ init_smux(void)
 		return;
 	}
 
+
 	if (bind (smux_listen_sd, (struct sockaddr *) &lo_socket, 
 	    sizeof (lo_socket)) < 0) {
 		snmp_log_perror("[init_smux] bind failed");
@@ -227,6 +228,19 @@ init_smux(void)
 		return;
 	}
 #endif 	/* SO_KEEPALIVE */
+
+#ifdef SO_REUSEADDR 
+        /* At least on Linux, when the master agent terminates, any
+           TCP connections for SMUX peers are put in the TIME_WAIT
+           state for about 60 seconds. If the master agent is started
+           during this time, the bind for the listening socket will
+           fail because the SMUX port is in use.
+        */
+        if (setsockopt (smux_listen_sd, SOL_SOCKET, SO_REUSEADDR, (char *)&one, 
+                        sizeof (one)) < 0) { 
+            snmp_log_perror("[init_smux] setsockopt(SO_REUSEADDR) failed"); 
+        } 
+#endif /* SO_REUSEADDR */ 
 
 	if(listen(smux_listen_sd, SOMAXCONN) == -1) {
 		snmp_log_perror("[init_smux] listen failed");
