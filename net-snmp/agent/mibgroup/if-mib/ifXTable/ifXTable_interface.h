@@ -55,7 +55,7 @@ extern          "C" {
         _ifXTable_initialize_interface(ifXTable_registration_ptr user_ctx,
                                        u_long flags);
 
-    ifXTable_rowreq_ctx *ifXTable_allocate_rowreq_ctx(void);
+    ifXTable_rowreq_ctx *ifXTable_allocate_rowreq_ctx(ifXTable_data *);
     void            ifXTable_release_rowreq_ctx(ifXTable_rowreq_ctx *
                                                 rowreq_ctx);
 
