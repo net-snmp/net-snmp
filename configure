@@ -138,7 +138,7 @@ ac_help="$ac_help
     tunnel:                Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
-    agentx/client:         allows the agent to run as either a snmp agent
+    agentx/subagent:       allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
     agentx/master:         makes the agent run as an agentX master agent
                            as well as a normal snmp agent.
