@@ -1,27 +1,9 @@
-SHELL = /bin/sh
-srcdir = @srcdir@
-VPATH = @srcdir@
-@SET_MAKE@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-libdir = @libdir@
-datadir = @datadir@
-snmplibdir = $(datadir)/snmp
-mibdir = $(snmplibdir)/mibs
-
-SED = @SED@
-
-INSTALL = @INSTALL@
-CPP = @CPP@ -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
-CFLAGS = @CFLAGS@
-EXTRACPPFLAGS = @EXTRACPPFLAGS@
-
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
 SUBDIRS = snmplib agent apps local ov man
 INSTALLDIRS = snmplib agent apps local man mibs
+
+CPP = @CPP@ -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
 all:	sedscript EXAMPLE.conf subdirs
 
