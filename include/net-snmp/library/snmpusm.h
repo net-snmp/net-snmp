@@ -75,6 +75,9 @@ extern          "C" {
         u_char         *userPublicString;
         int             userStatus;
         int             userStorageType;
+       /* these are actually DH * pointers but only if openssl is avail. */
+        void           *usmDHUserAuthKeyChange;
+        void           *usmDHUserPrivKeyChange;
         struct usmUser *next;
         struct usmUser *prev;
     };
