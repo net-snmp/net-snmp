@@ -208,7 +208,9 @@ int add_trap_session( struct snmp_session *ss, int pdutype, int version )
         } else {
             pptr->secModel = ss->version;
             pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
-            memdup((void *) &pptr->secName, (void *) ss->community,
+            pptr->secName = NULL;
+            if (ss->community && (ss->community_len > 0))
+                memdup((void *) &pptr->secName, (void *) ss->community,
                    ss->community_len);
         }
         pptr->storageType = ST_READONLY;
