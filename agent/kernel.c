@@ -13,6 +13,9 @@
 #endif
 #include <stdio.h>
 #include <errno.h>
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -53,7 +56,7 @@ init_kmem(const char *file)
 #else
     kd = kvm_open(NULL, NULL, NULL, O_RDONLY, NULL);
     if (!kd && !ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
-	snmp_log(LOG_CRIT, "init_kmem: kvm_open failed with errno %d\n", errno);
+	snmp_log(LOG_CRIT, "init_kmem: kvm_open failed: %s\n", strerror(errno));
 	exit(1);
     }
 #endif	/* HAVE_KVM_OPENFILES */
