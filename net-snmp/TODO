@@ -1,5 +1,6 @@
 TODO list for the ucd-snmp-coders:
 
+  snmpv3 support
   better SNMPv2c support in all apps and the agent.
   Continue to add and improve manual pages/documentation.
   More snmpset'able variables.
