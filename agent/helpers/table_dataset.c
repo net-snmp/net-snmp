@@ -10,8 +10,8 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
-#include "parse.h"
-#include "data_list.h"
+#include <net-snmp/parse.h>
+#include <net-snmp/data_list.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

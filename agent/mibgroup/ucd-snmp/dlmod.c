@@ -24,10 +24,10 @@
 
 #include "mibincl.h"
 #include "struct.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
-#include "snmp_debug.h"
+#include <net-snmp/snmp_debug.h>
 
 #if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
 

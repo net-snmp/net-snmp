@@ -68,31 +68,3 @@ makefileindepend: nosysdepend
 	perl $(top_srcdir)/makefileindepend.pl
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-
-if.lo: ../../include/net-snmp/net-snmp-config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-if.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-if.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
-if.lo: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
-if.lo: ../../snmplib/snmp_impl.h ../../snmplib/system.h ../../s/sysv.h
-inet6.lo: ../../include/net-snmp/net-snmp-config.h ../../m/generic.h ../../s/generic.h ../../s/linux.h
-inet6.lo: ../../s/sysv.h
-inet.lo: ../../include/net-snmp/net-snmp-config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-inet.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-inet.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h
-inet.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp.h
-inet.lo: ../../snmplib/snmp_impl.h ../../s/sysv.h 
-main.lo: ../../include/net-snmp/net-snmp-config.h ../../m/generic.h netstat.h ../../s/generic.h
-main.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/default_store.h
-main.lo: ../../snmplib/getopt.h ../../snmplib/mib.h ../../snmplib/snmp_api.h
-main.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp_debug.h
-main.lo: ../../snmplib/snmp.h ../../snmplib/snmp_impl.h ../../snmplib/system.h
-main.lo: ../../s/sysv.h  
-main.lo: ../../version.h
-route.lo: ../../include/net-snmp/net-snmp-config.h main.h ../../m/generic.h netstat.h ../../s/generic.h
-route.lo: ../../s/linux.h ../../snmplib/asn1.h ../../snmplib/getopt.h
-route.lo: ../../snmplib/mib.h ../../snmplib/snmp_api.h
-route.lo: ../../snmplib/snmp_client.h ../../snmplib/snmp.h
-route.lo: ../../snmplib/snmp_impl.h ../../s/sysv.h 
-winstub.lo: ../../include/net-snmp/net-snmp-config.h ../../m/generic.h ../../s/generic.h ../../s/linux.h
-winstub.lo: ../../s/sysv.h

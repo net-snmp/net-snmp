@@ -6,7 +6,7 @@
 #ifndef _MIBGROUP_USMUSER_H
 #define _MIBGROUP_USMUSER_H
 
-#include "snmpusm.h"
+#include <net-snmp/snmpusm.h>
 
 /* <...prefix>.<engineID_length>.<engineID>.<user_name_length>.<user_name>
    = 1 + 32 + 1 + 32 */

@@ -87,7 +87,7 @@
 #endif
 
 #include "mibincl.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include <net-snmp/agent/auto_nlist.h>
 
 #ifdef MIB_IPCOUNTER_SYMBOL

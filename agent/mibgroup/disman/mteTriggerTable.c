@@ -19,23 +19,23 @@
 
 /* minimal include directives */
 #include "mibincl.h"
-#include "snmp_api.h"
+#include <net-snmp/snmp_api.h>
 #include <net-snmp/agent/snmp_agent.h>
-#include "snmp_client.h"
-#include "snmp_transport.h"
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp_transport.h>
 #include "header_complex.h"
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
-#include "snmp_api.h"
+#include <net-snmp/snmp_api.h>
 #include "mteTriggerTable.h"
 #include "mteTriggerBooleanTable.h"
 #include "mteTriggerDeltaTable.h"
 #include "mteTriggerExistenceTable.h"
 #include "mteTriggerThresholdTable.h"
 #include "mteObjectsTable.h"
-#include "snmp-tc.h"
-#include "snmp_enum.h"
-#include "snmp_parse_args.h"
+#include <net-snmp/snmp-tc.h>
+#include <net-snmp/snmp_enum.h>
+#include <net-snmp/snmp_parse_args.h>
 
 
 /* 

@@ -28,11 +28,11 @@
 #include <fcntl.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_debug.h"
-#include "snmp_transport.h"
-#include "snmpUDPDomain.h"
-#include "snmpTCPDomain.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpUDPDomain.h>
+#include <net-snmp/snmpTCPDomain.h>
 
 
 const oid snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };

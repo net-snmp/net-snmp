@@ -63,7 +63,7 @@
 #include "interfaces.h"
 #include "if_fields.h"
 #include <net-snmp/agent/auto_nlist.h>
-#include "system.h"
+#include <net-snmp/system.h>
 #include "util_funcs.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)

@@ -112,30 +112,30 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "mibincl.h"
-#include "snmpv3.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
-#include "snmpusm.h"
-#include "system.h"
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/system.h>
 #include "kernel.h"
 #include <net-snmp/agent/snmp_vars.h>
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
 #ifdef SNMP_TRANSPORT_UDP_DOMAIN
-#include "snmpUDPDomain.h"
+#include <net-snmp/snmpUDPDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
-#include "snmpCallbackDomain.h"
+#include <net-snmp/snmpCallbackDomain.h>
 #endif
 
 #include "mibgroup/struct.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/agent/agent_registry.h>
-#include "transform_oids.h"
-#include "callback.h"
-#include "snmp_alarm.h"
+#include <net-snmp/transform_oids.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_alarm.h>
 #include "snmpd.h"
 #include "net-snmp/agent/all_helpers.h"
 #include "mib_module_includes.h"

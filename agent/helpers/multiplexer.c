@@ -3,7 +3,7 @@
 #include <sys/types.h>
 
 #include "mibincl.h"
-#include "tools.h"
+#include <net-snmp/tools.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_registry.h>
 #include <net-snmp/agent/multiplexer.h>

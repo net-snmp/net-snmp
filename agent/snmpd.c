@@ -125,42 +125,42 @@ typedef long    fd_mask;
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "system.h"
-#include "read_config.h"
-#include "snmp.h"
-#include "mib.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/system.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/mib.h>
 #include "m2m.h"
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "snmpv3.h"
-#include "callback.h"
-#include "snmp_alarm.h"
-#include "default_store.h"
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/default_store.h>
 #include "mib_module_config.h"
 
-#include "snmp_client.h"
+#include <net-snmp/snmp_client.h>
 #include "snmpd.h"
 #include <net-snmp/agent/agent_handler.h>
 #include <net-snmp/agent/var_struct.h>
 #include "mibgroup/struct.h"
-#include "snmp_debug.h"
+#include <net-snmp/snmp_debug.h>
 #include <net-snmp/agent/mib_modules.h>
 
-#include "snmp_secmod.h"
-#include "snmpusm.h"
-#include "tools.h"
-#include "lcd_time.h"
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/lcd_time.h>
 #include "mibgroup/util_funcs.h"
 
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/ds_agent.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "snmp_logging.h"
-#include "snmp_transport.h"
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/snmp_transport.h>
 
 #include "version.h"
 

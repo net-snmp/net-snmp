@@ -187,7 +187,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "mibincl.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"

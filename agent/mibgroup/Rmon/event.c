@@ -22,6 +22,12 @@
    for the ucd-snmp snmpd agent.
  *
  * $Log$
+ * Revision 1.3  2002/01/29 04:54:50  hardaker
+ * Major file moving and editing of include directives.
+ *   - essentially adds up to:
+ *     - mv snmplib/*.h include/net-snmp/
+ *     - local/convertcode `find . -name \*.c \*.h`
+ *
  * Revision 1.2  2002/01/04 20:50:31  hardaker
  * beginnings of ucd-snmp -> net-snmp structural changes.
  *   - config.h -> include/net-snmp/net-snmp-config.h
@@ -46,7 +52,7 @@
 /* Implementation headers */
 #include "agutil_api.h"
 #include "row_api.h"
-#include "snmp_alarm.h"
+#include <net-snmp/snmp_alarm.h>
 
 /* File scope definitions section */
 
@@ -524,7 +530,7 @@ create_explanaition (CRTL_ENTRY_T* evptr, u_char is_rising,
 
 #define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
 
-#include "snmp_client.h"
+#include <net-snmp/snmp_client.h>
 
 extern void send_enterprise_trap_vars (int, int, oid *, int, struct variable_list *);
 

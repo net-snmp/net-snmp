@@ -31,16 +31,16 @@
 #include <fcntl.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "vacm.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
-#include "default_store.h"
-#include "read_config.h"
-#include "snmp_transport.h"
-#include "snmpUDPIPv6Domain.h"
-#include "snmpTCPIPv6Domain.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/vacm.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpUDPIPv6Domain.h>
+#include <net-snmp/snmpTCPIPv6Domain.h>
 
 const oid ucdSnmpTCPIPv6Domain[9] = { UCDAVIS_MIB, 251, 5 };
 static snmp_tdomain tcp6Domain;

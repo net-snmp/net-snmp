@@ -28,10 +28,10 @@
 
 #include "mib_module_config.h"
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
 
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/agent_read_config.h>
@@ -39,15 +39,15 @@
 #include <net-snmp/agent/agent_registry.h>
 #include <net-snmp/agent/var_struct.h>
 
-#include "snmp.h"
-#include "mib.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
-#include "snmp_alarm.h"
-#include "read_config.h"
-#include "tools.h"
+#include <net-snmp/snmp.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/tools.h>
 #include <net-snmp/agent/agent_trap.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #define u_char unsigned char
 #define u_short unsigned short
 

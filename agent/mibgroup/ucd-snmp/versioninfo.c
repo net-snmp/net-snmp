@@ -29,9 +29,9 @@
 #include "struct.h"
 #include "versioninfo.h"
 #include "util_funcs.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "system.h"
+#include <net-snmp/system.h>
 
 #include "version.h"
 

@@ -1,6 +1,6 @@
 #ifdef UCD_COMPATIBLE
 
-#include <net-snmp/snmplib/scapi.h>
+#include <net-snmp/scapi.h>
 
 #else
 

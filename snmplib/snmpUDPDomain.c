@@ -29,14 +29,14 @@
 #include <netdb.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "vacm.h"
-#include "snmp_debug.h"
-#include "default_store.h"
-#include "read_config.h"
-#include "snmp_transport.h"
-#include "snmpUDPDomain.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/vacm.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpUDPDomain.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1

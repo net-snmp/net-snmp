@@ -14,14 +14,14 @@
 #include <strings.h>
 #endif
 
-#include "asn1.h"
+#include <net-snmp/asn1.h>
 #include "snmpd.h"
-#include "snmp_debug.h"
-#include "default_store.h"
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
-#include "snmp_logging.h"
+#include <net-snmp/snmp_logging.h>
 #include "mib_module_config.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
 #include "agentx/agentx_config.h"
 

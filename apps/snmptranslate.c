@@ -51,22 +51,22 @@ SOFTWARE.
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#include <getopt.h>
+#include <net-snmp/getopt.h>
 
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
-#include "parse.h"
-#include "mib.h"
-#include "snmp.h"
-#include "snmp_debug.h"
-#include "default_store.h"
-#include "system.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/parse.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/system.h>
 
 #include "version.h"
 
