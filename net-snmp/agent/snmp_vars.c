@@ -36,7 +36,12 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 #if STDC_HEADERS
+#include <string.h>
 #include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/time.h>
@@ -241,7 +246,7 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
 
-#ifdef USING_MIBII_VIEW_VARS_MODULE
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
 extern int in_view __P((oid *, int, int));
 #endif
 
@@ -345,6 +350,42 @@ free_subtree(st)
   return ret;
 }
 
+/* in_a_view: determines if a given packet_info is allowed to see a
+   given name/namelen OID pointer */
+
+int
+in_a_view(name, namelen, pi, cvp)
+  struct packet_info *pi;   /* IN - relevant auth info re PDU */
+  struct variable	*cvp; /* IN - relevant auth info re mib module */
+  oid		*name;	    /* IN - name of var, OUT - name matched */
+  int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+{
+  /* check for v1 and counter64s, since snmpv1 doesn't support it */
+  if (pi->version == SNMP_VERSION_1 && cvp->type == ASN_COUNTER64)
+    return 0;
+  return (
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
+#define GOT_A_VIEW_CHECK
+    /* check against the older v2party view support */
+    (pi->version == SNMP_VERSION_2p &&
+     in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+#endif
+#ifdef USING_MIBII_VACM_VARS_MODULE
+#define GOT_A_VIEW_CHECK
+    /* check against the snmpv3 VACM support */
+    (vacm_in_view(pi, name, *namelen)) ||
+#endif
+#ifndef GOT_A_VIEW_CHECK
+    /* no support at all for views?  Ick!
+       Oh well, default to allowing access to everyone then. */
+    1
+#else
+    0  /* needed for end of || clauses above */
+#endif
+    );
+}
+
+
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
@@ -421,16 +462,9 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 						  len, write_method);
 		    if (write_method)
 			*acl = cvp->acl;
-		    if (access &&
-                        (
-#ifdef USING_MIBII_VIEW_VARS_MODULE
-                         (pi->version == SNMP_VERSION_2p &&
-                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
-#endif
-                         (pi->version == SNMP_VERSION_1 &&
-                          cvp->type == ASN_COUNTER64) ||
-                         !vacm_in_view(pi, name, *namelen)) ) {
-                      access = NULL;
+                    /* check for permission to view this part of the OID tree */
+		    if (access && !in_a_view(name, namelen, pi, cvp)) {
+                        access = NULL;
 			*write_method = NULL;
 			/*
 			  if (in_view(vp->name, vp->namelen,

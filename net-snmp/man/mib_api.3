@@ -141,16 +141,6 @@ directories initialised by
 .I add_mibdir
 (or the default setup), though any imported modules do.
 .br
-By default, the following list of files will be loaded (if present):
-.I mib.txt
-in the current directory,
-.I /usr/local/lib/snmp/mib.txt
-and
-.I /etc/mib.txt
-though these can be overridden by setting the environmental variable
-.I MIBFILE
-to a (colon-separated) list of files.
-
 .I read_objid
 takes a string containing a textual version of an object identifier
 (in either numeric or descriptor form), and transforms this into

@@ -1,3 +1,5 @@
+#ifndef SNMP_API_H
+#define SNMP_API_H
 /***********************************************************
 	Copyright 1989 by Carnegie Mellon University
 
@@ -322,3 +324,4 @@ int snmp_get_suffix_only __P((void));
 int snmp_get_errno __P((void));
 void snmp_set_do_debugging __P((int));
 int snmp_get_do_debugging __P((void));
+#endif /* SNMP_API_H */

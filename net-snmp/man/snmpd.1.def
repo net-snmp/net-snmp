@@ -72,40 +72,16 @@ default) is allowed read-only access and the second ("private" by
 default) is allowed write access as well.  The 3-5th community strings
 are read-only as well.
 .IP
-In addition to these two configuration files in DATADIR/snmp, the
-agent will read any files with the names snmpd.conf and
-snmpd.local.conf in a colon sepereated path specified in the
+In addition to these two configuration files in DATADIR/snmp and/or
+LIBDIR/snmp, the agent will read any files with the names snmpd.conf
+and snmpd.local.conf in a colon sepereated path specified in the
 SNMPCONFPATH environmental variable.
-.TP
-.B DATADIR/snmp/mib.txt
-Defines the mib it should use.
-The location of this
-.B mib.txt 
-file may by overridden at run time be setting the enviornmental variable
-.B MIBFILE.
 .TP 
 .B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
 will not, however, load any file that begins with a '.' or decend into
 subdirectories.
 .B 
-.TP
-.B DATADIR/snmp/party.conf
-Defines the classic SNMP V2 parties.
-.TP
-.B DATADIR/snmp/view.conf
-Defines which parties defined in the 
-.B party.conf
-have access to the
-mibs in the
-.B mib.txt
-file.
-.TP
-.B DATADIR/snmp/context.conf
-Maps names to numerical view contexts.
-.TP
-.B DATADIR/snmp/acl.conf
-Defines the classic SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
 See the associated manual pages for information on the content of
@@ -114,6 +90,10 @@ these files.
 DATADIR/snmpd.conf
 .br
 DATADIR/snmpd.local.conf
+.br
+LIBDIR/snmpd.conf
+.br
+LIBDIR/snmpd.local.conf
 .br
 DATADIR/snmp/snmpd.conf
 .br
@@ -127,11 +107,7 @@ DATADIR/snmp/acl.conf
 .SH SEE ALSO
 (in recomended reading order)
 .PP
-snmpd.conf(5),
-party.conf(5),
-view.conf(5),
-context.conf(5),
-acl.conf(5)
+snmpd.conf(5)
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

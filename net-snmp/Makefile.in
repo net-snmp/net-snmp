@@ -3,7 +3,7 @@ TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bi
 SUBDIRS = snmplib agent apps local ov man
 INSTALLDIRS = snmplib agent apps local man mibs
 
-CPP = @CPP@ -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
+CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
 all:	sedscript EXAMPLE.conf subdirs
 
@@ -17,7 +17,7 @@ subdirs:
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
-install:    subdirs installdirs
+install:    all installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) ; \
 	done

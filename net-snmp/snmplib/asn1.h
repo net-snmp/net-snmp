@@ -1,3 +1,5 @@
+#ifndef ASN1_H
+#define ASN1_H
 /*
  * Definitions for Abstract Syntax Notation One, ASN.1
  * As defined in ISO/IS 8824 and ISO/IS 8825
@@ -159,3 +161,4 @@ u_char	*asn_parse_float __P((u_char *, int *, u_char *, float *, int));
 u_char	*asn_build_double __P((u_char *, int *, u_char, double *,
                                int));
 u_char	*asn_parse_double __P((u_char *, int *, u_char *, double *, int));
+#endif /* ASN1_H */

@@ -929,6 +929,7 @@ unsigned char PRIVATE_MIB_text[] = ".iso.org.dod.internet.private";
 unsigned char PARTY_MIB_text[] = ".iso.org.dod.internet.snmpParties";
 unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
 extern struct tree *tree_head;
+extern void adopt_orphans();
 struct tree *Mib;             /* Backwards compatibility */
 
 char Standard_Prefix[] = ".1.3.6.1.2.1.";
@@ -990,6 +991,7 @@ init_mib __P((void))
 	    read_module(entry);
 	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
+	adopt_orphans();
     }
 
     env_var = getenv("MIBFILES");

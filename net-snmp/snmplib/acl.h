@@ -1,3 +1,5 @@
+#ifndef ACL_H
+#define ACL_H
 /*
   aclTarget        INTEGER,
   aclSubject       INTEGER,
@@ -76,3 +78,4 @@ acl_createEntry __P((int target, int subject, int resources));
  */
 
 int read_acl_database __P((char *));
+#endif /* ACL_H */

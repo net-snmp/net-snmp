@@ -37,7 +37,7 @@ SOFTWARE.
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-#endif not lint
+#endif /* not lint */
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>

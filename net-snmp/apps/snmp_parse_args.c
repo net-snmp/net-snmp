@@ -161,7 +161,7 @@ snmp_parse_args(argc, argv, session)
         else if (++arg < argc)
           setenv("MIBDIRS",argv[arg], 1);
         else {
-          fprintf(stderr,"Need MIBS after -m flag.\n");
+          fprintf(stderr,"Need MIBDIRS after -M flag.\n");
           usage();
           exit(1);
         }

@@ -2,8 +2,9 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(agent/mibgroup/ucd-snmp/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
-AC_ARG_WITH(cc,[  --with-cc=CC                    use CC to compile .],export CC=$with_cc)
-AC_ARG_WITH(cflags,[  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],export CFLAGS=$with_cflags)
+AC_ARG_WITH(cc,[  --with-cc=CC                    use CC to compile .],[CC=$with_cc;export CC])
+AC_ARG_WITH(cflags,[  --with-cflags=CFLAGS            use CFLAGS as compile time arguments.],[CFLAGS=$with_cflags; export CFLAGS])
+AC_ARG_WITH(ldflags,[  --with-ldflags=LDFLAGS          use LDFLAGS as linking time arguments.],[LIBS=$with_ldflags; export LIBS])
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
 AC_ARG_ENABLE(shared,[  --enable-shared                 Compile and install shared libraries.],with_shared="yes",with_shared="no")
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
@@ -28,8 +29,10 @@ AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without
 
 AC_ARG_WITH(libwrap,
 [  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
-    if test -d "$withval"; then
+    if test "x$withval" != "x" -a -d "$withval"; then
         LIBS="-L$withval -lwrap $LIBS"
+    elif test "x$withval" eq "xyes"; then
+	LIBS="-lwrap $LIBS"
     else
         LIBS="$withval $LIBS"
     fi
@@ -520,8 +523,20 @@ dnl Checks for libraries.
 dnl AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(elf, nlist)
 AC_CHECK_LIB(m, asin)
-AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_LIB(socket, getservbyname)
+dnl On some platforms (Irix) libnsl and libsocket should not be used.
+AC_CHECK_FUNCS(gethostbyname getservbyname)
+if test "x$ac_cv_func_gethostbyname" != "xyes"; then
+       AC_CHECK_LIB(nsl, gethostbyname)
+       if test "x$ac_cv_lib_nsl_gethostbyname" = "yes"; then
+	    AC_DEFINE(HAVE_GETHOSTBYNAME)
+       fi
+fi
+if test "x$ac_cv_func_getservbyname" != "xyes"; then
+       AC_CHECK_LIB(socket, getservbyname)
+       if test "x$ac_cv_lib_socket_getservbyname" = "yes"; then
+	    AC_DEFINE(HAVE_GETSERVBYNAME)
+       fi
+fi
 dnl AC_CHECK_LIB(ucb, bzero)
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
