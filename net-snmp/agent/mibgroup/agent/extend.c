@@ -139,6 +139,7 @@ void init_extend( void )
     snmpd_register_config_handler("exec2", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("sh2",   extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("execFix2", extend_parse_config, NULL, NULL);
+    (void)_register_extend( ns_extend_oid, OID_LENGTH(ns_extend_oid));
 }
 
         /*************************
@@ -286,7 +287,7 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
          *  to the underlying data.
          *   So we'll keep a list internally as well.
          */
-    for ( eptr1 = ehead, eptr2 = NULL;
+    for ( eptr1 = ereg->ehead, eptr2 = NULL;
           eptr1;
           eptr2 = eptr1, eptr1 = eptr1->next ) {
 
@@ -299,7 +300,7 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
     if ( eptr2 )
         eptr2->next = extension;
     else
-        ehead       = extension;
+        ereg->ehead = extension;
     extension->next = eptr1;
     return extension;
 }
@@ -874,7 +875,8 @@ _extend_find_entry( netsnmp_request_info       *request,
                     netsnmp_table_request_info *table_info,
                     int mode  )
 {
-    netsnmp_extend *eptr;
+    netsnmp_extend            *eptr;
+    extend_registration_block *ereg;
     int line_idx;
     oid oid_buf[MAX_OID_LEN];
     int oid_len;
@@ -887,6 +889,9 @@ _extend_find_entry( netsnmp_request_info       *request,
         return NULL;
     }
 
+    ereg = _find_extension_block( request->requestvb->name,
+                                  request->requestvb->name_length );
+
     /***
      *  GET handling - find the exact entry being requested
      ***/
@@ -894,7 +899,7 @@ _extend_find_entry( netsnmp_request_info       *request,
         DEBUGMSGTL(( "nsExtendTable:output2", "GET: %s / %d\n ",
                       table_info->indexes->val.string,
                      *table_info->indexes->next_variable->val.integer));
-        for ( eptr = ehead; eptr; eptr = eptr->next ) {
+        for ( eptr = ereg->ehead; eptr; eptr = eptr->next ) {
             if ( !strcmp( eptr->token, table_info->indexes->val.string ))
                 break;
         }
@@ -927,7 +932,7 @@ _extend_find_entry( netsnmp_request_info       *request,
              * Beginning of the table - find the first active
              *  (and successful) entry, and use the first line of it
              */
-            for (eptr = ehead; eptr; eptr = eptr->next ) {
+            for (eptr = ereg->ehead; eptr; eptr = eptr->next ) {
                 if ((eptr->flags & NS_EXTEND_FLAGS_ACTIVE) &&
                     (netsnmp_cache_check_and_reload( eptr->cache ) >= 0 )) {
                     line_idx = 1;
@@ -943,7 +948,7 @@ _extend_find_entry( netsnmp_request_info       *request,
              * Otherwise, find the first entry not earlier
              * than the requested token...
              */
-            for (eptr = ehead; eptr; eptr = eptr->next ) {
+            for (eptr = ereg->ehead; eptr; eptr = eptr->next ) {
                 if ( strlen(eptr->token) > strlen( token ))
                     break;
                 if ( strlen(eptr->token) == strlen( token ) &&
