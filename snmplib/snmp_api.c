@@ -4826,6 +4826,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     const char *value)
 {
     int result = 0;
+    int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
     u_char buf[SPRINT_MAX_LEN];
     size_t tint;
     long ltmp;
@@ -4838,9 +4839,16 @@ snmp_add_var(struct snmp_pdu *pdu,
     struct counter64 c64tmp;
 #endif /* OPAQUE_SPECIAL_TYPES */
 
+    tp = get_tree(name, name_length, get_tree_head());
+    if (!tp || !tp->type) check = 0;
+
     switch(type){
       case 'i':
-	tp = get_tree(name, name_length, get_tree_head());
+        if (check && tp->type != TYPE_INTEGER && tp->type != TYPE_INTEGER32) {
+	    value = "Type of object is not INTEGER";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         if (sscanf(value, "%ld", &ltmp) != 1) {
 	    ep = tp ? tp->enums : NULL;
 	    while (ep) {
@@ -4857,7 +4865,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    }
 	}
 
-	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
+	if (check && tp->ranges) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -4865,7 +4873,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    }
 	    if (!rp) {
 		result = SNMPERR_RANGE;
-		snmp_set_detail("Value");
+		snmp_set_detail("Value out of range");
 		break;
 	    }
 	}
@@ -4874,13 +4882,35 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'u':
+        if (check && tp->type != TYPE_GAUGE && tp->type != TYPE_UNSIGNED32) {
+	    value = "Type of object is not Unsigned32";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
         break;
 
+      case '3':
+        if (check && tp->type != TYPE_UINTEGER32) {
+	    value = "Type of object is not UInteger32";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
+        if (sscanf(value, "%lu", &ltmp) == 1)
+	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
+				  (u_char *) &ltmp, sizeof(ltmp));
+	else goto fail;
+        break;
+
       case 'c':
+        if (check && tp->type != TYPE_COUNTER) {
+	    value = "Type of object is not Counter32";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
 				  (u_char *) &ltmp, sizeof(ltmp));
@@ -4888,6 +4918,11 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 't':
+        if (check && tp->type != TYPE_TIMETICKS) {
+	    value = "Type of object is not Timeticks";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         if (sscanf(value, "%lu", &ltmp) == 1)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
 				  (u_char *) &ltmp, sizeof(long));
@@ -4895,14 +4930,24 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'a':
+        if (check && tp->type != TYPE_IPADDR) {
+	    value = "Type of object is not IpAddress";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         ltmp = inet_addr(value);
-        if ( (ltmp != (long)-1) || (0 == strcmp(value,"255.255.255.255")) )
+        if (ltmp != (long)-1 || !strcmp(value,"255.255.255.255"))
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
 				  (u_char *) &ltmp, sizeof(long));
 	else goto fail;
         break;
 
       case 'o':
+        if (check && tp->type != TYPE_OBJID) {
+	    value = "Type of object is not OBJECT IDENTIFIER";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         tint = sizeof(buf) / sizeof(oid);
         if (read_objid(value, (oid *)buf, &tint))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
@@ -4913,6 +4958,11 @@ snmp_add_var(struct snmp_pdu *pdu,
       case 's':
       case 'x':
       case 'd':
+        if (check && tp->type != TYPE_OCTETSTR) {
+	    value = "Type of object is not OCTET STRING";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
         if (type == 'd'){
           ltmp = ascii_to_binary(value, buf);
         } else if (type == 's'){
@@ -4926,8 +4976,7 @@ snmp_add_var(struct snmp_pdu *pdu,
           snmp_set_detail(value);
           break;
         }
-	tp = get_tree(name, name_length, get_tree_head());
-	if (tp && tp->ranges && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE)) {
+	if (check && tp->ranges) {
 	    rp = tp->ranges;
 	    while (rp) {
 		if (rp->low <= ltmp && ltmp <= rp->high) break;
@@ -4935,7 +4984,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    }
 	    if (!rp) {
 		result = SNMPERR_RANGE;
-		snmp_set_detail("Length");
+		snmp_set_detail("Bad string length");
 		break;
 	    }
 	}
@@ -4947,9 +4996,13 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'b':
+        if (check && (tp->type != TYPE_OCTETSTR || !tp->enums)) {
+	    value = "Type of object is not BITS";
+	    result = SNMPERR_VALUE;
+	    goto set_error;
+	}
 	tint = 0;
 	memset(buf, 0, sizeof buf);
-	tp = get_tree(name, name_length, get_tree_head());
 	{ char *lvalue = strdup(value), *cp;
 	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
 	    char *ecp;
@@ -4968,9 +5021,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 		goto out;
 	      }
 	    }
-	    ix = ltmp/8;
+	    ix = ltmp / 8;
 	    if (ix >= (int)tint) tint = ix+1;
-	    bit = 0x80 >> ltmp%8;
+	    bit = 0x80 >> ltmp % 8;
 	    buf[ix] |= bit;
 	  }
 	  free(lvalue);
@@ -5012,7 +5065,7 @@ snmp_add_var(struct snmp_pdu *pdu,
       default:
 	result = SNMPERR_VAR_TYPE;
 	sprintf((char *)buf, "%c", type);
-	snmp_set_detail((const char *)buf);
+	snmp_set_detail((char *)buf);
         break;
     }
 
@@ -5021,6 +5074,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 
 fail:
     result = SNMPERR_VALUE;
+set_error:
     snmp_set_detail(value);
 out:
     SET_SNMP_ERROR(result);
