@@ -14,7 +14,6 @@
 #include <strings.h>
 #endif
 #include <stdio.h>
-#include <signal.h>
 #include <ctype.h>
 #include <errno.h>
 
@@ -85,7 +84,7 @@ void init_agent_read_config (void)
 #endif
 }
 
-RETSIGTYPE update_config(int a)
+void update_config(void)
 {
   free_config();
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
@@ -100,9 +99,6 @@ RETSIGTYPE update_config(int a)
   }
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
-#ifdef SIGHUP
-  signal(SIGHUP,update_config);
-#endif
 }
 
 

@@ -150,6 +150,7 @@ int 		log_addresses	 = 0;
 int 		verbose		 = 0;
 int 		snmp_dump_packet;
 int             running          = 1;
+int		reconfig	 = 0;
 
 oid version_id[]	 = { EXTENSIBLEMIB, AGENTID, OSTYPE };
 int version_id_len	 = sizeof(version_id)/sizeof(version_id[0]);
@@ -549,6 +550,15 @@ SnmpdShutDown(int a)
   running = 0;
 }
 
+#ifdef SIGHUP
+RETSIGTYPE
+SnmpdReconfig(int a)
+{
+  reconfig = 1;
+  signal(SIGHUP, SnmpdReconfig);
+}
+#endif
+
 static void
 SnmpTrapNodeDown(void)
 {
@@ -840,7 +850,7 @@ main(int argc, char *argv[])
     register_mib_handlers(); /* snmplib .conf handlers */
     read_premib_configs();   /* read pre-mib-reading .conf handlers */
     init_mib();              /* initialize the mib structures */
-    update_config(0);        /* read in config files and register HUP */
+    update_config();         /* read in config files and register HUP */
 
     /* get current time (ie, the time the agent started) */
     gettimeofday(&starttime, NULL);
@@ -854,6 +864,9 @@ main(int argc, char *argv[])
 #endif
 #ifdef SIGINT
     signal(SIGINT, SnmpdShutDown);
+#endif
+#ifdef SIGHUP
+    signal(SIGHUP, SnmpdReconfig);
 #endif
         
 #if HAVE_UNISTD_H
@@ -936,6 +949,10 @@ receive(void)
      * reset the 'sched'uler.
      */
     while (running) {
+	if (reconfig) {
+	    reconfig = 0;
+	    update_config();
+	}
 	tvp =  &timeout;
 	tvp->tv_sec = 0;
 	tvp->tv_usec = TIMETICK;
