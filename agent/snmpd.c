@@ -767,8 +767,8 @@ snmp_check_packet(struct snmp_session *session,
 
 	if (count >= ADDRCACHE ||
             ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)){
-	    DEBUGMSGTL(("snmpd", "Received SNMP packet(s) from %s\n",
-                        inet_ntoa(fromIp->sin_addr)));
+	    snmp_log(LOG_INFO, "Received SNMP packet(s) from %s\n",
+                        inet_ntoa(fromIp->sin_addr));
 	    for(count = 0; count < ADDRCACHE; count++){
 		if (addrCache[count].status == UNUSED){
 		    addrCache[count].addr = fromIp->sin_addr.s_addr;
