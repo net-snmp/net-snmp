@@ -597,6 +597,9 @@ var_ifEntry(struct variable *vp,
 #ifdef if_odrops
     long_return = (u_long) if_msg.ifm_data.ifi_odrops;
 #else
+#ifdef NO_DUMMY_VALUES
+    return NULL;
+#endif
     long_return = 0;
 #endif
     return (u_char *) &long_return;
@@ -824,6 +827,9 @@ var_ifEntry(struct variable *vp,
 		if(ifnet.if_type == IFT_ISDNPRIMARY) long_return=64000*30;
 	    }
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long) 10000000;
 #endif
 	    return (u_char *) &long_return;
@@ -861,6 +867,9 @@ var_ifEntry(struct variable *vp,
                + (now.tv_usec - ifnet.if_lastchange.tv_usec) / 10000);
           }
 #else
+#ifdef NO_DUMMY_VALUES
+	  return NULL;
+#endif
           long_return = 0; /* XXX */
 #endif
           return (u_char *) &long_return;
@@ -868,6 +877,9 @@ var_ifEntry(struct variable *vp,
 #ifdef STRUCT_IFNET_HAS_IF_IBYTES
           long_return = (u_long)  ifnet.if_ibytes;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -883,6 +895,9 @@ var_ifEntry(struct variable *vp,
 #if STRUCT_IFNET_HAS_IF_IMCASTS
 	    long_return = (u_long)  ifnet.if_imcasts;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -890,6 +905,9 @@ var_ifEntry(struct variable *vp,
 #if STRUCT_IFNET_HAS_IF_IQDROPS
 	    long_return = (u_long)  ifnet.if_iqdrops;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -900,6 +918,9 @@ var_ifEntry(struct variable *vp,
 #if STRUCT_IFNET_HAS_IF_NOPROTO
 	    long_return = (u_long)  ifnet.if_noproto;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -907,6 +928,9 @@ var_ifEntry(struct variable *vp,
 #ifdef STRUCT_IFNET_HAS_IF_OBYTES
           long_return = (u_long)  ifnet.if_obytes;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
 #endif
 	    return (u_char *) &long_return;
@@ -922,6 +946,9 @@ var_ifEntry(struct variable *vp,
 #if STRUCT_IFNET_HAS_IF_OMCASTS
 	    long_return = (u_long)  ifnet.if_omcasts;
 #else
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = (u_long)  0; /* XXX */
 #endif
 	    return (u_char *) &long_return;

@@ -269,6 +269,9 @@ var_system(struct variable *vp,
             *write_method = writeSystem;
             return (u_char *)sysLocation;
         case SYSSERVICES:
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
             long_return = 72;
             return (u_char *)&long_return;
 
