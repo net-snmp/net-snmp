@@ -6,7 +6,7 @@
 # on, simply put the following line (without the leading # mark) your
 # snmpd.conf file:
 #
-#   perl do /path/to/perl_module.pl
+#   perl do "/path/to/perl_module.pl";
 #
 
 my $regat = '.1.3.6.1.4.1.8072.999';
