@@ -9713,7 +9713,7 @@ echo "${ECHO_T}$new_module_list." >&6
 EOF
 
 
-MODULECPP="$CPP -I${srcdir}/agent/mibgroup"
+MODULECPP="$CPP -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 echo "$as_me:$LINENO: checking for and configuring mib modules pieces to use" >&5
 echo $ECHO_N "checking for and configuring mib modules pieces to use... $ECHO_C" >&6
 
