@@ -15,10 +15,10 @@
 	 *
 	 *********************/
 
-#ifndef linux
+#if !defined(linux) && !defined(HAVE_SYS_TCPIPSTATS_H)
 static struct nlist icmp_nl[] = {
 #define N_ICMPSTAT	0
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
 	{ "_icmpstat"},
 #else
         { "icmpstat"},
@@ -33,7 +33,7 @@ static void
 linux_read_icmp_stat __P((struct icmp_mib *));
 #endif
 
-static int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
+extern int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
 
 	/*********************
 	 *
@@ -44,7 +44,7 @@ static int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**
 
 void	init_icmp( )
 {
-#ifndef linux
+#if !defined(linux) && !defined(HAVE_SYS_TCPIPSTATS_H)
     init_nlist( icmp_nl );
 #endif
 }
@@ -52,7 +52,7 @@ void	init_icmp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
-static int
+int
 header_icmp(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -92,6 +92,7 @@ header_icmp(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 #ifndef linux
+#ifdef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
 var_icmp(vp, name, length, exact, var_len, write_method)
@@ -101,6 +102,101 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     int     exact;
     int     *var_len;
     int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+    register int i;
+    static struct icmpstat icmpstat;
+    static struct kna tcpipstats;
+    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+	return NULL;
+
+    /*
+     *	Get the ICMP statistics from the kernel...
+     */
+    if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
+	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+    }
+#define icmpstat tcpipstats.icmpstat
+
+    switch (vp->magic){
+	case ICMPINMSGS:
+	    long_return = icmpstat.icps_badcode + icmpstat.icps_tooshort +
+			  icmpstat.icps_checksum + icmpstat.icps_badlen;
+	    for (i=0; i <= ICMP_MAXTYPE; i++)
+		long_return += icmpstat.icps_inhist[i];
+	    return (u_char *)&long_return;
+	case ICMPINERRORS:
+	    long_return = icmpstat.icps_badcode + icmpstat.icps_tooshort +
+			  icmpstat.icps_checksum + icmpstat.icps_badlen;
+	    return (u_char *)&long_return;
+	case ICMPINDESTUNREACHS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_UNREACH];
+	case ICMPINTIMEEXCDS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_TIMXCEED];
+	case ICMPINPARMPROBS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_PARAMPROB];
+	case ICMPINSRCQUENCHS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_SOURCEQUENCH];
+	case ICMPINREDIRECTS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_REDIRECT];
+	case ICMPINECHOS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHO];
+	case ICMPINECHOREPS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_ECHOREPLY];
+	case ICMPINTIMESTAMPS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMP];
+	case ICMPINTIMESTAMPREPS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_TSTAMPREPLY];
+	case ICMPINADDRMASKS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREQ];
+	case ICMPINADDRMASKREPS:
+	    return (u_char *) &icmpstat.icps_inhist[ICMP_MASKREPLY];
+	case ICMPOUTMSGS:
+	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
+	    for (i=0; i <= ICMP_MAXTYPE; i++)
+		long_return += icmpstat.icps_outhist[i];
+	    return (u_char *)&long_return;
+	case ICMPOUTERRORS:
+	    long_return = icmpstat.icps_oldshort + icmpstat.icps_oldicmp;
+	    return (u_char *)&long_return;
+	case ICMPOUTDESTUNREACHS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_UNREACH];
+	case ICMPOUTTIMEEXCDS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_TIMXCEED];
+	case ICMPOUTPARMPROBS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_PARAMPROB];
+	case ICMPOUTSRCQUENCHS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_SOURCEQUENCH];
+	case ICMPOUTREDIRECTS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_REDIRECT];
+	case ICMPOUTECHOS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHO];
+	case ICMPOUTECHOREPS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_ECHOREPLY];
+	case ICMPOUTTIMESTAMPS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMP];
+	case ICMPOUTTIMESTAMPREPS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_TSTAMPREPLY];
+	case ICMPOUTADDRMASKS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREQ];
+	case ICMPOUTADDRMASKREPS:
+	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREPLY];
+	default:
+	    ERROR_MSG("");
+    }
+
+    return NULL;
+}
+
+#else /* not HAVE_SYS_TCPIPSTATS_H */
+
+u_char *
+var_icmp(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    oid     *name;
+    int     *length;
+    int     exact;
+    int     *var_len;
+    int     (**write_method)();
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -183,6 +279,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     return NULL;
 }
 
+#endif /* not HAVE_SYS_TCPIPSTATS_H */
 
 #else /* linux */
 

@@ -8,6 +8,11 @@
 #include "at.h"
 #include "interfaces.h"
 
+#if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
+# if defined(RTF_LLINFO)
+#  define CAN_USE_SYSCTL 1
+# endif
+#endif
 
 	/*********************
 	 *
@@ -21,12 +26,17 @@
 static struct nlist at_nl[] = {
 #define N_ARPTAB_SIZE	0
 #define N_ARPTAB        1
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
 	{ "_arptab_size" }, 
 	{ "_arptab" },      
 #else
+#if defined(__sgi)
+	{ "arptab_size" }, 
+	{ "arptab" },      
+#else
 	{ "arptab_nb" }, 
 	{ "arphd" },      
+#endif
 #endif
         { 0 },
 };
@@ -333,11 +343,11 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 
 #ifndef solaris2
 
+static int arptab_size, arptab_current;
 #if CAN_USE_SYSCTL
 static char *lim, *rtnext;
 static char *at = 0;
 #else
-static int arptab_size, arptab_current;
 #ifdef STRUCT_ARPHD_HAS_AT_NEXT
 static struct arphd *at=0;
 static struct arptab *at_ptr, at_entry;

@@ -30,6 +30,8 @@ PERFORMANCE OF THIS SOFTWARE.
  * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
  * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
  * (jbray@origin-at.co.uk) 1997
+ * Support for system({CTL_NET,PF_ROUTE,...) by Simon Leinen
+ * (simon@switch.ch) 1997
  */
 
 #include <config.h>
@@ -127,9 +129,22 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 
 #if solaris2
 #include "kernel_sunos5.h"
+#endif
+ 
+#ifdef HAVE_SYS_SYSCTL_H
+# ifdef CTL_NET
+#  ifdef PF_ROUTE
+#   ifdef NET_RT_DUMP
+#    define USE_SYSCTL_ROUTE_DUMP
+#   endif
+#  endif
+# endif
 #endif
 
 #define CACHE_TIME (120)	    /* Seconds */
@@ -150,11 +165,283 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 
-#ifndef solaris2
+extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
+
+#ifdef USE_SYSCTL_ROUTE_DUMP
+
+static void Route_Scan_Reload __P((void));
+
+static unsigned char *all_routes = 0;
+static unsigned char *all_routes_end;
+static size_t all_routes_size;
+
+extern const struct sockaddr * get_address (const void *, int, int);
+extern const struct in_addr * get_in_address (const void *, int, int);
+
+u_char *
+var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;   /* IN - pointer to variable entry that points here */
+    register oid	*name;	    /* IN/OUT - input name requested, output name found */
+    register int	*length;    /* IN/OUT - length of input and output strings */
+#ifndef linux
+    int			exact;	    /* IN - TRUE if an exact match was requested. */
+    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
+#endif /* linux */
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int)); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+  /*
+   * object identifier is of form:
+   * 1.3.6.1.2.1.4.21.1.1.A.B.C.D,  where A.B.C.D is IP address.
+   * IPADDR starts at offset 10.
+   */
+  struct rt_msghdr *rtp, *saveRtp=0;
+  register int Save_Valid, result;
+  static int saveNameLen=0, saveExact=0;
+  static oid saveName[14], Current[14];
+  u_char *cp; u_char *ap;
+  oid *op;
+#if 0
+  /** 
+  ** this optimisation fails, if there is only a single route avail.
+  ** it is a very special case, but better leave it out ...
+  **/
+#if 0
+  if (rtsize <= 1)
+    Save_Valid = 0;
+  else
+#endif /* 0 */
+    /*
+     *	OPTIMIZATION:
+     *
+     *	If the name was the same as the last name, with the possible
+     *	exception of the [9]th token, then don't read the routing table
+     *
+     */
+
+    if ((saveNameLen == *length) && (saveExact == exact)) {
+      register int temp=name[9];
+      name[9] = 0;
+      Save_Valid = (compare(name, *length, saveName, saveNameLen) == 0);
+      name[9] = temp;
+    } else
+      Save_Valid = 0;
+
+  if (Save_Valid && saveRtp) {
+    register int temp=name[9];    /* Fix up 'lowest' found entry */
+    bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+    name[9] = temp;
+    *length = 14;
+    rtp = saveRtp;
+  } else {
+#endif /* 0 */
+    /* fill in object part of name for current (less sizeof instance part) */
+
+    bcopy((char *)vp->name, (char *)Current, (int)(vp->namelen) * sizeof(oid));
+
+#if 0
+    /*
+     *  Only reload if this is the start of a wildcard
+     */
+    if (*length < 14) {
+      Route_Scan_Reload();
+    }
+#else
+    Route_Scan_Reload();
+#endif
+    for(ap = all_routes; ap < all_routes_end; ap += rtp->rtm_msglen) {
+      rtp = (struct rt_msghdr *) ap;
+      if (rtp->rtm_type == 0)
+	break;
+      if (rtp->rtm_version != RTM_VERSION)
+	{
+	  fprintf (stderr, "routing socket message version mismatch (%d instead of %d)\n",
+		   rtp->rtm_version, RTM_VERSION);
+	  break;
+	}
+      if (rtp->rtm_type != RTM_GET)
+	{
+	  fprintf (stderr, "routing socket returned message other than GET (%d)\n",
+		   rtp->rtm_type);
+	  continue;
+	}
+      if (! (rtp->rtm_addrs & RTA_DST))
+	continue;
+      cp = (u_char *) get_in_address ((struct sockaddr *) (rtp + 1),
+				      rtp->rtm_addrs, RTA_DST);
+      op = Current + 10;
+      *op++ = *cp++;
+      *op++ = *cp++;
+      *op++ = *cp++;
+      *op++ = *cp++;
+
+      result = compare(name, *length, Current, 14);
+      if ((exact && (result == 0)) || (!exact && (result < 0)))
+	break;
+    }
+    if (ap >= all_routes_end || rtp->rtm_type == 0)
+      return 0;
+    /*
+     *  Save in the 'cache'
+     */
+    bcopy((char *) name, (char *) saveName, *length * sizeof(oid));
+    saveName[9] = '\0';
+    saveNameLen = *length;
+    saveExact = exact;
+    saveRtp = rtp;
+    /*
+     *  Return the name
+     */
+    bcopy((char *) Current, (char *) name, 14 * sizeof(oid));
+    *length = 14;
+#if 0
+  }
+#endif /* 0 */
+
+  *write_method = write_rte;
+  *var_len = sizeof(long_return);
+
+  switch(vp->magic){
+  case IPROUTEDEST:
+    return (u_char *)get_in_address ((struct sockaddr *) (rtp + 1),
+				     rtp->rtm_addrs, RTA_DST);
+  case IPROUTEIFINDEX:
+    long_return = (u_long)rtp->rtm_index;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC1:
+    long_return = (rtp->rtm_flags & RTF_UP) ? 1 : 0;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC2:
+    long_return = -1;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC3:
+    long_return = -1;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC4:
+    long_return = -1;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC5:
+    long_return = -1;
+    return (u_char *)&long_return;
+  case IPROUTENEXTHOP:
+    return (u_char *)get_in_address ((struct sockaddr *) (rtp + 1),
+				     rtp->rtm_addrs, RTA_GATEWAY);
+  case IPROUTETYPE:
+    long_return = (rtp->rtm_flags & RTF_UP)
+      ? (rtp->rtm_flags & RTF_UP) ? 4 : 3
+      : 2;
+    return (u_char *)&long_return;
+  case IPROUTEPROTO:
+    long_return = (rtp->rtm_flags & RTF_DYNAMIC)
+      ? 10 : (rtp->rtm_flags & RTF_STATIC)
+      ? 2 : (rtp->rtm_flags & RTF_DYNAMIC) ? 4 : 1;
+    return (u_char *)&long_return;
+  case IPROUTEAGE:
+    long_return = 0;
+    return (u_char *)&long_return;
+  case IPROUTEMASK:
+    if (rtp->rtm_flags & RTF_HOST)
+      {
+	long_return = 0x00000001;
+	return (u_char *)&long_return;
+      }
+    else
+      {
+	return (u_char *)get_in_address ((struct sockaddr *) (rtp + 1),
+					 rtp->rtm_addrs, RTA_NETMASK);
+      }
+  case IPROUTEINFO:
+    *var_len = nullOidLen;
+    return (u_char *)&nullOid;
+  default:
+    ERROR_MSG("");
+  }
+  return NULL;
+}
+
+/*
+  get_address()
+
+  Traverse the address structures after a routing socket message and
+  extract a specific one.
+
+  Some of this is peculiar to IRIX 6.2, which doesn't have sa_len in
+  the sockaddr structure yet.  With sa_len, skipping an address entry
+  would be much easier.
+ */
+#include <sys/un.h>
+
+const struct sockaddr *
+get_address (const void * _ap, int addresses, int wanted)
+{
+  const struct sockaddr *ap = (struct sockaddr *) _ap;
+  int index;
+  int bitmask;
+
+  for (index = 0, bitmask = 1;
+       index < RTAX_MAX;
+       ++index, bitmask <<= 1)
+    {
+      if (bitmask == wanted)
+	{
+	  if (bitmask & addresses)
+	    {
+	      return ap;
+	    }
+	  else
+	    {
+	      return 0;
+	    }
+	}
+      else if (bitmask & addresses)
+	{
+	  unsigned length = 1;
+	  switch (ap->sa_family)
+	    {
+	    case AF_UNIX:
+	      length = sizeof (struct sockaddr_un);
+	      break;
+	    case AF_LINK:
+	      length = _MAX_SA_LEN;
+	      break;
+	    case AF_INET:
+	    default:
+	      length = sizeof (struct sockaddr_in);
+	      break;
+	    }
+	  while (length % sizeof (long) != 0)
+	    ++length;
+	  ap = (struct sockaddr *) ((char *) ap + length);
+	}
+    }
+  return 0;
+}
+
+/*
+  get_in_address()
+
+  Convenience function for the special case of get_address where an
+  AF_INET address is desired, and we're only interested in the in_addr
+  part.
+ */
+const struct in_addr *
+get_in_address (const void * ap, int addresses, int wanted)
+{
+  struct sockaddr_in * a;
+
+  a = (struct sockaddr_in *) get_address (ap, addresses, wanted);
+  if (a->sin_family != AF_INET)
+    {
+      ERROR_MSG("AF_INET sockaddr expected");
+    }
+  return &a->sin_addr;
+}
+
+
+#else /* not USE_SYSCTL_ROUTE_DUMP */
+
 static void Route_Scan_Reload __P((void));
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
-#endif
 
 #if !(defined(linux) || defined(solaris2))
 static struct nlist nl_var_route[] = {
@@ -180,6 +467,54 @@ static struct nlist nl_var_route[] = {
 	{ 0 },
 };
 #endif
+#endif
+
+#ifdef USE_SYSCTL_ROUTE_DUMP
+
+void
+init_var_route()
+{
+}
+
+static void Route_Scan_Reload()
+{
+  size_t size = 0;
+  int name[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_DUMP, 0 };
+
+  if (sysctl (name, sizeof (name) / sizeof (int),
+	      0, &size, 0, 0) == -1)
+    {
+      fprintf (stderr, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
+    }
+  else
+    {
+      if (all_routes == 0 || all_routes_size < size)
+	{
+	  if (all_routes != 0)
+	    {
+	      free (all_routes);
+	      all_routes = 0;
+	    }
+	  if ((all_routes = malloc (size)) == 0)
+	    {
+	      fprintf (stderr, "out of memory allocating route table\n");
+	    }
+	  all_routes_size = size;
+	}
+      else
+	{
+	  size = all_routes_size;
+	}
+      if (sysctl (name, sizeof (name) / sizeof (int),
+		  all_routes, &size, 0, 0) == -1)
+	{
+	  fprintf (stderr, "sysctl(CTL_NET,PF_ROUTE,0,0,NET_RT_DUMP,0)\n");
+	}
+      all_routes_end = all_routes + size;
+    }
+}
+
+#else /* not USE_SYSCTL_ROUTE_DUMP */
 
 void	init_var_route( )
 {
@@ -187,9 +522,6 @@ void	init_var_route( )
     init_nlist( nl_var_route );
 #endif
 }
-
-
-extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 #ifndef solaris2
 
@@ -994,4 +1326,6 @@ RTENTRY **r1, **r2;
 	if (dst1 > dst2) return(1);
 	return(-1);
 }
+#endif /* not USE_SYSCTL_ROUTE_DUMP */
+
 #endif /* solaris2 */
