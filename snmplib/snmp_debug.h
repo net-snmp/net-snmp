@@ -111,15 +111,34 @@ To print multiple pieces to a single line in one call, use:
 #define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%s", __DBGINDENT()))
 
 #define __DBGDUMPHEADER(token,x) \
-        __DBGPRINTINDENT(token), \
-        debugmsg(token,x), \
+        __DBGPRINTINDENT("dumph_" token); \
+        debugmsg("dumph_" token,x); \
+        if (debug_is_token_registered("dumpx" token) == SNMPERR_SUCCESS ||    \
+            debug_is_token_registered("dumpv" token) == SNMPERR_SUCCESS ||    \
+            (debug_is_token_registered("dumpx_" token) != SNMPERR_SUCCESS &&  \
+             debug_is_token_registered("dumpv_" token) != SNMPERR_SUCCESS)) { \
+            debugmsg("dumph_" token,"\n"); \
+        } else { \
+            debugmsg("dumph_" token,"  "); \
+        } \
+        __DBGINDENTMORE()
+
+#define __DBGDUMPSECTION(token,x) \
+        __DBGPRINTINDENT("dumph_" token); \
+        debugmsg("dumph_" token,x); \
+        debugmsg("dumph_" token,"\n"); \
         __DBGINDENTMORE()
 
 #define __DBGDUMPSETUP(token,buf,len) \
-        __DBGTRACE, \
-        __DBGMSGHEXTLI((token,buf,len)), \
-        debugmsg(token,"\n"), \
-        __DBGPRINTINDENT(token)
+        debugmsg("dumpx" token, "dumpx_%s:%s", token, __DBGINDENT()); \
+        __DBGMSGHEX(("dumpx_" token,buf,len)); \
+        if (debug_is_token_registered("dumpv" token) == SNMPERR_SUCCESS || \
+            debug_is_token_registered("dumpv_" token) != SNMPERR_SUCCESS) { \
+            debugmsg("dumpx_" token,"\n"); \
+        } else { \
+            debugmsg("dumpx_" token,"  "); \
+        } \
+        debugmsg("dumpv" token, "dumpv_%s:%s", token, __DBGINDENT());
 
 /******************* End   private macros ************************/
 /*****************************************************************/
@@ -146,6 +165,9 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGDUMPHEADER(token,x) \
 	do {if (_DBG_IF_) {__DBGDUMPHEADER(token,x);} }while(0)
 
+#define DEBUGDUMPSECTION(token,x) \
+	do {if (_DBG_IF_) {__DBGDUMPSECTION(token,x);} }while(0)
+
 #define DEBUGDUMPSETUP(token,buf,len) \
 	do {if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);} }while(0)
 
@@ -167,6 +189,7 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGMSGHEXTLI(x)
 #define DEBUGPRINTINDENT(token)
 #define DEBUGDUMPHEADER(token,x)
+#define DEBUGDUMPSECTION(token,x)
 #define DEBUGDUMPSETUP(token, buf, len)
 
 #endif
