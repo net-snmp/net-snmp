@@ -42,9 +42,9 @@ arguments:
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 wombat_variables[] = {
-    { WOMBATUPTIME,  TIMETICKS, RONLY, var_wombat, 1, {1}},
-    { WOMBATCURRENT,   COUNTER, RONLY, var_wombat, 1, {2}},
-    { WOMBATHIGHWATER, COUNTER, RONLY, var_wombat, 1, {3}}
+    { WOMBATUPTIME,  ASN_TIMETICKS, RONLY, var_wombat, 1, {1}},
+    { WOMBATCURRENT,   ASN_COUNTER, RONLY, var_wombat, 1, {2}},
+    { WOMBATHIGHWATER, ASN_COUNTER, RONLY, var_wombat, 1, {3}}
 };
 config_load_mib(1.3.6.1.2.1.99, 7, wombat_variables)
   /* arguments:
