@@ -32,7 +32,7 @@ LIBS=	 ../../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@
 all: $(TARG)
 
 snmpnetstat: ${LOBJS} ${USELIBS}
-	${LIBTOOL} ${CC} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
+	${LINK} -o $@ ${LOBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
 
 distclean: clean
 
