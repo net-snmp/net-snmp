@@ -512,7 +512,6 @@ int val;
     return;
 }
 
-
 int
 calculate_time_diff(t1, t2)
   struct timeval t1, t2;
