@@ -99,7 +99,7 @@ $fulllen = length($_);
 $outputName = shift;
 $outputName = $mib->{'label'} if (!defined($outputName));
 $OUTPUTNAME = uc($outputName);
-print "outputing to $outputName.c and $outputName.h ...\n";
+print "outputting to $outputName.c and $outputName.h ...\n";
 
 open(DOTH,">$outputName.h");
 open(DOTC,">$outputName.c");
