@@ -1468,7 +1468,7 @@ AC_CHECK_HEADERS(pkginfo.h,
     LIBS="${LIBS} -ladm"
     AGENTLIBS="${AGENTLIBS} -ladm"))
 dnl WIN32
-AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -lhlpapi")
+AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
 AC_CHECK_HEADERS(io.h)
 dnl SCO
 AC_CHECK_HEADERS(sys/stream.h)
