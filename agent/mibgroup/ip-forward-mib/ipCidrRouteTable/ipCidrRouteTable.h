@@ -450,7 +450,7 @@ extern          "C" {
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPCIDRROUTETABLE_H */

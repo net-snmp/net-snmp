@@ -188,7 +188,7 @@ extern          "C" {
     netsnmp_mib_handler *netsnmp_sparse_table_handler_get(void);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_HANDLER_H_ */

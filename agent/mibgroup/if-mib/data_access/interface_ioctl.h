@@ -34,7 +34,7 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 /**---------------------------------------------------------------------*/
 
 # ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_INTERFACE_IOCTL_H */

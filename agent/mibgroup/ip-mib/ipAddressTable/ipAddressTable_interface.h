@@ -76,7 +76,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IPADDRESSTABLE_INTERFACE_H */

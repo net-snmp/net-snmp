@@ -70,7 +70,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IFTABLE_INTERFACE_H */

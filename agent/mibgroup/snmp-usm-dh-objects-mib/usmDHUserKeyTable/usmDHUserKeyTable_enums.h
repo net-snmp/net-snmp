@@ -34,7 +34,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* USMDHUSERKEYTABLE_ENUMS_H */

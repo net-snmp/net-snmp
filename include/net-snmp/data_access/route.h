@@ -118,7 +118,7 @@ void netsnmp_access_route_entry_free(netsnmp_route_entry * entry);
 /**---------------------------------------------------------------------*/
 
 # ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_ROUTE_H */

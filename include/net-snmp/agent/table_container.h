@@ -80,7 +80,7 @@ extern          "C" {
                                           netsnmp_container *container,
                                           char key_type );
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _TABLE_CONTAINER_HANDLER_H_ */

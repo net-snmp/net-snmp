@@ -79,7 +79,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* INETNETTOMEDIATABLE_INTERFACE_H */

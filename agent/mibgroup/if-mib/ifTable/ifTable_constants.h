@@ -367,7 +367,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* IFTABLE_OIDS_H */

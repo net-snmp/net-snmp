@@ -185,7 +185,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* INETNETTOMEDIATABLE_OIDS_H */

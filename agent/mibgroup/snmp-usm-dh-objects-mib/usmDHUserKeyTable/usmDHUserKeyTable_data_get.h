@@ -151,7 +151,7 @@ extern          "C" {
 
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* USMDHUSERKEYTABLE_DATA_GET_H */

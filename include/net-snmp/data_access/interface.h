@@ -212,7 +212,7 @@ netsnmp_access_interface_entry_overrides_get(const char * name);
 /**---------------------------------------------------------------------*/
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* NETSNMP_ACCESS_INTERFACE_H */
