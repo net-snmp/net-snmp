@@ -1,7 +1,7 @@
 #
 # Many people have requested better examples of the configuration
 # file, so here it is.  You can stick the file straight into the
-# proper place (PREFIX/lib/snmp/snmpd.conf) and run all the commands
+# proper place (PREFIX/share/snmp/snmpd.conf) and run all the commands
 # I talk about below.
 #                        - Wes
 #
