@@ -88,7 +88,7 @@ extern int callback_master_num;
 void
 init_subagent(void) {
     if (agentx_callback_sess == NULL) {
-	agentx_callback_sess = snmp_callback_open(callback_master_num,
+	agentx_callback_sess = netsnmp_callback_open(callback_master_num,
 						  handle_subagent_response,
 						  NULL, NULL);
 	DEBUGMSGTL(("agentx/subagent", "init_subagent sess %08x\n",

@@ -228,7 +228,7 @@ init_agent (const char *app)
 #endif
 
   /* always register a callback transport for internal use */
-  callback_master_sess = snmp_callback_open(0, handle_snmp_packet,
+  callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
                                             netsnmp_agent_check_packet,
                                             netsnmp_agent_check_parse);
   if (callback_master_sess)
@@ -249,7 +249,7 @@ init_agent (const char *app)
 
   /*  Register configuration tokens from transport modules.  */
 #ifdef SNMP_TRANSPORT_UDP_DOMAIN
-  snmp_udp_agent_config_tokens_register();
+  netsnmp_udp_agent_config_tokens_register();
 #endif
 
 #ifdef NETSNMP_EMBEDDED_PERL

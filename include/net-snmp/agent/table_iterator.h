@@ -37,7 +37,7 @@ typedef struct netsnmp_iterator_info_s {
 #define TABLE_ITERATOR_NAME "table_iterator"
 
 netsnmp_mib_handler *netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo);
-int netsnmp_netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
+int netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                             netsnmp_iterator_info *iinfo);
 
 void *netsnmp_extract_iterator_context(netsnmp_request_info *);

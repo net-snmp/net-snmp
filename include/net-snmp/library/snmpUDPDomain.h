@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #endif
 
-netsnmp_transport	*snmp_udp_transport	(struct sockaddr_in *addr,
+netsnmp_transport	*netsnmp_udp_transport	(struct sockaddr_in *addr,
 					 int local);
 
 
@@ -19,23 +19,23 @@ netsnmp_transport	*snmp_udp_transport	(struct sockaddr_in *addr,
     written to *addr.  Returns 1 if the conversion was successful, or 0 if it
     failed.  */
 
-int		 snmp_sockaddr_in	(struct sockaddr_in *addr,
+int		 netsnmp_sockaddr_in	(struct sockaddr_in *addr,
 					 const char *peername,
 					 int remote_port);
 
 
 /*  Register any configuration tokens specific to the agent.  */
 
-void		snmp_udp_agent_config_tokens_register(void);
+void		netsnmp_udp_agent_config_tokens_register(void);
 
-void		snmp_udp_parse_security	(const char *token, char *param);
+void		netsnmp_udp_parse_security	(const char *token, char *param);
 
-int		snmp_udp_getSecName	(void *opaque, int olength,
+int		netsnmp_udp_getSecName	(void *opaque, int olength,
 					 const char *community,
 					 int community_len, char **secname);
 
 /*  "Constructor" for transport domain object.  */
 
-void		snmp_udp_ctor		(void);
+void		netsnmp_udp_ctor		(void);
 
 #endif/*_SNMPUDPDOMAIN_H*/

@@ -116,7 +116,7 @@ typedef struct netsnmp_agent_session_s {
 
 /*  Address cache handling functions.  */
 
-void 		netsnmp_snmp_addrcache_initialise	(void);
+void 		netsnmp_addrcache_initialise	(void);
 void		netsnmp_addrcache_age		(void);
 
 

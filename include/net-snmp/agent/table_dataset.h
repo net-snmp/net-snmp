@@ -19,7 +19,7 @@ typedef int (Netsnmp_Value_Change_Ok)(char *old_value, size_t old_value_len,
                               char *new_value, size_t new_value_len);
 
 /* stored within a given row */
-typedef struct netsnmp_netsnmp_table_data_set_storage_s {
+typedef struct netsnmp_table_data_set_storage_s {
    unsigned int column;
 
    /* info about it? */
@@ -42,26 +42,26 @@ typedef struct netsnmp_netsnmp_table_data_set_storage_s {
     } data;
    u_long  data_len;
    
-   struct netsnmp_netsnmp_table_data_set_storage_s *next;
-} netsnmp_netsnmp_table_data_set_storage;
+   struct netsnmp_table_data_set_storage_s *next;
+} netsnmp_table_data_set_storage;
 
 typedef struct netsnmp_table_data_set_s {
    table_data *table;
-   netsnmp_netsnmp_table_data_set_storage *default_row;
+   netsnmp_table_data_set_storage *default_row;
 } netsnmp_table_data_set;
 
-Netsnmp_Node_Handler netsnmp_netsnmp_table_data_set_helper_handler;
+Netsnmp_Node_Handler netsnmp_table_data_set_helper_handler;
 
 /* to set, add column, type, (writable) ? 1 : 0 */
 int netsnmp_table_set_add_default_row(netsnmp_table_data_set *, unsigned int, int, int);
 /* to set, add column, type, (writable) ? 1 : 0, ... */
 #if HAVE_STDARG_H
-void netsnmp_netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *, ...);
+void netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *, ...);
 #else
-void netsnmp_netsnmp_table_set_multi_add_default_row(va_alist);
+void netsnmp_table_set_multi_add_default_row(va_alist);
 #endif
 int netsnmp_set_row_column(netsnmp_table_row *, unsigned int, int, const char *, size_t);
-netsnmp_netsnmp_table_data_set_storage *netsnmp_netsnmp_table_data_set_find_column(netsnmp_netsnmp_table_data_set_storage *,
+netsnmp_table_data_set_storage *netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *,
                                                    unsigned int);
 int netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *, netsnmp_table_data_set *,
                             netsnmp_table_registration_info *);
@@ -78,6 +78,6 @@ inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp
 };
 #endif
 
-#define netsnmp_netsnmp_table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
+#define netsnmp_table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)
 
 #endif /* _TABLE_DATA_SET_HANDLER_H_ */

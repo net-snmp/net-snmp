@@ -274,7 +274,7 @@ agent_check_and_process(int block) {
 
 
 /*  Set up the address cache.  */
-void netsnmp_snmp_addrcache_initialise(void)
+void netsnmp_addrcache_initialise(void)
 {
   int i = 0;
   

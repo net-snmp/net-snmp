@@ -66,7 +66,7 @@ typedef struct table_array_data_s {
  **********************************************************************
  **********************************************************************/
 int
-netsnmp_netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
+netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
                      netsnmp_table_registration_info *tabreg,
                      netsnmp_table_array_callbacks   *cb,
                      int                     group_rows)
@@ -265,7 +265,7 @@ typedef struct set_context_s {
 static void
 release_netsnmp_array_group( netsnmp_oid_array_header * g, void *v )
 {
-    netsnmp_netsnmp_array_group_item *tmp;
+    netsnmp_array_group_item *tmp;
     netsnmp_array_group * group = (netsnmp_array_group*)g;
 
     while(group->list) {
@@ -471,7 +471,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
     netsnmp_oid_array_header *row, *tmp, index;
     netsnmp_request_info * current;
     netsnmp_array_group * g;
-    netsnmp_netsnmp_array_group_item * i;
+    netsnmp_array_group_item * i;
 
     for( current = requests; current; current = current->next) {
             
@@ -512,7 +512,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
             DEBUGMSGOID(("helper:table_array:group", index.idx,index.idx_len));
             DEBUGMSG(("helper:table_array:group", "\n"));
             g = (netsnmp_array_group*)tmp;
-            i = SNMP_MALLOC_TYPEDEF(netsnmp_netsnmp_array_group_item);
+            i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
             i->ri = current;
             i->tri = tblreq_info;
             i->next = g->list;
@@ -524,7 +524,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
         DEBUGMSGOID(("helper:table_array:group", index.idx,index.idx_len));
         DEBUGMSG(("helper:table_array:group", "\n"));
         g = SNMP_MALLOC_TYPEDEF(netsnmp_array_group);
-        i = SNMP_MALLOC_TYPEDEF(netsnmp_netsnmp_array_group_item);
+        i = SNMP_MALLOC_TYPEDEF(netsnmp_array_group_item);
         g->list = i;
         g->table = tad->array;
         i->ri = current;

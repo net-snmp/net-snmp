@@ -13,20 +13,20 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern const oid ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
+extern const oid netsnmp_ucdSnmpUnixDomain[9];  /*  = { UCDAVIS_MIB, 251, 2 };  */
 
-netsnmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
+netsnmp_transport		*netsnmp_unix_transport	(struct sockaddr_un *addr,
 						 int local);
-int		snmp_unix_recv	(netsnmp_transport *t, void *buf, int size,
+int		netsnmp_unix_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength);
-int		snmp_unix_send	(netsnmp_transport *t, void *buf, int size,
+int		netsnmp_unix_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength);
-int		snmp_unix_close	(netsnmp_transport *t);
-int		snmp_unix_accept	(netsnmp_transport *t);
+int		netsnmp_unix_close	(netsnmp_transport *t);
+int		netsnmp_unix_accept	(netsnmp_transport *t);
 
 /*  "Constructor" for transport domain object.  */
 
-void		snmp_unix_ctor		(void);
+void		netsnmp_unix_ctor		(void);
 
 #endif/*SNMP_TRANSPORT_UNIX_DOMAIN*/
 
