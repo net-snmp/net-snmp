@@ -200,7 +200,7 @@ AC_ARG_WITH(out_mib_modules,
 
   Optional mib modules that can be built into the agent include:
     host:                  host resources mib support.
-                             (alpha level code for linux, hpux, solaris)
+                             (beta level code for linux, hpux, solaris, bsdi)
     smux:                  smux sub-agent support.
     misc/ipfwacc:          accounting rules IP firewall information.
                              (only under linux)
@@ -500,6 +500,10 @@ if test "x$with_shared" = "xyes"; then
     freebsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
 	SHLIB_VERSION=.3.5
+	;;
+
+    bsdi4*)
+	SHLIB_LD_CMD="ld -Bshareable -o"
 	;;
 
     *)

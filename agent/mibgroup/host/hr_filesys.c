@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #endif
 
-#ifdef freebsd3
+#if defined(freebsd3) || defined(bsdi4)
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
 #define MOUNT_NFS "nfs"
@@ -295,7 +295,11 @@ var_hrfilesys(struct variable *vp,
 #endif
 #ifdef MNTTYPE_UFS
 	    else if (!strcmp( mnt_type, MNTTYPE_UFS))
+#if defined(BerkelyFS) && !defined(MNTTYPE_HFS)
+			fsys_type_id[fsys_type_len-1] = 3;
+#else /* SysV */
 			fsys_type_id[fsys_type_len-1] = 4;	/* or 3? XXX */
+#endif
 #endif
 #ifdef MNTTYPE_SYSV
 	    else if (!strcmp( mnt_type, MNTTYPE_SYSV))
@@ -328,6 +332,10 @@ var_hrfilesys(struct variable *vp,
 #ifdef MNTTYPE_NFS3
 	    else if (!strcmp( mnt_type, MNTTYPE_NFS3))
 			fsys_type_id[fsys_type_len-1] = 14;
+#endif
+#ifdef MNTTYPE_MFS
+	    else if (!strcmp( mnt_type, MNTTYPE_MFS))
+			fsys_type_id[fsys_type_len-1] = 8;
 #endif
 	    else
 			fsys_type_id[fsys_type_len-1] = 1;	/* Other */

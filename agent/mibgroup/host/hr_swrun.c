@@ -736,12 +736,14 @@ Init_HR_SWRun (void)
 #else
 
     current_proc_entry = 1;
+#ifndef bsdi2
     nproc = 0;
 
     if (auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof(int)) == 0) {
         snmp_log_perror("Init_HR_SWRun-auto_nlist NPROC");
         return;
     }
+#endif
     bytes = nproc*sizeof(struct proc);
 
     if (proc_table) free((char *)proc_table);

@@ -22,6 +22,14 @@
 #include "linux/tasks.h"
 #endif
 
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+
+#if !defined(UTMP_FILE) && defined(_PATH_UTMP)
+#define UTMP_FILE _PATH_UTMP
+#endif
+
 #ifdef UTMP_FILE
 void setutent (void);
 void endutent (void);
@@ -138,8 +146,12 @@ var_hrsys(struct variable *vp,
 #ifdef linux
     FILE       *fp;
 #endif
-#if defined(NPROC_SYMBOL) && !defined(NR_TASKS)
+#if (defined(NPROC_SYMBOL) && !defined(NR_TASKS)) || defined(bsdi2)
     int		nproc;
+#endif
+#ifdef bsdi2
+    static int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
+    int buf_size;
 #endif
 
     if (header_hrsys(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
@@ -185,6 +197,12 @@ var_hrsys(struct variable *vp,
 #ifdef NR_TASKS
 	    long_return = NR_TASKS;	/* <linux/tasks.h> */
 #else
+#ifdef bsdi2
+	    buf_size = sizeof(nproc);
+	    if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
+		    return NULL;
+	    long_return = nproc;
+#endif
 #ifdef NPROC_SYMBOL
 	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
