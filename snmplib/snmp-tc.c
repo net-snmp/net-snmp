@@ -77,7 +77,9 @@ date_n_time ( time_t *when, size_t  *length)
 	 * Timezone offset
 	 */
 #ifndef SYSV
+#ifndef aix
 #define timezone tm_p->tm_gmtoff
+#endif
 #endif
     if ( timezone > 0 )
 	string[8] = '-';
