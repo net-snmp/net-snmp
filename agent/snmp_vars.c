@@ -81,6 +81,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "system.h"
 #include "kernel.h"
 #include "snmp_vars.h"
+#include "default_store.h"
+#include "ds_agent.h"
 
 #include "mibgroup/struct.h"
 #include "read_config.h"
@@ -233,6 +235,13 @@ init_agent (void)
 #ifdef TESTING
   auto_nlist_print_tree(-2, 0);
 #endif
+
+  /* initialize agentx subagent if necessary. */
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+  if(ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == 1)
+      subagent_pre_init();
+#endif
+
 }  /* end init_agent() */
 
 
