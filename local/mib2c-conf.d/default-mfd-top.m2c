@@ -15,7 +15,7 @@
 @   eval $m2c_create_fewer_files = 0@
 @end@
 @if "x$m2c_processing_type" eq "x"@
-@   eval $m2c_processing_type = '*'@
+@   eval $m2c_processing_type = '#'@
 @end@
 @if "x$m2c_code_verbose" eq "x"@
 @   eval $m2c_code_verbose = 0@
