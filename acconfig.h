@@ -590,6 +590,9 @@
 /* define if you want to build with reentrant/threaded code */
 #undef NS_REENTRANT
 
+/* on aix, if you have perfstat */
+#undef HAVE_PERFSTAT
+
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_arch_require(x,y)

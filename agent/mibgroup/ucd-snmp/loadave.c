@@ -120,6 +120,9 @@
 #if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>
 #endif
+#if defined(aix4) || defined(aix5)
+#include <libperfstat.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -226,6 +229,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
 #endif
 #if defined(aix4) || defined(aix5)
     int             favenrun[3];
+    perfstat_cpu_total_t cs;
 #endif
 #if defined(hpux10) || defined(hpux11)
   struct pst_dynamic pst_buf;
@@ -260,12 +264,11 @@ try_getloadavg(double *r_ave, size_t s_ave)
 #elif !defined(cygwin)
 #ifdef CAN_USE_NLIST
 #if defined(aix4) || defined(aix5)
-    if (auto_nlist(LOADAVE_SYMBOL, (char *) favenrun, sizeof(favenrun)) ==
-        0)
-        return -1;
-    r_ave[0] = favenrun[0] / 65536.0;
-    r_ave[1] = favenrun[1] / 65536.0;
-    r_ave[2] = favenrun[2] / 65536.0;
+    if(perfstat_cpu_total((perfstat_id_t *)NULL, &cs, sizeof(perfstat_cpu_total_t), 1) > 0) {
+        r_ave[0] = cs.loadavg[0] / 65536.0;
+        r_ave[1] = cs.loadavg[1] / 65536.0;
+        r_ave[2] = cs.loadavg[2] / 65536.0;
+    }
     return 0;
 #else
     if (auto_nlist(LOADAVE_SYMBOL, (char *) pave, sizeof(double) * s_ave)
