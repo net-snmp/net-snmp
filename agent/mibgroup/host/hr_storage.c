@@ -490,7 +490,7 @@ var_hrstore(struct variable *vp,
 		case HRS_TYPE_MEM:
 			auto_nlist(PHYSMEM_SYMBOL, (char *)&physmem,
                                    sizeof (int));
-			long_return = physmem * pagesize / 1024;
+			long_return = physmem * (pagesize / 1024);
 			break;
 		case HRS_TYPE_SWAP:
 			break;
