@@ -187,7 +187,7 @@ snmp_log_string (int priority, const char *string)
 
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    syslog(priority, string);
+    syslog(priority, "%s", string);
   }
 #endif
 
