@@ -2101,7 +2101,7 @@ asn_realloc_rbuild_int (u_char **pkt, size_t *pkt_len,
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
-    *(*pkt + *pkt_len - (*++offset)) = testvalue & 0xff;
+    *(*pkt + *pkt_len - (++*offset)) = testvalue & 0xff;
   }
 
   if (asn_realloc_rbuild_header(pkt, pkt_len, offset, r, type,
@@ -2436,7 +2436,7 @@ asn_realloc_rbuild_unsigned_int64(u_char **pkt, size_t *pkt_len,
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
-    *(*pkt + *pkt_len - (*++offset)) = 0;
+    *(*pkt + *pkt_len - (++*offset)) = 0;
   }
   
   intsize = *offset - start_offset;
@@ -2574,7 +2574,7 @@ asn_realloc_rbuild_signed_int64(u_char **pkt, size_t *pkt_len,
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
       return 0; 
     }
-    *(*pkt + *pkt_len - (*++offset)) = (testvalue == 0) ? 0 : 0xff;
+    *(*pkt + *pkt_len - (++*offset)) = (testvalue == 0) ? 0 : 0xff;
   }
 
   intsize = *offset - start_offset;
