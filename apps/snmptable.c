@@ -397,8 +397,10 @@ void get_field_names( char* tblname )
     root[rootlen++] = tbl->subid;
     tbl = tbl->child_list;
   }
-  else
+  else {
     root[rootlen++] = 1;
+    going = 0;
+  }
 
   sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
 	  root, rootlen-1);
