@@ -39,6 +39,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmpbulkget"=".\snmpbulkget\snmpbulkget.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "snmpbulkwalk"=".\snmpbulkwalk\snmpbulkwalk.dsp" - Package Owner=<4>
 
 Package=<5>
