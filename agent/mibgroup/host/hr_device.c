@@ -222,7 +222,7 @@ var_hrdevice(struct variable *vp,
 {
     int             dev_idx, type;
     oid            *oid_p;
-    static char     string[100];
+    static char     string[1024];
 
     dev_idx =
         header_hrdevice(vp, name, length, exact, var_len, write_method);

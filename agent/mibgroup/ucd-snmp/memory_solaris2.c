@@ -28,7 +28,7 @@
 #define MAXSTRSIZE	80
 
 int             minimumswap;
-static char     errmsg[300];
+static char     errmsg[1024];
 /****************************
  * Kstat specific variables *
  ****************************/

@@ -257,7 +257,7 @@ enum meminfo_col { meminfo_total = 0, meminfo_used, meminfo_free,
 };
 #define MEMINFO_FILE "/proc/meminfo"
 
-static char     buf[300];
+static char     buf[1024];
 
 /*
  * This macro opens FILE only if necessary and seeks to 0 so that successive
@@ -504,7 +504,7 @@ var_extensible_mem(struct variable *vp,
 {
 
     static long     long_ret;
-    static char     errmsg[300];
+    static char     errmsg[1024];
 #if !defined(linux)
 #if defined(hpux10) || defined(hpux11)
     struct pst_dynamic pst_buf;
