@@ -4,7 +4,7 @@
 #include "config.h"
 
 #include <sys/types.h>
-#ifdef HAVE_STRING
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -164,7 +164,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 
     switch (unregister_mib_range(pdu->variables->name,
     		       pdu->variables->name_length,
-		       pdu->priority, pdu->range_subid, ubound, sp)) {
+		       pdu->priority, pdu->range_subid, ubound)) {
 	case MIB_UNREGISTERED_OK:
 				return AGENTX_ERR_NOERROR;
 	case MIB_NO_SUCH_REGISTRATION:

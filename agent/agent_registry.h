@@ -41,6 +41,7 @@ int register_mib_range(const char *, struct variable *, size_t , size_t , oid *,
 
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
+int unregister_mib_range (oid *, size_t, int, int, oid);
 void unregister_mibs_by_session (struct snmp_session *);
 
 struct subtree *free_subtree (struct subtree *);

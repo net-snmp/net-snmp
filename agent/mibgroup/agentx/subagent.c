@@ -220,12 +220,12 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
     (struct snmp_session *) clientarg;
 
   if (minorID == SNMPD_CALLBACK_REGISTER_OID)
-    agentx_register(agentx_ss,
+    return agentx_register(agentx_ss,
 		    reg_parms->name, reg_parms->namelen,
 		    reg_parms->priority,
 		    reg_parms->range_subid, reg_parms->range_ubound);
   else
-    agentx_unregister(agentx_ss,
+    return agentx_unregister(agentx_ss,
 		    reg_parms->name, reg_parms->namelen,
 		    reg_parms->priority,
 		    reg_parms->range_subid, reg_parms->range_ubound);
@@ -241,11 +241,11 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
     (struct snmp_session *) clientarg;
 
   if (minorID == SNMPD_CALLBACK_REG_SYSOR)
-    agentx_add_agentcaps(agentx_ss,
+    return agentx_add_agentcaps(agentx_ss,
 		    reg_parms->name, reg_parms->namelen,
 		    reg_parms->descr);
   else
-    agentx_remove_agentcaps(agentx_ss,
+    return agentx_remove_agentcaps(agentx_ss,
 		    reg_parms->name, reg_parms->namelen);
 }
 
