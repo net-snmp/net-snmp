@@ -112,13 +112,13 @@ usage(void)
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpvacm commands:\n");
     fprintf(stderr,
-            "  createAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL CONTEXTMATCH READVIEWNAME WRITEVIEWNAME NOTIFYVIEWNAME\n");
+            "                createAccess     GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL CONTEXTMATCH READVIEWNAME WRITEVIEWNAME NOTIFYVIEWNAME\n");
     fprintf(stderr,
-            "  deleteAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
-    fprintf(stderr, "  createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
-    fprintf(stderr, "  deleteSec2Group  MODEL SECURITYNAME\n");
-    fprintf(stderr, "  createView  [-Ce] NAME SUBTREE MASK\n");
-    fprintf(stderr, "  deleteView  NAME SUBTREE\n");
+            "                deleteAccess     GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
+    fprintf(stderr, "        createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
+    fprintf(stderr, "        deleteSec2Group  MODEL SECURITYNAME\n");
+    fprintf(stderr, "  [-Ce] createView       NAME SUBTREE MASK\n");
+    fprintf(stderr, "        deleteView       NAME SUBTREE\n");
 }
 
 
