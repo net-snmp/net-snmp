@@ -137,13 +137,22 @@ AC_DEFINE_UNQUOTED(MACHINE_INCLUDE_FILE, "$ac_cv_MACHINE_INCLUDE_FILE")
 AC_PATH_PROG(CCPATH,$CC)
 dnl watch out for /usr/ucb/cc on solaris, it doesn't work with this package.
 case $target_os in
+    bsdi*)
+	if test "x$CCPATH" = "x/usr/ucb/cc"; then
+	    AC_MSG_ERROR([
+
+*** The BSDI /usr/ucb/cc compiler does not work with this package.  
+*** Please run configure with --with-cc=gcc
+])
+	fi
+    ;;
     solaris*)
 	if test "x$CCPATH" = "x/usr/ucb/cc"; then
 	    AC_MSG_ERROR([
 
 *** The solaris /usr/ucb/cc compiler does not work with this package.  
-*** Please put a different compiler in your path first or set the 
-*** environmental variable CC to a different compiler and re-run configure.
+*** Please put a different compiler in your path first or run
+*** configure with --with-cc=XX, where XX is the compiler you want to use.
 ])
 	fi
     ;;
