@@ -935,11 +935,11 @@ read_config_print_usage(const char *lead)
                     DEBUGMSG(("read_config_usage", " "));
             }
             if (ltmp->help) {
-                snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead,
+                snmp_log(LOG_INFO, "%s%s%-24s %s\n", lead, lead,
                          ltmp->config_token, ltmp->help);
             } else {
                 DEBUGIF("read_config_usage") {
-                    snmp_log(LOG_INFO, "%s%s%-15s [NO HELP]\n", lead, lead,
+                    snmp_log(LOG_INFO, "%s%s%-24s [NO HELP]\n", lead, lead,
                              ltmp->config_token);
                 }
             }
