@@ -175,6 +175,10 @@ header_system(vp, name, length, exact, var_len, write_method)
 	 *
 	 *********************/
 
+#ifdef USING_SYSORTABLE_MODULE
+extern struct timeval sysOR_lastchange;
+#endif
+
 u_char	*
 var_system(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -225,6 +229,23 @@ var_system(vp, name, length, exact, var_len, write_method)
         case SYSSERVICES:
             long_return = 72;
             return (u_char *)&long_return;
+
+#ifdef USING_SYSORTABLE_MODULE
+        case SYSORLASTCHANGE:
+              diff.tv_sec = sysOR_lastchange.tv_sec - 1 - starttime.tv_sec;
+              diff.tv_usec =
+                sysOR_lastchange.tv_usec + 1000000L - starttime.tv_usec;
+              if (diff.tv_usec > 1000000L){
+                diff.tv_usec -= 1000000L;
+                diff.tv_sec++;
+              }
+              if ((diff.tv_sec * 100) + (diff.tv_usec / 10000) < 0)
+                long_return = 0;
+              else
+                long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+              return ((u_char *) &long_return);
+#endif
+              
 	default:
 	    ERROR_MSG("");
     }
