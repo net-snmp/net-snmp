@@ -1850,7 +1850,6 @@ _get_symbol(oid *objid,
 	    break;
 	default:
 	    goto finish_it;
-	    break;
 	}
         in_dices = in_dices->next;
     }

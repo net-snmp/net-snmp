@@ -519,7 +519,10 @@ long get_uptime (void)
    }
    return uptim;
 #endif /* linux */
+
+#ifdef cygwin
    return (0); /* not implemented */
+#endif 
 }
 
 #endif							/* ! WIN32 */

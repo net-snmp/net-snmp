@@ -2562,7 +2562,6 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
     break;
   default:
     return SNMPERR_GENERR;
-    break;
   }
 
   snmp_free_varbind(pdu->variables);	/* free the current varbind */
