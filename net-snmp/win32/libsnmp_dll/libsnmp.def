@@ -140,7 +140,6 @@ EXPORTS
 	init_callbacks
 	snmp_register_callback
 	snmp_call_callbacks
-	malloc_zero
 	strncasecmp
 	init_snmp_alarm
 	ds_register_premib
@@ -159,7 +158,13 @@ EXPORTS
 	snmp_res_lock
 	snmp_res_unlock
 	snmp_res_destroy_mutex
+        snmp_oid_toggle_options
+        snmp_oid_toggle_options_usage
+        getopt
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
+        optind                  DATA
+        optarg                  DATA
+        optopt                  DATA
 
