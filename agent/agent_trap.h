@@ -10,7 +10,9 @@ void send_easy_trap (int, int);
 void send_trap_pdu(struct snmp_pdu *);
 void send_v2trap ( struct variable_list *);
 void send_trap_vars (int, int, struct variable_list *);
-
+void send_enterprise_trap_vars (int trap, int specific,
+                       oid *enterprise, int enterprise_length,
+                       struct variable_list *vars);
 void snmpd_parse_config_authtrap (const char *, char *);
 void snmpd_parse_config_trapsink (const char *, char *);
 void snmpd_parse_config_trap2sink (const char *, char *);
