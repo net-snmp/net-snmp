@@ -4,7 +4,7 @@
 #include "mibincl.h"
 #include "../../config.h"
 
-static char *VersionInfo="Ext2-7-3";
+static char *VersionInfo="Ext3-0-pre1";
 
 int clear_cache();
 

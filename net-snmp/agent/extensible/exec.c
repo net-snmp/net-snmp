@@ -247,7 +247,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
   mysubtree[0].variables_len =
     sizeof(extensible_relocatable_variables)/sizeof(*extensible_relocatable_variables);
   mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
-  mysubtree[1].namelen = -1;
+  mysubtree[1].namelen = 0;
   return(mysubtree);
 }
 
