@@ -1,5 +1,10 @@
 #include <config.h>
 
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "mibincl.h"
 #include "proxy.h"
 #include "snmp_api.h"
@@ -195,7 +200,7 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
                     /* suffix appended? */
                     DEBUGMSGTL(("proxy_var","length=%d, base_len=%d, name_len=%d\n", ourlength, sp->base_len, sp->name_len));
-                    if (ourlength > sp->name_len)
+                    if (ourlength > (int)sp->name_len)
                         memcpy(&(sp->base[sp->base_len]), &(ourname[sp->name_len]),
                                sizeof(oid)*(ourlength - sp->name_len));
                     ourlength = ourlength - sp->name_len + sp->base_len;
@@ -264,7 +269,7 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
 
                     /* copy the value */
-		    if (!ret_str || ret_str_len < var->val_len) {
+		    if (!ret_str || ret_str_len < (int)var->val_len) {
 			ret_str_len = var->val_len;
 			if (!ret_str_len) ret_str_len = 1;
 			if (ret_str) free(ret_str);

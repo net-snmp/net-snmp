@@ -316,17 +316,17 @@ var_atEntry(struct variable *vp,
      * Interface is at offset 10,
      * IPADDR starts at offset 12.
      */
-#define AT_NAME_LENGTH	16
+#define AT_MAX_NAME_LENGTH	16
 #define AT_IFINDEX_OFF	10
-#define	AT_IPADDR_OFF	12
     u_char	*cp;
     oid		*op;
-    oid		lowest[AT_NAME_LENGTH];
-    oid		current[AT_NAME_LENGTH];
+    oid		lowest[AT_MAX_NAME_LENGTH];
+    oid		current[AT_MAX_NAME_LENGTH];
     if_ip_t	NextAddr;
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
+    int         offset, olength;
 
     /* fill in object part of name for current (less sizeof instance part) */
 
@@ -346,23 +346,30 @@ var_atEntry(struct variable *vp,
 		 req_type, &AT_Cmp, &NextAddr) != 0)
 		break;
       	current[AT_IFINDEX_OFF] = Interface_Index_By_Name (entry.ipNetToMediaIfIndex.o_bytes, entry.ipNetToMediaIfIndex.o_length);
-	current[AT_IFINDEX_OFF+1] = 1;
-        COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+AT_IPADDR_OFF);  
+        if (current[6] == 3 ) {	/* AT group oid */
+            current[AT_IFINDEX_OFF+1] = 1;
+            offset = AT_IFINDEX_OFF+2;
+            olength = AT_IFINDEX_OFF+6;
+        } else {
+            offset = AT_IFINDEX_OFF+1;
+            olength = AT_IFINDEX_OFF+5;
+        }
+        COPY_IPADDR(cp,(u_char *)&entry.ipNetToMediaNetAddress, op, current+offset);  
 	if (exact){
-	    if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) == 0){
-		memcpy( (char *)lowest,(char *)current, AT_NAME_LENGTH * sizeof(oid));
+	    if (snmp_oid_compare(current, olength, name, *length) == 0){
+		memcpy( (char *)lowest,(char *)current, olength * sizeof(oid));
 		Lowentry = entry;
 		Found++;
 		break;	/* no need to search further */
 	    }
 	} else {
-	    if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) > 0
-	      && snmp_oid_compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0) {
+	    if (snmp_oid_compare(current, olength, name, *length) > 0
+	      && snmp_oid_compare(current, olength, lowest, *length) < 0) {
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, and is not equal to it, save this one as the "next" one.
 		 */
-		memcpy( (char *)lowest,(char *)current, AT_NAME_LENGTH * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, olength * sizeof(oid));
 		Lowentry = entry;
 		Found++;
 	    }
@@ -371,8 +378,8 @@ var_atEntry(struct variable *vp,
     DEBUGMSGTL(("mibII/at", "... Found = %d\n", Found));
     if (Found == 0)
 	return(NULL);
-    memcpy( (char *)name,(char *)lowest, AT_NAME_LENGTH * sizeof(oid));
-    *length = AT_NAME_LENGTH;
+    memcpy( (char *)name,(char *)lowest, olength * sizeof(oid));
+    *length = olength;
     *write_method = 0;
     switch(vp->magic){
 	case IPMEDIAIFINDEX:

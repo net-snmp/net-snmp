@@ -95,7 +95,9 @@ static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
 
+#if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int getHwAddress(const char * networkDevice, char * addressOut);
+#endif
 
 void
 snmpv3_authtype_conf(const char *word, char *cptr)

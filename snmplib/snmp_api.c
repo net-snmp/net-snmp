@@ -64,6 +64,9 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -2808,7 +2811,7 @@ snmp_pdu_rbuild (struct snmp_pdu *pdu, u_char *cp, size_t *out_length)
 
   /* build the PDU sequence */
   cp = asn_rbuild_sequence(cp, out_length,
-                           pdu->command,
+                           (u_char)pdu->command,
                            startcp - cp);
 
   return cp;
@@ -5231,7 +5234,6 @@ snmp_add_var(struct snmp_pdu *pdu,
 	tint = 0;
 	memset(buf, 0, sizeof buf);
 	{ char *lvalue = strdup(value), *cp;
-          struct enum_list *ep;
           for (ep = tp ? tp->enums : NULL; ep; ep = ep->next)
             if (ep->value / 8 >= (int)tint) tint = ep->value / 8 + 1;
 	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {

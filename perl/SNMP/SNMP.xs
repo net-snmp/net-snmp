@@ -327,10 +327,10 @@ char* typestr;
 {
 	if (typestr == NULL || *typestr == '\0') return TYPE_UNKNOWN;
 
+	if (!strncasecmp(typestr,"INTEGER32",8))
+            return(TYPE_INTEGER32);
 	if (!strncasecmp(typestr,"INTEGER",3))
             return(TYPE_INTEGER);
-	if (!strncasecmp(typestr,"INTEGER32",3))
-            return(TYPE_INTEGER32);
 	if (!strncasecmp(typestr,"UNSIGNED32",3))
             return(TYPE_UNSIGNED32);
 	if (!strcasecmp(typestr,"COUNTER")) /* check all in case counter64 */
@@ -366,6 +366,8 @@ char* typestr;
                                    /* but it does?                  */
 	if (!strncasecmp(typestr, "NOTIF", 3))
 		return(TYPE_NOTIFTYPE);
+	if (!strncasecmp(typestr, "TRAP", 4))
+		return(TYPE_TRAPTYPE);
         return(TYPE_UNKNOWN);
 }
 
@@ -637,6 +639,9 @@ char * str;
 		break;
 	case TYPE_BITSTRING:
 		strcpy(str, "BITS");
+		break;
+	case TYPE_TRAPTYPE:
+		strcpy(str, "TRAP");
 		break;
 	case TYPE_OTHER: /* not sure if this is a valid leaf type?? */
 	case TYPE_NSAPADDRESS:
@@ -2971,6 +2976,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            int status;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+	   SV *sv_timestamp = NULL;
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3043,6 +3049,9 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 
               last_vars = (response ? response->variables : NULL);
 
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	         sv_timestamp = newSViv((IV)time(NULL));
+
               for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
@@ -3068,6 +3077,8 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                        len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
                        tmp_sv=newSVpv((char*)str_buf, len);
                        av_store(varbind, VARBIND_VAL_F, tmp_sv);
+		       if (sv_timestamp)
+                          av_store(varbind, VARBIND_TIME_F, sv_timestamp);
                        XPUSHs(sv_mortalcopy(tmp_sv));
                     } else {
                        av_store(varbind, VARBIND_VAL_F, &sv_undef);
@@ -3122,6 +3133,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 	   int old_numeric, old_printfull;	/* Old values of globals */
+	   SV *sv_timestamp = NULL;
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3214,6 +3226,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 		 ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, 1);
 	      }
 
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	         sv_timestamp = newSViv((IV)time(NULL));
+
               for(vars = (response?response->variables:NULL), varlist_ind = 0;
                   vars && (varlist_ind <= varlist_len);
                   vars = vars->next_variable, varlist_ind++) {
@@ -3241,6 +3256,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
                     tmp_sv = newSVpv((char*)str_buf, len);
                     av_store(varbind, VARBIND_VAL_F, tmp_sv);
+		    if (sv_timestamp)
+                       av_store(varbind, VARBIND_TIME_F, sv_timestamp);
                     XPUSHs(sv_mortalcopy(tmp_sv));
                  } else {
 		    /* Return undef for this variable. */
@@ -3306,6 +3323,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 	   int old_numeric, old_printfull;	/* Old values of globals */
 	   SV *rv;
+	   SV *sv_timestamp = NULL;
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3386,6 +3404,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                        *err_str_svp, *err_num_svp,
 				       *err_ind_svp);
 
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	         sv_timestamp = newSViv((IV)time(NULL));
+
 	      av_clear(varlist);
 
 	      /*
@@ -3434,6 +3455,8 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     len=__sprint_value(str_buf,vars,tp,type,sprintval_flag);
                     tmp_sv = newSVpv((char*)str_buf, len);
 		    av_store(varbind, VARBIND_VAL_F, tmp_sv);
+		    if (sv_timestamp)
+		       av_store(varbind, VARBIND_TIME_F, SvREFCNT_inc(sv_timestamp));
 
 		    rv = newRV_noinc((SV *)varbind);
 		    sv_bless(rv, gv_stashpv("SNMP::Varbind",0));

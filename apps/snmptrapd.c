@@ -84,6 +84,9 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_PROCESS_H  /* Win32-getpid */
+#include <process.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 
