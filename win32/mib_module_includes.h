@@ -140,6 +140,7 @@
 #include "mibgroup/mibII/route_write.h"
 #include "mibgroup/util_funcs.h"
 #include "mibgroup/mibII/vacm_context.h"
+#include "mibgroup/mibII/vacm_conf.h"
 #include "mibgroup/utilities/execute.h"
 #include "mibgroup/header_complex.h"
 
