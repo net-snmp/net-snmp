@@ -2,6 +2,16 @@
  *  Host Resources MIB - Device group implementation - hr_device.c
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
@@ -296,7 +306,9 @@ Init_Device(void)
            init_device[current_type] == NULL)
         if (++current_type >= HRDEV_TYPE_MAX)
             return;
-    (*init_device[current_type]) ();
+    /* Check current_type, if >= MAX first time into loop, would fail below */
+    if (current_type < HRDEV_TYPE_MAX)
+        (*init_device[current_type]) ();
 }
 
 int
