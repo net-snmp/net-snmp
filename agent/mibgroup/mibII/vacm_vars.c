@@ -1321,8 +1321,10 @@ write_vacmGroupName(int      action,
 {
     static unsigned char string[VACMSTRINGLEN];
     struct vacm_groupEntry *geptr;
+    static int resetOnFail;
 
     if (action == RESERVE1) {
+	resetOnFail = 0;
 	if (var_val_type != ASN_OCTET_STR) {
 	    return SNMP_ERR_WRONGTYPE;
 	}
@@ -1333,6 +1335,7 @@ write_vacmGroupName(int      action,
 	if ((geptr = sec2group_parse_groupEntry(name, name_len)) == NULL) {
 	    return SNMP_ERR_INCONSISTENTNAME;
 	} else {
+	    resetOnFail = 1;
 	    memcpy(string, geptr->groupName, VACMSTRINGLEN);
 	    memcpy(geptr->groupName, var_val, var_val_len);
 	    geptr->groupName[var_val_len] = 0;
@@ -1342,7 +1345,8 @@ write_vacmGroupName(int      action,
 	}
     } else if (action == FREE) {
 	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
-	if ((geptr = sec2group_parse_groupEntry(name, name_len)) != NULL) {
+	if ((geptr = sec2group_parse_groupEntry(name, name_len)) != NULL &&
+	    resetOnFail) {
 	    memcpy(geptr->groupName, string, VACMSTRINGLEN);
 	}
     }
@@ -1376,10 +1380,13 @@ write_vacmSecurityToGroupStorageType(int      action,
       long_ret = *((long *) var_val);
       if ((long_ret == ST_VOLATILE || long_ret == ST_NONVOLATILE) &&
           (geptr->storageType == ST_VOLATILE ||
-           geptr->storageType == ST_NONVOLATILE))
-        geptr->storageType = long_ret;
-      else
-        return SNMP_ERR_INCONSISTENTVALUE;
+           geptr->storageType == ST_NONVOLATILE)) {
+	  geptr->storageType = long_ret;
+      } else if (long_ret == geptr->storageType) {
+	  return SNMP_ERR_NOERROR;
+      } else {
+	  return SNMP_ERR_INCONSISTENTVALUE;
+      }
   }
   return SNMP_ERR_NOERROR;
 }
@@ -1673,7 +1680,7 @@ write_vacmAccessStatus(int      action,
 	  return SNMP_ERR_INCONSISTENTNAME;
       }
       
-      if (model < 1 || groupNameLen < 1 || groupNameLen > 32 || 
+      if (model < 0 || groupNameLen < 1 || groupNameLen > 32 || 
 	  contextPrefixLen > 32) {
 	  free(newGroupName);
 	  free(newContextPrefix);
@@ -1803,11 +1810,11 @@ write_vacmAccessStorageType(int      action,
           (aptr->storageType == ST_VOLATILE ||
            aptr->storageType == ST_NONVOLATILE)) */
 	  /*This version only supports volatile storage*/ 
-	  if (long_ret == ST_VOLATILE &&
-          aptr->storageType == ST_VOLATILE)           
-        aptr->storageType = long_ret;
-      else
-        return SNMP_ERR_INCONSISTENTVALUE;
+      if (long_ret == aptr->storageType) {
+	  return SNMP_ERR_NOERROR;
+      } else {
+	  return SNMP_ERR_INCONSISTENTVALUE;
+      }
   }
   return SNMP_ERR_NOERROR;
 }
@@ -1839,10 +1846,11 @@ write_vacmAccessContextMatch(int      action,
         return SNMP_ERR_NOSUCHNAME;
       }
       long_ret = *((long *) var_val);
-      if (long_ret == CM_EXACT || long_ret == CM_PREFIX)
-        aptr->contextMatch = long_ret;
-      else
-        return SNMP_ERR_INCONSISTENTVALUE;
+      if (long_ret == CM_EXACT || long_ret == CM_PREFIX) {
+	  aptr->contextMatch = long_ret;
+      } else {
+	  return SNMP_ERR_WRONGVALUE;
+      }
   }
   return SNMP_ERR_NOERROR;
 }
@@ -1858,8 +1866,10 @@ write_vacmAccessReadViewName(int      action,
 {
   static unsigned char string[VACMSTRINGLEN];
   struct vacm_accessEntry *aptr = NULL;
+  static int resetOnFail;
   
   if (action == RESERVE1) {
+      resetOnFail = 0;
       if (var_val_type != ASN_OCTET_STR) {
 	  DEBUGMSGTL(("mibII/vacm_vars",
 		      "write to vacmAccessReadViewName not ASN_OCTET_STR\n"));
@@ -1874,13 +1884,15 @@ write_vacmAccessReadViewName(int      action,
       if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
 	  return SNMP_ERR_INCONSISTENTNAME;
       } else {
+	  resetOnFail = 1;
 	  memcpy(string, aptr->readView, VACMSTRINGLEN);
 	  memcpy(aptr->readView, var_val, var_val_len);
 	  aptr->readView[var_val_len] = 0;
       }
   } else if (action == FREE) {
 	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
-      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
+	  resetOnFail) {
 	  memcpy(aptr->readView, string, var_val_len);
       }
   }
@@ -1898,8 +1910,10 @@ write_vacmAccessWriteViewName(int      action,
 {
   static unsigned char string[VACMSTRINGLEN];
   struct vacm_accessEntry *aptr = NULL;
-  
+  static int resetOnFail;
+
   if (action == RESERVE1) {
+      resetOnFail = 0;
       if (var_val_type != ASN_OCTET_STR) {
 	  DEBUGMSGTL(("mibII/vacm_vars",
 		      "write to vacmAccessWriteViewName not ASN_OCTET_STR\n"));
@@ -1914,13 +1928,15 @@ write_vacmAccessWriteViewName(int      action,
       if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
 	  return SNMP_ERR_INCONSISTENTNAME;
       } else {
+	  resetOnFail = 1;
 	  memcpy(string, aptr->writeView, VACMSTRINGLEN);
 	  memcpy(aptr->writeView, var_val, var_val_len);
 	  aptr->writeView[var_val_len] = 0;
       }
   } else if (action == FREE) {
 	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
-      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
+	  resetOnFail) {
 	  memcpy(aptr->writeView, string, var_val_len);
       }
   }
@@ -1938,8 +1954,10 @@ write_vacmAccessNotifyViewName(int      action,
 {
   static unsigned char string[VACMSTRINGLEN];
   struct vacm_accessEntry *aptr = NULL;
+  static int resetOnFail;
   
   if (action == RESERVE1) {
+      resetOnFail = 0;
       if (var_val_type != ASN_OCTET_STR) {
 	  DEBUGMSGTL(("mibII/vacm_vars",
 		     "write to vacmAccessNotifyViewName not ASN_OCTET_STR\n"));
@@ -1954,13 +1972,15 @@ write_vacmAccessNotifyViewName(int      action,
       if ((aptr = access_parse_accessEntry(name, name_len)) == NULL) {
 	  return SNMP_ERR_INCONSISTENTNAME;
       } else {
+	  resetOnFail = 1;
 	  memcpy(string, aptr->notifyView, VACMSTRINGLEN);
 	  memcpy(aptr->notifyView, var_val, var_val_len);
 	  aptr->notifyView[var_val_len] = 0;
       }
   } else if (action == FREE) {
 	/*  Try to undo the SET here (abnormal usage of FREE clause)  */
-      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL) {
+      if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
+	  resetOnFail) {
 	  memcpy(aptr->notifyView, string, var_val_len);
       }
   }
@@ -2239,6 +2259,8 @@ write_vacmViewStorageType(int      action,
 		 vptr->viewStorageType == ST_NONVOLATILE)) {
 		oldValue = vptr->viewStorageType;
 		vptr->viewStorageType = newValue;
+	    } else if (newValue == vptr->viewStorageType) {
+		return SNMP_ERR_NOERROR;
 	    } else {
 		return SNMP_ERR_INCONSISTENTVALUE ;
 	    }
