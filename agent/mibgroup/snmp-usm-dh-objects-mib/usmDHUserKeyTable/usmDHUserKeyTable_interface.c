@@ -85,7 +85,7 @@ static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_set_values;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_undo_cleanup;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_undo_values;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_commit;
-static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_irreversable_commit;
+static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_usmDHUserKeyTable_check_dependencies;
@@ -178,7 +178,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration_ptr
     access_multiplexer->set_values = _mfd_usmDHUserKeyTable_set_values;
     access_multiplexer->undo_sets = _mfd_usmDHUserKeyTable_undo_values;
     access_multiplexer->irreversible_commit =
-        _mfd_usmDHUserKeyTable_irreversable_commit;
+        _mfd_usmDHUserKeyTable_irreversible_commit;
 
     /*
      * no wrappers yet
@@ -1287,7 +1287,7 @@ _mfd_usmDHUserKeyTable_undo_commit(netsnmp_mib_handler *handler,
 }                               /* _mfd_usmDHUserKeyTable_commit */
 
 int
-_mfd_usmDHUserKeyTable_irreversable_commit(netsnmp_mib_handler *handler,
+_mfd_usmDHUserKeyTable_irreversible_commit(netsnmp_mib_handler *handler,
                                            netsnmp_handler_registration *reginfo,
                                            netsnmp_agent_request_info *agtreq_info,
                                            netsnmp_request_info *requests)
@@ -1295,7 +1295,7 @@ _mfd_usmDHUserKeyTable_irreversable_commit(netsnmp_mib_handler *handler,
     usmDHUserKeyTable_rowreq_ctx *rowreq_ctx =
         netsnmp_container_table_row_extract(requests);
     netsnmp_assert(NULL != rowreq_ctx);
-    return usmDHUserKeyTable_irreversable_commit(rowreq_ctx);
+    return usmDHUserKeyTable_irreversible_commit(rowreq_ctx);
 }
 
 
