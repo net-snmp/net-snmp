@@ -6,6 +6,7 @@
 #define _MIBGROUP_INTERFACES_H
 
 config_require(util_funcs)
+config_arch_require(solaris2, kernel_sunos5)
 
 struct in_ifaddr;
 struct ifnet;

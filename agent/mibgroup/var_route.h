@@ -6,6 +6,7 @@
 #define _MIBGROUP_VAR_ROUTE_H
 
 config_require(ip util_funcs)
+config_arch_require(solaris2, kernel_sunos5)
 
 void init_var_route __P((void));
 #ifdef RTENTRY_4_4

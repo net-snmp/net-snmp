@@ -569,7 +569,7 @@ struct radix_node *pt;
 #endif
       name[sizeof (name)-1] = '\0';
 #else
-      klookup( ifnet.if_name, name, sizeof name);
+      klookup((unsigned long)ifnet.if_name, name, sizeof name);
       name[sizeof (name) - 1] = '\0';
       cp = (char *) index(name, '\0');
       string_append_int (cp, ifnet.if_unit);

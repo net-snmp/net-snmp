@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_TCP_H
 #define _MIBGROUP_TCP_H
 
+config_arch_require(solaris2, kernel_sunos5)
+
 #ifndef solaris2
 #ifndef linux
 extern int TCP_Count_Connections __P((void));

@@ -69,7 +69,8 @@ AC_C_CONST
 dnl system check
 AC_CANONICAL_SYSTEM
 changequote(, )
-CFLAGS="$CFLAGS -D`echo $target_os | sed 's/[-._].*//'`"
+PARTIALTARGETOS=`echo $target_os | sed 's/[-._].*//'`
+CFLAGS="$CFLAGS -D$PARTIALTARGETOS"
 changequote([, ])
 
 AC_MSG_CHECKING(for additional cpp flags)
@@ -126,10 +127,7 @@ new_module_list="mibII ucd_snmp v2party $with_mib_modules"
 trap_list_o=""
 
 case $target_os in
-  solaris*) new_module_list="$new_module_list kernel_sunos5" ; trap_list_o="../agent/mibgroup/kernel_sunos5.o" ;;
-  hpux*) new_module_list="$new_module_list hpux memory" ;;
-  bsdi*) new_module_list="$new_module_list memory" ;;
-  linux*) new_module_list="$new_module_list memory" ;;
+  solaris*) trap_list_o="../agent/mibgroup/kernel_sunos5.o" ;;
 esac
 
 dnl Create include file list for snmp_vars.h to use.
@@ -166,7 +164,18 @@ while test "x$new_module_list" != "x"; do
       :
     else
       if test -f $srcdir/$mibdir/$i.h; then
-	new_list=`grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`
+        new_list=""
+        new_list_arch=`grep config_arch_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\),\(.*\)).*/\1-xarchx-\2/'`
+	if test "x$new_list_arch" != "x"; then
+          for j in $new_list_arch
+	    do
+	    archtest=`echo $j | sed 's/-xarchx-.*//'`
+	    if test "x$target_os" = "x$archtest" -o "x$PARTIALTARGETOS" = "x$archtest"; then
+	      new_list="$new_list `echo $j | sed 's/.*-xarchx-//'`"
+	    fi
+	  done
+	fi
+	new_list="$new_list `grep config_require $srcdir/$mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`"
 	if test "x$new_list" != "x"; then
 	  for j in $new_list
 	    do
@@ -389,7 +398,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
 AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
-AC_CHECK_FUNCS(signal sigset sigblock sighold)
+AC_CHECK_FUNCS(signal sigset sigblock sighold strerror)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles)
@@ -472,6 +481,11 @@ AC_TRY_COMPILE([
 #undef _KERNEL
 #include <net/route.h>
 ],[
+
+#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#define rt_dst rt_nodes->rn_key
+#endif
+
   struct rtentry rt; 
   rt.rt_nodes[0].rn_b = 1;
   rt.rt_dst.sa_len;

@@ -375,6 +375,7 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_arch_require(x,y)
 #define config_load_mib(x,y,z)
 #define config_parse_dot_conf(x,y,z)
   
@@ -390,7 +391,7 @@
 #endif
 #endif
 
-#if !(defined( __P) || defined(netbsd1))
+#if !(defined( __P) || defined(netbsd1) || defined(freebsd2))
 #ifdef __STDC__
 #define __P(params) params
 #else
