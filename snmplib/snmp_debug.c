@@ -193,7 +193,7 @@ debugmsg(va_alist)
 }
 
 void
-debugmsg_oid(const char *token, oid *theoid, size_t len)
+debugmsg_oid(const char *token, const oid *theoid, size_t len)
 {
   u_char *buf = NULL;
   size_t buf_len = 0, out_len = 0;
@@ -214,7 +214,7 @@ debugmsg_oid(const char *token, oid *theoid, size_t len)
 }
 
 void
-debugmsg_oidrange(const char *token, oid *theoid, size_t len,
+debugmsg_oidrange(const char *token, const oid *theoid, size_t len,
 		  size_t var_subid, oid range_ubound)
 {
   u_char *buf = NULL;
