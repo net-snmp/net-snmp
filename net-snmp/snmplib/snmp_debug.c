@@ -63,39 +63,6 @@ debug_indent_add(int amount) {
   }
 }
 
-void
-#if HAVE_STDARG_H
-DEBUGP(const char *first, ...)
-#else
-DEBUGP(va_alist)
-  va_dcl
-#endif
-{
-  va_list args;
-#if HAVE_STDARG_H
-  va_start(args, first);
-#else
-  const char *first;
-  va_start(args);
-  first = va_arg(args, const char *);
-#endif
-
-  if (dodebug && (debug_print_everything || debug_num_tokens == 0)) {
-    fprintf(stderr, "%s: ", DEBUG_ALWAYS_TOKEN);
-    vfprintf(stderr, first, args);
-  }
-  va_end(args);
-}
-
-void
-DEBUGPOID(oid *theoid,
-	  size_t len)
-{
-  char c_oid[SPRINT_MAX_LEN];
-  sprint_objid(c_oid,theoid,len);
-  DEBUGP(c_oid);
-}
-
 void debug_config_register_tokens(const char *configtoken, char *tokens) {
   debug_register_tokens(tokens);
 }
@@ -248,35 +215,58 @@ debugmsg_oidrange(const char *token, const oid *theoid, size_t len,
 }
 
 void
-debugmsg_hex(const char *token, u_char *thedata, size_t len) {
-  char buf[SPRINT_MAX_LEN];
-  
-  if (len > SPRINT_MAX_LEN/5) {
-      /* hex is long, so print only a certain amount (1/5th of size to
-         be safer than is needed) */
-      len = SPRINT_MAX_LEN/5;
-      debugmsg(token, "[truncated hex:]");
+debugmsg_hex(const char *token, u_char *thedata, size_t len)
+{
+  u_char *buf = NULL;
+  size_t buf_len = 0, out_len = 0;
+
+  if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1, thedata, len)) {
+    if (buf != NULL) {
+      debugmsg(token, "%s", buf);
+    }
+  } else {
+    if (buf != NULL) {	
+      debugmsg(token, "%s [TRUNCATED]", buf);
+    }
   }
-  sprint_hexstring(buf, thedata, len);
-  debugmsg(token, buf);
+
+  if (buf != NULL) {
+    free(buf);
+  }
 }
 
 void
-debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
+debugmsg_hextli(const char *token, u_char *thedata, size_t len)
+{
   char buf[SPRINT_MAX_LEN], token2[SPRINT_MAX_LEN];
+  u_char *b3 = NULL;
+  size_t b3_len = 0, o3_len = 0;
   int incr;
   sprintf(token2, "dumpx_%s", token);
 
   /*XX tracing lines removed from this function DEBUGTRACE; */
   DEBUGIF(token2) {
-    for(incr = 16; len > 0; len -= incr, thedata += incr) {
-      if ((int)len < incr) incr = len;
+    for (incr = 16; len > 0; len -= incr, thedata += incr) {
+      if ((int)len < incr) {
+	incr = len;
+      }
       /*XXnext two lines were DEBUGPRINTINDENT(token);*/
       sprintf(buf, "dumpx%s", token);
       debugmsg(buf, "%s: %s", token2, debug_indent());
-      sprint_hexstring(buf, thedata, incr);
-      debugmsg(token2, buf);
+      if (sprint_realloc_hexstring(&b3, &b3_len, &o3_len, 1, thedata, incr)) {
+	if (b3 != NULL) {
+	  debugmsg(token2, "%s", b3);
+	}
+      } else {	
+	if (b3 != NULL) {
+	  debugmsg(token2, "%s [TRUNCATED]", b3);
+	}
+      }
+      o3_len = 0;
     }
+  }
+  if (b3 != NULL) {
+    free(b3);
   }
 }
 
