@@ -17,6 +17,6 @@ CAPTURE "snmpgetnext $SNMP_SNMPD_PORT -v 2c localhost testcommunity system.sysUp
 
 STOPAGENT
 
-CHECK "system.sysUpTime.0 ="
+CHECK "system.sysUpTime.0 = Timeticks:"
 
 FINISHED
