@@ -107,7 +107,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
             cache_timeout = cache_default_timeout;
         if (!cache->timestamp ||
              atime_ready(cache->timestamp, 1000*cache_timeout)) {
-            cache->load_cache(cache);	/* XXX - what if this fails? */
+	    		/* XXX - what if this fails? */
+            cache->load_cache(cache, cache->magic);
             if (cache->timestamp)
        	        atime_setMarker(cache->timestamp);
 	    else

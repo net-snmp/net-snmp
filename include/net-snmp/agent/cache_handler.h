@@ -16,7 +16,7 @@ extern          "C" {
 
     typedef struct netsnmp_cache_s netsnmp_cache;
 
-    typedef int  (NetsnmpCacheLoad)(netsnmp_cache*);
+    typedef int  (NetsnmpCacheLoad)(netsnmp_cache*, void*);
     typedef void (NetsnmpCacheFree)(void);
 
     struct netsnmp_cache_s {
@@ -29,6 +29,8 @@ extern          "C" {
 
         NetsnmpCacheLoad *load_cache;
         NetsnmpCacheFree *free_cache;
+        void             *magic;	/* You never know when it might
+                                                     not come in useful .... */
 
         /*
 	 * For SNMP-management of the data caches
