@@ -66,7 +66,7 @@ int unregister_mib_priority (oid *, size_t, int);
 int unregister_mib_range (oid *, size_t, int, int, oid);
 int unregister_mib_context (oid *, size_t, int, int, oid, const char*);
 void unregister_mibs_by_session (netsnmp_session *);
-int  unnetsnmp_register_mib_table_row	(oid *mibloc, size_t mibloclen, int priority,
+int  unregister_mib_table_row	(oid *mibloc, size_t mibloclen, int priority,
 				 int var_subid, oid range_ubound,
 				 const char *context);
 
