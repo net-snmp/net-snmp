@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PATH=/usr/local/bin/:/usr/support/bin/:/1/OV/bin/:$PATH
+PATH=/usr/local/etc/:/usr/local/bin/:/afs/ece/support/bin/:/1/OV/bin/:$PATH
 
 # testing
 #echo user: `whoami`
@@ -14,12 +14,15 @@ TOTLOGLOCKFILE=$TOTLOGFILE.lock
 TMPFILE=/tmp/snmp.tmp.$$
 HOSTLISTFILE=/1/OV/ecehosts
 HOSTDB=/usr/support/named/host.db
+ERRORLOGFILE=/1/OV/log/snmpmgr-errors
+ERRORLOGLOCKFILE=$ERRORLOGFILE.lock
 
 # Variable declarations
 
 TYPE=$1
 FULLHOST=$2
 HOST=`echo $FULLHOST | sed 's/\.[^.]*\.ucdavis\.edu//'`
+SNMPGETOUT=""
 
 # pick only ece/cipic machines
 
@@ -44,7 +47,7 @@ total_log()
 
   # Generate the Total Log File:  all events
 
-  if [ $TYPE = "up" ]; then
+  if [ "$TYPE" = "up" ]; then
     PROC="up"
   fi
 
@@ -80,6 +83,16 @@ unlog_error()
   total_log
 }
 
+do_snmp_get()
+{
+  SNMPGETOUT=`/usr/local/etc/snmpget -t 3 -r 5 $1 ecemgr eceagent ececontext $2 | sed 's/^.*= *"\(.*\)".*/\1/'`
+  if [ "$SNMPGETOUT" = "No Response from $1" ]; then
+    lockfile $ERRORLOGLOCKFILE
+    echo "$1 $2" >> $ERRORLOGFILE
+    rm -f $ERRORLOGLOCKFILE
+    exit 1
+  fi
+}
 
 # Begin Main
 
@@ -103,7 +116,9 @@ if [ $TYPE = "down" -o $TYPE = "up" ]; then
 
     ERROR="$HOST is down"
     if [ `egrep "^$HOST:" $HOSTDB | wc -l` != 0 ]; then
+      su - bin << ++
       mark-down $HOST
+++     
       log_error
     fi
   else
@@ -112,7 +127,9 @@ if [ $TYPE = "down" -o $TYPE = "up" ]; then
     
     ERROR="$HOST is up"
     if [ `egrep "^$HOST:" $HOSTDB | wc -l` != 0 ]; then
+      su - bin << ++
       mark-up $HOST
+++
       unlog_error
     fi
   fi
@@ -126,8 +143,9 @@ MIBLOC=`echo $MIBERRFLAG | sed 's/\.[^.]*$//'`
 ERRTABLENO="$3"
 MIBPROC=$MIBLOC.2.$ERRTABLENO
 MIBERRMSG=$MIBLOC.101.$ERRTABLENO
-PROC=`/usr/local/etc/snmpget $FULLHOST ecemgr eceagent ececontext $MIBPROC | sed 's/^.*= *"\(.*\)".*/\1/'`
-if [ $PROC = "" ]; then
+do_snmp_get $FULLHOST $MIBPROC
+PROC=$SNMPGETOUT
+if [ "$PROC" = "" ]; then
   PROC="traperr"
 fi
 
@@ -137,7 +155,8 @@ if [ $TYPE = "err" ];   then
   
   # The problem is an error
   
-  ERROR=`/usr/local/etc/snmpget $FULLHOST ecemgr eceagent ececontext $MIBERRMSG | sed 's/^.*= *"\(.*\)".*/\1/'`
+  do_snmp_get $FULLHOST $MIBERRMSG
+  ERROR=$SNMPGETOUT
   if [ "$ERROR" = "" ]; then
     ERROR="Error MSG disappeared."
     total_log
