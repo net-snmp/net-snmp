@@ -105,9 +105,13 @@ int main(int argc, char *argv[])
     int varcount, nonRepeaters = -1, maxRepetitions;
 
     /* get the common command line arguments */
-    if ((snmp_parse_args(argc, argv, &session, NULL, NULL)) < 0) { 
+    switch (snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    case -2:
+    	exit(0);
+    case -1:
         usage();
         exit(1);
+    default:
     }
 
     SOCK_STARTUP;
