@@ -14,8 +14,8 @@
 
 #define PROCINDEX 1
 #define PROCNAMES 2
-#define PROCMIN   3
-#define PROCMAX   4
+#define PROCMIN 3
+#define PROCMAX 4
 #define PROCCOUNT 5
 #define PROCERROR 6
 #define PROCERRORMSG 7
