@@ -452,6 +452,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             (reginfo->rootoid_len + 2);
 
         if (MODE_IS_SET(reqinfo->mode)) {
+
+            char buf[256]; /* is this reasonable size?? */
+            int  rc;
+            size_t len;
+
             /*
              * use a cached copy of the row for modification 
              */
@@ -460,9 +465,27 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * cache location: may have been created already by other
              * SET requests in the same master request. 
              */
+            rc = snprintf(buf, sizeof(buf), "dataset_row_stash:%s:",
+                          datatable->table->name);
+            if ((-1 == rc) || (rc >= sizeof(buf))) {
+                snmp_log(LOG_ERR,"%s handler name too long\n",
+                         datatable->table->name);
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_GENERR);
+                continue;
+            }
+            len = sizeof(buf) - rc;
+            rc = snprint_objid(&buf[rc], len, table_info->index_oid,
+                               table_info->index_oid_len);
+            if (-1 == rc) {
+                snmp_log(LOG_ERR,"%s oid or name too long\n",
+                         datatable->table->name);
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_GENERR);
+                continue;
+            }
             stashp = (netsnmp_oid_stash_node **)
-                netsnmp_table_get_or_create_row_stash(reqinfo,
-                                                      "dataset_row_stash");
+                netsnmp_table_get_or_create_row_stash(reqinfo, buf);
 
             newrowstash
                 = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
