@@ -79,6 +79,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "default_store.h"
 
 int command = SNMP_MSG_GET;
 

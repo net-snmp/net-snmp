@@ -82,6 +82,7 @@
 #include "int64.h"
 #include "snmp_parse_args.h"
 #include "snmp_logging.h"
+#include "default_store.h"
 
 #define MAX_ARGS 256
     

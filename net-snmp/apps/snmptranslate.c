@@ -63,6 +63,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_debug.h"
+#include "default_store.h"
 #include "../snmplib/system.h"
 
 #include "version.h"

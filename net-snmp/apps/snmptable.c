@@ -74,6 +74,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
+#include "default_store.h"
 #include "system.h"
 #include "apps/snmp_parse_args.h"
 
