@@ -1,3 +1,6 @@
+#ifndef NET_SNMP_CONFIG_H
+#define NET_SNMP_CONFIG_H
+
 /* config.h:  a general config file */
 
 /* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
@@ -581,3 +584,4 @@
 
 #undef INET6
 
+#endif /* NET_SNMP_CONFIG_H */
