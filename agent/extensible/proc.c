@@ -9,6 +9,7 @@ struct myproc *procwatch;
 static struct extensible fixproc;
 int numprocs=0;
 
+#ifdef PROCMIBNUM
 unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -35,10 +36,10 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numprocs))
     return(NULL);
   
-  if (proc = get_proc_instance(procwatch,newname[8])) {
+  if (proc = get_proc_instance(procwatch,newname[*length-1])) {
     switch (vp->magic) {
       case MIBINDEX:
-        long_ret = newname[8];
+        long_ret = newname[*length-1];
         return((u_char *) (&long_ret));
       case ERRORNAME:   /* process name to check for */
         *var_len = strlen(proc->name);
@@ -111,11 +112,14 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
     if (tmp == 1 && action == COMMIT) {
+#ifdef PROCFIXCMD
       sprintf(fixproc.command,PROCFIXCMD,proc->name);
       exec_command(&fixproc);
+#endif
     } 
     return SNMP_ERR_NOERROR;
   }
   return SNMP_ERR_WRONGTYPE;
 }
 
+#endif

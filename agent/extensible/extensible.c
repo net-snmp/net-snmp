@@ -131,6 +131,7 @@ static struct nlist nl[] = {
 int nswapdev=10;            /* taken from <machine/space.h> */
 int nswapfs=10;            /* taken from <machine/space.h> */
 
+#ifdef MEMMIBNUM
 #ifdef hpux
 
 int getswap(rettype)
@@ -273,10 +274,12 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 }
 
 #endif
+#endif
 
 static int numdisks;
 struct diskpart disks[MAXDISKS];
 
+#ifdef DISKMIBNUM
 #if defined(hpux) || defined(ultrix)
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
@@ -376,6 +379,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 }
 
 #endif
+#endif
 
 #define NOERR 0
 #define LOCKDBROKE 1
@@ -390,6 +394,7 @@ int lockd_timeout()
 }
 */
 
+#ifdef LOCKDMIBNUM
 long lockd_test(msg)
   char *msg;
 {
@@ -426,6 +431,7 @@ long lockd_test(msg)
   /* unlink(LOCKDREALFILE); */
   return (NOERR);
 }
+
 
 unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -470,6 +476,9 @@ unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write
   return NULL;
 }
 
+#endif
+#ifdef LOADAVEMIBNUM
+
 unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -502,10 +511,11 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = newname[8];
+      long_ret = newname[*length-1];
       return((u_char *) (&long_ret));
     case ERRORNAME:
-      sprintf(errmsg,"Load-%d",newname[8]*5);
+      sprintf(errmsg,"Load-%d",((newname[*length-1] == 1) ? 1 :
+                                ((newname[*length-1] == 2) ? 5 : 15)));
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
@@ -520,22 +530,23 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #endif
   switch (vp->magic) {
     case LOADAVE:
-      sprintf(errmsg,"%.2f",avenrun[newname[8]-1]);
+      sprintf(errmsg,"%.2f",avenrun[newname[*length-1]-1]);
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case LOADMAXVAL:
-      sprintf(errmsg,"%.2f",maxload[newname[8]-1]);
+      sprintf(errmsg,"%.2f",maxload[newname[*length-1]-1]);
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case ERRORFLAG:
-      long_ret = (maxload[newname[8]-1] != 0 &&
-                  avenrun[newname[8]-1] >= maxload[newname[8]-1]) ? 1 : 0;
+      long_ret = (maxload[newname[*length-1]-1] != 0 &&
+                  avenrun[newname[*length-1]-1] >= maxload[newname[*length-1]-1]) ? 1 : 0;
       return((u_char *) (&long_ret));
     case ERRORMSG:
-      if (maxload[newname[8]-1] != 0 &&
-          avenrun[newname[8]-1] >= maxload[newname[8]-1]) {
-        sprintf(errmsg,"%d min Load Average too high (= %.2f)",newname[8]*5,
-               avenrun[newname[8]-1]);
+      if (maxload[newname[*length-1]-1] != 0 &&
+          avenrun[newname[*length-1]-1] >= maxload[newname[*length-1]-1]) {
+        sprintf(errmsg,"%d min Load Average too high (= %.2f)",
+                (newname[*length-1] == 1)?1:((newname[*length-1] == 2)?5:15),
+                avenrun[newname[*length-1]-1]);
       } else {
         errmsg[0] = NULL;
       }
@@ -543,6 +554,8 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
       return((u_char *) errmsg);
   }
 }
+
+#endif
 
 int update_config()
 {
