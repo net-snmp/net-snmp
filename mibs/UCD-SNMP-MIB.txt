@@ -285,7 +285,7 @@ memIndex OBJECT-TYPE
      ACCESS  read-only
      STATUS  mandatory
      DESCRIPTION  
-          "Bogus Index.  This should always return the integer 1."
+          "Bogus Index.  This should always return the integer 0."
      ::= { memory 1 } 
 
 memErrorName OBJECT-TYPE
@@ -634,7 +634,7 @@ versionIndex OBJECT-TYPE
      ACCESS  read-only
      STATUS  mandatory
      DESCRIPTION  
-          "Index to mib (always 1)"
+          "Index to mib (always 0)"
      ::= { version 1 } 
 
 versionTag OBJECT-TYPE
@@ -710,7 +710,7 @@ snmperrIndex OBJECT-TYPE
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
-		"Bogus Index for snmperrs (always 1)."
+		"Bogus Index for snmperrs (always 0)."
 	::= { snmperrs 1 }
 
 snmperrNames OBJECT-TYPE
