@@ -1,4 +1,4 @@
-.TH SNMPD 1 "7 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD 8 "7 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
@@ -218,21 +218,21 @@ the same error on other platforms.
 .B snmpd
 checks for the existence of and parses the following files:
 .TP 6
-.B DATADIR/snmp/snmp.conf
+.B SYSCONFDIR/snmp/snmp.conf
 Common configuration for the agent and applications. See
 .I snmp.conf(5)
 for details.
 .TP
-.B DATADIR/snmp/snmpd.conf
+.B SYSCONFDIR/snmp/snmpd.conf
 .TP
-.B DATADIR/snmp/snmpd.local.conf
+.B SYSCONFDIR/snmp/snmpd.local.conf
 Agent-specific configuration.  See
 .I snmpd.conf(5)
 for details.  These files are optional and may be used to configure
 access control, trap generation, subagent protocols and much else
 besides.
 .IP
-In addition to these two configuration files in DATADIR/snmp, the
+In addition to these two configuration files in SYSCONFDIR/snmp, the
 agent will read any files with the names
 .I snmpd.conf
 and

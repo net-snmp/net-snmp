@@ -1694,7 +1694,7 @@ How do I add functionality?
   Secondly, it is possible for the agent to run commands or shell scripts
   in response to queries.  These can obtain and report the necessary
   information, or perform actions as required.
-  Detailed information and examples are provided in the snmpd(1) and
+  Detailed information and examples are provided in the snmpd(8) and
   snmpd.conf(5) manual pages, and the EXAMPLE.conf file.
   This is known as "pass-through" support.
 
