@@ -1,0 +1,144 @@
+#!/bin/sh
+#
+#  Quick hack at UCD bug-report script
+#
+
+bug_reports_to=ucd-snmp-coders@ece.ucdavis.edu
+
+#
+#   Check how to do echo without a new line
+#	-n or \c
+#
+msg_file=/tmp/ucd-bug.$$
+echo -n "test\c" > $msg_file
+
+if grep c $msg_file>/dev/null
+then
+    n="-n"
+    c=""
+else
+    n=""
+    c="\c"
+fi
+
+
+#
+#   Ask for subject and 'From:' field
+#
+subject="UCD-SNMP version X.X.X bug report"
+echo $n "Subject [$subject]: $c"
+read answer
+if [ "$answer" != "" ]
+then
+    subject=$answer
+fi
+
+email=`whoami`@`hostname`
+echo $n "Your email address [$email]: $c"
+read answer
+if [ "$answer" != "" ]
+then
+    email=$answer
+fi
+
+#
+#    Start to build the bug report
+#
+echo "UCD-SNMP version X.X.X bug report" >  $msg_file
+echo "---------------------------------" >> $msg_file
+echo $n "Press return to edit bug report file $c"
+read pause
+${EDITOR:-vi} $msg_file
+
+#
+#    Add some potentially useful information
+#
+echo                                     >> $msg_file
+echo "System configuration:"             >> $msg_file
+uname -a                                 >> $msg_file
+if [ -f config.cache ]
+then
+    cat  config.cache                    >> $msg_file
+fi
+
+
+#
+#    Start to create the mail message
+#
+
+echo "To: $bug_reports_to"                  > ${msg_file}.2
+echo "From: $email"                        >> ${msg_file}.2
+echo "Subject: $subject"                   >> ${msg_file}.2
+echo "MIME-Version: 1.0"                   >> ${msg_file}.2
+
+#
+#    Any other files to add?
+#
+
+multipart=no
+boundary=""
+
+echo $n "Enter a file to include [RETURN if none]: $c"
+read answer
+while [ "$answer" != "" ]
+do
+    if [ "$multipart" = "no" ]
+    then
+		#
+		#  Make this a multipart message
+		#
+	multipart=yes
+	#boundary="`hostname`.$$.`date | tr "  " .`"
+	boundary="temp-boundary.$$"
+	echo "MIME-Type: multipart/mixed;"              >> ${msg_file}.2
+	echo "        boundary=\"$boundary\""           >> ${msg_file}.2
+	echo                                            >> ${msg_file}.2
+	echo "--$boundary"                              >> ${msg_file}.2
+		#
+		#  and add the bug report so far
+		#
+	echo "Content-Description: Bug Report"          >> ${msg_file}.2
+	echo                                            >> ${msg_file}.2
+	cat  ${msg_file}                                >> ${msg_file}.2
+	echo                                            >> ${msg_file}.2
+    fi
+
+
+		#
+		#  Include the specified file
+		#
+    if [ -f "$answer" ]
+    then
+	echo "--$boundary"                              >> ${msg_file}.2
+	echo "Content-Description: $answer"             >> ${msg_file}.2
+	echo                                            >> ${msg_file}.2
+	cat  ${answer}                                  >> ${msg_file}.2
+	echo                                            >> ${msg_file}.2
+    else
+	echo "Cannot open file $answer"
+    fi
+
+    echo $n "Enter another file to include [RETURN if no more]: $c"
+    read answer
+done
+
+
+#
+#  Finish off the message, send it and tidy up.
+#
+#
+if [ "$multipart" = "no" ]
+then
+	cat  ${msg_file}                                >> ${msg_file}.2
+else
+	echo "--$boundary--"                            >> ${msg_file}.2
+fi
+
+if [ -x /usr/lib/sendmail ]
+then
+    /usr/lib/sendmail $bug_reports_to < ${msg_file}.2
+else
+    mail $bug_reports_to < ${msg_file}.2
+fi
+
+rm ${msg_file} ${msg_file}.2
