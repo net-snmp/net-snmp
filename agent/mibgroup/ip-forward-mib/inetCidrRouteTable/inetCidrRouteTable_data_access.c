@@ -163,6 +163,9 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
 
     DEBUGMSGTL(("verbose:inetCidrRouteTable_cache_load", "called\n"));
     
+    if (NULL == route_container)
+        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
+
     /*
      * we just got a fresh copy of route data. snarf data
      */
