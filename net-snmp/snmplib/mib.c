@@ -317,8 +317,6 @@ _sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
         sprintf((char *) (*buf + *out_len), "]");
         *out_len += strlen((char *) (*buf + *out_len));
     }
-    *(*buf + (*out_len)++) = '\n';
-    *(*buf + *out_len) = 0;
     return 1;
 }
 
@@ -332,10 +330,16 @@ sprint_realloc_hexstring(u_char ** buf, size_t * buf_len, size_t * out_len,
         line_len=len;
 
     for (; (int)len > line_len; len -= line_len) {
-        _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len);
+        if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, line_len))
+            return 0;
+        *(*buf + (*out_len)++) = '\n';
+        *(*buf + *out_len) = 0;
         cp += line_len;
     }
-    return _sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, len);
+    if(!_sprint_hexstring_line(buf, buf_len, out_len, allow_realloc, cp, len))
+        return 0;
+    *(*buf + *out_len) = 0;
+    return 1;
 }
 
 
