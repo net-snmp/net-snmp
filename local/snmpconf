@@ -32,6 +32,41 @@ $term = new Term::ReadLine 'snmpconf';
 read_config_files($opts{'c'}, \%filetypes);
 debug(Dumper(\%filetypes));
 
+foreach my $i (qw(/usr/local/share/snmp /usr/local/lib/snmp /usr/local/etc .), "$ENV{HOME}/.snmp") {
+    debug("searching $i\n");
+    foreach my $ft (keys(%filetypes)) {
+	debug("searching for $i/$ft\n");
+	$knownfiles{"$i/$ft"} = $ft if (-f "$i/$ft");
+	my $localft = $ft;
+	$localft =~ s/.conf/.local.conf/;
+	$knownfiles{"$i/$localft"} = $ft if (-f "$i/$localft");
+    }
+}
+
+if (keys(%knownfiles)) {
+    print "The following configuration files were found:\n";
+    my $count=1;
+    foreach my $i (sort keys(%knownfiles)) {
+	printf("%2d  $i\n",$count++);
+    }
+    my $ans = get_answer($term,
+			 "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n? ", "^([\\d\\s,]+|all|a|none|n)\$", "all");
+    if ($ans ne "n" || $ans ne "y") {
+	my $count = 0;
+	my @list = split(/\s*,\s*/,$ans);
+	foreach my $i (sort keys(%knownfiles)) {
+	    $count++;
+	    if ($ans eq "all" || $ans eq "a" || grep(/^$count$/,@list)) {
+		debug("reading $i\n");
+		read_config($i, $knownfiles{$i});
+	    }
+	}
+    }
+}
+
+read_config("/usr/local/share/snmp/snmpd.conf", "snmpd.conf");
+#debug(Dumper(\%filetypes));
+
 if ($#ARGV >= 0) {
     #
     # loop through requested files.
@@ -235,6 +270,8 @@ sub read_config_item {
 	} elsif ($token =~ /^token\s*$/) {
 	    $curtoken = $rest;
 	    $results{'thetokens'}{$curtoken} = 1;
+	    $results{$curtoken}{'defined'} = 1;
+	    $tokenmap{$curtoken} = $results{$curtoken};
 	    debug("current token set to $token\n");
 	} else {
 	    push @{$results{$token}},$rest;
@@ -284,6 +321,10 @@ sub output_files {
 	    }
 	    print O "\n\n\n";
 	}
+	print O "#\n# Unknown directives read in from other files\n#\n";
+	foreach my $unknown (@unknown) {
+	    print O $unknown,"\n";
+	}
 	close(O);
     }
 }
@@ -307,4 +348,23 @@ sub get_answer {
     
 sub valid_answers {
     return "^(" . join("|",@_) . ")\$";
+}
+
+sub read_config {
+    my $file = shift;
+    my $filetype = shift;
+    return if (!defined($filetypes{$filetype}));
+    open(I,$file);
+    while(<I>) {
+	next if (/^\s*\#/);
+	next if (/^\s*$/);
+	chomp;
+	my ($token, $rest) = /^\s*(\w+)\s+(.*)/;
+	$token = lc($token);
+	if (defined($tokenmap{$token})) {
+	    push @{$tokenmap{$token}{'results'}},$_;
+	} else {
+	    push @unknown,$_;
+	}
+    }
 }
