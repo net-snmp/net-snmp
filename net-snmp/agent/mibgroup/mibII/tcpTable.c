@@ -243,13 +243,19 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
         break;
 
     case MODE_GETNEXT:
+    case MODE_GETBULK:
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
     case MODE_SET_UNDO:
+        snmp_log(LOG_WARNING, "mibII/tcpTable: Unsupported mode (%d)\n",
+                               reqinfo->mode);
+        break;
     default:
+        snmp_log(LOG_WARNING, "mibII/tcpTable: Unrecognised mode (%d)\n",
+                               reqinfo->mode);
         break;
     }
 
