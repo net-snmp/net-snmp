@@ -111,6 +111,9 @@ typedef struct ${context}_rowreq_ctx_s {
 @        eval $mfd_tmp = " "@
 @    end@
     ${context}_data            $mfd_tmp data;
+@   if $m2c_table_sparse == 1@
+    unsigned int                column_exists_flags; /* flags for existence */
+@   end@
 @   if $m2c_table_settable@
 @      if $m2c_undo_embed == 1@
 @         eval $mfd_tmp = " "@
@@ -148,7 +151,8 @@ typedef struct ${context}_ref_rowreq_ctx_s {
  */
 ## {
     int ${context}_pre_request(${context}_registration * user_context);
-    int ${context}_post_request(${context}_registration * user_context);
+    int ${context}_post_request(${context}_registration * user_context,
+        int rc);
 
 @   if $m2c_data_init == 1@
     int ${context}_rowreq_ctx_init(${context}_rowreq_ctx *rowreq_ctx);
@@ -369,12 +373,13 @@ ${context}_pre_request(${context}_registration * user_context)
 /**
  * post-request callback
  *
+ * @param rc : MFD_SUCCESS if all requests succeeded
  *
  * @retval MFD_SUCCESS : success.
  * @retval MFD_ERROR   : other error (ignored)
  */
 int
-${context}_post_request(${context}_registration * user_context)
+${context}_post_request(${context}_registration * user_context, int rc)
 {
     DEBUGMSGTL(("verbose:${context}:${context}_post_request","called\n"));
 
@@ -411,5 +416,18 @@ ${context}_post_request(${context}_registration * user_context)
 @run generic-table-constants.m2c@
 @run mfd-interface.m2c@
 @run mfd-data-access.m2c@
+##
 @run mfd-readme.m2c@
-##@run mfd-doxygen.m2c@
+##
+@if $mfd_generate_doxygen == 1@
+@   run mfd-doxygen.m2c@
+@end@
+##
+@if $mfd_generate_makefile == 1@
+@   run mfd-makefile.m2m@
+@end@
+##
+@if $mfd_generate_subagent == 1@
+@   run subagent.m2c@
+@end@
+##
