@@ -20,12 +20,9 @@ ${context}_allocate_data(void)
      * allocate memory for the context
      */
 @if $m2c_data_allocate != "generated"@
-$example_start
+    /** this might not be right for $m2c_data_context */
 @end@
-    ${context}_data *rtn = SNMP_MALLOC_TYPEDEF(${context}_data);
-@if $m2c_data_allocate != "generated"@
-$example_end
-@end@
+    ${context}_data *rtn = SNMP_MALLOC_TYPEDEF($m2c_data_context);
 
     DEBUGTRACE;
 

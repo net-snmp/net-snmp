@@ -37,11 +37,9 @@
 @    include -ifexists default-table-${context}.m2d@
 ##
 @    if $m2c_data_allocate == 1@
-@        eval $m2c_data_refdcl = "*"@
 @        eval $m2c_data_item = "${m2c_context_item}data->"@
 @        eval $m2c_undo_item = "${m2c_context_item}undo->"@
 @    else@
-@        eval $m2c_data_refdcl = ""@
 @        eval $m2c_data_item = "${m2c_context_item}data."@
 @        eval $m2c_undo_item = "${m2c_context_item}undo."@
 @    end@
