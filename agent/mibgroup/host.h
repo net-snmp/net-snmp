@@ -17,6 +17,9 @@
 	config_require(hr_swinst)
 	config_require(hr_utils)
 
+/* add the host resources mib to the default mibs to load */
+        config_add_mib(HOST-RESOURCES-MIB) 
+
 /*********************************************
  *
  *   A few words about the design of the Host Resources
