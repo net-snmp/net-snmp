@@ -39,9 +39,9 @@ init_scalar_int(void)
        scalar object) */
     oid my_registration_oid[] = { 1,3,6,1,4,1,8072,2,1,1,0 };
 
-    /* a debugging statement.  Run the agent with -Dscalar_int to see
+    /* a debugging statement.  Run the agent with -Dexample_scalar_int to see
        the output of this debugging statement. */
-    DEBUGMSGTL(("scalar_int",
+    DEBUGMSGTL(("example_scalar_int",
                 "Initalizing example scalar int.  Default value = %d\n",
                 example1));
             
@@ -59,6 +59,6 @@ init_scalar_int(void)
                           OID_LENGTH(my_registration_oid),
                           &example1, NULL);
 
-    DEBUGMSGTL(("scalar_int","Done initalizing example scalar int\n"));
+    DEBUGMSGTL(("example_scalar_int","Done initalizing example scalar int\n"));
 }
 

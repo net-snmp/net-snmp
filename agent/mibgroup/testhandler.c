@@ -125,53 +125,6 @@ init_testhandler(void) {
         table,
         table_info);
 
-    /*
-     * register a full featured, I don't care about the data afterwards table.
-     */
-    /* It's going to be the "working group chairs" table, since I'm
-       sitting at an IETF convention while I'm writing this.
-
-        column 1 = index = string = WG name
-        column 2 = string = chair #1
-        column 3 = string = chair #2  (most WGs have 2 chairs now)
-    */
-    table_set = netsnmp_create_table_data_set("chairs");
-    
-    /* set up what a row "should" look like */
-    netsnmp_table_dataset_add_index(table_set, ASN_OCTET_STR);
-    netsnmp_table_set_multi_add_default_row(table_set,
-                                            2, ASN_OCTET_STR, 1, NULL, 0,
-                                            3, ASN_OCTET_STR, 1, NULL, 0);
-
-    /* register the table */
-    netsnmp_register_table_data_set(netsnmp_create_handler_registration("chairs",
-                                                        NULL,
-                                                        my_data_table_set_oid,
-                                                        4, HANDLER_CAN_RWRITE),
-                            table_set, NULL);
-
-    /* add the data, for the first row */
-    row = netsnmp_create_table_data_row();
-    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpv3",\
-                        strlen("snmpv3"));
-    netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "Russ Mundy", strlen("Russ Mundy"));
-    netsnmp_mark_row_column_writable(row, 2, 1); /* make writable */
-    netsnmp_set_row_column(row, 3, ASN_OCTET_STR, "David Harrington",
-                   strlen("David Harrington"));
-    netsnmp_mark_row_column_writable(row, 3, 1); /* make writable */
-    netsnmp_table_dataset_add_row(table_set, row);
-
-    /* add the data, for the second row */
-    row = netsnmp_create_table_data_row();
-    netsnmp_table_row_add_index(row, ASN_OCTET_STR, "snmpconf",\
-                        strlen("snmpconf"));
-    netsnmp_set_row_column(row, 2, ASN_OCTET_STR, "David Partain",
-                   strlen("David Partain"));
-    netsnmp_mark_row_column_writable(row, 2, 1); /* make writable */
-    netsnmp_set_row_column(row, 3, ASN_OCTET_STR, "Jon Saperia",
-                   strlen("Jon Saperia"));
-    netsnmp_mark_row_column_writable(row, 3, 1); /* make writable */
-    netsnmp_table_dataset_add_row(table_set, row);
 }
 
 int

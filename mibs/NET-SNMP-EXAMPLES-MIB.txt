@@ -52,6 +52,57 @@ netSnmpExampleInteger OBJECT-TYPE
 --  Example Tables
 --
 
+netSnmpIETFWGTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF NetSnmpIETFWGEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"This table merely contains a set of data which is otherwise
+	 useless for true network management.  It is a table which
+	 describes properies about a IETF Working Group, such as the
+	 names of the two working group chairs."
+    ::= { netSnmpExampleTables 1 }
+
+netSnmpIETFWGEntry OBJECT-TYPE
+    SYNTAX      NetSnmpIETFWGEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"A rowm describing a given working group"
+    INDEX   { nsIETFWGName }
+    ::= {netSnmpIETFWGTable 1 }
+
+NetSnmpIETFWGEntry ::= SEQUENCE {
+	nsIETFWGName	OCTET STRING,
+	nsIETFWGChair1	OCTET STRING,
+	nsIETFWGChair2	OCTET STRING
+}
+
+nsIETFWGName OBJECT-TYPE
+    SYNTAX      OCTET STRING (SIZE(1..32))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"The name of the IETF Working Group this table describes."
+    ::= { netSnmpIETFWGEntry 1 }
+
+nsIETFWGChair1 OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+	"One of the names of the chairs for the IETF working group."
+    ::= { netSnmpIETFWGEntry 2 }
+
+nsIETFWGChair2 OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+	"The other name, if one exists, of the chairs for the IETF
+	working group."
+    ::= { netSnmpIETFWGEntry 3 }
+
 --
 --  Example Notifications
 --
