@@ -56,7 +56,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_PATH_PROG(PSPROG,ps)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_CHECK_PROGS(SED,sed gsed)
@@ -141,52 +140,71 @@ if test "x$with_shared" = "xyes"; then
     dnl defaults
 
     if test "x$GCC" = "xyes"; then
-      CFLAGS_SHLIB="-fpic -shared"
+      SHLIB_CFLAGS="-fpic -shared"
     else
-      CFLAGS_SHLIB="-Kpic"
+      SHLIB_CFLAGS="-Kpic"
     fi
-    LIB_EXTENSION="so"
-    LD_ARGS=
-    LD_RUNTIME_ARG=
+    SHLIB_EXTENSION="so"
+    SHLIB_LD_CMD="ld -r -o"
+    SHLIB_LDCONFIG_CMD=
+    CC_RUNTIME_ARG=
+    RANLIB=":"
 
     dnl over-rides
     case $target_os in
 
     linux*)
+	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -n $(libdir)'
+	;;
+
+    irix*)
+	SHLIB_LD_CMD="ld -shared -o"
+	CC_RUNTIME_ARG="-Wl,-rpath -Wl,$libdir"
+	;;
+
+    netbsd* | openbsd*)
+	SHLIB_LD_CMD="ld -Bshareable -o"
+	CC_RUNTIME_ARG="-R$libdir"
+	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -m $(libdir)'
 	;;
 
     hpux*)
-	LIB_EXTENSION="sl"
-        if test "x$GCC" = "xno"; then
-	    CFLAGS_SHLIB="+z"
+	SHLIB_EXTENSION="sl"
+        if test "x$GCC" != "xyes"; then
+	    SHLIB_CFLAGS="+Z"
 	fi
-	LD_RUNTIME_ARG="-Wl,+b,$libdir"
+	CC_RUNTIME_ARG="-Wl,+b,$libdir"
+	SHLIB_LD_CMD="ld -b -o"
 	;;
 
     osf*)
-	LD_RUNTIME_ARG="-rpath $libdir"
+	CC_RUNTIME_ARG="-rpath $libdir"
+	SHLIB_LD_CMD="ld -shared -o"
 	;;
 	
     aix*)
-	LIB_EXTENSION="a"
 	;;
 
     sysv4*)
-	LIB_EXTENSION="a"
-	LD_ARGS="-dy"
-	LD_RUNTIME_ARG="-R$libdir"
+	CC_RUNTIME_ARG="-R$libdir"
 	;;
     
     sunos*)
-	LIB_EXTENSION="a"
-	LD_ARGS="-dy"
+        if test "x$GCC" != "xyes"; then
+	    SHLIB_CFLAGS="-PIC"
+	fi
+	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/usr/etc" ldconfig $(libdir)'
 	;;
     
     solaris*)
-	LD_RUNTIME_ARG="-R$libdir"
-	LD_ARGS="-dy"
+	SHLIB_LD_CMD="ld -G -o"
+	CC_RUNTIME_ARG="-R$libdir"
 	;;
     
+    freebsd*)
+	SHLIB_LD_CMD="ld -Bshareable -o"
+	;;
+
     *)
 	AC_MSG_ERROR([
 	  *** shared libraries aren't supported for architecture $target_os
@@ -196,12 +214,17 @@ if test "x$with_shared" = "xyes"; then
     esac
 else
     LIB_EXTENSION="a"
-    LD_ARGS=
+    SHLIB_LD_CMD="ar cr"
+    SHLIB_LDCONFIG_CMD='$(RANLIB)'
 fi
 
-AC_SUBST(LIB_EXTENSION)
-AC_SUBST(CFLAGS_SHLIB)
-AC_SUBST(LD_RUNTIME_ARG)
+AC_SUBST(CC_RUNTIME_ARG)
+AC_SUBST(SHLIB_CFLAGS)
+AC_SUBST(SHLIB_EXTENSION)
+AC_SUBST(SHLIB_LDCONFIG_CMD)
+AC_SUBST(SHLIB_LD_CMD)
+AC_PROG_RANLIB
+
 
 dnl
 dnl Do hairy agent module processing.

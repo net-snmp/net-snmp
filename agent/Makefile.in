@@ -3,8 +3,8 @@
 #
 
 TARG=	 snmpd
-USELIBS= ../snmplib/libsnmp.$(LIB_EXTENSION)
-LIBS=	 -L../snmplib $(LD_RUNTIME_ARG) -lsnmp @LIBS@
+USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)
+LIBS=	 -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 	-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup
@@ -32,7 +32,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 
 AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o read_config.o
 
-snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.$(LIB_EXTENSION)
+snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.$(SHLIB_EXTENSION)
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:
