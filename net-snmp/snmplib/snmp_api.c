@@ -242,7 +242,7 @@ static const char *api_errors[-SNMPERR_MAX+1] = {
     "Unknown engine ID",                   /* SNMPERR_UNKNOWN_ENG_ID */
     "Unknown user name",                   /* SNMPERR_UNKNOWN_USER_NAME */
     "Unsupported security level",          /* SNMPERR_UNSUPPORTED_SEC_LEVEL */
-    "Authentication failure",              /* SNMPERR_AUTHENTICATION_FAILURE */
+    "Authentication failure (incorrect password, community or key)",              /* SNMPERR_AUTHENTICATION_FAILURE */
     "Not in time window",                  /* SNMPERR_NOT_IN_TIME_WINDOW */
     "Decryption error",                    /* SNMPERR_DECRYPTION_ERR */
     "SCAPI general failure",		   /* SNMPERR_SC_GENERAL_FAILURE */
@@ -965,7 +965,7 @@ _sess_copy( struct snmp_session *in_session)
                       (u_char*)cp, strlen(cp),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
-        snmp_set_detail("Error generating Ku from authentication pass phrase.");
+        snmp_set_detail("Error generating a key (Ku) from the supplied authentication pass phrase.");
 	snmp_sess_close(slp);
         return NULL;
       }
@@ -979,7 +979,7 @@ _sess_copy( struct snmp_session *in_session)
                       (u_char *)cp, strlen(cp),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
-        snmp_set_detail("Error generating Ku from privacy pass phrase.");
+        snmp_set_detail("Error generating a key (Ku) from the supplied privacy pass phrase.");
 	snmp_sess_close(slp);
         return NULL;
       }

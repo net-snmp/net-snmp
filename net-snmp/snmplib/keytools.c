@@ -109,7 +109,7 @@ generate_Ku(	const oid *hashtype,	u_int  hashtype_len,
 #ifdef SNMP_TESTING_CODE
           snmp_log(LOG_WARNING, "Warning: passphrase chosen is below the length requiremnts of the USM.\n");
 #else
-          snmp_set_detail("Password length too short.");
+          snmp_set_detail("The supplied password length is too short.");
           QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
 #endif
         }

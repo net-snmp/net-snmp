@@ -644,7 +644,7 @@ usm_parse_create_usmUser(const char *token, char *line)
 		    (u_char *)buf, strlen(buf),
 		    userKey, &userKeyLen );
   if (ret != SNMPERR_SUCCESS) {
-    config_perror("Error generating auth key from pass phrase.");
+    config_perror("Error generating the authentication key from the suppiled pass phrase.");
     usm_free_user(newuser);
     return;
   }
@@ -656,7 +656,7 @@ usm_parse_create_usmUser(const char *token, char *line)
 		     userKey, userKeyLen,
 		     newuser->authKey, &newuser->authKeyLen );
   if (ret != SNMPERR_SUCCESS) {
-    config_perror("Error generating localized auth key (Kul) from Ku.");
+    config_perror("Error generating localized authentication key (Kul) from the master key (Ku).");
     usm_free_user(newuser);
     return;
   }
@@ -687,14 +687,14 @@ usm_parse_create_usmUser(const char *token, char *line)
                       (u_char *)buf, strlen(buf),
                       userKey, &userKeyLen );
     if (ret != SNMPERR_SUCCESS) {
-      config_perror("Error generating priv key from pass phrase.");
+      config_perror("Error generating privacy key from the supplied pass phrase.");
       usm_free_user(newuser);
       return;
     }
 
     ret = sc_get_properlength(newuser->authProtocol, newuser->authProtocolLen);
     if (ret < 0) {
-      config_perror("Error getting proper key length for priv algorithm.");
+      config_perror("Error getting proper key length to sue for the privacy algorithm.");
       usm_free_user(newuser);
       return;
     }
@@ -706,7 +706,7 @@ usm_parse_create_usmUser(const char *token, char *line)
                        userKey, userKeyLen,
                        newuser->privKey, &newuser->privKeyLen );
     if (ret != SNMPERR_SUCCESS) {
-      config_perror("Error generating localized priv key (Kul) from Ku.");
+      config_perror("Error generating the localized privacy key (Kul) from the master key (Ku).");
       usm_free_user(newuser);
       return;
     }
