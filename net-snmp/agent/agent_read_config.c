@@ -123,16 +123,20 @@ snmpd_set_agent_user(const char *token, char *cptr)
         char           *ecp;
         int             uid;
         uid = strtoul(cptr + 1, &ecp, 10);
-        if (*ecp != 0)
+        if (*ecp != 0) {
             config_perror("Bad number");
-        else
-            ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+	} else {
+	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_USERID, uid);
+	}
     }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     else if ((info = getpwnam(cptr)) != NULL) {
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
-    } else
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_USERID, info->pw_uid);
+    } else {
         config_perror("User not found in passwd database");
+    }
 #endif
 }
 
@@ -146,16 +150,20 @@ snmpd_set_agent_group(const char *token, char *cptr)
     if (cptr[0] == '#') {
         char           *ecp;
         int             gid = strtoul(cptr + 1, &ecp, 10);
-        if (*ecp != 0)
+        if (*ecp != 0) {
             config_perror("Bad number");
-        else
-            ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, gid);
+	} else {
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_GROUPID, gid);
+	}
     }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
     else if ((info = getgrnam(cptr)) != NULL) {
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
-    } else
+        netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
+    } else {
         config_perror("Group not found in group database");
+    }
 #endif
 }
 #endif
@@ -169,28 +177,33 @@ snmpd_set_agent_address(const char *token, char *cptr)
     /*
      * has something been specified before? 
      */
-    ptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+    ptr = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+				NETSNMP_DS_AGENT_PORTS);
 
-    if (ptr)
+    if (ptr) {
         /*
          * append to the older specification string 
          */
         sprintf(buf, "%s,%s", ptr, cptr);
-    else
+    } else {
         strcpy(buf, cptr);
+    }
 
     DEBUGMSGTL(("snmpd_ports", "port spec: %s\n", buf));
-    ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, buf);
-
+    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+			  NETSNMP_DS_AGENT_PORTS, buf);
 }
 
 void
 init_agent_read_config(const char *app)
 {
-    if (app != NULL)
-        ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, app);
-    else
-        app = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+    if (app != NULL) {
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			      NETSNMP_DS_LIB_APPTYPE, app);
+    } else {
+        app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				    NETSNMP_DS_LIB_APPTYPE);
+    }
 
     register_app_config_handler("authtrapenable",
                                 snmpd_parse_config_authtrap, NULL,
@@ -199,7 +212,8 @@ init_agent_read_config(const char *app)
                                 snmpd_parse_config_authtrap, NULL, NULL);
 
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
         register_app_config_handler("trapsink",
                                     snmpd_parse_config_trapsink,
                                     snmpd_free_trapsinks,
@@ -232,8 +246,9 @@ init_agent_read_config(const char *app)
                                 "tableoid");
     register_app_config_handler("add_row", netsnmp_config_parse_add_row,
                                 NULL, "indexes... values...");
-    ds_register_config(ASN_BOOLEAN, app, "quit", DS_APPLICATION_ID,
-                       DS_AGENT_QUIT_IMMEDIATELY);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "quit", 
+			       NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
     netsnmp_init_handler_conf();
 
 #include "mib_module_dot_conf.h"

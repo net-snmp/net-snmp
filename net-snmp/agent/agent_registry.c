@@ -566,7 +566,8 @@ netsnmp_register_mib(const char *moduleName,
     /*
      * mark the MIB as detached, if there's no master agent present as of now 
      */
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT) {
         extern struct snmp_session *main_session;
         if (main_session == NULL)
             register_mib_detach_node(subtree);
@@ -1171,10 +1172,11 @@ void
 setup_tree(void)
 {
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    int             role;
+    int role =  netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				       NETSNMP_DS_AGENT_ROLE);
 
-    role = ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE);
-    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_ROLE, MASTER_AGENT);
 #endif
 
     netsnmp_register_null(root_subtrees[0].name, root_subtrees[0].namelen);
@@ -1191,7 +1193,8 @@ setup_tree(void)
      */
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, role);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_ROLE, role);
 #endif
 }
 

@@ -24,8 +24,8 @@ void
 maybe_source_perl_startup(void)
 {
     const char     *embedargs[] = { "", "" };
-    const char     *perl_init_file = ds_get_string(DS_APPLICATION_ID,
-                                                   DS_AGENT_PERL_INIT_FILE);
+    const char     *perl_init_file = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+							   NETSNMP_DS_AGENT_PERL_INIT_FILE);
     char            init_file[SNMP_MAXBUF];
 
     static int      have_done_init = 0;
@@ -59,18 +59,23 @@ maybe_source_perl_startup(void)
 
   bail_out:
     snmp_log(LOG_ERR, "embedded perl support failed to initalize\n");
-    ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL, 1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			   NETSNMP_DS_AGENT_DISABLE_PERL, 1);
     return;
 }
 
 void
 do_something_perlish(char *something)
 {
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_DISABLE_PERL)) {
         return;
+    }
     maybe_source_perl_startup();
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_DISABLE_PERL)) {
         return;
+    }
     DEBUGMSGTL(("perl", "calling perl\n"));
     eval_pv(something, TRUE);
     DEBUGMSGTL(("perl", "finished calling perl\n"));
@@ -85,11 +90,13 @@ perl_config_handler(const char *token, char *line)
 void
 init_perl(void)
 {
-    const char     *appid = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+    const char     *appid = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+						  NETSNMP_DS_LIB_APPTYPE);
     const char     *defaultid = "snmpd";
 
-    if (!appid)
+    if (!appid) {
         appid = defaultid;
+    }
 
     /*
      * register config handlers 
@@ -100,21 +107,25 @@ init_perl(void)
     /*
      * define the perlInitFile token to point to an init file 
      */
-    ds_register_premib(ASN_OCTET_STR, appid, "perlInitFile",
-                       DS_APPLICATION_ID, DS_AGENT_PERL_INIT_FILE);
+    netsnmp_ds_register_premib(ASN_OCTET_STR, appid, "perlInitFile",
+			       NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_PERL_INIT_FILE);
 
     /*
      * define the perlInitFile token to point to an init file 
      */
-    ds_register_premib(ASN_BOOLEAN, appid, "disablePerl",
-                       DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, appid, "disablePerl",
+			       NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_AGENT_DISABLE_PERL);
 }
 
 void
 shutdown_perl(void)
 {
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_DISABLE_PERL))
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_DISABLE_PERL)) {
         return;
+    }
     DEBUGMSGTL(("perl", "shutting down perl\n"));
     perl_destruct(my_perl);
     perl_free(my_perl);

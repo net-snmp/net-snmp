@@ -470,9 +470,8 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 
     snmp_increment_statistic(STAT_SNMPINPKTS);
 
-    if (log_addresses
-        || ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
-
+    if (log_addresses || netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+						NETSNMP_DS_AGENT_VERBOSE)) {
         for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
             if ((addrCache[i].status != SNMP_ADDRCACHE_UNUSED) &&
                 (strcmp(addrCache[i].addr, addr_string) == 0)) {
@@ -481,7 +480,8 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         }
 
         if (i >= SNMP_ADDRCACHE_SIZE ||
-            ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
+	    netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_VERBOSE)) {
             /*
              * Address wasn't in the cache, so log the packet...  
              */
@@ -529,8 +529,9 @@ netsnmp_agent_check_parse(netsnmp_session * session, netsnmp_pdu *pdu,
                           int result)
 {
     if (result == 0) {
-        if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
-            snmp_get_do_logging()) {
+        if (snmp_get_do_logging() &&
+	    netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_VERBOSE)) {
             netsnmp_variable_list *var_ptr;
 
             switch (pdu->command) {
@@ -673,7 +674,8 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     s->version = SNMP_DEFAULT_VERSION;
     s->callback = handle_snmp_packet;
     s->authenticator = NULL;
-    s->flags = ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS);
+    s->flags = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+				  NETSNMP_DS_AGENT_FLAGS);
     s->isAuthoritative = SNMP_SESS_AUTHORITATIVE;
 
     sp = snmp_add(s, t, netsnmp_agent_check_packet,
@@ -797,20 +799,23 @@ init_master_agent(void)
     char           *cptr;
     char            buf[SPRINT_MAX_LEN];
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT) {
         DEBUGMSGTL(("snmp_agent",
                     "init_master_agent; not master agent\n"));
         return 0;               /*  No error if ! MASTER_AGENT  */
     }
 #ifdef USING_AGENTX_MASTER_MODULE
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER) == 1)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_AGENTX_MASTER) == 1)
         real_init_master();
 #endif
 
     /*
      * Have specific agent ports been specified?  
      */
-    cptr = ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS);
+    cptr = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+				 NETSNMP_DS_AGENT_PORTS);
 
     if (cptr) {
         sprintf(buf, "%s", cptr);
@@ -818,8 +823,7 @@ init_master_agent(void)
         /*
          * No, so just specify the default port.  
          */
-        if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS) &
-            SNMP_FLAGS_STREAM_SOCKET) {
+        if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_FLAGS) & SNMP_FLAGS_STREAM_SOCKET) {
             sprintf(buf, "tcp:%d", SNMP_PORT);
         } else {
             sprintf(buf, "udp:%d", SNMP_PORT);
