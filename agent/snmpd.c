@@ -1030,28 +1030,13 @@ receive(void)
     int             numfds;
     fd_set          readfds, writefds, exceptfds;
     struct timeval  timeout, *tvp = &timeout;
-    struct timeval  sched, *svp = &sched, now, *nvp = &now;
     int             count, block, i;
 #ifdef	USING_SMUX_MODULE
     int             sd;
 #endif                          /* USING_SMUX_MODULE */
 
-
     /*
-     * Set the 'sched'uled timeout to the current time + one TIMETICK.
-     */
-    gettimeofday(nvp, (struct timezone *) NULL);
-    svp->tv_usec = nvp->tv_usec + TIMETICK;
-    svp->tv_sec = nvp->tv_sec;
-
-    while (svp->tv_usec >= ONE_SEC) {
-        svp->tv_usec -= ONE_SEC;
-        svp->tv_sec++;
-    }
-
-    /*
-     * Loop-forever: execute message handlers for sockets with data,
-     * reset the 'sched'uler.
+     * Loop-forever: execute message handlers for sockets with data
      */
     while (running) {
         if (reconfig) {
@@ -1074,9 +1059,11 @@ receive(void)
             }
         }
 
-        tvp = &timeout;
-        tvp->tv_sec = 0;
-        tvp->tv_usec = TIMETICK;
+        /*
+         * default to sleeping for a really long time
+         */
+        tvp->tv_sec = LONG_MAX;
+        tvp->tv_usec = 0;
 
         numfds = 0;
         FD_ZERO(&readfds);
@@ -1119,6 +1106,8 @@ receive(void)
     reselect:
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
                     numfds, tvp));
+        if(tvp)
+            DEBUGMSGTL(("timer", "tvp %d.%d\n", tvp->tv_sec, tvp->tv_usec));
         count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 
@@ -1208,36 +1197,6 @@ receive(void)
                 return -1;
             }                   /* endif -- count>0 */
 
-
-
-
-        /*
-         * If the time 'now' is greater than the 'sched'uled time, then:
-         *
-         *    Check alarm and event timers.
-         *    Reset the 'sched'uled time to current time + one TIMETICK.
-         *    Age the cache network addresses (from whom messges have
-         *        been received).
-         */
-        gettimeofday(nvp, (struct timezone *)NULL);
-
-        if (nvp->tv_sec > svp->tv_sec || (nvp->tv_sec == svp->tv_sec &&
-					  nvp->tv_usec > svp->tv_usec)) {
-            svp->tv_usec = nvp->tv_usec + TIMETICK;
-            svp->tv_sec = nvp->tv_sec;
-
-            while (svp->tv_usec >= ONE_SEC) {
-                svp->tv_usec -= ONE_SEC;
-                svp->tv_sec++;
-            }
-            if (log_addresses && lastAddrAge++ > 600) {
-                netsnmp_addrcache_age();
-            }
-        }
-
-        /*
-         * endif -- now>sched 
-         */
         /*
          * run requested alarms 
          */
