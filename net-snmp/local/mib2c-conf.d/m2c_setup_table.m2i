@@ -23,6 +23,7 @@
 @    eval $m2c_table_dependencies = $m2c_table_settable@
 @    eval $m2c_table_row_creation = table_has_create($context)@
 @    eval $m2c_table_skip_mapping = -1@ # -1 = no default; based on type
+@    eval $m2c_table_sparse = 0@
 ##
 @    eval $m2c_context_reg = "$mfd_default_context_reg"@
 @    eval $m2c_data_context = "$mfd_default_data_context"@
@@ -53,7 +54,11 @@
 @        end@ 
 @      end@
 @    else@ # no existing defaults
-@      perleval mkdir(defaults,0775); return 0; @
+@      ifdir defaults@
+##       NOP
+@      else@
+@         perleval my $rc = mkdir(defaults,0775); return $rc != 1 @
+@      end@
 @      run mfd-interactive-setup.m2c@
 @    end@ # no conf file
 @    if $m2c_gen_table_defaults == 1@
