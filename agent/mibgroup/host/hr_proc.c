@@ -13,6 +13,7 @@
 #include "hr_proc.h"
 #include "auto_nlist.h"
 #include "agent_read_config.h"
+#include "ucd-snmp/loadave.h"
 
 #define HRPROC_MONOTONICALLY_INCREASING
 
@@ -135,8 +136,6 @@ var_hrproc(struct variable *vp,
 	   int *var_len,
 	   WriteMethod **write_method)
 {
-extern int try_getloadavg(double *r_ave, size_t s_ave); /* ucd-snmp/loadave.c*/
-
     int  proc_idx;
     double avenrun[3];
 
