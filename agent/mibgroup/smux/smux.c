@@ -1745,7 +1745,7 @@ smux_trap_process(u_char * rsp, size_t * len)
     /*
      * parse the sub-agent enterprise oid 
      */
-    datalen = MAX_OID_LEN;
+    sa_enterpriseoid_len = MAX_OID_LEN;
     if ((ptr = asn_parse_objid(ptr, len,
                                &vartype, (oid *) & sa_enterpriseoid,
                                &sa_enterpriseoid_len)) == NULL) {
