@@ -1211,7 +1211,7 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 		   trap_description(pdu->trap_type))) {
     return 0;
   }
-  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " Trap(")) {
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " Trap (")) {
     return 0;
   }
 
