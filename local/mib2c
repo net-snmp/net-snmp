@@ -183,22 +183,19 @@ sub loadMib {
     my $NAME = uc($name);
     print "doing $mib->{label} : $mib->{objectID}\n" if $debug;
     if (defined($mib->{'access'}) && 
-	$mib->{'access'} =~ /ReadOnly|ReadWrite|WriteOnly|Create/) {
+	$mib->{'access'} =~ /ReadOnly|ReadWrite|WriteOnly|Create|NoAccess/) {
 	$count = $count + 1;
 	$subid = $mib->{'objectID'};
 	$subid =~ s/$fulloid\.//;
 	$subid =~ s/\./,/g;
 	if (!defined($variables{$mib->{'type'}})) {
-	    $count = $count + 1;
 	    print STDERR "unknown type:  $mib->{type} for $mib->{label}\n";
 	    print STDERR "unknown type:  no information generated for $mib->{label}\n";
 	} else {
 	    foreach $i (@process) {
 		next if (defined($variables{$i}{'skipif'}) &&
 			 eval $variables{$i}{'skipif'});
-		my $str = "\"$variables{$i}{'code'}\"";
-		print $str,"\n" if ($debug);
-		my $result = eval ($str);
+		my $result = (eval "\"$variables{$i}{'code'}\"");
 		$variables{$i}{'processed'} .= "$result\n";
 		$variables{$vroutine}{$i}{'processed'} .= "$result\n";
 	    }
@@ -287,3 +284,10 @@ sub read_config() {
     }
 }
 
+sub evalstr {
+    my $str = shift;
+#    if ($str !~ /^\"/) {
+	$str = "\"$str\"";  # surround by quotes.
+#    }
+    eval ($str);            # should return a string, with variables expanded
+}
