@@ -58,6 +58,10 @@
 #include <netinet/in.h>
 #endif
 
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -504,9 +508,10 @@ smux_accept(int sd)
 		snmp_log_perror("[smux_accept] accept failed");
 		return -1;
 	} else {
-		snmp_log(LOG_ERR, "[smux_accept] accepted fd %d - errno %d\n", fd, errno);
+		snmp_log(LOG_INFO, "[smux_accept] accepted fd %d from %s:%d\n",
+		    fd, inet_ntoa(in_socket.sin_addr), ntohs(in_socket.sin_port));
 		if (npeers + 1 == SMUXMAXPEERS) {
-			DEBUGMSGTL (("smux","[smux_accept] denied peer on fd %d, limit reached", fd));
+			snmp_log (LOG_ERR, "[smux_accept] denied peer on fd %d, limit %d reached", fd, SMUXMAXPEERS);
 			close(sd);
 			return -1;
 		}
@@ -543,7 +548,7 @@ smux_accept(int sd)
 #ifdef SO_RCVTIMEO
 		if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&tv, sizeof(tv)) < 0) {
 			DEBUGMSGTL (("smux","[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n", fd));
-                        snmp_log_perror("smux/setsockopt");
+                        snmp_log_perror("smux_accept: setsockopt SO_RCVTIMEO");
                 }
 #endif
 		npeers++;
@@ -644,12 +649,13 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	u_char type;
 	long version;
 	oid oid_name[MAX_OID_LEN];
-	char string[SMUXMAXSTRLEN];
+	char passwd[SMUXMAXSTRLEN];
+	char descr[SMUXMAXSTRLEN];
+	char oid_print[SMUXMAXSTRLEN];
 	int i;
 	size_t oid_name_len, string_len;
 
-	if ((ptr = asn_parse_int(ptr, len, &type, &version, 
-	    sizeof(version))) == NULL) {
+	if (!(ptr = asn_parse_int(ptr, len, &type, &version, sizeof(version)))) {
 		DEBUGMSGTL (("smux","[smux_open_process] version parse failed\n"));
 		*fail = TRUE;
 		return((ptr += *len));
@@ -665,17 +671,15 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 		*fail = TRUE;
 		return((ptr += *len));
 	}
+	sprint_objid(oid_print, oid_name, oid_name_len);
 
         if (snmp_get_do_debugging()) {
-          DEBUGMSGTL (("smux","[smux_open_process] smux peer:")); 
-          for (i=0; i < (int)oid_name_len; i++) 
-            DEBUGMSG (("smux",".%d", oid_name[i]));
-          DEBUGMSG (("smux"," \n"));
-          DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
+	    DEBUGMSGTL (("smux","[smux_open_process] smux peer: %s\n", oid_print)); 
+	    DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
         }
 
 	string_len = SMUXMAXSTRLEN;
-	if ((ptr = asn_parse_string(ptr, len, &type, (u_char *)string,
+	if ((ptr = asn_parse_string(ptr, len, &type, (u_char *)descr,
 	    &string_len)) == NULL) {
 		DEBUGMSGTL (("smux","[smux_open_process] descr parse failed\n"));
 		*fail = TRUE;
@@ -683,15 +687,16 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	}
 
         if (snmp_get_do_debugging()) {
-          DEBUGMSGTL (("smux","[smux_open_process] smux peer descr:")); 
+          DEBUGMSGTL (("smux","[smux_open_process] smux peer descr: ")); 
           for (i=0; i < (int)string_len; i++) 
-            DEBUGMSG (("smux","%c", string[i]));
-          DEBUGMSG (("smux"," \n"));
+            DEBUGMSG (("smux","%c", descr[i]));
+          DEBUGMSG (("smux","\n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
         }
+	descr[string_len] = 0;
 
 	string_len = SMUXMAXSTRLEN;
-	if ((ptr = asn_parse_string(ptr, len, &type, (u_char *)string,
+	if ((ptr = asn_parse_string(ptr, len, &type, (u_char *)passwd,
 	    &string_len)) == NULL) {
 		DEBUGMSGTL (("smux","[smux_open_process] passwd parse failed\n"));
 		*fail = TRUE;
@@ -699,23 +704,21 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	}
 
         if (snmp_get_do_debugging()) {
-          DEBUGMSGTL (("smux","[smux_open_process] smux peer passwd:")); 
+          DEBUGMSGTL (("smux","[smux_open_process] smux peer passwd: ")); 
           for (i=0; i < (int)string_len; i++) 
-            DEBUGMSG (("smux","%c", string[i]));
-          DEBUGMSG (("smux"," \n"));
+            DEBUGMSG (("smux","%c", passwd[i]));
+          DEBUGMSG (("smux","\n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
         }
-	string[string_len] = '\0';
-	if(!smux_auth_peer(oid_name, oid_name_len, string, fd)) {
-		if(snmp_get_do_debugging()) {
-		    DEBUGMSGTL (("smux","[smux_open_process] peer authentication failed for oid\n"));
-		    for (i = 0; i < (int)oid_name_len; i++) 
-			DEBUGMSG (("smux","\t.%d", oid_name[i]));
-		    DEBUGMSG (("smux"," password %s\n", string));
-		}
-		*fail = TRUE;
-		return ptr;
+	passwd[string_len] = '\0';
+	if(!smux_auth_peer(oid_name, oid_name_len, passwd, fd)) {
+	    snmp_log(LOG_WARNING, "refused smux peer: oid %s, password %s, descr %s\n",
+		     oid_print, passwd, descr);
+	    *fail = TRUE;
+	    return ptr;
 	}
+	snmp_log(LOG_INFO, "accepted smux peer: oid %s, password %s, descr %s\n",
+		 oid_print, passwd, descr);
 	*fail = FALSE;
 	return ptr;
 }
@@ -1113,7 +1116,7 @@ smux_snmp_process(int exact,
 
 	if (smux_build(type, smux_reqid, objid, len, 0, NULL, 
 	    *len, packet, &length) < 0) {
-	 snmp_log(LOG_NOTICE, "[smux_snmp_process]: smux_build failed\n");
+	 snmp_log(LOG_ERR, "[smux_snmp_process]: smux_build failed\n");
 		return NULL;
 	}
     DEBUGMSGTL(("smux", "[smux_snmp_process] oid from build: "));
@@ -1466,7 +1469,10 @@ smux_peer_cleanup(int sd)
 	/* make his auth available again */
 	for (i = 0; i < nauths; i++) {
 		if (Auths[i]->sa_active_fd == sd) {
+		  	char oid_name[128];
 			Auths[i]->sa_active_fd = -1;
+			sprint_objid(oid_name, Auths[i]->sa_oid, Auths[i]->sa_oid_len);
+			snmp_log(LOG_INFO, "peer disconnected: %s\n", oid_name);
 		}
 	}
 }
