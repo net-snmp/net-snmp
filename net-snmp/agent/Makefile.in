@@ -32,11 +32,16 @@ EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o \
                extensible/extensible.o extensible/hpmibs.o \
                extensible/versioninfo.o extensible/proc.o \
                extensible/exec.o extensible/pass.o
+MIBOBJS=mibgroup/system.o mibgroup/interfaces.o mibgroup/at.o \
+		 mibgroup/ip.o mibgroup/icmp.o \
+		 mibgroup/tcp.o mibgroup/udp.o \
+		 mibgroup/snmp.o
 
 all: subdirs snmpd
 
 subdirs:
 	cd extensible; $(MAKE)
+	cd mibgroup; $(MAKE)
 
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
@@ -50,12 +55,13 @@ getmibstat: getmibstat.o
 getmibstat.o: kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DKDEBUG -c $? 
 
-snmpd:	snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o kernel_sunos5.o ${EXTENSIBLEOBJS} ../snmplib/libsnmp.a
-	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o  kernel_sunos5.o ${EXTENSIBLEOBJS} ${LDFLAGS} ${LIBS}  
+snmpd:	snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o kernel_sunos5.o ${EXTENSIBLEOBJS} ${MIBOBJS} ../snmplib/libsnmp.a
+	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o  kernel_sunos5.o ${EXTENSIBLEOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:
 	rm -f *.o ${TARG}
 	cd extensible; make clean
+	cd mibgroup; make clean
 
 install:  installdirs
 	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) "
@@ -65,6 +71,7 @@ installdirs:
 
 depend: 
 	cd extensible; $(MAKE) depend; cd ..
+	cd mibgroup; $(MAKE) depend; cd ..
 	makedepend -I.. -I../snmplib *.c
 	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
 
