@@ -11,7 +11,7 @@ snmpd - daemon to respond to SNMP request packets.
 is a SNMP agent which binds to a port and awaits requests from
 SNMP management software.  Upon receiving a request, it processes the
 request(s), collects the requested information and/or performs the
-requested opperation(s) and returns the information to the sender.
+requested operation(s) and returns the information to the sender.
 .SH OPTIONS
 .RS
 .TP 6
@@ -21,13 +21,13 @@ Print version information for the agent, and exit.
 Dumps the addresses the agent corresponds with to stderr or logfile.
 .TP
 .B -V
-Makes af symbolic dump of the protocol transaction.
+Makes a symbolic dump of the protocol transaction.
 .TP
 .B -d
 Dumps the sent and received UDP packets to stderr or logfile.
 .TP 
 .B -q
-Print simplier output for easier automated parsing.
+Print simpler output for easier automated parsing.
 .B -D
 Turn on debugging output
 .TP
@@ -40,12 +40,12 @@ instead of the default SNMP agent port, 161.
 Don't fork() from the calling shell.
 .TP
 .B -l logfile
-Log's all output from the agent (including stdout/err) to 
+Log's all output from the agent (including stdout/stderr) to 
 .I logfile.
 Defaults to a compiled option.
 .TP
 .B -L
-Don't open a log file; use stdout/err instead.
+Don't open a log file; use stdout/stderr instead.
 .TP
 .B -A
 Append to the log file rather than truncating it.
@@ -56,14 +56,14 @@ Read
 as a configuration file.
 .TP
 .B -C
-Don't read any configuration files execpt the one optionally specified by the 
+Don't read any configuration files except the one optionally specified by the 
 .B -c 
 option.
 .RE
 .SH CONFIGURATION FILES
 .PP
 .B snmpd
-checks for the existance of and parses the following files:
+checks for the existence of and parses the following files:
 .RS
 .TP 6
 .B DATADIR/snmp/snmpd.conf
@@ -80,11 +80,11 @@ are read-only as well.
 In addition to these two configuration files in DATADIR/snmp, the
 agent will read any files with the names snmpd.conf and
 snmpd.local.conf in a colon separated path specified in the
-SNMPCONFPATH environmental variable.
+SNMPCONFPATH environment variable.
 .TP
 .B DATADIR/snmp/mibs/
 The agent will also load all files in this directory as mibs also.  It
-will not, however, load any file that begins with a '.' or decend into
+will not, however, load any file that begins with a '.' or descend into
 subdirectories.
 .B 
 .TP
@@ -116,7 +116,7 @@ DATADIR/snmp/context.conf
 .br
 DATADIR/snmp/acl.conf
 .SH SEE ALSO
-(in recomended reading order)
+(in recommended reading order)
 .PP
 snmpd.conf(5),
 party.conf(5),

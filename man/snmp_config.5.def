@@ -19,7 +19,7 @@ default places a configuration file can exist for any given
 configuration file type.
 .PP
 Additionally, the above default search path can be overridden by
-setting the enviornmental variable SNMPCONFPATH to a ':' separated
+setting the environment variable SNMPCONFPATH to a ':' separated
 list of directories to search for.
 .PP
 Finally, applications that store persistent data will also look in the 
