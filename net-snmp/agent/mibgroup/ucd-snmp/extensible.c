@@ -232,8 +232,13 @@ extensible_parse_config(const char *token, char *cptr)
     if (cptr == NULL) {
         config_perror("No command specified on line");
     } else {
-        for (tcptr = cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
-             tcptr++);
+        /*
+         * Support multi-element commands in shell configuration
+         *   lines, but truncate after the first command for 'exec'
+         */
+        for (tcptr = cptr; *tcptr != 0 && *tcptr != '#'; tcptr++)
+            if (*tcptr == ';' && ptmp->type == EXECPROC)
+                break;
         strncpy(ptmp->command, cptr, tcptr - cptr);
         ptmp->command[tcptr - cptr] = 0;
     }
