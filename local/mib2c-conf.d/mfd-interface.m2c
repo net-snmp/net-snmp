@@ -186,6 +186,11 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
     ${context}_if_ctx.user_ctx = reg_ptr;
 
     /*
+     * call data access initialization code
+     */
+    ${context}_init_data(user_context);
+
+    /*
      * set up the container
      */
     _${context}_container_init(&${context}_if_ctx);
