@@ -1,5 +1,129 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.6 -> V3.6.1
+	
+mslifcak  8 Mar 99 04:02:01
+    (parse.c) - fix subid init; remove useless '-Pl' option.
+
+mslifcak  8 Mar 99 04:14:41
+    - (snmp_api.c) use request data with request callback
+
+mslifcak  8 Mar 99 05:01:49
+    -(win32/config.h) remove unused SYS_TIME_NAME,GLOBALSECURITY. add new constants.
+
+mslifcak  8 Mar 99 05:07:13
+    - (AGENT) MAX_NAME_LEN --> MAX_OID_LEN in example
+
+mslifcak  8 Mar 99 09:58:17
+    - (snmplib/parse.c) Complete Dave Shields' patch for continue after error.
+
+mslifcak  8 Mar 99 14:28:20
+    - (snmpnetstat:if.c, route.c) limit interface name sizes to fit fixed length buffers.
+
+hardaker 10 Mar 99 15:07:31
+    - (EXAMPLE.conf.def): group lines were backwards.
+
+hardaker 11 Mar 99 15:48:22
+    - (README): Added Mike Baer.
+
+hardaker 11 Mar 99 15:48:52
+    - (memory_solaris2.c): changed some comments to /* */ instead of //.
+
+hardaker 11 Mar 99 16:10:31
+    - (AGENT): removed AGENT
+
+hardaker 11 Mar 99 16:10:47
+    - (mib2c): fixed a couple of bugs and ansi'ified things.
+
+hardaker 11 Mar 99 16:22:43
+    - (util_funcs.c, util_funcs.h): move MATCH_SUCCEEDED defs to .h.
+
+hardaker 11 Mar 99 16:23:44
+    - (snmp_api.h, snmp_debug.h): Patch from Erik Jacobsen:
+      - fixed prototypes for DEBUGP() and DEBUGPOID().
+
+mslifcak 12 Mar 99 07:08:40
+    - (dlmod_mib.c) : Use MATCH_FAIL/SUCCEEDED in util_funcs.h
+
+hardaker 12 Mar 99 09:15:14
+    - (mibincl.h, dummy.c, wombat.c, hr_device.c, hr_disk.c, hr_filesys.c,
+      hr_network.c, hr_partition.c, hr_print.c, hr_proc.c, hr_storage.c,
+      hr_swinst.c, hr_swrun.c, hr_system.c, icmp.c, interfaces.c, ip.c,
+      snmp_mib.c, sysORTable.c, system_mib.c, tcp.c, udp.c, dlmod.c,
+      registry.c): fixed MATCH_FAILED/SUCCEEDED defines -> util_funcs.h.
+
+mslifcak 12 Mar 99 11:31:16
+    - (dlmod_mib.c) : explicit test for MATCH_FAILED
+
+hardaker 12 Mar 99 12:20:12
+    - (mib2c): fix asn_parse functions to pass a pointer to the size variable.
+
+hardaker 12 Mar 99 14:17:08
+    - (NEWS): update.
+
+hardaker 12 Mar 99 14:17:44
+    - (smux.c): protect strcpy() against a null password specified on the
+      config line.
+
+mslifcak 12 Mar 99 14:34:12
+    - (hr_system.h) - don't require hr_util; done in mibgroup/host.h
+    - (hr_swrun.c) - solaris2 : make sure kvm_open is called before kd is used.
+    - (hr_swrun.c) - add lame sunos4 equivalent in HRSWRUNPERF_CPU.
+
+mslifcak 12 Mar 99 14:35:38
+    - (target.h, target/*.h) require util_funcs once.
+
+hardaker 12 Mar 99 14:36:39
+    - (util_funcs.h): MATCH_FAILED -> -1, since some use it.
+
+mslifcak 12 Mar 99 14:54:51
+    - restore config_require logic; fix sprintf calls to compile under SunOS 4.1.x.
+
+hardaker 12 Mar 99 15:23:18
+    - (INSTALL): don't print module list here...  tell them to look at
+      configure --help.
+
+hardaker 12 Mar 99 15:24:37
+    - (configure, configure.in, IPFWCHAINS-MIB.txt, README,
+      ipfwc_kernel_headers.h, ipfwchains.c, ipfwchains.h, libipfwc.c,
+      libipfwc.h): Patch from Didier Dhaenens:
+      - new modules: ipfwchains.
+
+mslifcak 15 Mar 99 05:54:07
+    - (Makefile.in libsnmp.h mib.c snmp.h snmp_api.c) update CMU_COMPATIBLE
+
+hardaker 15 Mar 99 08:49:10
+    - (Makefile.in, snmp_api.c):
+      - revert to snmp_parse.
+      - don't install libsnmp.h.
+
+mslifcak 15 Mar 99 09:42:34
+    - second pass at CMU_COMPAT : Disable by default, leave snmp_parse alone.
+
+hardaker 15 Mar 99 14:30:45
+    - (snmp.h): remove unneeded commented out define.
+
+hardaker 15 Mar 99 14:31:23
+    - (acconfig.h): added CMU_COMPATIBLE
+
+hardaker 15 Mar 99 15:21:02
+    - (hr_proc.c, hr_proc.h, loadave.c, loadave.h): fix try_loadave for solaris.
+
+hardaker 15 Mar 99 15:31:51
+    - (configure, configure.in, interfaces.c, linux.h): detect
+      /proc/net/dev version at run time, not compile time.
+
+hardaker 15 Mar 99 15:46:12
+    - (interfaces.c): fixes for linux 2.2 interface scanning.
+
+hardaker 15 Mar 99 15:55:35
+    - (Makefile.in): makefileindepend.
+
+hardaker 15 Mar 99 15:58:07
+    - (FAQ, NEWS): updates to talk about the AGENT.txt file.
+	
+-------------------------------------------------------------------------------
+
 Changes: V3.5.3 -> V3.6
 
 hardaker 19 Jun 98 13:14:43
