@@ -15,7 +15,7 @@ config_require(util_funcs)
 
 /* add the SNMPv2-TM mib into the default list of mibs to load, since
    it contains the Domain definitions (EG, snmpUDPDomain) */
-conifg_add_mib(SNMPv2-TM)
+config_add_mib(SNMPv2-TM)
 
 /* Magic number definitions: */
 
