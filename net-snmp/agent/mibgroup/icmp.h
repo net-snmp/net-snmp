@@ -65,10 +65,8 @@ struct variable2 icmp_variables[] = {
     {ICMPOUTADDRMASKS, COUNTER, RONLY, var_icmp, 1, {25}},
     {ICMPOUTADDRMASKREPS, COUNTER, RONLY, var_icmp, 1, {26}}
 };
-#define  ICMP_SUBTREE  { \
-    {MIB, 5}, 7, (struct variable *)icmp_variables, \
-	 sizeof(icmp_variables)/sizeof(*icmp_variables), \
-	 sizeof(*icmp_variables) }
+
+config_load_mib({MIB.5}, 7, icmp_variables)
 #endif
 
 #endif /* _MIBGROUP_ICMP_H */

@@ -22,7 +22,8 @@ LDFLAGS= @LDFLAGS@
 OSFLAGS=
 
 CFLAGS=@CFLAGS@
-CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
+CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
+	-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup
 
 CCHACK = @CC@
 CC = @CC@ $(CPPFLAGS)
@@ -32,10 +33,7 @@ EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o \
                extensible/extensible.o extensible/hpmibs.o \
                extensible/versioninfo.o extensible/proc.o \
                extensible/exec.o extensible/pass.o
-MIBOBJS=mibgroup/system.o mibgroup/interfaces.o mibgroup/at.o \
-		 mibgroup/ip.o mibgroup/icmp.o \
-		 mibgroup/tcp.o mibgroup/udp.o \
-		 mibgroup/snmp.o
+MIBOBJS=@mibgroup_list_o@
 
 all: subdirs snmpd
 

@@ -60,10 +60,8 @@ struct variable13 tcp_variables[] = {
     {TCPINERRS, COUNTER, RONLY, var_tcp, 1, {14}},
     {TCPOUTRSTS, COUNTER, RONLY, var_tcp, 1, {15}}
 };
-#define  TCP_SUBTREE  { \
-    {MIB, 6}, 7, (struct variable *)tcp_variables, \
-	 sizeof(tcp_variables)/sizeof(*tcp_variables), \
-	 sizeof(*tcp_variables) }
+
+config_load_mib({MIB.6}, 7, tcp_variables)
 #endif
 
 #endif /* _MIBGROUP_TCP_H */

@@ -143,14 +143,7 @@ init_snmp()
 {
   init_kmem("/dev/kmem"); 
 
-  init_system();
-  init_interfaces();
-  init_at();
-  init_ip();
-  init_icmp();
-  init_tcp();
-  init_udp();
-  init_snmpgroup();
+#include "mibgroup/mib_module_inits.h"
 
   init_extensible();
 }
@@ -258,14 +251,7 @@ struct subtree *subtrees;   /* this is now malloced in
                                       extensible/extensible.c */
 
 struct subtree subtrees_old[] = {
-    SYSTEM_SUBTREE,
-    INTERFACES_SUBTREE,
-    AT_SUBTREE,
-    IP_SUBTREE,
-    ICMP_SUBTREE,
-    TCP_SUBTREE,
-    UDP_SUBTREE,
-    SNMP_SUBTREE,
+#include "mibgroup/mib_module_loads.h"
 #include "mibgroup/extensible_subtrees.h"
 #include "mibgroup/snmpv2_subtrees.h"
 };
