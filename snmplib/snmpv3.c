@@ -210,7 +210,7 @@ setup_engineID(u_char **eidp, const char *text)
 #endif
   u_char     *bufp = NULL;
   size_t	  len;
-  int	    x, localEngineIDType = engineIDType;
+  int	    localEngineIDType = engineIDType;
 
 /* get the host name and save the information */
 #ifdef HAVE_GETHOSTNAME
@@ -304,21 +304,23 @@ setup_engineID(u_char **eidp, const char *text)
 #endif
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
     case ENGINEID_TYPE_MACADDR:
-      bufp[4] = ENGINEID_TYPE_MACADDR;
-      /* use default NIC if none provided */
-      if ( NULL == engineIDNic )
-      {
-	x=getHwAddress(DEFAULT_NIC,&bufp[5]);
-      }
-      else
-      {
-	x=getHwAddress(engineIDNic,&bufp[5]);
-      }
-      if ( 0 != x)
-      /* function failed fill MAC address with zeros */
-      {
-	memset(&bufp[5], 0, 6);
-      }
+	{ int x;
+		bufp[4] = ENGINEID_TYPE_MACADDR;
+		/* use default NIC if none provided */
+		if ( NULL == engineIDNic )
+		{
+			x = getHwAddress(DEFAULT_NIC,&bufp[5]);
+		}
+		else
+		{
+			x = getHwAddress(engineIDNic,&bufp[5]);
+		}
+		if ( 0 != x)
+		/* function failed fill MAC address with zeros */
+		{
+			memset(&bufp[5], 0, 6);
+		}
+	}
       break;
 #endif
     case ENGINEID_TYPE_IPV4:
