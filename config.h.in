@@ -254,6 +254,9 @@
 /* Define if you have the <net/if_types.h> header file.  */
 #undef HAVE_NET_IF_TYPES_H
 
+/* Define if you have the <net/if_var.h> header file.  */
+#undef HAVE_NET_IF_VAR_H
+
 /* Define if you have the <netinet/icmp_var.h> header file.  */
 #undef HAVE_NETINET_ICMP_VAR_H
 
@@ -286,6 +289,9 @@
 
 /* Define if you have the <netinet/udp_var.h> header file.  */
 #undef HAVE_NETINET_UDP_VAR_H
+
+/* Define if you have the <osreldate.h> header file.  */
+#undef HAVE_OSRELDATE_H
 
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
@@ -343,6 +349,9 @@
 
 /* Define if you have the <sys/protosw.h> header file.  */
 #undef HAVE_SYS_PROTOSW_H
+
+/* Define if you have the <sys/queue.h> header file.  */
+#undef HAVE_SYS_QUEUE_H
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
@@ -510,7 +519,7 @@
 
 /*   swap MIN                     */
 #define MEMMIBNUM 4
-#if defined(hpux9) || defined(bsdi2) || defined(linux)
+#if defined(hpux9) || defined(bsdi2) || defined(linux) || defined(freebsd2)
 #define USEMEMMIB
 #endif
 
@@ -551,7 +560,7 @@
 #define ULTRIXID 5
 #define HPUX10ID 6
 #define NETBSD1ID 7
-#define FREEBSD2ID 8
+#define FREEBSDID 8
 #define IRIXID 9
 #define UNKNOWNID 255
 
@@ -576,8 +585,8 @@
 #ifdef netbsd1
 #define OSTYPE NETBSD1ID
 #endif
-#ifdef freebsd2
-#define OSTYPE FREEBSD2ID
+#if defined(freebsd2) || defined(freebsd3)
+#define OSTYPE FREEBSDID
 #endif
 #if defined(irix6) || defined(irix5)
 #define OSTYPE IRIXID

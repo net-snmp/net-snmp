@@ -32,7 +32,7 @@ solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent 3 }
 osf               OBJECT IDENTIFIER ::= { ucdSnmpAgent 4 }
 ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent 5 }
 netbsd1           OBJECT IDENTIFIER ::= { ucdSnmpAgent 7 }
-freebsd2          OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
+freebsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 8 }
 irix              OBJECT IDENTIFIER ::= { ucdSnmpAgent 9 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 

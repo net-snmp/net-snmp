@@ -4,6 +4,12 @@
  */
 
 #include "../common_header.h"
+#ifdef HAVE_OSRELDATE_H
+#include <osreldate.h>
+#endif
+#ifdef HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #include "interfaces.h"
 
 
@@ -21,7 +27,11 @@ static struct nlist interfaces_nl[] = {
 #define N_IN_IFADDR    	1
 #if !defined(hpux) && !defined(solaris2)
         { "_ifnet"},
+#ifdef freebsd3
+        { "_in_ifaddrhead"},
+#else
         { "_in_ifaddr"},
+#endif
 #else
         { "ifnet"},
         { "in_ifaddr"},
@@ -300,10 +310,14 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
-#if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !defined(freebsd2)
+#if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
 /* XXX - SNMP's ifLastchange is time when op. status changed
  * FreeBSD's if_lastchange is time when packet was input or output
  * (at least in 2.1.0-RELEASE. Changed in later versions of the kernel?)
+ */
+/* FreeBSD's if_lastchange before the 2.1.5 release is the time when
+ * a packet was last input or output.  In the 2.1.5 and later releases,
+ * this is fixed, thus the 199607 comparison.
  */
           if ((ifnet.if_lastchange.tv_sec == 0 ) &&
               (ifnet.if_lastchange.tv_usec == 0))
@@ -905,7 +919,7 @@ struct ifnet *Retifnet;
 
 #else
 
-#ifdef netbsd1
+#if defined(netbsd1) || defined(freebsd3)
 #define ia_next ia_list.tqe_next
 #define if_next if_list.tqe_next
 #endif
@@ -946,7 +960,14 @@ struct in_ifaddr *Retin_ifaddr;
 		 *  Try to find an address for this interface
 		 */
 
+#ifdef freebsd3
+		TAILQ_HEAD(, in_ifaddr) iah;
+
+		KNLookup(interfaces_nl, N_IN_IFADDR, (char *)&iah, sizeof(iah));
+		ia = iah.tqh_first;
+#else
 		KNLookup(interfaces_nl, N_IN_IFADDR, (char *)&ia, sizeof(ia));
+#endif
 		while (ia) {
 		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
 		    if (in_ifaddr.ia_ifp == ifnetaddr) break;

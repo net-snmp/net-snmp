@@ -64,6 +64,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/mbuf.h>
 #endif
 #include <net/if.h>
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
 #if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
