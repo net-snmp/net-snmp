@@ -204,7 +204,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
 		
 		# delete the data beyond the number of days requested.
-		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = $host") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
+		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	    }
 
 	    my $newerr = 
