@@ -4762,8 +4762,15 @@ snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque,
      * source address).  
      */
 
-    pdu->transport_data = opaque;
-    pdu->transport_data_length = olength;
+    if ( opaque ) {
+        if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
+            pdu->transport_data = malloc(olength);
+            if (pdu->transport_data)
+                memcpy(pdu->transport_data, opaque, olength);
+        } else
+            pdu->transport_data = opaque;
+        pdu->transport_data_length = olength;
+    }
     pdu->tDomain = transport->domain;
     pdu->tDomainLen = transport->domain_length;
     return pdu;
@@ -5346,6 +5353,9 @@ _sess_read(void *sessp, fd_set * fdset)
             isp->packet_len -= pdulen;
         }
 
+        if (opaque != NULL) {
+            free(opaque);
+        }
         if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
             /*
              * Obviously this should never happen!  
