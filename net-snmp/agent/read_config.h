@@ -17,6 +17,7 @@ void free_config __P((void));
 RETSIGTYPE update_config __P((int));
 int pass_compare __P((void *, void *));
 void config_perror __P((char *));
+void config_pwarn __P((char *));
 char *skip_white __P((char *));
 char *skip_not_white __P((char *));
 void copy_word __P((char *, char *));
