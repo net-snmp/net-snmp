@@ -129,10 +129,9 @@ asn_dparse_int(u_char *data,
 /*
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
-    register u_char *bufp = data, *tbuf;
+    register u_char *bufp = data;
     u_long	    asn_length;
     register long   value = 0;
-    int i;
 
     if (intsize != sizeof (long)){
 	ERROR_MSG("not long");
@@ -199,7 +198,6 @@ asn_dparse_unsigned_int(u_char *data,
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long value = 0;
-    int i;
 
     if (intsize != sizeof (long)){
 	ERROR_MSG("not long");
@@ -407,7 +405,6 @@ asn_dparse_string(u_char *data,
 {
     u_char *bufp = data;
     u_long  asn_length;
-    int i;
 
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
@@ -653,7 +650,6 @@ asn_dparse_length(u_char  *data,
 	      int action)
 {
     register u_char lengthbyte = *data;
-    int i;
 
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
@@ -763,7 +759,6 @@ asn_dparse_objid(u_char *data,
     register u_long subidentifier;
     register long   length;
     u_long	    asn_length;
-    int i;
 
     *type = *bufp++;
     bufp = asn_dparse_length(bufp, &asn_length, action);
