@@ -404,8 +404,6 @@ getentry(req_e req_type, void *bufaddr, int len, int entrysize,
 {     
     void *bp = bufaddr, **rp = resp;
     int previous_found = 0;
-    cp->cache_comp = NULL;
-    cp->cache_arg = NULL;
     
     /* Here we have to perform address arithmetic with
        pointer to void. Ugly... */
