@@ -10,7 +10,7 @@
 @include mfd-access-unsorted-external-setup.m2i@
 ##
 static int
-${table}_read_and_update_index( $mfd_aue_param_decl,
+${table}_loop_read_and_update_index( $mfd_aue_param_decl,
                                 ${table}_ref_loop *loop_ref,
                                 ${table}_ref_ctx *ctx_ref);
 
@@ -24,15 +24,15 @@ ${table}_read_and_update_index( $mfd_aue_param_decl,
  *
  * A simplified version of the pseudo-code looks like this:
  *
- *    ${table}_init_loop_ctx(loop)
- *    ${table}_get_first(loop,data)
+ *    ${table}_loop_init_context(loop)
+ *    ${table}_loop_get_first(loop,data)
  *    while( no_error ) {
  *       if( best_match(data, key)
- *          ${table}_save_position(loop,pos);
- *       ${table}_get_next(loop,data)
+ *          ${table}_loop_save_position(loop,pos);
+ *       ${table}_loop_get_next(loop,data)
  *    }
- *    ${table}_get_data(pos,data)
- *    ${table}_cleanup_loop_ctx(loop)
+ *    ${table}_loop_get_data(pos,data)
+ *    ${table}_loop_cleanup_context(loop)
  */
 
 /**
@@ -47,7 +47,7 @@ ${table}_read_and_update_index( $mfd_aue_param_decl,
  *         MFD_ERROR   : unrecoverable error.
  */
 int
-${table}_init_data($mfd_aue_param_decl)
+${table}_loop_init_data($mfd_aue_param_decl)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
@@ -82,7 +82,7 @@ $example_end
  * -------
  *  This function will be called before the start of a new itertion over
  *  the data. The loop context that is initialized here will be passed to
- *  ${table}_get_first and ${table}_get_next.
+ *  ${table}_loop_get_first and ${table}_loop_get_next.
  *
  *  Set the loop context variable ref->itr_ctx so that the iteration
  *  functions (get_first and get_next) can locate the apropriate data
@@ -98,14 +98,14 @@ $example_end
  *         MFD_ERROR       : other error.
  */
 int
-${table}_init_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
+${table}_loop_init_context( $mfd_aue_param_decl, ${table}_ref_loop *ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
      * allocate memory for new structure
      */
-    ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+    ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
     if(NULL == ref->itr_ctx)
         return MFD_ERROR;
 
@@ -152,7 +152,7 @@ $example_end
  *  some other existing data, or peforming calculations to derive the data),
  *  then you should limit yourslef to setting the indexes. Extracting the
  *  can be put off until the desired row is found See the notes on
- *  ${table}_get_data().
+ *  ${table}_loop_get_data().
  *
  *  Note that this function does not correspond to a SNMP GET pdu, and
  *  you should return data items in whatever order they are already in.
@@ -169,13 +169,13 @@ $example_end
  *
  *  ctx_ref->ctx will be NULL. You should allocate a new context
  *  for this loop. [Alternatively, you could allocate one in
- *  ${table}_init_loop_ctx, save it in your
+ *  ${table}_loop_init_context, save it in your
  *  ${table}_ref_loop, and use it here.]
  *
  *  Once you have your context pointer, you should set the index (or indexes)
  *  in ctx_ref->ctx->tbl_idx to the appropriate value for this row. [If you
  *  use your loop_ref cleverly, you might be able to put this work in
- *  ${table}_get_next, and simply call that function.]
+ *  ${table}_loop_get_next, and simply call that function.]
  *
  * @param $mfd_aue_param_cmt
  * @param ref  Pointer to your loop reference.
@@ -186,7 +186,7 @@ $example_end
  *         MFD_ERROR       : error.
  */
 int
-${table}_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+${table}_loop_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                     ${table}_ref_ctx *ctx_ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
@@ -203,7 +203,7 @@ $example_start
  * do actual read of data in update_index, since get and get_next do
  * the same thing...
  */
-    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -226,7 +226,7 @@ $example_end
  *
  * More Details
  * ------------
- * ctx_ref->ctx will have been set in ${table}_get_first.
+ * ctx_ref->ctx will have been set in ${table}_loop_get_first.
  *
  * If there is currently no data available, return MFD_END_OF_DATA.
  * Otherwise, you should set the indexes in ctx_ref->ctx->tbl_idx.
@@ -243,7 +243,7 @@ $example_end
  *         MFD_ERROR       : error.
  */
 int
-${table}_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+${table}_loop_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                         ${table}_ref_ctx *ctx_ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
@@ -262,7 +262,7 @@ $example_start
  * do actual read of data in update_index, since get and get_next do
  * the same thing...
  */
-    return ${table}_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
+    return ${table}_loop_read_and_update_index($mfd_aue_param, loop_ref, ctx_ref);
 $example_end
 @else@
     return MFD_SUCCESS;
@@ -283,7 +283,7 @@ $example_end
  *
  *  At the end of the loop, when the best match has been found, the saved
  *  loop context will be used to get the data for the row by calling
- *  ${table}_get_data().
+ *  ${table}_loop_get_data().
 @if $m2c_data_transient != 0@ # persistent
  *
  *  Since your data is transient, you need to make a copy of it before
@@ -296,7 +296,7 @@ $example_end
 @   if $m2c_data_transient == 1@ # short term
  *  Since your data is semi-TRANSIENT data, you could just keep a pointer
  *  to the data in the loop reference. The data should then be copied in
- *  ${table}_get_data().
+ *  ${table}_loop_get_data().
 @   else@ # $m2c_data_transient == 2@ # copy immediately
  *  One idea would be to copy it space allocated in the loop reference
  *  structure. Another would be to simply have a pointer in the loop
@@ -315,7 +315,7 @@ $example_end
  *         MFD_ERROR   : error.
  */
 int
-${table}_save_position($mfd_aue_param_decl,
+${table}_loop_save_position($mfd_aue_param_decl,
                        ${table}_ref_loop *loop_ref,
                        ${table}_ref_loop *loop_save,
                        int reuse)
@@ -329,7 +329,7 @@ $example_start
      * allocate new loop context, unless you can reuse a previous pointer
      */
     if((0 == reuse) || (NULL == loop_save->itr_ctx))
-        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_context);
     if(NULL == loop_save->itr_ctx) {
         snmp_log(LOG_ERR, "could not allocate memory\n");
         return MFD_ERROR;
@@ -403,7 +403,7 @@ $example_end
  * -------
  *  At the end of the loop, when the best match has been found, the saved
  *  loop context will be used to get the data for the row by calling
- *  ${table}_get_data().
+ *  ${table}_loop_get_data().
  *
  * More Details
  * ------------
@@ -412,7 +412,7 @@ $example_end
  * @param ctx_ref pointer to a context reference.
  */
 int
-${table}_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+${table}_loop_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                            ${table}_ref_ctx *ctx_ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
@@ -459,7 +459,7 @@ $example_end
  *         MFD_ERROR   : error.
  */
 int
-${table}_cleanup_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
+${table}_loop_cleanup_context( $mfd_aue_param_decl, ${table}_ref_loop *ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
     
@@ -505,7 +505,7 @@ $example_start
  *         MFD_ERROR       : error.
  */
 static int
-${table}_read_and_update_index( $mfd_aue_param_decl,
+${table}_loop_read_and_update_index( $mfd_aue_param_decl,
                        ${table}_ref_loop *loop_ref,
                        ${table}_ref_ctx *ctx_ref)
 {
