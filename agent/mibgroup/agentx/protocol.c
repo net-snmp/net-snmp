@@ -470,7 +470,6 @@ _agentx_build(struct snmp_session        *session,
 {
      u_char *bufp = packet;
      u_char *prefix_ptr, *range_ptr;
-     size_t length;
      struct variable_list *vp;
      int inc;
      
@@ -810,7 +809,7 @@ u_char *
 agentx_parse_oid( u_char *data, size_t *length, int *inc,
 		  oid *oid_buf, size_t *oid_len, u_int network_byte_order)
 {
-     u_int n_subid, subid;
+     u_int n_subid;
      u_int prefix;
      int i;
      oid *oid_ptr = oid_buf;
@@ -935,7 +934,6 @@ agentx_parse_opaque(u_char *data, size_t *length, int *type,
     } fu;
     int tmp;
     u_char buf[BUFSIZ];
-    size_t str_len;
     char *cp;
 
     cp = agentx_parse_string( data, length,
@@ -997,7 +995,6 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
      u_char *bufp = data;
      u_int   int_val;
      struct counter64 *c64 = (struct counter64 *)data_buf;
-     size_t convert_tmp;
      
      DEBUGDUMPHEADER("recv", "VarBind:");
      DEBUGDUMPHEADER("recv", "Byte Order");
