@@ -66,6 +66,12 @@ int             netsnmp_register_long_instance(const char *name,
                                                Netsnmp_Node_Handler *
                                                subhandler);
 
+int             netsnmp_register_read_only_int_instance(const char *name,
+                                              oid * reg_oid,
+                                              size_t reg_oid_len, int *it,
+                                              Netsnmp_Node_Handler *
+                                              subhandler);
+
 int             netsnmp_register_int_instance(const char *name,
                                               oid * reg_oid,
                                               size_t reg_oid_len, int *it,
