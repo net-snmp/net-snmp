@@ -59,7 +59,7 @@ SOFTWARE.
 
 int main __P((int, char **));
 
-extern int  errno;
+_CRTIMP extern int  errno;
 extern int save_mib_descriptions;
 extern int mib_warnings;
 
@@ -147,5 +147,5 @@ main(argc, argv)
 	printf("\n");
 	print_description(name, name_length);
     }
-    exit (0);
+    return (0);
 }
