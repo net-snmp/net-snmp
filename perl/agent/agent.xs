@@ -108,6 +108,183 @@ not_there:
 }
 
 static double
+constant_SNMP_ERR(char *name, int len, int arg)
+{
+    if (9 + 1 >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+    switch (name[9]) {
+
+    case 'A':
+	if (strEQ(name + 10, "UTHORIZATIONERROR")) {	/* SNMP_ERR_A removed */
+#ifdef SNMP_ERR_AUTHORIZATIONERROR
+	    return SNMP_ERR_AUTHORIZATIONERROR;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'B':
+	if (strEQ(name + 10, "ADVALUE")) {	/* SNMP_ERR_B removed */
+#ifdef SNMP_ERR_BADVALUE
+	    return SNMP_ERR_BADVALUE;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'C':
+	if (strEQ(name + 10, "OMMITFAILED")) {	/* SNMP_ERR_C removed */
+#ifdef SNMP_ERR_COMMITFAILED
+	    return SNMP_ERR_COMMITFAILED;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'G':
+	if (strEQ(name + 10, "ENERR")) {	/* SNMP_ERR_G removed */
+#ifdef SNMP_ERR_GENERR
+	    return SNMP_ERR_GENERR;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'I':
+	if (strEQ(name + 10, "NCONSISTENTVALUE")) {	/* SNMP_ERR_I removed */
+#ifdef SNMP_ERR_INCONSISTENTVALUE
+	    return SNMP_ERR_INCONSISTENTVALUE;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'N':
+	if (strEQ(name + 10, "OACCESS")) {	/* SNMP_ERR_N removed */
+#ifdef SNMP_ERR_NOACCESS
+	    return SNMP_ERR_NOACCESS;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "OCREATION")) {	/* SNMP_ERR_N removed */
+#ifdef SNMP_ERR_NOCREATION
+	    return SNMP_ERR_NOCREATION;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "OERROR")) {	/* SNMP_ERR_N removed */
+#ifdef SNMP_ERR_NOERROR
+	    return SNMP_ERR_NOERROR;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "OSUCHNAME")) {	/* SNMP_ERR_N removed */
+#ifdef SNMP_ERR_NOSUCHNAME
+	    return SNMP_ERR_NOSUCHNAME;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "OTWRITABLE")) {	/* SNMP_ERR_N removed */
+#ifdef SNMP_ERR_NOTWRITABLE
+	    return SNMP_ERR_NOTWRITABLE;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'R':
+	if (strEQ(name + 10, "EADONLY")) {	/* SNMP_ERR_R removed */
+#ifdef SNMP_ERR_READONLY
+	    return SNMP_ERR_READONLY;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "ESOURCEUNAVAILABLE")) {	/* SNMP_ERR_R removed */
+#ifdef SNMP_ERR_RESOURCEUNAVAILABLE
+	    return SNMP_ERR_RESOURCEUNAVAILABLE;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'T':
+	if (strEQ(name + 10, "OOBIG")) {	/* SNMP_ERR_T removed */
+#ifdef SNMP_ERR_TOOBIG
+	    return SNMP_ERR_TOOBIG;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'U':
+	if (strEQ(name + 10, "NDOFAILED")) {	/* SNMP_ERR_U removed */
+#ifdef SNMP_ERR_UNDOFAILED
+	    return SNMP_ERR_UNDOFAILED;
+#else
+	    goto not_there;
+#endif
+	}
+        break;
+
+    case 'W':
+	if (strEQ(name + 10, "RONGENCODING")) {	/* SNMP_ERR_W removed */
+#ifdef SNMP_ERR_WRONGENCODING
+	    return SNMP_ERR_WRONGENCODING;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "RONGLENGTH")) {	/* SNMP_ERR_W removed */
+#ifdef SNMP_ERR_WRONGLENGTH
+	    return SNMP_ERR_WRONGLENGTH;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "RONGTYPE")) {	/* SNMP_ERR_W removed */
+#ifdef SNMP_ERR_WRONGTYPE
+	    return SNMP_ERR_WRONGTYPE;
+#else
+	    goto not_there;
+#endif
+	}
+
+	if (strEQ(name + 10, "RONGVALUE")) {	/* SNMP_ERR_W removed */
+#ifdef SNMP_ERR_WRONGVALUE
+	    return SNMP_ERR_WRONGVALUE;
+#else
+	    goto not_there;
+#endif
+	}
+    }
+not_there:
+    errno = ENOENT;
+    return 0;
+}
+    
+static double
 constant_MODE_S(char *name, int len, int arg)
 {
     if (6 + 3 >= len ) {
@@ -185,6 +362,10 @@ constant(char *name, int len, int arg)
 	if (!strnEQ(name + 0,"MODE_", 5))
 	    break;
 	return constant_MODE_S(name, len, arg);
+    case 'E':
+	if (!strnEQ(name + 0,"SNMP_ERR_", 9))
+	    break;
+	return constant_SNMP_ERR(name, len, arg);
     }
     errno = EINVAL;
     return 0;
@@ -739,6 +920,20 @@ nari_setOID(me, value)
             snmp_set_var_objid(request->requestvb, myoid, myoid_len);
         }
 
+void
+nari_setError(me, rinfo, ecode)
+        SV *me;
+        SV *rinfo;
+        int ecode;
+    PREINIT:
+	oid myoid[MAX_OID_LEN];
+	size_t myoid_len = MAX_OID_LEN;
+        netsnmp_request_info *request;
+        netsnmp_agent_request_info *reqinfo;
+    CODE:
+        request = (netsnmp_request_info *) SvIV(SvRV(me));
+        reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(rinfo));
+        netsnmp_set_request_error(reqinfo, request, ecode);
 
 SV *
 nari_next(me)
