@@ -94,7 +94,7 @@ snmptrapd_traphandle(char *token, char *line)
   copy_word(line, buf);
   (*ttmp)->traplen = MAX_OID_LEN;
   if (!read_objid(buf,(*ttmp)->trap, &((*ttmp)->traplen))) {
-    sprintf(buf,"Invalid object identifier: %s/%s",buf,line);
+    snmp_perror(buf);
     config_perror(buf);
     return;
   }

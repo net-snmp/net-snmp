@@ -20,7 +20,7 @@
  * FIX	This is slow...
  */
 
-static char *rcsid = "$Id$";	/* */
+static char rcsid[] = "$Id$";	/* */
 
 #include "../snmplib/all_system.h"
 #include "../snmplib/all_general_local.h"
@@ -84,7 +84,7 @@ void	usage(FILE *ofp);
 void	usage_synopsis(FILE *ofp);
 int     get_user_passphrases(void);
 int	    snmp_ttyecho(const int fd, const int echo);
-char   *snmp_getpassphrase(char *prompt, int fvisible);
+char   *snmp_getpassphrase(const char *prompt, int fvisible);
 
 /*******************************************************************-o-******
  */
@@ -646,7 +646,7 @@ snmp_ttyecho(const int fd, const int echo)
  * FIX	Put HAVE_GETPASS in autoconf.
  */
 char *
-snmp_getpassphrase(char *prompt, int visible)
+snmp_getpassphrase(const char *prompt, int visible)
 {
 	int		 ti,
 			 len;

@@ -77,7 +77,7 @@ int main (int, char **);
 
 #define CMD_NUM    4
 
-static char *successNotes[CMD_NUM] = {
+static const char *successNotes[CMD_NUM] = {
   "SNMPv3 Key(s) successfully changed.",
   "User successfully created.",
   "User successfully deleted.",
@@ -190,7 +190,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpset");
+      snmp_perror("snmpusm");
       exit(1);
     }
 
