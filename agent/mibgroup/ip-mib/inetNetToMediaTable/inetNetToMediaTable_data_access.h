@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         inetNetToMediaTable_init_data(inetNetToMediaTable_registration_ptr
                                       inetNetToMediaTable_reg);
 
@@ -55,7 +55,7 @@ extern          "C" {
     void            inetNetToMediaTable_cache_free(netsnmp_container *
                                                    container);
 
-    int            
+    int
         inetNetToMediaTable_row_prep(inetNetToMediaTable_rowreq_ctx *
                                      rowreq_ctx);
 
