@@ -85,7 +85,8 @@ sa_update_entry(struct snmp_alarm *alrm) {
 }
 
 void
-snmp_alarm_unregister(unsigned int clientreg) {
+snmp_alarm_unregister(unsigned int clientreg)
+{
   struct snmp_alarm *sa_ptr, **prevNext = &thealarms;
 
   for (sa_ptr = thealarms;
@@ -103,7 +104,18 @@ snmp_alarm_unregister(unsigned int clientreg) {
     DEBUGMSGTL(("snmp_alarm_unregister","alarm %d doesn't exist\n",clientreg));
   }
 }
-  
+
+void
+snmp_alarm_unregister_all(void)
+{
+  struct snmp_alarm *sa_ptr, *sa_tmp;
+
+  for (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_tmp) {
+    sa_tmp = sa_ptr->next;
+    free(sa_ptr);
+  }
+  thealarms = NULL;
+}  
 
 struct snmp_alarm *
 sa_find_next(void) {
