@@ -4,6 +4,10 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#ifdef hpux
+/* needed for htonl funcs */
+#include <netinet/in.h>
+#endif
 #include "asn1.h"
 #include "party.h"
 #include "system.h"
