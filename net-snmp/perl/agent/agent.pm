@@ -1,8 +1,6 @@
 package NetSNMP::agent;
 
-require 5.005_62;
 use strict;
-use warnings;
 use Carp;
 
 require Exporter;
@@ -14,7 +12,7 @@ use NetSNMP::agent::default_store (':all');
 use NetSNMP::OID (':all');
 use NetSNMP::agent::netsnmp_request_info;
 
-use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
+use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 
 @ISA = qw(Exporter AutoLoader DynaLoader);
 
@@ -60,7 +58,6 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my $constname;
-    our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     croak "& not defined" if $constname eq 'constant';
     my $val = constant($constname, @_ ? $_[0] : 0);
@@ -131,7 +128,8 @@ sub AUTOLOAD {
 
 sub new {
     my $type = shift;
-    my %$self = @_;
+    my ($self);
+    %$self = @_;
     bless($self, $type);
     if ($self->{'dont_init_agent'}) {
 	$self->mark_init_agent_done();
