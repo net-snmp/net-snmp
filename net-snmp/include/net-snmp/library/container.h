@@ -8,6 +8,9 @@
  * A basic container template. A generic way for code to store and
  * retrieve data. Allows for interchangable storage algorithms.
  */
+#ifndef NET_SNMP_CONFIG_H
+#error "Please include <net-snmp/net-snmp-config.h> before this file"
+#endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/factory.h>
@@ -229,45 +232,19 @@ extern "C" {
 #define CONTAINER_FIRST(x)          x->find(x,NULL)
 #define CONTAINER_FIND(x,k)         x->find(x,k)
 #define CONTAINER_NEXT(x,k)         x->find_next(x,k)
-#define CONTAINER_INSERT(x,k)       do { \
-                                       x->insert(x,k); \
-                                       if (NULL != x->next) { \
-                                          netsnmp_container *tmp = x->next; \
-                                          while(tmp) { \
-                                             tmp->insert(tmp,k); \
-                                             tmp = tmp->next; \
-                                          } \
-                                       } \
-                                    } while(0)
-#define CONTAINER_REMOVE(x,k)       do { \
-                                       if (NULL != x->next) { \
-                                          netsnmp_container *tmp = x->next; \
-                                          while(tmp->next) \
-                                             tmp = tmp->next; \
-                                          while(tmp) { \
-                                             tmp->remove(tmp,k); \
-                                             tmp = tmp->prev; \
-                                          } \
-                                       } \
-                                       x->remove(x,k); \
-                                    } while(0)
 #define CONTAINER_GET_SUBSET(x,k)   x->get_subset(x,k)
 #define CONTAINER_SIZE(x)           x->get_size(x)
 #define CONTAINER_ITERATOR(x)       x->get_iterator(x)
 #define CONTAINER_COMPARE(x,l,r)    x->compare(l,r)
 #define CONTAINER_FOR_EACH(x,f,c)   x->for_each(x,f,c)
-#define CONTAINER_FREE(x)           do { \
-                                       if (NULL != x->next) { \
-                                          netsnmp_container *tmp = x->next; \
-                                          while(tmp->next) \
-                                             tmp = tmp->next; \
-                                          while(tmp) { \
-                                             tmp->free(tmp); \
-                                             tmp = tmp->prev; \
-                                          } \
-                                       } \
-                                       x->free(x); \
-                                    } while(0)
+
+    /*
+     * nested containers complicate things, so that a function is
+     * required instead of a macro. would be nice if C had 'inline'...
+     */
+    int CONTAINER_INSERT(netsnmp_container *x, const void *k);
+    int CONTAINER_REMOVE(netsnmp_container *x, const void *k);
+    int CONTAINER_FREE(netsnmp_container *x);
 
     /*************************************************************************
      *
