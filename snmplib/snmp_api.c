@@ -2945,6 +2945,20 @@ snmpv3_parse(
     return SNMPERR_ASN_PARSE_ERR;
   }
 
+  /*  Check the msgID we received is a legal value.  If not, then increment
+      snmpInASNParseErrs and return the appropriate error (see RFC 2572,
+      para. 7.2, section 2 -- note that a bad msgID means that the received
+      message is NOT a serialiization of an SNMPv3Message, since the msgID
+      field is out of bounds).  */
+
+  if (pdu->msgid < 0 || pdu->msgid > 0x7fffffff) {
+    snmp_log(LOG_ERR, "Received bad msgID (%ld %s %s).\n", pdu->msgid,
+	     (pdu->msgid < 0)?"<":">", (pdu->msgid < 0)?"0":"2^31 - 1");
+    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
+    return SNMPERR_ASN_PARSE_ERR;
+  }
+
   /* msgMaxSize */
   DEBUGDUMPHEADER("recv", "msgMaxSize");
   data = asn_parse_int(data, length, &type, &msg_max_size,
@@ -2961,7 +2975,7 @@ snmpv3_parse(
       increment snmpInASNParseErrs and return the appropriate error (see RFC
       2572, para. 7.2, section 2 -- note that a bad msgMaxSize means that the
       received message is NOT a serialiization of an SNMPv3Message, since the
-      msgMagSize field is out of bounds).
+      msgMaxSize field is out of bounds).
 
       Note we store the msgMaxSize on a per-session basis which also seems
       reasonable; it could vary from PDU to PDU but that would be strange
