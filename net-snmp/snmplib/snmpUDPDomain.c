@@ -192,7 +192,159 @@ netsnmp_udp_close(netsnmp_transport *t)
     return rc;
 }
 
+/* Try to maximize the current buffer of type "optname"
+ * to the maximum allowable size by the OS (as close to
+ * reqbuf as possible)
+ */
+static void
+netsnmp_maximize_udp_buffer(int s, int optname, const char *buftype, int size)
+{
+    int            curbuf = 0, curbuflen = sizeof(int);
+    int            lo, mid, hi;
 
+    /* First we need to determine our current buffer */
+    if ((getsockopt(s, SOL_SOCKET, optname, (void *) &curbuf,
+                    &curbuflen) == 0) 
+            && (curbuflen == sizeof(int))) {
+
+        DEBUGMSGTL(("netsnmp_udp", "Current %s is %d\n", buftype, curbuf));
+
+        /* Let's not be stupid ... if we were asked for less than what we
+         * already have, then forget about it
+         */
+        if (size <= curbuf) {
+            DEBUGMSGTL(("netsnmp_udp", "Requested %s <= current buffer\n",
+                        buftype));
+            return;
+        }
+
+        /* Do a binary search the optimal buffer within 1k of the point of
+         * failure 
+         * This is rather bruteforce, but simple
+         */
+
+        hi = size;
+        lo = curbuf;
+
+        while (hi - lo > 1024) {
+            mid = (lo + hi) / 2;
+            if (setsockopt(s, SOL_SOCKET, optname, (void *) &mid,
+                        sizeof(int)) == 0) {
+                /* Success: search between mid and hi */
+                lo = mid;
+            } else {
+                /* Failed: search between lo and mid */
+                hi = mid;
+            }
+        }
+
+        /* Now print if this optimization helped or not */
+        if (getsockopt(s,SOL_SOCKET, optname, (void *) &curbuf,
+                    &curbuflen) == 0) {
+            DEBUGMSGTL(("netsnmp_udp", 
+                        "Maximized %s: %d\n",buftype, curbuf));
+        } 
+    } else {
+        /* There is really not a lot we can do anymore.
+         * If the OS doesn't give us the current buffer, then what's the 
+         * point in trying to make it better
+         */
+        DEBUGMSGTL(("netsnmp_udp", "Get %s failed ... giving up!\n", buftype));
+    }
+}
+
+
+/* Get the requested buffersize, based on
+ * - sockettype : client (local = 0) or server (local = 1) 
+ * - buffertype : send (optname = SO_SNDBUF) or recv (SO_RCVBUF)
+ */
+static int
+netsnmp_get_udpbuffersize(int optname, int local, const char **buftype)
+{
+    int size;
+
+    if (optname == SO_SNDBUF) {
+        if (local) {
+            *buftype = "server send buffer";
+            size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+                    NETSNMP_DS_LIB_UDP_SERVERSENDBUF);
+        } else {
+            *buftype = "client send buffer";
+            size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+                    NETSNMP_DS_LIB_UDP_CLIENTSENDBUF);
+        }
+    } else {
+        if (local) {
+            *buftype = "server receive buffer";
+            size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+                    NETSNMP_DS_LIB_UDP_SERVERRECVBUF);
+        } else {
+            *buftype = "client receive buffer";
+            size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+                    NETSNMP_DS_LIB_UDP_CLIENTRECVBUF);
+        }
+    }
+
+    /* If this variable was not specified, or the user tried to fool us
+     * by specifying a negative value just use a hardcoded default
+     */
+    if (size <= 0)
+        size = 1<<17;
+
+    DEBUGMSGTL(("netsnmp_udp", 
+                "requested %s is %d\n", *buftype, size));
+
+    return(size);
+}
+
+/* Change the udp buffer
+ * IN: s : socket
+ *     optname: SO_SNDBUF or SO_RCVBUF
+ *     local: server=1 or client=0
+ */
+static void
+netsnmp_set_udp_buffer(int s, int optname, int local)
+{
+    int            size = 0;
+    const char     *buftype;
+    int            curbuf = 0, curbuflen = sizeof(int);
+
+    /* What is the requested buffer size ? */
+    size = netsnmp_get_udpbuffersize(optname, local, &buftype);
+
+    /* Try to set the requested send buffer */
+    if (setsockopt
+            (s, SOL_SOCKET, optname, (void *) &size, sizeof(int)) == 0) {
+        /* Because some platforms lie about the actual buffer that has been 
+         * set (Linux will always say it worked ...), we print some 
+         * diagnostic output for debugging
+         */
+        DEBUGIF("netsnmp_udp") {
+            DEBUGMSG(("netsnmp_udp", "Set the %s to %d\n", buftype, size));
+            if ((getsockopt(s, SOL_SOCKET, optname, (void *) &curbuf,
+                            &curbuflen) == 0) 
+                    && (curbuflen == sizeof(int))) {
+
+                DEBUGMSG(("netsnmp_udp", "Now %s is %d\n", buftype, curbuf));
+            }
+        }
+    } else {
+        /* Obviously changing the buffer failed, most like like because we 
+         * requested a buffer greater than the OS limit.
+         * Therefore we need to search for an optimal buffer that is close
+         * enough to the point of failure.
+         * This will allow us to reach a more optimal buffer.
+         *   For example : On Solaris, if the max OS buffer is 100k and you 
+         *   request 110k, you end up with the default 8k :-(
+         *   After this quick seach we would get 1k close to 100k (the max)
+         */
+
+        DEBUGMSGTL(("netsnmp_udp", "couldn't set %s to %d\n",
+                    buftype, size));
+
+        netsnmp_maximize_udp_buffer(s, optname, buftype, size);
+    }
+}
 
 /*
  * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
@@ -204,7 +356,7 @@ netsnmp_transport *
 netsnmp_udp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0, udpbuf = (1 << 17);
+    int             rc = 0;
     char           *string = NULL;
     char           *client_socket = NULL;
 
@@ -272,21 +424,17 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
      */
 
 #ifdef  SO_SNDBUF
-    if (setsockopt
-        (t->sock, SOL_SOCKET, SO_SNDBUF, (void *) &udpbuf,
-         sizeof(int)) != 0) {
-        DEBUGMSGTL(("netsnmp_udp", "couldn't set SO_SNDBUF to %d bytes: %s\n",
-                    udpbuf, strerror(errno)));
-    }
+    /* Set the send buffer */
+    netsnmp_set_udp_buffer(t->sock, SO_SNDBUF, local);
+#else
+    DEBUGMSGTL(("netsnmp_udp", "Changing UDP send buffers is not supported\n"));
 #endif                          /*SO_SNDBUF */
 
 #ifdef  SO_RCVBUF
-    if (setsockopt
-        (t->sock, SOL_SOCKET, SO_RCVBUF, (void *) &udpbuf,
-         sizeof(int)) != 0) {
-        DEBUGMSGTL(("netsnmp_udp", "couldn't set SO_RCVBUF to %d bytes: %s\n",
-                    udpbuf, strerror(errno)));
-    }
+    /* Set the receive buffer */
+    netsnmp_set_udp_buffer(t->sock, SO_RCVBUF, local);
+#else
+    DEBUGMSGTL(("netsnmp_udp", "Changing UDP receive buffers is not supported\n"));
 #endif                          /*SO_RCVBUF */
 
     if (local) {

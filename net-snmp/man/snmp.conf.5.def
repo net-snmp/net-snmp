@@ -159,6 +159,26 @@ Turns on debugging for all applications run if set to 1.
 The debugging tokens that should be printed.  See the
 .I snmpcmd(1)
 manual page for debugging usage details.
+.IP "udpServerRecvBuf integer"
+.B udpServerRecvBuf
+is used to specify the UDP receive buffer size (in bytes)
+for the initialization of server sockets (eg. snmptrapd).
+If the OS hard limit is smaller than
+.B udpServerRecvBuf
+the resulting buffer will be lowered so it is close to the hard limit.  
+Some platforms may decide to increment the actual buffersize themselves 
+for internal housekeeping.
+This directive will be ignored on platforms that don't support
+..I setsockopt()
+.IP "udpServerSendBuf integer"
+Similar to udpServerRecvBuf, but this directive applies to the send 
+buffer of server sockets. 
+.IP "udpClientRecvBuf integer"
+Similar to udpServerRecvBuf, but this directive applies to the receive 
+buffer of client sockets (eg. snmpget). 
+.IP "udpClientSendBuf integer"
+Similar to udpServerRecvBuf, but this directive applies to the send 
+buffer of client sockets. 
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:
