@@ -13,7 +13,7 @@ BEGIN {
 $SNMP::save_descriptions = 1;
 
 use Test;
-BEGIN {plan tests => 26}
+BEGIN {plan tests => 33}
 use SNMP;
 
 SNMP::initMib();
@@ -231,3 +231,19 @@ ok($name eq $name_tag);
 $name_tag = SNMP::translateObj($junk_oid);
 ok($name ne $name_tag);
 #printf "%s %d\n", ($name ne $name_tag) ? "ok" :"not ok", $n++;
+
+######################################################################
+# ranges
+
+$node = $SNMP::MIB{snmpTargetAddrMMS};
+ok($node);
+$ranges = $node->{ranges};
+ok($ranges and ref $ranges eq 'ARRAY');
+ok(@$ranges == 2);
+ok($$ranges[0][0] == 0);
+ok($$ranges[0][1] == 0);
+ok($$ranges[1][0] == 484);
+ok($$ranges[1][1] == 2147483647);
+
+print "ranges = $ranges\n";
+

@@ -892,6 +892,7 @@ my %node_elements =
      units => 0,    # returns UNITS
      hint => 0,     # returns HINT
      enums => 0,    # returns hash ref {tag => num, ...}
+     ranges => 0,    # returns array ref [[low1,high1], [low2,high2], ...]
      description => 0, # returns DESCRIPTION ($SNMP::save_descriptions must
                     # be set prior to MIB initialization/parsing
     );
@@ -1554,6 +1555,10 @@ returns HINT
 =item enums
 
 returns hash ref {tag => num, ...}
+
+=item ranges
+
+returns array ref [[low1, high1], [low2, high2], ...]
 
 =item description
 
