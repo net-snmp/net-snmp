@@ -123,7 +123,7 @@ typedef struct ${context}_rowreq_ctx_s {
 @   end@ # settable
 
     /*
-     * flags per row. Currently, the first 8 bits are reserverd
+     * flags per row. Currently, the first (lower) 8 bits are reserved
      * for the user. See mfd.h for other flags.
      */
     u_int                       rowreq_flags;
