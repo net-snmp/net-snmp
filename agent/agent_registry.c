@@ -8,6 +8,7 @@
 #define IN_SNMP_VARS_C
 
 #include <config.h>
+#include <signal.h>
 #if HAVE_STRING_H
 #include <string.h>
 #endif
@@ -1374,3 +1375,139 @@ main( int argc, char argv[] )
     dump_registry();
 }
 #endif
+
+
+int external_readfd[NUM_EXTERNAL_FDS], external_readfdlen = 0;
+int external_writefd[NUM_EXTERNAL_FDS], external_writefdlen = 0;
+int external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen = 0;
+void (* external_readfdfunc[NUM_EXTERNAL_FDS])(int);
+void (* external_writefdfunc[NUM_EXTERNAL_FDS])(int);
+void (* external_exceptfdfunc[NUM_EXTERNAL_FDS])(int);
+
+int register_readfd(int fd, void (*func)(int)) {
+    if (external_readfdlen < NUM_EXTERNAL_FDS) {
+	external_readfd[external_readfdlen] = fd;
+	external_readfdfunc[external_readfdlen] = func;
+	external_readfdlen++;
+	DEBUGMSGTL(("register_readfd", "registered fd %d\n", fd));
+	return FD_REGISTERED_OK;
+    } else {
+	snmp_log(LOG_CRIT, "register_readfd: too many file descriptors\n");
+	return FD_REGISTRATION_FAILED;
+    }
+}
+
+int register_writefd(int fd, void (*func)(int)) {
+    if (external_writefdlen < NUM_EXTERNAL_FDS) {
+	external_writefd[external_writefdlen] = fd;
+	external_writefdfunc[external_writefdlen] = func;
+	external_writefdlen++;
+	DEBUGMSGTL(("register_writefd", "registered fd %d\n", fd));
+	return FD_REGISTERED_OK;
+    } else {
+	snmp_log(LOG_CRIT, "register_writefd: too many file descriptors\n");
+	return FD_REGISTRATION_FAILED;
+    }
+}
+
+int register_exceptfd(int fd, void (*func)(int)) {
+    if (external_exceptfdlen < NUM_EXTERNAL_FDS) {
+	external_exceptfd[external_exceptfdlen] = fd;
+	external_exceptfdfunc[external_exceptfdlen] = func;
+	external_exceptfdlen++;
+	DEBUGMSGTL(("register_exceptfd", "registered fd %d\n", fd));
+	return FD_REGISTERED_OK;
+    } else {
+	snmp_log(LOG_CRIT, "register_exceptfd: too many file descriptors\n");
+	return FD_REGISTRATION_FAILED;
+    }
+}
+
+int unregister_readfd(int fd) {
+    int i, j;
+
+    for (i = 0; i < external_readfdlen; i++) {
+	if (external_readfd[i] == fd) {
+	    external_readfdlen--;
+	    for (j = i; j < external_readfdlen; j++) {
+		external_readfd[j] = external_readfd[j+1];
+	    }
+	    DEBUGMSGTL(("unregister_readfd", "unregistered fd %d\n", fd));
+	    return FD_UNREGISTERED_OK;
+	}
+    }
+    return FD_NO_SUCH_REGISTRATION;
+}
+
+int unregister_writefd(int fd) {
+    int i, j;
+
+    for (i = 0; i < external_writefdlen; i++) {
+	if (external_writefd[i] == fd) {
+	    external_writefdlen--;
+	    for (j = i; j < external_writefdlen; j++) {
+		external_writefd[j] = external_writefd[j+1];
+	    }
+	    DEBUGMSGTL(("unregister_writefd", "unregistered fd %d\n", fd));
+	    return FD_UNREGISTERED_OK;
+	}
+    }
+    return FD_NO_SUCH_REGISTRATION;
+}
+
+int unregister_exceptfd(int fd) {
+    int i, j;
+
+    for (i = 0; i < external_exceptfdlen; i++) {
+	if (external_exceptfd[i] == fd) {
+	    external_exceptfdlen--;
+	    for (j = i; j < external_exceptfdlen; j++) {
+		external_exceptfd[j] = external_exceptfd[j+1];
+	    }
+	    DEBUGMSGTL(("unregister_exceptfd", "unregistered fd %d\n", fd));
+	    return FD_UNREGISTERED_OK;
+	}
+    }
+    return FD_NO_SUCH_REGISTRATION;
+}
+
+
+int external_signal_scheduled[NUM_EXTERNAL_SIGS];
+void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
+
+/*
+ * TODO: add agent_SIGXXX_handler functions and `case SIGXXX: ...' lines
+ *       below for every single that might be handled by register_signal().
+ */
+
+void agent_SIGCHLD_handler(void) { external_signal_scheduled[SIGCHLD] = 1; }
+
+int register_signal(int sig, void (*func)(int)) {
+    static struct sigaction act;
+
+    external_signal_handler[sig] = func;
+    switch (sig) {
+    case SIGCHLD:
+#if 0
+	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
+#else
+	act.sa_handler = agent_SIGCHLD_handler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	sigaction(SIGCHLD, &act, NULL);
+#endif
+	break;
+    default:
+	snmp_log(LOG_CRIT,
+		 "register_signal: signal %d cannot be handled\n", sig);
+	return SIG_REGISTRATION_FAILED;
+    }
+    DEBUGMSGTL(("register_signal", "registered signal %d\n", sig));
+    return SIG_REGISTERED_OK;
+}
+
+int unregister_signal(int sig) {
+    signal(sig, SIG_DFL);
+    DEBUGMSGTL(("unregister_signal", "unregistered signal %d\n", sig));
+    return SIG_UNREGISTERED_OK;
+}
