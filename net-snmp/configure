@@ -852,6 +852,18 @@ case "$target_os" in
 solaris2*) CPPFLAGS="$CPPFLAGS -I/usr/ucbinclude -I/usr/include" ; LDFLAGS="-L/usr/ucblib $LDFLAGS" ;;
 esac
 
+if test "x$prefix" = "xNONE"; then
+cat >> confdefs.h <<EOF
+#define SNMPLIBPATH "$ac_default_prefix/lib/snmp"
+EOF
+
+else
+cat >> confdefs.h <<EOF
+#define SNMPLIBPATH "$prefix/lib/snmp"
+EOF
+
+fi
+
 echo $ac_n "checking for location of sytem kernel""... $ac_c" 1>&6
 if test -f /vmunix; then
   cat >> confdefs.h <<\EOF
@@ -922,7 +934,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lm  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 926 "configure"
+#line 938 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -961,7 +973,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 965 "configure"
+#line 977 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1000,7 +1012,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1004 "configure"
+#line 1016 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1039,7 +1051,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lucb  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1043 "configure"
+#line 1055 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1078,7 +1090,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lkstat  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1082 "configure"
+#line 1094 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1117,7 +1129,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lkvm  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1121 "configure"
+#line 1133 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1159,7 +1171,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1163 "configure"
+#line 1175 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1180,7 +1192,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1184 "configure"
+#line 1196 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -1202,7 +1214,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1206 "configure"
+#line 1218 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -1220,7 +1232,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1224 "configure"
+#line 1236 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -1241,7 +1253,7 @@ if test "$cross_compiling" = yes; then
   ac_cv_header_stdc=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1245 "configure"
+#line 1257 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -1279,7 +1291,7 @@ if eval "test \"`echo '$''{'ac_cv_header_dirent_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1283 "configure"
+#line 1295 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <$ac_hdr>
@@ -1318,7 +1330,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldir  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1322 "configure"
+#line 1334 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1352,7 +1364,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lx  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1356 "configure"
+#line 1368 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1385,7 +1397,7 @@ if eval "test \"`echo '$''{'ac_cv_header_sys_wait_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1389 "configure"
+#line 1401 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -1428,7 +1440,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1432 "configure"
+#line 1444 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1462,7 +1474,7 @@ if eval "test \"`echo '$''{'ac_cv_type_off_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1466 "configure"
+#line 1478 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #if STDC_HEADERS
@@ -1493,7 +1505,7 @@ if eval "test \"`echo '$''{'ac_cv_header_time'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1497 "configure"
+#line 1509 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/time.h>
@@ -1527,7 +1539,7 @@ if eval "test \"`echo '$''{'ac_cv_struct_rtentry'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1531 "configure"
+#line 1543 "configure"
 #include "confdefs.h"
 #define KERNEL
 #include<net/route.h>
@@ -1588,7 +1600,7 @@ else
   ac_cv_c_bigendian=unknown
 # See if sys/param.h defines the BYTE_ORDER macro.
 cat > conftest.$ac_ext <<EOF
-#line 1592 "configure"
+#line 1604 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1604,7 +1616,7 @@ if eval $ac_compile; then
   rm -rf conftest*
   # It does; now see whether it defined to BIG_ENDIAN or not.
 cat > conftest.$ac_ext <<EOF
-#line 1608 "configure"
+#line 1620 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1633,7 +1645,7 @@ if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
 cat > conftest.$ac_ext <<EOF
-#line 1637 "configure"
+#line 1649 "configure"
 #include "confdefs.h"
 main () {
   /* Are we little or big endian?  From Harbison&Steele.  */
@@ -1672,7 +1684,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1676 "configure"
+#line 1688 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1703,7 +1715,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1707 "configure"
+#line 1719 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1761,7 +1773,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1765 "configure"
+#line 1777 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1789,7 +1801,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1793 "configure"
+#line 1805 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1843,7 +1855,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1847 "configure"
+#line 1859 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1885,7 +1897,7 @@ if eval "test \"`echo '$''{'ac_cv_prog_gcc_traditional'+set}'`\" = set"; then
 else
     ac_pattern="Autoconf.*'x'"
   cat > conftest.$ac_ext <<EOF
-#line 1889 "configure"
+#line 1901 "configure"
 #include "confdefs.h"
 #include <sgtty.h>
 Autoconf TIOCGETP
@@ -1903,7 +1915,7 @@ rm -f conftest*
 
   if test $ac_cv_prog_gcc_traditional = no; then
     cat > conftest.$ac_ext <<EOF
-#line 1907 "configure"
+#line 1919 "configure"
 #include "confdefs.h"
 #include <termio.h>
 Autoconf TCGETA
@@ -1931,7 +1943,7 @@ else
   ac_cv_func_memcmp=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1935 "configure"
+#line 1947 "configure"
 #include "confdefs.h"
 
 main()
@@ -1958,7 +1970,7 @@ if eval "test \"`echo '$''{'ac_cv_type_signal'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1962 "configure"
+#line 1974 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <signal.h>
@@ -1997,7 +2009,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2001 "configure"
+#line 2013 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2070,7 +2082,7 @@ fi
 
 ME=`whoami`
 if test -f /etc/resolv.conf; then
-  LOC=`cat /etc/resolv.conf | grep domain | awk '{print $NF}'`
+  LOC=`cat /etc/resolv.conf | grep '^domain' | tail -1 | awk '{print $NF}'`
 else
   LOC="@no.where"
 fi
@@ -2271,79 +2283,6 @@ cat >> confdefs.h <<EOF
 EOF
 
 echo "$ac_t""$ac_cv_user_prompt_EXTENSIBLEMIB" 1>&6
-
-
-MSG_CHECK=`echo "Config File Location" | tail -1`
-echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'ac_cv_user_prompt_CONFIGFILE'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  echo ""
-
-echo "Config File Location ("/etc/ece-snmpd.conf"): \c"
-read tmpinput
-if test "$tmpinput" = "" -a ""/etc/ece-snmpd.conf"" != ""; then
-  tmpinput=""/etc/ece-snmpd.conf""
-fi
-eval CONFIGFILE=\"$tmpinput\"
-
-
-eval ac_cv_user_prompt_CONFIGFILE=\$CONFIGFILE
-echo "setting $MSG_CHECK to...  \c"
-
-fi
- if test "$ac_cv_user_prompt_CONFIGFILE" != "none"; then
-  if test "1" != ""; then
-    cat >> confdefs.h <<EOF
-#define CONFIGFILE "$ac_cv_user_prompt_CONFIGFILE"
-EOF
-
-  else
-    cat >> confdefs.h <<EOF
-#define CONFIGFILE $ac_cv_user_prompt_CONFIGFILE
-EOF
-
-  fi
-fi
-echo "$ac_t""$ac_cv_user_prompt_CONFIGFILE" 1>&6
-
-
-
-MSG_CHECK=`echo "Second Config File Location" | tail -1`
-echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'ac_cv_user_prompt_CONFIGFILETWO'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  echo ""
-
-echo "Second Config File Location ("/etc/ece-snmpd.local.conf"): \c"
-read tmpinput
-if test "$tmpinput" = "" -a ""/etc/ece-snmpd.local.conf"" != ""; then
-  tmpinput=""/etc/ece-snmpd.local.conf""
-fi
-eval CONFIGFILETWO=\"$tmpinput\"
-
-
-eval ac_cv_user_prompt_CONFIGFILETWO=\$CONFIGFILETWO
-echo "setting $MSG_CHECK to...  \c"
-
-fi
- if test "$ac_cv_user_prompt_CONFIGFILETWO" != "none"; then
-  if test "1" != ""; then
-    cat >> confdefs.h <<EOF
-#define CONFIGFILETWO "$ac_cv_user_prompt_CONFIGFILETWO"
-EOF
-
-  else
-    cat >> confdefs.h <<EOF
-#define CONFIGFILETWO $ac_cv_user_prompt_CONFIGFILETWO
-EOF
-
-  fi
-fi
-echo "$ac_t""$ac_cv_user_prompt_CONFIGFILETWO" 1>&6
-
-
 
 
 MSG_CHECK=`echo "

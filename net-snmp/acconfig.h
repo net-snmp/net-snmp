@@ -7,6 +7,10 @@
 
 @TOP@
 
+/* SNMPLIBDIR contains important files */
+
+#undef SNMPLIBPATH
+
 /* mib pointer to the top of the extensible tree point this to the
  location in the tree your company/organization has been allocated.
  If you don't have an official one (like me), just make one up that
@@ -31,12 +35,6 @@
 
 /* configuration files.  I rdist the first one and leave machine
    specific stuff in the second one */
-
-/* default config file */
-#define CONFIGFILE "/etc/ece-snmpd.conf"
-
-/* optional second file */
-#define CONFIGFILETWO "/etc/ece-snmpd.local.conf" 
 
 /* default system contact */
 #undef SYS_CONTACT
