@@ -356,7 +356,7 @@ AC_ARG_WITH(enterprise-oid,
   AC_DEFINE_UNQUOTED(ENTERPRISE_MIB, $ent_oid)
   ent_dot_oid="1.3.6.1.4.1.$withval"
   AC_DEFINE_UNQUOTED(ENTERPRISE_DOT_MIB, $ent_dot_oid)
-  AC_MSG_RESULT($withval)
+  AC_MSG_RESULT(using enterprise number $withval)
 ],[
   AC_MSG_RESULT(using default "enterprise.net-snmp")
 ])
@@ -371,11 +371,11 @@ AC_ARG_WITH(enterprise-sysoid,
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
   sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB, $sys_dot_oid)
-  sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0) }'`
+  sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk -F\. '{ print NF }'`
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
-  AC_MSG_RESULT($withval)
+  AC_MSG_RESULT(using enterprise sysOID $withval ....)
 ],[
-  AC_MSG_RESULT(using default "NET-SNMP-MIB::netSnmpAgentOIDs...")
+  AC_MSG_RESULT(using default enterprise sysOID "NET-SNMP-MIB::netSnmpAgentOIDs...")
 ])
 
 AC_ARG_WITH(enterprise-notification-oid,
@@ -387,11 +387,11 @@ AC_ARG_WITH(enterprise-notification-oid,
   AC_DEFINE_UNQUOTED(NOTIFICATION_MIB, $notification_oid)
   notification_dot_oid=`echo "$withval" | sed 's/^\.//'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB, $notification_dot_oid)
-  notificationoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk '{ print length($0) }'`
+  notificationoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk -F\. '{ print NF }'`
   AC_DEFINE_UNQUOTED(NOTIFICATION_DOT_MIB_LENGTH, $notificationoid_len)
-  AC_MSG_RESULT($withval)
+  AC_MSG_RESULT(using enterprise notifications $withval)
 ],[
-  AC_MSG_RESULT(using default "enterprise.ucdavis")
+  AC_MSG_RESULT(using default notifications "NET-SNMP-MIB::netSnmpNotifications")
 ])
 dnl
 dnl Catch common mistakes in configure options
