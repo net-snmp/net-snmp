@@ -26,7 +26,6 @@ extern "C" {
 
 #endif
 
-typedef void (*snmp_log_callback)(int level, const char* text);
 struct snmp_log_message {
    int priority;
    const char *msg;
