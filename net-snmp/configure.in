@@ -18,7 +18,7 @@ AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories to 
 ])
 AC_ARG_WITH(mibs,[  --with-mibs=\"item1:item2:\"      Default mib IDs to load.
                                     (Default: SNMPv2-SMI:SNMPv2-TC:SNMPv2-MIB:
-                                              SNMPv2-CONF:UCD-SNMP-MIB)], AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$with_mibs"))
+                                           SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB)], AC_DEFINE_UNQUOTED(DEFAULT_MIBS,"$with_mibs"))
 AC_ARG_WITH(mibfiles,[  --with-mibfiles=\"file1:file2\"   Default mib files to load.
                                     (Default:  none.  uses IDs above instead.)],AC_DEFINE_UNQUOTED(DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"       Compile with additional mib modules.])
