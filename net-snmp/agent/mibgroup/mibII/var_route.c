@@ -377,7 +377,7 @@ var_ipRouteEntry(struct variable *vp,
       }
   case IPROUTEINFO:
     *var_len = nullOidLen;
-    return (u_char *)&nullOid;
+    return (u_char *) nullOid;
   default:
     ERROR_MSG("");
   }
