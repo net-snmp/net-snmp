@@ -318,10 +318,10 @@ get_set_cache(netsnmp_agent_session *asp)
             DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p restored from cache\n",
                         asp, asp->reqinfo));
             if(asp->requests->agent_req_info != asp->reqinfo) {
+                netsnmp_request_info *tmp = asp->requests;
                 DEBUGMSGTL(("verbose:asp",
                             "  reqinfo %p doesn't match cached reqinfo %p\n",
                             asp->reqinfo, asp->requests->agent_req_info));
-                netsnmp_request_info *tmp = asp->requests;
                 for(; tmp; tmp = tmp->next)
                     tmp->agent_req_info = asp->reqinfo;
             }
