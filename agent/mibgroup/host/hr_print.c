@@ -29,6 +29,15 @@ int header_hrprint (struct variable *,oid *, size_t *, int, size_t *, WriteMetho
 	 *
 	 *********************/
 
+#define	HRPRINT_STATUS		1
+#define	HRPRINT_ERROR		2
+
+struct variable4 hrprint_variables[] = {
+    { HRPRINT_STATUS,    ASN_INTEGER, RONLY, var_hrprint, 2, {1,1}},
+    { HRPRINT_ERROR,   ASN_OCTET_STR, RONLY, var_hrprint, 2, {1,2}}
+};
+oid hrprint_variables_oid[] = { 1,3,6,1,2,1,25,3,5 };
+
 
 void init_hr_print(void)
 {
@@ -40,6 +49,8 @@ void init_hr_print(void)
 #endif
 
 /*  device_descr[ HRDEV_PRINTER ] = &describe_printer;	*/
+
+    REGISTER_MIB("host/hr_print", hrprint_variables, variable4, hrprint_variables_oid);
 }
 
 /*

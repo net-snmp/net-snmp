@@ -10,14 +10,4 @@ extern FindVarMethod var_hrnet;
 
 config_require(mibII/interfaces)
 
-#define	HRNET_IFINDEX		1
-
-#ifdef IN_SNMP_VARS_C
-
-struct variable4 hrnet_variables[] = {
-    { HRNET_IFINDEX,   ASN_INTEGER, RONLY, var_hrnet, 2, {1,1}}
-};
-config_load_mib( MIB.25.3.4, 9, hrnet_variables)
-
-#endif
 #endif /* _MIBGROUP_HRNET_H */

@@ -92,6 +92,40 @@ struct proc *proc_table;
 #endif
 int current_proc_entry;
 
+
+#define	HRSWRUN_OSINDEX		1
+
+#define	HRSWRUN_INDEX		2
+#define	HRSWRUN_NAME		3
+#define	HRSWRUN_ID		4
+#define	HRSWRUN_PATH		5
+#define	HRSWRUN_PARAMS		6
+#define	HRSWRUN_TYPE		7
+#define	HRSWRUN_STATUS		8
+
+#define	HRSWRUNPERF_CPU		9
+#define	HRSWRUNPERF_MEM		10
+
+struct variable4 hrswrun_variables[] = {
+    { HRSWRUN_OSINDEX,   ASN_INTEGER, RONLY, var_hrswrun, 1, {1}},
+    { HRSWRUN_INDEX,     ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,1}},
+    { HRSWRUN_NAME,    ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,2}},
+    { HRSWRUN_ID,      ASN_OBJECT_ID, RONLY, var_hrswrun, 3, {2,1,3}},
+    { HRSWRUN_PATH,    ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,4}},
+    { HRSWRUN_PARAMS,  ASN_OCTET_STR, RONLY, var_hrswrun, 3, {2,1,5}},
+    { HRSWRUN_TYPE,      ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,6}},
+    { HRSWRUN_STATUS,    ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,7}}
+};
+
+struct variable4 hrswrunperf_variables[] = {
+    { HRSWRUNPERF_CPU,   ASN_INTEGER, RONLY, var_hrswrun, 3, {1,1,1}},
+    { HRSWRUNPERF_MEM,   ASN_INTEGER, RONLY, var_hrswrun, 3, {1,1,2}}
+};
+
+oid hrswrun_variables_oid[]     = { 1,3,6,1,2,1,25,4 };
+oid hrswrunperf_variables_oid[] = { 1,3,6,1,2,1,25,5 };
+
+
 void init_hr_swrun(void)
 {
 #ifdef PROC_SYMBOL
@@ -100,6 +134,9 @@ void init_hr_swrun(void)
 #ifdef NPROC_SYMBOL
   auto_nlist( NPROC_SYMBOL,0,0 );
 #endif
+
+    REGISTER_MIB("host/hr_swrun", hrswrun_variables, variable4, hrswrun_variables_oid);
+    REGISTER_MIB("host/hr_swrun", hrswrunperf_variables, variable4, hrswrunperf_variables_oid);
 }
 
 /*

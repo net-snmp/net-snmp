@@ -46,12 +46,33 @@ extern int count_processes (void);
 	 *
 	 *********************/
 
+#define	HRSYS_UPTIME		1
+#define	HRSYS_DATE		2
+#define	HRSYS_LOAD_DEV		3
+#define	HRSYS_LOAD_PARAM	4
+#define	HRSYS_USERS		5
+#define	HRSYS_PROCS		6
+#define	HRSYS_MAXPROCS		7
+
+struct variable2 hrsystem_variables[] = {
+    { HRSYS_UPTIME,     ASN_TIMETICKS, RONLY, var_hrsys, 1, {1}},
+    { HRSYS_DATE,       ASN_OCTET_STR, RONLY, var_hrsys, 1, {2}},
+    { HRSYS_LOAD_DEV,     ASN_INTEGER, RONLY, var_hrsys, 1, {3}},
+    { HRSYS_LOAD_PARAM, ASN_OCTET_STR, RONLY, var_hrsys, 1, {4}},
+    { HRSYS_USERS,          ASN_GAUGE, RONLY, var_hrsys, 1, {5}},
+    { HRSYS_PROCS,          ASN_GAUGE, RONLY, var_hrsys, 1, {6}},
+    { HRSYS_MAXPROCS,     ASN_INTEGER, RONLY, var_hrsys, 1, {7}}
+};
+oid hrsystem_variables_oid[] = { 1,3,6,1,2,1,25,1 };
+
 
 void init_hr_system(void)
 {
 #ifdef NPROC_SYMBOL
   auto_nlist(NPROC_SYMBOL,0,0);
 #endif
+
+    REGISTER_MIB("host/hr_system", hrsystem_variables, variable2, hrsystem_variables_oid);
 }
 
 /*
