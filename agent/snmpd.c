@@ -158,9 +158,6 @@ typedef long    fd_mask;
  */
 #ifdef USE_LIBWRAP
 #include <tcpd.h>
-
-int             allow_severity = LOG_INFO;
-int             deny_severity = LOG_WARNING;
 #endif                          /* USE_LIBWRAP */
 
 #define TIMETICK         500000L
