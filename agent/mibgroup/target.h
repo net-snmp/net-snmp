@@ -1,0 +1,2 @@
+config_require(target/snmpTargetAddrEntry)
+config_require(target/snmpTargetParamsEntry)
