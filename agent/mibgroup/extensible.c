@@ -131,10 +131,8 @@ void extensible_parse_config(word,cptr)
     while(*pprelocs != NULL)
       pprelocs = &((*pprelocs)->next);
     numrelocs++;
-    (*pprelocs) =
-      (struct extensible *) malloc(sizeof(struct extensible));
+    (*pprelocs) = (struct extensible *) malloc(sizeof(struct extensible));
     pptmp = pprelocs;
-    pprelocs = &((*pprelocs)->next);
   } else {
     /* it goes in with the general extensible table */
     while(*ppexten != NULL)
@@ -143,7 +141,6 @@ void extensible_parse_config(word,cptr)
     (*ppexten) =
       (struct extensible *) malloc(sizeof(struct extensible));
     pptmp = ppexten;
-    ppexten = &((*ppexten)->next);
   }
   /* the rest is pretty much handled the same */
   if (!strncasecmp(word,"sh",2)) 
@@ -174,6 +171,11 @@ void extensible_parse_config(word,cptr)
     (*pptmp)->command[tcptr-cptr-1] = 0;
     (*pptmp)->next = NULL;
   }
+  if ((*pptmp)->miblen > 0) {
+    register_mib((struct variable *) extensible_relocatable_variables,
+                 sizeof(struct variable2),
+                 6, (*pptmp)->miboid, (*pptmp)->miblen);
+  }
 }
 
 void extensible_free_config __P((void)) {
@@ -188,6 +190,7 @@ void extensible_free_config __P((void)) {
   for (etmp = relocs; etmp != NULL;) {
     etmp2 = etmp;
     etmp = etmp->next;
+    unregister_mib(etmp2->miboid, etmp2->miblen);
     free(etmp2);
   }
 
