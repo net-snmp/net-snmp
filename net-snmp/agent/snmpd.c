@@ -493,7 +493,7 @@ SnmpTrapNodeDown(int a)
 }
 
 #define NUM_SOCKETS     32
-static int sdlist[NUM_SOCKETS], sdlen = 0;
+int sdlist[NUM_SOCKETS], sdlen = 0;
 static int portlist[NUM_SOCKETS];
 int (*sd_handlers[NUM_SOCKETS])(int);
 
