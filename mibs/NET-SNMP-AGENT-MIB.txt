@@ -39,7 +39,6 @@ nsErrorHistory         OBJECT IDENTIFIER ::= {netSnmpObjects 6}
 nsConfiguration        OBJECT IDENTIFIER ::= {netSnmpObjects 7}
 nsTransactions         OBJECT IDENTIFIER ::= {netSnmpObjects 8}
 
-
 --
 --  Monitoring outstanding "transactions"
 --    (i.e. requests sent to AgentX subagents, or proxied agents)
@@ -92,7 +91,7 @@ nsModuleTable OBJECT-TYPE
 	"A table displaying all the oid's registered by mib modules in
 	 the agent.  Since the agent is modular in nature, this lists
 	 each module's OID it is responsible for and the name of the module"
-    ::= { netSnmpAgentMIB 2 }
+    ::= { nsMibRegistry 1 }
 
 nsModuleEntry OBJECT-TYPE
     SYNTAX	NsModuleEntry
