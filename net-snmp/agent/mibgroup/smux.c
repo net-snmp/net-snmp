@@ -99,7 +99,7 @@ static u_char *smux_sout_process __P((u_char *, int *));
 static u_char *smux_close_process __P((int, u_char *, int *));
 static u_char *smux_parse __P((u_char *, oid *, int *, int *));
 static u_char *smux_parse_var __P((u_char *, int *, oid *, int *, int *));
-static int smux_build __P((u_char, int, oid *, int *, u_char *, int *));
+static int smux_build __P((u_char, u_long, oid *, int *, u_char *, int *));
 
 int 
 init_smux __P((void))
@@ -718,7 +718,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 static int
 smux_build(type, reqid, objid, oidlen, packet, length)
 	u_char type;
-	long reqid;
+	u_long reqid;
 	oid *objid;
 	int *oidlen;
 	u_char *packet;
