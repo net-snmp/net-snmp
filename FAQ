@@ -483,8 +483,12 @@ I cannot set any variables in the MIB.
   are writable, mostly regarding the status of various elements of the
   system.  Few of these are currently setable in the agent.
 
-  The main variables that can be changes are purely those within the
+  The main variables that can be changed are purely those within the
   'system' group, relating to general contact information.
+    Note also that the 'public' community cannot be used to set values.
+  As shipped, the community name 'private' should be used, although this
+  can be changed in the snmpd.conf file by specifing a new community name
+  for slot 2.
   
 
 Sometimes I seem to get the wrong answers.  Why?
