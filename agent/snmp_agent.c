@@ -107,86 +107,95 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
     struct agent_snmp_session  *asp;
+    int status, allDone, i;
+    struct variable_list *var_ptr, *var_ptr2;
+
+    asp = malloc( sizeof( struct agent_snmp_session ));
+    asp->start = pdu->variables;
+    asp->end   = pdu->variables;
+    if ( asp->end != NULL )
+	while ( asp->end->next_variable != NULL )
+	    asp->end = asp->end->next_variable;
+    asp->session = session;
+    asp->pdu     = pdu;
+    asp->rw      = READ;
+    asp->exact   = TRUE;
+    asp->outstanding_requests = NULL;
+    asp->next    = NULL;
+
 
     switch (pdu->command) {
     case SNMP_MSG_GET:
         snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
+	status = handle_next_pass( asp );
 	break;
+
     case SNMP_MSG_GETBULK:
+	    /*
+	     * GETBULKS require multiple passes. The first pass handles the
+	     * explicitly requested varbinds, and subsequent passes append
+	     * to the existing var_op_list.  Each pass (after the first)
+	     * uses the results of the preceeding pass as the input list
+	     * (delimited by the start & end pointers.
+	     * Processing is terminated if all entries in a pass are
+	     * EndOfMib, or the maximum number of repetitions are made.
+	     */
         snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
+	asp->exact   = FALSE;
+		/*
+		 * Limit max repetitions to something reasonable
+		 *	XXX: We should figure out what will fit somehow...
+		 */
+	if ( asp->pdu->errindex > 100 )
+	    asp->pdu->errindex = 100;
+
+	status = handle_next_pass( asp );	/* First pass */
+	if ( status != SNMP_ERR_NOERROR )
+	    break;
+
+	while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
+	    asp->start = asp->start->next_variable;
+
+	while ( asp->pdu->errindex-- > 0 ) {	/* Process repeaters */
+		/*
+		 * Add new variable structures for the
+		 * repeating elements, ready for the next pass.
+		 * Also check that these are not all EndOfMib
+		 */
+	    allDone = TRUE;		/* Check for some content */
+	    for ( var_ptr = asp->start;
+		  var_ptr != asp->end->next_variable;
+		  var_ptr = var_ptr->next_variable ) {
+				/* XXX: we don't know the size of the next
+					OID, so assume the maximum length */
+		var_ptr2 = snmp_add_null_var(asp->pdu, var_ptr->name, MAX_OID_LEN);
+		for ( i=var_ptr->name_length ; i<MAX_OID_LEN ; i++)
+		    var_ptr2->name[i] = '\0';
+		var_ptr2->name_length = var_ptr->name_length;
+
+		if ( var_ptr->type != SNMP_ENDOFMIBVIEW )
+		    allDone = FALSE;
+	    }
+	    if ( allDone )
+		break;
+
+	    asp->start = asp->end->next_variable;
+	    while ( asp->end->next_variable != NULL )
+		asp->end = asp->end->next_variable;
+	    
+	    status = handle_next_pass( asp );
+	    if ( status != SNMP_ERR_NOERROR )
+		break;
+	}
 	break;
+
     case SNMP_MSG_GETNEXT:
         snmp_increment_statistic(STAT_SNMPINGETNEXTS);
+	asp->exact   = FALSE;
+	status = handle_next_pass( asp );
 	break;
+
     case SNMP_MSG_SET:
-        snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
-	break;
-    case SNMP_MSG_RESPONSE:
-        snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
-	return 0;
-    case SNMP_MSG_TRAP:
-    case SNMP_MSG_TRAP2:
-        snmp_increment_statistic(STAT_SNMPINTRAPS);
-	return 0;
-    default:
-        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-	return 0;
-    }
-	
-    asp = malloc( sizeof( struct agent_snmp_session ));
-    asp->mode = RESERVE1;
-    asp->start = pdu->variables;
-    asp->end   = pdu->variables;
-    asp->session = session;
-    asp->pdu     = pdu;
-    asp->outstanding_requests = NULL;
-    asp->next = agent_session_list;
-    agent_session_list = asp;
-    
-    if ( asp->end != NULL )
-	while ( asp->end->next_variable != NULL )
-	    asp->end = asp->end->next_variable;
-	
-    handle_next_pass( asp );
-    return 1;
-}
-
-
-void
-handle_next_pass(struct agent_snmp_session  *asp)
-{
-    int status, allDone, i;
-    struct variable_list *var_ptr, *vp2;
-    struct request_list *req_p, *next_req;
-    struct agent_snmp_session  *asp2;
-
-    /* XXX: Limit max repitions to something reasonable
-                    (we should figure out what will fit somehow...)
-            */
-    if (asp->pdu->command == SNMP_MSG_GETBULK && asp->pdu->errindex > 10)
-      asp->pdu->errindex = 100; 
-          
-    while ( 1 ) {
-        if ( asp->outstanding_requests != NULL )
-	    return;
-	status = handle_var_list( asp );
-        if ( asp->outstanding_requests != NULL ) {
-	    if ( status == SNMP_ERR_NOERROR ) {
-		/* Send out any AgentX (or similar) requests */
-		return;
-	    }
-	    else {
-	    	/* discard outstanding requests */
-		for ( req_p = asp->outstanding_requests ;
-			req_p != NULL ; req_p = next_req ) {
-			
-			next_req = req_p->next_request;
-			free( req_p );
-		}
-	    }
-	}
-	
-	if ( asp->pdu->command == SNMP_MSG_SET) {
     	    /*
 	     * SETS require 3-4 passes through the var_op_list.  The first two
 	     * passes verify that all types, lengths, and values are valid
@@ -197,147 +206,103 @@ handle_next_pass(struct agent_snmp_session  *asp)
 	     * pass is made so that any reserved resources can be freed.
 	     * If the third pass returns an error, another pass is made so that
 	     * any changes can be reversed.
-	     * If the fourth pass returns an error, we shuffle our feet and
-	     * look extremely embarrassed!
+	     * If the fourth pass (or any of the error handling passes)
+	     * return an error, we'd rather not know about it!
 	     */
-	    switch ( asp->mode ) {
-	        case RESERVE1:
-			asp->pdu->errstat = status;
-			asp->mode = (status==SNMP_ERR_NOERROR ? RESERVE2 : FREE);
-			break;
-	        case RESERVE2:
-	    				/*
-					 *  'COMMIT' and 'ACTION' have been
-					 *  the wrong way round up to now.
-					 *  Module code appears to use them correctly,
-					 *  so they've now been switched 
-					 */
-			asp->pdu->errstat = status;
-			asp->mode = (status==SNMP_ERR_NOERROR ? ACTION : FREE);
-			break;
-	        case ACTION:
-			asp->mode = (status==SNMP_ERR_NOERROR ? COMMIT : UNDO);
-			if ( status != SNMP_ERR_NOERROR )
-				asp->pdu->errstat = SNMP_ERR_COMMITFAILED;
-			break;
-	        case COMMIT:
-					/* This should not fail */
-			asp->mode = FINISHED_SUCCESS;
-			if ( status != SNMP_ERR_NOERROR )
-				asp->pdu->errstat = SNMP_ERR_COMMITFAILED;
-			break;
-	        case UNDO:
-			if ( status != SNMP_ERR_NOERROR ) {
-				asp->pdu->errstat = SNMP_ERR_UNDOFAILED;
-				asp->pdu->errindex = 0;
-			}
-			    /* Fallthrough */
-	        case FREE:
-			asp->mode = FINISHED_FAILURE;
-			break;
-	    }
-	}
-	else if ( asp->pdu->command == SNMP_MSG_GETBULK) {
-	    /*
-	     * GETBULKS require multiple passes. The first pass handles the
-	     * explicitly requested varbinds, and subsequent passes append
-	     * to the existing var_op_list.  Each pass (after the first)
-	     * uses the results of the preceeding pass as the input list
-	     * (delimited by the start & end pointers.
-	     * Processing is terminated if all entries in a pass are
-	     * EndOfMib, or the maximum number of repetitions are made.
-	     */
+        snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
+	asp->rw      = WRITE;
 
-	    if ( --asp->pdu->errindex == 0 ) {	/* Max repetitions */
-	        asp->mode = FINISHED_SUCCESS;
-		asp->pdu->errindex = 0;
-		asp->pdu->errstat = SNMP_ERR_NOERROR;
-	    }
-	    else {
-	    	if ( asp->mode == RESERVE1 ) {
-			/* First pass - need to skip non-repeaters */
-		    asp->start = asp->pdu->variables;
-		    while ( asp->pdu->errstat-- > 0) {
-		        asp->start = asp->start->next_variable;
-		    }
-		    asp->mode = ACTION;
-		}
-		
-			/*
-			 * Add new variable structures for the
-			 * repeating elements, ready for the next pass.
-			 * Also check that these are not all EndOfMib
-			 *
-			 * Hack alert:
-			 *    The variable handling routines assume that
-			 * the name variable passed in has room for the
-			 * returned name, which may be longer than the
-			 * requested name.
-			 *    Temporary fix is to allocate the maximum
-                         * allowable space possible (MAX_OID_LEN).
-			 */
-		 
-		allDone = TRUE;
-		var_ptr = asp->start;
-		for ( var_ptr=asp->start; var_ptr != asp->end->next_variable;
-		      var_ptr = var_ptr->next_variable) {
-		      vp2 = snmp_add_null_var( asp->pdu,
-		      	 		 var_ptr->name,
-					 MAX_OID_LEN);
-		      for ( i=var_ptr->name_length ; i< MAX_OID_LEN; i++)
-		          vp2->name[i] = '\0';
-		      vp2->name_length = var_ptr->name_length;
-		      
-		      if ( var_ptr->type != SNMP_ENDOFMIBVIEW ) {
-		          allDone=FALSE;
-		      }
-		}
-		if ( allDone ) {
-		    asp->mode = FINISHED_SUCCESS;
-		    asp->pdu->errindex = 0;
-		    asp->pdu->errstat = SNMP_ERR_NOERROR;
-		}
-		    
-		    	/*
-			 * Update the start/end pointers to use the
-			 * new portion of the list.
-			 */
-		asp->start = asp->end->next_variable;
-                while ( asp->end->next_variable !=NULL )
-                    asp->end = asp->end->next_variable;
-	    }
-	}
-	    /*
-	     * All other PDU types are single pass
-	     */
-	else {
-	    asp->pdu->errstat = status;
-	    asp->mode = (status==SNMP_ERR_NOERROR ?
-			    FINISHED_SUCCESS : FINISHED_FAILURE );
-	}
-	
-	if (( asp->mode == FINISHED_FAILURE ) ||
-	    ( asp->mode == FINISHED_SUCCESS
-			 && asp->outstanding_requests == NULL)) {
+        asp->mode = RESERVE1;
+	status = handle_next_pass( asp );
 
-	    /*  All Done - send back the reply & tidy up */
-	    asp->pdu->command = SNMP_MSG_RESPONSE;
-	    snmp_send( asp->session, asp->pdu );
-            snmp_increment_statistic(STAT_SNMPOUTPKTS);
-	    
-	    if ( agent_session_list == asp ) {
-	        agent_session_list = asp->next;
-	    }
-	    else {
-	         asp2 = agent_session_list;
-		 while ( asp2->next != NULL && asp2->next != asp )
-		     asp2 = asp2->next;
-		 asp2->next = asp->next;
-	    }
-	    free( asp );
-	    return;
+	if ( status != SNMP_ERR_NOERROR ) {
+	    asp->mode = FREE;
+	    (void) handle_next_pass( asp );
+	    break;
 	}
+
+        asp->mode = RESERVE2;
+	status = handle_next_pass( asp );
+
+	if ( status != SNMP_ERR_NOERROR ) {
+	    asp->mode = FREE;
+	    (void) handle_next_pass( asp );
+	    break;
+	}
+
+        asp->mode = ACTION;
+	status = handle_next_pass( asp );
+
+	if ( status != SNMP_ERR_NOERROR ) {
+	    asp->mode = UNDO;
+	    (void) handle_next_pass( asp );
+	    break;
+	}
+
+        asp->mode = COMMIT;
+	status = handle_next_pass( asp );
+
+	break;
+
+    case SNMP_MSG_RESPONSE:
+        snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
+	free( asp );
+	return 0;
+    case SNMP_MSG_TRAP:
+    case SNMP_MSG_TRAP2:
+        snmp_increment_statistic(STAT_SNMPINTRAPS);
+	free( asp );
+	return 0;
+    default:
+        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+	free( asp );
+	return 0;
     }
+	
+    
+	
+    if ( asp->outstanding_requests != NULL ) {
+	asp->next = agent_session_list;
+	agent_session_list = asp;
+    }
+    else {
+	asp->pdu->command = SNMP_MSG_RESPONSE;
+	asp->pdu->errstat = status;
+	snmp_send( asp->session, asp->pdu );
+	snmp_increment_statistic(STAT_SNMPOUTPKTS);
+	free( asp );
+    }
+
+    return 1;
+}
+
+
+int
+handle_next_pass(struct agent_snmp_session  *asp)
+{
+    int status;
+    struct request_list *req_p, *next_req;
+
+
+        if ( asp->outstanding_requests != NULL )
+	    return SNMP_ERR_NOERROR;
+	status = handle_var_list( asp );
+        if ( asp->outstanding_requests != NULL ) {
+	    if ( status == SNMP_ERR_NOERROR ) {
+		/* Send out any AgentX (or similar) requests */
+	    }
+	    else {
+	    	/* discard outstanding requests */
+		for ( req_p = asp->outstanding_requests ;
+			req_p != NULL ; req_p = next_req ) {
+			
+			next_req = req_p->next_request;
+			free( req_p );
+		}
+		asp->outstanding_requests = NULL;
+	    }
+	}
+	return status;
 }
 
 
@@ -351,19 +316,8 @@ handle_var_list(struct agent_snmp_session  *asp)
     u_short acl;
     WriteMethod *write_method;
     int	    noSuchObject;
-    int count, rw, exact;
+    int count;
     
-    if (asp->pdu->command == SNMP_MSG_SET)
-	rw = WRITE;
-    else
-	rw = READ;
-    if (asp->pdu->command == SNMP_MSG_GETNEXT ||
-        asp->pdu->command == SNMP_MSG_GETBULK){
-	exact = FALSE;
-    } else {
-	exact = TRUE;
-    }
-        
     count = 0;
     varbind_ptr = asp->start;
     if ( !varbind_ptr ) {
@@ -376,12 +330,12 @@ statp_loop:
 	statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
 			   &statType, &statLen, &acl,
-			   exact, &write_method, asp->pdu, &noSuchObject);
+			   asp->exact, &write_method, asp->pdu, &noSuchObject);
 			   
-	if (statP == NULL && rw != WRITE) {
+	if (statP == NULL && asp->rw != WRITE) {
 	    	varbind_ptr->val.integer   = NULL;
 	    	varbind_ptr->val_len = 0;
-		if ( exact ) {
+		if ( asp->exact ) {
 	            if ( noSuchObject == TRUE ){
 		        statType = SNMP_NOSUCHOBJECT;
 		    } else {
@@ -395,14 +349,14 @@ statp_loop:
 		/* GETNEXT/GETBULK should just skip inaccessible entries */
 	else if ( !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                              asp->pdu, varbind_ptr->type)
-			 && !exact) {
+			 && !asp->exact) {
 		goto statp_loop;
 	}
 		/* Other access problems are permanent */
-	else if (( rw == WRITE && !(acl & 2))
+	else if (( asp->rw == WRITE && !(acl & 2))
 	      || !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                             asp->pdu, varbind_ptr->type)) {
-	    if (asp->pdu->version == SNMP_VERSION_1 || rw != WRITE) {
+	    if (asp->pdu->version == SNMP_VERSION_1 || asp->rw != WRITE) {
 		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
 		ERROR_MSG("read-only");
 		statType = SNMP_ERR_NOSUCHNAME;
@@ -423,7 +377,7 @@ statp_loop:
 				statType, statP, statLen);
 
 		/*  FINALLY we can act on SET requests ....*/
-	    if ( rw == WRITE ) {
+	    if ( asp->rw == WRITE ) {
 	        if ( write_method != NULL ) {
 		    statType = (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
