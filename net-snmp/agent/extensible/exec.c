@@ -240,7 +240,7 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
       myvp.name[exten->miblen] = name[exten->miblen];
       myvp.namelen = exten->miblen+1;
       tmp = exten->miblen+1;
-      if (checkmib(&myvp,name,&tmp,exact,NULL,NULL,newname,
+      if (checkmib(&myvp,name,&tmp,-1,NULL,NULL,newname,
                    numrelocs))
         break;
     }

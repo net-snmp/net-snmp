@@ -55,31 +55,30 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   int exceptions[] = SECURITYEXCEPTIONS;
 #endif
 
-  for(i=0,rtest=0; i < vp->namelen; i++) {
+  for(i=0,rtest=0; i < vp->namelen && i < *length && !rtest; i++) {
     if (name[i] != vp->name[i]) {
-      rtest = 1;
+      if (name[i] < vp->name[i]) 
+        rtest = -1;
+      else
+        rtest = 1;
     }
   }
-  if (rtest) {
+  if (rtest > 0 || (rtest == 0 && vp->namelen+1 < *length) ||
+    (exact == -1 && rtest)) {
     if (var_len)
 	*var_len = NULL;
     return NULL;
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
-  if (*length == vp->namelen) {
-    bcopy((char *) vp->name, (char *)newname,
-          (int)vp->namelen * sizeof (oid));
-    newname[*length] = 1;
+  if (*length <= vp->namelen || rtest == -1) {
+    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
+    newname[vp->namelen] = 1;
     *length = vp->namelen+1;
   }
-  else if (*length != vp->namelen+1) {
-    if(var_len)
-      *var_len = NULL;
-    return NULL;
-  }
   else {
-    bcopy((char *) vp->name, (char *)newname, (int)vp->namelen * sizeof (oid));
+    *length = vp->namelen+1;
+    bcopy((char *)name, (char *)newname, (*length) * sizeof(oid));
     if (!exact)
       newname[*length-1] = name[*length-1] + 1;
     else
@@ -90,7 +89,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
       return NULL;
     }
   }  
-  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
+  bcopy((char *)newname, (char *)name, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
   if (var_len)
