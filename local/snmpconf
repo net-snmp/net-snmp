@@ -43,6 +43,7 @@ if ($opts{'h'}) {
 }
 
 # setup terminal interface.
+$ENV{'PERL_RL'}='o=0' if (!exists($ENV{'PERL_RL'}));
 $term = new Term::ReadLine 'snmpconf';
 
 # read in configuration file set
