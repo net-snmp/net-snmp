@@ -592,7 +592,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
 	    }
 	} else {
             if (print_format2) {
-                DEBUGMSGTL(( "snmptrapd", "print_format v1 = '%s'\n", print_format2));
+                DEBUGMSGTL(( "snmptrapd", "print_format v2 = '%s'\n", print_format2));
                 trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              print_format2, pdu, transport);
 	    } else {
@@ -758,7 +758,6 @@ do_external(char *cmd, struct hostent *host,
     snmp_set_quick_print(oldquick);
 }
 
-
 #define EXECUTE_FORMAT	"%b\n%B\n%V\n%v\n"
 
 int   command_handler( netsnmp_pdu           *pdu,
@@ -772,6 +771,11 @@ int   command_handler( netsnmp_pdu           *pdu,
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
     if (handler && handler->token && *handler->token) {
+	netsnmp_pdu    *v2_pdu = NULL;
+	if (pdu->command == SNMP_MSG_TRAP)
+	    v2_pdu = convert_v1pdu_to_v2(pdu);
+	else
+	    v2_pdu = pdu;
         oldquick = snmp_get_quick_print();
         snmp_set_quick_print(1);
 
@@ -791,12 +795,12 @@ int   command_handler( netsnmp_pdu           *pdu,
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
             realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
-                                             pdu, transport);
+                                             v2_pdu, transport);
         } else {
             DEBUGMSGTL(( "snmptrapd", "execute format\n"));
             realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              EXECUTE_FORMAT,
-                                             pdu, transport);
+                                             v2_pdu, transport);
 	}
 
         /*
@@ -804,6 +808,8 @@ int   command_handler( netsnmp_pdu           *pdu,
          */
         run_exec_command(handler->token, rbuf, NULL, 0);   /* Not interested in output */
         snmp_set_quick_print(oldquick);
+	if (pdu->command == SNMP_MSG_TRAP)
+	    snmp_free_pdu(v2_pdu);
     }
     return NETSNMPTRAPD_HANDLER_OK;
 }
