@@ -64,6 +64,7 @@
 #define setPerrorstatus(x) perror(x)
 #endif
 #include "read_config.h"
+#include "mib_module_config.h"
 
 #ifdef EXCACHETIME
 static long cachetime;

@@ -60,6 +60,7 @@ SOFTWARE.
 #include "mibgroup/util_funcs.h"
 #include "snmp_agent.h"
 #include "read_config.h"
+#include "mib_module_config.h"
 
 static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
 static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));

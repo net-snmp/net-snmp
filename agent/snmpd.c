@@ -83,6 +83,7 @@ typedef long    fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
+#include "mib_module_config.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "system.h"
