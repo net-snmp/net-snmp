@@ -111,9 +111,6 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
   fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
   fprintf(outf, "General communication options\n");
-  fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
-  fprintf(outf, "  -T <LAYER>\tuse LAYER for the network layer.\n");
-  fprintf(outf, "\t\t\t(UDP or TCP).\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf, "Debugging\n");
@@ -144,12 +141,11 @@ snmp_parse_args(int argc,
   char *Apsz = NULL;
   char *Xpsz = NULL;
   char *Cpsz = NULL;
-  int tmp_port;
   char Opts[BUF_SIZE];
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:p:r:t:c:Z:e:E:n:u:l:x:X:a:A:T:");
+  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:");
 #ifndef DEPRECATED_CLI_OPTIONS
   strcat(Opts, "fsSqR");
 #endif
@@ -264,15 +260,6 @@ snmp_parse_args(int argc,
         }
         break;
 
-      case 'p':
-        tmp_port = atoi(optarg);
-        if ((tmp_port < 1) || (tmp_port > 65535)) {
-          fprintf(stderr,"Invalid port number after -p flag.\n");
-          return(-1);
-        }
-        session->remote_port = (u_short)tmp_port;
-        break;
-
       case 't':
         session->timeout = atoi(optarg) * 1000000L;
         if (session->timeout < 0 || !isdigit(optarg[0])) {
@@ -288,17 +275,6 @@ snmp_parse_args(int argc,
           return(-1);
         }
         break;
-
-      case 'T':
-          if (strcasecmp(optarg,"TCP") == 0) {
-              session->flags |= SNMP_FLAGS_STREAM_SOCKET;
-          } else if (strcasecmp(optarg,"UDP") == 0) {
-              /* default, do nothing */
-          } else {
-              fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", optarg);
-              return(-1);
-          }
-          break;
 
       case 'c':
 	Cpsz = optarg;
