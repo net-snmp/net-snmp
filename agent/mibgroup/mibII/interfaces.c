@@ -156,6 +156,7 @@
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "auto_nlist.h"
+#include "sysORTable.h"
 
 static int Interface_Scan_Get_Count (void);
 
@@ -186,14 +187,17 @@ struct variable4 interfaces_variables[] = {
 };
 
 /* Define the OID pointer to the top of the mib tree that we're
-   registering underneath */
-oid interfaces_variables_oid[] = { 1,3,6,1,2,1,2 };
+   registering underneath, and the OID of the MIB module */
+oid interfaces_variables_oid[] = { SNMP_OID_MIB2,2 };
+oid interfaces_module_oid[]    = { SNMP_OID_MIB2,31 };
 
 void init_interfaces(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/interfaces", interfaces_variables, variable4, \
                interfaces_variables_oid);
+  REGISTER_SYSOR_ENTRY(interfaces_module_oid,
+	"The MIB module to describe generic objects for network interface sub-layers");
   
 #ifndef USE_SYSCTL_IFLIST
 #if HAVE_NET_IF_MIB_H

@@ -230,8 +230,6 @@ init_agent (const char *app)
 
 oid nullOid[] = {0,0};
 int nullOidLen = sizeof(nullOid)/sizeof(oid);
-oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
-int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
 
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's

@@ -111,6 +111,7 @@
 #include "tcp.h"
 #endif
 #include "udp.h"
+#include "sysORTable.h"
 
 #ifdef CAN_USE_SYSCTL
 #include <sys/sysctl.h>
@@ -147,14 +148,17 @@ struct variable8 udp_variables[] = {
 };
 
 /* Define the OID pointer to the top of the mib tree that we're
-   registering underneath */
-oid udp_variables_oid[] = { 1,3,6,1,2,1,7 };
+   registering underneath, and the OID for the MIB module */
+oid udp_variables_oid[] = { SNMP_OID_MIB2,7 };
+oid udp_module_oid[]    = { SNMP_OID_MIB2,50 };
 
 void init_udp(void)
 {
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/udp", udp_variables, variable8, udp_variables_oid);
+  REGISTER_SYSOR_ENTRY( udp_module_oid,
+		"The MIB module for managing UDP implementations");
 
 #ifdef UDPSTAT_SYMBOL
   auto_nlist( UDPSTAT_SYMBOL,0,0 );

@@ -19,6 +19,7 @@
 #include "util_funcs.h"
 
 #include "snmp_mib.h"
+#include "sysORTable.h"
 
 
 	/*********************
@@ -74,12 +75,23 @@ struct variable2 snmp_variables[] = {
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid snmp_variables_oid[] = { 1,3,6,1,2,1,11 };
+oid snmp_variables_oid[] = { SNMP_OID_MIB2,11 };
+#ifdef USING_MIBII_SYSTEM_MIB_MODULE
+extern oid system_module_oid[];
+extern int system_module_oid_len;
+extern int system_module_count;
+#endif
 
 void
 init_snmp_mib(void) {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/snmp", snmp_variables, variable2, snmp_variables_oid);
+
+#ifdef USING_MIBII_SYSTEM_MIB_MODULE
+  if ( ++system_module_count == 3 )
+	REGISTER_SYSOR_TABLE( system_module_oid, system_module_oid_len,
+		"The MIB module for SNMPv2 entities");
+#endif
 }
 
 /*

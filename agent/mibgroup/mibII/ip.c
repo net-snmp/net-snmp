@@ -97,6 +97,7 @@
 
 #include "ip.h"
 #include "interfaces.h"
+#include "sysORTable.h"
 
 
 	/*********************
@@ -177,13 +178,20 @@ struct variable4 ip_variables[] = {
 };
 
 /* Define the OID pointer to the top of the mib tree that we're
-   registering underneath */
-oid ip_variables_oid[] = { 1,3,6,1,2,1,4 };
+   registering underneath, and the OID of the MIB module */
+oid ip_variables_oid[] = { SNMP_OID_MIB2,4 };
+oid ip_module_oid[]    = { SNMP_OID_MIB2,4 };
+oid ip_module_oid_len  = sizeof(ip_module_oid) / sizeof( oid );
+int ip_module_count    = 0;   /* Need to liaise with icmp.c */
 
 void init_ip(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/ip", ip_variables, variable4, ip_variables_oid);
+  if ( ++ip_module_count == 2 )
+      REGISTER_SYSOR_ENTRY( ip_module_oid,
+		"The MIB module for managing IP and ICMP implementations");
+
 
   /* for speed optimization, we call this now to do the lookup */
 #ifdef IPSTAT_SYMBOL

@@ -46,6 +46,7 @@
 #include "read_config.h"
 #include "agent_read_config.h"
 #include "system.h"
+#include "sysORTable.h"
 
 
 	/*********************
@@ -134,7 +135,10 @@ struct variable2 system_variables[] = {
 };
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-oid system_variables_oid[] = { 1,3,6,1,2,1,1 };
+oid system_variables_oid[] = { SNMP_OID_MIB2,1 };
+oid system_module_oid[]    = { SNMP_OID_SNMPMODULES,1 };
+int system_module_oid_len  = sizeof( system_module_oid ) / sizeof( oid );
+int system_module_count    = 0;
 
 void init_system_mib(void)
 {
@@ -181,6 +185,10 @@ void init_system_mib(void)
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/system", system_variables, variable2, \
                system_variables_oid);
+
+  if ( ++system_module_count == 3 )
+	REGISTER_SYSOR_ENTRY( system_module_oid,
+		"The MIB module for SNMPv2 entities");
   
   /* register our config handlers */
   snmpd_register_config_handler("syslocation", system_parse_config_sysloc,

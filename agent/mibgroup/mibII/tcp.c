@@ -138,6 +138,7 @@
 
 /* #include "../common_header.h" */
 #include "tcp.h"
+#include "sysORTable.h"
 
 	/*********************
 	 *
@@ -188,13 +189,16 @@ struct variable13 tcp_variables[] = {
 };
 
 /* Define the OID pointer to the top of the mib tree that we're
-   registering underneath */
-oid tcp_variables_oid[] = { 1,3,6,1,2,1,6 };
+   registering underneath, and the OID for the MIB module */
+oid tcp_variables_oid[] = { SNMP_OID_MIB2,6 };
+oid tcp_module_oid[]    = { SNMP_OID_MIB2,49 };
 
 void init_tcp(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/tcp", tcp_variables, variable13, tcp_variables_oid);
+  REGISTER_SYSOR_ENTRY( tcp_module_oid,
+		"The MIB module for managing TCP implementations");
 
 #ifdef TCPSTAT_SYMBOL
   auto_nlist( TCPSTAT_SYMBOL,0,0 );
