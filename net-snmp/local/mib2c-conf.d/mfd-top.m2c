@@ -24,7 +24,7 @@ config_require(${name}_data_set);
 #include "${name}_oids.h"
 
 /* enum definions */
-/* #include "${name}_enums.h" */
+#include "${name}_enums.h"
 
 /***********************************************************************
  * function declarations
@@ -46,24 +46,10 @@ void init_$name(void);
     /** TODO: update typedef to correct pointer type.
      * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code) */
 @        eval $m2c_context_reg = "void *"@
-
 @    end@
 typedef $m2c_context_reg ${context}_reg_data;
 
-/***********************************************************************
- * data context
- */
-@    if "$m2c_data_context" eq ""@
-@        include generic-data-context.m2i@
-@    end@
-/*
- * Use a typedef to map existing data type to ${context}_data.
- */
-typedef $m2c_data_context ${context}_data;
-
-typedef struct ${table}_ref_data_s {
-    ${table}_data *data;
-} ${table}_ref_data;
+@    include generic-data-context.m2i@
 
 /***********************************************************************
  * undo context
@@ -81,11 +67,12 @@ typedef ${context}_data ${context}_undo_data;
  * ${context}_ctx pointer.
  */
 typedef struct ${context}_ctx_s {
-    netsnmp_index     oid_idx;
-    oid               oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
-    ${context}_idx    tbl_idx;
-    ${context}_data   *data; /** data */
-    ${context}_undo_data * undo;
+    netsnmp_index        oid_idx;
+    oid                  oid_tmp[MAX_OID_LEN]; /* xxx-rks: shrink this */
+    ${context}_idx       tbl_idx;
+    
+    ${context}_data      data;
+    ${context}_undo_data undo;
 
     /*
      * TODO: add any other useful data
@@ -106,7 +93,9 @@ netsnmp_container *${table}_container_init(netsnmp_mfd_registration *reg);
 @    include mfd-access-${m2c_table_access}-header.m2i@
 
     ${table}_ctx *${table}_allocate_ctx(netsnmp_mfd_registration *reg);
+@if $m2c_data_allocate == 1@
     ${context}_data *${context}_allocate_data(void);
+@end@
 @end@
 
 @include generic-header-bottom.m2i@
@@ -231,11 +220,13 @@ initialize_table_$table(void)
 ## Do support files
 ########################################################################
 @run generic-table-oids.m2c@
+@run generic-table-enums.m2c@
 @run mfd-interface.m2c@
 @run mfd-data-access.m2c@
 @run mfd-data-get.m2c@
 @run mfd-data-set.m2c@
 @run mfd-makefile.m2m@
+@run mfd-readme.m2c@
 @run subagent.m2c@
 ##@run mib2c.column_enums.conf@
 ##
