@@ -340,7 +340,7 @@ u_char *var_extensible_disk(struct variable *vp,
   double totalblks, free, used, avail, availblks;
 #else
   static long avail;
-#ifdef STRUCT_STATVFS_HAS_F_FILES
+#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined(STRUCT_STATFS_HAS_F_FILES)
   int percent_inode;
 #endif
 #endif
@@ -419,10 +419,16 @@ u_char *var_extensible_disk(struct variable *vp,
   iserror = (disks[disknum].minimumspace >= 0 ?
              avail < disks[disknum].minimumspace :
              100-percent <= disks[disknum].minpercent) ? 1 : 0;
-#ifdef STRUCT_STATVFS_HAS_F_FILES
+#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined(STRUCT_STATFS_HAS_F_AVAIL)
   percent_inode = vfs.f_favail <= 0 ? 100 :
     (int) ((double) (vfs.f_files - vfs.f_ffree) /
            (double) (vfs.f_files - (vfs.f_ffree - vfs.f_favail)) * 100.0 + 0.5);
+#else
+#if defined(STRUCT_STATFS_HAS_F_FILES) && defined(STRUCT_STATFS_HAS_F_FREE)
+  percent_inode = vfs.f_ffiles <= 0 ? 100 :
+    (int) ((double) (vfs.f_files - vfs.f_ffree) /
+           (double) (vfs.f_files) * 100.0 + 0.5);
+#endif
 #endif
   switch (vp->magic) {
     case DISKTOTAL:
@@ -444,7 +450,7 @@ u_char *var_extensible_disk(struct variable *vp,
     case DISKPERCENT:
       long_ret = percent;
       return ((u_char *) (&long_ret));
-#ifdef STRUCT_STATVFS_HAS_F_FILES
+#if defined(STRUCT_STATVFS_HAS_F_FILES) || defined(STRUCT_STATFS_HAS_F_FILES)
     case DISKPERCENTNODE:
       long_ret = percent_inode;
       return ((u_char *) (&long_ret));
