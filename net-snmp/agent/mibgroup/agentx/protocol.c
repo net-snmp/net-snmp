@@ -605,7 +605,7 @@ agentx_parse_string( u_char *data, size_t *length,
 {
      u_int len;
 
-     if ( *length <= 4 ) {
+     if ( *length < 4 ) {
 	DEBUGMSGTL(("agentx","Incomplete string"));
 	return NULL;
      }
