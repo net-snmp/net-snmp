@@ -1,6 +1,21 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.1.2*
+
+  New:
+    - extensible mib moved to ucdavis enterprise mib:  .1.3.6.1.4.1.2021.
+    - PORTING file added.
+    - new configure switch:  --without-root-access.
+
+  Ports:
+    - BSDi, and possibly irix, and linux is not too far off.
+    - massive improvemnts for netbsd, freebsd, hpux.
+
+  Fixes:
+    - Massive parser improvements.  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - configure script upgraded to autoconf 2.11.
+
 *3.1.1*
 
   New:
