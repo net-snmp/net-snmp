@@ -5,7 +5,7 @@
 TARG		= snmpd
 USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LOCAL_LIBS	= -L../snmplib
-LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
 
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib		\
 			-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup	\
