@@ -416,7 +416,8 @@ static void ARP_Scan_Init __P((void))
 	if (at) free (at);
 	arptab_size = n;
 	if (arptab_size > 0)
-		at = malloc (arptab_size * sizeof (struct arptab));
+		at = (struct arptab *)
+                  malloc (arptab_size * sizeof (struct arptab));
 	else
 		at = NULL;
 	for (i = 0; i < arptab_size; i++) {

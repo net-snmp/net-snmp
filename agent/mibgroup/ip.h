@@ -6,6 +6,31 @@
 #ifndef _MIBGROUP_IP_H
 #define _MIBGROUP_IP_H
 
+#ifdef linux
+struct ip_mib
+{
+ 	unsigned long	IpForwarding;
+ 	unsigned long	IpDefaultTTL;
+ 	unsigned long	IpInReceives;
+ 	unsigned long	IpInHdrErrors;
+ 	unsigned long	IpInAddrErrors;
+ 	unsigned long	IpForwDatagrams;
+ 	unsigned long	IpInUnknownProtos;
+ 	unsigned long	IpInDiscards;
+ 	unsigned long	IpInDelivers;
+ 	unsigned long	IpOutRequests;
+ 	unsigned long	IpOutDiscards;
+ 	unsigned long	IpOutNoRoutes;
+ 	unsigned long	IpReasmTimeout;
+ 	unsigned long	IpReasmReqds;
+ 	unsigned long	IpReasmOKs;
+ 	unsigned long	IpReasmFails;
+ 	unsigned long	IpFragOKs;
+ 	unsigned long	IpFragFails;
+ 	unsigned long	IpFragCreates;
+};
+#endif
+
 config_require(interfaces at var_route route_write)
 config_arch_require(solaris2, kernel_sunos5)
 

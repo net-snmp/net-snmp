@@ -5,6 +5,38 @@
 #ifndef _MIBGROUP_ICMP_H
 #define _MIBGROUP_ICMP_H
 
+#ifdef linux
+struct icmp_mib
+{
+ 	unsigned long	IcmpInMsgs;
+ 	unsigned long	IcmpInErrors;
+  	unsigned long	IcmpInDestUnreachs;
+ 	unsigned long	IcmpInTimeExcds;
+ 	unsigned long	IcmpInParmProbs;
+ 	unsigned long	IcmpInSrcQuenchs;
+ 	unsigned long	IcmpInRedirects;
+ 	unsigned long	IcmpInEchos;
+ 	unsigned long	IcmpInEchoReps;
+ 	unsigned long	IcmpInTimestamps;
+ 	unsigned long	IcmpInTimestampReps;
+ 	unsigned long	IcmpInAddrMasks;
+ 	unsigned long	IcmpInAddrMaskReps;
+ 	unsigned long	IcmpOutMsgs;
+ 	unsigned long	IcmpOutErrors;
+ 	unsigned long	IcmpOutDestUnreachs;
+ 	unsigned long	IcmpOutTimeExcds;
+ 	unsigned long	IcmpOutParmProbs;
+ 	unsigned long	IcmpOutSrcQuenchs;
+ 	unsigned long	IcmpOutRedirects;
+ 	unsigned long	IcmpOutEchos;
+ 	unsigned long	IcmpOutEchoReps;
+ 	unsigned long	IcmpOutTimestamps;
+ 	unsigned long	IcmpOutTimestampReps;
+ 	unsigned long	IcmpOutAddrMasks;
+ 	unsigned long	IcmpOutAddrMaskReps;
+};
+#endif
+
 config_arch_require(solaris2, kernel_sunos5)
 
 extern void	init_icmp __P((void));

@@ -7,6 +7,21 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #if HAVE_SYS_PROTOSW_H
