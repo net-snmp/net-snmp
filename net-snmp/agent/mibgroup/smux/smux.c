@@ -143,7 +143,8 @@ smux_parse_peer_auth( char *token, char *cptr)
 	cptr = skip_white(cptr);
 
         /* password */
-        strcpy(aptr->sa_passwd, cptr);
+        if (cptr)
+          strcpy(aptr->sa_passwd, cptr);
         
 	Auths[nauths++] = aptr;
 }
