@@ -64,6 +64,12 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
     }
     print STDERR "$host: $comm\n" if ($verbose);
     my $sess = new SNMP::Session (  DestHost => $host, Community => $comm, Timeout => 30000000 );
+    print "Sess ($host): $sess, ref=" . ref($sess). "\n" if ($verbose);
+    if (ref ($sess) ne "SNMP::Session") {
+	print STDERR "ack: \$sess not a SNMP::Session\n";
+	next nexthost;
+    }
+
 
     # get a list of tables we want to store
     $cmd = "SELECT * FROM hosttables where (host = '$host')";
@@ -74,6 +80,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	or print( "\tnot ok: $DBI::errstr\n" );
 
     while (  $tablelist = $tblh->fetchrow_hashref ) {
+	print "starting table $tablelist->{'tablename'}\n" if ($verbose);
 	my $mib = $SNMP::MIB{SNMP::translateObj($tablelist->{'tablename'})};
 	die "mib node $tablelist->{'tablename'} doesn't exist" if (!$mib);
 	my $children = $$mib{'children'};
@@ -83,13 +90,17 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	if ($delete) {
 	    setuptable($tablelist->{tablename});
 	} else {
-	    $dbh->do("select * from $tablelist->{tablename}")
-		or setuptable($tablelist->{tablename});
+	    print "starting. table $tablelist->{'tablename'}\n" if ($verbose);
+	    if ($dbh->do("select * from $tablelist->{tablename}") eq "0E0") {
+		setuptable($tablelist->{tablename});
+	    }
+	    print "starting. table $tablelist->{'tablename'}\n" if ($verbose);
 	}
 	
 	$var = 
 	    new SNMP::Varbind([SNMP::translateObj($tablelist->{'tablename'})]);
 	my $void = SNMP::translateObj($tablelist->{'tablename'});
+	print "Sess: $sess, ref=" . ref($sess). "\n" if ($verbose);
 	my $val = $sess->getnext($var);
 	print "init err: $sess->{'ErrorStr'}\n" if ($verbose);
 	if ($sess->{'ErrorStr'} =~ /Timeout/) {
@@ -162,11 +173,13 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	my $curs = getcursor("select oidindex from $tablelist->{tablename} where host = '$host'");
 	my $row;
 	while ($row = $curs->fetchrow_hashref) {
+	    print "  $row->{oidindex}\n" if ($verbose);
 	    if (!defined($tbl_ids{$row->{oidindex}})) {
 		$dbh->do("delete from $tablelist->{tablename} where oidindex = '$row->{oidindex}'");
 		print "deleting: $host $tablelist->{tablename} $row->{oidindex}\n" if ($verbose);
 	    }
 	}
+	print "  done with $tablelist->{tablename}\n" if ($verbose);
     } # table loop
 
     if (isbadhost($host)) {
@@ -176,6 +189,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	mailusers("$host responding again", "$host responding again",
 		  getoncallforhost($host));
     }
+    print "  done with $host\n" if ($verbose);
 } # host loop
 
 # disconnect
@@ -292,9 +306,9 @@ sub logerror {
     my $msg = (($err) ? "error" : "normal");
 		    
     my @people = getoncallforhost($host);
-    $msg = "$msg: $host\n";
-    $msg .= "$field = $result\n" if ($field || $result);
-    mailusers("SNMP: $msg: $host $field", $msg, @people);
+    $msg = "$msg: $host";
+    $msg .= " $field = $result" if ($field || $result);
+    mailusers("SNMP: $msg: $host $field", "$msg\n", @people);
 }
 
 sub mailusers {
