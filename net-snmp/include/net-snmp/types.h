@@ -38,6 +38,14 @@ typedef u_char  oid;
 #endif
 #endif
 
+#ifndef HAVE_SOCKLEN_T
+typedef u_int socklen_t;
+#endif
+
+#ifndef HAVE_IN_ADDR_T
+typedef u_int in_addr_t;
+#endif
+
 
     /*
      *  For the initial release, this will just refer to the
