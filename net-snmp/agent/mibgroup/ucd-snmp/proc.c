@@ -67,10 +67,6 @@
 #include "system.h"
 #include "kernel.h"
 
-#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
-#include "errormib.h"
-#endif
-
 static struct myproc *get_proc_instance (struct myproc *, oid);
 struct myproc *procwatch = NULL;
 static struct extensible fixproc;
