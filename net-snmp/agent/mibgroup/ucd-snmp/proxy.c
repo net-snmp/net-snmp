@@ -293,6 +293,7 @@ u_char *var_simple_proxy(struct variable *vp,
                     snmp_free_pdu(response);
 
                 DEBUGMSGTL(("proxy_var","--- exiting: %x\n", ret));
+                *write_method=proxy_set;
                 return ret;
             }
         }
@@ -301,3 +302,69 @@ u_char *var_simple_proxy(struct variable *vp,
     DEBUGMSGTL(("proxy_var","--- exiting: NULL\n"));
     return(NULL);
 }
+
+int
+proxy_set(int action, u_char *var_val, u_char var_val_type,
+          size_t var_val_len, u_char *statP, oid *name, size_t name_len) {
+    
+    struct snmp_pdu *pdu, *response;
+    struct simple_proxy *sp;
+    int status;
+
+    DEBUGMSGTL(("proxy_set","searching for ownership\n"));
+    for(sp = proxies; sp != NULL; sp = sp->next) {
+        if (sp->name_len <= name_len &&
+            snmp_oid_compare(sp->name, sp->name_len,
+                             name, sp->name_len) == 0) {
+            DEBUGMSGTL(("proxy_set","found it\n"));
+
+            /* translate oid to another base? */
+            if (sp->base_len > 0) {
+                if ((name_len - sp->name_len + sp->base_len) > MAX_OID_LEN) {
+                    /* too large */
+                    snmp_log(LOG_ERR, "proxy oid request length is too long\n");
+                    return SNMP_ERR_GENERR;
+                }
+                /* suffix appended? */
+                DEBUGMSGTL(("proxy_set","length=%d, base_len=%d, name_len=%d\n", name, sp->base_len, sp->name_len));
+                if (name_len > sp->name_len)
+                    memcpy(&(sp->base[sp->base_len]), &(name[sp->name_len]),
+                           sizeof(oid)*(name_len - sp->name_len));
+                name_len = name_len - sp->name_len + sp->base_len;
+                name = sp->base;
+            }
+            /* we're set to rock, but don't do it yet */
+            /* intentionally here rather than above to avoid oid
+               length problems during the COMMIT phase */
+            if (action != COMMIT)
+                return SNMP_ERR_NOERROR;
+            
+            /* create the request pdu */
+            DEBUGMSGTL(("proxy_set","performing set on: "));
+            DEBUGMSGOID(("proxy_set", name, name_len));
+            DEBUGMSG(("proxy_set","\n"));
+            pdu = snmp_pdu_create(SNMP_MSG_SET);
+            snmp_pdu_add_variable(pdu, name, name_len,
+                                  var_val_type, var_val, var_val_len);
+
+            /* send the set request */
+            DEBUGMSGTL(("proxy_set","sending pdu \n"));
+            status = snmp_synch_response(sp->sess, pdu, &response);
+            DEBUGMSGTL(("proxy_set", "set returned: %d\n", response->errstat));
+
+            /* copy the information out of it. */
+            if (status == STAT_SUCCESS && response) {
+                return response->errstat;
+            } else {
+                char *err;
+                snmp_error(sp->sess, NULL, NULL, &err);
+                DEBUGMSGTL(("proxy_set", "failed set request: %s\n",err));
+                free(err);
+                return SNMP_ERR_GENERR;
+            }
+        }
+    }
+    return SNMP_ERR_NOSUCHNAME;
+}
+ 
+        
