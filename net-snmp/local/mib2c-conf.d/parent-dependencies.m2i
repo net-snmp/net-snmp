@@ -13,11 +13,13 @@
  *
  * return 0 if the all the changes to the row are legal,
  *        an SNMP error code otherwise.
- * (set $@m2c_table_dependencies = 0 to prevent generation of this code)
+ *
+ * (see README-table-${table} if you don't have dependencies)
  */
 int
-${context}_check_dependencies( ${context}_reg *reg, ${context}_ctx *ctx,
-                            ${context}_ctx *undo_ctx )
+${context}_check_dependencies(netsnmp_mfd_registration *reg,
+                              ${context}_ctx *ctx,
+                              ${context}_ctx *undo_ctx )
 {
     netsnmp_assert(NULL != reg);
     netsnmp_assert(NULL != ctx);
