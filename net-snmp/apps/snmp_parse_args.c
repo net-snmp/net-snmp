@@ -102,8 +102,6 @@ snmp_parse_args_descriptions(outf)
           "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
-  fprintf(outf, "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
-  fprintf(outf, "  -W\t\tEnable detailed warnings of MIB symbol conflicts.\n");
 }
 
 int
