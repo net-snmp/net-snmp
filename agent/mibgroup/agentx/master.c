@@ -40,6 +40,8 @@ void
 real_init_master(void)
 {
     netsnmp_session sess, *session;
+    char *agentx_sockets;
+    char *cp1, *cp2;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
@@ -53,57 +55,78 @@ real_init_master(void)
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET))
-        sess.peername =
+        agentx_sockets =
             netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
     else
-        sess.peername = strdup(AGENTX_SOCKET);
+        agentx_sockets = strdup(AGENTX_SOCKET);
 
-    if (sess.peername[0] == '/') {
+    cp1 = agentx_sockets;
+    while (1) {
         /*
-         *  If this is a Unix pathname,
-         *  try and create the directory first.
+         *  If the AgentX socket string contains multiple descriptors,
+         *  then pick this apart and handle them one by one.
+         *
          */
-        if (mkdirhier(sess.peername, AGENT_DIRECTORY_MODE, 1)) {
-            snmp_log(LOG_ERR,
-                     "Failed to create the directory for the agentX socket: %s\n",
-                     sess.peername);
+        cp2 = strchr(cp1, ',');
+        if (cp2)
+            *cp2 = '\0';
+        sess.peername = strdup(cp1);
+        if (cp2)
+            cp1 = cp2+1;
+    
+        if (sess.peername[0] == '/') {
+            /*
+             *  If this is a Unix pathname,
+             *  try and create the directory first.
+             */
+            if (mkdirhier(sess.peername, AGENT_DIRECTORY_MODE, 1)) {
+                snmp_log(LOG_ERR,
+                         "Failed to create the directory for the agentX socket: %s\n",
+                         sess.peername);
+            }
         }
-    }
-
-    /*
-     *  Otherwise, let 'snmp_open' interpret the string.
-     */
-    sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
-    sess.remote_port = 0;
-    sess.callback = handle_master_agentx_packet;
-    session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
-                           agentx_realloc_build, agentx_check_packet);
-
-    if (session == NULL && sess.s_errno == EADDRINUSE) {
+    
         /*
-         * Could be a left-over socket (now deleted)
-         * Try again
+         *  Otherwise, let 'snmp_open' interpret the string.
          */
+        sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
+        sess.remote_port = 0;
+        sess.callback = handle_master_agentx_packet;
         session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
                                agentx_realloc_build, agentx_check_packet);
-    }
-
-    if (session == NULL) {
-        /*
-         * diagnose snmp_open errors with the input netsnmp_session pointer 
-         */
-        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-            snmp_sess_perror
-                ("Error: Couldn't open a master agentx socket to listen on",
-                 &sess);
-            exit(1);
-        } else {
-            netsnmp_sess_log_error(LOG_WARNING,
-                                   "Warning: Couldn't open a agentx master socket to listen on",
-                                   &sess);
+    
+        if (session == NULL && sess.s_errno == EADDRINUSE) {
+            /*
+             * Could be a left-over socket (now deleted)
+             * Try again
+             */
+            session = snmp_open_ex(&sess, NULL, agentx_parse, NULL, NULL,
+                                   agentx_realloc_build, agentx_check_packet);
         }
+    
+        if (session == NULL) {
+            /*
+             * diagnose snmp_open errors with the input netsnmp_session pointer 
+             */
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                snmp_sess_perror
+                    ("Error: Couldn't open a master agentx socket to listen on",
+                     &sess);
+                exit(1);
+            } else {
+                netsnmp_sess_log_error(LOG_WARNING,
+                                       "Warning: Couldn't open a agentx master socket to listen on",
+                                       &sess);
+            }
+        }
+        /*
+         * If we've processed the last (or only) socket, then we're done.
+         */
+        if (!cp2)
+            break;
     }
 
+    SNMP_FREE(agentx_sockets);
     DEBUGMSGTL(("agentx/master", "initializing...   DONE\n"));
 }
 
