@@ -4562,13 +4562,46 @@ snmp_get_token(FILE * fp, char *token, int maxtlen)
 }
 
 int
+add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
+{
+    FILE           *fp;
+    char            token[MAXTOKEN], token2[MAXTOKEN];
+
+    /*
+     * which module is this 
+     */
+    if ((fp = fopen(tmpstr, "r")) == NULL) {
+        snmp_log_perror(tmpstr);
+        return 1;
+    }
+    DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n",
+                tmpstr));
+    mibLine = 1;
+    File = tmpstr;
+    get_token(fp, token, MAXTOKEN);
+    /*
+     * simple test for this being a MIB 
+     */
+    if (get_token(fp, token2, MAXTOKEN) == DEFINITIONS) {
+        new_module(token, tmpstr);
+        if (ip)
+            fprintf(ip, "%s %s\n", token, d_name);
+        fclose(fp);
+        return 0;
+    } else {
+        fclose(fp);
+        return 1;
+    }
+}
+
+int
 add_mibdir(const char *dirname)
 {
-    FILE           *fp, *ip;
+    FILE           *ip;
     DIR            *dir, *dir2;
     const char     *oldFile = File;
     struct dirent  *file;
-    char            token[MAXTOKEN], token2[MAXTOKEN];
+    char            token[MAXTOKEN];
     char            tmpstr[300];
     int             count = 0;
 #if !(defined(WIN32) || defined(cygwin))
@@ -4634,28 +4667,8 @@ add_mibdir(const char *dirname)
                      */
                     closedir(dir2);
                 } else {
-                    /*
-                     * which module is this 
-                     */
-                    if ((fp = fopen(tmpstr, "r")) == NULL) {
-                        snmp_log_perror(tmpstr);
-                        continue;
-                    }
-                    DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n",
-                                tmpstr));
-                    mibLine = 1;
-                    File = tmpstr;
-                    get_token(fp, token, MAXTOKEN);
-                    /*
-                     * simple test for this being a MIB 
-                     */
-                    if (get_token(fp, token2, MAXTOKEN) == DEFINITIONS) {
-                        new_module(token, tmpstr);
+                    if ( add_mibfile( tmpstr, file->d_name, ip ))
                         count++;
-                        if (ip)
-                            fprintf(ip, "%s %s\n", token, file->d_name);
-                    }
-                    fclose(fp);
                 }
             }
         }

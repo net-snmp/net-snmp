@@ -212,6 +212,7 @@ SOFTWARE.
     int             unload_module(const char *name);
     void            unload_all_mibs(void);
     void            init_mib_internals(void);
+    int             add_mibfile(const char*, const char*, FILE *);
     int             add_mibdir(const char *);
     void            add_module_replacement(const char *, const char *,
                                            const char *, int);

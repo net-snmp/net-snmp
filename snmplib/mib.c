@@ -2540,6 +2540,18 @@ init_mib(void)
     }
     SNMP_FREE(env_var);
 
+    env_var = getenv("MIBFILES");
+    if (env_var != NULL) {
+        if (*env_var == '+')
+            entry = strtok(env_var+1, ENV_SEPARATOR);
+        else
+            entry = strtok(env_var, ENV_SEPARATOR);
+        while (entry) {
+            add_mibfile(entry, NULL, NULL);
+            entry = strtok(NULL, ENV_SEPARATOR);
+        }
+    }
+
     init_mib_internals();
 
     /*
