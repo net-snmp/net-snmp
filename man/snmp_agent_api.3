@@ -19,7 +19,7 @@ main () {
       ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
   }
 
-  init_agent();
+  init_agent("yourappname");
 
   /* initialize your mib code here */
   init_my_mib_code();
@@ -90,18 +90,10 @@ Logs error output from the SNMP agent to the standard error stream.
 .IP ds_set_boolean()
 Please see the default_store manual page for more information
 about this API.
-.IP subagent_pre_init()
-Initializes the AgentX subagent so that you will attach your process
-to the AgentX master agent.
-.IP "init_agent(int port, NULL, NULL)"
+.IP "init_agent(char *name)"
 Initializes the embedded agent.  This should be called before the
-init_snmp() call.
-.I port
-is the port you want to listen for SNMP requests on.
-.IP "subagent_pre_init()"
-Initialization needed for the AgentX subagent code.  Run this just
-before your mib initialization code if you want to be an agentX
-subagent.
+init_snmp() call.  name is used to dictate what .conf file to read
+when init_snmp() is called later
 .IP "init_snmp(char *name)"
 Initializes the SNMP library.  Note that one of the things this will
 do will be to read configuration files in an effort to configure your
@@ -112,6 +104,10 @@ string that you passed in.  It can be used to configure access
 control, for instance.   Please see the read_config(3),
 snmp_config(5), and snmpd.conf(5) manual pages for further details on
 this subject.
+.IP "init_master_agent(port, NULL, NULL)"
+Initializes the master agent and opens all its necessary ports.
+.I port
+is the port you want to listen for SNMP requests on.
 .IP "agent_check_and_process(int block)"
 This checks for packets arriving on the SNMP port and processes them
 if some are found.  If 
