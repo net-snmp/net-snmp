@@ -125,7 +125,6 @@ void
 parse_snmpNotifyFilterProfileTable(const char *token, char *line) {
   size_t tmpint;
   struct snmpNotifyFilterProfileTable_data *StorageTmp = SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-  struct variable_list *vars = NULL;
 
   DEBUGMSGTL(("snmpNotifyFilterProfileTable", "parsing config...  "));
 
@@ -339,7 +338,6 @@ write_snmpNotifyFilterProfileStorType(int      action,
 {
   static int tmpvar;
   struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -413,9 +411,8 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
   size_t newlen=name_len - (sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value;
-  static struct variable_list *vars, *vp;
+  struct variable_list *vars;
   struct header_complex_index *hciptr;
-  char who[MAX_OID_LEN], flagName[MAX_OID_LEN];
 
 
   StorageTmp =
@@ -567,7 +564,7 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
              /* Things are working well, so it's now safe to make the change
              permanently.  Make sure that anything done here can't fail! */
           if (StorageDel != NULL) {
-            StorageDel == 0;
+            StorageDel = NULL;
             /* XXX: free it, its dead */
           }
           if (StorageTmp && StorageTmp->snmpNotifyFilterProfileRowStatus == RS_CREATEANDGO) {
@@ -586,8 +583,6 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
 char *
 get_FilterName(char *targetName, size_t targetName_len,
                size_t *profileName_len) {
-    struct header_complex_index *hcp;
-    struct snmpNotifyFilterProfileTable_data *datap;
     struct variable_list *vars = NULL;
     struct snmpNotifyFilterProfileTable_data *data;
     

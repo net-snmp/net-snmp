@@ -44,9 +44,6 @@
 #include <netinet/in_systm.h>
 #endif
 #include <netinet/ip.h>
-#ifdef INET6
-#include <netinet/ip6.h>
-#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -366,7 +363,6 @@ long
 read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 {
    long ret_value = -1;
-   int i;
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_STATS };
    size_t len = sizeof( *tcpstat );

@@ -50,7 +50,6 @@
 #include "agentx/protocol.h"
 #include "agentx/client.h"
 
-static oid null_oid[] = {0, 0};
 extern struct timeval starttime;
 
 	/*

@@ -69,7 +69,6 @@ save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 {
     struct agent_set_info *ptr;
     struct timeval now;
-    struct snmp_pdu *pdu2;
     extern struct timeval starttime;
 
     ptr = (struct agent_set_info *)malloc(sizeof(struct agent_set_info));

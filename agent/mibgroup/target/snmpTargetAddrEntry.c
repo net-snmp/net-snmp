@@ -725,7 +725,7 @@ write_snmpTargetAddrTDomain(
    oid      *name,
    size_t   name_len)
 {
-  size_t                         bigsize=1000, objSize=128;
+  size_t                         objSize=128;
   int                            i;
   struct targetAddrTable_struct *temp_struct;
   static oid                    objid[MAX_OID_LEN];
@@ -787,7 +787,6 @@ write_snmpTargetAddrTAddress(
    oid      *name,
    size_t   name_len)
 {
-  size_t                         size=1500, bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -842,7 +841,6 @@ write_snmpTargetAddrTimeout(
   /* variables we may use later */
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -893,7 +891,6 @@ write_snmpTargetAddrRetryCount(
   /* variables we may use later */
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -943,7 +940,7 @@ write_snmpTargetAddrTagList(
 {
   /* variables we may use later */
   static unsigned char           string[1500];
-  size_t                         size=1500, bigsize=1000;
+  size_t                         size=1500;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -995,7 +992,7 @@ write_snmpTargetAddrParams(
    size_t   name_len)
 {
   static unsigned char           string[1500];
-  size_t                         size=1500, bigsize=1000;
+  size_t                         size=1500;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_OCTET_STR) {
@@ -1053,7 +1050,6 @@ write_snmpTargetAddrStorageType(
 {
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
@@ -1152,7 +1148,6 @@ write_snmpTargetAddrRowStatus(
   enum commit_action_enum        onCommitDo = NOTHING; 
   static long                    long_ret;
   size_t                         size;
-  size_t                         bigsize=1000;
   struct targetAddrTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {

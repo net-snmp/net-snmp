@@ -308,7 +308,6 @@ agentx_notify(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct variable_list *var;
     int got_sysuptime = 0;
-    struct timeval now;
     extern oid sysuptime_oid[], snmptrap_oid[];
     extern size_t sysuptime_oid_len, snmptrap_oid_len;
 
