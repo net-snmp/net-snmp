@@ -446,9 +446,8 @@ void devla_getstats(unsigned int regno, void *dummy) {
         if (lastat == NULL) {
                 lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
                 lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+               bzero(lastat->dinfo, sizeof(struct devinfo));
                 }
-
-        bzero(lastat->dinfo, sizeof(struct devinfo));
 
         if ((getdevs(lastat)) == -1) {
                 ERROR_MSG("can't do getdevs()\n");
