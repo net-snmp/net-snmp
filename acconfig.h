@@ -372,6 +372,7 @@
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_load_mib(x,y,z)
+#define config_parse_dot_conf(x,y,z)
   
 #include <mib_module_config.h>
 

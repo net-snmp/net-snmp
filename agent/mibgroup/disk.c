@@ -54,9 +54,6 @@
 #endif
 #include <sys/stat.h>
 #include <errno.h>
-#if HAVE_FSTAB_H
-#include <fstab.h>
-#endif
 #if HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
 #endif
@@ -90,10 +87,20 @@
 #if STDC_HEADERS
 #include <string.h>
 #endif
+#if HAVE_FSTAB_H
+#include <fstab.h>
+#endif
+#if HAVE_MNTENT_H
+#include <mntent.h>
+#endif
+#if HAVE_SYS_MNTTAB_H
+#include <sys/mnttab.h>
+#endif
 
 #include "mibincl.h"
 #include "disk.h"
 #include "util_funcs.h"
+#include "read_config.h"
 #if USING_ERRORMIB_MODULE
 #include "errormib.h"
 #else
@@ -102,6 +109,118 @@
 
 int numdisks;
 struct diskpart disks[MAXDISKS];
+
+void disk_free_config __P((void)) {
+  int i;
+  
+  numdisks = 0;
+  for(i=0;i<MAXDISKS;i++) {           /* init/erase disk db */
+    disks[i].device[0] = 0;
+    disks[i].path[0] = 0;
+    disks[i].minimumspace = -1;
+  }
+}
+
+void disk_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+#if HAVE_GETMNTENT
+#if HAVE_SYS_MNTTAB_H
+  struct mnttab mnttab;
+#else
+  struct mntent *mntent;
+#endif
+  FILE *mntfp;
+#else
+#if HAVE_FSTAB_H
+  struct fstab *fstab;
+  struct stat stat1, stat2;
+#endif
+#endif
+  char tmpbuf[1024];
+
+#if HAVE_FSTAB_H || HAVE_GETMNTENT
+  if (numdisks == MAXDISKS) {
+    config_perror("Too many disks specified.");
+    sprintf(tmpbuf,"\tignoring:  %s",cptr);
+    config_perror(tmpbuf);
+  }
+  else {
+    /* read disk path (eg, /1 or /usr) */
+    copy_word(cptr,disks[numdisks].path);
+    cptr = skip_not_white(cptr);
+    cptr = skip_white(cptr);
+    /* read optional minimum disk usage spec */
+    if (cptr != NULL) {
+      disks[numdisks].minimumspace = atoi(cptr);
+    }
+    else {
+      disks[numdisks].minimumspace = DEFDISKMINIMUMSPACE;
+    }
+    /* find the device associated with the directory */
+#if HAVE_GETMNTENT
+#if HAVE_SETMNTENT
+    mntfp = setmntent(ETC_MNTTAB, "r");
+    disks[numdisks].device[0] = 0;
+    while ((mntent = getmntent (mntfp)))
+      if (strcmp (disks[numdisks].path, mntent->mnt_dir) == 0) {
+        copy_word (mntent->mnt_fsname, disks[numdisks].device);
+        DEBUGP1("Disk:  %s\n",mntent->mnt_fsname);
+        break;
+      }
+#ifdef DODEBUG
+      else {
+        printf ("  %s != %s\n", disks[numdisks].path,
+                mntent->mnt_dir);
+      }
+#endif
+    endmntent(mntfp);
+    if (disks[numdisks].device[0] != 0) {
+      /* dummy clause for else below */
+      numdisks += 1;  /* but inc numdisks here after test */
+    }
+#else /* getmentent but not setmntent */
+    mntfp = fopen (ETC_MNTTAB, "r");
+    while ((i = getmntent (mntfp, &mnttab)) == 0)
+      if (strcmp (disks[numdisks].path, mnttab.mnt_mountp) == 0)
+        break;
+      else {
+#ifdef DODEBUG
+        printf ("  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp);
+#endif
+      }
+    fclose (mntfp);
+    if (i == 0) {
+      copy_word (mnttab.mnt_special, disks[numdisks].device);
+      numdisks += 1;
+    }
+#endif /* HAVE_SETMNTENT */
+#else
+#if HAVE_FSTAB_H
+    stat(disks[numdisks].path,&stat1);
+    setfsent();
+    if (fstab = getfsfile(disks[numdisks].path)) {
+      copy_word(fstab->fs_spec,disks[numdisks].device);
+      numdisks += 1;
+    }
+#endif
+#endif
+    else {
+      sprintf(tmpbuf, "Couldn't find device for disk %s",
+              disks[numdisks].path);
+      config_perror(tmpbuf);
+      disks[numdisks].minimumspace = -1;
+      disks[numdisks].path[0] = 0;
+    }
+#if HAVE_FSTAB_H
+    endfsent();
+#endif
+  }
+#else
+  config_perror("'disk' checks not supported on this architecture.");
+#endif
+}
 
 unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;

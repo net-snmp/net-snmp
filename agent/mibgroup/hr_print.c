@@ -128,7 +128,6 @@ var_hrprint(vp, name, length, exact, var_len, write_method)
     int     (**write_method)();
 {
     int  print_idx;
-    static char *string[100];
 
     print_idx = header_hrprint(vp, name, length, exact, var_len, write_method);
     if ( print_idx == MATCH_FAILED )

@@ -7,3 +7,4 @@ testconfig.c
 testconfig.h
 xxx.c
 xxx.h
+mib_module_dot_conf.h

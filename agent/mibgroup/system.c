@@ -16,6 +16,7 @@
 
 #include "system.h"
 #include "util_funcs.h"
+#include "read_config.h"
 #include "../../snmplib/system.h"
 
 
@@ -39,6 +40,39 @@ struct timeval starttime;
 int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+
+
+/* snmpd.conf config parsing */
+
+void system_parse_config_sysloc(word, cptr)
+  char *word;
+  char *cptr;
+{
+  char tmpbuf[1024];
+  
+  if (strlen(cptr) < 128) {
+    strcpy(sysLocation,cptr);
+    sysLocation[strlen(sysLocation)-1] = 0; /* chomp new line */
+  } else {
+    sprintf(tmpbuf, "syslocation token too long (must be < 128):\n\t%s", cptr);
+    config_perror(tmpbuf);
+  }
+}
+
+void system_parse_config_syscon(word, cptr)
+  char *word;
+  char *cptr;
+{
+  char tmpbuf[1024];
+
+  if (strlen(cptr) < 128) {
+    strcpy(sysContact,cptr);
+    sysContact[strlen(sysContact)-1] = 0;  /* chomp new line */
+  } else {
+    sprintf(tmpbuf, "syscontact token too long (must be < 128):\n\t%s", cptr);
+    config_perror(tmpbuf);
+  }
+}
 
 
 	/*********************

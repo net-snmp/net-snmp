@@ -14,11 +14,13 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <ctype.h>
 
 #include "mibincl.h"
 #include "pass.h"
 #include "extensible.h"
 #include "util_funcs.h"
+#include "read_config.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;
@@ -28,6 +30,58 @@ struct variable2 extensible_passthru_variables[] = {
   /* bogus entry.  Only some of it is actually used. */
   {MIBINDEX, INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
+
+void pass_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+  struct extensible **ppass = &passthrus;
+  char *tcptr;
+  
+  if (*cptr == '.') cptr++;
+  if (!isdigit(*cptr)) {
+    config_perror("second token is not a OID");
+    return;
+  }
+  numpassthrus++;
+  
+  while(*ppass != NULL)
+    ppass = &((*ppass)->next);
+  (*ppass) = (struct extensible *) malloc(sizeof(struct extensible));
+  (*ppass)->type = PASSTHRU;
+
+  (*ppass)->miblen = parse_miboid(cptr,(*ppass)->miboid);
+  while (isdigit(*cptr) || *cptr == '.') cptr++;
+  /* name */
+  cptr = skip_white(cptr);
+  if (cptr == NULL) {
+    config_perror("No command specified on pass line");
+    (*ppass)->command[0] = 0;
+  } else {
+    for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
+        tcptr++);
+    strncpy((*ppass)->command,cptr,tcptr-cptr);
+    (*ppass)->command[tcptr-cptr-1] = 0;
+  }
+  strcpy((*ppass)->name, (*ppass)->command);
+  (*ppass)->next = NULL;
+}
+
+void pass_free_config __P((void)) {
+  struct extensible *etmp, *etmp2;
+  
+  for (etmp = passthrus; etmp != NULL;) {
+    etmp2 = etmp;
+    etmp = etmp->next;
+    free(etmp2);
+  }
+  passthrus = NULL;
+  numpassthrus = 0;
+}
+
+
+
+  
 
 
 unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_method)

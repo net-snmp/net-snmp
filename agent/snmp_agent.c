@@ -27,6 +27,9 @@ SOFTWARE.
 #include <config.h>
 
 #include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -54,6 +57,8 @@ SOFTWARE.
 #include "mib.h"
 #include "mibgroup/snmp_mib.h"
 #include "snmpd.h"
+#include "mibgroup/util_funcs.h"
+#include "mibgroup/read_config.h"
 
 static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
 static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
@@ -1179,4 +1184,30 @@ setVariable(var_val, var_val_type, var_val_len, statP, statLen)
     }
 }
 
-
+void snmp_agent_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+  char tmpbuf[1024];
+  int i;
+    
+  i = atoi(cptr);
+  if (i > 0 && i <= NUM_COMMUNITIES) {
+    cptr = skip_not_white(cptr);
+    cptr = skip_white(cptr);
+    if (cptr != NULL) {
+      if (((int) strlen(cptr)) < COMMUNITY_MAX_LEN) {
+        copy_word(cptr,communities[i-1]);
+      } else {
+        sprintf(tmpbuf,"community name (#%d) \"%s\" too long", i, cptr);
+        config_perror(tmpbuf);
+      }
+    } else {
+      config_perror("no community name found");
+    }
+  } else {
+    sprintf(tmpbuf,"community number invalid:  %d, must be > 0 and < %d", i,
+            NUM_COMMUNITIES+1);
+    config_perror(tmpbuf);
+  }
+}

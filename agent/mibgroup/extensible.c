@@ -91,10 +91,12 @@
 #if STDC_HEADERS
 #include <string.h>
 #endif
+#include <ctype.h>
 
 #include "mibincl.h"
 #include "extensible.h"
 #include "util_funcs.h"
+#include "read_config.h"
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */
@@ -109,6 +111,89 @@ extern char sysName[];
 extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
+
+void extensible_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+
+  struct extensible **pptmp;
+  struct extensible **pprelocs = &relocs;
+  struct extensible **ppexten = &extens;
+  char *tcptr;
+  
+  if (*cptr == '.') cptr++;
+  if (isdigit(*cptr)) {
+    /* its a relocatable extensible mib */
+    while(*pprelocs != NULL)
+      pprelocs = &((*pprelocs)->next);
+    numrelocs++;
+    (*pprelocs) =
+      (struct extensible *) malloc(sizeof(struct extensible));
+    pptmp = pprelocs;
+    pprelocs = &((*pprelocs)->next);
+  } else {
+    /* it goes in with the general extensible table */
+    while(*ppexten != NULL)
+      ppexten = &((*ppexten)->next);
+    numextens++;
+    (*ppexten) =
+      (struct extensible *) malloc(sizeof(struct extensible));
+    pptmp = ppexten;
+    ppexten = &((*ppexten)->next);
+  }
+  /* the rest is pretty much handled the same */
+  if (!strncasecmp(word,"sh",2)) 
+    (*pptmp)->type = SHPROC;
+  else
+    (*pptmp)->type = EXECPROC;
+  if (isdigit(*cptr)) {
+    (*pptmp)->miblen = parse_miboid(cptr,(*pptmp)->miboid);
+    while (isdigit(*cptr) || *cptr == '.') cptr++;
+  }
+  else {
+    (*pptmp)->miboid[0] = -1;
+    (*pptmp)->miblen = 0;
+  }
+  /* name */
+  cptr = skip_white(cptr);
+  copy_word(cptr,(*pptmp)->name);
+  cptr = skip_not_white(cptr);
+  cptr = skip_white(cptr);
+  /* command */
+  if (cptr == NULL) {
+    config_perror("No command specified on line");
+    (*pptmp)->command[0] = 0;
+  } else {
+    for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
+        tcptr++);
+    strncpy((*pptmp)->command,cptr,tcptr-cptr);
+    (*pptmp)->command[tcptr-cptr-1] = 0;
+    (*pptmp)->next = NULL;
+  }
+}
+
+void extensible_free_config __P((void)) {
+  struct extensible *etmp, *etmp2;
+
+  for (etmp = extens; etmp != NULL;) {
+    etmp2 = etmp;
+    etmp = etmp->next;
+    free(etmp2);
+  }
+
+  for (etmp = relocs; etmp != NULL;) {
+    etmp2 = etmp;
+    etmp = etmp->next;
+    free(etmp2);
+  }
+
+  relocs = NULL;
+  extens = NULL;
+  numextens = 0;
+  numrelocs = 0;
+}
+
 
 struct extensible *get_exten_instance(exten,inst)
      int inst;

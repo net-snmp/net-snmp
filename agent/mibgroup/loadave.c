@@ -95,6 +95,7 @@
 #include "loadave.h"
 #include "util_funcs.h"
 #include "../kernel.h"
+#include "read_config.h"
 
 #define  KNLookup(nl_which, buf, s)   (klookup((int) loadave_nl[nl_which].n_value, buf, s))
 
@@ -119,6 +120,30 @@ void	init_loadave( )
 #endif
 }
 
+void loadave_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+  int i;
+  
+  for(i=0;i<=2;i++) {
+    if (cptr != NULL)
+      maxload[i] = atof(cptr);
+    else
+      maxload[i] = maxload[i-1];
+    cptr = skip_not_white(cptr);
+    cptr = skip_white(cptr);
+  }
+}
+
+void loadave_free_config __P((void)) {
+  int i;
+  
+  for (i=0; i<=2;i++)
+    maxload[i] = DEFMAXLOADAVE;
+}
+
+  
 unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */

@@ -7,6 +7,7 @@
 
 
 #include "host_res.h"
+#include "interfaces.h"
 #include "hr_network.h"
 
 
@@ -133,7 +134,6 @@ var_hrnet(vp, name, length, exact, var_len, write_method)
     int     (**write_method)();
 {
     int  net_idx;
-    static char *string[100];
 
     net_idx = header_hrnet(vp, name, length, exact, var_len, write_method);
     if ( net_idx == MATCH_FAILED )

@@ -1,7 +1,16 @@
 #include <config.h>
+
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#include <math.h>
+#include <ctype.h>
 
 #include "mibincl.h"
 #include "proc.h"
@@ -13,9 +22,61 @@
 #include "util_funcs.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
-struct myproc *procwatch;
+struct myproc *procwatch = NULL;
 static struct extensible fixproc;
 int numprocs=0;
+
+/* Define snmpd.conf reading routines first.  They get called
+   automatically by the invocation of a macro in the proc.h file. */
+
+void proc_free_config __P((void)) {
+  struct myproc *ptmp, *ptmp2;
+  
+  for (ptmp = procwatch; ptmp != NULL;) {
+    ptmp2 = ptmp;
+    ptmp = ptmp->next;
+    free(ptmp2);
+  }
+  procwatch = NULL;
+  numprocs = 0;
+}
+
+void proc_parse_config(word,cptr)
+  char *word;
+  char *cptr;
+{
+  /* skip past used ones */
+  struct myproc **procp = &procwatch;
+  while (*procp != NULL)
+    procp = &((*procp)->next);
+  
+  (*procp) = (struct myproc *) malloc(sizeof(struct myproc));
+  (*procp)->next = NULL;
+  numprocs++;
+  /* not blank and not a comment */
+  copy_word(cptr,(*procp)->name);
+  cptr = skip_not_white(cptr);
+  if ((cptr = skip_white(cptr))) 
+    {
+      (*procp)->max = atoi(cptr);
+      cptr = skip_not_white(cptr);
+      if ((cptr = skip_white(cptr)))
+        (*procp)->min = atoi(cptr);
+      else 
+        (*procp)->min = 0;
+    }
+  else
+    {
+      (*procp)->max = 0;
+      (*procp)->min = 0;
+    }
+#ifdef DODEBUG
+  fprintf (stderr,"Read:  %s (%d) (%d)\n",
+           (*procp)->name, (*procp)->max, (*procp)->min);
+#endif
+}
+
+/* The routine that handles everything */
 
 unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;

@@ -12,6 +12,11 @@ struct myproc *get_proc_instance __P((struct myproc*, int));
 int sh_count_procs __P((char *));
 int get_ps_output __P((struct extensible *));
 
+/* config file parsing routines */
+void proc_free_config __P((void));
+void proc_parse_config __P((char *, char *));
+config_parse_dot_conf("proc", proc_parse_config, proc_free_config);
+
 #include "mibdefs.h"
 
 #define PROCMIN 3
