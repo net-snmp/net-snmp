@@ -164,7 +164,7 @@ snmp_api.lo: keytools.h lcd_time.h ../m/generic.h mib.h mt_support.h parse.h
 snmp_api.lo: read_config.h ../s/generic.h ../s/linux.h snmp_alarm.h snmp_api.h
 snmp_api.lo: snmp_client.h snmp_debug.h snmp.h snmp_impl.h snmp_logging.h
 snmp_api.lo: snmp_parse_args.h snmp-tc.h snmpusm.h snmpv3.h ../s/sysv.h
-snmp_api.lo: system.h tools.h transform_oids.h 
+snmp_api.lo: system.h tools.h transform_oids.h snmp_transport.h
 snmp_auth.lo: asn1.h ../config.h md5.h ../m/generic.h mib.h scapi.h
 snmp_auth.lo: ../s/generic.h ../s/linux.h snmp_api.h snmp_debug.h snmp.h
 snmp_auth.lo: snmp_impl.h ../s/sysv.h system.h tools.h 
@@ -205,3 +205,27 @@ vacm.lo: asn1.h ../config.h default_store.h getopt.h ../m/generic.h
 vacm.lo: read_config.h ../s/generic.h ../s/linux.h snmp_api.h snmp_debug.h
 vacm.lo: snmp.h snmp-tc.h ../s/sysv.h 
 vacm.lo:  vacm.h
+snmp_transport.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmp_transport.lo: asn1.h snmp_api.h snmp_transport.h snmp_debug.h 
+snmp_transport.lo: snmp_logging.h
+snmp_transport.lo: snmpTCPDomain.h snmpUDPDomain.h snmpUnixDomain.h
+snmp_transport.lo: snmpIPXDomain.h snmpAAL5PVCDomain.h snmpCallbackDomain.h
+snmpUDPDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpUDPDomain.lo: asn1.h snmp.h vacm.h snmp_debug.h default_store.h
+snmpUDPDomain.lo: read_config.h snmp_transport.h snmpUDPDomain.h
+snmpTCPDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpTCPDomain.lo: asn1.h snmp_debug.h snmp_transport.h snmpUDPDomain.h
+snmpTCPDomain.lo: snmpTCPDomain.h
+snmpIPXDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpIPXDomain.lo: asn1.h snmp.h snmp_debug.h default_store.h
+snmpIPXDomain.lo: snmp_transport.h snmpIPXDomain.h
+snmpUnixDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpUnixDomain.lo: asn1.h snmp.h snmp_debug.h snmp_logging.h default_store.h
+snmpUnixDomain.lo: snmp_transport.h snmpUnixDomain.h
+snmpAAL5PVCDomain.lo: ../config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpAAL5PVCDomain.lo: asn1.h snmp.h snmp_debug.h default_store.h 
+snmpAAL5PVCDomain.lo: snmp_transport.h snmpAAL5PVCDomain.h
+snmpCallbackDomain.lo: ./config.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpCallbackDomain.lo: asn1.h snmp.h snmp_debug.h default_store.h snmp_impl.h
+snmpCallbackDomain.lo: snmp_api.h snmp_client.h tools.h snmp_transport.h
+snmpCallbackDomain.lo: snmpCallbackDomain.h
