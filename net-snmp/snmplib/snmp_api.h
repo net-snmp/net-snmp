@@ -81,7 +81,7 @@ struct snmp_pdu {
 
     /*  The actual transport domain.  This SHOULD NOT BE FREE()D.  */
 
-    oid	  *tDomain;
+    const oid *tDomain;
     size_t tDomainLen;
 
     struct variable_list *variables;
