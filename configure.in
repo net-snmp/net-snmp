@@ -1456,8 +1456,8 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_FUNCS(dlopen)
 
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
-AC_MSG_CHECKING(whether we need -ldevstat for diskio MIB)
 echo "$with_mib_modules" | grep "ucd-snmp/diskio" >/dev/null
+dnl whether we need -ldevstat for diskio MIB
 if test $? -eq 0 ; then
 	AC_CHECK_FUNC(getdevs, AC_DEFINE(HAVE_GETDEVS),
 		AC_CHECK_LIB(devstat, getdevs, AC_DEFINE(HAVE_GETDEVS)
