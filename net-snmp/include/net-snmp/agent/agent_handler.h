@@ -27,6 +27,7 @@ extern          "C" {
 #define HANDLER_CAN_GETANDGETNEXT     0x1       /* must be able to do both */
 #define HANDLER_CAN_SET               0x2
 #define HANDLER_CAN_GETBULK           0x4
+#define HANDLER_CAN_BABY_STEP         0x8
 
 #define HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)
 #define HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)
