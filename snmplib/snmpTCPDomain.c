@@ -36,7 +36,7 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 
 
-static oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
+oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
 static netsnmp_tdomain tcpDomain;
 
 
