@@ -226,6 +226,8 @@ init_master_agent(int dest_port,
         sprintf(buf,"%d,%s", dest_port, cptr);
     else if (cptr)
         sprintf(buf,"%s",cptr);
+    else if (dest_port)
+        sprintf(buf,"%d",dest_port);
     else
         sprintf(buf,"%d",SNMP_PORT);
 
