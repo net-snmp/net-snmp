@@ -26,6 +26,7 @@
 @        include generic-data-allocate.m2i@
 @    end@
 ########################################################################
+/**********************************************************************/
 /*
  * allocate resources for a ${table}_ctx
  */
@@ -73,65 +74,15 @@ ${table}_release_ctx(netsnmp_mfd_registration *reg, ${table}_ctx *ctx)
 
 ########################################################################
 ##
-int
-${table}_get_values(netsnmp_mfd_registration *mfdr,
-                    netsnmp_request_group *rg)
-{
-    ${table}_ctx * ctx;
-    netsnmp_request_group_item *rgi;
-    u_char * old_string;
-    void    (*dataFreeHook)(void *);
-
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    netsnmp_assert(rg && rg->existing_row);
-    
-    ctx = (${table}_ctx *)rg->existing_row;
-    rgi = rg->list;
-
-    while(rgi) {
-        /*
-         * save old pointer, so we can free it if replaced
-         */
-        old_string = rgi->ri->requestvb->val.string;
-        dataFreeHook = rgi->ri->requestvb->dataFreeHook;
-        if(NULL == rgi->ri->requestvb->val.string) { /* xxx-rks: move this up to mfd helper? */
-            rgi->ri->requestvb->val.string = rgi->ri->requestvb->buf;
-            rgi->ri->requestvb->val_len = sizeof(rgi->ri->requestvb->buf);
-        }
-
-        /*
-         * get column data
-         */
-        ${table}_get_column(ctx, rgi->ri->requestvb,
-                            rgi->tri->colnum);
-
-        /*
-         * if the buffer wasn't used previously for the old data,
-         * and the get routine replaced the pointer, we need to free
-         * the previous pointer.
-         */
-        if((old_string != rgi->ri->requestvb->buf) &&
-           (rgi->ri->requestvb->val.string != old_string)) {
-            if(dataFreeHook)
-                (*dataFreeHook)(old_string);
-            else
-                free(old_string);
-        }
-
-        /*
-         * next, please.
-         */
-        rgi = rgi->next;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-
+/***********************************************************************
+ *
+ * GET processing
+ *
+ ***********************************************************************/
 /*
  * Retrieve the value for a particular column
  */
-int
+NETSNMP_STATIC_INLINE int
 ${context}_get_column( ${context}_ctx *ctx,
                        netsnmp_variable_list *var, int column )
 {
@@ -188,6 +139,193 @@ ${context}_get_column( ${context}_ctx *ctx,
     return rc;
 }
 
+########################################################################
+##
+int
+${table}_get_values(netsnmp_mfd_registration *mfdr,
+                    netsnmp_request_info *requests,
+                    ${table}_ctx * ctx)
+{
+    netsnmp_table_request_info * tri;
+    u_char * old_string;
+    void    (*dataFreeHook)(void *);
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(ctx);
+    
+    for(;requests; requests = requests->next) {
+        /*
+         * save old pointer, so we can free it if replaced
+         */
+        old_string = requests->requestvb->val.string;
+        dataFreeHook = requests->requestvb->dataFreeHook;
+        if(NULL == requests->requestvb->val.string) { /* xxx-rks: move this up to mfd helper? */
+            requests->requestvb->val.string = requests->requestvb->buf;
+            requests->requestvb->val_len = sizeof(requests->requestvb->buf);
+        }
+
+        /*
+         * get column data
+         */
+        tri = netsnmp_extract_table_info(requests);
+        if(NULL == tri)
+            continue;
+        
+        ${table}_get_column(ctx, requests->requestvb, tri->colnum);
+
+        /*
+         * if the buffer wasn't used previously for the old data (i.e. it
+         * was allcoated memory)  and the get routine replaced the pointer,
+         * we need to free the previous pointer.
+         */
+        if((old_string != requests->requestvb->buf) &&
+           (requests->requestvb->val.string != old_string)) {
+            if(dataFreeHook)
+                (*dataFreeHook)(old_string);
+            else
+                free(old_string);
+        }
+    } /* for results */
+
+    return SNMP_ERR_NOERROR;
+}
+
+########################################################################
+##
+/***********************************************************************
+ *
+ * SET processing
+ *
+ ***********************************************************************/
+@if $m2c_table_writable == 0@
+/*
+ * NOT APPLICABLE (per MIB or user setting)
+ */
+@else@
+/*
+ * Check the syntax for a particular column
+ */
+NETSNMP_STATIC_INLINE int
+${context}_check_column( ${context}_ctx *ctx,
+                         netsnmp_variable_list *var, int column )
+{
+    int rc = SNMPERR_SUCCESS;
+    
+    DEBUGMSGT(("${name}:trace",">%s %d\n",__FUNCTION__, column));
+
+    switch(column) {
+@   foreach $node index@
+@      include m2c_setup_node.m2i@
+@      if $node.accessible == 1@
+
+    /* (INDEX) $node.syntax = $node.perltype = $node.type */
+    case COLUMN_$node.uc:
+    rc = netsnmp_check_vb_type_and_size(var, $node.type,
+                                        sizeof(ctx->tbl_idx.$node));
+        break;
+
+@      end@ ## accessible
+@   end@ ## index
+@   foreach $node nonindex@
+@      include m2c_setup_node.m2i@
+@      if $node.accessible == 0@
+@          break@
+@      end@
+
+        /* $node.syntax = $node.perltype = $node.type */
+    case COLUMN_$node.uc:
+    rc = netsnmp_check_vb_type( var, $node.type );
+    if(SNMPERR_SUCCESS == rc) {
+@      if $m2c_test == 1@
+@       eval $m2c_temp = "(netsnmp_varref)&var->val.string"@
+@       if $m2c_node_needlength == 1@
+@          eval $m2c_temp = "$m2c_temp, (netsnmp_ref_size_t*)&var->val_len"@
+@       end@
+@      else@
+@       if $m2c_node_needlength == 1@
+@          eval $m2c_temp = "($m2c_decl **)&var->val.string, &var->val_len"@
+@       else@
+@          eval $m2c_temp = "($m2c_decl *)var->val.string"@
+@       end@
+@      end@ # test
+@      if $node.enums == 1@
+
+    /* check that the value is one of defined enums */
+@         if ("$node.perltype" ne "INTEGER") || ("$node.perltype" eq "BITS")@
+@            die@
+@         end@
+@         if $node.syntax ne $node.perltype@
+@            eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@
+@         else@
+@            eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
+@         end@
+    if( 0
+@         foreach $e $v enum@
+@            include m2c_setup_enum.m2i@
+ || ( *var->val.integer == $m2c_ename )
+@         end@ # for each
+        ) {
+        rc = ${node}_check_value(ctx, $m2c_temp );
+        }
+    else
+        rc = SNMP_ERR_BADVALUE;
+@      elsif $node.ranges == 1@
+    /* check that the value is in the defined range(s) */
+        rc = ${node}_check_value(ctx, $m2c_temp );
+@      else@
+        rc = ${node}_check_value(ctx, $m2c_temp );
+@      end@
+    }
+        break;
+@   end@ # for each nonindex
+
+        default: /** We shouldn't get here */
+            rc = SNMP_ERR_GENERR;
+ snmp_log(LOG_ERR, "unknown column in %s\n", __FUNCTION__);
+    }
+
+    return rc;
+}
+
+int
+${context}_check_objects(netsnmp_mfd_registration *mfdr,
+                        netsnmp_request_info *requests,
+                        ${table}_ctx * ctx)
+{
+    netsnmp_table_request_info * tri;
+    int                          rc;
+
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+    netsnmp_assert(ctx);
+    
+    for(;requests; requests = requests->next) {
+
+        /*
+         * get column number from table request info, and check that column
+         */
+        tri = netsnmp_extract_table_info(requests);
+        if(NULL == tri)
+            continue;
+
+        rc = ${table}_check_column(ctx, requests->requestvb, tri->colnum);
+        if(rc) {
+            netsnmp_request_set_error(requests, rc);
+            break;
+        }
+
+    } /* for results */
+
+    return rc;
+}
+
+@end@ # writable
+/***********************************************************************
+ *
+ * DATA ACCESS
+ *
+ ***********************************************************************/
 @    include mfd-access-${m2c_table_access}-interface.m2i@
 @end@ # foreach table
 ##
