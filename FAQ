@@ -1172,6 +1172,12 @@ How do I install the Perl SNMP module?
 	make test
 	make install  (probably as root)
 
+  Note that with the 5.0 release line, there are additional SNMP-related
+  perl modules that should probably be installed as well.  These can also
+  be found under the 'perl' subdirectory.  At the very least, install the
+  'default_store' module.
+    This is not necessary with the 4.2.x releases.
+
 
 
 But compiling this fails! Why?
