@@ -143,7 +143,8 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
         ret->myvoid = (void *) cache;
 
-        if((cache->flags & NETSNMP_CACHE_PRELOAD) && ! cache->valid) {
+        if((NULL != cache) &&
+           (cache->flags & NETSNMP_CACHE_PRELOAD) && ! cache->valid) {
             /*
              * load cache, ignore rc (failed load doesn't affect registration)
              */
