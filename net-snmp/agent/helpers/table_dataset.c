@@ -583,6 +583,18 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             break;
 
         case MODE_SET_RESERVE2:
+            /*
+             * If the agent receives a SET request for an object in a non-existant
+             *  row, then the RESERVE1 pass will create the row automatically.
+             *
+             * But if that particular object is not writable, then the row 'data'
+             *  won't exist at that point, so the the check for the 'writable' flag
+             *  will be skipped. So we need to check for this possibility again here.
+             */
+            if (data && data->writable == 0) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_NOTWRITABLE);
+            }
             if (datatable->rowstatus_column == table_info->colnum) {
                 switch (*(request->requestvb->val.integer)) {
                 case RS_ACTIVE:
