@@ -178,7 +178,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		checkrowforerrors($tablelist->{'tablename'}, $host, $id);
 	    $dbh->do("delete from $tablelist->{tablename} where ( host = '$host'  and oidindex = '$id')");
 	    $res = $dbh->do("select * from $tablelist->{'tablename'} where ( host = '$host' and oidindex = '$id')");
-	    print STDERR "  result: $res/$\n" if ($verbose);
+	    print STDERR "  result: $res\n" if ($verbose);
 	    if ($res ne "0E0") {
 		$cmd = "update $tablelist->{'tablename'} set ";
 		foreach $h (keys(%vals)) {
