@@ -293,7 +293,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     else {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
-    if (buf_len != properlength) {
+    if ((int)buf_len != properlength) {
         QUITFUN(rval, sc_generate_keyed_hash_quit);
     }
     if ((int)*maclen > buf_len)
