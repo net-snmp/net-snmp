@@ -933,10 +933,11 @@ usm_generate_out_msg (
 
 		/* XXX  Hardwired to seek into a 1DES private key!
 		 */
-		if ( usm_set_salt(	salt,		&salt_length,
+		if ( !thePrivKey ||
+		     ( usm_set_salt(    salt,	   &salt_length,
 					thePrivKey+8,	thePrivKeyLength-8,
                         		&ptr[privParamsOffset])
-						== -1 )
+						== -1 ) )
 		{
 			DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
 			usm_free_usmStateReference (secStateRef);
