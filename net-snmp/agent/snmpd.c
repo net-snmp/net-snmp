@@ -786,17 +786,52 @@ main(int argc, char *argv[])
      */
 #if HAVE_FORK
     if (!dont_fork) {
+        /*
+         * Fork to return control to the invoking process and to
+         * guarantee that we aren't a process group leader.
+         */
         if (fork() != 0) {
-            /* parent */
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
+            /* Parent. */
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
                 exit(0);
             }
-#ifdef HAVE_SETSID
         } else {
-            /* child */
+            /* Child. */
+#ifdef HAVE_SETSID
+            /* Become a process/session group leader. */
             setsid();
 #endif
+            /*
+             * Fork to let the process/session group leader exit.
+             */
+            if (fork() != 0) {
+                /* Parent. */
+                exit(0);
+            } else {
+                /* Child. */
+
+                /* Avoid keeping any directory in use. */
+                chdir("/");
+
+                if (!stderr_log) {
+                    /*
+                     * Close inherited file descriptors to avoid
+                     * keeping unnecessary references.
+                     */
+                    close(0);
+                    close(1);
+                    close(2);
+
+                    /*
+                     * Redirect std{in,out,err} to /dev/null, just in
+                     * case.
+                     */
+                    open("/dev/null", O_RDWR);
+                    dup(0);
+                    dup(0);
+                }
+            }
         }
     }
 #endif
