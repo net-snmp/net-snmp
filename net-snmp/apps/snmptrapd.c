@@ -114,7 +114,6 @@ SOFTWARE.
 #include "snmpv3.h"
 #include "default_store.h"
 #include "snmp_transport.h"
-#include "snmpUDPDomain.h"
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 #include "snmpTCPDomain.h"
 #endif
@@ -147,7 +146,7 @@ int dropauth = 0;
 int running = 1;
 int reconfig = 0;
 u_long num_received = 0;
-static const char *default_port = "udp:162";
+static char *default_port = "udp:162";
 
 const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n",
 	   *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
@@ -719,9 +718,43 @@ RETSIGTYPE hup_handler(int sig)
 }
 #endif
 
+static struct snmp_session *
+snmptrapd_add_session(snmp_transport *t)
+{
+  struct snmp_session sess, *session = &sess, *rc = NULL;
+
+  snmp_sess_init(session);
+  session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
+  session->version = SNMP_DEFAULT_VERSION;
+  session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
+  session->retries = SNMP_DEFAULT_RETRIES;
+  session->timeout = SNMP_DEFAULT_TIMEOUT;
+  session->callback = snmp_input;
+  session->callback_magic = (void *)t;
+  session->authenticator = NULL;
+  sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
+  
+  rc = snmp_add(session, t, NULL, NULL);
+  if (rc == NULL) {
+    snmp_sess_perror("snmptrapd", session);
+  }
+  return rc;
+}
+
+static void
+snmptrapd_close_sessions(struct snmp_session *sess_list)
+{
+  struct snmp_session *s = NULL, *next = NULL;
+  
+  for (s = sess_list; s != NULL; s = next) {
+    next = s->next;
+    snmp_close(s);
+  }
+}
+
 int main(int argc, char *argv[])
 {
-    struct snmp_session sess, *session = &sess, *ss;
+    struct snmp_session *sess_list = NULL, *ss = NULL;
     snmp_transport *transport = NULL;
     int	arg;
     int count, numfds, block;
@@ -729,7 +762,6 @@ int main(int argc, char *argv[])
     struct timeval timeout, *tvp;
     int dofork=1;
     char *cp, *listen_ports = default_port;
-    int tcp=0;
     char *trap1_fmt_str_remember = NULL;
     int agentx_subagent = 1;
 #if HAVE_GETPID
@@ -985,34 +1017,47 @@ int main(int argc, char *argv[])
 
     SOCK_STARTUP;
 
-    transport = snmp_tdomain_transport(listen_ports, 1, "udp");
+    cp = listen_ports;
 
-    if (transport == NULL) {
-      snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
-	       listen_ports, errno, strerror(errno));
-      SOCK_CLEANUP;
-      exit(1);
-    }
+    while (cp != NULL) {
+      char *sep = strchr(cp, ',');
+      if (sep != NULL) {
+	*sep = 0;
+      } 
 
-    snmp_sess_init(session);
-    session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
-    session->version = SNMP_DEFAULT_VERSION;
-    session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
-    session->retries = SNMP_DEFAULT_RETRIES;
-    session->timeout = SNMP_DEFAULT_TIMEOUT;
-    session->callback = snmp_input;
-    session->callback_magic = (void *)transport;
-    session->authenticator = NULL;
-    sess.isAuthoritative = SNMP_SESS_UNKNOWNAUTH;
-
-    ss = snmp_add(session, transport, NULL, NULL);
-    if (ss == NULL) {
-        snmp_sess_perror("snmptrapd", session);
-        if (Syslog) {
-	    snmp_log(LOG_ERR,"couldn't open snmp - %m");
-	}
+      transport = snmp_tdomain_transport(cp, 1, "udp");
+      if (transport == NULL) {
+	snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
+		 cp, errno, strerror(errno));
+	snmptrapd_close_sessions(sess_list);
 	SOCK_CLEANUP;
 	exit(1);
+      } else {
+	ss = snmptrapd_add_session(transport);
+	if (ss == NULL) {
+	  /*  Shouldn't happen?  We have already opened the transport
+	      successfully so what could have gone wrong?  */
+	  snmptrapd_close_sessions(sess_list);
+	  snmp_transport_free(transport);
+	  if (Syslog) {
+	    snmp_log(LOG_ERR,"couldn't open snmp - %m");
+	  }
+	  SOCK_CLEANUP;
+	  exit(1);
+	} else {
+	  ss->next = sess_list;
+	  sess_list = ss;
+	}
+      }
+
+      /*  Process next listen address, if there is one.  */
+      
+      if (sep != NULL) {
+	*sep = ',';
+	cp = sep + 1;
+      } else {
+	cp = NULL;
+      }
     }
 
     signal(SIGTERM, term_handler);
@@ -1081,10 +1126,11 @@ int main(int argc, char *argv[])
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
 	       VersionInfo);
     }
-    if (Syslog)
+    if (Syslog) {
 	snmp_log(LOG_INFO, "Stopping snmptrapd");
+    }
 
-    snmp_close(ss);
+    snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
     snmp_disable_log();
     SOCK_CLEANUP;
