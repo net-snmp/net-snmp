@@ -101,6 +101,7 @@ main.o: ./../../snmplib/view.h ./../../snmplib/acl.h ../../version.h
 main.o: netstat.h
 route.o: ../../config.h ../../mib_module_config.h
 route.o: ../../agent/mibgroup/struct.h 
-route.o: main.h ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+route.o:   main.h
+route.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_api.h
 route.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h netstat.h
