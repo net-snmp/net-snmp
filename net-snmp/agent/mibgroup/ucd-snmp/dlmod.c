@@ -147,7 +147,7 @@ dlmod_load_module(struct dlmod *dlm)
     char *p, tmp_path[255];
     int (*dl_init)(void);
     
-    DEBUGMSGTL(("dlmod", "dlmod_load_module\n"));
+    DEBUGMSGTL(("dlmod", "dlmod_load_module %s: %s\n", dlm->name, dlm->path));
   
     if (!dlm || !dlm->path || !dlm->name ||
 	(dlm->status != DLMOD_UNLOADED && dlm->status != DLMOD_ERROR))
