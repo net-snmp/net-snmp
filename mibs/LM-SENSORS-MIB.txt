@@ -53,7 +53,7 @@ lmTempSensorsEntry OBJECT-TYPE
 LMTempSensorsEntry ::= SEQUENCE {
     lmTempSensorsIndex    Integer32,
     lmTempSensorsDevice   DisplayString,
-    lmTempSensorsValue    Integer32
+    lmTempSensorsValue    Gauge32
 }
 
 lmTempSensorsIndex OBJECT-TYPE
@@ -73,7 +73,7 @@ lmTempSensorsDevice OBJECT-TYPE
     ::= { lmTempSensorsEntry 2 }
 
 lmTempSensorsValue OBJECT-TYPE
-    SYNTAX      Integer32 (-2147483648..2147483647)
+    SYNTAX      Gauge32
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -150,7 +150,7 @@ lmVoltSensorsEntry OBJECT-TYPE
 LMVoltSensorsEntry ::= SEQUENCE {
     lmVoltSensorsIndex    Integer32,
     lmVoltSensorsDevice   DisplayString,
-    lmVoltSensorsValue    Integer32
+    lmVoltSensorsValue    Gauge32
 }
 
 lmVoltSensorsIndex OBJECT-TYPE
@@ -170,7 +170,7 @@ lmVoltSensorsDevice OBJECT-TYPE
     ::= { lmVoltSensorsEntry 2 }
 
 lmVoltSensorsValue OBJECT-TYPE
-    SYNTAX      Integer32 (-2147483648..2147483647)
+    SYNTAX      Gauge32
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -199,7 +199,7 @@ lmMiscSensorsEntry OBJECT-TYPE
 LMMiscSensorsEntry ::= SEQUENCE {
     lmMiscSensorsIndex    Integer32,
     lmMiscSensorsDevice   DisplayString,
-    lmMiscSensorsValue    Integer32
+    lmMiscSensorsValue    Gauge32
 }
 
 lmMiscSensorsIndex OBJECT-TYPE
@@ -219,7 +219,7 @@ lmMiscSensorsDevice OBJECT-TYPE
     ::= { lmMiscSensorsEntry 2 }
 
 lmMiscSensorsValue OBJECT-TYPE
-    SYNTAX      Integer32 (-2147483648..2147483647)
+    SYNTAX      Gauge32
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
