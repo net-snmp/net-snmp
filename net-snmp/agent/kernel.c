@@ -105,6 +105,7 @@ klookup(off, target, siz)
   long retsiz;
 
   if ((retsiz = klseek((off_t) off)) != off) {
+    fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
     perror("klseek");
 #ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
@@ -112,6 +113,7 @@ klookup(off, target, siz)
     return (0);
   }
   if ((retsiz = klread(target, siz)) != siz ) { 
+    fprintf (stderr, "klookup(%lx, %p, %d): ", off, target, siz);
     perror("klread");
     ERROR("klread");
 #ifdef EXIT_ON_BAD_KLREAD

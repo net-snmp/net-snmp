@@ -468,7 +468,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	      && (pi->pdutype != SET_REQ_MSG || !write_method)){
             print_mib_oid(var_name,var_name_len);
             printf(" -- ");
-	    printf("Mib Doesn't exist");
+	    printf("OID Doesn't exist");
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
