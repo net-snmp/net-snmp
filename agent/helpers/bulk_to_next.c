@@ -26,15 +26,15 @@
 /** returns a bulk_to_next handler that can be injected into a given
  *  handler chain.
  */
-mib_handler *
+netsnmp_mib_handler *
 get_bulk_to_next_handler(void) {
-    return create_handler("bulk_to_next", bulk_to_next_helper);
+    return netsnmp_create_handler("bulk_to_next", bulk_to_next_helper);
 }
 
 void
-bulk_to_next_fix_requests(request_info              *requests) 
+bulk_to_next_fix_requests(netsnmp_request_info              *requests) 
 {
-    request_info              *request;
+    netsnmp_request_info              *request;
     /* update the varbinds for the next request series */
     for(request = requests; request; request = request->next) {
         if (request->repeat > 0 && 
@@ -54,19 +54,19 @@ bulk_to_next_fix_requests(request_info              *requests)
 /** @internal Implements the bulk_to_next handler */
 int
 bulk_to_next_helper(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     int ret;
-    request_info              *request;
+    netsnmp_request_info              *request;
 
     switch(reqinfo->mode) {
         
         case MODE_GETBULK:
             reqinfo->mode = MODE_GETNEXT;
-            ret = call_next_handler(handler, reginfo, reqinfo, requests);
+            ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
             reqinfo->mode = MODE_GETBULK;
 
             /* update the varbinds for the next request series */
@@ -74,7 +74,7 @@ bulk_to_next_helper(
             return ret;
             
         default:
-            return call_next_handler(handler, reginfo, reqinfo, requests);
+            return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     }
     return SNMP_ERR_GENERR; /* should never get here */
 }
@@ -86,5 +86,5 @@ bulk_to_next_helper(
 void
 init_bulk_to_next_helper(void) 
 {
-    register_handler_by_name("bulk_to_next", get_bulk_to_next_handler());
+    netsnmp_register_handler_by_name("bulk_to_next", get_bulk_to_next_handler());
 }

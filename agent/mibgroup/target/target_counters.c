@@ -24,7 +24,7 @@ init_target_counters(void) {
      */
 
     register_read_only_instance(
-        create_handler_registration("myInstance",
+        netsnmp_create_handler_registration("myInstance",
                                     get_unknown_context_count,
                                     unknown_context_oid,
                                     sizeof(unknown_context_oid)/sizeof(oid),
@@ -35,7 +35,7 @@ init_target_counters(void) {
      */
 
     register_read_only_instance(
-        create_handler_registration("myInstance",
+        netsnmp_create_handler_registration("myInstance",
                                     get_unavailable_context_count,
                                     unavailable_context_oid,
                                     sizeof(unavailable_context_oid) /
@@ -46,10 +46,10 @@ init_target_counters(void) {
 
 int
 get_unknown_context_count(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
     /* we're only called for GETs of the right node, so this is easy: */
 
     u_long long_ret = snmp_get_statistic(STAT_SNMPUNKNOWNCONTEXTS);
@@ -62,10 +62,10 @@ get_unknown_context_count(
 
 int
 get_unavailable_context_count(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
     /* we're only called for GETs of the right node, so this is easy: */
 
     u_long long_ret = snmp_get_statistic(STAT_SNMPUNAVAILABLECONTEXTS);

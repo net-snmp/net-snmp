@@ -564,7 +564,7 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	    ask the transport abstraction layer to map its source address and
 	    community string to a security name for us.  */
 	
-	if (pdu->tDomain == snmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
+	if (pdu->tDomain == netsnmpUDPDomain || pdu->tDomain == snmpTCPDomain) {
 	  if (!snmp_udp_getSecName(pdu->transport_data,
 				   pdu->transport_data_length,
 				   (char *)pdu->community, pdu->community_len, &sn) &&

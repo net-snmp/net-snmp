@@ -10,33 +10,33 @@
  * have to check the oid at all.  Just answer.
  */
 
-int register_instance(handler_registration *reginfo);
-int register_read_only_instance(handler_registration *reginfo);
+int register_instance(netsnmp_handler_registration *reginfo);
+int register_read_only_instance(netsnmp_handler_registration *reginfo);
 
 #define INSTANCE_HANDLER_NAME "instance"
 
-mib_handler *get_instance_handler(void);
+netsnmp_mib_handler *get_instance_handler(void);
    
 int register_read_only_ulong_instance(const char *name,
                                       oid *reg_oid, size_t reg_oid_len,
-                                      u_long *it, NodeHandler *subhandler);
+                                      u_long *it, Netsnmp_Node_Handler *subhandler);
 int register_ulong_instance(const char *name, oid *reg_oid, size_t reg_oid_len,
-                            u_long *it, NodeHandler *subhandler);
+                            u_long *it, Netsnmp_Node_Handler *subhandler);
 int register_read_only_counter32_instance(const char *name,
                                           oid *reg_oid, size_t reg_oid_len,
-                                          u_long *it, NodeHandler *subhandler);
+                                          u_long *it, Netsnmp_Node_Handler *subhandler);
 int register_read_only_long_instance(const char *name,
                                      oid *reg_oid, size_t reg_oid_len,
-                                     long *it, NodeHandler *subhandler);
+                                     long *it, Netsnmp_Node_Handler *subhandler);
 int register_long_instance(const char *name, oid *reg_oid, size_t reg_oid_len,
-                           long *it, NodeHandler *subhandler);
+                           long *it, Netsnmp_Node_Handler *subhandler);
 
 int register_int_instance(const char *name, oid *reg_oid, size_t reg_oid_len,
-                          int *it, NodeHandler *subhandler);
+                          int *it, Netsnmp_Node_Handler *subhandler);
 
 
-NodeHandler instance_helper_handler;
-NodeHandler instance_ulong_handler;
-NodeHandler instance_long_handler;
-NodeHandler instance_int_handler;
-NodeHandler instance_counter32_handler;
+Netsnmp_Node_Handler instance_helper_handler;
+Netsnmp_Node_Handler instance_ulong_handler;
+Netsnmp_Node_Handler instance_long_handler;
+Netsnmp_Node_Handler instance_int_handler;
+Netsnmp_Node_Handler instance_counter32_handler;

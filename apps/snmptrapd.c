@@ -91,10 +91,9 @@ SOFTWARE.
 #include <errno.h>
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
-#include <net-snmp/agent/ds_agent.h>
-#include <net-snmp/agent/snmp_vars.h>
 #include "notification_log.h"
 
 #if USE_LIBWRAP
@@ -270,7 +269,7 @@ event_input(struct variable_list *vp)
 }
 
 void send_handler_data(FILE *file, struct hostent *host,
-		       struct snmp_pdu *pdu, snmp_transport *transport)
+		       struct snmp_pdu *pdu, netsnmp_transport *transport)
 {
   struct variable_list tmpvar, *vars;
   static oid trapoids[] = {1,3,6,1,6,3,1,1,5,0};
@@ -343,7 +342,7 @@ void send_handler_data(FILE *file, struct hostent *host,
 void do_external(char *cmd,
 		 struct hostent *host,
 		 struct snmp_pdu *pdu,
-		 snmp_transport *transport)
+		 netsnmp_transport *transport)
 {
   FILE *file;
   int oldquick, result;
@@ -413,7 +412,7 @@ int snmp_input(int op,
 	       void *magic)
 {
     struct variable_list *vars = NULL;
-    snmp_transport *transport = (snmp_transport *)magic;
+    netsnmp_transport *transport = (netsnmp_transport *)magic;
     char buf[64], *cp;
     struct snmp_pdu *reply;
     struct hostent *host = NULL;
@@ -541,10 +540,10 @@ int snmp_input(int op,
 	      reasonable for the UDP and TCP transport domains (we
 	      don't want to try to be too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-	  if (transport != NULL && (transport->domain == snmpUDPDomain ||
+	  if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
 				    transport->domain == snmpTCPDomain)) {
 #else
-	  if (transport != NULL && transport->domain == snmpUDPDomain) {
+	  if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif
 	    /*  This is kind of bletcherous -- it breaks the opacity of
 		transport_data but never mind -- the alternative is a lot of 
@@ -594,10 +593,10 @@ int snmp_input(int op,
 		reasonable for the UDP and TCP transport domains (we
 		don't want to try to be too clever here).  */
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
-	    if (transport != NULL && (transport->domain == snmpUDPDomain ||
+	    if (transport != NULL && (transport->domain == netsnmpUDPDomain ||
 				      transport->domain == snmpTCPDomain)) {
 #else
-	    if (transport != NULL && transport->domain == snmpUDPDomain) {
+	    if (transport != NULL && transport->domain == netsnmpUDPDomain) {
 #endif	
 	      /*  This is kind of bletcherous -- it breaks the opacity
 		  of transport_data but never mind -- the alternative is
@@ -750,7 +749,7 @@ RETSIGTYPE hup_handler(int sig)
 #endif
 
 static
-int pre_parse(struct snmp_session *session, snmp_transport *transport,
+int pre_parse(struct snmp_session *session, netsnmp_transport *transport,
 	      void *transport_data, int transport_data_length)
 {
 #if USE_LIBWRAP
@@ -781,7 +780,7 @@ int pre_parse(struct snmp_session *session, snmp_transport *transport,
 }
 
 static struct snmp_session *
-snmptrapd_add_session(snmp_transport *t)
+snmptrapd_add_session(netsnmp_transport *t)
 {
   struct snmp_session sess, *session = &sess, *rc = NULL;
 
@@ -819,7 +818,7 @@ main(int argc, char *argv[])
 {
     char options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:-:";
     struct snmp_session *sess_list = NULL, *ss = NULL;
-    snmp_transport *transport = NULL;
+    netsnmp_transport *transport = NULL;
     int	arg, i = 0;
     int count, numfds, block;
     fd_set fdset;
@@ -1180,7 +1179,7 @@ main(int argc, char *argv[])
 	*sep = 0;
       } 
 
-      transport = snmp_tdomain_transport(cp, 1, "udp");
+      transport = netnetsnmp_tdomain_transport(cp, 1, "udp");
       if (transport == NULL) {
 	snmp_log(LOG_ERR, "couldn't open %s -- errno %d (\"%s\")\n",
 		 cp, errno, strerror(errno));
@@ -1193,7 +1192,7 @@ main(int argc, char *argv[])
 	  /*  Shouldn't happen?  We have already opened the transport
 	      successfully so what could have gone wrong?  */
 	  snmptrapd_close_sessions(sess_list);
-	  snmp_transport_free(transport);
+	  netsnmp_transport_free(transport);
 	  if (Syslog) {
 	    snmp_log(LOG_ERR, "couldn't open snmp - %m");
 	  }

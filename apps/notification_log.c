@@ -169,7 +169,7 @@ initialize_table_nlmLogVariableTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogVariableTable_handler to "NULL" 
      */
-    register_table_data_set(create_handler_registration
+    register_table_data_set(netsnmp_create_handler_registration
                             ("nlmLogVariableTable",
                              nlmLogVariableTable_handler,
                              nlmLogVariableTable_oid,
@@ -275,7 +275,7 @@ initialize_table_nlmLogTable(void)
      * note: if you don't need a subhandler to deal with any aspects of
      * the request, change nlmLogTable_handler to "NULL" 
      */
-    register_table_data_set(create_handler_registration
+    register_table_data_set(netsnmp_create_handler_registration
                             ("nlmLogTable", nlmLogTable_handler,
                              nlmLogTable_oid, nlmLogTable_oid_len,
                              HANDLER_CAN_RWRITE), nlmLogTable, NULL);
@@ -291,20 +291,24 @@ init_notification_log(void)
 
     /* static variables */
     register_read_only_counter32_instance("nlmStatsGlobalNotificationsLogged",
-                                          my_nlmStatsGlobalNotificationsLogged_oid, OID_LENGTH(my_nlmStatsGlobalNotificationsLogged_oid),
-                                          &num_received);
+                                          my_nlmStatsGlobalNotificationsLogged_oid,
+                                          OID_LENGTH(my_nlmStatsGlobalNotificationsLogged_oid),
+                                          &num_received, NULL);
 
     register_read_only_counter32_instance("nlmStatsGlobalNotificationsBumped",
-                                          my_nlmStatsGlobalNotificationsBumped_oid, OID_LENGTH(my_nlmStatsGlobalNotificationsBumped_oid),
-                                          &num_deleted);
+                                          my_nlmStatsGlobalNotificationsBumped_oid,
+                                          OID_LENGTH(my_nlmStatsGlobalNotificationsBumped_oid),
+                                          &num_deleted, NULL);
 
     register_ulong_instance("nlmConfigGlobalEntryLimit",
-                            my_nlmConfigGlobalEntryLimit_oid, OID_LENGTH(my_nlmConfigGlobalEntryLimit_oid),
-                            &max_logged);
+                            my_nlmConfigGlobalEntryLimit_oid,
+                            OID_LENGTH(my_nlmConfigGlobalEntryLimit_oid),
+                            &max_logged, NULL);
 
     register_ulong_instance("nlmConfigGlobalAgeOut",
-                            my_nlmConfigGlobalAgeOut_oid, OID_LENGTH(my_nlmConfigGlobalAgeOut_oid),
-                            &max_age);
+                            my_nlmConfigGlobalAgeOut_oid,
+                            OID_LENGTH(my_nlmConfigGlobalAgeOut_oid),
+                            &max_age, NULL);
 
     /* tables */
     initialize_table_nlmLogTable();
@@ -315,7 +319,7 @@ u_long default_num = 0;
 
 void
 log_notification(struct hostent *host, struct snmp_pdu *pdu,
-                 snmp_transport *transport) 
+                 netsnmp_transport *transport) 
 {
     long tmpl;
     struct timeval now;
@@ -345,7 +349,7 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
 
     /* add the data */
     gettimeofday(&now, NULL);
-    tmpl = timeval_uptime( &now );
+    tmpl = netsnmp_timeval_uptime( &now );
     set_row_column(row, COLUMN_NLMLOGTIME, ASN_TIMETICKS,
                    (u_char *) &tmpl, sizeof(tmpl));
     time(&timetnow);
@@ -355,7 +359,7 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
     set_row_column(row, COLUMN_NLMLOGENGINEID, ASN_OCTET_STR,
                    pdu->securityEngineID, pdu->securityEngineIDLen);
     if (transport &&
-        transport->domain == snmpUDPDomain) {
+        transport->domain == netsnmpUDPDomain) {
         /* lame way to check for the udp domain */
         /*  no, it is the correct way to do it -- jbpn */
         struct sockaddr_in *addr =
@@ -457,9 +461,9 @@ log_notification(struct hostent *host, struct snmp_pdu *pdu,
 
 /** handles requests for the nlmLogTable table, if anything else needs to be done */
 int
-nlmLogTable_handler(mib_handler * handler,
-                    handler_registration * reginfo,
-                    agent_request_info * reqinfo, request_info * requests)
+nlmLogTable_handler(netsnmp_mib_handler * handler,
+                    netsnmp_handler_registration * reginfo,
+                    netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)
 {
     /*
      * perform anything here that you need to do.  The requests have
@@ -472,10 +476,10 @@ nlmLogTable_handler(mib_handler * handler,
 
 /** handles requests for the nlmLogVariableTable table, if anything else needs to be done */
 int
-nlmLogVariableTable_handler(mib_handler * handler,
-                            handler_registration * reginfo,
-                            agent_request_info * reqinfo,
-                            request_info * requests)
+nlmLogVariableTable_handler(netsnmp_mib_handler * handler,
+                            netsnmp_handler_registration * reginfo,
+                            netsnmp_agent_request_info * reqinfo,
+                            netsnmp_request_info * requests)
 {
     /*
      * perform anything here that you need to do.  The requests have

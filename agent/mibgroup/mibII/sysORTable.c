@@ -139,7 +139,7 @@ var_sysORTable(struct variable *vp,
     return (u_char *)ptr->OR_descr;
       
   case SYSORTABLEUPTIME:
-    long_return = timeval_uptime(&ptr->OR_uptime);
+    long_return = netsnmp_timeval_uptime(&ptr->OR_uptime);
     return (u_char *)&long_return;
 
   default:

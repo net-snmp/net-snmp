@@ -28,18 +28,18 @@
 /** returns a read_only handler that can be injected into a given
  *  handler chain.
  */
-mib_handler *
+netsnmp_mib_handler *
 get_read_only_handler(void) {
-    return create_handler("read_only", read_only_helper);
+    return netsnmp_create_handler("read_only", read_only_helper);
 }
 
 /** @internal Implements the read_only handler */
 int
 read_only_helper(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     DEBUGMSGTL(("helper:read_only", "Got request\n"));
 
@@ -51,11 +51,11 @@ read_only_helper(
         case MODE_SET_COMMIT:
         case MODE_SET_FREE:
         case MODE_SET_UNDO:
-            set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
+            netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
             return SNMP_ERR_NOERROR;
             
         default:
-            return call_next_handler(handler, reginfo, reqinfo, requests);
+            return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     }
     return SNMP_ERR_GENERR; /* should never get here */
 }
@@ -67,5 +67,5 @@ read_only_helper(
 void
 init_read_only_helper(void) 
 {
-    register_handler_by_name("read_only", get_read_only_handler());
+    netsnmp_register_handler_by_name("read_only", get_read_only_handler());
 }

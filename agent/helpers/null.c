@@ -16,20 +16,20 @@
 #endif
 
 int register_null(oid *loc, size_t loc_len) {
-    handler_registration *reginfo;
-    reginfo = SNMP_MALLOC_TYPEDEF(handler_registration);
+    netsnmp_handler_registration *reginfo;
+    reginfo = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     reginfo->handlerName = strdup("");
     reginfo->rootoid = loc;
     reginfo->rootoid_len = loc_len;
-    reginfo->handler = create_handler("null", null_handler);
-    return register_handler(reginfo);
+    reginfo->handler = netsnmp_create_handler("null", null_handler);
+    return netsnmp_register_handler(reginfo);
 }
 
 int
-null_handler(mib_handler               *handler,
-             handler_registration      *reginfo,
-             agent_request_info        *reqinfo,
-             request_info              *requests) {
+null_handler(netsnmp_mib_handler               *handler,
+             netsnmp_handler_registration      *reginfo,
+             netsnmp_agent_request_info        *reqinfo,
+             netsnmp_request_info              *requests) {
     DEBUGMSGTL(("helper:null", "Got request\n"));
 
 		DEBUGMSGTL(("helper:null", "  oid:"));
@@ -43,11 +43,11 @@ null_handler(mib_handler               *handler,
             return SNMP_ERR_NOERROR;
 
         case MODE_GET:
-            set_all_requests_error(reqinfo, requests, SNMP_NOSUCHOBJECT);
+            netsnmp_set_all_requests_error(reqinfo, requests, SNMP_NOSUCHOBJECT);
             return SNMP_ERR_NOERROR;
 
         default:
-            set_all_requests_error(reqinfo, requests, SNMP_ERR_NOSUCHNAME);
+            netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_NOSUCHNAME);
             return SNMP_ERR_NOERROR;
     }
 }

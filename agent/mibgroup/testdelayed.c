@@ -28,15 +28,15 @@ init_testdelayed(void) {
     /*
      * delayed handler test
      */
-    handler_registration *my_test;
-    my_test = SNMP_MALLOC_TYPEDEF(handler_registration);
+    netsnmp_handler_registration *my_test;
+    my_test = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     if (!my_test)
         return;
 
     my_test->modes = HANDLER_CAN_RWRITE;
     my_test->rootoid = my_delayed_oid;
     my_test->rootoid_len = 4; /* [sic] */
-    my_test->handler = create_handler("myDelayed", my_test_delayed_handler);
+    my_test->handler = netsnmp_create_handler("myDelayed", my_test_delayed_handler);
 
     register_serialize(my_test);
 
@@ -47,13 +47,13 @@ u_long sleeptime = 1;
 
 void
 return_delayed_response(unsigned int clientreg, void *clientarg) {
-    delegated_cache *cache = (delegated_cache *) clientarg;
+    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) clientarg;
     int cmp;
-    request_info              *requests;
-    agent_request_info        *reqinfo;
+    netsnmp_request_info              *requests;
+    netsnmp_agent_request_info        *reqinfo;
     u_long *sleeptime_cache = NULL;
 
-    cache = handler_check_cache(cache);
+    cache = netsnmp_handler_check_cache(cache);
     
     if (!cache) {
         snmp_log(LOG_ERR,"illegal call to return delayed response\n");
@@ -122,8 +122,8 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
         case MODE_SET_RESERVE1:
             /* check type */
             if (requests->requestvb->type != ASN_INTEGER) {
-                set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
-                free_delegated_cache(cache);
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
+                netsnmp_free_delegated_cache(cache);
                 return;
             }
             break;
@@ -133,12 +133,12 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
             memdup((u_char **) &sleeptime_cache,
                    (u_char *) &accesses, sizeof(accesses));
             if (sleeptime_cache == NULL) {
-                set_request_error(reqinfo, requests,
+                netsnmp_set_request_error(reqinfo, requests,
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
-                free_delegated_cache(cache);
+                netsnmp_free_delegated_cache(cache);
                 return;
             }
-            request_add_list_data(requests,
+            netsnmp_request_add_list_data(requests,
                                   create_data_list(TESTDELAYED_SET_NAME,
                                                    sleeptime_cache, free));
             break;
@@ -151,7 +151,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
             
         case MODE_SET_UNDO:
             sleeptime =
-                *((u_long *) request_get_list_data(requests,
+                *((u_long *) netsnmp_request_get_list_data(requests,
                                                    TESTDELAYED_SET_NAME));
             break;
             
@@ -159,16 +159,16 @@ return_delayed_response(unsigned int clientreg, void *clientarg) {
         case MODE_SET_FREE:
             break;
     }
-    free_delegated_cache(cache);
+    netsnmp_free_delegated_cache(cache);
     accesses++;
 }
 
 int
 my_test_delayed_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
     DEBUGMSGTL(("testdelayed", "Got request, mode = %d:\n", reqinfo->mode));
 
@@ -179,7 +179,7 @@ my_test_delayed_handler(
             /* register an alarm to update the results at a later time */
             snmp_alarm_register(sleeptime, 0, return_delayed_response,
                                 (void *)
-                                create_delegated_cache(handler, reginfo,
+                                netsnmp_create_delegated_cache(handler, reginfo,
                                                        reqinfo, requests,
                                                        NULL));
             break;

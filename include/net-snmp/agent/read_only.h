@@ -7,8 +7,8 @@
  */
 
 
-mib_handler *get_read_only_handler(void);
+netsnmp_mib_handler *get_read_only_handler(void);
 void init_read_only_helper(void);
    
-NodeHandler read_only_helper;
+Netsnmp_Node_Handler read_only_helper;
 

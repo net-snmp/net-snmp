@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #endif
 
-snmp_transport	*snmp_udp_transport	(struct sockaddr_in *addr,
+netsnmp_transport	*snmp_udp_transport	(struct sockaddr_in *addr,
 					 int local);
 
 

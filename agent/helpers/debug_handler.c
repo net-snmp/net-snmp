@@ -40,16 +40,16 @@
 /** returns a debug handler that can be injected into a given
  *  handler chain.
  */
-mib_handler *
+netsnmp_mib_handler *
 get_debug_handler(void) {
-    return create_handler("debug", debug_helper);
+    return netsnmp_create_handler("debug", debug_helper);
 }
 
 /** @internal debug print variables in a chain */
 void
-debug_print_requests(request_info              *requests) 
+debug_print_requests(netsnmp_request_info              *requests) 
 {
-    request_info *request;
+    netsnmp_request_info *request;
     
     for (request = requests; request; request = request->next) {
         DEBUGMSGTL(("helper:debug", "      #%2d: ", request->index));
@@ -78,12 +78,12 @@ debug_print_requests(request_info              *requests)
 /** @internal Implements the debug handler */
 int
 debug_helper(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
-    mib_handler               *hptr;
+    netsnmp_mib_handler               *hptr;
     int i, ret, count;
     
     DEBUGMSGTL(("helper:debug", "Entering Debugging Helper:\n"));
@@ -125,7 +125,7 @@ debug_helper(
     debug_print_requests(requests);
         
     DEBUGMSGTL(("helper:debug", "  --- calling next handler --- \n"));
-    ret = call_next_handler(handler, reginfo, reqinfo, requests);
+    ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
     
     DEBUGMSGTL(("helper:debug", "  Results:\n"));
     DEBUGMSGTL(("helper:debug", "    Returned code: %d\n", ret));
@@ -143,5 +143,5 @@ debug_helper(
 void
 init_debug_helper(void) 
 {
-    register_handler_by_name("debug", get_debug_handler());
+    netsnmp_register_handler_by_name("debug", get_debug_handler());
 }

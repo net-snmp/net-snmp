@@ -365,7 +365,7 @@ var_system(struct variable *vp,
             *var_len = version_sysoid_len*sizeof(version_sysoid[0]);
             return (u_char *)version_sysoid;
         case UPTIME:
-            long_return = get_agent_uptime();
+            long_return = netsnmp_get_agent_uptime();
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
@@ -389,7 +389,7 @@ var_system(struct variable *vp,
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
         case SYSORLASTCHANGE:
-	      long_return = timeval_uptime( &sysOR_lastchange );
+	      long_return = netsnmp_timeval_uptime( &sysOR_lastchange );
               return ((u_char *) &long_return);
 #endif
               

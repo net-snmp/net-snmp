@@ -8,7 +8,7 @@
 #endif
 
 
-snmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
+netsnmp_transport		*snmp_ipx_transport	(struct sockaddr_ipx *addr,
 						 int local);
 
 /*  Convert an textually formatted IPX address into a sockaddr_ipx

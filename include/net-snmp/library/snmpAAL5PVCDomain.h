@@ -14,7 +14,7 @@
 
 const oid ucdSnmpAal5PvcDomain[9];  /* = { UCDAVIS_MIB, 251, 3 }; */
 
-snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
+netsnmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 						 int local);
 
 /*  "Constructor" for transport domain object.  */

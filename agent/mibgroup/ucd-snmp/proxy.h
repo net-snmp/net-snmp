@@ -15,6 +15,6 @@ int proxy_got_response(int, struct snmp_session *, int,
                        struct snmp_pdu *, void *);
 void proxy_parse_config (const char *, char *);
 void init_proxy(void);
-NodeHandler proxy_handler;
+Netsnmp_Node_Handler proxy_handler;
 
 #endif /* UCD_SNMP_PROXY_H */

@@ -102,13 +102,13 @@ agentx_got_response(int operation,
 		    struct snmp_pdu *pdu,
 		    void *magic)
 {
-    delegated_cache *cache = (delegated_cache *) magic;
+    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) magic;
     int i, ret;
-    request_info *requests, *request;
+    netsnmp_request_info *requests, *request;
     struct variable_list *var;
     struct snmp_session *ax_session;
 
-    cache = handler_check_cache(cache);
+    cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
         DEBUGMSGTL(("agentx/master", "response too late on session %08p\n",
 		    session));
@@ -127,7 +127,7 @@ agentx_got_response(int operation,
 	    probability is that the whole agent has died somehow.  */
 
 	if (s != NULL) {
-	    snmp_transport *t = snmp_sess_transport(s);
+	    netsnmp_transport *t = snmp_sess_transport(s);
 	    close_agentx_session(session, -1);
 
 	    if (t != NULL) {
@@ -139,12 +139,12 @@ agentx_got_response(int operation,
 	} else {
 	    DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
 	}
-	handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
-	set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
+	netsnmp_handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
+	netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
 			  SNMP_ERR_GENERR);
 	ax_session = (struct snmp_session *) cache->localinfo;
-	free_agent_snmp_session_by_session(ax_session, NULL);
-	free_delegated_cache(cache);
+	netsnmp_free_agent_snmp_session_by_session(ax_session, NULL);
+	netsnmp_free_delegated_cache(cache);
 	return 0;
     }
 
@@ -158,10 +158,10 @@ agentx_got_response(int operation,
 			session));
 	}
 	close_agentx_session(session, -1);
-	handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
-	set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
+	netsnmp_handler_mark_requests_as_delegated(requests, REQUEST_IS_NOT_DELEGATED);
+	netsnmp_set_request_error(cache->reqinfo, requests, /* XXXWWW: should be index=0 */
 			  SNMP_ERR_GENERR);
-	free_delegated_cache(cache);
+	netsnmp_free_delegated_cache(cache);
 	return 0;
 
     case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -169,7 +169,7 @@ agentx_got_response(int operation,
 	CLEAR_SNMP_STRIKE_FLAGS( session->flags );
 	break;
     default:
-	free_delegated_cache(cache);
+	netsnmp_free_delegated_cache(cache);
 	return 0;
     }
 
@@ -184,7 +184,7 @@ agentx_got_response(int operation,
         for(request = requests, i = 1; request; request = request->next, i++) {
             if (request->index == pdu->errindex) {
                 /* mark this one as the one generating the error */
-                set_request_error(cache->reqinfo, request,
+                netsnmp_set_request_error(cache->reqinfo, request,
                                   pdu->errstat);
                 ret = 1;
             }
@@ -192,9 +192,9 @@ agentx_got_response(int operation,
         }
         if (!ret) {
             /* ack, unknown, mark the first one */
-            set_request_error(cache->reqinfo, request, SNMP_ERR_GENERR);
+            netsnmp_set_request_error(cache->reqinfo, request, SNMP_ERR_GENERR);
 	}
-        free_delegated_cache(cache);
+        netsnmp_free_delegated_cache(cache);
 	DEBUGMSGTL(("agentx/master","end error branch\n"));
         return 1;
     } else if (cache->reqinfo->mode == MODE_GET     ||
@@ -232,7 +232,7 @@ agentx_got_response(int operation,
                there is no way to fix the problem */
             snmp_log(LOG_ERR,
                      "response to agentx request illegal.  We're screwed.\n");
-            set_request_error(cache->reqinfo, requests, SNMP_ERR_GENERR);
+            netsnmp_set_request_error(cache->reqinfo, requests, SNMP_ERR_GENERR);
         }
 
         if (cache->reqinfo->mode == MODE_GETBULK)
@@ -244,7 +244,7 @@ agentx_got_response(int operation,
         }
     }
     DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
-    free_delegated_cache(cache);
+    netsnmp_free_delegated_cache(cache);
     return 1;
 }
 
@@ -263,13 +263,13 @@ agentx_got_response(int operation,
  */
 int
 agentx_master_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests)
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests)
 {
     struct snmp_session *ax_session = (struct snmp_session *)handler->myvoid;
-    request_info        *request = requests;
+    netsnmp_request_info        *request = requests;
     struct snmp_pdu     *pdu;
 
     DEBUGMSGTL(("agentx/master", "agentx master handler starting, mode = 0x%02x\n",
@@ -317,7 +317,7 @@ agentx_master_handler(
     }
 
     if (!pdu || !ax_session) {
-        set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
         return SNMP_ERR_NOERROR;
     }
 
@@ -388,7 +388,7 @@ agentx_master_handler(
     /* send the requests out */
     DEBUGMSGTL(("agentx", "sending pdu\n"));
     snmp_async_send(ax_session, pdu, agentx_got_response,
-                    create_delegated_cache(handler, reginfo, reqinfo, requests,
+                    netsnmp_create_delegated_cache(handler, reginfo, reqinfo, requests,
                                            (void *) ax_session));
     return SNMP_ERR_NOERROR;
 }

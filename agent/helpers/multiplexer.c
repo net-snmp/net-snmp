@@ -30,18 +30,18 @@
  *  @{
  */
 
-/** returns a multiplixer handler given a mib_handler_methods structure of subhandlers.
+/** returns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers.
  */
-mib_handler *
-get_multiplexer_handler(mib_handler_methods *req) {
-    mib_handler *ret = NULL;
+netsnmp_mib_handler *
+get_multiplexer_handler(netsnmp_mib_handler_methods *req) {
+    netsnmp_mib_handler *ret = NULL;
     
     if (!req) {
         snmp_log(LOG_INFO, "get_multiplexer_handler(NULL) called\n");
         return NULL;
     }
     
-    ret = create_handler("multiplexer", multiplexer_helper_handler);
+    ret = netsnmp_create_handler("multiplexer", multiplexer_helper_handler);
     if (ret) {
         ret->myvoid = (void *) req;
     }
@@ -51,25 +51,25 @@ get_multiplexer_handler(mib_handler_methods *req) {
 /** implements the multiplexer helper */
 int
 multiplexer_helper_handler(
-    mib_handler               *handler,
-    handler_registration      *reginfo,
-    agent_request_info        *reqinfo,
-    request_info              *requests) {
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests) {
 
-    mib_handler_methods *methods;
+    netsnmp_mib_handler_methods *methods;
     
     if (!handler->myvoid) {
         snmp_log(LOG_INFO, "improperly registered multiplexer found\n");
         return SNMP_ERR_GENERR;
     }
 
-    methods = (mib_handler_methods *) handler->myvoid;
+    methods = (netsnmp_mib_handler_methods *) handler->myvoid;
 
     switch(reqinfo->mode) {
         case MODE_GET:
             handler = methods->get_handler;
             if (!handler) {
-                set_all_requests_error(reqinfo, requests, SNMP_NOSUCHOBJECT);
+                netsnmp_set_all_requests_error(reqinfo, requests, SNMP_NOSUCHOBJECT);
             }
             break;
 
@@ -97,7 +97,7 @@ multiplexer_helper_handler(
         case MODE_SET_UNDO:
             handler = methods->set_handler;
             if (!handler) {
-                set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
+                netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
                 return SNMP_ERR_NOERROR;
             }
             break;
@@ -113,5 +113,5 @@ multiplexer_helper_handler(
                  reqinfo->mode);
         return SNMP_ERR_GENERR;
     }
-    return call_handler(handler, reginfo, reqinfo, requests);
+    return netsnmp_call_handler(handler, reginfo, reqinfo, requests);
 }

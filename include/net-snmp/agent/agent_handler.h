@@ -7,20 +7,20 @@ extern "C" {
 
 /** @addgroup handler */
 
-struct handler_registration_s;
+struct netsnmp_handler_registration_s;
 
-typedef struct mib_handler_s {
+typedef struct netsnmp_mib_handler_s {
    char   *handler_name;
    void   *myvoid;       /* for handler's internal use */
 
-   int (*access_method)(struct mib_handler_s *,
-                        struct handler_registration_s *,
-                        struct agent_request_info_s   *,
-                        struct request_info_s         *);
+   int (*access_method)(struct netsnmp_mib_handler_s *,
+                        struct netsnmp_handler_registration_s *,
+                        struct netsnmp_agent_request_info_s   *,
+                        struct netsnmp_request_info_s         *);
 
-   struct mib_handler_s *next;
-   struct mib_handler_s *prev;
-} mib_handler;
+   struct netsnmp_mib_handler_s *next;
+   struct netsnmp_mib_handler_s *prev;
+} netsnmp_mib_handler;
 
 #define HANDLER_CAN_GETANDGETNEXT     0x1 /* must be able to do both */
 #define HANDLER_CAN_SET               0x2
@@ -31,7 +31,7 @@ typedef struct mib_handler_s {
 #define HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY
 
 /* root registration info */
-typedef struct handler_registration_s {
+typedef struct netsnmp_handler_registration_s {
 
    char   *handlerName;  /* for mrTable listings, and other uses */
    char   *contextName;  /* NULL = default context */
@@ -41,7 +41,7 @@ typedef struct handler_registration_s {
    size_t  rootoid_len;
 
    /* handler details */
-   mib_handler *handler;
+   netsnmp_mib_handler *handler;
    int modes;
    
    /* more optional stuff */
@@ -50,82 +50,82 @@ typedef struct handler_registration_s {
    oid     range_ubound;
    int     timeout;
 
-} handler_registration;
+} netsnmp_handler_registration;
 
 /* function handler definitions */
-typedef int (NodeHandler)(
-    mib_handler               *handler,
-    handler_registration      *reginfo, /* pointer to registration struct */
-    agent_request_info        *reqinfo, /* pointer to current transaction */
-    request_info              *requests
+typedef int (Netsnmp_Node_Handler)(
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo, /* pointer to registration struct */
+    netsnmp_agent_request_info        *reqinfo, /* pointer to current transaction */
+    netsnmp_request_info              *requests
     );
 
-typedef struct delegated_cache_s {
+typedef struct netsnmp_delegated_cache_s {
    int                        transaction_id;
-   mib_handler               *handler;
-   handler_registration      *reginfo;
-   agent_request_info        *reqinfo;
-   request_info              *requests;
+   netsnmp_mib_handler               *handler;
+   netsnmp_handler_registration      *reginfo;
+   netsnmp_agent_request_info        *reqinfo;
+   netsnmp_request_info              *requests;
    void                      *localinfo;
-} delegated_cache;
+} netsnmp_delegated_cache;
 
 /* handler API functions */
-void init_handler_conf(void);
-int register_handler(handler_registration *reginfo);
-int register_handler_nocallback(handler_registration *reginfo);
-int inject_handler(handler_registration *reginfo, mib_handler *handler);
-mib_handler *find_handler_by_name(handler_registration *reginfo,
+void netsnmp_init_handler_conf(void);
+int netsnmp_register_handler(netsnmp_handler_registration *reginfo);
+int netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo);
+int netsnmp_inject_handler(netsnmp_handler_registration *reginfo, netsnmp_mib_handler *handler);
+netsnmp_mib_handler *netsnmp_find_handler_by_name(netsnmp_handler_registration *reginfo,
                                   const char *name);
-void *find_handler_data_by_name(handler_registration *reginfo,
+void *netsnmp_find_handler_data_by_name(netsnmp_handler_registration *reginfo,
                                 const char *name);
-int call_handlers(handler_registration *reginfo,
-                  agent_request_info   *reqinfo,
-                  request_info         *requests);
-int call_handler(mib_handler          *next_handler,
-                 handler_registration *reginfo,
-                 agent_request_info   *reqinfo,
-                 request_info         *requests);
-int call_next_handler(mib_handler          *current,
-                      handler_registration *reginfo,
-                      agent_request_info   *reqinfo,
-                      request_info         *requests);
-mib_handler *create_handler(const char *name,
-                            NodeHandler *handler_access_method);
-handler_registration *
-create_handler_registration(const char *name,
-                            NodeHandler *handler_access_method,
+int netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
+                  netsnmp_agent_request_info   *reqinfo,
+                  netsnmp_request_info         *requests);
+int netsnmp_call_handler(netsnmp_mib_handler          *next_handler,
+                 netsnmp_handler_registration *reginfo,
+                 netsnmp_agent_request_info   *reqinfo,
+                 netsnmp_request_info         *requests);
+int netsnmp_call_next_handler(netsnmp_mib_handler          *current,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info   *reqinfo,
+                      netsnmp_request_info         *requests);
+netsnmp_mib_handler *netsnmp_create_handler(const char *name,
+                            Netsnmp_Node_Handler *handler_access_method);
+netsnmp_handler_registration *
+netsnmp_create_handler_registration(const char *name,
+                            Netsnmp_Node_Handler *handler_access_method,
                             oid *reg_oid, size_t reg_oid_len, int modes);
-inline delegated_cache *
-create_delegated_cache(mib_handler               *,
-                       handler_registration      *,
-                       agent_request_info        *,
-                       request_info              *,
+inline netsnmp_delegated_cache *
+netsnmp_create_delegated_cache(netsnmp_mib_handler               *,
+                       netsnmp_handler_registration      *,
+                       netsnmp_agent_request_info        *,
+                       netsnmp_request_info              *,
                        void                      *);
-inline void free_delegated_cache(delegated_cache *dcache);
-inline delegated_cache *handler_check_cache(delegated_cache *dcache);
-void register_handler_by_name(const char *, mib_handler *);
+inline void netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache);
+inline netsnmp_delegated_cache *netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache);
+void netsnmp_register_handler_by_name(const char *, netsnmp_mib_handler *);
 
 inline void
-request_add_list_data(request_info *request, data_list *node);
+netsnmp_request_add_list_data(netsnmp_request_info *request, data_list *node);
 
 inline void *
-request_get_list_data(request_info *request, const char *name);
+netsnmp_request_get_list_data(netsnmp_request_info *request, const char *name);
 
 inline void
-free_request_data_set(request_info *request);
+netsnmp_free_request_data_set(netsnmp_request_info *request);
 
 inline void
-free_request_data_sets(request_info *request);
+netsnmp_free_request_data_sets(netsnmp_request_info *request);
 
-void		      snmp_handler_free		    (mib_handler *);
-mib_handler	     *snmp_handler_dup		    (mib_handler *);
-handler_registration *snmp_handler_registration_dup (handler_registration *);
-void		      snmp_handler_registration_free(handler_registration *);
+void		      netsnmp_handler_free		    (netsnmp_mib_handler *);
+netsnmp_mib_handler	     *netsnmp_handler_dup		    (netsnmp_mib_handler *);
+netsnmp_handler_registration *snmp_netnetsnmp_handler_registration_dup (netsnmp_handler_registration *);
+void		      snmp_netnetsnmp_handler_registration_free(netsnmp_handler_registration *);
 
 #define REQUEST_IS_DELEGATED     1
 #define REQUEST_IS_NOT_DELEGATED 0
-void handler_mark_requests_as_delegated(request_info *, int);
-void *handler_get_parent_data(request_info *, const char *);
+void netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *, int);
+void *netsnmp_handler_get_parent_data(netsnmp_request_info *, const char *);
 
 #ifdef __cplusplus
 };

@@ -45,7 +45,7 @@ SOFTWARE.
 
 struct variable_list;
 struct timeval;
-struct _snmp_transport;
+struct netsnmp_transport_s;
 
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
@@ -616,7 +616,7 @@ snmp_pdu_realloc_rbuild(u_char **pkt, size_t *pkt_len, size_t *offset,
 
 struct snmp_session *snmp_open_ex (struct snmp_session *,
 				   int (*fpre_parse) (struct snmp_session *,
-						      struct _snmp_transport *,
+						      struct netsnmp_transport_s *,
 						      void *, int),
 				   int (*fparse)     (struct snmp_session *,
 						      struct snmp_pdu *,
@@ -689,27 +689,27 @@ void * snmp_sess_open       (struct snmp_session *);
 void * snmp_sess_pointer    (struct snmp_session *);
 struct snmp_session * snmp_sess_session    (void *);
 
-/*  Return the snmp_transport structure associated with the given opaque
+/*  Return the netsnmp_transport structure associated with the given opaque
     pointer.  */
 
-struct _snmp_transport	*snmp_sess_transport	(void *);
+struct netsnmp_transport_s	*snmp_sess_transport	(void *);
 void			 snmp_sess_transport_set(void *,
-						 struct _snmp_transport *);
+						 struct netsnmp_transport_s *);
 
 /*  EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
 
     snmp_sess_add_ex, snmp_sess_add, snmp_add 
 
-    Analogous to snmp_open family of functions, but taking an snmp_transport
+    Analogous to snmp_open family of functions, but taking an netsnmp_transport
     pointer as an extra argument.  Unlike snmp_open et al. it doesn't attempt
     to interpret the in_session->peername as a transport endpoint specifier,
     but instead uses the supplied transport.				JBPN
 
 */
 
-void	*snmp_sess_add_ex(struct snmp_session *, struct _snmp_transport *,
+void	*snmp_sess_add_ex(struct snmp_session *, struct netsnmp_transport_s *,
 			  int (*fpre_parse) (struct snmp_session *,
-					     struct _snmp_transport *, void *,
+					     struct netsnmp_transport_s *, void *,
 					     int),
 			  int (*fparse) (struct snmp_session *, struct
 					 snmp_pdu *, u_char *, size_t), 
@@ -720,30 +720,30 @@ void	*snmp_sess_add_ex(struct snmp_session *, struct _snmp_transport *,
 			  int (*frbuild)(struct snmp_session *, struct
 				   snmp_pdu *, u_char **, size_t *, size_t *), 
 			  int (*fcheck) (u_char *, size_t),
-                          struct snmp_pdu * (*fcreate_pdu) (struct _snmp_transport *, void *, size_t));
+                          struct snmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t));
 
-void   *snmp_sess_add	(struct snmp_session *, struct _snmp_transport *,
+void   *snmp_sess_add	(struct snmp_session *, struct netsnmp_transport_s *,
 			 int (*fpre_parse) (struct snmp_session *,
-					    struct _snmp_transport *,
+					    struct netsnmp_transport_s *,
 					    void *, int),
 			 int (*fpost_parse) (struct snmp_session *,
 					     struct snmp_pdu *, int));
 
-struct snmp_session *snmp_add(struct snmp_session *, struct _snmp_transport *,
+struct snmp_session *snmp_add(struct snmp_session *, struct netsnmp_transport_s *,
 			      int (*fpre_parse) (struct snmp_session *,
-						 struct _snmp_transport *,
+						 struct netsnmp_transport_s *,
 						 void *, int),
 			      int (*fpost_parse) (struct snmp_session *,
 						  struct snmp_pdu *, int));
 struct snmp_session *snmp_add_full(struct snmp_session *in_session,
-                                   struct _snmp_transport *transport,
-                                   int (*fpre_parse) (struct snmp_session *, struct _snmp_transport *, void *, int),
+                                   struct netsnmp_transport_s *transport,
+                                   int (*fpre_parse) (struct snmp_session *, struct netsnmp_transport_s *, void *, int),
                                    int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
                                    int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
                                    int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
                                    int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **, size_t *, size_t *),
                                    int (*fcheck) (u_char *, size_t),
-                                   struct snmp_pdu * (*fcreate_pdu) (struct _snmp_transport *, void *, size_t)
+                                   struct snmp_pdu * (*fcreate_pdu) (struct netsnmp_transport_s *, void *, size_t)
 );
 
 /* use return value from snmp_sess_open as void * parameter */
