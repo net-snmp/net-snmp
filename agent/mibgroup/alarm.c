@@ -108,7 +108,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	    alarm->magic = state;
 	    bzero((char *)&session, sizeof(struct snmp_session));
 	    session.peername = SNMP_DEFAULT_PEERNAME;
-	    session.version = SNMP_VERSION_2;
+	    session.version = SNMP_VERSION_2_HISTORIC;
 	    session.srcParty = srcParty;
 	    session.srcPartyLen = srcPartyLen;
 	    session.dstParty = dstParty;
@@ -162,7 +162,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     pi->dstp = dstp;
     pi->cxp = cxp;
     
-    pi->version = SNMP_VERSION_2;
+    pi->version = SNMP_VERSION_2_HISTORIC;
     pi->pdutype = GET_REQ_MSG;
     /* rest of pi is not needed */
     
