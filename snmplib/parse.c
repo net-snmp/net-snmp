@@ -1286,7 +1286,7 @@ get_tc_index(descriptor, modid)
  * Returns pointer to string in table (should not be modified) or NULL
  */
 char *
-get_tc_decriptor(tc_index)
+get_tc_descriptor(tc_index)
 int tc_index;
 {
   if (tc_index < 0 || tc_index >= MAXTC) return NULL;
