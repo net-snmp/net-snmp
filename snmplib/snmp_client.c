@@ -435,7 +435,7 @@ snmp_synch_response(ss, pdu, response)
 	snmp_select_info(&numfds, &fdset, tvp, &block);
 	if (block == 1)
 	    tvp = NULL;	/* block without timeout */
-	count = select(numfds, &fdset, 0, 0, tvp);
+	count = select(numfds, (int *) &fdset, 0, 0, tvp);
 	if (count > 0){
 	    snmp_read(&fdset);
 	} else switch(count){
