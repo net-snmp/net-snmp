@@ -665,6 +665,8 @@ _init_snmp(void)
 
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
 		       NETSNMP_DS_LIB_DEFAULT_PORT, s_port);
+    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+                       NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH, 16);
 
 #ifdef USE_REVERSE_ASNENCODING
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 

@@ -87,6 +87,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT  4
 #define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
 #define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5
+#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH 6
 
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
