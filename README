@@ -50,16 +50,30 @@ INTRO
 
 SUPPORTED ARCHITECTURES
 
-  I'm using it on three architectures:  
-     hp700s/hpux9.0.5
+  I'm using it on these architectures:  
+     hppa1.1-hp-hpux9.05
         -- I develop here...  Its the architecture best supported in
-	   this package.  
+	   this package.  It is the only architecture that supports
+	   swap space checks. 
 
-     sun4/4.1.4               (note:  NOT SOLARIS) (note: no swap)
-     Dec5000/Ultrix 4.3                            (note: no swap)
+     mips-dec-ultrix4.3
+     alpha-dec-osf3.2
+     sparc-sun-solaris2.4
+     sparc-sun-sunos4.1.4
+
+  Please let me know if you compile it on other OS versions and it
+  works for you so I can add them to the above list.
 
 AVAILABILITY
-  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp-3.0.tar.gz
+  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp.tar.gz
+
+  This file will always point to the latest revision.  If you see
+  newer revisions in the directory marked with a -A[1-9] or -B[1-9]
+  please note that these are alpha ports of the next release.  Beware.
+
+INSTALLATION
+
+  See the INSTALL file distributed with this package.
 
 CODE UPDATES / MAILING LIST
 
@@ -68,8 +82,9 @@ CODE UPDATES / MAILING LIST
   ftp, I'll mail it to ucd-snmp-announce@ece.ucdavis.edu.  To
   subscribe/unsubscribe yourself to/from this list, mail a note to
   ucd-snmp-announce-request@ece.ucdavis.edu with a subject line of
-  'subscribe' or 'unsubscribe'.  I'll probably still post new
-  announcements on a very infrequent basis to the other channels.
+  'subscribe' or 'unsubscribe'.  I will post new announcements on a
+  very infrequent basis to the other channels, but only for major code
+  revisions and not for patches or small feature upgrades.  
 
 SNMPv1 vs. SNMPv2
 
@@ -114,12 +129,6 @@ DESIGN
 
   The exec entries that define their own mibs use the standard
   extensions defined above.
-
-INSTALLATION
-
-  Edit config.h in this directory to taste.  Its barely well documented. 
-
-  make
 
 MAN PAGES/DOCUMENTATION
 
