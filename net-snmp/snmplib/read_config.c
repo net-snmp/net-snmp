@@ -942,7 +942,10 @@ get_persistent_directory()
 {
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_PERSISTENT_DIR)) {
-        set_persistent_directory(PERSISTENT_DIRECTORY);
+        char *persdir = netsnmp_getenv("SNMP_PERSISTENT_DIR");
+        if (NULL == persdir)
+            persdir = PERSISTENT_DIRECTORY;
+        set_persistent_directory(persdir);
     }
     return (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				  NETSNMP_DS_LIB_PERSISTENT_DIR));
