@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
     /* Initialize the world. Create initial user */
     init_snmp("snmptrapd");
     if (trap1_fmt_str_remember) {
-        free_trap1_fmt;
+        free_trap1_fmt();
         trap1_fmt_str = strdup(trap1_fmt_str_remember);
     }
 
