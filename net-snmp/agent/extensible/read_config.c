@@ -268,7 +268,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 (*procp)->max = 0;
                 (*procp)->min = 0;
               }
-#if DODEBUG
+#ifdef DODEBUG
             fprintf (stderr,"Read:  %s (%d) (%d)\n",
                      (*procp)->name, (*procp)->max, (*procp)->min);
 #endif
